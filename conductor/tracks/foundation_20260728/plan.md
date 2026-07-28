@@ -43,10 +43,10 @@
     - [x] Test checking if a sticker is earned (hasSticker)
     - [x] Test reading settings (bgmEnabled defaults to true, sfxEnabled defaults to true)
     - [x] Test updating settings (bgmEnabled, sfxEnabled)
-- [ ] Task: Implement types and storage utilities
-    - [ ] Create `src/types/index.ts` (AppStorage, GameId, StickerData, Settings interfaces)
-    - [ ] Create `src/utils/storage.ts` (load, save, earnSticker, hasSticker, getSettings, updateSettings)
-    - [ ] Run tests — all pass (Green phase)
+- [x] Task: Implement types and storage utilities [7a72ef0]
+    - [x] Create `src/types/index.ts` (AppStorage, GameId, StickerData, Settings interfaces)
+    - [x] Create `src/utils/storage.ts` (load, save, earnSticker, hasSticker, getSettings, updateSettings)
+    - [x] Run tests — all pass (Green phase)
 - [ ] Task: Conductor - User Manual Verification 'Core Types & Storage Layer' (Protocol in workflow.md)
 
 ---
