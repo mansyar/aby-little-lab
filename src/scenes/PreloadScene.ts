@@ -16,7 +16,9 @@ import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
+import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
+import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
 
 const SVG_RASTER_SIZE = 512;
 
@@ -39,6 +41,8 @@ const SHAPE_ASSETS = [
   { key: "food_fish", svg: foodFishSvg },
   { key: "food_bone", svg: foodBoneSvg },
   { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
+  { key: "bubble", svg: bubbleSvg },
+  { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
 ] as const;
 
 /**
