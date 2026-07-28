@@ -1,0 +1,35 @@
+Task Summary: Implement AudioManager (TDD Green Phase)
+
+=== Task ===
+Implement the AudioManager class for SFX playback, BGM loop, BGM/SFX toggle management, and Web Audio API frog note synthesis.
+
+=== Files Changed ===
+- Created: src/audio/AudioManager.ts (140 lines) — AudioManager class with SfxName type export
+- Modified: src/__tests__/audio/AudioManager.test.ts — Fixed constructor mocks to use function expressions instead of arrow functions (arrow functions cannot be used with new)
+
+=== Implementation Details ===
+1. SFX playback: HTML5 Audio elements created for 6 sounds (pop, correct, incorrect, wake, win, sticker) with currentTime reset before each play
+2. BGM loop: Single HTML5 Audio element with loop=true
+3. BGM/SFX toggle: Reads settings via getSettings() on init, writes via updateSettings() on toggle. BGM auto-pauses when disabled.
+4. Web Audio API synthesis: Sine wave oscillator with configurable frequency, gain node for volume control, 0.5s duration
+5. Settings integration: Uses real storage utils (getSettings, updateSettings) for localStorage persistence
+6. Cleanup: destroy() closes AudioContext, pauses BGM, clears references
+
+=== Key Design Decisions ===
+- SfxName type derived from const array: type SfxName = (typeof SFX_NAMES)[number]
+- SFX audio paths: /audio/{name}.mp3 (assumes files in public/audio/)
+- BGM path: /audio/bgm.mp3
+- Frog note gain: 0.3 (comfortable volume per product guidelines)
+- Frog note duration: 0.5s (within 1-2s max SFX duration per product guidelines)
+- Oscillator type: sine (warm tone per product guidelines)
+
+=== Mock Fix ===
+Initial test used arrow functions in vi.fn() for AudioContext and Audio constructor mocks. Arrow functions cannot be used as constructors with 'new', causing 'TypeError: () => mockAudioContext is not a constructor'. Fixed by using regular function expressions with biome-ignore comments.
+
+=== Verification ===
+- Tests: 41/41 passed (29 AudioManager + 12 storage)
+- Coverage: 98.59% statements, 88.88% branches, 100% functions, 100% lines on AudioManager.ts
+  - Uncovered: line 66 (pauseBGM early return when bgmAudio is null — edge case) and line 133 (destroy when audioContext is null — edge case)
+  - Both well within the 80% threshold
+- Biome check: 8 files checked, no errors, no warnings
+- Production build: Succeeds in 46ms, PWA service worker generated
