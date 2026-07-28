@@ -62,7 +62,14 @@ export function isRoundComplete(completedPaths: number): boolean {
   return completedPaths >= 3;
 }
 
-/** Generates evenly-spaced waypoints from start to end with a gentle sine curve. */
+/** Generates evenly-spaced waypoints from start to end with a randomized gentle curve.
+ *
+ *  The curve is composed of two sine harmonics that both vanish at the
+ *  endpoints (t=0 and t=1), so the animal and food positions are always
+ *  preserved. The primary arch and optional S-curve components are
+ *  randomized per call, giving each playthrough a visually distinct path
+ *  while staying smooth and traceable for a toddler.
+ */
 export function generatePathPoints(
   startX: number,
   startY: number,
@@ -71,11 +78,19 @@ export function generatePathPoints(
   numPoints: number,
 ): Array<{ x: number; y: number }> {
   const points: Array<{ x: number; y: number }> = [];
+  const archAmplitude = 40 + Math.random() * 50; // 40–90px hump
+  const archDirection = Math.random() < 0.5 ? 1 : -1; // arch up or down
+  const sAmplitude = Math.random() * 30; // 0–30px secondary wave
+  const sDirection = Math.random() < 0.5 ? 1 : -1;
+
   for (let i = 0; i < numPoints; i++) {
     const t = i / (numPoints - 1);
     const x = startX + (endX - startX) * t;
-    const y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * 80;
-    points.push({ x, y });
+    const baseY = startY + (endY - startY) * t;
+    // sin(0) = 0 and sin(π) = 0 → endpoints preserved exactly
+    const archY = Math.sin(t * Math.PI) * archAmplitude * archDirection;
+    const sCurveY = Math.sin(t * Math.PI * 2) * sAmplitude * sDirection;
+    points.push({ x, y: baseY + archY + sCurveY });
   }
   return points;
 }

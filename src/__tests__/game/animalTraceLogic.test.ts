@@ -156,8 +156,21 @@ describe("generatePathPoints", () => {
 
   it("intermediate points have a gentle curve (y varies from base line)", () => {
     const points = generatePathPoints(200, 384, 824, 384, 6);
-    // Middle point should have y > 384 (sine curve arches upward)
+    // Curve is randomized but always deviates from the base line at midpoints
     expect(points[2].y).not.toBe(384);
     expect(points[3].y).not.toBe(384);
+  });
+
+  it("produces different curves on successive calls (randomized)", () => {
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2); // first call params
+    const result1 = generatePathPoints(200, 384, 824, 384, 6);
+
+    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.9); // second call params
+    const result2 = generatePathPoints(200, 384, 824, 384, 6);
+
+    // At least one intermediate point should differ between the two curves
+    const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
+    expect(midDiffer).toBe(true);
   });
 });

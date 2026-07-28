@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -818,6 +818,16 @@ describe("scene navigation flow", () => {
     const SPRITE_Y = 384;
     const PATH_POINTS = 6;
 
+    beforeEach(() => {
+      // Deterministic Math.random so test helper's generatePathPoints
+      // matches the scene's internal generatePathPoints call
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     /** Returns the input callback registered for a given event name. */
     function getInputCallback(scene: unknown, eventName: string): (...args: unknown[]) => void {
       const inputOnMock = getMockFn((scene as { input: Record<string, unknown> }).input.on);
@@ -1064,6 +1074,14 @@ describe("scene navigation flow", () => {
     const FOOD_X = 824;
     const SPRITE_Y = 384;
     const PATH_POINTS = 6;
+
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
 
     /** Returns the input callback registered for a given event name. */
     function getInputCallback(scene: unknown, eventName: string): (...args: unknown[]) => void {
