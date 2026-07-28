@@ -1,0 +1,18 @@
+Task: Phase 3 - Task 3 & 4 [TDD-Green]
+
+Extended AudioManager with two synthesized SFX methods:
+- playPop(): 1 oscillator, 800Hz, 0.08s duration, gain 0.3 (short percussive blip)
+- playWake(): 2 oscillators, E4(329.63Hz)+A4(440Hz), 0.15s+0.2s, gain 0.2 (soft rousing tone)
+
+Implemented PopFreezeScene.ts (replaced stub with full game scene):
+- initRound(): creates round state, configures physics world bounds collision, generates 5 initial bubbles
+- spawnBubble(): creates physics image with bubble texture, sets display size (96px), velocity, collide world bounds, bounce, interactive; for sleeping bubbles adds animal image + Zzz text overlays
+- update(): syncs sleeping-animal overlay positions with parent bubble each frame
+- handleTap(): routes to handlePop or handleWake based on bubble type; guards with roundComplete flag
+- handlePop(): plays pop SFX, particle burst, shrink tween, registers pop, respawns or completes
+- handleWake(): plays wake SFX, gentle wobble yoyo tween, no penalty
+- respawnBubble(): counts current sleeping bubbles, selects type, generates spawn config, spawns new bubble
+- createParticleBurst(): same pattern as ShapeSorterScene (shape_circle texture, reduced count for prefers-reduced-motion)
+- handleComplete(): stub for Phase 4 (win animation, sticker, auto-return)
+
+Verification: All 214 tests pass, Biome check passes, build succeeds.
