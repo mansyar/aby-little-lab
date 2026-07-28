@@ -40,7 +40,7 @@
     - [x] Test reaching food triggers correct SFX + particle burst, marks path complete
     - [x] Test trace tolerance is generous (inflated proximity band per touch-ergonomics)
 - [x] Task: Implement path tracing interaction (`Phaser.Curves.Path` + `pointermove` proximity) + particle burst + pause/resume in `AnimalTraceScene` [22d434c]
-- [ ] Task: Conductor - User Manual Verification 'Path Tracing & Feedback' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Path Tracing & Feedback' (Protocol in workflow.md)
 
 ---
 
