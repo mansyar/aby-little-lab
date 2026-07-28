@@ -1,27 +1,36 @@
 import Phaser from "phaser";
-import cutoutCircleUrl from "../assets/svg/shapes/cutout_circle.svg?url";
-import cutoutSquareUrl from "../assets/svg/shapes/cutout_square.svg?url";
-import cutoutStarUrl from "../assets/svg/shapes/cutout_star.svg?url";
-import cutoutTriangleUrl from "../assets/svg/shapes/cutout_triangle.svg?url";
-import shapeCircleUrl from "../assets/svg/shapes/shape_circle.svg?url";
-import shapeSquareUrl from "../assets/svg/shapes/shape_square.svg?url";
-import shapeStarUrl from "../assets/svg/shapes/shape_star.svg?url";
-import shapeTriangleUrl from "../assets/svg/shapes/shape_triangle.svg?url";
-import stickerShapeSorterUrl from "../assets/svg/stickers/sticker_shape_sorter.svg?url";
+import cutoutCircleSvg from "../assets/svg/shapes/cutout_circle.svg?raw";
+import cutoutSquareSvg from "../assets/svg/shapes/cutout_square.svg?raw";
+import cutoutStarSvg from "../assets/svg/shapes/cutout_star.svg?raw";
+import cutoutTriangleSvg from "../assets/svg/shapes/cutout_triangle.svg?raw";
+import shapeCircleSvg from "../assets/svg/shapes/shape_circle.svg?raw";
+import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
+import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
+import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
+import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
 
 const SVG_RASTER_SIZE = 512;
 
 const SHAPE_ASSETS = [
-  { key: "shape_circle", url: shapeCircleUrl },
-  { key: "shape_square", url: shapeSquareUrl },
-  { key: "shape_triangle", url: shapeTriangleUrl },
-  { key: "shape_star", url: shapeStarUrl },
-  { key: "cutout_circle", url: cutoutCircleUrl },
-  { key: "cutout_square", url: cutoutSquareUrl },
-  { key: "cutout_triangle", url: cutoutTriangleUrl },
-  { key: "cutout_star", url: cutoutStarUrl },
-  { key: "sticker_shape_sorter", url: stickerShapeSorterUrl },
+  { key: "shape_circle", svg: shapeCircleSvg },
+  { key: "shape_square", svg: shapeSquareSvg },
+  { key: "shape_triangle", svg: shapeTriangleSvg },
+  { key: "shape_star", svg: shapeStarSvg },
+  { key: "cutout_circle", svg: cutoutCircleSvg },
+  { key: "cutout_square", svg: cutoutSquareSvg },
+  { key: "cutout_triangle", svg: cutoutTriangleSvg },
+  { key: "cutout_star", svg: cutoutStarSvg },
+  { key: "sticker_shape_sorter", svg: stickerShapeSorterSvg },
 ] as const;
+
+/**
+ * Converts raw SVG markup into a base64 data URI that Phaser can load.
+ * Phaser's XHRLoader detects `data:` URLs and decodes them via `atob`,
+ * so the SVG must be properly base64-encoded to avoid `InvalidCharacterError`.
+ */
+function toDataUri(svg: string): string {
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+}
 
 /**
  * Preload scene — displays a progress bar while assets load.
@@ -53,7 +62,7 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     for (const asset of SHAPE_ASSETS) {
-      this.load.svg(asset.key, asset.url, {
+      this.load.svg(asset.key, toDataUri(asset.svg), {
         width: SVG_RASTER_SIZE,
         height: SVG_RASTER_SIZE,
       });
