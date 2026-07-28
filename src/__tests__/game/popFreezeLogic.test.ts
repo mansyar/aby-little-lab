@@ -5,17 +5,17 @@ import {
   type BubbleConfig,
   type BubbleType,
   CONCURRENT_BUBBLES,
-  MAX_SLEEPING,
-  MIN_SLEEPING,
-  WIN_TARGET,
   createRoundState,
   generateInitialBubbles,
   generateSpawnConfig,
+  MAX_SLEEPING,
+  MIN_SLEEPING,
   registerPop,
   registerWake,
   selectBubbleType,
   selectSleepingAnimal,
   shuffle,
+  WIN_TARGET,
 } from "../../game/popFreezeLogic";
 
 afterEach(() => {
@@ -64,11 +64,12 @@ describe("selectSleepingAnimal", () => {
   });
 
   it("returns different animals on successive calls (randomized)", () => {
+    // shuffle(ALL_ANIMALS) with 4 elements does 3 Fisher-Yates iterations
     const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.0);
+    spy.mockReturnValueOnce(0.0).mockReturnValueOnce(0.0).mockReturnValueOnce(0.0);
     const first = selectSleepingAnimal();
 
-    spy.mockReturnValueOnce(0.9);
+    spy.mockReturnValueOnce(0.9).mockReturnValueOnce(0.9).mockReturnValueOnce(0.9);
     const second = selectSleepingAnimal();
 
     expect(first).not.toBe(second);
@@ -105,10 +106,18 @@ describe("generateSpawnConfig", () => {
 
   it("produces different positions on successive calls (randomized)", () => {
     const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.1).mockReturnValueOnce(0.2).mockReturnValueOnce(0.3).mockReturnValueOnce(0.4);
+    spy
+      .mockReturnValueOnce(0.1)
+      .mockReturnValueOnce(0.2)
+      .mockReturnValueOnce(0.3)
+      .mockReturnValueOnce(0.4);
     const config1 = generateSpawnConfig(worldWidth, worldHeight, bubbleSize, "poppable");
 
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.9).mockReturnValueOnce(0.1).mockReturnValueOnce(0.2);
+    spy
+      .mockReturnValueOnce(0.8)
+      .mockReturnValueOnce(0.9)
+      .mockReturnValueOnce(0.1)
+      .mockReturnValueOnce(0.2);
     const config2 = generateSpawnConfig(worldWidth, worldHeight, bubbleSize, "poppable");
 
     expect(config1.x).not.toBe(config2.x);
