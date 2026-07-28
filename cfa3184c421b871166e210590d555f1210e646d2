@@ -1,0 +1,18 @@
+Phase 1 Checkpoint: SVG Assets & Preload Pipeline
+
+Automated Test Command: CI=true pnpm test
+Result: 166/166 tests passed (0 failed)
+
+Phase Changes (files modified since track start):
+- src/assets/svg/ui/bubble.svg (NEW) — Translucent round bubble, 512x512 viewBox, #BEE3F8 fill at 0.4 opacity, white highlight
+- src/assets/svg/stickers/sticker_pop_freeze.svg (NEW) — Pop-freeze sticker, cream circle bg, bubble with highlight and pop debris dots
+- src/scenes/PreloadScene.ts (MODIFIED) — Added bubble and sticker_pop_freeze SVG imports and asset array entries
+- src/__tests__/scenes/navigation.test.ts (MODIFIED) — Updated SVG count assertion from 18 to 20, added bubble/sticker key assertions
+
+Manual Verification Steps:
+1. Start dev server: pnpm dev
+2. Open browser to http://localhost:5173
+3. Confirm game boots, progress bar fills, Hub scene appears with 6 tiles
+4. Verify no SVG loading errors in DevTools Console
+
+User Confirmation: Yes — phase meets expectations.
