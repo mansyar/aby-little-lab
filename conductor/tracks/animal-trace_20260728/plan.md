@@ -13,7 +13,7 @@
     - [x] Create 4 food SVGs (`banana.svg`, `carrot.svg`, `fish.svg`, `bone.svg`) matching their animal, same style rules
     - [x] Create `animal-trace` sticker SVG in `src/assets/svg/stickers/`
 - [x] Task: Extend PreloadScene to load all 8 animal/food SVGs with explicit width/height for high-res rasterization [f55043a]
-- [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
 
