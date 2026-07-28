@@ -1,0 +1,19 @@
+Task: Write tests for synthesized gameplay SFX + Implement synthesized SFX methods in AudioManager
+
+Summary:
+- Added 12 unit tests for 4 new synthesized SFX methods (playCorrect, playIncorrect, playWin, playSticker)
+- Each method tested for: oscillator creation count, start/stop calls, and SFX toggle respect
+- Implemented private playTone helper method for single-tone Web Audio API synthesis
+- playCorrect: ascending chime (C5, E5, G5) - 3 oscillators
+- playIncorrect: descending tone (G4, C4) - 2 oscillators
+- playWin: celebratory arpeggio (C5, E5, G5, C6) - 4 oscillators
+- playSticker: sparkle (C6, E6) - 2 oscillators
+- All methods respect SFX toggle (no sound when sfxEnabled is false)
+- All 99 tests pass. AudioManager.ts coverage: 98.85% stmts, 94.11% branches, 100% funcs/lines
+- Biome check clean. Production build succeeds.
+
+Files modified:
+- src/audio/AudioManager.ts (added playCorrect, playIncorrect, playWin, playSticker, playTone)
+- src/__tests__/audio/AudioManager.test.ts (added 12 tests in 4 describe blocks)
+
+Why: Shape Sorter game needs synthesized gameplay SFX (correct/incorrect/win/sticker) via Web Audio API, extending the existing AudioManager pattern established by playFrogNote.
