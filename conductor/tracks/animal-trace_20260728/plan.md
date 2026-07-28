@@ -19,13 +19,13 @@
 
 ## Phase 2: Round Initialization & Path Logic
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for round initialization and path logic
-    - [ ] Test 3 of 4 animal-food pairs are randomly selected per round
-    - [ ] Test pair order is shuffled (Fisher-Yates)
-    - [ ] Test path progress tracking (animal advances along path points on valid trace input)
-    - [ ] Test completion detection (all 3 paths traced = round complete)
-- [ ] Task: Implement round initialization & path logic in `src/game/animalTraceLogic.ts` (pure functions: pair selection/shuffle, path progress computation, completion detection)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for round initialization and path logic [c481ac2]
+    - [x] Test 3 of 4 animal-food pairs are randomly selected per round
+    - [x] Test pair order is shuffled (Fisher-Yates)
+    - [x] Test path progress tracking (animal advances along path points on valid trace input)
+    - [x] Test completion detection (all 3 paths traced = round complete)
+- [x] Task: Implement round initialization & path logic in `src/game/animalTraceLogic.ts` (pure functions: pair selection/shuffle, path progress computation, completion detection) [c481ac2]
 - [ ] Task: Conductor - User Manual Verification 'Round Initialization & Path Logic' (Protocol in workflow.md)
 
 ---
