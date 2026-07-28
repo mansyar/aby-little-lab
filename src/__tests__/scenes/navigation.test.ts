@@ -378,12 +378,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 18 shape, animal/food, and sticker SVGs during preload", () => {
+    it("loads all 20 shape, animal/food, sticker, and bubble SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(18);
+      expect(svgCalls).toHaveLength(20);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -420,6 +420,8 @@ describe("scene navigation flow", () => {
       expect(keys).toContain("food_fish");
       expect(keys).toContain("food_bone");
       expect(keys).toContain("sticker_animal_trace");
+      expect(keys).toContain("bubble");
+      expect(keys).toContain("sticker_pop_freeze");
     });
 
     it("passes explicit width and height for high-res rasterization", () => {
