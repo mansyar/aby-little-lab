@@ -7,11 +7,11 @@
 
 ## Phase 1: SVG Assets & Preload Pipeline
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Create animal and food SVG assets
-    - [ ] Create 4 animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) at 512×512 viewBox, flat fills, 4-6px `#2D3748` stroke, distinct soft/vibrant non-primary colors, storybook style
-    - [ ] Create 4 food SVGs (`banana.svg`, `carrot.svg`, `fish.svg`, `bone.svg`) matching their animal, same style rules
-    - [ ] Create `animal-trace` sticker SVG in `src/assets/svg/stickers/`
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Create animal and food SVG assets [fe8c733]
+    - [x] Create 4 animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) at 512×512 viewBox, flat fills, 4-6px `#2D3748` stroke, distinct soft/vibrant non-primary colors, storybook style
+    - [x] Create 4 food SVGs (`banana.svg`, `carrot.svg`, `fish.svg`, `bone.svg`) matching their animal, same style rules
+    - [x] Create `animal-trace` sticker SVG in `src/assets/svg/stickers/`
 - [ ] Task: Extend PreloadScene to load all 8 animal/food SVGs with explicit width/height for high-res rasterization
 - [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
