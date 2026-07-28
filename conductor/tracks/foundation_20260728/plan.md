@@ -93,7 +93,7 @@
 - [x] Task: Implement Phaser config and core scenes [08ede6f]
     - [x] Create `src/main.ts` (typed Phaser.Types.Core.GameConfig, 1024×768, Scale.FIT + CENTER_BOTH, Arcade physics gravity y:0, 8 scene registration)
     - [x] Create `src/scenes/BootScene.ts` (screen.orientation.lock('landscape') with catch fallback, transition to Preload)
-    - [x] Create `src/scenes/PreloadScene.ts` (load placeholder SVGs at 512×512, progress bar, transition to Hub)
+    - [x] Create `src/scenes/PreloadScene.ts` (progress bar, transition to Hub) — NOTE: Placeholder SVG loading deferred; asset creation is Out of Scope per spec
     - [x] Create `src/scenes/HubScene.ts` (6 game tiles grid, sticker book display, settings button gated by ParentLock)
     - [x] Run tests — all pass (Green phase)
 - [x] Task: Create game scene stubs [b8d72ae]
@@ -105,3 +105,9 @@
     - [x] Create `src/scenes/BigSmallScene.ts` (placeholder UI + back button with ParentLock)
     - [x] Run tests — all pass (Green phase)
 - [x] Task: Conductor - User Manual Verification 'Scene Architecture & Navigation' (Protocol in workflow.md) [744bfcc]
+
+---
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions [f85e258]
