@@ -12,6 +12,7 @@ vi.mock("phaser", () => {
   function createMockGameObject(): Record<string, MockFn> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
+      disableInteractive: vi.fn(),
       on: vi.fn().mockReturnThis(),
       off: vi.fn().mockReturnThis(),
       setOrigin: vi.fn().mockReturnThis(),
@@ -45,6 +46,7 @@ vi.mock("phaser", () => {
     };
     scale!: Record<string, MockFn> & { width: number; height: number };
     time!: Record<string, MockFn>;
+    tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
     events!: Record<string, MockFn>;
     children!: Record<string, MockFn>;
@@ -58,6 +60,7 @@ vi.mock("phaser", () => {
         circle: vi.fn(() => createMockGameObject()),
         graphics: vi.fn(() => createMockGameObject()),
         zone: vi.fn(() => createMockGameObject()),
+        particles: vi.fn(() => createMockGameObject()),
       };
       this.scene = {
         start: vi.fn(),
@@ -81,6 +84,7 @@ vi.mock("phaser", () => {
       this.input = {
         on: vi.fn(),
         off: vi.fn(),
+        setDraggable: vi.fn(),
       };
       this.cameras = {
         main: {
@@ -100,6 +104,9 @@ vi.mock("phaser", () => {
       this.time = {
         delayedCall: vi.fn(),
         addEvent: vi.fn(),
+      };
+      this.tweens = {
+        add: vi.fn(),
       };
       this.sys = {
         events: {
@@ -140,6 +147,24 @@ vi.mock("../../utils/storage", async (importOriginal) => {
     hasSticker: vi.fn(actual.hasSticker),
   };
 });
+
+/**
+ * Mock AudioManager so scene tests can verify audio calls without real AudioContext.
+ */
+const { mockAudio } = vi.hoisted(() => ({
+  mockAudio: {
+    playCorrect: vi.fn(),
+    playIncorrect: vi.fn(),
+    playWin: vi.fn(),
+    playSticker: vi.fn(),
+  },
+}));
+
+vi.mock("../../audio/AudioManager", () => ({
+  AudioManager: {
+    getInstance: () => mockAudio,
+  },
+}));
 
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
@@ -463,6 +488,138 @@ describe("scene navigation flow", () => {
       for (const result of shapeResults) {
         const obj = result.value as Record<string, MockFn>;
         expect(getMockFn(obj.setInteractive)).toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe("ShapeSorterScene drag and drop", () => {
+    /** Returns shape image objects with their types and origin positions. */
+    function getShapes(scene: unknown): Array<{
+      obj: Record<string, MockFn>;
+      type: string;
+      originX: number;
+      originY: number;
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const results: Array<{
+        obj: Record<string, MockFn>;
+        type: string;
+        originX: number;
+        originY: number;
+      }> = [];
+
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("shape_")) {
+          results.push({
+            obj: imageMock.mock.results[i].value as Record<string, MockFn>,
+            type: key.replace("shape_", ""),
+            originX: imageMock.mock.calls[i][0] as number,
+            originY: imageMock.mock.calls[i][1] as number,
+          });
+        }
+      }
+      return results;
+    }
+
+    /** Returns slot zone objects with their types and positions. */
+    function getSlots(scene: unknown): Array<{
+      zone: Record<string, MockFn>;
+      type: string;
+      x: number;
+      y: number;
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const zoneMock = getMockFn(add.zone);
+
+      const slotTypes: string[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("cutout_")) {
+          slotTypes.push(key.replace("cutout_", ""));
+        }
+      }
+
+      const results: Array<{
+        zone: Record<string, MockFn>;
+        type: string;
+        x: number;
+        y: number;
+      }> = [];
+
+      for (let i = 0; i < zoneMock.mock.results.length && i < slotTypes.length; i++) {
+        results.push({
+          zone: zoneMock.mock.results[i].value as Record<string, MockFn>,
+          type: slotTypes[i],
+          x: zoneMock.mock.calls[i][0] as number,
+          y: zoneMock.mock.calls[i][1] as number,
+        });
+      }
+      return results;
+    }
+
+    it("correct drop snaps shape to slot center, marks non-interactive, triggers SFX + particles", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const slots = getSlots(scene);
+      const shape = shapes[0];
+      const slot = slots.find((s) => s.type === shape.type);
+      if (!slot) throw new Error("No matching slot found");
+
+      // Simulate drop on matching zone
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, slot.zone);
+
+      expect(getMockFn(shape.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
+      expect(getMockFn(shape.obj.disableInteractive)).toHaveBeenCalled();
+      expect(mockAudio.playCorrect).toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+    });
+
+    it("incorrect drop bounces shape back to origin with wobble (no penalty)", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const shape = shapes[0];
+
+      // Simulate dragend without prior drop (dropped outside any zone)
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      // Verify bounce-back tween targets origin position
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const shapeTween = tweenCalls.find((c) => c[0]?.targets === shape.obj);
+      expect(shapeTween).toBeDefined();
+      expect(shapeTween[0].x).toBe(shape.originX);
+      expect(shapeTween[0].y).toBe(shape.originY);
+
+      expect(mockAudio.playIncorrect).toHaveBeenCalled();
+      // No penalty — scene not restarted
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    });
+
+    it("creates touch targets meeting 64x64px minimum", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      expect(shapes.length).toBe(3);
+
+      for (const shape of shapes) {
+        const setDisplaySizeCalls = getMockFn(shape.obj.setDisplaySize).mock.calls;
+        for (const call of setDisplaySizeCalls) {
+          expect(call[0]).toBeGreaterThanOrEqual(64);
+          expect(call[1]).toBeGreaterThanOrEqual(64);
+        }
       }
     });
   });

@@ -147,6 +147,19 @@ describe("AudioManager", () => {
     });
   });
 
+  describe("getInstance()", () => {
+    it("returns an AudioManager instance", () => {
+      const instance = AudioManager.getInstance();
+      expect(instance).toBeInstanceOf(AudioManager);
+    });
+
+    it("returns the same instance on subsequent calls", () => {
+      const first = AudioManager.getInstance();
+      const second = AudioManager.getInstance();
+      expect(first).toBe(second);
+    });
+  });
+
   describe("playBGM()", () => {
     it("plays the BGM audio element", () => {
       manager.init();

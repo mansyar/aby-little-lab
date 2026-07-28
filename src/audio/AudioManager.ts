@@ -23,11 +23,20 @@ const FROG_NOTE_GAIN = 0.3;
  * Uses HTML5 Audio for MP3 playback and Web Audio API for oscillator synthesis.
  */
 export class AudioManager {
+  private static instance: AudioManager | null = null;
   private audioContext: AudioContext | null = null;
   private bgmAudio: HTMLAudioElement | null = null;
   private sfxAudio: Record<SfxName, HTMLAudioElement> | null = null;
   private bgmEnabled = true;
   private sfxEnabled = true;
+
+  /** Returns the shared AudioManager singleton instance. */
+  static getInstance(): AudioManager {
+    if (!AudioManager.instance) {
+      AudioManager.instance = new AudioManager();
+    }
+    return AudioManager.instance;
+  }
 
   /**
    * Initializes the audio system: creates AudioContext, loads settings from storage,

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
+import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
-import { type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
+import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
 
 /** Y position for cutout slots (top area). */
 const SLOT_Y = 200;
@@ -11,21 +12,52 @@ const SHAPE_Y = 600;
 /** Display size for shapes and slots (exceeds 96px ideal touch target). */
 const SHAPE_DISPLAY_SIZE = 128;
 
+/** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
+const DROP_ZONE_SIZE = 160;
+
+/** Tween duration for bounce-back animation (ms). */
+const BOUNCE_DURATION = 300;
+
+/** Texture key used for particle bursts. */
+const PARTICLE_TEXTURE = "shape_circle";
+
+/** Tracks a draggable shape's state during the round. */
+interface ShapeData {
+  obj: Phaser.GameObjects.Image;
+  type: ShapeType;
+  originX: number;
+  originY: number;
+  placed: boolean;
+}
+
+/** Tracks a slot's drop zone and position. */
+interface SlotData {
+  zone: Phaser.GameObjects.Zone;
+  type: ShapeType;
+  x: number;
+  y: number;
+}
+
 /**
  * Shape Sorter scene — drag geometric shapes to matching cut-out slots.
  *
  * Round initialization selects 3 of 4 shapes, shuffles slot positions and
- * shape positions independently, and renders cutout slots at top with
- * draggable shapes at bottom.
+ * shape positions independently. Shapes are dragged via Phaser Pointer Drag
+ * to matching cutout slots. Correct drops snap to center with SFX + particles;
+ * incorrect drops bounce back gently with a soft tone.
  */
 export class ShapeSorterScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private selectedShapes: ShapeType[] = [];
   private slotOrder: ShapeType[] = [];
   private shapeOrder: ShapeType[] = [];
+  private shapes: ShapeData[] = [];
+  private slots: SlotData[] = [];
+  private readonly audioManager: AudioManager;
 
   constructor() {
     super({ key: "ShapeSorter" });
+    this.audioManager = AudioManager.getInstance();
   }
 
   create(): void {
@@ -63,7 +95,7 @@ export class ShapeSorterScene extends Phaser.Scene {
     this.createShapes();
   }
 
-  /** Creates cutout slot images at the top of the screen. */
+  /** Creates cutout slot images and drop zones at the top of the screen. */
   private createSlots(): void {
     const spacing = this.scale.width / (this.selectedShapes.length + 1);
     for (let i = 0; i < this.slotOrder.length; i++) {
@@ -72,6 +104,11 @@ export class ShapeSorterScene extends Phaser.Scene {
       this.add
         .image(x, SLOT_Y, `cutout_${slotType}`)
         .setDisplaySize(SHAPE_DISPLAY_SIZE, SHAPE_DISPLAY_SIZE);
+
+      const zone = this.add.zone(x, SLOT_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
+      zone.setInteractive({ dropZone: true });
+
+      this.slots.push({ zone, type: slotType, x, y: SLOT_Y });
     }
   }
 
@@ -81,10 +118,72 @@ export class ShapeSorterScene extends Phaser.Scene {
     for (let i = 0; i < this.shapeOrder.length; i++) {
       const x = spacing * (i + 1);
       const shapeType = this.shapeOrder[i];
-      this.add
+      const obj = this.add
         .image(x, SHAPE_Y, `shape_${shapeType}`)
         .setDisplaySize(SHAPE_DISPLAY_SIZE, SHAPE_DISPLAY_SIZE)
         .setInteractive();
+
+      this.input.setDraggable(obj);
+
+      const shapeData: ShapeData = {
+        obj,
+        type: shapeType,
+        originX: x,
+        originY: SHAPE_Y,
+        placed: false,
+      };
+
+      obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
+        obj.setPosition(dragX, dragY);
+      });
+
+      obj.on("drop", (_pointer: unknown, target: unknown) => {
+        this.handleDrop(shapeData, target);
+      });
+
+      obj.on("dragend", () => {
+        this.handleDragEnd(shapeData);
+      });
+
+      this.shapes.push(shapeData);
     }
+  }
+
+  /** Handles a shape being dropped on a zone. Snaps on correct match, otherwise no-ops. */
+  private handleDrop(shape: ShapeData, target: unknown): void {
+    const slot = this.slots.find((s) => s.zone === target);
+    if (!slot) return;
+
+    if (isMatch(shape.type, slot.type)) {
+      shape.obj.setPosition(slot.x, slot.y);
+      shape.obj.disableInteractive();
+      shape.placed = true;
+      this.audioManager.playCorrect();
+      this.createParticleBurst(slot.x, slot.y);
+    }
+  }
+
+  /** Handles drag end. Bounces shape back to origin with wobble if not placed. */
+  private handleDragEnd(shape: ShapeData): void {
+    if (!shape.placed) {
+      this.audioManager.playIncorrect();
+      this.tweens.add({
+        targets: shape.obj,
+        x: shape.originX,
+        y: shape.originY,
+        duration: BOUNCE_DURATION,
+        ease: "Back.out",
+      });
+    }
+  }
+
+  /** Creates a soft particle burst at the given position. */
+  private createParticleBurst(x: number, y: number): void {
+    this.add.particles(x, y, PARTICLE_TEXTURE, {
+      speed: { min: 50, max: 150 },
+      lifespan: 800,
+      quantity: 12,
+      scale: { start: 0.3, end: 0 },
+    });
   }
 }
