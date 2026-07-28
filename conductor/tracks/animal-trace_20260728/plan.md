@@ -5,7 +5,7 @@
 
 ---
 
-## Phase 1: SVG Assets & Preload Pipeline
+## Phase 1: SVG Assets & Preload Pipeline [checkpoint: f46400d]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Create animal and food SVG assets [fe8c733]
@@ -13,7 +13,7 @@
     - [x] Create 4 food SVGs (`banana.svg`, `carrot.svg`, `fish.svg`, `bone.svg`) matching their animal, same style rules
     - [x] Create `animal-trace` sticker SVG in `src/assets/svg/stickers/`
 - [x] Task: Extend PreloadScene to load all 8 animal/food SVGs with explicit width/height for high-res rasterization [f55043a]
-- [~] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
 
