@@ -31,7 +31,7 @@
 
 ---
 
-## Phase 3: Floating Bubbles & Tap Interaction [checkpoint: pending]
+## Phase 3: Floating Bubbles & Tap Interaction [checkpoint: 7dce3eb]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for floating bubble motion, tap interaction, and audio [TDD-Red] [6cb5e0e]
