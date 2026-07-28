@@ -1,0 +1,22 @@
+Task: Implement round initialization & match logic in ShapeSorterScene
+
+Summary:
+Implemented round initialization in ShapeSorterScene. The scene now selects 3 of 4 shapes randomly, shuffles slot and shape positions independently, creates cutout slot images at top, and creates interactive shape images at bottom.
+
+Changes:
+- Modified src/scenes/ShapeSorterScene.ts:
+  - Imported selectThreeShapes, shuffle, ShapeType from shapeSorterLogic module
+  - Added constants: SLOT_Y=200, SHAPE_Y=600, SHAPE_DISPLAY_SIZE=128
+  - Added private fields: selectedShapes, slotOrder, shapeOrder
+  - Added initRound() method: calls selectThreeShapes(), shuffles slot and shape orders independently
+  - Added createSlots() method: creates 3 cutout_* images at top, evenly spaced
+  - Added createShapes() method: creates 3 shape_* images at bottom, evenly spaced, interactive
+  - Updated class JSDoc from stub to actual description
+- Modified src/__tests__/scenes/navigation.test.ts:
+  - Added 'ShapeSorterScene round initialization' describe block with 3 tests:
+    - Creates 3 cutout slot images (verifies add.image calls with cutout_ prefix)
+    - Creates 3 shape images (verifies add.image calls with shape_ prefix)
+    - Makes shape images interactive (verifies setInteractive called on shape objects)
+
+Test Results: 111/111 pass. Coverage: ShapeSorterScene.ts 100% stmts/branches/lines, 87.5% funcs.
+Biome check: Clean. Build: Passes.
