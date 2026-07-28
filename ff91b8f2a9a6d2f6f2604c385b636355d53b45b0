@@ -1,0 +1,16 @@
+Task: Write tests for round initialization and bubble logic [TDD-Red]
+
+Summary: Created test file for pure game logic module popFreezeLogic.ts (not yet implemented). Tests cover:
+- createRoundState: pop count init to 0, win target 6
+- selectBubbleType: maintains 1-2 sleeping bubble mix (sleeping when 0, poppable when >=2, random between)
+- selectSleepingAnimal: returns valid animal from set of 4, randomized
+- generateSpawnConfig: position within world bounds, non-zero velocity, randomized, animal for sleeping type
+- generateInitialBubbles: 5 concurrent bubbles, 1-2 sleeping, all sleeping have animals, all poppable have none
+- registerPop: increments count, returns isWin at target, no mutation
+- registerWake: no penalty, state unchanged, no mutation
+- shuffle: Fisher-Yates, same elements, new array, same length, independent results
+
+Files created:
+- src/__tests__/game/popFreezeLogic.test.ts
+
+Why: TDD Red phase — write failing tests before implementing the logic module. Tests fail because popFreezeLogic.ts does not exist yet.
