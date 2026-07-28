@@ -425,6 +425,48 @@ describe("scene navigation flow", () => {
     );
   });
 
+  describe("ShapeSorterScene round initialization", () => {
+    it("creates 3 cutout slot images", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const slotKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key.startsWith("cutout_"));
+      expect(slotKeys).toHaveLength(3);
+    });
+
+    it("creates 3 shape images", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const shapeKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key.startsWith("shape_"));
+      expect(shapeKeys).toHaveLength(3);
+    });
+
+    it("makes shape images interactive for dragging", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const imageResults = getMockFn(scene.add.image).mock.results;
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const shapeResults = imageResults.filter((_result, index) => {
+        const key = imageCalls[index][2] as string;
+        return key.startsWith("shape_");
+      });
+
+      expect(shapeResults).toHaveLength(3);
+      for (const result of shapeResults) {
+        const obj = result.value as Record<string, MockFn>;
+        expect(getMockFn(obj.setInteractive)).toHaveBeenCalled();
+      }
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();
