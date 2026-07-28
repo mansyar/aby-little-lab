@@ -51,7 +51,7 @@
 
 ---
 
-## Phase 3: Audio Manager
+## Phase 3: Audio Manager [checkpoint: d30f96f]
 
 - [x] Task: Write tests for AudioManager [ebc59c0]
     - [x] Test initialization (loads audio context)
@@ -68,7 +68,7 @@
     - [x] Implement BGM/SFX toggle management (reads/writes settings via storage utils)
     - [x] Implement Web Audio API oscillator synthesis for frog notes (C4, E4, G4)
     - [x] Run tests — all pass (Green phase)
-- [~] Task: Conductor - User Manual Verification 'Audio Manager' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Audio Manager' (Protocol in workflow.md) [d30f96f]
 
 ---
 
