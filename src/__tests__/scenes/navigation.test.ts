@@ -138,10 +138,25 @@ vi.mock("../../utils/storage", async (importOriginal) => {
   };
 });
 
+import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
+import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
 import { HubScene } from "../../scenes/HubScene";
+import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
+import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
+import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
+import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+
+const GAME_SCENES = [
+  { name: "ShapeSorterScene", SceneClass: ShapeSorterScene },
+  { name: "AnimalTraceScene", SceneClass: AnimalTraceScene },
+  { name: "PopFreezeScene", SceneClass: PopFreezeScene },
+  { name: "ShadowMatchScene", SceneClass: ShadowMatchScene },
+  { name: "MusicalMemoryScene", SceneClass: MusicalMemoryScene },
+  { name: "BigSmallScene", SceneClass: BigSmallScene },
+] as const;
 
 const GAME_SCENE_KEYS = [
   "ShapeSorter",
@@ -267,30 +282,29 @@ describe("scene navigation flow", () => {
   });
 
   describe("game scene stubs", () => {
-    it("navigates back to Hub via back button hold", async () => {
-      // Dynamic import so core scene tests pass after Task 4,
-      // and this test passes after Task 5 creates game scenes.
-      const { ShapeSorterScene } = await import("../../scenes/ShapeSorterScene");
+    it.each(GAME_SCENES)(
+      "navigates back to Hub via back button hold in $name",
+      ({ SceneClass }) => {
+        const scene = new SceneClass();
+        scene.create();
 
-      const scene = new ShapeSorterScene();
-      scene.create();
+        // Trigger pointerdown on the back button (starts ParentLock timer)
+        triggerAllPointerdowns(scene);
 
-      // Trigger pointerdown on the back button (starts ParentLock timer)
-      triggerAllPointerdowns(scene);
+        // Find ParentLock's delayedCall (3000ms default hold duration)
+        const timeMock = getMockFn(scene.time.delayedCall);
+        const parentLockCall = timeMock.mock.calls.find((call) => call[0] === 3000);
 
-      // Find ParentLock's delayedCall (3000ms default hold duration)
-      const timeMock = getMockFn(scene.time.delayedCall);
-      const parentLockCall = timeMock.mock.calls.find((call) => call[0] === 3000);
+        if (!parentLockCall) {
+          throw new Error("ParentLock delayedCall (3000ms) not found");
+        }
 
-      if (!parentLockCall) {
-        throw new Error("ParentLock delayedCall (3000ms) not found");
-      }
+        // Simulate hold completion (ParentLock success callback)
+        const holdCallback = parentLockCall[1] as () => void;
+        holdCallback();
 
-      // Simulate hold completion (ParentLock success callback)
-      const holdCallback = parentLockCall[1] as () => void;
-      holdCallback();
-
-      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
-    });
+        expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+      },
+    );
   });
 });
