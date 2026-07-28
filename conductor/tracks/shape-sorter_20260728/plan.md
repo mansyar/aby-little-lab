@@ -21,14 +21,14 @@
 
 ## Phase 2: Synthesized Gameplay SFX
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for synthesized gameplay SFX
-    - [ ] Test `playCorrect` plays an ascending chime
-    - [ ] Test `playIncorrect` plays a soft descending tone
-    - [ ] Test `playWin` plays a celebratory tone
-    - [ ] Test `playSticker` plays a sparkle tone
-    - [ ] Test SFX toggle respected (no sound when `sfxEnabled` is false)
-- [ ] Task: Implement synthesized SFX methods in AudioManager (Web Audio API)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for synthesized gameplay SFX e591bf6
+    - [x] Test `playCorrect` plays an ascending chime
+    - [x] Test `playIncorrect` plays a soft descending tone
+    - [x] Test `playWin` plays a celebratory tone
+    - [x] Test `playSticker` plays a sparkle tone
+    - [x] Test SFX toggle respected (no sound when `sfxEnabled` is false)
+- [x] Task: Implement synthesized SFX methods in AudioManager (Web Audio API) e591bf6
 - [ ] Task: Conductor - User Manual Verification 'Synthesized Gameplay SFX' (Protocol in workflow.md)
 
 ---
