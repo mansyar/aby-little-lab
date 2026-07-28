@@ -13,7 +13,9 @@
     - [x] Create 4 cutout slot SVGs (same paths, 30% opacity fill + dashed `#2D3748` stroke)
     - [x] Create `shape-sorter` sticker SVG in `src/assets/svg/stickers/`
 - [x] Task: Extend PreloadScene to load all 8 shape SVGs with explicit width/height for high-res rasterization e33cffe
-- [~] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+
+[checkpoint: b6d9bfd]
 
 ---
 
