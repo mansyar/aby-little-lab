@@ -1,0 +1,24 @@
+Task: Implement round initialization & bubble logic in src/game/popFreezeLogic.ts [TDD-Green]
+
+Summary: Implemented pure game logic module for Pop & Freeze mini-game. All 28 tests pass.
+
+Exports:
+- Types: AnimalType, BubbleType, BubbleConfig, RoundState
+- Constants: ALL_ANIMALS, WIN_TARGET (6), CONCURRENT_BUBBLES (5), MIN_SLEEPING (1), MAX_SLEEPING (2)
+- Functions:
+  - createRoundState(): returns {popCount: 0, winTarget: 6}
+  - shuffle<T>(): Fisher-Yates, returns new array
+  - selectBubbleType(sleepingCount): maintains 1-2 sleeping mix
+  - selectSleepingAnimal(): random pick from 4 animals
+  - generateSpawnConfig(w, h, size, type): randomized pos+vel within bounds, 30-80px/s drift
+  - generateInitialBubbles(w, h, size): 5 bubbles, 1-2 sleeping
+  - registerPop(state): increments count, returns {state, isWin}
+  - registerWake(state): no penalty, returns state unchanged
+
+Files created:
+- src/game/popFreezeLogic.ts
+
+Files modified:
+- src/__tests__/game/popFreezeLogic.test.ts (fixed selectSleepingAnimal test to mock all 3 Fisher-Yates iterations; Biome auto-formatting)
+
+Why: TDD Green phase — implement pure game logic to make all 28 tests pass. Logic is Phaser-independent for testability. Follows existing pattern from shapeSorterLogic.ts and animalTraceLogic.ts.
