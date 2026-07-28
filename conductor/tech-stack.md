@@ -30,7 +30,9 @@
   "vite": "^8.1.5",
   "vite-plugin-pwa": "^1.3.0",
   "vitest": "^4.1.10",
-  "@biomejs/biome": "^2.5.5"
+  "@vitest/coverage-v8": "^4.1.10",
+  "@biomejs/biome": "^2.5.5",
+  "happy-dom": "^18.0.1"
 }
 ```
 
