@@ -1,0 +1,51 @@
+Phase 4 Verification Report: Completion, Sticker Award & Return
+Track: animal-trace_20260728
+Checkpoint Commit: bcc1e4e9cfc65c0db86ab682c87308fbd75e82c1
+
+== Automated Tests ==
+Command: $env:CI="true"; npx vitest run
+Result: 6 test files, 162 tests passed (0 failed)
+New tests added: 6 (in "AnimalTraceScene completion and sticker flow" describe block)
+  - plays win SFX when all 3 paths are traced
+  - awards sticker on first completion only
+  - does not re-award sticker on replay
+  - auto-returns to Hub after 3s delay
+  - triggers win animation tween on round completion
+  - creates sticker animation image on first completion
+
+== Lint & Build ==
+Biome check: No fixes applied, no errors
+Vite build: Succeeded (1.47s)
+
+== Phase Scope (files changed since Phase 3 checkpoint 583aaca) ==
+- conductor/tracks/animal-trace_20260728/plan.md (non-code, excluded)
+- src/__tests__/scenes/navigation.test.ts (test file — 6 new tests + completeAllPaths helper)
+- src/scenes/AnimalTraceScene.ts (handleRoundComplete + createStickerAnimation implementation)
+
+Test coverage: All code files have corresponding test files.
+
+== Implementation Summary ==
+Implemented handleRoundComplete() in AnimalTraceScene:
+1. playWin() — win SFX on round completion
+2. Tween animal sprite (scaleX/scaleY 1.2, yoyo, 300ms) — celebration animation
+3. hasSticker("animal-trace") check — if false: earnSticker("animal-trace") + playSticker() + createStickerAnimation()
+4. createStickerAnimation() — sticker_animal_trace image at center, scale 0->1 with Back.out ease (300ms)
+5. delayedCall(3000, -> scene.start("Hub")) — auto-return after 3s
+
+Pattern matches ShapeSorterScene.handleComplete() and createStickerAnimation().
+
+== Manual Verification Plan ==
+1. Start dev server: pnpm dev
+2. Open browser to http://localhost:5173
+3. Confirm Hub loads with Animal Trace sticker showing unearned
+4. Tap Animal Trace tile, trace dotted path from animal to food
+5. Verify: animal follows finger, pauses on lift, resumes from position
+6. Verify: reaching food plays chime + particle burst
+7. Trace all 3 paths — on 3rd completion: win SFX, animal celebration tween, sticker unlock animation, sticker SFX
+8. After ~3s, auto-return to Hub
+9. Confirm Animal Trace sticker now shows earned in sticker book
+10. Replay — confirm no re-award of sticker (no sticker SFX/animation), but win SFX and auto-return still work
+11. Test parental lock: hold Back button 3s to exit to Hub
+
+== User Confirmation ==
+User confirmed: "Yes" — manual verification plan meets expectations.
