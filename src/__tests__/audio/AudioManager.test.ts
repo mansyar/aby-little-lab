@@ -404,6 +404,50 @@ describe("AudioManager", () => {
     });
   });
 
+  describe("playPop()", () => {
+    it("creates an oscillator for percussive blip", () => {
+      manager.init();
+      manager.playPop();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(1);
+    });
+
+    it("starts and stops the oscillator", () => {
+      manager.init();
+      manager.playPop();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playPop();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("playWake()", () => {
+    it("creates multiple oscillators for rousing tone", () => {
+      manager.init();
+      manager.playWake();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(2);
+    });
+
+    it("starts and stops oscillators", () => {
+      manager.init();
+      manager.playWake();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playWake();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
   describe("destroy()", () => {
     it("closes the AudioContext", () => {
       manager.init();

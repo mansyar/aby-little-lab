@@ -27,6 +27,10 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setVelocity: vi.fn().mockReturnThis(),
+      setCollideWorldBounds: vi.fn().mockReturnThis(),
+      setBounce: vi.fn().mockReturnThis(),
+      setCircle: vi.fn().mockReturnThis(),
       fillStyle: vi.fn().mockReturnThis(),
       fillCircle: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
@@ -53,6 +57,7 @@ vi.mock("phaser", () => {
     sys!: { events: Record<string, MockFn> };
     events!: Record<string, MockFn>;
     children!: Record<string, MockFn>;
+    physics!: { add: Record<string, MockFn>; world: Record<string, MockFn> };
 
     constructor() {
       this.add = {
@@ -122,6 +127,15 @@ vi.mock("phaser", () => {
       this.children = {
         forEach: vi.fn(),
       };
+      this.physics = {
+        add: {
+          image: vi.fn(() => createMockGameObject()),
+        },
+        world: {
+          setBoundsCollision: vi.fn(),
+          setBounds: vi.fn(),
+        },
+      };
     }
   }
 
@@ -182,6 +196,8 @@ const { mockAudio } = vi.hoisted(() => ({
     playIncorrect: vi.fn(),
     playWin: vi.fn(),
     playSticker: vi.fn(),
+    playPop: vi.fn(),
+    playWake: vi.fn(),
   },
 }));
 
@@ -1217,6 +1233,229 @@ describe("scene navigation flow", () => {
       completePath(scene);
 
       expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe("PopFreezeScene round initialization", () => {
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** Returns bubble physics image objects created by the scene. */
+    function getBubbles(scene: unknown): Array<Record<string, MockFn>> {
+      const physics = (scene as { physics: { add: Record<string, unknown> } }).physics.add;
+      const imageMock = getMockFn(physics.image);
+      return imageMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+    }
+
+    it("creates 5 concurrent bubble physics images", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const physicsImageMock = getMockFn(scene.physics.add.image);
+      expect(physicsImageMock.mock.calls).toHaveLength(5);
+    });
+
+    it("sets world bounds collision for bouncing", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      expect(getMockFn(scene.physics.world.setBoundsCollision)).toHaveBeenCalled();
+    });
+
+    it("sets velocity on each bubble for floating motion", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      for (const bubble of bubbles) {
+        expect(getMockFn(bubble.setVelocity)).toHaveBeenCalled();
+      }
+    });
+
+    it("enables world bounds collision on each bubble", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      for (const bubble of bubbles) {
+        expect(getMockFn(bubble.setCollideWorldBounds)).toHaveBeenCalledWith(true);
+      }
+    });
+
+    it("makes each bubble interactive for tapping", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      for (const bubble of bubbles) {
+        expect(getMockFn(bubble.setInteractive)).toHaveBeenCalled();
+      }
+    });
+
+    it("creates touch targets meeting 64x64px minimum", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      for (const bubble of bubbles) {
+        const setDisplaySizeCalls = getMockFn(bubble.setDisplaySize).mock.calls;
+        for (const call of setDisplaySizeCalls) {
+          expect(call[0]).toBeGreaterThanOrEqual(64);
+          expect(call[1]).toBeGreaterThanOrEqual(64);
+        }
+      }
+    });
+
+    it("creates animal image for sleeping bubbles", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const animalKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key.startsWith("animal_"));
+      expect(animalKeys.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("creates Zzz text for sleeping bubbles", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const textCalls = getMockFn(scene.add.text).mock.calls;
+      const zzzCalls = textCalls.filter((call) => call[2] === "Zzz");
+      expect(zzzCalls).toHaveLength(1);
+    });
+  });
+
+  describe("PopFreezeScene tap interaction", () => {
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** Returns bubble physics image objects created by the scene. */
+    function getBubbles(scene: unknown): Array<Record<string, MockFn>> {
+      const physics = (scene as { physics: { add: Record<string, unknown> } }).physics.add;
+      const imageMock = getMockFn(physics.image);
+      return imageMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+    }
+
+    /** Simulates a tap on a bubble by triggering its pointerdown callback. */
+    function tapBubble(bubble: Record<string, MockFn>): void {
+      const onCalls = getMockFn(bubble.on).mock.calls;
+      const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    it("tapping a poppable bubble triggers pop SFX + particle burst", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      // With Math.random=0.5: bubble 0 is sleeping, bubbles 1-4 are poppable
+      const poppableBubble = bubbles[1];
+
+      tapBubble(poppableBubble);
+
+      expect(mockAudio.playPop).toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+    });
+
+    it("tapping a sleeping bubble triggers wake SFX with no penalty", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      const sleepingBubble = bubbles[0];
+
+      tapBubble(sleepingBubble);
+
+      expect(mockAudio.playWake).toHaveBeenCalled();
+      expect(mockAudio.playPop).not.toHaveBeenCalled();
+      expect(getMockFn(sleepingBubble.destroy)).not.toHaveBeenCalled();
+    });
+
+    it("tapping a poppable bubble starts pop animation tween", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      const poppableBubble = bubbles[1];
+
+      tapBubble(poppableBubble);
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const popTween = tweenCalls.find((c) => c[0]?.targets === poppableBubble);
+      expect(popTween).toBeDefined();
+    });
+
+    it("tapping a sleeping bubble starts wake wobble animation", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      const sleepingBubble = bubbles[0];
+
+      tapBubble(sleepingBubble);
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const wakeTween = tweenCalls.find(
+        (c) => c[0]?.targets === sleepingBubble && c[0]?.yoyo === true,
+      );
+      expect(wakeTween).toBeDefined();
+    });
+
+    it("respawns a poppable bubble after pop to maintain concurrent count", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const physicsImageMock = getMockFn(scene.physics.add.image);
+      expect(physicsImageMock.mock.calls).toHaveLength(5);
+
+      const bubbles = getBubbles(scene);
+      tapBubble(bubbles[1]);
+
+      expect(physicsImageMock.mock.calls).toHaveLength(6);
+
+      const newBubble = physicsImageMock.mock.results[5].value as Record<string, MockFn>;
+      expect(getMockFn(newBubble.setInteractive)).toHaveBeenCalled();
+    });
+
+    it("does not respawn after win target is reached", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const physicsImageMock = getMockFn(scene.physics.add.image);
+      let bubbles = getBubbles(scene);
+
+      // Pop 4 initial poppable bubbles (indices 1-4)
+      tapBubble(bubbles[1]);
+      tapBubble(bubbles[2]);
+      tapBubble(bubbles[3]);
+      tapBubble(bubbles[4]);
+
+      // 4 pops → 4 respawns → 9 total physics images
+      expect(physicsImageMock.mock.calls).toHaveLength(9);
+
+      // Get updated list (includes respawns at indices 5-8)
+      bubbles = getBubbles(scene);
+      tapBubble(bubbles[5]);
+      // 5 pops → 5 respawns → 10 total
+      expect(physicsImageMock.mock.calls).toHaveLength(10);
+
+      tapBubble(bubbles[6]);
+      // 6 pops = win target → NO respawn → still 10
+      expect(physicsImageMock.mock.calls).toHaveLength(10);
     });
   });
 
