@@ -1,0 +1,11 @@
+Task: Write tests for completion and sticker flow [TDD-Red]
+
+Summary:
+- Added 'PopFreezeScene completion and sticker flow' describe block (6 tests) to navigation.test.ts
+- Tests cover FR5.1-FR5.4: win SFX on 6 pops, sticker award on first completion only, no re-award on replay, auto-return to Hub after 3s delay, win animation tween (yoyo scale 1.2), sticker animation image (sticker_pop_freeze)
+- Uses completeRound helper that pops 6 poppable bubbles (with Math.random=0.5 mock for deterministic bubble types)
+- Pattern matches ShapeSorterScene and AnimalTraceScene completion test blocks
+- 5 of 6 tests fail as expected (the 'does not re-award sticker' test passes since handleComplete is a stub)
+
+Files modified:
+- src/__tests__/scenes/navigation.test.ts
