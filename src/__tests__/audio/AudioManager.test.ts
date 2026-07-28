@@ -73,10 +73,14 @@ describe("AudioManager", () => {
       close: vi.fn(),
     };
 
-    audioContextConstructor = vi.fn(() => mockAudioContext);
+    // biome-ignore lint/complexity/useArrowFunction: Must use function expression — arrow functions cannot be used as constructors with new
+    audioContextConstructor = vi.fn(function () {
+      return mockAudioContext;
+    });
     vi.stubGlobal("AudioContext", audioContextConstructor);
 
-    audioConstructor = vi.fn((src?: string) => {
+    // biome-ignore lint/complexity/useArrowFunction: Must use function expression — arrow functions cannot be used as constructors with new
+    audioConstructor = vi.fn(function (src?: string) {
       const audio: MockAudioElement = {
         src: src ?? "",
         loop: false,
