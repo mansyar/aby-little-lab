@@ -68,7 +68,7 @@
     - [x] Implement BGM/SFX toggle management (reads/writes settings via storage utils)
     - [x] Implement Web Audio API oscillator synthesis for frog notes (C4, E4, G4)
     - [x] Run tests — all pass (Green phase)
-- [ ] Task: Conductor - User Manual Verification 'Audio Manager' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Audio Manager' (Protocol in workflow.md)
 
 ---
 
