@@ -7,6 +7,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
-
-- [~] **Track: Game 2 - Animal Trace-and-Connect**
-*Link: [./tracks/animal-trace_20260728/](./tracks/animal-trace_20260728/)*
