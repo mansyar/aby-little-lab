@@ -12,8 +12,8 @@
     - [x] Create 4 full-color shape SVGs (`shape_circle.svg`, `shape_square.svg`, `shape_triangle.svg`, `shape_star.svg`) at 512×512 viewBox, flat fills, 4-6px `#2D3748` stroke, distinct soft/vibrant non-primary colors
     - [x] Create 4 cutout slot SVGs (same paths, 30% opacity fill + dashed `#2D3748` stroke)
     - [x] Create `shape-sorter` sticker SVG in `src/assets/svg/stickers/`
-- [~] Task: Extend PreloadScene to load all 8 shape SVGs with explicit width/height for high-res rasterization
-- [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [x] Task: Extend PreloadScene to load all 8 shape SVGs with explicit width/height for high-res rasterization e33cffe
+- [~] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
 
