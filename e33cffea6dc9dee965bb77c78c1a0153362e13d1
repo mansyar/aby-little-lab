@@ -1,0 +1,11 @@
+Task: Extend PreloadScene to load all 8 shape SVGs with explicit width/height for high-res rasterization
+
+Summary: Extended PreloadScene to import and load 8 shape SVG assets (4 full-color shapes + 4 cutout slot variants) using Vite ?url imports for asset URL resolution. Each SVG is rasterized at 256x256 for high-DPI display quality.
+
+Files modified:
+- src/scenes/PreloadScene.ts — Added 8 SVG ?url imports, SHAPE_ASSETS constant array, SVG_RASTER_SIZE constant (256), and for-loop in preload() calling this.load.svg() for each asset with width/height config
+- src/__tests__/scenes/navigation.test.ts — Added 3 new test cases: verifies 8 load.svg calls, verifies correct keys (shape_circle, shape_square, shape_triangle, shape_star, cutout_circle, cutout_square, cutout_triangle, cutout_star), verifies width/height config passed
+
+Design: Uses Vite ?url import suffix for standard asset URL resolution (works in dev, build, and test). SVGs rasterized at 256x256 (2x of 128px display size) for crisp rendering on high-DPI displays. All 87 tests pass, Biome check clean, build succeeds.
+
+Why: Wires up the previously-deferred SVG asset pipeline so ShapeSorterScene can use this.add.image() with texture keys for shapes and cutouts.
