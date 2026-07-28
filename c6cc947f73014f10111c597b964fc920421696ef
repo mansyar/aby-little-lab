@@ -1,0 +1,11 @@
+Task: Create bubble & sticker SVG assets
+
+Summary: Created 2 new SVG assets for the Pop & Freeze mini-game.
+
+Created files:
+- src/assets/svg/ui/bubble.svg — translucent round bubble (512x512 viewBox, #BEE3F8 fill at 0.4 opacity, #2D3748 5px stroke, white highlight ellipse, storybook flat style)
+- src/assets/svg/stickers/sticker_pop_freeze.svg — pop-freeze sticker (cream circle bg, bubble with highlight, pop debris dots)
+
+Verified: Existing 4 animal SVGs (monkey, rabbit, cat, dog) already loaded by animal-trace track — reused as sleeping-animal content, no new animal art needed.
+
+Why: New game assets for the Pop & Freeze mini-game (bubble for popping, sticker for completion reward).
