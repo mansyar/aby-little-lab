@@ -12,7 +12,7 @@
     - [x] Create 1 bubble SVG (`bubble.svg`) at 512×512 viewBox, translucent round bubble with highlight, storybook style
     - [x] Create `pop-freeze` sticker SVG in `src/assets/svg/stickers/`
     - [x] Verify existing 4 animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) are reused as sleeping-animal content (no new animal art)
-- [ ] Task: Extend PreloadScene to load the new bubble SVG with explicit width/height for high-res rasterization (animals already loaded by animal-trace track)
+- [x] Task: Extend PreloadScene to load the new bubble SVG with explicit width/height for high-res rasterization (animals already loaded by animal-trace track) [c7926ef]
 - [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
