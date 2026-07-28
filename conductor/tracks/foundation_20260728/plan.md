@@ -61,13 +61,13 @@
     - [x] Test SFX toggle (enabled/disabled respects settings)
     - [x] Test settings persistence integration (toggling updates localStorage)
     - [x] Test Web Audio API synthesis (frog notes C4=261.63Hz, E4=329.63Hz, G4=392.00Hz)
-- [ ] Task: Implement AudioManager
-    - [ ] Create `src/audio/AudioManager.ts`
-    - [ ] Implement SFX playback (MP3 loading and playing via Phaser audio or HTML5 Audio)
-    - [ ] Implement BGM loop (play/pause single ambient track)
-    - [ ] Implement BGM/SFX toggle management (reads/writes settings via storage utils)
-    - [ ] Implement Web Audio API oscillator synthesis for frog notes (C4, E4, G4)
-    - [ ] Run tests — all pass (Green phase)
+- [x] Task: Implement AudioManager [25f22a7]
+    - [x] Create `src/audio/AudioManager.ts`
+    - [x] Implement SFX playback (MP3 loading and playing via Phaser audio or HTML5 Audio)
+    - [x] Implement BGM loop (play/pause single ambient track)
+    - [x] Implement BGM/SFX toggle management (reads/writes settings via storage utils)
+    - [x] Implement Web Audio API oscillator synthesis for frog notes (C4, E4, G4)
+    - [x] Run tests — all pass (Green phase)
 - [ ] Task: Conductor - User Manual Verification 'Audio Manager' (Protocol in workflow.md)
 
 ---
