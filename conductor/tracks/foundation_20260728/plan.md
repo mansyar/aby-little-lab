@@ -74,11 +74,11 @@
 
 ## Phase 4: Scene Architecture & Navigation
 
-- [ ] Task: Write tests for ParentLock component
-    - [ ] Test hold detection (3s threshold triggers success)
-    - [ ] Test success callback fires after 3s hold
-    - [ ] Test reset on release before 3s (no success callback)
-    - [ ] Test reset on pointer up/leave
+- [x] Task: Write tests for ParentLock component [2694ae4]
+    - [x] Test hold detection (3s threshold triggers success)
+    - [x] Test success callback fires after 3s hold
+    - [x] Test reset on release before 3s (no success callback)
+    - [x] Test reset on pointer up/leave
 - [ ] Task: Implement ParentLock component
     - [ ] Create `src/components/ParentLock.ts`
     - [ ] Implement hold-for-3s timer logic using Phaser input events
