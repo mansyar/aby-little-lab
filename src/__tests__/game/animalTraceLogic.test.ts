@@ -1,0 +1,128 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import {
+  ALL_PAIRS,
+  type AnimalFoodPair,
+  advancePath,
+  createPathProgress,
+  isPathComplete,
+  isRoundComplete,
+  selectThreePairs,
+  shuffle,
+} from "../../game/animalTraceLogic";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("selectThreePairs", () => {
+  it("returns exactly 3 pairs", () => {
+    const result = selectThreePairs();
+    expect(result).toHaveLength(3);
+  });
+
+  it("returns pairs from the valid set of 4", () => {
+    const result = selectThreePairs();
+    for (const pair of result) {
+      expect(ALL_PAIRS).toContainEqual(pair);
+    }
+  });
+
+  it("returns no duplicate pairs", () => {
+    const result = selectThreePairs();
+    const unique = new Set(result.map((p) => `${p.animal}-${p.food}`));
+    expect(unique.size).toBe(3);
+  });
+});
+
+describe("shuffle", () => {
+  it("returns an array with the same elements", () => {
+    const input: AnimalFoodPair[] = [...ALL_PAIRS];
+    const result = shuffle(input);
+    const sortByAnimal = (a: AnimalFoodPair, b: AnimalFoodPair) => a.animal.localeCompare(b.animal);
+    expect(result.sort(sortByAnimal)).toEqual(input.sort(sortByAnimal));
+  });
+
+  it("returns a new array (does not mutate input)", () => {
+    const input: AnimalFoodPair[] = [...ALL_PAIRS];
+    const inputCopy = [...input];
+    shuffle(input);
+    expect(input).toEqual(inputCopy);
+  });
+
+  it("returns the same length array", () => {
+    const input: AnimalFoodPair[] = [...ALL_PAIRS];
+    const result = shuffle(input);
+    expect(result).toHaveLength(input.length);
+  });
+
+  it("produces independent results when called twice with different random values", () => {
+    const input: AnimalFoodPair[] = [...ALL_PAIRS];
+
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
+    const result1 = shuffle(input);
+
+    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
+    const result2 = shuffle(input);
+
+    expect(result1).not.toEqual(result2);
+  });
+});
+
+describe("createPathProgress", () => {
+  it("creates progress starting at point 0", () => {
+    const progress = createPathProgress(5);
+    expect(progress.currentPoint).toBe(0);
+  });
+
+  it("creates progress with correct total points", () => {
+    const progress = createPathProgress(5);
+    expect(progress.totalPoints).toBe(5);
+  });
+});
+
+describe("advancePath", () => {
+  it("advances to the next point", () => {
+    const progress = createPathProgress(5);
+    const advanced = advancePath(progress);
+    expect(advanced.currentPoint).toBe(1);
+  });
+
+  it("does not advance past the last point", () => {
+    const progress = { currentPoint: 4, totalPoints: 5 };
+    const advanced = advancePath(progress);
+    expect(advanced.currentPoint).toBe(4);
+  });
+
+  it("returns a new object (does not mutate input)", () => {
+    const progress = createPathProgress(5);
+    const advanced = advancePath(progress);
+    expect(advanced).not.toBe(progress);
+    expect(progress.currentPoint).toBe(0);
+  });
+});
+
+describe("isPathComplete", () => {
+  it("returns false when not at the last point", () => {
+    const progress = createPathProgress(5);
+    expect(isPathComplete(progress)).toBe(false);
+  });
+
+  it("returns true when at the last point", () => {
+    const progress = { currentPoint: 4, totalPoints: 5 };
+    expect(isPathComplete(progress)).toBe(true);
+  });
+});
+
+describe("isRoundComplete", () => {
+  it("returns false when fewer than 3 paths completed", () => {
+    expect(isRoundComplete(0)).toBe(false);
+    expect(isRoundComplete(1)).toBe(false);
+    expect(isRoundComplete(2)).toBe(false);
+  });
+
+  it("returns true when 3 paths completed", () => {
+    expect(isRoundComplete(3)).toBe(true);
+  });
+});
