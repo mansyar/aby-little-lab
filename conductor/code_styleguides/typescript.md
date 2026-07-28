@@ -12,7 +12,7 @@ This document summarizes key rules and best practices from the Google TypeScript
   - Mark properties never reassigned outside the constructor with `readonly`.
   - **Never use the `public` modifier** (it's the default). Restrict visibility with `private` or `protected` where possible.
 - **Functions:** Prefer function declarations for named functions. Use arrow functions for anonymous functions/callbacks.
-- **String Literals:** Use single quotes (`'`). Use template literals (`` ` ``) for interpolation and multi-line strings.
+- **String Literals:** Use double quotes (`"`), matching the Biome configuration (`quoteStyle: "double"`). Use template literals (`` ` ``) for interpolation and multi-line strings.
 - **Equality Checks:** Always use triple equals (`===`) and not equals (`!==`).
 - **Type Assertions:** **Avoid type assertions (`x as SomeType`) and non-nullability assertions (`y!`)**. If you must use them, provide a clear justification.
 

@@ -8,6 +8,8 @@ import { ParentLock } from "../components/ParentLock";
  * a back button gated by ParentLock for navigation back to the Hub.
  */
 export class PopFreezeScene extends Phaser.Scene {
+  private parentLock?: ParentLock;
+
   constructor() {
     super({ key: "PopFreeze" });
   }
@@ -19,7 +21,7 @@ export class PopFreezeScene extends Phaser.Scene {
     });
     backButton.setInteractive();
 
-    new ParentLock({
+    this.parentLock = new ParentLock({
       scene: this,
       target: backButton,
       onSuccess: () => {
@@ -28,6 +30,10 @@ export class PopFreezeScene extends Phaser.Scene {
       onFailure: () => {
         // No action needed on failure.
       },
+    });
+
+    this.events.on("shutdown", () => {
+      this.parentLock?.destroy();
     });
   }
 }

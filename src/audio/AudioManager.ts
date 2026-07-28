@@ -55,7 +55,7 @@ export class AudioManager {
    */
   playBGM(): void {
     if (!this.bgmEnabled || !this.bgmAudio) return;
-    this.bgmAudio.play();
+    this.bgmAudio.play().catch(() => {});
   }
 
   /**
@@ -76,7 +76,7 @@ export class AudioManager {
     if (!this.sfxEnabled || !this.sfxAudio) return;
     const audio = this.sfxAudio[name];
     audio.currentTime = 0;
-    audio.play();
+    audio.play().catch(() => {});
   }
 
   /**

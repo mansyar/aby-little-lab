@@ -45,6 +45,7 @@ vi.mock("phaser", () => {
     scale!: Record<string, MockFn> & { width: number; height: number };
     time!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
+    events!: Record<string, MockFn>;
     children!: Record<string, MockFn>;
 
     constructor() {
@@ -106,6 +107,7 @@ vi.mock("phaser", () => {
           off: vi.fn(),
         },
       };
+      this.events = this.sys.events;
       this.children = {
         forEach: vi.fn(),
       };

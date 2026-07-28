@@ -31,6 +31,8 @@ const GRID_ROWS = 2;
  * and a settings button gated behind a parental lock.
  */
 export class HubScene extends Phaser.Scene {
+  private parentLock?: ParentLock;
+
   constructor() {
     super({ key: "Hub" });
   }
@@ -74,7 +76,7 @@ export class HubScene extends Phaser.Scene {
     settingsButton.setOrigin(1, 0);
     settingsButton.setInteractive();
 
-    new ParentLock({
+    this.parentLock = new ParentLock({
       scene: this,
       target: settingsButton,
       onSuccess: () => {
@@ -83,6 +85,10 @@ export class HubScene extends Phaser.Scene {
       onFailure: () => {
         // No action needed on failure.
       },
+    });
+
+    this.events.on("shutdown", () => {
+      this.parentLock?.destroy();
     });
   }
 }
