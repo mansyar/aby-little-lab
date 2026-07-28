@@ -83,7 +83,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 ## 8. Audio Design
 
 - **SFX (MP3):** pop, correct, incorrect, wake, win, sticker — one file per sound
-- **Synthesized (Web Audio API):** Game 5 frog notes (C4=261.63Hz, E4=329.63Hz, G4=392.00Hz)
+- **Synthesized (Web Audio API):** Game 5 frog notes (C4=261.63Hz, E4=329.63Hz, G4=392.00Hz); gameplay feedback SFX (correct, incorrect, win, sticker) used by Shape Sorter
 - **BGM:** Single gentle ambient loop (`bgm.mp3`), toggleable via parental settings
 - **Audio toggles:** BGM and SFX independently toggleable, persisted in localStorage
 
