@@ -104,4 +104,4 @@
     - [x] Create `src/scenes/MusicalMemoryScene.ts` (placeholder UI + back button with ParentLock)
     - [x] Create `src/scenes/BigSmallScene.ts` (placeholder UI + back button with ParentLock)
     - [x] Run tests — all pass (Green phase)
-- [ ] Task: Conductor - User Manual Verification 'Scene Architecture & Navigation' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Scene Architecture & Navigation' (Protocol in workflow.md)
