@@ -1,0 +1,33 @@
+Task: Implement ParentLock component
+
+Summary:
+Created src/components/ParentLock.ts implementing the hold-for-3-seconds
+parental lock mechanism using Phaser input events. The component registers
+pointerdown/pointerup/pointerout listeners on a target game object, starts
+a timer on pointerdown, fires onSuccess when the timer completes (default
+3000ms), and fires onFailure (canceling the timer) when the pointer is
+released or leaves the target before the hold duration elapses.
+
+Key Design Decisions:
+- Used arrow function class properties for handlePointerDown/handlePointerUp
+  to preserve 'this' binding when used as Phaser event callbacks. This avoids
+  passing a context parameter to on()/off(), which is important for testability
+  since the mock event emitter calls callbacks without 'this' binding.
+- Used import type Phaser from 'phaser' for type-only imports (verbatimModuleSyntax).
+- ParentLockOptions interface accepts Phaser.Scene and Phaser.GameObjects.GameObject.
+- Timer is stored as Phaser.Time.TimerEvent | null, cancelled via remove().
+
+Files Created:
+- src/components/ParentLock.ts (91 lines)
+
+Class API:
+- constructor(options: ParentLockOptions): Registers 3 event listeners
+- destroy(): Removes all listeners and cancels active timer
+- handlePointerDown (private): Starts delayedCall timer
+- handlePointerUp (private): Cancels timer, fires onFailure if active
+
+Verification:
+- Tests: 59/59 passed (18 ParentLock + 12 storage + 29 AudioManager)
+- Coverage: 100% on ParentLock.ts (statements, branches, functions, lines)
+- Biome check: No errors
+- Production build: Succeeded (PWA service worker generated)
