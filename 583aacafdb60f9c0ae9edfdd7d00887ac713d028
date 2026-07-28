@@ -1,0 +1,46 @@
+Phase 3 Verification Report — Animal Trace Path Tracing & Feedback
+===================================================================
+
+Automated Test Command:
+  $env:CI="true"; npx vitest run
+
+Test Results:
+  156 tests passed (0 failed)
+  6 test files passed
+  - src/__tests__/components/ParentLock.test.ts (18 tests)
+  - src/__tests__/utils/storage.test.ts (12 tests)
+  - src/__tests__/game/shapeSorterLogic.test.ts (9 tests)
+  - src/__tests__/game/animalTraceLogic.test.ts (21 tests, 5 new)
+  - src/__tests__/audio/AudioManager.test.ts (45 tests)
+  - src/__tests__/scenes/navigation.test.ts (51 tests, 11 new)
+
+Lint Check: npx biome check — clean, no errors
+Build: npx vite build — succeeds
+
+Phase Scope (files changed since Phase 2 checkpoint b3f881a):
+  - src/game/animalTraceLogic.ts (added generatePathPoints)
+  - src/scenes/AnimalTraceScene.ts (full implementation)
+  - src/__tests__/game/animalTraceLogic.test.ts (5 new tests)
+  - src/__tests__/scenes/navigation.test.ts (mock extension + 11 new tests)
+  - conductor/tracks/animal-trace_20260728/plan.md
+
+Manual Verification Steps:
+  1. Start dev server: npm run dev
+  2. Open browser to dev server URL
+  3. Navigate through Boot → Preload → Hub
+  4. Tap the Animal Trace tile (Game 2)
+  5. Verify animal on left, food on right, dotted path between them
+  6. Touch and drag along dotted path — animal follows finger
+  7. Lift finger mid-trace — animal pauses (no reset)
+  8. Touch again and continue — animal resumes from paused position
+  9. Complete trace to food — chime + particle burst
+  10. No sound during tracing — audio only on completion
+  11. Scene advances to next pair after brief delay
+  12. Hold back button 3s — returns to Hub
+
+User Confirmation: Yes — user confirmed all expectations met.
+
+Commits in this phase:
+  - 22d434c: feat(scene): Add animal trace path tracing and feedback
+  - e43707b: conductor(plan): Mark tasks 'Write tests' and 'Implement path tracing' as complete
+  - 583aaca: conductor(checkpoint): Checkpoint end of Phase 3
