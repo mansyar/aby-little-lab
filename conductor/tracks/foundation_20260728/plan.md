@@ -47,7 +47,7 @@
     - [x] Create `src/types/index.ts` (AppStorage, GameId, StickerData, Settings interfaces)
     - [x] Create `src/utils/storage.ts` (load, save, earnSticker, hasSticker, getSettings, updateSettings)
     - [x] Run tests — all pass (Green phase)
-- [ ] Task: Conductor - User Manual Verification 'Core Types & Storage Layer' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Core Types & Storage Layer' (Protocol in workflow.md)
 
 ---
 
