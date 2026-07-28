@@ -6,30 +6,30 @@
 
 ## Phase 1: Project Scaffolding
 
-- [ ] Task: Initialize pnpm project and install dependencies
-    - [ ] Create `package.json` with pnpm
-    - [ ] Install runtime dependency: `phaser@^4.2.1`
-    - [ ] Install dev dependencies: `typescript@^7.0.2`, `vite@^8.1.5`, `vite-plugin-pwa@^1.3.0`, `vitest@^4.1.10`, `@biomejs/biome@^2.5.5`
-- [ ] Task: Configure TypeScript
-    - [ ] Create `tsconfig.json` (target: ES2023+, strict: true, moduleResolution: bundler, types: vitest/globals)
-- [ ] Task: Configure Vite + PWA
-    - [ ] Create `vite.config.ts` with VitePWA plugin
-    - [ ] Configure manifest (name: "Aby's Little Lab", short_name: "Aby Lab", display: standalone, orientation: landscape, background_color: #FAF9F6, theme_color: #2B6CB0)
-    - [ ] Set registerType: 'autoUpdate', precache all build assets
-- [ ] Task: Configure Biome
-    - [ ] Create `biome.json` (2-space indent, double quotes, semicolons, recommended linter, organizeImports enabled)
-- [ ] Task: Configure Vitest
-    - [ ] Add Vitest configuration (environment: happy-dom for DOM/Phaser mock tests)
-    - [ ] Add test scripts to `package.json` (`test`, `test:coverage`)
-- [ ] Task: Create project structure and entry files
-    - [ ] Create `index.html` with root div and script import
-    - [ ] Create `src/styles/style.css` (base reset, body styling)
-    - [ ] Create directory structure (`src/scenes/`, `src/components/`, `src/types/`, `src/assets/audio/`, `src/assets/svg/`, `src/__tests__/scenes/`, `src/__tests__/components/`)
-    - [ ] Create placeholder PWA icon in `public/icons/` (512×512 PNG)
-- [ ] Task: Verify scaffolding works
-    - [ ] Run `pnpm dev` — dev server starts without errors
-    - [ ] Run `pnpm run build` — production build succeeds
-    - [ ] Run `CI=true pnpm test` — test runner executes (even with no tests)
+- [x] Task: Initialize pnpm project and install dependencies [ad136d4]
+    - [x] Create `package.json` with pnpm
+    - [x] Install runtime dependency: `phaser@^4.2.1`
+    - [x] Install dev dependencies: `typescript@^7.0.2`, `vite@^8.1.5`, `vite-plugin-pwa@^1.3.0`, `vitest@^4.1.10`, `@biomejs/biome@^2.5.5`
+- [x] Task: Configure TypeScript [ad136d4]
+    - [x] Create `tsconfig.json` (target: ES2023+, strict: true, moduleResolution: bundler, types: vitest/globals)
+- [x] Task: Configure Vite + PWA [ad136d4]
+    - [x] Create `vite.config.ts` with VitePWA plugin
+    - [x] Configure manifest (name: "Aby's Little Lab", short_name: "Aby Lab", display: standalone, orientation: landscape, background_color: #FAF9F6, theme_color: #2B6CB0)
+    - [x] Set registerType: 'autoUpdate', precache all build assets
+- [x] Task: Configure Biome [ad136d4]
+    - [x] Create `biome.json` (2-space indent, double quotes, semicolons, recommended linter, organizeImports enabled)
+- [x] Task: Configure Vitest [ad136d4]
+    - [x] Add Vitest configuration (environment: happy-dom for DOM/Phaser mock tests)
+    - [x] Add test scripts to `package.json` (`test`, `test:coverage`)
+- [x] Task: Create project structure and entry files [ad136d4]
+    - [x] Create `index.html` with root div and script import
+    - [x] Create `src/styles/style.css` (base reset, body styling)
+    - [x] Create directory structure (`src/scenes/`, `src/components/`, `src/types/`, `src/assets/audio/`, `src/assets/svg/`, `src/__tests__/scenes/`, `src/__tests__/components/`)
+    - [x] Create placeholder PWA icon in `public/icons/` (512×512 PNG)
+- [x] Task: Verify scaffolding works [ad136d4]
+    - [x] Run `pnpm dev` — dev server starts without errors
+    - [x] Run `pnpm run build` — production build succeeds
+    - [x] Run `CI=true pnpm test` — test runner executes (even with no tests)
 - [ ] Task: Conductor - User Manual Verification 'Project Scaffolding' (Protocol in workflow.md)
 
 ---
