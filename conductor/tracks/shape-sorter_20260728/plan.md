@@ -37,12 +37,12 @@
 
 ## Phase 3: Round Initialization & Match Logic
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for round initialization and match logic
-    - [ ] Test 3 of 4 shapes are randomly selected per round
-    - [ ] Test slot positions and shape positions are shuffled independently
-    - [ ] Test match detection (shape type matches slot type)
-- [ ] Task: Implement round initialization & match logic in ShapeSorterScene
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for round initialization and match logic a055f8c
+    - [x] Test 3 of 4 shapes are randomly selected per round
+    - [x] Test slot positions and shape positions are shuffled independently
+    - [x] Test match detection (shape type matches slot type)
+- [~] Task: Implement round initialization & match logic in ShapeSorterScene
 - [ ] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
 
 ---
