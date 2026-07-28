@@ -1,0 +1,16 @@
+Task: Write tests for storage utilities
+
+Summary: Wrote comprehensive Vitest test suite for the localStorage persistence layer. Tests follow TDD Red phase — they fail until src/types/index.ts and src/utils/storage.ts are implemented in the next task.
+
+Created files:
+- src/__tests__/utils/storage.test.ts (159 lines, 13 test cases)
+
+Test coverage:
+- load(): returns default AppStorage when empty, handles invalid JSON
+- save(): writes data readable back by load (roundtrip)
+- earnSticker(): sets earned=true with valid ISO timestamp, isolates to target sticker
+- hasSticker(): returns false for unearned, true after earning
+- getSettings(): returns defaults (bgmEnabled=true, sfxEnabled=true)
+- updateSettings(): updates individual/both settings, persists to localStorage
+
+Why: TDD requires failing tests before implementation. These tests define the API contract for the storage layer managing sticker collection and audio settings via localStorage key 'abby-little-lab:v1'.
