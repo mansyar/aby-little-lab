@@ -1,0 +1,29 @@
+Phase 3 Checkpoint: Round Initialization & Match Logic
+
+Automated Test Command: \$env:CI='true'; npx vitest run --coverage\
+Test Results: 111/111 tests pass (5 test files).
+
+Coverage Report:
+- shapeSorterLogic.ts: 100% stmts, 100% branches, 100% funcs, 100% lines
+- ShapeSorterScene.ts: 100% stmts, 100% branches, 87.5% funcs, 100% lines
+- Overall: 99.6% stmts, 95.65% branches, 89.61% funcs, 100% lines
+
+Biome Check: Clean (23 files).
+Production Build: Passes.
+
+Files Changed in Phase 3:
+- src/game/shapeSorterLogic.ts (NEW) — Pure logic: ShapeType, ALL_SHAPES, selectThreeShapes(), shuffle(), isMatch()
+- src/__tests__/game/shapeSorterLogic.test.ts (NEW) — 9 tests for logic functions
+- src/scenes/ShapeSorterScene.ts (MODIFIED) — Round init: selects 3/4 shapes, shuffles slots/shapes independently, creates cutout slots + interactive shape images
+- src/__tests__/scenes/navigation.test.ts (MODIFIED) — 3 new scene tests for round initialization
+
+Manual Verification Plan:
+1. Run \pnpm dev\ and open browser
+2. Navigate to Hub, click Shape Sorter tile
+3. Verify 3 cutout slot images appear at top
+4. Verify 3 colored shape images appear at bottom
+5. Verify shapes and slots are shuffled independently
+6. Verify back button + ParentLock (hold 3s) still works
+7. Re-enter game to verify different random arrangement
+
+User Confirmation: User confirmed Phase 3 meets expectations.
