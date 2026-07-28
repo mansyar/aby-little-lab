@@ -34,15 +34,15 @@
 ## Phase 3: Floating Bubbles & Tap Interaction
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for floating bubble motion, tap interaction, and audio [TDD-Red]
-    - [ ] Test bubbles float via Arcade Physics with random velocity and bounce off world bounds (stay on-screen)
-    - [ ] Test tapping a poppable bubble triggers pop animation + pop SFX + particle burst + increments count
-    - [ ] Test tapping a sleeping-animal bubble triggers wake SFX + brief wake animation with no penalty (count unchanged, bubble remains)
-    - [ ] Test poppable bubble respawn maintains concurrent count until win target reached
-    - [ ] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas
-    - [ ] Test AudioManager plays synthesized pop SFX on pop and wake SFX on wake (respecting SFX toggle)
-- [ ] Task: Extend AudioManager with synthesized pop & wake SFX via Web Audio API (pop = short percussive blip, wake = soft rousing tone) [TDD-Green]
-- [ ] Task: Implement floating bubble spawning (Arcade Physics + world-bounds bounce) + tap-to-pop + wake feedback + particle burst in `PopFreezeScene` [TDD-Green]
+- [x] Task: Write tests for floating bubble motion, tap interaction, and audio [TDD-Red] [6cb5e0e]
+    - [x] Test bubbles float via Arcade Physics with random velocity and bounce off world bounds (stay on-screen)
+    - [x] Test tapping a poppable bubble triggers pop animation + pop SFX + particle burst + increments count
+    - [x] Test tapping a sleeping-animal bubble triggers wake SFX + brief wake animation with no penalty (count unchanged, bubble remains)
+    - [x] Test poppable bubble respawn maintains concurrent count until win target reached
+    - [x] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas
+    - [x] Test AudioManager plays synthesized pop SFX on pop and wake SFX on wake (respecting SFX toggle)
+- [x] Task: Extend AudioManager with synthesized pop & wake SFX via Web Audio API (pop = short percussive blip, wake = soft rousing tone) [TDD-Green] [b5062d0]
+- [x] Task: Implement floating bubble spawning (Arcade Physics + world-bounds bounce) + tap-to-pop + wake feedback + particle burst in `PopFreezeScene` [TDD-Green] [b5062d0]
 - [ ] Task: Conductor - User Manual Verification 'Floating Bubbles & Tap Interaction' (Protocol in workflow.md)
 
 ---
