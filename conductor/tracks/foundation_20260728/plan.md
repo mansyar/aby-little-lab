@@ -79,11 +79,11 @@
     - [x] Test success callback fires after 3s hold
     - [x] Test reset on release before 3s (no success callback)
     - [x] Test reset on pointer up/leave
-- [ ] Task: Implement ParentLock component
-    - [ ] Create `src/components/ParentLock.ts`
-    - [ ] Implement hold-for-3s timer logic using Phaser input events
-    - [ ] Implement success/failure callbacks
-    - [ ] Run tests — all pass (Green phase)
+- [x] Task: Implement ParentLock component [ffbd54c]
+    - [x] Create `src/components/ParentLock.ts`
+    - [x] Implement hold-for-3s timer logic using Phaser input events
+    - [x] Implement success/failure callbacks
+    - [x] Run tests — all pass (Green phase)
 - [ ] Task: Write tests for scene navigation flow
     - [ ] Test BootScene starts and transitions to PreloadScene
     - [ ] Test PreloadScene loads assets and transitions to HubScene
