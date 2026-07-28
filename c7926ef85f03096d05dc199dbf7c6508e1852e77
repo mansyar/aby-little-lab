@@ -1,0 +1,8 @@
+Task: Extend PreloadScene to load bubble SVG
+
+Summary: Added bubble and pop-freeze sticker SVG imports and asset entries to PreloadScene.
+
+Modified files:
+- src/scenes/PreloadScene.ts — Added imports for bubble.svg and sticker_pop_freeze.svg, registered as 'bubble' and 'sticker_pop_freeze' texture keys in SHAPE_ASSETS array
+
+Why: Pop & Freeze game needs the bubble texture for floating bubbles and the sticker texture for the completion reward animation. Animals already loaded by animal-trace track are reused as sleeping-animal content.
