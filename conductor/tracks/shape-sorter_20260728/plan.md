@@ -72,5 +72,7 @@
     - [x] Test auto-return to Hub after 3s delay
     - [x] Test parental lock exits early to Hub (already covered by existing "game scene stubs" parameterized test for all 6 scenes)
 - [x] Task: Implement completion flow (win animation + sticker award + auto-return) in ShapeSorterScene 0259dd6
-- [ ] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
+
+[checkpoint: 35d3bc4]
 </protect>
