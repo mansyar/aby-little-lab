@@ -42,8 +42,8 @@
     - [x] Test 3 of 4 shapes are randomly selected per round
     - [x] Test slot positions and shape positions are shuffled independently
     - [x] Test match detection (shape type matches slot type)
-- [~] Task: Implement round initialization & match logic in ShapeSorterScene
-- [ ] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
+- [x] Task: Implement round initialization & match logic in ShapeSorterScene 1cf79cc
+- [~] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
 
 ---
 
