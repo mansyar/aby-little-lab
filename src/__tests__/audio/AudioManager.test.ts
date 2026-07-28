@@ -162,6 +162,17 @@ describe("AudioManager", () => {
       const bgm = findAudioBySrc("bgm");
       expect(bgm?.play).not.toHaveBeenCalled();
     });
+
+    it("handles promise rejection from play() without throwing", async () => {
+      manager.init();
+      const bgm = findAudioBySrc("bgm");
+      expect(bgm).toBeDefined();
+      if (!bgm) return;
+      bgm.play = vi.fn(() => Promise.reject(new Error("NotAllowed")));
+
+      manager.playBGM();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
   });
 
   describe("pauseBGM()", () => {
@@ -195,6 +206,17 @@ describe("AudioManager", () => {
       manager.playSFX("pop");
       const audio = findAudioBySrc("pop");
       expect(audio?.play).not.toHaveBeenCalled();
+    });
+
+    it("handles promise rejection from play() without throwing", async () => {
+      manager.init();
+      const audio = findAudioBySrc("pop");
+      expect(audio).toBeDefined();
+      if (!audio) return;
+      audio.play = vi.fn(() => Promise.reject(new Error("NotAllowed")));
+
+      manager.playSFX("pop");
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
   });
 

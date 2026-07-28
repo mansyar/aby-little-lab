@@ -14,6 +14,8 @@
 | Build Tool | Vite | 8.1.5 | Fast HMR dev server, ES module bundling, plugin ecosystem |
 | PWA | vite-plugin-pwa | 1.3.0 | Auto-generated service worker + manifest, precaching, auto-update |
 | Testing | Vitest | 4.1.10 | Native Vite integration, fast test runner |
+| Coverage | @vitest/coverage-v8 | 4.1.10 | V8-based code coverage provider |
+| Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
 | Linting/Formatting | Biome | 2.5.5 | All-in-one linter and formatter |
 | Package Manager | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
 | Audio | Web Audio API | Browser native | Synthesized tones for Game 5 (no file overhead) |
@@ -26,16 +28,16 @@
     "phaser": "^4.2.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.5",
+    "@vitest/coverage-v8": "^4.1.10",
+    "happy-dom": "^18.0.1",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.10",
-    "@biomejs/biome": "^2.5.5"
+    "vitest": "^4.1.10"
   }
 }
 ```
-
-*Exact versions to be pinned at project initialization.*
 
 ---
 
@@ -46,13 +48,16 @@ aby-little-lab/
 ├── index.html                      # Vite entry point
 ├── package.json                    # Dependencies & scripts
 ├── tsconfig.json                   # TypeScript compiler config
-├── vite.config.ts                  # Vite + vite-plugin-pwa configuration
+├── vite.config.ts                  # Vite + vite-plugin-pwa + Vitest configuration
+├── biome.json                      # Biome linter/formatter config (double quotes, 2-space)
 ├── public/
-│   └── icons/                      # PWA icons (generated from SVG)
+│   └── icons/                      # PWA icons (icon-512.png)
 └── src/
     ├── main.ts                     # Phaser 4 game config & global scene register
+    ├── vite-env.d.ts               # Vite type declarations
     ├── scenes/
-    │   ├── BootScene.ts            # SVG rasterization preloader & progress bar
+    │   ├── BootScene.ts            # Orientation lock & system initialization
+    │   ├── PreloadScene.ts         # Progress bar & asset preloading
     │   ├── HubScene.ts             # Game selection grid, sticker book & parental lock
     │   ├── ShapeSorterScene.ts     # Mini-Game 1
     │   ├── AnimalTraceScene.ts     # Mini-Game 2
@@ -61,11 +66,15 @@ aby-little-lab/
     │   ├── MusicalMemoryScene.ts   # Mini-Game 5
     │   └── BigSmallScene.ts        # Mini-Game 6
     ├── components/
-    │   └── ParentLock.ts           # Long-press escape UI component
+    │   └── ParentLock.ts           # Long-press escape UI component (hold 3s)
+    ├── audio/
+    │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis (Web Audio API)
     ├── types/
-    │   └── index.ts                # Shared interfaces (GameConfig, StickerData, SceneKeys)
+    │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
+    ├── utils/
+    │   └── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings)
     ├── assets/
-    │   ├── audio/                  # Web Audio assets (sfx_pop.mp3, sfx_win.mp3, bgm.mp3)
+    │   ├── audio/                  # Audio assets (sfx_pop.mp3, sfx_win.mp3, bgm.mp3)
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
     │       ├── animals/            # Monkey, Frog, Cat SVGs
@@ -75,8 +84,10 @@ aby-little-lab/
     ├── styles/
     │   └── style.css               # Touch locks (-webkit-user-select, touch-action: none)
     └── __tests__/
-        ├── scenes/                 # Scene-level tests (BootScene.test.ts, HubScene.test.ts, etc.)
-        └── components/             # Component tests (ParentLock.test.ts, etc.)
+        ├── audio/                  # AudioManager tests
+        ├── components/             # ParentLock tests
+        ├── scenes/                 # Scene-level tests (navigation, etc.)
+        └── utils/                  # Storage tests
 ```
 
 ---
@@ -86,13 +97,14 @@ aby-little-lab/
 The PWA manifest and service worker are configured via `vite-plugin-pwa`. No separate `manifest.json` or `sw.js` files are needed — the plugin auto-generates them at build time with default precaching for all static assets.
 
 ```typescript
-import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
+/// <reference types="vitest/config" />
+import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: "autoUpdate",
       manifest: {
         name: "Aby's Little Lab",
         short_name: "Aby Lab",
@@ -102,11 +114,28 @@ export default defineConfig({
         background_color: "#FAF9F6",
         theme_color: "#2B6CB0",
         icons: [
-          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" }
-        ]
-      }
-    })
-  ]
+          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+        ],
+      },
+    }),
+  ],
+  test: {
+    environment: "happy-dom",
+    globals: true,
+    include: ["src/__tests__/**/*.test.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.ts"],
+      exclude: ["src/__tests__/**", "src/main.ts", "src/types/**"],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+      },
+    },
+  },
 });
 ```
 
@@ -115,46 +144,59 @@ export default defineConfig({
 ## 4. Phaser Scale Manager Configuration (`src/main.ts`)
 
 ```typescript
-import Phaser from 'phaser';
-import { BootScene } from './scenes/BootScene';
-import { HubScene } from './scenes/HubScene';
-import { ShapeSorterScene } from './scenes/ShapeSorterScene';
-import { AnimalTraceScene } from './scenes/AnimalTraceScene';
-import { PopFreezeScene } from './scenes/PopFreezeScene';
-import { ShadowMatchScene } from './scenes/ShadowMatchScene';
-import { MusicalMemoryScene } from './scenes/MusicalMemoryScene';
-import { BigSmallScene } from './scenes/BigSmallScene';
+import "./styles/style.css";
+import Phaser from "phaser";
+import { AnimalTraceScene } from "./scenes/AnimalTraceScene";
+import { BigSmallScene } from "./scenes/BigSmallScene";
+import { BootScene } from "./scenes/BootScene";
+import { HubScene } from "./scenes/HubScene";
+import { MusicalMemoryScene } from "./scenes/MusicalMemoryScene";
+import { PopFreezeScene } from "./scenes/PopFreezeScene";
+import { PreloadScene } from "./scenes/PreloadScene";
+import { ShadowMatchScene } from "./scenes/ShadowMatchScene";
+import { ShapeSorterScene } from "./scenes/ShapeSorterScene";
 
 const config: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
-    width: 1024,
-    height: 768,
-    scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        parent: 'game-container'
+  type: Phaser.AUTO,
+  width: 1024,
+  height: 768,
+  parent: "game-container",
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: { x: 0, y: 0 },
     },
-    physics: {
-        default: 'arcade',
-        arcade: { gravity: { y: 0 }, debug: false }
-    },
-    scene: [BootScene, HubScene, ShapeSorterScene, AnimalTraceScene,
-            PopFreezeScene, ShadowMatchScene, MusicalMemoryScene, BigSmallScene]
+  },
+  scene: [
+    BootScene,
+    PreloadScene,
+    HubScene,
+    ShapeSorterScene,
+    AnimalTraceScene,
+    PopFreezeScene,
+    ShadowMatchScene,
+    MusicalMemoryScene,
+    BigSmallScene,
+  ],
 };
 
-const game = new Phaser.Game(config);
+new Phaser.Game(config);
 ```
 
 ---
 
-## 5. Screen Orientation Auto-Rotate (`src/main.ts`)
+## 5. Screen Orientation Auto-Rotate (`src/scenes/BootScene.ts`)
 
 On phone launch, attempt to lock the screen to landscape orientation. The manifest `orientation: landscape` serves as the primary hint; this JS call provides an additional programmatic lock for installed PWAs.
 
 ```typescript
 // Attempt programmatic landscape lock (works in standalone/installed PWA mode)
 if (screen.orientation) {
-    screen.orientation.lock('landscape').catch(() => {
+    screen.orientation.lock("landscape").catch(() => {
         // Not all browsers/devices support programmatic orientation lock.
         // The manifest `orientation: landscape` acts as a fallback.
     });
@@ -170,17 +212,27 @@ All app state is stored under a single localStorage key as a JSON object.
 **Key:** `abby-little-lab:v1`
 
 ```typescript
+type GameId =
+  | "shape-sorter"
+  | "animal-trace"
+  | "pop-freeze"
+  | "shadow-match"
+  | "musical-memory"
+  | "big-small";
+
+interface StickerData {
+  earned: boolean;
+  earnedAt: string | null; // ISO timestamp, null if not earned
+}
+
+interface Settings {
+  bgmEnabled: boolean;
+  sfxEnabled: boolean;
+}
+
 interface AppStorage {
-  stickers: {
-    [gameId: string]: {
-      earned: boolean;
-      earnedAt: number; // Unix timestamp (ms), 0 if not earned
-    };
-  };
-  settings: {
-    bgmEnabled: boolean;
-    sfxEnabled: boolean;
-  };
+  stickers: Record<GameId, StickerData>;
+  settings: Settings;
 }
 ```
 
@@ -200,12 +252,12 @@ interface AppStorage {
 ```json
 {
   "stickers": {
-    "shape-sorter": { "earned": true, "earnedAt": 1722480000000 },
-    "animal-trace": { "earned": false, "earnedAt": 0 },
-    "pop-freeze": { "earned": true, "earnedAt": 1722566400000 },
-    "shadow-match": { "earned": false, "earnedAt": 0 },
-    "musical-memory": { "earned": false, "earnedAt": 0 },
-    "big-small": { "earned": false, "earnedAt": 0 }
+    "shape-sorter": { "earned": true, "earnedAt": "2024-08-01T00:00:00.000Z" },
+    "animal-trace": { "earned": false, "earnedAt": null },
+    "pop-freeze": { "earned": true, "earnedAt": "2024-08-02T00:00:00.000Z" },
+    "shadow-match": { "earned": false, "earnedAt": null },
+    "musical-memory": { "earned": false, "earnedAt": null },
+    "big-small": { "earned": false, "earnedAt": null }
   },
   "settings": {
     "bgmEnabled": true,

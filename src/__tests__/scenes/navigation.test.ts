@@ -13,6 +13,7 @@ vi.mock("phaser", () => {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       on: vi.fn().mockReturnThis(),
+      off: vi.fn().mockReturnThis(),
       setOrigin: vi.fn().mockReturnThis(),
       setScale: vi.fn().mockReturnThis(),
       setDepth: vi.fn().mockReturnThis(),
@@ -201,6 +202,25 @@ function triggerAllPointerdowns(scene: unknown): void {
   }
 }
 
+/** Triggers the shutdown event on a scene, invoking any registered shutdown callbacks. */
+function triggerShutdown(scene: unknown): void {
+  const events = (scene as { events: Record<string, unknown> }).events;
+  const onMock = getMockFn(events.on);
+  const shutdownCall = onMock.mock.calls.find((call) => call[0] === "shutdown");
+  if (shutdownCall && typeof shutdownCall[1] === "function") {
+    shutdownCall[1]();
+  }
+}
+
+/** Returns true if any game object's off method was called. */
+function anyObjectOffCalled(scene: unknown): boolean {
+  const allObjects = getAllGameObjects(scene);
+  return allObjects.some((obj) => {
+    const offMock = obj.off as unknown as MockFn;
+    return offMock?.mock?.calls?.length > 0;
+  });
+}
+
 describe("scene navigation flow", () => {
   beforeEach(() => {
     vi.stubGlobal("screen", {
@@ -227,6 +247,22 @@ describe("scene navigation flow", () => {
 
       expect(screen.orientation.lock).toHaveBeenCalledWith("landscape");
     });
+
+    it("handles orientation lock rejection gracefully", async () => {
+      vi.stubGlobal("screen", {
+        orientation: {
+          lock: vi.fn().mockRejectedValue(new Error("NotSupported")),
+          unlock: vi.fn(),
+        },
+      });
+
+      const scene = new BootScene();
+      scene.create();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
+    });
   });
 
   describe("PreloadScene", () => {
@@ -243,6 +279,45 @@ describe("scene navigation flow", () => {
       scene.create();
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+
+    it("updates progress bar display size on progress event", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const loadOnMock = getMockFn(scene.load.on);
+      const progressCall = loadOnMock.mock.calls.find((call) => call[0] === "progress");
+      const progressCallback = progressCall?.[1] as (value: number) => void;
+
+      const progressBar = getMockFn(scene.add.rectangle).mock.results[0].value as Record<
+        string,
+        MockFn
+      >;
+
+      progressCallback(0.5);
+      expect(getMockFn(progressBar.setDisplaySize)).toHaveBeenCalledWith(150, 30);
+    });
+
+    it("destroys progress bar elements on complete event", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const loadOnMock = getMockFn(scene.load.on);
+      const completeCall = loadOnMock.mock.calls.find((call) => call[0] === "complete");
+      const completeCallback = completeCall?.[1] as () => void;
+
+      const progressBar = getMockFn(scene.add.rectangle).mock.results[0].value as Record<
+        string,
+        MockFn
+      >;
+      const progressBox = getMockFn(scene.add.rectangle).mock.results[1].value as Record<
+        string,
+        MockFn
+      >;
+
+      completeCallback();
+      expect(getMockFn(progressBar.destroy)).toHaveBeenCalled();
+      expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
   });
 
@@ -308,5 +383,29 @@ describe("scene navigation flow", () => {
         expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
       },
     );
+  });
+
+  describe("scene shutdown cleanup", () => {
+    it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
+      const scene = new SceneClass();
+      scene.create();
+
+      expect(anyObjectOffCalled(scene)).toBe(false);
+
+      triggerShutdown(scene);
+
+      expect(anyObjectOffCalled(scene)).toBe(true);
+    });
+
+    it("destroys ParentLock on shutdown in HubScene", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      expect(anyObjectOffCalled(scene)).toBe(false);
+
+      triggerShutdown(scene);
+
+      expect(anyObjectOffCalled(scene)).toBe(true);
+    });
   });
 });

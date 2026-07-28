@@ -109,8 +109,14 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 ```
 [BootScene]
     │
-    │  Preload SVGs (rasterize at 512×512)
+    │  Lock landscape orientation
+    │  Initialize audio & storage systems
+    │
+    ▼
+[PreloadScene]
+    │
     │  Show progress bar
+    │  (SVG asset loading deferred to game-specific tracks)
     │
     ▼
 [HubScene]
@@ -138,7 +144,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 ### Navigation Rules
 
-- **BootScene → HubScene:** Automatic after preload completes.
+- **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a progress bar before transitioning to HubScene.
 - **HubScene → GameScene:** Tap on a game tile. Instant transition.
 - **GameScene → HubScene:** Auto-return after game completion (3s delay with win animation) OR parental lock (hold 3s).
 - **HubScene → Exit:** Parental lock (hold 3s) required. Prevents accidental app exit.
