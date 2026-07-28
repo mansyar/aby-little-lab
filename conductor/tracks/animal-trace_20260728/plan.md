@@ -32,14 +32,14 @@
 
 ## Phase 3: Path Tracing & Feedback
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for path tracing and feedback behavior
-    - [ ] Test pointer proximity check progresses animal along `Phaser.Curves.Path` on valid touch (pointer within tolerance band)
-    - [ ] Test finger lift/stray beyond tolerance pauses animal at current position (no reset, no penalty)
-    - [ ] Test resume continues from current position when finger returns near path
-    - [ ] Test reaching food triggers correct SFX + particle burst, marks path complete
-    - [ ] Test trace tolerance is generous (inflated proximity band per touch-ergonomics)
-- [ ] Task: Implement path tracing interaction (`Phaser.Curves.Path` + `pointermove` proximity) + particle burst + pause/resume in `AnimalTraceScene`
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for path tracing and feedback behavior [22d434c]
+    - [x] Test pointer proximity check progresses animal along `Phaser.Curves.Path` on valid touch (pointer within tolerance band)
+    - [x] Test finger lift/stray beyond tolerance pauses animal at current position (no reset, no penalty)
+    - [x] Test resume continues from current position when finger returns near path
+    - [x] Test reaching food triggers correct SFX + particle burst, marks path complete
+    - [x] Test trace tolerance is generous (inflated proximity band per touch-ergonomics)
+- [x] Task: Implement path tracing interaction (`Phaser.Curves.Path` + `pointermove` proximity) + particle burst + pause/resume in `AnimalTraceScene` [22d434c]
 - [ ] Task: Conductor - User Manual Verification 'Path Tracing & Feedback' (Protocol in workflow.md)
 
 ---
