@@ -1,0 +1,19 @@
+Task: Write tests for completion and sticker flow + Implement completion flow in ShapeSorterScene
+
+Summary:
+- Added 4 tests in navigation.test.ts for completion/sticker flow: (1) playWin called when all 3 shapes placed, (2) earnSticker + playSticker called on first completion, (3) earnSticker + playSticker NOT called on replay (hasSticker=true), (4) delayedCall(3000) auto-returns to Hub.
+- Added earnSticker spy to storage mock alongside existing hasSticker spy.
+- Added completeAllShapes() helper to simulate dropping all 3 shapes on matching slots.
+- Implemented handleComplete() in ShapeSorterScene: playWin SFX, win animation (scale pulse tween on shapes), sticker award (earnSticker + playSticker + sticker text animation) on first completion only, and auto-return to Hub after 3s delay.
+- Added createStickerAnimation() for sticker unlock visual (text scale-up at center).
+- Added AUTO_RETURN_DELAY=3000 constant.
+- Imported hasSticker and earnSticker from storage module.
+- Updated handleDrop to check shapes.every(placed) after each correct placement.
+
+Files Modified:
+- src/scenes/ShapeSorterScene.ts (added handleComplete, createStickerAnimation, AUTO_RETURN_DELAY, storage import, completion check in handleDrop)
+- src/__tests__/scenes/navigation.test.ts (added earnSticker to storage mock, 4 new tests, completeAllShapes helper, getShapeObjects/getSlotZones helpers)
+
+Test Results: 120 tests pass (5 files). Coverage: ShapeSorterScene.ts 97.46% stmts, 70% branches, 89.47% funcs, 98.64% lines. Overall: 99.01% stmts, 91.37% branches, 89.88% funcs, 99.65% lines. Biome clean. Build passes.
+
+Why: Completes the Shape Sorter gameplay loop — placement detection triggers win celebration, sticker award (first time only), and auto-return to Hub. This is the final phase of the Shape Sorter track.
