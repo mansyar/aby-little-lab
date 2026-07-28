@@ -1,0 +1,18 @@
+Task: Create shape and sticker SVG assets
+
+Summary: Created 9 hand-authored flat vector SVG assets for the Shape Sorter mini-game.
+
+Files created:
+- src/assets/svg/shapes/shape_circle.svg (amber #F6AD55, r=200, 5px stroke)
+- src/assets/svg/shapes/shape_square.svg (purple #9F7AEA, 360x360 rounded rect, 5px stroke)
+- src/assets/svg/shapes/shape_triangle.svg (teal #4FD1C5, 3-point polygon, 5px stroke, round join)
+- src/assets/svg/shapes/shape_star.svg (pink #F687B3, 5-pointed star, 5px stroke, round join)
+- src/assets/svg/shapes/cutout_circle.svg (30% opacity fill, dashed stroke)
+- src/assets/svg/shapes/cutout_square.svg (30% opacity fill, dashed stroke)
+- src/assets/svg/shapes/cutout_triangle.svg (30% opacity fill, dashed stroke)
+- src/assets/svg/shapes/cutout_star.svg (30% opacity fill, dashed stroke)
+- src/assets/svg/stickers/sticker_shape_sorter.svg (circle badge with 4 mini shapes)
+
+Design: All SVGs use 512x512 viewBox, flat fills, #2D3748 stroke (5px for shapes, 3px for sticker details, 6px for sticker border). Each shape has a distinct color for color-independent design (differ by both color AND geometric form). Cutout variants use fill-opacity=0.3 and stroke-dasharray='12 8' per PRD §4.1.
+
+Why: Establishes the SVG asset pipeline for the first playable mini-game. These assets are loaded by PreloadScene and used by ShapeSorterScene for gameplay.
