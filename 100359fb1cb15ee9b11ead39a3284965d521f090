@@ -1,0 +1,18 @@
+Task: Write tests for drag/drop and feedback behavior + Implement drag/drop interaction + particle burst + bounce-back in ShapeSorterScene
+
+Summary:
+- Added 3 tests for ShapeSorterScene drag/drop: correct drop (snap + SFX + particles), incorrect drop (bounce-back + SFX + no penalty), touch targets >= 64px
+- Added 2 tests for AudioManager.getInstance() singleton behavior
+- Added mock support: disableInteractive, setDraggable, particles, tweens, AudioManager mock via vi.hoisted
+- Implemented ShapeSorterScene drag/drop: Phaser Pointer Drag + Zone drop zones, handleDrop (snap on correct match), handleDragEnd (bounce-back tween with Back.out easing), createParticleBurst
+- Added AudioManager.getInstance() singleton method for scene access
+- Extended createSlots() to create drop zones over slots
+- Extended createShapes() to enable drag and register drag/drop/dragend handlers
+
+Files Modified:
+- src/__tests__/scenes/navigation.test.ts (mock additions + 3 new tests)
+- src/__tests__/audio/AudioManager.test.ts (2 getInstance tests)
+- src/audio/AudioManager.ts (getInstance singleton)
+- src/scenes/ShapeSorterScene.ts (full drag/drop implementation)
+
+Why: Phase 4 of Shape Sorter track — establishes the drag/drop interaction architecture (reused by Games 4 and 6), wire-up of synthesized SFX feedback, and particle burst on correct placement.
