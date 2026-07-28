@@ -51,12 +51,12 @@
 
 ## Phase 4: Drag, Drop & Feedback
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for drag/drop and feedback behavior
-    - [ ] Test correct drop snaps shape to slot center, marks non-interactive, triggers correct SFX + particles
-    - [ ] Test incorrect drop bounces shape back to origin with wobble (no penalty)
-    - [ ] Test touch targets meet 64×64px minimum
-- [ ] Task: Implement drag/drop interaction + particle burst + bounce-back in ShapeSorterScene
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for drag/drop and feedback behavior 100359f
+    - [x] Test correct drop snaps shape to slot center, marks non-interactive, triggers correct SFX + particles
+    - [x] Test incorrect drop bounces shape back to origin with wobble (no penalty)
+    - [x] Test touch targets meet 64×64px minimum
+- [x] Task: Implement drag/drop interaction + particle burst + bounce-back in ShapeSorterScene 100359f
 - [ ] Task: Conductor - User Manual Verification 'Drag, Drop & Feedback' (Protocol in workflow.md)
 
 ---
