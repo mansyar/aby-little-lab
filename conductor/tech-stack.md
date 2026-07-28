@@ -124,6 +124,7 @@ aby-little-lab/
 │   └── icons/
 └── src/
     ├── main.ts                    # Phaser config + scene registration
+    ├── vite-env.d.ts              # Vite client type declarations
     ├── scenes/
     │   ├── BootScene.ts
     │   ├── PreloadScene.ts
@@ -136,6 +137,10 @@ aby-little-lab/
     │   └── BigSmallScene.ts
     ├── components/
     │   └── ParentLock.ts
+    ├── audio/
+    │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis
+    ├── utils/
+    │   └── storage.ts             # localStorage persistence layer
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
@@ -149,8 +154,14 @@ aby-little-lab/
     ├── styles/
     │   └── style.css
     └── __tests__/
+        ├── audio/
+        │   └── AudioManager.test.ts
+        ├── components/
+        │   └── ParentLock.test.ts
         ├── scenes/
-        └── components/
+        │   └── navigation.test.ts
+        └── utils/
+            └── storage.test.ts
 ```
 
 ## See Also

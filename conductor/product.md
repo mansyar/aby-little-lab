@@ -53,10 +53,11 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 ## 6. Game Flow & Navigation
 
 ```
-BootScene → HubScene → GameScene → HubScene
+BootScene → PreloadScene → HubScene → GameScene → HubScene
 ```
 
-- **BootScene:** Preload SVGs (rasterize at 512×512), show progress bar. Auto-transitions to Hub.
+- **BootScene:** Locks screen orientation to landscape via Screen Orientation API. Auto-transitions to Preload.
+- **PreloadScene:** Preloads SVG assets (rasterized at 512×512), displays progress bar. Auto-transitions to Hub.
 - **HubScene:** 6 game tiles grid, sticker book display, settings (behind parental lock).
 - **GameScene:** Initialized with randomized items. On completion: win animation + sticker award (if first time) + auto-return to Hub (3s delay). Exit via parental lock (hold 3s).
 
