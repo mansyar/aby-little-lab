@@ -29,7 +29,9 @@
     - [x] Test `playSticker` plays a sparkle tone
     - [x] Test SFX toggle respected (no sound when `sfxEnabled` is false)
 - [x] Task: Implement synthesized SFX methods in AudioManager (Web Audio API) e591bf6
-- [ ] Task: Conductor - User Manual Verification 'Synthesized Gameplay SFX' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Synthesized Gameplay SFX' (Protocol in workflow.md)
+
+[checkpoint: 38ae02f]
 
 ---
 
