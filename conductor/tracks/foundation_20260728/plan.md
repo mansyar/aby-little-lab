@@ -72,7 +72,7 @@
 
 ---
 
-## Phase 4: Scene Architecture & Navigation
+## Phase 4: Scene Architecture & Navigation [checkpoint: 744bfcc]
 
 - [x] Task: Write tests for ParentLock component [2694ae4]
     - [x] Test hold detection (3s threshold triggers success)
@@ -104,4 +104,4 @@
     - [x] Create `src/scenes/MusicalMemoryScene.ts` (placeholder UI + back button with ParentLock)
     - [x] Create `src/scenes/BigSmallScene.ts` (placeholder UI + back button with ParentLock)
     - [x] Run tests — all pass (Green phase)
-- [~] Task: Conductor - User Manual Verification 'Scene Architecture & Navigation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Scene Architecture & Navigation' (Protocol in workflow.md) [744bfcc]
