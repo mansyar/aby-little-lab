@@ -57,7 +57,9 @@
     - [x] Test incorrect drop bounces shape back to origin with wobble (no penalty)
     - [x] Test touch targets meet 64×64px minimum
 - [x] Task: Implement drag/drop interaction + particle burst + bounce-back in ShapeSorterScene 100359f
-- [ ] Task: Conductor - User Manual Verification 'Drag, Drop & Feedback' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Drag, Drop & Feedback' (Protocol in workflow.md)
+
+[checkpoint: 4dfbe47]
 
 ---
 
