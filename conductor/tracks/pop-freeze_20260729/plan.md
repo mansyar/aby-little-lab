@@ -49,8 +49,8 @@
 
 ## Phase 4: Completion, Sticker Award & Return
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for completion and sticker flow [TDD-Red]
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [~] Task: Write tests for completion and sticker flow [TDD-Red]
     - [ ] Test completion detected when pop count reaches 6
     - [ ] Test sticker awarded on first completion only (via `storage.earnSticker("pop-freeze")`)
     - [ ] Test auto-return to Hub after 3s delay
