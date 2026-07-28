@@ -84,12 +84,12 @@
     - [x] Implement hold-for-3s timer logic using Phaser input events
     - [x] Implement success/failure callbacks
     - [x] Run tests — all pass (Green phase)
-- [~] Task: Write tests for scene navigation flow
-    - [ ] Test BootScene starts and transitions to PreloadScene
-    - [ ] Test PreloadScene loads assets and transitions to HubScene
-    - [ ] Test HubScene displays 6 game tiles
-    - [ ] Test HubScene displays sticker book (earned/uneared stickers)
-    - [ ] Test navigation from Hub to game scene stub and back to Hub
+- [x] Task: Write tests for scene navigation flow [370ffe3]
+    - [x] Test BootScene starts and transitions to PreloadScene
+    - [x] Test PreloadScene loads assets and transitions to HubScene
+    - [x] Test HubScene displays 6 game tiles
+    - [x] Test HubScene displays sticker book (earned/uneared stickers)
+    - [x] Test navigation from Hub to game scene stub and back to Hub
 - [ ] Task: Implement Phaser config and core scenes
     - [ ] Create `src/main.ts` (typed Phaser.Types.Core.GameConfig, 1024×768, Scale.FIT + CENTER_BOTH, Arcade physics gravity y:0, 8 scene registration)
     - [ ] Create `src/scenes/BootScene.ts` (screen.orientation.lock('landscape') with catch fallback, transition to Preload)
