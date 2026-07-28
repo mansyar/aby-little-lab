@@ -20,7 +20,7 @@
 ## Phase 2: Round Initialization & Bubble Logic
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for round initialization and bubble logic [TDD-Red]
+- [x] Task: Write tests for round initialization and bubble logic [TDD-Red] [ff91b8f]
     - [ ] Test pop count initializes to 0 and win target is 6
     - [ ] Test spawn scheduling selects bubble type (poppable vs sleeping) maintaining the concurrent on-screen mix
     - [ ] Test spawn config generation randomizes position & velocity (within world bounds)
