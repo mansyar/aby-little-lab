@@ -303,6 +303,94 @@ describe("AudioManager", () => {
     });
   });
 
+  describe("playCorrect()", () => {
+    it("creates multiple oscillators for ascending chime", () => {
+      manager.init();
+      manager.playCorrect();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(3);
+    });
+
+    it("starts and stops oscillators", () => {
+      manager.init();
+      manager.playCorrect();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playCorrect();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("playIncorrect()", () => {
+    it("creates multiple oscillators for descending tone", () => {
+      manager.init();
+      manager.playIncorrect();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(2);
+    });
+
+    it("starts and stops oscillators", () => {
+      manager.init();
+      manager.playIncorrect();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playIncorrect();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("playWin()", () => {
+    it("creates multiple oscillators for celebratory tone", () => {
+      manager.init();
+      manager.playWin();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(4);
+    });
+
+    it("starts and stops oscillators", () => {
+      manager.init();
+      manager.playWin();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playWin();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("playSticker()", () => {
+    it("creates multiple oscillators for sparkle tone", () => {
+      manager.init();
+      manager.playSticker();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(2);
+    });
+
+    it("starts and stops oscillators", () => {
+      manager.init();
+      manager.playSticker();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playSticker();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
   describe("destroy()", () => {
     it("closes the AudioContext", () => {
       manager.init();

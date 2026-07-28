@@ -126,6 +126,84 @@ export class AudioManager {
   }
 
   /**
+   * Plays a pleasant ascending chime (C5, E5, G5) using the Web Audio API.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playCorrect(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 523.25, 0, 0.15, 0.3);
+    this.playTone(ctx, 659.25, 0.12, 0.15, 0.3);
+    this.playTone(ctx, 783.99, 0.24, 0.2, 0.3);
+  }
+
+  /**
+   * Plays a soft descending tone (G4, C4) using the Web Audio API.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playIncorrect(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 392.0, 0, 0.15, 0.2);
+    this.playTone(ctx, 261.63, 0.12, 0.2, 0.2);
+  }
+
+  /**
+   * Plays a celebratory arpeggio (C5, E5, G5, C6) using the Web Audio API.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playWin(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 523.25, 0, 0.12, 0.3);
+    this.playTone(ctx, 659.25, 0.1, 0.12, 0.3);
+    this.playTone(ctx, 783.99, 0.2, 0.12, 0.3);
+    this.playTone(ctx, 1046.5, 0.3, 0.25, 0.3);
+  }
+
+  /**
+   * Plays a sparkle tone (C6, E6) using the Web Audio API.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playSticker(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 1046.5, 0, 0.1, 0.2);
+    this.playTone(ctx, 1318.51, 0.08, 0.15, 0.2);
+  }
+
+  /**
+   * Plays a single synthesized tone at a given frequency with staggered start.
+   * @param ctx - The AudioContext to use for synthesis.
+   * @param frequency - The frequency of the tone in Hz.
+   * @param startOffset - Delay before the tone starts, in seconds.
+   * @param duration - Duration of the tone in seconds.
+   * @param gainValue - Volume level (0.0 to 1.0).
+   */
+  private playTone(
+    ctx: AudioContext,
+    frequency: number,
+    startOffset: number,
+    duration: number,
+    gainValue: number,
+  ): void {
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = frequency;
+
+    gainNode.gain.value = gainValue;
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+    oscillator.start(now + startOffset);
+    oscillator.stop(now + startOffset + duration);
+  }
+
+  /**
    * Cleans up audio resources: pauses BGM, closes AudioContext, and clears references.
    */
   destroy(): void {
