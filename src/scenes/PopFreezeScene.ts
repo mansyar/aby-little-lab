@@ -11,6 +11,7 @@ import {
   registerWake,
   selectBubbleType,
 } from "../game/popFreezeLogic";
+import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Display size for each bubble (exceeds 96px ideal touch target). */
 const BUBBLE_DISPLAY_SIZE = 96;
@@ -27,6 +28,12 @@ const POP_DURATION = 200;
 
 /** Duration of the wake wobble animation (ms). */
 const WOBBLE_DURATION = 300;
+
+/** Display size for the sticker unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Delay before auto-returning to Hub after round completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
 
 /** Tracks a bubble's runtime state: physics body, spawn config, and sleeping-animal overlays. */
 interface BubbleData {
@@ -231,8 +238,44 @@ export class PopFreezeScene extends Phaser.Scene {
     });
   }
 
-  /** Handles round completion. Phase 4 will add win animation, sticker award, and auto-return. */
+  /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
   private handleComplete(): void {
-    // Implemented in Phase 4.
+    this.audioManager.playWin();
+
+    for (const data of this.bubbles) {
+      this.tweens.add({
+        targets: data.obj,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 300,
+        yoyo: true,
+      });
+    }
+
+    if (!hasSticker("pop-freeze")) {
+      earnSticker("pop-freeze");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      this.scene.start("Hub");
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_pop_freeze")
+      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: stickerImage,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 300,
+      ease: "Back.out",
+    });
   }
 }
