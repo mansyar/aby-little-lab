@@ -30,7 +30,7 @@
 
 ---
 
-## Phase 3: Path Tracing & Feedback
+## Phase 3: Path Tracing & Feedback [checkpoint: 583aaca]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for path tracing and feedback behavior [22d434c]
