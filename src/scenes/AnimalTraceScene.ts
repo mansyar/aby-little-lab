@@ -50,6 +50,15 @@ const STICKER_DISPLAY_SIZE = 256;
 /** Delay before auto-returning to Hub after round completion (ms). */
 const AUTO_RETURN_DELAY = 3000;
 
+/** Y position for the progress indicator dots. */
+const PROGRESS_DOT_Y = 60;
+
+/** Spacing between progress indicator dots. */
+const PROGRESS_DOT_SPACING = 40;
+
+/** Radius of each progress indicator dot. */
+const PROGRESS_DOT_RADIUS = 8;
+
 /** Tracks the state of the current pair being traced. */
 interface PairState {
   pair: AnimalFoodPair;
@@ -58,6 +67,7 @@ interface PairState {
   progress: PathProgress;
   animalSprite: Phaser.GameObjects.Image;
   foodSprite: Phaser.GameObjects.Image;
+  pathGraphics: Phaser.GameObjects.Graphics;
   complete: boolean;
 }
 
@@ -76,6 +86,7 @@ export class AnimalTraceScene extends Phaser.Scene {
   private completedPaths = 0;
   private currentPair?: PairState;
   private isPointerDown = false;
+  private progressDots: Phaser.GameObjects.Arc[] = [];
   private readonly audioManager: AudioManager;
 
   constructor() {
@@ -102,6 +113,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     });
 
     this.pairs = selectThreePairs();
+    this.createProgressIndicator();
     this.renderPair(0);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
@@ -126,6 +138,12 @@ export class AnimalTraceScene extends Phaser.Scene {
 
   /** Renders the pair at the given index: animal, food, dotted path, and curve. */
   private renderPair(index: number): void {
+    if (this.currentPair) {
+      this.currentPair.animalSprite.destroy();
+      this.currentPair.foodSprite.destroy();
+      this.currentPair.pathGraphics.destroy();
+    }
+
     const pair = this.pairs[index];
     const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
 
@@ -142,7 +160,7 @@ export class AnimalTraceScene extends Phaser.Scene {
       .image(FOOD_X, SPRITE_Y, `food_${pair.food}`)
       .setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
 
-    this.drawDottedPath(pathPoints);
+    const pathGraphics = this.drawDottedPath(pathPoints);
 
     this.currentPair = {
       pair,
@@ -151,17 +169,19 @@ export class AnimalTraceScene extends Phaser.Scene {
       progress: createPathProgress(PATH_POINTS),
       animalSprite,
       foodSprite,
+      pathGraphics,
       complete: false,
     };
   }
 
   /** Draws a dotted path through the given waypoints using Graphics. */
-  private drawDottedPath(points: Array<{ x: number; y: number }>): void {
+  private drawDottedPath(points: Array<{ x: number; y: number }>): Phaser.GameObjects.Graphics {
     const graphics = this.add.graphics();
     graphics.fillStyle(0x2d3748, 1);
     for (let i = 1; i < points.length - 1; i++) {
       graphics.fillCircle(points[i].x, points[i].y, DOT_RADIUS);
     }
+    return graphics;
   }
 
   /** Checks pointer proximity to the next path point and advances if within tolerance. */
@@ -191,6 +211,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     this.audioManager.playCorrect();
     this.createParticleBurst(FOOD_X, SPRITE_Y);
     this.completedPaths++;
+    this.updateProgressIndicator();
 
     if (isRoundComplete(this.completedPaths)) {
       this.handleRoundComplete();
@@ -199,6 +220,29 @@ export class AnimalTraceScene extends Phaser.Scene {
         this.currentPairIndex++;
         this.renderPair(this.currentPairIndex);
       });
+    }
+  }
+
+  /** Creates 3 progress indicator dots at the top of the screen. */
+  private createProgressIndicator(): void {
+    const startX = this.cameras.main.centerX - PROGRESS_DOT_SPACING;
+    for (let i = 0; i < 3; i++) {
+      const dot = this.add.circle(
+        startX + i * PROGRESS_DOT_SPACING,
+        PROGRESS_DOT_Y,
+        PROGRESS_DOT_RADIUS,
+        0x2d3748,
+        0.3,
+      );
+      this.progressDots.push(dot);
+    }
+  }
+
+  /** Highlights the progress dot for the most recently completed path. */
+  private updateProgressIndicator(): void {
+    const dot = this.progressDots[this.completedPaths - 1];
+    if (dot) {
+      dot.setAlpha(1);
     }
   }
 
@@ -250,13 +294,16 @@ export class AnimalTraceScene extends Phaser.Scene {
   private createStickerAnimation(): void {
     const stickerImage = this.add
       .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_animal_trace")
-      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
-      .setScale(0);
+      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE);
+
+    const targetScaleX = stickerImage.scaleX;
+    const targetScaleY = stickerImage.scaleY;
+    stickerImage.setScale(0);
 
     this.tweens.add({
       targets: stickerImage,
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: targetScaleX,
+      scaleY: targetScaleY,
       duration: 300,
       ease: "Back.out",
     });

@@ -1160,6 +1160,25 @@ describe("scene navigation flow", () => {
       const keys = imageCalls.map((call) => call[2] as string);
       expect(keys).toContain("sticker_animal_trace");
     });
+
+    it("creates 3 progress indicator dots on scene create", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      expect(getMockFn(scene.add.circle)).toHaveBeenCalledTimes(3);
+    });
+
+    it("highlights a progress dot when a path is completed", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const circleMock = getMockFn(scene.add.circle);
+      const dots = circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+
+      completePath(scene);
+
+      expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
+    });
   });
 
   describe("scene shutdown cleanup", () => {
