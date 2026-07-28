@@ -193,6 +193,27 @@ export class AudioManager {
   }
 
   /**
+   * Plays a short percussive pop blip using the Web Audio API.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playPop(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 800, 0, 0.08, 0.3);
+  }
+
+  /**
+   * Plays a soft rousing wake tone (E4, A4) using the Web Audio API.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playWake(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 329.63, 0, 0.15, 0.2);
+    this.playTone(ctx, 440.0, 0.12, 0.2, 0.2);
+  }
+
+  /**
    * Plays a single synthesized tone at a given frequency with staggered start.
    * @param ctx - The AudioContext to use for synthesis.
    * @param frequency - The frequency of the tone in Hz.

@@ -1,17 +1,59 @@
 import Phaser from "phaser";
+import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
+import {
+  type BubbleConfig,
+  createRoundState,
+  generateInitialBubbles,
+  generateSpawnConfig,
+  type RoundState,
+  registerPop,
+  registerWake,
+  selectBubbleType,
+} from "../game/popFreezeLogic";
+
+/** Display size for each bubble (exceeds 96px ideal touch target). */
+const BUBBLE_DISPLAY_SIZE = 96;
+
+/** Texture key used for particle bursts. */
+const PARTICLE_TEXTURE = "shape_circle";
+
+/** Particle count for pop celebration bursts (reduced when prefers-reduced-motion). */
+const PARTICLE_COUNT = 12;
+const PARTICLE_COUNT_REDUCED = 6;
+
+/** Duration of the pop shrink animation (ms). */
+const POP_DURATION = 200;
+
+/** Duration of the wake wobble animation (ms). */
+const WOBBLE_DURATION = 300;
+
+/** Tracks a bubble's runtime state: physics body, spawn config, and sleeping-animal overlays. */
+interface BubbleData {
+  obj: Phaser.Physics.Arcade.Image;
+  config: BubbleConfig;
+  animalImage?: Phaser.GameObjects.Image;
+  zzzText?: Phaser.GameObjects.Text;
+}
 
 /**
- * Pop & Freeze scene — placeholder stub.
+ * Pop & Freeze scene — pop bubbles while avoiding waking sleeping animals.
  *
- * Game logic will be implemented in a future track. Currently provides
- * a back button gated by ParentLock for navigation back to the Hub.
+ * Bubbles float via Arcade Physics with world-bounds bouncing. Tapping a
+ * poppable bubble pops it (SFX + particles + respawn). Tapping a sleeping
+ * bubble triggers a gentle wobble with no penalty. After 6 pops the round
+ * is complete.
  */
 export class PopFreezeScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private readonly audioManager: AudioManager;
+  private roundState: RoundState = createRoundState();
+  private bubbles: BubbleData[] = [];
+  private roundComplete = false;
 
   constructor() {
     super({ key: "PopFreeze" });
+    this.audioManager = AudioManager.getInstance();
   }
 
   create(): void {
@@ -32,8 +74,165 @@ export class PopFreezeScene extends Phaser.Scene {
       },
     });
 
+    this.initRound();
+
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
     });
+  }
+
+  /** Initializes a new round: resets state, configures physics, spawns initial bubbles. */
+  private initRound(): void {
+    this.roundState = createRoundState();
+    this.roundComplete = false;
+    this.bubbles = [];
+
+    this.physics.world.setBoundsCollision(true, true, true, true);
+
+    const configs = generateInitialBubbles(
+      this.scale.width,
+      this.scale.height,
+      BUBBLE_DISPLAY_SIZE,
+    );
+
+    for (const config of configs) {
+      this.spawnBubble(config);
+    }
+  }
+
+  /** Creates a physics bubble from a spawn config and registers its tap handler. */
+  private spawnBubble(config: BubbleConfig): BubbleData {
+    const bubble = this.physics.add.image(config.x, config.y, "bubble");
+    bubble.setDisplaySize(BUBBLE_DISPLAY_SIZE, BUBBLE_DISPLAY_SIZE);
+    bubble.setVelocity(config.vx, config.vy);
+    bubble.setCollideWorldBounds(true);
+    bubble.setBounce(1, 1);
+    bubble.setInteractive();
+
+    let animalImage: Phaser.GameObjects.Image | undefined;
+    let zzzText: Phaser.GameObjects.Text | undefined;
+
+    if (config.type === "sleeping" && config.animal) {
+      animalImage = this.add
+        .image(config.x, config.y, `animal_${config.animal}`)
+        .setDisplaySize(BUBBLE_DISPLAY_SIZE * 0.6, BUBBLE_DISPLAY_SIZE * 0.6);
+
+      zzzText = this.add.text(config.x, config.y - BUBBLE_DISPLAY_SIZE * 0.5, "Zzz", {
+        fontSize: "20px",
+        color: "#2D3748",
+      });
+    }
+
+    const data: BubbleData = { obj: bubble, config, animalImage, zzzText };
+
+    bubble.on("pointerdown", () => {
+      this.handleTap(data);
+    });
+
+    this.bubbles.push(data);
+    return data;
+  }
+
+  /** Syncs sleeping-animal overlay positions with their parent bubble each frame. */
+  update(): void {
+    for (const data of this.bubbles) {
+      if (data.animalImage && data.zzzText) {
+        data.animalImage.setPosition(data.obj.x, data.obj.y);
+        data.zzzText.setPosition(data.obj.x, data.obj.y - BUBBLE_DISPLAY_SIZE * 0.5);
+      }
+    }
+  }
+
+  /** Routes a tap to pop or wake handling based on bubble type. */
+  private handleTap(data: BubbleData): void {
+    if (this.roundComplete) return;
+
+    if (data.config.type === "poppable") {
+      this.handlePop(data);
+    } else {
+      this.handleWake(data);
+    }
+  }
+
+  /** Pops a poppable bubble: SFX, particles, shrink animation, register pop, respawn or complete. */
+  private handlePop(data: BubbleData): void {
+    const index = this.bubbles.indexOf(data);
+    if (index >= 0) this.bubbles.splice(index, 1);
+
+    this.audioManager.playPop();
+    this.createParticleBurst(data.obj.x, data.obj.y);
+
+    this.tweens.add({
+      targets: data.obj,
+      scaleX: 0,
+      scaleY: 0,
+      duration: POP_DURATION,
+      ease: "Back.in",
+      onComplete: () => {
+        data.obj.destroy();
+      },
+    });
+
+    const { state: newState, isWin } = registerPop(this.roundState);
+    this.roundState = newState;
+
+    if (isWin) {
+      this.roundComplete = true;
+      this.handleComplete();
+    } else {
+      this.respawnBubble();
+    }
+  }
+
+  /** Wakes a sleeping bubble: SFX, gentle wobble, no penalty. */
+  private handleWake(data: BubbleData): void {
+    this.audioManager.playWake();
+    this.roundState = registerWake(this.roundState);
+
+    this.tweens.add({
+      targets: data.obj,
+      scaleX: 1.15,
+      scaleY: 1.15,
+      duration: WOBBLE_DURATION,
+      yoyo: true,
+      ease: "Quad.easeInOut",
+    });
+  }
+
+  /** Spawns a replacement bubble to maintain concurrent count (1-2 sleeping maintained). */
+  private respawnBubble(): void {
+    const sleepingCount = this.bubbles.filter((b) => b.config.type === "sleeping").length;
+    const type = selectBubbleType(sleepingCount);
+    const config = generateSpawnConfig(
+      this.scale.width,
+      this.scale.height,
+      BUBBLE_DISPLAY_SIZE,
+      type,
+    );
+    this.spawnBubble(config);
+  }
+
+  /** Returns true if the user has requested reduced motion via OS settings. */
+  private prefersReducedMotion(): boolean {
+    return (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  /** Creates a soft particle burst at the given position. */
+  private createParticleBurst(x: number, y: number): void {
+    this.add.particles(x, y, PARTICLE_TEXTURE, {
+      speed: { min: 50, max: 150 },
+      lifespan: 800,
+      quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
+      scale: { start: 0.3, end: 0 },
+    });
+  }
+
+  /** Handles round completion. Phase 4 will add win animation, sticker award, and auto-return. */
+  private handleComplete(): void {
+    // Implemented in Phase 4.
   }
 }
