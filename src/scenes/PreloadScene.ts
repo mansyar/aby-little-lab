@@ -1,4 +1,12 @@
 import Phaser from "phaser";
+import foodBananaSvg from "../assets/svg/animals/banana.svg?raw";
+import foodBoneSvg from "../assets/svg/animals/bone.svg?raw";
+import foodCarrotSvg from "../assets/svg/animals/carrot.svg?raw";
+import animalCatSvg from "../assets/svg/animals/cat.svg?raw";
+import animalDogSvg from "../assets/svg/animals/dog.svg?raw";
+import foodFishSvg from "../assets/svg/animals/fish.svg?raw";
+import animalMonkeySvg from "../assets/svg/animals/monkey.svg?raw";
+import animalRabbitSvg from "../assets/svg/animals/rabbit.svg?raw";
 import cutoutCircleSvg from "../assets/svg/shapes/cutout_circle.svg?raw";
 import cutoutSquareSvg from "../assets/svg/shapes/cutout_square.svg?raw";
 import cutoutStarSvg from "../assets/svg/shapes/cutout_star.svg?raw";
@@ -7,6 +15,7 @@ import shapeCircleSvg from "../assets/svg/shapes/shape_circle.svg?raw";
 import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
+import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
 
 const SVG_RASTER_SIZE = 512;
@@ -21,6 +30,15 @@ const SHAPE_ASSETS = [
   { key: "cutout_triangle", svg: cutoutTriangleSvg },
   { key: "cutout_star", svg: cutoutStarSvg },
   { key: "sticker_shape_sorter", svg: stickerShapeSorterSvg },
+  { key: "animal_monkey", svg: animalMonkeySvg },
+  { key: "animal_rabbit", svg: animalRabbitSvg },
+  { key: "animal_cat", svg: animalCatSvg },
+  { key: "animal_dog", svg: animalDogSvg },
+  { key: "food_banana", svg: foodBananaSvg },
+  { key: "food_carrot", svg: foodCarrotSvg },
+  { key: "food_fish", svg: foodFishSvg },
+  { key: "food_bone", svg: foodBoneSvg },
+  { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
 ] as const;
 
 /**

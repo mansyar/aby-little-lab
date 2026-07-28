@@ -355,12 +355,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 9 shape and sticker SVGs during preload", () => {
+    it("loads all 18 shape, animal/food, and sticker SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(9);
+      expect(svgCalls).toHaveLength(18);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -379,6 +379,24 @@ describe("scene navigation flow", () => {
       expect(keys).toContain("cutout_triangle");
       expect(keys).toContain("cutout_star");
       expect(keys).toContain("sticker_shape_sorter");
+    });
+
+    it("loads animal and food SVGs with correct keys", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const svgCalls = getMockFn(scene.load.svg).mock.calls;
+      const keys = svgCalls.map((call) => call[0] as string);
+
+      expect(keys).toContain("animal_monkey");
+      expect(keys).toContain("animal_rabbit");
+      expect(keys).toContain("animal_cat");
+      expect(keys).toContain("animal_dog");
+      expect(keys).toContain("food_banana");
+      expect(keys).toContain("food_carrot");
+      expect(keys).toContain("food_fish");
+      expect(keys).toContain("food_bone");
+      expect(keys).toContain("sticker_animal_trace");
     });
 
     it("passes explicit width and height for high-res rasterization", () => {
