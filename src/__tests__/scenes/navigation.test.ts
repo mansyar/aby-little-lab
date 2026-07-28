@@ -27,6 +27,9 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      fillStyle: vi.fn().mockReturnThis(),
+      fillCircle: vi.fn().mockReturnThis(),
+      lineStyle: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
   }
@@ -122,17 +125,36 @@ vi.mock("phaser", () => {
     }
   }
 
+  /** Mock for Phaser.Curves.Path — must be a class to support `new`. */
+  class MockPath {
+    add: MockFn;
+    lineTo: MockFn;
+    getPoints: MockFn;
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+
+    constructor() {
+      this.add = vi.fn().mockReturnThis();
+      this.lineTo = vi.fn().mockReturnThis();
+      this.getPoints = vi.fn(() => []);
+      this.start = { x: 0, y: 0 };
+      this.end = { x: 0, y: 0 };
+    }
+  }
+
   return {
     default: {
       Scene: MockScene,
       Game: vi.fn(),
       Scale: { FIT: 0, CENTER_BOTH: 0 },
       AUTO: "AUTO",
+      Curves: { Path: MockPath },
     },
     Scene: MockScene,
     Game: vi.fn(),
     Scale: { FIT: 0, CENTER_BOTH: 0 },
     AUTO: "AUTO",
+    Curves: { Path: MockPath },
   };
 });
 
@@ -169,6 +191,7 @@ vi.mock("../../audio/AudioManager", () => ({
   },
 }));
 
+import { generatePathPoints } from "../../game/animalTraceLogic";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
@@ -785,6 +808,234 @@ describe("scene navigation flow", () => {
       callback();
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+
+  describe("AnimalTraceScene path tracing", () => {
+    /** Layout constants matching the scene implementation. */
+    const ANIMAL_X = 200;
+    const FOOD_X = 824;
+    const SPRITE_Y = 384;
+    const PATH_POINTS = 6;
+
+    /** Returns the input callback registered for a given event name. */
+    function getInputCallback(scene: unknown, eventName: string): (...args: unknown[]) => void {
+      const inputOnMock = getMockFn((scene as { input: Record<string, unknown> }).input.on);
+      const call = inputOnMock.mock.calls.find((c) => c[0] === eventName);
+      if (!call || typeof call[1] !== "function") {
+        throw new Error(`Input callback for "${eventName}" not found`);
+      }
+      return call[1] as (...args: unknown[]) => void;
+    }
+
+    /** Returns the animal image game object created by the scene. */
+    function getAnimalSprite(scene: unknown): Record<string, MockFn> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("animal_")) {
+          return imageMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      throw new Error("Animal sprite not found");
+    }
+
+    /** Simulates tracing the entire path by advancing through all points. */
+    function completePath(scene: unknown): void {
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      for (let i = 1; i < pathPoints.length; i++) {
+        pointermove({ x: pathPoints[i].x, y: pathPoints[i].y });
+      }
+    }
+
+    it("creates animal and food images for the first pair", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const keys = imageCalls.map((call) => call[2] as string);
+
+      expect(keys.some((k) => k.startsWith("animal_"))).toBe(true);
+      expect(keys.some((k) => k.startsWith("food_"))).toBe(true);
+    });
+
+    it("creates a graphics object for the dotted path", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      expect(getMockFn(scene.add.graphics)).toHaveBeenCalled();
+    });
+
+    it("registers pointerdown, pointermove, and pointerup handlers", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const inputOnMock = getMockFn(scene.input.on);
+      const events = inputOnMock.mock.calls.map((call) => call[0] as string);
+
+      expect(events).toContain("pointerdown");
+      expect(events).toContain("pointermove");
+      expect(events).toContain("pointerup");
+    });
+
+    it("pointermove near next path point advances animal sprite", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
+
+      expect(getMockFn(animalSprite.setPosition)).toHaveBeenCalledWith(
+        pathPoints[1].x,
+        pathPoints[1].y,
+      );
+    });
+
+    it("pointer far from path does not advance animal", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: 500, y: 100 });
+      pointermove({ x: 600, y: 100 });
+
+      expect(getMockFn(animalSprite.setPosition)).not.toHaveBeenCalled();
+    });
+
+    it("pointerup pauses animal — no position reset", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+      const pointerup = getInputCallback(scene, "pointerup");
+
+      // Advance to point 1
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
+
+      // Pointer up (pause)
+      pointerup();
+
+      // Move pointer near point 2 while pointer is up — should not advance
+      pointermove({ x: pathPoints[2].x, y: pathPoints[2].y });
+
+      // Animal should still be at point 1 (last setPosition call)
+      const setPositionCalls = getMockFn(animalSprite.setPosition).mock.calls;
+      const lastCall = setPositionCalls[setPositionCalls.length - 1];
+      expect(lastCall).toEqual([pathPoints[1].x, pathPoints[1].y]);
+    });
+
+    it("resume continues from current position after pointer lift", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+      const pointerup = getInputCallback(scene, "pointerup");
+
+      // Advance to point 1, then pause
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
+      pointerup();
+
+      // Resume — pointer down near current position, move to point 2
+      pointerdown({ x: pathPoints[1].x, y: pathPoints[1].y });
+      pointermove({ x: pathPoints[2].x, y: pathPoints[2].y });
+
+      // Animal should now be at point 2
+      const setPositionCalls = getMockFn(animalSprite.setPosition).mock.calls;
+      const lastCall = setPositionCalls[setPositionCalls.length - 1];
+      expect(lastCall).toEqual([pathPoints[2].x, pathPoints[2].y]);
+    });
+
+    it("reaching food triggers correct SFX + particle burst", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      completePath(scene);
+
+      expect(mockAudio.playCorrect).toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+    });
+
+    it("no SFX during tracing (only on path completion)", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
+      pointermove({ x: pathPoints[2].x, y: pathPoints[2].y });
+
+      expect(mockAudio.playCorrect).not.toHaveBeenCalled();
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+    });
+
+    it("trace tolerance is generous (pointer within 60px of target advances)", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+
+      // Move to 40px before point 1 in x (within 60px tolerance)
+      pointermove({ x: pathPoints[1].x - 40, y: pathPoints[1].y });
+
+      expect(getMockFn(animalSprite.setPosition)).toHaveBeenCalledWith(
+        pathPoints[1].x,
+        pathPoints[1].y,
+      );
+    });
+
+    it("advances to next pair after path completion", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      completePath(scene);
+
+      // Find the delayedCall for advancing to next pair (1000ms)
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const advanceCall = delayedCallMock.mock.calls.find((call) => call[0] === 1000);
+      expect(advanceCall).toBeDefined();
+
+      const imageCountBefore = getMockFn(scene.add.image).mock.calls.length;
+
+      // Trigger the advance callback
+      const callback = advanceCall?.[1] as () => void;
+      callback();
+
+      // New animal and food images should have been created
+      const imageCountAfter = getMockFn(scene.add.image).mock.calls.length;
+      expect(imageCountAfter).toBeGreaterThan(imageCountBefore);
     });
   });
 

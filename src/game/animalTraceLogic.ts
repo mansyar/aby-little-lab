@@ -61,3 +61,21 @@ export function isPathComplete(progress: PathProgress): boolean {
 export function isRoundComplete(completedPaths: number): boolean {
   return completedPaths >= 3;
 }
+
+/** Generates evenly-spaced waypoints from start to end with a gentle sine curve. */
+export function generatePathPoints(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  numPoints: number,
+): Array<{ x: number; y: number }> {
+  const points: Array<{ x: number; y: number }> = [];
+  for (let i = 0; i < numPoints; i++) {
+    const t = i / (numPoints - 1);
+    const x = startX + (endX - startX) * t;
+    const y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * 80;
+    points.push({ x, y });
+  }
+  return points;
+}

@@ -1,17 +1,79 @@
 import Phaser from "phaser";
+import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
+import {
+  type AnimalFoodPair,
+  advancePath,
+  createPathProgress,
+  generatePathPoints,
+  isPathComplete,
+  isRoundComplete,
+  type PathProgress,
+  selectThreePairs,
+} from "../game/animalTraceLogic";
+
+/** X position for the animal sprite (left side). */
+const ANIMAL_X = 200;
+
+/** X position for the food sprite (right side). */
+const FOOD_X = 824;
+
+/** Y position for both sprites (vertical center). */
+const SPRITE_Y = 384;
+
+/** Display size for animal and food sprites. */
+const SPRITE_SIZE = 128;
+
+/** Number of waypoints per path. */
+const PATH_POINTS = 6;
+
+/** Proximity tolerance for tracing (generous, per touch-ergonomics). */
+const TRACE_TOLERANCE = 60;
+
+/** Radius of each dot in the dotted path. */
+const DOT_RADIUS = 6;
+
+/** Texture key used for particle bursts. */
+const PARTICLE_TEXTURE = "shape_circle";
+
+/** Particle count for celebration bursts (reduced when prefers-reduced-motion). */
+const PARTICLE_COUNT = 12;
+const PARTICLE_COUNT_REDUCED = 6;
+
+/** Delay before advancing to the next pair after path completion (ms). */
+const NEXT_PAIR_DELAY = 1000;
+
+/** Tracks the state of the current pair being traced. */
+interface PairState {
+  pair: AnimalFoodPair;
+  pathPoints: Array<{ x: number; y: number }>;
+  path: Phaser.Curves.Path;
+  progress: PathProgress;
+  animalSprite: Phaser.GameObjects.Image;
+  foodSprite: Phaser.GameObjects.Image;
+  complete: boolean;
+}
 
 /**
- * Animal Trace scene — placeholder stub.
+ * Animal Trace scene — trace a dotted path from an animal to its food.
  *
- * Game logic will be implemented in a future track. Currently provides
- * a back button gated by ParentLock for navigation back to the Hub.
+ * Toddler traces a dotted curve from animal sprite to food sprite using
+ * pointer proximity. Finger lift/stray pauses (no reset, no penalty).
+ * Reaching the food triggers a completion chime + particle burst. Three
+ * pairs are traced per round (3 of 4 animal-food pairs randomly selected).
  */
 export class AnimalTraceScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private pairs: AnimalFoodPair[] = [];
+  private currentPairIndex = 0;
+  private completedPaths = 0;
+  private currentPair?: PairState;
+  private isPointerDown = false;
+  private readonly audioManager: AudioManager;
 
   constructor() {
     super({ key: "AnimalTrace" });
+    this.audioManager = AudioManager.getInstance();
   }
 
   create(): void {
@@ -32,8 +94,128 @@ export class AnimalTraceScene extends Phaser.Scene {
       },
     });
 
+    this.pairs = selectThreePairs();
+    this.renderPair(0);
+
+    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      this.isPointerDown = true;
+      this.checkProximity(pointer.x, pointer.y);
+    });
+
+    this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+      if (this.isPointerDown) {
+        this.checkProximity(pointer.x, pointer.y);
+      }
+    });
+
+    this.input.on("pointerup", () => {
+      this.isPointerDown = false;
+    });
+
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
     });
+  }
+
+  /** Renders the pair at the given index: animal, food, dotted path, and curve. */
+  private renderPair(index: number): void {
+    const pair = this.pairs[index];
+    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+
+    const path = new Phaser.Curves.Path(pathPoints[0].x, pathPoints[0].y);
+    for (let i = 1; i < pathPoints.length; i++) {
+      path.lineTo(pathPoints[i].x, pathPoints[i].y);
+    }
+
+    const animalSprite = this.add
+      .image(ANIMAL_X, SPRITE_Y, `animal_${pair.animal}`)
+      .setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
+
+    const foodSprite = this.add
+      .image(FOOD_X, SPRITE_Y, `food_${pair.food}`)
+      .setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
+
+    this.drawDottedPath(pathPoints);
+
+    this.currentPair = {
+      pair,
+      pathPoints,
+      path,
+      progress: createPathProgress(PATH_POINTS),
+      animalSprite,
+      foodSprite,
+      complete: false,
+    };
+  }
+
+  /** Draws a dotted path through the given waypoints using Graphics. */
+  private drawDottedPath(points: Array<{ x: number; y: number }>): void {
+    const graphics = this.add.graphics();
+    graphics.fillStyle(0x2d3748, 1);
+    for (let i = 1; i < points.length - 1; i++) {
+      graphics.fillCircle(points[i].x, points[i].y, DOT_RADIUS);
+    }
+  }
+
+  /** Checks pointer proximity to the next path point and advances if within tolerance. */
+  private checkProximity(x: number, y: number): void {
+    if (!this.currentPair || this.currentPair.complete) return;
+    if (isPathComplete(this.currentPair.progress)) return;
+
+    const nextIndex = this.currentPair.progress.currentPoint + 1;
+    const target = this.currentPair.pathPoints[nextIndex];
+    const dist = Math.hypot(x - target.x, y - target.y);
+
+    if (dist <= TRACE_TOLERANCE) {
+      this.currentPair.progress = advancePath(this.currentPair.progress);
+      const pos = this.currentPair.pathPoints[this.currentPair.progress.currentPoint];
+      this.currentPair.animalSprite.setPosition(pos.x, pos.y);
+
+      if (isPathComplete(this.currentPair.progress)) {
+        this.handlePathComplete();
+      }
+    }
+  }
+
+  /** Handles a single path completion: SFX, particle burst, advance to next pair. */
+  private handlePathComplete(): void {
+    if (!this.currentPair) return;
+    this.currentPair.complete = true;
+    this.audioManager.playCorrect();
+    this.createParticleBurst(FOOD_X, SPRITE_Y);
+    this.completedPaths++;
+
+    if (isRoundComplete(this.completedPaths)) {
+      this.handleRoundComplete();
+    } else {
+      this.time.delayedCall(NEXT_PAIR_DELAY, () => {
+        this.currentPairIndex++;
+        this.renderPair(this.currentPairIndex);
+      });
+    }
+  }
+
+  /** Returns true if the user has requested reduced motion via OS settings. */
+  private prefersReducedMotion(): boolean {
+    return (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  /** Creates a soft particle burst at the given position. */
+  private createParticleBurst(x: number, y: number): void {
+    this.add.particles(x, y, PARTICLE_TEXTURE, {
+      speed: { min: 50, max: 150 },
+      lifespan: 800,
+      quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
+      scale: { start: 0.3, end: 0 },
+    });
+  }
+
+  /** Handles round completion — win animation, sticker award, and auto-return. */
+  private handleRoundComplete(): void {
+    // Implemented in Phase 4: Completion, Sticker Award & Return
   }
 }

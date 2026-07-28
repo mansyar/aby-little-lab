@@ -5,6 +5,7 @@ import {
   type AnimalFoodPair,
   advancePath,
   createPathProgress,
+  generatePathPoints,
   isPathComplete,
   isRoundComplete,
   selectThreePairs,
@@ -124,5 +125,39 @@ describe("isRoundComplete", () => {
 
   it("returns true when 3 paths completed", () => {
     expect(isRoundComplete(3)).toBe(true);
+  });
+});
+
+describe("generatePathPoints", () => {
+  it("returns the requested number of points", () => {
+    const points = generatePathPoints(200, 384, 824, 384, 6);
+    expect(points).toHaveLength(6);
+  });
+
+  it("first point is at the start position", () => {
+    const points = generatePathPoints(200, 384, 824, 384, 6);
+    expect(points[0].x).toBe(200);
+    expect(points[0].y).toBe(384);
+  });
+
+  it("last point is at the end position", () => {
+    const points = generatePathPoints(200, 384, 824, 384, 6);
+    expect(points[5].x).toBe(824);
+    expect(points[5].y).toBe(384);
+  });
+
+  it("points are evenly spaced in x", () => {
+    const points = generatePathPoints(200, 384, 824, 384, 6);
+    const xStep = (824 - 200) / 5;
+    for (let i = 0; i < points.length; i++) {
+      expect(points[i].x).toBeCloseTo(200 + xStep * i);
+    }
+  });
+
+  it("intermediate points have a gentle curve (y varies from base line)", () => {
+    const points = generatePathPoints(200, 384, 824, 384, 6);
+    // Middle point should have y > 384 (sine curve arches upward)
+    expect(points[2].y).not.toBe(384);
+    expect(points[3].y).not.toBe(384);
   });
 });
