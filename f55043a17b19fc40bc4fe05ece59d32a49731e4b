@@ -1,0 +1,9 @@
+Task: Extend PreloadScene to load all 8 animal/food SVGs with explicit width/height for high-res rasterization
+
+Summary: Extended PreloadScene to import and load 9 new SVG assets (4 animals, 4 foods, 1 sticker) for the Animal Trace game. Updated navigation tests to verify 18 total SVGs are loaded with correct texture keys.
+
+Files modified:
+- src/scenes/PreloadScene.ts: Added 9 new SVG imports and entries in SHAPE_ASSETS array
+- src/__tests__/scenes/navigation.test.ts: Updated PreloadScene tests to expect 18 SVGs, added test for animal/food keys
+
+TDD: Tests updated first (Red), implementation added (Green). All 124 tests pass. Biome check passes.
