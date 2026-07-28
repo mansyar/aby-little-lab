@@ -27,7 +27,7 @@
     - [ ] Test pop registration increments count and returns win status when target (6) reached
     - [ ] Test wake registration does not change pop count (no penalty)
 - [x] Task: Implement round initialization & bubble logic in `src/game/popFreezeLogic.ts` (pure functions: spawn scheduling/type selection, spawn config generation, pop counting, win detection) [TDD-Green] [755f050]
-- [ ] Task: Conductor - User Manual Verification 'Round Initialization & Bubble Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Round Initialization & Bubble Logic' (Protocol in workflow.md)
 
 ---
 
