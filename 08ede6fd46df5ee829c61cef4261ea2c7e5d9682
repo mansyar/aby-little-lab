@@ -1,0 +1,29 @@
+Task: Implement Phaser config and core scenes
+
+Files created:
+- src/vite-env.d.ts: Vite client type declarations (fixes pre-existing TS2882 CSS import error in main.ts from Phase 1)
+- src/scenes/BootScene.ts: Boot scene - locks screen orientation to landscape, transitions to Preload
+- src/scenes/PreloadScene.ts: Preload scene - progress bar with load event listeners, transitions to Hub
+- src/scenes/HubScene.ts: Hub scene - 6 game tiles grid (3x2), sticker book with hasSticker() check for each game, settings button gated by ParentLock
+- src/scenes/ShapeSorterScene.ts: Minimal game scene stub with back button + ParentLock (created so navigation test file can load - Vite resolves dynamic imports at module load time)
+- src/main.ts: Updated with Phaser.Types.Core.GameConfig (1024x768, Scale.FIT + CENTER_BOTH, Arcade physics gravity x:0 y:0, 3 scene registration)
+
+Key decisions:
+- ShapeSorterScene created as minimal stub because Vite's import-analysis resolves dynamic imports at load time, preventing the navigation test file from loading without it. Remaining 5 game scenes will be created in Task 5.
+- main.ts registers 3 core scenes now; will be updated to 8 scenes in Task 5.
+- PreloadScene uses add.rectangle() for progress bar (compatible with both mock and production Phaser API)
+- HubScene settings button onSuccess is a no-op placeholder (settings UI is out of scope for this track)
+- vite-env.d.ts created to fix pre-existing TS2882 error from Phase 1 (CSS side-effect import)
+
+Verification:
+- Tests: 67/67 passed (8 navigation + 18 ParentLock + 12 storage + 29 AudioManager)
+- Coverage: 97.22% stmts, 93.33% branches, 83.78% funcs, 97.84% lines (all above 80% threshold)
+- Biome check: 16 files, no errors
+- TypeScript: No errors in source files. Pre-existing test type errors remain (mock type incompatibilities in AudioManager.test.ts, ParentLock.test.ts, navigation.test.ts - do not affect runtime)
+- Production build: Succeeded (11 modules transformed, PWA service worker generated)
+
+Coverage deviations:
+- PreloadScene.ts: 75% stmts, 60% funcs - uncovered lines 23, 27-28 are callback bodies for load.on('progress') and load.on('complete') events. Test only verifies listener registration, not event triggering.
+- BootScene.ts: 66.66% funcs - the arrow function in .catch() callback is not covered (orientation lock mock always resolves)
+- HubScene.ts: 60% funcs - arrow functions in tile pointerdown callbacks and ParentLock onSuccess/onFailure not directly invoked
+- vite-env.d.ts: 0% - declaration file with no executable code
