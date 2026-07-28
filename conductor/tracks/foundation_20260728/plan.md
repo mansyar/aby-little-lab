@@ -36,13 +36,13 @@
 
 ## Phase 2: Core Types & Storage Layer
 
-- [ ] Task: Write tests for storage utilities
-    - [ ] Test reading empty storage (returns default AppStorage)
-    - [ ] Test writing and reading back storage data
-    - [ ] Test earning a sticker (sets earned: true, earnedAt: ISO timestamp)
-    - [ ] Test checking if a sticker is earned (hasSticker)
-    - [ ] Test reading settings (bgmEnabled defaults to true, sfxEnabled defaults to true)
-    - [ ] Test updating settings (bgmEnabled, sfxEnabled)
+- [x] Task: Write tests for storage utilities [a410b2f]
+    - [x] Test reading empty storage (returns default AppStorage)
+    - [x] Test writing and reading back storage data
+    - [x] Test earning a sticker (sets earned: true, earnedAt: ISO timestamp)
+    - [x] Test checking if a sticker is earned (hasSticker)
+    - [x] Test reading settings (bgmEnabled defaults to true, sfxEnabled defaults to true)
+    - [x] Test updating settings (bgmEnabled, sfxEnabled)
 - [ ] Task: Implement types and storage utilities
     - [ ] Create `src/types/index.ts` (AppStorage, GameId, StickerData, Settings interfaces)
     - [ ] Create `src/utils/storage.ts` (load, save, earnSticker, hasSticker, getSettings, updateSettings)
