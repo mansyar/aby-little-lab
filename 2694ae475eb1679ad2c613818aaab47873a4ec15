@@ -1,0 +1,43 @@
+Task: Write tests for ParentLock component
+
+Summary:
+Created test suite for the ParentLock component following TDD Red phase.
+The tests define the API contract for a hold-for-3-seconds parental lock
+mechanism using Phaser input events. ParentLock registers pointerdown,
+pointerup, and pointerout listeners on a target game object, starts a
+timer on pointerdown, fires onSuccess when the timer completes, and
+fires onFailure (canceling the timer) when the pointer is released or
+leaves the target before the hold duration elapses.
+
+Files Created:
+- src/__tests__/components/ParentLock.test.ts (209 lines, 18 test cases)
+
+Test Structure (4 describe blocks):
+1. constructor: Verifies pointerdown/pointerup/pointerout listeners
+   are registered on the target (3 tests)
+2. hold detection: Tests timer starts with 3000ms default, custom
+   holdDuration, and onSuccess fires on completion (3 tests)
+3. reset on release before 3s: Tests pointerup/pointerout cancel timer,
+   fire onFailure, no onSuccess, and no failure without active hold (7 tests)
+4. destroy(): Tests listener removal, timer cancellation, and no-error
+   when no timer active (5 tests)
+
+Mock Strategy:
+- MockTarget: Event emitter with on/off/emit methods, captures callbacks
+  for invocation via emit()
+- MockScene: Contains time.delayedCall which captures the timer callback
+  and returns a MockTimerEvent with remove()
+- MockFn type alias: ReturnType<typeof vi.fn> for consistent typing
+- as never casts used for mock objects passed to ParentLock constructor
+
+Verification:
+- Tests fail as expected (Red phase): Failed to resolve import
+  ../../components/ParentLock
+- All 41 existing tests (12 storage + 29 AudioManager) still pass
+- Biome check: No errors (format issues auto-fixed via pnpm run format)
+
+Rationale:
+The ParentLock component is critical for gating settings access and app
+exit in a toddler game. The hold-for-3s mechanism prevents accidental
+exits while being accessible to parents. Tests comprehensively cover
+success, failure, reset, and cleanup scenarios.
