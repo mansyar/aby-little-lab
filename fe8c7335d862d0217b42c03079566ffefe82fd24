@@ -1,0 +1,16 @@
+Task: Create animal and food SVG assets
+
+Summary: Created 9 SVG assets for the Animal Trace-and-Connect mini-game.
+
+Files created:
+- src/assets/svg/animals/monkey.svg (brown monkey face with ears)
+- src/assets/svg/animals/rabbit.svg (gray rabbit with long pink-lined ears)
+- src/assets/svg/animals/cat.svg (orange cat with triangular ears and whiskers)
+- src/assets/svg/animals/dog.svg (golden dog with floppy ears)
+- src/assets/svg/animals/banana.svg (yellow peeled banana)
+- src/assets/svg/animals/carrot.svg (orange carrot with green leaves)
+- src/assets/svg/animals/fish.svg (teal fish with tail and fins)
+- src/assets/svg/animals/bone.svg (cream bone shape)
+- src/assets/svg/stickers/sticker_animal_trace.svg (sticker with monkey, dotted path, banana)
+
+All SVGs use 512x512 viewBox, flat fills, 4-6px #2D3748 stroke, distinct soft/vibrant non-primary colors, storybook style per spec FR1.1-FR1.4.
