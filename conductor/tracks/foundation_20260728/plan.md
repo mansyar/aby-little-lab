@@ -90,12 +90,12 @@
     - [x] Test HubScene displays 6 game tiles
     - [x] Test HubScene displays sticker book (earned/uneared stickers)
     - [x] Test navigation from Hub to game scene stub and back to Hub
-- [ ] Task: Implement Phaser config and core scenes
-    - [ ] Create `src/main.ts` (typed Phaser.Types.Core.GameConfig, 1024×768, Scale.FIT + CENTER_BOTH, Arcade physics gravity y:0, 8 scene registration)
-    - [ ] Create `src/scenes/BootScene.ts` (screen.orientation.lock('landscape') with catch fallback, transition to Preload)
-    - [ ] Create `src/scenes/PreloadScene.ts` (load placeholder SVGs at 512×512, progress bar, transition to Hub)
-    - [ ] Create `src/scenes/HubScene.ts` (6 game tiles grid, sticker book display, settings button gated by ParentLock)
-    - [ ] Run tests — all pass (Green phase)
+- [x] Task: Implement Phaser config and core scenes [08ede6f]
+    - [x] Create `src/main.ts` (typed Phaser.Types.Core.GameConfig, 1024×768, Scale.FIT + CENTER_BOTH, Arcade physics gravity y:0, 8 scene registration)
+    - [x] Create `src/scenes/BootScene.ts` (screen.orientation.lock('landscape') with catch fallback, transition to Preload)
+    - [x] Create `src/scenes/PreloadScene.ts` (load placeholder SVGs at 512×512, progress bar, transition to Hub)
+    - [x] Create `src/scenes/HubScene.ts` (6 game tiles grid, sticker book display, settings button gated by ParentLock)
+    - [x] Run tests — all pass (Green phase)
 - [ ] Task: Create game scene stubs
     - [ ] Create `src/scenes/ShapeSorterScene.ts` (placeholder UI + back button with ParentLock)
     - [ ] Create `src/scenes/AnimalTraceScene.ts` (placeholder UI + back button with ParentLock)
