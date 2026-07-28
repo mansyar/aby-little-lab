@@ -1,0 +1,33 @@
+Phase 5 Checkpoint Verification Report
+
+Phase: Completion, Sticker Award & Return
+Track: shape-sorter_20260728
+
+Automated Test Results:
+- Command: \CI=true npx vitest run --coverage\
+- Result: 120 tests passed (5 test files)
+- Coverage:
+  - ShapeSorterScene.ts: 97.46% stmts, 70% branches, 89.47% funcs, 98.64% lines
+  - Overall: 99.01% stmts, 91.37% branches, 89.88% funcs, 99.65% lines
+- Biome check: Clean (23 files)
+- Production build: Passes
+
+Files Changed in Phase 5 (since checkpoint 4dfbe47):
+- src/scenes/ShapeSorterScene.ts (MODIFIED - added handleComplete, createStickerAnimation, AUTO_RETURN_DELAY, storage imports, completion check)
+- src/__tests__/scenes/navigation.test.ts (MODIFIED - added earnSticker spy, 4 completion/sticker tests, completeAllShapes helper)
+- conductor/tracks/shape-sorter_20260728/plan.md (MODIFIED - task statuses)
+
+Manual Verification Plan:
+1. Start dev server: pnpm dev
+2. Open browser to http://localhost:5173
+3. Tap Shape Sorter tile on Hub to enter game
+4. Verify 3 shapes and 3 cutout slots appear (shuffled per playthrough)
+5. Drag shape to matching slot: snaps to center, plays chime, particle burst
+6. Drag shape to wrong slot: bounces back gently, soft tone, no penalty
+7. Place all 3 shapes: win sound plays, shapes pulse, sticker text + sparkle sound (first time only)
+8. Wait 3s: auto-returns to Hub
+9. Replay: sticker NOT re-awarded
+10. Hold back button 3s: parental lock exits to Hub
+11. Turn off SFX toggle: no gameplay sounds
+
+User Confirmation: YES - Phase 5 meets expectations
