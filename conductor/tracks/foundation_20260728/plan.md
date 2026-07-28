@@ -34,7 +34,7 @@
 
 ---
 
-## Phase 2: Core Types & Storage Layer
+## Phase 2: Core Types & Storage Layer [checkpoint: a44d7f5]
 
 - [x] Task: Write tests for storage utilities [a410b2f]
     - [x] Test reading empty storage (returns default AppStorage)
@@ -47,7 +47,7 @@
     - [x] Create `src/types/index.ts` (AppStorage, GameId, StickerData, Settings interfaces)
     - [x] Create `src/utils/storage.ts` (load, save, earnSticker, hasSticker, getSettings, updateSettings)
     - [x] Run tests — all pass (Green phase)
-- [~] Task: Conductor - User Manual Verification 'Core Types & Storage Layer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Core Types & Storage Layer' (Protocol in workflow.md) [a44d7f5]
 
 ---
 
