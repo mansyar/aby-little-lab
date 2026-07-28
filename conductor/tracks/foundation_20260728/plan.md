@@ -4,7 +4,7 @@
 
 ---
 
-## Phase 1: Project Scaffolding
+## Phase 1: Project Scaffolding [checkpoint: df28f09]
 
 - [x] Task: Initialize pnpm project and install dependencies [ad136d4]
     - [x] Create `package.json` with pnpm
@@ -30,7 +30,7 @@
     - [x] Run `pnpm dev` — dev server starts without errors
     - [x] Run `pnpm run build` — production build succeeds
     - [x] Run `CI=true pnpm test` — test runner executes (even with no tests)
-- [ ] Task: Conductor - User Manual Verification 'Project Scaffolding' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Project Scaffolding' (Protocol in workflow.md) [df28f09]
 
 ---
 
