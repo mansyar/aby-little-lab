@@ -106,7 +106,7 @@ interface AppStorage {
 - SFX: MP3 format (sfx_pop, sfx_correct, sfx_incorrect, sfx_wake, sfx_win, sfx_sticker)
 - BGM: Single MP3 loop (bgm.mp3)
 - Synthesized: Web Audio API oscillators for Game 5 frog notes (C4, E4, G4)
-- Synthesized gameplay SFX: correct (ascending chime), incorrect (soft descending tone), win (celebratory arpeggio), sticker (sparkle) — via Web Audio API
+- Synthesized gameplay SFX: correct (ascending chime), incorrect (soft descending tone), win (celebratory arpeggio), sticker (sparkle), pop (short percussive blip), wake (soft rousing tone) — via Web Audio API
 
 ### PWA Icon
 - 512×512 PNG icon for manifest
@@ -141,7 +141,9 @@ aby-little-lab/
     ├── audio/
     │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis
     ├── game/
-    │   └── shapeSorterLogic.ts    # Pure game logic (shuffle, match detection)
+    │   ├── shapeSorterLogic.ts    # Pure game logic (shuffle, match detection)
+    │   ├── animalTraceLogic.ts    # Pure game logic (path tracing, pair selection)
+    │   └── popFreezeLogic.ts      # Pure game logic (spawn scheduling, pop counting)
     ├── utils/
     │   └── storage.ts             # localStorage persistence layer
     ├── types/
@@ -162,7 +164,9 @@ aby-little-lab/
         ├── components/
         │   └── ParentLock.test.ts
         ├── game/
-        │   └── shapeSorterLogic.test.ts
+        │   ├── shapeSorterLogic.test.ts
+        │   ├── animalTraceLogic.test.ts
+        │   └── popFreezeLogic.test.ts
         ├── scenes/
         │   └── navigation.test.ts
         └── utils/
