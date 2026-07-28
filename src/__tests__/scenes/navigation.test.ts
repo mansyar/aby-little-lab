@@ -1037,6 +1037,25 @@ describe("scene navigation flow", () => {
       const imageCountAfter = getMockFn(scene.add.image).mock.calls.length;
       expect(imageCountAfter).toBeGreaterThan(imageCountBefore);
     });
+
+    it("destroys particle emitter when advancing to next pair", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      completePath(scene);
+
+      // Get the particle emitter created on path completion
+      const particlesMock = getMockFn(scene.add.particles);
+      const emitter = particlesMock.mock.results[0].value as Record<string, MockFn>;
+
+      // Trigger the advance callback to render next pair
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const advanceCall = delayedCallMock.mock.calls.find((call) => call[0] === 1000);
+      const callback = advanceCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(emitter.destroy)).toHaveBeenCalled();
+    });
   });
 
   describe("AnimalTraceScene completion and sticker flow", () => {

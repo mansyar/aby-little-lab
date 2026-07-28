@@ -68,6 +68,7 @@ interface PairState {
   animalSprite: Phaser.GameObjects.Image;
   foodSprite: Phaser.GameObjects.Image;
   pathGraphics: Phaser.GameObjects.Graphics;
+  particleEmitter?: Phaser.GameObjects.Particles.ParticleEmitter;
   complete: boolean;
 }
 
@@ -142,6 +143,7 @@ export class AnimalTraceScene extends Phaser.Scene {
       this.currentPair.animalSprite.destroy();
       this.currentPair.foodSprite.destroy();
       this.currentPair.pathGraphics.destroy();
+      this.currentPair.particleEmitter?.destroy();
     }
 
     const pair = this.pairs[index];
@@ -209,7 +211,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     if (!this.currentPair) return;
     this.currentPair.complete = true;
     this.audioManager.playCorrect();
-    this.createParticleBurst(FOOD_X, SPRITE_Y);
+    this.currentPair.particleEmitter = this.createParticleBurst(FOOD_X, SPRITE_Y);
     this.completedPaths++;
     this.updateProgressIndicator();
 
@@ -256,13 +258,14 @@ export class AnimalTraceScene extends Phaser.Scene {
   }
 
   /** Creates a soft particle burst at the given position. */
-  private createParticleBurst(x: number, y: number): void {
-    this.add.particles(x, y, PARTICLE_TEXTURE, {
+  private createParticleBurst(x: number, y: number): Phaser.GameObjects.Particles.ParticleEmitter {
+    const emitter = this.add.particles(x, y, PARTICLE_TEXTURE, {
       speed: { min: 50, max: 150 },
       lifespan: 800,
       quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
       scale: { start: 0.3, end: 0 },
     });
+    return emitter;
   }
 
   /** Handles round completion — win animation, sticker award, and auto-return. */
