@@ -1,0 +1,45 @@
+Phase 4 Checkpoint Verification Report: Drag, Drop & Feedback
+
+Phase: Phase 4 — Drag, Drop & Feedback
+Track: Shape Sorter Mini-Game (shape-sorter_20260728)
+
+Automated Test Results:
+- Command: \$env:CI='true'; npx vitest run --coverage\
+- Tests: 116 passed (0 failed)
+- Test files: 5 passed
+- Coverage (global):
+  - Statements: 98.96% (threshold: 80%)
+  - Branches: 90.74% (threshold: 80%)
+  - Functions: 89.41% (threshold: 80%)
+  - Lines: 99.63% (threshold: 80%)
+- Key file coverage:
+  - ShapeSorterScene.ts: 96.82% stmts, 50% branches, 86.66% funcs, 98.3% lines
+  - AudioManager.ts: 98.9% stmts, 94.44% branches, 100% funcs, 100% lines
+
+Lint/Build:
+- Biome check: Clean (23 files)
+- Production build: Passes
+
+Files Changed in Phase 4:
+- src/audio/AudioManager.ts (MODIFIED — added getInstance singleton)
+- src/scenes/ShapeSorterScene.ts (MODIFIED — drag/drop, particles, bounce-back)
+- src/__tests__/scenes/navigation.test.ts (MODIFIED — mock additions + 3 drag/drop tests)
+- src/__tests__/audio/AudioManager.test.ts (MODIFIED — 2 getInstance tests)
+
+Manual Verification Plan:
+1. Start dev server: pnpm dev
+2. Open browser to http://localhost:5173
+3. Navigate to Shape Sorter via Hub tile
+4. Verify initial layout: 3 cutout slots at top, 3 shapes at bottom (shuffled)
+5. Test correct drop: drag shape to matching slot → snaps, chime, particles, non-interactive
+6. Test incorrect drop: drag to wrong slot/outside → bounces back, soft tone, no penalty
+7. Verify touch targets: 128x128px (exceeds 64px minimum)
+8. Test SFX toggle: disable sfxEnabled in localStorage → no SFX plays
+9. Test back button: hold 3s → returns to Hub
+
+User Confirmation: YES — Phase 4 meets expectations.
+
+Commits in Phase 4:
+- 100359f feat(scene): Implement ShapeSorterScene drag/drop with SFX and particle burst
+- abd730c conductor(plan): Mark tasks 'Write tests for drag/drop' and 'Implement drag/drop interaction' as complete
+- 4dfbe47 conductor(checkpoint): Checkpoint end of Phase 4
