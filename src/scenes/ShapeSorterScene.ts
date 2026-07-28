@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
+import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Y position for cutout slots (top area). */
 const SLOT_Y = 200;
@@ -20,6 +21,9 @@ const BOUNCE_DURATION = 300;
 
 /** Texture key used for particle bursts. */
 const PARTICLE_TEXTURE = "shape_circle";
+
+/** Delay before auto-returning to Hub after round completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
 
 /** Tracks a draggable shape's state during the round. */
 interface ShapeData {
@@ -160,6 +164,10 @@ export class ShapeSorterScene extends Phaser.Scene {
       shape.placed = true;
       this.audioManager.playCorrect();
       this.createParticleBurst(slot.x, slot.y);
+
+      if (this.shapes.every((s) => s.placed)) {
+        this.handleComplete();
+      }
     }
   }
 
@@ -184,6 +192,49 @@ export class ShapeSorterScene extends Phaser.Scene {
       lifespan: 800,
       quantity: 12,
       scale: { start: 0.3, end: 0 },
+    });
+  }
+
+  /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
+  private handleComplete(): void {
+    this.audioManager.playWin();
+
+    for (const shape of this.shapes) {
+      this.tweens.add({
+        targets: shape.obj,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 300,
+        yoyo: true,
+      });
+    }
+
+    if (!hasSticker("shape-sorter")) {
+      earnSticker("shape-sorter");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      this.scene.start("Hub");
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerText = this.add.text(
+      this.cameras.main.centerX,
+      this.cameras.main.centerY,
+      "\u2605 Sticker Earned!",
+      { fontSize: "48px", color: "#F6AD55" },
+    );
+    stickerText.setOrigin(0.5).setScale(0);
+    this.tweens.add({
+      targets: stickerText,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 300,
+      ease: "Back.out",
     });
   }
 }

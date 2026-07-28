@@ -145,6 +145,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
   return {
     ...actual,
     hasSticker: vi.fn(actual.hasSticker),
+    earnSticker: vi.fn(actual.earnSticker),
   };
 });
 
@@ -621,6 +622,114 @@ describe("scene navigation flow", () => {
           expect(call[1]).toBeGreaterThanOrEqual(64);
         }
       }
+    });
+  });
+
+  describe("ShapeSorterScene completion and sticker flow", () => {
+    /** Returns shape image objects with their types. */
+    function getShapeObjects(scene: unknown): Array<{ obj: Record<string, MockFn>; type: string }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const results: Array<{ obj: Record<string, MockFn>; type: string }> = [];
+
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("shape_")) {
+          results.push({
+            obj: imageMock.mock.results[i].value as Record<string, MockFn>,
+            type: key.replace("shape_", ""),
+          });
+        }
+      }
+      return results;
+    }
+
+    /** Returns slot zone objects with their types. */
+    function getSlotZones(scene: unknown): Array<{ zone: Record<string, MockFn>; type: string }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const zoneMock = getMockFn(add.zone);
+
+      const slotTypes: string[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("cutout_")) {
+          slotTypes.push(key.replace("cutout_", ""));
+        }
+      }
+
+      const results: Array<{ zone: Record<string, MockFn>; type: string }> = [];
+
+      for (let i = 0; i < zoneMock.mock.results.length && i < slotTypes.length; i++) {
+        results.push({
+          zone: zoneMock.mock.results[i].value as Record<string, MockFn>,
+          type: slotTypes[i],
+        });
+      }
+      return results;
+    }
+
+    /** Simulates dropping all shapes on their matching slots. */
+    function completeAllShapes(scene: ShapeSorterScene): void {
+      const shapes = getShapeObjects(scene);
+      const slots = getSlotZones(scene);
+      for (const shape of shapes) {
+        const slot = slots.find((s) => s.type === shape.type);
+        if (!slot) throw new Error("No matching slot found");
+        const onCalls = getMockFn(shape.obj.on).mock.calls;
+        const dropCall = onCalls.find((c) => c[0] === "drop");
+        const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+        dropCallback(null, slot.zone);
+      }
+    }
+
+    it("plays win SFX when all shapes are placed", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+      completeAllShapes(scene);
+
+      expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("awards sticker on first completion only", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+      completeAllShapes(scene);
+
+      expect(earnSticker).toHaveBeenCalledWith("shape-sorter");
+      expect(mockAudio.playSticker).toHaveBeenCalled();
+    });
+
+    it("does not re-award sticker on replay", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+      completeAllShapes(scene);
+
+      expect(earnSticker).not.toHaveBeenCalled();
+      expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    });
+
+    it("auto-returns to Hub after 3s delay", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+      completeAllShapes(scene);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+      expect(autoReturnCall).toBeDefined();
+
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
   });
 
