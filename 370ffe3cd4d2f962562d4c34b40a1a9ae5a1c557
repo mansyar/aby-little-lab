@@ -1,0 +1,30 @@
+Task: Write tests for scene navigation flow
+
+Summary:
+Created src/__tests__/scenes/navigation.test.ts with 8 test cases covering
+the scene navigation flow for Phase 4 (Scene Architecture & Navigation).
+
+Test coverage:
+- BootScene: transitions to PreloadScene on create, attempts screen orientation lock
+- PreloadScene: sets up progress bar during preload, transitions to HubScene on create
+- HubScene: creates 6 game tiles, creates sticker book checking sticker status for
+  each game, navigates to each game scene when respective tile is clicked
+- Game scene stubs: navigates back to Hub via back button hold (ParentLock)
+
+Mocking strategy:
+- vi.mock('phaser') provides MockScene class with fresh mock methods per instance.
+  MockScene creates mock game objects via createMockGameObject() with chainable
+  methods (setInteractive, on, setOrigin, etc. all return this).
+- vi.mock('../../utils/storage') spies on hasSticker while keeping real
+  implementations of all other storage functions (earnSticker, load, etc.).
+- vi.stubGlobal('screen') mocks screen.orientation.lock for BootScene tests.
+- Dynamic import for ShapeSorterScene allows core scene tests to pass after
+  Task 4 while game scene test passes after Task 5.
+
+Files created:
+- src/__tests__/scenes/navigation.test.ts (294 lines, 8 test cases)
+
+Verification:
+- Tests confirmed failing (Red phase): Failed to resolve import '../../scenes/PreloadScene'
+- All 59 existing tests still pass (12 storage + 18 ParentLock + 29 AudioManager)
+- Biome check: 11 files, no errors
