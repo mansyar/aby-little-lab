@@ -18,7 +18,7 @@
 | Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
 | Linting/Formatting | Biome | 2.5.5 | All-in-one linter and formatter |
 | Package Manager | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
-| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 (no file overhead) |
+| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) — no file overhead |
 
 ### Dependencies (`package.json`)
 
@@ -68,7 +68,9 @@ aby-little-lab/
     ├── components/
     │   └── ParentLock.ts           # Long-press escape UI component (hold 3s)
     ├── audio/
-    │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis (Web Audio API)
+    │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis (Web Audio API); singleton via getInstance()
+    ├── game/
+    │   └── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -84,9 +86,10 @@ aby-little-lab/
     ├── styles/
     │   └── style.css               # Touch locks (-webkit-user-select, touch-action: none)
     └── __tests__/
-        ├── audio/                  # AudioManager tests
+        ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock tests
-        ├── scenes/                 # Scene-level tests (navigation, etc.)
+        ├── game/                   # Game logic tests (shapeSorterLogic)
+        ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage tests
 ```
 
@@ -274,10 +277,14 @@ interface AppStorage {
 
 | File | Dimensions | Game | Notes |
 |---|---|---|---|
-| `shape_circle.svg` | 512×512 | Game 1 | Colored fill, thick outline |
-| `shape_square.svg` | 512×512 | Game 1 | Colored fill, thick outline |
-| `shape_triangle.svg` | 512×512 | Game 1 | Colored fill, thick outline |
-| `shape_star.svg` | 512×512 | Game 1 | Colored fill, thick outline |
+| `shape_circle.svg` | 512×512 | Game 1 | Colored fill (`#F6AD55`), thick `#2D3748` outline |
+| `shape_square.svg` | 512×512 | Game 1 | Colored fill (`#9F7AEA`), thick `#2D3748` outline |
+| `shape_triangle.svg` | 512×512 | Game 1 | Colored fill (`#4FD1C5`), thick `#2D3748` outline |
+| `shape_star.svg` | 512×512 | Game 1 | Colored fill (`#F687B3`), thick `#2D3748` outline |
+| `cutout_circle.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
+| `cutout_square.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
+| `cutout_triangle.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
+| `cutout_star.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
 
 ### SVG Assets — Animals (`assets/svg/animals/`)
 
@@ -356,11 +363,11 @@ interface AppStorage {
 
 | Type | Count |
 |---|---|
-| SVG — shapes | 4 |
+| SVG — shapes | 8 (4 shapes + 4 cutouts) |
 | SVG — animals | 5 |
 | SVG — items | 10 |
 | SVG — UI | 14 |
 | SVG — stickers | 6 |
 | Audio (MP3) | 7 |
 | PWA icons (PNG) | 1 |
-| **Total** | **47** |
+| **Total** | **51** |
