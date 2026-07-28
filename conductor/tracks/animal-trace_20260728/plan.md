@@ -17,7 +17,7 @@
 
 ---
 
-## Phase 2: Round Initialization & Path Logic
+## Phase 2: Round Initialization & Path Logic [checkpoint: b3f881a]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for round initialization and path logic [c481ac2]
