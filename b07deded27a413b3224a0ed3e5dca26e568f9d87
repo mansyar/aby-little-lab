@@ -1,0 +1,37 @@
+Phase 4 Checkpoint: Completion, Sticker Award & Return
+
+Track: Pop & Freeze! Mini-Game (pop-freeze_20260729)
+
+Automated Test Results:
+- Command: \$env:CI='true'; pnpm test\
+- Result: 7 test files passed, 220 tests passed (0 failed)
+- Biome check: passed (no errors, 27 files checked)
+- Production build: succeeded (vite build, 41 modules transformed)
+
+Phase Scope (files changed since previous checkpoint 7dce3eb):
+- src/scenes/PopFreezeScene.ts (handleComplete + createStickerAnimation implemented)
+- src/__tests__/scenes/navigation.test.ts (6 new tests for completion/sticker flow)
+- conductor/tracks/pop-freeze_20260729/plan.md (task status updates)
+
+Test Coverage:
+- PopFreezeScene completion and sticker flow: 6 tests
+  1. plays win SFX when 6 poppable bubbles are popped
+  2. awards sticker on first completion only (earnSticker('pop-freeze') + playSticker)
+  3. does not re-award sticker on replay (hasSticker=true → no earnSticker/playSticker)
+  4. auto-returns to Hub after 3s delay (delayedCall(3000) → scene.start('Hub'))
+  5. triggers win animation tween on round completion (yoyo scale 1.2)
+  6. creates sticker animation image on first completion (sticker_pop_freeze)
+
+Manual Verification Plan:
+1. Start dev server: pnpm dev
+2. Open browser to dev URL
+3. Navigate to Pop & Freeze via Hub tile
+4. Play through to completion (pop 6 poppable bubbles)
+5. Confirm win animation (bubbles scale up/back) + win SFX
+6. Confirm sticker award (sticker_pop_freeze image with scale-up animation + sticker SFX)
+7. Confirm auto-return to Hub after ~3s
+8. Confirm sticker displayed in Hub sticker book
+9. Replay: confirm no sticker re-award (only win SFX + animation, no sticker)
+10. Confirm parental lock exit (hold back button 3s → Hub)
+
+User Confirmation: YES — user confirmed all manual verification steps passed.
