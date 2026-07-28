@@ -1,0 +1,12 @@
+Task: Implement completion flow (stop spawning + win animation + sticker award + auto-return) in PopFreezeScene [TDD-Green]
+
+Summary:
+- Replaced handleComplete() stub with full implementation matching ShapeSorterScene pattern
+- On completion: plays win SFX, scales remaining bubbles with yoyo tween (1.2 scale, 300ms), awards sticker on first completion only (hasSticker check → earnSticker('pop-freeze') + playSticker + createStickerAnimation), auto-returns to Hub after 3s delay
+- Added createStickerAnimation() method: adds sticker_pop_freeze image at center, setDisplaySize(256), setScale(0), tweens to full scale with Back.out ease
+- Added imports: earnSticker, hasSticker from ../utils/storage
+- Added constants: STICKER_DISPLAY_SIZE=256, AUTO_RETURN_DELAY=3000
+- All 220 tests pass, Biome check passes, build succeeds
+
+Files modified:
+- src/scenes/PopFreezeScene.ts
