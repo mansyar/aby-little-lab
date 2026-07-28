@@ -1,0 +1,296 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+type MockFn = ReturnType<typeof vi.fn>;
+
+/**
+ * Mock Phaser module. Scene files extend Phaser.Scene, which at runtime
+ * resolves to MockScene. Each instance gets fresh mock methods in the
+ * constructor, enabling per-test isolation.
+ */
+vi.mock("phaser", () => {
+  /** Creates a mock game object with chainable methods used by Phaser scenes. */
+  function createMockGameObject(): Record<string, MockFn> {
+    return {
+      setInteractive: vi.fn().mockReturnThis(),
+      on: vi.fn().mockReturnThis(),
+      setOrigin: vi.fn().mockReturnThis(),
+      setScale: vi.fn().mockReturnThis(),
+      setDepth: vi.fn().mockReturnThis(),
+      setStyle: vi.fn().mockReturnThis(),
+      setFontSize: vi.fn().mockReturnThis(),
+      setText: vi.fn().mockReturnThis(),
+      setColor: vi.fn().mockReturnThis(),
+      setVisible: vi.fn().mockReturnThis(),
+      setAlpha: vi.fn().mockReturnThis(),
+      setPosition: vi.fn().mockReturnThis(),
+      setSize: vi.fn().mockReturnThis(),
+      setDisplaySize: vi.fn().mockReturnThis(),
+      destroy: vi.fn(),
+    };
+  }
+
+  class MockScene {
+    add!: Record<string, MockFn>;
+    scene!: Record<string, MockFn>;
+    load!: Record<string, MockFn>;
+    input!: Record<string, MockFn>;
+    cameras!: {
+      main: Record<string, MockFn> & {
+        centerX: number;
+        centerY: number;
+        width: number;
+        height: number;
+      };
+    };
+    scale!: Record<string, MockFn> & { width: number; height: number };
+    time!: Record<string, MockFn>;
+    sys!: { events: Record<string, MockFn> };
+    children!: Record<string, MockFn>;
+
+    constructor() {
+      this.add = {
+        rectangle: vi.fn(() => createMockGameObject()),
+        text: vi.fn(() => createMockGameObject()),
+        image: vi.fn(() => createMockGameObject()),
+        container: vi.fn(() => createMockGameObject()),
+        circle: vi.fn(() => createMockGameObject()),
+        graphics: vi.fn(() => createMockGameObject()),
+        zone: vi.fn(() => createMockGameObject()),
+      };
+      this.scene = {
+        start: vi.fn(),
+        stop: vi.fn(),
+        launch: vi.fn(),
+        get: vi.fn(),
+        switch: vi.fn(),
+        sleep: vi.fn(),
+        wake: vi.fn(),
+        pause: vi.fn(),
+        resume: vi.fn(),
+      };
+      this.load = {
+        svg: vi.fn(),
+        image: vi.fn(),
+        audio: vi.fn(),
+        on: vi.fn(),
+        once: vi.fn(),
+        off: vi.fn(),
+      };
+      this.input = {
+        on: vi.fn(),
+        off: vi.fn(),
+      };
+      this.cameras = {
+        main: {
+          setBackgroundColor: vi.fn(),
+          centerX: 512,
+          centerY: 384,
+          width: 1024,
+          height: 768,
+        },
+      };
+      this.scale = {
+        setSize: vi.fn(),
+        on: vi.fn(),
+        width: 1024,
+        height: 768,
+      };
+      this.time = {
+        delayedCall: vi.fn(),
+        addEvent: vi.fn(),
+      };
+      this.sys = {
+        events: {
+          on: vi.fn(),
+          once: vi.fn(),
+          off: vi.fn(),
+        },
+      };
+      this.children = {
+        forEach: vi.fn(),
+      };
+    }
+  }
+
+  return {
+    default: {
+      Scene: MockScene,
+      Game: vi.fn(),
+      Scale: { FIT: 0, CENTER_BOTH: 0 },
+      AUTO: "AUTO",
+    },
+    Scene: MockScene,
+    Game: vi.fn(),
+    Scale: { FIT: 0, CENTER_BOTH: 0 },
+    AUTO: "AUTO",
+  };
+});
+
+/**
+ * Spy on hasSticker to verify HubScene consults storage for sticker status.
+ * All other storage functions remain real implementations.
+ */
+vi.mock("../../utils/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/storage")>();
+  return {
+    ...actual,
+    hasSticker: vi.fn(actual.hasSticker),
+  };
+});
+
+import { BootScene } from "../../scenes/BootScene";
+import { HubScene } from "../../scenes/HubScene";
+import { PreloadScene } from "../../scenes/PreloadScene";
+import { earnSticker, hasSticker } from "../../utils/storage";
+
+const GAME_SCENE_KEYS = [
+  "ShapeSorter",
+  "AnimalTrace",
+  "PopFreeze",
+  "ShadowMatch",
+  "MusicalMemory",
+  "BigSmall",
+] as const;
+
+/** Casts a Phaser-typed method to a MockFn for mock assertions. */
+function getMockFn(fn: unknown): MockFn {
+  return fn as unknown as MockFn;
+}
+
+/** Collects all game objects created by scene.add.* methods. */
+function getAllGameObjects(scene: unknown): Array<Record<string, MockFn>> {
+  const add = (scene as { add: Record<string, unknown> }).add;
+  const objects: Array<Record<string, MockFn>> = [];
+  for (const method of Object.values(add)) {
+    const mock = getMockFn(method);
+    if (mock.mock?.results) {
+      for (const result of mock.mock.results) {
+        objects.push(result.value as Record<string, MockFn>);
+      }
+    }
+  }
+  return objects;
+}
+
+/** Triggers all pointerdown callbacks registered on game objects. */
+function triggerAllPointerdowns(scene: unknown): void {
+  const allObjects = getAllGameObjects(scene);
+  for (const obj of allObjects) {
+    const onMock = getMockFn(obj.on);
+    const pointerdownCall = onMock.mock.calls.find((call) => call[0] === "pointerdown");
+    if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+      pointerdownCall[1]();
+    }
+  }
+}
+
+describe("scene navigation flow", () => {
+  beforeEach(() => {
+    vi.stubGlobal("screen", {
+      orientation: {
+        lock: vi.fn().mockResolvedValue(undefined),
+        unlock: vi.fn(),
+      },
+    });
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  describe("BootScene", () => {
+    it("transitions to PreloadScene on create", () => {
+      const scene = new BootScene();
+      scene.create();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
+    });
+
+    it("attempts to lock screen orientation to landscape", () => {
+      const scene = new BootScene();
+      scene.create();
+
+      expect(screen.orientation.lock).toHaveBeenCalledWith("landscape");
+    });
+  });
+
+  describe("PreloadScene", () => {
+    it("sets up progress bar during preload", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      expect(getMockFn(scene.load.on)).toHaveBeenCalledWith("progress", expect.any(Function));
+      expect(getMockFn(scene.load.on)).toHaveBeenCalledWith("complete", expect.any(Function));
+    });
+
+    it("transitions to HubScene on create", () => {
+      const scene = new PreloadScene();
+      scene.create();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+
+  describe("HubScene", () => {
+    it("creates 6 game tiles", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const allObjects = getAllGameObjects(scene);
+      const interactiveObjects = allObjects.filter(
+        (obj) => getMockFn(obj.setInteractive).mock.calls.length > 0,
+      );
+
+      expect(interactiveObjects.length).toBeGreaterThanOrEqual(6);
+    });
+
+    it("creates sticker book checking sticker status for each game", () => {
+      earnSticker("shape-sorter");
+
+      const scene = new HubScene();
+      scene.create();
+
+      expect(hasSticker).toHaveBeenCalledTimes(6);
+    });
+
+    it("navigates to each game scene when respective tile is clicked", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+
+      const startMock = getMockFn(scene.scene.start);
+      const startedKeys = startMock.mock.calls.map((call) => call[0] as string);
+
+      for (const key of GAME_SCENE_KEYS) {
+        expect(startedKeys).toContain(key);
+      }
+    });
+  });
+
+  describe("game scene stubs", () => {
+    it("navigates back to Hub via back button hold", async () => {
+      // Dynamic import so core scene tests pass after Task 4,
+      // and this test passes after Task 5 creates game scenes.
+      const { ShapeSorterScene } = await import("../../scenes/ShapeSorterScene");
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      // Trigger pointerdown on the back button (starts ParentLock timer)
+      triggerAllPointerdowns(scene);
+
+      // Find ParentLock's delayedCall (3000ms default hold duration)
+      const timeMock = getMockFn(scene.time.delayedCall);
+      const parentLockCall = timeMock.mock.calls.find((call) => call[0] === 3000);
+
+      if (!parentLockCall) {
+        throw new Error("ParentLock delayedCall (3000ms) not found");
+      }
+
+      // Simulate hold completion (ParentLock success callback)
+      const holdCallback = parentLockCall[1] as () => void;
+      holdCallback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+});

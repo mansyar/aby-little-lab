@@ -84,7 +84,7 @@
     - [x] Implement hold-for-3s timer logic using Phaser input events
     - [x] Implement success/failure callbacks
     - [x] Run tests — all pass (Green phase)
-- [ ] Task: Write tests for scene navigation flow
+- [~] Task: Write tests for scene navigation flow
     - [ ] Test BootScene starts and transitions to PreloadScene
     - [ ] Test PreloadScene loads assets and transitions to HubScene
     - [ ] Test HubScene displays 6 game tiles
