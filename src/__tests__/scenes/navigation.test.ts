@@ -154,6 +154,8 @@ vi.mock("../../utils/storage", async (importOriginal) => {
  */
 const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
+    init: vi.fn(),
+    resume: vi.fn(),
     playCorrect: vi.fn(),
     playIncorrect: vi.fn(),
     playWin: vi.fn(),
@@ -289,6 +291,13 @@ describe("scene navigation flow", () => {
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
     });
+
+    it("initializes the AudioManager on create", () => {
+      const scene = new BootScene();
+      scene.create();
+
+      expect(mockAudio.init).toHaveBeenCalled();
+    });
   });
 
   describe("PreloadScene", () => {
@@ -422,6 +431,15 @@ describe("scene navigation flow", () => {
       for (const key of GAME_SCENE_KEYS) {
         expect(startedKeys).toContain(key);
       }
+    });
+
+    it("resumes AudioManager when a tile is clicked", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+
+      expect(mockAudio.resume).toHaveBeenCalled();
     });
   });
 

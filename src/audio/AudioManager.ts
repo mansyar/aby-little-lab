@@ -59,6 +59,17 @@ export class AudioManager {
   }
 
   /**
+   * Resumes the AudioContext if it is suspended.
+   * Browsers require a user interaction (tap, click) before audio can play,
+   * so this must be called from a user gesture handler (e.g., tile tap in Hub).
+   */
+  resume(): void {
+    if (this.audioContext?.state === "suspended") {
+      this.audioContext.resume();
+    }
+  }
+
+  /**
    * Starts BGM playback if BGM is enabled.
    * Does nothing if BGM is disabled or not initialized.
    */

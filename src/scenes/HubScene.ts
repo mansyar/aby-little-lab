@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import type { GameId } from "../types";
 import { hasSticker } from "../utils/storage";
@@ -52,6 +53,7 @@ export class HubScene extends Phaser.Scene {
       const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
       tile.setInteractive();
       tile.on("pointerdown", () => {
+        AudioManager.getInstance().resume();
         this.scene.start(GAME_TILES[i].sceneKey);
       });
 
