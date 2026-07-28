@@ -1,0 +1,31 @@
+Task: Phase 3 - Write tests + Implement path tracing and feedback
+
+Summary:
+- Added generatePathPoints() to animalTraceLogic.ts — pure function generating
+  evenly-spaced waypoints with a gentle sine curve for deterministic path layout
+- Implemented full AnimalTraceScene with path tracing interaction:
+  - Phaser.Curves.Path per pair with lineTo segments through generated points
+  - pointerdown/pointermove/pointerup handlers for tracing interaction
+  - Proximity check (Math.hypot) against next waypoint with 60px tolerance
+  - Animal sprite advances along path on valid touch
+  - Finger lift/stray pauses (no reset, no penalty) — resume from current position
+  - Reaching food: playCorrect SFX + soft particle burst
+  - Silent during tracing (no audio until path completion)
+  - Advances to next pair via delayedCall(1000ms) after path completion
+  - handleRoundComplete() stub for Phase 4
+- Extended navigation.test.ts Phaser mock: added Curves.Path (class-based),
+  graphics methods (fillStyle, fillCircle, lineStyle)
+- Added 5 generatePathPoints tests + 11 AnimalTraceScene behavior tests
+
+Modified files:
+- src/game/animalTraceLogic.ts (added generatePathPoints)
+- src/scenes/AnimalTraceScene.ts (full implementation replacing stub)
+- src/__tests__/game/animalTraceLogic.test.ts (5 new generatePathPoints tests)
+- src/__tests__/scenes/navigation.test.ts (mock extension + 11 scene tests)
+
+Why: Implements the core path-tracing interaction for the Animal Trace mini-game,
+enabling toddlers to trace dotted curves from animals to food with generous
+tolerance and no-fail design. Uses pure functions for testable path generation
+and Phaser.Curves.Path for spec compliance.
+
+Verification: 156 tests pass, Biome check clean, build succeeds.
