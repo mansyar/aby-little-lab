@@ -17,7 +17,7 @@
 
 ---
 
-## Phase 2: Round Initialization & Bubble Logic
+## Phase 2: Round Initialization & Bubble Logic [checkpoint: 42a84b4]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for round initialization and bubble logic [TDD-Red] [ff91b8f]
