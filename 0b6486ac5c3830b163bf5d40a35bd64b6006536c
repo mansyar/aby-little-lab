@@ -1,0 +1,20 @@
+Task: Write tests for completion and sticker flow + Implement completion flow
+
+Summary:
+Implemented the round completion flow for AnimalTraceScene — the final phase of the Animal Trace-and-Connect mini-game. When all 3 paths are traced, the scene plays a win SFX, triggers a celebration tween on the animal sprite, awards the "animal-trace" sticker on first completion only (with sticker SFX + unlock animation), and auto-returns to the Hub scene after a 3-second delay.
+
+Changes:
+- Added `earnSticker` and `hasSticker` imports from `../utils/storage`
+- Added constants: STICKER_DISPLAY_SIZE (256), AUTO_RETURN_DELAY (3000)
+- Implemented `handleRoundComplete()`: playWin, animal sprite scale 1.2 yoyo tween, hasSticker check → earnSticker("animal-trace") + playSticker + createStickerAnimation, delayedCall(3000, → Hub)
+- Implemented `createStickerAnimation()`: sticker_animal_trace image at center, scale 0→1 with Back.out ease
+- Added 6 new tests in "AnimalTraceScene completion and sticker flow" describe block with completeAllPaths helper
+- Tests cover: win SFX on round completion, sticker award on first completion, no re-award on replay, auto-return to Hub after 3s, win animation tween, sticker animation image
+
+Files modified:
+- src/scenes/AnimalTraceScene.ts (handleRoundComplete + createStickerAnimation implementation, new imports and constants)
+- src/__tests__/scenes/navigation.test.ts (6 new tests, completeAllPaths helper, duplicated getInputCallback/completePath helpers for self-contained describe block)
+
+Pattern: Matches ShapeSorterScene.handleComplete() and createStickerAnimation() — same sticker award flow, same auto-return delay, same tween patterns. Uses "animal-trace" as the game ID for storage, "sticker_animal_trace" as the sticker texture key.
+
+Test results: 162 tests pass (6 new + 156 existing). Biome check clean. Build succeeds.
