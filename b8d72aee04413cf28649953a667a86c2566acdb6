@@ -1,0 +1,21 @@
+Task: Create game scene stubs
+
+## Files Changed
+- src/scenes/AnimalTraceScene.ts (NEW) - Game scene stub with back button + ParentLock
+- src/scenes/BigSmallScene.ts (NEW) - Game scene stub with back button + ParentLock
+- src/scenes/MusicalMemoryScene.ts (NEW) - Game scene stub with back button + ParentLock
+- src/scenes/PopFreezeScene.ts (NEW) - Game scene stub with back button + ParentLock
+- src/scenes/ShadowMatchScene.ts (NEW) - Game scene stub with back button + ParentLock
+- src/main.ts (MODIFIED) - Added 5 new scene imports, updated scene array to 8 scenes
+- src/__tests__/scenes/navigation.test.ts (MODIFIED) - Parameterized game scene test from 1 to 6 tests using it.each
+
+## Decisions
+1. All 5 new scenes follow exact ShapeSorterScene pattern (created in Task 4)
+2. Navigation test parameterized to cover all 6 game scenes (was 1 test, now 6) to meet 80% coverage threshold
+3. Static imports replaced dynamic import (dynamic import was temporary for Red phase isolation)
+
+## Verification
+- Tests: 72/72 passed (13 navigation + 18 ParentLock + 12 storage + 29 AudioManager)
+- Coverage: 97.63% stmts, 93.33% branches, 80.7% funcs, 98.17% lines (all above 80% threshold)
+- Biome check: 19 files, no errors
+- Production build: Succeeded (17 modules transformed, PWA service worker generated)
