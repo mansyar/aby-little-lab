@@ -11,6 +11,7 @@ import {
   type PathProgress,
   selectThreePairs,
 } from "../game/animalTraceLogic";
+import { earnSticker, hasSticker } from "../utils/storage";
 
 /** X position for the animal sprite (left side). */
 const ANIMAL_X = 200;
@@ -42,6 +43,12 @@ const PARTICLE_COUNT_REDUCED = 6;
 
 /** Delay before advancing to the next pair after path completion (ms). */
 const NEXT_PAIR_DELAY = 1000;
+
+/** Display size for the sticker unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Delay before auto-returning to Hub after round completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
 
 /** Tracks the state of the current pair being traced. */
 interface PairState {
@@ -216,6 +223,42 @@ export class AnimalTraceScene extends Phaser.Scene {
 
   /** Handles round completion — win animation, sticker award, and auto-return. */
   private handleRoundComplete(): void {
-    // Implemented in Phase 4: Completion, Sticker Award & Return
+    this.audioManager.playWin();
+
+    if (this.currentPair) {
+      this.tweens.add({
+        targets: this.currentPair.animalSprite,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 300,
+        yoyo: true,
+      });
+    }
+
+    if (!hasSticker("animal-trace")) {
+      earnSticker("animal-trace");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      this.scene.start("Hub");
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_animal_trace")
+      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: stickerImage,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 300,
+      ease: "Back.out",
+    });
   }
 }

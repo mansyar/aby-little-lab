@@ -1039,6 +1039,129 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("AnimalTraceScene completion and sticker flow", () => {
+    /** Layout constants matching the scene implementation. */
+    const ANIMAL_X = 200;
+    const FOOD_X = 824;
+    const SPRITE_Y = 384;
+    const PATH_POINTS = 6;
+
+    /** Returns the input callback registered for a given event name. */
+    function getInputCallback(scene: unknown, eventName: string): (...args: unknown[]) => void {
+      const inputOnMock = getMockFn((scene as { input: Record<string, unknown> }).input.on);
+      const call = inputOnMock.mock.calls.find((c) => c[0] === eventName);
+      if (!call || typeof call[1] !== "function") {
+        throw new Error(`Input callback for "${eventName}" not found`);
+      }
+      return call[1] as (...args: unknown[]) => void;
+    }
+
+    /** Simulates tracing a single path by advancing through all points. */
+    function completePath(scene: unknown): void {
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      for (let i = 1; i < pathPoints.length; i++) {
+        pointermove({ x: pathPoints[i].x, y: pathPoints[i].y });
+      }
+    }
+
+    /** Simulates tracing all 3 paths, triggering delayedCall advances between pairs. */
+    function completeAllPaths(scene: unknown): void {
+      for (let pair = 0; pair < 3; pair++) {
+        completePath(scene);
+
+        if (pair < 2) {
+          const delayedCallMock = getMockFn(
+            (scene as { time: Record<string, unknown> }).time.delayedCall,
+          );
+          const advanceCalls = delayedCallMock.mock.calls.filter((call) => call[0] === 1000);
+          const latestAdvance = advanceCalls[advanceCalls.length - 1];
+          const callback = latestAdvance?.[1] as () => void;
+          callback();
+        }
+      }
+    }
+
+    it("plays win SFX when all 3 paths are traced", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+      completeAllPaths(scene);
+
+      expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("awards sticker on first completion only", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+      completeAllPaths(scene);
+
+      expect(earnSticker).toHaveBeenCalledWith("animal-trace");
+      expect(mockAudio.playSticker).toHaveBeenCalled();
+    });
+
+    it("does not re-award sticker on replay", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+      completeAllPaths(scene);
+
+      expect(earnSticker).not.toHaveBeenCalled();
+      expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    });
+
+    it("auto-returns to Hub after 3s delay", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+      completeAllPaths(scene);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const autoReturnCalls = delayedCallMock.mock.calls.filter((call) => call[0] === 3000);
+      const autoReturnCall = autoReturnCalls[autoReturnCalls.length - 1];
+      expect(autoReturnCall).toBeDefined();
+
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+
+    it("triggers win animation tween on round completion", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+      completeAllPaths(scene);
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const winTween = tweenCalls.find(
+        (c) => c[0]?.yoyo === true && c[0]?.scaleX === 1.2 && c[0]?.scaleY === 1.2,
+      );
+      expect(winTween).toBeDefined();
+    });
+
+    it("creates sticker animation image on first completion", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+      completeAllPaths(scene);
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const keys = imageCalls.map((call) => call[2] as string);
+      expect(keys).toContain("sticker_animal_trace");
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();
