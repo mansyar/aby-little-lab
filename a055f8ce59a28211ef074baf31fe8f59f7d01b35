@@ -1,0 +1,19 @@
+Task: Write tests for round initialization and match logic
+
+Summary:
+Created pure logic module for Shape Sorter game round initialization and match detection. Extracted from scene for testability.
+
+Changes:
+- Created src/game/shapeSorterLogic.ts with:
+  - ShapeType type (circle, square, triangle, star)
+  - ALL_SHAPES constant (readonly array of 4 shapes)
+  - selectThreeShapes(): Randomly selects 3 of 4 shapes using Fisher-Yates shuffle
+  - shuffle<T>(): Generic Fisher-Yates shuffle, returns new array, does not mutate input
+  - isMatch(): Checks if shape type matches slot type
+- Created src/__tests__/game/shapeSorterLogic.test.ts with 9 tests:
+  - selectThreeShapes: returns 3 shapes, all valid, no duplicates
+  - shuffle: same elements, no mutation, same length, independent results
+  - isMatch: true when matching, false when not
+
+Test Results: 9/9 pass. Coverage: 100% all metrics for shapeSorterLogic.ts.
+Biome check: Clean. Build: Passes.
