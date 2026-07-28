@@ -7,12 +7,12 @@
 
 ## Phase 1: SVG Assets & Preload Pipeline
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Create shape and sticker SVG assets
-    - [ ] Create 4 full-color shape SVGs (`shape_circle.svg`, `shape_square.svg`, `shape_triangle.svg`, `shape_star.svg`) at 512×512 viewBox, flat fills, 4-6px `#2D3748` stroke, distinct soft/vibrant non-primary colors
-    - [ ] Create 4 cutout slot SVGs (same paths, 30% opacity fill + dashed `#2D3748` stroke)
-    - [ ] Create `shape-sorter` sticker SVG in `src/assets/svg/stickers/`
-- [ ] Task: Extend PreloadScene to load all 8 shape SVGs with explicit width/height for high-res rasterization
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Create shape and sticker SVG assets 7f8d4bb
+    - [x] Create 4 full-color shape SVGs (`shape_circle.svg`, `shape_square.svg`, `shape_triangle.svg`, `shape_star.svg`) at 512×512 viewBox, flat fills, 4-6px `#2D3748` stroke, distinct soft/vibrant non-primary colors
+    - [x] Create 4 cutout slot SVGs (same paths, 30% opacity fill + dashed `#2D3748` stroke)
+    - [x] Create `shape-sorter` sticker SVG in `src/assets/svg/stickers/`
+- [~] Task: Extend PreloadScene to load all 8 shape SVGs with explicit width/height for high-res rasterization
 - [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
