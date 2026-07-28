@@ -46,13 +46,13 @@
 
 ## Phase 4: Completion, Sticker Award & Return
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for completion and sticker flow
-    - [ ] Test completion detected when all 3 paths are traced
-    - [ ] Test sticker awarded on first completion only (via `storage.earnSticker`)
-    - [ ] Test auto-return to Hub after 3s delay
-    - [ ] Test parental lock exits early to Hub (already covered by existing "game scene stubs" parameterized test for all 6 scenes)
-- [ ] Task: Implement completion flow (win animation + sticker award + auto-return) in `AnimalTraceScene`
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for completion and sticker flow [0b6486a]
+    - [x] Test completion detected when all 3 paths are traced
+    - [x] Test sticker awarded on first completion only (via `storage.earnSticker`)
+    - [x] Test auto-return to Hub after 3s delay
+    - [x] Test parental lock exits early to Hub (already covered by existing "game scene stubs" parameterized test for all 6 scenes)
+- [x] Task: Implement completion flow (win animation + sticker award + auto-return) in `AnimalTraceScene` [0b6486a]
 - [ ] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
 
 ---
