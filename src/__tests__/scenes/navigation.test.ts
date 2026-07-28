@@ -319,6 +319,46 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBar.destroy)).toHaveBeenCalled();
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
+
+    it("loads all 8 shape SVGs during preload", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const svgCalls = getMockFn(scene.load.svg).mock.calls;
+      expect(svgCalls).toHaveLength(8);
+    });
+
+    it("loads shape SVGs with correct keys", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const svgCalls = getMockFn(scene.load.svg).mock.calls;
+      const keys = svgCalls.map((call) => call[0] as string);
+
+      expect(keys).toContain("shape_circle");
+      expect(keys).toContain("shape_square");
+      expect(keys).toContain("shape_triangle");
+      expect(keys).toContain("shape_star");
+      expect(keys).toContain("cutout_circle");
+      expect(keys).toContain("cutout_square");
+      expect(keys).toContain("cutout_triangle");
+      expect(keys).toContain("cutout_star");
+    });
+
+    it("passes explicit width and height for high-res rasterization", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const svgCalls = getMockFn(scene.load.svg).mock.calls;
+      for (const call of svgCalls) {
+        expect(call[2]).toEqual(
+          expect.objectContaining({
+            width: expect.any(Number),
+            height: expect.any(Number),
+          }),
+        );
+      }
+    });
   });
 
   describe("HubScene", () => {

@@ -1,10 +1,32 @@
 import Phaser from "phaser";
+import cutoutCircleUrl from "../assets/svg/shapes/cutout_circle.svg?url";
+import cutoutSquareUrl from "../assets/svg/shapes/cutout_square.svg?url";
+import cutoutStarUrl from "../assets/svg/shapes/cutout_star.svg?url";
+import cutoutTriangleUrl from "../assets/svg/shapes/cutout_triangle.svg?url";
+import shapeCircleUrl from "../assets/svg/shapes/shape_circle.svg?url";
+import shapeSquareUrl from "../assets/svg/shapes/shape_square.svg?url";
+import shapeStarUrl from "../assets/svg/shapes/shape_star.svg?url";
+import shapeTriangleUrl from "../assets/svg/shapes/shape_triangle.svg?url";
+
+const SVG_RASTER_SIZE = 256;
+
+const SHAPE_ASSETS = [
+  { key: "shape_circle", url: shapeCircleUrl },
+  { key: "shape_square", url: shapeSquareUrl },
+  { key: "shape_triangle", url: shapeTriangleUrl },
+  { key: "shape_star", url: shapeStarUrl },
+  { key: "cutout_circle", url: cutoutCircleUrl },
+  { key: "cutout_square", url: cutoutSquareUrl },
+  { key: "cutout_triangle", url: cutoutTriangleUrl },
+  { key: "cutout_star", url: cutoutStarUrl },
+] as const;
 
 /**
  * Preload scene — displays a progress bar while assets load.
  *
- * Registers load event listeners for progress tracking, then transitions
- * to the Hub scene once all assets are loaded.
+ * Loads all shape SVG assets at high resolution for rasterization, registers
+ * load event listeners for progress tracking, then transitions to the Hub
+ * scene once all assets are loaded.
  */
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -27,6 +49,13 @@ export class PreloadScene extends Phaser.Scene {
       progressBar.destroy();
       progressBox.destroy();
     });
+
+    for (const asset of SHAPE_ASSETS) {
+      this.load.svg(asset.key, asset.url, {
+        width: SVG_RASTER_SIZE,
+        height: SVG_RASTER_SIZE,
+      });
+    }
   }
 
   create(): void {
