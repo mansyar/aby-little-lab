@@ -8,5 +8,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Game 3 - Pop & Freeze!**
+- [x] **Track: Game 3 - Pop & Freeze!**
 *Link: [./tracks/pop-freeze_20260729/](./tracks/pop-freeze_20260729/)*
