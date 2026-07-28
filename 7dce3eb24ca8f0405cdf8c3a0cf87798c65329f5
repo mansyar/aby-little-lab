@@ -1,0 +1,20 @@
+Checkpoint: Phase 3 - Floating Bubbles & Tap Interaction
+
+Verification Report:
+- Tests: 214 passed (7 test files) — includes 6 new AudioManager tests (playPop/playWake) and 14 new PopFreezeScene tests (8 round init + 6 tap interaction)
+- Biome check: passes (no errors)
+- Build: succeeds (vite build + PWA)
+- Manual verification: User confirmed all items pass:
+  1. 5 bubbles float on screen (mix of poppable + sleeping with animal + Zzz)
+  2. Tapping poppable bubble → pop SFX + particle burst + shrink animation + respawn
+  3. Tapping sleeping bubble → wake SFX + wobble + no penalty + bubble remains
+  4. 6 pops → round stops (no more respawns). Win animation/sticker/auto-return are Phase 4.
+  5. Back button (parental lock) works
+  6. Bubbles bounce off screen edges and float gently
+
+Commits in this phase:
+- 8330049: Read spec and workflow (task 1)
+- 6cb5e0e: TDD-Red tests (task 2)
+- b5062d0: TDD-Green implementation (tasks 3 & 4 — AudioManager pop/wake SFX + PopFreezeScene)
+- 730f1ad: Plan update marking tasks complete
+- 7dce3eb: Checkpoint commit (this one)
