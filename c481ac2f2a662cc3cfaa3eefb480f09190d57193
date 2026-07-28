@@ -1,0 +1,11 @@
+Task: Write tests for round initialization and path logic + Implement round initialization & path logic
+
+Summary:
+Created pure game logic module for the Animal Trace game, following the same pattern as shapeSorterLogic.ts. Includes pair selection (3 of 4 animal-food pairs, shuffled via Fisher-Yates), path progress tracking (discrete waypoints with advance/complete checks), and round completion detection (all 3 paths traced).
+
+Created/Modified Files:
+- src/game/animalTraceLogic.ts (new) — Types: AnimalType, FoodType, AnimalFoodPair, PathProgress. Constants: ALL_PAIRS (4 pairs). Functions: selectThreePairs(), shuffle(), createPathProgress(), advancePath(), isPathComplete(), isRoundComplete().
+- src/__tests__/game/animalTraceLogic.test.ts (new) — 16 tests covering pair selection, shuffle, path progress creation/advancement/completion, and round completion.
+
+Why:
+Pure game logic must be testable without Phaser. This module provides the testable foundation for the AnimalTraceScene to consume in Phase 3 (path tracing interaction) and Phase 4 (completion flow). Follows the established pattern from shapeSorterLogic.ts.
