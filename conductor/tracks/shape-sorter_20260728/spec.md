@@ -1,3 +1,4 @@
+<protect>
 # Track: Shape Sorter Mini-Game
 
 **Track ID:** `shape-sorter_20260728`
@@ -92,3 +93,4 @@ Implement Game 1 — Shape Sorter, the first playable mini-game for Aby's Little
 - [ ] SFX toggle off silences gameplay sounds.
 - [ ] `CI=true pnpm test` passes with >80% coverage on new code.
 - [ ] `pnpm run check` and `pnpm run build` pass.
+</protect>

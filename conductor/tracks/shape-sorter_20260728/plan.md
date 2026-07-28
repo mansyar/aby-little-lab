@@ -1,3 +1,4 @@
+<protect>
 # Implementation Plan: Shape Sorter Mini-Game
 
 **Track ID:** `shape-sorter_20260728`
@@ -6,6 +7,7 @@
 
 ## Phase 1: SVG Assets & Preload Pipeline
 
+- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Create shape and sticker SVG assets
     - [ ] Create 4 full-color shape SVGs (`shape_circle.svg`, `shape_square.svg`, `shape_triangle.svg`, `shape_star.svg`) at 512×512 viewBox, flat fills, 4-6px `#2D3748` stroke, distinct soft/vibrant non-primary colors
     - [ ] Create 4 cutout slot SVGs (same paths, 30% opacity fill + dashed `#2D3748` stroke)
@@ -17,6 +19,7 @@
 
 ## Phase 2: Synthesized Gameplay SFX
 
+- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Write tests for synthesized gameplay SFX
     - [ ] Test `playCorrect` plays an ascending chime
     - [ ] Test `playIncorrect` plays a soft descending tone
@@ -30,6 +33,7 @@
 
 ## Phase 3: Round Initialization & Match Logic
 
+- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Write tests for round initialization and match logic
     - [ ] Test 3 of 4 shapes are randomly selected per round
     - [ ] Test slot positions and shape positions are shuffled independently
@@ -41,6 +45,7 @@
 
 ## Phase 4: Drag, Drop & Feedback
 
+- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Write tests for drag/drop and feedback behavior
     - [ ] Test correct drop snaps shape to slot center, marks non-interactive, triggers correct SFX + particles
     - [ ] Test incorrect drop bounces shape back to origin with wobble (no penalty)
@@ -52,6 +57,7 @@
 
 ## Phase 5: Completion, Sticker Award & Return
 
+- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Write tests for completion and sticker flow
     - [ ] Test completion detected when all 3 shapes are placed
     - [ ] Test sticker awarded on first completion only (via `storage.earnSticker`)
@@ -59,3 +65,4 @@
     - [ ] Test parental lock exits early to Hub
 - [ ] Task: Implement completion flow (win animation + sticker award + auto-return) in ShapeSorterScene
 - [ ] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
+</protect>
