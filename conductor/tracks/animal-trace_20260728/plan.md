@@ -26,7 +26,7 @@
     - [x] Test path progress tracking (animal advances along path points on valid trace input)
     - [x] Test completion detection (all 3 paths traced = round complete)
 - [x] Task: Implement round initialization & path logic in `src/game/animalTraceLogic.ts` (pure functions: pair selection/shuffle, path progress computation, completion detection) [c481ac2]
-- [ ] Task: Conductor - User Manual Verification 'Round Initialization & Path Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Round Initialization & Path Logic' (Protocol in workflow.md)
 
 ---
 
