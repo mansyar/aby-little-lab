@@ -47,7 +47,7 @@
 
 ---
 
-## Phase 4: Completion, Sticker Award & Return
+## Phase 4: Completion, Sticker Award & Return [checkpoint: b07dede]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for completion and sticker flow [TDD-Red] [e17bab8]
@@ -56,7 +56,7 @@
     - [x] Test auto-return to Hub after 3s delay
     - [x] Test parental lock exits early to Hub (already covered by existing game-scene-stubs parameterized test for all 6 scenes)
 - [x] Task: Implement completion flow (stop spawning + win animation + sticker award + auto-return) in `PopFreezeScene` [TDD-Green] [abb41d1]
-- [ ] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
 
 ---
 
