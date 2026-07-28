@@ -70,7 +70,8 @@ aby-little-lab/
     ├── audio/
     │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis (Web Audio API); singleton via getInstance()
     ├── game/
-    │   └── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
+    │   ├── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
+    │   └── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -79,8 +80,8 @@ aby-little-lab/
     │   ├── audio/                  # Audio assets (sfx_pop.mp3, sfx_win.mp3, bgm.mp3)
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
-    │       ├── animals/            # Monkey, Frog, Cat SVGs
-    │       ├── items/              # Car, Duck, Apple, Teddy, Toy Car SVGs
+    │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2) + Frog variants (Game 5) + sleeping cat (Game 3)
+    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + Car, Duck, Apple (Game 4) + Teddy, Toy Car, Toy Box (Game 6)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs
     ├── styles/
@@ -88,7 +89,7 @@ aby-little-lab/
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock tests
-        ├── game/                   # Game logic tests (shapeSorterLogic)
+        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage tests
 ```
@@ -290,7 +291,10 @@ interface AppStorage {
 
 | File | Dimensions | Game | Notes |
 |---|---|---|---|
-| `monkey.svg` | 512×512 | Game 2 | Character sprite (left side) |
+| `monkey.svg` | 512×512 | Game 2 | Character sprite (left side) — brown (#A0522D) |
+| `rabbit.svg` | 512×512 | Game 2 | Character sprite (left side) |
+| `cat.svg` | 512×512 | Game 2 | Character sprite (left side) |
+| `dog.svg` | 512×512 | Game 2 | Character sprite (left side) |
 | `frog_green.svg` | 512×512 | Game 5 | Note: C4 (261.63 Hz) |
 | `frog_blue.svg` | 512×512 | Game 5 | Note: E4 (329.63 Hz) |
 | `frog_red.svg` | 512×512 | Game 5 | Note: G4 (392.00 Hz) |
@@ -300,7 +304,10 @@ interface AppStorage {
 
 | File | Dimensions | Game | Notes |
 |---|---|---|---|
-| `banana.svg` | 512×512 | Game 2 | Food target (right side) |
+| `banana.svg` | 512×512 | Game 2 | Food target (right side) — pairs with monkey |
+| `carrot.svg` | 512×512 | Game 2 | Food target (right side) — pairs with rabbit |
+| `fish.svg` | 512×512 | Game 2 | Food target (right side) — pairs with cat |
+| `bone.svg` | 512×512 | Game 2 | Food target (right side) — pairs with dog |
 | `car_color.svg` | 512×512 | Game 4 | Color variant |
 | `car_shadow.svg` | 512×512 | Game 4 | Shadow variant (`#2D3748`) |
 | `duck_color.svg` | 512×512 | Game 4 | Color variant |
@@ -325,7 +332,7 @@ interface AppStorage {
 | `shelf.svg` | 512×512 | Game 4 | Shadow display shelf |
 | `lock_icon.svg` | 512×512 | Global | Parental lock indicator |
 | `star.svg` | 512×512 | Game 3 / Global | Bonus star, rating |
-| `dotted_path.svg` | 512×512 | Game 2 | Trace path guide |
+| `dotted_path.svg` | 512×512 | Game 2 | Trace path guide *(superseded — path now generated at runtime via `Phaser.Curves.Path` + Graphics)* |
 | `bubble_soap.svg` | 512×512 | Game 3 | Standard bubble |
 | `pop_particle.svg` | 512×512 | Game 3 | Pop particle effect |
 | `lilypad.svg` | 512×512 | Game 5 | Frog platform |
@@ -364,10 +371,10 @@ interface AppStorage {
 | Type | Count |
 |---|---|
 | SVG — shapes | 8 (4 shapes + 4 cutouts) |
-| SVG — animals | 5 |
-| SVG — items | 10 |
+| SVG — animals | 8 |
+| SVG — items | 13 |
 | SVG — UI | 14 |
 | SVG — stickers | 6 |
 | Audio (MP3) | 7 |
 | PWA icons (PNG) | 1 |
-| **Total** | **51** |
+| **Total** | **54** |

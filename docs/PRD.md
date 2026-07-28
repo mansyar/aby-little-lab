@@ -70,12 +70,15 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Particle counts reduced when `prefers-reduced-motion` is active.
 - **Game Logic:** Pure functions in `src/game/shapeSorterLogic.ts` (Fisher-Yates shuffle, match detection, shape selection).
 
-### GAME 2 — Animal Trace-and-Connect (Fine Motor Precision)
+### GAME 2 — Animal Trace-and-Connect (Fine Motor Precision) ✅ Implemented
 
 - **Milestone:** Pre-writing motor coordination and line tracing control.
-- **Mechanics:** A cute SVG animal sprite sits on the left; its food SVG sits on the right. A thick dotted curve connects them. Child traces path to move animal.
-- **SVG Requirements:** `monkey.svg`, `banana.svg`, `dotted_path.svg`.
-- **Phaser Engine Logic:** Defines `Phaser.Curves.Path`. Checks pointer proximity on `pointermove`. Progresses animal sprite along path index on valid touch.
+- **Mechanics:** 3 of 4 animal-food pairs randomly selected per playthrough (Fisher-Yates shuffle). Animal sprite sits on the left; its food sprite sits on the right. A thick dotted curve connects them, generated programmatically at runtime. Child traces the path with a finger to move the animal toward the food. Lifting the finger or straying pauses the animal (no reset, no penalty); resuming continues from the same position. A progress indicator (3 dots) shows completed paths.
+- **Animal-Food Pairs:** Monkey → Banana, Rabbit → Carrot, Cat → Fish, Dog → Bone.
+- **SVG Requirements:** `monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg` (animals, `assets/svg/animals/`); `banana.svg`, `carrot.svg`, `fish.svg`, `bone.svg` (food, `assets/svg/items/`); `sticker_animal_trace.svg`. Dotted path is generated at runtime via `Phaser.Curves.Path` + Graphics — not a static SVG.
+- **Phaser Engine Logic:** Defines a `Phaser.Curves.Path` per pair (gentle multi-point curve). On `pointermove` while pointer is down, checks pointer proximity to next path waypoint (generous 60px tolerance). Advances animal sprite along path on valid touch. Finger lift/stray pauses at current position; resume continues from same spot. Reaching food triggers completion chime + soft particle burst. All 3 paths traced → win animation + sticker award (first time only) + auto-return to Hub after 3s.
+- **Game Logic:** Pure functions in `src/game/animalTraceLogic.ts` (pair selection/shuffle, path progress tracking, completion detection, waypoint generation) — testable without Phaser.
+- **Accessibility:** Particle counts reduced when `prefers-reduced-motion` is active. No-fail design (no penalties for deviation/lift).
 
 ### GAME 3 — Pop & Freeze! (Reflexes & Inhibitory Control)
 
@@ -121,8 +124,9 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 [PreloadScene]
     │
     │  Show progress bar
-    │  Load & rasterize SVG assets (Game 1 shapes + sticker loaded;
-    │  remaining games' assets loaded as tracks complete)
+    │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
+    │  animals/food + sticker loaded; remaining games' assets loaded
+    │  as tracks complete)
     │
     ▼
 [HubScene]
