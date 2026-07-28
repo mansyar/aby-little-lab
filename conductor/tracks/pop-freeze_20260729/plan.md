@@ -31,7 +31,7 @@
 
 ---
 
-## Phase 3: Floating Bubbles & Tap Interaction
+## Phase 3: Floating Bubbles & Tap Interaction [checkpoint: pending]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for floating bubble motion, tap interaction, and audio [TDD-Red] [6cb5e0e]
@@ -43,7 +43,7 @@
     - [x] Test AudioManager plays synthesized pop SFX on pop and wake SFX on wake (respecting SFX toggle)
 - [x] Task: Extend AudioManager with synthesized pop & wake SFX via Web Audio API (pop = short percussive blip, wake = soft rousing tone) [TDD-Green] [b5062d0]
 - [x] Task: Implement floating bubble spawning (Arcade Physics + world-bounds bounce) + tap-to-pop + wake feedback + particle burst in `PopFreezeScene` [TDD-Green] [b5062d0]
-- [ ] Task: Conductor - User Manual Verification 'Floating Bubbles & Tap Interaction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Floating Bubbles & Tap Interaction' (Protocol in workflow.md)
 
 ---
 
