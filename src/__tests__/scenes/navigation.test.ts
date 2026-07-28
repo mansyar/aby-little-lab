@@ -346,12 +346,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 8 shape SVGs during preload", () => {
+    it("loads all 9 shape and sticker SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(8);
+      expect(svgCalls).toHaveLength(9);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -369,6 +369,7 @@ describe("scene navigation flow", () => {
       expect(keys).toContain("cutout_square");
       expect(keys).toContain("cutout_triangle");
       expect(keys).toContain("cutout_star");
+      expect(keys).toContain("sticker_shape_sorter");
     });
 
     it("passes explicit width and height for high-res rasterization", () => {
@@ -606,6 +607,24 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playIncorrect).toHaveBeenCalled();
       // No penalty — scene not restarted
       expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    });
+
+    it("drop on non-slot target is a no-op (no snap, no SFX, no particles)", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const shape = shapes[0];
+
+      // Simulate drop on an invalid target (not a registered zone)
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, {});
+
+      expect(getMockFn(shape.obj.disableInteractive)).not.toHaveBeenCalled();
+      expect(mockAudio.playCorrect).not.toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).not.toHaveBeenCalled();
     });
 
     it("creates touch targets meeting 64x64px minimum", () => {

@@ -7,8 +7,9 @@ import shapeCircleUrl from "../assets/svg/shapes/shape_circle.svg?url";
 import shapeSquareUrl from "../assets/svg/shapes/shape_square.svg?url";
 import shapeStarUrl from "../assets/svg/shapes/shape_star.svg?url";
 import shapeTriangleUrl from "../assets/svg/shapes/shape_triangle.svg?url";
+import stickerShapeSorterUrl from "../assets/svg/stickers/sticker_shape_sorter.svg?url";
 
-const SVG_RASTER_SIZE = 256;
+const SVG_RASTER_SIZE = 512;
 
 const SHAPE_ASSETS = [
   { key: "shape_circle", url: shapeCircleUrl },
@@ -19,6 +20,7 @@ const SHAPE_ASSETS = [
   { key: "cutout_square", url: cutoutSquareUrl },
   { key: "cutout_triangle", url: cutoutTriangleUrl },
   { key: "cutout_star", url: cutoutStarUrl },
+  { key: "sticker_shape_sorter", url: stickerShapeSorterUrl },
 ] as const;
 
 /**

@@ -22,6 +22,13 @@ const BOUNCE_DURATION = 300;
 /** Texture key used for particle bursts. */
 const PARTICLE_TEXTURE = "shape_circle";
 
+/** Display size for the sticker unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Particle count for celebration bursts (reduced when prefers-reduced-motion). */
+const PARTICLE_COUNT = 12;
+const PARTICLE_COUNT_REDUCED = 6;
+
 /** Delay before auto-returning to Hub after round completion (ms). */
 const AUTO_RETURN_DELAY = 3000;
 
@@ -185,12 +192,21 @@ export class ShapeSorterScene extends Phaser.Scene {
     }
   }
 
+  /** Returns true if the user has requested reduced motion via OS settings. */
+  private prefersReducedMotion(): boolean {
+    return (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
   /** Creates a soft particle burst at the given position. */
   private createParticleBurst(x: number, y: number): void {
     this.add.particles(x, y, PARTICLE_TEXTURE, {
       speed: { min: 50, max: 150 },
       lifespan: 800,
-      quantity: 12,
+      quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
       scale: { start: 0.3, end: 0 },
     });
   }
@@ -222,15 +238,13 @@ export class ShapeSorterScene extends Phaser.Scene {
 
   /** Shows a sticker unlock animation at the center of the screen. */
   private createStickerAnimation(): void {
-    const stickerText = this.add.text(
-      this.cameras.main.centerX,
-      this.cameras.main.centerY,
-      "\u2605 Sticker Earned!",
-      { fontSize: "48px", color: "#F6AD55" },
-    );
-    stickerText.setOrigin(0.5).setScale(0);
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_shape_sorter")
+      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
+      .setScale(0);
+
     this.tweens.add({
-      targets: stickerText,
+      targets: stickerImage,
       scaleX: 1,
       scaleY: 1,
       duration: 300,
