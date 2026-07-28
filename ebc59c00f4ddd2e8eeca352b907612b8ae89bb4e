@@ -1,0 +1,39 @@
+Task Summary: Write tests for AudioManager (TDD Red Phase)
+
+=== Task ===
+Write comprehensive tests for the AudioManager class that defines the API contract for audio management in the toddler game suite.
+
+=== Changes ===
+- Created: src/__tests__/audio/AudioManager.test.ts (295 lines, 22 test cases)
+
+=== Test Coverage ===
+Tests defined for:
+1. init() - creates AudioContext, creates BGM audio with loop, creates 6 SFX audio elements, loads settings from storage, respects bgmEnabled=false
+2. playBGM() - plays BGM, does nothing when disabled
+3. pauseBGM() - pauses BGM audio element
+4. playSFX() - plays each of 6 sounds (pop, correct, incorrect, wake, win, sticker), resets currentTime to 0, does nothing when disabled
+5. setBGMEnabled() - updates localStorage, pauses BGM when false, can re-enable
+6. setSFXEnabled() - updates localStorage, can re-enable
+7. playFrogNote() - creates oscillator with correct freq (C4=261.63, E4=329.63, G4=392.0), sine wave type, starts/stops oscillator, respects SFX toggle
+8. destroy() - closes AudioContext, pauses BGM
+
+=== Mock Strategy ===
+- AudioContext: Mocked via vi.stubGlobal with createOscillator/createGain/close methods
+- Audio constructor: Mocked via vi.stubGlobal, creates mock audio elements with vi.fn() play/pause/load methods
+- localStorage: Real implementation via happy-dom (same as storage tests)
+- Storage utils (load, updateSettings): Real implementations for integration testing
+
+=== Verification ===
+- Tests fail as expected (Red phase): import '../../audio/AudioManager' not resolved
+- Existing 12 storage tests still pass
+- Biome check: 7 files checked, no errors
+
+=== Rationale ===
+Defines the AudioManager API contract before implementation. Tests cover all 7 plan subtasks:
+- Test initialization (loads audio context)
+- Test BGM play/pause
+- Test SFX playback (6 sounds)
+- Test BGM toggle (enabled/disabled respects settings)
+- Test SFX toggle (enabled/disabled respects settings)
+- Test settings persistence integration (toggling updates localStorage)
+- Test Web Audio API synthesis (frog notes C4/E4/G4)
