@@ -1459,6 +1459,121 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("PopFreezeScene completion and sticker flow", () => {
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** Returns bubble physics image objects created by the scene. */
+    function getBubbles(scene: unknown): Array<Record<string, MockFn>> {
+      const physics = (scene as { physics: { add: Record<string, unknown> } }).physics.add;
+      const imageMock = getMockFn(physics.image);
+      return imageMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+    }
+
+    /** Simulates a tap on a bubble by triggering its pointerdown callback. */
+    function tapBubble(bubble: Record<string, MockFn>): void {
+      const onCalls = getMockFn(bubble.on).mock.calls;
+      const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    /** Simulates popping 6 poppable bubbles to complete the round. */
+    function completeRound(scene: PopFreezeScene): void {
+      let bubbles = getBubbles(scene);
+      // With Math.random=0.5: bubble 0 is sleeping, bubbles 1-4 are poppable
+      tapBubble(bubbles[1]);
+      tapBubble(bubbles[2]);
+      tapBubble(bubbles[3]);
+      tapBubble(bubbles[4]);
+      // 4 pops → 4 respawns → 9 total; get updated list with respawns
+      bubbles = getBubbles(scene);
+      tapBubble(bubbles[5]);
+      tapBubble(bubbles[6]);
+    }
+
+    it("plays win SFX when 6 poppable bubbles are popped", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+      completeRound(scene);
+
+      expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("awards sticker on first completion only", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+      completeRound(scene);
+
+      expect(earnSticker).toHaveBeenCalledWith("pop-freeze");
+      expect(mockAudio.playSticker).toHaveBeenCalled();
+    });
+
+    it("does not re-award sticker on replay", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+      completeRound(scene);
+
+      expect(earnSticker).not.toHaveBeenCalled();
+      expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    });
+
+    it("auto-returns to Hub after 3s delay", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+      completeRound(scene);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+      expect(autoReturnCall).toBeDefined();
+
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+
+    it("triggers win animation tween on round completion", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+      completeRound(scene);
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const winTween = tweenCalls.find(
+        (c) => c[0]?.yoyo === true && c[0]?.scaleX === 1.2 && c[0]?.scaleY === 1.2,
+      );
+      expect(winTween).toBeDefined();
+    });
+
+    it("creates sticker animation image on first completion", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+      completeRound(scene);
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const keys = imageCalls.map((call) => call[2] as string);
+      expect(keys).toContain("sticker_pop_freeze");
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();
