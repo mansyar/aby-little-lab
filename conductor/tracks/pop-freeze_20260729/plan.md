@@ -33,7 +33,7 @@
 
 ## Phase 3: Floating Bubbles & Tap Interaction
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Write tests for floating bubble motion, tap interaction, and audio [TDD-Red]
     - [ ] Test bubbles float via Arcade Physics with random velocity and bounce off world bounds (stay on-screen)
     - [ ] Test tapping a poppable bubble triggers pop animation + pop SFX + particle burst + increments count
