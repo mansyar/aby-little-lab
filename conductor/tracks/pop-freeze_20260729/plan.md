@@ -7,11 +7,11 @@
 
 ## Phase 1: SVG Assets & Preload Pipeline
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Create bubble & sticker SVG assets
-    - [ ] Create 1 bubble SVG (`bubble.svg`) at 512×512 viewBox, translucent round bubble with highlight, storybook style
-    - [ ] Create `pop-freeze` sticker SVG in `src/assets/svg/stickers/`
-    - [ ] Verify existing 4 animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) are reused as sleeping-animal content (no new animal art)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Create bubble & sticker SVG assets [c6cc947]
+    - [x] Create 1 bubble SVG (`bubble.svg`) at 512×512 viewBox, translucent round bubble with highlight, storybook style
+    - [x] Create `pop-freeze` sticker SVG in `src/assets/svg/stickers/`
+    - [x] Verify existing 4 animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) are reused as sleeping-animal content (no new animal art)
 - [ ] Task: Extend PreloadScene to load the new bubble SVG with explicit width/height for high-res rasterization (animals already loaded by animal-trace track)
 - [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
