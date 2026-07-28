@@ -53,14 +53,14 @@
 
 ## Phase 3: Audio Manager
 
-- [ ] Task: Write tests for AudioManager
-    - [ ] Test initialization (loads audio context)
-    - [ ] Test BGM play/pause
-    - [ ] Test SFX playback (pop, correct, incorrect, wake, win, sticker)
-    - [ ] Test BGM toggle (enabled/disabled respects settings)
-    - [ ] Test SFX toggle (enabled/disabled respects settings)
-    - [ ] Test settings persistence integration (toggling updates localStorage)
-    - [ ] Test Web Audio API synthesis (frog notes C4=261.63Hz, E4=329.63Hz, G4=392.00Hz)
+- [x] Task: Write tests for AudioManager [ebc59c0]
+    - [x] Test initialization (loads audio context)
+    - [x] Test BGM play/pause
+    - [x] Test SFX playback (pop, correct, incorrect, wake, win, sticker)
+    - [x] Test BGM toggle (enabled/disabled respects settings)
+    - [x] Test SFX toggle (enabled/disabled respects settings)
+    - [x] Test settings persistence integration (toggling updates localStorage)
+    - [x] Test Web Audio API synthesis (frog notes C4=261.63Hz, E4=329.63Hz, G4=392.00Hz)
 - [ ] Task: Implement AudioManager
     - [ ] Create `src/audio/AudioManager.ts`
     - [ ] Implement SFX playback (MP3 loading and playing via Phaser audio or HTML5 Audio)
