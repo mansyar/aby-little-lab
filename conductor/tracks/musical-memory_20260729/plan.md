@@ -33,7 +33,7 @@
 
 ---
 
-## Phase 3: Sequence Playback & Child Input Interaction
+## Phase 3: Sequence Playback & Child Input Interaction [checkpoint: e7926d5]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for sequence playback and child input interaction [TDD-Red] [sha: c9abe87]
