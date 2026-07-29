@@ -46,7 +46,7 @@
 
 ---
 
-## Phase 4: Completion, Sticker Award & Return
+## Phase 4: Completion, Sticker Award & Return [checkpoint: 658b8fd]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for completion and sticker flow [TDD-Red]
