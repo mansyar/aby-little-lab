@@ -1,0 +1,24 @@
+Task: Create object & shadow silhouette SVG assets + Extend PreloadScene to load/rasterize 12+1 new SVGs
+
+Summary: Created 13 new SVG assets for the Shadow Match mini-game and extended the PreloadScene to load them.
+
+Files Created:
+- src/assets/svg/items/house.svg (yellow roof, blue body, windows, door)
+- src/assets/svg/items/tree.svg (green foliage circles, brown trunk)
+- src/assets/svg/items/car.svg (red body, blue windshield, dark wheels)
+- src/assets/svg/items/boat.svg (blue hull, white/pink sails, brown mast)
+- src/assets/svg/items/ball.svg (yellow circle with curving pattern lines)
+- src/assets/svg/items/umbrella.svg (purple dome with panels, brown handle)
+- src/assets/svg/shadows/shadow_house.svg (dark #2D3748 silhouette)
+- src/assets/svg/shadows/shadow_tree.svg
+- src/assets/svg/shadows/shadow_car.svg
+- src/assets/svg/shadows/shadow_boat.svg
+- src/assets/svg/shadows/shadow_ball.svg
+- src/assets/svg/shadows/shadow_umbrella.svg
+- src/assets/svg/stickers/sticker_shadow_match.svg (circle bg + shadow/object pair + star)
+
+Files Modified:
+- src/scenes/PreloadScene.ts (added 13 SVG imports + SHAPE_ASSETS entries, total 33)
+- src/__tests__/scenes/navigation.test.ts (updated SVG count assertion from 20 to 33)
+
+Why: Phase 1 of Shadow Match track — establishes the asset pipeline (objects, silhouettes, sticker) and preload integration needed for the game scene to reference these textures.
