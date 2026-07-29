@@ -1,0 +1,27 @@
+Phase 3 Verification Report: Drag-and-Drop & Match Interaction
+
+Automated Tests:
+- Command: \='true'; pnpm test
+- Result: 239/239 tests passed (8 test files)
+- New tests: 8 ShadowMatch scene tests (round initialization + drag-and-drop)
+- Biome check: passed (29 files, no fixes)
+- Build: passed (55 modules)
+
+Changed files since Phase 2 checkpoint (fcfda58):
+- src/scenes/ShadowMatchScene.ts (stub replaced with full implementation, 183 lines)
+- src/__tests__/scenes/navigation.test.ts (8 new ShadowMatch tests + helpers)
+- conductor/tracks.md (track status [~] in progress)
+
+Manual Verification Plan:
+1. Start dev server: pnpm dev
+2. Open browser to dev server URL
+3. Navigate to Shadow Match game via Hub tile
+4. Verify 6 colored objects + 6 dark shadow silhouettes in shuffled positions
+5. Drag correct object onto matching silhouette → snap + correct SFX + particles
+6. Drag object onto wrong silhouette → bounce-back + incorrect SFX, no penalty
+7. Verify matched objects are locked (not draggable)
+8. Verify touch targets are adequately sized (96x96px)
+
+User Confirmation: YES — user confirmed the drag-and-drop interaction meets expectations.
+
+Note: Completion flow (win animation, sticker, auto-return) is NOT yet implemented — that's Phase 4. handleComplete() is a stub.
