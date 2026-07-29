@@ -42,7 +42,7 @@
     - [x] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas / forgiving snap radius
     - [x] Test AudioManager plays existing correct SFX on match and incorrect SFX on mismatch (respecting SFX toggle)
 - [x] Task: Implement drag-and-drop + snap + bounce-back + particle burst in `ShadowMatchScene` (reuses Shape Sorter's drag/drop pattern; calls existing AudioManager SFX) [TDD-Green] [6560522]
-- [ ] Task: Conductor - User Manual Verification 'Drag-and-Drop & Match Interaction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Drag-and-Drop & Match Interaction' (Protocol in workflow.md)
 
 ---
 
