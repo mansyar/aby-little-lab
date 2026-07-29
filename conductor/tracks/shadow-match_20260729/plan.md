@@ -28,7 +28,7 @@
     - [x] Test win detection returns true when matched count reaches 6
     - [x] Test win detection returns false when matched count is less than 6
 - [x] Task: Implement round initialization & match logic in `src/game/shadowMatchLogic.ts` (pure functions: pair generation, independent shuffle, match detection, win detection) [TDD-Green] [dda57c9]
-- [ ] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
 
 ---
 
