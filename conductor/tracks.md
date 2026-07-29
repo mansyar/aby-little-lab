@@ -7,6 +7,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
-
-- [x] **Track: Game 3 - Pop & Freeze!**
-*Link: [./tracks/pop-freeze_20260729/](./tracks/pop-freeze_20260729/)*
