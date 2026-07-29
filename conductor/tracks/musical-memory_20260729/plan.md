@@ -35,18 +35,18 @@
 
 ## Phase 3: Sequence Playback & Child Input Interaction
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for sequence playback and child input interaction [TDD-Red]
-    - [ ] Test sequence auto-plays at round start: each frog scales up + plays its note (`playFrogNote`) in sequence order with a timed delay between notes
-    - [ ] Test input is locked during sequence playback (taps ignored)
-    - [ ] Test child tap on a frog scales it up + plays its note + registers input at the current index
-    - [ ] Test correct tap advances the input index; completing the full sequence triggers round success
-    - [ ] Test wrong tap plays incorrect SFX, re-plays the current sequence, resets input index, and retries the same round (no progress lost)
-    - [ ] Test replay button re-plays the current sequence on demand (input locked during replay; unlocked after)
-    - [ ] Test input is unlocked after sequence playback/replay completes
-    - [ ] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas
-- [ ] Task: Implement sequence auto-play (timed note + scale-up + glow), child input, replay button, and mistake handling in `MusicalMemoryScene` (calls existing `AudioManager.playFrogNote` + correct/incorrect SFX) [TDD-Green]
-- [ ] Task: Conductor - User Manual Verification 'Sequence Playback & Child Input Interaction' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for sequence playback and child input interaction [TDD-Red] [sha: c9abe87]
+    - [x] Test sequence auto-plays at round start: each frog scales up + plays its note (`playFrogNote`) in sequence order with a timed delay between notes
+    - [x] Test input is locked during sequence playback (taps ignored)
+    - [x] Test child tap on a frog scales it up + plays its note + registers input at the current index
+    - [x] Test correct tap advances the input index; completing the full sequence triggers round success
+    - [x] Test wrong tap plays incorrect SFX, re-plays the current sequence, resets input index, and retries the same round (no progress lost)
+    - [x] Test replay button re-plays the current sequence on demand (input locked during replay; unlocked after)
+    - [x] Test input is unlocked after sequence playback/replay completes
+    - [x] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas
+- [x] Task: Implement sequence auto-play (timed note + scale-up + glow), child input, replay button, and mistake handling in `MusicalMemoryScene` (calls existing `AudioManager.playFrogNote` + correct/incorrect SFX) [TDD-Green] [sha: c9abe87]
+- [~] Task: Conductor - User Manual Verification 'Sequence Playback & Child Input Interaction' (Protocol in workflow.md)
 
 ---
 
