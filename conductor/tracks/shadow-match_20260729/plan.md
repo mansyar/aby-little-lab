@@ -32,7 +32,7 @@
 
 ---
 
-## Phase 3: Drag-and-Drop & Match Interaction
+## Phase 3: Drag-and-Drop & Match Interaction [checkpoint: cc1f053]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for drag-and-drop interaction, snap/bounce, and audio [TDD-Red] [6560522]
