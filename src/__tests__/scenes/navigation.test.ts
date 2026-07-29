@@ -1804,6 +1804,30 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playCorrect).not.toHaveBeenCalled();
       expect(getMockFn(scene.add.particles)).not.toHaveBeenCalled();
     });
+
+    it("dragend without a drop on a zone bounces silently (no incorrect SFX)", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const object = objects[0];
+
+      // Simulate dragend without a preceding drop (object released on empty space)
+      const onCalls = getMockFn(object.obj.on).mock.calls;
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      // Bounce tween should be created
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounceTween = tweenCalls.find(
+        (c) => c[0]?.targets === object.obj && c[0]?.x === object.originX,
+      );
+      expect(bounceTween).toBeDefined();
+
+      // Incorrect SFX should NOT play (dropped on empty space, not a wrong zone)
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+    });
   });
 
   describe("ShadowMatchScene completion and sticker flow", () => {

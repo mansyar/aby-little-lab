@@ -39,6 +39,7 @@ interface ObjectData {
   originX: number;
   originY: number;
   matched: boolean;
+  droppedOnZone: boolean;
 }
 
 /** Tracks a shadow slot's drop zone and position. */
@@ -144,6 +145,7 @@ export class ShadowMatchScene extends Phaser.Scene {
         originX: x,
         originY: OBJECT_Y,
         matched: false,
+        droppedOnZone: false,
       };
 
       obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
@@ -167,6 +169,8 @@ export class ShadowMatchScene extends Phaser.Scene {
     const slot = this.shadowSlots.find((s) => s.zone === target);
     if (!slot) return;
 
+    data.droppedOnZone = true;
+
     if (isMatch(data.type, slot.type)) {
       data.obj.setPosition(slot.x, slot.y);
       data.obj.disableInteractive();
@@ -181,10 +185,12 @@ export class ShadowMatchScene extends Phaser.Scene {
     }
   }
 
-  /** Handles drag end. Bounces object back to origin with wobble if not matched. */
+  /** Handles drag end. Bounces object back to origin; plays incorrect SFX only if dropped on a zone. */
   private handleDragEnd(data: ObjectData): void {
     if (!data.matched) {
-      this.audioManager.playIncorrect();
+      if (data.droppedOnZone) {
+        this.audioManager.playIncorrect();
+      }
       this.tweens.add({
         targets: data.obj,
         x: data.originX,
@@ -192,6 +198,7 @@ export class ShadowMatchScene extends Phaser.Scene {
         duration: BOUNCE_DURATION,
         ease: "Back.out",
       });
+      data.droppedOnZone = false;
     }
   }
 
