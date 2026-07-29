@@ -34,14 +34,14 @@
 
 ## Phase 3: Drag-and-Drop & Match Interaction
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for drag-and-drop interaction, snap/bounce, and audio [TDD-Red]
-    - [ ] Test dragging a correct object onto its matching silhouette snaps it into place + correct SFX + particle burst
-    - [ ] Test dragging an object onto a wrong silhouette triggers bounce-back to origin + incorrect SFX with no penalty (object remains draggable)
-    - [ ] Test matched objects lock in place and are no longer draggable
-    - [ ] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas / forgiving snap radius
-    - [ ] Test AudioManager plays existing correct SFX on match and incorrect SFX on mismatch (respecting SFX toggle)
-- [ ] Task: Implement drag-and-drop + snap + bounce-back + particle burst in `ShadowMatchScene` (reuses Shape Sorter's drag/drop pattern; calls existing AudioManager SFX) [TDD-Green]
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for drag-and-drop interaction, snap/bounce, and audio [TDD-Red] [6560522]
+    - [x] Test dragging a correct object onto its matching silhouette snaps it into place + correct SFX + particle burst
+    - [x] Test dragging an object onto a wrong silhouette triggers bounce-back to origin + incorrect SFX with no penalty (object remains draggable)
+    - [x] Test matched objects lock in place and are no longer draggable
+    - [x] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas / forgiving snap radius
+    - [x] Test AudioManager plays existing correct SFX on match and incorrect SFX on mismatch (respecting SFX toggle)
+- [x] Task: Implement drag-and-drop + snap + bounce-back + particle burst in `ShadowMatchScene` (reuses Shape Sorter's drag/drop pattern; calls existing AudioManager SFX) [TDD-Green] [6560522]
 - [ ] Task: Conductor - User Manual Verification 'Drag-and-Drop & Match Interaction' (Protocol in workflow.md)
 
 ---
