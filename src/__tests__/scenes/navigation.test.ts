@@ -1577,6 +1577,235 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("ShadowMatchScene round initialization", () => {
+    it("creates 6 shadow silhouette images", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const shadowKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key.startsWith("sm_shadow_"));
+      expect(shadowKeys).toHaveLength(6);
+    });
+
+    it("creates 6 object images", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const objectKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key.startsWith("sm_") && !key.startsWith("sm_shadow_"));
+      expect(objectKeys).toHaveLength(6);
+    });
+
+    it("makes object images interactive and draggable", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const imageResults = getMockFn(scene.add.image).mock.results;
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const objectResults = imageResults.filter((_result, index) => {
+        const key = imageCalls[index][2] as string;
+        return key.startsWith("sm_") && !key.startsWith("sm_shadow_");
+      });
+
+      expect(objectResults).toHaveLength(6);
+      for (const result of objectResults) {
+        const obj = result.value as Record<string, MockFn>;
+        expect(getMockFn(obj.setInteractive)).toHaveBeenCalled();
+      }
+      expect(getMockFn(scene.input.setDraggable)).toHaveBeenCalledTimes(6);
+    });
+  });
+
+  describe("ShadowMatchScene drag and drop", () => {
+    /** Returns object image objects with their types and origin positions. */
+    function getObjects(scene: unknown): Array<{
+      obj: Record<string, MockFn>;
+      type: string;
+      originX: number;
+      originY: number;
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const results: Array<{
+        obj: Record<string, MockFn>;
+        type: string;
+        originX: number;
+        originY: number;
+      }> = [];
+
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("sm_") && !key.startsWith("sm_shadow_")) {
+          results.push({
+            obj: imageMock.mock.results[i].value as Record<string, MockFn>,
+            type: key.replace("sm_", ""),
+            originX: imageMock.mock.calls[i][0] as number,
+            originY: imageMock.mock.calls[i][1] as number,
+          });
+        }
+      }
+      return results;
+    }
+
+    /** Returns shadow slot zone objects with their types and positions. */
+    function getShadowSlots(scene: unknown): Array<{
+      zone: Record<string, MockFn>;
+      type: string;
+      x: number;
+      y: number;
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const zoneMock = getMockFn(add.zone);
+
+      const slotTypes: string[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("sm_shadow_")) {
+          slotTypes.push(key.replace("sm_shadow_", ""));
+        }
+      }
+
+      const results: Array<{
+        zone: Record<string, MockFn>;
+        type: string;
+        x: number;
+        y: number;
+      }> = [];
+
+      for (let i = 0; i < zoneMock.mock.results.length && i < slotTypes.length; i++) {
+        results.push({
+          zone: zoneMock.mock.results[i].value as Record<string, MockFn>,
+          type: slotTypes[i],
+          x: zoneMock.mock.calls[i][0] as number,
+          y: zoneMock.mock.calls[i][1] as number,
+        });
+      }
+      return results;
+    }
+
+    it("correct drop snaps object to shadow position, marks non-interactive, triggers SFX + particles", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      const object = objects[0];
+      const slot = slots.find((s) => s.type === object.type);
+      if (!slot) throw new Error("No matching shadow slot found");
+
+      const onCalls = getMockFn(object.obj.on).mock.calls;
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, slot.zone);
+
+      expect(getMockFn(object.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
+      expect(getMockFn(object.obj.disableInteractive)).toHaveBeenCalled();
+      expect(mockAudio.playCorrect).toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+    });
+
+    it("incorrect drop bounces object back to origin with wobble (no penalty)", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      const object = objects[0];
+      const wrongSlot = slots.find((s) => s.type !== object.type);
+      if (!wrongSlot) throw new Error("No mismatching slot found");
+
+      const onCalls = getMockFn(object.obj.on).mock.calls;
+
+      // Simulate drop on wrong zone (no snap, no SFX)
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, wrongSlot.zone);
+
+      // Simulate dragend (triggers bounce-back)
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const objTween = tweenCalls.find((c) => c[0]?.targets === object.obj);
+      expect(objTween).toBeDefined();
+      expect(objTween[0].x).toBe(object.originX);
+      expect(objTween[0].y).toBe(object.originY);
+
+      expect(mockAudio.playIncorrect).toHaveBeenCalled();
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    });
+
+    it("matched objects lock in place and do not bounce on dragend", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      const object = objects[0];
+      const slot = slots.find((s) => s.type === object.type);
+      if (!slot) throw new Error("No matching slot found");
+
+      const onCalls = getMockFn(object.obj.on).mock.calls;
+
+      // Correct drop
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, slot.zone);
+
+      expect(getMockFn(object.obj.disableInteractive)).toHaveBeenCalled();
+
+      // Dragend after match — should NOT bounce
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounceTween = tweenCalls.find(
+        (c) => c[0]?.targets === object.obj && c[0]?.x !== undefined,
+      );
+      expect(bounceTween).toBeUndefined();
+    });
+
+    it("creates touch targets meeting 64x64px minimum", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      expect(objects.length).toBe(6);
+
+      for (const object of objects) {
+        const setDisplaySizeCalls = getMockFn(object.obj.setDisplaySize).mock.calls;
+        for (const call of setDisplaySizeCalls) {
+          expect(call[0]).toBeGreaterThanOrEqual(64);
+          expect(call[1]).toBeGreaterThanOrEqual(64);
+        }
+      }
+    });
+
+    it("drop on non-slot target is a no-op (no snap, no SFX, no particles)", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const object = objects[0];
+
+      const onCalls = getMockFn(object.obj.on).mock.calls;
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, {});
+
+      expect(getMockFn(object.obj.disableInteractive)).not.toHaveBeenCalled();
+      expect(mockAudio.playCorrect).not.toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).not.toHaveBeenCalled();
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();
