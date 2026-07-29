@@ -1,6 +1,9 @@
 import Phaser from "phaser";
 import animalCatSvg from "../assets/svg/animals/cat.svg?raw";
 import animalDogSvg from "../assets/svg/animals/dog.svg?raw";
+import animalFrogBlueSvg from "../assets/svg/animals/frog_blue.svg?raw";
+import animalFrogGreenSvg from "../assets/svg/animals/frog_green.svg?raw";
+import animalFrogRedSvg from "../assets/svg/animals/frog_red.svg?raw";
 import animalMonkeySvg from "../assets/svg/animals/monkey.svg?raw";
 import animalRabbitSvg from "../assets/svg/animals/rabbit.svg?raw";
 import smBallSvg from "../assets/svg/items/ball.svg?raw";
@@ -11,6 +14,7 @@ import smCarSvg from "../assets/svg/items/car.svg?raw";
 import foodCarrotSvg from "../assets/svg/items/carrot.svg?raw";
 import foodFishSvg from "../assets/svg/items/fish.svg?raw";
 import smHouseSvg from "../assets/svg/items/house.svg?raw";
+import lilypadSvg from "../assets/svg/items/lilypad.svg?raw";
 import smTreeSvg from "../assets/svg/items/tree.svg?raw";
 import smUmbrellaSvg from "../assets/svg/items/umbrella.svg?raw";
 import smShadowBallSvg from "../assets/svg/shadows/shadow_ball.svg?raw";
@@ -28,6 +32,7 @@ import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
+import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
@@ -69,6 +74,11 @@ const SHAPE_ASSETS = [
   { key: "bubble", svg: bubbleSvg },
   { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
   { key: "sticker_shadow_match", svg: stickerShadowMatchSvg },
+  { key: "frog_green", svg: animalFrogGreenSvg },
+  { key: "frog_blue", svg: animalFrogBlueSvg },
+  { key: "frog_red", svg: animalFrogRedSvg },
+  { key: "lilypad", svg: lilypadSvg },
+  { key: "sticker_musical_memory", svg: stickerMusicalMemorySvg },
 ] as const;
 
 /**
