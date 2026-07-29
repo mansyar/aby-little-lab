@@ -7,12 +7,12 @@
 
 ## Phase 1: SVG Assets & Preload Pipeline
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Create object & shadow silhouette SVG assets
-    - [ ] Create 6 object SVGs in `src/assets/svg/items/`: `house.svg`, `tree.svg`, `car.svg`, `boat.svg`, `ball.svg`, `umbrella.svg` (512×512 viewBox, flat fills, thick #2D3748 outlines 4-6px, soft/vibrant palette, maximally distinct outline shapes)
-    - [ ] Create 6 shadow silhouette SVGs in `src/assets/svg/shadows/`: `shadow_house.svg`, `shadow_tree.svg`, `shadow_car.svg`, `shadow_boat.svg`, `shadow_ball.svg`, `shadow_umbrella.svg` (derived: duplicate paths, union fills, set #2D3748)
-    - [ ] Create `shadow-match` sticker SVG in `src/assets/svg/stickers/sticker_shadow_match.svg`
-- [ ] Task: Extend PreloadScene to load and rasterize the 6 object SVGs and 6 shadow SVGs with explicit width/height for high-res rasterization
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Create object & shadow silhouette SVG assets
+    - [x] Create 6 object SVGs in `src/assets/svg/items/`: `house.svg`, `tree.svg`, `car.svg`, `boat.svg`, `ball.svg`, `umbrella.svg` (512×512 viewBox, flat fills, thick #2D3748 outlines 4-6px, soft/vibrant palette, maximally distinct outline shapes)
+    - [x] Create 6 shadow silhouette SVGs in `src/assets/svg/shadows/`: `shadow_house.svg`, `shadow_tree.svg`, `shadow_car.svg`, `shadow_boat.svg`, `shadow_ball.svg`, `shadow_umbrella.svg` (derived: duplicate paths, union fills, set #2D3748)
+    - [x] Create `shadow-match` sticker SVG in `src/assets/svg/stickers/sticker_shadow_match.svg`
+- [x] Task: Extend PreloadScene to load and rasterize the 6 object SVGs and 6 shadow SVGs with explicit width/height for high-res rasterization [6311857]
 - [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
