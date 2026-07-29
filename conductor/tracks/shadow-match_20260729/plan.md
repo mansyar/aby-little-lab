@@ -56,4 +56,10 @@
     - [x] Test parental lock exits early to Hub (already covered by existing game-scene-stubs parameterized test for all 6 scenes)
 - [x] Task: Implement completion flow (win animation + sticker award + auto-return) in `ShadowMatchScene` [TDD-Green] [d3e9d39]
 - [x] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
+
+---
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions f9ace0f
 </protect>
