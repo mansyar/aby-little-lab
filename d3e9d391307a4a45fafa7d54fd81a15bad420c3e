@@ -1,0 +1,30 @@
+Task: Write tests for completion and sticker flow [TDD-Red] + Implement completion flow [TDD-Green]
+
+Changes:
+- Added 4 tests to navigation.test.ts in 'ShadowMatchScene completion and sticker flow' describe block:
+  1. 'plays win SFX when all 6 objects are matched' - verifies playWin called after completing all 6 matches
+  2. 'awards sticker on first completion only' - verifies earnSticker('shadow-match') + playSticker called when hasSticker returns false
+  3. 'does not re-award sticker on replay' - verifies earnSticker + playSticker NOT called when hasSticker returns true
+  4. 'auto-returns to Hub after 3s delay' - verifies delayedCall(3000) + callback triggers scene.start('Hub')
+
+- Implemented handleComplete() in ShadowMatchScene.ts (replaced empty stub):
+  - playWin() SFX
+  - Win animation: tween all matched objects scale 1.2 yoyo (300ms)
+  - If !hasSticker('shadow-match'): earnSticker('shadow-match') + playSticker() + createStickerAnimation()
+  - delayedCall(3000, () => scene.start('Hub'))
+
+- Implemented createStickerAnimation() in ShadowMatchScene.ts:
+  - Image at center with 'sticker_shadow_match' texture key
+  - setDisplaySize(256, 256) + setScale(0)
+  - Tween scale to 1 with Back.out ease (300ms)
+
+- Added imports: earnSticker, hasSticker from ../utils/storage
+- Added constants: STICKER_DISPLAY_SIZE=256, AUTO_RETURN_DELAY=3000
+
+Files modified:
+- src/scenes/ShadowMatchScene.ts (added imports, constants, handleComplete, createStickerAnimation)
+- src/__tests__/scenes/navigation.test.ts (added 4 completion tests + helper functions)
+
+Test results: 243/243 passed (8 test files)
+Biome check: passed
+Build: passed (55 modules)
