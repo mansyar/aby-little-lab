@@ -19,17 +19,17 @@
 
 ## Phase 2: Sequence Generation & Round Logic
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for sequence generation and round logic [TDD-Red]
-    - [ ] Test `generateSequence(length)` produces a sequence of the given length (start length 2) where every index is in range 0-2
-    - [ ] Test `appendNote(sequence)` returns a new sequence grown by exactly 1 (random index 0-2 appended; original unchanged)
-    - [ ] Test `validateInput(sequence, inputIndex, tappedFrog)` returns correct=true and advances index when tap matches sequence at current index
-    - [ ] Test `validateInput` returns correct=false when tap does not match (mistake; no index advance)
-    - [ ] Test `isRoundComplete(sequence, inputIndex)` returns true when inputIndex reaches sequence length
-    - [ ] Test `isWin(sequenceLength, target=6)` returns true only when sequence length reaches the win target (6)
-    - [ ] Test mistake handling resets inputIndex to 0 without changing the sequence or round count (no-fail, no progress lost)
-- [ ] Task: Implement sequence generation & round logic in `src/game/musicalMemoryLogic.ts` (pure functions: generateSequence, appendNote, validateInput, isRoundComplete, isWin) [TDD-Green]
-- [ ] Task: Conductor - User Manual Verification 'Sequence Generation & Round Logic' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for sequence generation and round logic [TDD-Red] [1723408]
+    - [x] Test `generateSequence(length)` produces a sequence of the given length (start length 2) where every index is in range 0-2
+    - [x] Test `appendNote(sequence)` returns a new sequence grown by exactly 1 (random index 0-2 appended; original unchanged)
+    - [x] Test `validateInput(sequence, inputIndex, tappedFrog)` returns correct=true and advances index when tap matches sequence at current index
+    - [x] Test `validateInput` returns correct=false when tap does not match (mistake; no index advance)
+    - [x] Test `isRoundComplete(sequence, inputIndex)` returns true when inputIndex reaches sequence length
+    - [x] Test `isWin(sequenceLength, target=6)` returns true only when sequence length reaches the win target (6)
+    - [x] Test mistake handling resets inputIndex to 0 without changing the sequence or round count (no-fail, no progress lost)
+- [x] Task: Implement sequence generation & round logic in `src/game/musicalMemoryLogic.ts` (pure functions: generateSequence, appendNote, validateInput, isRoundComplete, isWin) [TDD-Green] [1723408]
+- [~] Task: Conductor - User Manual Verification 'Sequence Generation & Round Logic' (Protocol in workflow.md)
 
 ---
 
