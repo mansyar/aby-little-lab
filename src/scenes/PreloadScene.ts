@@ -3,10 +3,22 @@ import animalCatSvg from "../assets/svg/animals/cat.svg?raw";
 import animalDogSvg from "../assets/svg/animals/dog.svg?raw";
 import animalMonkeySvg from "../assets/svg/animals/monkey.svg?raw";
 import animalRabbitSvg from "../assets/svg/animals/rabbit.svg?raw";
+import smBallSvg from "../assets/svg/items/ball.svg?raw";
 import foodBananaSvg from "../assets/svg/items/banana.svg?raw";
+import smBoatSvg from "../assets/svg/items/boat.svg?raw";
 import foodBoneSvg from "../assets/svg/items/bone.svg?raw";
+import smCarSvg from "../assets/svg/items/car.svg?raw";
 import foodCarrotSvg from "../assets/svg/items/carrot.svg?raw";
 import foodFishSvg from "../assets/svg/items/fish.svg?raw";
+import smHouseSvg from "../assets/svg/items/house.svg?raw";
+import smTreeSvg from "../assets/svg/items/tree.svg?raw";
+import smUmbrellaSvg from "../assets/svg/items/umbrella.svg?raw";
+import smShadowBallSvg from "../assets/svg/shadows/shadow_ball.svg?raw";
+import smShadowBoatSvg from "../assets/svg/shadows/shadow_boat.svg?raw";
+import smShadowCarSvg from "../assets/svg/shadows/shadow_car.svg?raw";
+import smShadowHouseSvg from "../assets/svg/shadows/shadow_house.svg?raw";
+import smShadowTreeSvg from "../assets/svg/shadows/shadow_tree.svg?raw";
+import smShadowUmbrellaSvg from "../assets/svg/shadows/shadow_umbrella.svg?raw";
 import cutoutCircleSvg from "../assets/svg/shapes/cutout_circle.svg?raw";
 import cutoutSquareSvg from "../assets/svg/shapes/cutout_square.svg?raw";
 import cutoutStarSvg from "../assets/svg/shapes/cutout_star.svg?raw";
@@ -17,6 +29,7 @@ import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
+import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
 
@@ -40,9 +53,22 @@ const SHAPE_ASSETS = [
   { key: "food_carrot", svg: foodCarrotSvg },
   { key: "food_fish", svg: foodFishSvg },
   { key: "food_bone", svg: foodBoneSvg },
+  { key: "sm_house", svg: smHouseSvg },
+  { key: "sm_tree", svg: smTreeSvg },
+  { key: "sm_car", svg: smCarSvg },
+  { key: "sm_boat", svg: smBoatSvg },
+  { key: "sm_ball", svg: smBallSvg },
+  { key: "sm_umbrella", svg: smUmbrellaSvg },
+  { key: "sm_shadow_house", svg: smShadowHouseSvg },
+  { key: "sm_shadow_tree", svg: smShadowTreeSvg },
+  { key: "sm_shadow_car", svg: smShadowCarSvg },
+  { key: "sm_shadow_boat", svg: smShadowBoatSvg },
+  { key: "sm_shadow_ball", svg: smShadowBallSvg },
+  { key: "sm_shadow_umbrella", svg: smShadowUmbrellaSvg },
   { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
   { key: "bubble", svg: bubbleSvg },
   { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
+  { key: "sticker_shadow_match", svg: stickerShadowMatchSvg },
 ] as const;
 
 /**
