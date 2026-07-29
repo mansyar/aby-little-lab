@@ -1,0 +1,45 @@
+Phase 4 Checkpoint Verification Report: Completion, Sticker Award & Return
+
+Track: shadow-match_20260729
+Phase: 4 — Completion, Sticker Award & Return
+
+Tasks Completed:
+1. Read spec.md and workflow.md — refreshed context (FR5: completion at 6 → win SFX + animation → sticker first-time-only → auto-return 3s)
+2. Write tests [TDD-Red] — 4 tests added to navigation.test.ts in 'ShadowMatchScene completion and sticker flow' describe block
+3. Implement completion flow [TDD-Green] — handleComplete() + createStickerAnimation() implemented in ShadowMatchScene.ts
+
+Implementation Details:
+- handleComplete(): playWin() → tween all objects scale 1.2 yoyo (300ms) → if !hasSticker('shadow-match'): earnSticker + playSticker + createStickerAnimation → delayedCall(3000, start Hub)
+- createStickerAnimation(): image at center with 'sticker_shadow_match' key, setDisplaySize(256), setScale(0) → tween scale to 1 (Back.out, 300ms)
+- Added imports: earnSticker, hasSticker from ../utils/storage
+- Added constants: STICKER_DISPLAY_SIZE=256, AUTO_RETURN_DELAY=3000
+
+Tests Added (4):
+1. 'plays win SFX when all 6 objects are matched' — verifies playWin called after completing all 6 matches
+2. 'awards sticker on first completion only' — verifies earnSticker('shadow-match') + playSticker when hasSticker=false
+3. 'does not re-award sticker on replay' — verifies earnSticker + playSticker NOT called when hasSticker=true
+4. 'auto-returns to Hub after 3s delay' — verifies delayedCall(3000) callback triggers scene.start('Hub')
+
+Changed Files (since Phase 3 checkpoint cc1f053):
+- src/scenes/ShadowMatchScene.ts (added imports, constants, handleComplete, createStickerAnimation)
+- src/__tests__/scenes/navigation.test.ts (added 4 completion tests + helper functions)
+- conductor/tracks/shadow-match_20260729/plan.md (task status updates)
+
+Quality Gates:
+- Tests: 243/243 passed (8 test files, navigation.test.ts has 92 tests)
+- Biome check: passed (29 files, no fixes)
+- Build: passed (55 modules)
+
+Manual Verification Plan:
+1. Start dev server: pnpm dev
+2. Open browser to http://localhost:5173
+3. Clear sticker from localStorage to simulate first-time play
+4. Navigate to Shadow Match, match all 6 objects
+5. Verify: win SFX + object pulse animation + sticker unlock animation + sticker SFX
+6. Verify: auto-return to Hub after 3s
+7. Verify: sticker appears in sticker book on Hub
+8. Replay: verify no sticker re-award (only win SFX + animation)
+9. Test parental lock: hold back button 3s → exits to Hub
+10. Test SFX toggle: disable SFX → no audio during gameplay
+
+User Confirmation: YES
