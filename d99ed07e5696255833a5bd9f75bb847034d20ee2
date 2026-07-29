@@ -1,0 +1,21 @@
+Task: Create frog & lily pad SVG assets + Extend PreloadScene
+
+Summary:
+- Created 3 frog SVGs (frog_green.svg, frog_blue.svg, frog_red.svg) in src/assets/svg/animals/ — 512x512 viewBox, flat fills, thick #2D3748 outlines (5-6px), storybook style. Colors: green=#48BB78, blue=#3182CE, red=#E53E3E. Same frog shape, distinguished by body color.
+- Created lilypad.svg in src/assets/svg/items/ — 512x512, flat green pad (#48BB78) with V-notch and vein lines.
+- Created sticker_musical_memory.svg in src/assets/svg/stickers/ — 512x512, circular badge with frog + musical notes (blue/red note heads matching frog colors).
+- Extended PreloadScene.ts to import and load all 5 new SVGs (frog_green, frog_blue, frog_red, lilypad, sticker_musical_memory) at 512x512 rasterization via the existing SVG loading pipeline.
+- Updated navigation.test.ts: changed SVG count expectation from 33 to 38 to reflect the 5 new assets.
+
+Files created:
+- src/assets/svg/animals/frog_green.svg
+- src/assets/svg/animals/frog_blue.svg
+- src/assets/svg/animals/frog_red.svg
+- src/assets/svg/items/lilypad.svg
+- src/assets/svg/stickers/sticker_musical_memory.svg
+
+Files modified:
+- src/scenes/PreloadScene.ts
+- src/__tests__/scenes/navigation.test.ts
+
+Why: Phase 1 of the Musical Memory Simon track. Establishes the visual asset pipeline (frog/lily pad/sticker SVGs) and wires them into the PreloadScene for high-res rasterization. These assets will be used by the MusicalMemoryScene in subsequent phases.
