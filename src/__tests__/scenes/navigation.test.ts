@@ -198,6 +198,7 @@ const { mockAudio } = vi.hoisted(() => ({
     playSticker: vi.fn(),
     playPop: vi.fn(),
     playWake: vi.fn(),
+    playFrogNote: vi.fn(),
   },
 }));
 
@@ -1935,6 +1936,301 @@ describe("scene navigation flow", () => {
       callback();
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+
+  describe("MusicalMemoryScene sequence playback and input", () => {
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** Returns frog image objects in index order (0=green, 1=blue, 2=red). */
+    function getFrogs(scene: unknown): Array<Record<string, MockFn>> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const frogKeys = ["frog_green", "frog_blue", "frog_red"];
+      const frogs: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        const frogIndex = frogKeys.indexOf(key);
+        if (frogIndex >= 0) {
+          frogs[frogIndex] = imageMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      return frogs;
+    }
+
+    /** Returns the replay button text object, or undefined if not found. */
+    function getReplayButton(scene: unknown): Record<string, MockFn> | undefined {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const textMock = getMockFn(add.text);
+      for (let i = 0; i < textMock.mock.calls.length; i++) {
+        const text = textMock.mock.calls[i][2] as string;
+        if (typeof text === "string" && text.includes("Replay")) {
+          return textMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      return undefined;
+    }
+
+    /** Fires all delayedCall callbacks sorted by delay value. */
+    function fireAllDelayedCalls(scene: unknown): void {
+      const delayedCallMock = getMockFn(
+        (scene as { time: Record<string, unknown> }).time.delayedCall,
+      );
+      const calls = [...delayedCallMock.mock.calls].sort(
+        (a, b) => (a[0] as number) - (b[0] as number),
+      );
+      for (const call of calls) {
+        if (typeof call[1] === "function") {
+          (call[1] as () => void)();
+        }
+      }
+    }
+
+    /** Fires delayedCall callbacks added at or after the given index, sorted by delay. */
+    function fireDelayedCallsFrom(scene: unknown, startIndex: number): void {
+      const delayedCallMock = getMockFn(
+        (scene as { time: Record<string, unknown> }).time.delayedCall,
+      );
+      const calls = delayedCallMock.mock.calls
+        .slice(startIndex)
+        .sort((a, b) => (a[0] as number) - (b[0] as number));
+      for (const call of calls) {
+        if (typeof call[1] === "function") {
+          (call[1] as () => void)();
+        }
+      }
+    }
+
+    /** Simulates a tap on a frog by triggering its pointerdown callback. */
+    function tapFrog(frogs: Array<Record<string, MockFn>>, frogIndex: number): void {
+      const frog = frogs[frogIndex];
+      if (!frog) throw new Error(`Frog ${frogIndex} not found`);
+      const onCalls = getMockFn(frog.on).mock.calls;
+      const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    /** Simulates a tap on the replay button. */
+    function tapReplayButton(scene: unknown): void {
+      const button = getReplayButton(scene);
+      if (!button) throw new Error("Replay button not found");
+      const onCalls = getMockFn(button.on).mock.calls;
+      const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    /** Clears audio mock call data to isolate subsequent interactions. */
+    function clearAudioMocks(): void {
+      mockAudio.playFrogNote.mockClear();
+      mockAudio.playCorrect.mockClear();
+      mockAudio.playIncorrect.mockClear();
+    }
+
+    it("creates 3 frog images and 3 lily pad images", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const keys = imageCalls.map((call) => call[2] as string);
+
+      expect(keys).toContain("frog_green");
+      expect(keys).toContain("frog_blue");
+      expect(keys).toContain("frog_red");
+      expect(keys.filter((k) => k === "lilypad")).toHaveLength(3);
+    });
+
+    it("auto-plays sequence at round start with each frog playing its note in sequence order", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      // With Math.random=0.5, sequence = [1, 1] (blue frog, E4=329.63Hz)
+      // Notes are scheduled via delayed calls — none played yet
+      expect(mockAudio.playFrogNote).not.toHaveBeenCalled();
+
+      // Fire all delayed calls to simulate playback
+      fireAllDelayedCalls(scene);
+
+      // Should have played 2 notes (sequence length 2), both E4 (329.63Hz)
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(2);
+      expect(mockAudio.playFrogNote).toHaveBeenCalledWith(329.63);
+    });
+
+    it("locks input during sequence playback (taps ignored)", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      // Don't fire delayed calls — playback is "in progress", input locked
+      const frogs = getFrogs(scene);
+      tapFrog(frogs, 1);
+
+      // No note should play from the tap (input locked)
+      expect(mockAudio.playFrogNote).not.toHaveBeenCalled();
+    });
+
+    it("unlocks input after sequence playback completes", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      // Fire all delayed calls — playback completes, input unlocked
+      fireAllDelayedCalls(scene);
+      clearAudioMocks();
+
+      const frogs = getFrogs(scene);
+      tapFrog(frogs, 1);
+
+      // Tap should be accepted — note plays
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(1);
+    });
+
+    it("child tap on a frog plays its note and triggers scale animation", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      const tweensBefore = getMockFn(scene.tweens.add).mock.calls.length;
+      tapFrog(frogs, 1); // Tap blue frog
+      const tweensAfter = getMockFn(scene.tweens.add).mock.calls.length;
+
+      // Note plays from the tap
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(1);
+      expect(mockAudio.playFrogNote).toHaveBeenCalledWith(329.63);
+
+      // Scale animation (tween) added for the tapped frog
+      expect(tweensAfter).toBeGreaterThan(tweensBefore);
+      const latestTween = getMockFn(scene.tweens.add).mock.calls[tweensAfter - 1][0];
+      expect(latestTween.targets).toBe(frogs[1]);
+      expect(latestTween.yoyo).toBe(true);
+    });
+
+    it("correct tap advances input index; completing the full sequence triggers round success", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      // Sequence is [1, 1] — tap blue frog twice to complete
+      tapFrog(frogs, 1); // Correct (index 0 -> 1)
+      tapFrog(frogs, 1); // Correct (index 1 -> 2, round complete)
+
+      // Round success triggers correct SFX
+      expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+    });
+
+    it("wrong tap plays incorrect SFX, replays the sequence, and retries the same round", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      const delayedCallsBefore = getMockFn(scene.time.delayedCall).mock.calls.length;
+
+      // Tap wrong frog (sequence[0]=1, tap frog 0=green)
+      tapFrog(frogs, 0);
+
+      // Incorrect SFX plays
+      expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
+
+      // Replay scheduled (new delayed calls)
+      const delayedCallsAfter = getMockFn(scene.time.delayedCall).mock.calls.length;
+      expect(delayedCallsAfter).toBeGreaterThan(delayedCallsBefore);
+
+      // Clear audio mocks to isolate replay notes
+      clearAudioMocks();
+
+      // Fire replay delayed calls
+      fireDelayedCallsFrom(scene, delayedCallsBefore);
+
+      // Notes replayed (2 notes for sequence length 2)
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(2);
+
+      // After replay, the same round can still be completed (no progress lost)
+      clearAudioMocks();
+      tapFrog(frogs, 1); // Correct
+      tapFrog(frogs, 1); // Correct, round complete
+      expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+    });
+
+    it("replay button re-plays the current sequence on demand", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      clearAudioMocks();
+
+      const delayedCallsBefore = getMockFn(scene.time.delayedCall).mock.calls.length;
+
+      tapReplayButton(scene);
+
+      // New delayed calls scheduled
+      const delayedCallsAfter = getMockFn(scene.time.delayedCall).mock.calls.length;
+      expect(delayedCallsAfter).toBeGreaterThan(delayedCallsBefore);
+
+      // Fire replay delayed calls
+      fireDelayedCallsFrom(scene, delayedCallsBefore);
+
+      // Notes replayed (2 notes for sequence length 2)
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(2);
+    });
+
+    it("input is locked during replay and unlocked after replay completes", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      const delayedCallsBefore = getMockFn(scene.time.delayedCall).mock.calls.length;
+
+      // Start replay
+      tapReplayButton(scene);
+
+      // Tap while replay in progress (input locked)
+      tapFrog(frogs, 1);
+      expect(mockAudio.playFrogNote).not.toHaveBeenCalled();
+
+      // Fire replay delayed calls (replay completes, input unlocked)
+      fireDelayedCallsFrom(scene, delayedCallsBefore);
+
+      // Clear replay notes to isolate the final tap
+      clearAudioMocks();
+
+      // Now tap should work
+      tapFrog(frogs, 1);
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(1);
+    });
+
+    it("creates frog touch targets meeting 64x64px minimum", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const frogs = getFrogs(scene);
+      expect(frogs).toHaveLength(3);
+
+      for (const frog of frogs) {
+        const setDisplaySizeCalls = getMockFn(frog.setDisplaySize).mock.calls;
+        for (const call of setDisplaySizeCalls) {
+          expect(call[0]).toBeGreaterThanOrEqual(64);
+          expect(call[1]).toBeGreaterThanOrEqual(64);
+        }
+      }
     });
   });
 
