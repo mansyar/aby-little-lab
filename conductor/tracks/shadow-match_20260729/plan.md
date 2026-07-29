@@ -13,7 +13,7 @@
     - [x] Create 6 shadow silhouette SVGs in `src/assets/svg/shadows/`: `shadow_house.svg`, `shadow_tree.svg`, `shadow_car.svg`, `shadow_boat.svg`, `shadow_ball.svg`, `shadow_umbrella.svg` (derived: duplicate paths, union fills, set #2D3748)
     - [x] Create `shadow-match` sticker SVG in `src/assets/svg/stickers/sticker_shadow_match.svg`
 - [x] Task: Extend PreloadScene to load and rasterize the 6 object SVGs and 6 shadow SVGs with explicit width/height for high-res rasterization [6311857]
-- [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
 
