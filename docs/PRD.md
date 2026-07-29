@@ -80,12 +80,14 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Game Logic:** Pure functions in `src/game/animalTraceLogic.ts` (pair selection/shuffle, path progress tracking, completion detection, waypoint generation) — testable without Phaser.
 - **Accessibility:** Particle counts reduced when `prefers-reduced-motion` is active. No-fail design (no penalties for deviation/lift).
 
-### GAME 3 — Pop & Freeze! (Reflexes & Inhibitory Control)
+### GAME 3 — Pop & Freeze! (Reflexes & Inhibitory Control) ✅ Implemented
 
 - **Milestone:** Visual reaction time and impulse control (Stop-and-Go processing).
-- **Mechanics:** SVG bubbles float upward. Tapping standard bubbles pops them. Glowing "Sleeping Animal" bubbles float up — letting them pass grants bonus stars; tapping wakes them up with funny sound.
-- **SVG Requirements:** `bubble_soap.svg`, `bubble_sleeping_cat.svg`, `pop_particle.svg`.
-- **Phaser Engine Logic:** Arcade Physics Group with negative Y velocity. `pointerdown` event triggers sprite destroy and SFX.
+- **Mechanics:** 5 bubbles float around the screen concurrently via Arcade Physics with world-bounds bouncing. 1–2 of these are "sleeping-animal" decoy bubbles (containing a sleeping animal inside). The child pops standard bubbles by tapping them. Tapping a sleeping-animal bubble triggers a gentle wobble and wake-up sound with **no penalty** — the bubble remains on screen. The round is won after **6 pops**. Popped bubbles respawn to maintain the concurrent count (with 1–2 sleeping maintained).
+- **SVG Requirements:** `bubble.svg` (512×512, translucent round bubble with highlight, storybook style). Reuses the 4 existing animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg` from Game 2) as sleeping-animal content inside bubbles — no new animal art. Sticker: `sticker_pop_freeze.svg`.
+- **Phaser Engine Logic:** Arcade Physics images with random velocity (30–80 px/s gentle drift) and world-bounds bounce (`setCollideWorldBounds` + `setBounce(1, 1)`). `pointerdown` triggers pop (shrink animation + synthesized pop SFX + particle burst + respawn) or wake (wobble animation + synthesized wake SFX, no penalty). Completion triggers win animation + sticker award (first time only) + auto-return to Hub after 3s.
+- **Game Logic:** Pure functions in `src/game/popFreezeLogic.ts` (round state, Fisher-Yates shuffle, bubble type selection maintaining 1–2 sleeping, spawn config generation with on-screen position clamping, pop registration with win detection, wake registration with no penalty) — testable without Phaser.
+- **Accessibility:** Particle counts reduced when `prefers-reduced-motion` is active. Touch targets at 96×96px (exceeds 64px minimum). No-fail design (no penalties for waking sleeping animals).
 
 ### GAME 4 — Shadow Match (Visual Discrimination & Spatial Awareness)
 
@@ -206,26 +208,28 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 | Generic tap | Soft pop | `sfx_pop.mp3` | All games (UI taps) |
 | Correct match | Ascending chime (3-note: C5, E5, G5) | Web Audio API (synthesized) | Games 1, 2, 4, 6 |
 | Incorrect match | Soft descending tone (G4 → C4) | Web Audio API (synthesized) | Games 1, 4, 6 |
-| Bubble pop | Bright pop | `sfx_pop.mp3` | Game 3 |
-| Sleeping animal tapped | Funny wake-up sound | `sfx_wake.mp3` | Game 3 |
+| Bubble pop | Bright percussive blip (800 Hz, 0.08s) | Web Audio API (synthesized) | Game 3 |
+| Sleeping animal tapped | Soft rousing tone (E4 + A4 dual oscillator) | Web Audio API (synthesized) | Game 3 |
 | Game complete | Win fanfare (4-note arpeggio: C5, E5, G5, C6) | Web Audio API (synthesized) | All games |
 | Sticker earned | Sparkle (2-note: C6, E6) | Web Audio API (synthesized) | All games (first completion) |
 
-> **Note:** Gameplay SFX (correct, incorrect, win, sticker) are **synthesized via Web Audio API** — no MP3 files needed for these. This was decided during the Shape Sorter track to reduce asset overhead. MP3 SFX files remain for pop and wake sounds.
+> **Note:** Gameplay SFX (correct, incorrect, win, sticker) are **synthesized via Web Audio API** — no MP3 files needed for these. This was decided during the Shape Sorter track to reduce asset overhead. Game 3's pop and wake sounds are also synthesized. MP3 SFX files remain only for generic UI tap sounds.
 
 ### Synthesized Audio (Web Audio API)
 
 | Note / Tone | Frequency | Used In |
 |---|---|---|
 | C4 | 261.63 Hz | Game 5 (green frog) |
-| E4 | 329.63 Hz | Game 5 (blue frog) |
+| E4 | 329.63 Hz | Game 5 (blue frog), Game 3 (wake tone, dual oscillator with A4) |
 | G4 | 392.00 Hz | Game 5 (red frog) |
+| A4 | 440.00 Hz | Game 3 (wake tone, dual oscillator with E4) |
+| 800 Hz | 800.00 Hz | Game 3 (bubble pop — short percussive blip, 0.08s) |
 | C5, E5, G5 | 523.25, 659.25, 783.99 Hz | Gameplay SFX — correct (ascending chime) |
 | G4, C4 | 392.00, 261.63 Hz | Gameplay SFX — incorrect (soft descending) |
 | C5, E5, G5, C6 | 523.25, 659.25, 783.99, 1046.5 Hz | Gameplay SFX — win (celebratory arpeggio) |
 | C6, E6 | 1046.5, 1318.51 Hz | Gameplay SFX — sticker (sparkle) |
 
-Game 5 frog notes and gameplay feedback SFX (correct, incorrect, win, sticker) are synthesized via Web Audio API oscillators — no audio files needed for these. The AudioManager exposes these as `playCorrect()`, `playIncorrect()`, `playWin()`, and `playSticker()` methods, all respecting the SFX toggle setting.
+Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), and Game 3 pop/wake sounds are all synthesized via Web Audio API oscillators — no audio files needed for these. The AudioManager exposes these as `playPop()`, `playWake()`, `playCorrect()`, `playIncorrect()`, `playWin()`, and `playSticker()` methods, all respecting the SFX toggle setting.
 
 ### Background Music (BGM)
 

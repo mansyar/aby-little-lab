@@ -18,7 +18,7 @@
 | Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
 | Linting/Formatting | Biome | 2.5.5 | All-in-one linter and formatter |
 | Package Manager | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
-| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) — no file overhead |
+| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) + Game 3 pop/wake sounds — no file overhead |
 
 ### Dependencies (`package.json`)
 
@@ -68,10 +68,11 @@ aby-little-lab/
     ├── components/
     │   └── ParentLock.ts           # Long-press escape UI component (hold 3s)
     ├── audio/
-    │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis (Web Audio API); singleton via getInstance()
+    │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
     ├── game/
     │   ├── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
-    │   └── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
+    │   ├── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
+    │   └── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -80,7 +81,7 @@ aby-little-lab/
     │   ├── audio/                  # Audio assets (sfx_pop.mp3, sfx_win.mp3, bgm.mp3)
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
-    │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2) + Frog variants (Game 5) + sleeping cat (Game 3)
+    │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
     │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + Car, Duck, Apple (Game 4) + Teddy, Toy Car, Toy Box (Game 6)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs
@@ -89,7 +90,7 @@ aby-little-lab/
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock tests
-        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic)
+        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage tests
 ```
@@ -298,7 +299,8 @@ interface AppStorage {
 | `frog_green.svg` | 512×512 | Game 5 | Note: C4 (261.63 Hz) |
 | `frog_blue.svg` | 512×512 | Game 5 | Note: E4 (329.63 Hz) |
 | `frog_red.svg` | 512×512 | Game 5 | Note: G4 (392.00 Hz) |
-| `cat_sleeping.svg` | 512×512 | Game 3 | Cat inside sleeping bubble |
+
+> **Note:** Game 3 (Pop & Freeze!) reuses the 4 existing animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) as sleeping-animal content inside translucent bubbles — no separate sleeping-animal SVGs were created.
 
 ### SVG Assets — Items (`assets/svg/items/`)
 
@@ -333,8 +335,7 @@ interface AppStorage {
 | `lock_icon.svg` | 512×512 | Global | Parental lock indicator |
 | `star.svg` | 512×512 | Game 3 / Global | Bonus star, rating |
 | `dotted_path.svg` | 512×512 | Game 2 | Trace path guide *(superseded — path now generated at runtime via `Phaser.Curves.Path` + Graphics)* |
-| `bubble_soap.svg` | 512×512 | Game 3 | Standard bubble |
-| `pop_particle.svg` | 512×512 | Game 3 | Pop particle effect |
+| `bubble.svg` | 512×512 | Game 3 | Translucent round bubble (`#BEE3F8`, fill-opacity 0.4) with `#2D3748` outline and highlight |
 | `lilypad.svg` | 512×512 | Game 5 | Frog platform |
 
 ### SVG Assets — Stickers (`assets/svg/stickers/`)
@@ -352,13 +353,14 @@ interface AppStorage {
 
 | File | Format | Used In | Notes |
 |---|---|---|---|
-| `sfx_pop.mp3` | MP3 | All / Game 3 | Generic tap + bubble pop |
+| `sfx_pop.mp3` | MP3 | All | Generic UI tap |
 | `sfx_correct.mp3` | MP3 | Games 1, 2, 4, 6 | Ascending 2-note chime |
 | `sfx_incorrect.mp3` | MP3 | Games 1, 4, 6 | Gentle descending tone |
-| `sfx_wake.mp3` | MP3 | Game 3 | Funny animal wake-up |
 | `sfx_win.mp3` | MP3 | All games | Win fanfare |
 | `sfx_sticker.mp3` | MP3 | All games | Sticker earned sparkle |
 | `bgm.mp3` | MP3 | All scenes | Ambient loop, low volume |
+
+> **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
 
 ### PWA Icons (`public/icons/`)
 
@@ -371,10 +373,10 @@ interface AppStorage {
 | Type | Count |
 |---|---|
 | SVG — shapes | 8 (4 shapes + 4 cutouts) |
-| SVG — animals | 8 |
+| SVG — animals | 7 |
 | SVG — items | 13 |
-| SVG — UI | 14 |
+| SVG — UI | 13 |
 | SVG — stickers | 6 |
-| Audio (MP3) | 7 |
+| Audio (MP3) | 6 |
 | PWA icons (PNG) | 1 |
 | **Total** | **54** |
