@@ -7,8 +7,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
-
-- [x] **Track: Game 4 - Shadow Match**
-*Link: [./tracks/shadow-match_20260729/](./tracks/shadow-match_20260729/)*
-
----
