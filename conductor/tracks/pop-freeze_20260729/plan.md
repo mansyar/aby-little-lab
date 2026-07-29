@@ -21,11 +21,11 @@
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for round initialization and bubble logic [TDD-Red] [ff91b8f]
-    - [ ] Test pop count initializes to 0 and win target is 6
-    - [ ] Test spawn scheduling selects bubble type (poppable vs sleeping) maintaining the concurrent on-screen mix
-    - [ ] Test spawn config generation randomizes position & velocity (within world bounds)
-    - [ ] Test pop registration increments count and returns win status when target (6) reached
-    - [ ] Test wake registration does not change pop count (no penalty)
+    - [x] Test pop count initializes to 0 and win target is 6
+    - [x] Test spawn scheduling selects bubble type (poppable vs sleeping) maintaining the concurrent on-screen mix
+    - [x] Test spawn config generation randomizes position & velocity (within world bounds)
+    - [x] Test pop registration increments count and returns win status when target (6) reached
+    - [x] Test wake registration does not change pop count (no penalty)
 - [x] Task: Implement round initialization & bubble logic in `src/game/popFreezeLogic.ts` (pure functions: spawn scheduling/type selection, spawn config generation, pop counting, win detection) [TDD-Green] [755f050]
 - [x] Task: Conductor - User Manual Verification 'Round Initialization & Bubble Logic' (Protocol in workflow.md)
 
@@ -61,5 +61,5 @@
 ---
 
 ## Phase: Review Fixes
-- [ ] Task: Apply review suggestions
+- [x] Task: Apply review suggestions [a7936dc]
 </protect>
