@@ -17,7 +17,7 @@
 
 ---
 
-## Phase 2: Sequence Generation & Round Logic
+## Phase 2: Sequence Generation & Round Logic [checkpoint: fda43bc]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for sequence generation and round logic [TDD-Red] [1723408]
@@ -29,7 +29,7 @@
     - [x] Test `isWin(sequenceLength, target=6)` returns true only when sequence length reaches the win target (6)
     - [x] Test mistake handling resets inputIndex to 0 without changing the sequence or round count (no-fail, no progress lost)
 - [x] Task: Implement sequence generation & round logic in `src/game/musicalMemoryLogic.ts` (pure functions: generateSequence, appendNote, validateInput, isRoundComplete, isWin) [TDD-Green] [1723408]
-- [~] Task: Conductor - User Manual Verification 'Sequence Generation & Round Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Sequence Generation & Round Logic' (Protocol in workflow.md)
 
 ---
 
