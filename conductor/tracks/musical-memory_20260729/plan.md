@@ -13,7 +13,7 @@
     - [x] Create `lilypad.svg` in `src/assets/svg/items/` (512×512, flat green pad that sits beneath each frog)
     - [x] Create `musical-memory` sticker SVG in `src/assets/svg/stickers/sticker_musical_memory.svg`
 - [x] Task: Extend PreloadScene to load and rasterize the 3 frog SVGs + lily pad SVG with explicit width/height for high-res rasterization [d99ed07]
-- [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
 
