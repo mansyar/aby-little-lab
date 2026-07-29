@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
+import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Y position for shadow silhouettes (top area). */
 const SHADOW_Y = 200;
@@ -24,6 +25,12 @@ const PARTICLE_TEXTURE = "shape_circle";
 /** Particle count for celebration bursts (reduced when prefers-reduced-motion). */
 const PARTICLE_COUNT = 12;
 const PARTICLE_COUNT_REDUCED = 6;
+
+/** Display size for the sticker unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Delay before auto-returning to Hub after round completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
 
 /** Tracks a draggable object's state during the round. */
 interface ObjectData {
@@ -207,8 +214,44 @@ export class ShadowMatchScene extends Phaser.Scene {
     });
   }
 
-  /** Handles round completion. (Phase 4: win animation, sticker award, auto-return) */
+  /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
   private handleComplete(): void {
-    // Phase 4 will implement: playWin + win animation + sticker + auto-return
+    this.audioManager.playWin();
+
+    for (const data of this.objectData) {
+      this.tweens.add({
+        targets: data.obj,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 300,
+        yoyo: true,
+      });
+    }
+
+    if (!hasSticker("shadow-match")) {
+      earnSticker("shadow-match");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      this.scene.start("Hub");
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_shadow_match")
+      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: stickerImage,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 300,
+      ease: "Back.out",
+    });
   }
 }

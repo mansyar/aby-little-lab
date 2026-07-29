@@ -1806,6 +1806,114 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("ShadowMatchScene completion and sticker flow", () => {
+    /** Returns object image objects with their types. */
+    function getObjects(scene: unknown): Array<{ obj: Record<string, MockFn>; type: string }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const results: Array<{ obj: Record<string, MockFn>; type: string }> = [];
+
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("sm_") && !key.startsWith("sm_shadow_")) {
+          results.push({
+            obj: imageMock.mock.results[i].value as Record<string, MockFn>,
+            type: key.replace("sm_", ""),
+          });
+        }
+      }
+      return results;
+    }
+
+    /** Returns shadow slot zone objects with their types. */
+    function getShadowSlots(scene: unknown): Array<{ zone: Record<string, MockFn>; type: string }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const zoneMock = getMockFn(add.zone);
+
+      const slotTypes: string[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("sm_shadow_")) {
+          slotTypes.push(key.replace("sm_shadow_", ""));
+        }
+      }
+
+      const results: Array<{ zone: Record<string, MockFn>; type: string }> = [];
+
+      for (let i = 0; i < zoneMock.mock.results.length && i < slotTypes.length; i++) {
+        results.push({
+          zone: zoneMock.mock.results[i].value as Record<string, MockFn>,
+          type: slotTypes[i],
+        });
+      }
+      return results;
+    }
+
+    /** Simulates dropping all objects on their matching shadow slots. */
+    function completeAllObjects(scene: ShadowMatchScene): void {
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      for (const object of objects) {
+        const slot = slots.find((s) => s.type === object.type);
+        if (!slot) throw new Error("No matching shadow slot found");
+        const onCalls = getMockFn(object.obj.on).mock.calls;
+        const dropCall = onCalls.find((c) => c[0] === "drop");
+        const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+        dropCallback(null, slot.zone);
+      }
+    }
+
+    it("plays win SFX when all 6 objects are matched", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShadowMatchScene();
+      scene.create();
+      completeAllObjects(scene);
+
+      expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("awards sticker on first completion only", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShadowMatchScene();
+      scene.create();
+      completeAllObjects(scene);
+
+      expect(earnSticker).toHaveBeenCalledWith("shadow-match");
+      expect(mockAudio.playSticker).toHaveBeenCalled();
+    });
+
+    it("does not re-award sticker on replay", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new ShadowMatchScene();
+      scene.create();
+      completeAllObjects(scene);
+
+      expect(earnSticker).not.toHaveBeenCalled();
+      expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    });
+
+    it("auto-returns to Hub after 3s delay", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShadowMatchScene();
+      scene.create();
+      completeAllObjects(scene);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+      expect(autoReturnCall).toBeDefined();
+
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();
