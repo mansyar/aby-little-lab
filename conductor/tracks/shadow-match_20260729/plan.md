@@ -19,15 +19,15 @@
 
 ## Phase 2: Round Initialization & Match Logic
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for round initialization and match logic [TDD-Red]
-    - [ ] Test 6 object-silhouette pairs are generated with correct object IDs (house, tree, car, boat, ball, umbrella)
-    - [ ] Test shuffle randomizes object positions and shadow positions independently (replay variety)
-    - [ ] Test match detection returns true when object and shadow share the same underlying object ID
-    - [ ] Test match detection returns false when object and shadow differ
-    - [ ] Test win detection returns true when matched count reaches 6
-    - [ ] Test win detection returns false when matched count is less than 6
-- [ ] Task: Implement round initialization & match logic in `src/game/shadowMatchLogic.ts` (pure functions: pair generation, independent shuffle, match detection, win detection) [TDD-Green]
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for round initialization and match logic [TDD-Red]
+    - [x] Test 6 object-silhouette pairs are generated with correct object IDs (house, tree, car, boat, ball, umbrella)
+    - [x] Test shuffle randomizes object positions and shadow positions independently (replay variety)
+    - [x] Test match detection returns true when object and shadow share the same underlying object ID
+    - [x] Test match detection returns false when object and shadow differ
+    - [x] Test win detection returns true when matched count reaches 6
+    - [x] Test win detection returns false when matched count is less than 6
+- [x] Task: Implement round initialization & match logic in `src/game/shadowMatchLogic.ts` (pure functions: pair generation, independent shuffle, match detection, win detection) [TDD-Green] [dda57c9]
 - [ ] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
 
 ---
