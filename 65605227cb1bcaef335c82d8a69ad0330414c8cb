@@ -1,0 +1,26 @@
+Task: Write tests for drag-and-drop interaction [TDD-Red] + Implement drag-and-drop + snap + bounce-back + particle burst in ShadowMatchScene [TDD-Green]
+
+Changes:
+- Replaced ShadowMatchScene stub with full Phase 3 implementation following ShapeSorterScene pattern
+- 6 shadow silhouette images + drop zones at SHADOW_Y=200
+- 6 draggable object images at OBJECT_Y=600 with DISPLAY_SIZE=96 (ideal touch target)
+- handleDrop: match → snap to slot position + disableInteractive + playCorrect + particle burst + win check via isWin()
+- handleDragEnd: mismatch → playIncorrect + bounce-back tween (Back.out, 300ms) to origin
+- handleComplete: stub (Phase 4 will implement win animation + sticker + auto-return)
+- createParticleBurst: reuses 'shape_circle' texture, 12 particles (6 if reduced motion)
+- prefersReducedMotion: checks window.matchMedia
+
+Tests added (8 new, 239 total):
+- ShadowMatchScene round initialization: 6 shadow images, 6 object images, interactive + draggable
+- Correct drop: snaps to position + disableInteractive + playCorrect + particles
+- Incorrect drop: bounce-back tween to origin + playIncorrect + no scene restart
+- Matched objects lock: disableInteractive called, no bounce on dragend
+- Touch targets: 6 objects with displaySize >= 64px
+- Non-slot drop: no-op (no snap, no SFX, no particles)
+
+Files modified:
+- src/scenes/ShadowMatchScene.ts (stub replaced with full implementation, 183 lines)
+- src/__tests__/scenes/navigation.test.ts (added 8 ShadowMatch tests + helpers)
+- conductor/tracks.md (track status [~] in progress)
+
+Quality gates: 239/239 tests pass, Biome check clean, build succeeds (55 modules)
