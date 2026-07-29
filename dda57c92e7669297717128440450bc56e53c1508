@@ -1,0 +1,28 @@
+Task: Write tests for round initialization and match logic [TDD-Red] + Implement round initialization and match logic [TDD-Green]
+
+Summary:
+- Created src/game/shadowMatchLogic.ts with pure game logic functions:
+  - ObjectType type (house, tree, car, boat, ball, umbrella)
+  - ALL_OBJECTS constant (canonical order)
+  - WIN_TARGET constant (= 6)
+  - shuffle<T>() — Fisher-Yates, returns new array, no mutation
+  - generateRound() — returns { objects, shadows } with independently shuffled orders
+  - isMatch(objectType, shadowType) — simple === comparison
+  - isWin(matchedCount) — true when matchedCount >= WIN_TARGET
+
+- Created src/__tests__/game/shadowMatchLogic.test.ts with 11 tests:
+  - generateRound: 6 objects with correct IDs, 6 shadows with correct IDs, independent shuffle of objects vs shadows
+  - shuffle: same elements, no mutation, same length, independent results with different random values
+  - isMatch: true on same type, false on different type (all 6 types tested)
+  - isWin: true at 6, false at 0-5
+
+Files created:
+- src/game/shadowMatchLogic.ts
+- src/__tests__/game/shadowMatchLogic.test.ts
+
+Quality gates:
+- Tests: 231/231 passed (220 existing + 11 new)
+- Biome check: passed
+- Build: passed
+
+Why: Provides testable pure logic for Shadow Match game — pair generation, independent shuffle for replay variety, match detection, and win detection. Follows the established pattern from shapeSorterLogic.ts.
