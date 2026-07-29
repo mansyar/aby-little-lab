@@ -7,12 +7,12 @@
 
 ## Phase 1: SVG Assets & Preload Pipeline
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Create frog & lily pad SVG assets
-    - [ ] Create 3 frog SVGs in `src/assets/svg/animals/`: `frog_green.svg`, `frog_blue.svg`, `frog_red.svg` (512×512 viewBox, flat fills, thick #2D3748 outlines 4-6px, storybook style; green=#48BB78, blue=#3182CE, red=#E53E3E; each frog clearly distinct by color)
-    - [ ] Create `lilypad.svg` in `src/assets/svg/items/` (512×512, flat green pad that sits beneath each frog)
-    - [ ] Create `musical-memory` sticker SVG in `src/assets/svg/stickers/sticker_musical_memory.svg`
-- [ ] Task: Extend PreloadScene to load and rasterize the 3 frog SVGs + lily pad SVG with explicit width/height for high-res rasterization
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Create frog & lily pad SVG assets
+    - [x] Create 3 frog SVGs in `src/assets/svg/animals/`: `frog_green.svg`, `frog_blue.svg`, `frog_red.svg` (512×512 viewBox, flat fills, thick #2D3748 outlines 4-6px, storybook style; green=#48BB78, blue=#3182CE, red=#E53E3E; each frog clearly distinct by color)
+    - [x] Create `lilypad.svg` in `src/assets/svg/items/` (512×512, flat green pad that sits beneath each frog)
+    - [x] Create `musical-memory` sticker SVG in `src/assets/svg/stickers/sticker_musical_memory.svg`
+- [x] Task: Extend PreloadScene to load and rasterize the 3 frog SVGs + lily pad SVG with explicit width/height for high-res rasterization [d99ed07]
 - [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
