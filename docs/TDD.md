@@ -72,7 +72,8 @@ aby-little-lab/
     ├── game/
     │   ├── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
     │   ├── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
-    │   └── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
+    │   ├── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
+    │   └── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -82,7 +83,8 @@ aby-little-lab/
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
     │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
-    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + Car, Duck, Apple (Game 4) + Teddy, Toy Car, Toy Box (Game 6)
+    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella (Game 4 objects) + Teddy, Toy Car, Toy Box (Game 6)
+    │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs
     ├── styles/
@@ -90,7 +92,7 @@ aby-little-lab/
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock tests
-        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic)
+        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage tests
 ```
@@ -310,12 +312,12 @@ interface AppStorage {
 | `carrot.svg` | 512×512 | Game 2 | Food target (right side) — pairs with rabbit |
 | `fish.svg` | 512×512 | Game 2 | Food target (right side) — pairs with cat |
 | `bone.svg` | 512×512 | Game 2 | Food target (right side) — pairs with dog |
-| `car_color.svg` | 512×512 | Game 4 | Color variant |
-| `car_shadow.svg` | 512×512 | Game 4 | Shadow variant (`#2D3748`) |
-| `duck_color.svg` | 512×512 | Game 4 | Color variant |
-| `duck_shadow.svg` | 512×512 | Game 4 | Shadow variant (`#2D3748`) |
-| `apple_color.svg` | 512×512 | Game 4 | Color variant |
-| `apple_shadow.svg` | 512×512 | Game 4 | Shadow variant (`#2D3748`) |
+| `house.svg` | 512×512 | Game 4 | Colored object — yellow walls (#F6E05E), orange roof (#F6AD55), thick `#2D3748` outline |
+| `tree.svg` | 512×512 | Game 4 | Colored object — green canopy (#48BB78), brown trunk (#A0522D), thick `#2D3748` outline |
+| `car.svg` | 512×512 | Game 4 | Colored object — red body (#F56565), thick `#2D3748` outline |
+| `boat.svg` | 512×512 | Game 4 | Colored object — blue hull (#4299E1), thick `#2D3748` outline |
+| `ball.svg` | 512×512 | Game 4 | Colored object — yellow (#ECC94B), thick `#2D3748` outline |
+| `umbrella.svg` | 512×512 | Game 4 | Colored object — purple (#9F7AEA), thick `#2D3748` outline |
 | `teddy_bear.svg` | 512×512 | Game 6 | Sorted by scale (big/small) |
 | `toy_car.svg` | 512×512 | Game 6 | Sorted by scale (big/small) |
 | `toy_box.svg` | 512×512 | Game 6 | Container (1.5× and 0.7× scale) |
@@ -337,6 +339,17 @@ interface AppStorage {
 | `dotted_path.svg` | 512×512 | Game 2 | Trace path guide *(superseded — path now generated at runtime via `Phaser.Curves.Path` + Graphics)* |
 | `bubble.svg` | 512×512 | Game 3 | Translucent round bubble (`#BEE3F8`, fill-opacity 0.4) with `#2D3748` outline and highlight |
 | `lilypad.svg` | 512×512 | Game 5 | Frog platform |
+
+### SVG Assets — Shadows (`assets/svg/shadows/`)
+
+| File | Dimensions | Game | Notes |
+|---|---|---|---|
+| `shadow_house.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `house.svg` paths |
+| `shadow_tree.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `tree.svg` paths |
+| `shadow_car.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `car.svg` paths |
+| `shadow_boat.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `boat.svg` paths |
+| `shadow_ball.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `ball.svg` paths |
+| `shadow_umbrella.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill (handle as stroke), derived from `umbrella.svg` paths |
 
 ### SVG Assets — Stickers (`assets/svg/stickers/`)
 
@@ -361,6 +374,8 @@ interface AppStorage {
 | `bgm.mp3` | MP3 | All scenes | Ambient loop, low volume |
 
 > **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
+>
+> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track.
 
 ### PWA Icons (`public/icons/`)
 
@@ -374,9 +389,10 @@ interface AppStorage {
 |---|---|
 | SVG — shapes | 8 (4 shapes + 4 cutouts) |
 | SVG — animals | 7 |
-| SVG — items | 13 |
+| SVG — items | 10 (4 Game 2 food + 6 Game 4 objects) |
+| SVG — shadows | 6 (Game 4 silhouettes) |
 | SVG — UI | 13 |
 | SVG — stickers | 6 |
 | Audio (MP3) | 6 |
 | PWA icons (PNG) | 1 |
-| **Total** | **54** |
+| **Total** | **57** |

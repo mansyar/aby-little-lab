@@ -71,7 +71,7 @@ src/
 ├── scenes/                # BootScene, PreloadScene, HubScene, 6 game scenes
 ├── components/            # ParentLock (hold-for-3s escape)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic: shuffle, match detection, path progress, bubble spawning)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic: shuffle, match detection, path progress, bubble spawning, round generation)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
 ├── utils/                 # localStorage CRUD (storage.ts)
 ├── assets/                # SVG and audio assets
@@ -86,7 +86,7 @@ src/
 | 1 | Shape Sorter | Cognitive reasoning & categorization | ✅ Implemented |
 | 2 | Animal Trace-and-Connect | Fine motor precision & pre-writing | ✅ Implemented |
 | 3 | Pop & Freeze! | Reflexes & inhibitory control | ✅ Implemented |
-| 4 | Shadow Match | Visual discrimination & spatial awareness | Stub |
+| 4 | Shadow Match | Visual discrimination & spatial awareness | ✅ Implemented |
 | 5 | Musical Memory Simon | Working memory & auditory recall | Stub |
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | Stub |
 

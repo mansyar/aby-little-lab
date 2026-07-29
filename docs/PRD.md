@@ -89,12 +89,15 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Game Logic:** Pure functions in `src/game/popFreezeLogic.ts` (round state, Fisher-Yates shuffle, bubble type selection maintaining 1–2 sleeping, spawn config generation with on-screen position clamping, pop registration with win detection, wake registration with no penalty) — testable without Phaser.
 - **Accessibility:** Particle counts reduced when `prefers-reduced-motion` is active. Touch targets at 96×96px (exceeds 64px minimum). No-fail design (no penalties for waking sleeping animals).
 
-### GAME 4 — Shadow Match (Visual Discrimination & Spatial Awareness)
+### GAME 4 — Shadow Match (Visual Discrimination & Spatial Awareness) ✅ Implemented
 
 - **Milestone:** Differentiating forms and visual outlines independent of color.
-- **Mechanics:** 3 dark silhouette SVG shadows sit on a shelf. 3 full-color SVG objects lie below. Child matches colored item to shadow.
-- **SVG Requirements:** `car_color.svg`, `car_shadow.svg`, `duck_color.svg`, `duck_shadow.svg`, `apple_color.svg`, `apple_shadow.svg`.
-- **Phaser Engine Logic:** Reuses drag/drop architecture, verifying asset keys on drop zone overlap (`itemKey === shadowKey`).
+- **Mechanics:** 6 dark silhouette SVG shadows sit in a row at the top of the screen. 6 full-color SVG objects lie below (positions shuffled independently per playthrough). Child drags each colored object onto its matching dark silhouette. Match all 6 to win.
+- **Object Set:** House, Tree, Car, Boat, Ball, Umbrella — 6 maximally distinct outline shapes satisfying color-independent accessibility.
+- **SVG Requirements:** 6 object SVGs in `assets/svg/items/` (`house.svg`, `tree.svg`, `car.svg`, `boat.svg`, `ball.svg`, `umbrella.svg`) — 512×512px, flat fills, thick `#2D3748` outlines 4–6px, soft/vibrant palette. 6 shadow silhouette SVGs in `assets/svg/shadows/` (`shadow_house.svg`, `shadow_tree.svg`, `shadow_car.svg`, `shadow_boat.svg`, `shadow_ball.svg`, `shadow_umbrella.svg`) — derived by duplicating each object's paths, unioning fills, setting color to `#2D3748`. Sticker: `sticker_shadow_match.svg`.
+- **Phaser Engine Logic:** Reuses Shape Sorter's drag/drop architecture (Phaser Pointer Drag + Zone detection). On correct drop: snaps object to silhouette center, plays synthesized correct SFX + particle burst, marks object as matched (locked in place). On incorrect drop: gentle bounce-back to origin + synthesized incorrect SFX, no penalty. Dropping on empty space bounces back silently (no incorrect SFX). Completion triggers win animation + sticker award (first time only) + auto-return to Hub after 3s.
+- **Accessibility:** Silhouettes differ by outline shape, not just darkness (color-independent design). Particle counts reduced when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
+- **Game Logic:** Pure functions in `src/game/shadowMatchLogic.ts` (Fisher-Yates shuffle, independent object/shadow position generation, match detection, win detection) — testable without Phaser.
 
 ### GAME 5 — Musical Memory Simon (Working Memory & Auditory Recall)
 
@@ -127,7 +130,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │
     │  Show progress bar
     │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
-    │  animals/food + sticker loaded; remaining games' assets loaded
+    │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
+    │  shadows + sticker loaded; remaining games' assets loaded
     │  as tracks complete)
     │
     ▼
