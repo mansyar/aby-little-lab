@@ -5,7 +5,7 @@
 
 ---
 
-## Phase 1: SVG Assets & Preload Pipeline
+## Phase 1: SVG Assets & Preload Pipeline [checkpoint: dbd6250]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Create object & shadow silhouette SVG assets
