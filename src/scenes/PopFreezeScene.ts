@@ -16,6 +16,9 @@ import { earnSticker, hasSticker } from "../utils/storage";
 /** Display size for each bubble (exceeds 96px ideal touch target). */
 const BUBBLE_DISPLAY_SIZE = 96;
 
+/** Base scale factor: display size divided by SVG raster size (512px). */
+const BUBBLE_BASE_SCALE = BUBBLE_DISPLAY_SIZE / 512;
+
 /** Texture key used for particle bursts. */
 const PARTICLE_TEXTURE = "shape_circle";
 
@@ -164,7 +167,8 @@ export class PopFreezeScene extends Phaser.Scene {
   /** Pops a poppable bubble: SFX, particles, shrink animation, register pop, respawn or complete. */
   private handlePop(data: BubbleData): void {
     const index = this.bubbles.indexOf(data);
-    if (index >= 0) this.bubbles.splice(index, 1);
+    if (index < 0) return;
+    this.bubbles.splice(index, 1);
 
     this.audioManager.playPop();
     this.createParticleBurst(data.obj.x, data.obj.y);
@@ -198,8 +202,8 @@ export class PopFreezeScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: data.obj,
-      scaleX: 1.15,
-      scaleY: 1.15,
+      scaleX: BUBBLE_BASE_SCALE * 1.15,
+      scaleY: BUBBLE_BASE_SCALE * 1.15,
       duration: WOBBLE_DURATION,
       yoyo: true,
       ease: "Quad.easeInOut",
@@ -245,8 +249,8 @@ export class PopFreezeScene extends Phaser.Scene {
     for (const data of this.bubbles) {
       this.tweens.add({
         targets: data.obj,
-        scaleX: 1.2,
-        scaleY: 1.2,
+        scaleX: BUBBLE_BASE_SCALE * 1.2,
+        scaleY: BUBBLE_BASE_SCALE * 1.2,
         duration: 300,
         yoyo: true,
       });
@@ -265,15 +269,15 @@ export class PopFreezeScene extends Phaser.Scene {
 
   /** Shows a sticker unlock animation at the center of the screen. */
   private createStickerAnimation(): void {
+    const stickerScale = STICKER_DISPLAY_SIZE / 512;
     const stickerImage = this.add
       .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_pop_freeze")
-      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
       .setScale(0);
 
     this.tweens.add({
       targets: stickerImage,
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: stickerScale,
+      scaleY: stickerScale,
       duration: 300,
       ease: "Back.out",
     });

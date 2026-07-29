@@ -1556,7 +1556,10 @@ describe("scene navigation flow", () => {
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const winTween = tweenCalls.find(
-        (c) => c[0]?.yoyo === true && c[0]?.scaleX === 1.2 && c[0]?.scaleY === 1.2,
+        (c) =>
+          c[0]?.yoyo === true &&
+          c[0]?.scaleX === (96 / 512) * 1.2 &&
+          c[0]?.scaleY === (96 / 512) * 1.2,
       );
       expect(winTween).toBeDefined();
     });
