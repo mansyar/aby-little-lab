@@ -1,0 +1,27 @@
+Phase 1 Checkpoint: SVG Assets & Preload Pipeline
+
+Automated Test Command: \$env:CI='true'; pnpm test\
+Test Result: 244 tests passed (8 test files). All passing.
+Lint: \pnpm run check\ — No errors. Clean.
+Build: \pnpm run build\ — Succeeded. PWA generated with 6 precache entries.
+
+Changed Files (Phase 1):
+- src/assets/svg/animals/frog_green.svg (NEW)
+- src/assets/svg/animals/frog_blue.svg (NEW)
+- src/assets/svg/animals/frog_red.svg (NEW)
+- src/assets/svg/items/lilypad.svg (NEW)
+- src/assets/svg/stickers/sticker_musical_memory.svg (NEW)
+- src/scenes/PreloadScene.ts (MODIFIED — added 5 new SVG imports + SHAPE_ASSETS entries)
+- src/__tests__/scenes/navigation.test.ts (MODIFIED — updated SVG count from 33 to 38)
+
+Test Coverage:
+- src/scenes/PreloadScene.ts — covered by src/__tests__/scenes/navigation.test.ts (preload SVG loading tests)
+- SVG files are non-code assets, excluded from test requirement.
+
+Manual Verification Steps:
+1. Start dev server: \pnpm dev\
+2. Open browser to the shown URL
+3. Confirm the game loads successfully (Hub scene with 6 game tiles appears). No console errors about missing SVG assets.
+4. Open browser DevTools Console: Verify no SVG loading errors appear during the PreloadScene phase.
+
+User Confirmation: User confirmed 'Yes' — verification meets expectations.
