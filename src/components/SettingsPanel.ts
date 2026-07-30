@@ -15,11 +15,6 @@ const TOGGLE_HEIGHT = 96;
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
   private readonly scene: Phaser.Scene;
-  private readonly backdrop: Phaser.GameObjects.Rectangle;
-  private readonly panel: Phaser.GameObjects.Rectangle;
-  private readonly title: Phaser.GameObjects.Text;
-  private readonly bgmToggle: Phaser.GameObjects.Text;
-  private readonly sfxToggle: Phaser.GameObjects.Text;
 
   /** Creates the settings panel using the current persisted audio settings. */
   constructor(scene: Phaser.Scene) {
@@ -29,25 +24,18 @@ export class SettingsPanel {
     const centerY = height / 2;
     const settings = getSettings();
 
-    this.backdrop = scene.add.rectangle(
-      centerX,
-      centerY,
-      width,
-      height,
-      BACKDROP_COLOR,
-      BACKDROP_ALPHA,
-    );
-    this.panel = scene.add
+    scene.add.rectangle(centerX, centerY, width, height, BACKDROP_COLOR, BACKDROP_ALPHA);
+    scene.add
       .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
       .setStrokeStyle(4, OUTLINE_COLOR);
-    this.title = scene.add
+    scene.add
       .text(centerX, centerY - 105, "Settings", {
         color: "#2d3748",
         fontSize: "32px",
       })
       .setOrigin(0.5);
-    this.bgmToggle = this.createToggle(centerX, centerY - 25, "BGM", settings.bgmEnabled);
-    this.sfxToggle = this.createToggle(centerX, centerY + 75, "SFX", settings.sfxEnabled);
+    this.createToggle(centerX, centerY - 25, "BGM", settings.bgmEnabled);
+    this.createToggle(centerX, centerY + 75, "SFX", settings.sfxEnabled);
   }
 
   /** Creates one inflated, touch-friendly settings label. */
@@ -57,14 +45,19 @@ export class SettingsPanel {
     label: string,
     enabled: boolean,
   ): Phaser.GameObjects.Text {
-    const toggle = this.scene
-      .add.text(x, y, `${label}: ${enabled ? "ON" : "OFF"}`, {
+    const toggle = this.scene.add
+      .text(x, y, `${label}: ${enabled ? "ON" : "OFF"}`, {
         color: enabled ? ENABLED_COLOR : DISABLED_COLOR,
         fontSize: "28px",
       })
       .setOrigin(0.5);
     toggle.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-TOGGLE_WIDTH / 2, -TOGGLE_HEIGHT / 2, TOGGLE_WIDTH, TOGGLE_HEIGHT),
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_WIDTH / 2,
+        -TOGGLE_HEIGHT / 2,
+        TOGGLE_WIDTH,
+        TOGGLE_HEIGHT,
+      ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     return toggle;

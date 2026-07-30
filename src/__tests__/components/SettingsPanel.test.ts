@@ -116,10 +116,7 @@ describe("SettingsPanel creation and display", () => {
     [{ bgmEnabled: true, sfxEnabled: true }, "BGM: ON", "SFX: ON", "#68d391"],
     [{ bgmEnabled: false, sfxEnabled: false }, "BGM: OFF", "SFX: OFF", "#a0aec0"],
   ])("reflects stored toggle state %o", (settings, bgmLabel, sfxLabel, color) => {
-    localStorage.setItem(
-      "abby-little-lab:v1",
-      JSON.stringify({ stickers: {}, settings }),
-    );
+    localStorage.setItem("abby-little-lab:v1", JSON.stringify({ stickers: {}, settings }));
     const scene = createScene();
 
     new SettingsPanel(scene as never);
@@ -148,12 +145,15 @@ describe("SettingsPanel creation and display", () => {
     for (const toggle of toggleObjects) {
       expect(toggle.setInteractive).toHaveBeenCalledWith(
         expect.objectContaining({
-          hitArea: expect.objectContaining({ height: expect.any(Number), width: expect.any(Number) }),
+          hitArea: expect.objectContaining({
+            height: expect.any(Number),
+            width: expect.any(Number),
+          }),
         }),
       );
-      const config = (toggle.setInteractive.mock.calls[0]?.[0] as {
+      const config = toggle.setInteractive.mock.calls[0]?.[0] as {
         hitArea: { height: number; width: number };
-      });
+      };
       expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
       expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
     }
