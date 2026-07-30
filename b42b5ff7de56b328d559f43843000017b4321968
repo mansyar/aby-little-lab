@@ -1,0 +1,29 @@
+Task Verification for b42b5ff:
+Phase: 4 — Round Progression, Progress Dots & Completion
+Task: Implement round progression, progress dots, completion flow with TDD
+
+Tests written (9 new in navigation.test.ts):
+- creates 5 progress dots at scene initialization
+- round success fills the next progress dot
+- sequence grows by 1 on round success and next round auto-plays
+- completion is triggered only at length-6 (5th round)
+- win animation tweens all frogs on completion
+- awards sticker on first completion only
+- does not re-award sticker when already earned
+- auto-returns to Hub after 3s delay on completion
+- parental lock exits to Hub at any time
+
+Implementation (MusicalMemoryScene.ts):
+- Added imports: appendNote, isWin, WIN_TARGET from musicalMemoryLogic; earnSticker, hasSticker from storage
+- Added constants: PROGRESS_DOT_COUNT=5, PROGRESS_DOT_Y=60, PROGRESS_DOT_SPACING=40, PROGRESS_DOT_RADIUS=8, AUTO_RETURN_DELAY=3000, STICKER_DISPLAY_SIZE=256, WIN_TWEEN_SCALE=1.2, WIN_TWEEN_DURATION=300
+- Added fields: progressDots[], roundCount=0
+- createProgressDots(): 5 dimmed circles at top of screen
+- handleRoundSuccess(): fill dot, check isWin, grow sequence or handleComplete
+- handleComplete(): playWin, win tweens on all frogs, sticker award (first only), auto-return to Hub after 3s
+- createStickerAnimation(): sticker image scale-from-0 with Back.out ease
+
+Quality Gates:
+- Tests: 284 passed (0 failures)
+- Coverage: MusicalMemoryScene.ts 99.05% stmts, 87.5% branches, 95% funcs, 100% lines
+- Biome check: clean
+- Build: succeeds
