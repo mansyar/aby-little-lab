@@ -1,0 +1,5 @@
+Task: Phase 1 quality correction
+
+Changes: Removed unused retained display-object fields until the Phase 2 destruction behavior needs them, and formatted the SettingsPanel source and test.
+Files: src/components/SettingsPanel.ts; src/__tests__/components/SettingsPanel.test.ts
+Why: Restores the project's required clean Biome check without changing Phase 1 behavior.
