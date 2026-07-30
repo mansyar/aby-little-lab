@@ -69,7 +69,7 @@ The project uses Biome with double quotes, 2-space indentation, and 100-characte
 src/
 ├── main.ts                # Phaser game config & scene register
 ├── scenes/                # BootScene, PreloadScene, HubScene, 6 game scenes
-├── components/            # ParentLock (hold-for-3s escape)
+├── components/            # ParentLock and SettingsPanel parental modal
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
@@ -89,6 +89,10 @@ src/
 | 4 | Shadow Match | Visual discrimination & spatial awareness | ✅ Implemented |
 | 5 | Musical Memory Simon | Working memory & auditory recall | ✅ Implemented |
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | ✅ Implemented |
+
+## Parental Settings
+
+Hold the Hub **Settings** control for 3 seconds to open the parental settings modal. It provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback will begin once the pending `bgm.mp3` asset is provided.
 
 ## Documentation
 

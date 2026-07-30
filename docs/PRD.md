@@ -145,7 +145,9 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │
     ├── Display 6 game tiles (grid)
     ├── Display sticker book (earned stickers)
-    ├── Display settings (BGM/SFX toggle, behind parental lock)
+    ├── Hold Settings for 3s ──────► [Settings modal]
+    │                                 ├── Toggle persisted BGM/SFX settings
+    │                                 └── Tap backdrop to return to Hub
     │
     ├── Tap game tile ──────────────────► [Game Scene]
     │                                        │
@@ -161,7 +163,6 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │                                                │
     ◄────────────────────────────────────────────────┘
     │
-    └── Hold 3s (parental lock) ──► Exit app
 ```
 
 ### Navigation Rules
@@ -169,7 +170,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a progress bar before transitioning to HubScene.
 - **HubScene → GameScene:** Tap on a game tile. Instant transition.
 - **GameScene → HubScene:** Auto-return after game completion (3s delay with win animation) OR parental lock (hold 3s).
-- **HubScene → Exit:** Parental lock (hold 3s) required. Prevents accidental app exit.
+- **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. Tapping the dark backdrop closes the modal and returns to the Hub.
 - **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
 
 ---
@@ -252,6 +253,7 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), and
 - BGM starts in BootScene and loops continuously.
 - BGM can be toggled on/off via parental settings (persisted in localStorage).
 - SFX can also be toggled independently.
+- The settings modal plays the synthesized correct chime when SFX is enabled. `bgm.mp3` is not yet supplied, so the BGM control persists and updates AudioManager state while playback awaits the asset.
 
 ### Audio Format
 

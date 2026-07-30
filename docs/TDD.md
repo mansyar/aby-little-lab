@@ -58,7 +58,7 @@ aby-little-lab/
     ├── scenes/
     │   ├── BootScene.ts            # Orientation lock & system initialization
     │   ├── PreloadScene.ts         # Progress bar & asset preloading
-    │   ├── HubScene.ts             # Game selection grid, sticker book & parental lock
+    │   ├── HubScene.ts             # Game selection grid, sticker book & settings parental lock
     │   ├── ShapeSorterScene.ts     # Mini-Game 1
     │   ├── AnimalTraceScene.ts     # Mini-Game 2
     │   ├── PopFreezeScene.ts       # Mini-Game 3
@@ -66,7 +66,8 @@ aby-little-lab/
     │   ├── MusicalMemoryScene.ts   # Mini-Game 5
     │   └── BigSmallScene.ts        # Mini-Game 6
     ├── components/
-    │   └── ParentLock.ts           # Long-press escape UI component (hold 3s)
+    │   ├── ParentLock.ts           # Long-press escape UI component (hold 3s)
+    │   └── SettingsPanel.ts        # Parental BGM/SFX modal overlay
     ├── audio/
     │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
     ├── game/
@@ -245,6 +246,12 @@ interface AppStorage {
   settings: Settings;
 }
 ```
+
+### Settings Panel
+
+`SettingsPanel` is created by `HubScene` after the Settings `ParentLock` succeeds. It renders a black 0.6-alpha backdrop and a cream, outlined modal. Its 96px-high BGM and SFX text hit areas exceed the 64px touch-target minimum.
+
+Each control delegates to the `AudioManager` singleton: BGM toggles persist through `setBGMEnabled()` and start or pause playback; SFX toggles persist through `setSFXEnabled()` and play `playCorrect()` only when enabled. Tapping the backdrop destroys every panel object. `HubScene` also destroys an open panel during shutdown.
 
 ### Game IDs
 
