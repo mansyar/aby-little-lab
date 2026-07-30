@@ -26,7 +26,7 @@
     - [ ] Render BGM toggle text ("BGM: ON" or "BGM: OFF") with correct color
     - [ ] Render SFX toggle text ("SFX: ON" or "SFX: OFF") with correct color
     - [ ] Set up interactive zones on toggle text with inflated hit areas (>=64x64px)
-- [ ] Task: Conductor - User Manual Verification 'SettingsPanel Component — Creation & Display' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'SettingsPanel Component — Creation & Display' (Protocol in workflow.md)
 
 ---
 
