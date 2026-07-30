@@ -1,0 +1,18 @@
+Phase 2 verification report — Toggle Interaction, Audio Integration & HubScene Wiring
+
+Automated checks:
+- pnpm run check — passed
+- CI=true pnpm run test:coverage — passed (331 tests; SettingsPanel 100% coverage)
+- pnpm run build — passed (Vite/PWA build)
+
+Manual verification steps approved by user:
+1. Start pnpm dev and open the Vite URL in a tablet/phone-sized viewport.
+2. Hold Settings for 3 seconds to open the modal.
+3. Confirm backdrop, panel, and touch targets.
+4. Toggle BGM/SFX and verify labels, colors, and persistence.
+5. Confirm enabling SFX plays a gentle chime; BGM audio asset is out of scope.
+6. Tap outside the panel and confirm Hub remains interactive.
+
+User confirmation: yes
+
+Outcome: Phase 2 checkpoint approved.
