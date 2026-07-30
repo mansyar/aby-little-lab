@@ -4,7 +4,7 @@
 
 ---
 
-## Phase 1: BGM Production Integration
+## Phase 1: BGM Production Integration [checkpoint: b48fde0]
 
 - [x] Task: Establish BGM packaging regression coverage [241929e]
    - [x] Add/update tests covering BGM initialization, looping, enabled/disabled behavior, and the `/audio/bgm.mp3` runtime URL.
@@ -16,7 +16,7 @@
 - [x] Task: Verify BGM user experience [af79eee]
   - [x] Confirm playback begins only after an eligible user interaction.
   - [x] Confirm looping, independent toggles, persisted settings, and comfortable playback volume.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint [b48fde0]
 
 ## Phase 2: Production PWA and Offline Validation
 
