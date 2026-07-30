@@ -1,0 +1,6 @@
+Review fix: Added HubScene integration coverage for SettingsPanel creation after ParentLock success and cleanup on scene shutdown.
+
+Modified files:
+- src/__tests__/scenes/navigation.test.ts
+
+Why: Prevents regressions in the settings modal lifecycle identified during formal review.
