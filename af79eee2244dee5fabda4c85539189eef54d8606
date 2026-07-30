@@ -1,0 +1,12 @@
+Task: Verify BGM user experience
+
+Summary: Verified BGM user experience across all acceptance criteria:
+- Playback begins only after eligible user interaction (SettingsPanel toggle behind parental lock; HubScene resume() on tile click)
+- Looping: bgmAudio.loop = true (confirmed by existing test)
+- Independent BGM/SFX toggles: setBGMEnabled()/setSFXEnabled() work independently (confirmed by existing tests)
+- Persisted settings: bgmEnabled/sfxEnabled persisted via localStorage (confirmed by existing tests)
+- Comfortable playback volume: Added BGM_VOLUME=0.3 constant and applied in init(). Previously volume defaulted to 1.0 (maximum), violating product guidelines. New test confirms volume is set between 0 and 1.0.
+
+Files changed:
+- src/audio/AudioManager.ts (added BGM_VOLUME constant, set bgmAudio.volume in init())
+- src/__tests__/audio/AudioManager.test.ts (added test: sets BGM audio element volume to a comfortable level below maximum)
