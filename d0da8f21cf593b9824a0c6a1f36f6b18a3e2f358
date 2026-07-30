@@ -1,0 +1,8 @@
+Task: Conductor - User Manual Verification 'Toggle Interaction, Audio Integration & HubScene Wiring'
+
+Summary: Presented a six-step end-to-end verification plan covering parental-lock access, modal appearance, BGM/SFX labels and persistence, SFX feedback, and backdrop closure. User approved the plan.
+
+Modified files:
+- conductor/tracks/settings-ui_20260730/plan.md
+
+Why: Records the approved human verification criteria for the completed settings interaction phase.
