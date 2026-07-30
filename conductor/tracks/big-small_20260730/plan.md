@@ -48,16 +48,16 @@
 
 ---
 
-## Phase 4: Completion, Sticker Award & Return
+## Phase 4: Completion, Sticker Award & Return [checkpoint: pending]
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for completion and sticker flow [TDD-Red]
-    - [ ] Test completion detected when sorted count reaches 6
-    - [ ] Test sticker awarded on first completion only (via `storage.earnSticker("big-small")`)
-    - [ ] Test auto-return to Hub after 3s delay
-    - [ ] Test parental lock exits early to Hub (already covered by existing game-scene-stubs parameterized test for all 6 scenes)
-- [ ] Task: Implement completion flow (win animation + sticker award + auto-return) in `BigSmallScene` [TDD-Green]
-- [ ] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for completion and sticker flow [TDD-Red]
+    - [x] Test completion detected when sorted count reaches 6
+    - [x] Test sticker awarded on first completion only (via `storage.earnSticker("big-small")`)
+    - [x] Test auto-return to Hub after 3s delay
+    - [x] Test parental lock exits early to Hub (already covered by existing game-scene-stubs parameterized test for all 6 scenes)
+- [x] Task: Implement completion flow (win animation + sticker award + auto-return) in `BigSmallScene` [TDD-Green]
+- [x] Task: Conductor - User Manual Verification 'Completion, Sticker Award & Return' (Protocol in workflow.md)
 
 ---
 
