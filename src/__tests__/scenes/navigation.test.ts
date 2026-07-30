@@ -208,6 +208,28 @@ vi.mock("../../audio/AudioManager", () => ({
   },
 }));
 
+const { MockSettingsPanel, mockSettingsPanel, mockSettingsPanelDestroy } = vi.hoisted(() => {
+  const mockSettingsPanelDestroy = vi.fn();
+  class MockSettingsPanel {
+    constructor(...args: unknown[]) {
+      mockSettingsPanel(...args);
+    }
+
+    destroy(): void {
+      mockSettingsPanelDestroy();
+    }
+  }
+  return {
+    MockSettingsPanel,
+    mockSettingsPanel: vi.fn(),
+    mockSettingsPanelDestroy,
+  };
+});
+
+vi.mock("../../components/SettingsPanel", () => ({
+  SettingsPanel: MockSettingsPanel,
+}));
+
 import { generatePathPoints } from "../../game/animalTraceLogic";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
@@ -458,6 +480,19 @@ describe("scene navigation flow", () => {
   });
 
   describe("HubScene", () => {
+    it("opens SettingsPanel when the settings parental lock succeeds", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+      const holdCallback = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 3000,
+      )?.[1] as () => void;
+      holdCallback();
+
+      expect(mockSettingsPanel).toHaveBeenCalledWith(scene);
+    });
+
     it("creates 6 game tiles", () => {
       const scene = new HubScene();
       scene.create();
@@ -2933,6 +2968,20 @@ describe("scene navigation flow", () => {
       triggerShutdown(scene);
 
       expect(anyObjectOffCalled(scene)).toBe(true);
+    });
+
+    it("destroys an open SettingsPanel on HubScene shutdown", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+      const holdCallback = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 3000,
+      )?.[1] as () => void;
+      holdCallback();
+      triggerShutdown(scene);
+
+      expect(mockSettingsPanelDestroy).toHaveBeenCalled();
     });
   });
 });
