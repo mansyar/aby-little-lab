@@ -395,12 +395,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 38 shape, animal/food, sticker, and bubble SVGs during preload", () => {
+    it("loads all 44 shape, animal/food, toy, sticker, and bubble SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(38);
+      expect(svgCalls).toHaveLength(44);
     });
 
     it("loads shape SVGs with correct keys", () => {

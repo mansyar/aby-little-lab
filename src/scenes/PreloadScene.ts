@@ -32,10 +32,16 @@ import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
+import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
 import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
+import toyTeddyBearSvg from "../assets/svg/toys/teddy_bear.svg?raw";
+import toyBallSvg from "../assets/svg/toys/toy_ball.svg?raw";
+import toyBlockSvg from "../assets/svg/toys/toy_block.svg?raw";
+import toyBoxSvg from "../assets/svg/toys/toy_box.svg?raw";
+import toyCarSvg from "../assets/svg/toys/toy_car.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
 
 const SVG_RASTER_SIZE = 512;
@@ -79,6 +85,12 @@ const SHAPE_ASSETS = [
   { key: "frog_red", svg: animalFrogRedSvg },
   { key: "lilypad", svg: lilypadSvg },
   { key: "sticker_musical_memory", svg: stickerMusicalMemorySvg },
+  { key: "toy_teddy_bear", svg: toyTeddyBearSvg },
+  { key: "toy_car", svg: toyCarSvg },
+  { key: "toy_ball", svg: toyBallSvg },
+  { key: "toy_block", svg: toyBlockSvg },
+  { key: "toy_box", svg: toyBoxSvg },
+  { key: "sticker_big_small", svg: stickerBigSmallSvg },
 ] as const;
 
 /**
