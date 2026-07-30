@@ -1,0 +1,8 @@
+Task: Write tests for toggle interaction, audio feedback, persistence, and close
+
+Summary: Added red tests for BGM and SFX toggle behavior, visual label updates, test-chime behavior, backdrop closure, and direct destruction.
+
+Modified files:
+- src/__tests__/components/SettingsPanel.test.ts
+
+Why: Establishes executable acceptance criteria before implementing Phase 2 behavior. The focused suite is intentionally red: 6 tests fail because interaction handlers and destroy behavior are absent.
