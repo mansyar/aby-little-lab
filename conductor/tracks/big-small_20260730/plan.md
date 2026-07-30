@@ -17,7 +17,7 @@
 
 ---
 
-## Phase 2: Round Initialization & Match Logic [checkpoint: pending]
+## Phase 2: Round Initialization & Match Logic [checkpoint: b7e66a4]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for round initialization and match logic [TDD-Red]
