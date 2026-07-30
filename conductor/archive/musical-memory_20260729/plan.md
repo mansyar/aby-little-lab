@@ -46,7 +46,7 @@
     - [x] Test input is unlocked after sequence playback/replay completes
     - [x] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas
 - [x] Task: Implement sequence auto-play (timed note + scale-up + glow), child input, replay button, and mistake handling in `MusicalMemoryScene` (calls existing `AudioManager.playFrogNote` + correct/incorrect SFX) [TDD-Green] [sha: c9abe87]
-- [~] Task: Conductor - User Manual Verification 'Sequence Playback & Child Input Interaction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Sequence Playback & Child Input Interaction' (Protocol in workflow.md)
 
 ---
 
