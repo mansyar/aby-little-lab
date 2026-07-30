@@ -13,6 +13,9 @@ const SHAPE_Y = 600;
 /** Display size for shapes and slots (exceeds 96px ideal touch target). */
 const SHAPE_DISPLAY_SIZE = 128;
 
+/** Base scale for shapes (display size / texture size). */
+const SHAPE_BASE_SCALE = SHAPE_DISPLAY_SIZE / 512;
+
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 160;
 
@@ -218,8 +221,8 @@ export class ShapeSorterScene extends Phaser.Scene {
     for (const shape of this.shapes) {
       this.tweens.add({
         targets: shape.obj,
-        scaleX: 1.2,
-        scaleY: 1.2,
+        scaleX: SHAPE_BASE_SCALE * 1.2,
+        scaleY: SHAPE_BASE_SCALE * 1.2,
         duration: 300,
         yoyo: true,
       });
@@ -238,15 +241,15 @@ export class ShapeSorterScene extends Phaser.Scene {
 
   /** Shows a sticker unlock animation at the center of the screen. */
   private createStickerAnimation(): void {
+    const stickerScale = STICKER_DISPLAY_SIZE / 512;
     const stickerImage = this.add
       .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_shape_sorter")
-      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
       .setScale(0);
 
     this.tweens.add({
       targets: stickerImage,
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: stickerScale,
+      scaleY: stickerScale,
       duration: 300,
       ease: "Back.out",
     });

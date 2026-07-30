@@ -13,6 +13,9 @@ const OBJECT_Y = 600;
 /** Display size for objects and shadows (ideal 96x96px touch target per spec). */
 const DISPLAY_SIZE = 96;
 
+/** Base scale for objects (display size / texture size). */
+const OBJECT_BASE_SCALE = DISPLAY_SIZE / 512;
+
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 120;
 
@@ -228,8 +231,8 @@ export class ShadowMatchScene extends Phaser.Scene {
     for (const data of this.objectData) {
       this.tweens.add({
         targets: data.obj,
-        scaleX: 1.2,
-        scaleY: 1.2,
+        scaleX: OBJECT_BASE_SCALE * 1.2,
+        scaleY: OBJECT_BASE_SCALE * 1.2,
         duration: 300,
         yoyo: true,
       });
@@ -248,15 +251,15 @@ export class ShadowMatchScene extends Phaser.Scene {
 
   /** Shows a sticker unlock animation at the center of the screen. */
   private createStickerAnimation(): void {
+    const stickerScale = STICKER_DISPLAY_SIZE / 512;
     const stickerImage = this.add
       .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_shadow_match")
-      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
       .setScale(0);
 
     this.tweens.add({
       targets: stickerImage,
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: stickerScale,
+      scaleY: stickerScale,
       duration: 300,
       ease: "Back.out",
     });

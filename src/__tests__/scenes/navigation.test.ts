@@ -1200,7 +1200,8 @@ describe("scene navigation flow", () => {
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const winTween = tweenCalls.find(
-        (c) => c[0]?.yoyo === true && c[0]?.scaleX === 1.2 && c[0]?.scaleY === 1.2,
+        // SPRITE_BASE_SCALE * 1.2 = (128 / 512) * 1.2 = 0.3
+        (c) => c[0]?.yoyo === true && c[0]?.scaleX === 0.3 && c[0]?.scaleY === 0.3,
       );
       expect(winTween).toBeDefined();
     });

@@ -25,6 +25,9 @@ const SPRITE_Y = 384;
 /** Display size for animal and food sprites. */
 const SPRITE_SIZE = 128;
 
+/** Base scale for sprites (display size / texture size). */
+const SPRITE_BASE_SCALE = SPRITE_SIZE / 512;
+
 /** Number of waypoints per path. */
 const PATH_POINTS = 6;
 
@@ -275,8 +278,8 @@ export class AnimalTraceScene extends Phaser.Scene {
     if (this.currentPair) {
       this.tweens.add({
         targets: this.currentPair.animalSprite,
-        scaleX: 1.2,
-        scaleY: 1.2,
+        scaleX: SPRITE_BASE_SCALE * 1.2,
+        scaleY: SPRITE_BASE_SCALE * 1.2,
         duration: 300,
         yoyo: true,
       });
