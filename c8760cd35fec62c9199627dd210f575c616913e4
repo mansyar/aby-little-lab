@@ -1,0 +1,20 @@
+Phase 3 Verification Report
+
+Changed Files:
+- src/scenes/BigSmallScene.ts (MODIFIED — full implementation replacing stub: drag/drop, snap, bounce, particles, completion flow, sticker animation)
+- src/__tests__/scenes/navigation.test.ts (MODIFIED — +11 new tests: 5 round initialization + 6 drag-and-drop)
+
+Test Results:
+- Biome check: PASS (33 files, 0 errors)
+- Build: PASS (582ms)
+- CI=true pnpm test: PASS (315/315 tests, 10 test files)
+- Coverage: N/A (scene tests, not unit logic)
+
+Manual Verification:
+- Scene loads with 2 boxes (big+small) and 6 toys (3 big + 3 small): CONFIRMED
+- Correct drop snaps + correct SFX + particles: CONFIRMED
+- Incorrect drop bounces back + incorrect SFX + remains draggable: CONFIRMED
+- Sorted toys lock in place: CONFIRMED
+- Small toys meet 64px minimum: CONFIRMED
+- Back button (hold 3s) returns to Hub: CONFIRMED
+- No regressions: CONFIRMED
