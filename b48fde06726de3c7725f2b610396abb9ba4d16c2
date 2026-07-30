@@ -1,0 +1,27 @@
+PHASE 1 VERIFICATION REPORT: BGM Production Integration
+
+Automated Tests:
+- Command: npx vitest run --coverage
+- Result: 11 test files, 338 tests — ALL PASSED
+- Coverage: 98.18% statements, 88.46% branches, 93.59% functions, 98.86% lines
+- AudioManager.ts: 97.11% statement coverage, 91.3% branch coverage
+
+Manual Verification Plan (user-confirmed):
+1. Start dev server: pnpm dev
+2. Open http://localhost:5173
+3. Navigate to http://localhost:5173/audio/bgm.mp3 — BGM file should be served (was 404 before)
+4. Confirm BGM does NOT autoplay on initial load (auto-play policy respected)
+5. Open Settings panel (hold Settings button 3s for parental lock)
+6. Enable BGM — confirm gentle ambient loop starts at comfortable low volume
+7. Confirm BGM seamlessly loops without gaps
+8. Toggle SFX independently — BGM continues playing
+9. Close and reopen browser — BGM setting persists (localStorage)
+10. Confirm volume is low and does not compete with SFX
+
+Files changed in Phase 1:
+- src/__tests__/audio/AudioManager.test.ts (added BGM URL, file existence, volume tests)
+- src/audio/AudioManager.ts (added BGM_VOLUME=0.3, set bgmAudio.volume in init())
+- public/audio/bgm.mp3 (relocated from src/assets/audio/)
+- conductor/tech-stack.md (updated asset pipeline documentation)
+
+Phase Status: COMPLETE
