@@ -16,7 +16,7 @@
     - [ ] Test SFX toggle text reflects initial state from getSettings (ON if sfxEnabled=true, OFF if false)
     - [ ] Test toggle text uses correct colors (green #68D391 for ON, gray #A0AEC0 for OFF)
     - [ ] Test toggle interactive zones have hit areas >=64x64px (inflated beyond visual text size)
-- [~] Task: Implement SettingsPanel component — creation and rendering [TDD-Green]
+- [x] Task: Implement SettingsPanel component — creation and rendering [TDD-Green] [15e8682]
     - [ ] Create `src/components/SettingsPanel.ts`
     - [ ] Constructor takes a Phaser.Scene parameter
     - [ ] Render semi-transparent backdrop rectangle (full screen, black ~0.6 alpha)
