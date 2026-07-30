@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
+import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
 import { hasSticker } from "../utils/storage";
 
@@ -33,6 +34,7 @@ const GRID_ROWS = 2;
  */
 export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private settingsPanel?: SettingsPanel;
 
   constructor() {
     super({ key: "Hub" });
@@ -82,7 +84,8 @@ export class HubScene extends Phaser.Scene {
       scene: this,
       target: settingsButton,
       onSuccess: () => {
-        // Settings UI will be implemented in a future track.
+        this.settingsPanel?.destroy();
+        this.settingsPanel = new SettingsPanel(this);
       },
       onFailure: () => {
         // No action needed on failure.
@@ -91,6 +94,8 @@ export class HubScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+      this.settingsPanel?.destroy();
+      this.settingsPanel = undefined;
     });
   }
 }
