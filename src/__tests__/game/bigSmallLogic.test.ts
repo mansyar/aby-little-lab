@@ -47,13 +47,13 @@ describe("selectToys", () => {
 
 describe("createToyInstances", () => {
   it("creates 6 instances from 3 selected types (2 per type)", () => {
-    const types: ToyType[] = ["teddy_bear", "toy_car", "toy_ball"];
+    const types: ToyType[] = ["teddy_bear", "car", "ball"];
     const instances = createToyInstances(types);
     expect(instances).toHaveLength(6);
   });
 
   it("each type gets one big (1.5x) and one small (0.7x) instance", () => {
-    const types: ToyType[] = ["teddy_bear", "toy_car", "toy_ball"];
+    const types: ToyType[] = ["teddy_bear", "car", "ball"];
     const instances = createToyInstances(types);
 
     for (const type of types) {
@@ -70,7 +70,7 @@ describe("createToyInstances", () => {
   });
 
   it("scaleCategory is 'big' for 1.5x and 'small' for 0.7x", () => {
-    const types: ToyType[] = ["toy_block"];
+    const types: ToyType[] = ["block"];
     const instances = createToyInstances(types);
 
     const big = instances.find((i) => i.scale === BIG_SCALE);
@@ -134,20 +134,20 @@ describe("createBoxes", () => {
 
 describe("shuffle", () => {
   it("returns an array with the same elements", () => {
-    const input: ToyType[] = ["teddy_bear", "toy_car", "toy_ball"];
+    const input: ToyType[] = ["teddy_bear", "car", "ball"];
     const result = shuffle(input);
     expect(result.sort()).toEqual(input.sort());
   });
 
   it("returns a new array (does not mutate input)", () => {
-    const input: ToyType[] = ["teddy_bear", "toy_car", "toy_ball"];
+    const input: ToyType[] = ["teddy_bear", "car", "ball"];
     const inputCopy = [...input];
     shuffle(input);
     expect(input).toEqual(inputCopy);
   });
 
   it("produces independent results when called twice with different random values", () => {
-    const input: ToyType[] = ["teddy_bear", "toy_car", "toy_ball"];
+    const input: ToyType[] = ["teddy_bear", "car", "ball"];
 
     const spy = vi.spyOn(Math, "random");
     spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);

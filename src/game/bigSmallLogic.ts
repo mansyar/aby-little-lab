@@ -1,11 +1,11 @@
 /** The four toy types used in the Big vs. Small game. */
-export type ToyType = "teddy_bear" | "toy_car" | "toy_ball" | "toy_block";
+export type ToyType = "teddy_bear" | "car" | "ball" | "block";
 
 /** The two size categories a toy or box can belong to. */
 export type ScaleCategory = "big" | "small";
 
 /** All four toy types, in canonical order. */
-export const ALL_TOYS: readonly ToyType[] = ["teddy_bear", "toy_car", "toy_ball", "toy_block"];
+export const ALL_TOYS: readonly ToyType[] = ["teddy_bear", "car", "ball", "block"];
 
 /** The number of sorted toys needed to complete the game. */
 export const WIN_TARGET = 6;
