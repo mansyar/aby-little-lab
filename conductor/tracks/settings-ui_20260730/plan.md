@@ -30,7 +30,7 @@
 
 ---
 
-## Phase 2: Toggle Interaction, Audio Integration & HubScene Wiring [TDD]
+## Phase 2: Toggle Interaction, Audio Integration & HubScene Wiring [TDD] [checkpoint: cf358b3]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase [78ee94a]
 - [x] Task: Write tests for toggle interaction, audio feedback, persistence, and close [TDD-Red] [7d33a07]
