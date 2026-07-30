@@ -74,7 +74,8 @@ aby-little-lab/
     │   ├── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
     │   ├── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
     │   ├── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
-    │   └── musicalMemoryLogic.ts # Pure game logic (sequence generation, note appending, input validation, round/win detection)
+    │   ├── musicalMemoryLogic.ts # Pure game logic (sequence generation, note appending, input validation, round/win detection)
+    │   └── bigSmallLogic.ts     # Pure game logic (toy selection, dual-scale instance creation, round generation, scale-category match detection, win detection)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -84,7 +85,8 @@ aby-little-lab/
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
     │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
-    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella (Game 4 objects) + Lily Pad (Game 5) + Teddy, Toy Car, Toy Box (Game 6)
+    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella (Game 4 objects) + Lily Pad (Game 5)
+    │       ├── toys/               # Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Box (Game 6)
     │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs
@@ -93,7 +95,7 @@ aby-little-lab/
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock tests
-        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic)
+        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage tests
 ```
@@ -319,9 +321,16 @@ interface AppStorage {
 | `boat.svg` | 512×512 | Game 4 | Colored object — blue hull (#4299E1), thick `#2D3748` outline |
 | `ball.svg` | 512×512 | Game 4 | Colored object — yellow (#ECC94B), thick `#2D3748` outline |
 | `umbrella.svg` | 512×512 | Game 4 | Colored object — purple (#9F7AEA), thick `#2D3748` outline |
-| `teddy_bear.svg` | 512×512 | Game 6 | Sorted by scale (big/small) |
-| `toy_car.svg` | 512×512 | Game 6 | Sorted by scale (big/small) |
-| `toy_box.svg` | 512×512 | Game 6 | Container (1.5× and 0.7× scale) |
+
+### SVG Assets — Toys (`assets/svg/toys/`)
+
+| File | Dimensions | Game | Notes |
+|---|---|---|---|
+| `teddy_bear.svg` | 512×512 | Game 6 | Golden brown body (#D69E2E), inner ears/muzzle (#F6AD55), sorted by scale (big/small) |
+| `toy_car.svg` | 512×512 | Game 6 | Coral body (#FC8181), light blue windows (#BEE3F8), sorted by scale (big/small) |
+| `toy_ball.svg` | 512×512 | Game 6 | Teal base (#4FD1C5), orange center circle (#F6AD55), sorted by scale (big/small) |
+| `toy_block.svg` | 512×512 | Game 6 | Purple body (#9F7AEA), yellow star (#ECC94B), sorted by scale (big/small) |
+| `toy_box.svg` | 512×512 | Game 6 | Orange body (#F6AD55), yellow opening (#ECC94B) — rendered at both 1.5× (big) and 0.7× (small) scales |
 
 ### SVG Assets — UI (`assets/svg/ui/`)
 
@@ -376,7 +385,7 @@ interface AppStorage {
 
 > **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
 >
-> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track.
+> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track. Game 6 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Big vs. Small Cleaner track.
 
 ### PWA Icons (`public/icons/`)
 
@@ -391,9 +400,10 @@ interface AppStorage {
 | SVG — shapes | 8 (4 shapes + 4 cutouts) |
 | SVG — animals | 7 |
 | SVG — items | 10 (4 Game 2 food + 6 Game 4 objects) |
+| SVG — toys | 5 (4 toys + 1 box, Game 6) |
 | SVG — shadows | 6 (Game 4 silhouettes) |
 | SVG — UI | 13 |
 | SVG — stickers | 6 |
 | Audio (MP3) | 6 |
 | PWA icons (PNG) | 1 |
-| **Total** | **57** |
+| **Total** | **62** |

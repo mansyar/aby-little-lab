@@ -99,7 +99,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Silhouettes differ by outline shape, not just darkness (color-independent design). Particle counts reduced when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
 - **Game Logic:** Pure functions in `src/game/shadowMatchLogic.ts` (Fisher-Yates shuffle, independent object/shadow position generation, match detection, win detection) — testable without Phaser.
 
-### GAME 5 — Musical Memory Simon (Working Memory & Auditory Recall)
+### GAME 5 — Musical Memory Simon (Working Memory & Auditory Recall) ✅ Implemented
 
 - **Milestone:** Sequential direction following and audio pattern retention.
 - **Mechanics:** 3 colorful SVG frogs on lily pads emit distinct musical notes (C4, E4, G4) and scale up in sequence. Child repeats the sequence. Each successful round adds one note, starting at 2 notes and winning at length 6 (5 rounds). A replay button lets the child re-listen to the current sequence on demand.
@@ -108,12 +108,16 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Frogs distinguished by color AND position AND note (not color-only). Gentle bounce animations (200–500ms). No-fail design (no penalties for wrong taps).
 - **Game Logic:** Pure functions in `src/game/musicalMemoryLogic.ts` (sequence generation, note appending, input validation, round completion, win detection) — testable without Phaser.
 
-### GAME 6 — Big vs. Small Cleaner (Scale & Quantitative Reasoning)
+### GAME 6 — Big vs. Small Cleaner (Scale & Quantitative Reasoning) ✅ Implemented
 
 - **Milestone:** Categorizing spatial size concepts ("Big" vs "Small").
-- **Mechanics:** Two toy box SVG containers sit on screen (1.5× scale "BIG" box, 0.7× scale "SMALL" box). Scattered toys must be sorted into respective boxes.
-- **SVG Requirements:** `toy_box.svg`, `teddy_bear.svg`, `toy_car.svg` (rendered at dual scales).
-- **Phaser Engine Logic:** Drag target evaluation checks `sprite.scaleCategory === box.scaleCategory`.
+- **Mechanics:** 3 of 4 toy types randomly selected per playthrough (Fisher-Yates shuffle). Each selected toy type spawns at two scales: big (1.5×) and small (0.7×), yielding 6 toys per round. Two toy box containers sit at the top of the screen — one rendered at 1.5× scale ("BIG" box) and one at 0.7× scale ("SMALL" box). Child drags each toy into the box whose scale category matches the toy's. Match all 6 to win.
+- **Toy Set:** Teddy Bear, Toy Car, Toy Ball, Toy Block — 4 toy types with maximally distinct silhouettes.
+- **SVG Requirements:** `teddy_bear.svg`, `toy_car.svg`, `toy_ball.svg`, `toy_block.svg` (512×512px, flat fills, thick `#2D3748` outlines 4–6px, storybook style, in `assets/svg/toys/`). `toy_box.svg` (512×512px, open container, rendered at both 1.5× and 0.7× scales — the box itself teaches the size concept). Sticker: `sticker_big_small.svg` (big orange ball + small purple ball on cream circle background).
+- **Toy Colors:** Teddy Bear golden brown (`#D69E2E`), Toy Car coral (`#FC8181`), Toy Ball teal (`#4FD1C5`), Toy Block purple (`#9F7AEA`) — all soft/vibrant non-primary.
+- **Phaser Engine Logic:** Reuses Shape Sorter / Shadow Match's drag/drop architecture (Phaser Pointer Drag + Zone detection). Each toy image is created at `TOY_BASE_SIZE × toy.scale` (96px base × 1.5 = 144px for big, 96px × 0.7 = 67px for small — exceeding the 64px minimum touch target). Box zones use `DROP_ZONE_SIZE = 160px`. On correct drop: snaps toy to box center, plays synthesized correct SFX + particle burst, marks toy as sorted (locked in place via `disableInteractive`). On incorrect drop: gentle bounce-back to origin via `Back.out` tween + synthesized incorrect SFX, no penalty. Dropping on empty space bounces back silently. Completion triggers win animation (all toys pulse scale) + sticker award (first time only) + auto-return to Hub after 3s.
+- **Accessibility:** Big toys (144px) and small toys (67px) both exceed the 64px minimum touch target. Size categories are visually distinct (1.5× vs 0.7× ratio). Particle counts reduced when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
+- **Game Logic:** Pure functions in `src/game/bigSmallLogic.ts` (Fisher-Yates shuffle, toy type selection, toy instance creation with dual scales, box creation, round generation with independent toy shuffling, scale-category match detection, win detection) — testable without Phaser.
 
 ---
 
@@ -133,8 +137,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  Show progress bar
     │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
     │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
-    │  shadows + sticker, Game 5 frogs + lily pad + sticker loaded;
-    │  remaining games' assets loaded as tracks complete)
+    │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
+    │  toys/box + sticker — all 6 games' assets loaded)
     │
     ▼
 [HubScene]
@@ -187,14 +191,16 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 | Token | Hex | Used In |
 |---|---|---|
-| `--orange` | `#F6AD55` | Game 1 (circle shape), Game 6 (items) |
-| `--teal` | `#4FD1C5` | Game 1 (triangle shape) |
-| `--purple` | `#9F7AEA` | Game 1 (square shape), Game 6 (items) |
+| `--orange` | `#F6AD55` | Game 1 (circle shape), Game 6 (toy box, teddy inner ears/muzzle, toy ball center, sticker big ball) |
+| `--teal` | `#4FD1C5` | Game 1 (triangle shape), Game 6 (toy ball) |
+| `--purple` | `#9F7AEA` | Game 1 (square shape), Game 6 (toy block, sticker small ball) |
 | `--pink` | `#F687B3` | Game 1 (star shape) |
 | `--green` | `#48BB78` | Game 5 (green frog → C4) |
 | `--blue` | `#3182CE` | Game 5 (blue frog → E4) |
 | `--red` | `#E53E3E` | Game 5 (red frog → G4) |
-| `--yellow` | `#F6AD55` | Game 6 (items) |
+| `--coral` | `#FC8181` | Game 6 (toy car) |
+| `--golden-brown` | `#D69E2E` | Game 6 (teddy bear body) |
+| `--yellow` | `#ECC94B` | Game 6 (toy box opening, toy block star) |
 
 ### Design Rules
 
