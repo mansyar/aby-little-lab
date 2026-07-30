@@ -52,15 +52,15 @@
 
 ## Phase 4: Round Progression, Progress Dots & Completion
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for round progression, progress dots, and completion flow [TDD-Red]
-    - [ ] Test round success fills the next progress dot (5 dots total)
-    - [ ] Test sequence grows by 1 on round success and the next round auto-plays
-    - [ ] Test completion is triggered only when the length-6 sequence is completed correctly
-    - [ ] Test win animation + win SFX play on completion
-    - [ ] Test sticker awarded on first completion only via `storage.earnSticker("musical-memory")` (with sticker SFX + unlock animation)
-    - [ ] Test auto-return to Hub scene after 3s delay
-    - [ ] Test parental lock (hold 3s) exits to Hub at any time
-- [ ] Task: Implement round progression, progress dots (5), completion flow (win animation + sticker award + auto-return) in `MusicalMemoryScene` [TDD-Green]
-- [ ] Task: Conductor - User Manual Verification 'Round Progression, Progress Dots & Completion' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for round progression, progress dots, and completion flow [TDD-Red] [sha: b42b5ff]
+    - [x] Test round success fills the next progress dot (5 dots total) [sha: b42b5ff]
+    - [x] Test sequence grows by 1 on round success and the next round auto-plays [sha: b42b5ff]
+    - [x] Test completion is triggered only when the length-6 sequence is completed correctly [sha: b42b5ff]
+    - [x] Test win animation + win SFX play on completion [sha: b42b5ff]
+    - [x] Test sticker awarded on first completion only via `storage.earnSticker("musical-memory")` (with sticker SFX + unlock animation) [sha: b42b5ff]
+    - [x] Test auto-return to Hub scene after 3s delay [sha: b42b5ff]
+    - [x] Test parental lock (hold 3s) exits to Hub at any time [sha: b42b5ff]
+- [x] Task: Implement round progression, progress dots (5), completion flow (win animation + sticker award + auto-return) in `MusicalMemoryScene` [TDD-Green] [sha: b42b5ff]
+- [~] Task: Conductor - User Manual Verification 'Round Progression, Progress Dots & Completion' (Protocol in workflow.md)
 </protect>
