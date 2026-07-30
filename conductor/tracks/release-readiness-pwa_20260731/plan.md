@@ -13,9 +13,9 @@
   - [x] Move/package `src/assets/audio/bgm.mp3` at the served `/audio/bgm.mp3` path.
   - [x] Preserve the current `AudioManager` API and BGM/SFX preference behavior.
   - [x] Run BGM and full test suites.
-- [ ] Task: Verify BGM user experience
-  - [ ] Confirm playback begins only after an eligible user interaction.
-  - [ ] Confirm looping, independent toggles, persisted settings, and comfortable playback volume.
+- [x] Task: Verify BGM user experience [af79eee]
+  - [x] Confirm playback begins only after an eligible user interaction.
+  - [x] Confirm looping, independent toggles, persisted settings, and comfortable playback volume.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: Production PWA and Offline Validation
