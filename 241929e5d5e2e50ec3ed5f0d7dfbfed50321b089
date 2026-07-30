@@ -1,0 +1,8 @@
+Task: Establish BGM packaging regression coverage
+
+Summary: Added regression tests covering BGM initialization, looping, enabled/disabled behavior, and the /audio/bgm.mp3 runtime URL. Tests confirm that the AudioManager creates the BGM audio element with the exact runtime URL and that the BGM file exists at public/audio/bgm.mp3.
+
+Files modified:
+- src/__tests__/audio/AudioManager.test.ts (added 3 tests: exact URL verification, file existence, file non-empty check, source asset size match)
+
+Pre-change failure confirmed: BGM file does not exist at public/audio/bgm.mp3 (expected failure before packaging step).
