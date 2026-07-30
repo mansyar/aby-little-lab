@@ -5,15 +5,15 @@
 
 ---
 
-## Phase 1: SVG Assets & Preload Pipeline
+## Phase 1: SVG Assets & Preload Pipeline [checkpoint: pending]
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Create toy & box SVG assets
-    - [ ] Create 4 toy SVGs in `src/assets/svg/toys/`: `teddy_bear.svg`, `toy_car.svg`, `toy_ball.svg`, `toy_block.svg` (512×512 viewBox, flat fills, thick #2D3748 outlines 4-6px, soft/vibrant palette, maximally distinct outline shapes)
-    - [ ] Create 1 toy box SVG: `toy_box.svg` in `src/assets/svg/toys/` (512×512 viewBox, open container style, flat fill, thick #2D3748 outline, storybook style)
-    - [ ] Create `big-small` sticker SVG in `src/assets/svg/stickers/sticker_big_small.svg`
-- [ ] Task: Extend PreloadScene to load and rasterize the 4 toy SVGs and 1 toy_box SVG with explicit width/height for high-res rasterization
-- [ ] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Create toy & box SVG assets
+    - [x] Create 4 toy SVGs in `src/assets/svg/toys/`: `teddy_bear.svg`, `toy_car.svg`, `toy_ball.svg`, `toy_block.svg` (512×512 viewBox, flat fills, thick #2D3748 outlines 4-6px, soft/vibrant palette, maximally distinct outline shapes)
+    - [x] Create 1 toy box SVG: `toy_box.svg` in `src/assets/svg/toys/` (512×512 viewBox, open container style, flat fill, thick #2D3748 outline, storybook style)
+    - [x] Create `big-small` sticker SVG in `src/assets/svg/stickers/sticker_big_small.svg`
+- [x] Task: Extend PreloadScene to load and rasterize the 4 toy SVGs and 1 toy_box SVG with explicit width/height for high-res rasterization
+- [x] Task: Conductor - User Manual Verification 'SVG Assets & Preload Pipeline' (Protocol in workflow.md)
 
 ---
 
