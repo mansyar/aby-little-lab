@@ -50,7 +50,7 @@
 
 ---
 
-## Phase 4: Round Progression, Progress Dots & Completion
+## Phase 4: Round Progression, Progress Dots & Completion [checkpoint: 1839d0a]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [x] Task: Write tests for round progression, progress dots, and completion flow [TDD-Red] [sha: b42b5ff]
@@ -62,5 +62,5 @@
     - [x] Test auto-return to Hub scene after 3s delay [sha: b42b5ff]
     - [x] Test parental lock (hold 3s) exits to Hub at any time [sha: b42b5ff]
 - [x] Task: Implement round progression, progress dots (5), completion flow (win animation + sticker award + auto-return) in `MusicalMemoryScene` [TDD-Green] [sha: b42b5ff]
-- [~] Task: Conductor - User Manual Verification 'Round Progression, Progress Dots & Completion' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Round Progression, Progress Dots & Completion' (Protocol in workflow.md)
 </protect>
