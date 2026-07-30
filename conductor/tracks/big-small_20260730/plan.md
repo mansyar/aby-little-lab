@@ -34,17 +34,17 @@
 
 ---
 
-## Phase 3: Drag-and-Drop & Match Interaction
+## Phase 3: Drag-and-Drop & Match Interaction [checkpoint: pending]
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for drag-and-drop interaction, snap/bounce, and audio [TDD-Red]
-    - [ ] Test dragging a correct-scale toy into the matching box snaps it into place + correct SFX + particle burst
-    - [ ] Test dragging a toy into the wrong-scale box triggers bounce-back to origin + incorrect SFX with no penalty (toy remains draggable)
-    - [ ] Test sorted toys lock in place and are no longer draggable
-    - [ ] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas / forgiving snap radius (small toys at 0.7× must still meet minimum)
-    - [ ] Test AudioManager plays existing correct SFX on match and incorrect SFX on mismatch (respecting SFX toggle)
-- [ ] Task: Implement drag-and-drop + snap + bounce-back + particle burst in `BigSmallScene` (reuses Shape Sorter's drag/drop pattern; calls existing AudioManager SFX; renders toy_box at two scales) [TDD-Green]
-- [ ] Task: Conductor - User Manual Verification 'Drag-and-Drop & Match Interaction' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for drag-and-drop interaction, snap/bounce, and audio [TDD-Red]
+    - [x] Test dragging a correct-scale toy into the matching box snaps it into place + correct SFX + particle burst
+    - [x] Test dragging a toy into the wrong-scale box triggers bounce-back to origin + incorrect SFX with no penalty (toy remains draggable)
+    - [x] Test sorted toys lock in place and are no longer draggable
+    - [x] Test touch targets meet ≥64×64px (ideal 96×96px) with inflated hit areas / forgiving snap radius (small toys at 0.7× must still meet minimum)
+    - [x] Test AudioManager plays existing correct SFX on match and incorrect SFX on mismatch (respecting SFX toggle)
+- [x] Task: Implement drag-and-drop + snap + bounce-back + particle burst in `BigSmallScene` (reuses Shape Sorter's drag/drop pattern; calls existing AudioManager SFX; renders toy_box at two scales) [TDD-Green]
+- [x] Task: Conductor - User Manual Verification 'Drag-and-Drop & Match Interaction' (Protocol in workflow.md)
 
 ---
 
