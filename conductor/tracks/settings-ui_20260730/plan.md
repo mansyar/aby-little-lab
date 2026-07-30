@@ -5,7 +5,7 @@
 
 ---
 
-## Phase 1: SettingsPanel Component — Creation & Display [TDD]
+## Phase 1: SettingsPanel Component — Creation & Display [TDD] [checkpoint: b15fc07]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase [9b3b146]
 - [x] Task: Write tests for SettingsPanel creation and display [TDD-Red] [bc73ccb]
