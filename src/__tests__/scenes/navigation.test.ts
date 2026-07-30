@@ -2789,6 +2789,129 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("BigSmallScene completion and sticker flow", () => {
+    /** Returns toy image objects with their scaleCategory. */
+    function getToys(scene: unknown): Array<{
+      obj: Record<string, MockFn>;
+      scaleCategory: "big" | "small";
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const results: Array<{
+        obj: Record<string, MockFn>;
+        scaleCategory: "big" | "small";
+      }> = [];
+
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("toy_") && key !== "toy_box") {
+          const obj = imageMock.mock.results[i].value as Record<string, MockFn>;
+          const displaySizeCalls = getMockFn(obj.setDisplaySize).mock.calls;
+          const size = displaySizeCalls[0]?.[0] as number;
+          const scaleCategory: "big" | "small" = size >= 100 ? "big" : "small";
+          results.push({ obj, scaleCategory });
+        }
+      }
+      return results;
+    }
+
+    /** Returns box slot zone objects with their scaleCategory. */
+    function getBoxSlots(
+      scene: unknown,
+    ): Array<{ zone: Record<string, MockFn>; scaleCategory: "big" | "small" }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const zoneMock = getMockFn(add.zone);
+
+      const boxSizes: number[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key === "toy_box") {
+          const obj = imageMock.mock.results[i].value as Record<string, MockFn>;
+          const displaySizeCalls = getMockFn(obj.setDisplaySize).mock.calls;
+          boxSizes.push(displaySizeCalls[0]?.[0] as number);
+        }
+      }
+
+      const results: Array<{
+        zone: Record<string, MockFn>;
+        scaleCategory: "big" | "small";
+      }> = [];
+
+      for (let j = 0; j < boxSizes.length && j < zoneMock.mock.results.length; j++) {
+        const scaleCategory: "big" | "small" = boxSizes[j] >= 100 ? "big" : "small";
+        results.push({
+          zone: zoneMock.mock.results[j].value as Record<string, MockFn>,
+          scaleCategory,
+        });
+      }
+      return results;
+    }
+
+    /** Simulates dropping all toys on their matching boxes. */
+    function completeAllToys(scene: BigSmallScene): void {
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      for (const toy of toys) {
+        const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+        if (!slot) throw new Error("No matching box slot found");
+        const onCalls = getMockFn(toy.obj.on).mock.calls;
+        const dropCall = onCalls.find((c) => c[0] === "drop");
+        const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+        dropCallback(null, slot.zone);
+      }
+    }
+
+    it("plays win SFX when all 6 toys are sorted", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new BigSmallScene();
+      scene.create();
+      completeAllToys(scene);
+
+      expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("awards sticker on first completion only", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new BigSmallScene();
+      scene.create();
+      completeAllToys(scene);
+
+      expect(earnSticker).toHaveBeenCalledWith("big-small");
+      expect(mockAudio.playSticker).toHaveBeenCalled();
+    });
+
+    it("does not re-award sticker on replay", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new BigSmallScene();
+      scene.create();
+      completeAllToys(scene);
+
+      expect(earnSticker).not.toHaveBeenCalled();
+      expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    });
+
+    it("auto-returns to Hub after 3s delay", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new BigSmallScene();
+      scene.create();
+      completeAllToys(scene);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+      expect(autoReturnCall).toBeDefined();
+
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();
