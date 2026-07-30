@@ -18,4 +18,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [ ] **Track: Settings UI Panel** *Link: [./tracks/settings-ui_20260730/index.md](./tracks/settings-ui_20260730/index.md)*
+- [~] **Track: Settings UI Panel** *Link: [./tracks/settings-ui_20260730/index.md](./tracks/settings-ui_20260730/index.md)*
