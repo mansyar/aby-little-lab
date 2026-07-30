@@ -2234,6 +2234,261 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("MusicalMemoryScene round progression and completion", () => {
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    /** Returns frog image objects in index order (0=green, 1=blue, 2=red). */
+    function getFrogs(scene: unknown): Array<Record<string, MockFn>> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const frogKeys = ["frog_green", "frog_blue", "frog_red"];
+      const frogs: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        const frogIndex = frogKeys.indexOf(key);
+        if (frogIndex >= 0) {
+          frogs[frogIndex] = imageMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      return frogs;
+    }
+
+    /** Returns progress dot circle objects in creation order. */
+    function getProgressDots(scene: unknown): Array<Record<string, MockFn>> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const circleMock = getMockFn(add.circle);
+      return circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+    }
+
+    /** Returns the back button text object. */
+    function getBackButton(scene: unknown): Record<string, MockFn> | undefined {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const textMock = getMockFn(add.text);
+      for (let i = 0; i < textMock.mock.calls.length; i++) {
+        const text = textMock.mock.calls[i][2] as string;
+        if (typeof text === "string" && text.includes("Back")) {
+          return textMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      return undefined;
+    }
+
+    /** Fires delayedCall callbacks added at or after the given index, sorted by delay. */
+    function fireDelayedCallsFrom(scene: unknown, startIndex: number): void {
+      const delayedCallMock = getMockFn(
+        (scene as { time: Record<string, unknown> }).time.delayedCall,
+      );
+      const calls = delayedCallMock.mock.calls
+        .slice(startIndex)
+        .sort((a, b) => (a[0] as number) - (b[0] as number));
+      for (const call of calls) {
+        if (typeof call[1] === "function") {
+          (call[1] as () => void)();
+        }
+      }
+    }
+
+    /** Simulates a tap on a frog by triggering its pointerdown callback. */
+    function tapFrog(frogs: Array<Record<string, MockFn>>, frogIndex: number): void {
+      const frog = frogs[frogIndex];
+      if (!frog) throw new Error(`Frog ${frogIndex} not found`);
+      const onCalls = getMockFn(frog.on).mock.calls;
+      const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    /** Clears audio mock call data to isolate subsequent interactions. */
+    function clearAudioMocks(): void {
+      mockAudio.playFrogNote.mockClear();
+      mockAudio.playCorrect.mockClear();
+      mockAudio.playIncorrect.mockClear();
+      mockAudio.playWin.mockClear();
+      mockAudio.playSticker.mockClear();
+    }
+
+    /**
+     * Completes one round: fires playback delayed calls (from firedUpTo),
+     * clears audio, then taps the correct frog (index 1 = blue) sequenceLength
+     * times. Returns the delayed call count after firing playback (for use as
+     * the next firedUpTo).
+     */
+    function completeRound(
+      scene: unknown,
+      frogs: Array<Record<string, MockFn>>,
+      firedUpTo: number,
+      sequenceLength: number,
+    ): number {
+      fireDelayedCallsFrom(scene, firedUpTo);
+      const newFiredUpTo = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
+        .mock.calls.length;
+      clearAudioMocks();
+      for (let i = 0; i < sequenceLength; i++) {
+        tapFrog(frogs, 1);
+      }
+      return newFiredUpTo;
+    }
+
+    /** Completes all 5 rounds (lengths 2→6). Returns the final firedUpTo. */
+    function completeAllRounds(scene: unknown, frogs: Array<Record<string, MockFn>>): number {
+      let firedUpTo = 0;
+      for (let len = 2; len <= 6; len++) {
+        firedUpTo = completeRound(scene, frogs, firedUpTo, len);
+      }
+      return firedUpTo;
+    }
+
+    it("creates 5 progress dots at scene initialization", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const dots = getProgressDots(scene);
+      expect(dots).toHaveLength(5);
+    });
+
+    it("round success fills the next progress dot", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+      const dots = getProgressDots(scene);
+
+      completeRound(scene, frogs, 0, 2);
+
+      expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
+      expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
+    });
+
+    it("sequence grows by 1 on round success and the next round auto-plays", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      const firedUpTo = completeRound(scene, frogs, 0, 2);
+
+      clearAudioMocks();
+      fireDelayedCallsFrom(scene, firedUpTo);
+
+      expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(3);
+    });
+
+    it("completion is triggered only at length-6 (5th round)", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      let firedUpTo = 0;
+      for (let len = 2; len <= 5; len++) {
+        clearAudioMocks();
+        firedUpTo = completeRound(scene, frogs, firedUpTo, len);
+      }
+      expect(mockAudio.playWin).not.toHaveBeenCalled();
+
+      clearAudioMocks();
+      completeRound(scene, frogs, firedUpTo, 6);
+
+      expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+    });
+
+    it("win animation tweens all frogs on completion", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      completeAllRounds(scene, frogs);
+
+      const tweensMock = getMockFn(scene.tweens.add);
+      const winTweens = tweensMock.mock.calls.filter((call) => {
+        const config = call[0] as Record<string, unknown>;
+        return config.scaleX === 1.2 && config.yoyo === true;
+      });
+
+      expect(winTweens).toHaveLength(3);
+      const targeted = winTweens.map((call) => (call[0] as Record<string, unknown>).targets);
+      for (const frog of frogs) {
+        expect(targeted).toContain(frog);
+      }
+    });
+
+    it("awards sticker on first completion only", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      completeAllRounds(scene, frogs);
+
+      expect(earnSticker).toHaveBeenCalledWith("musical-memory");
+      expect(mockAudio.playSticker).toHaveBeenCalled();
+    });
+
+    it("does not re-award sticker when already earned", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      completeAllRounds(scene, frogs);
+
+      expect(earnSticker).not.toHaveBeenCalled();
+      expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    });
+
+    it("auto-returns to Hub after 3s delay on completion", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      completeAllRounds(scene, frogs);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const calls3000 = delayedCallMock.mock.calls.filter((call) => call[0] === 3000);
+      expect(calls3000.length).toBeGreaterThan(0);
+
+      const autoReturnCall = calls3000[calls3000.length - 1];
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+
+    it("parental lock exits to Hub at any time", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const backButton = getBackButton(scene);
+      if (!backButton) throw new Error("Back button not found");
+      const onCalls = getMockFn(backButton.on).mock.calls;
+      const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const parentLockCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+      expect(parentLockCall).toBeDefined();
+
+      const callback = parentLockCall?.[1] as () => void;
+      callback();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();

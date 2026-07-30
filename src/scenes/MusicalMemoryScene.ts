@@ -2,12 +2,16 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import {
+  appendNote,
   FROG_COUNT,
   generateSequence,
   isRoundComplete,
+  isWin,
   START_LENGTH,
   validateInput,
+  WIN_TARGET,
 } from "../game/musicalMemoryLogic";
+import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Frog texture keys in index order (0=green, 1=blue, 2=red). */
 const FROG_TEXTURES = ["frog_green", "frog_blue", "frog_red"];
@@ -33,6 +37,30 @@ const BOUNCE_SCALE = (FROG_SIZE / SVG_SIZE) * 1.2;
 /** Duration of frog bounce animation (ms). */
 const BOUNCE_DURATION = 200;
 
+/** Number of progress dots (one per round: lengths 2→6). */
+const PROGRESS_DOT_COUNT = 5;
+
+/** Y position of progress dots from top of screen. */
+const PROGRESS_DOT_Y = 60;
+
+/** Spacing between progress dots (px). */
+const PROGRESS_DOT_SPACING = 40;
+
+/** Radius of progress dots (px). */
+const PROGRESS_DOT_RADIUS = 8;
+
+/** Auto-return delay to Hub after completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
+
+/** Display size of the sticker image in the unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Scale factor for win animation tween on frogs. */
+const WIN_TWEEN_SCALE = 1.2;
+
+/** Duration of win animation tween (ms). */
+const WIN_TWEEN_DURATION = 300;
+
 /**
  * Musical Memory scene — toddler repeats growing note sequences tapped on
  * 3 frogs (C4/E4/G4). Sequence auto-plays at round start (input locked);
@@ -46,6 +74,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
   private sequence: number[] = [];
   private inputIndex = 0;
   private inputLocked = true;
+  private progressDots: Phaser.GameObjects.Arc[] = [];
+  private roundCount = 0;
 
   constructor() {
     super({ key: "MusicalMemory" });
@@ -72,6 +102,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
 
     this.createFrogs();
     this.createReplayButton();
+    this.createProgressDots();
 
     this.sequence = generateSequence(START_LENGTH);
     this.inputIndex = 0;
@@ -110,6 +141,22 @@ export class MusicalMemoryScene extends Phaser.Scene {
     replayButton.setOrigin(0.5);
     replayButton.setInteractive();
     replayButton.on("pointerdown", () => this.handleReplay());
+  }
+
+  /** Creates 5 progress dots at the top of the screen, dimmed by default. */
+  private createProgressDots(): void {
+    const startX =
+      this.cameras.main.centerX - ((PROGRESS_DOT_COUNT - 1) * PROGRESS_DOT_SPACING) / 2;
+    for (let i = 0; i < PROGRESS_DOT_COUNT; i++) {
+      const dot = this.add.circle(
+        startX + i * PROGRESS_DOT_SPACING,
+        PROGRESS_DOT_Y,
+        PROGRESS_DOT_RADIUS,
+        0x2d3748,
+        0.3,
+      );
+      this.progressDots.push(dot);
+    }
   }
 
   /**
@@ -168,12 +215,69 @@ export class MusicalMemoryScene extends Phaser.Scene {
   }
 
   /**
-   * Handles round success. In Phase 3, plays the correct SFX.
-   * Phase 4 will extend this to fill progress dots, grow the sequence,
-   * check for win, and auto-play the next round.
+   * Handles round success: fills the next progress dot, then either triggers
+   * completion (if the sequence reached WIN_TARGET) or grows the sequence by
+   * one note and auto-plays the next round.
    */
   private handleRoundSuccess(): void {
     this.audioManager.playCorrect();
+
+    if (this.roundCount < this.progressDots.length) {
+      this.progressDots[this.roundCount].setAlpha(1);
+    }
+    this.roundCount++;
+
+    if (isWin(this.sequence.length, WIN_TARGET)) {
+      this.handleComplete();
+    } else {
+      this.sequence = appendNote(this.sequence);
+      this.inputIndex = 0;
+      this.playSequence();
+    }
+  }
+
+  /**
+   * Handles game completion: plays win SFX, animates all frogs, awards a
+   * sticker on first completion, and auto-returns to Hub after 3s.
+   */
+  private handleComplete(): void {
+    this.audioManager.playWin();
+
+    for (const frog of this.frogs) {
+      this.tweens.add({
+        targets: frog,
+        scaleX: WIN_TWEEN_SCALE,
+        scaleY: WIN_TWEEN_SCALE,
+        duration: WIN_TWEEN_DURATION,
+        yoyo: true,
+      });
+    }
+
+    if (!hasSticker("musical-memory")) {
+      earnSticker("musical-memory");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      this.scene.start("Hub");
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_musical_memory")
+      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: stickerImage,
+      scaleX: 1,
+      scaleY: 1,
+      duration: WIN_TWEEN_DURATION,
+      ease: "Back.out",
+    });
   }
 
   /** Handles a tap on the replay button: re-plays the current sequence. */
