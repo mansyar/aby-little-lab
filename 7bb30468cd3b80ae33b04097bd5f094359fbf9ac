@@ -1,0 +1,9 @@
+Task: Package the existing BGM asset for runtime delivery
+
+Summary: Relocated bgm.mp3 from src/assets/audio/ to public/audio/ so Vite serves it at /audio/bgm.mp3, the runtime URL expected by AudioManager. Updated tech-stack.md to document the corrected asset pipeline location.
+
+Files changed:
+- public/audio/bgm.mp3 (new file — BGM asset relocated from src/assets/audio/)
+- conductor/tech-stack.md (updated Audio Assets section and Project Structure to reflect public/audio/ location)
+
+Verification: All 337 tests pass, Biome lint clean.
