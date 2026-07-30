@@ -14,6 +14,7 @@ const SFX_FILES: Record<SfxName, string> = {
 };
 
 const BGM_FILE = "/audio/bgm.mp3";
+const BGM_VOLUME = 0.3;
 
 const FROG_NOTE_DURATION = 0.5;
 const FROG_NOTE_GAIN = 0.3;
@@ -51,6 +52,7 @@ export class AudioManager {
 
     this.bgmAudio = new Audio(BGM_FILE);
     this.bgmAudio.loop = true;
+    this.bgmAudio.volume = BGM_VOLUME;
 
     this.sfxAudio = {} as Record<SfxName, HTMLAudioElement>;
     for (const name of SFX_NAMES) {

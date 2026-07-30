@@ -129,6 +129,14 @@ describe("AudioManager", () => {
       expect(bgm?.src).toBe("/audio/bgm.mp3");
     });
 
+    it("sets BGM audio element volume to a comfortable level below maximum", () => {
+      manager.init();
+      const bgm = findAudioBySrc("bgm");
+      expect(bgm).toBeDefined();
+      expect(bgm?.volume).toBeGreaterThan(0);
+      expect(bgm?.volume).toBeLessThan(1.0);
+    });
+
     it("creates SFX audio elements for all 6 sounds", () => {
       manager.init();
       for (const name of SFX_NAMES) {
