@@ -1970,7 +1970,7 @@ describe("scene navigation flow", () => {
       const textMock = getMockFn(add.text);
       for (let i = 0; i < textMock.mock.calls.length; i++) {
         const text = textMock.mock.calls[i][2] as string;
-        if (typeof text === "string" && text.includes("Replay")) {
+        if (typeof text === "string" && text.includes("\uD83D\uDD04")) {
           return textMock.mock.results[i].value as Record<string, MockFn>;
         }
       }
@@ -2410,7 +2410,8 @@ describe("scene navigation flow", () => {
       const tweensMock = getMockFn(scene.tweens.add);
       const winTweens = tweensMock.mock.calls.filter((call) => {
         const config = call[0] as Record<string, unknown>;
-        return config.scaleX === 1.2 && config.yoyo === true;
+        // WIN_TWEEN_SCALE = (FROG_SIZE / SVG_SIZE) * 1.3 = (128 / 512) * 1.3
+        return config.scaleX === 0.325 && config.yoyo === true;
       });
 
       expect(winTweens).toHaveLength(3);

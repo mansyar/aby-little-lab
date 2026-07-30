@@ -55,8 +55,11 @@ const AUTO_RETURN_DELAY = 3000;
 /** Display size of the sticker image in the unlock animation. */
 const STICKER_DISPLAY_SIZE = 256;
 
-/** Scale factor for win animation tween on frogs. */
-const WIN_TWEEN_SCALE = 1.2;
+/** Target scale for the sticker image (display size / texture size). */
+const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
+
+/** Scale factor for win animation tween (relative to base display scale). */
+const WIN_TWEEN_SCALE = (FROG_SIZE / SVG_SIZE) * 1.3;
 
 /** Duration of win animation tween (ms). */
 const WIN_TWEEN_DURATION = 300;
@@ -70,11 +73,11 @@ const WIN_TWEEN_DURATION = 300;
 export class MusicalMemoryScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private readonly audioManager: AudioManager;
-  private frogs: Phaser.GameObjects.Image[] = [];
+  private readonly frogs: Phaser.GameObjects.Image[] = [];
   private sequence: number[] = [];
   private inputIndex = 0;
   private inputLocked = true;
-  private progressDots: Phaser.GameObjects.Arc[] = [];
+  private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   private roundCount = 0;
 
   constructor() {
@@ -135,8 +138,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
     const replayButton = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.height - 80,
-      "\uD83D\uDD04 Replay",
-      { fontSize: "32px", color: "#2d3748" },
+      "\uD83D\uDD04",
+      { fontSize: "48px", color: "#2d3748" },
     );
     replayButton.setOrigin(0.5);
     replayButton.setInteractive();
@@ -241,6 +244,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
    * sticker on first completion, and auto-returns to Hub after 3s.
    */
   private handleComplete(): void {
+    this.inputLocked = true;
     this.audioManager.playWin();
 
     for (const frog of this.frogs) {
@@ -268,13 +272,12 @@ export class MusicalMemoryScene extends Phaser.Scene {
   private createStickerAnimation(): void {
     const stickerImage = this.add
       .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_musical_memory")
-      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE)
       .setScale(0);
 
     this.tweens.add({
       targets: stickerImage,
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: STICKER_SCALE,
+      scaleY: STICKER_SCALE,
       duration: WIN_TWEEN_DURATION,
       ease: "Back.out",
     });
