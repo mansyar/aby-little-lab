@@ -33,7 +33,7 @@
 ## Phase 2: Toggle Interaction, Audio Integration & HubScene Wiring [TDD]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase [78ee94a]
-- [ ] Task: Write tests for toggle interaction, audio feedback, persistence, and close [TDD-Red]
+- [x] Task: Write tests for toggle interaction, audio feedback, persistence, and close [TDD-Red] [7d33a07]
     - [ ] Test tapping BGM toggle when ON calls `AudioManager.setBGMEnabled(false)` and `pauseBGM()`
     - [ ] Test tapping BGM toggle when OFF calls `AudioManager.setBGMEnabled(true)` and `playBGM()`
     - [ ] Test tapping BGM toggle updates text to "BGM: OFF" with gray color when disabling
