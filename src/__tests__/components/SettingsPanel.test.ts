@@ -1,5 +1,23 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
 
+vi.mock("phaser", () => {
+  class Rectangle {
+    static Contains = vi.fn();
+
+    constructor(
+      readonly x: number,
+      readonly y: number,
+      readonly width: number,
+      readonly height: number,
+    ) {}
+  }
+
+  return {
+    default: { Geom: { Rectangle } },
+    Geom: { Rectangle },
+  };
+});
+
 type MockFn = ReturnType<typeof vi.fn>;
 
 interface MockGameObject {
@@ -7,7 +25,7 @@ interface MockGameObject {
   on: MockFn;
   setInteractive: MockFn;
   setOrigin: MockFn;
-  setStyle: MockFn;
+  setStrokeStyle: MockFn;
 }
 
 interface MockScene {
@@ -29,11 +47,11 @@ function createGameObject(): MockGameObject {
     on: vi.fn(),
     setInteractive: vi.fn(),
     setOrigin: vi.fn(),
-    setStyle: vi.fn(),
+    setStrokeStyle: vi.fn(),
   };
   object.setOrigin.mockReturnValue(object);
   object.setInteractive.mockReturnValue(object);
-  object.setStyle.mockReturnValue(object);
+  object.setStrokeStyle.mockReturnValue(object);
   return object;
 }
 
@@ -78,7 +96,7 @@ describe("SettingsPanel creation and display", () => {
       0xfff8e7,
     );
     const panel = scene.add.rectangle.mock.results[1]?.value as MockGameObject;
-    expect(panel.setStyle).toHaveBeenCalledWith(4, 0x2d3748);
+    expect(panel.setStrokeStyle).toHaveBeenCalledWith(4, 0x2d3748);
   });
 
   it("displays a Settings title", () => {
