@@ -50,7 +50,7 @@
     - [ ] Implement close handler: tap backdrop calls `destroy()` to remove panel + backdrop + toggle objects
     - [ ] Integrate SettingsPanel into HubScene `onSuccess` callback (replace empty comment)
     - [ ] Ensure HubScene `shutdown` event destroys SettingsPanel if open
-- [ ] Task: Conductor - User Manual Verification 'Toggle Interaction, Audio Integration & HubScene Wiring' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Toggle Interaction, Audio Integration & HubScene Wiring' (Protocol in workflow.md)
 
 ---
 
