@@ -8,7 +8,7 @@
 ## Phase 1: SettingsPanel Component — Creation & Display [TDD]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase [9b3b146]
-- [~] Task: Write tests for SettingsPanel creation and display [TDD-Red]
+- [x] Task: Write tests for SettingsPanel creation and display [TDD-Red] [bc73ccb]
     - [ ] Test SettingsPanel creates a semi-transparent backdrop (black ~0.6 alpha) covering full screen
     - [ ] Test SettingsPanel creates a centered flat-fill panel (#FFF8E7) with #2D3748 outline
     - [ ] Test SettingsPanel displays "Settings" title text
