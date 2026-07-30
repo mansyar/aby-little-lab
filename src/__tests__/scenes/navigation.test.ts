@@ -2491,6 +2491,304 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("BigSmallScene round initialization", () => {
+    it("creates 6 toy images", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const toyKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key.startsWith("toy_") && key !== "toy_box");
+      expect(toyKeys).toHaveLength(6);
+    });
+
+    it("creates 2 box images", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const boxKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key === "toy_box");
+      expect(boxKeys).toHaveLength(2);
+    });
+
+    it("creates 2 drop zones with dropZone flag", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const zoneMock = getMockFn(scene.add.zone);
+      expect(zoneMock).toHaveBeenCalledTimes(2);
+
+      for (const result of zoneMock.mock.results) {
+        const zone = result.value as Record<string, MockFn>;
+        expect(getMockFn(zone.setInteractive)).toHaveBeenCalledWith({ dropZone: true });
+      }
+    });
+
+    it("makes toy images interactive and draggable", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const imageResults = getMockFn(scene.add.image).mock.results;
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const toyResults = imageResults.filter((_result, index) => {
+        const key = imageCalls[index][2] as string;
+        return key.startsWith("toy_") && key !== "toy_box";
+      });
+
+      expect(toyResults).toHaveLength(6);
+      for (const result of toyResults) {
+        const obj = result.value as Record<string, MockFn>;
+        expect(getMockFn(obj.setInteractive)).toHaveBeenCalled();
+      }
+      expect(getMockFn(scene.input.setDraggable)).toHaveBeenCalledTimes(6);
+    });
+
+    it("creates big toys >=96px and small toys >=64px", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const imageResults = getMockFn(scene.add.image).mock.results;
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+
+      const toySizes: number[] = [];
+      for (let i = 0; i < imageCalls.length; i++) {
+        const key = imageCalls[i][2] as string;
+        if (key.startsWith("toy_") && key !== "toy_box") {
+          const obj = imageResults[i].value as Record<string, MockFn>;
+          const displaySizeCalls = getMockFn(obj.setDisplaySize).mock.calls;
+          toySizes.push(displaySizeCalls[0]?.[0] as number);
+        }
+      }
+
+      const bigToys = toySizes.filter((s) => s >= 100);
+      const smallToys = toySizes.filter((s) => s < 100);
+
+      expect(bigToys).toHaveLength(3);
+      expect(smallToys).toHaveLength(3);
+
+      for (const size of bigToys) {
+        expect(size).toBeGreaterThanOrEqual(96);
+      }
+      for (const size of smallToys) {
+        expect(size).toBeGreaterThanOrEqual(64);
+      }
+    });
+  });
+
+  describe("BigSmallScene drag and drop", () => {
+    /** Returns toy image objects with their scaleCategory and origin positions. */
+    function getToys(scene: unknown): Array<{
+      obj: Record<string, MockFn>;
+      scaleCategory: "big" | "small";
+      originX: number;
+      originY: number;
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const results: Array<{
+        obj: Record<string, MockFn>;
+        scaleCategory: "big" | "small";
+        originX: number;
+        originY: number;
+      }> = [];
+
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("toy_") && key !== "toy_box") {
+          const obj = imageMock.mock.results[i].value as Record<string, MockFn>;
+          const displaySizeCalls = getMockFn(obj.setDisplaySize).mock.calls;
+          const size = displaySizeCalls[0]?.[0] as number;
+          const scaleCategory: "big" | "small" = size >= 100 ? "big" : "small";
+          results.push({
+            obj,
+            scaleCategory,
+            originX: imageMock.mock.calls[i][0] as number,
+            originY: imageMock.mock.calls[i][1] as number,
+          });
+        }
+      }
+      return results;
+    }
+
+    /** Returns box slot zone objects with their scaleCategory and positions. */
+    function getBoxSlots(scene: unknown): Array<{
+      zone: Record<string, MockFn>;
+      scaleCategory: "big" | "small";
+      x: number;
+      y: number;
+    }> {
+      const add = (scene as { add: Record<string, unknown> }).add;
+      const imageMock = getMockFn(add.image);
+      const zoneMock = getMockFn(add.zone);
+
+      const boxSizes: number[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key === "toy_box") {
+          const obj = imageMock.mock.results[i].value as Record<string, MockFn>;
+          const displaySizeCalls = getMockFn(obj.setDisplaySize).mock.calls;
+          boxSizes.push(displaySizeCalls[0]?.[0] as number);
+        }
+      }
+
+      const results: Array<{
+        zone: Record<string, MockFn>;
+        scaleCategory: "big" | "small";
+        x: number;
+        y: number;
+      }> = [];
+
+      for (let j = 0; j < boxSizes.length && j < zoneMock.mock.results.length; j++) {
+        const scaleCategory: "big" | "small" = boxSizes[j] >= 100 ? "big" : "small";
+        results.push({
+          zone: zoneMock.mock.results[j].value as Record<string, MockFn>,
+          scaleCategory,
+          x: zoneMock.mock.calls[j][0] as number,
+          y: zoneMock.mock.calls[j][1] as number,
+        });
+      }
+      return results;
+    }
+
+    it("correct drop snaps toy to box position, marks non-interactive, triggers SFX + particles", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+      if (!slot) throw new Error("No matching box slot found");
+
+      const onCalls = getMockFn(toy.obj.on).mock.calls;
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, slot.zone);
+
+      expect(getMockFn(toy.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
+      expect(getMockFn(toy.obj.disableInteractive)).toHaveBeenCalled();
+      expect(mockAudio.playCorrect).toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+    });
+
+    it("incorrect drop bounces toy back to origin with wobble (no penalty, remains draggable)", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const wrongSlot = slots.find((s) => s.scaleCategory !== toy.scaleCategory);
+      if (!wrongSlot) throw new Error("No mismatching box slot found");
+
+      const onCalls = getMockFn(toy.obj.on).mock.calls;
+
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, wrongSlot.zone);
+
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const toyTween = tweenCalls.find((c) => c[0]?.targets === toy.obj);
+      expect(toyTween).toBeDefined();
+      expect(toyTween[0].x).toBe(toy.originX);
+      expect(toyTween[0].y).toBe(toy.originY);
+
+      expect(mockAudio.playIncorrect).toHaveBeenCalled();
+      expect(getMockFn(toy.obj.disableInteractive)).not.toHaveBeenCalled();
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    });
+
+    it("sorted toys lock in place and do not bounce on dragend", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+      if (!slot) throw new Error("No matching box slot found");
+
+      const onCalls = getMockFn(toy.obj.on).mock.calls;
+
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, slot.zone);
+
+      expect(getMockFn(toy.obj.disableInteractive)).toHaveBeenCalled();
+
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounceTween = tweenCalls.find(
+        (c) => c[0]?.targets === toy.obj && c[0]?.x !== undefined,
+      );
+      expect(bounceTween).toBeUndefined();
+    });
+
+    it("creates touch targets meeting 64x64px minimum", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      expect(toys).toHaveLength(6);
+
+      for (const toy of toys) {
+        const setDisplaySizeCalls = getMockFn(toy.obj.setDisplaySize).mock.calls;
+        for (const call of setDisplaySizeCalls) {
+          expect(call[0]).toBeGreaterThanOrEqual(64);
+          expect(call[1]).toBeGreaterThanOrEqual(64);
+        }
+      }
+    });
+
+    it("drop on non-box target is a no-op (no snap, no SFX, no particles)", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const toy = toys[0];
+
+      const onCalls = getMockFn(toy.obj.on).mock.calls;
+      const dropCall = onCalls.find((c) => c[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, {});
+
+      expect(getMockFn(toy.obj.disableInteractive)).not.toHaveBeenCalled();
+      expect(mockAudio.playCorrect).not.toHaveBeenCalled();
+      expect(getMockFn(scene.add.particles)).not.toHaveBeenCalled();
+    });
+
+    it("dragend without a drop on a zone bounces silently (no incorrect SFX)", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const toy = toys[0];
+
+      const onCalls = getMockFn(toy.obj.on).mock.calls;
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounceTween = tweenCalls.find(
+        (c) => c[0]?.targets === toy.obj && c[0]?.x === toy.originX,
+      );
+      expect(bounceTween).toBeDefined();
+
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+    });
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();

@@ -1,17 +1,91 @@
 import Phaser from "phaser";
+import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
+import {
+  type BoxInstance,
+  generateRound,
+  isMatch,
+  isWin,
+  type ScaleCategory,
+  type ToyInstance,
+} from "../game/bigSmallLogic";
+import { earnSticker, hasSticker } from "../utils/storage";
+
+/** Y position for boxes (top area). */
+const BOX_Y = 200;
+
+/** Y position for toys (bottom area). */
+const TOY_Y = 580;
+
+/** Base display size for toys before scale is applied (ideal 96x96px). */
+const TOY_BASE_SIZE = 96;
+
+/** Base display size for boxes before scale is applied. */
+const BOX_BASE_SIZE = 128;
+
+/** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
+const DROP_ZONE_SIZE = 160;
+
+/** Tween duration for bounce-back animation (ms). */
+const BOUNCE_DURATION = 300;
+
+/** Texture key used for particle bursts. */
+const PARTICLE_TEXTURE = "shape_circle";
+
+/** Particle count for celebration bursts (reduced when prefers-reduced-motion). */
+const PARTICLE_COUNT = 12;
+const PARTICLE_COUNT_REDUCED = 6;
+
+/** Display size for the sticker unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Delay before auto-returning to Hub after round completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
+
+/** Texture size for SVG assets (used to calculate base scale). */
+const TEXTURE_SIZE = 512;
+
+/** Tracks a draggable toy's state during the round. */
+interface ToyData {
+  obj: Phaser.GameObjects.Image;
+  scaleCategory: ScaleCategory;
+  baseScale: number;
+  originX: number;
+  originY: number;
+  sorted: boolean;
+  droppedOnZone: boolean;
+}
+
+/** Tracks a box's drop zone and position. */
+interface BoxSlotData {
+  zone: Phaser.GameObjects.Zone;
+  scaleCategory: ScaleCategory;
+  x: number;
+  y: number;
+}
 
 /**
- * Big & Small scene — placeholder stub.
+ * Big vs. Small Cleaner scene — drag toys into matching big/small boxes.
  *
- * Game logic will be implemented in a future track. Currently provides
- * a back button gated by ParentLock for navigation back to the Hub.
+ * Round initialization generates 6 toy instances (3 big + 3 small) and 2 boxes.
+ * Toys are dragged via Phaser Pointer Drag to matching scale-category boxes.
+ * Correct drops snap to box center with SFX + particles; incorrect drops
+ * bounce back gently with a soft tone.
  */
 export class BigSmallScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private round: { toys: ToyInstance[]; boxes: BoxInstance[] } = {
+    toys: [],
+    boxes: [],
+  };
+  private toyData: ToyData[] = [];
+  private boxSlots: BoxSlotData[] = [];
+  private sortedCount = 0;
+  private readonly audioManager: AudioManager;
 
   constructor() {
     super({ key: "BigSmall" });
+    this.audioManager = AudioManager.getInstance();
   }
 
   create(): void {
@@ -32,8 +106,175 @@ export class BigSmallScene extends Phaser.Scene {
       },
     });
 
+    this.initRound();
+
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+    });
+  }
+
+  /** Initializes a new round: generates toys and boxes, renders them on screen. */
+  private initRound(): void {
+    this.round = generateRound();
+    this.boxSlots = [];
+    this.toyData = [];
+    this.sortedCount = 0;
+    this.createBoxSlots();
+    this.createToys();
+  }
+
+  /** Creates box images and drop zones at the top of the screen. */
+  private createBoxSlots(): void {
+    const spacing = this.scale.width / (this.round.boxes.length + 1);
+    for (let i = 0; i < this.round.boxes.length; i++) {
+      const x = spacing * (i + 1);
+      const box = this.round.boxes[i];
+      const displaySize = BOX_BASE_SIZE * box.scale;
+      this.add.image(x, BOX_Y, "toy_box").setDisplaySize(displaySize, displaySize);
+
+      const zone = this.add.zone(x, BOX_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
+      zone.setInteractive({ dropZone: true });
+
+      this.boxSlots.push({ zone, scaleCategory: box.scaleCategory, x, y: BOX_Y });
+    }
+  }
+
+  /** Creates interactive draggable toy images at the bottom of the screen. */
+  private createToys(): void {
+    const spacing = this.scale.width / (this.round.toys.length + 1);
+    for (let i = 0; i < this.round.toys.length; i++) {
+      const x = spacing * (i + 1);
+      const toy = this.round.toys[i];
+      const displaySize = TOY_BASE_SIZE * toy.scale;
+      const baseScale = displaySize / TEXTURE_SIZE;
+      const obj = this.add
+        .image(x, TOY_Y, `toy_${toy.type}`)
+        .setDisplaySize(displaySize, displaySize)
+        .setInteractive();
+
+      this.input.setDraggable(obj);
+
+      const data: ToyData = {
+        obj,
+        scaleCategory: toy.scaleCategory,
+        baseScale,
+        originX: x,
+        originY: TOY_Y,
+        sorted: false,
+        droppedOnZone: false,
+      };
+
+      obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
+        obj.setPosition(dragX, dragY);
+      });
+
+      obj.on("drop", (_pointer: unknown, target: unknown) => {
+        this.handleDrop(data, target);
+      });
+
+      obj.on("dragend", () => {
+        this.handleDragEnd(data);
+      });
+
+      this.toyData.push(data);
+    }
+  }
+
+  /** Handles a toy being dropped on a zone. Snaps on correct match, otherwise no-ops. */
+  private handleDrop(data: ToyData, target: unknown): void {
+    const slot = this.boxSlots.find((s) => s.zone === target);
+    if (!slot) return;
+
+    data.droppedOnZone = true;
+
+    if (isMatch(data.scaleCategory, slot.scaleCategory)) {
+      data.obj.setPosition(slot.x, slot.y);
+      data.obj.disableInteractive();
+      data.sorted = true;
+      this.sortedCount++;
+      this.audioManager.playCorrect();
+      this.createParticleBurst(slot.x, slot.y);
+
+      if (isWin(this.sortedCount)) {
+        this.handleComplete();
+      }
+    }
+  }
+
+  /** Handles drag end. Bounces toy back to origin; plays incorrect SFX only if dropped on a zone. */
+  private handleDragEnd(data: ToyData): void {
+    if (!data.sorted) {
+      if (data.droppedOnZone) {
+        this.audioManager.playIncorrect();
+      }
+      this.tweens.add({
+        targets: data.obj,
+        x: data.originX,
+        y: data.originY,
+        duration: BOUNCE_DURATION,
+        ease: "Back.out",
+      });
+      data.droppedOnZone = false;
+    }
+  }
+
+  /** Returns true if the user has requested reduced motion via OS settings. */
+  private prefersReducedMotion(): boolean {
+    return (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  /** Creates a soft particle burst at the given position. */
+  private createParticleBurst(x: number, y: number): void {
+    this.add.particles(x, y, PARTICLE_TEXTURE, {
+      speed: { min: 50, max: 150 },
+      lifespan: 800,
+      quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
+      scale: { start: 0.3, end: 0 },
+    });
+  }
+
+  /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
+  private handleComplete(): void {
+    this.audioManager.playWin();
+
+    for (const data of this.toyData) {
+      this.tweens.add({
+        targets: data.obj,
+        scaleX: data.baseScale * 1.2,
+        scaleY: data.baseScale * 1.2,
+        duration: 300,
+        yoyo: true,
+      });
+    }
+
+    if (!hasSticker("big-small")) {
+      earnSticker("big-small");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      this.scene.start("Hub");
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerScale = STICKER_DISPLAY_SIZE / TEXTURE_SIZE;
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_big_small")
+      .setScale(0);
+
+    this.tweens.add({
+      targets: stickerImage,
+      scaleX: stickerScale,
+      scaleY: stickerScale,
+      duration: 300,
+      ease: "Back.out",
     });
   }
 }
