@@ -1,0 +1,5 @@
+Task: Write tests for SettingsPanel creation and display (TDD-Red)
+
+Changes: Added red-phase tests covering backdrop, panel styling, title, initial toggle labels/colors, and 64px touch targets.
+Files: src/__tests__/components/SettingsPanel.test.ts; conductor/tracks/settings-ui_20260730/plan.md
+Why: Defines the required visible panel behavior before implementation.
