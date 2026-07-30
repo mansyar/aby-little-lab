@@ -1,0 +1,19 @@
+Phase 2 Verification Report - Big vs. Small Cleaner
+
+Phase: 2 - Round Initialization & Match Logic
+Checkpoint: b7e66a4
+
+Changed Files:
+- src/game/bigSmallLogic.ts (new) - pure game logic: selectToys, createToyInstances, createBoxes, generateRound, isMatch, isWin, shuffle
+- src/__tests__/game/bigSmallLogic.test.ts (new) - 20 tests covering all functions
+
+Test Results:
+- pnpm run check: PASS (33 files, 0 errors)
+- pnpm run build: PASS
+- CI=true pnpm test: PASS (304 tests, 10 test files)
+- Coverage: 100% on bigSmallLogic.ts (statements, branches, functions, lines)
+
+Manual Verification:
+- No regressions: pnpm dev loads without console errors: CONFIRMED
+- Hub scene displays normally: CONFIRMED
+- No visible behavior change (logic not yet wired to scene): CONFIRMED
