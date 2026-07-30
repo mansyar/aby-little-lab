@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Game 6 — Big vs. Small Cleaner** *Link: [./tracks/big-small_20260730/index.md](./tracks/big-small_20260730/index.md)*
+- [x] **Track: Game 6 — Big vs. Small Cleaner** *Link: [./archive/big-small_20260730/index.md](./archive/big-small_20260730/index.md)* (Archived)
 
 <!-- Archived tracks are moved to conductor/archive/ -->
 
