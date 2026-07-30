@@ -103,10 +103,12 @@ interface AppStorage {
 - Shadow assets derived by duplicating paths, unioning fills, setting color to `#2D3748`
 
 ### Audio Assets
-- SFX: MP3 format (sfx_pop, sfx_correct, sfx_incorrect, sfx_wake, sfx_win, sfx_sticker)
-- BGM: Single MP3 loop (bgm.mp3)
-- Synthesized: Web Audio API oscillators for Game 5 frog notes (C4, E4, G4)
-- Synthesized gameplay SFX: correct (ascending chime), incorrect (soft descending tone), win (celebratory arpeggio), sticker (sparkle), pop (short percussive blip), wake (soft rousing tone) — via Web Audio API
+- **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
+- **BGM:** Single MP3 loop (`bgm.mp3`) served at `/audio/bgm.mp3`
+- **SFX:** Synthesized via Web Audio API (correct, incorrect, win, sticker, pop, wake) — no MP3 files needed
+- **Synthesized:** Web Audio API oscillators for Game 5 frog notes (C4, E4, G4)
+
+> **2026-07-31 — Design Update:** BGM asset relocated from `src/assets/audio/bgm.mp3` to `public/audio/bgm.mp3`. In Vite, `public/` files are served at the root URL, so `public/audio/bgm.mp3` resolves at `/audio/bgm.mp3` — the runtime URL expected by `AudioManager`. This fixes the packaging mismatch where the BGM source lived in `src/assets/` (not served at runtime URLs) while `AudioManager` referenced `/audio/bgm.mp3`.
 
 ### PWA Icon
 - 512×512 PNG icon for manifest
@@ -122,7 +124,8 @@ aby-little-lab/
 ├── vite.config.ts
 ├── biome.json
 ├── public/
-│   └── icons/
+│   ├── icons/
+│   └── audio/                     # MP3 files served at /audio/ (BGM only)
 └── src/
     ├── main.ts                    # Phaser config + scene registration
     ├── vite-env.d.ts              # Vite client type declarations
@@ -149,7 +152,6 @@ aby-little-lab/
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
-    │   ├── audio/                 # MP3 files
     │   └── svg/
     │       ├── shapes/
     │       ├── animals/
