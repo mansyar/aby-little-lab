@@ -102,9 +102,11 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 ### GAME 5 — Musical Memory Simon (Working Memory & Auditory Recall)
 
 - **Milestone:** Sequential direction following and audio pattern retention.
-- **Mechanics:** 3 colorful SVG frogs on lily pads emit distinct musical notes (C4, E4, G4) and scale up in sequence. Child repeats the sequence. Each successful round adds one note, starting at 2 notes.
-- **SVG Requirements:** `frog_green.svg`, `frog_blue.svg`, `frog_red.svg`, `lilypad.svg`.
-- **Phaser Engine Logic:** Sequence stored in a typed array (`number[]`). Input locked during play. Evaluates user tap order against array indices. Sequence grows by 1 per successful round.
+- **Mechanics:** 3 colorful SVG frogs on lily pads emit distinct musical notes (C4, E4, G4) and scale up in sequence. Child repeats the sequence. Each successful round adds one note, starting at 2 notes and winning at length 6 (5 rounds). A replay button lets the child re-listen to the current sequence on demand.
+- **SVG Requirements:** `frog_green.svg`, `frog_blue.svg`, `frog_red.svg`, `lilypad.svg` (512×512px, flat fills, thick `#2D3748` outlines 4–6px, storybook style). Sticker: `sticker_musical_memory.svg`.
+- **Phaser Engine Logic:** Sequence stored in a typed array (`number[]`). Sequence auto-plays at round start with each frog scaling up + playing its note (input locked during playback, unlocked after). Evaluates user tap order against array indices. On wrong tap: plays a gentle incorrect tone, re-plays the sequence, and retries the same round (no-fail, no progress lost). On round success: fills a progress dot (5 dots total), grows the sequence by 1, and auto-plays the next round. Completion at length 6 triggers win animation + sticker award (first time only) + auto-return to Hub after 3s. Input is locked during the win celebration. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Frogs distinguished by color AND position AND note (not color-only). Gentle bounce animations (200–500ms). No-fail design (no penalties for wrong taps).
+- **Game Logic:** Pure functions in `src/game/musicalMemoryLogic.ts` (sequence generation, note appending, input validation, round completion, win detection) — testable without Phaser.
 
 ### GAME 6 — Big vs. Small Cleaner (Scale & Quantitative Reasoning)
 
@@ -131,8 +133,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  Show progress bar
     │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
     │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
-    │  shadows + sticker loaded; remaining games' assets loaded
-    │  as tracks complete)
+    │  shadows + sticker, Game 5 frogs + lily pad + sticker loaded;
+    │  remaining games' assets loaded as tracks complete)
     │
     ▼
 [HubScene]

@@ -73,7 +73,8 @@ aby-little-lab/
     │   ├── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
     │   ├── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
     │   ├── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
-    │   └── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
+    │   ├── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
+    │   └── musicalMemoryLogic.ts # Pure game logic (sequence generation, note appending, input validation, round/win detection)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -83,7 +84,7 @@ aby-little-lab/
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
     │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
-    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella (Game 4 objects) + Teddy, Toy Car, Toy Box (Game 6)
+    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella (Game 4 objects) + Lily Pad (Game 5) + Teddy, Toy Car, Toy Box (Game 6)
     │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs
@@ -92,7 +93,7 @@ aby-little-lab/
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock tests
-        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic)
+        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage tests
 ```
