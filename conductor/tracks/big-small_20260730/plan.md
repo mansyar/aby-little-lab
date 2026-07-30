@@ -17,20 +17,20 @@
 
 ---
 
-## Phase 2: Round Initialization & Match Logic
+## Phase 2: Round Initialization & Match Logic [checkpoint: pending]
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write tests for round initialization and match logic [TDD-Red]
-    - [ ] Test 3-of-4 toy types are randomly selected from the pool (teddy_bear, toy_car, toy_ball, toy_block)
-    - [ ] Test each selected toy type gets two scale instances: big (1.5×) and small (0.7×) = 6 toys total
-    - [ ] Test `scaleCategory` property is assigned correctly ("big" for 1.5×, "small" for 0.7×)
-    - [ ] Test toy positions are shuffled independently per playthrough (replay variety)
-    - [ ] Test match detection returns true when `toy.scaleCategory === box.scaleCategory`
-    - [ ] Test match detection returns false when scale categories differ
-    - [ ] Test win detection returns true when sorted count reaches 6
-    - [ ] Test win detection returns false when sorted count is less than 6
-- [ ] Task: Implement round initialization & match logic in `src/game/bigSmallLogic.ts` (pure functions: toy selection, scale assignment, shuffle, match detection, win detection) [TDD-Green]
-- [ ] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Write tests for round initialization and match logic [TDD-Red]
+    - [x] Test 3-of-4 toy types are randomly selected from the pool (teddy_bear, toy_car, toy_ball, toy_block)
+    - [x] Test each selected toy type gets two scale instances: big (1.5×) and small (0.7×) = 6 toys total
+    - [x] Test `scaleCategory` property is assigned correctly ("big" for 1.5×, "small" for 0.7×)
+    - [x] Test toy positions are shuffled independently per playthrough (replay variety)
+    - [x] Test match detection returns true when `toy.scaleCategory === box.scaleCategory`
+    - [x] Test match detection returns false when scale categories differ
+    - [x] Test win detection returns true when sorted count reaches 6
+    - [x] Test win detection returns false when sorted count is less than 6
+- [x] Task: Implement round initialization & match logic in `src/game/bigSmallLogic.ts` (pure functions: toy selection, scale assignment, shuffle, match detection, win detection) [TDD-Green]
+- [x] Task: Conductor - User Manual Verification 'Round Initialization & Match Logic' (Protocol in workflow.md)
 
 ---
 
