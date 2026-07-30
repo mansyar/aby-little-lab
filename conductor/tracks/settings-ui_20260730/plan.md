@@ -44,7 +44,7 @@
     - [ ] Test tapping SFX toggle updates text to "SFX: ON" with green color when enabling
     - [ ] Test tapping backdrop (outside panel) destroys the panel and all its game objects
     - [ ] Test SettingsPanel `destroy()` removes all game objects and restores HubScene interaction
-- [ ] Task: Implement toggle handlers, audio integration, close behavior, and HubScene wiring [TDD-Green]
+- [x] Task: Implement toggle handlers, audio integration, close behavior, and HubScene wiring [TDD-Green] [ddd0204]
     - [ ] Implement BGM toggle handler: flip state, call `setBGMEnabled(newVal)`, call `playBGM()` if enabling, update toggle text/color
     - [ ] Implement SFX toggle handler: flip state, call `setSFXEnabled(newVal)`, call `playCorrect()` if enabling, update toggle text/color
     - [ ] Implement close handler: tap backdrop calls `destroy()` to remove panel + backdrop + toggle objects
