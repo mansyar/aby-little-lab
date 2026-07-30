@@ -1,0 +1,9 @@
+Task: Implement toggle handlers, audio integration, close behavior, and HubScene wiring
+
+Summary: Added interactive BGM and SFX controls that route through AudioManager, refresh their labels and colors, close on backdrop tap, and destroy all modal display objects. Wired SettingsPanel creation to HubScene's ParentLock success callback and cleanup to scene shutdown.
+
+Modified files:
+- src/components/SettingsPanel.ts
+- src/scenes/HubScene.ts
+
+Why: Completes the parental settings modal behavior while preserving existing AudioManager persistence and centralizing overlay lifecycle cleanup.
