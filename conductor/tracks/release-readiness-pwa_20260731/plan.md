@@ -6,9 +6,9 @@
 
 ## Phase 1: BGM Production Integration
 
-- [ ] Task: Establish BGM packaging regression coverage
-  - [ ] Add/update tests covering BGM initialization, looping, enabled/disabled behavior, and the `/audio/bgm.mp3` runtime URL.
-  - [ ] Run the tests and confirm the pre-change failure where applicable.
+- [x] Task: Establish BGM packaging regression coverage [241929e]
+   - [x] Add/update tests covering BGM initialization, looping, enabled/disabled behavior, and the `/audio/bgm.mp3` runtime URL.
+   - [x] Run the tests and confirm the pre-change failure where applicable.
 - [ ] Task: Package the existing BGM asset for runtime delivery
   - [ ] Move/package `src/assets/audio/bgm.mp3` at the served `/audio/bgm.mp3` path.
   - [ ] Preserve the current `AudioManager` API and BGM/SFX preference behavior.
