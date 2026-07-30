@@ -1,0 +1,25 @@
+Checkpoint Report for 1839d0a:
+Phase: 4 — Round Progression, Progress Dots & Completion
+Track: musical-memory_20260729
+
+All tasks in Phase 4 are complete:
+- [x] Read spec.md and workflow.md
+- [x] Write tests (9 new tests in navigation.test.ts) [sha: b42b5ff]
+- [x] Implement round progression, progress dots, completion flow [sha: b42b5ff]
+- [x] User manual verification (8 checks, all passed)
+
+Quality Gates:
+- Tests: 284 passed (0 failures), 9 test files
+- Coverage: MusicalMemoryScene.ts 99.05% stmts, 87.5% branches, 95% funcs, 100% lines
+- Overall: 97.93% stmts, 87% branches, 92.65% funcs, 98.76% lines
+- Biome check: clean
+- Build: succeeds
+
+Phase 4 Implementation Summary:
+- 5 progress dots (dimmed circles) at top of screen
+- handleRoundSuccess(): fills progress dot, checks isWin, grows sequence via appendNote, auto-plays next round
+- handleComplete(): playWin, win tweens on all 3 frogs, sticker award (first only), auto-return to Hub after 3s
+- createStickerAnimation(): sticker image scale-from-0 with Back.out ease
+- Parental lock exits to Hub at any time (hold Back 3s)
+
+All phases (1-4) are now complete. Track is ready for finalization.
