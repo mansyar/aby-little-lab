@@ -18,4 +18,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [ ] **Track: Release Readiness & PWA Validation** *Link: [./tracks/release-readiness-pwa_20260731/index.md](./tracks/release-readiness-pwa_20260731/index.md)*
+- [~] **Track: Release Readiness & PWA Validation** *Link: [./tracks/release-readiness-pwa_20260731/index.md](./tracks/release-readiness-pwa_20260731/index.md)*
