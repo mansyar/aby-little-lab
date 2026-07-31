@@ -119,7 +119,10 @@ describe("scene transitions", () => {
         BG_BASE_RGB.b,
       );
       expect(scene.cameras.main.setZoom).toHaveBeenCalledWith(1.02);
-      expect(scene.cameras.main.zoomTo).toHaveBeenCalledWith(1, 300, "Sine.out");
+      // The camera Zoom effect resolves ease strings against its own EaseMap
+      // ("Sine" → Sine.Out). A dotted string like "Sine.out" is not a key there
+      // and would leave the effect's ease undefined, crashing on the first frame.
+      expect(scene.cameras.main.zoomTo).toHaveBeenCalledWith(1, 300, "Sine");
     });
 
     it("fades in without zoom when reduced motion is preferred", () => {

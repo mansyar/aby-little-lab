@@ -38,6 +38,9 @@ export function sceneEntrance(scene: Phaser.Scene): void {
   scene.cameras.main.fadeIn(duration, FADE_RED, FADE_GREEN, FADE_BLUE);
   if (!isReducedMotion()) {
     scene.cameras.main.setZoom(ENTRANCE_ZOOM);
-    scene.cameras.main.zoomTo(1, duration, "Sine.out");
+    // The camera Zoom effect resolves ease strings against its EaseMap,
+    // where "Sine" maps to Sine.Out. Dotted strings like "Sine.out" are not
+    // keys there and would leave the effect's ease undefined (runtime crash).
+    scene.cameras.main.zoomTo(1, duration, "Sine");
   }
 }
