@@ -165,6 +165,8 @@ export class ParentLock {
 
   /** Returns the center point of the target's bounds for ring positioning. */
   private getTargetCenter(): { x: number; y: number } {
+    // GameObject's typings don't surface getCenter, but every Phaser
+    // GameObject (incl. Text) implements it at runtime.
     return (
       this.target as unknown as {
         getCenter: () => { x: number; y: number };
