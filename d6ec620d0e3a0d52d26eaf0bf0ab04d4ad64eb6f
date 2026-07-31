@@ -1,0 +1,5 @@
+Phase 1 Verification Report (cross-cutting-motion_20260801)
+
+Automated: pnpm vitest run — 12 files, 390 tests passed. New motion.test.ts (7 tests) covers matchMedia true/false/unavailable and duration/scale selection.
+
+Manual verification (pending — to be performed by a human reviewer): run pnpm dev, open the app, confirm existing success splashes, win animations, and sticker reveals behave identically to before (behavior-preserving refactor).
