@@ -13,7 +13,7 @@
   - [x] **VERIFY:** Run completion-effect and navigation tests; confirm behavior unchanged.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 2: Scene Transitions [checkpoint: pending]
+## Phase 2: Scene Transitions [checkpoint: f103a67]
 
 - [x] Task: Create transition utility and wire into all scene starts [TDD] `a02c441`
   - [x] **RED:** Add failing tests asserting fade + zoom tween configs, reduced-motion fade-only variant, and cleanup (no leftover overlays after completion).
