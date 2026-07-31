@@ -1,0 +1,17 @@
+Task: Verify release-build PWA artifacts
+
+Summary: Ran production build and verified all PWA artifacts are present.
+Initial build had 6 precache entries — BGM was missing from the service
+worker precache manifest. Fixed by adding includeAssets: ['audio/bgm.mp3']
+to vite-plugin-pwa config. Rebuilt and verified 7 precache entries.
+
+Verified artifacts:
+- manifest.webmanifest: name, short_name, display standalone, orientation landscape, icons
+- sw.js + workbox-9c191d2f.js: service worker generated
+- dist/audio/bgm.mp3: BGM file copied and precached
+- dist/icons/icon-512.png: icon copied and precached
+- dist/index.html, assets/*, registerSW.js: all build assets precached
+- Precache: 7 entries (1403.48 KiB)
+
+Files changed:
+- vite.config.ts (added includeAssets: ['audio/bgm.mp3'])
