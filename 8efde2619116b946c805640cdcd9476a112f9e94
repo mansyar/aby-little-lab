@@ -1,0 +1,3 @@
+Task: Add press-feedback helper and apply to controls (Phase 4, cross-cutting-motion_20260801)
+
+Added src/utils/pressFeedback.ts: attachPressFeedback(obj) squishes a control to 95% of its captured base scale on pointerdown and springs it back on pointerup/pointerout/pointercancel. No-op under reduced motion (registers nothing). Applied to all six game Back controls, Musical Memory Replay, and Hub Settings. Attach order placed after the primary handlers (ParentLock / handleReplay) so the hold-to-confirm flow is unaffected. Hit areas (96x96) untouched. Added 4 unit tests + 8 integration tests (fire-all-listeners helper). Full suite: 412 tests pass; biome check clean.
