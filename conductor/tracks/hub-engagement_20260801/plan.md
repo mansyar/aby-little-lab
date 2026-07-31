@@ -6,11 +6,11 @@
 
 ## Phase 1: Entrance and Idle Life
 
-- [ ] Task: Staggered entrance, tile bobbing, and background decorations [TDD]
-  - [ ] **RED:** Add failing tests asserting staggered entrance tweens (delayed per-element, 300ms each), phase-offset bob loops on tiles, drifting background shapes, and static behavior under reduced-motion.
-  - [ ] **GREEN:** Implement entrance stagger, bob loops, and decorative layer in `HubScene`.
-  - [ ] **REFACTOR:** Keep decorations minimal and low-contrast; no speculative extras.
-  - [ ] **VERIFY:** Run Hub navigation tests; confirm scene still starts games correctly.
+- [x] Task: Staggered entrance, tile bobbing, and background decorations [TDD] `c6f035a`
+  - [x] **RED:** Add failing tests asserting staggered entrance tweens (delayed per-element, 300ms each), phase-offset bob loops on tiles, drifting background shapes, and static behavior under reduced-motion.
+  - [x] **GREEN:** Implement entrance stagger, bob loops, and decorative layer in `HubScene`.
+  - [x] **REFACTOR:** Keep decorations minimal and low-contrast; no speculative extras.
+  - [x] **VERIFY:** Run Hub navigation tests; confirm scene still starts games correctly.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: Tile Press Feedback
