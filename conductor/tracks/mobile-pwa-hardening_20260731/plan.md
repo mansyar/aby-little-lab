@@ -58,11 +58,11 @@
 
 ## Phase 4: Production Validation and Documentation
 
-- [ ] Task: Update release and device checklists
-  - [ ] Add installed-PWA fullscreen/standalone expectations and OS navigation-bar limitations.
-  - [ ] Add first-interaction BGM verification.
-  - [ ] Add no-missing-SFX-request verification.
-  - [ ] Add bounded completion-effect and reduced-motion checks.
+- [x] Task: Update release and device checklists [b8be504]
+  - [x] Add installed-PWA fullscreen/standalone expectations and OS navigation-bar limitations.
+  - [x] Add first-interaction BGM verification.
+  - [x] Add no-missing-SFX-request verification.
+  - [x] Add bounded completion-effect and reduced-motion checks.
 - [ ] Task: Run project quality gates
   - [ ] Run `CI=true pnpm test`.
   - [ ] Run `pnpm test:coverage` and verify configured thresholds.
