@@ -13,13 +13,13 @@
   - [x] **VERIFY:** Run completion-effect and navigation tests; confirm behavior unchanged.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 2: Scene Transitions
+## Phase 2: Scene Transitions [checkpoint: pending]
 
-- [ ] Task: Create transition utility and wire into all scene starts [TDD]
-  - [ ] **RED:** Add failing tests asserting fade + zoom tween configs, reduced-motion fade-only variant, and cleanup (no leftover overlays after completion).
-  - [ ] **GREEN:** Implement `src/utils/sceneTransitions.ts`; replace `scene.start` in Hub tile taps, all six game Back controls, all six auto-return delayed calls, and Preload→Hub.
-  - [ ] **REFACTOR:** Extract one shared transition call site per scene; keep Boot→Preload instant.
-  - [ ] **VERIFY:** Run navigation integration tests; confirm every navigation path is covered and no instant cut remains.
+- [x] Task: Create transition utility and wire into all scene starts [TDD] `a02c441`
+  - [x] **RED:** Add failing tests asserting fade + zoom tween configs, reduced-motion fade-only variant, and cleanup (no leftover overlays after completion).
+  - [x] **GREEN:** Implement `src/utils/sceneTransitions.ts`; replace `scene.start` in Hub tile taps, all six game Back controls, all six auto-return delayed calls, and Preload→Hub.
+  - [x] **REFACTOR:** Extract one shared transition call site per scene; keep Boot→Preload instant.
+  - [x] **VERIFY:** Run navigation integration tests; confirm every navigation path is covered and no instant cut remains.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Choreographed Win Celebration
