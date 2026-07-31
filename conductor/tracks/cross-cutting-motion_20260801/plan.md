@@ -40,7 +40,7 @@
   - [x] **VERIFY:** Run hit-area and navigation tests; confirm controls still work.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 5: Quality Gates [checkpoint: pending]
+## Phase 5: Quality Gates [checkpoint: deafc2d]
 
 - [x] Task: Release verification for this track
   - [x] Run `pnpm vitest run` (the project's test script `vitest` runs in watch mode; `pnpm vitest run` is the non-watch equivalent of `pnpm test -- --run`). 15 files, 412 tests pass.
