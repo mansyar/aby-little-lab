@@ -22,6 +22,8 @@
   - [x] **GREEN:** Implement press feedback on tiles without changing navigation behavior.
   - [x] **REFACTOR:** Reuse the shared press-feedback helper if available from `cross-cutting-motion_20260801`; otherwise implement locally.
   - [x] **VERIFY:** Run navigation tests; confirm tile taps still start games.
+
+> **Deviation note (2026-08-01):** User feedback during Phase 2 manual verification — tiles started the game on `pointerdown`, so the press squish was never visible (the scene faded out instantly). Per user decision, tiles now navigate on `pointerup` (release on the tile), so holding shows the squish and spring-back; `pointerout`/`pointercancel` before release cancel navigation. Regression tests updated + new cancel tests. Commit `295cffe`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Sticker Shelf
