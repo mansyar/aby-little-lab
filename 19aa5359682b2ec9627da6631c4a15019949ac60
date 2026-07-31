@@ -1,0 +1,5 @@
+Phase 3 Verification Report (cross-cutting-motion_20260801)
+
+Automated: pnpm vitest run — 14 files, 400 tests passed (incl. 4 new completionEffect tests). pnpm run check clean.
+
+Manual verification (pending — to be performed by a human reviewer): run pnpm dev; complete a round in each of the six games and confirm a star-burst ray + confetti celebration plays at screen center, then auto-returns to Hub after 3s; confirm sticker reveal still works on first completion; enable OS reduced-motion and confirm a gentler 6-ray burst without confetti.
