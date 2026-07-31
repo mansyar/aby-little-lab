@@ -13,7 +13,7 @@
   - [x] **VERIFY:** Run ParentLock tests and confirm all existing navigation tests still pass.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 2: Touch Target Integration
+## Phase 2: Touch Target Integration [checkpoint: 6fa1abb]
 
 - [x] Task: Expand protected and replay control hit areas [TDD] `074a1bb` (+fix `e678c99`)
   - [x] **RED:** Add failing tests asserting 96×96 logical-pixel hit areas for Hub Settings, all game Back controls, and Musical Memory Replay.
