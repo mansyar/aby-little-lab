@@ -31,13 +31,13 @@
   - [x] **VERIFY:** Run all scene completion tests and the full suite.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 4: Press Feedback
+## Phase 4: Press Feedback [checkpoint: pending]
 
-- [ ] Task: Add press-feedback helper and apply to controls [TDD]
-  - [ ] **RED:** Add failing tests: scale 0.95 on `pointerdown`, restore on `pointerup`/`pointerout`/`pointercancel`, no-op under reduced-motion.
-  - [ ] **GREEN:** Implement helper; apply to six game Back controls, Musical Memory Replay, and Hub Settings.
-  - [ ] **REFACTOR:** Reuse the helper everywhere; preserve 96×96 hit areas.
-  - [ ] **VERIFY:** Run hit-area and navigation tests; confirm controls still work.
+- [x] Task: Add press-feedback helper and apply to controls [TDD] `8efde26`
+  - [x] **RED:** Add failing tests: scale 0.95 on `pointerdown`, restore on `pointerup`/`pointerout`/`pointercancel`, no-op under reduced-motion.
+  - [x] **GREEN:** Implement helper; apply to six game Back controls, Musical Memory Replay, and Hub Settings.
+  - [x] **REFACTOR:** Reuse the helper everywhere; preserve 96×96 hit areas.
+  - [x] **VERIFY:** Run hit-area and navigation tests; confirm controls still work.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 5: Quality Gates
