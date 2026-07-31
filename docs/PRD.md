@@ -253,7 +253,7 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), and
 - BGM starts in BootScene and loops continuously.
 - BGM can be toggled on/off via parental settings (persisted in localStorage).
 - SFX can also be toggled independently.
-- The settings modal plays the synthesized correct chime when SFX is enabled. `bgm.mp3` is not yet supplied, so the BGM control persists and updates AudioManager state while playback awaits the asset.
+- The settings modal plays the synthesized correct chime when SFX is enabled. The packaged `/audio/bgm.mp3` loop plays after eligible user interaction and follows the persisted BGM setting.
 
 ### Audio Format
 

@@ -92,7 +92,7 @@ src/
 
 ## Parental Settings
 
-Hold the Hub **Settings** control for 3 seconds to open the parental settings modal. It provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback will begin once the pending `bgm.mp3` asset is provided.
+Hold the Hub **Settings** control for 3 seconds to open the parental settings modal. It provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
 
 ## Documentation
 

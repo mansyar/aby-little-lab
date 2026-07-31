@@ -24,9 +24,11 @@ This checklist ensures comprehensive testing across target devices before releas
 # Build production version
 pnpm run build
 
-# Start local server
-serve dist -l 3000
+# Start a local server for same-device smoke tests
+pnpm exec serve dist -l 3000
 ```
+
+> **Secure-context requirement:** Use `http://localhost:3000` only for same-device smoke tests. For phone/tablet installation, service-worker, offline, and update checks, use an HTTPS private static host or HTTPS tunnel. A LAN `http://[your-ip]:3000` URL cannot register the service worker.
 
 ### 2. Device Preparation
 - [ ] Clear browser cache and site data
@@ -39,7 +41,7 @@ serve dist -l 3000
 ### A. Installation and PWA Behavior
 
 #### iPad/Safari
-- [ ] Open `http://[your-ip]:3000` in Safari
+- [ ] Open the HTTPS private-host or HTTPS-tunnel URL in Safari
 - [ ] Tap Share button → "Add to Home Screen"
 - [ ] Verify app name appears as "Aby's Little Lab"
 - [ ] Launch app from home screen
@@ -49,7 +51,7 @@ serve dist -l 3000
 - [ ] Verify app loads from cache (offline ready)
 
 #### Android/Chrome
-- [ ] Open `http://[your-ip]:3000` in Chrome
+- [ ] Open the HTTPS private-host or HTTPS-tunnel URL in Chrome
 - [ ] Tap "Add to Home Screen" prompt or menu option
 - [ ] Verify app installs successfully
 - [ ] Launch app from home screen

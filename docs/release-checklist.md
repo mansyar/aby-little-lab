@@ -12,11 +12,12 @@
 
 ### 2. PWA Validation
 - [ ] Run `node scripts/validate-pwa.js`
-- [ ] Verify manifest.json is valid
+- [ ] Verify manifest.webmanifest is valid
 - [ ] Verify service worker is generated
 - [ ] Verify all assets are precached
 - [ ] Test offline functionality
 - [ ] Test installation on target devices
+- [ ] Perform phone/tablet PWA checks from an HTTPS URL
 
 ### 3. Asset Verification
 - [ ] All SVG assets load correctly
@@ -71,8 +72,9 @@ pnpm run build
 
 ### Step 6: Deploy to Static Host
 ```bash
-# Option 1: Local sideload
-serve dist -l 3000
+# Option 1: Same-device local smoke test (HTTP localhost only)
+pnpm exec serve dist -l 3000
+# For phone/tablet PWA, offline, and update testing, use an HTTPS private static host or tunnel.
 
 # Option 2: Deploy to static host
 # Upload dist/ directory to your static host
