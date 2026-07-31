@@ -22,7 +22,7 @@
   - [x] **VERIFY:** Run navigation integration tests; confirm every navigation path is covered and no instant cut remains.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 3: Choreographed Win Celebration [checkpoint: pending]
+## Phase 3: Choreographed Win Celebration [checkpoint: 19aa535]
 
 - [x] Task: Build `createWinCelebration` (star-burst + confetti) [TDD] `b92ee06`
   - [x] **RED:** Add failing tests: Graphics-based rays + drifting confetti bits, bounded self-cleaning (destroy on complete), no `add.particles` usage, reduced-motion variant.
