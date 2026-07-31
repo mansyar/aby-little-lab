@@ -23,7 +23,7 @@
 - [x] Task: Verify release-build PWA artifacts [532d874]
   - [x] Run the production build.
   - [x] Confirm manifest, service worker, icon, BGM, and game assets are present in generated output/precache artifacts.
-- [x] Task: Validate installation, standalone, update, and offline behavior [b53a024]
+- [~] Task: Validate installation, standalone, update, and offline behavior
   - [x] Serve the production build locally.
   - [x] Verify installation and standalone landscape launch.
   - [x] Verify every game remains playable after an initial online load and subsequent offline launch.
@@ -32,7 +32,7 @@
 
 ## Phase 3: Device Quality Validation and Release Documentation
 
-- [x] Task: Perform phone and tablet acceptance testing [b307905]
+- [~] Task: Perform phone and tablet acceptance testing
   - [x] Exercise boot → Hub → all six games → sticker award → Hub.
   - [x] Verify touch/drag/hold controls, parental lock, settings persistence, sticker persistence, and reduced-motion behavior.
   - [x] Record practical measurements/observations against boot, frame-rate, memory, touch, and audio targets.
@@ -43,3 +43,7 @@
   - [x] Run `pnpm run check`, `CI=true pnpm test`, coverage, and `pnpm run build`.
   - [x] Record results and any target limitations in release documentation.
 - [x] Task: Phase Verification & Checkpoint [549dd12]
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions 7bd40ae
