@@ -33,16 +33,16 @@
 
 ## Phase 4: Quality Gates and Manual Touch Verification
 
-- [~] Task: Complete release verification for this track
+- [x] Task: Complete release verification for this track
   - [x] Run `pnpm test -- --run`.
   - [x] Run `pnpm run test:coverage`.
   - [x] Run `pnpm run check`.
   - [x] Run `pnpm run build`.
-  - [ ] Verify Settings and every game Back control with a 3-second hold.
-  - [ ] Verify early release, pointerout, and cancellation do not trigger navigation.
-  - [ ] Verify Back, Settings, and Replay are usable without precision tapping.
+  - [x] Verify Settings and every game Back control with a 3-second hold.
+  - [x] Verify early release, pointerout, and cancellation do not trigger navigation.
+  - [x] Verify Back, Settings, and Replay are usable without precision tapping.
   - [x] Confirm no asset-loading, orientation, audio, or gameplay changes were introduced.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Definition of Done
 
