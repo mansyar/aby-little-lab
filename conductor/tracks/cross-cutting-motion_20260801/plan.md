@@ -31,7 +31,7 @@
   - [x] **VERIFY:** Run all scene completion tests and the full suite.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 4: Press Feedback [checkpoint: pending]
+## Phase 4: Press Feedback [checkpoint: 7284cc4]
 
 - [x] Task: Add press-feedback helper and apply to controls [TDD] `8efde26`
   - [x] **RED:** Add failing tests: scale 0.95 on `pointerdown`, restore on `pointerup`/`pointerout`/`pointercancel`, no-op under reduced-motion.
