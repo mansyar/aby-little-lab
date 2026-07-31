@@ -20,9 +20,9 @@
 
 ## Phase 2: Production PWA and Offline Validation
 
-- [ ] Task: Verify release-build PWA artifacts
-  - [ ] Run the production build.
-  - [ ] Confirm manifest, service worker, icon, BGM, and game assets are present in generated output/precache artifacts.
+- [x] Task: Verify release-build PWA artifacts [532d874]
+  - [x] Run the production build.
+  - [x] Confirm manifest, service worker, icon, BGM, and game assets are present in generated output/precache artifacts.
 - [ ] Task: Validate installation, standalone, update, and offline behavior
   - [ ] Serve the production build locally.
   - [ ] Verify installation and standalone landscape launch.
