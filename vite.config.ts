@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
+      includeAssets: ["audio/bgm.mp3"],
       manifest: {
         name: "Aby's Little Lab",
         short_name: "Aby Lab",
