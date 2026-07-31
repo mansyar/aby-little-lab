@@ -1,0 +1,9 @@
+Hotfix: sceneEntrance zoomTo crash (found during hub-engagement Phase 1 manual verification)
+
+Root cause: Phaser's camera Zoom effect resolves an ease string against its own EaseMap (keys like 'Sine', 'Linear', 'Sine.easeIn'...). The dotted string 'Sine.out' is NOT a key there, so the effect's ease stayed undefined and Zoom.update threw 'this.ease is not a function' on the first frame of every scene entrance.
+
+Fix: pass the canonical EaseMap key 'Sine' (which maps to Sine.Out) in src/utils/sceneTransitions.ts. Regression test updated in sceneTransitions.test.ts to pin the key.
+
+Files: src/utils/sceneTransitions.ts, src/__tests__/utils/sceneTransitions.test.ts
+
+Why: The Tween manager accepts dotted strings, but camera effects do not; the original cross-cutting-motion tests only asserted against mocks, so the runtime crash slipped through.
