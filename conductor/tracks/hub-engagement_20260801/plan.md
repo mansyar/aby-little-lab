@@ -17,11 +17,11 @@
 
 ## Phase 2: Tile Press Feedback
 
-- [ ] Task: Add press feedback to Hub tiles [TDD]
-  - [ ] **RED:** Add failing tests: scale 0.95 on `pointerdown`, spring-back on `pointerup`/`pointerout`, no-op under reduced-motion.
-  - [ ] **GREEN:** Implement press feedback on tiles without changing navigation behavior.
-  - [ ] **REFACTOR:** Reuse the shared press-feedback helper if available from `cross-cutting-motion_20260801`; otherwise implement locally.
-  - [ ] **VERIFY:** Run navigation tests; confirm tile taps still start games.
+- [x] Task: Add press feedback to Hub tiles [TDD] `13a2013`
+  - [x] **RED:** Add failing tests: scale 0.95 on `pointerdown`, spring-back on `pointerup`/`pointerout`, no-op under reduced-motion.
+  - [x] **GREEN:** Implement press feedback on tiles without changing navigation behavior.
+  - [x] **REFACTOR:** Reuse the shared press-feedback helper if available from `cross-cutting-motion_20260801`; otherwise implement locally.
+  - [x] **VERIFY:** Run navigation tests; confirm tile taps still start games.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Sticker Shelf
