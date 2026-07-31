@@ -10,15 +10,15 @@
   - [x] Confirm the affected areas: PWA manifest, `AudioManager`, Hub interaction, six game completion flows, and production validation.
   - [x] Record the deployed baseline: the installed phone PWA was reported not to enter fullscreen; phone navigation controls remained visible; BGM did not play; completion effects were performance-heavy and sometimes persisted; the Playwright deployment check reported 404s for `/audio/pop.mp3`, `/audio/correct.mp3`, `/audio/incorrect.mp3`, `/audio/wake.mp3`, `/audio/win.mp3`, and `/audio/sticker.mp3`.
 - [x] Task: Add failing audio behavior tests [TDD-Red] [39d2689]
-  - [ ] Test that the first eligible user interaction resumes audio and starts BGM when enabled.
-  - [ ] Test that BGM startup is idempotent across scene navigation.
-  - [ ] Test that disabled BGM does not start and re-enabling it starts playback.
-  - [ ] Test that synthesized SFX APIs remain available without constructing missing MP3 resources.
-- [ ] Task: Add failing completion-feedback tests [TDD-Red]
-  - [ ] Test that success feedback is single-shot and bounded.
-  - [ ] Test that completion feedback is cleaned up after its animation.
-  - [ ] Test reduced-motion behavior.
-  - [ ] Preserve tests for win audio, sticker award, and Hub auto-return for all six games.
+  - [x] Test that the first eligible user interaction resumes audio and starts BGM when enabled.
+  - [x] Test that BGM startup is idempotent across scene navigation.
+  - [x] Test that disabled BGM does not start and re-enabling it starts playback.
+  - [x] Test that synthesized SFX APIs remain available without constructing missing MP3 resources.
+- [x] Task: Add failing completion-feedback tests [TDD-Red] [ef4e055]
+  - [x] Test that success feedback is single-shot and bounded.
+  - [x] Test that completion feedback is cleaned up after its animation.
+  - [x] Test reduced-motion behavior.
+  - [x] Preserve tests for win audio, sticker award, and Hub auto-return for all six games.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: PWA Display and Audio Runtime
