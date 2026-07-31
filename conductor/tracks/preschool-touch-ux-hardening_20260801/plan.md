@@ -22,14 +22,14 @@
   - [x] **VERIFY:** Run affected scene tests and confirm neighboring controls do not overlap.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 3: Cross-Scene Regression Verification
+## Phase 3: Cross-Scene Regression Verification [checkpoint: a0be9c5]
 
 - [x] Task: Verify consistent touch behavior across the full navigation flow [TDD/Integration] `2500ece`
   - [x] **RED:** Add or extend integration assertions for Settings, every game Back control, and Musical Memory Replay.
   - [x] **GREEN:** Resolve any scene-specific integration failures without changing gameplay rules.
   - [x] **REFACTOR:** Remove test duplication and keep shared assertions readable.
   - [x] **VERIFY:** Confirm cancellation never navigates, completed holds navigate once, and progress indicators are cleaned up on scene shutdown.
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: Quality Gates and Manual Touch Verification
 
