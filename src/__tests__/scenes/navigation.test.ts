@@ -3149,4 +3149,131 @@ describe("scene navigation flow", () => {
       expect(mockSettingsPanelDestroy).toHaveBeenCalled();
     });
   });
+
+  describe("cross-scene touch regression", () => {
+    /** Fires the first registered listener for an event on a game object. */
+    function fireEvent(obj: Record<string, MockFn>, event: string): void {
+      const callback = getMockFn(obj.on).mock.calls.find((call) => call[0] === event)?.[1] as
+        | (() => void)
+        | undefined;
+      if (!callback) throw new Error(`no '${event}' listener registered on object`);
+      callback();
+    }
+
+    /** Returns the ParentLock 3000ms hold callback scheduled on the scene. */
+    function holdCallback(scene: unknown): () => void {
+      const call = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
+        .mock.calls.find((entry) => entry[0] === 3000);
+      if (!call) throw new Error("ParentLock 3000ms hold not found");
+      return call[1] as () => void;
+    }
+
+    it.each(GAME_SCENES)(
+      "never navigates when the Back hold is released early in $name",
+      ({ SceneClass }) => {
+        const scene = new SceneClass();
+        scene.create();
+
+        const backButton = getTextObject(scene, "Back");
+        if (!backButton) throw new Error("Back button not found");
+
+        fireEvent(backButton, "pointerdown");
+        fireEvent(backButton, "pointerup");
+
+        // A stale hold callback after early release must never navigate.
+        holdCallback(scene)();
+        expect(getMockFn(scene.scene.start)).not.toHaveBeenCalledWith("Hub");
+      },
+    );
+
+    it.each(GAME_SCENES)(
+      "never navigates when the Back hold is cancelled in $name",
+      ({ SceneClass }) => {
+        const scene = new SceneClass();
+        scene.create();
+
+        const backButton = getTextObject(scene, "Back");
+        if (!backButton) throw new Error("Back button not found");
+
+        fireEvent(backButton, "pointerdown");
+        fireEvent(backButton, "pointercancel");
+
+        holdCallback(scene)();
+        expect(getMockFn(scene.scene.start)).not.toHaveBeenCalledWith("Hub");
+      },
+    );
+
+    it("never opens the panel when the Settings hold is released early", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const settingsButton = getTextObject(scene, "Settings");
+      if (!settingsButton) throw new Error("Settings button not found");
+
+      fireEvent(settingsButton, "pointerdown");
+      fireEvent(settingsButton, "pointerup");
+
+      holdCallback(scene)();
+      expect(mockSettingsPanel).not.toHaveBeenCalled();
+    });
+
+    it("opens the panel exactly once when the Settings hold completes despite duplicate pointerdown", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const settingsButton = getTextObject(scene, "Settings");
+      if (!settingsButton) throw new Error("Settings button not found");
+
+      fireEvent(settingsButton, "pointerdown");
+      fireEvent(settingsButton, "pointerdown");
+
+      const holdCalls = getMockFn(scene.time.delayedCall).mock.calls.filter(
+        (call) => call[0] === 3000,
+      );
+      expect(holdCalls.length).toBe(1);
+
+      (holdCalls[0][1] as () => void)();
+      (holdCalls[0][1] as () => void)();
+      expect(mockSettingsPanel).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(GAME_SCENES)(
+      "cleans up the hold progress ring on shutdown in $name",
+      ({ SceneClass }) => {
+        const scene = new SceneClass();
+        scene.create();
+
+        const backButton = getTextObject(scene, "Back");
+        if (!backButton) throw new Error("Back button not found");
+
+        fireEvent(backButton, "pointerdown");
+
+        const graphicsMock = getMockFn(scene.add.graphics);
+        const ring = graphicsMock.mock.results.at(-1)?.value as Record<string, MockFn>;
+        expect(ring).toBeDefined();
+
+        triggerShutdown(scene);
+
+        expect(getMockFn(ring.destroy)).toHaveBeenCalled();
+      },
+    );
+
+    it("cleans up the Settings hold progress ring on Hub shutdown", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const settingsButton = getTextObject(scene, "Settings");
+      if (!settingsButton) throw new Error("Settings button not found");
+
+      fireEvent(settingsButton, "pointerdown");
+
+      const graphicsMock = getMockFn(scene.add.graphics);
+      const ring = graphicsMock.mock.results.at(-1)?.value as Record<string, MockFn>;
+      expect(ring).toBeDefined();
+
+      triggerShutdown(scene);
+
+      expect(getMockFn(ring.destroy)).toHaveBeenCalled();
+    });
+  });
 });
