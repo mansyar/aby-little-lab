@@ -371,6 +371,18 @@ function triggerAllPointerdowns(scene: unknown): void {
   }
 }
 
+/** Triggers all pointerup callbacks registered on game objects. */
+function triggerAllPointerups(scene: unknown): void {
+  const allObjects = getAllGameObjects(scene);
+  for (const obj of allObjects) {
+    const onMock = getMockFn(obj.on);
+    const pointerupCall = onMock.mock.calls.find((call) => call[0] === "pointerup");
+    if (pointerupCall && typeof pointerupCall[1] === "function") {
+      pointerupCall[1]();
+    }
+  }
+}
+
 /** Triggers the shutdown event on a scene, invoking any registered shutdown callbacks. */
 function triggerShutdown(scene: unknown): void {
   const events = (scene as { events: Record<string, unknown> }).events;
@@ -681,7 +693,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      triggerAllPointerdowns(scene);
+      triggerAllPointerups(scene);
       completeFadeOuts(scene);
 
       const startMock = getMockFn(scene.scene.start);
@@ -696,7 +708,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      triggerAllPointerdowns(scene);
+      triggerAllPointerups(scene);
 
       expect(mockAudio.resume).toHaveBeenCalled();
     });
@@ -705,7 +717,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      triggerAllPointerdowns(scene);
+      triggerAllPointerups(scene);
 
       expect(mockAudio.playBGM).toHaveBeenCalled();
     });
@@ -876,13 +888,42 @@ describe("scene navigation flow", () => {
       scene.create();
       completeHubEntrances(scene);
 
-      triggerAllPointerdowns(scene);
+      triggerAllPointerups(scene);
       completeFadeOuts(scene);
 
       const startedKeys = getMockFn(scene.scene.start).mock.calls.map((call) => call[0] as string);
       for (const key of GAME_SCENE_KEYS) {
         expect(startedKeys).toContain(key);
       }
+    });
+
+    it("does not navigate while a tile is merely pressed (only on release)", () => {
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      triggerAllPointerdowns(scene);
+      completeFadeOuts(scene);
+
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    });
+
+    it("cancels navigation when the pointer leaves or cancels before release", () => {
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      const tile = getRectangles(scene)[0];
+      fireAllObjectEvents(tile, "pointerdown");
+      fireAllObjectEvents(tile, "pointerout");
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+
+      const otherTile = getRectangles(scene)[1];
+      fireAllObjectEvents(otherTile, "pointerdown");
+      fireAllObjectEvents(otherTile, "pointercancel");
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
     });
 
     it("does not attach press feedback to tiles under reduced motion", () => {

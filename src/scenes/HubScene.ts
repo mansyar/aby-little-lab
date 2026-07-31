@@ -94,7 +94,9 @@ export class HubScene extends Phaser.Scene {
 
       const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
       tile.setInteractive();
-      tile.on("pointerdown", () => {
+      // Navigate on release so the press squish is visible while holding;
+      // releasing outside the tile (pointerout/pointercancel) cancels.
+      tile.on("pointerup", () => {
         startAudio();
         transitionToScene(this, GAME_TILES[i].sceneKey);
       });
