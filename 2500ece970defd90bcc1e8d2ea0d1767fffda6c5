@@ -1,0 +1,15 @@
+Task: Verify consistent touch behavior across the full navigation flow
+
+Summary: Added 21 cross-scene integration assertions in navigation.test.ts:
+- 6x early release on Back never navigates (stale callback no-op)
+- 6x pointercancel on Back never navigates
+- Hub Settings early release never opens the panel
+- Settings duplicate pointerdown schedules one hold and opens panel exactly once
+- 6x progress ring destroyed on scene shutdown
+- Hub Settings ring destroyed on shutdown
+
+RED note: tests passed on first write - the Phase 1 ParentLock hardening already satisfied all integration contracts; these assertions lock in the cross-scene behavior as regression guards (helpers throw if listeners/timers missing, so silent passes are impossible).
+
+Why: spec requirement 4 - regression tests for duplicate/cancel/callback-once/shutdown cleanup at the full navigation level.
+
+Verification: CI=true pnpm vitest run -> 11 files, 383/383 passed.
