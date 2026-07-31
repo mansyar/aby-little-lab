@@ -1,7 +1,7 @@
 {
   "track_id": "mobile-pwa-hardening_20260731",
   "type": "bug",
-  "state": "new",
+  "state": "completed",
   "spec": {
     "approved": true,
     "approved_at": "2026-07-31T00:00:00Z"
@@ -9,10 +9,10 @@
   "plan": {
     "approved": true,
     "approved_at": "2026-07-31T00:00:00Z",
-    "items_total": 69,
-    "items_completed": 0
+    "items_total": 67,
+    "items_completed": 67
   },
   "created_at": "2026-07-31T00:00:00Z",
-  "updated_at": "2026-07-31T00:00:00Z",
+  "updated_at": "2026-07-31T10:05:25Z",
   "description": "Mobile PWA Shell, Audio, and Completion Feedback Hardening"
 }
