@@ -13,6 +13,8 @@
 ### 2. PWA Validation
 - [ ] Run `node scripts/validate-pwa.js`
 - [ ] Verify manifest.webmanifest is valid
+- [ ] Verify the manifest requests fullscreen where supported and retains standalone as the fallback display mode
+- [ ] When system home/back/navigation bars remain visible, record them as platform-controlled limitations rather than app-rendered controls
 - [ ] Verify service worker is generated
 - [ ] Verify all assets are precached
 - [ ] Test offline functionality
@@ -21,12 +23,18 @@
 
 ### 3. Asset Verification
 - [ ] All SVG assets load correctly
-- [ ] BGM audio plays and loops
-- [ ] SFX audio works
+- [ ] The first valid user interaction starts low-volume looping BGM when BGM is enabled, and BGM continues across scene navigation
+- [ ] SFX audio works through Web Audio synthesis
+- [ ] No requests are made for the removed `/audio/pop.mp3`, `/audio/correct.mp3`, `/audio/incorrect.mp3`, `/audio/wake.mp3`, `/audio/win.mp3`, or `/audio/sticker.mp3` files
 - [ ] Icons display correctly
 - [ ] No missing or corrupted assets
 
-### 4. Documentation
+### 4. Interaction Feedback
+- [ ] Each game uses one brief, bounded splash/ray for success or completion feedback
+- [ ] The splash/ray cleans itself up and never clouds the play area
+- [ ] Reduced-motion mode disables or simplifies the splash/ray without affecting game completion
+
+### 5. Documentation
 - [ ] README.md is up to date
 - [ ] Release notes prepared
 - [ ] Deployment guide complete

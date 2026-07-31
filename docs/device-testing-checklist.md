@@ -46,6 +46,8 @@ pnpm exec serve dist -l 3000
 - [ ] Verify app name appears as "Aby's Little Lab"
 - [ ] Launch app from home screen
 - [ ] Verify standalone mode (no browser UI)
+- [ ] Verify fullscreen display where the platform supports it
+- [ ] Record any remaining OS home/back/navigation bars as platform-controlled limitations
 - [ ] Verify landscape orientation
 - [ ] Close and reopen app
 - [ ] Verify app loads from cache (offline ready)
@@ -56,6 +58,8 @@ pnpm exec serve dist -l 3000
 - [ ] Verify app installs successfully
 - [ ] Launch app from home screen
 - [ ] Verify standalone mode
+- [ ] Verify fullscreen display where the platform supports it
+- [ ] Record any remaining OS home/back/navigation bars as platform-controlled limitations
 - [ ] Verify landscape orientation
 - [ ] Close and reopen app
 - [ ] Verify app loads from cache
@@ -79,7 +83,7 @@ pnpm exec serve dist -l 3000
 - [ ] Shapes are visible and recognizable
 - [ ] Drag and drop works smoothly
 - [ ] Matching detection works correctly
-- [ ] Success feedback (chime + particles) works
+- [ ] Success feedback (chime + bounded splash/ray) works and disappears promptly
 - [ ] Error feedback (gentle animation) works
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
@@ -210,6 +214,15 @@ pnpm exec serve dist -l 3000
 - [ ] Test in low-light conditions
 - [ ] Verify all elements are clearly visible
 - [ ] Verify color contrast is adequate
+
+### G. Completion and Audio Regression Checks
+- [ ] On the first valid Hub interaction, BGM starts when enabled
+- [ ] BGM continues when moving between Hub and games
+- [ ] BGM and SFX settings persist after closing and reopening the app
+- [ ] SFX feedback remains synthesized and no removed SFX MP3 URL is requested
+- [ ] Each of the six games shows at most one short splash/ray for a success or completion action
+- [ ] No completion effect remains on screen or obscures the next interaction
+- [ ] Reduced-motion mode disables or simplifies the splash/ray
 
 ## Test Documentation
 
