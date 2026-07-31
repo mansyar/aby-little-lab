@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
+import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { hasSticker } from "../utils/storage";
 
 interface GameTile {
@@ -41,6 +42,8 @@ export class HubScene extends Phaser.Scene {
   }
 
   create(): void {
+    sceneEntrance(this);
+
     const startX =
       (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
     const startY =
@@ -61,7 +64,7 @@ export class HubScene extends Phaser.Scene {
       tile.setInteractive();
       tile.on("pointerdown", () => {
         startAudio();
-        this.scene.start(GAME_TILES[i].sceneKey);
+        transitionToScene(this, GAME_TILES[i].sceneKey);
       });
 
       const label = this.add.text(x, y, GAME_TILES[i].label, {

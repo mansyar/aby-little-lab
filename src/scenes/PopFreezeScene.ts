@@ -12,6 +12,7 @@ import {
   selectBubbleType,
 } from "../game/popFreezeLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
+import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Display size for each bubble (exceeds 96px ideal touch target). */
@@ -61,6 +62,8 @@ export class PopFreezeScene extends Phaser.Scene {
   }
 
   create(): void {
+    sceneEntrance(this);
+
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
       color: "#2d3748",
@@ -74,7 +77,7 @@ export class PopFreezeScene extends Phaser.Scene {
       scene: this,
       target: backButton,
       onSuccess: () => {
-        this.scene.start("Hub");
+        transitionToScene(this, "Hub");
       },
       onFailure: () => {
         // No action needed on failure.
@@ -241,7 +244,7 @@ export class PopFreezeScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      this.scene.start("Hub");
+      transitionToScene(this, "Hub");
     });
   }
 

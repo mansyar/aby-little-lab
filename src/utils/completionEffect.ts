@@ -1,5 +1,5 @@
 import type Phaser from "phaser";
-import { isReducedMotion, motionDuration, motionScale } from "./motion";
+import { motionDuration, motionScale } from "./motion";
 
 const RAY_COUNT = 8;
 const RAY_COLOR = 0xffd166;
@@ -12,7 +12,6 @@ const REDUCED_MOTION_DURATION = 180;
  * The effect uses one Graphics object instead of a particle emitter.
  */
 export function createCompletionSplash(scene: Phaser.Scene, x: number, y: number): void {
-  const reducedMotion = isReducedMotion();
   const innerRadius = motionScale(24, 18);
   const outerRadius = motionScale(72, 52);
   const lineWidth = motionScale(8, 6);

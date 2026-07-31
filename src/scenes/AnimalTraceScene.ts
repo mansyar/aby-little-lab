@@ -12,6 +12,7 @@ import {
   selectThreePairs,
 } from "../game/animalTraceLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
+import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** X position for the animal sprite (left side). */
@@ -92,6 +93,8 @@ export class AnimalTraceScene extends Phaser.Scene {
   }
 
   create(): void {
+    sceneEntrance(this);
+
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
       color: "#2d3748",
@@ -105,7 +108,7 @@ export class AnimalTraceScene extends Phaser.Scene {
       scene: this,
       target: backButton,
       onSuccess: () => {
-        this.scene.start("Hub");
+        transitionToScene(this, "Hub");
       },
       onFailure: () => {
         // No action needed on failure.
@@ -267,7 +270,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      this.scene.start("Hub");
+      transitionToScene(this, "Hub");
     });
   }
 

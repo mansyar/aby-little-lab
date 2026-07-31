@@ -105,6 +105,10 @@ vi.mock("phaser", () => {
       this.cameras = {
         main: {
           setBackgroundColor: vi.fn(),
+          fadeIn: vi.fn(),
+          fadeOut: vi.fn(),
+          setZoom: vi.fn(),
+          zoomTo: vi.fn(),
           centerX: 512,
           centerY: 384,
           width: 1024,
@@ -351,6 +355,20 @@ function triggerShutdown(scene: unknown): void {
   }
 }
 
+/**
+ * Completes all pending scene transitions by invoking every camera fadeOut
+ * callback registered so far. Scene starts are deferred until the fade-out
+ * completes, so tests must call this before asserting navigation.
+ */
+function completeFadeOuts(scene: unknown): void {
+  const cameras = (scene as { cameras: { main: Record<string, unknown> } }).cameras;
+  const fadeOutMock = getMockFn(cameras.main.fadeOut);
+  for (const call of fadeOutMock.mock.calls) {
+    const callback = call[4] as (() => void) | undefined;
+    callback?.();
+  }
+}
+
 /** Returns true if any game object's off method was called. */
 function anyObjectOffCalled(scene: unknown): boolean {
   const allObjects = getAllGameObjects(scene);
@@ -464,6 +482,7 @@ describe("scene navigation flow", () => {
     it("transitions to HubScene on create", () => {
       const scene = new PreloadScene();
       scene.create();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -609,6 +628,7 @@ describe("scene navigation flow", () => {
       scene.create();
 
       triggerAllPointerdowns(scene);
+      completeFadeOuts(scene);
 
       const startMock = getMockFn(scene.scene.start);
       const startedKeys = startMock.mock.calls.map((call) => call[0] as string);
@@ -658,6 +678,7 @@ describe("scene navigation flow", () => {
         // Simulate hold completion (ParentLock success callback)
         const holdCallback = parentLockCall[1] as () => void;
         holdCallback();
+        completeFadeOuts(scene);
 
         expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
       },
@@ -1024,6 +1045,7 @@ describe("scene navigation flow", () => {
 
       const callback = autoReturnCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -1378,6 +1400,7 @@ describe("scene navigation flow", () => {
 
       const callback = autoReturnCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -1737,6 +1760,7 @@ describe("scene navigation flow", () => {
 
       const callback = autoReturnCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -2128,6 +2152,7 @@ describe("scene navigation flow", () => {
 
       const callback = autoReturnCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -2660,6 +2685,7 @@ describe("scene navigation flow", () => {
       const autoReturnCall = calls3000[calls3000.length - 1];
       const callback = autoReturnCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -2682,6 +2708,7 @@ describe("scene navigation flow", () => {
 
       const callback = parentLockCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
@@ -3104,6 +3131,7 @@ describe("scene navigation flow", () => {
 
       const callback = autoReturnCall?.[1] as () => void;
       callback();
+      completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });

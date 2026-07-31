@@ -12,6 +12,7 @@ import {
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
+import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Frog texture keys in index order (0=green, 1=blue, 2=red). */
@@ -87,6 +88,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
   }
 
   create(): void {
+    sceneEntrance(this);
+
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
       color: "#2d3748",
@@ -100,7 +103,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
       scene: this,
       target: backButton,
       onSuccess: () => {
-        this.scene.start("Hub");
+        transitionToScene(this, "Hub");
       },
       onFailure: () => {
         // No action needed on failure.
@@ -272,7 +275,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      this.scene.start("Hub");
+      transitionToScene(this, "Hub");
     });
   }
 

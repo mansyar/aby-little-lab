@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
+import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Y position for cutout slots (top area). */
@@ -69,6 +70,8 @@ export class ShapeSorterScene extends Phaser.Scene {
   }
 
   create(): void {
+    sceneEntrance(this);
+
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
       color: "#2d3748",
@@ -82,7 +85,7 @@ export class ShapeSorterScene extends Phaser.Scene {
       scene: this,
       target: backButton,
       onSuccess: () => {
-        this.scene.start("Hub");
+        transitionToScene(this, "Hub");
       },
       onFailure: () => {
         // No action needed on failure.
@@ -213,7 +216,7 @@ export class ShapeSorterScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      this.scene.start("Hub");
+      transitionToScene(this, "Hub");
     });
   }
 
