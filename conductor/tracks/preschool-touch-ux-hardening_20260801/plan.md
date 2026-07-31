@@ -24,11 +24,11 @@
 
 ## Phase 3: Cross-Scene Regression Verification
 
-- [ ] Task: Verify consistent touch behavior across the full navigation flow [TDD/Integration]
-  - [ ] **RED:** Add or extend integration assertions for Settings, every game Back control, and Musical Memory Replay.
-  - [ ] **GREEN:** Resolve any scene-specific integration failures without changing gameplay rules.
-  - [ ] **REFACTOR:** Remove test duplication and keep shared assertions readable.
-  - [ ] **VERIFY:** Confirm cancellation never navigates, completed holds navigate once, and progress indicators are cleaned up on scene shutdown.
+- [x] Task: Verify consistent touch behavior across the full navigation flow [TDD/Integration] `2500ece`
+  - [x] **RED:** Add or extend integration assertions for Settings, every game Back control, and Musical Memory Replay.
+  - [x] **GREEN:** Resolve any scene-specific integration failures without changing gameplay rules.
+  - [x] **REFACTOR:** Remove test duplication and keep shared assertions readable.
+  - [x] **VERIFY:** Confirm cancellation never navigates, completed holds navigate once, and progress indicators are cleaned up on scene shutdown.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: Quality Gates and Manual Touch Verification
