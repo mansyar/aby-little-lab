@@ -1,0 +1,12 @@
+Phase 1 Verification Report — ParentLock Hardening
+
+Automated test command: CI=true pnpm vitest run
+Result: 11 files, 354/354 tests passed.
+
+Manual verification steps:
+1. pnpm dev, open http://localhost:5173
+2. Hold Settings for 3s: circular progress fill appears and completes, then Settings opens.
+3. Early release: no panel, ring disappears.
+4. In any game, hold Back for 3s: ring fills then returns to Hub; early release never navigates.
+
+User confirmation: Approved (explicit yes).
