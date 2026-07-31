@@ -6,11 +6,11 @@
 
 ## Phase 1: Motion Utility
 
-- [ ] Task: Create reduced-motion-aware motion utility [TDD]
-  - [ ] **RED:** Add failing tests for `isReducedMotion()` (matchMedia mock, absence fallback), `motionDuration(normal, reduced)`, and `motionScale(normal, reduced)`.
-  - [ ] **GREEN:** Implement `src/utils/motion.ts`; refactor `src/utils/completionEffect.ts` to consume it with behavior unchanged.
-  - [ ] **REFACTOR:** Keep the utility minimal — no speculative helpers beyond duration/scale/reduced-motion.
-  - [ ] **VERIFY:** Run completion-effect and navigation tests; confirm behavior unchanged.
+- [x] Task: Create reduced-motion-aware motion utility [TDD] `4319da7`
+  - [x] **RED:** Add failing tests for `isReducedMotion()` (matchMedia mock, absence fallback), `motionDuration(normal, reduced)`, and `motionScale(normal, reduced)`.
+  - [x] **GREEN:** Implement `src/utils/motion.ts`; refactor `src/utils/completionEffect.ts` to consume it with behavior unchanged.
+  - [x] **REFACTOR:** Keep the utility minimal — no speculative helpers beyond duration/scale/reduced-motion.
+  - [x] **VERIFY:** Run completion-effect and navigation tests; confirm behavior unchanged.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: Scene Transitions
