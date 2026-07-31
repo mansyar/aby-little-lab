@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { hasSticker } from "../utils/storage";
 
@@ -102,6 +103,7 @@ export class HubScene extends Phaser.Scene {
         // No action needed on failure.
       },
     });
+    attachPressFeedback(settingsButton);
     settingsButton.on("pointerdown", startAudio);
 
     this.events.on("shutdown", () => {

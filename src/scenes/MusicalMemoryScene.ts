@@ -12,6 +12,7 @@ import {
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
 import { createWinCelebration } from "../utils/completionEffect";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -106,6 +107,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
         // No action needed on failure.
       },
     });
+    attachPressFeedback(backButton);
 
     this.createFrogs();
     this.createReplayButton();
@@ -151,6 +153,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     replayButton.on("pointerdown", () => this.handleReplay());
+    attachPressFeedback(replayButton);
   }
 
   /** Creates 5 progress dots at the top of the screen, dimmed by default. */

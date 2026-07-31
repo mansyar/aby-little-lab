@@ -739,6 +739,61 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("control press feedback", () => {
+    /** Fires every event listener registered on the control. */
+    function fireControlEvent(obj: Record<string, MockFn>, event: string): void {
+      const callbacks = getMockFn(obj.on)
+        .mock.calls.filter((call) => call[0] === event)
+        .map((call) => call[1] as () => void);
+      if (callbacks.length === 0) throw new Error(`no '${event}' listener registered on control`);
+      for (const callback of callbacks) {
+        callback();
+      }
+    }
+
+    it.each(GAME_SCENES)(
+      "squishes the Back control while pressed and restores it in $name",
+      ({ SceneClass }) => {
+        const scene = new SceneClass();
+        scene.create();
+
+        const backButton = getTextObject(scene, "Back");
+        if (!backButton) throw new Error("Back button not found");
+
+        fireControlEvent(backButton, "pointerdown");
+        expect(getMockFn(backButton.setScale)).toHaveBeenCalledWith(0.95);
+        fireControlEvent(backButton, "pointerup");
+        expect(getMockFn(backButton.setScale)).toHaveBeenLastCalledWith(1);
+      },
+    );
+
+    it("squishes the Hub Settings control while pressed and restores it on cancel", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const settingsButton = getTextObject(scene, "Settings");
+      if (!settingsButton) throw new Error("Settings button not found");
+
+      fireControlEvent(settingsButton, "pointerdown");
+      expect(getMockFn(settingsButton.setScale)).toHaveBeenCalledWith(0.95);
+      fireControlEvent(settingsButton, "pointercancel");
+      expect(getMockFn(settingsButton.setScale)).toHaveBeenLastCalledWith(1);
+    });
+
+    it("squishes the Musical Memory Replay control while pressed and restores it on pointerout", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const replayButton = getTextObject(scene, "\uD83D\uDD04");
+      if (!replayButton) throw new Error("Replay button not found");
+
+      fireControlEvent(replayButton, "pointerdown");
+      expect(getMockFn(replayButton.setScale)).toHaveBeenCalledWith(0.95);
+      fireControlEvent(replayButton, "pointerout");
+      expect(getMockFn(replayButton.setScale)).toHaveBeenLastCalledWith(1);
+    });
+  });
+
   describe("ShapeSorterScene round initialization", () => {
     it("creates 3 cutout slot images", () => {
       const scene = new ShapeSorterScene();

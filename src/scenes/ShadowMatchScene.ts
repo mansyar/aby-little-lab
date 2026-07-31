@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -91,6 +92,7 @@ export class ShadowMatchScene extends Phaser.Scene {
         // No action needed on failure.
       },
     });
+    attachPressFeedback(backButton);
 
     this.initRound();
 

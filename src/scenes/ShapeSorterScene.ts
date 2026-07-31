@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -88,6 +89,7 @@ export class ShapeSorterScene extends Phaser.Scene {
         // No action needed on failure.
       },
     });
+    attachPressFeedback(backButton);
 
     this.initRound();
 
