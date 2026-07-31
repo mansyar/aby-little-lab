@@ -1,0 +1,7 @@
+Task: Staggered entrance, tile bobbing, and background decorations [TDD]
+
+Summary: HubScene now animates a staggered entrance (40ms per element, 300ms Sine.out fade/scale-in) for the 6 tiles, their labels, and 6 sticker markers; tiles and labels gently bob ±4px on a 2.5s phase-offset sine loop; 4 low-contrast background dots drift slowly (4-6s yoyo loops) behind the grid at depth -1. Under prefers-reduced-motion, entrance is alpha-only (no scale) and bob/drift/decorations are skipped entirely.
+
+Files: src/scenes/HubScene.ts, src/__tests__/scenes/navigation.test.ts
+
+Why: Bring the Hub to life per hub-engagement spec (staggered entrance + idle life) while honoring the reduced-motion and no-fail UX principles from product guidelines.
