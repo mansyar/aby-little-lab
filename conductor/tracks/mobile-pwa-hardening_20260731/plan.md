@@ -35,7 +35,7 @@
   - [x] Keep Web Audio synthesis and SFX enable/disable behavior intact.
   - [x] Ensure BGM remains the only file-based audio asset.
 - [x] Task: Run the Phase 2 automated tests and coverage checks (AudioManager: 49 passed, 89.62% coverage; Hub: 9 passed; build and 13 PWA checks passed)
-- [ ] Task: Phase 1–2 Verification & Checkpoint (Refer to `workflow.md`)
+- [ ] Task: Phase 1–3 Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Lightweight Success Feedback
 
@@ -54,8 +54,7 @@
   - [x] Verify completion still plays the appropriate audio cues.
   - [x] Verify completion still returns to Hub after the existing delay.
   - [x] Verify no persistent completion effect remains.
-- [ ] Task: Run the Phase 3 automated tests and coverage checks
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Run the Phase 3 automated tests and coverage checks (CI=true pnpm test: 333 passed; pnpm test:coverage: 97.35% statements, 97.97% lines)
 
 ## Phase 4: Production Validation and Documentation
 
