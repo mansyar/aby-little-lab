@@ -11,6 +11,7 @@ import {
   registerWake,
   selectBubbleType,
 } from "../game/popFreezeLogic";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Display size for each bubble (exceeds 96px ideal touch target). */
@@ -18,13 +19,6 @@ const BUBBLE_DISPLAY_SIZE = 96;
 
 /** Base scale factor: display size divided by SVG raster size (512px). */
 const BUBBLE_BASE_SCALE = BUBBLE_DISPLAY_SIZE / 512;
-
-/** Texture key used for particle bursts. */
-const PARTICLE_TEXTURE = "shape_circle";
-
-/** Particle count for pop celebration bursts (reduced when prefers-reduced-motion). */
-const PARTICLE_COUNT = 12;
-const PARTICLE_COUNT_REDUCED = 6;
 
 /** Duration of the pop shrink animation (ms). */
 const POP_DURATION = 200;
@@ -171,7 +165,7 @@ export class PopFreezeScene extends Phaser.Scene {
     this.bubbles.splice(index, 1);
 
     this.audioManager.playPop();
-    this.createParticleBurst(data.obj.x, data.obj.y);
+    createCompletionSplash(this, data.obj.x, data.obj.y);
 
     this.tweens.add({
       targets: data.obj,
@@ -221,25 +215,6 @@ export class PopFreezeScene extends Phaser.Scene {
       type,
     );
     this.spawnBubble(config);
-  }
-
-  /** Returns true if the user has requested reduced motion via OS settings. */
-  private prefersReducedMotion(): boolean {
-    return (
-      typeof window !== "undefined" &&
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
-  }
-
-  /** Creates a soft particle burst at the given position. */
-  private createParticleBurst(x: number, y: number): void {
-    this.add.particles(x, y, PARTICLE_TEXTURE, {
-      speed: { min: 50, max: 150 },
-      lifespan: 800,
-      quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
-      scale: { start: 0.3, end: 0 },
-    });
   }
 
   /** Handles round completion: win animation, sticker award, and auto-return to Hub. */

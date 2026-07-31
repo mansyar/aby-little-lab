@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Y position for cutout slots (top area). */
@@ -22,15 +23,8 @@ const DROP_ZONE_SIZE = 160;
 /** Tween duration for bounce-back animation (ms). */
 const BOUNCE_DURATION = 300;
 
-/** Texture key used for particle bursts. */
-const PARTICLE_TEXTURE = "shape_circle";
-
 /** Display size for the sticker unlock animation. */
 const STICKER_DISPLAY_SIZE = 256;
-
-/** Particle count for celebration bursts (reduced when prefers-reduced-motion). */
-const PARTICLE_COUNT = 12;
-const PARTICLE_COUNT_REDUCED = 6;
 
 /** Delay before auto-returning to Hub after round completion (ms). */
 const AUTO_RETURN_DELAY = 3000;
@@ -173,7 +167,7 @@ export class ShapeSorterScene extends Phaser.Scene {
       shape.obj.disableInteractive();
       shape.placed = true;
       this.audioManager.playCorrect();
-      this.createParticleBurst(slot.x, slot.y);
+      createCompletionSplash(this, slot.x, slot.y);
 
       if (this.shapes.every((s) => s.placed)) {
         this.handleComplete();
@@ -193,25 +187,6 @@ export class ShapeSorterScene extends Phaser.Scene {
         ease: "Back.out",
       });
     }
-  }
-
-  /** Returns true if the user has requested reduced motion via OS settings. */
-  private prefersReducedMotion(): boolean {
-    return (
-      typeof window !== "undefined" &&
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
-  }
-
-  /** Creates a soft particle burst at the given position. */
-  private createParticleBurst(x: number, y: number): void {
-    this.add.particles(x, y, PARTICLE_TEXTURE, {
-      speed: { min: 50, max: 150 },
-      lifespan: 800,
-      quantity: this.prefersReducedMotion() ? PARTICLE_COUNT_REDUCED : PARTICLE_COUNT,
-      scale: { start: 0.3, end: 0 },
-    });
   }
 
   /** Handles round completion: win animation, sticker award, and auto-return to Hub. */

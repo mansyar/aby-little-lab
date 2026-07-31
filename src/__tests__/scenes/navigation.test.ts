@@ -297,7 +297,8 @@ function assertBoundedSuccessEffect(scene: unknown, initialGraphicsCount: number
     | undefined;
   if (!effect) return;
 
-  const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock.calls;
+  const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
+    .calls;
   const effectTween = tweenCalls.find((call) => call[0]?.targets === effect);
   expect(effectTween).toBeDefined();
   if (!effectTween) return;
@@ -758,7 +759,10 @@ describe("scene navigation flow", () => {
 
       assertBoundedSuccessEffect(scene, initialGraphicsCount);
       const graphicsMock = getMockFn(scene.add.graphics);
-      const effect = graphicsMock.mock.results[initialGraphicsCount].value as Record<string, MockFn>;
+      const effect = graphicsMock.mock.results[initialGraphicsCount].value as Record<
+        string,
+        MockFn
+      >;
       const effectTween = getMockFn(scene.tweens.add).mock.calls.find(
         (call) => call[0]?.targets === effect,
       );

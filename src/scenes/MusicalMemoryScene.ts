@@ -11,6 +11,7 @@ import {
   validateInput,
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { earnSticker, hasSticker } from "../utils/storage";
 
 /** Frog texture keys in index order (0=green, 1=blue, 2=red). */
@@ -246,6 +247,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
   private handleComplete(): void {
     this.inputLocked = true;
     this.audioManager.playWin();
+    createCompletionSplash(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     for (const frog of this.frogs) {
       this.tweens.add({
