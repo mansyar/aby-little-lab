@@ -1,0 +1,10 @@
+Phase 2 Verification Report
+
+Command: CI=true pnpm vitest run
+Result: 11 files, 362/362 tests passed.
+
+Scope (diff f4b3138..HEAD): 7 scenes (Hub, ShapeSorter, AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall) + navigation.test.ts + plan.md.
+
+Summary: All protected controls (6 Back buttons, Hub Settings) and Musical Memory Replay expose 96x96 logical-pixel hit areas via Phaser.Geom.Rectangle. Manual verification found Settings unpressable due to Phaser anchoring custom hit areas at the top-left of display bounds (not origin); fixed with Rectangle(0,0,96,96) in e678c99 and locked in with expectHitAreaOrigin assertions. User confirmed manual touch verification: Settings hold opens panel, Back holds return to Hub, Replay ring responds.
+
+Manual steps performed: pnpm dev; 3s hold on Settings (ring fills, panel opens); tap near labels within ~50px registers; neighbors do not misfire.
