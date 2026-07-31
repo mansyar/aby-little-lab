@@ -29,7 +29,7 @@
   - [x] **GREEN:** Resolve any scene-specific integration failures without changing gameplay rules.
   - [x] **REFACTOR:** Remove test duplication and keep shared assertions readable.
   - [x] **VERIFY:** Confirm cancellation never navigates, completed holds navigate once, and progress indicators are cleaned up on scene shutdown.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: Quality Gates and Manual Touch Verification
 
