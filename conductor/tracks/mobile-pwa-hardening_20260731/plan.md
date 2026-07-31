@@ -25,11 +25,11 @@
   - [x] Request fullscreen display through supported manifest display metadata.
   - [x] Retain standalone fallback, landscape orientation, theme, and offline precaching.
   - [x] Update `scripts/validate-pwa.js` to validate the new display configuration.
-- [ ] Task: Implement reliable first-interaction BGM startup [TDD-Green]
-  - [ ] Wire the first valid Hub interaction to resume the audio context and start BGM.
-  - [ ] Keep startup idempotent and preserve playback across scene changes.
-  - [ ] Preserve persisted BGM settings and SettingsPanel behavior.
-  - [ ] Handle a rejected playback attempt so a later valid gesture can retry.
+- [x] Task: Implement reliable first-interaction BGM startup [TDD-Green] [976704f]
+  - [x] Wire the first valid Hub interaction to resume the audio context and start BGM.
+  - [x] Keep startup idempotent and preserve playback across scene changes.
+  - [x] Preserve persisted BGM settings and SettingsPanel behavior.
+  - [x] Handle a rejected playback attempt so a later valid gesture can retry.
 - [ ] Task: Remove stale synthesized-SFX MP3 loading [TDD-Green]
   - [ ] Remove the six missing SFX file references and eager `Audio` creation.
   - [ ] Keep Web Audio synthesis and SFX enable/disable behavior intact.
