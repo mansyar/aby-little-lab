@@ -6,7 +6,7 @@
 
 ## Phase 1: ParentLock Hardening
 
-- [ ] Task: Harden ParentLock reliability and circular progress feedback [TDD]
+- [x] Task: Harden ParentLock reliability and circular progress feedback [TDD] `4878222`
   - [ ] **RED:** Add failing tests for duplicate pointer-down prevention, pointer release/pointerout/pointercancel cancellation, callback-once behavior, shutdown cleanup, and progress reset.
   - [ ] **GREEN:** Implement active-pointer tracking, guarded 3-second timer behavior, cancellation handling, cleanup, and circular progress feedback.
   - [ ] **REFACTOR:** Simplify state transitions and remove duplication without changing behavior.
