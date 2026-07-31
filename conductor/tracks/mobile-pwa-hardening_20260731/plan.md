@@ -64,11 +64,11 @@
   - [x] Add no-missing-SFX-request verification.
   - [x] Add bounded completion-effect and reduced-motion checks.
 - [x] Task: Run project quality gates (CI=true pnpm test: 333 passed; pnpm test:coverage: 97.35% statements and 97.97% lines; check, build, and 13 PWA checks passed)
-  - [ ] Run `CI=true pnpm test`.
-  - [ ] Run `pnpm test:coverage` and verify configured thresholds.
-  - [ ] Run `pnpm run check`.
-  - [ ] Run `pnpm run build`.
-  - [ ] Run `node scripts/validate-pwa.js`.
+  - [x] Run `CI=true pnpm test`.
+  - [x] Run `pnpm test:coverage` and verify configured thresholds.
+  - [x] Run `pnpm run check`.
+  - [x] Run `pnpm run build`.
+  - [x] Run `node scripts/validate-pwa.js`.
 - [x] Task: Validate the production build with Playwright CLI (deployed 2026-07-31)
   - [x] Verify manifest display metadata and landscape configuration: standalone fallback, fullscreen override, and landscape passed.
   - [x] Verify `/audio/bgm.mp3` loads successfully: HTTP 200.
