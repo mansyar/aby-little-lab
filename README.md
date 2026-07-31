@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements.
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **415 tests across 15 files**, ~97% statement coverage.
 
 ## Code Quality
 
@@ -76,7 +76,7 @@ src/
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
-├── utils/                 # localStorage CRUD (storage.ts)
+├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback) + localStorage CRUD (storage.ts)
 ├── assets/                # SVG assets bundled into the game
 ├── styles/                # Global CSS
 └── __tests__/             # Unit tests (audio, components, game, scenes, utils)
@@ -105,6 +105,15 @@ Settings access (Hub **Settings**) and app exit (each game's **← Back**) are g
 The protected controls (Hub Settings, all six game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
 
 The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
+
+## Motion & Feedback
+
+All animation is driven by a shared motion system (`src/utils/`):
+
+- **Scene transitions** — every navigation path (boot → hub, hub ↔ game, completion returns) plays a 300ms crossfade to the app background, then a 180ms fade-in with a subtle entrance zoom.
+- **Win celebration** — all six games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
+- **Press feedback** — Back, Replay, and Settings controls squish to 95% of their base scale while pressed and spring back on release.
+- **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, and gameplay stays fully functional under `prefers-reduced-motion`.
 
 ## PWA Release Readiness
 

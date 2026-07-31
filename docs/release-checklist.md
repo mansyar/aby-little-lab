@@ -30,9 +30,11 @@
 - [ ] No missing or corrupted assets
 
 ### 4. Interaction Feedback
-- [ ] Each game uses one brief, bounded splash/ray for success or completion feedback
-- [ ] The splash/ray cleans itself up and never clouds the play area
-- [ ] Reduced-motion mode disables or simplifies the splash/ray without affecting game completion
+- [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the 300ms crossfade transition with a 180ms entrance fade + zoom; no instant scene switches
+- [ ] Each game's completion plays the shared win celebration (rays + confetti, ~700ms)
+- [ ] The splash/celebration cleans itself up and never clouds the play area
+- [ ] Back, Replay, and Settings controls give press feedback (95% squish) and spring back on release/pointer-out/cancel
+- [ ] With Reduce Motion enabled: transitions, celebration, and gameplay tweens shorten (~40%); celebration renders 6 rays with no confetti; press feedback is disabled; game completion still works
 
 ### 4b. Touch UX & Parental Lock
 - [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) expose 96×96px hit areas

@@ -81,7 +81,11 @@ aby-little-lab/
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
-    │   └── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings)
+    │   ├── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings)
+    │   ├── motion.ts               # Reduced-motion helpers (isReducedMotion, motionDuration, motionScale)
+    │   ├── sceneTransitions.ts     # Crossfade scene transitions (transitionToScene, sceneEntrance)
+    │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
+    │   └── pressFeedback.ts        # Press squish feedback for interactive controls (attachPressFeedback)
     ├── assets/
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
@@ -98,7 +102,7 @@ aby-little-lab/
         ├── components/             # ParentLock tests
         ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
-        └── utils/                  # Storage tests
+        └── utils/                  # Storage, motion, sceneTransitions, completionEffect, and pressFeedback tests
 ```
 
 ---
@@ -422,3 +426,53 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | Audio (MP3) | 1 |
 | PWA icons (PNG) | 1 |
 | **Total** | **57** |
+
+---
+
+## 8. Motion & Feedback System
+
+All animation and feedback utilities live in `src/utils/` and are wired into every scene. They were introduced by the Cross-Cutting Motion track (2026-08-01, archived at `conductor/archive/cross-cutting-motion_20260801/`).
+
+### `motion.ts`
+
+Single source of truth for reduced-motion behavior:
+
+- `isReducedMotion()` — reads `window.matchMedia("(prefers-reduced-motion: reduce)")`.
+- `motionDuration(normal, reduced)` — returns `reduced` when reduced motion is active, else `normal`.
+- `motionScale(normal, reduced)` — same pattern for scale amplitudes.
+
+Every tween in the app consults these helpers **at call time** (not module load), so a mid-session OS setting change takes effect immediately.
+
+### `sceneTransitions.ts`
+
+- `transitionToScene(scene, key)` — 300ms fade-out to the app background `0xfaf9f6`, starts the target scene, then 180ms fade-in. Used for every navigation path (boot → preload → hub, hub → game, game → hub, parental-lock exits).
+- `sceneEntrance(scene)` — 180ms fade-in with a subtle zoom from 1.02 → 1 at scene start.
+- The only remaining bare `scene.start` call is BootScene's initial launch (intentional — there is nothing to fade from).
+
+### `completionEffect.ts`
+
+- `createCompletionSplash(scene, x, y)` — bounded success effect for correct in-game actions; self-cleaning (destroys on tween complete), never clouds the play area.
+- `createWinCelebration(scene, x, y)` — the shared completion effect used by all six games (replaces per-game bespoke win tweens):
+  - 10 rays + 10 drifting confetti bits (`WIN_CONFETTI_COUNT = 10`), `WIN_STANDARD_DURATION = 700ms`, ray burst scale 1.25×.
+  - Colors: `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea`.
+  - Reduced motion: `WIN_REDUCED_DURATION = 300ms`, 6 rays, burst scale 1.0×, **no particles**.
+  - Fully self-cleaning; uses Graphics, never `add.particles`.
+
+### `pressFeedback.ts`
+
+- `attachPressFeedback(obj)` — captures `obj.scaleX` at attach time; `pointerdown` squishes to `baseScale × 0.95`; `pointerup`/`pointerout`/`pointercancel` spring back to `baseScale`. No-op under reduced motion.
+- Wired to the six game Back controls, Musical Memory Replay, and Hub Settings — and registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior.
+
+### Gameplay tween values (normal → reduced)
+
+| Tween | Normal | Reduced |
+|---|---|---|
+| Bounce-backs (Shape Sorter, Shadow Match, Big vs. Small) | 300 ms | 180 ms |
+| Bubble pop shrink (Pop & Freeze!) | 200 ms | 120 ms |
+| Wake wobble (Pop & Freeze!) | 300 ms, 1.15× base | 180 ms, 1.05× base |
+| Frog bounce (Musical Memory) | 200 ms, 1.2× base | 120 ms, 1.05× base |
+| Sticker pops (all six games) | 300 ms | 180 ms |
+
+### Test coverage
+
+415 tests across 15 files; all motion, transitions, completion-effect, and press-feedback utilities at 100% coverage. Coverage thresholds remain 80% for lines, functions, branches, and statements.

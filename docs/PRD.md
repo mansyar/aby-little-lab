@@ -59,6 +59,10 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Sticker Collection:** Each mini-game awards a unique themed sticker on completion. Stickers accumulate in a sticker book displayed on the HubScene. Earned stickers persist across sessions via localStorage.
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + particle burst. Incorrect actions give a gentle "try again" animation with no penalty.
+- **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
+- **Win Celebration:** All six games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
+- **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay) squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel.
+- **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
@@ -115,7 +119,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Toy Set:** Teddy Bear, Toy Car, Toy Ball, Toy Block — 4 toy types with maximally distinct silhouettes.
 - **SVG Requirements:** `teddy_bear.svg`, `toy_car.svg`, `toy_ball.svg`, `toy_block.svg` (512×512px, flat fills, thick `#2D3748` outlines 4–6px, storybook style, in `assets/svg/toys/`). `toy_box.svg` (512×512px, open container, rendered at both 1.5× and 0.7× scales — the box itself teaches the size concept). Sticker: `sticker_big_small.svg` (big orange ball + small purple ball on cream circle background).
 - **Toy Colors:** Teddy Bear golden brown (`#D69E2E`), Toy Car coral (`#FC8181`), Toy Ball teal (`#4FD1C5`), Toy Block purple (`#9F7AEA`) — all soft/vibrant non-primary.
-- **Phaser Engine Logic:** Reuses Shape Sorter / Shadow Match's drag/drop architecture (Phaser Pointer Drag + Zone detection). Each toy image is created at `TOY_BASE_SIZE × toy.scale` (96px base × 1.5 = 144px for big, 96px × 0.7 = 67px for small — exceeding the 64px minimum touch target). Box zones use `DROP_ZONE_SIZE = 160px`. On correct drop: snaps toy to box center, plays synthesized correct SFX + particle burst, marks toy as sorted (locked in place via `disableInteractive`). On incorrect drop: gentle bounce-back to origin via `Back.out` tween + synthesized incorrect SFX, no penalty. Dropping on empty space bounces back silently. Completion triggers win animation (all toys pulse scale) + sticker award (first time only) + auto-return to Hub after 3s.
+- **Phaser Engine Logic:** Reuses Shape Sorter / Shadow Match's drag/drop architecture (Phaser Pointer Drag + Zone detection). Each toy image is created at `TOY_BASE_SIZE × toy.scale` (96px base × 1.5 = 144px for big, 96px × 0.7 = 67px for small — exceeding the 64px minimum touch target). Box zones use `DROP_ZONE_SIZE = 160px`. On correct drop: snaps toy to box center, plays synthesized correct SFX + particle burst, marks toy as sorted (locked in place via `disableInteractive`). On incorrect drop: gentle bounce-back to origin via `Back.out` tween + synthesized incorrect SFX, no penalty. Dropping on empty space bounces back silently. Completion triggers the shared win celebration (rays + confetti) + sticker award (first time only) + auto-return to Hub after 3s.
 - **Accessibility:** Big toys (144px) and small toys (67px) both exceed the 64px minimum touch target. Size categories are visually distinct (1.5× vs 0.7× ratio). Particle counts reduced when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
 - **Game Logic:** Pure functions in `src/game/bigSmallLogic.ts` (Fisher-Yates shuffle, toy type selection, toy instance creation with dual scales, box creation, round generation with independent toy shuffling, scale-category match detection, win detection) — testable without Phaser.
 
@@ -167,13 +171,15 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 ### Navigation Rules
 
-- **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a progress bar before transitioning to HubScene.
-- **HubScene → GameScene:** Tap on a game tile. Instant transition.
-- **GameScene → HubScene:** Auto-return after game completion (3s delay with win animation) OR parental lock (hold 3s).
+- **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a progress bar before transitioning to HubScene. Both transitions are crossfades.
+- **HubScene → GameScene:** Tap on a game tile. 300ms crossfade transition with entrance zoom.
+- **GameScene → HubScene:** Auto-return after game completion (3s delay with win celebration, then crossfade) OR parental lock (hold 3s, then crossfade).
 - **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. Tapping the dark backdrop closes the modal and returns to the Hub.
 - **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
 
 > **Release decision (2026-08-01):** The parental lock was hardened across Hub Settings and all six game Back controls: one hold per active pointer (duplicate `pointerdown` ignored), cancellation on release/pointer-out/`pointercancel`/scene shutdown, exactly one success callback per completed hold, and no stale timers or callbacks after the scene is destroyed. A circular progress fill (48px radius, `--success` `#68D391` at 0.6 alpha, rendered above scene UI) shows hold progress and is always cleaned up on cancel, completion, or shutdown. All protected controls expose explicit 96×96px hit areas; Phaser anchors hit areas at the top-left of a control's display bounds (not its origin), so rectangles are specified as `Rectangle(0, 0, 96, 96)`.
+
+> **Release decision (2026-08-01):** A unified motion & feedback system was introduced. `src/utils/motion.ts` centralizes reduced-motion handling (`isReducedMotion`, `motionDuration`, `motionScale`); every animation in the app consults it — scene crossfades (300ms/180ms), the shared win celebration, press feedback (disabled under reduced motion), and all gameplay tweens (bounce-backs 300→180ms, bubble pop 200→120ms, wake wobble 300→180ms at 1.05× instead of 1.15×, frog bounce 200→120ms at 1.05× instead of 1.2×, sticker pops 300→180ms). Celebration: 10 rays + 10 confetti bits, 700ms standard / 300ms reduced, burst scale 1.25× / 1.0×, 6 rays and no particles when reduced. Covered by 415 tests across 15 files (~97% coverage).
 
 ---
 

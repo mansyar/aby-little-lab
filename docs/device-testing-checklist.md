@@ -208,8 +208,11 @@ pnpm exec serve dist -l 3000
 
 #### Reduced Motion
 - [ ] Enable "Reduce Motion" in device settings
-- [ ] Verify animations are minimized
-- [ ] Verify game functionality remains intact
+- [ ] Scene transitions are shortened (~40%) with no harsh flashes
+- [ ] Win celebration renders simplified (6 rays, no confetti) and completes normally
+- [ ] Gameplay tweens (bounce-backs, bubble pop, wake wobble, frog bounce, sticker pops) are shorter and gentler
+- [ ] Press feedback (squish) on Back/Replay/Settings is disabled
+- [ ] Game functionality remains intact — every game still reachable and completable
 - [ ] Verify no flashing or excessive movement
 
 #### Visual Clarity
@@ -223,7 +226,10 @@ pnpm exec serve dist -l 3000
 - [ ] BGM continues when moving between Hub and games
 - [ ] BGM and SFX settings persist after closing and reopening the app
 - [ ] SFX feedback remains synthesized and no removed SFX MP3 URL is requested
+- [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the crossfade transition
 - [ ] Each of the six games shows at most one short splash/ray for a success or completion action
+- [ ] All six games play the shared win celebration (rays + confetti) on completion, which cleans itself up
+- [ ] Back, Replay, and Settings controls squish on press and spring back on release
 - [ ] No completion effect remains on screen or obscures the next interaction
 - [ ] Reduced-motion mode disables or simplifies the splash/ray
 
