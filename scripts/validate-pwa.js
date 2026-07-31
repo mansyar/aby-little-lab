@@ -73,6 +73,19 @@ const checks = [
     },
   },
   {
+    name: "Manifest requests fullscreen with standalone fallback",
+    test: () => {
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(DIST_DIR, "manifest.webmanifest"), "utf8"),
+      );
+      return (
+        Array.isArray(manifest.display_override) &&
+        manifest.display_override.includes("fullscreen") &&
+        manifest.display_override.includes("standalone")
+      );
+    },
+  },
+  {
     name: "Service worker has precache entries",
     test: () => {
       const swContent = fs.readFileSync(path.join(DIST_DIR, "sw.js"), "utf8");

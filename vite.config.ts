@@ -11,6 +11,7 @@ export default defineConfig({
         name: "Aby's Little Lab",
         short_name: "Aby Lab",
         start_url: "./index.html",
+        display_override: ["fullscreen", "standalone"],
         display: "standalone",
         orientation: "landscape",
         background_color: "#FAF9F6",
