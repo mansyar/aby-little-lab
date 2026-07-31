@@ -22,13 +22,13 @@
   - [x] **VERIFY:** Run navigation integration tests; confirm every navigation path is covered and no instant cut remains.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 3: Choreographed Win Celebration
+## Phase 3: Choreographed Win Celebration [checkpoint: pending]
 
-- [ ] Task: Build `createWinCelebration` (star-burst + confetti) [TDD]
-  - [ ] **RED:** Add failing tests: Graphics-based rays + drifting confetti bits, bounded self-cleaning (destroy on complete), no `add.particles` usage, reduced-motion variant.
-  - [ ] **GREEN:** Implement celebration in `src/utils/completionEffect.ts` (or sibling module); wire into all six `handleComplete` flows, replacing the uniform scale-yoyo while preserving sticker reveal.
-  - [ ] **REFACTOR:** Share one implementation across scenes; remove per-scene duplicated win tween blocks.
-  - [ ] **VERIFY:** Run all scene completion tests and the full suite.
+- [x] Task: Build `createWinCelebration` (star-burst + confetti) [TDD] `b92ee06`
+  - [x] **RED:** Add failing tests: Graphics-based rays + drifting confetti bits, bounded self-cleaning (destroy on complete), no `add.particles` usage, reduced-motion variant.
+  - [x] **GREEN:** Implement celebration in `src/utils/completionEffect.ts` (or sibling module); wire into all six `handleComplete` flows, replacing the uniform scale-yoyo while preserving sticker reveal.
+  - [x] **REFACTOR:** Share one implementation across scenes; remove per-scene duplicated win tween blocks.
+  - [x] **VERIFY:** Run all scene completion tests and the full suite.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: Press Feedback
