@@ -3,8 +3,6 @@ import path from "node:path";
 import { AudioManager } from "../../audio/AudioManager";
 import { load } from "../../utils/storage";
 
-const SFX_NAMES = ["pop", "correct", "incorrect", "wake", "win", "sticker"];
-
 type MockFn = ReturnType<typeof vi.fn>;
 
 interface MockAudioElement {
@@ -37,6 +35,7 @@ interface MockAudioContext {
   destination: object;
   createOscillator: MockFn;
   createGain: MockFn;
+  resume: MockFn;
   close: MockFn;
 }
 
@@ -72,6 +71,7 @@ describe("AudioManager", () => {
       destination: {},
       createOscillator: vi.fn(() => mockOscillator),
       createGain: vi.fn(() => mockGainNode),
+      resume: vi.fn(),
       close: vi.fn(),
     };
 
@@ -137,12 +137,10 @@ describe("AudioManager", () => {
       expect(bgm?.volume).toBeLessThan(1.0);
     });
 
-    it("creates SFX audio elements for all 6 sounds", () => {
+    it("does not create file audio elements for synthesized SFX", () => {
       manager.init();
-      for (const name of SFX_NAMES) {
-        const audio = findAudioBySrc(name);
-        expect(audio).toBeDefined();
-      }
+      expect(audioConstructor).toHaveBeenCalledTimes(1);
+      expect(audioConstructor).toHaveBeenCalledWith("/audio/bgm.mp3");
     });
 
     it("loads bgmEnabled setting from storage (defaults to true)", () => {
@@ -205,6 +203,17 @@ describe("AudioManager", () => {
     });
   });
 
+  describe("resume()", () => {
+    it("resumes a suspended AudioContext from a user gesture", () => {
+      mockAudioContext.state = "suspended";
+      manager.init();
+
+      manager.resume();
+
+      expect(mockAudioContext.resume).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("pauseBGM()", () => {
     it("pauses the BGM audio element", () => {
       manager.init();
@@ -212,41 +221,6 @@ describe("AudioManager", () => {
       manager.pauseBGM();
       const bgm = findAudioBySrc("bgm");
       expect(bgm?.pause).toHaveBeenCalled();
-    });
-  });
-
-  describe("playSFX()", () => {
-    it.each(SFX_NAMES)("plays the %s sound", (name) => {
-      manager.init();
-      manager.playSFX(name);
-      const audio = findAudioBySrc(name);
-      expect(audio?.play).toHaveBeenCalled();
-    });
-
-    it("resets currentTime to 0 before playing", () => {
-      manager.init();
-      manager.playSFX("pop");
-      const audio = findAudioBySrc("pop");
-      expect(audio?.currentTime).toBe(0);
-    });
-
-    it("does nothing when SFX is disabled", () => {
-      manager.init();
-      manager.setSFXEnabled(false);
-      manager.playSFX("pop");
-      const audio = findAudioBySrc("pop");
-      expect(audio?.play).not.toHaveBeenCalled();
-    });
-
-    it("handles promise rejection from play() without throwing", async () => {
-      manager.init();
-      const audio = findAudioBySrc("pop");
-      expect(audio).toBeDefined();
-      if (!audio) return;
-      audio.play = vi.fn(() => Promise.reject(new Error("NotAllowed")));
-
-      manager.playSFX("pop");
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
   });
 

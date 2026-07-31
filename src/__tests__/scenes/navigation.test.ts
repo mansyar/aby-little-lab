@@ -192,6 +192,7 @@ const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
     init: vi.fn(),
     resume: vi.fn(),
+    playBGM: vi.fn(),
     playCorrect: vi.fn(),
     playIncorrect: vi.fn(),
     playWin: vi.fn(),
@@ -535,6 +536,15 @@ describe("scene navigation flow", () => {
       triggerAllPointerdowns(scene);
 
       expect(mockAudio.resume).toHaveBeenCalled();
+    });
+
+    it("starts BGM when a tile is clicked", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+
+      expect(mockAudio.playBGM).toHaveBeenCalled();
     });
   });
 
