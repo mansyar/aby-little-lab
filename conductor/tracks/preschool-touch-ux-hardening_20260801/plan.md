@@ -20,7 +20,7 @@
   - [x] **GREEN:** Add inflated interactive bounds while preserving visual positions and existing navigation/gameplay behavior.
   - [x] **REFACTOR:** Consolidate only genuinely shared hit-area logic and preserve scene-local conventions.
   - [x] **VERIFY:** Run affected scene tests and confirm neighboring controls do not overlap.
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Cross-Scene Regression Verification
 
