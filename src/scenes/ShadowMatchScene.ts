@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
-import { createCompletionSplash } from "../utils/completionEffect";
+import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -14,9 +14,6 @@ const OBJECT_Y = 600;
 
 /** Display size for objects and shadows (ideal 96x96px touch target per spec). */
 const DISPLAY_SIZE = 96;
-
-/** Base scale for objects (display size / texture size). */
-const OBJECT_BASE_SCALE = DISPLAY_SIZE / 512;
 
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 120;
@@ -209,15 +206,7 @@ export class ShadowMatchScene extends Phaser.Scene {
   private handleComplete(): void {
     this.audioManager.playWin();
 
-    for (const data of this.objectData) {
-      this.tweens.add({
-        targets: data.obj,
-        scaleX: OBJECT_BASE_SCALE * 1.2,
-        scaleY: OBJECT_BASE_SCALE * 1.2,
-        duration: 300,
-        yoyo: true,
-      });
-    }
+    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     if (!hasSticker("shadow-match")) {
       earnSticker("shadow-match");

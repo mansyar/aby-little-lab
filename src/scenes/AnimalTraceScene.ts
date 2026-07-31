@@ -11,7 +11,7 @@ import {
   type PathProgress,
   selectThreePairs,
 } from "../game/animalTraceLogic";
-import { createCompletionSplash } from "../utils/completionEffect";
+import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -26,9 +26,6 @@ const SPRITE_Y = 384;
 
 /** Display size for animal and food sprites. */
 const SPRITE_SIZE = 128;
-
-/** Base scale for sprites (display size / texture size). */
-const SPRITE_BASE_SCALE = SPRITE_SIZE / 512;
 
 /** Number of waypoints per path. */
 const PATH_POINTS = 6;
@@ -253,15 +250,7 @@ export class AnimalTraceScene extends Phaser.Scene {
   private handleRoundComplete(): void {
     this.audioManager.playWin();
 
-    if (this.currentPair) {
-      this.tweens.add({
-        targets: this.currentPair.animalSprite,
-        scaleX: SPRITE_BASE_SCALE * 1.2,
-        scaleY: SPRITE_BASE_SCALE * 1.2,
-        duration: 300,
-        yoyo: true,
-      });
-    }
+    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     if (!hasSticker("animal-trace")) {
       earnSticker("animal-trace");

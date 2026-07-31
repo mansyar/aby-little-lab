@@ -11,7 +11,7 @@ import {
   registerWake,
   selectBubbleType,
 } from "../game/popFreezeLogic";
-import { createCompletionSplash } from "../utils/completionEffect";
+import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -227,15 +227,7 @@ export class PopFreezeScene extends Phaser.Scene {
   private handleComplete(): void {
     this.audioManager.playWin();
 
-    for (const data of this.bubbles) {
-      this.tweens.add({
-        targets: data.obj,
-        scaleX: BUBBLE_BASE_SCALE * 1.2,
-        scaleY: BUBBLE_BASE_SCALE * 1.2,
-        duration: 300,
-        yoyo: true,
-      });
-    }
+    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     if (!hasSticker("pop-freeze")) {
       earnSticker("pop-freeze");

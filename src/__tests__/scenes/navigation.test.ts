@@ -333,6 +333,29 @@ function assertBoundedSuccessEffect(scene: unknown, initialGraphicsCount: number
   expect(getMockFn(effect.destroy)).toHaveBeenCalledTimes(1);
 }
 
+/**
+ * Verifies that a round completion plays the choreographed win celebration:
+ * a growing/fading ray burst, drifting confetti bits, and no particle emitter.
+ */
+function assertWinCelebrationCreated(scene: unknown): void {
+  const add = (scene as { add: Record<string, unknown> }).add;
+  const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
+    .calls;
+
+  // The ray burst grows and fades (motionScale(1.25, 1) under normal motion)
+  expect(
+    tweenCalls.some(
+      (call) => call[0]?.scaleX === 1.25 && call[0]?.scaleY === 1.25 && call[0]?.alpha === 0,
+    ),
+  ).toBe(true);
+
+  // Confetti bits drift and spin
+  expect(tweenCalls.some((call) => typeof call[0]?.angle === "number")).toBe(true);
+
+  // The celebration never uses a particle emitter
+  expect(getMockFn(add.particles)).not.toHaveBeenCalled();
+}
+
 /** Triggers all pointerdown callbacks registered on game objects. */
 function triggerAllPointerdowns(scene: unknown): void {
   const allObjects = getAllGameObjects(scene);
@@ -1405,19 +1428,14 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
 
-    it("triggers win animation tween on round completion", () => {
+    it("triggers the choreographed win celebration on round completion", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
       const scene = new AnimalTraceScene();
       scene.create();
       completeAllPaths(scene);
 
-      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-      const winTween = tweenCalls.find(
-        // SPRITE_BASE_SCALE * 1.2 = (128 / 512) * 1.2 = 0.3
-        (c) => c[0]?.yoyo === true && c[0]?.scaleX === 0.3 && c[0]?.scaleY === 0.3,
-      );
-      expect(winTween).toBeDefined();
+      assertWinCelebrationCreated(scene);
     });
 
     it("creates sticker animation image on first completion", () => {
@@ -1765,21 +1783,14 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
 
-    it("triggers win animation tween on round completion", () => {
+    it("triggers the choreographed win celebration on round completion", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
       const scene = new PopFreezeScene();
       scene.create();
       completeRound(scene);
 
-      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-      const winTween = tweenCalls.find(
-        (c) =>
-          c[0]?.yoyo === true &&
-          c[0]?.scaleX === (96 / 512) * 1.2 &&
-          c[0]?.scaleY === (96 / 512) * 1.2,
-      );
-      expect(winTween).toBeDefined();
+      assertWinCelebrationCreated(scene);
     });
 
     it("creates sticker animation image on first completion", () => {
@@ -2617,7 +2628,7 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
     });
 
-    it("win animation tweens all frogs on completion", () => {
+    it("plays the choreographed win celebration on completion", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
       const scene = new MusicalMemoryScene();
@@ -2628,19 +2639,7 @@ describe("scene navigation flow", () => {
       completeAllRounds(scene, frogs);
 
       assertBoundedSuccessEffect(scene, initialGraphicsCount);
-
-      const tweensMock = getMockFn(scene.tweens.add);
-      const winTweens = tweensMock.mock.calls.filter((call) => {
-        const config = call[0] as Record<string, unknown>;
-        // WIN_TWEEN_SCALE = (FROG_SIZE / SVG_SIZE) * 1.3 = (128 / 512) * 1.3
-        return config.scaleX === 0.325 && config.yoyo === true;
-      });
-
-      expect(winTweens).toHaveLength(3);
-      const targeted = winTweens.map((call) => (call[0] as Record<string, unknown>).targets);
-      for (const frog of frogs) {
-        expect(targeted).toContain(frog);
-      }
+      assertWinCelebrationCreated(scene);
     });
 
     it("awards sticker on first completion only", () => {

@@ -11,7 +11,7 @@ import {
   validateInput,
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
-import { createCompletionSplash } from "../utils/completionEffect";
+import { createWinCelebration } from "../utils/completionEffect";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -60,10 +60,7 @@ const STICKER_DISPLAY_SIZE = 256;
 /** Target scale for the sticker image (display size / texture size). */
 const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
 
-/** Scale factor for win animation tween (relative to base display scale). */
-const WIN_TWEEN_SCALE = (FROG_SIZE / SVG_SIZE) * 1.3;
-
-/** Duration of win animation tween (ms). */
+/** Duration of sticker reveal animation (ms). */
 const WIN_TWEEN_DURATION = 300;
 
 /**
@@ -256,17 +253,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
   private handleComplete(): void {
     this.inputLocked = true;
     this.audioManager.playWin();
-    createCompletionSplash(this, this.cameras.main.centerX, this.cameras.main.centerY);
-
-    for (const frog of this.frogs) {
-      this.tweens.add({
-        targets: frog,
-        scaleX: WIN_TWEEN_SCALE,
-        scaleY: WIN_TWEEN_SCALE,
-        duration: WIN_TWEEN_DURATION,
-        yoyo: true,
-      });
-    }
+    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     if (!hasSticker("musical-memory")) {
       earnSticker("musical-memory");

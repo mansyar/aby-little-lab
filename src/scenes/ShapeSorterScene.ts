@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
-import { createCompletionSplash } from "../utils/completionEffect";
+import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
 
@@ -14,9 +14,6 @@ const SHAPE_Y = 600;
 
 /** Display size for shapes and slots (exceeds 96px ideal touch target). */
 const SHAPE_DISPLAY_SIZE = 128;
-
-/** Base scale for shapes (display size / texture size). */
-const SHAPE_BASE_SCALE = SHAPE_DISPLAY_SIZE / 512;
 
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 160;
@@ -199,15 +196,7 @@ export class ShapeSorterScene extends Phaser.Scene {
   private handleComplete(): void {
     this.audioManager.playWin();
 
-    for (const shape of this.shapes) {
-      this.tweens.add({
-        targets: shape.obj,
-        scaleX: SHAPE_BASE_SCALE * 1.2,
-        scaleY: SHAPE_BASE_SCALE * 1.2,
-        duration: 300,
-        yoyo: true,
-      });
-    }
+    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     if (!hasSticker("shape-sorter")) {
       earnSticker("shape-sorter");
