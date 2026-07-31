@@ -42,7 +42,7 @@
 
 - **registerType:** `'autoUpdate'` — service worker updates automatically on new builds
 - **Manifest:** Embedded in config (name: "Aby's Little Lab", short_name: "Aby Lab", display: standalone, orientation: landscape, background_color: #FAF9F6, theme_color: #2B6CB0)
-- **Precache:** All build assets (HTML, JS, CSS, SVGs, MP3s) precached for full offline play
+- **Precache:** All build assets (HTML, JS, CSS, SVGs, and the BGM MP3) precached for full offline play
 
 ### Phaser Config (`main.ts`)
 
@@ -53,7 +53,7 @@
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
 - **Scenes:** 8 scenes (Boot, Preload, Hub, 6 game scenes)
 - **Input:** Touch-first, single-finger interactions
-- **Audio:** Web Audio API for synthesized tones, HTML5 Audio for MP3 SFX/BGM
+- **Audio:** Web Audio API for synthesized tones and SFX, HTML5 Audio for the MP3 BGM only
 
 ### TypeScript (`tsconfig.json`)
 

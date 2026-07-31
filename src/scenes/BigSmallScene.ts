@@ -63,7 +63,7 @@ interface BoxSlotData {
  *
  * Round initialization generates 6 toy instances (3 big + 3 small) and 2 boxes.
  * Toys are dragged via Phaser Pointer Drag to matching scale-category boxes.
- * Correct drops snap to box center with SFX + particles; incorrect drops
+ * Correct drops snap to box center with SFX + bounded splash/ray feedback; incorrect drops
  * bounce back gently with a soft tone.
  */
 export class BigSmallScene extends Phaser.Scene {

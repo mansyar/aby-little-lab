@@ -51,7 +51,7 @@ interface SlotData {
  *
  * Round initialization selects 3 of 4 shapes, shuffles slot positions and
  * shape positions independently. Shapes are dragged via Phaser Pointer Drag
- * to matching cutout slots. Correct drops snap to center with SFX + particles;
+ * to matching cutout slots. Correct drops snap to center with SFX + bounded splash/ray feedback;
  * incorrect drops bounce back gently with a soft tone.
  */
 export class ShapeSorterScene extends Phaser.Scene {

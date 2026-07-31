@@ -44,7 +44,7 @@ interface BubbleData {
  * Pop & Freeze scene — pop bubbles while avoiding waking sleeping animals.
  *
  * Bubbles float via Arcade Physics with world-bounds bouncing. Tapping a
- * poppable bubble pops it (SFX + particles + respawn). Tapping a sleeping
+ * poppable bubble pops it (SFX + bounded splash/ray feedback + respawn). Tapping a sleeping
  * bubble triggers a gentle wobble with no penalty. After 6 pops the round
  * is complete.
  */
@@ -158,7 +158,7 @@ export class PopFreezeScene extends Phaser.Scene {
     }
   }
 
-  /** Pops a poppable bubble: SFX, particles, shrink animation, register pop, respawn or complete. */
+  /** Pops a poppable bubble: SFX, bounded feedback, shrink animation, register pop, respawn or complete. */
   private handlePop(data: BubbleData): void {
     const index = this.bubbles.indexOf(data);
     if (index < 0) return;

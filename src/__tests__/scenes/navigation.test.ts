@@ -354,6 +354,10 @@ describe("scene navigation flow", () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   describe("BootScene", () => {
     it("transitions to PreloadScene on create", () => {
       const scene = new BootScene();

@@ -73,7 +73,7 @@ interface PairState {
  *
  * Toddler traces a dotted curve from animal sprite to food sprite using
  * pointer proximity. Finger lift/stray pauses (no reset, no penalty).
- * Reaching the food triggers a completion chime + particle burst. Three
+ * Reaching the food triggers a completion chime + bounded splash/ray feedback. Three
  * pairs are traced per round (3 of 4 animal-food pairs randomly selected).
  */
 export class AnimalTraceScene extends Phaser.Scene {
@@ -201,7 +201,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     }
   }
 
-  /** Handles a single path completion: SFX, particle burst, advance to next pair. */
+  /** Handles a single path completion: SFX, bounded feedback, advance to next pair. */
   private handlePathComplete(): void {
     if (!this.currentPair) return;
     this.currentPair.complete = true;
