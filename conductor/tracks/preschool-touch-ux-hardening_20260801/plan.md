@@ -15,12 +15,12 @@
 
 ## Phase 2: Touch Target Integration
 
-- [ ] Task: Expand protected and replay control hit areas [TDD]
-  - [ ] **RED:** Add failing tests asserting 96×96 logical-pixel hit areas for Hub Settings, all game Back controls, and Musical Memory Replay.
-  - [ ] **GREEN:** Add inflated interactive bounds while preserving visual positions and existing navigation/gameplay behavior.
-  - [ ] **REFACTOR:** Consolidate only genuinely shared hit-area logic and preserve scene-local conventions.
-  - [ ] **VERIFY:** Run affected scene tests and confirm neighboring controls do not overlap.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Expand protected and replay control hit areas [TDD] `074a1bb`
+  - [x] **RED:** Add failing tests asserting 96×96 logical-pixel hit areas for Hub Settings, all game Back controls, and Musical Memory Replay.
+  - [x] **GREEN:** Add inflated interactive bounds while preserving visual positions and existing navigation/gameplay behavior.
+  - [x] **REFACTOR:** Consolidate only genuinely shared hit-area logic and preserve scene-local conventions.
+  - [x] **VERIFY:** Run affected scene tests and confirm neighboring controls do not overlap.
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Cross-Scene Regression Verification
 
