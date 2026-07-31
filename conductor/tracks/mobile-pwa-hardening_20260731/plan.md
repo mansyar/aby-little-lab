@@ -19,8 +19,6 @@
   - [x] Test that completion feedback is cleaned up after its animation.
   - [x] Test reduced-motion behavior.
   - [x] Preserve tests for win audio, sticker award, and Hub auto-return for all six games.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-
 ## Phase 2: PWA Display and Audio Runtime
 
 - [ ] Task: Update PWA display configuration [TDD/config verification]
@@ -37,7 +35,7 @@
   - [ ] Keep Web Audio synthesis and SFX enable/disable behavior intact.
   - [ ] Ensure BGM remains the only file-based audio asset.
 - [ ] Task: Run the Phase 2 automated tests and coverage checks
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [ ] Task: Phase 1–2 Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Lightweight Success Feedback
 
