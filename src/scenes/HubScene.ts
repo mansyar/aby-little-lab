@@ -105,7 +105,9 @@ export class HubScene extends Phaser.Scene {
       });
       label.setOrigin(0.5);
 
-      this.animateEntrance([tile, label]);
+      this.animateEntrance([tile, label], () => {
+        attachPressFeedback(tile, { spring: true });
+      });
 
       if (!reducedMotion) {
         this.tweens.add({
@@ -190,8 +192,9 @@ export class HubScene extends Phaser.Scene {
    * Fades (and, under normal motion, scales) an element in with a per-element
    * stagger. Under reduced motion only alpha is animated.
    * @param targets - Display objects to animate.
+   * @param onComplete - Optional callback invoked when the entrance finishes.
    */
-  private animateEntrance(targets: Phaser.GameObjects.GameObject[]): void {
+  private animateEntrance(targets: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
     const index = this.entranceIndex;
     this.entranceIndex += 1;
     const config: Phaser.Types.Tweens.TweenBuilderConfig = {
@@ -201,6 +204,9 @@ export class HubScene extends Phaser.Scene {
       duration: ENTRANCE_DURATION,
       ease: "Sine.out",
     };
+    if (onComplete) {
+      config.onComplete = onComplete;
+    }
 
     for (const target of targets) {
       const tweenable = target as Phaser.GameObjects.GameObject & {

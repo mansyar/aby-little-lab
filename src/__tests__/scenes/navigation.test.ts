@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -45,6 +45,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
+      scene,
     };
   }
 
@@ -71,14 +72,14 @@ vi.mock("phaser", () => {
 
     constructor() {
       this.add = {
-        rectangle: vi.fn(() => createMockGameObject()),
-        text: vi.fn(() => createMockGameObject()),
-        image: vi.fn(() => createMockGameObject()),
-        container: vi.fn(() => createMockGameObject()),
-        circle: vi.fn(() => createMockGameObject()),
-        graphics: vi.fn(() => createMockGameObject()),
-        zone: vi.fn(() => createMockGameObject()),
-        particles: vi.fn(() => createMockGameObject()),
+        rectangle: vi.fn(() => createMockGameObject(this)),
+        text: vi.fn(() => createMockGameObject(this)),
+        image: vi.fn(() => createMockGameObject(this)),
+        container: vi.fn(() => createMockGameObject(this)),
+        circle: vi.fn(() => createMockGameObject(this)),
+        graphics: vi.fn(() => createMockGameObject(this)),
+        zone: vi.fn(() => createMockGameObject(this)),
+        particles: vi.fn(() => createMockGameObject(this)),
       };
       this.scene = {
         start: vi.fn(),
@@ -413,6 +414,34 @@ function getTextObject(scene: unknown, labelPart: string): Record<string, MockFn
     }
   }
   return undefined;
+}
+
+/** Returns all rectangle game objects (the Hub tiles). */
+function getRectangles(scene: unknown): Array<Record<string, MockFn>> {
+  const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
+  return rectangleMock.mock.results.map((result) => result.value as Record<string, MockFn>);
+}
+
+/** Fires every registered handler for an event on a game object. */
+function fireAllObjectEvents(obj: Record<string, MockFn>, event: string): void {
+  const onMock = getMockFn(obj.on);
+  for (const call of onMock.mock.calls) {
+    if (call[0] === event && typeof call[1] === "function") {
+      call[1]();
+    }
+  }
+}
+
+/** Completes the Hub's staggered entrance tweens (invokes their onComplete). */
+function completeHubEntrances(scene: unknown): void {
+  const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
+    .calls;
+  for (const call of tweenCalls) {
+    const config = call[0] as { duration?: number; onComplete?: () => void };
+    if (config.duration === 300 && typeof config.onComplete === "function") {
+      config.onComplete();
+    }
+  }
 }
 
 /** Asserts that an interactive object exposes a 96x96 logical-pixel hit area. */
@@ -804,6 +833,75 @@ describe("scene navigation flow", () => {
         expect("scaleX" in config).toBe(false);
         expect("scaleY" in config).toBe(false);
       }
+    });
+  });
+
+  describe("Hub engagement tile press feedback", () => {
+    it("squishes tiles to 95% on pointerdown and springs back with overshoot on release", () => {
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      const tile = getRectangles(scene)[0];
+      fireAllObjectEvents(tile, "pointerdown");
+      expect(getMockFn(tile.setScale)).toHaveBeenCalledWith(0.95);
+
+      fireAllObjectEvents(tile, "pointerup");
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const springTween = tweenCalls.find((call) => call[0]?.targets === tile);
+      expect(springTween).toBeDefined();
+      expect(springTween?.[0]?.scaleX).toBe(1);
+      expect(springTween?.[0]?.scaleY).toBe(1);
+      expect(springTween?.[0]?.ease).toBe("Back.out");
+    });
+
+    it("springs tiles back on pointerout and pointercancel", () => {
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      const tile = getRectangles(scene)[0];
+      for (const event of ["pointerout", "pointercancel"]) {
+        getMockFn(scene.tweens.add).mockClear();
+        fireAllObjectEvents(tile, event);
+        const springTween = getMockFn(scene.tweens.add).mock.calls.find(
+          (call) => call[0]?.targets === tile && call[0]?.ease === "Back.out",
+        );
+        expect(springTween).toBeDefined();
+      }
+    });
+
+    it("keeps tile taps navigating to games after press feedback is attached", () => {
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      triggerAllPointerdowns(scene);
+      completeFadeOuts(scene);
+
+      const startedKeys = getMockFn(scene.scene.start).mock.calls.map((call) => call[0] as string);
+      for (const key of GAME_SCENE_KEYS) {
+        expect(startedKeys).toContain(key);
+      }
+    });
+
+    it("does not attach press feedback to tiles under reduced motion", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      const tile = getRectangles(scene)[0];
+      fireAllObjectEvents(tile, "pointerdown");
+      fireAllObjectEvents(tile, "pointerup");
+
+      expect(getMockFn(tile.setScale)).not.toHaveBeenCalled();
+      expect(getMockFn(scene.tweens.add).mock.calls.some((call) => call[0]?.targets === tile)).toBe(
+        false,
+      );
     });
   });
 

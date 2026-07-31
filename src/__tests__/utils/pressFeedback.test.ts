@@ -23,14 +23,16 @@ interface MockControl {
   setScale: ReturnType<typeof vi.fn>;
   on: ReturnType<typeof vi.fn>;
   fire: (event: string) => void;
+  scene?: { tweens: { add: ReturnType<typeof vi.fn> } };
 }
 
 /** Builds a minimal interactive-object mock that records event handlers. */
-function createMockControl(baseScale = 1): MockControl {
+function createMockControl(baseScale = 1, scene?: MockControl["scene"]): MockControl {
   const handlers = new Map<string, Array<() => void>>();
   const obj = {
     scaleX: baseScale,
     setScale: vi.fn(),
+    scene,
     on: vi.fn((event: string, handler: () => void) => {
       const list = handlers.get(event) ?? [];
       list.push(handler);
@@ -92,6 +94,65 @@ describe("attachPressFeedback", () => {
     const control = createMockControl();
 
     attachPressFeedback(control as never);
+
+    expect(control.on).not.toHaveBeenCalled();
+  });
+
+  it("springs back with an overshoot tween on release when spring is enabled", () => {
+    stubMatchMedia(false);
+    const tweensAdd = vi.fn();
+    const control = createMockControl(1, { tweens: { add: tweensAdd } });
+
+    attachPressFeedback(control as never, { spring: true });
+
+    control.fire("pointerdown");
+    expect(control.setScale).toHaveBeenCalledWith(0.95);
+
+    control.fire("pointerup");
+    expect(tweensAdd).toHaveBeenCalledWith({
+      targets: control,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 150,
+      ease: "Back.out",
+    });
+  });
+
+  it("springs back on pointerout and pointercancel when spring is enabled", () => {
+    stubMatchMedia(false);
+    const tweensAdd = vi.fn();
+    const control = createMockControl(1, { tweens: { add: tweensAdd } });
+
+    attachPressFeedback(control as never, { spring: true });
+
+    for (const event of ["pointerout", "pointercancel"]) {
+      tweensAdd.mockClear();
+      control.fire("pointerdown");
+      control.fire(event);
+      expect(tweensAdd).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it("springs relative to the control's base scale", () => {
+    stubMatchMedia(false);
+    const tweensAdd = vi.fn();
+    const control = createMockControl(0.8, { tweens: { add: tweensAdd } });
+
+    attachPressFeedback(control as never, { spring: true });
+
+    control.fire("pointerdown");
+    expect(control.setScale).toHaveBeenCalledWith(0.76);
+    control.fire("pointerup");
+    expect(tweensAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ targets: control, scaleX: 0.8, scaleY: 0.8 }),
+    );
+  });
+
+  it("registers no listeners under reduced motion even with spring enabled", () => {
+    stubMatchMedia(true);
+    const control = createMockControl();
+
+    attachPressFeedback(control as never, { spring: true });
 
     expect(control.on).not.toHaveBeenCalled();
   });
