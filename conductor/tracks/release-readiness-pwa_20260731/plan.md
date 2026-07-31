@@ -23,11 +23,11 @@
 - [x] Task: Verify release-build PWA artifacts [532d874]
   - [x] Run the production build.
   - [x] Confirm manifest, service worker, icon, BGM, and game assets are present in generated output/precache artifacts.
-- [ ] Task: Validate installation, standalone, update, and offline behavior
-  - [ ] Serve the production build locally.
-  - [ ] Verify installation and standalone landscape launch.
-  - [ ] Verify every game remains playable after an initial online load and subsequent offline launch.
-  - [ ] Verify the configured service-worker auto-update behavior.
+- [x] Task: Validate installation, standalone, update, and offline behavior [b53a024]
+  - [x] Serve the production build locally.
+  - [x] Verify installation and standalone landscape launch.
+  - [x] Verify every game remains playable after an initial online load and subsequent offline launch.
+  - [x] Verify the configured service-worker auto-update behavior.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Device Quality Validation and Release Documentation
