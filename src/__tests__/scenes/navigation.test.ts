@@ -33,6 +33,10 @@ vi.mock("phaser", () => {
       setCircle: vi.fn().mockReturnThis(),
       fillStyle: vi.fn().mockReturnThis(),
       fillCircle: vi.fn().mockReturnThis(),
+      beginPath: vi.fn().mockReturnThis(),
+      moveTo: vi.fn().mockReturnThis(),
+      lineTo: vi.fn().mockReturnThis(),
+      strokePath: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
     };
@@ -279,6 +283,31 @@ function getAllGameObjects(scene: unknown): Array<Record<string, MockFn>> {
     }
   }
   return objects;
+}
+
+/** Verifies that a success interaction uses one bounded, self-cleaning visual effect. */
+function assertBoundedSuccessEffect(scene: unknown, initialGraphicsCount: number): void {
+  const add = (scene as { add: Record<string, unknown> }).add;
+  const graphicsMock = getMockFn(add.graphics);
+  expect(getMockFn(add.particles)).not.toHaveBeenCalled();
+  expect(graphicsMock.mock.results.length).toBeGreaterThan(initialGraphicsCount);
+
+  const effect = graphicsMock.mock.results[initialGraphicsCount]?.value as
+    | Record<string, MockFn>
+    | undefined;
+  if (!effect) return;
+
+  const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock.calls;
+  const effectTween = tweenCalls.find((call) => call[0]?.targets === effect);
+  expect(effectTween).toBeDefined();
+  if (!effectTween) return;
+
+  const config = effectTween[0] as { duration?: number; onComplete?: () => void };
+  expect(config.duration).toBeLessThanOrEqual(800);
+  expect(config.onComplete).toEqual(expect.any(Function));
+
+  config.onComplete?.();
+  expect(getMockFn(effect.destroy)).toHaveBeenCalledTimes(1);
 }
 
 /** Triggers all pointerdown callbacks registered on game objects. */
@@ -685,12 +714,13 @@ describe("scene navigation flow", () => {
       return results;
     }
 
-    it("correct drop snaps shape to slot center, marks non-interactive, triggers SFX + particles", () => {
+    it("correct drop snaps shape to slot center, marks non-interactive, and shows bounded feedback", () => {
       const scene = new ShapeSorterScene();
       scene.create();
 
       const shapes = getShapes(scene);
       const slots = getSlots(scene);
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
       const shape = shapes[0];
       const slot = slots.find((s) => s.type === shape.type);
       if (!slot) throw new Error("No matching slot found");
@@ -704,7 +734,37 @@ describe("scene navigation flow", () => {
       expect(getMockFn(shape.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
       expect(getMockFn(shape.obj.disableInteractive)).toHaveBeenCalled();
       expect(mockAudio.playCorrect).toHaveBeenCalled();
-      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
+    });
+
+    it("uses a reduced-motion success effect when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const slots = getSlots(scene);
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
+      const shape = shapes[0];
+      const slot = slots.find((s) => s.type === shape.type);
+      if (!slot) throw new Error("No matching slot found");
+
+      const dropCall = getMockFn(shape.obj.on).mock.calls.find((call) => call[0] === "drop");
+      const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+      dropCallback(null, slot.zone);
+
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
+      const graphicsMock = getMockFn(scene.add.graphics);
+      const effect = graphicsMock.mock.results[initialGraphicsCount].value as Record<string, MockFn>;
+      const effectTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === effect,
+      );
+      expect(effectTween).toBeDefined();
+      if (!effectTween) return;
+      expect((effectTween[0] as { duration: number }).duration).toBeLessThanOrEqual(300);
     });
 
     it("incorrect drop bounces shape back to origin with wobble (no penalty)", () => {
@@ -1043,14 +1103,15 @@ describe("scene navigation flow", () => {
       expect(lastCall).toEqual([pathPoints[2].x, pathPoints[2].y]);
     });
 
-    it("reaching food triggers correct SFX + particle burst", () => {
+    it("reaching food triggers correct SFX + bounded success feedback", () => {
       const scene = new AnimalTraceScene();
       scene.create();
 
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
       completePath(scene);
 
       expect(mockAudio.playCorrect).toHaveBeenCalled();
-      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
     });
 
     it("no SFX during tracing (only on path completion)", () => {
@@ -1112,23 +1173,14 @@ describe("scene navigation flow", () => {
       expect(imageCountAfter).toBeGreaterThan(imageCountBefore);
     });
 
-    it("destroys particle emitter when advancing to next pair", () => {
+    it("cleans success feedback after its bounded animation", () => {
       const scene = new AnimalTraceScene();
       scene.create();
 
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
       completePath(scene);
 
-      // Get the particle emitter created on path completion
-      const particlesMock = getMockFn(scene.add.particles);
-      const emitter = particlesMock.mock.results[0].value as Record<string, MockFn>;
-
-      // Trigger the advance callback to render next pair
-      const delayedCallMock = getMockFn(scene.time.delayedCall);
-      const advanceCall = delayedCallMock.mock.calls.find((call) => call[0] === 1000);
-      const callback = advanceCall?.[1] as () => void;
-      callback();
-
-      expect(getMockFn(emitter.destroy)).toHaveBeenCalled();
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
     });
   });
 
@@ -1404,18 +1456,19 @@ describe("scene navigation flow", () => {
       }
     }
 
-    it("tapping a poppable bubble triggers pop SFX + particle burst", () => {
+    it("tapping a poppable bubble triggers pop SFX + bounded success feedback", () => {
       const scene = new PopFreezeScene();
       scene.create();
 
       const bubbles = getBubbles(scene);
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
       // With Math.random=0.5: bubble 0 is sleeping, bubbles 1-4 are poppable
       const poppableBubble = bubbles[1];
 
       tapBubble(poppableBubble);
 
       expect(mockAudio.playPop).toHaveBeenCalled();
-      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
     });
 
     it("tapping a sleeping bubble triggers wake SFX with no penalty", () => {
@@ -1735,12 +1788,13 @@ describe("scene navigation flow", () => {
       return results;
     }
 
-    it("correct drop snaps object to shadow position, marks non-interactive, triggers SFX + particles", () => {
+    it("correct drop snaps object to shadow position, marks non-interactive, and shows bounded feedback", () => {
       const scene = new ShadowMatchScene();
       scene.create();
 
       const objects = getObjects(scene);
       const slots = getShadowSlots(scene);
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
       const object = objects[0];
       const slot = slots.find((s) => s.type === object.type);
       if (!slot) throw new Error("No matching shadow slot found");
@@ -1753,7 +1807,7 @@ describe("scene navigation flow", () => {
       expect(getMockFn(object.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
       expect(getMockFn(object.obj.disableInteractive)).toHaveBeenCalled();
       expect(mockAudio.playCorrect).toHaveBeenCalled();
-      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
     });
 
     it("incorrect drop bounces object back to origin with wobble (no penalty)", () => {
@@ -2450,8 +2504,11 @@ describe("scene navigation flow", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
       const frogs = getFrogs(scene);
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
 
       completeAllRounds(scene, frogs);
+
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
 
       const tweensMock = getMockFn(scene.tweens.add);
       const winTweens = tweensMock.mock.calls.filter((call) => {
@@ -2698,12 +2755,13 @@ describe("scene navigation flow", () => {
       return results;
     }
 
-    it("correct drop snaps toy to box position, marks non-interactive, triggers SFX + particles", () => {
+    it("correct drop snaps toy to box position, marks non-interactive, and shows bounded feedback", () => {
       const scene = new BigSmallScene();
       scene.create();
 
       const toys = getToys(scene);
       const slots = getBoxSlots(scene);
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
       const toy = toys[0];
       const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
       if (!slot) throw new Error("No matching box slot found");
@@ -2716,7 +2774,7 @@ describe("scene navigation flow", () => {
       expect(getMockFn(toy.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
       expect(getMockFn(toy.obj.disableInteractive)).toHaveBeenCalled();
       expect(mockAudio.playCorrect).toHaveBeenCalled();
-      expect(getMockFn(scene.add.particles)).toHaveBeenCalled();
+      assertBoundedSuccessEffect(scene, initialGraphicsCount);
     });
 
     it("incorrect drop bounces toy back to origin with wobble (no penalty, remains draggable)", () => {
