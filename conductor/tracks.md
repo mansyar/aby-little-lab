@@ -12,6 +12,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Game 5 — Musical Memory Simon** *Link: [./archive/musical-memory_20260729/index.md](./archive/musical-memory_20260729/index.md)* (Archived)
 - [x] **Track: Game 6 — Big vs. Small Cleaner** *Link: [./archive/big-small_20260730/index.md](./archive/big-small_20260730/index.md)* (Archived)
 - [x] **Track: Release Readiness & PWA Validation** *Link: [./archive/release-readiness-pwa_20260731/index.md](./archive/release-readiness-pwa_20260731/index.md)* (Archived)
+- [x] **Track: Mobile PWA Shell, Audio, and Completion Feedback Hardening** *Link: [./archive/mobile-pwa-hardening_20260731/index.md](./archive/mobile-pwa-hardening_20260731/index.md)* (Archived)
 
 <!-- Archived tracks are moved to conductor/archive/ -->
 
@@ -19,4 +20,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [x] **Track: Mobile PWA Shell, Audio, and Completion Feedback Hardening** *Link: [./tracks/mobile-pwa-hardening_20260731/index.md](./tracks/mobile-pwa-hardening_20260731/index.md)* (Completed)
+_No active tracks._
