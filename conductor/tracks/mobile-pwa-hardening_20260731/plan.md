@@ -84,10 +84,10 @@
 
 ## Review Fixes
 
-- [~] Task: Apply review fixes and record accepted behavior
-  - [ ] Restore the reduced-motion test global after each test.
-  - [ ] Update product and tech-stack audio documentation to describe synthesized SFX and BGM-only file loading.
-  - [ ] Update scene comments to describe bounded splash/ray feedback instead of particles.
+- [x] Task: Apply review fixes and record accepted behavior [0f3180d]
+  - [x] Restore the reduced-motion test global after each test.
+  - [x] Update product and tech-stack audio documentation to describe synthesized SFX and BGM-only file loading.
+  - [x] Update scene comments to describe bounded splash/ray feedback instead of particles.
   - [x] Confirm bounded splash behavior remains per successful action, as approved by the user.
 
 ## Definition of Done
