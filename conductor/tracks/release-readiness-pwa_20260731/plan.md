@@ -32,14 +32,14 @@
 
 ## Phase 3: Device Quality Validation and Release Documentation
 
-- [ ] Task: Perform phone and tablet acceptance testing
-  - [ ] Exercise boot → Hub → all six games → sticker award → Hub.
-  - [ ] Verify touch/drag/hold controls, parental lock, settings persistence, sticker persistence, and reduced-motion behavior.
-  - [ ] Record practical measurements/observations against boot, frame-rate, memory, touch, and audio targets.
-- [ ] Task: Document private-PWA release procedure
-  - [ ] Add concise static-host deployment instructions.
-  - [ ] Add a release checklist for automated checks, PWA/offline validation, device testing, and update/rollback handling.
-- [ ] Task: Execute final quality gates
-  - [ ] Run `pnpm run check`, `CI=true pnpm test`, coverage, and `pnpm run build`.
-  - [ ] Record results and any target limitations in release documentation.
+- [x] Task: Perform phone and tablet acceptance testing [b307905]
+  - [x] Exercise boot → Hub → all six games → sticker award → Hub.
+  - [x] Verify touch/drag/hold controls, parental lock, settings persistence, sticker persistence, and reduced-motion behavior.
+  - [x] Record practical measurements/observations against boot, frame-rate, memory, touch, and audio targets.
+- [x] Task: Document private-PWA release procedure [b307905]
+  - [x] Add concise static-host deployment instructions.
+  - [x] Add a release checklist for automated checks, PWA/offline validation, device testing, and update/rollback handling.
+- [x] Task: Execute final quality gates [b307905]
+  - [x] Run `pnpm run check`, `CI=true pnpm test`, coverage, and `pnpm run build`.
+  - [x] Record results and any target limitations in release documentation.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
