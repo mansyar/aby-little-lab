@@ -69,11 +69,11 @@
   - [ ] Run `pnpm run check`.
   - [ ] Run `pnpm run build`.
   - [ ] Run `node scripts/validate-pwa.js`.
-- [ ] Task: Validate the production build with Playwright CLI
-  - [ ] Verify manifest display metadata and landscape configuration.
-  - [ ] Verify `/audio/bgm.mp3` loads successfully.
-  - [ ] Verify the six stale SFX URLs are not requested.
-  - [ ] Verify no related console errors occur during Hub → game interactions.
+- [x] Task: Validate the production build with Playwright CLI (deployed 2026-07-31)
+  - [x] Verify manifest display metadata and landscape configuration: standalone fallback, fullscreen override, and landscape passed.
+  - [x] Verify `/audio/bgm.mp3` loads successfully: HTTP 200.
+  - [x] Verify the six stale SFX URLs are not requested.
+  - [x] Verify no related console errors occur during Hub → Shape Sorter interaction: zero errors and zero warnings.
 - [ ] Task: Perform manual mobile/PWA verification
   - [ ] Install the new build on a phone.
   - [ ] Verify fullscreen/standalone behavior and document platform-controlled navigation bars.
