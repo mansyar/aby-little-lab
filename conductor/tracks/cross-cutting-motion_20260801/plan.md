@@ -51,6 +51,18 @@
   - [x] Confirm no gameplay-rule, asset, or audio changes were introduced. Only scene wiring, effect/utility code, and tests changed.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
+## Review Fixes
+
+- [x] Task: Apply conductor-review findings
+  - [x] **Medium — Spec §2 compliance:** Route all remaining gameplay tweens through the motion utility (call-time `motionDuration`/`motionScale`):
+    - Bounce-backs: `BOUNCE_DURATION` 300 → reduced 180 (ShapeSorter, ShadowMatch, BigSmall).
+    - PopFreeze: pop shrink 200 → 120; wake wobble 300 → 180 and amplitude `BUBBLE_BASE_SCALE * 1.15` → reduced `BUBBLE_BASE_SCALE * 1.05`.
+    - MusicalMemory: frog bounce 200 → 120 and amplitude `(FROG_SIZE / SVG_SIZE) * 1.2` → reduced `* 1.05`.
+    - Sticker pops: `duration: 300` → `motionDuration(300, 180)` in all six games (incl. `WIN_TWEEN_DURATION`).
+  - [x] **Low — pressFeedback:** `const baseScale = obj.scaleX;` (drop the `?? 1` dead fallback); mock game objects in navigation tests now carry `scaleX: 1, scaleY: 1` so the base scale is a real value.
+  - [x] New tests: reduced-motion integration coverage for ShapeSorter bounce-back (duration 180), PopFreeze wake wobble (180 ms, 1.05×), MusicalMemory frog bounce (120 ms, 1.05×). 415 tests / 15 files pass; Biome clean (44 files).
+- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+
 ## Definition of Done
 
 - All approved acceptance criteria pass.

@@ -12,6 +12,7 @@ import {
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
 import { createWinCelebration } from "../utils/completionEffect";
+import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -37,8 +38,14 @@ const SVG_SIZE = 512;
 /** Scale factor for frog bounce animation (relative to display size). */
 const BOUNCE_SCALE = (FROG_SIZE / SVG_SIZE) * 1.2;
 
+/** Scale factor for the frog bounce under reduced motion (relative to display size). */
+const BOUNCE_REDUCED_SCALE = (FROG_SIZE / SVG_SIZE) * 1.05;
+
 /** Duration of frog bounce animation (ms). */
 const BOUNCE_DURATION = 200;
+
+/** Duration of the frog bounce under reduced motion (ms). */
+const BOUNCE_REDUCED_DURATION = 120;
 
 /** Number of progress dots (one per round: lengths 2→6). */
 const PROGRESS_DOT_COUNT = 5;
@@ -197,9 +204,9 @@ export class MusicalMemoryScene extends Phaser.Scene {
     this.audioManager.playFrogNote(FROG_FREQUENCIES[frogIndex]);
     this.tweens.add({
       targets: frog,
-      scaleX: BOUNCE_SCALE,
-      scaleY: BOUNCE_SCALE,
-      duration: BOUNCE_DURATION,
+      scaleX: motionScale(BOUNCE_SCALE, BOUNCE_REDUCED_SCALE),
+      scaleY: motionScale(BOUNCE_SCALE, BOUNCE_REDUCED_SCALE),
+      duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
       yoyo: true,
     });
   }
@@ -279,7 +286,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
       targets: stickerImage,
       scaleX: STICKER_SCALE,
       scaleY: STICKER_SCALE,
-      duration: WIN_TWEEN_DURATION,
+      duration: motionDuration(WIN_TWEEN_DURATION, 180),
       ease: "Back.out",
     });
   }

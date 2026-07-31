@@ -12,6 +12,7 @@ import {
   selectThreePairs,
 } from "../game/animalTraceLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -279,7 +280,7 @@ export class AnimalTraceScene extends Phaser.Scene {
       targets: stickerImage,
       scaleX: targetScaleX,
       scaleY: targetScaleY,
-      duration: 300,
+      duration: motionDuration(300, 180),
       ease: "Back.out",
     });
   }

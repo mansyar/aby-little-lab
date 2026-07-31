@@ -12,6 +12,7 @@ import {
   selectBubbleType,
 } from "../game/popFreezeLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -25,8 +26,14 @@ const BUBBLE_BASE_SCALE = BUBBLE_DISPLAY_SIZE / 512;
 /** Duration of the pop shrink animation (ms). */
 const POP_DURATION = 200;
 
+/** Duration of the pop shrink under reduced motion (ms). */
+const POP_REDUCED_DURATION = 120;
+
 /** Duration of the wake wobble animation (ms). */
 const WOBBLE_DURATION = 300;
+
+/** Duration of the wake wobble under reduced motion (ms). */
+const WOBBLE_REDUCED_DURATION = 180;
 
 /** Display size for the sticker unlock animation. */
 const STICKER_DISPLAY_SIZE = 256;
@@ -179,7 +186,7 @@ export class PopFreezeScene extends Phaser.Scene {
       targets: data.obj,
       scaleX: 0,
       scaleY: 0,
-      duration: POP_DURATION,
+      duration: motionDuration(POP_DURATION, POP_REDUCED_DURATION),
       ease: "Back.in",
       onComplete: () => {
         data.obj.destroy();
@@ -204,9 +211,9 @@ export class PopFreezeScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: data.obj,
-      scaleX: BUBBLE_BASE_SCALE * 1.15,
-      scaleY: BUBBLE_BASE_SCALE * 1.15,
-      duration: WOBBLE_DURATION,
+      scaleX: motionScale(BUBBLE_BASE_SCALE * 1.15, BUBBLE_BASE_SCALE * 1.05),
+      scaleY: motionScale(BUBBLE_BASE_SCALE * 1.15, BUBBLE_BASE_SCALE * 1.05),
+      duration: motionDuration(WOBBLE_DURATION, WOBBLE_REDUCED_DURATION),
       yoyo: true,
       ease: "Quad.easeInOut",
     });
@@ -253,7 +260,7 @@ export class PopFreezeScene extends Phaser.Scene {
       targets: stickerImage,
       scaleX: stickerScale,
       scaleY: stickerScale,
-      duration: 300,
+      duration: motionDuration(300, 180),
       ease: "Back.out",
     });
   }

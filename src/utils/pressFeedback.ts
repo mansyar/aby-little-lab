@@ -12,7 +12,7 @@ const PRESS_SCALE = 0.95;
 export function attachPressFeedback(obj: Phaser.GameObjects.Text): void {
   if (isReducedMotion()) return;
 
-  const baseScale = obj.scaleX ?? 1;
+  const baseScale = obj.scaleX;
   obj.on("pointerdown", () => {
     obj.setScale(baseScale * PRESS_SCALE);
   });

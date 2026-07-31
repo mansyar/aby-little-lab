@@ -43,6 +43,8 @@ vi.mock("phaser", () => {
       strokePath: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
+      scaleX: 1,
+      scaleY: 1,
     };
   }
 
@@ -985,6 +987,29 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
     });
 
+    it("uses a reduced-motion bounce-back when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const shape = shapes[0];
+
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+      const dragendCall = onCalls.find((c) => c[0] === "dragend");
+      const dragendCallback = dragendCall?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounceTween = tweenCalls.find((c) => c[0]?.targets === shape.obj);
+      expect(bounceTween).toBeDefined();
+      if (!bounceTween) return;
+      expect((bounceTween[0] as { duration: number }).duration).toBe(180);
+    });
+
     it("drop on non-slot target is a no-op (no snap, no SFX, no particles)", () => {
       const scene = new ShapeSorterScene();
       scene.create();
@@ -1705,6 +1730,30 @@ describe("scene navigation flow", () => {
       expect(wakeTween).toBeDefined();
     });
 
+    it("uses a reduced-motion wake wobble when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const bubbles = getBubbles(scene);
+      const sleepingBubble = bubbles[0];
+
+      tapBubble(sleepingBubble);
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const wakeTween = tweenCalls.find(
+        (c) => c[0]?.targets === sleepingBubble && c[0]?.yoyo === true,
+      );
+      expect(wakeTween).toBeDefined();
+      if (!wakeTween) return;
+      expect(wakeTween[0].duration).toBe(180);
+      expect(wakeTween[0].scaleX).toBeCloseTo((96 / 512) * 1.05, 5);
+      expect(wakeTween[0].scaleY).toBeCloseTo((96 / 512) * 1.05, 5);
+    });
+
     it("respawns a poppable bubble after pop to maintain concurrent count", () => {
       const scene = new PopFreezeScene();
       scene.create();
@@ -2398,6 +2447,28 @@ describe("scene navigation flow", () => {
       const latestTween = getMockFn(scene.tweens.add).mock.calls[tweensAfter - 1][0];
       expect(latestTween.targets).toBe(frogs[1]);
       expect(latestTween.yoyo).toBe(true);
+    });
+
+    it("uses a reduced-motion frog bounce when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      tapFrog(frogs, 1); // Tap blue frog
+      const tweensAfter = getMockFn(scene.tweens.add).mock.calls.length;
+
+      const latestTween = getMockFn(scene.tweens.add).mock.calls[tweensAfter - 1][0];
+      expect(latestTween.targets).toBe(frogs[1]);
+      expect(latestTween.duration).toBe(120);
+      expect(latestTween.scaleX).toBeCloseTo((128 / 512) * 1.05, 5);
+      expect(latestTween.scaleY).toBeCloseTo((128 / 512) * 1.05, 5);
     });
 
     it("correct tap advances input index; completing the full sequence triggers round success", () => {

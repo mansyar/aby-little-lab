@@ -10,6 +10,7 @@ import {
   type ToyInstance,
 } from "../game/bigSmallLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -31,6 +32,9 @@ const DROP_ZONE_SIZE = 160;
 
 /** Tween duration for bounce-back animation (ms). */
 const BOUNCE_DURATION = 300;
+
+/** Duration of the bounce-back under reduced motion (ms). */
+const BOUNCE_REDUCED_DURATION = 180;
 
 /** Display size for the sticker unlock animation. */
 const STICKER_DISPLAY_SIZE = 256;
@@ -213,7 +217,7 @@ export class BigSmallScene extends Phaser.Scene {
         targets: data.obj,
         x: data.originX,
         y: data.originY,
-        duration: BOUNCE_DURATION,
+        duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
         ease: "Back.out",
       });
       data.droppedOnZone = false;
@@ -248,7 +252,7 @@ export class BigSmallScene extends Phaser.Scene {
       targets: stickerImage,
       scaleX: stickerScale,
       scaleY: stickerScale,
-      duration: 300,
+      duration: motionDuration(300, 180),
       ease: "Back.out",
     });
   }
