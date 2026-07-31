@@ -21,10 +21,10 @@
   - [x] Preserve tests for win audio, sticker award, and Hub auto-return for all six games.
 ## Phase 2: PWA Display and Audio Runtime
 
-- [ ] Task: Update PWA display configuration [TDD/config verification]
-  - [ ] Request fullscreen display through supported manifest display metadata.
-  - [ ] Retain standalone fallback, landscape orientation, theme, and offline precaching.
-  - [ ] Update `scripts/validate-pwa.js` to validate the new display configuration.
+- [x] Task: Update PWA display configuration [TDD/config verification] [641282d]
+  - [x] Request fullscreen display through supported manifest display metadata.
+  - [x] Retain standalone fallback, landscape orientation, theme, and offline precaching.
+  - [x] Update `scripts/validate-pwa.js` to validate the new display configuration.
 - [ ] Task: Implement reliable first-interaction BGM startup [TDD-Green]
   - [ ] Wire the first valid Hub interaction to resume the audio context and start BGM.
   - [ ] Keep startup idempotent and preserve playback across scene changes.
