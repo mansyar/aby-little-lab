@@ -31,7 +31,7 @@
   - [x] **VERIFY:** Confirm cancellation never navigates, completed holds navigate once, and progress indicators are cleaned up on scene shutdown.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 4: Quality Gates and Manual Touch Verification
+## Phase 4: Quality Gates and Manual Touch Verification [checkpoint: 2abe8d6]
 
 - [x] Task: Complete release verification for this track
   - [x] Run `pnpm test -- --run`.
@@ -42,7 +42,7 @@
   - [x] Verify early release, pointerout, and cancellation do not trigger navigation.
   - [x] Verify Back, Settings, and Replay are usable without precision tapping.
   - [x] Confirm no asset-loading, orientation, audio, or gameplay changes were introduced.
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Definition of Done
 
