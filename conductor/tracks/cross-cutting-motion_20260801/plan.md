@@ -4,7 +4,7 @@
 
 ---
 
-## Phase 1: Motion Utility
+## Phase 1: Motion Utility [checkpoint: d6ec620]
 
 - [x] Task: Create reduced-motion-aware motion utility [TDD] `4319da7`
   - [x] **RED:** Add failing tests for `isReducedMotion()` (matchMedia mock, absence fallback), `motionDuration(normal, reduced)`, and `motionScale(normal, reduced)`.
