@@ -91,7 +91,10 @@ export class MusicalMemoryScene extends Phaser.Scene {
       fontSize: "24px",
       color: "#2d3748",
     });
-    backButton.setInteractive();
+    backButton.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
 
     this.parentLock = new ParentLock({
       scene: this,
@@ -143,7 +146,10 @@ export class MusicalMemoryScene extends Phaser.Scene {
       { fontSize: "48px", color: "#2d3748" },
     );
     replayButton.setOrigin(0.5);
-    replayButton.setInteractive();
+    replayButton.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
     replayButton.on("pointerdown", () => this.handleReplay());
   }
 

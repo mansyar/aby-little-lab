@@ -83,7 +83,10 @@ export class HubScene extends Phaser.Scene {
       color: "#2d3748",
     });
     settingsButton.setOrigin(1, 0);
-    settingsButton.setInteractive();
+    settingsButton.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(-96, 0, 96, 96),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
 
     this.parentLock = new ParentLock({
       scene: this,

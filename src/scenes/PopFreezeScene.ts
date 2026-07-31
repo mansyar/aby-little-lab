@@ -65,7 +65,10 @@ export class PopFreezeScene extends Phaser.Scene {
       fontSize: "24px",
       color: "#2d3748",
     });
-    backButton.setInteractive();
+    backButton.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
 
     this.parentLock = new ParentLock({
       scene: this,

@@ -164,6 +164,18 @@ vi.mock("phaser", () => {
     }
   }
 
+  /** Mock for Phaser.Geom.Rectangle — must be a class to support `new`. */
+  class MockRectangle {
+    static Contains = vi.fn(() => true);
+
+    constructor(
+      readonly x: number,
+      readonly y: number,
+      readonly width: number,
+      readonly height: number,
+    ) {}
+  }
+
   return {
     default: {
       Scene: MockScene,
@@ -171,12 +183,14 @@ vi.mock("phaser", () => {
       Scale: { FIT: 0, CENTER_BOTH: 0 },
       AUTO: "AUTO",
       Curves: { Path: MockPath },
+      Geom: { Rectangle: MockRectangle },
     },
     Scene: MockScene,
     Game: vi.fn(),
     Scale: { FIT: 0, CENTER_BOTH: 0 },
     AUTO: "AUTO",
     Curves: { Path: MockPath },
+    Geom: { Rectangle: MockRectangle },
   };
 });
 
@@ -344,6 +358,32 @@ function anyObjectOffCalled(scene: unknown): boolean {
     const offMock = obj.off as unknown as MockFn;
     return offMock?.mock?.calls?.length > 0;
   });
+}
+
+/** Returns the first text game object whose label contains the given text. */
+function getTextObject(
+  scene: unknown,
+  labelPart: string,
+): Record<string, MockFn> | undefined {
+  const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
+  for (let i = 0; i < textMock.mock.calls.length; i++) {
+    const text = textMock.mock.calls[i][2] as string;
+    if (typeof text === "string" && text.includes(labelPart)) {
+      return textMock.mock.results[i].value as Record<string, MockFn>;
+    }
+  }
+  return undefined;
+}
+
+/** Asserts that an interactive object exposes a 96x96 logical-pixel hit area. */
+function expectTouchTargetSize(obj: Record<string, MockFn>): void {
+  const setInteractiveMock = getMockFn(obj.setInteractive);
+  const interactiveConfig = setInteractiveMock.mock.calls.find(
+    (call) => call[0] && typeof call[0] === "object" && "hitArea" in call[0],
+  )?.[0] as { hitArea: { width: number; height: number } } | undefined;
+  expect(interactiveConfig).toBeDefined();
+  expect(interactiveConfig?.hitArea.width).toBeGreaterThanOrEqual(96);
+  expect(interactiveConfig?.hitArea.height).toBeGreaterThanOrEqual(96);
 }
 
 describe("scene navigation flow", () => {
@@ -611,6 +651,35 @@ describe("scene navigation flow", () => {
         expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
       },
     );
+  });
+
+  describe("protected control touch targets", () => {
+    it.each(GAME_SCENES)("gives the Back control a 96x96 hit area in $name", ({ SceneClass }) => {
+      const scene = new SceneClass();
+      scene.create();
+
+      const backButton = getTextObject(scene, "Back");
+      if (!backButton) throw new Error("Back button not found");
+      expectTouchTargetSize(backButton);
+    });
+
+    it("gives the Hub Settings control a 96x96 hit area", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const settingsButton = getTextObject(scene, "Settings");
+      if (!settingsButton) throw new Error("Settings button not found");
+      expectTouchTargetSize(settingsButton);
+    });
+
+    it("gives the Musical Memory Replay control a 96x96 hit area", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const replayButton = getTextObject(scene, "\uD83D\uDD04");
+      if (!replayButton) throw new Error("Replay button not found");
+      expectTouchTargetSize(replayButton);
+    });
   });
 
   describe("ShapeSorterScene round initialization", () => {
