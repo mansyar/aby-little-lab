@@ -15,7 +15,7 @@
 > **Deviation note (2026-08-01):** Manual verification surfaced a pre-existing runtime crash in `sceneTransitions.ts` (`Camera.zoomTo(1, duration, "Sine.out")` — camera Zoom effects resolve ease strings against their own EaseMap, where `"Sine.out"` is not a key, so `this.ease` stayed undefined and every scene entrance threw `TypeError: this.ease is not a function`). Fixed by passing the canonical EaseMap key `"Sine"` (→ `Sine.Out`), with regression test updated. Commit `48d9067`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 2: Tile Press Feedback
+## Phase 2: Tile Press Feedback [checkpoint: 25a7eae]
 
 - [x] Task: Add press feedback to Hub tiles [TDD] `13a2013`
   - [x] **RED:** Add failing tests: scale 0.95 on `pointerdown`, spring-back on `pointerup`/`pointerout`, no-op under reduced-motion.
