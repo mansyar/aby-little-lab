@@ -11,6 +11,8 @@
   - [x] **GREEN:** Implement entrance stagger, bob loops, and decorative layer in `HubScene`.
   - [x] **REFACTOR:** Keep decorations minimal and low-contrast; no speculative extras.
   - [x] **VERIFY:** Run Hub navigation tests; confirm scene still starts games correctly.
+
+> **Deviation note (2026-08-01):** Manual verification surfaced a pre-existing runtime crash in `sceneTransitions.ts` (`Camera.zoomTo(1, duration, "Sine.out")` — camera Zoom effects resolve ease strings against their own EaseMap, where `"Sine.out"` is not a key, so `this.ease` stayed undefined and every scene entrance threw `TypeError: this.ease is not a function`). Fixed by passing the canonical EaseMap key `"Sine"` (→ `Sine.Out`), with regression test updated. Commit `48d9067`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: Tile Press Feedback
