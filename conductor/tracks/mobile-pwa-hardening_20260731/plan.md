@@ -56,7 +56,7 @@
   - [x] Verify no persistent completion effect remains.
 - [x] Task: Run the Phase 3 automated tests and coverage checks (CI=true pnpm test: 333 passed; pnpm test:coverage: 97.35% statements, 97.97% lines)
 
-## Phase 4: Production Validation and Documentation
+## Phase 4: Production Validation and Documentation [checkpoint: 2160fda]
 
 - [x] Task: Update release and device checklists [b8be504]
   - [x] Add installed-PWA fullscreen/standalone expectations and OS navigation-bar limitations.
@@ -80,7 +80,7 @@
   - [x] Tap into a game and confirm BGM begins and continues across navigation.
   - [x] Complete representative games and confirm the single splash/ray disappears cleanly.
   - [x] Repeat with reduced-motion enabled.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint [2160fda]
 
 ## Definition of Done
 
