@@ -35,9 +35,9 @@
   - [x] Keep Web Audio synthesis and SFX enable/disable behavior intact.
   - [x] Ensure BGM remains the only file-based audio asset.
 - [x] Task: Run the Phase 2 automated tests and coverage checks (AudioManager: 49 passed, 89.62% coverage; Hub: 9 passed; build and 13 PWA checks passed)
-- [ ] Task: Phase 1–3 Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase 1–3 Verification & Checkpoint [9f917c5]
 
-## Phase 3: Lightweight Success Feedback
+## Phase 3: Lightweight Success Feedback [checkpoint: 9f917c5]
 
 - [x] Task: Design the bounded splash/ray effect [TDD-Green] [66ad559]
   - [x] Use a single low-cost visual effect rather than a persistent particle emitter.
