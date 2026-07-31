@@ -19,7 +19,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [ ] **Track: Cross-Cutting Motion** *Link: [./tracks/cross-cutting-motion_20260801/index.md](./tracks/cross-cutting-motion_20260801/index.md)*
+- [~] **Track: Cross-Cutting Motion** *Link: [./tracks/cross-cutting-motion_20260801/index.md](./tracks/cross-cutting-motion_20260801/index.md)*
 - [ ] **Track: Hub Engagement** *Link: [./tracks/hub-engagement_20260801/index.md](./tracks/hub-engagement_20260801/index.md)*
 - [ ] **Track: Per-Game Juice** *Link: [./tracks/per-game-juice_20260801/index.md](./tracks/per-game-juice_20260801/index.md)*
 - [ ] **Track: Mascot Companion** *Link: [./tracks/mascot-companion_20260801/index.md](./tracks/mascot-companion_20260801/index.md)*
