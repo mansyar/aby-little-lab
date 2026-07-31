@@ -40,15 +40,15 @@
   - [x] **VERIFY:** Run hit-area and navigation tests; confirm controls still work.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 5: Quality Gates
+## Phase 5: Quality Gates [checkpoint: pending]
 
-- [ ] Task: Release verification for this track
-  - [ ] Run `pnpm test -- --run`.
-  - [ ] Run `pnpm run test:coverage`.
-  - [ ] Run `pnpm run check`.
-  - [ ] Run `pnpm run build`.
-  - [ ] Manual: verify transitions on every navigation path, celebration in all six games, press feedback on Back/Replay/Settings, and reduced-motion behavior.
-  - [ ] Confirm no gameplay-rule, asset, or audio changes were introduced.
+- [x] Task: Release verification for this track
+  - [x] Run `pnpm vitest run` (the project's test script `vitest` runs in watch mode; `pnpm vitest run` is the non-watch equivalent of `pnpm test -- --run`). 15 files, 412 tests pass.
+  - [x] Run `pnpm run test:coverage`. All files: 97.45% stmts, 88.58% branch, 97.16% funcs, 98.09% lines — above the 80% thresholds; new utilities (motion, sceneTransitions, completionEffect, pressFeedback) at 100%.
+  - [x] Run `pnpm run check`. Biome clean (44 files, no fixes).
+  - [x] Run `pnpm run build`. Vite build succeeds (pre-existing >500 kB chunk warning only).
+  - [ ] Manual: verify transitions on every navigation path, celebration in all six games, press feedback on Back/Replay/Settings, and reduced-motion behavior. (Pending — to be performed by a human reviewer via `pnpm dev`; recorded per phase in git notes.)
+  - [x] Confirm no gameplay-rule, asset, or audio changes were introduced. Only scene wiring, effect/utility code, and tests changed.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Definition of Done
