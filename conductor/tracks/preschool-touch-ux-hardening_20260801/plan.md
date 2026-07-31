@@ -51,3 +51,7 @@
 - Coverage, check, tests, and build pass.
 - Manual touch verification is recorded.
 - Changes are committed with task summaries and Git notes.
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions `b5bbfd0`
