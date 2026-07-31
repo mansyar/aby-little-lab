@@ -1,0 +1,11 @@
+Task: Expand protected and replay control hit areas [TDD]
+
+Summary: Added 96x96 logical-pixel interactive hit areas to all protected controls: Back buttons in all 6 game scenes, Hub Settings, and Musical Memory Replay. Visual positions and labels unchanged; only interactive bounds enlarged, matching the existing SettingsPanel toggle convention.
+
+Files:
+- src/scenes/{ShapeSorter,AnimalTrace,PopFreeze,ShadowMatch,MusicalMemory,BigSmall}Scene.ts (Back)
+- src/scenes/HubScene.ts (Settings)
+- src/scenes/MusicalMemoryScene.ts (Replay)
+- src/__tests__/scenes/navigation.test.ts (Geom.Rectangle mock + 8 hit-area tests)
+
+Why: Back/Settings/Replay previously used text-bounds hit areas well under 96px, making them hard targets for preschoolers. Spec requirement 3.
