@@ -1,0 +1,10 @@
+Phase 3 Verification Report
+
+Command: CI=true pnpm vitest run
+Result: 11 files, 383/383 tests passed.
+
+Scope (diff 6fa1abb..HEAD): navigation.test.ts (test-only) + plan.md.
+
+Summary: Added 21 cross-scene integration assertions covering the full touch contract: early release and pointercancel never navigate (6 games each), Settings early release never opens the panel, duplicate pointerdown produces exactly one hold and one panel open, and the circular progress ring is destroyed on scene shutdown for every protected control (6 games + Hub). Assertions passed on first write because Phase 1 hardening already satisfied these contracts; helpers throw if listeners or hold timers are missing, so the guards cannot silently pass.
+
+Manual verification plan (user approved): quick tap-release on Back in all 6 games stays in game; 3s hold returns to Hub exactly once; quick tap on Settings does nothing; 3s hold opens panel once; cancelled holds leave no ring artifacts.
