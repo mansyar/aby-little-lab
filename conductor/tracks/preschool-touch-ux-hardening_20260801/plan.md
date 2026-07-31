@@ -15,7 +15,7 @@
 
 ## Phase 2: Touch Target Integration
 
-- [x] Task: Expand protected and replay control hit areas [TDD] `074a1bb`
+- [x] Task: Expand protected and replay control hit areas [TDD] `074a1bb` (+fix `e678c99`)
   - [x] **RED:** Add failing tests asserting 96×96 logical-pixel hit areas for Hub Settings, all game Back controls, and Musical Memory Replay.
   - [x] **GREEN:** Add inflated interactive bounds while preserving visual positions and existing navigation/gameplay behavior.
   - [x] **REFACTOR:** Consolidate only genuinely shared hit-area logic and preserve scene-local conventions.
