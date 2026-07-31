@@ -103,6 +103,17 @@ Production builds generate `dist/manifest.webmanifest` and an auto-updating serv
 
 Run the release checks with `pnpm run build` followed by `node scripts/validate-pwa.js`. Use an HTTPS private static host or tunnel for phone/tablet installation, offline, and update testing; `http://localhost` is suitable only for same-device smoke tests.
 
+## Docker Deployment
+
+The production image builds the Vite app in a Node stage and serves the generated `dist/` files with Nginx:
+
+```bash
+docker build -t aby-little-lab .
+docker run --rm -p 8080:80 aby-little-lab
+```
+
+Open `http://localhost:8080` for a local smoke test. For production PWA installation and offline testing, terminate TLS at your hosting provider or reverse proxy and serve the container over HTTPS.
+
 ## Documentation
 
 - [PRD.md](docs/PRD.md) - Product Requirements Document
