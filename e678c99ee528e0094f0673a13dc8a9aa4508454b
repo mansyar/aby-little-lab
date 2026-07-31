@@ -1,0 +1,5 @@
+Fix from manual verification: Settings button unpressable.
+
+Root cause: Phaser custom hit areas are anchored at the top-left of the object's display bounds (pointWithinHitArea adds displayOriginX/Y). The Settings button uses origin(1,0), so Rectangle(-96,0,96,96) placed the hit box entirely left of the visible label. Replay's Rectangle(-48,-48,96,96) was likewise offset.
+
+Fix: Rectangle(0,0,96,96) for both, so the visible control always sits inside the hit box. Added expectHitAreaOrigin regression assertions.
