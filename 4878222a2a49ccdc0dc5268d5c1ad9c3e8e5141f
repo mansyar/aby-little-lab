@@ -1,0 +1,10 @@
+Task: Harden ParentLock reliability and circular progress feedback [TDD]
+
+Summary: Hardened ParentLock with active-pointer tracking, guarded 3s timer, cancellation handling (pointerup/pointerout/pointercancel), callback-once guarantees, stale-callback guards, and a tween-driven circular progress ring that is destroyed on cancel, completion, and destroy().
+
+Files:
+- src/components/ParentLock.ts (modified): hold state machine + progress ring
+- src/__tests__/components/ParentLock.test.ts (modified): 14 new tests
+- src/__tests__/scenes/navigation.test.ts (modified): mock graphics/getCenter support
+
+Why: Duplicate pointer-downs could start multiple timers; pointercancel was unhandled; stale callbacks could fire after shutdown; and parents had no visible hold feedback. Fixes spec requirements 1-2.
