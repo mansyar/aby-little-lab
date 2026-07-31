@@ -63,7 +63,7 @@
   - [x] Add first-interaction BGM verification.
   - [x] Add no-missing-SFX-request verification.
   - [x] Add bounded completion-effect and reduced-motion checks.
-- [ ] Task: Run project quality gates
+- [x] Task: Run project quality gates (CI=true pnpm test: 333 passed; pnpm test:coverage: 97.35% statements and 97.97% lines; check, build, and 13 PWA checks passed)
   - [ ] Run `CI=true pnpm test`.
   - [ ] Run `pnpm test:coverage` and verify configured thresholds.
   - [ ] Run `pnpm run check`.
