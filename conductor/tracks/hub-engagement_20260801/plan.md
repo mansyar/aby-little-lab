@@ -4,7 +4,7 @@
 
 ---
 
-## Phase 1: Entrance and Idle Life
+## Phase 1: Entrance and Idle Life [checkpoint: 99f3af1]
 
 - [x] Task: Staggered entrance, tile bobbing, and background decorations [TDD] `c6f035a`
   - [x] **RED:** Add failing tests asserting staggered entrance tweens (delayed per-element, 300ms each), phase-offset bob loops on tiles, drifting background shapes, and static behavior under reduced-motion.
