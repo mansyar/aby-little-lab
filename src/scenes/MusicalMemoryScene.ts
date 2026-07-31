@@ -147,7 +147,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
     );
     replayButton.setOrigin(0.5);
     replayButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
+      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     replayButton.on("pointerdown", () => this.handleReplay());

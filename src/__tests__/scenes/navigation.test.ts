@@ -386,6 +386,20 @@ function expectTouchTargetSize(obj: Record<string, MockFn>): void {
   expect(interactiveConfig?.hitArea.height).toBeGreaterThanOrEqual(96);
 }
 
+/**
+ * Asserts that the interactive hit area is anchored at the top-left of the
+ * control's display bounds (Phaser hit areas are origin-independent).
+ */
+function expectHitAreaOrigin(obj: Record<string, MockFn>, x: number, y: number): void {
+  const setInteractiveMock = getMockFn(obj.setInteractive);
+  const interactiveConfig = setInteractiveMock.mock.calls.find(
+    (call) => call[0] && typeof call[0] === "object" && "hitArea" in call[0],
+  )?.[0] as { hitArea: { x: number; y: number } } | undefined;
+  expect(interactiveConfig).toBeDefined();
+  expect(interactiveConfig?.hitArea.x).toBe(x);
+  expect(interactiveConfig?.hitArea.y).toBe(y);
+}
+
 describe("scene navigation flow", () => {
   beforeEach(() => {
     vi.stubGlobal("screen", {
@@ -670,6 +684,7 @@ describe("scene navigation flow", () => {
       const settingsButton = getTextObject(scene, "Settings");
       if (!settingsButton) throw new Error("Settings button not found");
       expectTouchTargetSize(settingsButton);
+      expectHitAreaOrigin(settingsButton, 0, 0);
     });
 
     it("gives the Musical Memory Replay control a 96x96 hit area", () => {
@@ -679,6 +694,7 @@ describe("scene navigation flow", () => {
       const replayButton = getTextObject(scene, "\uD83D\uDD04");
       if (!replayButton) throw new Error("Replay button not found");
       expectTouchTargetSize(replayButton);
+      expectHitAreaOrigin(replayButton, 0, 0);
     });
   });
 

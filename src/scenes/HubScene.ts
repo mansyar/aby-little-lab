@@ -84,7 +84,7 @@ export class HubScene extends Phaser.Scene {
     });
     settingsButton.setOrigin(1, 0);
     settingsButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-96, 0, 96, 96),
+      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
 
