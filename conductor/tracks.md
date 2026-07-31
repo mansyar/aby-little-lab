@@ -13,11 +13,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Game 6 — Big vs. Small Cleaner** *Link: [./archive/big-small_20260730/index.md](./archive/big-small_20260730/index.md)* (Archived)
 - [x] **Track: Release Readiness & PWA Validation** *Link: [./archive/release-readiness-pwa_20260731/index.md](./archive/release-readiness-pwa_20260731/index.md)* (Archived)
 - [x] **Track: Mobile PWA Shell, Audio, and Completion Feedback Hardening** *Link: [./archive/mobile-pwa-hardening_20260731/index.md](./archive/mobile-pwa-hardening_20260731/index.md)* (Archived)
+- [x] **Track: Preschool Touch UX Hardening** *Link: [./archive/preschool-touch-ux-hardening_20260801/index.md](./archive/preschool-touch-ux-hardening_20260801/index.md)* (Archived)
 
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
-
-## Active Tracks
-
-- [x] **Track: Preschool Touch UX Hardening** *Link: [./tracks/preschool-touch-ux-hardening_20260801/index.md](./tracks/preschool-touch-ux-hardening_20260801/index.md)*
