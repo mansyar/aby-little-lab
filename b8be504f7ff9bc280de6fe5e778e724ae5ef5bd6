@@ -1,0 +1,5 @@
+Completed task: Update release and device checklists.
+
+Updated docs/release-checklist.md and docs/device-testing-checklist.md with fullscreen and standalone fallback expectations, documentation of OS-controlled navigation bars, first-interaction BGM checks, Web Audio synthesized-SFX checks, no-missing-SFX-request checks, bounded splash/ray cleanup, and reduced-motion verification across all six games.
+
+No runtime code changed in this task. The checklist changes align release validation with the implemented PWA display metadata, AudioManager behavior, and bounded completion feedback.
