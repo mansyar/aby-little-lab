@@ -66,6 +66,9 @@ The project uses Biome with double quotes, 2-space indentation, and 100-characte
 ## Project Structure
 
 ```
+public/
+├── audio/                 # BGM served at /audio/bgm.mp3 and precached for offline play
+└── icons/                 # PWA icons
 src/
 ├── main.ts                # Phaser game config & scene register
 ├── scenes/                # BootScene, PreloadScene, HubScene, 6 game scenes
@@ -74,7 +77,7 @@ src/
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
 ├── utils/                 # localStorage CRUD (storage.ts)
-├── assets/                # SVG and audio assets
+├── assets/                # SVG assets bundled into the game
 ├── styles/                # Global CSS
 └── __tests__/             # Unit tests (audio, components, game, scenes, utils)
 ```
@@ -94,10 +97,18 @@ src/
 
 Hold the Hub **Settings** control for 3 seconds to open the parental settings modal. It provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
 
+## PWA Release Readiness
+
+Production builds generate `dist/manifest.webmanifest` and an auto-updating service worker. The service worker precaches the bundled game assets, PWA icon, and `/audio/bgm.mp3` so the installed app can launch and play offline after its first online load.
+
+Run the release checks with `pnpm run build` followed by `node scripts/validate-pwa.js`. Use an HTTPS private static host or tunnel for phone/tablet installation, offline, and update testing; `http://localhost` is suitable only for same-device smoke tests.
+
 ## Documentation
 
 - [PRD.md](docs/PRD.md) - Product Requirements Document
 - [TDD.md](docs/TDD.md) - Technical Design Document
+- [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
+- [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
 
 ## License
 

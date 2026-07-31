@@ -51,6 +51,7 @@ aby-little-lab/
 ├── vite.config.ts                  # Vite + vite-plugin-pwa + Vitest configuration
 ├── biome.json                      # Biome linter/formatter config (double quotes, 2-space)
 ├── public/
+│   ├── audio/                      # Runtime audio served at /audio/ (BGM)
 │   └── icons/                      # PWA icons (icon-512.png)
 └── src/
     ├── main.ts                     # Phaser 4 game config & global scene register
@@ -82,7 +83,6 @@ aby-little-lab/
     ├── utils/
     │   └── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings)
     ├── assets/
-    │   ├── audio/                  # Audio assets (sfx_pop.mp3, sfx_win.mp3, bgm.mp3)
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
     │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
@@ -105,7 +105,7 @@ aby-little-lab/
 
 ## 3. PWA Configuration (`vite.config.ts`)
 
-The PWA manifest and service worker are configured via `vite-plugin-pwa`. No separate `manifest.json` or `sw.js` files are needed — the plugin auto-generates them at build time with default precaching for all static assets.
+The PWA manifest and service worker are configured via `vite-plugin-pwa`. No source `manifest.json` or `sw.js` files are maintained; production builds generate `manifest.webmanifest`, `sw.js`, and the Workbox runtime. Emitted build assets are precached, and `includeAssets` explicitly adds the runtime BGM file from `public/`.
 
 ```typescript
 /// <reference types="vitest/config" />
@@ -116,6 +116,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
+      includeAssets: ["audio/bgm.mp3"],
       manifest: {
         name: "Aby's Little Lab",
         short_name: "Aby Lab",
@@ -149,6 +150,8 @@ export default defineConfig({
   },
 });
 ```
+
+After `pnpm run build`, run `node scripts/validate-pwa.js` to verify the generated manifest, service worker, icon, BGM asset, and precache entries. Phone/tablet installation and offline checks must use an HTTPS private static host or tunnel.
 
 ---
 
@@ -379,16 +382,11 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `sticker_musical_memory.svg` | 512×512 | Game 5 | Unique themed sticker |
 | `sticker_big_small.svg` | 512×512 | Game 6 | Unique themed sticker |
 
-### Audio Assets (`assets/audio/`)
+### Audio Assets (`public/audio/`)
 
 | File | Format | Used In | Notes |
 |---|---|---|---|
-| `sfx_pop.mp3` | MP3 | All | Generic UI tap |
-| `sfx_correct.mp3` | MP3 | Games 1, 2, 4, 6 | Ascending 2-note chime |
-| `sfx_incorrect.mp3` | MP3 | Games 1, 4, 6 | Gentle descending tone |
-| `sfx_win.mp3` | MP3 | All games | Win fanfare |
-| `sfx_sticker.mp3` | MP3 | All games | Sticker earned sparkle |
-| `bgm.mp3` | MP3 | All scenes | Ambient loop, low volume |
+| `bgm.mp3` | MP3 | All scenes | Ambient loop at 0.3 volume, served at `/audio/bgm.mp3` and precached for offline play |
 
 > **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
 >
@@ -411,6 +409,6 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | SVG — shadows | 6 (Game 4 silhouettes) |
 | SVG — UI | 13 |
 | SVG — stickers | 6 |
-| Audio (MP3) | 6 |
+| Audio (MP3) | 1 |
 | PWA icons (PNG) | 1 |
-| **Total** | **62** |
+| **Total** | **57** |

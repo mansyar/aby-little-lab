@@ -99,7 +99,7 @@ git push origin v1.0.0
 
 ### Immediate Checks (within 1 hour)
 - [ ] App accessible via URL
-- [ ] PWA installation prompt appears
+- [ ] PWA can be installed (browser prompt or manual "Add to Home Screen")
 - [ ] Basic functionality works
 - [ ] No critical errors in console
 

@@ -218,7 +218,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 | Event | Sound | Source | Used In |
 |---|---|---|---|
-| Generic tap | Soft pop | `sfx_pop.mp3` | All games (UI taps) |
+| Generic tap | Soft pop | Web Audio API (synthesized) | All games (UI taps) |
 | Correct match | Ascending chime (3-note: C5, E5, G5) | Web Audio API (synthesized) | Games 1, 2, 4, 6 |
 | Incorrect match | Soft descending tone (G4 → C4) | Web Audio API (synthesized) | Games 1, 4, 6 |
 | Bubble pop | Bright percussive blip (800 Hz, 0.08s) | Web Audio API (synthesized) | Game 3 |
@@ -226,7 +226,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 | Game complete | Win fanfare (4-note arpeggio: C5, E5, G5, C6) | Web Audio API (synthesized) | All games |
 | Sticker earned | Sparkle (2-note: C6, E6) | Web Audio API (synthesized) | All games (first completion) |
 
-> **Note:** Gameplay SFX (correct, incorrect, win, sticker) are **synthesized via Web Audio API** — no MP3 files needed for these. This was decided during the Shape Sorter track to reduce asset overhead. Game 3's pop and wake sounds are also synthesized. MP3 SFX files remain only for generic UI tap sounds.
+> **Note:** All gameplay SFX (generic tap, correct, incorrect, win, sticker) are **synthesized via Web Audio API** — no MP3 files are needed. This reduces asset overhead and keeps feedback responsive across devices. Game 3's pop and wake sounds are also synthesized.
 
 ### Synthesized Audio (Web Audio API)
 
@@ -250,14 +250,16 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), and
 |---|---|
 | `bgm.mp3` | Single gentle ambient loop, played at low volume across all scenes |
 
-- BGM starts in BootScene and loops continuously.
+- BGM is initialized in BootScene and loops continuously after playback begins.
 - BGM can be toggled on/off via parental settings (persisted in localStorage).
 - SFX can also be toggled independently.
 - The settings modal plays the synthesized correct chime when SFX is enabled. The packaged `/audio/bgm.mp3` loop plays after eligible user interaction and follows the persisted BGM setting.
 
+> **Release decision (2026-07-31):** The supplied loop is packaged at `public/audio/bgm.mp3` so Vite serves it at `/audio/bgm.mp3`. Playback uses a gentle 0.3 volume and waits for eligible user interaction to respect browser autoplay policies.
+
 ### Audio Format
 
-- All audio files: **MP3** for broad device compatibility.
+- Packaged audio file (`bgm.mp3`): **MP3** for broad device compatibility; gameplay SFX are synthesized with Web Audio API.
 - Synthesized tones: **Web Audio API** (no file overhead).
 
 ---
@@ -269,11 +271,17 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), and
 | Frame rate | 60fps (min 30fps on low-end phones) | Smooth animations for toddler engagement |
 | Boot/load time | < 3 seconds (mid-range tablet) | Prevent attention loss during loading |
 | Memory usage | < 150MB total | SVG rasterization at 512×512 is lightweight; keep buffer for audio |
-| Offline capability | Full gameplay after first PWA install | vite-plugin-pwa precaches all build assets |
+| Offline capability | Full gameplay after the first HTTPS PWA load/install | vite-plugin-pwa precaches all build assets, including `/audio/bgm.mp3` |
 | Touch input latency | < 16ms (1 frame) | Immediate feedback for fine-motor activities |
 | Audio latency | < 50ms | Synchronized SFX with visual feedback |
 
 ---
+
+## 9. Release Readiness Decisions
+
+- Production builds generate `manifest.webmanifest` and an auto-updating service worker through `vite-plugin-pwa`.
+- The service worker precaches the bundled game assets, PWA icon, and BGM for offline play.
+- Phone/tablet installation, offline, and update validation must use an HTTPS private static host or tunnel; `http://localhost` is reserved for same-device smoke tests.
 
 ## See Also
 
