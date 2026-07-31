@@ -20,4 +20,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [~] **Track: Preschool Touch UX Hardening** *Link: [./tracks/preschool-touch-ux-hardening_20260801/index.md](./tracks/preschool-touch-ux-hardening_20260801/index.md)*
+- [x] **Track: Preschool Touch UX Hardening** *Link: [./tracks/preschool-touch-ux-hardening_20260801/index.md](./tracks/preschool-touch-ux-hardening_20260801/index.md)*
