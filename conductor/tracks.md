@@ -19,4 +19,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-_No active tracks._
+- [ ] **Track: Mobile PWA Shell, Audio, and Completion Feedback Hardening** *Link: [./tracks/mobile-pwa-hardening_20260731/index.md](./tracks/mobile-pwa-hardening_20260731/index.md)*
