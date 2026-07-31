@@ -1,0 +1,10 @@
+Phase 2 verification report (hub-engagement_20260801) — PASS
+
+Scope: Spring press feedback on Hub tiles + navigate-on-release refinement.
+Commits: 13a2013 (press feedback), 0f2a6ad (plan), 295cffe (navigate-on-release), 8728311 (plan deviation note).
+
+Automated: CI=true pnpm test -- --run -> 429 passed (15 files); pnpm run check clean; pnpm run build OK.
+
+Manual (2026-08-01, user confirmed): press-hold squishes to 95% and stays, game does NOT start while held; release on tile springs back with Back.out overshoot and starts the game; drag-off release cancels navigation; pointercancel cancels; reduced-motion shows no squish/spring but still navigates on release.
+
+Acceptance criteria FR3 met; navigation behavior refined per user decision (navigate on release).
