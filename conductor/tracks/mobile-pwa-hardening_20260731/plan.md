@@ -30,10 +30,10 @@
   - [x] Keep startup idempotent and preserve playback across scene changes.
   - [x] Preserve persisted BGM settings and SettingsPanel behavior.
   - [x] Handle a rejected playback attempt so a later valid gesture can retry.
-- [ ] Task: Remove stale synthesized-SFX MP3 loading [TDD-Green]
-  - [ ] Remove the six missing SFX file references and eager `Audio` creation.
-  - [ ] Keep Web Audio synthesis and SFX enable/disable behavior intact.
-  - [ ] Ensure BGM remains the only file-based audio asset.
+- [x] Task: Remove stale synthesized-SFX MP3 loading [TDD-Green] [e7cf36d]
+  - [x] Remove the six missing SFX file references and eager `Audio` creation.
+  - [x] Keep Web Audio synthesis and SFX enable/disable behavior intact.
+  - [x] Ensure BGM remains the only file-based audio asset.
 - [ ] Task: Run the Phase 2 automated tests and coverage checks
 - [ ] Task: Phase 1–2 Verification & Checkpoint (Refer to `workflow.md`)
 
