@@ -11,7 +11,7 @@
   - [ ] **GREEN:** Implement active-pointer tracking, guarded 3-second timer behavior, cancellation handling, cleanup, and circular progress feedback.
   - [ ] **REFACTOR:** Simplify state transitions and remove duplication without changing behavior.
   - [ ] **VERIFY:** Run ParentLock tests and confirm all existing navigation tests still pass.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: Touch Target Integration
 
