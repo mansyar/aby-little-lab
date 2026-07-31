@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
+import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { hasSticker } from "../utils/storage";
@@ -28,6 +29,29 @@ const TILE_SPACING = 50;
 const GRID_COLS = 3;
 const GRID_ROWS = 2;
 
+/** Delay between consecutive entrance elements (ms). */
+const ENTRANCE_STAGGER = 40;
+/** Duration of each element's entrance tween (ms). */
+const ENTRANCE_DURATION = 300;
+/** Vertical bob amplitude for idle tiles (px). */
+const BOB_AMPLITUDE = 4;
+/** Duration of one tile bob loop (ms). */
+const BOB_DURATION = 2500;
+/** Phase offset between tile bob loops (ms). */
+const BOB_PHASE_OFFSET = 200;
+/** Number of background decorations. */
+const DECORATION_COUNT = 4;
+/** Radius of background decoration dots (px). */
+const DECORATION_RADIUS = 10;
+/** Low-contrast color for background decorations. */
+const DECORATION_COLOR = 0xe8e0d0;
+/** Vertical drift distance for decorations (px). */
+const DECORATION_DRIFT = 16;
+/** Slowest decoration drift loop (ms). */
+const DECORATION_DRIFT_MIN = 4000;
+/** Fastest decoration drift loop (ms). */
+const DECORATION_DRIFT_MAX = 6000;
+
 /**
  * Hub scene — the central navigation hub.
  *
@@ -37,6 +61,7 @@ const GRID_ROWS = 2;
 export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private settingsPanel?: SettingsPanel;
+  private entranceIndex = 0;
 
   constructor() {
     super({ key: "Hub" });
@@ -44,6 +69,12 @@ export class HubScene extends Phaser.Scene {
 
   create(): void {
     sceneEntrance(this);
+    const reducedMotion = isReducedMotion();
+    this.entranceIndex = 0;
+
+    if (!reducedMotion) {
+      this.createDecorations();
+    }
 
     const startX =
       (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
@@ -74,12 +105,28 @@ export class HubScene extends Phaser.Scene {
       });
       label.setOrigin(0.5);
 
+      this.animateEntrance([tile, label]);
+
+      if (!reducedMotion) {
+        this.tweens.add({
+          targets: [tile, label],
+          y: y - BOB_AMPLITUDE,
+          duration: BOB_DURATION,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.inOut",
+          delay: i * BOB_PHASE_OFFSET,
+        });
+      }
+
       const earned = hasSticker(GAME_TILES[i].gameId);
       const sticker = this.add.text(x, y + TILE_HEIGHT / 2 - 20, earned ? "★" : "☆", {
         fontSize: "24px",
         color: earned ? "#68d391" : "#a0aec0",
       });
       sticker.setOrigin(0.5);
+
+      this.animateEntrance([sticker]);
     }
 
     const settingsButton = this.add.text(this.cameras.main.width - 20, 20, "Settings", {
@@ -111,5 +158,63 @@ export class HubScene extends Phaser.Scene {
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
     });
+  }
+
+  /** Creates a few low-contrast dots that drift slowly behind the grid. */
+  private createDecorations(): void {
+    const driftRange = DECORATION_DRIFT_MAX - DECORATION_DRIFT_MIN;
+    const positions: ReadonlyArray<[number, number]> = [
+      [this.cameras.main.width * 0.12, this.cameras.main.height * 0.18],
+      [this.cameras.main.width * 0.88, this.cameras.main.height * 0.15],
+      [this.cameras.main.width * 0.1, this.cameras.main.height * 0.8],
+      [this.cameras.main.width * 0.9, this.cameras.main.height * 0.75],
+    ];
+
+    for (let i = 0; i < DECORATION_COUNT; i++) {
+      const [x, y] = positions[i];
+      const dot = this.add.circle(x, y, DECORATION_RADIUS, DECORATION_COLOR);
+      dot.setDepth(-1);
+      this.tweens.add({
+        targets: dot,
+        y: y - DECORATION_DRIFT,
+        duration: DECORATION_DRIFT_MIN + (i * driftRange) / (DECORATION_COUNT - 1),
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.inOut",
+        delay: i * 300,
+      });
+    }
+  }
+
+  /**
+   * Fades (and, under normal motion, scales) an element in with a per-element
+   * stagger. Under reduced motion only alpha is animated.
+   * @param targets - Display objects to animate.
+   */
+  private animateEntrance(targets: Phaser.GameObjects.GameObject[]): void {
+    const index = this.entranceIndex;
+    this.entranceIndex += 1;
+    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
+      targets,
+      alpha: 1,
+      delay: index * ENTRANCE_STAGGER,
+      duration: ENTRANCE_DURATION,
+      ease: "Sine.out",
+    };
+
+    for (const target of targets) {
+      const tweenable = target as Phaser.GameObjects.GameObject & {
+        setAlpha: (alpha: number) => unknown;
+        setScale: (scale: number) => unknown;
+      };
+      tweenable.setAlpha(0);
+      if (!isReducedMotion()) {
+        tweenable.setScale(0);
+        config.scaleX = 1;
+        config.scaleY = 1;
+      }
+    }
+
+    this.tweens.add(config);
   }
 }

@@ -682,6 +682,131 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("Hub engagement entrance and idle life", () => {
+    it("staggers tile and sticker entrance tweens 40ms apart (300ms Sine.out each)", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const entranceTweens = tweenCalls
+        .map(
+          (call) => call[0] as { delay?: number; duration?: number; ease?: string; alpha?: number },
+        )
+        .filter(
+          (config) =>
+            config.duration === 300 && typeof config.delay === "number" && config.alpha === 1,
+        );
+
+      expect(entranceTweens.length).toBeGreaterThanOrEqual(12);
+      const delays = entranceTweens.map((config) => config.delay as number).sort((a, b) => a - b);
+      for (let i = 1; i < delays.length; i++) {
+        expect(delays[i] - delays[i - 1]).toBe(40);
+      }
+      for (const config of entranceTweens) {
+        expect(config.ease).toBe("Sine.out");
+      }
+    });
+
+    it("bobs tiles with phase-offset 2.5s ±4px sine loops", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bobTweens = tweenCalls
+        .map(
+          (call) =>
+            call[0] as {
+              duration?: number;
+              yoyo?: boolean;
+              repeat?: number;
+              ease?: string;
+              delay?: number;
+              y?: number;
+            },
+        )
+        .filter(
+          (config) => config.duration === 2500 && config.yoyo === true && config.repeat === -1,
+        );
+
+      expect(bobTweens).toHaveLength(6);
+      const delays = new Set(bobTweens.map((config) => config.delay));
+      expect(delays.size).toBe(6);
+
+      const startY = (768 - 2 * 150 - 50) / 2;
+      const expectedYs = [0, 1, 2, 3, 4, 5].map((i) => {
+        const row = Math.floor(i / 3);
+        return startY + row * 200 + 75 - 4;
+      });
+      const tweenYs = bobTweens.map((config) => config.y).sort((a, b) => (a ?? 0) - (b ?? 0));
+      expect(tweenYs).toEqual(expectedYs.sort((a, b) => a - b));
+
+      for (const config of bobTweens) {
+        expect(config.ease).toBe("Sine.inOut");
+      }
+    });
+
+    it("adds low-contrast drifting background decorations behind tiles", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const circleMock = getMockFn(scene.add.circle);
+      expect(circleMock.mock.calls.length).toBeGreaterThanOrEqual(4);
+      for (const result of circleMock.mock.results) {
+        const dot = result.value as Record<string, MockFn>;
+        expect(getMockFn(dot.setDepth)).toHaveBeenCalledWith(-1);
+      }
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const driftTweens = tweenCalls
+        .map((call) => call[0] as { duration?: number; yoyo?: boolean; repeat?: number })
+        .filter(
+          (config) =>
+            config.duration !== undefined &&
+            config.duration >= 4000 &&
+            config.duration <= 6000 &&
+            config.yoyo === true &&
+            config.repeat === -1,
+        );
+      expect(driftTweens.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it("under reduced motion: entrance fades only, no bob or drift", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new HubScene();
+      scene.create();
+
+      const configs = getMockFn(scene.tweens.add).mock.calls.map(
+        (call) => call[0] as Record<string, unknown>,
+      );
+
+      expect(configs.some((config) => config.duration === 2500 && config.yoyo === true)).toBe(
+        false,
+      );
+      expect(
+        configs.some(
+          (config) =>
+            typeof config.duration === "number" &&
+            config.duration >= 4000 &&
+            config.duration <= 6000 &&
+            config.yoyo === true,
+        ),
+      ).toBe(false);
+
+      const entranceTweens = configs.filter(
+        (config) => config.duration === 300 && typeof config.delay === "number",
+      );
+      expect(entranceTweens.length).toBeGreaterThanOrEqual(12);
+      for (const config of entranceTweens) {
+        expect(config.alpha).toBe(1);
+        expect("scaleX" in config).toBe(false);
+        expect("scaleY" in config).toBe(false);
+      }
+    });
+  });
+
   describe("game scene stubs", () => {
     it.each(GAME_SCENES)(
       "navigates back to Hub via back button hold in $name",
