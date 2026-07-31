@@ -1,0 +1,7 @@
+Phase 1 Verification Report — 'Entrance and Idle Life' (hub-engagement_20260801)
+
+Automated verification: CI=true pnpm test -- --run — 419 tests passed (15 files). pnpm run check clean. pnpm run build succeeds.
+
+Manual verification (user-confirmed 2026-08-01): tiles + sticker markers cascade in 40ms-staggered 300ms Sine.out fade/scale wave; tiles bob ±4px out of phase on 2.5s loops; 4 low-contrast dots drift slowly behind the grid; tile taps still start games; Settings parental lock still works; reduced-motion emulation yields fade-only entrance and fully static Hub.
+
+Hotfix included: sceneTransitions zoomTo 'Sine.out' -> 'Sine' (pre-existing runtime crash, commit 48d9067).
