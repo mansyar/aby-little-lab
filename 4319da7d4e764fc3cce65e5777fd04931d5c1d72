@@ -1,0 +1,3 @@
+Task: Create reduced-motion-aware motion utility (Phase 1, cross-cutting-motion_20260801)
+
+Added src/utils/motion.ts with isReducedMotion(), motionDuration(normal, reduced), and motionScale(normal, reduced) helpers that centralize prefers-reduced-motion handling. Refactored src/utils/completionEffect.ts to consume the utility with identical behavior/values (rays, core radius, scale, duration). Added 7 unit tests covering matchMedia true/false/unavailable cases and duration/scale selection. All 390 existing tests pass.
