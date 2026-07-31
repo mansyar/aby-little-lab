@@ -1,0 +1,7 @@
+Task: Add press feedback to Hub tiles [TDD]
+
+Summary: Hub tiles now squish to 95% scale on pointerdown and spring back to base scale with a Back.out overshoot tween (150ms) on pointerup/pointerout/pointercancel. Reused the shared attachPressFeedback helper from cross-cutting-motion, extended with an optional spring mode; helper type widened from Text to Text | Rectangle. Press feedback attaches on tile entrance completion so base scale is captured at 1.0 (not 0 during the scale-in). No-op under reduced motion; navigation behavior unchanged.
+
+Files: src/scenes/HubScene.ts, src/utils/pressFeedback.ts, src/__tests__/scenes/navigation.test.ts, src/__tests__/utils/pressFeedback.test.ts
+
+Why: Tactile feedback for the preschool touch audience per hub-engagement spec FR3, reusing existing motion infrastructure instead of duplicating logic.
