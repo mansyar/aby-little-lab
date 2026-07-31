@@ -74,12 +74,12 @@
   - [x] Verify `/audio/bgm.mp3` loads successfully: HTTP 200.
   - [x] Verify the six stale SFX URLs are not requested.
   - [x] Verify no related console errors occur during Hub → Shape Sorter interaction: zero errors and zero warnings.
-- [ ] Task: Perform manual mobile/PWA verification
-  - [ ] Install the new build on a phone.
-  - [ ] Verify fullscreen/standalone behavior and document platform-controlled navigation bars.
-  - [ ] Tap into a game and confirm BGM begins and continues across navigation.
-  - [ ] Complete representative games and confirm the single splash/ray disappears cleanly.
-  - [ ] Repeat with reduced-motion enabled.
+- [x] Task: Perform manual mobile/PWA verification (user confirmed all checks passed)
+  - [x] Install or update the new build on a phone.
+  - [x] Verify fullscreen/standalone behavior and document platform-controlled navigation bars.
+  - [x] Tap into a game and confirm BGM begins and continues across navigation.
+  - [x] Complete representative games and confirm the single splash/ray disappears cleanly.
+  - [x] Repeat with reduced-motion enabled.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Definition of Done
