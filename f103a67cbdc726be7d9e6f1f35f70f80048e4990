@@ -1,0 +1,5 @@
+Phase 2 Verification Report (cross-cutting-motion_20260801)
+
+Automated: pnpm vitest run — 13 files, 396 tests passed (incl. 6 new sceneTransitions tests). pnpm run check clean.
+
+Manual verification (pending — to be performed by a human reviewer): run pnpm dev; confirm every navigation path (Hub->game, game->Hub via 3s back hold, auto-return after win, Preload->Hub) now fades through the cream background with a subtle zoom-in on the incoming scene; enable OS reduced-motion and confirm fade-only (no zoom).
