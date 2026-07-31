@@ -1,0 +1,11 @@
+Checkpoint: Phase 4 Production Validation and Documentation
+
+Automated verification: CI=true pnpm test — 11 test files and 333 tests passed.
+
+Phase scope: docs/release-checklist.md and docs/device-testing-checklist.md; no runtime code files changed since checkpoint 9f917c5.
+
+Production Playwright verification: live manifest returned display standalone with display_override fullscreen and standalone, landscape orientation, BGM returned HTTP 200, no removed SFX MP3 URLs were requested, and Hub to Shape Sorter interaction produced zero console errors and warnings.
+
+Manual verification plan: install or update the HTTPS PWA on phone and tablet; verify standalone/fullscreen behavior and document OS navigation bars; confirm first-interaction BGM and persisted toggles; verify stickers, parental lock, offline persistence, all six games, bounded splash cleanup, reduced-motion behavior, and performance observations.
+
+User confirmation: user selected Confirm and checkpoint (Recommended), confirming the reported passing device checks.
