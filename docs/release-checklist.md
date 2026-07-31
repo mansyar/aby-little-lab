@@ -34,6 +34,13 @@
 - [ ] The splash/ray cleans itself up and never clouds the play area
 - [ ] Reduced-motion mode disables or simplifies the splash/ray without affecting game completion
 
+### 4b. Touch UX & Parental Lock
+- [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) expose 96×96px hit areas
+- [ ] A 3-second hold shows the circular progress ring and triggers the action exactly once
+- [ ] Duplicate touches during a hold do not double-trigger the action
+- [ ] Early release, pointer leaving the control, and pointer cancel never trigger the action
+- [ ] No progress-ring artifacts remain after cancelled holds or scene shutdown
+
 ### 5. Documentation
 - [ ] README.md is up to date
 - [ ] Release notes prepared

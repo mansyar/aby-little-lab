@@ -19,9 +19,9 @@ This document defines the production requirements for an ad-free, distraction-fr
 
 ### UX & Touch Architecture Requirements
 
-- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration.
+- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
 - **Textless Visual Cues:** Zero text dependency for gameplay. All prompts rely on visual animations, color coding, spatial affordances, and audio chime feedback.
-- **Interface Containment:** Embedded "Hold for 3 Seconds" parental lock to prevent accidental menu navigation or app exits during active play.
+- **Interface Containment:** Embedded "Hold for 3 Seconds" parental lock to prevent accidental menu navigation or app exits during active play. The hold shows a circular progress ring, runs one hold at a time (duplicate touches ignored), and never triggers on early release, pointer leaving the control, or pointer cancel.
 - **Responsive Scale:** Phaser Scale Manager enforces a locked 1024×768 landscape base resolution with dynamic centered letterboxing (`Phaser.Scale.FIT`). Phones auto-rotate to landscape on launch via the Screen Orientation API + manifest `orientation: landscape` lock.
 
 ---
@@ -172,6 +172,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **GameScene → HubScene:** Auto-return after game completion (3s delay with win animation) OR parental lock (hold 3s).
 - **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. Tapping the dark backdrop closes the modal and returns to the Hub.
 - **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
+
+> **Release decision (2026-08-01):** The parental lock was hardened across Hub Settings and all six game Back controls: one hold per active pointer (duplicate `pointerdown` ignored), cancellation on release/pointer-out/`pointercancel`/scene shutdown, exactly one success callback per completed hold, and no stale timers or callbacks after the scene is destroyed. A circular progress fill (48px radius, `--success` `#68D391` at 0.6 alpha, rendered above scene UI) shows hold progress and is always cleaned up on cancel, completion, or shutdown. All protected controls expose explicit 96×96px hit areas; Phaser anchors hit areas at the top-left of a control's display bounds (not its origin), so rectangles are specified as `Rectangle(0, 0, 96, 96)`.
 
 ---
 

@@ -77,6 +77,7 @@ pnpm exec serve dist -l 3000
 - [ ] Sticker book icon is accessible
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
+- [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) respond to taps near the visible label (96×96px hit areas — no precision tapping)
 
 #### Game 1: Shape Sorter
 - [ ] Game loads correctly
@@ -151,10 +152,12 @@ pnpm exec serve dist -l 3000
 - [ ] Settings affect audio playback
 
 #### Parental Lock
-- [ ] Hold-for-3-seconds mechanism works
-- [ ] Settings/exit menu appears after hold
-- [ ] Can exit app via parental lock
+- [ ] Hold-for-3-seconds mechanism works on Hub Settings and every game Back control
+- [ ] Circular progress ring fills during the hold and disappears on release/cancel/completion
+- [ ] Settings/exit menu appears exactly once after a completed hold (no duplicate triggers)
+- [ ] Early release, pointer leaving the control, and pointer cancel never trigger the action
 - [ ] No accidental triggers during gameplay
+- [ ] No ring artifacts remain after a cancelled hold or after leaving the scene
 
 ### D. Offline Testing
 

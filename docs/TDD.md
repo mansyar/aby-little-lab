@@ -67,7 +67,7 @@ aby-little-lab/
     │   ├── MusicalMemoryScene.ts   # Mini-Game 5
     │   └── BigSmallScene.ts        # Mini-Game 6
     ├── components/
-    │   ├── ParentLock.ts           # Long-press escape UI component (hold 3s)
+    │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
     │   └── SettingsPanel.ts        # Parental BGM/SFX modal overlay
     ├── audio/
     │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
@@ -255,6 +255,16 @@ interface AppStorage {
 `SettingsPanel` is created by `HubScene` after the Settings `ParentLock` succeeds. It renders a black 0.6-alpha backdrop and a cream, outlined modal. Its 96px-high BGM and SFX text hit areas exceed the 64px touch-target minimum.
 
 Each control delegates to the `AudioManager` singleton: BGM toggles persist through `setBGMEnabled()` and start or pause playback; SFX toggles persist through `setSFXEnabled()` and play `playCorrect()` only when enabled. Tapping the backdrop destroys every panel object. `HubScene` also destroys an open panel during shutdown.
+
+### ParentLock (hardened, 2026-08-01)
+
+`ParentLock` gates Hub Settings and every game Back control behind a 3-second hold (`DEFAULT_HOLD_DURATION = 3000`). Hardening decisions:
+
+- **Single hold per active pointer:** a second `pointerdown` while a hold is active is ignored (`holdActive` guard).
+- **Cancellation:** `pointerup`, `pointerout`, and `pointercancel` all cancel the hold and fire `onFailure` exactly once; `destroy()` (scene shutdown) cancels without firing callbacks.
+- **Exactly-once success:** the delayed-call callback checks `holdActive`, nulls the timer, clears the ring, then invokes `onSuccess()`; stale callbacks after cancel/destroy/shutdown are no-ops.
+- **Circular progress ring:** on `pointerdown`, a `Graphics` ring (48px radius, `#68D391` at 0.6 alpha, depth 10000) is drawn around the target center via `slice()` + `fillPath()`, animated with a `tweens.add` value tween over the hold duration. The ring and tween are destroyed on cancel, completion, and `destroy()` — no display objects leak.
+- **Hit areas:** protected controls (6 Back buttons, Hub Settings, Musical Memory Replay) use `setInteractive({ hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96), hitAreaCallback: Phaser.Geom.Rectangle.Contains })`. Phaser anchors custom hit areas at the **top-left of the display bounds** (`pointWithinHitArea` adds `displayOriginX/Y`), independent of `setOrigin` — hence `Rectangle(0, 0, 96, 96)` for every protected control.
 
 ### Game IDs
 

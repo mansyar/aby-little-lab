@@ -93,9 +93,18 @@ src/
 | 5 | Musical Memory Simon | Working memory & auditory recall | ✅ Implemented |
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | ✅ Implemented |
 
-## Parental Settings
+## Parental Lock & Touch UX
 
-Hold the Hub **Settings** control for 3 seconds to open the parental settings modal. It provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
+Settings access (Hub **Settings**) and app exit (each game's **← Back**) are gated by a **hold-for-3-seconds** parental lock:
+
+- A circular progress ring (green fill, 48px radius) shows the hold filling from 12 o'clock.
+- Only **one hold runs at a time** — duplicate touches during a hold are ignored, and the action fires exactly once.
+- Early release, pointer leaving the control, or pointer cancel **never** triggers the action.
+- The ring is cleared on release, cancel, and scene shutdown — no leftover display objects.
+
+The protected controls (Hub Settings, all six game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
+
+The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
 
 ## PWA Release Readiness
 
