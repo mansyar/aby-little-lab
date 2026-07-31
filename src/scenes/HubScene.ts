@@ -45,6 +45,11 @@ export class HubScene extends Phaser.Scene {
       (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
     const startY =
       (this.cameras.main.height - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2;
+    const startAudio = (): void => {
+      const audio = AudioManager.getInstance();
+      audio.resume();
+      audio.playBGM();
+    };
 
     for (let i = 0; i < GAME_TILES.length; i++) {
       const col = i % GRID_COLS;
@@ -55,7 +60,7 @@ export class HubScene extends Phaser.Scene {
       const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
       tile.setInteractive();
       tile.on("pointerdown", () => {
-        AudioManager.getInstance().resume();
+        startAudio();
         this.scene.start(GAME_TILES[i].sceneKey);
       });
 
@@ -91,6 +96,7 @@ export class HubScene extends Phaser.Scene {
         // No action needed on failure.
       },
     });
+    settingsButton.on("pointerdown", startAudio);
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
