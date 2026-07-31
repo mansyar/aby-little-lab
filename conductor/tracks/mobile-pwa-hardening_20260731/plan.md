@@ -39,21 +39,21 @@
 
 ## Phase 3: Lightweight Success Feedback
 
-- [ ] Task: Design the bounded splash/ray effect [TDD-Green]
-  - [ ] Use a single low-cost visual effect rather than a persistent particle emitter.
-  - [ ] Give the effect an explicit short lifetime and guaranteed cleanup.
-  - [ ] Keep the visual style flat, gentle, and within the existing 300–800 ms motion guidance.
-- [ ] Task: Replace unbounded success particles in the game scenes
-  - [ ] Audit all existing particle burst call sites, including per-action success feedback.
-  - [ ] Replace completion/success particle bursts with the bounded splash/ray behavior.
-  - [ ] Ensure no emitter or graphics object remains after the effect finishes.
-  - [ ] Apply reduced-motion behavior without adding rapid or distracting animation.
-  - [ ] Preserve completion sound, sticker animation, and 3-second Hub return.
-- [ ] Task: Extend scene tests for all six games
-  - [ ] Verify completion still awards stickers only once.
-  - [ ] Verify completion still plays the appropriate audio cues.
-  - [ ] Verify completion still returns to Hub after the existing delay.
-  - [ ] Verify no persistent completion effect remains.
+- [x] Task: Design the bounded splash/ray effect [TDD-Green] [66ad559]
+  - [x] Use a single low-cost visual effect rather than a persistent particle emitter.
+  - [x] Give the effect an explicit short lifetime and guaranteed cleanup.
+  - [x] Keep the visual style flat, gentle, and within the existing 300–800 ms motion guidance.
+- [x] Task: Replace unbounded success particles in the game scenes [66ad559]
+  - [x] Audit all existing particle burst call sites, including per-action success feedback.
+  - [x] Replace completion/success particle bursts with the bounded splash/ray behavior.
+  - [x] Ensure no emitter or graphics object remains after the effect finishes.
+  - [x] Apply reduced-motion behavior without adding rapid or distracting animation.
+  - [x] Preserve completion sound, sticker animation, and 3-second Hub return.
+- [x] Task: Extend scene tests for all six games [66ad559]
+  - [x] Verify completion still awards stickers only once.
+  - [x] Verify completion still plays the appropriate audio cues.
+  - [x] Verify completion still returns to Hub after the existing delay.
+  - [x] Verify no persistent completion effect remains.
 - [ ] Task: Run the Phase 3 automated tests and coverage checks
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
