@@ -4,15 +4,6 @@ const SFX_NAMES = ["pop", "correct", "incorrect", "wake", "win", "sticker"] as c
 
 export type SfxName = (typeof SFX_NAMES)[number];
 
-const SFX_FILES: Record<SfxName, string> = {
-  pop: "/audio/pop.mp3",
-  correct: "/audio/correct.mp3",
-  incorrect: "/audio/incorrect.mp3",
-  wake: "/audio/wake.mp3",
-  win: "/audio/win.mp3",
-  sticker: "/audio/sticker.mp3",
-};
-
 const BGM_FILE = "/audio/bgm.mp3";
 const BGM_VOLUME = 0.3;
 
@@ -20,14 +11,13 @@ const FROG_NOTE_DURATION = 0.5;
 const FROG_NOTE_GAIN = 0.3;
 
 /**
- * Manages all audio for the application: BGM loop, SFX playback, and synthesized frog notes.
- * Uses HTML5 Audio for MP3 playback and Web Audio API for oscillator synthesis.
+ * Manages all audio for the application: BGM loop, synthesized SFX, and frog notes.
+ * Uses HTML5 Audio for BGM playback and Web Audio API for oscillator synthesis.
  */
 export class AudioManager {
   private static instance: AudioManager | null = null;
   private audioContext: AudioContext | null = null;
   private bgmAudio: HTMLAudioElement | null = null;
-  private sfxAudio: Record<SfxName, HTMLAudioElement> | null = null;
   private bgmEnabled = true;
   private sfxEnabled = true;
 
@@ -41,7 +31,7 @@ export class AudioManager {
 
   /**
    * Initializes the audio system: creates AudioContext, loads settings from storage,
-   * and creates audio elements for BGM and all SFX sounds.
+   * and creates the looping BGM audio element.
    */
   init(): void {
     this.audioContext = new AudioContext();
@@ -53,11 +43,6 @@ export class AudioManager {
     this.bgmAudio = new Audio(BGM_FILE);
     this.bgmAudio.loop = true;
     this.bgmAudio.volume = BGM_VOLUME;
-
-    this.sfxAudio = {} as Record<SfxName, HTMLAudioElement>;
-    for (const name of SFX_NAMES) {
-      this.sfxAudio[name] = new Audio(SFX_FILES[name]);
-    }
   }
 
   /**
@@ -90,15 +75,31 @@ export class AudioManager {
   }
 
   /**
-   * Plays a sound effect by name. Resets the audio to the beginning before playing.
+   * Plays a synthesized sound effect by name.
    * Does nothing if SFX is disabled or not initialized.
    * @param name - The name of the SFX to play (pop, correct, incorrect, wake, win, sticker).
    */
   playSFX(name: SfxName): void {
-    if (!this.sfxEnabled || !this.sfxAudio) return;
-    const audio = this.sfxAudio[name];
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
+    switch (name) {
+      case "pop":
+        this.playPop();
+        break;
+      case "correct":
+        this.playCorrect();
+        break;
+      case "incorrect":
+        this.playIncorrect();
+        break;
+      case "wake":
+        this.playWake();
+        break;
+      case "win":
+        this.playWin();
+        break;
+      case "sticker":
+        this.playSticker();
+        break;
+    }
   }
 
   /**
@@ -256,6 +257,5 @@ export class AudioManager {
       this.audioContext = null;
     }
     this.bgmAudio = null;
-    this.sfxAudio = null;
   }
 }

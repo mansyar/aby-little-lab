@@ -214,6 +214,16 @@ describe("AudioManager", () => {
     });
   });
 
+  describe("playSFX()", () => {
+    it("routes legacy SFX calls to synthesized audio", () => {
+      manager.init();
+
+      manager.playSFX("pop");
+
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("pauseBGM()", () => {
     it("pauses the BGM audio element", () => {
       manager.init();
