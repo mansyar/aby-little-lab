@@ -34,7 +34,7 @@
   - [x] Remove the six missing SFX file references and eager `Audio` creation.
   - [x] Keep Web Audio synthesis and SFX enable/disable behavior intact.
   - [x] Ensure BGM remains the only file-based audio asset.
-- [ ] Task: Run the Phase 2 automated tests and coverage checks
+- [x] Task: Run the Phase 2 automated tests and coverage checks (AudioManager: 49 passed, 89.62% coverage; Hub: 9 passed; build and 13 PWA checks passed)
 - [ ] Task: Phase 1–2 Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: Lightweight Success Feedback
