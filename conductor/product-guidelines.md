@@ -58,14 +58,14 @@
 ## 5. Interaction Patterns
 
 ### Touch & Drag
-- Touch targets: minimum 64×64px, ideal 96×96px.
+- Touch targets: minimum 64×64px. Protected controls (Back, Settings, Musical Memory Replay) expose 96×96px hit areas.
 - Collision bounds are inflated beyond visual size to reduce fine-motor frustration.
 - Drag interactions use generous drop zones — the snap radius is forgiving.
 - No multi-touch requirements. All interactions are single-finger.
 
 ### Parental Lock
 - Hold-for-3-seconds mechanism on a designated UI element (e.g., settings icon, back button).
-- Visual progress indicator (filling circle) shows the hold progress.
+- Visual progress indicator (filling circle) shows the hold progress; only one hold runs at a time, and the indicator is cleared on release, cancel, or scene shutdown.
 - Prevents accidental navigation, settings access, or app exit.
 
 ### Auto-Progression
