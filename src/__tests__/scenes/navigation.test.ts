@@ -361,10 +361,7 @@ function anyObjectOffCalled(scene: unknown): boolean {
 }
 
 /** Returns the first text game object whose label contains the given text. */
-function getTextObject(
-  scene: unknown,
-  labelPart: string,
-): Record<string, MockFn> | undefined {
+function getTextObject(scene: unknown, labelPart: string): Record<string, MockFn> | undefined {
   const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
   for (let i = 0; i < textMock.mock.calls.length; i++) {
     const text = textMock.mock.calls[i][2] as string;
@@ -3162,8 +3159,9 @@ describe("scene navigation flow", () => {
 
     /** Returns the ParentLock 3000ms hold callback scheduled on the scene. */
     function holdCallback(scene: unknown): () => void {
-      const call = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
-        .mock.calls.find((entry) => entry[0] === 3000);
+      const call = getMockFn(
+        (scene as { time: Record<string, unknown> }).time.delayedCall,
+      ).mock.calls.find((entry) => entry[0] === 3000);
       if (!call) throw new Error("ParentLock 3000ms hold not found");
       return call[1] as () => void;
     }
