@@ -1,0 +1,11 @@
+Checkpoint: Phase 1-3 Mobile PWA Shell, Audio, and Completion Feedback Hardening
+
+Automated verification: CI=true pnpm test — 11 test files and 333 tests passed.
+
+Additional verification: pnpm test:coverage passed with 97.35% statements, 88.61% branches, 93.87% functions, and 97.97% lines; pnpm run check passed; pnpm run build passed; node scripts/validate-pwa.js passed all 13 checks.
+
+Changed code is covered by AudioManager.test.ts, navigation.test.ts, production build validation, and the PWA validator. The implementation removes stale SFX MP3 loading, starts BGM on first Hub interaction, requests fullscreen with standalone fallback, and replaces five particle systems plus Musical Memory feedback with a bounded splash effect.
+
+Manual verification plan: install the HTTPS PWA on a phone; verify fullscreen/standalone behavior and document OS navigation bars; confirm first-interaction BGM, cross-scene playback, and toggle persistence; confirm BGM loads and removed SFX URLs are not requested; complete all six games and verify one short splash/ray cleans up; repeat representative flows with reduced motion; verify landscape, persistence, parental lock, offline launch, tablet behavior, and performance.
+
+User confirmation: user selected Confirm plan (Recommended). Manual device verification remains pending for human execution.
