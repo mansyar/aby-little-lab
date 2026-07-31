@@ -1,0 +1,5 @@
+Phase 4 Verification Report (cross-cutting-motion_20260801)
+
+Automated: pnpm vitest run — 15 files, 412 tests passed (incl. 4 new pressFeedback unit tests and 8 control press-feedback integration tests). pnpm run check clean. Hit-area tests (96x96) and ParentLock hold-to-confirm tests unchanged and passing.
+
+Manual verification (pending — to be performed by a human reviewer): run pnpm dev; press-and-hold each Back control, the Replay button, and Hub Settings — each should squish to 95% while held and spring back on release; confirm the 3s hold still navigates/opens the panel; enable OS reduced-motion and confirm no squish occurs.
