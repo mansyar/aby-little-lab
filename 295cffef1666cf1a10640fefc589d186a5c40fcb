@@ -1,0 +1,5 @@
+Change: Hub tiles navigate on pointerup (release) instead of pointerdown, so the press squish stays visible while holding and spring-back plays on release. pointerout/pointercancel before release cancels navigation (no-op; Phaser only fires pointerup over the object). Settings ParentLock untouched (still pointerdown hold).
+
+Why: User reported pressing-and-holding a tile instantly started the game, hiding the new press feedback. User chose navigate-on-release.
+
+Tests: 3 existing tests switched to triggerAllPointerups; 2 new tests (no navigate on press alone; no navigate on pointerout/pointercancel). 429 passing.
