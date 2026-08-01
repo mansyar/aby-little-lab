@@ -6,8 +6,8 @@ import { PwaToast, type ToastKind } from "../components/PwaToast";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
 import { isReducedMotion } from "../utils/motion";
-import { getPwaBridge } from "../utils/pwaBridge";
 import { attachPressFeedback } from "../utils/pressFeedback";
+import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { hasSticker } from "../utils/storage";
 

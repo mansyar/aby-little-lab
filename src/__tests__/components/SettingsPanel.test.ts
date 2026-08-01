@@ -1,4 +1,5 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
+import type { InstallTracker, InstallUiState } from "../../utils/pwaInstall";
 
 const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
@@ -15,6 +16,15 @@ vi.mock("../../audio/AudioManager", () => ({
     getInstance: () => mockAudio,
   },
 }));
+
+/** Creates a fake install tracker in the given state for SettingsPanel tests. */
+function createFakeInstallTracker(state: InstallUiState): InstallTracker {
+  return {
+    getState: vi.fn(() => state),
+    prompt: vi.fn().mockResolvedValue(true),
+    destroy: vi.fn(),
+  };
+}
 
 vi.mock("phaser", () => {
   class Rectangle {
@@ -83,6 +93,13 @@ function triggerPointerdown(object: MockGameObject): void {
     | undefined;
   if (!callback) throw new Error("Expected pointerdown handler");
   callback();
+}
+
+/** Finds the display object created by the first text call with the given label. */
+function findTextByLabel(scene: MockScene, label: string): MockGameObject | undefined {
+  const callIndex = scene.add.text.mock.calls.findIndex((call) => call[2] === label);
+  if (callIndex < 0) return undefined;
+  return scene.add.text.mock.results[callIndex]?.value as MockGameObject | undefined;
 }
 
 function createScene(): MockScene {
@@ -171,7 +188,15 @@ describe("SettingsPanel creation and display", () => {
 
     new SettingsPanel(scene as never);
 
-    const toggleObjects = scene.add.text.mock.results.slice(1).map((result) => result.value);
+    const toggleObjects = scene.add.text.mock.results
+      .map((result) => result.value as MockGameObject)
+      .filter(
+        (_object, index) =>
+          scene.add.text.mock.calls[index]?.[2] === "BGM: ON" ||
+          scene.add.text.mock.calls[index]?.[2] === "BGM: OFF" ||
+          scene.add.text.mock.calls[index]?.[2] === "SFX: ON" ||
+          scene.add.text.mock.calls[index]?.[2] === "SFX: OFF",
+      );
     expect(toggleObjects).toHaveLength(2);
     for (const toggle of toggleObjects) {
       expect(toggle.setInteractive).toHaveBeenCalledWith(
@@ -281,5 +306,79 @@ describe("SettingsPanel interaction", () => {
     panel.destroy();
 
     for (const object of objects) expect(object.destroy).toHaveBeenCalled();
+  });
+});
+
+describe("SettingsPanel install control", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("shows an Install App button when the tracker is installable", () => {
+    const scene = createScene();
+    const tracker = createFakeInstallTracker("installable");
+
+    new SettingsPanel(scene as never, tracker);
+
+    expect(scene.add.text).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.any(Number),
+      "Install App",
+      expect.objectContaining({ color: "#2b6cb0" }),
+    );
+  });
+
+  it("calls tracker.prompt() when Install App is tapped", async () => {
+    const scene = createScene();
+    const tracker = createFakeInstallTracker("installable");
+    new SettingsPanel(scene as never, tracker);
+
+    const installButton = findTextByLabel(scene, "Install App");
+    expect(installButton).toBeDefined();
+    triggerPointerdown(installButton as MockGameObject);
+
+    expect(tracker.prompt).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives the install button an inflated touch target of at least 64px", () => {
+    const scene = createScene();
+    const tracker = createFakeInstallTracker("installable");
+    new SettingsPanel(scene as never, tracker);
+
+    const installButton = findTextByLabel(scene, "Install App") as MockGameObject;
+    const config = installButton.setInteractive.mock.calls[0]?.[0] as {
+      hitArea: { height: number; width: number };
+    };
+    expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
+  });
+
+  it("shows a How to Install button on iOS and opens the instructions overlay on tap", () => {
+    const scene = createScene();
+    const tracker = createFakeInstallTracker("ios-howto");
+    new SettingsPanel(scene as never, tracker);
+
+    const howToButton = findTextByLabel(scene, "How to Install");
+    expect(howToButton).toBeDefined();
+    triggerPointerdown(howToButton as MockGameObject);
+
+    expect(scene.add.text).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.any(Number),
+      expect.stringContaining("Add to Home Screen"),
+      expect.anything(),
+    );
+  });
+
+  it("shows no install control when the tracker reports hidden", () => {
+    const scene = createScene();
+    const tracker = createFakeInstallTracker("hidden");
+
+    new SettingsPanel(scene as never, tracker);
+
+    const texts = scene.add.text.mock.calls.map((call) => call[2] as string);
+    expect(texts).not.toContain("Install App");
+    expect(texts).not.toContain("How to Install");
   });
 });

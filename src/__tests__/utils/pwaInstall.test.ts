@@ -8,7 +8,10 @@ import {
 type ListenerMap = Map<string, (event?: unknown) => void>;
 
 /** Builds fake browser wiring that records added/removed listeners. */
-function createFakeDeps(userAgent: string, standalone = false): {
+function createFakeDeps(
+  userAgent: string,
+  standalone = false,
+): {
   deps: InstallTrackerDeps;
   listeners: ListenerMap;
   promptEvent: {
@@ -107,12 +110,9 @@ describe("getInstallUiState", () => {
 });
 
 describe("detectIOS", () => {
-  it.each(["iPhone Safari", "iPad", "iPod touch"])(
-    "detects iOS user agents (%s)",
-    (userAgent) => {
-      expect(detectIOS(userAgent)).toBe(true);
-    },
-  );
+  it.each(["iPhone Safari", "iPad", "iPod touch"])("detects iOS user agents (%s)", (userAgent) => {
+    expect(detectIOS(userAgent)).toBe(true);
+  });
 
   it.each(["Android Chrome", "Mozilla/5.0 (Windows NT 10.0)", "Macintosh"])(
     "rejects non-iOS user agents (%s)",
@@ -184,7 +184,10 @@ describe("createInstallTracker", () => {
 
     tracker.destroy();
 
-    expect(deps.removeEventListener).toHaveBeenCalledWith("beforeinstallprompt", expect.any(Function));
+    expect(deps.removeEventListener).toHaveBeenCalledWith(
+      "beforeinstallprompt",
+      expect.any(Function),
+    );
     expect(deps.removeEventListener).toHaveBeenCalledWith("appinstalled", expect.any(Function));
     expect(listeners.size).toBe(0);
   });

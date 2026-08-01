@@ -1,6 +1,6 @@
 import "./styles/style.css";
-import Phaser from "phaser";
 import { registerSW } from "virtual:pwa-register";
+import Phaser from "phaser";
 import { AnimalTraceScene } from "./scenes/AnimalTraceScene";
 import { BigSmallScene } from "./scenes/BigSmallScene";
 import { BootScene } from "./scenes/BootScene";

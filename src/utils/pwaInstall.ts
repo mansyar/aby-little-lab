@@ -42,10 +42,7 @@ export interface InstallTrackerDeps {
   /** True when the app runs in standalone/installed mode. */
   isStandalone: () => boolean;
   addEventListener: (type: "beforeinstallprompt" | "appinstalled", listener: () => void) => void;
-  removeEventListener: (
-    type: "beforeinstallprompt" | "appinstalled",
-    listener: () => void,
-  ) => void;
+  removeEventListener: (type: "beforeinstallprompt" | "appinstalled", listener: () => void) => void;
 }
 
 export interface InstallTracker {
