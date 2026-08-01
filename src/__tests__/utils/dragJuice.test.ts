@@ -92,6 +92,19 @@ describe("attachDragLift", () => {
     expect(tween.duration).toBe(150);
   });
 
+  it("skips the restore tween on drag end when skipRestore returns true", () => {
+    const obj = createMockObject();
+    attachDragLift(obj as unknown as Phaser.GameObjects.Image, { skipRestore: () => true });
+
+    const dragendCall = obj.on.mock.calls.find((c) => c[0] === "dragend");
+    if (!dragendCall) {
+      throw new Error("Missing dragend listener");
+    }
+    (dragendCall[1] as () => void)();
+
+    expect(getTweenCalls(obj.scene as never)).toHaveLength(0);
+  });
+
   it("uses reduced-motion amplitudes and durations", () => {
     stubReducedMotion(true);
     const obj = createMockObject();

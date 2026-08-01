@@ -61,6 +61,16 @@ export interface DropZoneHighlightTarget {
   height: number;
 }
 
+/** Options for {@link attachDragLift}. */
+export interface DragLiftOptions {
+  /**
+   * When it returns true on drag end, the scale/angle restore tween is
+   * skipped — used when a drop reaction (e.g. shrink-into-box) owns the
+   * object's scale afterwards.
+   */
+  skipRestore?: () => boolean;
+}
+
 /**
  * Adds lift-and-tilt juice to a draggable object.
  *
@@ -68,7 +78,7 @@ export interface DropZoneHighlightTarget {
  * restored. Amplitudes and durations are reduced under reduced motion.
  * Only the visual state is touched — drag/position logic is left untouched.
  */
-export function attachDragLift(obj: Phaser.GameObjects.Image): void {
+export function attachDragLift(obj: Phaser.GameObjects.Image, options?: DragLiftOptions): void {
   const baseScaleX = obj.scaleX;
   const baseScaleY = obj.scaleY;
 
@@ -84,6 +94,9 @@ export function attachDragLift(obj: Phaser.GameObjects.Image): void {
   });
 
   obj.on("dragend", () => {
+    if (options?.skipRestore?.()) {
+      return;
+    }
     obj.scene.tweens.add({
       targets: obj,
       scaleX: baseScaleX,

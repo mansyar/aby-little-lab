@@ -2780,7 +2780,8 @@ describe("scene navigation flow", () => {
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const bounceTween = tweenCalls.find(
-        (c) => c[0]?.targets === object.obj && c[0]?.x === object.originX,
+        (c) =>
+          c[0]?.targets === object.obj && c[0]?.x === object.originX && c[0]?.y === object.originY,
       );
       expect(bounceTween).toBeUndefined();
     });
@@ -3869,7 +3870,7 @@ describe("scene navigation flow", () => {
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const bounceTween = tweenCalls.find(
-        (c) => c[0]?.targets === toy.obj && c[0]?.x === toy.originX,
+        (c) => c[0]?.targets === toy.obj && c[0]?.x === toy.originX && c[0]?.y === toy.originY,
       );
       expect(bounceTween).toBeUndefined();
     });
@@ -4023,6 +4024,149 @@ describe("scene navigation flow", () => {
       dragleaveCallback(null, null, slots[0].zone);
 
       expect(getMockFn(highlight.destroy)).toHaveBeenCalledTimes(1);
+    });
+
+    it("shrinks the toy into the box with a 150ms tween on a correct drop", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      const dropCallback = getMockFn(toy.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+        | ((pointer: unknown, target: unknown) => void)
+        | undefined;
+      expect(dropCallback).toBeDefined();
+      if (!dropCallback) return;
+      dropCallback(null, slot.zone);
+
+      const shrinkTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === toy.obj && call[0]?.scaleX === 0 && call[0]?.scaleY === 0,
+      );
+      expect(shrinkTween).toBeDefined();
+      expect(shrinkTween?.[0]?.duration).toBe(150);
+      expect(shrinkTween?.[0]?.ease).toBe("Sine.in");
+    });
+
+    it("does not restore the drag-lift scale for a toy that was sorted", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      (
+        getMockFn(toy.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+          | ((pointer: unknown, target: unknown) => void)
+          | undefined
+      )?.(null, slot.zone);
+
+      const dragendCallbacks = getMockFn(toy.obj.on)
+        .mock.calls.filter((c) => c[0] === "dragend")
+        .map((c) => c[1] as () => void);
+      dragendCallbacks.forEach((callback) => {
+        callback();
+      });
+
+      const restoreTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === toy.obj && call[0]?.scaleX === 1 && call[0]?.scaleY === 1,
+      );
+      expect(restoreTween).toBeUndefined();
+    });
+
+    it("wiggles the box lid and briefly scales the box up on a correct drop", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      const imageMock = getMockFn(scene.add.image);
+      const boxImages: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "toy_box") {
+          boxImages.push(imageMock.mock.results[i].value as Record<string, MockFn>);
+        }
+      }
+      const box = boxImages[slots.indexOf(slot)];
+      expect(box).toBeDefined();
+      if (!box) return;
+
+      (
+        getMockFn(toy.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+          | ((pointer: unknown, target: unknown) => void)
+          | undefined
+      )?.(null, slot.zone);
+
+      const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === box && call[0]?.angle === 3 && call[0]?.yoyo === true,
+      );
+      expect(wiggleTween).toBeDefined();
+      expect(wiggleTween?.[0]?.repeat).toBe(3);
+
+      const bumpTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === box && call[0]?.scaleX === 1.05 && call[0]?.yoyo === true,
+      );
+      expect(bumpTween).toBeDefined();
+    });
+
+    it("uses reduced-motion timings for the box reaction", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const slots = getBoxSlots(scene);
+      const toy = toys[0];
+      const slot = slots.find((s) => s.scaleCategory === toy.scaleCategory);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      const imageMock = getMockFn(scene.add.image);
+      const boxImages: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "toy_box") {
+          boxImages.push(imageMock.mock.results[i].value as Record<string, MockFn>);
+        }
+      }
+      const box = boxImages[slots.indexOf(slot)];
+      expect(box).toBeDefined();
+      if (!box) return;
+
+      (
+        getMockFn(toy.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+          | ((pointer: unknown, target: unknown) => void)
+          | undefined
+      )?.(null, slot.zone);
+
+      const shrinkTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === toy.obj && call[0]?.scaleX === 0,
+      );
+      expect(shrinkTween?.[0]?.duration).toBe(90);
+
+      const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === box && call[0]?.angle === 3,
+      );
+      expect(wiggleTween?.[0]?.duration).toBe(120);
+
+      const bumpTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === box && call[0]?.scaleX === 1.02,
+      );
+      expect(bumpTween).toBeDefined();
+      expect(bumpTween?.[0]?.duration).toBe(150);
     });
   });
 

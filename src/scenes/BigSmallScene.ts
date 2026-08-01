@@ -11,7 +11,7 @@ import {
 } from "../game/bigSmallLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
-import { motionDuration } from "../utils/motion";
+import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -46,6 +46,36 @@ const AUTO_RETURN_DELAY = 3000;
 /** Texture size for SVG assets (used to calculate base scale). */
 const TEXTURE_SIZE = 512;
 
+/** Duration of the shrink-into-box tween on a correct drop (ms). */
+const SHRINK_DURATION = 150;
+
+/** Duration of the shrink-into-box tween under reduced motion (ms). */
+const SHRINK_REDUCED_DURATION = 90;
+
+/** Box lid wiggle angle (degrees) on a correct drop. */
+const BOX_WIGGLE_ANGLE = 3;
+
+/** Duration of one box lid wiggle half-cycle (ms). */
+const BOX_WIGGLE_DURATION = 200;
+
+/** Duration of one box lid wiggle half-cycle under reduced motion (ms). */
+const BOX_WIGGLE_REDUCED_DURATION = 120;
+
+/** Number of wiggle half-cycles (yoyo repeat); even count ends upright. */
+const BOX_WIGGLE_REPEAT = 3;
+
+/** Brief box scale bump on a correct drop. */
+const BOX_BUMP_SCALE = 1.05;
+
+/** Box scale bump under reduced motion. */
+const BOX_BUMP_REDUCED_SCALE = 1.02;
+
+/** Duration of the box scale bump (ms). */
+const BOX_BUMP_DURATION = 250;
+
+/** Duration of the box scale bump under reduced motion (ms). */
+const BOX_BUMP_REDUCED_DURATION = 150;
+
 /** Tracks a draggable toy's state during the round. */
 interface ToyData {
   obj: Phaser.GameObjects.Image;
@@ -63,6 +93,7 @@ interface BoxSlotData {
   scaleCategory: ScaleCategory;
   x: number;
   y: number;
+  obj: Phaser.GameObjects.Image;
 }
 
 /**
@@ -147,12 +178,13 @@ export class BigSmallScene extends Phaser.Scene {
       const x = spacing * (i + 1);
       const box = this.round.boxes[i];
       const displaySize = BOX_BASE_SIZE * box.scale;
-      this.add.image(x, BOX_Y, "toy_box").setDisplaySize(displaySize, displaySize);
+      const boxObj = this.add.image(x, BOX_Y, "toy_box");
+      boxObj.setDisplaySize(displaySize, displaySize);
 
       const zone = this.add.zone(x, BOX_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
       zone.setInteractive({ dropZone: true });
 
-      this.boxSlots.push({ zone, scaleCategory: box.scaleCategory, x, y: BOX_Y });
+      this.boxSlots.push({ zone, scaleCategory: box.scaleCategory, x, y: BOX_Y, obj: boxObj });
     }
   }
 
@@ -193,7 +225,7 @@ export class BigSmallScene extends Phaser.Scene {
         this.handleDragEnd(data);
       });
 
-      attachDragLift(obj);
+      attachDragLift(obj, { skipRestore: () => data.sorted });
 
       this.toyData.push(data);
     }
@@ -208,6 +240,14 @@ export class BigSmallScene extends Phaser.Scene {
 
     if (isMatch(data.scaleCategory, slot.scaleCategory)) {
       snapToSlot(this, data.obj, slot.x, slot.y);
+      this.tweens.add({
+        targets: data.obj,
+        scaleX: 0,
+        scaleY: 0,
+        duration: motionDuration(SHRINK_DURATION, SHRINK_REDUCED_DURATION),
+        ease: "Sine.in",
+      });
+      this.reactBox(slot);
       data.obj.disableInteractive();
       data.sorted = true;
       this.sortedCount++;
@@ -218,6 +258,31 @@ export class BigSmallScene extends Phaser.Scene {
         this.handleComplete();
       }
     }
+  }
+
+  /** Adds the box drop reaction: lid wiggle and a brief scale bump. */
+  private reactBox(slot: BoxSlotData): void {
+    const box = slot.obj;
+    const baseScaleX = box.scaleX;
+    const baseScaleY = box.scaleY;
+
+    this.tweens.add({
+      targets: box,
+      angle: BOX_WIGGLE_ANGLE,
+      duration: motionDuration(BOX_WIGGLE_DURATION, BOX_WIGGLE_REDUCED_DURATION),
+      yoyo: true,
+      repeat: BOX_WIGGLE_REPEAT,
+      ease: "Sine.inOut",
+    });
+
+    this.tweens.add({
+      targets: box,
+      scaleX: baseScaleX * motionScale(BOX_BUMP_SCALE, BOX_BUMP_REDUCED_SCALE),
+      scaleY: baseScaleY * motionScale(BOX_BUMP_SCALE, BOX_BUMP_REDUCED_SCALE),
+      duration: motionDuration(BOX_BUMP_DURATION, BOX_BUMP_REDUCED_DURATION),
+      yoyo: true,
+      ease: "Sine.inOut",
+    });
   }
 
   /** Handles drag end. Bounces toy back to origin; plays incorrect SFX only if dropped on a zone. */
