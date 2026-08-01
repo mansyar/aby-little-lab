@@ -54,6 +54,7 @@
 - **Scenes:** 8 scenes (Boot, Preload, Hub, 6 game scenes)
 - **Input:** Touch-first, single-finger interactions
 - **Audio:** Web Audio API for synthesized tones and SFX, HTML5 Audio for the MP3 BGM only
+- **Motion:** All juice animations respect `prefers-reduced-motion` via `utils/motion.ts` (reduced amplitudes/durations; loops like breathing/drift disabled)
 
 ### TypeScript (`tsconfig.json`)
 
@@ -148,7 +149,10 @@ aby-little-lab/
     │   ├── animalTraceLogic.ts    # Pure game logic (path tracing, pair selection)
     │   └── popFreezeLogic.ts      # Pure game logic (spawn scheduling, pop counting)
     ├── utils/
-    │   └── storage.ts             # localStorage persistence layer
+    │   ├── storage.ts             # localStorage persistence layer
+    │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
+    │   ├── dragJuice.ts           # drag lift/tilt, drop-zone highlight, snap tween
+    │   └── completionEffect.ts    # Graphics-based splash/win effects (no particle emitters)
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/

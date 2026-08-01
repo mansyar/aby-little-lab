@@ -35,7 +35,8 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 
 - **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display as a sticker shelf (SVG thumbnails) under each Hub tile — earned stickers shimmer, unearned ones are dimmed, and a just-earned sticker gets a highlight on return.
 - **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed.
-- **Gentle Feedback:** Correct → pleasant chime + particle burst. Incorrect → gentle "try again" animation, no penalty.
+- **Gentle Feedback:** Correct → pleasant chime + Graphics-based splash (no particle emitters). Incorrect → gentle "try again" animation, no penalty.
+- **Per-Game Juice:** Each game layers playful animation reactions — drag pieces lift/tilt and snap home with a `Back.out` settle, boxes wiggle and bump, shadows stamp, animals hop, bubbles burst into droplets, frogs ripple — all reduced-motion-aware (gentler/shorter or disabled) and zero-penalty.
 
 ## 4. UX Principles
 
