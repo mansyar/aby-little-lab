@@ -41,7 +41,7 @@
 - [x] Task: Verify mascot + cross-cutting systems in the new scene (cheer/nod/win paths) [6f75fe5]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 4: Documentation & Release Sync
+## Phase 4: Documentation & Release Sync [checkpoint: 5d6134e]
 
 - [x] Task: Update `conductor/product.md` — 7-game table, cross-game system references [7cb0f80]
 - [x] Task: Update `docs/PRD.md` and `docs/TDD.md` — game 7 requirements, scene count, asset manifest [d0f894e]
