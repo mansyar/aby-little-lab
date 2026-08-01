@@ -51,4 +51,4 @@
 - [ ] **Task 4.3:** Final verification
   - [ ] `v1.0.0` tag → merged commit on `master`; checklist complete; docs committed
   - [ ] **Phase Verification & Checkpoint** + final `conductor(plan):` update recording all SHAs
-  - [ ] `[checkpoint: <pending>]`
+  - [ ] `[checkpoint: 0945d47]`
