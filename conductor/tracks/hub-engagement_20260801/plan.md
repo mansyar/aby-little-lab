@@ -37,7 +37,7 @@
 > **Deviation note (2026-08-01):** User feedback during Phase 3 manual verification — sticker thumbnails rendered at full 512px texture size and filled the screen. Root cause: `setDisplaySize(56, 56)` was overridden by entrance/burst tweens tweening `scaleX/scaleY` to absolute values (1 / 0.85 / 1.15 / 1.25). Fixed by tweening to shelf-relative scales (`STICKER_SCALE = 56 / 512`, matching the existing game-scene pattern) and giving `animateEntrance` an optional `targetScale`. Regression tests assert final scales with `toBeCloseTo`. Commit `c2c9103`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 4: Idle Attract
+## Phase 4: Idle Attract [checkpoint: 18b9bb4]
 
 - [x] Task: Idle timer, wiggle cue, and `playIdleCall` SFX [TDD] `e7c0b9b`
   - [x] **RED:** Add failing AudioManager tests for `playIdleCall()` (gentle two-tone synthesis, respects SFX toggle); add Hub tests: fires ~25s after last input, repeats every ~10s, resets on pointer input, clears on shutdown, reduced-motion disables wiggle.
