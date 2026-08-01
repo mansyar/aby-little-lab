@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import {
   appendNote,
@@ -121,6 +122,7 @@ const DOT_POP_REDUCED_DURATION = 150;
  */
 export class MusicalMemoryScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private mascot?: Mascot;
   private readonly audioManager: AudioManager;
   private readonly frogs: Phaser.GameObjects.Image[] = [];
   private readonly lilypads: Array<{ pad: Phaser.GameObjects.Image; y: number }> = [];
@@ -137,6 +139,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
 
   create(): void {
     sceneEntrance(this);
+    this.mascot = createCornerMascot(this);
 
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
@@ -169,6 +172,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+      this.mascot?.destroy();
+      this.mascot = undefined;
     });
   }
 
@@ -313,6 +318,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
     } else {
       this.inputIndex = result.nextIndex;
       this.audioManager.playIncorrect();
+      this.mascot?.nod();
       this.playSequence();
     }
   }
@@ -324,6 +330,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
    */
   private handleRoundSuccess(): void {
     this.audioManager.playCorrect();
+    this.mascot?.cheer();
 
     if (this.roundCount < this.progressDots.length) {
       const dot = this.progressDots[this.roundCount];
@@ -355,6 +362,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
   private handleComplete(): void {
     this.inputLocked = true;
     this.audioManager.playWin();
+    this.mascot?.cheer(true);
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
     const earnedNow = !hasSticker("musical-memory");

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
@@ -95,6 +96,7 @@ interface ShadowSlotData {
  */
 export class ShadowMatchScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private mascot?: Mascot;
   private round: { objects: ObjectType[]; shadows: ObjectType[] } = {
     objects: [],
     shadows: [],
@@ -111,6 +113,7 @@ export class ShadowMatchScene extends Phaser.Scene {
 
   create(): void {
     sceneEntrance(this);
+    this.mascot = createCornerMascot(this);
 
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
@@ -137,6 +140,8 @@ export class ShadowMatchScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+      this.mascot?.destroy();
+      this.mascot = undefined;
     });
   }
 
@@ -236,6 +241,7 @@ export class ShadowMatchScene extends Phaser.Scene {
       data.matched = true;
       this.matchedCount++;
       this.audioManager.playCorrect();
+      this.mascot?.cheer();
       createCompletionSplash(this, slot.x, slot.y);
 
       if (isWin(this.matchedCount)) {
@@ -279,6 +285,7 @@ export class ShadowMatchScene extends Phaser.Scene {
     if (!data.matched) {
       if (data.droppedOnZone) {
         this.audioManager.playIncorrect();
+        this.mascot?.nod();
       }
       this.tweens.add({
         targets: data.obj,
@@ -294,6 +301,7 @@ export class ShadowMatchScene extends Phaser.Scene {
   /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
   private handleComplete(): void {
     this.audioManager.playWin();
+    this.mascot?.cheer(true);
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import {
   type BubbleConfig,
@@ -92,6 +93,7 @@ interface BubbleData {
  */
 export class PopFreezeScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private mascot?: Mascot;
   private readonly audioManager: AudioManager;
   private roundState: RoundState = createRoundState();
   private bubbles: BubbleData[] = [];
@@ -104,6 +106,7 @@ export class PopFreezeScene extends Phaser.Scene {
 
   create(): void {
     sceneEntrance(this);
+    this.mascot = createCornerMascot(this);
 
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
@@ -130,6 +133,8 @@ export class PopFreezeScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+      this.mascot?.destroy();
+      this.mascot = undefined;
     });
   }
 
@@ -215,6 +220,7 @@ export class PopFreezeScene extends Phaser.Scene {
     this.bubbles.splice(index, 1);
 
     this.audioManager.playPop();
+    this.mascot?.cheer();
     createCompletionSplash(this, data.obj.x, data.obj.y);
     this.emitPopDroplets(data.obj.x, data.obj.y);
 
@@ -285,6 +291,7 @@ export class PopFreezeScene extends Phaser.Scene {
   /** Wakes a sleeping bubble: SFX, gentle wobble, no penalty. */
   private handleWake(data: BubbleData): void {
     this.audioManager.playWake();
+    this.mascot?.nod();
     this.roundState = registerWake(this.roundState);
 
     this.tweens.add({
@@ -313,6 +320,7 @@ export class PopFreezeScene extends Phaser.Scene {
   /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
   private handleComplete(): void {
     this.audioManager.playWin();
+    this.mascot?.cheer(true);
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 

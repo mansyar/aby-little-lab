@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Mascot } from "../../components/Mascot";
+import { createCornerMascot, Mascot } from "../../components/Mascot";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -51,6 +51,10 @@ interface MockScene {
   tweens: {
     add: MockFn;
   };
+  scale: {
+    width: number;
+    height: number;
+  };
 }
 
 interface SceneHarness {
@@ -84,6 +88,10 @@ function createMockScene(): SceneHarness {
     },
     tweens: {
       add: vi.fn(() => tween),
+    },
+    scale: {
+      width: 1024,
+      height: 768,
     },
   };
   return { scene, image, graphics, tween };
@@ -245,6 +253,28 @@ describe("Mascot", () => {
       expect(bounce.yoyo).toBe(true);
       expect(harness.scene.add.graphics).not.toHaveBeenCalled();
     });
+
+    it("cheers bigger for round wins (scale 1.2, longer bounce)", () => {
+      const mascot = createMascot(harness.scene, 100, 100, 0.25);
+      mascot.cheer(true);
+
+      const bounce = getTweenConfigs(harness.scene)[0];
+      expect(bounce.targets).toBe(harness.image);
+      expect(bounce.scale).toBe(0.25 * 1.2);
+      expect(bounce.duration).toBe(260);
+      expect(bounce.yoyo).toBe(true);
+    });
+
+    it("uses minimal motion for big cheers under reduced motion", () => {
+      stubMatchMedia(true);
+      const mascot = createMascot(harness.scene, 100, 100, 0.25);
+      mascot.cheer(true);
+
+      const bounce = getTweenConfigs(harness.scene)[0];
+      expect(bounce.scale).toBe(0.25);
+      expect(bounce.duration).toBe(160);
+      expect(harness.scene.add.graphics).not.toHaveBeenCalled();
+    });
   });
 
   describe("idleLoop()", () => {
@@ -277,6 +307,14 @@ describe("Mascot", () => {
       const mascot = createMascot(harness.scene);
       mascot.idleLoop();
       expect(harness.scene.tweens.add).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("createCornerMascot()", () => {
+    it("places the mascot in the bottom-right corner at the default scale", () => {
+      createCornerMascot(harness.scene as never);
+      expect(harness.scene.add.image).toHaveBeenCalledWith(934, 678, "mascot_idle");
+      expect(harness.image.setScale).toHaveBeenCalledWith(0.2);
     });
   });
 

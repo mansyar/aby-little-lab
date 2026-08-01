@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
@@ -61,6 +62,7 @@ interface SlotData {
  */
 export class ShapeSorterScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private mascot?: Mascot;
   private selectedShapes: ShapeType[] = [];
   private slotOrder: ShapeType[] = [];
   private shapeOrder: ShapeType[] = [];
@@ -75,6 +77,7 @@ export class ShapeSorterScene extends Phaser.Scene {
 
   create(): void {
     sceneEntrance(this);
+    this.mascot = createCornerMascot(this);
 
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
@@ -101,6 +104,8 @@ export class ShapeSorterScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+      this.mascot?.destroy();
+      this.mascot = undefined;
     });
   }
 
@@ -193,6 +198,7 @@ export class ShapeSorterScene extends Phaser.Scene {
       shape.obj.disableInteractive();
       shape.placed = true;
       this.audioManager.playCorrect();
+      this.mascot?.cheer();
       createCompletionSplash(this, slot.x, slot.y);
 
       if (this.shapes.every((s) => s.placed)) {
@@ -205,6 +211,7 @@ export class ShapeSorterScene extends Phaser.Scene {
   private handleDragEnd(shape: ShapeData): void {
     if (!shape.placed) {
       if (shape.droppedOnZone) this.audioManager.playIncorrect();
+      this.mascot?.nod();
       this.tweens.add({
         targets: shape.obj,
         x: shape.originX,
@@ -219,6 +226,7 @@ export class ShapeSorterScene extends Phaser.Scene {
   /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
   private handleComplete(): void {
     this.audioManager.playWin();
+    this.mascot?.cheer(true);
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 

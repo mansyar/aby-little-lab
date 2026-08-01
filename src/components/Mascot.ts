@@ -17,8 +17,12 @@ const NOD_REDUCED_DURATION = 90;
 const CHEER_SCALE = 1.1;
 const CHEER_DURATION = 180;
 const CHEER_REDUCED_DURATION = 120;
+const CHEER_BIG_SCALE = 1.2;
+const CHEER_BIG_DURATION = 260;
+const CHEER_BIG_REDUCED_DURATION = 160;
 
 const SPARKLE_RADIUS = 36;
+const SPARKLE_BIG_RADIUS = 48;
 const SPARKLE_COLOR = 0xffd166;
 const SPARKLE_ALPHA = 0.9;
 const SPARKLE_DURATION = 400;
@@ -32,6 +36,25 @@ const BLINK_REPEAT_DELAY = 3700;
 
 const MASCOT_DEPTH = -1;
 const SPARKLE_DEPTH = 0;
+
+/** Default mascot scale for scene placement. */
+export const MASCOT_SCALE = 0.2;
+
+/** Corner inset used so the mascot never blocks gameplay or controls. */
+export const MASCOT_CORNER_MARGIN = 90;
+
+/**
+ * Places a non-interactive mascot in the bottom-right corner of a scene,
+ * behind gameplay z-order. Used by the Hub and all six game scenes.
+ */
+export function createCornerMascot(scene: Phaser.Scene): Mascot {
+  return new Mascot(
+    scene,
+    scene.scale.width - MASCOT_CORNER_MARGIN,
+    scene.scale.height - MASCOT_CORNER_MARGIN,
+    MASCOT_SCALE,
+  );
+}
 
 /**
  * Professor Hoot — the friendly teacher mascot.
@@ -83,12 +106,15 @@ export class Mascot {
   }
 
   /** Bounce + sparkle ring while wearing the celebrate pose, then back to idle. */
-  cheer(): void {
+  cheer(big = false): void {
     this.image.setTexture(CELEBRATE_TEXTURE);
     this.addTween({
       targets: this.image,
-      scale: this.baseScale * motionScale(CHEER_SCALE, 1),
-      duration: motionDuration(CHEER_DURATION, CHEER_REDUCED_DURATION),
+      scale: this.baseScale * motionScale(big ? CHEER_BIG_SCALE : CHEER_SCALE, 1),
+      duration: motionDuration(
+        big ? CHEER_BIG_DURATION : CHEER_DURATION,
+        big ? CHEER_BIG_REDUCED_DURATION : CHEER_REDUCED_DURATION,
+      ),
       yoyo: true,
       repeat: 1,
       ease: "Sine.inOut",
@@ -97,7 +123,7 @@ export class Mascot {
       },
     });
     if (!this.reduced) {
-      this.spawnSparkle();
+      this.spawnSparkle(big ? SPARKLE_BIG_RADIUS : SPARKLE_RADIUS);
     }
   }
 
@@ -141,12 +167,12 @@ export class Mascot {
     this.tweens.push(tween);
   }
 
-  private spawnSparkle(): void {
+  private spawnSparkle(radius: number): void {
     const sparkle = this.scene.add.graphics();
     this.sparkle = sparkle;
     sparkle.setDepth(SPARKLE_DEPTH);
     sparkle.fillStyle(SPARKLE_COLOR, SPARKLE_ALPHA);
-    sparkle.fillCircle(this.image.x, this.image.y, SPARKLE_RADIUS);
+    sparkle.fillCircle(this.image.x, this.image.y, radius);
     this.addTween({
       targets: sparkle,
       scale: SPARKLE_GROW,

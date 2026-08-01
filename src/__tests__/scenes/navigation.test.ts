@@ -4984,6 +4984,513 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("game mascot companion", () => {
+    /** Asserts the mascot sits in the bottom-right corner, small, behind gameplay. */
+    function expectCornerMascot(scene: unknown): void {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      const callIndex = imageMock.mock.calls.findIndex((call) => call[2] === "mascot_idle");
+      if (callIndex < 0) throw new Error("Mascot image not created");
+      expect(imageMock.mock.calls[callIndex][0] as number).toBeGreaterThan(874);
+      expect(imageMock.mock.calls[callIndex][1] as number).toBeGreaterThan(618);
+      const mascot = imageMock.mock.results[callIndex].value as Record<string, MockFn>;
+      expect(getMockFn(mascot.setScale).mock.calls[0]?.[0] as number).toBeLessThan(0.5);
+      expect(getMockFn(mascot.setDepth).mock.calls[0]?.[0] as number).toBeLessThan(0);
+      expect(getMockFn(mascot.setInteractive)).not.toHaveBeenCalled();
+    }
+
+    /** Returns the mascot image game object created by a scene (throws if missing). */
+    function getMascot(scene: unknown): Record<string, MockFn> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "mascot_idle") {
+          return imageMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      throw new Error("Mascot image not created");
+    }
+
+    /** Returns all scale-yoyo tweens targeting the mascot (cheer bounces). */
+    function findMascotScaleTweens(
+      scene: unknown,
+      mascot: Record<string, MockFn>,
+    ): Array<Record<string, unknown>> {
+      return getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add)
+        .mock.calls.map((call) => call[0] as Record<string, unknown>)
+        .filter(
+          (config) =>
+            config.targets === mascot && typeof config.scale === "number" && config.yoyo === true,
+        );
+    }
+
+    /** Returns the angle tween targeting the mascot (nod), if any. */
+    function findMascotAngleTween(
+      scene: unknown,
+      mascot: Record<string, MockFn>,
+    ): Record<string, unknown> | undefined {
+      return getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add)
+        .mock.calls.map((call) => call[0] as Record<string, unknown>)
+        .find(
+          (config) =>
+            config.targets === mascot && typeof config.angle === "object" && config.angle !== null,
+        );
+    }
+
+    /** Returns draggable images (key prefix) with their type suffixes. */
+    function getDraggables(
+      scene: unknown,
+      keyPrefix: string,
+    ): Array<{ obj: Record<string, MockFn>; type: string }> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      const results: Array<{ obj: Record<string, MockFn>; type: string }> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith(keyPrefix) && !key.startsWith("sm_shadow_") && key !== "toy_box") {
+          results.push({
+            obj: imageMock.mock.results[i].value as Record<string, MockFn>,
+            type: key.replace(keyPrefix, ""),
+          });
+        }
+      }
+      return results;
+    }
+
+    /** Returns drop zone objects (slot prefix) with their type suffixes. */
+    function getDragSlots(
+      scene: unknown,
+      slotPrefix: string,
+    ): Array<{ zone: Record<string, MockFn>; type: string }> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      const zoneMock = getMockFn((scene as { add: Record<string, unknown> }).add.zone);
+      const slotTypes: string[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith(slotPrefix)) {
+          slotTypes.push(key.replace(slotPrefix, ""));
+        }
+      }
+      const results: Array<{ zone: Record<string, MockFn>; type: string }> = [];
+      for (let i = 0; i < zoneMock.mock.results.length && i < slotTypes.length; i++) {
+        results.push({
+          zone: zoneMock.mock.results[i].value as Record<string, MockFn>,
+          type: slotTypes[i],
+        });
+      }
+      return results;
+    }
+
+    /** Simulates dropping an object on a zone. */
+    function dropObject(obj: Record<string, MockFn>, zone: Record<string, MockFn>): void {
+      const dropCallback = getMockFn(obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as (
+        pointer: unknown,
+        target: unknown,
+      ) => void;
+      dropCallback(null, zone);
+    }
+
+    /** Simulates releasing a drag (dragend). */
+    function dragEnd(obj: Record<string, MockFn>): void {
+      const dragendCallback = getMockFn(obj.on).mock.calls.find((c) => c[0] === "dragend")?.[1] as
+        | (() => void)
+        | undefined;
+      dragendCallback?.();
+    }
+
+    /** Returns toys with their scale category (big >= 100px display size). */
+    function getToys(
+      scene: unknown,
+    ): Array<{ obj: Record<string, MockFn>; scaleCategory: "big" | "small" }> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      const results: Array<{ obj: Record<string, MockFn>; scaleCategory: "big" | "small" }> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("toy_") && key !== "toy_box") {
+          const obj = imageMock.mock.results[i].value as Record<string, MockFn>;
+          const size = getMockFn(obj.setDisplaySize).mock.calls[0]?.[0] as number;
+          results.push({ obj, scaleCategory: size >= 100 ? "big" : "small" });
+        }
+      }
+      return results;
+    }
+
+    /** Returns box drop zones with their scale category. */
+    function getBoxes(
+      scene: unknown,
+    ): Array<{ zone: Record<string, MockFn>; scaleCategory: "big" | "small" }> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      const zoneMock = getMockFn((scene as { add: Record<string, unknown> }).add.zone);
+      const boxSizes: number[] = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "toy_box") {
+          const obj = imageMock.mock.results[i].value as Record<string, MockFn>;
+          boxSizes.push(getMockFn(obj.setDisplaySize).mock.calls[0]?.[0] as number);
+        }
+      }
+      const results: Array<{ zone: Record<string, MockFn>; scaleCategory: "big" | "small" }> = [];
+      for (let j = 0; j < boxSizes.length && j < zoneMock.mock.results.length; j++) {
+        results.push({
+          zone: zoneMock.mock.results[j].value as Record<string, MockFn>,
+          scaleCategory: boxSizes[j] >= 100 ? "big" : "small",
+        });
+      }
+      return results;
+    }
+
+    const ANIMAL_X = 200;
+    const FOOD_X = 824;
+    const SPRITE_Y = 384;
+    const PATH_POINTS = 6;
+
+    /** Returns the input callback registered for an event name. */
+    function getInputCallback(scene: unknown, eventName: string): (...args: unknown[]) => void {
+      const inputOnMock = getMockFn((scene as { input: Record<string, unknown> }).input.on);
+      const call = inputOnMock.mock.calls.find((c) => c[0] === eventName);
+      if (!call || typeof call[1] !== "function") {
+        throw new Error(`Input callback for "${eventName}" not found`);
+      }
+      return call[1] as (...args: unknown[]) => void;
+    }
+
+    /** Simulates tracing a single AnimalTrace path. */
+    function completePath(scene: unknown): void {
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      for (let i = 1; i < pathPoints.length; i++) {
+        pointermove({ x: pathPoints[i].x, y: pathPoints[i].y });
+      }
+    }
+
+    /** Simulates tracing all 3 AnimalTrace paths with between-pair advances. */
+    function completeAllPaths(scene: unknown): void {
+      for (let pair = 0; pair < 3; pair++) {
+        completePath(scene);
+        if (pair < 2) {
+          const delayedCallMock = getMockFn(
+            (scene as { time: Record<string, unknown> }).time.delayedCall,
+          );
+          const advanceCalls = delayedCallMock.mock.calls.filter((call) => call[0] === 1000);
+          const latest = advanceCalls[advanceCalls.length - 1];
+          if (latest && typeof latest[1] === "function") {
+            (latest[1] as () => void)();
+          }
+        }
+      }
+    }
+
+    /** Returns PopFreeze bubble physics images. */
+    function getBubbles(scene: unknown): Array<Record<string, MockFn>> {
+      const physics = (scene as { physics: { add: Record<string, unknown> } }).physics.add;
+      return getMockFn(physics.image).mock.results.map((r) => r.value as Record<string, MockFn>);
+    }
+
+    /** Simulates a tap on a bubble. */
+    function tapBubble(bubble: Record<string, MockFn>): void {
+      const pointerdownCall = getMockFn(bubble.on).mock.calls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    /** Simulates popping 6 poppable bubbles to complete the PopFreeze round. */
+    function completePopRound(scene: unknown): void {
+      let bubbles = getBubbles(scene);
+      tapBubble(bubbles[1]);
+      tapBubble(bubbles[2]);
+      tapBubble(bubbles[3]);
+      tapBubble(bubbles[4]);
+      bubbles = getBubbles(scene);
+      tapBubble(bubbles[5]);
+      tapBubble(bubbles[6]);
+    }
+
+    /** Returns MusicalMemory frog images in index order. */
+    function getFrogs(scene: unknown): Array<Record<string, MockFn>> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      const frogKeys = ["frog_green", "frog_blue", "frog_red"];
+      const frogs: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        const frogIndex = frogKeys.indexOf(key);
+        if (frogIndex >= 0) {
+          frogs[frogIndex] = imageMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      return frogs;
+    }
+
+    /** Simulates a tap on a frog. */
+    function tapFrog(frogs: Array<Record<string, MockFn>>, frogIndex: number): void {
+      const frog = frogs[frogIndex];
+      if (!frog) throw new Error(`Frog ${frogIndex} not found`);
+      const pointerdownCall = getMockFn(frog.on).mock.calls.find((c) => c[0] === "pointerdown");
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+    }
+
+    /** Fires delayedCall callbacks added at or after startIndex, sorted by delay. */
+    function fireDelayedCallsFrom(scene: unknown, startIndex: number): void {
+      const delayedCallMock = getMockFn(
+        (scene as { time: Record<string, unknown> }).time.delayedCall,
+      );
+      const calls = delayedCallMock.mock.calls
+        .slice(startIndex)
+        .sort((a, b) => (a[0] as number) - (b[0] as number));
+      for (const call of calls) {
+        if (typeof call[1] === "function") {
+          (call[1] as () => void)();
+        }
+      }
+    }
+
+    /** Completes one MusicalMemory round (playback, then correct frog taps). */
+    function completeMemoryRound(
+      scene: unknown,
+      frogs: Array<Record<string, MockFn>>,
+      firedUpTo: number,
+      sequenceLength: number,
+    ): number {
+      fireDelayedCallsFrom(scene, firedUpTo);
+      const newFiredUpTo = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
+        .mock.calls.length;
+      for (let i = 0; i < sequenceLength; i++) {
+        tapFrog(frogs, 1);
+      }
+      return newFiredUpTo;
+    }
+
+    /** Completes all 5 MusicalMemory rounds (lengths 2→6). */
+    function completeAllMemoryRounds(scene: unknown, frogs: Array<Record<string, MockFn>>): void {
+      let firedUpTo = 0;
+      for (let len = 2; len <= 6; len++) {
+        firedUpTo = completeMemoryRound(scene, frogs, firedUpTo, len);
+      }
+    }
+
+    interface MascotGameCase {
+      name: string;
+      build: () => { create: () => void };
+      sim: {
+        seedRandom?: boolean;
+        correct: (scene: unknown) => void;
+        incorrect?: (scene: unknown) => void;
+        win: (scene: unknown) => void;
+      };
+    }
+
+    const GAME_MASCOT_CASES: MascotGameCase[] = [
+      {
+        name: "ShapeSorterScene",
+        build: () => new ShapeSorterScene(),
+        sim: {
+          correct: (scene) => {
+            const shapes = getDraggables(scene, "shape_");
+            const slots = getDragSlots(scene, "cutout_");
+            const shape = shapes[0];
+            const slot = slots.find((s) => s.type === shape.type);
+            if (!slot) throw new Error("No matching slot found");
+            dropObject(shape.obj, slot.zone);
+          },
+          incorrect: (scene) => {
+            const shapes = getDraggables(scene, "shape_");
+            const slots = getDragSlots(scene, "cutout_");
+            const shape = shapes[0];
+            const wrongSlot = slots.find((s) => s.type !== shape.type);
+            if (!wrongSlot) throw new Error("No mismatching slot found");
+            dropObject(shape.obj, wrongSlot.zone);
+            dragEnd(shape.obj);
+          },
+          win: (scene) => {
+            const shapes = getDraggables(scene, "shape_");
+            const slots = getDragSlots(scene, "cutout_");
+            for (const shape of shapes) {
+              const slot = slots.find((s) => s.type === shape.type);
+              if (!slot) throw new Error("No matching slot found");
+              dropObject(shape.obj, slot.zone);
+            }
+          },
+        },
+      },
+      {
+        name: "AnimalTraceScene",
+        build: () => new AnimalTraceScene(),
+        sim: {
+          seedRandom: true,
+          correct: (scene) => completePath(scene),
+          // No-fail game: there is no incorrect reaction path.
+          win: (scene) => completeAllPaths(scene),
+        },
+      },
+      {
+        name: "PopFreezeScene",
+        build: () => new PopFreezeScene(),
+        sim: {
+          seedRandom: true,
+          correct: (scene) => {
+            const bubbles = getBubbles(scene);
+            tapBubble(bubbles[1]);
+          },
+          incorrect: (scene) => {
+            const bubbles = getBubbles(scene);
+            tapBubble(bubbles[0]);
+          },
+          win: (scene) => completePopRound(scene),
+        },
+      },
+      {
+        name: "ShadowMatchScene",
+        build: () => new ShadowMatchScene(),
+        sim: {
+          correct: (scene) => {
+            const objects = getDraggables(scene, "sm_");
+            const slots = getDragSlots(scene, "sm_shadow_");
+            const object = objects[0];
+            const slot = slots.find((s) => s.type === object.type);
+            if (!slot) throw new Error("No matching shadow slot found");
+            dropObject(object.obj, slot.zone);
+          },
+          incorrect: (scene) => {
+            const objects = getDraggables(scene, "sm_");
+            const slots = getDragSlots(scene, "sm_shadow_");
+            const object = objects[0];
+            const wrongSlot = slots.find((s) => s.type !== object.type);
+            if (!wrongSlot) throw new Error("No mismatching shadow slot found");
+            dropObject(object.obj, wrongSlot.zone);
+            dragEnd(object.obj);
+          },
+          win: (scene) => {
+            const objects = getDraggables(scene, "sm_");
+            const slots = getDragSlots(scene, "sm_shadow_");
+            for (const object of objects) {
+              const slot = slots.find((s) => s.type === object.type);
+              if (!slot) throw new Error("No matching shadow slot found");
+              dropObject(object.obj, slot.zone);
+            }
+          },
+        },
+      },
+      {
+        name: "MusicalMemoryScene",
+        build: () => new MusicalMemoryScene(),
+        sim: {
+          seedRandom: true,
+          correct: (scene) => {
+            fireDelayedCallsFrom(scene, 0);
+            const frogs = getFrogs(scene);
+            tapFrog(frogs, 1);
+            tapFrog(frogs, 1);
+          },
+          incorrect: (scene) => {
+            fireDelayedCallsFrom(scene, 0);
+            const frogs = getFrogs(scene);
+            tapFrog(frogs, 0);
+          },
+          win: (scene) => {
+            const frogs = getFrogs(scene);
+            completeAllMemoryRounds(scene, frogs);
+          },
+        },
+      },
+      {
+        name: "BigSmallScene",
+        build: () => new BigSmallScene(),
+        sim: {
+          correct: (scene) => {
+            const toys = getToys(scene);
+            const boxes = getBoxes(scene);
+            const toy = toys[0];
+            const box = boxes.find((b) => b.scaleCategory === toy.scaleCategory);
+            if (!box) throw new Error("No matching box found");
+            dropObject(toy.obj, box.zone);
+          },
+          incorrect: (scene) => {
+            const toys = getToys(scene);
+            const boxes = getBoxes(scene);
+            const toy = toys[0];
+            const wrongBox = boxes.find((b) => b.scaleCategory !== toy.scaleCategory);
+            if (!wrongBox) throw new Error("No mismatching box found");
+            dropObject(toy.obj, wrongBox.zone);
+            dragEnd(toy.obj);
+          },
+          win: (scene) => {
+            const toys = getToys(scene);
+            const boxes = getBoxes(scene);
+            for (const toy of toys) {
+              const box = boxes.find((b) => b.scaleCategory === toy.scaleCategory);
+              if (!box) throw new Error("No matching box found");
+              dropObject(toy.obj, box.zone);
+            }
+          },
+        },
+      },
+    ];
+
+    for (const game of GAME_MASCOT_CASES) {
+      describe(`mascot reactions in ${game.name}`, () => {
+        beforeEach(() => {
+          if (game.sim.seedRandom) {
+            vi.spyOn(Math, "random").mockReturnValue(0.5);
+          }
+        });
+
+        afterEach(() => {
+          vi.restoreAllMocks();
+        });
+
+        it("places a small corner mascot behind gameplay", () => {
+          const scene = game.build();
+          scene.create();
+          expectCornerMascot(scene);
+        });
+
+        it("cheers on a correct action", () => {
+          const scene = game.build();
+          scene.create();
+          const mascot = getMascot(scene);
+          game.sim.correct(scene);
+
+          expect(getMockFn(mascot.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+          const bounces = findMascotScaleTweens(scene, mascot);
+          expect(bounces.some((b) => Math.abs((b.scale as number) - 0.22) < 0.001)).toBe(true);
+        });
+
+        if (game.sim.incorrect) {
+          it("nods on an incorrect action", () => {
+            const scene = game.build();
+            scene.create();
+            const mascot = getMascot(scene);
+            game.sim.incorrect?.(scene);
+
+            const nod = findMascotAngleTween(scene, mascot);
+            expect(nod).toBeDefined();
+            if (!nod) return;
+            expect((nod.angle as { to: number }).to).toBe(6);
+          });
+        }
+
+        it("does a big cheer when the round is won", () => {
+          const scene = game.build();
+          scene.create();
+          const mascot = getMascot(scene);
+          game.sim.win(scene);
+
+          expect(getMockFn(mascot.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+          const bounces = findMascotScaleTweens(scene, mascot);
+          expect(bounces.some((b) => Math.abs((b.scale as number) - 0.24) < 0.001)).toBe(true);
+        });
+
+        it("destroys the mascot on scene shutdown", () => {
+          const scene = game.build();
+          scene.create();
+          const mascot = getMascot(scene);
+          triggerShutdown(scene);
+          expect(getMockFn(mascot.destroy)).toHaveBeenCalled();
+        });
+      });
+    }
+  });
+
   describe("scene shutdown cleanup", () => {
     it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
       const scene = new SceneClass();

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import {
   type AnimalFoodPair,
@@ -114,6 +115,7 @@ interface PairState {
  */
 export class AnimalTraceScene extends Phaser.Scene {
   private parentLock?: ParentLock;
+  private mascot?: Mascot;
   private pairs: AnimalFoodPair[] = [];
   private currentPairIndex = 0;
   private completedPaths = 0;
@@ -129,6 +131,7 @@ export class AnimalTraceScene extends Phaser.Scene {
 
   create(): void {
     sceneEntrance(this);
+    this.mascot = createCornerMascot(this);
 
     const backButton = this.add.text(20, 20, "← Back", {
       fontSize: "24px",
@@ -172,6 +175,8 @@ export class AnimalTraceScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
+      this.mascot?.destroy();
+      this.mascot = undefined;
     });
   }
 
@@ -273,6 +278,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     if (!this.currentPair) return;
     this.currentPair.complete = true;
     this.audioManager.playCorrect();
+    this.mascot?.cheer();
     this.wiggleFood();
     createCompletionSplash(this, FOOD_X, SPRITE_Y);
     this.completedPaths++;
@@ -335,6 +341,7 @@ export class AnimalTraceScene extends Phaser.Scene {
   /** Handles round completion — win animation, sticker award, and auto-return. */
   private handleRoundComplete(): void {
     this.audioManager.playWin();
+    this.mascot?.cheer(true);
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
