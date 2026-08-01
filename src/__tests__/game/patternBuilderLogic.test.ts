@@ -157,4 +157,33 @@ describe("generatePlaythrough", () => {
     const second = generateRound();
     expect(first).not.toEqual(second);
   });
+
+  it("mixes pattern types and gap positions across many playthroughs", () => {
+    const patternTypes = new Set<PatternType>();
+    const gapIndexes = new Set<number>();
+    for (let i = 0; i < 30; i++) {
+      for (const round of generatePlaythrough()) {
+        patternTypes.add(round.patternType);
+        gapIndexes.add(round.gapIndex);
+      }
+    }
+    expect(patternTypes).toEqual(new Set(["ABAB", "AABB", "ABB"]));
+    expect(gapIndexes).toEqual(new Set([1, 2, 3]));
+  });
+
+  it("keeps difficulty fixed: every round has one 4-slot pattern and 3 choices", () => {
+    for (const round of generatePlaythrough()) {
+      expect(round.row).toHaveLength(4);
+      expect(round.choices).toHaveLength(3);
+    }
+  });
+
+  it("produces different playthroughs under different random sequences", () => {
+    vi.spyOn(Math, "random").mockReturnValueOnce(0.05).mockReturnValueOnce(0.35);
+    const first = generatePlaythrough(5);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValueOnce(0.95).mockReturnValueOnce(0.65);
+    const second = generatePlaythrough(5);
+    expect(first).not.toEqual(second);
+  });
 });
