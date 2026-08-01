@@ -1,0 +1,14 @@
+hub-engagement_20260801 — RELEASE VERIFICATION PASS
+
+All quality gates green:
+- pnpm test -- --run: 444 passed (15 files)
+- pnpm run test:coverage: pressFeedback/motion/sceneTransitions/storage/SettingsPanel/game logic 100%; HubScene 98.08% lines (uncovered = reduced-motion edge branches)
+- pnpm run check: clean (44 files)
+- pnpm run build: OK (dist/sw.js, workbox generated)
+
+Manual (2026-08-01, user confirmed) on touch-sized landscape viewport:
+- Entrance stagger (40ms wave), idle float bob, tile press squish + spring, navigate-on-release, sticker shelf (earned shimmer / unearned dimmed), just-earned bounce + sparkle burst, idle attract (~25s wiggle + chime, ~10s repeat, input reset), Settings ParentLock hold, reduced-motion (fade-only entrances, no bob/wiggle/sparkle, chime only, no squish, games still start).
+
+Scope audit: no gameplay-rule, asset (public/, src/assets/), or orientation changes introduced by this track.
+
+Acceptance criteria FR1-FR5 all met; Definition of Done satisfied.
