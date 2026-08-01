@@ -114,6 +114,7 @@ export class HubScene extends Phaser.Scene {
     const reducedMotion = isReducedMotion();
     this.entranceIndex = 0;
     this.idleAttractActive = false;
+    this.attractTargets = [];
 
     if (!reducedMotion) {
       this.createDecorations();

@@ -1177,6 +1177,25 @@ describe("scene navigation flow", () => {
       expect(getMockFn(idleTimer.remove)).toHaveBeenCalled();
     });
 
+    it("does not duplicate wiggle targets when the scene is re-created", () => {
+      const scene = new HubScene();
+      scene.create();
+      // Revisit — scene.start("Hub") runs create() again on the same instance.
+      scene.create();
+
+      const idleCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 25000,
+      );
+      expect(idleCall).toBeDefined();
+      const callback = idleCall?.[1] as () => void;
+      callback();
+
+      const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
+        (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
+      );
+      expect(wiggleTweens.length).toBe(6);
+    });
+
     it("under reduced motion: plays the idle call but does not wiggle tiles", () => {
       vi.stubGlobal("window", {
         matchMedia: vi.fn(() => ({ matches: true })),
