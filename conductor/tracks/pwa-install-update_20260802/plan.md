@@ -17,7 +17,7 @@
 - [x] Task: Write tests for SettingsPanel install row + iOS instructions overlay (button states, tap → `prompt()` called, overlay opens/closes) (f60811a)
 - [x] Task: Implement install row in `SettingsPanel.ts` (context-aware button per state; hide when installed) (f60811a)
 - [x] Task: Implement iOS "How to Install" overlay (Share → Add to Home Screen, app-styled, visual cues) (f60811a)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: da3964a]
 
 ## Phase 3 — Icon & Meta Polish
 
