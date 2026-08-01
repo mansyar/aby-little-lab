@@ -1,0 +1,12 @@
+Phase 1 Verification Report — Pattern Generation Logic
+
+Automated test command: pnpm exec vitest run --coverage (full suite)
+Result: ALL PASS — 579 tests; patternBuilderLogic.ts 100% stmts/branch/funcs/lines; overall suite above 80% threshold.
+
+Lint: pnpm run check — clean (50 files, after organizing imports in the two new files).
+
+Files covered by tests:
+- src/types/index.ts + src/utils/storage.ts -> src/__tests__/utils/storage.test.ts (12 tests, GAME_IDS contract includes pattern-builder)
+- src/game/patternBuilderLogic.ts -> src/__tests__/game/patternBuilderLogic.test.ts (16 tests: buildPatternRow, 200-sample round validity, gap positions 1-3, all pattern types, deterministic mocks, playthrough mixing/fixed difficulty)
+
+Manual verification: pending — to be performed by a human reviewer. Playground spot-check of round generation is possible in the browser console once the scene exists (Phase 2). User confirmed checkpoint.
