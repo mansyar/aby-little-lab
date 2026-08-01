@@ -22,13 +22,13 @@
   - [ ] **VERIFY:** Run component tests; no particle emitters used.
 - [x] Task: Phase Verification & Checkpoint (87350f5)
 
-## Phase 3: Hub Integration
+## Phase 3: Hub Integration [checkpoint: d686a78]
 
 - [x] Task: Place mascot on Hub; wave on load; cheer on `justEarned` [TDD] (19b4cef)
   - [ ] **RED:** Add failing tests: mascot created on Hub create; `wave()` called on load; `cheer()` when scene data contains `justEarned`; graceful behavior when flag absent; destroyed on shutdown.
   - [ ] **GREEN:** Wire mascot into `HubScene` (bottom corner, touch-inert, behind gameplay z-order).
   - [ ] **VERIFY:** Run Hub navigation tests.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (d686a78)
 
 ## Phase 4: Game Integration (all six scenes)
 
