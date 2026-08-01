@@ -32,7 +32,7 @@
 - [x] Task: Scene tests — navigation (hub ↔ game, completion → hub), tap correctness/incorrectness, sticker handoff [44802ee]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 3: Integration & Assets
+## Phase 3: Integration & Assets [checkpoint: 83c3a40]
 
 - [x] Task: Author `sticker_pattern_builder.svg` (512×512 viewBox, storybook style, matches sticker conventions) [8e8200d]
 - [x] Task: PreloadScene — load the new sticker (shapes already loaded) [73deb24]
