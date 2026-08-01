@@ -6,6 +6,7 @@ import {
   isMatch,
   isWin,
   type ObjectType,
+  ROUND_SIZE,
   shuffle,
   WIN_TARGET,
 } from "../../game/shadowMatchLogic";
@@ -30,16 +31,16 @@ describe("generateRound", () => {
     expect(ALL_OBJECTS).toContain("mushroom");
   });
 
-  it("selects exactly 6 of the 8 objects per round (2 excluded)", () => {
+  it(`selects exactly ${ROUND_SIZE} of the ${ALL_OBJECTS.length} objects per round (${ALL_OBJECTS.length - ROUND_SIZE} excluded)`, () => {
     const round = generateRound();
     const excluded = ALL_OBJECTS.filter((o) => !round.objects.includes(o));
-    expect(excluded).toHaveLength(2);
+    expect(excluded).toHaveLength(ALL_OBJECTS.length - ROUND_SIZE);
   });
 
-  it("selects exactly 6 of the 8 shadows per round (2 excluded)", () => {
+  it(`selects exactly ${ROUND_SIZE} of the ${ALL_OBJECTS.length} shadows per round (${ALL_OBJECTS.length - ROUND_SIZE} excluded)`, () => {
     const round = generateRound();
     const excluded = ALL_OBJECTS.filter((o) => !round.shadows.includes(o));
-    expect(excluded).toHaveLength(2);
+    expect(excluded).toHaveLength(ALL_OBJECTS.length - ROUND_SIZE);
   });
 
   it("generates 6 shadows with correct object IDs", () => {
