@@ -173,9 +173,12 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the full quality-gate suite bef
 
 One-time setup:
 
-1. In Coolify, open the application → **Webhooks** → copy the **Deploy Webhook** URL.
-2. In GitHub, go to **Settings → Secrets and variables → Actions** and add it as the repository secret **`COOLIFY_DEPLOY_WEBHOOK`**.
-3. (Recommended) Enable branch protection on `master` with "Require status checks" → `Quality Gates`, so only gate-verified code can be merged.
+1. In Coolify, open **Keys & Tokens → API Tokens**, create a token with the **`deploy`** permission, and copy it.
+2. In Coolify, open the application → **Webhooks** → copy the **Deploy Webhook** URL.
+3. In GitHub, go to **Settings → Secrets and variables → Actions** and add two repository secrets:
+   - **`COOLIFY_DEPLOY_WEBHOOK`** — the Deploy Webhook URL
+   - **`COOLIFY_TOKEN`** — the API token (with `deploy` permission)
+4. (Recommended) Enable branch protection on `master` with "Require status checks" → `Quality Gates`, so only gate-verified code can be merged.
 
 ## Documentation
 
