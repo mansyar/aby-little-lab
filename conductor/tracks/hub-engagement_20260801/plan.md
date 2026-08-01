@@ -26,7 +26,7 @@
 > **Deviation note (2026-08-01):** User feedback during Phase 2 manual verification — tiles started the game on `pointerdown`, so the press squish was never visible (the scene faded out instantly). Per user decision, tiles now navigate on `pointerup` (release on the tile), so holding shows the squish and spring-back; `pointerout`/`pointercancel` before release cancel navigation. Regression tests updated + new cancel tests. Commit `295cffe`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 3: Sticker Shelf
+## Phase 3: Sticker Shelf [checkpoint: 5160877]
 
 - [x] Task: Real sticker thumbnails with earned/unearned states and just-earned highlight [TDD] `e98bf59`
   - [x] **RED:** Add failing tests: one thumbnail per game using sticker textures, earned full alpha + sparkle loop, unearned dimmed, larger bounce + sparkle burst for the `justEarned` id passed via scene-start data.
