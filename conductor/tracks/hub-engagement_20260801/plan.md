@@ -33,6 +33,8 @@
   - [x] **GREEN:** Implement shelf in `HubScene`; update all six game scenes to pass `{ justEarned: gameId }` on auto-return when a sticker was earned that session.
   - [x] **REFACTOR:** Centralize shelf construction; keep unearned presentation consistent.
   - [x] **VERIFY:** Run sticker-award integration tests across all games; confirm shelf states render correctly.
+
+> **Deviation note (2026-08-01):** User feedback during Phase 3 manual verification — sticker thumbnails rendered at full 512px texture size and filled the screen. Root cause: `setDisplaySize(56, 56)` was overridden by entrance/burst tweens tweening `scaleX/scaleY` to absolute values (1 / 0.85 / 1.15 / 1.25). Fixed by tweening to shelf-relative scales (`STICKER_SCALE = 56 / 512`, matching the existing game-scene pattern) and giving `animateEntrance` an optional `targetScale`. Regression tests assert final scales with `toBeCloseTo`. Commit `c2c9103`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: Idle Attract
