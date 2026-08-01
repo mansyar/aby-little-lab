@@ -43,11 +43,11 @@
 
 ## Phase 4: Documentation & Release Sync
 
-- [ ] Task: Update `conductor/product.md` — 7-game table, cross-game system references
-- [ ] Task: Update `docs/PRD.md` and `docs/TDD.md` — game 7 requirements, scene count, asset manifest
-- [ ] Task: Update `conductor/tech-stack.md` — scenes 8→9, game IDs, structure tree
-- [ ] Task: Update `README.md` — 7th game row, sticker count, test count
-- [ ] Task: Update `docs/release-checklist.md` — "six" → "seven" references
+- [x] Task: Update `conductor/product.md` — 7-game table, cross-game system references [7cb0f80]
+- [x] Task: Update `docs/PRD.md` and `docs/TDD.md` — game 7 requirements, scene count, asset manifest [d0f894e]
+- [x] Task: Update `conductor/tech-stack.md` — scenes 8→9, game IDs, structure tree [7cb0f80]
+- [x] Task: Update `README.md` — 7th game row, sticker count, test count [d0f894e]
+- [x] Task: Update `docs/release-checklist.md` — "six" → "seven" references [d0f894e]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 5: Final Quality & Review
