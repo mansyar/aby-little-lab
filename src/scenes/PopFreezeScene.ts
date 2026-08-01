@@ -12,7 +12,7 @@ import {
   selectBubbleType,
 } from "../game/popFreezeLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
-import { motionDuration, motionScale } from "../utils/motion";
+import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -34,6 +34,39 @@ const WOBBLE_DURATION = 300;
 
 /** Duration of the wake wobble under reduced motion (ms). */
 const WOBBLE_REDUCED_DURATION = 180;
+
+/** Number of droplet circles emitted when a bubble pops. */
+const DROPLET_COUNT = 3;
+
+/** Color of the pop droplets. */
+const DROPLET_COLOR = 0x4fd1c5;
+
+/** Alpha of the pop droplets. */
+const DROPLET_ALPHA = 0.9;
+
+/** Radius of each pop droplet circle. */
+const DROPLET_RADIUS = 12;
+
+/** Distance from the pop point to each droplet center. */
+const DROPLET_OFFSET = 44;
+
+/** Duration of the droplet fade-out (ms). */
+const DROPLET_DURATION = 300;
+
+/** Reduced-motion droplet fade-out duration (ms). */
+const DROPLET_REDUCED_DURATION = 180;
+
+/** Scale the droplet burst grows to while fading. */
+const DROPLET_GROW_SCALE = 1.2;
+
+/** Reduced-motion droplet burst growth. */
+const DROPLET_GROW_REDUCED_SCALE = 1.05;
+
+/** Duration of one breathing phase (half of the ~1.5s loop). */
+const BREATHE_DURATION = 750;
+
+/** Breathing scale multiplier (1.0 → 1.03 per phase). */
+const BREATHE_SCALE = 1.03;
 
 /** Display size for the sticker unlock animation. */
 const STICKER_DISPLAY_SIZE = 256;
@@ -140,6 +173,8 @@ export class PopFreezeScene extends Phaser.Scene {
         fontSize: "20px",
         color: "#2D3748",
       });
+
+      this.breatheAnimal(animalImage);
     }
 
     const data: BubbleData = { obj: bubble, config, animalImage, zzzText };
@@ -181,6 +216,7 @@ export class PopFreezeScene extends Phaser.Scene {
 
     this.audioManager.playPop();
     createCompletionSplash(this, data.obj.x, data.obj.y);
+    this.emitPopDroplets(data.obj.x, data.obj.y);
 
     this.tweens.add({
       targets: data.obj,
@@ -202,6 +238,47 @@ export class PopFreezeScene extends Phaser.Scene {
     } else {
       this.respawnBubble();
     }
+  }
+
+  /** Emits droplet circles radiating from the pop point (self-cleaning). */
+  private emitPopDroplets(x: number, y: number): void {
+    const droplets = this.add.graphics();
+    for (let i = 0; i < DROPLET_COUNT; i++) {
+      const angle = (Math.PI * 2 * i) / DROPLET_COUNT + Math.PI / 2;
+      droplets.fillStyle(DROPLET_COLOR, DROPLET_ALPHA);
+      droplets.fillCircle(
+        x + Math.cos(angle) * DROPLET_OFFSET,
+        y + Math.sin(angle) * DROPLET_OFFSET,
+        DROPLET_RADIUS,
+      );
+    }
+
+    this.tweens.add({
+      targets: droplets,
+      alpha: 0,
+      scaleX: motionScale(DROPLET_GROW_SCALE, DROPLET_GROW_REDUCED_SCALE),
+      scaleY: motionScale(DROPLET_GROW_SCALE, DROPLET_GROW_REDUCED_SCALE),
+      duration: motionDuration(DROPLET_DURATION, DROPLET_REDUCED_DURATION),
+      ease: "Sine.out",
+      onComplete: () => {
+        droplets.destroy();
+      },
+    });
+  }
+
+  /** Starts a gentle breathing scale loop on a sleeping animal (skipped under reduced motion). */
+  private breatheAnimal(animalImage: Phaser.GameObjects.Image): void {
+    if (isReducedMotion()) return;
+    const base = animalImage.scaleX;
+    this.tweens.add({
+      targets: animalImage,
+      scaleX: base * BREATHE_SCALE,
+      scaleY: base * BREATHE_SCALE,
+      duration: BREATHE_DURATION,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.inOut",
+    });
   }
 
   /** Wakes a sleeping bubble: SFX, gentle wobble, no penalty. */

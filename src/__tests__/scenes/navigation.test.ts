@@ -2593,6 +2593,129 @@ describe("scene navigation flow", () => {
       expect(wakeTween[0].scaleY).toBeCloseTo((96 / 512) * 1.05, 5);
     });
 
+    it("emits self-cleaning droplet circles when a bubble pops", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const graphicsMock = getMockFn(scene.add.graphics);
+      const graphicsCountBefore = graphicsMock.mock.results.length;
+
+      const bubbles = getBubbles(scene);
+      tapBubble(bubbles[1]);
+
+      // Splash + droplets graphics both created
+      expect(graphicsMock.mock.results.length).toBeGreaterThan(graphicsCountBefore + 1);
+
+      // The droplets graphics draws 3 radiating circles
+      let droplets: Record<string, MockFn> | undefined;
+      for (let i = graphicsCountBefore; i < graphicsMock.mock.results.length; i++) {
+        const g = graphicsMock.mock.results[i].value as Record<string, MockFn>;
+        if (getMockFn(g.fillCircle).mock.calls.length >= 3) {
+          droplets = g;
+        }
+      }
+      expect(droplets).toBeDefined();
+      if (!droplets) return;
+      expect(getMockFn(droplets.fillCircle)).toHaveBeenCalledTimes(3);
+
+      // Fade tween fades the droplets out and destroys them on completion
+      const fadeTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === droplets && c[0]?.alpha === 0,
+      );
+      expect(fadeTween).toBeDefined();
+      if (!fadeTween) return;
+      expect(fadeTween[0].duration).toBe(300);
+      const onComplete = (fadeTween[0] as { onComplete?: () => void }).onComplete;
+      expect(onComplete).toEqual(expect.any(Function));
+      onComplete?.();
+      expect(getMockFn(droplets.destroy)).toHaveBeenCalledTimes(1);
+    });
+
+    it("uses reduced-motion droplet timing when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const graphicsMock = getMockFn(scene.add.graphics);
+      const graphicsCountBefore = graphicsMock.mock.results.length;
+
+      const bubbles = getBubbles(scene);
+      tapBubble(bubbles[1]);
+
+      let droplets: Record<string, MockFn> | undefined;
+      for (let i = graphicsCountBefore; i < graphicsMock.mock.results.length; i++) {
+        const g = graphicsMock.mock.results[i].value as Record<string, MockFn>;
+        if (getMockFn(g.fillCircle).mock.calls.length >= 3) {
+          droplets = g;
+        }
+      }
+      expect(droplets).toBeDefined();
+      if (!droplets) return;
+
+      const fadeTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === droplets && c[0]?.alpha === 0,
+      );
+      expect(fadeTween).toBeDefined();
+      if (!fadeTween) return;
+      expect(fadeTween[0].duration).toBe(180);
+      expect(fadeTween[0].scaleX).toBe(1.05);
+    });
+
+    it("starts a gentle breathing loop on sleeping animals", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const imageMock = getMockFn(scene.add.image);
+      let animalImage: Record<string, MockFn> | undefined;
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (String(imageMock.mock.calls[i][2]).startsWith("animal_")) {
+          animalImage = imageMock.mock.results[i].value as Record<string, MockFn>;
+          break;
+        }
+      }
+      expect(animalImage).toBeDefined();
+      if (!animalImage) return;
+
+      const breatheTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === animalImage && c[0]?.repeat === -1,
+      );
+      expect(breatheTween).toBeDefined();
+      if (!breatheTween) return;
+      expect(breatheTween[0].yoyo).toBe(true);
+      expect(breatheTween[0].scaleX).toBeCloseTo(1.03, 5);
+      expect(breatheTween[0].scaleY).toBeCloseTo(1.03, 5);
+      expect(breatheTween[0].duration).toBe(750);
+    });
+
+    it("skips the breathing loop under reduced motion", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      const imageMock = getMockFn(scene.add.image);
+      let animalImage: Record<string, MockFn> | undefined;
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (String(imageMock.mock.calls[i][2]).startsWith("animal_")) {
+          animalImage = imageMock.mock.results[i].value as Record<string, MockFn>;
+          break;
+        }
+      }
+      expect(animalImage).toBeDefined();
+      if (!animalImage) return;
+
+      expect(
+        getMockFn(scene.tweens.add).mock.calls.some(
+          (c) => c[0]?.targets === animalImage && c[0]?.repeat === -1,
+        ),
+      ).toBe(false);
+    });
+
     it("respawns a poppable bubble after pop to maintain concurrent count", () => {
       const scene = new PopFreezeScene();
       scene.create();
