@@ -1,0 +1,5 @@
+Task 'Wire scenes & preload (Phase 3, Replay Variety Expansion)'.
+
+PreloadScene: added 14 imports + 14 SHAPE_ASSETS entries (shape_heart/crescent + cutouts, animal_elephant/pig, food_peanut/apple, sm_airplane/mushroom + shadows, toy_rocket/drum) at 512x512 raster. 46 -> 60 preloaded textures.
+Game scenes: verified no code changes needed — all scenes build texture keys dynamically (shape_<type>, sm_<type>, sm_shadow_<type>, toy_<type>, animal_<animal>); new types render automatically once preloaded. Shadow Match layout stays 6-slot (round is 6 of 8).
+Tests: navigation.test.ts preload count 46 -> 60 + added toContain assertions for the 8 new shape/animal/food keys. Fixed Biome import ordering + formatting drift in 5 files. Full suite 563/563, Biome check clean.
