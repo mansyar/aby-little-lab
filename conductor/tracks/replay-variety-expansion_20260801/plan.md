@@ -48,7 +48,7 @@
 - [x] Task: PopFreezeScene — decoys can render the 2 new animals (preload already covered) [9cd626d]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 4: Documentation
+## Phase 4: Documentation [checkpoint: a12aba9]
 
 - [x] Task: Update `docs/PRD.md` — SVG requirements, item/color tables for all four games + Pop & Freeze decoy pool [a8b7d95]
 - [x] Task: Update `docs/TDD.md` — asset manifest additions [a8b7d95]
