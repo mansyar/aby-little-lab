@@ -2939,6 +2939,122 @@ describe("scene navigation flow", () => {
 
       expect(getMockFn(highlight.destroy)).toHaveBeenCalledTimes(1);
     });
+
+    it("stamps the shadow slot with a scale pulse and fill flash on a correct drop", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      const object = objects[0];
+      const slot = slots.find((s) => s.type === object.type);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      const imageMock = getMockFn(scene.add.image);
+      const shadowImages: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if ((imageMock.mock.calls[i][2] as string).startsWith("sm_shadow_")) {
+          shadowImages.push(imageMock.mock.results[i].value as Record<string, MockFn>);
+        }
+      }
+      const shadow = shadowImages[slots.indexOf(slot)];
+      expect(shadow).toBeDefined();
+      if (!shadow) return;
+
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
+      (
+        getMockFn(object.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+          | ((pointer: unknown, target: unknown) => void)
+          | undefined
+      )?.(null, slot.zone);
+
+      const stampTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === shadow && call[0]?.scaleX === 1.1 && call[0]?.yoyo === true,
+      );
+      expect(stampTween).toBeDefined();
+      expect(stampTween?.[0]?.duration).toBe(200);
+
+      const flash = getMockFn(scene.add.graphics).mock.results[initialGraphicsCount]?.value as
+        | Record<string, MockFn>
+        | undefined;
+      expect(flash).toBeDefined();
+      if (!flash) return;
+      expect(getMockFn(flash.fillStyle)).toHaveBeenCalled();
+      expect(getMockFn(flash.fillCircle)).toHaveBeenCalled();
+
+      const flashTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === flash && call[0]?.alpha === 0,
+      );
+      expect(flashTween).toBeDefined();
+      const onComplete = flashTween?.[0]?.onComplete as (() => void) | undefined;
+      expect(onComplete).toBeDefined();
+      onComplete?.();
+      expect(getMockFn(flash.destroy)).toHaveBeenCalledTimes(1);
+    });
+
+    it("dims the matched object after a correct drop", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      const object = objects[0];
+      const slot = slots.find((s) => s.type === object.type);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      (
+        getMockFn(object.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+          | ((pointer: unknown, target: unknown) => void)
+          | undefined
+      )?.(null, slot.zone);
+
+      const dimTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === object.obj && call[0]?.alpha === 0.5,
+      );
+      expect(dimTween).toBeDefined();
+      expect(dimTween?.[0]?.duration).toBe(200);
+    });
+
+    it("uses reduced-motion amplitudes for the shadow reveal", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const slots = getShadowSlots(scene);
+      const object = objects[0];
+      const slot = slots.find((s) => s.type === object.type);
+      expect(slot).toBeDefined();
+      if (!slot) return;
+
+      const imageMock = getMockFn(scene.add.image);
+      const shadowImages: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if ((imageMock.mock.calls[i][2] as string).startsWith("sm_shadow_")) {
+          shadowImages.push(imageMock.mock.results[i].value as Record<string, MockFn>);
+        }
+      }
+      const shadow = shadowImages[slots.indexOf(slot)];
+
+      (
+        getMockFn(object.obj.on).mock.calls.find((c) => c[0] === "drop")?.[1] as
+          | ((pointer: unknown, target: unknown) => void)
+          | undefined
+      )?.(null, slot.zone);
+
+      const stampTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === shadow && call[0]?.scaleX === 1.05,
+      );
+      expect(stampTween?.[0]?.duration).toBe(120);
+
+      const dimTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === object.obj && call[0]?.alpha === 0.5,
+      );
+      expect(dimTween?.[0]?.duration).toBe(120);
+    });
   });
 
   describe("ShadowMatchScene completion and sticker flow", () => {

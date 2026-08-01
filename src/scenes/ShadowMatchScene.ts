@@ -4,7 +4,7 @@ import { ParentLock } from "../components/ParentLock";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
-import { motionDuration } from "../utils/motion";
+import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -33,6 +33,39 @@ const STICKER_DISPLAY_SIZE = 256;
 /** Delay before auto-returning to Hub after round completion (ms). */
 const AUTO_RETURN_DELAY = 3000;
 
+/** Shadow stamp scale pulse on a correct drop. */
+const STAMP_SCALE = 1.1;
+
+/** Shadow stamp scale pulse under reduced motion. */
+const STAMP_REDUCED_SCALE = 1.05;
+
+/** Duration of the shadow stamp pulse (ms). */
+const STAMP_DURATION = 200;
+
+/** Duration of the shadow stamp pulse under reduced motion (ms). */
+const STAMP_REDUCED_DURATION = 120;
+
+/** Color of the brief fill flash behind the shadow on a match. */
+const FLASH_COLOR = 0xffffff;
+
+/** Alpha of the fill flash on a match. */
+const FLASH_ALPHA = 0.7;
+
+/** Duration of the fill flash fade-out (ms). */
+const FLASH_DURATION = 150;
+
+/** Duration of the fill flash fade-out under reduced motion (ms). */
+const FLASH_REDUCED_DURATION = 90;
+
+/** Target alpha for a matched object (dims to reveal the shadow beneath). */
+const DIM_ALPHA = 0.5;
+
+/** Duration of the matched-object dim tween (ms). */
+const DIM_DURATION = 200;
+
+/** Duration of the matched-object dim under reduced motion (ms). */
+const DIM_REDUCED_DURATION = 120;
+
 /** Tracks a draggable object's state during the round. */
 interface ObjectData {
   obj: Phaser.GameObjects.Image;
@@ -49,6 +82,7 @@ interface ShadowSlotData {
   type: ObjectType;
   x: number;
   y: number;
+  obj: Phaser.GameObjects.Image;
 }
 
 /**
@@ -132,14 +166,13 @@ export class ShadowMatchScene extends Phaser.Scene {
     for (let i = 0; i < this.round.shadows.length; i++) {
       const x = spacing * (i + 1);
       const shadowType = this.round.shadows[i];
-      this.add
-        .image(x, SHADOW_Y, `sm_shadow_${shadowType}`)
-        .setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE);
+      const shadowObj = this.add.image(x, SHADOW_Y, `sm_shadow_${shadowType}`);
+      shadowObj.setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE);
 
       const zone = this.add.zone(x, SHADOW_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
       zone.setInteractive({ dropZone: true });
 
-      this.shadowSlots.push({ zone, type: shadowType, x, y: SHADOW_Y });
+      this.shadowSlots.push({ zone, type: shadowType, x, y: SHADOW_Y, obj: shadowObj });
     }
   }
 
@@ -192,6 +225,13 @@ export class ShadowMatchScene extends Phaser.Scene {
 
     if (isMatch(data.type, slot.type)) {
       snapToSlot(this, data.obj, slot.x, slot.y);
+      this.stampShadow(slot);
+      this.tweens.add({
+        targets: data.obj,
+        alpha: DIM_ALPHA,
+        duration: motionDuration(DIM_DURATION, DIM_REDUCED_DURATION),
+        ease: "Sine.out",
+      });
       data.obj.disableInteractive();
       data.matched = true;
       this.matchedCount++;
@@ -202,6 +242,36 @@ export class ShadowMatchScene extends Phaser.Scene {
         this.handleComplete();
       }
     }
+  }
+
+  /** Stamps the shadow slot: a scale pulse plus a brief self-cleaning fill flash. */
+  private stampShadow(slot: ShadowSlotData): void {
+    const shadow = slot.obj;
+    const baseScaleX = shadow.scaleX;
+    const baseScaleY = shadow.scaleY;
+
+    this.tweens.add({
+      targets: shadow,
+      scaleX: baseScaleX * motionScale(STAMP_SCALE, STAMP_REDUCED_SCALE),
+      scaleY: baseScaleY * motionScale(STAMP_SCALE, STAMP_REDUCED_SCALE),
+      duration: motionDuration(STAMP_DURATION, STAMP_REDUCED_DURATION),
+      yoyo: true,
+      ease: "Sine.inOut",
+    });
+
+    const flash = this.add.graphics();
+    flash.setPosition(slot.x, slot.y);
+    flash.fillStyle(FLASH_COLOR, FLASH_ALPHA);
+    flash.fillCircle(0, 0, DROP_ZONE_SIZE / 2);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      duration: motionDuration(FLASH_DURATION, FLASH_REDUCED_DURATION),
+      ease: "Sine.out",
+      onComplete: () => {
+        flash.destroy();
+      },
+    });
   }
 
   /** Handles drag end. Bounces object back to origin; plays incorrect SFX only if dropped on a zone. */
