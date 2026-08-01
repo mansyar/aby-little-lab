@@ -13,13 +13,13 @@
   - [x] **VERIFY:** Run all three logic suites plus scene integration tests.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 2: BigSmall Box Reaction
+## Phase 2: BigSmall Box Reaction `[checkpoint: 3e3a7af]`
 
 - [x] Task: Toy drop-in shrink and box lid wiggle [TDD] `3e3a7af`
   - [x] **RED:** Add failing tests: 150ms shrink-drop tween on correct drop, box rotation wiggle ±3° yoyo, box scale bump 1.05, splash still created.
   - [x] **GREEN:** Implement in `BigSmallScene`.
   - [x] **VERIFY:** Run BigSmall logic + scene tests.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: ShadowMatch Reveal
 
