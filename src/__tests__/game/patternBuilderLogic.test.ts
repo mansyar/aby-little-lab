@@ -1,6 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-import { ALL_SHAPES, type ShapeType } from "../../game/shapeSorterLogic";
 import {
   buildPatternRow,
   generatePlaythrough,
@@ -9,6 +7,7 @@ import {
   type PatternRound,
   type PatternType,
 } from "../../game/patternBuilderLogic";
+import { ALL_SHAPES, type ShapeType } from "../../game/shapeSorterLogic";
 
 afterEach(() => {
   vi.restoreAllMocks();

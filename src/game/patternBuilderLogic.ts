@@ -1,4 +1,4 @@
-import { ALL_SHAPES, shuffle, type ShapeType } from "./shapeSorterLogic";
+import { ALL_SHAPES, type ShapeType, shuffle } from "./shapeSorterLogic";
 
 /** The three repeating pattern types used in the Pattern Builder game. */
 export type PatternType = "ABAB" | "AABB" | "ABB";
