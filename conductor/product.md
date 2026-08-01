@@ -24,7 +24,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 
 | # | Game | Milestone | Core Mechanic |
 |---|---|---|---|
-| 1 | Shape Sorter | Cognitive reasoning & categorization | Drag shapes (circle, square, triangle, star) to matching cut-out slots |
+| 1 | Shape Sorter | Cognitive reasoning & categorization | Drag shapes (circle, square, triangle, star, heart, crescent) to matching cut-out slots |
 | 2 | Animal Trace-and-Connect | Fine motor precision & pre-writing | Trace dotted path from animal to its food |
 | 3 | Pop & Freeze! | Reflexes & inhibitory control | Pop bubbles; avoid waking sleeping animal bubbles |
 | 4 | Shadow Match | Visual discrimination & spatial awareness | Match colored objects to dark silhouettes |
