@@ -68,7 +68,8 @@ aby-little-lab/
     │   └── BigSmallScene.ts        # Mini-Game 6
     ├── components/
     │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
-    │   └── SettingsPanel.ts        # Parental BGM/SFX modal overlay
+    │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay
+    │   └── Mascot.ts               # Professor Hoot mascot (wave/nod/cheer/idleLoop + createCornerMascot factory; tween-only, reduced-motion-aware)
     ├── audio/
     │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
     ├── game/
@@ -95,12 +96,12 @@ aby-little-lab/
     │       ├── toys/               # Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Box (Game 6)
     │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
     │       ├── stickers/           # Reward stickers (one per mini-game)
-    │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs
+    │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs + Mascot poses
     ├── styles/
     │   └── style.css               # Touch locks (-webkit-user-select, touch-action: none)
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
-        ├── components/             # ParentLock tests
+        ├── components/             # ParentLock, Mascot tests
         ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage, motion, sceneTransitions, completionEffect, dragJuice, and pressFeedback tests
@@ -397,6 +398,15 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `sticker_musical_memory.svg` | 512×512 | Game 5 | Unique themed sticker |
 | `sticker_big_small.svg` | 512×512 | Game 6 | Unique themed sticker |
 
+### Mascot Poses (`src/assets/svg/ui/`)
+
+| File | Dimensions | Used In | Notes |
+|---|---|---|---|
+| `mascot_idle.svg` | 512×512 | Hub + all six games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
+| `mascot_celebrate.svg` | 512×512 | Hub + all six games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
+
+> **Note:** The mascot is **tween-only** — no sprite sheets or particle emitters. Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
+
 ### Audio Assets (`public/audio/`)
 
 | File | Format | Used In | Notes |
@@ -422,11 +432,11 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | SVG — items | 10 (4 Game 2 food + 6 Game 4 objects) |
 | SVG — toys | 5 (4 toys + 1 box, Game 6) |
 | SVG — shadows | 6 (Game 4 silhouettes) |
-| SVG — UI | 13 |
+| SVG — UI | 15 (13 shared + 2 mascot poses) |
 | SVG — stickers | 6 |
 | Audio (MP3) | 1 |
 | PWA icons (PNG) | 1 |
-| **Total** | **57** |
+| **Total** | **59** |
 
 ---
 
@@ -508,6 +518,23 @@ The Per-Game Juice track (archived at `conductor/archive/per-game-juice_20260801
 
 Shape Sorter also adopted the silent-bounce rule already used by Shadow Match and Big vs. Small: the incorrect SFX only plays when the piece was dropped on a zone; dropping on empty floor bounces back silently.
 
+### Mascot companion (2026-08-01)
+
+The Mascot Companion track (archived at `conductor/archive/mascot-companion_20260801/`) added Professor Hoot — a static-pose, tween-only teacher owl. Two SVGs (`mascot_idle.svg`, `mascot_celebrate.svg`, 512×512, `?raw` imports rasterized in PreloadScene as `mascot_idle`/`mascot_celebrate`). No sprite sheets, no particle emitters, no new audio — reactions reuse `AudioManager`'s shared synthesized SFX.
+
+#### `Mascot.ts`
+
+- `new Mascot(scene, x, y, scale)` — creates the sprite at `MASCOT_DEPTH = -1` (behind gameplay z-order), touch-inert (no interactive listeners; scene input isn't affected).
+- `wave()` — gentle left-right angle tween (8°, 200ms `Sine.inOut`; reduced 4°, 120ms).
+- `nod()` — forward tilt (6°, 150ms; reduced 3°, 90ms).
+- `cheer(big = false)` — swap to the celebrate pose, wings-up scale pop (1.1×/1.2×, 180ms/260ms `Back.out`; reduced: pose swap only, no bounce) plus a self-cleaning Graphics sparkle ring (r 32/48) on `big`. An in-flight cheer is **retired** (its tween is removed) before a new one starts, so rapid correct taps never stack scale tweens; the blink loop pauses during a cheer and resumes on complete.
+- `idleLoop()` — Hub-only: 3px vertical bob (`Sine.inOut`, 2500ms yoyo, `repeat: -1`) + periodic squash-blink (`scaleY 0.92`, 150ms, `repeatDelay 3700ms`). No-op under reduced motion.
+- `destroy()` — removes the sprite, any active cheer/blink tweens, and the sparkle ring.
+- `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `wave()` after the scene entrance, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
+- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all six games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
+
+Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 37 integration tests in `src/__tests__/scenes/navigation.test.ts` (7 Hub + 29 game-scene + 1 mid-air edge case).
+
 ### Test coverage
 
-490 tests across 16 files; all motion, transitions, completion-effect, drag-juice, and press-feedback utilities at 100% coverage; scenes ≥ 93.69% lines (AnimalTraceScene 95.45%, PopFreezeScene 93.69%, remainder ≥ 98%); total project 97.61% statements / 98.53% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+555 tests across 17 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.69% lines (AnimalTraceScene 95.45%, PopFreezeScene 93.69%, remainder ≥ 98%); total project 97.73% statements / 97.39% functions / 86.73% branches / 98.65% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.

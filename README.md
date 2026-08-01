@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **490 tests across 16 files**, ~97.6% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **555 tests across 17 files**, ~97.7% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
 
 ## Code Quality
 
@@ -72,7 +72,7 @@ public/
 src/
 ├── main.ts                # Phaser game config & scene register
 ├── scenes/                # BootScene, PreloadScene, HubScene, 6 game scenes
-├── components/            # ParentLock and SettingsPanel parental modal
+├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
@@ -134,6 +134,15 @@ The Hub is the child's landing screen, built for gentle, playful engagement:
 - **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
 - **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned ones are dimmed (30% alpha, 85% scale) so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session.
 - **Idle attract** — after ~25s without input, tiles wiggle gently (4° rotation wobble) and a soft two-tone chime (`AudioManager.playIdleCall()`) plays, repeating every ~10s while idle. Any pointer input resets the timer; reduced motion plays the chime without the wiggle.
+
+## Professor Hoot Mascot
+
+Professor Hoot — a round owl in a tiny lab coat — is the app's friendly teacher mascot, rendered from two static SVG poses (`mascot_idle.svg`, `mascot_celebrate.svg`) with tween-only animation (no sprite sheets, no particle emitters, no new audio):
+
+- **Hub** — Hoot sits in the bottom-right corner (0.2× scale, touch-inert, behind gameplay z-order): waves on load, cheers when the visit follows a newly earned sticker (`justEarned` scene data), then settles into a slow bob with a periodic squash-blink idle loop.
+- **All six games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
+- **Implementation** — `src/components/Mascot.ts` (wave/cheer/nod/idleLoop + `createCornerMascot()` shared factory). Overlapping cheers retire the in-flight tween and pause the blink loop so rapid pops never stack tweens. Reactions reuse the existing SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`) — no new audio files.
+- **Reduced motion** — the idle loop is disabled and reactions become minimal (gentle wave/nod, pose swap without bounce or sparkle).
 
 ## PWA Release Readiness
 

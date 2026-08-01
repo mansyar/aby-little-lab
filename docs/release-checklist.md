@@ -63,6 +63,14 @@
 - [ ] Reduced-motion: all juice gentler/shorter (lift 1.05× no tilt, no hop arc, smaller droplets/ripples); breathing and drift loops disabled
 - [ ] No new assets or audio files were added by this track (Graphics-only effects)
 
+### 4e. Mascot Companion
+- [ ] Hub: Professor Hoot appears bottom-right (touch-inert, behind tiles), waves on load, cheers on a just-earned sticker, then settles into the bob/blink idle loop
+- [ ] Every game: Hoot cheers on a correct action (pose swap + bounce; big cheer on win with sparkle ring) and nods on an incorrect action (Animal Trace excepted — it has no incorrect path)
+- [ ] Rapid correct taps: Hoot does not stack or freeze mid-animation (in-flight cheer is retired; blink pauses during cheer and resumes after)
+- [ ] Hoot never blocks taps, stays behind gameplay z-order, and is gone after leaving a scene (no lingering sprites across scene changes)
+- [ ] Reduced-motion: no idle loop; reactions are pose swaps / gentle wave-nod without bounce or sparkle; correct/incorrect audio still plays
+- [ ] No new assets or audio files were added by this track (two static SVG poses, tween-only animation)
+
 ### 5. Documentation
 - [ ] README.md is up to date
 - [ ] Release notes prepared

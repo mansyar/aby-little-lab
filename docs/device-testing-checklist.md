@@ -83,6 +83,8 @@ pnpm exec serve dist -l 3000
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
 - [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) respond to taps near the visible label (96×96px hit areas — no precision tapping)
+- [ ] Professor Hoot mascot sits in the bottom-right corner: waves on load, cheers on a just-earned sticker, then bobs/blinks on the idle loop
+- [ ] Mascot is touch-inert — tapping where Hoot stands still reaches the tile/control underneath
 
 #### Game 1: Shape Sorter
 - [ ] Game loads correctly
@@ -182,6 +184,13 @@ pnpm exec serve dist -l 3000
 - [ ] No accidental triggers during gameplay
 - [ ] No ring artifacts remain after a cancelled hold or after leaving the scene
 
+#### Mascot Companion
+- [ ] Hoot appears in the same bottom-right corner on the Hub and in all six games (consistent placement, behind gameplay z-order)
+- [ ] Hoot cheers on correct actions in every game (pose swap + bounce; bigger cheer + sparkle ring on win)
+- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small)
+- [ ] Rapid correct taps: Hoot finishes gracefully — no stuck pose, no runaway bounce (in-flight cheer retired)
+- [ ] Hoot disappears when leaving a scene and never lingers into the next scene
+
 ### D. Offline Testing
 
 #### After Initial Online Load
@@ -240,6 +249,7 @@ pnpm exec serve dist -l 3000
 - [ ] Juice under reduced motion: ripple rings smaller/faster; lily pad drift is disabled
 - [ ] Press feedback (squish) on Back/Replay/Settings/Hub tiles is disabled
 - [ ] Hub entrances fade without scale; no bob, wiggle, sparkle, or burst; idle attract plays chime only
+- [ ] Mascot under reduced motion: no idle bob/blink; reactions are pose swaps / gentle wave-nod without bounce or sparkle
 - [ ] Game functionality remains intact — every game still reachable and completable
 - [ ] Verify no flashing or excessive movement
 
