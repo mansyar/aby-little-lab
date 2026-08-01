@@ -615,12 +615,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 44 shape, animal/food, toy, sticker, and bubble SVGs during preload", () => {
+    it("loads all 46 shape, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(44);
+      expect(svgCalls).toHaveLength(46);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -659,6 +659,17 @@ describe("scene navigation flow", () => {
       expect(keys).toContain("sticker_animal_trace");
       expect(keys).toContain("bubble");
       expect(keys).toContain("sticker_pop_freeze");
+    });
+
+    it("loads both mascot poses with correct keys", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const svgCalls = getMockFn(scene.load.svg).mock.calls;
+      const keys = svgCalls.map((call) => call[0] as string);
+
+      expect(keys).toContain("mascot_idle");
+      expect(keys).toContain("mascot_celebrate");
     });
 
     it("passes explicit width and height for high-res rasterization", () => {
