@@ -1,0 +1,16 @@
+Task: Scaffold PatternBuilderScene.ts — layout & rendering; Task: Round interaction; Task: Win flow.
+
+Summary: Created the Pattern Builder scene implementing the full round flow from spec FR2.1-FR2.5, FR3.3-FR3.4.
+
+Changes:
+- 4 pattern slots (3 filled shapes + outlined empty gap marker) at centerY-80, spacing 170px
+- 3 answer cards (128x128 white rounded rects with stroke, 96x96+ touch target) at centerY+170, spacing 200px
+- 5 progress dots at top; filled with pop tween on correct answers
+- Parental-lock Back button (96x96 hit area) with press feedback, exits via transitionToScene to Hub
+- Correct tap: shape tweens to gap slot with Back.out settle (200ms; 120ms reduced), chime, mascot cheer, progress dot fill, next round after 700ms
+- Incorrect tap: card+shape wiggle (4deg/2deg reduced, yoyo, Sine.inOut, no penalty), soft tone, mascot nod
+- Win after 5 rounds: shared createWinCelebration, big mascot cheer, sticker award on first completion only (sticker_pattern_builder texture), auto-return to Hub after 3s with justEarned data
+- All tweens use motionDuration/motionScale/isReducedMotion helpers
+- Registered PatternBuilderScene in main.ts Phaser config (scene count 9)
+
+Why: Implements the 7th game per spec FR2/FR3; reuses shared sceneTransitions, pressFeedback, ParentLock, createCornerMascot, completionEffect, and storage utilities per FR3.4.
