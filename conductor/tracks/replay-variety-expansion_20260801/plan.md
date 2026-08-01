@@ -54,7 +54,7 @@
 - [x] Task: Update `docs/TDD.md` — asset manifest additions [a8b7d95]
 - [x] Task: Update `conductor/tech-stack.md` — asset structure notes [a8b7d95]
 - [x] Task: Update `README.md` — game description/variety notes [a8b7d95]
-- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (refer to workflow.md) [a12aba9]
 
 ## Phase 5: Final Quality & Review
 
