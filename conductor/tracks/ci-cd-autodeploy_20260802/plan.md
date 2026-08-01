@@ -27,7 +27,7 @@
   - [x] YAML parses cleanly (parser validation) — *actionlint 1.7.12: 0 errors*
   - [x] PR event path runs gates only — no deploy step at this phase
   - [x] Gate commands reproduce the Phase 1 baseline locally
-- [ ] Task: Phase 2 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase 2 Verification & Checkpoint (Refer to workflow.md) [checkpoint: 4038333]
 
 ## Phase 3: Auto-Deploy Trigger via Coolify Webhook
 
