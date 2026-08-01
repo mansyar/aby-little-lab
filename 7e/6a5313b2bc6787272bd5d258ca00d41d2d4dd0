@@ -1,0 +1,11 @@
+Task: Author mascot SVGs and register in PreloadScene
+
+Created two 512x512 storybook-style SVG poses for Professor Hoot (round owl in a tiny lab coat):
+- src/assets/svg/ui/mascot_idle.svg - base pose: ear tufts, round body, hanging wings, cream lab coat with pocket and pen, big eyes, beak, feet.
+- src/assets/svg/ui/mascot_celebrate.svg - identical owl with wings raised, happy arc eyes, open beak.
+
+Registered both via ?raw imports in PreloadScene SHAPE_ASSETS as 'mascot_idle' and 'mascot_celebrate', rasterized at 512x512 like all other SVGs. SVGs are inlined into the JS bundle, which the PWA precache (generateSW) covers automatically (verified: precache 7 entries, bundle contains mascot_idle).
+
+Updated navigation.test.ts: preload count 44 -> 46 and added a dedicated mascot pose key test.
+
+Why: Provides the visual character for the Mascot Companion track - two static poses animated purely with tweens (no sprite sheets).
