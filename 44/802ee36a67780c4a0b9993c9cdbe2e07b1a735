@@ -1,0 +1,5 @@
+Task: Scene tests — navigation (hub <-> game, completion -> hub), tap correctness/incorrectness, sticker handoff.
+
+Summary: Extended src/__tests__/scenes/navigation.test.ts with 5 PatternBuilderScene tests: layout (5 dots, 3 slots, 1 gap, 3 cards, touch targets >=96px), correct tap flow (chime, Back.out snap 200ms, dot fill, 700ms next round), incorrect tap (wiggle angle 4deg yoyo, no advance), full 5-round win (playWin, first-time sticker award + playSticker, win celebration, 3s auto-return to Hub with justEarned), and no re-award when already earned. Added setStrokeStyle to the Phaser mock and registered PatternBuilderScene in GAME_SCENES.
+
+Why: Verifies FR2.2-FR2.5 and AC2/AC3 for the new scene; maintains the suite's integration-test convention (boot -> hub -> game -> sticker award -> hub).
