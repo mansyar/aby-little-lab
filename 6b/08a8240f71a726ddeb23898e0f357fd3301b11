@@ -1,0 +1,5 @@
+Task: Replay-variety playthrough generation (TDD).
+
+Summary: generatePlaythrough (5-round default, independently randomized rounds) landed with the Task 2 module commit. This task adds the mixing verification tests to src/__tests__/game/patternBuilderLogic.test.ts: across 30 playthroughs all three pattern types (ABAB/AABB/ABB) and all gap positions (1/2/3) occur; difficulty stays fixed (every round = 4-slot row + 3 choices); playthroughs under different mocked random sequences differ. 16/16 tests pass; 100% coverage (stmts/branch/funcs/lines).
+
+Files: src/__tests__/game/patternBuilderLogic.test.ts
