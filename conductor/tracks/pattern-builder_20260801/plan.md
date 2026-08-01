@@ -21,15 +21,15 @@
 
 ## Phase 2: PatternBuilderScene
 
-- [ ] Task: Scaffold `PatternBuilderScene.ts` — layout & rendering
-  - [ ] 4 slots (3 shapes + marked empty gap), 3 answer cards, progress dots, parental-lock Back button (96×96 hit area), mascot corner
-  - [ ] Reuse sceneTransitions, pressFeedback, ParentLock, `createCornerMascot`
-- [ ] Task: Round interaction [TDD where applicable]
-  - [ ] Correct tap: shape snaps into gap with `Back.out` settle + chime, progress dot fills, next round
-  - [ ] Incorrect tap: card wiggles gently + soft incorrect tone, no penalty, no progression loss
-  - [ ] Reduced-motion variants for all tweens
-- [ ] Task: Win flow — after 5 rounds: shared completion effect, sticker award (first completion only), auto-return to Hub with `justEarned` data
-- [ ] Task: Scene tests — navigation (hub ↔ game, completion → hub), tap correctness/incorrectness, sticker handoff
+- [x] Task: Scaffold `PatternBuilderScene.ts` — layout & rendering [da54447]
+  - [x] 4 slots (3 shapes + marked empty gap), 3 answer cards, progress dots, parental-lock Back button (96×96 hit area), mascot corner
+  - [x] Reuse sceneTransitions, pressFeedback, ParentLock, `createCornerMascot`
+- [x] Task: Round interaction [TDD where applicable] [da54447]
+  - [x] Correct tap: shape snaps into gap with `Back.out` settle + chime, progress dot fills, next round
+  - [x] Incorrect tap: card wiggles gently + soft incorrect tone, no penalty, no progression loss
+  - [x] Reduced-motion variants for all tweens
+- [x] Task: Win flow — after 5 rounds: shared completion effect, sticker award (first completion only), auto-return to Hub with `justEarned` data [da54447]
+- [x] Task: Scene tests — navigation (hub ↔ game, completion → hub), tap correctness/incorrectness, sticker handoff [44802ee]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 3: Integration & Assets
