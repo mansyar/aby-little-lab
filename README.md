@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **445 tests across 15 files**, ~99% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **490 tests across 16 files**, ~97.6% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
 
 ## Code Quality
 
@@ -76,7 +76,7 @@ src/
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
-├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback) + localStorage CRUD (storage.ts)
+├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts)
 ├── assets/                # SVG assets bundled into the game
 ├── styles/                # Global CSS
 └── __tests__/             # Unit tests (audio, components, game, scenes, utils)
@@ -114,6 +114,17 @@ All animation is driven by a shared motion system (`src/utils/`):
 - **Win celebration** — all six games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
 - **Press feedback** — Back, Replay, Settings, and Hub game tiles squish to 95% of their base scale while pressed; tiles spring back with a `Back.out` overshoot (150ms), other controls restore instantly. Hub tiles navigate **on release** so the squish stays visible while holding; dragging off the tile cancels the navigation.
 - **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, Hub entrances fade without scale (no bob, wiggle, sparkle, or burst), the idle attract plays chime-only, and gameplay stays fully functional under `prefers-reduced-motion`.
+
+## Per-Game Juice
+
+Every game layers scene-level animation juice on top of its core rules (no gameplay changes, no new assets, Graphics-only effects):
+
+- **Drag lift & snap (Shape Sorter, Shadow Match, Big vs. Small)** — dragged pieces lift to 1.1× scale with a 4° tilt (1.05×, no tilt under reduced motion) and restore on release; drop zones pulse a soft outline while dragging over them; correct drops animate to the slot center with a 200ms `Back.out` snap tween (120ms reduced) instead of instant placement; incorrect drops still bounce back. Implemented by the shared `src/utils/dragJuice.ts` helper (`attachDragLift`, `attachDropZoneHighlight`, `snapToSlot`).
+- **Big vs. Small box reaction** — on a correct drop the toy shrinks into the box (150ms), the box lid wiggles (±3°, 3 yoyo repeats), and the box briefly bumps to 1.05× alongside the splash.
+- **Shadow Match reveal** — the matching silhouette stamps with a 1.1× pulse + white fill flash (self-cleaning), and the matched object dims to 50% alpha.
+- **Animal Trace** — the animal hops between waypoints with a small arc tween (~120ms per hop; straight and faster under reduced motion), the food wiggles (±4°, 3 yoyo repeats) on path arrival, and progress dots pop 1 → 1.4 → 1 with `Back.out` instead of alpha-only.
+- **Pop & Freeze** — popping emits 3 teal droplet circles radiating from the pop point (self-cleaning fade), and sleeping-animal decoys breathe on a 1.0 → 1.03 yoyo loop (~1.5s; disabled under reduced motion).
+- **Musical Memory** — frog taps emit expanding ripple rings (self-cleaning fade), lily pads drift gently ±3px on a 3s loop (disabled under reduced motion), and progress dots pop on fill.
 
 ## Hub Experience
 

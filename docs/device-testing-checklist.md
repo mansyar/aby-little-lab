@@ -91,6 +91,10 @@ pnpm exec serve dist -l 3000
 - [ ] Matching detection works correctly
 - [ ] Success feedback (chime + bounded splash/ray) works and disappears promptly
 - [ ] Error feedback (gentle animation) works
+- [ ] Juice: shape lifts (1.1× + slight tilt) on drag start and restores on release
+- [ ] Juice: drop zone pulses a soft outline while dragging over it
+- [ ] Juice: correct drop snaps to slot with a settle tween (no teleport)
+- [ ] Juice: dropping on empty floor bounces back silently (no incorrect SFX)
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
@@ -100,6 +104,9 @@ pnpm exec serve dist -l 3000
 - [ ] Touch tracing works smoothly
 - [ ] Connection detection works
 - [ ] Success/error feedback works
+- [ ] Juice: animal hops with a small arc between waypoints
+- [ ] Juice: food wiggles when the path is completed
+- [ ] Juice: progress dot pops with a scale bounce on completion
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
@@ -110,6 +117,8 @@ pnpm exec serve dist -l 3000
 - [ ] Sleeping animal bubbles cannot be popped
 - [ ] Score tracking works
 - [ ] Success/error feedback works
+- [ ] Juice: popping emits small droplet circles that fade out and disappear
+- [ ] Juice: sleeping-animal decoys breathe gently (scale pulse loop)
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
@@ -119,6 +128,9 @@ pnpm exec serve dist -l 3000
 - [ ] Drag and drop works
 - [ ] Matching detection works
 - [ ] Success/error feedback works
+- [ ] Juice: object lifts (1.1× + slight tilt) on drag start and restores on release
+- [ ] Juice: shadow slot pulses while dragging over it
+- [ ] Juice: on correct drop the silhouette stamps (pulse + brief flash) and the object dims
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
@@ -130,6 +142,9 @@ pnpm exec serve dist -l 3000
 - [ ] Sequence length increases correctly
 - [ ] Audio plays correctly
 - [ ] Success/error feedback works
+- [ ] Juice: tapped frog emits an expanding ripple ring that fades out
+- [ ] Juice: lily pads drift gently up and down
+- [ ] Juice: progress dot pops with a scale bounce on round success
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
@@ -139,6 +154,9 @@ pnpm exec serve dist -l 3000
 - [ ] Drag and drop works
 - [ ] Size sorting works correctly
 - [ ] Success/error feedback works
+- [ ] Juice: toy lifts (1.1× + slight tilt) on drag start and restores on release
+- [ ] Juice: box drop zone pulses while dragging over it
+- [ ] Juice: on correct drop the toy shrinks into the box and the lid wiggles
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
@@ -216,6 +234,10 @@ pnpm exec serve dist -l 3000
 - [ ] Scene transitions are shortened (~40%) with no harsh flashes
 - [ ] Win celebration renders simplified (6 rays, no confetti) and completes normally
 - [ ] Gameplay tweens (bounce-backs, bubble pop, wake wobble, frog bounce, sticker pops) are shorter and gentler
+- [ ] Juice under reduced motion: drag lift is 1.05× with no tilt; snaps/bounces shorter; stamp/dim/box reactions gentler
+- [ ] Juice under reduced motion: animal hops straight and faster; food wiggle and dot pops gentler
+- [ ] Juice under reduced motion: pop droplets smaller/faster; sleeping-animal breathing loop is disabled
+- [ ] Juice under reduced motion: ripple rings smaller/faster; lily pad drift is disabled
 - [ ] Press feedback (squish) on Back/Replay/Settings/Hub tiles is disabled
 - [ ] Hub entrances fade without scale; no bob, wiggle, sparkle, or burst; idle attract plays chime only
 - [ ] Game functionality remains intact — every game still reachable and completable

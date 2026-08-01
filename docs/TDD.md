@@ -85,6 +85,7 @@ aby-little-lab/
     │   ├── motion.ts               # Reduced-motion helpers (isReducedMotion, motionDuration, motionScale)
     │   ├── sceneTransitions.ts     # Crossfade scene transitions (transitionToScene, sceneEntrance)
     │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
+    │   ├── dragJuice.ts            # Per-game drag juice (attachDragLift, attachDropZoneHighlight, snapToSlot)
     │   └── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
     ├── assets/
     │   └── svg/                    # AI-Generated SVG Assets
@@ -102,7 +103,7 @@ aby-little-lab/
         ├── components/             # ParentLock tests
         ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
-        └── utils/                  # Storage, motion, sceneTransitions, completionEffect, and pressFeedback tests
+        └── utils/                  # Storage, motion, sceneTransitions, completionEffect, dragJuice, and pressFeedback tests
 ```
 
 ---
@@ -484,6 +485,29 @@ The Hub implements the engagement track (FR1–FR5):
 | Frog bounce (Musical Memory) | 200 ms, 1.2× base | 120 ms, 1.05× base |
 | Sticker pops (all six games) | 300 ms | 180 ms |
 
+### Per-game juice (2026-08-01)
+
+The Per-Game Juice track (archived at `conductor/archive/per-game-juice_20260801/`) added scene-level juice to every game — zero gameplay-rule changes, zero new assets, Graphics-only effects (the app never uses `add.particles`). Every value below consults `motionDuration`/`motionScale` at call time.
+
+#### `dragJuice.ts`
+
+- `attachDragLift(obj, options?)` — on `dragstart` tweens the object to `base × motionScale(1.1, 1.05)` scale and `motionScale(4, 0)` degrees tilt (`Sine.out`, 120ms/80ms); on `dragend` restores base scale and 0° (150ms/100ms). `options.skipRestore` lets a scene suppress the restore (Big vs. Small, whose toy already shrank into the box).
+- `attachDropZoneHighlight(scene, zones)` — registers `dragenter`/`dragleave`/`dragend` on `scene.input`; on enter creates a Graphics outline (`lineStyle(6, 0x2b6cb0, 0.9)`, `strokeRect` around the zone) and pulses it on a `repeat: -1` `Sine.inOut` yoyo (400ms/240ms, scale `motionScale(1.06, 1.02)`), destroying it on leave/end.
+- `snapToSlot(scene, obj, x, y)` — 200ms/120ms `Back.out` tween that replaces the old instant `setPosition` on correct drops.
+
+#### Per-game reactions (normal → reduced)
+
+| Game | Reaction | Values |
+|---|---|---|
+| Shape Sorter / Shadow Match / Big vs. Small | Drag lift + tilt, zone highlight, snap tween | lift 1.1×/1.05× + 4°/0°, snap 200ms/120ms `Back.out` |
+| Big vs. Small | Toy shrink into box, lid wiggle, box bump | shrink 150ms/90ms `Sine.in`, wiggle ±3° 200ms/120ms ×3 yoyo, bump 1.05×/1.02× 250ms/150ms |
+| Shadow Match | Silhouette stamp + fill flash, matched-object dim | stamp 1.1×/1.05× 200ms/120ms yoyo, flash white fill 150ms/90ms alpha fade self-cleaning, dim → 0.5 alpha 200ms/120ms |
+| Animal Trace | Hop arc, food wiggle, progress-dot pop | hop 60+60ms/36+36ms `Sine.inOut`, apex −6px/0px; wiggle ±4°/±2° 200ms/120ms ×3 yoyo; dot pop 1.4×/1.2× 250ms/150ms `Back.out` yoyo |
+| Pop & Freeze | Pop droplets, sleeping breathing | 3 teal droplets grow 1.2×/1.05×, fade 300ms/180ms, self-cleaning; breathing 1.0→1.03 yoyo 750ms/phase `repeat: -1`, disabled under reduced motion, `tween.remove()` on shutdown |
+| Musical Memory | Ripple ring, lily pad drift, dot pop | ripple grow 1.6×/1.3×, fade 400ms/240ms, self-cleaning; drift ±3px y 1500ms yoyo loop, disabled under reduced motion; dot pop 1.4×/1.2× 250ms/150ms `Back.out` |
+
+Shape Sorter also adopted the silent-bounce rule already used by Shadow Match and Big vs. Small: the incorrect SFX only plays when the piece was dropped on a zone; dropping on empty floor bounces back silently.
+
 ### Test coverage
 
-445 tests across 15 files; all motion, transitions, completion-effect, and press-feedback utilities at 100% coverage; HubScene at 98% lines (remaining branches are reduced-motion edge paths). Coverage thresholds remain 80% for lines, functions, branches, and statements.
+490 tests across 16 files; all motion, transitions, completion-effect, drag-juice, and press-feedback utilities at 100% coverage; scenes ≥ 93.69% lines (AnimalTraceScene 95.45%, PopFreezeScene 93.69%, remainder ≥ 98%); total project 97.61% statements / 98.53% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.

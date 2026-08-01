@@ -51,6 +51,18 @@
 - [ ] After ~25s idle, tiles wiggle + soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Reduced-motion: idle chime plays without the wiggle
 
+### 4d. Per-Game Juice
+- [ ] Drag scenes (Shape Sorter, Shadow Match, Big vs. Small): pieces lift (1.1× + tilt) on drag start and restore on release
+- [ ] Drag scenes: drop zones pulse a soft outline while dragging over; correct drops settle with a 200ms snap tween (no teleport)
+- [ ] Incorrect drops bounce back with wobble; dropping on empty floor bounces silently (no incorrect SFX in any drag game)
+- [ ] Big vs. Small: toy shrinks into box (150ms), lid wiggles ±3°, box bumps 1.05× — splash still appears
+- [ ] Shadow Match: silhouette stamps (pulse + brief white flash, self-cleaning) and matched object dims to 50%
+- [ ] Animal Trace: animal hops with arc between waypoints; food wiggles on arrival; progress dots pop 1 → 1.4 → 1
+- [ ] Pop & Freeze: pop emits 3 small droplet circles that fade out (self-cleaning); sleeping decoys breathe on a gentle loop
+- [ ] Musical Memory: tapped frog emits an expanding ripple ring (self-cleaning); lily pads drift ±3px; progress dots pop on fill
+- [ ] Reduced-motion: all juice gentler/shorter (lift 1.05× no tilt, no hop arc, smaller droplets/ripples); breathing and drift loops disabled
+- [ ] No new assets or audio files were added by this track (Graphics-only effects)
+
 ### 5. Documentation
 - [ ] README.md is up to date
 - [ ] Release notes prepared
