@@ -14,9 +14,9 @@
 
 - [x] Task: Write failing tests for `src/utils/pwaInstall.ts` (pure logic: state detection — prompt-available vs iOS-Safari vs installed/standalone; label selection; hidden rules) (a9e20aa)
 - [x] Task: Implement `src/utils/pwaInstall.ts` (platform detection, `beforeinstallprompt` capture, `appinstalled` tracking) (a9e20aa)
-- [~] Task: Write tests for SettingsPanel install row + iOS instructions overlay (button states, tap → `prompt()` called, overlay opens/closes)
-- [ ] Task: Implement install row in `SettingsPanel.ts` (context-aware button per state; hide when installed)
-- [ ] Task: Implement iOS "How to Install" overlay (Share → Add to Home Screen, app-styled, visual cues)
+- [x] Task: Write tests for SettingsPanel install row + iOS instructions overlay (button states, tap → `prompt()` called, overlay opens/closes) (f60811a)
+- [x] Task: Implement install row in `SettingsPanel.ts` (context-aware button per state; hide when installed) (f60811a)
+- [x] Task: Implement iOS "How to Install" overlay (Share → Add to Home Screen, app-styled, visual cues) (f60811a)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Icon & Meta Polish
