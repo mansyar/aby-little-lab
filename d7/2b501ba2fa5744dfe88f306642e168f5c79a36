@@ -1,0 +1,5 @@
+Verification Report — Phase 1 (Replay Variety Expansion)
+
+Automated: CI=true pnpm test — 555/555 tests passed (17 files).
+Manual: user confirmed the 14 new SVGs (shapes, animals/food, shadow-match items, toys) look correct; no clipping, correct storybook style, silhouettes solid.
+Pending manual human review: visual inspection of assets in a real device/context.
