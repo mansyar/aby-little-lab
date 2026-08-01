@@ -52,6 +52,6 @@
 
 ## Phase 5: Final Quality & Review
 
-- [ ] Task: Full regression — `pnpm run check`, `CI=true pnpm test`, coverage >80%, `pnpm run build`, `node scripts/validate-pwa.js`
-- [ ] Task: Apply review suggestions (conductor-review pass)
+- [x] Task: Full regression — `pnpm run check`, `CI=true pnpm test`, coverage >80%, `pnpm run build`, `node scripts/validate-pwa.js` [257f27b, re-verified at checkpoint]
+- [x] Task: Apply review suggestions (conductor-review pass) — destroy snapped card shape + regression test [257f27b]
 - [ ] Task: Final Phase Verification & Checkpoint (refer to workflow.md)
