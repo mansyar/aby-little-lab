@@ -51,7 +51,7 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 8 scenes (Boot, Preload, Hub, 6 game scenes)
+- **Scenes:** 9 scenes (Boot, Preload, Hub, 7 game scenes)
 - **Input:** Touch-first, single-finger interactions
 - **Audio:** Web Audio API for synthesized tones and SFX, HTML5 Audio for the MP3 BGM only
 - **Motion:** All juice animations respect `prefers-reduced-motion` via `utils/motion.ts` (reduced amplitudes/durations; loops like breathing/drift disabled)
@@ -94,7 +94,7 @@ interface AppStorage {
 }
 ```
 
-**Game IDs:** `shape-sorter`, `animal-trace`, `pop-freeze`, `shadow-match`, `musical-memory`, `big-small`
+**Game IDs:** `shape-sorter`, `animal-trace`, `pop-freeze`, `shadow-match`, `musical-memory`, `big-small`, `pattern-builder`
 
 ## 6. Asset Pipeline
 
@@ -104,6 +104,8 @@ interface AppStorage {
 - Shadow assets derived by duplicating paths, unioning fills, setting color to `#2D3748`
 
 > **2026-08-01 — Design Update (Replay Variety Expansion):** Item pools expanded for replay variety — Shape Sorter 4→6 shapes (heart, crescent), Animal Trace 4→6 pairs (elephant→peanut, pig→apple), Shadow Match 6→8 objects (airplane, mushroom; rounds select a shared 6-item set for objects and shadows), Big vs. Small 4→6 toys (rocket, drum). Pop & Freeze decoy pool reuses all 6 Game 2 animals. Round sizes unchanged (3-of-6, 3-of-6, 6-of-8, 3-of-6).
+
+> **2026-08-02 — Design Update (Pattern Builder):** Game 7 (Pattern Builder) added — a tap-to-complete pattern game reusing the six Game 1 shape SVGs (only new asset: `sticker_pattern_builder.svg`). Hub grid is now 4×2 (7 tiles); `GameId` includes `pattern-builder`. Pure logic in `src/game/patternBuilderLogic.ts` (ABAB/AABB/ABB rows, gap at end or middle, 3 unique choices, 5-round playthroughs).
 
 ### Audio Assets
 - **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
@@ -141,28 +143,39 @@ aby-little-lab/
     │   ├── PopFreezeScene.ts
     │   ├── ShadowMatchScene.ts
     │   ├── MusicalMemoryScene.ts
-    │   └── BigSmallScene.ts
+    │   ├── BigSmallScene.ts
+    │   └── PatternBuilderScene.ts
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
-    │   └── ParentLock.ts
+    │   ├── ParentLock.ts
+    │   └── SettingsPanel.ts
     ├── audio/
     │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis
     ├── game/
     │   ├── shapeSorterLogic.ts    # Pure game logic (shuffle, match detection)
     │   ├── animalTraceLogic.ts    # Pure game logic (path tracing, pair selection)
-    │   └── popFreezeLogic.ts      # Pure game logic (spawn scheduling, pop counting)
+    │   ├── popFreezeLogic.ts      # Pure game logic (spawn scheduling, pop counting)
+    │   ├── shadowMatchLogic.ts    # Pure game logic (shuffle, round generation, match/win detection)
+    │   ├── musicalMemoryLogic.ts  # Pure game logic (sequence generation, round/win detection)
+    │   ├── bigSmallLogic.ts       # Pure game logic (dual-scale toys, size match detection)
+    │   └── patternBuilderLogic.ts # Pure game logic (pattern rows, gap placement, choices)
     ├── utils/
     │   ├── storage.ts             # localStorage persistence layer
     │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
     │   ├── dragJuice.ts           # drag lift/tilt, drop-zone highlight, snap tween
-    │   └── completionEffect.ts    # Graphics-based splash/win effects (no particle emitters)
+    │   ├── completionEffect.ts    # Graphics-based splash/win effects (no particle emitters)
+    │   ├── sceneTransitions.ts    # crossfade transitions (transitionToScene, sceneEntrance)
+    │   └── pressFeedback.ts       # press squish + optional spring-back (attachPressFeedback)
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
     │   └── svg/
     │       ├── shapes/
+    │       ├── cutouts/
     │       ├── animals/
     │       ├── items/
+    │       ├── toys/
+    │       ├── shadows/
     │       ├── stickers/
     │       └── ui/
     ├── styles/
@@ -172,15 +185,25 @@ aby-little-lab/
         │   └── AudioManager.test.ts
         ├── components/
         │   ├── Mascot.test.ts
-        │   └── ParentLock.test.ts
+        │   ├── ParentLock.test.ts
+        │   └── SettingsPanel.test.ts
         ├── game/
         │   ├── shapeSorterLogic.test.ts
         │   ├── animalTraceLogic.test.ts
-        │   └── popFreezeLogic.test.ts
+        │   ├── popFreezeLogic.test.ts
+        │   ├── shadowMatchLogic.test.ts
+        │   ├── musicalMemoryLogic.test.ts
+        │   ├── bigSmallLogic.test.ts
+        │   └── patternBuilderLogic.test.ts
         ├── scenes/
         │   └── navigation.test.ts
         └── utils/
-            └── storage.test.ts
+            ├── storage.test.ts
+            ├── motion.test.ts
+            ├── dragJuice.test.ts
+            ├── pressFeedback.test.ts
+            ├── sceneTransitions.test.ts
+            └── completionEffect.test.ts
 ```
 
 ## See Also
