@@ -291,6 +291,7 @@ export class PatternBuilderScene extends Phaser.Scene {
       duration: motionDuration(SNAP_DURATION, SNAP_REDUCED_DURATION),
       ease: "Back.out",
       onComplete: () => {
+        shape.destroy();
         this.cardRects[choiceIndex]?.destroy();
         this.cardRects.splice(choiceIndex, 1);
         this.cardShapes.splice(choiceIndex, 1);

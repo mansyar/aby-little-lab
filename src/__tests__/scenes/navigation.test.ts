@@ -4489,6 +4489,10 @@ describe("scene navigation flow", () => {
         (snapTween[0].onComplete as () => void)();
       }
 
+      // The flown card shape is destroyed after snapping into the gap,
+      // so no orphaned display objects linger between rounds.
+      expect(getMockFn(cardShape.destroy)).toHaveBeenCalled();
+
       expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
       expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
 
