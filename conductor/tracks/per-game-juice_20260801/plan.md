@@ -37,13 +37,13 @@
   - [x] **VERIFY:** Run AnimalTrace logic + scene tests.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 5: PopFreeze Reactions
+## Phase 5: PopFreeze Reactions `[checkpoint: 838c1de]`
 
 - [x] Task: Pop droplets and breathing decoys [TDD] `838c1de`
   - [x] **RED:** Add failing tests: 3–4 droplet circles from pop point (Graphics, self-cleaning, ~300ms); sleeping animals breathing loop 1.0 → 1.03 yoyo; reduced-motion disables breathing.
   - [x] **GREEN:** Implement in `PopFreezeScene`.
   - [x] **VERIFY:** Run PopFreeze logic + scene tests.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 6: MusicalMemory Reactions
 
