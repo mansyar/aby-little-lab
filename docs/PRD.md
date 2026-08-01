@@ -7,7 +7,7 @@
 | **Platform** | PWA / Mobile Web (Tablet & Phone) |
 | **Tech Stack** | Phaser 4, TypeScript 7, Vite 8, HTML5, Web Audio API |
 | **Visual Pipeline** | AI-Generated SVG (Vector Native) |
-| **Distribution** | Local Sideload / Private PWA |
+| **Distribution** | Local Sideload / Private PWA (hosted: Docker + Nginx on a private VPS via Coolify, auto-deployed from CI) |
 
 ---
 
@@ -313,6 +313,8 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), Gam
 - Production builds generate `manifest.webmanifest` and an auto-updating service worker through `vite-plugin-pwa`.
 - The service worker precaches the bundled game assets, PWA icon, and BGM for offline play.
 - Phone/tablet installation, offline, and update validation must use an HTTPS private static host or tunnel; `http://localhost` is reserved for same-device smoke tests.
+
+> **Release decision (2026-08-02):** The app is deployed as a Docker + Nginx image on a private VPS managed by **Coolify** (builds from the repo Dockerfile; Nginx serves the PWA with correct SW/cache headers). A **GitHub Actions** pipeline (`.github/workflows/ci.yml`) enforces the quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` — on every pull request and `master` push; on green, a **Deploy to Coolify** job fires the Bearer-authenticated Coolify Deploy Webhook, so production updates only after all gates pass. Setup requires two repository secrets (`COOLIFY_DEPLOY_WEBHOOK`, `COOLIFY_TOKEN` with `deploy` permission) and, recommended, branch protection on `master` requiring the "Quality Gates" check. Docs-only pushes skip CI via `paths-ignore`. Full pipeline details in [README.md](../README.md) "CI/CD" section and [TDD.md](./TDD.md) §9.
 
 ## See Also
 

@@ -17,7 +17,7 @@
 | Coverage | @vitest/coverage-v8 | 4.1.10 | V8-based code coverage provider |
 | Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
 | Linting/Formatting | Biome | 2.5.5 | All-in-one linter and formatter |
-| Package Manager | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
+| Package Manager | pnpm | 11.7.0 | Fast, disk-efficient, strict dependency resolution — pinned via corepack in the Dockerfile and `pnpm/action-setup` in CI (2026-08-02) |
 | Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) + Game 3 pop/wake sounds + idle-attract chime — no file overhead |
 
 ### Dependencies (`package.json`)
@@ -564,3 +564,25 @@ Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reacti
 ### Test coverage
 
 592 tests across 18 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; total project 97.97% statements / 97.63% functions / 87.26% branches / 98.8% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+
+---
+
+## 9. CI/CD Pipeline (2026-08-02)
+
+Production is hosted on a private VPS (Docker + Nginx) managed by **Coolify**, which builds the image from the repo's `Dockerfile`. Since 2026-08-02, deployments are gated by **GitHub Actions** (`.github/workflows/ci.yml`):
+
+### Workflow
+
+| Event | Runs | Result |
+|---|---|---|
+| `pull_request` (opened/synchronize/reopened) | **Quality Gates** job | Status check on the PR; deploy job structurally skipped |
+| `push` to `master` (post-merge) | **Quality Gates** job → **Deploy to Coolify** job | On green, fires the Coolify Deploy Webhook; Coolify rebuilds from the repo Dockerfile and redeploys |
+
+- **Quality Gates** (ubuntu-latest, Node 22, pnpm 11.7.0 via `pnpm/action-setup@v6`, pnpm store cached via `setup-node` `cache: pnpm`, `pnpm install --frozen-lockfile`), sequential steps: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`.
+- **Deploy to Coolify** (`needs: quality-gates`, `if: github.event_name == 'push' && github.ref == 'refs/heads/master'`): fails fast if secrets are missing, then `curl --fail-with-body` GET to the webhook URL with `Authorization: Bearer $COOLIFY_TOKEN`.
+- **Secrets** (repository settings → Secrets and variables → Actions):
+  - `COOLIFY_DEPLOY_WEBHOOK` — Deploy Webhook URL from Coolify → the app → Webhooks.
+  - `COOLIFY_TOKEN` — Coolify API token (Keys & Tokens → API Tokens) with the `deploy` permission. The webhook endpoint returns 401 without a Bearer token.
+- **Docs-only pushes** (`conductor/**`, `docs/**`, `README.md`, `**/*.md`) skip CI via `paths-ignore` — no needless production rebuilds.
+- **Branch protection:** recommended on `master`, requiring the "Quality Gates" status check before merge (set in GitHub → Settings → Branches; not enforced from the repo).
+- The workflow declares explicit `permissions: contents: read` and pins action majors (`checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6`) to avoid deprecated runner runtimes.

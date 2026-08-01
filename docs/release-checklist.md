@@ -10,6 +10,8 @@
 - [ ] Review all changes since last release
 - [ ] Ensure no security vulnerabilities introduced
 
+> **CI enforcement (2026-08-02):** The four gates above are automatically enforced by GitHub Actions (`.github/workflows/ci.yml`, job **Quality Gates**: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`) on every pull request and `master` push. Local runs remain valid as a fast pre-push sanity check; CI is the release gate. Enable branch protection on `master` requiring the "Quality Gates" check to make them merge-blocking.
+
 ### 2. PWA Validation
 - [ ] Run `node scripts/validate-pwa.js`
 - [ ] Verify manifest.webmanifest is valid
@@ -82,6 +84,8 @@
 
 ## Release Process
 
+> **Automated pipeline (2026-08-02):** Production deploys are automated. Merging a pull request to `master` runs the Quality Gates job in CI; on green, the **Deploy to Coolify** job fires the Coolify Deploy Webhook (Bearer-authenticated) and Coolify rebuilds the Docker image from the repo's `Dockerfile` and redeploys the app on the VPS. The manual steps below are preserved for local smoke-testing and for emergency releases where CI is unavailable.
+
 ### Step 1: Create Release Branch
 ```bash
 git checkout -b release/v1.0.0
@@ -89,7 +93,7 @@ git checkout -b release/v1.0.0
 
 ### Step 2: Final Testing
 ```bash
-# Run all quality checks
+# Run all quality checks (CI enforces these too — see Quality Gates job)
 pnpm run check
 CI=true pnpm test
 pnpm run build
@@ -113,35 +117,31 @@ git commit -m "chore(release): Bump version to 1.0.0"
 git tag -a v1.0.0 -m "Release v1.0.0: Initial PWA release"
 ```
 
-### Step 5: Build Production Bundle
+### Step 5: Local Smoke Test (Optional — CI does the real gate)
 ```bash
-pnpm run build
-```
-
-### Step 6: Deploy to Static Host
-```bash
-# Option 1: Same-device local smoke test (HTTP localhost only)
+# Same-device local smoke test (HTTP localhost only)
 pnpm exec serve dist -l 3000
 # For phone/tablet PWA, offline, and update testing, use an HTTPS private static host or tunnel.
-
-# Option 2: Deploy to static host
-# Upload dist/ directory to your static host
 ```
 
-### Step 7: Verify Deployment
-- [ ] App loads correctly
+### Step 6: Merge and Push (triggers auto-deploy)
+```bash
+git checkout master
+git merge release/v1.0.0
+git push origin master
+git push origin v1.0.0
+```
+
+Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy to Coolify** (Coolify rebuilds from the repo Dockerfile). The deployed site updates only after all gates pass.
+
+### Step 7: Verify Deployment (automated path)
+- [ ] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green
+- [ ] Coolify shows a new deployment for the pushed commit
+- [ ] App loads correctly on the live URL
 - [ ] PWA installation works
 - [ ] Offline functionality works
 - [ ] All games function properly
 - [ ] Audio works correctly
-
-### Step 8: Merge and Push
-```bash
-git checkout main
-git merge release/v1.0.0
-git push origin main
-git push origin v1.0.0
-```
 
 ## Post-Release Verification
 
@@ -172,19 +172,16 @@ git push origin v1.0.0
 # Revert to previous version
 git revert HEAD
 
-# Rebuild and redeploy
-pnpm run build
-# Deploy dist/ directory
+# Push — CI gates it, then the Coolify Deploy Webhook redeploys automatically
+git push origin master
 ```
 
 #### Tag-based Rollback
 ```bash
-# Checkout previous release
+# Checkout previous release, push a branch/PR, merge when green
 git checkout v0.9.0
-
-# Rebuild and redeploy
-pnpm run build
-# Deploy dist/ directory
+git push origin HEAD:master  # via PR if branch protection is enabled
+# CI gates + Coolify auto-deploy applies the old build
 ```
 
 ### Communication Plan
