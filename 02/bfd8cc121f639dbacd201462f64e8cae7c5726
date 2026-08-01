@@ -1,0 +1,1 @@
+Phase 1 checkpoint: branch renamed to release/v1.0.0; all gates green (biome 51 files, 592 tests, build, PWA validate 13/13). Scope vs master d7ff3c3: conductor track init + registry only, no code changes.
