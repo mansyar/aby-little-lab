@@ -1,0 +1,14 @@
+Phase 2 Verification Report: Mascot Component
+
+Automated checks (all green):
+- CI=true pnpm test -- --run: 513/513 tests passed (17 files), including new 22-test Mascot component suite.
+- pnpm run check: biome lint + format clean (one import-order fix applied in PreloadScene).
+- pnpm run lint: clean.
+
+Files: src/components/Mascot.ts (new, tween-only, type-only phaser import), src/__tests__/components/Mascot.test.ts (new), PreloadScene.ts (import order).
+
+Coverage: Mascot.ts fully covered by Mascot.test.ts (constructor, wave, nod, cheer incl. reduced-motion, idleLoop incl. reduced-motion, destroy incl. idempotency).
+
+Manual verification: pnpm dev unaffected (component not yet wired to any scene; visual verification deferred to Phases 3-4).
+
+Risk/notes: No particle emitters; sparkle ring is self-cleaning Graphics. Reduced-motion: idleLoop disabled, cheer collapses to pose swap only, wave/nod amplitudes halved.
