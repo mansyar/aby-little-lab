@@ -449,6 +449,28 @@ describe("AudioManager", () => {
     });
   });
 
+  describe("playIdleCall()", () => {
+    it("creates two oscillators for a gentle two-tone call", () => {
+      manager.init();
+      manager.playIdleCall();
+      expect(mockAudioContext.createOscillator).toHaveBeenCalledTimes(2);
+    });
+
+    it("starts and stops oscillators", () => {
+      manager.init();
+      manager.playIdleCall();
+      expect(mockOscillator.start).toHaveBeenCalled();
+      expect(mockOscillator.stop).toHaveBeenCalled();
+    });
+
+    it("does nothing when SFX is disabled", () => {
+      manager.init();
+      manager.setSFXEnabled(false);
+      manager.playIdleCall();
+      expect(mockAudioContext.createOscillator).not.toHaveBeenCalled();
+    });
+  });
+
   describe("destroy()", () => {
     it("closes the AudioContext", () => {
       manager.init();

@@ -71,6 +71,16 @@ const SPARKLE_ALPHA = 0.75;
 const BURST_SCALE = 1.25;
 /** Duration of the just-earned sparkle burst pulse (ms). */
 const BURST_DURATION = 500;
+/** Idle time without input before the attract cue starts (ms). */
+const IDLE_ATTRACT_DELAY = 25000;
+/** Interval between idle calls while attract is active (ms). */
+const IDLE_CALL_INTERVAL = 10000;
+/** Wiggle amplitude for the attract cue (degrees). */
+const WIGGLE_ANGLE = 4;
+/** Duration of one wiggle swing (ms). */
+const WIGGLE_DURATION = 350;
+/** Phase offset between tile wiggles (ms). */
+const WIGGLE_PHASE_OFFSET = 120;
 
 /**
  * Hub scene — the central navigation hub.
@@ -84,6 +94,12 @@ export class HubScene extends Phaser.Scene {
   private entranceIndex = 0;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
+  /** Pending idle-attract timer. */
+  private idleCallTimer?: Phaser.Time.TimerEvent;
+  /** True once the attract cue has started for the current idle period. */
+  private idleAttractActive = false;
+  /** Tiles used as wiggle targets by the attract cue. */
+  private attractTargets: Phaser.GameObjects.Rectangle[] = [];
 
   constructor() {
     super({ key: "Hub" });
@@ -97,6 +113,7 @@ export class HubScene extends Phaser.Scene {
     sceneEntrance(this);
     const reducedMotion = isReducedMotion();
     this.entranceIndex = 0;
+    this.idleAttractActive = false;
 
     if (!reducedMotion) {
       this.createDecorations();
@@ -120,6 +137,7 @@ export class HubScene extends Phaser.Scene {
 
       const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
       tile.setInteractive();
+      this.attractTargets.push(tile);
       // Navigate on release so the press squish is visible while holding;
       // releasing outside the tile (pointerout/pointercancel) cancels.
       tile.on("pointerup", () => {
@@ -170,6 +188,11 @@ export class HubScene extends Phaser.Scene {
       }
     }
 
+    this.input.on("pointerdown", () => {
+      this.resetIdleAttract();
+    });
+    this.scheduleIdleAttract();
+
     const settingsButton = this.add.text(this.cameras.main.width - 20, 20, "Settings", {
       fontSize: "18px",
       color: "#2d3748",
@@ -198,7 +221,48 @@ export class HubScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
+      this.idleCallTimer?.remove();
+      this.idleCallTimer = undefined;
     });
+  }
+
+  /** Schedules the next idle-attract check after the given delay. */
+  private scheduleIdleAttract(delay = IDLE_ATTRACT_DELAY): void {
+    this.idleCallTimer = this.time.delayedCall(delay, () => {
+      this.triggerIdleAttract();
+    });
+  }
+
+  /** Re-arms the idle timer after any pointer input. */
+  private resetIdleAttract(): void {
+    this.idleCallTimer?.remove();
+    this.scheduleIdleAttract();
+  }
+
+  /**
+   * Plays the idle call; starts the tile wiggle cue once (skipped under reduced
+   * motion); re-arms itself so the call repeats every IDLE_CALL_INTERVAL.
+   */
+  private triggerIdleAttract(): void {
+    if (!this.idleCallTimer) return;
+    AudioManager.getInstance().playIdleCall();
+    if (!this.idleAttractActive) {
+      this.idleAttractActive = true;
+      if (!isReducedMotion()) {
+        for (let i = 0; i < this.attractTargets.length; i++) {
+          this.tweens.add({
+            targets: this.attractTargets[i],
+            angle: WIGGLE_ANGLE,
+            duration: WIGGLE_DURATION,
+            yoyo: true,
+            repeat: -1,
+            ease: "Sine.inOut",
+            delay: i * WIGGLE_PHASE_OFFSET,
+          });
+        }
+      }
+    }
+    this.scheduleIdleAttract(IDLE_CALL_INTERVAL);
   }
 
   /** Creates a few low-contrast dots that drift slowly behind the grid. */

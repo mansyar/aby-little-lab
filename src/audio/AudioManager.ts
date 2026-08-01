@@ -217,6 +217,18 @@ export class AudioManager {
   }
 
   /**
+   * Plays a gentle two-tone idle call (E5, G5) using the Web Audio API.
+   * Softer than other SFX so it nudges attention without startling.
+   * Does nothing if SFX is disabled or not initialized.
+   */
+  playIdleCall(): void {
+    if (!this.sfxEnabled || !this.audioContext) return;
+    const ctx = this.audioContext;
+    this.playTone(ctx, 659.25, 0, 0.15, 0.12);
+    this.playTone(ctx, 783.99, 0.15, 0.2, 0.12);
+  }
+
+  /**
    * Plays a single synthesized tone at a given frequency with staggered start.
    * @param ctx - The AudioContext to use for synthesis.
    * @param frequency - The frequency of the tone in Hz.

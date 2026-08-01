@@ -125,7 +125,7 @@ vi.mock("phaser", () => {
         height: 768,
       };
       this.time = {
-        delayedCall: vi.fn(),
+        delayedCall: vi.fn(() => ({ remove: vi.fn() })),
         addEvent: vi.fn(),
       };
       this.tweens = {
@@ -229,6 +229,7 @@ const { mockAudio } = vi.hoisted(() => ({
     playPop: vi.fn(),
     playWake: vi.fn(),
     playFrogNote: vi.fn(),
+    playIdleCall: vi.fn(),
   },
 }));
 
@@ -1091,6 +1092,110 @@ describe("scene navigation flow", () => {
       expect(entrance?.[0]?.alpha).toBe(0.3);
       expect("scaleX" in (entrance?.[0] ?? {})).toBe(false);
       expect("scaleY" in (entrance?.[0] ?? {})).toBe(false);
+    });
+  });
+
+  describe("Hub engagement idle attract", () => {
+    it("arms an idle attract timer ~25s after the scene is created", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const idleCalls = getMockFn(scene.time.delayedCall).mock.calls.filter(
+        (call) => call[0] === 25000,
+      );
+      expect(idleCalls.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("plays the idle call and wiggles all tiles when the idle timer fires", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const idleCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 25000,
+      );
+      expect(idleCall).toBeDefined();
+      const callback = idleCall?.[1] as () => void;
+      callback();
+
+      expect(mockAudio.playIdleCall).toHaveBeenCalled();
+
+      const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
+        (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
+      );
+      expect(wiggleTweens.length).toBe(6);
+    });
+
+    it("repeats the idle call every ~10s while idle", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const fireIdle = (delay: number): void => {
+        const call = getMockFn(scene.time.delayedCall).mock.calls.find((c) => c[0] === delay);
+        expect(call).toBeDefined();
+        const callback = call?.[1] as () => void;
+        callback();
+      };
+
+      fireIdle(25000);
+      expect(mockAudio.playIdleCall).toHaveBeenCalledTimes(1);
+
+      fireIdle(10000);
+      expect(mockAudio.playIdleCall).toHaveBeenCalledTimes(2);
+    });
+
+    it("resets the idle timer on pointer input", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const before = delayedCallMock.mock.calls.filter((call) => call[0] === 25000).length;
+
+      const inputOnMock = getMockFn(scene.input.on);
+      const pointerdownCall = inputOnMock.mock.calls.find((call) => call[0] === "pointerdown");
+      expect(pointerdownCall).toBeDefined();
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+
+      const after = delayedCallMock.mock.calls.filter((call) => call[0] === 25000).length;
+      expect(after).toBe(before + 1);
+    });
+
+    it("clears the idle timer on shutdown", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const idleCallIndex = delayedCallMock.mock.calls.findIndex((call) => call[0] === 25000);
+      const idleTimer = delayedCallMock.mock.results[idleCallIndex]?.value as {
+        remove: MockFn;
+      };
+      expect(idleTimer).toBeDefined();
+
+      triggerShutdown(scene);
+
+      expect(getMockFn(idleTimer.remove)).toHaveBeenCalled();
+    });
+
+    it("under reduced motion: plays the idle call but does not wiggle tiles", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new HubScene();
+      scene.create();
+
+      const idleCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 25000,
+      );
+      const callback = idleCall?.[1] as () => void;
+      callback();
+
+      expect(mockAudio.playIdleCall).toHaveBeenCalled();
+      const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
+        (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
+      );
+      expect(wiggleTweens.length).toBe(0);
     });
   });
 
