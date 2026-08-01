@@ -261,6 +261,8 @@ interface AppStorage {
 }
 ```
 
+**Migration (2026-08-02):** `load()` merges saved data over defaults per key (`stickers` and `settings`), so saves created before a game shipped keep working — every `GameId` always resolves to an entry (new games backfill as unearned) and existing progress/settings are preserved. Empty storage and corrupted JSON fall back to defaults.
+
 ### Settings Panel
 
 `SettingsPanel` is created by `HubScene` after the Settings `ParentLock` succeeds. It renders a black 0.6-alpha backdrop and a cream, outlined modal. Its 96px-high BGM and SFX text hit areas exceed the 64px touch-target minimum.
@@ -561,4 +563,4 @@ Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reacti
 
 ### Test coverage
 
-591 tests across 18 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 99.31% lines / 85.71% branches; total project 97.91% statements / 97.63% functions / 86.94% branches / 98.8% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+592 tests across 18 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; total project 97.97% statements / 97.63% functions / 87.26% branches / 98.8% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.

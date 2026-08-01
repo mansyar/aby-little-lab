@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **591 tests across 18 files**, ~97.9% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **592 tests across 18 files**, ~98.0% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
 
 ## Code Quality
 
