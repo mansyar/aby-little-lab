@@ -43,13 +43,13 @@
 
 ## Phase 4: Documentation & Live Validation
 
-- [ ] Task: Document CI/CD in README
-  - [ ] Add "CI/CD" section: pipeline flow (PR gates → merge → auto-deploy), obtaining the Coolify Deploy Webhook URL, adding the GitHub secret, and branch-protection recommendation (require quality-gates check on `master`)
-- [ ] Task: End-to-end live validation
-  - [ ] Push feature branch + open PR → confirm gates run green
-  - [ ] Add `COOLIFY_DEPLOY_WEBHOOK` secret (user action)
-  - [ ] Merge PR → confirm deploy webhook fires exactly once and Coolify rebuilds from the repo Dockerfile
-  - [ ] Confirm deployed site healthy (boot → hub → game start)
-- [ ] Task: Phase 4 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Document CI/CD in README (81d31b9)
+  - [x] Add "CI/CD" section: pipeline flow (PR gates → merge → auto-deploy), obtaining the Coolify Deploy Webhook URL, adding the GitHub secret, and branch-protection recommendation (require quality-gates check on `master`) — *covers both secrets: COOLIFY_DEPLOY_WEBHOOK + COOLIFY_TOKEN*
+- [x] Task: End-to-end live validation (81d31b9)
+  - [x] Push feature branch + open PR → confirm gates run green — *PR #1: Quality Gates pass (48s/49s), Deploy skipped*
+  - [x] Add `COOLIFY_DEPLOY_WEBHOOK` secret (user action) — *both secrets added; discovered Coolify requires COOLIFY_TOKEN too (see tech-stack amendment)*
+  - [x] Merge PR → confirm deploy webhook fires exactly once and Coolify rebuilds from the repo Dockerfile — *run 30721000784: gates 51s + Deploy to Coolify 7s, exit 0*
+  - [x] Confirm deployed site healthy (boot → hub → game start) — *user-verified live*
+- [x] Task: Phase 4 Verification & Checkpoint (Refer to workflow.md) [checkpoint: pending]
 
 **TDD note:** This is a config/infra chore — TDD is impractical for YAML; verification is via the existing gate suite (reproduced locally and in CI), YAML parsing, and the live end-to-end run in Phase 4.
