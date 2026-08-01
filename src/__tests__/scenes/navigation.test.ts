@@ -296,6 +296,7 @@ const GAME_SCENE_KEYS = [
   "ShadowMatch",
   "MusicalMemory",
   "BigSmall",
+  "PatternBuilder",
 ] as const;
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -620,12 +621,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 60 shape, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
+    it("loads all 61 shape, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(60);
+      expect(svgCalls).toHaveLength(61);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -715,7 +716,7 @@ describe("scene navigation flow", () => {
       expect(mockSettingsPanel).toHaveBeenCalledWith(scene);
     });
 
-    it("creates 6 game tiles", () => {
+    it("creates 7 game tiles", () => {
       const scene = new HubScene();
       scene.create();
 
@@ -724,7 +725,7 @@ describe("scene navigation flow", () => {
         (obj) => getMockFn(obj.setInteractive).mock.calls.length > 0,
       );
 
-      expect(interactiveObjects.length).toBeGreaterThanOrEqual(6);
+      expect(interactiveObjects.length).toBeGreaterThanOrEqual(7);
     });
 
     it("creates sticker book checking sticker status for each game", () => {
@@ -733,7 +734,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      expect(hasSticker).toHaveBeenCalledTimes(6);
+      expect(hasSticker).toHaveBeenCalledTimes(7);
     });
 
     it("navigates to each game scene when respective tile is clicked", () => {
@@ -913,13 +914,13 @@ describe("scene navigation flow", () => {
             typeof config.delay === "number",
         );
 
-      expect(bobTweens).toHaveLength(6);
+      expect(bobTweens).toHaveLength(7);
       const delays = new Set(bobTweens.map((config) => config.delay));
-      expect(delays.size).toBe(6);
+      expect(delays.size).toBe(7);
 
       const startY = (768 - 2 * 150 - 50) / 2;
-      const expectedYs = [0, 1, 2, 3, 4, 5].map((i) => {
-        const row = Math.floor(i / 3);
+      const expectedYs = [0, 1, 2, 3, 4, 5, 6].map((i) => {
+        const row = Math.floor(i / 4);
         return startY + row * 200 + 75 - 4;
       });
       const tweenYs = bobTweens.map((config) => config.y).sort((a, b) => (a ?? 0) - (b ?? 0));
@@ -1099,6 +1100,7 @@ describe("scene navigation flow", () => {
       "sticker_shadow_match",
       "sticker_musical_memory",
       "sticker_big_small",
+      "sticker_pattern_builder",
     ];
     /** Sticker textures are rasterized at 512px; the shelf displays them at 56px. */
     const STICKER_BASE_SCALE = 56 / 512;
@@ -1108,7 +1110,7 @@ describe("scene navigation flow", () => {
       scene.create();
 
       const stickers = getStickerImages(scene);
-      expect(stickers).toHaveLength(6);
+      expect(stickers).toHaveLength(7);
       expect(new Set(stickers.map((s) => s.key))).toEqual(new Set(STICKER_KEYS));
 
       // No ★/☆ text markers remain
@@ -1243,7 +1245,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(6);
+      expect(wiggleTweens.length).toBe(7);
     });
 
     it("repeats the idle call every ~10s while idle", () => {
@@ -1314,7 +1316,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(6);
+      expect(wiggleTweens.length).toBe(7);
     });
 
     it("under reduced motion: plays the idle call but does not wiggle tiles", () => {
@@ -4379,6 +4381,14 @@ describe("scene navigation flow", () => {
       return circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
     }
 
+    /** Returns the mascot image object (created with the mascot_idle texture). */
+    function getMascotImage(scene: unknown): Record<string, MockFn> {
+      const s = scene as { add: Record<string, unknown> };
+      const imageMock = getMockFn(s.add.image);
+      const index = imageMock.mock.calls.findIndex((call) => call[2] === "mascot_idle");
+      return imageMock.mock.results[index].value as Record<string, MockFn>;
+    }
+
     /** Simulates a tap on an answer card by triggering its pointerdown callback. */
     function tapCard(scene: unknown, cardIndex: number): void {
       const cards = getCardRects(scene);
@@ -4455,6 +4465,15 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
       expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
 
+      // Professor Hoot cheers with the celebrate pose on a correct answer.
+      const mascot = getMascotImage(scene);
+      expect(getMockFn(mascot.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+      const cheerTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === mascot && typeof call[0]?.scale === "number",
+      );
+      expect(cheerTween).toBeDefined();
+      expect(cheerTween?.[0]?.scale).toBeCloseTo(0.2 * 1.1, 5);
+
       const cardShape = getCardShapes(scene)[correctIndex];
       const rowY = scene.cameras.main.centerY - 80;
       const snapTween = getMockFn(scene.tweens.add).mock.calls.find(
@@ -4497,6 +4516,13 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playCorrect).not.toHaveBeenCalled();
       expect((scene as { roundIndex: number }).roundIndex).toBe(0);
 
+      // Professor Hoot nods along with the soft incorrect tone.
+      const mascot = getMascotImage(scene);
+      const nodTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === mascot && call[0]?.angle?.to === 6,
+      );
+      expect(nodTween).toBeDefined();
+
       const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
         const targets = call[0]?.targets;
         if (!Array.isArray(targets)) return false;
@@ -4522,6 +4548,15 @@ describe("scene navigation flow", () => {
       expect(earnSticker).toHaveBeenCalledWith("pattern-builder");
       expect(mockAudio.playSticker).toHaveBeenCalled();
       assertWinCelebrationCreated(scene);
+
+      // Professor Hoot gives the big cheer on the win (last mascot tween).
+      const mascot = getMascotImage(scene);
+      const mascotTweens = getMockFn(scene.tweens.add).mock.calls.filter(
+        (call) => call[0]?.targets === mascot && typeof call[0]?.scale === "number",
+      );
+      const bigCheer = mascotTweens[mascotTweens.length - 1];
+      expect(bigCheer).toBeDefined();
+      expect(bigCheer?.[0]?.scale).toBeCloseTo(0.2 * 1.2, 5);
 
       const delayedCallMock = getMockFn(scene.time.delayedCall);
       const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
