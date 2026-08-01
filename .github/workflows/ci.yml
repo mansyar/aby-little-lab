@@ -39,3 +39,28 @@ jobs:
 
       - name: PWA validation
         run: node scripts/validate-pwa.js
+
+  deploy:
+    name: Deploy to Coolify
+    needs: quality-gates
+    # Structurally impossible on pull_request events: deploy only on master pushes.
+    # Requires repository secret: COOLIFY_DEPLOY_WEBHOOK (Coolify -> Project -> Application
+    # -> Webhooks -> Deploy Webhook URL).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deploy webhook secret is configured
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+        if: env.DEPLOY_WEBHOOK == ''
+        run: |
+          echo "::error title=Missing secret::COOLIFY_DEPLOY_WEBHOOK repository secret is not configured. Add it under Settings -> Secrets and variables -> Actions, then re-run this job."
+          exit 1
+
+      - name: Trigger Coolify deploy webhook
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "$DEPLOY_WEBHOOK"
