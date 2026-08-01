@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **555 tests across 17 files**, ~97.7% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **563 tests across 17 files**, ~97.7% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
 
 ## Code Quality
 
@@ -92,6 +92,8 @@ src/
 | 4 | Shadow Match | Visual discrimination & spatial awareness | ✅ Implemented |
 | 5 | Musical Memory Simon | Working memory & auditory recall | ✅ Implemented |
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | ✅ Implemented |
+
+**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys), with round sizes and difficulty fixed.
 
 ## Parental Lock & Touch UX
 
