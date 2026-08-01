@@ -11,27 +11,27 @@
 
 ## Phase 2: Game Logic Expansion (TDD)
 
-- [ ] Task: Expand `shapeSorterLogic` pools [TDD]
+- [x] Task: Expand `shapeSorterLogic` pools [TDD] [ccfd4fe]
   - [ ] Write failing tests: `ShapeType` includes heart/crescent; selection returns 3 of 6 with only valid types
   - [ ] Implement: extend `ShapeType` and `ALL_SHAPES`
   - [ ] Run tests (red → green), verify coverage
   - [ ] Commit with git note + plan update
-- [ ] Task: Expand `animalTraceLogic` pairs [TDD]
+- [x] Task: Expand `animalTraceLogic` pairs [TDD] [ccfd4fe]
   - [ ] Write failing tests: pair pool = 6; selection 3 of 6; new pairs (elephant→peanut, pig→apple) valid
   - [ ] Implement: extend `AnimalType`, `FoodType`, `PAIRS`
   - [ ] Run tests (red → green), verify coverage
   - [ ] Commit with git note + plan update
-- [ ] Task: Expand `shadowMatchLogic` objects + round selection [TDD]
+- [x] Task: Expand `shadowMatchLogic` objects + round selection [TDD] [ccfd4fe]
   - [ ] Write failing tests: `ObjectType` includes airplane/mushroom; round selects exactly 6 of 8, no duplicates
   - [ ] Implement: extend `ObjectType`/`ALL_OBJECTS`; add 6-of-8 round selection
   - [ ] Run tests (red → green), verify coverage
   - [ ] Commit with git note + plan update
-- [ ] Task: Expand `bigSmallLogic` toys [TDD]
+- [x] Task: Expand `bigSmallLogic` toys [TDD] [ccfd4fe]
   - [ ] Write failing tests: `ToyType` includes rocket/drum; selection 3 of 6
   - [ ] Implement: extend `ToyType`/`ALL_TOYS`
   - [ ] Run tests (red → green), verify coverage
   - [ ] Commit with git note + plan update
-- [ ] Task: Expand `popFreezeLogic` decoy pool [TDD]
+- [x] Task: Expand `popFreezeLogic` decoy pool [TDD] [ccfd4fe]
   - [ ] Write failing tests: `ALL_ANIMALS` includes elephant/pig; decoy selection uses all 6
   - [ ] Implement: extend `AnimalType`/`ALL_ANIMALS`
   - [ ] Run tests (red → green), verify coverage
