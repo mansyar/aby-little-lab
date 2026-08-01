@@ -20,7 +20,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Replay Variety Expansion** *Link: [./tracks/replay-variety-expansion_20260801/index.md](./tracks/replay-variety-expansion_20260801/index.md)*
+- [x] **Track: Replay Variety Expansion** *Link: [./archive/replay-variety-expansion_20260801/index.md](./archive/replay-variety-expansion_20260801/index.md)*
 
 ---
 
