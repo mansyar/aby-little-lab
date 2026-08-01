@@ -214,14 +214,15 @@ export class ShadowMatchScene extends Phaser.Scene {
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
-    if (!hasSticker("shadow-match")) {
+    const earnedNow = !hasSticker("shadow-match");
+    if (earnedNow) {
       earnSticker("shadow-match");
       this.audioManager.playSticker();
       this.createStickerAnimation();
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub");
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "shadow-match" } : undefined);
     });
   }
 

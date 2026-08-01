@@ -434,6 +434,26 @@ function getRectangles(scene: unknown): Array<Record<string, MockFn>> {
   return rectangleMock.mock.results.map((result) => result.value as Record<string, MockFn>);
 }
 
+/** Returns image objects created with sticker_* texture keys (Hub shelf thumbnails). */
+function getStickerImages(scene: unknown): Array<{ obj: Record<string, MockFn>; key: string }> {
+  const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+  const stickers: Array<{ obj: Record<string, MockFn>; key: string }> = [];
+  for (let i = 0; i < imageMock.mock.calls.length; i++) {
+    const key = imageMock.mock.calls[i][2] as string;
+    if (typeof key === "string" && key.startsWith("sticker_")) {
+      stickers.push({ obj: imageMock.mock.results[i].value as Record<string, MockFn>, key });
+    }
+  }
+  return stickers;
+}
+
+/** Returns the sticker image object for the given texture key. */
+function getStickerImage(scene: unknown, key: string): Record<string, MockFn> {
+  const sticker = getStickerImages(scene).find((s) => s.key === key);
+  if (!sticker) throw new Error(`Sticker ${key} not found`);
+  return sticker.obj;
+}
+
 /** Fires every registered handler for an event on a game object. */
 function fireAllObjectEvents(obj: Record<string, MockFn>, event: string): void {
   const onMock = getMockFn(obj.on);
@@ -735,7 +755,9 @@ describe("scene navigation flow", () => {
         )
         .filter(
           (config) =>
-            config.duration === 300 && typeof config.delay === "number" && config.alpha === 1,
+            config.duration === 300 &&
+            typeof config.delay === "number" &&
+            (config.alpha === 1 || config.alpha === 0.3),
         );
 
       expect(entranceTweens.length).toBeGreaterThanOrEqual(12);
@@ -841,7 +863,8 @@ describe("scene navigation flow", () => {
       );
       expect(entranceTweens.length).toBeGreaterThanOrEqual(12);
       for (const config of entranceTweens) {
-        expect(config.alpha).toBe(1);
+        // Tiles/labels/earned stickers fade to 1; unearned stickers to 0.3.
+        expect([1, 0.3]).toContain(config.alpha);
         expect("scaleX" in config).toBe(false);
         expect("scaleY" in config).toBe(false);
       }
@@ -943,6 +966,113 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.tweens.add).mock.calls.some((call) => call[0]?.targets === tile)).toBe(
         false,
       );
+    });
+  });
+
+  describe("Hub engagement sticker shelf", () => {
+    const STICKER_KEYS = [
+      "sticker_shape_sorter",
+      "sticker_animal_trace",
+      "sticker_pop_freeze",
+      "sticker_shadow_match",
+      "sticker_musical_memory",
+      "sticker_big_small",
+    ];
+
+    it("replaces the star markers with one real sticker thumbnail per game (textless, touch-inert)", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const stickers = getStickerImages(scene);
+      expect(stickers).toHaveLength(6);
+      expect(new Set(stickers.map((s) => s.key))).toEqual(new Set(STICKER_KEYS));
+
+      // No ★/☆ text markers remain
+      const textMock = getMockFn(scene.add.text);
+      for (const call of textMock.mock.calls) {
+        const text = call[2];
+        if (typeof text === "string") {
+          expect(text).not.toMatch(/[★☆]/);
+        }
+      }
+
+      // Shelf is touch-inert
+      for (const sticker of stickers) {
+        expect(getMockFn(sticker.obj.setInteractive)).not.toHaveBeenCalled();
+      }
+    });
+
+    it("earned stickers get a gentle sparkle loop", () => {
+      earnSticker("shape-sorter");
+
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      const sticker = getStickerImage(scene, "sticker_shape_sorter");
+      const sparkle = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
+      );
+      expect(sparkle).toBeDefined();
+    });
+
+    it("unearned stickers are dimmed and have no sparkle", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const sticker = getStickerImage(scene, "sticker_animal_trace");
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const entrance = tweenCalls.find((call) => call[0]?.targets === sticker);
+      expect(entrance).toBeDefined();
+      expect(entrance?.[0]?.alpha).toBe(0.3);
+      expect(entrance?.[0]?.scaleX).toBe(0.85);
+      expect(entrance?.[0]?.scaleY).toBe(0.85);
+
+      const sparkle = tweenCalls.find(
+        (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
+      );
+      expect(sparkle).toBeUndefined();
+    });
+
+    it("gives the justEarned sticker a larger bounce and sparkle burst on entrance", () => {
+      earnSticker("shape-sorter");
+
+      const scene = new HubScene();
+      scene.init({ justEarned: "shape-sorter" });
+      scene.create();
+
+      const sticker = getStickerImage(scene, "sticker_shape_sorter");
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const entrance = tweenCalls.find(
+        (call) => call[0]?.targets === sticker && call[0]?.alpha === 1,
+      );
+      expect(entrance).toBeDefined();
+      expect(entrance?.[0]?.scaleX).toBe(1.15);
+      expect(entrance?.[0]?.scaleY).toBe(1.15);
+      expect(entrance?.[0]?.ease).toBe("Back.out");
+
+      completeHubEntrances(scene);
+      const burst = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
+      );
+      expect(burst).toBeDefined();
+    });
+
+    it("under reduced motion: unearned stickers fade to dim alpha only (no scale)", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new HubScene();
+      scene.create();
+
+      const sticker = getStickerImage(scene, "sticker_animal_trace");
+      const entrance = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === sticker,
+      );
+      expect(entrance?.[0]?.alpha).toBe(0.3);
+      expect("scaleX" in (entrance?.[0] ?? {})).toBe(false);
+      expect("scaleY" in (entrance?.[0] ?? {})).toBe(false);
     });
   });
 
@@ -1414,6 +1544,24 @@ describe("scene navigation flow", () => {
       callback();
       completeFadeOuts(scene);
 
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "shape-sorter",
+      });
+    });
+
+    it("passes no justEarned data on replay auto-return", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+      completeAllShapes(scene);
+
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+      const callback = autoReturnCall?.[1] as () => void;
+      callback();
+      completeFadeOuts(scene);
+
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
     });
   });
@@ -1769,7 +1917,9 @@ describe("scene navigation flow", () => {
       callback();
       completeFadeOuts(scene);
 
-      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "animal-trace",
+      });
     });
 
     it("triggers the choreographed win celebration on round completion", () => {
@@ -2148,7 +2298,9 @@ describe("scene navigation flow", () => {
       callback();
       completeFadeOuts(scene);
 
-      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "pop-freeze",
+      });
     });
 
     it("triggers the choreographed win celebration on round completion", () => {
@@ -2533,7 +2685,9 @@ describe("scene navigation flow", () => {
       callback();
       completeFadeOuts(scene);
 
-      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "shadow-match",
+      });
     });
   });
 
@@ -3076,7 +3230,9 @@ describe("scene navigation flow", () => {
       callback();
       completeFadeOuts(scene);
 
-      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "musical-memory",
+      });
     });
 
     it("parental lock exits to Hub at any time", () => {
@@ -3522,7 +3678,9 @@ describe("scene navigation flow", () => {
       callback();
       completeFadeOuts(scene);
 
-      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "big-small",
+      });
     });
   });
 

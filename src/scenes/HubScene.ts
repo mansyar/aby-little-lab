@@ -51,6 +51,22 @@ const DECORATION_DRIFT = 16;
 const DECORATION_DRIFT_MIN = 4000;
 /** Fastest decoration drift loop (ms). */
 const DECORATION_DRIFT_MAX = 6000;
+/** Display size of sticker thumbnails on the shelf (px). */
+const STICKER_DISPLAY_SIZE = 56;
+/** Alpha for unearned (locked) sticker thumbnails. */
+const UNEARNED_ALPHA = 0.3;
+/** Scale for unearned (locked) sticker thumbnails. */
+const UNEARNED_SCALE = 0.85;
+/** Entrance scale for the just-earned sticker. */
+const JUST_EARNED_SCALE = 1.15;
+/** Duration of the gentle sparkle shimmer loop (ms). */
+const SPARKLE_DURATION = 800;
+/** Peak alpha of the sparkle shimmer loop. */
+const SPARKLE_ALPHA = 0.75;
+/** Scale of the just-earned sparkle burst pulse. */
+const BURST_SCALE = 1.25;
+/** Duration of the just-earned sparkle burst pulse (ms). */
+const BURST_DURATION = 500;
 
 /**
  * Hub scene — the central navigation hub.
@@ -62,9 +78,15 @@ export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private settingsPanel?: SettingsPanel;
   private entranceIndex = 0;
+  /** Game id whose sticker was just earned; highlighted on this visit. */
+  private justEarned?: string;
 
   constructor() {
     super({ key: "Hub" });
+  }
+
+  init(data?: { justEarned?: string }): void {
+    this.justEarned = data?.justEarned;
   }
 
   create(): void {
@@ -124,13 +146,22 @@ export class HubScene extends Phaser.Scene {
       }
 
       const earned = hasSticker(GAME_TILES[i].gameId);
-      const sticker = this.add.text(x, y + TILE_HEIGHT / 2 - 20, earned ? "★" : "☆", {
-        fontSize: "24px",
-        color: earned ? "#68d391" : "#a0aec0",
-      });
-      sticker.setOrigin(0.5);
+      const sticker = this.add.image(
+        x,
+        y + TILE_HEIGHT / 2 - 20,
+        `sticker_${GAME_TILES[i].gameId.replace(/-/g, "_")}`,
+      );
+      sticker.setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE);
 
-      this.animateEntrance([sticker]);
+      if (earned) {
+        if (GAME_TILES[i].gameId === this.justEarned) {
+          this.animateJustEarned(sticker);
+        } else {
+          this.animateEntrance([sticker], () => this.addSparkle(sticker));
+        }
+      } else {
+        this.animateUnearned(sticker);
+      }
     }
 
     const settingsButton = this.add.text(this.cameras.main.width - 20, 20, "Settings", {
@@ -188,6 +219,81 @@ export class HubScene extends Phaser.Scene {
         delay: i * 300,
       });
     }
+  }
+
+  /**
+   * Fades an unearned sticker in dimmed and slightly smaller, with no sparkle,
+   * so the collection goal stays visible. Under reduced motion only alpha.
+   */
+  private animateUnearned(sticker: Phaser.GameObjects.Image): void {
+    const index = this.entranceIndex;
+    this.entranceIndex += 1;
+    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
+      targets: sticker,
+      alpha: UNEARNED_ALPHA,
+      delay: index * ENTRANCE_STAGGER,
+      duration: ENTRANCE_DURATION,
+      ease: "Sine.out",
+    };
+    sticker.setAlpha(0);
+    if (!isReducedMotion()) {
+      sticker.setScale(0);
+      config.scaleX = UNEARNED_SCALE;
+      config.scaleY = UNEARNED_SCALE;
+    }
+    this.tweens.add(config);
+  }
+
+  /**
+   * Brings the just-earned sticker in with a larger Back.out bounce and a
+   * sparkle burst (scale pulse + shimmer). Under reduced motion only alpha.
+   */
+  private animateJustEarned(sticker: Phaser.GameObjects.Image): void {
+    const index = this.entranceIndex;
+    this.entranceIndex += 1;
+    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
+      targets: sticker,
+      alpha: 1,
+      delay: index * ENTRANCE_STAGGER,
+      duration: ENTRANCE_DURATION,
+      ease: "Back.out",
+    };
+    sticker.setAlpha(0);
+    if (!isReducedMotion()) {
+      sticker.setScale(0);
+      config.scaleX = JUST_EARNED_SCALE;
+      config.scaleY = JUST_EARNED_SCALE;
+      config.onComplete = () => this.addJustEarnedBurst(sticker);
+    }
+    this.tweens.add(config);
+  }
+
+  /** Gentle alpha shimmer loop for earned stickers (no-op under reduced motion). */
+  private addSparkle(sticker: Phaser.GameObjects.Image): void {
+    if (isReducedMotion()) return;
+    this.tweens.add({
+      targets: sticker,
+      alpha: SPARKLE_ALPHA,
+      duration: SPARKLE_DURATION,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.inOut",
+    });
+  }
+
+  /** Sparkle burst for the just-earned sticker: shimmer plus scale pulse. */
+  private addJustEarnedBurst(sticker: Phaser.GameObjects.Image): void {
+    this.addSparkle(sticker);
+    if (isReducedMotion()) return;
+    this.tweens.add({
+      targets: sticker,
+      scaleX: BURST_SCALE,
+      scaleY: BURST_SCALE,
+      duration: BURST_DURATION,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.inOut",
+    });
   }
 
   /**

@@ -265,14 +265,15 @@ export class MusicalMemoryScene extends Phaser.Scene {
     this.audioManager.playWin();
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
-    if (!hasSticker("musical-memory")) {
+    const earnedNow = !hasSticker("musical-memory");
+    if (earnedNow) {
       earnSticker("musical-memory");
       this.audioManager.playSticker();
       this.createStickerAnimation();
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub");
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "musical-memory" } : undefined);
     });
   }
 

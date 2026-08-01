@@ -238,14 +238,15 @@ export class PopFreezeScene extends Phaser.Scene {
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
-    if (!hasSticker("pop-freeze")) {
+    const earnedNow = !hasSticker("pop-freeze");
+    if (earnedNow) {
       earnSticker("pop-freeze");
       this.audioManager.playSticker();
       this.createStickerAnimation();
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub");
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "pop-freeze" } : undefined);
     });
   }
 

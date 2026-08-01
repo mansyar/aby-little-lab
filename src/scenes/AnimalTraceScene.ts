@@ -255,14 +255,15 @@ export class AnimalTraceScene extends Phaser.Scene {
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
-    if (!hasSticker("animal-trace")) {
+    const earnedNow = !hasSticker("animal-trace");
+    if (earnedNow) {
       earnSticker("animal-trace");
       this.audioManager.playSticker();
       this.createStickerAnimation();
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub");
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "animal-trace" } : undefined);
     });
   }
 

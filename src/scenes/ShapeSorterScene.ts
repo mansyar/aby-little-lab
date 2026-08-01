@@ -204,14 +204,15 @@ export class ShapeSorterScene extends Phaser.Scene {
 
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
 
-    if (!hasSticker("shape-sorter")) {
+    const earnedNow = !hasSticker("shape-sorter");
+    if (earnedNow) {
       earnSticker("shape-sorter");
       this.audioManager.playSticker();
       this.createStickerAnimation();
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub");
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "shape-sorter" } : undefined);
     });
   }
 
