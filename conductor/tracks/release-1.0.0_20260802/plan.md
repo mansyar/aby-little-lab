@@ -2,15 +2,15 @@
 
 ## Phase 1 — Prepare Release Branch & Final Gates
 
-- [ ] **Task 1.1:** Rename current branch to `release/v1.0.0`
-  - [ ] Pre-check: current branch in sync with `origin/master` + clean tree (verified: `d7ff3c3` = `origin/master`)
-  - [ ] `git branch -m release/v1.0.0` → verify: branch shows `* release/v1.0.0`
-- [ ] **Task 1.2:** Run final quality gates locally (release-checklist Step 2)
-  - [ ] `pnpm run check` → clean
-  - [ ] `CI=true pnpm test` → all ~592 tests pass
-  - [ ] `pnpm run build` → succeeds
-  - [ ] `node scripts/validate-pwa.js` → manifest/SW/offline valid
-  - [ ] If any gate fails: fix with a proper commit (`fix: ...`), re-run gates; **never bypass**
+- [x] **Task 1.1:** Rename current branch to `release/v1.0.0`
+  - [x] Pre-check: current branch in sync with `origin/master` + clean tree (verified: `d7ff3c3` = `origin/master`)
+  - [x] `git branch -m release/v1.0.0` → verify: branch shows `* release/v1.0.0`
+- [x] **Task 1.2:** Run final quality gates locally (release-checklist Step 2)
+  - [x] `pnpm run check` → clean (biome: 51 files, no fixes)
+  - [x] `CI=true pnpm test` → 592 passed / 18 files (use `$env:CI="true"; pnpm test` in PowerShell)
+  - [x] `pnpm run build` → succeeds (chunk-size warning pre-existing, informational)
+  - [x] `node scripts/validate-pwa.js` → 13/13 passed
+  - [x] If any gate fails: fix with a proper commit (`fix: ...`), re-run gates; **never bypass** — no failures occurred
 - [ ] **Task 1.3: Phase Verification & Checkpoint** (Refer to workflow.md)
   - [ ] Verify phase scope via `git diff --name-only` vs previous checkpoint
   - [ ] Run gates (max 2 fix attempts); commit `conductor(checkpoint): Checkpoint end of Phase 1` + git notes; record `[checkpoint: sha]`
