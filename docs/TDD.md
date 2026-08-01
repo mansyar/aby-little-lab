@@ -90,10 +90,10 @@ aby-little-lab/
     │   └── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
     ├── assets/
     │   └── svg/                    # AI-Generated SVG Assets
-    │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
-    │       ├── animals/            # Monkey, Rabbit, Cat, Dog (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
-    │       ├── items/              # Banana, Carrot, Fish, Bone (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella (Game 4 objects) + Lily Pad (Game 5)
-    │       ├── toys/               # Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Box (Game 6)
+    │       ├── shapes/             # Circle, Square, Triangle, Star, Heart, Crescent SVGs + cutouts
+    │       ├── animals/            # Monkey, Rabbit, Cat, Dog, Elephant, Pig (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
+    │       ├── items/              # Banana, Carrot, Fish, Bone, Peanut, Apple (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella, Airplane, Mushroom (Game 4 objects) + Lily Pad (Game 5)
+    │       ├── toys/               # Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Rocket, Toy Drum, Toy Box (Game 6)
     │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs + Mascot poses
@@ -314,10 +314,14 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `shape_square.svg` | 512×512 | Game 1 | Colored fill (`#9F7AEA`), thick `#2D3748` outline |
 | `shape_triangle.svg` | 512×512 | Game 1 | Colored fill (`#4FD1C5`), thick `#2D3748` outline |
 | `shape_star.svg` | 512×512 | Game 1 | Colored fill (`#F687B3`), thick `#2D3748` outline |
+| `shape_heart.svg` | 512×512 | Game 1 | Colored fill (`#E53E3E`), thick `#2D3748` outline |
+| `shape_crescent.svg` | 512×512 | Game 1 | Colored fill (`#ECC94B`), thick `#2D3748` outline |
 | `cutout_circle.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
 | `cutout_square.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
 | `cutout_triangle.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
 | `cutout_star.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
+| `cutout_heart.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
+| `cutout_crescent.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
 
 ### SVG Assets — Animals (`assets/svg/animals/`)
 
@@ -327,6 +331,10 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `rabbit.svg` | 512×512 | Game 2 | Character sprite (left side) |
 | `cat.svg` | 512×512 | Game 2 | Character sprite (left side) |
 | `dog.svg` | 512×512 | Game 2 | Character sprite (left side) |
+| `elephant.svg` | 512×512 | Game 2 | Character sprite (left side) — gray (#A0AEC0), curled trunk |
+| `pig.svg` | 512×512 | Game 2 | Character sprite (left side) — pink (#F687B3), snout (#FBB6CE), curly tail |
+| `elephant.svg` | 512×512 | Game 2 | Character sprite (left side) — gray (#A0AEC0), curled trunk |
+| `pig.svg` | 512×512 | Game 2 | Character sprite (left side) — pink (#F687B3), snout (#FBB6CE), curly tail |
 | `frog_green.svg` | 512×512 | Game 5 | Note: C4 (261.63 Hz) |
 | `frog_blue.svg` | 512×512 | Game 5 | Note: E4 (329.63 Hz) |
 | `frog_red.svg` | 512×512 | Game 5 | Note: G4 (392.00 Hz) |
@@ -341,12 +349,16 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `carrot.svg` | 512×512 | Game 2 | Food target (right side) — pairs with rabbit |
 | `fish.svg` | 512×512 | Game 2 | Food target (right side) — pairs with cat |
 | `bone.svg` | 512×512 | Game 2 | Food target (right side) — pairs with dog |
+| `peanut.svg` | 512×512 | Game 2 | Food target (right side) — pairs with elephant |
+| `apple.svg` | 512×512 | Game 2 | Food target (right side) — pairs with pig |
 | `house.svg` | 512×512 | Game 4 | Colored object — yellow walls (#F6E05E), orange roof (#F6AD55), thick `#2D3748` outline |
 | `tree.svg` | 512×512 | Game 4 | Colored object — green canopy (#48BB78), brown trunk (#A0522D), thick `#2D3748` outline |
 | `car.svg` | 512×512 | Game 4 | Colored object — red body (#F56565), thick `#2D3748` outline |
 | `boat.svg` | 512×512 | Game 4 | Colored object — blue hull (#4299E1), thick `#2D3748` outline |
 | `ball.svg` | 512×512 | Game 4 | Colored object — yellow (#ECC94B), thick `#2D3748` outline |
 | `umbrella.svg` | 512×512 | Game 4 | Colored object — purple (#9F7AEA), thick `#2D3748` outline |
+| `airplane.svg` | 512×512 | Game 4 | Colored object — fuselage (#BEE3F8), fin/wings (#3182CE), thick `#2D3748` outline |
+| `mushroom.svg` | 512×512 | Game 4 | Colored object — red cap (#E53E3E) with white spots, cream stem (#FFF8E7), thick `#2D3748` outline |
 
 ### SVG Assets — Toys (`assets/svg/toys/`)
 
@@ -356,6 +368,8 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `toy_car.svg` | 512×512 | Game 6 | Coral body (#FC8181), light blue windows (#BEE3F8), sorted by scale (big/small) |
 | `toy_ball.svg` | 512×512 | Game 6 | Teal base (#4FD1C5), orange center circle (#F6AD55), sorted by scale (big/small) |
 | `toy_block.svg` | 512×512 | Game 6 | Purple body (#9F7AEA), yellow star (#ECC94B), sorted by scale (big/small) |
+| `toy_rocket.svg` | 512×512 | Game 6 | Blue body (#3182CE), red nose/fins (#E53E3E), flame (#F6AD55), sorted by scale (big/small) |
+| `toy_drum.svg` | 512×512 | Game 6 | Yellow body (#ECC94B), cream top (#FFF8E7), brown bottom (#D69E2E), sorted by scale (big/small) |
 | `toy_box.svg` | 512×512 | Game 6 | Orange body (#F6AD55), yellow opening (#ECC94B) — rendered at both 1.5× (big) and 0.7× (small) scales |
 
 ### SVG Assets — UI (`assets/svg/ui/`)
@@ -386,6 +400,8 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `shadow_boat.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `boat.svg` paths |
 | `shadow_ball.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `ball.svg` paths |
 | `shadow_umbrella.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill (handle as stroke), derived from `umbrella.svg` paths |
+| `shadow_airplane.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `airplane.svg` paths |
+| `shadow_mushroom.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `mushroom.svg` paths |
 
 ### SVG Assets — Stickers (`assets/svg/stickers/`)
 
@@ -427,16 +443,16 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 
 | Type | Count |
 |---|---|
-| SVG — shapes | 8 (4 shapes + 4 cutouts) |
-| SVG — animals | 7 |
-| SVG — items | 10 (4 Game 2 food + 6 Game 4 objects) |
-| SVG — toys | 5 (4 toys + 1 box, Game 6) |
-| SVG — shadows | 6 (Game 4 silhouettes) |
+| SVG — shapes | 12 (6 shapes + 6 cutouts) |
+| SVG — animals | 9 |
+| SVG — items | 14 (6 Game 2 food + 8 Game 4 objects) |
+| SVG — toys | 7 (6 toys + 1 box, Game 6) |
+| SVG — shadows | 8 (Game 4 silhouettes) |
 | SVG — UI | 15 (13 shared + 2 mascot poses) |
 | SVG — stickers | 6 |
 | Audio (MP3) | 1 |
 | PWA icons (PNG) | 1 |
-| **Total** | **59** |
+| **Total** | **73** |
 
 ---
 

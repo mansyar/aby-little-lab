@@ -89,7 +89,7 @@ interface ShadowSlotData {
 /**
  * Shadow Match scene — drag colored objects to matching dark silhouettes.
  *
- * Round initialization generates 6 object-silhouette pairs with independently
+ * Round initialization generates 6 of 8 object-silhouette pairs with independently
  * shuffled positions. Objects are dragged via Phaser Pointer Drag to matching
  * shadow silhouettes. Correct drops snap to center with SFX + bounded splash/ray feedback;
  * incorrect drops bounce back gently with a soft tone.

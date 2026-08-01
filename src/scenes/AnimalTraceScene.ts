@@ -111,7 +111,7 @@ interface PairState {
  * Toddler traces a dotted curve from animal sprite to food sprite using
  * pointer proximity. Finger lift/stray pauses (no reset, no penalty).
  * Reaching the food triggers a completion chime + bounded splash/ray feedback. Three
- * pairs are traced per round (3 of 4 animal-food pairs randomly selected).
+ * pairs are traced per round (3 of 6 animal-food pairs randomly selected).
  */
 export class AnimalTraceScene extends Phaser.Scene {
   private parentLock?: ParentLock;

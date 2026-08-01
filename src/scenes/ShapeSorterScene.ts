@@ -55,7 +55,7 @@ interface SlotData {
 /**
  * Shape Sorter scene — drag geometric shapes to matching cut-out slots.
  *
- * Round initialization selects 3 of 4 shapes, shuffles slot positions and
+ * Round initialization selects 3 of 6 shapes, shuffles slot positions and
  * shape positions independently. Shapes are dragged via Phaser Pointer Drag
  * to matching cutout slots. Correct drops snap to center with SFX + bounded splash/ray feedback;
  * incorrect drops bounce back gently with a soft tone.

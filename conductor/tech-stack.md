@@ -103,6 +103,8 @@ interface AppStorage {
 - Loaded via Phaser's SVG loader with explicit width/height for high-res rasterization
 - Shadow assets derived by duplicating paths, unioning fills, setting color to `#2D3748`
 
+> **2026-08-01 — Design Update (Replay Variety Expansion):** Item pools expanded for replay variety — Shape Sorter 4→6 shapes (heart, crescent), Animal Trace 4→6 pairs (elephant→peanut, pig→apple), Shadow Match 6→8 objects (airplane, mushroom; rounds select a shared 6-item set for objects and shadows), Big vs. Small 4→6 toys (rocket, drum). Pop & Freeze decoy pool reuses all 6 Game 2 animals. Round sizes unchanged (3-of-6, 3-of-6, 6-of-8, 3-of-6).
+
 ### Audio Assets
 - **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
 - **BGM:** Single MP3 loop (`bgm.mp3`) served at `/audio/bgm.mp3`
