@@ -39,7 +39,7 @@
 - [x] Task: Verify deploy guarding logic (88ce95c)
   - [x] Static review: conditions, `needs`, and secret guard are correct
   - [x] Document the required repository secret name (`COOLIFY_DEPLOY_WEBHOOK`) in workflow comments
-- [ ] Task: Phase 3 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase 3 Verification & Checkpoint (Refer to workflow.md) [checkpoint: c16917f]
 
 ## Phase 4: Documentation & Live Validation
 
