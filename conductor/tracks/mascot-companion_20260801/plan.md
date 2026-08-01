@@ -15,7 +15,7 @@
 
 ## Phase 2: Mascot Component
 
-- [ ] Task: Build `Mascot` component with wave/cheer/nod/idleLoop [TDD]
+- [x] Task: Build `Mascot` component with wave/cheer/nod/idleLoop [TDD] (5306e7f)
   - [ ] **RED:** Add failing tests: constructor creates idle image at given position/scale; `wave()` rotation yoyo; `cheer()` switches to celebrate pose, bounces, emits self-cleaning sparkle ring; `nod()` gentle rotate yoyo; `idleLoop()` bob + squash-blink; reduced-motion disables idle loop and minimizes amplitudes; `destroy()` cleans up.
   - [ ] **GREEN:** Implement `src/components/Mascot.ts`.
   - [ ] **REFACTOR:** Reuse motion utilities from `cross-cutting-motion_20260801` for durations/amplitudes where available.
