@@ -12,7 +12,7 @@
   - [x] Record baseline results (versions, test counts) in plan notes
 
 > **Phase 1 baseline (2026-08-02):** biome check clean (51 files); vitest 592 tests / 18 files passed; vite 8.1.5 build OK; validate-pwa 13/13 passed. Toolchain: pnpm 11.7.0 (corepack, matches Dockerfile), Node via corepack, Vitest 4.1.10. Note: `CI=true pnpm test` is bash syntax; on Windows PowerShell use `$env:CI='true'; pnpm test` (CI itself is bash-native, unaffected).
-- [ ] Task: Phase 1 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase 1 Verification & Checkpoint (Refer to workflow.md) [checkpoint: 50fe1c6]
 
 ## Phase 2: Quality-Gates Workflow (`.github/workflows/ci.yml`)
 
