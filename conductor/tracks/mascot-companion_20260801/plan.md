@@ -32,7 +32,7 @@
 
 ## Phase 4: Game Integration (all six scenes)
 
-- [ ] Task: Wire mascot reactions into ShapeSorter, AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall [TDD]
+- [x] Task: Wire mascot reactions into ShapeSorter, AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall [TDD] (59dc09d)
   - [ ] **RED:** Add per-scene failing tests: mascot created at corner scale; `cheer()` on correct action; `nod()` on incorrect action; big `cheer()` on win; destroyed on shutdown.
   - [ ] **GREEN:** Integrate `Mascot` into each scene's create/handlers.
   - [ ] **REFACTOR:** Share wiring where scenes share structure; keep per-scene conventions.
