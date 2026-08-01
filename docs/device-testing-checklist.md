@@ -73,16 +73,16 @@ pnpm exec serve dist -l 3000
 - [ ] No crashes or freezes during boot
 
 #### Hub Screen
-- [ ] All 6 game tiles are visible
+- [ ] All 7 game tiles are visible
 - [ ] Tiles, labels, and stickers enter with a staggered wave (40ms apart), not all at once
 - [ ] Tiles gently bob on an idle loop after entering
-- [ ] Sticker shelf shows six 56px thumbnails: earned at full color with shimmer, unearned dimmed (~30% opacity, smaller)
+- [ ] Sticker shelf shows seven 56px thumbnails: earned at full color with shimmer, unearned dimmed (~30% opacity, smaller)
 - [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replaying an earned game shows no highlight
 - [ ] Press and hold a game tile: it squishes and stays; release on the tile springs it back and starts the game; release off the tile does not navigate
 - [ ] After ~25s idle, tiles wiggle and a soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
-- [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) respond to taps near the visible label (96×96px hit areas — no precision tapping)
+- [ ] Protected controls (Settings, all seven game Back buttons, Musical Memory Replay) respond to taps near the visible label (96×96px hit areas — no precision tapping)
 - [ ] Professor Hoot mascot sits in the bottom-right corner: waves on load, cheers on a just-earned sticker, then bobs/blinks on the idle loop
 - [ ] Mascot is touch-inert — tapping where Hoot stands still reaches the tile/control underneath
 
@@ -162,6 +162,17 @@ pnpm exec serve dist -l 3000
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
+#### Game 7: Pattern Builder
+- [ ] Game loads correctly
+- [ ] 4 slots (3 filled shapes + clearly marked empty gap) and 3 answer cards are visible
+- [ ] Pattern shapes are recognizable (reuses the Shape Sorter shape SVGs)
+- [ ] Tapping the correct card snaps the shape into the gap with a settle tween + chime
+- [ ] Progress dots fill one per round; 5 rounds complete the game
+- [ ] Tapping a wrong card wiggles it gently with no penalty and no progression loss
+- [ ] Cards/slots exceed the 64px minimum touch target
+- [ ] Sticker awarded on first completion
+- [ ] Returns to Hub after completion (auto-return ~3s)
+
 ### C. Cross-Game Features
 
 #### Sticker System
@@ -185,9 +196,9 @@ pnpm exec serve dist -l 3000
 - [ ] No ring artifacts remain after a cancelled hold or after leaving the scene
 
 #### Mascot Companion
-- [ ] Hoot appears in the same bottom-right corner on the Hub and in all six games (consistent placement, behind gameplay z-order)
+- [ ] Hoot appears in the same bottom-right corner on the Hub and in all seven games (consistent placement, behind gameplay z-order)
 - [ ] Hoot cheers on correct actions in every game (pose swap + bounce; bigger cheer + sparkle ring on win)
-- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small)
+- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small, Pattern Builder)
 - [ ] Rapid correct taps: Hoot finishes gracefully — no stuck pose, no runaway bounce (in-flight cheer retired)
 - [ ] Hoot disappears when leaving a scene and never lingers into the next scene
 
@@ -265,8 +276,8 @@ pnpm exec serve dist -l 3000
 - [ ] BGM and SFX settings persist after closing and reopening the app
 - [ ] SFX feedback remains synthesized and no removed SFX MP3 URL is requested
 - [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the crossfade transition
-- [ ] Each of the six games shows at most one short splash/ray for a success or completion action
-- [ ] All six games play the shared win celebration (rays + confetti) on completion, which cleans itself up
+- [ ] Each of the seven games shows at most one short splash/ray for a success or completion action
+- [ ] All seven games play the shared win celebration (rays + confetti) on completion, which cleans itself up
 - [ ] Back, Replay, Settings, and Hub tile controls squish on press and spring back on release
 - [ ] No completion effect remains on screen or obscures the next interaction
 - [ ] Reduced-motion mode disables or simplifies the splash/ray

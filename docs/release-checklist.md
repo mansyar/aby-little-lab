@@ -37,7 +37,7 @@
 - [ ] With Reduce Motion enabled: transitions, celebration, and gameplay tweens shorten (~40%); celebration renders 6 rays with no confetti; press feedback is disabled; Hub entrances fade without scale, no bob/wiggle/sparkle, and the idle attract plays chime-only; game completion still works
 
 ### 4b. Touch UX & Parental Lock
-- [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) expose 96×96px hit areas
+- [ ] Protected controls (Settings, all seven game Back buttons, Musical Memory Replay) expose 96×96px hit areas
 - [ ] A 3-second hold shows the circular progress ring and triggers the action exactly once
 - [ ] Duplicate touches during a hold do not double-trigger the action
 - [ ] Early release, pointer leaving the control, and pointer cancel never trigger the action
@@ -46,7 +46,7 @@
 ### 4c. Hub Engagement
 - [ ] Tiles, labels, and stickers enter with a 40ms stagger wave (fade-only under reduced motion)
 - [ ] Tiles bob gently on a 2.5s idle loop
-- [ ] Sticker shelf shows six 56px thumbnails: earned shimmer, unearned dimmed (30% alpha)
+- [ ] Sticker shelf shows seven 56px thumbnails: earned shimmer, unearned dimmed (30% alpha)
 - [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replays show no highlight
 - [ ] After ~25s idle, tiles wiggle + soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Reduced-motion: idle chime plays without the wiggle
@@ -60,6 +60,9 @@
 - [ ] Animal Trace: animal hops with arc between waypoints; food wiggles on arrival; progress dots pop 1 → 1.4 → 1
 - [ ] Pop & Freeze: pop emits 3 small droplet circles that fade out (self-cleaning); sleeping decoys breathe on a gentle loop
 - [ ] Musical Memory: tapped frog emits an expanding ripple ring (self-cleaning); lily pads drift ±3px; progress dots pop on fill
+- [ ] Pattern Builder: correct tap snaps the card into the gap (200ms `Back.out`) with a chime + progress dot pop; wrong tap wiggles the card ±4° with no penalty and no progression loss
+- [ ] Pattern Builder: 5 rounds complete → shared win celebration (rays + confetti), sticker award on first completion, auto-return to Hub after 3s
+- [ ] Pattern Builder reduced-motion: snap 120ms, wiggle ±2°, celebration simplified
 - [ ] Reduced-motion: all juice gentler/shorter (lift 1.05× no tilt, no hop arc, smaller droplets/ripples); breathing and drift loops disabled
 - [ ] No new assets or audio files were added by this track (Graphics-only effects)
 

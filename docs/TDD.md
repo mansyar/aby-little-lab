@@ -65,7 +65,8 @@ aby-little-lab/
     │   ├── PopFreezeScene.ts       # Mini-Game 3
     │   ├── ShadowMatchScene.ts     # Mini-Game 4
     │   ├── MusicalMemoryScene.ts   # Mini-Game 5
-    │   └── BigSmallScene.ts        # Mini-Game 6
+    │   ├── BigSmallScene.ts        # Mini-Game 6
+    │   └── PatternBuilderScene.ts  # Mini-Game 7
     ├── components/
     │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
     │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay
@@ -78,7 +79,8 @@ aby-little-lab/
     │   ├── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
     │   ├── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
     │   ├── musicalMemoryLogic.ts # Pure game logic (sequence generation, note appending, input validation, round/win detection)
-    │   └── bigSmallLogic.ts     # Pure game logic (toy selection, dual-scale instance creation, round generation, scale-category match detection, win detection)
+    │   ├── bigSmallLogic.ts     # Pure game logic (toy selection, dual-scale instance creation, round generation, scale-category match detection, win detection)
+    │   └── patternBuilderLogic.ts # Pure game logic (pattern row generation, gap placement, 3-unique-choice generation, playthrough generation)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -102,7 +104,7 @@ aby-little-lab/
     └── __tests__/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock, Mascot tests
-        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic)
+        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic)
         ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
         └── utils/                  # Storage, motion, sceneTransitions, completionEffect, dragJuice, and pressFeedback tests
 ```
@@ -171,6 +173,7 @@ import { BigSmallScene } from "./scenes/BigSmallScene";
 import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
 import { MusicalMemoryScene } from "./scenes/MusicalMemoryScene";
+import { PatternBuilderScene } from "./scenes/PatternBuilderScene";
 import { PopFreezeScene } from "./scenes/PopFreezeScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 import { ShadowMatchScene } from "./scenes/ShadowMatchScene";
@@ -201,6 +204,7 @@ const config: Phaser.Types.Core.GameConfig = {
     ShadowMatchScene,
     MusicalMemoryScene,
     BigSmallScene,
+    PatternBuilderScene,
   ],
 };
 
@@ -238,7 +242,8 @@ type GameId =
   | "pop-freeze"
   | "shadow-match"
   | "musical-memory"
-  | "big-small";
+  | "big-small"
+  | "pattern-builder";
 
 interface StickerData {
   earned: boolean;
@@ -270,7 +275,7 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 - **Cancellation:** `pointerup`, `pointerout`, and `pointercancel` all cancel the hold and fire `onFailure` exactly once; `destroy()` (scene shutdown) cancels without firing callbacks.
 - **Exactly-once success:** the delayed-call callback checks `holdActive`, nulls the timer, clears the ring, then invokes `onSuccess()`; stale callbacks after cancel/destroy/shutdown are no-ops.
 - **Circular progress ring:** on `pointerdown`, a `Graphics` ring (48px radius, `#68D391` at 0.6 alpha, depth 10000) is drawn around the target center via `slice()` + `fillPath()`, animated with a `tweens.add` value tween over the hold duration. The ring and tween are destroyed on cancel, completion, and `destroy()` — no display objects leak.
-- **Hit areas:** protected controls (6 Back buttons, Hub Settings, Musical Memory Replay) use `setInteractive({ hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96), hitAreaCallback: Phaser.Geom.Rectangle.Contains })`. Phaser anchors custom hit areas at the **top-left of the display bounds** (`pointWithinHitArea` adds `displayOriginX/Y`), independent of `setOrigin` — hence `Rectangle(0, 0, 96, 96)` for every protected control.
+- **Hit areas:** protected controls (7 Back buttons, Hub Settings, Musical Memory Replay) use `setInteractive({ hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96), hitAreaCallback: Phaser.Geom.Rectangle.Contains })`. Phaser anchors custom hit areas at the **top-left of the display bounds** (`pointWithinHitArea` adds `displayOriginX/Y`), independent of `setOrigin` — hence `Rectangle(0, 0, 96, 96)` for every protected control.
 
 ### Game IDs
 
@@ -282,6 +287,7 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `shadow-match` | Game 4 |
 | `musical-memory` | Game 5 |
 | `big-small` | Game 6 |
+| `pattern-builder` | Game 7 |
 
 ### Example State
 
@@ -293,7 +299,8 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
     "pop-freeze": { "earned": true, "earnedAt": "2024-08-02T00:00:00.000Z" },
     "shadow-match": { "earned": false, "earnedAt": null },
     "musical-memory": { "earned": false, "earnedAt": null },
-    "big-small": { "earned": false, "earnedAt": null }
+    "big-small": { "earned": false, "earnedAt": null },
+    "pattern-builder": { "earned": false, "earnedAt": null }
   },
   "settings": {
     "bgmEnabled": true,
@@ -413,13 +420,14 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | `sticker_shadow_match.svg` | 512×512 | Game 4 | Unique themed sticker |
 | `sticker_musical_memory.svg` | 512×512 | Game 5 | Unique themed sticker |
 | `sticker_big_small.svg` | 512×512 | Game 6 | Unique themed sticker |
+| `sticker_pattern_builder.svg` | 512×512 | Game 7 | Unique themed sticker — ABAB row (orange circle + teal rounded square) with dashed gap slot on the cream badge |
 
 ### Mascot Poses (`src/assets/svg/ui/`)
 
 | File | Dimensions | Used In | Notes |
 |---|---|---|---|
-| `mascot_idle.svg` | 512×512 | Hub + all six games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
-| `mascot_celebrate.svg` | 512×512 | Hub + all six games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
+| `mascot_idle.svg` | 512×512 | Hub + all seven games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
+| `mascot_celebrate.svg` | 512×512 | Hub + all seven games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
 
 > **Note:** The mascot is **tween-only** — no sprite sheets or particle emitters. Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
 
@@ -431,7 +439,7 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 
 > **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
 >
-> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track. Game 6 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Big vs. Small Cleaner track.
+> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track. Game 6 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Big vs. Small Cleaner track. Game 7 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Pattern Builder track.
 
 ### PWA Icons (`public/icons/`)
 
@@ -449,10 +457,10 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | SVG — toys | 7 (6 toys + 1 box, Game 6) |
 | SVG — shadows | 8 (Game 4 silhouettes) |
 | SVG — UI | 15 (13 shared + 2 mascot poses) |
-| SVG — stickers | 6 |
+| SVG — stickers | 7 |
 | Audio (MP3) | 1 |
 | PWA icons (PNG) | 1 |
-| **Total** | **73** |
+| **Total** | **74** |
 
 ---
 
@@ -490,7 +498,7 @@ The Hub implements the engagement track (FR1–FR5):
 ### `completionEffect.ts`
 
 - `createCompletionSplash(scene, x, y)` — bounded success effect for correct in-game actions; self-cleaning (destroys on tween complete), never clouds the play area.
-- `createWinCelebration(scene, x, y)` — the shared completion effect used by all six games (replaces per-game bespoke win tweens):
+- `createWinCelebration(scene, x, y)` — the shared completion effect used by all seven games (replaces per-game bespoke win tweens):
   - 10 rays + 10 drifting confetti bits (`WIN_CONFETTI_COUNT = 10`), `WIN_STANDARD_DURATION = 700ms`, ray burst scale 1.25×.
   - Colors: `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea`.
   - Reduced motion: `WIN_REDUCED_DURATION = 300ms`, 6 rays, burst scale 1.0×, **no particles**.
@@ -499,7 +507,7 @@ The Hub implements the engagement track (FR1–FR5):
 ### `pressFeedback.ts`
 
 - `attachPressFeedback(obj, options?)` — captures `obj.scaleX` at attach time; `pointerdown` squishes to `baseScale × 0.95`; `pointerup`/`pointerout`/`pointercancel` restore `baseScale` — instantly by default, or with a 150ms `Back.out` spring when `options.spring` is set. No-op under reduced motion.
-- Wired to the six game Back controls, Musical Memory Replay, Hub Settings, and every Hub game tile (with `{ spring: true }`, attached on entrance completion so the base scale is captured at 1.0). Registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior. Hub tiles navigate on `pointerup` so the press squish stays visible while holding.
+- Wired to the seven game Back controls, Musical Memory Replay, Hub Settings, and every Hub game tile (with `{ spring: true }`, attached on entrance completion so the base scale is captured at 1.0). Registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior. Hub tiles navigate on `pointerup` so the press squish stays visible while holding.
 
 ### Gameplay tween values (normal → reduced)
 
@@ -509,7 +517,7 @@ The Hub implements the engagement track (FR1–FR5):
 | Bubble pop shrink (Pop & Freeze!) | 200 ms | 120 ms |
 | Wake wobble (Pop & Freeze!) | 300 ms, 1.15× base | 180 ms, 1.05× base |
 | Frog bounce (Musical Memory) | 200 ms, 1.2× base | 120 ms, 1.05× base |
-| Sticker pops (all six games) | 300 ms | 180 ms |
+| Sticker pops (all seven games) | 300 ms | 180 ms |
 
 ### Per-game juice (2026-08-01)
 
@@ -547,10 +555,10 @@ The Mascot Companion track (archived at `conductor/archive/mascot-companion_2026
 - `idleLoop()` — Hub-only: 3px vertical bob (`Sine.inOut`, 2500ms yoyo, `repeat: -1`) + periodic squash-blink (`scaleY 0.92`, 150ms, `repeatDelay 3700ms`). No-op under reduced motion.
 - `destroy()` — removes the sprite, any active cheer/blink tweens, and the sparkle ring.
 - `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `wave()` after the scene entrance, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
-- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all six games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
+- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all seven games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
 
 Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 37 integration tests in `src/__tests__/scenes/navigation.test.ts` (7 Hub + 29 game-scene + 1 mid-air edge case).
 
 ### Test coverage
 
-555 tests across 17 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.69% lines (AnimalTraceScene 95.45%, PopFreezeScene 93.69%, remainder ≥ 98%); total project 97.73% statements / 97.39% functions / 86.73% branches / 98.65% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+591 tests across 18 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 99.31% lines / 85.71% branches; total project 97.91% statements / 97.63% functions / 86.94% branches / 98.8% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.

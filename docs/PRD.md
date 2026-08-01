@@ -13,7 +13,7 @@
 
 ## 1. Executive Summary & Core Objectives
 
-This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **6 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
+This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **7 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
 
 **Key Strategic Pivot:** To ensure maximum crispness across high-DPI retina displays (iPads, Android tablets, and phones) without large asset file sizes, all graphical assets are built using an **AI-Generated SVG Pipeline**. Phaser 4 rasterizes these scalable vectors dynamically at load time into crisp bitmaps, matching exact target display resolutions.
 
@@ -60,10 +60,10 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + Graphics-based splash (the project uses Graphics shapes only — no `add.particles` emitters). Incorrect actions give a gentle "try again" animation with no penalty; dropping on empty space bounces back silently (no incorrect SFX).
 - **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
-- **Win Celebration:** All six games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
+- **Win Celebration:** All seven games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
 - **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
 - **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
-- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all six game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
+- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all seven game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
@@ -124,6 +124,16 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Big toys (144px) and small toys (67px) both exceed the 64px minimum touch target. Size categories are visually distinct (1.5× vs 0.7× ratio). Box-reaction tweens soften when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
 - **Game Logic:** Pure functions in `src/game/bigSmallLogic.ts` (Fisher-Yates shuffle, toy type selection, toy instance creation with dual scales, box creation, round generation with independent toy shuffling, scale-category match detection, win detection) — testable without Phaser.
 
+### GAME 7 — Pattern Builder (Sequential Pattern Recognition) ✅ Implemented
+
+- **Milestone:** Recognizing and completing simple repeating sequences.
+- **Mechanics:** 4 slots show 3 filled shapes and 1 marked empty gap; 3 answer cards sit below. Child taps the shape that completes the pattern. 5 rounds per playthrough; each round draws a fresh pattern from a 6-shape pool with 3 unique choices (no duplicate answers).
+- **Pattern Types:** ABAB, AABB, ABB — built from two distinct shapes chosen from the 6-shape pool (circle, square, triangle, star, heart, crescent). The gap appears at the end (50%) or in the middle (50%, never the first slot).
+- **SVG Requirements:** Reuses the 6 existing Game 1 shape SVGs (`shape_circle.svg` … `shape_crescent.svg`) — no new gameplay assets. Sticker: `sticker_pattern_builder.svg` (ABAB row of an orange circle + teal rounded square with a dashed gap slot on the cream badge).
+- **Phaser Engine Logic:** Tap-to-fill (no drag). Correct tap: the chosen card shape tweens into the gap with a 200ms `Back.out` snap (120ms reduced) + ascending chime, the progress dot pops 1 → 1.4 → 1 `Back.out`, and the next round starts after 700ms. Incorrect tap: the card wiggles ±4° (`Sine.inOut`, 350ms, 3 yoyo repeats; gentler ±2°/200ms under reduced motion) + soft descending tone, no penalty, no progression loss. After 5 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "pattern-builder" }`. Parental lock (hold 3s) exits to Hub at any time. Mascot: cheer on correct, nod on incorrect, big cheer on win.
+- **Accessibility:** Cards and slots are 120–128px (exceeding the 64px minimum and the 96×96px ideal). Shapes are distinguished by silhouette AND color. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Zero text — gameplay is purely visual.
+- **Game Logic:** Pure functions in `src/game/patternBuilderLogic.ts` (pattern row generation, gap placement, distractor selection, 3-unique-choice generation, playthrough generation, correct-shape lookup) — testable without Phaser.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -143,12 +153,13 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
     │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
-    │  toys/box + sticker — all 6 games' assets loaded)
+    │  toys/box + sticker, Game 7 shapes + sticker — all 7 games'
+    │  assets loaded)
     │
     ▼
 [HubScene]
     │
-    ├── Display 6 game tiles (grid)
+    ├── Display 7 game tiles (grid)
     ├── Display sticker shelf (earned/unearned thumbnails)
     ├── Hold Settings for 3s ──────► [Settings modal]
     │                                 ├── Toggle persisted BGM/SFX settings
@@ -178,7 +189,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. Tapping the dark backdrop closes the modal and returns to the Hub.
 - **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
 
-> **Release decision (2026-08-01):** The parental lock was hardened across Hub Settings and all six game Back controls: one hold per active pointer (duplicate `pointerdown` ignored), cancellation on release/pointer-out/`pointercancel`/scene shutdown, exactly one success callback per completed hold, and no stale timers or callbacks after the scene is destroyed. A circular progress fill (48px radius, `--success` `#68D391` at 0.6 alpha, rendered above scene UI) shows hold progress and is always cleaned up on cancel, completion, or shutdown. All protected controls expose explicit 96×96px hit areas; Phaser anchors hit areas at the top-left of a control's display bounds (not its origin), so rectangles are specified as `Rectangle(0, 0, 96, 96)`.
+> **Release decision (2026-08-01):** The parental lock was hardened across Hub Settings and all seven game Back controls: one hold per active pointer (duplicate `pointerdown` ignored), cancellation on release/pointer-out/`pointercancel`/scene shutdown, exactly one success callback per completed hold, and no stale timers or callbacks after the scene is destroyed. A circular progress fill (48px radius, `--success` `#68D391` at 0.6 alpha, rendered above scene UI) shows hold progress and is always cleaned up on cancel, completion, or shutdown. All protected controls expose explicit 96×96px hit areas; Phaser anchors hit areas at the top-left of a control's display bounds (not its origin), so rectangles are specified as `Rectangle(0, 0, 96, 96)`.
 
 > **Release decision (2026-08-01):** A unified motion & feedback system was introduced. `src/utils/motion.ts` centralizes reduced-motion handling (`isReducedMotion`, `motionDuration`, `motionScale`); every animation in the app consults it — scene crossfades (300ms/180ms), the shared win celebration, press feedback (disabled under reduced motion), and all gameplay tweens (bounce-backs 300→180ms, bubble pop 200→120ms, wake wobble 300→180ms at 1.05× instead of 1.15×, frog bounce 200→120ms at 1.05× instead of 1.2×, sticker pops 300→180ms). Celebration: 10 rays + 10 confetti bits, 700ms standard / 300ms reduced, burst scale 1.25× / 1.0×, 6 rays and no particles when reduced. Covered by 445 tests across 15 files (~99% coverage).
 
@@ -189,6 +200,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 > **RELEASED — 2026-08-01 (Mascot Companion track):** 555 tests across 17 files.
 >
 > **Mascot companion:** Professor Hoot was added as a static-pose + tween-only mascot — no sprite sheets, no particle emitters, no new audio. Reactions reuse the existing shared SFX (correct/incorrect/win/sticker), animations run through `motion.ts` (reduced-motion-aware), and the mascot is touch-inert (never blocks taps) and rendered behind gameplay z-order. Deployed to the Hub (wave/cheer/idleLoop) and all six game scenes (cheer on correct, nod on incorrect, big cheer on win, destroyed on shutdown). This is a celebration-surface addition: it does not add new learning content, but reinforces feedback loops through a consistent, gentle companion presence.
+
+> **Release decision (2026-08-02):** Game 7 (Pattern Builder) shipped — a tap-to-complete pattern game (ABAB/AABB/ABB, 6-shape pool, gap at end or middle, 3 unique choices, 5 rounds, zero text). Reuses the six Game 1 shape SVGs; the only new asset is `sticker_pattern_builder.svg`. The Hub grid grew to 4×2 (7 tiles) and the localStorage `GameId` union includes `pattern-builder`. Correct taps snap with `Back.out` + chime + dot pop; wrong taps wiggle with no penalty; mascot cheer/nod/big-cheer paths are covered by scene tests. 591 tests across 18 files (~98.8% lines, 97.9% statements).
 
 ---
 
