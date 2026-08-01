@@ -38,7 +38,7 @@
   - [ ] Commit with git note + plan update
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 3: Scene & Preload Wiring
+## Phase 3: Scene & Preload Wiring [checkpoint: d06d344]
 
 - [x] Task: PreloadScene — load the 14 new assets at 512×512 (verify no 404s; add/extend load tests where applicable) [9cd626d]
 - [x] Task: ShapeSorterScene — consume expanded shape pool (no layout/mechanics changes) [9cd626d]
