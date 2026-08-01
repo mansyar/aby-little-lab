@@ -1,6 +1,6 @@
 # Implementation Plan — Replay Variety Expansion
 
-## Phase 1: New SVG Assets
+## Phase 1: New SVG Assets [checkpoint: d72b501]
 
 - [x] Task: Author Shape Sorter assets — `shape_heart.svg`, `cutout_heart.svg`, `shape_crescent.svg`, `cutout_crescent.svg` (512×512 viewBox, flat fills, 4–6px `#2D3748` strokes; heart `#E53E3E`, crescent `#ECC94B`) [f837be5]
 - [x] Task: Author Animal Trace assets — `elephant.svg`, `pig.svg`, `peanut.svg`, `apple.svg` [f837be5]
