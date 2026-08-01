@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm (pinned to Dockerfile version)
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint & format check
+        run: pnpm run check
+
+      - name: Tests
+        run: CI=true pnpm test
+
+      - name: Production build
+        run: pnpm run build
+
+      - name: PWA validation
+        run: node scripts/validate-pwa.js
+
+  deploy:
+    name: Deploy to Coolify
+    needs: quality-gates
+    # Structurally impossible on pull_request events: deploy only on master pushes.
+    # Requires repository secrets:
+    #   COOLIFY_DEPLOY_WEBHOOK - Coolify -> Application -> Webhooks -> Deploy Webhook URL
+    #   COOLIFY_TOKEN         - Coolify -> Keys & Tokens -> API token with 'deploy' permission
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deploy secrets are configured
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        if: env.DEPLOY_WEBHOOK == '' || env.COOLIFY_TOKEN == ''
+        run: |
+          echo "::error title=Missing secrets::Set COOLIFY_DEPLOY_WEBHOOK (Coolify deploy webhook URL) and COOLIFY_TOKEN (Coolify API token with deploy permission) under Settings -> Secrets and variables -> Actions, then re-run this job."
+          exit 1
+
+      - name: Trigger Coolify deploy webhook
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request GET \
+            --url "$DEPLOY_WEBHOOK" \
+            --header "Authorization: Bearer $COOLIFY_TOKEN"

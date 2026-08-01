@@ -164,6 +164,22 @@ docker run --rm -p 8080:80 aby-little-lab
 
 Open `http://localhost:8080` for a local smoke test. For production PWA installation and offline testing, terminate TLS at your hosting provider or reverse proxy and serve the container over HTTPS.
 
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the full quality-gate suite before anything reaches production:
+
+- **Pull requests** — the `Quality Gates` job runs `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, and `node scripts/validate-pwa.js`. The PR must be green before merging (enable branch protection on `master` to require this check).
+- **Merge to `master`** — after the gates pass, the `Deploy to Coolify` job fires the Coolify Deploy Webhook, and Coolify rebuilds the app from the repo's Dockerfile and ships the new version.
+
+One-time setup:
+
+1. In Coolify, open **Keys & Tokens → API Tokens**, create a token with the **`deploy`** permission, and copy it.
+2. In Coolify, open the application → **Webhooks** → copy the **Deploy Webhook** URL.
+3. In GitHub, go to **Settings → Secrets and variables → Actions** and add two repository secrets:
+   - **`COOLIFY_DEPLOY_WEBHOOK`** — the Deploy Webhook URL
+   - **`COOLIFY_TOKEN`** — the API token (with `deploy` permission)
+4. (Recommended) Enable branch protection on `master` with "Require status checks" → `Quality Gates`, so only gate-verified code can be merged.
+
 ## Documentation
 
 - [PRD.md](docs/PRD.md) - Product Requirements Document
