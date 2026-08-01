@@ -71,3 +71,6 @@
 - Coverage, check, tests, and build pass.
 - Manual verification recorded.
 - Changes committed with task summaries and Git notes.
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions a99482f
