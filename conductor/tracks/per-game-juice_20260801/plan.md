@@ -47,10 +47,10 @@
 
 ## Phase 6: MusicalMemory Reactions
 
-- [ ] Task: Ripple rings, lily pad drift, progress-dot pop [TDD]
-  - [ ] **RED:** Add failing tests: expanding ripple ring on frog tap (Graphics, 400ms, alpha fade, self-cleaning); lily pad drift loop; progress dots pop on fill; reduced-motion disables drift.
-  - [ ] **GREEN:** Implement in `MusicalMemoryScene`.
-  - [ ] **VERIFY:** Run MusicalMemory logic + scene tests.
+- [x] Task: Ripple rings, lily pad drift, progress-dot pop [TDD] `ff2020b`
+  - [x] **RED:** Add failing tests: expanding ripple ring on frog tap (Graphics, 400ms, alpha fade, self-cleaning); lily pad drift loop; progress dots pop on fill; reduced-motion disables drift.
+  - [x] **GREEN:** Implement in `MusicalMemoryScene`.
+  - [x] **VERIFY:** Run MusicalMemory logic + scene tests.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 7: Quality Gates
