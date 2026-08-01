@@ -48,7 +48,7 @@
   - [x] Mark pre/post-release items (automated + track-validated items marked; manual device items left open with notes)
   - [x] Record actual performance metrics — pending device testing (noted in checklist)
 - [x] **Task 4.2:** Write release notes per template — `docs/release-notes-v1.0.0.md`
-- [ ] **Task 4.3:** Final verification
-  - [ ] `v1.0.0` tag → merged commit on `master`; checklist complete; docs committed
-  - [ ] **Phase Verification & Checkpoint** + final `conductor(plan):` update recording all SHAs
-  - [ ] `[checkpoint: 0945d47]`
+- [x] **Task 4.3:** Final verification
+  - [x] `v1.0.0` tag → merged commit on `master` (tag `d0e73bf` ancestor of `origin/master` `1e6d099`); checklist complete; docs committed to master (PR #3)
+  - [x] **Phase Verification & Checkpoint** + final `conductor(plan):` update recording all SHAs
+  - [x] `[checkpoint: 0945d47]`
