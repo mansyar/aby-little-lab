@@ -1,0 +1,18 @@
+{
+  "track_id": "hub-engagement_20260801",
+  "type": "feature",
+  "state": "complete",
+  "spec": {
+    "approved": true,
+    "approved_at": "2026-07-31T21:11:53Z"
+  },
+  "plan": {
+    "approved": true,
+    "approved_at": "2026-07-31T21:11:53Z",
+    "items_total": 10,
+    "items_completed": 10
+  },
+  "created_at": "2026-07-31T21:11:53Z",
+  "updated_at": "2026-08-01T10:59:00Z",
+  "description": "Hub Engagement: staggered entrance, idle life, tile press feedback, sticker shelf, idle attract"
+}
