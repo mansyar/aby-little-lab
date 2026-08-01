@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **415 tests across 15 files**, ~97% statement coverage.
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **445 tests across 15 files**, ~99% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
 
 ## Code Quality
 
@@ -112,8 +112,17 @@ All animation is driven by a shared motion system (`src/utils/`):
 
 - **Scene transitions** — every navigation path (boot → hub, hub ↔ game, completion returns) plays a 300ms crossfade to the app background, then a 180ms fade-in with a subtle entrance zoom.
 - **Win celebration** — all six games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
-- **Press feedback** — Back, Replay, and Settings controls squish to 95% of their base scale while pressed and spring back on release.
-- **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, and gameplay stays fully functional under `prefers-reduced-motion`.
+- **Press feedback** — Back, Replay, Settings, and Hub game tiles squish to 95% of their base scale while pressed; tiles spring back with a `Back.out` overshoot (150ms), other controls restore instantly. Hub tiles navigate **on release** so the squish stays visible while holding; dragging off the tile cancels the navigation.
+- **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, Hub entrances fade without scale (no bob, wiggle, sparkle, or burst), the idle attract plays chime-only, and gameplay stays fully functional under `prefers-reduced-motion`.
+
+## Hub Experience
+
+The Hub is the child's landing screen, built for gentle, playful engagement:
+
+- **Staggered entrance** — tiles, labels, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
+- **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
+- **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned ones are dimmed (30% alpha, 85% scale) so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session.
+- **Idle attract** — after ~25s without input, tiles wiggle gently (4° rotation wobble) and a soft two-tone chime (`AudioManager.playIdleCall()`) plays, repeating every ~10s while idle. Any pointer input resets the timer; reduced motion plays the chime without the wiggle.
 
 ## PWA Release Readiness
 

@@ -56,12 +56,12 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 ### Cross-Game Systems
 
-- **Sticker Collection:** Each mini-game awards a unique themed sticker on completion. Stickers accumulate in a sticker book displayed on the HubScene. Earned stickers persist across sessions via localStorage.
+- **Sticker Collection:** Each mini-game awards a unique themed sticker on completion. Stickers display as a shelf of real SVG thumbnails under each Hub tile: earned stickers render at full alpha with a gentle shimmer loop, unearned ones are dimmed (30% alpha, 85% scale) so the collection goal stays visible, and a just-earned sticker bounces in larger with a sparkle burst on auto-return. Earned stickers persist across sessions via localStorage.
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + particle burst. Incorrect actions give a gentle "try again" animation with no penalty.
 - **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
 - **Win Celebration:** All six games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
-- **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay) squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel.
+- **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
 - **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
@@ -148,7 +148,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 [HubScene]
     │
     ├── Display 6 game tiles (grid)
-    ├── Display sticker book (earned stickers)
+    ├── Display sticker shelf (earned/unearned thumbnails)
     ├── Hold Settings for 3s ──────► [Settings modal]
     │                                 ├── Toggle persisted BGM/SFX settings
     │                                 └── Tap backdrop to return to Hub
@@ -172,14 +172,16 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 ### Navigation Rules
 
 - **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a progress bar before transitioning to HubScene. Both transitions are crossfades.
-- **HubScene → GameScene:** Tap on a game tile. 300ms crossfade transition with entrance zoom.
+- **HubScene → GameScene:** Tap on a game tile — navigation fires on **release** (see Press Feedback). 300ms crossfade transition with entrance zoom.
 - **GameScene → HubScene:** Auto-return after game completion (3s delay with win celebration, then crossfade) OR parental lock (hold 3s, then crossfade).
 - **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. Tapping the dark backdrop closes the modal and returns to the Hub.
 - **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
 
 > **Release decision (2026-08-01):** The parental lock was hardened across Hub Settings and all six game Back controls: one hold per active pointer (duplicate `pointerdown` ignored), cancellation on release/pointer-out/`pointercancel`/scene shutdown, exactly one success callback per completed hold, and no stale timers or callbacks after the scene is destroyed. A circular progress fill (48px radius, `--success` `#68D391` at 0.6 alpha, rendered above scene UI) shows hold progress and is always cleaned up on cancel, completion, or shutdown. All protected controls expose explicit 96×96px hit areas; Phaser anchors hit areas at the top-left of a control's display bounds (not its origin), so rectangles are specified as `Rectangle(0, 0, 96, 96)`.
 
-> **Release decision (2026-08-01):** A unified motion & feedback system was introduced. `src/utils/motion.ts` centralizes reduced-motion handling (`isReducedMotion`, `motionDuration`, `motionScale`); every animation in the app consults it — scene crossfades (300ms/180ms), the shared win celebration, press feedback (disabled under reduced motion), and all gameplay tweens (bounce-backs 300→180ms, bubble pop 200→120ms, wake wobble 300→180ms at 1.05× instead of 1.15×, frog bounce 200→120ms at 1.05× instead of 1.2×, sticker pops 300→180ms). Celebration: 10 rays + 10 confetti bits, 700ms standard / 300ms reduced, burst scale 1.25× / 1.0×, 6 rays and no particles when reduced. Covered by 415 tests across 15 files (~97% coverage).
+> **Release decision (2026-08-01):** A unified motion & feedback system was introduced. `src/utils/motion.ts` centralizes reduced-motion handling (`isReducedMotion`, `motionDuration`, `motionScale`); every animation in the app consults it — scene crossfades (300ms/180ms), the shared win celebration, press feedback (disabled under reduced motion), and all gameplay tweens (bounce-backs 300→180ms, bubble pop 200→120ms, wake wobble 300→180ms at 1.05× instead of 1.15×, frog bounce 200→120ms at 1.05× instead of 1.2×, sticker pops 300→180ms). Celebration: 10 rays + 10 confetti bits, 700ms standard / 300ms reduced, burst scale 1.25× / 1.0×, 6 rays and no particles when reduced. Covered by 445 tests across 15 files (~99% coverage).
+
+> **Release decision (2026-08-01):** The Hub engagement track shipped staggered entrance (40ms per element, 300ms `Sine.out`, fade-only under reduced motion), idle life (2.5s ±4px bob loop with 200ms phase offsets; 4 low-contrast drift dots), a real SVG sticker shelf (56px thumbnails; earned shimmer at 0.75 alpha, unearned dimmed to 0.3 alpha/0.85 scale, just-earned `Back.out` 1.15× entrance + 500ms sparkle burst; game scenes pass `{ justEarned: gameId }` via scene-start data on first completion only), and idle attract (25s idle → 4° tile wiggle + soft `playIdleCall()` E5+G5 chime at 0.12 gain, repeating every 10s, reset on any pointer input, cleared on shutdown, chime-only under reduced motion). Two user-reported bugs were fixed during verification: `Camera.zoomTo` crash (camera Zoom effects resolve ease strings against their own EaseMap — pass `"Sine"`, not `"Sine.out"`) and sticker thumbnails rendering at full 512px texture size (entrance/burst tweens now scale relative to `STICKER_SCALE = 56/512`). Hub tiles navigate on release per user feedback. Covered by 445 tests across 15 files.
 
 ---
 
@@ -249,8 +251,9 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 | G4, C4 | 392.00, 261.63 Hz | Gameplay SFX — incorrect (soft descending) |
 | C5, E5, G5, C6 | 523.25, 659.25, 783.99, 1046.5 Hz | Gameplay SFX — win (celebratory arpeggio) |
 | C6, E6 | 1046.5, 1318.51 Hz | Gameplay SFX — sticker (sparkle) |
+| E5, G5 | 659.25, 783.99 Hz | Idle attract — idle call (gentle two-tone chime, 0.12 gain) |
 
-Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), and Game 3 pop/wake sounds are all synthesized via Web Audio API oscillators — no audio files needed for these. The AudioManager exposes these as `playPop()`, `playWake()`, `playCorrect()`, `playIncorrect()`, `playWin()`, and `playSticker()` methods, all respecting the SFX toggle setting.
+Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), Game 3 pop/wake sounds, and the idle-attract chime are all synthesized via Web Audio API oscillators — no audio files needed for these. The AudioManager exposes these as `playPop()`, `playWake()`, `playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`, and `playIdleCall()` methods, all respecting the SFX toggle setting.
 
 ### Background Music (BGM)
 

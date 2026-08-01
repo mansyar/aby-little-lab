@@ -33,7 +33,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 
 ### 3.2 Cross-Game Systems
 
-- **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display in a sticker book on the Hub.
+- **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display as a sticker shelf (SVG thumbnails) under each Hub tile — earned stickers shimmer, unearned ones are dimmed, and a just-earned sticker gets a highlight on return.
 - **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed.
 - **Gentle Feedback:** Correct → pleasant chime + particle burst. Incorrect → gentle "try again" animation, no penalty.
 
@@ -58,7 +58,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 
 - **BootScene:** Locks screen orientation to landscape via Screen Orientation API. Auto-transitions to Preload.
 - **PreloadScene:** Preloads SVG assets (rasterized at 512×512), displays progress bar. Auto-transitions to Hub.
-- **HubScene:** 6 game tiles grid, sticker book display, settings (behind parental lock).
+- **HubScene:** 6 game tiles grid, sticker shelf display, settings (behind parental lock).
 - **GameScene:** Initialized with randomized items. On completion: win animation + sticker award (if first time) + auto-return to Hub (3s delay). Exit via parental lock (hold 3s).
 
 ## 7. Visual Design

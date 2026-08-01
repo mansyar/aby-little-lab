@@ -18,7 +18,7 @@
 | Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
 | Linting/Formatting | Biome | 2.5.5 | All-in-one linter and formatter |
 | Package Manager | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
-| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) + Game 3 pop/wake sounds — no file overhead |
+| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) + Game 3 pop/wake sounds + idle-attract chime — no file overhead |
 
 ### Dependencies (`package.json`)
 
@@ -59,7 +59,7 @@ aby-little-lab/
     ├── scenes/
     │   ├── BootScene.ts            # Orientation lock & system initialization
     │   ├── PreloadScene.ts         # Progress bar & asset preloading
-    │   ├── HubScene.ts             # Game selection grid, sticker book & settings parental lock
+    │   ├── HubScene.ts             # Game selection grid, sticker shelf, idle attract & settings parental lock
     │   ├── ShapeSorterScene.ts     # Mini-Game 1
     │   ├── AnimalTraceScene.ts     # Mini-Game 2
     │   ├── PopFreezeScene.ts       # Mini-Game 3
@@ -85,7 +85,7 @@ aby-little-lab/
     │   ├── motion.ts               # Reduced-motion helpers (isReducedMotion, motionDuration, motionScale)
     │   ├── sceneTransitions.ts     # Crossfade scene transitions (transitionToScene, sceneEntrance)
     │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
-    │   └── pressFeedback.ts        # Press squish feedback for interactive controls (attachPressFeedback)
+    │   └── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
     ├── assets/
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star SVGs
@@ -443,10 +443,21 @@ Single source of truth for reduced-motion behavior:
 
 Every tween in the app consults these helpers **at call time** (not module load), so a mid-session OS setting change takes effect immediately.
 
+### HubScene engagement systems
+
+The Hub implements the engagement track (FR1–FR5):
+
+- **Entrance & idle life:** tiles/labels/stickers enter with a 40ms stagger (`ENTRANCE_STAGGER`), 300ms `Sine.out` alpha + scale; tiles and labels then bob on a 2.5s ±4px `Sine.inOut` loop (200ms phase offsets). Four low-contrast dots drift behind the grid (4000–6000ms loops, depth −1). All skipped or alpha-only under reduced motion.
+- **Sticker shelf:** real sticker textures (`sticker_<gameId>` keys, rasterized at 512px) rendered at `STICKER_SCALE = 56/512`:
+  - Earned: full alpha, 800ms shimmer loop (`SPARKLE_ALPHA 0.75`).
+  - Unearned: alpha 0.3, scale 0.85×.
+  - Just earned: `Back.out` entrance to 1.15× + 500ms sparkle burst (scale pulse to 1.25× + shimmer). Triggered via `init({ justEarned })` from scene-start data; game scenes pass it only when the sticker was earned that session (replays pass no data). The shelf is touch-inert (no `setInteractive`).
+- **Idle attract:** `scheduleIdleAttract()` arms a 25s timer; `triggerIdleAttract()` plays `AudioManager.playIdleCall()` (E5+G5, gain 0.12), starts a 4° rotation wiggle on all tiles (350ms `Sine.inOut` yoyo, 120ms offsets, once per idle period), and re-arms at 10s intervals. Any `input.on("pointerdown")` calls `resetIdleAttract()` (removes the pending timer, re-arms 25s). Shutdown removes the timer; reduced motion plays the chime only (no wiggle).
+
 ### `sceneTransitions.ts`
 
-- `transitionToScene(scene, key)` — 300ms fade-out to the app background `0xfaf9f6`, starts the target scene, then 180ms fade-in. Used for every navigation path (boot → preload → hub, hub → game, game → hub, parental-lock exits).
-- `sceneEntrance(scene)` — 180ms fade-in with a subtle zoom from 1.02 → 1 at scene start.
+- `transitionToScene(scene, key, data?)` — 300ms fade-out to the app background `0xfaf9f6`, starts the target scene (with `data` when provided), then 180ms fade-in. Used for every navigation path (boot → preload → hub, hub → game, game → hub, parental-lock exits). Game scenes pass `{ justEarned: gameId }` to the Hub on first-time sticker earns.
+- `sceneEntrance(scene)` — 180ms fade-in with a subtle zoom from 1.02 → 1 at scene start. The zoom ease is the canonical EaseMap key `"Sine"` — camera **Zoom effects resolve ease strings against their own EaseMap**, so dotted keys like `"Sine.out"` are not found and leave the effect's ease undefined (runtime crash).
 - The only remaining bare `scene.start` call is BootScene's initial launch (intentional — there is nothing to fade from).
 
 ### `completionEffect.ts`
@@ -460,8 +471,8 @@ Every tween in the app consults these helpers **at call time** (not module load)
 
 ### `pressFeedback.ts`
 
-- `attachPressFeedback(obj)` — captures `obj.scaleX` at attach time; `pointerdown` squishes to `baseScale × 0.95`; `pointerup`/`pointerout`/`pointercancel` spring back to `baseScale`. No-op under reduced motion.
-- Wired to the six game Back controls, Musical Memory Replay, and Hub Settings — and registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior.
+- `attachPressFeedback(obj, options?)` — captures `obj.scaleX` at attach time; `pointerdown` squishes to `baseScale × 0.95`; `pointerup`/`pointerout`/`pointercancel` restore `baseScale` — instantly by default, or with a 150ms `Back.out` spring when `options.spring` is set. No-op under reduced motion.
+- Wired to the six game Back controls, Musical Memory Replay, Hub Settings, and every Hub game tile (with `{ spring: true }`, attached on entrance completion so the base scale is captured at 1.0). Registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior. Hub tiles navigate on `pointerup` so the press squish stays visible while holding.
 
 ### Gameplay tween values (normal → reduced)
 
@@ -475,4 +486,4 @@ Every tween in the app consults these helpers **at call time** (not module load)
 
 ### Test coverage
 
-415 tests across 15 files; all motion, transitions, completion-effect, and press-feedback utilities at 100% coverage. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+445 tests across 15 files; all motion, transitions, completion-effect, and press-feedback utilities at 100% coverage; HubScene at 98% lines (remaining branches are reduced-motion edge paths). Coverage thresholds remain 80% for lines, functions, branches, and statements.

@@ -33,8 +33,8 @@
 - [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the 300ms crossfade transition with a 180ms entrance fade + zoom; no instant scene switches
 - [ ] Each game's completion plays the shared win celebration (rays + confetti, ~700ms)
 - [ ] The splash/celebration cleans itself up and never clouds the play area
-- [ ] Back, Replay, and Settings controls give press feedback (95% squish) and spring back on release/pointer-out/cancel
-- [ ] With Reduce Motion enabled: transitions, celebration, and gameplay tweens shorten (~40%); celebration renders 6 rays with no confetti; press feedback is disabled; game completion still works
+- [ ] Back, Replay, Settings, and Hub game tiles give press feedback (95% squish); Hub tiles spring back with a `Back.out` overshoot and navigate on release (releasing off-tile cancels)
+- [ ] With Reduce Motion enabled: transitions, celebration, and gameplay tweens shorten (~40%); celebration renders 6 rays with no confetti; press feedback is disabled; Hub entrances fade without scale, no bob/wiggle/sparkle, and the idle attract plays chime-only; game completion still works
 
 ### 4b. Touch UX & Parental Lock
 - [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) expose 96×96px hit areas
@@ -42,6 +42,14 @@
 - [ ] Duplicate touches during a hold do not double-trigger the action
 - [ ] Early release, pointer leaving the control, and pointer cancel never trigger the action
 - [ ] No progress-ring artifacts remain after cancelled holds or scene shutdown
+
+### 4c. Hub Engagement
+- [ ] Tiles, labels, and stickers enter with a 40ms stagger wave (fade-only under reduced motion)
+- [ ] Tiles bob gently on a 2.5s idle loop
+- [ ] Sticker shelf shows six 56px thumbnails: earned shimmer, unearned dimmed (30% alpha)
+- [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replays show no highlight
+- [ ] After ~25s idle, tiles wiggle + soft two-tone chime plays, repeating every ~10s; any touch resets the timer
+- [ ] Reduced-motion: idle chime plays without the wiggle
 
 ### 5. Documentation
 - [ ] README.md is up to date

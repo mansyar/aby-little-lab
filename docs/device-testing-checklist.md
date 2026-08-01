@@ -74,7 +74,12 @@ pnpm exec serve dist -l 3000
 
 #### Hub Screen
 - [ ] All 6 game tiles are visible
-- [ ] Sticker book icon is accessible
+- [ ] Tiles, labels, and stickers enter with a staggered wave (40ms apart), not all at once
+- [ ] Tiles gently bob on an idle loop after entering
+- [ ] Sticker shelf shows six 56px thumbnails: earned at full color with shimmer, unearned dimmed (~30% opacity, smaller)
+- [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replaying an earned game shows no highlight
+- [ ] Press and hold a game tile: it squishes and stays; release on the tile springs it back and starts the game; release off the tile does not navigate
+- [ ] After ~25s idle, tiles wiggle and a soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
 - [ ] Protected controls (Settings, all six game Back buttons, Musical Memory Replay) respond to taps near the visible label (96×96px hit areas — no precision tapping)
@@ -141,8 +146,8 @@ pnpm exec serve dist -l 3000
 
 #### Sticker System
 - [ ] Stickers persist after app close/reopen
-- [ ] Sticker book shows all earned stickers
-- [ ] Sticker book updates in real-time
+- [ ] Shelf shows all earned stickers at full color and unearned ones dimmed
+- [ ] Shelf updates in real-time (just-earned highlight appears on the auto-return visit)
 - [ ] No duplicate stickers awarded
 
 #### Settings
@@ -211,7 +216,8 @@ pnpm exec serve dist -l 3000
 - [ ] Scene transitions are shortened (~40%) with no harsh flashes
 - [ ] Win celebration renders simplified (6 rays, no confetti) and completes normally
 - [ ] Gameplay tweens (bounce-backs, bubble pop, wake wobble, frog bounce, sticker pops) are shorter and gentler
-- [ ] Press feedback (squish) on Back/Replay/Settings is disabled
+- [ ] Press feedback (squish) on Back/Replay/Settings/Hub tiles is disabled
+- [ ] Hub entrances fade without scale; no bob, wiggle, sparkle, or burst; idle attract plays chime only
 - [ ] Game functionality remains intact — every game still reachable and completable
 - [ ] Verify no flashing or excessive movement
 
@@ -229,7 +235,7 @@ pnpm exec serve dist -l 3000
 - [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the crossfade transition
 - [ ] Each of the six games shows at most one short splash/ray for a success or completion action
 - [ ] All six games play the shared win celebration (rays + confetti) on completion, which cleans itself up
-- [ ] Back, Replay, and Settings controls squish on press and spring back on release
+- [ ] Back, Replay, Settings, and Hub tile controls squish on press and spring back on release
 - [ ] No completion effect remains on screen or obscures the next interaction
 - [ ] Reduced-motion mode disables or simplifies the splash/ray
 
