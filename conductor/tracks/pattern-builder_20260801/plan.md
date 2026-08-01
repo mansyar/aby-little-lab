@@ -1,6 +1,6 @@
 # Implementation Plan — Game 7: Pattern Builder
 
-## Phase 1: Pattern Generation Logic (TDD)
+## Phase 1: Pattern Generation Logic (TDD) [checkpoint: b8d3c91]
 
 - [x] Task: Add `pattern-builder` GameId and round types (`PatternType`, `GapPosition`, `PatternRound`) [TDD] [ff2a1c0]
   - [ ] Write failing tests: `GameId` includes `pattern-builder`; round types constrain pattern type, gap, shapes
