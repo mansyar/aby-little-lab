@@ -1,0 +1,57 @@
+# Implementation Plan — Game 7: Pattern Builder
+
+## Phase 1: Pattern Generation Logic (TDD)
+
+- [ ] Task: Add `pattern-builder` GameId and round types (`PatternType`, `GapPosition`, `PatternRound`) [TDD]
+  - [ ] Write failing tests: `GameId` includes `pattern-builder`; round types constrain pattern type, gap, shapes
+  - [ ] Implement: extend `src/types/index.ts`
+  - [ ] Run tests (red → green), verify coverage
+  - [ ] Commit with git note + plan update
+- [ ] Task: Implement `patternBuilderLogic.ts` — round generation [TDD]
+  - [ ] Write failing tests: `generateRound()` returns a valid ABAB/AABB/ABB row of 4; two distinct pattern elements; gap at end or middle; correct answer present; 3 unique choices (correct + 2 distinct distractors) drawn from the 6-shape pool
+  - [ ] Implement: `generateRound()` reusing `ALL_SHAPES`
+  - [ ] Run tests (red → green), verify coverage
+  - [ ] Commit with git note + plan update
+- [ ] Task: Replay-variety playthrough generation [TDD]
+  - [ ] Write failing tests: `generatePlaythrough(5)` mixes pattern types, shape pairs, gap positions, and distractor sets across rounds; difficulty fixed
+  - [ ] Implement: playthrough generator
+  - [ ] Run tests (red → green), verify coverage
+  - [ ] Commit with git note + plan update
+- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+
+## Phase 2: PatternBuilderScene
+
+- [ ] Task: Scaffold `PatternBuilderScene.ts` — layout & rendering
+  - [ ] 4 slots (3 shapes + marked empty gap), 3 answer cards, progress dots, parental-lock Back button (96×96 hit area), mascot corner
+  - [ ] Reuse sceneTransitions, pressFeedback, ParentLock, `createCornerMascot`
+- [ ] Task: Round interaction [TDD where applicable]
+  - [ ] Correct tap: shape snaps into gap with `Back.out` settle + chime, progress dot fills, next round
+  - [ ] Incorrect tap: card wiggles gently + soft incorrect tone, no penalty, no progression loss
+  - [ ] Reduced-motion variants for all tweens
+- [ ] Task: Win flow — after 5 rounds: shared completion effect, sticker award (first completion only), auto-return to Hub with `justEarned` data
+- [ ] Task: Scene tests — navigation (hub ↔ game, completion → hub), tap correctness/incorrectness, sticker handoff
+- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+
+## Phase 3: Integration & Assets
+
+- [ ] Task: Author `sticker_pattern_builder.svg` (512×512 viewBox, storybook style, matches sticker conventions)
+- [ ] Task: PreloadScene — load the new sticker (shapes already loaded)
+- [ ] Task: HubScene — 7th tile + label, sticker shelf slot, entrance/idle config, press feedback
+- [ ] Task: Storage/types — `pattern-builder` in `GameId`; storage tests for sticker persistence
+- [ ] Task: Verify mascot + cross-cutting systems in the new scene (cheer/nod/win paths)
+- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+
+## Phase 4: Documentation & Release Sync
+
+- [ ] Task: Update `conductor/product.md` — 7-game table, cross-game system references
+- [ ] Task: Update `docs/PRD.md` and `docs/TDD.md` — game 7 requirements, scene count, asset manifest
+- [ ] Task: Update `conductor/tech-stack.md` — scenes 8→9, game IDs, structure tree
+- [ ] Task: Update `README.md` — 7th game row, sticker count, test count
+- [ ] Task: Update `docs/release-checklist.md` — "six" → "seven" references
+- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+
+## Phase 5: Final Quality & Review
+
+- [ ] Task: Full regression — `pnpm run check`, `CI=true pnpm test`, coverage >80%, `pnpm run build`, `node scripts/validate-pwa.js`
+- [ ] Task: Apply review suggestions (conductor-review pass)
+- [ ] Task: Final Phase Verification & Checkpoint (refer to workflow.md)

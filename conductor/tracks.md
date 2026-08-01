@@ -21,6 +21,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Replay Variety Expansion** *Link: [./archive/replay-variety-expansion_20260801/index.md](./archive/replay-variety-expansion_20260801/index.md)*
+- [ ] **Track: Game 7 — Pattern Builder** *Link: [./tracks/pattern-builder_20260801/index.md](./tracks/pattern-builder_20260801/index.md)*
 
 ---
 

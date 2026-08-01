@@ -1,0 +1,9 @@
+{
+  "track_id": "pattern-builder_20260801",
+  "title": "Game 7: Pattern Builder",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-08-01T00:00:00.000Z",
+  "updated_at": "2026-08-01T00:00:00.000Z",
+  "summary": "A pattern-completion mini-game (ABAB/AABB/ABB with one gap) targeting logical reasoning, integrated as the official 7th game with Hub tile, sticker, mascot, and docs sync."
+}
