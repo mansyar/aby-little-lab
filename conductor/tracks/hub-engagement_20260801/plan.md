@@ -28,11 +28,11 @@
 
 ## Phase 3: Sticker Shelf
 
-- [ ] Task: Real sticker thumbnails with earned/unearned states and just-earned highlight [TDD]
-  - [ ] **RED:** Add failing tests: one thumbnail per game using sticker textures, earned full alpha + sparkle loop, unearned dimmed, larger bounce + sparkle burst for the `justEarned` id passed via scene-start data.
-  - [ ] **GREEN:** Implement shelf in `HubScene`; update all six game scenes to pass `{ justEarned: gameId }` on auto-return when a sticker was earned that session.
-  - [ ] **REFACTOR:** Centralize shelf construction; keep unearned presentation consistent.
-  - [ ] **VERIFY:** Run sticker-award integration tests across all games; confirm shelf states render correctly.
+- [x] Task: Real sticker thumbnails with earned/unearned states and just-earned highlight [TDD] `e98bf59`
+  - [x] **RED:** Add failing tests: one thumbnail per game using sticker textures, earned full alpha + sparkle loop, unearned dimmed, larger bounce + sparkle burst for the `justEarned` id passed via scene-start data.
+  - [x] **GREEN:** Implement shelf in `HubScene`; update all six game scenes to pass `{ justEarned: gameId }` on auto-return when a sticker was earned that session.
+  - [x] **REFACTOR:** Centralize shelf construction; keep unearned presentation consistent.
+  - [x] **VERIFY:** Run sticker-award integration tests across all games; confirm shelf states render correctly.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: Idle Attract
