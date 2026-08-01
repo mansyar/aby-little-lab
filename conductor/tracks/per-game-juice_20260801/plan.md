@@ -23,10 +23,10 @@
 
 ## Phase 3: ShadowMatch Reveal
 
-- [ ] Task: Shadow stamp flash and matched-object dim [TDD]
-  - [ ] **RED:** Add failing tests: slot scale 1.1 yoyo + fill flash on match, matched object alpha reduced, splash still created.
-  - [ ] **GREEN:** Implement in `ShadowMatchScene`.
-  - [ ] **VERIFY:** Run ShadowMatch logic + scene tests.
+- [x] Task: Shadow stamp flash and matched-object dim [TDD] `1b2b7ed`
+  - [x] **RED:** Add failing tests: slot scale 1.1 yoyo + fill flash on match, matched object alpha reduced, splash still created.
+  - [x] **GREEN:** Implement in `ShadowMatchScene`.
+  - [x] **VERIFY:** Run ShadowMatch logic + scene tests.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: AnimalTrace Movement
