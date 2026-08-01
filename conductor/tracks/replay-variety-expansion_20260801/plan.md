@@ -56,8 +56,8 @@
 - [x] Task: Update `README.md` — game description/variety notes [a8b7d95]
 - [x] Task: Phase Verification & Checkpoint (refer to workflow.md) [a12aba9]
 
-## Phase 5: Final Quality & Review
+## Phase 5: Final Quality & Review [checkpoint: 5536382]
 
 - [x] Task: Full regression — `pnpm run check`, `CI=true pnpm test` (all 555+ tests), coverage >80%, `pnpm run build` [ec83354]
 - [x] Task: Apply review suggestions (conductor-review pass) [ec83354]
-- [ ] Task: Final Phase Verification & Checkpoint (refer to workflow.md)
+- [x] Task: Final Phase Verification & Checkpoint (refer to workflow.md) [5536382]
