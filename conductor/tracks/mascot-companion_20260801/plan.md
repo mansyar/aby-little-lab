@@ -6,7 +6,7 @@
 
 ## Phase 1: Mascot Assets
 
-- [ ] Task: Author mascot SVGs and register in PreloadScene
+- [x] Task: Author mascot SVGs and register in PreloadScene (7e6a531)
   - [ ] Create `src/assets/svg/ui/mascot_idle.svg` (owl professor, 512×512, storybook style, thick `--outline` strokes).
   - [ ] Create `src/assets/svg/ui/mascot_celebrate.svg` (wings-raised pose).
   - [ ] Import and register both textures in `PreloadScene` (rasterized at 512×512 like all SVGs).
