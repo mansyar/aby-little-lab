@@ -45,13 +45,13 @@
   - [x] **VERIFY:** Run PopFreeze logic + scene tests.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 6: MusicalMemory Reactions
+## Phase 6: MusicalMemory Reactions `[checkpoint: ff2020b]`
 
 - [x] Task: Ripple rings, lily pad drift, progress-dot pop [TDD] `ff2020b`
   - [x] **RED:** Add failing tests: expanding ripple ring on frog tap (Graphics, 400ms, alpha fade, self-cleaning); lily pad drift loop; progress dots pop on fill; reduced-motion disables drift.
   - [x] **GREEN:** Implement in `MusicalMemoryScene`.
   - [x] **VERIFY:** Run MusicalMemory logic + scene tests.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 7: Quality Gates
 
