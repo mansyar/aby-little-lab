@@ -39,16 +39,16 @@
   - [ ] **VERIFY:** Run all scene integration suites.
 - [x] Task: Phase Verification & Checkpoint (ec52bc5)
 
-## Phase 5: Quality Gates
+## Phase 5: Quality Gates [checkpoint: 7eff220]
 
-- [ ] Task: Release verification for this track
+- [x] Task: Release verification for this track (7eff220)
   - [ ] Run `pnpm test -- --run`.
   - [ ] Run `pnpm run test:coverage`.
   - [ ] Run `pnpm run check`.
   - [ ] Run `pnpm run build`.
   - [ ] Manual: verify mascot on Hub + all six games, all reactions, idle loop, reduced-motion behavior, offline precache of new assets.
   - [ ] Confirm no gameplay-rule, SFX, or audio changes were introduced.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (7eff220)
 
 ## Definition of Done
 
