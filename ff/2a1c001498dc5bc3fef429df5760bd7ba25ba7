@@ -1,0 +1,7 @@
+Task: Add pattern-builder GameId and round types (TDD).
+
+Summary: Extended the GameId union in src/types/index.ts with 'pattern-builder' and added its unearned default sticker entry in src/utils/storage.ts (createDefaultStorage), required by the Record<GameId, StickerData> contract. Updated src/__tests__/utils/storage.test.ts GAME_IDS contract + save-test AppStorage literal; verified red (missing default) before green (12/12 pass).
+
+Deviation note: the plan listed PatternType/GapPosition/PatternRound in this task, but per codebase convention (ShapeType lives in shapeSorterLogic.ts), game-specific round types are introduced in patternBuilderLogic.ts during the round-generation task instead of types/index.ts.
+
+Files: src/types/index.ts, src/utils/storage.ts, src/__tests__/utils/storage.test.ts
