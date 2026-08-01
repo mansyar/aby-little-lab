@@ -17,6 +17,7 @@ const GAME_IDS: GameId[] = [
   "shadow-match",
   "musical-memory",
   "big-small",
+  "pattern-builder",
 ];
 
 describe("Storage utilities", () => {
@@ -58,6 +59,7 @@ describe("Storage utilities", () => {
           "shadow-match": { earned: false, earnedAt: null },
           "musical-memory": { earned: false, earnedAt: null },
           "big-small": { earned: false, earnedAt: null },
+          "pattern-builder": { earned: false, earnedAt: null },
         },
         settings: {
           bgmEnabled: false,

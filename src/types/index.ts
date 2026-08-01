@@ -4,7 +4,8 @@ export type GameId =
   | "pop-freeze"
   | "shadow-match"
   | "musical-memory"
-  | "big-small";
+  | "big-small"
+  | "pattern-builder";
 
 export interface StickerData {
   earned: boolean;
