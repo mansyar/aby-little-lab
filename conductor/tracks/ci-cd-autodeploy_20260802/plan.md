@@ -31,14 +31,14 @@
 
 ## Phase 3: Auto-Deploy Trigger via Coolify Webhook
 
-- [ ] Task: Add deploy job gated to master
-  - [ ] Deploy job condition: push to `refs/heads/master` only — structurally impossible on PR events
-  - [ ] `needs: quality-gates` — deploy never runs without green gates
-  - [ ] Fail-fast guard: clear error if `COOLIFY_DEPLOY_WEBHOOK` secret is missing
-  - [ ] Webhook POST via curl with fail-on-non-2xx (`--fail-with-body`)
-- [ ] Task: Verify deploy guarding logic
-  - [ ] Static review: conditions, `needs`, and secret guard are correct
-  - [ ] Document the required repository secret name (`COOLIFY_DEPLOY_WEBHOOK`) in workflow comments
+- [x] Task: Add deploy job gated to master (88ce95c)
+  - [x] Deploy job condition: push to `refs/heads/master` only — structurally impossible on PR events
+  - [x] `needs: quality-gates` — deploy never runs without green gates
+  - [x] Fail-fast guard: clear error if `COOLIFY_DEPLOY_WEBHOOK` secret is missing
+  - [x] Webhook POST via curl with fail-on-non-2xx (`--fail-with-body`)
+- [x] Task: Verify deploy guarding logic (88ce95c)
+  - [x] Static review: conditions, `needs`, and secret guard are correct
+  - [x] Document the required repository secret name (`COOLIFY_DEPLOY_WEBHOOK`) in workflow comments
 - [ ] Task: Phase 3 Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Documentation & Live Validation
