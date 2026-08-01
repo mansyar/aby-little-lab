@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
@@ -112,6 +113,16 @@ export class ShadowMatchScene extends Phaser.Scene {
     this.objectData = [];
     this.matchedCount = 0;
     this.createShadowSlots();
+    attachDropZoneHighlight(
+      this,
+      this.shadowSlots.map((s) => ({
+        zone: s.zone,
+        x: s.x,
+        y: s.y,
+        width: DROP_ZONE_SIZE,
+        height: DROP_ZONE_SIZE,
+      })),
+    );
     this.createObjects();
   }
 
@@ -166,6 +177,8 @@ export class ShadowMatchScene extends Phaser.Scene {
         this.handleDragEnd(data);
       });
 
+      attachDragLift(obj);
+
       this.objectData.push(data);
     }
   }
@@ -178,7 +191,7 @@ export class ShadowMatchScene extends Phaser.Scene {
     data.droppedOnZone = true;
 
     if (isMatch(data.type, slot.type)) {
-      data.obj.setPosition(slot.x, slot.y);
+      snapToSlot(this, data.obj, slot.x, slot.y);
       data.obj.disableInteractive();
       data.matched = true;
       this.matchedCount++;

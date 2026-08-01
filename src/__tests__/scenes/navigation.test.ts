@@ -42,6 +42,7 @@ vi.mock("phaser", () => {
       lineTo: vi.fn().mockReturnThis(),
       strokePath: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
+      strokeRect: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
@@ -1459,7 +1460,19 @@ describe("scene navigation flow", () => {
       const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
       dropCallback(null, slot.zone);
 
-      expect(getMockFn(shape.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
+      // Correct drop animates to slot center via a 200ms Back.out snap tween
+      // (no instant setPosition snap).
+      const snapTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) =>
+          call[0]?.targets === shape.obj &&
+          call[0]?.x === slot.x &&
+          call[0]?.y === slot.y &&
+          call[0]?.ease === "Back.out",
+      );
+      expect(snapTween).toBeDefined();
+      if (!snapTween) return;
+      expect((snapTween[0] as { duration: number }).duration).toBe(200);
+      expect(getMockFn(shape.obj.setPosition)).not.toHaveBeenCalledWith(slot.x, slot.y);
       expect(getMockFn(shape.obj.disableInteractive)).toHaveBeenCalled();
       expect(mockAudio.playCorrect).toHaveBeenCalled();
       assertBoundedSuccessEffect(scene, initialGraphicsCount);
@@ -1544,6 +1557,103 @@ describe("scene navigation flow", () => {
       expect(bounceTween).toBeDefined();
       if (!bounceTween) return;
       expect((bounceTween[0] as { duration: number }).duration).toBe(180);
+    });
+
+    it("lifts and tilts the shape on drag start and restores it on drag end", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const shape = shapes[0];
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+
+      const dragstartCallback = onCalls.find((c) => c[0] === "dragstart")?.[1] as () => void;
+      expect(dragstartCallback).toBeDefined();
+      dragstartCallback();
+
+      const liftTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === shape.obj && c[0]?.angle === 4,
+      );
+      expect(liftTween).toBeDefined();
+      if (!liftTween) return;
+      expect(liftTween[0].scaleX).toBe(1.1);
+      expect(liftTween[0].scaleY).toBe(1.1);
+
+      // Both dragend listeners fire in the real game: the scene's bounce-back
+      // handler (game logic) and the drag-lift restore (juice).
+      const dragendCallbacks = onCalls
+        .filter((c) => c[0] === "dragend")
+        .map((c) => c[1] as () => void);
+      dragendCallbacks.forEach((callback) => {
+        callback();
+      });
+
+      const restoreTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === shape.obj && c[0]?.scaleX === 1 && c[0]?.scaleY === 1,
+      );
+      expect(restoreTween).toBeDefined();
+      expect(restoreTween?.[0]?.angle).toBe(0);
+    });
+
+    it("uses a reduced-motion lift (1.05 scale, no tilt) when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const shape = shapes[0];
+      const dragstartCallback = getMockFn(shape.obj.on).mock.calls.find(
+        (c) => c[0] === "dragstart",
+      )?.[1] as () => void;
+      dragstartCallback();
+
+      const liftTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === shape.obj && c[0]?.scaleX === 1.05,
+      );
+      expect(liftTween).toBeDefined();
+      if (!liftTween) return;
+      expect(liftTween[0].angle).toBe(0);
+    });
+
+    it("pulses a soft outline on the drop zone while dragging over it and clears on leave", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const slots = getSlots(scene);
+      const inputOnMock = getMockFn(scene.input.on);
+      const dragenterCallback = inputOnMock.mock.calls.find((c) => c[0] === "dragenter")?.[1] as
+        | ((pointer: unknown, obj: unknown, zone: unknown) => void)
+        | undefined;
+      expect(dragenterCallback).toBeDefined();
+      if (!dragenterCallback) return;
+
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
+      dragenterCallback(null, null, slots[0].zone);
+
+      const highlight = getMockFn(scene.add.graphics).mock.results[initialGraphicsCount]?.value as
+        | Record<string, MockFn>
+        | undefined;
+      expect(highlight).toBeDefined();
+      if (!highlight) return;
+      expect(getMockFn(highlight.strokeRect)).toHaveBeenCalled();
+
+      const pulseTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === highlight && call[0]?.repeat === -1,
+      );
+      expect(pulseTween).toBeDefined();
+      expect(pulseTween?.[0]?.yoyo).toBe(true);
+
+      const dragleaveCallback = inputOnMock.mock.calls.find((c) => c[0] === "dragleave")?.[1] as
+        | ((pointer: unknown, obj: unknown, zone: unknown) => void)
+        | undefined;
+      expect(dragleaveCallback).toBeDefined();
+      if (!dragleaveCallback) return;
+      dragleaveCallback(null, null, slots[0].zone);
+
+      expect(getMockFn(highlight.destroy)).toHaveBeenCalledTimes(1);
     });
 
     it("drop on non-slot target is a no-op (no snap, no SFX, no particles)", () => {
@@ -2595,7 +2705,18 @@ describe("scene navigation flow", () => {
       const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
       dropCallback(null, slot.zone);
 
-      expect(getMockFn(object.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
+      // Correct drop animates to shadow position via a 200ms Back.out snap tween.
+      const snapTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) =>
+          call[0]?.targets === object.obj &&
+          call[0]?.x === slot.x &&
+          call[0]?.y === slot.y &&
+          call[0]?.ease === "Back.out",
+      );
+      expect(snapTween).toBeDefined();
+      if (!snapTween) return;
+      expect((snapTween[0] as { duration: number }).duration).toBe(200);
+      expect(getMockFn(object.obj.setPosition)).not.toHaveBeenCalledWith(slot.x, slot.y);
       expect(getMockFn(object.obj.disableInteractive)).toHaveBeenCalled();
       expect(mockAudio.playCorrect).toHaveBeenCalled();
       assertBoundedSuccessEffect(scene, initialGraphicsCount);
@@ -2659,7 +2780,7 @@ describe("scene navigation flow", () => {
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const bounceTween = tweenCalls.find(
-        (c) => c[0]?.targets === object.obj && c[0]?.x !== undefined,
+        (c) => c[0]?.targets === object.obj && c[0]?.x === object.originX,
       );
       expect(bounceTween).toBeUndefined();
     });
@@ -2719,6 +2840,103 @@ describe("scene navigation flow", () => {
 
       // Incorrect SFX should NOT play (dropped on empty space, not a wrong zone)
       expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+    });
+
+    it("lifts and tilts the object on drag start and restores it on drag end", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const object = objects[0];
+      const onCalls = getMockFn(object.obj.on).mock.calls;
+
+      const dragstartCallback = onCalls.find((c) => c[0] === "dragstart")?.[1] as () => void;
+      expect(dragstartCallback).toBeDefined();
+      dragstartCallback();
+
+      const liftTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === object.obj && c[0]?.angle === 4,
+      );
+      expect(liftTween).toBeDefined();
+      if (!liftTween) return;
+      expect(liftTween[0].scaleX).toBe(1.1);
+      expect(liftTween[0].scaleY).toBe(1.1);
+
+      // Both dragend listeners fire in the real game: the scene's bounce-back
+      // handler (game logic) and the drag-lift restore (juice).
+      const dragendCallbacks = onCalls
+        .filter((c) => c[0] === "dragend")
+        .map((c) => c[1] as () => void);
+      dragendCallbacks.forEach((callback) => {
+        callback();
+      });
+
+      const restoreTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === object.obj && c[0]?.scaleX === 1 && c[0]?.scaleY === 1,
+      );
+      expect(restoreTween).toBeDefined();
+      expect(restoreTween?.[0]?.angle).toBe(0);
+    });
+
+    it("uses a reduced-motion lift (1.05 scale, no tilt) when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const objects = getObjects(scene);
+      const object = objects[0];
+      const dragstartCallback = getMockFn(object.obj.on).mock.calls.find(
+        (c) => c[0] === "dragstart",
+      )?.[1] as () => void;
+      dragstartCallback();
+
+      const liftTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === object.obj && c[0]?.scaleX === 1.05,
+      );
+      expect(liftTween).toBeDefined();
+      if (!liftTween) return;
+      expect(liftTween[0].angle).toBe(0);
+    });
+
+    it("pulses a soft outline on the shadow slot while dragging over it and clears on leave", () => {
+      const scene = new ShadowMatchScene();
+      scene.create();
+
+      const slots = getShadowSlots(scene);
+      const inputOnMock = getMockFn(scene.input.on);
+      const dragenterCallback = inputOnMock.mock.calls.find((c) => c[0] === "dragenter")?.[1] as
+        | ((pointer: unknown, obj: unknown, zone: unknown) => void)
+        | undefined;
+      expect(dragenterCallback).toBeDefined();
+      if (!dragenterCallback) return;
+
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
+      dragenterCallback(null, null, slots[0].zone);
+
+      const highlight = getMockFn(scene.add.graphics).mock.results[initialGraphicsCount]?.value as
+        | Record<string, MockFn>
+        | undefined;
+      expect(highlight).toBeDefined();
+      if (!highlight) return;
+      expect(getMockFn(highlight.strokeRect)).toHaveBeenCalled();
+
+      const pulseTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === highlight && call[0]?.repeat === -1,
+      );
+      expect(pulseTween).toBeDefined();
+      expect(pulseTween?.[0]?.yoyo).toBe(true);
+
+      const dragleaveCallback = inputOnMock.mock.calls.find((c) => c[0] === "dragleave")?.[1] as
+        | ((pointer: unknown, obj: unknown, zone: unknown) => void)
+        | undefined;
+      expect(dragleaveCallback).toBeDefined();
+      if (!dragleaveCallback) return;
+      dragleaveCallback(null, null, slots[0].zone);
+
+      expect(getMockFn(highlight.destroy)).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -3579,7 +3797,18 @@ describe("scene navigation flow", () => {
       const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
       dropCallback(null, slot.zone);
 
-      expect(getMockFn(toy.obj.setPosition)).toHaveBeenCalledWith(slot.x, slot.y);
+      // Correct drop animates to box position via a 200ms Back.out snap tween.
+      const snapTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) =>
+          call[0]?.targets === toy.obj &&
+          call[0]?.x === slot.x &&
+          call[0]?.y === slot.y &&
+          call[0]?.ease === "Back.out",
+      );
+      expect(snapTween).toBeDefined();
+      if (!snapTween) return;
+      expect((snapTween[0] as { duration: number }).duration).toBe(200);
+      expect(getMockFn(toy.obj.setPosition)).not.toHaveBeenCalledWith(slot.x, slot.y);
       expect(getMockFn(toy.obj.disableInteractive)).toHaveBeenCalled();
       expect(mockAudio.playCorrect).toHaveBeenCalled();
       assertBoundedSuccessEffect(scene, initialGraphicsCount);
@@ -3640,7 +3869,7 @@ describe("scene navigation flow", () => {
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const bounceTween = tweenCalls.find(
-        (c) => c[0]?.targets === toy.obj && c[0]?.x !== undefined,
+        (c) => c[0]?.targets === toy.obj && c[0]?.x === toy.originX,
       );
       expect(bounceTween).toBeUndefined();
     });
@@ -3697,6 +3926,103 @@ describe("scene navigation flow", () => {
       expect(bounceTween).toBeDefined();
 
       expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+    });
+
+    it("lifts and tilts the toy on drag start and restores it on drag end", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const toy = toys[0];
+      const onCalls = getMockFn(toy.obj.on).mock.calls;
+
+      const dragstartCallback = onCalls.find((c) => c[0] === "dragstart")?.[1] as () => void;
+      expect(dragstartCallback).toBeDefined();
+      dragstartCallback();
+
+      const liftTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === toy.obj && c[0]?.angle === 4,
+      );
+      expect(liftTween).toBeDefined();
+      if (!liftTween) return;
+      expect(liftTween[0].scaleX).toBe(1.1);
+      expect(liftTween[0].scaleY).toBe(1.1);
+
+      // Both dragend listeners fire in the real game: the scene's bounce-back
+      // handler (game logic) and the drag-lift restore (juice).
+      const dragendCallbacks = onCalls
+        .filter((c) => c[0] === "dragend")
+        .map((c) => c[1] as () => void);
+      dragendCallbacks.forEach((callback) => {
+        callback();
+      });
+
+      const restoreTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === toy.obj && c[0]?.scaleX === 1 && c[0]?.scaleY === 1,
+      );
+      expect(restoreTween).toBeDefined();
+      expect(restoreTween?.[0]?.angle).toBe(0);
+    });
+
+    it("uses a reduced-motion lift (1.05 scale, no tilt) when requested", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn(() => ({ matches: true })),
+      });
+
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const toys = getToys(scene);
+      const toy = toys[0];
+      const dragstartCallback = getMockFn(toy.obj.on).mock.calls.find(
+        (c) => c[0] === "dragstart",
+      )?.[1] as () => void;
+      dragstartCallback();
+
+      const liftTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === toy.obj && c[0]?.scaleX === 1.05,
+      );
+      expect(liftTween).toBeDefined();
+      if (!liftTween) return;
+      expect(liftTween[0].angle).toBe(0);
+    });
+
+    it("pulses a soft outline on the box drop zone while dragging over it and clears on leave", () => {
+      const scene = new BigSmallScene();
+      scene.create();
+
+      const slots = getBoxSlots(scene);
+      const inputOnMock = getMockFn(scene.input.on);
+      const dragenterCallback = inputOnMock.mock.calls.find((c) => c[0] === "dragenter")?.[1] as
+        | ((pointer: unknown, obj: unknown, zone: unknown) => void)
+        | undefined;
+      expect(dragenterCallback).toBeDefined();
+      if (!dragenterCallback) return;
+
+      const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
+      dragenterCallback(null, null, slots[0].zone);
+
+      const highlight = getMockFn(scene.add.graphics).mock.results[initialGraphicsCount]?.value as
+        | Record<string, MockFn>
+        | undefined;
+      expect(highlight).toBeDefined();
+      if (!highlight) return;
+      expect(getMockFn(highlight.strokeRect)).toHaveBeenCalled();
+
+      const pulseTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (call) => call[0]?.targets === highlight && call[0]?.repeat === -1,
+      );
+      expect(pulseTween).toBeDefined();
+      expect(pulseTween?.[0]?.yoyo).toBe(true);
+
+      const dragleaveCallback = inputOnMock.mock.calls.find((c) => c[0] === "dragleave")?.[1] as
+        | ((pointer: unknown, obj: unknown, zone: unknown) => void)
+        | undefined;
+      expect(dragleaveCallback).toBeDefined();
+      if (!dragleaveCallback) return;
+      dragleaveCallback(null, null, slots[0].zone);
+
+      expect(getMockFn(highlight.destroy)).toHaveBeenCalledTimes(1);
     });
   });
 

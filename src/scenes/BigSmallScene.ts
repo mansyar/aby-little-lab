@@ -10,6 +10,7 @@ import {
   type ToyInstance,
 } from "../game/bigSmallLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
@@ -126,6 +127,16 @@ export class BigSmallScene extends Phaser.Scene {
     this.toyData = [];
     this.sortedCount = 0;
     this.createBoxSlots();
+    attachDropZoneHighlight(
+      this,
+      this.boxSlots.map((s) => ({
+        zone: s.zone,
+        x: s.x,
+        y: s.y,
+        width: DROP_ZONE_SIZE,
+        height: DROP_ZONE_SIZE,
+      })),
+    );
     this.createToys();
   }
 
@@ -182,6 +193,8 @@ export class BigSmallScene extends Phaser.Scene {
         this.handleDragEnd(data);
       });
 
+      attachDragLift(obj);
+
       this.toyData.push(data);
     }
   }
@@ -194,7 +207,7 @@ export class BigSmallScene extends Phaser.Scene {
     data.droppedOnZone = true;
 
     if (isMatch(data.scaleCategory, slot.scaleCategory)) {
-      data.obj.setPosition(slot.x, slot.y);
+      snapToSlot(this, data.obj, slot.x, slot.y);
       data.obj.disableInteractive();
       data.sorted = true;
       this.sortedCount++;

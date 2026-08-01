@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { ParentLock } from "../components/ParentLock";
 import { isMatch, type ShapeType, selectThreeShapes, shuffle } from "../game/shapeSorterLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
@@ -109,6 +110,16 @@ export class ShapeSorterScene extends Phaser.Scene {
     this.shapeOrder = shuffle(this.selectedShapes);
 
     this.createSlots();
+    attachDropZoneHighlight(
+      this,
+      this.slots.map((s) => ({
+        zone: s.zone,
+        x: s.x,
+        y: s.y,
+        width: DROP_ZONE_SIZE,
+        height: DROP_ZONE_SIZE,
+      })),
+    );
     this.createShapes();
   }
 
@@ -162,6 +173,8 @@ export class ShapeSorterScene extends Phaser.Scene {
         this.handleDragEnd(shapeData);
       });
 
+      attachDragLift(obj);
+
       this.shapes.push(shapeData);
     }
   }
@@ -172,7 +185,7 @@ export class ShapeSorterScene extends Phaser.Scene {
     if (!slot) return;
 
     if (isMatch(shape.type, slot.type)) {
-      shape.obj.setPosition(slot.x, slot.y);
+      snapToSlot(this, shape.obj, slot.x, slot.y);
       shape.obj.disableInteractive();
       shape.placed = true;
       this.audioManager.playCorrect();
