@@ -21,13 +21,13 @@
   - [x] **VERIFY:** Run BigSmall logic + scene tests.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 3: ShadowMatch Reveal
+## Phase 3: ShadowMatch Reveal `[checkpoint: 1b2b7ed]`
 
 - [x] Task: Shadow stamp flash and matched-object dim [TDD] `1b2b7ed`
   - [x] **RED:** Add failing tests: slot scale 1.1 yoyo + fill flash on match, matched object alpha reduced, splash still created.
   - [x] **GREEN:** Implement in `ShadowMatchScene`.
   - [x] **VERIFY:** Run ShadowMatch logic + scene tests.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 4: AnimalTrace Movement
 
