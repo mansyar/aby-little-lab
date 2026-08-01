@@ -2,11 +2,11 @@
 
 ## Phase 1: New SVG Assets
 
-- [ ] Task: Author Shape Sorter assets — `shape_heart.svg`, `cutout_heart.svg`, `shape_crescent.svg`, `cutout_crescent.svg` (512×512 viewBox, flat fills, 4–6px `#2D3748` strokes; heart `#E53E3E`, crescent `#ECC94B`)
-- [ ] Task: Author Animal Trace assets — `elephant.svg`, `pig.svg`, `peanut.svg`, `apple.svg`
-- [ ] Task: Author Shadow Match assets — `airplane.svg`, `mushroom.svg`, `shadow_airplane.svg`, `shadow_mushroom.svg` (shadow = derived dark `#2D3748` silhouettes)
-- [ ] Task: Author Big vs. Small assets — `toy_rocket.svg` (`#3182CE`), `toy_drum.svg` (`#ECC94B`)
-- [ ] Task: Verify asset consistency — every new SVG matches storybook style, tight bounding box, and existing asset conventions
+- [x] Task: Author Shape Sorter assets — `shape_heart.svg`, `cutout_heart.svg`, `shape_crescent.svg`, `cutout_crescent.svg` (512×512 viewBox, flat fills, 4–6px `#2D3748` strokes; heart `#E53E3E`, crescent `#ECC94B`) [f837be5]
+- [x] Task: Author Animal Trace assets — `elephant.svg`, `pig.svg`, `peanut.svg`, `apple.svg` [f837be5]
+- [x] Task: Author Shadow Match assets — `airplane.svg`, `mushroom.svg`, `shadow_airplane.svg`, `shadow_mushroom.svg` (shadow = derived dark `#2D3748` silhouettes) [f837be5]
+- [x] Task: Author Big vs. Small assets — `toy_rocket.svg` (`#3182CE`), `toy_drum.svg` (`#ECC94B`) [f837be5]
+- [x] Task: Verify asset consistency — every new SVG matches storybook style, tight bounding box, and existing asset conventions [f837be5]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 2: Game Logic Expansion (TDD)
