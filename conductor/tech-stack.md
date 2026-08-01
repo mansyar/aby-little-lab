@@ -206,6 +206,10 @@ aby-little-lab/
             └── completionEffect.test.ts
 ```
 
+## 8. CI/CD
+
+> **2026-08-02 — CI/CD Introduction:** GitHub Actions added as CI tooling (`.github/workflows/ci.yml`). Triggers: `pull_request` (opened/synchronize/reopened) runs the quality gates only; `push` to `master` runs the gates and then triggers the Coolify Deploy Webhook. Runner: `ubuntu-latest`, Node 22, pnpm 11.7.0 via corepack with `--frozen-lockfile` (matching the Dockerfile build). Quality gates, in order: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`. Deployment requires the `COOLIFY_DEPLOY_WEBHOOK` repository secret; Coolify continues building from the repo Dockerfile (build path unchanged).
+
 ## See Also
 
 - [TDD.md](../docs/TDD.md) — Full technical design document with detailed config snippets
