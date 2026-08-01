@@ -1517,12 +1517,18 @@ describe("scene navigation flow", () => {
       scene.create();
 
       const shapes = getShapes(scene);
+      const slots = getSlots(scene);
       const shape = shapes[0];
+      const wrongSlot = slots.find((s) => s.type !== shape.type);
 
-      // Simulate dragend without prior drop (dropped outside any zone)
+      // Drop on a wrong slot, then release
       const onCalls = getMockFn(shape.obj.on).mock.calls;
-      const dragendCall = onCalls.find((c) => c[0] === "dragend");
-      const dragendCallback = dragendCall?.[1] as () => void;
+      const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+        pointer: unknown,
+        target: unknown,
+      ) => void;
+      dropCallback(null, wrongSlot?.zone);
+      const dragendCallback = onCalls.find((c) => c[0] === "dragend")?.[1] as () => void;
       dragendCallback();
 
       // Verify bounce-back tween targets origin position
@@ -1673,6 +1679,26 @@ describe("scene navigation flow", () => {
       expect(getMockFn(shape.obj.disableInteractive)).not.toHaveBeenCalled();
       expect(mockAudio.playCorrect).not.toHaveBeenCalled();
       expect(getMockFn(scene.add.particles)).not.toHaveBeenCalled();
+    });
+
+    it("dragend without a drop on a zone bounces silently (no incorrect SFX)", () => {
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const shapes = getShapes(scene);
+      const shape = shapes[0];
+
+      // Drag end with no prior drop on a zone: bounce back without incorrect SFX
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+      const dragendCallback = onCalls.find((c) => c[0] === "dragend")?.[1] as () => void;
+      dragendCallback();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounceTween = tweenCalls.find(
+        (c) => c[0]?.targets === shape.obj && c[0]?.x === shape.originX,
+      );
+      expect(bounceTween).toBeDefined();
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
     });
 
     it("creates touch targets meeting 64x64px minimum", () => {
@@ -2715,6 +2741,13 @@ describe("scene navigation flow", () => {
           (c) => c[0]?.targets === animalImage && c[0]?.repeat === -1,
         ),
       ).toBe(false);
+    });
+
+    it("registers a shutdown cleanup for the breathing loop", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      expect(getMockFn(scene.events.once)).toHaveBeenCalledWith("shutdown", expect.any(Function));
     });
 
     it("respawns a poppable bubble after pop to maintain concurrent count", () => {

@@ -40,6 +40,7 @@ interface ShapeData {
   originX: number;
   originY: number;
   placed: boolean;
+  droppedOnZone: boolean;
 }
 
 /** Tracks a slot's drop zone and position. */
@@ -159,6 +160,7 @@ export class ShapeSorterScene extends Phaser.Scene {
         originX: x,
         originY: SHAPE_Y,
         placed: false,
+        droppedOnZone: false,
       };
 
       obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
@@ -184,6 +186,8 @@ export class ShapeSorterScene extends Phaser.Scene {
     const slot = this.slots.find((s) => s.zone === target);
     if (!slot) return;
 
+    shape.droppedOnZone = true;
+
     if (isMatch(shape.type, slot.type)) {
       snapToSlot(this, shape.obj, slot.x, slot.y);
       shape.obj.disableInteractive();
@@ -200,7 +204,7 @@ export class ShapeSorterScene extends Phaser.Scene {
   /** Handles drag end. Bounces shape back to origin with wobble if not placed. */
   private handleDragEnd(shape: ShapeData): void {
     if (!shape.placed) {
-      this.audioManager.playIncorrect();
+      if (shape.droppedOnZone) this.audioManager.playIncorrect();
       this.tweens.add({
         targets: shape.obj,
         x: shape.originX,
@@ -208,6 +212,7 @@ export class ShapeSorterScene extends Phaser.Scene {
         duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
         ease: "Back.out",
       });
+      shape.droppedOnZone = false;
     }
   }
 

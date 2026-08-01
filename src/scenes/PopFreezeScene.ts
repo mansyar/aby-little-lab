@@ -270,7 +270,7 @@ export class PopFreezeScene extends Phaser.Scene {
   private breatheAnimal(animalImage: Phaser.GameObjects.Image): void {
     if (isReducedMotion()) return;
     const base = animalImage.scaleX;
-    this.tweens.add({
+    const tween = this.tweens.add({
       targets: animalImage,
       scaleX: base * BREATHE_SCALE,
       scaleY: base * BREATHE_SCALE,
@@ -279,6 +279,7 @@ export class PopFreezeScene extends Phaser.Scene {
       repeat: -1,
       ease: "Sine.inOut",
     });
+    this.events.once("shutdown", () => tween?.remove());
   }
 
   /** Wakes a sleeping bubble: SFX, gentle wobble, no penalty. */
