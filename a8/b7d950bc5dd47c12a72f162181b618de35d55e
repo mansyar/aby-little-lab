@@ -1,0 +1,7 @@
+Task 'Update documentation (Phase 4, Replay Variety Expansion)'.
+
+docs/PRD.md: Game 1 (6 shapes, colors for heart/crescent), Game 2 (6 pairs incl. elephant->peanut, pig->apple), Game 3 (6-animal decoy reuse), Game 4 (8-object pool, 6-of-8 shared-set rounds), Game 6 (6 toys, colors for rocket/drum), hand-authored note 4->6 shapes.
+docs/TDD.md: folder comments, asset tables (+4 shapes/cutouts, +2 animals, +4 items, +2 toys, +2 shadows), Pop & Freeze reuse note 4->6, summary counts 59->73.
+conductor/tech-stack.md: dated 2026-08-01 design note documenting expanded pools + round-size invariants.
+src/scenes: fixed stale doc comments (ShapeSorterScene 3-of-4 -> 3-of-6, AnimalTraceScene 3-of-4 -> 3-of-6, ShadowMatchScene 6 pairs -> 6 of 8) made inaccurate by this track's pool changes.
+README.md: verified no item-pool enumerations exist — no changes required.
