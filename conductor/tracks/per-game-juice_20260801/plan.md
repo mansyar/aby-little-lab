@@ -53,16 +53,16 @@
   - [x] **VERIFY:** Run MusicalMemory logic + scene tests.
 - [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
-## Phase 7: Quality Gates
+## Phase 7: Quality Gates `[checkpoint: pending]`
 
-- [ ] Task: Release verification for this track
-  - [ ] Run `pnpm test -- --run`.
-  - [ ] Run `pnpm run test:coverage`.
-  - [ ] Run `pnpm run check`.
-  - [ ] Run `pnpm run build`.
-  - [ ] Manual: play each game once and verify all listed reactions, effect cleanup, and reduced-motion behavior.
-  - [ ] Confirm no logic-file changes and no new assets/audio.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Release verification for this track
+  - [x] Run `pnpm test -- --run`. (488/488 passed, 16 files)
+  - [x] Run `pnpm run test:coverage`. (All files 97.61% stmts / 85.81% branch / 97.65% funcs / 98.53% lines — threshold 80% PASS)
+  - [x] Run `pnpm run check`. (Biome clean, 46 files)
+  - [x] Run `pnpm run build`. (built in 3.31s, PWA sw.js + workbox generated)
+  - [x] Manual: play each game once and verify all listed reactions, effect cleanup, and reduced-motion behavior. (User confirmed)
+  - [x] Confirm no logic-file changes and no new assets/audio. (git diff src/game/ vs track start: 0 files; only TS source/test files added)
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Definition of Done
 
