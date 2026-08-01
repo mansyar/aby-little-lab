@@ -53,3 +53,11 @@
 - [x] Task: Phase 4 Verification & Checkpoint (Refer to workflow.md) [checkpoint: 2d2c51b]
 
 **TDD note:** This is a config/infra chore — TDD is impractical for YAML; verification is via the existing gate suite (reproduced locally and in CI), YAML parsing, and the live end-to-end run in Phase 4.
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions (695e1f1)
+  - [x] Bump actions to current majors (checkout@v7, setup-node@v7, pnpm/action-setup@v6) — resolves Node 20 deprecation
+  - [x] `push` trigger `paths-ignore` for `conductor/**`, `docs/**`, `README.md`, `**/*.md` — avoids needless rebuilds on docs-only pushes
+  - [x] Explicit `permissions: contents: read` at workflow level
+  - [x] actionlint validation clean — actionlint 1.7.12: 0 errors
