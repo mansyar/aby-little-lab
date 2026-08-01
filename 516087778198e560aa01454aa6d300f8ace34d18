@@ -1,0 +1,10 @@
+Phase 3 verification report (hub-engagement_20260801) — PASS
+
+Scope: Sticker shelf (FR4) — real SVG thumbnails with earned/unearned/justEarned states.
+Commits: e98bf59 (shelf implementation), e06315d (plan), c2c9103 (size fix), 07ae1b8 (plan deviation note).
+
+Automated: CI=true pnpm test -- --run -> 435 passed (15 files); pnpm run check clean; pnpm run build OK.
+
+Manual (2026-08-01, user confirmed): six small (56px) thumbnails render under tiles; earned stickers shimmer, unearned are dimmed/smaller; just-earned sticker bounces in larger with sparkle burst after auto-return; replay returns without highlight; reduced-motion keeps dimmed fade-in with no shimmer/bounce/burst. Size regression (thumbnails rendering full 512px texture) fixed in c2c9103.
+
+Acceptance criteria FR4 met; NFR (reuse sticker SVGs, no new textures) honored.
