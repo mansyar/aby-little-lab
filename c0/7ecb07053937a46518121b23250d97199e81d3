@@ -1,0 +1,4 @@
+Task: Write tests + implement Hub toast UI component (PwaToast.ts)
+Summary: Added src/components/PwaToast.ts, an app-styled parent-facing toast for PWA lifecycle events. 'update' kind shows 'New version ready!' with Update now (primary #2B6CB0) + Later (secondary #A0AEC0) buttons; 'offline' kind shows 'Ready to play offline!' with a single OK button. Cream panel #FFF8E7 with 4px #2D3748 outline, 26px title, 24px buttons, inflated 200x72 hit areas (>=64px touch target). Entrance is alpha fade (300ms) + scale-in; under reduced motion alpha-only 200ms. No audio. Callbacks optional (guarded with optional chaining).
+Files: src/components/PwaToast.ts (new), src/__tests__/components/PwaToast.test.ts (new, 11 tests)
+Why: With registerType 'prompt' the app must surface update/offline events to parents in-app; this component renders them in the app's visual language on the Hub.
