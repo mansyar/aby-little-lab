@@ -1,0 +1,10 @@
+Phase 4 verification report (hub-engagement_20260801) — PASS
+
+Scope: Idle attract cue (FR5) — 25s idle timer, tile wiggle + playIdleCall chime, 10s repeat, input reset, shutdown cleanup, reduced-motion chime-only.
+Commits: e7c0b9b (implementation), 2e9f5eb (plan).
+
+Automated: CI=true pnpm test -- --run -> 444 passed (15 files); pnpm run check clean; pnpm run build OK.
+
+Manual (2026-08-01, user confirmed): ~25s idle triggers sequential tile wiggle + soft two-tone chime; chime repeats ~10s while idle; pointer input resets idle clock; returning from a game starts a fresh timer; Settings ParentLock hold unaffected; reduced-motion plays chime with no wiggle.
+
+Acceptance criteria FR5 met; no interference with ParentLock confirmed.
