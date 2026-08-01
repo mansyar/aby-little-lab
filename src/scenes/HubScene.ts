@@ -22,12 +22,13 @@ const GAME_TILES: readonly GameTile[] = [
   { sceneKey: "ShadowMatch", gameId: "shadow-match", label: "Shadow Match" },
   { sceneKey: "MusicalMemory", gameId: "musical-memory", label: "Musical Memory" },
   { sceneKey: "BigSmall", gameId: "big-small", label: "Big & Small" },
+  { sceneKey: "PatternBuilder", gameId: "pattern-builder", label: "Pattern Builder" },
 ];
 
 const TILE_WIDTH = 200;
 const TILE_HEIGHT = 150;
 const TILE_SPACING = 50;
-const GRID_COLS = 3;
+const GRID_COLS = 4;
 const GRID_ROWS = 2;
 
 /** Delay between consecutive entrance elements (ms). */
@@ -86,7 +87,7 @@ const WIGGLE_PHASE_OFFSET = 120;
 /**
  * Hub scene — the central navigation hub.
  *
- * Displays a grid of 6 game tiles, a sticker book showing earned stickers,
+ * Displays a grid of 7 game tiles, a sticker book showing earned stickers,
  * and a settings button gated behind a parental lock.
  */
 export class HubScene extends Phaser.Scene {

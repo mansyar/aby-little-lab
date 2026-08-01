@@ -46,6 +46,7 @@ import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
 import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
+import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_builder.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
@@ -122,6 +123,7 @@ const SHAPE_ASSETS = [
   { key: "toy_block", svg: toyBlockSvg },
   { key: "toy_box", svg: toyBoxSvg },
   { key: "sticker_big_small", svg: stickerBigSmallSvg },
+  { key: "sticker_pattern_builder", svg: stickerPatternBuilderSvg },
   { key: "mascot_idle", svg: mascotIdleSvg },
   { key: "mascot_celebrate", svg: mascotCelebrateSvg },
 ] as const;
