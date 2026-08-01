@@ -18,12 +18,13 @@
 
 ## Phase 2 — Version Bump & Tag
 
-- [ ] **Task 2.1:** Bump version (release-checklist Step 3)
-  - [ ] `npm version 1.0.0 --no-git-tag-version` → `package.json`/lockfile show `1.0.0`
-  - [ ] Commit `chore(release): Bump version to 1.0.0` + git notes
-- [ ] **Task 2.2:** Create tag (release-checklist Step 4)
-  - [ ] `git tag -a v1.0.0 -m 'Release v1.0.0: Initial PWA release'` → verify `git tag` shows `v1.0.0`
-- [ ] **Task 2.3: Phase Verification & Checkpoint** — verify tag + clean diff; checkpoint commit + git notes; record SHA
+- [x] **Task 2.1:** Bump version (release-checklist Step 3)
+  - [x] `npm version 1.0.0 --no-git-tag-version` → `package.json`/lockfile show `1.0.0`
+  - [x] Commit `chore(release): Bump version to 1.0.0` (`28da7a5`) + git notes
+- [x] **Task 2.2:** Create tag (release-checklist Step 4)
+  - [x] `git tag -a v1.0.0 -m 'Release v1.0.0: Initial PWA release'` → verify `git tag` shows `v1.0.0` (`d0e73bf`)
+- [x] **Task 2.3: Phase Verification & Checkpoint** — verify tag + clean diff; checkpoint commit + git notes; record SHA
+  - [x] `[checkpoint: 07834ea]`
 
 ## Phase 3 — Merge, Deploy & Verify
 
