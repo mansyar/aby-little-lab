@@ -47,6 +47,35 @@ describe("Storage utilities", () => {
       expect(result.stickers["shape-sorter"].earned).toBe(false);
       expect(result.settings.bgmEnabled).toBe(true);
     });
+
+    it("migrates an older save that predates a game by backfilling default sticker entries", () => {
+      // Simulate a save from before Game 7 shipped: no "pattern-builder" key.
+      const oldSave = {
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+          "animal-trace": { earned: false, earnedAt: null },
+          "pop-freeze": { earned: false, earnedAt: null },
+          "shadow-match": { earned: false, earnedAt: null },
+          "musical-memory": { earned: false, earnedAt: null },
+          "big-small": { earned: false, earnedAt: null },
+        },
+        settings: { bgmEnabled: false, sfxEnabled: true },
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(oldSave));
+
+      const result = load();
+
+      // The new game gets a fresh unearned entry instead of crashing.
+      expect(result.stickers["pattern-builder"]).toEqual({
+        earned: false,
+        earnedAt: null,
+      });
+      // Existing progress and settings are preserved.
+      expect(result.stickers["shape-sorter"].earned).toBe(true);
+      expect(result.stickers["shape-sorter"].earnedAt).toBe("2026-07-28T00:00:00.000Z");
+      expect(result.settings.bgmEnabled).toBe(false);
+      expect(result.settings.sfxEnabled).toBe(true);
+    });
   });
 
   describe("save", () => {

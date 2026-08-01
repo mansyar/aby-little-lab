@@ -22,15 +22,23 @@ function createDefaultStorage(): AppStorage {
 
 /** Reads AppStorage from localStorage, returning defaults if empty or corrupted. */
 export function load(): AppStorage {
+  const defaults = createDefaultStorage();
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw === null) {
-    return createDefaultStorage();
+    return defaults;
   }
+  let parsed: Partial<AppStorage>;
   try {
-    return JSON.parse(raw);
+    parsed = JSON.parse(raw);
   } catch {
-    return createDefaultStorage();
+    return defaults;
   }
+  // Merge saved data over defaults so saves from before a game shipped keep
+  // working: every game id (and setting) always has an entry.
+  return {
+    stickers: { ...defaults.stickers, ...parsed.stickers },
+    settings: { ...defaults.settings, ...parsed.settings },
+  };
 }
 
 /** Persists AppStorage to localStorage as JSON. */
