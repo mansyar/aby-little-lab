@@ -25,7 +25,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: CI/CD Quality Gates & Auto-Deploy via Coolify** *Link: [./tracks/ci-cd-autodeploy_20260802/index.md](./tracks/ci-cd-autodeploy_20260802/index.md)*
+- [~] **Track: CI/CD Quality Gates & Auto-Deploy via Coolify** *Link: [./tracks/ci-cd-autodeploy_20260802/index.md](./tracks/ci-cd-autodeploy_20260802/index.md)*
 
 ---
 
