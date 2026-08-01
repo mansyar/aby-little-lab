@@ -53,6 +53,10 @@ const DECORATION_DRIFT_MIN = 4000;
 const DECORATION_DRIFT_MAX = 6000;
 /** Display size of sticker thumbnails on the shelf (px). */
 const STICKER_DISPLAY_SIZE = 56;
+/** Sticker textures are rasterized at this size (matches PreloadScene). */
+const STICKER_TEXTURE_SIZE = 512;
+/** Base scale for sticker thumbnails (56px from a 512px texture). */
+const STICKER_SCALE = STICKER_DISPLAY_SIZE / STICKER_TEXTURE_SIZE;
 /** Alpha for unearned (locked) sticker thumbnails. */
 const UNEARNED_ALPHA = 0.3;
 /** Scale for unearned (locked) sticker thumbnails. */
@@ -151,15 +155,17 @@ export class HubScene extends Phaser.Scene {
         y + TILE_HEIGHT / 2 - 20,
         `sticker_${GAME_TILES[i].gameId.replace(/-/g, "_")}`,
       );
-      sticker.setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE);
 
       if (earned) {
         if (GAME_TILES[i].gameId === this.justEarned) {
+          sticker.setScale(STICKER_SCALE * JUST_EARNED_SCALE);
           this.animateJustEarned(sticker);
         } else {
-          this.animateEntrance([sticker], () => this.addSparkle(sticker));
+          sticker.setScale(STICKER_SCALE);
+          this.animateEntrance([sticker], () => this.addSparkle(sticker), STICKER_SCALE);
         }
       } else {
+        sticker.setScale(STICKER_SCALE * UNEARNED_SCALE);
         this.animateUnearned(sticker);
       }
     }
@@ -238,8 +244,8 @@ export class HubScene extends Phaser.Scene {
     sticker.setAlpha(0);
     if (!isReducedMotion()) {
       sticker.setScale(0);
-      config.scaleX = UNEARNED_SCALE;
-      config.scaleY = UNEARNED_SCALE;
+      config.scaleX = UNEARNED_SCALE * STICKER_SCALE;
+      config.scaleY = UNEARNED_SCALE * STICKER_SCALE;
     }
     this.tweens.add(config);
   }
@@ -261,8 +267,8 @@ export class HubScene extends Phaser.Scene {
     sticker.setAlpha(0);
     if (!isReducedMotion()) {
       sticker.setScale(0);
-      config.scaleX = JUST_EARNED_SCALE;
-      config.scaleY = JUST_EARNED_SCALE;
+      config.scaleX = JUST_EARNED_SCALE * STICKER_SCALE;
+      config.scaleY = JUST_EARNED_SCALE * STICKER_SCALE;
       config.onComplete = () => this.addJustEarnedBurst(sticker);
     }
     this.tweens.add(config);
@@ -287,8 +293,8 @@ export class HubScene extends Phaser.Scene {
     if (isReducedMotion()) return;
     this.tweens.add({
       targets: sticker,
-      scaleX: BURST_SCALE,
-      scaleY: BURST_SCALE,
+      scaleX: BURST_SCALE * STICKER_SCALE,
+      scaleY: BURST_SCALE * STICKER_SCALE,
       duration: BURST_DURATION,
       yoyo: true,
       repeat: -1,
@@ -301,8 +307,13 @@ export class HubScene extends Phaser.Scene {
    * stagger. Under reduced motion only alpha is animated.
    * @param targets - Display objects to animate.
    * @param onComplete - Optional callback invoked when the entrance finishes.
+   * @param targetScale - Scale to end at (defaults to 1; stickers pass their base scale).
    */
-  private animateEntrance(targets: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
+  private animateEntrance(
+    targets: Phaser.GameObjects.GameObject[],
+    onComplete?: () => void,
+    targetScale = 1,
+  ): void {
     const index = this.entranceIndex;
     this.entranceIndex += 1;
     const config: Phaser.Types.Tweens.TweenBuilderConfig = {
@@ -324,8 +335,8 @@ export class HubScene extends Phaser.Scene {
       tweenable.setAlpha(0);
       if (!isReducedMotion()) {
         tweenable.setScale(0);
-        config.scaleX = 1;
-        config.scaleY = 1;
+        config.scaleX = targetScale;
+        config.scaleY = targetScale;
       }
     }
 

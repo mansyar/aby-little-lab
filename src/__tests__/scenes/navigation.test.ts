@@ -978,6 +978,8 @@ describe("scene navigation flow", () => {
       "sticker_musical_memory",
       "sticker_big_small",
     ];
+    /** Sticker textures are rasterized at 512px; the shelf displays them at 56px. */
+    const STICKER_BASE_SCALE = 56 / 512;
 
     it("replaces the star markers with one real sticker thumbnail per game (textless, touch-inert)", () => {
       const scene = new HubScene();
@@ -1010,7 +1012,18 @@ describe("scene navigation flow", () => {
       completeHubEntrances(scene);
 
       const sticker = getStickerImage(scene, "sticker_shape_sorter");
-      const sparkle = getMockFn(scene.tweens.add).mock.calls.find(
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const targetsSticker = (call: { targets?: unknown }): boolean => {
+        const targets = call.targets;
+        return Array.isArray(targets) ? targets.includes(sticker) : targets === sticker;
+      };
+      const entrance = tweenCalls.find((call) => targetsSticker(call[0]) && call[0]?.alpha === 1);
+      expect(entrance).toBeDefined();
+      // Entrances must land on the shelf base scale (56px from a 512px texture),
+      // not scale 1 (which would render the texture full-size).
+      expect(entrance?.[0]?.scaleX).toBeCloseTo(STICKER_BASE_SCALE, 5);
+      expect(entrance?.[0]?.scaleY).toBeCloseTo(STICKER_BASE_SCALE, 5);
+      const sparkle = tweenCalls.find(
         (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
       );
       expect(sparkle).toBeDefined();
@@ -1025,8 +1038,8 @@ describe("scene navigation flow", () => {
       const entrance = tweenCalls.find((call) => call[0]?.targets === sticker);
       expect(entrance).toBeDefined();
       expect(entrance?.[0]?.alpha).toBe(0.3);
-      expect(entrance?.[0]?.scaleX).toBe(0.85);
-      expect(entrance?.[0]?.scaleY).toBe(0.85);
+      expect(entrance?.[0]?.scaleX).toBeCloseTo(0.85 * STICKER_BASE_SCALE, 5);
+      expect(entrance?.[0]?.scaleY).toBeCloseTo(0.85 * STICKER_BASE_SCALE, 5);
 
       const sparkle = tweenCalls.find(
         (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
@@ -1047,15 +1060,20 @@ describe("scene navigation flow", () => {
         (call) => call[0]?.targets === sticker && call[0]?.alpha === 1,
       );
       expect(entrance).toBeDefined();
-      expect(entrance?.[0]?.scaleX).toBe(1.15);
-      expect(entrance?.[0]?.scaleY).toBe(1.15);
+      expect(entrance?.[0]?.scaleX).toBeCloseTo(1.15 * STICKER_BASE_SCALE, 5);
+      expect(entrance?.[0]?.scaleY).toBeCloseTo(1.15 * STICKER_BASE_SCALE, 5);
       expect(entrance?.[0]?.ease).toBe("Back.out");
 
       completeHubEntrances(scene);
       const burst = getMockFn(scene.tweens.add).mock.calls.find(
-        (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
+        (call) =>
+          call[0]?.targets === sticker &&
+          call[0]?.repeat === -1 &&
+          typeof call[0]?.scaleX === "number",
       );
       expect(burst).toBeDefined();
+      // The burst pulse must also stay at shelf scale (1.25x the 56px base).
+      expect(burst?.[0]?.scaleX).toBeCloseTo(1.25 * STICKER_BASE_SCALE, 5);
     });
 
     it("under reduced motion: unearned stickers fade to dim alpha only (no scale)", () => {
