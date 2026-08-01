@@ -1,0 +1,9 @@
+Task 'Expand game logic pools (Phase 2, Replay Variety Expansion)' — TDD red (8 failing tests) then green.
+
+shapeSorterLogic: ShapeType += heart|crescent, ALL_SHAPES 4->6, selection 3 of 6.
+animalTraceLogic: AnimalType/FoodType += elephant->peanut, pig->apple, ALL_PAIRS 4->6, selection 3 of 6.
+shadowMatchLogic: ObjectType += airplane|mushroom, ALL_OBJECTS 6->8, ROUND_SIZE=6; generateRound now selects the SAME 6-object set for objects and shadows (win-ability invariant) then shuffles each independently (replay variety). Bug found via navigation tests: independently drawn subsets made some rounds unwinnable.
+bigSmallLogic: ToyType += rocket|drum, ALL_TOYS 4->6, selection 3 of 6.
+popFreezeLogic: AnimalType += elephant|pig, ALL_ANIMALS 4->6 (decoy pool).
+
+Tests: +8 new assertions/tests across the 5 game logic test files. Full suite 563/563 (17 files) green.
