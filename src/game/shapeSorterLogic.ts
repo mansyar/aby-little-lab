@@ -2,7 +2,14 @@
 export type ShapeType = "circle" | "square" | "triangle" | "star" | "heart" | "crescent";
 
 /** All six shape types, in canonical order. */
-export const ALL_SHAPES: readonly ShapeType[] = ["circle", "square", "triangle", "star", "heart", "crescent"];
+export const ALL_SHAPES: readonly ShapeType[] = [
+  "circle",
+  "square",
+  "triangle",
+  "star",
+  "heart",
+  "crescent",
+];
 
 /** Randomly selects 3 of the 6 shape types for a round. */
 export function selectThreeShapes(): ShapeType[] {

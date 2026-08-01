@@ -5,7 +5,14 @@ export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig
 export type BubbleType = "poppable" | "sleeping";
 
 /** All six animal types, in canonical order. */
-export const ALL_ANIMALS: readonly AnimalType[] = ["monkey", "rabbit", "cat", "dog", "elephant", "pig"];
+export const ALL_ANIMALS: readonly AnimalType[] = [
+  "monkey",
+  "rabbit",
+  "cat",
+  "dog",
+  "elephant",
+  "pig",
+];
 
 /** Number of pops required to win the round. */
 export const WIN_TARGET = 6;

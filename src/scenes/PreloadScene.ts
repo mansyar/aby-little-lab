@@ -1,11 +1,15 @@
 import Phaser from "phaser";
 import animalCatSvg from "../assets/svg/animals/cat.svg?raw";
 import animalDogSvg from "../assets/svg/animals/dog.svg?raw";
+import animalElephantSvg from "../assets/svg/animals/elephant.svg?raw";
 import animalFrogBlueSvg from "../assets/svg/animals/frog_blue.svg?raw";
 import animalFrogGreenSvg from "../assets/svg/animals/frog_green.svg?raw";
 import animalFrogRedSvg from "../assets/svg/animals/frog_red.svg?raw";
 import animalMonkeySvg from "../assets/svg/animals/monkey.svg?raw";
+import animalPigSvg from "../assets/svg/animals/pig.svg?raw";
 import animalRabbitSvg from "../assets/svg/animals/rabbit.svg?raw";
+import smAirplaneSvg from "../assets/svg/items/airplane.svg?raw";
+import foodAppleSvg from "../assets/svg/items/apple.svg?raw";
 import smBallSvg from "../assets/svg/items/ball.svg?raw";
 import foodBananaSvg from "../assets/svg/items/banana.svg?raw";
 import smBoatSvg from "../assets/svg/items/boat.svg?raw";
@@ -15,19 +19,27 @@ import foodCarrotSvg from "../assets/svg/items/carrot.svg?raw";
 import foodFishSvg from "../assets/svg/items/fish.svg?raw";
 import smHouseSvg from "../assets/svg/items/house.svg?raw";
 import lilypadSvg from "../assets/svg/items/lilypad.svg?raw";
+import smMushroomSvg from "../assets/svg/items/mushroom.svg?raw";
+import foodPeanutSvg from "../assets/svg/items/peanut.svg?raw";
 import smTreeSvg from "../assets/svg/items/tree.svg?raw";
 import smUmbrellaSvg from "../assets/svg/items/umbrella.svg?raw";
+import smShadowAirplaneSvg from "../assets/svg/shadows/shadow_airplane.svg?raw";
 import smShadowBallSvg from "../assets/svg/shadows/shadow_ball.svg?raw";
 import smShadowBoatSvg from "../assets/svg/shadows/shadow_boat.svg?raw";
 import smShadowCarSvg from "../assets/svg/shadows/shadow_car.svg?raw";
 import smShadowHouseSvg from "../assets/svg/shadows/shadow_house.svg?raw";
+import smShadowMushroomSvg from "../assets/svg/shadows/shadow_mushroom.svg?raw";
 import smShadowTreeSvg from "../assets/svg/shadows/shadow_tree.svg?raw";
 import smShadowUmbrellaSvg from "../assets/svg/shadows/shadow_umbrella.svg?raw";
 import cutoutCircleSvg from "../assets/svg/shapes/cutout_circle.svg?raw";
+import cutoutCrescentSvg from "../assets/svg/shapes/cutout_crescent.svg?raw";
+import cutoutHeartSvg from "../assets/svg/shapes/cutout_heart.svg?raw";
 import cutoutSquareSvg from "../assets/svg/shapes/cutout_square.svg?raw";
 import cutoutStarSvg from "../assets/svg/shapes/cutout_star.svg?raw";
 import cutoutTriangleSvg from "../assets/svg/shapes/cutout_triangle.svg?raw";
 import shapeCircleSvg from "../assets/svg/shapes/shape_circle.svg?raw";
+import shapeCrescentSvg from "../assets/svg/shapes/shape_crescent.svg?raw";
+import shapeHeartSvg from "../assets/svg/shapes/shape_heart.svg?raw";
 import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
@@ -42,6 +54,8 @@ import toyBallSvg from "../assets/svg/toys/toy_ball.svg?raw";
 import toyBlockSvg from "../assets/svg/toys/toy_block.svg?raw";
 import toyBoxSvg from "../assets/svg/toys/toy_box.svg?raw";
 import toyCarSvg from "../assets/svg/toys/toy_car.svg?raw";
+import toyDrumSvg from "../assets/svg/toys/toy_drum.svg?raw";
+import toyRocketSvg from "../assets/svg/toys/toy_rocket.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
 import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
@@ -54,31 +68,43 @@ const SHAPE_ASSETS = [
   { key: "shape_square", svg: shapeSquareSvg },
   { key: "shape_triangle", svg: shapeTriangleSvg },
   { key: "shape_star", svg: shapeStarSvg },
+  { key: "shape_heart", svg: shapeHeartSvg },
+  { key: "shape_crescent", svg: shapeCrescentSvg },
   { key: "cutout_circle", svg: cutoutCircleSvg },
   { key: "cutout_square", svg: cutoutSquareSvg },
   { key: "cutout_triangle", svg: cutoutTriangleSvg },
   { key: "cutout_star", svg: cutoutStarSvg },
+  { key: "cutout_heart", svg: cutoutHeartSvg },
+  { key: "cutout_crescent", svg: cutoutCrescentSvg },
   { key: "sticker_shape_sorter", svg: stickerShapeSorterSvg },
   { key: "animal_monkey", svg: animalMonkeySvg },
   { key: "animal_rabbit", svg: animalRabbitSvg },
   { key: "animal_cat", svg: animalCatSvg },
   { key: "animal_dog", svg: animalDogSvg },
+  { key: "animal_elephant", svg: animalElephantSvg },
+  { key: "animal_pig", svg: animalPigSvg },
   { key: "food_banana", svg: foodBananaSvg },
   { key: "food_carrot", svg: foodCarrotSvg },
   { key: "food_fish", svg: foodFishSvg },
   { key: "food_bone", svg: foodBoneSvg },
+  { key: "food_peanut", svg: foodPeanutSvg },
+  { key: "food_apple", svg: foodAppleSvg },
   { key: "sm_house", svg: smHouseSvg },
   { key: "sm_tree", svg: smTreeSvg },
   { key: "sm_car", svg: smCarSvg },
   { key: "sm_boat", svg: smBoatSvg },
   { key: "sm_ball", svg: smBallSvg },
   { key: "sm_umbrella", svg: smUmbrellaSvg },
+  { key: "sm_airplane", svg: smAirplaneSvg },
+  { key: "sm_mushroom", svg: smMushroomSvg },
   { key: "sm_shadow_house", svg: smShadowHouseSvg },
   { key: "sm_shadow_tree", svg: smShadowTreeSvg },
   { key: "sm_shadow_car", svg: smShadowCarSvg },
   { key: "sm_shadow_boat", svg: smShadowBoatSvg },
   { key: "sm_shadow_ball", svg: smShadowBallSvg },
   { key: "sm_shadow_umbrella", svg: smShadowUmbrellaSvg },
+  { key: "sm_shadow_airplane", svg: smShadowAirplaneSvg },
+  { key: "sm_shadow_mushroom", svg: smShadowMushroomSvg },
   { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
   { key: "bubble", svg: bubbleSvg },
   { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
@@ -90,6 +116,8 @@ const SHAPE_ASSETS = [
   { key: "sticker_musical_memory", svg: stickerMusicalMemorySvg },
   { key: "toy_teddy_bear", svg: toyTeddyBearSvg },
   { key: "toy_car", svg: toyCarSvg },
+  { key: "toy_rocket", svg: toyRocketSvg },
+  { key: "toy_drum", svg: toyDrumSvg },
   { key: "toy_ball", svg: toyBallSvg },
   { key: "toy_block", svg: toyBlockSvg },
   { key: "toy_box", svg: toyBoxSvg },

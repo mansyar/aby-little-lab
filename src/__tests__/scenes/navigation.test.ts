@@ -616,12 +616,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 46 shape, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
+    it("loads all 60 shape, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(46);
+      expect(svgCalls).toHaveLength(60);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -635,10 +635,14 @@ describe("scene navigation flow", () => {
       expect(keys).toContain("shape_square");
       expect(keys).toContain("shape_triangle");
       expect(keys).toContain("shape_star");
+      expect(keys).toContain("shape_heart");
+      expect(keys).toContain("shape_crescent");
       expect(keys).toContain("cutout_circle");
       expect(keys).toContain("cutout_square");
       expect(keys).toContain("cutout_triangle");
       expect(keys).toContain("cutout_star");
+      expect(keys).toContain("cutout_heart");
+      expect(keys).toContain("cutout_crescent");
       expect(keys).toContain("sticker_shape_sorter");
     });
 
@@ -653,10 +657,14 @@ describe("scene navigation flow", () => {
       expect(keys).toContain("animal_rabbit");
       expect(keys).toContain("animal_cat");
       expect(keys).toContain("animal_dog");
+      expect(keys).toContain("animal_elephant");
+      expect(keys).toContain("animal_pig");
       expect(keys).toContain("food_banana");
       expect(keys).toContain("food_carrot");
       expect(keys).toContain("food_fish");
       expect(keys).toContain("food_bone");
+      expect(keys).toContain("food_peanut");
+      expect(keys).toContain("food_apple");
       expect(keys).toContain("sticker_animal_trace");
       expect(keys).toContain("bubble");
       expect(keys).toContain("sticker_pop_freeze");

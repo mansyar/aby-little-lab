@@ -5,7 +5,14 @@ export type ToyType = "teddy_bear" | "car" | "ball" | "block" | "rocket" | "drum
 export type ScaleCategory = "big" | "small";
 
 /** All six toy types, in canonical order. */
-export const ALL_TOYS: readonly ToyType[] = ["teddy_bear", "car", "ball", "block", "rocket", "drum"];
+export const ALL_TOYS: readonly ToyType[] = [
+  "teddy_bear",
+  "car",
+  "ball",
+  "block",
+  "rocket",
+  "drum",
+];
 
 /** The number of sorted toys needed to complete the game. */
 export const WIN_TARGET = 6;

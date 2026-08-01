@@ -1,5 +1,13 @@
 /** The eight object types used in the Shadow Match game. */
-export type ObjectType = "house" | "tree" | "car" | "boat" | "ball" | "umbrella" | "airplane" | "mushroom";
+export type ObjectType =
+  | "house"
+  | "tree"
+  | "car"
+  | "boat"
+  | "ball"
+  | "umbrella"
+  | "airplane"
+  | "mushroom";
 
 /** All eight object types, in canonical order. */
 export const ALL_OBJECTS: readonly ObjectType[] = [
