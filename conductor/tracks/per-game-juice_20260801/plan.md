@@ -6,11 +6,11 @@
 
 ## Phase 1: Drag Lift and Snap (ShapeSorter, ShadowMatch, BigSmall)
 
-- [ ] Task: Drag lift, drop-zone highlight, and snap-to-slot tween [TDD]
-  - [ ] **RED:** Add failing tests: scale/tilt on drag start and restore on drop; drop-zone highlight on dragover; snap tween (200ms `Back.out`) replacing instant `setPosition`; reduced-motion amplitudes; incorrect bounce-back preserved.
-  - [ ] **GREEN:** Implement shared drag-juice helper (or per-scene where conventions differ) in the three drag scenes.
-  - [ ] **REFACTOR:** Keep match detection and win logic untouched; share only genuinely identical behavior.
-  - [ ] **VERIFY:** Run all three logic suites plus scene integration tests.
+- [x] Task: Drag lift, drop-zone highlight, and snap-to-slot tween [TDD] `05de0d4`
+  - [x] **RED:** Add failing tests: scale/tilt on drag start and restore on drop; drop-zone highlight on dragover; snap tween (200ms `Back.out`) replacing instant `setPosition`; reduced-motion amplitudes; incorrect bounce-back preserved.
+  - [x] **GREEN:** Implement shared drag-juice helper (or per-scene where conventions differ) in the three drag scenes.
+  - [x] **REFACTOR:** Keep match detection and win logic untouched; share only genuinely identical behavior.
+  - [x] **VERIFY:** Run all three logic suites plus scene integration tests.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 2: BigSmall Box Reaction
