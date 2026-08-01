@@ -31,10 +31,10 @@
 
 ## Phase 4: AnimalTrace Movement
 
-- [ ] Task: Animal hops, food wiggle, progress-dot pop [TDD]
-  - [ ] **RED:** Add failing tests: hop arc tween per waypoint advance, food wiggle on arrival, progress dots pop (scale 1 → 1.4 → 1 `Back.out`) instead of alpha-only.
-  - [ ] **GREEN:** Implement in `AnimalTraceScene`.
-  - [ ] **VERIFY:** Run AnimalTrace logic + scene tests.
+- [x] Task: Animal hops, food wiggle, progress-dot pop [TDD] `a8ec374`
+  - [x] **RED:** Add failing tests: hop arc tween per waypoint advance, food wiggle on arrival, progress dots pop (scale 1 → 1.4 → 1 `Back.out`) instead of alpha-only.
+  - [x] **GREEN:** Implement in `AnimalTraceScene`.
+  - [x] **VERIFY:** Run AnimalTrace logic + scene tests.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 5: PopFreeze Reactions
