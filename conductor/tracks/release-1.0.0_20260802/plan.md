@@ -40,13 +40,15 @@
   - [x] PWA install + offline gameplay: **manual** (needs real browser) — user verifies per checklist Step 7
   - [x] No failures → no rollback needed
 - [x] **Task 3.5: Phase Verification & Checkpoint** — checkpoint commit + git notes; record SHA
-  - [x] `[checkpoint: <pending sha>]`
+  - [x] `[checkpoint: fa8b6f7]`
 
 ## Phase 4 — Release Documentation & Sign-off
 
-- [ ] **Task 4.1:** Complete `docs/release-checklist.md`
-  - [ ] Mark pre/post-release items; record actual performance metrics (boot time, memory, fps) where measurable
-- [ ] **Task 4.2:** Write release notes per template (v1.0.0 summary, 7 games, PWA features)
+- [x] **Task 4.1:** Complete `docs/release-checklist.md`
+  - [x] Mark pre/post-release items (automated + track-validated items marked; manual device items left open with notes)
+  - [x] Record actual performance metrics — pending device testing (noted in checklist)
+- [x] **Task 4.2:** Write release notes per template — `docs/release-notes-v1.0.0.md`
 - [ ] **Task 4.3:** Final verification
   - [ ] `v1.0.0` tag → merged commit on `master`; checklist complete; docs committed
   - [ ] **Phase Verification & Checkpoint** + final `conductor(plan):` update recording all SHAs
+  - [ ] `[checkpoint: <pending>]`
