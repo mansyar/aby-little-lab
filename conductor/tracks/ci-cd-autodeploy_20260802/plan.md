@@ -50,6 +50,6 @@
   - [x] Add `COOLIFY_DEPLOY_WEBHOOK` secret (user action) — *both secrets added; discovered Coolify requires COOLIFY_TOKEN too (see tech-stack amendment)*
   - [x] Merge PR → confirm deploy webhook fires exactly once and Coolify rebuilds from the repo Dockerfile — *run 30721000784: gates 51s + Deploy to Coolify 7s, exit 0*
   - [x] Confirm deployed site healthy (boot → hub → game start) — *user-verified live*
-- [x] Task: Phase 4 Verification & Checkpoint (Refer to workflow.md) [checkpoint: pending]
+- [x] Task: Phase 4 Verification & Checkpoint (Refer to workflow.md) [checkpoint: 2d2c51b]
 
 **TDD note:** This is a config/infra chore — TDD is impractical for YAML; verification is via the existing gate suite (reproduced locally and in CI), YAML parsing, and the live end-to-end run in Phase 4.
