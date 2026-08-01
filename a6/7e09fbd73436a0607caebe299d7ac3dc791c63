@@ -1,0 +1,5 @@
+Verification Report — Phase 2 (Replay Variety Expansion)
+
+Automated: full suite 563/563 passed (17 files). Game logic tests 118/118. Coverage: all 5 modified modules have dedicated test files (shapeSorterLogic, animalTraceLogic, shadowMatchLogic, bigSmallLogic, popFreezeLogic); no uncovered branches introduced in diff (verified per-phase coverage step).
+Manual: user confirmed in-game — new shapes/pairs/objects/toys visible, Shadow Match rounds always complete-able, win/sticker/auto-return flow intact.
+Bug caught & fixed this phase: Shadow Match generateRound initially picked independent 6-of-8 subsets for objects and shadows, producing unwinnable rounds; fixed to select one shared 6-set then shuffle independently (same-set invariant).
