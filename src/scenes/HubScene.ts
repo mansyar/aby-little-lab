@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
-import { Mascot } from "../components/Mascot";
+import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
@@ -82,10 +82,6 @@ const WIGGLE_ANGLE = 4;
 const WIGGLE_DURATION = 350;
 /** Phase offset between tile wiggles (ms). */
 const WIGGLE_PHASE_OFFSET = 120;
-/** Mascot display scale (102px from a 512px texture). */
-const MASCOT_SCALE = 0.2;
-/** Distance of the mascot's center from the bottom-right corner (px). */
-const MASCOT_CORNER_MARGIN = 90;
 
 /**
  * Hub scene — the central navigation hub.
@@ -244,12 +240,7 @@ export class HubScene extends Phaser.Scene {
    * loop. Touch-inert and behind gameplay z-order by component design.
    */
   private createMascot(): void {
-    this.mascot = new Mascot(
-      this,
-      this.cameras.main.width - MASCOT_CORNER_MARGIN,
-      this.cameras.main.height - MASCOT_CORNER_MARGIN,
-      MASCOT_SCALE,
-    );
+    this.mascot = createCornerMascot(this);
     this.mascot.wave();
     if (this.justEarned) {
       this.mascot.cheer();

@@ -5489,6 +5489,19 @@ describe("scene navigation flow", () => {
         });
       });
     }
+
+    it("does not nod when a ShapeSorter shape is released in mid-air (no zone interaction)", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      const mascot = getMascot(scene);
+      const draggables = getDraggables(scene, "shape_");
+      dragEnd(draggables[0].obj);
+
+      expect(findMascotAngleTween(scene, mascot)).toBeUndefined();
+      vi.restoreAllMocks();
+    });
   });
 
   describe("scene shutdown cleanup", () => {

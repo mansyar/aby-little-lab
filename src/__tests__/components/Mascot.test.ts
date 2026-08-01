@@ -25,6 +25,8 @@ function stubMatchMedia(matches: boolean): void {
 
 interface MockTween {
   remove: MockFn;
+  pause: MockFn;
+  resume: MockFn;
 }
 
 interface MockImage {
@@ -80,7 +82,7 @@ function createMockScene(): SceneHarness {
     fillCircle: vi.fn(),
     destroy: vi.fn(),
   };
-  const tween: MockTween = { remove: vi.fn() };
+  const tween: MockTween = { remove: vi.fn(), pause: vi.fn(), resume: vi.fn() };
   const scene: MockScene = {
     add: {
       image: vi.fn(() => image),
@@ -274,6 +276,29 @@ describe("Mascot", () => {
       expect(bounce.scale).toBe(0.25);
       expect(bounce.duration).toBe(160);
       expect(harness.scene.add.graphics).not.toHaveBeenCalled();
+    });
+
+    it("replaces an in-flight cheer tween when cheered again", () => {
+      const mascot = createMascot(harness.scene);
+      mascot.cheer();
+      expect(harness.tween.remove).not.toHaveBeenCalled();
+
+      mascot.cheer();
+      expect(harness.tween.remove).toHaveBeenCalledTimes(1);
+    });
+
+    it("pauses the blink loop during a cheer and resumes it after", () => {
+      const mascot = createMascot(harness.scene, 100, 100, 0.25);
+      mascot.idleLoop();
+      expect(harness.tween.pause).not.toHaveBeenCalled();
+
+      mascot.cheer();
+      expect(harness.tween.pause).toHaveBeenCalled();
+
+      const bounce = getTweenConfigs(harness.scene)[2];
+      const onComplete = bounce.onComplete as () => void;
+      onComplete();
+      expect(harness.tween.resume).toHaveBeenCalled();
     });
   });
 

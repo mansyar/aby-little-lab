@@ -210,8 +210,10 @@ export class ShapeSorterScene extends Phaser.Scene {
   /** Handles drag end. Bounces shape back to origin with wobble if not placed. */
   private handleDragEnd(shape: ShapeData): void {
     if (!shape.placed) {
-      if (shape.droppedOnZone) this.audioManager.playIncorrect();
-      this.mascot?.nod();
+      if (shape.droppedOnZone) {
+        this.audioManager.playIncorrect();
+        this.mascot?.nod();
+      }
       this.tweens.add({
         targets: shape.obj,
         x: shape.originX,

@@ -71,6 +71,10 @@ export class Mascot {
   private readonly reduced: boolean;
   private readonly tweens: Phaser.Tweens.Tween[] = [];
   private sparkle: Phaser.GameObjects.Graphics | null = null;
+  /** The in-flight cheer bounce, retired when a new cheer starts. */
+  private cheerTween?: Phaser.Tweens.Tween;
+  /** The squash-blink loop, paused while cheering so it never fights the bounce. */
+  private blinkTween?: Phaser.Tweens.Tween;
 
   constructor(scene: Phaser.Scene, x: number, y: number, scale: number) {
     this.scene = scene;
@@ -108,7 +112,9 @@ export class Mascot {
   /** Bounce + sparkle ring while wearing the celebrate pose, then back to idle. */
   cheer(big = false): void {
     this.image.setTexture(CELEBRATE_TEXTURE);
-    this.addTween({
+    this.cheerTween?.remove();
+    this.blinkTween?.pause();
+    this.cheerTween = this.addTween({
       targets: this.image,
       scale: this.baseScale * motionScale(big ? CHEER_BIG_SCALE : CHEER_SCALE, 1),
       duration: motionDuration(
@@ -119,7 +125,9 @@ export class Mascot {
       repeat: 1,
       ease: "Sine.inOut",
       onComplete: () => {
+        this.cheerTween = undefined;
         this.image.setTexture(IDLE_TEXTURE);
+        this.blinkTween?.resume();
       },
     });
     if (!this.reduced) {
@@ -140,7 +148,7 @@ export class Mascot {
       repeat: -1,
       ease: "Sine.inOut",
     });
-    this.addTween({
+    this.blinkTween = this.addTween({
       targets: this.image,
       scaleY: this.baseScale * BLINK_SCALE,
       duration: BLINK_DURATION,
@@ -150,21 +158,23 @@ export class Mascot {
       ease: "Sine.inOut",
     });
   }
-
   /** Stops all tweens and removes the image and any sparkle ring. */
   destroy(): void {
     for (const tween of this.tweens) {
       tween.remove();
     }
     this.tweens.length = 0;
+    this.cheerTween = undefined;
+    this.blinkTween = undefined;
     this.sparkle?.destroy();
     this.sparkle = null;
     this.image.destroy();
   }
 
-  private addTween(config: Phaser.Types.Tweens.TweenBuilderConfig): void {
+  private addTween(config: Phaser.Types.Tweens.TweenBuilderConfig): Phaser.Tweens.Tween {
     const tween = this.scene.tweens.add(config);
     this.tweens.push(tween);
+    return tween;
   }
 
   private spawnSparkle(radius: number): void {
