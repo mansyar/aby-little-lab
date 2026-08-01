@@ -20,6 +20,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [ ] **Track: Replay Variety Expansion** *Link: [./tracks/replay-variety-expansion_20260801/index.md](./tracks/replay-variety-expansion_20260801/index.md)*
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
