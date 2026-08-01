@@ -1,0 +1,7 @@
+Task: Implement patternBuilderLogic.ts — round generation (TDD).
+
+Summary: New pure logic module src/game/patternBuilderLogic.ts reusing ALL_SHAPES/shuffle from shapeSorterLogic. Exports PatternType (ABAB/AABB/ABB), GapPosition, PatternRound { patternType, row[4], gapIndex (1-3, never 0), choices[3] }, buildPatternRow, generateRound, generatePlaythrough(5 default), getCorrectShape. Full-row representation with gapIndex marking the hidden slot (no nulls) keeps the scene simple.
+
+Tests: 13 in src/__tests__/game/patternBuilderLogic.test.ts — buildPatternRow exact arrays; 200-sample validity loops (row matches declared pattern, distinct pair, unique choices from ALL_SHAPES containing the correct shape, gap positions 1-3, all pattern types seen); deterministic mock round; playthrough length/default/variety under different random sequences. Coverage 100% (stmts/branch/funcs/lines).
+
+Files: src/game/patternBuilderLogic.ts, src/__tests__/game/patternBuilderLogic.test.ts
