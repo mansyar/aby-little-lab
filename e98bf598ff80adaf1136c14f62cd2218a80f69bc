@@ -1,0 +1,7 @@
+Sticker shelf (hub-engagement Phase 3, FR4): replaced ★/☆ text markers with real SVG sticker thumbnails (textures already loaded by PreloadScene; keys sticker_<gameId with - -> _>). Earned: full alpha + gentle 800ms alpha-shimmer sparkle loop; unearned: dimmed (alpha 0.3, scale 0.85) so the collection goal stays visible; justEarned: larger Back.out entrance to 1.15 + sparkle burst (shimmer + 500ms scale pulse to 1.25). Shelf is textless and touch-inert (no setInteractive).
+
+All six game scenes now pass { justEarned: <gameId> } via scene-start data on auto-return when the sticker was earned that session (earnedNow flag); replays pass undefined (plain Hub start). HubScene.init() reads data.justEarned.
+
+Reduced motion: unearned/justEarned entrances fade alpha only (no scale); sparkle loops and bursts skipped.
+
+Tests: 5 new shelf tests + updated 6 auto-return assertions + new replay no-data test; entrance stagger/reduced-motion tests updated for unearned alpha 0.3. 435 passing.
