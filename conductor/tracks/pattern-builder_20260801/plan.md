@@ -12,7 +12,7 @@
   - [ ] Implement: `generateRound()` reusing `ALL_SHAPES`
   - [ ] Run tests (red → green), verify coverage
   - [ ] Commit with git note + plan update
-- [ ] Task: Replay-variety playthrough generation [TDD]
+- [x] Task: Replay-variety playthrough generation [TDD] [6b08a82]
   - [ ] Write failing tests: `generatePlaythrough(5)` mixes pattern types, shape pairs, gap positions, and distractor sets across rounds; difficulty fixed
   - [ ] Implement: playthrough generator
   - [ ] Run tests (red → green), verify coverage
