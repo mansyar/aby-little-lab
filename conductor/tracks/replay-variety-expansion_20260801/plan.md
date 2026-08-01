@@ -58,6 +58,6 @@
 
 ## Phase 5: Final Quality & Review
 
-- [ ] Task: Full regression — `pnpm run check`, `CI=true pnpm test` (all 555+ tests), coverage >80%, `pnpm run build`
-- [ ] Task: Apply review suggestions (conductor-review pass)
+- [x] Task: Full regression — `pnpm run check`, `CI=true pnpm test` (all 555+ tests), coverage >80%, `pnpm run build` [ec83354]
+- [x] Task: Apply review suggestions (conductor-review pass) [ec83354]
 - [ ] Task: Final Phase Verification & Checkpoint (refer to workflow.md)
