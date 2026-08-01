@@ -2,14 +2,16 @@
 
 ## Phase 1: Baseline & CI Tooling Documentation
 
-- [ ] Task: Document CI/CD additions in tech-stack.md
-  - [ ] Add dated note (2026-08-02) — GitHub Actions as CI tooling; Node 22 + pnpm 11.7.0 (matches Dockerfile); workflow file location; trigger semantics (PR gates, master deploy)
-- [ ] Task: Establish local baseline for all four quality gates
-  - [ ] Run `pnpm run check` — confirm pass
-  - [ ] Run `CI=true pnpm test` — confirm all tests pass
-  - [ ] Run `pnpm run build` — confirm success
-  - [ ] Run `node scripts/validate-pwa.js` — confirm pass
-  - [ ] Record baseline results (versions, test counts) in plan notes
+- [x] Task: Document CI/CD additions in tech-stack.md (bbccb2e)
+  - [x] Add dated note (2026-08-02) — GitHub Actions as CI tooling; Node 22 + pnpm 11.7.0 (matches Dockerfile); workflow file location; trigger semantics (PR gates, master deploy)
+- [x] Task: Establish local baseline for all four quality gates
+  - [x] Run `pnpm run check` — confirm pass
+  - [x] Run `CI=true pnpm test` — confirm all tests pass
+  - [x] Run `pnpm run build` — confirm success
+  - [x] Run `node scripts/validate-pwa.js` — confirm pass
+  - [x] Record baseline results (versions, test counts) in plan notes
+
+> **Phase 1 baseline (2026-08-02):** biome check clean (51 files); vitest 592 tests / 18 files passed; vite 8.1.5 build OK; validate-pwa 13/13 passed. Toolchain: pnpm 11.7.0 (corepack, matches Dockerfile), Node via corepack, Vitest 4.1.10. Note: `CI=true pnpm test` is bash syntax; on Windows PowerShell use `$env:CI='true'; pnpm test` (CI itself is bash-native, unaffected).
 - [ ] Task: Phase 1 Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Quality-Gates Workflow (`.github/workflows/ci.yml`)
