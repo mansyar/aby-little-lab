@@ -43,6 +43,7 @@ vi.mock("phaser", () => {
       strokePath: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
       strokeRect: vi.fn().mockReturnThis(),
+      strokeCircle: vi.fn().mockReturnThis(),
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
@@ -3779,6 +3780,104 @@ describe("scene navigation flow", () => {
         }
       }
     });
+    it("emits a self-cleaning ripple ring when a frog is tapped", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const graphicsMock = getMockFn(scene.add.graphics);
+      const graphicsCountBefore = graphicsMock.mock.results.length;
+
+      const frogs = getFrogs(scene);
+      tapFrog(frogs, 1);
+
+      expect(graphicsMock.mock.results.length).toBeGreaterThan(graphicsCountBefore);
+      const ripple = graphicsMock.mock.results[graphicsCountBefore]?.value as
+        | Record<string, MockFn>
+        | undefined;
+      expect(ripple).toBeDefined();
+      if (!ripple) return;
+      expect(getMockFn(ripple.strokeCircle)).toHaveBeenCalled();
+
+      const rippleTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === ripple && c[0]?.alpha === 0,
+      );
+      expect(rippleTween).toBeDefined();
+      if (!rippleTween) return;
+      expect(rippleTween[0].duration).toBe(400);
+      const onComplete = (rippleTween[0] as { onComplete?: () => void }).onComplete;
+      expect(onComplete).toEqual(expect.any(Function));
+      onComplete?.();
+      expect(getMockFn(ripple.destroy)).toHaveBeenCalledTimes(1);
+    });
+
+    it("uses reduced-motion ripple timing when requested", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene);
+
+      const graphicsMock = getMockFn(scene.add.graphics);
+      const graphicsCountBefore = graphicsMock.mock.results.length;
+
+      const frogs = getFrogs(scene);
+      tapFrog(frogs, 1);
+
+      const ripple = graphicsMock.mock.results[graphicsCountBefore]?.value as
+        | Record<string, MockFn>
+        | undefined;
+      expect(ripple).toBeDefined();
+      if (!ripple) return;
+
+      const rippleTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === ripple && c[0]?.alpha === 0,
+      );
+      expect(rippleTween).toBeDefined();
+      if (!rippleTween) return;
+      expect(rippleTween[0].duration).toBe(240);
+      expect(rippleTween[0].scaleX).toBe(1.3);
+    });
+
+    it("drifts lily pads gently with a looping tween", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const imageMock = getMockFn(scene.add.image);
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const frogY = (scene.cameras.main.centerY as number) + 30;
+
+      let driftCount = 0;
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "lilypad") {
+          const pad = imageMock.mock.results[i].value as Record<string, MockFn>;
+          const driftTween = tweenCalls.find((c) => c[0]?.targets === pad && c[0]?.repeat === -1);
+          expect(driftTween).toBeDefined();
+          if (!driftTween) continue;
+          driftCount++;
+          expect(driftTween[0].yoyo).toBe(true);
+          expect(driftTween[0].y).toBe(frogY + 3);
+          expect(driftTween[0].duration).toBe(1500);
+        }
+      }
+      expect(driftCount).toBe(3);
+    });
+
+    it("skips lily pad drift under reduced motion", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const imageMock = getMockFn(scene.add.image);
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "lilypad") {
+          const pad = imageMock.mock.results[i].value as Record<string, MockFn>;
+          expect(tweenCalls.some((c) => c[0]?.targets === pad && c[0]?.repeat === -1)).toBe(false);
+        }
+      }
+    });
   });
 
   describe("MusicalMemoryScene round progression and completion", () => {
@@ -3910,6 +4009,43 @@ describe("scene navigation flow", () => {
 
       expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
       expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
+    });
+
+    it("pops the progress dot with a scale bounce on round success", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+      const dots = getProgressDots(scene);
+
+      completeRound(scene, frogs, 0, 2);
+
+      const popTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === dots[0] && c[0]?.scaleX === 1.4 && c[0]?.yoyo === true,
+      );
+      expect(popTween).toBeDefined();
+      if (!popTween) return;
+      expect(popTween[0].scaleY).toBe(1.4);
+      expect(popTween[0].ease).toBe("Back.out");
+      expect(popTween[0].duration).toBe(250);
+    });
+
+    it("uses a reduced-motion progress dot pop", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+      const dots = getProgressDots(scene);
+
+      completeRound(scene, frogs, 0, 2);
+
+      const popTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === dots[0],
+      );
+      expect(popTween).toBeDefined();
+      if (!popTween) return;
+      expect(popTween[0].scaleX).toBe(1.2);
+      expect(popTween[0].duration).toBe(150);
     });
 
     it("sequence grows by 1 on round success and the next round auto-plays", () => {

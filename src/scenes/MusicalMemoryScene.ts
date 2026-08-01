@@ -12,7 +12,7 @@ import {
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
 import { createWinCelebration } from "../utils/completionEffect";
-import { motionDuration, motionScale } from "../utils/motion";
+import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -71,6 +71,48 @@ const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
 /** Duration of sticker reveal animation (ms). */
 const WIN_TWEEN_DURATION = 300;
 
+/** Ripple ring radius (px). */
+const RIPPLE_RADIUS = 40;
+
+/** Ripple ring stroke width (px). */
+const RIPPLE_WIDTH = 3;
+
+/** Ripple ring color. */
+const RIPPLE_COLOR = 0x4fd1c5;
+
+/** Ripple ring alpha. */
+const RIPPLE_ALPHA = 0.8;
+
+/** Ripple ring fade-out duration (ms). */
+const RIPPLE_DURATION = 400;
+
+/** Reduced-motion ripple ring duration (ms). */
+const RIPPLE_REDUCED_DURATION = 240;
+
+/** Ripple ring growth while fading. */
+const RIPPLE_GROW_SCALE = 1.6;
+
+/** Reduced-motion ripple ring growth. */
+const RIPPLE_GROW_REDUCED_SCALE = 1.3;
+
+/** Lily pad vertical drift amount (px). */
+const DRIFT_AMOUNT = 3;
+
+/** Lily pad drift duration per phase (3s full loop = 2 phases). */
+const DRIFT_DURATION = 1500;
+
+/** Progress dot pop peak scale. */
+const DOT_POP_SCALE = 1.4;
+
+/** Reduced-motion progress dot pop peak scale. */
+const DOT_POP_REDUCED_SCALE = 1.2;
+
+/** Progress dot pop duration (ms). */
+const DOT_POP_DURATION = 250;
+
+/** Reduced-motion progress dot pop duration (ms). */
+const DOT_POP_REDUCED_DURATION = 150;
+
 /**
  * Musical Memory scene — toddler repeats growing note sequences tapped on
  * 3 frogs (C4/E4/G4). Sequence auto-plays at round start (input locked);
@@ -81,6 +123,7 @@ export class MusicalMemoryScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private readonly audioManager: AudioManager;
   private readonly frogs: Phaser.GameObjects.Image[] = [];
+  private readonly lilypads: Array<{ pad: Phaser.GameObjects.Image; y: number }> = [];
   private sequence: number[] = [];
   private inputIndex = 0;
   private inputLocked = true;
@@ -137,12 +180,31 @@ export class MusicalMemoryScene extends Phaser.Scene {
 
     for (let i = 0; i < FROG_COUNT; i++) {
       const x = centerX + (i - 1) * spacing;
-      this.add.image(x, frogY + 30, "lilypad").setDisplaySize(LILYPAD_SIZE, LILYPAD_SIZE);
+      const padY = frogY + 30;
+      const pad = this.add.image(x, padY, "lilypad").setDisplaySize(LILYPAD_SIZE, LILYPAD_SIZE);
+      this.lilypads.push({ pad, y: padY });
       const frog = this.add.image(x, frogY, FROG_TEXTURES[i]);
       frog.setDisplaySize(FROG_SIZE, FROG_SIZE);
       frog.setInteractive();
       frog.on("pointerdown", () => this.handleFrogTap(i));
       this.frogs.push(frog);
+    }
+
+    this.driftLilypads();
+  }
+
+  /** Starts a gentle vertical drift loop on all lily pads (skipped under reduced motion). */
+  private driftLilypads(): void {
+    if (isReducedMotion()) return;
+    for (const entry of this.lilypads) {
+      this.tweens.add({
+        targets: entry.pad,
+        y: entry.y + DRIFT_AMOUNT,
+        duration: DRIFT_DURATION,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.inOut",
+      });
     }
   }
 
@@ -197,17 +259,38 @@ export class MusicalMemoryScene extends Phaser.Scene {
     });
   }
 
-  /** Plays a frog's note and triggers a scale-up bounce animation. */
+  /** Plays a frog's note, emits a ripple ring, and triggers a scale-up bounce animation. */
   private animateFrog(frogIndex: number): void {
     const frog = this.frogs[frogIndex];
     if (!frog) return;
     this.audioManager.playFrogNote(FROG_FREQUENCIES[frogIndex]);
+    this.emitRipple(frog);
     this.tweens.add({
       targets: frog,
       scaleX: motionScale(BOUNCE_SCALE, BOUNCE_REDUCED_SCALE),
       scaleY: motionScale(BOUNCE_SCALE, BOUNCE_REDUCED_SCALE),
       duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
       yoyo: true,
+    });
+  }
+
+  /** Emits an expanding ripple ring around the frog (self-cleaning). */
+  private emitRipple(frog: Phaser.GameObjects.Image): void {
+    const ripple = this.add.graphics();
+    ripple.setPosition(frog.x, frog.y);
+    ripple.lineStyle(RIPPLE_WIDTH, RIPPLE_COLOR, RIPPLE_ALPHA);
+    ripple.strokeCircle(0, 0, RIPPLE_RADIUS);
+
+    this.tweens.add({
+      targets: ripple,
+      alpha: 0,
+      scaleX: motionScale(RIPPLE_GROW_SCALE, RIPPLE_GROW_REDUCED_SCALE),
+      scaleY: motionScale(RIPPLE_GROW_SCALE, RIPPLE_GROW_REDUCED_SCALE),
+      duration: motionDuration(RIPPLE_DURATION, RIPPLE_REDUCED_DURATION),
+      ease: "Sine.out",
+      onComplete: () => {
+        ripple.destroy();
+      },
     });
   }
 
@@ -243,7 +326,16 @@ export class MusicalMemoryScene extends Phaser.Scene {
     this.audioManager.playCorrect();
 
     if (this.roundCount < this.progressDots.length) {
-      this.progressDots[this.roundCount].setAlpha(1);
+      const dot = this.progressDots[this.roundCount];
+      dot.setAlpha(1);
+      this.tweens.add({
+        targets: dot,
+        scaleX: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+        scaleY: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+        duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
+        ease: "Back.out",
+        yoyo: true,
+      });
     }
     this.roundCount++;
 
