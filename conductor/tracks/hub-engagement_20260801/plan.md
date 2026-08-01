@@ -39,11 +39,11 @@
 
 ## Phase 4: Idle Attract
 
-- [ ] Task: Idle timer, wiggle cue, and `playIdleCall` SFX [TDD]
-  - [ ] **RED:** Add failing AudioManager tests for `playIdleCall()` (gentle two-tone synthesis, respects SFX toggle); add Hub tests: fires ~25s after last input, repeats every ~10s, resets on pointer input, clears on shutdown, reduced-motion disables wiggle.
-  - [ ] **GREEN:** Implement `AudioManager.playIdleCall()` and the Hub idle-attract timer + wiggle animation.
-  - [ ] **REFACTOR:** Ensure single timer lifecycle; no duplicate listeners.
-  - [ ] **VERIFY:** Run AudioManager and Hub navigation tests; confirm no interference with ParentLock.
+- [x] Task: Idle timer, wiggle cue, and `playIdleCall` SFX [TDD] `e7c0b9b`
+  - [x] **RED:** Add failing AudioManager tests for `playIdleCall()` (gentle two-tone synthesis, respects SFX toggle); add Hub tests: fires ~25s after last input, repeats every ~10s, resets on pointer input, clears on shutdown, reduced-motion disables wiggle.
+  - [x] **GREEN:** Implement `AudioManager.playIdleCall()` and the Hub idle-attract timer + wiggle animation.
+  - [x] **REFACTOR:** Ensure single timer lifecycle; no duplicate listeners.
+  - [x] **VERIFY:** Run AudioManager and Hub navigation tests; confirm no interference with ParentLock.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 5: Quality Gates
