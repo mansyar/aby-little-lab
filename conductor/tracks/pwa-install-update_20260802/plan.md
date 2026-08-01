@@ -2,9 +2,9 @@
 
 ## Phase 1 — PWA Registration & Update/Offline Toasts
 
-- [ ] Task: Write failing tests for SW registration bridge (pure logic: update-state tracking, toast-queueing, once-only offline toast) in `src/__tests__/utils/pwaBridge.test.ts`
-- [ ] Task: Implement `src/utils/pwaBridge.ts` — wraps `virtual:pwa-register`'s `registerSW({ immediate: true })`, exposes `onNeedRefresh`/`onOfflineReady` events and a queue that defers toasts until Hub is active (Red → Green)
-- [ ] Task: Write tests for Hub toast UI component (render, dismiss, update action fires `updateSW(true)`, reduced-motion behavior)
+- [x] Task: Write failing tests for SW registration bridge (pure logic: update-state tracking, toast-queueing, once-only offline toast) in `src/__tests__/utils/pwaBridge.test.ts` (5c2e0ae)
+- [x] Task: Implement `src/utils/pwaBridge.ts` — wraps `virtual:pwa-register`'s `registerSW({ immediate: true })`, exposes `onNeedRefresh`/`onOfflineReady` events and a queue that defers toasts until Hub is active (Red → Green) (5c2e0ae)
+- [~] Task: Write tests for Hub toast UI component (render, dismiss, update action fires `updateSW(true)`, reduced-motion behavior)
 - [ ] Task: Implement Hub toast component (app-styled, palette colors, no new audio, dismiss button, "Update now" button)
 - [ ] Task: Wire toasts into HubScene (show on scene create if queued; update prompt shows persistently until resolved)
 - [ ] Task: Change `vite.config.ts` `registerType: "autoUpdate"` → `"prompt"`
