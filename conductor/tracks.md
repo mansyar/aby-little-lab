@@ -25,7 +25,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: PWA Install & Update UX** *Link: [./tracks/pwa-install-update_20260802/index.md](./tracks/pwa-install-update_20260802/index.md)*
+- [~] **Track: PWA Install & Update UX** *Link: [./tracks/pwa-install-update_20260802/index.md](./tracks/pwa-install-update_20260802/index.md)*
 
 ---
 
