@@ -55,3 +55,5 @@
 - [x] Task: Full regression — `pnpm run check`, `CI=true pnpm test`, coverage >80%, `pnpm run build`, `node scripts/validate-pwa.js` [257f27b, re-verified at checkpoint]
 - [x] Task: Apply review suggestions (conductor-review pass) — destroy snapped card shape + regression test [257f27b]
 - [ ] Task: Final Phase Verification & Checkpoint (refer to workflow.md)
+
+**Post-checkpoint fix (found during manual verification):** `load()` returned raw parsed JSON, crashing `hasSticker` in `HubScene.create` for players with a save from before Game 7 shipped (missing `pattern-builder` sticker key). Fixed in [6624e49] by merging saved data over defaults per key; regression test added (592 total tests).
