@@ -8,7 +8,7 @@
 - [x] Task: Implement Hub toast component (app-styled, palette colors, no new audio, dismiss button, "Update now" button) (c07ecb0)
 - [x] Task: Wire toasts into HubScene (show on scene create if queued; update prompt shows persistently until resolved) (033e064)
 - [x] Task: Change `vite.config.ts` `registerType: "autoUpdate"` → `"prompt"` (033e064)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 5357063]
 
 ## Phase 2 — Context-Aware Install Control in Settings
 
