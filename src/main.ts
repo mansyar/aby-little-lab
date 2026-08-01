@@ -5,6 +5,7 @@ import { BigSmallScene } from "./scenes/BigSmallScene";
 import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
 import { MusicalMemoryScene } from "./scenes/MusicalMemoryScene";
+import { PatternBuilderScene } from "./scenes/PatternBuilderScene";
 import { PopFreezeScene } from "./scenes/PopFreezeScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 import { ShadowMatchScene } from "./scenes/ShadowMatchScene";
@@ -35,6 +36,7 @@ const config: Phaser.Types.Core.GameConfig = {
     ShadowMatchScene,
     MusicalMemoryScene,
     BigSmallScene,
+    PatternBuilderScene,
   ],
 };
 
