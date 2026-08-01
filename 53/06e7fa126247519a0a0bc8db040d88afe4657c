@@ -1,0 +1,9 @@
+Task: Build Mascot component with wave/cheer/nod/idleLoop [TDD]
+
+RED: src/__tests__/components/Mascot.test.ts (22 tests) covering constructor (position/key/scale/depth/touch-inert), wave (angle 8 yoyo repeat 1, 200ms; reduced: angle 4/120ms), nod (angle 6, 150ms; reduced: 3/90ms), cheer (celebrate pose swap, scale 1.1 yoyo bounce, pose restore onComplete, self-cleaning sparkle ring; reduced: no bounce/sparkle), idleLoop (2500ms bob, scaleY 0.92 blink with repeatDelay ~4s; disabled under reduced motion), destroy (tween/image/sparkle cleanup, idempotent).
+
+GREEN: src/components/Mascot.ts - tween-only component over two static poses. Uses motionDuration/motionScale/isReducedMotion from cross-cutting-motion track. Graphics sparkle ring self-cleaning via tween onComplete. Type-only phaser import.
+
+REFACTOR: no particle emitters; reused existing motion utilities; biome-clean.
+
+VERIFY: 513/513 full suite + biome check + format pass.
