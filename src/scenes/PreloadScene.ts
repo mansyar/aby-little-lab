@@ -43,8 +43,8 @@ import toyBlockSvg from "../assets/svg/toys/toy_block.svg?raw";
 import toyBoxSvg from "../assets/svg/toys/toy_box.svg?raw";
 import toyCarSvg from "../assets/svg/toys/toy_car.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
-import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
+import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
 
 const SVG_RASTER_SIZE = 512;
