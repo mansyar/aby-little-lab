@@ -50,7 +50,7 @@
 - [x] Task: Update `docs/release-checklist.md` — "six" → "seven" references [d0f894e]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 5: Final Quality & Review
+## Phase 5: Final Quality & Review [checkpoint: 2cba0cf]
 
 - [x] Task: Full regression — `pnpm run check`, `CI=true pnpm test`, coverage >80%, `pnpm run build`, `node scripts/validate-pwa.js` [257f27b, re-verified at checkpoint]
 - [x] Task: Apply review suggestions (conductor-review pass) — destroy snapped card shape + regression test [257f27b]
