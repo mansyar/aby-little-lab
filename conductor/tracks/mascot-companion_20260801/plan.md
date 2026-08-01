@@ -4,14 +4,14 @@
 
 ---
 
-## Phase 1: Mascot Assets
+## Phase 1: Mascot Assets [checkpoint: 51e628f]
 
 - [x] Task: Author mascot SVGs and register in PreloadScene (7e6a531)
   - [ ] Create `src/assets/svg/ui/mascot_idle.svg` (owl professor, 512×512, storybook style, thick `--outline` strokes).
   - [ ] Create `src/assets/svg/ui/mascot_celebrate.svg` (wings-raised pose).
   - [ ] Import and register both textures in `PreloadScene` (rasterized at 512×512 like all SVGs).
   - [ ] VERIFY: `pnpm run build` succeeds; assets appear in the built bundle/precache manifest.
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (51e628f)
 
 ## Phase 2: Mascot Component
 
