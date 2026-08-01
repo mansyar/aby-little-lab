@@ -12,7 +12,7 @@
 
 ## Phase 2 — Context-Aware Install Control in Settings
 
-- [ ] Task: Write failing tests for `src/utils/pwaInstall.ts` (pure logic: state detection — prompt-available vs iOS-Safari vs installed/standalone; label selection; hidden rules)
+- [~] Task: Write failing tests for `src/utils/pwaInstall.ts` (pure logic: state detection — prompt-available vs iOS-Safari vs installed/standalone; label selection; hidden rules)
 - [ ] Task: Implement `src/utils/pwaInstall.ts` (platform detection, `beforeinstallprompt` capture, `appinstalled` tracking)
 - [ ] Task: Write tests for SettingsPanel install row + iOS instructions overlay (button states, tap → `prompt()` called, overlay opens/closes)
 - [ ] Task: Implement install row in `SettingsPanel.ts` (context-aware button per state; hide when installed)
