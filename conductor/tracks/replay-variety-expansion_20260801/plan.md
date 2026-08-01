@@ -40,12 +40,12 @@
 
 ## Phase 3: Scene & Preload Wiring
 
-- [ ] Task: PreloadScene — load the 14 new assets at 512×512 (verify no 404s; add/extend load tests where applicable)
-- [ ] Task: ShapeSorterScene — consume expanded shape pool (no layout/mechanics changes)
-- [ ] Task: AnimalTraceScene — consume expanded pair pool (no layout/mechanics changes)
-- [ ] Task: ShadowMatchScene — consume 6-of-8 round selection (6-slot layout unchanged)
-- [ ] Task: BigSmallScene — consume expanded toy pool (no layout/mechanics changes)
-- [ ] Task: PopFreezeScene — decoys can render the 2 new animals (preload already covered)
+- [x] Task: PreloadScene — load the 14 new assets at 512×512 (verify no 404s; add/extend load tests where applicable) [9cd626d]
+- [x] Task: ShapeSorterScene — consume expanded shape pool (no layout/mechanics changes) [9cd626d]
+- [x] Task: AnimalTraceScene — consume expanded pair pool (no layout/mechanics changes) [9cd626d]
+- [x] Task: ShadowMatchScene — consume 6-of-8 round selection (6-slot layout unchanged) [9cd626d]
+- [x] Task: BigSmallScene — consume expanded toy pool (no layout/mechanics changes) [9cd626d]
+- [x] Task: PopFreezeScene — decoys can render the 2 new animals (preload already covered) [9cd626d]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 4: Documentation
