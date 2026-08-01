@@ -1,0 +1,4 @@
+Task: Write failing tests + implement PWA registration bridge (pwaBridge.ts)
+Summary: Added src/utils/pwaBridge.ts wrapping vite-plugin-pwa's registerSW with dependency injection (RegisterSWFn) so unit tests never need to mock the virtual:pwa-register module. The bridge delivers needRefresh/offlineReady events only while the Hub is active, queues events fired mid-game, flushes them on setHubActive(true), dedupes queued events, guarantees the offline toast fires at most once, and exposes updateNow() which calls updateSW(true) to reload with the new version.
+Files: src/utils/pwaBridge.ts (new), src/__tests__/utils/pwaBridge.test.ts (new, 15 tests)
+Why: Updates previously installed silently (autoUpdate). With registerType: 'prompt' (Phase 1 task 6) the app needs a scene-aware delivery mechanism so update/offline toasts only appear on the Hub, never mid-game.
