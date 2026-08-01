@@ -2,9 +2,11 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { PwaToast, type ToastKind } from "../components/PwaToast";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type { GameId } from "../types";
 import { isReducedMotion } from "../utils/motion";
+import { getPwaBridge } from "../utils/pwaBridge";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { hasSticker } from "../utils/storage";
@@ -104,6 +106,10 @@ export class HubScene extends Phaser.Scene {
   private attractTargets: Phaser.GameObjects.Rectangle[] = [];
   /** Professor Hoot, the friendly teacher mascot. */
   private mascot?: Mascot;
+  /** PWA lifecycle toast currently shown (update/offline). */
+  private pwaToast?: PwaToast;
+  /** Unsubscribes this scene from PWA lifecycle events on shutdown. */
+  private pwaUnsubscribe?: () => void;
 
   constructor() {
     super({ key: "Hub" });
@@ -224,7 +230,13 @@ export class HubScene extends Phaser.Scene {
     attachPressFeedback(settingsButton);
     settingsButton.on("pointerdown", startAudio);
 
+    this.wirePwaBridge();
+
     this.events.on("shutdown", () => {
+      this.pwaUnsubscribe?.();
+      getPwaBridge()?.setHubActive(false);
+      this.pwaToast?.destroy();
+      this.pwaToast = undefined;
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
@@ -232,6 +244,41 @@ export class HubScene extends Phaser.Scene {
       this.idleCallTimer = undefined;
       this.mascot?.destroy();
       this.mascot = undefined;
+    });
+  }
+
+  /**
+   * Subscribes to PWA lifecycle events so update/offline toasts appear on the
+   * Hub only. If an update was already available, shows its toast on entry.
+   */
+  private wirePwaBridge(): void {
+    const bridge = getPwaBridge();
+    if (!bridge) return;
+    this.pwaUnsubscribe = bridge.subscribe((event) => {
+      if (event === "needRefresh") {
+        this.showPwaToast("update");
+      } else {
+        this.showPwaToast("offline");
+      }
+    });
+    bridge.setHubActive(true);
+    if (bridge.updateAvailable()) {
+      this.showPwaToast("update");
+    }
+  }
+
+  /** Shows a PWA toast, replacing any toast already visible. */
+  private showPwaToast(kind: ToastKind): void {
+    this.pwaToast?.destroy();
+    const bridge = getPwaBridge();
+    if (!bridge) return;
+    this.pwaToast = new PwaToast(this, {
+      kind,
+      onUpdate: () => bridge.updateNow(),
+      onDismiss: () => {
+        this.pwaToast?.destroy();
+        this.pwaToast = undefined;
+      },
     });
   }
 

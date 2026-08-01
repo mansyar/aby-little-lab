@@ -200,7 +200,7 @@ describe("PwaToast interaction", () => {
     new PwaToast(scene as never, { kind: "update", onUpdate, onDismiss });
 
     const updateButton = getTextObjects(scene).find(
-      (object, index) => getTextLabels(scene)[index] === "Update now",
+      (_object, index) => getTextLabels(scene)[index] === "Update now",
     );
     if (!updateButton) throw new Error("Expected Update now button");
     triggerPointerdown(updateButton);
@@ -215,7 +215,7 @@ describe("PwaToast interaction", () => {
     new PwaToast(scene as never, { kind: "update", onUpdate: vi.fn(), onDismiss });
 
     const laterButton = getTextObjects(scene).find(
-      (object, index) => getTextLabels(scene)[index] === "Later",
+      (_object, index) => getTextLabels(scene)[index] === "Later",
     );
     if (!laterButton) throw new Error("Expected Later button");
     triggerPointerdown(laterButton);
@@ -229,7 +229,7 @@ describe("PwaToast interaction", () => {
     new PwaToast(scene as never, { kind: "offline", onDismiss });
 
     const okButton = getTextObjects(scene).find(
-      (object, index) => getTextLabels(scene)[index] === "OK",
+      (_object, index) => getTextLabels(scene)[index] === "OK",
     );
     if (!okButton) throw new Error("Expected OK button");
     triggerPointerdown(okButton);

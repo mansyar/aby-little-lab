@@ -46,15 +46,26 @@ export class PwaToast {
     this.objects.push(panel);
 
     const title = scene.add
-      .text(centerX, y - 35, options.kind === "update" ? "New version ready!" : "Ready to play offline!", {
-        color: TEXT_COLOR,
-        fontSize: "26px",
-      })
+      .text(
+        centerX,
+        y - 35,
+        options.kind === "update" ? "New version ready!" : "Ready to play offline!",
+        {
+          color: TEXT_COLOR,
+          fontSize: "26px",
+        },
+      )
       .setOrigin(0.5);
     this.objects.push(title);
 
     if (options.kind === "update") {
-      this.createButton(centerX - 110, y + 40, "Update now", PRIMARY_BUTTON_COLOR, options.onUpdate);
+      this.createButton(
+        centerX - 110,
+        y + 40,
+        "Update now",
+        PRIMARY_BUTTON_COLOR,
+        options.onUpdate,
+      );
       this.createButton(centerX + 110, y + 40, "Later", SECONDARY_BUTTON_COLOR, options.onDismiss);
     } else {
       this.createButton(centerX, y + 40, "OK", PRIMARY_BUTTON_COLOR, options.onDismiss);
