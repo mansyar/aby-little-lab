@@ -50,10 +50,10 @@
 
 ## Phase 4: Documentation
 
-- [ ] Task: Update `docs/PRD.md` — SVG requirements, item/color tables for all four games + Pop & Freeze decoy pool
-- [ ] Task: Update `docs/TDD.md` — asset manifest additions
-- [ ] Task: Update `conductor/tech-stack.md` — asset structure notes
-- [ ] Task: Update `README.md` — game description/variety notes
+- [x] Task: Update `docs/PRD.md` — SVG requirements, item/color tables for all four games + Pop & Freeze decoy pool [a8b7d95]
+- [x] Task: Update `docs/TDD.md` — asset manifest additions [a8b7d95]
+- [x] Task: Update `conductor/tech-stack.md` — asset structure notes [a8b7d95]
+- [x] Task: Update `README.md` — game description/variety notes [a8b7d95]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 5: Final Quality & Review
