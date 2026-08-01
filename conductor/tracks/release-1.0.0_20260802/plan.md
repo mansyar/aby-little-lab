@@ -11,9 +11,10 @@
   - [x] `pnpm run build` → succeeds (chunk-size warning pre-existing, informational)
   - [x] `node scripts/validate-pwa.js` → 13/13 passed
   - [x] If any gate fails: fix with a proper commit (`fix: ...`), re-run gates; **never bypass** — no failures occurred
-- [ ] **Task 1.3: Phase Verification & Checkpoint** (Refer to workflow.md)
-  - [ ] Verify phase scope via `git diff --name-only` vs previous checkpoint
-  - [ ] Run gates (max 2 fix attempts); commit `conductor(checkpoint): Checkpoint end of Phase 1` + git notes; record `[checkpoint: sha]`
+- [x] **Task 1.3: Phase Verification & Checkpoint** (Refer to workflow.md)
+  - [x] Verify phase scope via `git diff --name-only` vs previous checkpoint (scope: conductor track init + registry; no code files)
+  - [x] Run gates (max 2 fix attempts); commit `conductor(checkpoint): Checkpoint end of Phase 1` + git notes; record `[checkpoint: sha]`
+  - [x] `[checkpoint: 02bfd8c]`
 
 ## Phase 2 — Version Bump & Tag
 
