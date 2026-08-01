@@ -1,0 +1,10 @@
+Task: Author new SVG assets (Phase 1, Replay Variety Expansion)
+
+Created 14 new storybook-style SVGs (512x512 viewBox, flat fills, 4-6px #2D3748 strokes, no gradients):
+- shapes/: shape_heart.svg, cutout_heart.svg (heart #E53E3E), shape_crescent.svg, cutout_crescent.svg (crescent #ECC94B) + dashed translucent cutout variants
+- animals/: elephant.svg (gray #A0AEC0 + ear #718096, curled trunk), pig.svg (pink #F687B3, snout #FBB6CE, curly tail)
+- items/: peanut.svg (waist-pinched shell #D69E2E with texture), apple.svg (red #E53E3E, stem + leaf), airplane.svg (fuselage #BEE3F8, fin/wing #3182CE), mushroom.svg (red cap #E53E3E, white spots, cream stem)
+- shadows/: shadow_airplane.svg, shadow_mushroom.svg (solid #2D3748 silhouettes derived from object paths, no strokes/details)
+- toys/: toy_rocket.svg (body #3182CE, nose/fins #E53E3E, flame), toy_drum.svg (body #ECC94B, top head #FFF8E7, bottom #D69E2E)
+
+Why: expand item pools per track spec; assets follow PRD prompt matrix conventions (silhouette-first design, color-independent recognition, palette tokens).
