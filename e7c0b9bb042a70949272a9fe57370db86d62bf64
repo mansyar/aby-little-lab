@@ -1,0 +1,5 @@
+Idle attract (Phase 4, FR5): after 25s without pointer input the Hub plays AudioManager.playIdleCall (gentle E5+G5 two-tone at low gain 0.12) and wiggles all six tiles (4-degree rotation, 350ms Sine.inOut yoyo repeat -1, 120ms phase offset). The call repeats every 10s while idle. Any pointerdown resets the timer (removes pending timer, re-arms 25s). Shutdown removes the timer. Reduced motion: idle call still plays but no wiggle tween.
+
+Design: single TimerEvent chain (idleCallTimer field), trigger guards on timer presence so a cleared timer cannot fire; wiggle tweens are repeat -1 and die with the scene's tween manager on shutdown. MockScene.delayedCall now returns { remove: vi.fn() } to test timer removal; mockAudio gained playIdleCall.
+
+Tests: 3 AudioManager (two tones, start/stop, SFX toggle) + 6 Hub (arm 25s, fire call+wiggle 6 tiles, repeat 10s, reset on pointerdown, clear on shutdown, reduced-motion no wiggle). 444 passing.
