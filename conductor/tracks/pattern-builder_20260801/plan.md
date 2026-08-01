@@ -7,7 +7,7 @@
   - [ ] Implement: extend `src/types/index.ts`
   - [ ] Run tests (red → green), verify coverage
   - [ ] Commit with git note + plan update
-- [ ] Task: Implement `patternBuilderLogic.ts` — round generation [TDD]
+- [x] Task: Implement `patternBuilderLogic.ts` — round generation [TDD] [4a061ce]
   - [ ] Write failing tests: `generateRound()` returns a valid ABAB/AABB/ABB row of 4; two distinct pattern elements; gap at end or middle; correct answer present; 3 unique choices (correct + 2 distinct distractors) drawn from the 6-shape pool
   - [ ] Implement: `generateRound()` reusing `ALL_SHAPES`
   - [ ] Run tests (red → green), verify coverage
