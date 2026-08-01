@@ -12,7 +12,7 @@ import {
   selectThreePairs,
 } from "../game/animalTraceLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
-import { motionDuration } from "../utils/motion";
+import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -55,6 +55,42 @@ const PROGRESS_DOT_SPACING = 40;
 
 /** Radius of each progress indicator dot. */
 const PROGRESS_DOT_RADIUS = 8;
+
+/** Vertical arc (px) of the animal's hop between waypoints. */
+const HOP_ARC_Y = 6;
+
+/** Duration of one hop phase (apex up or landing down), total hop ~120ms. */
+const HOP_HALF_DURATION = 60;
+
+/** Reduced-motion duration of one hop phase. */
+const HOP_HALF_REDUCED_DURATION = 36;
+
+/** Food wiggle rotation amplitude (degrees) on path arrival. */
+const FOOD_WIGGLE_ANGLE = 4;
+
+/** Reduced-motion food wiggle rotation amplitude (degrees). */
+const FOOD_WIGGLE_REDUCED_ANGLE = 2;
+
+/** Food wiggle duration (ms). */
+const FOOD_WIGGLE_DURATION = 200;
+
+/** Reduced-motion food wiggle duration (ms). */
+const FOOD_WIGGLE_REDUCED_DURATION = 120;
+
+/** Number of yoyo repeats for the food wiggle. */
+const FOOD_WIGGLE_REPEAT = 3;
+
+/** Progress dot pop peak scale. */
+const DOT_POP_SCALE = 1.4;
+
+/** Reduced-motion progress dot pop peak scale. */
+const DOT_POP_REDUCED_SCALE = 1.2;
+
+/** Progress dot pop duration (ms). */
+const DOT_POP_DURATION = 250;
+
+/** Reduced-motion progress dot pop duration (ms). */
+const DOT_POP_REDUCED_DURATION = 150;
 
 /** Tracks the state of the current pair being traced. */
 interface PairState {
@@ -199,7 +235,7 @@ export class AnimalTraceScene extends Phaser.Scene {
     if (dist <= TRACE_TOLERANCE) {
       this.currentPair.progress = advancePath(this.currentPair.progress);
       const pos = this.currentPair.pathPoints[this.currentPair.progress.currentPoint];
-      this.currentPair.animalSprite.setPosition(pos.x, pos.y);
+      this.hopAnimalTo(pos);
 
       if (isPathComplete(this.currentPair.progress)) {
         this.handlePathComplete();
@@ -207,11 +243,37 @@ export class AnimalTraceScene extends Phaser.Scene {
     }
   }
 
+  /** Animates the animal hopping to the next waypoint with a small arc. */
+  private hopAnimalTo(pos: { x: number; y: number }): void {
+    const sprite = this.currentPair?.animalSprite;
+    if (!sprite) return;
+
+    const halfDuration = motionDuration(HOP_HALF_DURATION, HOP_HALF_REDUCED_DURATION);
+    const apexY = pos.y - motionScale(HOP_ARC_Y, 0);
+
+    this.tweens.add({
+      targets: sprite,
+      x: pos.x,
+      y: apexY,
+      duration: halfDuration,
+      ease: "Sine.inOut",
+      onComplete: () => {
+        this.tweens.add({
+          targets: sprite,
+          y: pos.y,
+          duration: halfDuration,
+          ease: "Sine.inOut",
+        });
+      },
+    });
+  }
+
   /** Handles a single path completion: SFX, bounded feedback, advance to next pair. */
   private handlePathComplete(): void {
     if (!this.currentPair) return;
     this.currentPair.complete = true;
     this.audioManager.playCorrect();
+    this.wiggleFood();
     createCompletionSplash(this, FOOD_X, SPRITE_Y);
     this.completedPaths++;
     this.updateProgressIndicator();
@@ -224,6 +286,20 @@ export class AnimalTraceScene extends Phaser.Scene {
         this.renderPair(this.currentPairIndex);
       });
     }
+  }
+
+  /** Wiggles the food sprite when the animal reaches it. */
+  private wiggleFood(): void {
+    const food = this.currentPair?.foodSprite;
+    if (!food) return;
+    this.tweens.add({
+      targets: food,
+      angle: motionScale(FOOD_WIGGLE_ANGLE, FOOD_WIGGLE_REDUCED_ANGLE),
+      duration: motionDuration(FOOD_WIGGLE_DURATION, FOOD_WIGGLE_REDUCED_DURATION),
+      yoyo: true,
+      repeat: FOOD_WIGGLE_REPEAT,
+      ease: "Sine.inOut",
+    });
   }
 
   /** Creates 3 progress indicator dots at the top of the screen. */
@@ -241,12 +317,19 @@ export class AnimalTraceScene extends Phaser.Scene {
     }
   }
 
-  /** Highlights the progress dot for the most recently completed path. */
+  /** Highlights the progress dot for the most recently completed path with a pop. */
   private updateProgressIndicator(): void {
     const dot = this.progressDots[this.completedPaths - 1];
-    if (dot) {
-      dot.setAlpha(1);
-    }
+    if (!dot) return;
+    dot.setAlpha(1);
+    this.tweens.add({
+      targets: dot,
+      scaleX: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      scaleY: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
+      ease: "Back.out",
+      yoyo: true,
+    });
   }
 
   /** Handles round completion — win animation, sticker award, and auto-return. */

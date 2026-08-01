@@ -1857,6 +1857,18 @@ describe("scene navigation flow", () => {
       throw new Error("Animal sprite not found");
     }
 
+    /** Returns the food image game object created by the scene. */
+    function getFoodSprite(scene: unknown): Record<string, MockFn> {
+      const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        const key = imageMock.mock.calls[i][2] as string;
+        if (key.startsWith("food_")) {
+          return imageMock.mock.results[i].value as Record<string, MockFn>;
+        }
+      }
+      throw new Error("Food sprite not found");
+    }
+
     /** Simulates tracing the entire path by advancing through all points. */
     function completePath(scene: unknown): void {
       const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
@@ -1912,10 +1924,15 @@ describe("scene navigation flow", () => {
       pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
       pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
 
-      expect(getMockFn(animalSprite.setPosition)).toHaveBeenCalledWith(
-        pathPoints[1].x,
-        pathPoints[1].y,
+      // Animal hops toward the next waypoint with a 6px arc (apex tween)
+      const hopTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === animalSprite && c[0]?.x === pathPoints[1].x,
       );
+      expect(hopTween).toBeDefined();
+      if (!hopTween) return;
+      expect(hopTween[0].y).toBe(pathPoints[1].y - 6);
+      expect(hopTween[0].duration).toBe(60);
+      expect(hopTween[0].ease).toBe("Sine.inOut");
     });
 
     it("pointer far from path does not advance animal", () => {
@@ -1930,7 +1947,10 @@ describe("scene navigation flow", () => {
       pointerdown({ x: 500, y: 100 });
       pointermove({ x: 600, y: 100 });
 
-      expect(getMockFn(animalSprite.setPosition)).not.toHaveBeenCalled();
+      // Animal should not have hopped at all
+      expect(
+        getMockFn(scene.tweens.add).mock.calls.some((c) => c[0]?.targets === animalSprite),
+      ).toBe(false);
     });
 
     it("pointerup pauses animal — no position reset", () => {
@@ -1954,10 +1974,15 @@ describe("scene navigation flow", () => {
       // Move pointer near point 2 while pointer is up — should not advance
       pointermove({ x: pathPoints[2].x, y: pathPoints[2].y });
 
-      // Animal should still be at point 1 (last setPosition call)
-      const setPositionCalls = getMockFn(animalSprite.setPosition).mock.calls;
-      const lastCall = setPositionCalls[setPositionCalls.length - 1];
-      expect(lastCall).toEqual([pathPoints[1].x, pathPoints[1].y]);
+      // Animal should still be hopping to point 1 (only one hop tween created)
+      const hopTweens = getMockFn(scene.tweens.add).mock.calls.filter(
+        (c) => c[0]?.targets === animalSprite,
+      );
+      expect(hopTweens).toHaveLength(1);
+      const onlyHop = hopTweens[0];
+      expect(onlyHop).toBeDefined();
+      if (!onlyHop) return;
+      expect(onlyHop[0].x).toBe(pathPoints[1].x);
     });
 
     it("resume continues from current position after pointer lift", () => {
@@ -1980,10 +2005,15 @@ describe("scene navigation flow", () => {
       pointerdown({ x: pathPoints[1].x, y: pathPoints[1].y });
       pointermove({ x: pathPoints[2].x, y: pathPoints[2].y });
 
-      // Animal should now be at point 2
-      const setPositionCalls = getMockFn(animalSprite.setPosition).mock.calls;
-      const lastCall = setPositionCalls[setPositionCalls.length - 1];
-      expect(lastCall).toEqual([pathPoints[2].x, pathPoints[2].y]);
+      // Animal should now be hopping to point 2 (second hop tween created)
+      const hopTweens = getMockFn(scene.tweens.add).mock.calls.filter(
+        (c) => c[0]?.targets === animalSprite,
+      );
+      expect(hopTweens).toHaveLength(2);
+      const secondHop = hopTweens[1];
+      expect(secondHop).toBeDefined();
+      if (!secondHop) return;
+      expect(secondHop[0].x).toBe(pathPoints[2].x);
     });
 
     it("reaching food triggers correct SFX + bounded success feedback", () => {
@@ -2028,10 +2058,12 @@ describe("scene navigation flow", () => {
       // Move to 40px before point 1 in x (within 60px tolerance)
       pointermove({ x: pathPoints[1].x - 40, y: pathPoints[1].y });
 
-      expect(getMockFn(animalSprite.setPosition)).toHaveBeenCalledWith(
-        pathPoints[1].x,
-        pathPoints[1].y,
+      const hopTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === animalSprite && c[0]?.x === pathPoints[1].x,
       );
+      expect(hopTween).toBeDefined();
+      if (!hopTween) return;
+      expect(hopTween[0].y).toBe(pathPoints[1].y - 6);
     });
 
     it("advances to next pair after path completion", () => {
@@ -2064,6 +2096,147 @@ describe("scene navigation flow", () => {
       completePath(scene);
 
       assertBoundedSuccessEffect(scene, initialGraphicsCount);
+    });
+
+    it("lands the animal on the waypoint after the hop arc completes", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
+
+      const apexTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === animalSprite && c[0]?.y === pathPoints[1].y - 6,
+      );
+      expect(apexTween).toBeDefined();
+      if (!apexTween) return;
+
+      // Apex tween schedules a landing tween back to the waypoint y
+      const onComplete = (apexTween[0] as { onComplete?: () => void }).onComplete;
+      expect(onComplete).toEqual(expect.any(Function));
+      onComplete?.();
+
+      const landingTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) =>
+          c[0]?.targets === animalSprite &&
+          c[0]?.y === pathPoints[1].y &&
+          c[0]?.duration === 60 &&
+          c[0]?.x === undefined,
+      );
+      expect(landingTween).toBeDefined();
+      if (!landingTween) return;
+      expect(landingTween[0].ease).toBe("Sine.inOut");
+    });
+
+    it("uses a reduced-motion hop (no arc, shorter duration) when requested", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+      const animalSprite = getAnimalSprite(scene);
+
+      const pointerdown = getInputCallback(scene, "pointerdown");
+      const pointermove = getInputCallback(scene, "pointermove");
+
+      pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
+      pointermove({ x: pathPoints[1].x, y: pathPoints[1].y });
+
+      const hopTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === animalSprite && c[0]?.x === pathPoints[1].x,
+      );
+      expect(hopTween).toBeDefined();
+      if (!hopTween) return;
+      expect(hopTween[0].y).toBe(pathPoints[1].y); // no arc
+      expect(hopTween[0].duration).toBe(36);
+
+      expect(
+        getMockFn(scene.tweens.add).mock.calls.some((c) => c[0]?.y === pathPoints[1].y - 6),
+      ).toBe(false);
+    });
+
+    it("wiggles the food sprite when the path is completed", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const foodSprite = getFoodSprite(scene);
+      completePath(scene);
+
+      const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) =>
+          c[0]?.targets === foodSprite &&
+          c[0]?.angle === 4 &&
+          c[0]?.yoyo === true &&
+          c[0]?.repeat === 3,
+      );
+      expect(wiggleTween).toBeDefined();
+      if (!wiggleTween) return;
+      expect(wiggleTween[0].duration).toBe(200);
+      expect(wiggleTween[0].ease).toBe("Sine.inOut");
+    });
+
+    it("uses a gentler reduced-motion food wiggle", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const foodSprite = getFoodSprite(scene);
+      completePath(scene);
+
+      const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === foodSprite,
+      );
+      expect(wiggleTween).toBeDefined();
+      if (!wiggleTween) return;
+      expect(wiggleTween[0].angle).toBe(2);
+      expect(wiggleTween[0].duration).toBe(120);
+    });
+
+    it("pops the progress dot with a scale bounce when a path is completed", () => {
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const circleMock = getMockFn(scene.add.circle);
+      const dots = circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+
+      completePath(scene);
+
+      const popTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === dots[0] && c[0]?.scaleX === 1.4 && c[0]?.yoyo === true,
+      );
+      expect(popTween).toBeDefined();
+      if (!popTween) return;
+      expect(popTween[0].scaleY).toBe(1.4);
+      expect(popTween[0].ease).toBe("Back.out");
+      expect(popTween[0].duration).toBe(250);
+    });
+
+    it("uses a reduced-motion progress dot pop", () => {
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+
+      const scene = new AnimalTraceScene();
+      scene.create();
+
+      const circleMock = getMockFn(scene.add.circle);
+      const dots = circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+
+      completePath(scene);
+
+      const popTween = getMockFn(scene.tweens.add).mock.calls.find(
+        (c) => c[0]?.targets === dots[0],
+      );
+      expect(popTween).toBeDefined();
+      if (!popTween) return;
+      expect(popTween[0].scaleX).toBe(1.2);
+      expect(popTween[0].duration).toBe(150);
     });
   });
 
