@@ -141,6 +141,7 @@ aby-little-lab/
     │   ├── MusicalMemoryScene.ts
     │   └── BigSmallScene.ts
     ├── components/
+    │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   └── ParentLock.ts
     ├── audio/
     │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis
@@ -168,6 +169,7 @@ aby-little-lab/
         ├── audio/
         │   └── AudioManager.test.ts
         ├── components/
+        │   ├── Mascot.test.ts
         │   └── ParentLock.test.ts
         ├── game/
         │   ├── shapeSorterLogic.test.ts
