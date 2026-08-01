@@ -16,17 +16,17 @@
 
 ## Phase 2: Quality-Gates Workflow (`.github/workflows/ci.yml`)
 
-- [ ] Task: Scaffold the GitHub Actions workflow
-  - [ ] Create `.github/workflows/ci.yml` with triggers: `pull_request` (opened/synchronize/reopened) + `push` to `master`
-  - [ ] Job on `ubuntu-latest` with `actions/checkout@v4`
-  - [ ] Set up Node 22 (`actions/setup-node@v4`) + corepack pnpm (prepare `pnpm@11.7.0`)
-  - [ ] pnpm store cache keyed on `pnpm-lock.yaml`
-  - [ ] `pnpm install --frozen-lockfile`
-  - [ ] Sequential gate steps: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`
-- [ ] Task: Validate workflow syntax & semantics
-  - [ ] YAML parses cleanly (parser validation)
-  - [ ] PR event path runs gates only — no deploy step at this phase
-  - [ ] Gate commands reproduce the Phase 1 baseline locally
+- [x] Task: Scaffold the GitHub Actions workflow (fa93fcb)
+  - [x] Create `.github/workflows/ci.yml` with triggers: `pull_request` (opened/synchronize/reopened) + `push` to `master`
+  - [x] Job on `ubuntu-latest` with `actions/checkout@v4`
+  - [x] Set up Node 22 (`actions/setup-node@v4`) + corepack pnpm (prepare `pnpm@11.7.0`) — *implemented via `pnpm/action-setup@v4` pinned 11.7.0 (deviation, see tech-stack.md)*
+  - [x] pnpm store cache keyed on `pnpm-lock.yaml` — *via `actions/setup-node@v4` `cache: pnpm`*
+  - [x] `pnpm install --frozen-lockfile`
+  - [x] Sequential gate steps: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`
+- [x] Task: Validate workflow syntax & semantics (fa93fcb)
+  - [x] YAML parses cleanly (parser validation) — *actionlint 1.7.12: 0 errors*
+  - [x] PR event path runs gates only — no deploy step at this phase
+  - [x] Gate commands reproduce the Phase 1 baseline locally
 - [ ] Task: Phase 2 Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Auto-Deploy Trigger via Coolify Webhook
