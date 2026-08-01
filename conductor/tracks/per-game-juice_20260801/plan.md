@@ -15,10 +15,10 @@
 
 ## Phase 2: BigSmall Box Reaction
 
-- [ ] Task: Toy drop-in shrink and box lid wiggle [TDD]
-  - [ ] **RED:** Add failing tests: 150ms shrink-drop tween on correct drop, box rotation wiggle ±3° yoyo, box scale bump 1.05, splash still created.
-  - [ ] **GREEN:** Implement in `BigSmallScene`.
-  - [ ] **VERIFY:** Run BigSmall logic + scene tests.
+- [x] Task: Toy drop-in shrink and box lid wiggle [TDD] `3e3a7af`
+  - [x] **RED:** Add failing tests: 150ms shrink-drop tween on correct drop, box rotation wiggle ±3° yoyo, box scale bump 1.05, splash still created.
+  - [x] **GREEN:** Implement in `BigSmallScene`.
+  - [x] **VERIFY:** Run BigSmall logic + scene tests.
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
 
 ## Phase 3: ShadowMatch Reveal
