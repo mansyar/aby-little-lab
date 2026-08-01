@@ -16,12 +16,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Preschool Touch UX Hardening** *Link: [./archive/preschool-touch-ux-hardening_20260801/index.md](./archive/preschool-touch-ux-hardening_20260801/index.md)* (Archived)
 - [x] **Track: Cross-Cutting Motion** *Link: [./archive/cross-cutting-motion_20260801/index.md](./archive/cross-cutting-motion_20260801/index.md)* (Archived)
 - [x] **Track: Hub Engagement** *Link: [./archive/hub-engagement_20260801/index.md](./archive/hub-engagement_20260801/index.md)* (Archived)
+- [x] **Track: Mascot Companion** *Link: [./archive/mascot-companion_20260801/index.md](./archive/mascot-companion_20260801/index.md)* (Archived)
 
 ---
-
-## Active Tracks
-
-- [x] **Track: Mascot Companion** *Link: [./tracks/mascot-companion_20260801/index.md](./tracks/mascot-companion_20260801/index.md)*
 
 <!-- Archived tracks are moved to conductor/archive/ -->
 
