@@ -17,6 +17,7 @@ vi.mock("phaser", () => {
       off: vi.fn().mockReturnThis(),
       setOrigin: vi.fn().mockReturnThis(),
       setScale: vi.fn().mockReturnThis(),
+      setTexture: vi.fn().mockReturnThis(),
       setDepth: vi.fn().mockReturnThis(),
       setStyle: vi.fn().mockReturnThis(),
       setFontSize: vi.fn().mockReturnThis(),
@@ -131,7 +132,7 @@ vi.mock("phaser", () => {
         addEvent: vi.fn(),
       };
       this.tweens = {
-        add: vi.fn(),
+        add: vi.fn(() => ({ remove: vi.fn(), stop: vi.fn() })),
       };
       this.sys = {
         events: {
@@ -757,6 +758,97 @@ describe("scene navigation flow", () => {
     });
   });
 
+  describe("Hub mascot companion", () => {
+    /** Returns the mock object created for the mascot_idle image. */
+    function getMascotImage(scene: HubScene): Record<string, MockFn> {
+      const imageMock = getMockFn(scene.add.image);
+      const index = imageMock.mock.calls.findIndex((call) => call[2] === "mascot_idle");
+      return imageMock.mock.results[index].value as Record<string, MockFn>;
+    }
+
+    it("places Professor Hoot at a bottom corner at small scale", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const imageMock = getMockFn(scene.add.image);
+      const call = imageMock.mock.calls.find((c) => c[2] === "mascot_idle");
+      expect(call).toBeDefined();
+      const [x, y] = call as [number, number, string];
+      expect(x).toBeGreaterThan(scene.cameras.main.width - 150);
+      expect(y).toBeGreaterThan(scene.cameras.main.height - 150);
+
+      const mascot = getMascotImage(scene);
+      const scale = getMockFn(mascot.setScale).mock.calls[0][0] as number;
+      expect(scale).toBeLessThan(0.5);
+    });
+
+    it("sits behind gameplay z-order and is touch-inert", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const mascot = getMascotImage(scene);
+      const depth = getMockFn(mascot.setDepth).mock.calls[0][0] as number;
+      expect(depth).toBeLessThan(0);
+      expect(getMockFn(mascot.setInteractive)).not.toHaveBeenCalled();
+    });
+
+    it("waves on load", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const mascot = getMascotImage(scene);
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const wave = tweenCalls.find(
+        (call) => call[0]?.targets === mascot && call[0]?.angle?.to === 8,
+      );
+      expect(wave).toBeDefined();
+    });
+
+    it("cheers with the celebrate pose when justEarned is present", () => {
+      earnSticker("shape-sorter");
+      const scene = new HubScene();
+      scene.init({ justEarned: "shape-sorter" });
+      scene.create();
+
+      const mascot = getMascotImage(scene);
+      expect(getMockFn(mascot.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bounce = tweenCalls.find(
+        (call) => call[0]?.targets === mascot && typeof call[0]?.scale === "number",
+      );
+      expect(bounce).toBeDefined();
+      expect(bounce?.[0]?.scale).toBeCloseTo(0.2 * 1.1, 5);
+    });
+
+    it("still waves and does not cheer when justEarned is absent", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const mascot = getMascotImage(scene);
+      expect(getMockFn(mascot.setTexture)).not.toHaveBeenCalledWith("mascot_celebrate");
+    });
+
+    it("runs the idle loop on the Hub", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const mascot = getMascotImage(scene);
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const bob = tweenCalls.find((call) => call[0]?.targets === mascot && call[0]?.repeat === -1);
+      expect(bob).toBeDefined();
+    });
+
+    it("is destroyed on scene shutdown", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const mascot = getMascotImage(scene);
+      triggerShutdown(scene);
+      expect(getMockFn(mascot.destroy)).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("Hub engagement entrance and idle life", () => {
     it("staggers tile and sticker entrance tweens 40ms apart (300ms Sine.out each)", () => {
       const scene = new HubScene();
@@ -802,7 +894,11 @@ describe("scene navigation flow", () => {
             },
         )
         .filter(
-          (config) => config.duration === 2500 && config.yoyo === true && config.repeat === -1,
+          (config) =>
+            config.duration === 2500 &&
+            config.yoyo === true &&
+            config.repeat === -1 &&
+            typeof config.delay === "number",
         );
 
       expect(bobTweens).toHaveLength(6);

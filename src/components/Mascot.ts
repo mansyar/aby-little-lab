@@ -30,8 +30,8 @@ const BLINK_SCALE = 0.92;
 const BLINK_DURATION = 150;
 const BLINK_REPEAT_DELAY = 3700;
 
-const MASCOT_DEPTH = -10;
-const SPARKLE_DEPTH = -9;
+const MASCOT_DEPTH = -1;
+const SPARKLE_DEPTH = 0;
 
 /**
  * Professor Hoot — the friendly teacher mascot.
