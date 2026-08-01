@@ -24,7 +24,7 @@
 
 ## Phase 3: Hub Integration
 
-- [ ] Task: Place mascot on Hub; wave on load; cheer on `justEarned` [TDD]
+- [x] Task: Place mascot on Hub; wave on load; cheer on `justEarned` [TDD] (19b4cef)
   - [ ] **RED:** Add failing tests: mascot created on Hub create; `wave()` called on load; `cheer()` when scene data contains `justEarned`; graceful behavior when flag absent; destroyed on shutdown.
   - [ ] **GREEN:** Wire mascot into `HubScene` (bottom corner, touch-inert, behind gameplay z-order).
   - [ ] **VERIFY:** Run Hub navigation tests.
