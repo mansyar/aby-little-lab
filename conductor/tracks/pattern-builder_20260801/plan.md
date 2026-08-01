@@ -34,11 +34,11 @@
 
 ## Phase 3: Integration & Assets
 
-- [ ] Task: Author `sticker_pattern_builder.svg` (512×512 viewBox, storybook style, matches sticker conventions)
-- [ ] Task: PreloadScene — load the new sticker (shapes already loaded)
-- [ ] Task: HubScene — 7th tile + label, sticker shelf slot, entrance/idle config, press feedback
-- [ ] Task: Storage/types — `pattern-builder` in `GameId`; storage tests for sticker persistence
-- [ ] Task: Verify mascot + cross-cutting systems in the new scene (cheer/nod/win paths)
+- [x] Task: Author `sticker_pattern_builder.svg` (512×512 viewBox, storybook style, matches sticker conventions) [8e8200d]
+- [x] Task: PreloadScene — load the new sticker (shapes already loaded) [73deb24]
+- [x] Task: HubScene — 7th tile + label, sticker shelf slot, entrance/idle config, press feedback [73deb24]
+- [x] Task: Storage/types — `pattern-builder` in `GameId`; storage tests for sticker persistence [ff2a1c0]
+- [x] Task: Verify mascot + cross-cutting systems in the new scene (cheer/nod/win paths) [6f75fe5]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 4: Documentation & Release Sync
