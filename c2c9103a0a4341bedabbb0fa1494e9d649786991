@@ -1,0 +1,7 @@
+Fix (user-reported): sticker shelf thumbnails rendered huge (filled the screen).
+
+Root cause: setDisplaySize(56,56) sets scale to 56/512, but the entrance/burst tweens tweened scaleX/scaleY to absolute values (1 for earned, 0.85 unearned, 1.15 justEarned, 1.25 burst), overriding the display size and rendering the 512px SVG texture full-size.
+
+Fix: introduced STICKER_SCALE = 56/512 (matching game scenes' STICKER_DISPLAY_SIZE/512 pattern) and tween to scale values relative to it (0.85*base, 1.15*base, 1.25*base). animateEntrance gained an optional targetScale param (default 1, unchanged for tiles/labels). Stickers are now set to their resting scale at creation so reduced-motion (no tween) still renders correctly.
+
+Regression tests: earned/unearned/justEarned entrance targets and burst pulse now asserted with toBeCloseTo against the base scale. 435 passing.
