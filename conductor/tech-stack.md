@@ -212,6 +212,8 @@ aby-little-lab/
 
 > **2026-08-02 — CI/CD Deviation Note:** In CI, pnpm is installed via `pnpm/action-setup@v4` pinned to `version: 11.7.0` instead of a raw `corepack prepare` step. Same version pin as the Dockerfile (`pnpm@11.7.0`), but the action is the recommended, more reliable install path on GitHub runners. The pnpm store is cached via `actions/setup-node@v4` `cache: pnpm` (keyed on `pnpm-lock.yaml`).
 
+> **2026-08-02 — CI/CD Amendment (Coolify webhook auth):** The Coolify deploy webhook endpoint requires Bearer authentication — the URL alone returns `401 Unauthenticated`. The deploy job therefore requires **two** repository secrets: `COOLIFY_DEPLOY_WEBHOOK` (Application → Webhooks → Deploy Webhook URL) and `COOLIFY_TOKEN` (Keys & Tokens → API token with `deploy` permission). The webhook is triggered with a **GET** request plus `Authorization: Bearer $COOLIFY_TOKEN` (per Coolify's official GitHub Actions docs) with `--fail-with-body`; a guard step fails fast if either secret is missing. Verified live on the first merged master push.
+
 ## See Also
 
 - [TDD.md](../docs/TDD.md) — Full technical design document with detailed config snippets
