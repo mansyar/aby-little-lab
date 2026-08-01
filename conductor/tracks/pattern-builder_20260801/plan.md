@@ -19,7 +19,7 @@
   - [ ] Commit with git note + plan update
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 2: PatternBuilderScene
+## Phase 2: PatternBuilderScene [checkpoint: 54600fd]
 
 - [x] Task: Scaffold `PatternBuilderScene.ts` — layout & rendering [da54447]
   - [x] 4 slots (3 shapes + marked empty gap), 3 answer cards, progress dots, parental-lock Back button (96×96 hit area), mascot corner
