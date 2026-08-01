@@ -1,0 +1,5 @@
+Verification Report — Phase 3 (Replay Variety Expansion)
+
+Automated: full suite 563/563 (17 files); Biome check clean; pnpm run build succeeded (PWA precache 7 entries, dist generated).
+Manual: user confirmed dev-server check — preload completes with no 404s; all new items render across the five affected games; no console errors.
+Scene changes: none required beyond PreloadScene (dynamic texture keys); navigation.test.ts preload count updated 46 -> 60 with new-key assertions.
