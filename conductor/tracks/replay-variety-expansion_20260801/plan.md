@@ -9,7 +9,7 @@
 - [x] Task: Verify asset consistency — every new SVG matches storybook style, tight bounding box, and existing asset conventions [f837be5]
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 2: Game Logic Expansion (TDD)
+## Phase 2: Game Logic Expansion (TDD) [checkpoint: a67e09f]
 
 - [x] Task: Expand `shapeSorterLogic` pools [TDD] [ccfd4fe]
   - [ ] Write failing tests: `ShapeType` includes heart/crescent; selection returns 3 of 6 with only valid types
