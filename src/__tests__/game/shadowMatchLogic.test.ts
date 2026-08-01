@@ -24,6 +24,24 @@ describe("generateRound", () => {
     expect(new Set(round.objects).size).toBe(6);
   });
 
+  it("expanded pool includes the new airplane and mushroom objects (8 total)", () => {
+    expect(ALL_OBJECTS).toHaveLength(8);
+    expect(ALL_OBJECTS).toContain("airplane");
+    expect(ALL_OBJECTS).toContain("mushroom");
+  });
+
+  it("selects exactly 6 of the 8 objects per round (2 excluded)", () => {
+    const round = generateRound();
+    const excluded = ALL_OBJECTS.filter((o) => !round.objects.includes(o));
+    expect(excluded).toHaveLength(2);
+  });
+
+  it("selects exactly 6 of the 8 shadows per round (2 excluded)", () => {
+    const round = generateRound();
+    const excluded = ALL_OBJECTS.filter((o) => !round.shadows.includes(o));
+    expect(excluded).toHaveLength(2);
+  });
+
   it("generates 6 shadows with correct object IDs", () => {
     const round = generateRound();
     expect(round.shadows).toHaveLength(6);
@@ -33,22 +51,17 @@ describe("generateRound", () => {
     expect(new Set(round.shadows).size).toBe(6);
   });
 
+  it("objects and shadows are the same set (every object has a matching shadow)", () => {
+    const round = generateRound();
+    expect(new Set(round.objects)).toEqual(new Set(round.shadows));
+  });
+
   it("shuffles objects and shadows independently (replay variety)", () => {
     const spy = vi.spyOn(Math, "random");
-    // Fisher-Yates on 6 elements makes 5 random calls per shuffle.
-    // First 5 calls (objects) return 0.5, next 5 (shadows) return 0.1
-    // to guarantee different orderings.
-    spy
-      .mockReturnValueOnce(0.5)
-      .mockReturnValueOnce(0.5)
-      .mockReturnValueOnce(0.5)
-      .mockReturnValueOnce(0.5)
-      .mockReturnValueOnce(0.5)
-      .mockReturnValueOnce(0.1)
-      .mockReturnValueOnce(0.1)
-      .mockReturnValueOnce(0.1)
-      .mockReturnValueOnce(0.1)
-      .mockReturnValueOnce(0.1);
+    // selection shuffle (8 elements, 7 calls) + objects shuffle (6 elements, 5 calls) use 0.5
+    for (let i = 0; i < 12; i++) spy.mockReturnValueOnce(0.5);
+    // shadows shuffle (6 elements, 5 calls) uses 0.1 → different ordering
+    for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.1);
     const round = generateRound();
     expect(round.objects).not.toEqual(round.shadows);
   });
@@ -96,6 +109,8 @@ describe("isMatch", () => {
     expect(isMatch("boat", "boat")).toBe(true);
     expect(isMatch("ball", "ball")).toBe(true);
     expect(isMatch("umbrella", "umbrella")).toBe(true);
+    expect(isMatch("airplane", "airplane")).toBe(true);
+    expect(isMatch("mushroom", "mushroom")).toBe(true);
   });
 
   it("returns false when object type does not match shadow type", () => {
@@ -105,6 +120,8 @@ describe("isMatch", () => {
     expect(isMatch("boat", "ball")).toBe(false);
     expect(isMatch("ball", "umbrella")).toBe(false);
     expect(isMatch("umbrella", "house")).toBe(false);
+    expect(isMatch("airplane", "mushroom")).toBe(false);
+    expect(isMatch("mushroom", "airplane")).toBe(false);
   });
 });
 

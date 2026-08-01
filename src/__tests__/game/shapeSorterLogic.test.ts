@@ -18,11 +18,17 @@ describe("selectThreeShapes", () => {
     expect(result).toHaveLength(3);
   });
 
-  it("returns shapes from the valid set of 4", () => {
+  it("returns shapes from the valid set of 6", () => {
     const result = selectThreeShapes();
     for (const shape of result) {
       expect(ALL_SHAPES).toContain(shape);
     }
+  });
+
+  it("expanded pool includes the new heart and crescent shapes (6 total)", () => {
+    expect(ALL_SHAPES).toHaveLength(6);
+    expect(ALL_SHAPES).toContain("heart");
+    expect(ALL_SHAPES).toContain("crescent");
   });
 
   it("returns no duplicate shapes", () => {
@@ -72,6 +78,8 @@ describe("isMatch", () => {
     expect(isMatch("square", "square")).toBe(true);
     expect(isMatch("triangle", "triangle")).toBe(true);
     expect(isMatch("star", "star")).toBe(true);
+    expect(isMatch("heart", "heart")).toBe(true);
+    expect(isMatch("crescent", "crescent")).toBe(true);
   });
 
   it("returns false when shape type does not match slot type", () => {
@@ -79,5 +87,7 @@ describe("isMatch", () => {
     expect(isMatch("square", "triangle")).toBe(false);
     expect(isMatch("triangle", "star")).toBe(false);
     expect(isMatch("star", "circle")).toBe(false);
+    expect(isMatch("heart", "star")).toBe(false);
+    expect(isMatch("crescent", "heart")).toBe(false);
   });
 });

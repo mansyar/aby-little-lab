@@ -1,11 +1,11 @@
-/** The four animal types used as sleeping-animal content in Pop & Freeze. */
-export type AnimalType = "monkey" | "rabbit" | "cat" | "dog";
+/** The six animal types used as sleeping-animal content in Pop & Freeze. */
+export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
 
 /** Whether a bubble is poppable or a sleeping-animal decoy. */
 export type BubbleType = "poppable" | "sleeping";
 
-/** All four animal types, in canonical order. */
-export const ALL_ANIMALS: readonly AnimalType[] = ["monkey", "rabbit", "cat", "dog"];
+/** All six animal types, in canonical order. */
+export const ALL_ANIMALS: readonly AnimalType[] = ["monkey", "rabbit", "cat", "dog", "elephant", "pig"];
 
 /** Number of pops required to win the round. */
 export const WIN_TARGET = 6;
@@ -57,7 +57,7 @@ export function selectBubbleType(sleepingCount: number): BubbleType {
   return Math.random() < 0.5 ? "sleeping" : "poppable";
 }
 
-/** Randomly selects one of the four sleeping animals. */
+/** Randomly selects one of the six sleeping animals. */
 export function selectSleepingAnimal(): AnimalType {
   return shuffle(ALL_ANIMALS)[0];
 }

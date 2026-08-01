@@ -22,11 +22,17 @@ describe("selectThreePairs", () => {
     expect(result).toHaveLength(3);
   });
 
-  it("returns pairs from the valid set of 4", () => {
+  it("returns pairs from the valid set of 6", () => {
     const result = selectThreePairs();
     for (const pair of result) {
       expect(ALL_PAIRS).toContainEqual(pair);
     }
+  });
+
+  it("expanded pool includes the new elephant->peanut and pig->apple pairs (6 total)", () => {
+    expect(ALL_PAIRS).toHaveLength(6);
+    expect(ALL_PAIRS).toContainEqual({ animal: "elephant", food: "peanut" });
+    expect(ALL_PAIRS).toContainEqual({ animal: "pig", food: "apple" });
   });
 
   it("returns no duplicate pairs", () => {

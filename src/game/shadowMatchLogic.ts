@@ -1,7 +1,7 @@
-/** The six object types used in the Shadow Match game. */
-export type ObjectType = "house" | "tree" | "car" | "boat" | "ball" | "umbrella";
+/** The eight object types used in the Shadow Match game. */
+export type ObjectType = "house" | "tree" | "car" | "boat" | "ball" | "umbrella" | "airplane" | "mushroom";
 
-/** All six object types, in canonical order. */
+/** All eight object types, in canonical order. */
 export const ALL_OBJECTS: readonly ObjectType[] = [
   "house",
   "tree",
@@ -9,10 +9,15 @@ export const ALL_OBJECTS: readonly ObjectType[] = [
   "boat",
   "ball",
   "umbrella",
+  "airplane",
+  "mushroom",
 ];
 
 /** The number of matches needed to complete the game. */
 export const WIN_TARGET = 6;
+
+/** Number of objects shown per round (6 of the 8 available). */
+export const ROUND_SIZE = 6;
 
 /** Returns a shuffled copy of the input array using the Fisher-Yates algorithm. */
 export function shuffle<T>(array: readonly T[]): T[] {
@@ -24,14 +29,17 @@ export function shuffle<T>(array: readonly T[]): T[] {
   return result;
 }
 
-/** Generates independently shuffled orders for objects and shadows for a round. */
+/** Generates a round: 6 of the 8 objects selected, with objects and shadows
+ *  sharing the same set (every object must have a matching shadow) but in
+ *  independently shuffled orders for replay variety. */
 export function generateRound(): {
   objects: ObjectType[];
   shadows: ObjectType[];
 } {
+  const selected = shuffle(ALL_OBJECTS).slice(0, ROUND_SIZE);
   return {
-    objects: shuffle(ALL_OBJECTS),
-    shadows: shuffle(ALL_OBJECTS),
+    objects: shuffle(selected),
+    shadows: shuffle(selected),
   };
 }
 

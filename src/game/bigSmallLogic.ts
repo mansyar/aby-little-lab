@@ -1,11 +1,11 @@
-/** The four toy types used in the Big vs. Small game. */
-export type ToyType = "teddy_bear" | "car" | "ball" | "block";
+/** The six toy types used in the Big vs. Small game. */
+export type ToyType = "teddy_bear" | "car" | "ball" | "block" | "rocket" | "drum";
 
 /** The two size categories a toy or box can belong to. */
 export type ScaleCategory = "big" | "small";
 
-/** All four toy types, in canonical order. */
-export const ALL_TOYS: readonly ToyType[] = ["teddy_bear", "car", "ball", "block"];
+/** All six toy types, in canonical order. */
+export const ALL_TOYS: readonly ToyType[] = ["teddy_bear", "car", "ball", "block", "rocket", "drum"];
 
 /** The number of sorted toys needed to complete the game. */
 export const WIN_TARGET = 6;
@@ -16,7 +16,7 @@ export const BIG_SCALE = 1.5;
 /** Scale factor for small items. */
 export const SMALL_SCALE = 0.7;
 
-/** Number of toy types to select per round (3 of 4). */
+/** Number of toy types to select per round (3 of 6). */
 export const SELECT_COUNT = 3;
 
 /** A toy instance placed on screen for the child to sort. */
@@ -42,7 +42,7 @@ export function shuffle<T>(array: readonly T[]): T[] {
   return result;
 }
 
-/** Randomly selects 3 of 4 toy types from the pool. */
+/** Randomly selects 3 of 6 toy types from the pool. */
 export function selectToys(): ToyType[] {
   return shuffle(ALL_TOYS).slice(0, SELECT_COUNT);
 }

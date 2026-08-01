@@ -1,10 +1,10 @@
-/** The four geometric shape types used in the Shape Sorter game. */
-export type ShapeType = "circle" | "square" | "triangle" | "star";
+/** The six geometric shape types used in the Shape Sorter game. */
+export type ShapeType = "circle" | "square" | "triangle" | "star" | "heart" | "crescent";
 
-/** All four shape types, in canonical order. */
-export const ALL_SHAPES: readonly ShapeType[] = ["circle", "square", "triangle", "star"];
+/** All six shape types, in canonical order. */
+export const ALL_SHAPES: readonly ShapeType[] = ["circle", "square", "triangle", "star", "heart", "crescent"];
 
-/** Randomly selects 3 of the 4 shape types for a round. */
+/** Randomly selects 3 of the 6 shape types for a round. */
 export function selectThreeShapes(): ShapeType[] {
   return shuffle(ALL_SHAPES).slice(0, 3);
 }

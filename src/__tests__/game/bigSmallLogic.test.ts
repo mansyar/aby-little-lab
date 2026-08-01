@@ -21,9 +21,15 @@ afterEach(() => {
 });
 
 describe("selectToys", () => {
-  it("selects exactly 3 toy types from the pool of 4", () => {
+  it("selects exactly 3 toy types from the pool of 6", () => {
     const selected = selectToys();
     expect(selected).toHaveLength(SELECT_COUNT);
+  });
+
+  it("expanded pool includes the new rocket and drum toys (6 total)", () => {
+    expect(ALL_TOYS).toHaveLength(6);
+    expect(ALL_TOYS).toContain("rocket");
+    expect(ALL_TOYS).toContain("drum");
   });
 
   it("all selected types are from the known pool", () => {
@@ -38,10 +44,10 @@ describe("selectToys", () => {
     expect(new Set(selected).size).toBe(SELECT_COUNT);
   });
 
-  it("excludes exactly one toy type from the pool", () => {
+  it("excludes exactly 3 toy types from the pool", () => {
     const selected = selectToys();
     const excluded = ALL_TOYS.filter((t) => !selected.includes(t));
-    expect(excluded).toHaveLength(1);
+    expect(excluded).toHaveLength(3);
   });
 });
 
@@ -104,13 +110,13 @@ describe("generateRound", () => {
 
   it("toys are shuffled independently per playthrough (replay variety)", () => {
     const spy = vi.spyOn(Math, "random");
-    // selectToys shuffle (4 elements, 3 random calls) + toy instances shuffle (6 elements, 5 random calls) = 8 total
+    // selectToys shuffle (6 elements, 5 random calls) + toy instances shuffle (6 elements, 5 random calls) = 10 total
     // First round: all 0.5
-    for (let i = 0; i < 8; i++) spy.mockReturnValueOnce(0.5);
+    for (let i = 0; i < 10; i++) spy.mockReturnValueOnce(0.5);
     const round1 = generateRound();
 
     // Second round: all 0.1
-    for (let i = 0; i < 8; i++) spy.mockReturnValueOnce(0.1);
+    for (let i = 0; i < 10; i++) spy.mockReturnValueOnce(0.1);
     const round2 = generateRound();
 
     expect(round1.toys).not.toEqual(round2.toys);

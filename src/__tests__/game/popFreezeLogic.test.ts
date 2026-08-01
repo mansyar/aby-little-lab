@@ -58,18 +58,24 @@ describe("selectBubbleType", () => {
 });
 
 describe("selectSleepingAnimal", () => {
-  it("returns an animal from the valid set of 4", () => {
+  it("expanded pool includes the new elephant and pig animals (6 total)", () => {
+    expect(ALL_ANIMALS).toHaveLength(6);
+    expect(ALL_ANIMALS).toContain("elephant");
+    expect(ALL_ANIMALS).toContain("pig");
+  });
+
+  it("returns an animal from the valid set of 6", () => {
     const animal = selectSleepingAnimal();
     expect(ALL_ANIMALS).toContain(animal);
   });
 
   it("returns different animals on successive calls (randomized)", () => {
-    // shuffle(ALL_ANIMALS) with 4 elements does 3 Fisher-Yates iterations
+    // shuffle(ALL_ANIMALS) with 6 elements does 5 Fisher-Yates iterations
     const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.0).mockReturnValueOnce(0.0).mockReturnValueOnce(0.0);
+    for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.0);
     const first = selectSleepingAnimal();
 
-    spy.mockReturnValueOnce(0.9).mockReturnValueOnce(0.9).mockReturnValueOnce(0.9);
+    for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.9);
     const second = selectSleepingAnimal();
 
     expect(first).not.toBe(second);

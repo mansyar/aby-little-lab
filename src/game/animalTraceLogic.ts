@@ -1,8 +1,8 @@
-/** The four animal types used in the Animal Trace game. */
-export type AnimalType = "monkey" | "rabbit" | "cat" | "dog";
+/** The six animal types used in the Animal Trace game. */
+export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
 
-/** The four food types matching each animal. */
-export type FoodType = "banana" | "carrot" | "fish" | "bone";
+/** The six food types matching each animal. */
+export type FoodType = "banana" | "carrot" | "fish" | "bone" | "peanut" | "apple";
 
 /** A paired animal and its corresponding food. */
 export interface AnimalFoodPair {
@@ -10,15 +10,17 @@ export interface AnimalFoodPair {
   food: FoodType;
 }
 
-/** All four animal-food pairs, in canonical order. */
+/** All six animal-food pairs, in canonical order. */
 export const ALL_PAIRS: readonly AnimalFoodPair[] = [
   { animal: "monkey", food: "banana" },
   { animal: "rabbit", food: "carrot" },
   { animal: "cat", food: "fish" },
   { animal: "dog", food: "bone" },
+  { animal: "elephant", food: "peanut" },
+  { animal: "pig", food: "apple" },
 ];
 
-/** Randomly selects 3 of the 4 animal-food pairs for a round. */
+/** Randomly selects 3 of the 6 animal-food pairs for a round. */
 export function selectThreePairs(): AnimalFoodPair[] {
   return shuffle(ALL_PAIRS).slice(0, 3);
 }
