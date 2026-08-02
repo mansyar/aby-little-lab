@@ -526,4 +526,15 @@ describe("SettingsPanel reset progress", () => {
       expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
     }
   });
+
+  it("invokes the onProgressReset callback after a reset", () => {
+    const scene = createScene();
+    const onProgressReset = vi.fn();
+    new SettingsPanel(scene as never, undefined, onProgressReset);
+
+    triggerPointerdown(findTextByLabel(scene, "Reset Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
+
+    expect(onProgressReset).toHaveBeenCalledTimes(1);
+  });
 });

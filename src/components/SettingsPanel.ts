@@ -25,14 +25,22 @@ export class SettingsPanel {
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly installTracker: InstallTracker;
   private resetRowText: Phaser.GameObjects.Text | null = null;
+  private readonly onProgressReset?: () => void;
 
   /**
    * Creates the settings panel using the current persisted audio settings.
    * @param installTracker - Injected install tracker (tests); defaults to a
    *   tracker wired to real browser install events.
+   * @param onProgressReset - Called after a confirmed progress reset so the
+   *   parent scene can re-render anything derived from the sticker collection.
    */
-  constructor(scene: Phaser.Scene, installTracker?: InstallTracker) {
+  constructor(
+    scene: Phaser.Scene,
+    installTracker?: InstallTracker,
+    onProgressReset?: () => void,
+  ) {
     this.scene = scene;
+    this.onProgressReset = onProgressReset;
     this.installTracker =
       installTracker ??
       createInstallTracker({
@@ -352,5 +360,6 @@ export class SettingsPanel {
     this.closeResetModal();
     this.resetRowText?.setText("Progress cleared");
     this.resetRowText?.setColor(DISABLED_COLOR);
+    this.onProgressReset?.();
   }
 }

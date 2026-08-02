@@ -333,7 +333,7 @@ import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
-import { earnSticker, hasSticker } from "../../utils/storage";
+import { earnSticker, hasSticker, resetProgress } from "../../utils/storage";
 
 const GAME_SCENES = [
   { name: "ShapeSorterScene", SceneClass: ShapeSorterScene },
@@ -769,7 +769,7 @@ describe("scene navigation flow", () => {
       )?.[1] as () => void;
       holdCallback();
 
-      expect(mockSettingsPanel).toHaveBeenCalledWith(scene);
+      expect(mockSettingsPanel).toHaveBeenCalledWith(scene, undefined, expect.any(Function));
     });
 
     it("creates 7 game tiles", () => {
@@ -1357,6 +1357,61 @@ describe("scene navigation flow", () => {
       expect(entrance?.[0]?.alpha).toBe(0.3);
       expect("scaleX" in (entrance?.[0] ?? {})).toBe(false);
       expect("scaleY" in (entrance?.[0] ?? {})).toBe(false);
+    });
+
+    it("re-renders the sticker shelf when the settings panel reports a progress reset", () => {
+      earnSticker("shape-sorter");
+
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+
+      // Open the parental settings panel the way a parent would (3s hold).
+      const settingsButton = getTextObject(scene, "Settings");
+      if (!settingsButton) throw new Error("Settings button not found");
+      const pointerdown = getMockFn(settingsButton.on).mock.calls.find(
+        (call) => call[0] === "pointerdown",
+      )?.[1] as (() => void) | undefined;
+      if (!pointerdown) throw new Error("no pointerdown listener");
+      pointerdown();
+      const holdCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 3000,
+      );
+      if (!holdCall) throw new Error("ParentLock 3000ms hold not found");
+      (holdCall[1] as () => void)();
+
+      // The Hub hands the settings panel a shelf re-render callback.
+      const settingsArgs = mockSettingsPanel.mock.calls.at(-1);
+      expect(settingsArgs).toBeDefined();
+      const rerender = settingsArgs?.[2] as () => void;
+      expect(typeof rerender).toBe("function");
+
+      const oldStickerImages = getStickerImages(scene);
+      expect(oldStickerImages).toHaveLength(7);
+
+      // The real panel calls resetProgress() before notifying the Hub; mirror it.
+      resetProgress();
+      rerender();
+
+      // Old thumbnails are destroyed...
+      for (const { obj } of oldStickerImages) {
+        expect(getMockFn(obj.destroy)).toHaveBeenCalled();
+      }
+      // ...and replaced by a fresh, fully dimmed shelf (the reset cleared everything).
+      const liveStickers = getStickerImages(scene).filter(
+        ({ obj }) => getMockFn(obj.destroy).mock.calls.length === 0,
+      );
+      expect(liveStickers).toHaveLength(7);
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      for (const { obj } of liveStickers) {
+        const targetsSticker = (call: { targets?: unknown }): boolean => {
+          const targets = call.targets;
+          return Array.isArray(targets) ? targets.includes(obj) : targets === obj;
+        };
+        const entrance = tweenCalls.find((call) => targetsSticker(call[0]));
+        expect(entrance).toBeDefined();
+        expect(entrance?.[0]?.alpha).toBe(0.3);
+      }
     });
   });
 
