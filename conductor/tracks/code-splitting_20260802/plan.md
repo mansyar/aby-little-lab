@@ -13,7 +13,7 @@
 
 ## Phase 2: Implement Lazy Scene Loading (TDD)
 
-- [ ] Task: Create testable scene registry module `src/scenes/sceneRegistry.ts`
+- [x] Task: Create testable scene registry module `src/scenes/sceneRegistry.ts` (55197e5)
   - [ ] Write failing tests `src/__tests__/scenes/sceneRegistry.test.ts`: `sceneLoaders` maps exactly the 7 game keys (ShapeSorter, AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall, PatternBuilder); `ensureSceneLoaded` skips the loader when the scene is already registered; `ensureSceneLoaded` resolves the loader and calls `scene.add(key, cls)` when not registered
   - [ ] Implement `sceneRegistry.ts` (per-key dynamic-import loaders + `ensureSceneLoaded`)
   - [ ] Run tests — confirm green (TDD: tests written before implementation)
