@@ -8,11 +8,11 @@
 - [x] Task: Implement `src/game/alphabetLogic.ts` until tests pass (Red → Green) `08570ee`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `8deca9e`
 
-## Phase 2: TTS Utility — `src/utils/speech.ts` (TDD)
+## Phase 2: TTS Utility — `src/utils/speech.ts` (TDD) `[checkpoint: dd58153]`
 
 - [x] Task: Write failing unit tests for `speakLetter` — support detection; en-US utterance with gentle rate; cancels prior utterances; respects enabled flag (SFX toggle); never throws when API unavailable `f4fc40b`
 - [x] Task: Implement `src/utils/speech.ts` until tests pass (Red → Green) `1b9c2b0`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `dd58153`
 
 ## Phase 3: Assets, Registry & Storage Integration
 
