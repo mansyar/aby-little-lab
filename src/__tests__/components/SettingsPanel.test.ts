@@ -382,3 +382,47 @@ describe("SettingsPanel install control", () => {
     expect(texts).not.toContain("How to Install");
   });
 });
+
+describe("SettingsPanel version footer", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("renders the app version in a muted footer row", () => {
+    const scene = createScene();
+
+    new SettingsPanel(scene as never);
+
+    expect(scene.add.text).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.any(Number),
+      `v${__APP_VERSION__}`,
+      expect.objectContaining({ color: "#a0aec0" }),
+    );
+  });
+
+  it("centers the version footer at the bottom of the panel", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const call = scene.add.text.mock.calls.find((item) => item[2] === `v${__APP_VERSION__}`);
+    expect(call).toBeDefined();
+    const [x, y] = call as unknown as [number, number];
+    expect(x).toBe(512);
+    // Below the toggle/install controls, inside the 460px-tall panel (half-height 230).
+    expect(y).toBeGreaterThan(384 + 150);
+    expect(y).toBeLessThan(384 + 230);
+  });
+
+  it("keeps the version footer non-interactive", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const callIndex = scene.add.text.mock.calls.findIndex(
+      (item) => item[2] === `v${__APP_VERSION__}`,
+    );
+    const footer = scene.add.text.mock.results[callIndex]?.value as MockGameObject;
+    expect(footer.setInteractive).not.toHaveBeenCalled();
+  });
+});
