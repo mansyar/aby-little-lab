@@ -24,7 +24,7 @@
 - [x] Task: Reduce `main.ts` to shell scenes only (dc31dd5)
   - [ ] Remove the 7 static game-scene imports; `scene` array becomes `[BootScene, PreloadScene, HubScene]`
   - [ ] Run `CI=true pnpm test` — full suite passes
-- [ ] Task: Verify build structure
+- [x] Task: Verify build structure
   - [ ] `pnpm run build`; confirm `dist/assets/` contains entry + 7 game-scene chunks (AC1)
   - [ ] Grep entry chunk for game-scene class names — must be absent (AC2)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
