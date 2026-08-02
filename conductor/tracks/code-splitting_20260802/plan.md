@@ -17,7 +17,7 @@
   - [ ] Write failing tests `src/__tests__/scenes/sceneRegistry.test.ts`: `sceneLoaders` maps exactly the 7 game keys (ShapeSorter, AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall, PatternBuilder); `ensureSceneLoaded` skips the loader when the scene is already registered; `ensureSceneLoaded` resolves the loader and calls `scene.add(key, cls)` when not registered
   - [ ] Implement `sceneRegistry.ts` (per-key dynamic-import loaders + `ensureSceneLoaded`)
   - [ ] Run tests — confirm green (TDD: tests written before implementation)
-- [ ] Task: Wire lazy loading into HubScene tile taps
+- [x] Task: Wire lazy loading into HubScene tile taps (9fd61e0)
   - [ ] Update `HubScene.ts` tile pointerup handler: `startAudio()` then `void ensureSceneLoaded(this, key).then(() => transitionToScene(this, key))`
   - [ ] Update `navigation.test.ts`: mock `../../scenes/sceneRegistry`; assert `ensureSceneLoaded` called for each game key; flush async ticks before fade-out assertions
   - [ ] Run `CI=true pnpm test` — full suite passes (existing `navigation.test.ts` updated)
