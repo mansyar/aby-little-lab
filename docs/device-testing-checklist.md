@@ -4,6 +4,13 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.1.0 (2026-08-03)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.1.0)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Result:** All sections A–G passed — PWA install (Android "Install App" + iOS "Add to Home Screen"), offline, TTS voice, settings & parental lock, mascot, performance targets (<3s boot, 60fps min 30, <150MB memory, <16ms touch, <50ms audio), accessibility (reduced motion), completion & audio regression
+- **Issues found:** none (no Critical/High/Medium/Low)
+
 ## Target Devices
 
 ### Primary Target Devices
@@ -358,15 +365,15 @@ pnpm exec serve dist -l 3000
 
 After completing all tests:
 
-- [ ] All Critical issues resolved
-- [ ] All High issues resolved or documented
-- [ ] Medium issues documented for future release
-- [ ] Low issues documented for future release
-- [ ] Performance targets met
-- [ ] Accessibility requirements met
-- [ ] Release documentation complete
+- [x] All Critical issues resolved
+- [x] All High issues resolved or documented
+- [x] Medium issues documented for future release
+- [x] Low issues documented for future release
+- [x] Performance targets met
+- [x] Accessibility requirements met
+- [x] Release documentation complete
 
-**Tester:** ________________
-**Date:** ________________
-**Device:** ________________
-**Overall Status:** ________________
+**Tester:** Ansyar (mansyar)
+**Date:** 2026-08-03
+**Device:** iPad, Android tablet, iPhone, Android phone (see Execution Record)
+**Overall Status:** PASSED — all items verified

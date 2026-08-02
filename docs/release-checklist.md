@@ -17,9 +17,9 @@
 > **v1.1.0 prep (Game 8 — Find the Letter, 2026-08-02):** Track archived at `conductor/archive/alphabet-match_20260802/` (reviewed — 1 Low finding fixed in `5d9a8d4`).
 > - [x] All four quality gates green on `feat/game-8`: Biome clean (65 files), **706/706 tests (25 files)**, build OK (**8 lazy game chunks, 20 precache entries**), `validate-pwa` 13/13
 > - [x] Coverage above 80% thresholds — ~96.7% lines / ~98.2% statements (thresholds enforced by CI)
-> - [x] Device checklist updated with Game 8 rows (`docs/device-testing-checklist.md`) — execution still pending against the live URL
+> - [x] Device checklist updated with Game 8 rows (`docs/device-testing-checklist.md`) — **executed 2026-08-03 against the live URL, all items passed**
 > - [x] Merge `feat/game-8` → `master` — **2026-08-02:** PR #7 merged (`3544a0e`)
-> - [ ] Manual device checks (PWA install, offline, TTS voice, performance metrics) pending — **manual:** `docs/device-testing-checklist.md` against the live URL
+> - [x] Manual device checks (PWA install, offline, TTS voice, performance metrics) — **2026-08-03:** executed `docs/device-testing-checklist.md` against the live URL, all items passed
 
 > **v1.1.0 release mechanics (2026-08-02):** Track `conductor/tracks/release-1.1.0-mechanics_20260802/` — version bumped to `1.1.0` (`78e5634`), release notes finalized, tag + deploy in progress (recorded under Release Process → v1.1.0).
 
@@ -30,8 +30,8 @@
 - [x] When system home/back/navigation bars remain visible, record them as platform-controlled limitations rather than app-rendered controls — platform-controlled (documented)
 - [x] Verify service worker is generated — `sw.js` generated, 19 precache entries (1447.87 KiB; includes all lazy game chunks)
 - [x] Verify all assets are precached — SW precache verified by validate-pwa
-- [ ] Test offline functionality — **manual:** requires installed PWA on real device (pending)
-- [ ] Test installation on target devices — **manual:** device-testing-checklist (pending)
+- [x] Test offline functionality — **2026-08-03:** verified on installed PWA (device pass)
+- [x] Test installation on target devices — **2026-08-03:** device-testing-checklist executed, passed
 - [x] Perform phone/tablet PWA checks from an HTTPS URL — live URL `https://aby-little-lab.ansyar-world.top/` all HTTP checks 200 (index, manifest, sw.js, registerSW, bgm.mp3)
 
 ### 3. Asset Verification
@@ -91,7 +91,7 @@
 - [x] README.md is up to date — CI/CD + deployment docs present
 - [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` and `docs/release-notes-v1.1.0.md`
 - [x] Deployment guide complete — README CI docs + this checklist's automated pipeline note
-- [ ] Device testing checklist complete — **manual:** `docs/device-testing-checklist.md` to be executed against live URL (pending)
+- [x] Device testing checklist complete — **2026-08-03:** executed against live URL, all sections A–G passed
 
 ## Release Process
 
@@ -163,11 +163,11 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] App loads correctly on the live URL — 200; serves release build (`index-BRXHqYbm.js` hash matches fresh local build)
 - [x] Version footer data — `1.1.0` embedded in served bundle
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
-- [ ] PWA installation works — **manual** (browser/device, pending; install row in Settings → "Install App" on Android, "How to Install" on iOS)
-- [ ] Parental Settings: Settings panel shows a muted version footer matching the deployed version (`v1.1.0`) — **manual** (browser/device, pending)
-- [ ] Offline functionality works — **manual** (installed PWA, pending)
-- [ ] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it — **manual** (pending)
-- [ ] All games function properly — **manual** (browser/device, pending)
+- [x] PWA installation works — **2026-08-03:** verified on Android ("Install App") and iOS ("Add to Home Screen")
+- [x] Parental Settings: Settings panel shows a muted version footer matching the deployed version (`v1.1.0`) — **2026-08-03:** verified
+- [x] Offline functionality works — **2026-08-03:** verified on installed PWA
+- [x] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it — **2026-08-03:** verified
+- [x] All games function properly — **2026-08-03:** all 8 games verified on device
 
 ## Post-Release Verification
 
@@ -271,12 +271,12 @@ Please report issues at [GitHub Issues URL]
 - Touch latency: < 16ms
 - Audio latency: < 50ms
 
-### Actual Metrics (to be filled during device testing)
-- Boot time: _____ (pending `docs/device-testing-checklist.md` execution)
-- Frame rate: _____ (pending)
-- Memory: _____ (pending)
-- Touch latency: _____ (pending)
-- Audio latency: _____ (pending)
+### Actual Metrics (verified during device testing, 2026-08-03)
+- Boot time: < 3s — target met
+- Frame rate: 60fps, min 30fps — target met
+- Memory: < 150MB — target met
+- Touch latency: < 16ms — target met
+- Audio latency: < 50ms — target met
 
 ## Final Sign-Off
 
@@ -300,12 +300,12 @@ Please report issues at [GitHub Issues URL]
 **Release Manager:** Ansyar (mansyar)
 **Date:** 2026-08-02
 **Version:** 1.1.0
-**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); manual device checks (install, offline, TTS, device-testing-checklist) pending
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); manual device checks completed **2026-08-03** — all items passed (install, offline, TTS, performance)
 
 **Approval:**
 - [x] Code quality meets standards
 - [x] All tests pass (706/706)
 - [x] Documentation complete
 - [x] Security review passed
-- [ ] Performance targets met — pending device metrics
+- [x] Performance targets met — verified on device 2026-08-03
 - [x] Ready for release

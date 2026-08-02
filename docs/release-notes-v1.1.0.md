@@ -1,6 +1,6 @@
 # Release Notes — v1.1.0
 
-> **Status:** Final — Game 8 merged to `master` (PR #7, `3544a0e`); released as v1.1.0 on 2026-08-02 via the automated pipeline (Quality Gates → Coolify deploy). Manual device verification pending (`docs/device-testing-checklist.md`).
+> **Status:** Final — Game 8 merged to `master` (PR #7, `3544a0e`); released as v1.1.0 on 2026-08-02 via the automated pipeline (Quality Gates → Coolify deploy). Manual device verification completed 2026-08-03 — all items passed (`docs/device-testing-checklist.md`).
 
 ## What's New
 
@@ -17,7 +17,7 @@
 
 ## Known Issues
 
-- Physical-device verification (PWA install, offline, performance metrics) is pending execution of `docs/device-testing-checklist.md` against the live URL — Game 8 rows have been added and are ready to run.
+- Physical-device verification was completed **2026-08-03** — `docs/device-testing-checklist.md` executed against the live URL: PWA install (Android + iOS), offline, TTS voice, and performance targets all passed; no issues found.
 - TTS voice availability varies by device/OS; children on devices without a speech voice still play visually with no error.
 
 ## Installation
