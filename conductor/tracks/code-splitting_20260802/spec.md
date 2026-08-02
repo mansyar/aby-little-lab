@@ -11,10 +11,12 @@ The production bundle currently emits a single 1,473 kB JS file (380 kB gzip) co
 
 ## Functional Requirements
 
-1. **Lazy scene registration:** In `src/main.ts`, replace the static imports of the 7 game scenes (`ShapeSorterScene`, `AnimalTraceScene`, `PopFreezeScene`, `ShadowMatchScene`, `MusicalMemoryScene`, `BigSmallScene`, `PatternBuilderScene`) with Phaser-supported lazy loaders (`() => import("./scenes/<Scene>.ts")`) in the Phaser config `scene` array.
-2. **Static shell scenes:** `BootScene`, `PreloadScene`, `HubScene` remain statically imported and load at startup.
-3. **On-demand loading:** Tapping a game tile in the Hub must trigger the fetch/parse of that game's chunk via the existing `transitionToScene(this, GAME_TILES[i].sceneKey)` flow — no scene-key or Hub code changes required beyond registration.
+1. **Lazy scene registration:** A new testable module `src/scenes/sceneRegistry.ts` maps the 7 game scene keys to dynamic-import loaders (`() => import("./scenes/<Scene>.ts").then(m => m.<Scene>Class)`) and exposes `ensureSceneLoaded(scene, key)` which no-ops when the scene is already registered, otherwise imports the module and registers it via `scene.add(key, SceneClass)`.
+2. **Static shell scenes:** `BootScene`, `PreloadScene`, `HubScene` remain statically imported in `main.ts` and load at startup; the Phaser config `scene` array contains only these 3 scenes.
+3. **On-demand loading:** The Hub tile tap handler awaits `ensureSceneLoaded(this, sceneKey)` before the existing `transitionToScene(this, sceneKey)` fade-out/start flow, so the game's chunk is fetched and parsed on first tap of that game.
 4. **Shared-code hoisting:** Rollup automatically extracts modules shared between scenes (e.g., `utils/`, `game/*Logic.ts`, components) into shared chunks — no manual chunk config is introduced.
+
+> **2026-08-02 — Design Deviation (Phaser 4 lazy loading):** Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the config `scene` array — `SceneManager.createSceneFromFunction` instantiates entries with `new scene()` (synchronous constructor; no promise handling exists in `SceneManager.js`). The documented Phaser approach for scene code splitting is runtime registration: dynamically `import()` the module, then `scene.add(key, SceneClass)`. FR1/FR3 above are revised accordingly (original FR1 assumed array-level lazy loaders; original FR3 assumed no Hub changes). Acceptance criteria are unaffected.
 
 ## Non-Functional Requirements
 
