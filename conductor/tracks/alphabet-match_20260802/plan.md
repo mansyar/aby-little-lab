@@ -35,3 +35,7 @@
 - [x] Task: Update docs — `docs/PRD.md` (Game 8 section + product amendment note), `docs/TDD.md`, `conductor/tech-stack.md` (scene count, GameId, assets), `conductor/product.md`, release notes `ae2be5c`
 - [x] Task: Run quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` `3734d08`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `8bbc203`
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions `5d9a8d4`
