@@ -11,16 +11,18 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Game 4 — Shadow Match** *Link: [./archive/shadow-match_20260729/index.md](./archive/shadow-match_20260729/index.md)* (Archived)
 - [x] **Track: Game 5 — Musical Memory Simon** *Link: [./archive/musical-memory_20260729/index.md](./archive/musical-memory_20260729/index.md)* (Archived)
 - [x] **Track: Game 6 — Big vs. Small Cleaner** *Link: [./archive/big-small_20260730/index.md](./archive/big-small_20260730/index.md)* (Archived)
+- [x] **Track: Settings UI Panel** *Link: [./archive/settings-ui_20260730/index.md](./archive/settings-ui_20260730/index.md)* (Archived)
 - [x] **Track: Release Readiness & PWA Validation** *Link: [./archive/release-readiness-pwa_20260731/index.md](./archive/release-readiness-pwa_20260731/index.md)* (Archived)
 - [x] **Track: Mobile PWA Shell, Audio, and Completion Feedback Hardening** *Link: [./archive/mobile-pwa-hardening_20260731/index.md](./archive/mobile-pwa-hardening_20260731/index.md)* (Archived)
 - [x] **Track: Preschool Touch UX Hardening** *Link: [./archive/preschool-touch-ux-hardening_20260801/index.md](./archive/preschool-touch-ux-hardening_20260801/index.md)* (Archived)
 - [x] **Track: Cross-Cutting Motion** *Link: [./archive/cross-cutting-motion_20260801/index.md](./archive/cross-cutting-motion_20260801/index.md)* (Archived)
 - [x] **Track: Hub Engagement** *Link: [./archive/hub-engagement_20260801/index.md](./archive/hub-engagement_20260801/index.md)* (Archived)
 - [x] **Track: Mascot Companion** *Link: [./archive/mascot-companion_20260801/index.md](./archive/mascot-companion_20260801/index.md)* (Archived)
+- [x] **Track: Per-Game Juice** *Link: [./archive/per-game-juice_20260801/index.md](./archive/per-game-juice_20260801/index.md)* (Archived)
 
 ---
 
-- [x] **Track: Replay Variety Expansion** *Link: [./archive/replay-variety-expansion_20260801/index.md](./archive/replay-variety-expansion_20260801/index.md)*
+- [x] **Track: Replay Variety Expansion** *Link: [./archive/replay-variety-expansion_20260801/index.md](./archive/replay-variety-expansion_20260801/index.md)* (Archived)
 - [x] **Track: Game 7 — Pattern Builder** *Link: [./archive/pattern-builder_20260801/index.md](./archive/pattern-builder_20260801/index.md)* (Archived)
 - [x] **Track: v1.0.0 Release Execution** *Link: [./archive/release-1.0.0_20260802/index.md](./archive/release-1.0.0_20260802/index.md)* (Archived)
 
@@ -30,10 +32,11 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [x] **Track: CI/CD Auto-Deploy** *Link: [./archive/ci-cd-autodeploy_20260802/index.md](./archive/ci-cd-autodeploy_20260802/index.md)* (Archived)
+- [x] **Track: Bundle Code Splitting** *Link: [./archive/code-splitting_20260802/index.md](./archive/code-splitting_20260802/index.md)* (Archived)
+- [x] **Track: Parental Settings Expansion** *Link: [./archive/parental-settings-expansion_20260802/index.md](./archive/parental-settings-expansion_20260802/index.md)* (Archived)
+- [x] **Track: Game 8 — Find the Letter (Alphabet Recognition)** *Link: [./archive/alphabet-match_20260802/index.md](./archive/alphabet-match_20260802/index.md)* (Archived)
 - [x] **Track: v1.1.0 Release Mechanics** *Link: [./archive/release-1.1.0-mechanics_20260802/index.md](./archive/release-1.1.0-mechanics_20260802/index.md)* (Archived)
-
----
-
 
 ---
 
