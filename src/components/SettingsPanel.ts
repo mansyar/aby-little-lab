@@ -66,6 +66,14 @@ export class SettingsPanel {
     this.createToggle(centerX, centerY - 25, "BGM", settings.bgmEnabled);
     this.createToggle(centerX, centerY + 75, "SFX", settings.sfxEnabled);
     this.createInstallRow(centerX, centerY + 175);
+    this.objects.push(
+      scene.add
+        .text(centerX, centerY + 215, `v${__APP_VERSION__}`, {
+          color: DISABLED_COLOR,
+          fontSize: "18px",
+        })
+        .setOrigin(0.5),
+    );
   }
 
   /** Destroys the modal, the install overlay, and all display objects. */
