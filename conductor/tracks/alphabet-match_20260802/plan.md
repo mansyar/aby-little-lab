@@ -28,10 +28,10 @@
 - [x] Task: Implement `AlphabetScene` until tests pass (Red → Green); register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts` `2bef73e`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `9bc9b2f`
 
-## Phase 5: Hub Integration, Docs & Quality Gates
+## Phase 5: Hub Integration, Docs & Quality Gates `[checkpoint: 8bbc203]`
 
-- [ ] Task: Add 8th Hub tile (4×2 grid), wire scene start, sticker shelf, mascot
-- [ ] Task: Update `src/__tests__/scenes/navigation.test.ts` for 8 tiles + `ensureSceneLoaded("Alphabet")`
-- [ ] Task: Update docs — `docs/PRD.md` (Game 8 section + product amendment note), `docs/TDD.md`, `conductor/tech-stack.md` (scene count, GameId, assets), `conductor/product.md`, release notes
-- [ ] Task: Run quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Add 8th Hub tile (4×2 grid), wire scene start, sticker shelf, mascot `707476c`
+- [x] Task: Update `src/__tests__/scenes/navigation.test.ts` for 8 tiles + `ensureSceneLoaded("Alphabet")` `707476c`
+- [x] Task: Update docs — `docs/PRD.md` (Game 8 section + product amendment note), `docs/TDD.md`, `conductor/tech-stack.md` (scene count, GameId, assets), `conductor/product.md`, release notes `ae2be5c`
+- [x] Task: Run quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` `3734d08`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `8bbc203`
