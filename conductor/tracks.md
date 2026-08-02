@@ -27,7 +27,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [~] **Track: PWA Install & Update UX** *Link: [./tracks/pwa-install-update_20260802/index.md](./tracks/pwa-install-update_20260802/index.md)*
-- [x] **Track: Parental Settings Expansion — App Version & Progress Reset** *Link: [./tracks/parental-settings-expansion_20260802/index.md](./tracks/parental-settings-expansion_20260802/index.md)*
 
 ---
 
