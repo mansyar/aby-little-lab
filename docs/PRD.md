@@ -165,7 +165,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │                                 ├── Toggle persisted BGM/SFX settings
     │                                 └── Tap backdrop to return to Hub
     │
-    ├── Tap game tile ──────────────────► [Game Scene]
+    ├── Tap game tile ──────────────────► [Game Scene]   (scene lazy-loaded on first tap)
     │                                        │
     │                                        ├── Initialize with randomized items
     │                                        ├── Gameplay loop
@@ -184,7 +184,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 ### Navigation Rules
 
 - **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a progress bar before transitioning to HubScene. Both transitions are crossfades.
-- **HubScene → GameScene:** Tap on a game tile — navigation fires on **release** (see Press Feedback). 300ms crossfade transition with entrance zoom.
+- **HubScene → GameScene:** Tap on a game tile — navigation fires on **release** (see Press Feedback). The tapped game's chunk is lazy-loaded (dynamic import + runtime scene registration via `sceneRegistry.ensureSceneLoaded`) before the 300ms crossfade transition with entrance zoom starts.
 - **GameScene → HubScene:** Auto-return after game completion (3s delay with win celebration, then crossfade) OR parental lock (hold 3s, then crossfade).
 - **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. A context-aware install row appears below the toggles (see §9). Tapping the dark backdrop closes the modal and returns to the Hub.
 - **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
@@ -305,6 +305,8 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), Gam
 | Offline capability | Full gameplay after the first HTTPS PWA load/install | vite-plugin-pwa precaches all build assets, including `/audio/bgm.mp3` |
 | Touch input latency | < 16ms (1 frame) | Immediate feedback for fine-motor activities |
 | Audio latency | < 50ms | Synchronized SFX with visual feedback |
+
+> **Release decision (2026-08-02):** Bundle code splitting shipped (performance chore, archived at `conductor/archive/code-splitting_20260802/`). The seven game scenes are **lazy-loaded**: a Hub tile tap dynamically imports and registers the scene before the crossfade transition starts. The startup bundle dropped from 1,473 kB to 1,444 kB (372.5 KB gzip) and each game loads as its own 3–5 KB chunk only when first tapped; Rollup auto-hoists shared modules (game logic, drag juice, completion effect). **Offline capability is unchanged** — the service worker precaches every emitted chunk (19 precache entries), so all games still play after the first offline load. The boot/load-time target is aided by moving game code out of the startup parse path. Navigation tests assert `ensureSceneLoaded` fires per tile; 652 tests across 22 files (~96.6% lines / ~98.1% statements).
 
 ---
 

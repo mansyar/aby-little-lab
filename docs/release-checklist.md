@@ -4,27 +4,29 @@
 
 ### 1. Code Quality Gates
 - [x] Run `pnpm run check` (linting/formatting) — **2026-08-02:** biome clean (51 files)
-- [x] Run `CI=true pnpm test` (all tests pass) — **2026-08-02:** 592/592 tests, 18 files
-- [x] Run `pnpm run build` (production build succeeds) — **2026-08-02:** OK (`index-DPWHmQqT.js`)
-- [x] Verify code coverage meets threshold (>80%) — ~98.8% lines / ~98.0% statements (CI-enforced)
+- [x] Run `CI=true pnpm test` (all tests pass) — **2026-08-02:** 652/652 tests, 22 files (includes lazy scene-registry tests)
+- [x] Run `pnpm run build` (production build succeeds) — **2026-08-02:** OK (entry `index-NPwwI8ke.js` + 7 lazy game-scene chunks, 19 precache entries)
+- [x] Verify code coverage meets threshold (>80%) — ~96.6% lines / ~98.1% statements (CI-enforced)
 - [x] Review all changes since last release — first release; all 17 prior tracks reviewed and archived
 - [x] Ensure no security vulnerabilities introduced — pnpm supply-chain policy passed; no hardcoded secrets
 
 > **CI enforcement (2026-08-02):** The four gates above are automatically enforced by GitHub Actions (`.github/workflows/ci.yml`, job **Quality Gates**: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`) on every pull request and `master` push. Local runs remain valid as a fast pre-push sanity check; CI is the release gate. Enable branch protection on `master` requiring the "Quality Gates" check to make them merge-blocking.
+
+> **Code splitting (2026-08-02):** The bundle-splitting chore (archived at `conductor/archive/code-splitting_20260802/`) lazy-loads the seven game scenes. Post-build verification: entry chunk `dist/assets/index-*.js` contains no game-scene constructor registrations (only `Boot`/`Preload`/`Hub` via `super({ key: ... })` inspection), each of the 7 `*Scene-*.js` chunks contains exactly its own scene key, and `sw.js` precaches all 19 emitted entries — offline play is unaffected. Verified manually on device: no game chunk fetched before its tile is tapped; each game boots, plays, and returns to the Hub; re-taps do not re-fetch.
 
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
 - [x] Verify the manifest requests fullscreen where supported and retains standalone as the fallback display mode — `display_override: ["fullscreen","standalone"]` + `display: standalone`
 - [x] When system home/back/navigation bars remain visible, record them as platform-controlled limitations rather than app-rendered controls — platform-controlled (documented)
-- [x] Verify service worker is generated — `sw.js` generated, 7 precache entries (1432.65 KiB)
+- [x] Verify service worker is generated — `sw.js` generated, 19 precache entries (1447.87 KiB; includes all lazy game chunks)
 - [x] Verify all assets are precached — SW precache verified by validate-pwa
 - [ ] Test offline functionality — **manual:** requires installed PWA on real device (pending)
 - [ ] Test installation on target devices — **manual:** device-testing-checklist (pending)
 - [x] Perform phone/tablet PWA checks from an HTTPS URL — live URL `https://aby-little-lab.ansyar-world.top/` all HTTP checks 200 (index, manifest, sw.js, registerSW, bgm.mp3)
 
 ### 3. Asset Verification
-- [x] All SVG assets load correctly — validated in game tracks (2026-07-28 → 08-01); build + 592 tests green
+- [x] All SVG assets load correctly — validated in game tracks (2026-07-28 → 08-01); build + 652 tests green
 - [x] The first valid user interaction starts low-volume looping BGM when BGM is enabled, and BGM continues across scene navigation — validated (AudioManager tests, 52); `bgm.mp3` served 200 on live URL
 - [x] SFX audio works through Web Audio synthesis — validated (AudioManager tests)
 - [x] No requests are made for the removed `/audio/pop.mp3`, `/audio/correct.mp3`, `/audio/incorrect.mp3`, `/audio/wake.mp3`, `/audio/win.mp3`, or `/audio/sticker.mp3` files — validated in audio track
@@ -226,7 +228,7 @@ Please report issues at [GitHub Issues URL]
 
 ### Pre-Release Security Review
 - [x] No hardcoded secrets or API keys — secrets live in GitHub Actions secrets only (`COOLIFY_DEPLOY_WEBHOOK`, `COOLIFY_TOKEN`)
-- [x] Input validation present — game logic validated (592 tests)
+- [x] Input validation present — game logic validated (652 tests)
 - [x] XSS protection in place — no dynamic HTML injection; Vite defaults
 - [x] No SQL injection vulnerabilities — no backend database
 - [x] Secure data storage (localStorage) — `abby-little-lab:v1`, no sensitive data

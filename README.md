@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **592 tests across 18 files**, ~98.0% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **652 tests across 22 files**, ~96.6% lines / ~98.1% statements coverage (all shared motion/feedback/storage/transition utilities at 100%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
 
 ## Code Quality
 
@@ -70,8 +70,8 @@ public/
 ├── audio/                 # BGM served at /audio/bgm.mp3 and precached for offline play
 └── icons/                 # PWA icons
 src/
-├── main.ts                # Phaser game config & scene register
-├── scenes/                # BootScene, PreloadScene, HubScene, 7 game scenes
+├── main.ts                # Phaser game config & shell scene register (game scenes lazy-loaded)
+├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 7 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
 ├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building)
@@ -152,6 +152,16 @@ Professor Hoot — a round owl in a tiny lab coat — is the app's friendly teac
 Production builds generate `dist/manifest.webmanifest` and an auto-updating service worker. The service worker precaches the bundled game assets, PWA icon, and `/audio/bgm.mp3` so the installed app can launch and play offline after its first online load.
 
 Run the release checks with `pnpm run build` followed by `node scripts/validate-pwa.js`. Use an HTTPS private static host or tunnel for phone/tablet installation, offline, and update testing; `http://localhost` is suitable only for same-device smoke tests.
+
+## Bundle Code Splitting (2026-08-02)
+
+The seven game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
+
+- `src/scenes/sceneRegistry.ts` maps each game's scene key to a dynamic `import()` loader. A Hub tile tap awaits `ensureSceneLoaded()` (import + runtime `scene.add()`), and only then starts the crossfade transition.
+- **Phaser 4 limitation:** the `scene` array does not support async/lazy loaders — function entries are invoked with `new` synchronously. Runtime registration after a dynamic import is the supported pattern.
+- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus seven 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
+- **Offline is unchanged:** the service worker precaches every emitted chunk (19 precache entries), so all games still play offline after the first load.
+- Structural acceptance: the entry chunk contains zero game-scene constructor registrations (verified via `super({ key: ... })` inspection of `dist/assets`).
 
 ## Docker Deployment
 
