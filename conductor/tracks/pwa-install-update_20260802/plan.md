@@ -24,7 +24,7 @@
 - [x] Task: Add 192×192 and maskable 512×512 icons to `public/icons/` (PNG generated from existing 512 asset) (219133c)
 - [x] Task: Update manifest in `vite.config.ts` (192px icon, maskable purpose entry) (219133c)
 - [x] Task: Add iOS meta tags + `apple-touch-icon` link to `index.html` (219133c)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 36e6117]
 
 ## Phase 4 — Full Verification, Docs & Device Test
 
