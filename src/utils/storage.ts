@@ -12,6 +12,7 @@ function createDefaultStorage(): AppStorage {
       "musical-memory": { earned: false, earnedAt: null },
       "big-small": { earned: false, earnedAt: null },
       "pattern-builder": { earned: false, earnedAt: null },
+      "alphabet-match": { earned: false, earnedAt: null },
     },
     settings: {
       bgmEnabled: true,

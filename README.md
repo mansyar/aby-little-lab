@@ -1,6 +1,6 @@
 # Aby's Little Lab
 
-An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Seven mini-games targeting cognitive, motor, and reasoning milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
+An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Eight mini-games targeting cognitive, motor, literacy, and reasoning milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
 
 ## Tech Stack
 
@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **667 tests across 22 files**, ~96.7% lines / ~98.2% statements coverage (all shared motion/feedback/storage/transition utilities at 100%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **706 tests across 25 files**, ~96.7% lines / ~98.2% statements coverage (all shared motion/feedback/storage/transition utilities at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
 
 ## Code Quality
 
@@ -71,12 +71,12 @@ public/
 └── icons/                 # PWA icons
 src/
 ├── main.ts                # Phaser game config & shell scene register (game scenes lazy-loaded)
-├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 7 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
+├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 8 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
 ├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter playthrough & round generation)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
-├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts)
+├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts) + letter TTS (speech.ts)
 ├── assets/                # SVG assets bundled into the game
 ├── styles/                # Global CSS
 └── __tests__/             # Unit tests (audio, components, game, scenes, utils)
@@ -93,8 +93,9 @@ src/
 | 5 | Musical Memory Simon | Working memory & auditory recall | ✅ Implemented |
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | ✅ Implemented |
 | 7 | Pattern Builder | Sequential pattern recognition | ✅ Implemented |
+| 8 | Find the Letter | Early literacy (letter recognition) | ✅ Implemented |
 
-**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys), with round sizes and difficulty fixed.
+**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys; Find the Letter: 6 of 26 letters), with round sizes and difficulty fixed.
 
 ## Parental Lock & Touch UX
 
@@ -105,14 +106,14 @@ Settings access (Hub **Settings**) and app exit (each game's **← Back**) are g
 - Early release, pointer leaving the control, or pointer cancel **never** triggers the action.
 - The ring is cleared on release, cancel, and scene shutdown — no leftover display objects.
 
-The protected controls (Hub Settings, all seven game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
+The protected controls (Hub Settings, all eight game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
 
 The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
 
 Parent-facing additions (all behind the 3-second hold, never visible to the child during play):
 
 - **Version footer** — a muted `v{version}` readout at the bottom of the panel, sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
-- **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all seven stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
+- **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all eight stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
 - **Install control** — a context-aware row: "Install App" where a browser prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, hidden once the app is installed (see PWA Release Readiness).
 
 ## Motion & Feedback
@@ -120,7 +121,7 @@ Parent-facing additions (all behind the 3-second hold, never visible to the chil
 All animation is driven by a shared motion system (`src/utils/`):
 
 - **Scene transitions** — every navigation path (boot → hub, hub ↔ game, completion returns) plays a 300ms crossfade to the app background, then a 180ms fade-in with a subtle entrance zoom.
-- **Win celebration** — all seven games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
+- **Win celebration** — all eight games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
 - **Press feedback** — Back, Replay, Settings, and Hub game tiles squish to 95% of their base scale while pressed; tiles spring back with a `Back.out` overshoot (150ms), other controls restore instantly. Hub tiles navigate **on release** so the squish stays visible while holding; dragging off the tile cancels the navigation.
 - **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, Hub entrances fade without scale (no bob, wiggle, sparkle, or burst), the idle attract plays chime-only, and gameplay stays fully functional under `prefers-reduced-motion`.
 
@@ -134,6 +135,7 @@ Every game layers scene-level animation juice on top of its core rules (no gamep
 - **Animal Trace** — the animal hops between waypoints with a small arc tween (~120ms per hop; straight and faster under reduced motion), the food wiggles (±4°, 3 yoyo repeats) on path arrival, and progress dots pop 1 → 1.4 → 1 with `Back.out` instead of alpha-only.
 - **Pop & Freeze** — popping emits 3 teal droplet circles radiating from the pop point (self-cleaning fade), and sleeping-animal decoys breathe on a 1.0 → 1.03 yoyo loop (~1.5s; disabled under reduced motion).
 - **Musical Memory** — frog taps emit expanding ripple rings (self-cleaning fade), lily pads drift gently ±3px on a 3s loop (disabled under reduced motion), and progress dots pop on fill.
+- **Find the Letter** — the target letter pops in at round start and is named aloud via SpeechSynthesis (silent when SFX is off or unsupported — visual-only play always works); answer cards squish on press, correct taps chime with a progress-dot pop (700ms to the next round), and wrong taps wiggle gently (±4°, 3 yoyo repeats; ±2°/200ms reduced motion) with no penalty. Win shares the suite celebration plus a first-time sticker reveal.
 
 ## Hub Experience
 
@@ -149,7 +151,7 @@ The Hub is the child's landing screen, built for gentle, playful engagement:
 Professor Hoot — a round owl in a tiny lab coat — is the app's friendly teacher mascot, rendered from two static SVG poses (`mascot_idle.svg`, `mascot_celebrate.svg`) with tween-only animation (no sprite sheets, no particle emitters, no new audio):
 
 - **Hub** — Hoot sits in the bottom-right corner (0.2× scale, touch-inert, behind gameplay z-order): waves on load, cheers when the visit follows a newly earned sticker (`justEarned` scene data), then settles into a slow bob with a periodic squash-blink idle loop.
-- **All seven games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
+- **All eight games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
 - **Implementation** — `src/components/Mascot.ts` (wave/cheer/nod/idleLoop + `createCornerMascot()` shared factory). Overlapping cheers retire the in-flight tween and pause the blink loop so rapid pops never stack tweens. Reactions reuse the existing SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`) — no new audio files.
 - **Reduced motion** — the idle loop is disabled and reactions become minimal (gentle wave/nod, pose swap without bounce or sparkle).
 
@@ -161,12 +163,12 @@ Run the release checks with `pnpm run build` followed by `node scripts/validate-
 
 ## Bundle Code Splitting (2026-08-02)
 
-The seven game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
+The eight game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
 
 - `src/scenes/sceneRegistry.ts` maps each game's scene key to a dynamic `import()` loader. A Hub tile tap awaits `ensureSceneLoaded()` (import + runtime `scene.add()`), and only then starts the crossfade transition.
 - **Phaser 4 limitation:** the `scene` array does not support async/lazy loaders — function entries are invoked with `new` synchronously. Runtime registration after a dynamic import is the supported pattern.
-- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus seven 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
-- **Offline is unchanged:** the service worker precaches every emitted chunk (19 precache entries), so all games still play offline after the first load.
+- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus eight 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
+- **Offline is unchanged:** the service worker precaches every emitted chunk (20 precache entries), so all games still play offline after the first load.
 - Structural acceptance: the entry chunk contains zero game-scene constructor registrations (verified via `super({ key: ... })` inspection of `dist/assets`).
 
 ## Docker Deployment
@@ -202,6 +204,7 @@ One-time setup:
 - [TDD.md](docs/TDD.md) - Technical Design Document
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
+- [release-notes-v1.1.0.md](docs/release-notes-v1.1.0.md) - v1.1.0 release notes (Game 8 — Find the Letter)
 
 ## License
 

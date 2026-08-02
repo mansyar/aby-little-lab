@@ -20,7 +20,7 @@ This document defines the production requirements for an ad-free, distraction-fr
 ### UX & Touch Architecture Requirements
 
 - **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
-- **Textless Visual Cues:** Zero text dependency for gameplay. All prompts rely on visual animations, color coding, spatial affordances, and audio chime feedback.
+- **Textless Visual Cues:** Zero text dependency for gameplay. All prompts rely on visual animations, color coding, spatial affordances, and audio chime feedback. *(2026-08-02 amendment — Game 8:* letters are the **learning content** (like shapes or animals), not UI instructions; no written instructions appear anywhere in the app. *)*
 - **Interface Containment:** Embedded "Hold for 3 Seconds" parental lock to prevent accidental menu navigation or app exits during active play. The hold shows a circular progress ring, runs one hold at a time (duplicate touches ignored), and never triggers on early release, pointer leaving the control, or pointer cancel.
 - **Responsive Scale:** Phaser Scale Manager enforces a locked 1024×768 landscape base resolution with dynamic centered letterboxing (`Phaser.Scale.FIT`). Phones auto-rotate to landscape on launch via the Screen Orientation API + manifest `orientation: landscape` lock.
 
@@ -60,10 +60,10 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + Graphics-based splash (the project uses Graphics shapes only — no `add.particles` emitters). Incorrect actions give a gentle "try again" animation with no penalty; dropping on empty space bounces back silently (no incorrect SFX).
 - **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
-- **Win Celebration:** All seven games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
+- **Win Celebration:** All eight games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
 - **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
 - **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
-- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all seven game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
+- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all eight game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
@@ -134,6 +134,16 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Cards and slots are 120–128px (exceeding the 64px minimum and the 96×96px ideal). Shapes are distinguished by silhouette AND color. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Zero text — gameplay is purely visual.
 - **Game Logic:** Pure functions in `src/game/patternBuilderLogic.ts` (pattern row generation, gap placement, distractor selection, 3-unique-choice generation, playthrough generation, correct-shape lookup) — testable without Phaser.
 
+### GAME 8 — Find the Letter (Alphabet Recognition) ✅ Implemented
+
+- **Milestone:** Early literacy — recognizing uppercase letter shapes.
+- **Mechanics:** A large target letter (200px, bold blue) appears top-center and is **spoken aloud** via browser SpeechSynthesis (`speechSynthesis.speak`, en-US, gentle rate; respects the SFX toggle; silent graceful fallback if unsupported — the visual letter remains the primary cue). 4 letter cards (160px each) sit below; the child taps the card matching the target. 6 rounds per playthrough; each playthrough draws 6 **unique** letters uniformly from A–Z (no duplicates; difficulty stays fixed — 4 choices every round, per the replay-variety principle).
+- **Letter Set:** Uppercase A–Z only. All 26 letter SVGs use identical styling (`#2B6CB0` fill, `#2D3748` stroke, bold sans-serif) so letters are recognized by **shape only** — no color-as-cue.
+- **SVG Requirements:** `letter_a.svg` … `letter_z.svg` (512×512px, bold uppercase letterforms, `assets/svg/letters/`). Sticker: `sticker_alphabet_match.svg` ("ABC" on the cream badge).
+- **Phaser Engine Logic:** Tap-to-answer (no drag). Correct tap: ascending chime + mascot cheer + progress dot pop (`Back.out`, 1.4×/1.2× reduced), next round after 700ms. Incorrect tap: soft descending tone + mascot nod + card wiggle ±4° (`Sine.inOut`, 350ms, 3 yoyo repeats; ±2°/200ms reduced), no penalty, no progression loss. After 6 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "alphabet-match" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Target (200px) and cards (160px) far exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Letters are the learning content — no written instructions anywhere.
+- **Game Logic:** Pure functions in `src/game/alphabetLogic.ts` (26-letter alphabet, playthrough generation with unique targets, round generation with 4 unique choices, answer evaluation, win detection) — testable without Phaser. TTS wrapper in `src/utils/speech.ts`.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -153,13 +163,14 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
     │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
-    │  toys/box + sticker, Game 7 shapes + sticker — all 7 games'
+    │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
+    │  sticker — all 8 games'
     │  assets loaded)
     │
     ▼
 [HubScene]
     │
-    ├── Display 7 game tiles (grid)
+    ├── Display 8 game tiles (grid, 4×2)
     ├── Display sticker shelf (earned/unearned thumbnails)
     ├── Hold Settings for 3s ──────► [Settings modal]
     │                                 ├── Toggle persisted BGM/SFX settings
@@ -204,6 +215,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 > **Mascot companion:** Professor Hoot was added as a static-pose + tween-only mascot — no sprite sheets, no particle emitters, no new audio. Reactions reuse the existing shared SFX (correct/incorrect/win/sticker), animations run through `motion.ts` (reduced-motion-aware), and the mascot is touch-inert (never blocks taps) and rendered behind gameplay z-order. Deployed to the Hub (wave/cheer/idleLoop) and all six game scenes (cheer on correct, nod on incorrect, big cheer on win, destroyed on shutdown). This is a celebration-surface addition: it does not add new learning content, but reinforces feedback loops through a consistent, gentle companion presence.
 
 > **Release decision (2026-08-02):** Game 7 (Pattern Builder) shipped — a tap-to-complete pattern game (ABAB/AABB/ABB, 6-shape pool, gap at end or middle, 3 unique choices, 5 rounds, zero text). Reuses the six Game 1 shape SVGs; the only new asset is `sticker_pattern_builder.svg`. The Hub grid grew to 4×2 (7 tiles) and the localStorage `GameId` union includes `pattern-builder`. Correct taps snap with `Back.out` + chime + dot pop; wrong taps wiggle with no penalty; mascot cheer/nod/big-cheer paths are covered by scene tests. 592 tests across 18 files (~98.8% lines, ~98.0% statements). During manual verification, `load()` was found to crash on saves from before Game 7 shipped (missing `pattern-builder` sticker key); it now merges saved data over defaults per key, so pre-existing saves migrate cleanly and any future game ids backfill automatically.
+>
+> **Release decision (2026-08-02):** Game 8 (Find the Letter) shipped — an uppercase letter-recognition game (6 unique letters per playthrough drawn uniformly from A–Z, 4 unique cards per round, 6 rounds to win). New dependency: browser SpeechSynthesis for letter names (en-US, gentle rate, respects the SFX toggle, graceful silent fallback). New assets: 26 letter SVGs (`assets/svg/letters/`, identical styling so recognition is shape-only) + `sticker_alphabet_match.svg`. The Hub grid is now 4×2 (8 tiles) and the `GameId` union includes `alphabet-match`. This track amends the "Zero text dependency" principle: letters are the learning content, not UI instructions — no written instructions appear anywhere. 706 tests across 25 files (~96%+ lines, 80% thresholds still enforced). Storage migration is automatic via the existing per-key merge (`load()` backfills the new sticker key for old saves).
 
 ---
 

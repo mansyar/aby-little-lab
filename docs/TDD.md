@@ -67,7 +67,8 @@ aby-little-lab/
     │   ├── ShadowMatchScene.ts     # Mini-Game 4
     │   ├── MusicalMemoryScene.ts   # Mini-Game 5
     │   ├── BigSmallScene.ts        # Mini-Game 6
-    │   └── PatternBuilderScene.ts  # Mini-Game 7
+    │   ├── PatternBuilderScene.ts  # Mini-Game 7
+    │   └── AlphabetScene.ts        # Mini-Game 8
     ├── components/
     │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
     │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay + context-aware install control (Install App / How to Install / hidden)
@@ -82,7 +83,8 @@ aby-little-lab/
     │   ├── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
     │   ├── musicalMemoryLogic.ts # Pure game logic (sequence generation, note appending, input validation, round/win detection)
     │   ├── bigSmallLogic.ts     # Pure game logic (toy selection, dual-scale instance creation, round generation, scale-category match detection, win detection)
-    │   └── patternBuilderLogic.ts # Pure game logic (pattern row generation, gap placement, 3-unique-choice generation, playthrough generation)
+    │   ├── patternBuilderLogic.ts # Pure game logic (pattern row generation, gap placement, 3-unique-choice generation, playthrough generation)
+    │   └── alphabetLogic.ts       # Pure game logic (letter playthrough generation, round generation with 4 unique choices, evaluation, win detection)
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
@@ -92,6 +94,7 @@ aby-little-lab/
     │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
     │   ├── dragJuice.ts            # Per-game drag juice (attachDragLift, attachDropZoneHighlight, snapToSlot)
     │   ├── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
+    │   ├── speech.ts               # TTS letter pronunciation (speakLetter, isSpeechSupported; en-US, SFX-toggle aware, graceful fallback)
     │   ├── pwaBridge.ts            # Testable wrapper around virtual:pwa-register (needRefresh/offlineReady events, Hub-active queue, updateNow)
     │   └── pwaInstall.ts           # Install-state machine (installable/ios-howto/hidden), beforeinstallprompt capture, iOS UA detection
     ├── assets/
@@ -101,6 +104,7 @@ aby-little-lab/
     │       ├── items/              # Banana, Carrot, Fish, Bone, Peanut, Apple (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella, Airplane, Mushroom (Game 4 objects) + Lily Pad (Game 5)
     │       ├── toys/               # Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Rocket, Toy Drum, Toy Box (Game 6)
     │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
+    │       ├── letters/            # Uppercase letter SVGs for Game 8 (letter_a..letter_z — identical #2B6CB0 fill / #2D3748 stroke styling)
     │       ├── stickers/           # Reward stickers (one per mini-game)
     │       └── ui/                 # Tiles, Star, Lock, Box, Shelf, Bubbles, Path SVGs + Mascot poses
     ├── styles/
@@ -195,7 +199,7 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  // Shell scenes only — the 7 game scenes are lazy-loaded and registered
+  // Shell scenes only — the 8 game scenes are lazy-loaded and registered
   // at runtime via ensureSceneLoaded() when a Hub tile is tapped.
   scene: [BootScene, PreloadScene, HubScene],
 };
@@ -205,7 +209,7 @@ new Phaser.Game(config);
 
 ### Bundle Code Splitting & Lazy Scene Loading (2026-08-02)
 
-**Design decision:** only the shell scenes (`BootScene`, `PreloadScene`, `HubScene`) are statically registered; the seven game scenes are lazy-loaded so the startup bundle excludes their code (track `code-splitting_20260802`, archived at `conductor/archive/code-splitting_20260802/`).
+**Design decision:** only the shell scenes (`BootScene`, `PreloadScene`, `HubScene`) are statically registered; the eight game scenes are lazy-loaded so the startup bundle excludes their code (track `code-splitting_20260802`, archived at `conductor/archive/code-splitting_20260802/`).
 
 **Phaser 4.2.1 limitation (verified in `SceneManager.js`):** the `scene` array does **not** support async/lazy loaders. `SceneType` includes `Function`, but `createSceneFromFunction` invokes `new scene()` synchronously — no promise is awaited, so a dynamic-import function cannot be used as an array entry. The supported pattern is runtime registration: `await import()` the scene module, then `scene.add(key, SceneClass)` before `scene.start(key)`.
 
@@ -264,7 +268,8 @@ type GameId =
   | "shadow-match"
   | "musical-memory"
   | "big-small"
-  | "pattern-builder";
+  | "pattern-builder"
+  | "alphabet-match";
 
 interface StickerData {
   earned: boolean;
@@ -317,6 +322,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `musical-memory` | Game 5 |
 | `big-small` | Game 6 |
 | `pattern-builder` | Game 7 |
+| `alphabet-match` | Game 8 |
 
 ### Example State
 
@@ -329,7 +335,8 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
     "shadow-match": { "earned": false, "earnedAt": null },
     "musical-memory": { "earned": false, "earnedAt": null },
     "big-small": { "earned": false, "earnedAt": null },
-    "pattern-builder": { "earned": false, "earnedAt": null }
+    "pattern-builder": { "earned": false, "earnedAt": null },
+    "alphabet-match": { "earned": false, "earnedAt": null }
   },
   "settings": {
     "bgmEnabled": true,
@@ -450,13 +457,20 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `sticker_musical_memory.svg` | 512×512 | Game 5 | Unique themed sticker |
 | `sticker_big_small.svg` | 512×512 | Game 6 | Unique themed sticker |
 | `sticker_pattern_builder.svg` | 512×512 | Game 7 | Unique themed sticker — ABAB row (orange circle + teal rounded square) with dashed gap slot on the cream badge |
+| `sticker_alphabet_match.svg` | 512×512 | Game 8 | Unique themed sticker — "ABC" letterforms on the cream badge |
+
+### SVG Assets — Letters (`assets/svg/letters/`)
+
+| File | Dimensions | Game | Notes |
+|---|---|---|---|
+| `letter_a.svg` … `letter_z.svg` | 512×512 | Game 8 | Bold uppercase letterforms (`Arial`-class sans-serif, 400px), identical `#2B6CB0` fill / `#2D3748` stroke styling for all 26 — letters are distinguished by shape only (no color-as-cue) |
 
 ### Mascot Poses (`src/assets/svg/ui/`)
 
 | File | Dimensions | Used In | Notes |
 |---|---|---|---|
-| `mascot_idle.svg` | 512×512 | Hub + all seven games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
-| `mascot_celebrate.svg` | 512×512 | Hub + all seven games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
+| `mascot_idle.svg` | 512×512 | Hub + all eight games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
+| `mascot_celebrate.svg` | 512×512 | Hub + all eight games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
 
 > **Note:** The mascot is **tween-only** — no sprite sheets or particle emitters. Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
 
@@ -468,7 +482,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 
 > **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
 >
-> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track. Game 6 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Big vs. Small Cleaner track. Game 7 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Pattern Builder track.
+> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track. Game 6 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Big vs. Small Cleaner track. Game 7 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Pattern Builder track. Game 8 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Find the Letter track (letter **names** use browser SpeechSynthesis via `src/utils/speech.ts`, not Web Audio).
 
 ### PWA Icons (`public/icons/`)
 
@@ -487,11 +501,12 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | SVG — items | 14 (6 Game 2 food + 8 Game 4 objects) |
 | SVG — toys | 7 (6 toys + 1 box, Game 6) |
 | SVG — shadows | 8 (Game 4 silhouettes) |
+| SVG — letters | 26 (Game 8 letterforms) |
 | SVG — UI | 15 (13 shared + 2 mascot poses) |
-| SVG — stickers | 7 |
+| SVG — stickers | 8 |
 | Audio (MP3) | 1 |
 | PWA icons (PNG) | 3 |
-| **Total** | **76** |
+| **Total** | **103** |
 
 ---
 
@@ -529,7 +544,7 @@ The Hub implements the engagement track (FR1–FR5):
 ### `completionEffect.ts`
 
 - `createCompletionSplash(scene, x, y)` — bounded success effect for correct in-game actions; self-cleaning (destroys on tween complete), never clouds the play area.
-- `createWinCelebration(scene, x, y)` — the shared completion effect used by all seven games (replaces per-game bespoke win tweens):
+- `createWinCelebration(scene, x, y)` — the shared completion effect used by all eight games (replaces per-game bespoke win tweens):
   - 10 rays + 10 drifting confetti bits (`WIN_CONFETTI_COUNT = 10`), `WIN_STANDARD_DURATION = 700ms`, ray burst scale 1.25×.
   - Colors: `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea`.
   - Reduced motion: `WIN_REDUCED_DURATION = 300ms`, 6 rays, burst scale 1.0×, **no particles**.
@@ -538,7 +553,7 @@ The Hub implements the engagement track (FR1–FR5):
 ### `pressFeedback.ts`
 
 - `attachPressFeedback(obj, options?)` — captures `obj.scaleX` at attach time; `pointerdown` squishes to `baseScale × 0.95`; `pointerup`/`pointerout`/`pointercancel` restore `baseScale` — instantly by default, or with a 150ms `Back.out` spring when `options.spring` is set. No-op under reduced motion.
-- Wired to the seven game Back controls, Musical Memory Replay, Hub Settings, and every Hub game tile (with `{ spring: true }`, attached on entrance completion so the base scale is captured at 1.0). Registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior. Hub tiles navigate on `pointerup` so the press squish stays visible while holding.
+- Wired to the eight game Back controls, Musical Memory Replay, Hub Settings, and every Hub game tile (with `{ spring: true }`, attached on entrance completion so the base scale is captured at 1.0). Registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior. Hub tiles navigate on `pointerup` so the press squish stays visible while holding.
 
 ### Gameplay tween values (normal → reduced)
 
@@ -548,7 +563,7 @@ The Hub implements the engagement track (FR1–FR5):
 | Bubble pop shrink (Pop & Freeze!) | 200 ms | 120 ms |
 | Wake wobble (Pop & Freeze!) | 300 ms, 1.15× base | 180 ms, 1.05× base |
 | Frog bounce (Musical Memory) | 200 ms, 1.2× base | 120 ms, 1.05× base |
-| Sticker pops (all seven games) | 300 ms | 180 ms |
+| Sticker pops (all eight games) | 300 ms | 180 ms |
 
 ### Per-game juice (2026-08-01)
 
@@ -586,13 +601,13 @@ The Mascot Companion track (archived at `conductor/archive/mascot-companion_2026
 - `idleLoop()` — Hub-only: 3px vertical bob (`Sine.inOut`, 2500ms yoyo, `repeat: -1`) + periodic squash-blink (`scaleY 0.92`, 150ms, `repeatDelay 3700ms`). No-op under reduced motion.
 - `destroy()` — removes the sprite, any active cheer/blink tweens, and the sparkle ring.
 - `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `wave()` after the scene entrance, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
-- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all seven games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
+- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all eight games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
 
 Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 37 integration tests in `src/__tests__/scenes/navigation.test.ts` (7 Hub + 29 game-scene + 1 mid-air edge case).
 
 ### Test coverage
 
-667 tests across 22 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; `sceneRegistry.ts` reports 30% lines because the seven dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project 96.69% lines / 87.53% functions / 92.05% branches / 98.18% statements. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+706 tests across 25 files; all motion, transitions, completion-effect, drag-juice, press-feedback, speech, and mascot utilities at 100% coverage; scenes ≥ 93% lines; `sceneRegistry.ts` reports low lines because the eight dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project ~96%+ lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
 
 ---
 

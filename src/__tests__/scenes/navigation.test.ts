@@ -328,6 +328,7 @@ function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
 
 import { generatePathPoints } from "../../game/animalTraceLogic";
 import { getCorrectShape } from "../../game/patternBuilderLogic";
+import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
@@ -349,6 +350,7 @@ const GAME_SCENES = [
   { name: "MusicalMemoryScene", SceneClass: MusicalMemoryScene },
   { name: "BigSmallScene", SceneClass: BigSmallScene },
   { name: "PatternBuilderScene", SceneClass: PatternBuilderScene },
+  { name: "AlphabetScene", SceneClass: AlphabetScene },
 ] as const;
 
 const GAME_SCENE_KEYS = [
@@ -359,6 +361,7 @@ const GAME_SCENE_KEYS = [
   "MusicalMemory",
   "BigSmall",
   "PatternBuilder",
+  "Alphabet",
 ] as const;
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -683,12 +686,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 61 shape, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
+    it("loads all 88 shape, letter, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(61);
+      expect(svgCalls).toHaveLength(88);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -796,7 +799,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      expect(hasSticker).toHaveBeenCalledTimes(7);
+      expect(hasSticker).toHaveBeenCalledTimes(8);
     });
 
     it("navigates to each game scene when respective tile is clicked", async () => {
@@ -1066,12 +1069,12 @@ describe("scene navigation flow", () => {
             typeof config.delay === "number",
         );
 
-      expect(bobTweens).toHaveLength(7);
+      expect(bobTweens).toHaveLength(8);
       const delays = new Set(bobTweens.map((config) => config.delay));
-      expect(delays.size).toBe(7);
+      expect(delays.size).toBe(8);
 
       const startY = (768 - 2 * 150 - 50) / 2;
-      const expectedYs = [0, 1, 2, 3, 4, 5, 6].map((i) => {
+      const expectedYs = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
         const row = Math.floor(i / 4);
         return startY + row * 200 + 75 - 4;
       });
@@ -1255,6 +1258,7 @@ describe("scene navigation flow", () => {
       "sticker_musical_memory",
       "sticker_big_small",
       "sticker_pattern_builder",
+      "sticker_alphabet_match",
     ];
     /** Sticker textures are rasterized at 512px; the shelf displays them at 56px. */
     const STICKER_BASE_SCALE = 56 / 512;
@@ -1264,7 +1268,7 @@ describe("scene navigation flow", () => {
       scene.create();
 
       const stickers = getStickerImages(scene);
-      expect(stickers).toHaveLength(7);
+      expect(stickers).toHaveLength(8);
       expect(new Set(stickers.map((s) => s.key))).toEqual(new Set(STICKER_KEYS));
 
       // No ★/☆ text markers remain
@@ -1399,7 +1403,7 @@ describe("scene navigation flow", () => {
       expect(typeof rerender).toBe("function");
 
       const oldStickerImages = getStickerImages(scene);
-      expect(oldStickerImages).toHaveLength(7);
+      expect(oldStickerImages).toHaveLength(8);
 
       // The real panel calls resetProgress() before notifying the Hub; mirror it.
       resetProgress();
@@ -1413,7 +1417,7 @@ describe("scene navigation flow", () => {
       const liveStickers = getStickerImages(scene).filter(
         ({ obj }) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(liveStickers).toHaveLength(7);
+      expect(liveStickers).toHaveLength(8);
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       for (const { obj } of liveStickers) {
         const targetsSticker = (call: { targets?: unknown }): boolean => {
@@ -1454,7 +1458,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(7);
+      expect(wiggleTweens.length).toBe(8);
     });
 
     it("repeats the idle call every ~10s while idle", () => {
@@ -1525,7 +1529,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(7);
+      expect(wiggleTweens.length).toBe(8);
     });
 
     it("under reduced motion: plays the idle call but does not wiggle tiles", () => {
@@ -6046,14 +6050,14 @@ describe("scene navigation flow", () => {
       scene.create();
       completeHubEntrances(scene);
       const firstVisit = getStickerImages(scene);
-      expect(firstVisit).toHaveLength(7);
+      expect(firstVisit).toHaveLength(8);
 
       // Leave the Hub (shutdown clears the tracked shelf) and return: create()
       // re-runs on every visit via scene.start.
       triggerShutdown(scene);
       scene.create();
       completeHubEntrances(scene);
-      expect(getStickerImages(scene)).toHaveLength(14);
+      expect(getStickerImages(scene)).toHaveLength(16);
 
       // Isolate first-visit images: a re-render after a progress reset must not
       // destroy (or re-destroy) them — only the live second-visit shelf.
@@ -6082,7 +6086,7 @@ describe("scene navigation flow", () => {
       const fresh = getStickerImages(scene).filter(
         ({ obj }) => !firstVisitSet.has(obj) && getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(fresh).toHaveLength(7);
+      expect(fresh).toHaveLength(8);
     });
   });
 
