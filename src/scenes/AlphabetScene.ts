@@ -106,6 +106,8 @@ export class AlphabetScene extends Phaser.Scene {
   private readonly cardRects: Phaser.GameObjects.Rectangle[] = [];
   /** Answer card letter texts of the current round. */
   private readonly cardTexts: Phaser.GameObjects.Text[] = [];
+  /** Per-round display objects (currently the target letter text). */
+  private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
   private rounds: AlphabetRound[] = [];
   private roundIndex = 0;
   private inputLocked = false;
@@ -179,13 +181,14 @@ export class AlphabetScene extends Phaser.Scene {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
 
-    this.add
+    const target = this.add
       .text(centerX, centerY + TARGET_Y_OFFSET, round.target, {
         fontSize: TARGET_FONT_SIZE,
         color: LETTER_COLOR,
         fontStyle: "bold",
       })
       .setOrigin(0.5);
+    this.roundObjects.push(target);
 
     const { sfxEnabled } = load().settings;
     speakLetter(round.target, sfxEnabled);
@@ -222,6 +225,10 @@ export class AlphabetScene extends Phaser.Scene {
 
   /** Destroys all display objects created for the current round. */
   private clearRound(): void {
+    for (const obj of this.roundObjects) {
+      obj.destroy();
+    }
+    this.roundObjects.length = 0;
     for (const card of this.cardRects) {
       card.destroy();
     }

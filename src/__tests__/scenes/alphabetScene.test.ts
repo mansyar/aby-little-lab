@@ -486,6 +486,15 @@ describe("AlphabetScene round flow", () => {
     const secondRound = getCurrentRound(scene);
     expect(mockSpeech.speakLetter).toHaveBeenCalledWith(secondRound.target, true);
     expect(getCardTexts(scene)).toHaveLength(8);
+
+    // The previous round's target letter is destroyed on re-render — no stale
+    // target objects accumulate across rounds.
+    const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
+    const targetResults = textMock.mock.results.filter(
+      (_, i) => textMock.mock.calls[i]?.[3]?.fontSize === "200px",
+    );
+    expect(getMockFn(targetResults[0].value as Record<string, MockFn>).destroy).toHaveBeenCalled();
+    expect(getMockFn(targetResults[1].value as Record<string, MockFn>).destroy).not.toHaveBeenCalled();
   });
 
   it("tapping a wrong card wiggles gently and does not advance the round", () => {
