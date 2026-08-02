@@ -4,6 +4,7 @@ import {
   getSettings,
   hasSticker,
   load,
+  resetProgress,
   save,
   updateSettings,
 } from "../../utils/storage";
@@ -185,6 +186,47 @@ describe("Storage utilities", () => {
       updateSettings({ bgmEnabled: false });
       const result = load();
       expect(result.settings.bgmEnabled).toBe(false);
+    });
+  });
+
+  describe("resetProgress", () => {
+    it("clears every sticker while preserving audio settings", () => {
+      earnSticker("shape-sorter");
+      earnSticker("pattern-builder");
+      updateSettings({ bgmEnabled: false });
+
+      resetProgress();
+
+      const result = load();
+      for (const gameId of GAME_IDS) {
+        expect(result.stickers[gameId]).toEqual({ earned: false, earnedAt: null });
+      }
+      expect(result.settings.bgmEnabled).toBe(false);
+      expect(result.settings.sfxEnabled).toBe(true);
+    });
+
+    it("persists the cleared sticker collection to localStorage", () => {
+      earnSticker("shape-sorter");
+
+      resetProgress();
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      expect(stored).not.toBeNull();
+      if (stored !== null) {
+        const parsed = JSON.parse(stored) as AppStorage;
+        expect(parsed.stickers["shape-sorter"]).toEqual({ earned: false, earnedAt: null });
+      }
+    });
+
+    it("handles corrupt storage without throwing", () => {
+      localStorage.setItem(STORAGE_KEY, "invalid-json");
+
+      expect(() => resetProgress()).not.toThrow();
+
+      const result = load();
+      for (const gameId of GAME_IDS) {
+        expect(result.stickers[gameId]).toEqual({ earned: false, earnedAt: null });
+      }
     });
   });
 });
