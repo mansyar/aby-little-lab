@@ -1,0 +1,5 @@
+Phase 2 Verification Report (code-splitting_20260802)
+Automated: CI=true pnpm test — 22 files, 651 tests passed. Coverage (v8): All files 96.64% lines / 87.46% funcs / 92.04% branches / 98.12% stmts (threshold 80%). sceneRegistry.ts loader wrappers (7 dynamic imports) not unit-invoked (would drag Phaser scenes into happy-dom); ensureSceneLoaded logic 100% function-covered via injected loaders; loader behavior verified structurally via AC1/AC2.
+Build: entry (1443.79 kB) contains only Boot/Preload/Hub constructors; 7 game-scene chunks present (AC1/AC2 PASS).
+Manual: verification plan presented (network tab startup fetch set, per-tile chunk fetch, offline play). User confirmed: 'Yes — proceed' (2026-08-02).
+Scope: src/scenes/sceneRegistry.ts (+tests), HubScene.ts, main.ts, navigation.test.ts updates.
