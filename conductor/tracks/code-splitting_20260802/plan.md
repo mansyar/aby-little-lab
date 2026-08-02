@@ -3,7 +3,7 @@
 **Track ID:** `code-splitting_20260802`
 **Type:** Chore (Performance)
 
-## Phase 1: Verify Phaser 4 Lazy-Scene Support
+## Phase 1: Verify Phaser 4 Lazy-Scene Support [checkpoint: a13a5db]
 
 - [x] Task: Confirm Phaser 4.2.1 supports lazy scene loading via dynamic-import functions in the `scene` array (check Phaser 4 docs + type definitions in `node_modules/phaser`)
   - **Finding:** NOT supported. `SceneType` includes `Function`, but `SceneManager.createSceneFromFunction` calls `new scene()` synchronously — no promise/await handling exists in `SceneManager.js` (Phaser 4.2.1).
