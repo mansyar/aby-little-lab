@@ -232,7 +232,7 @@ export async function ensureSceneLoaded(scene, key, loaders = sceneLoaders): Pro
 
 **Race safety:** `SceneManager.add` on an already-registered key does **not** throw for instances — it silently pushes a duplicate instance into `this.scenes`. `ensureSceneLoaded` therefore re-checks registration after the import resolves, and the review-fix test covers two concurrent loads registering exactly once.
 
-**Build output:** the entry chunk (~1.44 MB / 372 KB gzip, dominated by Phaser) contains only the shell; each game scene ships as its own 3–5 KB chunk (`dist/assets/<SceneName>-*.js`). Rollup auto-hoists shared modules (`shapeSorterLogic`, `dragJuice`, `completionEffect`) into common chunks — no `manualChunks` config. PWA precache is unchanged: `generateSW` precaches every emitted chunk (19 entries), preserving full offline play.
+**Build output:** the entry chunk (~1.44 MB / 372 KB gzip, dominated by Phaser) contains only the shell; each game scene ships as its own 3–5 KB chunk (`dist/assets/<SceneName>-*.js`). Rollup auto-hoists shared modules (`shapeSorterLogic`, `dragJuice`, `completionEffect`) into common chunks — no `manualChunks` config. PWA precache is unchanged: `generateSW` precaches every emitted chunk (20 entries), preserving full offline play.
 
 **Structural acceptance checks:** the entry chunk contains zero game-scene constructor registrations (`super({ key: ... })` grep over `dist/assets` finds only `Boot`, `Preload`, `Hub` in the entry; each scene chunk contains exactly its own key).
 
@@ -630,3 +630,4 @@ Production is hosted on a private VPS (Docker + Nginx) managed by **Coolify**, w
 - **Docs-only pushes** (`conductor/**`, `docs/**`, `README.md`, `**/*.md`) skip CI via `paths-ignore` — no needless production rebuilds.
 - **Branch protection:** recommended on `master`, requiring the "Quality Gates" status check before merge (set in GitHub → Settings → Branches; not enforced from the repo).
 - The workflow declares explicit `permissions: contents: read` and pins action majors (`checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6`) to avoid deprecated runner runtimes.
+- **Release history (executed end-to-end):** **v1.1.0** (2026-08-02) — first tag-based release through this pipeline. `npm version 1.1.0 --no-git-tag-version` + `chore(release): Bump version to 1.1.0`; annotated tag `v1.1.0`; push to `master` → CI run `30745388316` (Quality Gates 52s ✓, Deploy to Coolify 5s ✓); live verification via entry-chunk hash match (`index-BRXHqYbm.js`) and `1.1.0` present in the served bundle. Chore track archived at `conductor/archive/release-1.1.0-mechanics_20260802/`.
