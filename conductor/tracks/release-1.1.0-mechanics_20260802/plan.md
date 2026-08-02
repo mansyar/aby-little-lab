@@ -1,0 +1,57 @@
+# Plan: v1.1.0 Release Mechanics
+
+## Phase 1: Baseline Gates & Version Bump
+
+- [ ] **Task: Run local quality gates (baseline green)**
+  - [ ] Run `pnpm run check` (Biome lint + format)
+  - [ ] Run `CI=true pnpm test` (single-execution, full suite)
+  - [ ] Run `pnpm run build` (production build succeeds)
+  - [ ] Run `node scripts/validate-pwa.js` (13/13)
+- [ ] **Task: Bump version to 1.1.0**
+  - [ ] Run `npm version 1.1.0 --no-git-tag-version`
+  - [ ] Verify `package.json` shows `"version": "1.1.0"`
+- [ ] **Task: Commit version bump**
+  - [ ] Stage `package.json`
+  - [ ] Commit `chore(release): Bump version to 1.1.0`
+  - [ ] Attach git note (task summary, why, files)
+  - [ ] Record commit SHA in `plan.md`, mark task `[x]`
+  - [ ] Commit plan update `conductor(plan): Mark task ... as complete`
+- [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
+
+## Phase 2: Finalize Release Documentation
+
+- [ ] **Task: Finalize `docs/release-notes-v1.1.0.md`**
+  - [ ] Flip status Draft → final; add date; reflect merged state
+  - [ ] Keep device-testing + TTS-voice variation in Known Issues (manual)
+- [ ] **Task: Update `docs/release-checklist.md`**
+  - [ ] Mark v1.1.0 prep items now satisfied (merge done, gates green)
+  - [ ] Update Final Sign-Off (version 1.1.0, status)
+- [ ] **Task: Commit docs changes** (`docs(release): Finalize v1.1.0 release notes and checklist`) + git note + plan update
+- [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
+
+## Phase 3: Tag & Deploy
+
+- [ ] **Task: Create annotated tag** `v1.1.0` — *"Release v1.1.0: Find the Letter + PWA & parental settings refinements"*
+- [ ] **Task: Push `master` + tag to `origin`**
+  - [ ] Push master (triggers CI: Quality Gates → Deploy to Coolify)
+  - [ ] Push tag `v1.1.0`
+- [ ] **Task: Verify CI run**
+  - [ ] Record run ID (e.g., via `gh run list`)
+  - [ ] Confirm Quality Gates job green
+  - [ ] Confirm Deploy to Coolify job green
+- [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
+
+## Phase 4: Post-Deploy Verification (Automatable)
+
+- [ ] **Task: Verify live index + entry JS hash**
+  - [ ] Fetch live `index.html` (200); compare entry JS hash to local `dist/assets/index-*.js`
+- [ ] **Task: Verify `1.1.0` embedded in served bundle** (version footer data)
+- [ ] **Task: Verify live `sw.js` + manifest return 200**
+- [ ] **Task: Update `docs/release-checklist.md` post-release verifiable items + Final Sign-Off; commit docs update**
+- [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
+
+## Phase 5: Track Completion & Archive
+
+- [ ] **Task: Conduct track review** (per Conductor review protocol; apply suggestions)
+- [ ] **Task: Mark track complete; archive to `conductor/archive/`; update Tracks Registry**
+- [ ] **Task: Final checkpoint & commit**
