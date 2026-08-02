@@ -14,12 +14,12 @@
 - [x] Task: Implement `src/utils/speech.ts` until tests pass (Red → Green) `1b9c2b0`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `dd58153`
 
-## Phase 3: Assets, Registry & Storage Integration
+## Phase 3: Assets, Registry & Storage Integration `[checkpoint: baafb07]`
 
-- [x] Task: Author 26 uppercase letter SVGs (`src/assets/svg/letters/letter_a.svg` … `letter_z.svg`, 512×512, flat `#2B6CB0` fill, thick `#2D3748` stroke, identical styling) + `sticker_alphabet.svg`
-- [x] Task: Add `alphabet-match` to `GameId` union + storage sticker key in `src/types/index.ts`; update storage tests (defaults, reset) and add old-save migration coverage for Game 8
-- [x] Task: Preload the 27 new SVGs in `PreloadScene`; update the preload SVG-count assertion in `navigation.test.ts` (61 → 88)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Author 26 uppercase letter SVGs (`src/assets/svg/letters/letter_a.svg` … `letter_z.svg`, 512×512, flat `#2B6CB0` fill, thick `#2D3748` stroke, identical styling) + `sticker_alphabet.svg` `7dabd1b`
+- [x] Task: Add `alphabet-match` to `GameId` union + storage sticker key in `src/types/index.ts`; update storage tests (defaults, reset) and add old-save migration coverage for Game 8 `2fa2469`
+- [x] Task: Preload the 27 new SVGs in `PreloadScene`; update the preload SVG-count assertion in `navigation.test.ts` (61 → 88) `5b0d26a`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `baafb07`
 - [ ] Task: Register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts` *(moved from Phase 3 → Phase 4: Vitest fails to resolve the dynamic import until `AlphabetScene.ts` exists, so registration ships with the scene in Phase 4)*
 
 ## Phase 4: AlphabetScene — `src/scenes/AlphabetScene.ts` (TDD)
