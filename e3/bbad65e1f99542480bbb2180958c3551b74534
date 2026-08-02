@@ -1,0 +1,1 @@
+Task: Record v1.1.0 post-deploy verification — added Step 7b block: CI run 30745388316 (Quality Gates 52s, Deploy 5s), live entry index-BRXHqYbm.js matches fresh local build, 1.1.0 embedded in served bundle, sw.js/manifest 200. Manual items (install, footer, offline, update flow, games) left pending for user's device session.
