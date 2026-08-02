@@ -1,0 +1,1 @@
+Task: Implement alphabetLogic.ts (Green phase). Files: src/game/alphabetLogic.ts. Why: minimal pure module (ALPHABET, generateRound, generatePlaythrough, isCorrectLetter, hasCompletedPlaythrough) reusing Fisher-Yates shuffle from shapeSorterLogic; difficulty fixed at 4 choices, 6-round playthroughs.
