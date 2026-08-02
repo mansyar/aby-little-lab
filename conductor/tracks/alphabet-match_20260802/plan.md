@@ -16,16 +16,16 @@
 
 ## Phase 3: Assets, Registry & Storage Integration
 
-- [ ] Task: Author 26 uppercase letter SVGs (`src/assets/svg/letters/letter_a.svg` … `letter_z.svg`, 512×512, flat `#2B6CB0` fill, thick `#2D3748` stroke, identical styling) + `sticker_alphabet.svg`
-- [ ] Task: Register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts`
-- [ ] Task: Add `alphabet-match` to `GameId` union + storage sticker key in `src/types/index.ts`; verify storage tests cover old-save migration
-- [ ] Task: Preload the 27 new SVGs in `PreloadScene`
+- [x] Task: Author 26 uppercase letter SVGs (`src/assets/svg/letters/letter_a.svg` … `letter_z.svg`, 512×512, flat `#2B6CB0` fill, thick `#2D3748` stroke, identical styling) + `sticker_alphabet.svg`
+- [x] Task: Add `alphabet-match` to `GameId` union + storage sticker key in `src/types/index.ts`; update storage tests (defaults, reset) and add old-save migration coverage for Game 8
+- [x] Task: Preload the 27 new SVGs in `PreloadScene`; update the preload SVG-count assertion in `navigation.test.ts` (61 → 88)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [ ] Task: Register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts` *(moved from Phase 3 → Phase 4: Vitest fails to resolve the dynamic import until `AlphabetScene.ts` exists, so registration ships with the scene in Phase 4)*
 
 ## Phase 4: AlphabetScene — `src/scenes/AlphabetScene.ts` (TDD)
 
 - [ ] Task: Write scene tests (`src/__tests__/scenes/alphabetScene.test.ts`) — target letter + 4 cards rendered; correct tap advances round (chime, mascot cheer, dot pop); incorrect tap wiggles with no penalty/no advance; TTS spoken per round start respecting SFX toggle; win at 6 → celebration + sticker (first completion only) + `justEarned: "alphabet-match"` + auto-return after 3s; parental lock exit; reduced-motion variants
-- [ ] Task: Implement `AlphabetScene` until tests pass (Red → Green)
+- [ ] Task: Implement `AlphabetScene` until tests pass (Red → Green); register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5: Hub Integration, Docs & Quality Gates
