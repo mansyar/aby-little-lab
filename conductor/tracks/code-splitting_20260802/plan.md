@@ -11,7 +11,7 @@
   - **Pattern:** Runtime registration — `await import()` the scene module, then `scene.add(key, SceneClass)` before `scene.start(key)`. Documented in `spec.md` + `tech-stack.md` (dated deviation notes).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2: Implement Lazy Scene Loading (TDD)
+## Phase 2: Implement Lazy Scene Loading (TDD) [checkpoint: a515599]
 
 - [x] Task: Create testable scene registry module `src/scenes/sceneRegistry.ts` (55197e5)
   - [ ] Write failing tests `src/__tests__/scenes/sceneRegistry.test.ts`: `sceneLoaders` maps exactly the 7 game keys (ShapeSorter, AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall, PatternBuilder); `ensureSceneLoaded` skips the loader when the scene is already registered; `ensureSceneLoaded` resolves the loader and calls `scene.add(key, cls)` when not registered
