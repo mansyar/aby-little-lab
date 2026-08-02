@@ -1,0 +1,3 @@
+Task: Reduce main.ts to shell scenes only (dc31dd5)
+Summary: Removed the 7 static game-scene imports; Phaser config scene array is now [BootScene, PreloadScene, HubScene] with a comment pointing to ensureSceneLoaded() runtime registration. Full suite (651 tests) + biome check green.
+Created: src/main.ts (3 insertions, 19 deletions).
