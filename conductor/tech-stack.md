@@ -51,7 +51,7 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 9 scenes (Boot, Preload, Hub, 7 game scenes)
+- **Scenes:** 10 scenes (Boot, Preload, Hub, 8 game scenes)
 
 > **2026-08-02 — Design Update (Bundle Code Splitting):** Game scenes are lazy-loaded via runtime registration. `src/scenes/sceneRegistry.ts` maps each game scene key to a dynamic-import loader and exposes `ensureSceneLoaded(scene, key)` (no-op if already registered, else `import()` + `scene.add(key, SceneClass)`); HubScene awaits it before transitioning into a game. Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the `scene` array — functions there are invoked with `new` (constructor form only, no promise handling in `SceneManager`). Shell scenes (Boot/Preload/Hub) remain statically registered in `main.ts`. Rollup hoists shared modules into shared chunks automatically; no `manualChunks` config.
 - **Input:** Touch-first, single-finger interactions
@@ -96,7 +96,7 @@ interface AppStorage {
 }
 ```
 
-**Game IDs:** `shape-sorter`, `animal-trace`, `pop-freeze`, `shadow-match`, `musical-memory`, `big-small`, `pattern-builder`
+**Game IDs:** `shape-sorter`, `animal-trace`, `pop-freeze`, `shadow-match`, `musical-memory`, `big-small`, `pattern-builder`, `alphabet-match`
 
 ## 6. Asset Pipeline
 
@@ -108,6 +108,8 @@ interface AppStorage {
 > **2026-08-01 — Design Update (Replay Variety Expansion):** Item pools expanded for replay variety — Shape Sorter 4→6 shapes (heart, crescent), Animal Trace 4→6 pairs (elephant→peanut, pig→apple), Shadow Match 6→8 objects (airplane, mushroom; rounds select a shared 6-item set for objects and shadows), Big vs. Small 4→6 toys (rocket, drum). Pop & Freeze decoy pool reuses all 6 Game 2 animals. Round sizes unchanged (3-of-6, 3-of-6, 6-of-8, 3-of-6).
 
 > **2026-08-02 — Design Update (Pattern Builder):** Game 7 (Pattern Builder) added — a tap-to-complete pattern game reusing the six Game 1 shape SVGs (only new asset: `sticker_pattern_builder.svg`). Hub grid is now 4×2 (7 tiles); `GameId` includes `pattern-builder`. Pure logic in `src/game/patternBuilderLogic.ts` (ABAB/AABB/ABB rows, gap at end or middle, 3 unique choices, 5-round playthroughs).
+
+> **2026-08-02 — Design Update (Find the Letter):** Game 8 (Find the Letter) added — a tap-to-match uppercase letter recognition game. New assets: 26 letter SVGs (`src/assets/svg/letters/letter_a.svg`…`letter_z.svg`, identical `#2B6CB0` fill / `#2D3748` stroke styling so recognition is shape-only) + `sticker_alphabet_match.svg` (keyed `sticker_alphabet_match` to match the shelf's `gameId.replace(/-/g, "_")` convention). New dependency: browser SpeechSynthesis (`src/utils/speech.ts` — en-US, rate 0.9, respects the SFX toggle, silent no-throw fallback). Hub grid is 4×2 (8 tiles); `GameId` includes `alphabet-match`; scene registry has 8 lazy loaders. Pure logic in `src/game/alphabetLogic.ts` (6 unique targets per playthrough drawn uniformly from A–Z, 4 unique choices per round, evaluation + win detection). Old saves migrate automatically via the per-key storage merge.
 
 ### Audio Assets
 - **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
@@ -151,7 +153,8 @@ aby-little-lab/
     │   ├── ShadowMatchScene.ts
     │   ├── MusicalMemoryScene.ts
     │   ├── BigSmallScene.ts
-    │   └── PatternBuilderScene.ts
+    │   ├── PatternBuilderScene.ts
+    │   └── AlphabetScene.ts
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   ├── ParentLock.ts
@@ -165,14 +168,16 @@ aby-little-lab/
     │   ├── shadowMatchLogic.ts    # Pure game logic (shuffle, round generation, match/win detection)
     │   ├── musicalMemoryLogic.ts  # Pure game logic (sequence generation, round/win detection)
     │   ├── bigSmallLogic.ts       # Pure game logic (dual-scale toys, size match detection)
-    │   └── patternBuilderLogic.ts # Pure game logic (pattern rows, gap placement, choices)
+    │   ├── patternBuilderLogic.ts # Pure game logic (pattern rows, gap placement, choices)
+    │   └── alphabetLogic.ts       # Pure game logic (letter playthroughs, round choices, win detection)
     ├── utils/
     │   ├── storage.ts             # localStorage persistence layer
     │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
     │   ├── dragJuice.ts           # drag lift/tilt, drop-zone highlight, snap tween
     │   ├── completionEffect.ts    # Graphics-based splash/win effects (no particle emitters)
     │   ├── sceneTransitions.ts    # crossfade transitions (transitionToScene, sceneEntrance)
-    │   └── pressFeedback.ts       # press squish + optional spring-back (attachPressFeedback)
+    │   ├── pressFeedback.ts       # press squish + optional spring-back (attachPressFeedback)
+    │   └── speech.ts              # TTS letter pronunciation wrapper (SpeechSynthesis, graceful fallback)
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
@@ -183,6 +188,7 @@ aby-little-lab/
     │       ├── items/
     │       ├── toys/
     │       ├── shadows/
+    │       ├── letters/           # Game 8 uppercase letter SVGs (letter_a..letter_z)
     │       ├── stickers/
     │       └── ui/
     ├── styles/
@@ -201,15 +207,19 @@ aby-little-lab/
         │   ├── shadowMatchLogic.test.ts
         │   ├── musicalMemoryLogic.test.ts
         │   ├── bigSmallLogic.test.ts
-        │   └── patternBuilderLogic.test.ts
+        │   ├── patternBuilderLogic.test.ts
+        │   └── alphabetLogic.test.ts
         ├── scenes/
-        │   └── navigation.test.ts
+        │   ├── navigation.test.ts
+        │   ├── sceneRegistry.test.ts
+        │   └── alphabetScene.test.ts
         └── utils/
             ├── storage.test.ts
             ├── motion.test.ts
             ├── dragJuice.test.ts
             ├── pressFeedback.test.ts
             ├── sceneTransitions.test.ts
+            ├── speech.test.ts
             └── completionEffect.test.ts
 ```
 
