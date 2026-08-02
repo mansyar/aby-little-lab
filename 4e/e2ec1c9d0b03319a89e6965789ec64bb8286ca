@@ -1,0 +1,1 @@
+Task: Implement the footer version row in SettingsPanel.ts. Renders v<__APP_VERSION__> in muted #a0aec0 at 18px, centered at centerY+215 (inside the 460px panel, below the install row), non-interactive. Green phase: all 20 SettingsPanel tests pass.
