@@ -1,16 +1,9 @@
 import "./styles/style.css";
 import { registerSW } from "virtual:pwa-register";
 import Phaser from "phaser";
-import { AnimalTraceScene } from "./scenes/AnimalTraceScene";
-import { BigSmallScene } from "./scenes/BigSmallScene";
 import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
-import { MusicalMemoryScene } from "./scenes/MusicalMemoryScene";
-import { PatternBuilderScene } from "./scenes/PatternBuilderScene";
-import { PopFreezeScene } from "./scenes/PopFreezeScene";
 import { PreloadScene } from "./scenes/PreloadScene";
-import { ShadowMatchScene } from "./scenes/ShadowMatchScene";
-import { ShapeSorterScene } from "./scenes/ShapeSorterScene";
 import { initPwaBridge } from "./utils/pwaBridge";
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -28,18 +21,9 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  scene: [
-    BootScene,
-    PreloadScene,
-    HubScene,
-    ShapeSorterScene,
-    AnimalTraceScene,
-    PopFreezeScene,
-    ShadowMatchScene,
-    MusicalMemoryScene,
-    BigSmallScene,
-    PatternBuilderScene,
-  ],
+  // Shell scenes only — the 7 game scenes are lazy-loaded and registered
+  // at runtime via ensureSceneLoaded() when a Hub tile is tapped.
+  scene: [BootScene, PreloadScene, HubScene],
 };
 
 // Initialize the PWA bridge before the game boots so HubScene can receive
