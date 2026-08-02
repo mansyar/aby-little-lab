@@ -1,0 +1,3 @@
+Task: Create testable scene registry module (src/scenes/sceneRegistry.ts)
+Summary: Added sceneRegistry.ts exporting per-key dynamic-import loaders for the 7 game scenes and ensureSceneLoaded(scene, key) which no-ops when the scene is registered, else imports the module and registers it via scene.add. Tests (sceneRegistry.test.ts, 3 tests) cover: exact key set, no-op when registered, dynamic import + add when not registered (loaders injected). Why: Phaser 4.2.1 has no array-level lazy scene loaders (verified in Phase 1); runtime import + scene.add is the documented code-splitting approach.
+Created: src/scenes/sceneRegistry.ts, src/__tests__/scenes/sceneRegistry.test.ts
