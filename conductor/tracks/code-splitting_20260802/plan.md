@@ -35,6 +35,11 @@
 
 ## Phase 4: Quality Gates & Manual Verification
 
-- [ ] Task: Run full quality gates: `pnpm run check` && `CI=true pnpm test` && `pnpm run build` (AC6)
-- [ ] Task: Prepare manual verification plan (AC3/AC4): startup network tab shows no game-chunk fetches; tapping each of the 7 tiles loads its chunk and plays; offline mode still plays any game
+- [x] Task: Run full quality gates: `pnpm run check` && `CI=true pnpm test` && `pnpm run build` (AC6)
+  - Gate 1 `pnpm run check`: PASS (59 files, Biome)
+  - Gate 2 `CI=true pnpm test`: 651 passed (22 files)
+  - Gate 3 `pnpm run build`: PASS (19 precache entries)
+  - Bonus Gate 4 `node scripts/validate-pwa.js`: 13/13 PASS (CI pipeline gate)
+- [x] Task: Prepare manual verification plan (AC3/AC4): startup network tab shows no game-chunk fetches; tapping each of the 7 tiles loads its chunk and plays; offline mode still plays any game
+  - Plan: (1) `pnpm exec vite preview` (serves `dist/`); (2) DevTools Network — startup must fetch only entry/shared chunks, no `*Scene-*.js` before any tile tap (AC3); (3) tap each tile → first tap fetches that game's chunk, game boots/plays/returns to Hub with stickers/audio/parental lock intact (AC4); (4) re-tap same game → no re-fetch; (5) after SW install, set Network to Offline → all games still play.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
