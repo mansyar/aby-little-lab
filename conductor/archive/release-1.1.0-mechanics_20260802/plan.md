@@ -50,7 +50,7 @@
 - [x] **Task: Update `docs/release-checklist.md` post-release verifiable items + Final Sign-Off; commit docs update** `e3bbad6` (Step 7b record)
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
-## Phase 5: Track Completion & Archive
+## Phase 5: Track Completion & Archive [checkpoint: 887e0cb]
 
 - [x] **Task: Conduct track review** (per Conductor review protocol; apply suggestions) — self-review: all acceptance criteria met; no code changes to review
 - [x] **Task: Mark track complete; archive to `conductor/archive/`; update Tracks Registry**
