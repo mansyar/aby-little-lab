@@ -86,7 +86,7 @@ import letterWSvg from "../assets/svg/letters/letter_w.svg?raw";
 import letterXSvg from "../assets/svg/letters/letter_x.svg?raw";
 import letterYSvg from "../assets/svg/letters/letter_y.svg?raw";
 import letterZSvg from "../assets/svg/letters/letter_z.svg?raw";
-import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet.svg?raw";
+import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
 
 const SVG_RASTER_SIZE = 512;
@@ -179,7 +179,7 @@ const SHAPE_ASSETS = [
   { key: "letter_x", svg: letterXSvg },
   { key: "letter_y", svg: letterYSvg },
   { key: "letter_z", svg: letterZSvg },
-  { key: "sticker_alphabet", svg: stickerAlphabetSvg },
+  { key: "sticker_alphabet_match", svg: stickerAlphabetSvg },
 ] as const;
 
 /**

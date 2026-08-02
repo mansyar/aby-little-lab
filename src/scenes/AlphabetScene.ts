@@ -322,7 +322,7 @@ export class AlphabetScene extends Phaser.Scene {
   /** Shows a sticker unlock animation at the center of the screen. */
   private createStickerAnimation(): void {
     const stickerImage = this.add
-      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_alphabet")
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_alphabet_match")
       .setScale(0);
 
     this.tweens.add({

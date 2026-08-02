@@ -536,7 +536,7 @@ describe("AlphabetScene round flow", () => {
     // First completion awards the sticker and shows the reveal animation.
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     const stickerImage = getMockFn((scene as { add: Record<string, unknown> }).add.image).mock.calls.find(
-      (call) => call[2] === "sticker_alphabet",
+      (call) => call[2] === "sticker_alphabet_match",
     );
     expect(stickerImage).toBeDefined();
 
