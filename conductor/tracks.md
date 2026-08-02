@@ -40,6 +40,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [ ] **Track: Game 9 & 10 — First Words (Find the Word + Build the Word)** *Link: [./tracks/first-words_20260803/index.md](./tracks/first-words_20260803/index.md)*
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
