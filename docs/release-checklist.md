@@ -138,8 +138,9 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [ ] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green
 - [ ] Coolify shows a new deployment for the pushed commit
 - [ ] App loads correctly on the live URL
-- [ ] PWA installation works
+- [ ] PWA installation works (install row in Settings → "Install App" on Android, "How to Install" on iOS)
 - [ ] Offline functionality works
+- [ ] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it
 - [ ] All games function properly
 - [ ] Audio works correctly
 
@@ -147,7 +148,7 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 
 ### Immediate Checks (within 1 hour)
 - [ ] App accessible via URL
-- [ ] PWA can be installed (browser prompt or manual "Add to Home Screen")
+- [ ] PWA can be installed (Settings panel install row: browser prompt on Android/Chrome, Share → Add to Home Screen guidance on iOS)
 - [ ] Basic functionality works
 - [ ] No critical errors in console
 

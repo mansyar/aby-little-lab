@@ -40,7 +40,7 @@
 
 ### Vite + PWA (`vite.config.ts`)
 
-- **registerType:** `'autoUpdate'` — service worker updates automatically on new builds
+- **registerType:** `'prompt'` — service worker updates are deferred to user choice via the Hub update toast
 - **Manifest:** Embedded in config (name: "Aby's Little Lab", short_name: "Aby Lab", display: standalone, orientation: landscape, background_color: #FAF9F6, theme_color: #2B6CB0)
 - **Precache:** All build assets (HTML, JS, CSS, SVGs, and the BGM MP3) precached for full offline play
 
@@ -116,7 +116,10 @@ interface AppStorage {
 > **2026-07-31 — Design Update:** BGM asset relocated from `src/assets/audio/bgm.mp3` to `public/audio/bgm.mp3`. In Vite, `public/` files are served at the root URL, so `public/audio/bgm.mp3` resolves at `/audio/bgm.mp3` — the runtime URL expected by `AudioManager`. This fixes the packaging mismatch where the BGM source lived in `src/assets/` (not served at runtime URLs) while `AudioManager` referenced `/audio/bgm.mp3`.
 
 ### PWA Icon
-- 512×512 PNG icon for manifest
+- 192×192 + 512×512 PNG icons for manifest, plus a 512×512 maskable variant (`purpose: "any maskable"`)
+- iOS install support: `apple-touch-icon` link and `apple-mobile-web-app-capable` meta tag in `index.html`
+
+> **2026-08-02 — Design Update (PWA Install & Update UX):** SW registration moved from `registerType: 'autoUpdate'` to `'prompt'`; updates now surface as a parent-facing Hub toast ("New version ready!") instead of installing silently. New modules: `src/utils/pwaBridge.ts` (testable wrapper around `virtual:pwa-register`; queues update/offline events until the Hub is active), `src/utils/pwaInstall.ts` (install-state machine — `installable` / `ios-howto` / `hidden` — with `beforeinstallprompt` capture and iOS UA detection), `src/components/PwaToast.ts` (Hub lifecycle toast UI). The Settings panel gained a context-aware install row: "Install App" where a browser prompt is available, "How to Install" (Share → Add to Home Screen overlay) on iOS Safari, hidden once installed. `workbox-window` added as a direct devDependency (pnpm strict resolution).
 
 ## 7. Project Structure
 
