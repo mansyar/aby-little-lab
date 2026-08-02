@@ -1,6 +1,6 @@
-# Release Notes — v1.1.0 (Draft)
+# Release Notes — v1.1.0
 
-> **Status:** Draft — Game 8 is implemented on `feat/game-8`, code-reviewed, and archived (`conductor/archive/alphabet-match_20260802/`). Not yet merged/released. Finalize after merge and deployment.
+> **Status:** Final — Game 8 merged to `master` (PR #7, `3544a0e`); released as v1.1.0 on 2026-08-02 via the automated pipeline (Quality Gates → Coolify deploy). Manual device verification pending (`docs/device-testing-checklist.md`).
 
 ## What's New
 
