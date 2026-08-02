@@ -91,7 +91,9 @@ export function createInstallTracker(deps: InstallTrackerDeps): InstallTracker {
     },
     async prompt(): Promise<boolean> {
       if (!deferredPrompt) return false;
-      await deferredPrompt.prompt();
+      const promptEvent = deferredPrompt;
+      deferredPrompt = null;
+      await promptEvent.prompt();
       return true;
     },
     destroy(): void {

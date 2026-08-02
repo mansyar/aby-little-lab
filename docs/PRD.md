@@ -319,8 +319,6 @@ Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), Gam
 
 > **Release decision (2026-08-02):** PWA install & update UX shipped — `registerType: "prompt"` with a Hub toast ("New version ready!" with Update now / Later, plus a one-time "Ready to play offline!" toast); 192px + maskable 512px manifest icons; iOS meta tags (`apple-mobile-web-app-capable`, `apple-touch-icon`, `theme-color`). Install flow verified on Android; iOS flow documented in the device-testing checklist (no iOS device available at release time).
 
-> **Release decision (2026-08-02):** The app is deployed as a Docker + Nginx image on a private VPS managed by **Coolify** (builds from the repo Dockerfile; Nginx serves the PWA with correct SW/cache headers). A **GitHub Actions** pipeline (`.github/workflows/ci.yml`) enforces the quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` — on every pull request and `master` push; on green, a **Deploy to Coolify** job fires the Bearer-authenticated Coolify Deploy Webhook, so production updates only after all gates pass. Setup requires two repository secrets (`COOLIFY_DEPLOY_WEBHOOK`, `COOLIFY_TOKEN` with `deploy` permission) and, recommended, branch protection on `master` requiring the "Quality Gates" check. Docs-only pushes skip CI via `paths-ignore`. Full pipeline details in [README.md](../README.md) "CI/CD" section and [TDD.md](./TDD.md) §9.
-
 ## See Also
 
 - [TDD.md](./TDD.md) — Technical Design Document (tech stack details, directory structure, PWA/Phaser configuration, localStorage schema, full asset manifest)

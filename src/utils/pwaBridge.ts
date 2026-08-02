@@ -100,7 +100,7 @@ export function createPwaBridge(registerSW: RegisterSWFn): PwaBridge {
       }
     },
     updateNow(): void {
-      void updateSW(true);
+      void updateSW(true).catch(() => undefined);
     },
     updateAvailable(): boolean {
       return updateAvailableFlag;
