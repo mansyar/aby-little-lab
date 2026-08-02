@@ -494,7 +494,9 @@ describe("AlphabetScene round flow", () => {
       (_, i) => textMock.mock.calls[i]?.[3]?.fontSize === "200px",
     );
     expect(getMockFn(targetResults[0].value as Record<string, MockFn>).destroy).toHaveBeenCalled();
-    expect(getMockFn(targetResults[1].value as Record<string, MockFn>).destroy).not.toHaveBeenCalled();
+    expect(
+      getMockFn(targetResults[1].value as Record<string, MockFn>).destroy,
+    ).not.toHaveBeenCalled();
   });
 
   it("tapping a wrong card wiggles gently and does not advance the round", () => {
