@@ -30,10 +30,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Bundle Code Splitting — Lazy-Load Game Scenes** *Link: [./tracks/code-splitting_20260802/index.md](./tracks/code-splitting_20260802/index.md)*
-
----
-
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
