@@ -1,0 +1,4 @@
+Task: Verify build structure (04b64a2)
+AC1 PASS: pnpm run build emits entry + 7 game-scene chunks: ShapeSorterScene (3.01k), AnimalTraceScene (4.83k), PopFreezeScene (4.48k), ShadowMatchScene (3.83k), MusicalMemoryScene (4.42k), BigSmallScene (4.01k), PatternBuilderScene (4.77k). Shared modules hoisted automatically: shapeSorterLogic (0.29k), dragJuice (1.03k), completionEffect (1.45k). Entry: 1443.79 kB (was 1473.34 kB — Phaser remains the dominant shell dependency by design).
+AC2 PASS: rg for constructor key registrations 'super({key:X})' — entry contains ONLY Boot/Hub/Preload; each of the 7 scene chunks contains exactly its own game key. Class names are minified, so constructor-key registration is the definitive structural check.
+No source changes this task; build-only verification.
