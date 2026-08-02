@@ -26,6 +26,7 @@ const GAME_TILES: readonly GameTile[] = [
   { sceneKey: "MusicalMemory", gameId: "musical-memory", label: "Musical Memory" },
   { sceneKey: "BigSmall", gameId: "big-small", label: "Big & Small" },
   { sceneKey: "PatternBuilder", gameId: "pattern-builder", label: "Pattern Builder" },
+  { sceneKey: "Alphabet", gameId: "alphabet-match", label: "Find the Letter" },
 ];
 
 const TILE_WIDTH = 200;
