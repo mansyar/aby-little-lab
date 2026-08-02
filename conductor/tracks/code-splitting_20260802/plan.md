@@ -21,7 +21,7 @@
   - [ ] Update `HubScene.ts` tile pointerup handler: `startAudio()` then `void ensureSceneLoaded(this, key).then(() => transitionToScene(this, key))`
   - [ ] Update `navigation.test.ts`: mock `../../scenes/sceneRegistry`; assert `ensureSceneLoaded` called for each game key; flush async ticks before fade-out assertions
   - [ ] Run `CI=true pnpm test` — full suite passes (existing `navigation.test.ts` updated)
-- [ ] Task: Reduce `main.ts` to shell scenes only
+- [x] Task: Reduce `main.ts` to shell scenes only (dc31dd5)
   - [ ] Remove the 7 static game-scene imports; `scene` array becomes `[BootScene, PreloadScene, HubScene]`
   - [ ] Run `CI=true pnpm test` — full suite passes
 - [ ] Task: Verify build structure
