@@ -139,6 +139,8 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Coolify shows a new deployment for the pushed commit — Deploy webhook fired successfully; confirm dashboard shows `97d95b0`
 - [x] App loads correctly on the live URL — 200; serves release build (`index-DPWHmQqT.js` hash matches local build)
 - [ ] PWA installation works — **manual** (browser/device, pending; install row in Settings → "Install App" on Android, "How to Install" on iOS)
+- [ ] Parental Settings: Settings panel shows a muted version footer matching the deployed version (`v1.0.0`) — **manual** (browser/device, pending)
+- [ ] Parental Settings: "Reset Progress" row opens a confirm modal; Cancel changes nothing; Reset clears all stickers (Hub shelf goes dim immediately) while BGM/SFX settings persist — **manual** (browser/device, pending)
 - [ ] Offline functionality works — **manual** (installed PWA, pending)
 - [ ] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it — **manual** (pending)
 - [ ] All games function properly — **manual** (browser/device, pending)
