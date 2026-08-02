@@ -72,3 +72,10 @@ export function updateSettings(partial: Partial<Settings>): void {
   data.settings = { ...data.settings, ...partial };
   save(data);
 }
+
+/** Clears the sticker collection while preserving the audio settings. */
+export function resetProgress(): void {
+  const data = load();
+  data.stickers = createDefaultStorage().stickers;
+  save(data);
+}

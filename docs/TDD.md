@@ -86,7 +86,7 @@ aby-little-lab/
     ├── types/
     │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
     ├── utils/
-    │   ├── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings)
+    │   ├── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings, resetProgress)
     │   ├── motion.ts               # Reduced-motion helpers (isReducedMotion, motionDuration, motionScale)
     │   ├── sceneTransitions.ts     # Crossfade scene transitions (transitionToScene, sceneEntrance)
     │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
@@ -291,6 +291,10 @@ interface AppStorage {
 Each control delegates to the `AudioManager` singleton: BGM toggles persist through `setBGMEnabled()` and start or pause playback; SFX toggles persist through `setSFXEnabled()` and play `playCorrect()` only when enabled. Tapping the backdrop destroys every panel object. `HubScene` also destroys an open panel during shutdown.
 
 Below the toggles, an install row renders based on `InstallTracker.getState()` (see `src/utils/pwaInstall.ts`): **"Install App"** (state `installable`) calls `tracker.prompt()` on tap to trigger the deferred `beforeinstallprompt`; **"How to Install"** (state `ios-howto`) opens an iOS instructions overlay (Share → Add to Home Screen steps + Close); state `hidden` (installed/standalone) renders nothing. The tracker is injectable in tests and defaults to real browser event wiring.
+
+A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits between the install row and the footer. Tapping it opens a two-step confirm modal ("Reset all stickers?" with Cancel / Reset buttons, both 240×64): Cancel destroys the overlay without changes; Reset calls `resetProgress()` from `src/utils/storage.ts`, closes the overlay, and updates the row in place to "Progress cleared" (muted). The panel shows a muted, non-interactive version footer (`v${__APP_VERSION__}`, 18px, `#A0AEC0`) at the bottom; `__APP_VERSION__` is injected by Vite's `define` from `package.json` `version`.
+
+`resetProgress()` (2026-08-02) clears every sticker (`earned: false`, `earnedAt: null`) while preserving `settings`; it reuses `load()`'s migration-safe merging, so it also repairs corrupt storage. The panel's optional third constructor argument `onProgressReset` fires after a confirmed reset; `HubScene` passes a callback that destroys and re-creates the sticker shelf images (`createShelfSticker()` / `rerenderStickerShelf()`), re-reading storage so the Hub reflects the reset immediately. Tests cover the callback contract and the re-render (old thumbnails destroyed, 7 fresh dimmed thumbnails).
 
 ### ParentLock (hardened, 2026-08-01)
 
@@ -588,7 +592,7 @@ Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reacti
 
 ### Test coverage
 
-652 tests across 22 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; `sceneRegistry.ts` reports 30% lines because the seven dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project 96.58% lines / 87.26% functions / 92.04% branches / 98.12% statements. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+667 tests across 22 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; `sceneRegistry.ts` reports 30% lines because the seven dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project 96.69% lines / 87.53% functions / 92.05% branches / 98.18% statements. Coverage thresholds remain 80% for lines, functions, branches, and statements.
 
 ---
 

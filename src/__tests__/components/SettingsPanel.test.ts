@@ -1,5 +1,6 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
 import type { InstallTracker, InstallUiState } from "../../utils/pwaInstall";
+import { earnSticker, load, updateSettings } from "../../utils/storage";
 
 const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
@@ -380,5 +381,160 @@ describe("SettingsPanel install control", () => {
     const texts = scene.add.text.mock.calls.map((call) => call[2] as string);
     expect(texts).not.toContain("Install App");
     expect(texts).not.toContain("How to Install");
+  });
+});
+
+describe("SettingsPanel version footer", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("renders the app version in a muted footer row", () => {
+    const scene = createScene();
+
+    new SettingsPanel(scene as never);
+
+    expect(scene.add.text).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.any(Number),
+      `v${__APP_VERSION__}`,
+      expect.objectContaining({ color: "#a0aec0" }),
+    );
+  });
+
+  it("centers the version footer at the bottom of the panel", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const call = scene.add.text.mock.calls.find((item) => item[2] === `v${__APP_VERSION__}`);
+    expect(call).toBeDefined();
+    const [x, y] = call as unknown as [number, number];
+    expect(x).toBe(512);
+    // Below the toggle/install controls, inside the 500px-tall panel (half-height 250).
+    expect(y).toBeGreaterThan(384 + 150);
+    expect(y).toBeLessThan(384 + 250);
+  });
+
+  it("keeps the version footer non-interactive", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const callIndex = scene.add.text.mock.calls.findIndex(
+      (item) => item[2] === `v${__APP_VERSION__}`,
+    );
+    const footer = scene.add.text.mock.results[callIndex]?.value as MockGameObject;
+    expect(footer.setInteractive).not.toHaveBeenCalled();
+  });
+});
+
+describe("SettingsPanel reset progress", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("renders a Reset Progress row in the danger color", () => {
+    const scene = createScene();
+
+    new SettingsPanel(scene as never);
+
+    expect(scene.add.text).toHaveBeenCalledWith(
+      512,
+      expect.any(Number),
+      "Reset Progress",
+      expect.objectContaining({ color: "#fc8181" }),
+    );
+  });
+
+  it("opens the confirm modal when the reset row is tapped", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Reset Progress") as MockGameObject);
+
+    expect(findTextByLabel(scene, "Reset all stickers?")).toBeDefined();
+    expect(findTextByLabel(scene, "Cancel")).toBeDefined();
+    expect(findTextByLabel(scene, "Reset")).toBeDefined();
+  });
+
+  it("keeps stickers when the modal is cancelled", () => {
+    earnSticker("shape-sorter");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const row = findTextByLabel(scene, "Reset Progress") as MockGameObject;
+
+    triggerPointerdown(row);
+    triggerPointerdown(findTextByLabel(scene, "Cancel") as MockGameObject);
+
+    expect(load().stickers["shape-sorter"].earned).toBe(true);
+    const modalTitle = findTextByLabel(scene, "Reset all stickers?") as MockGameObject;
+    expect(modalTitle.destroy).toHaveBeenCalled();
+    expect(row.setText).not.toHaveBeenCalledWith("Progress cleared");
+  });
+
+  it("clears every sticker and shows confirmation when Reset is tapped", () => {
+    earnSticker("shape-sorter");
+    earnSticker("pattern-builder");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const row = findTextByLabel(scene, "Reset Progress") as MockGameObject;
+
+    triggerPointerdown(row);
+    triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
+
+    const result = load();
+    expect(result.stickers["shape-sorter"].earned).toBe(false);
+    expect(result.stickers["pattern-builder"].earned).toBe(false);
+    expect(
+      (findTextByLabel(scene, "Reset all stickers?") as MockGameObject).destroy,
+    ).toHaveBeenCalled();
+    expect(row.setText).toHaveBeenCalledWith("Progress cleared");
+    expect(row.setColor).toHaveBeenCalledWith("#a0aec0");
+  });
+
+  it("preserves audio settings after a reset", () => {
+    updateSettings({ bgmEnabled: false });
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Reset Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
+
+    expect(load().settings.bgmEnabled).toBe(false);
+    expect(load().settings.sfxEnabled).toBe(true);
+  });
+
+  it("gives the reset row and modal buttons inflated touch targets of at least 64px", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const row = findTextByLabel(scene, "Reset Progress") as MockGameObject;
+    const rowConfig = row.setInteractive.mock.calls[0]?.[0] as {
+      hitArea: { height: number; width: number };
+    };
+    expect(rowConfig.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(rowConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+
+    triggerPointerdown(row);
+    for (const label of ["Cancel", "Reset"]) {
+      const button = findTextByLabel(scene, label) as MockGameObject;
+      const config = button.setInteractive.mock.calls[0]?.[0] as {
+        hitArea: { height: number; width: number };
+      };
+      expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
+      expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
+    }
+  });
+
+  it("invokes the onProgressReset callback after a reset", () => {
+    const scene = createScene();
+    const onProgressReset = vi.fn();
+    new SettingsPanel(scene as never, undefined, onProgressReset);
+
+    triggerPointerdown(findTextByLabel(scene, "Reset Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
+
+    expect(onProgressReset).toHaveBeenCalledTimes(1);
   });
 });

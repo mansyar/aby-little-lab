@@ -4,9 +4,9 @@
 
 ### 1. Code Quality Gates
 - [x] Run `pnpm run check` (linting/formatting) — **2026-08-02:** biome clean (51 files)
-- [x] Run `CI=true pnpm test` (all tests pass) — **2026-08-02:** 652/652 tests, 22 files (includes lazy scene-registry tests)
+- [x] Run `CI=true pnpm test` (all tests pass) — **2026-08-02:** 667/667 tests, 22 files (includes lazy scene-registry tests)
 - [x] Run `pnpm run build` (production build succeeds) — **2026-08-02:** OK (entry `index-NPwwI8ke.js` + 7 lazy game-scene chunks, 19 precache entries)
-- [x] Verify code coverage meets threshold (>80%) — ~96.6% lines / ~98.1% statements (CI-enforced)
+- [x] Verify code coverage meets threshold (>80%) — ~96.7% lines / ~98.2% statements (CI-enforced)
 - [x] Review all changes since last release — first release; all 17 prior tracks reviewed and archived
 - [x] Ensure no security vulnerabilities introduced — pnpm supply-chain policy passed; no hardcoded secrets
 
@@ -141,6 +141,8 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Coolify shows a new deployment for the pushed commit — Deploy webhook fired successfully; confirm dashboard shows `97d95b0`
 - [x] App loads correctly on the live URL — 200; serves release build (`index-DPWHmQqT.js` hash matches local build)
 - [ ] PWA installation works — **manual** (browser/device, pending; install row in Settings → "Install App" on Android, "How to Install" on iOS)
+- [ ] Parental Settings: Settings panel shows a muted version footer matching the deployed version (`v1.0.0`) — **manual** (browser/device, pending)
+- [ ] Parental Settings: "Reset Progress" row opens a confirm modal; Cancel changes nothing; Reset clears all stickers (Hub shelf goes dim immediately) while BGM/SFX settings persist — **manual** (browser/device, pending)
 - [ ] Offline functionality works — **manual** (installed PWA, pending)
 - [ ] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it — **manual** (pending)
 - [ ] All games function properly — **manual** (browser/device, pending)

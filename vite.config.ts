@@ -1,8 +1,14 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import pkg from "./package.json";
 
 export default defineConfig({
+  define: {
+    // Injected at build/test time from package.json — the single source of
+    // truth for the app version shown in the parental Settings panel.
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
     VitePWA({
       registerType: "prompt",
