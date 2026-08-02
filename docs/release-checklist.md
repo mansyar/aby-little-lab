@@ -14,6 +14,13 @@
 
 > **Code splitting (2026-08-02):** The bundle-splitting chore (archived at `conductor/archive/code-splitting_20260802/`) lazy-loads the seven game scenes. Post-build verification: entry chunk `dist/assets/index-*.js` contains no game-scene constructor registrations (only `Boot`/`Preload`/`Hub` via `super({ key: ... })` inspection), each of the 7 `*Scene-*.js` chunks contains exactly its own scene key, and `sw.js` precaches all 19 emitted entries — offline play is unaffected. Verified manually on device: no game chunk fetched before its tile is tapped; each game boots, plays, and returns to the Hub; re-taps do not re-fetch.
 
+> **v1.1.0 prep (Game 8 — Find the Letter, 2026-08-02):** Track archived at `conductor/archive/alphabet-match_20260802/` (reviewed — 1 Low finding fixed in `5d9a8d4`).
+> - [x] All four quality gates green on `feat/game-8`: Biome clean (65 files), **706/706 tests (25 files)**, build OK (**8 lazy game chunks, 20 precache entries**), `validate-pwa` 13/13
+> - [x] Coverage above 80% thresholds — ~96.7% lines / ~98.2% statements (thresholds enforced by CI)
+> - [x] Device checklist updated with Game 8 rows (`docs/device-testing-checklist.md`) — execution still pending against the live URL
+> - [ ] Merge `feat/game-8` → `master` (automated pipeline: Quality Gates → Coolify deploy)
+> - [ ] Manual device checks (PWA install, offline, TTS voice, performance metrics) pending
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL

@@ -1,6 +1,6 @@
 # Release Notes — v1.1.0 (Draft)
 
-> **Status:** Draft — Game 8 is implemented on `feat/game-8` but not yet released. Update after merge and deployment.
+> **Status:** Draft — Game 8 is implemented on `feat/game-8`, code-reviewed, and archived (`conductor/archive/alphabet-match_20260802/`). Not yet merged/released. Finalize after merge and deployment.
 
 ## What's New
 
@@ -17,7 +17,7 @@
 
 ## Known Issues
 
-- Physical-device verification (PWA install, offline, performance metrics) is pending execution of `docs/device-testing-checklist.md` against the live URL — add Game 8 rows before release.
+- Physical-device verification (PWA install, offline, performance metrics) is pending execution of `docs/device-testing-checklist.md` against the live URL — Game 8 rows have been added and are ready to run.
 - TTS voice availability varies by device/OS; children on devices without a speech voice still play visually with no error.
 
 ## Installation
