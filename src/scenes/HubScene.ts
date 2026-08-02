@@ -228,6 +228,7 @@ export class HubScene extends Phaser.Scene {
       this.idleCallTimer = undefined;
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.stickerImages = [];
     });
   }
 

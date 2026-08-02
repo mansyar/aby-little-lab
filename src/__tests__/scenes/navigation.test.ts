@@ -6028,6 +6028,48 @@ describe("scene navigation flow", () => {
 
       expect(mockSettingsPanelDestroy).toHaveBeenCalled();
     });
+
+    it("clears tracked stickers on shutdown so a shelf re-render never touches previous visits", () => {
+      const scene = new HubScene();
+      scene.create();
+      completeHubEntrances(scene);
+      const firstVisit = getStickerImages(scene);
+      expect(firstVisit).toHaveLength(7);
+
+      // Leave the Hub (shutdown clears the tracked shelf) and return: create()
+      // re-runs on every visit via scene.start.
+      triggerShutdown(scene);
+      scene.create();
+      completeHubEntrances(scene);
+      expect(getStickerImages(scene)).toHaveLength(14);
+
+      // Isolate first-visit images: a re-render after a progress reset must not
+      // destroy (or re-destroy) them — only the live second-visit shelf.
+      for (const { obj } of firstVisit) {
+        getMockFn(obj.destroy).mockClear();
+      }
+      triggerAllPointerdowns(scene);
+      const holdCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 3000,
+      );
+      (holdCall?.[1] as () => void)();
+      const settingsArgs = mockSettingsPanel.mock.calls.at(-1);
+      const rerender = settingsArgs?.[2] as () => void;
+      expect(rerender).toBeDefined();
+      resetProgress();
+      rerender();
+
+      for (const { obj } of firstVisit) {
+        expect(getMockFn(obj.destroy)).not.toHaveBeenCalled();
+      }
+      // The re-rendered shelf holds exactly 7 fresh thumbnails (the stale
+      // first-visit images still exist in the mock display list, untouched).
+      const firstVisitSet = new Set(firstVisit.map(({ obj }) => obj));
+      const fresh = getStickerImages(scene).filter(
+        ({ obj }) => !firstVisitSet.has(obj) && getMockFn(obj.destroy).mock.calls.length === 0,
+      );
+      expect(fresh).toHaveLength(7);
+    });
   });
 
   describe("cross-scene touch regression", () => {
