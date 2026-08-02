@@ -1,0 +1,1 @@
+Task: Implement resetProgress() in src/utils/storage.ts. Clears all stickers (createDefaultStorage().stickers) while preserving settings; persists via save(). TDD: 3 failing tests first (clears stickers + preserves settings, persists to localStorage, corrupt data no-throw), all green after.
