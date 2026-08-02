@@ -6049,10 +6049,12 @@ describe("scene navigation flow", () => {
         getMockFn(obj.destroy).mockClear();
       }
       triggerAllPointerdowns(scene);
-      const holdCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+      const holdCalls = getMockFn(scene.time.delayedCall).mock.calls.filter(
         (call) => call[0] === 3000,
       );
-      (holdCall?.[1] as () => void)();
+      expect(holdCalls.length).toBeGreaterThan(0);
+      // The last hold belongs to the live (second-visit) settings button.
+      (holdCalls[holdCalls.length - 1][1] as () => void)();
       const settingsArgs = mockSettingsPanel.mock.calls.at(-1);
       const rerender = settingsArgs?.[2] as () => void;
       expect(rerender).toBeDefined();
