@@ -1,0 +1,4 @@
+Phase 3 Verification Report (code-splitting_20260802)
+AC5 PASS: dist/sw.js precache includes all 7 game-scene chunks + shared chunks + entry (19 entries). Offline guarantee unchanged — full precache, no runtime-only caching.
+Automated: no code changed since Phase 2 checkpoint (a515599); suite green (651 tests) at last code state (dc31dd5).
+Manual: offline behavior covered by Phase 2 manual plan step 5 (SW install then offline play). No user confirmation requested this phase (verification-only, no behavior change).
