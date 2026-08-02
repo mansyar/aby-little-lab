@@ -33,3 +33,6 @@
 - [x] Task: Full quality gate run — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` (e1e5a55)
 - [x] Task: Manual Android phone verification (install via Settings button, offline play, update flow via new deploy) — documented in checklist (20e0383)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 20e0383]
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 8bbedc6
