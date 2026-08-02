@@ -1,0 +1,1 @@
+Review fixes (0a6ecdb): ensureSceneLoaded now re-checks scene registration after the dynamic import resolves, making concurrent calls (double-tap race) idempotent — Phaser 4 SceneManager.add silently leaks a duplicate instance instead of rejecting. Added race test (deferred gate, two concurrent loads, assert single add). Suite: 652 tests pass; biome clean.
