@@ -43,11 +43,11 @@
 
 ## Phase 4: Post-Deploy Verification (Automatable)
 
-- [ ] **Task: Verify live index + entry JS hash**
-  - [ ] Fetch live `index.html` (200); compare entry JS hash to local `dist/assets/index-*.js`
-- [ ] **Task: Verify `1.1.0` embedded in served bundle** (version footer data)
-- [ ] **Task: Verify live `sw.js` + manifest return 200**
-- [ ] **Task: Update `docs/release-checklist.md` post-release verifiable items + Final Sign-Off; commit docs update**
+- [x] **Task: Verify live index + entry JS hash**
+  - [x] Fetch live `index.html` (200); compare entry JS hash to local `dist/assets/index-*.js` — live `index-BRXHqYbm.js` matches fresh post-bump local build
+- [x] **Task: Verify `1.1.0` embedded in served bundle** (version footer data) — ✓
+- [x] **Task: Verify live `sw.js` + manifest return 200** — ✓ both 200
+- [x] **Task: Update `docs/release-checklist.md` post-release verifiable items + Final Sign-Off; commit docs update** `e3bbad6` (Step 7b record)
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
 ## Phase 5: Track Completion & Archive
