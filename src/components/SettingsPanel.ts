@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
-import { getSettings } from "../utils/storage";
+import { getSettings, resetProgress } from "../utils/storage";
 
 const BACKDROP_COLOR = 0x000000;
 const BACKDROP_ALPHA = 0.6;
@@ -11,10 +11,12 @@ const OUTLINE_COLOR = 0x2d3748;
 const ENABLED_COLOR = "#68d391";
 const DISABLED_COLOR = "#a0aec0";
 const PRIMARY_COLOR = "#2b6cb0";
+const DANGER_COLOR = "#fc8181";
 const PANEL_WIDTH = 480;
-const PANEL_HEIGHT = 460;
+const PANEL_HEIGHT = 500;
 const TOGGLE_WIDTH = 240;
 const TOGGLE_HEIGHT = 96;
+const ROW_HEIGHT = 64;
 
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
@@ -22,6 +24,7 @@ export class SettingsPanel {
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly installTracker: InstallTracker;
+  private resetRowText: Phaser.GameObjects.Text | null = null;
 
   /**
    * Creates the settings panel using the current persisted audio settings.
@@ -63,12 +66,13 @@ export class SettingsPanel {
         })
         .setOrigin(0.5),
     );
-    this.createToggle(centerX, centerY - 25, "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, centerY + 75, "SFX", settings.sfxEnabled);
-    this.createInstallRow(centerX, centerY + 175);
+    this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
+    this.createToggle(centerX, centerY + 55, "SFX", settings.sfxEnabled);
+    this.createResetRow(centerX, centerY + 135);
+    this.createInstallRow(centerX, centerY + 199);
     this.objects.push(
       scene.add
-        .text(centerX, centerY + 215, `v${__APP_VERSION__}`, {
+        .text(centerX, centerY + 230, `v${__APP_VERSION__}`, {
           color: DISABLED_COLOR,
           fontSize: "18px",
         })
@@ -146,9 +150,9 @@ export class SettingsPanel {
     button.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
         -TOGGLE_WIDTH / 2,
-        -TOGGLE_HEIGHT / 2,
+        -ROW_HEIGHT / 2,
         TOGGLE_WIDTH,
-        TOGGLE_HEIGHT,
+        ROW_HEIGHT,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
@@ -233,5 +237,120 @@ export class SettingsPanel {
   private closeIosOverlay(): void {
     for (const object of this.overlayObjects) object.destroy();
     this.overlayObjects.length = 0;
+  }
+
+  /** Adds the parental "Reset Progress" row that clears all stickers. */
+  private createResetRow(x: number, y: number): void {
+    const row = this.scene.add
+      .text(x, y, "Reset Progress", {
+        color: DANGER_COLOR,
+        fontSize: "24px",
+      })
+      .setOrigin(0.5);
+    row.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_WIDTH / 2,
+        -ROW_HEIGHT / 2,
+        TOGGLE_WIDTH,
+        ROW_HEIGHT,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    row.on("pointerdown", () => this.showResetModal());
+    this.resetRowText = row;
+    this.objects.push(row);
+  }
+
+  /** Shows the two-step "Reset all stickers?" confirmation modal. */
+  private showResetModal(): void {
+    const { width, height } = this.scene.cameras.main;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    const modalBackdrop = this.scene.add
+      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
+      .setInteractive();
+    modalBackdrop.on("pointerdown", () => this.closeResetModal());
+    this.overlayObjects.push(modalBackdrop);
+    this.overlayObjects.push(
+      this.scene.add
+        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
+        .setStrokeStyle(4, OUTLINE_COLOR),
+    );
+    this.overlayObjects.push(
+      this.scene.add
+        .text(centerX, centerY - 105, "Reset all stickers?", {
+          color: "#2d3748",
+          fontSize: "32px",
+        })
+        .setOrigin(0.5),
+    );
+    this.overlayObjects.push(
+      this.scene.add
+        .text(centerX, centerY - 25, "All stickers will be cleared.", {
+          color: "#2d3748",
+          fontSize: "24px",
+        })
+        .setOrigin(0.5),
+    );
+    this.overlayObjects.push(
+      this.createModalButton(
+        centerX,
+        centerY + 45,
+        "Cancel",
+        PRIMARY_COLOR,
+        () => this.closeResetModal(),
+      ),
+    );
+    this.overlayObjects.push(
+      this.createModalButton(
+        centerX,
+        centerY + 125,
+        "Reset",
+        DANGER_COLOR,
+        () => this.confirmReset(),
+      ),
+    );
+  }
+
+  /** Creates a tappable modal button with an inflated touch target. */
+  private createModalButton(
+    x: number,
+    y: number,
+    label: string,
+    color: string,
+    onClick: () => void,
+  ): Phaser.GameObjects.Text {
+    const button = this.scene.add
+      .text(x, y, label, {
+        color,
+        fontSize: "24px",
+      })
+      .setOrigin(0.5);
+    button.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_WIDTH / 2,
+        -ROW_HEIGHT / 2,
+        TOGGLE_WIDTH,
+        ROW_HEIGHT,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    button.on("pointerdown", onClick);
+    return button;
+  }
+
+  /** Closes the reset confirmation modal without changing any data. */
+  private closeResetModal(): void {
+    for (const object of this.overlayObjects) object.destroy();
+    this.overlayObjects.length = 0;
+  }
+
+  /** Clears the sticker collection and shows inline confirmation. */
+  private confirmReset(): void {
+    resetProgress();
+    this.closeResetModal();
+    this.resetRowText?.setText("Progress cleared");
+    this.resetRowText?.setColor(DISABLED_COLOR);
   }
 }
