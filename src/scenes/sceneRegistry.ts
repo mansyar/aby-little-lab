@@ -33,5 +33,10 @@ export async function ensureSceneLoaded(
     return;
   }
   const sceneClass = await loaders[key]();
-  scene.scene.add(key, sceneClass);
+  // Re-check after the await so concurrent calls (e.g. a fast double-tap
+  // on a Hub tile) don't both register the scene. Phaser 4's SceneManager
+  // does not reject duplicate adds — it silently leaks a second instance.
+  if (!scene.scene.get(key)) {
+    scene.scene.add(key, sceneClass);
+  }
 }

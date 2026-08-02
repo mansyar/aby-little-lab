@@ -52,4 +52,38 @@ describe("sceneRegistry", () => {
     expect(loader).toHaveBeenCalledTimes(1);
     expect(add).toHaveBeenCalledWith("ShapeSorter", FakeScene);
   });
+
+  it("registers only once when two loads race for the same scene", async () => {
+    let releaseGate!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      releaseGate = resolve;
+    });
+    const loader = vi.fn(async () => {
+      await gate;
+      return FakeScene;
+    });
+    const registered = new Map<string, unknown>();
+    const add = vi.fn((key: string, sceneClass: unknown) => {
+      registered.set(key, sceneClass);
+    });
+    const scene = {
+      scene: {
+        get: (key: string) => registered.get(key) ?? null,
+        add,
+      },
+    };
+
+    const first = ensureSceneLoaded(scene as never, "ShapeSorter", {
+      ShapeSorter: loader,
+    });
+    const second = ensureSceneLoaded(scene as never, "ShapeSorter", {
+      ShapeSorter: loader,
+    });
+    releaseGate();
+    await Promise.all([first, second]);
+
+    // Both taps imported the chunk, but the scene is registered only once.
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(add).toHaveBeenCalledTimes(1);
+  });
 });
