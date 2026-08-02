@@ -1,0 +1,27 @@
+# Implementation Plan: Parental Settings Expansion — App Version & Progress Reset
+
+## Phase 1 — App Version Display [checkpoint: 70cf1c4]
+
+- [x] Task: Write failing tests for the Settings footer version row (renders `__APP_VERSION__`-sourced text at the footer position; parent-facing; non-interactive) — 47dcdbe
+- [x] Task: Expose `__APP_VERSION__` via Vite `define` in `vite.config.ts` (read from `package.json` version) + declare the global in `vite-env.d.ts` — ce2978f
+- [x] Task: Implement the footer version row in `SettingsPanel.ts` (Red → Green) — 4ee2ec1
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 2 — Reset Progress (logic + UI) [checkpoint: d296cee]
+
+- [x] Task: Write failing tests for `resetProgress()` in `src/__tests__/utils/storage.test.ts` (clears all 7 stickers, preserves settings, handles empty/corrupt data, persists) — 183314d
+- [x] Task: Implement `resetProgress()` in `src/utils/storage.ts` (Red → Green) — 183314d
+- [x] Task: Write tests for the confirm modal + reset row (row renders; tap opens modal; Cancel dismisses without change; Reset fires `resetProgress()`; ≥64px touch targets) — 5c0e8e7
+- [x] Task: Implement the "Reset Progress" row + confirm modal + confirmation feedback in `SettingsPanel.ts` (Red → Green) — 5c0e8e7
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 3 — Integration, Docs & Verification [checkpoint: 0904dd9]
+
+- [x] Task: Verify the Hub sticker shelf reflects the reset state (shelf reads storage on scene create; add/adjust test if needed) — 9eb2f0b
+- [x] Task: Update docs — dated note in `conductor/tech-stack.md` (`__APP_VERSION__` define + `resetProgress`), parental-settings section in `docs/PRD.md` / `docs/TDD.md` / `docs/release-checklist.md` — f9c3ba9
+- [x] Task: Full quality gate run — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` — 0b8a6f4 (check ✓ after format fix, 662/662 tests, build ✓, validate-pwa 13/13 ✓)
+- [x] Task: Manual device verification (version display + reset flow on tablet/phone) — documented in checklist (items added in f9c3ba9; execution pending human device test)
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions (clear `stickerImages` on Hub shutdown + regression test) — 37de77f

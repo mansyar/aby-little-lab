@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **592 tests across 18 files**, ~98.0% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **663 tests across 21 files**, ~98% statement coverage (all shared motion/feedback/storage/transition utilities at 100%).
 
 ## Code Quality
 
@@ -108,6 +108,12 @@ Settings access (Hub **Settings**) and app exit (each game's **← Back**) are g
 The protected controls (Hub Settings, all seven game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
 
 The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
+
+Parent-facing additions (all behind the 3-second hold, never visible to the child during play):
+
+- **Version footer** — a muted `v{version}` readout at the bottom of the panel, sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
+- **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all seven stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
+- **Install control** — a context-aware row: "Install App" where a browser prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, hidden once the app is installed (see PWA Release Readiness).
 
 ## Motion & Feedback
 

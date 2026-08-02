@@ -95,6 +95,8 @@ const WIGGLE_PHASE_OFFSET = 120;
 export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private settingsPanel?: SettingsPanel;
+  /** Sticker thumbnails currently on the shelf (rebuilt after a progress reset). */
+  private stickerImages: Phaser.GameObjects.Image[] = [];
   private entranceIndex = 0;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
@@ -180,25 +182,7 @@ export class HubScene extends Phaser.Scene {
         });
       }
 
-      const earned = hasSticker(GAME_TILES[i].gameId);
-      const sticker = this.add.image(
-        x,
-        y + TILE_HEIGHT / 2 - 20,
-        `sticker_${GAME_TILES[i].gameId.replace(/-/g, "_")}`,
-      );
-
-      if (earned) {
-        if (GAME_TILES[i].gameId === this.justEarned) {
-          sticker.setScale(STICKER_SCALE * JUST_EARNED_SCALE);
-          this.animateJustEarned(sticker);
-        } else {
-          sticker.setScale(STICKER_SCALE);
-          this.animateEntrance([sticker], () => this.addSparkle(sticker), STICKER_SCALE);
-        }
-      } else {
-        sticker.setScale(STICKER_SCALE * UNEARNED_SCALE);
-        this.animateUnearned(sticker);
-      }
+      this.createShelfSticker(i, x, y);
     }
 
     this.input.on("pointerdown", () => {
@@ -221,7 +205,7 @@ export class HubScene extends Phaser.Scene {
       target: settingsButton,
       onSuccess: () => {
         this.settingsPanel?.destroy();
-        this.settingsPanel = new SettingsPanel(this);
+        this.settingsPanel = new SettingsPanel(this, undefined, () => this.rerenderStickerShelf());
       },
       onFailure: () => {
         // No action needed on failure.
@@ -244,6 +228,7 @@ export class HubScene extends Phaser.Scene {
       this.idleCallTimer = undefined;
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.stickerImages = [];
     });
   }
 
@@ -358,6 +343,50 @@ export class HubScene extends Phaser.Scene {
         ease: "Sine.inOut",
         delay: i * 300,
       });
+    }
+  }
+
+  /** Creates one shelf sticker thumbnail for the given tile, reflecting storage. */
+  private createShelfSticker(index: number, x: number, y: number): void {
+    const earned = hasSticker(GAME_TILES[index].gameId);
+    const sticker = this.add.image(
+      x,
+      y + TILE_HEIGHT / 2 - 20,
+      `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`,
+    );
+    this.stickerImages.push(sticker);
+
+    if (earned) {
+      if (GAME_TILES[index].gameId === this.justEarned) {
+        sticker.setScale(STICKER_SCALE * JUST_EARNED_SCALE);
+        this.animateJustEarned(sticker);
+      } else {
+        sticker.setScale(STICKER_SCALE);
+        this.animateEntrance([sticker], () => this.addSparkle(sticker), STICKER_SCALE);
+      }
+    } else {
+      sticker.setScale(STICKER_SCALE * UNEARNED_SCALE);
+      this.animateUnearned(sticker);
+    }
+  }
+
+  /**
+   * Rebuilds the sticker shelf from storage after a parental progress reset so
+   * cleared stickers immediately show as dimmed on the Hub.
+   */
+  private rerenderStickerShelf(): void {
+    for (const sticker of this.stickerImages) sticker.destroy();
+    this.stickerImages = [];
+    const startX =
+      (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
+    const startY =
+      (this.cameras.main.height - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2;
+    for (let i = 0; i < GAME_TILES.length; i++) {
+      const col = i % GRID_COLS;
+      const row = Math.floor(i / GRID_COLS);
+      const x = startX + col * (TILE_WIDTH + TILE_SPACING) + TILE_WIDTH / 2;
+      const y = startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2;
+      this.createShelfSticker(i, x, y);
     }
   }
 
