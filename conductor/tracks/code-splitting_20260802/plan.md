@@ -33,7 +33,7 @@
 
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4: Quality Gates & Manual Verification
+## Phase 4: Quality Gates & Manual Verification [checkpoint: ecb6715]
 
 - [x] Task: Run full quality gates: `pnpm run check` && `CI=true pnpm test` && `pnpm run build` (AC6)
   - Gate 1 `pnpm run check`: PASS (59 files, Biome)
