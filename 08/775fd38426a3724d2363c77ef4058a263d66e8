@@ -1,0 +1,1 @@
+Task: Write failing unit tests for alphabetLogic (Red phase). Files: src/__tests__/game/alphabetLogic.test.ts. Why: TDD-first — proves playthrough (6 unique targets uniform from A-Z, no dupes), round (4 unique cards, exactly one correct), evaluation and win detection contracts before implementation.
