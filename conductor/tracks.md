@@ -30,6 +30,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [ ] **Track: Game 8 — Find the Letter (Alphabet Recognition)** *Link: [./tracks/alphabet-match_20260802/index.md](./tracks/alphabet-match_20260802/index.md)*
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---

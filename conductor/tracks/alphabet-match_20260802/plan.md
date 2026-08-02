@@ -1,0 +1,37 @@
+# Implementation Plan — Game 8: "Find the Letter" (Alphabet Recognition)
+
+**Track:** `alphabet-match_20260802` · **Type:** Feature · **Branch:** `feat/game-8`
+
+## Phase 1: Pure Game Logic — `src/game/alphabetLogic.ts` (TDD)
+
+- [ ] Task: Write failing unit tests for `alphabetLogic` — playthrough draws 6 unique letters uniformly from A–Z (no duplicates); each round has 4 unique cards (1 target + 3 distinct distractors) with exactly one correct answer; answer evaluation; win detection at 6 correct
+- [ ] Task: Implement `src/game/alphabetLogic.ts` until tests pass (Red → Green)
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 2: TTS Utility — `src/utils/speech.ts` (TDD)
+
+- [ ] Task: Write failing unit tests for `speakLetter` — support detection; en-US utterance with gentle rate; cancels prior utterances; respects enabled flag (SFX toggle); never throws when API unavailable
+- [ ] Task: Implement `src/utils/speech.ts` until tests pass (Red → Green)
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 3: Assets, Registry & Storage Integration
+
+- [ ] Task: Author 26 uppercase letter SVGs (`src/assets/svg/letters/letter_a.svg` … `letter_z.svg`, 512×512, flat `#2B6CB0` fill, thick `#2D3748` stroke, identical styling) + `sticker_alphabet.svg`
+- [ ] Task: Register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts`
+- [ ] Task: Add `alphabet-match` to `GameId` union + storage sticker key in `src/types/index.ts`; verify storage tests cover old-save migration
+- [ ] Task: Preload the 27 new SVGs in `PreloadScene`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 4: AlphabetScene — `src/scenes/AlphabetScene.ts` (TDD)
+
+- [ ] Task: Write scene tests (`src/__tests__/scenes/alphabetScene.test.ts`) — target letter + 4 cards rendered; correct tap advances round (chime, mascot cheer, dot pop); incorrect tap wiggles with no penalty/no advance; TTS spoken per round start respecting SFX toggle; win at 6 → celebration + sticker (first completion only) + `justEarned: "alphabet-match"` + auto-return after 3s; parental lock exit; reduced-motion variants
+- [ ] Task: Implement `AlphabetScene` until tests pass (Red → Green)
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 5: Hub Integration, Docs & Quality Gates
+
+- [ ] Task: Add 8th Hub tile (4×2 grid), wire scene start, sticker shelf, mascot
+- [ ] Task: Update `src/__tests__/scenes/navigation.test.ts` for 8 tiles + `ensureSceneLoaded("Alphabet")`
+- [ ] Task: Update docs — `docs/PRD.md` (Game 8 section + product amendment note), `docs/TDD.md`, `conductor/tech-stack.md` (scene count, GameId, assets), `conductor/product.md`, release notes
+- [ ] Task: Run quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
