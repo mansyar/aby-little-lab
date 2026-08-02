@@ -1,0 +1,1 @@
+Task: Write failing tests for the Settings footer version row (Phase 1). Three tests: renders v<version> muted footer, centered at the bottom of the 460px panel (below controls), and non-interactive. Red phase verified - ReferenceError before the Vite define existed.
