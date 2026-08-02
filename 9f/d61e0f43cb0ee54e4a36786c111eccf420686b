@@ -1,0 +1,3 @@
+Task: Wire lazy loading into HubScene tile taps (9fd61e0)
+Summary: HubScene tile pointerup handler now calls startAudio() then void ensureSceneLoaded(this, GAME_TILES[i].sceneKey).then(() => transitionToScene(this, GAME_TILES[i].sceneKey)) — the game chunk is dynamically imported and registered with the Scene Manager before the fade-out starts the target scene. navigation.test.ts: mocked ../../scenes/sceneRegistry via vi.hoisted (factory dereference would otherwise hit TDZ), asserted ensureSceneLoaded called with (scene, key) for each of the 7 keys, flushed microtask (setTimeout 0) before completeFadeOuts in the two tile-navigation tests.
+Created: HubScene.ts import + handler; navigation.test.ts mock + 2 async test updates.
