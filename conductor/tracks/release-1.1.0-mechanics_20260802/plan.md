@@ -20,13 +20,13 @@
 
 ## Phase 2: Finalize Release Documentation
 
-- [ ] **Task: Finalize `docs/release-notes-v1.1.0.md`**
-  - [ ] Flip status Draft → final; add date; reflect merged state
-  - [ ] Keep device-testing + TTS-voice variation in Known Issues (manual)
-- [ ] **Task: Update `docs/release-checklist.md`**
-  - [ ] Mark v1.1.0 prep items now satisfied (merge done, gates green)
-  - [ ] Update Final Sign-Off (version 1.1.0, status)
-- [ ] **Task: Commit docs changes** (`docs(release): Finalize v1.1.0 release notes and checklist`) + git note + plan update
+- [x] **Task: Finalize `docs/release-notes-v1.1.0.md`**
+  - [x] Flip status Draft → final; add date; reflect merged state
+  - [x] Keep device-testing + TTS-voice variation in Known Issues (manual)
+- [x] **Task: Update `docs/release-checklist.md`**
+  - [x] Mark v1.1.0 prep items now satisfied (merge done, gates green)
+  - [x] Update Final Sign-Off (version 1.1.0, status)
+- [x] **Task: Commit docs changes** `4962e45` (`docs(release): Finalize v1.1.0 release notes and checklist`) + git note + plan update
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
 ## Phase 3: Tag & Deploy
