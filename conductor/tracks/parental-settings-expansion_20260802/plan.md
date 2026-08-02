@@ -7,13 +7,13 @@
 - [x] Task: Implement the footer version row in `SettingsPanel.ts` (Red → Green) — 4ee2ec1
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Reset Progress (logic + UI)
+## Phase 2 — Reset Progress (logic + UI) [checkpoint: d296cee]
 
-- [ ] Task: Write failing tests for `resetProgress()` in `src/__tests__/utils/storage.test.ts` (clears all 7 stickers, preserves settings, handles empty/corrupt data, persists)
-- [ ] Task: Implement `resetProgress()` in `src/utils/storage.ts` (Red → Green)
-- [ ] Task: Write tests for the confirm modal + reset row (row renders; tap opens modal; Cancel dismisses without change; Reset fires `resetProgress()`; ≥64px touch targets)
-- [ ] Task: Implement the "Reset Progress" row + confirm modal + confirmation feedback in `SettingsPanel.ts` (Red → Green)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write failing tests for `resetProgress()` in `src/__tests__/utils/storage.test.ts` (clears all 7 stickers, preserves settings, handles empty/corrupt data, persists) — 183314d
+- [x] Task: Implement `resetProgress()` in `src/utils/storage.ts` (Red → Green) — 183314d
+- [x] Task: Write tests for the confirm modal + reset row (row renders; tap opens modal; Cancel dismisses without change; Reset fires `resetProgress()`; ≥64px touch targets) — 5c0e8e7
+- [x] Task: Implement the "Reset Progress" row + confirm modal + confirmation feedback in `SettingsPanel.ts` (Red → Green) — 5c0e8e7
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Integration, Docs & Verification
 
