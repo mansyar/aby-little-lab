@@ -255,8 +255,8 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { generatePlaythrough } from "../../game/alphabetLogic";
+import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -369,7 +369,9 @@ describe("AlphabetScene round flow", () => {
 
   /** Fires the next-round delay (700ms) so the round advances. */
   function fireNextRoundDelay(scene: unknown): void {
-    const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
+    const delayedCallMock = getMockFn(
+      (scene as { time: Record<string, unknown> }).time.delayedCall,
+    );
     const nextRoundCall = delayedCallMock.mock.calls.find((call) => call[0] === 700);
     expect(nextRoundCall).toBeDefined();
     if (nextRoundCall && typeof nextRoundCall[1] === "function") {
@@ -386,13 +388,17 @@ describe("AlphabetScene round flow", () => {
 
   /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
   function fireAutoReturn(scene: unknown): void {
-    const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
+    const delayedCallMock = getMockFn(
+      (scene as { time: Record<string, unknown> }).time.delayedCall,
+    );
     const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
     expect(autoReturnCall).toBeDefined();
     if (autoReturnCall && typeof autoReturnCall[1] === "function") {
       (autoReturnCall[1] as () => void)();
     }
-    const fadeOutMock = getMockFn((scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut);
+    const fadeOutMock = getMockFn(
+      (scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
+    );
     const fadeOutCall = fadeOutMock.mock.calls.at(-1);
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
@@ -415,7 +421,8 @@ describe("AlphabetScene round flow", () => {
     expect(getMockFn(cards[0].setStrokeStyle)).toHaveBeenCalled();
 
     // Cards meet the 96×96 ideal touch target (160px side).
-    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock.calls;
+    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
+      .calls;
     const cardsY = scene.cameras.main.centerY + 180;
     for (const call of rectCalls) {
       if (call[1] === cardsY) {
@@ -426,8 +433,8 @@ describe("AlphabetScene round flow", () => {
     expect(getCardTexts(scene)).toHaveLength(4);
 
     // The 4 cards show exactly the round's choices.
-    const cardLetters = getMockFn((scene as { add: Record<string, unknown> }).add.text).mock.calls
-      .filter((call) => call[3]?.fontSize === "100px")
+    const cardLetters = getMockFn((scene as { add: Record<string, unknown> }).add.text)
+      .mock.calls.filter((call) => call[3]?.fontSize === "100px")
       .map((call) => call[2]);
     expect(cardLetters.sort()).toEqual([...round.choices].sort());
 
@@ -535,9 +542,9 @@ describe("AlphabetScene round flow", () => {
 
     // First completion awards the sticker and shows the reveal animation.
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
-    const stickerImage = getMockFn((scene as { add: Record<string, unknown> }).add.image).mock.calls.find(
-      (call) => call[2] === "sticker_alphabet_match",
-    );
+    const stickerImage = getMockFn(
+      (scene as { add: Record<string, unknown> }).add.image,
+    ).mock.calls.find((call) => call[2] === "sticker_alphabet_match");
     expect(stickerImage).toBeDefined();
 
     fireAutoReturn(scene);

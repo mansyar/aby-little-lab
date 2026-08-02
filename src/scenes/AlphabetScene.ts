@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import { generatePlaythrough, type AlphabetRound } from "../game/alphabetLogic";
+import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
 import { createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
@@ -179,7 +179,7 @@ export class AlphabetScene extends Phaser.Scene {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
 
-    const targetText = this.add
+    this.add
       .text(centerX, centerY + TARGET_Y_OFFSET, round.target, {
         fontSize: TARGET_FONT_SIZE,
         color: LETTER_COLOR,

@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ALPHABET,
+  type AlphabetRound,
   generatePlaythrough,
   generateRound,
   hasCompletedPlaythrough,
   isCorrectLetter,
-  type AlphabetRound,
   type Letter,
 } from "../../game/alphabetLogic";
 
