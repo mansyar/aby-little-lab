@@ -31,5 +31,5 @@
 - [x] Task: Update `conductor/tech-stack.md` (registerType change + new PWA UX modules) with dated note
 - [x] Task: Update `docs/PRD.md` / `docs/TDD.md` / `docs/release-checklist.md` (PWA install/update UX section, device checklist items)
 - [x] Task: Full quality gate run — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` (e1e5a55)
-- [~] Task: Manual Android phone verification (install via Settings button, offline play, update flow via new deploy) — documented in checklist
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Manual Android phone verification (install via Settings button, offline play, update flow via new deploy) — documented in checklist (20e0383)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 20e0383]
