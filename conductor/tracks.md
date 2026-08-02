@@ -30,7 +30,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: v1.1.0 Release Mechanics** *Link: [./tracks/release-1.1.0-mechanics_20260802/index.md](./tracks/release-1.1.0-mechanics_20260802/index.md)*
+- [x] **Track: v1.1.0 Release Mechanics** *Link: [./archive/release-1.1.0-mechanics_20260802/index.md](./archive/release-1.1.0-mechanics_20260802/index.md)* (Archived)
 
 ---
 
