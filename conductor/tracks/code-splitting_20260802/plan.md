@@ -43,3 +43,6 @@
 - [x] Task: Prepare manual verification plan (AC3/AC4): startup network tab shows no game-chunk fetches; tapping each of the 7 tiles loads its chunk and plays; offline mode still plays any game
   - Plan: (1) `pnpm exec vite preview` (serves `dist/`); (2) DevTools Network — startup must fetch only entry/shared chunks, no `*Scene-*.js` before any tile tap (AC3); (3) tap each tile → first tap fetches that game's chunk, game boots/plays/returns to Hub with stickers/audio/parental lock intact (AC4); (4) re-tap same game → no re-fetch; (5) after SW install, set Network to Offline → all games still play.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 0a6ecdb
