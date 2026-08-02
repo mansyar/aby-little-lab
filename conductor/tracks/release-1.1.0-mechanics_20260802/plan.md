@@ -31,14 +31,14 @@
 
 ## Phase 3: Tag & Deploy
 
-- [ ] **Task: Create annotated tag** `v1.1.0` — *"Release v1.1.0: Find the Letter + PWA & parental settings refinements"*
-- [ ] **Task: Push `master` + tag to `origin`**
-  - [ ] Push master (triggers CI: Quality Gates → Deploy to Coolify)
-  - [ ] Push tag `v1.1.0`
-- [ ] **Task: Verify CI run**
-  - [ ] Record run ID (e.g., via `gh run list`)
-  - [ ] Confirm Quality Gates job green
-  - [ ] Confirm Deploy to Coolify job green
+- [x] **Task: Create annotated tag** `v1.1.0` — *"Release v1.1.0: Find the Letter + PWA & parental settings refinements"*
+- [x] **Task: Push `master` + tag to `origin`**
+  - [x] Push master (triggers CI: Quality Gates → Deploy to Coolify) — `3544a0e..44676ad`
+  - [x] Push tag `v1.1.0`
+- [x] **Task: Verify CI run**
+  - [x] Record run ID (e.g., via `gh run list`) — **run `30745388316`**
+  - [x] Confirm Quality Gates job green — ✓ (52s)
+  - [x] Confirm Deploy to Coolify job green — ✓ (5s)
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
 ## Phase 4: Post-Deploy Verification (Automatable)
