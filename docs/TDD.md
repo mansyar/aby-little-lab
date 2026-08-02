@@ -12,7 +12,7 @@
 | Game Engine | Phaser 4 | 4.2.1 | Latest stable 2D framework with SVG rasterization, Arcade Physics, scene management |
 | Language | TypeScript | 7.0.2 | Type safety for scenes, components, shared interfaces |
 | Build Tool | Vite | 8.1.5 | Fast HMR dev server, ES module bundling, plugin ecosystem |
-| PWA | vite-plugin-pwa | 1.3.0 | Auto-generated service worker + manifest, precaching, auto-update |
+| PWA | vite-plugin-pwa | 1.3.0 | Auto-generated service worker + manifest, precaching, prompt-based updates |
 | Testing | Vitest | 4.1.10 | Native Vite integration, fast test runner |
 | Coverage | @vitest/coverage-v8 | 4.1.10 | V8-based code coverage provider |
 | Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
@@ -52,7 +52,7 @@ aby-little-lab/
 ├── biome.json                      # Biome linter/formatter config (double quotes, 2-space)
 ├── public/
 │   ├── audio/                      # Runtime audio served at /audio/ (BGM)
-│   └── icons/                      # PWA icons (icon-512.png)
+│   └── icons/                      # PWA icons (192px, 512px, maskable)
 └── src/
     ├── main.ts                     # Phaser 4 game config & global scene register
     ├── vite-env.d.ts               # Vite type declarations
@@ -69,7 +69,8 @@ aby-little-lab/
     │   └── PatternBuilderScene.ts  # Mini-Game 7
     ├── components/
     │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
-    │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay
+    │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay + context-aware install control (Install App / How to Install / hidden)
+    │   ├── PwaToast.ts             # Hub lifecycle toast (update-ready + offline-ready, app-styled, reduced-motion-aware)
     │   └── Mascot.ts               # Professor Hoot mascot (wave/nod/cheer/idleLoop + createCornerMascot factory; tween-only, reduced-motion-aware)
     ├── audio/
     │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
@@ -89,7 +90,9 @@ aby-little-lab/
     │   ├── sceneTransitions.ts     # Crossfade scene transitions (transitionToScene, sceneEntrance)
     │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
     │   ├── dragJuice.ts            # Per-game drag juice (attachDragLift, attachDropZoneHighlight, snapToSlot)
-    │   └── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
+    │   ├── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
+    │   ├── pwaBridge.ts            # Testable wrapper around virtual:pwa-register (needRefresh/offlineReady events, Hub-active queue, updateNow)
+    │   └── pwaInstall.ts           # Install-state machine (installable/ios-howto/hidden), beforeinstallprompt capture, iOS UA detection
     ├── assets/
     │   └── svg/                    # AI-Generated SVG Assets
     │       ├── shapes/             # Circle, Square, Triangle, Star, Heart, Crescent SVGs + cutouts
@@ -113,7 +116,7 @@ aby-little-lab/
 
 ## 3. PWA Configuration (`vite.config.ts`)
 
-The PWA manifest and service worker are configured via `vite-plugin-pwa`. No source `manifest.json` or `sw.js` files are maintained; production builds generate `manifest.webmanifest`, `sw.js`, and the Workbox runtime. Emitted build assets are precached, and `includeAssets` explicitly adds the runtime BGM file from `public/`.
+The PWA manifest and service worker are configured via `vite-plugin-pwa`. No source `manifest.json` or `sw.js` files are maintained; production builds generate `manifest.webmanifest`, `sw.js`, and the Workbox runtime. Emitted build assets are precached, and `includeAssets` explicitly adds the runtime BGM file from `public/`. `registerType: "prompt"` means updates are deferred until the user taps "Update now" on the Hub toast (`src/components/PwaToast.ts` via `src/utils/pwaBridge.ts`).
 
 ```typescript
 /// <reference types="vitest/config" />
@@ -123,7 +126,7 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
   plugins: [
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       includeAssets: ["audio/bgm.mp3"],
       manifest: {
         name: "Aby's Little Lab",
@@ -134,7 +137,9 @@ export default defineConfig({
         background_color: "#FAF9F6",
         theme_color: "#2B6CB0",
         icons: [
+          { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
       },
     }),
@@ -268,6 +273,8 @@ interface AppStorage {
 `SettingsPanel` is created by `HubScene` after the Settings `ParentLock` succeeds. It renders a black 0.6-alpha backdrop and a cream, outlined modal. Its 96px-high BGM and SFX text hit areas exceed the 64px touch-target minimum.
 
 Each control delegates to the `AudioManager` singleton: BGM toggles persist through `setBGMEnabled()` and start or pause playback; SFX toggles persist through `setSFXEnabled()` and play `playCorrect()` only when enabled. Tapping the backdrop destroys every panel object. `HubScene` also destroys an open panel during shutdown.
+
+Below the toggles, an install row renders based on `InstallTracker.getState()` (see `src/utils/pwaInstall.ts`): **"Install App"** (state `installable`) calls `tracker.prompt()` on tap to trigger the deferred `beforeinstallprompt`; **"How to Install"** (state `ios-howto`) opens an iOS instructions overlay (Share → Add to Home Screen steps + Close); state `hidden` (installed/standalone) renders nothing. The tracker is injectable in tests and defaults to real browser event wiring.
 
 ### ParentLock (hardened, 2026-08-01)
 
@@ -447,7 +454,9 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 
 | File | Dimensions | Notes |
 |---|---|---|
+| `icon-192.png` | 192×192 | App icon for manifest + `apple-touch-icon` |
 | `icon-512.png` | 512×512 | App icon for PWA manifest |
+| `icon-maskable-512.png` | 512×512 | Maskable variant (`purpose: "any maskable"`), content within the safe zone |
 
 ### Asset Summary
 
@@ -461,8 +470,8 @@ Each control delegates to the `AudioManager` singleton: BGM toggles persist thro
 | SVG — UI | 15 (13 shared + 2 mascot poses) |
 | SVG — stickers | 7 |
 | Audio (MP3) | 1 |
-| PWA icons (PNG) | 1 |
-| **Total** | **74** |
+| PWA icons (PNG) | 3 |
+| **Total** | **76** |
 
 ---
 

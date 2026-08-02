@@ -265,6 +265,62 @@ vi.mock("../../components/SettingsPanel", () => ({
   SettingsPanel: MockSettingsPanel,
 }));
 
+/**
+ * Mock PwaToast so HubScene wiring tests can verify toast creation/dismissal
+ * without rendering real Phaser objects.
+ */
+const { MockPwaToast, mockPwaToast, mockPwaToastDestroy } = vi.hoisted(() => {
+  const mockPwaToastDestroy = vi.fn();
+  class MockPwaToast {
+    constructor(...args: unknown[]) {
+      mockPwaToast(...args);
+    }
+
+    destroy(): void {
+      mockPwaToastDestroy();
+    }
+  }
+  return {
+    MockPwaToast,
+    mockPwaToast: vi.fn(),
+    mockPwaToastDestroy,
+  };
+});
+
+vi.mock("../../components/PwaToast", () => ({
+  PwaToast: MockPwaToast,
+}));
+
+/**
+ * Mock the PWA bridge so HubScene tests can drive update/offline events
+ * without a real service worker registration.
+ */
+const { mockBridge, mockBridgeState } = vi.hoisted(() => {
+  const mockBridgeState = {
+    listener: null as null | ((event: "needRefresh" | "offlineReady") => void),
+  };
+  const mockBridge = {
+    subscribe: vi.fn((listener: (event: "needRefresh" | "offlineReady") => void) => {
+      mockBridgeState.listener = listener;
+      return vi.fn();
+    }),
+    setHubActive: vi.fn(),
+    updateNow: vi.fn(),
+    updateAvailable: vi.fn(() => false),
+    offlineReadyShown: vi.fn(() => false),
+  };
+  return { mockBridge, mockBridgeState };
+});
+
+vi.mock("../../utils/pwaBridge", () => ({
+  getPwaBridge: () => mockBridge,
+}));
+
+/** Emits a PWA lifecycle event through the mock bridge's subscribed listener. */
+function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
+  mockBridgeState.listener?.(event);
+}
+
 import { generatePathPoints } from "../../game/animalTraceLogic";
 import { getCorrectShape } from "../../game/patternBuilderLogic";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
@@ -768,6 +824,92 @@ describe("scene navigation flow", () => {
       triggerAllPointerups(scene);
 
       expect(mockAudio.playBGM).toHaveBeenCalled();
+    });
+  });
+
+  describe("Hub PWA lifecycle toasts", () => {
+    beforeEach(() => {
+      mockBridgeState.listener = null;
+      mockPwaToast.mockClear();
+      mockPwaToastDestroy.mockClear();
+      mockBridge.setHubActive.mockClear();
+      mockBridge.updateNow.mockClear();
+      mockBridge.updateAvailable.mockClear();
+      mockBridge.updateAvailable.mockReturnValue(false);
+      mockBridge.subscribe.mockClear();
+    });
+
+    it("subscribes to the PWA bridge and marks the hub active on create", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      expect(mockBridge.subscribe).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockBridge.setHubActive).toHaveBeenCalledWith(true);
+    });
+
+    it("shows an update toast when the bridge reports a new version", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      emitPwaEvent("needRefresh");
+
+      expect(mockPwaToast).toHaveBeenCalledTimes(1);
+      const options = mockPwaToast.mock.calls[0]?.[1] as {
+        kind: string;
+        onUpdate?: () => void;
+      };
+      expect(options.kind).toBe("update");
+    });
+
+    it("shows an offline toast when the bridge reports offline readiness", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      emitPwaEvent("offlineReady");
+
+      expect(mockPwaToast).toHaveBeenCalledTimes(1);
+      const options = mockPwaToast.mock.calls[0]?.[1] as { kind: string };
+      expect(options.kind).toBe("offline");
+    });
+
+    it("shows an update toast on create when an update is already available", () => {
+      mockBridge.updateAvailable.mockReturnValue(true);
+
+      const scene = new HubScene();
+      scene.create();
+
+      expect(mockPwaToast).toHaveBeenCalledTimes(1);
+      const options = mockPwaToast.mock.calls[0]?.[1] as { kind: string };
+      expect(options.kind).toBe("update");
+    });
+
+    it("does not show a toast on create when no update is available", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      expect(mockPwaToast).not.toHaveBeenCalled();
+    });
+
+    it("applies the update when the toast Update action fires", () => {
+      const scene = new HubScene();
+      scene.create();
+      emitPwaEvent("needRefresh");
+
+      const options = mockPwaToast.mock.calls[0]?.[1] as {
+        onUpdate?: () => void;
+      };
+      options.onUpdate?.();
+
+      expect(mockBridge.updateNow).toHaveBeenCalledTimes(1);
+    });
+
+    it("destroys the toast on scene shutdown", () => {
+      const scene = new HubScene();
+      scene.create();
+      emitPwaEvent("offlineReady");
+
+      triggerShutdown(scene);
+      expect(mockPwaToastDestroy).toHaveBeenCalled();
     });
   });
 

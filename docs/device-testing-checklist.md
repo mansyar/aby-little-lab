@@ -40,9 +40,11 @@ pnpm exec serve dist -l 3000
 
 ### A. Installation and PWA Behavior
 
-#### iPad/Safari
+#### iOS (iPad/iPhone Safari)
 - [ ] Open the HTTPS private-host or HTTPS-tunnel URL in Safari
-- [ ] Tap Share button → "Add to Home Screen"
+- [ ] Open Settings (parental lock) and verify the install row shows "How to Install"
+- [ ] Tap "How to Install" and verify the overlay shows Share → Add to Home Screen steps
+- [ ] Follow the steps to add to home screen
 - [ ] Verify app name appears as "Aby's Little Lab"
 - [ ] Launch app from home screen
 - [ ] Verify standalone mode (no browser UI)
@@ -54,8 +56,10 @@ pnpm exec serve dist -l 3000
 
 #### Android/Chrome
 - [ ] Open the HTTPS private-host or HTTPS-tunnel URL in Chrome
-- [ ] Tap "Add to Home Screen" prompt or menu option
-- [ ] Verify app installs successfully
+- [ ] Open Settings (parental lock) and verify the context-aware install row shows "Install App"
+- [ ] Tap "Install App" and verify the browser install prompt appears
+- [ ] Confirm the install and verify the app installs successfully
+- [ ] After install, open Settings again and verify the install row is hidden (already installed)
 - [ ] Launch app from home screen
 - [ ] Verify standalone mode
 - [ ] Verify fullscreen display where the platform supports it
@@ -217,8 +221,11 @@ pnpm exec serve dist -l 3000
 - [ ] Make a small code change
 - [ ] Rebuild and redeploy
 - [ ] Refresh the app while online
-- [ ] Verify update is applied automatically
+- [ ] On the Hub, verify the "New version ready!" toast appears
+- [ ] Tap "Update now" and verify the new version loads
+- [ ] Tap "Later" and verify the app keeps running on the old version
 - [ ] Verify no data loss during update
+- [ ] On first successful SW install, verify the "Ready to play offline!" toast appears
 
 ### E. Performance Testing
 

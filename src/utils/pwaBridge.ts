@@ -38,6 +38,19 @@ export interface PwaBridge {
   offlineReadyShown(): boolean;
 }
 
+let appBridge: PwaBridge | null = null;
+
+/** Initializes the app-wide bridge; call once at startup with the real registerSW. */
+export function initPwaBridge(registerSW: RegisterSWFn): PwaBridge {
+  appBridge = createPwaBridge(registerSW);
+  return appBridge;
+}
+
+/** Returns the app-wide bridge, or null before initialization. */
+export function getPwaBridge(): PwaBridge | null {
+  return appBridge;
+}
+
 /** Creates a PWA bridge backed by the given registerSW implementation. */
 export function createPwaBridge(registerSW: RegisterSWFn): PwaBridge {
   const listeners = new Set<(event: PwaEvent) => void>();

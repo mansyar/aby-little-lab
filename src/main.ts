@@ -1,4 +1,5 @@
 import "./styles/style.css";
+import { registerSW } from "virtual:pwa-register";
 import Phaser from "phaser";
 import { AnimalTraceScene } from "./scenes/AnimalTraceScene";
 import { BigSmallScene } from "./scenes/BigSmallScene";
@@ -10,6 +11,7 @@ import { PopFreezeScene } from "./scenes/PopFreezeScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 import { ShadowMatchScene } from "./scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "./scenes/ShapeSorterScene";
+import { initPwaBridge } from "./utils/pwaBridge";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -39,5 +41,9 @@ const config: Phaser.Types.Core.GameConfig = {
     PatternBuilderScene,
   ],
 };
+
+// Initialize the PWA bridge before the game boots so HubScene can receive
+// update/offline events the moment it becomes active.
+initPwaBridge(registerSW);
 
 new Phaser.Game(config);
