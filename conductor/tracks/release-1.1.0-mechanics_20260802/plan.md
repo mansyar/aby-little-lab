@@ -41,7 +41,7 @@
   - [x] Confirm Deploy to Coolify job green — ✓ (5s)
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
-## Phase 4: Post-Deploy Verification (Automatable)
+## Phase 4: Post-Deploy Verification (Automatable) [checkpoint: afcb8fb]
 
 - [x] **Task: Verify live index + entry JS hash**
   - [x] Fetch live `index.html` (200); compare entry JS hash to local `dist/assets/index-*.js` — live `index-BRXHqYbm.js` matches fresh post-bump local build
