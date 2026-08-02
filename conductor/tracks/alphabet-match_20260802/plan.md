@@ -24,7 +24,7 @@
 
 ## Phase 4: AlphabetScene — `src/scenes/AlphabetScene.ts` (TDD)
 
-- [ ] Task: Write scene tests (`src/__tests__/scenes/alphabetScene.test.ts`) — target letter + 4 cards rendered; correct tap advances round (chime, mascot cheer, dot pop); incorrect tap wiggles with no penalty/no advance; TTS spoken per round start respecting SFX toggle; win at 6 → celebration + sticker (first completion only) + `justEarned: "alphabet-match"` + auto-return after 3s; parental lock exit; reduced-motion variants
+- [~] Task: Write scene tests (`src/__tests__/scenes/alphabetScene.test.ts`) — target letter + 4 cards rendered; correct tap advances round (chime, mascot cheer, dot pop); incorrect tap wiggles with no penalty/no advance; TTS spoken per round start respecting SFX toggle; win at 6 → celebration + sticker (first completion only) + `justEarned: "alphabet-match"` + auto-return after 3s; parental lock exit; reduced-motion variants
 - [ ] Task: Implement `AlphabetScene` until tests pass (Red → Green); register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
