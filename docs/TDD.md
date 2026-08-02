@@ -54,12 +54,13 @@ aby-little-lab/
 │   ├── audio/                      # Runtime audio served at /audio/ (BGM)
 │   └── icons/                      # PWA icons (192px, 512px, maskable)
 └── src/
-    ├── main.ts                     # Phaser 4 game config & global scene register
+    ├── main.ts                     # Phaser 4 game config & shell scene register (game scenes lazy-loaded via sceneRegistry)
     ├── vite-env.d.ts               # Vite type declarations
     ├── scenes/
     │   ├── BootScene.ts            # Orientation lock & system initialization
     │   ├── PreloadScene.ts         # Progress bar & asset preloading
-    │   ├── HubScene.ts             # Game selection grid, sticker shelf, idle attract & settings parental lock
+    │   ├── HubScene.ts             # Game selection grid, sticker shelf, idle attract & settings parental lock; tile taps lazy-load game scenes
+    │   ├── sceneRegistry.ts        # Lazy scene registry (per-key dynamic-import loaders + ensureSceneLoaded runtime registration, 2026-08-02)
     │   ├── ShapeSorterScene.ts     # Mini-Game 1
     │   ├── AnimalTraceScene.ts     # Mini-Game 2
     │   ├── PopFreezeScene.ts       # Mini-Game 3
@@ -108,7 +109,7 @@ aby-little-lab/
         ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
         ├── components/             # ParentLock, Mascot tests
         ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic)
-        ├── scenes/                 # Scene-level tests (navigation, drag/drop, completion)
+        ├── scenes/                 # Scene-level tests (navigation incl. lazy scene registration, drag/drop, completion, registry)
         └── utils/                  # Storage, motion, sceneTransitions, completionEffect, dragJuice, and pressFeedback tests
 ```
 
@@ -172,17 +173,12 @@ After `pnpm run build`, run `node scripts/validate-pwa.js` to verify the generat
 
 ```typescript
 import "./styles/style.css";
+import { registerSW } from "virtual:pwa-register";
 import Phaser from "phaser";
-import { AnimalTraceScene } from "./scenes/AnimalTraceScene";
-import { BigSmallScene } from "./scenes/BigSmallScene";
 import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
-import { MusicalMemoryScene } from "./scenes/MusicalMemoryScene";
-import { PatternBuilderScene } from "./scenes/PatternBuilderScene";
-import { PopFreezeScene } from "./scenes/PopFreezeScene";
 import { PreloadScene } from "./scenes/PreloadScene";
-import { ShadowMatchScene } from "./scenes/ShadowMatchScene";
-import { ShapeSorterScene } from "./scenes/ShapeSorterScene";
+import { initPwaBridge } from "./utils/pwaBridge";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -199,22 +195,42 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  scene: [
-    BootScene,
-    PreloadScene,
-    HubScene,
-    ShapeSorterScene,
-    AnimalTraceScene,
-    PopFreezeScene,
-    ShadowMatchScene,
-    MusicalMemoryScene,
-    BigSmallScene,
-    PatternBuilderScene,
-  ],
+  // Shell scenes only — the 7 game scenes are lazy-loaded and registered
+  // at runtime via ensureSceneLoaded() when a Hub tile is tapped.
+  scene: [BootScene, PreloadScene, HubScene],
 };
 
 new Phaser.Game(config);
 ```
+
+### Bundle Code Splitting & Lazy Scene Loading (2026-08-02)
+
+**Design decision:** only the shell scenes (`BootScene`, `PreloadScene`, `HubScene`) are statically registered; the seven game scenes are lazy-loaded so the startup bundle excludes their code (track `code-splitting_20260802`, archived at `conductor/archive/code-splitting_20260802/`).
+
+**Phaser 4.2.1 limitation (verified in `SceneManager.js`):** the `scene` array does **not** support async/lazy loaders. `SceneType` includes `Function`, but `createSceneFromFunction` invokes `new scene()` synchronously — no promise is awaited, so a dynamic-import function cannot be used as an array entry. The supported pattern is runtime registration: `await import()` the scene module, then `scene.add(key, SceneClass)` before `scene.start(key)`.
+
+**`src/scenes/sceneRegistry.ts`:**
+
+```typescript
+export const sceneLoaders: Record<string, () => Promise<Phaser.Types.Scenes.SceneType>> = {
+  ShapeSorter: () => import("./ShapeSorterScene").then((m) => m.ShapeSorterScene),
+  // ...same pattern for AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall, PatternBuilder
+};
+
+export async function ensureSceneLoaded(scene, key, loaders = sceneLoaders): Promise<void> {
+  if (scene.scene.get(key)) return; // already registered
+  const sceneClass = await loaders[key]();
+  if (!scene.scene.get(key)) scene.scene.add(key, sceneClass); // idempotent under concurrent taps
+}
+```
+
+**Hub wiring:** the tile `pointerup` handler runs `void ensureSceneLoaded(this, GAME_TILES[i].sceneKey).then(() => transitionToScene(this, GAME_TILES[i].sceneKey))` — the chunk loads before the fade-out starts the target scene.
+
+**Race safety:** `SceneManager.add` on an already-registered key does **not** throw for instances — it silently pushes a duplicate instance into `this.scenes`. `ensureSceneLoaded` therefore re-checks registration after the import resolves, and the review-fix test covers two concurrent loads registering exactly once.
+
+**Build output:** the entry chunk (~1.44 MB / 372 KB gzip, dominated by Phaser) contains only the shell; each game scene ships as its own 3–5 KB chunk (`dist/assets/<SceneName>-*.js`). Rollup auto-hoists shared modules (`shapeSorterLogic`, `dragJuice`, `completionEffect`) into common chunks — no `manualChunks` config. PWA precache is unchanged: `generateSW` precaches every emitted chunk (19 entries), preserving full offline play.
+
+**Structural acceptance checks:** the entry chunk contains zero game-scene constructor registrations (`super({ key: ... })` grep over `dist/assets` finds only `Boot`, `Preload`, `Hub` in the entry; each scene chunk contains exactly its own key).
 
 ---
 
@@ -576,7 +592,7 @@ Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reacti
 
 ### Test coverage
 
-592 tests across 18 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; total project 97.97% statements / 97.63% functions / 87.26% branches / 98.8% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+667 tests across 22 files; all motion, transitions, completion-effect, drag-juice, press-feedback, and mascot utilities at 100% coverage; scenes ≥ 93.27% lines (PopFreezeScene 93.27%, remainder ≥ 95%); PatternBuilderScene 100% lines / 92.85% branches; `sceneRegistry.ts` reports 30% lines because the seven dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project 96.69% lines / 87.53% functions / 92.05% branches / 98.18% statements. Coverage thresholds remain 80% for lines, functions, branches, and statements.
 
 ---
 

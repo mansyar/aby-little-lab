@@ -10,6 +10,7 @@ import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { hasSticker } from "../utils/storage";
+import { ensureSceneLoaded } from "./sceneRegistry";
 
 interface GameTile {
   sceneKey: string;
@@ -157,7 +158,11 @@ export class HubScene extends Phaser.Scene {
       // releasing outside the tile (pointerout/pointercancel) cancels.
       tile.on("pointerup", () => {
         startAudio();
-        transitionToScene(this, GAME_TILES[i].sceneKey);
+        // Lazy-load the game chunk (dynamic import + scene registration)
+        // before the fade-out transition starts the target scene.
+        void ensureSceneLoaded(this, GAME_TILES[i].sceneKey).then(() => {
+          transitionToScene(this, GAME_TILES[i].sceneKey);
+        });
       });
 
       const label = this.add.text(x, y, GAME_TILES[i].label, {

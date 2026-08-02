@@ -316,6 +316,11 @@ vi.mock("../../utils/pwaBridge", () => ({
   getPwaBridge: () => mockBridge,
 }));
 
+const mockEnsureSceneLoaded = vi.hoisted(() => vi.fn(async () => {}));
+vi.mock("../../scenes/sceneRegistry", () => ({
+  ensureSceneLoaded: mockEnsureSceneLoaded,
+}));
+
 /** Emits a PWA lifecycle event through the mock bridge's subscribed listener. */
 function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
   mockBridgeState.listener?.(event);
@@ -333,6 +338,7 @@ import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
+import { ensureSceneLoaded } from "../../scenes/sceneRegistry";
 import { earnSticker, hasSticker, resetProgress } from "../../utils/storage";
 
 const GAME_SCENES = [
@@ -793,17 +799,21 @@ describe("scene navigation flow", () => {
       expect(hasSticker).toHaveBeenCalledTimes(7);
     });
 
-    it("navigates to each game scene when respective tile is clicked", () => {
+    it("navigates to each game scene when respective tile is clicked", async () => {
       const scene = new HubScene();
       scene.create();
 
       triggerAllPointerups(scene);
+      // The tile handler awaits the (mocked) lazy scene loader before
+      // transitioning, so flush the pending microtask before fading out.
+      await new Promise((resolve) => setTimeout(resolve, 0));
       completeFadeOuts(scene);
 
       const startMock = getMockFn(scene.scene.start);
       const startedKeys = startMock.mock.calls.map((call) => call[0] as string);
 
       for (const key of GAME_SCENE_KEYS) {
+        expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, key);
         expect(startedKeys).toContain(key);
       }
     });
@@ -1171,12 +1181,14 @@ describe("scene navigation flow", () => {
       }
     });
 
-    it("keeps tile taps navigating to games after press feedback is attached", () => {
+    it("keeps tile taps navigating to games after press feedback is attached", async () => {
       const scene = new HubScene();
       scene.create();
       completeHubEntrances(scene);
 
       triggerAllPointerups(scene);
+      // Flush the mocked lazy-loader microtask before fading out.
+      await new Promise((resolve) => setTimeout(resolve, 0));
       completeFadeOuts(scene);
 
       const startedKeys = getMockFn(scene.scene.start).mock.calls.map((call) => call[0] as string);

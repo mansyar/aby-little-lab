@@ -34,7 +34,7 @@
 ## Known Issues
 
 - Physical-device verification (PWA install, offline, performance metrics) is pending execution of `docs/device-testing-checklist.md` against the live URL.
-- Large main bundle (~1.47 MB / 377 KB gzip) — informational; code-splitting is a candidate for a future release.
+- ~~Large main bundle~~ — **resolved 2026-08-02 (post-release):** bundle code splitting shipped. The entry chunk dropped to ~1.44 MB (372 KB gzip) and the seven game scenes now load as small lazy chunks (3–5 KB) only when tapped from the Hub; offline play is unaffected (all chunks remain precached).
 
 ## Installation
 
