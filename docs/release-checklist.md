@@ -157,6 +157,18 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [ ] All games function properly — **manual** (browser/device, pending)
 - [x] Audio works correctly — `bgm.mp3` 200; SFX synthesis validated via AudioManager tests (manual listen pending)
 
+### Step 7b: Verify Deployment — v1.1.0 (2026-08-02)
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `30745388316`** (Quality Gates 52s ✓, Deploy to Coolify 5s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo (`44676ad`); live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-BRXHqYbm.js` hash matches fresh local build)
+- [x] Version footer data — `1.1.0` embedded in served bundle
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [ ] PWA installation works — **manual** (browser/device, pending; install row in Settings → "Install App" on Android, "How to Install" on iOS)
+- [ ] Parental Settings: Settings panel shows a muted version footer matching the deployed version (`v1.1.0`) — **manual** (browser/device, pending)
+- [ ] Offline functionality works — **manual** (installed PWA, pending)
+- [ ] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it — **manual** (pending)
+- [ ] All games function properly — **manual** (browser/device, pending)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
