@@ -10,8 +10,8 @@
 
 ## Phase 2: TTS Utility — `src/utils/speech.ts` (TDD)
 
-- [ ] Task: Write failing unit tests for `speakLetter` — support detection; en-US utterance with gentle rate; cancels prior utterances; respects enabled flag (SFX toggle); never throws when API unavailable
-- [ ] Task: Implement `src/utils/speech.ts` until tests pass (Red → Green)
+- [x] Task: Write failing unit tests for `speakLetter` — support detection; en-US utterance with gentle rate; cancels prior utterances; respects enabled flag (SFX toggle); never throws when API unavailable `f4fc40b`
+- [x] Task: Implement `src/utils/speech.ts` until tests pass (Red → Green) `1b9c2b0`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Assets, Registry & Storage Integration
