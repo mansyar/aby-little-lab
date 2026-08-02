@@ -4,8 +4,8 @@
 
 ## Phase 1: Pure Game Logic — `src/game/alphabetLogic.ts` (TDD)
 
-- [ ] Task: Write failing unit tests for `alphabetLogic` — playthrough draws 6 unique letters uniformly from A–Z (no duplicates); each round has 4 unique cards (1 target + 3 distinct distractors) with exactly one correct answer; answer evaluation; win detection at 6 correct
-- [ ] Task: Implement `src/game/alphabetLogic.ts` until tests pass (Red → Green)
+- [x] Task: Write failing unit tests for `alphabetLogic` — playthrough draws 6 unique letters uniformly from A–Z (no duplicates); each round has 4 unique cards (1 target + 3 distinct distractors) with exactly one correct answer; answer evaluation; win detection at 6 correct `08775fd`
+- [x] Task: Implement `src/game/alphabetLogic.ts` until tests pass (Red → Green) `08570ee`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: TTS Utility — `src/utils/speech.ts` (TDD)
