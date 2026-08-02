@@ -31,8 +31,8 @@
 
 ## Phase 3: Validate PWA Precache & Offline Guarantee
 
-- [ ] Task: Inspect generated `dist/sw.js` — precache manifest includes all new chunks (AC5)
-- [ ] Task: Confirm no changes to `vite.config.ts` PWA options are needed (default `globPatterns` covers emitted chunks)
+- [x] Task: Inspect generated `dist/sw.js` — precache manifest includes all new chunks (AC5)
+- [x] Task: Confirm no changes to `vite.config.ts` PWA options are needed (default `globPatterns` covers emitted chunks)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Quality Gates & Manual Verification
