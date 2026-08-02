@@ -205,9 +205,7 @@ export class HubScene extends Phaser.Scene {
       target: settingsButton,
       onSuccess: () => {
         this.settingsPanel?.destroy();
-        this.settingsPanel = new SettingsPanel(this, undefined, () =>
-          this.rerenderStickerShelf(),
-        );
+        this.settingsPanel = new SettingsPanel(this, undefined, () => this.rerenderStickerShelf());
       },
       onFailure: () => {
         // No action needed on failure.

@@ -34,11 +34,7 @@ export class SettingsPanel {
    * @param onProgressReset - Called after a confirmed progress reset so the
    *   parent scene can re-render anything derived from the sticker collection.
    */
-  constructor(
-    scene: Phaser.Scene,
-    installTracker?: InstallTracker,
-    onProgressReset?: () => void,
-  ) {
+  constructor(scene: Phaser.Scene, installTracker?: InstallTracker, onProgressReset?: () => void) {
     this.scene = scene;
     this.onProgressReset = onProgressReset;
     this.installTracker =
@@ -302,21 +298,13 @@ export class SettingsPanel {
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
-      this.createModalButton(
-        centerX,
-        centerY + 45,
-        "Cancel",
-        PRIMARY_COLOR,
-        () => this.closeResetModal(),
+      this.createModalButton(centerX, centerY + 45, "Cancel", PRIMARY_COLOR, () =>
+        this.closeResetModal(),
       ),
     );
     this.overlayObjects.push(
-      this.createModalButton(
-        centerX,
-        centerY + 125,
-        "Reset",
-        DANGER_COLOR,
-        () => this.confirmReset(),
+      this.createModalButton(centerX, centerY + 125, "Reset", DANGER_COLOR, () =>
+        this.confirmReset(),
       ),
     );
   }
