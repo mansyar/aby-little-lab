@@ -190,6 +190,10 @@ pnpm exec serve dist -l 3000
 - [ ] SFX toggle works (on/off)
 - [ ] Settings persist after app close/reopen
 - [ ] Settings affect audio playback
+- [ ] Version footer shows the deployed version (e.g., `v1.0.0`) at the bottom of the panel and is not tappable
+- [ ] "Reset Progress" row opens the "Reset all stickers?" confirm modal; Cancel closes it without changes
+- [ ] Reset clears every sticker (Hub shelf dims immediately), preserves BGM/SFX settings, and the row shows "Progress cleared"
+- [ ] Reset persists after app close/reopen (stickers stay cleared, settings stay unchanged)
 
 #### Parental Lock
 - [ ] Hold-for-3-seconds mechanism works on Hub Settings and every game Back control
