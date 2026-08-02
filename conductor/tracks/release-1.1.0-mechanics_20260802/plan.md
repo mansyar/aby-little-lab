@@ -18,7 +18,7 @@
   - [x] Commit plan update `conductor(plan): Mark task ... as complete`
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
-## Phase 2: Finalize Release Documentation
+## Phase 2: Finalize Release Documentation [checkpoint: a2d1159]
 
 - [x] **Task: Finalize `docs/release-notes-v1.1.0.md`**
   - [x] Flip status Draft → final; add date; reflect merged state
