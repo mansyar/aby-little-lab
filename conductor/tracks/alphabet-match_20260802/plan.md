@@ -22,11 +22,11 @@
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `baafb07`
 - [ ] Task: Register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts` *(moved from Phase 3 → Phase 4: Vitest fails to resolve the dynamic import until `AlphabetScene.ts` exists, so registration ships with the scene in Phase 4)*
 
-## Phase 4: AlphabetScene — `src/scenes/AlphabetScene.ts` (TDD)
+## Phase 4: AlphabetScene — `src/scenes/AlphabetScene.ts` (TDD) `[checkpoint: 9bc9b2f]`
 
-- [~] Task: Write scene tests (`src/__tests__/scenes/alphabetScene.test.ts`) — target letter + 4 cards rendered; correct tap advances round (chime, mascot cheer, dot pop); incorrect tap wiggles with no penalty/no advance; TTS spoken per round start respecting SFX toggle; win at 6 → celebration + sticker (first completion only) + `justEarned: "alphabet-match"` + auto-return after 3s; parental lock exit; reduced-motion variants
-- [ ] Task: Implement `AlphabetScene` until tests pass (Red → Green); register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write failing scene tests `src/__tests__/scenes/alphabetScene.test.ts` — target + 4 cards rendered; correct tap advances round with chime/mascot cheer/dot pop; incorrect tap wiggles, no penalty, no advance; TTS per round start respecting SFX toggle; win at 6 → celebration + sticker first-completion-only + `justEarned: 'alphabet-match'` + auto-return 3s; parental lock exit; reduced-motion variants `f4faf01`
+- [x] Task: Implement `AlphabetScene` until tests pass (Red → Green); register `Alphabet` lazy loader in `src/scenes/sceneRegistry.ts` `2bef73e`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `9bc9b2f`
 
 ## Phase 5: Hub Integration, Docs & Quality Gates
 
