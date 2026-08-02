@@ -1,0 +1,4 @@
+Task: Validate PWA Precache & Offline Guarantee (9344d5a)
+AC5 PASS: dist/sw.js precache manifest contains all 7 game-scene chunks (AnimalTraceScene-XZK3dLY4.js, BigSmallScene-DgKgYT4Y.js, MusicalMemoryScene-CTkQhAcg.js, PatternBuilderScene-L-bpM6TB.js, PopFreezeScene-BZq3TY0h.js, ShadowMatchScene-CeR4eSC2.js, ShapeSorterScene-Dv0i8gYn.js), shared chunks (shapeSorterLogic, dragJuice, completionEffect), entry chunk, plus audio/manifest/index.html — 19 precache entries total, matching build output. Offline guarantee unchanged: all chunks precached at SW install, no runtime-only caching.
+vite.config.ts: no PWA option changes needed — default globPatterns covered every emitted chunk (verified empirically in sw.js).
+No source changes this phase; verification-only.
