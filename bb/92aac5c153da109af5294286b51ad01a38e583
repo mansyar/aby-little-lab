@@ -1,0 +1,9 @@
+Phase 1 (Baseline Gates & Version Bump) — verification report
+
+Automated tests: CI=true pnpm test -> 706/706 passed (25 files), 29.83s. Biome check clean (65 files), build OK, validate-pwa 13/13.
+
+Phase scope: package.json version bump 1.0.0 -> 1.1.0 (commit 78e5634) + conductor docs. No code files, no new tests required.
+
+Manual verification (human, pending): pnpm dev -> localhost:3000 -> hold Settings 3s -> version footer shows v1.1.0.
+
+User confirmation: Yes, proceed.
