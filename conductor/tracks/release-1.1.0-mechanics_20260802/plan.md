@@ -29,7 +29,7 @@
 - [x] **Task: Commit docs changes** `4962e45` (`docs(release): Finalize v1.1.0 release notes and checklist`) + git note + plan update
 - [ ] **Task: Phase Verification & Checkpoint** *(Refer to workflow.md)*
 
-## Phase 3: Tag & Deploy
+## Phase 3: Tag & Deploy [checkpoint: 8afe772]
 
 - [x] **Task: Create annotated tag** `v1.1.0` — *"Release v1.1.0: Find the Letter + PWA & parental settings refinements"*
 - [x] **Task: Push `master` + tag to `origin`**
