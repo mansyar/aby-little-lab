@@ -1,0 +1,1 @@
+Task: Expose __APP_VERSION__ via Vite define (read from package.json version) and declare the global in vite-env.d.ts. Tests now fail with assertion errors instead of ReferenceError, proving the define resolves inside vitest.
