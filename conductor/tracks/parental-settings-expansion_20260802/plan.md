@@ -1,6 +1,6 @@
 # Implementation Plan: Parental Settings Expansion — App Version & Progress Reset
 
-## Phase 1 — App Version Display
+## Phase 1 — App Version Display [checkpoint: 70cf1c4]
 
 - [x] Task: Write failing tests for the Settings footer version row (renders `__APP_VERSION__`-sourced text at the footer position; parent-facing; non-interactive) — 47dcdbe
 - [x] Task: Expose `__APP_VERSION__` via Vite `define` in `vite.config.ts` (read from `package.json` version) + declare the global in `vite-env.d.ts` — ce2978f
