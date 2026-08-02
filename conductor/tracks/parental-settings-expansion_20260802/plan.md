@@ -15,10 +15,10 @@
 - [x] Task: Implement the "Reset Progress" row + confirm modal + confirmation feedback in `SettingsPanel.ts` (Red → Green) — 5c0e8e7
 - [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Integration, Docs & Verification
+## Phase 3 — Integration, Docs & Verification [checkpoint: 0904dd9]
 
-- [ ] Task: Verify the Hub sticker shelf reflects the reset state (shelf reads storage on scene create; add/adjust test if needed)
-- [ ] Task: Update docs — dated note in `conductor/tech-stack.md` (`__APP_VERSION__` define + `resetProgress`), parental-settings section in `docs/PRD.md` / `docs/TDD.md` / `docs/release-checklist.md`
-- [ ] Task: Full quality gate run — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
-- [ ] Task: Manual device verification (version display + reset flow on tablet/phone) — documented in checklist
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Verify the Hub sticker shelf reflects the reset state (shelf reads storage on scene create; add/adjust test if needed) — 9eb2f0b
+- [x] Task: Update docs — dated note in `conductor/tech-stack.md` (`__APP_VERSION__` define + `resetProgress`), parental-settings section in `docs/PRD.md` / `docs/TDD.md` / `docs/release-checklist.md` — f9c3ba9
+- [x] Task: Full quality gate run — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` — 0b8a6f4 (check ✓ after format fix, 662/662 tests, build ✓, validate-pwa 13/13 ✓)
+- [x] Task: Manual device verification (version display + reset flow on tablet/phone) — documented in checklist (items added in f9c3ba9; execution pending human device test)
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
