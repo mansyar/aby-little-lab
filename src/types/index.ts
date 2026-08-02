@@ -5,7 +5,8 @@ export type GameId =
   | "shadow-match"
   | "musical-memory"
   | "big-small"
-  | "pattern-builder";
+  | "pattern-builder"
+  | "alphabet-match";
 
 export interface StickerData {
   earned: boolean;

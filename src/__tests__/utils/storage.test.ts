@@ -19,6 +19,7 @@ const GAME_IDS: GameId[] = [
   "musical-memory",
   "big-small",
   "pattern-builder",
+  "alphabet-match",
 ];
 
 describe("Storage utilities", () => {
@@ -77,6 +78,35 @@ describe("Storage utilities", () => {
       expect(result.settings.bgmEnabled).toBe(false);
       expect(result.settings.sfxEnabled).toBe(true);
     });
+
+    it("migrates a save from before Game 8 by backfilling the alphabet-match sticker entry", () => {
+      // Simulate a save from before Game 8 shipped: no "alphabet-match" key.
+      const oldSave = {
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+          "animal-trace": { earned: false, earnedAt: null },
+          "pop-freeze": { earned: false, earnedAt: null },
+          "shadow-match": { earned: false, earnedAt: null },
+          "musical-memory": { earned: false, earnedAt: null },
+          "big-small": { earned: false, earnedAt: null },
+          "pattern-builder": { earned: true, earnedAt: "2026-08-01T00:00:00.000Z" },
+        },
+        settings: { bgmEnabled: true, sfxEnabled: false },
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(oldSave));
+
+      const result = load();
+
+      expect(result.stickers["alphabet-match"]).toEqual({
+        earned: false,
+        earnedAt: null,
+      });
+      // Existing progress and settings are preserved.
+      expect(result.stickers["pattern-builder"].earned).toBe(true);
+      expect(result.stickers["shape-sorter"].earned).toBe(true);
+      expect(result.settings.bgmEnabled).toBe(true);
+      expect(result.settings.sfxEnabled).toBe(false);
+    });
   });
 
   describe("save", () => {
@@ -90,6 +120,7 @@ describe("Storage utilities", () => {
           "musical-memory": { earned: false, earnedAt: null },
           "big-small": { earned: false, earnedAt: null },
           "pattern-builder": { earned: false, earnedAt: null },
+          "alphabet-match": { earned: false, earnedAt: null },
         },
         settings: {
           bgmEnabled: false,
