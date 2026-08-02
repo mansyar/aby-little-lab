@@ -1,0 +1,9 @@
+Phase 4 (Post-Deploy Verification) - verification report
+
+Automated checks (all green): live index 200 with entry index-BRXHqYbm.js matching fresh post-bump local build; '1.1.0' embedded in served bundle (1455489 bytes); sw.js 200; manifest.webmanifest 200.
+
+Docs: Step 7b v1.1.0 record added to release-checklist.md (e3bbad6).
+
+Manual verification (human, pending): version footer shows v1.1.0 in Settings; Game 8 playable on device; full docs/device-testing-checklist.md.
+
+User confirmation: Yes, proceed.
