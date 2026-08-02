@@ -22,3 +22,6 @@
 - [x] Task: Full quality gate run — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` — 0b8a6f4 (check ✓ after format fix, 662/662 tests, build ✓, validate-pwa 13/13 ✓)
 - [x] Task: Manual device verification (version display + reset flow on tablet/phone) — documented in checklist (items added in f9c3ba9; execution pending human device test)
 - [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions (clear `stickerImages` on Hub shutdown + regression test) — 37de77f
