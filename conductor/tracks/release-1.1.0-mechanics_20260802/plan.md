@@ -1,6 +1,6 @@
 # Plan: v1.1.0 Release Mechanics
 
-## Phase 1: Baseline Gates & Version Bump
+## Phase 1: Baseline Gates & Version Bump [checkpoint: 9ae169a]
 
 - [x] **Task: Run local quality gates (baseline green)**
   - [x] Run `pnpm run check` (Biome lint + format)
