@@ -2,9 +2,9 @@
 
 ## Phase 1 — App Version Display
 
-- [ ] Task: Write failing tests for the Settings footer version row (renders `__APP_VERSION__`-sourced text at the footer position; parent-facing; non-interactive)
-- [ ] Task: Expose `__APP_VERSION__` via Vite `define` in `vite.config.ts` (read from `package.json` version) + declare the global in `vite-env.d.ts`
-- [ ] Task: Implement the footer version row in `SettingsPanel.ts` (Red → Green)
+- [x] Task: Write failing tests for the Settings footer version row (renders `__APP_VERSION__`-sourced text at the footer position; parent-facing; non-interactive) — 47dcdbe
+- [x] Task: Expose `__APP_VERSION__` via Vite `define` in `vite.config.ts` (read from `package.json` version) + declare the global in `vite-env.d.ts` — ce2978f
+- [x] Task: Implement the footer version row in `SettingsPanel.ts` (Red → Green) — 4ee2ec1
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Reset Progress (logic + UI)
