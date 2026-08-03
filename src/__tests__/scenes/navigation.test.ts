@@ -346,6 +346,7 @@ import {
   getActiveProfile,
   hasSticker,
   resetProgress,
+  switchProfile,
 } from "../../utils/storage";
 
 const GAME_SCENES = [
@@ -945,6 +946,24 @@ describe("scene navigation flow", () => {
       expect(getActiveProfile().id).toBe("p2");
       expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
       expect(hasSticker).toHaveBeenCalledTimes(10);
+    });
+
+    it("renders the sticker shelf for the active profile only", () => {
+      // Award a sticker on p1 (default), then create p2 as the active profile.
+      earnSticker("shape-sorter");
+      addProfile("dog");
+      const scene = new HubScene();
+      scene.create();
+
+      // p2 shelf render: shape-sorter is NOT earned.
+      expect(hasSticker.mock.results[0]?.value).toBe(false);
+
+      // Switch back to p1 and re-render: shape-sorter IS earned.
+      switchProfile("p1");
+      scene.rerenderStickerShelf();
+
+      expect(hasSticker.mock.results[10]?.value).toBe(true);
+      expect(hasSticker.mock.calls).toHaveLength(20);
     });
   });
 
