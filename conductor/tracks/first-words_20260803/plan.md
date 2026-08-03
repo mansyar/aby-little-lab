@@ -72,11 +72,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 ## Phase 2: Game 9 — Find the Word (WordMatchScene)
 
 ### Task 2.1 — Scene shell
-- [ ] Write scene tests alongside: `src/__tests__/scenes/wordMatchScene.test.ts`
+- [x] Write scene tests alongside: `src/__tests__/scenes/wordMatchScene.test.ts`
       (shell elements: entrance, mascot, parent-locked Back, 6 progress dots)
-- [ ] Implement `src/scenes/WordMatchScene.ts` shell mirroring AlphabetScene
+- [x] Implement `src/scenes/WordMatchScene.ts` shell mirroring AlphabetScene
       (sceneEntrance, corner mascot, ParentLock + 96px Back, progress dots)
-- [ ] Commit `feat(scenes): Add Find the Word scene shell` + plan commit
+- [x] Commit `feat(scenes): Add Find the Word scene shell` + plan commit
+      — `d7c859d`
 
 ### Task 2.2 — Round rendering
 - [ ] Tests: prompt picture (~180px) top-center from `wordLogic` texture key;
