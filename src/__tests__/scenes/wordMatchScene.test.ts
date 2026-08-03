@@ -255,9 +255,9 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-import { earnSticker, updateSettings } from "../../utils/storage";
 import { getWord } from "../../game/wordLogic";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
+import { earnSticker, updateSettings } from "../../utils/storage";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -344,9 +344,7 @@ function tapCard(scene: unknown, cardIndex: number): void {
 
 /** Fires the next-round delay (700ms) so the round advances. */
 function fireNextRoundDelay(scene: unknown): void {
-  const delayedCallMock = getMockFn(
-    (scene as { time: Record<string, unknown> }).time.delayedCall,
-  );
+  const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
   const nextRoundCall = delayedCallMock.mock.calls.find((call) => call[0] === 700);
   expect(nextRoundCall).toBeDefined();
   if (nextRoundCall && typeof nextRoundCall[1] === "function") {
@@ -363,9 +361,7 @@ function completeRound(scene: unknown): void {
 
 /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
 function fireAutoReturn(scene: unknown): void {
-  const delayedCallMock = getMockFn(
-    (scene as { time: Record<string, unknown> }).time.delayedCall,
-  );
+  const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
   const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
   expect(autoReturnCall).toBeDefined();
   if (autoReturnCall && typeof autoReturnCall[1] === "function") {
@@ -516,9 +512,11 @@ describe("WordMatchScene round rendering", () => {
       for (let j = 0; j < word.length; j++) {
         expect(getMockFn(letters[j].setDisplaySize)).toHaveBeenCalledWith(80, 80);
       }
-      const keys = (getMockFn((scene as { add: Record<string, unknown> }).add.image).mock
-        .calls as Array<[number, number, string]>)
-        .filter((call) => typeof call[2] === "string" && call[2].startsWith("letter_"));
+      const keys = (
+        getMockFn((scene as { add: Record<string, unknown> }).add.image).mock.calls as Array<
+          [number, number, string]
+        >
+      ).filter((call) => typeof call[2] === "string" && call[2].startsWith("letter_"));
       const cardLetterKeys = keys.filter((call) => {
         const [x, y] = call as [number, number];
         const row = y === CARD_ROW_YS[0] ? 0 : 1;

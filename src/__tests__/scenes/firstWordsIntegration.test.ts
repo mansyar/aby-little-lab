@@ -296,7 +296,9 @@ function getMockFn(fn: unknown): MockFn {
 
 /** Fires the callback passed to the latest `cameras.main.fadeOut` call. */
 function completeFadeOuts(scene: unknown): void {
-  const fadeOut = getMockFn((scene as { cameras: { main: { fadeOut: unknown } } }).cameras.main.fadeOut);
+  const fadeOut = getMockFn(
+    (scene as { cameras: { main: { fadeOut: unknown } } }).cameras.main.fadeOut,
+  );
   const last = fadeOut.mock.calls.at(-1);
   if (!last) throw new Error("no fadeOut call");
   (last[4] as () => void)();
@@ -304,7 +306,8 @@ function completeFadeOuts(scene: unknown): void {
 
 /** Fires the callback of the LATEST time.delayedCall registered with `delay`. */
 function fireDelayedCall(scene: unknown, delay: number): void {
-  const calls = getMockFn((scene as { time: { delayedCall: unknown } }).time.delayedCall).mock.calls;
+  const calls = getMockFn((scene as { time: { delayedCall: unknown } }).time.delayedCall).mock
+    .calls;
   const match = calls.filter((call) => call[0] === delay).at(-1);
   if (!match) throw new Error(`no delayedCall registered with delay ${delay}`);
   (match[1] as () => void)();
@@ -375,7 +378,10 @@ describe("First Words integration flows", () => {
     const wordMatch = new WordMatchScene();
     wordMatch.create();
     for (let round = 0; round < 6; round++) {
-      const scene = wordMatch as unknown as { rounds: Array<{ target: string; choices: string[] }>; roundIndex: number };
+      const scene = wordMatch as unknown as {
+        rounds: Array<{ target: string; choices: string[] }>;
+        roundIndex: number;
+      };
       const current = scene.rounds[scene.roundIndex];
       const cardRects = getMockFn(wordMatch.add.rectangle).mock.results.map((r) => r.value);
       const correctIndex = current.choices.indexOf(current.target);

@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  WORD_POOL,
   generateLetterTiles,
   generateWordBuildPlaythrough,
   generateWordPlaythrough,
   generateWordRound,
   isCorrectWord,
+  WORD_POOL,
   type WordRound,
 } from "../../game/wordLogic";
 

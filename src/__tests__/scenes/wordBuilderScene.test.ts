@@ -255,9 +255,9 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-import { earnSticker, updateSettings } from "../../utils/storage";
-import { getWord, generateLetterTiles } from "../../game/wordLogic";
+import { generateLetterTiles, getWord } from "../../game/wordLogic";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
+import { earnSticker, updateSettings } from "../../utils/storage";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -333,9 +333,7 @@ function tapCard(scene: unknown, cardIndex: number): void {
 
 /** Fires the next-round delay (700ms) so the round advances. */
 function fireNextRoundDelay(scene: unknown): void {
-  const delayedCallMock = getMockFn(
-    (scene as { time: Record<string, unknown> }).time.delayedCall,
-  );
+  const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
   const nextRoundCall = delayedCallMock.mock.calls.find((call) => call[0] === 700);
   expect(nextRoundCall).toBeDefined();
   if (nextRoundCall && typeof nextRoundCall[1] === "function") {
@@ -352,9 +350,7 @@ function completeRound(scene: unknown): void {
 
 /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
 function fireAutoReturn(scene: unknown): void {
-  const delayedCallMock = getMockFn(
-    (scene as { time: Record<string, unknown> }).time.delayedCall,
-  );
+  const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
   const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
   expect(autoReturnCall).toBeDefined();
   if (autoReturnCall && typeof autoReturnCall[1] === "function") {
@@ -406,9 +402,7 @@ describe("WordBuilderScene shell", () => {
     const backCall = textMock.mock.calls.find((call) => call[2] === "← Back");
     expect(backCall).toBeDefined();
     const backIndex = textMock.mock.calls.indexOf(backCall);
-    expect(
-      getMockFn(textMock.mock.results[backIndex].value.setInteractive),
-    ).toHaveBeenCalled();
+    expect(getMockFn(textMock.mock.results[backIndex].value.setInteractive)).toHaveBeenCalled();
     expect(mockParentLockInstances).toHaveLength(1);
     expect(mockParentLockInstances[0].onSuccess).toBeDefined();
 
@@ -433,9 +427,7 @@ describe("WordBuilderScene shell", () => {
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
     }
-    expect((scene as { scene: Record<string, unknown> }).scene.start).toHaveBeenCalledWith(
-      "Hub",
-    );
+    expect((scene as { scene: Record<string, unknown> }).scene.start).toHaveBeenCalledWith("Hub");
   });
 });
 
@@ -721,9 +713,7 @@ describe("WordBuilderScene completion", () => {
 
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     const imageMock = getMockFn(scene.add.image);
-    expect(
-      imageMock.mock.calls.some((call) => call[2] === "sticker_word_builder"),
-    ).toBe(true);
+    expect(imageMock.mock.calls.some((call) => call[2] === "sticker_word_builder")).toBe(true);
 
     fireAutoReturn(scene);
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
@@ -812,14 +802,11 @@ describe("WordBuilderScene round rendering", () => {
     expect(letters.map((l) => l.key)).toEqual(
       expectedTiles.map((letter) => `letter_${letter.toLowerCase()}`),
     );
-    const firstLetterMock = getMockFn(
-      (scene as { add: Record<string, unknown> }).add.image,
-    );
+    const firstLetterMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
     const letterCall = firstLetterMock.mock.calls.find((c) => c[1] === TILE_Y);
     if (letterCall) {
       const letterIndex = firstLetterMock.mock.calls.indexOf(letterCall);
-      const letterObj = firstLetterMock.mock.results[letterIndex]
-        .value as Record<string, MockFn>;
+      const letterObj = firstLetterMock.mock.results[letterIndex].value as Record<string, MockFn>;
       expect(getMockFn(letterObj.setDisplaySize)).toHaveBeenCalledWith(80, 80);
     }
   });

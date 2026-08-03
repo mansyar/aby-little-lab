@@ -3,16 +3,16 @@ import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import {
-  generateWordBuildPlaythrough,
-  generateLetterTiles,
   type FirstWord,
+  generateLetterTiles,
+  generateWordBuildPlaythrough,
 } from "../game/wordLogic";
+import { createWinCelebration } from "../utils/completionEffect";
+import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
-import { motionDuration, motionScale, isReducedMotion } from "../utils/motion";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load, earnSticker, hasSticker } from "../utils/storage";
-import { createWinCelebration } from "../utils/completionEffect";
+import { earnSticker, hasSticker, load } from "../utils/storage";
 
 /** Number of words per playthrough. */
 const WORD_COUNT = 3;
@@ -355,11 +355,7 @@ export class WordBuilderScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(
-        this,
-        "Hub",
-        earnedNow ? { justEarned: "word-builder" } : undefined,
-      );
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "word-builder" } : undefined);
     });
   }
 
@@ -367,9 +363,7 @@ export class WordBuilderScene extends Phaser.Scene {
   private createStickerAnimation(): void {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    const sticker = this.add
-      .image(centerX, centerY, "sticker_word_builder")
-      .setScale(0);
+    const sticker = this.add.image(centerX, centerY, "sticker_word_builder").setScale(0);
     this.tweens.add({
       targets: sticker,
       scaleX: STICKER_SCALE,
