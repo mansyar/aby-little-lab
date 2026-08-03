@@ -4,6 +4,13 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — First Words (Games 9 & 10) (2026-08-03)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (First Words build, post-v1.1.0)
+- **Devices:** tablet (iPadOS 15+) + phone (iOS 15+)
+- **Result:** All First Words checks passed — Hub 10 tiles in 5×2 (no clipping, labels readable), Find the Word (2×2 word cards, picture + spoken prompt, correct chime/cheer/dot pop, gentle wrong-tap wiggle, no two cards share a first letter, 6 rounds → sticker + auto-return with just-earned highlight), Build the Word (slots + 6 letter tiles, left-to-right fill with settle pop + tick, wrong-tile wiggle, 3 words easy-first, word linger, 3 words → sticker + auto-return), SFX-off TTS silence + silent visual-only fallback, parental lock on both games' Back buttons, sticker persistence after close/reopen with no duplicates, reduced-motion behavior
+- **Issues found:** none (no Critical/High/Medium/Low)
+
 ## Execution Record — v1.1.0 (2026-08-03)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.1.0)
