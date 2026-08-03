@@ -220,6 +220,16 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
 - [x] New-word pictures render in Find the Word / Build the Word on device — SUN/HAT/BUG/DUCK spot checks (device checklist passed pre-release); deployed wordLogic chunk contains full 18-word pool (BEAR/DUCK/OWL/sm_sun confirmed in served chunk `wordLogic-CSJj7LfP.js`)
 
+### Step 7f: Verify Deployment — v1.4.0 (2026-08-04)
+- [x] PR #11 merged `release/v1.4.0` → `master` (`ce460f7`) — **2026-08-04**
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `30861443424`** (Quality Gates 1m2s ✓, Deploy to Coolify 6s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-Un88orXN.js` matches fresh 1.4.0 local build exactly, 1,466,773 bytes)
+- [x] Version footer data — `1.4.0` embedded in served bundle; no stale `1.3.0` string
+- [x] Multi-Kid Profiles code live — `abby-little-lab:v2` storage schema confirmed in served bundle
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [x] Device testing on v1.4.0 — **executed 2026-08-04 on iPad, Android tablet, iPhone, Android phone, all items passed** (profiles UI, sticker isolation, migration)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
@@ -390,6 +400,23 @@ Please report issues at [GitHub Issues URL]
 **Approval:**
 - [x] Code quality meets standards
 - [x] All tests pass (779/779)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — verified on device 2026-08-04 (device checklist all sections passed)
+- [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.4.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-04
+**Version:** 1.4.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); device testing completed **2026-08-04** on iPad, Android tablet, iPhone, and Android phone — all items passed (Multi-Kid Profiles: chip, picker, sticker isolation, migration)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (828/828)
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — verified on device 2026-08-04 (device checklist all sections passed)
