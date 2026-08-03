@@ -56,7 +56,7 @@ const CARD_PADDING = 30;
 const CARD_ROW_Y_OFFSETS = [110, 270] as const;
 
 /** Horizontal offset of the two card columns from screen center (px). */
-const CARD_COL_X_OFFSET = 200;
+const CARD_COL_X_OFFSET = 210;
 
 /** Stroke width of card outlines. */
 const OUTLINE_WIDTH = 4;

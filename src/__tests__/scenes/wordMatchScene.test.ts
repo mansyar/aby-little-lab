@@ -255,6 +255,7 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+import * as wordLogic from "../../game/wordLogic";
 import { getWord } from "../../game/wordLogic";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
@@ -545,6 +546,43 @@ describe("WordMatchScene round rendering", () => {
 
     const round = getCurrentRound(scene);
     expect(mockSpeech.speakWord).toHaveBeenCalledWith(round.target, false);
+  });
+
+  it("keeps a visible gap between two 4-letter cards sharing a row", () => {
+    // Force a deterministic playthrough where BALL and FROG share the top row.
+    vi.spyOn(wordLogic, "generateWordPlaythrough").mockReturnValue([
+      { target: "BALL", choices: ["BALL", "FROG", "CAT", "DOG"] },
+      { target: "CAT", choices: ["CAT", "FROG", "BALL", "TREE"] },
+      { target: "DOG", choices: ["DOG", "FISH", "BOAT", "PIG"] },
+      { target: "PIG", choices: ["PIG", "TREE", "BALL", "CAR"] },
+      { target: "CAR", choices: ["CAR", "FROG", "DOG", "BOAT"] },
+      { target: "FROG", choices: ["FROG", "CAT", "PIG", "BALL"] },
+    ]);
+
+    const scene = new WordMatchScene();
+    scene.create();
+
+    // add.rectangle(x, y, width, height, color) — position is the center.
+    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
+      .calls as Array<[number, number, number, number]>;
+    const FOUR_LETTER_CARD_WIDTH = 4 * 80 + 3 * 8 + 2 * 30; // 404
+    let widePairs = 0;
+    for (const rowY of CARD_ROW_YS) {
+      const rowCalls = rectCalls.filter((call) => call[1] === rowY);
+      for (let i = 0; i + 1 < rowCalls.length; i += 2) {
+        const left = rowCalls[i];
+        const right = rowCalls[i + 1];
+        if (left[2] !== FOUR_LETTER_CARD_WIDTH || right[2] !== FOUR_LETTER_CARD_WIDTH) {
+          continue;
+        }
+        widePairs += 1;
+        const leftEdge = left[0] + left[2] / 2;
+        const rightEdge = right[0] - right[2] / 2;
+        expect(leftEdge).toBeLessThan(rightEdge);
+      }
+    }
+    // The crafted playthrough must exercise the wide-card scenario at least once.
+    expect(widePairs).toBeGreaterThan(0);
   });
 });
 
