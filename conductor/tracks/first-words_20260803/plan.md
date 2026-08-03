@@ -150,7 +150,7 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 
 ---
 
-## Phase 4: Integration — Hub, registry, assets
+## Phase 4: Integration — Hub, registry, assets [checkpoint: ccf3f49]
 
 ### Task 4.1 — Sticker assets
 - [x] Add `src/assets/svg/stickers/sticker_word_match.svg` and
