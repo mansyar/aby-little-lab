@@ -8,10 +8,11 @@ import {
   type FirstWord,
 } from "../game/wordLogic";
 import { attachPressFeedback } from "../utils/pressFeedback";
-import { motionDuration, isReducedMotion } from "../utils/motion";
+import { motionDuration, motionScale, isReducedMotion } from "../utils/motion";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { load, earnSticker, hasSticker } from "../utils/storage";
+import { createWinCelebration } from "../utils/completionEffect";
 
 /** Number of words per playthrough. */
 const WORD_COUNT = 3;
@@ -71,6 +72,28 @@ const SLOT_POP_SCALE = 1.15;
 
 /** Settle-pop tween duration (ms). */
 const SLOT_POP_DURATION = 150;
+
+/** How long a finished word lingers before the next word (ms). */
+const WORD_LINGER_DELAY = 1200;
+
+/** How long the win state lingers before auto-returning to the Hub (ms). */
+const AUTO_RETURN_DELAY = 3000;
+
+/** Progress dot pop scale, normal vs reduced motion. */
+const DOT_POP_SCALE = 1.4;
+const DOT_POP_REDUCED_SCALE = 1.2;
+
+/** Progress dot pop durations (ms), normal vs reduced motion. */
+const DOT_POP_DURATION = 250;
+const DOT_POP_REDUCED_DURATION = 150;
+
+/** Source SVG size and display size for the sticker reveal (256px from 512). */
+const SVG_SIZE = 512;
+const STICKER_DISPLAY_SIZE = 256;
+const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
+
+/** Win/sticker reveal tween duration (ms). */
+const WIN_TWEEN_DURATION = 300;
 
 /**
  * Build the Word scene — a picture is shown and its word is spoken aloud, and
@@ -280,9 +303,79 @@ export class WordBuilderScene extends Phaser.Scene {
     this.filledSlots += 1;
 
     if (this.filledSlots === word.word.length) {
-      // Word fully spelled: lock input. Lingering, chime, and next-word
-      // flow land in Task 3.4.
+      // Word fully spelled: chime + cheer, pop the dot, linger, then advance.
       this.inputLocked = true;
+      this.audioManager.playCorrect();
+      this.mascot?.cheer();
+      this.fillProgressDot();
+      this.time.delayedCall(WORD_LINGER_DELAY, () => {
+        this.wordIndex += 1;
+        if (this.wordIndex < this.words.length) {
+          this.inputLocked = false;
+          this.renderRound();
+        } else {
+          this.handleComplete();
+        }
+      });
     }
+  }
+
+  /** Pops the progress dot for the just-finished word. */
+  private fillProgressDot(): void {
+    const dot = this.progressDots[this.wordIndex];
+    dot.setAlpha(1);
+    const reduced = isReducedMotion();
+    this.tweens.add({
+      targets: dot,
+      scale: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
+      ease: "Back.out",
+      yoyo: true,
+    });
+  }
+
+  /**
+   * Playthrough complete: win SFX + shared celebration, sticker on first
+   * completion, auto-return to the Hub with `justEarned`.
+   */
+  private handleComplete(): void {
+    this.inputLocked = true;
+    this.audioManager.playWin();
+    this.mascot?.cheer(true);
+
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    createWinCelebration(this, centerX, centerY);
+
+    const earnedNow = !hasSticker("word-builder");
+    if (earnedNow) {
+      earnSticker("word-builder");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      transitionToScene(
+        this,
+        "Hub",
+        earnedNow ? { justEarned: "word-builder" } : undefined,
+      );
+    });
+  }
+
+  /** Reveals the word-builder sticker with a scale-in tween. */
+  private createStickerAnimation(): void {
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    const sticker = this.add
+      .image(centerX, centerY, "sticker_word_builder")
+      .setScale(0);
+    this.tweens.add({
+      targets: sticker,
+      scaleX: STICKER_SCALE,
+      scaleY: STICKER_SCALE,
+      duration: motionDuration(WIN_TWEEN_DURATION, 180),
+      ease: "Back.out",
+    });
   }
 }

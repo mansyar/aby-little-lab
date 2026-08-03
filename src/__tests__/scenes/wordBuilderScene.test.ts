@@ -631,6 +631,122 @@ function getPromptImage(scene: unknown): Record<string, MockFn> | undefined {
     : undefined;
 }
 
+/** Taps every letter of the current word in order. */
+function fillWord(scene: unknown): void {
+  const word = getCurrentWord(scene);
+  const tiles = getTileValues(scene);
+  for (const letter of word) {
+    tapTile(scene, tiles.indexOf(letter));
+  }
+}
+
+/** Fires the word-linger delay (1200ms) so the next word starts. */
+const WORD_LINGER_DELAY = 1200;
+
+function fireWordLinger(scene: unknown): void {
+  const s = scene as { time: Record<string, MockFn> };
+  const delayedCall = getMockFn(s.time.delayedCall);
+  const call = delayedCall.mock.calls.find((c) => c[0] === WORD_LINGER_DELAY);
+  expect(call).toBeDefined();
+  if (call && typeof call[1] === "function") {
+    (call[1] as () => void)();
+  }
+}
+
+describe("WordBuilderScene completion", () => {
+  let matchMediaMock: MockFn;
+
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    mockSpeech.speakWord.mockClear();
+    mockSpeech.isSpeechSupported.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("chimes, cheers, pops a dot, and advances after a finished word lingers", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    fillWord(scene);
+
+    expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+    const mascotImage = getMascotImage(scene);
+    expect(getMockFn(mascotImage.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+    const dots = getProgressDots(scene);
+    expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
+    expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalled();
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    fireWordLinger(scene);
+
+    expect((scene as { wordIndex: number }).wordIndex).toBe(1);
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect(getTileValues(scene)).toHaveLength(6);
+    expect(getTileRects(scene)).toHaveLength(12);
+  });
+
+  it("wins after 3 words, awarding the sticker and auto-returning with justEarned", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    for (let i = 0; i < 3; i++) {
+      fillWord(scene);
+      fireWordLinger(scene);
+    }
+
+    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    const celebration = getMockFn(scene.tweens.add).mock.calls.find((call) => {
+      const t = call[0] as { scaleX?: number; scaleY?: number; alpha?: number };
+      return t?.scaleX === 1.25 && t?.scaleY === 1.25 && t?.alpha === 0;
+    });
+    expect(celebration).toBeDefined();
+
+    expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
+    const imageMock = getMockFn(scene.add.image);
+    expect(
+      imageMock.mock.calls.some((call) => call[2] === "sticker_word_builder"),
+    ).toBe(true);
+
+    fireAutoReturn(scene);
+    expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+      justEarned: "word-builder",
+    });
+  });
+
+  it("does not re-award the sticker or pass justEarned on repeat completions", () => {
+    earnSticker("word-builder");
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    for (let i = 0; i < 3; i++) {
+      fillWord(scene);
+      fireWordLinger(scene);
+    }
+
+    expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    fireAutoReturn(scene);
+    expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+  });
+});
+
 describe("WordBuilderScene round rendering", () => {
   let matchMediaMock: MockFn;
 
