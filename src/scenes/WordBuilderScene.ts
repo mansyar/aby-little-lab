@@ -9,6 +9,8 @@ import {
 } from "../game/wordLogic";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
+import { speakWord } from "../utils/speech";
+import { load } from "../utils/storage";
 
 /** Number of words per playthrough. */
 const WORD_COUNT = 3;
@@ -22,6 +24,36 @@ const PROGRESS_DOT_SPACING = 40;
 /** Radius of progress dots (px). */
 const PROGRESS_DOT_RADIUS = 8;
 
+/** Display size of the prompt picture (px). */
+const PICTURE_SIZE = 180;
+
+/** Y offset of the prompt picture from screen center. */
+const PICTURE_Y_OFFSET = -240;
+
+/** Y offset of the slot row from screen center. */
+const SLOT_Y_OFFSET = 40;
+
+/** Side length of each empty word slot (px). */
+const SLOT_SIZE = 120;
+
+/** Gap between slots (px). */
+const SLOT_GAP = 20;
+
+/** Y offset of the letter tile row from screen center. */
+const TILE_Y_OFFSET = 220;
+
+/** Side length of each letter tile (px). */
+const TILE_SIZE = 110;
+
+/** Gap between letter tiles (px). */
+const TILE_GAP = 16;
+
+/** Display size of a letter texture inside a slot or tile (px). */
+const LETTER_SIZE = 80;
+
+/** Card/tile outline width (px). */
+const OUTLINE_WIDTH = 4;
+
 /**
  * Build the Word scene — a picture is shown and its word is spoken aloud, and
  * the child spells the word by tapping letter tiles in order into word slots.
@@ -34,8 +66,15 @@ export class WordBuilderScene extends Phaser.Scene {
   private mascot?: Mascot;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
+  private readonly slotRects: Phaser.GameObjects.Rectangle[] = [];
+  private readonly tileRects: Phaser.GameObjects.Rectangle[] = [];
+  private readonly tileLetterImages: Phaser.GameObjects.Image[] = [];
+  private readonly tileLetterValues: string[] = [];
+  private readonly slotImages: Array<Phaser.GameObjects.Image | null> = [];
+  private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
   private words: FirstWord[] = [];
   private wordIndex = 0;
+  private filledSlots = 0;
   private inputLocked = false;
 
   constructor() {
@@ -96,10 +135,86 @@ export class WordBuilderScene extends Phaser.Scene {
     }
   }
 
-  /** Renders the current word's prompt picture, slots, and letter tiles. */
+  /**
+   * Renders the current word's prompt picture, one slot per letter, and the
+   * 6 letter tiles (word letters + distractors), then speaks the word.
+   */
   private renderRound(): void {
-    // Round rendering (prompt picture + slots + letter tiles) lands in
-    // Task 3.2.
-    void generateLetterTiles;
+    this.clearRound();
+
+    const word = this.words[this.wordIndex];
+    speakWord(word.word, load().settings.sfxEnabled);
+
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+
+    const prompt = this.add
+      .image(centerX, centerY + PICTURE_Y_OFFSET, word.promptTexture)
+      .setDisplaySize(PICTURE_SIZE, PICTURE_SIZE);
+    this.roundObjects.push(prompt);
+
+    // One empty slot per letter of the word.
+    const slotRowWidth = word.word.length * SLOT_SIZE + (word.word.length - 1) * SLOT_GAP;
+    const slotStartX = centerX - slotRowWidth / 2 + SLOT_SIZE / 2;
+    for (let i = 0; i < word.word.length; i++) {
+      const slot = this.add
+        .rectangle(
+          slotStartX + i * (SLOT_SIZE + SLOT_GAP),
+          centerY + SLOT_Y_OFFSET,
+          SLOT_SIZE,
+          SLOT_SIZE,
+          0xffffff,
+          1,
+        )
+        .setStrokeStyle(OUTLINE_WIDTH, 0x2d3748, 1);
+      this.slotRects.push(slot);
+      this.roundObjects.push(slot);
+      this.slotImages.push(null);
+    }
+
+    // Six letter tiles: the word's unique letters plus distractors.
+    const tileValues = generateLetterTiles(word.word);
+    const tileRowWidth = tileValues.length * TILE_SIZE + (tileValues.length - 1) * TILE_GAP;
+    const tileStartX = centerX - tileRowWidth / 2 + TILE_SIZE / 2;
+    for (let i = 0; i < tileValues.length; i++) {
+      const tileX = tileStartX + i * (TILE_SIZE + TILE_GAP);
+      const tileY = centerY + TILE_Y_OFFSET;
+      const tile = this.add
+        .rectangle(tileX, tileY, TILE_SIZE, TILE_SIZE, 0xffffff, 1)
+        .setStrokeStyle(OUTLINE_WIDTH, 0x2d3748, 1);
+      tile.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(0, 0, TILE_SIZE, TILE_SIZE),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      tile.on("pointerdown", () => this.handleTile(i));
+
+      const letterImage = this.add
+        .image(tileX, tileY, `letter_${tileValues[i].toLowerCase()}`)
+        .setDisplaySize(LETTER_SIZE, LETTER_SIZE);
+
+      this.tileRects.push(tile);
+      this.tileLetterImages.push(letterImage);
+      this.tileLetterValues.push(tileValues[i]);
+      this.roundObjects.push(tile, letterImage);
+    }
+  }
+
+  /** Destroys all objects of the current round and resets per-round state. */
+  private clearRound(): void {
+    for (const obj of this.roundObjects) {
+      obj.destroy();
+    }
+    this.roundObjects.length = 0;
+    this.slotRects.length = 0;
+    this.tileRects.length = 0;
+    this.tileLetterImages.length = 0;
+    this.tileLetterValues.length = 0;
+    this.slotImages.length = 0;
+    this.filledSlots = 0;
+  }
+
+  /** Letter-tile tap handling (sequential spelling) lands in Task 3.3. */
+  private handleTile(_tileIndex: number): void {
+    // Interaction (fill next empty slot, wiggle on wrong) lands in Task 3.3.
   }
 }

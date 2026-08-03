@@ -256,7 +256,7 @@ const { mockSpeech } = vi.hoisted(() => ({
 vi.mock("../../utils/speech", () => mockSpeech);
 
 import { earnSticker, updateSettings } from "../../utils/storage";
-import { getWord } from "../../game/wordLogic";
+import { getWord, generateLetterTiles } from "../../game/wordLogic";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -309,17 +309,6 @@ function getMascotImage(scene: unknown): Record<string, MockFn> {
   const s = scene as { add: Record<string, unknown> };
   const imageMock = getMockFn(s.add.image);
   const index = imageMock.mock.calls.findIndex((call) => call[2] === "mascot_idle");
-  return imageMock.mock.results[index].value as Record<string, MockFn>;
-}
-
-/** Returns the prompt picture image object of the current round. */
-function getPromptImage(scene: unknown): Record<string, MockFn> | undefined {
-  const s = scene as { add: Record<string, unknown> };
-  const imageMock = getMockFn(s.add.image);
-  const round = getCurrentRound(scene);
-  const promptTexture = getWord(round.target)?.promptTexture;
-  const index = imageMock.mock.calls.findIndex((call) => call[2] === promptTexture);
-  if (index === -1) return undefined;
   return imageMock.mock.results[index].value as Record<string, MockFn>;
 }
 
@@ -447,5 +436,157 @@ describe("WordBuilderScene shell", () => {
     expect((scene as { scene: Record<string, unknown> }).scene.start).toHaveBeenCalledWith(
       "Hub",
     );
+  });
+});
+
+/** Current word under test (from scene state). */
+function getCurrentWord(scene: unknown): string {
+  const s = scene as { words: Array<{ word: string }>; wordIndex: number };
+  return s.words[s.wordIndex].word;
+}
+
+/** Slot row Y (slots sit at centerY + 40 = 424). */
+const SLOT_Y = 384 + 40;
+
+/** Tile row Y (tiles sit at centerY + 220 = 604). */
+const TILE_Y = 384 + 220;
+
+/** Rectangles whose y is the slot row. */
+function getSlotRects(scene: unknown): Array<Record<string, MockFn>> {
+  const s = scene as { add: Record<string, MockFn> };
+  const rectangleMock = getMockFn(s.add.rectangle);
+  const slots: Array<Record<string, MockFn>> = [];
+  for (let i = 0; i < rectangleMock.mock.calls.length; i++) {
+    if (rectangleMock.mock.calls[i][1] === SLOT_Y) {
+      slots.push(rectangleMock.mock.results[i].value as Record<string, MockFn>);
+    }
+  }
+  return slots;
+}
+
+/** Rectangles whose y is the tile row. */
+function getTileRects(scene: unknown): Array<Record<string, MockFn>> {
+  const s = scene as { add: Record<string, MockFn> };
+  const rectangleMock = getMockFn(s.add.rectangle);
+  const tiles: Array<Record<string, MockFn>> = [];
+  for (let i = 0; i < rectangleMock.mock.calls.length; i++) {
+    if (rectangleMock.mock.calls[i][1] === TILE_Y) {
+      tiles.push(rectangleMock.mock.results[i].value as Record<string, MockFn>);
+    }
+  }
+  return tiles;
+}
+
+/** Letter images placed on the tile row, sorted left-to-right by x. */
+function getTileLetters(scene: unknown): Array<{ key: string; x: number }> {
+  const s = scene as { add: Record<string, MockFn> };
+  const imageMock = getMockFn(s.add.image);
+  return imageMock.mock.calls
+    .filter((call) => call[1] === TILE_Y && typeof call[2] === "string")
+    .map((call) => ({ key: call[2] as string, x: call[0] as number }))
+    .sort((a, b) => a.x - b.x);
+}
+
+/** The prompt picture image (from the word's promptTexture). */
+function getPromptImage(scene: unknown): Record<string, MockFn> | undefined {
+  const s = scene as { add: Record<string, MockFn> };
+  const imageMock = getMockFn(s.add.image);
+  const word = getCurrentWord(scene);
+  const texture = getWord(word)?.promptTexture;
+  const call = imageMock.mock.calls.find((c) => c[2] === texture);
+  return call
+    ? (imageMock.mock.results[imageMock.mock.calls.indexOf(call)].value as Record<string, MockFn>)
+    : undefined;
+}
+
+describe("WordBuilderScene round rendering", () => {
+  let matchMediaMock: MockFn;
+
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    mockSpeech.speakWord.mockClear();
+    mockSpeech.isSpeechSupported.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("renders the prompt picture from the word's texture key", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const prompt = getPromptImage(scene);
+    expect(prompt).toBeDefined();
+    expect(getMockFn(prompt!.setDisplaySize)).toHaveBeenCalledWith(180, 180);
+  });
+
+  it("renders one slot per letter of the word", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    const slots = getSlotRects(scene);
+    expect(slots).toHaveLength(word.length);
+    for (const slot of slots) {
+      expect(getMockFn(slot.setStrokeStyle)).toHaveBeenCalled();
+    }
+  });
+
+  it("renders 6 letter tiles with distractors from letter textures", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    const expectedTiles = generateLetterTiles(getWord(word)!.word);
+    const tiles = getTileRects(scene);
+    expect(tiles).toHaveLength(6);
+    for (const tile of tiles) {
+      expect(getMockFn(tile.setInteractive)).toHaveBeenCalled();
+      expect(getMockFn(tile.setStrokeStyle)).toHaveBeenCalled();
+    }
+
+    const letters = getTileLetters(scene);
+    expect(letters).toHaveLength(6);
+    expect(letters.map((l) => l.key)).toEqual(
+      expectedTiles.map((letter) => `letter_${letter.toLowerCase()}`),
+    );
+    const firstLetterMock = getMockFn(
+      (scene as { add: Record<string, unknown> }).add.image,
+    );
+    const letterCall = firstLetterMock.mock.calls.find((c) => c[1] === TILE_Y);
+    if (letterCall) {
+      const letterIndex = firstLetterMock.mock.calls.indexOf(letterCall);
+      const letterObj = firstLetterMock.mock.results[letterIndex]
+        .value as Record<string, MockFn>;
+      expect(getMockFn(letterObj.setDisplaySize)).toHaveBeenCalledWith(80, 80);
+    }
+  });
+
+  it("speaks the word when SFX is enabled and stays silent when disabled", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(word, true);
+
+    mockSpeech.speakWord.mockClear();
+    updateSettings({ sfxEnabled: false });
+    const silentScene = new WordBuilderScene();
+    silentScene.create();
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(word, false);
   });
 });
