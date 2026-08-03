@@ -8,15 +8,15 @@
 
 - [x] Task: Document the v2 storage design in `tech-stack.md` (dated note, per Workflow Principle 2 — tech-stack changes before implementation) `2d1323d`
 - [x] Task: Extend types in `src/types/index.ts` (`Profile`, `ProfileV2`, `AVATAR_IDS`) `d942343`
-- [ ] Task: Write failing tests for migration & profile logic (`src/utils/storage.test.ts` + new `src/game/profileLogic.test.ts`):
-  - [ ] v1 save migrates to v2 → profile `p1`, stickers intact, settings preserved, v1 key untouched
-  - [ ] Fresh install (no v1/v2) → default profile auto-created, playable immediately
-  - [ ] v2 load with existing profiles → active profile restored, per-key merge backfill intact
-  - [ ] `addProfile` — avatar uniqueness, max-4 guard, min-1 guarantee
-  - [ ] `deleteProfile` — active-profile fallback to first remaining; last-profile deletion recreates default
-  - [ ] Sticker read/write strictly per active profile (isolation between profiles)
-- [ ] Task: Implement pure profile logic (migration, load/save v2, add/delete/switch, per-profile sticker access) in `src/utils/storage.ts`
-- [ ] Task: Run tests (Red → Green confirmed) and update legacy storage tests to the new API
+- [x] Task: Write failing tests for migration & profile logic (`src/utils/storage.test.ts` + new `src/game/profileLogic.test.ts`):
+  - [x] v1 save migrates to v2 → profile `p1`, stickers intact, settings preserved, v1 key untouched
+  - [x] Fresh install (no v1/v2) → default profile auto-created, playable immediately
+  - [x] v2 load with existing profiles → active profile restored, per-key merge backfill intact
+  - [x] `addProfile` — avatar uniqueness, max-4 guard, min-1 guarantee
+  - [x] `deleteProfile` — active-profile fallback to first remaining; last-profile deletion recreates default
+  - [x] Sticker read/write strictly per active profile (isolation between profiles)
+- [x] Task: Implement pure profile logic (migration, load/save v2, add/delete/switch, per-profile sticker access) in `src/utils/storage.ts` `4af3b21`
+- [x] Task: Run tests (Red → Green confirmed) and update legacy storage tests to the new API `4af3b21`
 - [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
 
 ## Phase 2 — Kid-Tappable Hub Profile Switcher
