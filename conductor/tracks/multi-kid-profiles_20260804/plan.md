@@ -42,11 +42,11 @@
 
 ## Phase 4 — Integration, Docs & Quality Gates `[checkpoint: 89a1b50]`
 
-- [ ] Task: Write integration test — per-profile sticker isolation across boot → hub → game → award → switch
-- [ ] Task: Update `product.md` (sticker section: per-profile note) and `tech-stack.md` (schema v2 final)
-- [ ] Task: Run full quality gates — `pnpm run check`, `CI=true pnpm test` (coverage ≥ 80% on new modules), `pnpm run build`
+- [x] Task: Write integration test — per-profile sticker isolation across boot → hub → game → award → switch `562b2b4`
+- [x] Task: Update `product.md` (sticker section: per-profile note) and `tech-stack.md` (schema v2 final) `12370c7`
+- [x] Task: Run full quality gates — `pnpm run check`, `CI=true pnpm test` (coverage ≥ 80% on new modules), `pnpm run build` `12370c7`
 - [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
-- [ ] Task: Draft release notes for v1.4.0 (deployment decision deferred — separate release track, per repo convention)
+- [x] Task: Draft release notes for v1.4.0 (deployment decision deferred — separate release track, per repo convention) `12370c7`
 
 ## Notes
 
