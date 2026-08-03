@@ -1,0 +1,1 @@
+Task 1.2: WordRound generation - 4 unique choices incl. target, no shared first letters across choices, unique targets per 6-round playthrough. 18 tests green.
