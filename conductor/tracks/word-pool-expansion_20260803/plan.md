@@ -32,6 +32,11 @@
 
 ## Phase 3 — Scene Integration Verification
 
+- [x] Task: Fix input lock persisting across scene re-launch (bug found in manual verification) (09a60b0)
+  - [x] Regression test in `src/__tests__/scenes/wordMatchScene.test.ts`: complete 6 rounds (input locked), call `create()` again on the same instance, assert `inputLocked` resets to `false` and a card tap registers a correct answer
+  - [x] Regression test in `src/__tests__/scenes/wordBuilderScene.test.ts`: same re-launch pattern after completing all 3 words
+  - [x] Fix: reset `inputLocked = false` in `create()` of `WordMatchScene.ts` and `WordBuilderScene.ts`
+  - [x] Run the affected test files green
 - [ ] Task: Extend first-words integration coverage for new words
   - [ ] In `src/__tests__/scenes/firstWordsIntegration.test.ts`, add a playthrough case covering at least one reused-texture word (e.g., OWL/BONE) and one new-SVG word (e.g., SUN/DUCK) — prompt picture renders from the right texture key, rounds/answers behave as existing cases
   - [ ] Confirm no scene-rule code changes were needed (data-driven scenes)
