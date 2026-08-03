@@ -161,10 +161,11 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `4d535dc`
 
 ### Task 4.2 — Scene registry
-- [ ] Update `src/__tests__/scenes/sceneRegistry.test.ts` (new loaders)
-- [ ] Add `WordMatch` and `WordBuilder` dynamic-import loaders to
+- [x] Update `src/__tests__/scenes/sceneRegistry.test.ts` (new loaders)
+- [x] Add `WordMatch` and `WordBuilder` dynamic-import loaders to
       `sceneRegistry.ts`
-- [ ] Commit `feat(scenes): Register First Words lazy loaders` + plan commit
+- [x] Commit `feat(scenes): Register First Words lazy loaders` + plan commit
+      — `67d2dc6`
 
 ### Task 4.3 — Hub: 10 tiles, 5×2 grid
 - [ ] Update `src/__tests__/scenes/navigation.test.ts` and hub tests for the
