@@ -148,3 +148,13 @@ export function switchActiveProfile(v2: ProfileV2, profileId: string): ProfileV2
   if (!v2.profiles.some((p) => p.id === profileId)) return v2;
   return { ...v2, activeProfileId: profileId };
 }
+
+/** Texture key for each avatar, reusing existing animal assets (no new SVGs). */
+export const PROFILE_AVATAR_TEXTURES: Record<AvatarId, string> = {
+  cat: "animal_cat",
+  dog: "animal_dog",
+  pig: "animal_pig",
+  frog: "frog_red",
+  duck: "sm_duck",
+  bear: "toy_teddy_bear",
+};
