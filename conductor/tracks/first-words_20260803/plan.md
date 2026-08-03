@@ -69,7 +69,7 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 
 ---
 
-## Phase 2: Game 9 — Find the Word (WordMatchScene)
+## Phase 2: Game 9 — Find the Word (WordMatchScene) [checkpoint: 2c610be]
 
 ### Task 2.1 — Scene shell
 - [x] Write scene tests alongside: `src/__tests__/scenes/wordMatchScene.test.ts`
