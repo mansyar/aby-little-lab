@@ -153,11 +153,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 ## Phase 4: Integration — Hub, registry, assets
 
 ### Task 4.1 — Sticker assets
-- [ ] Add `src/assets/svg/stickers/sticker_word_match.svg` and
+- [x] Add `src/assets/svg/stickers/sticker_word_match.svg` and
       `sticker_word_builder.svg` in the existing style (primary #2B6CB0,
       outline #2D3748)
-- [ ] Register both in `PreloadScene` `SHAPE_ASSETS` (512×512 raster)
-- [ ] Commit `feat(assets): Add First Words stickers` + plan commit
+- [x] Register both in `PreloadScene` `SHAPE_ASSETS` (512×512 raster)
+- [x] Commit `feat(assets): Add First Words stickers` + plan commit
+      — `4d535dc`
 
 ### Task 4.2 — Scene registry
 - [ ] Update `src/__tests__/scenes/sceneRegistry.test.ts` (new loaders)
