@@ -1,0 +1,1 @@
+Task 3.4: word complete -> chime (playCorrect) + mascot cheer + dot pop, linger 1.2s, next word; after 3 words handleComplete: playWin + shared celebration + sticker word-builder (first time only) + auto-return 3s with justEarned. 13 scene tests green.
