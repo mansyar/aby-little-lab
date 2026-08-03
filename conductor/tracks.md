@@ -44,7 +44,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: First Words Word Pool Expansion** *Link: [./tracks/word-pool-expansion_20260803/index.md](./tracks/word-pool-expansion_20260803/index.md)*
+- [x] **Track: First Words Word Pool Expansion** *Link: [./archive/word-pool-expansion_20260803/index.md](./archive/word-pool-expansion_20260803/index.md)* (Archived)
 
 ---
 
