@@ -1,0 +1,7 @@
+Task: Document v2 storage design in tech-stack.md
+
+Summary: Added dated 2026-08-04 design note under the localStorage schema section describing the v2 schema (abby-little-lab:v2), the unchanged public facade API operating on the active profile, v1->v2 additive migration, the six textless avatars mapped to existing textures, and the new profile management functions.
+
+Files: conductor/tech-stack.md
+
+Why: Per Workflow Principle 2, tech-stack changes are documented before implementation so the design is recorded while the migration approach is still fresh.
