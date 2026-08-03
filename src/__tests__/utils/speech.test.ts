@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { isSpeechSupported, speakLetter } from "../../utils/speech";
+import { isSpeechSupported, speakLetter, speakWord } from "../../utils/speech";
 
 describe("speech", () => {
   const cancel = vi.fn();
@@ -60,6 +60,39 @@ describe("speech", () => {
       vi.unstubAllGlobals();
       expect(() => speakLetter("A", true)).not.toThrow();
       expect(speakLetter("A", true)).toBe(false);
+    });
+  });
+
+  describe("speakWord", () => {
+    it("returns false and does nothing when disabled", () => {
+      expect(speakWord("CAT", false)).toBe(false);
+      expect(speak).not.toHaveBeenCalled();
+      expect(cancel).not.toHaveBeenCalled();
+    });
+
+    it("speaks the full word with a gentle rate when enabled", () => {
+      const result = speakWord("CAT", true);
+      expect(result).toBe(true);
+      expect(speak).toHaveBeenCalledTimes(1);
+      const utterance = Utterance.mock.instances[0];
+      expect(utterance.text).toBe("CAT");
+      expect(utterance.lang).toBe("en-US");
+      expect(utterance.rate).toBeGreaterThanOrEqual(0.7);
+      expect(utterance.rate).toBeLessThanOrEqual(0.9);
+      expect(speak).toHaveBeenCalledWith(utterance);
+    });
+
+    it("cancels prior utterances before speaking a new word", () => {
+      speakWord("DOG", true);
+      speakWord("PIG", true);
+      expect(cancel).toHaveBeenCalledTimes(2);
+      expect(Utterance.mock.instances).toHaveLength(2);
+    });
+
+    it("never throws when speechSynthesis is unavailable", () => {
+      vi.unstubAllGlobals();
+      expect(() => speakWord("CAT", true)).not.toThrow();
+      expect(speakWord("CAT", true)).toBe(false);
     });
   });
 });
