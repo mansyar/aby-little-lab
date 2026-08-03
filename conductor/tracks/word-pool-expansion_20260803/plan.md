@@ -16,9 +16,9 @@
   - [x] Add/extend tests: `generateWordPlaythrough(6)` returns 6 unique targets; no round shares a first letter among the 4 choices; target included exactly once
   - [x] Add/extend tests: builder playthroughs (3 words) are easy-first, unique, and draw from the expanded pool
   - [x] Run the full game-logic test files green
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (1849a4c)
 
-## Phase 2 — SVG Assets & Preload Registration
+## Phase 2 — SVG Assets & Preload Registration [checkpoint: cc5587e]
 
 - [x] Task: Author 4 new picture SVGs (b045de0)
   - [x] Create `src/assets/svg/items/sun.svg`, `hat.svg`, `bug.svg`, `duck.svg` (512×512 viewBox, flat fills, thick `#2D3748` strokes 4–6px, soft/vibrant, tight bounding box — per PRD design rules)
@@ -28,7 +28,7 @@
   - [x] Add `SHAPE_ASSETS` entries: `sm_sun`, `sm_hat`, `sm_bug`, `sm_duck`
   - [x] Update any preload texture-key assertions in tests (e.g., navigation/preload key lists) to include the 4 new keys
   - [x] Run the affected test files green
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (cc5587e)
 
 ## Phase 3 — Scene Integration Verification
 
