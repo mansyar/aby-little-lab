@@ -232,3 +232,6 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 - [x] Commit `chore(conductor): Mark track 'first-words' as complete and archive`
 - [ ] Release notes for the upcoming release are handled by the release
       mechanics track (out of scope here)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions (CARD_COL_X_OFFSET 200 -> 210 + regression test) - 8568f4a
