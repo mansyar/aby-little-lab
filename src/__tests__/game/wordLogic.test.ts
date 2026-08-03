@@ -1,5 +1,32 @@
-import { describe, expect, it } from "vitest";
-import { WORD_POOL } from "../../game/wordLogic";
+import { describe, expect, it, vi, afterEach } from "vitest";
+import {
+  WORD_POOL,
+  generateWordPlaythrough,
+  generateWordRound,
+  isCorrectWord,
+  type WordRound,
+} from "../../game/wordLogic";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+/** Number of rounds sampled to exercise randomized behavior without flaking. */
+const VARIETY_SAMPLES = 200;
+
+function expectValidWordRound(round: WordRound): void {
+  expect(round.choices).toHaveLength(4);
+  const uniqueChoices = new Set(round.choices);
+  expect(uniqueChoices.size).toBe(4);
+  for (const choice of round.choices) {
+    expect(WORD_POOL.some((entry) => entry.word === choice)).toBe(true);
+  }
+  // Exactly one correct answer: the target appears exactly once.
+  expect(round.choices.filter((choice) => choice === round.target)).toHaveLength(1);
+  // Pre-reader guard: no two choices share a first letter.
+  const firstLetters = round.choices.map((choice) => choice[0]);
+  expect(new Set(firstLetters).size).toBe(4);
+}
 
 describe("WORD_POOL", () => {
   it("contains exactly the 9 first words", () => {
@@ -43,5 +70,90 @@ describe("WORD_POOL", () => {
 
   it("uses a unique prompt texture per word", () => {
     expect(new Set(WORD_POOL.map((entry) => entry.promptTexture)).size).toBe(WORD_POOL.length);
+  });
+});
+
+describe("generateWordRound", () => {
+  it("produces structurally valid rounds for every pool word across many samples", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const target = WORD_POOL[i % WORD_POOL.length];
+      expectValidWordRound(generateWordRound(target));
+    }
+  });
+
+  it("always includes the given target word", () => {
+    for (const entry of WORD_POOL) {
+      expect(generateWordRound(entry).choices).toContain(entry.word);
+    }
+  });
+
+  it("never uses a distractor that shares the target's first letter", () => {
+    for (const entry of WORD_POOL) {
+      const round = generateWordRound(entry);
+      for (const choice of round.choices) {
+        if (choice !== entry.word) {
+          expect(choice[0]).not.toBe(entry.word[0]);
+        }
+      }
+    }
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = generateWordRound(WORD_POOL[0]);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = generateWordRound(WORD_POOL[0]);
+    expect(second).toEqual(first);
+    expectValidWordRound(first);
+  });
+});
+
+describe("generateWordPlaythrough", () => {
+  it("returns the requested number of valid rounds", () => {
+    const playthrough = generateWordPlaythrough(6);
+    expect(playthrough).toHaveLength(6);
+    for (const round of playthrough) {
+      expectValidWordRound(round);
+    }
+  });
+
+  it("defaults to 6 rounds", () => {
+    expect(generateWordPlaythrough()).toHaveLength(6);
+  });
+
+  it("draws unique target words within a playthrough (no duplicates)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const targets = generateWordPlaythrough().map((round) => round.target);
+      expect(new Set(targets).size).toBe(targets.length);
+    }
+  });
+
+  it("draws targets uniformly from the full pool across many playthroughs", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 50; i++) {
+      for (const round of generateWordPlaythrough()) {
+        seen.add(round.target);
+      }
+    }
+    expect(seen).toEqual(new Set(WORD_POOL.map((entry) => entry.word)));
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = generateWordPlaythrough();
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = generateWordPlaythrough();
+    expect(second).toEqual(first);
+  });
+});
+
+describe("isCorrectWord", () => {
+  it("returns true only for the round's target", () => {
+    const round: WordRound = { target: "CAT", choices: ["CAT", "DOG", "PIG", "CAR"] };
+    expect(isCorrectWord(round, "CAT")).toBe(true);
+    expect(isCorrectWord(round, "DOG")).toBe(false);
+    expect(isCorrectWord(round, "CAR")).toBe(false);
   });
 });

@@ -32,3 +32,47 @@ export const WORD_POOL: readonly FirstWord[] = [
 export function getWord(word: string): FirstWord | undefined {
   return WORD_POOL.find((entry) => entry.word === word);
 }
+
+/** A single Find the Word round: one target word and 4 unique printed choices. */
+export interface WordRound {
+  /** The word the child must find. */
+  target: string;
+  /** Four unique word cards; exactly one equals `target`. */
+  choices: string[];
+}
+
+/**
+ * Builds one Find the Word round: 3 distractors from the pool, one per
+ * distinct first letter, never sharing the target's first letter (pre-reader
+ * confusion guard). All positions are shuffled.
+ */
+export function generateWordRound(target: FirstWord): WordRound {
+  const firstLetter = target.word[0];
+  const candidates = WORD_POOL.filter(
+    (entry) => entry.word !== target.word && entry.word[0] !== firstLetter,
+  );
+  // Group distractors by first letter, then pick one word from each of 3
+  // distinct groups so the 4 choices never share a first letter.
+  const groups = new Map<string, FirstWord[]>();
+  for (const entry of candidates) {
+    const group = groups.get(entry.word[0]) ?? [];
+    group.push(entry);
+    groups.set(entry.word[0], group);
+  }
+  const distractors = shuffle([...groups.values()])
+    .slice(0, 3)
+    .map((group) => shuffle(group)[0].word);
+  return { target: target.word, choices: shuffle([target.word, ...distractors]) };
+}
+
+/** Generates a playthrough of rounds (6 by default), each with a unique target word. */
+export function generateWordPlaythrough(roundCount = 6): WordRound[] {
+  return shuffle(WORD_POOL)
+    .slice(0, roundCount)
+    .map((target) => generateWordRound(target));
+}
+
+/** Returns whether the tapped word is the round's target. */
+export function isCorrectWord(round: WordRound, word: string): boolean {
+  return round.target === word;
+}
