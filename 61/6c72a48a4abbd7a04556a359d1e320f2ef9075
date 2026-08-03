@@ -1,0 +1,1 @@
+Post-deploy verification: CI run 30797682029 (Quality Gates 1m20s, Deploy 6s) green; live entry index-zIGt_U__.js matches local build; 1.2.0 embedded in served bundle (no stale 1.1.0); sw.js + manifest 200. Recorded Step 7c + README releases row.
