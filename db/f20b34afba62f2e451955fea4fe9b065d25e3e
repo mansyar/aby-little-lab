@@ -1,0 +1,1 @@
+Task 1.4: speakWord added via shared speakText (rate 0.8, en-US, SFX-gated, cancel-prior, no-throw); speakLetter delegates unchanged at 0.9. 10 tests green.
