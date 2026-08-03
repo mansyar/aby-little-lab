@@ -121,11 +121,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `803b09c`
 
 ### Task 3.2 — Round rendering
-- [ ] Tests: prompt picture top-center; slot row (one ~120px empty box per
+- [x] Tests: prompt picture top-center; slot row (one ~120px empty box per
       letter); 6 letter tiles (~110px) from `letter_<c>` textures with
       distractors; `speakWord` invoked
-- [ ] Implement `renderRound` (slots + tiles)
-- [ ] Commit `feat(scenes): Render Build the Word rounds` + plan commit
+- [x] Implement `renderRound` (slots + tiles)
+- [x] Commit `feat(scenes): Render Build the Word rounds` + plan commit
+      — `578f842`
 
 ### Task 3.3 — Interaction (sequential spelling)
 - [ ] Tests: correct letter fills the next empty slot (settle pop + soft
