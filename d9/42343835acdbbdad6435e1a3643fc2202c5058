@@ -1,0 +1,7 @@
+Task: Extend types in src/types/index.ts
+
+Summary: Added AvatarId union (cat, dog, pig, frog, duck, bear), AVATAR_IDS const array, MAX_PROFILES=4, DEFAULT_AVATAR_ID='cat', Profile interface (id, avatarId, createdAt, stickers), and ProfileV2 schema (activeProfileId, profiles, settings). AppStorage remains for facade backward compatibility.
+
+Files: src/types/index.ts
+
+Why: Foundation for the profile-aware storage v2; types are consumed by profileLogic.ts, storage.ts, and all profile UI in later phases.
