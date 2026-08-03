@@ -14,7 +14,7 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 
 ---
 
-## Phase 1: Foundations — word logic, speech, storage
+## Phase 1: Foundations — word logic, speech, storage [checkpoint: bab451b]
 
 ### Task 1.1 — Word pool and shared types
 - [x] TDD: write failing tests for `src/game/wordLogic.ts` — the 9-word pool
