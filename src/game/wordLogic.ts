@@ -14,19 +14,29 @@ export interface FirstWord {
 }
 
 /**
- * The 9 first words. Every prompt texture is an already-loaded PreloadScene
- * texture, so no new art is required for the words themselves.
+ * The 18 first words. Prompt textures are PreloadScene texture keys:
+ * most reuse existing art; `sm_sun`/`sm_hat`/`sm_bug`/`sm_duck` are new
+ * SVGs registered alongside this pool.
  */
 export const WORD_POOL: readonly FirstWord[] = [
   { word: "CAT", letters: 3, promptTexture: "animal_cat", tier: 3 },
   { word: "DOG", letters: 3, promptTexture: "animal_dog", tier: 3 },
   { word: "PIG", letters: 3, promptTexture: "animal_pig", tier: 3 },
   { word: "CAR", letters: 3, promptTexture: "sm_car", tier: 3 },
+  { word: "OWL", letters: 3, promptTexture: "mascot_idle", tier: 3 },
+  { word: "SUN", letters: 3, promptTexture: "sm_sun", tier: 3 },
+  { word: "HAT", letters: 3, promptTexture: "sm_hat", tier: 3 },
+  { word: "BUG", letters: 3, promptTexture: "sm_bug", tier: 3 },
   { word: "FROG", letters: 4, promptTexture: "frog_red", tier: 4 },
   { word: "BALL", letters: 4, promptTexture: "sm_ball", tier: 4 },
   { word: "FISH", letters: 4, promptTexture: "food_fish", tier: 4 },
   { word: "BOAT", letters: 4, promptTexture: "sm_boat", tier: 4 },
   { word: "TREE", letters: 4, promptTexture: "sm_tree", tier: 4 },
+  { word: "BONE", letters: 4, promptTexture: "food_bone", tier: 4 },
+  { word: "STAR", letters: 4, promptTexture: "shape_star", tier: 4 },
+  { word: "DRUM", letters: 4, promptTexture: "toy_drum", tier: 4 },
+  { word: "BEAR", letters: 4, promptTexture: "toy_teddy_bear", tier: 4 },
+  { word: "DUCK", letters: 4, promptTexture: "sm_duck", tier: 4 },
 ];
 
 /** Looks up a word's entry by its uppercase spelling. */

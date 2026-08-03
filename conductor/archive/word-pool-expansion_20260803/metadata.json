@@ -1,0 +1,8 @@
+{
+  "id": "word-pool-expansion_20260803",
+  "type": "feature",
+  "status": "new",
+  "created": "2026-08-03",
+  "branch": "feat/word-pool-expansion",
+  "summary": "Expand the shared 9-word pool of Games 9 & 10 (Find the Word / Build the Word) to 18 words by reusing existing textures where possible and adding 4 new picture SVGs. Game mechanics, difficulty, and storage schema stay unchanged."
+}

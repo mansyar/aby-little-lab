@@ -281,6 +281,7 @@ vi.mock("../../utils/pwaBridge", () => ({
   getPwaBridge: () => mockBridge,
 }));
 
+import { generateWordRound, getWord } from "../../game/wordLogic";
 import { BootScene } from "../../scenes/BootScene";
 import { HubScene } from "../../scenes/HubScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
@@ -464,5 +465,93 @@ describe("First Words integration flows", () => {
       const scaleMock = getMockFn((image as { setScale: unknown }).setScale);
       expect(scaleMock.mock.calls.some((c) => c[0] === earnedScale)).toBe(true);
     }
+  });
+
+  it("renders prompt pictures for reused-texture and new-SVG words in both games", () => {
+    // Find the Word — drive rounds including OWL (reuses Professor Hoot art)
+    // and SUN (new SVG). The scene is data-driven, so injecting rounds into
+    // the real scene exercises renderRound → getWord → texture key end-to-end.
+    const wordMatch = new WordMatchScene();
+    wordMatch.create();
+    const matchState = wordMatch as unknown as {
+      rounds: Array<{ target: string; choices: string[] }>;
+      roundIndex: number;
+      renderRound: () => void;
+    };
+    matchState.rounds = [
+      generateWordRound(getWord("OWL")!),
+      generateWordRound(getWord("SUN")!),
+      generateWordRound(getWord("DUCK")!),
+      generateWordRound(getWord("BEAR")!),
+    ];
+    matchState.roundIndex = 0;
+    matchState.renderRound();
+
+    for (let round = 0; round < 4; round++) {
+      const current = matchState.rounds[matchState.roundIndex];
+      const correctIndex = current.choices.indexOf(current.target);
+      const cardRects = getMockFn(wordMatch.add.rectangle).mock.results.map((r) => r.value);
+      fireObjectEvent(cardRects.at(-4 + correctIndex), "pointerdown");
+      fireDelayedCall(wordMatch, 700);
+    }
+    expect(hasSticker("word-match")).toBe(true);
+
+    // Prompt pictures are the images scaled to 180x180 (mascot art and the
+    // back button are not) — collect their texture keys.
+    const imageCalls = getMockFn(wordMatch.add.image).mock.calls;
+    const matchPromptKeys = imageCalls
+      .map((call, index) => ({
+        key: call[2] as string,
+        obj: getMockFn(wordMatch.add.image).mock.results[index].value,
+      }))
+      .filter(({ obj }) =>
+        getMockFn((obj as { setDisplaySize: unknown }).setDisplaySize).mock.calls.some(
+          (c) => c[0] === 180 && c[1] === 180,
+        ),
+      )
+      .map(({ key }) => key);
+    expect(matchPromptKeys).toContain("mascot_idle"); // OWL reuses Hoot
+    expect(matchPromptKeys).toContain("sm_sun"); // SUN uses the new SVG
+    expect(matchPromptKeys).toContain("sm_duck"); // DUCK uses the new SVG
+    expect(matchPromptKeys).toContain("toy_teddy_bear"); // BEAR reuses the teddy
+
+    // Build the Word — same data-driven path with DUCK (new SVG) and BEAR.
+    const builder = new WordBuilderScene();
+    builder.create();
+    const builderState = builder as unknown as {
+      words: Array<{ word: string }>;
+      wordIndex: number;
+      tileLetterValues: string[];
+      renderRound: () => void;
+    };
+    builderState.words = [getWord("DUCK")!, getWord("BEAR")!];
+    builderState.wordIndex = 0;
+    builderState.renderRound();
+
+    for (let word = 0; word < 2; word++) {
+      const current = builderState.words[builderState.wordIndex];
+      for (const expected of current.word) {
+        const tileIndex = builderState.tileLetterValues.indexOf(expected);
+        expect(tileIndex).toBeGreaterThanOrEqual(0);
+        const tileRects = getMockFn(builder.add.rectangle).mock.results.map((r) => r.value);
+        fireObjectEvent(tileRects.at(-6 + tileIndex), "pointerdown");
+      }
+      fireDelayedCall(builder, 1200);
+    }
+    expect(hasSticker("word-builder")).toBe(true);
+
+    const builderPromptKeys = getMockFn(builder.add.image)
+      .mock.calls.map((call, index) => ({
+        key: call[2] as string,
+        obj: getMockFn(builder.add.image).mock.results[index].value,
+      }))
+      .filter(({ obj }) =>
+        getMockFn((obj as { setDisplaySize: unknown }).setDisplaySize).mock.calls.some(
+          (c) => c[0] === 180 && c[1] === 180,
+        ),
+      )
+      .map(({ key }) => key);
+    expect(builderPromptKeys).toContain("sm_duck");
+    expect(builderPromptKeys).toContain("toy_teddy_bear");
   });
 });

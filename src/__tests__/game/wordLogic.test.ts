@@ -31,13 +31,32 @@ function expectValidWordRound(round: WordRound): void {
 }
 
 describe("WORD_POOL", () => {
-  it("contains exactly the 9 first words", () => {
-    expect(WORD_POOL).toHaveLength(9);
+  it("contains exactly the 18 first words", () => {
+    expect(WORD_POOL).toHaveLength(18);
   });
 
   it("contains the expected words", () => {
     const words = WORD_POOL.map((entry) => entry.word).sort();
-    expect(words).toEqual(["BALL", "BOAT", "CAR", "CAT", "DOG", "FISH", "FROG", "PIG", "TREE"]);
+    expect(words).toEqual([
+      "BALL",
+      "BEAR",
+      "BOAT",
+      "BONE",
+      "BUG",
+      "CAR",
+      "CAT",
+      "DOG",
+      "DRUM",
+      "DUCK",
+      "FISH",
+      "FROG",
+      "HAT",
+      "OWL",
+      "PIG",
+      "STAR",
+      "SUN",
+      "TREE",
+    ]);
   });
 
   it("has no duplicate words", () => {
@@ -57,8 +76,8 @@ describe("WORD_POOL", () => {
   });
 
   it("classifies 3-letter words as tier 3 and 4-letter words as tier 4", () => {
-    expect(WORD_POOL.filter((entry) => entry.tier === 3)).toHaveLength(4);
-    expect(WORD_POOL.filter((entry) => entry.tier === 4)).toHaveLength(5);
+    expect(WORD_POOL.filter((entry) => entry.tier === 3)).toHaveLength(8);
+    expect(WORD_POOL.filter((entry) => entry.tier === 4)).toHaveLength(10);
     for (const entry of WORD_POOL) {
       expect(entry.tier).toBe(entry.word.length === 3 ? 3 : 4);
     }
@@ -72,6 +91,51 @@ describe("WORD_POOL", () => {
 
   it("uses a unique prompt texture per word", () => {
     expect(new Set(WORD_POOL.map((entry) => entry.promptTexture)).size).toBe(WORD_POOL.length);
+  });
+
+  it("uses only PreloadScene-registered prompt texture keys", () => {
+    const KNOWN_TEXTURE_KEYS = new Set([
+      "animal_cat",
+      "animal_dog",
+      "animal_pig",
+      "sm_car",
+      "mascot_idle",
+      "sm_sun",
+      "sm_hat",
+      "sm_bug",
+      "frog_red",
+      "sm_ball",
+      "food_fish",
+      "sm_boat",
+      "sm_tree",
+      "food_bone",
+      "shape_star",
+      "toy_drum",
+      "toy_teddy_bear",
+      "sm_duck",
+    ]);
+    for (const entry of WORD_POOL) {
+      expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);
+    }
+    // Bijection guard: no stale entries may linger in the known-key list.
+    expect(new Set(WORD_POOL.map((entry) => entry.promptTexture)).size).toBe(
+      KNOWN_TEXTURE_KEYS.size,
+    );
+  });
+
+  it("maps new words to the approved reuse textures", () => {
+    const byWord = new Map(WORD_POOL.map((entry) => [entry.word, entry.promptTexture]));
+    // Reused existing textures (no new art).
+    expect(byWord.get("OWL")).toBe("mascot_idle");
+    expect(byWord.get("BONE")).toBe("food_bone");
+    expect(byWord.get("STAR")).toBe("shape_star");
+    expect(byWord.get("DRUM")).toBe("toy_drum");
+    expect(byWord.get("BEAR")).toBe("toy_teddy_bear");
+    // New SVG textures (registered in Phase 2).
+    expect(byWord.get("SUN")).toBe("sm_sun");
+    expect(byWord.get("HAT")).toBe("sm_hat");
+    expect(byWord.get("BUG")).toBe("sm_bug");
+    expect(byWord.get("DUCK")).toBe("sm_duck");
   });
 });
 

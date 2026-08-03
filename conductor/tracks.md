@@ -44,6 +44,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [x] **Track: First Words Word Pool Expansion** *Link: [./archive/word-pool-expansion_20260803/index.md](./archive/word-pool-expansion_20260803/index.md)* (Archived)
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---

@@ -14,13 +14,17 @@ import smBallSvg from "../assets/svg/items/ball.svg?raw";
 import foodBananaSvg from "../assets/svg/items/banana.svg?raw";
 import smBoatSvg from "../assets/svg/items/boat.svg?raw";
 import foodBoneSvg from "../assets/svg/items/bone.svg?raw";
+import smBugSvg from "../assets/svg/items/bug.svg?raw";
 import smCarSvg from "../assets/svg/items/car.svg?raw";
 import foodCarrotSvg from "../assets/svg/items/carrot.svg?raw";
+import smDuckSvg from "../assets/svg/items/duck.svg?raw";
 import foodFishSvg from "../assets/svg/items/fish.svg?raw";
+import smHatSvg from "../assets/svg/items/hat.svg?raw";
 import smHouseSvg from "../assets/svg/items/house.svg?raw";
 import lilypadSvg from "../assets/svg/items/lilypad.svg?raw";
 import smMushroomSvg from "../assets/svg/items/mushroom.svg?raw";
 import foodPeanutSvg from "../assets/svg/items/peanut.svg?raw";
+import smSunSvg from "../assets/svg/items/sun.svg?raw";
 import smTreeSvg from "../assets/svg/items/tree.svg?raw";
 import smUmbrellaSvg from "../assets/svg/items/umbrella.svg?raw";
 import letterASvg from "../assets/svg/letters/letter_a.svg?raw";
@@ -127,6 +131,10 @@ const SHAPE_ASSETS = [
   { key: "sm_umbrella", svg: smUmbrellaSvg },
   { key: "sm_airplane", svg: smAirplaneSvg },
   { key: "sm_mushroom", svg: smMushroomSvg },
+  { key: "sm_bug", svg: smBugSvg },
+  { key: "sm_duck", svg: smDuckSvg },
+  { key: "sm_hat", svg: smHatSvg },
+  { key: "sm_sun", svg: smSunSvg },
   { key: "sm_shadow_house", svg: smShadowHouseSvg },
   { key: "sm_shadow_tree", svg: smShadowTreeSvg },
   { key: "sm_shadow_car", svg: smShadowCarSvg },

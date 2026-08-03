@@ -578,6 +578,27 @@ describe("AlphabetScene round flow", () => {
     expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
   });
 
+  it("re-launching after completion unlocks input so cards are tappable again", () => {
+    const scene = new AlphabetScene();
+    scene.create();
+
+    for (let i = 0; i < 6; i++) {
+      completeRound(scene);
+    }
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    // Returning to the Hub and tapping the tile again calls create() on the
+    // same scene instance (Phaser restart) — input must be unlocked.
+    scene.create();
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+
+    const round = getCurrentRound(scene);
+    const correctIndex = round.choices.indexOf(round.target);
+    const correctCallsBefore = mockAudio.playCorrect.mock.calls.length;
+    tapCard(scene, correctIndex);
+    expect(mockAudio.playCorrect.mock.calls.length).toBe(correctCallsBefore + 1);
+  });
+
   it("parental lock hold success exits to the Hub", () => {
     const scene = new AlphabetScene();
     scene.create();

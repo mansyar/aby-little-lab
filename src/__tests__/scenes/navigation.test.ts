@@ -688,12 +688,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 90 shape, letter, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
+    it("loads all 94 shape, letter, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(90);
+      expect(svgCalls).toHaveLength(94);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -4515,6 +4515,27 @@ describe("scene navigation flow", () => {
       });
     });
 
+    it("re-launching after completion restarts playback and unlocks input", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      const frogs = getFrogs(scene);
+
+      completeAllRounds(scene, frogs);
+      expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+      // Returning to the Hub and tapping the tile again calls create() on the
+      // same scene instance; playSequence re-locks during playback and
+      // unlocks after the last note, so input recovers without extra resets.
+      scene.create();
+      const freshFrogs = getFrogs(scene);
+      fireDelayedCallsFrom(scene, 0);
+
+      expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+      const noteCallsBefore = mockAudio.playFrogNote.mock.calls.length;
+      tapFrog(freshFrogs, 1);
+      expect(mockAudio.playFrogNote.mock.calls.length).toBe(noteCallsBefore + 1);
+    });
+
     it("parental lock exits to Hub at any time", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
@@ -4813,6 +4834,28 @@ describe("scene navigation flow", () => {
       completeFadeOuts(scene);
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+    });
+
+    it("re-launching after completion unlocks input so cards are tappable again", () => {
+      vi.mocked(hasSticker).mockReturnValue(true);
+      const scene = new PatternBuilderScene();
+      scene.create();
+
+      for (let i = 0; i < 5; i++) {
+        completeRound(scene);
+      }
+      expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+      // Returning to the Hub and tapping the tile again calls create() on the
+      // same scene instance (Phaser restart) — input must be unlocked.
+      scene.create();
+      expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+
+      const round = getCurrentRound(scene);
+      const correctIndex = round.choices.indexOf(getCorrectShape(round));
+      const correctCallsBefore = mockAudio.playCorrect.mock.calls.length;
+      tapCard(scene, correctIndex);
+      expect(mockAudio.playCorrect.mock.calls.length).toBe(correctCallsBefore + 1);
     });
   });
 
