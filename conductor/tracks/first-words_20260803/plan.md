@@ -114,10 +114,11 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 ## Phase 3: Game 10 — Build the Word (WordBuilderScene)
 
 ### Task 3.1 — Scene shell
-- [ ] Scene tests: `src/__tests__/scenes/wordBuilderScene.test.ts` (entrance,
+- [x] Scene tests: `src/__tests__/scenes/wordBuilderScene.test.ts` (entrance,
       mascot, parent-locked Back, 3 progress dots)
-- [ ] Implement `src/scenes/WordBuilderScene.ts` shell
-- [ ] Commit `feat(scenes): Add Build the Word scene shell` + plan commit
+- [x] Implement `src/scenes/WordBuilderScene.ts` shell
+- [x] Commit `feat(scenes): Add Build the Word scene shell` + plan commit
+      — `803b09c`
 
 ### Task 3.2 — Round rendering
 - [ ] Tests: prompt picture top-center; slot row (one ~120px empty box per
