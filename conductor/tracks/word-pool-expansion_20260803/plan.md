@@ -2,7 +2,7 @@
 
 > Track id: `word-pool-expansion_20260803` · Workflow: `conductor/workflow.md` (TDD, phase checkpoints, git notes, quality gates)
 
-## Phase 1 — Pool Data & Pure Logic (TDD)
+## Phase 1 — Pool Data & Pure Logic (TDD) [checkpoint: 1849a4c]
 
 - [x] Task: Write failing tests for the expanded word pool (24e92a3)
   - [x] In `src/__tests__/game/wordLogic.test.ts` (or a new focused describe block), assert `WORD_POOL` has exactly 18 entries
