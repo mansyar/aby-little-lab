@@ -1,7 +1,7 @@
 import type Phaser from "phaser";
 
 /**
- * Dynamic-import loaders for the 8 game scenes, keyed by scene key
+ * Dynamic-import loaders for the 10 game scenes, keyed by scene key
  * (matching the `sceneKey` values of GAME_TILES in HubScene).
  *
  * Phaser 4 does not support lazy loaders in the config `scene` array
@@ -17,6 +17,8 @@ export const sceneLoaders: Record<string, () => Promise<Phaser.Types.Scenes.Scen
   BigSmall: () => import("./BigSmallScene").then((m) => m.BigSmallScene),
   PatternBuilder: () => import("./PatternBuilderScene").then((m) => m.PatternBuilderScene),
   Alphabet: () => import("./AlphabetScene").then((m) => m.AlphabetScene),
+  WordMatch: () => import("./WordMatchScene").then((m) => m.WordMatchScene),
+  WordBuilder: () => import("./WordBuilderScene").then((m) => m.WordBuilderScene),
 };
 
 /**
