@@ -190,7 +190,7 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 
 ---
 
-## Phase 5: Quality gates, docs, manual verification
+## Phase 5: Quality gates, docs, manual verification [checkpoint: 42a9cc7]
 
 ### Task 5.1 — Quality gates
 - [x] `pnpm run check`, `CI=true pnpm test`, `pnpm run build`,
