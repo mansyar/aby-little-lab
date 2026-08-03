@@ -71,12 +71,12 @@ public/
 └── icons/                 # PWA icons
 src/
 ├── main.ts                # Phaser game config & shell scene register (game scenes lazy-loaded)
-├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 8 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
+├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 10 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
 ├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter playthrough & round generation)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter/word playthrough & round generation)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
-├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts) + letter TTS (speech.ts)
+├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
 ├── assets/                # SVG assets bundled into the game
 ├── styles/                # Global CSS
 └── __tests__/             # Unit tests (audio, components, game, scenes, utils)
@@ -94,8 +94,10 @@ src/
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | ✅ Implemented |
 | 7 | Pattern Builder | Sequential pattern recognition | ✅ Implemented |
 | 8 | Find the Letter | Early literacy (letter recognition) | ✅ Implemented |
+| 9 | Find the Word | Early literacy (sight words) | ✅ Implemented |
+| 10 | Build the Word | Early literacy (spelling) | ✅ Implemented |
 
-**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys; Find the Letter: 6 of 26 letters), with round sizes and difficulty fixed.
+**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys; Find the Letter: 6 of 26 letters; Find the Word: 6 of 9 words, no two cards sharing a first letter; Build the Word: 3 words per playthrough, 2× 3-letter + 1× 4-letter, 6 tiles with distractors), with round sizes and difficulty fixed.
 
 ## Parental Lock & Touch UX
 
@@ -106,14 +108,14 @@ Settings access (Hub **Settings**) and app exit (each game's **← Back**) are g
 - Early release, pointer leaving the control, or pointer cancel **never** triggers the action.
 - The ring is cleared on release, cancel, and scene shutdown — no leftover display objects.
 
-The protected controls (Hub Settings, all eight game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
+The protected controls (Hub Settings, all ten game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
 
 The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
 
 Parent-facing additions (all behind the 3-second hold, never visible to the child during play):
 
 - **Version footer** — a muted `v{version}` readout at the bottom of the panel, sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
-- **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all eight stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
+- **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all ten stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
 - **Install control** — a context-aware row: "Install App" where a browser prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, hidden once the app is installed (see PWA Release Readiness).
 
 ## Motion & Feedback
@@ -121,7 +123,7 @@ Parent-facing additions (all behind the 3-second hold, never visible to the chil
 All animation is driven by a shared motion system (`src/utils/`):
 
 - **Scene transitions** — every navigation path (boot → hub, hub ↔ game, completion returns) plays a 300ms crossfade to the app background, then a 180ms fade-in with a subtle entrance zoom.
-- **Win celebration** — all eight games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
+- **Win celebration** — all ten games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
 - **Press feedback** — Back, Replay, Settings, and Hub game tiles squish to 95% of their base scale while pressed; tiles spring back with a `Back.out` overshoot (150ms), other controls restore instantly. Hub tiles navigate **on release** so the squish stays visible while holding; dragging off the tile cancels the navigation.
 - **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, Hub entrances fade without scale (no bob, wiggle, sparkle, or burst), the idle attract plays chime-only, and gameplay stays fully functional under `prefers-reduced-motion`.
 
@@ -136,6 +138,8 @@ Every game layers scene-level animation juice on top of its core rules (no gamep
 - **Pop & Freeze** — popping emits 3 teal droplet circles radiating from the pop point (self-cleaning fade), and sleeping-animal decoys breathe on a 1.0 → 1.03 yoyo loop (~1.5s; disabled under reduced motion).
 - **Musical Memory** — frog taps emit expanding ripple rings (self-cleaning fade), lily pads drift gently ±3px on a 3s loop (disabled under reduced motion), and progress dots pop on fill.
 - **Find the Letter** — the target letter pops in at round start and is named aloud via SpeechSynthesis (silent when SFX is off or unsupported — visual-only play always works); answer cards squish on press, correct taps chime with a progress-dot pop (700ms to the next round), and wrong taps wiggle gently (±4°, 3 yoyo repeats; ±2°/200ms reduced motion) with no penalty. Win shares the suite celebration plus a first-time sticker reveal.
+- **Find the Word** — the prompt picture pops in and the word is spoken aloud (rate 0.8, silent when SFX is off or unsupported); the 4 word cards in a 2×2 grid squish on press, correct taps chime with a progress-dot pop (700ms to the next round), wrong taps wiggle gently with no penalty, and every round's choices start with different letters so pre-readers can match first letters.
+- **Build the Word** — the word is spoken and each correct letter tile settles into the next empty slot with a `Back.out` pop plus a soft tick; wrong tiles wiggle with no penalty, slots fill strictly left-to-right, and a finished word lingers 1.2s with a chime + Hoot cheer before the next word (3 words, easy-first) appears.
 
 ## Hub Experience
 
