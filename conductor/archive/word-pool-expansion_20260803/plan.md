@@ -60,5 +60,9 @@
 
 ## Completion
 
-- [ ] Task: Final review against spec acceptance criteria (1–8) and Definition of Done in workflow.md
-- [ ] Task: Mark track complete, archive to `conductor/archive/word-pool-expansion_20260803/`, update `conductor/tracks.md`
+- [x] Task: Final review against spec acceptance criteria (1–8) and Definition of Done in workflow.md (523949a)
+- [x] Task: Mark track complete, archive to `conductor/archive/word-pool-expansion_20260803/`, update `conductor/tracks.md` (523949a)
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions (22d98b0)
