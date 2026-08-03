@@ -26,12 +26,13 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       commit; record SHA — `4209b1c`
 
 ### Task 1.2 — Find the Word round generation
-- [ ] TDD: failing tests for round generation — unique target words across a
+- [x] TDD: failing tests for round generation — unique target words across a
       playthrough, 4 unique choices per round, **no two choices share a first
       letter**, choices always include the target
-- [ ] Implement `generateWordRound` / `generateWordPlaythrough(6)` and
+- [x] Implement `generateWordRound` / `generateWordPlaythrough(6)` and
       `isCorrectWord` helpers in `wordLogic.ts`
-- [ ] Commit `feat(logic): Add Find the Word round generation` + plan commit
+- [x] Commit `feat(logic): Add Find the Word round generation` + plan commit
+      — `850ca9d`
 
 ### Task 1.3 — Build the Word generation
 - [ ] TDD: failing tests for builder generation — **easy-first ordering**
