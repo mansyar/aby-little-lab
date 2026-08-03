@@ -38,9 +38,9 @@
   - [x] Delete profile — two-step confirm, active-profile fallback, min-1 guarantee
 - [x] Task: Implement Profiles section in `SettingsPanel.ts` (reuse confirm-modal + hold patterns) `d1328ba`
 - [x] Task: Wire add/delete to storage logic; keep Hub shelf in sync via existing callbacks `d1328ba`
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — 826/826 tests, biome clean, user manual verification passed `89a1b50`
 
-## Phase 4 — Integration, Docs & Quality Gates
+## Phase 4 — Integration, Docs & Quality Gates `[checkpoint: 89a1b50]`
 
 - [ ] Task: Write integration test — per-profile sticker isolation across boot → hub → game → award → switch
 - [ ] Task: Update `product.md` (sticker section: per-profile note) and `tech-stack.md` (schema v2 final)
