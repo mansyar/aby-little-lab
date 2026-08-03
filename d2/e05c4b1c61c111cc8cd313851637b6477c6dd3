@@ -1,0 +1,1 @@
+Task: Register new textures in PreloadScene. Added ?raw imports for bug/duck/hat/sun SVGs and 4 SHAPE_ASSETS entries (sm_bug, sm_duck, sm_hat, sm_sun) following the sm_ prompt-picture convention; updated navigation.test.ts preload SVG count 90->94. Why: WORD_POOL references these keys; scenes are data-driven so no other code changes needed.
