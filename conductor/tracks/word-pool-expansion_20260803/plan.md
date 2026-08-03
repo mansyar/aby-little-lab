@@ -9,13 +9,13 @@
   - [x] Assert tier counts: 8× 3-letter, 10× 4-letter; all words unique
   - [x] Assert every `promptTexture` is a known PreloadScene texture key (list: `animal_cat`, `animal_dog`, `animal_pig`, `sm_car`, `mascot_idle`, `sm_sun`, `sm_hat`, `sm_bug`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`, `food_bone`, `shape_star`, `toy_drum`, `toy_teddy_bear`, `sm_duck`)
   - [x] Run the targeted tests and confirm the new assertions fail (Red phase) — `CI=true pnpm test -- wordLogic`
-- [~] Task: Expand `WORD_POOL` in `src/game/wordLogic.ts`
-  - [ ] Add the 9 new entries per the approved pool (OWL→`mascot_idle`, SUN/HAT/BUG→`sm_sun`/`sm_hat`/`sm_bug`, BONE→`food_bone`, STAR→`shape_star`, DRUM→`toy_drum`, BEAR→`toy_teddy_bear`, DUCK→`sm_duck`)
-  - [ ] Run the targeted tests and confirm green (Green phase)
-- [ ] Task: Verify round/builder generation across the full pool
-  - [ ] Add/extend tests: `generateWordPlaythrough(6)` returns 6 unique targets; no round shares a first letter among the 4 choices; target included exactly once
-  - [ ] Add/extend tests: builder playthroughs (3 words) are easy-first, unique, and draw from the expanded pool
-  - [ ] Run the full game-logic test files green
+- [x] Task: Expand `WORD_POOL` in `src/game/wordLogic.ts` (585909e)
+  - [x] Add the 9 new entries per the approved pool (OWL→`mascot_idle`, SUN/HAT/BUG→`sm_sun`/`sm_hat`/`sm_bug`, BONE→`food_bone`, STAR→`shape_star`, DRUM→`toy_drum`, BEAR→`toy_teddy_bear`, DUCK→`sm_duck`)
+  - [x] Run the targeted tests and confirm green (Green phase)
+- [x] Task: Verify round/builder generation across the full pool (585909e)
+  - [x] Add/extend tests: `generateWordPlaythrough(6)` returns 6 unique targets; no round shares a first letter among the 4 choices; target included exactly once
+  - [x] Add/extend tests: builder playthroughs (3 words) are easy-first, unique, and draw from the expanded pool
+  - [x] Run the full game-logic test files green
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — SVG Assets & Preload Registration
