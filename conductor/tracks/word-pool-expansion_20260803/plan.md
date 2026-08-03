@@ -33,6 +33,7 @@
 ## Phase 3 — Scene Integration Verification
 
 - [x] Task: Fix input lock persisting across scene re-launch (bug found in manual verification) (09a60b0)
+- [x] Task: Fix input lock in Alphabet/Pattern Builder scenes; verify Musical Memory recovers (c0b53ea)
   - [x] Regression test in `src/__tests__/scenes/wordMatchScene.test.ts`: complete 6 rounds (input locked), call `create()` again on the same instance, assert `inputLocked` resets to `false` and a card tap registers a correct answer
   - [x] Regression test in `src/__tests__/scenes/wordBuilderScene.test.ts`: same re-launch pattern after completing all 3 words
   - [x] Fix: reset `inputLocked = false` in `create()` of `WordMatchScene.ts` and `WordBuilderScene.ts`
