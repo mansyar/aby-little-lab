@@ -17,9 +17,9 @@
   - [x] Sticker read/write strictly per active profile (isolation between profiles)
 - [x] Task: Implement pure profile logic (migration, load/save v2, add/delete/switch, per-profile sticker access) in `src/utils/storage.ts` `4af3b21`
 - [x] Task: Run tests (Red → Green confirmed) and update legacy storage tests to the new API `4af3b21`
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — 813/813 tests, coverage ≥80% on new modules, user manual verification passed `3e26c39`
 
-## Phase 2 — Kid-Tappable Hub Profile Switcher
+## Phase 2 — Kid-Tappable Hub Profile Switcher `[checkpoint: 3e26c39]`
 
 - [ ] Task: Write Hub scene tests for the profile UI:
   - [ ] Active-profile avatar chip renders on Hub
