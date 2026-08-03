@@ -150,6 +150,7 @@ export class WordMatchScene extends Phaser.Scene {
 
     this.rounds = generateWordPlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
+    this.inputLocked = false;
     this.renderRound();
 
     this.events.on("shutdown", () => {

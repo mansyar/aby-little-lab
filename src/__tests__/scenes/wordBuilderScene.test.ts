@@ -752,6 +752,27 @@ describe("WordBuilderScene completion", () => {
     fireAutoReturn(scene);
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
   });
+
+  it("re-launching after completion unlocks input so tiles are tappable again", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    for (let i = 0; i < 3; i++) {
+      fillWord(scene);
+      fireWordLinger(scene);
+    }
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    // Returning to the Hub and tapping the tile again calls create() on the
+    // same scene instance (Phaser restart) — input must be unlocked.
+    scene.create();
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+
+    const word = getCurrentWord(scene);
+    const popCallsBefore = mockAudio.playPop.mock.calls.length;
+    tapTile(scene, getTileValues(scene).indexOf(word[0]));
+    expect(mockAudio.playPop.mock.calls.length).toBe(popCallsBefore + 1);
+  });
 });
 
 describe("WordBuilderScene round rendering", () => {
