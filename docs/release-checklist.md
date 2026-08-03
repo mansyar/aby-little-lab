@@ -29,6 +29,11 @@
 > - [x] Device checklist updated with Games 9 & 10 rows (`docs/device-testing-checklist.md`) — **executed 2026-08-03 on tablet + phone, all items passed**
 > - [x] Release branch `release/v1.2.0` created; version bumped to `1.2.0` (`a4ddc7a`); release notes finalized (`docs/release-notes-v1.2.0.md`)
 
+> **v1.2.1 prep (Build the Word slot letter fix, 2026-08-03):**
+> - [x] Bug: the letter placed in a Build the Word slot rendered at the full 512px texture size (overflowing the 120px slot) — `setScale` after `setDisplaySize` overwrote the 80/512 scale factor (`4702df5` fix; regression test asserts `setDisplaySize(92, 92)`, no `setScale`, settle tween on `displayWidth/displayHeight` → 80)
+> - [x] All four quality gates green on `release/v1.2.1`: Biome clean (72 files, warnings tolerated), **771/771 tests (29 files)**, build OK, `validate-pwa` 13/13
+> - [x] Release branch `release/v1.2.1` created; version bumped to `1.2.1` (`2c6d575`); release notes finalized (`docs/release-notes-v1.2.1.md`)
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
