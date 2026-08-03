@@ -193,9 +193,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 ## Phase 5: Quality gates, docs, manual verification
 
 ### Task 5.1 — Quality gates
-- [ ] `pnpm run check`, `CI=true pnpm test`, `pnpm run build`,
+- [x] `pnpm run check`, `CI=true pnpm test`, `pnpm run build`,
       `node scripts/validate-pwa.js` all green; coverage ≥ 80%
-- [ ] Commit `chore(quality): Pass First Words quality gates` + plan commit
+      (check 0 warnings-error, 29 files / 770 tests, build precache 24
+      entries, PWA 13/13 passed, coverage 96.97%)
+- [x] Commit `chore(quality): Pass First Words quality gates` + plan commit
+      — `4df7cc4`
 
 ### Task 5.2 — Docs sync
 - [ ] `product.md`: 10 mini-games (Games 9 & 10 first-words milestones)
