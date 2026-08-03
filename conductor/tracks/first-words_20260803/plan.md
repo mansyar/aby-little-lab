@@ -168,13 +168,14 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `67d2dc6`
 
 ### Task 4.3 — Hub: 10 tiles, 5×2 grid
-- [ ] Update `src/__tests__/scenes/navigation.test.ts` and hub tests for the
+- [x] Update `src/__tests__/scenes/navigation.test.ts` and hub tests for the
       new tiles/grid
-- [ ] `GAME_TILES` += Find the Word / Build the Word entries; rework grid to
+- [x] `GAME_TILES` += Find the Word / Build the Word entries; rework grid to
       `GRID_COLS = 5`, `TILE_WIDTH = 160`, `TILE_SPACING = 40` (5×160 + 4×40
       = 960 ≤ 1024); verify no tile/label clipping, sticker shelf positions
       derive from constants
-- [ ] Commit `feat(hub): Add First Words tiles in 5x2 grid` + plan commit
+- [x] Commit `feat(hub): Add First Words tiles in 5x2 grid` + plan commit
+      — `603e976`
 
 ### Task 4.4 — Integration tests
 - [ ] Add/extend integration tests: boot → hub → Find the Word → sticker →
