@@ -46,26 +46,26 @@
 
 ## Phase 3: Release Branch, PR, Merge & Tag [checkpoint: d141b71]
 
-- [ ] Task: Create release branch `release/v1.4.0`
-- [ ] Task: Open PR `release/v1.4.0` → `master`
-- [ ] Task: Merge PR (CI Quality Gates green → Deploy to Coolify fires)
-- [ ] Task: Create annotated tag `v1.4.0` — "Release v1.4.0: Multi-Kid Profiles"
-  - [ ] Push tag to `origin`
-- [ ] Task: Verify CI run
-  - [ ] Record run ID (e.g., via `gh run list`)
-  - [ ] Confirm Quality Gates job green
-  - [ ] Confirm Deploy to Coolify job green
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Create release branch `release/v1.4.0`
+- [x] Task: Open PR `release/v1.4.0` → `master` — **PR #11**
+- [x] Task: Merge PR (CI Quality Gates green → Deploy to Coolify fires) — **`ce460f7`**
+- [x] Task: Create annotated tag `v1.4.0` — "Release v1.4.0: Multi-Kid Profiles"
+  - [x] Push tag to `origin`
+- [x] Task: Verify CI run
+  - [x] Record run ID (e.g., via `gh run list`) — **run `30861443424`**
+  - [x] Confirm Quality Gates job green — ✓ 1m2s
+  - [x] Confirm Deploy to Coolify job green — ✓ 6s
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — PR #11 merged, tag pushed, CI green, user verified `2040b87`
 
-## Phase 4: Post-Deploy Verification
+## Phase 4: Post-Deploy Verification [checkpoint: 2040b87]
 
-- [ ] Task: Verify live index + entry JS hash
-  - [ ] Fetch live `index.html` (200); compare entry JS hash to local `dist/assets/index-*.js`
-- [ ] Task: Verify `1.4.0` embedded in served bundle (version footer data); no stale `1.3.0`
-- [ ] Task: Verify multi-kid profile code in served bundle (profileLogic / profile v2 strings)
-- [ ] Task: Verify live `sw.js` + `manifest.webmanifest` return 200
-- [ ] Task: Update `docs/release-checklist.md` Step 7f verifiable items + Final Sign-Off; commit docs update
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Verify live index + entry JS hash
+  - [x] Fetch live `index.html` (200); compare entry JS hash to local `dist/assets/index-*.js` — **live `index-Un88orXN.js` matches fresh 1.4.0 local build exactly (1,466,773 bytes)**
+- [x] Task: Verify `1.4.0` embedded in served bundle (version footer data); no stale `1.3.0` — **1.4.0 present; no v1.3.0 string**
+- [x] Task: Verify multi-kid profile code in served bundle (profileLogic / profile v2 strings) — **`abby-little-lab:v2` present**
+- [x] Task: Verify live `sw.js` + `manifest.webmanifest` return 200 — **both 200**
+- [x] Task: Update `docs/release-checklist.md` Step 7f verifiable items + Final Sign-Off; commit docs update — **`3a584b2`**
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — live index 200 + entry hash match, 1.4.0 in bundle, profiles v2 code live, sw.js/manifest 200, user verified `2040b87` → see Phase 5
 
 ## Phase 5: Track Completion & Archive
 
