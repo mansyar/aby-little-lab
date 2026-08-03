@@ -1,0 +1,1 @@
+Task: Write failing tests for the expanded word pool. Updated src/__tests__/game/wordLogic.test.ts: WORD_POOL length 9->18, expected word list (18 words), tier counts 8/10, added known-texture-key assertion and approved reuse-texture mapping test. Confirmed Red: 4 failing assertions until the pool is expanded.
