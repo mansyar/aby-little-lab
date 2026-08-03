@@ -1,0 +1,1 @@
+Task: Bump version to 1.2.0 - Bumped package.json from 1.1.0 to 1.2.0 via 'npm version --no-git-tag-version'. No source changes; the __APP_VERSION__ Vite define picks up the new version for the Settings panel footer.
