@@ -217,18 +217,18 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       plan commit — `f26a9e9`
 
 ### Phase 5 checkpoint
-- [ ] Phase-end protocol + `conductor(checkpoint)` commit + `git notes`; mark
-      Phase 5 heading
+- [x] Phase-end protocol + `conductor(checkpoint)` commit + `git notes`; mark
+      Phase 5 heading — checkpoint `42a9cc7`
 
 ---
 
 ## Phase 6: Track completion & archive
 
 ### Task 6.1 — Completion
-- [ ] Final review against spec Acceptance Criteria (all 8 items)
-- [ ] Mark track complete in `metadata.json` (status `complete`, items
+- [x] Final review against spec Acceptance Criteria (all 8 items) — all met
+- [x] Mark track complete in `metadata.json` (status `complete`, items
       totals), archive folder to `conductor/archive/first-words_20260803/`,
       update `tracks.md` registry entry to `[x] ... (Archived)`
-- [ ] Commit `chore(conductor): Mark track 'first-words' as complete and archive`
+- [x] Commit `chore(conductor): Mark track 'first-words' as complete and archive`
 - [ ] Release notes for the upcoming release are handled by the release
       mechanics track (out of scope here)
