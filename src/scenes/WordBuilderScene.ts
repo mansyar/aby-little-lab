@@ -153,6 +153,7 @@ export class WordBuilderScene extends Phaser.Scene {
 
     this.words = generateWordBuildPlaythrough(WORD_COUNT);
     this.wordIndex = 0;
+    this.inputLocked = false;
     this.renderRound();
 
     this.events.on("shutdown", () => {

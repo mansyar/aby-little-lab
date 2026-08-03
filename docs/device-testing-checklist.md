@@ -212,6 +212,8 @@ pnpm exec serve dist -l 3000
 - [ ] TTS is silent when the SFX toggle is off; on devices with no speech voice the game plays fully visually with no error
 - [ ] 6 rounds complete the game; sticker awarded on first completion
 - [ ] Returns to Hub after completion (auto-return ~3s)
+- [ ] New-pool words spot check: OWL (Hoot picture), SUN, HAT, BUG, DUCK appear across playthroughs with correct prompt art at ~180px (no missing-texture boxes)
+- [ ] Replay check: after winning, re-entering the game keeps cards tappable (input-lock regression fixed)
 
 #### Game 10: Build the Word (Spelling)
 - [ ] Game loads correctly
@@ -224,6 +226,8 @@ pnpm exec serve dist -l 3000
 - [ ] TTS is silent when the SFX toggle is off; on devices with no speech voice the game plays fully visually with no error
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion (auto-return ~3s)
+- [ ] New-pool words spot check: DUCK/BEAR/BONE/STAR/DRUM render with correct prompt art at ~180px and spell with the usual 6 tiles
+- [ ] Replay check: after winning, re-entering the game keeps tiles tappable (input-lock regression fixed)
 
 ### C. Cross-Game Features
 

@@ -34,6 +34,12 @@
 > - [x] All four quality gates green on `release/v1.2.1`: Biome clean (72 files, warnings tolerated), **771/771 tests (29 files)**, build OK, `validate-pwa` 13/13
 > - [x] Release branch `release/v1.2.1` created; version bumped to `1.2.1` (`2c6d575`); release notes finalized (`docs/release-notes-v1.2.1.md`)
 
+> **v1.3.0 prep (First Words word pool expansion + replay input-lock fixes, 2026-08-04):** Track archived at `conductor/archive/word-pool-expansion_20260803/` (reviewed — 2 Low findings fixed in `22d98b0`).
+> - [x] All four quality gates green on `release/v1.3.0`: Biome clean (72 files, 15 baseline warnings), **779/779 tests (29 files)**, build OK, `validate-pwa` 13/13
+> - [x] Coverage above 80% thresholds (CI-enforced)
+> - [x] Device checklist updated with Games 9 & 10 new-word spot checks + replay checks (`docs/device-testing-checklist.md`) — **executed 2026-08-04 against the live URL, all items passed**
+> - [x] Release branch `release/v1.3.0` created; version bumped to `1.3.0` (`cc955e2`); release notes finalized (`docs/release-notes-v1.3.0.md`)
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
@@ -199,6 +205,15 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
 - [x] Build the Word slot letters render at the correct size (80px) inside the 120px slots
 
+### Step 7e: Verify Deployment — v1.3.0 (2026-08-04)
+- [ ] PR merged `release/v1.3.0` → `master` — **pending**
+- [ ] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **pending**
+- [ ] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [ ] App loads correctly on the live URL — 200; serves release build (hash matches fresh local build)
+- [ ] Version footer data — `1.3.0` embedded in served bundle; no stale `1.2.1` string
+- [ ] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [ ] New-word pictures render in Find the Word / Build the Word on device — SUN/HAT/BUG/DUCK spot checks (device checklist already passed pre-release)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
@@ -355,4 +370,21 @@ Please report issues at [GitHub Issues URL]
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — verified on device 2026-08-03
+- [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.3.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-04
+**Version:** 1.3.0
+**Status:** In progress — release branch ready, PR pending, deploy pending
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (779/779)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — verified on device 2026-08-04 (device checklist all sections passed)
 - [x] Ready for release
