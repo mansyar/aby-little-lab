@@ -175,6 +175,15 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Update flow works: deploy a second change → "New version ready!" toast on Hub → "Update now" applies it — **2026-08-03:** verified
 - [x] All games function properly — **2026-08-03:** all 8 games verified on device
 
+### Step 7c: Verify Deployment — v1.2.0 (2026-08-03)
+- [x] PR #8 merged `release/v1.2.0` → `master` (`c445e41`) — **2026-08-03**
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `30797682029`** (Quality Gates 1m20s ✓, Deploy to Coolify 6s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-zIGt_U__.js` hash matches fresh local build)
+- [x] Version footer data — `1.2.0` embedded in served bundle; no stale `1.1.0` string
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [x] All games function properly — **2026-08-03:** all 10 games verified on device (tablet + phone)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
