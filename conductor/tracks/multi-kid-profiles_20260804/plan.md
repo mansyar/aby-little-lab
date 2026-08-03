@@ -28,9 +28,9 @@
   - [x] Picker closes cleanly; input lock state correct after switch (no stale `inputLocked`)
 - [x] Task: Implement avatar chip + picker overlay in `HubScene.ts` (≥ 96×96 touch targets, textless) `1f3e9a3`
 - [x] Task: Wire switching to storage (`switchProfile`) and shelf re-render (reuse `rerenderStickerShelf()`) `1f3e9a3`
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — 817/817 tests, biome clean, user manual verification passed `571a80c`
 
-## Phase 3 — Parental-Gated Profile Management (Settings)
+## Phase 3 — Parental-Gated Profile Management (Settings) `[checkpoint: 571a80c]`
 
 - [ ] Task: Write `SettingsPanel` tests for the Profiles section:
   - [ ] Profiles section visible only behind the parental hold
