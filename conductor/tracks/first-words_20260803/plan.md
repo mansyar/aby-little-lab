@@ -201,11 +201,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `4df7cc4`
 
 ### Task 5.2 — Docs sync
-- [ ] `product.md`: 10 mini-games (Games 9 & 10 first-words milestones)
-- [ ] `tech-stack.md`: new scenes/loaders, game ids, Hub grid constants
-- [ ] README game rows; `PRD.md` Game 9/10 milestones;
+- [x] `product.md`: 10 mini-games (Games 9 & 10 first-words milestones)
+- [x] `tech-stack.md`: new scenes/loaders, game ids, Hub grid constants
+- [x] README game rows; `PRD.md` Game 9/10 milestones;
       `docs/device-testing-checklist.md` sections for both games
-- [ ] Commit `docs: Document First Words games` + plan commit
+- [x] Commit `docs: Document First Words games` + plan commit
+      — `d93a702`
 
 ### Task 5.3 — Manual verification
 - [ ] Present manual verification plan (tablet + phone, per
