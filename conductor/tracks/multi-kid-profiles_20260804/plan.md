@@ -21,13 +21,13 @@
 
 ## Phase 2 — Kid-Tappable Hub Profile Switcher `[checkpoint: 3e26c39]`
 
-- [ ] Task: Write Hub scene tests for the profile UI:
-  - [ ] Active-profile avatar chip renders on Hub
-  - [ ] Tapping chip opens the avatar picker overlay (no parental lock)
-  - [ ] Selecting an avatar switches `activeProfileId` and re-renders the sticker shelf in place
-  - [ ] Picker closes cleanly; input lock state correct after switch (no stale `inputLocked`)
-- [ ] Task: Implement avatar chip + picker overlay in `HubScene.ts` (≥ 96×96 touch targets, textless)
-- [ ] Task: Wire switching to storage (`switchProfile`) and shelf re-render (reuse `rerenderStickerShelf()`)
+- [x] Task: Write Hub scene tests for the profile UI:
+  - [x] Active-profile avatar chip renders on Hub
+  - [x] Tapping chip opens the avatar picker overlay (no parental lock)
+  - [x] Selecting an avatar switches `activeProfileId` and re-renders the sticker shelf in place
+  - [x] Picker closes cleanly; input lock state correct after switch (no stale `inputLocked`)
+- [x] Task: Implement avatar chip + picker overlay in `HubScene.ts` (≥ 96×96 touch targets, textless) `1f3e9a3`
+- [x] Task: Wire switching to storage (`switchProfile`) and shelf re-render (reuse `rerenderStickerShelf()`) `1f3e9a3`
 - [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
 
 ## Phase 3 — Parental-Gated Profile Management (Settings)
