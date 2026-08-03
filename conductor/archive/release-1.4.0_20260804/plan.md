@@ -69,8 +69,8 @@
 
 ## Phase 5: Track Completion & Archive
 
-- [ ] Task: Conduct track review (per Conductor review protocol; apply suggestions)
-- [ ] Task: Mark track complete; archive to `conductor/archive/`; update Tracks Registry
+- [x] Task: Conduct track review (per Conductor review protocol; apply suggestions) — no code findings; release track, docs-only after bump; PR #11 merged, tag pushed, CI green, live verified
+- [x] Task: Mark track complete; archive to `conductor/archive/`; update Tracks Registry — archived `conductor/archive/release-1.4.0_20260804/`
 - [ ] Task: Final checkpoint & commit
 
 ## Notes
