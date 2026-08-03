@@ -255,11 +255,64 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+import { getWord } from "../../game/wordLogic";
+import { updateSettings } from "../../utils/storage";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
+}
+
+/** Returns the current round of the scene. */
+function getCurrentRound(scene: unknown): { target: string; choices: string[] } {
+  const s = scene as { rounds: Array<{ target: string; choices: string[] }>; roundIndex: number };
+  return s.rounds[s.roundIndex];
+}
+
+/** Card row y positions derived from the layout constants (centerY 384). */
+const CARD_ROW_YS = [384 + 110, 384 + 270];
+
+/** Returns the 4 card rectangles (created at the two card rows). */
+function getCardRects(scene: unknown): Array<Record<string, MockFn>> {
+  const s = scene as { add: Record<string, unknown> };
+  const rectangleMock = getMockFn(s.add.rectangle);
+  const cards: Array<Record<string, MockFn>> = [];
+  for (let i = 0; i < rectangleMock.mock.calls.length; i++) {
+    if (CARD_ROW_YS.includes(rectangleMock.mock.calls[i][1] as number)) {
+      cards.push(rectangleMock.mock.results[i].value as Record<string, MockFn>);
+    }
+  }
+  return cards;
+}
+
+/** Returns the letter images of one card (2×2 grid position by x/y). */
+function getCardLetters(scene: unknown, cardIndex: number): Array<Record<string, MockFn>> {
+  const s = scene as { add: Record<string, unknown> };
+  const imageMock = getMockFn(s.add.image);
+  const centerX = (scene as { cameras: { main: { centerX: number } } }).cameras.main.centerX;
+  const letters: Array<Record<string, MockFn>> = [];
+  for (let i = 0; i < imageMock.mock.calls.length; i++) {
+    const [x, y, key] = imageMock.mock.calls[i] as [number, number, string];
+    if (typeof key !== "string" || !key.startsWith("letter_")) continue;
+    const row = y === CARD_ROW_YS[0] ? 0 : 1;
+    const col = x < centerX ? 0 : 1;
+    if (row * 2 + col === cardIndex) {
+      letters.push(imageMock.mock.results[i].value as Record<string, MockFn>);
+    }
+  }
+  return letters;
+}
+
+/** Returns the prompt picture image object of the current round. */
+function getPromptImage(scene: unknown): Record<string, MockFn> | undefined {
+  const s = scene as { add: Record<string, unknown> };
+  const imageMock = getMockFn(s.add.image);
+  const round = getCurrentRound(scene);
+  const promptTexture = getWord(round.target)?.promptTexture;
+  const index = imageMock.mock.calls.findIndex((call) => call[2] === promptTexture);
+  if (index === -1) return undefined;
+  return imageMock.mock.results[index].value as Record<string, MockFn>;
 }
 
 describe("WordMatchScene shell", () => {
@@ -331,5 +384,103 @@ describe("WordMatchScene shell", () => {
       (fadeOutCall[4] as () => void)();
     }
     expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+  });
+});
+
+describe("WordMatchScene round rendering", () => {
+  let matchMediaMock: MockFn;
+
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    mockSpeech.speakWord.mockClear();
+    mockSpeech.isSpeechSupported.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("renders the prompt picture from the round's texture key at ~180px", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+
+    const round = getCurrentRound(scene);
+    const prompt = getPromptImage(scene);
+    expect(prompt).toBeDefined();
+    expect(getMockFn(prompt!.setDisplaySize)).toHaveBeenCalledWith(180, 180);
+  });
+
+  it("renders 4 word cards in a 2×2 grid, composed of letter textures", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+
+    const cards = getCardRects(scene);
+    expect(cards).toHaveLength(4);
+    expect(getMockFn(cards[0].setInteractive)).toHaveBeenCalled();
+    expect(getMockFn(cards[0].setStrokeStyle)).toHaveBeenCalled();
+
+    // Cards are at least 160px tall — comfortably above the 96px touch target.
+    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
+      .calls;
+    const cardCalls = rectCalls.filter((call) => CARD_ROW_YS.includes(call[1] as number));
+    expect(cardCalls).toHaveLength(4);
+    for (const call of cardCalls) {
+      expect(call[3]).toBeGreaterThanOrEqual(96);
+      expect(call[4]).toBeGreaterThanOrEqual(96);
+    }
+
+    // Each card shows its word's letters in order as ~80px letter images.
+    for (let i = 0; i < round.choices.length; i++) {
+      const letters = getCardLetters(scene, i);
+      const word = round.choices[i];
+      expect(letters).toHaveLength(word.length);
+      for (let j = 0; j < word.length; j++) {
+        expect(getMockFn(letters[j].setDisplaySize)).toHaveBeenCalledWith(80, 80);
+      }
+      const keys = (getMockFn((scene as { add: Record<string, unknown> }).add.image).mock
+        .calls as Array<[number, number, string]>)
+        .filter((call) => typeof call[2] === "string" && call[2].startsWith("letter_"));
+      const cardLetterKeys = keys.filter((call) => {
+        const [x, y] = call as [number, number];
+        const row = y === CARD_ROW_YS[0] ? 0 : 1;
+        const col = x < scene.cameras.main.centerX ? 0 : 1;
+        return row * 2 + col === i;
+      });
+      expect(cardLetterKeys.map((call) => call[2])).toEqual(
+        word.split("").map((letter) => `letter_${letter.toLowerCase()}`),
+      );
+    }
+  });
+
+  it("speaks the target word at round start when SFX is enabled", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+
+    const round = getCurrentRound(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(round.target, true);
+  });
+
+  it("silences TTS when the SFX toggle is off", () => {
+    updateSettings({ sfxEnabled: false });
+
+    const scene = new WordMatchScene();
+    scene.create();
+
+    const round = getCurrentRound(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(round.target, false);
   });
 });

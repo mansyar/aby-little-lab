@@ -2,9 +2,11 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import { generateWordPlaythrough, type WordRound } from "../game/wordLogic";
+import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
+import { speakWord } from "../utils/speech";
+import { load } from "../utils/storage";
 
 /** Number of rounds per playthrough. */
 const ROUND_COUNT = 6;
@@ -18,6 +20,33 @@ const PROGRESS_DOT_SPACING = 40;
 /** Radius of progress dots (px). */
 const PROGRESS_DOT_RADIUS = 8;
 
+/** Display size of the prompt picture (px). */
+const PICTURE_SIZE = 180;
+
+/** Vertical offset of the prompt picture from screen center (px). */
+const PICTURE_Y_OFFSET = -240;
+
+/** Card height (px) — comfortably above the 96px touch target. */
+const CARD_HEIGHT = 160;
+
+/** Display size of each letter inside a word card (px). */
+const LETTER_SIZE = 80;
+
+/** Horizontal gap between letters inside a word card (px). */
+const LETTER_GAP = 8;
+
+/** Horizontal padding inside a word card beyond the letters (px). */
+const CARD_PADDING = 30;
+
+/** Vertical offsets of the two card rows from screen center (px). */
+const CARD_ROW_Y_OFFSETS = [110, 270] as const;
+
+/** Horizontal offset of the two card columns from screen center (px). */
+const CARD_COL_X_OFFSET = 200;
+
+/** Stroke width of card outlines. */
+const OUTLINE_WIDTH = 4;
+
 /**
  * Find the Word scene — a picture is shown and its word is spoken aloud, and
  * the child taps the matching printed word among 4 cards in a 2×2 grid.
@@ -30,6 +59,12 @@ export class WordMatchScene extends Phaser.Scene {
   private mascot?: Mascot;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
+  /** Answer card backgrounds of the current round. */
+  private readonly cardRects: Phaser.GameObjects.Rectangle[] = [];
+  /** Letter images per card of the current round (indexed like cardRects). */
+  private readonly cardLetters: Phaser.GameObjects.Image[][] = [];
+  /** Per-round display objects (currently the prompt picture). */
+  private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
   private rounds: WordRound[] = [];
   private roundIndex = 0;
   private inputLocked = false;
@@ -92,8 +127,86 @@ export class WordMatchScene extends Phaser.Scene {
     }
   }
 
-  /** Renders the current round's prompt and answer cards. */
+  /**
+   * Renders the current round: the prompt picture (with the word spoken
+   * aloud via TTS when SFX is enabled) and 4 word cards in a 2×2 grid.
+   * Previous objects are destroyed.
+   */
   private renderRound(): void {
-    // Round rendering (prompt picture + 2×2 word cards) lands in Task 2.2.
+    this.clearRound();
+
+    const round = this.rounds[this.roundIndex];
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+
+    const prompt = this.add.image(
+      centerX,
+      centerY + PICTURE_Y_OFFSET,
+      getWord(round.target)?.promptTexture ?? "",
+    );
+    prompt.setDisplaySize(PICTURE_SIZE, PICTURE_SIZE);
+    this.roundObjects.push(prompt);
+
+    const { sfxEnabled } = load().settings;
+    speakWord(round.target, sfxEnabled);
+
+    this.createCards(round);
+  }
+
+  /** Creates the 4 word cards in a 2×2 grid with tap handling. */
+  private createCards(round: WordRound): void {
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+
+    for (let i = 0; i < round.choices.length; i++) {
+      const word = round.choices[i];
+      const row = Math.floor(i / 2);
+      const col = i % 2;
+      const cardX = centerX + (col === 0 ? -CARD_COL_X_OFFSET : CARD_COL_X_OFFSET);
+      const cardY = centerY + CARD_ROW_Y_OFFSETS[row];
+      const contentWidth = word.length * LETTER_SIZE + (word.length - 1) * LETTER_GAP;
+      const cardWidth = contentWidth + CARD_PADDING * 2;
+
+      const card = this.add.rectangle(cardX, cardY, cardWidth, CARD_HEIGHT, 0xffffff);
+      card.setStrokeStyle(OUTLINE_WIDTH, 0x2d3748, 1);
+      card.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(0, 0, cardWidth, CARD_HEIGHT),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      card.on("pointerdown", () => this.handleChoice(i));
+      this.cardRects.push(card);
+
+      // Compose the word from the already-loaded letter textures.
+      const letters: Phaser.GameObjects.Image[] = [];
+      const startX = cardX - contentWidth / 2 + LETTER_SIZE / 2;
+      for (let j = 0; j < word.length; j++) {
+        const letter = this.add.image(
+          startX + j * (LETTER_SIZE + LETTER_GAP),
+          cardY,
+          `letter_${word[j].toLowerCase()}`,
+        );
+        letter.setDisplaySize(LETTER_SIZE, LETTER_SIZE);
+        letters.push(letter);
+      }
+      this.cardLetters.push(letters);
+    }
+  }
+
+  /** Destroys all display objects created for the current round. */
+  private clearRound(): void {
+    for (const obj of this.roundObjects) {
+      obj.destroy();
+    }
+    this.roundObjects.length = 0;
+    for (const card of this.cardRects) {
+      card.destroy();
+    }
+    this.cardRects.length = 0;
+    for (const letters of this.cardLetters) {
+      for (const letter of letters) {
+        letter.destroy();
+      }
+    }
+    this.cardLetters.length = 0;
   }
 }
