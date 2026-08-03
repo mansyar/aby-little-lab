@@ -89,11 +89,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `9a618d1`
 
 ### Task 2.3 — Interaction
-- [ ] Tests: correct tap → chime + Hoot cheer + progress dot pop + next round
+- [x] Tests: correct tap → chime + Hoot cheer + progress dot pop + next round
       in ~0.7s; wrong tap → gentle reduced-motion-aware wiggle + soft tone,
       no penalty, input locked during transitions
-- [ ] Implement `handleChoice`/`handleCorrect`/`handleIncorrect`
-- [ ] Commit `feat(scenes): Wire Find the Word interaction` + plan commit
+- [x] Implement `handleChoice`/`handleCorrect`/`handleIncorrect`
+- [x] Commit `feat(scenes): Wire Find the Word interaction` + plan commit
+      — `2b2a930`
 
 ### Task 2.4 — Completion
 - [ ] Tests: win SFX + shared celebration; `earnSticker("word-match")` on
