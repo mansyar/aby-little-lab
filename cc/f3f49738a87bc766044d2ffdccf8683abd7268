@@ -1,0 +1,1 @@
+Phase 4 verification (manual deferred per user): changed src files HubScene.ts, PreloadScene.ts, sceneRegistry.ts - covered by navigation.test.ts / sceneRegistry.test.ts; sticker SVGs registered via PreloadScene (navigation preload count 90). New firstWordsIntegration.test.ts (3 flows). Full suite: 29 files / 770 tests passed (13 new since Phase 3).
