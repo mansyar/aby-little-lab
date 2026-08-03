@@ -111,7 +111,7 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 
 ---
 
-## Phase 3: Game 10 — Build the Word (WordBuilderScene)
+## Phase 3: Game 10 — Build the Word (WordBuilderScene) [checkpoint: 8e33b6d]
 
 ### Task 3.1 — Scene shell
 - [x] Scene tests: `src/__tests__/scenes/wordBuilderScene.test.ts` (entrance,
