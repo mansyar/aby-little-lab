@@ -1,0 +1,1 @@
+Task 3.3: handleTile fills next empty slot (playPop soft tick + settle pop Back.out tween, tile locks in), wrong tile playIncorrect + nod + wiggle tween (angle 4/2, yoyo, 3 repeats); input locked on full word. slotXs array stores slot centers (mock-safe). 10 scene tests green.
