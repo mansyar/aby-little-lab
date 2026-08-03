@@ -810,6 +810,28 @@ describe("scene navigation flow", () => {
       expect(mockSettingsPanel).toHaveBeenCalledWith(scene, undefined, expect.any(Function));
     });
 
+    it("refreshes the avatar chip when the settings panel reports a change", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+      const holdCallback = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 3000,
+      )?.[1] as () => void;
+      holdCallback();
+
+      // Simulate the profile add/delete flow in Settings: invoke the
+      // onProgressReset callback passed to the panel, then add a profile.
+      const settingsArgs = mockSettingsPanel.mock.calls.at(-1) as unknown[];
+      const onProgressReset = settingsArgs[2] as () => void;
+      addProfile("dog");
+      onProgressReset();
+
+      const chip = findLastAddedImage(scene, "animal_cat");
+      expect(chip).toBeDefined();
+      expect(getMockFn(chip?.setTexture)).toHaveBeenCalledWith("animal_dog");
+    });
+
     it("creates 7 game tiles", () => {
       const scene = new HubScene();
       scene.create();
@@ -924,6 +946,8 @@ describe("scene navigation flow", () => {
       expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
       // Shelf re-rendered: 10 more sticker lookups after the initial 10.
       expect(hasSticker).toHaveBeenCalledTimes(20);
+      // Chip re-textured to the newly active profile.
+      expect(getMockFn(chip.setTexture)).toHaveBeenCalledWith("animal_cat");
     });
 
     it("tapping outside the picker closes it without switching", () => {

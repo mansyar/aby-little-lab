@@ -234,7 +234,10 @@ export class HubScene extends Phaser.Scene {
       target: settingsButton,
       onSuccess: () => {
         this.settingsPanel?.destroy();
-        this.settingsPanel = new SettingsPanel(this, undefined, () => this.rerenderStickerShelf());
+        this.settingsPanel = new SettingsPanel(this, undefined, () => {
+          this.rerenderStickerShelf();
+          this.refreshProfileChip();
+        });
       },
       onFailure: () => {
         // No action needed on failure.
@@ -325,6 +328,7 @@ export class HubScene extends Phaser.Scene {
       avatar.on("pointerup", () => {
         if (profile.id !== activeId) {
           switchProfile(profile.id);
+          this.refreshProfileChip();
           this.rerenderStickerShelf();
         }
         this.closeProfilePicker();
@@ -339,6 +343,11 @@ export class HubScene extends Phaser.Scene {
     for (const obj of this.profilePickerObjects) obj.destroy();
     this.profilePickerObjects = [];
     this.profilePickerOpen = false;
+  }
+
+  /** Re-textures the avatar chip to the active profile (after switch/add/delete). */
+  private refreshProfileChip(): void {
+    this.profileChip?.setTexture(PROFILE_AVATAR_TEXTURES[getActiveProfile().avatarId]);
   }
 
   /**
