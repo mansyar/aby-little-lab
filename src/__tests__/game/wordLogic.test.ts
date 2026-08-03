@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import {
   WORD_POOL,
+  generateLetterTiles,
+  generateWordBuildPlaythrough,
   generateWordPlaythrough,
   generateWordRound,
   isCorrectWord,
@@ -155,5 +157,116 @@ describe("isCorrectWord", () => {
     expect(isCorrectWord(round, "CAT")).toBe(true);
     expect(isCorrectWord(round, "DOG")).toBe(false);
     expect(isCorrectWord(round, "CAR")).toBe(false);
+  });
+});
+
+describe("generateWordBuildPlaythrough", () => {
+  it("returns the requested number of pool words", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = generateWordBuildPlaythrough(3);
+      expect(playthrough).toHaveLength(3);
+      for (const entry of playthrough) {
+        expect(WORD_POOL).toContain(entry);
+      }
+    }
+  });
+
+  it("defaults to 3 words", () => {
+    expect(generateWordBuildPlaythrough()).toHaveLength(3);
+  });
+
+  it("orders words easy-first: every 3-letter word before every 4-letter word", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = generateWordBuildPlaythrough(3);
+      const firstTier4Index = playthrough.findIndex((entry) => entry.tier === 4);
+      const lastTier3Index = playthrough.findIndex((entry) => entry.tier === 3);
+      if (firstTier4Index !== -1 && lastTier3Index !== -1) {
+        expect(firstTier4Index).toBeGreaterThan(lastTier3Index);
+      }
+    }
+  });
+
+  it("never repeats a word within a playthrough", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const words = generateWordBuildPlaythrough(3).map((entry) => entry.word);
+      expect(new Set(words).size).toBe(words.length);
+    }
+  });
+
+  it("includes at least one 4-letter word in every 3-word playthrough", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = generateWordBuildPlaythrough(3);
+      expect(playthrough.some((entry) => entry.tier === 4)).toBe(true);
+    }
+  });
+
+  it("varies the drawn words across playthroughs", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 50; i++) {
+      for (const entry of generateWordBuildPlaythrough(3)) {
+        seen.add(entry.word);
+      }
+    }
+    expect(seen.size).toBeGreaterThan(4);
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = generateWordBuildPlaythrough();
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = generateWordBuildPlaythrough();
+    expect(second).toEqual(first);
+  });
+});
+
+describe("generateLetterTiles", () => {
+  it("always returns exactly 6 tiles", () => {
+    for (const entry of WORD_POOL) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        expect(generateLetterTiles(entry.word)).toHaveLength(6);
+      }
+    }
+  });
+
+  it("contains every unique letter of the word", () => {
+    for (const entry of WORD_POOL) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const tiles = generateLetterTiles(entry.word);
+        for (const letter of new Set(entry.word.split(""))) {
+          expect(tiles).toContain(letter);
+        }
+      }
+    }
+  });
+
+  it("contains no duplicate tiles", () => {
+    for (const entry of WORD_POOL) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const tiles = generateLetterTiles(entry.word);
+        expect(new Set(tiles).size).toBe(6);
+      }
+    }
+  });
+
+  it("uses only distractor letters not present in the word", () => {
+    for (const entry of WORD_POOL) {
+      const tiles = generateLetterTiles(entry.word);
+      const wordLetters = new Set(entry.word.split(""));
+      const distractors = tiles.filter((tile) => !wordLetters.has(tile));
+      expect(distractors.length).toBeGreaterThanOrEqual(2);
+      for (const distractor of distractors) {
+        expect(wordLetters.has(distractor)).toBe(false);
+      }
+    }
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = generateLetterTiles("CAT");
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = generateLetterTiles("CAT");
+    expect(second).toEqual(first);
   });
 });

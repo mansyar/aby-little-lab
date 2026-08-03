@@ -1,3 +1,4 @@
+import { ALPHABET } from "./alphabetLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** A single first word: the printed word, its length, and its picture texture. */
@@ -75,4 +76,34 @@ export function generateWordPlaythrough(roundCount = 6): WordRound[] {
 /** Returns whether the tapped word is the round's target. */
 export function isCorrectWord(round: WordRound, word: string): boolean {
   return round.target === word;
+}
+
+/**
+ * Generates a Build the Word playthrough, easy-first: 3-letter words lead,
+ * 4-letter words follow, random within each tier, no repeats. With the
+ * default 3 words this yields two 3-letter words then one 4-letter word.
+ */
+export function generateWordBuildPlaythrough(wordCount = 3): FirstWord[] {
+  const tier3 = shuffle(WORD_POOL.filter((entry) => entry.tier === 3));
+  const tier4 = shuffle(WORD_POOL.filter((entry) => entry.tier === 4));
+  const earlyCount = Math.min(tier3.length, Math.max(0, wordCount - 1));
+  return [...tier3.slice(0, earlyCount), ...tier4.slice(0, wordCount - earlyCount)].slice(
+    0,
+    wordCount,
+  );
+}
+
+/**
+ * Builds the 6 letter tiles for a word: the word's unique letters plus
+ * 2–3 distractor letters not in the word, all shuffled.
+ */
+export function generateLetterTiles(word: string): string[] {
+  const uniqueLetters = [...new Set(word.split(""))];
+  const distractorCount = 6 - uniqueLetters.length;
+  const wordLetters = new Set(uniqueLetters);
+  const distractors = shuffle(ALPHABET.filter((letter) => !wordLetters.has(letter))).slice(
+    0,
+    distractorCount,
+  );
+  return shuffle([...uniqueLetters, ...distractors]);
 }
