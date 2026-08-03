@@ -8,6 +8,7 @@ import {
   type FirstWord,
 } from "../game/wordLogic";
 import { attachPressFeedback } from "../utils/pressFeedback";
+import { motionDuration, isReducedMotion } from "../utils/motion";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -54,6 +55,23 @@ const LETTER_SIZE = 80;
 /** Card/tile outline width (px). */
 const OUTLINE_WIDTH = 4;
 
+/** Wiggle angle for wrong tiles (deg), normal vs reduced motion. */
+const WIGGLE_ANGLE = 4;
+const WIGGLE_REDUCED_ANGLE = 2;
+
+/** Wiggle durations (ms), normal vs reduced motion. */
+const WIGGLE_DURATION = 350;
+const WIGGLE_REDUCED_DURATION = 200;
+
+/** Number of wiggle yoyo repeats on a wrong tile. */
+const WIGGLE_REPEATS = 3;
+
+/** Settle-pop scale for a letter locking into a slot. */
+const SLOT_POP_SCALE = 1.15;
+
+/** Settle-pop tween duration (ms). */
+const SLOT_POP_DURATION = 150;
+
 /**
  * Build the Word scene — a picture is shown and its word is spoken aloud, and
  * the child spells the word by tapping letter tiles in order into word slots.
@@ -67,6 +85,7 @@ export class WordBuilderScene extends Phaser.Scene {
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   private readonly slotRects: Phaser.GameObjects.Rectangle[] = [];
+  private readonly slotXs: number[] = [];
   private readonly tileRects: Phaser.GameObjects.Rectangle[] = [];
   private readonly tileLetterImages: Phaser.GameObjects.Image[] = [];
   private readonly tileLetterValues: string[] = [];
@@ -168,6 +187,7 @@ export class WordBuilderScene extends Phaser.Scene {
         )
         .setStrokeStyle(OUTLINE_WIDTH, 0x2d3748, 1);
       this.slotRects.push(slot);
+      this.slotXs.push(slotStartX + i * (SLOT_SIZE + SLOT_GAP));
       this.roundObjects.push(slot);
       this.slotImages.push(null);
     }
@@ -206,6 +226,7 @@ export class WordBuilderScene extends Phaser.Scene {
     }
     this.roundObjects.length = 0;
     this.slotRects.length = 0;
+    this.slotXs.length = 0;
     this.tileRects.length = 0;
     this.tileLetterImages.length = 0;
     this.tileLetterValues.length = 0;
@@ -213,8 +234,55 @@ export class WordBuilderScene extends Phaser.Scene {
     this.filledSlots = 0;
   }
 
-  /** Letter-tile tap handling (sequential spelling) lands in Task 3.3. */
-  private handleTile(_tileIndex: number): void {
-    // Interaction (fill next empty slot, wiggle on wrong) lands in Task 3.3.
+  /**
+   * Letter-tile tap handling: fills the next empty slot when the tile
+   * matches the expected letter, otherwise wiggles the tile (no penalty).
+   * Input is locked while a transition is in flight.
+   */
+  private handleTile(tileIndex: number): void {
+    if (this.inputLocked) return;
+
+    const word = this.words[this.wordIndex];
+    const chosen = this.tileLetterValues[tileIndex];
+    const expected = word.word[this.filledSlots];
+
+    if (chosen !== expected) {
+      this.audioManager.playIncorrect();
+      this.mascot?.nod();
+      const reduced = isReducedMotion();
+      this.tweens.add({
+        targets: [this.tileRects[tileIndex], this.tileLetterImages[tileIndex]],
+        angle: reduced ? WIGGLE_REDUCED_ANGLE : WIGGLE_ANGLE,
+        duration: motionDuration(WIGGLE_DURATION, WIGGLE_REDUCED_DURATION),
+        yoyo: true,
+        repeat: WIGGLE_REPEATS,
+        ease: "Sine.inOut",
+      });
+      return;
+    }
+
+    // Correct: soft tick + settle pop, then lock the letter into the slot.
+    this.audioManager.playPop();
+    const slotX = this.slotXs[this.filledSlots];
+    const slotY = this.cameras.main.centerY + SLOT_Y_OFFSET;
+    const letterImage = this.add
+      .image(slotX, slotY, `letter_${chosen.toLowerCase()}`)
+      .setDisplaySize(LETTER_SIZE, LETTER_SIZE)
+      .setScale(SLOT_POP_SCALE);
+    this.tweens.add({
+      targets: letterImage,
+      scale: 1,
+      duration: SLOT_POP_DURATION,
+      ease: "Back.out",
+    });
+    this.slotImages[this.filledSlots] = letterImage;
+    this.roundObjects.push(letterImage);
+    this.filledSlots += 1;
+
+    if (this.filledSlots === word.word.length) {
+      // Word fully spelled: lock input. Lingering, chime, and next-word
+      // flow land in Task 3.4.
+      this.inputLocked = true;
+    }
   }
 }

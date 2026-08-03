@@ -477,7 +477,139 @@ function getTileRects(scene: unknown): Array<Record<string, MockFn>> {
   return tiles;
 }
 
-/** Letter images placed on the tile row, sorted left-to-right by x. */
+/** Simulates a tap on a letter tile by triggering its pointerdown callback. */
+function tapTile(scene: unknown, tileIndex: number): void {
+  const tiles = getTileRects(scene);
+  const tile = tiles[tileIndex];
+  if (!tile) throw new Error(`Tile ${tileIndex} not found`);
+  const onCalls = getMockFn(tile.on).mock.calls;
+  const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+  if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+    (pointerdownCall[1] as () => void)();
+  }
+}
+
+/** Letter images placed in the slot row (the letters locked in so far). */
+function getSlotImages(scene: unknown): Array<{ key: string; x: number }> {
+  const s = scene as { add: Record<string, MockFn> };
+  const imageMock = getMockFn(s.add.image);
+  return imageMock.mock.calls
+    .filter((call) => call[1] === SLOT_Y && typeof call[2] === "string")
+    .map((call) => ({ key: call[2] as string, x: call[0] as number }))
+    .sort((a, b) => a.x - b.x);
+}
+
+/** Tile letters in on-screen order (scene private state, accessed in tests). */
+function getTileValues(scene: unknown): string[] {
+  return (scene as unknown as { tileLetterValues: string[] }).tileLetterValues;
+}
+
+describe("WordBuilderScene interaction", () => {
+  let matchMediaMock: MockFn;
+
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    mockSpeech.speakWord.mockClear();
+    mockSpeech.isSpeechSupported.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("fills the next empty slot with a settle pop and locks the tile in", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    const tiles = getTileValues(scene);
+    const correctIndex = tiles.indexOf(word[0]);
+
+    tapTile(scene, correctIndex);
+
+    expect(mockAudio.playPop).toHaveBeenCalledTimes(1);
+    const slots = getSlotImages(scene);
+    expect(slots).toHaveLength(1);
+    expect(slots[0].key).toBe(`letter_${word[0].toLowerCase()}`);
+
+    // The tile is locked in: tapping it again does not fill another slot.
+    tapTile(scene, correctIndex);
+    expect(getSlotImages(scene)).toHaveLength(1);
+  });
+
+  it("wiggles wrong tiles with a soft tone and no penalty", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    const tiles = getTileValues(scene);
+    const wrongIndex = tiles.findIndex((letter) => letter !== word[0]);
+
+    tapTile(scene, wrongIndex);
+
+    expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
+    expect(getSlotImages(scene)).toHaveLength(0);
+
+    const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
+      const t = call[0] as { angle?: number; yoyo?: boolean };
+      return t?.angle === 4 && t?.yoyo === true;
+    });
+    expect(wiggleTween).toBeDefined();
+    const targets = (wiggleTween![0] as { targets: unknown[] }).targets;
+    const wrongRect = getTileRects(scene)[wrongIndex];
+    expect(targets).toContain(wrongRect);
+  });
+
+  it("fills slots strictly left-to-right in word order", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    const tiles = getTileValues(scene);
+    for (const letter of word.slice(0, 2)) {
+      tapTile(scene, tiles.indexOf(letter));
+    }
+
+    const slots = getSlotImages(scene);
+    expect(slots).toHaveLength(2);
+    expect(slots[0].key).toBe(`letter_${word[0].toLowerCase()}`);
+    expect(slots[1].key).toBe(`letter_${word[1].toLowerCase()}`);
+    expect(slots[0].x).toBeLessThan(slots[1].x);
+  });
+
+  it("locks input once the word is fully spelled", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    const word = getCurrentWord(scene);
+    const tiles = getTileValues(scene);
+    for (const letter of word) {
+      tapTile(scene, tiles.indexOf(letter));
+    }
+
+    expect(getSlotImages(scene)).toHaveLength(word.length);
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    tapTile(scene, 0);
+    expect(getSlotImages(scene)).toHaveLength(word.length);
+    expect(mockAudio.playPop).toHaveBeenCalledTimes(word.length);
+  });
+});
+
+/** Letter images on the tile row, sorted left-to-right by x. */
 function getTileLetters(scene: unknown): Array<{ key: string; x: number }> {
   const s = scene as { add: Record<string, MockFn> };
   const imageMock = getMockFn(s.add.image);
