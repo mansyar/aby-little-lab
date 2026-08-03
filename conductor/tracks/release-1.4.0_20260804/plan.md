@@ -20,9 +20,9 @@
   - [x] Attach git note (task summary, why, files)
   - [x] Record commit SHA in `plan.md`, mark task `[x]`
   - [x] Commit plan update `conductor(plan): Mark task ... as complete`
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — gates green, 1.4.0 bumped, user verified `2c40fd0`
 
-## Phase 2: Finalize Release Documentation
+## Phase 2: Finalize Release Documentation [checkpoint: 2c40fd0]
 
 - [ ] Task: Finalize `docs/release-notes-v1.4.0.md`
   - [ ] Flip status DRAFT → FINAL; add release date and pipeline record
