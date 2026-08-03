@@ -13,6 +13,8 @@ function createDefaultStorage(): AppStorage {
       "big-small": { earned: false, earnedAt: null },
       "pattern-builder": { earned: false, earnedAt: null },
       "alphabet-match": { earned: false, earnedAt: null },
+      "word-match": { earned: false, earnedAt: null },
+      "word-builder": { earned: false, earnedAt: null },
     },
     settings: {
       bgmEnabled: true,

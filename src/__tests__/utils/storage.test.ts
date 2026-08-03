@@ -20,6 +20,8 @@ const GAME_IDS: GameId[] = [
   "big-small",
   "pattern-builder",
   "alphabet-match",
+  "word-match",
+  "word-builder",
 ];
 
 describe("Storage utilities", () => {
@@ -107,6 +109,34 @@ describe("Storage utilities", () => {
       expect(result.settings.bgmEnabled).toBe(true);
       expect(result.settings.sfxEnabled).toBe(false);
     });
+
+    it("migrates a save from before the word games by backfilling word-match and word-builder sticker entries", () => {
+      // Simulate a save from before Games 9 & 10 shipped: no word ids.
+      const oldSave = {
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+          "animal-trace": { earned: false, earnedAt: null },
+          "pop-freeze": { earned: false, earnedAt: null },
+          "shadow-match": { earned: false, earnedAt: null },
+          "musical-memory": { earned: false, earnedAt: null },
+          "big-small": { earned: false, earnedAt: null },
+          "pattern-builder": { earned: false, earnedAt: null },
+          "alphabet-match": { earned: true, earnedAt: "2026-08-02T00:00:00.000Z" },
+        },
+        settings: { bgmEnabled: false, sfxEnabled: false },
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(oldSave));
+
+      const result = load();
+
+      expect(result.stickers["word-match"]).toEqual({ earned: false, earnedAt: null });
+      expect(result.stickers["word-builder"]).toEqual({ earned: false, earnedAt: null });
+      // Existing progress and settings are preserved.
+      expect(result.stickers["alphabet-match"].earned).toBe(true);
+      expect(result.stickers["shape-sorter"].earned).toBe(true);
+      expect(result.settings.bgmEnabled).toBe(false);
+      expect(result.settings.sfxEnabled).toBe(false);
+    });
   });
 
   describe("save", () => {
@@ -169,6 +199,16 @@ describe("Storage utilities", () => {
       expect(result.stickers["animal-trace"].earned).toBe(true);
       expect(result.stickers["shape-sorter"].earned).toBe(false);
       expect(result.stickers["big-small"].earned).toBe(false);
+    });
+
+    it("earns the word games' stickers", () => {
+      earnSticker("word-match");
+      earnSticker("word-builder");
+
+      const result = load();
+      expect(result.stickers["word-match"].earned).toBe(true);
+      expect(result.stickers["word-builder"].earned).toBe(true);
+      expect(result.stickers["alphabet-match"].earned).toBe(false);
     });
   });
 
