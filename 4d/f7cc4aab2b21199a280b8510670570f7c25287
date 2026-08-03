@@ -1,0 +1,1 @@
+Task 5.1: all quality gates green - pnpm check (0 errors), CI=true pnpm test (29 files / 770 tests), pnpm build (precache 24 entries), validate-pwa (13/13). Coverage 96.97% (>=80). Biome auto-fixed 6 files (import order, formatting, unused vars).
