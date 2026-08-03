@@ -1,0 +1,1 @@
+Review fix: WordMatchScene CARD_COL_X_OFFSET 200->210 so two 4-letter cards in a row keep a 16px gutter (was 4px overlap of border strokes at the seam). Regression test crafts a playthrough with BALL+FROG sharing a row and asserts edges never cross. 771 tests green, check clean.
