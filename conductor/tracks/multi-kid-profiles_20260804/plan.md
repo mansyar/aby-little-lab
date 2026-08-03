@@ -48,6 +48,10 @@
 - [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — check clean, 827/827 tests, coverage ≥80%, build OK, user end-to-end verification passed `e64642e`
 - [x] Task: Draft release notes for v1.4.0 (deployment decision deferred — separate release track, per repo convention) `12370c7`
 
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions — Hub avatar chip refresh after profile switch / settings change `094ee19`
+
 ## Notes
 
 - Phase 1 follows TDD strictly: failing tests → implementation → Green.
