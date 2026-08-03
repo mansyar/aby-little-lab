@@ -20,14 +20,14 @@
 
 ## Phase 2 — SVG Assets & Preload Registration
 
-- [ ] Task: Author 4 new picture SVGs
-  - [ ] Create `src/assets/svg/items/sun.svg`, `hat.svg`, `bug.svg`, `duck.svg` (512×512 viewBox, flat fills, thick `#2D3748` strokes 4–6px, soft/vibrant, tight bounding box — per PRD design rules)
-  - [ ] Visually spot-check each SVG renders cleanly (dev server or image view)
-- [ ] Task: Register new textures in PreloadScene
-  - [ ] Add `?raw` imports for the 4 new SVGs in `src/scenes/PreloadScene.ts`
-  - [ ] Add `SHAPE_ASSETS` entries: `sm_sun`, `sm_hat`, `sm_bug`, `sm_duck`
-  - [ ] Update any preload texture-key assertions in tests (e.g., navigation/preload key lists) to include the 4 new keys
-  - [ ] Run the affected test files green
+- [x] Task: Author 4 new picture SVGs (b045de0)
+  - [x] Create `src/assets/svg/items/sun.svg`, `hat.svg`, `bug.svg`, `duck.svg` (512×512 viewBox, flat fills, thick `#2D3748` strokes 4–6px, soft/vibrant, tight bounding box — per PRD design rules)
+  - [x] Visually spot-check each SVG renders cleanly (dev server or image view)
+- [x] Task: Register new textures in PreloadScene (d2e05c4)
+  - [x] Add `?raw` imports for the 4 new SVGs in `src/scenes/PreloadScene.ts`
+  - [x] Add `SHAPE_ASSETS` entries: `sm_sun`, `sm_hat`, `sm_bug`, `sm_duck`
+  - [x] Update any preload texture-key assertions in tests (e.g., navigation/preload key lists) to include the 4 new keys
+  - [x] Run the affected test files green
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Scene Integration Verification
