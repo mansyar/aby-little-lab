@@ -1,0 +1,1 @@
+Task 2.4: handleComplete plays win SFX + shared celebration, earns word-match sticker on first completion only (sticker reveal animation), auto-returns to Hub after 3s with justEarned. 12 scene tests green.
