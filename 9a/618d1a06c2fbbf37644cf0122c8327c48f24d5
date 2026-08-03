@@ -1,0 +1,1 @@
+Task 2.2: renderRound renders prompt picture (~180px, promptTexture from wordLogic) + speakWord with SFX flag; createCards places 4 cards in 2x2 grid (rows +110/+270, cols +/-200), cards composed of letter_<c> textures at 80px, min height 160. 6 scene tests green.
