@@ -1,0 +1,8 @@
+{
+  "id": "release-1.4.0_20260804",
+  "title": "v1.4.0 Release Execution",
+  "type": "release",
+  "status": "new",
+  "createdAt": "2026-08-04T00:00:00.000Z",
+  "summary": "Execute the v1.4.0 release (Multi-Kid Profiles): baseline gates, version bump to 1.4.0, finalize release docs (release notes, release checklist, device testing record, TDD release history), release branch + PR merge, annotated tag, and post-deploy verification via the automated pipeline."
+}
