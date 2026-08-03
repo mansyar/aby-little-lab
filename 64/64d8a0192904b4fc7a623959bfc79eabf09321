@@ -1,0 +1,1 @@
+Task: Bump version to 1.4.0 — package.json version 1.3.0 -> 1.4.0 via npm version --no-git-tag-version. Baseline gates green before bump: biome check 0 errors (16 pre-existing warnings), 828/828 tests, build OK, validate-pwa 13/13. Files: package.json. Why: Phase 1 of v1.4.0 release track.
