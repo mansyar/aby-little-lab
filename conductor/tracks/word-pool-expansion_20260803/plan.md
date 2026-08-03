@@ -4,12 +4,12 @@
 
 ## Phase 1 — Pool Data & Pure Logic (TDD)
 
-- [ ] Task: Write failing tests for the expanded word pool
-  - [ ] In `src/__tests__/game/wordLogic.test.ts` (or a new focused describe block), assert `WORD_POOL` has exactly 18 entries
-  - [ ] Assert tier counts: 8× 3-letter, 10× 4-letter; all words unique
-  - [ ] Assert every `promptTexture` is a known PreloadScene texture key (list: `animal_cat`, `animal_dog`, `animal_pig`, `sm_car`, `mascot_idle`, `sm_sun`, `sm_hat`, `sm_bug`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`, `food_bone`, `shape_star`, `toy_drum`, `toy_teddy_bear`, `sm_duck`)
-  - [ ] Run the targeted tests and confirm the new assertions fail (Red phase) — `CI=true pnpm test -- wordLogic`
-- [ ] Task: Expand `WORD_POOL` in `src/game/wordLogic.ts`
+- [x] Task: Write failing tests for the expanded word pool
+  - [x] In `src/__tests__/game/wordLogic.test.ts` (or a new focused describe block), assert `WORD_POOL` has exactly 18 entries
+  - [x] Assert tier counts: 8× 3-letter, 10× 4-letter; all words unique
+  - [x] Assert every `promptTexture` is a known PreloadScene texture key (list: `animal_cat`, `animal_dog`, `animal_pig`, `sm_car`, `mascot_idle`, `sm_sun`, `sm_hat`, `sm_bug`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`, `food_bone`, `shape_star`, `toy_drum`, `toy_teddy_bear`, `sm_duck`)
+  - [x] Run the targeted tests and confirm the new assertions fail (Red phase) — `CI=true pnpm test -- wordLogic`
+- [~] Task: Expand `WORD_POOL` in `src/game/wordLogic.ts`
   - [ ] Add the 9 new entries per the approved pool (OWL→`mascot_idle`, SUN/HAT/BUG→`sm_sun`/`sm_hat`/`sm_bug`, BONE→`food_bone`, STAR→`shape_star`, DRUM→`toy_drum`, BEAR→`toy_teddy_bear`, DUCK→`sm_duck`)
   - [ ] Run the targeted tests and confirm green (Green phase)
 - [ ] Task: Verify round/builder generation across the full pool
