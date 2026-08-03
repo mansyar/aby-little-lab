@@ -32,12 +32,12 @@
 
 ## Phase 3 — Parental-Gated Profile Management (Settings) `[checkpoint: 571a80c]`
 
-- [ ] Task: Write `SettingsPanel` tests for the Profiles section:
-  - [ ] Profiles section visible only behind the parental hold
-  - [ ] Add profile flow — unused avatars only, max-4 rejection, success state
-  - [ ] Delete profile — two-step confirm, active-profile fallback, min-1 guarantee
-- [ ] Task: Implement Profiles section in `SettingsPanel.ts` (reuse confirm-modal + hold patterns)
-- [ ] Task: Wire add/delete to storage logic; keep Hub shelf in sync via existing callbacks
+- [x] Task: Write `SettingsPanel` tests for the Profiles section:
+  - [x] Profiles section visible only behind the parental hold
+  - [x] Add profile flow — unused avatars only, max-4 rejection, success state
+  - [x] Delete profile — two-step confirm, active-profile fallback, min-1 guarantee
+- [x] Task: Implement Profiles section in `SettingsPanel.ts` (reuse confirm-modal + hold patterns) `d1328ba`
+- [x] Task: Wire add/delete to storage logic; keep Hub shelf in sync via existing callbacks `d1328ba`
 - [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
 
 ## Phase 4 — Integration, Docs & Quality Gates
