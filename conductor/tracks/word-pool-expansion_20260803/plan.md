@@ -46,16 +46,16 @@
 
 ## Phase 4 — Documentation & Quality Gates
 
-- [ ] Task: Update documentation
-  - [ ] `docs/PRD.md` — Game 9/10 sections: pool size 9 → 18, new words, new asset list
-  - [ ] `conductor/tech-stack.md` — dated design-update note (pool, new `sm_` textures)
-  - [ ] README — game rows if they enumerate the word pool
-  - [ ] `docs/device-testing-checklist.md` — new-word spot checks (e.g., SUN/DUCK rounds render and play)
-- [ ] Task: Run full quality gates
-  - [ ] `pnpm run check`
-  - [ ] `CI=true pnpm test` (coverage ≥ 80%)
-  - [ ] `pnpm run build`
-  - [ ] `node scripts/validate-pwa.js`
+- [x] Task: Update documentation (12fdf8b)
+  - [x] `docs/PRD.md` — Game 9/10 sections: pool size 9 → 18, new words, new asset list
+  - [x] `conductor/tech-stack.md` — dated design-update note (pool, new `sm_` textures)
+  - [x] README — game rows if they enumerate the word pool
+  - [x] `docs/device-testing-checklist.md` — new-word spot checks (e.g., SUN/DUCK rounds render and play)
+- [x] Task: Run full quality gates (671f77f)
+  - [x] `pnpm run check`
+  - [x] `CI=true pnpm test` (coverage ≥ 80%)
+  - [x] `pnpm run build`
+  - [x] `node scripts/validate-pwa.js`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Completion
