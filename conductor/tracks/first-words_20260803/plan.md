@@ -35,13 +35,14 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `850ca9d`
 
 ### Task 1.3 — Build the Word generation
-- [ ] TDD: failing tests for builder generation — **easy-first ordering**
+- [x] TDD: failing tests for builder generation — **easy-first ordering**
       (3-letter words before 4-letter words, random within tier, no repeats in
       a playthrough of 3), 6 letter tiles per word (word's unique letters +
       2–3 distractors not in the word, shuffled, always ≥ the needed letters)
-- [ ] Implement `generateWordBuildPlaythrough(3)` / `generateLetterTiles` in
+- [x] Implement `generateWordBuildPlaythrough(3)` / `generateLetterTiles` in
       `wordLogic.ts`
-- [ ] Commit `feat(logic): Add Build the Word tile generation` + plan commit
+- [x] Commit `feat(logic): Add Build the Word tile generation` + plan commit
+      — `2b68a6f`
 
 ### Task 1.4 — Speech: speakWord
 - [ ] TDD: failing tests for `speakWord` in `src/__tests__/utils/speech.test.ts`
