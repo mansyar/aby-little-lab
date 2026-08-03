@@ -38,8 +38,24 @@ describe("WORD_POOL", () => {
   it("contains the expected words", () => {
     const words = WORD_POOL.map((entry) => entry.word).sort();
     expect(words).toEqual([
-      "BALL", "BEAR", "BOAT", "BONE", "BUG", "CAR", "CAT", "DOG", "DRUM",
-      "DUCK", "FISH", "FROG", "HAT", "OWL", "PIG", "STAR", "SUN", "TREE",
+      "BALL",
+      "BEAR",
+      "BOAT",
+      "BONE",
+      "BUG",
+      "CAR",
+      "CAT",
+      "DOG",
+      "DRUM",
+      "DUCK",
+      "FISH",
+      "FROG",
+      "HAT",
+      "OWL",
+      "PIG",
+      "STAR",
+      "SUN",
+      "TREE",
     ]);
   });
 
@@ -79,10 +95,24 @@ describe("WORD_POOL", () => {
 
   it("uses only PreloadScene-registered prompt texture keys", () => {
     const KNOWN_TEXTURE_KEYS = new Set([
-      "animal_cat", "animal_dog", "animal_pig", "sm_car", "mascot_idle",
-      "sm_sun", "sm_hat", "sm_bug", "frog_red", "sm_ball", "food_fish",
-      "sm_boat", "sm_tree", "food_bone", "shape_star", "toy_drum",
-      "toy_teddy_bear", "sm_duck",
+      "animal_cat",
+      "animal_dog",
+      "animal_pig",
+      "sm_car",
+      "mascot_idle",
+      "sm_sun",
+      "sm_hat",
+      "sm_bug",
+      "frog_red",
+      "sm_ball",
+      "food_fish",
+      "sm_boat",
+      "sm_tree",
+      "food_bone",
+      "shape_star",
+      "toy_drum",
+      "toy_teddy_bear",
+      "sm_duck",
     ]);
     for (const entry of WORD_POOL) {
       expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);

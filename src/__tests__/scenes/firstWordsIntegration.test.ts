@@ -281,12 +281,12 @@ vi.mock("../../utils/pwaBridge", () => ({
   getPwaBridge: () => mockBridge,
 }));
 
+import { generateWordRound, getWord } from "../../game/wordLogic";
 import { BootScene } from "../../scenes/BootScene";
 import { HubScene } from "../../scenes/HubScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
-import { generateWordRound, getWord } from "../../game/wordLogic";
 import { earnSticker, hasSticker } from "../../utils/storage";
 
 const STORAGE_KEY = "abby-little-lab:v1";
@@ -540,8 +540,8 @@ describe("First Words integration flows", () => {
     }
     expect(hasSticker("word-builder")).toBe(true);
 
-    const builderPromptKeys = getMockFn(builder.add.image).mock.calls
-      .map((call, index) => ({
+    const builderPromptKeys = getMockFn(builder.add.image)
+      .mock.calls.map((call, index) => ({
         key: call[2] as string,
         obj: getMockFn(builder.add.image).mock.results[index].value,
       }))
