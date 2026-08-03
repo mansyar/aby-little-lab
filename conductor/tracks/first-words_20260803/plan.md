@@ -45,12 +45,13 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `2b68a6f`
 
 ### Task 1.4 — Speech: speakWord
-- [ ] TDD: failing tests for `speakWord` in `src/__tests__/utils/speech.test.ts`
+- [x] TDD: failing tests for `speakWord` in `src/__tests__/utils/speech.test.ts`
       (rate 0.8, SFX-gated, silent fallback, cancels prior utterance — mirror
       existing `speakLetter` tests); refactor `speakLetter` onto a shared
       internal `speakText` so existing behavior is unchanged
-- [ ] Implement in `src/utils/speech.ts`
-- [ ] Commit `feat(utils): Add speakWord for First Words prompts` + plan commit
+- [x] Implement in `src/utils/speech.ts`
+- [x] Commit `feat(utils): Add speakWord for First Words prompts` + plan commit
+      — `dbf20b3`
 
 ### Task 1.5 — Types and storage
 - [ ] TDD: failing tests for `GameId` including `word-match`/`word-builder`,
