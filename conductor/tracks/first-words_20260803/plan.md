@@ -209,11 +209,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `d93a702`
 
 ### Task 5.3 — Manual verification
-- [ ] Present manual verification plan (tablet + phone, per
+- [x] Present manual verification plan (tablet + phone, per
       device-testing-checklist) and pause for user confirmation
-- [ ] Execute verification, record results
-- [ ] Commit `docs(device): Record First Words device verification` +
-      plan commit
+- [x] Execute verification, record results — user ran all checks;
+      all passed, recorded in execution record section
+- [x] Commit `docs(device): Record First Words device verification` +
+      plan commit — `f26a9e9`
 
 ### Phase 5 checkpoint
 - [ ] Phase-end protocol + `conductor(checkpoint)` commit + `git notes`; mark
