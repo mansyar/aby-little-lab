@@ -1,6 +1,6 @@
 # Release Notes — v1.4.0
 
-> **Status:** DRAFT — Multi-Kid Profiles. Deployment decision deferred to a dedicated release track (per repo convention); this document will be finalized by that track.
+> **Status:** FINAL — Multi-Kid Profiles merged to `master` via the `release/v1.4.0` pull request; released on 2026-08-04 via the automated pipeline (Quality Gates → Coolify deploy). Manual device verification completed 2026-08-04 — all items passed on iPad, Android tablet, iPhone, and Android phone (`docs/device-testing-checklist.md`).
 
 ## What's New
 

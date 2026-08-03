@@ -40,6 +40,12 @@
 > - [x] Device checklist updated with Games 9 & 10 new-word spot checks + replay checks (`docs/device-testing-checklist.md`) — **executed 2026-08-04 against the live URL, all items passed**
 > - [x] Release branch `release/v1.3.0` created; version bumped to `1.3.0` (`cc955e2`); release notes finalized (`docs/release-notes-v1.3.0.md`)
 
+> **v1.4.0 prep (Multi-Kid Profiles, 2026-08-04):** Track archived at `conductor/archive/multi-kid-profiles_20260804/` (reviewed — 1 Medium finding fixed in `094ee19`).
+> - [x] All four quality gates green on `master` pre-release: Biome clean (74 files, 16 baseline warnings), **828/828 tests (30 files)**, build OK, `validate-pwa` 13/13
+> - [x] Coverage above 80% thresholds — `profileLogic.ts` 100% lines / 88.2% branches; `storage.ts` 98.2% lines (CI-enforced)
+> - [x] Device checklist updated with Multi-Kid Profiles rows (`docs/device-testing-checklist.md`) — **executed 2026-08-04 on iPad, Android tablet, iPhone, Android phone, all items passed**
+> - [x] Release notes drafted (`docs/release-notes-v1.4.0.md`) — finalized by the release track
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
@@ -106,9 +112,9 @@
 
 ### 5. Documentation
 - [x] README.md is up to date — CI/CD + deployment docs present
-- [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` and `docs/release-notes-v1.1.0.md`
+- [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` … `docs/release-notes-v1.4.0.md`
 - [x] Deployment guide complete — README CI docs + this checklist's automated pipeline note
-- [x] Device testing checklist complete — **2026-08-03:** executed against live URL, all sections A–G passed
+- [x] Device testing checklist complete — **2026-08-03:** executed against live URL, all sections A–G passed; **2026-08-04:** v1.4.0 Multi-Kid Profiles execution record added (all devices passed)
 
 ## Release Process
 
