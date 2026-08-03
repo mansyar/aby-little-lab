@@ -1,0 +1,1 @@
+Task 2.3: handleChoice routes correct (chime + Hoot cheer + dot pop + 700ms advance) vs incorrect (soft tone + nod + reduced-motion-aware wiggle, no penalty); input locked during transitions. 10 scene tests green.
