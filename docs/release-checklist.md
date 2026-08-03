@@ -206,13 +206,13 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Build the Word slot letters render at the correct size (80px) inside the 120px slots
 
 ### Step 7e: Verify Deployment — v1.3.0 (2026-08-04)
-- [ ] PR merged `release/v1.3.0` → `master` — **pending**
-- [ ] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **pending**
-- [ ] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
-- [ ] App loads correctly on the live URL — 200; serves release build (hash matches fresh local build)
-- [ ] Version footer data — `1.3.0` embedded in served bundle; no stale `1.2.1` string
-- [ ] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
-- [ ] New-word pictures render in Find the Word / Build the Word on device — SUN/HAT/BUG/DUCK spot checks (device checklist already passed pre-release)
+- [x] PR #10 merged `release/v1.3.0` → `master` (`fbcfda1`) — **2026-08-04**
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `30848360550`** (Quality Gates ✓, Deploy to Coolify 6s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-Dp-dS9CK.js`; Docker-built hash differs from local `index-rHE__3p4.js` — environment artifact, content verified below)
+- [x] Version footer data — `1.3.0` embedded in served bundle; no stale `1.2.1` string
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [x] New-word pictures render in Find the Word / Build the Word on device — SUN/HAT/BUG/DUCK spot checks (device checklist passed pre-release); deployed wordLogic chunk contains full 18-word pool (BEAR/DUCK/OWL/sm_sun confirmed in served chunk `wordLogic-CSJj7LfP.js`)
 
 ## Post-Release Verification
 
@@ -379,7 +379,7 @@ Please report issues at [GitHub Issues URL]
 **Release Manager:** Ansyar (mansyar)
 **Date:** 2026-08-04
 **Version:** 1.3.0
-**Status:** In progress — release branch ready, PR pending, deploy pending
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); device testing completed **2026-08-04** — all items passed (new-word spot checks, replay checks)
 
 **Approval:**
 - [x] Code quality meets standards
