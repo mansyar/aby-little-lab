@@ -1,0 +1,1 @@
+Task 4.4: firstWordsIntegration.test.ts - real lazy-loaded scene chain (boot->preload->hub->WordMatch->sticker->hub with justEarned; hub->WordBuilder->sticker; localStorage persistence across reload with fresh Hub rendering earned stickers). 3 integration tests green; full suite 29 files / 770 tests.
