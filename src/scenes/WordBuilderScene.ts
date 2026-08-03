@@ -288,13 +288,17 @@ export class WordBuilderScene extends Phaser.Scene {
     this.audioManager.playPop();
     const slotX = this.slotXs[this.filledSlots];
     const slotY = this.cameras.main.centerY + SLOT_Y_OFFSET;
+    // Size the placed letter purely via display size. Calling setScale after
+    // setDisplaySize would overwrite the scale factor (80/512) with the pop
+    // scale and render the letter at the full 512px texture size, overflowing
+    // the slot — so the settle pop tweens displayWidth/displayHeight instead.
     const letterImage = this.add
       .image(slotX, slotY, `letter_${chosen.toLowerCase()}`)
-      .setDisplaySize(LETTER_SIZE, LETTER_SIZE)
-      .setScale(SLOT_POP_SCALE);
+      .setDisplaySize(LETTER_SIZE * SLOT_POP_SCALE, LETTER_SIZE * SLOT_POP_SCALE);
     this.tweens.add({
       targets: letterImage,
-      scale: 1,
+      displayWidth: LETTER_SIZE,
+      displayHeight: LETTER_SIZE,
       duration: SLOT_POP_DURATION,
       ease: "Back.out",
     });

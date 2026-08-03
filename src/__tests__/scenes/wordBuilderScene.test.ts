@@ -537,6 +537,23 @@ describe("WordBuilderScene interaction", () => {
     expect(slots).toHaveLength(1);
     expect(slots[0].key).toBe(`letter_${word[0].toLowerCase()}`);
 
+    // Regression: the placed letter is sized purely via display size and must
+    // never have its scale overwritten afterwards. (setScale after
+    // setDisplaySize replaces the 80/512 scale factor with 1.15, rendering the
+    // letter at the full 512px texture size and overflowing the slot.)
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const slotImageCall = imageMock.mock.calls.find(
+      (call) => call[2] === `letter_${word[0].toLowerCase()}` && call[1] === SLOT_Y,
+    );
+    expect(slotImageCall).toBeDefined();
+    const slotImage = imageMock.mock.results[imageMock.mock.calls.indexOf(slotImageCall!)].value;
+    expect(getMockFn(slotImage.setDisplaySize)).toHaveBeenCalledWith(92, 92); // 80 * 1.15 pop-in
+    expect(getMockFn(slotImage.setScale)).not.toHaveBeenCalled();
+    const settleTween = getMockFn(scene.tweens.add).mock.calls.find(
+      (call) => (call[0] as { targets?: unknown }).targets === slotImage,
+    );
+    expect(settleTween?.[0]).toMatchObject({ displayWidth: 80, displayHeight: 80 });
+
     // The tile is locked in: tapping it again does not fill another slot.
     tapTile(scene, correctIndex);
     expect(getSlotImages(scene)).toHaveLength(1);
