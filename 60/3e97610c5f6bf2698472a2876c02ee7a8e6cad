@@ -1,0 +1,1 @@
+Task 4.3: Hub GAME_TILES 8->10 (Find the Word, Build the Word); grid reworked 4x2->5x2 (TILE_WIDTH 160, SPACING 40 -> 960px); label font 20px->18px for 160px tiles; sticker shelf positions from constants; navigation tests updated (bob/entrance/sticker counts 8->10, GAME_SCENE_KEYS +2). 294 navigation tests green.
