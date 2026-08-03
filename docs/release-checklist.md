@@ -23,6 +23,12 @@
 
 > **v1.1.0 release mechanics (2026-08-02):** Track `conductor/tracks/release-1.1.0-mechanics_20260802/` — version bumped to `1.1.0` (`78e5634`), release notes finalized, tag + deploy in progress (recorded under Release Process → v1.1.0).
 
+> **v1.2.0 prep (First Words — Games 9 & 10, 2026-08-03):** Track archived at `conductor/archive/first-words_20260803/` (reviewed — 1 Low finding fixed in `8568f4a`).
+> - [x] All four quality gates green on `release/v1.2.0`: Biome clean (72 files), **771/771 tests (29 files)**, build OK (**10 lazy game chunks, 24 precache entries**), `validate-pwa` 13/13
+> - [x] Coverage above 80% thresholds — 96.97% statements / 98.19% lines (thresholds enforced by CI)
+> - [x] Device checklist updated with Games 9 & 10 rows (`docs/device-testing-checklist.md`) — **executed 2026-08-03 on tablet + phone, all items passed**
+> - [x] Release branch `release/v1.2.0` created; version bumped to `1.2.0` (`a4ddc7a`); release notes finalized (`docs/release-notes-v1.2.0.md`)
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
@@ -305,6 +311,23 @@ Please report issues at [GitHub Issues URL]
 **Approval:**
 - [x] Code quality meets standards
 - [x] All tests pass (706/706)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — verified on device 2026-08-03
+- [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.2.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-03
+**Version:** 1.2.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); manual device checks completed **2026-08-03** — all items passed (install, offline, TTS, performance, both new games)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (771/771)
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — verified on device 2026-08-03

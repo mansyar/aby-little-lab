@@ -51,7 +51,7 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 10 scenes (Boot, Preload, Hub, 8 game scenes)
+- **Scenes:** 12 scenes (Boot, Preload, Hub, 10 game scenes)
 
 > **2026-08-02 — Design Update (Bundle Code Splitting):** Game scenes are lazy-loaded via runtime registration. `src/scenes/sceneRegistry.ts` maps each game scene key to a dynamic-import loader and exposes `ensureSceneLoaded(scene, key)` (no-op if already registered, else `import()` + `scene.add(key, SceneClass)`); HubScene awaits it before transitioning into a game. Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the `scene` array — functions there are invoked with `new` (constructor form only, no promise handling in `SceneManager`). Shell scenes (Boot/Preload/Hub) remain statically registered in `main.ts`. Rollup hoists shared modules into shared chunks automatically; no `manualChunks` config.
 - **Input:** Touch-first, single-finger interactions
@@ -96,7 +96,7 @@ interface AppStorage {
 }
 ```
 
-**Game IDs:** `shape-sorter`, `animal-trace`, `pop-freeze`, `shadow-match`, `musical-memory`, `big-small`, `pattern-builder`, `alphabet-match`
+**Game IDs:** `shape-sorter`, `animal-trace`, `pop-freeze`, `shadow-match`, `musical-memory`, `big-small`, `pattern-builder`, `alphabet-match`, `word-match`, `word-builder`
 
 ## 6. Asset Pipeline
 
@@ -110,6 +110,8 @@ interface AppStorage {
 > **2026-08-02 — Design Update (Pattern Builder):** Game 7 (Pattern Builder) added — a tap-to-complete pattern game reusing the six Game 1 shape SVGs (only new asset: `sticker_pattern_builder.svg`). Hub grid is now 4×2 (7 tiles); `GameId` includes `pattern-builder`. Pure logic in `src/game/patternBuilderLogic.ts` (ABAB/AABB/ABB rows, gap at end or middle, 3 unique choices, 5-round playthroughs).
 
 > **2026-08-02 — Design Update (Find the Letter):** Game 8 (Find the Letter) added — a tap-to-match uppercase letter recognition game. New assets: 26 letter SVGs (`src/assets/svg/letters/letter_a.svg`…`letter_z.svg`, identical `#2B6CB0` fill / `#2D3748` stroke styling so recognition is shape-only) + `sticker_alphabet_match.svg` (keyed `sticker_alphabet_match` to match the shelf's `gameId.replace(/-/g, "_")` convention). New dependency: browser SpeechSynthesis (`src/utils/speech.ts` — en-US, rate 0.9, respects the SFX toggle, silent no-throw fallback). Hub grid is 4×2 (8 tiles); `GameId` includes `alphabet-match`; scene registry has 8 lazy loaders. Pure logic in `src/game/alphabetLogic.ts` (6 unique targets per playthrough drawn uniformly from A–Z, 4 unique choices per round, evaluation + win detection). Old saves migrate automatically via the per-key storage merge.
+
+> **2026-08-03 — Design Update (First Words):** Games 9 & 10 added — Find the Word (`WordMatchScene`, id `word-match`) and Build the Word (`WordBuilderScene`, id `word-builder`), both early-literacy games on a 9-word pool that reuses **existing** textures only (`animal_cat/dog/pig`, `sm_car`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`; 3-letter tier: CAT/DOG/PIG/CAR, 4-letter tier: FROG/BALL/FISH/BOAT/TREE). Words render by composing the already-loaded `letter_a`…`letter_z` textures (~80px/letter, card min height 160px). Pure logic in `src/game/wordLogic.ts` (6-round playthroughs with no two choices sharing a first letter — pre-reader guard; easy-first builder playthroughs — 2× 3-letter + 1× 4-letter for the default 3 words, no repeats; 6-tile letter sets with the word's unique letters + 2–3 distractors not in the word). TTS: `speakWord` (en-US, rate 0.8) added alongside `speakLetter` on a shared internal `speakText` in `src/utils/speech.ts`, still SFX-gated with a silent no-throw fallback. New stickers `sticker_word_match.svg` (CAT) and `sticker_word_builder.svg` (DOG) registered in PreloadScene (preload SVG count 88 → 90). Hub grid is 5×2 (10 tiles, `TILE_WIDTH` 160, `TILE_SPACING` 40 — 5×160+4×40 = 960 ≤ 1024, tile labels 18px); `GameId` includes `word-match`/`word-builder`; scene registry has 10 lazy loaders. Old saves migrate automatically via the existing per-key storage merge (`load()` backfills both new sticker keys).
 
 ### Audio Assets
 - **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
@@ -154,7 +156,9 @@ aby-little-lab/
     │   ├── MusicalMemoryScene.ts
     │   ├── BigSmallScene.ts
     │   ├── PatternBuilderScene.ts
-    │   └── AlphabetScene.ts
+    │   ├── AlphabetScene.ts
+    │   ├── WordMatchScene.ts
+    │   └── WordBuilderScene.ts
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   ├── ParentLock.ts
@@ -169,7 +173,8 @@ aby-little-lab/
     │   ├── musicalMemoryLogic.ts  # Pure game logic (sequence generation, round/win detection)
     │   ├── bigSmallLogic.ts       # Pure game logic (dual-scale toys, size match detection)
     │   ├── patternBuilderLogic.ts # Pure game logic (pattern rows, gap placement, choices)
-    │   └── alphabetLogic.ts       # Pure game logic (letter playthroughs, round choices, win detection)
+    │   ├── alphabetLogic.ts       # Pure game logic (letter playthroughs, round choices, win detection)
+    │   └── wordLogic.ts           # Pure game logic (word pool, round/builder generation, win detection)
     ├── utils/
     │   ├── storage.ts             # localStorage persistence layer
     │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
@@ -177,7 +182,7 @@ aby-little-lab/
     │   ├── completionEffect.ts    # Graphics-based splash/win effects (no particle emitters)
     │   ├── sceneTransitions.ts    # crossfade transitions (transitionToScene, sceneEntrance)
     │   ├── pressFeedback.ts       # press squish + optional spring-back (attachPressFeedback)
-    │   └── speech.ts              # TTS letter pronunciation wrapper (SpeechSynthesis, graceful fallback)
+    │   └── speech.ts              # TTS letter/word pronunciation wrapper (SpeechSynthesis, graceful fallback)
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
@@ -208,11 +213,15 @@ aby-little-lab/
         │   ├── musicalMemoryLogic.test.ts
         │   ├── bigSmallLogic.test.ts
         │   ├── patternBuilderLogic.test.ts
-        │   └── alphabetLogic.test.ts
+        │   ├── alphabetLogic.test.ts
+        │   └── wordLogic.test.ts
         ├── scenes/
         │   ├── navigation.test.ts
         │   ├── sceneRegistry.test.ts
-        │   └── alphabetScene.test.ts
+        │   ├── alphabetScene.test.ts
+        │   ├── wordMatchScene.test.ts
+        │   ├── wordBuilderScene.test.ts
+        │   └── firstWordsIntegration.test.ts
         └── utils/
             ├── storage.test.ts
             ├── motion.test.ts

@@ -1,6 +1,6 @@
 # Initial Concept
 
-Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 8 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
+Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 10 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
 
 ---
 
@@ -8,7 +8,7 @@ Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 8 mini-games,
 
 ## 1. Product Overview
 
-**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **8 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
+**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **10 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
 
 All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes scalable vectors dynamically at load time into crisp bitmaps, matching exact display resolutions without large file sizes.
 
@@ -20,7 +20,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 
 ## 3. Key Features
 
-### 3.1 Eight Mini-Games
+### 3.1 Ten Mini-Games
 
 | # | Game | Milestone | Core Mechanic |
 |---|---|---|---|
@@ -32,10 +32,12 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 | 6 | Big vs. Small Cleaner | Scale & quantitative reasoning | Sort toys by size into big/small boxes |
 | 7 | Pattern Builder | Sequential pattern recognition | Tap the missing shape to complete ABAB/AABB/ABB patterns |
 | 8 | Find the Letter | Early literacy (letter recognition) | Tap the letter card matching the spoken/displayed uppercase target |
+| 9 | Find the Word | Early literacy (sight words) | Tap the printed word matching the pictured/spoken word among 4 cards |
+| 10 | Build the Word | Early literacy (spelling) | Spell the pictured/spoken word by tapping letter tiles in order |
 
 ### 3.2 Cross-Game Systems
 
-- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all eight game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
+- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all ten game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
 - **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display as a sticker shelf (SVG thumbnails) under each Hub tile — earned stickers shimmer, unearned ones are dimmed, and a just-earned sticker gets a highlight on return.
 - **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed.
 - **Gentle Feedback:** Correct → pleasant chime + Graphics-based splash (no particle emitters). Incorrect → gentle "try again" animation, no penalty.
@@ -62,7 +64,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 
 - **BootScene:** Locks screen orientation to landscape via Screen Orientation API. Auto-transitions to Preload.
 - **PreloadScene:** Preloads SVG assets (rasterized at 512×512), displays progress bar. Auto-transitions to Hub.
-- **HubScene:** 8 game tiles grid (4×2), sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner.
+- **HubScene:** 10 game tiles grid (5×2), sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner.
 - **GameScene:** Initialized with randomized items. On completion: win animation + sticker award (if first time) + auto-return to Hub (3s delay). Exit via parental lock (hold 3s).
 
 ## 7. Visual Design

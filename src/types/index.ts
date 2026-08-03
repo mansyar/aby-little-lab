@@ -6,7 +6,9 @@ export type GameId =
   | "musical-memory"
   | "big-small"
   | "pattern-builder"
-  | "alphabet-match";
+  | "alphabet-match"
+  | "word-match"
+  | "word-builder";
 
 export interface StickerData {
   earned: boolean;

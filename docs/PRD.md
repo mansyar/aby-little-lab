@@ -13,7 +13,7 @@
 
 ## 1. Executive Summary & Core Objectives
 
-This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **8 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
+This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **10 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
 
 **Key Strategic Pivot:** To ensure maximum crispness across high-DPI retina displays (iPads, Android tablets, and phones) without large asset file sizes, all graphical assets are built using an **AI-Generated SVG Pipeline**. Phaser 4 rasterizes these scalable vectors dynamically at load time into crisp bitmaps, matching exact target display resolutions.
 
@@ -60,10 +60,10 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + Graphics-based splash (the project uses Graphics shapes only — no `add.particles` emitters). Incorrect actions give a gentle "try again" animation with no penalty; dropping on empty space bounces back silently (no incorrect SFX).
 - **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
-- **Win Celebration:** All eight games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
+- **Win Celebration:** All ten games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation.
 - **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
 - **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
-- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all eight game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
+- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all ten game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
@@ -144,6 +144,27 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Target (200px) and cards (160px) far exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Letters are the learning content — no written instructions anywhere.
 - **Game Logic:** Pure functions in `src/game/alphabetLogic.ts` (26-letter alphabet, playthrough generation with unique targets, round generation with 4 unique choices, answer evaluation, win detection) — testable without Phaser. TTS wrapper in `src/utils/speech.ts`.
 
+### GAME 9 — Find the Word (Sight-Word Recognition) ✅ Implemented
+
+- **Milestone:** Early literacy — matching a spoken/pictured word to its printed form.
+- **Mechanics:** A picture prompt (~180px, top-center) appears and the word is **spoken aloud** via browser SpeechSynthesis (`speechSynthesis.speak`, en-US, rate 0.8; respects the SFX toggle; silent graceful fallback if unsupported — the picture remains the primary cue). 4 word cards in a 2×2 grid sit below; the child taps the card matching the prompt. 6 rounds per playthrough; each playthrough draws 6 **unique** words from a 9-word pool. Cards render as the word's letters composed from the shared letter textures (~80px/letter, min card height 160px).
+- **Word Pool:** 9 words reusing **existing** textures only — 3-letter tier: CAT, DOG, PIG, CAR; 4-letter tier: FROG, BALL, FISH, BOAT, TREE (pictures: `animal_cat`, `animal_dog`, `animal_pig`, `sm_car`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`). Uppercase printed words only.
+- **Pre-Reader Guard:** No two answer cards in a round share a first letter, so pre-readers can match by first-letter shape alone.
+- **SVG Requirements:** No new gameplay SVGs (words compose from existing letter textures; pictures reuse existing animal/food/object SVGs). Sticker: `sticker_word_match.svg` ("CAT" on the cream badge).
+- **Phaser Engine Logic:** Tap-to-answer (no drag). Correct tap: ascending chime + mascot cheer + progress dot pop (`Back.out`, 1.4×/1.2× reduced), next round after 700ms. Incorrect tap: soft descending tone + mascot nod + card wiggle ±4° (`Sine.inOut`, 350ms, 3 yoyo repeats; ±2°/200ms reduced), no penalty, no progression loss. After 6 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "word-match" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Cards (min 160px high, ~240px wide) far exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Words are the learning content — no written instructions anywhere.
+- **Game Logic:** Pure functions in `src/game/wordLogic.ts` (9-word pool with tiers, playthrough generation with unique targets, round generation with 4 unique choices and the no-shared-first-letter guard, answer evaluation, win detection) — testable without Phaser. Word TTS via `src/utils/speech.ts` (`speakWord`, rate 0.8).
+
+### GAME 10 — Build the Word (Spelling) ✅ Implemented
+
+- **Milestone:** Early literacy — spelling a spoken/pictured word by ordering its letters.
+- **Mechanics:** A picture prompt (~180px, top-center) appears and the word is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback). A row of empty slots (one 120px box per letter) sits mid-screen with 6 letter tiles (~110px) below. The child spells the word by tapping the correct letter tiles in order — slots fill strictly left-to-right and lock in. 3 words per playthrough, easy-first: 2× 3-letter words then 1× 4-letter word (no repeats within a playthrough).
+- **Letter Tiles:** 6 tiles per word — the word's unique letters plus 2–3 distractor letters **not** in the word (drawn from A–Z), shuffled. Tiles compose from the shared letter textures (`letter_a`…`letter_z`).
+- **SVG Requirements:** No new gameplay SVGs (same reuse as Game 9). Sticker: `sticker_word_builder.svg` ("DOG" on the cream badge).
+- **Phaser Engine Logic:** Correct letter: soft tick (`playPop`) + settle-pop into the next empty slot (`Back.out` 1.15× → 1, 150ms), tile locks in (re-tap ignored). Incorrect letter: soft descending tone + mascot nod + tile wiggle ±4° (gentler under reduced motion), no penalty. Finished word: chime + mascot cheer + progress dot pop, lingers 1.2s, then the next word renders. After 3 words: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "word-builder" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Slots (120px) and tiles (110px) exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Words are the learning content — no written instructions anywhere.
+- **Game Logic:** Pure functions in `src/game/wordLogic.ts` (easy-first playthrough generation, letter-tile generation with distractors, sequential spelling state) — testable without Phaser.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -164,7 +185,8 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
     │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
-    │  sticker — all 8 games'
+    │  sticker, Games 9 & 10 letter/animal/food/object textures +
+    │  stickers — all 10 games'
     │  assets loaded)
     │
     ▼
