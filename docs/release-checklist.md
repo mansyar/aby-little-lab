@@ -189,6 +189,16 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
 - [x] All games function properly — **2026-08-03:** all 10 games verified on device (tablet + phone)
 
+### Step 7d: Verify Deployment — v1.2.1 (2026-08-03)
+- [x] PR #9 merged `release/v1.2.1` → `master` (`b5134c9`) — **2026-08-03**
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `30800890115`**
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-BD8CYTTw.js` hash matches fresh local build)
+- [x] Version footer data — `1.2.1` embedded in served bundle
+- [x] Fix confirmed in served bundle — `displayWidth` settle-tween present in the deployed `WordBuilderScene` chunk
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [x] Build the Word slot letters render at the correct size (80px) inside the 120px slots
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
