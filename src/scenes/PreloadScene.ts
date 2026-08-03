@@ -77,6 +77,8 @@ import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_bui
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
+import stickerWordBuilderSvg from "../assets/svg/stickers/sticker_word_builder.svg?raw";
+import stickerWordMatchSvg from "../assets/svg/stickers/sticker_word_match.svg?raw";
 import toyTeddyBearSvg from "../assets/svg/toys/teddy_bear.svg?raw";
 import toyBallSvg from "../assets/svg/toys/toy_ball.svg?raw";
 import toyBlockSvg from "../assets/svg/toys/toy_block.svg?raw";
@@ -151,6 +153,8 @@ const SHAPE_ASSETS = [
   { key: "toy_box", svg: toyBoxSvg },
   { key: "sticker_big_small", svg: stickerBigSmallSvg },
   { key: "sticker_pattern_builder", svg: stickerPatternBuilderSvg },
+  { key: "sticker_word_match", svg: stickerWordMatchSvg },
+  { key: "sticker_word_builder", svg: stickerWordBuilderSvg },
   { key: "mascot_idle", svg: mascotIdleSvg },
   { key: "mascot_celebrate", svg: mascotCelebrateSvg },
   { key: "letter_a", svg: letterASvg },
