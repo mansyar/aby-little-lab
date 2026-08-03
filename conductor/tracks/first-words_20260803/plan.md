@@ -137,11 +137,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       plan commit — `e49a55b`
 
 ### Task 3.4 — Completion (word + playthrough)
-- [ ] Tests: finished word lingers ~1.2s, chime + Hoot cheer, progress dot
+- [x] Tests: finished word lingers ~1.2s, chime + Hoot cheer, progress dot
       pops; after 3 words: win SFX + celebration + `earnSticker("word-builder")`
       once + auto-return ~3s with `justEarned`
-- [ ] Implement `handleWordComplete` / `handleComplete`
-- [ ] Commit `feat(scenes): Complete Build the Word flow` + plan commit
+- [x] Implement `handleWordComplete` / `handleComplete`
+- [x] Commit `feat(scenes): Complete Build the Word flow` + plan commit
+      — `1b6128e`
 
 ### Phase 3 checkpoint
 - [ ] Phase-end protocol + `conductor(checkpoint)` commit + `git notes`; mark
