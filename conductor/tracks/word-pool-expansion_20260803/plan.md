@@ -44,7 +44,7 @@
   - [x] Run `CI=true pnpm test` full suite green
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (ea06941)
 
-## Phase 4 — Documentation & Quality Gates
+## Phase 4 — Documentation & Quality Gates [checkpoint: 32c98a0]
 
 - [x] Task: Update documentation (12fdf8b)
   - [x] `docs/PRD.md` — Game 9/10 sections: pool size 9 → 18, new words, new asset list
@@ -56,7 +56,7 @@
   - [x] `CI=true pnpm test` (coverage ≥ 80%)
   - [x] `pnpm run build`
   - [x] `node scripts/validate-pwa.js`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (32c98a0)
 
 ## Completion
 
