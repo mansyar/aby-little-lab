@@ -178,10 +178,11 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `603e976`
 
 ### Task 4.4 — Integration tests
-- [ ] Add/extend integration tests: boot → hub → Find the Word → sticker →
+- [x] Add/extend integration tests: boot → hub → Find the Word → sticker →
       hub; boot → hub → Build the Word → sticker; PWA offline/localStorage
       persistence for both new ids
-- [ ] Commit `test(scenes): Cover First Words integration flows` + plan commit
+- [x] Commit `test(scenes): Cover First Words integration flows` + plan commit
+      — `59c10d8`
 
 ### Phase 4 checkpoint
 - [ ] Phase-end protocol + `conductor(checkpoint)` commit + `git notes`; mark
