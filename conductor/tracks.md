@@ -52,4 +52,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Multi-Kid Profiles** *Link: [./tracks/multi-kid-profiles_20260804/index.md](./tracks/multi-kid-profiles_20260804/index.md)*
+- [~] **Track: Multi-Kid Profiles** *Link: [./tracks/multi-kid-profiles_20260804/index.md](./tracks/multi-kid-profiles_20260804/index.md)*
