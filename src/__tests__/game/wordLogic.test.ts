@@ -117,6 +117,10 @@ describe("WORD_POOL", () => {
     for (const entry of WORD_POOL) {
       expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);
     }
+    // Bijection guard: no stale entries may linger in the known-key list.
+    expect(new Set(WORD_POOL.map((entry) => entry.promptTexture)).size).toBe(
+      KNOWN_TEXTURE_KEYS.size,
+    );
   });
 
   it("maps new words to the approved reuse textures", () => {
