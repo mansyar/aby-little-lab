@@ -30,7 +30,7 @@
   - [x] Run the affected test files green
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (cc5587e)
 
-## Phase 3 — Scene Integration Verification
+## Phase 3 — Scene Integration Verification [checkpoint: ea06941]
 
 - [x] Task: Fix input lock persisting across scene re-launch (bug found in manual verification) (09a60b0)
 - [x] Task: Fix input lock in Alphabet/Pattern Builder scenes; verify Musical Memory recovers (c0b53ea)
@@ -42,7 +42,7 @@
   - [x] In `src/__tests__/scenes/firstWordsIntegration.test.ts`, add a playthrough case covering at least one reused-texture word (e.g., OWL/BONE) and one new-SVG word (e.g., SUN/DUCK) — prompt picture renders from the right texture key, rounds/answers behave as existing cases
   - [x] Confirm no scene-rule code changes were needed (data-driven scenes)
   - [x] Run `CI=true pnpm test` full suite green
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (ea06941)
 
 ## Phase 4 — Documentation & Quality Gates
 
