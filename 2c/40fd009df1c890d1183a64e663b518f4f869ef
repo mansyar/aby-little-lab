@@ -1,0 +1,1 @@
+Phase 1 (Baseline Gates & Version Bump) verification report — Automated: biome check 0 errors (16 pre-existing warnings); CI=true pnpm test 828/828 (30 files); pnpm run build OK; validate-pwa 13/13. Version bumped 1.3.0 -> 1.4.0 (commit 6464d8a, git note attached). Manual: user verified and approved checkpoint. Plan commit: conductor(plan) Phase 1 tasks.
