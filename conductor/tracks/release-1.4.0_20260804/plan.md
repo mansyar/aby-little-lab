@@ -24,27 +24,27 @@
 
 ## Phase 2: Finalize Release Documentation [checkpoint: 2c40fd0]
 
-- [ ] Task: Finalize `docs/release-notes-v1.4.0.md`
-  - [ ] Flip status DRAFT → FINAL; add release date and pipeline record
-  - [ ] Keep TTS voice variation in Known Issues (accepted, manual)
-- [ ] Task: Update `docs/device-testing-checklist.md`
-  - [ ] Add Execution Record v1.4.0 (devices: iPad, Android tablet, iPhone, Android phone — all passed)
-  - [ ] Update Sign-Off block (date 2026-08-04)
-- [ ] Task: Update `docs/release-checklist.md`
-  - [ ] Add v1.4.0 prep note (gates green, device testing passed, docs drafted)
-  - [ ] Add Step 7f deployment verification section (filled after deploy)
-  - [ ] Add Final Sign-Off v1.4.0 block
-- [ ] Task: Update `docs/TDD.md` release history + check `docs/PRD.md`
-  - [ ] Append v1.4.0 to the release-history note in `docs/TDD.md`
-  - [ ] Verify `docs/PRD.md` needs no version-specific update
-- [ ] Task: Commit docs changes
-  - [ ] Commit `docs(release): Finalize v1.4.0 release notes, checklist, device records`
-  - [ ] Attach git note
-  - [ ] Record commit SHA in `plan.md`, mark task `[x]`
-  - [ ] Commit plan update
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Finalize `docs/release-notes-v1.4.0.md`
+  - [x] Flip status DRAFT → FINAL; add release date and pipeline record
+  - [x] Keep TTS voice variation in Known Issues (accepted, manual)
+- [x] Task: Update `docs/device-testing-checklist.md`
+  - [x] Add Execution Record v1.4.0 (devices: iPad, Android tablet, iPhone, Android phone — all passed)
+  - [x] Update Sign-Off block (date 2026-08-04)
+- [x] Task: Update `docs/release-checklist.md`
+  - [x] Add v1.4.0 prep note (gates green, device testing passed, docs drafted)
+  - [x] Add Step 7f deployment verification section (filled after deploy)
+  - [x] Add Final Sign-Off v1.4.0 block
+- [x] Task: Update `docs/TDD.md` release history + check `docs/PRD.md`
+  - [x] Append v1.4.0 to the release-history note in `docs/TDD.md`
+  - [x] Verify `docs/PRD.md` needs no version-specific update
+- [x] Task: Commit docs changes `0788cee`
+  - [x] Commit `docs(release): Finalize v1.4.0 release notes, checklist, device records`
+  - [x] Attach git note
+  - [x] Record commit SHA in `plan.md`, mark task `[x]`
+  - [x] Commit plan update
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — docs finalized, user verified `d141b71`
 
-## Phase 3: Release Branch, PR, Merge & Tag
+## Phase 3: Release Branch, PR, Merge & Tag [checkpoint: d141b71]
 
 - [ ] Task: Create release branch `release/v1.4.0`
 - [ ] Task: Open PR `release/v1.4.0` → `master`
