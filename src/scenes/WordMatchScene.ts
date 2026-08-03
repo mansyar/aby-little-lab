@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
+import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
@@ -46,6 +47,39 @@ const CARD_COL_X_OFFSET = 200;
 
 /** Stroke width of card outlines. */
 const OUTLINE_WIDTH = 4;
+
+/** Delay before the next round after a correct answer (ms). */
+const NEXT_ROUND_DELAY = 700;
+
+/** Auto-return delay to Hub after completion (ms). */
+const AUTO_RETURN_DELAY = 3000;
+
+/** Wiggle amplitude for an incorrect answer (degrees). */
+const WIGGLE_ANGLE = 4;
+
+/** Reduced-motion wiggle amplitude (degrees). */
+const WIGGLE_REDUCED_ANGLE = 2;
+
+/** Wiggle swing duration (ms). */
+const WIGGLE_DURATION = 350;
+
+/** Reduced-motion wiggle swing duration (ms). */
+const WIGGLE_REDUCED_DURATION = 200;
+
+/** Number of yoyo repeats for the incorrect-answer wiggle. */
+const WIGGLE_REPEATS = 3;
+
+/** Progress dot pop peak scale. */
+const DOT_POP_SCALE = 1.4;
+
+/** Reduced-motion progress dot pop peak scale. */
+const DOT_POP_REDUCED_SCALE = 1.2;
+
+/** Progress dot pop duration (ms). */
+const DOT_POP_DURATION = 250;
+
+/** Reduced-motion progress dot pop duration (ms). */
+const DOT_POP_REDUCED_DURATION = 150;
 
 /**
  * Find the Word scene — a picture is shown and its word is spoken aloud, and
@@ -208,5 +242,78 @@ export class WordMatchScene extends Phaser.Scene {
       }
     }
     this.cardLetters.length = 0;
+  }
+
+  /** Handles a tap on an answer card: correct advances, wrong wiggles. */
+  private handleChoice(choiceIndex: number): void {
+    if (this.inputLocked) return;
+    const round = this.rounds[this.roundIndex];
+    if (round.choices[choiceIndex] === round.target) {
+      this.handleCorrect();
+    } else {
+      this.handleIncorrect(choiceIndex);
+    }
+  }
+
+  /**
+   * Handles a correct answer: the correct chime plays, Professor Hoot cheers,
+   * the progress dot fills with a pop, and the next round starts after a
+   * short delay (completion after the final round).
+   */
+  private handleCorrect(): void {
+    this.inputLocked = true;
+    this.audioManager.playCorrect();
+    this.mascot?.cheer();
+    this.fillProgressDot();
+
+    this.time.delayedCall(NEXT_ROUND_DELAY, () => {
+      this.roundIndex++;
+      if (this.roundIndex >= this.rounds.length) {
+        this.handleComplete();
+      } else {
+        this.inputLocked = false;
+        this.renderRound();
+      }
+    });
+  }
+
+  /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
+  private handleIncorrect(choiceIndex: number): void {
+    this.audioManager.playIncorrect();
+    this.mascot?.nod();
+
+    const targets = [this.cardRects[choiceIndex], ...this.cardLetters[choiceIndex]];
+    const angle = isReducedMotion() ? WIGGLE_REDUCED_ANGLE : WIGGLE_ANGLE;
+    this.tweens.add({
+      targets,
+      angle,
+      duration: motionDuration(WIGGLE_DURATION, WIGGLE_REDUCED_DURATION),
+      yoyo: true,
+      repeat: WIGGLE_REPEATS,
+      ease: "Sine.inOut",
+    });
+  }
+
+  /** Fills the progress dot for the just-completed round with a pop. */
+  private fillProgressDot(): void {
+    const dot = this.progressDots[this.roundIndex];
+    dot.setAlpha(1);
+    this.tweens.add({
+      targets: dot,
+      scaleX: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      scaleY: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
+      ease: "Back.out",
+      yoyo: true,
+    });
+  }
+
+  /**
+   * Handles game completion: plays win SFX, runs the shared celebration,
+   * awards a sticker on first completion, and auto-returns to Hub after 3s.
+   */
+  private handleComplete(): void {
+    // Completion flow (win SFX, celebration, sticker, auto-return) lands in
+    // Task 2.4.
   }
 }

@@ -304,6 +304,14 @@ function getCardLetters(scene: unknown, cardIndex: number): Array<Record<string,
   return letters;
 }
 
+/** Returns the mascot image object (created with the mascot_idle texture). */
+function getMascotImage(scene: unknown): Record<string, MockFn> {
+  const s = scene as { add: Record<string, unknown> };
+  const imageMock = getMockFn(s.add.image);
+  const index = imageMock.mock.calls.findIndex((call) => call[2] === "mascot_idle");
+  return imageMock.mock.results[index].value as Record<string, MockFn>;
+}
+
 /** Returns the prompt picture image object of the current round. */
 function getPromptImage(scene: unknown): Record<string, MockFn> | undefined {
   const s = scene as { add: Record<string, unknown> };
@@ -313,6 +321,44 @@ function getPromptImage(scene: unknown): Record<string, MockFn> | undefined {
   const index = imageMock.mock.calls.findIndex((call) => call[2] === promptTexture);
   if (index === -1) return undefined;
   return imageMock.mock.results[index].value as Record<string, MockFn>;
+}
+
+/** Returns the 6 progress dot circle objects in creation order. */
+function getProgressDots(scene: unknown): Array<Record<string, MockFn>> {
+  const s = scene as { add: Record<string, unknown> };
+  const circleMock = getMockFn(s.add.circle);
+  return circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+}
+
+/** Simulates a tap on an answer card by triggering its pointerdown callback. */
+function tapCard(scene: unknown, cardIndex: number): void {
+  const cards = getCardRects(scene);
+  const card = cards[cardIndex];
+  if (!card) throw new Error(`Card ${cardIndex} not found`);
+  const onCalls = getMockFn(card.on).mock.calls;
+  const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
+  if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+    (pointerdownCall[1] as () => void)();
+  }
+}
+
+/** Fires the next-round delay (700ms) so the round advances. */
+function fireNextRoundDelay(scene: unknown): void {
+  const delayedCallMock = getMockFn(
+    (scene as { time: Record<string, unknown> }).time.delayedCall,
+  );
+  const nextRoundCall = delayedCallMock.mock.calls.find((call) => call[0] === 700);
+  expect(nextRoundCall).toBeDefined();
+  if (nextRoundCall && typeof nextRoundCall[1] === "function") {
+    (nextRoundCall[1] as () => void)();
+  }
+}
+
+/** Taps the correct card and fires the next-round delay for the current round. */
+function completeRound(scene: unknown): void {
+  const round = getCurrentRound(scene);
+  tapCard(scene, round.choices.indexOf(round.target));
+  fireNextRoundDelay(scene);
 }
 
 describe("WordMatchScene shell", () => {
@@ -482,5 +528,151 @@ describe("WordMatchScene round rendering", () => {
 
     const round = getCurrentRound(scene);
     expect(mockSpeech.speakWord).toHaveBeenCalledWith(round.target, false);
+  });
+});
+
+describe("WordMatchScene interaction", () => {
+  let matchMediaMock: MockFn;
+
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    mockSpeech.speakWord.mockClear();
+    mockSpeech.isSpeechSupported.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  /** Toggles the `prefers-reduced-motion` media query result. */
+  function setReducedMotion(reduced: boolean): void {
+    matchMediaMock.mockImplementation(() => ({
+      matches: reduced,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+  }
+
+  it("tapping the correct card plays the correct chime, pops the dot, and advances", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+    const dots = getProgressDots(scene);
+
+    tapCard(scene, round.choices.indexOf(round.target));
+
+    expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+    expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+
+    // Professor Hoot cheers with the celebrate pose on a correct answer.
+    const mascot = getMascotImage(scene);
+    expect(getMockFn(mascot.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+
+    // The first progress dot fills.
+    expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
+    expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
+
+    fireNextRoundDelay(scene);
+    expect((scene as { roundIndex: number }).roundIndex).toBe(1);
+
+    // The new round re-renders and speaks its own target word.
+    const secondRound = getCurrentRound(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(secondRound.target, true);
+    expect(getCardRects(scene)).toHaveLength(8);
+
+    // The previous round's prompt picture is destroyed on re-render.
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const promptResults = imageMock.mock.results.filter(
+      (_, i) => imageMock.mock.calls[i]?.[2] === getWord(firstRoundTarget(scene)).promptTexture,
+    );
+    expect(getMockFn(promptResults[0].value as Record<string, MockFn>).destroy).toHaveBeenCalled();
+  });
+
+  function firstRoundTarget(scene: unknown): string {
+    const s = scene as { rounds: Array<{ target: string }> };
+    return s.rounds[0].target;
+  }
+
+  it("tapping a wrong card wiggles gently and does not advance the round", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+    const correctIndex = round.choices.indexOf(round.target);
+    const wrongIndex = (correctIndex + 1) % 4;
+    const rect = getCardRects(scene)[wrongIndex];
+    const letters = getCardLetters(scene, wrongIndex);
+
+    tapCard(scene, wrongIndex);
+
+    expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
+    expect(mockAudio.playCorrect).not.toHaveBeenCalled();
+    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+
+    // Professor Hoot nods along with the soft incorrect tone.
+    const mascot = getMascotImage(scene);
+    const nodTween = getMockFn(scene.tweens.add).mock.calls.find(
+      (call) => call[0]?.targets === mascot && call[0]?.angle?.to === 6,
+    );
+    expect(nodTween).toBeDefined();
+
+    const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
+      const targets = call[0]?.targets;
+      if (!Array.isArray(targets)) return false;
+      return targets.includes(rect) && targets.some((t) => letters.includes(t));
+    });
+    expect(wiggleTween).toBeDefined();
+    if (!wiggleTween) return;
+    expect((wiggleTween[0] as { angle: number }).angle).toBe(4);
+    expect((wiggleTween[0] as { yoyo: boolean }).yoyo).toBe(true);
+  });
+
+  it("locks input during the next-round transition", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+
+    tapCard(scene, round.choices.indexOf(round.target));
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    // A tap while locked is ignored (no second correct chime, no advance).
+    tapCard(scene, round.choices.indexOf(round.target));
+    expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+  });
+
+  it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
+    setReducedMotion(true);
+    const scene = new WordMatchScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+    const correctIndex = round.choices.indexOf(round.target);
+    const wrongIndex = (correctIndex + 1) % 4;
+    const rect = getCardRects(scene)[wrongIndex];
+    const letters = getCardLetters(scene, wrongIndex);
+
+    tapCard(scene, wrongIndex);
+
+    const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
+      const targets = call[0]?.targets;
+      if (!Array.isArray(targets)) return false;
+      return targets.includes(rect) && targets.some((t) => letters.includes(t));
+    });
+    expect(wiggleTween).toBeDefined();
+    if (!wiggleTween) return;
+    expect((wiggleTween[0] as { angle: number }).angle).toBe(2);
+    expect((wiggleTween[0] as { duration: number }).duration).toBe(200);
   });
 });
