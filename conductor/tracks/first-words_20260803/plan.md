@@ -97,11 +97,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `2b2a930`
 
 ### Task 2.4 — Completion
-- [ ] Tests: win SFX + shared celebration; `earnSticker("word-match")` on
+- [x] Tests: win SFX + shared celebration; `earnSticker("word-match")` on
       first completion only; auto-return to Hub in ~3s with `justEarned`
-- [ ] Implement `handleComplete` + sticker reveal (texture
+- [x] Implement `handleComplete` + sticker reveal (texture
       `sticker_word_match`)
-- [ ] Commit `feat(scenes): Complete Find the Word flow` + plan commit
+- [x] Commit `feat(scenes): Complete Find the Word flow` + plan commit
+      — `5922544`
 
 ### Phase 2 checkpoint
 - [ ] Phase-end protocol (diff vs checkpoint, tests, manual verification plan
