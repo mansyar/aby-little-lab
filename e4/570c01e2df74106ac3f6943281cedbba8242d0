@@ -1,0 +1,1 @@
+Task 1.5: GameId + default storage now include word-match and word-builder; merge-on-load backfills pre-word-game saves; reset clears new stickers. 19 storage tests green.
