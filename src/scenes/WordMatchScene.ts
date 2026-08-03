@@ -2,12 +2,13 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
-import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
+import { getWord, generateWordPlaythrough, type WordRound } from "../game/wordLogic";
+import { createWinCelebration } from "../utils/completionEffect";
+import { motionDuration, motionScale, isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { earnSticker, hasSticker, load } from "../utils/storage";
 
 /** Number of rounds per playthrough. */
 const ROUND_COUNT = 6;
@@ -20,6 +21,18 @@ const PROGRESS_DOT_SPACING = 40;
 
 /** Radius of progress dots (px). */
 const PROGRESS_DOT_RADIUS = 8;
+
+/** Original SVG texture size (used for scale calculations). */
+const SVG_SIZE = 512;
+
+/** Display size of the sticker image in the unlock animation. */
+const STICKER_DISPLAY_SIZE = 256;
+
+/** Target scale for the sticker image (display size / texture size). */
+const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
+
+/** Duration of sticker reveal animation (ms). */
+const WIN_TWEEN_DURATION = 300;
 
 /** Display size of the prompt picture (px). */
 const PICTURE_SIZE = 180;
@@ -313,7 +326,35 @@ export class WordMatchScene extends Phaser.Scene {
    * awards a sticker on first completion, and auto-returns to Hub after 3s.
    */
   private handleComplete(): void {
-    // Completion flow (win SFX, celebration, sticker, auto-return) lands in
-    // Task 2.4.
+    this.inputLocked = true;
+    this.audioManager.playWin();
+    this.mascot?.cheer(true);
+    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
+
+    const earnedNow = !hasSticker("word-match");
+    if (earnedNow) {
+      earnSticker("word-match");
+      this.audioManager.playSticker();
+      this.createStickerAnimation();
+    }
+
+    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
+      transitionToScene(this, "Hub", earnedNow ? { justEarned: "word-match" } : undefined);
+    });
+  }
+
+  /** Shows a sticker unlock animation at the center of the screen. */
+  private createStickerAnimation(): void {
+    const stickerImage = this.add
+      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_word_match")
+      .setScale(0);
+
+    this.tweens.add({
+      targets: stickerImage,
+      scaleX: STICKER_SCALE,
+      scaleY: STICKER_SCALE,
+      duration: motionDuration(WIN_TWEEN_DURATION, 180),
+      ease: "Back.out",
+    });
   }
 }

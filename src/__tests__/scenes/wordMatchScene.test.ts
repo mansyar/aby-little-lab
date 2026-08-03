@@ -255,8 +255,8 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+import { earnSticker, updateSettings } from "../../utils/storage";
 import { getWord } from "../../game/wordLogic";
-import { updateSettings } from "../../utils/storage";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -359,6 +359,25 @@ function completeRound(scene: unknown): void {
   const round = getCurrentRound(scene);
   tapCard(scene, round.choices.indexOf(round.target));
   fireNextRoundDelay(scene);
+}
+
+/** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
+function fireAutoReturn(scene: unknown): void {
+  const delayedCallMock = getMockFn(
+    (scene as { time: Record<string, unknown> }).time.delayedCall,
+  );
+  const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
+  expect(autoReturnCall).toBeDefined();
+  if (autoReturnCall && typeof autoReturnCall[1] === "function") {
+    (autoReturnCall[1] as () => void)();
+  }
+  const fadeOutMock = getMockFn(
+    (scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
+  );
+  const fadeOutCall = fadeOutMock.mock.calls.at(-1);
+  if (fadeOutCall && typeof fadeOutCall[4] === "function") {
+    (fadeOutCall[4] as () => void)();
+  }
 }
 
 describe("WordMatchScene shell", () => {
@@ -674,5 +693,78 @@ describe("WordMatchScene interaction", () => {
     if (!wiggleTween) return;
     expect((wiggleTween[0] as { angle: number }).angle).toBe(2);
     expect((wiggleTween[0] as { duration: number }).duration).toBe(200);
+  });
+});
+
+describe("WordMatchScene completion", () => {
+  let matchMediaMock: MockFn;
+
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    mockSpeech.speakWord.mockClear();
+    mockSpeech.isSpeechSupported.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+
+    for (let i = 0; i < 6; i++) {
+      completeRound(scene);
+    }
+
+    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+
+    // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
+    const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+    expect(
+      tweenCalls.some(
+        (call) => call[0]?.scaleX === 1.25 && call[0]?.scaleY === 1.25 && call[0]?.alpha === 0,
+      ),
+    ).toBe(true);
+
+    // First completion awards the sticker and shows the reveal animation.
+    expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
+    const stickerImage = getMockFn(
+      (scene as { add: Record<string, unknown> }).add.image,
+    ).mock.calls.find((call) => call[2] === "sticker_word_match");
+    expect(stickerImage).toBeDefined();
+
+    fireAutoReturn(scene);
+    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub", {
+      justEarned: "word-match",
+    });
+  });
+
+  it("does not award the sticker again or pass justEarned on repeat completions", () => {
+    earnSticker("word-match");
+    const scene = new WordMatchScene();
+    scene.create();
+
+    for (let i = 0; i < 6; i++) {
+      completeRound(scene);
+    }
+
+    expect(mockAudio.playSticker).not.toHaveBeenCalled();
+    fireAutoReturn(scene);
+    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
   });
 });
