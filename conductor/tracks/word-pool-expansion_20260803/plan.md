@@ -38,10 +38,10 @@
   - [x] Regression test in `src/__tests__/scenes/wordBuilderScene.test.ts`: same re-launch pattern after completing all 3 words
   - [x] Fix: reset `inputLocked = false` in `create()` of `WordMatchScene.ts` and `WordBuilderScene.ts`
   - [x] Run the affected test files green
-- [ ] Task: Extend first-words integration coverage for new words
-  - [ ] In `src/__tests__/scenes/firstWordsIntegration.test.ts`, add a playthrough case covering at least one reused-texture word (e.g., OWL/BONE) and one new-SVG word (e.g., SUN/DUCK) — prompt picture renders from the right texture key, rounds/answers behave as existing cases
-  - [ ] Confirm no scene-rule code changes were needed (data-driven scenes)
-  - [ ] Run `CI=true pnpm test` full suite green
+- [x] Task: Extend first-words integration coverage for new words (16a6551)
+  - [x] In `src/__tests__/scenes/firstWordsIntegration.test.ts`, add a playthrough case covering at least one reused-texture word (e.g., OWL/BONE) and one new-SVG word (e.g., SUN/DUCK) — prompt picture renders from the right texture key, rounds/answers behave as existing cases
+  - [x] Confirm no scene-rule code changes were needed (data-driven scenes)
+  - [x] Run `CI=true pnpm test` full suite green
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Documentation & Quality Gates
