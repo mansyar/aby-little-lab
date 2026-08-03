@@ -80,12 +80,13 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `d7c859d`
 
 ### Task 2.2 — Round rendering
-- [ ] Tests: prompt picture (~180px) top-center from `wordLogic` texture key;
+- [x] Tests: prompt picture (~180px) top-center from `wordLogic` texture key;
       2×2 word-card grid composed of letter textures (~80px/letter, min
       card height 160px); `speakWord` invoked with SFX flag
-- [ ] Implement `renderRound` + `createCards` (letter images from
+- [x] Implement `renderRound` + `createCards` (letter images from
       `letter_<c>` textures)
-- [ ] Commit `feat(scenes): Render Find the Word rounds` + plan commit
+- [x] Commit `feat(scenes): Render Find the Word rounds` + plan commit
+      — `9a618d1`
 
 ### Task 2.3 — Interaction
 - [ ] Tests: correct tap → chime + Hoot cheer + progress dot pop + next round
