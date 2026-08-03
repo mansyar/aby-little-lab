@@ -45,7 +45,7 @@
 - [x] Task: Write integration test — per-profile sticker isolation across boot → hub → game → award → switch `562b2b4`
 - [x] Task: Update `product.md` (sticker section: per-profile note) and `tech-stack.md` (schema v2 final) `12370c7`
 - [x] Task: Run full quality gates — `pnpm run check`, `CI=true pnpm test` (coverage ≥ 80% on new modules), `pnpm run build` `12370c7`
-- [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
+- [x] Task: Phase Verification & Checkpoint (per `workflow.md`) — check clean, 827/827 tests, coverage ≥80%, build OK, user end-to-end verification passed `e64642e`
 - [x] Task: Draft release notes for v1.4.0 (deployment decision deferred — separate release track, per repo convention) `12370c7`
 
 ## Notes
