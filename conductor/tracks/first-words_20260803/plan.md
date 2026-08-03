@@ -129,12 +129,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `578f842`
 
 ### Task 3.3 — Interaction (sequential spelling)
-- [ ] Tests: correct letter fills the next empty slot (settle pop + soft
+- [x] Tests: correct letter fills the next empty slot (settle pop + soft
       tick) and locks in; wrong tile wiggles + soft tone, no penalty; slots
       fill strictly left-to-right; input locked during transitions
-- [ ] Implement tap handling and slot/tile state
-- [ ] Commit `feat(scenes): Wire Build the Word spelling interaction` +
-      plan commit
+- [x] Implement tap handling and slot/tile state
+- [x] Commit `feat(scenes): Wire Build the Word spelling interaction` +
+      plan commit — `e49a55b`
 
 ### Task 3.4 — Completion (word + playthrough)
 - [ ] Tests: finished word lingers ~1.2s, chime + Hoot cheer, progress dot
