@@ -6,7 +6,7 @@
 
 ## Phase 1 — Storage v2 Foundation (schema, migration, profile CRUD)
 
-- [ ] Task: Document the v2 storage design in `tech-stack.md` (dated note, per Workflow Principle 2 — tech-stack changes before implementation)
+- [x] Task: Document the v2 storage design in `tech-stack.md` (dated note, per Workflow Principle 2 — tech-stack changes before implementation) `2d1323d`
 - [ ] Task: Extend types in `src/types/index.ts` (`Profile`, `ProfileV2`, `AVATAR_IDS`)
 - [ ] Task: Write failing tests for migration & profile logic (`src/utils/storage.test.ts` + new `src/game/profileLogic.test.ts`):
   - [ ] v1 save migrates to v2 → profile `p1`, stickers intact, settings preserved, v1 key untouched
