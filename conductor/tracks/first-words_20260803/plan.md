@@ -54,12 +54,12 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
       — `dbf20b3`
 
 ### Task 1.5 — Types and storage
-- [ ] TDD: failing tests for `GameId` including `word-match`/`word-builder`,
+- [x] TDD: failing tests for `GameId` including `word-match`/`word-builder`,
       default storage entries, merge-on-load for pre-existing saves, and
       Reset Progress clearing the new stickers
-- [ ] Update `src/types/index.ts` and `src/utils/storage.ts`
-- [ ] Commit `feat(storage): Register word-match and word-builder stickers` +
-      plan commit
+- [x] Update `src/types/index.ts` and `src/utils/storage.ts`
+- [x] Commit `feat(storage): Register word-match and word-builder stickers` +
+      plan commit — `e4570c0`
 
 ### Phase 1 checkpoint
 - [ ] Announce phase end; `git diff --name-only` vs previous checkpoint;
