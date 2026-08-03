@@ -289,7 +289,7 @@ import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
 
-const STORAGE_KEY = "abby-little-lab:v1";
+const STORAGE_KEY = "abby-little-lab:v2";
 
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -443,10 +443,13 @@ describe("First Words integration flows", () => {
 
     // Offline persistence: the save survives in localStorage.
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") as {
-      stickers: Record<string, { earned: boolean }>;
+      activeProfileId: string;
+      profiles: Array<{ id: string; stickers: Record<string, { earned: boolean }> }>;
     };
-    expect(saved.stickers["word-match"].earned).toBe(true);
-    expect(saved.stickers["word-builder"].earned).toBe(true);
+    const activeProfile =
+      saved.profiles.find((p) => p.id === saved.activeProfileId) ?? saved.profiles[0];
+    expect(activeProfile.stickers["word-match"].earned).toBe(true);
+    expect(activeProfile.stickers["word-builder"].earned).toBe(true);
 
     // A fresh Hub (reload) shows both stickers at the earned scale.
     const hub = new HubScene();
