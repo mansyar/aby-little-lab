@@ -4,6 +4,13 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.4.0 (2026-08-04)
+
+- **Target:** local preview build of the v1.4.0 codebase (Multi-Kid Profiles, post-v1.3.0)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Result:** All Multi-Kid Profiles checks passed — Hub avatar chip top-left (≥96px touch target, textless), chip tap opens the profile picker without a parental hold, ≥96px avatar tiles with the active profile scaled up, switching profiles re-renders the sticker shelf instantly, overlay tap closes cleanly with no stale input lock, Settings → Profiles behind the 3-second hold, add profile from unused avatars only, "Profile limit reached" at 4 profiles, two-step delete confirmation (Cancel keeps, Delete removes with active-profile fallback), last profile deletion recreates the default, per-profile sticker isolation (each profile's shelf shows only its own stickers), persistence after close/reopen, automatic v1 → first-profile migration with no prompts, BGM/SFX settings shared device-level, all 10 games still play correctly
+- **Issues found:** none (no Critical/High/Medium/Low)
+
 ## Execution Record — First Words (Games 9 & 10) (2026-08-03)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (First Words build, post-v1.1.0)
@@ -408,6 +415,6 @@ After completing all tests:
 - [x] Release documentation complete
 
 **Tester:** Ansyar (mansyar)
-**Date:** 2026-08-03
+**Date:** 2026-08-04
 **Device:** iPad, Android tablet, iPhone, Android phone (see Execution Record)
 **Overall Status:** PASSED — all items verified

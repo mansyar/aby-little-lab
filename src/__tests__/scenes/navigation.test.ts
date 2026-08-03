@@ -340,7 +340,14 @@ import { PreloadScene } from "../../scenes/PreloadScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { ensureSceneLoaded } from "../../scenes/sceneRegistry";
-import { earnSticker, hasSticker, resetProgress } from "../../utils/storage";
+import {
+  addProfile,
+  earnSticker,
+  getActiveProfile,
+  hasSticker,
+  resetProgress,
+  switchProfile,
+} from "../../utils/storage";
 
 const GAME_SCENES = [
   { name: "ShapeSorterScene", SceneClass: ShapeSorterScene },
@@ -490,6 +497,26 @@ function anyObjectOffCalled(scene: unknown): boolean {
     const offMock = obj.off as unknown as MockFn;
     return offMock?.mock?.calls?.length > 0;
   });
+}
+
+/** Returns the object returned by the LAST add.image call with the given texture. */
+function findLastAddedImage(scene: unknown, texture: string): Record<string, MockFn> | undefined {
+  const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+  for (let i = imageMock.mock.calls.length - 1; i >= 0; i--) {
+    if (imageMock.mock.calls[i]?.[2] === texture) {
+      return imageMock.mock.results[i]?.value as Record<string, MockFn> | undefined;
+    }
+  }
+  return undefined;
+}
+
+/** Fires the first pointerup handler registered on a game object. */
+function triggerPointerupOn(obj: Record<string, MockFn>): void {
+  const onMock = getMockFn(obj.on);
+  const call = onMock.mock.calls.find((c) => c[0] === "pointerup");
+  if (call && typeof call[1] === "function") {
+    call[1]();
+  }
 }
 
 /** Returns the first text game object whose label contains the given text. */
@@ -783,6 +810,28 @@ describe("scene navigation flow", () => {
       expect(mockSettingsPanel).toHaveBeenCalledWith(scene, undefined, expect.any(Function));
     });
 
+    it("refreshes the avatar chip when the settings panel reports a change", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerdowns(scene);
+      const holdCallback = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === 3000,
+      )?.[1] as () => void;
+      holdCallback();
+
+      // Simulate the profile add/delete flow in Settings: invoke the
+      // onProgressReset callback passed to the panel, then add a profile.
+      const settingsArgs = mockSettingsPanel.mock.calls.at(-1) as unknown[];
+      const onProgressReset = settingsArgs[2] as () => void;
+      addProfile("dog");
+      onProgressReset();
+
+      const chip = findLastAddedImage(scene, "animal_cat");
+      expect(chip).toBeDefined();
+      expect(getMockFn(chip?.setTexture)).toHaveBeenCalledWith("animal_dog");
+    });
+
     it("creates 7 game tiles", () => {
       const scene = new HubScene();
       scene.create();
@@ -839,6 +888,106 @@ describe("scene navigation flow", () => {
       triggerAllPointerups(scene);
 
       expect(mockAudio.playBGM).toHaveBeenCalled();
+    });
+  });
+
+  describe("Hub profile switcher", () => {
+    it("renders the active profile's avatar as a 96px chip on the Hub", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const chip = findLastAddedImage(scene, "animal_cat");
+      expect(chip).toBeDefined();
+      if (!chip) return;
+      const interactive = getMockFn(chip.setInteractive).mock.calls[0]?.[0] as {
+        hitArea: { width: number; height: number };
+      };
+      expect(interactive.hitArea.width).toBe(96);
+      expect(interactive.hitArea.height).toBe(96);
+      expect(getMockFn(chip.on).mock.calls.some((call) => call[0] === "pointerup")).toBe(true);
+    });
+
+    it("opens the avatar picker on chip tap without a parental hold", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const chip = findLastAddedImage(scene, "animal_cat");
+      if (!chip) throw new Error("chip not created");
+      triggerPointerupOn(chip);
+
+      expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(true);
+      // No 3s parental hold involved: the 3000ms hold callback never fired.
+      expect(getMockFn(scene.time.delayedCall).mock.calls.some((call) => call[0] === 3000)).toBe(
+        false,
+      );
+      // Both chip and picker avatar use the active profile's texture.
+      expect(
+        getMockFn((scene as { add: Record<string, unknown> }).add.image).mock.calls.filter(
+          (call) => call[2] === "animal_cat",
+        ),
+      ).toHaveLength(2);
+    });
+
+    it("switching profiles re-renders the sticker shelf and closes the picker", () => {
+      addProfile("dog");
+      const scene = new HubScene();
+      scene.create();
+
+      const chip = findLastAddedImage(scene, "animal_dog");
+      if (!chip) throw new Error("chip not created");
+      triggerPointerupOn(chip);
+
+      expect(getActiveProfile().id).toBe("p2");
+      const pickerAvatar = findLastAddedImage(scene, "animal_cat");
+      if (!pickerAvatar) throw new Error("picker avatar not created");
+      triggerPointerupOn(pickerAvatar);
+
+      expect(getActiveProfile().id).toBe("p1");
+      expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
+      // Shelf re-rendered: 10 more sticker lookups after the initial 10.
+      expect(hasSticker).toHaveBeenCalledTimes(20);
+      // Chip re-textured to the newly active profile.
+      expect(getMockFn(chip.setTexture)).toHaveBeenCalledWith("animal_cat");
+    });
+
+    it("tapping outside the picker closes it without switching", () => {
+      addProfile("dog");
+      const scene = new HubScene();
+      scene.create();
+
+      const chip = findLastAddedImage(scene, "animal_dog");
+      if (!chip) throw new Error("chip not created");
+      triggerPointerupOn(chip);
+
+      // The overlay is the full-screen rectangle added when the picker opened.
+      const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
+      const overlay = rectangleMock.mock.results.at(-1)?.value as
+        | Record<string, MockFn>
+        | undefined;
+      if (!overlay) throw new Error("overlay not created");
+      triggerPointerupOn(overlay);
+
+      expect(getActiveProfile().id).toBe("p2");
+      expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
+      expect(hasSticker).toHaveBeenCalledTimes(10);
+    });
+
+    it("renders the sticker shelf for the active profile only", () => {
+      // Award a sticker on p1 (default), then create p2 as the active profile.
+      earnSticker("shape-sorter");
+      addProfile("dog");
+      const scene = new HubScene();
+      scene.create();
+
+      // p2 shelf render: shape-sorter is NOT earned.
+      expect(hasSticker.mock.results[0]?.value).toBe(false);
+
+      // Switch back to p1 and re-render: shape-sorter IS earned.
+      switchProfile("p1");
+      scene.rerenderStickerShelf();
+
+      expect(hasSticker.mock.results[10]?.value).toBe(true);
+      expect(hasSticker.mock.calls).toHaveLength(20);
     });
   });
 

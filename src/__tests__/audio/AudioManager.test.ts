@@ -153,6 +153,8 @@ describe("AudioManager", () => {
     it("respects bgmEnabled=false from storage on init", () => {
       const data = load();
       data.settings.bgmEnabled = false;
+      // Simulate a legacy v1 save: force re-migration so settings flow through.
+      localStorage.removeItem("abby-little-lab:v2");
       localStorage.setItem("abby-little-lab:v1", JSON.stringify(data));
 
       manager.init();

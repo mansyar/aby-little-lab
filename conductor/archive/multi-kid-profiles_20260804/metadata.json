@@ -1,0 +1,8 @@
+{
+  "id": "multi-kid-profiles_20260804",
+  "title": "Multi-Kid Profiles",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-04T00:00:00.000Z",
+  "summary": "Up to 4 kid profiles with per-profile sticker collections, kid-tappable avatar switcher on the Hub, parental-gated profile management, and automatic migration of existing v1 saves."
+}

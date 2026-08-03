@@ -4,12 +4,13 @@ import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { PwaToast, type ToastKind } from "../components/PwaToast";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
 import type { GameId } from "../types";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { hasSticker } from "../utils/storage";
+import { getActiveProfile, getProfiles, hasSticker, switchProfile } from "../utils/storage";
 import { ensureSceneLoaded } from "./sceneRegistry";
 
 interface GameTile {
@@ -89,6 +90,20 @@ const WIGGLE_ANGLE = 4;
 const WIGGLE_DURATION = 350;
 /** Phase offset between tile wiggles (ms). */
 const WIGGLE_PHASE_OFFSET = 120;
+/** Avatar textures are rasterized at this size (matches PreloadScene). */
+const AVATAR_TEXTURE_SIZE = 512;
+/** Display size of the active-profile avatar chip (px). */
+const AVATAR_CHIP_DISPLAY = 72;
+/** Touch target size of the avatar chip (px). */
+const AVATAR_CHIP_HIT = 96;
+/** Corner inset for the avatar chip, mirroring the Settings button (px). */
+const AVATAR_CHIP_INSET = 20;
+/** Display size of avatars in the profile picker (px). */
+const PICKER_AVATAR_DISPLAY = 96;
+/** Gap between picker avatars (px). */
+const PICKER_AVATAR_SPACING = 40;
+/** Depth of the picker overlay (above all Hub content). */
+const PICKER_DEPTH = 20;
 
 /**
  * Hub scene — the central navigation hub.
@@ -116,6 +131,12 @@ export class HubScene extends Phaser.Scene {
   private pwaToast?: PwaToast;
   /** Unsubscribes this scene from PWA lifecycle events on shutdown. */
   private pwaUnsubscribe?: () => void;
+  /** Active-profile avatar chip (top-left, kid-tappable). */
+  private profileChip?: Phaser.GameObjects.Image;
+  /** True while the profile picker overlay is open. */
+  private profilePickerOpen = false;
+  /** Objects owned by the open profile picker (destroyed together on close). */
+  private profilePickerObjects: Phaser.GameObjects.GameObject[] = [];
 
   constructor() {
     super({ key: "Hub" });
@@ -213,7 +234,10 @@ export class HubScene extends Phaser.Scene {
       target: settingsButton,
       onSuccess: () => {
         this.settingsPanel?.destroy();
-        this.settingsPanel = new SettingsPanel(this, undefined, () => this.rerenderStickerShelf());
+        this.settingsPanel = new SettingsPanel(this, undefined, () => {
+          this.rerenderStickerShelf();
+          this.refreshProfileChip();
+        });
       },
       onFailure: () => {
         // No action needed on failure.
@@ -221,6 +245,8 @@ export class HubScene extends Phaser.Scene {
     });
     attachPressFeedback(settingsButton);
     settingsButton.on("pointerdown", startAudio);
+
+    this.createProfileChip(startAudio);
 
     this.wirePwaBridge();
 
@@ -232,12 +258,96 @@ export class HubScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
+      this.closeProfilePicker();
+      this.profileChip?.destroy();
+      this.profileChip = undefined;
       this.idleCallTimer?.remove();
       this.idleCallTimer = undefined;
       this.mascot?.destroy();
       this.mascot = undefined;
       this.stickerImages = [];
     });
+  }
+
+  /**
+   * Creates the kid-tappable avatar chip (top-left) showing the active
+   * profile's avatar. Tapping it opens the profile picker — no parental lock.
+   */
+  private createProfileChip(startAudio: () => void): void {
+    const active = getActiveProfile();
+    const chip = this.add.image(
+      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
+      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
+      PROFILE_AVATAR_TEXTURES[active.avatarId],
+    );
+    chip.setScale(AVATAR_CHIP_DISPLAY / AVATAR_TEXTURE_SIZE);
+    chip.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(0, 0, AVATAR_CHIP_HIT, AVATAR_CHIP_HIT),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    chip.on("pointerup", () => {
+      startAudio();
+      this.openProfilePicker();
+    });
+    attachPressFeedback(chip);
+    this.profileChip = chip;
+  }
+
+  /**
+   * Opens the textless profile picker: a dim overlay plus one avatar per
+   * profile (≥96px). Tapping a profile switches to it and re-renders the
+   * sticker shelf; tapping the overlay closes without switching.
+   */
+  private openProfilePicker(): void {
+    if (this.profilePickerOpen) return;
+    this.profilePickerOpen = true;
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const profiles = getProfiles();
+    const activeId = getActiveProfile().id;
+
+    const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x2d3748, 0.65);
+    overlay.setDepth(PICKER_DEPTH);
+    overlay.setInteractive();
+    overlay.on("pointerup", () => this.closeProfilePicker());
+    this.profilePickerObjects.push(overlay);
+
+    const totalWidth =
+      profiles.length * PICKER_AVATAR_DISPLAY + (profiles.length - 1) * PICKER_AVATAR_SPACING;
+    let x = width / 2 - totalWidth / 2 + PICKER_AVATAR_DISPLAY / 2;
+    const y = height / 2;
+    for (const profile of profiles) {
+      const avatar = this.add.image(x, y, PROFILE_AVATAR_TEXTURES[profile.avatarId]);
+      avatar.setDepth(PICKER_DEPTH + 1);
+      avatar.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(0, 0, PICKER_AVATAR_DISPLAY, PICKER_AVATAR_DISPLAY),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      const baseScale = PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE;
+      avatar.setScale(profile.id === activeId ? baseScale * 1.15 : baseScale);
+      avatar.on("pointerup", () => {
+        if (profile.id !== activeId) {
+          switchProfile(profile.id);
+          this.refreshProfileChip();
+          this.rerenderStickerShelf();
+        }
+        this.closeProfilePicker();
+      });
+      this.profilePickerObjects.push(avatar);
+      x += PICKER_AVATAR_DISPLAY + PICKER_AVATAR_SPACING;
+    }
+  }
+
+  /** Closes the picker overlay and resets the picker state (no stale lock). */
+  private closeProfilePicker(): void {
+    for (const obj of this.profilePickerObjects) obj.destroy();
+    this.profilePickerObjects = [];
+    this.profilePickerOpen = false;
+  }
+
+  /** Re-textures the avatar chip to the active profile (after switch/add/delete). */
+  private refreshProfileChip(): void {
+    this.profileChip?.setTexture(PROFILE_AVATAR_TEXTURES[getActiveProfile().avatarId]);
   }
 
   /**

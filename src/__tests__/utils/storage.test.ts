@@ -1,15 +1,22 @@
 import type { AppStorage, GameId } from "../../types";
 import {
+  addProfile,
+  deleteProfile,
   earnSticker,
+  getActiveProfile,
+  getAvailableAvatars,
+  getProfiles,
   getSettings,
   hasSticker,
   load,
   resetProgress,
   save,
+  switchProfile,
   updateSettings,
 } from "../../utils/storage";
 
-const STORAGE_KEY = "abby-little-lab:v1";
+const V1_KEY = "abby-little-lab:v1";
+const V2_KEY = "abby-little-lab:v2";
 
 const GAME_IDS: GameId[] = [
   "shape-sorter",
@@ -45,7 +52,7 @@ describe("Storage utilities", () => {
     });
 
     it("returns default AppStorage when storage contains invalid JSON", () => {
-      localStorage.setItem(STORAGE_KEY, "invalid-json");
+      localStorage.setItem(V1_KEY, "invalid-json");
       const result = load();
 
       expect(result.stickers["shape-sorter"].earned).toBe(false);
@@ -65,7 +72,7 @@ describe("Storage utilities", () => {
         },
         settings: { bgmEnabled: false, sfxEnabled: true },
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(oldSave));
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
       const result = load();
 
@@ -95,7 +102,7 @@ describe("Storage utilities", () => {
         },
         settings: { bgmEnabled: true, sfxEnabled: false },
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(oldSave));
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
       const result = load();
 
@@ -125,7 +132,7 @@ describe("Storage utilities", () => {
         },
         settings: { bgmEnabled: false, sfxEnabled: false },
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(oldSave));
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
       const result = load();
 
@@ -160,12 +167,14 @@ describe("Storage utilities", () => {
 
       save(data);
 
-      const stored = localStorage.getItem(STORAGE_KEY);
+      // save() persists the v2 schema: the provided stickers become the ACTIVE profile's.
+      const stored = localStorage.getItem(V2_KEY);
       expect(stored).not.toBeNull();
       if (stored !== null) {
         const parsed = JSON.parse(stored);
-        expect(parsed.stickers["shape-sorter"].earned).toBe(true);
-        expect(parsed.stickers["shape-sorter"].earnedAt).toBe("2026-07-28T00:00:00.000Z");
+        const active = parsed.profiles.find((p: { id: string }) => p.id === parsed.activeProfileId);
+        expect(active.stickers["shape-sorter"].earned).toBe(true);
+        expect(active.stickers["shape-sorter"].earnedAt).toBe("2026-07-28T00:00:00.000Z");
         expect(parsed.settings.bgmEnabled).toBe(false);
       }
 
@@ -281,16 +290,20 @@ describe("Storage utilities", () => {
 
       resetProgress();
 
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(V2_KEY);
       expect(stored).not.toBeNull();
       if (stored !== null) {
-        const parsed = JSON.parse(stored) as AppStorage;
-        expect(parsed.stickers["shape-sorter"]).toEqual({ earned: false, earnedAt: null });
+        const parsed = JSON.parse(stored) as {
+          activeProfileId: string;
+          profiles: Array<{ id: string; stickers: Record<string, unknown> }>;
+        };
+        const active = parsed.profiles.find((p) => p.id === parsed.activeProfileId)!;
+        expect(active.stickers["shape-sorter"]).toEqual({ earned: false, earnedAt: null });
       }
     });
 
     it("handles corrupt storage without throwing", () => {
-      localStorage.setItem(STORAGE_KEY, "invalid-json");
+      localStorage.setItem(V1_KEY, "invalid-json");
 
       expect(() => resetProgress()).not.toThrow();
 
@@ -300,4 +313,135 @@ describe("Storage utilities", () => {
       }
     });
   });
+
+  describe("profiles", () => {
+    it("migrates a v1 save into profile p1 with stickers and settings preserved", () => {
+      const oldSave = {
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+          "animal-trace": { earned: false, earnedAt: null },
+          "pop-freeze": { earned: false, earnedAt: null },
+          "shadow-match": { earned: false, earnedAt: null },
+          "musical-memory": { earned: false, earnedAt: null },
+          "big-small": { earned: false, earnedAt: null },
+          "pattern-builder": { earned: false, earnedAt: null },
+          "alphabet-match": { earned: false, earnedAt: null },
+          "word-match": { earned: false, earnedAt: null },
+          "word-builder": { earned: false, earnedAt: null },
+        },
+        settings: { bgmEnabled: false, sfxEnabled: true },
+      };
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
+
+      const profiles = getProfiles();
+      expect(profiles).toHaveLength(1);
+      expect(profiles[0]).toMatchObject({ id: "p1", avatarId: "cat" });
+      expect(profiles[0].stickers["shape-sorter"].earned).toBe(true);
+      expect(getSettings()).toEqual({ bgmEnabled: false, sfxEnabled: true });
+    });
+
+    it("keeps the v1 key untouched after migration", () => {
+      localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+
+      load();
+
+      expect(localStorage.getItem(V1_KEY)).not.toBeNull();
+      expect(localStorage.getItem(V2_KEY)).not.toBeNull();
+    });
+
+    it("creates a fresh default profile on a new install", () => {
+      const profiles = getProfiles();
+      expect(profiles).toHaveLength(1);
+      expect(profiles[0].id).toBe("p1");
+      expect(profiles[0].avatarId).toBe("cat");
+      expect(getActiveProfile().id).toBe("p1");
+    });
+
+    it("addProfile creates a new active profile with no stickers", () => {
+      addProfile("dog");
+
+      expect(getProfiles()).toHaveLength(2);
+      const active = getActiveProfile();
+      expect(active.avatarId).toBe("dog");
+      expect(active.stickers["shape-sorter"].earned).toBe(false);
+    });
+
+    it("addProfile returns null for a duplicate avatar", () => {
+      expect(addProfile("cat")).toBeNull();
+    });
+
+    it("keeps stickers strictly per profile", () => {
+      addProfile("dog");
+      earnSticker("shape-sorter");
+
+      expect(hasSticker("shape-sorter")).toBe(true);
+      expect(getActiveProfile().id).toBe("p2");
+
+      switchProfile("p1");
+      expect(hasSticker("shape-sorter")).toBe(false);
+      expect(getActiveProfile().id).toBe("p1");
+    });
+
+    it("switchProfile returns false for an unknown profile id", () => {
+      expect(switchProfile("nope")).toBe(false);
+      expect(getActiveProfile().id).toBe("p1");
+    });
+
+    it("resetProgress clears only the active profile's stickers", () => {
+      addProfile("dog");
+      earnSticker("shape-sorter");
+      switchProfile("p1");
+      earnSticker("animal-trace");
+
+      resetProgress();
+
+      expect(hasSticker("animal-trace")).toBe(false);
+      switchProfile("p2");
+      expect(hasSticker("shape-sorter")).toBe(true);
+    });
+
+    it("deleteProfile falls back to the first remaining profile when active is deleted", () => {
+      addProfile("dog");
+      deleteProfile("p2");
+
+      expect(getProfiles()).toHaveLength(1);
+      expect(getActiveProfile().id).toBe("p1");
+    });
+
+    it("deleteProfile recreates a fresh default when the last profile is deleted", () => {
+      earnSticker("shape-sorter");
+      deleteProfile("p1");
+
+      expect(getProfiles()).toHaveLength(1);
+      expect(getActiveProfile().id).toBe("p1");
+      expect(hasSticker("shape-sorter")).toBe(false);
+    });
+
+    it("getAvailableAvatars excludes avatars in use", () => {
+      addProfile("dog");
+      addProfile("frog");
+      expect(getAvailableAvatars()).toEqual(["pig", "duck", "bear"]);
+    });
+  });
 });
+
+function v1OnlySave(): {
+  stickers: Record<string, { earned: boolean; earnedAt: string | null }>;
+  settings: { bgmEnabled: boolean; sfxEnabled: boolean };
+} {
+  return {
+    stickers: {
+      "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+      "animal-trace": { earned: false, earnedAt: null },
+      "pop-freeze": { earned: false, earnedAt: null },
+      "shadow-match": { earned: false, earnedAt: null },
+      "musical-memory": { earned: false, earnedAt: null },
+      "big-small": { earned: false, earnedAt: null },
+      "pattern-builder": { earned: false, earnedAt: null },
+      "alphabet-match": { earned: false, earnedAt: null },
+      "word-match": { earned: false, earnedAt: null },
+      "word-builder": { earned: false, earnedAt: null },
+    },
+    settings: { bgmEnabled: false, sfxEnabled: true },
+  };
+}
