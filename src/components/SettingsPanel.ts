@@ -1,7 +1,16 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
+import { MAX_PROFILES } from "../types";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
-import { getSettings, resetProgress } from "../utils/storage";
+import {
+  addProfile,
+  deleteProfile,
+  getAvailableAvatars,
+  getProfiles,
+  getSettings,
+  resetProgress,
+} from "../utils/storage";
 
 const BACKDROP_COLOR = 0x000000;
 const BACKDROP_ALPHA = 0.6;
@@ -13,16 +22,19 @@ const DISABLED_COLOR = "#a0aec0";
 const PRIMARY_COLOR = "#2b6cb0";
 const DANGER_COLOR = "#fc8181";
 const PANEL_WIDTH = 480;
-const PANEL_HEIGHT = 500;
+const PANEL_HEIGHT = 560;
 const TOGGLE_WIDTH = 240;
 const TOGGLE_HEIGHT = 96;
 const ROW_HEIGHT = 64;
+/** Avatar textures are rasterized at this size (matches PreloadScene). */
+const AVATAR_TEXTURE_SIZE = 512;
 
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
   private readonly scene: Phaser.Scene;
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
+  private readonly modalObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly installTracker: InstallTracker;
   private resetRowText: Phaser.GameObjects.Text | null = null;
   private readonly onProgressReset?: () => void;
@@ -72,8 +84,9 @@ export class SettingsPanel {
     );
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
     this.createToggle(centerX, centerY + 55, "SFX", settings.sfxEnabled);
-    this.createResetRow(centerX, centerY + 135);
-    this.createInstallRow(centerX, centerY + 199);
+    this.createProfilesRow(centerX, centerY + 125);
+    this.createResetRow(centerX, centerY + 195);
+    this.createInstallRow(centerX, centerY + 255);
     this.objects.push(
       scene.add
         .text(centerX, centerY + 230, `v${__APP_VERSION__}`, {
@@ -86,6 +99,8 @@ export class SettingsPanel {
 
   /** Destroys the modal, the install overlay, and all display objects. */
   destroy(): void {
+    for (const object of this.modalObjects) object.destroy();
+    this.modalObjects.length = 0;
     for (const object of this.overlayObjects) object.destroy();
     this.overlayObjects.length = 0;
     for (const object of this.objects) object.destroy();
@@ -168,6 +183,196 @@ export class SettingsPanel {
       }
     });
     this.objects.push(button);
+  }
+
+  /** Adds the parental "Profiles" row that opens the profile manager overlay. */
+  private createProfilesRow(x: number, y: number): void {
+    const row = this.scene.add
+      .text(x, y, "Profiles", {
+        color: PRIMARY_COLOR,
+        fontSize: "24px",
+      })
+      .setOrigin(0.5);
+    row.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_WIDTH / 2,
+        -ROW_HEIGHT / 2,
+        TOGGLE_WIDTH,
+        ROW_HEIGHT,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    row.on("pointerdown", () => this.openProfilesOverlay());
+    this.objects.push(row);
+  }
+
+  /**
+   * Opens the profile manager overlay: one row per profile (avatar + Delete)
+   * plus unused avatars for adding new profiles (up to 4). Rebuilds itself
+   * after add/delete so the list always reflects persisted state.
+   */
+  private openProfilesOverlay(): void {
+    this.closeProfilesOverlay();
+    const { width, height } = this.scene.cameras.main;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const profiles = getProfiles();
+    const available = getAvailableAvatars();
+
+    const backdrop = this.scene.add
+      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
+      .setInteractive();
+    backdrop.on("pointerdown", () => this.closeProfilesOverlay());
+    this.overlayObjects.push(backdrop);
+    this.overlayObjects.push(
+      this.scene.add
+        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
+        .setStrokeStyle(4, OUTLINE_COLOR),
+    );
+    this.overlayObjects.push(
+      this.scene.add
+        .text(centerX, centerY - 250, "Profiles", {
+          color: "#2d3748",
+          fontSize: "32px",
+        })
+        .setOrigin(0.5),
+    );
+
+    profiles.forEach((profile, index) => {
+      const y = centerY - 194 + index * 80;
+      const avatar = this.scene.add.image(
+        centerX - 110,
+        y,
+        PROFILE_AVATAR_TEXTURES[profile.avatarId],
+      );
+      avatar.setScale(96 / AVATAR_TEXTURE_SIZE);
+      this.overlayObjects.push(avatar);
+      const remove = this.scene.add
+        .text(centerX + 60, y, "Delete", {
+          color: DANGER_COLOR,
+          fontSize: "22px",
+        })
+        .setOrigin(0.5);
+      remove.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(
+          -TOGGLE_WIDTH / 2,
+          -ROW_HEIGHT / 2,
+          TOGGLE_WIDTH,
+          ROW_HEIGHT,
+        ),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      remove.on("pointerdown", () => this.showDeleteProfileModal(profile.id));
+      this.overlayObjects.push(remove);
+    });
+
+    if (profiles.length >= MAX_PROFILES) {
+      this.overlayObjects.push(
+        this.scene.add
+          .text(centerX, centerY + 116, "Profile limit reached", {
+            color: DISABLED_COLOR,
+            fontSize: "24px",
+          })
+          .setOrigin(0.5),
+      );
+    } else {
+      this.overlayObjects.push(
+        this.scene.add
+          .text(centerX, centerY + 96, "Add Profile", {
+            color: PRIMARY_COLOR,
+            fontSize: "22px",
+          })
+          .setOrigin(0.5),
+      );
+      const totalWidth = available.length * 80 + (available.length - 1) * 36;
+      let x = centerX - totalWidth / 2 + 40;
+      const y = centerY + 146;
+      for (const avatarId of available) {
+        const avatar = this.scene.add.image(x, y, PROFILE_AVATAR_TEXTURES[avatarId]);
+        avatar.setScale(80 / AVATAR_TEXTURE_SIZE);
+        avatar.setInteractive({
+          hitArea: new Phaser.Geom.Rectangle(-50, -50, 100, 100),
+          hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+        });
+        avatar.on("pointerdown", () => {
+          addProfile(avatarId);
+          this.openProfilesOverlay();
+          this.onProgressReset?.();
+        });
+        this.overlayObjects.push(avatar);
+        x += 80 + 36;
+      }
+    }
+
+    this.overlayObjects.push(
+      this.createModalButton(centerX, centerY + 220, "Close", PRIMARY_COLOR, () =>
+        this.closeProfilesOverlay(),
+      ),
+    );
+  }
+
+  /** Destroys the profile manager overlay (not the panel). */
+  private closeProfilesOverlay(): void {
+    for (const object of this.overlayObjects) object.destroy();
+    this.overlayObjects.length = 0;
+  }
+
+  /** Shows the two-step "Delete profile?" confirmation modal. */
+  private showDeleteProfileModal(profileId: string): void {
+    const { width, height } = this.scene.cameras.main;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    const modalBackdrop = this.scene.add
+      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
+      .setInteractive();
+    modalBackdrop.on("pointerdown", () => this.closeDeleteProfileModal());
+    this.modalObjects.push(modalBackdrop);
+    this.modalObjects.push(
+      this.scene.add
+        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
+        .setStrokeStyle(4, OUTLINE_COLOR),
+    );
+    this.modalObjects.push(
+      this.scene.add
+        .text(centerX, centerY - 105, "Delete profile?", {
+          color: "#2d3748",
+          fontSize: "32px",
+        })
+        .setOrigin(0.5),
+    );
+    this.modalObjects.push(
+      this.scene.add
+        .text(centerX, centerY - 25, "This profile's stickers will be lost.", {
+          color: "#2d3748",
+          fontSize: "24px",
+        })
+        .setOrigin(0.5),
+    );
+    this.modalObjects.push(
+      this.createModalButton(centerX, centerY + 45, "Cancel", PRIMARY_COLOR, () =>
+        this.closeDeleteProfileModal(),
+      ),
+    );
+    this.modalObjects.push(
+      this.createModalButton(centerX, centerY + 125, "Delete", DANGER_COLOR, () =>
+        this.confirmDeleteProfile(profileId),
+      ),
+    );
+  }
+
+  /** Closes the delete confirmation modal, keeping the profile overlay open. */
+  private closeDeleteProfileModal(): void {
+    for (const object of this.modalObjects) object.destroy();
+    this.modalObjects.length = 0;
+  }
+
+  /** Deletes the profile, then rebuilds the profile overlay. */
+  private confirmDeleteProfile(profileId: string): void {
+    deleteProfile(profileId);
+    this.closeDeleteProfileModal();
+    this.openProfilesOverlay();
+    this.onProgressReset?.();
   }
 
   /** Shows the iOS "Add to Home Screen" instructions overlay. */

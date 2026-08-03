@@ -1,6 +1,13 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
 import type { InstallTracker, InstallUiState } from "../../utils/pwaInstall";
-import { earnSticker, load, updateSettings } from "../../utils/storage";
+import {
+  addProfile,
+  earnSticker,
+  getActiveProfile,
+  getProfiles,
+  load,
+  updateSettings,
+} from "../../utils/storage";
 
 const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
@@ -50,15 +57,17 @@ type MockFn = ReturnType<typeof vi.fn>;
 interface MockGameObject {
   destroy: MockFn;
   on: MockFn;
-  setInteractive: MockFn;
   setColor: MockFn;
+  setInteractive: MockFn;
   setOrigin: MockFn;
+  setScale: MockFn;
   setStrokeStyle: MockFn;
   setText: MockFn;
 }
 
 interface MockScene {
   add: {
+    image: MockFn;
     rectangle: MockFn;
     text: MockFn;
   };
@@ -74,15 +83,17 @@ function createGameObject(): MockGameObject {
   const object: MockGameObject = {
     destroy: vi.fn(),
     on: vi.fn(),
-    setInteractive: vi.fn(),
     setColor: vi.fn(),
+    setInteractive: vi.fn(),
     setOrigin: vi.fn(),
+    setScale: vi.fn(),
     setStrokeStyle: vi.fn(),
     setText: vi.fn(),
   };
   object.setColor.mockReturnValue(object);
   object.setOrigin.mockReturnValue(object);
   object.setInteractive.mockReturnValue(object);
+  object.setScale.mockReturnValue(object);
   object.setStrokeStyle.mockReturnValue(object);
   object.setText.mockReturnValue(object);
   return object;
@@ -103,9 +114,31 @@ function findTextByLabel(scene: MockScene, label: string): MockGameObject | unde
   return scene.add.text.mock.results[callIndex]?.value as MockGameObject | undefined;
 }
 
+/** Finds the display object created by the LAST text call with the given label. */
+function findLastTextByLabel(scene: MockScene, label: string): MockGameObject | undefined {
+  let lastIndex = -1;
+  scene.add.text.mock.calls.forEach((call, index) => {
+    if (call[2] === label) lastIndex = index;
+  });
+  if (lastIndex < 0) return undefined;
+  return scene.add.text.mock.results[lastIndex]?.value as MockGameObject | undefined;
+}
+
+/** Returns every display object created by add.image with the given texture. */
+function findImagesByTexture(scene: MockScene, texture: string): MockGameObject[] {
+  const images: MockGameObject[] = [];
+  scene.add.image.mock.calls.forEach((call, index) => {
+    if (call[2] === texture) {
+      images.push(scene.add.image.mock.results[index]?.value as MockGameObject);
+    }
+  });
+  return images;
+}
+
 function createScene(): MockScene {
   return {
     add: {
+      image: vi.fn(() => createGameObject()),
       rectangle: vi.fn(() => createGameObject()),
       text: vi.fn(() => createGameObject()),
     },
@@ -536,5 +569,147 @@ describe("SettingsPanel reset progress", () => {
     triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
 
     expect(onProgressReset).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("SettingsPanel profile management", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("renders a Profiles row that opens the profile manager overlay", () => {
+    const scene = createScene();
+
+    new SettingsPanel(scene as never);
+
+    const row = findTextByLabel(scene, "Profiles");
+    expect(row).toBeDefined();
+    triggerPointerdown(row as MockGameObject);
+
+    expect(findTextByLabel(scene, "Close")).toBeDefined();
+    expect(scene.add.image).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.any(Number),
+      "animal_cat",
+    );
+  });
+
+  it("adds a profile from an unused avatar, making it active", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    const dogAvatar = findImagesByTexture(scene, "animal_dog")[0] as MockGameObject;
+    triggerPointerdown(dogAvatar);
+
+    expect(getProfiles()).toHaveLength(2);
+    expect(getActiveProfile().id).toBe("p2");
+    // Overlay rebuilt: dog now renders as the new profile row (one more image
+    // than the original add-row offering).
+    expect(findImagesByTexture(scene, "animal_dog")).toHaveLength(2);
+  });
+
+  it("does not offer avatars already in use", () => {
+    addProfile("dog");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+
+    expect(findImagesByTexture(scene, "animal_dog")).toHaveLength(1);
+    expect(findImagesByTexture(scene, "animal_pig")).toHaveLength(1);
+  });
+
+  it("shows the limit message when four profiles exist", () => {
+    addProfile("dog");
+    addProfile("pig");
+    addProfile("frog");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+
+    expect(findTextByLabel(scene, "Profile limit reached")).toBeDefined();
+    expect(findTextByLabel(scene, "Add Profile")).toBeUndefined();
+  });
+
+  it("requires two-step confirmation before deleting a profile", () => {
+    addProfile("dog");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Delete") as MockGameObject);
+
+    expect(findTextByLabel(scene, "Delete profile?")).toBeDefined();
+    triggerPointerdown(findTextByLabel(scene, "Cancel") as MockGameObject);
+
+    expect(getProfiles()).toHaveLength(2);
+    expect(
+      (findTextByLabel(scene, "Delete profile?") as MockGameObject).destroy,
+    ).toHaveBeenCalled();
+  });
+
+  it("removes the profile when the modal Delete is confirmed", () => {
+    addProfile("dog");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Delete") as MockGameObject);
+    triggerPointerdown(findLastTextByLabel(scene, "Delete") as MockGameObject);
+
+    expect(getProfiles()).toHaveLength(1);
+    expect(getActiveProfile().id).toBe("p2");
+    // Overlay rebuilt after the deletion.
+    expect(findTextByLabel(scene, "Delete")).toBeDefined();
+  });
+
+  it("recreates the default profile when the last one is deleted", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Delete") as MockGameObject);
+    triggerPointerdown(findLastTextByLabel(scene, "Delete") as MockGameObject);
+
+    expect(getProfiles()).toHaveLength(1);
+    expect(getActiveProfile().avatarId).toBe("cat");
+  });
+
+  it("notifies the parent scene after adding and after deleting", () => {
+    const onProgressReset = vi.fn();
+    const scene = createScene();
+    new SettingsPanel(scene as never, undefined, onProgressReset);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    triggerPointerdown(findImagesByTexture(scene, "animal_dog")[0] as MockGameObject);
+    expect(onProgressReset).toHaveBeenCalledTimes(1);
+
+    triggerPointerdown(findTextByLabel(scene, "Delete") as MockGameObject);
+    triggerPointerdown(findLastTextByLabel(scene, "Delete") as MockGameObject);
+    expect(onProgressReset).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives profile controls inflated touch targets of at least 64px", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const rowConfig = (findTextByLabel(scene, "Profiles") as MockGameObject).setInteractive.mock
+      .calls[0]?.[0] as { hitArea: { height: number; width: number } };
+    expect(rowConfig.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(rowConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    const deleteConfig = (findTextByLabel(scene, "Delete") as MockGameObject).setInteractive.mock
+      .calls[0]?.[0] as { hitArea: { height: number; width: number } };
+    expect(deleteConfig.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(deleteConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+
+    const addConfig = (findImagesByTexture(scene, "animal_dog")[0] as MockGameObject).setInteractive
+      .mock.calls[0]?.[0] as { hitArea: { height: number; width: number } };
+    expect(addConfig.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(addConfig.hitArea.height).toBeGreaterThanOrEqual(64);
   });
 });
