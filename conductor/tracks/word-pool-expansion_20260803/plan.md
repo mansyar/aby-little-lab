@@ -4,7 +4,7 @@
 
 ## Phase 1 — Pool Data & Pure Logic (TDD)
 
-- [x] Task: Write failing tests for the expanded word pool
+- [x] Task: Write failing tests for the expanded word pool (24e92a3)
   - [x] In `src/__tests__/game/wordLogic.test.ts` (or a new focused describe block), assert `WORD_POOL` has exactly 18 entries
   - [x] Assert tier counts: 8× 3-letter, 10× 4-letter; all words unique
   - [x] Assert every `promptTexture` is a known PreloadScene texture key (list: `animal_cat`, `animal_dog`, `animal_pig`, `sm_car`, `mascot_idle`, `sm_sun`, `sm_hat`, `sm_bug`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`, `food_bone`, `shape_star`, `toy_drum`, `toy_teddy_bear`, `sm_duck`)
