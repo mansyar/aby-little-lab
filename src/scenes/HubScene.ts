@@ -27,12 +27,14 @@ const GAME_TILES: readonly GameTile[] = [
   { sceneKey: "BigSmall", gameId: "big-small", label: "Big & Small" },
   { sceneKey: "PatternBuilder", gameId: "pattern-builder", label: "Pattern Builder" },
   { sceneKey: "Alphabet", gameId: "alphabet-match", label: "Find the Letter" },
+  { sceneKey: "WordMatch", gameId: "word-match", label: "Find the Word" },
+  { sceneKey: "WordBuilder", gameId: "word-builder", label: "Build the Word" },
 ];
 
-const TILE_WIDTH = 200;
+const TILE_WIDTH = 160;
 const TILE_HEIGHT = 150;
-const TILE_SPACING = 50;
-const GRID_COLS = 4;
+const TILE_SPACING = 40;
+const GRID_COLS = 5;
 const GRID_ROWS = 2;
 
 /** Delay between consecutive entrance elements (ms). */
@@ -91,7 +93,7 @@ const WIGGLE_PHASE_OFFSET = 120;
 /**
  * Hub scene — the central navigation hub.
  *
- * Displays a grid of 7 game tiles, a sticker book showing earned stickers,
+ * Displays a grid of 10 game tiles, a sticker book showing earned stickers,
  * and a settings button gated behind a parental lock.
  */
 export class HubScene extends Phaser.Scene {
@@ -167,7 +169,7 @@ export class HubScene extends Phaser.Scene {
       });
 
       const label = this.add.text(x, y, GAME_TILES[i].label, {
-        fontSize: "20px",
+        fontSize: "18px",
         color: "#ffffff",
       });
       label.setOrigin(0.5);

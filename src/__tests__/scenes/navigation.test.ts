@@ -362,6 +362,8 @@ const GAME_SCENE_KEYS = [
   "BigSmall",
   "PatternBuilder",
   "Alphabet",
+  "WordMatch",
+  "WordBuilder",
 ] as const;
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -799,7 +801,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      expect(hasSticker).toHaveBeenCalledTimes(8);
+      expect(hasSticker).toHaveBeenCalledTimes(10);
     });
 
     it("navigates to each game scene when respective tile is clicked", async () => {
@@ -1069,14 +1071,14 @@ describe("scene navigation flow", () => {
             typeof config.delay === "number",
         );
 
-      expect(bobTweens).toHaveLength(8);
+      expect(bobTweens).toHaveLength(10);
       const delays = new Set(bobTweens.map((config) => config.delay));
-      expect(delays.size).toBe(8);
+      expect(delays.size).toBe(10);
 
-      const startY = (768 - 2 * 150 - 50) / 2;
-      const expectedYs = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
-        const row = Math.floor(i / 4);
-        return startY + row * 200 + 75 - 4;
+      const startY = (768 - 2 * 150 - 40) / 2;
+      const expectedYs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => {
+        const row = Math.floor(i / 5);
+        return startY + row * 190 + 75 - 4;
       });
       const tweenYs = bobTweens.map((config) => config.y).sort((a, b) => (a ?? 0) - (b ?? 0));
       expect(tweenYs).toEqual(expectedYs.sort((a, b) => a - b));
@@ -1259,6 +1261,8 @@ describe("scene navigation flow", () => {
       "sticker_big_small",
       "sticker_pattern_builder",
       "sticker_alphabet_match",
+      "sticker_word_match",
+      "sticker_word_builder",
     ];
     /** Sticker textures are rasterized at 512px; the shelf displays them at 56px. */
     const STICKER_BASE_SCALE = 56 / 512;
@@ -1268,7 +1272,7 @@ describe("scene navigation flow", () => {
       scene.create();
 
       const stickers = getStickerImages(scene);
-      expect(stickers).toHaveLength(8);
+      expect(stickers).toHaveLength(10);
       expect(new Set(stickers.map((s) => s.key))).toEqual(new Set(STICKER_KEYS));
 
       // No ★/☆ text markers remain
@@ -1403,7 +1407,7 @@ describe("scene navigation flow", () => {
       expect(typeof rerender).toBe("function");
 
       const oldStickerImages = getStickerImages(scene);
-      expect(oldStickerImages).toHaveLength(8);
+      expect(oldStickerImages).toHaveLength(10);
 
       // The real panel calls resetProgress() before notifying the Hub; mirror it.
       resetProgress();
@@ -1417,7 +1421,7 @@ describe("scene navigation flow", () => {
       const liveStickers = getStickerImages(scene).filter(
         ({ obj }) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(liveStickers).toHaveLength(8);
+      expect(liveStickers).toHaveLength(10);
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       for (const { obj } of liveStickers) {
         const targetsSticker = (call: { targets?: unknown }): boolean => {
@@ -1458,7 +1462,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(8);
+      expect(wiggleTweens.length).toBe(10);
     });
 
     it("repeats the idle call every ~10s while idle", () => {
@@ -1529,7 +1533,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(8);
+      expect(wiggleTweens.length).toBe(10);
     });
 
     it("under reduced motion: plays the idle call but does not wiggle tiles", () => {
@@ -6050,14 +6054,14 @@ describe("scene navigation flow", () => {
       scene.create();
       completeHubEntrances(scene);
       const firstVisit = getStickerImages(scene);
-      expect(firstVisit).toHaveLength(8);
+      expect(firstVisit).toHaveLength(10);
 
       // Leave the Hub (shutdown clears the tracked shelf) and return: create()
       // re-runs on every visit via scene.start.
       triggerShutdown(scene);
       scene.create();
       completeHubEntrances(scene);
-      expect(getStickerImages(scene)).toHaveLength(16);
+      expect(getStickerImages(scene)).toHaveLength(20);
 
       // Isolate first-visit images: a re-render after a progress reset must not
       // destroy (or re-destroy) them — only the live second-visit shelf.
@@ -6080,13 +6084,13 @@ describe("scene navigation flow", () => {
       for (const { obj } of firstVisit) {
         expect(getMockFn(obj.destroy)).not.toHaveBeenCalled();
       }
-      // The re-rendered shelf holds exactly 7 fresh thumbnails (the stale
+      // The re-rendered shelf holds exactly 10 fresh thumbnails (the stale
       // first-visit images still exist in the mock display list, untouched).
       const firstVisitSet = new Set(firstVisit.map(({ obj }) => obj));
       const fresh = getStickerImages(scene).filter(
         ({ obj }) => !firstVisitSet.has(obj) && getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(fresh).toHaveLength(8);
+      expect(fresh).toHaveLength(10);
     });
   });
 
