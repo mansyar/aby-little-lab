@@ -6,20 +6,20 @@
 
 ## Phase 1: Baseline Gates & Version Bump
 
-- [ ] Task: Run local quality gates (baseline green)
-  - [ ] Run `pnpm run check` (Biome lint + format — 0 errors)
-  - [ ] Run `CI=true pnpm test` (full suite, single execution)
-  - [ ] Run `pnpm run build` (production build succeeds)
-  - [ ] Run `node scripts/validate-pwa.js` (13/13)
-- [ ] Task: Bump version to 1.4.0
-  - [ ] Run `npm version 1.4.0 --no-git-tag-version`
-  - [ ] Verify `package.json` shows `"version": "1.4.0"`
-- [ ] Task: Commit version bump
-  - [ ] Stage `package.json`
-  - [ ] Commit `chore(release): Bump version to 1.4.0`
-  - [ ] Attach git note (task summary, why, files)
-  - [ ] Record commit SHA in `plan.md`, mark task `[x]`
-  - [ ] Commit plan update `conductor(plan): Mark task ... as complete`
+- [x] Task: Run local quality gates (baseline green)
+  - [x] Run `pnpm run check` (Biome lint + format — 0 errors)
+  - [x] Run `CI=true pnpm test` (full suite, single execution)
+  - [x] Run `pnpm run build` (production build succeeds)
+  - [x] Run `node scripts/validate-pwa.js` (13/13)
+- [x] Task: Bump version to 1.4.0
+  - [x] Run `npm version 1.4.0 --no-git-tag-version`
+  - [x] Verify `package.json` shows `"version": "1.4.0"`
+- [x] Task: Commit version bump `6464d8a`
+  - [x] Stage `package.json`
+  - [x] Commit `chore(release): Bump version to 1.4.0`
+  - [x] Attach git note (task summary, why, files)
+  - [x] Record commit SHA in `plan.md`, mark task `[x]`
+  - [x] Commit plan update `conductor(plan): Mark task ... as complete`
 - [ ] Task: Phase Verification & Checkpoint (per `workflow.md`)
 
 ## Phase 2: Finalize Release Documentation
