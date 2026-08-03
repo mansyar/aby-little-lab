@@ -146,6 +146,7 @@ export class AlphabetScene extends Phaser.Scene {
 
     this.rounds = generatePlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
+    this.inputLocked = false;
     this.renderRound();
 
     this.events.on("shutdown", () => {
