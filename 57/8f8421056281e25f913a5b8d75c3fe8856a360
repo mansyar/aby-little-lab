@@ -1,0 +1,1 @@
+Task 3.2: renderRound draws prompt picture (~180px), one 120px slot per letter (row at centerY+40), 6 letter tiles (~110px, centerY+220) from letter_<c> textures with distractors via generateLetterTiles; speakWord(word, sfxEnabled). 6 scene tests green.
