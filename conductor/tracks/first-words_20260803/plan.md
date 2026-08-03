@@ -17,13 +17,13 @@ Pre-commit gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`.
 ## Phase 1: Foundations — word logic, speech, storage
 
 ### Task 1.1 — Word pool and shared types
-- [ ] TDD: write failing tests for `src/game/wordLogic.ts` — the 9-word pool
+- [x] TDD: write failing tests for `src/game/wordLogic.ts` — the 9-word pool
       (cat, dog, pig, car, frog, ball, fish, boat, tree) with word text,
       letter count, prompt texture key, and 3/4-letter tier classification
-- [ ] Implement the pool and types (uppercase words, `PromptTexture` keyed to
+- [x] Implement the pool and types (uppercase words, `PromptTexture` keyed to
       existing PreloadScene textures)
-- [ ] Commit `feat(logic): Add First Words word pool` + `conductor(plan)` task
-      commit; record SHA
+- [x] Commit `feat(logic): Add First Words word pool` + `conductor(plan)` task
+      commit; record SHA — `4209b1c`
 
 ### Task 1.2 — Find the Word round generation
 - [ ] TDD: failing tests for round generation — unique target words across a
