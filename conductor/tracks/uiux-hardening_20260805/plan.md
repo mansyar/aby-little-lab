@@ -45,17 +45,17 @@
 
 ## Phase 3 — Prompt Replay Affordance
 
-- [ ] **Task 3.1: Author speaker SVG icon**
-  - [ ] Create `icon_speaker.svg` in `src/assets/svg/ui/`; register in PreloadScene
-- [ ] **Task 3.2: Create shared SpeakerButton component**
-  - [ ] Write `src/components/SpeakerButton.ts` — ≥96×96 hit area, speaks current prompt via speech.ts (SFX-gated), reduced-motion aware
-  - [ ] Write tests `src/__tests__/components/SpeakerButton.test.ts` (TDD: renders, hit area, invokes speech callback, respects sfx disabled)
-- [ ] **Task 3.3: Integrate into 4 speech-driven scenes**
-  - [ ] AlphabetScene, WordMatchScene, WordBuilderScene, HowManyScene — add SpeakerButton near progress dots; re-speaks current round prompt
-  - [ ] Update scene tests to verify replay button exists and re-triggers speech
-- [ ] **Task 3.4: Replace MusicalMemory emoji replay with SpeakerButton**
-  - [ ] Remove 🔄 text; use SpeakerButton (replays the sequence note)
-  - [ ] Update musicalMemory scene test
+- [x] **Task 3.1: Author speaker SVG icon** (`56bd9c9`)
+  - [x] Create `icon_speaker.svg` in `src/assets/svg/ui/`; register in PreloadScene
+- [x] **Task 3.2: Create shared SpeakerButton component** (`56bd9c9`)
+  - [x] Write `src/components/SpeakerButton.ts` — ≥96×96 hit area, speaks current prompt via speech.ts (SFX-gated), reduced-motion aware
+  - [x] Write tests `src/__tests__/components/SpeakerButton.test.ts` (TDD: renders, hit area, invokes speech callback, respects sfx disabled)
+- [x] **Task 3.3: Integrate into 4 speech-driven scenes** (`56bd9c9`)
+  - [x] AlphabetScene, WordMatchScene, WordBuilderScene, HowManyScene — add SpeakerButton near progress dots; re-speaks current round prompt
+  - [x] Update scene tests to verify replay button exists and re-triggers speech
+- [x] **Task 3.4: Replace MusicalMemory emoji replay with SpeakerButton** (`56bd9c9`)
+  - [x] Remove 🔄 text; use SpeakerButton (replays the sequence note)
+  - [x] Update musicalMemory scene test
 - [ ] **Task: Phase 3 Verification & Checkpoint (refer to workflow.md)**
 
 ## Phase 4 — Audio Resume & Settings Readability
