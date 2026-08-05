@@ -1,0 +1,1 @@
+Task: Implement speakNumber via shared speakText (en-US, rate 0.9, cancels prior utterances). Summary: Added NUMBER_WORDS mapping (0-10) and speakNumber(number, enabled) to src/utils/speech.ts, reusing the existing speakText helper: SFX-gated silent when disabled, graceful false fallback when SpeechSynthesis is unavailable, cancels prior utterances. Files: src/utils/speech.ts.
