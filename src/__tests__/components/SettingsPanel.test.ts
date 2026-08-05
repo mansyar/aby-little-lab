@@ -4,8 +4,10 @@ import {
   addProfile,
   earnSticker,
   getActiveProfile,
+  getPlayTime,
   getProfiles,
   load,
+  setPlayTimeLimit,
   updateSettings,
 } from "../../utils/storage";
 
@@ -711,5 +713,116 @@ describe("SettingsPanel profile management", () => {
       .mock.calls[0]?.[0] as { hitArea: { height: number; width: number } };
     expect(addConfig.hitArea.width).toBeGreaterThanOrEqual(64);
     expect(addConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+  });
+});
+
+describe("SettingsPanel play time", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  function openProfilesOverlay(scene: MockScene): void {
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+  }
+
+  /** Every text object whose label starts with the play-time prefix. */
+  function findPlayTimeChips(scene: MockScene): Array<{ label: string; object: MockGameObject }> {
+    const chips: Array<{ label: string; object: MockGameObject }> = [];
+    scene.add.text.mock.calls.forEach((call, index) => {
+      const label = call[2] as string;
+      if (label.startsWith("Play Time:")) {
+        chips.push({
+          label,
+          object: scene.add.text.mock.results[index]?.value as MockGameObject,
+        });
+      }
+    });
+    return chips;
+  }
+
+  it("renders a Play Time chip per profile row, defaulting to Off", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    expect(findTextByLabel(scene, "Play Time: Off")).toBeDefined();
+  });
+
+  it("shows the stored limit on the chip", () => {
+    setPlayTimeLimit("p1", 30);
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    expect(findTextByLabel(scene, "Play Time: 30m")).toBeDefined();
+  });
+
+  it("renders one chip per profile with that profile's own limit", () => {
+    setPlayTimeLimit("p1", 45);
+    addProfile("dog"); // p2 becomes active, unlimited.
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    const chips = findPlayTimeChips(scene);
+    expect(chips).toHaveLength(2);
+    expect(chips.map((chip) => chip.label).sort()).toEqual(["Play Time: 45m", "Play Time: Off"]);
+  });
+
+  it("cycles Off -> 15 -> 30 -> 45 -> 60 -> Off and persists each step", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    const chip = findTextByLabel(scene, "Play Time: Off") as MockGameObject;
+    const expected = [
+      "Play Time: 15m",
+      "Play Time: 30m",
+      "Play Time: 45m",
+      "Play Time: 60m",
+      "Play Time: Off",
+    ];
+    for (const label of expected) {
+      triggerPointerdown(chip);
+      expect(chip.setText).toHaveBeenCalledWith(label);
+    }
+    expect(getPlayTime("p1").limitMinutes).toBeNull();
+  });
+
+  it("persists the limit when a chip is tapped", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    triggerPointerdown(findTextByLabel(scene, "Play Time: Off") as MockGameObject);
+
+    expect(getPlayTime("p1").limitMinutes).toBe(15);
+  });
+
+  it("changes only the tapped profile's limit", () => {
+    setPlayTimeLimit("p1", 30);
+    addProfile("dog");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    triggerPointerdown(findTextByLabel(scene, "Play Time: Off") as MockGameObject);
+
+    expect(getPlayTime("p2").limitMinutes).toBe(15);
+    expect(getPlayTime("p1").limitMinutes).toBe(30);
+  });
+
+  it("gives play-time chips inflated touch targets of at least 64px", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    const chip = findTextByLabel(scene, "Play Time: Off") as MockGameObject;
+    const config = chip.setInteractive.mock.calls[0]?.[0] as {
+      hitArea: { height: number; width: number };
+    };
+    expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
   });
 });

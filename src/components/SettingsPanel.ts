@@ -7,9 +7,11 @@ import {
   addProfile,
   deleteProfile,
   getAvailableAvatars,
+  getPlayTime,
   getProfiles,
   getSettings,
   resetProgress,
+  setPlayTimeLimit,
 } from "../utils/storage";
 
 const BACKDROP_COLOR = 0x000000;
@@ -28,6 +30,13 @@ const TOGGLE_HEIGHT = 96;
 const ROW_HEIGHT = 64;
 /** Avatar textures are rasterized at this size (matches PreloadScene). */
 const AVATAR_TEXTURE_SIZE = 512;
+/** Daily play-time limit options cycled by the per-profile chip (null = Off). */
+const PLAY_TIME_OPTIONS: ReadonlyArray<number | null> = [null, 15, 30, 45, 60];
+
+/** "Off" for an unlimited budget, otherwise "15m"-style labels. */
+function playTimeLabel(limitMinutes: number | null): string {
+  return limitMinutes === null ? "Off" : `${limitMinutes}m`;
+}
 
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
@@ -264,6 +273,31 @@ export class SettingsPanel {
       });
       remove.on("pointerdown", () => this.showDeleteProfileModal(profile.id));
       this.overlayObjects.push(remove);
+
+      const limit = getPlayTime(profile.id).limitMinutes;
+      const chip = this.scene.add
+        .text(centerX - 10, y, `Play Time: ${playTimeLabel(limit)}`, {
+          color: PRIMARY_COLOR,
+          fontSize: "18px",
+        })
+        .setOrigin(0.5);
+      chip.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(
+          -TOGGLE_WIDTH / 4,
+          -ROW_HEIGHT / 2,
+          TOGGLE_WIDTH / 2,
+          ROW_HEIGHT,
+        ),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      chip.on("pointerdown", () => {
+        const current = getPlayTime(profile.id).limitMinutes;
+        const index = PLAY_TIME_OPTIONS.indexOf(current);
+        const next = PLAY_TIME_OPTIONS[(index + 1) % PLAY_TIME_OPTIONS.length];
+        setPlayTimeLimit(profile.id, next);
+        chip.setText(`Play Time: ${playTimeLabel(next)}`);
+      });
+      this.overlayObjects.push(chip);
     });
 
     if (profiles.length >= MAX_PROFILES) {
