@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **934 tests across 34 files**, ~98% lines coverage (all shared motion/feedback/storage/transition/play-time/count utilities at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **955 tests across 36 files**, ~98% lines / ~97% statements coverage (all shared motion/feedback/storage/transition/play-time/count/typography/viewport utilities and the SpeakerButton component at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
 
 ## Code Quality
 
@@ -68,17 +68,18 @@ The project uses Biome with double quotes, 2-space indentation, and 100-characte
 ```
 public/
 ├── audio/                 # BGM served at /audio/bgm.mp3 and precached for offline play
+├── fonts/                 # Bundled Baloo 2 variable font (WOFF2, precached)
 └── icons/                 # PWA icons
 src/
 ├── main.ts                # Phaser game config & shell scene register (game scenes lazy-loaded)
 ├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 11 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
-├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions)
+├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions), SpeakerButton (shared replay control)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
 ├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, profileLogic, playTimeLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter/word playthrough, profile CRUD, per-profile daily play-time budgets)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, PlayTime, AppStorage, Profile, ProfileV2)
-├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
-├── assets/                # SVG assets bundled into the game
-├── styles/                # Global CSS
+├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + typography (typography.ts) + settings pinch-zoom (viewportZoom.ts) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
+├── assets/                # SVG assets bundled into the game (incl. ui/tiles/ tile icons, icon_speaker, sleep_zzz)
+├── styles/                # Global CSS (@font-face for Baloo 2)
 └── __tests__/             # Unit tests (audio, components, game, scenes, utils)
 ```
 
@@ -109,24 +110,25 @@ Settings access (Hub **Settings**) and app exit (each game's **← Back**) are g
 - Early release, pointer leaving the control, or pointer cancel **never** triggers the action.
 - The ring is cleared on release, cancel, and scene shutdown — no leftover display objects.
 
-The protected controls (Hub Settings, all eleven game Back buttons, and the Musical Memory **Replay** control) expose explicit **96×96px hit areas** anchored to their display bounds, so children can tap near the visible label without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned or centered controls.
+The protected controls (Hub Settings, all eleven game Back buttons) and the shared replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, and Musical Memory — where it replaced the emoji replay) expose explicit **96×96px hit areas**, so children can tap near the visible control without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned controls; the centered speaker icon uses `Rectangle(-48, -48, 96, 96)`.
 
 The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop.
 
 Parent-facing additions (all behind the 3-second hold, never visible to the child during play):
 
-- **Version footer** — a muted `v{version}` readout at the bottom of the panel, sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
+- **Version footer** — a muted `v{version}` readout **under the title** (clear of the install row, moved 2026-08-06), sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
 - **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all eleven stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
 - **Install control** — a context-aware row: "Install App" where a browser prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, hidden once the app is installed (see PWA Release Readiness).
 - **Profile manager** — up to 4 kid profiles, each with its own sticker collection; the Hub's top-left avatar chip (kid-tappable) switches profiles without parental input, while adding/removing profiles happens behind the hold (two-step delete). Profiles use 6 textless animal avatars (cat, dog, pig, frog, duck, bear) reusing existing art; old saves auto-migrate to the first profile.
 - **Play-time limits** — a per-profile daily cap (Off/15/30/45/60 minutes) via a chip in Profiles; usage accrues while games run and resets each day. The Hub shows a textless remaining-budget arc (turns orange ≤5 min), a 2s hourglass nudge delays launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge — no mid-game cutoffs, off by default (2026-08-05).
+- **Typography & readability (2026-08-06)** — a bundled Baloo 2 rounded font replaces Phaser's default Courier everywhere (precached, shared `textStyle()` helper); Settings text is larger (30–36px); the version footer moved under the title; pinch-zoom is allowed while the Settings panel is open so parents can zoom in on a phone.
 
 ## Motion & Feedback
 
 All animation is driven by a shared motion system (`src/utils/`):
 
 - **Scene transitions** — every navigation path (boot → hub, hub ↔ game, completion returns) plays a 300ms crossfade to the app background, then a 180ms fade-in with a subtle entrance zoom.
-- **Win celebration** — all ten games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction.
+- **Win celebration** — all eleven games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction; the first-time sticker reveal pops ~400ms later so the confetti clears first.
 - **Press feedback** — Back, Replay, Settings, and Hub game tiles squish to 95% of their base scale while pressed; tiles spring back with a `Back.out` overshoot (150ms), other controls restore instantly. Hub tiles navigate **on release** so the squish stays visible while holding; dragging off the tile cancels the navigation.
 - **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, Hub entrances fade without scale (no bob, wiggle, sparkle, or burst), the idle attract plays chime-only, and gameplay stays fully functional under `prefers-reduced-motion`.
 
@@ -140,31 +142,42 @@ Every game layers scene-level animation juice on top of its core rules (no gamep
 - **Animal Trace** — the animal hops between waypoints with a small arc tween (~120ms per hop; straight and faster under reduced motion), the food wiggles (±4°, 3 yoyo repeats) on path arrival, and progress dots pop 1 → 1.4 → 1 with `Back.out` instead of alpha-only.
 - **Pop & Freeze** — popping emits 3 teal droplet circles radiating from the pop point (self-cleaning fade), and sleeping-animal decoys breathe on a 1.0 → 1.03 yoyo loop (~1.5s; disabled under reduced motion).
 - **Musical Memory** — frog taps emit expanding ripple rings (self-cleaning fade), lily pads drift gently ±3px on a 3s loop (disabled under reduced motion), and progress dots pop on fill.
-- **Find the Letter** — the target letter pops in at round start and is named aloud via SpeechSynthesis (silent when SFX is off or unsupported — visual-only play always works); answer cards squish on press, correct taps chime with a progress-dot pop (700ms to the next round), and wrong taps wiggle gently (±4°, 3 yoyo repeats; ±2°/200ms reduced motion) with no penalty. Win shares the suite celebration plus a first-time sticker reveal.
-- **Find the Word** — the prompt picture pops in and the word is spoken aloud (rate 0.8, silent when SFX is off or unsupported); the 4 word cards in a 2×2 grid squish on press, correct taps chime with a progress-dot pop (700ms to the next round), wrong taps wiggle gently with no penalty, and every round's choices start with different letters so pre-readers can match first letters.
-- **Build the Word** — the word is spoken and each correct letter tile settles into the next empty slot with a `Back.out` pop plus a soft tick; wrong tiles wiggle with no penalty, slots fill strictly left-to-right, and a finished word lingers 1.2s with a chime + Hoot cheer before the next word (3 words, easy-first) appears.
-- **How Many?** — the target numeral pops in large and is spoken aloud; tap the group of objects whose count matches (3 cards at 1–3, then 4 cards up to 5 and 10). Correct taps flash green with a chime and progress dot; wrong taps wiggle with no penalty.
+- **Find the Letter** — the target letter (rendered from the letter SVG texture, ~200px glyph) pops in at round start and is named aloud via SpeechSynthesis (silent when SFX is off or unsupported — visual-only play always works); a speaker-icon button next to it re-names the letter on demand; answer cards squish on press, correct taps chime with a progress-dot pop (700ms to the next round), and wrong taps wiggle gently (±4°, 3 yoyo repeats; ±2°/200ms reduced motion) with no penalty. Win shares the suite celebration plus a first-time sticker reveal.
+- **Find the Word** — the prompt picture pops in and the word is spoken aloud (rate 0.8, silent when SFX is off or unsupported); a speaker-icon button re-hears the word on demand; the 4 word cards in a 2×2 grid squish on press, correct taps chime with a progress-dot pop (700ms to the next round), wrong taps wiggle gently with no penalty, and every round's choices start with different letters so pre-readers can match first letters.
+- **Build the Word** — the word is spoken (a speaker-icon button re-hears it on demand) and each correct letter tile settles into the next empty slot with a `Back.out` pop plus a soft tick; wrong tiles wiggle with no penalty, slots fill strictly left-to-right, and a finished word lingers 1.2s with a chime + Hoot cheer before the next word (3 words, easy-first) appears.
+- **How Many?** — the target numeral pops in large and is spoken aloud (a speaker-icon button re-hears it on demand); tap the group of objects whose count matches (3 cards at 1–3, then 4 cards up to 5 and 10). Correct taps flash green with a chime and progress dot; wrong taps wiggle with no penalty.
 
 ## Parental Controls
 ## Hub Experience
 
 The Hub is the child's landing screen, built for gentle, playful engagement:
 
-- **Staggered entrance** — tiles, labels, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
+- **Tile icons** — every tile shows a distinct storybook icon (80px, `src/assets/svg/ui/tiles/`) above a small text label, so the 11 games are identifiable at a glance without reading (2026-08-06).
+- **Staggered entrance** — tiles, labels, icons, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
 - **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
-- **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned ones are dimmed (30% alpha, 85% scale) so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session. The shelf always shows the active profile's collection and re-renders on profile switch.
+- **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned slots show a dashed empty-slot outline so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session. The shelf always shows the active profile's collection and re-renders on profile switch.
 - **Profile chip** — a kid-tappable avatar chip (96px target) in the top-left opens a textless profile picker; switching profiles re-renders the sticker shelf and play-time state instantly.
 - **Play-time state** — with a daily cap set, a small textless arc at the bottom-center shows remaining budget (cool green; orange ≤5 min), a 2s hourglass nudge precedes game launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge (mascot waves once). All refresh live on profile switch or settings change.
-- **Idle attract** — after ~25s without input, tiles wiggle gently (4° rotation wobble) and a soft two-tone chime (`AudioManager.playIdleCall()`) plays, repeating every ~10s while idle. Any pointer input resets the timer; reduced motion plays the chime without the wiggle.
+- **Idle attract** — after ~25s without input, two tiles wiggle gently (4° rotation wobble; the pick rotates each cue) and a soft two-tone chime (`AudioManager.playIdleCall()`) plays, repeating every ~10s while idle. Any pointer input resets the timer (and resumes the audio context, so the chime is audible on a fresh load); reduced motion plays the chime without the wiggle.
 
 ## Professor Hoot Mascot
 
 Professor Hoot — a round owl in a tiny lab coat — is the app's friendly teacher mascot, rendered from two static SVG poses (`mascot_idle.svg`, `mascot_celebrate.svg`) with tween-only animation (no sprite sheets, no particle emitters, no new audio):
 
 - **Hub** — Hoot sits in the bottom-right corner (0.2× scale, touch-inert, behind gameplay z-order): waves on load, cheers when the visit follows a newly earned sticker (`justEarned` scene data), then settles into a slow bob with a periodic squash-blink idle loop.
-- **All ten games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
+- **All eleven games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
 - **Implementation** — `src/components/Mascot.ts` (wave/cheer/nod/idleLoop + `createCornerMascot()` shared factory). Overlapping cheers retire the in-flight tween and pause the blink loop so rapid pops never stack tweens. Reactions reuse the existing SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`) — no new audio files.
 - **Reduced motion** — the idle loop is disabled and reactions become minimal (gentle wave/nod, pose swap without bounce or sparkle).
+
+## UI & Typography (2026-08-06)
+
+The UI/UX Hardening track (archived at `conductor/archive/uiux-hardening_20260805/`) shipped the consolidated audit remediation:
+
+- **Baloo 2 typography** — a bundled variable font (WOFF2, `public/fonts/baloo2-latin.woff2`, precached, `@font-face` in `src/styles/style.css`) replaces Phaser's default Courier everywhere. `src/utils/typography.ts` provides `FONT_FAMILY`, size presets, and a `textStyle()` helper applied to every Text object.
+- **Find the Letter SVG letters** — the game now renders the target and answer cards from the preloaded `letter_*` SVG textures (256px target / 128px card glyphs), matching the Word games' letterforms.
+- **Sleep glyph** — Pop & Freeze sleeping decoys show a storybook `sleep_zzz` glyph instead of the old "Zzz" text.
+- **Preload branding** — the loading screen shows "Aby's Little Lab" + tagline above the progress bar.
+- **Win sticker timing** — the sticker reveal pops ~400ms after the celebration so the rays/confetti clear first.
 
 ## PWA Release Readiness
 
@@ -174,12 +187,12 @@ Run the release checks with `pnpm run build` followed by `node scripts/validate-
 
 ## Bundle Code Splitting (2026-08-02)
 
-The ten game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
+The eleven game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
 
 - `src/scenes/sceneRegistry.ts` maps each game's scene key to a dynamic `import()` loader. A Hub tile tap awaits `ensureSceneLoaded()` (import + runtime `scene.add()`), and only then starts the crossfade transition.
 - **Phaser 4 limitation:** the `scene` array does not support async/lazy loaders — function entries are invoked with `new` synchronously. Runtime registration after a dynamic import is the supported pattern.
-- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus ten 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
-- **Offline is unchanged:** the service worker precaches every emitted chunk (20 precache entries), so all games still play offline after the first load.
+- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus eleven 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
+- **Offline is unchanged:** the service worker precaches every emitted chunk (28 precache entries incl. the Baloo 2 font), so all games still play offline after the first load.
 - Structural acceptance: the entry chunk contains zero game-scene constructor registrations (verified via `super({ key: ... })` inspection of `dist/assets`).
 
 ## Docker Deployment

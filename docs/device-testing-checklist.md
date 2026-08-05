@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — UI/UX Hardening spot-check (2026-08-06)
+
+- **Target:** local dev/build of the post-1.5.0 codebase (UI/UX Hardening track, archived at `conductor/archive/uiux-hardening_20260805/`)
+- **Devices:** phone + tablet (landscape)
+- **Checks:** all 11 Hub tiles show a distinct storybook icon (textless differentiators) with a smaller secondary label; Baloo 2 rounded font renders everywhere (no Courier); unearned sticker slots show dashed empty-slot outlines; Find the Letter target + cards render the letter SVG textures matching the Word games' letterforms; speaker replay buttons re-speak the prompt in Find the Letter / Find the Word / Build the Word / How Many? and Musical Memory's replay is the same icon; idle-attract chime is audible on a fresh load after any first touch; Settings fonts are larger (30–36px) with the version footer under the title (no install-row overlap) and pinch-zoom works while Settings is open; Preload shows the brand lockup; idle attract wiggles only two tiles; win sticker pops after the confetti; Shadow Match objects are slightly larger
+- **Result:** all items passed
+- **Issues found:** none (no Critical/High/Medium/Low)
+
 ## Execution Record — v1.5.0 (2026-08-05)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.5.0 — Play-Time Limits + Game 11 How Many?)
@@ -106,16 +114,16 @@ pnpm exec serve dist -l 3000
 - [ ] No crashes or freezes during boot
 
 #### Hub Screen
-- [ ] All 10 game tiles are visible
-- [ ] Tiles, labels, and stickers enter with a staggered wave (40ms apart), not all at once
+- [ ] All 11 game tiles are visible (5×3 grid) — each shows a distinct storybook icon above its label
+- [ ] Tiles, labels, icons, and stickers enter with a staggered wave (40ms apart), not all at once
 - [ ] Tiles gently bob on an idle loop after entering
-- [ ] Sticker shelf shows ten 56px thumbnails: earned at full color with shimmer, unearned dimmed (~30% opacity, smaller)
+- [ ] Sticker shelf shows eleven 56px stickers: earned at full color with shimmer, unearned slots show dashed empty-slot outlines
 - [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replaying an earned game shows no highlight
 - [ ] Press and hold a game tile: it squishes and stays; release on the tile springs it back and starts the game; release off the tile does not navigate
-- [ ] After ~25s idle, tiles wiggle and a soft two-tone chime plays, repeating every ~10s; any touch resets the timer
+- [ ] After ~25s idle, two tiles wiggle (rotating pick) and a soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
-- [ ] Protected controls (Settings, all ten game Back buttons, Musical Memory Replay) respond to taps near the visible label (96×96px hit areas — no precision tapping)
+- [ ] Protected controls (Settings, all eleven game Back buttons) plus the replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, Musical Memory) respond to taps near the visible control (96×96px hit areas — no precision tapping)
 - [ ] Professor Hoot mascot sits in the bottom-right corner: waves on load, cheers on a just-earned sticker, then bobs/blinks on the idle loop
 - [ ] Mascot is touch-inert — tapping where Hoot stands still reaches the tile/control underneath
 
@@ -208,8 +216,8 @@ pnpm exec serve dist -l 3000
 
 #### Game 8: Find the Letter (Alphabet Recognition)
 - [ ] Game loads correctly
-- [ ] A large target letter (~200px, bold blue) appears top-center and its name is **spoken aloud** (device TTS voice present)
-- [ ] 4 uppercase letter cards are visible (160px each — exceed the 96px ideal touch target)
+- [ ] A large target letter (rendered from the letter SVG texture, ~200px glyph) appears top-center and its name is **spoken aloud** (device TTS voice present); the speaker button re-names it on demand
+- [ ] 4 uppercase letter cards are visible (160px each, letter glyphs from the letter SVG textures — exceed the 96px ideal touch target)
 - [ ] Letters are distinguished by shape only (identical fill/stroke styling — no color-as-cue)
 - [ ] Tapping the correct card plays the chime, Professor Hoot cheers, and the progress dot pops; next round starts in ~0.7s
 - [ ] Tapping a wrong card wiggles it gently with no penalty and no progression loss
@@ -248,7 +256,7 @@ pnpm exec serve dist -l 3000
 
 #### Sticker System
 - [ ] Stickers persist after app close/reopen
-- [ ] Shelf shows all earned stickers at full color and unearned ones dimmed
+- [ ] Shelf shows all earned stickers at full color and dashed empty-slot outlines for unearned ones
 - [ ] Shelf updates in real-time (just-earned highlight appears on the auto-return visit)
 - [ ] No duplicate stickers awarded
 
@@ -257,7 +265,8 @@ pnpm exec serve dist -l 3000
 - [ ] SFX toggle works (on/off)
 - [ ] Settings persist after app close/reopen
 - [ ] Settings affect audio playback
-- [ ] Version footer shows the deployed version (e.g., `v1.0.0`) at the bottom of the panel and is not tappable
+- [ ] Version footer shows the deployed version (e.g., `v1.0.0`) under the title (clear of the install row) and is not tappable
+- [ ] Settings text is readable on a phone (30–36px fonts) and pinch-zoom works while the panel is open
 - [ ] "Reset Progress" row opens the "Reset all stickers?" confirm modal; Cancel closes it without changes
 - [ ] Reset clears every sticker (Hub shelf dims immediately), preserves BGM/SFX settings, and the row shows "Progress cleared"
 - [ ] Reset persists after app close/reopen (stickers stay cleared, settings stay unchanged)
@@ -271,7 +280,7 @@ pnpm exec serve dist -l 3000
 - [ ] No ring artifacts remain after a cancelled hold or after leaving the scene
 
 #### Mascot Companion
-- [ ] Hoot appears in the same bottom-right corner on the Hub and in all ten games (consistent placement, behind gameplay z-order)
+- [ ] Hoot appears in the same bottom-right corner on the Hub and in all eleven games (consistent placement, behind gameplay z-order)
 - [ ] Hoot cheers on correct actions in every game (pose swap + bounce; bigger cheer + sparkle ring on win)
 - [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small, Pattern Builder, Find the Letter, Find the Word, Build the Word)
 - [ ] Rapid correct taps: Hoot finishes gracefully — no stuck pose, no runaway bounce (in-flight cheer retired)
@@ -354,8 +363,8 @@ pnpm exec serve dist -l 3000
 - [ ] BGM and SFX settings persist after closing and reopening the app
 - [ ] SFX feedback remains synthesized and no removed SFX MP3 URL is requested
 - [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the crossfade transition
-- [ ] Each of the ten games shows at most one short splash/ray for a success or completion action
-- [ ] All ten games play the shared win celebration (rays + confetti) on completion, which cleans itself up
+- [ ] Each of the eleven games shows at most one short splash/ray for a success or completion action
+- [ ] All eleven games play the shared win celebration (rays + confetti) on completion, which cleans itself up; the first-time sticker reveal pops after the confetti (~400ms), not on top of it
 - [ ] Back, Replay, Settings, and Hub tile controls squish on press and spring back on release
 - [ ] No completion effect remains on screen or obscures the next interaction
 - [ ] Reduced-motion mode disables or simplifies the splash/ray
