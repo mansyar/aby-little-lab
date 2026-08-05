@@ -44,6 +44,8 @@
 - **Manifest:** Embedded in config (name: "Aby's Little Lab", short_name: "Aby Lab", display: standalone, orientation: landscape, background_color: #FAF9F6, theme_color: #2B6CB0)
 - **Precache:** All build assets (HTML, JS, CSS, SVGs, and the BGM MP3) precached for full offline play
 
+> **2026-08-05 — Design Update (UI/UX Hardening):** Bundled **Baloo 2** variable font (WOFF2, wght 100–800) at `public/fonts/baloo2-latin.woff2`, declared via `@font-face` in `src/styles/style.css` and added to `vite.config.ts` `includeAssets` so it is PWA-precached. All Text objects share the family through `src/utils/typography.ts` (`FONT_FAMILY`, size presets, and a `textStyle()` helper). Typography-related UI assets added under `src/assets/svg/ui/`: 11 storybook-style `tile_*` icons (Hub tile differentiators), `icon_speaker` (replay/speaker control shared by the speech-driven games), and `sleep_zzz` (Pop & Freeze sleep glyph). Preload SVG count 105 → 118.
+
 ### Phaser Config (`main.ts`)
 
 > **Note:** Phaser 4 is a major version upgrade from Phaser 3. Verify API compatibility during implementation — some class names, method signatures, or behaviors may have changed. Refer to [Phaser 4 docs](https://docs.phaser.io/) for the latest API.
