@@ -1,0 +1,7 @@
+Phase 2 Verification Report (Assets & Number Speech)
+Scope: git diff --name-only 3ac0910..HEAD -> plan.md, speech.test.ts, speech.ts, 10 numeral SVGs, sticker_how_many.svg (SVGs are non-code assets, excluded from test-pairing per protocol).
+Tests: CI=true pnpm test -> 32 files passed, 915 tests passed (910 prior + 5 new speakNumber tests: disabled no-op, number-word mapping 0-10, gentle rate 0.8-1.0, cancels prior utterances, silent fallback).
+Coverage: speakNumber fully exercised by new tests; speech.ts continues at 100% lines (previously fully covered).
+Lint: pnpm run check clean after import-collapse fix 047715e (15 baseline warnings only).
+Manual verification plan delivered: numeral_3.svg and sticker_how_many.svg browser checks; speech/visual wiring deferred to Phase 3 scene.
+User confirmation: yes.
