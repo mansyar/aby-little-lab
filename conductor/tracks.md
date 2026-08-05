@@ -60,8 +60,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Game 11 — How Many? (Counting & Numeral Recognition)** *Link: [./tracks/how-many_20260805/index.md](./tracks/how-many_20260805/index.md)* (Complete)
-
 ---
 
 <!-- Archived tracks are moved to conductor/archive/ -->
