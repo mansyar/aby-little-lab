@@ -1,0 +1,1 @@
+Phase 4 Checkpoint (Audio Resume & Settings Readability) — diff since 20a6099: 5 files +124/-21 (HubScene audio resume, SettingsPanel font bumps + viewport wiring, viewportZoom util + 4 tests, navigation.test.ts resume test). Quality gates: 954 tests pass, lint 15 pre-existing warnings none new. Manual verification pending.
