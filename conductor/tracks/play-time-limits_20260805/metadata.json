@@ -1,0 +1,8 @@
+{
+  "id": "play-time-limits_20260805",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-05",
+  "updatedAt": "2026-08-05",
+  "summary": "Per-profile daily play-time cap with gentle round-finish enforcement, 5-minute warning, Hub hint, and Settings control."
+}
