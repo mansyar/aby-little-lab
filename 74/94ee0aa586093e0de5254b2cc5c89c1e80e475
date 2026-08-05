@@ -1,0 +1,1 @@
+Task 1.1: Bundled Baloo 2 variable font (wght 100-800, latin subset, 33KB) in public/fonts, @font-face registered in style.css with font-display:swap, added to PWA includeAssets for precaching. Task 1.2: Created src/utils/typography.ts (FONT_FAMILY stack + 4 size presets), 5 unit tests pass (TDD Red->Green). Full suite: 939 tests pass, lint clean for new files.
