@@ -12,7 +12,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: "prompt",
-      includeAssets: ["audio/bgm.mp3"],
+      includeAssets: ["audio/bgm.mp3", "fonts/baloo2-latin.woff2"],
       manifest: {
         name: "Aby's Little Lab",
         short_name: "Aby Lab",

@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("/fonts/baloo2-latin.woff2") format("woff2");
+}
+
 * {
   margin: 0;
   padding: 0;
