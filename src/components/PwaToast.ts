@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { isReducedMotion, motionDuration } from "../utils/motion";
+import { textStyle } from "../utils/typography";
 
 const PANEL_COLOR = 0xfff8e7;
 const OUTLINE_COLOR = 0x2d3748;
@@ -50,10 +51,10 @@ export class PwaToast {
         centerX,
         y - 35,
         options.kind === "update" ? "New version ready!" : "Ready to play offline!",
-        {
+        textStyle({
           color: TEXT_COLOR,
           fontSize: "26px",
-        },
+        }),
       )
       .setOrigin(0.5);
     this.objects.push(title);
@@ -88,10 +89,10 @@ export class PwaToast {
     onTap?: () => void,
   ): Phaser.GameObjects.Text {
     const button = this.scene.add
-      .text(x, y, label, {
+      .text(x, y, label, textStyle({
         color,
         fontSize: "24px",
-      })
+      }))
       .setOrigin(0.5);
     button.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(

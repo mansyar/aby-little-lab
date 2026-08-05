@@ -13,6 +13,7 @@ import {
   resetProgress,
   setPlayTimeLimit,
 } from "../utils/storage";
+import { textStyle } from "../utils/typography";
 
 const BACKDROP_COLOR = 0x000000;
 const BACKDROP_ALPHA = 0.6;
@@ -85,10 +86,10 @@ export class SettingsPanel {
     );
     this.objects.push(
       scene.add
-        .text(centerX, centerY - 105, "Settings", {
+        .text(centerX, centerY - 105, "Settings", textStyle({
           color: "#2d3748",
           fontSize: "32px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
@@ -98,10 +99,10 @@ export class SettingsPanel {
     this.createInstallRow(centerX, centerY + 255);
     this.objects.push(
       scene.add
-        .text(centerX, centerY + 230, `v${__APP_VERSION__}`, {
+        .text(centerX, centerY + 230, `v${__APP_VERSION__}`, textStyle({
           color: DISABLED_COLOR,
           fontSize: "18px",
-        })
+        }))
         .setOrigin(0.5),
     );
   }
@@ -124,10 +125,10 @@ export class SettingsPanel {
     enabled: boolean,
   ): Phaser.GameObjects.Text {
     const toggle = this.scene.add
-      .text(x, y, `${label}: ${enabled ? "ON" : "OFF"}`, {
+      .text(x, y, `${label}: ${enabled ? "ON" : "OFF"}`, textStyle({
         color: enabled ? ENABLED_COLOR : DISABLED_COLOR,
         fontSize: "28px",
-      })
+      }))
       .setOrigin(0.5);
     toggle.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
@@ -170,10 +171,10 @@ export class SettingsPanel {
 
     const label = state === "installable" ? "Install App" : "How to Install";
     const button = this.scene.add
-      .text(x, y, label, {
+      .text(x, y, label, textStyle({
         color: PRIMARY_COLOR,
         fontSize: "24px",
-      })
+      }))
       .setOrigin(0.5);
     button.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
@@ -197,10 +198,10 @@ export class SettingsPanel {
   /** Adds the parental "Profiles" row that opens the profile manager overlay. */
   private createProfilesRow(x: number, y: number): void {
     const row = this.scene.add
-      .text(x, y, "Profiles", {
+      .text(x, y, "Profiles", textStyle({
         color: PRIMARY_COLOR,
         fontSize: "24px",
-      })
+      }))
       .setOrigin(0.5);
     row.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
@@ -240,10 +241,10 @@ export class SettingsPanel {
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY - 250, "Profiles", {
+        .text(centerX, centerY - 250, "Profiles", textStyle({
           color: "#2d3748",
           fontSize: "32px",
-        })
+        }))
         .setOrigin(0.5),
     );
 
@@ -257,10 +258,10 @@ export class SettingsPanel {
       avatar.setScale(96 / AVATAR_TEXTURE_SIZE);
       this.overlayObjects.push(avatar);
       const remove = this.scene.add
-        .text(centerX + 60, y, "Delete", {
+        .text(centerX + 60, y, "Delete", textStyle({
           color: DANGER_COLOR,
           fontSize: "22px",
-        })
+        }))
         .setOrigin(0.5);
       remove.setInteractive({
         hitArea: new Phaser.Geom.Rectangle(
@@ -276,10 +277,10 @@ export class SettingsPanel {
 
       const limit = getPlayTime(profile.id).limitMinutes;
       const chip = this.scene.add
-        .text(centerX - 10, y, `Play Time: ${playTimeLabel(limit)}`, {
+        .text(centerX - 10, y, `Play Time: ${playTimeLabel(limit)}`, textStyle({
           color: PRIMARY_COLOR,
           fontSize: "18px",
-        })
+        }))
         .setOrigin(0.5);
       chip.setInteractive({
         hitArea: new Phaser.Geom.Rectangle(
@@ -306,19 +307,19 @@ export class SettingsPanel {
     if (profiles.length >= MAX_PROFILES) {
       this.overlayObjects.push(
         this.scene.add
-          .text(centerX, centerY + 116, "Profile limit reached", {
+          .text(centerX, centerY + 116, "Profile limit reached", textStyle({
             color: DISABLED_COLOR,
             fontSize: "24px",
-          })
+          }))
           .setOrigin(0.5),
       );
     } else {
       this.overlayObjects.push(
         this.scene.add
-          .text(centerX, centerY + 96, "Add Profile", {
+          .text(centerX, centerY + 96, "Add Profile", textStyle({
             color: PRIMARY_COLOR,
             fontSize: "22px",
-          })
+          }))
           .setOrigin(0.5),
       );
       const totalWidth = available.length * 80 + (available.length - 1) * 36;
@@ -372,18 +373,18 @@ export class SettingsPanel {
     );
     this.modalObjects.push(
       this.scene.add
-        .text(centerX, centerY - 105, "Delete profile?", {
+        .text(centerX, centerY - 105, "Delete profile?", textStyle({
           color: "#2d3748",
           fontSize: "32px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.modalObjects.push(
       this.scene.add
-        .text(centerX, centerY - 25, "This profile's stickers will be lost.", {
+        .text(centerX, centerY - 25, "This profile's stickers will be lost.", textStyle({
           color: "#2d3748",
           fontSize: "24px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.modalObjects.push(
@@ -430,41 +431,41 @@ export class SettingsPanel {
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY - 105, "Install on iOS", {
+        .text(centerX, centerY - 105, "Install on iOS", textStyle({
           color: "#2d3748",
           fontSize: "32px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY - 25, "1. Tap the Share icon", {
+        .text(centerX, centerY - 25, "1. Tap the Share icon", textStyle({
           color: "#2d3748",
           fontSize: "24px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY + 35, "2. Choose Add to Home Screen", {
+        .text(centerX, centerY + 35, "2. Choose Add to Home Screen", textStyle({
           color: "#2d3748",
           fontSize: "24px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY + 95, "3. Open Aby's Little Lab offline", {
+        .text(centerX, centerY + 95, "3. Open Aby's Little Lab offline", textStyle({
           color: "#2d3748",
           fontSize: "24px",
-        })
+        }))
         .setOrigin(0.5),
     );
     const close = this.scene.add
-      .text(centerX, centerY + 175, "Close", {
+      .text(centerX, centerY + 175, "Close", textStyle({
         color: PRIMARY_COLOR,
         fontSize: "24px",
-      })
+      }))
       .setOrigin(0.5);
     close.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
@@ -488,10 +489,10 @@ export class SettingsPanel {
   /** Adds the parental "Reset Progress" row that clears all stickers. */
   private createResetRow(x: number, y: number): void {
     const row = this.scene.add
-      .text(x, y, "Reset Progress", {
+      .text(x, y, "Reset Progress", textStyle({
         color: DANGER_COLOR,
         fontSize: "24px",
-      })
+      }))
       .setOrigin(0.5);
     row.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
@@ -525,18 +526,18 @@ export class SettingsPanel {
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY - 105, "Reset all stickers?", {
+        .text(centerX, centerY - 105, "Reset all stickers?", textStyle({
           color: "#2d3748",
           fontSize: "32px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
       this.scene.add
-        .text(centerX, centerY - 25, "All stickers will be cleared.", {
+        .text(centerX, centerY - 25, "All stickers will be cleared.", textStyle({
           color: "#2d3748",
           fontSize: "24px",
-        })
+        }))
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
@@ -560,10 +561,10 @@ export class SettingsPanel {
     onClick: () => void,
   ): Phaser.GameObjects.Text {
     const button = this.scene.add
-      .text(x, y, label, {
+      .text(x, y, label, textStyle({
         color,
         fontSize: "24px",
-      })
+      }))
       .setOrigin(0.5);
     button.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(

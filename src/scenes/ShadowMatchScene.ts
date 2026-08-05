@@ -9,6 +9,7 @@ import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
+import { textStyle } from "../utils/typography";
 
 /** Y position for shadow silhouettes (top area). */
 const SHADOW_Y = 200;
@@ -115,10 +116,10 @@ export class ShadowMatchScene extends Phaser.Scene {
     sceneEntrance(this);
     this.mascot = createCornerMascot(this);
 
-    const backButton = this.add.text(20, 20, "← Back", {
+    const backButton = this.add.text(20, 20, "← Back", textStyle({
       fontSize: "24px",
       color: "#2d3748",
-    });
+    }));
     backButton.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,

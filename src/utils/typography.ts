@@ -21,3 +21,19 @@ export const FONT_SIZE_MEDIUM = 24;
 export const FONT_SIZE_LARGE = 32;
 /** Large parent-facing rows and overlay instructions. */
 export const FONT_SIZE_XLARGE = 40;
+
+/**
+ * Returns a Phaser Text style object with the app font family applied.
+ *
+ * Pass the caller's own style props (fontSize, color, ...) and the bundled
+ * Baloo 2 family is prepended automatically. Without this, Phaser falls back
+ * to its default Courier font.
+ *
+ * @example
+ * this.add.text(x, y, "Hello", textStyle({ fontSize: "24px", color: "#2d3748" }))
+ */
+export function textStyle(
+  style: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return { fontFamily: FONT_FAMILY, ...style };
+}

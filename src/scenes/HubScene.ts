@@ -17,6 +17,7 @@ import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
+import { textStyle } from "../utils/typography";
 import {
   getActiveProfile,
   getPlayTime,
@@ -233,10 +234,10 @@ export class HubScene extends Phaser.Scene {
         }
       });
 
-      const label = this.add.text(x, y, GAME_TILES[i].label, {
+      const label = this.add.text(x, y, GAME_TILES[i].label, textStyle({
         fontSize: "18px",
         color: "#ffffff",
-      });
+      }));
       label.setOrigin(0.5);
 
       this.animateEntrance([tile, label], () => {
@@ -265,10 +266,10 @@ export class HubScene extends Phaser.Scene {
     });
     this.scheduleIdleAttract();
 
-    const settingsButton = this.add.text(this.cameras.main.width - 20, 20, "Settings", {
+    const settingsButton = this.add.text(this.cameras.main.width - 20, 20, "Settings", textStyle({
       fontSize: "18px",
       color: "#2d3748",
-    });
+    }));
     settingsButton.setOrigin(1, 0);
     settingsButton.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),

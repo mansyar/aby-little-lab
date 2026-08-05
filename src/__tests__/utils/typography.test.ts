@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { FONT_FAMILY, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_SIZE_SMALL, FONT_SIZE_XLARGE } from "../../utils/typography";
+import {
+  FONT_FAMILY,
+  FONT_SIZE_LARGE,
+  FONT_SIZE_MEDIUM,
+  FONT_SIZE_SMALL,
+  FONT_SIZE_XLARGE,
+  textStyle,
+} from "../../utils/typography";
 
 describe("typography utility", () => {
   describe("FONT_FAMILY", () => {
@@ -29,6 +36,24 @@ describe("typography utility", () => {
       expect(FONT_SIZE_SMALL).toBeLessThan(FONT_SIZE_MEDIUM);
       expect(FONT_SIZE_MEDIUM).toBeLessThan(FONT_SIZE_LARGE);
       expect(FONT_SIZE_LARGE).toBeLessThan(FONT_SIZE_XLARGE);
+    });
+  });
+
+  describe("textStyle", () => {
+    it("applies the app font family", () => {
+      expect(textStyle()).toEqual({ fontFamily: FONT_FAMILY });
+    });
+
+    it("preserves the caller's style props", () => {
+      expect(textStyle({ fontSize: "24px", color: "#2d3748" })).toEqual({
+        fontFamily: FONT_FAMILY,
+        fontSize: "24px",
+        color: "#2d3748",
+      });
+    });
+
+    it("does not override an explicit fontFamily", () => {
+      expect(textStyle({ fontFamily: "serif" })).toEqual({ fontFamily: "serif" });
     });
   });
 });
