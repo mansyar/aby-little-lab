@@ -1,0 +1,8 @@
+Phase 3 Verification Report (Scene Implementation)
+Scope: git diff --name-only a55f2d7..HEAD -> plan.md, howManyScene.test.ts (new), HowManyScene.ts (new), profileLogic.ts (GAME_IDS + how-many), types/index.ts (GameId union).
+Tests: CI=true pnpm test -> 33 files passed, 927 tests passed (915 prior + 12 new HowMany scene tests).
+Coverage: HowManyScene fully exercised by the 12 scene tests (layout, TTS on/off, correct/wrong taps, win flow, relaunch input-lock reset, parental lock, reduced motion); project thresholds unchanged.
+Lint: pnpm run check clean at baseline 15 warnings, 0 errors.
+Notes: GameId union + GAME_IDS backfill pulled forward from Phase 4 because scene tests exercise hasSticker('how-many') (committed separately as 351edfe).
+Manual verification plan delivered; browser checks deferred to Phase 4 integration when the Hub tile launches the scene.
+User confirmation: yes.
