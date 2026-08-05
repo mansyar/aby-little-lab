@@ -800,6 +800,17 @@ describe("SettingsPanel play time", () => {
     expect(getPlayTime("p1").limitMinutes).toBe(15);
   });
 
+  it("notifies the hub when a chip changes the limit", () => {
+    const onProgressReset = vi.fn();
+    const scene = createScene();
+    new SettingsPanel(scene as never, undefined, onProgressReset);
+    openProfilesOverlay(scene);
+
+    triggerPointerdown(findTextByLabel(scene, "Play Time: Off") as MockGameObject);
+
+    expect(onProgressReset).toHaveBeenCalledTimes(1);
+  });
+
   it("changes only the tapped profile's limit", () => {
     setPlayTimeLimit("p1", 30);
     addProfile("dog");

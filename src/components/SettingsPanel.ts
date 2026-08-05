@@ -293,9 +293,12 @@ export class SettingsPanel {
       chip.on("pointerdown", () => {
         const current = getPlayTime(profile.id).limitMinutes;
         const index = PLAY_TIME_OPTIONS.indexOf(current);
-        const next = PLAY_TIME_OPTIONS[(index + 1) % PLAY_TIME_OPTIONS.length];
+        const safeIndex = index === -1 ? 0 : index;
+        const next = PLAY_TIME_OPTIONS[(safeIndex + 1) % PLAY_TIME_OPTIONS.length];
         setPlayTimeLimit(profile.id, next);
         chip.setText(`Play Time: ${playTimeLabel(next)}`);
+        // Keep the Hub's indicator and lock state in sync with the new limit.
+        this.onProgressReset?.();
       });
       this.overlayObjects.push(chip);
     });
