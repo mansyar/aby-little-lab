@@ -269,7 +269,9 @@ type GameId =
   | "musical-memory"
   | "big-small"
   | "pattern-builder"
-  | "alphabet-match";
+  | "alphabet-match"
+  | "word-match"
+  | "word-builder";
 
 interface StickerData {
   earned: boolean;
@@ -288,6 +290,42 @@ interface AppStorage {
 ```
 
 **Migration (2026-08-02):** `load()` merges saved data over defaults per key (`stickers` and `settings`), so saves created before a game shipped keep working — every `GameId` always resolves to an entry (new games backfill as unearned) and existing progress/settings are preserved. Empty storage and corrupted JSON fall back to defaults.
+
+**Key:** `abby-little-lab:v2` (profile-aware schema, 2026-08-04)
+
+```typescript
+interface StickerData {
+  earned: boolean;
+  earnedAt: string | null; // ISO timestamp, null if not earned
+}
+
+interface Settings {
+  bgmEnabled: boolean;
+  sfxEnabled: boolean;
+}
+
+interface PlayTime {
+  limitMinutes: number | null; // daily cap in minutes; null = unlimited (default)
+  usedMinutes: number; // minutes used toward the limit on lastUsedDate
+  lastUsedDate: string; // local "YYYY-MM-DD" key; usage resets when it changes
+}
+
+interface Profile {
+  id: string; // "p1"..."p4"
+  avatarId: AvatarId; // "cat" | "dog" | "pig" | "frog" | "duck" | "bear"
+  createdAt: string; // ISO timestamp
+  stickers: Record<GameId, StickerData>;
+  playTime: PlayTime; // per-profile daily budget (2026-08-05)
+}
+
+interface ProfileV2 {
+  activeProfileId: string;
+  profiles: Profile[];
+  settings: Settings; // device-level, shared by all profiles
+}
+```
+
+**Migration (2026-08-04):** `ensureV2()` migrates a `v1` save into the first profile (`p1`) on first access — the `v1` key is never destroyed, and settings stay global. `normalizeV2()` backfills missing `stickers` keys and per-profile `playTime` fields (2026-08-05) so pre-feature saves work untouched. Storage lives in `src/utils/storage.ts` (thin facade over the pure logic in `src/game/profileLogic.ts` and `src/game/playTimeLogic.ts`).
 
 ### Settings Panel
 
@@ -323,6 +361,8 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `big-small` | Game 6 |
 | `pattern-builder` | Game 7 |
 | `alphabet-match` | Game 8 |
+| `word-match` | Game 9 |
+| `word-builder` | Game 10 |
 
 ### Example State
 
@@ -603,11 +643,11 @@ The Mascot Companion track (archived at `conductor/archive/mascot-companion_2026
 - `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `wave()` after the scene entrance, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
 - **Scene wiring:** Hub waves on load, cheers on `justEarned`; all eight games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
 
-Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 37 integration tests in `src/__tests__/scenes/navigation.test.ts` (7 Hub + 29 game-scene + 1 mid-air edge case).
+Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 317 integration tests in `src/__tests__/scenes/navigation.test.ts` (Hub navigation, profile switcher, PWA toasts, mascot, engagement/idle, sticker shelf, touch regression, and play-time enforcement).
 
 ### Test coverage
 
-706 tests across 25 files; all motion, transitions, completion-effect, drag-juice, press-feedback, speech, and mascot utilities at 100% coverage; scenes ≥ 93% lines; `sceneRegistry.ts` reports low lines because the eight dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project ~96%+ lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+897 tests across 31 files (2026-08-05); all motion, transitions, completion-effect, drag-juice, press-feedback, speech, play-time, and mascot utilities at 100% coverage; scenes ≥ 93% lines; `sceneRegistry.ts` reports low lines because the dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project ~98% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
 
 ---
 
@@ -632,3 +672,4 @@ Production is hosted on a private VPS (Docker + Nginx) managed by **Coolify**, w
 - The workflow declares explicit `permissions: contents: read` and pins action majors (`checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6`) to avoid deprecated runner runtimes.
 - **Release history (executed end-to-end):** **v1.1.0** (2026-08-02) — first tag-based release through this pipeline. `npm version 1.1.0 --no-git-tag-version` + `chore(release): Bump version to 1.1.0`; annotated tag `v1.1.0`; push to `master` → CI run `30745388316` (Quality Gates 52s ✓, Deploy to Coolify 5s ✓); live verification via entry-chunk hash match (`index-BRXHqYbm.js`) and `1.1.0` present in the served bundle. Chore track archived at `conductor/archive/release-1.1.0-mechanics_20260802/`.
 - **v1.4.0** (2026-08-04) — Multi-Kid Profiles release via the same pipeline. `npm version 1.4.0 --no-git-tag-version` + `chore(release): Bump version to 1.4.0` (`6464d8a`); release branch `release/v1.4.0` → PR → merge to `master` (Quality Gates → Deploy to Coolify); annotated tag `v1.4.0`; live verification via entry-chunk hash match and `1.4.0` in the served bundle; device testing 2026-08-04 on iPad, Android tablet, iPhone, Android phone (all passed). Release track archived at `conductor/archive/release-1.4.0_20260804/` on completion of the track.
+- **Play-Time Limits (2026-08-05)** — feature track implemented on `master` (not yet released; pending a release-execution track). Adds a per-profile daily cap (Off/15/30/45/60 min) configured via a chip in Settings → Profiles; session accounting (`startPlaySession`/`endPlaySession` in `src/game/playTimeLogic.ts`, `recordPlayTime` in `src/utils/storage.ts`) accrues usage from Hub tile tap to Hub return; Hub renders a textless remaining-budget arc (warm ≤5 min), a 2s hourglass nudge delays launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge. Off by default; no mid-game cutoffs; reduced-motion aware. Track archived at `conductor/archive/play-time-limits_20260805/`.

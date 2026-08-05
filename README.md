@@ -1,6 +1,6 @@
 # Aby's Little Lab
 
-An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Eight mini-games targeting cognitive, motor, literacy, and reasoning milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
+An ad-free, distraction-free developmental game suite for preschoolers aged 3-5. Ten mini-games targeting cognitive, motor, literacy, and reasoning milestones, built with Phaser 4 + TypeScript + Vite as an installable PWA.
 
 ## Tech Stack
 
@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **706 tests across 25 files**, ~96.7% lines / ~98.2% statements coverage (all shared motion/feedback/storage/transition utilities at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **897 tests across 31 files**, ~98% lines coverage (all shared motion/feedback/storage/transition/play-time utilities at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
 
 ## Code Quality
 
@@ -74,8 +74,8 @@ src/
 ├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 10 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
 ├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter/word playthrough & round generation)
-├── types/                 # Shared interfaces (GameId, StickerData, Settings, AppStorage)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, profileLogic, playTimeLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter/word playthrough, profile CRUD, per-profile daily play-time budgets)
+├── types/                 # Shared interfaces (GameId, StickerData, Settings, PlayTime, AppStorage, Profile, ProfileV2)
 ├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
 ├── assets/                # SVG assets bundled into the game
 ├── styles/                # Global CSS
@@ -117,6 +117,8 @@ Parent-facing additions (all behind the 3-second hold, never visible to the chil
 - **Version footer** — a muted `v{version}` readout at the bottom of the panel, sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
 - **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all ten stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
 - **Install control** — a context-aware row: "Install App" where a browser prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, hidden once the app is installed (see PWA Release Readiness).
+- **Profile manager** — up to 4 kid profiles, each with its own sticker collection; the Hub's top-left avatar chip (kid-tappable) switches profiles without parental input, while adding/removing profiles happens behind the hold (two-step delete). Profiles use 6 textless animal avatars (cat, dog, pig, frog, duck, bear) reusing existing art; old saves auto-migrate to the first profile.
+- **Play-time limits** — a per-profile daily cap (Off/15/30/45/60 minutes) via a chip in Profiles; usage accrues while games run and resets each day. The Hub shows a textless remaining-budget arc (turns orange ≤5 min), a 2s hourglass nudge delays launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge — no mid-game cutoffs, off by default (2026-08-05).
 
 ## Motion & Feedback
 
@@ -147,7 +149,9 @@ The Hub is the child's landing screen, built for gentle, playful engagement:
 
 - **Staggered entrance** — tiles, labels, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
 - **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
-- **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned ones are dimmed (30% alpha, 85% scale) so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session.
+- **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned ones are dimmed (30% alpha, 85% scale) so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session. The shelf always shows the active profile's collection and re-renders on profile switch.
+- **Profile chip** — a kid-tappable avatar chip (96px target) in the top-left opens a textless profile picker; switching profiles re-renders the sticker shelf and play-time state instantly.
+- **Play-time state** — with a daily cap set, a small textless arc at the bottom-center shows remaining budget (cool green; orange ≤5 min), a 2s hourglass nudge precedes game launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge (mascot waves once). All refresh live on profile switch or settings change.
 - **Idle attract** — after ~25s without input, tiles wiggle gently (4° rotation wobble) and a soft two-tone chime (`AudioManager.playIdleCall()`) plays, repeating every ~10s while idle. Any pointer input resets the timer; reduced motion plays the chime without the wiggle.
 
 ## Professor Hoot Mascot
@@ -155,7 +159,7 @@ The Hub is the child's landing screen, built for gentle, playful engagement:
 Professor Hoot — a round owl in a tiny lab coat — is the app's friendly teacher mascot, rendered from two static SVG poses (`mascot_idle.svg`, `mascot_celebrate.svg`) with tween-only animation (no sprite sheets, no particle emitters, no new audio):
 
 - **Hub** — Hoot sits in the bottom-right corner (0.2× scale, touch-inert, behind gameplay z-order): waves on load, cheers when the visit follows a newly earned sticker (`justEarned` scene data), then settles into a slow bob with a periodic squash-blink idle loop.
-- **All eight games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
+- **All ten games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
 - **Implementation** — `src/components/Mascot.ts` (wave/cheer/nod/idleLoop + `createCornerMascot()` shared factory). Overlapping cheers retire the in-flight tween and pause the blink loop so rapid pops never stack tweens. Reactions reuse the existing SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`) — no new audio files.
 - **Reduced motion** — the idle loop is disabled and reactions become minimal (gentle wave/nod, pose swap without bounce or sparkle).
 
@@ -167,11 +171,11 @@ Run the release checks with `pnpm run build` followed by `node scripts/validate-
 
 ## Bundle Code Splitting (2026-08-02)
 
-The eight game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
+The ten game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
 
 - `src/scenes/sceneRegistry.ts` maps each game's scene key to a dynamic `import()` loader. A Hub tile tap awaits `ensureSceneLoaded()` (import + runtime `scene.add()`), and only then starts the crossfade transition.
 - **Phaser 4 limitation:** the `scene` array does not support async/lazy loaders — function entries are invoked with `new` synchronously. Runtime registration after a dynamic import is the supported pattern.
-- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus eight 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
+- **Build output:** a single entry chunk (~1.44 MB / 372 KB gzip — Phaser dominates the shell) plus ten 3–5 KB game-scene chunks that are fetched only on the first tap of each game. Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`).
 - **Offline is unchanged:** the service worker precaches every emitted chunk (20 precache entries), so all games still play offline after the first load.
 - Structural acceptance: the entry chunk contains zero game-scene constructor registrations (verified via `super({ key: ... })` inspection of `dist/assets`).
 
@@ -206,6 +210,8 @@ One-time setup:
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
+| **v1.4.0** | 2026-08-04 | Multi-Kid Profiles — up to 4 kid profiles with own sticker collections, 6 textless animal avatars, parental-gated profile management, automatic v1 migration | `v1.4.0` |
+| **v1.3.0** | 2026-08-04 | First Words word pool expansion (9→18 words, no shared first letters) + replay reliability fix | `v1.3.0` |
 | **v1.2.1** | 2026-08-03 | Build the Word slot letter size fix; deployed via the automated pipeline (CI run `30800890115`, Quality Gates + Coolify) | `v1.2.1` |
 | **v1.2.0** | 2026-08-03 | Games 9 & 10 — Find the Word + Build the Word (first words literacy); 5×2 hub grid; deployed via the automated pipeline (CI run `30797682029`, Quality Gates + Coolify) | `v1.2.0` |
 | **v1.1.0** | 2026-08-02 | Game 8 — Find the Letter (letter recognition + TTS); deployed via the automated pipeline (CI run `30745388316`, Quality Gates + Coolify) | `v1.1.0` |
@@ -219,6 +225,8 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [TDD.md](docs/TDD.md) - Technical Design Document
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
+- [release-notes-v1.4.0.md](docs/release-notes-v1.4.0.md) - v1.4.0 release notes (Multi-Kid Profiles, released)
+- [release-notes-v1.3.0.md](docs/release-notes-v1.3.0.md) - v1.3.0 release notes (First Words word pool expansion, released)
 - [release-notes-v1.2.1.md](docs/release-notes-v1.2.1.md) - v1.2.1 release notes (Build the Word slot letter fix, released)
 - [release-notes-v1.2.0.md](docs/release-notes-v1.2.0.md) - v1.2.0 release notes (Games 9 & 10 — First Words, released)
 - [release-notes-v1.1.0.md](docs/release-notes-v1.1.0.md) - v1.1.0 release notes (Game 8 — Find the Letter, released)
