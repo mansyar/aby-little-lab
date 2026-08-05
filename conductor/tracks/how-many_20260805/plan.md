@@ -11,10 +11,10 @@
 
 ## Phase 2 — Assets & Number Speech
 
-- [ ] Task: Create 10 numeral SVGs `src/assets/svg/numbers/numeral_0.svg`…`numeral_9.svg` (512×512, `#2B6CB0` fill, `#2D3748` stroke, identical styling)
-- [ ] Task: Create `sticker_how_many.svg` (numeral "3" + star sparkle on cream badge)
-- [ ] Task: Write failing test for `speakNumber(n)` in `src/utils/speech.ts` (number words, SFX-gated, silent fallback)
-- [ ] Task: Implement `speakNumber` via shared `speakText` (en-US, rate ~0.9, cancels prior utterances)
+- [x] Task: Create 10 numeral SVGs `src/assets/svg/numbers/numeral_0.svg`…`numeral_9.svg` (512×512, `#2B6CB0` fill, `#2D3748` stroke, identical styling) *(4d61c82)*
+- [x] Task: Create `sticker_how_many.svg` (numeral "3" + star sparkle on cream badge) *(4d61c82)*
+- [x] Task: Write failing test for `speakNumber(n)` in `src/utils/speech.ts` (number words, SFX-gated, silent fallback) *(4501c6b)*
+- [x] Task: Implement `speakNumber` via shared `speakText` (en-US, rate ~0.9, cancels prior utterances) *(7c69b54)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Scene Implementation
