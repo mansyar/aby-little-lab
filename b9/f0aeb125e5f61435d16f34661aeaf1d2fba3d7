@@ -1,0 +1,1 @@
+Phase 2: SettingsPanel play-time chip per profile row (Off/15/30/45/60 cycle), persists via setPlayTimeLimit. 876 tests green, SettingsPanel 94.8% stmts, biome clean.
