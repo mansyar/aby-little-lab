@@ -70,7 +70,7 @@
 - [x] **Task 4.3: Pinch-zoom on Settings overlay only** (`cf09de5`)
   - [x] Temporarily relax `user-scalable=no`/`maximum-scale=1.0` in the meta viewport while Settings is open; restore on close (util or inline handler)
   - [x] Add unit test for the zoom-toggle util
-- [ ] **Task: Phase 4 Verification & Checkpoint (refer to workflow.md)**
+- [x] **Task: Phase 4 Verification & Checkpoint (refer to workflow.md)** — [checkpoint: `41de4ba`]
 
 ## Phase 5 — Polish Items
 
