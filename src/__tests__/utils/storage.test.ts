@@ -1,5 +1,5 @@
-import type { AppStorage, GameId } from "../../types";
 import { todayKey } from "../../game/playTimeLogic";
+import type { AppStorage, GameId } from "../../types";
 import {
   addProfile,
   deleteProfile,

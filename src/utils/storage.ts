@@ -1,3 +1,4 @@
+import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
 import {
   addProfile as addProfileToV2,
   availableAvatarIds,
@@ -7,7 +8,6 @@ import {
   normalizeV2,
   switchActiveProfile,
 } from "../game/profileLogic";
-import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
 import type {
   AppStorage,
   AvatarId,
