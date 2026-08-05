@@ -237,6 +237,17 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
 - [x] Device testing on v1.4.0 — **executed 2026-08-04 on iPad, Android tablet, iPhone, Android phone, all items passed** (profiles UI, sticker isolation, migration)
 
+### Step 7g: Verify Deployment — v1.5.0 (2026-08-05)
+- [x] Direct push to `master` (`5b6924a`) — no release branch (user decision; pipeline gates on `master` push)
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `30994101415`** (Quality Gates ✓; Deploy first attempt failed with HTTP 520 from the Coolify webhook — transient Cloudflare upstream error, job re-run `92267221829` succeeded 6s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-Bgbr44nH.js` matches fresh 1.5.0 local build exactly)
+- [x] Version footer data — `1.5.0` embedded in served bundle; no stale `1.4.0` string
+- [x] Game 11 live — `how-many` + `HowMany` present in served entry; lazy chunk `HowManyScene-Deh9UyzD.js` 200 (matches local chunk)
+- [x] Play-Time Limits live — `Play Time` chip label + `usedMinutes`/`limitMinutes` storage fields confirmed in served entry
+- [x] Service worker + manifest served — `sw.js` 200 (precaches `index-Bgbr44nH.js`), `manifest.webmanifest` 200
+- [ ] Device testing on v1.5.0 — **pending** (recorded in `docs/device-testing-checklist.md`; execute against live URL: 11-tile hub, How Many? end-to-end, play-time arc/nudge/Time's Up)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
