@@ -13,12 +13,12 @@
   - [x] Write `src/utils/typography.ts` — export `FONT_FAMILY` and font-size presets
   - [x] Write tests `src/__tests__/utils/typography.test.ts` verifying constants exist and reference the font name (TDD: test first)
   - [x] Verify `CI=true pnpm test` (new tests fail before implementation)
-- [ ] **Task 1.3: Apply font family across all Text objects**
-  - [ ] Add `fontFamily: FONT_FAMILY` to Text style objects in HubScene (tile labels, Settings, profile picker)
-  - [ ] Apply in SettingsPanel (all rows/overlays/toasts)
-  - [ ] Apply in all 11 game scenes (back button, prompts, dots labels, Zzz → replaced in Task 1.4)
-  - [ ] Apply in PwaToast
-  - [ ] Run existing tests + lint (`CI=true pnpm test`, `pnpm run check`) — update snapshots if any
+- [x] **Task 1.3: Apply font family across all Text objects** — `35de574`
+  - [x] Add `fontFamily: FONT_FAMILY` to Text style objects in HubScene (tile labels, Settings, profile picker)
+  - [x] Apply in SettingsPanel (all rows/overlays/toasts)
+  - [x] Apply in all 11 game scenes (back button, prompts, dots labels, Zzz → replaced in Task 1.4)
+  - [x] Apply in PwaToast
+  - [x] Run existing tests + lint (`CI=true pnpm test`, `pnpm run check`) — update snapshots if any
 - [ ] **Task 1.4: Replace PopFreeze "Zzz" with SVG sleep glyph**
   - [ ] Author `sleep_zzz.svg` in `src/assets/svg/ui/`
   - [ ] Register in PreloadScene; render image in PopFreezeScene (replaces text object)
