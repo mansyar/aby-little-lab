@@ -19,8 +19,8 @@
 
 ## Phase 2 — Settings UI (Play Time chip in Profiles overlay)
 
-- [ ] Task: TDD — extend `src/__tests__/components/SettingsPanel.test.ts` (chip renders per profile, cycles Off→15→30→45→60→Off, persists via storage, overlay refresh)
-- [ ] Task: Implement Play Time chip inline in `SettingsPanel.openProfilesOverlay()` (per profile row, no panel height growth)
+- [x] Task: TDD — extend `src/__tests__/components/SettingsPanel.test.ts` (chip renders per profile, cycles Off→15→30→45→60→Off, persists via storage, overlay refresh) *(b9f0aeb)*
+- [x] Task: Implement Play Time chip inline in `SettingsPanel.openProfilesOverlay()` (per profile row, no panel height growth) *(b9f0aeb)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Hub Enforcement & Session Accounting
