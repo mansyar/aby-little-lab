@@ -351,6 +351,7 @@ export class PopFreezeScene extends Phaser.Scene {
       scaleX: stickerScale,
       scaleY: stickerScale,
       duration: motionDuration(300, 180),
+      delay: motionDuration(400, 250),
       ease: "Back.out",
     });
   }

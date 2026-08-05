@@ -397,6 +397,7 @@ export class WordBuilderScene extends Phaser.Scene {
       scaleX: STICKER_SCALE,
       scaleY: STICKER_SCALE,
       duration: motionDuration(WIN_TWEEN_DURATION, 180),
+      delay: motionDuration(400, 250),
       ease: "Back.out",
     });
   }

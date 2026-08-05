@@ -18,7 +18,7 @@ const SHADOW_Y = 200;
 const OBJECT_Y = 600;
 
 /** Display size for objects and shadows (ideal 96x96px touch target per spec). */
-const DISPLAY_SIZE = 96;
+const DISPLAY_SIZE = 112;
 
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 120;
@@ -330,6 +330,7 @@ export class ShadowMatchScene extends Phaser.Scene {
       scaleX: stickerScale,
       scaleY: stickerScale,
       duration: motionDuration(300, 180),
+      delay: motionDuration(400, 250),
       ease: "Back.out",
     });
   }

@@ -103,7 +103,7 @@ export class SettingsPanel {
     this.createInstallRow(centerX, centerY + 255);
     this.objects.push(
       scene.add
-        .text(centerX, centerY + 230, `v${__APP_VERSION__}`, textStyle({
+        .text(centerX, centerY - 75, `v${__APP_VERSION__}`, textStyle({
           color: DISABLED_COLOR,
           fontSize: "24px",
         }))

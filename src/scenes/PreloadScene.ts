@@ -118,6 +118,7 @@ import tileShapeSorterSvg from "../assets/svg/ui/tiles/tile_shape_sorter.svg?raw
 import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
 import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
+import { textStyle } from "../utils/typography";
 
 const SVG_RASTER_SIZE = 512;
 
@@ -267,6 +268,20 @@ export class PreloadScene extends Phaser.Scene {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
 
+    const title = this.add
+      .text(centerX, centerY - 110, "Aby's Little Lab", textStyle({
+        color: "#2B6CB0",
+        fontSize: "44px",
+        fontStyle: "bold",
+      }))
+      .setOrigin(0.5);
+    const tagline = this.add
+      .text(centerX, centerY - 70, "Fun little games for little learners", textStyle({
+        color: "#2d3748",
+        fontSize: "24px",
+      }))
+      .setOrigin(0.5);
+
     const progressBar = this.add.rectangle(centerX, centerY, 300, 30, 0xffffff);
     const progressBox = this.add.rectangle(centerX, centerY, 320, 50, 0x222222);
     progressBox.setDepth(-1);
@@ -276,6 +291,8 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     this.load.on("complete", () => {
+      title.destroy();
+      tagline.destroy();
       progressBar.destroy();
       progressBox.destroy();
     });

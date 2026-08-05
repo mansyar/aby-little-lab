@@ -768,6 +768,23 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
+    it("shows a brand lockup above the progress bar while loading", () => {
+      const scene = new PreloadScene();
+      scene.preload();
+
+      const title = getTextObject(scene, "Aby's Little Lab");
+      expect(title).toBeDefined();
+      const tagline = getTextObject(scene, "Fun little games");
+      expect(tagline).toBeDefined();
+
+      const loadOnMock = getMockFn(scene.load.on);
+      const completeCall = loadOnMock.mock.calls.find((call) => call[0] === "complete");
+      const completeCallback = completeCall?.[1] as () => void;
+      completeCallback();
+      expect(getMockFn(title.destroy)).toHaveBeenCalled();
+      expect(getMockFn(tagline.destroy)).toHaveBeenCalled();
+    });
+
     it("loads all 118 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
@@ -1688,7 +1705,7 @@ describe("scene navigation flow", () => {
       expect(idleCalls.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("plays the idle call and wiggles all tiles when the idle timer fires", () => {
+    it("plays the idle call and wiggles a couple of tiles when the idle timer fires", () => {
       const scene = new HubScene();
       scene.create();
 
@@ -1704,7 +1721,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(11);
+      expect(wiggleTweens.length).toBe(2);
     });
 
     it("repeats the idle call every ~10s while idle", () => {
@@ -1789,7 +1806,7 @@ describe("scene navigation flow", () => {
       const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
         (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
       );
-      expect(wiggleTweens.length).toBe(11);
+      expect(wiggleTweens.length).toBe(2);
     });
 
     it("under reduced motion: plays the idle call but does not wiggle tiles", () => {

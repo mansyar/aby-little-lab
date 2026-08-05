@@ -438,7 +438,7 @@ describe("SettingsPanel version footer", () => {
     );
   });
 
-  it("centers the version footer at the bottom of the panel", () => {
+  it("centers the version footer under the title, clear of the install row", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
@@ -446,9 +446,9 @@ describe("SettingsPanel version footer", () => {
     expect(call).toBeDefined();
     const [x, y] = call as unknown as [number, number];
     expect(x).toBe(512);
-    // Below the toggle/install controls, inside the 500px-tall panel (half-height 250).
-    expect(y).toBeGreaterThan(384 + 150);
-    expect(y).toBeLessThan(384 + 250);
+    // Between the title (-105) and the BGM toggle (-45), inside the panel.
+    expect(y).toBeGreaterThan(384 - 105);
+    expect(y).toBeLessThan(384 - 45);
   });
 
   it("keeps the version footer non-interactive", () => {

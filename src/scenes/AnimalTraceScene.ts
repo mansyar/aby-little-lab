@@ -373,6 +373,7 @@ export class AnimalTraceScene extends Phaser.Scene {
       scaleX: targetScaleX,
       scaleY: targetScaleY,
       duration: motionDuration(300, 180),
+      delay: motionDuration(400, 250),
       ease: "Back.out",
     });
   }

@@ -116,6 +116,8 @@ const WIGGLE_ANGLE = 4;
 const WIGGLE_DURATION = 350;
 /** Phase offset between tile wiggles (ms). */
 const WIGGLE_PHASE_OFFSET = 120;
+/** How many tiles wiggle during an attract cue (rotating pick). */
+const ATTRACT_WIGGLE_COUNT = 2;
 /** Avatar textures are rasterized at this size (matches PreloadScene). */
 const AVATAR_TEXTURE_SIZE = 512;
 /** Display size of the active-profile avatar chip (px). */
@@ -165,6 +167,8 @@ export class HubScene extends Phaser.Scene {
   private idleAttractActive = false;
   /** Tiles used as wiggle targets by the attract cue. */
   private attractTargets: Phaser.GameObjects.Rectangle[] = [];
+  /** Rotates which tiles are picked for each idle-attract wiggle. */
+  private attractWiggleTick = 0;
   /** Professor Hoot, the friendly teacher mascot. */
   private mascot?: Mascot;
   /** PWA lifecycle toast currently shown (update/offline). */
@@ -596,10 +600,14 @@ export class HubScene extends Phaser.Scene {
     AudioManager.getInstance().playIdleCall();
     if (!this.idleAttractActive) {
       this.idleAttractActive = true;
-      if (!isReducedMotion()) {
-        for (let i = 0; i < this.attractTargets.length; i++) {
+      if (!isReducedMotion() && this.attractTargets.length > 0) {
+        // Wiggle only a couple of tiles so the cue stays gentle; rotate the
+        // pick across the grid on each attract so no tile feels ignored.
+        const start = this.attractWiggleTick % this.attractTargets.length;
+        for (let i = 0; i < ATTRACT_WIGGLE_COUNT; i++) {
+          const tile = this.attractTargets[(start + i) % this.attractTargets.length];
           this.tweens.add({
-            targets: this.attractTargets[i],
+            targets: tile,
             angle: WIGGLE_ANGLE,
             duration: WIGGLE_DURATION,
             yoyo: true,
@@ -608,6 +616,7 @@ export class HubScene extends Phaser.Scene {
             delay: i * WIGGLE_PHASE_OFFSET,
           });
         }
+        this.attractWiggleTick += 1;
       }
     }
     this.scheduleIdleAttract(IDLE_CALL_INTERVAL);
