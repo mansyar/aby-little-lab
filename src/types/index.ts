@@ -8,7 +8,8 @@ export type GameId =
   | "pattern-builder"
   | "alphabet-match"
   | "word-match"
-  | "word-builder";
+  | "word-builder"
+  | "how-many";
 
 export interface StickerData {
   earned: boolean;

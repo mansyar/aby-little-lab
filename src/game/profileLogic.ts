@@ -21,6 +21,7 @@ const GAME_IDS: GameId[] = [
   "alphabet-match",
   "word-match",
   "word-builder",
+  "how-many",
 ];
 
 /** Fresh sticker collection: every game unearned. */
