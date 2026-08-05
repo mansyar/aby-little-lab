@@ -94,4 +94,4 @@
   - [x] `pnpm run build` + `node scripts/validate-pwa.js` (PWA precache includes font + new SVGs)
 - [x] **Task 6.2: Manual verification plan (mobile/tablet)**
   - [x] Spot-check Hub icons, typography, replay buttons, settings zoom on phone + tablet
-- [ ] **Task: Phase 6 Verification & Checkpoint (refer to workflow.md)**
+- [x] **Task: Phase 6 Verification & Checkpoint (refer to workflow.md)** [checkpoint: `5d1e87d`]
