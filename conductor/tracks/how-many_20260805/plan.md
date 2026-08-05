@@ -4,9 +4,9 @@
 
 ## Phase 1 — Pure Game Logic (TDD)
 
-- [ ] Task: Write failing tests for `src/game/countLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band 1–3/1–5/1–10; round group counts 3/4/4), distinct-counts guard, item-type assignment & shuffle, answer evaluation, win detection
-- [ ] Task: Implement `src/game/countLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` / `isPlaythroughComplete`
-- [ ] Task: Verify coverage for `countLogic.ts` (>80%; project runs ~98%)
+- [x] Task: Write failing tests for `src/game/countLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band 1–3/1–5/1–10; round group counts 3/4/4), distinct-counts guard, item-type assignment & shuffle, answer evaluation, win detection *(7c84cb9)*
+- [x] Task: Implement `src/game/countLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` / `isPlaythroughComplete` *(817522a)*
+- [x] Task: Verify coverage for `countLogic.ts` (>80%; project runs ~98%) *(817522a)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Assets & Number Speech
