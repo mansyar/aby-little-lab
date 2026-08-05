@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { SpeakerButton } from "../components/SpeakerButton";
 import {
   type FirstWord,
   generateLetterTiles,
@@ -32,6 +33,9 @@ const PICTURE_SIZE = 180;
 
 /** Y offset of the prompt picture from screen center. */
 const PICTURE_Y_OFFSET = -240;
+
+/** Horizontal gap between the prompt picture and the replay button (px). */
+const SPEAKER_OFFSET = 70;
 
 /** Y offset of the slot row from screen center. */
 const SLOT_Y_OFFSET = 40;
@@ -106,6 +110,7 @@ const WIN_TWEEN_DURATION = 300;
 export class WordBuilderScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private mascot?: Mascot;
+  private speaker?: SpeakerButton;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   private readonly slotRects: Phaser.GameObjects.Rectangle[] = [];
@@ -152,6 +157,21 @@ export class WordBuilderScene extends Phaser.Scene {
 
     this.createProgressDots();
 
+    // "Hear it again" — re-speaks the current target word on demand.
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    this.speaker = new SpeakerButton(
+      this,
+      centerX + PICTURE_SIZE / 2 + SPEAKER_OFFSET,
+      centerY + PICTURE_Y_OFFSET,
+      {
+        onSpeak: () => {
+          const word = this.words[this.wordIndex];
+          speakWord(word.word, load().settings.sfxEnabled);
+        },
+      },
+    );
+
     this.words = generateWordBuildPlaythrough(WORD_COUNT);
     this.wordIndex = 0;
     this.inputLocked = false;
@@ -161,6 +181,8 @@ export class WordBuilderScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.speaker?.destroy();
+      this.speaker = undefined;
     });
   }
 

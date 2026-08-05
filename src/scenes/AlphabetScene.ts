@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { SpeakerButton } from "../components/SpeakerButton";
 import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
 import { createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
@@ -28,6 +29,9 @@ const CARD_SPACING = 200;
 
 /** Vertical offset of the target letter from screen center (px). */
 const TARGET_Y_OFFSET = -140;
+
+/** Horizontal gap between the target letter and the replay button (px). */
+const SPEAKER_OFFSET = 70;
 
 /** Vertical offset of the answer cards from screen center (px). */
 const CARDS_Y_OFFSET = 180;
@@ -107,6 +111,7 @@ function letterKey(letter: string): string {
 export class AlphabetScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private mascot?: Mascot;
+  private speaker?: SpeakerButton;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   /** Answer card backgrounds of the current round. */
@@ -151,6 +156,22 @@ export class AlphabetScene extends Phaser.Scene {
 
     this.createProgressDots();
 
+    // "Hear it again" — re-speaks the current target letter on demand.
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    this.speaker = new SpeakerButton(
+      this,
+      centerX + TARGET_DISPLAY_SIZE / 2 + SPEAKER_OFFSET,
+      centerY + TARGET_Y_OFFSET,
+      {
+        onSpeak: () => {
+          const round = this.rounds[this.roundIndex];
+          const { sfxEnabled } = load().settings;
+          speakLetter(round.target, sfxEnabled);
+        },
+      },
+    );
+
     this.rounds = generatePlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
     this.inputLocked = false;
@@ -160,6 +181,8 @@ export class AlphabetScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.speaker?.destroy();
+      this.speaker = undefined;
     });
   }
 

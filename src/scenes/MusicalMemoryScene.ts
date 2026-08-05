@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { SpeakerButton } from "../components/SpeakerButton";
 import {
   appendNote,
   FROG_COUNT,
@@ -124,6 +125,7 @@ const DOT_POP_REDUCED_DURATION = 150;
 export class MusicalMemoryScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private mascot?: Mascot;
+  private speaker?: SpeakerButton;
   private readonly audioManager: AudioManager;
   private readonly frogs: Phaser.GameObjects.Image[] = [];
   private readonly lilypads: Array<{ pad: Phaser.GameObjects.Image; y: number }> = [];
@@ -175,6 +177,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.speaker?.destroy();
+      this.speaker = undefined;
     });
   }
 
@@ -214,21 +218,14 @@ export class MusicalMemoryScene extends Phaser.Scene {
     }
   }
 
-  /** Creates the replay button at the bottom of the screen. */
+  /** Creates the replay button at the bottom of the screen (textless speaker glyph). */
   private createReplayButton(): void {
-    const replayButton = this.add.text(
+    this.speaker = new SpeakerButton(
+      this,
       this.cameras.main.centerX,
       this.cameras.main.height - 80,
-      "\uD83D\uDD04",
-      { fontSize: "48px", color: "#2d3748" },
+      { onSpeak: () => this.handleReplay() },
     );
-    replayButton.setOrigin(0.5);
-    replayButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    replayButton.on("pointerdown", () => this.handleReplay());
-    attachPressFeedback(replayButton);
   }
 
   /** Creates 5 progress dots at the top of the screen, dimmed by default. */

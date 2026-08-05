@@ -571,6 +571,17 @@ function getStickerImageSafe(scene: unknown, key: string): Record<string, MockFn
   return getStickerImages(scene).find((s) => s.key === key)?.obj;
 }
 
+/** Returns the image game object created with the given texture key. */
+function getImageByKey(scene: unknown, key: string): Record<string, MockFn> | undefined {
+  const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+  for (let i = 0; i < imageMock.mock.calls.length; i++) {
+    if (imageMock.mock.calls[i][2] === key) {
+      return imageMock.mock.results[i].value as Record<string, MockFn>;
+    }
+  }
+  return undefined;
+}
+
 /** Returns the dashed empty-slot outlines drawn by the Hub for unearned stickers. */
 function getEmptySlots(scene: unknown): Array<Record<string, MockFn>> {
   const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
@@ -757,12 +768,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 117 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, tile icon, and mascot SVGs during preload", () => {
+    it("loads all 118 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(117);
+      expect(svgCalls).toHaveLength(118);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -1841,10 +1852,12 @@ describe("scene navigation flow", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
 
-      const replayButton = getTextObject(scene, "\uD83D\uDD04");
+      const replayButton = getImageByKey(scene, "icon_speaker");
       if (!replayButton) throw new Error("Replay button not found");
       expectTouchTargetSize(replayButton);
-      expectHitAreaOrigin(replayButton, 0, 0);
+      // The speaker glyph is centered on its position, so its hit area is
+      // anchored at (-48,-48) to cover the full 96x96 target.
+      expectHitAreaOrigin(replayButton, -48, -48);
     });
   });
 
@@ -1893,7 +1906,7 @@ describe("scene navigation flow", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
 
-      const replayButton = getTextObject(scene, "\uD83D\uDD04");
+      const replayButton = getImageByKey(scene, "icon_speaker");
       if (!replayButton) throw new Error("Replay button not found");
 
       fireControlEvent(replayButton, "pointerdown");
@@ -4098,14 +4111,13 @@ describe("scene navigation flow", () => {
       return frogs;
     }
 
-    /** Returns the replay button text object, or undefined if not found. */
+    /** Returns the replay speaker button image object, or undefined if not found. */
     function getReplayButton(scene: unknown): Record<string, MockFn> | undefined {
       const add = (scene as { add: Record<string, unknown> }).add;
-      const textMock = getMockFn(add.text);
-      for (let i = 0; i < textMock.mock.calls.length; i++) {
-        const text = textMock.mock.calls[i][2] as string;
-        if (typeof text === "string" && text.includes("\uD83D\uDD04")) {
-          return textMock.mock.results[i].value as Record<string, MockFn>;
+      const imageMock = getMockFn(add.image);
+      for (let i = 0; i < imageMock.mock.calls.length; i++) {
+        if (imageMock.mock.calls[i][2] === "icon_speaker") {
+          return imageMock.mock.results[i].value as Record<string, MockFn>;
         }
       }
       return undefined;

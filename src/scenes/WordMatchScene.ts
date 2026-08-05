@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { SpeakerButton } from "../components/SpeakerButton";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
 import { createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
@@ -40,6 +41,9 @@ const PICTURE_SIZE = 180;
 
 /** Vertical offset of the prompt picture from screen center (px). */
 const PICTURE_Y_OFFSET = -240;
+
+/** Horizontal gap between the prompt picture and the replay button (px). */
+const SPEAKER_OFFSET = 70;
 
 /** Card height (px) — comfortably above the 96px touch target. */
 const CARD_HEIGHT = 160;
@@ -105,6 +109,7 @@ const DOT_POP_REDUCED_DURATION = 150;
 export class WordMatchScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private mascot?: Mascot;
+  private speaker?: SpeakerButton;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   /** Answer card backgrounds of the current round. */
@@ -149,6 +154,21 @@ export class WordMatchScene extends Phaser.Scene {
 
     this.createProgressDots();
 
+    // "Hear it again" — re-speaks the current target word on demand.
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    this.speaker = new SpeakerButton(
+      this,
+      centerX + PICTURE_SIZE / 2 + SPEAKER_OFFSET,
+      centerY + PICTURE_Y_OFFSET,
+      {
+        onSpeak: () => {
+          const round = this.rounds[this.roundIndex];
+          speakWord(round.target, load().settings.sfxEnabled);
+        },
+      },
+    );
+
     this.rounds = generateWordPlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
     this.inputLocked = false;
@@ -158,6 +178,8 @@ export class WordMatchScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.speaker?.destroy();
+      this.speaker = undefined;
     });
   }
 

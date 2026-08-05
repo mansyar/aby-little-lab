@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { SpeakerButton } from "../components/SpeakerButton";
 import {
   type CountGroup,
   type CountRound,
@@ -30,6 +31,9 @@ const TARGET_SCALE = TARGET_DISPLAY_SIZE / SVG_SIZE;
 
 /** Vertical offset of the target numeral from screen center (px). */
 const TARGET_Y_OFFSET = -190;
+
+/** Horizontal gap between the target numeral and the replay button (px). */
+const SPEAKER_OFFSET = 70;
 
 /** Display size of the group cards (exceeds 96px ideal touch target). */
 const CARD_SIZE = 200;
@@ -125,6 +129,7 @@ const OUTLINE_COLOR = 0x2d3748;
 export class HowManyScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private mascot?: Mascot;
+  private speaker?: SpeakerButton;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   /** Group card backgrounds of the current round. */
@@ -169,6 +174,21 @@ export class HowManyScene extends Phaser.Scene {
 
     this.createProgressDots();
 
+    // "Hear it again" — re-speaks the current target number on demand.
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    this.speaker = new SpeakerButton(
+      this,
+      centerX + TARGET_DISPLAY_SIZE / 2 + SPEAKER_OFFSET,
+      centerY + TARGET_Y_OFFSET,
+      {
+        onSpeak: () => {
+          const round = this.rounds[this.roundIndex];
+          speakNumber(round.target, load().settings.sfxEnabled);
+        },
+      },
+    );
+
     this.rounds = createPlaythrough();
     this.roundIndex = 0;
     this.inputLocked = false;
@@ -178,6 +198,8 @@ export class HowManyScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
+      this.speaker?.destroy();
+      this.speaker = undefined;
     });
   }
 

@@ -102,6 +102,7 @@ import toyCarSvg from "../assets/svg/toys/toy_car.svg?raw";
 import toyDrumSvg from "../assets/svg/toys/toy_drum.svg?raw";
 import toyRocketSvg from "../assets/svg/toys/toy_rocket.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
+import iconSpeakerSvg from "../assets/svg/ui/icon_speaker.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
 import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
 import sleepZzzSvg from "../assets/svg/ui/sleep_zzz.svg?raw";
@@ -168,6 +169,7 @@ const SHAPE_ASSETS = [
   { key: "sm_shadow_mushroom", svg: smShadowMushroomSvg },
   { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
   { key: "bubble", svg: bubbleSvg },
+  { key: "icon_speaker", svg: iconSpeakerSvg },
   { key: "sleep_zzz", svg: sleepZzzSvg },
   { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
   { key: "sticker_shadow_match", svg: stickerShadowMatchSvg },
