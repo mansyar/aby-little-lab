@@ -2,7 +2,12 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import { type CountRound, createPlaythrough, evaluateRound } from "../game/countLogic";
+import {
+  type CountGroup,
+  type CountRound,
+  createPlaythrough,
+  evaluateRound,
+} from "../game/countLogic";
 import { createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
@@ -253,11 +258,7 @@ export class HowManyScene extends Phaser.Scene {
   }
 
   /** Places `group.count` copies of the group's item texture in a loose grid. */
-  private createCardItems(
-    group: { count: number; texture: string },
-    cardX: number,
-    cardY: number,
-  ): void {
+  private createCardItems(group: CountGroup, cardX: number, cardY: number): void {
     const items: Phaser.GameObjects.GameObject[] = [];
     const rowCount = Math.ceil(group.count / ITEMS_PER_ROW);
     const colCount = Math.min(group.count, ITEMS_PER_ROW);
@@ -318,7 +319,7 @@ export class HowManyScene extends Phaser.Scene {
     const rect = this.cardRects[groupIndex];
     rect.setFillStyle(SUCCESS_COLOR, 1);
     this.time.delayedCall(250, () => {
-      rect.setFillStyle(CARD_BG_COLOR, 1);
+      if (!rect.destroyed) rect.setFillStyle(CARD_BG_COLOR, 1);
     });
 
     this.time.delayedCall(NEXT_ROUND_DELAY, () => {
