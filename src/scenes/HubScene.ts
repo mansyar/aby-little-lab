@@ -4,13 +4,27 @@ import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { PwaToast, type ToastKind } from "../components/PwaToast";
 import { SettingsPanel } from "../components/SettingsPanel";
+import {
+  endPlaySession,
+  getRemainingMinutes,
+  isLimitReached,
+  isNearLimit,
+  startPlaySession,
+} from "../game/playTimeLogic";
 import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
 import type { GameId } from "../types";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { getActiveProfile, getProfiles, hasSticker, switchProfile } from "../utils/storage";
+import {
+  getActiveProfile,
+  getPlayTime,
+  getProfiles,
+  hasSticker,
+  recordPlayTime,
+  switchProfile,
+} from "../utils/storage";
 import { ensureSceneLoaded } from "./sceneRegistry";
 
 interface GameTile {
@@ -104,6 +118,18 @@ const PICKER_AVATAR_DISPLAY = 96;
 const PICKER_AVATAR_SPACING = 40;
 /** Depth of the picker overlay (above all Hub content). */
 const PICKER_DEPTH = 20;
+/** Radius of the play-time hint arc / moon badge (px). */
+const HINT_ARC_RADIUS = 12;
+/** Cool (plenty of time remaining) color for the hint arc. */
+const HINT_COOL_COLOR = 0x68d391;
+/** Warm (5 minutes or fewer remaining) color for the hint arc. */
+const HINT_WARM_COLOR = 0xed8936;
+/** Alpha applied to game tiles while the daily limit is reached. */
+const TIME_UP_TILE_ALPHA = 0.45;
+/** How long the pre-game nudge overlay stays before launching (ms). */
+const NUDGE_DELAY = 2000;
+/** Depth of the pre-game nudge overlay (above all Hub content). */
+const NUDGE_DEPTH = 20;
 
 /**
  * Hub scene — the central navigation hub.
@@ -137,6 +163,12 @@ export class HubScene extends Phaser.Scene {
   private profilePickerOpen = false;
   /** Objects owned by the open profile picker (destroyed together on close). */
   private profilePickerObjects: Phaser.GameObjects.GameObject[] = [];
+  /** True while the active profile's daily play-time limit is reached. */
+  private timeUp = false;
+  /** Play-time indicator (hint arc or moon badge) for the active profile. */
+  private playTimeGraphics?: Phaser.GameObjects.Graphics;
+  /** True while the pre-game nudge overlay is showing. */
+  private nudgeActive = false;
 
   constructor() {
     super({ key: "Hub" });
@@ -152,6 +184,14 @@ export class HubScene extends Phaser.Scene {
     this.entranceIndex = 0;
     this.idleAttractActive = false;
     this.attractTargets = [];
+    this.timeUp = false;
+    this.nudgeActive = false;
+
+    // Account for the play session that ended when the game scene returned.
+    const ended = endPlaySession();
+    if (ended) {
+      recordPlayTime(ended.profileId, ended.minutes);
+    }
 
     this.createMascot();
 
@@ -180,13 +220,16 @@ export class HubScene extends Phaser.Scene {
       this.attractTargets.push(tile);
       // Navigate on release so the press squish is visible while holding;
       // releasing outside the tile (pointerout/pointercancel) cancels.
+      // Locked tiles (daily limit reached) swallow the tap entirely.
       tile.on("pointerup", () => {
+        if (this.timeUp) return;
         startAudio();
-        // Lazy-load the game chunk (dynamic import + scene registration)
-        // before the fade-out transition starts the target scene.
-        void ensureSceneLoaded(this, GAME_TILES[i].sceneKey).then(() => {
-          transitionToScene(this, GAME_TILES[i].sceneKey);
-        });
+        startPlaySession(getActiveProfile().id);
+        if (this.shouldNudge()) {
+          this.showPlayTimeNudge(i);
+        } else {
+          this.launchGame(i);
+        }
       });
 
       const label = this.add.text(x, y, GAME_TILES[i].label, {
@@ -214,6 +257,8 @@ export class HubScene extends Phaser.Scene {
       this.createShelfSticker(i, x, y);
     }
 
+    this.createPlayTimeIndicator();
+
     this.input.on("pointerdown", () => {
       this.resetIdleAttract();
     });
@@ -237,6 +282,7 @@ export class HubScene extends Phaser.Scene {
         this.settingsPanel = new SettingsPanel(this, undefined, () => {
           this.rerenderStickerShelf();
           this.refreshProfileChip();
+          this.refreshPlayTimeState();
         });
       },
       onFailure: () => {
@@ -261,6 +307,8 @@ export class HubScene extends Phaser.Scene {
       this.closeProfilePicker();
       this.profileChip?.destroy();
       this.profileChip = undefined;
+      this.playTimeGraphics?.destroy();
+      this.playTimeGraphics = undefined;
       this.idleCallTimer?.remove();
       this.idleCallTimer = undefined;
       this.mascot?.destroy();
@@ -330,6 +378,7 @@ export class HubScene extends Phaser.Scene {
           switchProfile(profile.id);
           this.refreshProfileChip();
           this.rerenderStickerShelf();
+          this.refreshPlayTimeState();
         }
         this.closeProfilePicker();
       });
@@ -348,6 +397,109 @@ export class HubScene extends Phaser.Scene {
   /** Re-textures the avatar chip to the active profile (after switch/add/delete). */
   private refreshProfileChip(): void {
     this.profileChip?.setTexture(PROFILE_AVATAR_TEXTURES[getActiveProfile().avatarId]);
+  }
+
+  /**
+   * Launches the game at the given tile index: lazy-loads its chunk, then
+   * transitions via the shared fade-out.
+   */
+  private launchGame(tileIndex: number): void {
+    void ensureSceneLoaded(this, GAME_TILES[tileIndex].sceneKey).then(() => {
+      transitionToScene(this, GAME_TILES[tileIndex].sceneKey);
+    });
+  }
+
+  /** True when the active profile has 5 minutes or fewer remaining. */
+  private shouldNudge(): boolean {
+    return isNearLimit(getPlayTime());
+  }
+
+  /**
+   * Creates the play-time indicator for the active profile: a hint arc under
+   * the grid while time remains (warm when 5 minutes or fewer are left), or a
+   * textless moon badge with dimmed, locked tiles once the daily limit is
+   * reached. No-op when the profile has no limit set.
+   */
+  private createPlayTimeIndicator(): void {
+    const playTime = getPlayTime();
+    if (playTime.limitMinutes === null) return;
+    const graphics = this.add.graphics();
+    this.playTimeGraphics = graphics;
+    graphics.setDepth(-1);
+    const cx = this.cameras.main.width / 2;
+    const cy = this.cameras.main.height - 16;
+    if (isLimitReached(playTime)) {
+      this.timeUp = true;
+      for (const tile of this.attractTargets) {
+        tile.setAlpha(TIME_UP_TILE_ALPHA);
+        tile.disableInteractive();
+      }
+      this.mascot?.wave();
+      graphics.fillStyle(0x2d3748, 1);
+      graphics.fillCircle(cx, cy, HINT_ARC_RADIUS + 6);
+      graphics.fillStyle(0xfff8e7, 1);
+      graphics.fillCircle(cx - 5, cy - 4, HINT_ARC_RADIUS + 1);
+    } else {
+      const remaining = getRemainingMinutes(playTime);
+      const ratio = Math.max(0, Math.min(1, remaining / (playTime.limitMinutes ?? 1)));
+      const endAngle = -Math.PI / 2 + ratio * Math.PI * 2;
+      graphics.fillStyle(isNearLimit(playTime) ? HINT_WARM_COLOR : HINT_COOL_COLOR, 1);
+      graphics.slice(cx, cy, HINT_ARC_RADIUS, -Math.PI / 2, endAngle, false);
+      graphics.fillPath();
+      graphics.fillCircle(cx, cy, 3);
+    }
+  }
+
+  /**
+   * Rebuilds the play-time indicator and tile lock state after a profile
+   * switch or a parental settings change.
+   */
+  private refreshPlayTimeState(): void {
+    this.playTimeGraphics?.destroy();
+    this.playTimeGraphics = undefined;
+    if (this.timeUp) {
+      for (const tile of this.attractTargets) {
+        tile.setAlpha(1);
+        tile.setInteractive();
+      }
+      this.timeUp = false;
+    }
+    this.createPlayTimeIndicator();
+  }
+
+  /**
+   * Shows a textless nudge (dim overlay + hourglass) for NUDGE_DELAY ms before
+   * launching the game — a soft "almost done" signal without harsh cutoffs.
+   */
+  private showPlayTimeNudge(tileIndex: number): void {
+    if (this.nudgeActive) return;
+    this.nudgeActive = true;
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const cx = width / 2;
+    const cy = height / 2;
+    const objects: Phaser.GameObjects.GameObject[] = [];
+    const overlay = this.add.rectangle(cx, cy, width, height, 0x2d3748, 0.6);
+    overlay.setDepth(NUDGE_DEPTH);
+    overlay.setInteractive();
+    objects.push(overlay);
+    const hourglass = this.add.graphics();
+    hourglass.setDepth(NUDGE_DEPTH + 1);
+    hourglass.fillStyle(0xffffff, 1);
+    hourglass.beginPath();
+    hourglass.moveTo(cx - 36, cy - 40);
+    hourglass.lineTo(cx + 36, cy - 40);
+    hourglass.lineTo(cx, cy);
+    hourglass.lineTo(cx - 36, cy + 40);
+    hourglass.lineTo(cx + 36, cy + 40);
+    hourglass.lineTo(cx, cy);
+    hourglass.fillPath();
+    objects.push(hourglass);
+    this.time.delayedCall(NUDGE_DELAY, () => {
+      for (const obj of objects) obj.destroy();
+      this.nudgeActive = false;
+      this.launchGame(tileIndex);
+    });
   }
 
   /**

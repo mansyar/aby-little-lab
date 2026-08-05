@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   addPlayTime,
   createDefaultPlayTime,
+  endPlaySession,
   getRemainingMinutes,
   isLimitReached,
   isNearLimit,
   normalizePlayTime,
   setLimit,
+  startPlaySession,
   todayKey,
 } from "../../game/playTimeLogic";
 import type { PlayTime } from "../../types";
@@ -185,6 +187,35 @@ describe("playTimeLogic", () => {
     it("ignores a non-positive limit", () => {
       expect(setLimit(pt(), 0, DAY).limitMinutes).toBeNull();
       expect(setLimit(pt(), -10, DAY).limitMinutes).toBeNull();
+    });
+  });
+
+  describe("play session", () => {
+    it("starts a session and ends it with rounded whole minutes", () => {
+      startPlaySession("p1", DAY.getTime());
+      const session = endPlaySession(DAY.getTime() + 2.5 * 60 * 1000);
+      expect(session).toEqual({ profileId: "p1", minutes: 3 });
+    });
+
+    it("returns null when no session is active", () => {
+      expect(endPlaySession()).toBeNull();
+    });
+
+    it("is idempotent after the session ends", () => {
+      startPlaySession("p1", DAY.getTime());
+      endPlaySession(DAY.getTime() + 60 * 1000);
+      expect(endPlaySession(DAY.getTime() + 120 * 1000)).toBeNull();
+    });
+
+    it("clamps to zero minutes when the clock went backwards", () => {
+      startPlaySession("p1", DAY.getTime());
+      const session = endPlaySession(DAY.getTime() - 60 * 1000);
+      expect(session?.minutes).toBe(0);
+    });
+
+    it("records zero minutes for a very short session", () => {
+      startPlaySession("p1", DAY.getTime());
+      expect(endPlaySession(DAY.getTime() + 10 * 1000)?.minutes).toBe(0);
     });
   });
 });

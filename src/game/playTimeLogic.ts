@@ -94,3 +94,33 @@ export function setLimit(
   const valid = typeof limitMinutes === "number" && limitMinutes > 0 ? limitMinutes : null;
   return { ...pt, limitMinutes: valid };
 }
+
+interface ActiveSession {
+  profileId: string;
+  startedAt: number;
+}
+
+let activeSession: ActiveSession | null = null;
+
+/**
+ * Starts a play session for a profile. Only one session can be active at a
+ * time; starting a new one discards any previous unfinished session.
+ */
+export function startPlaySession(profileId: string, now = Date.now()): void {
+  activeSession = { profileId, startedAt: now };
+}
+
+/**
+ * Ends the active play session, returning the whole minutes elapsed since it
+ * started (rounded to the nearest minute, clamped to 0 when the clock went
+ * backwards). Returns null when no session is active. The session is cleared
+ * regardless.
+ */
+export function endPlaySession(now = Date.now()): { profileId: string; minutes: number } | null {
+  const session = activeSession;
+  activeSession = null;
+  if (session === null) return null;
+  const elapsed = now - session.startedAt;
+  const minutes = elapsed <= 0 ? 0 : Math.round(elapsed / 60_000);
+  return { profileId: session.profileId, minutes };
+}
