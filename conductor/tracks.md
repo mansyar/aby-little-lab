@@ -60,7 +60,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: UI/UX Hardening — Consolidated Audit Remediation** *Link: [./tracks/uiux-hardening_20260805/index.md](./tracks/uiux-hardening_20260805/index.md)* (Archived)
+- [x] **Track: UI/UX Hardening — Consolidated Audit Remediation** *Link: [./archive/uiux-hardening_20260805/index.md](./archive/uiux-hardening_20260805/index.md)* (Archived)
 
 ---
 
