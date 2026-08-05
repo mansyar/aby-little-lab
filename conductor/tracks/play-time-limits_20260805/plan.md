@@ -15,7 +15,7 @@
 - [x] Task: TDD — extend `src/__tests__/utils/storage.test.ts` (`getPlayTime`, `setPlayTimeLimit`, `recordPlayTime`, old-save migration) *(5314464)*
 - [x] Task: Implement storage facade additions in `src/utils/storage.ts` *(5314464)*
 - [x] Task: Document design update in `conductor/tech-stack.md` (dated note: schema addition + new module) *(31cba01)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 4ed62ed]
 
 ## Phase 2 — Settings UI (Play Time chip in Profiles overlay)
 
