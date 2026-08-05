@@ -40,3 +40,6 @@
 - [x] Task: Update `README.md` (games table, hub experience notes) *(4cacaba)*
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(4cacaba — check: 0 errors/15 baseline warnings; tests: 33 files/934 passed; build: precache 26 entries 1497 KiB; validate-pwa: 13 passed, 0 failed)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *[checkpoint: 5cd2de1]*
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions *(377913d)*
