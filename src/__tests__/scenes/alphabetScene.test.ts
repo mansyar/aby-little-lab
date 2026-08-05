@@ -305,12 +305,20 @@ describe("AlphabetScene round flow", () => {
     return s.rounds[s.roundIndex];
   }
 
-  /** Returns the big target-letter text object. */
-  function getTargetText(scene: unknown): Record<string, MockFn> {
+  /** Returns the big target-letter image object. */
+  function getTargetLetter(scene: unknown): Record<string, MockFn> {
     const s = scene as { add: Record<string, unknown> };
-    const textMock = getMockFn(s.add.text);
-    const index = textMock.mock.calls.findIndex((call) => call[3]?.fontSize === "200px");
-    return textMock.mock.results[index].value as Record<string, MockFn>;
+    const imageMock = getMockFn(s.add.image);
+    const targetY = (scene as { cameras: { main: { centerY: number } } }).cameras.main.centerY - 140;
+    const index = imageMock.mock.calls.findIndex(
+      (call) => call[1] === targetY && isLetterKey(call[2]),
+    );
+    return imageMock.mock.results[index].value as Record<string, MockFn>;
+  }
+
+  /** Returns true when the given texture key is a preloaded letter SVG (e.g. "letter_a"). */
+  function isLetterKey(key: unknown): key is string {
+    return typeof key === "string" && /^letter_[a-z]$/.test(key);
   }
 
   /** Returns the 4 answer card rectangles (created at the cards row y). */
@@ -327,17 +335,18 @@ describe("AlphabetScene round flow", () => {
     return cards;
   }
 
-  /** Returns the 4 answer card letter texts (fontSize 100px). */
-  function getCardTexts(scene: unknown): Array<Record<string, MockFn>> {
+  /** Returns the 4 answer card letter images (created at the cards row y). */
+  function getCardLetters(scene: unknown): Array<Record<string, MockFn>> {
     const s = scene as { add: Record<string, unknown> };
-    const textMock = getMockFn(s.add.text);
-    const texts: Array<Record<string, MockFn>> = [];
-    for (let i = 0; i < textMock.mock.calls.length; i++) {
-      if (textMock.mock.calls[i][3]?.fontSize === "100px") {
-        texts.push(textMock.mock.results[i].value as Record<string, MockFn>);
+    const imageMock = getMockFn(s.add.image);
+    const cardsY = (scene as { cameras: { main: { centerY: number } } }).cameras.main.centerY + 180;
+    const letters: Array<Record<string, MockFn>> = [];
+    for (let i = 0; i < imageMock.mock.calls.length; i++) {
+      if (imageMock.mock.calls[i][1] === cardsY && isLetterKey(imageMock.mock.calls[i][2])) {
+        letters.push(imageMock.mock.results[i].value as Record<string, MockFn>);
       }
     }
-    return texts;
+    return letters;
   }
 
   /** Returns the 6 progress dot circle objects in creation order. */
@@ -410,10 +419,12 @@ describe("AlphabetScene round flow", () => {
     scene.create();
 
     const round = getCurrentRound(scene);
-    expect(getTargetText(scene)).toBeDefined();
-    const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
-    const targetCall = textMock.mock.calls.find((call) => call[3]?.fontSize === "200px");
-    expect(targetCall?.[2]).toBe(round.target);
+    expect(getTargetLetter(scene)).toBeDefined();
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const targetCall = imageMock.mock.calls.find(
+      (call) => isLetterKey(call[2]) && call[1] === scene.cameras.main.centerY - 140,
+    );
+    expect(targetCall?.[2]).toBe(`letter_${round.target.toLowerCase()}`);
 
     const cards = getCardRects(scene);
     expect(cards).toHaveLength(4);
@@ -430,13 +441,13 @@ describe("AlphabetScene round flow", () => {
         expect(call[3]).toBeGreaterThanOrEqual(96);
       }
     }
-    expect(getCardTexts(scene)).toHaveLength(4);
+    expect(getCardLetters(scene)).toHaveLength(4);
 
-    // The 4 cards show exactly the round's choices.
-    const cardLetters = getMockFn((scene as { add: Record<string, unknown> }).add.text)
-      .mock.calls.filter((call) => call[3]?.fontSize === "100px")
-      .map((call) => call[2]);
-    expect(cardLetters.sort()).toEqual([...round.choices].sort());
+    // The 4 cards show exactly the round's choices (via letter_* SVG textures).
+    const cardLetterKeys = imageMock.mock.calls
+      .filter((call) => isLetterKey(call[2]) && call[1] === cardsY)
+      .map((call) => (call[2] as string).replace("letter_", "").toUpperCase());
+    expect(cardLetterKeys.sort()).toEqual([...round.choices].sort());
 
     expect(getProgressDots(scene)).toHaveLength(6);
   });
@@ -481,17 +492,17 @@ describe("AlphabetScene round flow", () => {
     fireNextRoundDelay(scene);
     expect((scene as { roundIndex: number }).roundIndex).toBe(1);
 
-    // The new round re-renders (4 new card texts on top of the old 4) and
+    // The new round re-renders (4 new card letters on top of the old 4) and
     // speaks its own target letter.
     const secondRound = getCurrentRound(scene);
     expect(mockSpeech.speakLetter).toHaveBeenCalledWith(secondRound.target, true);
-    expect(getCardTexts(scene)).toHaveLength(8);
+    expect(getCardLetters(scene)).toHaveLength(8);
 
     // The previous round's target letter is destroyed on re-render — no stale
     // target objects accumulate across rounds.
-    const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
-    const targetResults = textMock.mock.results.filter(
-      (_, i) => textMock.mock.calls[i]?.[3]?.fontSize === "200px",
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const targetResults = imageMock.mock.results.filter(
+      (_, i) => isLetterKey(imageMock.mock.calls[i]?.[2]) && imageMock.mock.calls[i]?.[1] === scene.cameras.main.centerY - 140,
     );
     expect(getMockFn(targetResults[0].value as Record<string, MockFn>).destroy).toHaveBeenCalled();
     expect(
@@ -506,7 +517,7 @@ describe("AlphabetScene round flow", () => {
     const correctIndex = round.choices.indexOf(round.target);
     const wrongIndex = (correctIndex + 1) % 4;
     const rect = getCardRects(scene)[wrongIndex];
-    const text = getCardTexts(scene)[wrongIndex];
+    const letter = getCardLetters(scene)[wrongIndex];
 
     tapCard(scene, wrongIndex);
 
@@ -524,7 +535,7 @@ describe("AlphabetScene round flow", () => {
     const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
       const targets = call[0]?.targets;
       if (!Array.isArray(targets)) return false;
-      return targets.includes(rect) && targets.includes(text);
+      return targets.includes(rect) && targets.includes(letter);
     });
     expect(wiggleTween).toBeDefined();
     if (!wiggleTween) return;
@@ -629,14 +640,14 @@ describe("AlphabetScene round flow", () => {
     const correctIndex = round.choices.indexOf(round.target);
     const wrongIndex = (correctIndex + 1) % 4;
     const rect = getCardRects(scene)[wrongIndex];
-    const text = getCardTexts(scene)[wrongIndex];
+    const letter = getCardLetters(scene)[wrongIndex];
 
     tapCard(scene, wrongIndex);
 
     const wiggleTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
       const targets = call[0]?.targets;
       if (!Array.isArray(targets)) return false;
-      return targets.includes(rect) && targets.includes(text);
+      return targets.includes(rect) && targets.includes(letter);
     });
     expect(wiggleTween).toBeDefined();
     if (!wiggleTween) return;

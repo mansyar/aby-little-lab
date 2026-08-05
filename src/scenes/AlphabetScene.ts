@@ -14,11 +14,11 @@ import { textStyle } from "../utils/typography";
 /** Number of rounds per playthrough. */
 const ROUND_COUNT = 6;
 
-/** Font size of the big target letter (px). */
-const TARGET_FONT_SIZE = "200px";
+/** Display size of the big target letter image (px; glyph ≈ 200px visual). */
+const TARGET_DISPLAY_SIZE = 256;
 
-/** Font size of the letter inside each answer card (px). */
-const CARD_FONT_SIZE = "100px";
+/** Display size of the letter image inside each answer card (px; glyph ≈ 100px visual). */
+const CARD_LETTER_DISPLAY_SIZE = 128;
 
 /** Display size of the answer cards (exceeds 96px ideal touch target). */
 const CARD_SIZE = 160;
@@ -90,7 +90,13 @@ const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
 const WIN_TWEEN_DURATION = 300;
 
 /** Letter color — same blue as the letter SVGs. */
-const LETTER_COLOR = "#2B6CB0";
+
+/**
+ * Maps an uppercase letter to its preloaded SVG texture key (e.g. "A" → "letter_a").
+ */
+function letterKey(letter: string): string {
+  return `letter_${letter.toLowerCase()}`;
+}
 
 /**
  * Find the Letter scene — a big target letter is shown and named aloud, and
@@ -105,9 +111,9 @@ export class AlphabetScene extends Phaser.Scene {
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
   /** Answer card backgrounds of the current round. */
   private readonly cardRects: Phaser.GameObjects.Rectangle[] = [];
-  /** Answer card letter texts of the current round. */
-  private readonly cardTexts: Phaser.GameObjects.Text[] = [];
-  /** Per-round display objects (currently the target letter text). */
+  /** Answer card letter images of the current round. */
+  private readonly cardLetters: Phaser.GameObjects.Image[] = [];
+  /** Per-round display objects (currently the target letter image). */
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
   private rounds: AlphabetRound[] = [];
   private roundIndex = 0;
@@ -184,12 +190,8 @@ export class AlphabetScene extends Phaser.Scene {
     const centerY = this.cameras.main.centerY;
 
     const target = this.add
-      .text(centerX, centerY + TARGET_Y_OFFSET, round.target, {
-        fontSize: TARGET_FONT_SIZE,
-        color: LETTER_COLOR,
-        fontStyle: "bold",
-      })
-      .setOrigin(0.5);
+      .image(centerX, centerY + TARGET_Y_OFFSET, letterKey(round.target))
+      .setDisplaySize(TARGET_DISPLAY_SIZE, TARGET_DISPLAY_SIZE);
     this.roundObjects.push(target);
 
     const { sfxEnabled } = load().settings;
@@ -215,13 +217,9 @@ export class AlphabetScene extends Phaser.Scene {
       this.cardRects.push(card);
 
       const letter = this.add
-        .text(x, cardsY, round.choices[i], {
-          fontSize: CARD_FONT_SIZE,
-          color: LETTER_COLOR,
-          fontStyle: "bold",
-        })
-        .setOrigin(0.5);
-      this.cardTexts.push(letter);
+        .image(x, cardsY, letterKey(round.choices[i]))
+        .setDisplaySize(CARD_LETTER_DISPLAY_SIZE, CARD_LETTER_DISPLAY_SIZE);
+      this.cardLetters.push(letter);
     }
   }
 
@@ -235,10 +233,10 @@ export class AlphabetScene extends Phaser.Scene {
       card.destroy();
     }
     this.cardRects.length = 0;
-    for (const card of this.cardTexts) {
+    for (const card of this.cardLetters) {
       card.destroy();
     }
-    this.cardTexts.length = 0;
+    this.cardLetters.length = 0;
   }
 
   /** Handles a tap on an answer card: correct advances, wrong wiggles. */
@@ -280,10 +278,10 @@ export class AlphabetScene extends Phaser.Scene {
     this.mascot?.nod();
 
     const rect = this.cardRects[choiceIndex];
-    const text = this.cardTexts[choiceIndex];
+    const letter = this.cardLetters[choiceIndex];
     const angle = isReducedMotion() ? WIGGLE_REDUCED_ANGLE : WIGGLE_ANGLE;
     this.tweens.add({
-      targets: [rect, text],
+      targets: [rect, letter],
       angle,
       duration: motionDuration(WIGGLE_DURATION, WIGGLE_REDUCED_DURATION),
       yoyo: true,
