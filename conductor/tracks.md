@@ -56,7 +56,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Play-Time Limits (Per-Profile Daily Cap)** *Link: [./tracks/play-time-limits_20260805/index.md](./tracks/play-time-limits_20260805/index.md)*
+- [x] **Track: Play-Time Limits (Per-Profile Daily Cap)** *Link: [./archive/play-time-limits_20260805/index.md](./archive/play-time-limits_20260805/index.md)* (Archived)
 
 ---
 
