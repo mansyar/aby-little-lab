@@ -95,3 +95,6 @@
 - [x] **Task 6.2: Manual verification plan (mobile/tablet)**
   - [x] Spot-check Hub icons, typography, replay buttons, settings zoom on phone + tablet
 - [x] **Task: Phase 6 Verification & Checkpoint (refer to workflow.md)** [checkpoint: `5d1e87d`]
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions `1f5d10e`
