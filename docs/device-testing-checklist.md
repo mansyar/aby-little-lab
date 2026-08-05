@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.5.0 (2026-08-05)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.5.0 — Play-Time Limits + Game 11 How Many?)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** Hub shows 11 tiles in a 5×3 grid (no clipping, labels readable, sticker shelf + play-time arc fit); How Many? end-to-end — large spoken numeral at round start, 3 cards in rounds 1–2 and 4 cards (2×2) in rounds 3–6, each card shows N copies of one item with distinct item types per round, correct tap flashes green with chime + cheer + progress dot and advances in ~0.7s, wrong tap wiggles with no penalty and no progression loss, win after 6 rounds → confetti + rays + sticker (first completion only) + 3s auto-return with just-earned highlight, replay shows sticker already earned, SFX-off silences the spoken number with visual-only play, parental hold-3s exits to Hub; Play-Time Limits — Settings → Profiles Play Time chip cycles Off/15/30/45/60, remaining-budget arc shows and turns warm at ≤5 min, 2s hourglass nudge before starting near the limit, Time's Up dims + locks tiles with moon badge and no mid-game cutoff, budget resets next day, per-profile isolation; sticker persistence after close/reopen; reduced-motion behavior
+- **Result:** pending manual device execution against the live URL (post-deploy)
+- **Issues found:** pending
+
 ## Execution Record — v1.4.0 (2026-08-04)
 
 - **Target:** local preview build of the v1.4.0 codebase (Multi-Kid Profiles, post-v1.3.0)

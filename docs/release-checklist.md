@@ -40,6 +40,13 @@
 > - [x] Device checklist updated with Games 9 & 10 new-word spot checks + replay checks (`docs/device-testing-checklist.md`) — **executed 2026-08-04 against the live URL, all items passed**
 > - [x] Release branch `release/v1.3.0` created; version bumped to `1.3.0` (`cc955e2`); release notes finalized (`docs/release-notes-v1.3.0.md`)
 
+> **v1.5.0 prep (Play-Time Limits + Game 11 — How Many?, 2026-08-05):** Both tracks archived (`conductor/archive/play-time-limits_20260805/`, `conductor/archive/how-many_20260805/`; How Many? reviewed — 2 Low findings fixed in `377913d`).
+> - [x] All four quality gates green on `master` pre-release: Biome clean (80 files, 15 baseline warnings), **934/934 tests (33 files)**, build OK (**26 precache entries, 1497 KiB**), `validate-pwa` 13/13
+> - [x] Coverage above 80% thresholds — countLogic.ts 100% lines; project ~97% lines (CI-enforced)
+> - [x] Device checklist updated with v1.5.0 rows (`docs/device-testing-checklist.md`) — **execution pending against the live URL post-deploy**
+> - [x] Release notes finalized (`docs/release-notes-v1.5.0.md`)
+> - [x] Released directly from `master` (no release branch) — version bumped to `1.5.0`, tag + push (recorded under Release Process → v1.5.0)
+
 > **v1.4.0 prep (Multi-Kid Profiles, 2026-08-04):** Track archived at `conductor/archive/multi-kid-profiles_20260804/` (reviewed — 1 Medium finding fixed in `094ee19`).
 > - [x] All four quality gates green on `master` pre-release: Biome clean (74 files, 16 baseline warnings), **828/828 tests (30 files)**, build OK, `validate-pwa` 13/13
 > - [x] Coverage above 80% thresholds — `profileLogic.ts` 100% lines / 88.2% branches; `storage.ts` 98.2% lines (CI-enforced)
@@ -420,4 +427,21 @@ Please report issues at [GitHub Issues URL]
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — verified on device 2026-08-04 (device checklist all sections passed)
+- [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.5.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-05
+**Version:** 1.5.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); device testing pending against the live URL (recorded in `docs/device-testing-checklist.md`)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (934/934)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed; device metrics pending (device checklist execution)
 - [x] Ready for release
