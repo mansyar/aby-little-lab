@@ -25,11 +25,11 @@
 
 ## Phase 3 — Hub Enforcement & Session Accounting
 
-- [ ] Task: TDD — extend HubScene/navigation tests (session accrual on return, Time's Up lock state, hint arc visibility/warm color, pre-game nudge overlay, reduced-motion behavior)
-- [ ] Task: Implement `HubScene` session accounting (`sessionStartAt` on tile tap, `recordPlayTime` on return)
-- [ ] Task: Implement Time's Up state (dim/lock tiles, mascot wave, Graphics "moon" badge, textless)
-- [ ] Task: Implement Hub hint arc (remaining-fraction progress, warm color ≤5 min, hidden when no limit)
-- [ ] Task: Implement pre-game nudge overlay (≤5 min remaining, ~2s, mascot + hourglass Graphics, motion-aware)
+- [x] Task: TDD — extend HubScene/navigation tests (session accrual on return, Time's Up lock state, hint arc visibility/warm color, pre-game nudge overlay, reduced-motion behavior) *(7fd5459)*
+- [x] Task: Implement `HubScene` session accounting (`startPlaySession` on tile tap, `endPlaySession` + `recordPlayTime` on return) *(7fd5459)*
+- [x] Task: Implement Time's Up state (dim/lock tiles, mascot wave, Graphics "moon" badge, textless) *(7fd5459)*
+- [x] Task: Implement Hub hint arc (remaining-fraction progress, warm color ≤5 min, hidden when no limit) *(7fd5459)*
+- [x] Task: Implement pre-game nudge overlay (≤5 min remaining, ~2s, hourglass Graphics, motion-aware) *(7fd5459)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Docs & Release Readiness
