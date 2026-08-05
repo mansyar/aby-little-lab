@@ -56,7 +56,7 @@
 - [x] **Task 3.4: Replace MusicalMemory emoji replay with SpeakerButton** (`56bd9c9`)
   - [x] Remove 🔄 text; use SpeakerButton (replays the sequence note)
   - [x] Update musicalMemory scene test
-- [ ] **Task: Phase 3 Verification & Checkpoint (refer to workflow.md)**
+- [x] **Task: Phase 3 Verification & Checkpoint (refer to workflow.md)** — [checkpoint: `20a6099`]
 
 ## Phase 4 — Audio Resume & Settings Readability
 
