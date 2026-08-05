@@ -53,6 +53,16 @@ import letterWSvg from "../assets/svg/letters/letter_w.svg?raw";
 import letterXSvg from "../assets/svg/letters/letter_x.svg?raw";
 import letterYSvg from "../assets/svg/letters/letter_y.svg?raw";
 import letterZSvg from "../assets/svg/letters/letter_z.svg?raw";
+import numeral0Svg from "../assets/svg/numbers/numeral_0.svg?raw";
+import numeral1Svg from "../assets/svg/numbers/numeral_1.svg?raw";
+import numeral2Svg from "../assets/svg/numbers/numeral_2.svg?raw";
+import numeral3Svg from "../assets/svg/numbers/numeral_3.svg?raw";
+import numeral4Svg from "../assets/svg/numbers/numeral_4.svg?raw";
+import numeral5Svg from "../assets/svg/numbers/numeral_5.svg?raw";
+import numeral6Svg from "../assets/svg/numbers/numeral_6.svg?raw";
+import numeral7Svg from "../assets/svg/numbers/numeral_7.svg?raw";
+import numeral8Svg from "../assets/svg/numbers/numeral_8.svg?raw";
+import numeral9Svg from "../assets/svg/numbers/numeral_9.svg?raw";
 import smShadowAirplaneSvg from "../assets/svg/shadows/shadow_airplane.svg?raw";
 import smShadowBallSvg from "../assets/svg/shadows/shadow_ball.svg?raw";
 import smShadowBoatSvg from "../assets/svg/shadows/shadow_boat.svg?raw";
@@ -76,6 +86,7 @@ import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
+import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
 import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
 import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_builder.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
@@ -192,6 +203,17 @@ const SHAPE_ASSETS = [
   { key: "letter_y", svg: letterYSvg },
   { key: "letter_z", svg: letterZSvg },
   { key: "sticker_alphabet_match", svg: stickerAlphabetSvg },
+  { key: "numeral_0", svg: numeral0Svg },
+  { key: "numeral_1", svg: numeral1Svg },
+  { key: "numeral_2", svg: numeral2Svg },
+  { key: "numeral_3", svg: numeral3Svg },
+  { key: "numeral_4", svg: numeral4Svg },
+  { key: "numeral_5", svg: numeral5Svg },
+  { key: "numeral_6", svg: numeral6Svg },
+  { key: "numeral_7", svg: numeral7Svg },
+  { key: "numeral_8", svg: numeral8Svg },
+  { key: "numeral_9", svg: numeral9Svg },
+  { key: "sticker_how_many", svg: stickerHowManySvg },
 ] as const;
 
 /**

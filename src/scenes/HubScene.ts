@@ -44,13 +44,14 @@ const GAME_TILES: readonly GameTile[] = [
   { sceneKey: "Alphabet", gameId: "alphabet-match", label: "Find the Letter" },
   { sceneKey: "WordMatch", gameId: "word-match", label: "Find the Word" },
   { sceneKey: "WordBuilder", gameId: "word-builder", label: "Build the Word" },
+  { sceneKey: "HowMany", gameId: "how-many", label: "How Many?" },
 ];
 
 const TILE_WIDTH = 160;
 const TILE_HEIGHT = 150;
 const TILE_SPACING = 40;
 const GRID_COLS = 5;
-const GRID_ROWS = 2;
+const GRID_ROWS = 3;
 
 /** Delay between consecutive entrance elements (ms). */
 const ENTRANCE_STAGGER = 40;
@@ -134,7 +135,7 @@ const NUDGE_DEPTH = 20;
 /**
  * Hub scene — the central navigation hub.
  *
- * Displays a grid of 10 game tiles, a sticker book showing earned stickers,
+ * Displays a grid of 11 game tiles, a sticker book showing earned stickers,
  * and a settings button gated behind a parental lock.
  */
 export class HubScene extends Phaser.Scene {
