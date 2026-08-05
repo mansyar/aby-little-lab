@@ -25,11 +25,11 @@
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `how-many` to `GameId` union (`src/types/index.ts`) + sticker key mapping
-- [ ] Task: Register `HowMany` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
-- [ ] Task: Load 11 new SVGs in `PreloadScene` (numeral + sticker textures)
-- [ ] Task: Grow Hub grid 5×2 → 5×3 (11 tiles, `TILE_WIDTH` 160 unchanged); verify sticker-shelf and play-time arc fit vertically
-- [ ] Task: Regression tests — old saves migrate cleanly (per-key merge), navigation test covers 11 tiles
+- [x] Task: Add `how-many` to `GameId` union (`src/types/index.ts`) + sticker key mapping *(351edfe — pulled forward into Phase 3; `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge)*
+- [x] Task: Register `HowMany` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(0a36635 — loader; registry tests updated in 94410a0)*
+- [x] Task: Load 11 new SVGs in `PreloadScene` (numeral + sticker textures) *(0a36635)*
+- [x] Task: Grow Hub grid 5×2 → 5×3 (11 tiles, `TILE_WIDTH` 160 unchanged); verify sticker-shelf and play-time arc fit vertically *(0a36635 — startY = (768 − 3×150 − 2×40)/2 = 119; rows at 194/384/574, shelf bottom 657, arc at 752: fits)*
+- [x] Task: Regression tests — old saves migrate cleanly (per-key merge), navigation test covers 11 tiles *(94410a0 — per-key merge via `GAME_IDS` backfill verified by existing profileLogic migration tests; navigation + firstWordsIntegration + sceneRegistry tests updated to 11)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Docs & Release Readiness
