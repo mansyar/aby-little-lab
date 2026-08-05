@@ -15,7 +15,7 @@
 - [x] Task: Create `sticker_how_many.svg` (numeral "3" + star sparkle on cream badge) *(4d61c82)*
 - [x] Task: Write failing test for `speakNumber(n)` in `src/utils/speech.ts` (number words, SFX-gated, silent fallback) *(4501c6b)*
 - [x] Task: Implement `speakNumber` via shared `speakText` (en-US, rate ~0.9, cancels prior utterances) *(7c69b54)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *[checkpoint: a55f2d7]*
 
 ## Phase 3 — Scene Implementation
 
