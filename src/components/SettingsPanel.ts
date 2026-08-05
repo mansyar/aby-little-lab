@@ -3,6 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
 import { MAX_PROFILES } from "../types";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
+import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
 import {
   addProfile,
   deleteProfile,
@@ -69,6 +70,9 @@ export class SettingsPanel {
         addEventListener: (type, listener) => window.addEventListener(type, listener),
         removeEventListener: (type, listener) => window.removeEventListener(type, listener),
       });
+    // Parents read the panel's text on phones; relax the pinch-zoom lock only
+    // while the panel is open, restoring it on close.
+    allowPinchZoom();
     const { width, height } = scene.cameras.main;
     const centerX = width / 2;
     const centerY = height / 2;
@@ -88,7 +92,7 @@ export class SettingsPanel {
       scene.add
         .text(centerX, centerY - 105, "Settings", textStyle({
           color: "#2d3748",
-          fontSize: "32px",
+          fontSize: "36px",
         }))
         .setOrigin(0.5),
     );
@@ -101,7 +105,7 @@ export class SettingsPanel {
       scene.add
         .text(centerX, centerY + 230, `v${__APP_VERSION__}`, textStyle({
           color: DISABLED_COLOR,
-          fontSize: "18px",
+          fontSize: "24px",
         }))
         .setOrigin(0.5),
     );
@@ -115,6 +119,7 @@ export class SettingsPanel {
     this.overlayObjects.length = 0;
     for (const object of this.objects) object.destroy();
     this.installTracker.destroy();
+    restorePinchZoom();
   }
 
   /** Creates one inflated, touch-friendly settings label. */
@@ -127,7 +132,7 @@ export class SettingsPanel {
     const toggle = this.scene.add
       .text(x, y, `${label}: ${enabled ? "ON" : "OFF"}`, textStyle({
         color: enabled ? ENABLED_COLOR : DISABLED_COLOR,
-        fontSize: "28px",
+        fontSize: "34px",
       }))
       .setOrigin(0.5);
     toggle.setInteractive({
@@ -173,7 +178,7 @@ export class SettingsPanel {
     const button = this.scene.add
       .text(x, y, label, textStyle({
         color: PRIMARY_COLOR,
-        fontSize: "24px",
+        fontSize: "32px",
       }))
       .setOrigin(0.5);
     button.setInteractive({
@@ -200,7 +205,7 @@ export class SettingsPanel {
     const row = this.scene.add
       .text(x, y, "Profiles", textStyle({
         color: PRIMARY_COLOR,
-        fontSize: "24px",
+        fontSize: "32px",
       }))
       .setOrigin(0.5);
     row.setInteractive({
@@ -243,7 +248,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 250, "Profiles", textStyle({
           color: "#2d3748",
-          fontSize: "32px",
+          fontSize: "36px",
         }))
         .setOrigin(0.5),
     );
@@ -260,7 +265,7 @@ export class SettingsPanel {
       const remove = this.scene.add
         .text(centerX + 60, y, "Delete", textStyle({
           color: DANGER_COLOR,
-          fontSize: "22px",
+          fontSize: "30px",
         }))
         .setOrigin(0.5);
       remove.setInteractive({
@@ -279,7 +284,7 @@ export class SettingsPanel {
       const chip = this.scene.add
         .text(centerX - 10, y, `Play Time: ${playTimeLabel(limit)}`, textStyle({
           color: PRIMARY_COLOR,
-          fontSize: "18px",
+          fontSize: "26px",
         }))
         .setOrigin(0.5);
       chip.setInteractive({
@@ -309,7 +314,7 @@ export class SettingsPanel {
         this.scene.add
           .text(centerX, centerY + 116, "Profile limit reached", textStyle({
             color: DISABLED_COLOR,
-            fontSize: "24px",
+            fontSize: "30px",
           }))
           .setOrigin(0.5),
       );
@@ -318,7 +323,7 @@ export class SettingsPanel {
         this.scene.add
           .text(centerX, centerY + 96, "Add Profile", textStyle({
             color: PRIMARY_COLOR,
-            fontSize: "22px",
+            fontSize: "30px",
           }))
           .setOrigin(0.5),
       );
@@ -375,7 +380,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 105, "Delete profile?", textStyle({
           color: "#2d3748",
-          fontSize: "32px",
+          fontSize: "36px",
         }))
         .setOrigin(0.5),
     );
@@ -383,7 +388,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 25, "This profile's stickers will be lost.", textStyle({
           color: "#2d3748",
-          fontSize: "24px",
+          fontSize: "30px",
         }))
         .setOrigin(0.5),
     );
@@ -433,7 +438,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 105, "Install on iOS", textStyle({
           color: "#2d3748",
-          fontSize: "32px",
+          fontSize: "36px",
         }))
         .setOrigin(0.5),
     );
@@ -441,7 +446,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 25, "1. Tap the Share icon", textStyle({
           color: "#2d3748",
-          fontSize: "24px",
+          fontSize: "30px",
         }))
         .setOrigin(0.5),
     );
@@ -449,7 +454,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY + 35, "2. Choose Add to Home Screen", textStyle({
           color: "#2d3748",
-          fontSize: "24px",
+          fontSize: "30px",
         }))
         .setOrigin(0.5),
     );
@@ -457,14 +462,14 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY + 95, "3. Open Aby's Little Lab offline", textStyle({
           color: "#2d3748",
-          fontSize: "24px",
+          fontSize: "30px",
         }))
         .setOrigin(0.5),
     );
     const close = this.scene.add
       .text(centerX, centerY + 175, "Close", textStyle({
         color: PRIMARY_COLOR,
-        fontSize: "24px",
+        fontSize: "30px",
       }))
       .setOrigin(0.5);
     close.setInteractive({
@@ -491,7 +496,7 @@ export class SettingsPanel {
     const row = this.scene.add
       .text(x, y, "Reset Progress", textStyle({
         color: DANGER_COLOR,
-        fontSize: "24px",
+        fontSize: "32px",
       }))
       .setOrigin(0.5);
     row.setInteractive({
@@ -528,7 +533,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 105, "Reset all stickers?", textStyle({
           color: "#2d3748",
-          fontSize: "32px",
+          fontSize: "36px",
         }))
         .setOrigin(0.5),
     );
@@ -536,7 +541,7 @@ export class SettingsPanel {
       this.scene.add
         .text(centerX, centerY - 25, "All stickers will be cleared.", textStyle({
           color: "#2d3748",
-          fontSize: "24px",
+          fontSize: "30px",
         }))
         .setOrigin(0.5),
     );
@@ -563,7 +568,7 @@ export class SettingsPanel {
     const button = this.scene.add
       .text(x, y, label, textStyle({
         color,
-        fontSize: "24px",
+        fontSize: "30px",
       }))
       .setOrigin(0.5);
     button.setInteractive({

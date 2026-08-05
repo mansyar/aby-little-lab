@@ -277,6 +277,9 @@ export class HubScene extends Phaser.Scene {
     this.createPlayTimeIndicator();
 
     this.input.on("pointerdown", () => {
+      // Any first interaction unlocks audio so the idle-attract cue is
+      // audible on a fresh load (the tile tap already resumes + starts BGM).
+      AudioManager.getInstance().resume();
       this.resetIdleAttract();
     });
     this.scheduleIdleAttract();

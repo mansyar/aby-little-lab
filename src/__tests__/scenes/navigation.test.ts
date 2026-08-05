@@ -1743,6 +1743,20 @@ describe("scene navigation flow", () => {
       expect(after).toBe(before + 1);
     });
 
+    it("resumes the AudioContext on any first pointerdown so idle-attract audio is audible", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const inputOnMock = getMockFn(scene.input.on);
+      const pointerdownCall = inputOnMock.mock.calls.find((call) => call[0] === "pointerdown");
+      expect(pointerdownCall).toBeDefined();
+      if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+        (pointerdownCall[1] as () => void)();
+      }
+
+      expect(mockAudio.resume).toHaveBeenCalled();
+    });
+
     it("clears the idle timer on shutdown", () => {
       const scene = new HubScene();
       scene.create();
