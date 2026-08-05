@@ -76,12 +76,15 @@ const STICKER_DISPLAY_SIZE = 256;
 /** Delay before auto-returning to Hub after round completion (ms). */
 const AUTO_RETURN_DELAY = 3000;
 
+/** Display size for the sleep glyph on sleeping bubbles. */
+const ZZZ_DISPLAY_SIZE = 40;
+
 /** Tracks a bubble's runtime state: physics body, spawn config, and sleeping-animal overlays. */
 interface BubbleData {
   obj: Phaser.Physics.Arcade.Image;
   config: BubbleConfig;
   animalImage?: Phaser.GameObjects.Image;
-  zzzText?: Phaser.GameObjects.Text;
+  zzzImage?: Phaser.GameObjects.Image;
 }
 
 /**
@@ -168,22 +171,21 @@ export class PopFreezeScene extends Phaser.Scene {
     bubble.setInteractive();
 
     let animalImage: Phaser.GameObjects.Image | undefined;
-    let zzzText: Phaser.GameObjects.Text | undefined;
+    let zzzImage: Phaser.GameObjects.Image | undefined;
 
     if (config.type === "sleeping" && config.animal) {
       animalImage = this.add
         .image(config.x, config.y, `animal_${config.animal}`)
         .setDisplaySize(BUBBLE_DISPLAY_SIZE * 0.6, BUBBLE_DISPLAY_SIZE * 0.6);
 
-      zzzText = this.add.text(config.x, config.y - BUBBLE_DISPLAY_SIZE * 0.5, "Zzz", {
-        fontSize: "20px",
-        color: "#2D3748",
-      });
+      zzzImage = this.add
+        .image(config.x, config.y - BUBBLE_DISPLAY_SIZE * 0.5, "sleep_zzz")
+        .setDisplaySize(ZZZ_DISPLAY_SIZE, ZZZ_DISPLAY_SIZE);
 
       this.breatheAnimal(animalImage);
     }
 
-    const data: BubbleData = { obj: bubble, config, animalImage, zzzText };
+    const data: BubbleData = { obj: bubble, config, animalImage, zzzImage };
 
     bubble.on("pointerdown", () => {
       this.handleTap(data);
@@ -196,9 +198,9 @@ export class PopFreezeScene extends Phaser.Scene {
   /** Syncs sleeping-animal overlay positions with their parent bubble each frame. */
   update(): void {
     for (const data of this.bubbles) {
-      if (data.animalImage && data.zzzText) {
+      if (data.animalImage && data.zzzImage) {
         data.animalImage.setPosition(data.obj.x, data.obj.y);
-        data.zzzText.setPosition(data.obj.x, data.obj.y - BUBBLE_DISPLAY_SIZE * 0.5);
+        data.zzzImage.setPosition(data.obj.x, data.obj.y - BUBBLE_DISPLAY_SIZE * 0.5);
       }
     }
   }

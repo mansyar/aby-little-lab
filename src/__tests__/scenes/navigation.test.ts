@@ -723,12 +723,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 105 shape, letter, numeral, animal/food, toy, sticker, bubble, and mascot SVGs during preload", () => {
+    it("loads all 106 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(105);
+      expect(svgCalls).toHaveLength(106);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -2998,13 +2998,19 @@ describe("scene navigation flow", () => {
       expect(animalKeys.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("creates Zzz text for sleeping bubbles", () => {
+    it("creates sleep glyph image (not text) for sleeping bubbles", () => {
       const scene = new PopFreezeScene();
       scene.create();
 
+      const imageCalls = getMockFn(scene.add.image).mock.calls;
+      const zzzKeys = imageCalls
+        .map((call) => call[2] as string)
+        .filter((key) => key === "sleep_zzz");
+      expect(zzzKeys.length).toBeGreaterThanOrEqual(1);
+
       const textCalls = getMockFn(scene.add.text).mock.calls;
-      const zzzCalls = textCalls.filter((call) => call[2] === "Zzz");
-      expect(zzzCalls).toHaveLength(1);
+      const zzzTextCalls = textCalls.filter((call) => call[2] === "Zzz");
+      expect(zzzTextCalls).toHaveLength(0);
     });
   });
 
