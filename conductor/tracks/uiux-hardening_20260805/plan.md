@@ -74,16 +74,16 @@
 
 ## Phase 5 — Polish Items
 
-- [ ] **Task 5.1: Win sticker/celebration overlap fix**
-  - [ ] Delay sticker animation ~400ms (or offset) so it doesn't overlap fading rays/confetti
-- [ ] **Task 5.2: Scope idle-attract wiggle**
-  - [ ] Change Hub idle attract to wiggle 1–2 tiles (rotating pick) instead of all 11
-- [ ] **Task 5.3: Preload branding**
-  - [ ] Add "Aby's Little Lab" brand lockup + mascot wave on PreloadScreen alongside progress bar
-- [ ] **Task 5.4: Shadow Match object size 96→112px**
-  - [ ] Update ShadowMatchScene object display size + drop zone/layout offsets; verify scene tests
-- [ ] **Task 5.5: Settings footer overlap fix**
-  - [ ] Reposition version footer so it doesn't overlap the install row
+- [x] **Task 5.1: Win sticker/celebration overlap fix** (SHA: afc68b7)
+  - [x] Delay sticker animation ~400ms (or offset) so it doesn't overlap fading rays/confetti
+- [x] **Task 5.2: Scope idle-attract wiggle** (SHA: afc68b7)
+  - [x] Change Hub idle attract to wiggle 1–2 tiles (rotating pick) instead of all 11
+- [x] **Task 5.3: Preload branding** (SHA: afc68b7)
+  - [x] Add "Aby's Little Lab" brand lockup + mascot wave on PreloadScreen alongside progress bar
+- [x] **Task 5.4: Shadow Match object size 96→112px** (SHA: afc68b7)
+  - [x] Update ShadowMatchScene object display size + drop zone/layout offsets; verify scene tests
+- [x] **Task 5.5: Settings footer overlap fix** (SHA: afc68b7)
+  - [x] Reposition version footer so it doesn't overlap the install row
 - [ ] **Task: Phase 5 Verification & Checkpoint (refer to workflow.md)**
 
 ## Phase 6 — Final Verification & Quality Gates
