@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   COUNT_ITEMS,
+  type CountGroup,
+  type CountRound,
   createPlaythrough,
   createRound,
   evaluateRound,
   isPlaythroughComplete,
   ROUND_BANDS,
-  type CountGroup,
-  type CountRound,
 } from "../../game/countLogic";
 
 afterEach(() => {
