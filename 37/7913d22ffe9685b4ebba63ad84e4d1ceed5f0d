@@ -1,0 +1,1 @@
+Review fixes (2 Low findings): (1) createCardItems now takes the exported CountGroup interface instead of an inline structural type (drift risk); (2) success-flash restore delayedCall guards rect.destroyed before setFillStyle (defensive for fast parental exit). Formatted via biome --write; howManyScene tests 934 passed; check clean at baseline 15 warnings.
