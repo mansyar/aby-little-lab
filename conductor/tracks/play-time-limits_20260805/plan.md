@@ -38,3 +38,7 @@
 - [x] Task: Update `docs/PRD.md` if version-specific content exists (verify; no-op acceptable) *(5b2f4c7)*
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(3278dfd)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 74e8004]
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions — notify Hub on chip change (onProgressReset) so the indicator/lock state stays in sync, harden chip cycle index, add regression test *(21b040d)*
