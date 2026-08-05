@@ -37,4 +37,4 @@
 - [x] Task: Update `conductor/product.md` (Play-Time Limits feature in cross-game systems / UX principles) *(5b2f4c7)*
 - [x] Task: Update `docs/PRD.md` if version-specific content exists (verify; no-op acceptable) *(5b2f4c7)*
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(3278dfd)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 74e8004]
