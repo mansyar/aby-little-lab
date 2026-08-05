@@ -1,0 +1,1 @@
+Phase 3 Checkpoint (Prompt Replay Affordance) — diff since 0c990ea: 10 files +270/-22 (icon_speaker.svg, SpeakerButton.ts + 5 tests, PreloadScene +1 asset, 4 speech scenes + SpeakerButton, MusicalMemory emoji -> SpeakerButton, navigation.test.ts replay/preload-count updates). Quality gates: 949 tests pass, lint 15 pre-existing warnings none new. Manual verification pending.
