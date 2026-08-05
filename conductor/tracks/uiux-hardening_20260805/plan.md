@@ -92,6 +92,6 @@
   - [x] `pnpm run check` (Biome lint + format)
   - [x] `CI=true pnpm test` (all tests pass, coverage ≥80%)
   - [x] `pnpm run build` + `node scripts/validate-pwa.js` (PWA precache includes font + new SVGs)
-- [ ] **Task 6.2: Manual verification plan (mobile/tablet)**
-  - [ ] Spot-check Hub icons, typography, replay buttons, settings zoom on phone + tablet
+- [x] **Task 6.2: Manual verification plan (mobile/tablet)**
+  - [x] Spot-check Hub icons, typography, replay buttons, settings zoom on phone + tablet
 - [ ] **Task: Phase 6 Verification & Checkpoint (refer to workflow.md)**
