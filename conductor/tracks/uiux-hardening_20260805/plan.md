@@ -84,7 +84,7 @@
   - [x] Update ShadowMatchScene object display size + drop zone/layout offsets; verify scene tests
 - [x] **Task 5.5: Settings footer overlap fix** (SHA: afc68b7)
   - [x] Reposition version footer so it doesn't overlap the install row
-- [ ] **Task: Phase 5 Verification & Checkpoint (refer to workflow.md)**
+- [x] **Task: Phase 5 Verification & Checkpoint (refer to workflow.md)** [checkpoint: `440a8a2`]
 
 ## Phase 6 — Final Verification & Quality Gates
 
