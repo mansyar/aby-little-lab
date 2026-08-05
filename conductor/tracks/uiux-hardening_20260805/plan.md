@@ -19,10 +19,10 @@
   - [x] Apply in all 11 game scenes (back button, prompts, dots labels, Zzz → replaced in Task 1.4)
   - [x] Apply in PwaToast
   - [x] Run existing tests + lint (`CI=true pnpm test`, `pnpm run check`) — update snapshots if any
-- [ ] **Task 1.4: Replace PopFreeze "Zzz" with SVG sleep glyph**
-  - [ ] Author `sleep_zzz.svg` in `src/assets/svg/ui/`
-  - [ ] Register in PreloadScene; render image in PopFreezeScene (replaces text object)
-  - [ ] Add/update scene test verifying no text "Zzz" is created
+- [x] **Task 1.4: Replace PopFreeze "Zzz" with SVG sleep glyph** — `2f8cbd7`
+  - [x] Author `sleep_zzz.svg` in `src/assets/svg/ui/`
+  - [x] Register in PreloadScene; render image in PopFreezeScene (replaces text object)
+  - [x] Add/update scene test verifying no text "Zzz" is created
 - [ ] **Task 1.5: AlphabetScene uses letter SVG textures**
   - [ ] Swap target letter + answer cards from `add.text` to preloaded `letter_*` textures (F1.5)
   - [ ] Update `alphabetScene.test.ts` to assert texture-based rendering
