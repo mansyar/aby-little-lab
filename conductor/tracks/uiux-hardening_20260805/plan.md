@@ -23,9 +23,9 @@
   - [x] Author `sleep_zzz.svg` in `src/assets/svg/ui/`
   - [x] Register in PreloadScene; render image in PopFreezeScene (replaces text object)
   - [x] Add/update scene test verifying no text "Zzz" is created
-- [ ] **Task 1.5: AlphabetScene uses letter SVG textures**
-  - [ ] Swap target letter + answer cards from `add.text` to preloaded `letter_*` textures (F1.5)
-  - [ ] Update `alphabetScene.test.ts` to assert texture-based rendering
+- [x] **Task 1.5: AlphabetScene uses letter SVG textures** — `0f9884c`
+  - [x] Swap target letter + answer cards from `add.text` to preloaded `letter_*` textures (F1.5)
+  - [x] Update `alphabetScene.test.ts` to assert texture-based rendering
 - [ ] **Task: Phase 1 Verification & Checkpoint (refer to workflow.md)**
 
 ## Phase 2 — Hub Tile Iconography
