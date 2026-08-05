@@ -88,10 +88,10 @@
 
 ## Phase 6 — Final Verification & Quality Gates
 
-- [ ] **Task 6.1: Run full quality gates**
-  - [ ] `pnpm run check` (Biome lint + format)
-  - [ ] `CI=true pnpm test` (all tests pass, coverage ≥80%)
-  - [ ] `pnpm run build` + `node scripts/validate-pwa.js` (PWA precache includes font + new SVGs)
+- [x] **Task 6.1: Run full quality gates** (SHA: c4d6b57)
+  - [x] `pnpm run check` (Biome lint + format)
+  - [x] `CI=true pnpm test` (all tests pass, coverage ≥80%)
+  - [x] `pnpm run build` + `node scripts/validate-pwa.js` (PWA precache includes font + new SVGs)
 - [ ] **Task 6.2: Manual verification plan (mobile/tablet)**
   - [ ] Spot-check Hub icons, typography, replay buttons, settings zoom on phone + tablet
 - [ ] **Task: Phase 6 Verification & Checkpoint (refer to workflow.md)**
