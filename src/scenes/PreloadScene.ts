@@ -269,17 +269,27 @@ export class PreloadScene extends Phaser.Scene {
     const centerY = this.cameras.main.height / 2;
 
     const title = this.add
-      .text(centerX, centerY - 110, "Aby's Little Lab", textStyle({
-        color: "#2B6CB0",
-        fontSize: "44px",
-        fontStyle: "bold",
-      }))
+      .text(
+        centerX,
+        centerY - 110,
+        "Aby's Little Lab",
+        textStyle({
+          color: "#2B6CB0",
+          fontSize: "44px",
+          fontStyle: "bold",
+        }),
+      )
       .setOrigin(0.5);
     const tagline = this.add
-      .text(centerX, centerY - 70, "Fun little games for little learners", textStyle({
-        color: "#2d3748",
-        fontSize: "24px",
-      }))
+      .text(
+        centerX,
+        centerY - 70,
+        "Fun little games for little learners",
+        textStyle({
+          color: "#2d3748",
+          fontSize: "24px",
+        }),
+      )
       .setOrigin(0.5);
 
     const progressBar = this.add.rectangle(centerX, centerY, 300, 30, 0xffffff);

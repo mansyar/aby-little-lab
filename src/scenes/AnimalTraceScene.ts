@@ -134,10 +134,15 @@ export class AnimalTraceScene extends Phaser.Scene {
     sceneEntrance(this);
     this.mascot = createCornerMascot(this);
 
-    const backButton = this.add.text(20, 20, "← Back", textStyle({
-      fontSize: "24px",
-      color: "#2d3748",
-    }));
+    const backButton = this.add.text(
+      20,
+      20,
+      "← Back",
+      textStyle({
+        fontSize: "24px",
+        color: "#2d3748",
+      }),
+    );
     backButton.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,

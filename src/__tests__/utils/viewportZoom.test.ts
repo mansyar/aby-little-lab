@@ -1,9 +1,9 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   allowPinchZoom,
-  restorePinchZoom,
   PINCH_ZOOM_VIEWPORT,
   RESTORED_VIEWPORT,
+  restorePinchZoom,
 } from "../../utils/viewportZoom";
 
 describe("viewportZoom", () => {
@@ -12,8 +12,7 @@ describe("viewportZoom", () => {
   beforeEach(() => {
     viewport = document.createElement("meta");
     viewport.name = "viewport";
-    viewport.content =
-      "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+    viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
     document.head.appendChild(viewport);
   });
 

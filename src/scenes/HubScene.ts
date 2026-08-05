@@ -17,7 +17,6 @@ import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { textStyle } from "../utils/typography";
 import {
   getActiveProfile,
   getPlayTime,
@@ -26,6 +25,7 @@ import {
   recordPlayTime,
   switchProfile,
 } from "../utils/storage";
+import { textStyle } from "../utils/typography";
 import { ensureSceneLoaded } from "./sceneRegistry";
 
 interface GameTile {
@@ -37,16 +37,61 @@ interface GameTile {
 }
 
 const GAME_TILES: readonly GameTile[] = [
-  { sceneKey: "ShapeSorter", gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
-  { sceneKey: "AnimalTrace", gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
-  { sceneKey: "PopFreeze", gameId: "pop-freeze", label: "Pop & Freeze", tileKey: "tile_pop_freeze" },
-  { sceneKey: "ShadowMatch", gameId: "shadow-match", label: "Shadow Match", tileKey: "tile_shadow_match" },
-  { sceneKey: "MusicalMemory", gameId: "musical-memory", label: "Musical Memory", tileKey: "tile_musical_memory" },
+  {
+    sceneKey: "ShapeSorter",
+    gameId: "shape-sorter",
+    label: "Shape Sorter",
+    tileKey: "tile_shape_sorter",
+  },
+  {
+    sceneKey: "AnimalTrace",
+    gameId: "animal-trace",
+    label: "Animal Trace",
+    tileKey: "tile_animal_trace",
+  },
+  {
+    sceneKey: "PopFreeze",
+    gameId: "pop-freeze",
+    label: "Pop & Freeze",
+    tileKey: "tile_pop_freeze",
+  },
+  {
+    sceneKey: "ShadowMatch",
+    gameId: "shadow-match",
+    label: "Shadow Match",
+    tileKey: "tile_shadow_match",
+  },
+  {
+    sceneKey: "MusicalMemory",
+    gameId: "musical-memory",
+    label: "Musical Memory",
+    tileKey: "tile_musical_memory",
+  },
   { sceneKey: "BigSmall", gameId: "big-small", label: "Big & Small", tileKey: "tile_big_small" },
-  { sceneKey: "PatternBuilder", gameId: "pattern-builder", label: "Pattern Builder", tileKey: "tile_pattern_builder" },
-  { sceneKey: "Alphabet", gameId: "alphabet-match", label: "Find the Letter", tileKey: "tile_alphabet" },
-  { sceneKey: "WordMatch", gameId: "word-match", label: "Find the Word", tileKey: "tile_word_match" },
-  { sceneKey: "WordBuilder", gameId: "word-builder", label: "Build the Word", tileKey: "tile_word_builder" },
+  {
+    sceneKey: "PatternBuilder",
+    gameId: "pattern-builder",
+    label: "Pattern Builder",
+    tileKey: "tile_pattern_builder",
+  },
+  {
+    sceneKey: "Alphabet",
+    gameId: "alphabet-match",
+    label: "Find the Letter",
+    tileKey: "tile_alphabet",
+  },
+  {
+    sceneKey: "WordMatch",
+    gameId: "word-match",
+    label: "Find the Word",
+    tileKey: "tile_word_match",
+  },
+  {
+    sceneKey: "WordBuilder",
+    gameId: "word-builder",
+    label: "Build the Word",
+    tileKey: "tile_word_builder",
+  },
   { sceneKey: "HowMany", gameId: "how-many", label: "How Many?", tileKey: "tile_how_many" },
 ];
 
@@ -253,10 +298,15 @@ export class HubScene extends Phaser.Scene {
       const icon = this.add.image(x, y + TILE_ICON_Y_OFFSET, GAME_TILES[i].tileKey);
       icon.setDisplaySize(TILE_ICON_DISPLAY, TILE_ICON_DISPLAY);
 
-      const label = this.add.text(x, y + TILE_LABEL_Y_OFFSET, GAME_TILES[i].label, textStyle({
-        fontSize: "15px",
-        color: "#ffffff",
-      }));
+      const label = this.add.text(
+        x,
+        y + TILE_LABEL_Y_OFFSET,
+        GAME_TILES[i].label,
+        textStyle({
+          fontSize: "15px",
+          color: "#ffffff",
+        }),
+      );
       label.setOrigin(0.5);
 
       this.animateEntrance([tile, label, icon], () => {
@@ -288,10 +338,15 @@ export class HubScene extends Phaser.Scene {
     });
     this.scheduleIdleAttract();
 
-    const settingsButton = this.add.text(this.cameras.main.width - 20, 20, "Settings", textStyle({
-      fontSize: "18px",
-      color: "#2d3748",
-    }));
+    const settingsButton = this.add.text(
+      this.cameras.main.width - 20,
+      20,
+      "Settings",
+      textStyle({
+        fontSize: "18px",
+        color: "#2d3748",
+      }),
+    );
     settingsButton.setOrigin(1, 0);
     settingsButton.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),

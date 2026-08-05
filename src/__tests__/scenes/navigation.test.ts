@@ -6781,7 +6781,9 @@ describe("scene navigation flow", () => {
         expect(getMockFn(tile.setInteractive)).toHaveBeenCalled();
       }
       expect(getMockFn(moon.destroy)).toHaveBeenCalled();
-      expect(getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0)).toHaveLength(0);
+      expect(
+        getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0),
+      ).toHaveLength(0);
     });
 
     it("re-renders the hint when settings change", () => {
@@ -6800,7 +6802,9 @@ describe("scene navigation flow", () => {
       setPlayTimeLimit("p1", 30);
       onProgressReset();
 
-      expect(getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0)).toHaveLength(1);
+      expect(
+        getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0),
+      ).toHaveLength(1);
     });
   });
 });

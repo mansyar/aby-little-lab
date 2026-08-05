@@ -32,8 +32,6 @@ export const FONT_SIZE_XLARGE = 40;
  * @example
  * this.add.text(x, y, "Hello", textStyle({ fontSize: "24px", color: "#2d3748" }))
  */
-export function textStyle(
-  style: Record<string, unknown> = {},
-): Record<string, unknown> {
+export function textStyle(style: Record<string, unknown> = {}): Record<string, unknown> {
   return { fontFamily: FONT_FAMILY, ...style };
 }

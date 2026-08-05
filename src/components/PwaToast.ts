@@ -89,10 +89,15 @@ export class PwaToast {
     onTap?: () => void,
   ): Phaser.GameObjects.Text {
     const button = this.scene.add
-      .text(x, y, label, textStyle({
-        color,
-        fontSize: "24px",
-      }))
+      .text(
+        x,
+        y,
+        label,
+        textStyle({
+          color,
+          fontSize: "24px",
+        }),
+      )
       .setOrigin(0.5);
     button.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(

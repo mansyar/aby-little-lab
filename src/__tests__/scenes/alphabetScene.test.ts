@@ -309,7 +309,8 @@ describe("AlphabetScene round flow", () => {
   function getTargetLetter(scene: unknown): Record<string, MockFn> {
     const s = scene as { add: Record<string, unknown> };
     const imageMock = getMockFn(s.add.image);
-    const targetY = (scene as { cameras: { main: { centerY: number } } }).cameras.main.centerY - 140;
+    const targetY =
+      (scene as { cameras: { main: { centerY: number } } }).cameras.main.centerY - 140;
     const index = imageMock.mock.calls.findIndex(
       (call) => call[1] === targetY && isLetterKey(call[2]),
     );
@@ -502,7 +503,9 @@ describe("AlphabetScene round flow", () => {
     // target objects accumulate across rounds.
     const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
     const targetResults = imageMock.mock.results.filter(
-      (_, i) => isLetterKey(imageMock.mock.calls[i]?.[2]) && imageMock.mock.calls[i]?.[1] === scene.cameras.main.centerY - 140,
+      (_, i) =>
+        isLetterKey(imageMock.mock.calls[i]?.[2]) &&
+        imageMock.mock.calls[i]?.[1] === scene.cameras.main.centerY - 140,
     );
     expect(getMockFn(targetResults[0].value as Record<string, MockFn>).destroy).toHaveBeenCalled();
     expect(
