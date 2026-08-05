@@ -93,8 +93,6 @@ const STICKER_SCALE = STICKER_DISPLAY_SIZE / SVG_SIZE;
 /** Duration of sticker reveal animation (ms). */
 const WIN_TWEEN_DURATION = 300;
 
-/** Letter color — same blue as the letter SVGs. */
-
 /**
  * Maps an uppercase letter to its preloaded SVG texture key (e.g. "A" → "letter_a").
  */
