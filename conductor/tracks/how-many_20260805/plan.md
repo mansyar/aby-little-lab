@@ -34,9 +34,9 @@
 
 ## Phase 5 — Docs & Release Readiness
 
-- [ ] Task: Update `conductor/product.md` (Game 11 row, hub grid 5×3, numeral-as-content amendment)
-- [ ] Task: Update `conductor/tech-stack.md` with dated design note (Game 11, hub grid, asset pipeline additions)
-- [ ] Task: Update `docs/PRD.md` (Game 11 section) and `docs/TDD.md` (scene/structure/coverage notes) as needed
-- [ ] Task: Update `README.md` (games table, hub experience notes)
-- [ ] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [x] Task: Update `conductor/product.md` (Game 11 row, hub grid 5×3, numeral-as-content amendment) *(4cacaba)*
+- [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 11, hub grid, asset pipeline additions) *(4cacaba)*
+- [x] Task: Update `docs/PRD.md` (Game 11 section) and `docs/TDD.md` (scene/structure/coverage notes) as needed *(4cacaba)*
+- [x] Task: Update `README.md` (games table, hub experience notes) *(4cacaba)*
+- [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(4cacaba — check: 0 errors/15 baseline warnings; tests: 33 files/934 passed; build: precache 26 entries 1497 KiB; validate-pwa: 13 passed, 0 failed)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
