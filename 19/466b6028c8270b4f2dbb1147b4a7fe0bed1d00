@@ -1,0 +1,7 @@
+Phase 4 Verification Report (Integration)
+Scope: git diff --name-only df41d90..HEAD -> plan.md, firstWordsIntegration.test.ts, navigation.test.ts, sceneRegistry.test.ts, HubScene.ts, PreloadScene.ts, sceneRegistry.ts.
+Test pairing: HubScene.ts/PreloadScene.ts -> navigation.test.ts (preload 105 assets, 11 tiles, hasSticker 11/22, bob 11, startY 119, stickers 11/22/11, idle wiggle 11); sceneRegistry.ts -> sceneRegistry.test.ts (11 keys); old-save per-key merge covered by existing profileLogic migration tests (GAME_IDS backfill, tolerant no exact-count assertions).
+Tests: CI=true pnpm test -> 33 files passed, 934 tests passed (927 prior + 7 net: counts updated, HowManyScene stub added to GAME_SCENES; setFillStyle added to shared mock).
+Lint: pnpm run check clean at baseline 15 warnings, 0 errors (import sort fixed in PreloadScene).
+Commits: 94410a0 Red (test updates, confirmed 16 failures pre-implementation), 0a36635 Green (registry loader, 11 preload assets, GRID_ROWS 3 with startY=(768-3*150-2*40)/2=119; rows at 194/384/574, shelf bottom 657, arc 752: verified fit), c9c7172 plan.
+Manual verification plan delivered (11-tile 5x3 grid, launch How Many?, full flow, sticker, old saves, play-time arc fit); user confirmation: yes.
