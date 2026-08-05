@@ -30,17 +30,17 @@
 
 ## Phase 2 — Hub Tile Iconography
 
-- [ ] **Task 2.1: Author 11 dedicated SVG tile icons**
-  - [ ] Create `tile_shape_sorter.svg`, `tile_animal_trace.svg`, `tile_pop_freeze.svg`, `tile_shadow_match.svg`, `tile_musical_memory.svg`, `tile_big_small.svg`, `tile_pattern_builder.svg`, `tile_alphabet.svg`, `tile_word_match.svg`, `tile_word_builder.svg`, `tile_how_many.svg` in `src/assets/svg/ui/tiles/` (512×512, flat fills, 4–6px outlines)
-  - [ ] Verify each follows storybook rules (no gradients/neon, palette-consistent)
-- [ ] **Task 2.2: Register tile icons in PreloadScene**
-  - [ ] Import + register the 11 SVGs in the preload list
-- [ ] **Task 2.3: Render icons on Hub tiles**
-  - [ ] In HubScene, display the icon (e.g. 96px display) above/in place of the text label; keep label as secondary
-  - [ ] Add/update Hub-related test asserting an image texture is attached per tile
-- [ ] **Task 2.4: Sticker shelf empty-slot cue**
-  - [ ] Draw dashed "empty slot" outline for unearned stickers (Graphics), replace current 0.3-alpha ghost
-  - [ ] Update shelf test if present
+- [x] **Task 2.1: Author 11 dedicated SVG tile icons** (8566ac9)
+  - [x] Create `tile_shape_sorter.svg`, `tile_animal_trace.svg`, `tile_pop_freeze.svg`, `tile_shadow_match.svg`, `tile_musical_memory.svg`, `tile_big_small.svg`, `tile_pattern_builder.svg`, `tile_alphabet.svg`, `tile_word_match.svg`, `tile_word_builder.svg`, `tile_how_many.svg` in `src/assets/svg/ui/tiles/` (512×512, flat fills, 4–6px outlines)
+  - [x] Verify each follows storybook rules (no gradients/neon, palette-consistent)
+- [x] **Task 2.2: Register tile icons in PreloadScene** (8566ac9)
+  - [x] Import + register the 11 SVGs in the preload list
+- [x] **Task 2.3: Render icons on Hub tiles** (8566ac9)
+  - [x] In HubScene, display the icon (80px display) above the text label; keep label as secondary (15px at bottom of tile)
+  - [x] Add/update Hub-related test asserting an image texture is attached per tile
+- [x] **Task 2.4: Sticker shelf empty-slot cue** (8566ac9)
+  - [x] Draw dashed "empty slot" outline for unearned stickers (Graphics), replace current 0.3-alpha ghost
+  - [x] Update shelf test if present
 - [ ] **Task: Phase 2 Verification & Checkpoint (refer to workflow.md)**
 
 ## Phase 3 — Prompt Replay Affordance
