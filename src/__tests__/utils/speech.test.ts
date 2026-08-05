@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  isSpeechSupported,
-  speakLetter,
-  speakNumber,
-  speakWord,
-} from "../../utils/speech";
+import { isSpeechSupported, speakLetter, speakNumber, speakWord } from "../../utils/speech";
 
 describe("speech", () => {
   const cancel = vi.fn();
