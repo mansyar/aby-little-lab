@@ -30,7 +30,7 @@
 - [x] Task: Implement Time's Up state (dim/lock tiles, mascot wave, Graphics "moon" badge, textless) *(7fd5459)*
 - [x] Task: Implement Hub hint arc (remaining-fraction progress, warm color ≤5 min, hidden when no limit) *(7fd5459)*
 - [x] Task: Implement pre-game nudge overlay (≤5 min remaining, ~2s, hourglass Graphics, motion-aware) *(7fd5459)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 30b22f1]
 
 ## Phase 4 — Docs & Release Readiness
 
