@@ -1,0 +1,1 @@
+Phase 3: Hub session accounting (startPlaySession on tile tap, endPlaySession+recordPlayTime on hub return), Time's Up state (dim + locked tiles, moon badge, mascot wave), hint arc (cool/warm, no limit = none), pre-game nudge (2s hourglass overlay), profile-switch/settings refresh. 896 tests green, playTimeLogic 100% / HubScene 99.4% lines, biome clean.
