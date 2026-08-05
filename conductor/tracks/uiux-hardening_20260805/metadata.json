@@ -1,0 +1,11 @@
+{
+  "id": "uiux-hardening_20260805",
+  "title": "UI/UX Hardening — Consolidated Audit Remediation",
+  "type": "Feature",
+  "status": "new",
+  "createdAt": "2026-08-05",
+  "updatedAt": "2026-08-05",
+  "archivedAt": null,
+  "summary": "Consolidated remediation of the UI/UX audit: global typography system (bundled rounded font), Hub tile iconography, prompt replay affordance, Hub audio-resume + parent settings readability, and low-priority polish items.",
+  "auditRef": "UI/UX Audit 2026-08-05 (H1-H4, M1-M2, Low/Polish)"
+}
