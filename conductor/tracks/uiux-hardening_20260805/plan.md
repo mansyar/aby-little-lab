@@ -5,14 +5,14 @@
 
 ## Phase 1 — Global Typography System
 
-- [ ] **Task 1.1: Bundle rounded child-friendly font asset**
-  - [ ] Add font (e.g. Baloo 2, regular + bold) as WOFF2 in `public/fonts/`
-  - [ ] Register `@font-face` in `src/styles/style.css` (or index.html) with `font-display: swap`
-  - [ ] Verify the font file is precached by the PWA build (`dist/` contains it)
-- [ ] **Task 1.2: Create shared typography constants**
-  - [ ] Write `src/utils/typography.ts` — export `FONT_FAMILY` and font-size presets
-  - [ ] Write tests `src/__tests__/utils/typography.test.ts` verifying constants exist and reference the font name (TDD: test first)
-  - [ ] Verify `CI=true pnpm test` (new tests fail before implementation)
+- [x] **Task 1.1: Bundle rounded child-friendly font asset** — `7494ee0`
+  - [x] Add font (e.g. Baloo 2, regular + bold) as WOFF2 in `public/fonts/`
+  - [x] Register `@font-face` in `src/styles/style.css` (or index.html) with `font-display: swap`
+  - [x] Verify the font file is precached by the PWA build (`dist/` contains it)
+- [x] **Task 1.2: Create shared typography constants** — `7494ee0`
+  - [x] Write `src/utils/typography.ts` — export `FONT_FAMILY` and font-size presets
+  - [x] Write tests `src/__tests__/utils/typography.test.ts` verifying constants exist and reference the font name (TDD: test first)
+  - [x] Verify `CI=true pnpm test` (new tests fail before implementation)
 - [ ] **Task 1.3: Apply font family across all Text objects**
   - [ ] Add `fontFamily: FONT_FAMILY` to Text style objects in HubScene (tile labels, Settings, profile picker)
   - [ ] Apply in SettingsPanel (all rows/overlays/toasts)
