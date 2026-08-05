@@ -41,7 +41,7 @@
 - [x] **Task 2.4: Sticker shelf empty-slot cue** (8566ac9)
   - [x] Draw dashed "empty slot" outline for unearned stickers (Graphics), replace current 0.3-alpha ghost
   - [x] Update shelf test if present
-- [ ] **Task: Phase 2 Verification & Checkpoint (refer to workflow.md)**
+- [x] **Task: Phase 2 Verification & Checkpoint (refer to workflow.md)** [checkpoint: `0c990ea`]
 
 ## Phase 3 — Prompt Replay Affordance
 
