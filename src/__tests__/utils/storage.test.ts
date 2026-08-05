@@ -1,16 +1,20 @@
 import type { AppStorage, GameId } from "../../types";
+import { todayKey } from "../../game/playTimeLogic";
 import {
   addProfile,
   deleteProfile,
   earnSticker,
   getActiveProfile,
   getAvailableAvatars,
+  getPlayTime,
   getProfiles,
   getSettings,
   hasSticker,
   load,
+  recordPlayTime,
   resetProgress,
   save,
+  setPlayTimeLimit,
   switchProfile,
   updateSettings,
 } from "../../utils/storage";
@@ -297,8 +301,8 @@ describe("Storage utilities", () => {
           activeProfileId: string;
           profiles: Array<{ id: string; stickers: Record<string, unknown> }>;
         };
-        const active = parsed.profiles.find((p) => p.id === parsed.activeProfileId)!;
-        expect(active.stickers["shape-sorter"]).toEqual({ earned: false, earnedAt: null });
+        const active = parsed.profiles.find((p) => p.id === parsed.activeProfileId);
+        expect(active?.stickers["shape-sorter"]).toEqual({ earned: false, earnedAt: null });
       }
     });
 
@@ -421,6 +425,97 @@ describe("Storage utilities", () => {
       addProfile("dog");
       addProfile("frog");
       expect(getAvailableAvatars()).toEqual(["pig", "duck", "bear"]);
+    });
+  });
+
+  describe("play time", () => {
+    it("returns an unlimited default play time on a fresh install", () => {
+      const playTime = getPlayTime();
+      expect(playTime.limitMinutes).toBeNull();
+      expect(playTime.usedMinutes).toBe(0);
+      expect(playTime.lastUsedDate).toBe(todayKey());
+    });
+
+    it("migrates a v1 save with an unlimited default play time", () => {
+      localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+      load();
+
+      const playTime = getPlayTime("p1");
+      expect(playTime.limitMinutes).toBeNull();
+      expect(playTime.usedMinutes).toBe(0);
+    });
+
+    it("backfills play time on a v2 save from before the feature", () => {
+      localStorage.setItem(
+        V2_KEY,
+        JSON.stringify({
+          activeProfileId: "p1",
+          profiles: [
+            { id: "p1", avatarId: "cat", createdAt: "2026-08-04T00:00:00.000Z", stickers: {} },
+          ],
+          settings: { bgmEnabled: true, sfxEnabled: true },
+        }),
+      );
+
+      const playTime = getPlayTime("p1");
+      expect(playTime.limitMinutes).toBeNull();
+      expect(playTime.usedMinutes).toBe(0);
+    });
+
+    it("setPlayTimeLimit persists a per-profile limit", () => {
+      setPlayTimeLimit("p1", 30);
+      expect(getPlayTime("p1").limitMinutes).toBe(30);
+    });
+
+    it("clears a limit when set to null", () => {
+      setPlayTimeLimit("p1", 30);
+      setPlayTimeLimit("p1", null);
+      expect(getPlayTime("p1").limitMinutes).toBeNull();
+    });
+
+    it("recordPlayTime accrues usage on the profile", () => {
+      setPlayTimeLimit("p1", 30);
+      recordPlayTime("p1", 12);
+      recordPlayTime("p1", 3);
+      expect(getPlayTime("p1").usedMinutes).toBe(15);
+    });
+
+    it("keeps play time strictly per profile", () => {
+      setPlayTimeLimit("p1", 30);
+      addProfile("dog"); // p2 becomes active
+
+      recordPlayTime("p2", 5);
+      expect(getPlayTime().usedMinutes).toBe(5);
+      expect(getPlayTime("p1").usedMinutes).toBe(0);
+      expect(getPlayTime("p1").limitMinutes).toBe(30);
+      expect(getPlayTime("p2").limitMinutes).toBeNull();
+    });
+
+    it("resets usage to zero when the day rolls over", () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+      localStorage.setItem(
+        V2_KEY,
+        JSON.stringify({
+          activeProfileId: "p1",
+          profiles: [
+            {
+              id: "p1",
+              avatarId: "cat",
+              createdAt: "2026-08-04T00:00:00.000Z",
+              stickers: {},
+              playTime: { limitMinutes: 30, usedMinutes: 25, lastUsedDate: yesterdayKey },
+            },
+          ],
+          settings: { bgmEnabled: true, sfxEnabled: true },
+        }),
+      );
+
+      const playTime = getPlayTime("p1");
+      expect(playTime.usedMinutes).toBe(0);
+      expect(playTime.lastUsedDate).toBe(todayKey());
+      expect(playTime.limitMinutes).toBe(30);
     });
   });
 });

@@ -20,6 +20,19 @@ export interface Settings {
   sfxEnabled: boolean;
 }
 
+/**
+ * Per-profile daily play-time budget. `limitMinutes: null` means unlimited;
+ * usage resets when the local day key changes.
+ */
+export interface PlayTime {
+  /** Daily limit in minutes; null = unlimited (default). */
+  limitMinutes: number | null;
+  /** Minutes used toward the limit on the day in `lastUsedDate`. */
+  usedMinutes: number;
+  /** Local date key ("YYYY-MM-DD") the used minutes belong to. */
+  lastUsedDate: string;
+}
+
 export interface AppStorage {
   stickers: Record<GameId, StickerData>;
   settings: Settings;
@@ -40,6 +53,8 @@ export interface Profile {
   avatarId: AvatarId;
   createdAt: string;
   stickers: Record<GameId, StickerData>;
+  /** Daily play-time budget (unlimited by default). */
+  playTime: PlayTime;
 }
 
 /** Profile-aware storage schema (key `abby-little-lab:v2`). */

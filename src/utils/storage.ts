@@ -7,7 +7,16 @@ import {
   normalizeV2,
   switchActiveProfile,
 } from "../game/profileLogic";
-import type { AppStorage, AvatarId, GameId, Profile, ProfileV2, Settings } from "../types";
+import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
+import type {
+  AppStorage,
+  AvatarId,
+  GameId,
+  PlayTime,
+  Profile,
+  ProfileV2,
+  Settings,
+} from "../types";
 
 const V1_KEY = "abby-little-lab:v1";
 const V2_KEY = "abby-little-lab:v2";
@@ -145,4 +154,32 @@ export function switchProfile(profileId: string): boolean {
 
 export function getAvailableAvatars(): AvatarId[] {
   return availableAvatarIds(ensureV2());
+}
+
+/** Normalized play time for the active profile (or the profile with the given id). */
+export function getPlayTime(profileId?: string): PlayTime {
+  const v2 = ensureV2();
+  const id = profileId ?? v2.activeProfileId;
+  const profile = v2.profiles.find((p) => p.id === id) ?? v2.profiles[0];
+  return normalizePlayTime(profile.playTime);
+}
+
+/** Sets (or clears with null) a profile's daily play-time limit. */
+export function setPlayTimeLimit(profileId: string, limitMinutes: number | null): void {
+  mutate((v2) => ({
+    ...v2,
+    profiles: v2.profiles.map((p) =>
+      p.id === profileId ? { ...p, playTime: setLimit(p.playTime, limitMinutes) } : p,
+    ),
+  }));
+}
+
+/** Adds minutes to a profile's usage for today. */
+export function recordPlayTime(profileId: string, minutes: number): void {
+  mutate((v2) => ({
+    ...v2,
+    profiles: v2.profiles.map((p) =>
+      p.id === profileId ? { ...p, playTime: addPlayTime(p.playTime, minutes) } : p,
+    ),
+  }));
 }

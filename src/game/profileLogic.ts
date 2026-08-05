@@ -8,6 +8,7 @@ import type {
   StickerData,
 } from "../types";
 import { AVATAR_IDS, DEFAULT_AVATAR_ID, MAX_PROFILES } from "../types";
+import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
 
 const GAME_IDS: GameId[] = [
   "shape-sorter",
@@ -39,7 +40,13 @@ export function createDefaultProfile(
   avatarId: AvatarId = DEFAULT_AVATAR_ID,
   createdAt = new Date().toISOString(),
 ): Profile {
-  return { id, avatarId, createdAt, stickers: createDefaultStickers() };
+  return {
+    id,
+    avatarId,
+    createdAt,
+    stickers: createDefaultStickers(),
+    playTime: createDefaultPlayTime(new Date(createdAt)),
+  };
 }
 
 /** Merges saved stickers over defaults so older saves backfill missing game ids. */
@@ -87,6 +94,7 @@ export function normalizeV2(
         : DEFAULT_AVATAR_ID,
       createdAt: typeof p?.createdAt === "string" ? p.createdAt : now,
       stickers: mergeStickers(p?.stickers),
+      playTime: normalizePlayTime(p?.playTime, new Date(now)),
     }));
   } else {
     profiles = [createDefaultProfile("p1", DEFAULT_AVATAR_ID, now)];

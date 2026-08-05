@@ -60,6 +60,13 @@ describe("profileLogic", () => {
       const profile = createDefaultProfile("p1", undefined, NOW);
       expect(profile.avatarId).toBe(DEFAULT_AVATAR_ID);
     });
+
+    it("creates a profile with an unlimited default play time", () => {
+      const profile = createDefaultProfile("p1", "cat", NOW);
+      expect(profile.playTime.limitMinutes).toBeNull();
+      expect(profile.playTime.usedMinutes).toBe(0);
+      expect(typeof profile.playTime.lastUsedDate).toBe("string");
+    });
   });
 
   describe("migrateV1", () => {
@@ -103,6 +110,15 @@ describe("profileLogic", () => {
       );
       expect(v2.profiles).toHaveLength(1);
       expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true });
+    });
+
+    it("gives migrated profile p1 an unlimited default play time", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      expect(v2.profiles[0].playTime).toEqual({
+        limitMinutes: null,
+        usedMinutes: 0,
+        lastUsedDate: expect.any(String),
+      });
     });
   });
 
@@ -151,6 +167,28 @@ describe("profileLogic", () => {
 
       expect(normalized.settings.bgmEnabled).toBe(true);
       expect(normalized.settings.sfxEnabled).toBe(true);
+    });
+
+    it("backfills play time on profiles from before the feature", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      delete (v2.profiles[0] as Partial<ProfileV2["profiles"][number]>).playTime;
+      const normalized = normalizeV2(v2, NOW);
+
+      expect(normalized.profiles[0].playTime.limitMinutes).toBeNull();
+      expect(normalized.profiles[0].playTime.usedMinutes).toBe(0);
+      expect(typeof normalized.profiles[0].playTime.lastUsedDate).toBe("string");
+    });
+
+    it("keeps an existing play time untouched", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      // Build a key for the SAME local day as NOW so no rollover occurs.
+      const nowDate = new Date(NOW);
+      const localKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}-${String(nowDate.getDate()).padStart(2, "0")}`;
+      const playTime = { limitMinutes: 30, usedMinutes: 12, lastUsedDate: localKey };
+      v2.profiles[0].playTime = playTime;
+      const normalized = normalizeV2(v2, NOW);
+
+      expect(normalized.profiles[0].playTime).toEqual(playTime);
     });
   });
 
