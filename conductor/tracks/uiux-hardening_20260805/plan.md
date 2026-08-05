@@ -26,7 +26,7 @@
 - [x] **Task 1.5: AlphabetScene uses letter SVG textures** — `0f9884c`
   - [x] Swap target letter + answer cards from `add.text` to preloaded `letter_*` textures (F1.5)
   - [x] Update `alphabetScene.test.ts` to assert texture-based rendering
-- [ ] **Task: Phase 1 Verification & Checkpoint (refer to workflow.md)**
+- [x] **Task: Phase 1 Verification & Checkpoint (refer to workflow.md)** — [checkpoint: `4cf5333`]
 
 ## Phase 2 — Hub Tile Iconography
 
