@@ -102,6 +102,10 @@ interface AppStorage {
 >
 > **Status: IMPLEMENTED (2026-08-04).** UI: `HubScene` renders a 96×96 touch-target avatar chip (top-left) that opens a textless profile picker (≥96px avatars, active scaled 1.15×, tap switches and re-renders the sticker shelf, overlay tap closes without switching); `SettingsPanel` (panel height 500→560) gains a parental-gated **Profiles** row opening a manager overlay — one row per profile (96px avatar + two-step-confirmed Delete), an Add Profile row of unused avatars (100px hit targets), a "Profile limit reached" state at 4 profiles, and overlay refresh after add/delete. Both Hub shelf and settings stay in sync through the existing `onProgressReset` callback.
 
+> **2026-08-05 — Design Update (Play-Time Limits):** Each profile gains a daily play-time budget — `playTime: { limitMinutes: number | null, usedMinutes: number, lastUsedDate: string }` (additive v2 field; `null` = unlimited, off by default). `lastUsedDate` is a local "YYYY-MM-DD" key; usage resets to zero when the day changes. Pure logic in `src/game/playTimeLogic.ts` (`todayKey`, `createDefaultPlayTime`, `normalizePlayTime`, `getRemainingMinutes`, `isLimitReached`, `isNearLimit` (default 5-min threshold), `addPlayTime`, `setLimit`); `normalizeV2`/`migrateV1` backfill the field per profile (same per-key merge pattern as stickers — no storage key change, old saves migrate cleanly). New facade functions in `src/utils/storage.ts`: `getPlayTime(profileId?)` (normalizes, day-rollover aware), `setPlayTimeLimit(profileId, minutes|null)`, `recordPlayTime(profileId, minutes)`.
+>
+> **Status: IN PROGRESS (Phase 1 of 4 complete).** Remaining phases: Settings → Profiles Play Time chip (cycles Off/15/30/45/60), Hub enforcement (finish-round-then-stop lock state, textless "Time's Up" badge, hint arc + pre-game nudge at ≤5 min remaining).
+
 ## 6. Asset Pipeline
 
 ### SVG Assets
