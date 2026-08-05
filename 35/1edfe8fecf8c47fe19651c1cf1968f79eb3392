@@ -1,0 +1,1 @@
+Task (pulled forward from Phase 4): scene tests require hasSticker('how-many') to resolve. Summary: Added 'how-many' to the GameId union in src/types/index.ts and to GAME_IDS in src/game/profileLogic.ts so createDefaultStickers()/mergeStickers() backfill the new sticker key for fresh and old saves. Files: src/types/index.ts, src/game/profileLogic.ts.
