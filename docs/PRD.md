@@ -165,6 +165,15 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Accessibility:** Slots (120px) and tiles (110px) exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Words are the learning content — no written instructions anywhere.
 - **Game Logic:** Pure functions in `src/game/wordLogic.ts` (easy-first playthrough generation, letter-tile generation with distractors, sequential spelling state) — testable without Phaser.
 
+### GAME 11 — How Many? (Early Numeracy: Counting & Number Recognition) ✅ Implemented
+
+- **Milestone:** Early numeracy — counting a small set of objects and matching it to a target number.
+- **Mechanics:** A large target numeral (~240px) pops in top-center and is **spoken aloud** (en-US, rate 0.9; SFX-gated, silent fallback). Below it sit 3–4 object-group cards (200×200px, ≥96px touch): rounds 1–2 show 3 cards with counts 1–3, rounds 3–6 show 4 cards with counts 1–5 then 1–10. Each card shows N small item copies (~42px loose grid) of one item type. The child taps the group whose count matches the target. 6 rounds per playthrough, 2 per progressive band; win on 6 correct.
+- **Count Logic:** Within a round all group counts are distinct and exactly one matches the target; group positions and item types are shuffled per round. Item types come from existing textures only (`shape_star`, `sm_ball`, `food_apple`, `food_fish`, `food_carrot`, `sm_sun`, `sm_house`, `sm_duck`) — zero new object assets. Pure functions in `src/game/countLogic.ts` (playthrough/round generation, answer evaluation, win detection) — testable without Phaser.
+- **SVG Requirements:** 10 numeral SVGs `numeral_0.svg`…`numeral_9.svg` (512×512, `#2B6CB0` fill / `#2D3748` stroke, identical styling to the letter set so recognition is digit-shape only) + `sticker_how_many.svg` ("3" + star sparkle on the cream badge).
+- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "how-many" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Cards (200px) and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Numerals are the learning content — displayed large and spoken; no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -186,7 +195,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
     │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
     │  sticker, Games 9 & 10 letter/animal/food/object textures +
-    │  stickers — all 10 games'
+    │  stickers — all 11 games'
     │  assets loaded)
     │
     ▼

@@ -363,6 +363,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `alphabet-match` | Game 8 |
 | `word-match` | Game 9 |
 | `word-builder` | Game 10 |
+| `how-many` | Game 11 |
 
 ### Example State
 
@@ -647,7 +648,7 @@ Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reacti
 
 ### Test coverage
 
-897 tests across 31 files (2026-08-05); all motion, transitions, completion-effect, drag-juice, press-feedback, speech, play-time, and mascot utilities at 100% coverage; scenes ≥ 93% lines; `sceneRegistry.ts` reports low lines because the dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project ~98% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
+934 tests across 34 files (2026-08-05); all motion, transitions, completion-effect, drag-juice, press-feedback, speech, play-time, mascot, and count utilities at 100% coverage; scenes ≥ 93% lines; `sceneRegistry.ts` reports low lines because the dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project ~98% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
 
 ---
 
