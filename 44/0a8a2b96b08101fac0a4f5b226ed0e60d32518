@@ -1,0 +1,1 @@
+Phase 5 Checkpoint (Polish): diff since f7b9edb: 16 files +66/-12 (sticker tween delays x11, Hub idle-attract scoped to 2 rotating tiles, Preload brand lockup, ShadowMatch 112px, Settings footer repositioned under title). Quality gates: 955 tests pass, lint 15 pre-existing warnings none new. Manual verification pending.
