@@ -60,16 +60,16 @@
 
 ## Phase 4 — Audio Resume & Settings Readability
 
-- [ ] **Task 4.1: Resume AudioContext on first Hub pointerdown**
-  - [ ] In HubScene, listen for first pointerdown anywhere → `AudioManager.getInstance().resume()` (idempotent), enabling idle-attract audio on fresh load
-  - [ ] Add test verifying resume is called once on first pointerdown
-- [ ] **Task 4.2: Increase Settings panel/overlay font sizes**
-  - [ ] Bump toggle rows, profile rows, modals, install/iOS overlays to ~30–36px (per F4.2)
-  - [ ] Re-verify panel fits 480×560 (adjust row spacing/panel height if needed)
-  - [ ] Update SettingsPanel tests if font-size assertions exist
-- [ ] **Task 4.3: Pinch-zoom on Settings overlay only**
-  - [ ] Temporarily relax `user-scalable=no`/`maximum-scale=1.0` in the meta viewport while Settings is open; restore on close (util or inline handler)
-  - [ ] Add unit test for the zoom-toggle util
+- [x] **Task 4.1: Resume AudioContext on first Hub pointerdown** (`cf09de5`)
+  - [x] In HubScene, listen for first pointerdown anywhere → `AudioManager.getInstance().resume()` (idempotent), enabling idle-attract audio on fresh load
+  - [x] Add test verifying resume is called once on first pointerdown
+- [x] **Task 4.2: Increase Settings panel/overlay font sizes** (`cf09de5`)
+  - [x] Bump toggle rows, profile rows, modals, install/iOS overlays to ~30–36px (per F4.2)
+  - [x] Re-verify panel fits 480×560 (adjust row spacing/panel height if needed)
+  - [x] Update SettingsPanel tests if font-size assertions exist
+- [x] **Task 4.3: Pinch-zoom on Settings overlay only** (`cf09de5`)
+  - [x] Temporarily relax `user-scalable=no`/`maximum-scale=1.0` in the meta viewport while Settings is open; restore on close (util or inline handler)
+  - [x] Add unit test for the zoom-toggle util
 - [ ] **Task: Phase 4 Verification & Checkpoint (refer to workflow.md)**
 
 ## Phase 5 — Polish Items
