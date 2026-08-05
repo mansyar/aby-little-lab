@@ -105,6 +105,17 @@ import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
 import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
 import sleepZzzSvg from "../assets/svg/ui/sleep_zzz.svg?raw";
+import tileAlphabetSvg from "../assets/svg/ui/tiles/tile_alphabet.svg?raw";
+import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw";
+import tileBigSmallSvg from "../assets/svg/ui/tiles/tile_big_small.svg?raw";
+import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
+import tileMusicalMemorySvg from "../assets/svg/ui/tiles/tile_musical_memory.svg?raw";
+import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.svg?raw";
+import tilePopFreezeSvg from "../assets/svg/ui/tiles/tile_pop_freeze.svg?raw";
+import tileShadowMatchSvg from "../assets/svg/ui/tiles/tile_shadow_match.svg?raw";
+import tileShapeSorterSvg from "../assets/svg/ui/tiles/tile_shape_sorter.svg?raw";
+import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
+import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
 
 const SVG_RASTER_SIZE = 512;
@@ -216,6 +227,17 @@ const SHAPE_ASSETS = [
   { key: "numeral_8", svg: numeral8Svg },
   { key: "numeral_9", svg: numeral9Svg },
   { key: "sticker_how_many", svg: stickerHowManySvg },
+  { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
+  { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
+  { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
+  { key: "tile_shadow_match", svg: tileShadowMatchSvg },
+  { key: "tile_musical_memory", svg: tileMusicalMemorySvg },
+  { key: "tile_big_small", svg: tileBigSmallSvg },
+  { key: "tile_pattern_builder", svg: tilePatternBuilderSvg },
+  { key: "tile_alphabet", svg: tileAlphabetSvg },
+  { key: "tile_word_match", svg: tileWordMatchSvg },
+  { key: "tile_word_builder", svg: tileWordBuilderSvg },
+  { key: "tile_how_many", svg: tileHowManySvg },
 ] as const;
 
 /**

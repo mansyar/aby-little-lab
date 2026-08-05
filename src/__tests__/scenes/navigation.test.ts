@@ -44,6 +44,7 @@ vi.mock("phaser", () => {
       moveTo: vi.fn().mockReturnThis(),
       lineTo: vi.fn().mockReturnThis(),
       strokePath: vi.fn().mockReturnThis(),
+      arc: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
       strokeRect: vi.fn().mockReturnThis(),
       strokeCircle: vi.fn().mockReturnThis(),
@@ -565,6 +566,39 @@ function getStickerImage(scene: unknown, key: string): Record<string, MockFn> {
   return sticker.obj;
 }
 
+/** Returns the sticker image for a key, or undefined when not rendered. */
+function getStickerImageSafe(scene: unknown, key: string): Record<string, MockFn> | undefined {
+  return getStickerImages(scene).find((s) => s.key === key)?.obj;
+}
+
+/** Returns the dashed empty-slot outlines drawn by the Hub for unearned stickers. */
+function getEmptySlots(scene: unknown): Array<Record<string, MockFn>> {
+  const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+  const slots: Array<Record<string, MockFn>> = [];
+  for (let i = 0; i < graphicsMock.mock.results.length; i++) {
+    const obj = graphicsMock.mock.results[i].value as Record<string, MockFn>;
+    const lineStyleCalls = getMockFn(obj.lineStyle).mock.calls;
+    const arcCalls = getMockFn(obj.arc).mock.calls;
+    if (lineStyleCalls.length > 0 && arcCalls.length > 0) {
+      slots.push(obj);
+    }
+  }
+  return slots;
+}
+
+/** Returns the tile icon images added by the Hub (distinct from stickers). */
+function getTileIcons(scene: unknown): Array<{ obj: Record<string, MockFn>; key: string }> {
+  const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+  const icons: Array<{ obj: Record<string, MockFn>; key: string }> = [];
+  for (let i = 0; i < imageMock.mock.calls.length; i++) {
+    const key = imageMock.mock.calls[i][2] as string;
+    if (typeof key === "string" && key.startsWith("tile_")) {
+      icons.push({ obj: imageMock.mock.results[i].value as Record<string, MockFn>, key });
+    }
+  }
+  return icons;
+}
+
 /** Fires every registered handler for an event on a game object. */
 function fireAllObjectEvents(obj: Record<string, MockFn>, event: string): void {
   const onMock = getMockFn(obj.on);
@@ -723,12 +757,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(progressBox.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 106 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, and mascot SVGs during preload", () => {
+    it("loads all 117 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, tile icon, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(106);
+      expect(svgCalls).toHaveLength(117);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -850,6 +884,37 @@ describe("scene navigation flow", () => {
       );
 
       expect(interactiveObjects.length).toBeGreaterThanOrEqual(7);
+    });
+
+    it("renders one dedicated storybook icon image per game tile (textless differentiators)", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const icons = getTileIcons(scene);
+      expect(icons).toHaveLength(11);
+      expect(new Set(icons.map((i) => i.key))).toEqual(
+        new Set([
+          "tile_shape_sorter",
+          "tile_animal_trace",
+          "tile_pop_freeze",
+          "tile_shadow_match",
+          "tile_musical_memory",
+          "tile_big_small",
+          "tile_pattern_builder",
+          "tile_alphabet",
+          "tile_word_match",
+          "tile_word_builder",
+          "tile_how_many",
+        ]),
+      );
+      // Icons render at 80px display (>=64px minimum visible size for kids).
+      for (const icon of icons) {
+        const displaySizeCalls = getMockFn(icon.obj.setDisplaySize).mock.calls;
+        expect(displaySizeCalls.length).toBeGreaterThanOrEqual(1);
+        const size = displaySizeCalls.at(-1) as [number, number] | undefined;
+        expect(size?.[0]).toBeGreaterThanOrEqual(64);
+        expect(size?.[1]).toBeGreaterThanOrEqual(64);
+      }
     });
 
     it("creates sticker book checking sticker status for each game", () => {
@@ -1190,7 +1255,7 @@ describe("scene navigation flow", () => {
           (config) =>
             config.duration === 300 &&
             typeof config.delay === "number" &&
-            (config.alpha === 1 || config.alpha === 0.3),
+            (config.alpha === 1 || config.alpha === 0.55),
         );
 
       expect(entranceTweens.length).toBeGreaterThanOrEqual(12);
@@ -1300,8 +1365,8 @@ describe("scene navigation flow", () => {
       );
       expect(entranceTweens.length).toBeGreaterThanOrEqual(12);
       for (const config of entranceTweens) {
-        // Tiles/labels/earned stickers fade to 1; unearned stickers to 0.3.
-        expect([1, 0.3]).toContain(config.alpha);
+        // Tiles/labels/earned stickers fade to 1; empty slots to 0.55.
+        expect([1, 0.55]).toContain(config.alpha);
         expect("scaleX" in config).toBe(false);
         expect("scaleY" in config).toBe(false);
       }
@@ -1409,29 +1474,18 @@ describe("scene navigation flow", () => {
   });
 
   describe("Hub engagement sticker shelf", () => {
-    const STICKER_KEYS = [
-      "sticker_shape_sorter",
-      "sticker_animal_trace",
-      "sticker_pop_freeze",
-      "sticker_shadow_match",
-      "sticker_musical_memory",
-      "sticker_big_small",
-      "sticker_pattern_builder",
-      "sticker_alphabet_match",
-      "sticker_word_match",
-      "sticker_word_builder",
-      "sticker_how_many",
-    ];
     /** Sticker textures are rasterized at 512px; the shelf displays them at 56px. */
     const STICKER_BASE_SCALE = 56 / 512;
 
     it("replaces the star markers with one real sticker thumbnail per game (textless, touch-inert)", () => {
+      earnSticker("shape-sorter");
+
       const scene = new HubScene();
       scene.create();
 
       const stickers = getStickerImages(scene);
-      expect(stickers).toHaveLength(11);
-      expect(new Set(stickers.map((s) => s.key))).toEqual(new Set(STICKER_KEYS));
+      expect(stickers).toHaveLength(1);
+      expect(new Set(stickers.map((s) => s.key))).toEqual(new Set(["sticker_shape_sorter"]));
 
       // No ★/☆ text markers remain
       const textMock = getMockFn(scene.add.text);
@@ -1445,6 +1499,20 @@ describe("scene navigation flow", () => {
       // Shelf is touch-inert
       for (const sticker of stickers) {
         expect(getMockFn(sticker.obj.setInteractive)).not.toHaveBeenCalled();
+      }
+    });
+
+    it("shows dashed empty-slot outlines for unearned stickers (textless, touch-inert)", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      // Fresh profile: nothing earned -> 11 dashed outlines, no ghost thumbnails.
+      expect(getStickerImages(scene)).toHaveLength(0);
+      const slots = getEmptySlots(scene);
+      expect(slots).toHaveLength(11);
+      for (const slot of slots) {
+        expect(getMockFn(slot.setInteractive)).not.toHaveBeenCalled();
+        expect(getMockFn(slot.arc).mock.calls.length).toBeGreaterThanOrEqual(5);
       }
     });
 
@@ -1473,20 +1541,19 @@ describe("scene navigation flow", () => {
       expect(sparkle).toBeDefined();
     });
 
-    it("unearned stickers are dimmed and have no sparkle", () => {
+    it("unearned stickers show a dashed empty slot and have no sparkle", () => {
       const scene = new HubScene();
       scene.create();
 
-      const sticker = getStickerImage(scene, "sticker_animal_trace");
+      expect(getStickerImageSafe(scene, "sticker_animal_trace")).toBeUndefined();
+      const slot = getEmptySlots(scene)[1];
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-      const entrance = tweenCalls.find((call) => call[0]?.targets === sticker);
+      const entrance = tweenCalls.find((call) => call[0]?.targets === slot);
       expect(entrance).toBeDefined();
-      expect(entrance?.[0]?.alpha).toBe(0.3);
-      expect(entrance?.[0]?.scaleX).toBeCloseTo(0.85 * STICKER_BASE_SCALE, 5);
-      expect(entrance?.[0]?.scaleY).toBeCloseTo(0.85 * STICKER_BASE_SCALE, 5);
+      expect(entrance?.[0]?.alpha).toBe(0.55);
 
       const sparkle = tweenCalls.find(
-        (call) => call[0]?.targets === sticker && call[0]?.repeat === -1,
+        (call) => call[0]?.targets === slot && call[0]?.repeat === -1,
       );
       expect(sparkle).toBeUndefined();
     });
@@ -1520,7 +1587,7 @@ describe("scene navigation flow", () => {
       expect(burst?.[0]?.scaleX).toBeCloseTo(1.25 * STICKER_BASE_SCALE, 5);
     });
 
-    it("under reduced motion: unearned stickers fade to dim alpha only (no scale)", () => {
+    it("under reduced motion: empty slots fade to alpha only (no scale)", () => {
       vi.stubGlobal("window", {
         matchMedia: vi.fn(() => ({ matches: true })),
       });
@@ -1528,11 +1595,11 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      const sticker = getStickerImage(scene, "sticker_animal_trace");
+      const slot = getEmptySlots(scene)[1];
       const entrance = getMockFn(scene.tweens.add).mock.calls.find(
-        (call) => call[0]?.targets === sticker,
+        (call) => call[0]?.targets === slot,
       );
-      expect(entrance?.[0]?.alpha).toBe(0.3);
+      expect(entrance?.[0]?.alpha).toBe(0.55);
       expect("scaleX" in (entrance?.[0] ?? {})).toBe(false);
       expect("scaleY" in (entrance?.[0] ?? {})).toBe(false);
     });
@@ -1565,7 +1632,9 @@ describe("scene navigation flow", () => {
       expect(typeof rerender).toBe("function");
 
       const oldStickerImages = getStickerImages(scene);
-      expect(oldStickerImages).toHaveLength(11);
+      expect(oldStickerImages).toHaveLength(1);
+      const oldSlots = getEmptySlots(scene);
+      expect(oldSlots).toHaveLength(10);
 
       // The real panel calls resetProgress() before notifying the Hub; mirror it.
       resetProgress();
@@ -1575,20 +1644,24 @@ describe("scene navigation flow", () => {
       for (const { obj } of oldStickerImages) {
         expect(getMockFn(obj.destroy)).toHaveBeenCalled();
       }
-      // ...and replaced by a fresh, fully dimmed shelf (the reset cleared everything).
+      // ...and replaced by a fresh, fully empty shelf (the reset cleared everything).
       const liveStickers = getStickerImages(scene).filter(
         ({ obj }) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(liveStickers).toHaveLength(11);
+      expect(liveStickers).toHaveLength(0);
+      const liveSlots = getEmptySlots(scene).filter(
+        (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
+      );
+      expect(liveSlots).toHaveLength(11);
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-      for (const { obj } of liveStickers) {
+      for (const obj of liveSlots) {
         const targetsSticker = (call: { targets?: unknown }): boolean => {
           const targets = call.targets;
           return Array.isArray(targets) ? targets.includes(obj) : targets === obj;
         };
         const entrance = tweenCalls.find((call) => targetsSticker(call[0]));
         expect(entrance).toBeDefined();
-        expect(entrance?.[0]?.alpha).toBe(0.3);
+        expect(entrance?.[0]?.alpha).toBe(0.55);
       }
     });
   });
@@ -6257,18 +6330,26 @@ describe("scene navigation flow", () => {
     });
 
     it("clears tracked stickers on shutdown so a shelf re-render never touches previous visits", () => {
+      earnSticker("shape-sorter");
+      // Other describes stub hasSticker via mockReturnValue (persists past
+      // clearAllMocks), so restore the real storage-backed behavior for this
+      // test deterministically (earnSticker -> true, resetProgress -> false).
+      vi.mocked(hasSticker).mockRestore();
+
       const scene = new HubScene();
       scene.create();
       completeHubEntrances(scene);
       const firstVisit = getStickerImages(scene);
-      expect(firstVisit).toHaveLength(11);
+      expect(firstVisit).toHaveLength(1);
+      const firstVisitSlots = getEmptySlots(scene);
+      expect(firstVisitSlots).toHaveLength(10);
 
       // Leave the Hub (shutdown clears the tracked shelf) and return: create()
       // re-runs on every visit via scene.start.
       triggerShutdown(scene);
       scene.create();
       completeHubEntrances(scene);
-      expect(getStickerImages(scene)).toHaveLength(22);
+      expect(getStickerImages(scene)).toHaveLength(2);
 
       // Isolate first-visit images: a re-render after a progress reset must not
       // destroy (or re-destroy) them — only the live second-visit shelf.
@@ -6291,11 +6372,10 @@ describe("scene navigation flow", () => {
       for (const { obj } of firstVisit) {
         expect(getMockFn(obj.destroy)).not.toHaveBeenCalled();
       }
-      // The re-rendered shelf holds exactly 10 fresh thumbnails (the stale
-      // first-visit images still exist in the mock display list, untouched).
-      const firstVisitSet = new Set(firstVisit.map(({ obj }) => obj));
-      const fresh = getStickerImages(scene).filter(
-        ({ obj }) => !firstVisitSet.has(obj) && getMockFn(obj.destroy).mock.calls.length === 0,
+      // The reset cleared everything: the re-rendered shelf holds 11 fresh
+      // empty slots (the stale first-visit objects still exist, untouched).
+      const fresh = getEmptySlots(scene).filter(
+        (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
       expect(fresh).toHaveLength(11);
     });
@@ -6447,6 +6527,19 @@ describe("scene navigation flow", () => {
       return result;
     }
 
+    /** Returns only play-time indicator graphics (slice/fillStyle based), excluding dashed empty slots. */
+    function getPlayTimeGraphics(scene: unknown): Array<Record<string, MockFn>> {
+      const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+      const result: Array<Record<string, MockFn>> = [];
+      for (let i = 0; i < graphicsMock.mock.results.length; i++) {
+        const obj = graphicsMock.mock.results[i].value as Record<string, MockFn>;
+        const hasFill = getMockFn(obj.fillStyle).mock.calls.length > 0;
+        const hasSlice = getMockFn(obj.slice).mock.calls.length > 0;
+        if (hasFill || hasSlice) result.push(obj);
+      }
+      return result;
+    }
+
     it("records the elapsed session minutes on return to the hub", () => {
       startPlaySession("p1", Date.now() - 3 * 60 * 1000);
       const scene = new HubScene();
@@ -6515,7 +6608,8 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      expect(getMockFn(scene.add.graphics)).not.toHaveBeenCalled();
+      // Empty-slot outlines are allowed; the play-time indicator must not exist.
+      expect(getPlayTimeGraphics(scene)).toHaveLength(0);
     });
 
     it("draws a hint arc showing remaining budget when a limit is set", () => {
@@ -6625,6 +6719,12 @@ describe("scene navigation flow", () => {
         expect(getMockFn(tile.disableInteractive)).toHaveBeenCalled();
       }
 
+      // The moon badge is created for the limited profile, then destroyed
+      // and not replaced once the switch to the unlimited profile happens.
+      const moons = getPlayTimeGraphics(scene);
+      expect(moons).toHaveLength(1);
+      const moon = moons[0];
+
       const chip = findLastAddedImage(scene, "animal_cat");
       if (!chip) throw new Error("chip not created");
       triggerPointerupOn(chip);
@@ -6637,16 +6737,14 @@ describe("scene navigation flow", () => {
         expect(getMockFn(tile.setAlpha)).toHaveBeenCalledWith(1);
         expect(getMockFn(tile.setInteractive)).toHaveBeenCalled();
       }
-      // The moon badge is destroyed and not replaced (unlimited profile).
-      const moon = getLastGraphics(scene);
       expect(getMockFn(moon.destroy)).toHaveBeenCalled();
-      expect(getMockFn(scene.add.graphics).mock.calls).toHaveLength(1);
+      expect(getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0)).toHaveLength(0);
     });
 
     it("re-renders the hint when settings change", () => {
       const scene = new HubScene();
       scene.create();
-      expect(getMockFn(scene.add.graphics)).not.toHaveBeenCalled();
+      expect(getPlayTimeGraphics(scene)).toHaveLength(0);
 
       triggerAllPointerdowns(scene);
       const holdCallback = getMockFn(scene.time.delayedCall).mock.calls.find(
@@ -6659,7 +6757,7 @@ describe("scene navigation flow", () => {
       setPlayTimeLimit("p1", 30);
       onProgressReset();
 
-      expect(getMockFn(scene.add.graphics)).toHaveBeenCalled();
+      expect(getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0)).toHaveLength(1);
     });
   });
 });

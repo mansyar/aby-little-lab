@@ -32,20 +32,22 @@ interface GameTile {
   sceneKey: string;
   gameId: GameId;
   label: string;
+  /** Preloaded tile icon texture key (storybook-style SVG). */
+  tileKey: string;
 }
 
 const GAME_TILES: readonly GameTile[] = [
-  { sceneKey: "ShapeSorter", gameId: "shape-sorter", label: "Shape Sorter" },
-  { sceneKey: "AnimalTrace", gameId: "animal-trace", label: "Animal Trace" },
-  { sceneKey: "PopFreeze", gameId: "pop-freeze", label: "Pop & Freeze" },
-  { sceneKey: "ShadowMatch", gameId: "shadow-match", label: "Shadow Match" },
-  { sceneKey: "MusicalMemory", gameId: "musical-memory", label: "Musical Memory" },
-  { sceneKey: "BigSmall", gameId: "big-small", label: "Big & Small" },
-  { sceneKey: "PatternBuilder", gameId: "pattern-builder", label: "Pattern Builder" },
-  { sceneKey: "Alphabet", gameId: "alphabet-match", label: "Find the Letter" },
-  { sceneKey: "WordMatch", gameId: "word-match", label: "Find the Word" },
-  { sceneKey: "WordBuilder", gameId: "word-builder", label: "Build the Word" },
-  { sceneKey: "HowMany", gameId: "how-many", label: "How Many?" },
+  { sceneKey: "ShapeSorter", gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
+  { sceneKey: "AnimalTrace", gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
+  { sceneKey: "PopFreeze", gameId: "pop-freeze", label: "Pop & Freeze", tileKey: "tile_pop_freeze" },
+  { sceneKey: "ShadowMatch", gameId: "shadow-match", label: "Shadow Match", tileKey: "tile_shadow_match" },
+  { sceneKey: "MusicalMemory", gameId: "musical-memory", label: "Musical Memory", tileKey: "tile_musical_memory" },
+  { sceneKey: "BigSmall", gameId: "big-small", label: "Big & Small", tileKey: "tile_big_small" },
+  { sceneKey: "PatternBuilder", gameId: "pattern-builder", label: "Pattern Builder", tileKey: "tile_pattern_builder" },
+  { sceneKey: "Alphabet", gameId: "alphabet-match", label: "Find the Letter", tileKey: "tile_alphabet" },
+  { sceneKey: "WordMatch", gameId: "word-match", label: "Find the Word", tileKey: "tile_word_match" },
+  { sceneKey: "WordBuilder", gameId: "word-builder", label: "Build the Word", tileKey: "tile_word_builder" },
+  { sceneKey: "HowMany", gameId: "how-many", label: "How Many?", tileKey: "tile_how_many" },
 ];
 
 const TILE_WIDTH = 160;
@@ -53,6 +55,12 @@ const TILE_HEIGHT = 150;
 const TILE_SPACING = 40;
 const GRID_COLS = 5;
 const GRID_ROWS = 3;
+/** Display size of the game icon artwork on each tile (px). */
+const TILE_ICON_DISPLAY = 80;
+/** Vertical offset of the tile icon above the tile center (px). */
+const TILE_ICON_Y_OFFSET = -32;
+/** Vertical offset of the secondary text label below the tile center (px). */
+const TILE_LABEL_Y_OFFSET = 18;
 
 /** Delay between consecutive entrance elements (ms). */
 const ENTRANCE_STAGGER = 40;
@@ -82,10 +90,12 @@ const STICKER_DISPLAY_SIZE = 56;
 const STICKER_TEXTURE_SIZE = 512;
 /** Base scale for sticker thumbnails (56px from a 512px texture). */
 const STICKER_SCALE = STICKER_DISPLAY_SIZE / STICKER_TEXTURE_SIZE;
-/** Alpha for unearned (locked) sticker thumbnails. */
-const UNEARNED_ALPHA = 0.3;
-/** Scale for unearned (locked) sticker thumbnails. */
-const UNEARNED_SCALE = 0.85;
+/** Alpha of the dashed empty-slot outline for unearned stickers. */
+const EMPTY_SLOT_ALPHA = 0.55;
+/** Stroke width of the dashed empty-slot outline (px). */
+const EMPTY_SLOT_LINE_WIDTH = 4;
+/** Number of dashes in the empty-slot circle. */
+const EMPTY_SLOT_DASH_COUNT = 10;
 /** Entrance scale for the just-earned sticker. */
 const JUST_EARNED_SCALE = 1.15;
 /** Duration of the gentle sparkle shimmer loop (ms). */
@@ -144,6 +154,8 @@ export class HubScene extends Phaser.Scene {
   private settingsPanel?: SettingsPanel;
   /** Sticker thumbnails currently on the shelf (rebuilt after a progress reset). */
   private stickerImages: Phaser.GameObjects.Image[] = [];
+  /** Dashed empty-slot outlines for unearned stickers (rebuilt after a reset). */
+  private emptySlotGraphics: Phaser.GameObjects.Graphics[] = [];
   private entranceIndex = 0;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
@@ -234,19 +246,22 @@ export class HubScene extends Phaser.Scene {
         }
       });
 
-      const label = this.add.text(x, y, GAME_TILES[i].label, textStyle({
-        fontSize: "18px",
+      const icon = this.add.image(x, y + TILE_ICON_Y_OFFSET, GAME_TILES[i].tileKey);
+      icon.setDisplaySize(TILE_ICON_DISPLAY, TILE_ICON_DISPLAY);
+
+      const label = this.add.text(x, y + TILE_LABEL_Y_OFFSET, GAME_TILES[i].label, textStyle({
+        fontSize: "15px",
         color: "#ffffff",
       }));
       label.setOrigin(0.5);
 
-      this.animateEntrance([tile, label], () => {
+      this.animateEntrance([tile, label, icon], () => {
         attachPressFeedback(tile, { spring: true });
       });
 
       if (!reducedMotion) {
         this.tweens.add({
-          targets: [tile, label],
+          targets: [tile, label, icon],
           y: y - BOB_AMPLITUDE,
           duration: BOB_DURATION,
           yoyo: true,
@@ -315,7 +330,10 @@ export class HubScene extends Phaser.Scene {
       this.idleCallTimer = undefined;
       this.mascot?.destroy();
       this.mascot = undefined;
+      for (const sticker of this.stickerImages) sticker.destroy();
       this.stickerImages = [];
+      for (const graphics of this.emptySlotGraphics) graphics.destroy();
+      this.emptySlotGraphics = [];
     });
   }
 
@@ -621,14 +639,16 @@ export class HubScene extends Phaser.Scene {
   /** Creates one shelf sticker thumbnail for the given tile, reflecting storage. */
   private createShelfSticker(index: number, x: number, y: number): void {
     const earned = hasSticker(GAME_TILES[index].gameId);
-    const sticker = this.add.image(
-      x,
-      y + TILE_HEIGHT / 2 - 20,
-      `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`,
-    );
-    this.stickerImages.push(sticker);
+    const stickerX = x;
+    const stickerY = y + TILE_HEIGHT / 2 - 20;
 
     if (earned) {
+      const sticker = this.add.image(
+        stickerX,
+        stickerY,
+        `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`,
+      );
+      this.stickerImages.push(sticker);
       if (GAME_TILES[index].gameId === this.justEarned) {
         sticker.setScale(STICKER_SCALE * JUST_EARNED_SCALE);
         this.animateJustEarned(sticker);
@@ -637,9 +657,37 @@ export class HubScene extends Phaser.Scene {
         this.animateEntrance([sticker], () => this.addSparkle(sticker), STICKER_SCALE);
       }
     } else {
-      sticker.setScale(STICKER_SCALE * UNEARNED_SCALE);
-      this.animateUnearned(sticker);
+      this.drawEmptySlot(stickerX, stickerY);
     }
+  }
+
+  /**
+   * Draws a dashed circle outline where an unearned sticker will appear,
+   * communicating the collection goal textlessly in place of a dimmed ghost.
+   */
+  private drawEmptySlot(x: number, y: number): void {
+    const graphics = this.add.graphics();
+    this.emptySlotGraphics.push(graphics);
+    const radius = STICKER_DISPLAY_SIZE / 2;
+    graphics.lineStyle(EMPTY_SLOT_LINE_WIDTH, 0xffffff, EMPTY_SLOT_ALPHA);
+    const segment = (Math.PI * 2) / EMPTY_SLOT_DASH_COUNT / 2;
+    for (let i = 0; i < EMPTY_SLOT_DASH_COUNT; i++) {
+      const start = i * segment * 2;
+      graphics.beginPath();
+      graphics.arc(x, y, radius, start, start + segment, false);
+      graphics.strokePath();
+    }
+    const index = this.entranceIndex;
+    this.entranceIndex += 1;
+    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
+      targets: graphics,
+      alpha: EMPTY_SLOT_ALPHA,
+      delay: index * ENTRANCE_STAGGER,
+      duration: ENTRANCE_DURATION,
+      ease: "Sine.out",
+    };
+    graphics.setAlpha(0);
+    this.tweens.add(config);
   }
 
   /**
@@ -649,6 +697,8 @@ export class HubScene extends Phaser.Scene {
   private rerenderStickerShelf(): void {
     for (const sticker of this.stickerImages) sticker.destroy();
     this.stickerImages = [];
+    for (const graphics of this.emptySlotGraphics) graphics.destroy();
+    this.emptySlotGraphics = [];
     const startX =
       (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
     const startY =
@@ -660,29 +710,6 @@ export class HubScene extends Phaser.Scene {
       const y = startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2;
       this.createShelfSticker(i, x, y);
     }
-  }
-
-  /**
-   * Fades an unearned sticker in dimmed and slightly smaller, with no sparkle,
-   * so the collection goal stays visible. Under reduced motion only alpha.
-   */
-  private animateUnearned(sticker: Phaser.GameObjects.Image): void {
-    const index = this.entranceIndex;
-    this.entranceIndex += 1;
-    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
-      targets: sticker,
-      alpha: UNEARNED_ALPHA,
-      delay: index * ENTRANCE_STAGGER,
-      duration: ENTRANCE_DURATION,
-      ease: "Sine.out",
-    };
-    sticker.setAlpha(0);
-    if (!isReducedMotion()) {
-      sticker.setScale(0);
-      config.scaleX = UNEARNED_SCALE * STICKER_SCALE;
-      config.scaleY = UNEARNED_SCALE * STICKER_SCALE;
-    }
-    this.tweens.add(config);
   }
 
   /**

@@ -41,6 +41,7 @@ vi.mock("phaser", () => {
       moveTo: vi.fn().mockReturnThis(),
       lineTo: vi.fn().mockReturnThis(),
       strokePath: vi.fn().mockReturnThis(),
+      arc: vi.fn().mockReturnThis(),
       lineStyle: vi.fn().mockReturnThis(),
       strokeRect: vi.fn().mockReturnThis(),
       strokeCircle: vi.fn().mockReturnThis(),
