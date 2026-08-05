@@ -59,3 +59,29 @@ export function speakLetter(letter: string, enabled: boolean): boolean {
 export function speakWord(word: string, enabled: boolean): boolean {
   return speakText(word, enabled, 0.8);
 }
+
+/** Number words for 0-10, the How Many? counting range. */
+const NUMBER_WORDS = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+] as const;
+
+/**
+ * Speaks a number word (en-US) if enabled and supported, at the same gentle
+ * rate as a single letter.
+ * @param number - The number to pronounce (e.g. 3 → "three").
+ * @param enabled - Whether speech is allowed (SFX toggle).
+ * @returns True when an utterance was actually dispatched.
+ */
+export function speakNumber(number: number, enabled: boolean): boolean {
+  return speakText(NUMBER_WORDS[number] ?? String(number), enabled, 0.9);
+}
