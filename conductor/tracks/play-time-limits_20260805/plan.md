@@ -7,14 +7,14 @@
 
 ## Phase 1 — Pure Logic & Storage Layer
 
-- [ ] Task: Extend types (`src/types/index.ts`) — add `PlayTime` interface and `playTime` field on `Profile`
-- [ ] Task: TDD — write failing tests for `src/game/playTimeLogic.test.ts` (todayKey, defaults, normalize w/ day rollover, remaining, reached, near-limit, addPlayTime, setLimit)
-- [ ] Task: Implement `src/game/playTimeLogic.ts` to pass (Green phase)
-- [ ] Task: TDD — extend `src/__tests__/game/profileLogic.test.ts` (normalizeV2/migrateV1 backfill `playTime` per profile)
-- [ ] Task: Implement backfill in `profileLogic.ts` (`createDefaultProfile`, `normalizeV2`, `migrateV1`)
-- [ ] Task: TDD — extend `src/__tests__/utils/storage.test.ts` (`getPlayTime`, `setPlayTimeLimit`, `recordPlayTime`, old-save migration)
-- [ ] Task: Implement storage facade additions in `src/utils/storage.ts`
-- [ ] Task: Document design update in `conductor/tech-stack.md` (dated note: schema addition + new module)
+- [x] Task: Extend types (`src/types/index.ts`) — add `PlayTime` interface and `playTime` field on `Profile` *(5314464)*
+- [x] Task: TDD — write failing tests for `src/game/playTimeLogic.test.ts` (todayKey, defaults, normalize w/ day rollover, remaining, reached, near-limit, addPlayTime, setLimit) *(5314464)*
+- [x] Task: Implement `src/game/playTimeLogic.ts` to pass (Green phase) *(5314464)*
+- [x] Task: TDD — extend `src/__tests__/game/profileLogic.test.ts` (normalizeV2/migrateV1 backfill `playTime` per profile) *(5314464)*
+- [x] Task: Implement backfill in `profileLogic.ts` (`createDefaultProfile`, `normalizeV2`, `migrateV1`) *(5314464)*
+- [x] Task: TDD — extend `src/__tests__/utils/storage.test.ts` (`getPlayTime`, `setPlayTimeLimit`, `recordPlayTime`, old-save migration) *(5314464)*
+- [x] Task: Implement storage facade additions in `src/utils/storage.ts` *(5314464)*
+- [x] Task: Document design update in `conductor/tech-stack.md` (dated note: schema addition + new module) *(31cba01)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Settings UI (Play Time chip in Profiles overlay)
