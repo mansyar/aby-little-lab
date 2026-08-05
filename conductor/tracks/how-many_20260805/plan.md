@@ -19,8 +19,8 @@
 
 ## Phase 3 — Scene Implementation
 
-- [ ] Task: Write scene tests following `alphabetScene.test.ts` style: round setup (target numeral, group counts, layout), correct tap → advance, incorrect tap → wiggle + no penalty, TTS called on round start, win flow + `{ justEarned: "how-many" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix)
-- [ ] Task: Implement `HowManyScene.ts` (scene key `HowMany`): target numeral card (~256px, pop-in), group cards 2×2 (3 in band 1) with N item copies, `pressFeedback`, progress dots, mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s
+- [x] Task: Write scene tests following `alphabetScene.test.ts` style: round setup (target numeral, group counts, layout), correct tap → advance, incorrect tap → wiggle + no penalty, TTS called on round start, win flow + `{ justEarned: "how-many" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(ab90dd0)*
+- [x] Task: Implement `HowManyScene.ts` (scene key `HowMany`): target numeral card (~256px, pop-in), group cards 2×2 (3 in band 1) with N item copies, pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s *(5e6c9c2)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Integration
