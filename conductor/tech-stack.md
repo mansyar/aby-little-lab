@@ -127,6 +127,8 @@ interface AppStorage {
 
 > **2026-08-05 — Design Update (Game 11 — How Many?):** Game 11 (How Many?) added — early numeracy counting game: a large target numeral pops in top-center and is spoken aloud (SpeechSynthesis), and the child taps the object group whose count matches. New assets: 10 numeral SVGs (`src/assets/svg/numbers/numeral_0.svg`…`numeral_9.svg`, identical `#2B6CB0` fill / `#2D3748` stroke styling to the letter set so recognition is digit-shape only) + `sticker_how_many.svg` (keyed `sticker_how_many`). Preload SVG count 94 → 105. Group items reuse existing textures only (`shape_star`, `sm_ball`, `food_apple`, `food_fish`, `food_carrot`, `sm_sun`, `sm_house`, `sm_duck` — zero new object assets). Pure logic in `src/game/countLogic.ts` (6-round playthroughs, 2 rounds per progressive band 1–3 / 1–5 / 1–10 with 3/4/4 group cards; distinct-counts guard per round, exactly one group matches the target, positions and item types shuffled). TTS: `speakNumber` (en-US, rate 0.9, 0–10 word mapping) added on the shared `speakText` in `src/utils/speech.ts`, still SFX-gated with a silent no-throw fallback. Hub grid is now 5×3 (11 tiles, `TILE_WIDTH` 160, `TILE_SPACING` 40; startY = (768 − 3×150 − 2×40)/2 = 119 — sticker shelf and play-time arc verified to fit); `GameId` includes `how-many`; scene registry has 11 lazy loaders. Old saves migrate automatically via the existing per-key storage merge (`GAME_IDS` backfill covers the new sticker key).
 
+> **2026-08-06 — Design Update (TTS & Speaker Button Fix):** Fixed two audio bugs. (1) The speaker replay button (and Hub avatar chip, profile-picker avatars, Settings Add-Profile avatars) used custom hit areas in texture-local coordinates that missed the visible icon on 512px rasterized textures — `setInteractive()` now uses the frame-based default hit area; regression coverage via `src/__tests__/helpers/hitTest.ts` (engine-accurate tap simulation). (2) iOS/WebKit silently drops `speechSynthesis.speak()` until an utterance is dispatched inside a user gesture — `speech.ts` gained `unlockSpeechForUserGesture()`, called from the Hub's first tap/pointerdown alongside `AudioManager.resume()`. `speakText` also cancels only when the engine is speaking/pending and defers the replacement utterance 100ms, avoiding the cancel/speak race where WebKit/Chromium's async cancel wipes a synchronously queued utterance.
+
 ### Audio Assets
 - **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
 - **BGM:** Single MP3 loop (`bgm.mp3`) served at `/audio/bgm.mp3`
@@ -196,7 +198,7 @@ aby-little-lab/
     │   ├── completionEffect.ts    # Graphics-based splash/win effects (no particle emitters)
     │   ├── sceneTransitions.ts    # crossfade transitions (transitionToScene, sceneEntrance)
     │   ├── pressFeedback.ts       # press squish + optional spring-back (attachPressFeedback)
-    │   └── speech.ts              # TTS letter/word pronunciation wrapper (SpeechSynthesis, graceful fallback)
+    │   └── speech.ts              # TTS letter/word pronunciation wrapper (SpeechSynthesis, iOS gesture unlock, graceful fallback)
     ├── types/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
