@@ -248,6 +248,16 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Service worker + manifest served — `sw.js` 200 (precaches `index-Bgbr44nH.js`), `manifest.webmanifest` 200
 - [ ] Device testing on v1.5.0 — **pending** (recorded in `docs/device-testing-checklist.md`; execute against live URL: 11-tile hub, How Many? end-to-end, play-time arc/nudge/Time's Up)
 
+### Step 7h: Verify Deployment — v1.6.0 (2026-08-06)
+- [x] Release branch `release/v1.6.0` + PR #14 merged to `master` (merge commit; CI Quality Gates green on PR)
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `31109687344`** (Deploy to Coolify 5s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-UJjn3q9H.js` matches fresh 1.6.0 local build exactly)
+- [x] Version footer data — `1.6.0` embedded in served bundle + visible in Settings panel footer; no stale `1.5.0` string
+- [x] Service worker + manifest served — `sw.js` 200 (precaches `index-UJjn3q9H.js`), `manifest.webmanifest` 200
+- [x] Live smoke test (headless browser) — boot → hub → Shape Sorter: round 1 (star/oval/teardrop) → dot 1, round 2 (rectangle/heart/crescent) → dot 2, round 3 (diamond/pentagon/square) → dot 3 → win → sticker badge on tile → auto-return to hub; Settings opens via 3s parental hold with footer `v1.6.0`, BGM/SFX toggles, Profiles, Reset Progress intact
+- [ ] Device testing on v1.6.0 — **pending** (Phase 6 of `release-1.6.0_20260806` track; execute against live URL: 18-shape 3-round Shape Sorter, speaker replay, TTS first-tap unlock, polished-asset visual pass, PWA update path from v1.5.0)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
