@@ -18,14 +18,14 @@
 
 ## Phase 3 — TTS: iPad gesture unlock + cancel/speak race hardening
 
-- [ ] Task (TDD): Write failing tests for `speech.ts` — warm-up unlock (silent utterance, dispatched once, respects SFX gating), guarded `cancel()` (skip when engine idle; utterance survives mid-speech cancels)
-- [ ] Task: Implement `speech.ts` changes (`unlockSpeechForUserGesture` + race-safe speak path)
-- [ ] Task (TDD): Wire the unlock into the first user gesture in `HubScene` (tile tap / first pointerdown — alongside `audio.resume()`) + tests
-- [ ] Task: Verify no regression in scene tests (round-start `speakX(target, sfxEnabled)` calls unchanged)
-- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+- [x] Task: Write failing tests for `speech.ts` — warm-up unlock (silent utterance, dispatched once, respects SFX gating), guarded `cancel()` (skip when engine idle; utterance survives mid-speech cancels)
+- [x] Task: Implement `speech.ts` changes (`unlockSpeechForUserGesture` + race-safe speak path)
+- [x] Task (TDD): Wire the unlock into the first user gesture in `HubScene` (tile tap / first pointerdown — alongside `audio.resume()`) + tests
+- [x] Task: Verify no regression in scene tests (round-start `speakX(target, sfxEnabled)` calls unchanged)
+- [x] Task: Phase Verification & Checkpoint (refer to workflow.md) — automated gates green (see Phase 4)
 
 ## Phase 4 — Full verification
 
-- [ ] Task: Run all quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`
-- [ ] Task: Manual desktop verification — speaker squish + replay speech in all 4 speech games; Hub avatar chip opens picker; Add-Profile avatars create profiles
-- [ ] Task: Device verification checklist (iPad + Android) — **pending human review** (desktop only available)
+- [x] Task: Run all quality gates — `pnpm run check` (1 pre-existing warning only), `CI=true pnpm test` (979/979), `pnpm run build` (passes)
+- [x] Task: Manual desktop verification — speaker squish + replay speech in all 4 speech games; Hub avatar chip opens picker; Add-Profile avatars create profiles
+- [ ] Task: Device verification checklist (iPad + Android) — **pending human review** (deferred post-track; desktop only available)
