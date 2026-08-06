@@ -613,6 +613,22 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
     });
 
+    it("does not crash when screen.orientation.lock is unavailable (iPad WebKit)", () => {
+      // iPad Safari/Chrome (WebKit) expose only a partial Screen Orientation
+      // API: `screen.orientation` exists but `lock` is missing. Calling it
+      // throws a synchronous TypeError, so BootScene must still start Preload.
+      vi.stubGlobal("screen", {
+        orientation: {
+          unlock: vi.fn(),
+        },
+      });
+
+      const scene = new BootScene();
+      scene.create();
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
+    });
+
     it("initializes the AudioManager on create", () => {
       const scene = new BootScene();
       scene.create();
