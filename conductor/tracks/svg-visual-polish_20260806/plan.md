@@ -106,3 +106,10 @@
 - [x] Zoom-verified by image-reader at 512px: 7/7 PASS + 2/2 cosmetic recheck [8da072b]
 - [x] Automated gates: 979/979 tests, biome 1 pre-existing warning [8da072b]
 - [x] Phase Verification & Checkpoint [checkpoint: 8da072b]
+
+## Phase 9d: Revert Letters & Numerals (user decision, round-2 feedback)
+- [x] Restore all 26 letter_*.svg + 10 numeral_*.svg from ec3e113^ (pre-polish Arial <text> versions) [53e7c42]
+- [x] SVG_STYLE.md sec 4 + category table updated: <text> allowed/required for letters+numbers; custom-path metrics kept for sticker/tile accents only [53e7c42]
+- [x] Contact sheets re-rendered (letters.png, numbers.png) [53e7c42]
+- [x] Automated gates: 979/979 tests, biome 1 pre-existing warning [53e7c42]
+- [x] Phase Verification & Checkpoint [checkpoint: 53e7c42]
