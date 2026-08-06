@@ -246,7 +246,7 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Game 11 live — `how-many` + `HowMany` present in served entry; lazy chunk `HowManyScene-Deh9UyzD.js` 200 (matches local chunk)
 - [x] Play-Time Limits live — `Play Time` chip label + `usedMinutes`/`limitMinutes` storage fields confirmed in served entry
 - [x] Service worker + manifest served — `sw.js` 200 (precaches `index-Bgbr44nH.js`), `manifest.webmanifest` 200
-- [ ] Device testing on v1.5.0 — **pending** (recorded in `docs/device-testing-checklist.md`; execute against live URL: 11-tile hub, How Many? end-to-end, play-time arc/nudge/Time's Up)
+- [x] Device testing on v1.5.0 — **executed 2026-08-06 as carried rows in the v1.6.0 execution** (11-tile hub, How Many? end-to-end, play-time arc/nudge/Time's Up — all passed on iPad, Android tablet, iPhone, Android phone against the live URL)
 
 ### Step 7h: Verify Deployment — v1.6.0 (2026-08-06)
 - [x] Release branch `release/v1.6.0` + PR #14 merged to `master` (merge commit; CI Quality Gates green on PR)
@@ -256,7 +256,7 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Version footer data — `1.6.0` embedded in served bundle + visible in Settings panel footer; no stale `1.5.0` string
 - [x] Service worker + manifest served — `sw.js` 200 (precaches `index-UJjn3q9H.js`), `manifest.webmanifest` 200
 - [x] Live smoke test (headless browser) — boot → hub → Shape Sorter: round 1 (star/oval/teardrop) → dot 1, round 2 (rectangle/heart/crescent) → dot 2, round 3 (diamond/pentagon/square) → dot 3 → win → sticker badge on tile → auto-return to hub; Settings opens via 3s parental hold with footer `v1.6.0`, BGM/SFX toggles, Profiles, Reset Progress intact
-- [ ] Device testing on v1.6.0 — **pending** (Phase 6 of `release-1.6.0_20260806` track; execute against live URL: 18-shape 3-round Shape Sorter, speaker replay, TTS first-tap unlock, polished-asset visual pass, PWA update path from v1.5.0)
+- [x] Device testing on v1.6.0 — **executed 2026-08-06 on iPad, Android tablet, iPhone, Android phone against the live URL — all items passed, no issues** (18-shape 3-round Shape Sorter, speaker replay, TTS first-tap unlock, polished-asset visual pass, Settings readability, PWA update path from v1.5.0)
 
 ## Post-Release Verification
 
