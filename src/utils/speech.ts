@@ -21,6 +21,12 @@ export function isSpeechSupported(): boolean {
 let speechUnlocked = false;
 
 /**
+ * Defer interval after cancel(): the platform's async cancel callback must
+ * complete before the replacement utterance is queued (WebKit/Chromium race).
+ */
+const INTERRUPT_DEFER_MS = 100;
+
+/**
  * Unlocks the Web Speech session on iOS/WebKit, where programmatic speaks
  * are silently dropped until an utterance is dispatched inside a real user
  * gesture. Dispatches a single silent warm-up utterance; safe to call
@@ -31,15 +37,15 @@ export function unlockSpeechForUserGesture(): void {
   if (speechUnlocked || !isSpeechSupported()) {
     return;
   }
-  speechUnlocked = true;
   try {
     const { speechSynthesis, SpeechSynthesisUtterance } = window;
     const warmUp = new SpeechSynthesisUtterance();
     warmUp.text = " ";
     warmUp.volume = 0;
     speechSynthesis.speak(warmUp);
+    speechUnlocked = true;
   } catch {
-    // Best-effort: the next interaction will try again.
+    // Best-effort: the flag stays clear so the next interaction retries.
   }
 }
 
@@ -82,7 +88,7 @@ function speakText(text: string, enabled: boolean, rate: number): boolean {
         } catch {
           // Best-effort: the utterance is dropped when the engine is gone.
         }
-      }, 100);
+      }, INTERRUPT_DEFER_MS);
     } else {
       speechSynthesis.speak(utterance);
     }
