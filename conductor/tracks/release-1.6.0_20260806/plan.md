@@ -16,14 +16,14 @@
 - [x] Task 1.3: Capture baseline release metrics (test count 979, precache 27 entries / 1525.47 KiB, main chunk index-Cbz3RFR2.js) for release notes
 - [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint fc49e7f, git note attached
 
-## Phase 2 — Release Branch & Version Bump
+## Phase 2 — Release Branch & Version Bump [checkpoint: e8f16cf]
 
 - [x] Task 2.1: Create release branch `git checkout -b release/v1.6.0` from master
 - [x] Task 2.2: Bump version `npm version 1.6.0 --no-git-tag-version`
   - [x] Verify `package.json` version = 1.6.0
   - [x] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts defines it from pkg.version)
 - [x] Task 2.3: Commit: `chore(release): Bump version to 1.6.0` (a260b58)
-- [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint e8f16cf, git note attached
 
 ## Phase 3 — Release Documentation
 
