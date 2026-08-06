@@ -8,10 +8,10 @@
 
 ## Phase 1: Foundation — Style Spec, Tooling, Baseline
 
-- [ ] Task: Write `docs/SVG_STYLE.md` — polish standards doc: outline palette (`#2D3748`, 4–6px @512), soft/vibrant color rotation list, letterform construction technique (thick round-capped paths, `paint-order` outline), silhouette-first rule, per-category composition rules (tiles: icon zone ~70%, readable @48px; stickers: one-glance concept), shape↔cutout hue pairing.
-- [ ] Task: Add `scripts/render-svg-contact-sheets.mjs` — repo tool that renders all SVGs into per-category contact-sheet HTML + screenshots (adapted from the audit tooling; keeps the visual QA loop repeatable).
-- [ ] Task: Capture baseline contact sheets into a commit-visible location (e.g., `docs/svg-contact-sheets/baseline/`) for before/after comparison.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write `docs/SVG_STYLE.md` — polish standards doc: outline palette (`#2D3748`, 4–6px @512), soft/vibrant color rotation list, letterform construction technique (thick round-capped paths, `paint-order` outline), silhouette-first rule, per-category composition rules (tiles: icon zone ~70%, readable @48px; stickers: one-glance concept), shape↔cutout hue pairing. (c536445)
+- [x] Task: Add `scripts/render-svg-contact-sheets.mjs` — repo tool that renders all SVGs into per-category contact-sheet HTML + screenshots (adapted from the audit tooling; keeps the visual QA loop repeatable). (bd80f61)
+- [x] Task: Capture baseline contact sheets into a commit-visible location (e.g., `docs/svg-contact-sheets/baseline/`) for before/after comparison. (026de51)
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Shapes & Cutouts (36 files)
 
