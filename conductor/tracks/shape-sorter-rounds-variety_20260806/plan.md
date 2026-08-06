@@ -41,16 +41,16 @@
 
 ## Phase 2: Pool Expansion & Playthrough Generation (TDD)
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Write failing tests for playthrough generation in `shapeSorterLogic.test.ts` (Red)
-    - [ ] Test `ALL_SHAPES` has exactly 18 entries including the 12 new shape types
-    - [ ] Test `generatePlaythrough(3)` returns 3 rounds × 3 shapes
-    - [ ] Test no shape repeats across a playthrough (9 unique per session)
-    - [ ] Test no duplicate shapes within a round
-    - [ ] Test all drawn shapes belong to `ALL_SHAPES`
-    - [ ] Test existing `selectThreeShapes` / `shuffle` / `isMatch` behavior unchanged
-- [ ] Task: Implement `generatePlaythrough(roundCount = 3)` and expand `ALL_SHAPES` to 18 (Green)
-- [ ] Task: Verify coverage (>80%) and run `CI=true pnpm test`
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase af519c9
+- [x] Task: Write failing tests for playthrough generation in `shapeSorterLogic.test.ts` (Red) a471506
+    - [x] Test `ALL_SHAPES` has exactly 18 entries including the 12 new shape types
+    - [x] Test `generatePlaythrough(3)` returns 3 rounds × 3 shapes
+    - [x] Test no shape repeats across a playthrough (9 unique per session)
+    - [x] Test no duplicate shapes within a round
+    - [x] Test all drawn shapes belong to `ALL_SHAPES`
+    - [x] Test existing `selectThreeShapes` / `shuffle` / `isMatch` behavior unchanged
+- [x] Task: Implement `generatePlaythrough(roundCount = 3)` and expand `ALL_SHAPES` to 18 (Green) a471506
+- [x] Task: Verify coverage (>80%) and run `CI=true pnpm test` a471506
 - [ ] Task: Conductor - User Manual Verification 'Pool Expansion & Playthrough Generation' (Protocol in workflow.md)
 
 ---
@@ -68,11 +68,11 @@
 
 - [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
 - [ ] Task: Write failing scene tests in `src/__tests__/scenes/shapeSorterScene.test.ts` (Red), mirroring `wordMatchScene.test.ts`
-    - [ ] Test scene renders 3 progress dots on create (dimmed)
-    - [ ] Test placing all 3 shapes of round 1 advances to round 2 (first dot filled)
-    - [ ] Test round 2 rebuilds slots/shapes with fresh playthrough data (teardown of round 1 objects)
-    - [ ] Test win celebration + sticker award only after round 3 completes
-    - [ ] Test progress dot pops (scale 1 → 1.4 → 1, `Back.out`) on round completion
+    - [x] Test scene renders 3 progress dots on create (dimmed)
+    - [x] Test placing all 3 shapes of round 1 advances to round 2 (first dot filled)
+    - [x] Test round 2 rebuilds slots/shapes with fresh playthrough data (teardown of round 1 objects)
+    - [x] Test win celebration + sticker award only after round 3 completes
+    - [x] Test progress dot pops (scale 1 → 1.4 → 1, `Back.out`) on round completion
 - [ ] Task: Implement round state (`roundIndex`, `playthrough`), 3 progress dots, round teardown/re-init, completion gated to final round (Green)
 - [ ] Task: Regression — existing juice intact (drag lift/tilt, zone highlight, snap tween, silent floor bounce, mascot reactions, reduced-motion) via full suite `CI=true pnpm test`
 - [ ] Task: Conductor - User Manual Verification 'Multi-Round Sessions & Progress Dots' (Protocol in workflow.md)
