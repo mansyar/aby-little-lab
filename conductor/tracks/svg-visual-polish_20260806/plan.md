@@ -94,3 +94,15 @@
 - [x] Task: Letterforms — C was a U-shaped arc (wrong sweep flags); fixed with O-verified left-half arc; G = C + right spur; J = deep U-hook. Broken C path also replaced in 3 inline copies (sticker_alphabet_match, sticker_word_match, tile_word_match). *(cc1091b)*
 - [x] Task: Numerals — 1 steeper flag, 3 two-bump path, 4 closed-top (diagonal+bar+stem), 6 loop+bowl+neck, 9 bowl+tail. All 9 glyphs pixel-verified PASS. *(cc1091b)*
 - [x] Task: Automated gates — 979/979 tests, biome 1 pre-existing warning. Contact sheets re-rendered to docs/svg-contact-sheets/final/. *(cc1091b)*
+
+## Phase 9c: Round-2 User-Feedback Fixes (post Phase 9b)
+- [x] G rebuilt: full circle + right spur overlapping ring edge (was detached bar) [8da072b]
+- [x] Elephant: trunk + tusks raised 30px onto face; tusks drawn in front of trunk [8da072b]
+- [x] Cat: ears behind head circle, tilted outward -20/+20 deg symmetric [8da072b]
+- [x] Numeral 1: curved flag + stem meets base bar [8da072b]
+- [x] Numeral 4: diagonal top-right -> down-left (handwriting style) [8da072b]
+- [x] Numeral 6: loop repositioned, neck ends on bowl edge (was 30px outside) [8da072b]
+- [x] Numeral 9: tail flows from bowl bottom-right, natural connection [8da072b]
+- [x] Zoom-verified by image-reader at 512px: 7/7 PASS + 2/2 cosmetic recheck [8da072b]
+- [x] Automated gates: 979/979 tests, biome 1 pre-existing warning [8da072b]
+- [x] Phase Verification & Checkpoint [checkpoint: 8da072b]
