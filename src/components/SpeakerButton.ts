@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { attachPressFeedback } from "../utils/pressFeedback";
 
 /** Display size of the speaker icon artwork (px). */

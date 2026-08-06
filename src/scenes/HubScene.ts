@@ -17,6 +17,7 @@ import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
+import { unlockSpeechForUserGesture } from "../utils/speech";
 import {
   getActiveProfile,
   getPlayTime,
@@ -293,6 +294,9 @@ export class HubScene extends Phaser.Scene {
     const startY =
       (this.cameras.main.height - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2;
     const startAudio = (): void => {
+      // First gesture in the session also unlocks iOS/WebKit speech (a silent
+      // warm-up utterance), otherwise programmatic TTS is silently dropped.
+      unlockSpeechForUserGesture();
       const audio = AudioManager.getInstance();
       audio.resume();
       audio.playBGM();
@@ -381,6 +385,7 @@ export class HubScene extends Phaser.Scene {
     this.input.on("pointerdown", () => {
       // Any first interaction unlocks audio so the idle-attract cue is
       // audible on a fresh load (the tile tap already resumes + starts BGM).
+      unlockSpeechForUserGesture();
       AudioManager.getInstance().resume();
       this.resetIdleAttract();
     });

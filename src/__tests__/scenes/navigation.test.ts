@@ -245,6 +245,15 @@ vi.mock("../../audio/AudioManager", () => ({
   },
 }));
 
+const mockSpeech = vi.hoisted(() => ({
+  isSpeechSupported: vi.fn(() => false),
+  unlockSpeechForUserGesture: vi.fn(),
+  speakLetter: vi.fn(() => true),
+  speakWord: vi.fn(() => true),
+  speakNumber: vi.fn(() => true),
+}));
+vi.mock("../../utils/speech", () => mockSpeech);
+
 const { MockSettingsPanel, mockSettingsPanel, mockSettingsPanelDestroy } = vi.hoisted(() => {
   const mockSettingsPanelDestroy = vi.fn();
   class MockSettingsPanel {
@@ -1015,6 +1024,15 @@ describe("scene navigation flow", () => {
       triggerAllPointerups(scene);
 
       expect(mockAudio.resume).toHaveBeenCalled();
+    });
+
+    it("unlocks WebKit speech on the first tile tap (iOS gesture unlock)", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      triggerAllPointerups(scene);
+
+      expect(mockSpeech.unlockSpeechForUserGesture).toHaveBeenCalled();
     });
 
     it("starts BGM when a tile is clicked", () => {

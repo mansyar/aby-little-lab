@@ -1,16 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { isSpeechSupported, speakLetter, speakNumber, speakWord } from "../../utils/speech";
+import {
+  isSpeechSupported,
+  speakLetter,
+  speakNumber,
+  speakWord,
+  unlockSpeechForUserGesture,
+} from "../../utils/speech";
 
 describe("speech", () => {
   const cancel = vi.fn();
   const speak = vi.fn();
+  const resume = vi.fn();
+  const synth = { cancel, speak, resume, speaking: false, pending: false };
   let Utterance: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     cancel.mockClear();
     speak.mockClear();
+    resume.mockClear();
+    synth.speaking = false;
+    synth.pending = false;
     Utterance = vi.fn();
-    vi.stubGlobal("speechSynthesis", { cancel, speak });
+    vi.stubGlobal("speechSynthesis", synth);
     vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
   });
 
@@ -49,11 +60,30 @@ describe("speech", () => {
       expect(speak).toHaveBeenCalledWith(utterance);
     });
 
-    it("cancels prior utterances before speaking a new one", () => {
+    it("does not cancel an idle queue before speaking (avoids the cancel/speak race)", () => {
       speakLetter("A", true);
       speakLetter("B", true);
-      expect(cancel).toHaveBeenCalledTimes(2);
+      expect(cancel).not.toHaveBeenCalled();
+      expect(speak).toHaveBeenCalledTimes(2);
       expect(Utterance.mock.instances).toHaveLength(2);
+    });
+
+    it("cancels and defers the new utterance when the engine is speaking", () => {
+      vi.useFakeTimers();
+      try {
+        synth.speaking = true;
+        const result = speakLetter("B", true);
+        expect(result).toBe(true);
+        expect(cancel).toHaveBeenCalledTimes(1);
+        expect(resume).toHaveBeenCalledTimes(1);
+        // Never queue synchronously after cancel(): the platform's async
+        // cancel callback can wipe the fresh utterance (WebKit/Chromium).
+        expect(speak).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(100);
+        expect(speak).toHaveBeenCalledWith(Utterance.mock.instances[0]);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("never throws when speechSynthesis is unavailable", () => {
@@ -82,10 +112,11 @@ describe("speech", () => {
       expect(speak).toHaveBeenCalledWith(utterance);
     });
 
-    it("cancels prior utterances before speaking a new word", () => {
+    it("does not cancel an idle queue before speaking a new word", () => {
       speakWord("DOG", true);
       speakWord("PIG", true);
-      expect(cancel).toHaveBeenCalledTimes(2);
+      expect(cancel).not.toHaveBeenCalled();
+      expect(speak).toHaveBeenCalledTimes(2);
       expect(Utterance.mock.instances).toHaveLength(2);
     });
 
@@ -136,10 +167,11 @@ describe("speech", () => {
       }
     });
 
-    it("cancels prior utterances before speaking a new number", () => {
+    it("does not cancel an idle queue before speaking a new number", () => {
       speakNumber(2, true);
       speakNumber(4, true);
-      expect(cancel).toHaveBeenCalledTimes(2);
+      expect(cancel).not.toHaveBeenCalled();
+      expect(speak).toHaveBeenCalledTimes(2);
       expect(Utterance.mock.instances).toHaveLength(2);
     });
 
@@ -147,6 +179,30 @@ describe("speech", () => {
       vi.unstubAllGlobals();
       expect(() => speakNumber(3, true)).not.toThrow();
       expect(speakNumber(3, true)).toBe(false);
+    });
+  });
+
+  describe("unlockSpeechForUserGesture", () => {
+    it("dispatches one silent warm-up utterance to unlock the WebKit session", () => {
+      unlockSpeechForUserGesture();
+      expect(speak).toHaveBeenCalledTimes(1);
+      const warmUp = Utterance.mock.instances[0];
+      expect(warmUp.volume).toBe(0);
+      expect(cancel).not.toHaveBeenCalled();
+    });
+
+    it("is idempotent — unlocks at most once per page session", async () => {
+      // Fresh module instance so the per-session unlock flag starts clean.
+      vi.resetModules();
+      const speech = await import("../../utils/speech");
+      speech.unlockSpeechForUserGesture();
+      speech.unlockSpeechForUserGesture();
+      expect(speak).toHaveBeenCalledTimes(1);
+    });
+
+    it("never throws when speechSynthesis is unavailable", () => {
+      vi.unstubAllGlobals();
+      expect(() => unlockSpeechForUserGesture()).not.toThrow();
     });
   });
 });
