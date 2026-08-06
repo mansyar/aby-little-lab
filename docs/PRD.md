@@ -41,7 +41,7 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 ### Standardized Prompt Engineering Matrix
 
-> **Note:** Game 1 (Shape Sorter) SVGs are currently **hand-authored** flat vectors (6 shapes + 6 cutout slots + 1 sticker), not AI-generated. The AI generation pipeline will be adopted for subsequent games.
+> **Note:** Game 1 (Shape Sorter) SVGs are currently **hand-authored** flat vectors (18 shapes + 18 cutout slots + 1 sticker), not AI-generated. The AI generation pipeline will be adopted for subsequent games.
 
 | Asset Type | Target Mini-Game | Recommended AI Generation Prompt |
 |---|---|---|
@@ -67,13 +67,13 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
-- **Milestone:** Matching and sorting geometric shapes (Circle, Square, Triangle, Star, Heart, Crescent).
-- **Mechanics:** 3 of 6 shapes randomly selected per playthrough. 3 cut-out SVG slot frames sit at the top. 3 colored SVG shapes spawn at bottom (positions shuffled independently). Player drags shape to matching slot.
-- **SVG Requirements:** `shape_circle.svg`, `shape_square.svg`, `shape_triangle.svg`, `shape_star.svg`, `shape_heart.svg`, `shape_crescent.svg` (512×512px, hand-authored flat vectors). Cutouts: `cutout_*.svg` (same paths, 30% opacity fill + dashed `#2D3748` stroke). Sticker: `sticker_shape_sorter.svg`.
-- **Shape Colors:** Circle `#F6AD55` (orange), Square `#9F7AEA` (purple), Triangle `#4FD1C5` (teal), Star `#F687B3` (pink), Heart `#E53E3E` (red), Crescent `#ECC94B` (yellow) — all soft/vibrant non-primary, color-independent design.
-- **Phaser Engine Logic:** Uses Phaser Pointer Drag and Zone detection (`this.add.zone()`). Pieces lift to 1.1× scale with a 4° tilt on drag start (1.05×, no tilt under reduced motion) and restore on release; drop zones pulse a soft outline while dragging over them. Correct drops snap to center via a 200ms `Back.out` tween (120ms reduced) with synthesized chime + Graphics splash. Incorrect drops bounce back with gentle wobble (no penalty); dropping on empty space bounces back silently (no incorrect SFX).
+- **Milestone:** Matching and sorting geometric shapes (18 total: Circle, Square, Triangle, Star, Heart, Crescent, Oval, Rectangle, Diamond, Pentagon, Hexagon, Octagon, Trapezoid, Semicircle, Arrow, Plus, Ring, Teardrop).
+- **Mechanics:** 3 rounds of 3 shapes per playthrough (9 unique shapes per session — no repeats across rounds) drawn from the 18-shape pool via `generatePlaythrough(3)`. Each round shows 3 cut-out SVG slot frames at the top and 3 colored SVG shapes at the bottom (positions shuffled independently). Player drags shape to matching slot. A progress dot fills for each completed round; the win + sticker award happen only after round 3.
+- **SVG Requirements:** `shape_circle.svg` … `shape_teardrop.svg` (18 shapes, 512×512px, hand-authored flat vectors). Cutouts: `cutout_*.svg` (same paths, 30% opacity fill + dashed `#2D3748` stroke). Sticker: `sticker_shape_sorter.svg`.
+- **Shape Colors:** Circle `#F6AD55` (orange), Square `#9F7AEA` (purple), Triangle `#4FD1C5` (teal), Star `#F687B3` (pink), Heart `#E53E3E` (red), Crescent `#ECC94B` (yellow), Oval `#63B3ED` (sky blue), Rectangle `#48BB78` (green), Diamond `#ED64A6` (rose), Pentagon `#B7791F` (golden brown), Hexagon `#4C51BF` (indigo), Octagon `#D69E2E` (amber), Trapezoid `#38B2AC` (turquoise), Semicircle `#F56565` (coral), Arrow `#9AE6B4` (mint), Plus `#FBB6CE` (blush), Ring `#A0AEC0` (soft gray-blue), Teardrop `#B2F5EA` (aqua) — all soft/vibrant non-primary, color-independent design.
+- **Phaser Engine Logic:** Uses Phaser Pointer Drag and Zone detection (`this.add.zone()`). Pieces lift to 1.1× scale with a 4° tilt on drag start (1.05×, no tilt under reduced motion) and restore on release; drop zones pulse a soft outline while dragging over them. Correct drops snap to center via a 200ms `Back.out` tween (120ms reduced) with synthesized chime + Graphics splash. Incorrect drops bounce back with gentle wobble (no penalty); dropping on empty space bounces back silently (no incorrect SFX). Completing a round fills its progress dot with a 1 → 1.4 → 1 `Back.out` pop (1.15 reduced); the next round re-renders fresh shapes after ~1.2s; the win celebration, sticker award, and 3s auto-return to Hub happen only after the final round.
 - **Accessibility:** All juice amplitudes/durations soften when `prefers-reduced-motion` is active.
-- **Game Logic:** Pure functions in `src/game/shapeSorterLogic.ts` (Fisher-Yates shuffle, match detection, shape selection).
+- **Game Logic:** Pure functions in `src/game/shapeSorterLogic.ts` (Fisher-Yates shuffle, match detection, shape selection, `generatePlaythrough(roundCount)` producing 9-unique-shape sessions).
 
 ### GAME 2 — Animal Trace-and-Connect (Fine Motor Precision) ✅ Implemented
 

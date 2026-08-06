@@ -201,8 +201,7 @@ aby-little-lab/
     │   └── index.ts               # AppStorage interface, game types
     ├── assets/
     │   └── svg/
-    │       ├── shapes/
-    │       ├── cutouts/
+    │       ├── shapes/            # Game 1 shape + cutout SVGs (18 + 18, single folder)
     │       ├── animals/
     │       ├── items/
     │       ├── toys/
@@ -253,6 +252,8 @@ aby-little-lab/
 > **2026-08-02 — CI/CD Deviation Note:** In CI, pnpm is installed via `pnpm/action-setup@v4` pinned to `version: 11.7.0` instead of a raw `corepack prepare` step. Same version pin as the Dockerfile (`pnpm@11.7.0`), but the action is the recommended, more reliable install path on GitHub runners. The pnpm store is cached via `actions/setup-node@v4` `cache: pnpm` (keyed on `pnpm-lock.yaml`).
 
 > **2026-08-02 — CI/CD Amendment (Coolify webhook auth):** The Coolify deploy webhook endpoint requires Bearer authentication — the URL alone returns `401 Unauthenticated`. The deploy job therefore requires **two** repository secrets: `COOLIFY_DEPLOY_WEBHOOK` (Application → Webhooks → Deploy Webhook URL) and `COOLIFY_TOKEN` (Keys & Tokens → API token with `deploy` permission). The webhook is triggered with a **GET** request plus `Authorization: Bearer $COOLIFY_TOKEN` (per Coolify's official GitHub Actions docs) with `--fail-with-body`; a guard step fails fast if either secret is missing. Verified live on the first merged master push.
+
+> **2026-08-06 — Design Update (Shape Sorter Variety & Multi-Round):** Game 1 shape pool expanded 6 → 18 shapes (12 new hand-authored geometric shapes: oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring, teardrop — each with its own distinct soft/vibrant color) plus 12 matching `cutout_*` SVGs, all in `src/assets/svg/shapes/` (no separate cutouts folder). Preload SVG count 118 → 142 (24 new `?raw` imports + `SHAPE_ASSETS` entries; `SHAPE_ASSETS` is now exported for testability). Sessions became 3 rounds × 3 shapes — `generatePlaythrough(roundCount)` in `src/game/shapeSorterLogic.ts` shuffles the 18-pool once and slices 3 per round (9 unique shapes per session, difficulty fixed); `ShapeSorterScene` renders 3 progress dots above the slots that fill with a 1 → 1.4 → 1 `Back.out` pop on round completion, tears down and re-inits rounds after ~1.2s, and gates the win/sticker/auto-return to the final round. Pattern Builder is intentionally unaffected (its `SHAPE_TEXTURES` map still uses the original 6 shape textures). New scene tests: `src/__tests__/scenes/shapeSorterScene.test.ts` (8 tests); navigation suite updated for round-aware completion.
 
 ## See Also
 

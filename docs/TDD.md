@@ -561,7 +561,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 
 | Type | Count |
 |---|---|
-| SVG — shapes | 12 (6 shapes + 6 cutouts) |
+| SVG — shapes | 36 (18 shapes + 18 cutouts) |
 | SVG — animals | 9 |
 | SVG — items | 19 (6 Game 2 food + 8 Game 4 objects + 4 Game 9/10 word pictures + lily pad) |
 | SVG — toys | 7 (6 toys + 1 box, Game 6) |
@@ -574,7 +574,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | Audio (MP3) | 1 |
 | Font (WOFF2) | 1 (Baloo 2, 2026-08-06) |
 | PWA icons (PNG) | 3 |
-| **SVG total (registered in PreloadScene)** | **118** |
+| **SVG total (registered in PreloadScene)** | **142** |
 
 ### UI/UX Hardening (2026-08-06)
 
