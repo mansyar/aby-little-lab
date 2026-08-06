@@ -55,7 +55,7 @@
 
 ---
 
-## Phase 3: Preload Wiring
+## Phase 3: Preload Wiring [checkpoint: 81ab2c3]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 888ef88
 - [x] Task: Add 24 `?raw` imports + `SHAPE_ASSETS` entries in `PreloadScene.ts` (preload SVG count 118 → 142) 888ef88
