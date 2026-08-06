@@ -286,24 +286,6 @@ function getCardRects(scene: unknown): Array<Record<string, MockFn>> {
   return cards;
 }
 
-/** Returns the letter images of one card (2×2 grid position by x/y). */
-function _getCardLetters(scene: unknown, cardIndex: number): Array<Record<string, MockFn>> {
-  const s = scene as { add: Record<string, unknown> };
-  const imageMock = getMockFn(s.add.image);
-  const centerX = (scene as { cameras: { main: { centerX: number } } }).cameras.main.centerX;
-  const letters: Array<Record<string, MockFn>> = [];
-  for (let i = 0; i < imageMock.mock.calls.length; i++) {
-    const [x, y, key] = imageMock.mock.calls[i] as [number, number, string];
-    if (typeof key !== "string" || !key.startsWith("letter_")) continue;
-    const row = y === CARD_ROW_YS[0] ? 0 : 1;
-    const col = x < centerX ? 0 : 1;
-    if (row * 2 + col === cardIndex) {
-      letters.push(imageMock.mock.results[i].value as Record<string, MockFn>);
-    }
-  }
-  return letters;
-}
-
 /** Returns the mascot image object (created with the mascot_idle texture). */
 function getMascotImage(scene: unknown): Record<string, MockFn> {
   const s = scene as { add: Record<string, unknown> };
@@ -339,13 +321,6 @@ function fireNextRoundDelay(scene: unknown): void {
   if (nextRoundCall && typeof nextRoundCall[1] === "function") {
     (nextRoundCall[1] as () => void)();
   }
-}
-
-/** Taps the correct card and fires the next-round delay for the current round. */
-function _completeRound(scene: unknown): void {
-  const round = getCurrentRound(scene);
-  tapCard(scene, round.choices.indexOf(round.target));
-  fireNextRoundDelay(scene);
 }
 
 /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */

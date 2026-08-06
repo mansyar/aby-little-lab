@@ -479,7 +479,6 @@ describe("WordMatchScene round rendering", () => {
     const scene = new WordMatchScene();
     scene.create();
 
-    const _round = getCurrentRound(scene);
     const prompt = getPromptImage(scene);
     expect(prompt).toBeDefined();
     expect(getMockFn(prompt?.setDisplaySize)).toHaveBeenCalledWith(180, 180);
