@@ -1,0 +1,14 @@
+Phase Verification Report — Phase 1: TDD Fix, BootScene Orientation Lock Crash
+
+Automated test command: CI=true pnpm test
+Result: 664/664 tests passed (21 files), including new regression test 'does not crash when screen.orientation.lock is unavailable (iPad WebKit)'.
+Additional gates: pnpm run check (57 files clean), pnpm run build (PWA generated successfully).
+
+Manual verification steps (pending — to be performed by a human reviewer):
+1. Start dev server: pnpm dev
+2. On iPad Safari, open http://<computer-IP>:5173 (or deployed PWA URL)
+3. Confirm game boots past progress bar to Hub screen — no black screen; landscape preferred (lock only applies in standalone PWA mode)
+4. Repeat on iPad Chrome — same boot to Hub, no black screen
+5. Sanity check desktop Chrome: game boots normally, orientation lock still attempted
+
+User confirmation: YES — user approved proceeding with checkpoint (2026-08-06). Manual iPad verification still pending.
