@@ -5,7 +5,7 @@
 
 ---
 
-## Phase 1: Shape & Cutout Asset Creation (24 new SVGs)
+## Phase 1: Shape & Cutout Asset Creation (24 new SVGs) [checkpoint: 204b36c]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 2678a79
 - [x] Task: Author 12 new shape SVGs (512×512 viewBox, flat fill, 5px `#2D3748` stroke, assigned distinct colors) 849a9b2
