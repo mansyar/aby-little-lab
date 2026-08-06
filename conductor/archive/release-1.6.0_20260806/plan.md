@@ -60,11 +60,11 @@
 - [x] Task 6.3: Commit results: `docs(device): Record v1.6.0 device testing results` — commit 33c02f6
 - [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 7 — Finalize & Archive
+## Phase 7 — Finalize & Archive [checkpoint: 5e51d56]
 
 - [x] Task 7.1: Final gates on master if any post-merge changes occurred — final gates run on release/v1.6.0 (identical code to master; post-merge changes doc-only): check 1 pre-existing warning, CI=true pnpm test 979/979 (38 files), build OK, validate-pwa all passed
 - [x] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete — docs/release-notes-v1.6.0.md status FINAL (released 2026-08-06 via automated pipeline, device testing completed all passed); release-checklist.md Final Sign-Off — v1.6.0 added + v1.5.0 sign-off updated (commit 4cd5a74)
 - [x] Task 7.3: Archive track folder to `conductor/archive/release-1.6.0_20260806/` — moved via git mv
   - [x] Registry: mark entry `[x]` with archive link — user decision 2026-08-06: **keep entry [x] + archive link** (dominant convention)
-- [ ] Task 7.4: Commit: `chore(conductor): Archive track 'v1.6.0 Release Execution'`
-- [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 7.4: Commit: `chore(conductor): Archive track 'v1.6.0 Release Execution'` — commit 0f32a7e; master merged via 2fb0e8d (docs + archive on master)
+- [x] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint 5e51d56, git note attached
