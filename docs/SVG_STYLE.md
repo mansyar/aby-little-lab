@@ -49,7 +49,9 @@ Filled shapes (circles, hearts, animal bodies): fill + outer stroke in one pass 
 
 ## 4. Letterforms & Numerals (letters/, numbers/)
 
-**Replace all `<text>` elements with custom stroked paths.**
+**Reverted to system-font `<text>` glyphs (2026-08-06, track feedback round 2):** the custom stroked-path letterforms were replaced back with the pre-polish Arial style — bold uppercase `Arial, Helvetica, sans-serif`, 400px, `fill="#2B6CB0"`, `stroke="#2D3748" stroke-width="14"`, `paint-order="stroke fill"`, centered at 256/256. Letters are distinguished by shape only (identical styling across all 26 + 10). Known tradeoff: outline reads thin vs the rest of the library — acceptable; custom paths are NOT to be reintroduced for letters/numbers without product sign-off.
+
+Retained guidance for any *other* stroked text (stickers/tiles accents):
 
 | Metric | Value |
 |---|---|
@@ -68,7 +70,7 @@ Construction: each glyph is 1–4 stroke paths (vertical, diagonal, arc segments
 |---|---|---|
 | `shapes/` | shape fills ≈ 65–75% of canvas (r ≈ 175–200) | Every shape must have a clearly readable mass; crescent is a closed moon (outer + inner arc), ring is a thick annulus (stroke ≥ 70px) |
 | `shapes/cutout_*` | identical geometry to `shape_*`, **same hue family** (pastel tint) | `stroke-dasharray="10 24"`, stroke width ≈ 12–14, transparent fill |
-| `letters/`, `numbers/` | §4 above | No `<text>` allowed (grep-verified) |
+| `letters/`, `numbers/` | §4 above | System-font `<text>` glyphs (Arial 400px bold, `paint-order="stroke fill"`) — `<text>` is allowed and required here (see §4) |
 | `animals/` | character fills ≈ 80–85% of canvas | Head ≥ 40% of canvas; eyes ≥ 24px diameter each; species-identifying feature must be silhouette-visible (trunk, snout, ears, whiskers) |
 | `toys/` | object fills ≈ 75–85% | Gravity: flame/rocket oriented **downward-launch** (rocket: nose up, flames at bottom) |
 | `items/` | object fills ≈ 65–75% | Object must be identifiable at 64px; duplicates (ball, car) differ from toy versions in line work + concept |
