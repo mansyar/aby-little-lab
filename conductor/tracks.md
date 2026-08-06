@@ -68,6 +68,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: TTS & Speaker Button Fix — Hit-Area Bug + iPad Speech Unlock** *Link: [./tracks/tts-speaker-fix_20260806/index.md](./tracks/tts-speaker-fix_20260806/index.md)*
+- [~] **Track: TTS & Speaker Button Fix — Hit-Area Bug + iPad Speech Unlock** *Link: [./tracks/tts-speaker-fix_20260806/index.md](./tracks/tts-speaker-fix_20260806/index.md)*
 
 
