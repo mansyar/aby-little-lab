@@ -801,12 +801,12 @@ describe("scene navigation flow", () => {
       expect(getMockFn(tagline.destroy)).toHaveBeenCalled();
     });
 
-    it("loads all 118 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
+    it("loads all 142 shape, letter, numeral, animal/food, toy, sticker, bubble, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
       const scene = new PreloadScene();
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(118);
+      expect(svgCalls).toHaveLength(142);
     });
 
     it("loads shape SVGs with correct keys", () => {

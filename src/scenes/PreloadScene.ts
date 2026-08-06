@@ -146,7 +146,8 @@ import { textStyle } from "../utils/typography";
 
 const SVG_RASTER_SIZE = 512;
 
-const SHAPE_ASSETS = [
+/** Raw SVG asset table: key → SVG source string, rasterized by the SVG loader at `SVG_RASTER_SIZE`. */
+export const SHAPE_ASSETS = [
   { key: "shape_circle", svg: shapeCircleSvg },
   { key: "shape_square", svg: shapeSquareSvg },
   { key: "shape_triangle", svg: shapeTriangleSvg },
