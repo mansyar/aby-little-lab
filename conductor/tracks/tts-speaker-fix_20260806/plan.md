@@ -29,3 +29,7 @@
 - [x] Task: Run all quality gates — `pnpm run check` (1 pre-existing warning only), `CI=true pnpm test` (979/979), `pnpm run build` (passes)
 - [x] Task: Manual desktop verification — speaker squish + replay speech in all 4 speech games; Hub avatar chip opens picker; Add-Profile avatars create profiles
 - [ ] Task: Device verification checklist (iPad + Android) — **pending human review** (deferred post-track; desktop only available)
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions c37988a
