@@ -11,6 +11,9 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 1024,
   height: 768,
   parent: "game-container",
+  // Scenes are transparent and show the page background (--bg-base #FAF9F6)
+  // through; an opaque canvas would render black behind every scene.
+  transparent: true,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

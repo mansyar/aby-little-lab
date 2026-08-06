@@ -34,9 +34,16 @@ interface GameTile {
   label: string;
   /** Preloaded tile icon texture key (storybook-style SVG). */
   tileKey: string;
+  /**
+   * Optional smaller icon display size (px) for typography-heavy tiles whose
+   * ink extends close to the bottom of the art; defaults to TILE_ICON_DISPLAY.
+   */
+  iconDisplay?: number;
+  /** Optional raised icon offset for typography-heavy tiles (px). */
+  iconOffsetY?: number;
 }
 
-const GAME_TILES: readonly GameTile[] = [
+export const GAME_TILES: readonly GameTile[] = [
   {
     sceneKey: "ShapeSorter",
     gameId: "shape-sorter",
@@ -79,20 +86,33 @@ const GAME_TILES: readonly GameTile[] = [
     gameId: "alphabet-match",
     label: "Find the Letter",
     tileKey: "tile_alphabet",
+    iconDisplay: 52,
+    iconOffsetY: -44,
   },
   {
     sceneKey: "WordMatch",
     gameId: "word-match",
     label: "Find the Word",
     tileKey: "tile_word_match",
+    iconDisplay: 52,
+    iconOffsetY: -44,
   },
   {
     sceneKey: "WordBuilder",
     gameId: "word-builder",
     label: "Build the Word",
     tileKey: "tile_word_builder",
+    iconDisplay: 52,
+    iconOffsetY: -44,
   },
-  { sceneKey: "HowMany", gameId: "how-many", label: "How Many?", tileKey: "tile_how_many" },
+  {
+    sceneKey: "HowMany",
+    gameId: "how-many",
+    label: "How Many?",
+    tileKey: "tile_how_many",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;
@@ -101,9 +121,11 @@ const TILE_SPACING = 40;
 const GRID_COLS = 5;
 const GRID_ROWS = 3;
 /** Display size of the game icon artwork on each tile (px). */
-const TILE_ICON_DISPLAY = 80;
+const TILE_ICON_DISPLAY = 64;
+/** Tile icon textures are rasterized at this size (matches PreloadScene). */
+const TILE_ICON_TEXTURE_SIZE = 512;
 /** Vertical offset of the tile icon above the tile center (px). */
-const TILE_ICON_Y_OFFSET = -32;
+const TILE_ICON_Y_OFFSET = -40;
 /** Vertical offset of the secondary text label below the tile center (px). */
 const TILE_LABEL_Y_OFFSET = 18;
 
@@ -111,11 +133,15 @@ const TILE_LABEL_Y_OFFSET = 18;
 const ENTRANCE_STAGGER = 40;
 /** Duration of each element's entrance tween (ms). */
 const ENTRANCE_DURATION = 300;
-/** Vertical bob amplitude for idle tiles (px). */
-const BOB_AMPLITUDE = 4;
-/** Duration of one tile bob loop (ms). */
+/**
+ * Gentle scale "breathe" pulse for idle tiles (1 = none). Scale-only motion
+ * keeps icon/label/shelf geometry fixed, unlike a vertical bob which can
+ * visually collide with the fixed shelf slots.
+ */
+const BOB_AMPLITUDE = 1.025;
+/** Duration of one tile breathe loop (ms). */
 const BOB_DURATION = 2500;
-/** Phase offset between tile bob loops (ms). */
+/** Phase offset between tile breathe loops (ms). */
 const BOB_PHASE_OFFSET = 200;
 /** Number of background decorations. */
 const DECORATION_COUNT = 4;
@@ -295,8 +321,10 @@ export class HubScene extends Phaser.Scene {
         }
       });
 
-      const icon = this.add.image(x, y + TILE_ICON_Y_OFFSET, GAME_TILES[i].tileKey);
-      icon.setDisplaySize(TILE_ICON_DISPLAY, TILE_ICON_DISPLAY);
+      const iconDisplay = GAME_TILES[i].iconDisplay ?? TILE_ICON_DISPLAY;
+      const iconY = y + (GAME_TILES[i].iconOffsetY ?? TILE_ICON_Y_OFFSET);
+      const icon = this.add.image(x, iconY, GAME_TILES[i].tileKey);
+      icon.setDisplaySize(iconDisplay, iconDisplay);
 
       const label = this.add.text(
         x,
@@ -309,19 +337,39 @@ export class HubScene extends Phaser.Scene {
       );
       label.setOrigin(0.5);
 
-      this.animateEntrance([tile, label, icon], () => {
+      // The tile and label pop to scale 1; the icon gets its own entrance that
+      // ends at its display scale (from the 512px texture) so the pop does not
+      // reset it to the native size. Typography-heavy tiles use a smaller size.
+      this.animateEntrance([tile, label], () => {
         attachPressFeedback(tile, { spring: true });
       });
+      this.animateEntrance([icon], undefined, iconDisplay / TILE_ICON_TEXTURE_SIZE);
 
       if (!reducedMotion) {
+        // Breathe pulse: scale-only wave so the icon/label/shelf geometry
+        // stays fixed (a vertical bob could collide with the fixed slots).
+        // Starts after the entrance pop settles; staggered per tile for a
+        // travelling wave. Icon scales from its own display scale.
+        const breatheDelay = ENTRANCE_DURATION + 50 + i * BOB_PHASE_OFFSET;
         this.tweens.add({
-          targets: [tile, label, icon],
-          y: y - BOB_AMPLITUDE,
+          targets: [tile, label],
+          scaleX: BOB_AMPLITUDE,
+          scaleY: BOB_AMPLITUDE,
           duration: BOB_DURATION,
           yoyo: true,
           repeat: -1,
           ease: "Sine.inOut",
-          delay: i * BOB_PHASE_OFFSET,
+          delay: breatheDelay,
+        });
+        this.tweens.add({
+          targets: [icon],
+          scaleX: iconDisplay * BOB_AMPLITUDE * (1 / TILE_ICON_TEXTURE_SIZE),
+          scaleY: iconDisplay * BOB_AMPLITUDE * (1 / TILE_ICON_TEXTURE_SIZE),
+          duration: BOB_DURATION,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.inOut",
+          delay: breatheDelay,
         });
       }
 
@@ -707,7 +755,10 @@ export class HubScene extends Phaser.Scene {
   private createShelfSticker(index: number, x: number, y: number): void {
     const earned = hasSticker(GAME_TILES[index].gameId);
     const stickerX = x;
-    const stickerY = y + TILE_HEIGHT / 2 - 20;
+    // Sits 13px below the tile center (62px from center: 13px above the tile
+    // bottom edge) so the dashed slot / thumbnail clears the label's bob range
+    // (label bottom at +25.5px + 4px bob = +29.5px; circle top at +34px).
+    const stickerY = y + TILE_HEIGHT / 2 - 13;
 
     if (earned) {
       const sticker = this.add.image(
@@ -836,7 +887,8 @@ export class HubScene extends Phaser.Scene {
    * stagger. Under reduced motion only alpha is animated.
    * @param targets - Display objects to animate.
    * @param onComplete - Optional callback invoked when the entrance finishes.
-   * @param targetScale - Scale to end at (defaults to 1; stickers pass their base scale).
+   * @param targetScale - Scale to end at (defaults to 1; pre-sized objects pass
+   *   their display scale, e.g. tile icons at 80/512).
    */
   private animateEntrance(
     targets: Phaser.GameObjects.GameObject[],

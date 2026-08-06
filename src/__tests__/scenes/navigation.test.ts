@@ -336,7 +336,7 @@ import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
-import { HubScene } from "../../scenes/HubScene";
+import { GAME_TILES, HubScene } from "../../scenes/HubScene";
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
 import { PatternBuilderScene } from "../../scenes/PatternBuilderScene";
 import { PopFreezeScene } from "../../scenes/PopFreezeScene";
@@ -951,13 +951,17 @@ describe("scene navigation flow", () => {
           "tile_how_many",
         ]),
       );
-      // Icons render at 80px display (>=64px minimum visible size for kids).
+      // Icons render at their per-tile display size (>=64px default; the four
+      // typography-heavy tiles use 56px so their ink clears the label). The
+      // tile rect itself remains the 160x150 touch target for kids.
       for (const icon of icons) {
         const displaySizeCalls = getMockFn(icon.obj.setDisplaySize).mock.calls;
         expect(displaySizeCalls.length).toBeGreaterThanOrEqual(1);
         const size = displaySizeCalls.at(-1) as [number, number] | undefined;
-        expect(size?.[0]).toBeGreaterThanOrEqual(64);
-        expect(size?.[1]).toBeGreaterThanOrEqual(64);
+        const tile = GAME_TILES.find((entry) => entry.tileKey === icon.key);
+        const expected = tile?.iconDisplay ?? 64;
+        expect(size?.[0]).toBe(expected);
+        expect(size?.[1]).toBe(expected);
       }
     });
 
@@ -1312,20 +1316,50 @@ describe("scene navigation flow", () => {
       }
     });
 
-    it("bobs tiles with phase-offset 2.5s ±4px sine loops", () => {
+    it("keeps each tile icon at its display size while tile and label pop in", () => {
       const scene = new HubScene();
       scene.create();
 
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-      const bobTweens = tweenCalls
+      const entrances = tweenCalls
+        .map((call) => call[0])
+        .filter(
+          (config) =>
+            config?.alpha === 1 && config?.duration === 300 && Array.isArray(config.targets),
+        );
+      const tileEntrance = entrances.find((config) => config.targets.length === 2);
+      expect(tileEntrance).toBeDefined();
+      expect(tileEntrance?.scaleX).toBe(1);
+
+      // Icon entrances appear in GAME_TILES order, one per tile, each ending
+      // at its own display scale (typography-heavy tiles render smaller) so
+      // the entrance pop never resets them to the native 512px texture size.
+      const iconEntrances = entrances.filter((config) => config.targets.length === 1);
+      expect(iconEntrances).toHaveLength(GAME_TILES.length);
+      iconEntrances.forEach((config, i) => {
+        const expected = (GAME_TILES[i].iconDisplay ?? 64) / 512;
+        expect(config.scaleX).toBe(expected);
+        expect(config.scaleY).toBe(expected);
+      });
+    });
+
+    it("pulses tiles, labels and icons in a phase-offset 2.5s scale wave", () => {
+      const scene = new HubScene();
+      scene.create();
+
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      const breatheTweens = tweenCalls
         .map(
           (call) =>
             call[0] as {
+              targets?: unknown[];
               duration?: number;
               yoyo?: boolean;
               repeat?: number;
               ease?: string;
               delay?: number;
+              scaleX?: number;
+              scaleY?: number;
               y?: number;
             },
         )
@@ -1337,21 +1371,28 @@ describe("scene navigation flow", () => {
             typeof config.delay === "number",
         );
 
-      expect(bobTweens).toHaveLength(11);
-      const delays = new Set(bobTweens.map((config) => config.delay));
-      expect(delays.size).toBe(11);
+      // Two per tile: the tile+label group and the icon (from its own scale).
+      expect(breatheTweens).toHaveLength(GAME_TILES.length * 2);
 
-      const startY = (768 - 3 * 150 - 2 * 40) / 2;
-      const expectedYs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => {
-        const row = Math.floor(i / 5);
-        return startY + row * 190 + 75 - 4;
-      });
-      const tweenYs = bobTweens.map((config) => config.y).sort((a, b) => (a ?? 0) - (b ?? 0));
-      expect(tweenYs).toEqual(expectedYs.sort((a, b) => a - b));
-
-      for (const config of bobTweens) {
+      for (const config of breatheTweens) {
         expect(config.ease).toBe("Sine.inOut");
+        expect(config.y).toBeUndefined();
+        expect(config.scaleX).toBe(config.scaleY);
       }
+
+      GAME_TILES.forEach((tile, i) => {
+        const expectedDelay = 300 + 50 + i * 200;
+        const pair = breatheTweens.filter((config) => config.delay === expectedDelay);
+        expect(pair).toHaveLength(2);
+        const group = pair.find((config) => config.targets?.length === 2);
+        const iconTween = pair.find((config) => config.targets?.length === 1);
+        expect(group).toBeDefined();
+        expect(iconTween).toBeDefined();
+        // Tile and label breathe from scale 1; the icon from its display scale.
+        expect(group?.scaleX).toBe(1.025);
+        const iconScale = ((tile.iconDisplay ?? 64) / 512) * 1.025;
+        expect(iconTween?.scaleX).toBeCloseTo(iconScale, 10);
+      });
     });
 
     it("adds low-contrast drifting background decorations behind tiles", () => {

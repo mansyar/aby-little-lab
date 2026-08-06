@@ -264,12 +264,6 @@ function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
 }
 
-/** Returns the current round of the scene. */
-function getCurrentRound(scene: unknown): { target: string; choices: string[] } {
-  const s = scene as { rounds: Array<{ target: string; choices: string[] }>; roundIndex: number };
-  return s.rounds[s.roundIndex];
-}
-
 /** Card row y positions derived from the layout constants (centerY 384). */
 const CARD_ROW_YS = [384 + 110, 384 + 270];
 
@@ -299,28 +293,6 @@ function getProgressDots(scene: unknown): Array<Record<string, MockFn>> {
   const s = scene as { add: Record<string, unknown> };
   const circleMock = getMockFn(s.add.circle);
   return circleMock.mock.results.map((r) => r.value as Record<string, MockFn>);
-}
-
-/** Simulates a tap on an answer card by triggering its pointerdown callback. */
-function tapCard(scene: unknown, cardIndex: number): void {
-  const cards = getCardRects(scene);
-  const card = cards[cardIndex];
-  if (!card) throw new Error(`Card ${cardIndex} not found`);
-  const onCalls = getMockFn(card.on).mock.calls;
-  const pointerdownCall = onCalls.find((c) => c[0] === "pointerdown");
-  if (pointerdownCall && typeof pointerdownCall[1] === "function") {
-    (pointerdownCall[1] as () => void)();
-  }
-}
-
-/** Fires the next-round delay (700ms) so the round advances. */
-function fireNextRoundDelay(scene: unknown): void {
-  const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
-  const nextRoundCall = delayedCallMock.mock.calls.find((call) => call[0] === 700);
-  expect(nextRoundCall).toBeDefined();
-  if (nextRoundCall && typeof nextRoundCall[1] === "function") {
-    (nextRoundCall[1] as () => void)();
-  }
 }
 
 /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
