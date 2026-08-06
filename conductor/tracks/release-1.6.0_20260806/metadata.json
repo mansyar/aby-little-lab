@@ -1,0 +1,10 @@
+{
+  "id": "release-1.6.0_20260806",
+  "title": "v1.6.0 Release Execution",
+  "type": "Chore",
+  "status": "new",
+  "createdAt": "2026-08-06",
+  "updatedAt": "2026-08-06",
+  "archivedAt": null,
+  "summary": "Ship the post-v1.5.0 backlog as v1.6.0: UI/UX Hardening, Shape Sorter Variety & Multi-Round, TTS & Speaker Button Fix, and the 142-asset SVG Visual Polish. Release branch + PR, annotated tag, auto-deploy to Coolify, deployment verification, full device-testing checklist execution (including carried v1.5.0 rows), docs sync, archive."
+}

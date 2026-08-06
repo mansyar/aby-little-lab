@@ -1,0 +1,70 @@
+# Implementation Plan — v1.6.0 Release Execution
+
+**Track ID:** `release-1.6.0_20260806` · **Type:** Chore
+**Methodology:** release process per `docs/release-checklist.md`; phases per `conductor/workflow.md` (checkpoint protocol at each phase end). TDD not applicable — verification via existing gates and checklist execution.
+
+## Phase 1 — Pre-Release Baseline Validation
+
+- [ ] Task 1.1: Confirm clean working tree and master tip
+  - [ ] `git status --short` shows no changes
+  - [ ] `git log -1` confirms HEAD = latest post-polish commit
+- [ ] Task 1.2: Run full quality gates locally (CI order)
+  - [ ] `pnpm run check` — Biome lint + format clean
+  - [ ] `CI=true pnpm test` — expect 979/979 passing
+  - [ ] `pnpm run build` — production build succeeds
+  - [ ] `node scripts/validate-pwa.js` — manifest/SW valid
+- [ ] Task 1.3: Capture baseline release metrics (test count, precache entries, dist size) for release notes
+- [ ] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 2 — Release Branch & Version Bump
+
+- [ ] Task 2.1: Create release branch `git checkout -b release/v1.6.0` from master
+- [ ] Task 2.2: Bump version `npm version 1.6.0 --no-git-tag-version`
+  - [ ] Verify `package.json` version = 1.6.0
+  - [ ] Verify `__APP_VERSION__` footer source picks it up (Vite define reads package.json)
+- [ ] Task 2.3: Commit: `chore(release): Bump version to 1.6.0`
+- [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 3 — Release Documentation
+
+- [ ] Task 3.1: Draft `docs/release-notes-v1.6.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering: UI/UX Hardening, 18-shape Shape Sorter multi-round, TTS & Speaker fix, SVG Visual Polish (142 assets)
+- [ ] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.6.0 rows (18-shape Shape Sorter rounds, speaker replay/TTS, polished-asset visual pass, PWA update path from v1.5.0); carry pending v1.5.0 execution row into the new record
+- [ ] Task 3.3: Verify knowledge docs synced by prior tracks (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md` asset manifest); patch only real gaps (SVG count 142, shape pool 18, Baloo 2, TTS gesture unlock)
+- [ ] Task 3.4: Commit: `docs(release): Prepare v1.6.0 release notes and device checklist`
+- [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 4 — Release Branch Gates + Tag + PR
+
+- [ ] Task 4.1: Re-run all four gates on `release/v1.6.0` (check → test → build → validate-pwa)
+- [ ] Task 4.2: Create annotated tag `git tag -a v1.6.0 -m "Release v1.6.0 — UI/UX hardening, 18-shape Shape Sorter, TTS fixes, 142-asset SVG polish"`
+- [ ] Task 4.3: Push branch + tag; open PR `release/v1.6.0` → `master` (body = release notes summary)
+  - [ ] Confirm CI "Quality Gates" check passes on the PR (merge-blocking)
+- [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 5 — Merge, Deploy & Verify
+
+- [ ] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`)
+- [ ] Task 5.2: Verify deployment
+  - [ ] CI run on master green
+  - [ ] Live `https://aby-little-lab.ansyar-world.top/` serves `index-*.js` hash matching local `dist/`
+  - [ ] `/sw.js` + `/manifest.webmanifest` return 200
+  - [ ] Settings footer shows v1.6.0
+- [ ] Task 5.3: Live smoke test: boot → hub → Shape Sorter (18 shapes, 3 rounds, progress dots) → sticker → hub; settings (play-time limits, profiles) intact
+- [ ] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.6.0 row: CI run ID, hash match, version footer, SW/manifest)
+- [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 6 — Device Testing Execution
+
+- [ ] Task 6.1: Execute the v1.6.0 checklist record (iPad / Android tablet / iPhone / Android phone; includes carried v1.5.0 rows) against the live URL; record pass/issue per item
+- [ ] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
+- [ ] Task 6.3: Commit results: `docs(device): Record v1.6.0 device testing results`
+- [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 7 — Finalize & Archive
+
+- [ ] Task 7.1: Final gates on master if any post-merge changes occurred
+- [ ] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete
+- [ ] Task 7.3: Archive track folder to `conductor/archive/release-1.6.0_20260806/`
+  - [ ] Registry: mark entry `[x]` with archive link (dominant convention) — or remove entry (latest svg-visual-polish convention) pending user decision
+- [ ] Task 7.4: Commit: `chore(conductor): Archive track 'v1.6.0 Release Execution'`
+- [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
