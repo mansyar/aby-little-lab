@@ -1,0 +1,8 @@
+Phase 3 - test coverage per checkpoint protocol.
+
+- New src/__tests__/scenes/preloadScene.test.ts (4 tests): asserts all 12 new shape + 12 new cutout keys registered with non-empty SVG content, original 6 pairs retained, exactly 18 shape + 18 cutout textures.
+- Exported SHAPE_ASSETS from PreloadScene.ts to make the registration table testable (module-scope const).
+- Updated navigation.test.ts preload SVG count 118 -> 142 (new invariant, verified by full suite).
+- Minimal phaser mock used in preloadScene.test.ts (real Phaser probes canvas 2D context at import, unavailable in happy-dom).
+
+Full suite: 963 tests passed, 37 files.
