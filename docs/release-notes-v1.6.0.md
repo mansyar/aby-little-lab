@@ -1,6 +1,6 @@
 # Release Notes — v1.6.0
 
-> **Status:** DRAFT — pending release via the automated pipeline (Quality Gates → Coolify deploy).
+> **Status:** FINAL — released on 2026-08-06 via the automated pipeline (Quality Gates → Coolify deploy). Device testing completed on iPad, Android tablet, iPhone, and Android phone — all items passed, no issues.
 
 ## What's New
 

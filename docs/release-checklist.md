@@ -457,12 +457,29 @@ Please report issues at [GitHub Issues URL]
 **Release Manager:** Ansyar (mansyar)
 **Date:** 2026-08-05
 **Version:** 1.5.0
-**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); device testing pending against the live URL (recorded in `docs/device-testing-checklist.md`)
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); device testing **completed 2026-08-06 as carried rows in the v1.6.0 execution** — all passed on iPad, Android tablet, iPhone, Android phone (see `docs/device-testing-checklist.md`)
 
 **Approval:**
 - [x] Code quality meets standards
 - [x] All tests pass (934/934)
 - [x] Documentation complete
 - [x] Security review passed
-- [x] Performance targets met — automated gates passed; device metrics pending (device checklist execution)
+- [x] Performance targets met — automated gates passed; device metrics verified 2026-08-06 (carried rows in v1.6.0 execution)
+- [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.6.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-06
+**Version:** 1.6.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); device testing **completed 2026-08-06** on iPad, Android tablet, iPhone, and Android phone — all items passed, no issues (18-shape 3-round Shape Sorter, speaker replay, TTS first-tap unlock, polished-asset visual pass, Settings readability, PWA update path)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (979/979)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed; device metrics verified 2026-08-06 (device checklist all sections passed)
 - [x] Ready for release
