@@ -65,3 +65,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 <!-- Archived tracks are moved to conductor/archive/ -->
+
+---
+
+- [ ] **Track: Shape Sorter — Multi-Round Sessions & 18-Shape Variety** *Link: [./tracks/shape-sorter-rounds-variety_20260806/index.md](./tracks/shape-sorter-rounds-variety_20260806/index.md)*
