@@ -57,16 +57,16 @@
 
 ## Phase 3: Preload Wiring
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Add 24 `?raw` imports + `SHAPE_ASSETS` entries in `PreloadScene.ts` (preload SVG count 118 → 142)
-- [ ] Task: Verify production build + PWA validation (`pnpm run build` + `node scripts/validate-pwa.js`)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 888ef88
+- [x] Task: Add 24 `?raw` imports + `SHAPE_ASSETS` entries in `PreloadScene.ts` (preload SVG count 118 → 142) 888ef88
+- [x] Task: Verify production build + PWA validation (`pnpm run build` + `node scripts/validate-pwa.js`) 888ef88
 - [ ] Task: Conductor - User Manual Verification 'Preload Wiring' (Protocol in workflow.md)
 
 ---
 
 ## Phase 4: Multi-Round Sessions & Progress Dots (TDD)
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 888ef88
 - [ ] Task: Write failing scene tests in `src/__tests__/scenes/shapeSorterScene.test.ts` (Red), mirroring `wordMatchScene.test.ts`
     - [x] Test scene renders 3 progress dots on create (dimmed)
     - [x] Test placing all 3 shapes of round 1 advances to round 2 (first dot filled)
@@ -81,7 +81,7 @@
 
 ## Phase 5: Documentation & Review
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 888ef88
 - [ ] Task: Update docs — `docs/PRD.md` (Game 1: 18-shape pool, 3-round sessions, progress dots), `conductor/tech-stack.md` (preload count 118 → 142, pool expansion note), `docs/TDD.md` (shape list + session design)
 - [ ] Task: Apply review suggestions for this track
 - [ ] Task: Conductor - User Manual Verification 'Documentation & Review' (Protocol in workflow.md)
