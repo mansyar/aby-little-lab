@@ -287,7 +287,7 @@ function getCardRects(scene: unknown): Array<Record<string, MockFn>> {
 }
 
 /** Returns the letter images of one card (2×2 grid position by x/y). */
-function getCardLetters(scene: unknown, cardIndex: number): Array<Record<string, MockFn>> {
+function _getCardLetters(scene: unknown, cardIndex: number): Array<Record<string, MockFn>> {
   const s = scene as { add: Record<string, unknown> };
   const imageMock = getMockFn(s.add.image);
   const centerX = (scene as { cameras: { main: { centerX: number } } }).cameras.main.centerX;
@@ -342,7 +342,7 @@ function fireNextRoundDelay(scene: unknown): void {
 }
 
 /** Taps the correct card and fires the next-round delay for the current round. */
-function completeRound(scene: unknown): void {
+function _completeRound(scene: unknown): void {
   const round = getCurrentRound(scene);
   tapCard(scene, round.choices.indexOf(round.target));
   fireNextRoundDelay(scene);
@@ -546,7 +546,8 @@ describe("WordBuilderScene interaction", () => {
       (call) => call[2] === `letter_${word[0].toLowerCase()}` && call[1] === SLOT_Y,
     );
     expect(slotImageCall).toBeDefined();
-    const slotImage = imageMock.mock.results[imageMock.mock.calls.indexOf(slotImageCall!)].value;
+    if (!slotImageCall) return;
+    const slotImage = imageMock.mock.results[imageMock.mock.calls.indexOf(slotImageCall)].value;
     expect(getMockFn(slotImage.setDisplaySize)).toHaveBeenCalledWith(92, 92); // 80 * 1.15 pop-in
     expect(getMockFn(slotImage.setScale)).not.toHaveBeenCalled();
     const settleTween = getMockFn(scene.tweens.add).mock.calls.find(
@@ -577,7 +578,8 @@ describe("WordBuilderScene interaction", () => {
       return t?.angle === 4 && t?.yoyo === true;
     });
     expect(wiggleTween).toBeDefined();
-    const targets = (wiggleTween![0] as { targets: unknown[] }).targets;
+    if (!wiggleTween) return;
+    const targets = (wiggleTween[0] as { targets: unknown[] }).targets;
     const wrongRect = getTileRects(scene)[wrongIndex];
     expect(targets).toContain(wrongRect);
   });
@@ -807,7 +809,7 @@ describe("WordBuilderScene round rendering", () => {
 
     const prompt = getPromptImage(scene);
     expect(prompt).toBeDefined();
-    expect(getMockFn(prompt!.setDisplaySize)).toHaveBeenCalledWith(180, 180);
+    expect(getMockFn(prompt?.setDisplaySize)).toHaveBeenCalledWith(180, 180);
   });
 
   it("renders one slot per letter of the word", () => {
@@ -827,7 +829,7 @@ describe("WordBuilderScene round rendering", () => {
     scene.create();
 
     const word = getCurrentWord(scene);
-    const expectedTiles = generateLetterTiles(getWord(word)!.word);
+    const expectedTiles = generateLetterTiles(getWord(word)?.word);
     const tiles = getTileRects(scene);
     expect(tiles).toHaveLength(6);
     for (const tile of tiles) {

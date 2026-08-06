@@ -2391,17 +2391,28 @@ describe("scene navigation flow", () => {
       return results;
     }
 
-    /** Simulates dropping all shapes on their matching slots. */
-    function completeAllShapes(scene: ShapeSorterScene): void {
-      const shapes = getShapeObjects(scene);
-      const slots = getSlotZones(scene);
-      for (const shape of shapes) {
-        const slot = slots.find((s) => s.type === shape.type);
-        if (!slot) throw new Error("No matching slot found");
-        const onCalls = getMockFn(shape.obj.on).mock.calls;
-        const dropCall = onCalls.find((c) => c[0] === "drop");
-        const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
-        dropCallback(null, slot.zone);
+    /** Simulates completing all three rounds by placing every shape of each round. */
+    function completeAllRounds(scene: ShapeSorterScene): void {
+      for (let round = 0; round < 3; round++) {
+        const shapes = getShapeObjects(scene).slice(round * 3, round * 3 + 3);
+        const slots = getSlotZones(scene).slice(round * 3, round * 3 + 3);
+        for (const shape of shapes) {
+          const slot = slots.find((s) => s.type === shape.type);
+          if (!slot) throw new Error("No matching slot found");
+          const onCalls = getMockFn(shape.obj.on).mock.calls;
+          const dropCall = onCalls.find((c) => c[0] === "drop");
+          const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+          dropCallback(null, slot.zone);
+        }
+        if (round < 2) {
+          // Fire the newest round-advance delayed call (NEXT_ROUND_DELAY = 1200ms).
+          const advanceCalls = getMockFn(scene.time.delayedCall).mock.calls.filter(
+            (call) => call[0] === 1200,
+          );
+          const advanceCall = advanceCalls[advanceCalls.length - 1];
+          const advanceCallback = advanceCall?.[1] as () => void;
+          advanceCallback();
+        }
       }
     }
 
@@ -2410,7 +2421,7 @@ describe("scene navigation flow", () => {
 
       const scene = new ShapeSorterScene();
       scene.create();
-      completeAllShapes(scene);
+      completeAllRounds(scene);
 
       expect(mockAudio.playWin).toHaveBeenCalled();
     });
@@ -2420,7 +2431,7 @@ describe("scene navigation flow", () => {
 
       const scene = new ShapeSorterScene();
       scene.create();
-      completeAllShapes(scene);
+      completeAllRounds(scene);
 
       expect(earnSticker).toHaveBeenCalledWith("shape-sorter");
       expect(mockAudio.playSticker).toHaveBeenCalled();
@@ -2431,7 +2442,7 @@ describe("scene navigation flow", () => {
 
       const scene = new ShapeSorterScene();
       scene.create();
-      completeAllShapes(scene);
+      completeAllRounds(scene);
 
       expect(earnSticker).not.toHaveBeenCalled();
       expect(mockAudio.playSticker).not.toHaveBeenCalled();
@@ -2442,7 +2453,7 @@ describe("scene navigation flow", () => {
 
       const scene = new ShapeSorterScene();
       scene.create();
-      completeAllShapes(scene);
+      completeAllRounds(scene);
 
       const delayedCallMock = getMockFn(scene.time.delayedCall);
       const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
@@ -2462,7 +2473,7 @@ describe("scene navigation flow", () => {
 
       const scene = new ShapeSorterScene();
       scene.create();
-      completeAllShapes(scene);
+      completeAllRounds(scene);
 
       const delayedCallMock = getMockFn(scene.time.delayedCall);
       const autoReturnCall = delayedCallMock.mock.calls.find((call) => call[0] === 3000);
@@ -6149,12 +6160,24 @@ describe("scene navigation flow", () => {
             dragEnd(shape.obj);
           },
           win: (scene) => {
-            const shapes = getDraggables(scene, "shape_");
-            const slots = getDragSlots(scene, "cutout_");
-            for (const shape of shapes) {
-              const slot = slots.find((s) => s.type === shape.type);
-              if (!slot) throw new Error("No matching slot found");
-              dropObject(shape.obj, slot.zone);
+            for (let round = 0; round < 3; round++) {
+              const shapes = getDraggables(scene, "shape_").slice(round * 3, round * 3 + 3);
+              const slots = getDragSlots(scene, "cutout_").slice(round * 3, round * 3 + 3);
+              for (const shape of shapes) {
+                const slot = slots.find((s) => s.type === shape.type);
+                if (!slot) throw new Error("No matching slot found");
+                dropObject(shape.obj, slot.zone);
+              }
+              if (round < 2) {
+                // Fire the newest round-advance delayed call (NEXT_ROUND_DELAY = 1200ms).
+                const delayedCallMock = getMockFn(
+                  (scene as { time: { delayedCall: unknown } }).time.delayedCall,
+                );
+                const advanceCalls = delayedCallMock.mock.calls.filter((call) => call[0] === 1200);
+                const advanceCall = advanceCalls[advanceCalls.length - 1];
+                const advanceCallback = advanceCall?.[1] as () => void;
+                advanceCallback();
+              }
             }
           },
         },

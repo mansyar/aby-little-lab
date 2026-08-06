@@ -479,10 +479,10 @@ describe("WordMatchScene round rendering", () => {
     const scene = new WordMatchScene();
     scene.create();
 
-    const round = getCurrentRound(scene);
+    const _round = getCurrentRound(scene);
     const prompt = getPromptImage(scene);
     expect(prompt).toBeDefined();
-    expect(getMockFn(prompt!.setDisplaySize)).toHaveBeenCalledWith(180, 180);
+    expect(getMockFn(prompt?.setDisplaySize)).toHaveBeenCalledWith(180, 180);
   });
 
   it("renders 4 word cards in a 2×2 grid, composed of letter textures", () => {

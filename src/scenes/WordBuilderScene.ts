@@ -357,7 +357,7 @@ export class WordBuilderScene extends Phaser.Scene {
   private fillProgressDot(): void {
     const dot = this.progressDots[this.wordIndex];
     dot.setAlpha(1);
-    const reduced = isReducedMotion();
+    const _reduced = isReducedMotion();
     this.tweens.add({
       targets: dot,
       scale: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),

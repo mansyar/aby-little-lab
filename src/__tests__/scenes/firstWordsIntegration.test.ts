@@ -482,11 +482,17 @@ describe("First Words integration flows", () => {
       roundIndex: number;
       renderRound: () => void;
     };
+    // Returns the word or throws, avoiding non-null assertions (Biome rule).
+    const requiredWord = (key: string) => {
+      const word = getWord(key);
+      if (!word) throw new Error(`Word "${key}" not found in pool`);
+      return word;
+    };
     matchState.rounds = [
-      generateWordRound(getWord("OWL")!),
-      generateWordRound(getWord("SUN")!),
-      generateWordRound(getWord("DUCK")!),
-      generateWordRound(getWord("BEAR")!),
+      generateWordRound(requiredWord("OWL")),
+      generateWordRound(requiredWord("SUN")),
+      generateWordRound(requiredWord("DUCK")),
+      generateWordRound(requiredWord("BEAR")),
     ];
     matchState.roundIndex = 0;
     matchState.renderRound();
@@ -528,7 +534,18 @@ describe("First Words integration flows", () => {
       tileLetterValues: string[];
       renderRound: () => void;
     };
-    builderState.words = [getWord("DUCK")!, getWord("BEAR")!];
+    builderState.words = [
+      (() => {
+        const word = getWord("DUCK");
+        if (!word) throw new Error('Word "DUCK" not found in pool');
+        return word;
+      })(),
+      (() => {
+        const word = getWord("BEAR");
+        if (!word) throw new Error('Word "BEAR" not found in pool');
+        return word;
+      })(),
+    ];
     builderState.wordIndex = 0;
     builderState.renderRound();
 
