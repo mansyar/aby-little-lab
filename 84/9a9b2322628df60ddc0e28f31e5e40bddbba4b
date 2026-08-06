@@ -1,0 +1,7 @@
+Task: Author 12 new shape SVGs and 12 cutout SVGs for Shape Sorter pool expansion.
+
+Shapes: oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring, teardrop - hand-authored at 512x512 viewBox, flat fill, 5px #2D3748 stroke, matching the existing 6 pairs' style (rounded rect rx=20, stroke-linejoin=round on polygons). Each shape gets a new distinct soft/vibrant non-primary color. Cutouts mirror shape path data with fill-opacity=0.3 and stroke-dasharray='12 8'.
+
+Why: expands Game 1 pool from 6 to 18 shapes to support multi-round sessions with 9 unique shapes per playthrough. No gameplay or code changes; pure asset additions.
+
+Files: 24 new SVGs in src/assets/svg/shapes/ (12 shape_*.svg + 12 cutout_*.svg).
