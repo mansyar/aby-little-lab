@@ -5,15 +5,15 @@
 
 ## Phase 1 — Pre-Release Baseline Validation
 
-- [ ] Task 1.1: Confirm clean working tree and master tip
-  - [ ] `git status --short` shows no changes
-  - [ ] `git log -1` confirms HEAD = latest post-polish commit
-- [ ] Task 1.2: Run full quality gates locally (CI order)
-  - [ ] `pnpm run check` — Biome lint + format clean
-  - [ ] `CI=true pnpm test` — expect 979/979 passing
-  - [ ] `pnpm run build` — production build succeeds
-  - [ ] `node scripts/validate-pwa.js` — manifest/SW valid
-- [ ] Task 1.3: Capture baseline release metrics (test count, precache entries, dist size) for release notes
+- [x] Task 1.1: Confirm clean working tree and master tip
+  - [x] `git status --short` shows no changes
+  - [x] `git log -1` confirms HEAD = latest post-polish commit
+- [x] Task 1.2: Run full quality gates locally (CI order)
+  - [x] `pnpm run check` — Biome clean (1 pre-existing warning: unused `getCardRects` in wordBuilderScene.test.ts)
+  - [x] `CI=true pnpm test` — 979/979 passing (38 files)
+  - [x] `pnpm run build` — OK (index-Cbz3RFR2.js, 27 precache entries, 1525.47 KiB)
+  - [x] `node scripts/validate-pwa.js` — 13/13 passed
+- [x] Task 1.3: Capture baseline release metrics (test count 979, precache 27 entries / 1525.47 KiB, main chunk index-Cbz3RFR2.js) for release notes
 - [ ] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Release Branch & Version Bump
