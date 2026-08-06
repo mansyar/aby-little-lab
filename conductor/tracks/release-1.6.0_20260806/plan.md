@@ -55,7 +55,7 @@
 
 ## Phase 6 — Device Testing Execution
 
-- [ ] Task 6.1: Execute the v1.6.0 checklist record (iPad / Android tablet / iPhone / Android phone; includes carried v1.5.0 rows) against the live URL; record pass/issue per item
+- [~] Task 6.1: Execute the v1.6.0 checklist record (iPad / Android tablet / iPhone / Android phone; includes carried v1.5.0 rows) against the live URL; record pass/issue per item
 - [ ] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
 - [ ] Task 6.3: Commit results: `docs(device): Record v1.6.0 device testing results`
 - [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
