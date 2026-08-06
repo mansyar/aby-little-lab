@@ -25,13 +25,13 @@
 - [x] Task 2.3: Commit: `chore(release): Bump version to 1.6.0` (a260b58)
 - [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint e8f16cf, git note attached
 
-## Phase 3 — Release Documentation
+## Phase 3 — Release Documentation [checkpoint: a57c258]
 
 - [x] Task 3.1: Draft `docs/release-notes-v1.6.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering: UI/UX Hardening, 18-shape Shape Sorter multi-round, TTS & Speaker fix, SVG Visual Polish (142 assets) — written as DRAFT (FINAL in Phase 7)
 - [x] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.6.0 rows (18-shape Shape Sorter rounds, speaker replay/TTS, polished-asset visual pass, PWA update path from v1.5.0); carry pending v1.5.0 execution row into the new record — v1.6.0 record added at top (newest-first), carried v1.5.0 rows included, result pending (Phase 6)
 - [x] Task 3.3: Verify knowledge docs synced by prior tracks (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md` asset manifest); patch only real gaps (SVG count 142, shape pool 18, Baloo 2, TTS gesture unlock) — TDD.md already fully synced (142 total, tiles, SpeakerButton, hit-area notes); patched conductor/product.md Game 1 row (18-shape pool, 3 rounds × 3) and conductor/tech-stack.md (added SVG Visual Polish Design Update entry)
 - [x] Task 3.4: Commit: `docs(release): Prepare v1.6.0 release notes and device checklist` (56b52e9)
-- [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint a57c258, git note attached
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
