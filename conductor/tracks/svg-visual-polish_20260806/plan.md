@@ -61,15 +61,15 @@
 
 ## Phase 7: UI Assets (5 files)
 
-- [~] Task: Redesign `bubble.svg` — add thick dark outline (restores style-system rule), 2 specular highlights (large + small), subtle translucent fill cue; must read as a soap bubble.
-- [ ] Task: Redesign `sleep_zzz.svg` — three progressively-sized "Z"s with storybook personality (softer dark-blue tone, gentle motion hint, NOT a black lightning zigzag).
-- [ ] Task: Fix `icon_speaker.svg` — consistent stroke weight between speaker body and arcs; tighten arc spacing (emanating from the cone). Mascots (`mascot_idle`, `mascot_celebrate`) stay untouched (reference quality).
-- [ ] Task: Render ui contact sheet and confirm bubble/speaker/zzz match the mascot quality bar.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Redesign `bubble.svg` — add thick dark outline (restores style-system rule), 2 specular highlights (large + small), subtle translucent fill cue; must read as a soap bubble. (c7fe6c0)
+- [x] Task: Redesign `sleep_zzz.svg` — three progressively-sized "Z"s with storybook personality (softer dark-blue tone, gentle motion hint, NOT a black lightning zigzag). (c7fe6c0)
+- [x] Task: Fix `icon_speaker.svg` — consistent stroke weight between speaker body and arcs; tighten arc spacing (emanating from the cone). Mascots (`mascot_idle`, `mascot_celebrate`) stay untouched (reference quality). (c7fe6c0)
+- [x] Task: Render ui contact sheet and confirm bubble/speaker/zzz match the mascot quality bar. (c7fe6c0)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: c7fe6c0]
 
 ## Phase 8: Stickers & Tiles (22 files)
 
-- [ ] Task: Rebuild worst stickers: `sticker_pop_freeze.svg` (popped-bubble moment, not an empty bubble), `sticker_big_small.svg` (two-object size contrast with character, not plain circles), `sticker_how_many.svg` (object group being counted + numeral, centered; remove mystery diamond).
+- [~] Task: Rebuild worst stickers: `sticker_pop_freeze.svg` (popped-bubble moment, not an empty bubble), `sticker_big_small.svg` (two-object size contrast with character, not plain circles), `sticker_how_many.svg` (object group being counted + numeral, centered; remove mystery diamond).
 - [ ] Task: Rebuild `sticker_animal_trace.svg` (readable start→end dotted path, centered) and `sticker_pattern_builder.svg` (clear AB-A sequence; replace dashed placeholder with a "missing piece" cue) and `sticker_shadow_match.svg` (real shape + silhouette pairing).
 - [ ] Task: Differentiate the three text stickers (`sticker_alphabet_match`, `sticker_word_builder`, `sticker_word_match`) — distinct colors/framing/accents so each has visual identity (ABC vs. built word vs. match layout).
 - [ ] Task: Rebuild worst tiles: `tile_pop_freeze.svg` (replace sleep-"Z" with a pop/burst concept), `tile_animal_trace.svg` (clear dotted trace path, larger markers, centered), `tile_word_builder.svg` (show a letter being placed / building progress — no dashed empty box), `tile_shadow_match.svg` (visible shadow pairing), `tile_big_small.svg` (dramatic size contrast, remove unexplained baseline).
