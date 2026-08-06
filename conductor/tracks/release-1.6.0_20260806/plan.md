@@ -41,7 +41,7 @@
   - [x] Confirm CI "Quality Gates" check passes on the PR (merge-blocking) — PASS 1m24s (run 31108882448); Deploy to Coolify correctly skipped (master-only)
 - [x] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint e20a819, git note attached
 
-## Phase 5 — Merge, Deploy & Verify
+## Phase 5 — Merge, Deploy & Verify [checkpoint: 0790fda]
 
 - [x] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`) — PR #14 merged 2026-08-06T14:12:45Z; CI run 31109687344: Quality Gates + Deploy to Coolify both green (deploy job 5s)
 - [x] Task 5.2: Verify deployment
@@ -51,7 +51,7 @@
   - [x] Settings footer shows v1.6.0 — "1.6.0" found in live bundle + visible in Settings panel footer
 - [x] Task 5.3: Live smoke test: boot → hub → Shape Sorter (18 shapes, 3 rounds, progress dots) → sticker → hub; settings (play-time limits, profiles) intact — headless Chrome via playwright-cli: hub 11 tiles (5+5+1) storybook icons; Shape Sorter round 1 star/oval/teardrop → dot 1; round 2 rectangle/heart/crescent (new 18-pool shapes confirmed) → dot 2; round 3 diamond/pentagon/square → dot 3 → win → sticker badge on tile → auto-return hub; Settings opens via 3s hold: BGM/SFX ON, Profiles, Reset Progress, footer v1.6.0
 - [x] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.6.0 row: CI run ID, hash match, version footer, SW/manifest) — Step 7h added (d9a0ddb)
-- [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint 0790fda, git note attached
 
 ## Phase 6 — Device Testing Execution
 
