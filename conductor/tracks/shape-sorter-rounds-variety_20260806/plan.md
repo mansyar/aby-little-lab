@@ -39,7 +39,7 @@
 
 ---
 
-## Phase 2: Pool Expansion & Playthrough Generation (TDD)
+## Phase 2: Pool Expansion & Playthrough Generation (TDD) [checkpoint: 9bd0645]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase af519c9
 - [x] Task: Write failing tests for playthrough generation in `shapeSorterLogic.test.ts` (Red) a471506
