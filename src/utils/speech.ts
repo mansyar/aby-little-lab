@@ -5,6 +5,11 @@
  * SFX toggle (callers pass the enabled flag) and degrades gracefully when
  * the API is unavailable (unsupported browser, no network for remote
  * voices, etc.) — the game's visual displays always remain.
+ *
+ * iOS/WebKit quirk: the speech session stays locked until at least one
+ * utterance is dispatched inside a real user gesture. Callers must invoke
+ * `unlockSpeechForUserGesture()` from the first interaction (e.g. a Hub tile
+ * tap); without it, iOS silently drops every programmatic speak.
  */
 
 /** Returns whether the browser exposes the Web Speech synthesis API. */
@@ -12,14 +17,54 @@ export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+/** True once the iOS/WebKit user-gesture unlock has been performed. */
+let speechUnlocked = false;
+
+/**
+ * Defer interval after cancel(): the platform's async cancel callback must
+ * complete before the replacement utterance is queued (WebKit/Chromium race).
+ */
+const INTERRUPT_DEFER_MS = 100;
+
+/**
+ * Unlocks the Web Speech session on iOS/WebKit, where programmatic speaks
+ * are silently dropped until an utterance is dispatched inside a real user
+ * gesture. Dispatches a single silent warm-up utterance; safe to call
+ * repeatedly (unlocks at most once per page session). Best-effort, never
+ * throws. Call from the first user interaction (Hub tile tap / pointerdown).
+ */
+export function unlockSpeechForUserGesture(): void {
+  if (speechUnlocked || !isSpeechSupported()) {
+    return;
+  }
+  try {
+    const { speechSynthesis, SpeechSynthesisUtterance } = window;
+    const warmUp = new SpeechSynthesisUtterance();
+    warmUp.text = " ";
+    warmUp.volume = 0;
+    speechSynthesis.speak(warmUp);
+    speechUnlocked = true;
+  } catch {
+    // Best-effort: the flag stays clear so the next interaction retries.
+  }
+}
+
 /**
  * Speaks text (en-US) if enabled and supported.
- * Cancels any prior utterance so rapid round changes never overlap.
+ *
+ * Only cancels a queue that is actually speaking or pending: an
+ * unconditional cancel() followed by an immediate speak() races with the
+ * platform's async cancel callbacks (WebKit/Chromium), which can wipe the
+ * freshly queued utterance. When an interrupt IS needed, the new utterance
+ * is dispatched on a short timer so it cannot be cleared by the in-flight
+ * cancel, and resume() un-sticks the paused state some engines enter after
+ * a cancel.
+ *
  * Never throws — callers can always fall back to visual-only feedback.
  * @param text - The text to pronounce (e.g. "A" or "CAT").
  * @param enabled - Whether speech is allowed (SFX toggle).
  * @param rate - Speaking rate, slower for toddlers.
- * @returns True when an utterance was actually dispatched.
+ * @returns True when an utterance was (or will be) dispatched.
  */
 function speakText(text: string, enabled: boolean, rate: number): boolean {
   if (!enabled || !isSpeechSupported()) {
@@ -27,12 +72,26 @@ function speakText(text: string, enabled: boolean, rate: number): boolean {
   }
   try {
     const { speechSynthesis, SpeechSynthesisUtterance } = window;
-    speechSynthesis.cancel();
+    const needsInterrupt = speechSynthesis.speaking || speechSynthesis.pending;
+    if (needsInterrupt) {
+      speechSynthesis.cancel();
+      speechSynthesis.resume();
+    }
     const utterance = new SpeechSynthesisUtterance();
     utterance.text = text;
     utterance.lang = "en-US";
     utterance.rate = rate;
-    speechSynthesis.speak(utterance);
+    if (needsInterrupt) {
+      window.setTimeout(() => {
+        try {
+          speechSynthesis.speak(utterance);
+        } catch {
+          // Best-effort: the utterance is dropped when the engine is gone.
+        }
+      }, INTERRUPT_DEFER_MS);
+    } else {
+      speechSynthesis.speak(utterance);
+    }
     return true;
   } catch {
     return false;

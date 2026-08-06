@@ -17,6 +17,7 @@ import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
+import { unlockSpeechForUserGesture } from "../utils/speech";
 import {
   getActiveProfile,
   getPlayTime,
@@ -293,6 +294,9 @@ export class HubScene extends Phaser.Scene {
     const startY =
       (this.cameras.main.height - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2;
     const startAudio = (): void => {
+      // First gesture in the session also unlocks iOS/WebKit speech (a silent
+      // warm-up utterance), otherwise programmatic TTS is silently dropped.
+      unlockSpeechForUserGesture();
       const audio = AudioManager.getInstance();
       audio.resume();
       audio.playBGM();
@@ -381,6 +385,7 @@ export class HubScene extends Phaser.Scene {
     this.input.on("pointerdown", () => {
       // Any first interaction unlocks audio so the idle-attract cue is
       // audible on a fresh load (the tile tap already resumes + starts BGM).
+      unlockSpeechForUserGesture();
       AudioManager.getInstance().resume();
       this.resetIdleAttract();
     });
@@ -459,10 +464,9 @@ export class HubScene extends Phaser.Scene {
       PROFILE_AVATAR_TEXTURES[active.avatarId],
     );
     chip.setScale(AVATAR_CHIP_DISPLAY / AVATAR_TEXTURE_SIZE);
-    chip.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, AVATAR_CHIP_HIT, AVATAR_CHIP_HIT),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    // Frame-based default hit area covers the visible chip exactly (custom
+    // rects are tested in texture-local space and miss on 512px textures).
+    chip.setInteractive();
     chip.on("pointerup", () => {
       startAudio();
       this.openProfilePicker();
@@ -497,10 +501,7 @@ export class HubScene extends Phaser.Scene {
     for (const profile of profiles) {
       const avatar = this.add.image(x, y, PROFILE_AVATAR_TEXTURES[profile.avatarId]);
       avatar.setDepth(PICKER_DEPTH + 1);
-      avatar.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, PICKER_AVATAR_DISPLAY, PICKER_AVATAR_DISPLAY),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
+      avatar.setInteractive();
       const baseScale = PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE;
       avatar.setScale(profile.id === activeId ? baseScale * 1.15 : baseScale);
       avatar.on("pointerup", () => {

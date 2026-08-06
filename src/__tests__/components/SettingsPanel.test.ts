@@ -709,10 +709,14 @@ describe("SettingsPanel profile management", () => {
     expect(deleteConfig.hitArea.width).toBeGreaterThanOrEqual(64);
     expect(deleteConfig.hitArea.height).toBeGreaterThanOrEqual(64);
 
-    const addConfig = (findImagesByTexture(scene, "animal_dog")[0] as MockGameObject).setInteractive
-      .mock.calls[0]?.[0] as { hitArea: { height: number; width: number } };
-    expect(addConfig.hitArea.width).toBeGreaterThanOrEqual(64);
-    expect(addConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+    // Add-Profile avatars use the frame-based default hit area: custom rects
+    // are tested in texture-local space (+displayOrigin) and land off the
+    // visible icon on 512px textures.
+    const addAvatar = findImagesByTexture(scene, "animal_dog")[0] as MockGameObject;
+    const addConfig = addAvatar.setInteractive.mock.calls.find(
+      (call) => call[0] && typeof call[0] === "object",
+    );
+    expect(addConfig).toBeUndefined();
   });
 });
 

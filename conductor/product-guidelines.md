@@ -59,6 +59,7 @@
 
 ### Touch & Drag
 - Touch targets: minimum 64×64px. Protected controls (Back, Settings, Musical Memory Replay) expose 96×96px hit areas.
+- Custom hit areas on Image objects are tested in **texture-local space** (top-left origin, `+displayOrigin` normalized). With 512px SVG rasterization, centered rects like `(-48,-48,96,96)` land off the visible icon — use the frame-based default (`setInteractive()` without options) or a frame-derived rect. Regression tests must simulate the engine's hit math (see `src/__tests__/helpers/hitTest.ts`).
 - Collision bounds are inflated beyond visual size to reduce fine-motor frustration.
 - Drag interactions use generous drop zones — the snap radius is forgiving.
 - No multi-touch requirements. All interactions are single-finger.
