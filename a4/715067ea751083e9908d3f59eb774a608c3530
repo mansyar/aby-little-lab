@@ -1,0 +1,7 @@
+Phase 2 - Pool Expansion & Playthrough Generation.
+
+Implemented generatePlaythrough(roundCount): shuffles the 18-shape pool once and slices 3 per round -> 9 unique shapes per 3-round session, no repeats across rounds, no duplicates within a round. ALL_SHAPES expanded from 6 to 18 (12 new geometric types). selectThreeShapes/shuffle/isMatch unchanged.
+
+TDD: wrote 4 new generatePlaythrough tests + updated the stale '6 total' pool test to 18 total (5 failures confirmed Red), then implemented (Green: 14/14). Full suite: 959 tests passed, 96.95% lines / 88.81% branches coverage (>=80% gate).
+
+Files: src/game/shapeSorterLogic.ts, src/__tests__/game/shapeSorterLogic.test.ts.
