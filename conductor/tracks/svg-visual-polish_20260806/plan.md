@@ -44,16 +44,16 @@
 
 ## Phase 5: Items (19 files)
 
-- [~] Task: Redesign `bone.svg` (classic dog-bone: two end lobes + narrow waist), `lilypad.svg` (flat oval with side notch — not a wedge/pacman), `peanut.svg` (clear figure-8 two-lobe pinch).
-- [ ] Task: Redesign `hat.svg` (wide brim + crown + decorative band/flower so it never reads as food).
-- [ ] Task: Fix `airplane.svg` (single wing layer, tail fin, better fuselage) and `umbrella.svg` (remove line through canopy, clear hooked handle).
-- [ ] Task: Differentiate `ball.svg` and `car.svg` from `toy_ball.svg`/`toy_car.svg` (line-work consistency + distinct concept, e.g., delivery van vs. sporty toy car) without renaming files.
-- [ ] Task: Render items contact sheet; verify every item is recognizable in silhouette.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Redesign `bone.svg` (classic dog-bone: two end lobes + narrow waist), `lilypad.svg` (flat oval with side notch — not a wedge/pacman), `peanut.svg` (clear figure-8 two-lobe pinch). (5f56d84)
+- [x] Task: Redesign `hat.svg` (wide brim + crown + decorative band/flower so it never reads as food). (5f56d84)
+- [x] Task: Fix `airplane.svg` (single wing layer, tail fin, better fuselage) and `umbrella.svg` (remove line through canopy, clear hooked handle). (5f56d84)
+- [x] Task: Differentiate `ball.svg` and `car.svg` from `toy_ball.svg`/`toy_car.svg` (line-work consistency + distinct concept, e.g., delivery van vs. sporty toy car) without renaming files. (5f56d84 — ball = red soccer w/ pentagons, car = blue sedan)
+- [x] Task: Render items contact sheet; verify every item is recognizable in silhouette. (5f56d84)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 5f56d84]
 
 ## Phase 6: Shadows (8 files)
 
-- [ ] Task: Redraw `shadow_airplane.svg` — distinct fuselage + wings + tail fin (use shadow_house/car as weight references).
+- [~] Task: Redraw `shadow_airplane.svg` — distinct fuselage + wings + tail fin (use shadow_house/car as weight references).
 - [ ] Task: Thicken `shadow_umbrella.svg` handle to ~10–15% of canopy width with rounded tip; fatten `shadow_boat.svg` hull so it reads as a hull.
 - [ ] Task: Equalize visual weight across all 8 silhouettes (target ~60–70% bounding-box occupancy, consistent darkness).
 - [ ] Task: Render shadows contact sheet and confirm all 8 silhouettes are instantly recognizable.
