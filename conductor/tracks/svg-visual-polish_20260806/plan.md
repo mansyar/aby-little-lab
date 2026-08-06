@@ -53,15 +53,15 @@
 
 ## Phase 6: Shadows (8 files)
 
-- [~] Task: Redraw `shadow_airplane.svg` — distinct fuselage + wings + tail fin (use shadow_house/car as weight references).
-- [ ] Task: Thicken `shadow_umbrella.svg` handle to ~10–15% of canopy width with rounded tip; fatten `shadow_boat.svg` hull so it reads as a hull.
-- [ ] Task: Equalize visual weight across all 8 silhouettes (target ~60–70% bounding-box occupancy, consistent darkness).
-- [ ] Task: Render shadows contact sheet and confirm all 8 silhouettes are instantly recognizable.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Redraw `shadow_airplane.svg` — distinct fuselage + wings + tail fin (use shadow_house/car as weight references). (6146543)
+- [x] Task: Thicken `shadow_umbrella.svg` handle to ~10–15% of canopy width with rounded tip; fatten `shadow_boat.svg` hull so it reads as a hull. (6146543)
+- [x] Task: Equalize visual weight across all 8 silhouettes (target ~60–70% bounding-box occupancy, consistent darkness). (6146543)
+- [x] Task: Render shadows contact sheet and confirm all 8 silhouettes are instantly recognizable. (6146543)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 6146543]
 
 ## Phase 7: UI Assets (5 files)
 
-- [ ] Task: Redesign `bubble.svg` — add thick dark outline (restores style-system rule), 2 specular highlights (large + small), subtle translucent fill cue; must read as a soap bubble.
+- [~] Task: Redesign `bubble.svg` — add thick dark outline (restores style-system rule), 2 specular highlights (large + small), subtle translucent fill cue; must read as a soap bubble.
 - [ ] Task: Redesign `sleep_zzz.svg` — three progressively-sized "Z"s with storybook personality (softer dark-blue tone, gentle motion hint, NOT a black lightning zigzag).
 - [ ] Task: Fix `icon_speaker.svg` — consistent stroke weight between speaker body and arcs; tighten arc spacing (emanating from the cone). Mascots (`mascot_idle`, `mascot_celebrate`) stay untouched (reference quality).
 - [ ] Task: Render ui contact sheet and confirm bubble/speaker/zzz match the mascot quality bar.
