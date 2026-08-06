@@ -1,0 +1,1 @@
+Phase 4 Verification Report: automated CI=true pnpm test 971 passed/38 files; coverage 97.02 lines/89.02 branches; biome clean (88 files); build ok; validate-pwa 13 passed; TDD Red 8/8 -> Green 8/8; manual multi-round session review APPROVED ('Looks good'); scope: ShapeSorterScene + new shapeSorterScene.test.ts + navigation helper updates + pre-existing biome fixes.
