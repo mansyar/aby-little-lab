@@ -84,3 +84,13 @@
 - [x] Task: Run `npm run check` (biome) and `npm run build` (production build). *(biome 1 pre-existing warning; build OK, 27 precache entries 1526 KiB)*
 - [x] Task: Update `docs/SVG_STYLE.md` if the implementation surfaced deviations; ensure no `plan.md`/`spec.md` drift. *(no deviations — metrics matched: 58-62px outer stroke implemented as 60, cutouts 12-14 as 14, dashes 18-22)*
 - [x] Task: Phase Verification & Checkpoint — final checkpoint + manual verification plan for human review (Refer to workflow.md) — [checkpoint: f808aba]
+
+## Phase 9b: User-Feedback Fixes (post-Final-QA review)
+
+- [x] Task: Elephant — full frontal redesign: 2 eyes (r26 + glints), 2 crescent tusks flanking the centered trunk, symmetric ears. Pixel-verified symmetric (eyes (200,160)/(312,160), tusks (150,340)/(362,340) white); zoom-render vision-approved READY. *(cc1091b)*
+- [x] Task: Cat ears — replaced sharp triangles with rounded curved-ear paths (4th iteration); pig ears — floppy rounded flaps. *(cc1091b)*
+- [x] Task: Bone — classic emoji dog-bone: r58 knobs at x170/x342 + concave waist (Q 256 250 / 256 262); pixel-verified 4/4. *(cc1091b)*
+- [x] Task: Carrot — flipped cone tip-down with leaves at top; Sun — 8 even 45° rays (was 10 inconsistent angles). *(cc1091b)*
+- [x] Task: Letterforms — C was a U-shaped arc (wrong sweep flags); fixed with O-verified left-half arc; G = C + right spur; J = deep U-hook. Broken C path also replaced in 3 inline copies (sticker_alphabet_match, sticker_word_match, tile_word_match). *(cc1091b)*
+- [x] Task: Numerals — 1 steeper flag, 3 two-bump path, 4 closed-top (diagonal+bar+stem), 6 loop+bowl+neck, 9 bowl+tail. All 9 glyphs pixel-verified PASS. *(cc1091b)*
+- [x] Task: Automated gates — 979/979 tests, biome 1 pre-existing warning. Contact sheets re-rendered to docs/svg-contact-sheets/final/. *(cc1091b)*
