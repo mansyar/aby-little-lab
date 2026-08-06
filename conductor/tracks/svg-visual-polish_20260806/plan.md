@@ -11,20 +11,20 @@
 - [x] Task: Write `docs/SVG_STYLE.md` — polish standards doc: outline palette (`#2D3748`, 4–6px @512), soft/vibrant color rotation list, letterform construction technique (thick round-capped paths, `paint-order` outline), silhouette-first rule, per-category composition rules (tiles: icon zone ~70%, readable @48px; stickers: one-glance concept), shape↔cutout hue pairing. (c536445)
 - [x] Task: Add `scripts/render-svg-contact-sheets.mjs` — repo tool that renders all SVGs into per-category contact-sheet HTML + screenshots (adapted from the audit tooling; keeps the visual QA loop repeatable). (bd80f61)
 - [x] Task: Capture baseline contact sheets into a commit-visible location (e.g., `docs/svg-contact-sheets/baseline/`) for before/after comparison. (026de51)
-- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: b60db06]
 
 ## Phase 2: Shapes & Cutouts (36 files)
 
-- [ ] Task: Fix broken crescent — redraw `shape_crescent.svg` as a closed crescent-moon path (outer arc + inner arc, filled, thick outline); mirror the same geometry in `cutout_crescent.svg` (dashed, pastel, lockstep hue).
-- [ ] Task: Recolor `shape_ring.svg` + `cutout_ring.svg` from dull gray to a brand palette color (e.g., soft yellow or teal); recolor `shape_pentagon.svg` + `cutout_pentagon.svg` from muddy brown to a vibrant soft hue.
-- [ ] Task: Fix `shape_rectangle.svg` + `cutout_rectangle.svg` proportions (match square footprint, horizontal aspect); bump visual mass of `shape_plus.svg` + `cutout_plus.svg` and the ring pair.
-- [ ] Task: Retune cutout dash pattern (longer dashes, larger gaps for a "stitching" feel); verify every shape↔cutout pair shares the same hue family (solid + pastel).
-- [ ] Task: Render shapes/cutouts contact sheet and visually confirm: no broken paths, palette-consistent, pairs matched.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Fix broken crescent — redraw `shape_crescent.svg` as a closed crescent-moon path (outer arc + inner arc, filled, thick outline); mirror the same geometry in `cutout_crescent.svg` (dashed, pastel, lockstep hue). (e4bcbc1)
+- [x] Task: Recolor `shape_ring.svg` + `cutout_ring.svg` from dull gray to a brand palette color (e.g., soft yellow or teal); recolor `shape_pentagon.svg` + `cutout_pentagon.svg` from muddy brown to a vibrant soft hue. (e4bcbc1)
+- [x] Task: Fix `shape_rectangle.svg` + `cutout_rectangle.svg` proportions (match square footprint, horizontal aspect); bump visual mass of `shape_plus.svg` + `cutout_plus.svg` and the ring pair. (e4bcbc1)
+- [x] Task: Retune cutout dash pattern (longer dashes, larger gaps for a "stitching" feel); verify every shape↔cutout pair shares the same hue family (solid + pastel). (e4bcbc1)
+- [x] Task: Render shapes/cutouts contact sheet and visually confirm: no broken paths, palette-consistent, pairs matched. (e4bcbc1)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: e4bcbc1]
 
 ## Phase 3: Letters & Numbers (36 files)
 
-- [ ] Task: Build the letterform template — define the construction technique (custom `<path>` strokes, round caps/joins, `#2D3748` outline via stroke or `paint-order`), glyph metrics grid (cap height, baseline, optical overshoot), and the 5–6 color rotation; draft pilots `letter_a`, `letter_b`, `letter_c`.
+- [~] Task: Build the letterform template — define the construction technique (custom `<path>` strokes, round caps/joins, `#2D3748` outline via stroke or `paint-order`), glyph metrics grid (cap height, baseline, optical overshoot), and the 5–6 color rotation; draft pilots `letter_a`, `letter_b`, `letter_c`.
 - [ ] Task: Render pilot letters and review for shape quality, outline weight, and color rotation before mass-producing.
 - [ ] Task: Redraw letters `d`–`m` in the pilot style (12 files).
 - [ ] Task: Redraw letters `n`–`z` in the pilot style (13 files).
