@@ -3,5 +3,6 @@
   <circle cx="112" cy="256" r="44" fill="#F6AD55" stroke="#2D3748" stroke-width="4"/>
   <rect x="164" y="212" width="88" height="88" rx="12" fill="#4FD1C5" stroke="#2D3748" stroke-width="4"/>
   <circle cx="304" cy="256" r="44" fill="#F6AD55" stroke="#2D3748" stroke-width="4"/>
-  <rect x="356" y="212" width="88" height="88" rx="12" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-dasharray="10 8"/>
+  <rect x="356" y="212" width="88" height="88" rx="12" fill="#4FD1C5" fill-opacity="0.3" stroke="#2D3748" stroke-width="4" stroke-dasharray="10 8"/>
+  <path d="M 400 148 L 406 166 L 424 172 L 406 178 L 400 196 L 394 178 L 376 172 L 394 166 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
 </svg>

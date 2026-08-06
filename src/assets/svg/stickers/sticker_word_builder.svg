@@ -1,4 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <circle cx="256" cy="256" r="240" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-  <text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="200" fill="#2B6CB0" stroke="#2D3748" stroke-width="8" paint-order="stroke fill">DOG</text>
+  <g transform="translate(135 320) scale(0.45) translate(-256 -320)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 170 400 L 170 70 L 240 70 A 165 165 0 0 1 240 400 Z" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 170 400 L 170 70 L 240 70 A 165 165 0 0 1 240 400 Z" stroke="#68D391" stroke-width="40"/>
+  </g>
+  <g transform="translate(280 285) scale(0.45) translate(-256 -285)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 256 106 A 150 150 0 1 0 256 406 A 150 150 0 1 0 256 106" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 256 106 A 150 150 0 1 0 256 406 A 150 150 0 1 0 256 106" stroke="#FC8181" stroke-width="40"/>
+  </g>
+  <path d="M 278 250 L 278 238 M 296 252 L 296 240" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <rect x="390" y="262" width="88" height="112" rx="14" fill="#FFFFFF" fill-opacity="0.5" stroke="#2D3748" stroke-width="5" stroke-dasharray="10 8"/>
 </svg>

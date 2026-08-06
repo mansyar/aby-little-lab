@@ -1,4 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <circle cx="256" cy="256" r="240" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-  <text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="200" fill="#2B6CB0" stroke="#2D3748" stroke-width="8" paint-order="stroke fill">CAT</text>
+  <circle cx="256" cy="145" r="62" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+  <polygon points="212,98 240,58 264,92" fill="#F6AD55" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="300,98 272,58 248,92" fill="#F6AD55" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="222,88 240,66 254,88" fill="#F687B3"/>
+  <polygon points="290,88 272,66 258,88" fill="#F687B3"/>
+  <circle cx="228" cy="142" r="10" fill="#2D3748"/>
+  <circle cx="284" cy="142" r="10" fill="#2D3748"/>
+  <circle cx="232" cy="138" r="3" fill="#FFFFFF"/>
+  <circle cx="288" cy="138" r="3" fill="#FFFFFF"/>
+  <path d="M 256 165 L 248 176 L 264 176 Z" fill="#F687B3" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 200 168 L 166 162 M 200 178 L 166 180" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 312 168 L 346 162 M 312 178 L 346 180" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <g transform="translate(130 350) scale(0.45) translate(-256 -350)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 386 181 A 150 150 0 0 0 126 331" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 386 181 A 150 150 0 0 0 126 331" stroke="#2B6CB0" stroke-width="40"/>
+  </g>
+  <g transform="translate(270 350) scale(0.45) translate(-256 -350)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 126 400 L 256 70 L 386 400 M 176 290 L 336 290" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 126 400 L 256 70 L 386 400 M 176 290 L 336 290" stroke="#FC8181" stroke-width="40"/>
+  </g>
+  <g transform="translate(400 350) scale(0.45) translate(-256 -350)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 166 70 L 346 70 M 256 70 L 256 400" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 166 70 L 346 70 M 256 70 L 256 400" stroke="#F6AD55" stroke-width="40"/>
+  </g>
 </svg>

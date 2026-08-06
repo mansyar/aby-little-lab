@@ -4,7 +4,11 @@
   <ellipse cx="320" cy="260" rx="42" ry="54" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
   <circle cx="190" cy="250" r="12" fill="#2D3748"/>
   <circle cx="320" cy="250" r="12" fill="#2D3748"/>
-  <path d="M200 120 L230 80 L260 120" fill="none" stroke="#2D3748" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="330" y="70" width="34" height="110" rx="12" fill="#2D3748"/>
-  <path d="M364 80 C410 90 410 150 364 168" fill="none" stroke="#2D3748" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 222 320 Q 256 350 290 320" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="200" cy="120" r="28" fill="#2D3748"/>
+  <rect x="214" y="38" width="10" height="82" fill="#2D3748"/>
+  <path d="M 224 44 Q 258 54 250 82 Q 244 64 224 62 Z" fill="#2D3748"/>
+  <circle cx="350" cy="100" r="28" fill="#2D3748"/>
+  <rect x="364" y="18" width="10" height="82" fill="#2D3748"/>
+  <path d="M 374 24 Q 340 40 348 68 Q 356 52 374 50 Z" fill="#2D3748"/>
 </svg>

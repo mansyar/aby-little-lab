@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <circle cx="256" cy="256" r="240" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-  <path d="M 410 65 Q 428 83 455 110 Q 428 137 410 155 Q 392 137 365 110 Q 392 83 410 65 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="4"/>
-  <text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="200" fill="#2B6CB0" stroke="#2D3748" stroke-width="8" paint-order="stroke fill">3</text>
+  <circle cx="150" cy="120" r="38" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="256" cy="120" r="38" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="362" cy="120" r="38" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+  <g transform="translate(256 330) scale(0.52) translate(-256 -330)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 180 120 Q 180 80 240 80 Q 310 80 310 165 Q 310 215 260 250 Q 320 280 320 340 Q 320 420 230 420 Q 140 420 140 350" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 180 120 Q 180 80 240 80 Q 310 80 310 165 Q 310 215 260 250 Q 320 280 320 340 Q 320 420 230 420 Q 140 420 140 350" stroke="#2B6CB0" stroke-width="40"/>
+  </g>
 </svg>
