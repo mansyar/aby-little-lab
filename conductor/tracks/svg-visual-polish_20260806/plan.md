@@ -69,17 +69,17 @@
 
 ## Phase 8: Stickers & Tiles (22 files)
 
-- [~] Task: Rebuild worst stickers: `sticker_pop_freeze.svg` (popped-bubble moment, not an empty bubble), `sticker_big_small.svg` (two-object size contrast with character, not plain circles), `sticker_how_many.svg` (object group being counted + numeral, centered; remove mystery diamond).
-- [ ] Task: Rebuild `sticker_animal_trace.svg` (readable start→end dotted path, centered) and `sticker_pattern_builder.svg` (clear AB-A sequence; replace dashed placeholder with a "missing piece" cue) and `sticker_shadow_match.svg` (real shape + silhouette pairing).
-- [ ] Task: Differentiate the three text stickers (`sticker_alphabet_match`, `sticker_word_builder`, `sticker_word_match`) — distinct colors/framing/accents so each has visual identity (ABC vs. built word vs. match layout).
-- [ ] Task: Rebuild worst tiles: `tile_pop_freeze.svg` (replace sleep-"Z" with a pop/burst concept), `tile_animal_trace.svg` (clear dotted trace path, larger markers, centered), `tile_word_builder.svg` (show a letter being placed / building progress — no dashed empty box), `tile_shadow_match.svg` (visible shadow pairing), `tile_big_small.svg` (dramatic size contrast, remove unexplained baseline).
-- [ ] Task: Fix `tile_musical_memory.svg` music notes (proper eighth-note shapes matching the sticker), `tile_shape_sorter.svg` (consistent fills — no empty white square), and standardize icon mass/placement across all 11 tiles (icon zone ~70%, readable @48px).
-- [ ] Task: Render stickers/tiles contact sheets; verify one-glance game concepts and 48px readability.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Rebuild worst stickers: `sticker_pop_freeze.svg` (popped-bubble moment, not an empty bubble), `sticker_big_small.svg` (two-object size contrast with character, not plain circles), `sticker_how_many.svg` (object group being counted + numeral, centered; remove mystery diamond). *(9ca8d57)*
+- [x] Task: Rebuild `sticker_animal_trace.svg` (readable start→end dotted path, centered) and `sticker_pattern_builder.svg` (clear AB-A sequence; replace dashed placeholder with a "missing piece" cue) and `sticker_shadow_match.svg` (real shape + silhouette pairing). *(9ca8d57)*
+- [x] Task: Differentiate the three text stickers (`sticker_alphabet_match`, `sticker_word_builder`, `sticker_word_match`) — distinct colors/framing/accents so each has visual identity (ABC vs. built word vs. match layout). *(9ca8d57)*
+- [x] Task: Rebuild worst tiles: `tile_pop_freeze.svg` (replace sleep-"Z" with a pop/burst concept), `tile_animal_trace.svg` (clear dotted trace path, larger markers, centered), `tile_word_builder.svg` (show a letter being placed / building progress — no dashed empty box), `tile_shadow_match.svg` (visible shadow pairing), `tile_big_small.svg` (dramatic size contrast, remove unexplained baseline). *(9ca8d57)*
+- [x] Task: Fix `tile_musical_memory.svg` music notes (proper eighth-note shapes matching the sticker), `tile_shape_sorter.svg` (consistent fills — no empty white square), and standardize icon mass/placement across all 11 tiles (icon zone ~70%, readable @48px). *(9ca8d57)*
+- [x] Task: Render stickers/tiles contact sheets; verify one-glance game concepts and 48px readability. *(9ca8d57)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 9ca8d57]
 
 ## Phase 9: Final QA & Handoff
 
-- [ ] Task: Full 142-asset contact-sheet review — re-render every category; confirm no broken paths, no `<text>` in letters/numbers, consistent outlines, silhouette recognizability.
+- [~] Task: Full 142-asset contact-sheet review — re-render every category; confirm no broken paths, no `<text>` in letters/numbers, consistent outlines, silhouette recognizability.
 - [ ] Task: Run `CI=true npm test` (existing suite must stay green — zero source changes expected).
 - [ ] Task: Run `npm run check` (biome) and `npm run build` (production build).
 - [ ] Task: Update `docs/SVG_STYLE.md` if the implementation surfaced deviations; ensure no `plan.md`/`spec.md` drift.
