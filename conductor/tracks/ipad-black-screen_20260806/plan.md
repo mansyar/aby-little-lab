@@ -1,6 +1,6 @@
 # Implementation Plan: iPad Black Screen — Orientation Lock Crash
 
-## Phase 1 — TDD Fix: BootScene Orientation Lock Crash
+## Phase 1 — TDD Fix: BootScene Orientation Lock Crash [checkpoint: 3b0bb66]
 
 - [x] **Task: Write failing regression test (Red phase)** `3621766`
   - [x] In `src/__tests__/scenes/navigation.test.ts` (BootScene describe block): stub `screen.orientation` with only `unlock` (WebKit partial API — no `lock`), call `scene.create()`, assert `scene.scene.start` called with `"Preload"`
@@ -16,6 +16,6 @@
   - [x] `pnpm run check` — Biome lint/format clean (57 files)
   - [x] `pnpm run build` — production build succeeds (PWA generated)
 
-- [~] **Task: Phase Verification & Checkpoint** (Refer to workflow.md)
-  - [ ] Present manual iPad verification steps (Safari + Chrome: game boots to Hub, no black screen)
-  - [ ] Create checkpoint commit with verification git note
+- [x] **Task: Phase Verification & Checkpoint** (Refer to workflow.md)
+  - [x] Present manual iPad verification steps (Safari + Chrome: game boots to Hub, no black screen)
+  - [x] Create checkpoint commit with verification git note
