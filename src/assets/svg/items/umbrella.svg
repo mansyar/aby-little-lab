@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <path d="M 256 100 Q 120 100 80 240 Q 256 200 432 240 Q 392 100 256 100 Z" fill="#9F7AEA" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M 80 240 Q 130 220 168 240" fill="#B794F4" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M 168 240 Q 212 220 256 240" fill="#B794F4" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M 256 240 Q 300 220 344 240" fill="#B794F4" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M 344 240 Q 388 220 432 240" fill="#B794F4" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M 256 100 Q 256 200 256 240" fill="none" stroke="#2D3748" stroke-width="5"/>
-  <path d="M 256 240 Q 246 310 266 370 Q 276 400 256 410" fill="none" stroke="#A0522D" stroke-width="7" stroke-linecap="round"/>
-  <path d="M 240 405 Q 256 425 272 405" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 256 100 Q 110 100 90 240 Q 152 210 196 240 Q 226 208 256 240 Q 286 208 316 240 Q 360 210 422 240 Q 402 100 256 100 Z" fill="#9F7AEA" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 256 240 L 256 370 Q 256 404 286 404 Q 298 404 298 392" fill="none" stroke="#A0522D" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="256" cy="96" r="9" fill="#2D3748"/>
 </svg>

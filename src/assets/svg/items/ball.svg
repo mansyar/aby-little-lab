@@ -1,9 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="170" fill="#ECC94B" stroke="#2D3748" stroke-width="6"/>
-  <path d="M 86 256 Q 256 186 426 256" fill="none" stroke="#2D3748" stroke-width="5"/>
-  <path d="M 86 256 Q 256 326 426 256" fill="none" stroke="#2D3748" stroke-width="5"/>
-  <path d="M 256 86 Q 186 256 256 426" fill="none" stroke="#2D3748" stroke-width="5"/>
-  <path d="M 256 86 Q 326 256 256 426" fill="none" stroke="#2D3748" stroke-width="5"/>
-  <path d="M 140 140 Q 200 200 256 256" fill="none" stroke="#2D3748" stroke-width="4" opacity="0.4"/>
-  <path d="M 372 140 Q 312 200 256 256" fill="none" stroke="#2D3748" stroke-width="4" opacity="0.4"/>
+  <circle cx="256" cy="256" r="175" fill="#E53E3E" stroke="#2D3748" stroke-width="6"/>
+  <polygon points="256,216 218,244 232,288 280,288 294,244" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="256,122 223.7,145.5 236,183.5 276,183.5 288.3,145.5" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="161,191 128.7,214.6 141,252.6 181,252.6 193.3,214.6" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="197.2,302.9 164.9,326.5 177.2,364.5 217.2,364.5 229.5,326.5" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="314.8,302.9 282.5,326.5 294.8,364.5 334.8,364.5 347.1,326.5" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="351.1,191.1 318.8,214.6 331.1,252.6 371.1,252.6 383.4,214.6" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <line x1="256" y1="216" x2="256" y2="156" stroke="#2D3748" stroke-width="4"/>
+  <line x1="218" y1="244" x2="161" y2="225" stroke="#2D3748" stroke-width="4"/>
+  <line x1="232" y1="288" x2="197" y2="337" stroke="#2D3748" stroke-width="4"/>
+  <line x1="280" y1="288" x2="315" y2="337" stroke="#2D3748" stroke-width="4"/>
+  <line x1="294" y1="244" x2="351" y2="225" stroke="#2D3748" stroke-width="4"/>
 </svg>
