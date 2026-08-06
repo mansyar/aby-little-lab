@@ -35,10 +35,10 @@
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
-- [ ] Task 4.1: Re-run all four gates on `release/v1.6.0` (check → test → build → validate-pwa)
-- [ ] Task 4.2: Create annotated tag `git tag -a v1.6.0 -m "Release v1.6.0 — UI/UX hardening, 18-shape Shape Sorter, TTS fixes, 142-asset SVG polish"`
-- [ ] Task 4.3: Push branch + tag; open PR `release/v1.6.0` → `master` (body = release notes summary)
-  - [ ] Confirm CI "Quality Gates" check passes on the PR (merge-blocking)
+- [x] Task 4.1: Re-run all four gates on `release/v1.6.0` (check → test → build → validate-pwa) — check PASS (1 pre-existing warning); test 979/979 (1 transient flaky timeout in countLogic 'proceeds easy-first' under load — passed in isolation 407ms and full re-run 62.83s, no code change); build OK (index-UJjn3q9H.js — hash differs from baseline index-Cbz3RFR2.js because bundle embeds __APP_VERSION__ 1.6.0); validate-pwa 13/13
+- [x] Task 4.2: Create annotated tag `git tag -a v1.6.0 -m "Release v1.6.0 — UI/UX hardening, 18-shape Shape Sorter, TTS fixes, 142-asset SVG polish"` — created and pushed to origin
+- [x] Task 4.3: Push branch + tag; open PR `release/v1.6.0` → `master` (body = release notes summary) — branch + tag pushed; PR #14 opened (https://github.com/mansyar/aby-little-lab/pull/14)
+  - [x] Confirm CI "Quality Gates" check passes on the PR (merge-blocking) — PASS 1m24s (run 31108882448); Deploy to Coolify correctly skipped (master-only)
 - [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Merge, Deploy & Verify
