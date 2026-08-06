@@ -27,7 +27,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [~] **Track: PWA Install & Update UX** *Link: [./tracks/pwa-install-update_20260802/index.md](./tracks/pwa-install-update_20260802/index.md)*
-- [x] **Track: iPad Black Screen — Orientation Lock Crash** *Link: [./tracks/ipad-black-screen_20260806/index.md](./tracks/ipad-black-screen_20260806/index.md)*
 
 ---
 
