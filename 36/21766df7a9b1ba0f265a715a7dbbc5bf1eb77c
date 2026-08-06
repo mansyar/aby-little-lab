@@ -1,0 +1,7 @@
+Task: Write failing regression test (Red phase)
+
+Summary: Added a regression test in src/__tests__/scenes/navigation.test.ts (BootScene describe block) that stubs screen.orientation WITHOUT the lock method (replicating iPad WebKit's partial Screen Orientation API) and asserts scene.scene.start is called with 'Preload'.
+
+Files: src/__tests__/scenes/navigation.test.ts
+
+Why: On iPad (Safari + Chrome, both WebKit), screen.orientation.lock is not a function; calling it throws a synchronous TypeError that crashes BootScene.create() before Preload starts, leaving a black screen. The test fails on current code with 'TypeError: screen.orientation.lock is not a function' at BootScene.ts:18, reproducing the production bug.
