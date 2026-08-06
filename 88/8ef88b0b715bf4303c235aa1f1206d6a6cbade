@@ -1,0 +1,7 @@
+Phase 3 - Preload Wiring.
+
+Added 24 raw SVG imports (alphabetically organized, verified by biome organizeImports) and 24 SHAPE_ASSETS entries in PreloadScene.ts: 12 shape_* keys + 12 cutout_* keys -> 18 shape + 18 cutout textures available at runtime (previous 6+6).
+
+Verified: pnpm run check (86 files, no errors), pnpm run build succeeded, node scripts/validate-pwa.js -> 13 passed, 0 failed.
+
+Files: src/scenes/PreloadScene.ts.
