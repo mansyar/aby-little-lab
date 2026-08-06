@@ -3,7 +3,7 @@
 **Track ID:** `release-1.6.0_20260806` · **Type:** Chore
 **Methodology:** release process per `docs/release-checklist.md`; phases per `conductor/workflow.md` (checkpoint protocol at each phase end). TDD not applicable — verification via existing gates and checklist execution.
 
-## Phase 1 — Pre-Release Baseline Validation
+## Phase 1 — Pre-Release Baseline Validation [checkpoint: fc49e7f]
 
 - [x] Task 1.1: Confirm clean working tree and master tip
   - [x] `git status --short` shows no changes
@@ -14,7 +14,7 @@
   - [x] `pnpm run build` — OK (index-Cbz3RFR2.js, 27 precache entries, 1525.47 KiB)
   - [x] `node scripts/validate-pwa.js` — 13/13 passed
 - [x] Task 1.3: Capture baseline release metrics (test count 979, precache 27 entries / 1525.47 KiB, main chunk index-Cbz3RFR2.js) for release notes
-- [ ] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md) — checkpoint fc49e7f, git note attached
 
 ## Phase 2 — Release Branch & Version Bump
 
