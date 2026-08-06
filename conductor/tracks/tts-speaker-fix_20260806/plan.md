@@ -4,17 +4,17 @@
 
 ## Phase 1 — Speaker button hit-area fix
 
-- [ ] Task: Create engine-accurate hit-test simulation helper for tests (replicates Phaser 4.2.1 `pointWithinHitArea`: local transform → `+displayOriginX/Y` → `Rectangle.Contains`)
-- [ ] Task (TDD): Write failing tests for `SpeakerButton` — simulated taps across the visible 96×96 icon hit; taps outside miss
-- [ ] Task: Implement fix in `SpeakerButton.ts` (frame-derived hit rect via the texture frame — no magic numbers)
-- [ ] Task: Update `navigation.test.ts` / `SpeakerButton.test.ts` assertions that encode the old `(-48,-48)` convention
-- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+- [x] Task: Create engine-accurate hit-test simulation helper for tests (replicates Phaser 4.2.1 `pointWithinHitArea`: local transform → `+displayOriginX/Y` → `Rectangle.Contains`)
+- [x] Task (TDD): Write failing tests for `SpeakerButton` — simulated taps across the visible 96×96 icon hit; taps outside miss
+- [x] Task: Implement fix in `SpeakerButton.ts` (frame-derived hit rect via the texture frame — no magic numbers)
+- [x] Task: Update `navigation.test.ts` / `SpeakerButton.test.ts` assertions that encode the old `(-48,-48)` convention
+- [x] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 2 — Same-family avatar hit-area fixes
 
-- [ ] Task (TDD): Write failing engine-accurate tests for Hub avatar chip, profile-picker avatars, SettingsPanel Add-Profile avatars
-- [ ] Task: Implement fixes in `HubScene.ts` (chip + picker avatars) and `SettingsPanel.ts` (Add-Profile avatars) using frame-derived rects
-- [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
+- [x] Task (TDD): Write failing engine-accurate tests for Hub avatar chip, profile-picker avatars, SettingsPanel Add-Profile avatars
+- [x] Task: Implement fixes in `HubScene.ts` (chip + picker avatars) and `SettingsPanel.ts` (Add-Profile avatars) using frame-derived rects
+- [x] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 3 — TTS: iPad gesture unlock + cancel/speak race hardening
 

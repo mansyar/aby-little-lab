@@ -657,6 +657,21 @@ function expectHitAreaOrigin(obj: Record<string, MockFn>, x: number, y: number):
   expect(interactiveConfig?.hitArea.y).toBe(y);
 }
 
+/**
+ * Asserts that an Image control does not define a custom hit area, i.e. the
+ * engine's frame-based default is used. For origin-0.5 Images on 512x512
+ * textures the default frame rect covers exactly the visible scaled icon
+ * (custom rects are tested in texture-local space and can be wildly
+ * misaligned with the rendered icon).
+ */
+function expectUsesDefaultFrameHitArea(obj: Record<string, MockFn>): void {
+  const setInteractiveMock = getMockFn(obj.setInteractive);
+  const customConfig = setInteractiveMock.mock.calls.find(
+    (call) => call[0] && typeof call[0] === "object",
+  );
+  expect(customConfig).toBeUndefined();
+}
+
 describe("scene navigation flow", () => {
   beforeEach(() => {
     vi.stubGlobal("screen", {
@@ -1020,11 +1035,8 @@ describe("scene navigation flow", () => {
       const chip = findLastAddedImage(scene, "animal_cat");
       expect(chip).toBeDefined();
       if (!chip) return;
-      const interactive = getMockFn(chip.setInteractive).mock.calls[0]?.[0] as {
-        hitArea: { width: number; height: number };
-      };
-      expect(interactive.hitArea.width).toBe(96);
-      expect(interactive.hitArea.height).toBe(96);
+      // Frame-based default hit area covers the visible chip exactly.
+      expectUsesDefaultFrameHitArea(chip);
       expect(getMockFn(chip.on).mock.calls.some((call) => call[0] === "pointerup")).toBe(true);
     });
 
@@ -1936,16 +1948,15 @@ describe("scene navigation flow", () => {
       expectHitAreaOrigin(settingsButton, 0, 0);
     });
 
-    it("gives the Musical Memory Replay control a 96x96 hit area", () => {
+    it("makes the Musical Memory Replay control tappable across its visible icon", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
 
       const replayButton = getImageByKey(scene, "icon_speaker");
       if (!replayButton) throw new Error("Replay button not found");
-      expectTouchTargetSize(replayButton);
-      // The speaker glyph is centered on its position, so its hit area is
-      // anchored at (-48,-48) to cover the full 96x96 target.
-      expectHitAreaOrigin(replayButton, -48, -48);
+      // Frame-based default hit area: covers exactly the visible 96x96 icon
+      // (a custom centered rect is dead in Phaser 4 texture-local space).
+      expectUsesDefaultFrameHitArea(replayButton);
     });
   });
 

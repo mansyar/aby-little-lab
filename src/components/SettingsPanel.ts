@@ -383,10 +383,7 @@ export class SettingsPanel {
       for (const avatarId of available) {
         const avatar = this.scene.add.image(x, y, PROFILE_AVATAR_TEXTURES[avatarId]);
         avatar.setScale(80 / AVATAR_TEXTURE_SIZE);
-        avatar.setInteractive({
-          hitArea: new Phaser.Geom.Rectangle(-50, -50, 100, 100),
-          hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-        });
+        avatar.setInteractive();
         avatar.on("pointerdown", () => {
           addProfile(avatarId);
           this.openProfilesOverlay();

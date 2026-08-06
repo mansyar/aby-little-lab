@@ -459,10 +459,9 @@ export class HubScene extends Phaser.Scene {
       PROFILE_AVATAR_TEXTURES[active.avatarId],
     );
     chip.setScale(AVATAR_CHIP_DISPLAY / AVATAR_TEXTURE_SIZE);
-    chip.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, AVATAR_CHIP_HIT, AVATAR_CHIP_HIT),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    // Frame-based default hit area covers the visible chip exactly (custom
+    // rects are tested in texture-local space and miss on 512px textures).
+    chip.setInteractive();
     chip.on("pointerup", () => {
       startAudio();
       this.openProfilePicker();
@@ -497,10 +496,7 @@ export class HubScene extends Phaser.Scene {
     for (const profile of profiles) {
       const avatar = this.add.image(x, y, PROFILE_AVATAR_TEXTURES[profile.avatarId]);
       avatar.setDepth(PICKER_DEPTH + 1);
-      avatar.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, PICKER_AVATAR_DISPLAY, PICKER_AVATAR_DISPLAY),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
+      avatar.setInteractive();
       const baseScale = PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE;
       avatar.setScale(profile.id === activeId ? baseScale * 1.15 : baseScale);
       avatar.on("pointerup", () => {
