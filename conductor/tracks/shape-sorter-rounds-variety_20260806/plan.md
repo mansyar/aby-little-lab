@@ -64,7 +64,7 @@
 
 ---
 
-## Phase 4: Multi-Round Sessions & Progress Dots (TDD)
+## Phase 4: Multi-Round Sessions & Progress Dots (TDD) [checkpoint: 50c454b]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 888ef88
 - [x] Task: Write failing scene tests in `src/__tests__/scenes/shapeSorterScene.test.ts` (Red), mirroring `wordMatchScene.test.ts` 405e669
