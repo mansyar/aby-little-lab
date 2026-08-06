@@ -72,7 +72,7 @@
     - [x] Test placing all 3 shapes of round 1 advances to round 2 (first dot filled) 405e669
     - [x] Test round 2 rebuilds slots/shapes with fresh playthrough data (teardown of round 1 objects) 405e669
     - [x] Test win celebration + sticker award only after round 3 completes 405e669
-    - [x] Test progress dot pops (scale 1 → 1.4 → 1, `Back.out`) on round completion
+    - [x] Test progress dot pops (scale 1 → 1.4 → 1, `Back.out`) on round completion 405e669
 - [x] Task: Implement round state (`roundIndex`, `playthrough`), 3 progress dots, round teardown/re-init, completion gated to final round (Green) 405e669
 - [x] Task: Regression — existing juice intact (drag lift/tilt, zone highlight, snap tween, silent floor bounce, mascot reactions, reduced-motion) via full suite `CI=true pnpm test` 405e669
 - [ ] Task: Conductor - User Manual Verification 'Multi-Round Sessions & Progress Dots' (Protocol in workflow.md)
