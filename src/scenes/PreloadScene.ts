@@ -71,17 +71,41 @@ import smShadowHouseSvg from "../assets/svg/shadows/shadow_house.svg?raw";
 import smShadowMushroomSvg from "../assets/svg/shadows/shadow_mushroom.svg?raw";
 import smShadowTreeSvg from "../assets/svg/shadows/shadow_tree.svg?raw";
 import smShadowUmbrellaSvg from "../assets/svg/shadows/shadow_umbrella.svg?raw";
+import cutoutArrowSvg from "../assets/svg/shapes/cutout_arrow.svg?raw";
 import cutoutCircleSvg from "../assets/svg/shapes/cutout_circle.svg?raw";
 import cutoutCrescentSvg from "../assets/svg/shapes/cutout_crescent.svg?raw";
+import cutoutDiamondSvg from "../assets/svg/shapes/cutout_diamond.svg?raw";
 import cutoutHeartSvg from "../assets/svg/shapes/cutout_heart.svg?raw";
+import cutoutHexagonSvg from "../assets/svg/shapes/cutout_hexagon.svg?raw";
+import cutoutOctagonSvg from "../assets/svg/shapes/cutout_octagon.svg?raw";
+import cutoutOvalSvg from "../assets/svg/shapes/cutout_oval.svg?raw";
+import cutoutPentagonSvg from "../assets/svg/shapes/cutout_pentagon.svg?raw";
+import cutoutPlusSvg from "../assets/svg/shapes/cutout_plus.svg?raw";
+import cutoutRectangleSvg from "../assets/svg/shapes/cutout_rectangle.svg?raw";
+import cutoutRingSvg from "../assets/svg/shapes/cutout_ring.svg?raw";
+import cutoutSemicircleSvg from "../assets/svg/shapes/cutout_semicircle.svg?raw";
 import cutoutSquareSvg from "../assets/svg/shapes/cutout_square.svg?raw";
 import cutoutStarSvg from "../assets/svg/shapes/cutout_star.svg?raw";
+import cutoutTeardropSvg from "../assets/svg/shapes/cutout_teardrop.svg?raw";
+import cutoutTrapezoidSvg from "../assets/svg/shapes/cutout_trapezoid.svg?raw";
 import cutoutTriangleSvg from "../assets/svg/shapes/cutout_triangle.svg?raw";
+import shapeArrowSvg from "../assets/svg/shapes/shape_arrow.svg?raw";
 import shapeCircleSvg from "../assets/svg/shapes/shape_circle.svg?raw";
 import shapeCrescentSvg from "../assets/svg/shapes/shape_crescent.svg?raw";
+import shapeDiamondSvg from "../assets/svg/shapes/shape_diamond.svg?raw";
 import shapeHeartSvg from "../assets/svg/shapes/shape_heart.svg?raw";
+import shapeHexagonSvg from "../assets/svg/shapes/shape_hexagon.svg?raw";
+import shapeOctagonSvg from "../assets/svg/shapes/shape_octagon.svg?raw";
+import shapeOvalSvg from "../assets/svg/shapes/shape_oval.svg?raw";
+import shapePentagonSvg from "../assets/svg/shapes/shape_pentagon.svg?raw";
+import shapePlusSvg from "../assets/svg/shapes/shape_plus.svg?raw";
+import shapeRectangleSvg from "../assets/svg/shapes/shape_rectangle.svg?raw";
+import shapeRingSvg from "../assets/svg/shapes/shape_ring.svg?raw";
+import shapeSemicircleSvg from "../assets/svg/shapes/shape_semicircle.svg?raw";
 import shapeSquareSvg from "../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../assets/svg/shapes/shape_star.svg?raw";
+import shapeTeardropSvg from "../assets/svg/shapes/shape_teardrop.svg?raw";
+import shapeTrapezoidSvg from "../assets/svg/shapes/shape_trapezoid.svg?raw";
 import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
@@ -129,12 +153,36 @@ const SHAPE_ASSETS = [
   { key: "shape_star", svg: shapeStarSvg },
   { key: "shape_heart", svg: shapeHeartSvg },
   { key: "shape_crescent", svg: shapeCrescentSvg },
+  { key: "shape_arrow", svg: shapeArrowSvg },
+  { key: "shape_diamond", svg: shapeDiamondSvg },
+  { key: "shape_hexagon", svg: shapeHexagonSvg },
+  { key: "shape_octagon", svg: shapeOctagonSvg },
+  { key: "shape_oval", svg: shapeOvalSvg },
+  { key: "shape_pentagon", svg: shapePentagonSvg },
+  { key: "shape_plus", svg: shapePlusSvg },
+  { key: "shape_rectangle", svg: shapeRectangleSvg },
+  { key: "shape_ring", svg: shapeRingSvg },
+  { key: "shape_semicircle", svg: shapeSemicircleSvg },
+  { key: "shape_teardrop", svg: shapeTeardropSvg },
+  { key: "shape_trapezoid", svg: shapeTrapezoidSvg },
   { key: "cutout_circle", svg: cutoutCircleSvg },
   { key: "cutout_square", svg: cutoutSquareSvg },
   { key: "cutout_triangle", svg: cutoutTriangleSvg },
   { key: "cutout_star", svg: cutoutStarSvg },
   { key: "cutout_heart", svg: cutoutHeartSvg },
   { key: "cutout_crescent", svg: cutoutCrescentSvg },
+  { key: "cutout_arrow", svg: cutoutArrowSvg },
+  { key: "cutout_diamond", svg: cutoutDiamondSvg },
+  { key: "cutout_hexagon", svg: cutoutHexagonSvg },
+  { key: "cutout_octagon", svg: cutoutOctagonSvg },
+  { key: "cutout_oval", svg: cutoutOvalSvg },
+  { key: "cutout_pentagon", svg: cutoutPentagonSvg },
+  { key: "cutout_plus", svg: cutoutPlusSvg },
+  { key: "cutout_rectangle", svg: cutoutRectangleSvg },
+  { key: "cutout_ring", svg: cutoutRingSvg },
+  { key: "cutout_semicircle", svg: cutoutSemicircleSvg },
+  { key: "cutout_teardrop", svg: cutoutTeardropSvg },
+  { key: "cutout_trapezoid", svg: cutoutTrapezoidSvg },
   { key: "sticker_shape_sorter", svg: stickerShapeSorterSvg },
   { key: "animal_monkey", svg: animalMonkeySvg },
   { key: "animal_rabbit", svg: animalRabbitSvg },
