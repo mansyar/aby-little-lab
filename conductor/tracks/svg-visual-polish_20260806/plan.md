@@ -24,17 +24,17 @@
 
 ## Phase 3: Letters & Numbers (36 files)
 
-- [~] Task: Build the letterform template — define the construction technique (custom `<path>` strokes, round caps/joins, `#2D3748` outline via stroke or `paint-order`), glyph metrics grid (cap height, baseline, optical overshoot), and the 5–6 color rotation; draft pilots `letter_a`, `letter_b`, `letter_c`.
-- [ ] Task: Render pilot letters and review for shape quality, outline weight, and color rotation before mass-producing.
-- [ ] Task: Redraw letters `d`–`m` in the pilot style (12 files).
-- [ ] Task: Redraw letters `n`–`z` in the pilot style (13 files).
-- [ ] Task: Redraw numerals `0`–`9` matching the letter style (10 files) — `1` gets chunky base + flag, `4` open-top, `7` slightly curved; same color rotation so the number line reads as a rainbow set.
-- [ ] Task: Verify no `<text>` elements remain in `letters/` or `numbers/` (grep); render letters/numbers contact sheets; check optical size equalization (`i`, `j`, `l`, `1` not tiny) and small-size legibility.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Build the letterform template — define the construction technique (custom `<path>` strokes, round caps/joins, `#2D3748` outline via stroke or `paint-order`), glyph metrics grid (cap height, baseline, optical overshoot), and the 5–6 color rotation; draft pilots `letter_a`, `letter_b`, `letter_c`. (ec3e113)
+- [x] Task: Render pilot letters and review for shape quality, outline weight, and color rotation before mass-producing. (ec3e113)
+- [x] Task: Redraw letters `d`–`m` in the pilot style (12 files). (ec3e113)
+- [x] Task: Redraw letters `n`–`z` in the pilot style (13 files). (ec3e113)
+- [x] Task: Redraw numerals `0`–`9` matching the letter style (10 files) — `1` gets chunky base + flag, `4` open-top, `7` slightly curved; same color rotation so the number line reads as a rainbow set. (ec3e113)
+- [x] Task: Verify no `<text>` elements remain in `letters/` or `numbers/` (grep); render letters/numbers contact sheets; check optical size equalization (`i`, `j`, `l`, `1` not tiny) and small-size legibility. (ec3e113)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: ec3e113]
 
 ## Phase 4: Animals & Toys (16 files)
 
-- [ ] Task: Redesign `elephant.svg` — clearly readable: curled trunk in front, two distinct ears, eye, tusk(s), body posture; no longer a gray sphere.
+- [~] Task: Redesign `elephant.svg` — clearly readable: curled trunk in front, two distinct ears, eye, tusk(s), body posture; no longer a gray sphere.
 - [ ] Task: Redesign `pig.svg` — separate head from body, obvious snout disc with two nostril dots, proper ears, remove the random white cheek circle.
 - [ ] Task: Polish frogs (`frog_blue/green/red`) — enlarge eyes ~20% and lower them for cuteness; optionally add one unique belly marking per frog so variants are distinguishable at silhouette level; refine `cat.svg` ear base (less fox-like).
 - [ ] Task: Fix `toy_rocket.svg` — flames at the BOTTOM, nose cone at top, clearly readable fins.
