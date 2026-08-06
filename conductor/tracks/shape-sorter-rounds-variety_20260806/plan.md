@@ -7,34 +7,34 @@
 
 ## Phase 1: Shape & Cutout Asset Creation (24 new SVGs)
 
-- [ ] Task: Read spec.md and workflow.md to refresh context before starting this phase
-- [ ] Task: Author 12 new shape SVGs (512×512 viewBox, flat fill, 5px `#2D3748` stroke, assigned distinct colors)
-    - [ ] `shape_oval.svg` (`#63B3ED`)
-    - [ ] `shape_rectangle.svg` (`#48BB78`)
-    - [ ] `shape_diamond.svg` (`#ED64A6`)
-    - [ ] `shape_pentagon.svg` (`#B7791F`)
-    - [ ] `shape_hexagon.svg` (`#4C51BF`)
-    - [ ] `shape_octagon.svg` (`#D69E2E`)
-    - [ ] `shape_trapezoid.svg` (`#38B2AC`)
-    - [ ] `shape_semicircle.svg` (`#F56565`)
-    - [ ] `shape_arrow.svg` (`#9AE6B4`)
-    - [ ] `shape_plus.svg` (`#FBB6CE`)
-    - [ ] `shape_ring.svg` (`#A0AEC0`)
-    - [ ] `shape_teardrop.svg` (`#B2F5EA`)
-- [ ] Task: Author 12 cutout SVGs (same path data, `fill-opacity="0.3"` + `stroke-dasharray="12 8"`)
-    - [ ] `cutout_oval.svg`
-    - [ ] `cutout_rectangle.svg`
-    - [ ] `cutout_diamond.svg`
-    - [ ] `cutout_pentagon.svg`
-    - [ ] `cutout_hexagon.svg`
-    - [ ] `cutout_octagon.svg`
-    - [ ] `cutout_trapezoid.svg`
-    - [ ] `cutout_semicircle.svg`
-    - [ ] `cutout_arrow.svg`
-    - [ ] `cutout_plus.svg`
-    - [ ] `cutout_ring.svg`
-    - [ ] `cutout_teardrop.svg`
-- [ ] Task: Visual/style consistency check against the 6 existing pairs (stroke width, fill opacity, dash pattern, shape silhouette clarity)
+- [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 2678a79
+- [x] Task: Author 12 new shape SVGs (512×512 viewBox, flat fill, 5px `#2D3748` stroke, assigned distinct colors) 849a9b2
+    - [x] `shape_oval.svg` (`#63B3ED`)
+    - [x] `shape_rectangle.svg` (`#48BB78`)
+    - [x] `shape_diamond.svg` (`#ED64A6`)
+    - [x] `shape_pentagon.svg` (`#B7791F`)
+    - [x] `shape_hexagon.svg` (`#4C51BF`)
+    - [x] `shape_octagon.svg` (`#D69E2E`)
+    - [x] `shape_trapezoid.svg` (`#38B2AC`)
+    - [x] `shape_semicircle.svg` (`#F56565`)
+    - [x] `shape_arrow.svg` (`#9AE6B4`)
+    - [x] `shape_plus.svg` (`#FBB6CE`)
+    - [x] `shape_ring.svg` (`#A0AEC0`)
+    - [x] `shape_teardrop.svg` (`#B2F5EA`)
+- [x] Task: Author 12 cutout SVGs (same path data, `fill-opacity="0.3"` + `stroke-dasharray="12 8"`) 849a9b2
+    - [x] `cutout_oval.svg`
+    - [x] `cutout_rectangle.svg`
+    - [x] `cutout_diamond.svg`
+    - [x] `cutout_pentagon.svg`
+    - [x] `cutout_hexagon.svg`
+    - [x] `cutout_octagon.svg`
+    - [x] `cutout_trapezoid.svg`
+    - [x] `cutout_semicircle.svg`
+    - [x] `cutout_arrow.svg`
+    - [x] `cutout_plus.svg`
+    - [x] `cutout_ring.svg`
+    - [x] `cutout_teardrop.svg`
+- [x] Task: Visual/style consistency check against the 6 existing pairs (stroke width, fill opacity, dash pattern, shape silhouette clarity) 849a9b2
 - [ ] Task: Conductor - User Manual Verification 'Shape & Cutout Asset Creation' (Protocol in workflow.md)
 
 ---
