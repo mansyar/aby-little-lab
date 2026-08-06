@@ -79,10 +79,10 @@
 
 ---
 
-## Phase 5: Documentation & Review
+## Phase 5: Documentation & Review [checkpoint: 9deced6]
 
 - [x] Task: Read spec.md and workflow.md to refresh context before starting this phase 888ef88
 - [x] Task: Update docs — `docs/PRD.md` (Game 1: 18-shape pool, 3-round sessions, progress dots), `conductor/tech-stack.md` (preload count 118 → 142, pool expansion note), `docs/TDD.md` (shape list + session design) be56574
 - [x] Task: Apply review suggestions for this track 405e669
-- [ ] Task: Conductor - User Manual Verification 'Documentation & Review' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Documentation & Review' (Protocol in workflow.md) 9deced6
 </protect>
