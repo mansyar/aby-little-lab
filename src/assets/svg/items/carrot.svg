@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <polygon points="256,200 360,440 152,440" fill="#ED8936" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M 220 200 Q 210 120 180 100 Q 200 140 200 190" fill="#68D391" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M 256 200 Q 256 110 256 80 Q 276 130 276 190" fill="#68D391" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M 292 200 Q 302 120 332 100 Q 312 140 312 190" fill="#68D391" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="256,440 368,230 144,230" fill="#ED8936" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 215 230 Q 200 150 175 120 Q 195 170 200 225" fill="#68D391" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 256 230 Q 256 140 256 95 Q 275 155 275 225" fill="#68D391" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 297 230 Q 312 150 337 120 Q 317 170 312 225" fill="#68D391" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
   <line x1="240" y1="280" x2="250" y2="290" stroke="#C05621" stroke-width="4" stroke-linecap="round"/>
   <line x1="270" y1="320" x2="280" y2="330" stroke="#C05621" stroke-width="4" stroke-linecap="round"/>
   <line x1="225" y1="360" x2="235" y2="370" stroke="#C05621" stroke-width="4" stroke-linecap="round"/>

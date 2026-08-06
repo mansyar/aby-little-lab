@@ -1,13 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <path d="M 256 56 L 256 116" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 358 108 L 376 164" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 404 204 L 356 232" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 404 320 L 356 292" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 358 416 L 340 360" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 256 468 L 256 408" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 154 416 L 136 360" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 108 320 L 156 292" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 108 204 L 156 232" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
-  <path d="M 154 108 L 136 164" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 256 122 L 256 50" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 351 161 L 402 110" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 390 256 L 462 256" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 351 351 L 402 402" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 256 390 L 256 462" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 161 351 L 110 402" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 122 256 L 50 256" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
+  <path d="M 161 161 L 110 110" stroke="#F6AD55" stroke-width="26" stroke-linecap="round"/>
   <circle cx="256" cy="256" r="122" fill="#FBD38D" stroke="#2D3748" stroke-width="6"/>
 </svg>

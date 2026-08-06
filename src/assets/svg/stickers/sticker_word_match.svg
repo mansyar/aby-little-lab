@@ -13,8 +13,8 @@
   <path d="M 200 168 L 166 162 M 200 178 L 166 180" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
   <path d="M 312 168 L 346 162 M 312 178 L 346 180" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
   <g transform="translate(130 350) scale(0.45) translate(-256 -350)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 386 181 A 150 150 0 0 0 126 331" stroke="#2D3748" stroke-width="60"/>
-    <path d="M 386 181 A 150 150 0 0 0 126 331" stroke="#2B6CB0" stroke-width="40"/>
+    <path d="M 256 106 A 150 150 0 1 0 256 406" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 256 106 A 150 150 0 1 0 256 406" stroke="#2B6CB0" stroke-width="40"/>
   </g>
   <g transform="translate(270 350) scale(0.45) translate(-256 -350)" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <path d="M 126 400 L 256 70 L 386 400 M 176 290 L 336 290" stroke="#2D3748" stroke-width="60"/>

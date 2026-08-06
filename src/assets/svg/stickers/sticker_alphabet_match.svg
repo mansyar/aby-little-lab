@@ -12,7 +12,7 @@
     <path d="M 170 400 L 170 70 A 90 90 0 1 1 170 235 A 90 90 0 1 1 170 400" stroke="#FC8181" stroke-width="40"/>
   </g>
   <g transform="translate(382 256) scale(0.45) translate(-256 -256)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 386 181 A 150 150 0 0 0 126 331" stroke="#2D3748" stroke-width="60"/>
-    <path d="M 386 181 A 150 150 0 0 0 126 331" stroke="#F6AD55" stroke-width="40"/>
+    <path d="M 256 106 A 150 150 0 1 0 256 406" stroke="#2D3748" stroke-width="60"/>
+    <path d="M 256 106 A 150 150 0 1 0 256 406" stroke="#F6AD55" stroke-width="40"/>
   </g>
 </svg>
