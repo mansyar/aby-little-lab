@@ -1,0 +1,7 @@
+Task: Implement minimal guard in BootScene.create() (Green phase)
+
+Summary: In src/scenes/BootScene.ts create(), the orientation lock call is now guarded: only invoke screen.orientation.lock('landscape') when screen.orientation exists AND typeof orientation.lock === 'function'. scene.start('Preload') is unconditional, so boot always proceeds.
+
+Files: src/scenes/BootScene.ts
+
+Why: iPad Safari/Chrome (WebKit) expose only a partial Screen Orientation API — the object exists but lock() is missing. The previous code called screen.orientation.lock('landscape') directly; on iPad this throws a synchronous TypeError that crashed create() before Preload started, leaving the Phaser canvas permanently black. The guard preserves the landscape lock on devices that support it (Android, PWA standalone on iPadOS 16.4+) while letting unsupported browsers boot normally. Verified: all 664 tests pass, including the new regression test.
