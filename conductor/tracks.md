@@ -64,7 +64,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: v1.6.0 Release Execution** *Link: [./tracks/release-1.6.0_20260806/index.md](./tracks/release-1.6.0_20260806/index.md)*
+- [~] **Track: v1.6.0 Release Execution** *Link: [./tracks/release-1.6.0_20260806/index.md](./tracks/release-1.6.0_20260806/index.md)*
 
 ---
 
