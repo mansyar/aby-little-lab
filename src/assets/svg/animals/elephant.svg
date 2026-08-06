@@ -7,12 +7,12 @@
   <ellipse cx="386" cy="192" rx="44" ry="84" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
   <ellipse cx="386" cy="192" rx="26" ry="58" fill="#718096" stroke="#2D3748" stroke-width="5"/>
   <circle cx="256" cy="180" r="120" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
-  <path d="M 170 300 Q 132 332 126 384 Q 162 392 188 346 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M 342 300 Q 380 332 386 384 Q 350 392 324 346 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 256 300 Q 188 304 182 372 Q 178 434 230 436 Q 272 438 276 404" stroke="#2D3748" stroke-width="64"/>
-    <path d="M 256 300 Q 188 304 182 372 Q 178 434 230 436 Q 272 438 276 404" stroke="#A0AEC0" stroke-width="50"/>
+    <path d="M 256 270 Q 190 274 184 342 Q 180 404 230 406 Q 272 408 276 374" stroke="#2D3748" stroke-width="64"/>
+    <path d="M 256 270 Q 190 274 184 342 Q 180 404 230 406 Q 272 408 276 374" stroke="#A0AEC0" stroke-width="50"/>
   </g>
+  <path d="M 162 272 Q 124 304 118 356 Q 154 364 180 318 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 350 272 Q 388 304 394 356 Q 358 364 332 318 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
   <circle cx="200" cy="160" r="26" fill="#2D3748"/>
   <circle cx="209" cy="151" r="10" fill="#FFFFFF"/>
   <circle cx="312" cy="160" r="26" fill="#2D3748"/>
