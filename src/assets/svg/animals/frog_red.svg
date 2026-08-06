@@ -3,14 +3,14 @@
   <ellipse cx="402" cy="340" rx="60" ry="35" fill="#E53E3E" stroke="#2D3748" stroke-width="5"/>
   <ellipse cx="256" cy="310" rx="150" ry="120" fill="#E53E3E" stroke="#2D3748" stroke-width="6"/>
   <ellipse cx="256" cy="350" rx="90" ry="65" fill="#FFF8E7" stroke="#2D3748" stroke-width="4"/>
-  <circle cx="196" cy="180" r="58" fill="#E53E3E" stroke="#2D3748" stroke-width="5"/>
-  <circle cx="316" cy="180" r="58" fill="#E53E3E" stroke="#2D3748" stroke-width="5"/>
-  <circle cx="196" cy="180" r="36" fill="#FFFFFF" stroke="#2D3748" stroke-width="4"/>
-  <circle cx="316" cy="180" r="36" fill="#FFFFFF" stroke="#2D3748" stroke-width="4"/>
-  <circle cx="200" cy="185" r="16" fill="#2D3748"/>
-  <circle cx="312" cy="185" r="16" fill="#2D3748"/>
-  <circle cx="206" cy="178" r="6" fill="#FFFFFF"/>
-  <circle cx="318" cy="178" r="6" fill="#FFFFFF"/>
+  <circle cx="196" cy="200" r="70" fill="#E53E3E" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="316" cy="200" r="70" fill="#E53E3E" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="196" cy="200" r="44" fill="#FFFFFF" stroke="#2D3748" stroke-width="4"/>
+  <circle cx="316" cy="200" r="44" fill="#FFFFFF" stroke="#2D3748" stroke-width="4"/>
+  <circle cx="200" cy="205" r="20" fill="#2D3748"/>
+  <circle cx="312" cy="205" r="20" fill="#2D3748"/>
+  <circle cx="206" cy="198" r="8" fill="#FFFFFF"/>
+  <circle cx="318" cy="198" r="8" fill="#FFFFFF"/>
   <path d="M 210 320 Q 256 355 302 320" fill="none" stroke="#2D3748" stroke-width="5" stroke-linecap="round"/>
   <circle cx="244" cy="260" r="5" fill="#2D3748"/>
   <circle cx="268" cy="260" r="5" fill="#2D3748"/>

@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect x="116" y="200" width="280" height="160" rx="16" fill="#ECC94B" stroke="#2D3748" stroke-width="6"/>
-  <ellipse cx="256" cy="200" rx="140" ry="30" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-  <ellipse cx="256" cy="360" rx="140" ry="30" fill="#D69E2E" stroke="#2D3748" stroke-width="6"/>
-  <path d="M 176 220 L 176 340" fill="none" stroke="#D69E2E" stroke-width="5" stroke-linecap="round"/>
-  <path d="M 336 220 L 336 340" fill="none" stroke="#D69E2E" stroke-width="5" stroke-linecap="round"/>
+  <line x1="140" y1="105" x2="232" y2="196" stroke="#D69E2E" stroke-width="18" stroke-linecap="round"/>
+  <line x1="372" y1="105" x2="280" y2="196" stroke="#D69E2E" stroke-width="18" stroke-linecap="round"/>
+  <rect x="126" y="212" width="260" height="140" rx="14" fill="#E53E3E" stroke="#2D3748" stroke-width="6"/>
+  <ellipse cx="256" cy="212" rx="130" ry="28" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <ellipse cx="256" cy="212" rx="130" ry="28" fill="none" stroke="#2D3748" stroke-width="14"/>
+  <ellipse cx="256" cy="352" rx="130" ry="26" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
 </svg>
