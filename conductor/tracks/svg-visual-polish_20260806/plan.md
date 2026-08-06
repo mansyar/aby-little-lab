@@ -34,17 +34,17 @@
 
 ## Phase 4: Animals & Toys (16 files)
 
-- [~] Task: Redesign `elephant.svg` — clearly readable: curled trunk in front, two distinct ears, eye, tusk(s), body posture; no longer a gray sphere.
-- [ ] Task: Redesign `pig.svg` — separate head from body, obvious snout disc with two nostril dots, proper ears, remove the random white cheek circle.
-- [ ] Task: Polish frogs (`frog_blue/green/red`) — enlarge eyes ~20% and lower them for cuteness; optionally add one unique belly marking per frog so variants are distinguishable at silhouette level; refine `cat.svg` ear base (less fox-like).
-- [ ] Task: Fix `toy_rocket.svg` — flames at the BOTTOM, nose cone at top, clearly readable fins.
-- [ ] Task: Redraw `toy_block.svg` as an actual letter block (cube face + letter, keep filename); `toy_drum.svg` gets drumhead + rim (+ optional crossed sticks); `toy_box.svg` reads as an open toy box (toys peeking or open lid); enlarge `toy_car.svg` wheels slightly.
-- [ ] Task: Render animals/toys contact sheets and confirm recognizability at thumbnail size.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Redesign `elephant.svg` — clearly readable: curled trunk in front, two distinct ears, eye, tusk(s), body posture; no longer a gray sphere. (f264939)
+- [x] Task: Redesign `pig.svg` — separate head from body, obvious snout disc with two nostril dots, proper ears, remove the random white cheek circle. (f264939)
+- [x] Task: Polish frogs (`frog_blue/green/red`) — enlarge eyes ~20% and lower them for cuteness; optionally add one unique belly marking per frog so variants are distinguishable at silhouette level; refine `cat.svg` ear base (less fox-like). (f264939)
+- [x] Task: Fix `toy_rocket.svg` — flames at the BOTTOM, nose cone at top, clearly readable fins. (f264939 — verified already correct in source; audit was a misread)
+- [x] Task: Redraw `toy_block.svg` as an actual letter block (cube face + letter, keep filename); `toy_drum.svg` gets drumhead + rim (+ optional crossed sticks); `toy_box.svg` reads as an open toy box (toys peeking or open lid); enlarge `toy_car.svg` wheels slightly. (f264939)
+- [x] Task: Render animals/toys contact sheets and confirm recognizability at thumbnail size. (f264939)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: f264939]
 
 ## Phase 5: Items (19 files)
 
-- [ ] Task: Redesign `bone.svg` (classic dog-bone: two end lobes + narrow waist), `lilypad.svg` (flat oval with side notch — not a wedge/pacman), `peanut.svg` (clear figure-8 two-lobe pinch).
+- [~] Task: Redesign `bone.svg` (classic dog-bone: two end lobes + narrow waist), `lilypad.svg` (flat oval with side notch — not a wedge/pacman), `peanut.svg` (clear figure-8 two-lobe pinch).
 - [ ] Task: Redesign `hat.svg` (wide brim + crown + decorative band/flower so it never reads as food).
 - [ ] Task: Fix `airplane.svg` (single wing layer, tail fin, better fuselage) and `umbrella.svg` (remove line through canopy, clear hooked handle).
 - [ ] Task: Differentiate `ball.svg` and `car.svg` from `toy_ball.svg`/`toy_car.svg` (line-work consistency + distinct concept, e.g., delivery van vs. sporty toy car) without renaming files.
