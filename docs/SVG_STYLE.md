@@ -56,11 +56,11 @@ Filled shapes (circles, hearts, animal bodies): fill + outer stroke in one pass 
 | Glyph canvas | 512×512, art centered |
 | Cap height | ≈ 330px (letters), digits ≈ 320px |
 | Baseline | y ≈ 400 |
-| Outer stroke (outline) | 52–56px, round caps/joins |
-| Inner stroke (color) | 36–38px (≈0.68 outer) |
+| Outer stroke (outline) | 58–62px (implemented: 60), round caps/joins |
+| Inner stroke (color) | 38–42px (implemented: 40, ≈0.68 outer) |
 | Color rotation | Palette order (Blue, Coral, Orange, Yellow, Green, Purple, Teal, Pink) cycling by alphabetical/numeric index |
 
-Construction: each glyph is 1–4 stroke paths (vertical, diagonal, arc segments). Optical sizing — `I`, `J`, `L`, `1` get chunky flags/bases; `4` open-top; `7` curved; counters (A, B, D, O, P, Q, R, 0, 6, 8, 9) large enough to stay open at small sizes.
+Construction: each glyph is 1–4 stroke paths (vertical, diagonal, arc segments). Optical sizing — `I`, `J`, `L`, `1` get chunky flags/bases; `4` open-top (pure diagonal + right vertical, NO left vertical — a left vertical makes it read as "N"); `7` curved; counters (A, B, D, O, P, Q, R, 0, 6, 8, 9) large enough to stay open at small sizes. Arc-heavy glyphs (B, P, R) require `large-arc=1` when the arc passes more than 180° around the bowl center.
 
 ## 5. Category Rules
 
