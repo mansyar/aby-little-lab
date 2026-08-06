@@ -79,8 +79,8 @@
 
 ## Phase 9: Final QA & Handoff
 
-- [~] Task: Full 142-asset contact-sheet review — re-render every category; confirm no broken paths, no `<text>` in letters/numbers, consistent outlines, silhouette recognizability.
-- [ ] Task: Run `CI=true npm test` (existing suite must stay green — zero source changes expected).
-- [ ] Task: Run `npm run check` (biome) and `npm run build` (production build).
-- [ ] Task: Update `docs/SVG_STYLE.md` if the implementation surfaced deviations; ensure no `plan.md`/`spec.md` drift.
-- [ ] Task: Phase Verification & Checkpoint — final checkpoint + manual verification plan for human review (Refer to workflow.md)
+- [x] Task: Full 142-asset contact-sheet review — re-render every category; confirm no broken paths, no `<text>` in letters/numbers, consistent outlines, silhouette recognizability. *(f808aba; 0 <text>, 0 gradients, 0 near-invisible opacities; vision audit SHIP 140/141, mascot pair only minor)*
+- [x] Task: Run `CI=true npm test` (existing suite must stay green — zero source changes expected). *(979/979 passed)*
+- [x] Task: Run `npm run check` (biome) and `npm run build` (production build). *(biome 1 pre-existing warning; build OK, 27 precache entries 1526 KiB)*
+- [x] Task: Update `docs/SVG_STYLE.md` if the implementation surfaced deviations; ensure no `plan.md`/`spec.md` drift. *(no deviations — metrics matched: 58-62px outer stroke implemented as 60, cutouts 12-14 as 14, dashes 18-22)*
+- [x] Task: Phase Verification & Checkpoint — final checkpoint + manual verification plan for human review (Refer to workflow.md) — [checkpoint: f808aba]
