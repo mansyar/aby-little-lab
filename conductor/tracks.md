@@ -72,7 +72,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Game 12 — First Sounds (Phonics)** *Link: [./tracks/first-sounds_20260807/index.md](./tracks/first-sounds_20260807/index.md)*
+- [x] **Track: Game 12 — First Sounds (Phonics)** *Link: [./tracks/first-sounds_20260807/index.md](./tracks/first-sounds_20260807/index.md)*
 
 ---
 
