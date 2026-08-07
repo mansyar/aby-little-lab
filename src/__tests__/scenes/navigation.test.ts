@@ -138,11 +138,7 @@ vi.mock("phaser", () => {
         add: vi.fn(() => ({ remove: vi.fn(), stop: vi.fn() })),
       };
       this.sys = {
-        events: {
-          on: vi.fn(),
-          once: vi.fn(),
-          off: vi.fn(),
-        },
+        events: createMockEventEmitter(),
       };
       this.events = this.sys.events;
       this.children = {
@@ -458,6 +454,36 @@ function assertWinCelebrationCreated(scene: unknown): void {
 
   // The celebration never uses a particle emitter
   expect(getMockFn(add.particles)).not.toHaveBeenCalled();
+}
+
+/**
+ * A small working event emitter for the mocked scene, so once('shutdown')
+ * handlers (e.g. the transition guard) actually fire when tests emit events.
+ * Call records stay observable through the vi.fn()s, preserving existing
+ * assertions that search `events.on` mock calls.
+ */
+function createMockEventEmitter(): Record<string, MockFn> {
+  const handlers: Record<string, Array<{ fn: () => void; once: boolean }>> = {};
+  return {
+    on: vi.fn((event: string, fn: () => void) => {
+      if (!handlers[event]) handlers[event] = [];
+      handlers[event].push({ fn, once: false });
+    }),
+    once: vi.fn((event: string, fn: () => void) => {
+      if (!handlers[event]) handlers[event] = [];
+      handlers[event].push({ fn, once: true });
+    }),
+    off: vi.fn(),
+    emit: vi.fn((event: string) => {
+      const list = handlers[event];
+      if (!list) return;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const entry = list[i];
+        entry.fn();
+        if (entry.once) list.splice(i, 1);
+      }
+    }),
+  };
 }
 
 /** Triggers all pointerdown callbacks registered on game objects. */
@@ -999,21 +1025,22 @@ describe("scene navigation flow", () => {
     });
 
     it("navigates to each game scene when respective tile is clicked", async () => {
-      const scene = new HubScene();
-      scene.create();
+      // A fresh Hub per navigation mirrors reality: once a transition starts,
+      // the guard blocks further transitions on that instance until shutdown
+      // (which Phaser fires when the Hub is replaced by the game scene).
+      for (let i = 0; i < GAME_SCENE_KEYS.length; i++) {
+        const scene = new HubScene();
+        scene.create();
 
-      triggerAllPointerups(scene);
-      // The tile handler awaits the (mocked) lazy scene loader before
-      // transitioning, so flush the pending microtask before fading out.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      completeFadeOuts(scene);
+        const tile = getRectangles(scene)[i];
+        fireAllObjectEvents(tile, "pointerup");
+        // The tile handler awaits the (mocked) lazy scene loader before
+        // transitioning, so flush the pending microtask before fading out.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        completeFadeOuts(scene);
 
-      const startMock = getMockFn(scene.scene.start);
-      const startedKeys = startMock.mock.calls.map((call) => call[0] as string);
-
-      for (const key of GAME_SCENE_KEYS) {
-        expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, key);
-        expect(startedKeys).toContain(key);
+        expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, GAME_SCENE_KEYS[i]);
+        expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(GAME_SCENE_KEYS[i]);
       }
     });
 
@@ -1524,18 +1551,19 @@ describe("scene navigation flow", () => {
     });
 
     it("keeps tile taps navigating to games after press feedback is attached", async () => {
-      const scene = new HubScene();
-      scene.create();
-      completeHubEntrances(scene);
+      // Fresh Hub per navigation (see "navigates to each game scene").
+      for (let i = 0; i < GAME_SCENE_KEYS.length; i++) {
+        const scene = new HubScene();
+        scene.create();
+        completeHubEntrances(scene);
 
-      triggerAllPointerups(scene);
-      // Flush the mocked lazy-loader microtask before fading out.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      completeFadeOuts(scene);
+        const tile = getRectangles(scene)[i];
+        fireAllObjectEvents(tile, "pointerup");
+        // Flush the mocked lazy-loader microtask before fading out.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        completeFadeOuts(scene);
 
-      const startedKeys = getMockFn(scene.scene.start).mock.calls.map((call) => call[0] as string);
-      for (const key of GAME_SCENE_KEYS) {
-        expect(startedKeys).toContain(key);
+        expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(GAME_SCENE_KEYS[i]);
       }
     });
 
@@ -2536,6 +2564,37 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
         justEarned: "shape-sorter",
       });
+    });
+
+    it("ignores a late Back hold when the auto-return is already navigating", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      // Child starts a 3s Back hold mid-game, then finishes the round.
+      triggerAllPointerdowns(scene);
+      completeAllRounds(scene);
+
+      const timeMock = getMockFn(scene.time.delayedCall);
+      const hold3000 = timeMock.mock.calls.filter((call) => call[0] === 3000);
+      expect(hold3000.length).toBeGreaterThanOrEqual(2);
+      const parentLockHold = hold3000[0][1] as () => void;
+      const autoReturn = hold3000[hold3000.length - 1][1] as () => void;
+
+      // Auto-return fires first and navigates exactly once.
+      autoReturn();
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "shape-sorter",
+      });
+
+      // The stale Back hold completes afterwards: must NOT start a second
+      // transition (the guard blocks it before any new fade-out begins).
+      parentLockHold();
+      expect(getMockFn(scene.cameras.main.fadeOut)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
     });
 
     it("passes no justEarned data on replay auto-return", () => {
@@ -3572,6 +3631,39 @@ describe("scene navigation flow", () => {
       completeRound(scene);
 
       expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("ignores a late Back hold when the auto-return is already navigating", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      // Child starts a 3s Back hold mid-game, then pops the last bubble.
+      const backButton = getTextObject(scene, "Back");
+      if (!backButton) throw new Error("Back button not found");
+      const pointerdown = getMockFn(backButton.on).mock.calls.find((call) => call[0] === "pointerdown");
+      const pointerdownCallback = pointerdown?.[1] as (() => void) | undefined;
+      if (!pointerdownCallback) throw new Error("Back button pointerdown not found");
+      pointerdownCallback();
+      completeRound(scene);
+
+      const timeMock = getMockFn(scene.time.delayedCall);
+      const hold3000 = timeMock.mock.calls.filter((call) => call[0] === 3000);
+      expect(hold3000.length).toBeGreaterThanOrEqual(2);
+      const parentLockHold = hold3000[0][1] as () => void;
+      const autoReturn = hold3000[hold3000.length - 1][1] as () => void;
+
+      // Auto-return fires first and navigates exactly once.
+      autoReturn();
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
+
+      // The stale Back hold completes afterwards: must NOT start a second
+      // transition (the guard blocks it before any new fade-out begins).
+      parentLockHold();
+      expect(getMockFn(scene.cameras.main.fadeOut)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
     });
 
     it("awards sticker on first completion only", () => {

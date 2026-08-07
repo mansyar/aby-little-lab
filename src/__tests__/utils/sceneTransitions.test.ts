@@ -23,7 +23,28 @@ function stubMatchMedia(matches: boolean): void {
 function createMockScene(): {
   cameras: { main: Record<string, ReturnType<typeof vi.fn>> };
   scene: { start: ReturnType<typeof vi.fn> };
+  events: { on: ReturnType<typeof vi.fn>; once: ReturnType<typeof vi.fn>; emit: ReturnType<typeof vi.fn> };
 } {
+  const handlers: Record<string, Array<{ fn: () => void; once: boolean }>> = {};
+  const events = {
+    on: vi.fn((event: string, fn: () => void) => {
+      if (!handlers[event]) handlers[event] = [];
+      handlers[event].push({ fn, once: false });
+    }),
+    once: vi.fn((event: string, fn: () => void) => {
+      if (!handlers[event]) handlers[event] = [];
+      handlers[event].push({ fn, once: true });
+    }),
+    emit: vi.fn((event: string) => {
+      const list = handlers[event];
+      if (!list) return;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const entry = list[i];
+        entry.fn();
+        if (entry.once) list.splice(i, 1);
+      }
+    }),
+  };
   return {
     cameras: {
       main: {
@@ -36,6 +57,7 @@ function createMockScene(): {
     scene: {
       start: vi.fn(),
     },
+    events,
   };
 }
 
@@ -102,6 +124,33 @@ describe("scene transitions", () => {
       invokeFadeOutCallback(scene);
 
       expect(scene.scene.start).toHaveBeenCalledWith("Hub", { justEarned: "pop-freeze" });
+    });
+
+    it("ignores a second transition while a scene is already navigating", () => {
+      stubMatchMedia(false);
+      const scene = createMockScene();
+
+      // Race: the 3s auto-return fires, then a stale ParentLock Back hold
+      // completes — the second call must be a no-op.
+      transitionToScene(scene as never, "Hub", { justEarned: "shape-sorter" });
+      transitionToScene(scene as never, "Hub");
+
+      expect(scene.cameras.main.fadeOut).toHaveBeenCalledTimes(1);
+      invokeFadeOutCallback(scene);
+      expect(scene.scene.start).toHaveBeenCalledTimes(1);
+      expect(scene.scene.start).toHaveBeenCalledWith("Hub", { justEarned: "shape-sorter" });
+    });
+
+    it("allows a new transition after the scene shuts down", () => {
+      stubMatchMedia(false);
+      const scene = createMockScene();
+
+      transitionToScene(scene as never, "Hub");
+      // Phaser fires shutdown when the scene is replaced.
+      scene.events.emit("shutdown");
+      transitionToScene(scene as never, "Alphabet");
+
+      expect(scene.cameras.main.fadeOut).toHaveBeenCalledTimes(2);
     });
   });
 

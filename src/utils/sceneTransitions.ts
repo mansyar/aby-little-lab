@@ -14,10 +14,26 @@ const REDUCED_FADE_DURATION = 180;
 const ENTRANCE_ZOOM = 1.02;
 
 /**
+ * Scenes that have already begun a transition out. A scene can race two
+ * transitions (e.g. the 3s auto-return vs. a ParentLock Back hold completing
+ * at the same moment); the second must be ignored. Cleared on scene shutdown
+ * so a relaunched scene starts clean.
+ */
+const navigatingScenes = new WeakMap<Phaser.Scene, boolean>();
+
+/**
  * Fades the current scene out through the app background color, then starts
  * the target scene. Scene data is forwarded to the target scene.
+ * No-op if the scene is already transitioning out.
  */
 export function transitionToScene(scene: Phaser.Scene, targetKey: string, data?: object): void {
+  if (navigatingScenes.get(scene)) {
+    return;
+  }
+  navigatingScenes.set(scene, true);
+  scene.events.once("shutdown", () => {
+    navigatingScenes.delete(scene);
+  });
   const duration = motionDuration(STANDARD_FADE_DURATION, REDUCED_FADE_DURATION);
   scene.cameras.main.fadeOut(duration, FADE_RED, FADE_GREEN, FADE_BLUE, () => {
     if (data === undefined) {
