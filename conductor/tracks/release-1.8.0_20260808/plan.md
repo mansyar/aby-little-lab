@@ -65,13 +65,17 @@
   - [x] Settings: parental hold-3s opens panel (backdrop dim verified by pixel sampling); version footer `v1.8.0`; BGM/SFX rows present; zero console errors/warnings during the whole session
   - [x] Observation (non-blocking, tested/intended): distractor sets are guarded against the TARGET only (e.g., round B·P·O·H for OWL is legal) — B/P may co-occur as distractors; no product impact for 3–5yo
 - [x] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.8.0 row: CI run ID, hash match, version footer, SW/manifest)
-- [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
+  - [x] Checkpoint commit `93df247` (empty) + git notes verification report; phase heading marker; commit `e97a9d3`; branch synced to origin
 
 ## Phase 6 — Targeted Device Testing
 
-- [ ] Task 6.1: Execute the v1.8.0 checklist record (iPad / Android tablet / iPhone / Android phone — targeted Game 12 rows + carried rows) against the live URL; record pass/issue per item
-- [ ] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
-- [ ] Task 6.3: Commit results: `docs(device): Record v1.8.0 device testing results`
+- [x] Task 6.1: Execute the v1.8.0 checklist record (iPad / Android tablet / iPhone / Android phone — targeted Game 12 rows + carried rows) against the live URL; record pass/issue per item
+  - [x] Executed by user on all 4 device classes (iPad, Android tablet, iPhone, Android phone) against the live URL — 2026-08-08
+  - [x] All v1.8.0 rows passed (Hub 12 tiles; First Sounds spoken prompt + iOS TTS unlock; 6 rounds; 4 cards; correct-tap feedback; wrong-tap no penalty; confusion guards; speaker replay during win; win celebration + sticker + auto-return; replay; parental Back; SFX-off; reduced-motion) + all carried v1.7.0 rows passed
+- [x] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
+  - [x] No issues found — nothing to triage (no Critical/High/Medium/Low)
+- [x] Task 6.3: Commit results: `docs(device): Record v1.8.0 device testing results`
 - [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 7 — Finalize & Archive
