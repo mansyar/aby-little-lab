@@ -265,7 +265,12 @@ function getMockFn(fn: unknown): MockFn {
 }
 
 /** Returns the current round of the scene. */
-function getCurrentRound(scene: unknown): { word: string; promptTexture: string; target: string; choices: string[] } {
+function getCurrentRound(scene: unknown): {
+  word: string;
+  promptTexture: string;
+  target: string;
+  choices: string[];
+} {
   const s = scene as {
     rounds: Array<{ word: string; promptTexture: string; target: string; choices: string[] }>;
     roundIndex: number;
