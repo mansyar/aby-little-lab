@@ -3549,6 +3549,21 @@ describe("scene navigation flow", () => {
       tapBubble(bubbles[6]);
     }
 
+    it("sizes every bubble physics body to the 96px display size", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      // Without setCircle, the Arcade body stays at the 512px SVG frame:
+      // bubbles would bounce ~208px short of the visible edge and overlap
+      // each other's tap regions. Every bubble must get a 96px circle body.
+      const physicsImageMock = getMockFn(scene.physics.add.image);
+      const bubbles = physicsImageMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+      expect(bubbles.length).toBeGreaterThan(0);
+      for (const bubble of bubbles) {
+        expect(getMockFn(bubble.setCircle)).toHaveBeenCalledWith(48);
+      }
+    });
+
     it("plays win SFX when 6 poppable bubbles are popped", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
