@@ -32,11 +32,11 @@
 
 ## Phase 5 — Docs & Release Readiness
 
-- [ ] Task: Update `conductor/product.md` (Game 12 row, game list 11 → 12)
-- [ ] Task: Update `conductor/tech-stack.md` with dated design note (Game 12, phonics logic, asset additions)
-- [ ] Task: Update `docs/PRD.md` (Game 12 section) and `docs/TDD.md` (structure/coverage notes) as needed
-- [ ] Task: Update `README.md` (games table — 12 games)
-- [ ] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [x] Task: Update `conductor/product.md` (Game 12 row, game list 11 → 12) *(7fa8d33 — plus Game 12 row, mascot/speaker lists, 12-game grid, Textless Cues amendment for Game 12)*
+- [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 12, phonics logic, asset additions) *(7fa8d33 — dated 2026-08-07 note + stale scene/game-logic directory listing fixed (HowMany/FirstSounds, countLogic/firstSoundsLogic); scene count 12 → 13)*
+- [x] Task: Update `docs/PRD.md` (Game 12 section) and `docs/TDD.md` (structure/coverage notes) as needed *(7fa8d33 — PRD GAME 12 full section + exec summary 10 → 12; TDD scene/game-id/asset/counts tables + current-state eleven → twelve)*
+- [x] Task: Update `README.md` (games table — 12 games) *(7fa8d33 — table row, replay variety, per-game juice bullet, tile icons, lazy-load/chunk counts)*
+- [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(Phase 5 checkpoint — Biome clean 96 files; 43 files / 1065 tests green; build ✓ 4.26s, PWA precache 28 entries; validate-pwa 13 passed / 0 failed)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase: Review Fixes
