@@ -4,6 +4,7 @@ import {
   generateWordBuildPlaythrough,
   generateWordPlaythrough,
   generateWordRound,
+  getWord,
   WORD_POOL,
   type WordRound,
 } from "../../game/wordLogic";
@@ -211,6 +212,18 @@ describe("generateWordPlaythrough", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = generateWordPlaythrough();
     expect(second).toEqual(first);
+  });
+
+  it("orders 3-letter targets before 4-letter targets (easy first)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = generateWordPlaythrough().map(
+        (round) => getWord(round.target)?.tier ?? 0,
+      );
+      // Mirrors the builder: 5 easy rounds lead, the final round is harder.
+      expect(tiers.filter((tier) => tier === 3)).toHaveLength(5);
+      expect(tiers.filter((tier) => tier === 4)).toHaveLength(1);
+      expect(tiers).toEqual([...tiers].sort((a, b) => a - b));
+    }
   });
 });
 
