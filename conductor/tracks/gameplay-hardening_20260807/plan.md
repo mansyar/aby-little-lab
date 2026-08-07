@@ -64,9 +64,9 @@
 
 ## Phase 4 — Gameplay Depth (FR-9)
 
-- [ ] Task 4.1: FR-9a — Animal Trace next-waypoint guidance
-  - [ ] Design: highlight next waypoint (larger + pulsing ring via Graphics), light visited waypoints; reduced-motion aware
-  - [ ] Write/extend scene tests (next-dot highlight state, visited-dot state)
+- [x] Task 4.1: FR-9a — Animal Trace next-waypoint guidance [commit: a8dc338]
+  - [x] Design: highlight next waypoint (larger + pulsing ring via Graphics), light visited waypoints; reduced-motion aware
+  - [x] Write/extend scene tests (next-dot highlight state, visited-dot state)
   - [ ] Implement in `AnimalTraceScene` (draw path / checkProximity / advance)
   - [ ] Commit: `feat(animal-trace): Highlight next waypoint with pulsing ring`
 - [ ] Task 4.2: FR-9b — Musical Memory run cap + note-delay scaling
