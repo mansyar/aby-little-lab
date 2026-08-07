@@ -97,7 +97,7 @@
   - [ ] Write failing property tests: distractor choices never confusable with answer (shape families; letter families e.g. C vs G/O/Q, I vs L/T, M vs W)
   - [ ] Implement family-based filtering in `patternBuilderLogic.ts` and `alphabetLogic.ts`
   - [ ] Commit: `feat(logic): Guard distractors against confusable lookalikes`
-- [ ] Task 4.9: FR-9i — How Many distinct targets per band + centered last row
+- [x] Task 4.9: FR-9i — How Many distinct targets per band + centered last row [commit: cca37f7]
   - [ ] Write failing logic tests: no duplicate target within a band
   - [ ] Implement distinct-target draw in `countLogic.createPlaythrough`
   - [ ] Center the last grid row in `HowManyScene.createCardItems` (scene test update)
