@@ -5,7 +5,7 @@
 ## What's New
 
 - **Game 12 — First Sounds, now in the lab.** Professor Hoot speaks a word, and little listeners tap the letter it starts with. Six friendly rounds per play, four letter cards each round, drawn from a curated phonics pool of twelve everyday words (CAT, DOG, PIG, SUN, HAT, BUG, OWL, TREE, STAR, BALL, FROG, FISH) — with the same artwork kids already know from the Word games.
-- **Built to avoid trick questions.** Confusable letter pairs are never offered together: similar-sounding pairs (B/P, D/T) and similar-looking letters (C/G/O/Q, I/L/T, M/W) stay apart, so every round has one clear answer.
+- **Built to avoid trick questions.** The correct letter is never shown alongside a confusable twin: similar-sounding pairs (B/P, D/T) and similar-looking letters (C/G/O/Q, I/L/T, M/W) stay apart from the answer, so every round has one clear choice.
 - **Gentle by design.** A correct tap chimes, pulses the letter, and speaks both the letter name and the word. A wrong tap just gives a friendly bounce — no penalty, no pressure, try again.
 - **Twelve mini-games complete.** The Hub now shows the full storybook row: all 12 tiles, matching the family's 6-round structure, 96 px touch targets, and just-earned sticker pop after the win.
 

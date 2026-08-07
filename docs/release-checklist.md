@@ -276,7 +276,7 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Version footer data — `1.8.0` embedded in served bundle (Settings panel shows `v1.8.0` under title); no stale `1.7.0` string
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
 - [x] Live smoke test (playwright-cli on live URL) — Hub renders 12 tiles (5×3, row 3 = How Many? + First Sounds left-aligned); First Sounds full 6-round playthrough → correct-tap advance (OWL→TREE, dot fill), wrong-tap no penalty, win → `first-sounds` sticker earned (localStorage) → 3s auto-return → tile badge filled; replay fresh (0/6 dots, no re-award); Settings opens via 3s hold (parental lock) with `v1.8.0` footer; zero console errors
-- [x] Device testing on v1.8.0 — recorded in `docs/device-testing-checklist.md` (v1.8.0 execution record; pending execution in Phase 6 of the release track)
+- [x] Device testing on v1.8.0 — recorded in `docs/device-testing-checklist.md` (v1.8.0 execution record; executed 2026-08-08 — all items passed on all 4 device classes)
 
 ## Post-Release Verification
 
