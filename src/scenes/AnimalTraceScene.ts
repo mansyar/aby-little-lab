@@ -134,6 +134,12 @@ export class AnimalTraceScene extends Phaser.Scene {
     sceneEntrance(this);
     this.mascot = createCornerMascot(this);
 
+    // Reset all per-session state so a relaunch starts a fresh round.
+    this.currentPairIndex = 0;
+    this.completedPaths = 0;
+    this.currentPair = undefined;
+    this.progressDots = [];
+
     const backButton = this.add.text(
       20,
       20,
