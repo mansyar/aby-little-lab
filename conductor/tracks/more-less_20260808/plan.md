@@ -11,9 +11,9 @@
 
 ## Phase 2 — Assets & Prompt Audio
 
-- [ ] Task: Create `src/assets/svg/ui/arrow_up.svg` + `arrow_down.svg` (512×512 storybook style, thick `#2D3748` outline, soft vibrant fill)
-- [ ] Task: Create `tile_more_less.svg` (Hub tile icon: two dot-groups + arrow) and `sticker_more_less.svg` (cream badge, two groups + arrow)
-- [ ] Task: Verify `speakWord("more"/"less")` (existing speech tests — en-US, rate 0.8, SFX-gated, silent fallback; no code change expected)
+- [x] Task: Create `src/assets/svg/ui/arrow_up.svg` + `arrow_down.svg` (512×512 storybook style, thick `#2D3748` outline, soft vibrant fill) *(9b641be)*
+- [x] Task: Create `tile_more_less.svg` (Hub tile icon: two dot-groups + arrow) and `sticker_more_less.svg` (cream badge, two groups + arrow) *(9b641be)*
+- [x] Task: Verify `speakWord("more"/"less")` (existing speech tests — en-US, rate 0.8, SFX-gated, silent fallback; no code change expected) *(9b641be — speakWord → speakText(word, enabled, 0.8) is fully generic; no code change needed)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Scene Implementation
