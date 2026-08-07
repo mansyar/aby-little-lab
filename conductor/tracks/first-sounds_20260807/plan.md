@@ -30,7 +30,7 @@
 - [x] Task: Regression tests — navigation test covers 12 tiles, sticker-shelf renders new sticker, existing 1024 tests stay green *(7c7ebc7 — 1065 tests green: shelf slots 12, hasSticker 24 calls, SVG loads 144)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5 — Docs & Release Readiness
+## Phase 5 — Docs & Release Readiness [checkpoint: 6d764be]
 
 - [x] Task: Update `conductor/product.md` (Game 12 row, game list 11 → 12) *(7fa8d33 — plus Game 12 row, mascot/speaker lists, 12-game grid, Textless Cues amendment for Game 12)*
 - [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 12, phonics logic, asset additions) *(7fa8d33 — dated 2026-08-07 note + stale scene/game-logic directory listing fixed (HowMany/FirstSounds, countLogic/firstSoundsLogic); scene count 12 → 13)*
