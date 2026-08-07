@@ -60,7 +60,7 @@
   - [x] Remove `selectThreeShapes` (shapeSorterLogic), `baseScale` (BigSmall), `isCorrectWord` (wordLogic), `isCorrectLetter` + `hasCompletedPlaythrough` (alphabetLogic), `isPlaythroughComplete` (countLogic) and their tests-only usages
   - [x] Full suite green after removal
   - [x] Commit: `refactor(game): Remove test-only dead exports`
-- [ ] Task 3.3: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.3: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: ecb70a0]
 
 ## Phase 4 — Gameplay Depth (FR-9)
 
