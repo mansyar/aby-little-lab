@@ -80,7 +80,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Game 13 — More or Less (Quantity Comparison)** *Link: [./tracks/more-less_20260808/index.md](./tracks/more-less_20260808/index.md)*
+- [~] **Track: Game 13 — More or Less (Quantity Comparison)** *Link: [./tracks/more-less_20260808/index.md](./tracks/more-less_20260808/index.md)*
 
 ---
 
