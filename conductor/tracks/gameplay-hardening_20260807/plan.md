@@ -69,7 +69,7 @@
   - [x] Write/extend scene tests (next-dot highlight state, visited-dot state)
   - [ ] Implement in `AnimalTraceScene` (draw path / checkProximity / advance)
   - [ ] Commit: `feat(animal-trace): Highlight next waypoint with pulsing ring`
-- [ ] Task 4.2: FR-9b — Musical Memory run cap + note-delay scaling
+- [x] Task 4.2: FR-9b — Musical Memory run cap + note-delay scaling [commit: ea2e8e0]
   - [ ] Write failing logic tests: no >2 consecutive same-frog runs in generated sequences; `appendNote` respects cap
   - [ ] Implement cap in `musicalMemoryLogic.ts`
   - [ ] Note-delay scaling: 600 → 480ms at length ≥5 in `MusicalMemoryScene.playSequence` (update timing tests)
