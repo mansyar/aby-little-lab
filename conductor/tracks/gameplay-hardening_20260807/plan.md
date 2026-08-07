@@ -93,7 +93,7 @@
 - [x] Task 4.7: FR-9g — Pattern Builder 6 rounds [commit: c86d9a6]
   - [ ] Change `ROUND_COUNT` 5 → 6 in `PatternBuilderScene.ts`; update logic tests that assume 5
   - [ ] Commit: `feat(pattern-builder): Align round count to six`
-- [ ] Task 4.8: FR-9h — Confusable-distractor guards (Pattern Builder, Alphabet)
+- [x] Task 4.8: FR-9h — Confusable-distractor guards (Pattern Builder, Alphabet) [commit: fd08a25]
   - [ ] Write failing property tests: distractor choices never confusable with answer (shape families; letter families e.g. C vs G/O/Q, I vs L/T, M vs W)
   - [ ] Implement family-based filtering in `patternBuilderLogic.ts` and `alphabetLogic.ts`
   - [ ] Commit: `feat(logic): Guard distractors against confusable lookalikes`
