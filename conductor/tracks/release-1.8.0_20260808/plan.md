@@ -35,7 +35,7 @@
 - [x] Task 3.4: Commit: `docs(release): Prepare v1.8.0 release notes and device checklist` (5cab3b7)
 - [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4 — Release Branch Gates + Tag + PR
+## Phase 4 — Release Branch Gates + Tag + PR [checkpoint: f2492df]
 
 - [x] Task 4.1: Re-run all four gates on `release/v1.8.0` (check → test → build → validate-pwa)
   - [x] `pnpm run check` — Biome clean (96 files, 370ms)
