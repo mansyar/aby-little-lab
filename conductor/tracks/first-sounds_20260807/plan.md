@@ -9,7 +9,7 @@
 - [x] Task: Verify coverage for `firstSoundsLogic.ts` (project runs ~98%; threshold >80%) *(ea6c593 — 95% stmts / 87.5% branch; only uncovered line is the defensive init throw; suite 97.12% stmts / 98.18% lines)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Assets
+## Phase 2 — Assets [checkpoint: a0e65f1]
 
 - [x] Task: Create `src/assets/svg/ui/tiles/tile_first_sounds.svg` (storybook style — flat fills, 4–6px `#2D3748` strokes, letter "A" + sound-wave motif matching tile family) *(6f44ef3)*
 - [x] Task: Create `src/assets/svg/stickers/sticker_first_sounds.svg` (letter + sound wave on cream badge, matching sticker family) *(247f61c)*
