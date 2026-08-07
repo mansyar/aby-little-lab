@@ -39,12 +39,12 @@
 
 ## Phase 2 — Auto-Return Transition Guard
 
-- [ ] Task 2.1: FR-6 — navigation guard across all 11 game scenes
-  - [ ] Write failing test for the Back-during-celebration race in at least one drag scene and one tap scene
-  - [ ] Add scene-level navigation guard (e.g., `navigating` flag set before every `transitionToScene`; both ParentLock back and auto-return check it)
-  - [ ] Apply consistently to all 11 game scenes
-  - [ ] Confirm tests pass; full suite green
-  - [ ] Commit: `fix(scenes): Guard against double transition during auto-return`
+- [x] Task 2.1: FR-6 — navigation guard across all 11 game scenes [commit: 96e1786]
+  - [x] Write failing test for the Back-during-celebration race in at least one drag scene and one tap scene
+  - [x] Add scene-level navigation guard (e.g., `navigating` flag set before every `transitionToScene`; both ParentLock back and auto-return check it)
+  - [x] Apply consistently to all 11 game scenes
+  - [x] Confirm tests pass; full suite green
+  - [x] Commit: `fix(scenes): Guard against double transition during auto-return`
 - [ ] Task 2.2: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Cross-Cutting Consistency & Dead Code
