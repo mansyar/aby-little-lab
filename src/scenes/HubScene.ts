@@ -114,6 +114,14 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "FirstSounds",
+    gameId: "first-sounds",
+    label: "First Sounds",
+    tileKey: "tile_first_sounds",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;
@@ -220,7 +228,7 @@ const NUDGE_DEPTH = 20;
 /**
  * Hub scene — the central navigation hub.
  *
- * Displays a grid of 11 game tiles, a sticker book showing earned stickers,
+ * Displays a grid of 12 game tiles, a sticker book showing earned stickers,
  * and a settings button gated behind a parental lock.
  */
 export class HubScene extends Phaser.Scene {
