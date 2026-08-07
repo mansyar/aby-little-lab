@@ -240,7 +240,7 @@ vi.mock("../../components/ParentLock", () => ({
 }));
 
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
-import { earnSticker, hasSticker } from "../../utils/storage";
+import { hasSticker } from "../../utils/storage";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -341,7 +341,9 @@ describe("AnimalTraceScene session state", () => {
     expect(state.completedPaths).toBe(1);
     // The last scheduled action after the relaunch must be the next-pair
     // delay (1000ms), never a round-completion auto-return (3000ms).
-    const delayedCallMock = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall);
+    const delayedCallMock = getMockFn(
+      (scene as { time: Record<string, unknown> }).time.delayedCall,
+    );
     const lastCall = delayedCallMock.mock.calls.at(-1);
     expect(lastCall?.[0]).toBe(1000);
   });
@@ -390,5 +392,57 @@ describe("AnimalTraceScene session state", () => {
     traceFullPath(scene);
     expect(getMockFn(mockAudio.playWin)).toHaveBeenCalledTimes(1);
     expect(getAutoReturnCall(scene)).toBeDefined();
+  });
+
+  it("marks the next waypoint with a ring and lights visited dots as the trace advances", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    // Path graphics is the single graphics object created for the path.
+    const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+    expect(graphicsMock).toHaveBeenCalledTimes(1);
+    const graphics = graphicsMock.mock.results[0].value as Record<string, MockFn>;
+
+    const points = (scene as { currentPair: { pathPoints: Array<{ x: number; y: number }> } })
+      .currentPair.pathPoints;
+
+    // Fresh pair: the ring sits on the first interior waypoint (index 1).
+    expect(graphics.strokeCircle).toHaveBeenCalledWith(
+      points[1].x,
+      points[1].y,
+      expect.any(Number),
+    );
+
+    // Advance to waypoint 1: it becomes lit (visited color) and the ring
+    // moves to waypoint 2.
+    firePointerAt(scene, points[1].x, points[1].y);
+    expect(graphics.fillStyle).toHaveBeenCalledWith(0x68d391, 1);
+    expect(graphics.fillCircle).toHaveBeenCalledWith(points[1].x, points[1].y, 6);
+    expect(graphics.strokeCircle).toHaveBeenCalledWith(
+      points[2].x,
+      points[2].y,
+      expect.any(Number),
+    );
+  });
+
+  it("skips the pulsing ring animation under reduced motion", () => {
+    setReducedMotion(true);
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const tweensMock = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const pulseTweens = tweensMock.mock.calls.filter((call) => call[0] && "onUpdate" in call[0]);
+    expect(pulseTweens).toHaveLength(0);
+  });
+
+  it("pulses the next-waypoint ring with a looping tween in normal motion", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const tweensMock = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const pulseTweens = tweensMock.mock.calls.filter(
+      (call) => call[0] && typeof call[0].onUpdate === "function" && call[0].repeat === -1,
+    );
+    expect(pulseTweens).toHaveLength(1);
   });
 });
