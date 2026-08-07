@@ -110,6 +110,7 @@ import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
+import stickerFirstSoundsSvg from "../assets/svg/stickers/sticker_first_sounds.svg?raw";
 import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
 import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
 import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_builder.svg?raw";
@@ -133,6 +134,7 @@ import sleepZzzSvg from "../assets/svg/ui/sleep_zzz.svg?raw";
 import tileAlphabetSvg from "../assets/svg/ui/tiles/tile_alphabet.svg?raw";
 import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw";
 import tileBigSmallSvg from "../assets/svg/ui/tiles/tile_big_small.svg?raw";
+import tileFirstSoundsSvg from "../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
 import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
 import tileMusicalMemorySvg from "../assets/svg/ui/tiles/tile_musical_memory.svg?raw";
 import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.svg?raw";
@@ -236,6 +238,7 @@ export const SHAPE_ASSETS = [
   { key: "toy_block", svg: toyBlockSvg },
   { key: "toy_box", svg: toyBoxSvg },
   { key: "sticker_big_small", svg: stickerBigSmallSvg },
+  { key: "sticker_first_sounds", svg: stickerFirstSoundsSvg },
   { key: "sticker_pattern_builder", svg: stickerPatternBuilderSvg },
   { key: "sticker_word_match", svg: stickerWordMatchSvg },
   { key: "sticker_word_builder", svg: stickerWordBuilderSvg },
@@ -285,6 +288,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_shadow_match", svg: tileShadowMatchSvg },
   { key: "tile_musical_memory", svg: tileMusicalMemorySvg },
   { key: "tile_big_small", svg: tileBigSmallSvg },
+  { key: "tile_first_sounds", svg: tileFirstSoundsSvg },
   { key: "tile_pattern_builder", svg: tilePatternBuilderSvg },
   { key: "tile_alphabet", svg: tileAlphabetSvg },
   { key: "tile_word_match", svg: tileWordMatchSvg },

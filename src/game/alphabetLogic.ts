@@ -78,7 +78,7 @@ const CONFUSABLE_LETTER_FAMILIES: ReadonlyArray<readonly Letter[]> = [
 ];
 
 /** True when `letter` and `other` belong to the same confusable family. */
-function isConfusableWith(letter: Letter, other: Letter): boolean {
+export function isConfusableWith(letter: Letter, other: Letter): boolean {
   return CONFUSABLE_LETTER_FAMILIES.some(
     (family) => family.includes(letter) && family.includes(other),
   );
