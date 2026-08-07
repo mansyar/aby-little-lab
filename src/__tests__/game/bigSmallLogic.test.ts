@@ -136,6 +136,20 @@ describe("createBoxes", () => {
     expect(big?.scale).toBe(BIG_SCALE);
     expect(small?.scale).toBe(SMALL_SCALE);
   });
+
+  it("shuffles which side the big box lands on across plays", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 50; i++) {
+      seen.add(createBoxes()[0].scaleCategory);
+    }
+    expect(seen).toEqual(new Set(["big", "small"]));
+  });
+
+  it("places the small box first under a low random value", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.0);
+    const boxes = createBoxes();
+    expect(boxes[0].scaleCategory).toBe("small");
+  });
 });
 
 describe("shuffle", () => {

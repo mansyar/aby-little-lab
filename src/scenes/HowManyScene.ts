@@ -189,6 +189,7 @@ export class HowManyScene extends Phaser.Scene {
       {
         onSpeak: () => {
           const round = this.rounds[this.roundIndex];
+          if (!round) return; // Celebration after the final round — nothing to speak.
           speakNumber(round.target, load().settings.sfxEnabled);
         },
       },
@@ -289,15 +290,18 @@ export class HowManyScene extends Phaser.Scene {
   private createCardItems(group: CountGroup, cardX: number, cardY: number): void {
     const items: Phaser.GameObjects.GameObject[] = [];
     const rowCount = Math.ceil(group.count / ITEMS_PER_ROW);
-    const colCount = Math.min(group.count, ITEMS_PER_ROW);
-    const gridWidth = colCount * ITEM_SIZE + (colCount - 1) * ITEM_GAP;
     const gridHeight = rowCount * ITEM_SIZE + (rowCount - 1) * ITEM_GAP;
+    const topY = cardY - gridHeight / 2;
 
     for (let i = 0; i < group.count; i++) {
       const row = Math.floor(i / ITEMS_PER_ROW);
       const col = i % ITEMS_PER_ROW;
-      const x = cardX - gridWidth / 2 + col * (ITEM_SIZE + ITEM_GAP) + ITEM_SIZE / 2;
-      const y = cardY - gridHeight / 2 + row * (ITEM_SIZE + ITEM_GAP) + ITEM_SIZE / 2;
+      // Center each row on its own width so a partial last row (e.g. 2 items
+      // under 4+4) sits centered instead of pushed to the left.
+      const inRow = Math.min(group.count - row * ITEMS_PER_ROW, ITEMS_PER_ROW);
+      const rowWidth = inRow * ITEM_SIZE + (inRow - 1) * ITEM_GAP;
+      const x = cardX - rowWidth / 2 + col * (ITEM_SIZE + ITEM_GAP) + ITEM_SIZE / 2;
+      const y = topY + row * (ITEM_SIZE + ITEM_GAP) + ITEM_SIZE / 2;
       const item = this.add.image(x, y, group.texture).setDisplaySize(ITEM_SIZE, ITEM_SIZE);
       items.push(item);
     }

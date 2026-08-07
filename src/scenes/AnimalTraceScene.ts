@@ -13,7 +13,7 @@ import {
   selectThreePairs,
 } from "../game/animalTraceLogic";
 import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
-import { motionDuration, motionScale } from "../utils/motion";
+import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker } from "../utils/storage";
@@ -39,6 +39,21 @@ const TRACE_TOLERANCE = 60;
 
 /** Radius of each dot in the dotted path. */
 const DOT_RADIUS = 6;
+
+/** Color of dots the child has already visited. */
+const VISITED_COLOR = 0x68d391;
+
+/** Color and styling of the next-waypoint ring. */
+const NEXT_RING_COLOR = 0x2b6cb0;
+const NEXT_RING_WIDTH = 4;
+const NEXT_RING_ALPHA = 0.9;
+
+/** Base radius of the next-waypoint ring. */
+const NEXT_RING_RADIUS = 14;
+
+/** How large the ring pulses (radius multiplier) and how fast (ms). */
+const RING_PULSE_SCALE = 1.6;
+const RING_PULSE_DURATION = 700;
 
 /** Delay before advancing to the next pair after path completion (ms). */
 const NEXT_PAIR_DELAY = 1000;
@@ -98,7 +113,6 @@ const DOT_POP_REDUCED_DURATION = 150;
 interface PairState {
   pair: AnimalFoodPair;
   pathPoints: Array<{ x: number; y: number }>;
-  path: Phaser.Curves.Path;
   progress: PathProgress;
   animalSprite: Phaser.GameObjects.Image;
   foodSprite: Phaser.GameObjects.Image;
@@ -123,6 +137,8 @@ export class AnimalTraceScene extends Phaser.Scene {
   private currentPair?: PairState;
   private isPointerDown = false;
   private progressDots: Phaser.GameObjects.Arc[] = [];
+  private ringRadius = NEXT_RING_RADIUS;
+  private pathPulseTween?: { stop(): void };
   private readonly audioManager: AudioManager;
 
   constructor() {
@@ -133,6 +149,14 @@ export class AnimalTraceScene extends Phaser.Scene {
   create(): void {
     sceneEntrance(this);
     this.mascot = createCornerMascot(this);
+
+    // Reset all per-session state so a relaunch starts a fresh round.
+    this.currentPairIndex = 0;
+    this.completedPaths = 0;
+    this.currentPair = undefined;
+    this.progressDots = [];
+    this.ringRadius = NEXT_RING_RADIUS;
+    this.pathPulseTween = undefined;
 
     const backButton = this.add.text(
       20,
@@ -197,11 +221,6 @@ export class AnimalTraceScene extends Phaser.Scene {
     const pair = this.pairs[index];
     const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
 
-    const path = new Phaser.Curves.Path(pathPoints[0].x, pathPoints[0].y);
-    for (let i = 1; i < pathPoints.length; i++) {
-      path.lineTo(pathPoints[i].x, pathPoints[i].y);
-    }
-
     const animalSprite = this.add
       .image(ANIMAL_X, SPRITE_Y, `animal_${pair.animal}`)
       .setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
@@ -215,23 +234,74 @@ export class AnimalTraceScene extends Phaser.Scene {
     this.currentPair = {
       pair,
       pathPoints,
-      path,
       progress: createPathProgress(PATH_POINTS),
       animalSprite,
       foodSprite,
       pathGraphics,
       complete: false,
     };
+
+    this.startRingPulse();
+  }
+
+  /** Restarts the looping pulse on the next-waypoint ring (normal motion only). */
+  private startRingPulse(): void {
+    this.pathPulseTween?.stop();
+    this.pathPulseTween = undefined;
+    this.ringRadius = NEXT_RING_RADIUS;
+
+    if (isReducedMotion()) return;
+
+    const pulseTarget = { r: NEXT_RING_RADIUS };
+    this.pathPulseTween = this.tweens.add({
+      targets: pulseTarget,
+      r: NEXT_RING_RADIUS * RING_PULSE_SCALE,
+      duration: RING_PULSE_DURATION,
+      yoyo: true,
+      repeat: -1,
+      onUpdate: () => {
+        this.ringRadius = pulseTarget.r;
+        if (this.currentPair) {
+          this.redrawPathGuide(this.currentPair.pathGraphics, this.currentPair.pathPoints);
+        }
+      },
+    });
   }
 
   /** Draws a dotted path through the given waypoints using Graphics. */
   private drawDottedPath(points: Array<{ x: number; y: number }>): Phaser.GameObjects.Graphics {
     const graphics = this.add.graphics();
-    graphics.fillStyle(0x2d3748, 1);
-    for (let i = 1; i < points.length - 1; i++) {
-      graphics.fillCircle(points[i].x, points[i].y, DOT_RADIUS);
-    }
+    this.redrawPathGuide(graphics, points, 0);
     return graphics;
+  }
+
+  /**
+   * Redraws the path guide: pending dots in ink, visited dots lit, and a
+   * ring around the next waypoint.
+   */
+  private redrawPathGuide(
+    graphics: Phaser.GameObjects.Graphics,
+    points: Array<{ x: number; y: number }>,
+    visited: number,
+  ): void {
+    graphics.clear();
+
+    for (let i = 1; i < points.length - 1; i++) {
+      if (i <= visited) {
+        graphics.fillStyle(VISITED_COLOR, 1);
+        graphics.fillCircle(points[i].x, points[i].y, DOT_RADIUS);
+      } else {
+        graphics.fillStyle(0x2d3748, 1);
+        graphics.fillCircle(points[i].x, points[i].y, DOT_RADIUS);
+      }
+    }
+
+    const nextIndex = visited + 1;
+    // The path is complete once the animal sits on the final waypoint.
+    if (visited < points.length - 1 && nextIndex < points.length) {
+      graphics.lineStyle(NEXT_RING_WIDTH, NEXT_RING_COLOR, NEXT_RING_ALPHA);
+      graphics.strokeCircle(points[nextIndex].x, points[nextIndex].y, this.ringRadius);
+    }
   }
 
   /** Checks pointer proximity to the next path point and advances if within tolerance. */
@@ -247,6 +317,11 @@ export class AnimalTraceScene extends Phaser.Scene {
       this.currentPair.progress = advancePath(this.currentPair.progress);
       const pos = this.currentPair.pathPoints[this.currentPair.progress.currentPoint];
       this.hopAnimalTo(pos);
+      this.redrawPathGuide(
+        this.currentPair.pathGraphics,
+        this.currentPair.pathPoints,
+        this.currentPair.progress.currentPoint,
+      );
 
       if (isPathComplete(this.currentPair.progress)) {
         this.handlePathComplete();

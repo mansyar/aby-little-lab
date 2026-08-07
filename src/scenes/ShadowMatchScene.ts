@@ -21,7 +21,7 @@ const OBJECT_Y = 600;
 const DISPLAY_SIZE = 112;
 
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
-const DROP_ZONE_SIZE = 120;
+const DROP_ZONE_SIZE = 160;
 
 /** Tween duration for bounce-back animation (ms). */
 const BOUNCE_DURATION = 300;

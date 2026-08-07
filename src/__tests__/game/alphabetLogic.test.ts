@@ -4,8 +4,6 @@ import {
   type AlphabetRound,
   generatePlaythrough,
   generateRound,
-  hasCompletedPlaythrough,
-  isCorrectLetter,
   type Letter,
 } from "../../game/alphabetLogic";
 
@@ -57,6 +55,27 @@ describe("generateRound", () => {
       const target = ALPHABET[i % 26];
       const round = generateRound(target);
       expect(round.choices.filter((choice) => choice === target)).toHaveLength(1);
+    }
+  });
+
+  it("never offers a confusable same-family distractor (C/G/O/Q, I/L/T, M/W)", () => {
+    const FAMILIES: ReadonlyArray<readonly string[]> = [
+      ["C", "G", "O", "Q"],
+      ["I", "L", "T"],
+      ["M", "W"],
+    ];
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      for (const family of FAMILIES) {
+        for (const target of family) {
+          const round = generateRound(target as never);
+          const distractors = round.choices.filter((choice) => choice !== target);
+          for (const familyLetter of family) {
+            if (familyLetter !== target) {
+              expect(distractors).not.toContain(familyLetter);
+            }
+          }
+        }
+      }
     }
   });
 
@@ -123,26 +142,5 @@ describe("generatePlaythrough", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = generatePlaythrough();
     expect(second).toEqual(first);
-  });
-});
-
-describe("isCorrectLetter", () => {
-  it("returns true only for the round's target", () => {
-    const round: AlphabetRound = { target: "A", choices: ["A", "B", "C", "D"] };
-    expect(isCorrectLetter(round, "A")).toBe(true);
-    expect(isCorrectLetter(round, "B")).toBe(false);
-    expect(isCorrectLetter(round, "D")).toBe(false);
-  });
-});
-
-describe("hasCompletedPlaythrough", () => {
-  it("returns true once all rounds are answered correctly", () => {
-    expect(hasCompletedPlaythrough(6, 6)).toBe(true);
-    expect(hasCompletedPlaythrough(7, 6)).toBe(true);
-  });
-
-  it("returns false before all rounds are answered correctly", () => {
-    expect(hasCompletedPlaythrough(0, 6)).toBe(false);
-    expect(hasCompletedPlaythrough(5, 6)).toBe(false);
   });
 });

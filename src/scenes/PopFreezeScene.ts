@@ -170,6 +170,9 @@ export class PopFreezeScene extends Phaser.Scene {
   private spawnBubble(config: BubbleConfig): BubbleData {
     const bubble = this.physics.add.image(config.x, config.y, "bubble");
     bubble.setDisplaySize(BUBBLE_DISPLAY_SIZE, BUBBLE_DISPLAY_SIZE);
+    // Size the Arcade body to the 96px display, not the 512px SVG frame —
+    // otherwise bubbles bounce ~208px short of walls and overlap tap areas.
+    bubble.setCircle(BUBBLE_DISPLAY_SIZE / 2);
     bubble.setVelocity(config.vx, config.vy);
     bubble.setCollideWorldBounds(true);
     bubble.setBounce(1, 1);

@@ -64,12 +64,12 @@ export function createToyInstances(types: readonly ToyType[]): ToyInstance[] {
   return instances;
 }
 
-/** Creates the two boxes: one big and one small. */
+/** Creates the two boxes (big and small) with shuffled left/right sides. */
 export function createBoxes(): BoxInstance[] {
-  return [
+  return shuffle([
     { scaleCategory: "big", scale: BIG_SCALE },
     { scaleCategory: "small", scale: SMALL_SCALE },
-  ];
+  ]);
 }
 
 /** Generates a round with shuffled toy positions and two boxes. */

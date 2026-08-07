@@ -1,0 +1,10 @@
+{
+  "id": "gameplay-hardening_20260807",
+  "title": "Gameplay Hardening — Replay & Session Bug Fixes + Gameplay Depth",
+  "type": "bug+feature",
+  "status": "new",
+  "createdAt": "2026-08-07",
+  "updatedAt": "2026-08-07",
+  "archivedAt": null,
+  "summary": "Fix five verified replay/session bugs (Animal Trace session state reset, Shape Sorter progress-dot reset, speaker-button crash in the 4 speech games, Musical Memory replay input position, Pop & Freeze physics body/hit area), guard double scene transitions during auto-return, apply cross-cutting consistency fixes and dead-code removal, add gameplay depth (guided tracing, confusable-distractor guards, easy-first word ordering, used-tile feedback, correct-answer splashes, pacing and variety polish), add the 3 missing scene test suites (Animal Trace, Pop & Freeze, Pattern Builder), and ship as v1.7.0 via the established release pipeline (branch, bump, docs, gates, tag, PR, Coolify deploy, verification, device testing, archive)."
+}

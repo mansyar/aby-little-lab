@@ -578,6 +578,49 @@ describe("AlphabetScene round flow", () => {
     });
   });
 
+  /** Returns the speaker button image created with the icon_speaker texture. */
+  function getSpeakerImage(scene: unknown): Record<string, MockFn> {
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const index = imageMock.mock.calls.findIndex((call) => call[2] === "icon_speaker");
+    return imageMock.mock.results[index].value as Record<string, MockFn>;
+  }
+
+  it("guards the speaker during the win celebration (no crash after the final round)", () => {
+    const scene = new AlphabetScene();
+    scene.create();
+
+    for (let i = 0; i < 6; i++) {
+      completeRound(scene);
+    }
+    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+
+    // Tapping "hear it again" during the 3s celebration must not dereference
+    // rounds[roundIndex] past the end of the array.
+    const speakerImage = getSpeakerImage(scene);
+    const pointerdown = getMockFn(speakerImage.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdown).toBeDefined();
+    if (pointerdown && typeof pointerdown[1] === "function") {
+      expect(() => (pointerdown[1] as () => void)()).not.toThrow();
+    }
+  });
+
+  it("shows a splash burst at the tapped card on a correct answer", () => {
+    const scene = new AlphabetScene();
+    scene.create();
+
+    const round = getCurrentRound(scene);
+    const correctIndex = round.choices.indexOf(round.target);
+    tapCard(scene, correctIndex);
+
+    // The correct-answer splash is the first graphics drawn after the tap
+    // (the mascot cheer may add its own sparkle graphics afterwards).
+    const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+    expect(graphicsMock.mock.results.length).toBeGreaterThan(0);
+    const graphics = graphicsMock.mock.results[0].value as Record<string, MockFn>;
+    expect(getMockFn(graphics.lineStyle)).toHaveBeenCalled();
+    expect(getMockFn(graphics.fillCircle)).toHaveBeenCalled();
+  });
+
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("alphabet-match");
     const scene = new AlphabetScene();

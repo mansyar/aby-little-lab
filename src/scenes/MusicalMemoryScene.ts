@@ -35,6 +35,12 @@ const LILYPAD_SIZE = 160;
 /** Delay between notes during sequence playback (ms). */
 const NOTE_DELAY = 600;
 
+/** Faster note delay once sequences grow long enough to feel sluggish (ms). */
+const FAST_NOTE_DELAY = 480;
+
+/** Sequences of this length or longer play at the faster note delay. */
+const FAST_NOTE_DELAY_LENGTH = 5;
+
 /** Original SVG texture size (used for scale calculations). */
 const SVG_SIZE = 512;
 
@@ -256,13 +262,15 @@ export class MusicalMemoryScene extends Phaser.Scene {
    */
   private playSequence(): void {
     this.inputLocked = true;
+    // Long sequences play faster so later rounds don't drag.
+    const delay = this.sequence.length >= FAST_NOTE_DELAY_LENGTH ? FAST_NOTE_DELAY : NOTE_DELAY;
     for (let i = 0; i < this.sequence.length; i++) {
       const frogIndex = this.sequence[i];
-      this.time.delayedCall(i * NOTE_DELAY, () => {
+      this.time.delayedCall(i * delay, () => {
         this.animateFrog(frogIndex);
       });
     }
-    this.time.delayedCall(this.sequence.length * NOTE_DELAY, () => {
+    this.time.delayedCall(this.sequence.length * delay, () => {
       this.inputLocked = false;
     });
   }
@@ -399,6 +407,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
   /** Handles a tap on the replay button: re-plays the current sequence. */
   private handleReplay(): void {
     if (this.inputLocked) return;
+    // A re-listen restarts the pattern, so input must start at the first note.
+    this.inputIndex = 0;
     this.playSequence();
   }
 }

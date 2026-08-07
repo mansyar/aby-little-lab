@@ -138,11 +138,7 @@ vi.mock("phaser", () => {
         add: vi.fn(() => ({ remove: vi.fn(), stop: vi.fn() })),
       };
       this.sys = {
-        events: {
-          on: vi.fn(),
-          once: vi.fn(),
-          off: vi.fn(),
-        },
+        events: createMockEventEmitter(),
       };
       this.events = this.sys.events;
       this.children = {
@@ -458,6 +454,36 @@ function assertWinCelebrationCreated(scene: unknown): void {
 
   // The celebration never uses a particle emitter
   expect(getMockFn(add.particles)).not.toHaveBeenCalled();
+}
+
+/**
+ * A small working event emitter for the mocked scene, so once('shutdown')
+ * handlers (e.g. the transition guard) actually fire when tests emit events.
+ * Call records stay observable through the vi.fn()s, preserving existing
+ * assertions that search `events.on` mock calls.
+ */
+function createMockEventEmitter(): Record<string, MockFn> {
+  const handlers: Record<string, Array<{ fn: () => void; once: boolean }>> = {};
+  return {
+    on: vi.fn((event: string, fn: () => void) => {
+      if (!handlers[event]) handlers[event] = [];
+      handlers[event].push({ fn, once: false });
+    }),
+    once: vi.fn((event: string, fn: () => void) => {
+      if (!handlers[event]) handlers[event] = [];
+      handlers[event].push({ fn, once: true });
+    }),
+    off: vi.fn(),
+    emit: vi.fn((event: string) => {
+      const list = handlers[event];
+      if (!list) return;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const entry = list[i];
+        entry.fn();
+        if (entry.once) list.splice(i, 1);
+      }
+    }),
+  };
 }
 
 /** Triggers all pointerdown callbacks registered on game objects. */
@@ -999,21 +1025,22 @@ describe("scene navigation flow", () => {
     });
 
     it("navigates to each game scene when respective tile is clicked", async () => {
-      const scene = new HubScene();
-      scene.create();
+      // A fresh Hub per navigation mirrors reality: once a transition starts,
+      // the guard blocks further transitions on that instance until shutdown
+      // (which Phaser fires when the Hub is replaced by the game scene).
+      for (let i = 0; i < GAME_SCENE_KEYS.length; i++) {
+        const scene = new HubScene();
+        scene.create();
 
-      triggerAllPointerups(scene);
-      // The tile handler awaits the (mocked) lazy scene loader before
-      // transitioning, so flush the pending microtask before fading out.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      completeFadeOuts(scene);
+        const tile = getRectangles(scene)[i];
+        fireAllObjectEvents(tile, "pointerup");
+        // The tile handler awaits the (mocked) lazy scene loader before
+        // transitioning, so flush the pending microtask before fading out.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        completeFadeOuts(scene);
 
-      const startMock = getMockFn(scene.scene.start);
-      const startedKeys = startMock.mock.calls.map((call) => call[0] as string);
-
-      for (const key of GAME_SCENE_KEYS) {
-        expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, key);
-        expect(startedKeys).toContain(key);
+        expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, GAME_SCENE_KEYS[i]);
+        expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(GAME_SCENE_KEYS[i]);
       }
     });
 
@@ -1524,18 +1551,19 @@ describe("scene navigation flow", () => {
     });
 
     it("keeps tile taps navigating to games after press feedback is attached", async () => {
-      const scene = new HubScene();
-      scene.create();
-      completeHubEntrances(scene);
+      // Fresh Hub per navigation (see "navigates to each game scene").
+      for (let i = 0; i < GAME_SCENE_KEYS.length; i++) {
+        const scene = new HubScene();
+        scene.create();
+        completeHubEntrances(scene);
 
-      triggerAllPointerups(scene);
-      // Flush the mocked lazy-loader microtask before fading out.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      completeFadeOuts(scene);
+        const tile = getRectangles(scene)[i];
+        fireAllObjectEvents(tile, "pointerup");
+        // Flush the mocked lazy-loader microtask before fading out.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        completeFadeOuts(scene);
 
-      const startedKeys = getMockFn(scene.scene.start).mock.calls.map((call) => call[0] as string);
-      for (const key of GAME_SCENE_KEYS) {
-        expect(startedKeys).toContain(key);
+        expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(GAME_SCENE_KEYS[i]);
       }
     });
 
@@ -2536,6 +2564,37 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
         justEarned: "shape-sorter",
       });
+    });
+
+    it("ignores a late Back hold when the auto-return is already navigating", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new ShapeSorterScene();
+      scene.create();
+
+      // Child starts a 3s Back hold mid-game, then finishes the round.
+      triggerAllPointerdowns(scene);
+      completeAllRounds(scene);
+
+      const timeMock = getMockFn(scene.time.delayedCall);
+      const hold3000 = timeMock.mock.calls.filter((call) => call[0] === 3000);
+      expect(hold3000.length).toBeGreaterThanOrEqual(2);
+      const parentLockHold = hold3000[0][1] as () => void;
+      const autoReturn = hold3000[hold3000.length - 1][1] as () => void;
+
+      // Auto-return fires first and navigates exactly once.
+      autoReturn();
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "shape-sorter",
+      });
+
+      // The stale Back hold completes afterwards: must NOT start a second
+      // transition (the guard blocks it before any new fade-out begins).
+      parentLockHold();
+      expect(getMockFn(scene.cameras.main.fadeOut)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
     });
 
     it("passes no justEarned data on replay auto-return", () => {
@@ -3549,6 +3608,21 @@ describe("scene navigation flow", () => {
       tapBubble(bubbles[6]);
     }
 
+    it("sizes every bubble physics body to the 96px display size", () => {
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      // Without setCircle, the Arcade body stays at the 512px SVG frame:
+      // bubbles would bounce ~208px short of the visible edge and overlap
+      // each other's tap regions. Every bubble must get a 96px circle body.
+      const physicsImageMock = getMockFn(scene.physics.add.image);
+      const bubbles = physicsImageMock.mock.results.map((r) => r.value as Record<string, MockFn>);
+      expect(bubbles.length).toBeGreaterThan(0);
+      for (const bubble of bubbles) {
+        expect(getMockFn(bubble.setCircle)).toHaveBeenCalledWith(48);
+      }
+    });
+
     it("plays win SFX when 6 poppable bubbles are popped", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
@@ -3557,6 +3631,41 @@ describe("scene navigation flow", () => {
       completeRound(scene);
 
       expect(mockAudio.playWin).toHaveBeenCalled();
+    });
+
+    it("ignores a late Back hold when the auto-return is already navigating", () => {
+      vi.mocked(hasSticker).mockReturnValue(false);
+
+      const scene = new PopFreezeScene();
+      scene.create();
+
+      // Child starts a 3s Back hold mid-game, then pops the last bubble.
+      const backButton = getTextObject(scene, "Back");
+      if (!backButton) throw new Error("Back button not found");
+      const pointerdown = getMockFn(backButton.on).mock.calls.find(
+        (call) => call[0] === "pointerdown",
+      );
+      const pointerdownCallback = pointerdown?.[1] as (() => void) | undefined;
+      if (!pointerdownCallback) throw new Error("Back button pointerdown not found");
+      pointerdownCallback();
+      completeRound(scene);
+
+      const timeMock = getMockFn(scene.time.delayedCall);
+      const hold3000 = timeMock.mock.calls.filter((call) => call[0] === 3000);
+      expect(hold3000.length).toBeGreaterThanOrEqual(2);
+      const parentLockHold = hold3000[0][1] as () => void;
+      const autoReturn = hold3000[hold3000.length - 1][1] as () => void;
+
+      // Auto-return fires first and navigates exactly once.
+      autoReturn();
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
+
+      // The stale Back hold completes afterwards: must NOT start a second
+      // transition (the guard blocks it before any new fade-out begins).
+      parentLockHold();
+      expect(getMockFn(scene.cameras.main.fadeOut)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
     });
 
     it("awards sticker on first completion only", () => {
@@ -4339,6 +4448,39 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playFrogNote).toHaveBeenCalledWith(329.63);
     });
 
+    it("plays short sequences at 600ms per note and long sequences at 480ms", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const s = scene as unknown as {
+        sequence: number[];
+        playSequence: () => void;
+      };
+      const delayedCallMock = getMockFn(
+        (scene as unknown as { time: { delayedCall: MockFn } }).time.delayedCall,
+      );
+
+      // Sequence of length 4 (below the 5-note threshold) keeps the 600ms pace.
+      const before = delayedCallMock.mock.calls.length;
+      s.sequence = [0, 1, 2, 3];
+      s.playSequence();
+      const shortCalls = delayedCallMock.mock.calls.slice(before);
+      expect(shortCalls[0][0]).toBe(0); // first note plays immediately
+      expect(shortCalls[1][0]).toBe(600);
+      expect(shortCalls[3][0]).toBe(3 * 600);
+      expect(shortCalls[4][0]).toBe(4 * 600); // input unlock
+
+      // Sequence of length 5 or more plays faster (480ms).
+      const beforeLong = delayedCallMock.mock.calls.length;
+      s.sequence = [0, 1, 2, 3, 4];
+      s.playSequence();
+      const longCalls = delayedCallMock.mock.calls.slice(beforeLong);
+      expect(longCalls[0][0]).toBe(0); // first note plays immediately
+      expect(longCalls[1][0]).toBe(480);
+      expect(longCalls[4][0]).toBe(4 * 480);
+      expect(longCalls[5][0]).toBe(5 * 480); // input unlock
+    });
+
     it("locks input during sequence playback (taps ignored)", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
@@ -4483,6 +4625,43 @@ describe("scene navigation flow", () => {
 
       // Notes replayed (2 notes for sequence length 2)
       expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(2);
+    });
+
+    it("replay resets input progress so the child can restart from the first note", () => {
+      // Sequence [0, 1] (green, blue): distinct adjacent notes expose the
+      // stale-inputIndex bug — without the reset, a replay followed by the
+      // first-note tap would be judged against the SECOND note and fail.
+      vi.spyOn(Math, "random")
+        .mockReturnValueOnce(0.0)
+        .mockReturnValueOnce(0.5)
+        .mockReturnValue(0.5);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene); // initial playback done, input unlocked
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      // Child taps the first note correctly (inputIndex 0 -> 1)
+      tapFrog(frogs, 0);
+      expect((scene as { inputIndex: number }).inputIndex).toBe(1);
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+
+      // Child asks to hear the sequence again mid-round…
+      const delayedCallsBefore = getMockFn(scene.time.delayedCall).mock.calls.length;
+      tapReplayButton(scene);
+      fireDelayedCallsFrom(scene, delayedCallsBefore);
+
+      // …and the replay restarts input at the first note.
+      expect((scene as { inputIndex: number }).inputIndex).toBe(0);
+
+      // Tapping the FIRST note again must be judged correct, not measured
+      // against the stale second-note position.
+      clearAudioMocks();
+      tapFrog(frogs, 0);
+      expect((scene as { inputIndex: number }).inputIndex).toBe(1);
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
     });
 
     it("input is locked during replay and unlocked after replay completes", () => {
@@ -4710,9 +4889,9 @@ describe("scene navigation flow", () => {
 
     /**
      * Completes one round: fires playback delayed calls (from firedUpTo),
-     * clears audio, then taps the correct frog (index 1 = blue) sequenceLength
-     * times. Returns the delayed call count after firing playback (for use as
-     * the next firedUpTo).
+     * clears audio, then taps the actual sequence notes `sequenceLength`
+     * times (the run cap means sequences are no longer all-1). Returns the
+     * delayed call count after firing playback (for use as the next firedUpTo).
      */
     function completeRound(
       scene: unknown,
@@ -4724,8 +4903,9 @@ describe("scene navigation flow", () => {
       const newFiredUpTo = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
         .mock.calls.length;
       clearAudioMocks();
+      const sequence = (scene as { sequence: number[] }).sequence;
       for (let i = 0; i < sequenceLength; i++) {
-        tapFrog(frogs, 1);
+        tapFrog(frogs, sequence[i]);
       }
       return newFiredUpTo;
     }
@@ -5041,12 +5221,12 @@ describe("scene navigation flow", () => {
       }
     }
 
-    it("creates 5 progress dots, 3 filled slots, 1 gap marker, and 3 answer cards", () => {
+    it("creates 6 progress dots, 3 filled slots, 1 gap marker, and 3 answer cards", () => {
       const scene = new PatternBuilderScene();
       scene.create();
 
       const dots = getProgressDots(scene);
-      expect(dots).toHaveLength(5);
+      expect(dots).toHaveLength(6);
 
       const cards = getCardRects(scene);
       expect(cards).toHaveLength(3);
@@ -5153,13 +5333,13 @@ describe("scene navigation flow", () => {
       expect((wiggleTween[0] as { yoyo: boolean }).yoyo).toBe(true);
     });
 
-    it("completing all 5 rounds triggers win, first-time sticker award, and auto-return", () => {
+    it("completing all 6 rounds triggers win, first-time sticker award, and auto-return", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
       const scene = new PatternBuilderScene();
       scene.create();
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
 
@@ -5195,7 +5375,7 @@ describe("scene navigation flow", () => {
       const scene = new PatternBuilderScene();
       scene.create();
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
 
@@ -5218,7 +5398,7 @@ describe("scene navigation flow", () => {
       const scene = new PatternBuilderScene();
       scene.create();
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
       expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
@@ -6172,7 +6352,7 @@ describe("scene navigation flow", () => {
       }
     }
 
-    /** Completes one MusicalMemory round (playback, then correct frog taps). */
+    /** Completes one MusicalMemory round (playback, then the actual note taps). */
     function completeMemoryRound(
       scene: unknown,
       frogs: Array<Record<string, MockFn>>,
@@ -6182,8 +6362,9 @@ describe("scene navigation flow", () => {
       fireDelayedCallsFrom(scene, firedUpTo);
       const newFiredUpTo = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
         .mock.calls.length;
+      const sequence = (scene as { sequence: number[] }).sequence;
       for (let i = 0; i < sequenceLength; i++) {
-        tapFrog(frogs, 1);
+        tapFrog(frogs, sequence[i]);
       }
       return newFiredUpTo;
     }

@@ -8,7 +8,7 @@ import {
   type PatternRound,
 } from "../game/patternBuilderLogic";
 import type { ShapeType } from "../game/shapeSorterLogic";
-import { createWinCelebration } from "../utils/completionEffect";
+import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
@@ -26,7 +26,7 @@ const SHAPE_TEXTURES: Record<ShapeType, string> = {
 };
 
 /** Number of rounds per playthrough. */
-const ROUND_COUNT = 5;
+const ROUND_COUNT = 6;
 
 /** Display size for slot shapes (exceeds 64px minimum, meets 96px ideal). */
 const SLOT_SIZE = 120;
@@ -171,6 +171,8 @@ export class PatternBuilderScene extends Phaser.Scene {
     });
     attachPressFeedback(backButton);
 
+    // Reset per-session state so a relaunch starts with fresh progress dots.
+    this.progressDots.length = 0;
     this.createProgressDots();
 
     this.rounds = generatePlaythrough(ROUND_COUNT);
@@ -290,6 +292,9 @@ export class PatternBuilderScene extends Phaser.Scene {
     const targetX = this.cameras.main.centerX + (round.gapIndex - 1.5) * SLOT_SPACING;
     const targetY = this.cameras.main.centerY + ROW_Y_OFFSET;
     const shape = this.cardShapes[choiceIndex];
+
+    // Burst at the gap the shape is flying into.
+    createCompletionSplash(this, targetX, targetY);
 
     this.tweens.add({
       targets: shape,

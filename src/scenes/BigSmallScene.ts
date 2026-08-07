@@ -82,7 +82,6 @@ const BOX_BUMP_REDUCED_DURATION = 150;
 interface ToyData {
   obj: Phaser.GameObjects.Image;
   scaleCategory: ScaleCategory;
-  baseScale: number;
   originX: number;
   originY: number;
   sorted: boolean;
@@ -206,7 +205,6 @@ export class BigSmallScene extends Phaser.Scene {
       const x = spacing * (i + 1);
       const toy = this.round.toys[i];
       const displaySize = TOY_BASE_SIZE * toy.scale;
-      const baseScale = displaySize / TEXTURE_SIZE;
       const obj = this.add
         .image(x, TOY_Y, `toy_${toy.type}`)
         .setDisplaySize(displaySize, displaySize)
@@ -217,7 +215,6 @@ export class BigSmallScene extends Phaser.Scene {
       const data: ToyData = {
         obj,
         scaleCategory: toy.scaleCategory,
-        baseScale,
         originX: x,
         originY: TOY_Y,
         sorted: false,

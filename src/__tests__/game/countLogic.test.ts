@@ -6,7 +6,6 @@ import {
   createPlaythrough,
   createRound,
   evaluateRound,
-  isPlaythroughComplete,
   ROUND_BANDS,
 } from "../../game/countLogic";
 
@@ -138,6 +137,16 @@ describe("createPlaythrough", () => {
     expect(createPlaythrough()).toHaveLength(6);
   });
 
+  it("keeps the two rounds of each band at distinct targets", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = createPlaythrough();
+      // Band pairs: (0,1) = 1-3, (2,3) = 1-5, (4,5) = 1-10.
+      expect(playthrough[0].target).not.toBe(playthrough[1].target);
+      expect(playthrough[2].target).not.toBe(playthrough[3].target);
+      expect(playthrough[4].target).not.toBe(playthrough[5].target);
+    }
+  });
+
   it("proceeds easy-first through the bands (2 rounds each)", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
       const playthrough = createPlaythrough();
@@ -184,14 +193,5 @@ describe("evaluateRound", () => {
         expect(evaluateRound(round, group)).toBe(false);
       }
     }
-  });
-});
-
-describe("isPlaythroughComplete", () => {
-  it("completes only once every round has been answered correctly", () => {
-    expect(isPlaythroughComplete(0, 6)).toBe(false);
-    expect(isPlaythroughComplete(5, 6)).toBe(false);
-    expect(isPlaythroughComplete(6, 6)).toBe(true);
-    expect(isPlaythroughComplete(7, 6)).toBe(true);
   });
 });

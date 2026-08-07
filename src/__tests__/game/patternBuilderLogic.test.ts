@@ -103,6 +103,27 @@ describe("generateRound", () => {
     expect(seen).toEqual(new Set(["ABAB", "AABB", "ABB"]));
   });
 
+  it("never offers a confusable same-family distractor (hexagon with octagon, circle with ring)", () => {
+    const FAMILIES: ReadonlyArray<readonly string[]> = [
+      ["pentagon", "hexagon", "octagon"],
+      ["circle", "oval", "ring", "semicircle"],
+      ["square", "rectangle"],
+    ];
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      const round = generateRound();
+      const correct = getCorrectShape(round);
+      const distractors = round.choices.filter((choice) => choice !== correct);
+      for (const family of FAMILIES) {
+        if (!family.includes(correct)) continue;
+        for (const familyShape of family) {
+          if (familyShape !== correct) {
+            expect(distractors).not.toContain(familyShape);
+          }
+        }
+      }
+    }
+  });
+
   it("covers end and middle gap positions across samples", () => {
     const seen = new Set<number>();
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
@@ -144,8 +165,8 @@ describe("generatePlaythrough", () => {
     }
   });
 
-  it("defaults to 5 rounds", () => {
-    expect(generatePlaythrough()).toHaveLength(5);
+  it("defaults to 6 rounds, matching the other mini-games", () => {
+    expect(generatePlaythrough()).toHaveLength(6);
   });
 
   it("produces different rounds under different random sequences", () => {

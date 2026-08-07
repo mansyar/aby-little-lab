@@ -5,7 +5,6 @@ import {
   generatePlaythrough,
   isMatch,
   type ShapeType,
-  selectThreeShapes,
   shuffle,
 } from "../../game/shapeSorterLogic";
 
@@ -13,40 +12,20 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("selectThreeShapes", () => {
-  it("returns exactly 3 shapes", () => {
-    const result = selectThreeShapes();
-    expect(result).toHaveLength(3);
-  });
-
-  it("returns shapes from the valid set of 6", () => {
-    const result = selectThreeShapes();
-    for (const shape of result) {
-      expect(ALL_SHAPES).toContain(shape);
-    }
-  });
-
-  it("expanded pool includes all 12 new shape types (18 total)", () => {
-    expect(ALL_SHAPES).toHaveLength(18);
-    expect(ALL_SHAPES).toContain("oval");
-    expect(ALL_SHAPES).toContain("rectangle");
-    expect(ALL_SHAPES).toContain("diamond");
-    expect(ALL_SHAPES).toContain("pentagon");
-    expect(ALL_SHAPES).toContain("hexagon");
-    expect(ALL_SHAPES).toContain("octagon");
-    expect(ALL_SHAPES).toContain("trapezoid");
-    expect(ALL_SHAPES).toContain("semicircle");
-    expect(ALL_SHAPES).toContain("arrow");
-    expect(ALL_SHAPES).toContain("plus");
-    expect(ALL_SHAPES).toContain("ring");
-    expect(ALL_SHAPES).toContain("teardrop");
-  });
-
-  it("returns no duplicate shapes", () => {
-    const result = selectThreeShapes();
-    const unique = new Set(result);
-    expect(unique.size).toBe(3);
-  });
+it("expanded pool includes all 12 new shape types (18 total)", () => {
+  expect(ALL_SHAPES).toHaveLength(18);
+  expect(ALL_SHAPES).toContain("oval");
+  expect(ALL_SHAPES).toContain("rectangle");
+  expect(ALL_SHAPES).toContain("diamond");
+  expect(ALL_SHAPES).toContain("pentagon");
+  expect(ALL_SHAPES).toContain("hexagon");
+  expect(ALL_SHAPES).toContain("octagon");
+  expect(ALL_SHAPES).toContain("trapezoid");
+  expect(ALL_SHAPES).toContain("semicircle");
+  expect(ALL_SHAPES).toContain("arrow");
+  expect(ALL_SHAPES).toContain("plus");
+  expect(ALL_SHAPES).toContain("ring");
+  expect(ALL_SHAPES).toContain("teardrop");
 });
 
 describe("shuffle", () => {

@@ -67,9 +67,28 @@ export interface AlphabetRound {
   choices: Letter[];
 }
 
+/**
+ * Letter families that look alike to a toddler (e.g. C with G/O/Q). A target
+ * never gets a distractor from its own family, so choices stay distinguishable.
+ */
+const CONFUSABLE_LETTER_FAMILIES: ReadonlyArray<readonly Letter[]> = [
+  ["C", "G", "O", "Q"],
+  ["I", "L", "T"],
+  ["M", "W"],
+];
+
+/** True when `letter` and `other` belong to the same confusable family. */
+function isConfusableWith(letter: Letter, other: Letter): boolean {
+  return CONFUSABLE_LETTER_FAMILIES.some(
+    (family) => family.includes(letter) && family.includes(other),
+  );
+}
+
 /** Builds one round for a target: 3 unique distractors, all positions shuffled. */
 export function generateRound(target: Letter): AlphabetRound {
-  const distractors = shuffle(ALPHABET.filter((letter) => letter !== target)).slice(0, 3);
+  const distractors = shuffle(
+    ALPHABET.filter((letter) => letter !== target && !isConfusableWith(target, letter)),
+  ).slice(0, 3);
   return { target, choices: shuffle([target, ...distractors]) };
 }
 
@@ -78,14 +97,4 @@ export function generatePlaythrough(roundCount = 6): AlphabetRound[] {
   return shuffle(ALPHABET)
     .slice(0, roundCount)
     .map((target) => generateRound(target));
-}
-
-/** Returns whether the tapped letter is the round's target. */
-export function isCorrectLetter(round: AlphabetRound, letter: Letter): boolean {
-  return round.target === letter;
-}
-
-/** Returns whether the child has answered every round of the playthrough correctly. */
-export function hasCompletedPlaythrough(correctCount: number, totalRounds: number): boolean {
-  return correctCount >= totalRounds;
 }

@@ -415,4 +415,30 @@ describe("ShapeSorterScene multi-round sessions", () => {
       expect(getMockFn(zone.destroy)).toHaveBeenCalled();
     }
   });
+
+  it("fills fresh progress dots on relaunch (no stale destroyed dots)", () => {
+    const scene = createScene();
+    completeSession(scene);
+
+    // Relaunch: the progress-dot array must be reset, not accumulated.
+    scene.create();
+    const internals = getInternals(scene);
+    expect(internals.progressDots).toHaveLength(3);
+
+    // Two sessions drew 3 dots each; the fresh session owns the last three.
+    const circleResults = getMockFn(scene.add.circle).mock.results.map(
+      (r) => r.value as MockGameObject,
+    );
+    const freshDots = circleResults.slice(3);
+    expect(freshDots).toHaveLength(3);
+    expect(internals.progressDots[0]).toBe(freshDots[0]);
+
+    // Completing round 1 must fill a fresh dot, never a destroyed one.
+    placeAllShapes(scene);
+    const popTween = getMockFn(scene.tweens.add).mock.calls.find(
+      (call) => call[0]?.targets === internals.progressDots[0],
+    );
+    expect(popTween).toBeDefined();
+    expect(popTween?.[0]?.targets).toBe(freshDots[0]);
+  });
 });

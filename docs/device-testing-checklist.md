@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.7.0 (2026-08-07)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.7.0 — replay/session bug fixes, gameplay depth, consistency pass)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** Carried v1.6.0 rows — Hub 11 tiles 5×3, sticker shelf + play-time arc, How Many? end-to-end, Play-Time Limits, sticker persistence, reduced-motion. v1.7.0 rows — Animal Trace: relaunch after a full session starts fresh at path 1 of 3 (no instant win), relaunch mid-session starts fresh with no crash, next waypoint pulses with a ring and visited dots light up green; Shape Sorter: after a completed 3-round session, relaunch fills progress dots again (no stale dots); Pattern Builder: 6 rounds per play (was 5), relaunch after win fills fresh progress dots, correct card bursts a splash at the gap; Word Match: playthrough leads with 3-letter words (easy first), correct card bursts a splash; Find the Letter: correct card bursts a splash; Word Builder: correct tile flies its letter into the slot and the tile dims into a ghost, duplicate-letter words (BALL) keep the tile tappable for the second use with a thunk, tiles render ~132px (above the 64px floor at phone FIT scale), speaker during the 3s win celebration doesn't crash; Musical Memory: no frog plays more than twice in a row, sequences of 5+ notes play at 480ms per note, replaying the sequence resets input so the first correct tap after a re-listen is judged right; Pop & Freeze: bubbles bounce at the visible edge (physics body matches the 96px bubble, no ~208px phantom wall), speaker during win celebration doesn't crash (all four speech games); Big vs Small: big/small boxes swap sides between plays; How Many: two rounds of each band show different target counts, partial last item rows are centered; Back-hold during auto-return never double-navigates (all games)
+- **Result:** pending — executed 2026-08-07 (recorded after release)
+- **Issues found:** pending
+
 ## Execution Record — v1.6.0 (2026-08-06)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.6.0 — Shape Sorter 18-shape multi-round, UI/UX hardening, TTS fixes, 142-asset SVG polish)
@@ -153,6 +161,7 @@ pnpm exec serve dist -l 3000
 - [ ] Game loads correctly
 - [ ] Dotted paths are visible
 - [ ] Touch tracing works smoothly
+- [ ] The next waypoint pulses with a ring (clear "where next?" cue) and visited dots light up in success green
 - [ ] Connection detection works
 - [ ] Success/error feedback works
 - [ ] Juice: animal hops with a small arc between waypoints
@@ -164,6 +173,7 @@ pnpm exec serve dist -l 3000
 #### Game 3: Pop & Freeze!
 - [ ] Game loads correctly
 - [ ] Bubbles appear and move
+- [ ] Bubbles bounce at the visible screen edge (physics body matches the 96px bubble — no phantom wall ~208px short of the edge)
 - [ ] Touch to pop works
 - [ ] Sleeping animal bubbles cannot be popped
 - [ ] Score tracking works
@@ -189,6 +199,8 @@ pnpm exec serve dist -l 3000
 - [ ] Game loads correctly
 - [ ] Frog notes are visible
 - [ ] Sequence playback works
+- [ ] No frog plays more than twice in a row; sequences of 5+ notes play at the faster 480ms per-note pace
+- [ ] Replaying the sequence resets input — the first correct tap after a re-listen is judged right
 - [ ] Touch input works
 - [ ] Sequence length increases correctly
 - [ ] Audio plays correctly
@@ -216,7 +228,7 @@ pnpm exec serve dist -l 3000
 - [ ] 4 slots (3 filled shapes + clearly marked empty gap) and 3 answer cards are visible
 - [ ] Pattern shapes are recognizable (reuses the Shape Sorter shape SVGs)
 - [ ] Tapping the correct card snaps the shape into the gap with a settle tween + chime
-- [ ] Progress dots fill one per round; 5 rounds complete the game
+- [ ] Progress dots fill one per round; 6 rounds complete the game (v1.7.0 — was 5)
 - [ ] Tapping a wrong card wiggles it gently with no penalty and no progression loss
 - [ ] Cards/slots exceed the 64px minimum touch target
 - [ ] Sticker awarded on first completion
@@ -228,6 +240,7 @@ pnpm exec serve dist -l 3000
 - [ ] 4 uppercase letter cards are visible (160px each, letter glyphs from the letter SVG textures — exceed the 96px ideal touch target)
 - [ ] Letters are distinguished by shape only (identical fill/stroke styling — no color-as-cue)
 - [ ] Tapping the correct card plays the chime, Professor Hoot cheers, and the progress dot pops; next round starts in ~0.7s
+- [ ] The correct card bursts a small splash at the tap point (v1.7.0)
 - [ ] Tapping a wrong card wiggles it gently with no penalty and no progression loss
 - [ ] TTS is silent when the SFX toggle is off; on devices with no speech voice the game plays fully visually with no error
 - [ ] 6 rounds complete the game; sticker awarded on first completion
@@ -237,9 +250,11 @@ pnpm exec serve dist -l 3000
 - [ ] Game loads correctly
 - [ ] A picture prompt (~180px) appears top-center and the word is **spoken aloud** (device TTS voice present)
 - [ ] 4 word cards are visible in a 2×2 grid, each composed of the word's letters (~80px/letter, min 160px tall — exceed the 96px ideal touch target)
-- [ ] No two cards in a round start with the same letter (pre-reader first-letter matching works)
 - [ ] Tapping the correct card plays the chime, Professor Hoot cheers, and the progress dot pops; next round starts in ~0.7s
+- [ ] The playthrough leads with 3-letter words (easy first — five 3-letter rounds then one 4-letter round)
+- [ ] The correct card bursts a small splash at the tap point (v1.7.0)
 - [ ] Tapping a wrong card wiggles it gently with no penalty and no progression loss
+- [ ] No two cards in a round start with the same letter (pre-reader first-letter matching works)
 - [ ] TTS is silent when the SFX toggle is off; on devices with no speech voice the game plays fully visually with no error
 - [ ] 6 rounds complete the game; sticker awarded on first completion
 - [ ] Returns to Hub after completion (auto-return ~3s)
@@ -249,9 +264,10 @@ pnpm exec serve dist -l 3000
 #### Game 10: Build the Word (Spelling)
 - [ ] Game loads correctly
 - [ ] A picture prompt (~180px) appears top-center and the word is **spoken aloud** (device TTS voice present)
-- [ ] One empty slot (120px) per letter of the word plus 6 letter tiles (~110px) are visible
+- [ ] One empty slot (120px) per letter of the word plus 6 letter tiles (~132px, above the 64px floor at phone scale) are visible
 - [ ] Letter tiles include the word's letters plus 2–3 distractor letters not in the word
-- [ ] Tapping the correct letter settles it into the next empty slot (left-to-right) with a soft tick; the tile locks in
+- [ ] Tapping the correct letter flies it into the next empty slot (left-to-right) with a soft tick; the tile dims into a ghost (v1.7.0)
+- [ ] Duplicate-letter words (BALL) keep the tile tappable for the second use — a fresh copy settles into the slot and the tile thunks instead of ghosting early
 - [ ] Tapping a wrong letter wiggles it gently with no penalty and no progression loss
 - [ ] A finished word plays the chime + Hoot cheer, lingers ~1.2s, then the next word appears (3 words per playthrough, easy-first)
 - [ ] TTS is silent when the SFX toggle is off; on devices with no speech voice the game plays fully visually with no error

@@ -105,3 +105,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Touch latency | < 16ms |
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
+
+## Changelog — v1.7.0 (2026-08-07)
+
+> **2026-08-07 — Gameplay Hardening:** Replay/session fixes for Animal Trace, Shape Sorter, Pattern Builder (fresh session state on every launch), Musical Memory (replay resets input), Pop & Freeze (bubbles bounce at the true edge — physics body matches the 96px bubble), speaker replay no longer crashes during the win celebration (Find the Letter, Find the Word, Build the Word, How Many?), and a double-navigation guard for Back-hold during auto-return. Gameplay depth: Animal Trace next-waypoint ring + visited-dot lighting; Musical Memory same-frog run cap (max 2) and faster notes for long sequences; Word Match easy-first ordering; correct-answer splashes in Word Match, Find the Letter, Pattern Builder; Word Builder fly-to-slot + ghost tiles (duplicate letters stay tappable) and 132px tiles for the phone touch floor; Pattern Builder 6 rounds; confusable-distractor guards in Alphabet and Pattern Builder; How Many distinct targets per band + centered partial rows; Big vs Small shuffled box sides. Consistency pass: Shadow Match drop zones 160px, reduced-motion-aware Word Builder effects, Baloo 2 back button in Shape Sorter, dead code removed. Released as v1.7.0.

@@ -76,16 +76,19 @@ export function generateWordRound(target: FirstWord): WordRound {
   return { target: target.word, choices: shuffle([target.word, ...distractors]) };
 }
 
-/** Generates a playthrough of rounds (6 by default), each with a unique target word. */
+/**
+ * Generates a Find the Word playthrough of rounds (6 by default), each with a
+ * unique target word, ordered easy-first like the builder: 3-letter words
+ * lead, 4-letter words follow, random within each tier, no repeats. With the
+ * default 6 rounds this yields five 3-letter rounds then one 4-letter round.
+ */
 export function generateWordPlaythrough(roundCount = 6): WordRound[] {
-  return shuffle(WORD_POOL)
+  const tier3 = shuffle(WORD_POOL.filter((entry) => entry.tier === 3));
+  const tier4 = shuffle(WORD_POOL.filter((entry) => entry.tier === 4));
+  const earlyCount = Math.min(tier3.length, Math.max(0, roundCount - 1));
+  return [...tier3.slice(0, earlyCount), ...tier4.slice(0, roundCount - earlyCount)]
     .slice(0, roundCount)
     .map((target) => generateWordRound(target));
-}
-
-/** Returns whether the tapped word is the round's target. */
-export function isCorrectWord(round: WordRound, word: string): boolean {
-  return round.target === word;
 }
 
 /**
