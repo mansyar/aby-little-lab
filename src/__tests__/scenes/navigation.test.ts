@@ -340,6 +340,7 @@ import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
+import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { GAME_TILES, HubScene } from "../../scenes/HubScene";
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
@@ -371,6 +372,7 @@ const GAME_SCENES = [
   { name: "PatternBuilderScene", SceneClass: PatternBuilderScene },
   { name: "AlphabetScene", SceneClass: AlphabetScene },
   { name: "HowManyScene", SceneClass: HowManyScene },
+  { name: "FirstSoundsScene", SceneClass: FirstSoundsScene },
 ] as const;
 
 const GAME_SCENE_KEYS = [
@@ -385,6 +387,7 @@ const GAME_SCENE_KEYS = [
   "WordMatch",
   "WordBuilder",
   "HowMany",
+  "FirstSounds",
 ] as const;
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -856,7 +859,7 @@ describe("scene navigation flow", () => {
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(142);
+      expect(svgCalls).toHaveLength(144);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -985,7 +988,7 @@ describe("scene navigation flow", () => {
       scene.create();
 
       const icons = getTileIcons(scene);
-      expect(icons).toHaveLength(11);
+      expect(icons).toHaveLength(12);
       expect(new Set(icons.map((i) => i.key))).toEqual(
         new Set([
           "tile_shape_sorter",
@@ -999,6 +1002,7 @@ describe("scene navigation flow", () => {
           "tile_word_match",
           "tile_word_builder",
           "tile_how_many",
+          "tile_first_sounds",
         ]),
       );
       // Icons render at their per-tile display size (>=64px default; the four
@@ -1021,7 +1025,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      expect(hasSticker).toHaveBeenCalledTimes(11);
+      expect(hasSticker).toHaveBeenCalledTimes(12);
     });
 
     it("navigates to each game scene when respective tile is clicked", async () => {
@@ -1122,8 +1126,8 @@ describe("scene navigation flow", () => {
 
       expect(getActiveProfile().id).toBe("p1");
       expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
-      // Shelf re-rendered: 10 more sticker lookups after the initial 10.
-      expect(hasSticker).toHaveBeenCalledTimes(22);
+      // Shelf re-rendered: 12 more sticker lookups after the initial 12.
+      expect(hasSticker).toHaveBeenCalledTimes(24);
       // Chip re-textured to the newly active profile.
       expect(getMockFn(chip.setTexture)).toHaveBeenCalledWith("animal_cat");
     });
@@ -1147,7 +1151,7 @@ describe("scene navigation flow", () => {
 
       expect(getActiveProfile().id).toBe("p2");
       expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
-      expect(hasSticker).toHaveBeenCalledTimes(11);
+      expect(hasSticker).toHaveBeenCalledTimes(12);
     });
 
     it("renders the sticker shelf for the active profile only", () => {
@@ -1164,8 +1168,8 @@ describe("scene navigation flow", () => {
       switchProfile("p1");
       scene.rerenderStickerShelf();
 
-      expect(hasSticker.mock.results[11]?.value).toBe(true);
-      expect(hasSticker.mock.calls).toHaveLength(22);
+      expect(hasSticker.mock.results[12]?.value).toBe(true);
+      expect(hasSticker.mock.calls).toHaveLength(24);
     });
   });
 
@@ -1649,10 +1653,10 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      // Fresh profile: nothing earned -> 11 dashed outlines, no ghost thumbnails.
+      // Fresh profile: nothing earned -> 12 dashed outlines, no ghost thumbnails.
       expect(getStickerImages(scene)).toHaveLength(0);
       const slots = getEmptySlots(scene);
-      expect(slots).toHaveLength(11);
+      expect(slots).toHaveLength(12);
       for (const slot of slots) {
         expect(getMockFn(slot.setInteractive)).not.toHaveBeenCalled();
         expect(getMockFn(slot.arc).mock.calls.length).toBeGreaterThanOrEqual(5);
@@ -1777,7 +1781,7 @@ describe("scene navigation flow", () => {
       const oldStickerImages = getStickerImages(scene);
       expect(oldStickerImages).toHaveLength(1);
       const oldSlots = getEmptySlots(scene);
-      expect(oldSlots).toHaveLength(10);
+      expect(oldSlots).toHaveLength(11);
 
       // The real panel calls resetProgress() before notifying the Hub; mirror it.
       resetProgress();
@@ -1795,7 +1799,7 @@ describe("scene navigation flow", () => {
       const liveSlots = getEmptySlots(scene).filter(
         (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(liveSlots).toHaveLength(11);
+      expect(liveSlots).toHaveLength(12);
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       for (const obj of liveSlots) {
         const targetsSticker = (call: { targets?: unknown }): boolean => {
@@ -6675,7 +6679,7 @@ describe("scene navigation flow", () => {
       const firstVisit = getStickerImages(scene);
       expect(firstVisit).toHaveLength(1);
       const firstVisitSlots = getEmptySlots(scene);
-      expect(firstVisitSlots).toHaveLength(10);
+      expect(firstVisitSlots).toHaveLength(11);
 
       // Leave the Hub (shutdown clears the tracked shelf) and return: create()
       // re-runs on every visit via scene.start.
@@ -6705,12 +6709,12 @@ describe("scene navigation flow", () => {
       for (const { obj } of firstVisit) {
         expect(getMockFn(obj.destroy)).not.toHaveBeenCalled();
       }
-      // The reset cleared everything: the re-rendered shelf holds 11 fresh
+      // The reset cleared everything: the re-rendered shelf holds 12 fresh
       // empty slots (the stale first-visit objects still exist, untouched).
       const fresh = getEmptySlots(scene).filter(
         (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(fresh).toHaveLength(11);
+      expect(fresh).toHaveLength(12);
     });
   });
 
