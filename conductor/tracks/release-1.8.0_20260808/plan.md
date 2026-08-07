@@ -20,11 +20,11 @@
 
 ## Phase 2 — Release Branch & Version Bump
 
-- [ ] Task 2.1: Create release branch `git checkout -b release/v1.8.0` from master
-- [ ] Task 2.2: Bump version `npm version 1.8.0 --no-git-tag-version`
-  - [ ] Verify `package.json` version = 1.8.0
-  - [ ] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts defines it from pkg.version)
-- [ ] Task 2.3: Commit: `chore(release): Bump version to 1.8.0`
+- [x] Task 2.1: Create release branch `git checkout -b release/v1.8.0` from master — created from origin/master @ 873594e (PR #16 merge)
+- [x] Task 2.2: Bump version `npm version 1.8.0 --no-git-tag-version`
+  - [x] Verify `package.json` version = 1.8.0 — confirmed (only file changed; no lockfile churn)
+  - [x] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts defines it from pkg.version) — vite.config.ts:10 `__APP_VERSION__: JSON.stringify(pkg.version)`
+- [x] Task 2.3: Commit: `chore(release): Bump version to 1.8.0` (6654582)
 - [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Release Documentation
