@@ -195,14 +195,20 @@ describe("generateWordPlaythrough", () => {
     }
   });
 
-  it("draws targets uniformly from the full pool across many playthroughs", () => {
-    const seen = new Set<string>();
-    for (let i = 0; i < 50; i++) {
+  it("draws targets uniformly within each tier across many playthroughs", () => {
+    // FR-9c orders playthroughs easy-first (5 tier-3 + 1 tier-4 at default 6),
+    // so uniformity holds within each tier, not across the full pool.
+    const seen3 = new Set<string>();
+    const seen4 = new Set<string>();
+    for (let i = 0; i < 200; i++) {
       for (const round of generateWordPlaythrough()) {
-        seen.add(round.target);
+        const tier = getWord(round.target)?.tier ?? 0;
+        if (tier === 3) seen3.add(round.target);
+        else if (tier === 4) seen4.add(round.target);
       }
     }
-    expect(seen).toEqual(new Set(WORD_POOL.map((entry) => entry.word)));
+    expect(seen3).toEqual(new Set(WORD_POOL.filter((e) => e.tier === 3).map((e) => e.word)));
+    expect(seen4).toEqual(new Set(WORD_POOL.filter((e) => e.tier === 4).map((e) => e.word)));
   });
 
   it("is deterministic under a fixed random sequence", () => {
@@ -216,9 +222,7 @@ describe("generateWordPlaythrough", () => {
 
   it("orders 3-letter targets before 4-letter targets (easy first)", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
-      const tiers = generateWordPlaythrough().map(
-        (round) => getWord(round.target)?.tier ?? 0,
-      );
+      const tiers = generateWordPlaythrough().map((round) => getWord(round.target)?.tier ?? 0);
       // Mirrors the builder: 5 easy rounds lead, the final round is harder.
       expect(tiers.filter((tier) => tier === 3)).toHaveLength(5);
       expect(tiers.filter((tier) => tier === 4)).toHaveLength(1);

@@ -171,6 +171,8 @@ export class PatternBuilderScene extends Phaser.Scene {
     });
     attachPressFeedback(backButton);
 
+    // Reset per-session state so a relaunch starts with fresh progress dots.
+    this.progressDots.length = 0;
     this.createProgressDots();
 
     this.rounds = generatePlaythrough(ROUND_COUNT);
