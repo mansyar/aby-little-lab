@@ -18,21 +18,21 @@
 - [ ] Task 1.4: Merge PR to master; confirm master now contains all Game 12 code (`git ls-tree -r master --name-only | grep -i firstsounds` non-empty)
 - [ ] Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Release Branch & Version Bump
+## Phase 2 — Release Branch & Version Bump [checkpoint: c024437]
 
-- [ ] Task 2.1: Create release branch `git checkout -b release/v1.8.0` from master
-- [ ] Task 2.2: Bump version `npm version 1.8.0 --no-git-tag-version`
-  - [ ] Verify `package.json` version = 1.8.0
-  - [ ] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts defines it from pkg.version)
-- [ ] Task 2.3: Commit: `chore(release): Bump version to 1.8.0`
+- [x] Task 2.1: Create release branch `git checkout -b release/v1.8.0` from master — created from origin/master @ 873594e (PR #16 merge)
+- [x] Task 2.2: Bump version `npm version 1.8.0 --no-git-tag-version`
+  - [x] Verify `package.json` version = 1.8.0 — confirmed (only file changed; no lockfile churn)
+  - [x] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts defines it from pkg.version) — vite.config.ts:10 `__APP_VERSION__: JSON.stringify(pkg.version)`
+- [x] Task 2.3: Commit: `chore(release): Bump version to 1.8.0` (6654582)
 - [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Release Documentation
+## Phase 3 — Release Documentation [checkpoint: 758796b]
 
-- [ ] Task 3.1: Draft `docs/release-notes-v1.8.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 12 — written as DRAFT (FINAL in Phase 7)
-- [ ] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.8.0 record at top (newest-first): targeted Game 12 rows (6 phonics rounds, 4-letter choices with confusion guards, speaker replay 96px guard, TTS speakLetter/speakWord, sticker award, 3s win auto-return, 12-tile hub) + carried rows; result pending (Phase 6)
-- [ ] Task 3.3: Verify knowledge docs synced by the Game 12 track (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`) — patch only real gaps
-- [ ] Task 3.4: Commit: `docs(release): Prepare v1.8.0 release notes and device checklist`
+- [x] Task 3.1: Draft `docs/release-notes-v1.8.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 12 — written as DRAFT (FINAL in Phase 7)
+- [x] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.8.0 record at top (newest-first): targeted Game 12 rows (6 rounds, 4 letter cards with confusion guards, speaker replay 96px guard, TTS speakLetter/speakWord, sticker award, 3s win auto-return, 12-tile hub, SFX-off, reduced-motion) + carried v1.7.0 rows; result pending (Phase 6)
+- [x] Task 3.3: Verify knowledge docs synced by the Game 12 track (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`) — all present (PRD ×2, TDD ×5, product/tech-stack/README referenced); no gaps to patch
+- [x] Task 3.4: Commit: `docs(release): Prepare v1.8.0 release notes and device checklist` (5cab3b7)
 - [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Release Branch Gates + Tag + PR

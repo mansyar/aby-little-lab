@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.8.0 (2026-08-08)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.8.0 — Game 12 First Sounds)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** Carried v1.7.0 rows — Animal Trace relaunch freshness + waypoint ring, Shape Sorter relaunch progress dots, Pattern Builder 6 rounds + splash, Word Match easy-first 3-letter words, Find the Letter splash, Word Builder ghost tiles + duplicate letters (BALL) + ~132px tiles, Musical Memory max-2-in-a-row + 480ms notes + replay input reset, Pop & Freeze bounce at the visible edge, speaker guarded during the win celebration (all speech games), Big vs Small swapped sides, How Many distinct counts + centered partial rows, Back-hold during auto-return never double-navigates, sticker persistence after close/reopen, play-time limits spot check. v1.8.0 rows — Hub shows 12 tiles in a 5×3 grid (row 3: 2 tiles left-aligned, no clipping, tile_first_sounds icon distinct); First Sounds starts with a spoken word prompt on the first tap of a fresh load (iOS TTS gesture unlock); 6 rounds per play; each round shows exactly 4 letter cards with the target word spoken; correct letter tap → chime + letter pulse + spoken letter name + spoken word + progress dot; wrong letter tap → gentle bounce with no penalty and no progression loss; confusion guards hold in every round (no B/P or D/T pair together; no visually confusable family mix [C/G/O/Q, I/L/T, M/W] together); speaker replay button (~96px hit area) re-speaks the prompt and never crashes during the 3s win celebration; win after round 6 → confetti + rays + sticker (first completion only) + 3s auto-return with just-earned highlight; replay shows sticker already earned; parental hold-3s Back exits to Hub; SFX-off silences speech and SFX with visual-only play; reduced-motion respected
+- **Result:** pending — executed during the v1.8.0 release track (Phase 6, 2026-08-08)
+- **Issues found:** pending
+
 ## Execution Record — v1.7.0 (2026-08-07)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.7.0 — replay/session bug fixes, gameplay depth, consistency pass)
