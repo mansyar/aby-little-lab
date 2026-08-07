@@ -5221,12 +5221,12 @@ describe("scene navigation flow", () => {
       }
     }
 
-    it("creates 5 progress dots, 3 filled slots, 1 gap marker, and 3 answer cards", () => {
+    it("creates 6 progress dots, 3 filled slots, 1 gap marker, and 3 answer cards", () => {
       const scene = new PatternBuilderScene();
       scene.create();
 
       const dots = getProgressDots(scene);
-      expect(dots).toHaveLength(5);
+      expect(dots).toHaveLength(6);
 
       const cards = getCardRects(scene);
       expect(cards).toHaveLength(3);
@@ -5333,13 +5333,13 @@ describe("scene navigation flow", () => {
       expect((wiggleTween[0] as { yoyo: boolean }).yoyo).toBe(true);
     });
 
-    it("completing all 5 rounds triggers win, first-time sticker award, and auto-return", () => {
+    it("completing all 6 rounds triggers win, first-time sticker award, and auto-return", () => {
       vi.mocked(hasSticker).mockReturnValue(false);
 
       const scene = new PatternBuilderScene();
       scene.create();
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
 
@@ -5375,7 +5375,7 @@ describe("scene navigation flow", () => {
       const scene = new PatternBuilderScene();
       scene.create();
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
 
@@ -5398,7 +5398,7 @@ describe("scene navigation flow", () => {
       const scene = new PatternBuilderScene();
       scene.create();
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
       expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);

@@ -144,8 +144,8 @@ describe("generatePlaythrough", () => {
     }
   });
 
-  it("defaults to 5 rounds", () => {
-    expect(generatePlaythrough()).toHaveLength(5);
+  it("defaults to 6 rounds, matching the other mini-games", () => {
+    expect(generatePlaythrough()).toHaveLength(6);
   });
 
   it("produces different rounds under different random sequences", () => {

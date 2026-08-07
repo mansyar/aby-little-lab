@@ -26,7 +26,7 @@ const SHAPE_TEXTURES: Record<ShapeType, string> = {
 };
 
 /** Number of rounds per playthrough. */
-const ROUND_COUNT = 5;
+const ROUND_COUNT = 6;
 
 /** Display size for slot shapes (exceeds 64px minimum, meets 96px ideal). */
 const SLOT_SIZE = 120;

@@ -55,8 +55,8 @@ export function generateRound(): PatternRound {
   return { patternType, row, gapIndex, choices };
 }
 
-/** Generates a full playthrough of rounds (5 by default), each independently randomized. */
-export function generatePlaythrough(roundCount = 5): PatternRound[] {
+/** Generates a full playthrough of rounds (6 by default, matching the other games). */
+export function generatePlaythrough(roundCount = 6): PatternRound[] {
   return Array.from({ length: roundCount }, () => generateRound());
 }
 
