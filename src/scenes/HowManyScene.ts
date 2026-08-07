@@ -189,6 +189,7 @@ export class HowManyScene extends Phaser.Scene {
       {
         onSpeak: () => {
           const round = this.rounds[this.roundIndex];
+          if (!round) return; // Celebration after the final round — nothing to speak.
           speakNumber(round.target, load().settings.sfxEnabled);
         },
       },

@@ -172,6 +172,7 @@ export class WordBuilderScene extends Phaser.Scene {
       {
         onSpeak: () => {
           const word = this.words[this.wordIndex];
+          if (!word) return; // Celebration after the final word — nothing to speak.
           speakWord(word.word, load().settings.sfxEnabled);
         },
       },

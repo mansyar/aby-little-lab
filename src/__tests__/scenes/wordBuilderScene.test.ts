@@ -687,6 +687,33 @@ describe("WordBuilderScene completion", () => {
     });
   });
 
+  /** Returns the speaker button image created with the icon_speaker texture. */
+  function getSpeakerImage(scene: unknown): Record<string, MockFn> {
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const index = imageMock.mock.calls.findIndex((call) => call[2] === "icon_speaker");
+    return imageMock.mock.results[index].value as Record<string, MockFn>;
+  }
+
+  it("guards the speaker during the win celebration (no crash after the final word)", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    for (let i = 0; i < 3; i++) {
+      fillWord(scene);
+      fireWordLinger(scene);
+    }
+    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+
+    // Tapping "hear it again" during the 3s celebration must not dereference
+    // words[wordIndex] past the end of the array.
+    const speakerImage = getSpeakerImage(scene);
+    const pointerdown = getMockFn(speakerImage.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdown).toBeDefined();
+    if (pointerdown && typeof pointerdown[1] === "function") {
+      expect(() => (pointerdown[1] as () => void)()).not.toThrow();
+    }
+  });
+
   it("does not re-award the sticker or pass justEarned on repeat completions", () => {
     earnSticker("word-builder");
     const scene = new WordBuilderScene();
