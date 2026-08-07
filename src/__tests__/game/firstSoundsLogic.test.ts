@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isConfusableWith, type Letter } from "../../game/alphabetLogic";
-import { getWord, WORD_POOL } from "../../game/wordLogic";
 import {
   firstLetterOf,
   generatePhonicsPlaythrough,
@@ -9,6 +8,7 @@ import {
   PHONICS_POOL,
   type PhonicsRound,
 } from "../../game/firstSoundsLogic";
+import { getWord, WORD_POOL } from "../../game/wordLogic";
 
 afterEach(() => {
   vi.restoreAllMocks();

@@ -55,9 +55,7 @@ const SOUND_CONFUSABLE_PAIRS: ReadonlyArray<readonly [Letter, Letter]> = [
 
 /** True when `letter` and `other` belong to a sound-confusable pair. */
 function isSoundConfusableWith(letter: Letter, other: Letter): boolean {
-  return SOUND_CONFUSABLE_PAIRS.some(
-    (pair) => pair.includes(letter) && pair.includes(other),
-  );
+  return SOUND_CONFUSABLE_PAIRS.some((pair) => pair.includes(letter) && pair.includes(other));
 }
 
 /** Returns the uppercase initial letter of a word, e.g. "CAT" → "C". */
