@@ -49,14 +49,22 @@
 
 ## Phase 5 — Merge, Deploy & Verify
 
-- [ ] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`)
-- [ ] Task 5.2: Verify deployment
-  - [ ] CI run on master green (Quality Gates + Deploy to Coolify)
-  - [ ] Live `https://aby-little-lab.ansyar-world.top/` serves `index-*.js` hash matching local `dist/`
-  - [ ] `/sw.js` + `/manifest.webmanifest` return 200
-  - [ ] Settings footer shows v1.8.0
-- [ ] Task 5.3: Live smoke test: boot → hub (12 tiles, row 3 has 2 left-aligned) → First Sounds (6 rounds, 4 letter cards, correct → pulse + speakLetter + speakWord, incorrect → bounce no penalty, win → sticker_first_sounds → 3s auto-return) → sticker badge; settings (profiles, play-time limits) intact
-- [ ] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.8.0 row: CI run ID, hash match, version footer, SW/manifest)
+- [x] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`)
+  - [x] Merged via `gh pr merge 17 --merge` — master 873594e..719dae1 (merge commit 'Merge pull request #17 from mansyar/release/v1.8.0')
+  - [x] Master CI run 31193529605: Quality Gates PASS 2m9s (job 92916042170); Deploy to Coolify PASS 7s (job 92916646422) — webhook triggered
+- [x] Task 5.2: Verify deployment
+  - [x] CI run on master green (Quality Gates + Deploy to Coolify)
+  - [x] Live `https://aby-little-lab.ansyar-world.top/` serves `index-*.js` hash matching local `dist/` — live went to `assets/index-Ch7rE_Md.js` at 01:40:57 (polled; transiently served previous `index-DZXUyNHv.js` from the PR #16 merge deploy until Coolify rollout finished)
+  - [x] `/sw.js` + `/manifest.webmanifest` return 200
+  - [x] Settings footer shows v1.8.0 (verified via playwright hold-3s → Settings panel → `v1.8.0` under title)
+- [x] Task 5.3: Live smoke test: boot → hub (12 tiles, row 3 has 2 left-aligned) → First Sounds (6 rounds, 4 letter cards, correct → pulse + speakLetter + speakWord, incorrect → bounce no penalty, win → sticker_first_sounds → 3s auto-return) → sticker badge; settings (profiles, play-time limits) intact
+  - [x] Hub: 12 tiles 5×3, row 3 = How Many? + First Sounds left-aligned; no clipping (screenshot-verified)
+  - [x] First Sounds round 1: 4 letter cards, 6 progress dots, word picture + speaker button; correct tap (O for OWL) → round advanced (OWL→TREE), dot 1/6 filled; wrong taps → gentle bounce, no progression loss (blind 4-card sweeps advance exactly 1 round each)
+  - [x] Full 6-round completion → `first-sounds.earned=true` in localStorage (earnedAt 15:45:55Z) → 3s auto-return to hub → sticker badge rendered on tile (filled vs dashed elsewhere)
+  - [x] Replay: fresh session (0/6 dots on re-entry), completion does NOT re-award (earnedAt unchanged)
+  - [x] Settings: parental hold-3s opens panel (backdrop dim verified by pixel sampling); version footer `v1.8.0`; BGM/SFX rows present; zero console errors/warnings during the whole session
+  - [x] Observation (non-blocking, tested/intended): distractor sets are guarded against the TARGET only (e.g., round B·P·O·H for OWL is legal) — B/P may co-occur as distractors; no product impact for 3–5yo
+- [x] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.8.0 row: CI run ID, hash match, version footer, SW/manifest)
 - [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6 — Targeted Device Testing
