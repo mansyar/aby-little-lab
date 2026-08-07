@@ -5,14 +5,14 @@
 
 ## Phase 1 — Feature Merge & Baseline Validation
 
-- [ ] Task 1.1: Confirm `feat/game-12` clean working tree; `git log -1` verifies HEAD = Game 12 archive commit (5b12c29)
-  - [ ] `git status --short` shows no changes
-  - [ ] `git log -1` confirms expected HEAD
-- [ ] Task 1.2: Run full quality gates on `feat/game-12` (CI order)
-  - [ ] `pnpm run check` — Biome clean
-  - [ ] `CI=true pnpm test` — 1024/1024 passing (41 files)
-  - [ ] `pnpm run build` — OK (record main chunk hash + precache entries + KiB)
-  - [ ] `node scripts/validate-pwa.js` — all passed
+- [x] Task 1.1: Confirm `feat/game-12` clean working tree; `git log -1` verifies HEAD = Game 12 archive commit (5b12c29)
+  - [x] `git status --short` shows no changes
+  - [x] `git log -1` confirms expected HEAD — HEAD = ac0da92 (in-progress marker; stacked on 9314092 track init, above archive 5b12c29)
+- [x] Task 1.2: Run full quality gates on `feat/game-12` (CI order)
+  - [x] `pnpm run check` — Biome clean (96 files, 400ms)
+  - [x] `CI=true pnpm test` — 1065/1065 passing (43 files, 64.53s) — includes firstSoundsLogic (19) + firstSoundsScene (15)
+  - [x] `pnpm run build` — OK (main chunk index-DZXUyNHv.js, 1503.58 KiB / gzip 382.05, FirstSoundsScene-BRPiBd0Z.js lazy chunk, 28 precache entries / 1533.95 KiB)
+  - [x] `node scripts/validate-pwa.js` — 13/13 passed
 - [ ] Task 1.3: Push `feat/game-12`; open PR → `master` (body = Game 12 summary)
   - [ ] Confirm CI "Quality Gates" check passes on the PR (merge-blocking)
 - [ ] Task 1.4: Merge PR to master; confirm master now contains all Game 12 code (`git ls-tree -r master --name-only | grep -i firstsounds` non-empty)
