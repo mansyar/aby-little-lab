@@ -78,7 +78,7 @@
   - [ ] Write failing logic tests: playthrough targets ordered 3-letter before 4-letter
   - [ ] Implement tier ordering in `wordLogic.generateWordPlaythrough` (mirror builder)
   - [ ] Commit: `feat(word-match): Order easy words first`
-- [ ] Task 4.4: FR-9d — Correct-answer splashes (Word Match, Find the Letter, Pattern Builder)
+- [x] Task 4.4: FR-9d — Correct-answer splashes (Word Match, Find the Letter, Pattern Builder) [commit: 2362ab0]
   - [ ] Add `createCompletionSplash` at tapped card (WordMatch), target letter (Alphabet), gap (PatternBuilder) on correct answers
   - [ ] Extend scene tests to assert splash emission
   - [ ] Commit: `feat(scenes): Add correct-answer splash to WordMatch, Alphabet, PatternBuilder`
