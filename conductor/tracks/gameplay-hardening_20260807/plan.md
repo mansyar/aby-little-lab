@@ -5,36 +5,36 @@
 
 ## Phase 1 — Critical Session & Replay Bug Fixes
 
-- [ ] Task 1.1: FR-1 — Animal Trace session state reset
-  - [ ] Write failing relaunch tests (may scaffold minimal scene-test harness): full-session relaunch → 1 path does NOT complete the round; mid-session exit → relaunch → all 3 paths required
-  - [ ] Confirm tests fail (Red phase)
-  - [ ] Reset `currentPairIndex`, `completedPaths`, and `progressDots` in `AnimalTraceScene.create()`
-  - [ ] Confirm tests pass (Green phase)
-  - [ ] Commit: `fix(animal-trace): Reset session state on scene relaunch`
-- [ ] Task 1.2: FR-2 — Shape Sorter progress-dot reset
-  - [ ] Write failing relaunch test: relaunch → complete a round → dot fills (destroy stale dots + reset array in `create()`)
-  - [ ] Confirm tests fail (Red phase)
-  - [ ] Clear `progressDots` array in `ShapeSorterScene.create()`
-  - [ ] Confirm tests pass (Green phase)
-  - [ ] Commit: `fix(shape-sorter): Reset progress dots on scene relaunch`
-- [ ] Task 1.3: FR-3 — Speaker crash guard (Alphabet, HowMany, WordMatch, WordBuilder)
-  - [ ] Write failing tests per scene: tap speaker during 3s win celebration → no throw
-  - [ ] Confirm tests fail (Red phase)
-  - [ ] Guard `onSpeak`: `if (!round) return;` in `AlphabetScene.ts`, `HowManyScene.ts`, `WordMatchScene.ts`, `WordBuilderScene.ts`
-  - [ ] Confirm tests pass (Green phase)
-  - [ ] Commit: `fix(speech-games): Guard speaker replay against post-final-round crash`
-- [ ] Task 1.4: FR-4 — Musical Memory replay resets input position
-  - [ ] Write failing test: 2 correct taps → replay → tap first note → judged correct (round progresses)
-  - [ ] Confirm tests fail (Red phase)
-  - [ ] Reset `inputIndex = 0` in `MusicalMemoryScene.handleReplay()`
-  - [ ] Confirm tests pass (Green phase)
-  - [ ] Commit: `fix(musical-memory): Reset input position on sequence replay`
-- [ ] Task 1.5: FR-5 — Pop & Freeze physics body matches display
-  - [ ] Write failing tests: spawned bubble body size ≈ 96px display; poppable-vs-sleeping tap routing unchanged
-  - [ ] Confirm tests fail (Red phase)
-  - [ ] `setCircle(BUBBLE_DISPLAY_SIZE / 2)` on physics bubble spawn in `PopFreezeScene.ts`
-  - [ ] Confirm tests pass (Green phase); visually verify bounce-at-edge behavior
-  - [ ] Commit: `fix(pop-freeze): Size bubble physics body to display`
+- [x] Task 1.1: FR-1 — Animal Trace session state reset [commit: bb26636]
+  - [x] Write failing relaunch tests (may scaffold minimal scene-test harness): full-session relaunch → 1 path does NOT complete the round; mid-session exit → relaunch → all 3 paths required
+  - [x] Confirm tests fail (Red phase)
+  - [x] Reset `currentPairIndex`, `completedPaths`, and `progressDots` in `AnimalTraceScene.create()`
+  - [x] Confirm tests pass (Green phase)
+  - [x] Commit: `fix(animal-trace): Reset session state on scene relaunch`
+- [x] Task 1.2: FR-2 — Shape Sorter progress-dot reset [commit: d726065]
+  - [x] Write failing relaunch test: relaunch → complete a round → dot fills (destroy stale dots + reset array in `create()`)
+  - [x] Confirm tests fail (Red phase)
+  - [x] Clear `progressDots` array in `ShapeSorterScene.create()`
+  - [x] Confirm tests pass (Green phase)
+  - [x] Commit: `fix(shape-sorter): Reset progress dots on scene relaunch`
+- [x] Task 1.3: FR-3 — Speaker crash guard (Alphabet, HowMany, WordMatch, WordBuilder) [commit: 68451d0]
+  - [x] Write failing tests per scene: tap speaker during 3s win celebration → no throw
+  - [x] Confirm tests fail (Red phase)
+  - [x] Guard `onSpeak`: `if (!round) return;` in `AlphabetScene.ts`, `HowManyScene.ts`, `WordMatchScene.ts`, `WordBuilderScene.ts`
+  - [x] Confirm tests pass (Green phase)
+  - [x] Commit: `fix(speech-games): Guard speaker replay during win celebration`
+- [x] Task 1.4: FR-4 — Musical Memory replay resets input position [commit: 8a4d3b9]
+  - [x] Write failing test: 2 correct taps → replay → tap first note → judged correct (round progresses)
+  - [x] Confirm tests fail (Red phase)
+  - [x] Reset `inputIndex = 0` in `MusicalMemoryScene.handleReplay()`
+  - [x] Confirm tests pass (Green phase)
+  - [x] Commit: `fix(musical-memory): Reset input progress when sequence is replayed`
+- [x] Task 1.5: FR-5 — Pop & Freeze physics body matches display [commit: 550a53d]
+  - [x] Write failing tests: spawned bubble body size ≈ 96px display; poppable-vs-sleeping tap routing unchanged
+  - [x] Confirm tests fail (Red phase)
+  - [x] `setCircle(BUBBLE_DISPLAY_SIZE / 2)` on physics bubble spawn in `PopFreezeScene.ts`
+  - [x] Confirm tests pass (Green phase); visually verify bounce-at-edge behavior
+  - [x] Commit: `fix(pop-freeze): Size bubble physics body to display`
 - [ ] Task 1.6: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Auto-Return Transition Guard
