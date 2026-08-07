@@ -4485,6 +4485,43 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(2);
     });
 
+    it("replay resets input progress so the child can restart from the first note", () => {
+      // Sequence [0, 1] (green, blue): distinct adjacent notes expose the
+      // stale-inputIndex bug — without the reset, a replay followed by the
+      // first-note tap would be judged against the SECOND note and fail.
+      vi.spyOn(Math, "random")
+        .mockReturnValueOnce(0.0)
+        .mockReturnValueOnce(0.5)
+        .mockReturnValue(0.5);
+
+      const scene = new MusicalMemoryScene();
+      scene.create();
+      fireAllDelayedCalls(scene); // initial playback done, input unlocked
+
+      const frogs = getFrogs(scene);
+      clearAudioMocks();
+
+      // Child taps the first note correctly (inputIndex 0 -> 1)
+      tapFrog(frogs, 0);
+      expect((scene as { inputIndex: number }).inputIndex).toBe(1);
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+
+      // Child asks to hear the sequence again mid-round…
+      const delayedCallsBefore = getMockFn(scene.time.delayedCall).mock.calls.length;
+      tapReplayButton(scene);
+      fireDelayedCallsFrom(scene, delayedCallsBefore);
+
+      // …and the replay restarts input at the first note.
+      expect((scene as { inputIndex: number }).inputIndex).toBe(0);
+
+      // Tapping the FIRST note again must be judged correct, not measured
+      // against the stale second-note position.
+      clearAudioMocks();
+      tapFrog(frogs, 0);
+      expect((scene as { inputIndex: number }).inputIndex).toBe(1);
+      expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
+    });
+
     it("input is locked during replay and unlocked after replay completes", () => {
       const scene = new MusicalMemoryScene();
       scene.create();

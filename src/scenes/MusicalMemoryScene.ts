@@ -399,6 +399,8 @@ export class MusicalMemoryScene extends Phaser.Scene {
   /** Handles a tap on the replay button: re-plays the current sequence. */
   private handleReplay(): void {
     if (this.inputLocked) return;
+    // A re-listen restarts the pattern, so input must start at the first note.
+    this.inputIndex = 0;
     this.playSequence();
   }
 }
