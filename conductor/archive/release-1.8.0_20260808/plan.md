@@ -76,13 +76,18 @@
 - [x] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
   - [x] No issues found — nothing to triage (no Critical/High/Medium/Low)
 - [x] Task 6.3: Commit results: `docs(device): Record v1.8.0 device testing results`
-- [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+  - [x] Checkpoint commit `8299e64` (empty) + git notes verification report; phase heading marker; commit `9ace4e7`
 
 ## Phase 7 — Finalize & Archive
 
-- [ ] Task 7.1: Final gates on master if any post-merge changes occurred
-- [ ] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete; update `docs/release-checklist.md` Final Sign-Off block (version, test count, release manager)
-- [ ] Task 7.3: Archive track folder to `conductor/archive/release-1.8.0_20260808/` (via git mv)
-  - [ ] Registry: mark entry `[x]` with archive link + (Archived) — dominant convention
+- [x] Task 7.1: Final gates on master if any post-merge changes occurred
+  - [x] All 4 gates on release/v1.8.0 (final state): Biome clean 96 files 894ms; CI=true pnpm test 1065/1065 (43 files); build `index-Ch7rE_Md.js` 1,503.58 KiB / gzip 382.06, 28 precache entries 1533.95 KiB — hash IDENTICAL to live deployment (deterministic build confirms deployed source = current tree); validate-pwa 13/13
+- [x] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete; update `docs/release-checklist.md` Final Sign-Off block (version, test count, release manager)
+  - [x] release-notes-v1.8.0.md → FINAL (released 2026-08-08, live smoke + device testing passed, no issues)
+  - [x] release-checklist.md Final Sign-Off — v1.8.0 block (Ansyar, 2026-08-08, 1065/1065 tests, all approvals checked)
+- [x] Task 7.3: Archive track folder to `conductor/archive/release-1.8.0_20260808/` (via git mv)
+  - [x] `git mv conductor/tracks/release-1.8.0_20260808 conductor/archive/release-1.8.0_20260808` — index.md, metadata.json, plan.md, spec.md moved
+  - [x] Registry: entry `[x]` with archive link `./archive/release-1.8.0_20260808/index.md` + (Archived) — dominant convention
 - [ ] Task 7.4: Commit: `chore(conductor): Archive track 'v1.8.0 Release Execution'`
 - [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
