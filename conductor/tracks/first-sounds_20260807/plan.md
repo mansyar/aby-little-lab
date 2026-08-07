@@ -4,7 +4,7 @@
 
 ## Phase 1 — Pure Game Logic (TDD)
 
-- [ ] Task: Write failing tests for `src/game/firstSoundsLogic.ts` (Red phase): `PHONICS_POOL` (12 curated words, 9 distinct initial letters), playthrough generation (6 rounds, 6 unique target letters, shuffled, no repeats), round generation (4 unique letter choices, target included), sound-confusion guard (B/P and D/T never co-occur), visual-family guard (reuse alphabetLogic confusable-family helper; verify its exported name), `firstLetterOf` mapping
+- [x] Task: Write failing tests for `src/game/firstSoundsLogic.ts` (Red phase): `PHONICS_POOL` (12 curated words, 9 distinct initial letters), playthrough generation (6 rounds, 6 unique target letters, shuffled, no repeats), round generation (4 unique letter choices, target included), sound-confusion guard (B/P and D/T never co-occur), visual-family guard (reuse alphabetLogic confusable-family helper; verify its exported name), `firstLetterOf` mapping *(4f8fd44)*
 - [ ] Task: Implement `src/game/firstSoundsLogic.ts` pure functions to pass (Green phase): `PHONICS_POOL`, `PHONICS_LETTERS`, `generatePhonicsPlaythrough(roundCount = 6)`, `generatePhonicsRound(target)`, `firstLetterOf(word)`
 - [ ] Task: Verify coverage for `firstSoundsLogic.ts` (project runs ~98%; threshold >80%)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
