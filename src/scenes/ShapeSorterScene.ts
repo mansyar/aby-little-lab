@@ -138,6 +138,7 @@ export class ShapeSorterScene extends Phaser.Scene {
 
     this.playthrough = generatePlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
+    this.progressDots = [];
     this.createProgressDots();
     this.initRound();
 
