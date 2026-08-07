@@ -15,7 +15,7 @@
 - [x] Task: Create `src/assets/svg/stickers/sticker_first_sounds.svg` (letter + sound wave on cream badge, matching sticker family) *(247f61c)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Scene Implementation
+## Phase 3 — Scene Implementation [checkpoint: cf602eb]
 
 - [x] Task: Write scene tests following `wordMatchScene.test.ts` / `alphabetScene.test.ts` style: round setup (picture + spoken word + 4 letter cards), correct tap → advance + `speakLetter` feedback, incorrect tap → gentle bounce + no penalty + retry, speaker replay button (96×96 hit area, guard when `rounds[roundIndex]` undefined), TTS called on round start, win flow → `{ justEarned: "first-sounds" }` + sticker, 3s auto-return, parental-lock exit, input-lock reset on relaunch, reduced-motion paths *(6366f8a — pulled forward from Phase 4: GameId union + GAME_IDS registration required by the scene)*
 - [x] Task: Implement `FirstSoundsScene.ts` (scene key `FirstSounds`): prompt picture (~256px, pop-in), speaker replay, 4 letter cards with pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, `transitionToScene` idempotency, double-navigation guard *(3616410 — prompt 180px per WordMatch pattern, not 256px; pressFeedback applied to Back button per shared pattern)*
