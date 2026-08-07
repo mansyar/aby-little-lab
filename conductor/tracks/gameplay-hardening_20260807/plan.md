@@ -82,7 +82,7 @@
   - [ ] Add `createCompletionSplash` at tapped card (WordMatch), target letter (Alphabet), gap (PatternBuilder) on correct answers
   - [ ] Extend scene tests to assert splash emission
   - [ ] Commit: `feat(scenes): Add correct-answer splash to WordMatch, Alphabet, PatternBuilder`
-- [ ] Task 4.5: FR-9e — Word Builder used-tile fly-to-slot
+- [x] Task 4.5: FR-9e — Word Builder used-tile fly-to-slot [commit: 1b04a38]
   - [ ] Write failing scene tests: placed tile animates into slot; ghost placeholder remains; duplicate letters re-tappable
   - [ ] Implement fly-to-slot + placeholder in `WordBuilderScene`
   - [ ] Commit: `feat(word-builder): Animate used tiles into their slots`
