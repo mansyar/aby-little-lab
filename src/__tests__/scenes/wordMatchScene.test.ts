@@ -815,6 +815,23 @@ describe("WordMatchScene completion", () => {
     }
   });
 
+  it("shows a splash burst at the tapped card on a correct answer", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+
+    const round = getCurrentRound(scene);
+    const correctIndex = round.choices.indexOf(round.target);
+    tapCard(scene, correctIndex);
+
+    // The correct-answer splash is the first graphics drawn after the tap
+    // (the mascot cheer may add its own sparkle graphics afterwards).
+    const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+    expect(graphicsMock.mock.results.length).toBeGreaterThan(0);
+    const graphics = graphicsMock.mock.results[0].value as Record<string, MockFn>;
+    expect(getMockFn(graphics.lineStyle)).toHaveBeenCalled();
+    expect(getMockFn(graphics.fillCircle)).toHaveBeenCalled();
+  });
+
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("word-match");
     const scene = new WordMatchScene();

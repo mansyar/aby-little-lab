@@ -4,7 +4,7 @@ import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { SpeakerButton } from "../components/SpeakerButton";
 import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
-import { createWinCelebration } from "../utils/completionEffect";
+import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
@@ -271,19 +271,24 @@ export class AlphabetScene extends Phaser.Scene {
     if (this.inputLocked) return;
     const round = this.rounds[this.roundIndex];
     if (round.choices[choiceIndex] === round.target) {
-      this.handleCorrect();
+      this.handleCorrect(choiceIndex);
     } else {
       this.handleIncorrect(choiceIndex);
     }
   }
 
   /**
-   * Handles a correct answer: the correct chime plays, Professor Hoot cheers,
-   * the progress dot fills with a pop, and the next round starts after a
-   * short delay (completion after the final round).
+   * Handles a correct answer: a splash bursts at the tapped card, the correct
+   * chime plays, Professor Hoot cheers, the progress dot fills with a pop,
+   * and the next round starts after a short delay (completion after the
+   * final round).
    */
-  private handleCorrect(): void {
+  private handleCorrect(choiceIndex: number): void {
     this.inputLocked = true;
+    const card = this.cardRects[choiceIndex];
+    if (card) {
+      createCompletionSplash(this, card.x, card.y);
+    }
     this.audioManager.playCorrect();
     this.mascot?.cheer();
     this.fillProgressDot();
