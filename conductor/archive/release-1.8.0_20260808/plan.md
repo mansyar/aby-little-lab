@@ -92,3 +92,7 @@
 - [x] Task 7.4: Commit: `chore(conductor): Archive track 'v1.8.0 Release Execution'`
   - [x] Commits: `cc0507d` docs(release): Finalize v1.8.0 release notes (FINAL) and sign-off; `fbb515b` chore(conductor): Archive track 'v1.8.0 Release Execution' (tracks.md registry [x] + archive link, plan 7.3 markers)
 - [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions (2 Low findings: stale 'pending' wording in release-checklist Step 7j; release-notes wording on confusable pairs) `61dba1a`
