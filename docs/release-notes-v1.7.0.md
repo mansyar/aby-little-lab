@@ -1,6 +1,6 @@
 # Release Notes — v1.7.0
 
-> **Status:** DRAFT — prepared for the v1.7.0 release. Final status and device-testing results are recorded here after release.
+> **Status:** FINAL — released 2026-08-07 via the automated pipeline (Quality Gates → Coolify deploy). Live smoke testing + device testing passed on iPad, Android tablet, iPhone, and Android phone against the live URL — no issues found.
 
 ## What's New
 

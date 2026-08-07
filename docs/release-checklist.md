@@ -258,6 +258,16 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Live smoke test (headless browser) — boot → hub → Shape Sorter: round 1 (star/oval/teardrop) → dot 1, round 2 (rectangle/heart/crescent) → dot 2, round 3 (diamond/pentagon/square) → dot 3 → win → sticker badge on tile → auto-return to hub; Settings opens via 3s parental hold with footer `v1.6.0`, BGM/SFX toggles, Profiles, Reset Progress intact
 - [x] Device testing on v1.6.0 — **executed 2026-08-06 on iPad, Android tablet, iPhone, Android phone against the live URL — all items passed, no issues** (18-shape 3-round Shape Sorter, speaker replay, TTS first-tap unlock, polished-asset visual pass, Settings readability, PWA update path from v1.5.0)
 
+### Step 7i: Verify Deployment — v1.7.0 (2026-08-07)
+- [x] Release branch `release/v1.7.0` + PR #15 merged to `master` (merge commit `ec20d2d`; CI Quality Gates green on PR — 1m38s, Deploy skipped on PR as designed)
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `31160729484`** (Quality Gates 1m49s ✓, Deploy to Coolify 6s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated
+- [x] App loads correctly on the live URL — 200; serves release build (`index-duuf5J_o.js` matches fresh 1.7.0 local build exactly — SHA-256 identical)
+- [x] Version footer data — `1.7.0` embedded in served bundle; no stale `1.6.0` string
+- [x] Service worker + manifest served — `sw.js` 200 (precaches `index-duuf5J_o.js` + current v1.7.0 chunks), `manifest.webmanifest` 200
+- [x] Live smoke test — boot → Hub renders; user manual smoke session on the live URL: all v1.7.0 targeted checks passed (replay/session fixes in Animal Trace, Shape Sorter, Pattern Builder; Musical Memory replay reset + run cap; Pop & Freeze edge bounce; speaker during win celebration; double-navigation guard; gameplay depth items)
+- [x] Device testing on v1.7.0 — recorded in `docs/device-testing-checklist.md` (v1.7.0 execution record)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
@@ -482,4 +492,21 @@ Please report issues at [GitHub Issues URL]
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — automated gates passed; device metrics verified 2026-08-06 (device checklist all sections passed)
+- [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.7.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-07
+**Version:** 1.7.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); live smoke testing completed 2026-08-07 against the live URL (replay/session fixes, gameplay depth, speaker guards, double-navigation guard)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (1024/1024)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed; device metrics verified 2026-08-07 (device checklist all sections passed)
 - [x] Ready for release
