@@ -86,7 +86,7 @@
   - [ ] Write failing scene tests: placed tile animates into slot; ghost placeholder remains; duplicate letters re-tappable
   - [ ] Implement fly-to-slot + placeholder in `WordBuilderScene`
   - [ ] Commit: `feat(word-builder): Animate used tiles into their slots`
-- [ ] Task 4.6: FR-9f — Word Builder phone-safe tile size
+- [x] Task 4.6: FR-9f — Word Builder phone-safe tile size [commit: 3099f1b]
   - [ ] Determine `TILE_SIZE` raising so tiles ≥64px at phone FIT scale (~0.49); adjust layout constants
   - [ ] Update/extend scene tests asserting tile dimensions at design resolution
   - [ ] Commit: `feat(word-builder): Raise tile size for phone touch floor`
