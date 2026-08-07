@@ -49,8 +49,11 @@ const SLOT_GAP = 20;
 /** Y offset of the letter tile row from screen center. */
 const TILE_Y_OFFSET = 220;
 
-/** Side length of each letter tile (px). */
-const TILE_SIZE = 110;
+/**
+ * Side length of each letter tile (px). Kept at 132 so tiles stay above the
+ * 64px touch floor on small phones (FIT scale ~0.49 → 64.7px on screen).
+ */
+const TILE_SIZE = 132;
 
 /** Gap between letter tiles (px). */
 const TILE_GAP = 16;

@@ -264,22 +264,6 @@ function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
 }
 
-/** Card row y positions derived from the layout constants (centerY 384). */
-const CARD_ROW_YS = [384 + 110, 384 + 270];
-
-/** Returns the 4 card rectangles (created at the two card rows). */
-function getCardRects(scene: unknown): Array<Record<string, MockFn>> {
-  const s = scene as { add: Record<string, unknown> };
-  const rectangleMock = getMockFn(s.add.rectangle);
-  const cards: Array<Record<string, MockFn>> = [];
-  for (let i = 0; i < rectangleMock.mock.calls.length; i++) {
-    if (CARD_ROW_YS.includes(rectangleMock.mock.calls[i][1] as number)) {
-      cards.push(rectangleMock.mock.results[i].value as Record<string, MockFn>);
-    }
-  }
-  return cards;
-}
-
 /** Returns the mascot image object (created with the mascot_idle texture). */
 function getMascotImage(scene: unknown): Record<string, MockFn> {
   const s = scene as { add: Record<string, unknown> };
@@ -521,6 +505,27 @@ describe("WordBuilderScene interaction", () => {
     // Tapping the ghost again does not fill another slot.
     tapTile(scene, correctIndex);
     expect(getSlotImages(scene)).toHaveLength(0);
+  });
+
+  it("sizes letter tiles to stay above the 64px touch floor at phone scale", () => {
+    const scene = new WordBuilderScene();
+    scene.create();
+
+    // At the smallest supported phone (FIT scale ~0.49) a 110px tile renders
+    // at ~54px — below the 64px touch floor. The tile side must be at least
+    // 64 / 0.49 = ~131px in the 1024px base canvas.
+    const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
+    const tileCalls = rectangleMock.mock.calls.filter((call) => call[1] === TILE_Y);
+    expect(tileCalls.length).toBeGreaterThan(0);
+    for (const call of tileCalls) {
+      const width = call[2] as number;
+      const height = call[3] as number;
+      expect(width).toBeGreaterThanOrEqual(131);
+      expect(height).toBeGreaterThanOrEqual(131);
+    }
+    // The whole six-tile row must still fit the 1024px base canvas.
+    const rowWidth = tileCalls.length * (tileCalls[0][2] as number) + (tileCalls.length - 1) * 16;
+    expect(rowWidth).toBeLessThanOrEqual(1024);
   });
 
   it("keeps a duplicate-letter tile tappable until its second use", () => {
