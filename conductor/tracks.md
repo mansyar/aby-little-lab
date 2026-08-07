@@ -68,7 +68,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Gameplay Hardening — Replay & Session Bug Fixes + Gameplay Depth** *Link: [./tracks/gameplay-hardening_20260807/index.md](./tracks/gameplay-hardening_20260807/index.md)*
+- [x] **Track: Gameplay Hardening — Replay & Session Bug Fixes + Gameplay Depth** *Link: [./archive/gameplay-hardening_20260807/index.md](./archive/gameplay-hardening_20260807/index.md)* (Archived)
 
 ---
 
