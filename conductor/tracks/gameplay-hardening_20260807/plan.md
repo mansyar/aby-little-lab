@@ -118,7 +118,7 @@
   - [x] Cover: round flow, correct snap (tween → destroy → splice → delayed call), wrong wiggle, `inputLocked` reset on relaunch, sticker gating, parent-lock exit, reduced-motion wiggle
 - [x] Task 5.4: Full suite + coverage gate green
 - [x] Task 5.5: Commit: `test(scenes): Add AnimalTrace, PopFreeze, PatternBuilder scene suites`
-- [ ] Task 5.6: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 5.6: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: fd201cd]
 
 ## Phase 6 — Pre-Release Baseline Validation
 
