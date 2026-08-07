@@ -21,7 +21,7 @@
 - [x] Task: Implement `FirstSoundsScene.ts` (scene key `FirstSounds`): prompt picture (~256px, pop-in), speaker replay, 4 letter cards with pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, `transitionToScene` idempotency, double-navigation guard *(3616410 — prompt 180px per WordMatch pattern, not 256px; pressFeedback applied to Back button per shared pattern)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4 — Integration
+## Phase 4 — Integration [checkpoint: 5878aa5]
 
 - [x] Task: Add `"first-sounds"` to `GameId` union (`src/types/index.ts`) + sticker key mapping; verify `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(6366f8a — done early in Phase 3; storage.ts merges `createDefaultStickers()` over saved profiles on load, so old saves get the new sticker entry)*
 - [x] Task: Register `FirstSounds` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(c123905 + 7c7ebc7)*
