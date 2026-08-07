@@ -49,17 +49,17 @@
 
 ## Phase 3 — Cross-Cutting Consistency & Dead Code
 
-- [ ] Task 3.1: Consistency deltas
-  - [ ] Shadow Match `DROP_ZONE_SIZE` 120 → 160 (update any size-dependent tests)
-  - [ ] Word Builder settle-pop via `motionDuration`/`motionScale` (reduced-motion aware)
-  - [ ] Word Builder dot-pop tween `scale:` → `scaleX/scaleY` (align with all siblings)
-  - [ ] Shape Sorter back button uses `textStyle()` (Baloo 2)
-  - [ ] Commit: `style(scenes): Align drop zone, settle-pop motion, dot tween, back-button font`
-- [ ] Task 3.2: Dead code removal
-  - [ ] Verify `Curves.Path` (AnimalTrace) and `slotRects` (WordBuilder) are unused including by tests
-  - [ ] Remove `selectThreeShapes` (shapeSorterLogic), `baseScale` (BigSmall), `isCorrectWord` (wordLogic), `isCorrectLetter` + `hasCompletedPlaythrough` (alphabetLogic), `isPlaythroughComplete` (countLogic) and their tests-only usages
-  - [ ] Full suite green after removal
-  - [ ] Commit: `refactor(game): Remove test-only dead exports`
+- [x] Task 3.1: Consistency deltas [commit: 9f47af7] (combined with 3.2 in one commit)
+  - [x] Shadow Match `DROP_ZONE_SIZE` 120 → 160 (update any size-dependent tests)
+  - [x] Word Builder settle-pop via `motionDuration`/`motionScale` (reduced-motion aware)
+  - [x] Word Builder dot-pop tween `scale:` → `scaleX/scaleY` (align with all siblings)
+  - [x] Shape Sorter back button uses `textStyle()` (Baloo 2)
+  - [x] Commit: `style(scenes): Align drop zone, settle-pop motion, dot tween, back-button font`
+- [x] Task 3.2: Dead code removal [commit: 9f47af7]
+  - [x] Verify `Curves.Path` (AnimalTrace) and `slotRects` (WordBuilder) are unused including by tests
+  - [x] Remove `selectThreeShapes` (shapeSorterLogic), `baseScale` (BigSmall), `isCorrectWord` (wordLogic), `isCorrectLetter` + `hasCompletedPlaythrough` (alphabetLogic), `isPlaythroughComplete` (countLogic) and their tests-only usages
+  - [x] Full suite green after removal
+  - [x] Commit: `refactor(game): Remove test-only dead exports`
 - [ ] Task 3.3: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Gameplay Depth (FR-9)
