@@ -27,7 +27,7 @@
 - [x] Task 2.3: Commit: `chore(release): Bump version to 1.8.0` (6654582)
 - [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Release Documentation
+## Phase 3 — Release Documentation [checkpoint: 758796b]
 
 - [x] Task 3.1: Draft `docs/release-notes-v1.8.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 12 — written as DRAFT (FINAL in Phase 7)
 - [x] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.8.0 record at top (newest-first): targeted Game 12 rows (6 rounds, 4 letter cards with confusion guards, speaker replay 96px guard, TTS speakLetter/speakWord, sticker award, 3s win auto-return, 12-tile hub, SFX-off, reduced-motion) + carried v1.7.0 rows; result pending (Phase 6)
