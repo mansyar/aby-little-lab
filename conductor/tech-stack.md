@@ -53,7 +53,7 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 12 scenes (Boot, Preload, Hub, 10 game scenes)
+- **Scenes:** 13 scenes (Boot, Preload, Hub, 12 game scenes)
 
 > **2026-08-02 — Design Update (Bundle Code Splitting):** Game scenes are lazy-loaded via runtime registration. `src/scenes/sceneRegistry.ts` maps each game scene key to a dynamic-import loader and exposes `ensureSceneLoaded(scene, key)` (no-op if already registered, else `import()` + `scene.add(key, SceneClass)`); HubScene awaits it before transitioning into a game. Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the `scene` array — functions there are invoked with `new` (constructor form only, no promise handling in `SceneManager`). Shell scenes (Boot/Preload/Hub) remain statically registered in `main.ts`. Rollup hoists shared modules into shared chunks automatically; no `manualChunks` config.
 - **Input:** Touch-first, single-finger interactions
@@ -129,6 +129,8 @@ interface AppStorage {
 
 > **2026-08-06 — Design Update (TTS & Speaker Button Fix):** Fixed two audio bugs. (1) The speaker replay button (and Hub avatar chip, profile-picker avatars, Settings Add-Profile avatars) used custom hit areas in texture-local coordinates that missed the visible icon on 512px rasterized textures — `setInteractive()` now uses the frame-based default hit area; regression coverage via `src/__tests__/helpers/hitTest.ts` (engine-accurate tap simulation). (2) iOS/WebKit silently drops `speechSynthesis.speak()` until an utterance is dispatched inside a user gesture — `speech.ts` gained `unlockSpeechForUserGesture()`, called from the Hub's first tap/pointerdown alongside `AudioManager.resume()`. `speakText` also cancels only when the engine is speaking/pending and defers the replacement utterance 100ms, avoiding the cancel/speak race where WebKit/Chromium's async cancel wipes a synchronously queued utterance.
 
+> **2026-08-07 — Design Update (Game 12 — First Sounds):** Game 12 (First Sounds) added — early-literacy phonemic awareness: a pictured word is spoken aloud (rate 0.8, SFX-gated) and the child taps the letter card of its first sound; the correct letter is then spoken back (`speakLetter`). Word pool: curated 12-word subset of `WORD_POOL` (`CAT DOG PIG SUN HAT BUG OWL TREE STAR BALL FROG FISH`) with 9 distinct first letters (C D P O S H B F T), zero new object assets. Round logic: 3 distractor letters per round excluded by the sound-confusable pairs (B/P, D/T) and the Alphabet visual families ([C,G,O,Q], [I,L,T], [M,W] — `isConfusableWith` now exported from `src/game/alphabetLogic.ts`); 6 unique target letters per playthrough drawn uniformly from the 9. Pure logic in `src/game/firstSoundsLogic.ts` (pool derivation from `WORD_POOL`, round/playthrough generation). New assets: `tile_first_sounds.svg` + `sticker_first_sounds.svg` (letter "A" + `#68D391` sound-wave arcs in the two-pass stroked style). Preload SVG count 142 → 144. `GameId` includes `first-sounds`; `GAME_IDS` in `profileLogic.ts` covers the new sticker key for old saves; scene registry has 12 lazy loaders; Hub grid stays 5×3 with row 3 holding 2 tiles (How Many?, First Sounds — left-aligned per fill logic). Scene: `FirstSoundsScene` (AlphabetScene card-row layout with WordMatch prompt pattern; 180px prompt, 160px cards, 128px letters, speaker guard during celebration).
+
 ### Audio Assets
 - **Location:** `public/audio/` — Vite serves `public/` at root, so files are accessible at `/audio/<file>`
 - **BGM:** Single MP3 loop (`bgm.mp3`) served at `/audio/bgm.mp3`
@@ -174,7 +176,9 @@ aby-little-lab/
     │   ├── PatternBuilderScene.ts
     │   ├── AlphabetScene.ts
     │   ├── WordMatchScene.ts
-    │   └── WordBuilderScene.ts
+    │   ├── WordBuilderScene.ts
+    │   ├── HowManyScene.ts
+    │   └── FirstSoundsScene.ts
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   ├── ParentLock.ts
@@ -190,7 +194,9 @@ aby-little-lab/
     │   ├── bigSmallLogic.ts       # Pure game logic (dual-scale toys, size match detection)
     │   ├── patternBuilderLogic.ts # Pure game logic (pattern rows, gap placement, choices)
     │   ├── alphabetLogic.ts       # Pure game logic (letter playthroughs, round choices, win detection)
-    │   └── wordLogic.ts           # Pure game logic (word pool, round/builder generation, win detection)
+    │   ├── wordLogic.ts           # Pure game logic (word pool, round/builder generation, win detection)
+    │   ├── countLogic.ts          # Pure game logic (counting bands, group cards, win detection)
+    │   └── firstSoundsLogic.ts    # Pure game logic (phonics pool, first-letter rounds, win detection)
     ├── utils/
     │   ├── storage.ts             # localStorage persistence layer
     │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
