@@ -110,14 +110,14 @@
 
 ## Phase 5 — Missing Scene Test Suites
 
-- [ ] Task 5.1: `src/__tests__/scenes/animalTraceScene.test.ts`
-  - [ ] Cover: pointer down/move/up wiring, proximity advancement, hop tween, pair-complete → next pair, round win → sticker/auto-return, relaunch resets (FR-1), reduced-motion
-- [ ] Task 5.2: `src/__tests__/scenes/popFreezeScene.test.ts`
-  - [ ] Cover: spawn wiring, tap routing (pop vs wake), pop → respawn invariant (5 concurrent), round-complete lock, droplet emission, win/sticker/auto-return, reduced-motion breathe skip, body-size assertion (FR-5)
-- [ ] Task 5.3: `src/__tests__/scenes/patternBuilderScene.test.ts`
-  - [ ] Cover: round flow, correct snap (tween → destroy → splice → delayed call), wrong wiggle, `inputLocked` reset on relaunch, sticker gating, parent-lock exit, reduced-motion wiggle
-- [ ] Task 5.4: Full suite + coverage gate green
-- [ ] Task 5.5: Commit: `test(scenes): Add AnimalTrace, PopFreeze, PatternBuilder scene suites`
+- [x] Task 5.1: `src/__tests__/scenes/animalTraceScene.test.ts` (created in Phase 1, 7 tests)
+  - [x] Cover: pointer down/move/up wiring, proximity advancement, hop tween, pair-complete → next pair, round win → sticker/auto-return, relaunch resets (FR-1), reduced-motion
+- [x] Task 5.2: `src/__tests__/scenes/popFreezeScene.test.ts`
+  - [x] Cover: spawn wiring, tap routing (pop vs wake), pop → respawn invariant (5 concurrent), round-complete lock, droplet emission, win/sticker/auto-return, reduced-motion breathe skip, body-size assertion (FR-5)
+- [x] Task 5.3: `src/__tests__/scenes/patternBuilderScene.test.ts`
+  - [x] Cover: round flow, correct snap (tween → destroy → splice → delayed call), wrong wiggle, `inputLocked` reset on relaunch, sticker gating, parent-lock exit, reduced-motion wiggle
+- [x] Task 5.4: Full suite + coverage gate green
+- [x] Task 5.5: Commit: `test(scenes): Add AnimalTrace, PopFreeze, PatternBuilder scene suites`
 - [ ] Task 5.6: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6 — Pre-Release Baseline Validation
