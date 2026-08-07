@@ -47,7 +47,7 @@
   - [x] Confirm CI "Quality Gates" passes on the PR (merge-blocking) — PASS 1m31s (run 31193021189); Deploy to Coolify correctly skipped (master-only); PR #17 https://github.com/mansyar/aby-little-lab/pull/17
 - [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5 — Merge, Deploy & Verify
+## Phase 5 — Merge, Deploy & Verify [checkpoint: 93df247]
 
 - [x] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`)
   - [x] Merged via `gh pr merge 17 --merge` — master 873594e..719dae1 (merge commit 'Merge pull request #17 from mansyar/release/v1.8.0')
