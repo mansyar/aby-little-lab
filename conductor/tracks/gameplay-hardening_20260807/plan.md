@@ -102,7 +102,7 @@
   - [ ] Implement distinct-target draw in `countLogic.createPlaythrough`
   - [ ] Center the last grid row in `HowManyScene.createCardItems` (scene test update)
   - [ ] Commit: `feat(how-many): Distinct targets per band and centered grid rows`
-- [ ] Task 4.10: FR-9j — Big Small box-side shuffle
+- [x] Task 4.10: FR-9j — Big Small box-side shuffle [commit: 7d481f9]
   - [ ] Write failing logic tests: box-side assignment rotates across calls; each play has exactly one big + one small box
   - [ ] Implement shuffle in `bigSmallLogic.createBoxes` (scene renders from returned order)
   - [ ] Commit: `feat(big-small): Shuffle big/small box sides per play`
