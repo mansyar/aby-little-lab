@@ -1,6 +1,6 @@
 # Release Notes — v1.8.0
 
-> **Status:** DRAFT — in preparation for the 2026-08-08 release via the automated pipeline (Quality Gates → Coolify deploy). This section is finalized after live verification and device testing.
+> **Status:** FINAL — released 2026-08-08 via the automated pipeline (Quality Gates → Coolify deploy). Live smoke testing + device testing passed on iPad, Android tablet, iPhone, and Android phone against the live URL — no issues found.
 
 ## What's New
 
