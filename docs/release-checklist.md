@@ -520,3 +520,18 @@ Please report issues at [GitHub Issues URL]
 - [x] Security review passed
 - [x] Performance targets met — automated gates passed; device metrics verified 2026-08-07 (device checklist all sections passed)
 - [x] Ready for release
+
+## Final Sign-Off — v1.8.0
+
+**Release Manager:** Ansyar (mansyar)
+**Date:** 2026-08-08
+**Version:** 1.8.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify); live smoke testing + device testing completed 2026-08-08 against the live URL (Game 12 First Sounds end-to-end, hub layout, sticker award + replay, parental lock, version footer v1.8.0)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (1065/1065)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed; device metrics verified 2026-08-08 (device checklist v1.8.0 record all items passed on all 4 device classes)
+- [x] Ready for release
