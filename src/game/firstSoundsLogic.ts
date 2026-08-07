@@ -60,6 +60,7 @@ function isSoundConfusableWith(letter: Letter, other: Letter): boolean {
 
 /** Returns the uppercase initial letter of a word, e.g. "CAT" → "C". */
 export function firstLetterOf(word: string): Letter {
+  // The phonics pool is curated uppercase words; assert is safe by construction.
   return word[0] as Letter;
 }
 
