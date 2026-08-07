@@ -462,6 +462,44 @@ describe("HowManyScene round flow", () => {
     expect(getProgressDots(scene)).toHaveLength(6);
   });
 
+  it("centers the last partial row of items inside a card", () => {
+    const scene = new HowManyScene();
+    scene.create();
+
+    // Force a band-3-style group of 10 items: rows of 4 + 4 + 2. The final
+    // row of 2 must sit centered under the card, not pushed to the left.
+    const s = scene as unknown as {
+      rounds: Array<{ target: number; groups: Array<{ count: number; texture: string }> }>;
+      roundIndex: number;
+      renderRound: () => void;
+    };
+    s.rounds = [{ target: 10, groups: [{ count: 10, texture: "shape_star" }] }];
+    s.roundIndex = 0;
+    s.renderRound();
+
+    // Single group → the card sits at centerX - CARD_SPACING_X/2 on the top
+    // row: x 392, y 419 (centerY 384 + CARDS_Y_OFFSET 140 - 105).
+    const cardX = 512 - 120;
+    const cardY = 384 + 140 - 105;
+    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const numeralCall = imageMock.mock.calls.findIndex((call) => call[2] === "numeral_10");
+    expect(numeralCall).toBeGreaterThanOrEqual(0);
+    if (numeralCall < 0) return;
+    const starCalls = imageMock.mock.calls
+      .slice(numeralCall + 1)
+      .filter((call) => call[2] === "shape_star");
+    expect(starCalls).toHaveLength(10);
+    // Last row sits at cardY - gridHeight/2 + 2 * (42 + 4) + 21 = cardY + 46
+    // (gridHeight = 3 * 42 + 2 * 4 = 134).
+    const row2 = starCalls.filter((call) => call[1] === cardY + 46);
+    expect(row2).toHaveLength(2);
+    const xs = row2.map((call) => call[0] as number).sort((a, b) => a - b);
+    // Centered: one slot either side of the card's midpoint (2 items x 42px
+    // + 4px gap = 88px row, so offsets of ±23 from the center).
+    expect(xs[0]).toBeCloseTo(cardX - 23, 5);
+    expect(xs[1]).toBeCloseTo(cardX + 23, 5);
+  });
+
   it("shows 4 group cards from band 2 onward", () => {
     const scene = new HowManyScene();
     scene.create();
