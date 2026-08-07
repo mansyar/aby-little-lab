@@ -68,7 +68,7 @@
 - [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
   - [x] Checkpoint commit `93df247` (empty) + git notes verification report; phase heading marker; commit `e97a9d3`; branch synced to origin
 
-## Phase 6 — Targeted Device Testing
+## Phase 6 — Targeted Device Testing [checkpoint: 8299e64]
 
 - [x] Task 6.1: Execute the v1.8.0 checklist record (iPad / Android tablet / iPhone / Android phone — targeted Game 12 rows + carried rows) against the live URL; record pass/issue per item
   - [x] Executed by user on all 4 device classes (iPad, Android tablet, iPhone, Android phone) against the live URL — 2026-08-08
