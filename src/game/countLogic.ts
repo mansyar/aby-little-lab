@@ -69,8 +69,3 @@ export function createPlaythrough(): CountRound[] {
 export function evaluateRound(round: CountRound, group: CountGroup): boolean {
   return group.count === round.target;
 }
-
-/** Returns whether the child has answered every round correctly. */
-export function isPlaythroughComplete(correctCount: number, totalRounds: number): boolean {
-  return correctCount >= totalRounds;
-}

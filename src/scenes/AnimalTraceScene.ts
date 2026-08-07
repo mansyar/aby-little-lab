@@ -98,7 +98,6 @@ const DOT_POP_REDUCED_DURATION = 150;
 interface PairState {
   pair: AnimalFoodPair;
   pathPoints: Array<{ x: number; y: number }>;
-  path: Phaser.Curves.Path;
   progress: PathProgress;
   animalSprite: Phaser.GameObjects.Image;
   foodSprite: Phaser.GameObjects.Image;
@@ -203,11 +202,6 @@ export class AnimalTraceScene extends Phaser.Scene {
     const pair = this.pairs[index];
     const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
 
-    const path = new Phaser.Curves.Path(pathPoints[0].x, pathPoints[0].y);
-    for (let i = 1; i < pathPoints.length; i++) {
-      path.lineTo(pathPoints[i].x, pathPoints[i].y);
-    }
-
     const animalSprite = this.add
       .image(ANIMAL_X, SPRITE_Y, `animal_${pair.animal}`)
       .setDisplaySize(SPRITE_SIZE, SPRITE_SIZE);
@@ -221,7 +215,6 @@ export class AnimalTraceScene extends Phaser.Scene {
     this.currentPair = {
       pair,
       pathPoints,
-      path,
       progress: createPathProgress(PATH_POINTS),
       animalSprite,
       foodSprite,

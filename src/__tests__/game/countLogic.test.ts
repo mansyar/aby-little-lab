@@ -6,7 +6,6 @@ import {
   createPlaythrough,
   createRound,
   evaluateRound,
-  isPlaythroughComplete,
   ROUND_BANDS,
 } from "../../game/countLogic";
 
@@ -184,14 +183,5 @@ describe("evaluateRound", () => {
         expect(evaluateRound(round, group)).toBe(false);
       }
     }
-  });
-});
-
-describe("isPlaythroughComplete", () => {
-  it("completes only once every round has been answered correctly", () => {
-    expect(isPlaythroughComplete(0, 6)).toBe(false);
-    expect(isPlaythroughComplete(5, 6)).toBe(false);
-    expect(isPlaythroughComplete(6, 6)).toBe(true);
-    expect(isPlaythroughComplete(7, 6)).toBe(true);
   });
 });

@@ -41,11 +41,6 @@ export const ALL_SHAPES: readonly ShapeType[] = [
   "teardrop",
 ];
 
-/** Randomly selects 3 of the 18 shape types for a round. */
-export function selectThreeShapes(): ShapeType[] {
-  return shuffle(ALL_SHAPES).slice(0, 3);
-}
-
 /**
  * Generates a playthrough of `roundCount` rounds, each containing 3 shapes,
  * drawn without repeats across the entire playthrough (unique shapes per session).

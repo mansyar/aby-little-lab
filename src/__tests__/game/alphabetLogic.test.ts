@@ -4,8 +4,6 @@ import {
   type AlphabetRound,
   generatePlaythrough,
   generateRound,
-  hasCompletedPlaythrough,
-  isCorrectLetter,
   type Letter,
 } from "../../game/alphabetLogic";
 
@@ -123,26 +121,5 @@ describe("generatePlaythrough", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = generatePlaythrough();
     expect(second).toEqual(first);
-  });
-});
-
-describe("isCorrectLetter", () => {
-  it("returns true only for the round's target", () => {
-    const round: AlphabetRound = { target: "A", choices: ["A", "B", "C", "D"] };
-    expect(isCorrectLetter(round, "A")).toBe(true);
-    expect(isCorrectLetter(round, "B")).toBe(false);
-    expect(isCorrectLetter(round, "D")).toBe(false);
-  });
-});
-
-describe("hasCompletedPlaythrough", () => {
-  it("returns true once all rounds are answered correctly", () => {
-    expect(hasCompletedPlaythrough(6, 6)).toBe(true);
-    expect(hasCompletedPlaythrough(7, 6)).toBe(true);
-  });
-
-  it("returns false before all rounds are answered correctly", () => {
-    expect(hasCompletedPlaythrough(0, 6)).toBe(false);
-    expect(hasCompletedPlaythrough(5, 6)).toBe(false);
   });
 });

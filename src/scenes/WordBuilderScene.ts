@@ -74,9 +74,11 @@ const WIGGLE_REPEATS = 3;
 
 /** Settle-pop scale for a letter locking into a slot. */
 const SLOT_POP_SCALE = 1.15;
+const SLOT_POP_REDUCED_SCALE = 1.05;
 
-/** Settle-pop tween duration (ms). */
+/** Settle-pop tween duration (ms), normal vs reduced motion. */
 const SLOT_POP_DURATION = 150;
+const SLOT_POP_REDUCED_DURATION = 90;
 
 /** How long a finished word lingers before the next word (ms). */
 const WORD_LINGER_DELAY = 1200;
@@ -113,7 +115,6 @@ export class WordBuilderScene extends Phaser.Scene {
   private speaker?: SpeakerButton;
   private readonly audioManager: AudioManager;
   private readonly progressDots: Phaser.GameObjects.Arc[] = [];
-  private readonly slotRects: Phaser.GameObjects.Rectangle[] = [];
   private readonly slotXs: number[] = [];
   private readonly tileRects: Phaser.GameObjects.Rectangle[] = [];
   private readonly tileLetterImages: Phaser.GameObjects.Image[] = [];
@@ -239,7 +240,6 @@ export class WordBuilderScene extends Phaser.Scene {
           1,
         )
         .setStrokeStyle(OUTLINE_WIDTH, 0x2d3748, 1);
-      this.slotRects.push(slot);
       this.slotXs.push(slotStartX + i * (SLOT_SIZE + SLOT_GAP));
       this.roundObjects.push(slot);
       this.slotImages.push(null);
@@ -278,7 +278,6 @@ export class WordBuilderScene extends Phaser.Scene {
       obj.destroy();
     }
     this.roundObjects.length = 0;
-    this.slotRects.length = 0;
     this.slotXs.length = 0;
     this.tileRects.length = 0;
     this.tileLetterImages.length = 0;
@@ -324,12 +323,15 @@ export class WordBuilderScene extends Phaser.Scene {
     // the slot — so the settle pop tweens displayWidth/displayHeight instead.
     const letterImage = this.add
       .image(slotX, slotY, `letter_${chosen.toLowerCase()}`)
-      .setDisplaySize(LETTER_SIZE * SLOT_POP_SCALE, LETTER_SIZE * SLOT_POP_SCALE);
+      .setDisplaySize(
+        LETTER_SIZE * motionScale(SLOT_POP_SCALE, SLOT_POP_REDUCED_SCALE),
+        LETTER_SIZE * motionScale(SLOT_POP_SCALE, SLOT_POP_REDUCED_SCALE),
+      );
     this.tweens.add({
       targets: letterImage,
       displayWidth: LETTER_SIZE,
       displayHeight: LETTER_SIZE,
-      duration: SLOT_POP_DURATION,
+      duration: motionDuration(SLOT_POP_DURATION, SLOT_POP_REDUCED_DURATION),
       ease: "Back.out",
     });
     this.slotImages[this.filledSlots] = letterImage;
@@ -360,7 +362,8 @@ export class WordBuilderScene extends Phaser.Scene {
     dot.setAlpha(1);
     this.tweens.add({
       targets: dot,
-      scale: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      scaleX: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
+      scaleY: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
       duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
       ease: "Back.out",
       yoyo: true,

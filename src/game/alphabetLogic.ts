@@ -79,13 +79,3 @@ export function generatePlaythrough(roundCount = 6): AlphabetRound[] {
     .slice(0, roundCount)
     .map((target) => generateRound(target));
 }
-
-/** Returns whether the tapped letter is the round's target. */
-export function isCorrectLetter(round: AlphabetRound, letter: Letter): boolean {
-  return round.target === letter;
-}
-
-/** Returns whether the child has answered every round of the playthrough correctly. */
-export function hasCompletedPlaythrough(correctCount: number, totalRounds: number): boolean {
-  return correctCount >= totalRounds;
-}

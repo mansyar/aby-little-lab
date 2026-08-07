@@ -83,11 +83,6 @@ export function generateWordPlaythrough(roundCount = 6): WordRound[] {
     .map((target) => generateWordRound(target));
 }
 
-/** Returns whether the tapped word is the round's target. */
-export function isCorrectWord(round: WordRound, word: string): boolean {
-  return round.target === word;
-}
-
 /**
  * Generates a Build the Word playthrough, easy-first: 3-letter words lead,
  * 4-letter words follow, random within each tier, no repeats. With the

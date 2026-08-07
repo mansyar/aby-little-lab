@@ -4,7 +4,6 @@ import {
   generateWordBuildPlaythrough,
   generateWordPlaythrough,
   generateWordRound,
-  isCorrectWord,
   WORD_POOL,
   type WordRound,
 } from "../../game/wordLogic";
@@ -212,15 +211,6 @@ describe("generateWordPlaythrough", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = generateWordPlaythrough();
     expect(second).toEqual(first);
-  });
-});
-
-describe("isCorrectWord", () => {
-  it("returns true only for the round's target", () => {
-    const round: WordRound = { target: "CAT", choices: ["CAT", "DOG", "PIG", "CAR"] };
-    expect(isCorrectWord(round, "CAT")).toBe(true);
-    expect(isCorrectWord(round, "DOG")).toBe(false);
-    expect(isCorrectWord(round, "CAR")).toBe(false);
   });
 });
 
