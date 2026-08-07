@@ -106,7 +106,7 @@
   - [ ] Write failing logic tests: box-side assignment rotates across calls; each play has exactly one big + one small box
   - [ ] Implement shuffle in `bigSmallLogic.createBoxes` (scene renders from returned order)
   - [ ] Commit: `feat(big-small): Shuffle big/small box sides per play`
-- [ ] Task 4.11: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 4.11: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 00a0b32]
 
 ## Phase 5 — Missing Scene Test Suites
 
