@@ -74,7 +74,7 @@
   - [ ] Implement cap in `musicalMemoryLogic.ts`
   - [ ] Note-delay scaling: 600 → 480ms at length ≥5 in `MusicalMemoryScene.playSequence` (update timing tests)
   - [ ] Commit: `feat(musical-memory): Cap same-frog runs and scale note delay`
-- [ ] Task 4.3: FR-9c — Word Match easy-first ordering
+- [x] Task 4.3: FR-9c — Word Match easy-first ordering [commit: 04c7c32]
   - [ ] Write failing logic tests: playthrough targets ordered 3-letter before 4-letter
   - [ ] Implement tier ordering in `wordLogic.generateWordPlaythrough` (mirror builder)
   - [ ] Commit: `feat(word-match): Order easy words first`
