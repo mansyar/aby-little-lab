@@ -23,7 +23,11 @@ function stubMatchMedia(matches: boolean): void {
 function createMockScene(): {
   cameras: { main: Record<string, ReturnType<typeof vi.fn>> };
   scene: { start: ReturnType<typeof vi.fn> };
-  events: { on: ReturnType<typeof vi.fn>; once: ReturnType<typeof vi.fn>; emit: ReturnType<typeof vi.fn> };
+  events: {
+    on: ReturnType<typeof vi.fn>;
+    once: ReturnType<typeof vi.fn>;
+    emit: ReturnType<typeof vi.fn>;
+  };
 } {
   const handlers: Record<string, Array<{ fn: () => void; once: boolean }>> = {};
   const events = {
