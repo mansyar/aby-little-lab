@@ -4,9 +4,9 @@
 
 ## Phase 1 — Pure Game Logic (TDD)
 
-- [ ] Task: Write failing tests for `src/game/moreLessLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band 1–3/1–5/1–10; exactly 3 "more" + 3 "less" shuffled; two distinct counts per round), item-type assignment & shuffle, answer evaluation, win detection
-- [ ] Task: Implement `src/game/moreLessLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` / `isPlaythroughComplete`
-- [ ] Task: Verify coverage for `moreLessLogic.ts` (>80%; project runs ~98%)
+- [x] Task: Write failing tests for `src/game/moreLessLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band 1–3/1–5/1–10; exactly 3 "more" + 3 "less" shuffled; two distinct counts per round), item-type assignment & shuffle, answer evaluation, win detection *(77880ef)*
+- [x] Task: Implement `src/game/moreLessLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` / `isPlaythroughComplete` *(77880ef)*
+- [x] Task: Verify coverage for `moreLessLogic.ts` (>80%; project runs ~98%) *(77880ef — 100% stmts/branch/funcs/lines; full suite 44 files/1079 tests green)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Assets & Prompt Audio
