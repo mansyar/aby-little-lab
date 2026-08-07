@@ -125,7 +125,7 @@
 - [ ] Task 6.1: Confirm clean working tree and master tip (`git status --short` empty; `git log -1` expected)
 - [ ] Task 6.2: Run full quality gates locally (CI order): `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`
 - [ ] Task 6.3: Capture baseline release metrics (test count, precache entries/size, main chunk hash) for release notes
-- [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 42492a2]
 
 ## Phase 7 — Release Branch, Version Bump & Docs
 
