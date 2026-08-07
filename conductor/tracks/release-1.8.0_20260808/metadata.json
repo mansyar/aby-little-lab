@@ -1,0 +1,10 @@
+{
+  "id": "release-1.8.0_20260808",
+  "title": "v1.8.0 Release Execution",
+  "type": "Chore",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "archivedAt": null,
+  "summary": "Ship Game 12 — First Sounds as v1.8.0: merge feat/game-12 to master (PR + quality gates), release/v1.8.0 branch + version bump, release notes, device-testing rows, annotated tag, PR to master, Coolify auto-deploy, deployment verification + live smoke, targeted Game 12 device testing, finalize + archive. Mirrors the v1.6.0/v1.7.0 release-track pattern."
+}

@@ -76,6 +76,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [ ] **Track: v1.8.0 Release Execution** *Link: [./tracks/release-1.8.0_20260808/index.md](./tracks/release-1.8.0_20260808/index.md)*
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
