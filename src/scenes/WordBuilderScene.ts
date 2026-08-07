@@ -80,6 +80,21 @@ const SLOT_POP_REDUCED_SCALE = 1.05;
 const SLOT_POP_DURATION = 150;
 const SLOT_POP_REDUCED_DURATION = 90;
 
+/** Fly-to-slot duration (ms) for a used tile's letter, normal vs reduced. */
+const TILE_FLY_DURATION = 300;
+const TILE_FLY_REDUCED_DURATION = 180;
+
+/** Ghost-placeholder alpha for a tile whose letter has been used up. */
+const TILE_GHOST_ALPHA = 0.25;
+
+/** Thunk scale for a duplicate-letter tile reused mid-word, normal vs reduced. */
+const TILE_THUNK_SCALE = 1.12;
+const TILE_THUNK_REDUCED_SCALE = 1.06;
+
+/** Thunk tween duration (ms), normal vs reduced motion. */
+const TILE_THUNK_DURATION = 120;
+const TILE_THUNK_REDUCED_DURATION = 80;
+
 /** How long a finished word lingers before the next word (ms). */
 const WORD_LINGER_DELAY = 1200;
 
@@ -313,29 +328,62 @@ export class WordBuilderScene extends Phaser.Scene {
       return;
     }
 
-    // Correct: soft tick + settle pop, then lock the letter into the slot.
+    // Correct: soft tick, then fly the tapped letter into the slot.
     this.audioManager.playPop();
     const slotX = this.slotXs[this.filledSlots];
     const slotY = this.cameras.main.centerY + SLOT_Y_OFFSET;
-    // Size the placed letter purely via display size. Calling setScale after
-    // setDisplaySize would overwrite the scale factor (80/512) with the pop
-    // scale and render the letter at the full 512px texture size, overflowing
-    // the slot — so the settle pop tweens displayWidth/displayHeight instead.
-    const letterImage = this.add
-      .image(slotX, slotY, `letter_${chosen.toLowerCase()}`)
-      .setDisplaySize(
-        LETTER_SIZE * motionScale(SLOT_POP_SCALE, SLOT_POP_REDUCED_SCALE),
-        LETTER_SIZE * motionScale(SLOT_POP_SCALE, SLOT_POP_REDUCED_SCALE),
-      );
-    this.tweens.add({
-      targets: letterImage,
-      displayWidth: LETTER_SIZE,
-      displayHeight: LETTER_SIZE,
-      duration: motionDuration(SLOT_POP_DURATION, SLOT_POP_REDUCED_DURATION),
-      ease: "Back.out",
-    });
-    this.slotImages[this.filledSlots] = letterImage;
-    this.roundObjects.push(letterImage);
+    const tileRect = this.tileRects[tileIndex];
+    const tileLetter = this.tileLetterImages[tileIndex];
+    // A letter that still appears later in the word (e.g. BALL's single L)
+    // needs its tile for a second tap: place a fresh copy with the settle pop
+    // and thunk the tile. Otherwise the tile's letter flies into the slot and
+    // the tile becomes a ghosted placeholder that no longer looks tappable.
+    const stillNeeded = word.word.slice(this.filledSlots + 1).includes(chosen);
+
+    if (stillNeeded) {
+      // Size the placed letter purely via display size. Calling setScale after
+      // setDisplaySize would overwrite the scale factor (80/512) with the pop
+      // scale and render the letter at the full 512px texture size, overflowing
+      // the slot — so the settle pop tweens displayWidth/displayHeight instead.
+      const copy = this.add
+        .image(slotX, slotY, `letter_${chosen.toLowerCase()}`)
+        .setDisplaySize(
+          LETTER_SIZE * motionScale(SLOT_POP_SCALE, SLOT_POP_REDUCED_SCALE),
+          LETTER_SIZE * motionScale(SLOT_POP_SCALE, SLOT_POP_REDUCED_SCALE),
+        );
+      this.tweens.add({
+        targets: copy,
+        displayWidth: LETTER_SIZE,
+        displayHeight: LETTER_SIZE,
+        duration: motionDuration(SLOT_POP_DURATION, SLOT_POP_REDUCED_DURATION),
+        ease: "Back.out",
+      });
+      this.slotImages[this.filledSlots] = copy;
+      this.roundObjects.push(copy);
+      // Acknowledge the reuse so the child knows the tap registered.
+      this.tweens.add({
+        targets: tileRect,
+        scaleX: motionScale(TILE_THUNK_SCALE, TILE_THUNK_REDUCED_SCALE),
+        scaleY: motionScale(TILE_THUNK_SCALE, TILE_THUNK_REDUCED_SCALE),
+        duration: motionDuration(TILE_THUNK_DURATION, TILE_THUNK_REDUCED_DURATION),
+        ease: "Sine.out",
+        yoyo: true,
+      });
+    } else {
+      // Last use: the letter itself flies into the slot and the tile becomes
+      // an empty ghost placeholder.
+      this.tweens.add({
+        targets: tileLetter,
+        x: slotX,
+        y: slotY,
+        duration: motionDuration(TILE_FLY_DURATION, TILE_FLY_REDUCED_DURATION),
+        ease: "Sine.out",
+      });
+      this.slotImages[this.filledSlots] = tileLetter;
+      tileRect.setAlpha(TILE_GHOST_ALPHA);
+      tileRect.disableInteractive();
+      this.tileLetterValues[tileIndex] = "";
+    }
     this.filledSlots += 1;
 
     if (this.filledSlots === word.word.length) {
