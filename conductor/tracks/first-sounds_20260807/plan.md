@@ -11,8 +11,8 @@
 
 ## Phase 2 — Assets
 
-- [ ] Task: Create `src/assets/svg/ui/tiles/tile_first_sounds.svg` (storybook style — flat fills, 4–6px `#2D3748` strokes, letter "A" + sound-wave motif matching tile family)
-- [ ] Task: Create `src/assets/svg/stickers/sticker_first_sounds.svg` (letter + sound wave on cream badge, matching sticker family)
+- [x] Task: Create `src/assets/svg/ui/tiles/tile_first_sounds.svg` (storybook style — flat fills, 4–6px `#2D3748` strokes, letter "A" + sound-wave motif matching tile family) *(6f44ef3)*
+- [x] Task: Create `src/assets/svg/stickers/sticker_first_sounds.svg` (letter + sound wave on cream badge, matching sticker family) *(247f61c)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Scene Implementation
