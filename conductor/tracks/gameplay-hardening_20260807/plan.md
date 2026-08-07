@@ -90,7 +90,7 @@
   - [ ] Determine `TILE_SIZE` raising so tiles ≥64px at phone FIT scale (~0.49); adjust layout constants
   - [ ] Update/extend scene tests asserting tile dimensions at design resolution
   - [ ] Commit: `feat(word-builder): Raise tile size for phone touch floor`
-- [ ] Task 4.7: FR-9g — Pattern Builder 6 rounds
+- [x] Task 4.7: FR-9g — Pattern Builder 6 rounds [commit: c86d9a6]
   - [ ] Change `ROUND_COUNT` 5 → 6 in `PatternBuilderScene.ts`; update logic tests that assume 5
   - [ ] Commit: `feat(pattern-builder): Align round count to six`
 - [ ] Task 4.8: FR-9h — Confusable-distractor guards (Pattern Builder, Alphabet)
