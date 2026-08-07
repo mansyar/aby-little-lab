@@ -18,7 +18,7 @@
 - [ ] Task 1.4: Merge PR to master; confirm master now contains all Game 12 code (`git ls-tree -r master --name-only | grep -i firstsounds` non-empty)
 - [ ] Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Release Branch & Version Bump
+## Phase 2 — Release Branch & Version Bump [checkpoint: c024437]
 
 - [x] Task 2.1: Create release branch `git checkout -b release/v1.8.0` from master — created from origin/master @ 873594e (PR #16 merge)
 - [x] Task 2.2: Bump version `npm version 1.8.0 --no-git-tag-version`
