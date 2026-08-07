@@ -9,7 +9,7 @@
 - [x] Task: Verify coverage for `moreLessLogic.ts` (>80%; project runs ~98%) *(77880ef — 100% stmts/branch/funcs/lines; full suite 44 files/1079 tests green)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Assets & Prompt Audio
+## Phase 2 — Assets & Prompt Audio *[checkpoint: 126b99c]*
 
 - [x] Task: Create `src/assets/svg/ui/arrow_up.svg` + `arrow_down.svg` (512×512 storybook style, thick `#2D3748` outline, soft vibrant fill) *(9b641be)*
 - [x] Task: Create `tile_more_less.svg` (Hub tile icon: two dot-groups + arrow) and `sticker_more_less.svg` (cream badge, two groups + arrow) *(9b641be)*
