@@ -37,10 +37,14 @@
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
-- [ ] Task 4.1: Re-run all four gates on `release/v1.8.0` (check → test → build → validate-pwa); note expected build hash change vs Phase 1 (bundle embeds `__APP_VERSION__` 1.8.0)
-- [ ] Task 4.2: Create annotated tag `git tag -a v1.8.0 -m "Release v1.8.0 — Game 12 First Sounds (phonics)"`; push to origin
-- [ ] Task 4.3: Push branch; open PR `release/v1.8.0` → `master` (body = release notes summary)
-  - [ ] Confirm CI "Quality Gates" passes on the PR (merge-blocking); Deploy to Coolify correctly skipped (master-only)
+- [x] Task 4.1: Re-run all four gates on `release/v1.8.0` (check → test → build → validate-pwa)
+  - [x] `pnpm run check` — Biome clean (96 files, 370ms)
+  - [x] `CI=true pnpm test` — 1065/1065 passing (43 files, 56.28s)
+  - [x] `pnpm run build` — OK (main chunk index-Ch7rE_Md.js, 1503.58 KiB / gzip 382.06, FirstSoundsScene-6CL-AZi6.js lazy chunk, 28 precache entries / 1533.95 KiB) — hash changed from index-DZXUyNHv.js (v1.7.0-era) as expected: bundle embeds __APP_VERSION__ 1.8.0
+  - [x] `node scripts/validate-pwa.js` — 13/13 passed
+- [x] Task 4.2: Create annotated tag `git tag -a v1.8.0 -m "Release v1.8.0 — Game 12 First Sounds (phonics)"`; push to origin — pushed
+- [x] Task 4.3: Push branch; open PR `release/v1.8.0` → `master` (body = release notes summary)
+  - [x] Confirm CI "Quality Gates" passes on the PR (merge-blocking) — PASS 1m31s (run 31193021189); Deploy to Coolify correctly skipped (master-only); PR #17 https://github.com/mansyar/aby-little-lab/pull/17
 - [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Merge, Deploy & Verify
