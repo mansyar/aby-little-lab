@@ -41,6 +41,27 @@ describe("generateSequence", () => {
     // Math.floor(0.0 * 3) = 0, Math.floor(0.5 * 3) = 1
     expect(seq).toEqual([0, 1]);
   });
+
+  it("never emits a run longer than 2 consecutive same-frog notes", () => {
+    // A constant 0.0 would otherwise produce all-green sequences; the cap
+    // must force a different frog after two repeats.
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValue(0.0);
+    const seq = generateSequence(12);
+    for (let i = 2; i < seq.length; i++) {
+      expect(seq[i] === seq[i - 1] && seq[i - 1] === seq[i - 2]).toBe(false);
+    }
+  });
+
+  it("keeps every note in range even when the run cap forces a different frog", () => {
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValue(0.0);
+    const seq = generateSequence(12);
+    for (const note of seq) {
+      expect(note).toBeGreaterThanOrEqual(0);
+      expect(note).toBeLessThan(FROG_COUNT);
+    }
+  });
 });
 
 describe("appendNote", () => {
@@ -76,6 +97,24 @@ describe("appendNote", () => {
     const grown = appendNote([0]);
     // Math.floor(0.99 * 3) = 2
     expect(grown).toEqual([0, 2]);
+  });
+
+  it("avoids a third consecutive same-frog note", () => {
+    // [0, 0] is already a run of 2; the appended note must not be 0.
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValue(0.0);
+    const grown = appendNote([0, 0]);
+    expect(grown).toHaveLength(3);
+    expect(grown.slice(0, 2)).toEqual([0, 0]);
+    expect(grown[2]).not.toBe(0);
+  });
+
+  it("appends normally when the sequence has no run to cap", () => {
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValue(0.99);
+    const grown = appendNote([0, 2]);
+    // Math.floor(0.99 * 3) = 2 — no run, free pick.
+    expect(grown).toEqual([0, 2, 2]);
   });
 });
 

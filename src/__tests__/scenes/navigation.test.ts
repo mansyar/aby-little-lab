@@ -3642,7 +3642,9 @@ describe("scene navigation flow", () => {
       // Child starts a 3s Back hold mid-game, then pops the last bubble.
       const backButton = getTextObject(scene, "Back");
       if (!backButton) throw new Error("Back button not found");
-      const pointerdown = getMockFn(backButton.on).mock.calls.find((call) => call[0] === "pointerdown");
+      const pointerdown = getMockFn(backButton.on).mock.calls.find(
+        (call) => call[0] === "pointerdown",
+      );
       const pointerdownCallback = pointerdown?.[1] as (() => void) | undefined;
       if (!pointerdownCallback) throw new Error("Back button pointerdown not found");
       pointerdownCallback();
@@ -4446,6 +4448,39 @@ describe("scene navigation flow", () => {
       expect(mockAudio.playFrogNote).toHaveBeenCalledWith(329.63);
     });
 
+    it("plays short sequences at 600ms per note and long sequences at 480ms", () => {
+      const scene = new MusicalMemoryScene();
+      scene.create();
+
+      const s = scene as unknown as {
+        sequence: number[];
+        playSequence: () => void;
+      };
+      const delayedCallMock = getMockFn(
+        (scene as unknown as { time: { delayedCall: MockFn } }).time.delayedCall,
+      );
+
+      // Sequence of length 4 (below the 5-note threshold) keeps the 600ms pace.
+      const before = delayedCallMock.mock.calls.length;
+      s.sequence = [0, 1, 2, 3];
+      s.playSequence();
+      const shortCalls = delayedCallMock.mock.calls.slice(before);
+      expect(shortCalls[0][0]).toBe(0); // first note plays immediately
+      expect(shortCalls[1][0]).toBe(600);
+      expect(shortCalls[3][0]).toBe(3 * 600);
+      expect(shortCalls[4][0]).toBe(4 * 600); // input unlock
+
+      // Sequence of length 5 or more plays faster (480ms).
+      const beforeLong = delayedCallMock.mock.calls.length;
+      s.sequence = [0, 1, 2, 3, 4];
+      s.playSequence();
+      const longCalls = delayedCallMock.mock.calls.slice(beforeLong);
+      expect(longCalls[0][0]).toBe(0); // first note plays immediately
+      expect(longCalls[1][0]).toBe(480);
+      expect(longCalls[4][0]).toBe(4 * 480);
+      expect(longCalls[5][0]).toBe(5 * 480); // input unlock
+    });
+
     it("locks input during sequence playback (taps ignored)", () => {
       const scene = new MusicalMemoryScene();
       scene.create();
@@ -4854,9 +4889,9 @@ describe("scene navigation flow", () => {
 
     /**
      * Completes one round: fires playback delayed calls (from firedUpTo),
-     * clears audio, then taps the correct frog (index 1 = blue) sequenceLength
-     * times. Returns the delayed call count after firing playback (for use as
-     * the next firedUpTo).
+     * clears audio, then taps the actual sequence notes `sequenceLength`
+     * times (the run cap means sequences are no longer all-1). Returns the
+     * delayed call count after firing playback (for use as the next firedUpTo).
      */
     function completeRound(
       scene: unknown,
@@ -4868,8 +4903,9 @@ describe("scene navigation flow", () => {
       const newFiredUpTo = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
         .mock.calls.length;
       clearAudioMocks();
+      const sequence = (scene as { sequence: number[] }).sequence;
       for (let i = 0; i < sequenceLength; i++) {
-        tapFrog(frogs, 1);
+        tapFrog(frogs, sequence[i]);
       }
       return newFiredUpTo;
     }
@@ -6316,7 +6352,7 @@ describe("scene navigation flow", () => {
       }
     }
 
-    /** Completes one MusicalMemory round (playback, then correct frog taps). */
+    /** Completes one MusicalMemory round (playback, then the actual note taps). */
     function completeMemoryRound(
       scene: unknown,
       frogs: Array<Record<string, MockFn>>,
@@ -6326,8 +6362,9 @@ describe("scene navigation flow", () => {
       fireDelayedCallsFrom(scene, firedUpTo);
       const newFiredUpTo = getMockFn((scene as { time: Record<string, unknown> }).time.delayedCall)
         .mock.calls.length;
+      const sequence = (scene as { sequence: number[] }).sequence;
       for (let i = 0; i < sequenceLength; i++) {
-        tapFrog(frogs, 1);
+        tapFrog(frogs, sequence[i]);
       }
       return newFiredUpTo;
     }
