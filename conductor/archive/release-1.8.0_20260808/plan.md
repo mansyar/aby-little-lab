@@ -89,5 +89,6 @@
 - [x] Task 7.3: Archive track folder to `conductor/archive/release-1.8.0_20260808/` (via git mv)
   - [x] `git mv conductor/tracks/release-1.8.0_20260808 conductor/archive/release-1.8.0_20260808` — index.md, metadata.json, plan.md, spec.md moved
   - [x] Registry: entry `[x]` with archive link `./archive/release-1.8.0_20260808/index.md` + (Archived) — dominant convention
-- [ ] Task 7.4: Commit: `chore(conductor): Archive track 'v1.8.0 Release Execution'`
+- [x] Task 7.4: Commit: `chore(conductor): Archive track 'v1.8.0 Release Execution'`
+  - [x] Commits: `cc0507d` docs(release): Finalize v1.8.0 release notes (FINAL) and sign-off; `fbb515b` chore(conductor): Archive track 'v1.8.0 Release Execution' (tracks.md registry [x] + archive link, plan 7.3 markers)
 - [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
