@@ -23,11 +23,11 @@
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `"first-sounds"` to `GameId` union (`src/types/index.ts`) + sticker key mapping; verify `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge
-- [ ] Task: Register `FirstSounds` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
-- [ ] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker textures)
-- [ ] Task: Add 12th entry to `GAME_TILES` in `HubScene` (sceneKey `FirstSounds`, gameId `first-sounds`, label "First Sounds", tileKey `tile_first_sounds`); confirm 5×3 grid geometry unchanged (row 3 → 2 tiles, left-aligned per existing fill logic)
-- [ ] Task: Regression tests — navigation test covers 12 tiles, sticker-shelf renders new sticker, existing 1024 tests stay green
+- [x] Task: Add `"first-sounds"` to `GameId` union (`src/types/index.ts`) + sticker key mapping; verify `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(6366f8a — done early in Phase 3; storage.ts merges `createDefaultStickers()` over saved profiles on load, so old saves get the new sticker entry)*
+- [x] Task: Register `FirstSounds` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(c123905 + 7c7ebc7)*
+- [x] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker textures) *(c123905 — preload assertion 142 → 144 in 7c7ebc7)*
+- [x] Task: Add 12th entry to `GAME_TILES` in `HubScene` (sceneKey `FirstSounds`, gameId `first-sounds`, label "First Sounds", tileKey `tile_first_sounds`); confirm 5×3 grid geometry unchanged (row 3 → 2 tiles, left-aligned per existing fill logic) *(c123905 — iconDisplay 52/iconOffsetY -44 like the other typography-heavy tiles; grid math untouched)*
+- [x] Task: Regression tests — navigation test covers 12 tiles, sticker-shelf renders new sticker, existing 1024 tests stay green *(7c7ebc7 — 1065 tests green: shelf slots 12, hasSticker 24 calls, SVG loads 144)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Docs & Release Readiness
