@@ -2,7 +2,7 @@
 
 **Track:** `more-less_20260808` · **Branch:** `feat/game-13`
 
-## Phase 1 — Pure Game Logic (TDD)
+## Phase 1 — Pure Game Logic (TDD) *[checkpoint: 876dff1]*
 
 - [x] Task: Write failing tests for `src/game/moreLessLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band 1–3/1–5/1–10; exactly 3 "more" + 3 "less" shuffled; two distinct counts per round), item-type assignment & shuffle, answer evaluation, win detection *(77880ef)*
 - [x] Task: Implement `src/game/moreLessLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` / `isPlaythroughComplete` *(77880ef)*
