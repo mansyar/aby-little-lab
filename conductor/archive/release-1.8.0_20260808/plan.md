@@ -79,7 +79,7 @@
 - [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
   - [x] Checkpoint commit `8299e64` (empty) + git notes verification report; phase heading marker; commit `9ace4e7`
 
-## Phase 7 — Finalize & Archive
+## Phase 7 — Finalize & Archive [checkpoint: dc22a5c]
 
 - [x] Task 7.1: Final gates on master if any post-merge changes occurred
   - [x] All 4 gates on release/v1.8.0 (final state): Biome clean 96 files 894ms; CI=true pnpm test 1065/1065 (43 files); build `index-Ch7rE_Md.js` 1,503.58 KiB / gzip 382.06, 28 precache entries 1533.95 KiB — hash IDENTICAL to live deployment (deterministic build confirms deployed source = current tree); validate-pwa 13/13
