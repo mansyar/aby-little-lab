@@ -45,7 +45,7 @@
   - [x] Apply consistently to all 11 game scenes
   - [x] Confirm tests pass; full suite green
   - [x] Commit: `fix(scenes): Guard against double transition during auto-return`
-- [ ] Task 2.2: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.2: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: db2c97b]
 
 ## Phase 3 — Cross-Cutting Consistency & Dead Code
 
