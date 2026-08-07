@@ -136,7 +136,7 @@
 - [ ] Task 7.4: Update `docs/device-testing-checklist.md` — add v1.7.0 rows (double-playthrough replay of Animal Trace/Shape Sorter, speaker during celebration, Pop & Freeze bubble taps, guided tracing, Word Builder tiles on phone)
 - [ ] Task 7.5: Sync knowledge docs (`conductor/tech-stack.md` design-update entry; `conductor/product.md` only for real gaps — e.g., Pattern Builder 6 rounds, gameplay depth notes)
 - [ ] Task 7.6: Commit: `docs(release): Prepare v1.7.0 release notes and device checklist`
-- [ ] Task 7.7: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 7.7: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: a486fab]
 
 ## Phase 8 — Release Branch Gates + Tag + PR
 
