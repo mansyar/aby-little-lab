@@ -58,6 +58,27 @@ describe("generateRound", () => {
     }
   });
 
+  it("never offers a confusable same-family distractor (C/G/O/Q, I/L/T, M/W)", () => {
+    const FAMILIES: ReadonlyArray<readonly string[]> = [
+      ["C", "G", "O", "Q"],
+      ["I", "L", "T"],
+      ["M", "W"],
+    ];
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      for (const family of FAMILIES) {
+        for (const target of family) {
+          const round = generateRound(target as never);
+          const distractors = round.choices.filter((choice) => choice !== target);
+          for (const familyLetter of family) {
+            if (familyLetter !== target) {
+              expect(distractors).not.toContain(familyLetter);
+            }
+          }
+        }
+      }
+    }
+  });
+
   it("is deterministic under a fixed random sequence", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const first = generateRound("B");

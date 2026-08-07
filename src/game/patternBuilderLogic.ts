@@ -35,6 +35,24 @@ function pickFrom<T>(array: readonly T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+/**
+ * Shape families that look alike to a toddler (e.g. hexagon vs octagon, or
+ * circle vs ring). A round's choices never include a shape from the correct
+ * shape's own family, so the answer stays distinguishable.
+ */
+const CONFUSABLE_SHAPE_FAMILIES: ReadonlyArray<readonly ShapeType[]> = [
+  ["pentagon", "hexagon", "octagon"],
+  ["circle", "oval", "ring", "semicircle"],
+  ["square", "rectangle"],
+];
+
+/** True when `shape` and `other` belong to the same confusable family. */
+function isConfusableWith(shape: ShapeType, other: ShapeType): boolean {
+  return CONFUSABLE_SHAPE_FAMILIES.some(
+    (family) => family.includes(shape) && family.includes(other),
+  );
+}
+
 /** Picks a gap index: the end (3) half the time, otherwise a middle slot (1 or 2). */
 function pickGapIndex(): number {
   if (Math.random() < 0.5) {
@@ -50,7 +68,9 @@ export function generateRound(): PatternRound {
   const row = buildPatternRow(patternType, a, b);
   const gapIndex = pickGapIndex();
   const correct = row[gapIndex];
-  const distractors = shuffle(ALL_SHAPES.filter((shape) => shape !== correct)).slice(0, 2);
+  const distractors = shuffle(
+    ALL_SHAPES.filter((shape) => shape !== correct && !isConfusableWith(correct, shape)),
+  ).slice(0, 2);
   const choices = shuffle([correct, ...distractors]);
   return { patternType, row, gapIndex, choices };
 }
