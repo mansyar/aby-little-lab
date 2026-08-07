@@ -268,6 +268,16 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Live smoke test — boot → Hub renders; user manual smoke session on the live URL: all v1.7.0 targeted checks passed (replay/session fixes in Animal Trace, Shape Sorter, Pattern Builder; Musical Memory replay reset + run cap; Pop & Freeze edge bounce; speaker during win celebration; double-navigation guard; gameplay depth items)
 - [x] Device testing on v1.7.0 — recorded in `docs/device-testing-checklist.md` (v1.7.0 execution record)
 
+### Step 7j: Verify Deployment — v1.8.0 (2026-08-08)
+- [x] Release branch `release/v1.8.0` + PR #17 merged to `master` (merge commit `719dae1`; CI Quality Gates green on PR — 1m31s, Deploy skipped on PR as designed)
+- [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **run `31193529605`** (Quality Gates 2m9s ✓, Deploy to Coolify 7s ✓)
+- [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated (polled; live served `index-Ch7rE_Md.js` at 01:40:57)
+- [x] App loads correctly on the live URL — 200; serves release build (`index-Ch7rE_Md.js` matches fresh 1.8.0 local build — same asset hash; transiently served the pre-bump `index-DZXUyNHv.js` from the PR #16 merge until rollout finished)
+- [x] Version footer data — `1.8.0` embedded in served bundle (Settings panel shows `v1.8.0` under title); no stale `1.7.0` string
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [x] Live smoke test (playwright-cli on live URL) — Hub renders 12 tiles (5×3, row 3 = How Many? + First Sounds left-aligned); First Sounds full 6-round playthrough → correct-tap advance (OWL→TREE, dot fill), wrong-tap no penalty, win → `first-sounds` sticker earned (localStorage) → 3s auto-return → tile badge filled; replay fresh (0/6 dots, no re-award); Settings opens via 3s hold (parental lock) with `v1.8.0` footer; zero console errors
+- [x] Device testing on v1.8.0 — recorded in `docs/device-testing-checklist.md` (v1.8.0 execution record; pending execution in Phase 6 of the release track)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
