@@ -23,6 +23,7 @@ const GAME_IDS: GameId[] = [
   "word-builder",
   "how-many",
   "first-sounds",
+  "more-less",
 ];
 
 /** Fresh sticker collection: every game unearned. */

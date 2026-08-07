@@ -10,7 +10,8 @@ export type GameId =
   | "word-match"
   | "word-builder"
   | "how-many"
-  | "first-sounds";
+  | "first-sounds"
+  | "more-less";
 
 export interface StickerData {
   earned: boolean;
