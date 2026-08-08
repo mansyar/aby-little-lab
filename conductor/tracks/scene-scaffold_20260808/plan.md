@@ -45,7 +45,7 @@
 - [x] Task: Migrate `MusicalMemoryScene` (5 progress dots, dot count parameterized) `b008872`
 - [x] Task: Verify `navigation.test.ts` + all 13 scene tests green `b008872`
 - [x] Task: Commit `refactor(scenes): Migrate PopFreeze and MusicalMemory to GameSceneBase` `b008872`
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 6718f1c]`
 
 ## Phase 5: Docs, Quality Gates, Completion
 
