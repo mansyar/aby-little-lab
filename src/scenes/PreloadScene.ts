@@ -112,6 +112,7 @@ import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.s
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
 import stickerFirstSoundsSvg from "../assets/svg/stickers/sticker_first_sounds.svg?raw";
 import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
+import stickerMoreLessSvg from "../assets/svg/stickers/sticker_more_less.svg?raw";
 import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
 import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_builder.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
@@ -126,6 +127,8 @@ import toyBoxSvg from "../assets/svg/toys/toy_box.svg?raw";
 import toyCarSvg from "../assets/svg/toys/toy_car.svg?raw";
 import toyDrumSvg from "../assets/svg/toys/toy_drum.svg?raw";
 import toyRocketSvg from "../assets/svg/toys/toy_rocket.svg?raw";
+import arrowDownSvg from "../assets/svg/ui/arrow_down.svg?raw";
+import arrowUpSvg from "../assets/svg/ui/arrow_up.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";
 import iconSpeakerSvg from "../assets/svg/ui/icon_speaker.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
@@ -136,6 +139,7 @@ import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw
 import tileBigSmallSvg from "../assets/svg/ui/tiles/tile_big_small.svg?raw";
 import tileFirstSoundsSvg from "../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
 import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
+import tileMoreLessSvg from "../assets/svg/ui/tiles/tile_more_less.svg?raw";
 import tileMusicalMemorySvg from "../assets/svg/ui/tiles/tile_musical_memory.svg?raw";
 import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.svg?raw";
 import tilePopFreezeSvg from "../assets/svg/ui/tiles/tile_pop_freeze.svg?raw";
@@ -222,6 +226,8 @@ export const SHAPE_ASSETS = [
   { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
   { key: "bubble", svg: bubbleSvg },
   { key: "icon_speaker", svg: iconSpeakerSvg },
+  { key: "arrow_up", svg: arrowUpSvg },
+  { key: "arrow_down", svg: arrowDownSvg },
   { key: "sleep_zzz", svg: sleepZzzSvg },
   { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
   { key: "sticker_shadow_match", svg: stickerShadowMatchSvg },
@@ -282,6 +288,7 @@ export const SHAPE_ASSETS = [
   { key: "numeral_8", svg: numeral8Svg },
   { key: "numeral_9", svg: numeral9Svg },
   { key: "sticker_how_many", svg: stickerHowManySvg },
+  { key: "sticker_more_less", svg: stickerMoreLessSvg },
   { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
   { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
   { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
@@ -294,6 +301,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_word_match", svg: tileWordMatchSvg },
   { key: "tile_word_builder", svg: tileWordBuilderSvg },
   { key: "tile_how_many", svg: tileHowManySvg },
+  { key: "tile_more_less", svg: tileMoreLessSvg },
 ] as const;
 
 /**

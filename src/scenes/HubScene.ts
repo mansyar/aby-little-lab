@@ -122,6 +122,14 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "MoreLess",
+    gameId: "more-less",
+    label: "More or Less",
+    tileKey: "tile_more_less",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;
