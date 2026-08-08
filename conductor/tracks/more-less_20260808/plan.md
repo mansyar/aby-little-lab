@@ -33,11 +33,11 @@
 
 ## Phase 5 — Docs & Release Readiness
 
-- [ ] Task: Update `conductor/product.md` (Game 13 row, hub grid 13 tiles, quantity-comparison amendment)
-- [ ] Task: Update `conductor/tech-stack.md` with dated design note (Game 13, asset pipeline additions)
-- [ ] Task: Update `docs/PRD.md` (Game 13 section) and `docs/TDD.md` (scene/structure notes) as needed
-- [ ] Task: Update `README.md` (games table, hub experience notes)
-- [ ] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [x] Task: Update `conductor/product.md` (Game 13 row, hub grid 13 tiles, quantity-comparison amendment) *(2335df1)*
+- [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 13, asset pipeline additions) *(2335df1)*
+- [x] Task: Update `docs/PRD.md` (Game 13 section) and `docs/TDD.md` (scene/structure notes) as needed *(2335df1)*
+- [x] Task: Update `README.md` (games table, hub experience notes) *(2335df1)*
+- [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(2335df1 — check clean (Biome fixed 3 organizeImports), full suite 45 files/1101 tests, build OK, validate-pwa 13 passed)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase: Review Fixes
