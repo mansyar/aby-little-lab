@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.10.0 (2026-08-08)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.10.0 — Game 13 More or Less)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** Carried v1.8.0 rows — Hub 12 tiles 5×3 (row 3: 2 tiles left-aligned, tile_first_sounds distinct); First Sounds spoken prompt + iOS TTS unlock; 6 rounds × 4 letter cards with confusion guards; correct-tap feedback chain; wrong-tap no penalty; speaker replay guard during win; win celebration + sticker + auto-return; replay no re-award; parental hold-3s Back; SFX-off visual-only; reduced-motion respected; Animal Trace relaunch freshness + waypoint ring; Shape Sorter relaunch progress dots; Pattern Builder 6 rounds + splash; Word Match easy-first; Find the Letter splash; Word Builder ghost tiles + duplicate letters + ~132px tiles; Musical Memory max-2-in-a-row + 480ms notes + replay input reset; Pop & Freeze edge bounce; speaker guarded during win (all speech games); Big vs Small swapped sides; How Many distinct counts + centered partial rows; Back-hold during auto-return never double-navigates; sticker persistence after close/reopen; play-time limits spot check. v1.10.0 rows — Hub shows 13 tiles in a 5×3 grid (row 3: 3 tiles left-aligned — How Many?, First Sounds, More or Less — no clipping, tile_more_less icon distinct); More or Less starts with a big storybook arrow (UP = more, DOWN = less) popping in on the first tap of a fresh load (iOS TTS gesture unlock) with the comparison word spoken; 6 rounds per play; each round shows exactly 2 group cards with different counts (easy-first bands 1–3 / 1–5 / 1–10); exactly 3 "more" + 3 "less" prompts per play, shuffled; correct group tap → chime + green card flash + mascot cheer + progress dot pop → next round in ~0.7s; wrong group tap → gentle wiggle ±4° + mascot nod, no penalty, no progression loss; counting items render at ~48px with partial last rows centered; speaker replay button (~96px hit area) re-speaks "more"/"less" and never crashes during the 3s win celebration; win after round 6 → confetti + rays + sticker (first completion only) + 3s auto-return with just-earned highlight; replay shows sticker already earned; parental hold-3s Back exits to Hub; SFX-off silences speech and SFX with visual-only play; reduced-motion respected
+- **Result:** **pending — to be executed against the live URL after deploy**
+- **Issues found:** pending
+
 ## Execution Record — v1.8.0 (2026-08-08)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.8.0 — Game 12 First Sounds)
