@@ -1,6 +1,6 @@
 # Release Notes — v1.10.0
 
-> **Status:** DRAFT — release in progress (2026-08-08). Version bump to 1.10.0; final status and verification recorded after deploy.
+> **Status:** FINAL — released 2026-08-08 (tag v1.10.0, deployed and live). Post-deploy verification (footer check, live smoke, device testing) was folded into the v1.11.0 release execution — the live site now serves v1.11.0, which covers Game 13 and Game 14 together; no issues found.
 
 ## What's New
 
