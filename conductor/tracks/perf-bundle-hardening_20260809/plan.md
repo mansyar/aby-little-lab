@@ -25,7 +25,7 @@
 - [x] Task: Update `conductor/tech-stack.md` — dated note on new coverage thresholds and current coverage (179f76a)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (70fc245)
 
-## Phase 3: Boot-Time Asset Profiling (Measure First) [checkpoint: PENDING]
+## Phase 3: Boot-Time Asset Profiling (Measure First) [checkpoint: 193a1b8]
 
 - [x] Task: Instrument `PreloadScene` — record `load.complete` elapsed time and per-SVG rasterization time (debug-only, no user-visible change) (cd69195)
 - [x] Task: Measure on reference profile (`pnpm exec vite preview`, throttled CPU/mobile network) — record results vs <3s target (AC5) — dev pipeline: 152 files in 641 ms (avg 4 ms/file, slowest 289 ms); prod preview navigation duration 1080.7 ms (< 3 s); shell + phaser chunks confirmed as separate requests; ~152 blob SVG raster requests; full record in docs/perf-baseline.md
