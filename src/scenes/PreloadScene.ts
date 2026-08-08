@@ -369,34 +369,36 @@ export class PreloadScene extends Phaser.Scene {
       progressBar.setDisplaySize(300 * value, 30);
     });
 
-    // Boot-time profiling (dev-only): aggregate SVG load/rasterization cost.
-    // import.meta.env.DEV is statically replaced and dead-code-eliminated in
-    // production builds.
-    const loadStart = performance.now();
-    let fileCount = 0;
-    let lastFileAt = loadStart;
-    let slowestFileDelta = 0;
-
-    this.load.on("filecomplete", () => {
-      const now = performance.now();
-      const delta = now - lastFileAt;
-      lastFileAt = now;
-      fileCount += 1;
-      if (delta > slowestFileDelta) slowestFileDelta = delta;
-    });
-
     this.load.on("complete", () => {
       title.destroy();
       tagline.destroy();
       progressBar.destroy();
       progressBox.destroy();
-      if (import.meta.env.DEV) {
+    });
+
+    if (import.meta.env.DEV) {
+      // Boot-time profiling (dev-only): aggregate SVG load/rasterization cost.
+      // The entire block is statically removed from production builds.
+      const loadStart = performance.now();
+      let fileCount = 0;
+      let lastFileAt = loadStart;
+      let slowestFileDelta = 0;
+
+      this.load.on("filecomplete", () => {
+        const now = performance.now();
+        const delta = now - lastFileAt;
+        lastFileAt = now;
+        fileCount += 1;
+        if (delta > slowestFileDelta) slowestFileDelta = delta;
+      });
+
+      this.load.on("complete", () => {
         const elapsed = Math.round(performance.now() - loadStart);
         console.info(
           `[preload] ${fileCount} files in ${elapsed}ms (avg ${Math.round(elapsed / Math.max(fileCount, 1))}ms/file, slowest ${Math.round(slowestFileDelta)}ms)`,
         );
-      }
-    });
+      });
+    }
 
     for (const asset of SHAPE_ASSETS) {
       this.load.svg(asset.key, toDataUri(asset.svg), {
