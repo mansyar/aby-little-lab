@@ -84,7 +84,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Game Scene Scaffold Extraction (Refactor)** *Link: [./tracks/scene-scaffold_20260808/index.md](./tracks/scene-scaffold_20260808/index.md)*
+- [x] **Track: Game Scene Scaffold Extraction (Refactor)** *Link: [./tracks/scene-scaffold_20260808/index.md](./tracks/scene-scaffold_20260808/index.md)*
 
 ---
 
