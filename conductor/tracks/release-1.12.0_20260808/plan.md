@@ -34,7 +34,7 @@
 - [x] Task 3.4: Commit: `docs(release): Prepare v1.12.0 release notes and device checklist` (922a15b)
 - [x] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4 — Release Branch Gates + Tag + PR [checkpoint: <sha>]
+## Phase 4 — Release Branch Gates + Tag + PR [checkpoint: cee87ec]
 
 - [x] Task 4.1: Re-run all four gates on `release/v1.12.0` (check → test → build → validate-pwa)
   - [x] Biome clean (109 files, 367ms); 1176/1176 tests (50 files, 65.20s); build `index-CRvqpYn-.js` 1511.21 kB (gzip 383.31); validate-pwa 13/13
