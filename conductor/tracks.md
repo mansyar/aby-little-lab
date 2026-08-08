@@ -108,7 +108,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Performance & Bundle Hardening** *Link: [./tracks/perf-bundle-hardening_20260809/index.md](./tracks/perf-bundle-hardening_20260809/index.md)*
+- [x] **Track: Performance & Bundle Hardening** *Link: [./archive/perf-bundle-hardening_20260809/index.md](./archive/perf-bundle-hardening_20260809/index.md)* (Archived)
 
 
 
