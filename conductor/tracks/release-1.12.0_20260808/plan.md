@@ -3,7 +3,7 @@
 **Track ID:** `release-1.12.0_20260808` · **Type:** Chore
 **Methodology:** release process per `docs/release-checklist.md`; phases per `conductor/workflow.md` (checkpoint protocol at each phase end). TDD not applicable — verification via existing gates and checklist execution.
 
-## Phase 1 — Baseline Validation [checkpoint: <sha>]
+## Phase 1 — Baseline Validation [checkpoint: 67b8b60]
 
 - [x] Task 1.1: Confirm master state — HEAD = `3f9981d` (TTS Voice Selection archive commit); working tree clean; local ahead of origin by exactly 19 TTS commits (`git status --short --branch`, `git log --oneline origin/master..HEAD`)
   - [x] Confirmed: HEAD 6a8dca7 (in-progress marker, stacked on ca2f041 track init + 3f9981d TTS archive); tree clean; origin/master ahead by 21 (19 TTS commits + 2 conductor commits)
