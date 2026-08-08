@@ -36,11 +36,15 @@
 
 ## Phase 4 — Release Branch Gates + Tag + PR [checkpoint: <sha>]
 
-- [ ] Task 4.1: Re-run all four gates on `release/v1.12.0` (check → test → build → validate-pwa)
-- [ ] Task 4.2: Create annotated tag `git tag -a v1.12.0 -m "Release v1.12.0 — TTS Voice Selection (parental device-level voice picker)"`; push to origin
-- [ ] Task 4.3: Push branch; open PR `release/v1.12.0` → `master` (body = release notes summary)
-  - [ ] Confirm CI "Quality Gates" passes on the PR (merge-blocking); Deploy to Coolify correctly skipped
-- [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 4.1: Re-run all four gates on `release/v1.12.0` (check → test → build → validate-pwa)
+  - [x] Biome clean (109 files, 367ms); 1176/1176 tests (50 files, 65.20s); build `index-CRvqpYn-.js` 1511.21 kB (gzip 383.31); validate-pwa 13/13
+- [x] Task 4.2: Create annotated tag `git tag -a v1.12.0 -m "Release v1.12.0 — TTS Voice Selection (parental device-level voice picker)"`; push to origin
+  - [x] Tag `v1.12.0` pushed; branch `release/v1.12.0` pushed
+- [x] Task 4.3: Push branch; open PR `release/v1.12.0` → `master` (body = release notes summary)
+  - [x] PR #25 opened (https://github.com/mansyar/aby-little-lab/pull/25)
+  - [x] Quality Gates PASS on PR (runs 31251979925 + 31251989129, both 2m+); Deploy to Coolify SKIPPED on PR run (tag run 31251979925 deploy job failed by design — tag-deploy guard "refusing to deploy" since v1.12.0 not yet on master; expected, deploy happens via master merge)
+  - [x] PR MERGEABLE (master unprotected — no blocking rules; UNSTABLE state = expected tag-guard failure)
+- [x] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Merge, Deploy & Verify [checkpoint: <sha>]
 
