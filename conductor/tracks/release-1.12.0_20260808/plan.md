@@ -66,11 +66,14 @@
   - [x] Step 7l added (commit 29646ab) + Final Sign-Off — v1.12.0 block
 - [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 6 — Targeted Device Testing
+## Phase 6 — Targeted Device Testing [checkpoint: <sha>]
 
-- [ ] Task 6.1: Prepare the v1.12.0 checklist record for execution (10 TTS rows + carried rows) — conductor-prepared; **user executes** on iPad / Android tablet / iPhone / Android phone against the live URL; record pass/issue per item
-- [ ] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
-- [ ] Task 6.3: Commit results: `docs(device): Record v1.12.0 device testing results`
+- [x] Task 6.1: Prepare the v1.12.0 checklist record for execution (10 TTS rows + carried rows) — conductor-prepared; **user executes** on iPad / Android tablet / iPhone / Android phone against the live URL; record pass/issue per item
+  - [x] Record prepared in Phase 3 (docs/device-testing-checklist.md, top entry); user executed 2026-08-08 on all 4 device classes against the live URL — **all items passed**
+- [x] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
+  - [x] No issues found — none to triage; no Known Issues additions
+- [x] Task 6.3: Commit results: `docs(device): Record v1.12.0 device testing results`
+  - [x] Checklist updated: Result → "all items passed on all 4 device classes … executed 2026-08-08", Issues found → "none (no Critical/High/Medium/Low)"
 - [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 7 — Finalize & Archive
