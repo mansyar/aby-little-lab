@@ -5,14 +5,16 @@
 
 ## Phase 1 — Baseline Validation [checkpoint: <sha>]
 
-- [ ] Task 1.1: Confirm master state — HEAD = `3f9981d` (TTS Voice Selection archive commit); working tree clean; local ahead of origin by exactly 19 TTS commits (`git status --short --branch`, `git log --oneline origin/master..HEAD`)
-- [ ] Task 1.2: Run full quality gates on master (CI order)
-  - [ ] `pnpm run check` — Biome clean
-  - [ ] `CI=true pnpm test` — 1176/1176 passing (49 files)
-  - [ ] `pnpm run build` — OK (note new lazy chunks/hash, precache entries)
-  - [ ] `node scripts/validate-pwa.js` — all passed
-- [ ] Task 1.3: Confirm no stale version references (`1.11.0` not lingering in src; `__APP_VERSION__` reads pkg.version)
-- [ ] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 1.1: Confirm master state — HEAD = `3f9981d` (TTS Voice Selection archive commit); working tree clean; local ahead of origin by exactly 19 TTS commits (`git status --short --branch`, `git log --oneline origin/master..HEAD`)
+  - [x] Confirmed: HEAD 6a8dca7 (in-progress marker, stacked on ca2f041 track init + 3f9981d TTS archive); tree clean; origin/master ahead by 21 (19 TTS commits + 2 conductor commits)
+- [x] Task 1.2: Run full quality gates on master (CI order)
+  - [x] `pnpm run check` — Biome clean (109 files, 349ms)
+  - [x] `CI=true pnpm test` — 1176/1176 passing (50 files, 76.65s)
+  - [x] `pnpm run build` — OK (31 precache entries, 1537.89 KiB; chunk-size warning pre-existing)
+  - [x] `node scripts/validate-pwa.js` — 13/13 passed
+- [x] Task 1.3: Confirm no stale version references (`1.11.0` not lingering in src; `__APP_VERSION__` reads pkg.version)
+  - [x] No `1.11.0`/`1.12.0` literals in src; vite.config.ts `__APP_VERSION__: JSON.stringify(pkg.version)`; SettingsPanel footer `v${__APP_VERSION__}`
+- [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Release Branch & Version Bump [checkpoint: <sha>]
 
