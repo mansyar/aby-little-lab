@@ -57,15 +57,15 @@
 
 ## Phase 6 — Targeted Device Testing
 
-- [ ] Task 6.1: Execute the v1.11.0 checklist record (iPad / Android tablet / iPhone / Android phone — targeted Game 14 rows + carried rows) against the live URL; record pass/issue per item
-- [ ] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
-- [ ] Task 6.3: Commit results: `docs(device): Record v1.11.0 device testing results`
-- [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 6.1: Execute the v1.11.0 checklist record (iPad / Android tablet / iPhone / Android phone — targeted Game 14 rows + carried rows) against the live URL; record pass/issue per item — user executed 2026-08-08; **all items passed on all 4 device classes** (incl. hotfixed More or Less arrow)
+- [x] Task 6.2: Triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved) — no findings to triage; zero issues
+- [x] Task 6.3: Commit results: `docs(device): Record v1.11.0 device testing results` — 87f7546 (device-testing-checklist Result/Issues updated; release notes FINAL; Final Sign-Off block added)
+- [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md) — *(c7b994a)*
 
 ## Phase 7 — Finalize & Archive
 
-- [ ] Task 7.1: Final gates on master if any post-merge changes occurred
-- [ ] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete; update `docs/release-checklist.md` Final Sign-Off block (version v1.11.0, 1145 tests, release manager)
+- [x] Task 7.1: Final gates on master if any post-merge changes occurred — no source changes since the last full gate run (hotfix `828f9e0`: 49 files/1150 tests, Biome clean, build OK, validate-pwa 13/13); post-merge commits are docs-only; master CI Quality Gates PASS on the last push (run 31247071489+)
+- [x] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete; update `docs/release-checklist.md` Final Sign-Off block (version v1.11.0, 1145 tests, release manager) — release notes FINAL (87f7546); Final Sign-Off — v1.11.0 block added: 1145/1145 tests, status Released, all approvals [x]
 - [ ] Task 7.3: Archive track folder to `conductor/archive/release-1.11.0_20260808/` (via git mv)
 - [ ] Task 7.4: Commit: `chore(conductor): Archive track 'v1.11.0 Release Execution'`
 - [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
