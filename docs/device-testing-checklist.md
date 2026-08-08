@@ -4,6 +4,15 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.13.0 (2026-08-09)
+
+- **Target:** local production preview (boot/bundle-hardening build) — live-URL record to be appended by the v1.13.0 release-execution track
+- **Scope:** Performance & Bundle Hardening spot-check (vendor code-split, coverage guardrail, boot profiling) — see `docs/perf-baseline.md`
+- **Devices:** Android tablet (Android 10+, preferred), iPad (iPadOS 15+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** v1.13.0 perf rows — app reaches the Hub within 3 s of launch on a cold load (reference profile: 1080 ms desktop preview; raster pipeline 641 ms dev-measured); the shell (index-*.js ≤ 200 kB) and the Phaser vendor chunk (phaser-*.js) load as two separate requests with no monolithic entry chunk; a game tile launches and returns to the Hub normally (scene lazy-chunks intact after the split); the PWA update flow still works — when a new build is deployed the update prompt appears after reload and applying it serves the new version (registerType "prompt" path unchanged); offline re-play — after a full load with network on, switching to airplane mode and relaunching still boots the game from the service-worker precache (33 entries incl. phaser chunk)
+- **Result:** **reference-profile executed 2026-08-09 (desktop Chromium, playwright-cli)** — boot 1080.7 ms (< 3 s), shell + phaser chunks confirmed as separate requests, no console errors beyond pre-existing favicon 404; **device-class execution pending** — to run against the live URL as part of the v1.13.0 release execution
+- **Issues found:** none on reference profile (no Critical/High/Medium/Low)
+
 ## Execution Record — v1.12.0 (2026-08-08)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.12.0 — TTS Voice Selection)
