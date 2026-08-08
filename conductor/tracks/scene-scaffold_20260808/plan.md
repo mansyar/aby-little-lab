@@ -52,4 +52,4 @@
 - [x] Task: Update `conductor/tech-stack.md` — document GameSceneBase scaffold architecture (dated note) `98ab44e`
 - [x] Task: Run final gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` `98ab44e`
 - [x] Task: Commit `docs(conductor): Document scene scaffold architecture` `98ab44e`
-- [x] Task: Final checkpoint + git note with verification report
+- [x] Task: Final checkpoint + git note with verification report `[checkpoint: 08866a3]`
