@@ -25,6 +25,7 @@ const GAME_IDS: GameId[] = [
   "first-sounds",
   "more-less",
   "odd-one-out",
+  "color-match",
 ];
 
 /** Fresh sticker collection: every game unearned. */

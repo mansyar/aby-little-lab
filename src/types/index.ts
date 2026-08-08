@@ -12,7 +12,8 @@ export type GameId =
   | "how-many"
   | "first-sounds"
   | "more-less"
-  | "odd-one-out";
+  | "odd-one-out"
+  | "color-match";
 
 export interface StickerData {
   earned: boolean;
