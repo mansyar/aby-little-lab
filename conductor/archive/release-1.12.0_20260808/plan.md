@@ -77,7 +77,7 @@
 - [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
   - [x] Checkpoint commit 891634c
 
-## Phase 7 — Finalize & Archive [checkpoint: <sha>]
+## Phase 7 — Finalize & Archive [checkpoint: 91bd323]
 
 - [x] Task 7.1: Final gates on master if any post-merge changes occurred
   - [x] Re-ran all 4 gates on master (post-merge docs-only changes): Biome clean 109 files 284ms; 1176/1176 tests (50 files, 76.10s); build `index-CRvqpYn-.js` 1511.21 kB (gzip 383.31) — identical to deployed bundle; validate-pwa 13/13
@@ -85,5 +85,8 @@
   - [x] release-notes-v1.12.0.md status → FINAL (released 2026-08-08, tag v1.12.0, deployed + live, device testing passed on all 4 device classes)
   - [x] release-checklist.md Final Sign-Off v1.12.0 updated — device testing executed + passed, no pending items
 - [x] Task 7.3: Archive track folder to `conductor/archive/release-1.12.0_20260808/` (via git mv)
+  - [x] git mv executed; renames committed (42b60d5)
 - [x] Task 7.4: Commit: `chore(conductor): Archive track 'v1.12.0 Release Execution'`
-- [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
+  - [x] Commit 631e881 (plan.md finalization + archive); registry updated to (Archived) in commit 7fd1304
+- [x] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
+  - [x] Checkpoint commit 91bd323
