@@ -247,6 +247,7 @@ const mockSpeech = vi.hoisted(() => ({
   speakLetter: vi.fn(() => true),
   speakWord: vi.fn(() => true),
   speakNumber: vi.fn(() => true),
+  setPreferredVoiceURI: vi.fn(),
 }));
 vi.mock("../../utils/speech", () => mockSpeech);
 
@@ -361,6 +362,7 @@ import {
   resetProgress,
   setPlayTimeLimit,
   switchProfile,
+  updateSettings,
 } from "../../utils/storage";
 
 const GAME_SCENES = [
@@ -781,6 +783,15 @@ describe("scene navigation flow", () => {
       scene.create();
 
       expect(mockAudio.init).toHaveBeenCalled();
+    });
+
+    it("applies the stored TTS voice preference on create", () => {
+      updateSettings({ preferredVoiceURI: "urn:test-voice" });
+
+      const scene = new BootScene();
+      scene.create();
+
+      expect(mockSpeech.setPreferredVoiceURI).toHaveBeenCalledWith("urn:test-voice");
     });
   });
 

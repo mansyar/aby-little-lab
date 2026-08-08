@@ -405,7 +405,11 @@ describe("Storage utilities", () => {
       expect(profiles).toHaveLength(1);
       expect(profiles[0]).toMatchObject({ id: "p1", avatarId: "cat" });
       expect(profiles[0].stickers["shape-sorter"].earned).toBe(true);
-      expect(getSettings()).toEqual({ bgmEnabled: false, sfxEnabled: true });
+      expect(getSettings()).toEqual({
+        bgmEnabled: false,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+      });
     });
 
     it("keeps the v1 key untouched after migration", () => {

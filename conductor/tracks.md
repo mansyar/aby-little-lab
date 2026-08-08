@@ -92,6 +92,14 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [x] **Track: TTS Voice Selection (Parental Settings)** *Link: [./archive/tts-voice-selection_20260808/index.md](./archive/tts-voice-selection_20260808/index.md)* (Archived)
+
+---
+
+- [~] **Track: v1.12.0 Release Execution (Ship TTS Voice Selection)** *Link: [./tracks/release-1.12.0_20260808/index.md](./tracks/release-1.12.0_20260808/index.md)*
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---

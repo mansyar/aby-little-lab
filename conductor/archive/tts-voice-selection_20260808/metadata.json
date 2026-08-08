@@ -1,0 +1,8 @@
+{
+  "id": "tts-voice-selection_20260808",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "summary": "Device-level TTS voice selection in the parental Settings panel: pick any installed speechSynthesis voice (with a Default (device) option) applied to all 7 speech-driven scenes via speech.ts, with an in-place preview. Addresses the accepted known issue 'TTS voice availability varies by device/OS'."
+}

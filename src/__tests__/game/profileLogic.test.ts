@@ -27,7 +27,7 @@ function v1Save(overrides: Partial<AppStorage> = {}): Partial<AppStorage> {
       "word-match": { earned: false, earnedAt: null },
       "word-builder": { earned: false, earnedAt: null },
     },
-    settings: { bgmEnabled: false, sfxEnabled: true },
+    settings: { bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null },
     ...overrides,
   };
 }
@@ -76,7 +76,7 @@ describe("profileLogic", () => {
       expect(v2.activeProfileId).toBe("p1");
       expect(v2.profiles).toHaveLength(1);
       expect(v2.profiles[0]).toMatchObject({ id: "p1", avatarId: "cat", createdAt: NOW });
-      expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true });
+      expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null });
     });
 
     it("moves v1 stickers and settings into profile p1", () => {
@@ -88,7 +88,7 @@ describe("profileLogic", () => {
         earned: true,
         earnedAt: "2026-07-28T00:00:00.000Z",
       });
-      expect(v2.settings).toEqual({ bgmEnabled: false, sfxEnabled: true });
+      expect(v2.settings).toEqual({ bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null });
       expect(v2.activeProfileId).toBe("p1");
     });
 
@@ -109,7 +109,7 @@ describe("profileLogic", () => {
         NOW,
       );
       expect(v2.profiles).toHaveLength(1);
-      expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true });
+      expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null });
     });
 
     it("gives migrated profile p1 an unlimited default play time", () => {
@@ -167,6 +167,29 @@ describe("profileLogic", () => {
 
       expect(normalized.settings.bgmEnabled).toBe(true);
       expect(normalized.settings.sfxEnabled).toBe(true);
+    });
+
+    it("defaults the TTS voice preference to null (browser default)", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      const normalized = normalizeV2(JSON.parse(JSON.stringify(v2)), NOW);
+
+      expect(normalized.settings.preferredVoiceURI).toBeNull();
+    });
+
+    it("preserves a stored voice preference through normalize", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      v2.settings.preferredVoiceURI = "com.example.voice.123";
+      const normalized = normalizeV2(JSON.parse(JSON.stringify(v2)), NOW);
+
+      expect(normalized.settings.preferredVoiceURI).toBe("com.example.voice.123");
+    });
+
+    it("backfills the voice preference for saves from before the feature", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      delete (v2.settings as Partial<ProfileV2["settings"]>).preferredVoiceURI;
+      const normalized = normalizeV2(v2, NOW);
+
+      expect(normalized.settings.preferredVoiceURI).toBeNull();
     });
 
     it("backfills play time on profiles from before the feature", () => {

@@ -1,11 +1,14 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { setPreferredVoiceURI } from "../utils/speech";
+import { getSettings } from "../utils/storage";
 
 /**
  * Boot scene — the first scene loaded by the game.
  *
- * Initializes the audio system, attempts to lock the screen orientation to
- * landscape, then transitions to the Preload scene.
+ * Initializes the audio system, applies the stored TTS voice preference,
+ * attempts to lock the screen orientation to landscape, then transitions to
+ * the Preload scene.
  */
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +17,8 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     AudioManager.getInstance().init();
+    // Apply the device-level TTS voice preference before any scene speaks.
+    setPreferredVoiceURI(getSettings().preferredVoiceURI);
 
     // iPad Safari/Chrome (all iOS browsers use WebKit) only implement a partial
     // Screen Orientation API: `screen.orientation` exists but `lock()` does

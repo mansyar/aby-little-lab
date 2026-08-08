@@ -1,0 +1,8 @@
+{
+  "id": "release-1.12.0_20260808",
+  "type": "chore",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "summary": "Ship TTS Voice Selection as v1.12.0: release branch + version bump, release docs and device-testing checklist record, quality gates, annotated tag, PR to master, Coolify auto-deploy, live verification and targeted 4-device-class device testing (10 TTS voice rows + carried rows). Mirrors the v1.6.0-v1.11.0 release-track pattern."
+}
