@@ -14,8 +14,8 @@
   - [x] Test: shutdown cleanup — destroys parentLock/mascot/speaker on `shutdown`
 - [x] Task: Implement `GameSceneBase` (Green phase) — shared state (parentLock, mascot, speaker, audioManager, progressDots, inputLocked) + shared methods + protected constants `adf5d99`
 - [x] Task: Run `CI=true pnpm test` to confirm scaffold tests pass; Biome clean `adf5d99`
-- [ ] Task: Commit `refactor(scenes): Add GameSceneBase shared scaffold`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Commit `refactor(scenes): Add GameSceneBase shared scaffold` `adf5d99`
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Migrate Speech/Card Family (6 scenes)
 
