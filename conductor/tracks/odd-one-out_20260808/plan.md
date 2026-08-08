@@ -16,11 +16,11 @@
 - [x] Task: Verify `speakWord` handles item names ("ball", "star", "dog", "blue frog") — existing generic `speakText(word, enabled, 0.8)`; no code change expected *(680793e — verified; speech tests 19/19 green)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(460f6b5)*
 
-## Phase 3 — Scene Implementation
+## Phase 3 — Scene Implementation [checkpoint: 7977c34]
 
 - [x] Task: Write scene tests following `shadowMatchScene.test.ts` (2×2 grid) / `moreLessScene.test.ts` style: round setup (4 cards, 3 identical + 1 odd), correct tap → advance, incorrect tap → wiggle + no penalty, prompt spoken at round start, win flow + `{ justEarned: "odd-one-out" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(4d4dc5a — 11 tests)*
 - [x] Task: Implement `OddOneOutScene.ts` (scene key `OddOneOut`): 2×2 grid centered (~256px cards, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, speaker button, shared win celebration, auto-return after 3s *(4d4dc5a — completeGame('odd-one-out') win flow; GameId union + GAME_IDS add pulled forward as scene prerequisite)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(7977c34)*
 
 ## Phase 4 — Integration
 
