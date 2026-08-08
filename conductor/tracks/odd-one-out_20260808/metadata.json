@@ -1,0 +1,8 @@
+{
+  "id": "odd-one-out_20260808",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "summary": "Game 14: Odd One Out - visual discrimination & categorization game (2x2 grid of 3 identical + 1 distinct card, TTS prompt speaks the odd item, progressive bands: cross-category / same-category / frog color variants, 6 rounds per playthrough)."
+}
