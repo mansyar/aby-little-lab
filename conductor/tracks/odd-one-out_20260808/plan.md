@@ -18,13 +18,13 @@
 
 ## Phase 3 — Scene Implementation
 
-- [ ] Task: Write scene tests following `shadowMatchScene.test.ts` (2×2 grid) / `moreLessScene.test.ts` style: round setup (4 cards, 3 identical + 1 odd), correct tap → advance, incorrect tap → wiggle + no penalty, prompt spoken at round start, win flow + `{ justEarned: "odd-one-out" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix)
-- [ ] Task: Implement `OddOneOutScene.ts` (scene key `OddOneOut`): 2×2 grid centered (~256px cards, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, speaker button, shared win celebration, auto-return after 3s
+- [x] Task: Write scene tests following `shadowMatchScene.test.ts` (2×2 grid) / `moreLessScene.test.ts` style: round setup (4 cards, 3 identical + 1 odd), correct tap → advance, incorrect tap → wiggle + no penalty, prompt spoken at round start, win flow + `{ justEarned: "odd-one-out" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(4d4dc5a — 11 tests)*
+- [x] Task: Implement `OddOneOutScene.ts` (scene key `OddOneOut`): 2×2 grid centered (~256px cards, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, speaker button, shared win celebration, auto-return after 3s *(4d4dc5a — completeGame('odd-one-out') win flow; GameId union + GAME_IDS add pulled forward as scene prerequisite)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `odd-one-out` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge
+- [x] Task: Add `odd-one-out` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(4d4dc5a — pulled forward: required by GameSceneBase.completeGame/hasSticker)*
 - [ ] Task: Register `OddOneOut` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
 - [ ] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker; 148 → 150)
 - [ ] Task: Hub grid — 14 tiles in 5×3 (row 3 = 4 tiles; verify fill logic left-aligns and sticker shelf / play-time arc still fit)
