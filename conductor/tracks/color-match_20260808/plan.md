@@ -22,14 +22,14 @@
 - [x] Task: Implement `ColorMatchScene.ts` (scene key `ColorMatch`): Graphics-drawn swatch prompt top-center (~180px), 2×2 grid of 4 cards (~256px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, speaker button, shared win celebration, auto-return after 3s *(68f8323 — swatch 110px + cards 220px to fit 1024×768; full suite 52 files/1206 tests green; biome clean 113 files)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(83fc708)*
 
-## Phase 4 — Integration
+## Phase 4 — Integration [checkpoint: accfc1f]
 
 - [x] Task: Add `color-match` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(68f8323 — pulled forward as scene prerequisite, per odd-one-out precedent)*
-- [ ] Task: Register `ColorMatch` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
-- [ ] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker; 150 → 152)
-- [ ] Task: Hub grid — 15 tiles in 5×3 (rows 5/5/5, grid fully populated; verify sticker shelf / play-time arc still fit)
-- [ ] Task: Regression tests — old saves migrate cleanly, navigation test covers 15 tiles, sceneRegistry tests updated
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Register `ColorMatch` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(226af86 — loader added; registry test expects 15 keys)*
+- [x] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker; 150 → 152) *(226af86 — both imported + registered; imports alphabetized)*
+- [x] Task: Hub grid — 15 tiles in 5×3 (rows 5/5/5, grid fully populated; verify sticker shelf / play-time arc still fit) *(226af86 — GAME_TILES entry added; iconDisplay 52/iconOffsetY -44; navigation tests cover 15 icons/slots)*
+- [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 15 tiles, sceneRegistry tests updated *(226af86 — storage Game 15 backfill test; navigation counts 15 icons/30 hasSticker/results[15]/svgCalls 152/14 unearned slots; firstWordsIntegration 15 tiles; full suite 52 files/1207 tests)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(accfc1f)*
 
 ## Phase 5 — Docs & Release Readiness
 
