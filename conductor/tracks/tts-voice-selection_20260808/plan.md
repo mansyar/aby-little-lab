@@ -16,7 +16,7 @@
 - [x] Task: Extend `Settings` in `src/types/index.ts` with `preferredVoiceURI: string | null`; update `defaultSettings()` in `profileLogic.ts` + additive `normalizeV2` merge (75a183a)
   - [x] Tests: default settings include `preferredVoiceURI: null`; v1 migration and v2 normalize preserve old saves without error
 - [x] Task: Verify coverage for Phase 1 code files (voiceLogic 100%, profileLogic 100%)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 0db7000]
 
 ## Phase 2 — speech.ts Integration (TDD)
 
