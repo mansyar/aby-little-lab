@@ -30,14 +30,14 @@
 
 ## Phase 3 — SettingsPanel Voice Row + Preview
 
-- [ ] Task: Add Voice row to `SettingsPanel` (UI; tests alongside implementation)
-  - [ ] Row label shows "Voice: Default (device)" or truncated selected voice name; tap cycles options (Default → all device voices → wrap)
-  - [ ] Preview button in the row speaks sample phrase with currently selected voice; honors SFX toggle parity (AC-5)
-  - [ ] Handle `voiceschanged` async load state; row remains functional when `getVoices()` is empty
-  - [ ] Persist via `updateSettings({ preferredVoiceURI })` on selection change
-- [ ] Task: Write/extend SettingsPanel tests (row exists, cycling, preview speaks, persistence)
-- [ ] Task: Verify coverage
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) — manual plan: dev server, open Settings via 3s parental hold, cycle voice, preview, restart persistence
+- [x] Task: Add Voice row to `SettingsPanel` (UI; tests alongside implementation) (a745cef)
+  - [x] Row label shows "Voice: Default (device)" or truncated selected voice name; tap cycles options (Default → all device voices → wrap)
+  - [x] Preview button in the row speaks sample phrase with currently selected voice; honors SFX toggle parity (AC-5)
+  - [x] Handle `voiceschanged` async load state; row remains functional when `getVoices()` is empty
+  - [x] Persist via `updateSettings({ preferredVoiceURI })` on selection change
+- [x] Task: Write/extend SettingsPanel tests (row exists, cycling, preview speaks, persistence) (a745cef) — 8 new tests in `SettingsPanel TTS voice selection` describe + 1 BootScene sync test in navigation.test.ts
+- [x] Task: Verify coverage (SettingsPanel 98.72% lines, BootScene 100%, voiceLogic 100%)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: pending] — manual plan: dev server, open Settings via 3s parental hold, cycle voice, preview, restart persistence
 
 ## Phase 4 — Full Verification & Documentation
 
