@@ -2,12 +2,12 @@
 
 **Track:** `color-match_20260808` · **Branch:** `feat/game-15`
 
-## Phase 1 — Pure Game Logic (TDD)
+## Phase 1 — Pure Game Logic (TDD) [checkpoint: 73b428c]
 
-- [ ] Task: Write failing tests for `src/game/colorMatchLogic.ts` (Red phase): playthrough generation (6 rounds; 3 per band easy/hard; rounds 1–3 from 4-color pool red/blue/yellow/green, rounds 4–6 from 6-color pool + orange/purple; exactly 4 distinct colors per round; target = one sampled color; swatch hexes match SVG fill constants), round building, answer evaluation
-- [ ] Task: Implement `src/game/colorMatchLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, `isCorrect` + `COLOR_POOLS` / `COLOR_CARDS` mappings
-- [ ] Task: Verify coverage for `colorMatchLogic.ts` (>80%; project runs ~98%)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write failing tests for `src/game/colorMatchLogic.ts` (Red phase): playthrough generation (6 rounds; 3 per band easy/hard; rounds 1–3 from 4-color pool red/blue/yellow/green, rounds 4–6 from 6-color pool + orange/purple; exactly 4 distinct colors per round; target = one sampled color; swatch hexes match SVG fill constants), round building, answer evaluation *(119f6fd — 17 tests, Red confirmed: module missing)*
+- [x] Task: Implement `src/game/colorMatchLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, `isCorrect` + `COLOR_POOLS` / `COLOR_CARDS` mappings *(119f6fd — 19 tests green incl. defensive throw/out-of-range branches)*
+- [x] Task: Verify coverage for `colorMatchLogic.ts` (>80%; project runs ~98%) *(119f6fd — 95.45% stmts / 75% branch / 100% funcs / 94.44% lines; full suite 51 files/1195 tests green)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(73b428c)*
 
 ## Phase 2 — Assets & Prompt Audio
 
