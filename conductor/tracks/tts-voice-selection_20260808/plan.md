@@ -53,3 +53,9 @@
 ---
 
 **Out of scope:** per-profile voices, locale selection, cloud sync, new SVG art, kid-facing voice UI.
+
+---
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions (59ea382)
