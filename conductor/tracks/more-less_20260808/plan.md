@@ -42,4 +42,4 @@
 
 ## Phase: Review Fixes
 
-- [ ] Task: Apply review suggestions
+- [x] Task: Apply review suggestions *(01bd524 — clarified plan.md Task wording: win detection is in-scene per countLogic/HowManyScene convention; no code changes needed — 2 informational Low findings only)*
