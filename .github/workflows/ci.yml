@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches: [master]
-    tags: ['v*']
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
     paths-ignore: ['conductor/**', 'docs/**', 'README.md', '**/*.md']
 
 permissions:
@@ -48,13 +48,22 @@ jobs:
   deploy:
     name: Deploy to Coolify
     needs: quality-gates
-    # Deploys only on version-tag pushes (e.g. v1.9.0); PRs and master pushes
-    # never deploy. Requires repository secrets:
+    # Deploys only on strict semver version-tag pushes (e.g. v1.9.0), and only
+    # if the tag points to a commit on master (master lineage guard below).
+    # PRs and master pushes never deploy. Requires repository secrets:
     #   COOLIFY_DEPLOY_WEBHOOK - Coolify -> Application -> Webhooks -> Deploy Webhook URL
     #   COOLIFY_TOKEN         - Coolify -> Keys & Tokens -> API token with 'deploy' permission
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
+      - name: Ensure tag points to a master commit
+        run: |
+          git fetch origin master
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "::error::Tag $GITHUB_REF_NAME points to a commit not on master; refusing to deploy."
+            exit 1
+          fi
+
       - name: Verify deploy secrets are configured
         env:
           DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
