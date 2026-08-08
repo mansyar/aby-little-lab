@@ -84,7 +84,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Game 14 — Odd One Out (Visual Discrimination & Categorization)** *Link: [./tracks/odd-one-out_20260808/index.md](./tracks/odd-one-out_20260808/index.md)*
+- [x] **Track: Game 14 — Odd One Out (Visual Discrimination & Categorization)** *Link: [./archive/odd-one-out_20260808/index.md](./archive/odd-one-out_20260808/index.md)* (Archived)
 
 ---
 
