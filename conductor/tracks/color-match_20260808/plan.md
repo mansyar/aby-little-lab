@@ -39,3 +39,7 @@
 - [x] Task: Update `README.md` (games table, hub experience notes) *(8555bc6 — row 15, replay variety, controls/speaker lists, Color Match bullet, fifteen references)*
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(8555bc6 — biome 113 files clean; 52 files/1207 tests green; build ok; validate-pwa 13/13)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(68edfea)*
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions *04dbeca*
