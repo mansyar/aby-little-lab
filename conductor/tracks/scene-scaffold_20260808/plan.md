@@ -19,16 +19,16 @@
 
 ## Phase 2: Migrate Speech/Card Family (6 scenes)
 
-- [ ] Task: Migrate `AlphabetScene` — extends GameSceneBase; remove duplicated constants/methods (progress dots, win flow, back button, shutdown)
-  - [ ] Verify `alphabetScene.test.ts` still passes unchanged
-- [ ] Task: Migrate `WordMatchScene` — same treatment
-- [ ] Task: Migrate `WordBuilderScene`
-- [ ] Task: Migrate `HowManyScene`
-- [ ] Task: Migrate `FirstSoundsScene`
-- [ ] Task: Migrate `MoreLessScene`
-- [ ] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green
-- [ ] Task: Commit `refactor(scenes): Migrate speech family to GameSceneBase`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Migrate `AlphabetScene` — extends GameSceneBase; remove duplicated constants/methods (progress dots, win flow, back button, shutdown) `6cef9a8`
+  - [x] Verify `alphabetScene.test.ts` still passes unchanged `6cef9a8`
+- [x] Task: Migrate `WordMatchScene` — same treatment `6cef9a8`
+- [x] Task: Migrate `WordBuilderScene` `6cef9a8`
+- [x] Task: Migrate `HowManyScene` `6cef9a8`
+- [x] Task: Migrate `FirstSoundsScene` `6cef9a8`
+- [x] Task: Migrate `MoreLessScene` `6cef9a8`
+- [x] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green `6cef9a8`
+- [x] Task: Commit `refactor(scenes): Migrate speech family to GameSceneBase` (one commit per scene or batch, per workflow) `6cef9a8`
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Migrate Drag/Pattern Family (5 scenes)
 
