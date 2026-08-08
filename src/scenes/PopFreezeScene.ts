@@ -1,7 +1,4 @@
-import Phaser from "phaser";
-import { AudioManager } from "../audio/AudioManager";
-import { createCornerMascot, type Mascot } from "../components/Mascot";
-import { ParentLock } from "../components/ParentLock";
+import type Phaser from "phaser";
 import {
   type BubbleConfig,
   createRoundState,
@@ -12,12 +9,10 @@ import {
   registerWake,
   selectBubbleType,
 } from "../game/popFreezeLogic";
-import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
-import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { earnSticker, hasSticker } from "../utils/storage";
-import { textStyle } from "../utils/typography";
+import { sceneEntrance } from "../utils/sceneTransitions";
+import { GameSceneBase } from "./GameSceneBase";
 
 /** Display size for each bubble (exceeds 96px ideal touch target). */
 const BUBBLE_DISPLAY_SIZE = 96;
@@ -70,12 +65,6 @@ const BREATHE_DURATION = 750;
 /** Breathing scale multiplier (1.0 → 1.03 per phase). */
 const BREATHE_SCALE = 1.03;
 
-/** Display size for the sticker unlock animation. */
-const STICKER_DISPLAY_SIZE = 256;
-
-/** Delay before auto-returning to Hub after round completion (ms). */
-const AUTO_RETURN_DELAY = 3000;
-
 /** Display size for the sleep glyph on sleeping bubbles. */
 const ZZZ_DISPLAY_SIZE = 40;
 
@@ -95,56 +84,23 @@ interface BubbleData {
  * bubble triggers a gentle wobble with no penalty. After 6 pops the round
  * is complete.
  */
-export class PopFreezeScene extends Phaser.Scene {
-  private parentLock?: ParentLock;
-  private mascot?: Mascot;
-  private readonly audioManager: AudioManager;
+export class PopFreezeScene extends GameSceneBase {
   private roundState: RoundState = createRoundState();
   private bubbles: BubbleData[] = [];
   private roundComplete = false;
 
   constructor() {
-    super({ key: "PopFreeze" });
-    this.audioManager = AudioManager.getInstance();
+    super("PopFreeze");
   }
 
   create(): void {
     sceneEntrance(this);
-    this.mascot = createCornerMascot(this);
-
-    const backButton = this.add.text(
-      20,
-      20,
-      "← Back",
-      textStyle({
-        fontSize: "24px",
-        color: "#2d3748",
-      }),
-    );
-    backButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-
-    this.parentLock = new ParentLock({
-      scene: this,
-      target: backButton,
-      onSuccess: () => {
-        transitionToScene(this, "Hub");
-      },
-      onFailure: () => {
-        // No action needed on failure.
-      },
-    });
-    attachPressFeedback(backButton);
+    this.createCornerMascot();
+    this.createBackButton();
 
     this.initRound();
 
-    this.events.on("shutdown", () => {
-      this.parentLock?.destroy();
-      this.mascot?.destroy();
-      this.mascot = undefined;
-    });
+    this.registerShutdownCleanup();
   }
 
   /** Initializes a new round: resets state, configures physics, spawns initial bubbles. */
@@ -251,7 +207,7 @@ export class PopFreezeScene extends Phaser.Scene {
 
     if (isWin) {
       this.roundComplete = true;
-      this.handleComplete();
+      this.completeGame("pop-freeze");
     } else {
       this.respawnBubble();
     }
@@ -326,41 +282,5 @@ export class PopFreezeScene extends Phaser.Scene {
       type,
     );
     this.spawnBubble(config);
-  }
-
-  /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
-  private handleComplete(): void {
-    this.audioManager.playWin();
-    this.mascot?.cheer(true);
-
-    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
-
-    const earnedNow = !hasSticker("pop-freeze");
-    if (earnedNow) {
-      earnSticker("pop-freeze");
-      this.audioManager.playSticker();
-      this.createStickerAnimation();
-    }
-
-    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub", earnedNow ? { justEarned: "pop-freeze" } : undefined);
-    });
-  }
-
-  /** Shows a sticker unlock animation at the center of the screen. */
-  private createStickerAnimation(): void {
-    const stickerScale = STICKER_DISPLAY_SIZE / 512;
-    const stickerImage = this.add
-      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_pop_freeze")
-      .setScale(0);
-
-    this.tweens.add({
-      targets: stickerImage,
-      scaleX: stickerScale,
-      scaleY: stickerScale,
-      duration: motionDuration(300, 180),
-      delay: motionDuration(400, 250),
-      ease: "Back.out",
-    });
   }
 }
