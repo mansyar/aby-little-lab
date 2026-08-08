@@ -4,9 +4,9 @@
 
 ## Phase 1 — Pure Game Logic (TDD)
 
-- [ ] Task: Write failing tests for `src/game/oddOneOutLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band easy/mid/hard; exactly 3 identical + 1 distinct card per round; odd texture unique per playthrough; group texture never equals odd texture), band rules (easy = cross-category, mid = same-category different item, hard = frog color variants), odd-item selection, answer evaluation
-- [ ] Task: Implement `src/game/oddOneOutLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` (or `isCorrect`); win detection lives in-scene (`roundIndex >= rounds.length`, per countLogic/HowManyScene convention)
-- [ ] Task: Verify coverage for `oddOneOutLogic.ts` (>80%; project runs ~98%)
+- [x] Task: Write failing tests for `src/game/oddOneOutLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band easy/mid/hard; exactly 3 identical + 1 distinct card per round; odd texture unique per playthrough; group texture never equals odd texture), band rules (easy = cross-category, mid = same-category different item, hard = frog color variants), odd-item selection, answer evaluation *(44c4506)*
+- [x] Task: Implement `src/game/oddOneOutLogic.ts` pure functions to pass (Green phase): `createPlaythrough`, `createRound`, `evaluateRound` (or `isCorrect`); win detection lives in-scene (`roundIndex >= rounds.length`, per countLogic/HowManyScene convention) *(44c4506 — createPlaythrough/createRound/isCorrect + promptFor; 21 tests green)*
+- [x] Task: Verify coverage for `oddOneOutLogic.ts` (>80%; project runs ~98%) *(44c4506 — 97.22% stmts / 90.9% branch / 100% funcs / 97.05% lines; full suite 47 files/1133 tests green)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Assets & Prompt Audio
