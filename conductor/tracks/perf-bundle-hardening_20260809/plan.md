@@ -20,8 +20,8 @@
 
 - [x] Task: Run `CI=true pnpm test` with coverage — record current all-files numbers (52 files / 1207 tests baseline)
   - **Baseline (2026-08-09):** All files 96.77% stmts / 89.13% branch / 91.87% funcs / 98.1% lines
-- [~] Task: Raise thresholds in `vite.config.ts` `test.coverage.thresholds` → lines 95 / statements 90 / functions 88 / branches 85 (AC3)
-  - [ ] Full suite + coverage run — PASS at new thresholds (threshold run fails first on current 80% config only if a metric is below; verify green at new values)
+- [x] Task: Raise thresholds in `vite.config.ts` `test.coverage.thresholds` → lines 95 / statements 90 / functions 88 / branches 85 (AC3) (790d741)
+  - [x] Full suite + coverage run — PASS at new thresholds (threshold run fails first on current 80% config only if a metric is below; verify green at new values) — All files 96.72% stmts / 88.85% branch / 91.87% funcs / 98.1% lines, 52 files / 1207 tests; re-verified green in Phase 4 gates
 - [x] Task: Update `conductor/tech-stack.md` — dated note on new coverage thresholds and current coverage (179f76a)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (70fc245)
 
@@ -33,7 +33,7 @@
 - [x] Task: If code changed — add/update unit tests for the raster-size decision logic (TDD where applicable); full suite green — not applicable: no code changed post-instrumentation (suite verified green after cd69195: 52 files / 1207 tests)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4: Device Spot-Check & Quality Gates
+## Phase 4: Device Spot-Check & Quality Gates [checkpoint: ec24d39]
 
 - [x] Task: Add v1.13.0 perf spot-check rows to `docs/device-testing-checklist.md` — boot time measurement, PWA update flow (new SW prompt on release), offline re-play (f5f1ba9)
 - [x] Task: Execute spot-check on ≥1 device class (Android tablet preferred); record results (AC6) — reference profile executed 2026-08-09 (boot 1080.7 ms, chunks separate, no console errors); device-class execution pending per user decision — recorded in checklist, to run against live URL in v1.13.0 release-execution track (out of scope here)
