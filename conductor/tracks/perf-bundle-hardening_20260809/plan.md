@@ -3,17 +3,18 @@
 **Track ID:** `perf-bundle-hardening_20260809`
 **Type:** Chore (Performance)
 
-## Phase 1: Vendor Code-Splitting (Phaser Isolation)
+## Phase 1: Vendor Code-Splitting (Phaser Isolation) [checkpoint: d2e9ed8]
 
-- [ ] Task: Baseline & research — record current `pnpm run build` output (entry 1,513 kB, full chunk list); confirm the Vite 8.1.5 rolldown code-splitting API (`build.rolldownOptions.output.codeSplitting` / manualChunks); verify Phaser 4.2.1 exports a single full-engine import surface (document finding)
-- [ ] Task: Write bundle-assertion script `scripts/validate-bundle.js` — parses `dist/assets` manifest; asserts (a) a distinct Phaser vendor chunk exists, (b) shell entry `index-*.js` ≤ 200 kB minified
-  - [ ] Run script against current build — confirm it FAILS on (b) (Red phase)
-- [ ] Task: Implement vendor split in `vite.config.ts` — isolate `phaser` into its own chunk (rolldown `output.codeSplitting`)
+- [x] Task: Baseline & research — record current `pnpm run build` output (entry 1,513 kB, full chunk list); confirm the Vite 8.1.5 rolldown code-splitting API (`build.rolldownOptions.output.codeSplitting` / manualChunks); verify Phaser 4.2.1 exports a single full-engine import surface (document finding)
+  - **Findings:** Baseline entry `index-Buf2jTEF.js` = 1,513.11 kB minified (383.52 kB gzip); 15 lazy scene chunks 2.68–5.38 kB; Vite emits >500 kB warning. Rolldown 1.1.5 (Vite 8.1.5 dep) API confirmed: `build.rolldownOptions.output.codeSplitting: { groups: [{ name, test }] }` — `name` names the chunk (`phaser-[hash].js`), `test` is string/regex/function; use `[\\/]` separators for Windows safety. Phaser 4.2.1 exports only `"."` → single `dist/phaser.esm.js` full-engine file; no tree-shaking surface — group by module path `node_modules[\\/]phaser`.
+- [x] Task: Write bundle-assertion script `scripts/validate-bundle.js` — parses `dist/assets` manifest; asserts (a) a distinct Phaser vendor chunk exists, (b) shell entry `index-*.js` ≤ 200 kB minified (1cb143d)
+  - [x] Run script against current build — confirm it FAILS on (b) (Red phase)
+- [~] Task: Implement vendor split in `vite.config.ts` — isolate `phaser` into its own chunk (rolldown `output.codeSplitting`)
   - [ ] `pnpm run build`; run `scripts/validate-bundle.js` — PASS (Green phase: AC1 + AC2)
   - [ ] Confirm game-scene lazy chunks unchanged (still separate per-scene files)
 - [ ] Task: Verify PWA integrity — `node scripts/validate-pwa.js`; precache contains vendor + shell chunks; offline guarantee intact (AC4)
-- [ ] Task: Wire `scripts/validate-bundle.js` into CI — add step after `pnpm run build` in `.github/workflows/ci.yml`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Wire `scripts/validate-bundle.js` into CI — add step after `pnpm run build` in `.github/workflows/ci.yml` (45b2bec)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (d2e9ed8)
 
 ## Phase 2: Coverage Guardrail Lock
 
