@@ -31,11 +31,11 @@
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 14 tiles, sceneRegistry tests updated *(1086915 — storage pre-Game-14 backfill test added; navigation counts updated to 14/28; firstWordsIntegration 14 tiles)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(3ce0c1d)*
 
-## Phase 5 — Docs & Release Readiness
+## Phase 5 — Docs & Release Readiness [checkpoint: d40bb82]
 
 - [x] Task: Update `conductor/product.md` (Game 14 row, hub grid 14 tiles, visual-discrimination amendment) *(d90e87b)*
 - [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 14, asset pipeline additions) *(d90e87b)*
 - [x] Task: Update `docs/PRD.md` (Game 14 section) and `docs/TDD.md` (scene/structure notes) as needed *(d90e87b)*
 - [x] Task: Update `README.md` (games table, hub experience notes) *(d90e87b)*
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(d90e87b — biome clean 106 files; 48 files/1145 tests green; build ok; validate-pwa 13/13)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(d40bb82)*
