@@ -16,13 +16,14 @@
 - [x] Task: Wire `scripts/validate-bundle.js` into CI — add step after `pnpm run build` in `.github/workflows/ci.yml` (45b2bec)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (d2e9ed8)
 
-## Phase 2: Coverage Guardrail Lock
+## Phase 2: Coverage Guardrail Lock [checkpoint: 70fc245]
 
-- [ ] Task: Run `CI=true pnpm test` with coverage — record current all-files numbers (52 files / 1207 tests baseline)
-- [ ] Task: Raise thresholds in `vite.config.ts` `test.coverage.thresholds` → lines 95 / statements 90 / functions 88 / branches 85 (AC3)
+- [x] Task: Run `CI=true pnpm test` with coverage — record current all-files numbers (52 files / 1207 tests baseline)
+  - **Baseline (2026-08-09):** All files 96.77% stmts / 89.13% branch / 91.87% funcs / 98.1% lines
+- [~] Task: Raise thresholds in `vite.config.ts` `test.coverage.thresholds` → lines 95 / statements 90 / functions 88 / branches 85 (AC3)
   - [ ] Full suite + coverage run — PASS at new thresholds (threshold run fails first on current 80% config only if a metric is below; verify green at new values)
-- [ ] Task: Update `conductor/tech-stack.md` — dated note on new coverage thresholds and current coverage
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `conductor/tech-stack.md` — dated note on new coverage thresholds and current coverage (179f76a)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (70fc245)
 
 ## Phase 3: Boot-Time Asset Profiling (Measure First)
 
