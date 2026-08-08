@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.12.0 (2026-08-08)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.12.0 — TTS Voice Selection)
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** Carried rows — v1.11.0 record (Hub 14 tiles 5×3 row 3 = 4 left-aligned; Odd One Out 2×2 grid 3 identical + 1 distinct, spoken prompt + speaker replay, 6 rounds easy-first bands, correct flash/chime/dot-pop 700ms, wrong wiggle no penalty, sticker first-only + replay no re-award, SFX-off, reduced-motion; More or Less arrow renders after hotfix; plus prior carried rows per the v1.11.0/v1.8.0 records — Animal Trace relaunch freshness, Shape Sorter progress dots, Pattern Builder 6 rounds, Word Match easy-first, Find the Letter splash, Word Builder ghost tiles + duplicate letters, Musical Memory max-2-in-a-row, Pop & Freeze edge bounce, Big vs Small swapped sides, How Many distinct counts + centered partial rows, Back-hold during auto-return never double-navigates, sticker persistence, play-time limits spot check) and the 10 TTS Voice Selection rows below. v1.12.0 rows — Voice row shows "Voice: Default (device)" on a fresh install (no stored preference); tapping the voice chip cycles through installed voices (all languages listed, no en-US gate) and wraps back to "Default (device)"; long voice names are truncated in the chip (readable, no overflow); "Preview" button speaks "Hi! I can talk." with the currently selected voice when SFX is on; "Preview" is silent when the SFX toggle is off (parity with prompt speech); selected voice persists after app close/reopen (device-level, shared across profiles); choosing "Default (device)" restores the browser-default voice; all 7 speech games (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out) use the selected voice; when the stored voice no longer exists on the device, speech falls back to the default silently (no error, no visual regression); voice chip + preview buttons are ≥64px touch targets
+- **Result:** pending — to be executed against the live URL after deploy
+- **Issues found:** pending
+
 ## Execution Record — v1.11.0 (2026-08-08)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.11.0 — Game 14 Odd One Out)
