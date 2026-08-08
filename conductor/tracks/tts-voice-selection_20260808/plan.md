@@ -8,15 +8,15 @@
 
 ## Phase 1 — Voice Selection Pure Logic + Schema (TDD)
 
-- [ ] Task: Write failing tests for `src/game/voiceLogic.ts` (Red)
-  - [ ] Test `availableVoiceOptions`: "Default (device)" always first; all voices listed (all languages, no hard en-US gate); sorted by language then name
-  - [ ] Test `resolveVoice`: matches by `voiceURI`; returns `null` when URI absent or no voices
-  - [ ] Test empty voice list → only "Default (device)" option; `resolveVoice` → `null`
-- [ ] Task: Implement `voiceLogic.ts` (Green) — `VoiceOption` type, `availableVoiceOptions`, `resolveVoice`
-- [ ] Task: Extend `Settings` in `src/types/index.ts` with `preferredVoiceURI: string | null`; update `defaultSettings()` in `profileLogic.ts` + additive `normalizeV2` merge
-  - [ ] Tests: default settings include `preferredVoiceURI: null`; v1 migration and v2 normalize preserve old saves without error
-- [ ] Task: Verify coverage for Phase 1 code files
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write failing tests for `src/game/voiceLogic.ts` (Red) (75a183a)
+  - [x] Test `availableVoiceOptions`: "Default (device)" always first; all voices listed (all languages, no hard en-US gate); sorted by language then name
+  - [x] Test `resolveVoice`: matches by `voiceURI`; returns `null` when URI absent or no voices
+  - [x] Test empty voice list → only "Default (device)" option; `resolveVoice` → `null`
+- [x] Task: Implement `voiceLogic.ts` (Green) — `VoiceOption` type, `availableVoiceOptions`, `resolveVoice` (75a183a)
+- [x] Task: Extend `Settings` in `src/types/index.ts` with `preferredVoiceURI: string | null`; update `defaultSettings()` in `profileLogic.ts` + additive `normalizeV2` merge (75a183a)
+  - [x] Tests: default settings include `preferredVoiceURI: null`; v1 migration and v2 normalize preserve old saves without error
+- [x] Task: Verify coverage for Phase 1 code files (voiceLogic 100%, profileLogic 100%)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — speech.ts Integration (TDD)
 
