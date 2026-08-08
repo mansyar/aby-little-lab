@@ -42,7 +42,7 @@
   - [ ] Confirm CI "Quality Gates" passes on the PR (merge-blocking); Deploy to Coolify correctly skipped
 - [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5 — Merge, Deploy & Verify
+## Phase 5 — Merge, Deploy & Verify [checkpoint: dd97b49]
 
 - [x] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`) — PR #24 merged `f6b386d` (CI run 31243588460 Quality Gates PASS, Deploy skipped on PR); annotated tag `v1.11.0` created on master merge commit + pushed → CI run 31243738792 Quality Gates + Deploy to Coolify PASS, webhook fired
 - [x] Task 5.2: Verify deployment
@@ -53,7 +53,7 @@
 - [x] Task 5.3: Live smoke test: boot → hub (14 tiles 5×3, row 3 = 4 left-aligned; no clipping) → Odd One Out (6 rounds easy-first bands, spoken prompt + speaker replay, 3 identical + 1 distinct, correct flash/chime/dot pop 700ms, wrong wiggle no penalty, win → sticker_odd_one_out → 3s auto-return, replay no re-award) → Game 13 More or Less spot check → settings (profiles, play-time limits, footer) intact; zero console errors — executed 2026-08-08; all passed incl. sticker earned live; **arrow defect found & hotfixed** (see below)
 - [x] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.11.0 row: CI run ID, hash match, version footer, SW/manifest) — Step 7k v1.11.0 section added (incl. hotfix record); also recorded in `docs/release-notes-v1.11.0.md` (Bug Fixes) and `docs/device-testing-checklist.md` (hotfix note)
 - [x] **Hotfix — More or Less arrow (2026-08-08):** arrow rendered as small square — textures registered as `arrow_up`/`arrow_down` while `MoreLessScene` looks up `arrow_more`/`arrow_less`. Fixed in `828f9e0` (keys registered under scene lookups + regression test; 49 files/1150 tests, Biome clean). Tag `v1.11.0` amended (delete + recreate on `828f9e0`); CI run 31247079734 Quality Gates + Deploy PASS; live serves `index-d3aQJys-.js` matching local fix build; arrow verified rendering live
-- [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md) — *(pending checkpoint commit)*
+- [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md) — *(dd97b49)*
 
 ## Phase 6 — Targeted Device Testing
 
