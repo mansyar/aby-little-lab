@@ -67,14 +67,23 @@ export class SettingsPanel {
 
   /** Rebuilds the voice picker list when the platform loads voices late. */
   private readonly voiceChangedHandler = (): void => {
+    this.syncVoiceSelection();
+    this.voiceChip?.setText(`Voice: ${truncateLabel(this.voiceOptions[this.voiceIndex].label)}`);
+  };
+
+  /**
+   * Refreshes the voice options from the platform and resolves the chip index
+   * against the stored preference (falling back to "Default (device)" when the
+   * URI is unset or no longer installed).
+   */
+  private syncVoiceSelection(): void {
     this.voiceOptions = availableVoiceOptions(window.speechSynthesis?.getVoices?.() ?? []);
     const stored = getSettings().preferredVoiceURI;
     this.voiceIndex = Math.max(
       0,
       this.voiceOptions.findIndex((option) => option.voiceURI === stored),
     );
-    this.voiceChip?.setText(`Voice: ${truncateLabel(this.voiceOptions[this.voiceIndex].label)}`);
-  };
+  }
 
   /**
    * Creates the settings panel using the current persisted audio settings.
@@ -262,12 +271,7 @@ export class SettingsPanel {
    * phrase with the current selection, honoring the SFX toggle.
    */
   private createVoiceRow(x: number, y: number): void {
-    this.voiceOptions = availableVoiceOptions(window.speechSynthesis?.getVoices?.() ?? []);
-    const stored = getSettings().preferredVoiceURI;
-    this.voiceIndex = Math.max(
-      0,
-      this.voiceOptions.findIndex((option) => option.voiceURI === stored),
-    );
+    this.syncVoiceSelection();
 
     const chip = this.scene.add
       .text(
