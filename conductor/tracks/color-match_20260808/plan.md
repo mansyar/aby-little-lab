@@ -31,11 +31,11 @@
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 15 tiles, sceneRegistry tests updated *(226af86 — storage Game 15 backfill test; navigation counts 15 icons/30 hasSticker/results[15]/svgCalls 152/14 unearned slots; firstWordsIntegration 15 tiles; full suite 52 files/1207 tests)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(accfc1f)*
 
-## Phase 5 — Docs & Release Readiness
+## Phase 5 — Docs & Release Readiness [checkpoint: 68edfea]
 
-- [ ] Task: Update `conductor/product.md` (Game 15 row, games target 14 → 15, hub grid 5/5/5, color-recognition amendment)
-- [ ] Task: Update `conductor/tech-stack.md` with dated design note (Game 15, asset pipeline additions)
-- [ ] Task: Update `docs/PRD.md` (Game 15 section) and `docs/TDD.md` as needed
-- [ ] Task: Update `README.md` (games table, hub experience notes)
-- [ ] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `conductor/product.md` (Game 15 row, games target 14 → 15, hub grid 5/5/5, color-recognition amendment) *(8555bc6 — 15 mini-games, Game 15 row, mascot/speech lists, zero-text amendment, Game 15 changelog)*
+- [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 15, asset pipeline additions) *(8555bc6 — colorMatchLogic.ts in logic tree, Game 15 Design Update note with swatch/card design + COLOR_CARDS hexes)*
+- [x] Task: Update `docs/PRD.md` (Game 15 section) and `docs/TDD.md` as needed *(8555bc6 — GAME 15 section + fifteen references; TDD scene tree/GameId/asset tables/hit areas)*
+- [x] Task: Update `README.md` (games table, hub experience notes) *(8555bc6 — row 15, replay variety, controls/speaker lists, Color Match bullet, fifteen references)*
+- [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(8555bc6 — biome 113 files clean; 52 files/1207 tests green; build ok; validate-pwa 13/13)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(68edfea)*
