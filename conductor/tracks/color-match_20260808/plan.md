@@ -9,12 +9,12 @@
 - [x] Task: Verify coverage for `colorMatchLogic.ts` (>80%; project runs ~98%) *(119f6fd — 95.45% stmts / 75% branch / 100% funcs / 94.44% lines; full suite 51 files/1195 tests green)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(73b428c)*
 
-## Phase 2 — Assets & Prompt Audio
+## Phase 2 — Assets & Prompt Audio [checkpoint: 27a1bbf]
 
-- [ ] Task: Create `src/assets/svg/ui/tiles/tile_color_match.svg` (Hub tile icon: color swatches with one highlighted; 512×512 storybook style, thick `#2D3748` outline per `docs/SVG_STYLE.md`)
-- [ ] Task: Create `src/assets/svg/stickers/sticker_color_match.svg` (cream badge, color swatches with one highlighted)
-- [ ] Task: Verify `speakText` handles color names ("red", "blue", "yellow", "green", "orange", "purple") — existing generic API; no code change expected
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Create `src/assets/svg/ui/tiles/tile_color_match.svg` (Hub tile icon: color swatches with one highlighted; 512×512 storybook style, thick `#2D3748` outline per `docs/SVG_STYLE.md`) *(1d447db — 2×2 grid of the 4 easy colors, white star on red card)*
+- [x] Task: Create `src/assets/svg/stickers/sticker_color_match.svg` (cream badge, color swatches with one highlighted) *(1d447db — tile content scaled 0.48 in cream circle badge)*
+- [x] Task: Verify `speakText` handles color names ("red", "blue", "yellow", "green", "orange", "purple") — existing generic API; no code change expected *(1d447db — speakWord(word, enabled) en-US rate 0.8 verified; no change)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(27a1bbf)*
 
 ## Phase 3 — Scene Implementation
 
