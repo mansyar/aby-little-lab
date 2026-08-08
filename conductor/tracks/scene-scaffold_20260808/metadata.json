@@ -1,0 +1,8 @@
+{
+  "id": "scene-scaffold_20260808",
+  "type": "refactor",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "summary": "Extract the duplicated game-scene skeleton (back button + ParentLock, corner mascot, progress dots, input lock, win celebration, sticker award, auto-return, shutdown cleanup) into GameSceneBase extends Phaser.Scene and migrate all 13 game scenes onto it. Pure refactor: zero user-visible behavior change."
+}

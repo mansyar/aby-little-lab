@@ -1,0 +1,57 @@
+# Implementation Plan: Game Scene Scaffold Extraction
+
+**Track ID:** `scene-scaffold_20260808`
+**Status:** new
+
+## Phase 1: Base Scaffold (TDD)
+
+- [ ] Task: Write failing tests for `src/scenes/GameSceneBase.ts` (Red phase)
+  - [ ] Test: `createBackButton()` — creates back text with ParentLock; ParentLock success transitions to Hub
+  - [ ] Test: `createProgressDots(n)` — creates n dots at top with correct spacing/radius/alpha
+  - [ ] Test: `fillProgressDot(i)` — fills dot (alpha 1) + pop tween, honors reduced-motion
+  - [ ] Test: `completeGame(gameId, stickerKey)` — win SFX, mascot cheer, celebration, auto-return after delay
+  - [ ] Test: `completeGame` sticker path — earns sticker + animation on first completion; skips when already earned
+  - [ ] Test: shutdown cleanup — destroys parentLock/mascot/speaker on `shutdown`
+- [ ] Task: Implement `GameSceneBase` (Green phase) — shared state (parentLock, mascot, speaker, audioManager, progressDots, inputLocked) + shared methods + protected constants
+- [ ] Task: Run `CI=true pnpm test` to confirm scaffold tests pass; Biome clean
+- [ ] Task: Commit `refactor(scenes): Add GameSceneBase shared scaffold`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 2: Migrate Speech/Card Family (6 scenes)
+
+- [ ] Task: Migrate `AlphabetScene` — extends GameSceneBase; remove duplicated constants/methods (progress dots, win flow, back button, shutdown)
+  - [ ] Verify `alphabetScene.test.ts` still passes unchanged
+- [ ] Task: Migrate `WordMatchScene` — same treatment
+- [ ] Task: Migrate `WordBuilderScene`
+- [ ] Task: Migrate `HowManyScene`
+- [ ] Task: Migrate `FirstSoundsScene`
+- [ ] Task: Migrate `MoreLessScene`
+- [ ] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green
+- [ ] Task: Commit `refactor(scenes): Migrate speech family to GameSceneBase`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 3: Migrate Drag/Pattern Family (5 scenes)
+
+- [ ] Task: Migrate `ShapeSorterScene` (reset progress dots per playthrough behavior preserved)
+- [ ] Task: Migrate `AnimalTraceScene`
+- [ ] Task: Migrate `ShadowMatchScene`
+- [ ] Task: Migrate `BigSmallScene`
+- [ ] Task: Migrate `PatternBuilderScene`
+- [ ] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green
+- [ ] Task: Commit `refactor(scenes): Migrate drag/pattern family to GameSceneBase`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 4: Migrate Odd Scenes + Integration
+
+- [ ] Task: Migrate `PopFreezeScene` (no progress dots — base methods used without dots)
+- [ ] Task: Migrate `MusicalMemoryScene` (5 progress dots, dot count parameterized)
+- [ ] Task: Verify `navigation.test.ts` + all 13 scene tests green
+- [ ] Task: Commit `refactor(scenes): Migrate PopFreeze and MusicalMemory to GameSceneBase`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 5: Docs, Quality Gates, Completion
+
+- [ ] Task: Update `conductor/tech-stack.md` — document GameSceneBase scaffold architecture (dated note)
+- [ ] Task: Run final gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [ ] Task: Commit `docs(conductor): Document scene scaffold architecture`
+- [ ] Task: Final checkpoint + git note with verification report
