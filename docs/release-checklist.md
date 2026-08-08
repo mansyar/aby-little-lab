@@ -310,7 +310,7 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 - [x] Version footer data — `1.12.0` embedded in served bundle; no stale `1.11.0` strings
 - [x] Service worker + manifest served — `sw.js` 200 (precaches new bundle), `manifest.webmanifest` 200
 - [x] Live smoke test — Hub renders 14 tiles (5×3, row 3 = 4 left-aligned, no clipping); Settings opens via 3s parental hold with `v1.12.0` footer; Voice row shows "Voice: Default (device)" on fresh install; tapping the voice chip cycles to installed device voices (Microsoft David/Mark/Zira observed) and persists `preferredVoiceURI` to localStorage (`abby-little-lab:v2`); "Preview" speaks "Hi! I can talk." with the selected voice (rate 0.8, `speechSynthesis.speaking` true, SFX on); preference survives reload; Find the Letter speaks its target letter with the selected voice; zero console errors (only Phaser banner)
-- [~] Device testing on v1.12.0 — recorded in `docs/device-testing-checklist.md` (v1.12.0 execution record; **pending execution**)
+- [x] Device testing on v1.12.0 — executed 2026-08-08 on all 4 device classes (iPad, Android tablet, iPhone, Android phone) against the live URL; **all items passed** (all 10 TTS Voice Selection rows + carried rows), no issues found — recorded in `docs/device-testing-checklist.md` (v1.12.0 execution record)
 
 ## Post-Release Verification
 
