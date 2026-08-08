@@ -1,6 +1,6 @@
 # Release Notes — v1.12.0
 
-> **Status:** DRAFT — release in progress (2026-08-08, tag `v1.12.0`).
+> **Status:** FINAL — released 2026-08-08 (tag `v1.12.0`, deployed and live at https://aby-little-lab.ansyar-world.top/; device testing passed on all 4 device classes).
 
 ## What's New
 

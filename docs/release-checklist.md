@@ -586,12 +586,12 @@ Please report issues at [GitHub Issues URL]
 ## Final Sign-Off — v1.12.0
 
 **Version:** 1.12.0
-**Status:** Released — automated verification complete (all gates green: Biome clean 109 files, 1176/1176 tests in 50 files, build `index-CRvqpYn-.js` 1511.21 kB / gzip 383.31 kB, PWA validation 13/13; deployed via CI → Coolify, tag `v1.12.0` on master merge commit `5fd54d4`, CI run 31252538554 Quality Gates + Deploy PASS); live smoke completed 2026-08-08 against the live URL (hub 14 tiles, Settings voice row: default label, chip cycle + persistence, preview speaks selected voice, Find the Letter uses selected voice, zero console errors); device testing recorded in `docs/device-testing-checklist.md` (v1.12.0 execution record; **pending execution**)
+**Status:** Released — automated verification complete (all gates green: Biome clean 109 files, 1176/1176 tests in 50 files, build `index-CRvqpYn-.js` 1511.21 kB / gzip 383.31 kB, PWA validation 13/13; deployed via CI → Coolify, tag `v1.12.0` on master merge commit `5fd54d4`, CI run 31252538554 Quality Gates + Deploy PASS); live smoke completed 2026-08-08 against the live URL (hub 14 tiles, Settings voice row: default label, chip cycle + persistence, preview speaks selected voice, Find the Letter uses selected voice, zero console errors); device testing executed and passed 2026-08-08 on all 4 device classes (iPad, Android tablet, iPhone, Android phone) — all 10 TTS Voice Selection rows + carried rows passed, no issues found
 
 **Approval:**
 - [x] Code quality meets standards
 - [x] All tests pass (1176/1176)
 - [x] Documentation complete
 - [x] Security review passed
-- [x] Performance targets met — automated gates passed; device testing record v1.12.0 pending execution
+- [x] Performance targets met — automated gates passed; device testing record v1.12.0 executed, all items passed on all 4 device classes
 - [x] Ready for release
