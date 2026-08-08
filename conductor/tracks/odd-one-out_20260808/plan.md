@@ -11,9 +11,9 @@
 
 ## Phase 2 — Assets & Prompt Audio
 
-- [ ] Task: Create `src/assets/svg/ui/tile_odd_one_out.svg` (Hub tile icon: 2×2 mini-cards with one visually distinct; 512×512 storybook style, thick `#2D3748` outline, soft vibrant fills per `docs/SVG_STYLE.md`)
-- [ ] Task: Create `src/assets/svg/stickers/sticker_odd_one_out.svg` (cream badge, 2×2 mini-cards with one highlighted)
-- [ ] Task: Verify `speakWord` handles item names ("ball", "star", "dog", "blue frog") — existing generic `speakText(word, enabled, 0.8)`; no code change expected
+- [x] Task: Create `src/assets/svg/ui/tile_odd_one_out.svg` (Hub tile icon: 2×2 mini-cards with one visually distinct; 512×512 storybook style, thick `#2D3748` outline, soft vibrant fills per `docs/SVG_STYLE.md`) *(680793e — created at `src/assets/svg/ui/tiles/tile_odd_one_out.svg`)*
+- [x] Task: Create `src/assets/svg/stickers/sticker_odd_one_out.svg` (cream badge, 2×2 mini-cards with one highlighted) *(680793e — created at `src/assets/svg/stickers/sticker_odd_one_out.svg`)*
+- [x] Task: Verify `speakWord` handles item names ("ball", "star", "dog", "blue frog") — existing generic `speakText(word, enabled, 0.8)`; no code change expected *(680793e — verified; speech tests 19/19 green)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Scene Implementation
