@@ -16,7 +16,7 @@
 - [x] Task: Verify `speakWord("more"/"less")` (existing speech tests — en-US, rate 0.8, SFX-gated, silent fallback; no code change expected) *(9b641be — speakWord → speakText(word, enabled, 0.8) is fully generic; no code change needed)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Scene Implementation
+## Phase 3 — Scene Implementation *[checkpoint: a186525]*
 
 - [x] Task: Write scene tests following `howManyScene.test.ts` style: round setup (arrow cue, two cards, counts/layout), correct tap → advance, incorrect tap → wiggle + no penalty, prompt on round start, more-vs-less evaluation, win flow + `{ justEarned: "more-less" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(0ca2859)*
 - [x] Task: Implement `MoreLessScene.ts` (scene key `MoreLess`): arrow cue (~256px, pop-in, arrow_down texture for "less"), two group cards with N item copies (~48px loose grid), pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s *(0ca2859 — 14 tests, full suite 45 files/1093 green, scene coverage 94.5% lines)*
