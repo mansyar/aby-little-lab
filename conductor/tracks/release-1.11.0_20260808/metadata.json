@@ -1,0 +1,10 @@
+{
+  "id": "release-1.11.0_20260808",
+  "title": "v1.11.0 Release Execution",
+  "type": "Chore",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "archivedAt": null,
+  "summary": "Ship Game 14 — Odd One Out as v1.11.0: baseline validation (Game 14 already merged to master), release/v1.11.0 branch + version bump, release notes (incl. finalizing dangling v1.10.0 docs), device-testing rows, annotated tag, PR to master, Coolify auto-deploy, deployment verification + live smoke, targeted Game 14 device testing, finalize + archive. Mirrors the v1.6.0-v1.10.0 release-track pattern."
+}
