@@ -61,4 +61,13 @@ describe("PreloadScene SHAPE_ASSETS", () => {
     expect(shapes).toHaveLength(18);
     expect(cutouts).toHaveLength(18);
   });
+
+  it("registers the More or Less arrow textures under the keys the scene looks up", () => {
+    // MoreLessScene renders `arrow_${round.mode}` where mode is "more" | "less".
+    // These keys must exist in SHAPE_ASSETS or Phaser falls back to its
+    // 32x32 missing-texture square (the v1.10.0 arrow bug).
+    const keys = SHAPE_ASSETS.map((a) => a.key);
+    expect(keys).toContain("arrow_more");
+    expect(keys).toContain("arrow_less");
+  });
 });
