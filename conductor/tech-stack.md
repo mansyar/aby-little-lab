@@ -110,6 +110,10 @@ interface AppStorage {
 >
 > **Status: IMPLEMENTED (2026-08-05).** Settings → Profiles Play Time chip (Off/15/30/45/60 cycle), Hub session accounting (startPlaySession on tile tap → endPlaySession/recordPlayTime on return), Time's Up state (dimmed + locked tiles, moon badge, mascot wave), hint arc (cool/warm at ≤5 min, hidden when no limit), pre-game nudge (2s hourglass overlay), live refresh on profile switch / settings change.
 
+> **2026-08-08 — Design Update (TTS Voice Selection):** Device-level TTS voice preference addressing known issue "TTS voice availability varies by device/OS". `Settings` gains `preferredVoiceURI: string | null` (additive; `null` = browser default, off by default; v1/v2 saves migrate via the existing additive merge). Pure logic in `src/game/voiceLogic.ts` (`availableVoiceOptions(voices)` — "Default (device)" first, then all installed voices sorted by lang/name, no en-US gate; `resolveVoice(voices, uri)` — `null` fallback when URI missing or voices unavailable). `src/utils/speech.ts` gains `setPreferredVoiceURI(uri)`; `speakText` assigns `utterance.voice` via `resolveVoice(speechSynthesis.getVoices?.(), preferredVoiceURI)` — best-effort, never throws, silent fallback. `BootScene.create()` syncs the stored preference at startup so all 7 speech-driven scenes inherit it before any prompt. UI: `SettingsPanel` (panel height 560→640, rows re-spaced 185/245/305) gains a Voice chip row ("Voice: <label>", cycles Default → installed voices with 24-char truncation, persists via `updateSettings`, ≥64px hit areas) + Preview button speaking "Hi! I can talk." honoring the SFX toggle; a `voiceschanged` listener refreshes the chip when voices load late (removed on destroy). Tests: voiceLogic 100%, BootScene 100%, SettingsPanel 98.7% lines; full suite 1176.
+>
+> **Status: IMPLEMENTED (2026-08-08).** Feature complete; device-testing-checklist.md gained 10 TTS voice selection rows for the v1.12.0 release pass.
+
 ## 6. Asset Pipeline
 
 ### SVG Assets
