@@ -16,11 +16,11 @@ Aby's Little Lab gains a 15th mini-game teaching **color recognition**. Each rou
 ### FR-1 — Playthrough generation (`src/game/colorMatchLogic.ts`, pure functions)
 
 - 6 rounds per playthrough in **2 progressive bands** (difficulty fixed across replays, per replay-variety principle):
-  - Rounds 1–3 (**easy**): 3-color pool — red, blue, yellow.
+  - Rounds 1–3 (**easy**): 4-color pool — red, blue, yellow, green.
   - Rounds 4–6 (**hard**): 6-color pool — red, blue, yellow, green, orange, purple.
 - Each round has **exactly 4 cards, all distinct colors** (sampled from the band's pool, shuffled); the **target** is one of the sampled colors; the prompt is the target color's swatch. No two cards share a color within a round.
 - **Color → texture mapping** (reuses existing textures only; swatch hexes MUST equal the source SVG fills so the child matches by eye):
-  - red → `shape_heart` (#E53E3E) · blue → `frog_blue` · yellow → `shape_crescent` (#ECC94B)
+  - red → `shape_heart` (#E53E3E) · blue → `frog_blue` (#3182CE) · yellow → `shape_crescent` (#ECC94B)
   - green → `shape_rectangle` (#48BB78) · orange → `shape_circle` (#F6AD55) · purple → `shape_square` (#9F7AEA)
 - Export a `buildPlaythrough(rng)` generator (band-aware) + `buildRound(colorPool, rng)` + `isCorrect(cards, selectedIndex, targetColor)` helpers, mirroring `moreLessLogic.ts` / `oddOneOutLogic.ts` purity.
 
@@ -62,7 +62,7 @@ Aby's Little Lab gains a 15th mini-game teaching **color recognition**. Each rou
 
 ## 5. Acceptance Criteria
 
-1. Playthroughs are 6 rounds in bands easy (3 colors) / hard (6 colors) (3 each); each round has exactly 4 distinct-color cards; target color matches the swatch; win detected at 6 correct.
+1. Playthroughs are 6 rounds in bands easy (4 colors) / hard (6 colors) (3 each); each round has exactly 4 distinct-color cards; target color matches the swatch; win detected at 6 correct.
 2. Tapping the matching card advances the round; wrong taps wiggle with no penalty or progression loss.
 3. Color name spoken once at round start; silent when SFX disabled or API unavailable; visual play unaffected; speaker button replays.
 4. Win → shared celebration + sticker (first completion only) + auto-return; `justEarned` passed to Hub.

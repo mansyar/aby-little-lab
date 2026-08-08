@@ -4,7 +4,7 @@
 
 ## Phase 1 — Pure Game Logic (TDD)
 
-- [ ] Task: Write failing tests for `src/game/colorMatchLogic.ts` (Red phase): playthrough generation (6 rounds; 3 per band easy/hard; rounds 1–3 from 3-color pool red/blue/yellow, rounds 4–6 from 6-color pool + green/orange/purple; exactly 4 distinct colors per round; target = one sampled color; swatch hexes match SVG fill constants), round building, answer evaluation
+- [ ] Task: Write failing tests for `src/game/colorMatchLogic.ts` (Red phase): playthrough generation (6 rounds; 3 per band easy/hard; rounds 1–3 from 4-color pool red/blue/yellow/green, rounds 4–6 from 6-color pool + orange/purple; exactly 4 distinct colors per round; target = one sampled color; swatch hexes match SVG fill constants), round building, answer evaluation
 - [ ] Task: Implement `src/game/colorMatchLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, `isCorrect` + `COLOR_POOLS` / `COLOR_CARDS` mappings
 - [ ] Task: Verify coverage for `colorMatchLogic.ts` (>80%; project runs ~98%)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
