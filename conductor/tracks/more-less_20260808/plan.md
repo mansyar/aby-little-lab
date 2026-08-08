@@ -31,7 +31,7 @@
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 13 tiles, sceneRegistry tests updated *(d056f21 — navigation 350 tests, full suite 45 files/1101 green; new v1 migration test backfills `more-less`)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5 — Docs & Release Readiness
+## Phase 5 — Docs & Release Readiness *[checkpoint: 2d521b2]*
 
 - [x] Task: Update `conductor/product.md` (Game 13 row, hub grid 13 tiles, quantity-comparison amendment) *(2335df1)*
 - [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 13, asset pipeline additions) *(2335df1)*
