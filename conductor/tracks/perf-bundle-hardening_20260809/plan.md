@@ -40,3 +40,7 @@
 - [x] Task: Full quality gates — `pnpm run check` && `CI=true pnpm test` && `pnpm run build` && `node scripts/validate-pwa.js` && `node scripts/validate-bundle.js` — all PASS: check 114 files clean; 52 files / 1207 tests; build shell 137.29 kB (25.59 gzip) + phaser chunk 1,375.72 kB + 15 lazy chunks + precache 33; validate-pwa 13/13; validate-bundle 2/2
 - [x] Task: Sync docs — `conductor/product.md` changelog entry, `conductor/tech-stack.md` asset-pipeline/coverage notes — tech-stack.md updated in Phase 2 (179f76a); product.md/product-guidelines.md: no change (approved by user 2026-08-09 — zero user-visible change)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions — gate PreloadScene boot profiling entirely behind `import.meta.env.DEV`: UI-destroy complete handler registered first (preserves test contract), DEV block registers filecomplete + logging listeners; block verified fully stripped from production bundle (build grep: no `[preload]` string) (608538f)
