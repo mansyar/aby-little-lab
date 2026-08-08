@@ -106,5 +106,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Game 15 — Color Match (Color Recognition)** *Link: [./archive/color-match_20260808/index.md](./archive/color-match_20260808/index.md)* (Archived)
 
+---
+
+- [ ] **Track: Performance & Bundle Hardening** *Link: [./tracks/perf-bundle-hardening_20260809/index.md](./tracks/perf-bundle-hardening_20260809/index.md)*
+
 
 

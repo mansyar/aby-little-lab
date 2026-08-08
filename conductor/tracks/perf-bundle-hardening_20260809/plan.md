@@ -1,0 +1,40 @@
+# Plan: Performance & Bundle Hardening
+
+**Track ID:** `perf-bundle-hardening_20260809`
+**Type:** Chore (Performance)
+
+## Phase 1: Vendor Code-Splitting (Phaser Isolation)
+
+- [ ] Task: Baseline & research — record current `pnpm run build` output (entry 1,513 kB, full chunk list); confirm the Vite 8.1.5 rolldown code-splitting API (`build.rolldownOptions.output.codeSplitting` / manualChunks); verify Phaser 4.2.1 exports a single full-engine import surface (document finding)
+- [ ] Task: Write bundle-assertion script `scripts/validate-bundle.js` — parses `dist/assets` manifest; asserts (a) a distinct Phaser vendor chunk exists, (b) shell entry `index-*.js` ≤ 200 kB minified
+  - [ ] Run script against current build — confirm it FAILS on (b) (Red phase)
+- [ ] Task: Implement vendor split in `vite.config.ts` — isolate `phaser` into its own chunk (rolldown `output.codeSplitting`)
+  - [ ] `pnpm run build`; run `scripts/validate-bundle.js` — PASS (Green phase: AC1 + AC2)
+  - [ ] Confirm game-scene lazy chunks unchanged (still separate per-scene files)
+- [ ] Task: Verify PWA integrity — `node scripts/validate-pwa.js`; precache contains vendor + shell chunks; offline guarantee intact (AC4)
+- [ ] Task: Wire `scripts/validate-bundle.js` into CI — add step after `pnpm run build` in `.github/workflows/ci.yml`
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 2: Coverage Guardrail Lock
+
+- [ ] Task: Run `CI=true pnpm test` with coverage — record current all-files numbers (52 files / 1207 tests baseline)
+- [ ] Task: Raise thresholds in `vite.config.ts` `test.coverage.thresholds` → lines 95 / statements 90 / functions 88 / branches 85 (AC3)
+  - [ ] Full suite + coverage run — PASS at new thresholds (threshold run fails first on current 80% config only if a metric is below; verify green at new values)
+- [ ] Task: Update `conductor/tech-stack.md` — dated note on new coverage thresholds and current coverage
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 3: Boot-Time Asset Profiling (Measure First)
+
+- [ ] Task: Instrument `PreloadScene` — record `load.complete` elapsed time and per-SVG rasterization time (debug-only, no user-visible change)
+- [ ] Task: Measure on reference profile (`pnpm exec vite preview`, throttled CPU/mobile network) — record results vs <3s target (AC5)
+- [ ] Task: Decision gate — if rasterization proves a real gap (e.g., >1s of the 3s budget): implement smallest effective fix (e.g., per-asset raster-size map for small-display assets); if no gap: document findings, make no code change
+- [ ] Task: If code changed — add/update unit tests for the raster-size decision logic (TDD where applicable); full suite green
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase 4: Device Spot-Check & Quality Gates
+
+- [ ] Task: Add v1.13.0 perf spot-check rows to `docs/device-testing-checklist.md` — boot time measurement, PWA update flow (new SW prompt on release), offline re-play
+- [ ] Task: Execute spot-check on ≥1 device class (Android tablet preferred); record results (AC6)
+- [ ] Task: Full quality gates — `pnpm run check` && `CI=true pnpm test` && `pnpm run build` && `node scripts/validate-pwa.js` && `node scripts/validate-bundle.js`
+- [ ] Task: Sync docs — `conductor/product.md` changelog entry, `conductor/tech-stack.md` asset-pipeline/coverage notes
+- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
