@@ -20,13 +20,13 @@
 
 ## Phase 2 — speech.ts Integration (TDD)
 
-- [ ] Task: Write failing tests for `setPreferredVoiceURI` + voice assignment in `speakText` (Red)
-  - [ ] Mock `speechSynthesis.getVoices()` in happy-dom; test utterance receives matching `voice` when URI resolves
-  - [ ] Test silent fallback to default when URI missing / voices unavailable / not supported
-  - [ ] Test existing behavior unchanged when no preference set (regression)
-- [ ] Task: Implement `setPreferredVoiceURI(uri)` and voice resolution in `speakText` (Green) — best-effort, never throws
-- [ ] Task: Verify coverage
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write failing tests for `setPreferredVoiceURI` + voice assignment in `speakText` (Red) (7fb5f90)
+  - [x] Mock `speechSynthesis.getVoices()` in happy-dom; test utterance receives matching `voice` when URI resolves
+  - [x] Test silent fallback to default when URI missing / voices unavailable / not supported
+  - [x] Test existing behavior unchanged when no preference set (regression)
+- [x] Task: Implement `setPreferredVoiceURI(uri)` and voice resolution in `speakText` (Green) — best-effort, never throws (7fb5f90)
+- [x] Task: Verify coverage (speech.ts 97.4% lines)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: pending]
 
 ## Phase 3 — SettingsPanel Voice Row + Preview
 
