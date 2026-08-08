@@ -1,6 +1,6 @@
 # Release Notes — v1.11.0
 
-> **Status:** DRAFT — release in progress (2026-08-08). Version bump to 1.11.0; final status and verification recorded after deploy.
+> **Status:** FINAL — released 2026-08-08 (tag `v1.11.0`, deployed and live). Automated verification complete: all gates green, deployment verified (bundle hash match, service worker + manifest 200, version footer v1.11.0), live smoke passed (Game 14 end-to-end + Game 13 spot check), device testing passed on all 4 device classes. Includes the More or Less arrow hotfix (see Bug Fixes).
 
 ## What's New
 

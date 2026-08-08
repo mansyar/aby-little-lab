@@ -559,3 +559,16 @@ Please report issues at [GitHub Issues URL]
 - [x] Security review passed
 - [x] Performance targets met — automated gates passed; device metrics verified 2026-08-08 (device checklist v1.8.0 record all items passed on all 4 device classes)
 - [x] Ready for release
+
+## Final Sign-Off — v1.11.0
+
+**Version:** 1.11.0
+**Status:** Released — automated verification complete (all gates green, deployed via CI → Coolify, tag `v1.11.0` amended with the More or Less arrow hotfix `828f9e0`); live smoke testing + device testing completed 2026-08-08 against the live URL (Game 14 Odd One Out end-to-end incl. all 3 difficulty bands + sticker award + replay, hub 14-tile layout, Game 13 spot check incl. hotfixed arrow, version footer v1.11.0)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (1145/1145)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed; device metrics verified 2026-08-08 (device checklist v1.11.0 record all items passed on all 4 device classes)
+- [x] Ready for release
