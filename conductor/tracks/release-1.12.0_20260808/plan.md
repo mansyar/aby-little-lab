@@ -46,7 +46,7 @@
   - [x] PR MERGEABLE (master unprotected — no blocking rules; UNSTABLE state = expected tag-guard failure)
 - [x] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5 — Merge, Deploy & Verify [checkpoint: <sha>]
+## Phase 5 — Merge, Deploy & Verify [checkpoint: fc039f4]
 
 - [x] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`); confirm the 19 TTS commits land on `origin/master`
   - [x] PR #25 merged (`5fd54d4`); all 19 TTS commits (2716346..3f9981d) confirmed on `origin/master` via `git merge-base --is-ancestor`
