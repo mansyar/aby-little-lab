@@ -1,6 +1,6 @@
 # Initial Concept
 
-Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 14 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
+Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 15 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
 
 ---
 
@@ -38,13 +38,14 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 | 12 | First Sounds | Early literacy (phonemic awareness) | Hear a word spoken, tap the letter card of its first sound |
 | 13 | More or Less | Early numeracy (quantity comparison) | Tap the group that has MORE or FEWER items than the other (arrow cue + spoken prompt) |
 | 14 | Odd One Out | Visual discrimination & categorization | Tap the card that is different among 4 (2×2 grid: 3 identical + 1 distinct; spoken prompt names the odd item) |
+| 15 | Color Match | Color recognition | Tap the colored object matching the large swatch + spoken color name (2×2 grid of 4 distinct-color cards) |
 
 ### 3.2 Cross-Game Systems
 
-- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all fourteen game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
+- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all fifteen game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
 - **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display as a sticker shelf (SVG thumbnails) under each Hub tile — earned stickers shimmer, unearned ones are dimmed, and a just-earned sticker gets a highlight on return. Since v2 (2026-08-04), stickers are **per kid profile**: up to 4 profiles, each with its own collection; a kid-tappable avatar chip on the Hub switches profiles instantly (no parental lock), while profile creation/deletion stays behind the parental hold in Settings → Profiles.
 - **Play-Time Limits** *(2026-08-05)*: Parents can set a per-profile daily play-time cap (Off / 15 / 30 / 45 / 60 min) in Settings → Profiles. Usage accrues per profile while games run; the Hub shows a textless remaining-budget arc that turns warm at ≤5 min, a soft hourglass nudge delays game launch once 5 min remain, and when the cap is reached tiles dim and lock with a moon badge — no mid-game cutoffs, no harshness, fully off by default.
-- **TTS Voice Selection** *(2026-08-08)*: Parents can pick the device TTS voice used by all speech-driven games (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out) in Settings → Voice. Device-level (shared across profiles), "Default (device)" option, in-place Preview honoring the SFX toggle. Addresses the accepted known issue "TTS voice availability varies by device/OS".
+- **TTS Voice Selection** *(2026-08-08)*: Parents can pick the device TTS voice used by all speech-driven games (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match) in Settings → Voice. Device-level (shared across profiles), "Default (device)" option, in-place Preview honoring the SFX toggle. Addresses the accepted known issue "TTS voice availability varies by device/OS".
 - **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed.
 - **Gentle Feedback:** Correct → pleasant chime + Graphics-based splash (no particle emitters). Incorrect → gentle "try again" animation, no penalty.
 - **Per-Game Juice:** Each game layers playful animation reactions — drag pieces lift/tilt and snap home with a `Back.out` settle, boxes wiggle and bump, shadows stamp, animals hop, bubbles burst into droplets, frogs ripple — all reduced-motion-aware (gentler/shorter or disabled) and zero-penalty.
@@ -52,7 +53,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 ## 4. UX Principles
 
 - **Touch-First Ergonomics:** Touch targets minimum 64×64px (ideal 96×96px) with inflated collision bounds.
-- **Textless Visual Cues:** Zero text dependency for gameplay — all prompts are visual/audio. *(2026-08-02 amendment — Game 8:* letters are the learning content, not UI instructions; no written instructions appear anywhere. *)* *(2026-08-05 amendment — Game 11:* numerals are learning content too, displayed large and spoken aloud; the game is fully playable without reading anything. *)* *(2026-08-07 amendment — Game 12:* the spoken word is the prompt and letter cards are the answer set; both are learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 13:* the comparison word ("more"/"less") is the prompt, spoken aloud with a large up/down arrow cue; quantity comparison itself is the learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 14:* category, type, and color differences are the learning content; the TTS prompt names the odd item, no written instructions appear. *)
+- **Textless Visual Cues:** Zero text dependency for gameplay — all prompts are visual/audio. *(2026-08-02 amendment — Game 8:* letters are the learning content, not UI instructions; no written instructions appear anywhere. *)* *(2026-08-05 amendment — Game 11:* numerals are learning content too, displayed large and spoken aloud; the game is fully playable without reading anything. *)* *(2026-08-07 amendment — Game 12:* the spoken word is the prompt and letter cards are the answer set; both are learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 13:* the comparison word ("more"/"less") is the prompt, spoken aloud with a large up/down arrow cue; quantity comparison itself is the learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 14:* category, type, and color differences are the learning content; the TTS prompt names the odd item, no written instructions appear. *)* *(2026-08-08 amendment — Game 15:* color names are the learning content; the large swatch + spoken color name are the prompt, no written instructions appear. *)
 - **Parental Lock:** Hold-for-3-seconds mechanism gates settings access and app exit.
 - **Responsive Scale:** 1024×768 landscape base resolution with `Phaser.Scale.FIT` centered letterboxing. Phones auto-rotate to landscape via Screen Orientation API.
 
@@ -109,6 +110,10 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Touch latency | < 16ms |
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
+
+## Changelog — Game 15 (2026-08-08)
+
+> **2026-08-08 — Game 15 — Color Match:** Color-recognition game added. Each round shows a large color swatch (Graphics, target-color fill + thick outline) whose color name is spoken aloud (SFX-gated, silent fallback, speaker replay); four cards below show objects of **4 distinct colors** and the child taps the one matching the swatch. 6 rounds per playthrough, easy-first bands: rounds 1–3 draw 4 colors from the 4-color pool (red heart / blue frog / yellow crescent / green rectangle), rounds 4–6 from the 6-color pool (+ orange circle / purple square). Correct tap: success flash + chime + mascot cheer + progress-dot pop, 700ms advance. Wrong tap: wiggle + nod, no penalty. After 6 correct: shared win celebration + first-time sticker + 3s auto-return with `{ justEarned: "color-match" }`. New assets: `tile_color_match.svg`, `sticker_color_match.svg` (preload 150 → 152; zero new object art — reuses heart/frog/crescent/rectangle/circle/square textures; swatch hexes equal the source SVG fills). **Hub grid completes 5×3 with 15 tiles (rows 5/5/5)**; `GameId` includes `color-match` with `GAME_IDS` per-key backfill for old saves.
 
 ## Changelog — Game 14 (2026-08-08)
 
