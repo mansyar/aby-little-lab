@@ -17,14 +17,13 @@
 
 ## Bug Fixes
 
-- None — this release adds a game rather than fixing regressions.
+- **More or Less comparison arrow now renders.** The arrow textures were registered under keys the scene never looks up (`arrow_up`/`arrow_down` vs the scene's `arrow_more`/`arrow_less`), so Phaser fell back to its missing-texture square. Fixed by registering under the keys the scene queries, with a regression test asserting the key contract. Ships with the amended `v1.11.0` tag (hotfix `828f9e0`, verified live).
 
 ## Known Issues
 
 - TTS voice availability varies by device/OS (accepted).
 - Play-time budget is stored per device per profile — it does not sync across devices (accepted; cloud sync is out of scope).
 - Letter and numeral artwork uses the system font (per product decision), so glyph rendering varies slightly across devices (accepted).
-- No other known issues.
 
 ## Installation
 
