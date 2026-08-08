@@ -92,6 +92,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [ ] **Track: TTS Voice Selection (Parental Settings)** *Link: [./tracks/tts-voice-selection_20260808/index.md](./tracks/tts-voice-selection_20260808/index.md)*
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---
