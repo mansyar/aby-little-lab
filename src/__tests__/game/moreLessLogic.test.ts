@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { COUNT_ITEMS } from "../../game/countLogic";
 import {
   type ComparisonMode,
-  type MoreLessRound,
-  type GroupSide,
   createPlaythrough,
   createRound,
   evaluateRound,
+  type GroupSide,
+  type MoreLessRound,
   ROUND_BANDS,
 } from "../../game/moreLessLogic";
 

@@ -237,8 +237,8 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-import { MoreLessScene } from "../../scenes/MoreLessScene";
 import type { MoreLessRound } from "../../game/moreLessLogic";
+import { MoreLessScene } from "../../scenes/MoreLessScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */

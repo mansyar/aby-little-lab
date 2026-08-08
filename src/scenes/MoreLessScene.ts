@@ -4,10 +4,10 @@ import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { SpeakerButton } from "../components/SpeakerButton";
 import {
-  type MoreLessGroup,
-  type MoreLessRound,
   createPlaythrough,
   evaluateRound,
+  type MoreLessGroup,
+  type MoreLessRound,
 } from "../game/moreLessLogic";
 import { createWinCelebration } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
