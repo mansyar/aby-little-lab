@@ -125,7 +125,7 @@
 
 ## Release Process
 
-> **Automated pipeline (2026-08-02):** Production deploys are automated. Merging a pull request to `master` runs the Quality Gates job in CI; on green, the **Deploy to Coolify** job fires the Coolify Deploy Webhook (Bearer-authenticated) and Coolify rebuilds the Docker image from the repo's `Dockerfile` and redeploys the app on the VPS. The manual steps below are preserved for local smoke-testing and for emergency releases where CI is unavailable.
+> **Automated pipeline (2026-08-08):** Production deploys are automated and **tag-gated**. Pull requests and `master` pushes run only the Quality Gates job (check → test → build → validate-pwa). Pushing a strict semver tag (`v1.10.0`-style) runs Quality Gates on the tagged commit and, when green, the **Deploy to Coolify** job fires the Coolify Deploy Webhook (Bearer-authenticated) — but only if the tag points to a commit on `master` (master-lineage guard). Coolify rebuilds the Docker image from the repo's `Dockerfile` and redeploys the app on the VPS. The manual steps below are preserved for local smoke-testing and for emergency releases where CI is unavailable.
 
 ### Step 1: Create Release Branch
 ```bash
@@ -173,7 +173,7 @@ git push origin master
 git push origin v1.0.0
 ```
 
-Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy to Coolify** (Coolify rebuilds from the repo Dockerfile). The deployed site updates only after all gates pass.
+Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing the version tag (Step 6) triggers the automated pipeline: **Quality Gates → Deploy to Coolify** (Coolify rebuilds from the repo Dockerfile). The deployed site updates only after all gates pass.
 
 ### Step 7: Verify Deployment (automated path)
 - [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **2026-08-02:** run `30722232904` (Quality Gates 48s ✓, Deploy to Coolify 6s ✓)
@@ -277,6 +277,19 @@ Merging to `master` triggers the automated pipeline: **Quality Gates → Deploy 
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
 - [x] Live smoke test (playwright-cli on live URL) — Hub renders 12 tiles (5×3, row 3 = How Many? + First Sounds left-aligned); First Sounds full 6-round playthrough → correct-tap advance (OWL→TREE, dot fill), wrong-tap no penalty, win → `first-sounds` sticker earned (localStorage) → 3s auto-return → tile badge filled; replay fresh (0/6 dots, no re-award); Settings opens via 3s hold (parental lock) with `v1.8.0` footer; zero console errors
 - [x] Device testing on v1.8.0 — recorded in `docs/device-testing-checklist.md` (v1.8.0 execution record; executed 2026-08-08 — all items passed on all 4 device classes)
+
+### Step 7k: Verify Deployment — v1.10.0 (2026-08-08)
+
+> **Pipeline change:** v1.10.0 is the first release using the tag-gated deploy — the tag is created on the `master` merge commit and its push triggers Quality Gates → Deploy to Coolify (PRs and master pushes no longer deploy).
+
+- [x] Release branch `release/v1.10.0` + PR merged to `master` (CI Quality Gates green on PR; Deploy skipped on PR as designed)
+- [ ] CI run for the `v1.10.0` tag push: Quality Gates green, Deploy to Coolify job green — **pending tag push**
+- [ ] Deploy webhook fired — Coolify rebuilt from repo; live URL updated — **pending**
+- [ ] App loads correctly on the live URL — 200; serves release build (hash matches fresh 1.10.0 local build) — **pending**
+- [ ] Version footer data — `1.10.0` embedded in served bundle (Settings panel shows `v1.10.0` under title); no stale `1.8.0` string — **pending**
+- [ ] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200 — **pending**
+- [ ] Live smoke test — Hub renders 13 tiles (5×3, row 3 = How Many? + First Sounds + More or Less left-aligned); More or Less full 6-round playthrough (arrow cue, more/less prompts, correct-tap advance, wrong-tap no penalty, win → `more-less` sticker earned → 3s auto-return); replay fresh (no re-award); Settings opens via 3s hold with `v1.10.0` footer — **pending**
+- [ ] Device testing on v1.10.0 — recorded in `docs/device-testing-checklist.md` (v1.10.0 execution record; **pending execution** after deploy)
 
 ## Post-Release Verification
 
