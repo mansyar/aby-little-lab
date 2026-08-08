@@ -80,6 +80,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [x] **Track: Game 13 — More or Less (Quantity Comparison)** *Link: [./archive/more-less_20260808/index.md](./archive/more-less_20260808/index.md)* (Archived)
+
+---
+
 <!-- Archived tracks are moved to conductor/archive/ -->
 
 ---

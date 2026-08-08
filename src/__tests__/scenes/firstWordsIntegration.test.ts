@@ -369,7 +369,7 @@ describe("First Words integration flows", () => {
     const hub = new HubScene();
     hub.create();
     const tiles = getTileRects(hub);
-    expect(tiles).toHaveLength(12);
+    expect(tiles).toHaveLength(13);
     fireObjectEvent(tiles[8], "pointerup");
     await new Promise((resolve) => setTimeout(resolve, 0)); // flush dynamic import
     completeFadeOuts(hub);

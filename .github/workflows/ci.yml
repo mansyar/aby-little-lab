@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches: [master]
+    tags: ['v*']
     paths-ignore: ['conductor/**', 'docs/**', 'README.md', '**/*.md']
 
 permissions:
@@ -47,11 +48,11 @@ jobs:
   deploy:
     name: Deploy to Coolify
     needs: quality-gates
-    # Structurally impossible on pull_request events: deploy only on master pushes.
-    # Requires repository secrets:
+    # Deploys only on version-tag pushes (e.g. v1.9.0); PRs and master pushes
+    # never deploy. Requires repository secrets:
     #   COOLIFY_DEPLOY_WEBHOOK - Coolify -> Application -> Webhooks -> Deploy Webhook URL
     #   COOLIFY_TOKEN         - Coolify -> Keys & Tokens -> API token with 'deploy' permission
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - name: Verify deploy secrets are configured

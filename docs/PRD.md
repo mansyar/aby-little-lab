@@ -19,7 +19,7 @@ This document defines the production requirements for an ad-free, distraction-fr
 
 ### UX & Touch Architecture Requirements
 
-- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) and the shared replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, Musical Memory) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
+- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) and the shared replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Musical Memory) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
 - **Textless Visual Cues:** Zero text dependency for gameplay. All prompts rely on visual animations, color coding, spatial affordances, and audio chime feedback. *(2026-08-02 amendment — Game 8:* letters are the **learning content** (like shapes or animals), not UI instructions; no written instructions appear anywhere in the app. *)*
 - **Interface Containment:** Embedded "Hold for 3 Seconds" parental lock to prevent accidental menu navigation or app exits during active play. The hold shows a circular progress ring, runs one hold at a time (duplicate touches ignored), and never triggers on early release, pointer leaving the control, or pointer cancel.
 - **Responsive Scale:** Phaser Scale Manager enforces a locked 1024×768 landscape base resolution with dynamic centered letterboxing (`Phaser.Scale.FIT`). Phones auto-rotate to landscape on launch via the Screen Orientation API + manifest `orientation: landscape` lock.
@@ -60,10 +60,10 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + Graphics-based splash (the project uses Graphics shapes only — no `add.particles` emitters). Incorrect actions give a gentle "try again" animation with no penalty; dropping on empty space bounces back silently (no incorrect SFX).
 - **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
-- **Win Celebration:** All twelve games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation. The first-time sticker reveal pops ~400ms after the celebration starts (250ms reduced motion) so the rays/confetti clear first.
+- **Win Celebration:** All thirteen games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation. The first-time sticker reveal pops ~400ms after the celebration starts (250ms reduced motion) so the rays/confetti clear first.
 - **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay, the shared replay SpeakerButton) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
 - **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
-- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all twelve game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
+- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all thirteen game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
@@ -184,6 +184,15 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Phaser Engine Logic:** Correct tap: splash + chime (`playCorrect`) + the correct letter spoken back (`speakLetter`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "first-sounds" }`. Parental lock (hold 3s) exits to Hub at any time.
 - **Accessibility:** Cards (160px) and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Letters are the learning content — spoken and tappable; no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
 
+### GAME 13 — More or Less (Early Numeracy: Quantity Comparison) ✅ Implemented
+
+- **Milestone:** Early numeracy — comparing two small quantities and identifying which has MORE or FEWER items.
+- **Mechanics:** A large arrow cue (~256px) pops in top-center — **up arrow = "more", down arrow = "less"** — and the comparison word is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). Below it sit two group cards (220×220px, ≥96px touch), each showing N small item copies (~48px loose grid) of one item type from the shared counting set. The child taps the group that has more/fewer items than the other. 6 rounds per playthrough (3 "more" + 3 "less", shuffled), easy-first bands 1–3 / 1–5 / 1–10; win on 6 correct.
+- **Round Logic:** Within a round the two group counts are always distinct (never equal), so exactly one card satisfies the prompt; card sides, item types, and counts shuffle per round. Item types come from existing textures only (`COUNT_ITEMS`: `shape_star`, `sm_ball`, `food_apple`, `food_fish`, `food_carrot`, `sm_sun`, `sm_house`, `sm_duck`) — zero new object assets. Pure functions in `src/game/moreLessLogic.ts` (playthrough/round generation, more-vs-less evaluation, win detection) — testable without Phaser.
+- **SVG Requirements:** `arrow_up.svg` + `arrow_down.svg` (chunky storybook arrows, `#2B6CB0` fill / `#2D3748` stroke, matching the numeral visual language) + `tile_more_less.svg` (two dot-cards + up arrow on the transparent tile) + `sticker_more_less.svg` (two mini-cards + arrow on the cream badge).
+- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "more-less" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Cards (220px), arrow cue (~256px), and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Quantity comparison is the learning content — the arrow + spoken word are the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -205,13 +214,13 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
     │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
     │  sticker, Games 9 & 10 letter/animal/food/object textures +
-    │  stickers — all 12 games'
+     │  stickers — all 13 games'
     │  assets loaded)
     │
     ▼
 [HubScene]
     │
-    ├── Display 12 game tiles (grid, 5×3)
+    ├── Display 13 game tiles (grid, 5×3)
     ├── Display sticker shelf (earned thumbnails + empty-slot outlines)
     ├── Hold Settings for 3s ──────► [Settings modal]
     │                                 ├── Toggle persisted BGM/SFX settings
