@@ -28,7 +28,7 @@
 - [x] Task: Migrate `MoreLessScene` `6cef9a8`
 - [x] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green `6cef9a8`
 - [x] Task: Commit `refactor(scenes): Migrate speech family to GameSceneBase` (one commit per scene or batch, per workflow) `6cef9a8`
-- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Migrate Drag/Pattern Family (5 scenes)
 
