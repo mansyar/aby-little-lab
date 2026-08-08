@@ -48,15 +48,23 @@
 
 ## Phase 5 — Merge, Deploy & Verify [checkpoint: <sha>]
 
-- [ ] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`); confirm the 19 TTS commits land on `origin/master`
-- [ ] Task 5.2: Verify deployment
-  - [ ] CI run on master green (Quality Gates + Deploy to Coolify)
-  - [ ] Live `https://aby-little-lab.ansyar-world.top/` serves `index-*.js` hash matching local `dist/`
-  - [ ] `/sw.js` + `/manifest.webmanifest` return 200
-  - [ ] Settings footer shows v1.12.0 (bundle-level verified; visual panel check folded into Phase 6)
-- [ ] Task 5.3: Live smoke test: boot → hub (14 tiles) → Settings (Voice row shows "Default (device)"; chip cycles; Preview speaks "Hi! I can talk." with SFX on) → Find the Letter spot check (speech uses selected voice) → hub; zero console errors
-- [ ] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.12.0 row: CI run ID, hash match, version footer, SW/manifest)
-- [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 5.1: Merge PR to master; push master → triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`); confirm the 19 TTS commits land on `origin/master`
+  - [x] PR #25 merged (`5fd54d4`); all 19 TTS commits (2716346..3f9981d) confirmed on `origin/master` via `git merge-base --is-ancestor`
+- [x] Task 5.2: Verify deployment
+  - [x] Master CI run 31252424141: Quality Gates PASS (Deploy skipped — master-push run, by design); tag run 31252538554: Quality Gates + Deploy to Coolify PASS (tag `v1.12.0` moved to merge commit `5fd54d4`, guard passed, webhook fired)
+  - [x] Live serves `assets/index-CRvqpYn-.js` — SHA256 identical to local `dist/` (85C573C5E580…)
+  - [x] `/sw.js` 200 + precaches new bundle; `/manifest.webmanifest` 200
+  - [x] `1.12.0` embedded in served bundle (footer `v${__APP_VERSION__}`); no stale `1.11.0` strings
+- [x] Task 5.3: Live smoke test: boot → hub (14 tiles) → Settings (Voice row shows "Default (device)"; chip cycles; Preview speaks "Hi! I can talk." with SFX on) → Find the Letter spot check (speech uses selected voice) → hub; zero console errors
+  - [x] Hub 14 tiles (5×3, row 3 = 4 left-aligned) renders; Settings opens via 3.5s parental hold, footer v1.12.0
+  - [x] Voice row shows "Voice: Default (device)" on fresh install (`preferredVoiceURI: null`)
+  - [x] Chip cycles → `preferredVoiceURI` set to "Microsoft David - English (United States)" in localStorage and persists after reload
+  - [x] Preview speaks "Hi! I can talk." with selected voice (rate 0.8; `speechSynthesis.speaking` true) — verified via `speak()` spy
+  - [x] Find the Letter speaks target letter with selected voice (utterance "R" → Microsoft David)
+  - [x] Zero console errors (only Phaser banner); panel layout matches source (Play Time lives in Profiles overlay; panel closes via backdrop tap — both by design)
+- [x] Task 5.4: Record deployment verification in `docs/release-checklist.md` (v1.12.0 row: CI run ID, hash match, version footer, SW/manifest)
+  - [x] Step 7l added (commit 29646ab) + Final Sign-Off — v1.12.0 block
+- [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6 — Targeted Device Testing
 
