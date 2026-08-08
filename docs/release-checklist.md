@@ -286,10 +286,10 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 - [x] CI run for the `v1.10.0` tag push: Quality Gates green, Deploy to Coolify job green — run 31231857063 (2026-08-08)
 - [x] Deploy webhook fired — Coolify rebuilt from repo; live URL updated — confirmed 2026-08-08
 - [x] App loads correctly on the live URL — 200; serves release build `index-D0rDcRTo.js` (matches fresh 1.10.0 local build) — confirmed 2026-08-08
-- [ ] Version footer data — `1.10.0` embedded in served bundle (Settings panel shows `v1.10.0` under title); no stale `1.8.0` string — **pending in-browser check**
+- [~] Version footer data — `1.10.0` embedded in served bundle (Settings panel shows `v1.10.0` under title); no stale `1.8.0` string — **folded into v1.11.0 Step 7k** (v1.10.0 superseded live; the v1.11.0 footer check covers the current bundle)
 - [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200 — confirmed 2026-08-08
-- [ ] Live smoke test — Hub renders 13 tiles (5×3, row 3 = How Many? + First Sounds + More or Less left-aligned); More or Less full 6-round playthrough (arrow cue, more/less prompts, correct-tap advance, wrong-tap no penalty, win → `more-less` sticker earned → 3s auto-return); replay fresh (no re-award); Settings opens via 3s hold with `v1.10.0` footer — **pending**
-- [ ] Device testing on v1.10.0 — recorded in `docs/device-testing-checklist.md` (v1.10.0 execution record; **pending execution** after deploy)
+- [~] Live smoke test — Hub renders 13 tiles (5×3, row 3 = How Many? + First Sounds + More or Less left-aligned); More or Less full 6-round playthrough (arrow cue, more/less prompts, correct-tap advance, wrong-tap no penalty, win → `more-less` sticker earned → 3s auto-return); replay fresh (no re-award); Settings opens via 3s hold with `v1.10.0` footer — **folded into v1.11.0 Step 7k** (live site now serves v1.11.0; Game 13 rows carried into the v1.11.0 smoke test)
+- [~] Device testing on v1.10.0 — recorded in `docs/device-testing-checklist.md` (v1.10.0 execution record; **pending execution** after deploy) — **folded into v1.11.0 device-testing record** (v1.10.0/Game 13 rows carried)
 
 ## Post-Release Verification
 
