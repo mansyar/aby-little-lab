@@ -25,14 +25,14 @@
 - [x] Task 2.3: Commit: `chore(release): Bump version to 1.11.0` (3a9f26e)
 - [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md) *(5e43459)*
 
-## Phase 3 — Release Documentation
+## Phase 3 — Release Documentation [checkpoint: c90e782]
 
-- [ ] Task 3.1: Draft `docs/release-notes-v1.11.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 14 — written as DRAFT (FINAL in Phase 7)
-- [ ] Task 3.2: Finalize dangling v1.10.0 docs: `docs/release-notes-v1.10.0.md` DRAFT → FINAL (note: verification folded into v1.11.0, since v1.10.0 is superseded live); mark v1.10.0 pending items in `docs/release-checklist.md` as folded/superseded (footer check, live smoke, device testing)
-- [ ] Task 3.3: Update `docs/device-testing-checklist.md` — add v1.11.0 record at top (newest-first): targeted Game 14 rows (hub 14 tiles 5×3 row 3 = 4 left-aligned; 2×2 grid 3 identical + 1 distinct; spoken prompt + speaker replay; 6 rounds easy-first bands cross-category / same-category / frog colors; correct tap flash/chime/dot pop 700ms; wrong tap wiggle no penalty; sticker first-only; replay no re-award; SFX-off; reduced-motion) + carried v1.10.0/Game 13 rows; result pending (Phase 6)
-- [ ] Task 3.4: Verify knowledge docs already synced by the Game 14 track (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — all present; no gaps to patch
-- [ ] Task 3.5: Commit: `docs(release): Prepare v1.11.0 release notes and device checklist`
-- [ ] Task 3.6: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.1: Draft `docs/release-notes-v1.11.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 14 — written as DRAFT (FINAL in Phase 7)
+- [x] Task 3.2: Finalize dangling v1.10.0 docs: `docs/release-notes-v1.10.0.md` DRAFT → FINAL (note: verification folded into v1.11.0, since v1.10.0 is superseded live); mark v1.10.0 pending items in `docs/release-checklist.md` as folded/superseded (footer check, live smoke, device testing)
+- [x] Task 3.3: Update `docs/device-testing-checklist.md` — add v1.11.0 record at top (newest-first): targeted Game 14 rows (hub 14 tiles 5×3 row 3 = 4 left-aligned; 2×2 grid 3 identical + 1 distinct; spoken prompt + speaker replay; 6 rounds easy-first bands cross-category / same-category / frog colors; correct tap flash/chime/dot pop 700ms; wrong tap wiggle no penalty; sticker first-only; replay no re-award; SFX-off; reduced-motion) + carried v1.10.0/Game 13 rows; result pending (Phase 6)
+- [x] Task 3.4: Verify knowledge docs already synced by the Game 14 track (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — all present; no gaps to patch
+- [x] Task 3.5: Commit: `docs(release): Prepare v1.11.0 release notes and device checklist` (b73ce9d)
+- [x] Task 3.6: Phase Verification & Checkpoint (Refer to workflow.md) *(c90e782)*
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
