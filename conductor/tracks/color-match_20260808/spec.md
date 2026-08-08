@@ -26,8 +26,8 @@ Aby's Little Lab gains a 15th mini-game teaching **color recognition**. Each rou
 
 ### FR-2 — Round flow (scene `ColorMatchScene.ts`, key `ColorMatch`)
 
-- **Prompt:** large color swatch (runtime Graphics rounded rect, ~180px, thick `#2D3748` outline) top-center; target color's name spoken once (see FR-3).
-- **Answer:** 4 cards in a **2×2 grid** centered (card ~256×256 display, ≥96×96 touch targets with generous hit areas, spacing matching ShadowMatch's grid pattern).
+- **Prompt:** large color swatch (runtime Graphics rounded rect, 110×110px, 8px `#2D3748` outline) top-center; target color's name spoken once (see FR-3).
+- **Answer:** 4 cards in a **2×2 grid** centered (card 220×220 display — sized with the 110px swatch so both fit the 1024×768 canvas, ≥96×96 touch targets with generous hit areas, spacing matching ShadowMatch's grid pattern).
 - **Correct:** tapped card flashes `--success` + chime (`playCorrect`) + mascot cheer + progress dot pops; next round after ~700ms (`NEXT_ROUND_DELAY` from `GameSceneBase`).
 - **Incorrect:** tapped card wiggles ±4° + soft descending tone (`playIncorrect`) + mascot nod; **no penalty** — round stays, child retries.
 - After 6 correct: shared win celebration (rays + confetti), sticker award (first time only, `{ justEarned: "color-match" }`), mascot big cheer, auto-return to Hub after 3s.
