@@ -25,10 +25,10 @@
 ## Phase 4 — Integration
 
 - [x] Task: Add `odd-one-out` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(4d4dc5a — pulled forward: required by GameSceneBase.completeGame/hasSticker)*
-- [ ] Task: Register `OddOneOut` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
-- [ ] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker; 148 → 150)
-- [ ] Task: Hub grid — 14 tiles in 5×3 (row 3 = 4 tiles; verify fill logic left-aligns and sticker shelf / play-time arc still fit)
-- [ ] Task: Regression tests — old saves migrate cleanly, navigation test covers 14 tiles, sceneRegistry tests updated
+- [x] Task: Register `OddOneOut` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(1086915 — loader added; registry test 14 keys)*
+- [x] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker; 148 → 150) *(1086915 — both imported + registered)*
+- [x] Task: Hub grid — 14 tiles in 5×3 (row 3 = 4 tiles; verify fill logic left-aligns and sticker shelf / play-time arc still fit) *(1086915 — GAME_TILES entry added; iconDisplay 52/iconOffsetY -44; navigation tests cover 14 icons/slots)*
+- [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 14 tiles, sceneRegistry tests updated *(1086915 — storage pre-Game-14 backfill test added; navigation counts updated to 14/28; firstWordsIntegration 14 tiles)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Docs & Release Readiness
