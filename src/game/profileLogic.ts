@@ -35,7 +35,7 @@ export function createDefaultStickers(): Record<GameId, StickerData> {
 }
 
 function defaultSettings(): Settings {
-  return { bgmEnabled: true, sfxEnabled: true };
+  return { bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null };
 }
 
 /** Creates a profile with the given identity and a fresh sticker collection. */

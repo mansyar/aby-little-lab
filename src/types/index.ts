@@ -22,6 +22,8 @@ export interface StickerData {
 export interface Settings {
   bgmEnabled: boolean;
   sfxEnabled: boolean;
+  /** Preferred TTS voice URI (device-level); null = browser default voice. */
+  preferredVoiceURI: string | null;
 }
 
 /**
