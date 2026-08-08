@@ -862,7 +862,7 @@ describe("scene navigation flow", () => {
       scene.preload();
 
       const svgCalls = getMockFn(scene.load.svg).mock.calls;
-      expect(svgCalls).toHaveLength(148);
+      expect(svgCalls).toHaveLength(150);
     });
 
     it("loads shape SVGs with correct keys", () => {
@@ -991,7 +991,7 @@ describe("scene navigation flow", () => {
       scene.create();
 
       const icons = getTileIcons(scene);
-      expect(icons).toHaveLength(13);
+      expect(icons).toHaveLength(14);
       expect(new Set(icons.map((i) => i.key))).toEqual(
         new Set([
           "tile_shape_sorter",
@@ -1007,6 +1007,7 @@ describe("scene navigation flow", () => {
           "tile_how_many",
           "tile_first_sounds",
           "tile_more_less",
+          "tile_odd_one_out",
         ]),
       );
       // Icons render at their per-tile display size (>=64px default; the four
@@ -1029,7 +1030,7 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      expect(hasSticker).toHaveBeenCalledTimes(13);
+      expect(hasSticker).toHaveBeenCalledTimes(14);
     });
 
     it("navigates to each game scene when respective tile is clicked", async () => {
@@ -1130,8 +1131,8 @@ describe("scene navigation flow", () => {
 
       expect(getActiveProfile().id).toBe("p1");
       expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
-      // Shelf re-rendered: 12 more sticker lookups after the initial 12.
-      expect(hasSticker).toHaveBeenCalledTimes(26);
+      // Shelf re-rendered: 14 more sticker lookups after the initial 14.
+      expect(hasSticker).toHaveBeenCalledTimes(28);
       // Chip re-textured to the newly active profile.
       expect(getMockFn(chip.setTexture)).toHaveBeenCalledWith("animal_cat");
     });
@@ -1155,7 +1156,7 @@ describe("scene navigation flow", () => {
 
       expect(getActiveProfile().id).toBe("p2");
       expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
-      expect(hasSticker).toHaveBeenCalledTimes(13);
+      expect(hasSticker).toHaveBeenCalledTimes(14);
     });
 
     it("renders the sticker shelf for the active profile only", () => {
@@ -1172,8 +1173,8 @@ describe("scene navigation flow", () => {
       switchProfile("p1");
       scene.rerenderStickerShelf();
 
-      expect(hasSticker.mock.results[13]?.value).toBe(true);
-      expect(hasSticker.mock.calls).toHaveLength(26);
+      expect(hasSticker.mock.results[14]?.value).toBe(true);
+      expect(hasSticker.mock.calls).toHaveLength(28);
     });
   });
 
@@ -1657,10 +1658,10 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      // Fresh profile: nothing earned -> 13 dashed outlines, no ghost thumbnails.
+      // Fresh profile: nothing earned -> 14 dashed outlines, no ghost thumbnails.
       expect(getStickerImages(scene)).toHaveLength(0);
       const slots = getEmptySlots(scene);
-      expect(slots).toHaveLength(13);
+      expect(slots).toHaveLength(14);
       for (const slot of slots) {
         expect(getMockFn(slot.setInteractive)).not.toHaveBeenCalled();
         expect(getMockFn(slot.arc).mock.calls.length).toBeGreaterThanOrEqual(5);
@@ -1785,7 +1786,7 @@ describe("scene navigation flow", () => {
       const oldStickerImages = getStickerImages(scene);
       expect(oldStickerImages).toHaveLength(1);
       const oldSlots = getEmptySlots(scene);
-      expect(oldSlots).toHaveLength(12);
+      expect(oldSlots).toHaveLength(13);
 
       // The real panel calls resetProgress() before notifying the Hub; mirror it.
       resetProgress();
@@ -1803,7 +1804,7 @@ describe("scene navigation flow", () => {
       const liveSlots = getEmptySlots(scene).filter(
         (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(liveSlots).toHaveLength(13);
+      expect(liveSlots).toHaveLength(14);
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       for (const obj of liveSlots) {
         const targetsSticker = (call: { targets?: unknown }): boolean => {
@@ -6683,7 +6684,7 @@ describe("scene navigation flow", () => {
       const firstVisit = getStickerImages(scene);
       expect(firstVisit).toHaveLength(1);
       const firstVisitSlots = getEmptySlots(scene);
-      expect(firstVisitSlots).toHaveLength(12);
+      expect(firstVisitSlots).toHaveLength(13);
 
       // Leave the Hub (shutdown clears the tracked shelf) and return: create()
       // re-runs on every visit via scene.start.
@@ -6713,12 +6714,12 @@ describe("scene navigation flow", () => {
       for (const { obj } of firstVisit) {
         expect(getMockFn(obj.destroy)).not.toHaveBeenCalled();
       }
-      // The reset cleared everything: the re-rendered shelf holds 13 fresh
+      // The reset cleared everything: the re-rendered shelf holds 14 fresh
       // empty slots (the stale first-visit objects still exist, untouched).
       const fresh = getEmptySlots(scene).filter(
         (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
       );
-      expect(fresh).toHaveLength(13);
+      expect(fresh).toHaveLength(14);
     });
   });
 

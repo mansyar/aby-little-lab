@@ -130,6 +130,14 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "OddOneOut",
+    gameId: "odd-one-out",
+    label: "Odd One Out",
+    tileKey: "tile_odd_one_out",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;
