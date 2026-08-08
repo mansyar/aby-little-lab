@@ -23,6 +23,7 @@ export const sceneLoaders: Record<string, () => Promise<Phaser.Types.Scenes.Scen
   FirstSounds: () => import("./FirstSoundsScene").then((m) => m.FirstSoundsScene),
   MoreLess: () => import("./MoreLessScene").then((m) => m.MoreLessScene),
   OddOneOut: () => import("./OddOneOutScene").then((m) => m.OddOneOutScene),
+  ColorMatch: () => import("./ColorMatchScene").then((m) => m.ColorMatchScene),
 };
 
 /**

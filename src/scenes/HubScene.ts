@@ -138,6 +138,14 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "ColorMatch",
+    gameId: "color-match",
+    label: "Color Match",
+    tileKey: "tile_color_match",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;

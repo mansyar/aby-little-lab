@@ -110,6 +110,7 @@ import shapeTriangleSvg from "../assets/svg/shapes/shape_triangle.svg?raw";
 import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.svg?raw";
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
+import stickerColorMatchSvg from "../assets/svg/stickers/sticker_color_match.svg?raw";
 import stickerFirstSoundsSvg from "../assets/svg/stickers/sticker_first_sounds.svg?raw";
 import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
 import stickerMoreLessSvg from "../assets/svg/stickers/sticker_more_less.svg?raw";
@@ -138,6 +139,7 @@ import sleepZzzSvg from "../assets/svg/ui/sleep_zzz.svg?raw";
 import tileAlphabetSvg from "../assets/svg/ui/tiles/tile_alphabet.svg?raw";
 import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw";
 import tileBigSmallSvg from "../assets/svg/ui/tiles/tile_big_small.svg?raw";
+import tileColorMatchSvg from "../assets/svg/ui/tiles/tile_color_match.svg?raw";
 import tileFirstSoundsSvg from "../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
 import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
 import tileMoreLessSvg from "../assets/svg/ui/tiles/tile_more_less.svg?raw";
@@ -292,6 +294,7 @@ export const SHAPE_ASSETS = [
   { key: "sticker_how_many", svg: stickerHowManySvg },
   { key: "sticker_more_less", svg: stickerMoreLessSvg },
   { key: "sticker_odd_one_out", svg: stickerOddOneOutSvg },
+  { key: "sticker_color_match", svg: stickerColorMatchSvg },
   { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
   { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
   { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
@@ -306,6 +309,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_how_many", svg: tileHowManySvg },
   { key: "tile_more_less", svg: tileMoreLessSvg },
   { key: "tile_odd_one_out", svg: tileOddOneOutSvg },
+  { key: "tile_color_match", svg: tileColorMatchSvg },
 ] as const;
 
 /**

@@ -4,7 +4,6 @@ import {
   buildRound,
   COLOR_CARDS,
   COLOR_POOLS,
-  type ColorCard,
   type ColorId,
   type ColorMatchRound,
   isCorrect,
