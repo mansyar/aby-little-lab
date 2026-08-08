@@ -37,7 +37,7 @@
 - [x] Task: Migrate `PatternBuilderScene` `d9c1b59`
 - [x] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green `d9c1b59`
 - [x] Task: Commit `refactor(scenes): Migrate drag/pattern family to GameSceneBase` `d9c1b59`
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: bec79b9]`
 
 ## Phase 4: Migrate Odd Scenes + Integration
 
