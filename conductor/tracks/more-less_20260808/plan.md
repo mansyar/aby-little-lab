@@ -22,7 +22,7 @@
 - [x] Task: Implement `MoreLessScene.ts` (scene key `MoreLess`): arrow cue (~256px, pop-in, arrow_down texture for "less"), two group cards with N item copies (~48px loose grid), pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s *(0ca2859 — 14 tests, full suite 45 files/1093 green, scene coverage 94.5% lines)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4 — Integration
+## Phase 4 — Integration *[checkpoint: 17e00dc]*
 
 - [x] Task: Add `more-less` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(0ca2859 — pulled forward into Phase 3; `hasSticker("more-less")` is called by the scene's win flow, same as how-many)*
 - [x] Task: Register `MoreLess` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(d056f21)*
