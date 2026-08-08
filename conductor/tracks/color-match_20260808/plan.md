@@ -16,15 +16,15 @@
 - [x] Task: Verify `speakText` handles color names ("red", "blue", "yellow", "green", "orange", "purple") — existing generic API; no code change expected *(1d447db — speakWord(word, enabled) en-US rate 0.8 verified; no change)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(27a1bbf)*
 
-## Phase 3 — Scene Implementation
+## Phase 3 — Scene Implementation [checkpoint: 83fc708]
 
-- [ ] Task: Write scene tests following `oddOneOutScene.test.ts` style: round setup (swatch prompt + 4 distinct-color cards), correct tap → advance, incorrect tap → wiggle + no penalty, prompt spoken at round start, win flow + `{ justEarned: "color-match" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix)
-- [ ] Task: Implement `ColorMatchScene.ts` (scene key `ColorMatch`): Graphics-drawn swatch prompt top-center (~180px), 2×2 grid of 4 cards (~256px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, speaker button, shared win celebration, auto-return after 3s
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write scene tests following `oddOneOutScene.test.ts` style: round setup (swatch prompt + 4 distinct-color cards), correct tap → advance, incorrect tap → wiggle + no penalty, prompt spoken at round start, win flow + `{ justEarned: "color-match" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(68f8323 — 11 tests; icon_speaker filtered in texture helper)*
+- [x] Task: Implement `ColorMatchScene.ts` (scene key `ColorMatch`): Graphics-drawn swatch prompt top-center (~180px), 2×2 grid of 4 cards (~256px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, speaker button, shared win celebration, auto-return after 3s *(68f8323 — swatch 110px + cards 220px to fit 1024×768; full suite 52 files/1206 tests green; biome clean 113 files)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(83fc708)*
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `color-match` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge
+- [x] Task: Add `color-match` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(68f8323 — pulled forward as scene prerequisite, per odd-one-out precedent)*
 - [ ] Task: Register `ColorMatch` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
 - [ ] Task: Load 2 new SVGs in `PreloadScene` (tile + sticker; 150 → 152)
 - [ ] Task: Hub grid — 15 tiles in 5×3 (rows 5/5/5, grid fully populated; verify sticker shelf / play-time arc still fit)
