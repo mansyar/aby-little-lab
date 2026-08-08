@@ -13,13 +13,13 @@
 
 ## 1. Executive Summary & Core Objectives
 
-This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **12 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
+This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **14 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
 
 **Key Strategic Pivot:** To ensure maximum crispness across high-DPI retina displays (iPads, Android tablets, and phones) without large asset file sizes, all graphical assets are built using an **AI-Generated SVG Pipeline**. Phaser 4 rasterizes these scalable vectors dynamically at load time into crisp bitmaps, matching exact target display resolutions.
 
 ### UX & Touch Architecture Requirements
 
-- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) and the shared replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Musical Memory) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
+- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) and the shared replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Musical Memory) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
 - **Textless Visual Cues:** Zero text dependency for gameplay. All prompts rely on visual animations, color coding, spatial affordances, and audio chime feedback. *(2026-08-02 amendment — Game 8:* letters are the **learning content** (like shapes or animals), not UI instructions; no written instructions appear anywhere in the app. *)*
 - **Interface Containment:** Embedded "Hold for 3 Seconds" parental lock to prevent accidental menu navigation or app exits during active play. The hold shows a circular progress ring, runs one hold at a time (duplicate touches ignored), and never triggers on early release, pointer leaving the control, or pointer cancel.
 - **Responsive Scale:** Phaser Scale Manager enforces a locked 1024×768 landscape base resolution with dynamic centered letterboxing (`Phaser.Scale.FIT`). Phones auto-rotate to landscape on launch via the Screen Orientation API + manifest `orientation: landscape` lock.
@@ -60,10 +60,10 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
 - **Feedback:** Correct actions trigger a pleasant chime + Graphics-based splash (the project uses Graphics shapes only — no `add.particles` emitters). Incorrect actions give a gentle "try again" animation with no penalty; dropping on empty space bounces back silently (no incorrect SFX).
 - **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
-- **Win Celebration:** All thirteen games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation. The first-time sticker reveal pops ~400ms after the celebration starts (250ms reduced motion) so the rays/confetti clear first.
+- **Win Celebration:** All fourteen games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation. The first-time sticker reveal pops ~400ms after the celebration starts (250ms reduced motion) so the rays/confetti clear first.
 - **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay, the shared replay SpeakerButton) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
 - **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
-- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all thirteen game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
+- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all fourteen game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
 
 ### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
 
@@ -193,6 +193,15 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "more-less" }`. Parental lock (hold 3s) exits to Hub at any time.
 - **Accessibility:** Cards (220px), arrow cue (~256px), and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Quantity comparison is the learning content — the arrow + spoken word are the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
 
+### GAME 14 — Odd One Out (Visual Discrimination & Categorization) ✅ Implemented
+
+- **Milestone:** Visual discrimination — spotting the one card that is different among otherwise-identical cards.
+- **Mechanics:** A 2×2 grid of 4 cards (~256px, ≥96px touch) shows exactly **3 identical textures (the group) + 1 distinct (the odd one)**; the odd item's name is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). The child taps the card that is different. 6 rounds per playthrough, easy-first: rounds 1–2 cross-category (e.g. 3 animals + 1 shape), rounds 3–4 same-category different item (e.g. 3 cats + 1 dog, 3 stars + 1 circle), rounds 5–6 near-identical (e.g. 3 green frogs + 1 blue frog); win on 6 correct.
+- **Round Logic:** The odd texture is unique per playthrough (never repeated within a session). Group/odd textures always differ. Band 1 picks the odd from a different category than the group; band 2 keeps both within one non-frog category but a different item; band 3 uses the frog color variants only (frog pool reserved for band 3 so the 3-frog set never starves later rounds). Item art comes from existing textures only (`ANIMAL_ITEMS` 6, `FROG_ITEMS` 3, `TOY_ITEMS` 6, `SHAPE_ITEMS` 18 — 33 total) — zero new object assets. Pure functions in `src/game/oddOneOutLogic.ts` (playthrough/round generation with band rules, odd-slot placement, `isCorrect(round, slot)` evaluation) — testable without Phaser.
+- **SVG Requirements:** `tile_odd_one_out.svg` (2×2 mini-cards with one visually distinct — an orange triangle among blue circles) + `sticker_odd_one_out.svg` (same motif on the cream badge). No new object art.
+- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "odd-one-out" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Cards (256px) and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Category/type/color differences are the learning content — the spoken item name is the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -214,13 +223,13 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
     │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
     │  sticker, Games 9 & 10 letter/animal/food/object textures +
-     │  stickers — all 13 games'
+     │  stickers — all 14 games'
     │  assets loaded)
     │
     ▼
 [HubScene]
     │
-    ├── Display 13 game tiles (grid, 5×3)
+    ├── Display 14 game tiles (grid, 5×3)
     ├── Display sticker shelf (earned thumbnails + empty-slot outlines)
     ├── Hold Settings for 3s ──────► [Settings modal]
     │                                 ├── Toggle persisted BGM/SFX settings

@@ -1,6 +1,6 @@
 # Initial Concept
 
-Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 13 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
+Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 14 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
 
 ---
 
@@ -8,7 +8,7 @@ Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 13 mini-games
 
 ## 1. Product Overview
 
-**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **13 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
+**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **14 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
 
 All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes scalable vectors dynamically at load time into crisp bitmaps, matching exact display resolutions without large file sizes.
 
@@ -20,7 +20,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 
 ## 3. Key Features
 
-### 3.1 Thirteen Mini-Games
+### 3.1 Fourteen Mini-Games
 
 | # | Game | Milestone | Core Mechanic |
 |---|---|---|---|
@@ -37,10 +37,11 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 | 11 | How Many? | Early numeracy (counting & number recognition) | Tap the group of objects matching the spoken/displayed target count |
 | 12 | First Sounds | Early literacy (phonemic awareness) | Hear a word spoken, tap the letter card of its first sound |
 | 13 | More or Less | Early numeracy (quantity comparison) | Tap the group that has MORE or FEWER items than the other (arrow cue + spoken prompt) |
+| 14 | Odd One Out | Visual discrimination & categorization | Tap the card that is different among 4 (2×2 grid: 3 identical + 1 distinct; spoken prompt names the odd item) |
 
 ### 3.2 Cross-Game Systems
 
-- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all thirteen game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
+- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all fourteen game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
 - **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display as a sticker shelf (SVG thumbnails) under each Hub tile — earned stickers shimmer, unearned ones are dimmed, and a just-earned sticker gets a highlight on return. Since v2 (2026-08-04), stickers are **per kid profile**: up to 4 profiles, each with its own collection; a kid-tappable avatar chip on the Hub switches profiles instantly (no parental lock), while profile creation/deletion stays behind the parental hold in Settings → Profiles.
 - **Play-Time Limits** *(2026-08-05)*: Parents can set a per-profile daily play-time cap (Off / 15 / 30 / 45 / 60 min) in Settings → Profiles. Usage accrues per profile while games run; the Hub shows a textless remaining-budget arc that turns warm at ≤5 min, a soft hourglass nudge delays game launch once 5 min remain, and when the cap is reached tiles dim and lock with a moon badge — no mid-game cutoffs, no harshness, fully off by default.
 - **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed.
@@ -50,7 +51,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 ## 4. UX Principles
 
 - **Touch-First Ergonomics:** Touch targets minimum 64×64px (ideal 96×96px) with inflated collision bounds.
-- **Textless Visual Cues:** Zero text dependency for gameplay — all prompts are visual/audio. *(2026-08-02 amendment — Game 8:* letters are the learning content, not UI instructions; no written instructions appear anywhere. *)* *(2026-08-05 amendment — Game 11:* numerals are learning content too, displayed large and spoken aloud; the game is fully playable without reading anything. *)* *(2026-08-07 amendment — Game 12:* the spoken word is the prompt and letter cards are the answer set; both are learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 13:* the comparison word ("more"/"less") is the prompt, spoken aloud with a large up/down arrow cue; quantity comparison itself is the learning content, no written instructions appear. *)*
+- **Textless Visual Cues:** Zero text dependency for gameplay — all prompts are visual/audio. *(2026-08-02 amendment — Game 8:* letters are the learning content, not UI instructions; no written instructions appear anywhere. *)* *(2026-08-05 amendment — Game 11:* numerals are learning content too, displayed large and spoken aloud; the game is fully playable without reading anything. *)* *(2026-08-07 amendment — Game 12:* the spoken word is the prompt and letter cards are the answer set; both are learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 13:* the comparison word ("more"/"less") is the prompt, spoken aloud with a large up/down arrow cue; quantity comparison itself is the learning content, no written instructions appear. *)* *(2026-08-08 amendment — Game 14:* category, type, and color differences are the learning content; the TTS prompt names the odd item, no written instructions appear. *)
 - **Parental Lock:** Hold-for-3-seconds mechanism gates settings access and app exit.
 - **Responsive Scale:** 1024×768 landscape base resolution with `Phaser.Scale.FIT` centered letterboxing. Phones auto-rotate to landscape via Screen Orientation API.
 
@@ -68,7 +69,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 
 - **BootScene:** Locks screen orientation to landscape via Screen Orientation API. Auto-transitions to Preload.
 - **PreloadScene:** Preloads SVG assets (rasterized at 512×512), displays progress bar. Auto-transitions to Hub.
-- **HubScene:** 13 game tiles grid (5×3), sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner.
+- **HubScene:** 14 game tiles grid (5×3), sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner.
 - **GameScene:** Initialized with randomized items. On completion: win animation + sticker award (if first time) + auto-return to Hub (3s delay). Exit via parental lock (hold 3s).
 
 ## 7. Visual Design
@@ -107,6 +108,10 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Touch latency | < 16ms |
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
+
+## Changelog — Game 14 (2026-08-08)
+
+> **2026-08-08 — Game 14 — Odd One Out:** Visual-discrimination game added. Each round shows a 2×2 grid of 4 cards — exactly 3 identical textures (the group) + 1 distinct (the odd one); the odd item's name is spoken aloud (SFX-gated, silent fallback, speaker replay). 6 rounds per playthrough, easy-first bands: 2 cross-category rounds (odd from a different category: animal/toy/shape), 2 same-category different-item rounds (e.g. 3 cats + 1 dog), 2 hard rounds (same animal different color — 3 green frogs + 1 blue frog); the odd texture is unique per playthrough. Correct tap: success flash + chime + mascot cheer + progress-dot pop, 700ms advance. Wrong tap: wiggle + nod, no penalty. After 6 correct: shared win celebration + first-time sticker + 3s auto-return with `{ justEarned: "odd-one-out" }`. New assets: `tile_odd_one_out.svg`, `sticker_odd_one_out.svg` (preload 148 → 150; zero new object art — reuses animal/frog/toy/shape textures). Hub grid 5×3 with 14 tiles (row 3: 4 tiles left-aligned); `GameId` includes `odd-one-out` with `GAME_IDS` per-key backfill for old saves.
 
 ## Changelog — v1.9.0 (2026-08-08)
 

@@ -53,7 +53,7 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 14 scenes (Boot, Preload, Hub, 13 game scenes)
+- **Scenes:** 15 scenes (Boot, Preload, Hub, 14 game scenes)
 
 > **2026-08-02 — Design Update (Bundle Code Splitting):** Game scenes are lazy-loaded via runtime registration. `src/scenes/sceneRegistry.ts` maps each game scene key to a dynamic-import loader and exposes `ensureSceneLoaded(scene, key)` (no-op if already registered, else `import()` + `scene.add(key, SceneClass)`); HubScene awaits it before transitioning into a game. Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the `scene` array — functions there are invoked with `new` (constructor form only, no promise handling in `SceneManager`). Shell scenes (Boot/Preload/Hub) remain statically registered in `main.ts`. Rollup hoists shared modules into shared chunks automatically; no `manualChunks` config.
 
@@ -171,7 +171,7 @@ aby-little-lab/
     │   ├── BootScene.ts
     │   ├── PreloadScene.ts
     │   ├── HubScene.ts
-    │   ├── GameSceneBase.ts         # Shared scaffold for all 13 game scenes (back button, mascot, progress dots, win/sticker/auto-return)
+    │   ├── GameSceneBase.ts         # Shared scaffold for all 14 game scenes (back button, mascot, progress dots, win/sticker/auto-return)
     │   ├── ShapeSorterScene.ts
     │   ├── AnimalTraceScene.ts
     │   ├── PopFreezeScene.ts
@@ -183,8 +183,8 @@ aby-little-lab/
     │   ├── WordMatchScene.ts
     │   ├── WordBuilderScene.ts
     │   ├── HowManyScene.ts
-    │   ├── FirstSoundsScene.ts
-    │   └── MoreLessScene.ts
+    │   ├── MoreLessScene.ts
+    │   └── OddOneOutScene.ts
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   ├── ParentLock.ts
@@ -203,7 +203,8 @@ aby-little-lab/
     │   ├── wordLogic.ts           # Pure game logic (word pool, round/builder generation, win detection)
     │   ├── countLogic.ts          # Pure game logic (counting bands, group cards, win detection)
     │   ├── firstSoundsLogic.ts    # Pure game logic (phonics pool, first-letter rounds, win detection)
-    │   └── moreLessLogic.ts       # Pure game logic (quantity comparison, more/less rounds, win detection)
+    │   ├── moreLessLogic.ts       # Pure game logic (quantity comparison, more/less rounds, win detection)
+    │   └── oddOneOutLogic.ts      # Pure game logic (odd-one-out pools, bands, round/playthrough generation, evaluation)
     ├── utils/
     │   ├── storage.ts             # localStorage persistence layer
     │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
@@ -286,5 +287,7 @@ aby-little-lab/
 > **2026-08-07 — Design Update (Gameplay Depth):** Animal Trace: next waypoint gets a pulsing primary ring (`redrawPathGuide` + looping `onUpdate` tween, reduced-motion aware) and visited dots turn success-green. Musical Memory: `MAX_RUN = 2` caps consecutive same-frog notes (`pickNote` draws from other frogs); `playSequence` uses 480ms per note for sequences of length ≥ 5 (`FAST_NOTE_DELAY`, `FAST_NOTE_DELAY_LENGTH`). Word Match: `generateWordPlaythrough` mirrors the builder — 5 tier-3 rounds then 1 tier-4 at default 6 (easy-first). Correct-answer splashes (`createCompletionSplash`) added at the tapped card in Word Match + Find the Letter (`handleCorrect(choiceIndex)`) and at the target gap in Pattern Builder. Word Builder: used tiles fly into their slot (x/y tween `TILE_FLY_DURATION` 300/180 reduced) and ghost (`TILE_GHOST_ALPHA` 0.25 + `disableInteractive` + cleared letter value); duplicate-letter words (BALL) keep the tile tappable with a fresh copy settle-pop + thunk tween (`TILE_THUNK_*`); `TILE_SIZE` 110 → 132 (64.7px on screen at 0.49 FIT scale, above the 64px touch floor). Pattern Builder: `ROUND_COUNT`/`generatePlaythrough` 5 → 6 (matches the other games). Confusable-distractor guards: `CONFUSABLE_LETTER_FAMILIES` ([C,G,O,Q], [I,L,T], [M,W]) in `alphabetLogic.ts` and `CONFUSABLE_SHAPE_FAMILIES` ([pentagon,hexagon,octagon], [circle,oval,ring,semicircle], [square,rectangle]) in `patternBuilderLogic.ts` — distractors never share a family with the target. How Many: `createPlaythrough` draws 2 distinct targets per band (shuffle-based, avoids constant-random infinite loops), `createRound(band, target?)` gained an optional target; `createCardItems` centers each row on its own width (partial last rows). Big vs Small: `createBoxes` shuffles the two boxes (no fixed big-left).
 
 > **2026-08-07 — Consistency & Dead Code:** `ShadowMatchScene` `DROP_ZONE_SIZE` 120 → 160; Word Builder settle-pop and dot-pop use `motionDuration`/`motionScale` + `scaleX`/`scaleY` (reduced-motion aligned); Shape Sorter back button uses `textStyle()` (Baloo 2). Removed dead exports `selectThreeShapes` (shapeSorterLogic), `isCorrectWord` (wordLogic), `isCorrectLetter` + `hasCompletedPlaythrough` (alphabetLogic), `isPlaythroughComplete` (countLogic), unused `Phaser.Curves.Path` construction + `PairState.path` (AnimalTrace), Word Builder `slotRects` array, Big Small `ToyData.baseScale`. New scene suites: `src/__tests__/scenes/popFreezeScene.test.ts` (11 tests) and `patternBuilderScene.test.ts` (8 tests) close the missing-suite gaps (Animal Trace suite was added in Phase 1). Full suite: 41 files / 1024 tests green; coverage 98.2% lines / 97.16% stmts / 92.94% funcs / 89.87% branch; Biome clean.
+
+> **2026-08-08 — Design Update (Game 14 — Odd One Out):** Visual discrimination & categorization game added: each round shows a 2×2 grid of 4 cards (256px, ≥96px touch) — 3 identical textures + 1 distinct; the odd item is named by TTS (`promptFor(texture)` word map, `speakWord` rate 0.8, SFX-gated, speaker replay). New assets: `tile_odd_one_out.svg` (2×2 mini-cards, one orange triangle among blue circles) + `sticker_odd_one_out.svg` (cream badge). Preload SVG count 148 → 150. Item art reuses existing textures only (`ANIMAL_ITEMS` 6, `FROG_ITEMS` 3, `TOY_ITEMS` 6, `SHAPE_ITEMS` 18 — 33 total, zero new object assets). Pure logic in `src/game/oddOneOutLogic.ts` (6-round playthroughs, 2 per band easy-first: band 1 cross-category, band 2 same-category different item, band 3 frog color variants; unique odd texture per playthrough; frog pool reserved for band 3; `isCorrect(round, slot)` evaluation; 97.22% stmts coverage). `GameId` includes `odd-one-out`; `GAME_IDS` in `profileLogic.ts` covers the new sticker key for old saves; scene registry has 14 lazy loaders; Hub grid stays 5×3 with row 3 now holding 4 tiles (How Many?, First Sounds, More or Less, Odd One Out — left-aligned per fill logic). Scene: `OddOneOutScene` (MoreLessScene layout family — 2×2 card grid, 150px item images, prompt speech + speaker replay, success flash/chime/dot-pop 700ms, wiggle no-penalty, shared win celebration + `odd-one-out` sticker + 3s auto-return, ParentLock exit, input-lock reset on relaunch).
 
 > **2026-08-08 — Design Update (Game 13 — More or Less):** Quantity comparison game added (full details in the §3 design note above). `src/game/moreLessLogic.ts` (100% coverage: `ROUND_BANDS`, `createRound(band, mode)`, `createPlaythrough` — 6 rounds, 2 per band 1–3/1–5/1–10 easy-first, exactly 3 more + 3 less shuffled, `evaluateRound`, distinct-counts guard) and `src/scenes/MoreLessScene.ts` (94.5% lines: arrow cue pop-in, 220px cards, 48px items 4-per-row loose grid, speakWord prompt + speaker replay, success flash/chime/dot-pop 700ms, wiggle no-penalty, shared win celebration + `more-less` sticker + 3s auto-return, ParentLock exit, input-lock reset on relaunch). Scene test suite `src/__tests__/scenes/moreLessScene.test.ts` (14 tests) closes with the how-many scene conventions; `GameId` union + `GAME_IDS` backfill; scene registry 13 lazy loaders; preload 148 SVGs; Hub 13 tiles 5×3. Full suite: 45 files / 1101 tests green; Biome clean.
