@@ -41,10 +41,14 @@
 
 ## Phase 4 — Full Verification & Documentation
 
-- [ ] Task: Run full quality gates in CI order: `pnpm run check` → `CI=true pnpm test` → `pnpm run build`
-- [ ] Task: Update `docs/device-testing-checklist.md` with TTS voice selection rows (targeted device test additions)
-- [ ] Task: Final phase verification & checkpoint
-- [ ] Task: Summarize feature for future release track (v1.12.0 candidate)
+- [x] Task: Run full quality gates in CI order: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` (check clean 109 files, 50 files / 1176 tests, build OK with pre-existing chunk-size warning)
+- [x] Task: Update `docs/device-testing-checklist.md` with TTS voice selection rows (targeted device test additions) (03ef786)
+- [x] Task: Final phase verification & checkpoint [checkpoint: pending]
+- [x] Task: Summarize feature for future release track (v1.12.0 candidate) (see below)
+
+---
+
+**Feature summary (v1.12.0 candidate):** Device-level TTS voice selection in the parental Settings panel. New `src/game/voiceLogic.ts` (pure: `availableVoiceOptions`, `resolveVoice`), `Settings.preferredVoiceURI` (string | null, additive migration, default null), `setPreferredVoiceURI` in `speech.ts` applying the voice to every speech-driven scene (7 games), SettingsPanel Voice chip row (cycles Default → installed voices, truncated labels, persists via `updateSettings`) + Preview button speaking "Hi! I can talk." honoring the SFX toggle, `voiceschanged` async refresh, BootScene sync on start. Addresses known issue #1 "TTS voice availability varies by device/OS". Out of scope: per-profile voices, locale selection, cloud sync.
 
 ---
 
