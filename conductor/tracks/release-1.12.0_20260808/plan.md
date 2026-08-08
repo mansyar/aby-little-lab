@@ -16,14 +16,14 @@
   - [x] No `1.11.0`/`1.12.0` literals in src; vite.config.ts `__APP_VERSION__: JSON.stringify(pkg.version)`; SettingsPanel footer `v${__APP_VERSION__}`
 - [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Release Branch & Version Bump [checkpoint: <sha>]
+## Phase 2 — Release Branch & Version Bump [checkpoint: 5e1d6f0]
 
-- [ ] Task 2.1: Create release branch `git checkout -b release/v1.12.0` from master
-- [ ] Task 2.2: Bump version `npm version 1.12.0 --no-git-tag-version`
-  - [ ] Verify `package.json` version = 1.12.0 (no lockfile churn)
-  - [ ] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version)
-- [ ] Task 2.3: Commit: `chore(release): Bump version to 1.12.0`
-- [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.1: Create release branch `git checkout -b release/v1.12.0` from master — created from master @ a0b79ea
+- [x] Task 2.2: Bump version `npm version 1.12.0 --no-git-tag-version`
+  - [x] Verify `package.json` version = 1.12.0 (no lockfile churn) — confirmed, package.json only (diff shows single line change)
+  - [x] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version) — vite.config.ts `__APP_VERSION__: JSON.stringify(pkg.version)` (verified in Phase 1)
+- [x] Task 2.3: Commit: `chore(release): Bump version to 1.12.0` (505d0d3)
+- [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Release Documentation [checkpoint: <sha>]
 
