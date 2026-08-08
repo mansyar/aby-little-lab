@@ -24,15 +24,11 @@ const PHASER_CHUNK_RE = /^phaser-[^.]+\.js$/;
 const ENTRY_CHUNK_RE = /^index-[^.]+\.js$/;
 
 if (!fs.existsSync(ASSETS_DIR)) {
-  console.error(
-    "FAIL: dist/assets not found — run 'pnpm run build' before validate-bundle.",
-  );
+  console.error("FAIL: dist/assets not found — run 'pnpm run build' before validate-bundle.");
   process.exit(1);
 }
 
-const jsFiles = fs
-  .readdirSync(ASSETS_DIR)
-  .filter((f) => f.endsWith(".js"));
+const jsFiles = fs.readdirSync(ASSETS_DIR).filter((f) => f.endsWith(".js"));
 
 let failures = 0;
 
@@ -47,9 +43,7 @@ if (phaserChunks.length === 0) {
   );
   failures++;
 } else {
-  const sizeKb = (
-    fs.statSync(path.join(ASSETS_DIR, phaserChunks[0])).size / 1024
-  ).toFixed(1);
+  const sizeKb = (fs.statSync(path.join(ASSETS_DIR, phaserChunks[0])).size / 1024).toFixed(1);
   console.log(`PASS: Phaser vendor chunk present: ${phaserChunks[0]} (${sizeKb} kB)`);
 }
 
