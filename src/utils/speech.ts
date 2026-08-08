@@ -12,6 +12,8 @@
  * tap); without it, iOS silently drops every programmatic speak.
  */
 
+import { resolveVoice } from "../game/voiceLogic";
+
 /** Returns whether the browser exposes the Web Speech synthesis API. */
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -19,6 +21,17 @@ export function isSpeechSupported(): boolean {
 
 /** True once the iOS/WebKit user-gesture unlock has been performed. */
 let speechUnlocked = false;
+
+/** Preferred voice URI from Settings; null = browser default. */
+let preferredVoiceURI: string | null = null;
+
+/**
+ * Sets the device-level TTS voice preference. A null URI restores the
+ * browser default; an unknown URI silently falls back to the default.
+ */
+export function setPreferredVoiceURI(uri: string | null): void {
+  preferredVoiceURI = uri;
+}
 
 /**
  * Defer interval after cancel(): the platform's async cancel callback must
@@ -81,6 +94,10 @@ function speakText(text: string, enabled: boolean, rate: number): boolean {
     utterance.text = text;
     utterance.lang = "en-US";
     utterance.rate = rate;
+    // Apply the stored voice preference when it resolves; otherwise the
+    // platform's default voice pronounces (never throws).
+    const voices = speechSynthesis.getVoices?.() ?? [];
+    utterance.voice = resolveVoice(voices, preferredVoiceURI) ?? undefined;
     if (needsInterrupt) {
       window.setTimeout(() => {
         try {

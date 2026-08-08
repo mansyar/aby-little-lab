@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   isSpeechSupported,
+  setPreferredVoiceURI,
   speakLetter,
   speakNumber,
   speakWord,
@@ -11,18 +12,22 @@ describe("speech", () => {
   const cancel = vi.fn();
   const speak = vi.fn();
   const resume = vi.fn();
-  const synth = { cancel, speak, resume, speaking: false, pending: false };
+  const getVoices = vi.fn();
+  const synth = { cancel, speak, resume, getVoices, speaking: false, pending: false };
   let Utterance: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     cancel.mockClear();
     speak.mockClear();
     resume.mockClear();
+    getVoices.mockClear();
     synth.speaking = false;
     synth.pending = false;
     Utterance = vi.fn();
     vi.stubGlobal("speechSynthesis", synth);
     vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
+    // Every test starts with no voice preference (browser default).
+    setPreferredVoiceURI(null);
   });
 
   afterEach(() => {
@@ -179,6 +184,59 @@ describe("speech", () => {
       vi.unstubAllGlobals();
       expect(() => speakNumber(3, true)).not.toThrow();
       expect(speakNumber(3, true)).toBe(false);
+    });
+  });
+
+  describe("setPreferredVoiceURI", () => {
+    function makeVoice(overrides: Partial<SpeechSynthesisVoice>): SpeechSynthesisVoice {
+      return {
+        voiceURI: "uri",
+        name: "name",
+        lang: "en-US",
+        localService: false,
+        default: false,
+        ...overrides,
+      } as SpeechSynthesisVoice;
+    }
+
+    it("assigns the matching voice to the utterance when the URI resolves", () => {
+      const zoe = makeVoice({ voiceURI: "com.zoe", name: "Zoe" });
+      const fred = makeVoice({ voiceURI: "com.fred", name: "Fred" });
+      getVoices.mockReturnValue([zoe, fred]);
+
+      setPreferredVoiceURI("com.fred");
+      speakWord("CAT", true);
+
+      const utterance = Utterance.mock.instances[0];
+      expect(utterance.voice).toBe(fred);
+    });
+
+    it("leaves the utterance voice unset (browser default) when no preference is set", () => {
+      getVoices.mockReturnValue([makeVoice({ voiceURI: "com.zoe", name: "Zoe" })]);
+
+      speakWord("CAT", true);
+
+      const utterance = Utterance.mock.instances[0];
+      expect(utterance.voice).toBeUndefined();
+    });
+
+    it("silently falls back to the default when the stored URI no longer exists", () => {
+      getVoices.mockReturnValue([makeVoice({ voiceURI: "com.zoe", name: "Zoe" })]);
+
+      setPreferredVoiceURI("vanished-uri");
+      expect(() => speakWord("CAT", true)).not.toThrow();
+
+      const utterance = Utterance.mock.instances[0];
+      expect(utterance.voice).toBeUndefined();
+    });
+
+    it("never throws when getVoices is unavailable", () => {
+      delete (synth as { getVoices?: unknown }).getVoices;
+
+      setPreferredVoiceURI("com.zoe");
+      expect(() => speakLetter("A", true)).not.toThrow();
+      expect(speakLetter("A", true)).toBe(true);
+      expect(Utterance.mock.instances[0].voice).toBeUndefined();
     });
   });
 
