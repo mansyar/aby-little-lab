@@ -16,14 +16,14 @@
   - [x] Run 31242855792 on master: completed success; Deploy not fired (tag-gated)
 - [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md) *(b4a7f8a)*
 
-## Phase 2 — Release Branch & Version Bump
+## Phase 2 — Release Branch & Version Bump [checkpoint: 5e43459]
 
-- [ ] Task 2.1: Create release branch `git checkout -b release/v1.11.0` from master
-- [ ] Task 2.2: Bump version `npm version 1.11.0 --no-git-tag-version`
-  - [ ] Verify `package.json` version = 1.11.0 (no lockfile churn)
-  - [ ] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version)
-- [ ] Task 2.3: Commit: `chore(release): Bump version to 1.11.0`
-- [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.1: Create release branch `git checkout -b release/v1.11.0` from master — created from master @ a509931
+- [x] Task 2.2: Bump version `npm version 1.11.0 --no-git-tag-version`
+  - [x] Verify `package.json` version = 1.11.0 (no lockfile churn) — confirmed, package.json only
+  - [x] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version) — vite.config.ts `__APP_VERSION__: JSON.stringify(pkg.version)`
+- [x] Task 2.3: Commit: `chore(release): Bump version to 1.11.0` (3a9f26e)
+- [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md) *(5e43459)*
 
 ## Phase 3 — Release Documentation
 
