@@ -26,7 +26,7 @@
   - [x] Test existing behavior unchanged when no preference set (regression)
 - [x] Task: Implement `setPreferredVoiceURI(uri)` and voice resolution in `speakText` (Green) — best-effort, never throws (7fb5f90)
 - [x] Task: Verify coverage (speech.ts 97.4% lines)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: pending]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: 5302606]
 
 ## Phase 3 — SettingsPanel Voice Row + Preview
 
