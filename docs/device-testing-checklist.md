@@ -320,6 +320,18 @@ pnpm exec serve dist -l 3000
 - [ ] Reset clears every sticker (Hub shelf dims immediately), preserves BGM/SFX settings, and the row shows "Progress cleared"
 - [ ] Reset persists after app close/reopen (stickers stay cleared, settings stay unchanged)
 
+#### TTS Voice Selection (v1.12.0 candidate)
+- [ ] Voice row shows "Voice: Default (device)" on a fresh install (no stored preference)
+- [ ] Tapping the voice chip cycles through installed voices (all languages listed, no en-US gate) and wraps back to "Default (device)"
+- [ ] Long voice names are truncated in the chip (readable, no overflow)
+- [ ] "Preview" button speaks "Hi! I can talk." with the currently selected voice when SFX is on
+- [ ] "Preview" is silent when the SFX toggle is off (parity with prompt speech)
+- [ ] Selected voice persists after app close/reopen (device-level, shared across profiles)
+- [ ] Choosing "Default (device)" restores the browser-default voice
+- [ ] Games that speak (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out) use the selected voice
+- [ ] When the stored voice no longer exists on the device, speech falls back to the default silently (no error, no visual regression)
+- [ ] Voice chip + preview buttons are ≥64px touch targets (panel is parental-gated; no accidental taps)
+
 #### Parental Lock
 - [ ] Hold-for-3-seconds mechanism works on Hub Settings and every game Back control
 - [ ] Circular progress ring fills during the hold and disappears on release/cancel/completion
