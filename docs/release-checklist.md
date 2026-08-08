@@ -302,6 +302,16 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 - [x] **Hotfix — More or Less arrow (2026-08-08):** the comparison arrow rendered as a small square (missing texture). Root cause: textures registered under `arrow_up`/`arrow_down` while `MoreLessScene` looks up `arrow_more`/`arrow_less`. Fixed in `828f9e0` (register under the scene's keys + regression test asserting the key contract). Tag `v1.11.0` amended (delete + recreate on `828f9e0`); CI run 31247079734 Quality Gates + Deploy PASS; live serves `index-d3aQJys-.js` (matches local fix build); arrow verified rendering live
 - [~] Device testing on v1.11.0 — recorded in `docs/device-testing-checklist.md` (v1.11.0 execution record; **pending execution**)
 
+### Step 7l: Verify Deployment — v1.12.0 (2026-08-08)
+
+- [x] PR #25 (`release/v1.12.0` → master) merged (`5fd54d4`) — CI run 31252424141 Quality Gates PASS; Deploy correctly skipped on master-push run
+- [x] Annotated tag `v1.12.0` moved to master merge commit `5fd54d4` + pushed (same pattern as v1.11.0 tag amendment; initial tag push failed the master-lineage guard by design) — CI run 31252538554 Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
+- [x] App loads correctly on the live URL — 200; serves release build `index-CRvqpYn-.js` (SHA256 matches local `dist/` build: `85C573C5…`)
+- [x] Version footer data — `1.12.0` embedded in served bundle; no stale `1.11.0` strings
+- [x] Service worker + manifest served — `sw.js` 200 (precaches new bundle), `manifest.webmanifest` 200
+- [x] Live smoke test — Hub renders 14 tiles (5×3, row 3 = 4 left-aligned, no clipping); Settings opens via 3s parental hold with `v1.12.0` footer; Voice row shows "Voice: Default (device)" on fresh install; tapping the voice chip cycles to installed device voices (Microsoft David/Mark/Zira observed) and persists `preferredVoiceURI` to localStorage (`abby-little-lab:v2`); "Preview" speaks "Hi! I can talk." with the selected voice (rate 0.8, `speechSynthesis.speaking` true, SFX on); preference survives reload; Find the Letter speaks its target letter with the selected voice; zero console errors (only Phaser banner)
+- [~] Device testing on v1.12.0 — recorded in `docs/device-testing-checklist.md` (v1.12.0 execution record; **pending execution**)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
@@ -571,4 +581,17 @@ Please report issues at [GitHub Issues URL]
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — automated gates passed; device metrics verified 2026-08-08 (device checklist v1.11.0 record all items passed on all 4 device classes)
+- [x] Ready for release
+
+## Final Sign-Off — v1.12.0
+
+**Version:** 1.12.0
+**Status:** Released — automated verification complete (all gates green: Biome clean 109 files, 1176/1176 tests in 50 files, build `index-CRvqpYn-.js` 1511.21 kB / gzip 383.31 kB, PWA validation 13/13; deployed via CI → Coolify, tag `v1.12.0` on master merge commit `5fd54d4`, CI run 31252538554 Quality Gates + Deploy PASS); live smoke completed 2026-08-08 against the live URL (hub 14 tiles, Settings voice row: default label, chip cycle + persistence, preview speaks selected voice, Find the Letter uses selected voice, zero console errors); device testing recorded in `docs/device-testing-checklist.md` (v1.12.0 execution record; **pending execution**)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (1176/1176)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed; device testing record v1.12.0 pending execution
 - [x] Ready for release
