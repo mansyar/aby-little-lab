@@ -25,10 +25,10 @@
 ## Phase 4 — Integration
 
 - [x] Task: Add `more-less` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(0ca2859 — pulled forward into Phase 3; `hasSticker("more-less")` is called by the scene's win flow, same as how-many)*
-- [ ] Task: Register `MoreLess` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
-- [ ] Task: Load 4 new SVGs in `PreloadScene` (2 arrows + tile + sticker)
-- [ ] Task: Hub grid — 13 tiles in 5×3 (row 3 gains More or Less; verify fill logic left-aligns and sticker shelf / play-time arc still fit)
-- [ ] Task: Regression tests — old saves migrate cleanly, navigation test covers 13 tiles, sceneRegistry tests updated
+- [x] Task: Register `MoreLess` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(d056f21)*
+- [x] Task: Load 4 new SVGs in `PreloadScene` (2 arrows + tile + sticker) *(d056f21 — 144 → 148)*
+- [x] Task: Hub grid — 13 tiles in 5×3 (row 3 gains More or Less; verify fill logic left-aligns and sticker shelf / play-time arc still fit) *(d056f21 — `col = i % GRID_COLS` left-aligns row 3 automatically; shelf slot counts 12 → 13 in tests)*
+- [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 13 tiles, sceneRegistry tests updated *(d056f21 — navigation 350 tests, full suite 45 files/1101 green; new v1 migration test backfills `more-less`)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Docs & Release Readiness
