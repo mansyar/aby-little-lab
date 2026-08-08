@@ -32,14 +32,14 @@
 
 ## Phase 3: Migrate Drag/Pattern Family (5 scenes)
 
-- [ ] Task: Migrate `ShapeSorterScene` (reset progress dots per playthrough behavior preserved)
-- [ ] Task: Migrate `AnimalTraceScene`
-- [ ] Task: Migrate `ShadowMatchScene`
-- [ ] Task: Migrate `BigSmallScene`
-- [ ] Task: Migrate `PatternBuilderScene`
-- [ ] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green
-- [ ] Task: Commit `refactor(scenes): Migrate drag/pattern family to GameSceneBase`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Migrate `ShapeSorterScene` (reset progress dots per playthrough behavior preserved) `d9c1b59`
+- [x] Task: Migrate `AnimalTraceScene` `d9c1b59`
+- [x] Task: Migrate `ShadowMatchScene` `d9c1b59`
+- [x] Task: Migrate `BigSmallScene` `d9c1b59`
+- [x] Task: Migrate `PatternBuilderScene` `d9c1b59`
+- [x] Task: Run full suite `CI=true pnpm test` + `pnpm run check` green `d9c1b59`
+- [x] Task: Commit `refactor(scenes): Migrate drag/pattern family to GameSceneBase` `d9c1b59`
+- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Migrate Odd Scenes + Integration
 
