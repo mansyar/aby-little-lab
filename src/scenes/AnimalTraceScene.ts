@@ -1,7 +1,4 @@
-import Phaser from "phaser";
-import { AudioManager } from "../audio/AudioManager";
-import { createCornerMascot, type Mascot } from "../components/Mascot";
-import { ParentLock } from "../components/ParentLock";
+import type Phaser from "phaser";
 import {
   type AnimalFoodPair,
   advancePath,
@@ -12,12 +9,10 @@ import {
   type PathProgress,
   selectThreePairs,
 } from "../game/animalTraceLogic";
-import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
-import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { earnSticker, hasSticker } from "../utils/storage";
-import { textStyle } from "../utils/typography";
+import { sceneEntrance } from "../utils/sceneTransitions";
+import { GameSceneBase } from "./GameSceneBase";
 
 /** X position for the animal sprite (left side). */
 const ANIMAL_X = 200;
@@ -58,21 +53,6 @@ const RING_PULSE_DURATION = 700;
 /** Delay before advancing to the next pair after path completion (ms). */
 const NEXT_PAIR_DELAY = 1000;
 
-/** Display size for the sticker unlock animation. */
-const STICKER_DISPLAY_SIZE = 256;
-
-/** Delay before auto-returning to Hub after round completion (ms). */
-const AUTO_RETURN_DELAY = 3000;
-
-/** Y position for the progress indicator dots. */
-const PROGRESS_DOT_Y = 60;
-
-/** Spacing between progress indicator dots. */
-const PROGRESS_DOT_SPACING = 40;
-
-/** Radius of each progress indicator dot. */
-const PROGRESS_DOT_RADIUS = 8;
-
 /** Vertical arc (px) of the animal's hop between waypoints. */
 const HOP_ARC_Y = 6;
 
@@ -97,18 +77,6 @@ const FOOD_WIGGLE_REDUCED_DURATION = 120;
 /** Number of yoyo repeats for the food wiggle. */
 const FOOD_WIGGLE_REPEAT = 3;
 
-/** Progress dot pop peak scale. */
-const DOT_POP_SCALE = 1.4;
-
-/** Reduced-motion progress dot pop peak scale. */
-const DOT_POP_REDUCED_SCALE = 1.2;
-
-/** Progress dot pop duration (ms). */
-const DOT_POP_DURATION = 250;
-
-/** Reduced-motion progress dot pop duration (ms). */
-const DOT_POP_REDUCED_DURATION = 150;
-
 /** Tracks the state of the current pair being traced. */
 interface PairState {
   pair: AnimalFoodPair;
@@ -128,27 +96,23 @@ interface PairState {
  * Reaching the food triggers a completion chime + bounded splash/ray feedback. Three
  * pairs are traced per round (3 of 6 animal-food pairs randomly selected).
  */
-export class AnimalTraceScene extends Phaser.Scene {
-  private parentLock?: ParentLock;
-  private mascot?: Mascot;
+export class AnimalTraceScene extends GameSceneBase {
   private pairs: AnimalFoodPair[] = [];
   private currentPairIndex = 0;
   private completedPaths = 0;
   private currentPair?: PairState;
   private isPointerDown = false;
-  private progressDots: Phaser.GameObjects.Arc[] = [];
   private ringRadius = NEXT_RING_RADIUS;
   private pathPulseTween?: { stop(): void };
-  private readonly audioManager: AudioManager;
 
   constructor() {
-    super({ key: "AnimalTrace" });
-    this.audioManager = AudioManager.getInstance();
+    super("AnimalTrace");
   }
 
   create(): void {
     sceneEntrance(this);
-    this.mascot = createCornerMascot(this);
+    this.createCornerMascot();
+    this.createBackButton();
 
     // Reset all per-session state so a relaunch starts a fresh round.
     this.currentPairIndex = 0;
@@ -158,34 +122,8 @@ export class AnimalTraceScene extends Phaser.Scene {
     this.ringRadius = NEXT_RING_RADIUS;
     this.pathPulseTween = undefined;
 
-    const backButton = this.add.text(
-      20,
-      20,
-      "← Back",
-      textStyle({
-        fontSize: "24px",
-        color: "#2d3748",
-      }),
-    );
-    backButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-
-    this.parentLock = new ParentLock({
-      scene: this,
-      target: backButton,
-      onSuccess: () => {
-        transitionToScene(this, "Hub");
-      },
-      onFailure: () => {
-        // No action needed on failure.
-      },
-    });
-    attachPressFeedback(backButton);
-
     this.pairs = selectThreePairs();
-    this.createProgressIndicator();
+    this.createProgressDots(3);
     this.renderPair(0);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
@@ -203,11 +141,7 @@ export class AnimalTraceScene extends Phaser.Scene {
       this.isPointerDown = false;
     });
 
-    this.events.on("shutdown", () => {
-      this.parentLock?.destroy();
-      this.mascot?.destroy();
-      this.mascot = undefined;
-    });
+    this.registerShutdownCleanup();
   }
 
   /** Renders the pair at the given index: animal, food, dotted path, and curve. */
@@ -363,10 +297,10 @@ export class AnimalTraceScene extends Phaser.Scene {
     this.wiggleFood();
     createCompletionSplash(this, FOOD_X, SPRITE_Y);
     this.completedPaths++;
-    this.updateProgressIndicator();
+    this.fillProgressDot(this.completedPaths - 1);
 
     if (isRoundComplete(this.completedPaths)) {
-      this.handleRoundComplete();
+      this.completeGame("animal-trace");
     } else {
       this.time.delayedCall(NEXT_PAIR_DELAY, () => {
         this.currentPairIndex++;
@@ -386,75 +320,6 @@ export class AnimalTraceScene extends Phaser.Scene {
       yoyo: true,
       repeat: FOOD_WIGGLE_REPEAT,
       ease: "Sine.inOut",
-    });
-  }
-
-  /** Creates 3 progress indicator dots at the top of the screen. */
-  private createProgressIndicator(): void {
-    const startX = this.cameras.main.centerX - PROGRESS_DOT_SPACING;
-    for (let i = 0; i < 3; i++) {
-      const dot = this.add.circle(
-        startX + i * PROGRESS_DOT_SPACING,
-        PROGRESS_DOT_Y,
-        PROGRESS_DOT_RADIUS,
-        0x2d3748,
-        0.3,
-      );
-      this.progressDots.push(dot);
-    }
-  }
-
-  /** Highlights the progress dot for the most recently completed path with a pop. */
-  private updateProgressIndicator(): void {
-    const dot = this.progressDots[this.completedPaths - 1];
-    if (!dot) return;
-    dot.setAlpha(1);
-    this.tweens.add({
-      targets: dot,
-      scaleX: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
-      scaleY: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
-      duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
-      ease: "Back.out",
-      yoyo: true,
-    });
-  }
-
-  /** Handles round completion — win animation, sticker award, and auto-return. */
-  private handleRoundComplete(): void {
-    this.audioManager.playWin();
-    this.mascot?.cheer(true);
-
-    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
-
-    const earnedNow = !hasSticker("animal-trace");
-    if (earnedNow) {
-      earnSticker("animal-trace");
-      this.audioManager.playSticker();
-      this.createStickerAnimation();
-    }
-
-    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub", earnedNow ? { justEarned: "animal-trace" } : undefined);
-    });
-  }
-
-  /** Shows a sticker unlock animation at the center of the screen. */
-  private createStickerAnimation(): void {
-    const stickerImage = this.add
-      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_animal_trace")
-      .setDisplaySize(STICKER_DISPLAY_SIZE, STICKER_DISPLAY_SIZE);
-
-    const targetScaleX = stickerImage.scaleX;
-    const targetScaleY = stickerImage.scaleY;
-    stickerImage.setScale(0);
-
-    this.tweens.add({
-      targets: stickerImage,
-      scaleX: targetScaleX,
-      scaleY: targetScaleY,
-      duration: motionDuration(300, 180),
-      delay: motionDuration(400, 250),
-      ease: "Back.out",
     });
   }
 }

@@ -1,7 +1,4 @@
-import Phaser from "phaser";
-import { AudioManager } from "../audio/AudioManager";
-import { createCornerMascot, type Mascot } from "../components/Mascot";
-import { ParentLock } from "../components/ParentLock";
+import type Phaser from "phaser";
 import {
   type BoxInstance,
   generateRound,
@@ -10,13 +7,11 @@ import {
   type ScaleCategory,
   type ToyInstance,
 } from "../game/bigSmallLogic";
-import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration, motionScale } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
-import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { earnSticker, hasSticker } from "../utils/storage";
-import { textStyle } from "../utils/typography";
+import { sceneEntrance } from "../utils/sceneTransitions";
+import { GameSceneBase } from "./GameSceneBase";
 
 /** Y position for boxes (top area). */
 const BOX_Y = 200;
@@ -38,15 +33,6 @@ const BOUNCE_DURATION = 300;
 
 /** Duration of the bounce-back under reduced motion (ms). */
 const BOUNCE_REDUCED_DURATION = 180;
-
-/** Display size for the sticker unlock animation. */
-const STICKER_DISPLAY_SIZE = 256;
-
-/** Delay before auto-returning to Hub after round completion (ms). */
-const AUTO_RETURN_DELAY = 3000;
-
-/** Texture size for SVG assets (used to calculate base scale). */
-const TEXTURE_SIZE = 512;
 
 /** Duration of the shrink-into-box tween on a correct drop (ms). */
 const SHRINK_DURATION = 150;
@@ -105,9 +91,7 @@ interface BoxSlotData {
  * Correct drops snap to box center with SFX + bounded splash/ray feedback; incorrect drops
  * bounce back gently with a soft tone.
  */
-export class BigSmallScene extends Phaser.Scene {
-  private parentLock?: ParentLock;
-  private mascot?: Mascot;
+export class BigSmallScene extends GameSceneBase {
   private round: { toys: ToyInstance[]; boxes: BoxInstance[] } = {
     toys: [],
     boxes: [],
@@ -115,50 +99,19 @@ export class BigSmallScene extends Phaser.Scene {
   private toyData: ToyData[] = [];
   private boxSlots: BoxSlotData[] = [];
   private sortedCount = 0;
-  private readonly audioManager: AudioManager;
 
   constructor() {
-    super({ key: "BigSmall" });
-    this.audioManager = AudioManager.getInstance();
+    super("BigSmall");
   }
 
   create(): void {
     sceneEntrance(this);
-    this.mascot = createCornerMascot(this);
-
-    const backButton = this.add.text(
-      20,
-      20,
-      "← Back",
-      textStyle({
-        fontSize: "24px",
-        color: "#2d3748",
-      }),
-    );
-    backButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-
-    this.parentLock = new ParentLock({
-      scene: this,
-      target: backButton,
-      onSuccess: () => {
-        transitionToScene(this, "Hub");
-      },
-      onFailure: () => {
-        // No action needed on failure.
-      },
-    });
-    attachPressFeedback(backButton);
+    this.createCornerMascot();
+    this.createBackButton();
 
     this.initRound();
 
-    this.events.on("shutdown", () => {
-      this.parentLock?.destroy();
-      this.mascot?.destroy();
-      this.mascot = undefined;
-    });
+    this.registerShutdownCleanup();
   }
 
   /** Initializes a new round: generates toys and boxes, renders them on screen. */
@@ -264,7 +217,7 @@ export class BigSmallScene extends Phaser.Scene {
       createCompletionSplash(this, slot.x, slot.y);
 
       if (isWin(this.sortedCount)) {
-        this.handleComplete();
+        this.completeGame("big-small");
       }
     }
   }
@@ -310,41 +263,5 @@ export class BigSmallScene extends Phaser.Scene {
       });
       data.droppedOnZone = false;
     }
-  }
-
-  /** Handles round completion: win animation, sticker award, and auto-return to Hub. */
-  private handleComplete(): void {
-    this.audioManager.playWin();
-    this.mascot?.cheer(true);
-
-    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
-
-    const earnedNow = !hasSticker("big-small");
-    if (earnedNow) {
-      earnSticker("big-small");
-      this.audioManager.playSticker();
-      this.createStickerAnimation();
-    }
-
-    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub", earnedNow ? { justEarned: "big-small" } : undefined);
-    });
-  }
-
-  /** Shows a sticker unlock animation at the center of the screen. */
-  private createStickerAnimation(): void {
-    const stickerScale = STICKER_DISPLAY_SIZE / TEXTURE_SIZE;
-    const stickerImage = this.add
-      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_big_small")
-      .setScale(0);
-
-    this.tweens.add({
-      targets: stickerImage,
-      scaleX: stickerScale,
-      scaleY: stickerScale,
-      duration: motionDuration(300, 180),
-      delay: motionDuration(400, 250),
-      ease: "Back.out",
-    });
   }
 }

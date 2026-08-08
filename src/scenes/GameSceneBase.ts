@@ -30,7 +30,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected mascot?: Mascot;
   protected speaker?: SpeakerButton;
   protected readonly audioManager: AudioManager;
-  protected readonly progressDots: Phaser.GameObjects.Arc[] = [];
+  protected progressDots: Phaser.GameObjects.Arc[] = [];
   protected inputLocked = false;
 
   /** Delay before the next round after a correct answer (ms). */

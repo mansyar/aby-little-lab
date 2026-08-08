@@ -1,15 +1,10 @@
-import Phaser from "phaser";
-import { AudioManager } from "../audio/AudioManager";
-import { createCornerMascot, type Mascot } from "../components/Mascot";
-import { ParentLock } from "../components/ParentLock";
+import type Phaser from "phaser";
 import { generatePlaythrough, isMatch, type ShapeType, shuffle } from "../game/shapeSorterLogic";
-import { createCompletionSplash, createWinCelebration } from "../utils/completionEffect";
+import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
-import { motionDuration, motionScale } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
-import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { earnSticker, hasSticker } from "../utils/storage";
-import { textStyle } from "../utils/typography";
+import { motionDuration } from "../utils/motion";
+import { sceneEntrance } from "../utils/sceneTransitions";
+import { GameSceneBase } from "./GameSceneBase";
 
 /** Y position for cutout slots (top area). */
 const SLOT_Y = 200;
@@ -29,41 +24,8 @@ const BOUNCE_DURATION = 300;
 /** Duration of the bounce-back under reduced motion (ms). */
 const BOUNCE_REDUCED_DURATION = 180;
 
-/** Display size for the sticker unlock animation. */
-const STICKER_DISPLAY_SIZE = 256;
-
-/** Delay before auto-returning to Hub after session completion (ms). */
-const AUTO_RETURN_DELAY = 3000;
-
 /** Number of rounds per play session. */
 const ROUND_COUNT = 3;
-
-/** Delay before advancing to the next round (ms). */
-const NEXT_ROUND_DELAY = 1200;
-
-/** Y position for round progress dots (above the slots). */
-const PROGRESS_DOT_Y = 100;
-
-/** Radius of round progress dots. */
-const PROGRESS_DOT_RADIUS = 18;
-
-/** Horizontal spacing between progress dots. */
-const PROGRESS_DOT_SPACING = 64;
-
-/** Alpha of unfilled progress dots. */
-const PROGRESS_DOT_ALPHA = 0.3;
-
-/** Pop scale for the progress dot fill animation. */
-const DOT_POP_SCALE = 1.4;
-
-/** Pop scale for the progress dot under reduced motion. */
-const DOT_POP_REDUCED_SCALE = 1.15;
-
-/** Pop tween duration (ms). */
-const DOT_POP_DURATION = 220;
-
-/** Pop tween duration under reduced motion (ms). */
-const DOT_POP_REDUCED_DURATION = 140;
 
 /** Tracks a draggable shape's state during the round. */
 interface ShapeData {
@@ -94,62 +56,41 @@ interface SlotData {
  * with a soft tone. Win celebration + sticker award happen after the final
  * round.
  */
-export class ShapeSorterScene extends Phaser.Scene {
-  private parentLock?: ParentLock;
-  private mascot?: Mascot;
+export class ShapeSorterScene extends GameSceneBase {
+  // Shape Sorter's larger dots sit above the slots, with a shorter pop and a
+  // longer inter-round delay than the shared defaults.
+  protected readonly PROGRESS_DOT_Y = 100;
+  protected readonly PROGRESS_DOT_RADIUS = 18;
+  protected readonly PROGRESS_DOT_SPACING = 64;
+  protected readonly DOT_POP_REDUCED_SCALE = 1.15;
+  protected readonly DOT_POP_DURATION = 220;
+  protected readonly DOT_POP_REDUCED_DURATION = 140;
+  protected readonly NEXT_ROUND_DELAY = 1200;
+
   private playthrough: ShapeType[][] = [];
   private roundIndex = 0;
-  private progressDots: Phaser.GameObjects.Arc[] = [];
   private selectedShapes: ShapeType[] = [];
   private slotOrder: ShapeType[] = [];
   private shapeOrder: ShapeType[] = [];
   private shapes: ShapeData[] = [];
   private slots: SlotData[] = [];
-  private readonly audioManager: AudioManager;
 
   constructor() {
-    super({ key: "ShapeSorter" });
-    this.audioManager = AudioManager.getInstance();
+    super("ShapeSorter");
   }
 
   create(): void {
     sceneEntrance(this);
-    this.mascot = createCornerMascot(this);
-
-    const backButton = this.add.text(
-      20,
-      20,
-      "← Back",
-      textStyle({ fontSize: "24px", color: "#2d3748" }),
-    );
-    backButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-
-    this.parentLock = new ParentLock({
-      scene: this,
-      target: backButton,
-      onSuccess: () => {
-        transitionToScene(this, "Hub");
-      },
-      onFailure: () => {
-        // No action needed on failure.
-      },
-    });
-    attachPressFeedback(backButton);
+    this.createCornerMascot();
+    this.createBackButton();
 
     this.playthrough = generatePlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
     this.progressDots = [];
-    this.createProgressDots();
+    this.createProgressDots(ROUND_COUNT);
     this.initRound();
 
-    this.events.on("shutdown", () => {
-      this.parentLock?.destroy();
-      this.mascot?.destroy();
-      this.mascot = undefined;
-    });
+    this.registerShutdownCleanup();
   }
 
   /** Initializes the current round: selects its shapes, shuffles positions, renders slots and shapes. */
@@ -259,16 +200,16 @@ export class ShapeSorterScene extends Phaser.Scene {
    * session when the final round is done.
    */
   private handleRoundComplete(): void {
-    this.fillProgressDot();
+    this.fillProgressDot(this.roundIndex);
 
     if (this.roundIndex < this.playthrough.length - 1) {
-      this.time.delayedCall(NEXT_ROUND_DELAY, () => {
+      this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
         this.teardownRound();
         this.roundIndex += 1;
         this.initRound();
       });
     } else {
-      this.handleComplete();
+      this.completeGame("shape-sorter");
     }
   }
 
@@ -283,31 +224,6 @@ export class ShapeSorterScene extends Phaser.Scene {
     }
     this.shapes = [];
     this.slots = [];
-  }
-
-  /** Creates the round progress dots above the slots. */
-  private createProgressDots(): void {
-    const startX = this.cameras.main.centerX - ((ROUND_COUNT - 1) * PROGRESS_DOT_SPACING) / 2;
-    for (let i = 0; i < ROUND_COUNT; i++) {
-      const dot = this.add
-        .circle(startX + i * PROGRESS_DOT_SPACING, PROGRESS_DOT_Y, PROGRESS_DOT_RADIUS, 0x2d3748)
-        .setAlpha(PROGRESS_DOT_ALPHA);
-      this.progressDots.push(dot);
-    }
-  }
-
-  /** Fills and pops the progress dot for the just-completed round. */
-  private fillProgressDot(): void {
-    const dot = this.progressDots[this.roundIndex];
-    dot.setAlpha(1);
-    this.tweens.add({
-      targets: dot,
-      scaleX: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
-      scaleY: motionScale(DOT_POP_SCALE, DOT_POP_REDUCED_SCALE),
-      duration: motionDuration(DOT_POP_DURATION, DOT_POP_REDUCED_DURATION),
-      ease: "Back.out",
-      yoyo: true,
-    });
   }
 
   /** Handles drag end. Bounces shape back to origin with wobble if not placed. */
@@ -326,41 +242,5 @@ export class ShapeSorterScene extends Phaser.Scene {
       });
       shape.droppedOnZone = false;
     }
-  }
-
-  /** Handles session completion: win animation, sticker award, and auto-return to Hub. */
-  private handleComplete(): void {
-    this.audioManager.playWin();
-    this.mascot?.cheer(true);
-
-    createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);
-
-    const earnedNow = !hasSticker("shape-sorter");
-    if (earnedNow) {
-      earnSticker("shape-sorter");
-      this.audioManager.playSticker();
-      this.createStickerAnimation();
-    }
-
-    this.time.delayedCall(AUTO_RETURN_DELAY, () => {
-      transitionToScene(this, "Hub", earnedNow ? { justEarned: "shape-sorter" } : undefined);
-    });
-  }
-
-  /** Shows a sticker unlock animation at the center of the screen. */
-  private createStickerAnimation(): void {
-    const stickerScale = STICKER_DISPLAY_SIZE / 512;
-    const stickerImage = this.add
-      .image(this.cameras.main.centerX, this.cameras.main.centerY, "sticker_shape_sorter")
-      .setScale(0);
-
-    this.tweens.add({
-      targets: stickerImage,
-      scaleX: stickerScale,
-      scaleY: stickerScale,
-      duration: motionDuration(300, 180),
-      delay: motionDuration(400, 250),
-      ease: "Back.out",
-    });
   }
 }

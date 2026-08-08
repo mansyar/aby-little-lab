@@ -309,8 +309,9 @@ describe("ShapeSorterScene multi-round sessions", () => {
 
     const dots = getMockFn(scene.add.circle).mock.results.map((r) => r.value as MockGameObject);
     expect(dots).toHaveLength(3);
-    for (const dot of dots) {
-      expect(getMockFn(dot.setAlpha)).toHaveBeenCalledWith(PROGRESS_DOT_ALPHA);
+    // Dots are dimmed via the shared scaffold's alpha argument on add.circle.
+    for (const call of getMockFn(scene.add.circle).mock.calls) {
+      expect(call[4]).toBe(PROGRESS_DOT_ALPHA);
     }
   });
 
