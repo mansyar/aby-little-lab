@@ -37,7 +37,7 @@
   - [x] Persist via `updateSettings({ preferredVoiceURI })` on selection change
 - [x] Task: Write/extend SettingsPanel tests (row exists, cycling, preview speaks, persistence) (a745cef) — 8 new tests in `SettingsPanel TTS voice selection` describe + 1 BootScene sync test in navigation.test.ts
 - [x] Task: Verify coverage (SettingsPanel 98.72% lines, BootScene 100%, voiceLogic 100%)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: pending] — manual plan: dev server, open Settings via 3s parental hold, cycle voice, preview, restart persistence
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: f022704] — manual plan: dev server, open Settings via 3s parental hold, cycle voice, preview, restart persistence
 
 ## Phase 4 — Full Verification & Documentation
 
