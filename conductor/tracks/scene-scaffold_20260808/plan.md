@@ -5,15 +5,15 @@
 
 ## Phase 1: Base Scaffold (TDD)
 
-- [ ] Task: Write failing tests for `src/scenes/GameSceneBase.ts` (Red phase)
-  - [ ] Test: `createBackButton()` — creates back text with ParentLock; ParentLock success transitions to Hub
-  - [ ] Test: `createProgressDots(n)` — creates n dots at top with correct spacing/radius/alpha
-  - [ ] Test: `fillProgressDot(i)` — fills dot (alpha 1) + pop tween, honors reduced-motion
-  - [ ] Test: `completeGame(gameId, stickerKey)` — win SFX, mascot cheer, celebration, auto-return after delay
-  - [ ] Test: `completeGame` sticker path — earns sticker + animation on first completion; skips when already earned
-  - [ ] Test: shutdown cleanup — destroys parentLock/mascot/speaker on `shutdown`
-- [ ] Task: Implement `GameSceneBase` (Green phase) — shared state (parentLock, mascot, speaker, audioManager, progressDots, inputLocked) + shared methods + protected constants
-- [ ] Task: Run `CI=true pnpm test` to confirm scaffold tests pass; Biome clean
+- [x] Task: Write failing tests for `src/scenes/GameSceneBase.ts` (Red phase) `adf5d99`
+  - [x] Test: `createBackButton()` — creates back text with ParentLock; ParentLock success transitions to Hub
+  - [x] Test: `createProgressDots(n)` — creates n dots at top with correct spacing/radius/alpha
+  - [x] Test: `fillProgressDot(i)` — fills dot (alpha 1) + pop tween, honors reduced-motion
+  - [x] Test: `completeGame(gameId)` — win SFX, mascot cheer, celebration, auto-return after delay
+  - [x] Test: `completeGame` sticker path — earns sticker + animation on first completion; skips when already earned
+  - [x] Test: shutdown cleanup — destroys parentLock/mascot/speaker on `shutdown`
+- [x] Task: Implement `GameSceneBase` (Green phase) — shared state (parentLock, mascot, speaker, audioManager, progressDots, inputLocked) + shared methods + protected constants `adf5d99`
+- [x] Task: Run `CI=true pnpm test` to confirm scaffold tests pass; Biome clean `adf5d99`
 - [ ] Task: Commit `refactor(scenes): Add GameSceneBase shared scaffold`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
