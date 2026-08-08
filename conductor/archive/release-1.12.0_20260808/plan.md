@@ -90,3 +90,8 @@
   - [x] Commit 631e881 (plan.md finalization + archive); registry updated to (Archived) in commit 7fd1304
 - [x] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
   - [x] Checkpoint commit 91bd323
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions `4100bfd`
+  - Low: stale `[~] device testing pending execution` checkbox in release-checklist.md Step 7l — flipped to `[x]` with executed results (all 4 device classes, all 10 TTS rows + carried rows passed, no issues)
