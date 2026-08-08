@@ -18,13 +18,13 @@
 
 ## Phase 3 — Scene Implementation
 
-- [ ] Task: Write scene tests following `howManyScene.test.ts` style: round setup (arrow cue, two cards, counts/layout), correct tap → advance, incorrect tap → wiggle + no penalty, prompt on round start, more-vs-less evaluation, win flow + `{ justEarned: "more-less" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix)
-- [ ] Task: Implement `MoreLessScene.ts` (scene key `MoreLess`): arrow cue (~256px, pop-in, rotated for "less"), two group cards with N item copies (~48px loose grid), pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s
+- [x] Task: Write scene tests following `howManyScene.test.ts` style: round setup (arrow cue, two cards, counts/layout), correct tap → advance, incorrect tap → wiggle + no penalty, prompt on round start, more-vs-less evaluation, win flow + `{ justEarned: "more-less" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(0ca2859)*
+- [x] Task: Implement `MoreLessScene.ts` (scene key `MoreLess`): arrow cue (~256px, pop-in, arrow_down texture for "less"), two group cards with N item copies (~48px loose grid), pressFeedback, progress dots, mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s *(0ca2859 — 14 tests, full suite 45 files/1093 green, scene coverage 94.5% lines)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `more-less` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge
+- [x] Task: Add `more-less` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge *(0ca2859 — pulled forward into Phase 3; `hasSticker("more-less")` is called by the scene's win flow, same as how-many)*
 - [ ] Task: Register `MoreLess` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
 - [ ] Task: Load 4 new SVGs in `PreloadScene` (2 arrows + tile + sticker)
 - [ ] Task: Hub grid — 13 tiles in 5×3 (row 3 gains More or Less; verify fill logic left-aligns and sticker shelf / play-time arc still fit)
