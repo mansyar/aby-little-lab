@@ -43,7 +43,7 @@
 
 - [x] Task: Run full quality gates in CI order: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` (check clean 109 files, 50 files / 1176 tests, build OK with pre-existing chunk-size warning)
 - [x] Task: Update `docs/device-testing-checklist.md` with TTS voice selection rows (targeted device test additions) (03ef786)
-- [x] Task: Final phase verification & checkpoint [checkpoint: pending]
+- [x] Task: Final phase verification & checkpoint [checkpoint: e2338cc]
 - [x] Task: Summarize feature for future release track (v1.12.0 candidate) (see below)
 
 ---
