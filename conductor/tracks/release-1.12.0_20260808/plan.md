@@ -25,13 +25,14 @@
 - [x] Task 2.3: Commit: `chore(release): Bump version to 1.12.0` (505d0d3)
 - [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Release Documentation [checkpoint: <sha>]
+## Phase 3 — Release Documentation [checkpoint: 298cab5]
 
-- [ ] Task 3.1: Draft `docs/release-notes-v1.12.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering TTS Voice Selection — written as DRAFT (FINAL in Phase 7)
-- [ ] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.12.0 record at top (newest-first): the 10 TTS voice rows (default voice fresh install; chip cycles all voices no en-US gate wrapping to Default; long-name truncation; preview speaks with SFX on; preview silent with SFX off; persistence device-level; Default restores; all 7 speech games use selected voice; missing-voice silent fallback; ≥64px touch targets) + carried speech-game/regression rows; result pending (Phase 6)
-- [ ] Task 3.3: Verify knowledge docs already synced by the TTS track (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — patch real gaps only
-- [ ] Task 3.4: Commit: `docs(release): Prepare v1.12.0 release notes and device checklist`
-- [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.1: Draft `docs/release-notes-v1.12.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering TTS Voice Selection — written as DRAFT (FINAL in Phase 7)
+- [x] Task 3.2: Update `docs/device-testing-checklist.md` — add v1.12.0 record at top (newest-first): the 10 TTS voice rows (default voice fresh install; chip cycles all voices no en-US gate wrapping to Default; long-name truncation; preview speaks with SFX on; preview silent with SFX off; persistence device-level; Default restores; all 7 speech games use selected voice; missing-voice silent fallback; ≥64px touch targets) + carried speech-game/regression rows; result pending (Phase 6)
+- [x] Task 3.3: Verify knowledge docs already synced by the TTS track (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — patch real gaps only
+  - [x] All present: product.md line 47 (TTS Voice Selection entry), tech-stack.md lines 113–115 (Design Update + IMPLEMENTED status), TDD.md/PRD.md speech.ts refs, README.md; no gaps to patch
+- [x] Task 3.4: Commit: `docs(release): Prepare v1.12.0 release notes and device checklist` (922a15b)
+- [x] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Release Branch Gates + Tag + PR [checkpoint: <sha>]
 
