@@ -6,6 +6,7 @@ import {
   getActiveProfile,
   getPlayTime,
   getProfiles,
+  getSettings,
   load,
   setPlayTimeLimit,
   updateSettings,
@@ -839,5 +840,179 @@ describe("SettingsPanel play time", () => {
     };
     expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
     expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
+  });
+});
+
+describe("SettingsPanel TTS voice selection", () => {
+  function makeVoice(voiceURI: string, name: string, lang: string): SpeechSynthesisVoice {
+    return {
+      voiceURI,
+      name,
+      lang,
+      localService: false,
+      default: false,
+    };
+  }
+
+  function stubSynth(voices: SpeechSynthesisVoice[]): {
+    synth: Record<string, unknown>;
+    speak: ReturnType<typeof vi.fn>;
+    listeners: Record<string, () => void>;
+  } {
+    const listeners: Record<string, () => void> = {};
+    const speak = vi.fn();
+    const synth = {
+      speaking: false,
+      pending: false,
+      getVoices: vi.fn(() => voices),
+      speak,
+      cancel: vi.fn(),
+      resume: vi.fn(),
+      addEventListener: vi.fn((event: string, handler: () => void) => {
+        listeners[event] = handler;
+      }),
+      removeEventListener: vi.fn((event: string) => {
+        delete listeners[event];
+      }),
+    };
+    vi.stubGlobal("speechSynthesis", synth);
+    return { synth, speak, listeners };
+  }
+
+  class MockUtterance {
+    text: string;
+    lang = "en-US";
+    rate = 1;
+    voice: SpeechSynthesisVoice | null = null;
+
+    constructor(text: string) {
+      this.text = text;
+    }
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("shows the Default (device) chip when no voices are installed", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    expect(findTextByLabel(scene, "Voice: Default (device)")).toBeDefined();
+  });
+
+  it("cycles to the next installed voice on tap and persists the preference", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US"), makeVoice("urn:fred", "Fred", "fr-FR")]);
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
+    triggerPointerdown(chip);
+
+    expect(chip.setText).toHaveBeenCalledWith("Voice: en-US — Zoe");
+    expect(getSettings().preferredVoiceURI).toBe("urn:zoe");
+  });
+
+  it("wraps back to Default (device) after the last voice", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US"), makeVoice("urn:fred", "Fred", "fr-FR")]);
+    updateSettings({ preferredVoiceURI: "urn:fred" });
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: fr-FR — Fred") as MockGameObject;
+    triggerPointerdown(chip);
+
+    expect(chip.setText).toHaveBeenCalledWith("Voice: Default (device)");
+    expect(getSettings().preferredVoiceURI).toBeNull();
+  });
+
+  it("truncates long voice labels in the chip", () => {
+    stubSynth([makeVoice("urn:long", "A Really Long Voice Name That Spills Over", "en-US")]);
+    updateSettings({ preferredVoiceURI: "urn:long" });
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: en-US — A Really Long V…") as MockGameObject;
+    triggerPointerdown(chip);
+
+    expect(chip.setText).toHaveBeenCalledWith("Voice: Default (device)");
+  });
+
+  it("gives the voice chip and preview inflated touch targets of at least 64px", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
+    const chipConfig = chip.setInteractive.mock.calls[0]?.[0] as {
+      hitArea: { height: number; width: number };
+    };
+    expect(chipConfig.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(chipConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+
+    const preview = findTextByLabel(scene, "Preview") as MockGameObject;
+    const previewConfig = preview.setInteractive.mock.calls[0]?.[0] as {
+      hitArea: { height: number; width: number };
+    };
+    expect(previewConfig.hitArea.width).toBeGreaterThanOrEqual(64);
+    expect(previewConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+  });
+
+  it("Preview speaks the sample phrase with the selected voice when SFX is on", () => {
+    const { speak } = stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    vi.stubGlobal("SpeechSynthesisUtterance", MockUtterance);
+    updateSettings({ preferredVoiceURI: "urn:zoe" });
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Preview") as MockGameObject);
+
+    expect(speak).toHaveBeenCalledTimes(1);
+    const utterance = speak.mock.calls[0]?.[0] as MockUtterance;
+    expect(utterance.text).toBe("Hi! I can talk.");
+    expect(utterance.voice?.voiceURI).toBe("urn:zoe");
+  });
+
+  it("Preview stays silent when SFX is off", () => {
+    const { speak } = stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    vi.stubGlobal("SpeechSynthesisUtterance", MockUtterance);
+    updateSettings({ sfxEnabled: false });
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Preview") as MockGameObject);
+
+    expect(speak).not.toHaveBeenCalled();
+  });
+
+  it("refreshes the chip when voices load asynchronously (voiceschanged)", () => {
+    const { synth, listeners } = stubSynth([]);
+    updateSettings({ preferredVoiceURI: "urn:zoe" });
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
+
+    // Voices arrive late on some platforms.
+    (synth.getVoices as ReturnType<typeof vi.fn>).mockReturnValue([
+      makeVoice("urn:zoe", "Zoe", "en-US"),
+    ]);
+    listeners.voiceschanged?.();
+
+    expect(chip.setText).toHaveBeenCalledWith("Voice: en-US — Zoe");
+  });
+
+  it("removes the voiceschanged listener on destroy", () => {
+    const { synth } = stubSynth([]);
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+
+    panel.destroy();
+
+    expect(synth.removeEventListener).toHaveBeenCalledWith("voiceschanged", expect.any(Function));
   });
 });
