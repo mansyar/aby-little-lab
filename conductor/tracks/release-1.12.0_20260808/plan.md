@@ -74,7 +74,8 @@
   - [x] No issues found — none to triage; no Known Issues additions
 - [x] Task 6.3: Commit results: `docs(device): Record v1.12.0 device testing results`
   - [x] Checklist updated: Result → "all items passed on all 4 device classes … executed 2026-08-08", Issues found → "none (no Critical/High/Medium/Low)"
-- [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+  - [x] Checkpoint commit 891634c
 
 ## Phase 7 — Finalize & Archive
 
