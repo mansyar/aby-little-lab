@@ -3,16 +3,18 @@
 **Track ID:** `release-1.11.0_20260808` · **Type:** Chore
 **Methodology:** release process per `docs/release-checklist.md`; phases per `conductor/workflow.md` (checkpoint protocol at each phase end). TDD not applicable — verification via existing gates and checklist execution.
 
-## Phase 1 — Baseline Validation
+## Phase 1 — Baseline Validation [checkpoint: b4a7f8a]
 
-- [ ] Task 1.1: Confirm master state — HEAD = `0bfa8e8` (Game 14 archive commit); working tree clean; origin/master in sync (`git status --short --branch`)
-- [ ] Task 1.2: Run full quality gates on master (CI order)
-  - [ ] `pnpm run check` — Biome clean
-  - [ ] `CI=true pnpm test` — 1145/1145 passing (48 files)
-  - [ ] `pnpm run build` — OK (record main chunk hash)
-  - [ ] `node scripts/validate-pwa.js` — 13/13 passed
-- [ ] Task 1.3: Verify CI "Quality Gates" run on the earlier master push (76887e8..0bfa8e8) is green (check run status); Deploy correctly skipped (no tag)
-- [ ] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 1.1: Confirm master state — HEAD = `0bfa8e8` (Game 14 archive commit); working tree clean; origin/master in sync (`git status --short --branch`)
+  - [x] Confirmed: HEAD 3fc78d0 (in-progress marker, stacked on 6502eda track init + 0bfa8e8 Game 14); tree clean; origin/master ahead 2 (conductor-only commits)
+- [x] Task 1.2: Run full quality gates on master (CI order)
+  - [x] `pnpm run check` — Biome clean (106 files, 385ms)
+  - [x] `CI=true pnpm test` — 1145/1145 passing (48 files, 66.06s)
+  - [x] `pnpm run build` — OK (index-H4IegXRl.js, 1509.08 KiB / gzip 382.77, OddOneOutScene-C1DqT6-T.js lazy chunk, 31 precache entries)
+  - [x] `node scripts/validate-pwa.js` — 13/13 passed
+- [x] Task 1.3: Verify CI "Quality Gates" run on the earlier master push (76887e8..0bfa8e8) is green (check run status); Deploy correctly skipped (no tag)
+  - [x] Run 31242855792 on master: completed success; Deploy not fired (tag-gated)
+- [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md) *(b4a7f8a)*
 
 ## Phase 2 — Release Branch & Version Bump
 
