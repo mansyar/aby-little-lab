@@ -104,7 +104,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Game 15 — Color Match (Color Recognition)** *Link: [./tracks/color-match_20260808/index.md](./tracks/color-match_20260808/index.md)*
+- [x] **Track: Game 15 — Color Match (Color Recognition)** *Link: [./tracks/color-match_20260808/index.md](./tracks/color-match_20260808/index.md)*
 
 
 
