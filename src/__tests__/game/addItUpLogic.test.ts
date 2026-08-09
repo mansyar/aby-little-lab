@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { COUNT_ITEMS } from "../../game/countLogic";
 import {
   ADD_IT_UP_BANDS,
+  type AddItUpRound,
+  type BandId,
   buildPlaythrough,
   buildRound,
   isCorrect,
-  type AddItUpRound,
-  type BandId,
 } from "../../game/addItUpLogic";
+import { COUNT_ITEMS } from "../../game/countLogic";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -178,9 +178,7 @@ describe("isCorrect", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
       const round = buildRound(3);
       round.answerOptions.forEach((option, slot) => {
-        expect(isCorrect(round.answerOptions, slot, round.target)).toBe(
-          option === round.target,
-        );
+        expect(isCorrect(round.answerOptions, slot, round.target)).toBe(option === round.target);
       });
     }
   });

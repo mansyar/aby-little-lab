@@ -59,10 +59,7 @@ function distractorOptions(target: number, max: number): number[] {
  * already drawn in the playthrough — the round's pair never repeats one.
  * Every band keeps enough unused pairs for its two rounds per playthrough.
  */
-export function buildRound(
-  band: BandId,
-  usedPairs: ReadonlySet<string> = new Set(),
-): AddItUpRound {
+export function buildRound(band: BandId, usedPairs: ReadonlySet<string> = new Set()): AddItUpRound {
   const config = ADD_IT_UP_BANDS[band - 1];
   if (!config) {
     // Only reachable if a caller passes a band id outside ADD_IT_UP_BANDS.

@@ -314,7 +314,9 @@ describe("AddItUpScene round flow", () => {
    * Returns the active item images of the current round in creation order:
    * first the two addend dot-groups, then the four answer dot-groups.
    */
-  function getItemsInOrder(scene: unknown): Array<{ texture: string; obj: Record<string, MockFn> }> {
+  function getItemsInOrder(
+    scene: unknown,
+  ): Array<{ texture: string; obj: Record<string, MockFn> }> {
     const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
     const items: Array<{ texture: string; obj: Record<string, MockFn> }> = [];
     for (let i = 0; i < imageMock.mock.calls.length; i++) {
@@ -393,7 +395,7 @@ describe("AddItUpScene round flow", () => {
   /** Taps the answer card matching the target total and fires the next-round delay. */
   function completeRound(scene: unknown): void {
     const round = getCurrentRound(scene);
-    const targetSlot = round.answerOptions.findIndex((option) => option === round.target);
+    const targetSlot = round.answerOptions.indexOf(round.target);
     tapCard(scene, targetSlot);
     fireNextRoundDelay(scene);
   }
@@ -484,7 +486,7 @@ describe("AddItUpScene round flow", () => {
     const scene = new AddItUpScene();
     scene.create();
     const round = getCurrentRound(scene);
-    const targetSlot = round.answerOptions.findIndex((option) => option === round.target);
+    const targetSlot = round.answerOptions.indexOf(round.target);
     const dots = getProgressDots(scene);
     const cards = getAnswerCardRects(scene);
 
@@ -519,7 +521,7 @@ describe("AddItUpScene round flow", () => {
     const scene = new AddItUpScene();
     scene.create();
     const round = getCurrentRound(scene);
-    const targetSlot = round.answerOptions.findIndex((option) => option === round.target);
+    const targetSlot = round.answerOptions.indexOf(round.target);
     const wrongIndex = targetSlot === 0 ? 1 : 0;
     const rect = getAnswerCardRects(scene)[wrongIndex];
 
@@ -619,7 +621,7 @@ describe("AddItUpScene round flow", () => {
     expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
 
     const round = getCurrentRound(scene);
-    const targetSlot = round.answerOptions.findIndex((option) => option === round.target);
+    const targetSlot = round.answerOptions.indexOf(round.target);
     const correctCallsBefore = mockAudio.playCorrect.mock.calls.length;
     tapCard(scene, targetSlot);
     expect(mockAudio.playCorrect.mock.calls.length).toBe(correctCallsBefore + 1);
@@ -652,7 +654,7 @@ describe("AddItUpScene round flow", () => {
     const scene = new AddItUpScene();
     scene.create();
     const round = getCurrentRound(scene);
-    const targetSlot = round.answerOptions.findIndex((option) => option === round.target);
+    const targetSlot = round.answerOptions.indexOf(round.target);
     const wrongIndex = targetSlot === 0 ? 1 : 0;
     const rect = getAnswerCardRects(scene)[wrongIndex];
 

@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { buildPlaythrough, type AddItUpRound, isCorrect } from "../game/addItUpLogic";
+import { type AddItUpRound, buildPlaythrough, isCorrect } from "../game/addItUpLogic";
 import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -111,12 +111,21 @@ export class AddItUpScene extends GameSceneBase {
     this.createAddendCard(
       right.count,
       right.texture,
-      leftEdge + ADDEND_CARD_SIZE + PROMPT_SPACING + SYMBOL_DISPLAY_SIZE + PROMPT_SPACING + ADDEND_CARD_SIZE / 2,
+      leftEdge +
+        ADDEND_CARD_SIZE +
+        PROMPT_SPACING +
+        SYMBOL_DISPLAY_SIZE +
+        PROMPT_SPACING +
+        ADDEND_CARD_SIZE / 2,
       promptY,
     );
     this.createSymbol(
       "equals",
-      leftEdge + 2 * ADDEND_CARD_SIZE + 2 * PROMPT_SPACING + SYMBOL_DISPLAY_SIZE + SYMBOL_DISPLAY_SIZE / 2,
+      leftEdge +
+        2 * ADDEND_CARD_SIZE +
+        2 * PROMPT_SPACING +
+        SYMBOL_DISPLAY_SIZE +
+        SYMBOL_DISPLAY_SIZE / 2,
       promptY,
     );
 
@@ -125,7 +134,13 @@ export class AddItUpScene extends GameSceneBase {
     for (let i = 0; i < 4; i++) {
       const x = answersLeft + i * (ANSWER_CARD_SIZE + ANSWER_SPACING) + ANSWER_CARD_SIZE / 2;
 
-      const card = this.add.rectangle(x, answersY, ANSWER_CARD_SIZE, ANSWER_CARD_SIZE, this.CARD_BG_COLOR);
+      const card = this.add.rectangle(
+        x,
+        answersY,
+        ANSWER_CARD_SIZE,
+        ANSWER_CARD_SIZE,
+        this.CARD_BG_COLOR,
+      );
       card.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
       card.setInteractive({
         hitArea: new Phaser.Geom.Rectangle(0, 0, ANSWER_CARD_SIZE, ANSWER_CARD_SIZE),

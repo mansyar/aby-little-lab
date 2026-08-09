@@ -239,7 +239,6 @@ vi.mock("../../components/Mascot", () => ({
 vi.mock("../../components/ParentLock", () => ({
   ParentLock: class {
     destroy = vi.fn();
-    constructor(..._args: unknown[]) {}
   },
 }));
 
@@ -247,14 +246,12 @@ vi.mock("../../components/PwaToast", () => ({
   PwaToast: class {
     destroy = vi.fn();
     show = vi.fn();
-    constructor(..._args: unknown[]) {}
   },
 }));
 
 vi.mock("../../components/SettingsPanel", () => ({
   SettingsPanel: class {
     destroy = vi.fn();
-    constructor(..._args: unknown[]) {}
   },
 }));
 
