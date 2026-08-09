@@ -116,5 +116,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: v1.13.0 Release Execution (Games 15 & 16 + Perf/Bundle Hardening)** *Link: [./tracks/release-1.13.0_20260809/index.md](./tracks/release-1.13.0_20260809/index.md)*
+- [x] **Track: v1.13.0 Release Execution (Games 15 & 16 + Perf/Bundle Hardening)** *Link: [./archive/release-1.13.0_20260809/index.md](./archive/release-1.13.0_20260809/index.md)* (Archived)
 
