@@ -20,7 +20,7 @@ This checklist ensures comprehensive testing across target devices before releas
 - **Scope:** Parent Progress Insights (per-profile Learning Progress report) — see the track archived at `conductor/archive/parent-progress-insights_20260809/`
 - **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
 - **Checks:** v1.14.0 progress-report rows — Settings shows a "Progress" row between Profiles and Reset; holding the row opens the Learning Progress overlay (header + X close); fresh install shows 8 rows on page 1 with "0 plays · — · —" and grey accuracy bars (no crash on old saves without progress fields); playing a game once updates the row to "1 plays · 100% · Today" with a full green bar; winning the same game 3 times adds the ★ mastery star; More/Back page through all 16 rows ("1 / 2" → "2 / 2"); the 7-day strip at the bottom counts up (bar height grows with plays); switching the avatar chip shows the sibling profile's report without switching the active profile (active-profile sticker/play-time behavior unchanged); X and backdrop tap both close the overlay and the Settings panel remains fully usable; all overlay rows/chips are ≥64 px touch targets; report updates are visible immediately after returning from a game without reloading
-- **Result:** folded into the v1.13.0 record (pending user-led execution)
+- **Result:** folded into the v1.13.0 record (executed by user 2026-08-09 — all items passed, no issues found)
 
 ## Execution Record — v1.12.0 (2026-08-08)
 
