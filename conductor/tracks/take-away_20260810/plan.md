@@ -14,7 +14,7 @@
 - [x] Task: Create `src/assets/svg/ui/minus.svg` (symbol cue — plus.svg precedent; chunky `#2B6CB0` fill / `#2D3748` stroke) (dc41b0b)
 - [x] Task: Create `src/assets/svg/ui/tiles/tile_take_away.svg` (Hub tile icon: two dot cards joined by a big "−", answer card highlighted; 512×512 storybook style per `docs/SVG_STYLE.md`) (dc41b0b)
 - [x] Task: Create `src/assets/svg/stickers/sticker_take_away.svg` (cream badge, dot cards with "−" and "=") (dc41b0b)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 872c2ae]
 
 ## Phase 3 — Scene Implementation
 
