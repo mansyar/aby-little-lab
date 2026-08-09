@@ -68,6 +68,6 @@ with accuracy/mastery, and the 7-day activity strip — fitting 1024×768.
 Goal: full verification per workflow quality gates; docs updated; device
 checklist rows added for the next release.
 
-- [ ] Task 4.1: Run full quality gates — `CI=true pnpm test`, coverage report meets thresholds, `pnpm run check` (Biome), `pnpm run build`, `pnpm run validate-bundle` / `validate-pwa`; fix any failures
-- [ ] Task 4.2: Update docs — PRD milestone/feature notes (progress report), `docs/device-testing-checklist.md` rows for the next release (progress report + carried rows), release notes draft for next version
+- [x] Task 4.1: Run full quality gates — `CI=true pnpm test`, coverage report meets thresholds, `pnpm run check` (Biome), `pnpm run build`, `pnpm run validate-bundle` / `validate-pwa`; fix any failures — 1260/1260 tests; coverage 96.74/88.58/92.14/98 (thresholds 90/85/88/95); Biome clean; build 2.64s; bundle PASS (shell 140.7 kB ≤ 200 kB); PWA 13/13
+- [x] Task 4.2: Update docs — PRD milestone/feature notes (progress report), `docs/device-testing-checklist.md` rows for the next release (progress report + carried rows), release notes draft for next version — PRD gains the 2026-08-09 Progress Insights release decision; device-testing gains the v1.14.0 draft execution record (9 progress-report rows, pending live URL); `docs/release-notes-v1.14.0.md` drafted (DRAFT; v1.13.0 perf release still pending its release-execution track)
 - [ ] Task 4.3: Phase Verification & Checkpoint (Refer to workflow.md)
