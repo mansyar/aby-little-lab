@@ -10,16 +10,16 @@ Spec: [./spec.md](./spec.md)
 Goal: `progressLogic.ts` (pure, Phaser-free) + additive v2 storage migration so
 progress/activity survive loads, saves, and profile switches with zero data loss.
 
-- [ ] Task 1.1: Write failing tests for `src/game/progressLogic.ts`
-  - [ ] ... `createDefaultProgress()` returns zeroed stats for all 15 game ids
-  - [ ] ... `normalizeProgress()` backfills missing keys and invalid shapes
-  - [ ] ... `recordPlay()` increments plays, sets lastPlayedAt, adds today's activity day
-  - [ ] ... `recordResult()` accumulates wins/correct/wrong and prunes activity to 7 days
-  - [ ] ... `getAccuracy()` returns 0..1 ratio (and null/0 for no taps)
-  - [ ] ... `isMastered(progress)` is true when wins >= 3
-  - [ ] ... `createDefaultActivity()` / activity prune rolls off days older than 7
-  - [ ] ... relative last-played formatter ("Today", "1d ago", "—") is date-safe
-- [ ] Task 1.2: Implement `src/game/progressLogic.ts` to pass (mirror `playTimeLogic.ts` style, JSDoc on all public functions)
+- [x] Task 1.1: Write failing tests for `src/game/progressLogic.ts` `[e1e8986]`
+  - [x] ... `createDefaultProgress()` returns zeroed stats for all 15 game ids
+  - [x] ... `normalizeProgress()` backfills missing keys and invalid shapes
+  - [x] ... `recordPlay()` increments plays, sets lastPlayedAt, adds today's activity day
+  - [x] ... `recordResult()` accumulates wins/correct/wrong and prunes activity to 7 days
+  - [x] ... `getAccuracy()` returns 0..1 ratio (and null/0 for no taps)
+  - [x] ... `isMastered(progress)` is true when wins >= 3
+  - [x] ... `createDefaultActivity()` / activity prune rolls off days older than 7
+  - [x] ... relative last-played formatter ("Today", "1d ago", "—") is date-safe
+- [x] Task 1.2: Implement `src/game/progressLogic.ts` to pass (mirror `playTimeLogic.ts` style, JSDoc on all public functions) `[e1e8986]`
 - [ ] Task 1.3: Write failing tests for storage migration (`src/__tests__/utils/storage.test.ts` or sibling)
   - [ ] ... old v2 save without `progress`/`activity` loads with zeroed defaults
   - [ ] ... v1-migrated save gains zeroed progress
