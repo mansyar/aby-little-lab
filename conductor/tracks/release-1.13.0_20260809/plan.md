@@ -25,11 +25,14 @@
 
 ## Phase 3 — Release Documentation
 
-- [ ] Task 3.1: Draft `docs/release-notes-v1.13.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 15 (Color Match), Game 16 (Add It Up), and Performance & Bundle Hardening — written as DRAFT (FINAL in Phase 7); carried known issues (cross-device sync, system-font letterforms); must not cover Parent Progress Insights
-- [ ] Task 3.2: Update `docs/device-testing-checklist.md` — extend the existing v1.13.0 record with Game 15 (Color Match) rows + Game 16 (Add It Up) rows alongside the perf rows; result marked pending user execution (Phase 6)
-- [ ] Task 3.3: Verify knowledge docs already synced by the three tracks (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — patch real gaps only
-- [ ] Task 3.4: Commit: `docs(release): Prepare v1.13.0 release notes and device checklist`
-- [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.1: Draft `docs/release-notes-v1.13.0.md` (template: What's New / Improvements / Bug Fixes / Known Issues / Installation / Feedback) covering Game 15 (Color Match), Game 16 (Add It Up), and Performance & Bundle Hardening — written as DRAFT (FINAL in Phase 7); carried known issues (cross-device sync, system-font letterforms); must not cover Parent Progress Insights
+  - [x] DRAFT written per the v1.12.0 template; covers both new games + bundle split; carried known issues; no Parent Progress Insights content
+- [x] Task 3.2: Update `docs/device-testing-checklist.md` — extend the existing v1.13.0 record with Game 15 (Color Match) rows + Game 16 (Add It Up) rows alongside the perf rows; result marked pending user execution (Phase 6)
+  - [x] Record retargeted to live URL; scope includes both games; full Color Match + Add It Up rows drafted (grid 5×3+1, swatch prompt, 6 rounds easy-first, feedback chains, stickers, no-speech Add It Up, carried v1.12.0 rows); result = reference-profile done, device-class pending user-led
+- [x] Task 3.3: Verify knowledge docs already synced by the three tracks (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — patch real gaps only
+  - [x] Audit found 2 stale refs, patched: product.md "14 distinct mini-games" → 16; TDD.md "fifteen game Back buttons" → sixteen. tech-stack/PRD/README already synced by the game tracks
+- [x] Task 3.4: Commit: `docs(release): Prepare v1.13.0 release notes and device checklist` (510bf34)
+- [~] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
