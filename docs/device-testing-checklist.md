@@ -13,6 +13,15 @@ This checklist ensures comprehensive testing across target devices before releas
 - **Result:** **reference-profile executed 2026-08-09 (desktop Chromium, playwright-cli)** — boot 1080.7 ms (< 3 s), shell + phaser chunks confirmed as separate requests, no console errors beyond pre-existing favicon 404; **device-class execution pending** — to run against the live URL as part of the v1.13.0 release execution
 - **Issues found:** none on reference profile (no Critical/High/Medium/Low)
 
+## Execution Record — v1.14.0 (2026-08-09) — draft, pending release execution
+
+- **Target:** local production preview (Progress Insights build) — live-URL record to be appended by the v1.14.0 release-execution track
+- **Scope:** Parent Progress Insights (per-profile Learning Progress report) — see the track archived at `conductor/archive/parent-progress-insights_20260809/`
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+)
+- **Checks:** v1.14.0 progress-report rows — Settings shows a "Progress" row between Profiles and Reset; holding the row opens the Learning Progress overlay (header + X close); fresh install shows 8 rows on page 1 with "0 plays · — · —" and grey accuracy bars (no crash on old saves without progress fields); playing a game once updates the row to "1 plays · 100% · Today" with a full green bar; winning the same game 3 times adds the ★ mastery star; More/Back page through all 15 rows ("1 / 2" → "2 / 2"); the 7-day strip at the bottom counts up (bar height grows with plays); switching the avatar chip shows the sibling profile's report without switching the active profile (active-profile sticker/play-time behavior unchanged); X and backdrop tap both close the overlay and the Settings panel remains fully usable; all overlay rows/chips are ≥64 px touch targets; report updates are visible immediately after returning from a game without reloading
+- **Result:** **pending** — to run against the live URL as part of the v1.14.0 release execution
+- **Issues found:** none yet (no Critical/High/Medium/Low)
+
 ## Execution Record — v1.12.0 (2026-08-08)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.12.0 — TTS Voice Selection)
