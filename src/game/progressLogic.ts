@@ -1,6 +1,6 @@
 import type { DayActivity, GameId, GameProgress } from "../types";
-import { GAME_IDS } from "./profileLogic";
 import { todayKey } from "./playTimeLogic";
+import { GAME_IDS } from "./profileLogic";
 
 /**
  * Pure logic for per-profile learning progress. Each profile tracks, per
@@ -50,9 +50,10 @@ export function normalizeProgressMap(
   raw: Partial<Record<GameId, GameProgress>> | null | undefined,
 ): Record<GameId, GameProgress> {
   const merged = { ...createDefaultProgressMap(), ...raw };
-  return Object.fromEntries(
-    GAME_IDS.map((id) => [id, normalizeProgress(merged[id])]),
-  ) as Record<GameId, GameProgress>;
+  return Object.fromEntries(GAME_IDS.map((id) => [id, normalizeProgress(merged[id])])) as Record<
+    GameId,
+    GameProgress
+  >;
 }
 
 /** Records a started play: increments plays and stamps the last-played time. */
@@ -90,9 +91,7 @@ export function getAccuracy(progress: Partial<GameProgress> | null | undefined):
 }
 
 /** Accuracy as a rounded percent label, or an em dash when there are no taps. */
-export function formatAccuracyPercent(
-  progress: Partial<GameProgress> | null | undefined,
-): string {
+export function formatAccuracyPercent(progress: Partial<GameProgress> | null | undefined): string {
   const accuracy = getAccuracy(progress);
   return accuracy === null ? "—" : `${Math.round(accuracy * 100)}%`;
 }
@@ -149,11 +148,7 @@ export function relativeLastPlayed(
   const key = todayKey(now);
   const playedKey = todayKey(played);
   const days =
-    (Date.UTC(
-      Number(key.slice(0, 4)),
-      Number(key.slice(5, 7)) - 1,
-      Number(key.slice(8, 10)),
-    ) -
+    (Date.UTC(Number(key.slice(0, 4)), Number(key.slice(5, 7)) - 1, Number(key.slice(8, 10))) -
       Date.UTC(
         Number(playedKey.slice(0, 4)),
         Number(playedKey.slice(5, 7)) - 1,

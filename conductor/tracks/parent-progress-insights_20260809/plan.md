@@ -20,13 +20,13 @@ progress/activity survive loads, saves, and profile switches with zero data loss
   - [x] ... `createDefaultActivity()` / activity prune rolls off days older than 7
   - [x] ... relative last-played formatter ("Today", "1d ago", "—") is date-safe
 - [x] Task 1.2: Implement `src/game/progressLogic.ts` to pass (mirror `playTimeLogic.ts` style, JSDoc on all public functions) `[e1e8986]`
-- [ ] Task 1.3: Write failing tests for storage migration (`src/__tests__/utils/storage.test.ts` or sibling)
-  - [ ] ... old v2 save without `progress`/`activity` loads with zeroed defaults
-  - [ ] ... v1-migrated save gains zeroed progress
-  - [ ] ... `recordGamePlay(gameId)` / `recordGameResult(gameId, result)` persist per ACTIVE profile
-  - [ ] ... `save()`/`earnSticker()`/`resetProgress()` preserve existing progress
-  - [ ] ... `getProgress(profileId?)` returns normalized per-profile progress
-- [ ] Task 1.4: Implement storage additions in `src/utils/storage.ts` (recordGamePlay, recordGameResult, getProgress) and extend `Profile` type + `createDefaultProfile`/`normalizeV2` backfill in `src/types/index.ts` / `src/game/profileLogic.ts`
+- [x] Task 1.3: Write failing tests for storage migration (`src/__tests__/utils/storage.test.ts` or sibling) `[5e97782]`
+  - [x] ... old v2 save without `progress`/`activity` loads with zeroed defaults
+  - [x] ... v1-migrated save gains zeroed progress
+  - [x] ... `recordGamePlay(gameId)` / `recordGameResult(gameId, result)` persist per ACTIVE profile
+  - [x] ... `save()`/`earnSticker()`/`resetProgress()` preserve existing progress
+  - [x] ... `getProgress(profileId?)` returns normalized per-profile progress
+- [x] Task 1.4: Implement storage additions in `src/utils/storage.ts` (recordGamePlay, recordGameResult, getProgress) and extend `Profile` type + `createDefaultProfile`/`normalizeV2` backfill in `src/types/index.ts` / `src/game/profileLogic.ts` `[5e97782]`
 - [ ] Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Session Instrumentation (Hub → GameSceneBase → Scenes)

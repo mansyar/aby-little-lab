@@ -1,12 +1,5 @@
 import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
 import {
-  addActivity,
-  normalizeProgressMap,
-  pruneActivity,
-  recordPlay,
-  recordResult,
-} from "../game/progressLogic";
-import {
   addProfile as addProfileToV2,
   availableAvatarIds,
   createDefaultStickers,
@@ -15,6 +8,13 @@ import {
   normalizeV2,
   switchActiveProfile,
 } from "../game/profileLogic";
+import {
+  addActivity,
+  normalizeProgressMap,
+  pruneActivity,
+  recordPlay,
+  recordResult,
+} from "../game/progressLogic";
 import type {
   AppStorage,
   AvatarId,

@@ -682,13 +682,13 @@ describe("progress recording", () => {
     recordGamePlay("shape-sorter");
     const firstProfile = getActiveProfile().id;
 
-    const second = addProfile("dog");
-    expect(second).not.toBeNull();
+    addProfile("dog");
+    const secondProfile = getActiveProfile().id;
     recordGamePlay("color-match");
 
     expect(getProgress(firstProfile)["shape-sorter"].plays).toBe(1);
-    expect(getProgress(second!.id)["shape-sorter"].plays).toBe(0);
-    expect(getProgress(second!.id)["color-match"].plays).toBe(1);
+    expect(getProgress(secondProfile)["shape-sorter"].plays).toBe(0);
+    expect(getProgress(secondProfile)["color-match"].plays).toBe(1);
   });
 
   it("records a completed result with correct/wrong and a win", () => {
@@ -706,7 +706,10 @@ describe("progress recording", () => {
     recordGamePlay("shape-sorter");
     recordGameResult("shape-sorter", 5, 1);
 
-    save({ stickers: { "shape-sorter": { earned: true, earnedAt: "2026-08-05T00:00:00.000Z" } }, settings: { bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null } });
+    save({
+      stickers: { "shape-sorter": { earned: true, earnedAt: "2026-08-05T00:00:00.000Z" } },
+      settings: { bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null },
+    });
     earnSticker("color-match");
     expect(getProgress()["shape-sorter"].plays).toBe(1);
 

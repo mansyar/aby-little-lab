@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { GAME_IDS } from "../../game/profileLogic";
 import {
-  MASTERY_WINS,
   addActivity,
   createDefaultProgress,
   createDefaultProgressMap,
   formatAccuracyPercent,
   getAccuracy,
   isMastered,
+  MASTERY_WINS,
   normalizeProgress,
   normalizeProgressMap,
   pruneActivity,
@@ -15,7 +16,6 @@ import {
   relativeLastPlayed,
 } from "../../game/progressLogic";
 import type { DayActivity, GameProgress } from "../../types";
-import { GAME_IDS } from "../../game/profileLogic";
 
 const DAY = new Date(2026, 7, 5, 10, 0, 0); // 2026-08-05 local
 const NEXT_DAY = new Date(2026, 7, 6, 9, 0, 0); // 2026-08-06 local
@@ -57,7 +57,13 @@ describe("progressLogic", () => {
 
   describe("normalizeProgress", () => {
     it("keeps a valid progress unchanged", () => {
-      const input = gp({ plays: 4, wins: 3, correct: 20, wrong: 5, lastPlayedAt: "2026-08-05T10:00:00.000Z" });
+      const input = gp({
+        plays: 4,
+        wins: 3,
+        correct: 20,
+        wrong: 5,
+        lastPlayedAt: "2026-08-05T10:00:00.000Z",
+      });
       expect(normalizeProgress(input)).toEqual(input);
     });
 
@@ -82,7 +88,9 @@ describe("progressLogic", () => {
     });
 
     it("keeps a valid last-played timestamp", () => {
-      const normalized = normalizeProgress({ lastPlayedAt: "2026-08-05T10:00:00.000Z" } as GameProgress);
+      const normalized = normalizeProgress({
+        lastPlayedAt: "2026-08-05T10:00:00.000Z",
+      } as GameProgress);
       expect(normalized.lastPlayedAt).toBe("2026-08-05T10:00:00.000Z");
     });
   });
@@ -270,7 +278,13 @@ describe("progressLogic", () => {
       activity = pruneActivity(addActivity(activity, THREE_DAYS_LATER), THREE_DAYS_LATER);
 
       expect(progress).toEqual(
-        gp({ plays: 3, wins: 3, correct: 15, wrong: 3, lastPlayedAt: THREE_DAYS_LATER.toISOString() }),
+        gp({
+          plays: 3,
+          wins: 3,
+          correct: 15,
+          wrong: 3,
+          lastPlayedAt: THREE_DAYS_LATER.toISOString(),
+        }),
       );
       expect(isMastered(progress)).toBe(true);
       expect(getAccuracy(progress)).toBeCloseTo(15 / 18);
