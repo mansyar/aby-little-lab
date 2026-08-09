@@ -8,7 +8,7 @@ Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 16 mini-games
 
 ## 1. Product Overview
 
-**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **14 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
+**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **16 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
 
 All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes scalable vectors dynamically at load time into crisp bitmaps, matching exact display resolutions without large file sizes.
 
