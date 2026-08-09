@@ -27,7 +27,7 @@ progress/activity survive loads, saves, and profile switches with zero data loss
   - [x] ... `save()`/`earnSticker()`/`resetProgress()` preserve existing progress
   - [x] ... `getProgress(profileId?)` returns normalized per-profile progress
 - [x] Task 1.4: Implement storage additions in `src/utils/storage.ts` (recordGamePlay, recordGameResult, getProgress) and extend `Profile` type + `createDefaultProfile`/`normalizeV2` backfill in `src/types/index.ts` / `src/game/profileLogic.ts` `[5e97782]`
-- [ ] Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 96ca0fa]`
 
 ## Phase 2 — Session Instrumentation (Hub → GameSceneBase → Scenes)
 
