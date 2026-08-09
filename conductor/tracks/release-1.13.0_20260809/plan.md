@@ -36,10 +36,13 @@
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
-- [ ] Task 4.1: Re-run all five gates on `release/v1.13.0` (check → test → build → validate-pwa → validate-bundle)
-- [ ] Task 4.2: Create annotated tag `git tag -a v1.13.0 -m "Release v1.13.0 — Games 15 & 16 (Color Match, Add It Up) + Performance & Bundle Hardening"`; push tag to origin
-- [ ] Task 4.3: Push branch; open PR `release/v1.13.0` → `master` (body = release notes summary); confirm Quality Gates PASS on PR, Deploy skipped (tag-guard by design)
-- [ ] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 4.1: Re-run all five gates on `release/v1.13.0` (check → test → build → validate-pwa → validate-bundle)
+  - [x] Biome clean (121 files); 1284/1284 tests (56 files, 82.18s); build OK — shell `index-C8KSx-ay.js` 148.04 kB / gzip 27.72, phaser vendor `phaser-CYX5YQB3.js` 1,375.72 kB, 16 lazy game chunks (ColorMatchScene-B6LalKu6.js, AddItUpScene-DR7U0WBN.js), precache 34 entries; validate-pwa 13/13; validate-bundle PASS (vendor present, shell 144.6 kB ≤ 200 kB)
+- [x] Task 4.2: Create annotated tag `git tag -a v1.13.0 -m "Release v1.13.0 — Games 15 & 16 (Color Match, Add It Up) + Performance & Bundle Hardening"`; push tag to origin
+  - [x] Tag created locally (annotated, message as planned). **Push deferred to Phase 5 after the PR merge** — the CI tag-guard only deploys tags pointing at a commit on `master` (master-lineage guard; same pattern as v1.11.0/v1.12.0 tag amendment). Pushing it on the release branch would fail the guard by design
+- [x] Task 4.3: Push branch; open PR `release/v1.13.0` → `master` (body = release notes summary); confirm Quality Gates PASS on PR, Deploy skipped (tag-guard by design)
+  - [x] Branch pushed (`origin/release/v1.13.0`); **PR #26** opened (https://github.com/mansyar/aby-little-lab/pull/26); Quality Gates **PASS** (2m16s, run 31316546105); Deploy to Coolify **skipping** (correct — tag-guard)
+- [~] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Merge, Deploy & Verify
 
