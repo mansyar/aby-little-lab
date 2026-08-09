@@ -35,16 +35,16 @@ Goal: every play session records plays, wins, and correct/wrong taps at the
 three shared choke points; one-line additions at each scene's existing answer
 sites.
 
-- [ ] Task 2.1: Write failing tests for HubScene session-start recording
-  - [ ] ... tapping a game tile records a play for the active profile (storage spy)
-  - [ ] ... repeated taps do not double-record when navigation is guarded
-- [ ] Task 2.2: Implement HubScene recording (single tile-tap handler → `recordGamePlay(gameId)`)
-- [ ] Task 2.3: Write failing tests for GameSceneBase session flush
-  - [ ] ... `completeGame(gameId)` flushes accumulated correct/wrong + win via `recordGameResult`
-  - [ ] ... `recordCorrect()`/`recordWrong()` accumulate in-session counters
-  - [ ] ... scene shutdown without completion does NOT flush results
-- [ ] Task 2.4: Implement GameSceneBase session counters, `recordCorrect()`/`recordWrong()`, and flush inside `completeGame()` before the win flow
-- [ ] Task 2.5: Instrument the 15 game scenes — add `this.recordCorrect()` / `this.recordWrong()` at each scene's single `playCorrect()` / `playIncorrect()` call site; games without a right/wrong path (e.g., Pop & Freeze, Animal Trace) remain tap-free. Verify via existing scene tests + new assertion spot checks (TDD impractical for one-liners; covered by Phase 2/3 tests)
+- [x] Task 2.1: Write failing tests for HubScene session-start recording `[7c28912]`
+  - [x] ... tapping a game tile records a play for the active profile (storage spy)
+  - [x] ... repeated taps do not double-record when navigation is guarded
+- [x] Task 2.2: Implement HubScene recording (single tile-tap handler → `recordGamePlay(gameId)`) `[7c28912]`
+- [x] Task 2.3: Write failing tests for GameSceneBase session flush `[7c28912]`
+  - [x] ... `completeGame(gameId)` flushes accumulated correct/wrong + win via `recordGameResult`
+  - [x] ... `recordCorrect()`/`recordWrong()` accumulate in-session counters
+  - [x] ... scene shutdown without completion does NOT flush results
+- [x] Task 2.4: Implement GameSceneBase session counters, `recordCorrect()`/`recordWrong()`, and flush inside `completeGame()` before the win flow `[7c28912]`
+- [x] Task 2.5: Instrument the 15 game scenes — add `this.recordCorrect()` / `this.recordWrong()` at each scene's single `playCorrect()` / `playIncorrect()` call site; games without a right/wrong path (e.g., Pop & Freeze, Animal Trace) remain tap-free. Verify via existing scene tests + new assertion spot checks (TDD impractical for one-liners; covered by Phase 2/3 tests) `[a43a740]`
 - [ ] Task 2.6: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Progress Report Overlay (SettingsPanel UI)
