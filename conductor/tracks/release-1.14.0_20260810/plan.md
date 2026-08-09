@@ -5,7 +5,7 @@
 
 For every file-changing task: mark `[~]`, implement, verify, commit with a Git note, mark `[x]`, record the SHA, and commit the plan update separately.
 
-## Phase 1 — Baseline and Unreleased-Delta Validation
+## Phase 1 — Baseline and Unreleased-Delta Validation [checkpoint: 07ae567]
 
 - [x] **Task 1.1: Verify repository state**
   - [x] Confirm clean working tree and current `master` tracking state.
