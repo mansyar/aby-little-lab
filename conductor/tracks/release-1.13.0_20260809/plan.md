@@ -42,7 +42,7 @@
   - [x] Tag created locally (annotated, message as planned). **Push deferred to Phase 5 after the PR merge** — the CI tag-guard only deploys tags pointing at a commit on `master` (master-lineage guard; same pattern as v1.11.0/v1.12.0 tag amendment). Pushing it on the release branch would fail the guard by design
 - [x] Task 4.3: Push branch; open PR `release/v1.13.0` → `master` (body = release notes summary); confirm Quality Gates PASS on PR, Deploy skipped (tag-guard by design)
   - [x] Branch pushed (`origin/release/v1.13.0`); **PR #26** opened (https://github.com/mansyar/aby-little-lab/pull/26); Quality Gates **PASS** (2m16s, run 31316546105); Deploy to Coolify **skipping** (correct — tag-guard)
-- [~] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 48e5f2b]
 
 ## Phase 5 — Merge, Deploy & Verify
 
