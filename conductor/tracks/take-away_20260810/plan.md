@@ -29,7 +29,7 @@
 - [x] Task: Load 3 new SVGs in `PreloadScene` (minus + tile + sticker; 156 → 159) (d298759)
 - [x] Task: Hub grid — 17 tiles in 5×3+2 (row 4: 2 tiles left-aligned; generic modulo layout handles it — verify sticker shelf / play-time arc still fit; update grid comment) (d298759 — grid comment updated to 5×3+2; hubScene test asserts all 17 tiles on-canvas)
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 17 tiles, sceneRegistry tests updated, progress recording flows into Learning Progress (d298759 — preload 159, tile icons 17, hasSticker 17/34, slots 17; full suite 58 files/1309 tests green)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 5f0af11]
 
 ## Phase 5 — Docs & Release Readiness
 
