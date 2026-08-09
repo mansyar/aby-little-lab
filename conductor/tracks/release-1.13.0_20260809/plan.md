@@ -15,12 +15,13 @@
 
 ## Phase 2 — Release Branch & Version Bump
 
-- [ ] Task 2.1: Create release branch `git checkout -b release/v1.13.0` from master
-- [ ] Task 2.2: Bump version `npm version 1.13.0 --no-git-tag-version`
-  - [ ] Verify `package.json` version = 1.13.0 (no lockfile churn)
-  - [ ] Verify `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version)
-- [ ] Task 2.3: Commit: `chore(release): Bump version to 1.13.0`
-- [ ] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.1: Create release branch `git checkout -b release/v1.13.0` from master
+  - [x] Branch `release/v1.13.0` created from master @ 158016b; clean
+- [x] Task 2.2: Bump version `npm version 1.13.0 --no-git-tag-version`
+  - [x] `package.json` version = 1.13.0 (verified via `node -p`); only package.json changed — zero lockfile churn
+  - [x] `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version)
+- [x] Task 2.3: Commit: `chore(release): Bump version to 1.13.0` (579cd21)
+- [~] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Release Documentation
 
