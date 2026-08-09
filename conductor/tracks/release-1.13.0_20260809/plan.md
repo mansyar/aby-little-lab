@@ -68,7 +68,7 @@
   - [x] User reported (2026-08-09): all device checks passed, no issues found. Triage: none to record
 - [x] Task 6.3: Commit results: `docs(device): Record v1.13.0 device testing results` (when the user reports)
   - [x] Commit `1747639` — device-testing-checklist v1.13.0 Result updated (user-executed, all passed); release notes v1.13.0 FINAL; release-checklist Step 7m + Final Sign-Off device rows completed
-- [~] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: b207ee6]
 
 ## Phase 7 — Finalize & Archive
 
