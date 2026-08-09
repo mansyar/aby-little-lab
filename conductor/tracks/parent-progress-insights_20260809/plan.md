@@ -52,15 +52,15 @@ sites.
 Goal: parent-gated "Progress" row + overlay: profile switcher, 15 game rows
 with accuracy/mastery, and the 7-day activity strip — fitting 1024×768.
 
-- [ ] Task 3.1: Write failing tests for report data formatting helpers (accuracy label/percent, relative last-played, mastery star rule, activity strip buckets)
-- [ ] Task 3.2: Implement formatting helpers in `progressLogic.ts` (pure) to pass
-- [ ] Task 3.3: Write failing tests for the SettingsPanel Progress overlay
-  - [ ] ... Progress row exists and opens the overlay
-  - [ ] ... overlay shows 15 game rows with plays/accuracy/mastery/last-played
-  - [ ] ... profile switcher re-renders rows for the selected profile without switching active profile
-  - [ ] ... activity strip renders 7 day bars from profile activity
-  - [ ] ... close (backdrop/X) destroys overlay objects; panel rows remain functional
-- [ ] Task 3.4: Implement the Progress row + overlay in `src/components/SettingsPanel.ts` (reuse overlay-object pattern, `tile_*` textures, `typography.ts` styles, ≥64px touch targets, scroll/dense layout for 15 rows)
+- [x] Task 3.1: Write failing tests for report data formatting helpers (accuracy label/percent, relative last-played, mastery star rule, activity strip buckets) `[e1e8986]` — covered by Phase 1 `progressLogic.test.ts` (formatAccuracyPercent, relativeLastPlayed, isMastered, pruneActivity)
+- [x] Task 3.2: Implement formatting helpers in `progressLogic.ts` (pure) to pass `[e1e8986]` — landed in Phase 1
+- [x] Task 3.3: Write failing tests for the SettingsPanel Progress overlay `[61708b3]`
+  - [x] ... Progress row exists and opens the overlay
+  - [x] ... overlay shows 15 game rows with plays/accuracy/mastery/last-played
+  - [x] ... profile switcher re-renders rows for the selected profile without switching active profile
+  - [x] ... activity strip renders 7 day bars from profile activity
+  - [x] ... close (backdrop/X) destroys overlay objects; panel rows remain functional
+- [x] Task 3.4: Implement the Progress row + overlay in `src/components/SettingsPanel.ts` (reuse overlay-object pattern, `tile_*` textures, `typography.ts` styles, ≥64px touch targets, scroll/dense layout for 15 rows) `[61708b3]`
 - [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Quality Gates, Docs & Release Readiness
