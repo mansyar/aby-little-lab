@@ -312,6 +312,17 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 - [x] Live smoke test — Hub renders 14 tiles (5×3, row 3 = 4 left-aligned, no clipping); Settings opens via 3s parental hold with `v1.12.0` footer; Voice row shows "Voice: Default (device)" on fresh install; tapping the voice chip cycles to installed device voices (Microsoft David/Mark/Zira observed) and persists `preferredVoiceURI` to localStorage (`abby-little-lab:v2`); "Preview" speaks "Hi! I can talk." with the selected voice (rate 0.8, `speechSynthesis.speaking` true, SFX on); preference survives reload; Find the Letter speaks its target letter with the selected voice; zero console errors (only Phaser banner)
 - [x] Device testing on v1.12.0 — executed 2026-08-08 on all 4 device classes (iPad, Android tablet, iPhone, Android phone) against the live URL; **all items passed** (all 10 TTS Voice Selection rows + carried rows), no issues found — recorded in `docs/device-testing-checklist.md` (v1.12.0 execution record)
 
+### Step 7m: Verify Deployment — v1.13.0 (2026-08-09)
+
+- [x] PR #26 (`release/v1.13.0` → master) merged (`e530a1b`) — CI run 31316546105 Quality Gates PASS on PR; Deploy correctly skipped on PR (tag-guard by design)
+- [x] Annotated tag `v1.13.0` created on the fold-amendment commit `1981b35` + pushed — CI run 31317159116 Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
+- [x] **Hotfix — Hub 16th tile clipping (2026-08-09):** live smoke found the Add It Up tile (row 4) rendering ~71px off-canvas — `GRID_ROWS = 3` leftover from the 15-tile era made `startY = 119` and row-3 tile bottom 839 > 768. Fixed in `f049fdf` (`TILE_HEIGHT` 150→116, `TILE_SPACING` 40→22, `GRID_ROWS` 3→4 → 4×116+3×22 = 530, startY stays 119 clearing the top control band, row 4 bottom 649) + regression test asserting all 16 tile rects fit 1024×768. Tag `v1.13.0` amended (delete + recreate on `0e14060`); CI runs 31320046231 + 31320051000 Quality Gates + Deploy PASS; live serves `index-_bk4Yf06.js` (matches local fix build); tile verified rendering fully on-canvas via headless re-screenshot
+- [x] App loads correctly on the live URL — 200; serves release build `index-_bk4Yf06.js` (SHA256 matches local `dist/` build: `C26410A6…`)
+- [x] Version footer data — `1.13.0` embedded in served bundle; no stale `1.12.0` strings
+- [x] Service worker + manifest served — `sw.js` 200 (precaches new bundle), `manifest.webmanifest` 200
+- [x] Live smoke test — Hub renders 16 tiles (5×3+1, row 4 = Add It Up left-aligned, no clipping); Color Match loads (swatch + speaker + 2×2 grid); Add It Up loads (equation row + "+"/"=" cues + 4 answer cards); Settings opens via 3s parental hold with `v1.13.0` footer + Progress row; zero console errors
+- [~] Device testing on v1.13.0 — recorded in `docs/device-testing-checklist.md` (v1.13.0 execution record; **pending user-led execution**)
+
 ## Post-Release Verification
 
 ### Immediate Checks (within 1 hour)
@@ -594,4 +605,17 @@ Please report issues at [GitHub Issues URL]
 - [x] Documentation complete
 - [x] Security review passed
 - [x] Performance targets met — automated gates passed; device testing record v1.12.0 executed, all items passed on all 4 device classes
+- [x] Ready for release
+
+## Final Sign-Off — v1.13.0
+
+**Version:** 1.13.0
+**Status:** Released — automated verification complete (all gates green: Biome clean 121 files, 1285/1285 tests in 56 files, build `index-_bk4Yf06.js` shell 148.04 kB / gzip 27.72 kB + phaser vendor chunk 1,375.72 kB, PWA validation 13/13, bundle validation PASS; deployed via CI → Coolify, tag `v1.13.0` amended to `0e14060` after the Hub-grid hotfix `f049fdf`, CI runs 31320046231 + 31320051000 Quality Gates + Deploy PASS); live smoke completed 2026-08-09 against the live URL (hub 16 tiles 5×3+1 no clipping after hotfix, Color Match + Add It Up scenes load, Settings v1.13.0 footer + Progress row, zero console errors); device testing pending user-led execution (v1.13.0 checklist record drafted — Game 15/16 rows + perf rows + carried v1.12.0 rows)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (1285/1285)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met — automated gates passed (vendor code-split validated, shell ≤ 200 kB); device metrics pending user-led execution (device checklist v1.13.0 record)
 - [x] Ready for release
