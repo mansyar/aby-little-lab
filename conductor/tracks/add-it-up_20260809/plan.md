@@ -20,15 +20,15 @@
 
 - [x] Task: Write scene tests following `colorMatchScene.test.ts` style: round setup (2 addend dot-cards + "+"/"=" cues + 4 answer cards), correct tap → advance, incorrect tap → wiggle + no penalty, win flow + `{ justEarned: "add-it-up" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) (558d0b4 — 9 tests; helper excludes plus/equals cue images from item ordering)
 - [x] Task: Implement `AddItUpScene.ts` (scene key `AddItUp`): 2 addend cards (~180px) + plus/equals cues, centered row of 4 answer cards (~150px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no prompt audio (558d0b4 — equation row [A][+][B][=], dot-group layout per MoreLessScene, no speaker button)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 35a9af3]
 
 ## Phase 4 — Integration
 
 - [x] Task: Add `add-it-up` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge (558d0b4 — pulled forward as scene prerequisite; completeGame validates gameId; full suite 1284 green)
-- [ ] Task: Register `AddItUp` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
-- [ ] Task: Load 4 new SVGs in `PreloadScene` (tile + sticker + plus + equals; 152 → 156)
-- [ ] Task: Hub grid — 16 tiles in 5×3 + 1 (row 4: 1 tile left-aligned; verify sticker shelf / play-time arc still fit)
-- [ ] Task: Regression tests — old saves migrate cleanly, navigation test covers 16 tiles, sceneRegistry tests updated, progress recording (plays/accuracy) flows into Learning Progress
+- [x] Task: Register `AddItUp` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests (7606d33 — sceneLoaders now 16 entries; registry test key list 15 → 16)
+- [x] Task: Load 4 new SVGs in `PreloadScene` (tile + sticker + plus + equals; 152 → 156) (7606d33 — imports + SHAPE_ASSETS entries: equals after arrow_less, plus after mascot_celebrate, sticker_add_it_up after sticker_color_match, tile_add_it_up last)
+- [x] Task: Hub grid — 16 tiles in 5×3 + 1 (row 4: 1 tile left-aligned; verify sticker shelf / play-time arc still fit) (7606d33 — grid math is modulo GRID_COLS; 16th tile lands col 0 row 3 with no layout code change; shelf is per-game not positional)
+- [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 16 tiles, sceneRegistry tests updated, progress recording (plays/accuracy) flows into Learning Progress (7606d33 + fec8063 — preload svg 152→156, tile icons 15→16 + tile_add_it_up key, hasSticker counts 15/30→16/32, empty slots 14/15→15/16, first-words integration 15→16; full suite 56 files / 1284 tests green)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Docs & Release Readiness
