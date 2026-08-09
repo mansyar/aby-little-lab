@@ -61,7 +61,7 @@ with accuracy/mastery, and the 7-day activity strip — fitting 1024×768.
   - [x] ... activity strip renders 7 day bars from profile activity
   - [x] ... close (backdrop/X) destroys overlay objects; panel rows remain functional
 - [x] Task 3.4: Implement the Progress row + overlay in `src/components/SettingsPanel.ts` (reuse overlay-object pattern, `tile_*` textures, `typography.ts` styles, ≥64px touch targets, scroll/dense layout for 15 rows) `[61708b3]`
-- [ ] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 0dfc1c3]`
 
 ## Phase 4 — Quality Gates, Docs & Release Readiness
 
