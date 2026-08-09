@@ -321,7 +321,7 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 - [x] Version footer data — `1.13.0` embedded in served bundle; no stale `1.12.0` strings
 - [x] Service worker + manifest served — `sw.js` 200 (precaches new bundle), `manifest.webmanifest` 200
 - [x] Live smoke test — Hub renders 16 tiles (5×3+1, row 4 = Add It Up left-aligned, no clipping); Color Match loads (swatch + speaker + 2×2 grid); Add It Up loads (equation row + "+"/"=" cues + 4 answer cards); Settings opens via 3s parental hold with `v1.13.0` footer + Progress row; zero console errors
-- [~] Device testing on v1.13.0 — recorded in `docs/device-testing-checklist.md` (v1.13.0 execution record; **pending user-led execution**)
+- [x] Device testing on v1.13.0 — executed by user 2026-08-09 against the live URL; **all items passed, no issues found** — recorded in `docs/device-testing-checklist.md` (v1.13.0 execution record)
 
 ## Post-Release Verification
 
@@ -610,12 +610,12 @@ Please report issues at [GitHub Issues URL]
 ## Final Sign-Off — v1.13.0
 
 **Version:** 1.13.0
-**Status:** Released — automated verification complete (all gates green: Biome clean 121 files, 1285/1285 tests in 56 files, build `index-_bk4Yf06.js` shell 148.04 kB / gzip 27.72 kB + phaser vendor chunk 1,375.72 kB, PWA validation 13/13, bundle validation PASS; deployed via CI → Coolify, tag `v1.13.0` amended to `0e14060` after the Hub-grid hotfix `f049fdf`, CI runs 31320046231 + 31320051000 Quality Gates + Deploy PASS); live smoke completed 2026-08-09 against the live URL (hub 16 tiles 5×3+1 no clipping after hotfix, Color Match + Add It Up scenes load, Settings v1.13.0 footer + Progress row, zero console errors); device testing pending user-led execution (v1.13.0 checklist record drafted — Game 15/16 rows + perf rows + carried v1.12.0 rows)
+**Status:** Released — automated verification complete (all gates green: Biome clean 121 files, 1285/1285 tests in 56 files, build `index-_bk4Yf06.js` shell 148.04 kB / gzip 27.72 kB + phaser vendor chunk 1,375.72 kB, PWA validation 13/13, bundle validation PASS; deployed via CI → Coolify, tag `v1.13.0` amended to `0e14060` after the Hub-grid hotfix `f049fdf`, CI runs 31320046231 + 31320051000 Quality Gates + Deploy PASS); live smoke completed 2026-08-09 against the live URL (hub 16 tiles 5×3+1 no clipping after hotfix, Color Match + Add It Up scenes load, Settings v1.13.0 footer + Progress row, zero console errors); device testing executed by user 2026-08-09 against the live URL — all items passed, no issues found (v1.13.0 checklist record: Game 15/16 rows + perf rows + Parent Progress rows + carried v1.12.0 rows)
 
 **Approval:**
 - [x] Code quality meets standards
 - [x] All tests pass (1285/1285)
 - [x] Documentation complete
 - [x] Security review passed
-- [x] Performance targets met — automated gates passed (vendor code-split validated, shell ≤ 200 kB); device metrics pending user-led execution (device checklist v1.13.0 record)
+- [x] Performance targets met — automated gates passed (vendor code-split validated, shell ≤ 200 kB); device testing executed by user 2026-08-09, all items passed (device checklist v1.13.0 record)
 - [x] Ready for release

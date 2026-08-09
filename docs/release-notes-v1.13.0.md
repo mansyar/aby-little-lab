@@ -1,6 +1,6 @@
 # Release Notes — v1.13.0
 
-> **Status:** DRAFT — Games 15 & 16 (Color Match, Add It Up) + Performance & Bundle Hardening + Parent Progress Insights (2026-08-09). Finalized by the v1.13.0 release-execution track. *(Amendment: Parent Progress Insights folded into this release per user decision — the v1.14.0 draft notes are superseded.)*
+> **Status:** FINAL — released 2026-08-09 (tag `v1.13.0`, deployed and live at https://aby-little-lab.ansyar-world.top/; device testing passed on the user's device classes). *(Amendment: Parent Progress Insights folded into this release per user decision — the v1.14.0 draft notes are superseded.)*
 
 ## What's New
 
