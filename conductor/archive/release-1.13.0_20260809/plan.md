@@ -80,4 +80,4 @@
   - [x] git mv completed; commit `50fd365` (5 files renamed; stray `.playwright-cli/` test logs removed)
 - [x] Task 7.4: Commit: `chore(conductor): Archive track 'v1.13.0 Release Execution'`; registry updated to (Archived)
   - [x] Registry `[x] (Archived)` at `./archive/release-1.13.0_20260809/index.md`; metadata.json status 'archived'
-- [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 100e573]
