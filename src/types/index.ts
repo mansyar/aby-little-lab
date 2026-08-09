@@ -82,6 +82,10 @@ export interface Profile {
   stickers: Record<GameId, StickerData>;
   /** Daily play-time budget (unlimited by default). */
   playTime: PlayTime;
+  /** Per-game learning stats (zeroed by default). */
+  progress: Record<GameId, GameProgress>;
+  /** Last-7-days play activity (today + 6 prior, pruned on write). */
+  activity: DayActivity[];
 }
 
 /** Profile-aware storage schema (key `abby-little-lab:v2`). */

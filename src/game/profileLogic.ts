@@ -9,6 +9,7 @@ import type {
 } from "../types";
 import { AVATAR_IDS, DEFAULT_AVATAR_ID, MAX_PROFILES } from "../types";
 import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
+import { createDefaultProgressMap, normalizeProgressMap, pruneActivity } from "./progressLogic";
 
 /** All registered game ids, in hub order (shared by progress and stickers). */
 export const GAME_IDS: GameId[] = [
@@ -52,6 +53,8 @@ export function createDefaultProfile(
     createdAt,
     stickers: createDefaultStickers(),
     playTime: createDefaultPlayTime(new Date(createdAt)),
+    progress: createDefaultProgressMap(),
+    activity: [],
   };
 }
 
@@ -101,6 +104,8 @@ export function normalizeV2(
       createdAt: typeof p?.createdAt === "string" ? p.createdAt : now,
       stickers: mergeStickers(p?.stickers),
       playTime: normalizePlayTime(p?.playTime, new Date(now)),
+      progress: normalizeProgressMap(p?.progress),
+      activity: pruneActivity(p?.activity, new Date(now)),
     }));
   } else {
     profiles = [createDefaultProfile("p1", DEFAULT_AVATAR_ID, now)];
