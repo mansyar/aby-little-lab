@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { GAME_IDS } from "../../game/profileLogic";
 import {
   addActivity,
   createDefaultProgress,
@@ -16,6 +15,7 @@ import {
   relativeLastPlayed,
 } from "../../game/progressLogic";
 import type { DayActivity, GameProgress } from "../../types";
+import { GAME_IDS } from "../../types";
 
 const DAY = new Date(2026, 7, 5, 10, 0, 0); // 2026-08-05 local
 const NEXT_DAY = new Date(2026, 7, 6, 9, 0, 0); // 2026-08-06 local

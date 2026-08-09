@@ -7,28 +7,9 @@ import type {
   Settings,
   StickerData,
 } from "../types";
-import { AVATAR_IDS, DEFAULT_AVATAR_ID, MAX_PROFILES } from "../types";
+import { AVATAR_IDS, DEFAULT_AVATAR_ID, GAME_IDS, MAX_PROFILES } from "../types";
 import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
 import { createDefaultProgressMap, normalizeProgressMap, pruneActivity } from "./progressLogic";
-
-/** All registered game ids, in hub order (shared by progress and stickers). */
-export const GAME_IDS: GameId[] = [
-  "shape-sorter",
-  "animal-trace",
-  "pop-freeze",
-  "shadow-match",
-  "musical-memory",
-  "big-small",
-  "pattern-builder",
-  "alphabet-match",
-  "word-match",
-  "word-builder",
-  "how-many",
-  "first-sounds",
-  "more-less",
-  "odd-one-out",
-  "color-match",
-];
 
 /** Fresh sticker collection: every game unearned. */
 export function createDefaultStickers(): Record<GameId, StickerData> {

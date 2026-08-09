@@ -75,6 +75,25 @@ export const MAX_PROFILES = 4;
 /** Avatar used for the auto-created first profile (migration / fresh install). */
 export const DEFAULT_AVATAR_ID: AvatarId = "cat";
 
+/** All registered game ids, in hub order (shared by stickers and progress). */
+export const GAME_IDS: GameId[] = [
+  "shape-sorter",
+  "animal-trace",
+  "pop-freeze",
+  "shadow-match",
+  "musical-memory",
+  "big-small",
+  "pattern-builder",
+  "alphabet-match",
+  "word-match",
+  "word-builder",
+  "how-many",
+  "first-sounds",
+  "more-less",
+  "odd-one-out",
+  "color-match",
+];
+
 export interface Profile {
   id: string;
   avatarId: AvatarId;

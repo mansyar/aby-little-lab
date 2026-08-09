@@ -1,6 +1,6 @@
 import type { DayActivity, GameId, GameProgress } from "../types";
+import { GAME_IDS } from "../types";
 import { todayKey } from "./playTimeLogic";
-import { GAME_IDS } from "./profileLogic";
 
 /**
  * Pure logic for per-profile learning progress. Each profile tracks, per

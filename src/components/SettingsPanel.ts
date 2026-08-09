@@ -197,7 +197,7 @@ export class SettingsPanel {
     this.createProgressRow(centerX, centerY + 185);
     this.createResetRow(centerX, centerY + 245);
     this.createInstallRow(centerX, centerY + 305);
-    this.createVoiceRow(centerX, centerY + 355);
+    this.createVoiceRow(centerX, centerY + 345);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
