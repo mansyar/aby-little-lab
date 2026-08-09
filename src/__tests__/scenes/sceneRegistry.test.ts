@@ -5,8 +5,9 @@ import { ensureSceneLoaded, sceneLoaders } from "../../scenes/sceneRegistry";
 class FakeScene {}
 
 describe("sceneRegistry", () => {
-  it("maps exactly the 15 game scene keys", () => {
+  it("maps exactly the 16 game scene keys", () => {
     expect(Object.keys(sceneLoaders).sort()).toEqual([
+      "AddItUp",
       "Alphabet",
       "AnimalTrace",
       "BigSmall",

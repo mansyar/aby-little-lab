@@ -147,6 +147,14 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "AddItUp",
+    gameId: "add-it-up",
+    label: "Add It Up",
+    tileKey: "tile_add_it_up",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;

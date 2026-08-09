@@ -24,6 +24,7 @@ export const sceneLoaders: Record<string, () => Promise<Phaser.Types.Scenes.Scen
   MoreLess: () => import("./MoreLessScene").then((m) => m.MoreLessScene),
   OddOneOut: () => import("./OddOneOutScene").then((m) => m.OddOneOutScene),
   ColorMatch: () => import("./ColorMatchScene").then((m) => m.ColorMatchScene),
+  AddItUp: () => import("./AddItUpScene").then((m) => m.AddItUpScene),
 };
 
 /**
