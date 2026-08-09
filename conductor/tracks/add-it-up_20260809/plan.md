@@ -38,4 +38,4 @@
 - [x] Task: Update `docs/PRD.md` (Game 16 section) and `docs/TDD.md` as needed
 - [x] Task: Update `README.md` (games table, hub experience notes)
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` (96ba95e + 2ff90c6 — all four gates green: Biome clean after --write fixes, 56 files / 1284 tests, build 34 precache entries 1559 KiB, validate-pwa 13/13)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 55d5650]
