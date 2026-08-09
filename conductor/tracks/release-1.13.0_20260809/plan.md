@@ -11,7 +11,7 @@
   - [x] Biome clean (121 files, 411ms); 1284/1284 tests (56 files, 83.66s); build OK (shell index-Ctz6486l.js 148.04 kB / gzip 27.72; phaser vendor chunk 1,375.72 kB); validate-pwa 13/13; validate-bundle PASS (vendor chunk present, shell 144.6 kB ≤ 200 kB)
 - [x] Task 1.3: Confirm no stale version references (`1.12.0` not lingering in src beyond pkg.version; `__APP_VERSION__` reads pkg.version; SettingsPanel footer `v${__APP_VERSION__}`)
   - [x] No `1.12.0`/`1.13.0` literals in src; vite.config.ts line 10 `__APP_VERSION__: JSON.stringify(pkg.version)`; SettingsPanel.ts line 211 footer `v${__APP_VERSION__}`
-- [~] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 1.4: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 9d92d69]
 
 ## Phase 2 — Release Branch & Version Bump
 
