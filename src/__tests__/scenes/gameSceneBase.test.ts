@@ -231,6 +231,19 @@ vi.mock("../../components/ParentLock", () => ({
   ParentLock: MockParentLock,
 }));
 
+/** Spy on recordGameResult (calls through to the real implementation). */
+const { mockRecordGameResult } = vi.hoisted(() => ({
+  mockRecordGameResult: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/storage")>();
+  mockRecordGameResult.mockImplementation((gameId: string, correct: number, wrong: number) => {
+    actual.recordGameResult(gameId, correct, wrong);
+  });
+  return { ...actual, recordGameResult: mockRecordGameResult };
+});
+
 import { GameSceneBase } from "../../scenes/GameSceneBase";
 import { earnSticker, hasSticker } from "../../utils/storage";
 
@@ -269,6 +282,14 @@ class TestScene extends GameSceneBase {
 
   testSetSpeaker(speaker: SpeakerButton): void {
     this.speaker = speaker;
+  }
+
+  testRecordCorrect(): void {
+    this.recordCorrect();
+  }
+
+  testRecordWrong(): void {
+    this.recordWrong();
   }
 
   getDots(): Phaser.GameObjects.Arc[] {
@@ -541,6 +562,54 @@ describe("GameSceneBase scaffold", () => {
       const mascotImage = getMascotImage(scene);
       expect(getMockFn(mascotImage.destroy)).toHaveBeenCalled();
       expect(scene.getMascot()).toBeUndefined();
+    });
+  });
+
+  describe("session progress recording", () => {
+    beforeEach(() => {
+      mockRecordGameResult.mockClear();
+    });
+
+    it("flushes accumulated correct and wrong taps as a win on completion", () => {
+      const scene = new TestScene();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+      scene.testCompleteGame("shape-sorter");
+
+      expect(mockRecordGameResult).toHaveBeenCalledTimes(1);
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 2, 1);
+    });
+
+    it("flushes zeroed counters when the game is completed without taps", () => {
+      const scene = new TestScene();
+      scene.testCompleteGame("color-match");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("color-match", 0, 0);
+    });
+
+    it("resets the session counters after flushing", () => {
+      const scene = new TestScene();
+      scene.testRecordCorrect();
+      scene.testCompleteGame("shape-sorter");
+      scene.testCompleteGame("shape-sorter");
+
+      expect(mockRecordGameResult).toHaveBeenNthCalledWith(1, "shape-sorter", 1, 0);
+      expect(mockRecordGameResult).toHaveBeenNthCalledWith(2, "shape-sorter", 0, 0);
+    });
+
+    it("does not flush results when the scene shuts down without completing", () => {
+      const scene = new TestScene();
+      scene.testRecordCorrect();
+      scene.testRegisterShutdownCleanup();
+
+      const onMock = getMockFn(scene.events.on);
+      const shutdownCall = onMock.mock.calls.find((c) => c[0] === "shutdown");
+      expect(shutdownCall).toBeDefined();
+      const handler = shutdownCall?.[1] as () => void;
+      handler();
+
+      expect(mockRecordGameResult).not.toHaveBeenCalled();
     });
   });
 });
