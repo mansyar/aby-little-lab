@@ -155,11 +155,19 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "TakeAway",
+    gameId: "take-away",
+    label: "Take Away",
+    tileKey: "tile_take_away",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
 ];
 
 const TILE_WIDTH = 160;
 /**
- * 16 tiles render as 5×3+1 (rows 5/5/5/1). Height and spacing are sized so the
+ * 17 tiles render as 5×3+2 (rows 5/5/5/2). Height and spacing are sized so the
  * 4 rows fit inside 768 with the same 119px top/bottom margins as the 15-tile
  * grid — clearing the top-band controls (avatar chip / Settings, bottom edge
  * 116) while keeping every tile and its sticker shelf on-canvas.

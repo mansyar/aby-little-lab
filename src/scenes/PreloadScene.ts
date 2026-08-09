@@ -121,6 +121,7 @@ import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_bui
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
+import stickerTakeAwaySvg from "../assets/svg/stickers/sticker_take_away.svg?raw";
 import stickerWordBuilderSvg from "../assets/svg/stickers/sticker_word_builder.svg?raw";
 import stickerWordMatchSvg from "../assets/svg/stickers/sticker_word_match.svg?raw";
 import toyTeddyBearSvg from "../assets/svg/toys/teddy_bear.svg?raw";
@@ -137,6 +138,7 @@ import equalsSvg from "../assets/svg/ui/equals.svg?raw";
 import iconSpeakerSvg from "../assets/svg/ui/icon_speaker.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
 import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
+import minusSvg from "../assets/svg/ui/minus.svg?raw";
 import plusSvg from "../assets/svg/ui/plus.svg?raw";
 import sleepZzzSvg from "../assets/svg/ui/sleep_zzz.svg?raw";
 import tileAddItUpSvg from "../assets/svg/ui/tiles/tile_add_it_up.svg?raw";
@@ -153,6 +155,7 @@ import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.s
 import tilePopFreezeSvg from "../assets/svg/ui/tiles/tile_pop_freeze.svg?raw";
 import tileShadowMatchSvg from "../assets/svg/ui/tiles/tile_shadow_match.svg?raw";
 import tileShapeSorterSvg from "../assets/svg/ui/tiles/tile_shape_sorter.svg?raw";
+import tileTakeAwaySvg from "../assets/svg/ui/tiles/tile_take_away.svg?raw";
 import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
 import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
@@ -259,6 +262,7 @@ export const SHAPE_ASSETS = [
   { key: "sticker_word_builder", svg: stickerWordBuilderSvg },
   { key: "mascot_idle", svg: mascotIdleSvg },
   { key: "mascot_celebrate", svg: mascotCelebrateSvg },
+  { key: "minus", svg: minusSvg },
   { key: "plus", svg: plusSvg },
   { key: "letter_a", svg: letterASvg },
   { key: "letter_b", svg: letterBSvg },
@@ -302,6 +306,7 @@ export const SHAPE_ASSETS = [
   { key: "sticker_odd_one_out", svg: stickerOddOneOutSvg },
   { key: "sticker_color_match", svg: stickerColorMatchSvg },
   { key: "sticker_add_it_up", svg: stickerAddItUpSvg },
+  { key: "sticker_take_away", svg: stickerTakeAwaySvg },
   { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
   { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
   { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
@@ -318,6 +323,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_odd_one_out", svg: tileOddOneOutSvg },
   { key: "tile_color_match", svg: tileColorMatchSvg },
   { key: "tile_add_it_up", svg: tileAddItUpSvg },
+  { key: "tile_take_away", svg: tileTakeAwaySvg },
 ] as const;
 
 /**

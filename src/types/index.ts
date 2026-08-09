@@ -14,7 +14,8 @@ export type GameId =
   | "more-less"
   | "odd-one-out"
   | "color-match"
-  | "add-it-up";
+  | "add-it-up"
+  | "take-away";
 
 export interface StickerData {
   earned: boolean;
@@ -94,6 +95,7 @@ export const GAME_IDS: GameId[] = [
   "odd-one-out",
   "color-match",
   "add-it-up",
+  "take-away",
 ];
 
 export interface Profile {
