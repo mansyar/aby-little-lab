@@ -62,8 +62,9 @@
 
 ## Phase 6 — Targeted Device Testing (user-led, async)
 
-- [ ] Task 6.1: Prepare the v1.13.0 checklist record for execution (Game 15 rows + Game 16 rows + perf rows + carried rows) — conductor-prepared in Phase 3; **user executes** on iPad / Android tablet / iPhone / Android phone against the live URL at their convenience
-- [ ] Task 6.2: Record results when the user reports them; triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
+- [x] Task 6.1: Prepare the v1.13.0 checklist record for execution (Game 15 rows + Game 16 rows + perf rows + carried rows) — conductor-prepared in Phase 3; **user executes** on iPad / Android tablet / iPhone / Android phone against the live URL at their convenience
+  - [x] Record fully drafted in `docs/device-testing-checklist.md` (v1.13.0 Execution Record: Target live URL, Scope = Game 15 + Game 16 + Perf/Bundle Hardening + Parent Progress Insights; Checks = perf rows (boot <3s, shell ≤200 kB + vendor chunk, game launch/return, PWA update flow, offline re-play, precache 34 entries) + full Color Match rows (16-tile grid, spoken prompt, 4/6-color pools, feedback chains, sticker) + full Add It Up rows (equation row, no speech, bands, distinct totals, sticker) + Parent Progress rows (Progress row, 16 rows paged 8+8, mastery star, 7-day strip, avatar chip) + carried v1.12.0 TTS Voice rows; Result: reference-profile executed 2026-08-09 desktop, device-class execution pending user-led)
+- [~] Task 6.2: Record results when the user reports them; triage findings — document accepted issues in Known Issues; escalate blockers to user (max 2 fix attempts per workflow if a hotfix is approved)
 - [ ] Task 6.3: Commit results: `docs(device): Record v1.13.0 device testing results` (when the user reports)
 - [ ] Task 6.4: Phase Verification & Checkpoint (Refer to workflow.md)
 
