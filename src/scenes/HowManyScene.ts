@@ -220,6 +220,7 @@ export class HowManyScene extends GameSceneBase {
   private handleCorrect(groupIndex: number): void {
     this.inputLocked = true;
     this.audioManager.playCorrect();
+    this.recordCorrect();
     this.mascot?.cheer();
     this.fillProgressDot(this.roundIndex);
 
@@ -243,6 +244,7 @@ export class HowManyScene extends GameSceneBase {
   /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
   private handleIncorrect(groupIndex: number): void {
     this.audioManager.playIncorrect();
+    this.recordWrong();
     this.mascot?.nod();
 
     const rect = this.cardRects[groupIndex];

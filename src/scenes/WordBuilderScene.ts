@@ -214,6 +214,7 @@ export class WordBuilderScene extends GameSceneBase {
 
     if (chosen !== expected) {
       this.audioManager.playIncorrect();
+      this.recordWrong();
       this.mascot?.nod();
       const reduced = isReducedMotion();
       this.tweens.add({
@@ -289,6 +290,7 @@ export class WordBuilderScene extends GameSceneBase {
       // Word fully spelled: chime + cheer, pop the dot, linger, then advance.
       this.inputLocked = true;
       this.audioManager.playCorrect();
+      this.recordCorrect();
       this.mascot?.cheer();
       this.fillProgressDot(this.wordIndex);
       this.time.delayedCall(WORD_LINGER_DELAY, () => {

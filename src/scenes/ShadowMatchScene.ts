@@ -203,6 +203,7 @@ export class ShadowMatchScene extends GameSceneBase {
       data.matched = true;
       this.matchedCount++;
       this.audioManager.playCorrect();
+      this.recordCorrect();
       this.mascot?.cheer();
       createCompletionSplash(this, slot.x, slot.y);
 
@@ -247,6 +248,7 @@ export class ShadowMatchScene extends GameSceneBase {
     if (!data.matched) {
       if (data.droppedOnZone) {
         this.audioManager.playIncorrect();
+        this.recordWrong();
         this.mascot?.nod();
       }
       this.tweens.add({

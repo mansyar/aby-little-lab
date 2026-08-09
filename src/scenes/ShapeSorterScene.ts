@@ -185,6 +185,7 @@ export class ShapeSorterScene extends GameSceneBase {
       shape.obj.disableInteractive();
       shape.placed = true;
       this.audioManager.playCorrect();
+      this.recordCorrect();
       this.mascot?.cheer();
       createCompletionSplash(this, slot.x, slot.y);
 
@@ -231,6 +232,7 @@ export class ShapeSorterScene extends GameSceneBase {
     if (!shape.placed) {
       if (shape.droppedOnZone) {
         this.audioManager.playIncorrect();
+        this.recordWrong();
         this.mascot?.nod();
       }
       this.tweens.add({

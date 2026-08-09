@@ -174,6 +174,7 @@ export class PatternBuilderScene extends GameSceneBase {
   private handleCorrect(choiceIndex: number): void {
     this.inputLocked = true;
     this.audioManager.playCorrect();
+    this.recordCorrect();
     this.mascot?.cheer();
 
     const round = this.rounds[this.roundIndex];
@@ -218,6 +219,7 @@ export class PatternBuilderScene extends GameSceneBase {
   /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
   private handleIncorrect(choiceIndex: number): void {
     this.audioManager.playIncorrect();
+    this.recordWrong();
     this.mascot?.nod();
 
     const rect = this.cardRects[choiceIndex];

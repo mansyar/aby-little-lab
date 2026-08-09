@@ -172,6 +172,7 @@ export class FirstSoundsScene extends GameSceneBase {
       createCompletionSplash(this, card.x, card.y);
     }
     this.audioManager.playCorrect();
+    this.recordCorrect();
     const { sfxEnabled } = load().settings;
     speakLetter(this.rounds[this.roundIndex].target, sfxEnabled);
     this.mascot?.cheer();
@@ -191,6 +192,7 @@ export class FirstSoundsScene extends GameSceneBase {
   /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
   private handleIncorrect(choiceIndex: number): void {
     this.audioManager.playIncorrect();
+    this.recordWrong();
     this.mascot?.nod();
 
     const rect = this.cardRects[choiceIndex];
