@@ -118,3 +118,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: v1.13.0 Release Execution (Games 15 & 16 + Perf/Bundle Hardening)** *Link: [./archive/release-1.13.0_20260809/index.md](./archive/release-1.13.0_20260809/index.md)* (Archived)
 
+---
+
+- [ ] **Track: Game 17 — Take Away (Early Subtraction)** *Link: [./tracks/take-away_20260810/index.md](./tracks/take-away_20260810/index.md)*
+
