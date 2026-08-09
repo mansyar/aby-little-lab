@@ -10,7 +10,8 @@ import type {
 import { AVATAR_IDS, DEFAULT_AVATAR_ID, MAX_PROFILES } from "../types";
 import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
 
-const GAME_IDS: GameId[] = [
+/** All registered game ids, in hub order (shared by progress and stickers). */
+export const GAME_IDS: GameId[] = [
   "shape-sorter",
   "animal-trace",
   "pop-freeze",

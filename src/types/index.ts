@@ -20,6 +20,26 @@ export interface StickerData {
   earnedAt: string | null;
 }
 
+/** Per-game learning stats for a profile (all zeroed by default). */
+export interface GameProgress {
+  /** Sessions started from the Hub. */
+  plays: number;
+  /** Completed sessions (every completion is a win by no-fail design). */
+  wins: number;
+  /** Correct answer taps across completed sessions. */
+  correct: number;
+  /** Incorrect answer taps across completed sessions. */
+  wrong: number;
+  /** ISO timestamp of the most recent play, or null when never played. */
+  lastPlayedAt: string | null;
+}
+
+/** One day of aggregated play activity (key "YYYY-MM-DD", local). */
+export interface DayActivity {
+  day: string;
+  plays: number;
+}
+
 export interface Settings {
   bgmEnabled: boolean;
   sfxEnabled: boolean;
