@@ -29,13 +29,13 @@
 - [x] Task: Load 4 new SVGs in `PreloadScene` (tile + sticker + plus + equals; 152 → 156) (7606d33 — imports + SHAPE_ASSETS entries: equals after arrow_less, plus after mascot_celebrate, sticker_add_it_up after sticker_color_match, tile_add_it_up last)
 - [x] Task: Hub grid — 16 tiles in 5×3 + 1 (row 4: 1 tile left-aligned; verify sticker shelf / play-time arc still fit) (7606d33 — grid math is modulo GRID_COLS; 16th tile lands col 0 row 3 with no layout code change; shelf is per-game not positional)
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 16 tiles, sceneRegistry tests updated, progress recording (plays/accuracy) flows into Learning Progress (7606d33 + fec8063 — preload svg 152→156, tile icons 15→16 + tile_add_it_up key, hasSticker counts 15/30→16/32, empty slots 14/15→15/16, first-words integration 15→16; full suite 56 files / 1284 tests green)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: d4582a5]
 
 ## Phase 5 — Docs & Release Readiness
 
-- [ ] Task: Update `conductor/product.md` (Game 16 row, games target 15 → 16, hub grid 5/5/5/1, addition amendment)
-- [ ] Task: Update `conductor/tech-stack.md` with dated design note (Game 16, logic tree + asset additions)
-- [ ] Task: Update `docs/PRD.md` (Game 16 section) and `docs/TDD.md` as needed
-- [ ] Task: Update `README.md` (games table, hub experience notes)
-- [ ] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [x] Task: Update `conductor/product.md` (Game 16 row, games target 15 → 16, hub grid 5/5/5/1, addition amendment)
+- [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 16, logic tree + asset additions)
+- [x] Task: Update `docs/PRD.md` (Game 16 section) and `docs/TDD.md` as needed
+- [x] Task: Update `README.md` (games table, hub experience notes)
+- [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` (96ba95e + 2ff90c6 — all four gates green: Biome clean after --write fixes, 56 files / 1284 tests, build 34 precache entries 1559 KiB, validate-pwa 13/13)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
