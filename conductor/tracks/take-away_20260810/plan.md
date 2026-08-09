@@ -24,11 +24,11 @@
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `take-away` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill covers old saves via per-key merge
-- [ ] Task: Register `TakeAway` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests (17 loaders)
-- [ ] Task: Load 3 new SVGs in `PreloadScene` (minus + tile + sticker; 156 → 159)
-- [ ] Task: Hub grid — 17 tiles in 5×3+2 (row 4: 2 tiles left-aligned; generic modulo layout handles it — verify sticker shelf / play-time arc still fit; update grid comment)
-- [ ] Task: Regression tests — old saves migrate cleanly, navigation test covers 17 tiles, sceneRegistry tests updated, progress recording flows into Learning Progress
+- [x] Task: Add `take-away` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill covers old saves via per-key merge (8a1b5c6 — pulled forward as Phase 3 scene prerequisite per add-it-up precedent; old-save merge covered by normalizeProgress per-key tests)
+- [x] Task: Register `TakeAway` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests (17 loaders) (d298759)
+- [x] Task: Load 3 new SVGs in `PreloadScene` (minus + tile + sticker; 156 → 159) (d298759)
+- [x] Task: Hub grid — 17 tiles in 5×3+2 (row 4: 2 tiles left-aligned; generic modulo layout handles it — verify sticker shelf / play-time arc still fit; update grid comment) (d298759 — grid comment updated to 5×3+2; hubScene test asserts all 17 tiles on-canvas)
+- [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 17 tiles, sceneRegistry tests updated, progress recording flows into Learning Progress (d298759 — preload 159, tile icons 17, hasSticker 17/34, slots 17; full suite 58 files/1309 tests green)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Docs & Release Readiness
