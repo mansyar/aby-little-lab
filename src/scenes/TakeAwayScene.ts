@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { type TakeAwayRound, buildPlaythrough, isCorrect } from "../game/takeAwayLogic";
+import { buildPlaythrough, isCorrect, type TakeAwayRound } from "../game/takeAwayLogic";
 import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";

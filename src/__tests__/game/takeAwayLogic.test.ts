@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { COUNT_ITEMS } from "../../game/countLogic";
 import {
-  TAKE_AWAY_BANDS,
   type BandId,
-  type TakeAwayRound,
   buildPlaythrough,
   buildRound,
   isCorrect,
+  TAKE_AWAY_BANDS,
+  type TakeAwayRound,
 } from "../../game/takeAwayLogic";
-import { COUNT_ITEMS } from "../../game/countLogic";
 
 afterEach(() => {
   vi.restoreAllMocks();
