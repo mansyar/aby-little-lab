@@ -112,5 +112,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Game 16 — Add It Up (Early Addition)** *Link: [./tracks/add-it-up_20260809/index.md](./tracks/add-it-up_20260809/index.md)*
+- [x] **Track: Game 16 — Add It Up (Early Addition)** *Link: [./archive/add-it-up_20260809/index.md](./archive/add-it-up_20260809/index.md)* (Archived)
 
