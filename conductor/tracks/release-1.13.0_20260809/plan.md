@@ -46,10 +46,12 @@
 
 ## Phase 5 — Merge, Deploy & Verify
 
-- [ ] Task 5.1: Merge PR to master; confirm the three tracks' commits land on `origin/master`; tag run triggers Coolify auto-deploy webhook (Bearer `$COOLIFY_TOKEN`)
-- [ ] Task 5.2: Verify deployment — master CI run + tag CI run (Quality Gates + Deploy to Coolify PASS); live serves `assets/index-*.js` with SHA256 identical to local `dist/`; `/sw.js` 200 + precaches new bundle; `/manifest.webmanifest` 200; `1.13.0` embedded in served bundle (footer), no stale `1.12.0` strings
-- [ ] Task 5.3: Live smoke test: boot → hub (16 tiles, 5×3 + 1) → Color Match spot check (swatch prompt + spoken color name, 2×2 grid, 6 rounds) → Add It Up spot check (equation row + "+" cue + 4 answer cards, no speech) → Settings (footer v1.13.0) → hub; zero console errors
-- [ ] Task 5.4: Record deployment verification in `docs/release-checklist.md` (Step 7m + Final Sign-Off — v1.13.0 block; device testing marked pending user execution)
+> **Amendment (post-merge, user-approved 2026-08-09):** Parent Progress Insights (archived track `parent-progress-insights_20260809`) is **folded into the v1.13.0 announcement** — the code was already on master when `release/v1.13.0` was cut, so the bundle includes it. Release notes v1.13.0 updated with a Progress section; device-testing-checklist v1.13.0 record gained the progress rows; the v1.14.0 draft notes + checklist record are marked SUPERSEDED. Committed directly to master (docs-only change; CI gates run on the master push, no deploy without a tag).
+
+- [x] Task 5.1: Merge PR #26 (`e530a1b` on origin/master); confirm all three tracks' commits on origin/master; tag-gated deploy triggers after tag push
+- [ ] Task 5.2: Verify deployment (master CI + tag CI Quality Gates PASS, Deploy to Coolify PASS; live `index-*.js` SHA256 matches local dist/; `/sw.js` + `/manifest.webmanifest` 200; Settings footer `v1.13.0`; no stale `1.12.0` strings)
+- [ ] Task 5.3: Live smoke — boot → Hub (16 tiles 5×3+1) → Color Match spot check (swatch + spoken color, 2×2 grid, 6 rounds) → Add It Up spot check (equation row + "+" cue + 4 answer cards, no speech) → Progress overlay spot check (Settings → Progress → 16 rows paged 8+8) → Settings footer v1.13.0 → Hub; zero console errors
+- [ ] Task 5.4: Record deployment verification in `docs/release-checklist.md` (Step 7m + Final Sign-Off v1.13.0 block; device testing marked pending user execution)
 - [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6 — Targeted Device Testing (user-led, async)

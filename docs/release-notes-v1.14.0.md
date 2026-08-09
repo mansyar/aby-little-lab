@@ -1,6 +1,6 @@
 # Release Notes — v1.14.0 (draft)
 
-> **Status:** DRAFT — Parent Progress Insights (2026-08-09). Not yet released; this draft covers the next feature release after v1.13.0 (Performance & Bundle Hardening, which is also awaiting release execution).
+> **Status:** SUPERSEDED (2026-08-09) — Parent Progress Insights was folded into the **v1.13.0** release by user decision (the code was already on master when v1.13.0 was cut). The content below is preserved for reference; **no v1.14.0 release is planned** — the v1.13.0 release notes and device-testing checklist now carry the Progress rows.
 
 ## What's New
 
