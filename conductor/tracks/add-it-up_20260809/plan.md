@@ -14,17 +14,17 @@
 - [x] Task: Create `src/assets/svg/ui/tiles/tile_add_it_up.svg` (Hub tile icon: two dot cards joined by a big "+", answer card highlighted; 512×512 storybook style, thick `#2D3748` outline per `docs/SVG_STYLE.md`) (993e869)
 - [x] Task: Create `src/assets/svg/stickers/sticker_add_it_up.svg` (cream badge, dot cards with "+" and "=") (993e869)
 - [x] Task: Create `plus.svg` and `equals.svg` symbol cues (check More or Less arrow-asset precedent for naming/location; 152 → 156 preload) (993e869 — placed at `src/assets/svg/ui/plus.svg` and `equals.svg`, mirroring `arrow_up.svg` precedent; preload count updated in Phase 4)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 8ad9e6f]
 
 ## Phase 3 — Scene Implementation
 
-- [ ] Task: Write scene tests following `colorMatchScene.test.ts` style: round setup (2 addend dot-cards + "+"/"=" cues + 4 answer cards), correct tap → advance, incorrect tap → wiggle + no penalty, win flow + `{ justEarned: "add-it-up" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix)
-- [ ] Task: Implement `AddItUpScene.ts` (scene key `AddItUp`): 2 addend cards (~180px) + plus/equals cues, centered row of 4 answer cards (~150px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no prompt audio
+- [x] Task: Write scene tests following `colorMatchScene.test.ts` style: round setup (2 addend dot-cards + "+"/"=" cues + 4 answer cards), correct tap → advance, incorrect tap → wiggle + no penalty, win flow + `{ justEarned: "add-it-up" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) (558d0b4 — 9 tests; helper excludes plus/equals cue images from item ordering)
+- [x] Task: Implement `AddItUpScene.ts` (scene key `AddItUp`): 2 addend cards (~180px) + plus/equals cues, centered row of 4 answer cards (~150px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no prompt audio (558d0b4 — equation row [A][+][B][=], dot-group layout per MoreLessScene, no speaker button)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Integration
 
-- [ ] Task: Add `add-it-up` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge
+- [x] Task: Add `add-it-up` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge (558d0b4 — pulled forward as scene prerequisite; completeGame validates gameId; full suite 1284 green)
 - [ ] Task: Register `AddItUp` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests
 - [ ] Task: Load 4 new SVGs in `PreloadScene` (tile + sticker + plus + equals; 152 → 156)
 - [ ] Task: Hub grid — 16 tiles in 5×3 + 1 (row 4: 1 tile left-aligned; verify sticker shelf / play-time arc still fit)
