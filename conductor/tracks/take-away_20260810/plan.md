@@ -7,7 +7,7 @@
 - [x] Task: Write failing tests for `src/game/takeAwayLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band easy ≤4 / mid ≤6 / hard ≤10; minuend > subtrahend ≥ 1; differences within band; no ordered (minuend, subtrahend) pair repeats; 4 answer cards with distinct totals in [1..bandMax], exactly one = target; prompt cards use two distinct item types; answer cards share one item type), round building, answer evaluation (cf5168f — Red confirmed: module missing, 0 tests)
 - [x] Task: Implement `src/game/takeAwayLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, `isCorrect` + `TAKE_AWAY_BANDS` / counting-item texture mapping (mirror `addItUpLogic.ts`) (cf5168f — 15 tests green)
 - [x] Task: Verify coverage for `takeAwayLogic.ts` (≥95% lines; project runs ~98%) (cf5168f — 100% stmts/branch/funcs/lines)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 5ac22f2]
 
 ## Phase 2 — Assets
 
