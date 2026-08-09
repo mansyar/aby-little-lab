@@ -50,7 +50,10 @@
 
 - [x] Task 5.1: Merge PR #26 (`e530a1b` on origin/master); confirm all three tracks' commits on origin/master; tag-gated deploy triggers after tag push
 - [ ] Task 5.2: Verify deployment (master CI + tag CI Quality Gates PASS, Deploy to Coolify PASS; live `index-*.js` SHA256 matches local dist/; `/sw.js` + `/manifest.webmanifest` 200; Settings footer `v1.13.0`; no stale `1.12.0` strings)
-- [ ] Task 5.3: Live smoke — boot → Hub (16 tiles 5×3+1) → Color Match spot check (swatch + spoken color, 2×2 grid, 6 rounds) → Add It Up spot check (equation row + "+" cue + 4 answer cards, no speech) → Progress overlay spot check (Settings → Progress → 16 rows paged 8+8) → Settings footer v1.13.0 → Hub; zero console errors
+- [~] Task 5.3: Live smoke — boot → Hub (16 tiles 5×3+1) → Color Match spot check (swatch + spoken color, 2×2 grid, 6 rounds) → Add It Up spot check (equation row + "+" cue + 4 answer cards, no speech) → Progress overlay spot check (Settings → Progress → 16 rows paged 8+8) → Settings footer v1.13.0 → Hub; zero console errors
+  - [x] Playwright headless live smoke executed (2026-08-09): zero console/page errors; Color Match scene PASS (swatch + speaker + 2×2 grid); Add It Up scene PASS (equation row + "+"/"=" cues + 4 answer cards 1/2/4/3); Settings panel PASS (footer v1.13.0, Progress row present, Voice row)
+  - [x] **DEFECT FOUND:** 16th Hub tile (Add It Up) clipped at canvas bottom — `GRID_ROWS = 3` leftover from the 15-tile era; row 3 (index 15) center y = 764, bottom 839 > 768 (~71px overflow). Hotfix approved by user (2026-08-09)
+  - [x] **Hotfix `f049fdf`:** HubScene grid metrics → `TILE_HEIGHT` 150→116, `TILE_SPACING` 40→22, `GRID_ROWS` 3→4 (4×116+3×22 = 530 → startY stays 119, clearing avatar chip/Settings band at 116; row 4 center 591, bottom 649). Regression test added (hubScene.test.ts — all 16 tile rects fully inside 1024×768). Gates: Biome clean, 1285/1285 tests (56 files), build shell index-_bk4Yf06.js 144.6 kB, validate-pwa 13/13, validate-bundle PASS
 - [ ] Task 5.4: Record deployment verification in `docs/release-checklist.md` (Step 7m + Final Sign-Off v1.13.0 block; device testing marked pending user execution)
 - [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
 
