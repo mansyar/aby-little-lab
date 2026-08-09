@@ -21,7 +21,7 @@
   - [x] `package.json` version = 1.13.0 (verified via `node -p`); only package.json changed — zero lockfile churn
   - [x] `__APP_VERSION__` footer source picks it up (vite.config.ts reads pkg.version)
 - [x] Task 2.3: Commit: `chore(release): Bump version to 1.13.0` (579cd21)
-- [~] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 950f92c]
 
 ## Phase 3 — Release Documentation
 
