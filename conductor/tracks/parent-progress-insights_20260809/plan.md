@@ -71,3 +71,7 @@ checklist rows added for the next release.
 - [x] Task 4.1: Run full quality gates — `CI=true pnpm test`, coverage report meets thresholds, `pnpm run check` (Biome), `pnpm run build`, `pnpm run validate-bundle` / `validate-pwa`; fix any failures — 1260/1260 tests; coverage 96.74/88.58/92.14/98 (thresholds 90/85/88/95); Biome clean; build 2.64s; bundle PASS (shell 140.7 kB ≤ 200 kB); PWA 13/13
 - [x] Task 4.2: Update docs — PRD milestone/feature notes (progress report), `docs/device-testing-checklist.md` rows for the next release (progress report + carried rows), release notes draft for next version — PRD gains the 2026-08-09 Progress Insights release decision; device-testing gains the v1.14.0 draft execution record (9 progress-report rows, pending live URL); `docs/release-notes-v1.14.0.md` drafted (DRAFT; v1.13.0 perf release still pending its release-execution track)
 - [x] Task 4.3: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 2998deb]`
+
+## Phase: Review Fixes
+
+- [~] Task: Apply review suggestions — (1) move `GAME_IDS` from `profileLogic.ts` to `src/types/index.ts` (breaks the progressLogic ↔ profileLogic circular import); (2) re-space Settings voice row +355 → +345 so its 64px hit area stays on-canvas; (3) `git rm` 6 stale `.playwright-cli/` smoke-test artifacts accidentally committed in `2497d2f`
