@@ -32,7 +32,7 @@
 - [x] Task 3.3: Verify knowledge docs already synced by the three tracks (`conductor/tech-stack.md`, `conductor/product.md`, `docs/TDD.md`, `docs/PRD.md`, `README.md`) — patch real gaps only
   - [x] Audit found 2 stale refs, patched: product.md "14 distinct mini-games" → 16; TDD.md "fifteen game Back buttons" → sixteen. tech-stack/PRD/README already synced by the game tracks
 - [x] Task 3.4: Commit: `docs(release): Prepare v1.13.0 release notes and device checklist` (510bf34)
-- [~] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 9a33824]
 
 ## Phase 4 — Release Branch Gates + Tag + PR
 
