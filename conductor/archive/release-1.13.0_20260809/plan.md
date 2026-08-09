@@ -76,6 +76,8 @@
   - [x] No source changes since hotfix `f049fdf` (only docs); gates already green at 1285/1285, Biome clean, build/validate PASS — no re-run needed
 - [x] Task 7.2: Finalize release notes status to FINAL; mark all plan tasks complete; update `docs/release-checklist.md` Final Sign-Off block (version v1.13.0, tests, release manager)
   - [x] Release notes FINAL (1747639); Final Sign-Off v1.13.0 block complete incl. device testing passed
-- [ ] Task 7.3: Archive track folder to `conductor/archive/release-1.13.0_20260809/` (via git mv)
-- [ ] Task 7.4: Commit: `chore(conductor): Archive track 'v1.13.0 Release Execution'`; registry updated to (Archived)
+- [x] Task 7.3: Archive track folder to `conductor/archive/release-1.13.0_20260809/` (via git mv)
+  - [x] git mv completed; commit `50fd365` (5 files renamed; stray `.playwright-cli/` test logs removed)
+- [x] Task 7.4: Commit: `chore(conductor): Archive track 'v1.13.0 Release Execution'`; registry updated to (Archived)
+  - [x] Registry `[x] (Archived)` at `./archive/release-1.13.0_20260809/index.md`; metadata.json status 'archived'
 - [ ] Task 7.5: Phase Verification & Checkpoint (Refer to workflow.md)
