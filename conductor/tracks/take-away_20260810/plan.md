@@ -20,7 +20,7 @@
 
 - [x] Task: Write scene tests following `addItUpScene.test.ts` style: round setup (2 prompt dot-cards + "−"/"=" cues + 4 answer cards), correct tap → advance, incorrect tap → wiggle + no penalty, win flow + `{ justEarned: "take-away" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) (8a1b5c6 — Red confirmed: module missing, 0 tests; 9 tests in final suite)
 - [x] Task: Implement `TakeAwayScene.ts` (scene key `TakeAway`): 2 prompt cards (~180px) + minus/equals cues, centered row of 4 answer cards (~170px, ≥96px touch targets), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no prompt audio (8a1b5c6 — equation row [A][−][B][=], dot-group layout per AddItUpScene, no speaker button; 'take-away' GameId added to src/types/index.ts as scene prerequisite)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: 67ceea2]
 
 ## Phase 4 — Integration
 
