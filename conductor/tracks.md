@@ -112,7 +112,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Parent Progress Insights** *Link: [./tracks/parent-progress-insights_20260809/index.md](./tracks/parent-progress-insights_20260809/index.md)*
+- [~] **Track: Parent Progress Insights** *Link: [./tracks/parent-progress-insights_20260809/index.md](./tracks/parent-progress-insights_20260809/index.md)*
 
 
 
