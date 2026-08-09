@@ -74,4 +74,4 @@ checklist rows added for the next release.
 
 ## Phase: Review Fixes
 
-- [~] Task: Apply review suggestions — (1) move `GAME_IDS` from `profileLogic.ts` to `src/types/index.ts` (breaks the progressLogic ↔ profileLogic circular import); (2) re-space Settings voice row +355 → +345 so its 64px hit area stays on-canvas; (3) `git rm` 6 stale `.playwright-cli/` smoke-test artifacts accidentally committed in `2497d2f`
+- [x] Task: Apply review suggestions `[45245fe]` — (1) move `GAME_IDS` from `profileLogic.ts` to `src/types/index.ts` (breaks the progressLogic ↔ profileLogic circular import); (2) re-space Settings voice row +355 → +345 so its 64px hit area stays on-canvas; (3) `git rm` 6 stale `.playwright-cli/` smoke-test artifacts accidentally committed in `2497d2f`
