@@ -58,7 +58,7 @@
   - [x] Post-hotfix re-verification live: `index-_bk4Yf06.js` served (SHA match), footer v1.13.0, zero console errors, Hub re-screenshot confirmed 16/16 tiles fully on-canvas (image-reader: PASS — 5+5+5+1, Add It Up tile + label intact; only a cosmetic dashed entrance decoration under the tile is shaved at the canvas edge, non-blocking)
 - [x] Task 5.4: Record deployment verification in `docs/release-checklist.md` (Step 7m + Final Sign-Off v1.13.0 block; device testing marked pending user execution)
   - [x] Step 7m added (PR #26 merge e530a1b, tag runs, hotfix record, hash match `C26410A6…`, footer, smoke summary, device testing pending); Final Sign-Off v1.13.0 block added (1285/1285, 56 files, shell/vendor sizes, hotfix amendment)
-- [ ] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 5.5: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: db00c67]
 
 ## Phase 6 — Targeted Device Testing (user-led, async)
 
