@@ -77,6 +77,7 @@ aby-little-lab/
     │   └── MoreLessScene.ts        # Mini-Game 13
     │   └── OddOneOutScene.ts       # Mini-Game 14
     │   └── ColorMatchScene.ts      # Mini-Game 15
+    │   └── AddItUpScene.ts         # Mini-Game 16
     ├── components/
     │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
     │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay + context-aware install control (Install App / How to Install / hidden)
@@ -382,6 +383,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `more-less` | Game 13 |
 | `odd-one-out` | Game 14 |
 | `color-match` | Game 15 |
+| `add-it-up` | Game 16 |
 
 ### Example State
 
@@ -494,6 +496,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `tile_more_less.svg` | 512×512 | Hub | Game 13 tile icon — two dot-cards (3 blue vs 5 green dots) + up arrow |
 | `tile_odd_one_out.svg` | 512×512 | Hub | Game 14 tile icon — 2×2 mini-cards with one visually distinct (orange triangle among blue circles) |
 | `tile_color_match.svg` | 512×512 | Hub | Game 15 tile icon — 2×2 swatch cards (red/blue/yellow/green) with a white star on the red card |
+| `tile_add_it_up.svg` | 512×512 | Hub | Game 16 tile icon — two dot-cards (2 blue vs 3 green dots) joined by a chunky plus, yellow answer card with 5 blue dots |
 | `shelf.svg` | 512×512 | Game 4 | Shadow display shelf |
 | `lock_icon.svg` | 512×512 | Global | Parental lock indicator |
 | `star.svg` | 512×512 | Game 3 / Global | Bonus star, rating |
@@ -537,6 +540,9 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `sticker_more_less.svg` | 512×512 | Game 13 | Unique themed sticker — two mini-cards + up arrow on the cream badge |
 | `sticker_odd_one_out.svg` | 512×512 | Game 14 | Unique themed sticker — 2×2 mini-cards with one highlighted on the cream badge |
 | `sticker_color_match.svg` | 512×512 | Game 15 | Unique themed sticker — 2×2 swatch cards with the red one starred on the cream badge |
+| `sticker_add_it_up.svg` | 512×512 | Game 16 | Unique themed sticker — dot-cards + chunky plus with the yellow answer card on the cream badge |
+| `plus.svg` | 512×512 | Game 16 | Symbol cue — chunky "+" (arrow_up.svg precedent) |
+| `equals.svg` | 512×512 | Game 16 | Symbol cue — chunky "=" (arrow_up.svg precedent) |
 
 ### SVG Assets — Letters (`assets/svg/letters/`)
 
