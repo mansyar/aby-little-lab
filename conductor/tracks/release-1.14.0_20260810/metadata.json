@@ -1,0 +1,10 @@
+{
+  "id": "release-1.14.0_20260810",
+  "title": "v1.14.0 Release Execution — Complete 17-Game Suite",
+  "type": "chore",
+  "status": "new",
+  "createdAt": "2026-08-10",
+  "updatedAt": "2026-08-10",
+  "archivedAt": null,
+  "summary": "Ship Game 17 — Take Away and the complete 17-game suite as v1.14.0 through a release branch and PR, five quality gates, an annotated master-lineage tag, tag-gated Coolify deployment, live smoke testing, and physical iOS/iPadOS and Android verification."
+}

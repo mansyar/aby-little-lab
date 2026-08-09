@@ -122,3 +122,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Game 17 — Take Away (Early Subtraction)** *Link: [./archive/take-away_20260810/index.md](./archive/take-away_20260810/index.md)* (Archived)
 
+---
+
+- [ ] **Track: v1.14.0 Release Execution — Complete 17-Game Suite** *Link: [./tracks/release-1.14.0_20260810/index.md](./tracks/release-1.14.0_20260810/index.md)*
