@@ -4,9 +4,9 @@
 
 ## Phase 1 — Pure Game Logic (TDD)
 
-- [ ] Task: Write failing tests for `src/game/addItUpLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band easy ≤4 / mid ≤6 / hard ≤10; addends ≥ 1; sums within band; no order-insensitive (a,b) pair repeats; 4 answer cards with distinct totals in [1..bandMax], exactly one = target; addend cards use two distinct item types; answer cards share one item type), round building, answer evaluation
-- [ ] Task: Implement `src/game/addItUpLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, `isCorrect` + `ADD_IT_UP_BANDS` / counting-item texture mapping
-- [ ] Task: Verify coverage for `addItUpLogic.ts` (>80%; project runs ~98%)
+- [x] Task: Write failing tests for `src/game/addItUpLogic.ts` (Red phase): playthrough generation (6 rounds; 2 per band easy ≤4 / mid ≤6 / hard ≤10; addends ≥ 1; sums within band; no order-insensitive (a,b) pair repeats; 4 answer cards with distinct totals in [1..bandMax], exactly one = target; addend cards use two distinct item types; answer cards share one item type), round building, answer evaluation (cd0292a — Red confirmed: module missing, 0 tests)
+- [x] Task: Implement `src/game/addItUpLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, `isCorrect` + `ADD_IT_UP_BANDS` / counting-item texture mapping (cd0292a — 15 tests green)
+- [x] Task: Verify coverage for `addItUpLogic.ts` (>80%; project runs ~98%) (cd0292a — 100% stmts/branch/funcs/lines)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Assets
