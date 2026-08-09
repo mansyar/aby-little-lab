@@ -1,0 +1,8 @@
+{
+  "id": "release-1.13.0_20260809",
+  "type": "chore",
+  "status": "new",
+  "title": "v1.13.0 Release Execution (Games 15 & 16 + Perf/Bundle Hardening)",
+  "createdAt": "2026-08-09T00:00:00.000Z",
+  "summary": "Ship Game 15 (Color Match), Game 16 (Add It Up), and Performance & Bundle Hardening as v1.13.0 via the standard release process (release branch + version bump 1.12.0 → 1.13.0, release notes, device-testing checklist Game 15/16 rows, five quality gates incl. validate-bundle, annotated tag + PR → master, tag-gated Coolify deploy, live smoke, user-led async device testing). Parent Progress Insights is explicitly out of scope (ships later as v1.14.0)."
+}
