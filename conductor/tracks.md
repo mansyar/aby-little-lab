@@ -120,5 +120,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Game 17 — Take Away (Early Subtraction)** *Link: [./tracks/take-away_20260810/index.md](./tracks/take-away_20260810/index.md)*
+- [~] **Track: Game 17 — Take Away (Early Subtraction)** *Link: [./tracks/take-away_20260810/index.md](./tracks/take-away_20260810/index.md)*
 
