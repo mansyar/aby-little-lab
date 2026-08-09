@@ -38,4 +38,4 @@
 - [x] Task: Update `docs/PRD.md` (Game 17 section) and `docs/TDD.md` as needed (f615529 — GAME 17 section, 17 refs; TDD scene tree/GameId/asset tables + seventeen prose refs)
 - [x] Task: Update `README.md` (games table, hub experience notes) (f615529 — seventeen, table row 17, replay variety, controls/win/mascot/lazy-load 17)
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` (f615529 — Biome 125 files clean, 58 files/1309 tests, build OK PWA 35 entries, validate-pwa 13/13)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — [checkpoint: d7a6898]
