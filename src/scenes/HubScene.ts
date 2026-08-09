@@ -158,10 +158,16 @@ export const GAME_TILES: readonly GameTile[] = [
 ];
 
 const TILE_WIDTH = 160;
-const TILE_HEIGHT = 150;
-const TILE_SPACING = 40;
+/**
+ * 16 tiles render as 5×3+1 (rows 5/5/5/1). Height and spacing are sized so the
+ * 4 rows fit inside 768 with the same 119px top/bottom margins as the 15-tile
+ * grid — clearing the top-band controls (avatar chip / Settings, bottom edge
+ * 116) while keeping every tile and its sticker shelf on-canvas.
+ */
+const TILE_HEIGHT = 116;
+const TILE_SPACING = 22;
 const GRID_COLS = 5;
-const GRID_ROWS = 3;
+const GRID_ROWS = 4;
 /** Display size of the game icon artwork on each tile (px). */
 const TILE_ICON_DISPLAY = 64;
 /** Tile icon textures are rasterized at this size (matches PreloadScene). */

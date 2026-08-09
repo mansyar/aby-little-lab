@@ -5,6 +5,8 @@ type MockFn = ReturnType<typeof vi.fn>;
 interface MockObject {
   kind: string;
   handlers: Record<string, (...args: unknown[]) => unknown>;
+  /** Constructor arguments captured by the factory mock (e.g. rectangle x/y/w/h). */
+  args?: unknown[];
 }
 
 const { mockAudio, mockRecordGamePlay, mockRegistry } = vi.hoisted(() => {
@@ -108,7 +110,11 @@ vi.mock("phaser", () => {
 
     constructor() {
       this.add = {
-        rectangle: vi.fn((..._args: unknown[]) => createMockGameObject(this, "rectangle")),
+        rectangle: vi.fn((...args: unknown[]) => {
+          const obj = createMockGameObject(this, "rectangle");
+          obj.args = args;
+          return obj;
+        }),
         text: vi.fn((..._args: unknown[]) => createMockGameObject(this, "text")),
         image: vi.fn((..._args: unknown[]) => createMockGameObject(this, "image")),
         container: vi.fn((..._args: unknown[]) => createMockGameObject(this, "container")),
@@ -355,5 +361,21 @@ describe("HubScene session-start recording", () => {
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(getProgress()["shape-sorter"].plays).toBe(1);
+  });
+
+  it("renders all 16 tiles fully inside the 1024×768 canvas (5×3+1 grid)", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    const tiles = mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
+    expect(tiles).toHaveLength(16);
+
+    for (const tile of tiles) {
+      const [x, y, width, height] = tile.args as number[];
+      expect(y - height / 2).toBeGreaterThanOrEqual(0);
+      expect(y + height / 2).toBeLessThanOrEqual(768);
+      expect(x - width / 2).toBeGreaterThanOrEqual(0);
+      expect(x + width / 2).toBeLessThanOrEqual(1024);
+    }
   });
 });
