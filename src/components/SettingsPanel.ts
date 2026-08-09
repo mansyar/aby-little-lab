@@ -1,16 +1,24 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
+import {
+  formatAccuracyPercent,
+  getAccuracy,
+  isMastered,
+  relativeLastPlayed,
+} from "../game/progressLogic";
 import { availableVoiceOptions, type VoiceOption } from "../game/voiceLogic";
-import { MAX_PROFILES } from "../types";
+import { type GameId, MAX_PROFILES } from "../types";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
 import { setPreferredVoiceURI, speakWord } from "../utils/speech";
 import {
   addProfile,
   deleteProfile,
+  getActiveProfile,
   getAvailableAvatars,
   getPlayTime,
   getProfiles,
+  getProgress,
   getSettings,
   resetProgress,
   setPlayTimeLimit,
@@ -29,7 +37,7 @@ const DISABLED_COLOR = "#a0aec0";
 const PRIMARY_COLOR = "#2b6cb0";
 const DANGER_COLOR = "#fc8181";
 const PANEL_WIDTH = 480;
-const PANEL_HEIGHT = 640;
+const PANEL_HEIGHT = 760;
 const TOGGLE_WIDTH = 240;
 const TOGGLE_HEIGHT = 96;
 const ROW_HEIGHT = 64;
@@ -41,6 +49,49 @@ const PLAY_TIME_OPTIONS: ReadonlyArray<number | null> = [null, 15, 30, 45, 60];
 const VOICE_PREVIEW_TEXT = "Hi! I can talk.";
 /** Longest voice label shown in the chip before truncation. */
 const VOICE_LABEL_MAX = 24;
+/** Game rows shown per page in the Learning Progress overlay. */
+const PROGRESS_PAGE_SIZE = 8;
+/** Vertical pitch between progress rows (two text lines each). */
+const PROGRESS_ROW_PITCH = 40;
+/** Center-relative Y of the first progress row. */
+const PROGRESS_ROW_START_Y = -150;
+/** Center-relative Y of the 7-day activity strip label. */
+const PROGRESS_STRIP_LABEL_Y = 230;
+/** Center-relative Y of the 7-day activity bars. */
+const PROGRESS_STRIP_Y = 265;
+/** Width of one activity bar. */
+const PROGRESS_BAR_WIDTH = 24;
+/** Number of day bars in the 7-day activity strip. */
+const PROGRESS_BAR_COUNT = 7;
+/** Height of the tallest activity bar. */
+const PROGRESS_BAR_HEIGHT = 36;
+/** Horizontal gap between activity bars. */
+const PROGRESS_BAR_GAP = 6;
+/** Track color for the per-game accuracy bar. */
+const ACCURACY_TRACK_COLOR = 0xe8e0d0;
+/** Fill color for the per-game accuracy bar. */
+const ACCURACY_FILL_COLOR = 0x68d391;
+/** Mastery badge shown next to games with at least 3 wins. */
+const MASTERY_STAR = "★";
+
+/** The 15 games in hub order, for the Learning Progress report rows. */
+const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
+  { gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
+  { gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
+  { gameId: "pop-freeze", label: "Pop & Freeze", tileKey: "tile_pop_freeze" },
+  { gameId: "shadow-match", label: "Shadow Match", tileKey: "tile_shadow_match" },
+  { gameId: "musical-memory", label: "Musical Memory", tileKey: "tile_musical_memory" },
+  { gameId: "big-small", label: "Big & Small", tileKey: "tile_big_small" },
+  { gameId: "pattern-builder", label: "Pattern Builder", tileKey: "tile_pattern_builder" },
+  { gameId: "alphabet-match", label: "Find the Letter", tileKey: "tile_alphabet" },
+  { gameId: "word-match", label: "Find the Word", tileKey: "tile_word_match" },
+  { gameId: "word-builder", label: "Build the Word", tileKey: "tile_word_builder" },
+  { gameId: "how-many", label: "How Many?", tileKey: "tile_how_many" },
+  { gameId: "first-sounds", label: "First Sounds", tileKey: "tile_first_sounds" },
+  { gameId: "more-less", label: "More or Less", tileKey: "tile_more_less" },
+  { gameId: "odd-one-out", label: "Odd One Out", tileKey: "tile_odd_one_out" },
+  { gameId: "color-match", label: "Color Match", tileKey: "tile_color_match" },
+];
 
 /** "Off" for an unlimited budget, otherwise "15m"-style labels. */
 function playTimeLabel(limitMinutes: number | null): string {
@@ -63,6 +114,10 @@ export class SettingsPanel {
   private voiceChip: Phaser.GameObjects.Text | null = null;
   private voiceOptions: VoiceOption[] = [];
   private voiceIndex = 0;
+  /** Current page (0-based) of the Learning Progress overlay. */
+  private progressPage = 0;
+  /** Profile whose report is shown; null means the active profile. */
+  private progressProfileId: string | null = null;
   private readonly onProgressReset?: () => void;
 
   /** Rebuilds the voice picker list when the platform loads voices late. */
@@ -139,9 +194,10 @@ export class SettingsPanel {
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
     this.createToggle(centerX, centerY + 55, "SFX", settings.sfxEnabled);
     this.createProfilesRow(centerX, centerY + 125);
-    this.createResetRow(centerX, centerY + 185);
-    this.createInstallRow(centerX, centerY + 245);
-    this.createVoiceRow(centerX, centerY + 305);
+    this.createProgressRow(centerX, centerY + 185);
+    this.createResetRow(centerX, centerY + 245);
+    this.createInstallRow(centerX, centerY + 305);
+    this.createVoiceRow(centerX, centerY + 345);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
@@ -354,6 +410,256 @@ export class SettingsPanel {
     });
     row.on("pointerdown", () => this.openProfilesOverlay());
     this.objects.push(row);
+  }
+
+  /** Adds the parental "Progress" row that opens the Learning Progress overlay. */
+  private createProgressRow(x: number, y: number): void {
+    const row = this.scene.add
+      .text(
+        x,
+        y,
+        "Progress",
+        textStyle({
+          color: PRIMARY_COLOR,
+          fontSize: "32px",
+        }),
+      )
+      .setOrigin(0.5);
+    row.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_WIDTH / 2,
+        -ROW_HEIGHT / 2,
+        TOGGLE_WIDTH,
+        ROW_HEIGHT,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    row.on("pointerdown", () => this.openProgressOverlay());
+    this.objects.push(row);
+  }
+
+  /**
+   * Opens the per-profile Learning Progress report: profile switcher, paged
+   * per-game rows (plays, accuracy bar + %, mastery star, last played), and
+   * the 7-day activity strip. Read-only: switching the viewed profile never
+   * changes the active profile.
+   */
+  private openProgressOverlay(): void {
+    this.closeProgressOverlay();
+    this.progressPage = 0;
+    this.progressProfileId = getActiveProfile().id;
+    this.renderProgressOverlay();
+  }
+
+  /** Renders (or re-renders) the Learning Progress overlay content. */
+  private renderProgressOverlay(): void {
+    this.closeProgressOverlay();
+    const { width, height } = this.scene.cameras.main;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const viewedId = this.progressProfileId ?? getActiveProfile().id;
+    const progress = getProgress(viewedId);
+
+    const backdrop = this.scene.add
+      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
+      .setInteractive();
+    backdrop.on("pointerdown", () => this.closeProgressOverlay());
+    this.overlayObjects.push(backdrop);
+    this.overlayObjects.push(
+      this.scene.add
+        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
+        .setStrokeStyle(4, OUTLINE_COLOR),
+    );
+    this.overlayObjects.push(
+      this.scene.add
+        .text(
+          centerX,
+          centerY - 250,
+          "Learning Progress",
+          textStyle({
+            color: "#2d3748",
+            fontSize: "36px",
+          }),
+        )
+        .setOrigin(0.5),
+    );
+
+    const close = this.scene.add
+      .text(
+        centerX + PANEL_WIDTH / 2 - 32,
+        centerY - 250,
+        "X",
+        textStyle({
+          color: "#2d3748",
+          fontSize: "32px",
+        }),
+      )
+      .setOrigin(0.5);
+    close.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_HEIGHT / 2,
+        -TOGGLE_HEIGHT / 2,
+        TOGGLE_HEIGHT,
+        TOGGLE_HEIGHT,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    close.on("pointerdown", () => this.closeProgressOverlay());
+    this.overlayObjects.push(close);
+
+    const profiles = getProfiles();
+    profiles.forEach((profile, index) => {
+      const x = centerX + (index - (profiles.length - 1) / 2) * 56;
+      const chip = this.scene.add.image(
+        x,
+        centerY - 195,
+        PROFILE_AVATAR_TEXTURES[profile.avatarId],
+      );
+      chip.setScale(64 / AVATAR_TEXTURE_SIZE);
+      chip.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      chip.on("pointerdown", () => {
+        if (profile.id !== viewedId) {
+          this.progressProfileId = profile.id;
+          this.renderProgressOverlay();
+        }
+      });
+      this.overlayObjects.push(chip);
+    });
+
+    const pageStart = this.progressPage * PROGRESS_PAGE_SIZE;
+    const pageEnd = Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_GAME_ROWS.length);
+    for (let i = pageStart; i < pageEnd; i += 1) {
+      const row = PROGRESS_GAME_ROWS[i];
+      const y = centerY + PROGRESS_ROW_START_Y + (i - pageStart) * PROGRESS_ROW_PITCH;
+      const game = progress[row.gameId];
+      const accuracy = getAccuracy(game);
+
+      const icon = this.scene.add.image(centerX - 182, y, row.tileKey);
+      icon.setScale(28 / AVATAR_TEXTURE_SIZE);
+      this.overlayObjects.push(icon);
+
+      const name = this.scene.add
+        .text(
+          centerX - 158,
+          y,
+          `${isMastered(game) ? `${MASTERY_STAR} ` : ""}${row.label}`,
+          textStyle({
+            color: "#2d3748",
+            fontSize: "30px",
+          }),
+        )
+        .setOrigin(0, 0.5);
+      this.overlayObjects.push(name);
+
+      const stats = this.scene.add
+        .text(
+          centerX - 158,
+          y + 26,
+          `${game.plays} plays · ${formatAccuracyPercent(game)} · ${relativeLastPlayed(game.lastPlayedAt)}`,
+          textStyle({
+            color: PRIMARY_COLOR,
+            fontSize: "26px",
+          }),
+        )
+        .setOrigin(0, 0.5);
+      this.overlayObjects.push(stats);
+
+      const track = this.scene.add.rectangle(centerX + 130, y, 120, 10, ACCURACY_TRACK_COLOR);
+      this.overlayObjects.push(track);
+      if (accuracy !== null) {
+        const fill = this.scene.add.rectangle(
+          centerX + 70 + (accuracy * 120) / 2,
+          y,
+          Math.max(2, Math.round(accuracy * 120)),
+          10,
+          ACCURACY_FILL_COLOR,
+        );
+        this.overlayObjects.push(fill);
+      }
+    }
+
+    const pageCount = Math.ceil(PROGRESS_GAME_ROWS.length / PROGRESS_PAGE_SIZE);
+    this.overlayObjects.push(
+      this.scene.add
+        .text(
+          centerX - 20,
+          centerY + 175,
+          `${this.progressPage + 1} / ${pageCount}`,
+          textStyle({
+            color: DISABLED_COLOR,
+            fontSize: "30px",
+          }),
+        )
+        .setOrigin(0.5),
+    );
+    const pageButton = this.scene.add
+      .text(
+        centerX + 60,
+        centerY + 175,
+        this.progressPage + 1 < pageCount ? "More" : "Back",
+        textStyle({
+          color: PRIMARY_COLOR,
+          fontSize: "30px",
+        }),
+      )
+      .setOrigin(0.5);
+    pageButton.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(
+        -TOGGLE_WIDTH / 4,
+        -ROW_HEIGHT / 2,
+        TOGGLE_WIDTH / 2,
+        ROW_HEIGHT,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    pageButton.on("pointerdown", () => {
+      this.progressPage = (this.progressPage + 1) % pageCount;
+      this.renderProgressOverlay();
+    });
+    this.overlayObjects.push(pageButton);
+
+    const activity = getProfiles().find((profile) => profile.id === viewedId)?.activity ?? [];
+    const totalPlays = activity.reduce((sum, entry) => sum + entry.plays, 0);
+    this.overlayObjects.push(
+      this.scene.add
+        .text(
+          centerX,
+          centerY + PROGRESS_STRIP_LABEL_Y,
+          `Last 7 days · ${totalPlays} plays`,
+          textStyle({
+            color: "#2d3748",
+            fontSize: "30px",
+          }),
+        )
+        .setOrigin(0.5),
+    );
+    const maxPlays = Math.max(1, ...activity.map((entry) => entry.plays));
+    const startX =
+      centerX - ((PROGRESS_BAR_COUNT - 1) * (PROGRESS_BAR_WIDTH + PROGRESS_BAR_GAP)) / 2;
+    for (let i = 0; i < PROGRESS_BAR_COUNT; i += 1) {
+      const entry = activity[i];
+      const plays = entry?.plays ?? 0;
+      const barHeight =
+        plays === 0 ? 4 : Math.max(10, Math.round((PROGRESS_BAR_HEIGHT * plays) / maxPlays));
+      this.overlayObjects.push(
+        this.scene.add.rectangle(
+          startX + i * (PROGRESS_BAR_WIDTH + PROGRESS_BAR_GAP),
+          centerY + PROGRESS_STRIP_Y,
+          PROGRESS_BAR_WIDTH,
+          barHeight,
+          ACCURACY_FILL_COLOR,
+        ),
+      );
+    }
+  }
+
+  /** Destroys the Learning Progress overlay (not the panel). */
+  private closeProgressOverlay(): void {
+    for (const object of this.overlayObjects) object.destroy();
+    this.overlayObjects.length = 0;
   }
 
   /**

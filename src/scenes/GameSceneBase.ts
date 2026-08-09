@@ -11,7 +11,7 @@ import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { transitionToScene } from "../utils/sceneTransitions";
-import { earnSticker, hasSticker } from "../utils/storage";
+import { earnSticker, hasSticker, recordGameResult } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 
 /**
@@ -32,6 +32,12 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected readonly audioManager: AudioManager;
   protected progressDots: Phaser.GameObjects.Arc[] = [];
   protected inputLocked = false;
+
+  /** Correct taps recorded this session (flushed to progress on completion). */
+  private sessionCorrect = 0;
+
+  /** Incorrect taps recorded this session (flushed to progress on completion). */
+  private sessionWrong = 0;
 
   /** Delay before the next round after a correct answer (ms). */
   protected readonly NEXT_ROUND_DELAY = 700;
@@ -175,6 +181,16 @@ export abstract class GameSceneBase extends Phaser.Scene {
     });
   }
 
+  /** Records a correct answer for the active profile's learning progress. */
+  protected recordCorrect(): void {
+    this.sessionCorrect += 1;
+  }
+
+  /** Records an incorrect answer for the active profile's learning progress. */
+  protected recordWrong(): void {
+    this.sessionWrong += 1;
+  }
+
   /**
    * Handles game completion: plays the win SFX, runs the shared celebration,
    * awards the sticker on first completion, and auto-returns to the Hub after
@@ -182,6 +198,9 @@ export abstract class GameSceneBase extends Phaser.Scene {
    */
   protected completeGame(gameId: GameId): void {
     this.inputLocked = true;
+    recordGameResult(gameId, this.sessionCorrect, this.sessionWrong);
+    this.sessionCorrect = 0;
+    this.sessionWrong = 0;
     this.audioManager.playWin();
     this.mascot?.cheer(true);
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);

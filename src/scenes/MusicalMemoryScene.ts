@@ -236,6 +236,7 @@ export class MusicalMemoryScene extends GameSceneBase {
     } else {
       this.inputIndex = result.nextIndex;
       this.audioManager.playIncorrect();
+      this.recordWrong();
       this.mascot?.nod();
       this.playSequence();
     }
@@ -248,6 +249,7 @@ export class MusicalMemoryScene extends GameSceneBase {
    */
   private handleRoundSuccess(): void {
     this.audioManager.playCorrect();
+    this.recordCorrect();
     this.mascot?.cheer();
 
     if (this.roundCount < this.progressDots.length) {

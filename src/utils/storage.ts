@@ -8,10 +8,18 @@ import {
   normalizeV2,
   switchActiveProfile,
 } from "../game/profileLogic";
+import {
+  addActivity,
+  normalizeProgressMap,
+  pruneActivity,
+  recordPlay,
+  recordResult,
+} from "../game/progressLogic";
 import type {
   AppStorage,
   AvatarId,
   GameId,
+  GameProgress,
   PlayTime,
   Profile,
   ProfileV2,
@@ -182,4 +190,52 @@ export function recordPlayTime(profileId: string, minutes: number): void {
       p.id === profileId ? { ...p, playTime: addPlayTime(p.playTime, minutes) } : p,
     ),
   }));
+}
+
+/** Records a started play on the ACTIVE profile: plays++, last-played stamp, today's activity. */
+export function recordGamePlay(gameId: GameId): void {
+  mutate((v2) => {
+    const now = new Date();
+    return {
+      ...v2,
+      profiles: v2.profiles.map((p) =>
+        p.id === v2.activeProfileId
+          ? {
+              ...p,
+              progress: {
+                ...p.progress,
+                [gameId]: recordPlay(p.progress[gameId], now),
+              },
+              activity: pruneActivity(addActivity(p.activity, now), now),
+            }
+          : p,
+      ),
+    };
+  });
+}
+
+/** Records a completed session on the ACTIVE profile: win + correct/wrong taps. */
+export function recordGameResult(gameId: GameId, correct: number, wrong: number): void {
+  mutate((v2) => ({
+    ...v2,
+    profiles: v2.profiles.map((p) =>
+      p.id === v2.activeProfileId
+        ? {
+            ...p,
+            progress: {
+              ...p.progress,
+              [gameId]: recordResult(p.progress[gameId], { correct, wrong, win: true }),
+            },
+          }
+        : p,
+    ),
+  }));
+}
+
+/** Normalized per-game progress for the active profile (or the profile with the given id). */
+export function getProgress(profileId?: string): Record<GameId, GameProgress> {
+  const v2 = ensureV2();
+  const id = profileId ?? v2.activeProfileId;
+  const profile = v2.profiles.find((p) => p.id === id) ?? v2.profiles[0];
+  return normalizeProgressMap(profile.progress);
 }

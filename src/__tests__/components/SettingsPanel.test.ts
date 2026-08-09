@@ -1,4 +1,5 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
+import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import type { InstallTracker, InstallUiState } from "../../utils/pwaInstall";
 import {
   addProfile,
@@ -8,7 +9,10 @@ import {
   getProfiles,
   getSettings,
   load,
+  recordGamePlay,
+  recordGameResult,
   setPlayTimeLimit,
+  switchProfile,
   updateSettings,
 } from "../../utils/storage";
 
@@ -1014,5 +1018,126 @@ describe("SettingsPanel TTS voice selection", () => {
     panel.destroy();
 
     expect(synth.removeEventListener).toHaveBeenCalledWith("voiceschanged", expect.any(Function));
+  });
+});
+
+describe("SettingsPanel progress report", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("renders a Progress row in the settings panel", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    expect(findTextByLabel(scene, "Progress")).toBeDefined();
+  });
+
+  it("opens the Learning Progress overlay from the Progress row", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const row = findTextByLabel(scene, "Progress") as MockGameObject;
+    triggerPointerdown(row);
+
+    expect(findTextByLabel(scene, "Learning Progress")).toBeDefined();
+    expect(findTextByLabel(scene, "X")).toBeDefined();
+    // Profile switcher chip for the single default profile.
+    expect(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.cat).length).toBe(1);
+    // First page shows the first 8 game rows.
+    expect(findTextByLabel(scene, "Shape Sorter")).toBeDefined();
+    expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
+    expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
+    // Page control and the 7-day strip.
+    expect(findTextByLabel(scene, "More")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 2")).toBeDefined();
+    expect(findTextByLabel(scene, "Last 7 days · 0 plays")).toBeDefined();
+    const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24);
+    expect(bars).toHaveLength(7);
+  });
+
+  it("shows per-game plays, accuracy, and last played from progress data", () => {
+    recordGamePlay("shape-sorter");
+    recordGameResult("shape-sorter", 6, 2);
+    recordGamePlay("animal-trace");
+
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    expect(findTextByLabel(scene, "1 plays · 75% · Today")).toBeDefined();
+    expect(findTextByLabel(scene, "1 plays · — · Today")).toBeDefined();
+    expect(findTextByLabel(scene, "Last 7 days · 2 plays")).toBeDefined();
+  });
+
+  it("shows a mastery star for games with at least 3 wins", () => {
+    recordGamePlay("shape-sorter");
+    recordGameResult("shape-sorter", 3, 0);
+    recordGameResult("shape-sorter", 3, 1);
+    recordGameResult("shape-sorter", 4, 0);
+
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    expect(findTextByLabel(scene, "★ Shape Sorter")).toBeDefined();
+    expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
+  });
+
+  it("pages through all 15 game rows", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    const pageOneRow = findTextByLabel(scene, "Shape Sorter") as MockGameObject;
+    const moreButton = findTextByLabel(scene, "More") as MockGameObject;
+    expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
+
+    triggerPointerdown(moreButton);
+    expect(moreButton.destroy).toHaveBeenCalled();
+    expect(pageOneRow.destroy).toHaveBeenCalled();
+    expect(findTextByLabel(scene, "2 / 2")).toBeDefined();
+    expect(findTextByLabel(scene, "Color Match")).toBeDefined();
+
+    const backButton = findTextByLabel(scene, "Back") as MockGameObject;
+    triggerPointerdown(backButton);
+    expect(backButton.destroy).toHaveBeenCalled();
+    expect(findTextByLabel(scene, "1 / 2")).toBeDefined();
+    expect(findTextByLabel(scene, "More")).toBeDefined();
+  });
+
+  it("re-renders rows for the selected profile without switching the active profile", () => {
+    recordGamePlay("shape-sorter");
+    addProfile("dog");
+    recordGamePlay("color-match");
+    switchProfile(getProfiles()[0].id);
+
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    expect(findTextByLabel(scene, "0 plays · — · —")).toBeDefined();
+    triggerPointerdown(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.dog)[0]);
+    expect(findTextByLabel(scene, "1 plays · — · Today")).toBeDefined();
+    expect(getActiveProfile().id).toBe(getProfiles()[0].id);
+  });
+
+  it("closes the overlay on backdrop tap and X tap, keeping the panel usable", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    const header = findTextByLabel(scene, "Learning Progress") as MockGameObject;
+
+    const overlayBackdrop = scene.add.rectangle.mock.results.find(
+      (_result, index) => scene.add.rectangle.mock.calls[index]?.[5] === 0.75,
+    )?.value as MockGameObject;
+    triggerPointerdown(overlayBackdrop);
+    expect(header.destroy).toHaveBeenCalled();
+
+    // The panel still works: tapping Progress reopens a fresh overlay.
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    expect(findTextByLabel(scene, "Learning Progress")).toBeDefined();
+    const header2 = findTextByLabel(scene, "Learning Progress") as MockGameObject;
+    triggerPointerdown(findTextByLabel(scene, "X") as MockGameObject);
+    expect(header2.destroy).toHaveBeenCalled();
   });
 });

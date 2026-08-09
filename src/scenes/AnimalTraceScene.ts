@@ -293,6 +293,7 @@ export class AnimalTraceScene extends GameSceneBase {
     if (!this.currentPair) return;
     this.currentPair.complete = true;
     this.audioManager.playCorrect();
+    this.recordCorrect();
     this.mascot?.cheer();
     this.wiggleFood();
     createCompletionSplash(this, FOOD_X, SPRITE_Y);

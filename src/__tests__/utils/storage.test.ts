@@ -8,9 +8,12 @@ import {
   getAvailableAvatars,
   getPlayTime,
   getProfiles,
+  getProgress,
   getSettings,
   hasSticker,
   load,
+  recordGamePlay,
+  recordGameResult,
   recordPlayTime,
   resetProgress,
   save,
@@ -209,6 +212,40 @@ describe("Storage utilities", () => {
       // Existing progress and settings are preserved.
       expect(result.stickers["more-less"].earned).toBe(true);
       expect(result.stickers["first-sounds"].earned).toBe(true);
+      expect(result.settings.bgmEnabled).toBe(true);
+      expect(result.settings.sfxEnabled).toBe(false);
+    });
+
+    it("migrates a save from before Game 15 by backfilling the color-match sticker entry", () => {
+      // Simulate a save from before Color Match shipped: no "color-match" key.
+      const oldSave = {
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+          "animal-trace": { earned: false, earnedAt: null },
+          "pop-freeze": { earned: false, earnedAt: null },
+          "shadow-match": { earned: false, earnedAt: null },
+          "musical-memory": { earned: false, earnedAt: null },
+          "big-small": { earned: false, earnedAt: null },
+          "pattern-builder": { earned: false, earnedAt: null },
+          "alphabet-match": { earned: false, earnedAt: null },
+          "word-match": { earned: false, earnedAt: null },
+          "word-builder": { earned: false, earnedAt: null },
+          "how-many": { earned: false, earnedAt: null },
+          "first-sounds": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+          "more-less": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+          "odd-one-out": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+        },
+        settings: { bgmEnabled: true, sfxEnabled: false },
+      };
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
+
+      const result = load();
+
+      // The new game gets a fresh unearned entry instead of crashing.
+      expect(result.stickers["color-match"]).toEqual({ earned: false, earnedAt: null });
+      // Existing progress and settings are preserved.
+      expect(result.stickers["odd-one-out"].earned).toBe(true);
+      expect(result.stickers["more-less"].earned).toBe(true);
       expect(result.settings.bgmEnabled).toBe(true);
       expect(result.settings.sfxEnabled).toBe(false);
     });
@@ -608,3 +645,126 @@ function v1OnlySave(): {
     settings: { bgmEnabled: false, sfxEnabled: true },
   };
 }
+
+describe("progress recording", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("records a play for the active profile", () => {
+    recordGamePlay("shape-sorter");
+
+    const progress = getProgress()["shape-sorter"];
+    expect(progress.plays).toBe(1);
+    expect(progress.wins).toBe(0);
+    expect(progress.correct).toBe(0);
+    expect(progress.wrong).toBe(0);
+    expect(progress.lastPlayedAt).not.toBeNull();
+    // Other games stay untouched.
+    expect(getProgress()["color-match"]).toEqual({
+      plays: 0,
+      wins: 0,
+      correct: 0,
+      wrong: 0,
+      lastPlayedAt: null,
+    });
+  });
+
+  it("stamps today's activity entry on play", () => {
+    recordGamePlay("shape-sorter");
+    recordGamePlay("shape-sorter");
+
+    const active = getActiveProfile();
+    expect(active.activity).toContainEqual({ day: todayKey(new Date()), plays: 2 });
+  });
+
+  it("records plays per active profile", () => {
+    recordGamePlay("shape-sorter");
+    const firstProfile = getActiveProfile().id;
+
+    addProfile("dog");
+    const secondProfile = getActiveProfile().id;
+    recordGamePlay("color-match");
+
+    expect(getProgress(firstProfile)["shape-sorter"].plays).toBe(1);
+    expect(getProgress(secondProfile)["shape-sorter"].plays).toBe(0);
+    expect(getProgress(secondProfile)["color-match"].plays).toBe(1);
+  });
+
+  it("records a completed result with correct/wrong and a win", () => {
+    recordGameResult("shape-sorter", 5, 1);
+    recordGameResult("shape-sorter", 6, 0);
+
+    const progress = getProgress()["shape-sorter"];
+    expect(progress.wins).toBe(2);
+    expect(progress.correct).toBe(11);
+    expect(progress.wrong).toBe(1);
+    expect(progress.plays).toBe(0);
+  });
+
+  it("preserves progress across save, earnSticker, and resetProgress", () => {
+    recordGamePlay("shape-sorter");
+    recordGameResult("shape-sorter", 5, 1);
+
+    save({
+      stickers: { "shape-sorter": { earned: true, earnedAt: "2026-08-05T00:00:00.000Z" } },
+      settings: { bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null },
+    });
+    earnSticker("color-match");
+    expect(getProgress()["shape-sorter"].plays).toBe(1);
+
+    resetProgress();
+    const progress = getProgress()["shape-sorter"];
+    expect(progress.wins).toBe(1);
+    expect(progress.correct).toBe(5);
+    expect(progress.wrong).toBe(1);
+    // Stickers were cleared, progress was not.
+    expect(load().stickers["shape-sorter"].earned).toBe(false);
+  });
+
+  it("backfills zeroed progress for an older v2 save without progress", () => {
+    const oldV2 = {
+      activeProfileId: "p1",
+      profiles: [
+        {
+          id: "p1",
+          avatarId: "cat",
+          createdAt: "2026-08-01T00:00:00.000Z",
+          stickers: {
+            "shape-sorter": { earned: true, earnedAt: "2026-08-02T00:00:00.000Z" },
+          },
+          playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: "2026-08-05" },
+        },
+      ],
+      settings: { bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null },
+    };
+    localStorage.setItem(V2_KEY, JSON.stringify(oldV2));
+
+    // Sticker data survived, progress is zeroed and complete.
+    expect(load().stickers["shape-sorter"].earned).toBe(true);
+    expect(getProgress()["shape-sorter"]).toEqual({
+      plays: 0,
+      wins: 0,
+      correct: 0,
+      wrong: 0,
+      lastPlayedAt: null,
+    });
+    expect(getProgress()["odd-one-out"]).toEqual({
+      plays: 0,
+      wins: 0,
+      correct: 0,
+      wrong: 0,
+      lastPlayedAt: null,
+    });
+    expect(getActiveProfile().activity).toEqual([]);
+  });
+
+  it("migrates a v1 save with zeroed progress", () => {
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+
+    expect(getProgress()["shape-sorter"].plays).toBe(0);
+    expect(getActiveProfile().activity).toEqual([]);
+    // v1 sticker survived migration.
+    expect(load().stickers["shape-sorter"].earned).toBe(true);
+  });
+});

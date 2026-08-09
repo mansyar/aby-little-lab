@@ -193,6 +193,7 @@ export class WordMatchScene extends GameSceneBase {
       createCompletionSplash(this, card.x, card.y);
     }
     this.audioManager.playCorrect();
+    this.recordCorrect();
     this.mascot?.cheer();
     this.fillProgressDot(this.roundIndex);
 
@@ -210,6 +211,7 @@ export class WordMatchScene extends GameSceneBase {
   /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
   private handleIncorrect(choiceIndex: number): void {
     this.audioManager.playIncorrect();
+    this.recordWrong();
     this.mascot?.nod();
 
     const targets = [this.cardRects[choiceIndex], ...this.cardLetters[choiceIndex]];

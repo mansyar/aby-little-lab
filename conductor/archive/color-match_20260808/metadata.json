@@ -1,0 +1,8 @@
+{
+  "id": "color-match_20260808",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-08",
+  "updatedAt": "2026-08-08",
+  "summary": "Game 15: Color Match - color recognition game (large swatch + spoken color name prompt, tap the matching colored object among 4 distinct-color cards, progressive bands: 4-color pool rounds 1-3 / 6-color pool rounds 4-6, 6 rounds per playthrough, completes hub grid 5x3)."
+}

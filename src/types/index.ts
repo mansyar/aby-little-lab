@@ -12,11 +12,33 @@ export type GameId =
   | "how-many"
   | "first-sounds"
   | "more-less"
-  | "odd-one-out";
+  | "odd-one-out"
+  | "color-match"
+  | "add-it-up";
 
 export interface StickerData {
   earned: boolean;
   earnedAt: string | null;
+}
+
+/** Per-game learning stats for a profile (all zeroed by default). */
+export interface GameProgress {
+  /** Sessions started from the Hub. */
+  plays: number;
+  /** Completed sessions (every completion is a win by no-fail design). */
+  wins: number;
+  /** Correct answer taps across completed sessions. */
+  correct: number;
+  /** Incorrect answer taps across completed sessions. */
+  wrong: number;
+  /** ISO timestamp of the most recent play, or null when never played. */
+  lastPlayedAt: string | null;
+}
+
+/** One day of aggregated play activity (key "YYYY-MM-DD", local). */
+export interface DayActivity {
+  day: string;
+  plays: number;
 }
 
 export interface Settings {
@@ -54,6 +76,26 @@ export const MAX_PROFILES = 4;
 /** Avatar used for the auto-created first profile (migration / fresh install). */
 export const DEFAULT_AVATAR_ID: AvatarId = "cat";
 
+/** All registered game ids, in hub order (shared by stickers and progress). */
+export const GAME_IDS: GameId[] = [
+  "shape-sorter",
+  "animal-trace",
+  "pop-freeze",
+  "shadow-match",
+  "musical-memory",
+  "big-small",
+  "pattern-builder",
+  "alphabet-match",
+  "word-match",
+  "word-builder",
+  "how-many",
+  "first-sounds",
+  "more-less",
+  "odd-one-out",
+  "color-match",
+  "add-it-up",
+];
+
 export interface Profile {
   id: string;
   avatarId: AvatarId;
@@ -61,6 +103,10 @@ export interface Profile {
   stickers: Record<GameId, StickerData>;
   /** Daily play-time budget (unlimited by default). */
   playTime: PlayTime;
+  /** Per-game learning stats (zeroed by default). */
+  progress: Record<GameId, GameProgress>;
+  /** Last-7-days play activity (today + 6 prior, pruned on write). */
+  activity: DayActivity[];
 }
 
 /** Profile-aware storage schema (key `abby-little-lab:v2`). */

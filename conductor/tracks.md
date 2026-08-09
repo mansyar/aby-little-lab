@@ -104,5 +104,17 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [x] **Track: Game 15 — Color Match (Color Recognition)** *Link: [./archive/color-match_20260808/index.md](./archive/color-match_20260808/index.md)* (Archived)
 
+---
+
+- [x] **Track: Performance & Bundle Hardening** *Link: [./archive/perf-bundle-hardening_20260809/index.md](./archive/perf-bundle-hardening_20260809/index.md)* (Archived)
+
+---
+
+- [x] **Track: Game 16 — Add It Up (Early Addition)** *Link: [./archive/add-it-up_20260809/index.md](./archive/add-it-up_20260809/index.md)* (Archived)
+
+---
+
+- [~] **Track: v1.13.0 Release Execution (Games 15 & 16 + Perf/Bundle Hardening)** *Link: [./tracks/release-1.13.0_20260809/index.md](./tracks/release-1.13.0_20260809/index.md)*
 

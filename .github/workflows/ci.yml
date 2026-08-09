@@ -42,6 +42,9 @@ jobs:
       - name: Production build
         run: pnpm run build
 
+      - name: Bundle validation
+        run: node scripts/validate-bundle.js
+
       - name: PWA validation
         run: node scripts/validate-pwa.js
 

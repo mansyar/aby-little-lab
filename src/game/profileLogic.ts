@@ -7,25 +7,9 @@ import type {
   Settings,
   StickerData,
 } from "../types";
-import { AVATAR_IDS, DEFAULT_AVATAR_ID, MAX_PROFILES } from "../types";
+import { AVATAR_IDS, DEFAULT_AVATAR_ID, GAME_IDS, MAX_PROFILES } from "../types";
 import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
-
-const GAME_IDS: GameId[] = [
-  "shape-sorter",
-  "animal-trace",
-  "pop-freeze",
-  "shadow-match",
-  "musical-memory",
-  "big-small",
-  "pattern-builder",
-  "alphabet-match",
-  "word-match",
-  "word-builder",
-  "how-many",
-  "first-sounds",
-  "more-less",
-  "odd-one-out",
-];
+import { createDefaultProgressMap, normalizeProgressMap, pruneActivity } from "./progressLogic";
 
 /** Fresh sticker collection: every game unearned. */
 export function createDefaultStickers(): Record<GameId, StickerData> {
@@ -50,6 +34,8 @@ export function createDefaultProfile(
     createdAt,
     stickers: createDefaultStickers(),
     playTime: createDefaultPlayTime(new Date(createdAt)),
+    progress: createDefaultProgressMap(),
+    activity: [],
   };
 }
 
@@ -99,6 +85,8 @@ export function normalizeV2(
       createdAt: typeof p?.createdAt === "string" ? p.createdAt : now,
       stickers: mergeStickers(p?.stickers),
       playTime: normalizePlayTime(p?.playTime, new Date(now)),
+      progress: normalizeProgressMap(p?.progress),
+      activity: pruneActivity(p?.activity, new Date(now)),
     }));
   } else {
     profiles = [createDefaultProfile("p1", DEFAULT_AVATAR_ID, now)];

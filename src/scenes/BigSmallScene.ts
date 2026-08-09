@@ -213,6 +213,7 @@ export class BigSmallScene extends GameSceneBase {
       data.sorted = true;
       this.sortedCount++;
       this.audioManager.playCorrect();
+      this.recordCorrect();
       this.mascot?.cheer();
       createCompletionSplash(this, slot.x, slot.y);
 
@@ -252,6 +253,7 @@ export class BigSmallScene extends GameSceneBase {
     if (!data.sorted) {
       if (data.droppedOnZone) {
         this.audioManager.playIncorrect();
+        this.recordWrong();
         this.mascot?.nod();
       }
       this.tweens.add({

@@ -43,6 +43,23 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Isolate the Phaser engine into its own vendor chunk so it is
+        // cached once by the service worker and app updates download only
+        // the shell delta (enforced by scripts/validate-bundle.js).
+        codeSplitting: {
+          groups: [
+            {
+              name: "phaser",
+              test: /[\\/]node_modules[\\/]phaser[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: "happy-dom",
     globals: true,
@@ -53,10 +70,10 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       exclude: ["src/__tests__/**", "src/main.ts", "src/types/**"],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80,
+        lines: 95,
+        functions: 88,
+        branches: 85,
+        statements: 90,
       },
     },
   },

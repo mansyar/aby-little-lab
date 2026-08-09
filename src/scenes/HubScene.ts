@@ -23,6 +23,7 @@ import {
   getPlayTime,
   getProfiles,
   hasSticker,
+  recordGamePlay,
   recordPlayTime,
   switchProfile,
 } from "../utils/storage";
@@ -135,6 +136,22 @@ export const GAME_TILES: readonly GameTile[] = [
     gameId: "odd-one-out",
     label: "Odd One Out",
     tileKey: "tile_odd_one_out",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
+  {
+    sceneKey: "ColorMatch",
+    gameId: "color-match",
+    label: "Color Match",
+    tileKey: "tile_color_match",
+    iconDisplay: 52,
+    iconOffsetY: -44,
+  },
+  {
+    sceneKey: "AddItUp",
+    gameId: "add-it-up",
+    label: "Add It Up",
+    tileKey: "tile_add_it_up",
     iconDisplay: 52,
     iconOffsetY: -44,
   },
@@ -283,6 +300,8 @@ export class HubScene extends Phaser.Scene {
   private playTimeGraphics?: Phaser.GameObjects.Graphics;
   /** True while the pre-game nudge overlay is showing. */
   private nudgeActive = false;
+  /** True after a tile tap began navigation; blocks double-tap double-records. */
+  private navLocked = false;
 
   constructor() {
     super({ key: "Hub" });
@@ -339,9 +358,11 @@ export class HubScene extends Phaser.Scene {
       // releasing outside the tile (pointerout/pointercancel) cancels.
       // Locked tiles (daily limit reached) swallow the tap entirely.
       tile.on("pointerup", () => {
-        if (this.timeUp) return;
+        if (this.timeUp || this.navLocked) return;
+        this.navLocked = true;
         startAudio();
         startPlaySession(getActiveProfile().id);
+        recordGamePlay(GAME_TILES[i].gameId);
         if (this.shouldNudge()) {
           this.showPlayTimeNudge(i);
         } else {
