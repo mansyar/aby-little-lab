@@ -45,7 +45,7 @@ sites.
   - [x] ... scene shutdown without completion does NOT flush results
 - [x] Task 2.4: Implement GameSceneBase session counters, `recordCorrect()`/`recordWrong()`, and flush inside `completeGame()` before the win flow `[7c28912]`
 - [x] Task 2.5: Instrument the 15 game scenes — add `this.recordCorrect()` / `this.recordWrong()` at each scene's single `playCorrect()` / `playIncorrect()` call site; games without a right/wrong path (e.g., Pop & Freeze, Animal Trace) remain tap-free. Verify via existing scene tests + new assertion spot checks (TDD impractical for one-liners; covered by Phase 2/3 tests) `[a43a740]`
-- [ ] Task 2.6: Phase Verification & Checkpoint (Refer to workflow.md)
+- [ ] Task 2.6: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: ab91967]`
 
 ## Phase 3 — Progress Report Overlay (SettingsPanel UI)
 
