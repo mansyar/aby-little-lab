@@ -7,24 +7,27 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 1 — Baseline and Unreleased-Delta Validation
 
-- [ ] **Task 1.1: Verify repository state**
-  - [ ] Confirm clean working tree and current `master` tracking state.
-  - [ ] Fetch remote state without modifying local work.
-  - [ ] Confirm `v1.13.0` exists and no `v1.14.0` tag exists.
-  - [ ] Record `origin/master..master`, including the exact commit count and subjects.
-  - [ ] Confirm the unreleased range contains only intended project and Conductor work.
-- [ ] **Task 1.2: Verify release content**
-  - [ ] Confirm package version is `1.13.0`.
-  - [ ] Confirm Take Away implementation and archived track are present.
-  - [ ] Confirm Game 17 is registered, lazy-loaded, preloaded, represented on the Hub, and included in progress/storage integration.
-  - [ ] Confirm the existing v1.14.0 notes and device record are superseded drafts rather than released history.
-- [ ] **Task 1.3: Run baseline quality gates in CI order**
-  - [ ] Run `pnpm run check`.
-  - [ ] Run `CI=true pnpm test`.
-  - [ ] Run `pnpm run build`.
-  - [ ] Run `node scripts/validate-pwa.js`.
-  - [ ] Run `node scripts/validate-bundle.js`.
-  - [ ] Record actual test totals, bundle sizes, lazy chunks, precache entries, and validator results.
+- [x] **Task 1.1: Verify repository state**
+  - [x] Confirm clean working tree and current `master` tracking state.
+  - [x] Fetch remote state without modifying local work.
+  - [x] Confirm `v1.13.0` exists and no `v1.14.0` tag exists.
+  - [x] Record `origin/master..master`, including the exact commit count and subjects.
+  - [x] Confirm the unreleased range contains only intended project and Conductor work.
+  - Evidence (2026-08-10): Baseline was clean before the plan-state transition. After `git fetch --prune origin`, local `master` was 28 commits ahead: 26 intended Game 17 commits plus the release-track initialization and in-progress commits. `v1.13.0` exists, `v1.14.0` does not, and the 29-file delta contains only Take Away, 17-game milestone documentation, and this release track.
+- [x] **Task 1.2: Verify release content**
+  - [x] Confirm package version is `1.13.0`.
+  - [x] Confirm Take Away implementation and archived track are present.
+  - [x] Confirm Game 17 is registered, lazy-loaded, preloaded, represented on the Hub, and included in progress/storage integration.
+  - [x] Confirm the existing v1.14.0 notes and device record are superseded drafts rather than released history.
+  - Evidence (2026-08-10): `package.json` is `1.13.0`. Take Away source (`src/scenes/TakeAwayScene.ts`, `src/game/takeAwayLogic.ts` + unit tests) and the archived track (`conductor/archive/take-away_20260810/`) are present. `sceneLoaders` registers `TakeAway` (lazy dynamic import, `src/scenes/sceneRegistry.ts:28`); HubScene loads it on tap via `ensureSceneLoaded` (`HubScene.ts:597`); preload assets `sticker_take_away` and `tile_take_away` exist (`PreloadScene.ts:309,326`); `GAME_TILES` has a `TakeAway` tile with a 17-tile 5×3+2 grid (`HubScene.ts:159-165`); `"take-away"` is in the `GameId` union and `GAME_IDS` so stickers, per-game progress, play-time, and activity are profile-integrated (`src/types/index.ts:18,98`). `docs/release-notes-v1.14.0.md` is a SUPERSEDED draft (explicitly "no v1.14.0 release is planned") and the v1.14.0 device record in `docs/device-testing-checklist.md:16` is marked SUPERSEDED — neither is released history.
+- [x] **Task 1.3: Run baseline quality gates in CI order**
+  - [x] Run `pnpm run check`.
+  - [x] Run `CI=true pnpm test`.
+  - [x] Run `pnpm run build`.
+  - [x] Run `node scripts/validate-pwa.js`.
+  - [x] Run `node scripts/validate-bundle.js`.
+  - [x] Record actual test totals, bundle sizes, lazy chunks, precache entries, and validator results.
+  - Evidence (2026-08-10): Gate results on local `master` baseline — **check**: Biome, 125 files, 0 issues. **test**: 58 files, 1309 tests passed (86.3s). **build**: success; 17 lazy game-scene chunks (e.g. `TakeAwayScene-Bb4vvFno.js` 4.14 kB) plus separate Phaser vendor chunk `phaser-CYX5YQB3.js` (1,375.72 kB raw) and shell `index-D8Kv6Gq2.js` (151.19 kB); PWA precache 35 entries, 1566.27 KiB. **validate-pwa**: 13/13 checks passed. **validate-bundle**: PASS — Phaser vendor chunk present, shell 147.7 kB ≤ 200 kB.
 - [ ] **Task 1.4: Phase Verification & Checkpoint**
   - [ ] Review the unreleased delta and gate evidence against the specification.
   - [ ] Obtain explicit manual confirmation that the delta is intended for v1.14.0.
