@@ -12,10 +12,10 @@
 
 ## Phase 2 — SVG Glyph Font Update (38 files, tests-first)
 
-- [ ] Task 2.1: Write failing asset regression tests — `letterNumeralFonts.test.ts` asserts all 38 raw SVGs carry `font-family="'Baloo 2', Arial, Helvetica, sans-serif"`, the old Arial-only string is absent, and the styling contract (`fill`/`stroke`/`stroke-width`/`paint-order`/`font-size`) is preserved (Red)
-- [ ] Task 2.2: Update 26 letter SVGs (`letters/letter_a.svg`…`letter_z.svg`)
-- [ ] Task 2.3: Update 10 numeral SVGs (`numbers/numeral_0.svg`…`numeral_9.svg`)
-- [ ] Task 2.4: Update 2 accents (`ui/tiles/tile_first_sounds.svg`, `stickers/sticker_first_sounds.svg`) (Green — full suite green)
+- [x] Task 2.1: Write failing asset regression tests — `letterNumeralFonts.test.ts` asserts all 38 raw SVGs carry `font-family="'Baloo 2', Arial, Helvetica, sans-serif"`, the old Arial-only string is absent, and the styling contract (`fill`/`stroke`/`stroke-width`/`paint-order`/`font-size`) is preserved (Red) `d4ad01f`
+- [x] Task 2.2: Update 26 letter SVGs (`letters/letter_a.svg`…`letter_z.svg`) `7337946`
+- [x] Task 2.3: Update 10 numeral SVGs (`numbers/numeral_0.svg`…`numeral_9.svg`) `dce7237`
+- [x] Task 2.4: Update 2 accents (`ui/tiles/tile_first_sounds.svg`, `stickers/sticker_first_sounds.svg`) (Green — full suite green) `91572f3`
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 3 — Docs & Quality Gates
