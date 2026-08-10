@@ -363,12 +363,12 @@ describe("HubScene session-start recording", () => {
     expect(getProgress()["shape-sorter"].plays).toBe(1);
   });
 
-  it("renders all 16 tiles fully inside the 1024×768 canvas (5×3+1 grid)", () => {
+  it("renders all 17 tiles fully inside the 1024×768 canvas (5×3+2 grid)", () => {
     const scene = new HubScene();
     scene.create();
 
     const tiles = mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
-    expect(tiles).toHaveLength(16);
+    expect(tiles).toHaveLength(17);
 
     for (const tile of tiles) {
       const [x, y, width, height] = tile.args as number[];

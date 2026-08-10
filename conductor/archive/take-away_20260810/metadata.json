@@ -1,0 +1,11 @@
+{
+  "id": "take-away_20260810",
+  "title": "Game 17 — Take Away (Early Subtraction)",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-10T00:00:00.000Z",
+  "branch": "feat/game-17",
+  "gameId": "take-away",
+  "sceneKey": "TakeAway",
+  "related": []
+}

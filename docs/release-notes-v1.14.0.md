@@ -1,28 +1,25 @@
-# Release Notes — v1.14.0 (draft)
+# Release Notes — v1.14.0
 
-> **Status:** SUPERSEDED (2026-08-09) — Parent Progress Insights was folded into the **v1.13.0** release by user decision (the code was already on master when v1.13.0 was cut). The content below is preserved for reference; **no v1.14.0 release is planned** — the v1.13.0 release notes and device-testing checklist now carry the Progress rows.
+> **Status:** DRAFT — prepared 2026-08-10. Becomes FINAL after production deployment and physical-device verification complete.
 
 ## What's New
 
-- **See how learning is going.** Parents hold the Hub settings button for 3 seconds, open Settings, and find a new **Progress** row. It opens a per-profile **Learning Progress** report: for each of the 15 games — plays, accuracy (correct answers out of all answers, with a green fill bar), a ★ mastery star once the game is won 3 times, and when it was last played ("Today", "Yesterday", or "3d ago").
-- **Every kid gets their own report.** The report follows the active profile automatically, and avatar chips at the top of the overlay let parents peek at a sibling's progress without switching the active profile — stickers, play-time, and the Hub stay exactly as the child left them.
-- **See recent play at a glance.** A 7-day activity strip at the bottom of the report shows how many games were played each of the last 7 days, so screen-time patterns are visible in one glance.
+- **Game 17 — Take Away.** The first **early subtraction** game: two prompt cards show items being taken away (the first card is the group to start with, the second the group being removed, joined by a "take away" cue), and four answer cards show the possible differences as dot groups. The child counts both groups and taps the card with the correct answer. Six rounds per play, **easy-first**: minuends up to 4 (rounds 1–2), then up to 6 (rounds 3–4), then up to 10 (rounds 5–6). Differences never reach 0, and no subtraction pair repeats within a playthrough. Correct taps chime and cheer; a wrong tap is met with gentle, encouraging feedback — never a penalty. Winning awards the first-completion **sticker** and the shared win celebration, then returns to the Hub after 3 seconds. Replays shuffle cards and options so the game stays fresh.
+- **The 17-game suite is complete.** Take Away joins Color Match and Add It Up as the third math game, rounding out the full learning path — colors, shapes, letters, first words, phonics, counting, comparing, and now adding and taking away.
 
 ## Improvements
 
-- Games are paged 8 + 7 so all 15 rows fit comfortably in landscape on phones and tablets.
-- Backing out of a game mid-way still counts the play; only completed rounds are counted as wins (the app has no-fail design, so accuracy is always encouraging).
-- Pop & Freeze and Animal Trace have no right/wrong answers by design — they count as plays and wins but show "—" for accuracy.
-- Everything is recorded on-device, per profile, with no migration bumps — existing saves gain the new fields automatically.
+- Take Away is fully textless and speech-free — subtraction is done by eye, with no audio dependency (the third game alongside Add It Up that needs no prompt voice).
+- The Hub grid now holds all 17 tiles (5×3 + 2 — the fourth row starts with Add It Up and ends with Take Away, left-aligned).
+- Difficulty is fixed across replays per the replay-variety principle: every playthrough is easy-first, but no round ever repeats the same minuend-subtrahend pair.
 
 ## Bug Fixes
 
-- None (no regressions; full suite 1260 tests across 54 files).
+- None (no regressions; full suite 1309 tests across 58 files).
 
 ## Known Issues
 
-- Progress is stored per device per profile — it does not sync across devices (accepted; cloud sync is out of scope).
-- Play-time budget is stored per device per profile — it does not sync across devices (accepted; cloud sync is out of scope).
+- Learning progress and play-time budgets are stored per device per profile — they do not sync across devices (accepted; cloud sync is out of scope).
 - Letter and numeral artwork uses the system font (per product decision), so glyph rendering varies slightly across devices (accepted).
 
 ## Installation

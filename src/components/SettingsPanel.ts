@@ -91,6 +91,8 @@ const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey
   { gameId: "more-less", label: "More or Less", tileKey: "tile_more_less" },
   { gameId: "odd-one-out", label: "Odd One Out", tileKey: "tile_odd_one_out" },
   { gameId: "color-match", label: "Color Match", tileKey: "tile_color_match" },
+  { gameId: "add-it-up", label: "Add It Up", tileKey: "tile_add_it_up" },
+  { gameId: "take-away", label: "Take Away", tileKey: "tile_take_away" },
 ];
 
 /** "Off" for an unlimited budget, otherwise "15m"-style labels. */
