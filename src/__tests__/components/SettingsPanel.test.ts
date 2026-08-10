@@ -1043,10 +1043,11 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "X")).toBeDefined();
     // Profile switcher chip for the single default profile.
     expect(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.cat).length).toBe(1);
-    // First page shows the first 8 game rows.
+    // First page shows the first 6 game rows.
     expect(findTextByLabel(scene, "Shape Sorter")).toBeDefined();
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
-    expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
+    expect(findTextByLabel(scene, "Big & Small")).toBeDefined();
+    expect(findTextByLabel(scene, "Pattern Builder")).toBeUndefined();
     // Page control and the 7-day strip.
     expect(findTextByLabel(scene, "More")).toBeDefined();
     expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
@@ -1097,18 +1098,40 @@ describe("SettingsPanel progress report", () => {
     expect(moreButton.destroy).toHaveBeenCalled();
     expect(pageOneRow.destroy).toHaveBeenCalled();
     expect(findTextByLabel(scene, "2 / 3")).toBeDefined();
-    expect(findTextByLabel(scene, "Color Match")).toBeDefined();
-    expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
+    expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
+    expect(findTextByLabel(scene, "First Sounds")).toBeDefined();
+    expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Take Away")).toBeUndefined();
 
     triggerPointerdown(findTextByLabel(scene, "More") as MockGameObject);
     expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "Color Match")).toBeDefined();
+    expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
 
     // Back on the last page wraps around to the first page.
     triggerPointerdown(findTextByLabel(scene, "Back") as MockGameObject);
     expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "More")).toBeDefined();
+  });
+
+  it("spaces consecutive progress rows at least 56px apart", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    // Row names are the 30px texts at x = centerX - 158 (354 for a 1024-wide
+    // scene). Stats lines are 26px, the title is 36px, and footer texts sit at
+    // different x positions, so this filter isolates exactly the row names.
+    const nameYs = scene.add.text.mock.calls
+      .filter((call) => call[0] === 354 && call[3]?.fontSize === "30px")
+      .map((call) => call[1] as number)
+      .sort((a, b) => a - b);
+
+    expect(nameYs).toHaveLength(6);
+    for (let i = 1; i < nameYs.length; i += 1) {
+      expect(nameYs[i] - nameYs[i - 1]).toBeGreaterThanOrEqual(56);
+    }
   });
 
   it("re-renders rows for the selected profile without switching the active profile", () => {
