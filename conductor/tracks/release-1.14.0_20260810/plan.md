@@ -55,7 +55,7 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [ ] Obtain explicit manual verification.
   - [ ] Create the phase checkpoint and record its SHA.
 
-## Phase 3 — Release Documentation and Test Matrix
+## Phase 3 — Release Documentation and Test Matrix [checkpoint: f378a5f]
 
 - [x] **Task 3.1: Rewrite v1.14.0 release notes**
   - [x] Replace the superseded Progress-only draft with Take Away and the completed 17-game milestone.
@@ -83,10 +83,11 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Attach the required Git note and record the SHA.
   - [x] Commit the corresponding plan-state update.
   - Evidence (2026-08-10): docs commit `0a93c73` on `release/v1.14.0` (release notes + device checklist + release checklist + product.md + PRD.md; git note attached). Source fix committed separately: `dada2b0` — `fix(progress): Add Add It Up and Take Away to the Learning Progress report` (SettingsPanel.ts + regression tests, git note attached, SettingsPanel tests 60/60). Plan-state commit pending with Task 3.5 completion.
-- [ ] **Task 3.6: Phase Verification & Checkpoint**
-  - [ ] Review all release wording and checklist rows against the approved specification.
-  - [ ] Obtain explicit manual approval of the draft release materials.
-  - [ ] Create the phase checkpoint and record its SHA.
+- [x] **Task 3.6: Phase Verification & Checkpoint**
+  - [x] Review all release wording and checklist rows against the approved specification.
+  - [x] Obtain explicit manual approval of the draft release materials.
+  - [x] Create the phase checkpoint and record its SHA.
+  - Evidence (2026-08-10): user approved all draft materials (release notes DRAFT, device record pending, checklist records, paging patches, in-track fix). Checkpoint `f378a5f` (empty commit) on `release/v1.14.0`; git note attached with the Phase 3 Verification Report.
 
 ## Phase 4 — Release-Candidate Gates
 
