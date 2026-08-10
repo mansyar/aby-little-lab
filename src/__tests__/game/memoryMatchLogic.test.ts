@@ -180,7 +180,8 @@ describe("buildPlaythrough", () => {
 
 describe("isPair", () => {
   it("returns true only when two different indices share a texture", () => {
-    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+    // Exhaustive per round (every index pair); a few rounds guard layout variety.
+    for (let i = 0; i < 10; i++) {
       const round = buildRound("medium");
       for (let a = 0; a < round.layout.length; a++) {
         for (let b = 0; b < round.layout.length; b++) {
