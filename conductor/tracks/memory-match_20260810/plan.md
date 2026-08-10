@@ -22,14 +22,14 @@
 - [x] Task: Implement `MemoryMatchScene.ts` (scene key `MemoryMatch`): rounded-rect card bases + `card_back` texture face-down, flip via scaleX 1→0→1 with face swap, ~140–160px cards (≥96px touch), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no speaker button (no speech) *(b4a75e6 — 13 scene tests Green; GameId "memory-match" pulled forward in src/types/index.ts)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(1d4b2c3 — 13 scene tests Green; full suite 1344 passed / 2 failed = known machine-load timeouts in countLogic/takeAwayLogic sampling loops, verified pass standalone)*
 
-## Phase 4 — Integration
+## Phase 4 — Integration [checkpoint: c8bca98]
 
 - [x] Task: Add `memory-match` to `GameId` union (`src/types/index.ts`); `GAME_IDS` backfill in `profileLogic.ts` covers old saves via per-key merge (pulled forward as scene prerequisite, per color-match precedent) *(b4a75e6 — GameId union + GAME_IDS extended; per-key merge confirmed in profileLogic.createDefaultStickers / progressLogic.normalizeProgress — old saves get default entries automatically)*
 - [x] Task: Register `MemoryMatch` lazy loader in `src/scenes/sceneRegistry.ts` + update registry tests *(c7b44e5 — 18th loader; key-list test updated to 18)*
 - [x] Task: Load 3 new SVGs in `PreloadScene` (tile + sticker + card back; 159 → 162) *(c7b44e5 — SHAPE_ASSETS + imports; navigation preload-count test 159→162)*
 - [x] Task: Hub grid — 18 tiles in 5×3+3 (row 4 = 3 left-aligned tiles; verify sticker shelf / play-time arc still fit; iconDisplay 52/iconOffsetY -44) *(c7b44e5 — 18th GAME_TILES entry; canvas-fit test 17→18; shelf slots 16→17 where one sticker earned)*
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 18 tiles, sceneRegistry tests updated *(c7b44e5 — navigation 351/351 incl. GAME_SCENE_KEYS completed to 18 in hub order (also closes pre-existing OddOneOut..TakeAway coverage gap); SettingsPanel 18 rows 6+6+6; hasSticker call counts 34→36; hubScene/firstWordsIntegration 18 tiles)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(c8bca98 — navigation 351/351 standalone; all 8 changed files green; full-suite baseline unchanged: 2 known machine-load flakes)*
 
 ## Phase 5 — Docs & Release Readiness
 
