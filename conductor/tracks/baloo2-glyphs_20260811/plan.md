@@ -20,11 +20,11 @@
 
 ## Phase 3 — Docs & Quality Gates
 
-- [ ] Task 3.1: Update `docs/SVG_STYLE.md` §4 — letters/numerals now use bundled Baloo 2 (bold, 400px, `#2B6CB0`/`#2D3748` styling unchanged) with Arial fallback; note the BootScene rasterization gate; keep the no-custom-paths-without-sign-off rule
-- [ ] Task 3.2: Add dated design update to `conductor/tech-stack.md` — resolves the accepted known issue; gate behavior + timeout rationale; fallback rationale; zero new assets
-- [ ] Task 3.3: Update `docs/PRD.md` letter-set and numeral styling lines ("bold sans-serif" → bundled Baloo 2)
-- [ ] Task 3.4: Add glyph-consistency check row to `docs/device-testing-checklist.md` — letters/numerals render the rounded Baloo 2 style consistently across devices (for the next release record)
-- [ ] Task 3.5: Run full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
+- [x] Task 3.1: Update `docs/SVG_STYLE.md` §4 — letters/numerals now use bundled Baloo 2 (bold, 400px, `#2B6CB0`/`#2D3748` styling unchanged) with Arial fallback; note the BootScene rasterization gate; keep the no-custom-paths-without-sign-off rule
+- [x] Task 3.2: Add dated design update to `conductor/tech-stack.md` — resolves the accepted known issue; gate behavior + timeout rationale; fallback rationale; zero new assets
+- [x] Task 3.3: Update `docs/PRD.md` letter-set and numeral styling lines ("bold sans-serif" → bundled Baloo 2)
+- [x] Task 3.4: Add glyph-consistency check row to `docs/device-testing-checklist.md` — letters/numerals render the rounded Baloo 2 style consistently across devices (for the next release record)
+- [x] Task 3.5: Run full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` `c809663` `815d672`
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 4 — Review & Archive
