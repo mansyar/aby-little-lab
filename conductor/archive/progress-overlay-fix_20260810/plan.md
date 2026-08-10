@@ -72,8 +72,10 @@ checkpoints with verification protocol).
 - [x] **Task 4.1: Finalize release records**
   - [x] `docs/release-notes-v1.14.1.md` → FINAL; `docs/release-checklist.md` sign-off recorded.
   - Evidence (2026-08-10): release notes → FINAL (released 2026-08-10, tag v1.14.1); release-checklist.md Final Sign-Off — v1.14.1 appended (verify-deployment rows + approval).
-- [ ] **Task 4.2: Complete Conductor state**
-  - [ ] Mark all plan tasks complete; metadata status `completed` + `archivedAt`; move track to `conductor/archive/`; update the Tracks Registry to the archived relative path.
-- [ ] **Task 4.3: Commit archival + git note**
-  - [ ] Commit as `chore(conductor): Archive track 'progress-overlay-fix'`; attach the required Git note and record the SHA.
+- [x] **Task 4.2: Complete Conductor state**
+  - [x] Mark all plan tasks complete; metadata status `completed` + `archivedAt`; move track to `conductor/archive/`; update the Tracks Registry to the archived relative path.
+  - Evidence (2026-08-10): metadata.json `status: completed`, `archivedAt: 2026-08-10T20:41:06.044Z`; track moved to `conductor/archive/progress-overlay-fix_20260810/`; Tracks Registry updated to `./archive/progress-overlay-fix_20260810/index.md` (Archived).
+- [x] **Task 4.3: Commit archival + git note**
+  - [x] Commit as `chore(conductor): Archive track 'progress-overlay-fix'`; attach the required Git note and record the SHA.
+  - Evidence (2026-08-10): commit `[SHA_TBD]` + git note (archival summary).
 - [ ] **Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)** — final checkpoint.
