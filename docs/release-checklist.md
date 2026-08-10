@@ -646,3 +646,24 @@ Please report issues at [GitHub Issues URL]
 - [x] Security review passed
 - [x] Performance targets met
 - [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.14.1
+
+**Version:** 1.14.1
+**Status:** RELEASED — 2026-08-10 (tag `v1.14.1`, deployed live at https://aby-little-lab.ansyar-world.top/ via CI → Coolify webhook; release notes FINAL; bug-fix release — Learning Progress overlay row collision in parent Settings → Progress)
+
+**Verify Deployment — v1.14.1 (2026-08-10):**
+- [x] Tag `v1.14.1` on master pushed — CI run (Quality Gates + Deploy) PASS, Coolify webhook fired, live updated
+- [x] Live smoke — Settings opens via 3s parental hold with `v1.14.1` footer; Progress pages 6+6+5 (all 17 games: Shape Sorter … Big & Small / Pattern Builder … First Sounds / More or Less … Take Away) with zero text collisions (rows, profile chips, footer, accuracy bars); footers 1/3 → 2/3 → 3/3 with More/Back wrap-around; service worker activated + controlling; offline reload boots a clean Hub from precache
+- [x] Quality gates on release commit — Biome clean (125 files), `CI=true pnpm test` 1310/1310 (58 files), build OK (35 PWA entries), `validate-pwa` 13/13, `validate-bundle` PASS (shell 147.8 kB ≤ 200 kB)
+- [x] Device testing — **pending** (deferred by user decision, non-blocking; recorded in `docs/device-testing-checklist.md` v1.14.1 record)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (1310/1310)
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met
+- [x] Ready for release

@@ -64,12 +64,14 @@ checkpoints with verification protocol).
   - [x] User verifies on ≥ 1 phone + ≥ 1 tablet (parent Progress view); record results in `docs/device-testing-checklist.md`.
   - [x] Triage findings: no Critical/High → release not blocked; record accepted non-blocking items.
   - Evidence (2026-08-10): device-class execution **deferred by user decision** (non-blocking — desktop live smoke green, no Critical/High). Recorded as pending in `docs/device-testing-checklist.md` (Execution Record — v1.14.1).
-- [ ] **Task 3.7: Phase Verification & Checkpoint (Refer to workflow.md)**
+- [x] **Task 3.7: Phase Verification & Checkpoint (Refer to workflow.md)**
+  - Evidence (2026-08-10): release executed + live smoke green; device testing deferred by user (non-blocking). Checkpoint: `[3941584]`.
 
 ## Phase 4 — Finalize & Archive
 
-- [ ] **Task 4.1: Finalize release records**
-  - [ ] `docs/release-notes-v1.14.1.md` → FINAL; `docs/release-checklist.md` sign-off recorded.
+- [x] **Task 4.1: Finalize release records**
+  - [x] `docs/release-notes-v1.14.1.md` → FINAL; `docs/release-checklist.md` sign-off recorded.
+  - Evidence (2026-08-10): release notes → FINAL (released 2026-08-10, tag v1.14.1); release-checklist.md Final Sign-Off — v1.14.1 appended (verify-deployment rows + approval).
 - [ ] **Task 4.2: Complete Conductor state**
   - [ ] Mark all plan tasks complete; metadata status `completed` + `archivedAt`; move track to `conductor/archive/`; update the Tracks Registry to the archived relative path.
 - [ ] **Task 4.3: Commit archival + git note**

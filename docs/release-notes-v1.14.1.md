@@ -1,6 +1,6 @@
 # Release Notes - v1.14.1
 
-> **Status:** DRAFT - in preparation (target tag `v1.14.1`).
+> **Status:** FINAL - released 2026-08-10 (tag `v1.14.1`, deployed live at https://aby-little-lab.ansyar-world.top/, desktop automated smoke passed; device-class verification recorded as pending in `docs/device-testing-checklist.md`).
 
 ## Bug Fixes
 
