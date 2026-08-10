@@ -1,0 +1,9 @@
+{
+  "id": "memory-match_20260810",
+  "title": "Game 18 — Memory Match (Visual Working Memory)",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-10T00:00:00.000Z",
+  "branch": "feat/game-18",
+  "release": "v1.15.0"
+}
