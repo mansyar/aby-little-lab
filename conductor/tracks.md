@@ -132,4 +132,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Game 18 — Memory Match (Visual Working Memory)** *Link: [./tracks/memory-match_20260810/index.md](./tracks/memory-match_20260810/index.md)*
+- [~] **Track: Game 18 — Memory Match (Visual Working Memory)** *Link: [./tracks/memory-match_20260810/index.md](./tracks/memory-match_20260810/index.md)*
