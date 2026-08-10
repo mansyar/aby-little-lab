@@ -134,23 +134,26 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 6 — Tag and Production Deployment
 
-- [ ] **Task 6.1: Create the release tag**
-  - [ ] Update local `master` to the merged `origin/master`.
-  - [ ] Create annotated tag `v1.14.0` on the verified master-lineage commit.
-  - [ ] Verify annotation, target SHA, and lineage before pushing.
-- [ ] **Task 6.2: Trigger and monitor deployment**
-  - [ ] Push `v1.14.0`.
-  - [ ] Confirm tag-triggered Quality Gates pass.
-  - [ ] Confirm the master-lineage guard passes.
-  - [ ] Confirm Deploy to Coolify and the webhook complete successfully.
-  - [ ] Do not move or amend the tag without explicit approval.
-- [ ] **Task 6.3: Verify deployed artifacts**
-  - [ ] Confirm the live URL returns successfully.
-  - [ ] Confirm `sw.js` and `manifest.webmanifest` return successfully.
-  - [ ] Confirm the served application is v1.14.0 with no stale v1.13.0 app version.
-  - [ ] Compare served assets with the release build by hash where deterministic, otherwise by content.
-- [ ] **Task 6.4: Phase Verification & Checkpoint**
-  - [ ] Record tag SHA, CI run URL, deployment result, asset evidence, and rollback reference.
+- [x] **Task 6.1: Create the release tag**
+  - [x] Update local `master` to the merged `origin/master`.
+  - [x] Create annotated tag `v1.14.0` on the verified master-lineage commit.
+  - [x] Verify annotation, target SHA, and lineage before pushing.
+  - Evidence (2026-08-10): local `master` fast-forwarded to `origin/master` (`5ec4705`). Annotated tag `v1.14.0` created on `5ec4705` (tagger mansyar; message: "Release v1.14.0: Game 17 Take Away — complete 17-game suite…"). Verified: annotation present, target = merge commit `5ec4705`, 0 commits off master lineage.
+- [x] **Task 6.2: Trigger and monitor deployment**
+  - [x] Push `v1.14.0`.
+  - [x] Confirm tag-triggered Quality Gates pass.
+  - [x] Confirm the master-lineage guard passes.
+  - [x] Confirm Deploy to Coolify and the webhook complete successfully.
+  - [x] Do not move or amend the tag without explicit approval.
+  - Evidence (2026-08-10): tag pushed — CI run `31346877435` (push, tag `v1.14.0`): Quality Gates PASS; Deploy to Coolify PASS incl. "Ensure tag points to a master commit" (master-lineage guard) + "Trigger Coolify deploy webhook" ✓. Master-push run `31346792946` Quality Gates PASS, no deploy (by design). Tag not moved/amended.
+- [x] **Task 6.3: Verify deployed artifacts**
+  - [x] Confirm the live URL returns successfully.
+  - [x] Confirm `sw.js` and `manifest.webmanifest` return successfully.
+  - [x] Confirm the served application is v1.14.0 with no stale v1.13.0 app version.
+  - [x] Compare served assets with the release build by hash where deterministic, otherwise by content.
+  - Evidence (2026-08-10): live URL 200; `sw.js` 200; `manifest.webmanifest` 200. Served entry `assets/index-oLiid_3z.js` matches the local release build exactly — SHA-256 identical (`F623F789EAB3…`); served bundle contains `1.14.0` and no `1.13.0` string.
+- [~] **Task 6.4: Phase Verification & Checkpoint**
+  - [x] Record tag SHA, CI run URL, deployment result, asset evidence, and rollback reference.
   - [ ] Obtain explicit manual confirmation that production deployment is healthy.
   - [ ] Create the phase checkpoint and record its SHA.
 
