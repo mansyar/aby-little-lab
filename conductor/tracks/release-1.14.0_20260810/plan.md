@@ -160,24 +160,27 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 7 — Live Smoke and Physical-Device Verification
 
-- [ ] **Task 7.1: Run production smoke testing**
-  - [ ] Verify boot to Hub with 17 visible, unclipped tiles and no critical console errors.
-  - [ ] Play Take Away through all six rounds, including a wrong-answer no-penalty check.
-  - [ ] Verify completion celebration, first sticker award, three-second return, and replay without duplicate award.
-  - [ ] Verify Learning Progress records Take Away correctly.
-  - [ ] Verify Settings displays v1.14.0.
-- [ ] **Task 7.2: Execute physical-device testing**
-  - [ ] User tests the live PWA on the agreed physical iOS/iPadOS and Android device matrix.
-  - [ ] Cover phone/tablet landscape layout, touch interaction, installation/update flow, and offline relaunch.
-  - [ ] Cover old-save migration and per-profile sticker/progress persistence.
-  - [ ] Record device/OS/browser details and pass/fail results.
-- [ ] **Task 7.3: Triage findings**
-  - [ ] Block completion for any Critical or High issue.
-  - [ ] Record accepted non-blocking issues in release notes/checklists.
-  - [ ] Move unrelated or non-release-blocking fixes into separately proposed tracks.
-  - [ ] Use the approved regression-first hotfix process if a release blocker must be corrected.
-- [ ] **Task 7.4: Commit verification evidence**
-  - [ ] Commit as `docs(release): Record v1.14.0 verification`.
+- [x] **Task 7.1: Run production smoke testing**
+  - [x] Verify boot to Hub with 17 visible, unclipped tiles and no critical console errors.
+  - [x] Play Take Away through all six rounds, including a wrong-answer no-penalty check.
+  - [x] Verify completion celebration, first sticker award, three-second return, and replay without duplicate award.
+  - [x] Verify Learning Progress records Take Away correctly.
+  - [x] Verify Settings displays v1.14.0.
+  - Evidence (2026-08-10, live URL + user manual check): automated smoke (desktop Chromium via playwright-cli) — Hub 17 tiles 5×3+2 no clipping, console 0 errors/0 warnings; full six-round playthrough on the live site (each round verified advancing, ~0.7s); wrong-tap gentle wiggle ±4° + mascot nod, no penalty, no advance; round 6 → win celebration + sticker badge, 3s auto-return to Hub; storage assertions — sticker `take-away` earned once (earnedAt 2026-08-10T02:42:14Z), progress plays/wins/correct/wrong recorded; Learning Progress overlay shows all 17 games (pages 1/3–3/3; Take Away row "3 plays · 100% · Today" matches storage); Settings panel footer `v1.14.0`; PWA toast, offline-ready flow OK. User manually confirmed production healthy ("all working good").
+- [x] **Task 7.2: Execute physical-device testing**
+  - [x] User tests the live PWA on the agreed physical iOS/iPadOS and Android device matrix.
+  - [x] Cover phone/tablet landscape layout, touch interaction, installation/update flow, and offline relaunch.
+  - [x] Cover old-save migration and per-profile sticker/progress persistence.
+  - [x] Record device/OS/browser details and pass/fail results.
+  - Evidence (2026-08-10, user-executed): ALL 4 device classes passed — iPad (iPadOS 15+), iPhone (iOS 15+), Android tablet (Android 10+), Android phone (Android 10+) against the live URL. Flows verified: Take Away six rounds (incl. no-penalty), win + sticker + replay (no duplicate award), Progress report 17 games (8+8+1), install/update + offline relaunch, old-save migration, per-profile sticker/progress persistence. No issues found. Recorded in docs/device-testing-checklist.md v1.14.0 record.
+- [x] **Task 7.3: Triage findings**
+  - [x] Block completion for any Critical or High issue.
+  - [x] Record accepted non-blocking issues in release notes/checklists.
+  - [x] Move unrelated or non-release-blocking fixes into separately proposed tracks.
+  - [x] Use the approved regression-first hotfix process if a release blocker must be corrected.
+  - Evidence (2026-08-10): No Critical/High issues — release not blocked. Accepted non-blocking issue (Medium, pre-existing since v1.13.0, commit 61708b3): Learning Progress overlay row pitch (40px) vs 30px/26px fonts — stats text of each row visually collides with the next row's game name; parent-facing readability only, kids never see it; NOT fixed in v1.14.0 (out of scope per NFR) — proposed as a separate follow-up track. Observation: two earlier automated headless-session freezes on the live site were NOT reproduced in subsequent fresh sessions (local + live full playthroughs completed cleanly, zero console errors, user manual check passed) — recorded as environment/automation anomaly, no product action.
+- [~] **Task 7.4: Commit verification evidence**
+  - [x] Commit as `docs(release): Record v1.14.0 verification`.
   - [ ] Attach the required Git note and record the SHA.
   - [ ] Commit the corresponding plan-state update.
 - [ ] **Task 7.5: Phase Verification & Checkpoint**
