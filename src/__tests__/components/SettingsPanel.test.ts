@@ -1084,7 +1084,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 17 game rows", () => {
+  it("pages through all 18 game rows", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);

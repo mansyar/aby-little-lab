@@ -74,7 +74,7 @@ const ACCURACY_FILL_COLOR = 0x68d391;
 /** Mastery badge shown next to games with at least 3 wins. */
 const MASTERY_STAR = "★";
 
-/** The 15 games in hub order, for the Learning Progress report rows. */
+/** The 18 games in hub order, for the Learning Progress report rows. */
 const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
   { gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
   { gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
@@ -93,6 +93,7 @@ const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey
   { gameId: "color-match", label: "Color Match", tileKey: "tile_color_match" },
   { gameId: "add-it-up", label: "Add It Up", tileKey: "tile_add_it_up" },
   { gameId: "take-away", label: "Take Away", tileKey: "tile_take_away" },
+  { gameId: "memory-match", label: "Memory Match", tileKey: "tile_memory_match" },
 ];
 
 /** "Off" for an unlimited budget, otherwise "15m"-style labels. */
