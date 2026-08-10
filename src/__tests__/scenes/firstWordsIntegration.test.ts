@@ -284,6 +284,14 @@ vi.mock("../../utils/pwaBridge", () => ({
 
 import { generateWordRound, getWord } from "../../game/wordLogic";
 import { BootScene } from "../../scenes/BootScene";
+
+/**
+ * Mock the glyph font gate so the BootScene await resolves on a microtask
+ * (track baloo2-glyphs_20260811).
+ */
+vi.mock("../../utils/fonts", () => ({
+  ensureGlyphFontLoaded: vi.fn(() => Promise.resolve()),
+}));
 import { HubScene } from "../../scenes/HubScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
@@ -354,9 +362,10 @@ describe("First Words integration flows", () => {
   });
 
   it("boot → hub → Find the Word → sticker → hub (auto-return with justEarned)", async () => {
-    // Boot launches Preload.
+    // Boot launches Preload (after the glyph font gate resolves).
     const boot = new BootScene();
     boot.create();
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(getMockFn(boot.scene.start)).toHaveBeenCalledWith("Preload");
 
     // Preload finishes and transitions to the Hub.
