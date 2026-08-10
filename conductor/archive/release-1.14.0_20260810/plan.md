@@ -28,10 +28,11 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Run `node scripts/validate-bundle.js`.
   - [x] Record actual test totals, bundle sizes, lazy chunks, precache entries, and validator results.
   - Evidence (2026-08-10): Gate results on local `master` baseline — **check**: Biome, 125 files, 0 issues. **test**: 58 files, 1309 tests passed (86.3s). **build**: success; 17 lazy game-scene chunks (e.g. `TakeAwayScene-Bb4vvFno.js` 4.14 kB) plus separate Phaser vendor chunk `phaser-CYX5YQB3.js` (1,375.72 kB raw) and shell `index-D8Kv6Gq2.js` (151.19 kB); PWA precache 35 entries, 1566.27 KiB. **validate-pwa**: 13/13 checks passed. **validate-bundle**: PASS — Phaser vendor chunk present, shell 147.7 kB ≤ 200 kB.
-- [ ] **Task 1.4: Phase Verification & Checkpoint**
-  - [ ] Review the unreleased delta and gate evidence against the specification.
-  - [ ] Obtain explicit manual confirmation that the delta is intended for v1.14.0.
-  - [ ] Create the workflow checkpoint commit with Git note and record its SHA.
+- [x] **Task 1.4: Phase Verification & Checkpoint**
+  - [x] Review the unreleased delta and gate evidence against the specification.
+  - [x] Obtain explicit manual confirmation that the delta is intended for v1.14.0.
+  - [x] Create the workflow checkpoint commit with Git note and record its SHA.
+  - Evidence (2026-08-10): user explicitly confirmed the 28-commit unreleased delta (26 Game 17 commits + release-track init/in-progress) is intended v1.14.0 content. Checkpoint `07ae567` `conductor(checkpoint): Checkpoint end of Phase 1` with git note (all five gates PASS on master baseline). Phase heading + phase-complete commit `318b7e9`.
 
 ## Phase 2 — Release Branch and Version [checkpoint: 50c5dd8]
 
@@ -50,10 +51,11 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Attach the required Git note and record the commit SHA.
   - [x] Commit the corresponding plan-state update.
   - Evidence (2026-08-10): commit `2e4d39d` on `release/v1.14.0` — `chore(release): Bump version to 1.14.0`; git note attached (version bump method, only package.json changed, `__APP_VERSION__` footer mechanism, bundle verification). Plan-state commit `60e392e`.
-- [~] **Task 2.4: Phase Verification & Checkpoint**
-  - [ ] Verify branch identity, clean diff, and version output.
-  - [ ] Obtain explicit manual verification.
-  - [ ] Create the phase checkpoint and record its SHA.
+- [x] **Task 2.4: Phase Verification & Checkpoint**
+  - [x] Verify branch identity, clean diff, and version output.
+  - [x] Obtain explicit manual verification.
+  - [x] Create the phase checkpoint and record its SHA.
+  - Evidence (2026-08-10): user confirmed — branch `release/v1.14.0`; package version 1.14.0; only package.json changed in the bump; main chunk embeds 1.14.0 with no stale 1.13.0; diff vs `origin/master` scoped to Game 17 + release work (30 files, 1822 insertions, 55 deletions). Checkpoint `50c5dd8` with git note; phase-complete commit `834dc3a`.
 
 ## Phase 3 — Release Documentation and Test Matrix [checkpoint: f378a5f]
 
@@ -113,24 +115,28 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Create the phase checkpoint and record its SHA.
   - Evidence (2026-08-10): user confirmed readiness to push `release/v1.14.0` and open the PR. Checkpoint `4cc8889`; git note attached with the Phase 4 Verification Report.
 
-## Phase 5 — Pull Request and Merge
+## Phase 5 — Pull Request and Merge [checkpoint: c2c09e4]
 
-- [ ] **Task 5.1: Publish the release branch**
-  - [ ] Push only `release/v1.14.0`; do not push local `master` directly.
-  - [ ] Verify the remote branch contains the full intended unreleased delta.
-- [ ] **Task 5.2: Open the release PR**
-  - [ ] Open `release/v1.14.0` to `master`.
-  - [ ] Summarize Game 17, the 17-game milestone, gate evidence, device plan, known issues, and rollback approach.
-  - [ ] Verify Deploy to Coolify is skipped for the PR as designed.
-- [ ] **Task 5.3: Review and merge**
-  - [ ] Confirm PR diff and commits match the approved release scope.
-  - [ ] Wait for the GitHub Actions Quality Gates to pass.
-  - [ ] Merge without bypassing branch protection or checks.
-  - [ ] Verify `origin/master` contains every intended unreleased and release commit.
-- [ ] **Task 5.4: Phase Verification & Checkpoint**
-  - [ ] Record PR URL, CI run, merge method, and merge SHA.
-  - [ ] Obtain explicit confirmation that tagging may proceed.
-  - [ ] Create or record the workflow checkpoint as permitted by the established release workflow.
+- [x] **Task 5.1: Publish the release branch**
+  - [x] Push only `release/v1.14.0`; do not push local `master` directly.
+  - [x] Verify the remote branch contains the full intended unreleased delta.
+  - Evidence (2026-08-10): pushed `release/v1.14.0` only (local `master` never pushed); remote tip `21f1a1d` == local HEAD; 41 commits ahead of `origin/master` (28 unreleased delta + 13 release-track commits incl. phase checkpoints).
+- [x] **Task 5.2: Open the release PR**
+  - [x] Open `release/v1.14.0` to `master`.
+  - [x] Summarize Game 17, the 17-game milestone, gate evidence, device plan, known issues, and rollback approach.
+  - [x] Verify Deploy to Coolify is skipped for the PR as designed.
+  - Evidence (2026-08-10): PR #27 <https://github.com/mansyar/aby-little-lab/pull/27> with full summary (Game 17, 17-game milestone, five-gate evidence, device plan, known issues, rollback via tag). CI run `31346669652` (pull_request): Quality Gates only — Deploy to Coolify reported "skipping" (tag-guard by design), verified via `gh pr checks`.
+- [x] **Task 5.3: Review and merge**
+  - [x] Confirm PR diff and commits match the approved release scope.
+  - [x] Wait for the GitHub Actions Quality Gates to pass.
+  - [x] Merge without bypassing branch protection or checks.
+  - [x] Verify `origin/master` contains every intended unreleased and release commit.
+  - Evidence (2026-08-10): PR diff = 35 files (matches Phase 4 approved scope); Quality Gates PASS in 2m20s (job 93329755521); merged via `gh pr merge 27 --merge` — state MERGED 2026-08-10T01:19:24Z, merge commit `5ec4705`; `git fetch` confirmed `origin/master` = `5ec4705` contains all 41 intended commits.
+- [x] **Task 5.4: Phase Verification & Checkpoint**
+  - [x] Record PR URL, CI run, merge method, and merge SHA.
+  - [x] Obtain explicit confirmation that tagging may proceed.
+  - [x] Create or record the workflow checkpoint as permitted by the established release workflow.
+  - Evidence (2026-08-10): records — PR #27, CI run `31346669652` (Quality Gates PASS, Deploy skipped), merge method merge commit, merge SHA `5ec4705`. User explicitly confirmed tagging may proceed ("Yes, tag and deploy"). Phase 5 checkpoint recorded as `c2c09e4` on `release/v1.14.0` with git note (Phase 5 Verification Report) — note: this checkpoint was committed after the PR merge and therefore lives on the release branch only, not on master's lineage; master's Phase 5 state is completed here in the archival plan.
 
 ## Phase 6 — Tag and Production Deployment [checkpoint: 64e8297]
 
