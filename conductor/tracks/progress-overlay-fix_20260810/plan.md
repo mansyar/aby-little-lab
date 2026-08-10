@@ -25,8 +25,9 @@ checkpoints with verification protocol).
   - [x] Commit as `fix(settings): Increase progress overlay row pitch and reduce page size`.
   - [x] Attach the required Git note and record the SHA in `plan.md`.
   - Evidence (2026-08-10): commits `2944301` (test updates — Red→Green evidence) and `ddcbf4b` (source constants 56/6); git note attached to `ddcbf4b` (task summary, files, why, flakiness observation).
-- [ ] **Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)**
-  - [ ] Diff scope vs previous checkpoint, confirm every changed code file has tests, run the full suite, present a manual verification plan, create the phase checkpoint commit + git note, record the SHA.
+- [x] **Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)**
+  - [x] Diff scope vs previous checkpoint, confirm every changed code file has tests, run the full suite, present a manual verification plan, create the phase checkpoint commit + git note, record the SHA.
+  - Evidence (2026-08-10): diff scope `bcff7fe..HEAD` (SettingsPanel.ts, SettingsPanel.test.ts, tracks.md, plan.md) — every code file has tests; full suite 1310/1310; manual verification plan presented to user and confirmed. Checkpoint: `[ecdd0d8]`.
 
 ## Phase 2 — Render Verification
 
