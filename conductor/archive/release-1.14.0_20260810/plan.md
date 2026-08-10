@@ -222,3 +222,6 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Obtain final manual approval.
   - [x] Create the final checkpoint and record its SHA.
   - Evidence (2026-08-10): verified — registry link `./archive/release-1.14.0_20260810/index.md` resolves; 4 archived files present; metadata status `completed` / archivedAt `2026-08-10`; all plan tasks `[x]`; working tree clean; tag `v1.14.0` present. User granted final manual approval. Final checkpoint `076315a` (empty commit) with git note attached (Phase 8 Final Verification Report).
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 4a95738
