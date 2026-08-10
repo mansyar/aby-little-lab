@@ -53,6 +53,8 @@
 > - [x] Device checklist updated with Multi-Kid Profiles rows (`docs/device-testing-checklist.md`) — **executed 2026-08-04 on iPad, Android tablet, iPhone, Android phone, all items passed**
 > - [x] Release notes drafted (`docs/release-notes-v1.4.0.md`) — finalized by the release track
 
+> **v1.14.0 prep (Game 17 — Take Away, complete 17-game suite, 2026-08-10):** Release track `conductor/tracks/release-1.14.0_20260810/`. Baseline gates on local `master` all green — Biome clean (125 files), **1309/1309 tests (58 files)**, build OK (17 lazy game chunks + separate Phaser vendor chunk, 35 precache entries / 1566.27 KiB), `validate-pwa` 13/13, `validate-bundle` PASS. Release branch `release/v1.14.0` created; version bumped to `1.14.0` (`2e4d39d`); release notes rewritten (`docs/release-notes-v1.14.0.md`, DRAFT); device execution record replaced with the current v1.14.0 record (pending execution). **In-track source fix (user-approved, regression-first):** the parent Learning Progress report listed only 15 games — missing Add It Up (shipped in v1.13.0) and Take Away; both rows added to `PROGRESS_GAME_ROWS` with regression tests asserting all 17 rows page 8 + 8 + 1.
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
@@ -322,6 +324,16 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 - [x] Service worker + manifest served — `sw.js` 200 (precaches new bundle), `manifest.webmanifest` 200
 - [x] Live smoke test — Hub renders 16 tiles (5×3+1, row 4 = Add It Up left-aligned, no clipping); Color Match loads (swatch + speaker + 2×2 grid); Add It Up loads (equation row + "+"/"=" cues + 4 answer cards); Settings opens via 3s parental hold with `v1.13.0` footer + Progress row; zero console errors
 - [x] Device testing on v1.13.0 — executed by user 2026-08-09 against the live URL; **all items passed, no issues found** — recorded in `docs/device-testing-checklist.md` (v1.13.0 execution record)
+
+### Step 7n: Verify Deployment — v1.14.0 (2026-08-10)
+
+- [ ] PR (`release/v1.14.0` → master) merged — CI Quality Gates PASS on PR; Deploy correctly skipped on PR (tag-guard by design)
+- [ ] Annotated tag `v1.14.0` on master merge commit + pushed — CI run Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
+- [ ] App loads correctly on the live URL — 200; serves release build (hash matches fresh 1.14.0 local build)
+- [ ] Version footer data — `1.14.0` embedded in served bundle; no stale `1.13.0` strings
+- [ ] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [ ] Live smoke test — Hub renders 17 tiles (5×3 + 2, row 4 = Add It Up + Take Away left-aligned, no clipping); Take Away full 6-round playthrough (easy-first bands, wrong-tap no penalty, win → `take-away` sticker → 3s auto-return, replay no re-award); Settings opens via 3s parental hold with `v1.14.0` footer; Progress report shows all 17 games; zero console errors
+- [ ] Device testing on v1.14.0 — recorded in `docs/device-testing-checklist.md` (v1.14.0 execution record; **pending execution**)
 
 ## Post-Release Verification
 
@@ -619,3 +631,18 @@ Please report issues at [GitHub Issues URL]
 - [x] Security review passed
 - [x] Performance targets met — automated gates passed (vendor code-split validated, shell ≤ 200 kB); device testing executed by user 2026-08-09, all items passed (device checklist v1.13.0 record)
 - [x] Ready for release
+
+---
+
+## Final Sign-Off — v1.14.0
+
+**Version:** 1.14.0
+**Status:** In progress — prepared 2026-08-10 (release branch, version bump, docs, regression tests); not yet released (deployment and verification pending)
+
+**Approval:**
+- [ ] Code quality meets standards
+- [ ] All tests pass
+- [ ] Documentation complete
+- [ ] Security review passed
+- [ ] Performance targets met
+- [ ] Ready for release
