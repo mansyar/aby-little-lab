@@ -1,0 +1,8 @@
+{
+  "id": "baloo2-glyphs_20260811",
+  "type": "bug",
+  "status": "new",
+  "createdAt": "2026-08-11",
+  "updatedAt": "2026-08-11",
+  "summary": "Render all 38 letter/numeral/accent SVGs with the bundled Baloo 2 font (Arial fallback) and gate font loading in BootScene before Phaser rasterizes them. Resolves the accepted known issue 'Letter and numeral artwork uses the system font (per product decision), so glyph rendering varies slightly across devices'."
+}

@@ -133,3 +133,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Game 18 — Memory Match (Visual Working Memory)** *Link: [./archive/memory-match_20260810/index.md](./archive/memory-match_20260810/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Glyph Font Consistency — Baloo 2 Letters & Numerals** *Link: [./tracks/baloo2-glyphs_20260811/index.md](./tracks/baloo2-glyphs_20260811/index.md)*
