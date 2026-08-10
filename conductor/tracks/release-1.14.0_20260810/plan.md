@@ -35,15 +35,17 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 2 — Release Branch and Version
 
-- [ ] **Task 2.1: Create `release/v1.14.0`**
-  - [ ] Branch from the verified completed local `master`.
-  - [ ] Verify the branch base contains the complete unreleased delta and Phase 1 checkpoint.
-- [ ] **Task 2.2: Bump the version**
-  - [ ] Run the established no-tag version command for `1.14.0`.
-  - [ ] Confirm only expected package/lock files change.
-  - [ ] Confirm Vite's `__APP_VERSION__` continues to derive from the package version.
-  - [ ] Build and verify the generated application contains `1.14.0`.
-- [ ] **Task 2.3: Commit the version change**
+- [x] **Task 2.1: Create `release/v1.14.0`**
+  - [x] Branch from the verified completed local `master`.
+  - [x] Verify the branch base contains the complete unreleased delta and Phase 1 checkpoint.
+  - Evidence (2026-08-10): `release/v1.14.0` created from local `master` at `318b7e9`; branch is 30 commits ahead of `origin/master` (28 unreleased delta + Phase 1 checkpoint `07ae567` + plan-state commit `318b7e9`).
+- [x] **Task 2.2: Bump the version**
+  - [x] Run the established no-tag version command for `1.14.0`.
+  - [x] Confirm only expected package/lock files change.
+  - [x] Confirm Vite's `__APP_VERSION__` continues to derive from the package version.
+  - [x] Build and verify the generated application contains `1.14.0`.
+  - Evidence (2026-08-10): `npm version 1.14.0 --no-git-tag-version` succeeded; only `package.json` changed (zero lockfile churn). `vite.config.ts:10` still defines `__APP_VERSION__: JSON.stringify(pkg.version)` and `SettingsPanel.ts:211` renders `v${__APP_VERSION__}`. Build OK — main chunk hash changed to `index-Zn-0_WWH.js` (151.19 kB) as expected; bundle contains `1.14.0` and no stale `1.13.0` string.
+- [~] **Task 2.3: Commit the version change**
   - [ ] Commit as `chore(release): Bump version to 1.14.0`.
   - [ ] Attach the required Git note and record the commit SHA.
   - [ ] Commit the corresponding plan-state update.
