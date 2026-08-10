@@ -18,8 +18,8 @@
 
 ## Phase 3 — Scene Implementation
 
-- [ ] Task: Write scene tests following `colorMatchScene.test.ts` style: deal (face-down cards, grid per band), tap reveal flip, matched pair locks face-up + success flash, mismatch flips back + wiggle + no penalty, input locked during transitions, round advance ~700ms with dot pop, win flow + `{ justEarned: "memory-match" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix)
-- [ ] Task: Implement `MemoryMatchScene.ts` (scene key `MemoryMatch`): rounded-rect card bases + `card_back` texture face-down, flip via scaleX 1→0→1 with face swap, ~140–160px cards (≥96px touch), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no speaker button (no speech)
+- [x] Task: Write scene tests following `colorMatchScene.test.ts` style: deal (face-down cards, grid per band), tap reveal flip, matched pair locks face-up + success flash, mismatch flips back + wiggle + no penalty, input locked during transitions, round advance ~700ms with dot pop, win flow + `{ justEarned: "memory-match" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(b4a75e6 — 13 tests; Red confirmed: module missing; sparse-array `every()` hole bug caught + fixed via dense arrays)*
+- [x] Task: Implement `MemoryMatchScene.ts` (scene key `MemoryMatch`): rounded-rect card bases + `card_back` texture face-down, flip via scaleX 1→0→1 with face swap, ~140–160px cards (≥96px touch), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no speaker button (no speech) *(b4a75e6 — 13 scene tests Green; GameId "memory-match" pulled forward in src/types/index.ts)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Integration
