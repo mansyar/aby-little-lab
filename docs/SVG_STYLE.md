@@ -49,7 +49,9 @@ Filled shapes (circles, hearts, animal bodies): fill + outer stroke in one pass 
 
 ## 4. Letterforms & Numerals (letters/, numbers/)
 
-**Reverted to system-font `<text>` glyphs (2026-08-06, track feedback round 2):** the custom stroked-path letterforms were replaced back with the pre-polish Arial style — bold uppercase `Arial, Helvetica, sans-serif`, 400px, `fill="#2B6CB0"`, `stroke="#2D3748" stroke-width="14"`, `paint-order="stroke fill"`, centered at 256/256. Letters are distinguished by shape only (identical styling across all 26 + 10). Known tradeoff: outline reads thin vs the rest of the library — acceptable; custom paths are NOT to be reintroduced for letters/numbers without product sign-off.
+**Bundled Baloo 2 `<text>` glyphs (2026-08-11, track baloo2-glyphs_20260811):** the system-font `<text>` glyphs now render with the **bundled Baloo 2 variable font** — bold uppercase `'Baloo 2', Arial, Helvetica, sans-serif`, 400px, `fill="#2B6CB0"`, `stroke="#2D3748" stroke-width="14"`, `paint-order="stroke fill"`, centered at 256/256. Baloo 2 (PWA-precached WOFF2, bundled since 2026-08-05) resolves the accepted known issue "glyph rendering varies slightly across devices" — Phaser rasterizes the same letterforms everywhere; **Arial stays as the fallback** so any font-load failure renders identically to the pre-fix look. Letters are distinguished by shape only (identical styling across all 26 + 10). Known tradeoff: outline reads thin vs the rest of the library — acceptable; custom paths are NOT to be reintroduced for letters/numbers without product sign-off.
+
+**Rasterization gate (2026-08-11):** Phaser rasterizes SVG `<text>` once at Preload time, so `BootScene.create()` awaits `ensureGlyphFontLoaded()` (`src/utils/fonts.ts` — no-throw, 2.5s timeout race, guards missing `document.fonts`) before starting Preload. Regression guards: `src/__tests__/assets/letterNumeralFonts.test.ts` (all 38 SVGs), `src/__tests__/utils/fonts.test.ts`.
 
 Retained guidance for any *other* stroked text (stickers/tiles accents):
 
@@ -70,7 +72,7 @@ Construction: each glyph is 1–4 stroke paths (vertical, diagonal, arc segments
 |---|---|---|
 | `shapes/` | shape fills ≈ 65–75% of canvas (r ≈ 175–200) | Every shape must have a clearly readable mass; crescent is a closed moon (outer + inner arc), ring is a thick annulus (stroke ≥ 70px) |
 | `shapes/cutout_*` | identical geometry to `shape_*`, **same hue family** (pastel tint) | `stroke-dasharray="10 24"`, stroke width ≈ 12–14, transparent fill |
-| `letters/`, `numbers/` | §4 above | System-font `<text>` glyphs (Arial 400px bold, `paint-order="stroke fill"`) — `<text>` is allowed and required here (see §4) |
+| `letters/`, `numbers/` | §4 above | Bundled Baloo 2 `<text>` glyphs (`'Baloo 2', Arial, ...` 400px bold, `paint-order="stroke fill"`) — `<text>` is allowed and required here (see §4) |
 | `animals/` | character fills ≈ 80–85% of canvas | Head ≥ 40% of canvas; eyes ≥ 24px diameter each; species-identifying feature must be silhouette-visible (trunk, snout, ears, whiskers) |
 | `toys/` | object fills ≈ 75–85% | Gravity: flame/rocket oriented **downward-launch** (rocket: nose up, flames at bottom) |
 | `items/` | object fills ≈ 65–75% | Object must be identifiable at 64px; duplicates (ball, car) differ from toy versions in line work + concept |
