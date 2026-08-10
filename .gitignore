@@ -6,3 +6,5 @@ coverage
 .playwright-cli/
 
 test-out.txt
+
+gate*.txt
