@@ -78,4 +78,5 @@ checkpoints with verification protocol).
 - [x] **Task 4.3: Commit archival + git note**
   - [x] Commit as `chore(conductor): Archive track 'progress-overlay-fix'`; attach the required Git note and record the SHA.
   - Evidence (2026-08-10): commit `a228bf9` + git note (archival summary).
-- [ ] **Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)** — final checkpoint.
+- [x] **Task 4.4: Phase Verification & Checkpoint (Refer to workflow.md)** — final checkpoint.
+  - Evidence (2026-08-10): full suite green throughout (no code changes in P4); release records finalized + track archived; final checkpoint confirmed by user. Checkpoint: `[40d67b1]`.
