@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="240" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <g transform="translate(256 264) scale(0.48) translate(-256 -264)">
+    <rect x="56" y="146" width="112" height="220" rx="24" fill="#FAF9F6" stroke="#2D3748" stroke-width="12"/>
+    <g transform="translate(112 256) scale(0.667) translate(-256 -256)">
+      <path d="M256,196 L269.52,237.39 L313.07,237.46 L277.27,263.11 L291.27,304.54 L256,279 L220.73,304.54 L234.73,263.11 L198.93,237.46 L242.48,237.39 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="8" stroke-linejoin="round"/>
+    </g>
+    <rect x="200" y="110" width="112" height="260" rx="24" fill="#FAF9F6" stroke="#2D3748" stroke-width="12"/>
+    <g transform="translate(256 246) scale(0.933) translate(-256 -256)">
+      <path d="M256,196 L269.52,237.39 L313.07,237.46 L277.27,263.11 L291.27,304.54 L256,279 L220.73,304.54 L234.73,263.11 L198.93,237.46 L242.48,237.39 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="8" stroke-linejoin="round"/>
+    </g>
+    <rect x="344" y="146" width="112" height="220" rx="24" fill="#FAF9F6" stroke="#2D3748" stroke-width="12"/>
+    <g transform="translate(400 256) scale(0.667) translate(-256 -256)">
+      <path d="M256,196 L269.52,237.39 L313.07,237.46 L277.27,263.11 L291.27,304.54 L256,279 L220.73,304.54 L234.73,263.11 L198.93,237.46 L242.48,237.39 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="8" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>
