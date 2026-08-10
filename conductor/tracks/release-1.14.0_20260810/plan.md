@@ -91,20 +91,23 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 4 — Release-Candidate Gates
 
-- [ ] **Task 4.1: Run all five gates on `release/v1.14.0`**
-  - [ ] Run check, test, build, PWA validation, and bundle validation in CI order.
-  - [ ] Confirm the build contains 17 lazy game chunks and a separate Phaser vendor chunk.
-  - [ ] Confirm the PWA precache contains the Take Away chunk and required assets.
-  - [ ] Record all final release-candidate evidence.
-- [ ] **Task 4.2: Inspect the complete release diff**
-  - [ ] Compare `release/v1.14.0` with `origin/master`.
-  - [ ] Confirm there are no secrets, generated artifacts, unrelated edits, or new feature scope.
-  - [ ] Confirm all intended local commits are included.
-- [ ] **Task 4.3: Handle failures without bypassing gates**
-  - [ ] Correct release-document or configuration failures narrowly and rerun affected gates.
-  - [ ] For a source defect, stop and obtain explicit hotfix approval.
-  - [ ] If approved, add a failing regression test first, implement the minimum fix, then rerun all five gates.
-- [ ] **Task 4.4: Phase Verification & Checkpoint**
+- [x] **Task 4.1: Run all five gates on `release/v1.14.0`**
+  - [x] Run check, test, build, PWA validation, and bundle validation in CI order.
+  - [x] Confirm the build contains 17 lazy game chunks and a separate Phaser vendor chunk.
+  - [x] Confirm the PWA precache contains the Take Away chunk and required assets.
+  - [x] Record all final release-candidate evidence.
+  - Evidence (2026-08-10): all five gates PASS on `release/v1.14.0` — 1) `pnpm run check` Biome 125 files clean; 2) `CI=true pnpm test` 58 files / 1309 tests (88s); 3) `pnpm run build` OK — 17 lazy game-scene chunks + separate Phaser vendor chunk `phaser-CYX5YQB3.js` (unchanged from baseline); 4) `validate-pwa` 13/13; 5) `validate-bundle` PASS. Precache contains `TakeAwayScene-BOGkTWeu.js`.
+- [x] **Task 4.2: Inspect the complete release diff**
+  - [x] Compare `release/v1.14.0` with `origin/master`.
+  - [x] Confirm there are no secrets, generated artifacts, unrelated edits, or new feature scope.
+  - [x] Confirm all intended local commits are included.
+  - Evidence (2026-08-10): `git diff origin/master..HEAD` = 35 files (1882 insertions, 81 deletions) — Take Away source/tests/assets (11 files), archived take-away track (4), release track docs (4), milestone docs (README/TDD/PRD/product/tech-stack/tracks), approved `SettingsPanel.ts` fix + regression tests, release notes/checklist/device record, package.json version. Secrets scan clean (only spec/checklist prose matched); no generated artifacts; no unrelated edits.
+- [x] **Task 4.3: Handle failures without bypassing gates**
+  - [x] Correct release-document or configuration failures narrowly and rerun affected gates.
+  - [x] For a source defect, stop and obtain explicit hotfix approval.
+  - [x] If approved, add a failing regression test first, implement the minimum fix, then rerun all five gates.
+  - Evidence (2026-08-10): no gate failures on the release candidate. The Phase 3 in-track source fix (`dada2b0`, user-approved) followed the regression-first protocol; all five gates rerun green on the release branch afterwards.
+- [~] **Task 4.4: Phase Verification & Checkpoint**
   - [ ] Present release-candidate evidence for manual verification.
   - [ ] Confirm readiness to publish the branch.
   - [ ] Create the phase checkpoint and record its SHA.
