@@ -3,6 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 type MockFn = ReturnType<typeof vi.fn>;
 
 /**
+ * Mock the glyph font gate: BootScene awaits ensureGlyphFontLoaded() before
+ * starting Preload. Tests override the default resolved promise per-test.
+ */
+vi.mock("../../utils/fonts", () => ({
+  ensureGlyphFontLoaded: vi.fn(() => Promise.resolve()),
+}));
+
+/**
  * Mock Phaser module. Scene files extend Phaser.Scene, which at runtime
  * resolves to MockScene. Each instance gets fresh mock methods in the
  * constructor, enabling per-test isolation.
@@ -341,6 +349,7 @@ import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
+import { ensureGlyphFontLoaded } from "../../utils/fonts";
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { GAME_TILES, HubScene } from "../../scenes/HubScene";
@@ -737,9 +746,32 @@ describe("scene navigation flow", () => {
   });
 
   describe("BootScene", () => {
-    it("transitions to PreloadScene on create", () => {
+    it("transitions to PreloadScene on create", async () => {
       const scene = new BootScene();
       scene.create();
+
+      // The glyph font gate resolves on a microtask; flush before asserting.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
+    });
+
+    it("waits for the Baloo 2 glyph font before starting Preload", async () => {
+      let resolveFont!: () => void;
+      vi.mocked(ensureGlyphFontLoaded).mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveFont = resolve;
+        }),
+      );
+
+      const scene = new BootScene();
+      scene.create();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+
+      resolveFont();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
     });
@@ -767,7 +799,7 @@ describe("scene navigation flow", () => {
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
     });
 
-    it("does not crash when screen.orientation.lock is unavailable (iPad WebKit)", () => {
+    it("does not crash when screen.orientation.lock is unavailable (iPad WebKit)", async () => {
       // iPad Safari/Chrome (WebKit) expose only a partial Screen Orientation
       // API: `screen.orientation` exists but `lock` is missing. Calling it
       // throws a synchronous TypeError, so BootScene must still start Preload.
@@ -779,6 +811,8 @@ describe("scene navigation flow", () => {
 
       const scene = new BootScene();
       scene.create();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Preload");
     });
