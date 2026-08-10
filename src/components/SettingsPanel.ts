@@ -50,9 +50,9 @@ const VOICE_PREVIEW_TEXT = "Hi! I can talk.";
 /** Longest voice label shown in the chip before truncation. */
 const VOICE_LABEL_MAX = 24;
 /** Game rows shown per page in the Learning Progress overlay. */
-const PROGRESS_PAGE_SIZE = 8;
+const PROGRESS_PAGE_SIZE = 6;
 /** Vertical pitch between progress rows (two text lines each). */
-const PROGRESS_ROW_PITCH = 40;
+const PROGRESS_ROW_PITCH = 56;
 /** Center-relative Y of the first progress row. */
 const PROGRESS_ROW_START_Y = -150;
 /** Center-relative Y of the 7-day activity strip label. */
