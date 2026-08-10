@@ -45,11 +45,12 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Confirm Vite's `__APP_VERSION__` continues to derive from the package version.
   - [x] Build and verify the generated application contains `1.14.0`.
   - Evidence (2026-08-10): `npm version 1.14.0 --no-git-tag-version` succeeded; only `package.json` changed (zero lockfile churn). `vite.config.ts:10` still defines `__APP_VERSION__: JSON.stringify(pkg.version)` and `SettingsPanel.ts:211` renders `v${__APP_VERSION__}`. Build OK — main chunk hash changed to `index-Zn-0_WWH.js` (151.19 kB) as expected; bundle contains `1.14.0` and no stale `1.13.0` string.
-- [~] **Task 2.3: Commit the version change**
-  - [ ] Commit as `chore(release): Bump version to 1.14.0`.
-  - [ ] Attach the required Git note and record the commit SHA.
-  - [ ] Commit the corresponding plan-state update.
-- [ ] **Task 2.4: Phase Verification & Checkpoint**
+- [x] **Task 2.3: Commit the version change**
+  - [x] Commit as `chore(release): Bump version to 1.14.0`.
+  - [x] Attach the required Git note and record the commit SHA.
+  - [x] Commit the corresponding plan-state update.
+  - Evidence (2026-08-10): commit `2e4d39d` on `release/v1.14.0` — `chore(release): Bump version to 1.14.0`; git note attached (version bump method, only package.json changed, `__APP_VERSION__` footer mechanism, bundle verification). Plan-state commit `60e392e`.
+- [~] **Task 2.4: Phase Verification & Checkpoint**
   - [ ] Verify branch identity, clean diff, and version output.
   - [ ] Obtain explicit manual verification.
   - [ ] Create the phase checkpoint and record its SHA.
