@@ -39,7 +39,8 @@ checkpoints with verification protocol).
   - [x] If evidence shows residual collisions: adjust constants (max 2 iterations) and re-run Phase 1 tests.
   - Evidence (2026-08-10): visual analysis of all 3 pages — row sets exact (6+6+5, 17/17 games), NO collisions in any of the 4 categories (row↔row, first row↔profile chip, last row↔footer, stats↔accuracy bars). No constant adjustment needed (0 iterations). Observations: rasterized row-name baseline spacing ≈52px (visual tolerance; deterministic test enforces ≥56px on text Y positions — passes); unplayed stats render "0 plays · – – –" (pre-existing unplayed-state format, unrelated to this track).
 - [x] **Task 2.3: Commit render evidence + git note** (playwright artifacts excluded from the tree per repo practice; evidence recorded in `plan.md`).
-- [ ] **Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)**
+- [x] **Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)**
+  - Evidence (2026-08-10): full suite 1310/1310 still green after Phase 2 (no code changes in this phase); render evidence accepted by user. Checkpoint: `[fc758b0]`.
 
 ## Phase 3 — Release v1.14.1
 
