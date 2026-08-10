@@ -128,4 +128,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix Learning Progress Overlay Row Collision (Parent Settings)** *Link: [./tracks/progress-overlay-fix_20260810/index.md](./tracks/progress-overlay-fix_20260810/index.md)*
+- [~] **Track: Fix Learning Progress Overlay Row Collision (Parent Settings)** *Link: [./tracks/progress-overlay-fix_20260810/index.md](./tracks/progress-overlay-fix_20260810/index.md)*
