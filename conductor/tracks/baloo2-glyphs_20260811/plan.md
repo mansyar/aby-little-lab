@@ -2,7 +2,7 @@
 
 **Track:** `baloo2-glyphs_20260811` · **Type:** Bug fix · **Branch:** `fix/baloo2-glyphs`
 
-## Phase 1 — Font-Load Gate (TDD)
+## Phase 1 — Font-Load Gate (TDD) [checkpoint: e47ef05]
 
 - [x] Task 1.1: Write failing tests for `src/utils/fonts.ts` — `ensureGlyphFontLoaded()` resolves when `document.fonts` is missing, when load throws, when load rejects, when load succeeds, and the timeout guard fires (Red) `5af6561`
 - [x] Task 1.2: Implement `src/utils/fonts.ts` minimal no-throw helper (Green) `6aa0d5b`
