@@ -349,7 +349,6 @@ import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
-import { ensureGlyphFontLoaded } from "../../utils/fonts";
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { GAME_TILES, HubScene } from "../../scenes/HubScene";
@@ -361,6 +360,7 @@ import { PreloadScene } from "../../scenes/PreloadScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { ensureSceneLoaded } from "../../scenes/sceneRegistry";
+import { ensureGlyphFontLoaded } from "../../utils/fonts";
 import {
   addProfile,
   earnSticker,

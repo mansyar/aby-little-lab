@@ -292,6 +292,7 @@ import { BootScene } from "../../scenes/BootScene";
 vi.mock("../../utils/fonts", () => ({
   ensureGlyphFontLoaded: vi.fn(() => Promise.resolve()),
 }));
+
 import { HubScene } from "../../scenes/HubScene";
 import { PreloadScene } from "../../scenes/PreloadScene";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";

@@ -35,8 +35,8 @@ import numeral6Svg from "../../assets/svg/numbers/numeral_6.svg?raw";
 import numeral7Svg from "../../assets/svg/numbers/numeral_7.svg?raw";
 import numeral8Svg from "../../assets/svg/numbers/numeral_8.svg?raw";
 import numeral9Svg from "../../assets/svg/numbers/numeral_9.svg?raw";
-import tileFirstSoundsSvg from "../../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
 import stickerFirstSoundsSvg from "../../assets/svg/stickers/sticker_first_sounds.svg?raw";
+import tileFirstSoundsSvg from "../../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
 
 /**
  * Regression guard for the glyph font consistency fix (track
@@ -52,7 +52,7 @@ import stickerFirstSoundsSvg from "../../assets/svg/stickers/sticker_first_sound
  * only, per product decision.
  */
 
-const NEW_STACK = 'font-family="\'Baloo 2\', Arial, Helvetica, sans-serif"';
+const NEW_STACK = "font-family=\"'Baloo 2', Arial, Helvetica, sans-serif\"";
 const OLD_ARIAL_ONLY = 'font-family="Arial, Helvetica, sans-serif"';
 
 const GLYPH_SVGS: ReadonlyArray<readonly [name: string, svg: string]> = [

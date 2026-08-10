@@ -69,9 +69,12 @@ describe("ensureGlyphFontLoaded", () => {
     vi.useFakeTimers();
     vi.stubGlobal("document", {
       fonts: {
-        load: vi.fn(() => new Promise(() => {
-          // Never settles — simulates a stalled network.
-        })),
+        load: vi.fn(
+          () =>
+            new Promise(() => {
+              // Never settles — simulates a stalled network.
+            }),
+        ),
       },
     });
 
