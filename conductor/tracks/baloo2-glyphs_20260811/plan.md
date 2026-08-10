@@ -5,9 +5,9 @@
 ## Phase 1 — Font-Load Gate (TDD)
 
 - [x] Task 1.1: Write failing tests for `src/utils/fonts.ts` — `ensureGlyphFontLoaded()` resolves when `document.fonts` is missing, when load throws, when load rejects, when load succeeds, and the timeout guard fires (Red) `5af6561`
-- [~] Task 1.2: Implement `src/utils/fonts.ts` minimal no-throw helper (Green)
-- [ ] Task 1.3: Write failing BootScene test — Preload starts only after the font promise resolves (navigation.test.ts pattern; Red)
-- [ ] Task 1.4: Wire `BootScene.create()` to await the helper before `this.scene.start("Preload")` (Green)
+- [x] Task 1.2: Implement `src/utils/fonts.ts` minimal no-throw helper (Green) `6aa0d5b`
+- [x] Task 1.3: Write failing BootScene test — Preload starts only after the font promise resolves (navigation.test.ts pattern; Red) `6e1b017`
+- [~] Task 1.4: Wire `BootScene.create()` to await the helper before `this.scene.start("Preload")` (Green)
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
 ## Phase 2 — SVG Glyph Font Update (38 files, tests-first)
