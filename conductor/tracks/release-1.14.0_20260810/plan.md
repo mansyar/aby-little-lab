@@ -158,7 +158,7 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Create the phase checkpoint and record its SHA.
   - Evidence (2026-08-10): user confirmed deployment healthy. Records: tag `v1.14.0` → `5ec4705`; CI run <https://github.com/mansyar/aby-little-lab/actions/runs/31346877435>; deployed asset `index-oLiid_3z.js` (SHA-256 `F623F789EAB3…`); rollback = v1.13.0 tag. Checkpoint `64e8297`; git note attached.
 
-## Phase 7 — Live Smoke and Physical-Device Verification
+## Phase 7 — Live Smoke and Physical-Device Verification [checkpoint: 0a2067e]
 
 - [x] **Task 7.1: Run production smoke testing**
   - [x] Verify boot to Hub with 17 visible, unclipped tiles and no critical console errors.
@@ -184,10 +184,11 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Attach the required Git note and record the SHA.
   - [x] Commit the corresponding plan-state update.
   - Evidence (2026-08-10): commit `8070d3f` on master — docs/device-testing-checklist.md (v1.14.0 result PASSED on all 4 device classes + automated smoke evidence) + plan.md (Tasks 7.1–7.3 complete); git note attached (verification record + triage summary). Playwright automation artifacts (.playwright-cli/, hub-17.png) removed from the tree before commit.
-- [~] **Task 7.5: Phase Verification & Checkpoint**
+- [x] **Task 7.5: Phase Verification & Checkpoint**
   - [x] Confirm all production and physical-device acceptance criteria have evidence.
-  - [ ] Obtain explicit final verification approval.
-  - [ ] Create the phase checkpoint and record its SHA.
+  - [x] Obtain explicit final verification approval.
+  - [x] Create the phase checkpoint and record its SHA.
+  - Evidence (2026-08-10): user approved final verification. Checkpoint `0a2067e` (empty commit) on master; git note attached with the Phase 7 Verification Report.
 
 ## Phase 8 — Finalize and Archive
 
