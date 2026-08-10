@@ -4,6 +4,15 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — v1.14.1 (2026-08-10)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.14.1 — Bug fix: Learning Progress overlay row collision in parent Settings → Progress)
+- **Scope:** Parent Settings → Learning Progress report — rows pitched 40px → 56px, page size 8 → 6 (pages 8+8+1 → 6+6+5, all 17 games still reachable with More/Back wrap-around). No gameplay, storage, audio, or kid-facing changes.
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+) — **pending**
+- **Checks:** Settings opens via the 3s parental hold; Progress page 1 shows 6 rows (Shape Sorter … Big & Small); page 2 shows 6 rows (Pattern Builder … First Sounds); page 3 shows 5 rows (More or Less … Take Away); no text collisions anywhere — row stats vs next row's game name, first row vs profile chip, last row vs "N / 3" footer, stats vs accuracy bars; More/Back wrap-around works; footer shows `v1.14.1`
+- **Result:** **desktop automated smoke PASSED 2026-08-10** (headless Chromium 1024×768 vs the live URL via playwright-cli): Settings panel + `v1.14.1` footer verified; pages 6+6+5 with all 17 rows and zero collisions in all four check categories; footers 1/3 → 2/3 → 3/3; service worker activated + controlling; offline reload boots a clean Hub from the precache. **Device-class execution PENDING** (deferred by user decision — desktop smoke is green, no Critical/High findings, release not blocked; this record will be completed when the user runs the device checks)
+- **Issues found:** none on the desktop smoke (no Critical/High/Medium/Low)
+
 ## Execution Record — v1.13.0 (2026-08-09)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.13.0 — Games 15 & 16 + Perf/Bundle Hardening + Parent Progress Insights)

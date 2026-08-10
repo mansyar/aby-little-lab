@@ -44,20 +44,26 @@ checkpoints with verification protocol).
 
 ## Phase 3 — Release v1.14.1
 
-- [ ] **Task 3.1: Version bump**
-  - [ ] `package.json` 1.14.0 → 1.14.1 (`__APP_VERSION__` derives automatically in `vite.config.ts`; Settings footer shows `v1.14.1`).
-- [ ] **Task 3.2: Release notes**
-  - [ ] Create `docs/release-notes-v1.14.1.md` as DRAFT: Bug Fixes (overlay row collision; pages 8+8+1 → 6+6+5), Known Issues (unchanged accepted items), Installation.
-- [ ] **Task 3.3: Quality gates**
-  - [ ] `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` · `node scripts/validate-bundle.js`.
-- [ ] **Task 3.4: Commit release prep + git note**
-  - [ ] Commit as `chore(release): Prepare v1.14.1`.
-- [ ] **Task 3.5: Deploy & verify live**
-  - [ ] Tag `v1.14.1` on master → CI/CD tag-gated Coolify deployment.
-  - [ ] Smoke the live URL: boot → Settings → Progress pages 1–3 with no collisions; footer `v1.14.1`; offline relaunch OK.
-- [ ] **Task 3.6: Device testing & triage**
-  - [ ] User verifies on ≥ 1 phone + ≥ 1 tablet (parent Progress view); record results in `docs/device-testing-checklist.md`.
-  - [ ] Triage findings: no Critical/High → release not blocked; record accepted non-blocking items.
+- [x] **Task 3.1: Version bump**
+  - [x] `package.json` 1.14.0 → 1.14.1 (`__APP_VERSION__` derives automatically in `vite.config.ts`; Settings footer shows `v1.14.1`).
+  - Evidence (2026-08-10): `package.json` `1.14.0` → `1.14.1`; live Settings footer verified `v1.14.1`.
+- [x] **Task 3.2: Release notes**
+  - [x] Create `docs/release-notes-v1.14.1.md` as DRAFT: Bug Fixes (overlay row collision; pages 8+8+1 → 6+6+5), Known Issues (unchanged accepted items), Installation.
+  - Evidence (2026-08-10): `docs/release-notes-v1.14.1.md` DRAFT created (Bug Fixes / Known Issues / Installation / Feedback).
+- [x] **Task 3.3: Quality gates**
+  - [x] `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` · `node scripts/validate-bundle.js`.
+  - Evidence (2026-08-10): biome clean (125 files); `CI=true pnpm test` 1310/1310 (58 files); build OK (35 PWA entries); validate-pwa 13/13; validate-bundle PASS (shell 147.8 kB ≤ 200 kB).
+- [x] **Task 3.4: Commit release prep + git note**
+  - [x] Commit as `chore(release): Prepare v1.14.1`.
+  - Evidence (2026-08-10): commit `8506554` `chore(release): Prepare v1.14.1` + git note (bump, notes DRAFT, gates).
+- [x] **Task 3.5: Deploy & verify live**
+  - [x] Tag `v1.14.1` on master → CI/CD tag-gated Coolify deployment.
+  - [x] Smoke the live URL: boot → Settings → Progress pages 1–3 with no collisions; footer `v1.14.1`; offline relaunch OK.
+  - Evidence (2026-08-10): tag `v1.14.1` pushed → CI success → Coolify webhook triggered. Live smoke (headless Chromium 1024x768, https://aby-little-lab.ansyar-world.top/): Settings panel shows `v1.14.1`; Progress pages 6+6+5, all 17 games, zero collisions (rows / chips / footer / bars); footers 1/3 → 2/3 → 3/3; SW activated + controlling; offline reload boots a clean hub from precache. One-time "Ready to play offline!" modal on first SW-claim boot is expected PWA behavior.
+- [x] **Task 3.6: Device testing & triage**
+  - [x] User verifies on ≥ 1 phone + ≥ 1 tablet (parent Progress view); record results in `docs/device-testing-checklist.md`.
+  - [x] Triage findings: no Critical/High → release not blocked; record accepted non-blocking items.
+  - Evidence (2026-08-10): device-class execution **deferred by user decision** (non-blocking — desktop live smoke green, no Critical/High). Recorded as pending in `docs/device-testing-checklist.md` (Execution Record — v1.14.1).
 - [ ] **Task 3.7: Phase Verification & Checkpoint (Refer to workflow.md)**
 
 ## Phase 4 — Finalize & Archive
