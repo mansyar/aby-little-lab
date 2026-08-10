@@ -31,11 +31,11 @@
 - [x] Task: Regression tests — old saves migrate cleanly, navigation test covers 18 tiles, sceneRegistry tests updated *(c7b44e5 — navigation 351/351 incl. GAME_SCENE_KEYS completed to 18 in hub order (also closes pre-existing OddOneOut..TakeAway coverage gap); SettingsPanel 18 rows 6+6+6; hasSticker call counts 34→36; hubScene/firstWordsIntegration 18 tiles)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(c8bca98 — navigation 351/351 standalone; all 8 changed files green; full-suite baseline unchanged: 2 known machine-load flakes)*
 
-## Phase 5 — Docs & Release Readiness
+## Phase 5 — Docs & Release Readiness [checkpoint: be85ffa]
 
-- [ ] Task: Update `conductor/product.md` (Game 18 row, games target 17 → 18, hub grid 5×3+3, working-memory amendment)
-- [ ] Task: Update `conductor/tech-stack.md` with dated design note (Game 18, memoryMatchLogic in logic tree, card/flip design)
-- [ ] Task: Update `docs/PRD.md` (Game 18 section) and `docs/TDD.md` as needed
-- [ ] Task: Update `README.md` (games table, hub experience notes)
-- [ ] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `conductor/product.md` (Game 18 row, games target 17 → 18, hub grid 5×3+3, working-memory amendment) *(f94dbae — 18 mini-games, table row 18, hub 5×3+3, progress 6+6+6, textless amendment, Game 18 changelog)*
+- [x] Task: Update `conductor/tech-stack.md` with dated design note (Game 18, memoryMatchLogic in logic tree, card/flip design) *(f94dbae — 21 scenes/18 game scenes + 2026-08-11 design note)*
+- [x] Task: Update `docs/PRD.md` (Game 18 section) and `docs/TDD.md` as needed *(f94dbae — GAME 18 section, 18 tiles/games/stickers, 6+6+6; TDD scene tree/GameId/3 asset rows + 7 prose refs)*
+- [x] Task: Update `README.md` (games table, hub experience notes) *(f94dbae — 18 games, table row 18, Memory Match juice bullet, replay variety, 8 count refs)*
+- [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(be85ffa — biome clean 129 files; full suite 60 files/1346 tests ALL PASSED (no flakes); build 2.38s; validate-pwa 13/13)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(be85ffa — diff from c8bca98 = 5 doc files + plan; all gates green)*
