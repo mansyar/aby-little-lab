@@ -89,7 +89,7 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Create the phase checkpoint and record its SHA.
   - Evidence (2026-08-10): user approved all draft materials (release notes DRAFT, device record pending, checklist records, paging patches, in-track fix). Checkpoint `f378a5f` (empty commit) on `release/v1.14.0`; git note attached with the Phase 3 Verification Report.
 
-## Phase 4 — Release-Candidate Gates
+## Phase 4 — Release-Candidate Gates [checkpoint: 4cc8889]
 
 - [x] **Task 4.1: Run all five gates on `release/v1.14.0`**
   - [x] Run check, test, build, PWA validation, and bundle validation in CI order.
@@ -107,10 +107,11 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] For a source defect, stop and obtain explicit hotfix approval.
   - [x] If approved, add a failing regression test first, implement the minimum fix, then rerun all five gates.
   - Evidence (2026-08-10): no gate failures on the release candidate. The Phase 3 in-track source fix (`dada2b0`, user-approved) followed the regression-first protocol; all five gates rerun green on the release branch afterwards.
-- [~] **Task 4.4: Phase Verification & Checkpoint**
-  - [ ] Present release-candidate evidence for manual verification.
-  - [ ] Confirm readiness to publish the branch.
-  - [ ] Create the phase checkpoint and record its SHA.
+- [x] **Task 4.4: Phase Verification & Checkpoint**
+  - [x] Present release-candidate evidence for manual verification.
+  - [x] Confirm readiness to publish the branch.
+  - [x] Create the phase checkpoint and record its SHA.
+  - Evidence (2026-08-10): user confirmed readiness to push `release/v1.14.0` and open the PR. Checkpoint `4cc8889`; git note attached with the Phase 4 Verification Report.
 
 ## Phase 5 — Pull Request and Merge
 
