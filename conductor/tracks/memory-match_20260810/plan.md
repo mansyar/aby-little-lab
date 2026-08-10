@@ -16,11 +16,11 @@
 - [x] Task: Create `src/assets/svg/ui/gameplay/card_back.svg` (face-down card back: cream card, star motif, storybook style) *(f8bb206 — placed at `src/assets/svg/ui/card_back.svg`: no ui/gameplay/ dir exists, ui/ is the convention)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(a2be712 — 3 SVGs well-formed XML, style-spec compliant; no code touched)*
 
-## Phase 3 — Scene Implementation
+## Phase 3 — Scene Implementation [checkpoint: 1d4b2c3]
 
 - [x] Task: Write scene tests following `colorMatchScene.test.ts` style: deal (face-down cards, grid per band), tap reveal flip, matched pair locks face-up + success flash, mismatch flips back + wiggle + no penalty, input locked during transitions, round advance ~700ms with dot pop, win flow + `{ justEarned: "memory-match" }`, parental-lock exit, input-lock reset on relaunch (regression per first-words fix) *(b4a75e6 — 13 tests; Red confirmed: module missing; sparse-array `every()` hole bug caught + fixed via dense arrays)*
 - [x] Task: Implement `MemoryMatchScene.ts` (scene key `MemoryMatch`): rounded-rect card bases + `card_back` texture face-down, flip via scaleX 1→0→1 with face swap, ~140–160px cards (≥96px touch), pressFeedback, progress dots (6), mascot cheer/nod/big-cheer, shared win celebration, auto-return after 3s, no speaker button (no speech) *(b4a75e6 — 13 scene tests Green; GameId "memory-match" pulled forward in src/types/index.ts)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(1d4b2c3 — 13 scene tests Green; full suite 1344 passed / 2 failed = known machine-load timeouts in countLogic/takeAwayLogic sampling loops, verified pass standalone)*
 
 ## Phase 4 — Integration
 
