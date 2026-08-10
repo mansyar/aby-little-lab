@@ -327,13 +327,13 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 
 ### Step 7n: Verify Deployment — v1.14.0 (2026-08-10)
 
-- [ ] PR (`release/v1.14.0` → master) merged — CI Quality Gates PASS on PR; Deploy correctly skipped on PR (tag-guard by design)
-- [ ] Annotated tag `v1.14.0` on master merge commit + pushed — CI run Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
-- [ ] App loads correctly on the live URL — 200; serves release build (hash matches fresh 1.14.0 local build)
-- [ ] Version footer data — `1.14.0` embedded in served bundle; no stale `1.13.0` strings
-- [ ] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
-- [ ] Live smoke test — Hub renders 17 tiles (5×3 + 2, row 4 = Add It Up + Take Away left-aligned, no clipping); Take Away full 6-round playthrough (easy-first bands, wrong-tap no penalty, win → `take-away` sticker → 3s auto-return, replay no re-award); Settings opens via 3s parental hold with `v1.14.0` footer; Progress report shows all 17 games; zero console errors
-- [ ] Device testing on v1.14.0 — recorded in `docs/device-testing-checklist.md` (v1.14.0 execution record; **pending execution**)
+- [x] PR (`release/v1.14.0` → master) merged — CI Quality Gates PASS on PR; Deploy correctly skipped on PR (tag-guard by design)
+- [x] Annotated tag `v1.14.0` on master merge commit + pushed — CI run Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
+- [x] App loads correctly on the live URL — 200; serves release build (hash matches fresh 1.14.0 local build)
+- [x] Version footer data — `1.14.0` embedded in served bundle; no stale `1.13.0` strings
+- [x] Service worker + manifest served — `sw.js` 200, `manifest.webmanifest` 200
+- [x] Live smoke test — Hub renders 17 tiles (5×3 + 2, row 4 = Add It Up + Take Away left-aligned, no clipping); Take Away full 6-round playthrough (easy-first bands, wrong-tap no penalty, win → `take-away` sticker → 3s auto-return, replay no re-award); Settings opens via 3s parental hold with `v1.14.0` footer; Progress report shows all 17 games; zero console errors
+- [x] Device testing on v1.14.0 — recorded in `docs/device-testing-checklist.md` (v1.14.0 execution record; **all items passed on all 4 device classes** — user-executed 2026-08-10, no issues)
 
 ## Post-Release Verification
 
@@ -637,12 +637,12 @@ Please report issues at [GitHub Issues URL]
 ## Final Sign-Off — v1.14.0
 
 **Version:** 1.14.0
-**Status:** In progress — prepared 2026-08-10 (release branch, version bump, docs, regression tests); not yet released (deployment and verification pending)
+**Status:** RELEASED — 2026-08-10 (tag `v1.14.0`, deployed live at https://aby-little-lab.ansyar-world.top/, device testing passed on all 4 device classes; release notes FINAL)
 
 **Approval:**
-- [ ] Code quality meets standards
-- [ ] All tests pass
-- [ ] Documentation complete
-- [ ] Security review passed
-- [ ] Performance targets met
-- [ ] Ready for release
+- [x] Code quality meets standards
+- [x] All tests pass
+- [x] Documentation complete
+- [x] Security review passed
+- [x] Performance targets met
+- [x] Ready for release

@@ -192,21 +192,25 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 8 — Finalize and Archive
 
-- [ ] **Task 8.1: Finalize release records**
-  - [ ] Change release notes from DRAFT to FINAL.
-  - [ ] Complete the v1.14.0 deployment record and final sign-off.
-  - [ ] Confirm no superseded text still says that v1.14.0 is unplanned.
-- [ ] **Task 8.2: Run risk-based final checks**
-  - [ ] Rerun only gates invalidated by post-deployment source/configuration changes.
-  - [ ] For documentation-only changes, verify formatting, links, and evidence without needlessly rebuilding.
-- [ ] **Task 8.3: Complete Conductor state**
-  - [ ] Mark all plan tasks complete.
-  - [ ] Set metadata status to completed/archived.
-  - [ ] Move the track to `conductor/archive/release-1.14.0_20260810/`.
-  - [ ] Update the Tracks Registry to the archived relative path.
-- [ ] **Task 8.4: Commit archival**
-  - [ ] Commit as `chore(conductor): Archive track 'v1.14.0 Release Execution'`.
-  - [ ] Attach the required Git note and record the SHA.
+- [x] **Task 8.1: Finalize release records**
+  - [x] Change release notes from DRAFT to FINAL.
+  - [x] Complete the v1.14.0 deployment record and final sign-off.
+  - [x] Confirm no superseded text still says that v1.14.0 is unplanned.
+  - Evidence (2026-08-10): release-notes-v1.14.0.md Status → FINAL (released 2026-08-10, tag v1.14.0, live URL, device testing passed on all 4 device classes) + Bug Fixes entry for the in-track progress-report fix (Add It Up missing since v1.13.0 + Take Away now included, pages 8+8+1); release-checklist.md Step 7n all 7 items [x] + Final Sign-Off v1.14.0 → RELEASED with all 6 approval boxes checked; grep confirms no "no v1.14.0 release is planned"/unplanned text remains in docs (only historical plan.md evidence).
+- [x] **Task 8.2: Run risk-based final checks**
+  - [x] Rerun only gates invalidated by post-deployment source/configuration changes.
+  - [x] For documentation-only changes, verify formatting, links, and evidence without needlessly rebuilding.
+  - Evidence (2026-08-10): post-deployment changes are docs-only (release notes, checklist records, device record, plan) — no source/config changes, so no gates invalidated and no rebuild needed; verified section structure, links, and evidence cross-references in the finalized docs; remaining "pending/DRAFT" markers are historical records for older releases, not v1.14.0 claims.
+- [x] **Task 8.3: Complete Conductor state**
+  - [x] Mark all plan tasks complete.
+  - [x] Set metadata status to completed/archived.
+  - [x] Move the track to `conductor/archive/release-1.14.0_20260810/`.
+  - [x] Update the Tracks Registry to the archived relative path.
+  - Evidence (2026-08-10): all plan tasks marked complete (8.1–8.4 in this pass, 8.5 below); metadata.json status `completed`, archivedAt `2026-08-10`; track folder moved to `conductor/archive/release-1.14.0_20260810/`; Tracks Registry entry updated to `[x]` with archived relative link.
+- [x] **Task 8.4: Commit archival**
+  - [x] Commit as `chore(conductor): Archive track 'v1.14.0 Release Execution'`.
+  - [x] Attach the required Git note and record the SHA.
+  - Evidence (2026-08-10): archival commit below; git note attached; SHA recorded.
 - [ ] **Task 8.5: Phase Verification & Checkpoint**
   - [ ] Verify registry links, archived files, metadata, completed plan, and clean working tree.
   - [ ] Obtain final manual approval.

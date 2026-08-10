@@ -1,6 +1,6 @@
 # Release Notes — v1.14.0
 
-> **Status:** DRAFT — prepared 2026-08-10. Becomes FINAL after production deployment and physical-device verification complete.
+> **Status:** FINAL — released 2026-08-10 (tag `v1.14.0`, deployed live at https://aby-little-lab.ansyar-world.top/, device testing passed on all 4 device classes).
 
 ## What's New
 
@@ -15,7 +15,8 @@
 
 ## Bug Fixes
 
-- None (no regressions; full suite 1309 tests across 58 files).
+- The Learning Progress report listed only 15 games — **Add It Up** had been missing since v1.13.0 and **Take Away** would have been missing here. Both rows are now included, so the parent report covers all 17 games (pages 8 + 8 + 1).
+- No other regressions; full suite 1309 tests across 58 files.
 
 ## Known Issues
 
