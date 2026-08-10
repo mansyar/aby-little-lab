@@ -2,12 +2,12 @@
 
 **Track:** `memory-match_20260810` · **Branch:** `feat/game-18`
 
-## Phase 1 — Pure Game Logic (TDD)
+## Phase 1 — Pure Game Logic (TDD) [checkpoint: 001725b]
 
 - [x] Task: Write failing tests for `src/game/memoryMatchLogic.ts` (Red phase): playthrough generation (6 rounds; rounds 1–2 = 2×3 grid / 3 pairs, rounds 3–4 = 3×4 / 6 pairs, rounds 5–6 = 4×4 / 8 pairs; all pair textures distinct within a round; shuffled positions; no texture repeats within a round), round building, match-state helpers (reveal, matched set, round-complete, playthrough-complete) *(f8ba17a — 23 tests, Red confirmed: module missing)*
 - [x] Task: Implement `src/game/memoryMatchLogic.ts` pure functions to pass (Green phase): `buildPlaythrough`, `buildRound`, pair/match evaluation helpers + band/POOL constants *(f8ba17a — 23 tests Green)*
 - [x] Task: Verify coverage for `memoryMatchLogic.ts` (>80%; project runs ~95% lines) *(100% stmts/branch/funcs/lines)*
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(001725b — 23 tests Green, 100% coverage; full-suite timeouts = machine-load flakes, verified 6/6 affected files pass standalone)*
 
 ## Phase 2 — Assets (3 SVGs)
 
