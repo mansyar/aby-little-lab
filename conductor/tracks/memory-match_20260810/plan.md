@@ -11,9 +11,9 @@
 
 ## Phase 2 — Assets (3 SVGs)
 
-- [ ] Task: Create `src/assets/svg/ui/tiles/tile_memory_match.svg` (Hub tile icon: mini face-down cards with one pair revealed; 512×512 storybook style, thick `#2D3748` outline per `docs/SVG_STYLE.md`)
-- [ ] Task: Create `src/assets/svg/stickers/sticker_memory_match.svg` (cream badge, two matching cards)
-- [ ] Task: Create `src/assets/svg/ui/gameplay/card_back.svg` (face-down card back: cream card, star motif, storybook style)
+- [x] Task: Create `src/assets/svg/ui/tiles/tile_memory_match.svg` (Hub tile icon: mini face-down cards with one pair revealed; 512×512 storybook style, thick `#2D3748` outline per `docs/SVG_STYLE.md`) *(f8bb206 — 3 cards, blue star motif, cream/blue 2-hue)*
+- [x] Task: Create `src/assets/svg/stickers/sticker_memory_match.svg` (cream badge, two matching cards) *(f8bb206 — cream circle + scaled tile scene)*
+- [x] Task: Create `src/assets/svg/ui/gameplay/card_back.svg` (face-down card back: cream card, star motif, storybook style) *(f8bb206 — placed at `src/assets/svg/ui/card_back.svg`: no ui/gameplay/ dir exists, ui/ is the convention)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Scene Implementation
