@@ -29,6 +29,6 @@
 
 ## Phase 4 — Review & Archive
 
-- [ ] Task 4.1: Self-review against spec acceptance criteria + code review checklist (workflow.md)
-- [ ] Task 4.2: Apply review suggestions (if any)
-- [ ] Task 4.3: Mark track complete, archive to `conductor/archive/baloo2-glyphs_20260811/`, update registry
+- [x] Task 4.1: Self-review against spec acceptance criteria + code review checklist (workflow.md)
+- [x] Task 4.2: Apply review suggestions (if any)
+- [x] Task 4.3: Mark track complete, archive to `conductor/archive/baloo2-glyphs_20260811/`, update registry

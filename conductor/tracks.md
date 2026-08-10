@@ -136,4 +136,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Glyph Font Consistency — Baloo 2 Letters & Numerals** *Link: [./tracks/baloo2-glyphs_20260811/index.md](./tracks/baloo2-glyphs_20260811/index.md)*
+- [x] **Track: Glyph Font Consistency — Baloo 2 Letters & Numerals** *Link: [./archive/baloo2-glyphs_20260811/index.md](./archive/baloo2-glyphs_20260811/index.md)* (Archived)

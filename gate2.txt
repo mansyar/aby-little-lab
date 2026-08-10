@@ -1,0 +1,168 @@
+Γ£ô Lockfile passes supply-chain policies (verified 9d ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 1.4s using pnpm v11.7.0
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mC:/Users/Ansyar/Documents/Upskilling/games/aby-little-lab[39m
+
+ [32mΓ£ô[39m src/__tests__/scenes/navigation.test.ts [2m([22m[2m352 tests[22m[2m)[22m[33m 96742[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m navigates to each game scene when respective tile is clicked [33m 652[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m keeps tile taps navigating to games after press feedback is attached [33m 629[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m under reduced motion: plays the idle call but does not wiggle tiles [33m 546[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m squishes the Back control while pressed and restores it in 'BigSmallScene' [33m 698[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m does not re-award sticker on replay [33m 686[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m uses a reduced-motion progress dot pop [33m 741[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m tapping a sleeping bubble starts wake wobble animation [33m 823[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m makes object images interactive and draggable [33m 783[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m auto-returns to Hub after 3s delay [33m 473[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m creates 3 frog images and 3 lily pad images [33m 596[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m skips lily pad drift under reduced motion [33m 1106[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m creates 5 progress dots at scene initialization [33m 372[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m does not re-award sticker when already earned [33m 395[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m auto-returns to Hub after 3s delay on completion [33m 341[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m parental lock exits to Hub at any time [33m 444[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m tapping the correct card plays the correct chime, fills the dot, and advances [33m 1015[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m tapping a wrong card wiggles it gently and does not advance the round [33m 452[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m completing all 6 rounds triggers win, first-time sticker award, and auto-return [33m 367[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m does not re-award sticker when already earned [33m 308[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m re-launching after completion unlocks input so cards are tappable again [33m 627[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m creates 6 toy images [33m 387[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m creates 2 box images [33m 625[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m creates 2 drop zones with dropZone flag [33m 417[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m makes toy images interactive and draggable [33m 596[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m creates big toys >=96px and small toys >=64px [33m 669[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m correct drop snaps toy to box position, marks non-interactive, and shows bounded feedback [33m 789[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m incorrect drop bounces toy back to origin with wobble (no penalty, remains draggable) [33m 406[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m sorted toys lock in place and do not bounce on dragend [33m 482[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m drop on non-box target is a no-op (no snap, no SFX, no particles) [33m 2330[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m dragend without a drop on a zone bounces silently (no incorrect SFX) [33m 853[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m lifts and tilts the toy on drag start and restores it on drag end [33m 1088[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m uses a reduced-motion lift (1.05 scale, no tilt) when requested [33m 1178[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m pulses a soft outline on the box drop zone while dragging over it and clears on leave [33m 583[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m shrinks the toy into the box with a 150ms tween on a correct drop [33m 609[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m does not restore the drag-lift scale for a toy that was sorted [33m 599[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m wiggles the box lid and briefly scales the box up on a correct drop [33m 513[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m uses reduced-motion timings for the box reaction [33m 436[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m plays win SFX when all 6 toys are sorted [33m 346[2mms[22m[39m
+         [33m[2mΓ£ô[22m[39m places a small corner mascot behind gameplay [33m 954[2mms[22m[39m
+         [33m[2mΓ£ô[22m[39m cheers on a correct action [33m 312[2mms[22m[39m
+         [33m[2mΓ£ô[22m[39m destroys the mascot on scene shutdown [33m 960[2mms[22m[39m
+         [33m[2mΓ£ô[22m[39m cheers on a correct action [33m 313[2mms[22m[39m
+         [33m[2mΓ£ô[22m[39m does a big cheer when the round is won [33m 311[2mms[22m[39m
+         [33m[2mΓ£ô[22m[39m places a small corner mascot behind gameplay [33m 884[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m destroys ParentLock on shutdown in 'PopFreezeScene' [33m 308[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m destroys ParentLock on shutdown in 'MusicalMemoryScene' [33m 313[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m destroys ParentLock on shutdown in 'PatternBuilderScene' [33m 1113[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m destroys ParentLock on shutdown in 'MoreLessScene' [33m 352[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m destroys an open SettingsPanel on HubScene shutdown [33m 323[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m clears tracked stickers on shutdown so a shelf re-render never touches previous visits [33m 341[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is released early in 'PopFreezeScene' [33m 1119[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is released early in 'ShadowMatchScene' [33m 308[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is released early in 'MusicalMemoryScene' [33m 323[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is released early in 'PatternBuilderScene' [33m 317[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is released early in 'HowManyScene' [33m 324[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is released early in 'MoreLessScene' [33m 318[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is cancelled in 'PopFreezeScene' [33m 1116[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is cancelled in 'MusicalMemoryScene' [33m 317[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is cancelled in 'PatternBuilderScene' [33m 324[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is cancelled in 'HowManyScene' [33m 310[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never navigates when the Back hold is cancelled in 'FirstSoundsScene' [33m 318[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m never opens the panel when the Settings hold is released early [33m 334[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m opens the panel exactly once when the Settings hold completes despite duplicate pointerdown [33m 1182[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m cleans up the hold progress ring on shutdown in 'AnimalTraceScene' [33m 324[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m cleans up the hold progress ring on shutdown in 'ShadowMatchScene' [33m 317[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m cleans up the hold progress ring on shutdown in 'MusicalMemoryScene' [33m 313[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m cleans up the hold progress ring on shutdown in 'PatternBuilderScene' [33m 310[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m cleans up the hold progress ring on shutdown in 'FirstSoundsScene' [33m 1156[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m cleans up the Settings hold progress ring on Hub shutdown [33m 368[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m records the elapsed session minutes on return to the hub [33m 354[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m does not record play time when no game session was started [33m 369[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m records against the profile that started the session [33m 352[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m locks and dims tiles when the daily limit is reached [33m 367[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m does not navigate when tiles are locked [33m 380[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m draws a textless moon badge when time is up [33m 1391[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m shows no play-time graphics when no limit is set [33m 428[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m draws a hint arc showing remaining budget when a limit is set [33m 520[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m colors the hint arc warm when 5 minutes or fewer remain [33m 396[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m colors the hint arc cool green when plenty of time remains [33m 374[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m shows a nudge overlay before launching when 5 minutes or fewer remain [33m 422[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m launches games immediately when more than 5 minutes remain [33m 373[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m shows the nudge overlay under reduced motion without animating it [33m 350[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m unlocks the hub when switching to an unlimited profile [33m 1450[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m re-renders the hint when settings change [33m 453[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/addItUpLogic.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 1180[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m produces structurally valid rounds for every band across many samples [33m 387[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m keeps every round structurally valid [33m 706[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/takeAwayLogic.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 1148[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m keeps every round structurally valid [33m 842[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/colorMatchLogic.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 1368[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m keeps every round structurally valid [33m 841[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/wordLogic.test.ts [2m([22m[2m32 tests[22m[2m)[22m[33m 2242[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m always returns exactly 6 tiles [33m 475[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m contains every unique letter of the word [33m 1122[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/countLogic.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 780[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m proceeds easy-first through the bands (2 rounds each) [33m 462[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/memoryMatchLogic.test.ts [2m([22m[2m23 tests[22m[2m)[22m[33m 679[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m keeps every round structurally valid [33m 397[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/memoryMatchScene.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 462[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/moreLessLogic.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 412[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/wordMatchScene.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 352[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/takeAwayScene.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 338[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/howManyScene.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 331[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/addItUpScene.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 318[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/wordBuilderScene.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 322[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/firstWordsIntegration.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 289[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/components/SettingsPanel.test.ts [2m([22m[2m61 tests[22m[2m)[22m[32m 283[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/moreLessScene.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 274[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/firstSoundsScene.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 293[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/alphabetScene.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 211[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/oddOneOutLogic.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 228[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/firstSoundsLogic.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 206[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/alphabetLogic.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 201[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/colorMatchScene.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 191[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/patternBuilderScene.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 179[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/oddOneOutScene.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 173[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/hubScene.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 155[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/shapeSorterScene.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 161[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/popFreezeScene.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 133[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/patternBuilderLogic.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/animalTraceScene.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/gameSceneBase.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 71[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/audio/AudioManager.test.ts [2m([22m[2m52 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/storage.test.ts [2m([22m[2m48 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/components/ParentLock.test.ts [2m([22m[2m39 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/popFreezeLogic.test.ts [2m([22m[2m29 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/animalTraceLogic.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/components/Mascot.test.ts [2m([22m[2m27 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/progressLogic.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/voiceLogic.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/components/PwaToast.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/speech.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/profileLogic.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/viewportZoom.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/assets/letterNumeralFonts.test.ts [2m([22m[2m114 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/musicalMemoryLogic.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/completionEffect.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/dragJuice.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/shadowMatchLogic.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/playTimeLogic.test.ts [2m([22m[2m34 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/bigSmallLogic.test.ts [2m([22m[2m23 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/game/shapeSorterLogic.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/pwaInstall.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/preloadScene.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/pressFeedback.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/fonts.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/sceneTransitions.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/pwaBridge.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/scenes/sceneRegistry.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/components/SpeakerButton.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/motion.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/utils/typography.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/assets/arrowSvgPaths.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m62 passed[39m[22m[90m (62)[39m
+[2m      Tests [22m [1m[32m1467 passed[39m[22m[90m (1467)[39m
+[2m   Start at [22m 09:31:51
+[2m   Duration [22m 200.77s[2m (transform 3.73s, setup 0ms, import 12.52s, tests 110.48s, environment 54.39s)[22m
+
