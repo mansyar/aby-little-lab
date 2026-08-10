@@ -132,7 +132,7 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [ ] Obtain explicit confirmation that tagging may proceed.
   - [ ] Create or record the workflow checkpoint as permitted by the established release workflow.
 
-## Phase 6 — Tag and Production Deployment
+## Phase 6 — Tag and Production Deployment [checkpoint: 64e8297]
 
 - [x] **Task 6.1: Create the release tag**
   - [x] Update local `master` to the merged `origin/master`.
@@ -152,10 +152,11 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Confirm the served application is v1.14.0 with no stale v1.13.0 app version.
   - [x] Compare served assets with the release build by hash where deterministic, otherwise by content.
   - Evidence (2026-08-10): live URL 200; `sw.js` 200; `manifest.webmanifest` 200. Served entry `assets/index-oLiid_3z.js` matches the local release build exactly — SHA-256 identical (`F623F789EAB3…`); served bundle contains `1.14.0` and no `1.13.0` string.
-- [~] **Task 6.4: Phase Verification & Checkpoint**
+- [x] **Task 6.4: Phase Verification & Checkpoint**
   - [x] Record tag SHA, CI run URL, deployment result, asset evidence, and rollback reference.
-  - [ ] Obtain explicit manual confirmation that production deployment is healthy.
-  - [ ] Create the phase checkpoint and record its SHA.
+  - [x] Obtain explicit manual confirmation that production deployment is healthy.
+  - [x] Create the phase checkpoint and record its SHA.
+  - Evidence (2026-08-10): user confirmed deployment healthy. Records: tag `v1.14.0` → `5ec4705`; CI run <https://github.com/mansyar/aby-little-lab/actions/runs/31346877435>; deployed asset `index-oLiid_3z.js` (SHA-256 `F623F789EAB3…`); rollback = v1.13.0 tag. Checkpoint `64e8297`; git note attached.
 
 ## Phase 7 — Live Smoke and Physical-Device Verification
 
