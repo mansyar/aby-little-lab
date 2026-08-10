@@ -10,7 +10,7 @@
 - [x] Task 1.4: Wire `BootScene.create()` to await the helper before `this.scene.start("Preload")` (Green) `8af0ea2`
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 2 — SVG Glyph Font Update (38 files, tests-first)
+## Phase 2 — SVG Glyph Font Update (38 files, tests-first) [checkpoint: d5ee1c4]
 
 - [x] Task 2.1: Write failing asset regression tests — `letterNumeralFonts.test.ts` asserts all 38 raw SVGs carry `font-family="'Baloo 2', Arial, Helvetica, sans-serif"`, the old Arial-only string is absent, and the styling contract (`fill`/`stroke`/`stroke-width`/`paint-order`/`font-size`) is preserved (Red) `d4ad01f`
 - [x] Task 2.2: Update 26 letter SVGs (`letters/letter_a.svg`…`letter_z.svg`) `7337946`
