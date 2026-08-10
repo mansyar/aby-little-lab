@@ -196,7 +196,7 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Create the phase checkpoint and record its SHA.
   - Evidence (2026-08-10): user approved final verification. Checkpoint `0a2067e` (empty commit) on master; git note attached with the Phase 7 Verification Report.
 
-## Phase 8 — Finalize and Archive
+## Phase 8 — Finalize and Archive [checkpoint: 076315a]
 
 - [x] **Task 8.1: Finalize release records**
   - [x] Change release notes from DRAFT to FINAL.
@@ -217,7 +217,8 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Commit as `chore(conductor): Archive track 'v1.14.0 Release Execution'`.
   - [x] Attach the required Git note and record the SHA.
   - Evidence (2026-08-10): archival commit below; git note attached; SHA recorded.
-- [ ] **Task 8.5: Phase Verification & Checkpoint**
-  - [ ] Verify registry links, archived files, metadata, completed plan, and clean working tree.
-  - [ ] Obtain final manual approval.
-  - [ ] Create the final checkpoint and record its SHA.
+- [x] **Task 8.5: Phase Verification & Checkpoint**
+  - [x] Verify registry links, archived files, metadata, completed plan, and clean working tree.
+  - [x] Obtain final manual approval.
+  - [x] Create the final checkpoint and record its SHA.
+  - Evidence (2026-08-10): verified — registry link `./archive/release-1.14.0_20260810/index.md` resolves; 4 archived files present; metadata status `completed` / archivedAt `2026-08-10`; all plan tasks `[x]`; working tree clean; tag `v1.14.0` present. User granted final manual approval. Final checkpoint `076315a` (empty commit) with git note attached (Phase 8 Final Verification Report).
