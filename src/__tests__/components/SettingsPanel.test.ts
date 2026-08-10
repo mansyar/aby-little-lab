@@ -1049,7 +1049,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
     // Page control and the 7-day strip.
     expect(findTextByLabel(scene, "More")).toBeDefined();
-    expect(findTextByLabel(scene, "1 / 2")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "Last 7 days · 0 plays")).toBeDefined();
     const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24);
     expect(bars).toHaveLength(7);
@@ -1083,7 +1083,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 15 game rows", () => {
+  it("pages through all 17 game rows", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
@@ -1091,18 +1091,19 @@ describe("SettingsPanel progress report", () => {
     const pageOneRow = findTextByLabel(scene, "Shape Sorter") as MockGameObject;
     const moreButton = findTextByLabel(scene, "More") as MockGameObject;
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
+    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
 
     triggerPointerdown(moreButton);
     expect(moreButton.destroy).toHaveBeenCalled();
     expect(pageOneRow.destroy).toHaveBeenCalled();
-    expect(findTextByLabel(scene, "2 / 2")).toBeDefined();
+    expect(findTextByLabel(scene, "2 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeDefined();
+    expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
+    expect(findTextByLabel(scene, "Take Away")).toBeUndefined();
 
-    const backButton = findTextByLabel(scene, "Back") as MockGameObject;
-    triggerPointerdown(backButton);
-    expect(backButton.destroy).toHaveBeenCalled();
-    expect(findTextByLabel(scene, "1 / 2")).toBeDefined();
-    expect(findTextByLabel(scene, "More")).toBeDefined();
+    triggerPointerdown(findTextByLabel(scene, "More") as MockGameObject);
+    expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "Take Away")).toBeDefined();
   });
 
   it("re-renders rows for the selected profile without switching the active profile", () => {
