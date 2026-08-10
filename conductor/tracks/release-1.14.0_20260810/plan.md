@@ -33,7 +33,7 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [ ] Obtain explicit manual confirmation that the delta is intended for v1.14.0.
   - [ ] Create the workflow checkpoint commit with Git note and record its SHA.
 
-## Phase 2 — Release Branch and Version
+## Phase 2 — Release Branch and Version [checkpoint: 50c5dd8]
 
 - [x] **Task 2.1: Create `release/v1.14.0`**
   - [x] Branch from the verified completed local `master`.
