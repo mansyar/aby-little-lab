@@ -39,3 +39,7 @@
 - [x] Task: Update `README.md` (games table, hub experience notes) *(f94dbae — 18 games, table row 18, Memory Match juice bullet, replay variety, 8 count refs)*
 - [x] Task: Full quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` *(be85ffa — biome clean 129 files; full suite 60 files/1346 tests ALL PASSED (no flakes); build 2.38s; validate-pwa 13/13)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) *(be85ffa — diff from c8bca98 = 5 doc files + plan; all gates green)*
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions *bcf5192 — dedup isRoundComplete via logic import; 36/36 tests pass, Biome clean*
