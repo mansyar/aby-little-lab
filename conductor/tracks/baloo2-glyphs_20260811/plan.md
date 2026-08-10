@@ -18,7 +18,7 @@
 - [x] Task 2.4: Update 2 accents (`ui/tiles/tile_first_sounds.svg`, `stickers/sticker_first_sounds.svg`) (Green — full suite green) `91572f3`
 - [ ] Task: Phase Verification & Checkpoint (refer to workflow.md)
 
-## Phase 3 — Docs & Quality Gates
+## Phase 3 — Docs & Quality Gates [checkpoint: 1dbeb90]
 
 - [x] Task 3.1: Update `docs/SVG_STYLE.md` §4 — letters/numerals now use bundled Baloo 2 (bold, 400px, `#2B6CB0`/`#2D3748` styling unchanged) with Arial fallback; note the BootScene rasterization gate; keep the no-custom-paths-without-sign-off rule
 - [x] Task 3.2: Add dated design update to `conductor/tech-stack.md` — resolves the accepted known issue; gate behavior + timeout rationale; fallback rationale; zero new assets
