@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <circle cx="256" cy="256" r="240" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
   <g transform="translate(256 310) scale(0.52) translate(-256 -310)">
-    <text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="400" fill="#2B6CB0" stroke="#2D3748" stroke-width="14" paint-order="stroke fill">A</text>
+    <text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="'Baloo 2', Arial, Helvetica, sans-serif" font-weight="bold" font-size="400" fill="#2B6CB0" stroke="#2D3748" stroke-width="14" paint-order="stroke fill">A</text>
   </g>
   <path d="M 348 260 a 48 48 0 0 1 0 90" fill="none" stroke="#68D391" stroke-width="24" stroke-linecap="round"/>
   <path d="M 376 232 a 74 74 0 0 1 0 140" fill="none" stroke="#68D391" stroke-width="24" stroke-linecap="round"/>
