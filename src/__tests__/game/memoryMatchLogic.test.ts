@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  bandForRound,
   BAND_GRID,
   BAND_PAIRS,
+  bandForRound,
   buildPlaythrough,
   buildRound,
   isPair,
@@ -185,9 +185,7 @@ describe("isPair", () => {
       const round = buildRound("medium");
       for (let a = 0; a < round.layout.length; a++) {
         for (let b = 0; b < round.layout.length; b++) {
-          expect(isPair(round.layout, a, b)).toBe(
-            a !== b && round.layout[a] === round.layout[b],
-          );
+          expect(isPair(round.layout, a, b)).toBe(a !== b && round.layout[a] === round.layout[b]);
         }
       }
     }
