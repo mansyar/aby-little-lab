@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import {
   buildPlaythrough,
   isPair,
+  isRoundComplete,
   type MemoryBand,
   type MemoryRound,
 } from "../game/memoryMatchLogic";
@@ -284,9 +285,4 @@ export class MemoryMatchScene extends GameSceneBase {
       },
     });
   }
-}
-
-/** Returns true when every card in the round is matched. */
-function isRoundComplete(matched: readonly boolean[]): boolean {
-  return matched.every(Boolean);
 }
