@@ -1104,6 +1104,11 @@ describe("SettingsPanel progress report", () => {
     triggerPointerdown(findTextByLabel(scene, "More") as MockGameObject);
     expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
+
+    // Back on the last page wraps around to the first page.
+    triggerPointerdown(findTextByLabel(scene, "Back") as MockGameObject);
+    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "More")).toBeDefined();
   });
 
   it("re-renders rows for the selected profile without switching the active profile", () => {
