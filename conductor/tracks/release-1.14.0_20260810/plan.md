@@ -179,12 +179,13 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
   - [x] Move unrelated or non-release-blocking fixes into separately proposed tracks.
   - [x] Use the approved regression-first hotfix process if a release blocker must be corrected.
   - Evidence (2026-08-10): No Critical/High issues — release not blocked. Accepted non-blocking issue (Medium, pre-existing since v1.13.0, commit 61708b3): Learning Progress overlay row pitch (40px) vs 30px/26px fonts — stats text of each row visually collides with the next row's game name; parent-facing readability only, kids never see it; NOT fixed in v1.14.0 (out of scope per NFR) — proposed as a separate follow-up track. Observation: two earlier automated headless-session freezes on the live site were NOT reproduced in subsequent fresh sessions (local + live full playthroughs completed cleanly, zero console errors, user manual check passed) — recorded as environment/automation anomaly, no product action.
-- [~] **Task 7.4: Commit verification evidence**
+- [x] **Task 7.4: Commit verification evidence**
   - [x] Commit as `docs(release): Record v1.14.0 verification`.
-  - [ ] Attach the required Git note and record the SHA.
-  - [ ] Commit the corresponding plan-state update.
-- [ ] **Task 7.5: Phase Verification & Checkpoint**
-  - [ ] Confirm all production and physical-device acceptance criteria have evidence.
+  - [x] Attach the required Git note and record the SHA.
+  - [x] Commit the corresponding plan-state update.
+  - Evidence (2026-08-10): commit `8070d3f` on master — docs/device-testing-checklist.md (v1.14.0 result PASSED on all 4 device classes + automated smoke evidence) + plan.md (Tasks 7.1–7.3 complete); git note attached (verification record + triage summary). Playwright automation artifacts (.playwright-cli/, hub-17.png) removed from the tree before commit.
+- [~] **Task 7.5: Phase Verification & Checkpoint**
+  - [x] Confirm all production and physical-device acceptance criteria have evidence.
   - [ ] Obtain explicit final verification approval.
   - [ ] Create the phase checkpoint and record its SHA.
 
