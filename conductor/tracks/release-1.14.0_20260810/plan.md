@@ -57,27 +57,32 @@ For every file-changing task: mark `[~]`, implement, verify, commit with a Git n
 
 ## Phase 3 — Release Documentation and Test Matrix
 
-- [ ] **Task 3.1: Rewrite v1.14.0 release notes**
-  - [ ] Replace the superseded Progress-only draft with Take Away and the completed 17-game milestone.
-  - [ ] Use the established sections: What's New, Improvements, Bug Fixes, Known Issues, Installation, and Feedback.
-  - [ ] Keep status DRAFT until production and device verification finish.
-  - [ ] Preserve accepted known issues without claiming cloud sync or other out-of-scope work.
-- [ ] **Task 3.2: Prepare the v1.14.0 device execution record**
-  - [ ] Replace the superseded v1.14.0 record while retaining that Progress shipped in v1.13.0.
-  - [ ] Add the physical iOS/iPadOS and Android device matrix.
-  - [ ] Add checks for the 17-tile Hub, Take Away's six rounds, no-penalty feedback, sticker/replay behavior, progress reporting, save migration, PWA update, and offline relaunch.
-  - [ ] Mark execution results pending.
-- [ ] **Task 3.3: Prepare release-checklist records**
-  - [ ] Add v1.14.0 preparation status.
-  - [ ] Add an empty deployment-verification section.
-  - [ ] Add an incomplete final sign-off block.
-- [ ] **Task 3.4: Audit milestone documentation**
-  - [ ] Check Product, Tech Stack, PRD, TDD, README, and other release-facing docs for stale game counts or release claims.
-  - [ ] Patch only confirmed knowledge gaps.
-- [ ] **Task 3.5: Commit release documentation**
-  - [ ] Commit as `docs(release): Prepare v1.14.0 release`.
-  - [ ] Attach the required Git note and record the SHA.
-  - [ ] Commit the corresponding plan-state update.
+- [x] **Task 3.1: Rewrite v1.14.0 release notes**
+  - [x] Replace the superseded Progress-only draft with Take Away and the completed 17-game milestone.
+  - [x] Use the established sections: What's New, Improvements, Bug Fixes, Known Issues, Installation, and Feedback.
+  - [x] Keep status DRAFT until production and device verification finish.
+  - [x] Preserve accepted known issues without claiming cloud sync or other out-of-scope work.
+  - Evidence (2026-08-10): `docs/release-notes-v1.14.0.md` rewritten — Take Away (early subtraction, easy-first bands ≤4/≤6/≤10, 6 rounds, no-penalty feedback, first-completion sticker, 3s auto-return, replay freshness) + 17-game milestone; textless/speech-free; Hub 5×3 + 2; DRAFT status; known issues preserved (per-device storage, system-font glyph variance).
+- [x] **Task 3.2: Prepare the v1.14.0 device execution record**
+  - [x] Replace the superseded v1.14.0 record while retaining that Progress shipped in v1.13.0.
+  - [x] Add the physical iOS/iPadOS and Android device matrix.
+  - [x] Add checks for the 17-tile Hub, Take Away's six rounds, no-penalty feedback, sticker/replay behavior, progress reporting, save migration, PWA update, and offline relaunch.
+  - [x] Mark execution results pending.
+  - Evidence (2026-08-10): superseded record in `docs/device-testing-checklist.md` replaced with the current v1.14.0 record — live URL target, 4 device classes, 17-tile Hub (5×3 + 2), Take Away six easy-first rounds, textless/no-speaker, no-penalty wrong taps, win → sticker → 3s auto-return → replay no re-award, progress reporting (17 games, 8 + 8 + 1 pages), save migration, PWA update, offline relaunch; result pending.
+- [x] **Task 3.3: Prepare release-checklist records**
+  - [x] Add v1.14.0 preparation status.
+  - [x] Add an empty deployment-verification section.
+  - [x] Add an incomplete final sign-off block.
+  - Evidence (2026-08-10): `docs/release-checklist.md` — v1.14.0 prep note (baseline gates, branch, bump `2e4d39d`, notes rewritten, in-track fix recorded); Step 7n Verify Deployment — v1.14.0 (all items unchecked); Final Sign-Off — v1.14.0 (Status: In progress, approval unchecked).
+- [x] **Task 3.4: Audit milestone documentation**
+  - [x] Check Product, Tech Stack, PRD, TDD, README, and other release-facing docs for stale game counts or release claims.
+  - [x] Patch only confirmed knowledge gaps.
+  - Evidence (2026-08-10): audited `conductor/product.md`, `conductor/tech-stack.md`, `docs/PRD.md`, `docs/TDD.md`, `README.md` — game counts current (17); patched two stale "rows page 8 + 8" paging claims → "8 + 8 + 1" in `product.md:51` and `PRD.md:292` (report now covers 17 games). No other gaps found.
+- [x] **Task 3.5: Commit release documentation**
+  - [x] Commit as `docs(release): Prepare v1.14.0 release`.
+  - [x] Attach the required Git note and record the SHA.
+  - [x] Commit the corresponding plan-state update.
+  - Evidence (2026-08-10): docs commit `0a93c73` on `release/v1.14.0` (release notes + device checklist + release checklist + product.md + PRD.md; git note attached). Source fix committed separately: `dada2b0` — `fix(progress): Add Add It Up and Take Away to the Learning Progress report` (SettingsPanel.ts + regression tests, git note attached, SettingsPanel tests 60/60). Plan-state commit pending with Task 3.5 completion.
 - [ ] **Task 3.6: Phase Verification & Checkpoint**
   - [ ] Review all release wording and checklist rows against the approved specification.
   - [ ] Obtain explicit manual approval of the draft release materials.
