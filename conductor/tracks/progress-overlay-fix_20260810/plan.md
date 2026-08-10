@@ -31,12 +31,14 @@ checkpoints with verification protocol).
 
 ## Phase 2 — Render Verification
 
-- [ ] **Task 2.1: Headless render of all three pages**
-  - [ ] `pnpm exec vite preview --port 4173` + headless Chromium (playwright-cli): open Settings → Progress, capture pages 1/3, 2/3, 3/3.
-- [ ] **Task 2.2: Inspect screenshots for collisions**
-  - [ ] Check row ↔ row, first row ↔ profile chips, last row ↔ "1 / 3 · More" footer, stats ↔ accuracy bars.
-  - [ ] If evidence shows residual collisions: adjust constants (max 2 iterations) and re-run Phase 1 tests.
-- [ ] **Task 2.3: Commit render evidence + git note** (playwright artifacts excluded from the tree per repo practice; evidence recorded in `plan.md`).
+- [x] **Task 2.1: Headless render of all three pages**
+  - [x] `pnpm exec vite preview --port 4173` + headless Chromium (playwright-cli): open Settings → Progress, capture pages 1/3, 2/3, 3/3.
+  - Evidence (2026-08-10): built dist (35 PWA entries), preview on :4173, headless Chromium 1024x768. Navigated Hub → Settings (3s parent hold) → Progress; captured `progress-p1.png` (6 rows), `progress-p2.png` (6 rows), `progress-p3.png` (5 rows). Screenshots excluded from tree per repo practice.
+- [x] **Task 2.2: Inspect screenshots for collisions**
+  - [x] Check row ↔ row, first row ↔ profile chips, last row ↔ "1 / 3 · More" footer, stats ↔ accuracy bars.
+  - [x] If evidence shows residual collisions: adjust constants (max 2 iterations) and re-run Phase 1 tests.
+  - Evidence (2026-08-10): visual analysis of all 3 pages — row sets exact (6+6+5, 17/17 games), NO collisions in any of the 4 categories (row↔row, first row↔profile chip, last row↔footer, stats↔accuracy bars). No constant adjustment needed (0 iterations). Observations: rasterized row-name baseline spacing ≈52px (visual tolerance; deterministic test enforces ≥56px on text Y positions — passes); unplayed stats render "0 plays · – – –" (pre-existing unplayed-state format, unrelated to this track).
+- [x] **Task 2.3: Commit render evidence + git note** (playwright artifacts excluded from the tree per repo practice; evidence recorded in `plan.md`).
 - [ ] **Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)**
 
 ## Phase 3 — Release v1.14.1
