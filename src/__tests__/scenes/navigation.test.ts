@@ -757,6 +757,8 @@ describe("scene navigation flow", () => {
     });
 
     it("waits for the Baloo 2 glyph font before starting Preload", async () => {
+      // Definite-assignment (`!`) is safe here: the Promise executor runs
+      // synchronously, so resolveFont is assigned before any await.
       let resolveFont!: () => void;
       vi.mocked(ensureGlyphFontLoaded).mockReturnValueOnce(
         new Promise<void>((resolve) => {

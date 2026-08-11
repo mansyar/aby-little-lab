@@ -14,6 +14,8 @@ import { ensureGlyphFontLoaded } from "../../utils/fonts";
  * load, stalled network) it resolves and the SVG fallback stack renders.
  */
 
+// Intentional: assert the descriptor/timeout contract with literals rather
+// than importing module internals (a shared import would create a false pass).
 const BALOO_2_DESCRIPTOR = '700 400px "Baloo 2"';
 
 afterEach(() => {
