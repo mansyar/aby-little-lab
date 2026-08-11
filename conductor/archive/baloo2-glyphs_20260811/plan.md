@@ -32,3 +32,7 @@
 - [x] Task 4.1: Self-review against spec acceptance criteria + code review checklist (workflow.md)
 - [x] Task 4.2: Apply review suggestions (if any)
 - [x] Task 4.3: Mark track complete, archive to `conductor/archive/baloo2-glyphs_20260811/`, update registry
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions `4bb17ca`
