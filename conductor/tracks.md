@@ -140,3 +140,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Fix Hub Tiles Unresponsive After Completing a Game** *Link: [./archive/hub-navlock-revisit_20260822/index.md](./archive/hub-navlock-revisit_20260822/index.md)* (Archived)
 
 
+
+---
+
+- [ ] **Track: Professor Hoot — Ligne-Powered Animation Pilot** *Link: [./tracks/hoot-ligne-pilot_20260822/index.md](./tracks/hoot-ligne-pilot_20260822/index.md)*
