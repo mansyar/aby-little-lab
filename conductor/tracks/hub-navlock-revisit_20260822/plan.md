@@ -8,7 +8,7 @@
 For every file-changing task: mark `[~]`, implement, verify, commit with a Git
 note, mark `[x]`, record the SHA, and commit the plan update separately.
 
-## Phase 1 — TDD Regression Fix
+## Phase 1 — TDD Regression Fix [checkpoint: ffdc176]
 
 - [x] **Task 1.1: Write the failing regression test (Red)**
   - [x] Study the existing Hub tile-launch tests in
@@ -30,10 +30,10 @@ note, mark `[x]`, record the SHA, and commit the plan update separately.
 - [x] **Task 1.4: Commit the fix** — recorded fix SHA: `8bc9f87`
   - [x] Commit as `fix(hub): Reset navLocked when the Hub scene restarts`.
   - [x] Attach task-summary Git note; record SHA in plan; commit plan update.
-- [ ] **Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)**
-  - [ ] Announce test command + results; propose manual verification steps
+- [x] **Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)**
+  - [x] Announce test command + results; propose manual verification steps
         (dev server: play game → auto-return → start different game).
-  - [ ] Await explicit user confirmation; create checkpoint commit + Git note;
+  - [x] Await explicit user confirmation; create checkpoint commit + Git note;
         record `[checkpoint: <sha>]`.
 
 ## Phase 2 — Version Bump and Release Notes (v1.14.2)
