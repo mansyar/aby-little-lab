@@ -8,7 +8,7 @@ Gates before any task completion: `pnpm run check` → `CI=true pnpm test` →
 `pnpm run build`. Every file-changing task: mark `[~]`, implement, verify,
 commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
-## Phase 1 — Asset Authoring and Pipeline Proof
+## Phase 1 — Asset Authoring and Pipeline Proof [checkpoint: 8cc0c52]
 
 - [x] **Task 1.1: Verify authoring toolchain**
   - [x] Locate/verify prebuilt `ligne-cli` (Ligne workspace at `D:\Projects\ligne`);
@@ -48,12 +48,26 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
   - [x] Quality gates on the asset: `validate` clean; `decompile ∘ compile`
         identity diff green; compile `hoot.ligne` (18,100 bytes).
   - [x] Commit sources + compiled binary; Git note; SHA record; plan commit.
-- [ ] **Task 1.4: Golden review checkpoint**
-  - [ ] Render a labeled contact sheet of all 7 states; present to user.
-  - [ ] Await explicit approval (rework loop if poses/motion rejected).
-  - [ ] Phase checkpoint commit + verification note; `[checkpoint: <sha>]`.
+- [x] **Task 1.4: Golden review checkpoint**
+  - [x] Render a labeled contact sheet of all 7 states; present to user. —
+        DONE, with a material caveat: `ligne-cli render` ignores `--time` for
+        animation sampling (every frame byte-identical), so static pose review
+        of MOTION is impossible with the CLI; the sheet showed one fixed frame
+        per clip doc.
+  - [x] Await explicit approval (rework loop if poses/motion rejected). —
+        User chose to close Phase 1 with motion verification DEFERRED: Phase 2
+        opens with a live preview harness before any game integration.
+  - [x] Phase checkpoint commit + verification note; `[checkpoint: 8cc0c52]`.
 
 ## Phase 2 — Runtime Integration (TDD)
+
+- [ ] **Task 2.0: Live motion-proof harness (NEW — gate for everything else)**
+  - [ ] Standalone preview page (not wired into the game) loading `hoot.ligne`
+        via `@ligne-engine/web` `LignePlayer`; buttons fire each trigger
+        (wave/nod/cheer/cheer_big/curious/flap_greeting); idle loop plays.
+  - [ ] User visually confirms all seven states animate correctly in-browser.
+        Rework loop on the asset if motion is wrong (edit SVG/SceneDoc →
+        recompile → reload). NO further integration until this passes.
 
 - [ ] **Task 2.1: Failing tests first (Red)**
   - [ ] Unit tests for `LigneMascot` against a mocked player interface:
