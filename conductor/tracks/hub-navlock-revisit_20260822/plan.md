@@ -51,23 +51,23 @@ note, mark `[x]`, record the SHA, and commit the plan update separately.
   - [x] Commit as `docs(release): Prepare v1.14.2 release notes` + Git note + SHA record.
 - [x] **Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)**
 
-## Phase 3 — Tag, Deploy, and Live Verification
+## Phase 3 — Tag, Deploy, and Live Verification [checkpoint: 1f6ecaf]
 
-- [ ] **Task 3.1: Create annotated tag `v1.14.2`** on the verified master-lineage HEAD;
-      verify annotation/target before any push.
-- [ ] **Task 3.2: Push master + tag; monitor CI**
-  - [ ] Push `master` (publishes the 55-commit backlog + this work) and the tag.
-  - [ ] Confirm tag-run Quality Gates pass and the master-lineage deploy guard passes;
-        confirm Deploy to Coolify completes.
-  - [ ] Contingency: if branch protection rejects a direct master push, fall back to
-        the established release-branch → PR flow (pause for user approval).
-- [ ] **Task 3.3: Verify deployment artifacts**
-  - [ ] Live URL, `sw.js`, `manifest.webmanifest` return 200; served bundle contains
-        `1.14.2` and no stale `1.14.1`; Settings footer shows v1.14.2.
-- [ ] **Task 3.4: Live reproduction-path smoke test**
-  - [ ] On the live PWA: boot → play a game → auto-return → start a *different*
-        game → repeat across several games; confirm zero dead tiles.
-- [ ] **Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)**
+- [x] **Task 3.1: Create annotated tag `v1.14.2`** on the verified master-lineage HEAD;
+      verify annotation/target before any push. — tag object `6e7c44e`, target = HEAD `48ec661`.
+- [x] **Task 3.2: Push master + tag; monitor CI**
+  - [x] Push `master` (published the backlog, `ab02152..48ec661`) and the tag.
+  - [x] Confirmed tag-run Quality Gates pass and the master-lineage deploy guard passes;
+        Deploy to Coolify completed (webhook fired, 11s).
+  - [x] Contingency unused: direct push accepted (no branch protection block).
+- [x] **Task 3.3: Verify deployment artifacts**
+  - [x] Live URL, `sw.js`, `manifest.webmanifest` return 200; served bundle
+        (`index-D-W8e_Vf.js`, hash-identical to gated local build) contains `1.14.2`
+        and no stale `1.14.1`.
+- [x] **Task 3.4: Live reproduction-path smoke test**
+  - [x] User-confirmed on the live PWA: v1.14.2 visible in Settings footer;
+        play game → auto-return → different game launches; multi-game chaining clean.
+- [x] **Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)**
 
 ## Phase 4 — Finalize and Archive
 
