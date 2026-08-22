@@ -1109,6 +1109,37 @@ describe("scene navigation flow", () => {
       }
     });
 
+    it("launches a different game after auto-returning to the same scene instance", async () => {
+      // Production replays ONE HubScene instance across visits: Phaser keeps
+      // the Hub in its scene registry, so returning from a game re-runs
+      // create() on the identical object instead of constructing a fresh one.
+      const scene = new HubScene();
+      scene.create();
+
+      // First visit: launch Shape Sorter.
+      const firstVisitRectCount = getRectangles(scene).length;
+      fireAllObjectEvents(getRectangles(scene)[0], "pointerup");
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      completeFadeOuts(scene);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("ShapeSorter");
+
+      // Phaser fires shutdown when the Hub is replaced by the game scene;
+      // emit it through the working event emitter so BOTH on/once-registered
+      // cleanup handlers run (the transition guard registers via once).
+      scene.events.emit("shutdown");
+
+      // Auto-return: the SAME instance re-runs create().
+      scene.create();
+
+      // Second visit: tap a DIFFERENT tile (second rect of the new batch).
+      fireAllObjectEvents(getRectangles(scene)[firstVisitRectCount + 1], "pointerup");
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      completeFadeOuts(scene);
+
+      expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, "AnimalTrace");
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("AnimalTrace");
+    });
+
     it("resumes AudioManager when a tile is clicked", () => {
       const scene = new HubScene();
       scene.create();

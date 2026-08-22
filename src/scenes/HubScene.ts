@@ -341,6 +341,9 @@ export class HubScene extends Phaser.Scene {
     this.attractTargets = [];
     this.timeUp = false;
     this.nudgeActive = false;
+    // Phaser reuses this instance across visits (auto-return re-runs create()),
+    // so clear the launch guard or every tile tap after the first game is dead.
+    this.navLocked = false;
 
     // Account for the play session that ended when the game scene returned.
     const ended = endPlaySession();
