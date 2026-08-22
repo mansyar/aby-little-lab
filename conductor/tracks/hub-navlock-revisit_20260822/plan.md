@@ -10,26 +10,26 @@ note, mark `[x]`, record the SHA, and commit the plan update separately.
 
 ## Phase 1 — TDD Regression Fix
 
-- [~] **Task 1.1: Write the failing regression test (Red)**
-  - [ ] Study the existing Hub tile-launch tests in
+- [x] **Task 1.1: Write the failing regression test (Red)**
+  - [x] Study the existing Hub tile-launch tests in
         `src/__tests__/scenes/navigation.test.ts` and match their setup/style.
-  - [ ] Add a test that replays a second hub visit **on the same scene instance**:
+  - [x] Add a test that replays a second hub visit **on the same scene instance**:
         tap a game tile → simulate game completion/auto-return by re-running
         `create()` on the identical instance → tap a different tile → assert
         navigation proceeds (`scene.start` called with the target key).
-  - [ ] Run the targeted suite and confirm the new test fails exactly as the
+  - [x] Run the targeted suite and confirm the new test fails exactly as the
         production bug does (silent no-op tap).
-- [ ] **Task 1.2: Implement the minimal fix (Green)**
-  - [ ] In `HubScene.create()`, reset `this.navLocked = false;` beside the
+- [x] **Task 1.2: Implement the minimal fix (Green)**
+  - [x] In `HubScene.create()`, reset `this.navLocked = false;` beside the
         existing transient-state resets (`timeUp`, `nudgeActive`).
-  - [ ] Rerun the targeted suite — new test green, no regressions in file.
-- [ ] **Task 1.3: Quality gates**
-  - [ ] `pnpm run check`
-  - [ ] `CI=true pnpm test`
-  - [ ] `pnpm run build`
-- [ ] **Task 1.4: Commit the fix**
-  - [ ] Commit as `fix(hub): Reset navLocked when the Hub scene restarts`.
-  - [ ] Attach task-summary Git note; record SHA in plan; commit plan update.
+  - [x] Rerun the targeted suite — new test green, no regressions in file.
+- [x] **Task 1.3: Quality gates**
+  - [x] `pnpm run check`
+  - [x] `CI=true pnpm test`
+  - [x] `pnpm run build`
+- [x] **Task 1.4: Commit the fix** — recorded fix SHA: `8bc9f87`
+  - [x] Commit as `fix(hub): Reset navLocked when the Hub scene restarts`.
+  - [x] Attach task-summary Git note; record SHA in plan; commit plan update.
 - [ ] **Task 1.5: Phase Verification & Checkpoint (Refer to workflow.md)**
   - [ ] Announce test command + results; propose manual verification steps
         (dev server: play game → auto-return → start different game).
