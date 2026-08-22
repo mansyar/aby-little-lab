@@ -1,6 +1,6 @@
 # Release Notes - v1.14.2
 
-> **Status:** DRAFT - pending tag `v1.14.2` deployment (will be finalized with live URL and verification results after CI/CD deploy).
+> **Status:** FINAL - released 2026-08-22 (tag `v1.14.2`, deployed live at https://aby-little-lab.ansyar-world.top/ via CI/CD; tag-run bundle and PWA validation passed; served build verified as v1.14.2; live hub fix confirmed by multi-game chaining smoke test).
 
 This patch release fixes a navigation bug that could leave the game hub unresponsive after finishing a game, and also ships two completed feature tracks that were finished after v1.14.1 was cut: the eighteenth learning game (**Memory Match**) and consistent **Baloo 2** letter/numeral artwork.
 
