@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Professor Hoot — Ligne artboard v1. Rig-friendly: every animated part
+       lives in its own translate-anchored group so the imported SceneDoc node
+       carries its rotation pivot. Palette matches mascot_idle.svg exactly. -->
+  <!-- tail (drawn first: behind everything) -->
+  <g id="tail">
+    <polygon points="238,420 208,478 252,452" fill="#C0801F" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <polygon points="256,424 256,486 276,456" fill="#D69E2E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <polygon points="274,420 304,478 260,452" fill="#C0801F" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <!-- feet -->
+  <g id="feet">
+    <ellipse cx="200" cy="462" rx="32" ry="14" fill="#ED8936" stroke="#2D3748" stroke-width="5"/>
+    <ellipse cx="312" cy="462" rx="32" ry="14" fill="#ED8936" stroke="#2D3748" stroke-width="5"/>
+  </g>
+  <!-- wings (behind body, shoulder pivots via group translate) -->
+  <g id="wing_left" transform="translate(126 296)">
+    <ellipse cx="0" cy="0" rx="38" ry="74" fill="#C0801F" stroke="#2D3748" stroke-width="6"/>
+  </g>
+  <g id="wing_right" transform="translate(386 296)">
+    <ellipse cx="0" cy="0" rx="38" ry="74" fill="#C0801F" stroke="#2D3748" stroke-width="6"/>
+  </g>
+  <!-- body group: torso + belly + lab coat (pivot at torso centre) -->
+  <g id="body" transform="translate(256 310)">
+    <circle cx="0" cy="0" r="140" fill="#D69E2E" stroke="#2D3748" stroke-width="8"/>
+    <ellipse cx="0" cy="42" rx="92" ry="82" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+    <ellipse cx="0" cy="88" rx="114" ry="54" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+    <polygon points="-34,-16 0,18 34,-16" fill="#FFF8E7" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <rect x="46" y="58" width="54" height="42" rx="7" fill="#FFF8E7" stroke="#2D3748" stroke-width="4"/>
+    <rect x="68" y="42" width="11" height="28" rx="3" fill="#4FD1C5" stroke="#2D3748" stroke-width="3"/>
+  </g>
+  <!-- head group (pivot at neck so curious head-tilt reads naturally) -->
+  <g id="head" transform="translate(256 170)">
+    <!-- ear tufts (inside head so they follow tilts) -->
+    <polygon points="-71,-72 -41,-128 -11,-84" fill="#D69E2E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="71,-72 41,-128 11,-84" fill="#D69E2E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+    <circle cx="0" cy="0" r="105" fill="#D69E2E" stroke="#2D3748" stroke-width="8"/>
+    <!-- eyes: own groups; each ends with a hidden gold eyelid (fill-opacity 0)
+         that idle_loop's blink raises via FillAlpha -->
+    <g id="eye_left" transform="translate(-46 -15)">
+      <circle cx="0" cy="0" r="48" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+      <circle cx="9" cy="6" r="21" fill="#2D3748"/>
+      <circle cx="15" cy="-2" r="7" fill="#FFF8E7"/>
+      <g id="lid_left">
+        <circle cx="0" cy="0" r="48" fill="#D69E2E" stroke="#2D3748" stroke-width="6" fill-opacity="0" stroke-opacity="0"/>
+      </g>
+    </g>
+    <g id="eye_right" transform="translate(46 -15)">
+      <circle cx="0" cy="0" r="48" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+      <circle cx="-9" cy="6" r="21" fill="#2D3748"/>
+      <circle cx="-15" cy="-2" r="7" fill="#FFF8E7"/>
+      <g id="lid_right">
+        <circle cx="0" cy="0" r="48" fill="#D69E2E" stroke="#2D3748" stroke-width="6" fill-opacity="0" stroke-opacity="0"/>
+      </g>
+    </g>
+    <g id="beak" transform="translate(0 52)">
+      <polygon points="0,-24 -22,12 22,12" fill="#ED8936" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>
