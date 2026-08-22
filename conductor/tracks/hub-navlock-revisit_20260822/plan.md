@@ -36,19 +36,20 @@ note, mark `[x]`, record the SHA, and commit the plan update separately.
   - [x] Await explicit user confirmation; create checkpoint commit + Git note;
         record `[checkpoint: <sha>]`.
 
-## Phase 2 — Version Bump and Release Notes (v1.14.2)
+## Phase 2 — Version Bump and Release Notes (v1.14.2) [checkpoint: 4126b42]
 
-- [ ] **Task 2.1: Verify pre-release state**
-  - [ ] Clean tree; `package.json` = 1.14.1; no `v1.14.2` tag exists locally/remotely.
-- [ ] **Task 2.2: Bump version**
-  - [ ] `npm version 1.14.2 --no-git-tag-version`; confirm only expected files change.
-  - [ ] Build once and confirm the bundle embeds `1.14.2` (no stale `1.14.1`).
-  - [ ] Commit as `chore(release): Bump version to 1.14.2` + Git note + SHA record.
-- [ ] **Task 2.3: Write release notes**
-  - [ ] Create `docs/release-notes-v1.14.2.md` using the established section layout,
-        describing the hub dead-tiles fix (DRAFT until deployed).
-  - [ ] Commit as `docs(release): Prepare v1.14.2 release notes` + Git note + SHA record.
-- [ ] **Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)**
+- [x] **Task 2.1: Verify pre-release state**
+  - [x] Clean tree; `package.json` = 1.14.1; no `v1.14.2` tag exists locally/remotely.
+- [x] **Task 2.2: Bump version** — recorded bump SHA: `b074d46`
+  - [x] `npm version 1.14.2 --no-git-tag-version`; confirm only expected files change.
+  - [x] Build once and confirm the bundle embeds `1.14.2` (no stale `1.14.1`).
+  - [x] Commit as `chore(release): Bump version to 1.14.2` + Git note + SHA record.
+- [x] **Task 2.3: Write release notes** — recorded notes SHA: `6a623c4`
+  - [x] Create `docs/release-notes-v1.14.2.md` using the established section layout,
+        describing the hub dead-tiles fix plus shipped Memory Match / Baloo 2 work
+        (DRAFT until deployed).
+  - [x] Commit as `docs(release): Prepare v1.14.2 release notes` + Git note + SHA record.
+- [x] **Task 2.4: Phase Verification & Checkpoint (Refer to workflow.md)**
 
 ## Phase 3 — Tag, Deploy, and Live Verification
 
