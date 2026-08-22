@@ -10,7 +10,7 @@ note, mark `[x]`, record the SHA, and commit the plan update separately.
 
 ## Phase 1 — TDD Regression Fix
 
-- [ ] **Task 1.1: Write the failing regression test (Red)**
+- [~] **Task 1.1: Write the failing regression test (Red)**
   - [ ] Study the existing Hub tile-launch tests in
         `src/__tests__/scenes/navigation.test.ts` and match their setup/style.
   - [ ] Add a test that replays a second hub visit **on the same scene instance**:

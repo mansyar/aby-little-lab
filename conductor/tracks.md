@@ -140,4 +140,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix Hub Tiles Unresponsive After Completing a Game** *Link: [./tracks/hub-navlock-revisit_20260822/index.md](./tracks/hub-navlock-revisit_20260822/index.md)*
+- [~] **Track: Fix Hub Tiles Unresponsive After Completing a Game** *Link: [./tracks/hub-navlock-revisit_20260822/index.md](./tracks/hub-navlock-revisit_20260822/index.md)*
