@@ -69,12 +69,12 @@ note, mark `[x]`, record the SHA, and commit the plan update separately.
         play game → auto-return → different game launches; multi-game chaining clean.
 - [x] **Task 3.5: Phase Verification & Checkpoint (Refer to workflow.md)**
 
-## Phase 4 — Finalize and Archive
+## Phase 4 — Finalize and Archive [checkpoint: 874e0bf]
 
-- [ ] **Task 4.1: Finalize records** — flip release notes DRAFT → FINAL; record
-      deployment evidence.
-- [ ] **Task 4.2: Complete Conductor state** — metadata → completed/archived;
+- [x] **Task 4.1: Finalize records** — recorded finalize SHA: `e6e5df6`
+      Release notes flipped DRAFT → FINAL with deployment evidence.
+- [x] **Task 4.2: Complete Conductor state** — metadata → completed/archived;
       move track to `conductor/archive/hub-navlock-revisit_20260822/`; update
       Tracks Registry link; commit `chore(conductor): Archive track
       'Fix Hub Tiles Unresponsive After Completing a Game'` + Git note.
-- [ ] **Task 4.3: Final Verification & Checkpoint (Refer to workflow.md)**
+- [x] **Task 4.3: Final Verification & Checkpoint (Refer to workflow.md)**

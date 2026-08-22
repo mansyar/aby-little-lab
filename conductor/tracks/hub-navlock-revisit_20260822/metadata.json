@@ -2,8 +2,9 @@
   "id": "hub-navlock-revisit_20260822",
   "title": "Fix Hub Tiles Unresponsive After Completing a Game",
   "type": "bug",
-  "status": "new",
+  "status": "completed",
   "createdAt": "2026-08-22",
   "updatedAt": "2026-08-22",
+  "archivedAt": "2026-08-22",
   "summary": "Reset HubScene.navLocked on scene restart so tiles stay responsive after returning from any game, with a TDD regression test replaying a second hub visit on the same instance; ship as patch release v1.14.2 via tag-triggered CI/CD deploy."
 }
