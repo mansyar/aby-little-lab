@@ -137,7 +137,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Glyph Font Consistency — Baloo 2 Letters & Numerals** *Link: [./archive/baloo2-glyphs_20260811/index.md](./archive/baloo2-glyphs_20260811/index.md)* (Archived)
+- [x] **Track: Fix Hub Tiles Unresponsive After Completing a Game** *Link: [./archive/hub-navlock-revisit_20260822/index.md](./archive/hub-navlock-revisit_20260822/index.md)* (Archived)
 
----
 
-- [~] **Track: Fix Hub Tiles Unresponsive After Completing a Game** *Link: [./tracks/hub-navlock-revisit_20260822/index.md](./tracks/hub-navlock-revisit_20260822/index.md)*
