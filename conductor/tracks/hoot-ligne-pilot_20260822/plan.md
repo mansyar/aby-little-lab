@@ -10,26 +10,44 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
 ## Phase 1 — Asset Authoring and Pipeline Proof
 
-- [ ] **Task 1.1: Verify authoring toolchain**
-  - [ ] Locate/verify prebuilt `ligne-cli` (Ligne workspace at `D:\Projects\ligne`);
-        record version; smoke-test `validate --help`.
-  - [ ] Decide asset locations in this repo: authoring sources
+- [x] **Task 1.1: Verify authoring toolchain**
+  - [x] Locate/verify prebuilt `ligne-cli` (Ligne workspace at `D:\Projects\ligne`);
+        record version; smoke-test `validate --help`. — **ligne-cli 0.2.0** at
+        `D:\Projects\ligne\target\debug\ligne-cli.exe`; validate help OK.
+  - [x] Decide asset locations in this repo: authoring sources
         (`hoot.svg`, `hoot.ligne.json`) + compiled `hoot.ligne` under a new
-        `assets/ligne/`; confirm import-path convention against Vite config.
-- [ ] **Task 1.2: Author the rig-ready artboard (FR1)**
-  - [ ] Write `hoot.svg`: Storybook Flat, thick 4–6px outline strokes, flat
+        `assets/ligne/`; confirm import-path convention against Vite config. —
+        Decided `src/assets/ligne/` (matches existing `src/assets/svg/<cat>/`
+        convention).
+- [x] **Task 1.2: Author the rig-ready artboard (FR1)**
+  - [x] Write `hoot.svg`: Storybook Flat, thick 4–6px outline strokes, flat
         fills, brand palette continuity; named groups `body / head / eye_left /
-        eye_right / beak / wing_left / wing_right / tail / feet`.
-  - [ ] `ligne-cli import` → SceneDoc → `validate` → render static snapshot.
-- [ ] **Task 1.3: Rig and animate the seven states (FR2)**
-  - [ ] Bones/rig via small `mutate` batches; pose verification via render
-        snapshots (wing raise, head tilt extremes).
-  - [ ] Author states/transitions: idle loop (bob+blink+breathing), wave, nod,
+        eye_right / beak / wing_left / wing_right / tail / feet`. — Written;
+        palette mirrored from mascot_idle.svg (#D69E2E/#C0801F/#F6AD55/#FFF8E7/
+        #ED8936/#4FD1C5 pen, #2D3748 outlines); parts anchored via translate
+        groups so imported nodes carry pivots (verified in SceneDoc: head
+        tx=256/ty=170, wings at shoulders).
+  - [x] `ligne-cli import` → SceneDoc → `validate` → render static snapshot. —
+        import ok / validate ok / render ok; t0 PNG visually verified.
+- [x] **Task 1.3: Rig and animate the seven states (FR2)** — recorded SHA: `84ce2e1`
+  - [x] Bones/rig via small `mutate` batches; pose verification via render
+        snapshots (wing raise, head tilt extremes). — Pivots achieved without
+        bones: named translate-anchored groups import as nodes carrying their
+        transforms; rotations compose correctly around them.
+  - [x] Author states/transitions: idle loop (sway+blink), wave, nod,
         cheer, cheer_big, curious, flap_greeting; exit-time transitions back to
-        idle, ~150ms cross-fades.
-  - [ ] Quality gates on the asset: `validate` clean; `decompile ∘ compile`
-        identity diff green; compile `hoot.ligne`.
-  - [ ] Commit sources + compiled binary; Git note; SHA record; plan commit.
+        idle, ~150ms cross-fades. — NOTE: engine limitations discovered in
+        ligne-cli 0.2.0 renderer forced a rotation+FillAlpha-only design:
+        Sx/Sy tracks sample ~0; any Tx/Ty track rebuilds the node transform
+        dropping rest translation. Idle bob/breathing became a ±1.6° body sway;
+        cheer hops became wing-raise + head-lift compositions; blink is two
+        hidden gold eyelids toggled via FillAlpha tracks (SVG fill-opacity
+        survives import). Animations/states/transitions/layers were injected by
+        scripted SceneDoc authoring because the mutate vocabulary cannot create
+        animations.
+  - [x] Quality gates on the asset: `validate` clean; `decompile ∘ compile`
+        identity diff green; compile `hoot.ligne` (18,100 bytes).
+  - [x] Commit sources + compiled binary; Git note; SHA record; plan commit.
 - [ ] **Task 1.4: Golden review checkpoint**
   - [ ] Render a labeled contact sheet of all 7 states; present to user.
   - [ ] Await explicit approval (rework loop if poses/motion rejected).
