@@ -1,60 +1,94 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Professor Hoot — Ligne artboard v1. Rig-friendly: every animated part
-       lives in its own translate-anchored group so the imported SceneDoc node
-       carries its rotation pivot. Palette matches mascot_idle.svg exactly. -->
-  <!-- tail (drawn first: behind everything) -->
+  <!-- Professor Hoot — fresh flat-vector rebuild for the Ligne rig. -->
+
   <g id="tail">
-    <polygon points="238,420 208,478 252,452" fill="#C0801F" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-    <polygon points="256,424 256,486 276,456" fill="#D69E2E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-    <polygon points="274,420 304,478 260,452" fill="#C0801F" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M218 406 L205 477 L247 445 Z" fill="#A9661C" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M256 412 L256 490 L284 444 Z" fill="#C0801F" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M294 406 L307 477 L265 445 Z" fill="#A9661C" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
   </g>
-  <!-- feet -->
+
   <g id="feet">
-    <ellipse cx="200" cy="462" rx="32" ry="14" fill="#ED8936" stroke="#2D3748" stroke-width="5"/>
-    <ellipse cx="312" cy="462" rx="32" ry="14" fill="#ED8936" stroke="#2D3748" stroke-width="5"/>
+    <path d="M162 479 Q168 463 183 467 Q190 451 204 466 Q214 454 225 469 Q238 463 243 477 Q232 490 203 490 Q175 490 162 479 Z" fill="#ED8936" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M350 479 Q344 463 329 467 Q322 451 308 466 Q298 454 287 469 Q274 463 269 477 Q280 490 309 490 Q337 490 350 479 Z" fill="#ED8936" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M186 466 Q192 478 188 487 M213 465 Q218 478 213 488 M326 466 Q320 478 324 487 M299 465 Q294 478 299 488" fill="none" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
   </g>
-  <!-- wings (behind body, shoulder pivots via group translate) -->
+
+  <!-- Coat sleeves and feathered wing-hands rotate together from the shoulders. -->
   <g id="wing_left" transform="translate(126 296)">
-    <ellipse cx="0" cy="0" rx="38" ry="74" fill="#C0801F" stroke="#2D3748" stroke-width="6"/>
+    <path d="M35 -72 C-13 -84 -49 -49 -51 -7 C-52 14 -46 31 -35 43 L-13 22 C-20 5 -14 -17 3 -34 C17 -47 32 -58 35 -72 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M-15 16 C-31 18 -41 31 -40 44 C-39 53 -31 56 -24 50 C-33 60 -30 70 -22 74 C-13 77 -8 69 -5 61 C-8 72 -1 79 7 75 C17 69 15 56 10 44 C5 29 -4 18 -15 16 Z" fill="#C0801F" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-35 43 L-14 18" fill="none" stroke="#2D3748" stroke-width="5" stroke-linecap="round"/>
+    <path d="M-30 49 Q-18 55 -11 65 M-25 32 Q-11 39 -4 51" fill="none" stroke="#F6AD55" stroke-width="4" stroke-linecap="round"/>
   </g>
   <g id="wing_right" transform="translate(386 296)">
-    <ellipse cx="0" cy="0" rx="38" ry="74" fill="#C0801F" stroke="#2D3748" stroke-width="6"/>
+    <path d="M-35 -72 C13 -84 49 -49 51 -7 C52 14 46 31 35 43 L13 22 C20 5 14 -17 -3 -34 C-17 -47 -32 -58 -35 -72 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M15 16 C31 18 41 31 40 44 C39 53 31 56 24 50 C33 60 30 70 22 74 C13 77 8 69 5 61 C8 72 1 79 -7 75 C-17 69 -15 56 -10 44 C-5 29 4 18 15 16 Z" fill="#C0801F" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M35 43 L14 18" fill="none" stroke="#2D3748" stroke-width="5" stroke-linecap="round"/>
+    <path d="M30 49 Q18 55 11 65 M25 32 Q11 39 4 51" fill="none" stroke="#F6AD55" stroke-width="4" stroke-linecap="round"/>
   </g>
-  <!-- body group: torso + belly + lab coat (pivot at torso centre) -->
+
   <g id="body" transform="translate(256 310)">
-    <circle cx="0" cy="0" r="140" fill="#D69E2E" stroke="#2D3748" stroke-width="8"/>
-    <ellipse cx="0" cy="42" rx="92" ry="82" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
-    <ellipse cx="0" cy="88" rx="114" ry="54" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-    <polygon points="-34,-16 0,18 34,-16" fill="#FFF8E7" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-    <rect x="46" y="58" width="54" height="42" rx="7" fill="#FFF8E7" stroke="#2D3748" stroke-width="4"/>
-    <rect x="68" y="42" width="11" height="28" rx="3" fill="#4FD1C5" stroke="#2D3748" stroke-width="3"/>
+    <ellipse cx="0" cy="11" rx="128" ry="145" fill="#C0801F" stroke="#2D3748" stroke-width="8"/>
+
+    <!-- Layered breast feathers remain visible in the coat opening. -->
+    <path d="M-51 -64 Q-34 -43 -17 -61 Q0 -38 17 -61 Q34 -43 51 -64 L39 24 Q20 48 0 69 Q-20 48 -39 24 Z" fill="#D69E2E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-37 -37 Q-19 -18 0 -37 Q19 -18 37 -37 M-30 -8 Q-15 9 0 -8 Q15 9 30 -8 M-21 19 Q-10 32 0 19 Q10 32 21 19" fill="none" stroke="#F6AD55" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Full professor coat, cut high beneath the head. -->
+    <path d="M-127 -32 Q-109 -68 -87 -76 C-68 -49 -39 -31 0 -26 C39 -31 68 -49 87 -76 Q109 -68 127 -32 C132 20 128 85 112 140 Q57 159 0 159 Q-57 159 -112 140 C-128 85 -132 20 -127 -32 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M-112 -52 C-84 -50 -58 -44 -39 -37 C-23 -30 -10 -23 0 -19 C-8 1 -15 22 -21 48 C-37 23 -55 2 -73 -17 C-88 -32 -101 -44 -112 -52 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 -52 C84 -50 58 -44 39 -37 C23 -30 10 -23 0 -19 C8 1 15 22 21 48 C37 23 55 2 73 -17 C88 -32 101 -44 112 -52 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <line x1="0" y1="-17" x2="0" y2="151" stroke="#2D3748" stroke-width="3.5"/>
+    <circle cx="-15" cy="57" r="5" fill="#4FD1C5" stroke="#2D3748" stroke-width="2"/>
+    <circle cx="-15" cy="83" r="5" fill="#4FD1C5" stroke="#2D3748" stroke-width="2"/>
+    <circle cx="-15" cy="109" r="5" fill="#4FD1C5" stroke="#2D3748" stroke-width="2"/>
+
+    <!-- One research note and pen, with room to breathe. -->
+    <rect x="73" y="39" width="17" height="40" rx="3" transform="rotate(5 81 59)" fill="#FFF8E7" stroke="#2D3748" stroke-width="3"/>
+    <path d="M77 51 L85 51 M77 58 L85 58" stroke="#C0801F" stroke-width="2" stroke-linecap="round"/>
+    <path d="M48 62 L101 62 L97 103 Q75 115 52 103 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="62" y="35" width="11" height="39" rx="4" fill="#4FD1C5" stroke="#2D3748" stroke-width="3"/>
   </g>
-  <!-- head group (pivot at neck so curious head-tilt reads naturally) -->
+
   <g id="head" transform="translate(256 170)">
-    <!-- ear tufts (inside head so they follow tilts) -->
-    <polygon points="-71,-72 -41,-128 -11,-84" fill="#D69E2E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
-    <polygon points="71,-72 41,-128 11,-84" fill="#D69E2E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
-    <circle cx="0" cy="0" r="105" fill="#D69E2E" stroke="#2D3748" stroke-width="8"/>
-    <!-- eyes: own groups; each ends with a hidden gold eyelid (fill-opacity 0)
-         that idle_loop's blink raises via FillAlpha -->
-    <g id="eye_left" transform="translate(-46 -15)">
-      <circle cx="0" cy="0" r="48" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-      <circle cx="9" cy="6" r="21" fill="#2D3748"/>
-      <circle cx="15" cy="-2" r="7" fill="#FFF8E7"/>
+    <!-- Integrated horned-owl crown and rounded head. -->
+    <path d="M-101 -55 Q-107 -96 -78 -117 Q-72 -103 -64 -92 L-53 -99 Q-45 -88 -33 -83 Q0 -101 33 -83 Q45 -88 53 -99 L64 -92 Q72 -103 78 -117 Q107 -96 101 -55 C116 -23 112 25 94 60 C75 96 40 112 0 112 C-40 112 -75 96 -94 60 C-112 25 -116 -23 -101 -55 Z" fill="#C0801F" stroke="#2D3748" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M-79 -101 Q-69 -86 -51 -80 M79 -101 Q69 -86 51 -80" fill="none" stroke="#F6AD55" stroke-width="7" stroke-linecap="round"/>
+
+    <!-- Heart-shaped facial disk. -->
+    <path d="M0 -65 C-25 -89 -73 -80 -94 -43 C-115 -6 -99 49 -61 72 C-34 88 -12 70 0 51 C12 70 34 88 61 72 C99 49 115 -6 94 -43 C73 -80 25 -89 0 -65 Z" fill="#FFF8E7" stroke="#D69E2E" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M-83 -43 Q-50 -67 -17 -45 M17 -45 Q51 -62 83 -41" fill="none" stroke="#A9661C" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-32 -78 Q-16 -72 0 -60 Q16 -72 32 -78" fill="none" stroke="#F6AD55" stroke-width="5" stroke-linecap="round"/>
+
+    <g id="eye_left" transform="translate(-45 -10)">
+      <circle cx="0" cy="0" r="34" fill="#F6AD55" stroke="#C0801F" stroke-width="2.5"/>
+      <circle cx="1" cy="5" r="20" fill="#2D3748"/>
+      <circle cx="-5" cy="-4" r="7" fill="#FFF8E7"/>
+      <circle cx="5" cy="3" r="3" fill="#FFF8E7"/>
+      <circle cx="0" cy="0" r="41.5" fill="none" stroke="#2D3748" stroke-width="4.5"/>
       <g id="lid_left">
-        <circle cx="0" cy="0" r="48" fill="#D69E2E" stroke="#2D3748" stroke-width="6" fill-opacity="0" stroke-opacity="0"/>
+        <circle cx="0" cy="0" r="36" fill="#FFF8E7" stroke="#2D3748" stroke-width="5" fill-opacity="0" stroke-opacity="0"/>
       </g>
     </g>
-    <g id="eye_right" transform="translate(46 -15)">
-      <circle cx="0" cy="0" r="48" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
-      <circle cx="-9" cy="6" r="21" fill="#2D3748"/>
-      <circle cx="-15" cy="-2" r="7" fill="#FFF8E7"/>
+    <g id="eye_right" transform="translate(45 -10)">
+      <circle cx="0" cy="0" r="34" fill="#F6AD55" stroke="#C0801F" stroke-width="2.5"/>
+      <circle cx="-1" cy="5" r="20" fill="#2D3748"/>
+      <circle cx="-9" cy="-4" r="7" fill="#FFF8E7"/>
+      <circle cx="1" cy="3" r="3" fill="#FFF8E7"/>
+      <circle cx="0" cy="0" r="41.5" fill="none" stroke="#2D3748" stroke-width="4.5"/>
       <g id="lid_right">
-        <circle cx="0" cy="0" r="48" fill="#D69E2E" stroke="#2D3748" stroke-width="6" fill-opacity="0" stroke-opacity="0"/>
+        <circle cx="0" cy="0" r="36" fill="#FFF8E7" stroke="#2D3748" stroke-width="5" fill-opacity="0" stroke-opacity="0"/>
       </g>
     </g>
-    <g id="beak" transform="translate(0 52)">
-      <polygon points="0,-24 -22,12 22,12" fill="#ED8936" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+
+    <!-- Spectacle bridge, temples, and friendly cheek color. -->
+    <path d="M-5 -11 Q0 -17 5 -11 M-86 -17 L-103 -21 M86 -17 L103 -21" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="-78" cy="43" rx="15" ry="9" fill="#F6AD55"/>
+    <ellipse cx="79" cy="40" rx="17" ry="10" fill="#F6AD55"/>
+
+    <g id="beak" transform="translate(0 48)">
+      <path d="M-23 -7 Q0 -23 23 -7 Q15 10 0 19 Q-15 10 -23 -7 Z" fill="#ED8936" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M-7 15 Q0 23 7 15 Q3 25 0 27 Q-3 25 -7 15 Z" fill="#ED8936" stroke="#2D3748" stroke-width="2.5" stroke-linejoin="round"/>
     </g>
   </g>
 </svg>
