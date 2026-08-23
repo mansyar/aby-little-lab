@@ -72,12 +72,13 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
         after radians correction, safe `head_nod` wrapper, stronger flap motion,
         and child-friendly owl-professor art refinement; user: “looks fine.”
 
-- [ ] **Task 2.1: Failing tests first (Red)**
-  - [ ] Unit tests for `LigneMascot` against a mocked player interface:
+- [x] **Task 2.1: Failing tests first (Red)** — recorded SHA: `0bb6dcf`
+  - [x] Unit tests for `LigneMascot` against a mocked player interface:
         trigger mapping (wave/nod/cheer(big)/idleLoop/destroy → fireTrigger),
         swap orchestration (tween→Ligne in place, position/scale/depth kept),
         fallback on load failure/timeout, reduced-motion never loads, destroy
-        cleanup (no leaks of canvas/listeners/tweens).
+        cleanup (no leaks of canvas/listeners/tweens). — RED confirmed: targeted
+        suite fails on the intentionally missing `components/LigneMascot` module.
 - [ ] **Task 2.2: Implement to Green**
   - [ ] Install `@ligne-engine/web@^0.2.1` + `@ligne-engine/bundler@^0.1.0`;
         wire the bundler's Vite plugin for `.ligne` imports.
