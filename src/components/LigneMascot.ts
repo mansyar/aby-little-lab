@@ -41,6 +41,7 @@ interface ActivateLigneMascotOptions {
 export type LigneMascotLoader = (placement: LigneMascotPlacement) => Promise<LigneMascot>;
 
 const ARTBOARD_SIZE = 512;
+const DOM_OVERLAY_DEPTH = 1;
 
 async function resolveHootAssetUrl(): Promise<string> {
   if (import.meta.env.DEV) return "/hoot.ligne";
@@ -67,7 +68,11 @@ export async function loadLigneMascot(
   const player = await LignePlayer.load(await response.arrayBuffer(), canvas);
   const display = scene.add.dom(placement.x, placement.y, canvas);
   display.setScale(placement.scale);
-  display.setDepth(placement.depth);
+  // Phaser display depths and browser stacking contexts are unrelated. A
+  // negative DOM depth places Hoot beneath the entire WebGL canvas, not merely
+  // behind Phaser game objects. Keep the inert overlay above that canvas.
+  display.setDepth(DOM_OVERLAY_DEPTH);
+  canvas.parentElement?.style.setProperty("z-index", String(DOM_OVERLAY_DEPTH));
   return new LigneMascot({ player, canvas, display });
 }
 
