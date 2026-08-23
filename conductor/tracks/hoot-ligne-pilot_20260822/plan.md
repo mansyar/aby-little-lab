@@ -61,13 +61,16 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
 ## Phase 2 — Runtime Integration (TDD)
 
-- [ ] **Task 2.0: Live motion-proof harness (NEW — gate for everything else)**
-  - [ ] Standalone preview page (not wired into the game) loading `hoot.ligne`
+- [x] **Task 2.0: Live motion-proof harness (NEW — gate for everything else)** — recorded SHA: `b755c71`
+  - [x] Standalone preview page (not wired into the game) loading `hoot.ligne`
         via `@ligne-engine/web` `LignePlayer`; buttons fire each trigger
-        (wave/nod/cheer/cheer_big/curious/flap_greeting); idle loop plays.
-  - [ ] User visually confirms all seven states animate correctly in-browser.
+        (wave/nod/cheer/cheer_big/curious/flap_greeting); idle loop plays. —
+        Implemented in `preview-hoot.html` + `src/preview/ligne-hoot.ts`.
+  - [x] User visually confirms all seven states animate correctly in-browser.
         Rework loop on the asset if motion is wrong (edit SVG/SceneDoc →
-        recompile → reload). NO further integration until this passes.
+        recompile → reload). NO further integration until this passes. — Passed
+        after radians correction, safe `head_nod` wrapper, stronger flap motion,
+        and child-friendly owl-professor art refinement; user: “looks fine.”
 
 - [ ] **Task 2.1: Failing tests first (Red)**
   - [ ] Unit tests for `LigneMascot` against a mocked player interface:
