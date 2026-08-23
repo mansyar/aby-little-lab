@@ -42,6 +42,7 @@ export type LigneMascotLoader = (placement: LigneMascotPlacement) => Promise<Lig
 
 const ARTBOARD_SIZE = 512;
 const DOM_OVERLAY_DEPTH = 1;
+const APP_BACKGROUND = [250 / 255, 249 / 255, 246 / 255, 1] as const;
 
 async function resolveHootAssetUrl(): Promise<string> {
   if (import.meta.env.DEV) return "/hoot.ligne";
@@ -65,7 +66,14 @@ export async function loadLigneMascot(
   canvas.height = ARTBOARD_SIZE;
   canvas.className = "ligne-mascot-canvas";
   canvas.setAttribute("aria-hidden", "true");
-  const player = await LignePlayer.load(await response.arrayBuffer(), canvas);
+  const player = await LignePlayer.load(await response.arrayBuffer(), canvas, {
+    // Ligne 0.2.1's WebGPU backend configures an opaque canvas even when the
+    // clear alpha is zero. Match the app shell until the engine uses a
+    // premultiplied canvas alpha mode.
+    background: APP_BACKGROUND,
+    width: ARTBOARD_SIZE,
+    height: ARTBOARD_SIZE,
+  });
   const display = scene.add.dom(placement.x, placement.y, canvas);
   display.setScale(placement.scale);
   // Phaser display depths and browser stacking contexts are unrelated. A
@@ -73,7 +81,13 @@ export async function loadLigneMascot(
   // behind Phaser game objects. Keep the inert overlay above that canvas.
   display.setDepth(DOM_OVERLAY_DEPTH);
   canvas.parentElement?.style.setProperty("z-index", String(DOM_OVERLAY_DEPTH));
-  return new LigneMascot({ player, canvas, display });
+  try {
+    return new LigneMascot({ player, canvas, display });
+  } catch (error) {
+    player.dispose();
+    display.destroy();
+    throw error;
+  }
 }
 
 /** Adapts the Ligne player to the scene-facing mascot reaction API. */
@@ -89,8 +103,9 @@ export class LigneMascot {
   constructor(options: LigneMascotOptions) {
     this.player = options.player;
     this.display = options.display;
-    this.requestFrame = options.requestFrame ?? requestAnimationFrame;
-    this.cancelFrame = options.cancelFrame ?? cancelAnimationFrame;
+    this.requestFrame =
+      options.requestFrame ?? ((callback) => window.requestAnimationFrame(callback));
+    this.cancelFrame = options.cancelFrame ?? ((handle) => window.cancelAnimationFrame(handle));
     options.canvas.style.pointerEvents = "none";
     this.frameHandle = this.requestFrame(this.tick);
   }

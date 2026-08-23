@@ -27,7 +27,11 @@ async function boot(): Promise<void> {
       throw new Error(`asset fetch failed: HTTP ${response.status}`);
     }
     const bytes = new Uint8Array(await response.arrayBuffer());
-    const player = await LignePlayer.load(bytes, canvas);
+    const player = await LignePlayer.load(bytes, canvas, {
+      background: [250 / 255, 249 / 255, 246 / 255, 1],
+      width: canvas.width,
+      height: canvas.height,
+    });
 
     let last = performance.now();
     const tick = (now: number): void => {

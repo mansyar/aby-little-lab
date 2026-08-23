@@ -53,6 +53,7 @@ const PLACEMENT: LigneMascotPlacement = {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 describe("LigneMascot", () => {
@@ -93,6 +94,28 @@ describe("LigneMascot", () => {
 
     expect(player.advance).toHaveBeenLastCalledWith(0.016);
     expect(player.render).toHaveBeenCalledTimes(2);
+  });
+
+  it("invokes the browser animation-frame APIs with the Window receiver", () => {
+    const requestFrame = vi.fn(function (this: unknown) {
+      if (this !== window) throw new TypeError("Illegal invocation");
+      return 42;
+    });
+    const cancelFrame = vi.fn(function (this: unknown) {
+      if (this !== window) throw new TypeError("Illegal invocation");
+    });
+    vi.stubGlobal("requestAnimationFrame", requestFrame);
+    vi.stubGlobal("cancelAnimationFrame", cancelFrame);
+
+    const mascot = new LigneMascot({
+      player: createPlayer(),
+      canvas: document.createElement("canvas"),
+      display: { destroy: vi.fn() },
+    });
+    mascot.destroy();
+
+    expect(requestFrame).toHaveBeenCalledOnce();
+    expect(cancelFrame).toHaveBeenCalledWith(42);
   });
 
   it("keeps the overlay canvas touch-inert and installs no pointer listeners", () => {
