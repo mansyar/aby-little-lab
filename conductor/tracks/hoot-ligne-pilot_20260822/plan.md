@@ -79,17 +79,21 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
         fallback on load failure/timeout, reduced-motion never loads, destroy
         cleanup (no leaks of canvas/listeners/tweens). — RED confirmed: targeted
         suite fails on the intentionally missing `components/LigneMascot` module.
-- [ ] **Task 2.2: Implement to Green**
-  - [ ] Install `@ligne-engine/web@^0.2.1` + `@ligne-engine/bundler@^0.1.0`;
-        wire the bundler's Vite plugin for `.ligne` imports.
-  - [ ] `LigneMascot` component with exact API parity over `fireTrigger`;
-        no input plugin (touch-inert preserved).
-  - [ ] Lazy activation manager: post-boot dynamic import of engine chunk +
+- [x] **Task 2.2: Implement to Green** — recorded SHAs: `460ef6b`, `83821d0`
+  - [x] Install `@ligne-engine/web@^0.2.1` + `@ligne-engine/bundler@^0.1.0`;
+        wire the bundler's Vite plugin for `.ligne` imports. — Production build
+        emits the character asset and lazy Ligne JS/WASM chunks.
+  - [x] `LigneMascot` component with exact API parity over `fireTrigger`;
+        no input plugin (touch-inert preserved). — Canvas computed
+        `pointer-events: none` in the live Hub.
+  - [x] Lazy activation manager: post-boot dynamic import of engine chunk +
         character asset; hot-swap; silent tween fallback on failure/timeout;
         skip entirely under reduced motion.
-  - [ ] Fire `curious` when a game scene starts (GameSceneBase create);
-        `flap_greeting` on Hub load greeting slot.
-  - [ ] Run targeted suite → Green; then full gates.
+  - [x] Fire `curious` when a game scene starts (GameSceneBase create);
+        `flap_greeting` on Hub load greeting slot. — Reactions queue while the
+        lazy player loads so the scene-entry trigger is not lost.
+  - [x] Run targeted suite → Green; then full gates. — 63 files and 1,479 tests
+        passed; Biome check and production build passed.
 - [ ] **Task 2.3: Commit + phase checkpoint** (verification report incl.
       changed-file coverage; manual steps proposal; await user confirmation).
 
