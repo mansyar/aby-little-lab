@@ -56,7 +56,7 @@ export async function loadLigneMascot(
     import("@ligne-engine/web"),
     resolveHootAssetUrl(),
   ]);
-  const response = await fetch(assetUrl);
+  const response = await fetch(assetUrl, import.meta.env.DEV ? { cache: "no-store" } : undefined);
   if (!response.ok) throw new Error(`Unable to load Professor Hoot (${response.status})`);
 
   const canvas = document.createElement("canvas");

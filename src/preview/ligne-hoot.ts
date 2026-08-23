@@ -22,7 +22,7 @@ async function boot(): Promise<void> {
     throw new Error("missing #hoot canvas element");
   }
   try {
-    const response = await fetch(HOOT_URL);
+    const response = await fetch(HOOT_URL, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`asset fetch failed: HTTP ${response.status}`);
     }
