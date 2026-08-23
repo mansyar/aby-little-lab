@@ -123,6 +123,7 @@ describe("Mascot", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -396,6 +397,31 @@ describe("Mascot", () => {
       mascot.flapGreeting();
       resolveLoad?.(ligne as never);
       await vi.waitFor(() => expect(ligne.flapGreeting).toHaveBeenCalledOnce());
+    });
+
+    it("allows the Ligne WASM runtime more than three seconds to initialize", async () => {
+      vi.useFakeTimers();
+      const ligne = {
+        wave: vi.fn(),
+        nod: vi.fn(),
+        cheer: vi.fn(),
+        curious: vi.fn(),
+        flapGreeting: vi.fn(),
+        idleLoop: vi.fn(),
+        destroy: vi.fn(),
+      };
+      const load = vi.fn(
+        () =>
+          new Promise<never>((resolve) => {
+            setTimeout(() => resolve(ligne as never), 4_000);
+          }),
+      );
+
+      createCornerMascot(harness.scene as never, load);
+      await vi.advanceTimersByTimeAsync(4_000);
+
+      expect(harness.image.setVisible).toHaveBeenCalledWith(false);
+      expect(ligne.destroy).not.toHaveBeenCalled();
     });
   });
 

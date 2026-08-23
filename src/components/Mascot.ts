@@ -41,7 +41,9 @@ const BLINK_DURATION = 150;
 const BLINK_REPEAT_DELAY = 3700;
 
 const MASCOT_DEPTH = -1;
-const LIGNE_LOAD_TIMEOUT_MS = 3_000;
+// WASM compilation can exceed three seconds on lower-powered devices. The
+// fallback remains visible throughout, so a generous timeout has no UX cost.
+const LIGNE_LOAD_TIMEOUT_MS = 10_000;
 const SPARKLE_DEPTH = 0;
 
 /** Default mascot scale for scene placement. */
