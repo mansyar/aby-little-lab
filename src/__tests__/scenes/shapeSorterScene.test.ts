@@ -214,7 +214,7 @@ vi.mock("../../audio/AudioManager", () => ({
 }));
 
 const { mockMascot } = vi.hoisted(() => ({
-  mockMascot: { cheer: vi.fn(), nod: vi.fn(), destroy: vi.fn() },
+  mockMascot: { cheer: vi.fn(), curious: vi.fn(), nod: vi.fn(), destroy: vi.fn() },
 }));
 
 vi.mock("../../components/Mascot", () => ({

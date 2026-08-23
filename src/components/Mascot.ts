@@ -89,6 +89,7 @@ export class Mascot {
   /** The squash-blink loop, paused while cheering so it never fights the bounce. */
   private blinkTween?: Phaser.Tweens.Tween;
   private ligne?: LigneMascot;
+  private pendingLigneReaction?: (mascot: LigneMascot) => void;
   private destroyed = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number, scale: number) {
@@ -106,6 +107,7 @@ export class Mascot {
       this.ligne.wave();
       return;
     }
+    this.pendingLigneReaction = (mascot) => mascot.wave();
     this.addTween({
       targets: this.image,
       angle: { from: 0, to: motionScale(WAVE_ANGLE, WAVE_REDUCED_ANGLE) },
@@ -122,6 +124,7 @@ export class Mascot {
       this.ligne.nod();
       return;
     }
+    this.pendingLigneReaction = (mascot) => mascot.nod();
     this.addTween({
       targets: this.image,
       angle: { from: 0, to: motionScale(NOD_ANGLE, NOD_REDUCED_ANGLE) },
@@ -138,6 +141,7 @@ export class Mascot {
       this.ligne.cheer(big);
       return;
     }
+    this.pendingLigneReaction = (mascot) => mascot.cheer(big);
     this.image.setTexture(CELEBRATE_TEXTURE);
     this.cheerTween?.remove();
     this.blinkTween?.pause();
@@ -190,6 +194,25 @@ export class Mascot {
     });
   }
 
+  /** Queues the game-entry reaction for Ligne without changing tween fallback motion. */
+  curious(): void {
+    if (this.ligne) {
+      this.ligne.curious();
+      return;
+    }
+    this.pendingLigneReaction = (mascot) => mascot.curious();
+  }
+
+  /** Uses the existing fallback wave while reserving Ligne's richer greeting. */
+  flapGreeting(): void {
+    if (this.ligne) {
+      this.ligne.flapGreeting();
+      return;
+    }
+    this.wave();
+    this.pendingLigneReaction = (mascot) => mascot.flapGreeting();
+  }
+
   /** Starts the post-boot Ligne hot-swap without delaying scene creation. */
   async activateLigne(
     load: LigneMascotLoader = (placement) => loadLigneMascot(this.scene, placement),
@@ -212,6 +235,8 @@ export class Mascot {
       return;
     }
     this.ligne = ligne;
+    this.pendingLigneReaction?.(ligne);
+    this.pendingLigneReaction = undefined;
   }
 
   /** Stops all tweens and removes the image and any sparkle ring. */
@@ -228,6 +253,7 @@ export class Mascot {
     this.sparkle = null;
     this.ligne?.destroy();
     this.ligne = undefined;
+    this.pendingLigneReaction = undefined;
     this.image.destroy();
   }
 

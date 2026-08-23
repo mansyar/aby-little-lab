@@ -149,6 +149,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /** Places Professor Hoot in the bottom-right corner and stores the instance. */
   protected createCornerMascot(): Mascot {
     this.mascot = createCornerMascotComponent(this);
+    this.mascot.curious();
     return this.mascot;
   }
 

@@ -353,6 +353,8 @@ describe("Mascot", () => {
         wave: vi.fn(),
         nod: vi.fn(),
         cheer: vi.fn(),
+        curious: vi.fn(),
+        flapGreeting: vi.fn(),
         idleLoop: vi.fn(),
         destroy: vi.fn(),
       };
@@ -370,6 +372,30 @@ describe("Mascot", () => {
       expect(ligne.nod).toHaveBeenCalledOnce();
       expect(ligne.cheer).toHaveBeenCalledWith(true);
       expect(ligne.idleLoop).toHaveBeenCalledOnce();
+    });
+
+    it("replays a queued Ligne greeting after the lazy load completes", async () => {
+      const ligne = {
+        wave: vi.fn(),
+        nod: vi.fn(),
+        cheer: vi.fn(),
+        curious: vi.fn(),
+        flapGreeting: vi.fn(),
+        idleLoop: vi.fn(),
+        destroy: vi.fn(),
+      };
+      let resolveLoad: ((mascot: never) => void) | undefined;
+      const load = vi.fn(
+        () =>
+          new Promise<never>((resolve) => {
+            resolveLoad = resolve;
+          }),
+      );
+      const mascot = createCornerMascot(harness.scene as never, load);
+
+      mascot.flapGreeting();
+      resolveLoad?.(ligne as never);
+      await vi.waitFor(() => expect(ligne.flapGreeting).toHaveBeenCalledOnce());
     });
   });
 

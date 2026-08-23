@@ -236,6 +236,7 @@ vi.mock("../../components/Mascot", () => ({
   createCornerMascot: vi.fn(() => ({
     cheer: vi.fn(),
     wave: vi.fn(),
+    flapGreeting: vi.fn(),
     nod: vi.fn(),
     idleLoop: vi.fn(),
     destroy: vi.fn(),

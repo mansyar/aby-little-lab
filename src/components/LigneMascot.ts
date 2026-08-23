@@ -102,6 +102,14 @@ export class LigneMascot {
     this.player.fireTrigger(big ? "cheer_big" : "cheer");
   }
 
+  curious(): void {
+    this.player.fireTrigger("curious");
+  }
+
+  flapGreeting(): void {
+    this.player.fireTrigger("flap_greeting");
+  }
+
   /** Ligne's default state already owns its looping idle animation. */
   idleLoop(): void {}
 

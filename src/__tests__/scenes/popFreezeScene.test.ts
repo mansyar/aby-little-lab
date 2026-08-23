@@ -231,6 +231,7 @@ vi.mock("../../components/ParentLock", () => ({
 const { mockMascot } = vi.hoisted(() => ({
   mockMascot: {
     cheer: vi.fn(),
+    curious: vi.fn(),
     nod: vi.fn(),
     destroy: vi.fn(),
   },

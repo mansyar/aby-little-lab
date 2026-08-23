@@ -739,13 +739,13 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Places Professor Hoot in the bottom-right corner: waves on load, cheers
+   * Places Professor Hoot in the bottom-right corner: greets on load, cheers
    * when the visit follows a newly earned sticker, then settles into the idle
    * loop. Touch-inert and behind gameplay z-order by component design.
    */
   private createMascot(): void {
     this.mascot = createCornerMascot(this);
-    this.mascot.wave();
+    this.mascot.flapGreeting();
     if (this.justEarned) {
       this.mascot.cheer();
     }

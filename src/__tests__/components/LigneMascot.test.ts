@@ -63,12 +63,16 @@ describe("LigneMascot", () => {
     mascot.nod();
     mascot.cheer();
     mascot.cheer(true);
+    mascot.curious();
+    mascot.flapGreeting();
 
     expect(player.fireTrigger.mock.calls.map(([trigger]) => trigger)).toEqual([
       "wave",
       "nod",
       "cheer",
       "cheer_big",
+      "curious",
+      "flap_greeting",
     ]);
   });
 
