@@ -94,8 +94,13 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
         lazy player loads so the scene-entry trigger is not lost.
   - [x] Run targeted suite → Green; then full gates. — 63 files and 1,479 tests
         passed; Biome check and production build passed.
-- [ ] **Task 2.3: Commit + phase checkpoint** (verification report incl.
-      changed-file coverage; manual steps proposal; await user confirmation).
+- [x] **Task 2.3: Commit + phase checkpoint** — recorded SHA: `6ea0c1d`
+  - [x] Verification report covered all runtime/config/scene/test changes: Biome
+        checked 135 files; all 63 test files and 1,481 tests passed; production
+        build emitted the `.ligne` asset and lazy Ligne JS/WASM chunks.
+  - [x] Live Hub verification confirmed the redesigned Ligne Hoot replaces the
+        tween fallback, renders above Phaser, remains touch-inert, and produces
+        no browser errors. User explicitly approved Phase 2.
 
 ## Phase 3 — PWA Wiring and Performance Guardrails
 
