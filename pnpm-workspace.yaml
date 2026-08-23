@@ -1,2 +1,3 @@
 minimumReleaseAgeExclude:
+  - '@ligne-engine/bundler@0.1.0'
   - '@ligne-engine/web@0.2.1'

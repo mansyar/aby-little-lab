@@ -34,6 +34,7 @@ interface MockImage {
   y: number;
   setScale: MockFn;
   setDepth: MockFn;
+  setVisible: MockFn;
   setTexture: MockFn;
   destroy: MockFn;
 }
@@ -73,6 +74,7 @@ function createMockScene(): SceneHarness {
     y: 100,
     setScale: vi.fn(),
     setDepth: vi.fn(),
+    setVisible: vi.fn(),
     setTexture: vi.fn(),
     destroy: vi.fn(),
   };
@@ -85,7 +87,11 @@ function createMockScene(): SceneHarness {
   const tween: MockTween = { remove: vi.fn(), pause: vi.fn(), resume: vi.fn() };
   const scene: MockScene = {
     add: {
-      image: vi.fn(() => image),
+      image: vi.fn((x: number, y: number) => {
+        image.x = x;
+        image.y = y;
+        return image;
+      }),
       graphics: vi.fn(() => graphics),
     },
     tweens: {
@@ -340,6 +346,30 @@ describe("Mascot", () => {
       createCornerMascot(harness.scene as never);
       expect(harness.scene.add.image).toHaveBeenCalledWith(934, 678, "mascot_idle");
       expect(harness.image.setScale).toHaveBeenCalledWith(0.2);
+    });
+
+    it("hot-swaps to a loaded Ligne mascot and delegates reactions", async () => {
+      const ligne = {
+        wave: vi.fn(),
+        nod: vi.fn(),
+        cheer: vi.fn(),
+        idleLoop: vi.fn(),
+        destroy: vi.fn(),
+      };
+      const load = vi.fn(async () => ligne as never);
+      const mascot = createCornerMascot(harness.scene as never, load);
+      await vi.waitFor(() => expect(harness.image.setVisible).toHaveBeenCalledWith(false));
+
+      mascot.wave();
+      mascot.nod();
+      mascot.cheer(true);
+      mascot.idleLoop();
+
+      expect(load).toHaveBeenCalledWith({ x: 934, y: 678, scale: 0.2, depth: -1 });
+      expect(ligne.wave).toHaveBeenCalledOnce();
+      expect(ligne.nod).toHaveBeenCalledOnce();
+      expect(ligne.cheer).toHaveBeenCalledWith(true);
+      expect(ligne.idleLoop).toHaveBeenCalledOnce();
     });
   });
 

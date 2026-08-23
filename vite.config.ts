@@ -1,15 +1,17 @@
 /// <reference types="vitest/config" />
+import { ligne } from "@ligne-engine/bundler/vite";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import pkg from "./package.json";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   define: {
     // Injected at build/test time from package.json — the single source of
     // truth for the app version shown in the parental Settings panel.
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
   plugins: [
+    ...(command === "build" ? [ligne()] : []),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["audio/bgm.mp3", "fonts/baloo2-latin.woff2"],
@@ -77,4 +79,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

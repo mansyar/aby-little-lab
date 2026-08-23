@@ -28,3 +28,8 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* Phaser manages DOMElement inline styles; keep Hoot inert despite its updates. */
+.ligne-mascot-canvas {
+  pointer-events: none !important;
+}

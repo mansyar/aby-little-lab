@@ -18,6 +18,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.5.5
         version: 2.5.10
+      '@ligne-engine/bundler':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@vitest/coverage-v8':
         specifier: ^4.1.10
         version: 4.1.11(vitest@4.1.11)
@@ -635,6 +638,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@ligne-engine/bundler@0.1.0':
+    resolution: {integrity: sha512-8ZbQUio23HzpdeQIrIyFXgBGsvN4j0cse9MT67SoErZefUqeemTDWmzWLu6sWcxyOONmCA/LIVynU1ucUHnsrg==}
 
   '@ligne-engine/web@0.2.1':
     resolution: {integrity: sha512-ZXFRH+KBirUqYHt9q7g0kow1I2+Nz6jnmRDSlQJ96ZTH078Sr3VZqaooibTnkfOo09IkQU/Bu/9J5XEjh3NIkg==}
@@ -3276,6 +3282,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@ligne-engine/bundler@0.1.0': {}
 
   '@ligne-engine/web@0.2.1(phaser@4.2.1)':
     optionalDependencies:
