@@ -143,4 +143,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Professor Hoot — Ligne-Powered Animation Pilot** *Link: [./tracks/hoot-ligne-pilot_20260822/index.md](./tracks/hoot-ligne-pilot_20260822/index.md)*
+- [x] **Track: Professor Hoot — Ligne-Powered Animation Pilot** *Link: [./archive/hoot-ligne-pilot_20260822/index.md](./archive/hoot-ligne-pilot_20260822/index.md)* (Archived)
