@@ -16,6 +16,25 @@ const __dirname = path.dirname(__filename);
 
 const DIST_DIR = path.join(__dirname, "..", "dist");
 
+function readServiceWorker() {
+  return fs.readFileSync(path.join(DIST_DIR, "sw.js"), "utf8");
+}
+
+function readPrecacheManifest() {
+  const serviceWorker = readServiceWorker();
+  const callStart = serviceWorker.indexOf("precacheAndRoute(");
+  const start = serviceWorker.indexOf("[", callStart);
+  if (callStart < 0 || start < 0) return "";
+
+  let depth = 0;
+  for (let index = start; index < serviceWorker.length; index++) {
+    if (serviceWorker[index] === "[") depth++;
+    if (serviceWorker[index] === "]") depth--;
+    if (depth === 0) return serviceWorker.slice(start, index + 1);
+  }
+  return "";
+}
+
 // Validation checks
 const checks = [
   {
@@ -97,6 +116,21 @@ const checks = [
     test: () => {
       const swContent = fs.readFileSync(path.join(DIST_DIR, "sw.js"), "utf8");
       return swContent.includes("audio/bgm.mp3");
+    },
+  },
+  {
+    name: "Service worker includes Hoot asset in precache",
+    test: () => readPrecacheManifest().includes(".ligne"),
+  },
+  {
+    name: "Service worker excludes Ligne WASM from precache",
+    test: () => !readPrecacheManifest().includes("ligne_wasm_bg"),
+  },
+  {
+    name: "Service worker runtime-caches Ligne WASM",
+    test: () => {
+      const serviceWorker = readServiceWorker();
+      return serviceWorker.includes("ligne-engine-wasm") && serviceWorker.includes("CacheFirst");
     },
   },
   {
