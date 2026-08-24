@@ -44,3 +44,36 @@ tier-level bottleneck).
 - The dev/prod instrumentation is intentionally dev-only; if a permanent
   perf-regression gate is ever wanted, promote the timing into the
   `validate-*` script family with a CI threshold.
+
+## Ligne Pilot Addendum — 2026-08-24
+
+Track: `hoot-ligne-pilot_20260822`, Phase 3. Measured from a production Vite
+preview in a fresh Chromium context using the same Navigation Timing and
+request-entry method as the baseline above.
+
+### Bundle delta
+
+| Asset | Baseline | Ligne pilot | Delta / delivery |
+|---|---:|---:|---|
+| Shell entry | 134.0 KiB | 155.2 KiB | +21.2 KiB; still below the enforced 200 KiB ceiling |
+| Phaser vendor | 1,343.5 KiB | 1,342.6 KiB | -0.9 KiB; effectively unchanged |
+| Hoot asset URL module | — | 0.07 kB raw / 0.09 kB gzip | Lazy |
+| Ligne JS bridge | — | 32.04 kB raw / 9.44 kB gzip | Lazy and precached |
+| Ligne WASM engine | — | 1,682.84 kB raw / 538.81 kB gzip | Lazy; CacheFirst runtime cache, excluded from precache |
+| Hoot `.ligne` asset | — | 29.31 kB raw | Lazy at runtime and precached for offline fallback recovery |
+
+`node scripts/validate-bundle.js` passed both guardrails: the Phaser vendor
+chunk remains isolated and the shell remains below 200 KiB.
+
+### Boot evidence
+
+| Metric | Original baseline | Ligne pilot | Target | Status |
+|---|---:|---:|---:|---|
+| Production navigation duration | 1080.7 ms | 2065.0 ms | < 3000 ms | PASS |
+| Ligne loading begins | — | 2172.3 ms | After boot | PASS |
+
+The reference run remained 935 ms inside the boot budget. More importantly,
+the first Ligne request began 107.3 ms after the page load event, confirming
+that the `.ligne`, JS bridge, and WASM engine were not on the measured boot
+critical path. The tween mascot remains available immediately and the Ligne
+runtime replaces it asynchronously.
