@@ -127,8 +127,8 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
 ## Phase 4 — Release v1.15.0 Preparation
 
-- [ ] **Task 4.1: Pre-release state check** (clean tree; no existing v1.15.0
-      tag locally or remote).
+- [x] **Task 4.1: Pre-release state check** — implementation tree clean before
+      the plan marker; no `v1.15.0` tag exists locally or on `origin`.
 - [ ] **Task 4.2: Version bump** — `npm version 1.15.0 --no-git-tag-version`;
       only package.json changes; build embeds `1.15.0`, zero stale refs.
 - [ ] **Task 4.3: Release notes** — `docs/release-notes-v1.15.0.md` per house
