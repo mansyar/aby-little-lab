@@ -136,7 +136,9 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
       `docs/release-notes-v1.15.0.md` in house format, retaining DRAFT status
       until deployment and documenting the feature, fixes, performance, caching,
       and cold-offline fallback behavior.
-- [ ] **Task 4.4: Phase checkpoint**
+- [x] **Task 4.4: Phase checkpoint** — recorded SHA: `147d166`. Version bump
+      and DRAFT release notes verified; no tag/push/deploy performed; user
+      explicitly approved Phase 4.
 
 ## Phase 5 — Tag, Deploy, and Live Verification
 
