@@ -145,10 +145,10 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 - [x] **Task 5.1: Annotated tag `v1.15.0`** — created on verified
       master-lineage target `1a10c60` with house annotation message; target
       verified before push.
-- [~] **Task 5.2: Push master + tag; watch CI** — gates job green; Deploy to
-      Coolify completes (master-lineage guard). Contingency: release-branch →
-      PR flow if direct push is blocked (pause for user).
-- [ ] **Task 5.3: Artifact verification** — live URL/sw.js/manifest 200;
+- [x] **Task 5.2: Push master + tag; watch CI** — pushed `master` and
+      `v1.15.0`; GitHub Actions run `32676437437` passed Quality Gates in
+      2m58s and the master-lineage-guarded Coolify deploy job in 9s.
+- [~] **Task 5.3: Artifact verification** — live URL/sw.js/manifest 200;
       served bundle embeds `1.15.0`; wasm chunk served and CacheFirst-cached.
 - [ ] **Task 5.4: Live smoke** — Hoot animates via Ligne on Hub + games
       (curious on game start, flap greeting, cheer on win, nod on miss);
