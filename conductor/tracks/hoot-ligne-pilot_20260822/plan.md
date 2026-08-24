@@ -155,11 +155,12 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
       animated Ligne mascot with fallback hidden; nod and cheer frames changed;
       the canvas stayed touch-inert and consoles were clean. Reduced-motion
       live load skipped Ligne; prior cold-offline verification retained fallback.
-- [~] **Task 5.5: Phase checkpoint**
+- [x] **Task 5.5: Phase checkpoint** — checkpoint SHA: `2b1f914`; live
+      deployment and smoke evidence explicitly approved by the user.
 
 ## Phase 6 — Finalize and Archive
 
-- [ ] **Task 6.1: Finalize records** — release notes DRAFT → FINAL with deploy
+- [~] **Task 6.1: Finalize records** — release notes DRAFT → FINAL with deploy
       evidence; performance measurements recorded.
 - [ ] **Task 6.2: Complete Conductor state** — metadata completed/archived;
       move track to archive; registry link update; archive commit + note.
