@@ -142,7 +142,7 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
 ## Phase 5 — Tag, Deploy, and Live Verification
 
-- [ ] **Task 5.1: Annotated tag `v1.15.0`** on verified master-lineage HEAD
+- [~] **Task 5.1: Annotated tag `v1.15.0`** on verified master-lineage HEAD
       (house annotation message); verify target before push.
 - [ ] **Task 5.2: Push master + tag; watch CI** — gates job green; Deploy to
       Coolify completes (master-lineage guard). Contingency: release-branch →
