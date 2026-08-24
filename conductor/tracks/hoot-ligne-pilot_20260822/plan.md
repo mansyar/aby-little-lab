@@ -148,9 +148,10 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 - [x] **Task 5.2: Push master + tag; watch CI** — pushed `master` and
       `v1.15.0`; GitHub Actions run `32676437437` passed Quality Gates in
       2m58s and the master-lineage-guarded Coolify deploy job in 9s.
-- [~] **Task 5.3: Artifact verification** — live URL/sw.js/manifest 200;
-      served bundle embeds `1.15.0`; wasm chunk served and CacheFirst-cached.
-- [ ] **Task 5.4: Live smoke** — Hoot animates via Ligne on Hub + games
+- [x] **Task 5.3: Artifact verification** — live URL, `sw.js`, and manifest
+      returned 200; served entry embeds `1.15.0`; Hoot `.ligne` and Ligne WASM
+      returned 200; service worker contains the `ligne-engine-wasm` route.
+- [~] **Task 5.4: Live smoke** — Hoot animates via Ligne on Hub + games
       (curious on game start, flap greeting, cheer on win, nod on miss);
       throttled/offline reload shows tween fallback gracefully.
 - [ ] **Task 5.5: Phase checkpoint**
