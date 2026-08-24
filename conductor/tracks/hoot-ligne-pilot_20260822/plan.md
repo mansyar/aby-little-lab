@@ -160,8 +160,9 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
 ## Phase 6 — Finalize and Archive
 
-- [~] **Task 6.1: Finalize records** — release notes DRAFT → FINAL with deploy
-      evidence; performance measurements recorded.
-- [ ] **Task 6.2: Complete Conductor state** — metadata completed/archived;
+- [x] **Task 6.1: Finalize records** — recorded SHA: `5480f57`. Release notes
+      are FINAL with tag, deploy, artifact, live-smoke, fallback, and performance
+      evidence.
+- [~] **Task 6.2: Complete Conductor state** — metadata completed/archived;
       move track to archive; registry link update; archive commit + note.
 - [ ] **Task 6.3: Final verification & checkpoint**
