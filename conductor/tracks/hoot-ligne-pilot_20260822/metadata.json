@@ -1,9 +1,0 @@
-{
-  "id": "hoot-ligne-pilot_20260822",
-  "title": "Professor Hoot — Ligne-Powered Animation Pilot",
-  "type": "feature",
-  "status": "new",
-  "createdAt": "2026-08-22",
-  "updatedAt": "2026-08-22",
-  "summary": "Replace the tween-based Professor Hoot mascot with a rigged, state-driven Ligne character: new artboard authored code-first via ligne-cli, seven animation states (five parity + curious head-tilt and double wing-flap greeting), drop-in API parity behind the existing Mascot interface, lazy post-boot wasm activation with tween fallback and a precache/runtime-cache split, shipped as v1.15.0."
-}
