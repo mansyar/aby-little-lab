@@ -165,4 +165,6 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
       evidence.
 - [x] **Task 6.2: Complete Conductor state** — metadata marked completed and
       archived; track moved to `conductor/archive`; registry link updated.
-- [~] **Task 6.3: Final verification & checkpoint**
+- [x] **Task 6.3: Final verification & checkpoint** — checkpoint SHA:
+      `e714a80`; release, live smoke, fallback behavior, final records, and
+      archived Conductor state verified and approved.
