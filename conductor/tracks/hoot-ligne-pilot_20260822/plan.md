@@ -104,12 +104,15 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 
 ## Phase 3 — PWA Wiring and Performance Guardrails
 
-- [ ] **Task 3.1: Caching split (FR5)**
-  - [ ] Add `.ligne` character asset to precache glob; add runtimeCaching
+- [x] **Task 3.1: Caching split (FR5)** — recorded SHA: `c8c9a29`
+  - [x] Add `.ligne` character asset to precache glob; add runtimeCaching
         CacheFirst rule for the wasm engine chunk; ensure the chunk is excluded
         from precache globs.
-  - [ ] Verify offline behavior: first visit online → engine cached; cold
+  - [x] Verify offline behavior: first visit online → engine cached; cold
         offline visit → tween fallback; subsequent offline visits → Ligne Hoot.
+        Production Playwright verification observed 1 canvas after deleting the
+        runtime cache and going offline, then 2 canvases online and on the next
+        offline reload after `ligne-engine-wasm` was populated.
 - [ ] **Task 3.2: Performance evidence**
   - [ ] Bundle report: new lazy chunk sizes vs baseline doc.
   - [ ] Boot time-to-interactive before/after (production preview build);
