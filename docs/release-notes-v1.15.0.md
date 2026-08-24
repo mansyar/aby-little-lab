@@ -1,6 +1,10 @@
 # Release Notes - v1.15.0
 
-> **Status:** DRAFT - prepared 2026-08-24; awaiting tag, deployment, and live verification.
+> **Status:** FINAL - released 2026-08-24
+>
+> **Tag:** `v1.15.0`
+>
+> **Deployment:** https://aby-little-lab.ansyar-world.top
 
 This release gives Professor Hoot a new child-friendly design and a richer set
 of character animations powered by the Ligne runtime, while preserving the
@@ -53,6 +57,16 @@ existing lightweight mascot as a safe fallback.
 The game is a PWA - update by reopening the app or triggering an update from
 the install/update prompt. All progress, stickers, profiles, and play-time
 settings are stored locally on the device.
+
+## Release Verification
+
+- GitHub Actions run `32676437437` passed all quality gates and triggered the
+  Coolify deployment.
+- The live app, manifest, service worker, Hoot asset, and Ligne WASM all
+  returned HTTP 200; the served application bundle reported version `1.15.0`.
+- Live Hub and Shape Sorter checks confirmed the animated Ligne mascot replaces
+  the fallback, remains touch-inert, and reacts correctly. Reduced-motion mode
+  retained the lightweight fallback as designed.
 
 ## Feedback
 
