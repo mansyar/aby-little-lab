@@ -113,10 +113,13 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
         Production Playwright verification observed 1 canvas after deleting the
         runtime cache and going offline, then 2 canvases online and on the next
         offline reload after `ligne-engine-wasm` was populated.
-- [ ] **Task 3.2: Performance evidence**
-  - [ ] Bundle report: new lazy chunk sizes vs baseline doc.
-  - [ ] Boot time-to-interactive before/after (production preview build);
-        confirm boot budget untouched.
+- [x] **Task 3.2: Performance evidence** — recorded SHA: `1449417`
+  - [x] Bundle report: new lazy chunk sizes vs baseline doc. — shell 155.2
+        KiB (≤200 KiB); Ligne bridge 32.04 kB raw / 9.44 kB gzip; WASM
+        1,682.84 kB raw / 538.81 kB gzip; Hoot asset 29.31 kB.
+  - [x] Boot time-to-interactive before/after (production preview build);
+        confirm boot budget untouched. — navigation completed in 2065.0 ms
+        (<3000 ms), and the first Ligne request began afterward at 2172.3 ms.
 - [ ] **Task 3.3: Gates + commit + phase checkpoint**
 
 ## Phase 4 — Release v1.15.0 Preparation
