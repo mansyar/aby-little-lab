@@ -151,10 +151,11 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
 - [x] **Task 5.3: Artifact verification** — live URL, `sw.js`, and manifest
       returned 200; served entry embeds `1.15.0`; Hoot `.ligne` and Ligne WASM
       returned 200; service worker contains the `ligne-engine-wasm` route.
-- [~] **Task 5.4: Live smoke** — Hoot animates via Ligne on Hub + games
-      (curious on game start, flap greeting, cheer on win, nod on miss);
-      throttled/offline reload shows tween fallback gracefully.
-- [ ] **Task 5.5: Phase checkpoint**
+- [x] **Task 5.4: Live smoke** — Hub and Shape Sorter showed the visible,
+      animated Ligne mascot with fallback hidden; nod and cheer frames changed;
+      the canvas stayed touch-inert and consoles were clean. Reduced-motion
+      live load skipped Ligne; prior cold-offline verification retained fallback.
+- [~] **Task 5.5: Phase checkpoint**
 
 ## Phase 6 — Finalize and Archive
 
