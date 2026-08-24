@@ -120,7 +120,10 @@ commit + Git note, mark `[x]`, record SHA, separate `conductor(plan)` commit.
   - [x] Boot time-to-interactive before/after (production preview build);
         confirm boot budget untouched. — navigation completed in 2065.0 ms
         (<3000 ms), and the first Ligne request began afterward at 2172.3 ms.
-- [ ] **Task 3.3: Gates + commit + phase checkpoint**
+- [x] **Task 3.3: Gates + commit + phase checkpoint** — recorded SHA:
+      `219527a`. All 1,481 tests, PWA/bundle validators, Biome, and production
+      build passed; cold/subsequent offline behavior was verified in Chromium;
+      user explicitly approved Phase 3.
 
 ## Phase 4 — Release v1.15.0 Preparation
 
