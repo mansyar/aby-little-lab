@@ -104,15 +104,15 @@ Create and audit all release-facing documentation in DRAFT state; finalize numbe
 
 Run the complete gate set on the final RC (Cohesion + Ligne fix + version + docs) and archive evidence before the PR.
 
-- [ ] Task: Run the five gates in CI order on `release/v1.16.0` — capture full logs for the track record
-  - [ ] `pnpm run check` → record "Checked 125+ files in … No fixes applied."
-  - [ ] `CI=true pnpm test` → record passed suites/tests and thresholds.
-  - [ ] `pnpm run build` → record chunk sizes, lazy chunks, precache entries/size (now inclusive of WASM), built time.
-  - [ ] `node scripts/validate-pwa.js` → record 15/15 with new contract.
-  - [ ] `node scripts/validate-bundle.js` → record 3/3.
-- [ ] Task: Confirm version propagation
-  - [ ] Verify `dist/` bundle contains `1.16.0` where versioned and that the served `sw.js` precache names reflect the new build.
-  - [ ] Verify the Ligne offline contract holds in the built artifact: `dist/sw.js` lists `ligne_wasm_bg-*.wasm` in precache, no RuntimeCaching for it.
+- [x] Task: Run the five gates in CI order on `release/v1.16.0` — capture full logs for the track record
+  - [x] **Gate 1 `pnpm run check`** — **PASS**: "Checked 137 files in 282ms. No fixes applied." 0 errors; 1 benign info (biome.json schema 2.5.5 vs CLI 2.5.10).
+  - [x] **Gate 2 `CI=true pnpm test`** — **PASS**: **64 files / 1565 tests**, thresholds (95/88/85/90) satisfied, duration ~94s.
+  - [x] **Gate 3 `pnpm run build`** — **PASS**: built in 539ms. precache **46 entries (3354.86 KiB)** incl. WASM `ligne_wasm_bg-CaSOm_fQ.wasm` (1,682.84 kB / gzip 538.81 kB); shell `index-_0xClWjb.js` 161.06 kB (gzip 30.11 kB); Phaser vendor `phaser-P1E8uaLi.js` 1,374.82 kB separate; lazy `ligne_wasm-Bzdj-wlA.js` 32.04 kB.
+  - [x] **Gate 4 `node scripts/validate-pwa.js`** — **PASS: 15/15** (incl. "Service worker includes Ligne WASM engine" — new contract).
+  - [x] **Gate 5 `node scripts/validate-bundle.js`** — **PASS**: Phaser vendor `phaser-P1E8uaLi.js` (1342.6 kB); shell `index-_0xClWjb.js` 157.3 kB ≤ 200 kB.
+- [x] Task: Confirm version propagation
+  - [x] `dist/assets/index-_0xClWjb.js` contains `1.16.0` (bundle grep, confirmed in Phase 3 verification). Served `sw.js` precache names reflect the new build (46 entries incl. `ligne_wasm_bg-CaSOm_fQ.wasm`).
+  - [x] Ligne offline contract holds in the artifact: `dist/sw.js` lists `ligne_wasm_bg-CaSOm_fQ.wasm` in precache (found once), and **no** `ligne-engine-wasm` runtime-caching route remains (0 matches).
 - [ ] Task: Phase Verification & Checkpoint — Phase 5
   - [ ] Aggregate gate evidence into Conductor notes; `conductor(plan): Mark phase 'Phase 5 - Release-Candidate Quality Gates' as complete` and checkpoint `Checkpoint end of Phase 5 — Release Candidate`.
 
