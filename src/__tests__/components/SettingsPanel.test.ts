@@ -64,12 +64,15 @@ type MockFn = ReturnType<typeof vi.fn>;
 interface MockGameObject {
   destroy: MockFn;
   on: MockFn;
+  setAlpha: MockFn;
   setColor: MockFn;
+  setFillStyle: MockFn;
   setInteractive: MockFn;
   setOrigin: MockFn;
   setScale: MockFn;
   setStrokeStyle: MockFn;
   setText: MockFn;
+  setX: MockFn;
 }
 
 interface MockScene {
@@ -90,20 +93,52 @@ function createGameObject(): MockGameObject {
   const object: MockGameObject = {
     destroy: vi.fn(),
     on: vi.fn(),
+    setAlpha: vi.fn(),
     setColor: vi.fn(),
+    setFillStyle: vi.fn(),
     setInteractive: vi.fn(),
     setOrigin: vi.fn(),
     setScale: vi.fn(),
     setStrokeStyle: vi.fn(),
     setText: vi.fn(),
+    setX: vi.fn(),
   };
   object.setColor.mockReturnValue(object);
+  object.setFillStyle.mockReturnValue(object);
   object.setOrigin.mockReturnValue(object);
   object.setInteractive.mockReturnValue(object);
   object.setScale.mockReturnValue(object);
   object.setStrokeStyle.mockReturnValue(object);
   object.setText.mockReturnValue(object);
+  object.setX.mockReturnValue(object);
   return object;
+}
+
+/** Counts how many handlers were registered for an event on a mock object. */
+function listenerCount(object: MockGameObject, event: string): number {
+  return object.on.mock.calls.filter(([name]) => name === event).length;
+}
+
+/** Finds a text object whose label starts with the given prefix. */
+function findTextStartingWith(scene: MockScene, prefix: string): MockGameObject | undefined {
+  const callIndex = scene.add.text.mock.calls.findIndex(
+    (call) => typeof call[2] === "string" && (call[2] as string).startsWith(prefix),
+  );
+  if (callIndex < 0) return undefined;
+  return scene.add.text.mock.results[callIndex]?.value as MockGameObject | undefined;
+}
+
+interface RectWithArgs {
+  args?: unknown[];
+  object: MockGameObject;
+}
+
+/** Returns every created rectangle together with its constructor arguments. */
+function getRectangles(scene: MockScene): RectWithArgs[] {
+  return scene.add.rectangle.mock.results.map((result, index) => ({
+    args: scene.add.rectangle.mock.calls[index] as unknown[],
+    object: result.value as MockGameObject,
+  }));
 }
 
 function triggerPointerdown(object: MockGameObject): void {
@@ -146,7 +181,12 @@ function createScene(): MockScene {
   return {
     add: {
       image: vi.fn(() => createGameObject()),
-      rectangle: vi.fn(() => createGameObject()),
+      // Captures constructor args so geometry-based assertions can identify shapes.
+      rectangle: vi.fn((...args: unknown[]) => {
+        const object = createGameObject();
+        (object as unknown as { args?: unknown[] }).args = args;
+        return object;
+      }),
       text: vi.fn(() => createGameObject()),
     },
     cameras: {
@@ -266,7 +306,7 @@ describe("SettingsPanel interaction", () => {
   it("disables BGM, pauses it, and updates its label", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
-    const bgmToggle = scene.add.text.mock.results[1]?.value as MockGameObject;
+    const bgmToggle = findTextByLabel(scene, "BGM: ON") as MockGameObject;
 
     triggerPointerdown(bgmToggle);
 
@@ -283,7 +323,7 @@ describe("SettingsPanel interaction", () => {
     );
     const scene = createScene();
     new SettingsPanel(scene as never);
-    const bgmToggle = scene.add.text.mock.results[1]?.value as MockGameObject;
+    const bgmToggle = findTextByLabel(scene, "BGM: OFF") as MockGameObject;
 
     triggerPointerdown(bgmToggle);
 
@@ -296,7 +336,7 @@ describe("SettingsPanel interaction", () => {
   it("disables SFX without playing a chime and updates its label", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
-    const sfxToggle = scene.add.text.mock.results[2]?.value as MockGameObject;
+    const sfxToggle = findTextByLabel(scene, "SFX: ON") as MockGameObject;
 
     triggerPointerdown(sfxToggle);
 
@@ -313,7 +353,7 @@ describe("SettingsPanel interaction", () => {
     );
     const scene = createScene();
     new SettingsPanel(scene as never);
-    const sfxToggle = scene.add.text.mock.results[2]?.value as MockGameObject;
+    const sfxToggle = findTextByLabel(scene, "SFX: OFF") as MockGameObject;
 
     triggerPointerdown(sfxToggle);
 
@@ -1048,11 +1088,13 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
     expect(findTextByLabel(scene, "Big & Small")).toBeDefined();
     expect(findTextByLabel(scene, "Pattern Builder")).toBeUndefined();
-    // Page control and the 7-day strip.
-    expect(findTextByLabel(scene, "More")).toBeDefined();
+    // Explicit prev/next chevron controls and the 7-day strip.
+    expect(findTextByLabel(scene, "‹")).toBeDefined();
+    expect(findTextByLabel(scene, "›")).toBeDefined();
     expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "Last 7 days · 0 plays")).toBeDefined();
-    const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24);
+    // Activity strip bars are 24px wide; the toggle knobs are 24×24 squares.
+    const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24 && call[3] !== 24);
     expect(bars).toHaveLength(7);
   });
 
@@ -1084,18 +1126,20 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 18 game rows", () => {
+  it("pages through all 18 game rows with explicit chevrons", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
 
     const pageOneRow = findTextByLabel(scene, "Shape Sorter") as MockGameObject;
-    const moreButton = findTextByLabel(scene, "More") as MockGameObject;
+    const nextChevron = () => findTextByLabel(scene, "›") as MockGameObject | undefined;
+    const prevChevron = () => findTextByLabel(scene, "‹") as MockGameObject | undefined;
+    expect(nextChevron()).toBeDefined();
+    expect(prevChevron()).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
 
-    triggerPointerdown(moreButton);
-    expect(moreButton.destroy).toHaveBeenCalled();
+    triggerPointerdown(nextChevron() as MockGameObject);
     expect(pageOneRow.destroy).toHaveBeenCalled();
     expect(findTextByLabel(scene, "2 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
@@ -1103,16 +1147,23 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Take Away")).toBeUndefined();
 
-    triggerPointerdown(findTextByLabel(scene, "More") as MockGameObject);
+    triggerPointerdown(nextChevron() as MockGameObject);
     expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeDefined();
     expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
 
-    // Back on the last page wraps around to the first page.
-    triggerPointerdown(findTextByLabel(scene, "Back") as MockGameObject);
+    // The last page clamps instead of wrapping around.
+    triggerPointerdown(nextChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
+
+    // Previous pages walk back to the first page, which also clamps.
+    triggerPointerdown(prevChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "2 / 3")).toBeDefined();
+    triggerPointerdown(prevChevron() as MockGameObject);
     expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
-    expect(findTextByLabel(scene, "More")).toBeDefined();
+    triggerPointerdown(prevChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
   });
 
   it("spaces consecutive progress rows at least 56px apart", () => {
@@ -1168,5 +1219,246 @@ describe("SettingsPanel progress report", () => {
     const header2 = findTextByLabel(scene, "Learning Progress") as MockGameObject;
     triggerPointerdown(findTextByLabel(scene, "X") as MockGameObject);
     expect(header2.destroy).toHaveBeenCalled();
+  });
+});
+
+describe("SettingsPanel affordance cohesion", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  /** Builds a panel with the install button visible for press-feedback checks. */
+  function buildPanel(): MockScene {
+    const scene = createScene();
+    const tracker = createFakeInstallTracker("installable");
+    new SettingsPanel(scene as never, tracker as unknown as InstallTracker);
+    return scene;
+  }
+
+  it("attaches shared press feedback to every parent control", () => {
+    const scene = buildPanel();
+
+    const controls = [
+      findTextByLabel(scene, "BGM: ON"),
+      findTextByLabel(scene, "SFX: ON"),
+      findTextByLabel(scene, "Profiles"),
+      findTextByLabel(scene, "Progress"),
+      findLastTextByLabel(scene, "Reset Progress"),
+      findTextByLabel(scene, "Install App") ?? findTextByLabel(scene, "How to Install"),
+      findTextStartingWith(scene, "Voice:"),
+      findTextByLabel(scene, "Preview"),
+    ];
+    expect(controls.length).toBe(8);
+    for (const control of controls) {
+      expect(control).toBeDefined();
+      // One gameplay handler + one press-feedback squish handler.
+      expect(listenerCount(control as MockGameObject, "pointerdown")).toBe(2);
+      // Restore handlers for release / leave / cancel.
+      expect(listenerCount(control as MockGameObject, "pointerup")).toBeGreaterThanOrEqual(1);
+      expect(listenerCount(control as MockGameObject, "pointerout")).toBeGreaterThanOrEqual(1);
+      expect(listenerCount(control as MockGameObject, "pointercancel")).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("registers only gameplay handlers under reduced motion", () => {
+    vi.stubGlobal("window", {
+      matchMedia: () => ({ matches: true }),
+    });
+
+    const scene = buildPanel();
+
+    for (const label of ["BGM: ON", "Profiles"]) {
+      const control = findTextByLabel(scene, label) as MockGameObject;
+      expect(listenerCount(control, "pointerdown")).toBe(1);
+      expect(listenerCount(control, "pointerup")).toBe(0);
+    }
+  });
+
+  it("presents toggles with a track and knob that flip state visually", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    // Track (64x32) and knob (24x24) rectangles exist near each toggle row.
+    const rects = getRectangles(scene).filter((r) => {
+      const [, , w, h] = r.args ?? [];
+      return w === 64 && h === 32;
+    });
+    expect(rects.length).toBeGreaterThanOrEqual(2);
+
+    const knobs = getRectangles(scene).filter((r) => {
+      const [, , w, h] = r.args ?? [];
+      return w === 24 && h === 24;
+    });
+    expect(knobs.length).toBeGreaterThanOrEqual(2);
+
+    // Tapping BGM moves its knob and repaints the track.
+    const knob = knobs[0]?.object as MockGameObject;
+    triggerPointerdown(findTextByLabel(scene, "BGM: ON") as MockGameObject);
+    expect(knob.setX).toHaveBeenCalled();
+    const anyTrack = rects[0]?.object as MockGameObject;
+    expect(anyTrack.setFillStyle).toHaveBeenCalled();
+  });
+
+  it("pages the progress report with explicit prev/next chevrons", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    const pageLabel = () => findLastTextByLabel(scene, "1 / 3");
+    expect(pageLabel()).toBeDefined();
+
+    // The ambiguous single More/Back button is gone.
+    expect(findLastTextByLabel(scene, "More")).toBeUndefined();
+    expect(findLastTextByLabel(scene, "Back")).toBeUndefined();
+
+    // Explicit chevron buttons exist and clamp at both ends.
+    const next = findLastTextByLabel(scene, "›") as MockGameObject;
+    const prev = findLastTextByLabel(scene, "‹") as MockGameObject;
+    expect(next).toBeDefined();
+    expect(prev).toBeDefined();
+
+    triggerPointerdown(next);
+    triggerPointerdown(next);
+    expect(findLastTextByLabel(scene, "3 / 3")).toBeDefined();
+    triggerPointerdown(next);
+    expect(findLastTextByLabel(scene, "3 / 3")).toBeDefined(); // clamped
+
+    triggerPointerdown(prev);
+    triggerPointerdown(prev);
+    expect(findLastTextByLabel(scene, "1 / 3")).toBeDefined();
+    triggerPointerdown(prev);
+    expect(findLastTextByLabel(scene, "1 / 3")).toBeDefined(); // clamped
+  });
+
+  it("highlights the viewed profile in the progress report", () => {
+    addProfile("dog"); // becomes the ACTIVE profile per storage semantics
+
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    // Avatar chips sit at y=189 spread 56px apart around centerX.
+    const profiles = getProfiles();
+    const chipX = (index: number) => 512 + (index - (profiles.length - 1) / 2) * 56;
+    const activeIndex = profiles.findIndex((profile) => profile.id === getActiveProfile().id);
+    const ringsAt = (x: number) =>
+      getRectangles(scene).filter((r) => {
+        const [rx, ry, w] = r.args ?? [];
+        return (
+          Math.abs((rx as number) - x) <= 2 &&
+          ry === 189 &&
+          (w as number) >= 70 &&
+          (w as number) <= 90
+        );
+      });
+
+    // The report opens on the ACTIVE profile with its ring showing.
+    expect(ringsAt(chipX(activeIndex)).length).toBeGreaterThan(0);
+
+    // Tapping another chip moves the highlight without switching profiles.
+    // Only rectangles created after this point count — the mock keeps records
+    // of destroyed rings from earlier renders.
+    const rectCountBeforeSwitch = scene.add.rectangle.mock.calls.length;
+    const ringsSince = (x: number) =>
+      getRectangles(scene)
+        .slice(rectCountBeforeSwitch)
+        .filter((r) => {
+          const [rx, ry, w] = r.args ?? [];
+          return (
+            Math.abs((rx as number) - x) <= 2 &&
+            ry === 189 &&
+            (w as number) >= 70 &&
+            (w as number) <= 90
+          );
+        });
+    const otherIndex = activeIndex === 0 ? 1 : 0;
+    const otherChip = findImagesByTexture(
+      scene,
+      PROFILE_AVATAR_TEXTURES[profiles[otherIndex].avatarId],
+    )[0] as MockGameObject | undefined;
+    expect(otherChip).toBeDefined();
+    triggerPointerdown(otherChip as MockGameObject);
+
+    expect(getActiveProfile().id).toBe(profiles[activeIndex].id); // unchanged
+    expect(ringsSince(chipX(otherIndex)).length).toBeGreaterThan(0);
+    expect(ringsSince(chipX(activeIndex)).length).toBe(0);
+  });
+
+  it("outlines the active profile row in the Profiles manager", () => {
+    addProfile("dog"); // becomes the ACTIVE profile per storage semantics
+
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+
+    // Rows start at centerY-194 with an 80px pitch; avatars sit at centerX-110.
+    const profiles = getProfiles();
+    const activeRow = profiles.findIndex((profile) => profile.id === getActiveProfile().id);
+    const ringsNear = (y: number) =>
+      getRectangles(scene).filter((r) => {
+        const [rx, ry, w] = r.args ?? [];
+        return (
+          Math.abs((rx as number) - 402) <= 2 &&
+          Math.abs((ry as number) - y) <= 2 &&
+          (w as number) >= 100
+        );
+      });
+    const inactiveRow = activeRow === 0 ? 1 : 0;
+
+    expect(ringsNear(190 + activeRow * 80).length).toBeGreaterThan(0); // active outlined
+    expect(ringsNear(190 + inactiveRow * 80).length).toBe(0); // others plain
+  });
+
+  it("draws a background card behind each settings row", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    // Six rows: BGM, SFX, Profiles, Progress, Reset, Voice.
+    const cards = getRectangles(scene).filter((r) => {
+      const [, , w, h] = r.args ?? [];
+      return w === 400 && h === 68;
+    });
+    expect(cards).toHaveLength(6);
+  });
+
+  it("offers an explicit close button on the main panel", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const closeButton = findTextByLabel(scene, "✕") as MockGameObject | undefined;
+    expect(closeButton).toBeDefined();
+    expect(closeButton?.on.mock.calls.some(([event]) => event === "pointerdown")).toBe(true);
+
+    const backdrop = scene.add.rectangle.mock.results[0]?.value as MockGameObject;
+    triggerPointerdown(closeButton as MockGameObject);
+    expect(backdrop.destroy).toHaveBeenCalled();
+  });
+
+  it("gives destructive confirm buttons a distinct stroked treatment", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    // Reset modal.
+    triggerPointerdown(findLastTextByLabel(scene, "Reset Progress") as MockGameObject);
+    const resetButtons = getRectangles(scene).filter((r) => {
+      const [, ry, w, h] = r.args ?? [];
+      return w === 240 && h === 64 && (ry as number) > 384;
+    });
+    expect(resetButtons.some((r) => r.object.setStrokeStyle.mock.calls.length > 0)).toBe(true);
+
+    // Close modal, open Profiles, then the delete confirmation modal.
+    triggerPointerdown(findLastTextByLabel(scene, "Cancel") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+    triggerPointerdown(findLastTextByLabel(scene, "Delete") as MockGameObject);
+    const deleteButtons = getRectangles(scene).filter((r) => {
+      const [, ry, w, h] = r.args ?? [];
+      return w === 240 && h === 64 && (ry as number) > 384;
+    });
+    expect(deleteButtons.some((r) => r.object.setStrokeStyle.mock.calls.length > 0)).toBe(true);
   });
 });
