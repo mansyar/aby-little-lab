@@ -122,8 +122,8 @@ Run the complete gate set on the final RC (Cohesion + Ligne fix + version + docs
 
 Publish the release through the guarded pipeline; no commits bypass the PR.
 
-- [ ] Task: Push `release/v1.16.0` to `origin` (`git push -u origin release/v1.16.0`)
-  - [ ] Record remote ref `origin/release/v1.16.0` SHA and fetch prune output.
+- [x] Task: Push `release/v1.16.0` to `origin` (`git push -u origin release/v1.16.0`)
+  - [x] Pushed: `origin/release/v1.16.0` = **`02f0eab`** (matches local HEAD). Upstream tracking set. `git fetch --prune origin` clean — no unexpected divergence.
 - [ ] Task: Open PR `release/v1.16.0 → master`
   - [ ] Title: `Release v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot`; body cites base `v1.15.0` and links to track spec/plan, notes the WASM-precache contract change, and references the RC gate evidence.
   - [ ] Request review; do not self-merge without review.
