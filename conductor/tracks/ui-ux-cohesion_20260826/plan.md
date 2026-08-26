@@ -59,13 +59,13 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Verify lazy loading, `navLocked`, profile switching, sticker-shelf refresh, and play-time behavior remain unchanged. *(pins; navigation.test.ts/firstWordsIntegration.test.ts hardened to geometry-based identification)*
   - [x] Add reduced-motion assertions for changed entrance, idle, or selection treatment. *(zero tile-targeting tweens under RM)*
 
-- [ ] Task: Polish Hub visual hierarchy in place
-  - [ ] Preserve the current grid, tile order, lazy navigation, sticker shelf, play-time indicator, mascot, and profile flow.
-  - [ ] Rebalance icon, label, and sticker spacing for legibility at base and narrow-landscape sizes.
-  - [ ] Add a persistent, unambiguous active-profile ring/outline/badge in the Hub and picker; do not rely on scale alone.
-  - [ ] Distinguish resting, pressed, earned, and unavailable tile states using flat storybook treatments and non-color-only cues.
-  - [ ] Add only subtle domain grouping accents; do not introduce categories, tabs, carousel navigation, or new instructional text.
-  - [ ] Verify no clipping or overlap with Settings, profile controls, mascot, stickers, or play-time indicators.
+- [x] Task: Polish Hub visual hierarchy in place [c709e13]
+  - [x] Preserve the current grid, tile order, lazy navigation, sticker shelf, play-time indicator, mascot, and profile flow. *(all regression pins green)*
+  - [x] Rebalance icon, label, and sticker spacing for legibility at base and narrow-landscape sizes. *(labels 15px→17px, offset +2; FIT handles narrow landscape)*
+  - [x] Add a persistent, unambiguous active-profile ring/outline/badge in the Hub and picker; do not rely on scale alone. *(shipped with Task 1 — 1123961)*
+  - [x] Distinguish resting, pressed, earned, and unavailable tile states using flat storybook treatments and non-color-only cues. *(stroke outline; spring squish; shelf sticker glyph; locked dim+scale-0.97+moon badge)*
+  - [x] Add only subtle domain grouping accents; do not introduce categories, tabs, carousel navigation, or new instructional text. *(none added: no domain taxonomy exists and inventing one = new IA, excluded by spec)*
+  - [x] Verify no clipping or overlap with Settings, profile controls, mascot, stickers, or play-time indicators. *(geometry unchanged except label offset +2 inside tile; in-bounds pins pass)*
 
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Run Hub/navigation/profile tests and quality checks for changed code.
