@@ -13,11 +13,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
 
 ## Phase 1 — Interaction inventory and shared contracts
 
-- [ ] Task: Inventory current interactive surfaces
-  - [ ] Audit all 18 game scenes, Hub/profile controls, Settings/Progress overlays, ParentLock, and SpeakerButton.
-  - [ ] Record existing resting, pressed, selected, locked, disabled, and audio-feedback states.
-  - [ ] Identify controls already using `attachPressFeedback` and controls with scene-specific feedback.
-  - [ ] Confirm no-fail, touch-target, reduced-motion, and pointer-cancellation constraints for each surface.
+- [x] Task: Inventory current interactive surfaces [1ed2431]
+  - [x] Audit all 18 game scenes, Hub/profile controls, Settings/Progress overlays, ParentLock, and SpeakerButton.
+  - [x] Record existing resting, pressed, selected, locked, disabled, and audio-feedback states.
+  - [x] Identify controls already using `attachPressFeedback` and controls with scene-specific feedback.
+  - [x] Confirm no-fail, touch-target, reduced-motion, and pointer-cancellation constraints for each surface. *(Artifact: ./notes/inventory.md)*
 
 - [ ] Task: Establish the shared interaction test contract
   - [ ] Extend `src/__tests__/utils/pressFeedback.test.ts` for every supported object type and pointerdown/up/out/cancel behavior.
