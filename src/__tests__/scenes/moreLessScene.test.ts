@@ -240,6 +240,12 @@ vi.mock("../../utils/speech", () => mockSpeech);
 import type { MoreLessRound } from "../../game/moreLessLogic";
 import { MoreLessScene } from "../../scenes/MoreLessScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
+import {
+  countListeners,
+  expectPressFeedbackContract,
+  fireFirstHandler,
+  getInteractiveRects,
+} from "../helpers/pressFeedback";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -805,6 +811,73 @@ describe("MoreLessScene round flow", () => {
       const higher = round.left.count > round.right.count ? 0 : 1;
       const correct = round.mode === "more" ? higher : higher === 0 ? 1 : 0;
       expect(correct).toBe(getCorrectSide(round));
+    }
+  });
+});
+
+/* --- Press feedback cohesion (Track: UI/UX Cohesion, Phase 2) --- */
+
+describe("MoreLessScene press feedback cohesion", () => {
+  /** Stubs matchMedia to control the prefers-reduced-motion result. */
+  function stubMotion(reduced: boolean): void {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: reduced,
+        media: "(prefers-reduced-motion: reduce)",
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("gives every group card press feedback restoring on release, out, and cancel", () => {
+    stubMotion(false);
+    const scene = new MoreLessScene();
+    scene.create();
+
+    const controls = getInteractiveRects(scene);
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      expectPressFeedbackContract(control);
+    }
+  });
+
+  it("keeps the gameplay choice handler registered before the press squish", () => {
+    stubMotion(false);
+    const scene = new MoreLessScene();
+    scene.create();
+
+    const [first] = getInteractiveRects(scene);
+    fireFirstHandler(first, "pointerdown");
+    expect(first.setScale).not.toHaveBeenCalledWith(0.95);
+  });
+
+  it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
+    stubMotion(true);
+    const reducedScene = new MoreLessScene();
+    reducedScene.create();
+    const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
+      countListeners(control, "pointerdown"),
+    );
+
+    stubMotion(false);
+    const scene = new MoreLessScene();
+    scene.create();
+    const controls = getInteractiveRects(scene);
+
+    expect(reducedCounts.length).toBeGreaterThan(0);
+    expect(controls.map((control) => countListeners(control, "pointerdown"))).toEqual(
+      reducedCounts.map((count) => count + 1),
+    );
+    for (const control of controls) {
+      expect(countListeners(control, "pointerup")).toBe(1);
+      expect(countListeners(control, "pointercancel")).toBe(1);
     }
   });
 });
