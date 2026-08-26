@@ -9,6 +9,7 @@ import {
 } from "../game/progressLogic";
 import { availableVoiceOptions, type VoiceOption } from "../game/voiceLogic";
 import { type GameId, MAX_PROFILES } from "../types";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
 import { setPreferredVoiceURI, speakWord } from "../utils/speech";
 import {
@@ -73,6 +74,30 @@ const ACCURACY_TRACK_COLOR = 0xe8e0d0;
 const ACCURACY_FILL_COLOR = 0x68d391;
 /** Mastery badge shown next to games with at least 3 wins. */
 const MASTERY_STAR = "★";
+/** Background card behind each main-panel settings row. */
+const ROW_CARD_WIDTH = 400;
+const ROW_CARD_HEIGHT = 68;
+/** Slightly deeper cream than the panel so rows read as tappable. */
+const ROW_CARD_COLOR = 0xf6efdd;
+/** Toggle switch presentation: a track plus a knob whose side encodes state. */
+const TOGGLE_TRACK_WIDTH = 64;
+const TOGGLE_TRACK_HEIGHT = 32;
+const TOGGLE_KNOB_SIZE = 24;
+/** Knob center offset from the track center when on/off. */
+const TOGGLE_KNOB_OFFSET = 16;
+const TOGGLE_TRACK_ON_COLOR = 0x68d391;
+const TOGGLE_TRACK_OFF_COLOR = 0xa0aec0;
+const TOGGLE_KNOB_COLOR = 0xfff8e7;
+/** Outline ring behind the viewed profile chip in Learning Progress. */
+const VIEWED_RING_SIZE = 80;
+/** Outline ring behind the active profile row in the Profiles manager. */
+const ACTIVE_RING_SIZE = 112;
+/** Emphasized confirm-button card in modals (destructive or primary). */
+const MODAL_BUTTON_WIDTH = 240;
+const MODAL_BUTTON_HEIGHT = 64;
+/** Numeric twins of the CSS danger/primary colors for shape strokes. */
+const DANGER_HEX = 0xfc8181;
+const PRIMARY_HEX = 0x2b6cb0;
 
 /** The 18 games in hub order, for the Learning Progress report rows. */
 const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
@@ -194,6 +219,25 @@ export class SettingsPanel {
         )
         .setOrigin(0.5),
     );
+    // Explicit, glanceable close affordance (backdrop tap still works).
+    const closeButton = this.scene.add
+      .text(
+        centerX + PANEL_WIDTH / 2 - 36,
+        centerY - 105,
+        "✕",
+        textStyle({
+          color: "#2d3748",
+          fontSize: "32px",
+        }),
+      )
+      .setOrigin(0.5);
+    closeButton.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+    });
+    closeButton.on("pointerdown", () => this.destroy());
+    attachPressFeedback(closeButton);
+    this.objects.push(closeButton);
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
     this.createToggle(centerX, centerY + 55, "SFX", settings.sfxEnabled);
     this.createProfilesRow(centerX, centerY + 125);
@@ -236,16 +280,49 @@ export class SettingsPanel {
     restorePinchZoom();
   }
 
-  /** Creates one inflated, touch-friendly settings label. */
+  /** Draws the flat background card behind one settings row. */
+  private addRowCard(x: number, y: number): void {
+    const card = this.scene.add.rectangle(x, y, ROW_CARD_WIDTH, ROW_CARD_HEIGHT, ROW_CARD_COLOR);
+    card.setStrokeStyle(2, OUTLINE_COLOR, 1);
+    this.objects.push(card);
+  }
+
+  /**
+   * Creates one inflated, touch-friendly settings toggle: a labeled row card
+   * plus a track-and-knob switch whose knob side encodes the state (never
+   * color alone).
+   */
   private createToggle(
     x: number,
     y: number,
     label: string,
     enabled: boolean,
   ): Phaser.GameObjects.Text {
+    this.addRowCard(x, y);
+
+    const switchX = x + 170;
+    const track = this.scene.add.rectangle(
+      switchX,
+      y,
+      TOGGLE_TRACK_WIDTH,
+      TOGGLE_TRACK_HEIGHT,
+      enabled ? TOGGLE_TRACK_ON_COLOR : TOGGLE_TRACK_OFF_COLOR,
+    );
+    this.objects.push(track);
+
+    const knob = this.scene.add.rectangle(
+      switchX + (enabled ? TOGGLE_KNOB_OFFSET : -TOGGLE_KNOB_OFFSET),
+      y,
+      TOGGLE_KNOB_SIZE,
+      TOGGLE_KNOB_SIZE,
+      TOGGLE_KNOB_COLOR,
+    );
+    knob.setStrokeStyle(2, OUTLINE_COLOR, 1);
+    this.objects.push(knob);
+
     const toggle = this.scene.add
       .text(
-        x,
+        x - 40,
         y,
         `${label}: ${enabled ? "ON" : "OFF"}`,
         textStyle({
@@ -256,9 +333,9 @@ export class SettingsPanel {
       .setOrigin(0.5);
     toggle.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
+        -(TOGGLE_WIDTH / 2 + 40),
         -TOGGLE_HEIGHT / 2,
-        TOGGLE_WIDTH,
+        TOGGLE_WIDTH + 80,
         TOGGLE_HEIGHT,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
@@ -279,7 +356,11 @@ export class SettingsPanel {
 
       toggle.setText(`${label}: ${nextEnabled ? "ON" : "OFF"}`);
       toggle.setColor(nextEnabled ? ENABLED_COLOR : DISABLED_COLOR);
+      // Slide the knob and repaint the track so state is visible without text.
+      knob.setX(switchX + (nextEnabled ? TOGGLE_KNOB_OFFSET : -TOGGLE_KNOB_OFFSET));
+      track.setFillStyle(nextEnabled ? TOGGLE_TRACK_ON_COLOR : TOGGLE_TRACK_OFF_COLOR, 1);
     });
+    attachPressFeedback(toggle);
     this.objects.push(toggle);
     return toggle;
   }
@@ -292,6 +373,7 @@ export class SettingsPanel {
   private createInstallRow(x: number, y: number): void {
     const state = this.installTracker.getState();
     if (state === "hidden") return;
+    this.addRowCard(x, y);
 
     const label = state === "installable" ? "Install App" : "How to Install";
     const button = this.scene.add
@@ -321,6 +403,7 @@ export class SettingsPanel {
         this.showIosOverlay();
       }
     });
+    attachPressFeedback(button);
     this.objects.push(button);
   }
 
@@ -331,6 +414,7 @@ export class SettingsPanel {
    */
   private createVoiceRow(x: number, y: number): void {
     this.syncVoiceSelection();
+    this.addRowCard(x, y);
 
     const chip = this.scene.add
       .text(
@@ -359,6 +443,7 @@ export class SettingsPanel {
       setPreferredVoiceURI(next.voiceURI);
       chip.setText(`Voice: ${truncateLabel(next.label)}`);
     });
+    attachPressFeedback(chip);
     this.objects.push(chip);
     this.voiceChip = chip;
 
@@ -386,11 +471,13 @@ export class SettingsPanel {
       setPreferredVoiceURI(getSettings().preferredVoiceURI);
       speakWord(VOICE_PREVIEW_TEXT, getSettings().sfxEnabled);
     });
+    attachPressFeedback(preview);
     this.objects.push(preview);
   }
 
   /** Adds the parental "Profiles" row that opens the profile manager overlay. */
   private createProfilesRow(x: number, y: number): void {
+    this.addRowCard(x, y);
     const row = this.scene.add
       .text(
         x,
@@ -412,11 +499,13 @@ export class SettingsPanel {
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     row.on("pointerdown", () => this.openProfilesOverlay());
+    attachPressFeedback(row);
     this.objects.push(row);
   }
 
   /** Adds the parental "Progress" row that opens the Learning Progress overlay. */
   private createProgressRow(x: number, y: number): void {
+    this.addRowCard(x, y);
     const row = this.scene.add
       .text(
         x,
@@ -438,6 +527,7 @@ export class SettingsPanel {
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     row.on("pointerdown", () => this.openProgressOverlay());
+    attachPressFeedback(row);
     this.objects.push(row);
   }
 
@@ -513,6 +603,12 @@ export class SettingsPanel {
     const profiles = getProfiles();
     profiles.forEach((profile, index) => {
       const x = centerX + (index - (profiles.length - 1) / 2) * 56;
+      // Persistent outline marks the profile being viewed (never color alone).
+      if (profile.id === viewedId) {
+        const ring = this.scene.add.rectangle(x, centerY - 195, VIEWED_RING_SIZE, VIEWED_RING_SIZE);
+        ring.setStrokeStyle(4, OUTLINE_COLOR, 1);
+        this.overlayObjects.push(ring);
+      }
       const chip = this.scene.add.image(
         x,
         centerY - 195,
@@ -529,6 +625,7 @@ export class SettingsPanel {
           this.renderProgressOverlay();
         }
       });
+      attachPressFeedback(chip);
       this.overlayObjects.push(chip);
     });
 
@@ -598,31 +695,40 @@ export class SettingsPanel {
         )
         .setOrigin(0.5),
     );
-    const pageButton = this.scene.add
-      .text(
-        centerX + 60,
-        centerY + 175,
-        this.progressPage + 1 < pageCount ? "More" : "Back",
-        textStyle({
-          color: PRIMARY_COLOR,
-          fontSize: "30px",
-        }),
-      )
-      .setOrigin(0.5);
-    pageButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 4,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH / 2,
-        ROW_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    pageButton.on("pointerdown", () => {
-      this.progressPage = (this.progressPage + 1) % pageCount;
-      this.renderProgressOverlay();
-    });
-    this.overlayObjects.push(pageButton);
+
+    /**
+     * Adds one explicit page-navigation chevron. The handler stays registered
+     * at the bounds but no-ops, so the affordance never disappears while the
+     * dimmed styling signals that the edge is reached.
+     */
+    const addPageChevron = (glyph: string, x: number, delta: number): void => {
+      const enabled = delta < 0 ? this.progressPage > 0 : this.progressPage + 1 < pageCount;
+      const chevron = this.scene.add
+        .text(
+          x,
+          centerY + 175,
+          glyph,
+          textStyle({
+            color: enabled ? PRIMARY_COLOR : DISABLED_COLOR,
+            fontSize: "40px",
+          }),
+        )
+        .setOrigin(0.5);
+      chevron.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      });
+      chevron.on("pointerdown", () => {
+        const nextPage = this.progressPage + delta;
+        if (nextPage < 0 || nextPage >= pageCount) return;
+        this.progressPage = nextPage;
+        this.renderProgressOverlay();
+      });
+      attachPressFeedback(chevron);
+      this.overlayObjects.push(chevron);
+    };
+    addPageChevron("‹", centerX - 110, -1);
+    addPageChevron("›", centerX + 110, 1);
 
     const activity = getProfiles().find((profile) => profile.id === viewedId)?.activity ?? [];
     const totalPlays = activity.reduce((sum, entry) => sum + entry.plays, 0);
@@ -704,12 +810,20 @@ export class SettingsPanel {
 
     profiles.forEach((profile, index) => {
       const y = centerY - 194 + index * 80;
+      // Persistent outline marks the ACTIVE profile (read-only in the report,
+      // authoritative here) so it is never identified by position alone.
+      if (profile.id === getActiveProfile().id) {
+        const ring = this.scene.add.rectangle(centerX - 110, y, ACTIVE_RING_SIZE, ACTIVE_RING_SIZE);
+        ring.setStrokeStyle(4, OUTLINE_COLOR, 1);
+        this.overlayObjects.push(ring);
+      }
       const avatar = this.scene.add.image(
         centerX - 110,
         y,
         PROFILE_AVATAR_TEXTURES[profile.avatarId],
       );
       avatar.setScale(96 / AVATAR_TEXTURE_SIZE);
+      attachPressFeedback(avatar);
       this.overlayObjects.push(avatar);
       const remove = this.scene.add
         .text(
@@ -732,6 +846,7 @@ export class SettingsPanel {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       remove.on("pointerdown", () => this.showDeleteProfileModal(profile.id));
+      attachPressFeedback(remove);
       this.overlayObjects.push(remove);
 
       const limit = getPlayTime(profile.id).limitMinutes;
@@ -765,6 +880,7 @@ export class SettingsPanel {
         // Keep the Hub's indicator and lock state in sync with the new limit.
         this.onProgressReset?.();
       });
+      attachPressFeedback(chip);
       this.overlayObjects.push(chip);
     });
 
@@ -808,6 +924,7 @@ export class SettingsPanel {
           this.openProfilesOverlay();
           this.onProgressReset?.();
         });
+        attachPressFeedback(avatar);
         this.overlayObjects.push(avatar);
         x += 80 + 36;
       }
@@ -869,13 +986,23 @@ export class SettingsPanel {
         .setOrigin(0.5),
     );
     this.modalObjects.push(
-      this.createModalButton(centerX, centerY + 45, "Cancel", PRIMARY_COLOR, () =>
-        this.closeDeleteProfileModal(),
+      this.createModalButton(
+        centerX,
+        centerY + 45,
+        "Cancel",
+        PRIMARY_COLOR,
+        () => this.closeDeleteProfileModal(),
+        { bucket: this.modalObjects },
       ),
     );
     this.modalObjects.push(
-      this.createModalButton(centerX, centerY + 125, "Delete", DANGER_COLOR, () =>
-        this.confirmDeleteProfile(profileId),
+      this.createModalButton(
+        centerX,
+        centerY + 125,
+        "Delete",
+        DANGER_COLOR,
+        () => this.confirmDeleteProfile(profileId),
+        { bucket: this.modalObjects, emphasized: true },
       ),
     );
   }
@@ -994,6 +1121,7 @@ export class SettingsPanel {
 
   /** Adds the parental "Reset Progress" row that clears all stickers. */
   private createResetRow(x: number, y: number): void {
+    this.addRowCard(x, y);
     const row = this.scene.add
       .text(
         x,
@@ -1015,6 +1143,7 @@ export class SettingsPanel {
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     row.on("pointerdown", () => this.showResetModal());
+    attachPressFeedback(row);
     this.resetRowText = row;
     this.objects.push(row);
   }
@@ -1067,20 +1196,43 @@ export class SettingsPanel {
       ),
     );
     this.overlayObjects.push(
-      this.createModalButton(centerX, centerY + 125, "Reset", DANGER_COLOR, () =>
-        this.confirmReset(),
+      this.createModalButton(
+        centerX,
+        centerY + 125,
+        "Reset",
+        DANGER_COLOR,
+        () => this.confirmReset(),
+        { emphasized: true },
       ),
     );
   }
 
-  /** Creates a tappable modal button with an inflated touch target. */
+  /**
+   * Creates a tappable modal button with an inflated touch target. Destructive
+   * or primary confirmations get an emphasized stroked card behind the label so
+   * they are visually distinct from plain dismiss buttons; everything lands in
+   * the caller's cleanup bucket.
+   */
   private createModalButton(
     x: number,
     y: number,
     label: string,
     color: string,
     onClick: () => void,
+    options?: { emphasized?: boolean; bucket?: Phaser.GameObjects.GameObject[] },
   ): Phaser.GameObjects.Text {
+    const bucket = options?.bucket ?? this.overlayObjects;
+    if (options?.emphasized) {
+      const card = this.scene.add.rectangle(
+        x,
+        y,
+        MODAL_BUTTON_WIDTH,
+        MODAL_BUTTON_HEIGHT,
+        PANEL_COLOR,
+      );
+      card.setStrokeStyle(3, color === DANGER_COLOR ? DANGER_HEX : PRIMARY_HEX, 1);
+      bucket.push(card);
+    }
     const button = this.scene.add
       .text(
         x,
@@ -1102,6 +1254,7 @@ export class SettingsPanel {
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     button.on("pointerdown", onClick);
+    attachPressFeedback(button);
     return button;
   }
 
