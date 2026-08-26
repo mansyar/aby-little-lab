@@ -65,7 +65,7 @@ Make the Hoot mascot available offline on first install by moving the engine fro
 
 ---
 
-## Phase 3 — Release Branch and Version Preparation
+## Phase 3 — Release Branch and Version Preparation [checkpoint: c34aa3a]
 
 Prepare the release branch with the version bump using the established mechanism.
 
@@ -76,8 +76,8 @@ Prepare the release branch with the version bump using the established mechanism
   - [x] `npm version 1.16.0 --no-git-tag-version` updated `package.json` 1.15.0→1.16.0. No `package-lock.json` exists (pnpm project); `pnpm-lock.yaml` (v9) does not store the root package version, so no lockfile change required.
   - [x] `vite.config.ts` `define.__APP_VERSION__` = `JSON.stringify(pkg.version)` now reads `1.16.0`; `src/components/SettingsPanel.ts:258` renders `v${__APP_VERSION__}` → footer will serve `v1.16.0`.
   - [x] Commit: `chore(release): bump version to 1.16.0` **`4d6a1cc`** (git note attached).
-- [ ] Task: Phase Verification & Checkpoint — Phase 3
-  - [ ] `conductor(plan): Mark phase 'Phase 3 - Release Branch and Version Preparation' as complete` and checkpoint.
+- [x] Task: Phase Verification & Checkpoint — Phase 3
+  - [x] `conductor(plan): Mark phase 'Phase 3 - Release Branch and Version Preparation' as complete` and checkpoint. Checkpoint `c34aa3a` (conductor(checkpoint) + git note).
 
 ---
 
