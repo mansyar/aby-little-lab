@@ -118,13 +118,13 @@ No technology-stack deviation is anticipated. If implementation requires a new d
 
 ## Phase 6 — Integrated quality, documentation, and review
 
-- [ ] Task: Run project quality gates
-  - [ ] Run `pnpm run check`.
-  - [ ] Run `CI=true pnpm test` with coverage.
-  - [ ] Run `pnpm run build`.
-  - [ ] Run `node scripts/validate-pwa.js`.
-  - [ ] Run `node scripts/validate-bundle.js`.
-  - [ ] Resolve regressions without changing the approved scope.
+- [x] Task: Run project quality gates [54d0aed]
+  - [x] Run `pnpm run check`. *(Clean; only pre-existing biome.json `$schema` info.)*
+  - [x] Run `CI=true pnpm test` with coverage. *(Serialized + hookTimeout 60s: 64/64 files, 1568 tests; thresholds met — Lines 96.63 / Stmts 95.44 / Branch 87.61 / Funcs 90.78.)*
+  - [x] Run `pnpm run build`. *(OK; precache 45 entries, 1711.46 KiB.)*
+  - [x] Run `node scripts/validate-pwa.js`. *(16 passed, 0 failed.)*
+  - [x] Run `node scripts/validate-bundle.js`. *(PASS — shell entry 157.3 kB ≤ 200 kB.)*
+  - [x] Resolve regressions without changing the approved scope. *(No regressions; parallel-coverage flakes are pre-existing instrumentation-load issues documented in the gate note.)*
 
 - [ ] Task: Perform manual UI/UX verification
   - [ ] Start the app with `pnpm dev` and verify the URL printed by Vite.
