@@ -140,7 +140,7 @@ Publish the release through the guarded pipeline; no commits bypass the PR.
 
 ---
 
-## Phase 7 — Tag and Production Deployment
+## Phase 7 — Tag and Production Deployment [checkpoint: 4bdf191]
 
 Create the release tag on the merged master and verify the tag-gated deployment.
 
@@ -152,8 +152,8 @@ Create the release tag on the merged master and verify the tag-gated deployment.
   - [x] `git push origin v1.16.0` — tag pushed; `* [new tag] v1.16.0 -> v1.16.0`.
   - [x] GitHub Actions detected the tag push and ran the tag-gated workflow — **run `33023037193`** (https://github.com/mansyar/aby-little-lab/actions/runs/33023037193): Quality Gates PASS (2m49s, all steps), **Deploy to Coolify PASS** (8s) — "Ensure tag points to a master commit" guard passed; "Trigger Coolify deploy webhook" fired. Conclusion `success`.
   - [x] Coolify deployment outcome: **live verified** — live `/` serves `index-_0xClWjb.js` (the v1.16.0 shell from the local build); served bundle reports `1.16.0`; live `sw.js` precaches `ligne_wasm_bg-CaSOm_fQ.wasm` (1 match) and has **no** `ligne-engine-wasm` runtime route (0 matches). (Coolify deployment ID/log lines aggregate in Phase 8.)
-- [~] Task: Phase Verification & Checkpoint — Phase 7
-  - [ ] Record tag SHA, workflow run, and deployment outcome; `conductor(plan): Mark phase 'Phase 7 - Tag and Production Deployment' as complete` and checkpoint.
+- [x] Task: Phase Verification & Checkpoint — Phase 7
+  - [x] Tag `v1.16.0` = `93c0af3`; workflow run `33023037193` (Quality Gates + Deploy, `success`); live verified (bundle `1.16.0`, sw.js precaches wasm, no runtime route). `conductor(plan): Mark phase 'Phase 7 - Tag and Production Deployment' as complete` and checkpoint **`4bdf191`** (git note attached).
 
 ---
 
