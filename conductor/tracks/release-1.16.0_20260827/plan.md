@@ -69,13 +69,13 @@ Make the Hoot mascot available offline on first install by moving the engine fro
 
 Prepare the release branch with the version bump using the established mechanism.
 
-- [ ] Task: Verify `release/v1.16.0` branch base
-  - [ ] `git branch -vv` shows `release/v1.16.0` tracks `origin/master@df19f37` plus Phase 2 commits only; `git log --oneline v1.15.0..HEAD` reflects Cohesion + Ligne fix.
-  - [ ] Confirm the branch already exists from track initialization; if rebased or recreated, document the new base SHA.
-- [ ] Task: Bump version `1.15.0 → 1.16.0`
-  - [ ] Run `npm version 1.16.0 --no-git-tag-version` (established per release-1.14.0) to update `package.json` and `package-lock.json`/`pnpm-lock.yaml` accordingly without creating a tag.
-  - [ ] Verify `__APP_VERSION__` (Vite `define` from `package.json`) will serve `1.16.0`; confirm Settings footer renders `v{version}` — checked in `src/components/SettingsPanel.ts` path.
-  - [ ] Commit: `chore(release): bump version to 1.16.0` on `release/v1.16.0`; record SHA.
+- [x] Task: Verify `release/v1.16.0` branch base
+  - [x] `git branch -vv` shows `release/v1.16.0` checked out at `b087ed0` (no upstream yet — expected; pushed in Phase 6). Merge-base of `release/v1.16.0` and `origin/master` = **`73343f5`** (== `origin/master` HEAD), matching the Phase 1 baseline note; `origin/master` **is** an ancestor of the branch. `git log v1.15.0..HEAD` reflects the local-only UI/UX Cohesion batch (`ec76438`→`df19f37`) + the Ligne fix + release-track commits only.
+  - [x] Branch not rebased/recreated — it derives from track initialization (`e41cc78 chore(conductor): initialize track`). Base documented: `origin/master@73343f5`. (The plan's `df19f37` reference was the initial assumption; Phase 1 baseline note established `73343f5` as actual `origin/master`.)
+- [x] Task: Bump version `1.15.0 → 1.16.0`
+  - [x] `npm version 1.16.0 --no-git-tag-version` updated `package.json` 1.15.0→1.16.0. No `package-lock.json` exists (pnpm project); `pnpm-lock.yaml` (v9) does not store the root package version, so no lockfile change required.
+  - [x] `vite.config.ts` `define.__APP_VERSION__` = `JSON.stringify(pkg.version)` now reads `1.16.0`; `src/components/SettingsPanel.ts:258` renders `v${__APP_VERSION__}` → footer will serve `v1.16.0`.
+  - [x] Commit: `chore(release): bump version to 1.16.0` **`4d6a1cc`** (git note attached).
 - [ ] Task: Phase Verification & Checkpoint — Phase 3
   - [ ] `conductor(plan): Mark phase 'Phase 3 - Release Branch and Version Preparation' as complete` and checkpoint.
 
