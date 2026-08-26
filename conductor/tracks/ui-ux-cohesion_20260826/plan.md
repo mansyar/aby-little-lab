@@ -25,7 +25,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Add or update test helpers only where needed to simulate Phaser event registration. *(Existing mock helper reused; no changes needed)*
   - [x] Run focused tests and confirm expected failures before changing utility behavior, if utility changes are required. *(Type-only union widening — no runtime delta; suite confirmed green before and after)*
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Verify the inventory covers every planned surface.
   - [ ] Run the focused interaction test suite.
   - [ ] Present the phase manual-verification scope and obtain user confirmation before checkpointing.
