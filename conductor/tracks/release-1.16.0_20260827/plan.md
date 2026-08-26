@@ -35,7 +35,7 @@ Confirm the starting state so the release delta is unambiguous before touching c
 
 ---
 
-## Phase 2 — Ligne Offline-First Mascot Fix (TDD / Regression-First)
+## Phase 2 — Ligne Offline-First Mascot Fix (TDD / Regression-First) [checkpoint: 3b5a753]
 
 Make the Hoot mascot available offline on first install by moving the engine from runtime to precache, without regressing boot or Ligne behavior.
 
@@ -59,9 +59,9 @@ Make the Hoot mascot available offline on first install by moving the engine fro
 - [x] Task: Commit the fix
   - [x] Stage `vite.config.ts`, `scripts/validate-pwa.js`, `conductor/tracks/release-1.16.0_20260827/plan.md`. Commit: `fix(pwa): precache Ligne WASM engine for offline-first Hoot`.
   - [x] Attach git note with the validator diff + `dist/sw.js` precache excerpt; record SHA.
-- [~] Task: Phase Verification & Checkpoint — Phase 2
-  - [ ] **Test-isolation note (out-of-scope, recorded 2026-08-26):** The full test gate failed to collect `src/__tests__/audio/AudioManager.test.ts` (0 tests — `No such built-in module: node:`). Root cause: the suite imports `node:fs`/`node:path` at top level, which are externalized for browser compatibility under the `happy-dom` env in this toolchain. The file and test config are unchanged in `v1.15.0..HEAD`, so it is a pre-existing flake, not a Phase 2 regression. Fixed per approval as a separate commit `32f911b` `test(audio): drop Node-only BGM filesystem checks from happy-dom suite` (removed the three redundant `BGM runtime URL` fs tests; BGM existence/precache already enforced by `scripts/validate-pwa.js`). Gate now green: 64 files / **1565 tests**.
-  - [ ] `conductor(plan): Mark phase 'Phase 2 - Ligne Offline-First Mascot Fix' as complete` and checkpoint.
+- [x] Task: Phase Verification & Checkpoint — Phase 2
+  - [x] **Test-isolation note (out-of-scope, recorded 2026-08-26):** The full test gate failed to collect `src/__tests__/audio/AudioManager.test.ts` (0 tests — `No such built-in module: node:`). Root cause: the suite imports `node:fs`/`node:path` at top level, which are externalized for browser compatibility under the `happy-dom` env in this toolchain. The file and test config are unchanged in `v1.15.0..HEAD`, so it is a pre-existing flake, not a Phase 2 regression. Fixed per approval as a separate commit `32f911b` `test(audio): drop Node-only BGM filesystem checks from happy-dom suite` (removed the three redundant `BGM runtime URL` fs tests; BGM existence/precache already enforced by `scripts/validate-pwa.js`). Gate now green: 64 files / **1565 tests**.
+  - [x] `conductor(plan): Mark phase 'Phase 2 - Ligne Offline-First Mascot Fix' as complete` and checkpoint. Checkpoint `3b5a753` (conductor(checkpoint) + git note).
 
 ---
 
