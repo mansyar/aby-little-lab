@@ -31,6 +31,7 @@ Confirm the starting state so the release delta is unambiguous before touching c
   - [x] `node scripts/validate-bundle.js` — **PASS**: vendor present `phaser-P1E8uaLi.js` (1342.6 kB); shell `index-BvhT7VZn.js` 157.3 kB ≤ 200 kB.
 - [x] Task: Phase Verification & Checkpoint — Phase 1
   - [x] All Phase 1 evidence recorded; no unexpected findings (origin/master baseline clarified: UI/UX Cohesion is local-only, as expected for release-branch flow); `conductor(plan): Mark phase 'Phase 1 - Baseline and Unreleased-Delta Validation' as complete`.
+  - [x] **Checkpoint:** `7c6e7ce` (conductor(checkpoint) + git note).
 
 ---
 
