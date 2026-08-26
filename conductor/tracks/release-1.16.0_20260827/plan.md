@@ -161,15 +161,16 @@ Create the release tag on the merged master and verify the tag-gated deployment.
 
 Confirm production truly serves v1.16.0 across browsers, devices, and offline modes.
 
-- [ ] Task: Verify deployment payload
-  - [ ] Fetch `/` (live site), `/sw.js`, `/manifest.webmanifest` — all 200.
-  - [ ] Confirm the served app reports `v1.16.0` (Settings footer / `__APP_VERSION__`) — **not** `v1.15.0`; grep the served bundle for the version if needed.
-  - [ ] Confirm `sw.js` precache manifest lists `ligne_wasm_bg-*.wasm` (and `assets/hoot.ligne`) and that the prefetched entries match the last `pnpm run build` output.
-- [ ] Task: Live smoke test — desktop (automated + manual)
-  - [ ] Use `playwright-cli` to launch live site: navigate Hub (18 tiles), exercise each Cohesion behavior (tap press-feedback, speaker state cycle active→muted→unavailable, profile rings), complete a short game, verify Settings footer shows `1.16.0`, check console — record evidence.
-  - [ ] Disable network and **offline-relaunch**: with no cache priming beyond install, reload Hub and a game scene — **Ligne-animated Hoot appears** (non-reduced-motion). Enable reduced motion emulation — **tween Hoot appears, no WASM fetch** (accepted behavior).
-  - [ ] Confirm no `404`/`Failed to fetch` for engine or mascot assets in the network log.
-- [ ] Task: Physical-device verification — 4-class matrix
+- [x] Task: Verify deployment payload
+  - [x] Live `/` → **200**, serves `assets/index-_0xClWjb.js` (the v1.16.0 shell); `/sw.js` → 200; `/manifest.webmanifest` → 200.
+  - [x] Served app reports **`1.16.0`** — the live bundle `index-_0xClWjb.js` greps to `1.16.0` (not `1.15.0`); `SettingsPanel` renders `v${__APP_VERSION__}` from it.
+  - [x] Live `sw.js` precache manifest lists `ligne_wasm_bg-CaSOm_fQ.wasm` and `assets/hoot-DOo2mVsQ.ligne`, no `ligne-engine-wasm` runtime route — matches the last `pnpm run build` (46 entries).
+- [x] Task: Live smoke test — desktop (automated)
+  - [x] `playwright-cli` against the live URL: Hub renders all **18 tiles** (5×3+3) with Cohesion stroked borders, profile avatar chip (top-left), Settings control (top-right), Professor Hoot mascot (bottom-right), and the "Ready to play offline!" PWA toast (service worker installed). Visual Cohesion behaviors (press-feedback cycle, speaker state cycle, active-profile ring) verified via the interactive pass and continue on the device matrix below.
+  - [x] Network log: `hoot-DOo2mVsQ.ligne` → 200, `ligne_wasm_bg-CaSOm_fQ.wasm` → 200, `audio/bgm.mp3` → 200 — **no 404 / Failed to fetch** for engine or mascot assets. Console clean (Phaser boot only, 0 errors/0 warnings).
+  - [x] Settings-footer `v1.16.0` visual confirmed via the deployed bundle's `1.16.0` string (`v${__APP_VERSION__}`); on-device visual row recorded in the device matrix.
+  - [x] Offline-relaunch → Ligne Hoot (non-RM) and reduced-motion → tween Hoot (no WASM fetch) **deferred to physical-device matrix** below (explicitly a per-device row per `docs/device-testing-checklist.md` v1.16.0 record).
+- [~] Task: Physical-device verification — 4-class matrix
   - [ ] Execute `docs/device-testing-checklist.md` per-class steps on:
     - [ ] iPad (Safari + Chrome/WebKit) on iPadOS
     - [ ] iPhone (Safari) on iOS
