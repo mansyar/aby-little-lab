@@ -116,7 +116,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Confirm every significant audio state has a visual counterpart. *(Speaking → green pulse; muted/unavailable → dimmed tint; neutral after end/error/cancel; RM static tint.)*
   - [x] Obtain user confirmation and create the phase checkpoint. *(Checkpoint bdf3548, 2026-08-27.)*
 
-## Phase 6 — Integrated quality, documentation, and review
+## Phase 6 — Integrated quality, documentation, and review [checkpoint: e64cf37]
 
 - [x] Task: Run project quality gates [54d0aed]
   - [x] Run `pnpm run check`. *(Clean; only pre-existing biome.json `$schema` info.)*
@@ -139,7 +139,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Review the final diff against `spec.md`, `plan.md`, product guidelines, and the quality-gate checklist. *(All FR1-FR4/NFRs mapped to commits; out-of-scope items untouched; quality gates verified in Task 1.)*
   - [x] Prepare the track for Conductor review. *(All commits + git notes in place; final review pending after checkpoint.)*
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-  - [ ] Attach automated commands, manual verification steps, and user feedback to the checkpoint Git note.
-  - [ ] Record the final phase checkpoint SHA in this plan.
-  - [ ] Confirm all acceptance criteria are satisfied or explicitly document follow-up work.
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`) [e64cf37]
+  - [x] Attach automated commands, manual verification steps, and user feedback to the checkpoint Git note. *(Full final note on e64cf37: all five gate commands + results, 8-step manual pass, acceptance criteria 1–10, deviation record.)*
+  - [x] Record the final phase checkpoint SHA in this plan. *(e64cf37 on the Phase 6 heading.)*
+  - [x] Confirm all acceptance criteria are satisfied or explicitly document follow-up work. *(All 10 satisfied; user confirmed 2026-08-27; no follow-up work.)*
