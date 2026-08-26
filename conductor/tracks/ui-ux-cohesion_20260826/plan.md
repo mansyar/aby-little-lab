@@ -133,11 +133,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Check clipping, overlap, touch-target sizing, visual hierarchy, no-fail feedback, and textless gameplay. *(No issues reported.)*
   - [x] Capture concise verification notes or screenshots where they clarify the result. *(Notes recorded; user confirmed 2026-08-27.)*
 
-- [ ] Task: Update project records and self-review
-  - [ ] Update relevant UI/UX or device-verification documentation without rewriting historical records.
-  - [ ] Document any implementation deviation from `tech-stack.md`; otherwise record that no deviation occurred.
-  - [ ] Review the final diff against `spec.md`, `plan.md`, product guidelines, and the quality-gate checklist.
-  - [ ] Prepare the track for Conductor review.
+- [x] Task: Update project records and self-review [5b856f9]
+  - [x] Update relevant UI/UX or device-verification documentation without rewriting historical records. *(tech-stack.md dated 2026-08-27 Design Update appended; device-testing-checklist.md Execution Record inserted newest-first.)*
+  - [x] Document any implementation deviation from `tech-stack.md`; otherwise record that no deviation occurred. *(No deviation — zero new dependencies/schema/framework changes; recorded in the note.)*
+  - [x] Review the final diff against `spec.md`, `plan.md`, product guidelines, and the quality-gate checklist. *(All FR1-FR4/NFRs mapped to commits; out-of-scope items untouched; quality gates verified in Task 1.)*
+  - [x] Prepare the track for Conductor review. *(All commits + git notes in place; final review pending after checkpoint.)*
 
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Attach automated commands, manual verification steps, and user feedback to the checkpoint Git note.
