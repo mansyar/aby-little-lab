@@ -16,21 +16,7 @@ export default defineConfig(({ command }) => ({
       registerType: "prompt",
       includeAssets: ["audio/bgm.mp3", "fonts/baloo2-latin.woff2"],
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,ligne}"],
-        runtimeCaching: [
-          {
-            urlPattern: /\/assets\/ligne_wasm_bg-[\w-]+\.wasm$/,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "ligne-engine-wasm",
-              cacheableResponse: { statuses: [0, 200] },
-              expiration: {
-                maxEntries: 2,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-            },
-          },
-        ],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,ligne,wasm}"],
       },
       manifest: {
         name: "Aby's Little Lab",

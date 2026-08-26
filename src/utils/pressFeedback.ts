@@ -22,7 +22,7 @@ export interface PressFeedbackOptions {
  * @param options - Optional behavior tweaks.
  */
 export function attachPressFeedback(
-  obj: Phaser.GameObjects.Text | Phaser.GameObjects.Rectangle,
+  obj: Phaser.GameObjects.Text | Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image,
   options?: PressFeedbackOptions,
 ): void {
   if (isReducedMotion()) return;

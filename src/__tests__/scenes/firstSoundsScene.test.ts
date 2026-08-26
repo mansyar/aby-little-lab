@@ -28,6 +28,8 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
       setCollideWorldBounds: vi.fn().mockReturnThis(),
@@ -251,6 +253,7 @@ const { mockSpeech } = vi.hoisted(() => ({
     speakWord: vi.fn(() => true),
     speakLetter: vi.fn(() => true),
     isSpeechSupported: vi.fn(() => true),
+    onSpeechLifecycle: vi.fn(() => vi.fn()),
   },
 }));
 
@@ -258,6 +261,12 @@ vi.mock("../../utils/speech", () => mockSpeech);
 
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
+import {
+  countListeners,
+  expectPressFeedbackContract,
+  fireFirstHandler,
+  getInteractiveRects,
+} from "../helpers/pressFeedback";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -752,5 +761,72 @@ describe("FirstSoundsScene completion", () => {
     const correctCallsBefore = mockAudio.playCorrect.mock.calls.length;
     tapCard(scene, correctIndex);
     expect(mockAudio.playCorrect.mock.calls.length).toBe(correctCallsBefore + 1);
+  });
+});
+
+/* --- Press feedback cohesion (Track: UI/UX Cohesion, Phase 2) --- */
+
+describe("FirstSoundsScene press feedback cohesion", () => {
+  /** Stubs matchMedia to control the prefers-reduced-motion result. */
+  function stubMotion(reduced: boolean): void {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: reduced,
+        media: "(prefers-reduced-motion: reduce)",
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("gives every choice card press feedback restoring on release, out, and cancel", () => {
+    stubMotion(false);
+    const scene = new FirstSoundsScene();
+    scene.create();
+
+    const controls = getInteractiveRects(scene);
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      expectPressFeedbackContract(control);
+    }
+  });
+
+  it("keeps the gameplay choice handler registered before the press squish", () => {
+    stubMotion(false);
+    const scene = new FirstSoundsScene();
+    scene.create();
+
+    const [first] = getInteractiveRects(scene);
+    fireFirstHandler(first, "pointerdown");
+    expect(first.setScale).not.toHaveBeenCalledWith(0.95);
+  });
+
+  it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
+    stubMotion(true);
+    const reducedScene = new FirstSoundsScene();
+    reducedScene.create();
+    const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
+      countListeners(control, "pointerdown"),
+    );
+
+    stubMotion(false);
+    const scene = new FirstSoundsScene();
+    scene.create();
+    const controls = getInteractiveRects(scene);
+
+    expect(reducedCounts.length).toBeGreaterThan(0);
+    expect(controls.map((control) => countListeners(control, "pointerdown"))).toEqual(
+      reducedCounts.map((count) => count + 1),
+    );
+    for (const control of controls) {
+      expect(countListeners(control, "pointerup")).toBe(1);
+      expect(countListeners(control, "pointercancel")).toBe(1);
+    }
   });
 });

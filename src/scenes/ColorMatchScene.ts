@@ -77,6 +77,7 @@ export class ColorMatchScene extends GameSceneBase {
       centerX + SWATCH_SIZE / 2 + this.SPEAKER_OFFSET,
       swatchY,
       {
+        muted: !load().settings.sfxEnabled,
         onSpeak: () => {
           const round = this.rounds[this.roundIndex];
           if (!round) return; // Celebration after the final round — nothing to speak.

@@ -28,6 +28,8 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setFillStyle: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
@@ -232,6 +234,7 @@ const { mockSpeech } = vi.hoisted(() => ({
   mockSpeech: {
     speakWord: vi.fn(() => true),
     isSpeechSupported: vi.fn(() => true),
+    onSpeechLifecycle: vi.fn(() => vi.fn()),
   },
 }));
 
@@ -241,6 +244,12 @@ import type { OddOneRound } from "../../game/oddOneOutLogic";
 import { promptFor } from "../../game/oddOneOutLogic";
 import { OddOneOutScene } from "../../scenes/OddOneOutScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
+import {
+  countListeners,
+  expectPressFeedbackContract,
+  fireFirstHandler,
+  getInteractiveRects,
+} from "../helpers/pressFeedback";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -629,6 +638,73 @@ describe("OddOneOutScene round flow", () => {
       expect(round.groupTexture).not.toBe(round.oddTexture);
       expect(round.oddSlot).toBeGreaterThanOrEqual(0);
       expect(round.oddSlot).toBeLessThanOrEqual(3);
+    }
+  });
+});
+
+/* --- Press feedback cohesion (Track: UI/UX Cohesion, Phase 2) --- */
+
+describe("OddOneOutScene press feedback cohesion", () => {
+  /** Stubs matchMedia to control the prefers-reduced-motion result. */
+  function stubMotion(reduced: boolean): void {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: reduced,
+        media: "(prefers-reduced-motion: reduce)",
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("gives every option card press feedback restoring on release, out, and cancel", () => {
+    stubMotion(false);
+    const scene = new OddOneOutScene();
+    scene.create();
+
+    const controls = getInteractiveRects(scene);
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      expectPressFeedbackContract(control);
+    }
+  });
+
+  it("keeps the gameplay choice handler registered before the press squish", () => {
+    stubMotion(false);
+    const scene = new OddOneOutScene();
+    scene.create();
+
+    const [first] = getInteractiveRects(scene);
+    fireFirstHandler(first, "pointerdown");
+    expect(first.setScale).not.toHaveBeenCalledWith(0.95);
+  });
+
+  it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
+    stubMotion(true);
+    const reducedScene = new OddOneOutScene();
+    reducedScene.create();
+    const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
+      countListeners(control, "pointerdown"),
+    );
+
+    stubMotion(false);
+    const scene = new OddOneOutScene();
+    scene.create();
+    const controls = getInteractiveRects(scene);
+
+    expect(reducedCounts.length).toBeGreaterThan(0);
+    expect(controls.map((control) => countListeners(control, "pointerdown"))).toEqual(
+      reducedCounts.map((count) => count + 1),
+    );
+    for (const control of controls) {
+      expect(countListeners(control, "pointerup")).toBe(1);
+      expect(countListeners(control, "pointercancel")).toBe(1);
     }
   });
 });

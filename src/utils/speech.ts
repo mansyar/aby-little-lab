@@ -19,6 +19,34 @@ export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+export type SpeechLifecycleEvent =
+  | { kind: "speech:start" }
+  | { kind: "speech:end" }
+  | { kind: "speech:error" };
+
+let lifecycleSeq = 0;
+const lifecycleListeners = new Set<(event: SpeechLifecycleEvent) => void>();
+
+function emitLifecycle(event: SpeechLifecycleEvent): void {
+  for (const listener of lifecycleListeners) {
+    listener(event);
+  }
+}
+
+/**
+ * Subscribes to Web Speech utterance lifecycle events so UI can mirror the
+ * spoken state (e.g. the speaker glyph). Only the most recently dispatched
+ * utterance may emit: superseded or cancelled utterances are ignored, so an
+ * interruption can never leave a stale "speaking" state behind.
+ * @returns An unsubscribe function.
+ */
+export function onSpeechLifecycle(listener: (event: SpeechLifecycleEvent) => void): () => void {
+  lifecycleListeners.add(listener);
+  return () => {
+    lifecycleListeners.delete(listener);
+  };
+}
+
 /** True once the iOS/WebKit user-gesture unlock has been performed. */
 let speechUnlocked = false;
 
@@ -91,6 +119,22 @@ function speakText(text: string, enabled: boolean, rate: number): boolean {
       speechSynthesis.resume();
     }
     const utterance = new SpeechSynthesisUtterance();
+    const token = ++lifecycleSeq;
+    utterance.onstart = () => {
+      if (token === lifecycleSeq) {
+        emitLifecycle({ kind: "speech:start" });
+      }
+    };
+    utterance.onend = () => {
+      if (token === lifecycleSeq) {
+        emitLifecycle({ kind: "speech:end" });
+      }
+    };
+    utterance.onerror = () => {
+      if (token === lifecycleSeq) {
+        emitLifecycle({ kind: "speech:error" });
+      }
+    };
     utterance.text = text;
     utterance.lang = "en-US";
     utterance.rate = rate;

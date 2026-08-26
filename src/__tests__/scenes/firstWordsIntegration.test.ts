@@ -27,6 +27,9 @@ vi.mock("phaser", () => {
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
+      setFillStyle: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
       setCollideWorldBounds: vi.fn().mockReturnThis(),
       setBounce: vi.fn().mockReturnThis(),
@@ -75,7 +78,11 @@ vi.mock("phaser", () => {
 
     constructor() {
       this.add = {
-        rectangle: vi.fn(() => createMockGameObject(this)),
+        rectangle: vi.fn((...args: unknown[]) => {
+          const obj = createMockGameObject(this);
+          (obj as { args?: unknown[] }).args = args;
+          return obj;
+        }),
         text: vi.fn(() => createMockGameObject(this)),
         image: vi.fn(() => createMockGameObject(this)),
         container: vi.fn(() => createMockGameObject(this)),
@@ -335,7 +342,11 @@ function fireObjectEvent(obj: unknown, event: string): void {
 /** The tile rectangles added by HubScene (index = GAME_TILES position). */
 function getTileRects(scene: unknown): unknown[] {
   const rectMock = getMockFn((scene as { add: { rectangle: unknown } }).add.rectangle);
-  return rectMock.mock.results.map((r) => r.value);
+  // Game tiles are the only 160×116 rectangles; smaller ones are decorative
+  // rings or markers.
+  return rectMock.mock.results
+    .map((r) => r.value as { args?: number[] })
+    .filter((r) => r.args?.[2] === 160);
 }
 
 describe("First Words integration flows", () => {

@@ -667,3 +667,17 @@ Please report issues at [GitHub Issues URL]
 - [x] Security review passed
 - [x] Performance targets met
 - [x] Ready for release
+
+### v1.16.0 — Release Candidate Gates (DRAFT, release/v1.16.0)
+
+> **v1.16.0 prep (UI/UX Cohesion + Ligne Offline-First Hoot, 2026-08-27):** Release track `conductor/tracks/release-1.16.0_20260827/` (base `v1.15.0`, branch `release/v1.16.0`). Baseline gates on the RC — Biome clean (137 files, 0 errors), **1565/1565 tests (64 files)**, coverage thresholds met (95/88/85/90), build OK (precache **46 entries / 3354.86 KiB** — includes the precached Ligne WASM engine `ligne_wasm_bg-*.wasm`; shell `index-*.js` 161.06 kB ≤ 200 kB; Phaser vendor chunk separate), `validate-pwa` **15/15** (new contract: Ligne WASM precached, no runtime cache for it), `validate-bundle` PASS.
+> - Note: the one local test-isolation flake (stale `node:`-dependent BGM filesystem tests) was fixed out-of-band as `32f911b`.
+> - Release branch `release/v1.16.0` created at track init; version bumped to `1.16.0` (`4d6a1cc`); release notes drafted (`docs/release-notes-v1.16.0.md`, DRAFT); device execution record staged (`docs/device-testing-checklist.md` — pending).
+
+**Verify Deployment — v1.16.0 (pending, filled in Phase 8):**
+- [ ] PR (`release/v1.16.0` → master) merged — CI Quality Gates PASS on PR; Deploy skipped on PR (tag-guard by design)
+- [ ] Annotated tag `v1.16.0` on master merge commit + pushed — CI run Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
+- [ ] App loads correctly on the live URL — 200; serves release build (version `1.16.0` in bundle/footer)
+- [ ] Service worker + manifest served — `sw.js` 200 (precache manifest includes `ligne_wasm_bg-*.wasm`), `manifest.webmanifest` 200
+- [ ] Live smoke — Hub 18 tiles; Cohesion behaviors (press feedback, speaker states, Settings/Progress affordances, profile rings); Settings footer `v1.16.0`; **offline relaunch → Ligne Hoot (non-RM)** and **tween Hoot (RM, no WASM fetch)**; zero console/network errors
+- [ ] Device testing on v1.16.0 — recorded in `docs/device-testing-checklist.md` (v1.16.0 record, 4-class matrix + offline-relaunch + reduced-motion + console-health rows)

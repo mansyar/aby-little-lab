@@ -232,6 +232,12 @@ vi.mock("../../components/ParentLock", () => ({
 import type { TakeAwayRound } from "../../game/takeAwayLogic";
 import { TakeAwayScene } from "../../scenes/TakeAwayScene";
 import { earnSticker } from "../../utils/storage";
+import {
+  countListeners,
+  expectPressFeedbackContract,
+  fireFirstHandler,
+  getInteractiveRects,
+} from "../helpers/pressFeedback";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -683,6 +689,73 @@ describe("TakeAwayScene round flow", () => {
       expect(round.answerOptions).toContain(round.target);
       expect(round.promptCards[0].count - round.promptCards[1].count).toBe(round.target);
       expect(round.promptCards[0].count).toBeGreaterThan(round.promptCards[1].count);
+    }
+  });
+});
+
+/* --- Press feedback cohesion (Track: UI/UX Cohesion, Phase 2) --- */
+
+describe("TakeAwayScene press feedback cohesion", () => {
+  /** Stubs matchMedia to control the prefers-reduced-motion result. */
+  function stubMotion(reduced: boolean): void {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: reduced,
+        media: "(prefers-reduced-motion: reduce)",
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("gives every answer card press feedback restoring on release, out, and cancel", () => {
+    stubMotion(false);
+    const scene = new TakeAwayScene();
+    scene.create();
+
+    const controls = getInteractiveRects(scene);
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      expectPressFeedbackContract(control);
+    }
+  });
+
+  it("keeps the gameplay choice handler registered before the press squish", () => {
+    stubMotion(false);
+    const scene = new TakeAwayScene();
+    scene.create();
+
+    const [first] = getInteractiveRects(scene);
+    fireFirstHandler(first, "pointerdown");
+    expect(first.setScale).not.toHaveBeenCalledWith(0.95);
+  });
+
+  it("attaches exactly one extra pointerdown listener per answer card when motion is allowed", () => {
+    stubMotion(true);
+    const reducedScene = new TakeAwayScene();
+    reducedScene.create();
+    const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
+      countListeners(control, "pointerdown"),
+    );
+
+    stubMotion(false);
+    const scene = new TakeAwayScene();
+    scene.create();
+    const controls = getInteractiveRects(scene);
+
+    expect(reducedCounts.length).toBeGreaterThan(0);
+    expect(controls.map((control) => countListeners(control, "pointerdown"))).toEqual(
+      reducedCounts.map((count) => count + 1),
+    );
+    for (const control of controls) {
+      expect(countListeners(control, "pointerup")).toBe(1);
+      expect(countListeners(control, "pointercancel")).toBe(1);
     }
   });
 });

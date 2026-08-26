@@ -123,15 +123,8 @@ const checks = [
     test: () => readPrecacheManifest().includes(".ligne"),
   },
   {
-    name: "Service worker excludes Ligne WASM from precache",
-    test: () => !readPrecacheManifest().includes("ligne_wasm_bg"),
-  },
-  {
-    name: "Service worker runtime-caches Ligne WASM",
-    test: () => {
-      const serviceWorker = readServiceWorker();
-      return serviceWorker.includes("ligne-engine-wasm") && serviceWorker.includes("CacheFirst");
-    },
+    name: "Service worker includes Ligne WASM engine in precache",
+    test: () => readPrecacheManifest().includes("ligne_wasm_bg"),
   },
   {
     name: "Service worker includes navigation route",

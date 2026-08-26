@@ -3,6 +3,7 @@ import { SpeakerButton } from "../components/SpeakerButton";
 import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakLetter } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -70,6 +71,7 @@ export class AlphabetScene extends GameSceneBase {
       centerX + TARGET_DISPLAY_SIZE / 2 + this.SPEAKER_OFFSET,
       centerY + TARGET_Y_OFFSET,
       {
+        muted: !load().settings.sfxEnabled,
         onSpeak: () => {
           const round = this.rounds[this.roundIndex];
           if (!round) return; // Celebration after the final round — nothing to speak.
@@ -123,6 +125,7 @@ export class AlphabetScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       card.on("pointerdown", () => this.handleChoice(i));
+      attachPressFeedback(card);
       this.cardRects.push(card);
 
       const letter = this.add

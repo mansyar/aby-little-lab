@@ -11,6 +11,7 @@ import {
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { GameSceneBase } from "./GameSceneBase";
 
@@ -95,6 +96,8 @@ export class MusicalMemoryScene extends GameSceneBase {
   private sequence: number[] = [];
   private inputIndex = 0;
   private roundCount = 0;
+  /** Guards overlapping sequence playbacks so a stale completion cannot clear the speaker. */
+  private sequencePlayId = 0;
 
   constructor() {
     super("MusicalMemory");
@@ -131,6 +134,7 @@ export class MusicalMemoryScene extends GameSceneBase {
       frog.setDisplaySize(FROG_SIZE, FROG_SIZE);
       frog.setInteractive();
       frog.on("pointerdown", () => this.handleFrogTap(i));
+      attachPressFeedback(frog);
       this.frogs.push(frog);
     }
 
@@ -169,6 +173,10 @@ export class MusicalMemoryScene extends GameSceneBase {
    */
   private playSequence(): void {
     this.inputLocked = true;
+    this.sequencePlayId++;
+    const id = this.sequencePlayId;
+    // The speaker glyph mirrors the audible playback (active while playing).
+    this.speaker?.setActive(true);
     // Long sequences play faster so later rounds don't drag.
     const delay = this.sequence.length >= FAST_NOTE_DELAY_LENGTH ? FAST_NOTE_DELAY : NOTE_DELAY;
     for (let i = 0; i < this.sequence.length; i++) {
@@ -178,7 +186,10 @@ export class MusicalMemoryScene extends GameSceneBase {
       });
     }
     this.time.delayedCall(this.sequence.length * delay, () => {
-      this.inputLocked = false;
+      if (this.sequencePlayId === id) {
+        this.speaker?.setActive(false);
+        this.inputLocked = false;
+      }
     });
   }
 

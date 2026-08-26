@@ -48,7 +48,15 @@ function createMockControl(baseScale = 1, scene?: MockControl["scene"]): MockCon
   return obj;
 }
 
-describe("attachPressFeedback", () => {
+/**
+ * Every game-object kind the utility declares support for (text labels,
+ * rectangle cards, and image-based icons such as SpeakerButton). The runtime
+ * contract only relies on scale plus Phaser event registration, so each kind
+ * shares the same mock shape while pinning the supported surface.
+ */
+const SUPPORTED_CONTROL_KINDS = ["text", "rectangle", "image"] as const;
+
+describe.each(SUPPORTED_CONTROL_KINDS)("attachPressFeedback on %s controls", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });

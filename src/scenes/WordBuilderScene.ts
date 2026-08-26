@@ -6,6 +6,7 @@ import {
   generateWordBuildPlaythrough,
 } from "../game/wordLogic";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -106,6 +107,7 @@ export class WordBuilderScene extends GameSceneBase {
       centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
       centerY + PICTURE_Y_OFFSET,
       {
+        muted: !load().settings.sfxEnabled,
         onSpeak: () => {
           const word = this.words[this.wordIndex];
           if (!word) return; // Celebration after the final word — nothing to speak.
@@ -174,6 +176,7 @@ export class WordBuilderScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       tile.on("pointerdown", () => this.handleTile(i));
+      attachPressFeedback(tile);
 
       const letterImage = this.add
         .image(tileX, tileY, `letter_${tileValues[i].toLowerCase()}`)

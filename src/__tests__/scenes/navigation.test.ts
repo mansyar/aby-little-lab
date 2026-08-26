@@ -36,6 +36,8 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setFillStyle: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
@@ -86,7 +88,11 @@ vi.mock("phaser", () => {
 
     constructor() {
       this.add = {
-        rectangle: vi.fn(() => createMockGameObject(this)),
+        rectangle: vi.fn((...args: unknown[]) => {
+          const obj = createMockGameObject(this);
+          (obj as { args?: unknown[] }).args = args;
+          return obj;
+        }),
         text: vi.fn(() => createMockGameObject(this)),
         image: vi.fn(() => createMockGameObject(this)),
         container: vi.fn(() => createMockGameObject(this)),
@@ -251,6 +257,7 @@ vi.mock("../../audio/AudioManager", () => ({
 
 const mockSpeech = vi.hoisted(() => ({
   isSpeechSupported: vi.fn(() => false),
+  onSpeechLifecycle: vi.fn(() => vi.fn()),
   unlockSpeechForUserGesture: vi.fn(),
   speakLetter: vi.fn(() => true),
   speakWord: vi.fn(() => true),
@@ -1233,11 +1240,14 @@ describe("scene navigation flow", () => {
       if (!chip) throw new Error("chip not created");
       triggerPointerupOn(chip);
 
-      // The overlay is the full-screen rectangle added when the picker opened.
+      // The overlay is the full-screen (1024×768) rectangle added when the
+      // picker opened. Match by geometry: decorative rectangles such as the
+      // active-profile ring may be created after it.
       const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
-      const overlay = rectangleMock.mock.results.at(-1)?.value as
-        | Record<string, MockFn>
-        | undefined;
+      const overlay = rectangleMock.mock.results
+        .map((r) => r.value as { args?: number[] } & Record<string, MockFn>)
+        .filter((r) => r.args?.[2] === 1024)
+        .at(-1);
       if (!overlay) throw new Error("overlay not created");
       triggerPointerupOn(overlay);
 
@@ -1826,7 +1836,7 @@ describe("scene navigation flow", () => {
       expect(burst?.[0]?.scaleX).toBeCloseTo(1.25 * STICKER_BASE_SCALE, 5);
     });
 
-    it("under reduced motion: empty slots fade to alpha only (no scale)", () => {
+    it("under reduced motion: empty slots appear instantly (no fade tween)", () => {
       vi.stubGlobal("window", {
         matchMedia: vi.fn(() => ({ matches: true })),
       });
@@ -1834,13 +1844,16 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      const slot = getEmptySlots(scene)[1];
-      const entrance = getMockFn(scene.tweens.add).mock.calls.find(
-        (call) => call[0]?.targets === slot,
+      // Reduced motion skips the fade entirely: no tween may target a slot,
+      // and each slot lands directly at its final alpha.
+      const slots = getEmptySlots(scene);
+      const slotTweens = getMockFn(scene.tweens.add).mock.calls.filter((call) =>
+        slots.includes(call[0]?.targets),
       );
-      expect(entrance?.[0]?.alpha).toBe(0.55);
-      expect("scaleX" in (entrance?.[0] ?? {})).toBe(false);
-      expect("scaleY" in (entrance?.[0] ?? {})).toBe(false);
+      expect(slotTweens).toHaveLength(0);
+      for (const slot of slots) {
+        expect(getMockFn(slot.setAlpha)).toHaveBeenCalledWith(0.55);
+      }
     });
 
     it("re-renders the sticker shelf when the settings panel reports a progress reset", () => {
@@ -7000,7 +7013,11 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      const tiles = getRectangles(scene);
+      // Game tiles are 160×116 rectangles; smaller rectangles are decorative
+      // rings/markers outside the locked-tile treatment.
+      const tiles = getRectangles(scene).filter(
+        (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 150,
+      );
       expect(tiles.length).toBeGreaterThanOrEqual(10);
       for (const tile of tiles) {
         expect(getMockFn(tile.setAlpha)).toHaveBeenCalledWith(TIME_UP_TILE_ALPHA);
@@ -7142,8 +7159,11 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      // p1 active -> locked and dimmed from the start.
-      const tiles = getRectangles(scene);
+      // p1 active -> locked and dimmed from the start. Only game tiles
+      // (160×116) participate; decorative rectangles are excluded.
+      const tiles = getRectangles(scene).filter(
+        (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 150,
+      );
       for (const tile of tiles) {
         expect(getMockFn(tile.disableInteractive)).toHaveBeenCalled();
       }

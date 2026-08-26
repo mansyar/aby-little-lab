@@ -59,7 +59,7 @@ request-entry method as the baseline above.
 | Phaser vendor | 1,343.5 KiB | 1,342.6 KiB | -0.9 KiB; effectively unchanged |
 | Hoot asset URL module | — | 0.07 kB raw / 0.09 kB gzip | Lazy |
 | Ligne JS bridge | — | 32.04 kB raw / 9.44 kB gzip | Lazy and precached |
-| Ligne WASM engine | — | 1,682.84 kB raw / 538.81 kB gzip | Lazy; CacheFirst runtime cache, excluded from precache |
+| Ligne WASM engine | — | 1,682.84 kB raw / 538.81 kB gzip | Lazy JS bridge but WASM **precached** (v1.16.0+); was CacheFirst runtime cache, excluded from precache |
 | Hoot `.ligne` asset | — | 29.31 kB raw | Lazy at runtime and precached for offline fallback recovery |
 
 `node scripts/validate-bundle.js` passed both guardrails: the Phaser vendor

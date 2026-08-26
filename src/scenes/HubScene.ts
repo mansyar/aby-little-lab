@@ -191,7 +191,7 @@ const TILE_ICON_TEXTURE_SIZE = 512;
 /** Vertical offset of the tile icon above the tile center (px). */
 const TILE_ICON_Y_OFFSET = -40;
 /** Vertical offset of the secondary text label below the tile center (px). */
-const TILE_LABEL_Y_OFFSET = 18;
+const TILE_LABEL_Y_OFFSET = 20;
 
 /** Delay between consecutive entrance elements (ms). */
 const ENTRANCE_STAGGER = 40;
@@ -273,8 +273,11 @@ const HINT_ARC_RADIUS = 12;
 const HINT_COOL_COLOR = 0x68d391;
 /** Warm (5 minutes or fewer remaining) color for the hint arc. */
 const HINT_WARM_COLOR = 0xed8936;
-/** Alpha applied to game tiles while the daily limit is reached. */
+/** Alpha applied to Hub tiles while the daily limit locks them. */
 const TIME_UP_TILE_ALPHA = 0.45;
+
+/** Static scale for locked tiles — a non-color "unavailable" size cue. */
+const TIME_UP_TILE_SCALE = 0.97;
 /** How long the pre-game nudge overlay stays before launching (ms). */
 const NUDGE_DELAY = 2000;
 /** Depth of the pre-game nudge overlay (above all Hub content). */
@@ -377,6 +380,8 @@ export class HubScene extends Phaser.Scene {
       const y = startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2;
 
       const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
+      // Flat storybook outline, matching every game scene's card language.
+      tile.setStrokeStyle(4, 0x2d3748);
       tile.setInteractive();
       this.attractTargets.push(tile);
       // Navigate on release so the press squish is visible while holding;
@@ -405,7 +410,7 @@ export class HubScene extends Phaser.Scene {
         y + TILE_LABEL_Y_OFFSET,
         GAME_TILES[i].label,
         textStyle({
-          fontSize: "15px",
+          fontSize: "17px",
           color: "#ffffff",
         }),
       );
@@ -534,6 +539,18 @@ export class HubScene extends Phaser.Scene {
       PROFILE_AVATAR_TEXTURES[active.avatarId],
     );
     chip.setScale(AVATAR_CHIP_DISPLAY / AVATAR_TEXTURE_SIZE);
+
+    // Flat storybook ring so the active profile is unambiguous without
+    // relying on scale alone (spec FR2).
+    const ring = this.add.rectangle(
+      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
+      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
+      AVATAR_CHIP_DISPLAY + 20,
+      AVATAR_CHIP_DISPLAY + 20,
+    );
+    ring.setFillStyle(0x000000, 0);
+    ring.setStrokeStyle(4, 0x2d3748, 1); // thick flat outline (#2D3748)
+    ring.setDepth(-1);
     // Frame-based default hit area covers the visible chip exactly (custom
     // rects are tested in texture-local space and miss on 512px textures).
     chip.setInteractive();
@@ -574,6 +591,20 @@ export class HubScene extends Phaser.Scene {
       avatar.setInteractive();
       const baseScale = PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE;
       avatar.setScale(profile.id === activeId ? baseScale * 1.15 : baseScale);
+      if (profile.id === activeId) {
+        // Selection ring behind the enlarged active avatar; destroyed with
+        // the picker on close via profilePickerObjects.
+        const marker = this.add.rectangle(
+          x,
+          y,
+          PICKER_AVATAR_DISPLAY + 16,
+          PICKER_AVATAR_DISPLAY + 16,
+        );
+        marker.setFillStyle(0x000000, 0);
+        marker.setStrokeStyle(4, 0x2d3748, 1);
+        marker.setDepth(PICKER_DEPTH);
+        this.profilePickerObjects.push(marker);
+      }
       avatar.on("pointerup", () => {
         if (profile.id !== activeId) {
           switchProfile(profile.id);
@@ -633,6 +664,7 @@ export class HubScene extends Phaser.Scene {
       this.timeUp = true;
       for (const tile of this.attractTargets) {
         tile.setAlpha(TIME_UP_TILE_ALPHA);
+        tile.setScale(TIME_UP_TILE_SCALE);
         tile.disableInteractive();
       }
       this.mascot?.wave();
@@ -661,6 +693,7 @@ export class HubScene extends Phaser.Scene {
     if (this.timeUp) {
       for (const tile of this.attractTargets) {
         tile.setAlpha(1);
+        tile.setScale(1);
         tile.setInteractive();
       }
       this.timeUp = false;
@@ -875,8 +908,13 @@ export class HubScene extends Phaser.Scene {
       duration: ENTRANCE_DURATION,
       ease: "Sine.out",
     };
-    graphics.setAlpha(0);
-    this.tweens.add(config);
+    if (isReducedMotion()) {
+      // Reduced motion skips the fade-in and lands directly at final alpha.
+      graphics.setAlpha(EMPTY_SLOT_ALPHA);
+    } else {
+      graphics.setAlpha(0);
+      this.tweens.add(config);
+    }
   }
 
   /**
