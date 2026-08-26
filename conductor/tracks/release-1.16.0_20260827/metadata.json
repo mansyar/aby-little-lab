@@ -1,0 +1,58 @@
+{
+  "id": "release-1.16.0_20260827",
+  "title": "v1.16.0 Release Execution — UI/UX Cohesion + Ligne Offline-First Mascot",
+  "type": "chore",
+  "status": "in_progress",
+  "createdAt": "2026-08-27T05:30:00.000Z",
+  "updatedAt": "2026-08-27T05:44:00.000Z",
+  "branch": "release/v1.16.0",
+  "baseTag": "v1.15.0",
+  "targetVersion": "1.16.0",
+  "scope": {
+    "deltaCommits": 52,
+    "nonConductorFiles": 38,
+    "includes": [
+      "UI/UX Cohesion (press feedback, speaker states, Settings/Learning Progress, Hub hierarchy)",
+      "Ligne WASM offline-first mascot fix (precache + validator contract update)"
+    ]
+  },
+  "branchHygiene": {
+    "mode": "full_local_and_remote",
+    "local": [
+      "fix/ipad-black-screen",
+      "feat/game-12",
+      "feat/game-13",
+      "feat/game-14",
+      "feat/game-17",
+      "feat/parental-settings-expansion",
+      "ci/fix-deploy-checkout",
+      "ci/tag-deploy-guard",
+      "fix/speaker-button-tts",
+      "hotfix/more-less-arrow",
+      "release/v1.6.0",
+      "release/v1.7.0",
+      "release/v1.8.0",
+      "release/v1.10.0",
+      "release/v1.11.0",
+      "release/v1.12.0",
+      "release/v1.13.0",
+      "release/v1.14.0"
+    ],
+    "remote": [
+      "origin/ci/fix-deploy-checkout",
+      "origin/ci/tag-deploy-guard",
+      "origin/feat/game-12",
+      "origin/feat/game-13",
+      "origin/fix/speaker-button-tts",
+      "origin/release/v1.6.0",
+      "origin/release/v1.7.0",
+      "origin/release/v1.8.0",
+      "origin/release/v1.10.0",
+      "origin/release/v1.11.0",
+      "origin/release/v1.12.0",
+      "origin/release/v1.13.0",
+      "origin/release/v1.14.0"
+    ]
+  },
+  "deviceTesting": "4-class matrix (iPad/iPadOS, iPhone/iOS, Android tablet, Android phone) + desktop smoke"
+}
