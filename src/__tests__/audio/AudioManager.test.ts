@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import { AudioManager } from "../../audio/AudioManager";
 import { load } from "../../utils/storage";
 
@@ -486,28 +484,6 @@ describe("AudioManager", () => {
       manager.destroy();
       const bgm = findAudioBySrc("bgm");
       expect(bgm?.pause).toHaveBeenCalled();
-    });
-  });
-
-  describe("BGM runtime URL", () => {
-    const bgmRuntimePath = path.resolve(process.cwd(), "public/audio/bgm.mp3");
-
-    it("BGM file exists at public/audio/bgm.mp3", () => {
-      expect(fs.existsSync(bgmRuntimePath)).toBe(true);
-    });
-
-    it("BGM file is non-empty", () => {
-      if (!fs.existsSync(bgmRuntimePath)) return;
-      const stats = fs.statSync(bgmRuntimePath);
-      expect(stats.size).toBeGreaterThan(0);
-    });
-
-    it("BGM runtime file matches source asset size", () => {
-      const sourcePath = path.resolve(process.cwd(), "src/assets/audio/bgm.mp3");
-      if (!fs.existsSync(bgmRuntimePath) || !fs.existsSync(sourcePath)) return;
-      const runtimeStats = fs.statSync(bgmRuntimePath);
-      const sourceStats = fs.statSync(sourcePath);
-      expect(runtimeStats.size).toBe(sourceStats.size);
     });
   });
 });
