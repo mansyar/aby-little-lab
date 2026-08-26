@@ -32,18 +32,18 @@ No technology-stack deviation is anticipated. If implementation requires a new d
 
 ## Phase 2 — Cross-game child interaction cohesion
 
-- [ ] Task: Add regression coverage before scene changes
-  - [ ] Extend existing scene tests for tap-card families, including Alphabet, Word Match, Word Builder, How Many, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, and Pattern Builder.
-  - [ ] Add missing scene tests for any changed scene without an existing corresponding suite.
-  - [ ] Verify press feedback does not interfere with input locking, correct/wrong feedback, round transitions, or completion.
-  - [ ] Include reduced-motion and pointerout/pointercancel cases.
+- [x] Task: Add regression coverage before scene changes [5cd9206]
+  - [x] Extend existing scene tests for tap-card families, including Alphabet, Word Match, Word Builder, How Many, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, and Pattern Builder.
+  - [x] Add missing scene tests for any changed scene without an existing corresponding suite. *(New musicalMemoryScene.test.ts)*
+  - [x] Verify press feedback does not interfere with input locking, correct/wrong feedback, round transitions, or completion. *(Ordering pins + playback-lock pin; full suite green)*
+  - [x] Include reduced-motion and pointerout/pointercancel cases. *(RM delta pin; contract covers up/out/cancel)*
 
-- [ ] Task: Implement consistent child-control feedback
-  - [ ] Apply the shared interaction treatment to missing tap cards and other child-facing interactive controls.
-  - [ ] Preserve existing pointerdown versus pointerup navigation semantics and no-fail reactions.
-  - [ ] Avoid duplicate listeners or competing tweens on controls that already have bespoke feedback.
-  - [ ] Ensure new listeners/tweens are cleaned up through existing scene lifecycle behavior.
-  - [ ] Keep all gameplay text-independent and preserve existing touch targets.
+- [x] Task: Implement consistent child-control feedback [f36f0b9]
+  - [x] Apply the shared interaction treatment to missing tap cards and other child-facing interactive controls. *(6 card scenes + Musical Memory frogs)*
+  - [x] Preserve existing pointerdown versus pointerup navigation semantics and no-fail reactions.
+  - [x] Avoid duplicate listeners or competing tweens on controls that already have bespoke feedback.
+  - [x] Ensure new listeners/tweens are cleaned up through existing scene lifecycle behavior.
+  - [x] Keep all gameplay text-independent and preserve existing touch targets.
 
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Run targeted scene, interaction, and reduced-motion tests.
