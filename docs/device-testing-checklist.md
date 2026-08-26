@@ -13,6 +13,15 @@ This checklist ensures comprehensive testing across target devices before releas
 - **Result:** **PASSED 2026-08-27** — automated gates green (check, suite 64 files/1568, coverage thresholds met, build, PWA + bundle validators) plus user-confirmed manual pass; no Critical/High/Medium/Low findings
 - **Issues found:** none
 
+## Execution Record - v1.16.0 (release/v1.16.0, pending verification)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot; base `v1.15.0`, release track `conductor/tracks/release-1.16.0_20260827/`)
+- **Scope:** shared press feedback on every child tap control, speaker visual states (active/muted/unavailable), Settings & Learning Progress affordances (row cards, switch toggles, ✕ close, chevron pager), Hub tile hierarchy (strokes/labels) + active-profile rings, and the **offline-first Ligne mascot fix** (engine precached — animated Hoot on first offline visit; tween Hoot under reduced motion)
+- **Devices:** iPad (iPadOS 15+), iPhone (iOS 15+), Android tablet (Android 10+), Android phone (Android 10+) — **all four classes PENDING**
+- **Checks:** (carried UI/UX Cohesion rows from the pass above) press feedback on all child controls; speaker pulse while speaking, dimmed when SFX off, dimmed when speech unsupported; Settings row cards + toggles + ✕ + chevron pager + viewed/active rings; Hub tile hierarchy + active-profile rings + daily-limit state; **offline-relaunch rows —** clear site data, go offline, relaunch → animated Hoot (Ligne) appears with **no network request fails** for engine or mascot (no `404`/`Failed to fetch`); re-launch after a first online load primed the precache → Hoot still available offline; **reduced-motion rows —** with OS `prefers-reduced-motion`, the tween (lightweight) Hoot appears and **no WASM fetch is made** (accepted behavior); hot/refresh reload boots a clean Hub from the precache; **console-health rows —** zero console errors across Hub, a game, Settings, and offline relaunch
+- **Result:** **PENDING — to be executed against the live URL after deploy** (automated desktop smoke is green; device-class execution deferred per user schedule)
+- **Issues found:** pending
+
 ## Execution Record - v1.14.1 (2026-08-10)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.14.1 — Bug fix: Learning Progress overlay row collision in parent Settings → Progress)
