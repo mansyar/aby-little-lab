@@ -28,6 +28,8 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setFillStyle: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
@@ -232,6 +234,7 @@ const { mockSpeech } = vi.hoisted(() => ({
   mockSpeech: {
     speakWord: vi.fn(() => true),
     isSpeechSupported: vi.fn(() => true),
+    onSpeechLifecycle: vi.fn(() => vi.fn()),
   },
 }));
 
@@ -338,5 +341,66 @@ describe("MusicalMemoryScene press feedback cohesion", () => {
     fireFirstHandler(first, "pointerdown");
 
     expect(mockAudio.playFrogNote).not.toHaveBeenCalled();
+  });
+});
+
+describe("MusicalMemoryScene replay drives the speaker grammar", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        media: "(prefers-reduced-motion: reduce)",
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  /** The replay button glyph (the icon_speaker image). */
+  function getSpeakerImage(scene: MusicalMemoryScene): Record<string, MockFn> {
+    const calls = scene.add.image.mock.calls;
+    const index = calls.findIndex((call) => call[2] === "icon_speaker");
+    if (index === -1) throw new Error("speaker image not found");
+    const value = scene.add.image.mock.results[index]?.value;
+    if (!value) throw new Error("speaker image result missing");
+    return value as Record<string, MockFn>;
+  }
+
+  /** Fires the most recently scheduled delayed call (the sequence completion). */
+  function fireLastDelayedCall(scene: MusicalMemoryScene): void {
+    const callback = scene.time.delayedCall.mock.calls.at(-1)?.[1];
+    if (typeof callback !== "function") {
+      throw new Error("completion delayed call not found");
+    }
+    (callback as () => void)();
+  }
+
+  it("pulses the replay button while a replay plays and restores neutral after", () => {
+    const scene = new MusicalMemoryScene();
+    scene.create();
+
+    // create() auto-plays; complete that initial playback first.
+    fireLastDelayedCall(scene);
+    const speaker = getSpeakerImage(scene);
+
+    fireFirstHandler(speaker, "pointerdown");
+    expect(speaker.setTint).toHaveBeenCalledWith(0x68d391);
+
+    fireLastDelayedCall(scene);
+    expect(speaker.clearTint).toHaveBeenCalled();
+    expect(speaker.setAlpha).toHaveBeenLastCalledWith(1);
   });
 });

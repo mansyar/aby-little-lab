@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   isSpeechSupported,
+  onSpeechLifecycle,
   setPreferredVoiceURI,
   speakLetter,
   speakNumber,
@@ -262,5 +263,115 @@ describe("speech", () => {
       vi.unstubAllGlobals();
       expect(() => unlockSpeechForUserGesture()).not.toThrow();
     });
+  });
+});
+
+describe("speech lifecycle events", () => {
+  const cancel = vi.fn();
+  const speak = vi.fn();
+  const resume = vi.fn();
+  const getVoices = vi.fn();
+  const synth = { cancel, speak, resume, getVoices, speaking: false, pending: false };
+  let Utterance: ReturnType<typeof vi.fn>;
+  let events: Array<{ kind: string }>;
+  let remove: (() => void) | null;
+
+  beforeEach(() => {
+    events = [];
+    remove = null;
+    cancel.mockClear();
+    speak.mockClear();
+    resume.mockClear();
+    getVoices.mockClear();
+    synth.speaking = false;
+    synth.pending = false;
+    Utterance = vi.fn();
+    vi.stubGlobal("speechSynthesis", synth);
+    vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
+    setPreferredVoiceURI(null);
+  });
+
+  afterEach(() => {
+    remove?.();
+    remove = null;
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  /** Installs a listener and records every lifecycle event it receives. */
+  function install(): void {
+    remove = onSpeechLifecycle((event) => {
+      events.push(event);
+    });
+  }
+
+  it("emits speech:start and then speech:end for a successful utterance", () => {
+    install();
+    speakLetter("A", true);
+    const utterance = Utterance.mock.instances[0];
+    utterance.onstart();
+    expect(events.map((e) => e.kind)).toEqual(["speech:start"]);
+    utterance.onend();
+    expect(events.map((e) => e.kind)).toEqual(["speech:start", "speech:end"]);
+  });
+
+  it("emits speech:error when the engine reports an utterance failure", () => {
+    install();
+    speakLetter("A", true);
+    Utterance.mock.instances[0].onerror();
+    expect(events.map((e) => e.kind)).toEqual(["speech:error"]);
+  });
+
+  it("emits no events when speech is disabled", () => {
+    install();
+    speakLetter("A", false);
+    expect(Utterance.mock.instances).toHaveLength(0);
+    expect(events).toEqual([]);
+  });
+
+  it("emits no events when speech is unsupported", () => {
+    vi.unstubAllGlobals();
+    install();
+    speakLetter("A", true);
+    expect(events).toEqual([]);
+  });
+
+  it("ignores lifecycle events from a superseded utterance so interruption cannot leave stale state", () => {
+    vi.useFakeTimers();
+    try {
+      install();
+      // The first utterance starts normally.
+      speakLetter("B", true);
+      const first = Utterance.mock.instances[0];
+      first.onstart();
+      expect(events.map((e) => e.kind)).toEqual(["speech:start"]);
+
+      // A second, interrupting utterance supersedes the first.
+      synth.speaking = true;
+      speakLetter("C", true);
+      expect(speak).toHaveBeenCalledTimes(1); // deferred, not yet dispatched
+
+      // The cancelled first utterance ends late — it must not clear the state.
+      first.onend();
+      expect(events.map((e) => e.kind)).toEqual(["speech:start"]);
+
+      // The replacement utterance drives its own lifecycle.
+      vi.advanceTimersByTime(100);
+      const second = Utterance.mock.instances[1];
+      second.onstart();
+      second.onend();
+      expect(events.map((e) => e.kind)).toEqual(["speech:start", "speech:start", "speech:end"]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("stops delivering events after unsubscribe", () => {
+    install();
+    remove?.();
+    remove = null;
+    speakLetter("A", true);
+    Utterance.mock.instances[0].onstart();
+    expect(events).toEqual([]);
   });
 });

@@ -28,6 +28,8 @@ vi.mock("phaser", () => {
       setDisplaySize: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setFillStyle: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
       setCollideWorldBounds: vi.fn().mockReturnThis(),
       setBounce: vi.fn().mockReturnThis(),

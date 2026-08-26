@@ -36,6 +36,8 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setFillStyle: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
@@ -255,6 +257,7 @@ vi.mock("../../audio/AudioManager", () => ({
 
 const mockSpeech = vi.hoisted(() => ({
   isSpeechSupported: vi.fn(() => false),
+  onSpeechLifecycle: vi.fn(() => vi.fn()),
   unlockSpeechForUserGesture: vi.fn(),
   speakLetter: vi.fn(() => true),
   speakWord: vi.fn(() => true),

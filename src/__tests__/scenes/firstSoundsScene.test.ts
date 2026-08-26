@@ -28,6 +28,8 @@ vi.mock("phaser", () => {
       setPosition: vi.fn().mockReturnThis(),
       setSize: vi.fn().mockReturnThis(),
       setDisplaySize: vi.fn().mockReturnThis(),
+      setTint: vi.fn().mockReturnThis(),
+      clearTint: vi.fn().mockReturnThis(),
       setStrokeStyle: vi.fn().mockReturnThis(),
       setVelocity: vi.fn().mockReturnThis(),
       setCollideWorldBounds: vi.fn().mockReturnThis(),
@@ -251,6 +253,7 @@ const { mockSpeech } = vi.hoisted(() => ({
     speakWord: vi.fn(() => true),
     speakLetter: vi.fn(() => true),
     isSpeechSupported: vi.fn(() => true),
+    onSpeechLifecycle: vi.fn(() => vi.fn()),
   },
 }));
 
