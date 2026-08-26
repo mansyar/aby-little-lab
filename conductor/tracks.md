@@ -147,4 +147,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: UI/UX Cohesion** *Link: [./tracks/ui-ux-cohesion_20260826/index.md](./tracks/ui-ux-cohesion_20260826/index.md)* (Active)
+- [x] **Track: UI/UX Cohesion** *Link: [./archive/ui-ux-cohesion_20260826/index.md](./archive/ui-ux-cohesion_20260826/index.md)* (Archived)
