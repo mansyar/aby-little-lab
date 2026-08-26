@@ -7,6 +7,7 @@ import {
   evaluateRound,
 } from "../game/countLogic";
 import { isReducedMotion, motionDuration } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakNumber } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -155,6 +156,7 @@ export class HowManyScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       card.on("pointerdown", () => this.handleChoice(i));
+      attachPressFeedback(card);
       this.cardRects.push(card);
 
       this.createCardItems(round.groups[i], x, cardY);

@@ -7,6 +7,7 @@ import {
 import type { ShapeType } from "../game/shapeSorterLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { GameSceneBase } from "./GameSceneBase";
 
@@ -131,6 +132,7 @@ export class PatternBuilderScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       card.on("pointerdown", () => this.handleChoice(i));
+      attachPressFeedback(card);
       this.cardRects.push(card);
 
       const shape = this.add.image(x, cardsY, SHAPE_TEXTURES[round.choices[i]]);

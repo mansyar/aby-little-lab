@@ -11,6 +11,7 @@ import {
   WIN_TARGET,
 } from "../game/musicalMemoryLogic";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { GameSceneBase } from "./GameSceneBase";
 
@@ -131,6 +132,7 @@ export class MusicalMemoryScene extends GameSceneBase {
       frog.setDisplaySize(FROG_SIZE, FROG_SIZE);
       frog.setInteractive();
       frog.on("pointerdown", () => this.handleFrogTap(i));
+      attachPressFeedback(frog);
       this.frogs.push(frog);
     }
 

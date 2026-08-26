@@ -3,6 +3,7 @@ import { SpeakerButton } from "../components/SpeakerButton";
 import { generatePhonicsPlaythrough, type PhonicsRound } from "../game/firstSoundsLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakLetter, speakWord } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -123,6 +124,7 @@ export class FirstSoundsScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       card.on("pointerdown", () => this.handleChoice(i));
+      attachPressFeedback(card);
       this.cardRects.push(card);
 
       const letter = this.add

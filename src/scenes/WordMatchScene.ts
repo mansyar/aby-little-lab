@@ -3,6 +3,7 @@ import { SpeakerButton } from "../components/SpeakerButton";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -133,6 +134,7 @@ export class WordMatchScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       card.on("pointerdown", () => this.handleChoice(i));
+      attachPressFeedback(card);
       this.cardRects.push(card);
 
       // Compose the word from the already-loaded letter textures.

@@ -6,6 +6,7 @@ import {
   generateWordBuildPlaythrough,
 } from "../game/wordLogic";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
+import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
 import { load } from "../utils/storage";
@@ -174,6 +175,7 @@ export class WordBuilderScene extends GameSceneBase {
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       });
       tile.on("pointerdown", () => this.handleTile(i));
+      attachPressFeedback(tile);
 
       const letterImage = this.add
         .image(tileX, tileY, `letter_${tileValues[i].toLowerCase()}`)
