@@ -128,13 +128,13 @@ Publish the release through the guarded pipeline; no commits bypass the PR.
   - [x] Title: `Release v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot`; body cites base `v1.15.0`, links to track spec/plan, documents the WASM-precache contract change, and lists the RC gate evidence.
   - [x] Request review — reviewer `mansyar` added (`gh pr edit 28 --add-reviewer mansyar`); will not self-merge without review.
   - [x] **PR #28** — https://github.com/mansyar/aby-little-lab/pull/28
-- [ ] Task: Wait for GitHub Actions Quality Gates to pass on the PR
-  - [ ] Record the run ID/URL (e.g., `GHA run https://github.com/.../actions/runs/... passed`).
-  - [ ] If any check fails, fix on `release/v1.16.0`, re-push, and re-record.
-- [ ] Task: Merge the PR to `master`
-  - [ ] Merge strategy: per house convention (Merge commit — preserve release-branch history) or squash only if approved; never rebase master history.
-  - [ ] Record the merge commit SHA on `master`.
-  - [ ] Fast-forward local `master`: `git switch master && git pull origin master` and confirm it contains the merge.
+- [x] Task: Wait for GitHub Actions Quality Gates to pass on the PR
+  - [x] **PASS** — GHA run `33021500231` (https://github.com/mansyar/aby-little-lab/actions/runs/33021500231) completed **success** on PR #28 head `c9fea76`: Quality Gates 3m27s all steps green; `Deploy to Coolify` correctly **skipped** on the PR (tag-guard by design).
+  - [x] No check failures — no re-push/fix needed.
+- [x] Task: Merge the PR to `master`
+  - [x] Merge strategy: house convention **merge commit** (`gh pr merge 28 --merge`) — release-branch history preserved; master not rebased.
+  - [x] **Merge commit SHA on master:** **`93c0af3`** (`Merge pull request #28 from mansyar/release/v1.16.0`).
+  - [x] Local `master` fast-forwarded: `git switch master && git pull origin master` → confirms `93c0af3` present; local/origin master in sync (0/0).
 - [ ] Task: Phase Verification & Checkpoint — Phase 6
   - [ ] `conductor(plan): Mark phase 'Phase 6 - Pull Request and Merge to Master' as complete` and checkpoint `Checkpoint end of Phase 6`.
 
