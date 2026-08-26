@@ -1833,7 +1833,7 @@ describe("scene navigation flow", () => {
       expect(burst?.[0]?.scaleX).toBeCloseTo(1.25 * STICKER_BASE_SCALE, 5);
     });
 
-    it("under reduced motion: empty slots fade to alpha only (no scale)", () => {
+    it("under reduced motion: empty slots appear instantly (no fade tween)", () => {
       vi.stubGlobal("window", {
         matchMedia: vi.fn(() => ({ matches: true })),
       });
@@ -1841,13 +1841,16 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      const slot = getEmptySlots(scene)[1];
-      const entrance = getMockFn(scene.tweens.add).mock.calls.find(
-        (call) => call[0]?.targets === slot,
+      // Reduced motion skips the fade entirely: no tween may target a slot,
+      // and each slot lands directly at its final alpha.
+      const slots = getEmptySlots(scene);
+      const slotTweens = getMockFn(scene.tweens.add).mock.calls.filter((call) =>
+        slots.includes(call[0]?.targets),
       );
-      expect(entrance?.[0]?.alpha).toBe(0.55);
-      expect("scaleX" in (entrance?.[0] ?? {})).toBe(false);
-      expect("scaleY" in (entrance?.[0] ?? {})).toBe(false);
+      expect(slotTweens).toHaveLength(0);
+      for (const slot of slots) {
+        expect(getMockFn(slot.setAlpha)).toHaveBeenCalledWith(0.55);
+      }
     });
 
     it("re-renders the sticker shelf when the settings panel reports a progress reset", () => {
