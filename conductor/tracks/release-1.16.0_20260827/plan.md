@@ -144,11 +144,11 @@ Publish the release through the guarded pipeline; no commits bypass the PR.
 
 Create the release tag on the merged master and verify the tag-gated deployment.
 
-- [ ] Task: Create annotated tag `v1.16.0`
-  - [ ] `git tag -a v1.16.0 <master-merge-SHA> -m "chore(release): v1.16.0 — UI/UX Cohesion + Ligne offline-first Hoot"`
-  - [ ] Verify `git show v1.16.0` and `git log -1 --format="%h %ci %s" v1.16.0` — tag must be on `master` lineage, not on the release branch.
-  - [ ] Run the master-lineage guard check used by CI (assert `git merge-base --is-ancestor v1.16.0 master` true and tag reachable from `origin/master`).
-- [ ] Task: Push the tag and trigger deployment
+- [x] Task: Create annotated tag `v1.16.0`
+  - [x] `git tag -a v1.16.0 93c0af3 -m "chore(release): v1.16.0 — UI/UX Cohesion + Ligne offline-first Hoot"` — points at the master merge commit `93c0af3`.
+  - [x] Verified `git log -1 v1.16.0` = `93c0af3 2026-08-27 09:02:34 +1000 Merge pull request #28` — tag on **master lineage**, not the release branch.
+  - [x] Master-lineage guard (as CI): `git merge-base --is-ancestor v1.16.0 master` **true**; tag **reachable from `origin/master`**; tag does NOT descend from the release-branch-only tip `7eaeaeb`.
+- [~] Task: Push the tag and trigger deployment
   - [ ] `git push origin v1.16.0`
   - [ ] Confirm GitHub Actions detects the tag push and runs the expected release workflow (tag-gated).
   - [ ] Confirm Coolify reports success for the `v1.16.0` deployment; record the deployment run URL and Coolify deployment ID/log lines.
