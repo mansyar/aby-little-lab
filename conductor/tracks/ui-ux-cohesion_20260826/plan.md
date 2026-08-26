@@ -53,11 +53,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
 
 ## Phase 3 — Hub and profile-picker hierarchy
 
-- [ ] Task: Write Hub/profile regression coverage
-  - [ ] Extend `src/__tests__/scenes/hubScene.test.ts` for selected-profile indication, profile-picker selection, pressed tile state, earned/sticker state, and daily-limit state.
-  - [ ] Add layout assertions for the preserved 5×3+3 grid at 1024×768.
-  - [ ] Verify lazy loading, `navLocked`, profile switching, sticker-shelf refresh, and play-time behavior remain unchanged.
-  - [ ] Add reduced-motion assertions for changed entrance, idle, or selection treatment.
+- [x] Task: Write Hub/profile regression coverage [1123961]
+  - [x] Extend `src/__tests__/scenes/hubScene.test.ts` for selected-profile indication, profile-picker selection, pressed tile state, earned/sticker state, and daily-limit state. *(13 tests; chip + picker rings RED→GREEN; minimal ring implementation included to keep gates green)*
+  - [x] Add layout assertions for the preserved 5×3+3 grid at 1024×768. *(rows [5,5,5,3], pitch 182)*
+  - [x] Verify lazy loading, `navLocked`, profile switching, sticker-shelf refresh, and play-time behavior remain unchanged. *(pins; navigation.test.ts/firstWordsIntegration.test.ts hardened to geometry-based identification)*
+  - [x] Add reduced-motion assertions for changed entrance, idle, or selection treatment. *(zero tile-targeting tweens under RM)*
 
 - [ ] Task: Polish Hub visual hierarchy in place
   - [ ] Preserve the current grid, tile order, lazy navigation, sticker shelf, play-time indicator, mascot, and profile flow.
