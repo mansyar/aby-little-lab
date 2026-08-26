@@ -118,7 +118,7 @@ Run the complete gate set on the final RC (Cohesion + Ligne fix + version + docs
 
 ---
 
-## Phase 6 — Pull Request and Merge to Master
+## Phase 6 — Pull Request and Merge to Master [checkpoint: a179b46]
 
 Publish the release through the guarded pipeline; no commits bypass the PR.
 
@@ -135,8 +135,8 @@ Publish the release through the guarded pipeline; no commits bypass the PR.
   - [x] Merge strategy: house convention **merge commit** (`gh pr merge 28 --merge`) — release-branch history preserved; master not rebased.
   - [x] **Merge commit SHA on master:** **`93c0af3`** (`Merge pull request #28 from mansyar/release/v1.16.0`).
   - [x] Local `master` fast-forwarded: `git switch master && git pull origin master` → confirms `93c0af3` present; local/origin master in sync (0/0).
-- [~] Task: Phase Verification & Checkpoint — Phase 6
-  - [ ] `conductor(plan): Mark phase 'Phase 6 - Pull Request and Merge to Master' as complete` and checkpoint `Checkpoint end of Phase 6`.
+- [x] Task: Phase Verification & Checkpoint — Phase 6
+  - [x] `conductor(plan): Mark phase 'Phase 6 - Pull Request and Merge to Master' as complete` and checkpoint `Checkpoint end of Phase 6` (**`a179b46`** + git note).
 
 ---
 
