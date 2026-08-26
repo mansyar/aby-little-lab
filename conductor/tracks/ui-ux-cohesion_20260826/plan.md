@@ -19,11 +19,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Identify controls already using `attachPressFeedback` and controls with scene-specific feedback.
   - [x] Confirm no-fail, touch-target, reduced-motion, and pointer-cancellation constraints for each surface. *(Artifact: ./notes/inventory.md)*
 
-- [ ] Task: Establish the shared interaction test contract
-  - [ ] Extend `src/__tests__/utils/pressFeedback.test.ts` for every supported object type and pointerdown/up/out/cancel behavior.
-  - [ ] Verify captured base scale, optional spring behavior, and reduced-motion no-op behavior.
-  - [ ] Add or update test helpers only where needed to simulate Phaser event registration.
-  - [ ] Run focused tests and confirm expected failures before changing utility behavior, if utility changes are required.
+- [x] Task: Establish the shared interaction test contract [33b8877]
+  - [x] Extend `src/__tests__/utils/pressFeedback.test.ts` for every supported object type and pointerdown/up/out/cancel behavior. *(24 cases: text/rectangle/image × 8 behaviors)*
+  - [x] Verify captured base scale, optional spring behavior, and reduced-motion no-op behavior.
+  - [x] Add or update test helpers only where needed to simulate Phaser event registration. *(Existing mock helper reused; no changes needed)*
+  - [x] Run focused tests and confirm expected failures before changing utility behavior, if utility changes are required. *(Type-only union widening — no runtime delta; suite confirmed green before and after)*
 
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Verify the inventory covers every planned surface.
