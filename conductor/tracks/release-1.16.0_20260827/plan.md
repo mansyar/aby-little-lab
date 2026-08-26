@@ -100,7 +100,7 @@ Create and audit all release-facing documentation in DRAFT state; finalize numbe
 
 ---
 
-## Phase 5 — Release-Candidate Quality Gates
+## Phase 5 — Release-Candidate Quality Gates [checkpoint: cacc466]
 
 Run the complete gate set on the final RC (Cohesion + Ligne fix + version + docs) and archive evidence before the PR.
 
@@ -113,8 +113,8 @@ Run the complete gate set on the final RC (Cohesion + Ligne fix + version + docs
 - [x] Task: Confirm version propagation
   - [x] `dist/assets/index-_0xClWjb.js` contains `1.16.0` (bundle grep, confirmed in Phase 3 verification). Served `sw.js` precache names reflect the new build (46 entries incl. `ligne_wasm_bg-CaSOm_fQ.wasm`).
   - [x] Ligne offline contract holds in the artifact: `dist/sw.js` lists `ligne_wasm_bg-CaSOm_fQ.wasm` in precache (found once), and **no** `ligne-engine-wasm` runtime-caching route remains (0 matches).
-- [ ] Task: Phase Verification & Checkpoint — Phase 5
-  - [ ] Aggregate gate evidence into Conductor notes; `conductor(plan): Mark phase 'Phase 5 - Release-Candidate Quality Gates' as complete` and checkpoint `Checkpoint end of Phase 5 — Release Candidate`.
+- [x] Task: Phase Verification & Checkpoint — Phase 5
+  - [x] Aggregate gate evidence into Conductor notes; `conductor(plan): Mark phase 'Phase 5 - Release-Candidate Quality Gates' as complete` and checkpoint `Checkpoint end of Phase 5 — Release Candidate` (`cacc466` + git note).
 
 ---
 
