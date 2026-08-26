@@ -67,7 +67,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Add only subtle domain grouping accents; do not introduce categories, tabs, carousel navigation, or new instructional text. *(none added: no domain taxonomy exists and inventing one = new IA, excluded by spec)*
   - [x] Verify no clipping or overlap with Settings, profile controls, mascot, stickers, or play-time indicators. *(geometry unchanged except label offset +2 inside tile; in-bounds pins pass)*
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Run Hub/navigation/profile tests and quality checks for changed code.
   - [ ] Manually inspect 1024×768 and narrow-landscape layouts with fresh, earned, switched-profile, and time-limit states.
   - [ ] Verify reduced-motion behavior and touch-target sizes.
