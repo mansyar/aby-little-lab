@@ -11,7 +11,7 @@ Before implementation, mark the current task `[~]`. For logic-bearing changes, w
 
 No technology-stack deviation is anticipated. If implementation requires a new dependency or a change to the documented stack, stop before implementation, document the deviation, and obtain approval.
 
-## Phase 1 — Interaction inventory and shared contracts
+## Phase 1 — Interaction inventory and shared contracts [checkpoint: b2d98b6]
 
 - [x] Task: Inventory current interactive surfaces [1ed2431]
   - [x] Audit all 18 game scenes, Hub/profile controls, Settings/Progress overlays, ParentLock, and SpeakerButton.
@@ -25,10 +25,10 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Add or update test helpers only where needed to simulate Phaser event registration. *(Existing mock helper reused; no changes needed)*
   - [x] Run focused tests and confirm expected failures before changing utility behavior, if utility changes are required. *(Type-only union widening — no runtime delta; suite confirmed green before and after)*
 
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-  - [ ] Verify the inventory covers every planned surface.
-  - [ ] Run the focused interaction test suite.
-  - [ ] Present the phase manual-verification scope and obtain user confirmation before checkpointing.
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`) [b2d98b6]
+  - [x] Verify the inventory covers every planned surface.
+  - [x] Run the focused interaction test suite.
+  - [x] Present the phase manual-verification scope and obtain user confirmation before checkpointing. *(Confirmed 2026-08-26)*
 
 ## Phase 2 — Cross-game child interaction cohesion
 
