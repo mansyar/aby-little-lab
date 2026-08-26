@@ -95,7 +95,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Verify controls remain at least 64×64px and important controls approach 96×96px. *(Toggles/rows keep 96×96 hit areas; ✕, chevrons, and modal buttons sized at 96×96.)*
   - [x] Obtain user confirmation and create the phase checkpoint. *(Checkpoint b758d6a, 2026-08-27.)*
 
-## Phase 5 — Speaker and audio-visual feedback
+## Phase 5 — Speaker and audio-visual feedback [checkpoint: bdf3548]
 
 - [x] Task: Define and test the speaker-state contract [de395be]
   - [x] Extend speech tests for successful dispatch, disabled speech, unsupported speech, completion, interruption, and failure. *(Lifecycle describe: start/end sequence, error, disabled, unsupported, superseded-utterance isolation with fake timers, unsubscribe.)*
@@ -110,11 +110,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Keep the 96px touch target, iOS gesture unlock behavior, SFX gating, reduced-motion compliance, and scene cleanup. *(Unchanged; muted via load().settings in 8 scenes; destroy unsubscribes.)*
   - [x] Do not add a new audio dependency or couple the UI to one browser’s speech implementation. *(Pure Web Speech observability + Phaser primitives.)*
 
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-  - [ ] Run speech, SpeakerButton, and affected scene tests.
-  - [ ] Manually verify speech enabled/disabled, unsupported/failing speech, replay, interruption, and reduced motion.
-  - [ ] Confirm every significant audio state has a visual counterpart.
-  - [ ] Obtain user confirmation and create the phase checkpoint.
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`) [bdf3548]
+  - [x] Run speech, SpeakerButton, and affected scene tests. *(speech 35, SpeakerButton 15, musicalMemory 5, scene suites + navigation + firstWordsIntegration all green.)*
+  - [x] Manually verify speech enabled/disabled, unsupported/failing speech, replay, interruption, and reduced motion. *(Steps 1-7 presented; user confirmed on 2026-08-27.)*
+  - [x] Confirm every significant audio state has a visual counterpart. *(Speaking → green pulse; muted/unavailable → dimmed tint; neutral after end/error/cancel; RM static tint.)*
+  - [x] Obtain user confirmation and create the phase checkpoint. *(Checkpoint bdf3548, 2026-08-27.)*
 
 ## Phase 6 — Integrated quality, documentation, and review
 
