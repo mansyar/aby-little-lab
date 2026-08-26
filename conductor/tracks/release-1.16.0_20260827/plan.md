@@ -81,7 +81,7 @@ Prepare the release branch with the version bump using the established mechanism
 
 ---
 
-## Phase 4 — Release Documentation (DRAFT)
+## Phase 4 — Release Documentation (DRAFT) [checkpoint: a9afe6f]
 
 Create and audit all release-facing documentation in DRAFT state; finalize numbers only after live verification.
 
@@ -95,8 +95,8 @@ Create and audit all release-facing documentation in DRAFT state; finalize numbe
   - [x] No Ligne/pilot "Current phase" line reads as pilot-only in `tech-stack.md` — no patch needed.
 - [x] Task: Commit documentation
   - [x] `docs(release): draft v1.16.0 release notes and checklists` **`d173571`** (git note attached).
-- [ ] Task: Phase Verification & Checkpoint — Phase 4
-  - [ ] `conductor(plan): Mark phase 'Phase 4 - Release Documentation (DRAFT)' as complete` and checkpoint.
+- [x] Task: Phase Verification & Checkpoint — Phase 4
+  - [x] `conductor(plan): Mark phase 'Phase 4 - Release Documentation (DRAFT)' as complete` and checkpoint. Checkpoint `a9afe6f` (conductor(checkpoint) + git note).
 
 ---
 
