@@ -30,7 +30,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Run the focused interaction test suite.
   - [x] Present the phase manual-verification scope and obtain user confirmation before checkpointing. *(Confirmed 2026-08-26)*
 
-## Phase 2 — Cross-game child interaction cohesion
+## Phase 2 — Cross-game child interaction cohesion [checkpoint: 205d207]
 
 - [x] Task: Add regression coverage before scene changes [5cd9206]
   - [x] Extend existing scene tests for tap-card families, including Alphabet, Word Match, Word Builder, How Many, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, and Pattern Builder.
@@ -45,11 +45,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Ensure new listeners/tweens are cleaned up through existing scene lifecycle behavior.
   - [x] Keep all gameplay text-independent and preserve existing touch targets.
 
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-  - [ ] Run targeted scene, interaction, and reduced-motion tests.
-  - [ ] Manually verify one representative game from each interaction family plus Back and progress controls.
-  - [ ] Confirm no visual feedback introduces pressure, penalties, or accidental navigation.
-  - [ ] Obtain user confirmation and create the phase checkpoint.
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`) [205d207]
+  - [x] Run targeted scene, interaction, and reduced-motion tests.
+  - [x] Manually verify one representative game from each interaction family plus Back and progress controls.
+  - [x] Confirm no visual feedback introduces pressure, penalties, or accidental navigation.
+  - [x] Obtain user confirmation and create the phase checkpoint. *(Confirmed 2026-08-26)*
 
 ## Phase 3 — Hub and profile-picker hierarchy
 
