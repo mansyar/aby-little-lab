@@ -170,7 +170,8 @@ Confirm production truly serves v1.16.0 across browsers, devices, and offline mo
   - [x] Network log: `hoot-DOo2mVsQ.ligne` → 200, `ligne_wasm_bg-CaSOm_fQ.wasm` → 200, `audio/bgm.mp3` → 200 — **no 404 / Failed to fetch** for engine or mascot assets. Console clean (Phaser boot only, 0 errors/0 warnings).
   - [x] Settings-footer `v1.16.0` visual confirmed via the deployed bundle's `1.16.0` string (`v${__APP_VERSION__}`); on-device visual row recorded in the device matrix.
   - [x] Offline-relaunch → Ligne Hoot (non-RM) and reduced-motion → tween Hoot (no WASM fetch) **deferred to physical-device matrix** below (explicitly a per-device row per `docs/device-testing-checklist.md` v1.16.0 record).
-- [~] Task: Physical-device verification — 4-class matrix
+- [x] Task: Physical-device verification — 4-class matrix
+  - [ ] **Deferred (2026-08-26, user decision):** device-class execution is **non-blocking** and deferred — house precedent (v1.14.1 recorded the same). The matrix will be executed by the user against the live URL (`docs/device-testing-checklist.md` v1.16.0 record); results backfilled into this plan and the FINAL release notes when run. No Critical/High findings on the desktop smoke above, so the release is not blocked.
   - [ ] Execute `docs/device-testing-checklist.md` per-class steps on:
     - [ ] iPad (Safari + Chrome/WebKit) on iPadOS
     - [ ] iPhone (Safari) on iOS
@@ -178,11 +179,12 @@ Confirm production truly serves v1.16.0 across browsers, devices, and offline mo
     - [ ] Android phone (Chrome)
   - [ ] Per device, cover: landscape FIT scaling, touch-target sizes, press-feedback visible on all child tap controls, speaker state visuals correct per availability, Settings & Progress affordances, per-profile sticker/progress persistence, **offline relaunch → Ligne Hoot (non-RM)** and **tween Hoot (RM)**, console health — record device/OS/browser and pass/fail per row.
   - [ ] Any blocker (Critical/High) becomes a follow-up track; Medium/Low may be noted without blocking the release.
-- [ ] Task: Promote and finalize documentation with live evidence
-  - [ ] Promote `docs/release-notes-v1.16.0.md` from DRAFT → FINAL (stamp deployment run, Coolify ID, live verification date, device sign-off).
-  - [ ] Fill `docs/device-testing-checklist.md` v1.16.0 execution record with device rows + sign-off.
-  - [ ] Fill `docs/release-checklist.md` deployment-verification and sign-off sections.
-  - [ ] Commit on `master` (or on `release/v1.16.0` and forward-merge if still before tag — but since tag already moved forward, commit directly on `master` and confirm gates still green): `docs(release): record v1.16.0 live and device verification`.
+- [~] Task: Promote and finalize documentation with live evidence
+  - [x] Desktop live evidence recorded (Phase 8 Task 1–2 above): deployment payload, Hub smoke, network/console health.
+  - [ ] Promote `docs/release-notes-v1.16.0.md` from DRAFT → FINAL — **holds until device sign-off** (deployment run `33023037193`, live verification date 2026-08-26 recorded; device sign-off stamp pending).
+  - [ ] Fill `docs/device-testing-checklist.md` v1.16.0 execution record with device rows + sign-off (record currently staged PENDING).
+  - [ ] Fill `docs/release-checklist.md` deployment-verification and sign-off sections (placeholders staged; fill after device pass).
+  - [ ] Commit on `master`: `docs(release): record v1.16.0 live and device verification` — **after** the device pass.
 - [ ] Task: Phase Verification & Checkpoint — Phase 8
   - [ ] Aggregate live + device evidence; `conductor(plan): Mark phase 'Phase 8 - Live Smoke and Physical-Device Verification' as complete` and checkpoint.
 
