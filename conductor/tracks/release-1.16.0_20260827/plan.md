@@ -148,11 +148,11 @@ Create the release tag on the merged master and verify the tag-gated deployment.
   - [x] `git tag -a v1.16.0 93c0af3 -m "chore(release): v1.16.0 — UI/UX Cohesion + Ligne offline-first Hoot"` — points at the master merge commit `93c0af3`.
   - [x] Verified `git log -1 v1.16.0` = `93c0af3 2026-08-27 09:02:34 +1000 Merge pull request #28` — tag on **master lineage**, not the release branch.
   - [x] Master-lineage guard (as CI): `git merge-base --is-ancestor v1.16.0 master` **true**; tag **reachable from `origin/master`**; tag does NOT descend from the release-branch-only tip `7eaeaeb`.
-- [~] Task: Push the tag and trigger deployment
-  - [ ] `git push origin v1.16.0`
-  - [ ] Confirm GitHub Actions detects the tag push and runs the expected release workflow (tag-gated).
-  - [ ] Confirm Coolify reports success for the `v1.16.0` deployment; record the deployment run URL and Coolify deployment ID/log lines.
-- [ ] Task: Phase Verification & Checkpoint — Phase 7
+- [x] Task: Push the tag and trigger deployment
+  - [x] `git push origin v1.16.0` — tag pushed; `* [new tag] v1.16.0 -> v1.16.0`.
+  - [x] GitHub Actions detected the tag push and ran the tag-gated workflow — **run `33023037193`** (https://github.com/mansyar/aby-little-lab/actions/runs/33023037193): Quality Gates PASS (2m49s, all steps), **Deploy to Coolify PASS** (8s) — "Ensure tag points to a master commit" guard passed; "Trigger Coolify deploy webhook" fired. Conclusion `success`.
+  - [x] Coolify deployment outcome: **live verified** — live `/` serves `index-_0xClWjb.js` (the v1.16.0 shell from the local build); served bundle reports `1.16.0`; live `sw.js` precaches `ligne_wasm_bg-CaSOm_fQ.wasm` (1 match) and has **no** `ligne-engine-wasm` runtime route (0 matches). (Coolify deployment ID/log lines aggregate in Phase 8.)
+- [~] Task: Phase Verification & Checkpoint — Phase 7
   - [ ] Record tag SHA, workflow run, and deployment outcome; `conductor(plan): Mark phase 'Phase 7 - Tag and Production Deployment' as complete` and checkpoint.
 
 ---
