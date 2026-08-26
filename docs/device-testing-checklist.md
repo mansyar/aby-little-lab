@@ -4,7 +4,16 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
-## Execution Record — v1.14.1 (2026-08-10)
+## Execution Record - UI/UX Cohesion pass (2026-08-27)
+
+- **Target:** local `pnpm dev` build (pre-release v1.15.0+ — UI/UX Cohesion track `conductor/tracks/ui-ux-cohesion_20260826/`)
+- **Scope:** shared interaction grammar (press feedback on all child/parent controls), Hub & profile-picker hierarchy (tile strokes/labels, active-profile rings, daily-limit state, RM-gated slots), Settings/Progress affordances (row cards, switch toggles, ✕ close, chevron pager, viewed/active rings, stroked destructive modals), speaker/audio-visual states (speaking pulse, muted/unavailable dimming, Musical Memory replay pulse, interruption safety)
+- **Devices:** desktop 1024×768, narrow landscape (~740×360), phone portrait, tablet (per user verification pass)
+- **Checks:** all 18 Hub entries; profile switching incl. picker ring movement; sticker shelf earned vs dashed; play-time limit state + restore; parent lock hold-gate; Settings row cards + toggles + ✕; Profiles active-row ring + stroked-red Delete modal + Cancel; Progress viewed-profile ring (read-only — active profile never changes from the report) + ‹ › pager dimmed at bounds; BGM/SFX real audio response; speaker pulse during speech, dim when SFX off, dim when speech unsupported; Musical Memory replay pulse; interruption leaves no stale pulse; OS reduced-motion — static states, no breathing/pulse tweens, instant slots; offline relaunch from precache; sticker persistence across reload; no-fail feedback unchanged; textless child gameplay preserved
+- **Result:** **PASSED 2026-08-27** — automated gates green (check, suite 64 files/1568, coverage thresholds met, build, PWA + bundle validators) plus user-confirmed manual pass; no Critical/High/Medium/Low findings
+- **Issues found:** none
+
+## Execution Record - v1.14.1 (2026-08-10)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.14.1 — Bug fix: Learning Progress overlay row collision in parent Settings → Progress)
 - **Scope:** Parent Settings → Learning Progress report — rows pitched 40px → 56px, page size 8 → 6 (pages 8+8+1 → 6+6+5, all 17 games still reachable with More/Back wrap-around). No gameplay, storage, audio, or kid-facing changes.
