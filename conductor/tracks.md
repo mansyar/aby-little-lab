@@ -144,3 +144,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Professor Hoot — Ligne-Powered Animation Pilot** *Link: [./archive/hoot-ligne-pilot_20260822/index.md](./archive/hoot-ligne-pilot_20260822/index.md)* (Archived)
+
+---
+
+- [ ] **Track: UI/UX Cohesion** *Link: [./tracks/ui-ux-cohesion_20260826/index.md](./tracks/ui-ux-cohesion_20260826/index.md)* (Active)

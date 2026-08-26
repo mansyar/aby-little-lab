@@ -1,0 +1,9 @@
+{
+  "id": "ui-ux-cohesion_20260826",
+  "title": "UI/UX Cohesion",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-26",
+  "updatedAt": "2026-08-26",
+  "summary": "Polish interaction feedback, Hub hierarchy, profile selection, parent-facing controls, Learning Progress affordances, and speaker feedback across the existing 18-game preschool experience without changing game mechanics or storage."
+}
