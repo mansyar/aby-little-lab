@@ -124,10 +124,10 @@ Publish the release through the guarded pipeline; no commits bypass the PR.
 
 - [x] Task: Push `release/v1.16.0` to `origin` (`git push -u origin release/v1.16.0`)
   - [x] Pushed: `origin/release/v1.16.0` = **`02f0eab`** (matches local HEAD). Upstream tracking set. `git fetch --prune origin` clean — no unexpected divergence.
-- [ ] Task: Open PR `release/v1.16.0 → master`
-  - [ ] Title: `Release v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot`; body cites base `v1.15.0` and links to track spec/plan, notes the WASM-precache contract change, and references the RC gate evidence.
-  - [ ] Request review; do not self-merge without review.
-  - [ ] Record PR number and URL.
+- [x] Task: Open PR `release/v1.16.0 → master`
+  - [x] Title: `Release v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot`; body cites base `v1.15.0`, links to track spec/plan, documents the WASM-precache contract change, and lists the RC gate evidence.
+  - [x] Request review — reviewer `mansyar` added (`gh pr edit 28 --add-reviewer mansyar`); will not self-merge without review.
+  - [x] **PR #28** — https://github.com/mansyar/aby-little-lab/pull/28
 - [ ] Task: Wait for GitHub Actions Quality Gates to pass on the PR
   - [ ] Record the run ID/URL (e.g., `GHA run https://github.com/.../actions/runs/... passed`).
   - [ ] If any check fails, fix on `release/v1.16.0`, re-push, and re-record.
