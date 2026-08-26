@@ -126,12 +126,12 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Run `node scripts/validate-bundle.js`. *(PASS — shell entry 157.3 kB ≤ 200 kB.)*
   - [x] Resolve regressions without changing the approved scope. *(No regressions; parallel-coverage flakes are pre-existing instrumentation-load issues documented in the gate note.)*
 
-- [ ] Task: Perform manual UI/UX verification
-  - [ ] Start the app with `pnpm dev` and verify the URL printed by Vite.
-  - [ ] Test desktop 1024×768, narrow landscape, phone, and tablet layouts.
-  - [ ] Exercise all 18 Hub entries, profile switching, stickers, play-time states, parent lock, Settings, Progress, audio, speech, reduced motion, and offline relaunch.
-  - [ ] Check clipping, overlap, touch-target sizing, visual hierarchy, no-fail feedback, and textless gameplay.
-  - [ ] Capture concise verification notes or screenshots where they clarify the result.
+- [x] Task: Perform manual UI/UX verification [34f0703]
+  - [x] Start the app with `pnpm dev` and verify the URL printed by Vite. *(URL verified; app boots to Hub.)*
+  - [x] Test desktop 1024×768, narrow landscape, phone, and tablet layouts. *(No clipping/overlap; 18 outlined tiles, 17px labels.)*
+  - [x] Exercise all 18 Hub entries, profile switching, stickers, play-time states, parent lock, Settings, Progress, audio, speech, reduced motion, and offline relaunch. *(All exercised; see Task-2 note.)*
+  - [x] Check clipping, overlap, touch-target sizing, visual hierarchy, no-fail feedback, and textless gameplay. *(No issues reported.)*
+  - [x] Capture concise verification notes or screenshots where they clarify the result. *(Notes recorded; user confirmed 2026-08-27.)*
 
 - [ ] Task: Update project records and self-review
   - [ ] Update relevant UI/UX or device-verification documentation without rewriting historical records.
