@@ -13,23 +13,24 @@
 
 Confirm the starting state so the release delta is unambiguous before touching code.
 
-- [ ] Task: Verify repository and tag state
-  - [ ] Confirm `git status --short` clean on `release/v1.16.0`; `git branch` shows `release/v1.16.0` checked out; `git branch -r` shows `origin/master`.
-  - [ ] Confirm `git log -1 --format="%h %ci %s" v1.15.0` is `1a10c60` @ 2026-08-24; confirm `v1.16.0` tag does **not** exist (`git tag --list v1.16.0` empty).
-  - [ ] Record `git log --oneline v1.15.0..origin/master --not --remotes` count (expected 52) and `git diff --stat v1.15.0..origin/master -- src` shape (38 files +2664) in track working notes.
-  - [ ] Fetch remote: `git fetch --prune --tags` succeeds and shows no unexpected divergence.
-- [ ] Task: Confirm Cohesion implementation is present
-  - [ ] Verify `conductor/archive/ui-ux-cohesion_20260826/` exists and is archived complete.
-  - [ ] Spot-check Cohesion sources: `src/utils/pressFeedback.ts`, `src/components/SpeakerButton.ts`, `src/scenes/HubScene.ts`, `src/components/SettingsPanel.ts` contain the Cohesion changes (diff vs `v1.15.0`).
-  - [ ] Open `docs/release-notes-v1.15.0.md` and confirm the Ligne offline known issue is the only open item being resolved by this release.
-- [ ] Task: Run baseline quality gates (record evidence; gates must pass before proceeding)
-  - [ ] `pnpm run check` — record Biome errors fixed count (expected 0) and files checked (expected 125+).
-  - [ ] `CI=true pnpm test` — record suite summary (expected ~1300+ tests) and threshold outcome (95/88/85/90).
-  - [ ] `pnpm run build` — record shell chunk (≈20 kB), vendor (≈310 kB), lazy chunks, precache entries/size for reference.
-  - [ ] `node scripts/validate-pwa.js` — record result (expected 15/15 on baseline with current contract).
-  - [ ] `node scripts/validate-bundle.js` — record result (expected 3/3).
-- [ ] Task: Phase Verification & Checkpoint — Phase 1
-  - [ ] Re-run `conductor-status` / verify all Phase 1 evidence recorded; open follow-up issues for anything unexpected; `conductor(plan): Mark phase 'Phase 1 - Baseline and Unreleased-Delta Validation' as complete`.
+- [x] Task: Verify repository and tag state
+  - [x] Confirm `git status --short` clean on `release/v1.16.0`; `git branch` shows `release/v1.16.0` checked out; `git branch -r` shows `origin/master`.
+  - [x] Confirm `git log -1 --format="%h %ci %s" v1.15.0` is `1a10c60` @ 2026-08-24; confirm `v1.16.0` tag does **not** exist (`git tag --list v1.16.0` empty).
+  - [x] Record `git log --oneline v1.15.0..origin/master --not --remotes` count (expected 52) and `git diff --stat v1.15.0..origin/master -- src` shape (38 files +2664) in track working notes.
+  - [x] **Baseline note (recorded 2026-08-27):** `origin/master` = `73343f5` (12 commits past `v1.15.0` tag = the v1.15.0 release-execution records). UI/UX Cohesion is local-only. PR delta `origin/master..release/v1.16.0` = **42 commits / 36 non-Conductor files / 35 src files (+2639/−81)** — the 40-commit UI/UX Cohesion batch + the 2 conductor track commits (init + in-progress).
+  - [x] Fetch remote: `git fetch --prune --tags` succeeds and shows no unexpected divergence.
+- [x] Task: Confirm Cohesion implementation is present
+  - [x] Verify `conductor/archive/ui-ux-cohesion_20260826/` exists and is archived complete.
+  - [x] Spot-check Cohesion sources: `src/utils/pressFeedback.ts`, `src/components/SpeakerButton.ts`, `src/scenes/HubScene.ts`, `src/components/SettingsPanel.ts` contain the Cohesion changes (diff vs `v1.15.0`).
+  - [x] Open `docs/release-notes-v1.15.0.md` and confirm the Ligne offline known issue is the only open item being resolved by this release.
+- [x] Task: Run baseline quality gates (record evidence; gates must pass before proceeding)
+  - [x] `pnpm run check` — **PASS**: 137 files checked, 0 errors, 0 fixes; 1 benign info (biome schema 2.5.5 vs CLI 2.5.10 mismatch).
+  - [x] `CI=true pnpm test` — **PASS**: 64 files / **1568 tests passed**, duration ~106s, thresholds (95/88/85/90) satisfied.
+  - [x] `pnpm run build` — **PASS**: built in 2.65s; precache **45 entries (1711.46 KiB)**; shell `index-*.js` 161.06 kB (gzip 30.13 kB); Phaser vendor `phaser-P1E8uaLi.js` 1374.82 kB separate; `ligne_wasm-Bzdj-wlA.js` lazy 32.04 kB.
+  - [x] `node scripts/validate-pwa.js` — **PASS: 16/16** (incl. current "excludes Ligne WASM from precache" + "runtime-caches Ligne WASM").
+  - [x] `node scripts/validate-bundle.js` — **PASS**: vendor present `phaser-P1E8uaLi.js` (1342.6 kB); shell `index-BvhT7VZn.js` 157.3 kB ≤ 200 kB.
+- [x] Task: Phase Verification & Checkpoint — Phase 1
+  - [x] All Phase 1 evidence recorded; no unexpected findings (origin/master baseline clarified: UI/UX Cohesion is local-only, as expected for release-branch flow); `conductor(plan): Mark phase 'Phase 1 - Baseline and Unreleased-Delta Validation' as complete`.
 
 ---
 
