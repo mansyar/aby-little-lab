@@ -97,20 +97,20 @@ No technology-stack deviation is anticipated. If implementation requires a new d
 
 ## Phase 5 — Speaker and audio-visual feedback
 
-- [ ] Task: Define and test the speaker-state contract
-  - [ ] Extend speech tests for successful dispatch, disabled speech, unsupported speech, completion, interruption, and failure.
-  - [ ] Extend SpeakerButton tests for pressed, active/replaying, unavailable/muted, neutral, and destroy/cleanup states.
-  - [ ] Preserve the existing callback behavior and silent visual-only fallback.
-  - [ ] Cover Musical Memory replay separately from Web Speech while using the same understandable visual grammar.
+- [x] Task: Define and test the speaker-state contract [de395be]
+  - [x] Extend speech tests for successful dispatch, disabled speech, unsupported speech, completion, interruption, and failure. *(Lifecycle describe: start/end sequence, error, disabled, unsupported, superseded-utterance isolation with fake timers, unsubscribe.)*
+  - [x] Extend SpeakerButton tests for pressed, active/replaying, unavailable/muted, neutral, and destroy/cleanup states. *(9 state tests incl. idempotent setActive, reduced-motion static tint, destroy unsubscribes+stops tween; 96px target and press-feedback pins retained.)*
+  - [x] Preserve the existing callback behavior and silent visual-only fallback. *(onSpeak on pointerdown unchanged; unsupported path dims without subscribing — callback still fires.)*
+  - [x] Cover Musical Memory replay separately from Web Speech while using the same understandable visual grammar. *(Replay drives setActive externally through the SpeakerButton public API.)*
 
-- [ ] Task: Implement minimal speaker feedback
-  - [ ] Add the smallest lifecycle bridge needed for SpeakerButton to observe speech/replay state.
-  - [ ] Show immediate tap acknowledgement, active speech/replay when observable, unavailable/muted state when applicable, and neutral state afterward.
-  - [ ] Ensure interrupted or failed speech cannot leave a stale active state.
-  - [ ] Keep the 96px touch target, iOS gesture unlock behavior, SFX gating, reduced-motion compliance, and scene cleanup.
-  - [ ] Do not add a new audio dependency or couple the UI to one browser’s speech implementation.
+- [x] Task: Implement minimal speaker feedback [2687d4f]
+  - [x] Add the smallest lifecycle bridge needed for SpeakerButton to observe speech/replay state. *(onSpeechLifecycle subscription with per-utterance token guard in speech.ts.)*
+  - [x] Show immediate tap acknowledgement, active speech/replay when observable, unavailable/muted state when applicable, and neutral state afterward. *(Press squish already acked; active tint + alpha breathing [static dim under RM]; muted dim when SFX off; neutral after end/error.)*
+  - [x] Ensure interrupted or failed speech cannot leave a stale active state. *(Token guard invalidates superseded utterances; error → neutral; MusicalMemory sequencePlayId guard.)*
+  - [x] Keep the 96px touch target, iOS gesture unlock behavior, SFX gating, reduced-motion compliance, and scene cleanup. *(Unchanged; muted via load().settings in 8 scenes; destroy unsubscribes.)*
+  - [x] Do not add a new audio dependency or couple the UI to one browser’s speech implementation. *(Pure Web Speech observability + Phaser primitives.)*
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Run speech, SpeakerButton, and affected scene tests.
   - [ ] Manually verify speech enabled/disabled, unsupported/failing speech, replay, interruption, and reduced motion.
   - [ ] Confirm every significant audio state has a visual counterpart.
