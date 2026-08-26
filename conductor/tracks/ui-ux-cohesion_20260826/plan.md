@@ -75,19 +75,19 @@ No technology-stack deviation is anticipated. If implementation requires a new d
 
 ## Phase 4 — Parent Settings and Learning Progress affordances
 
-- [ ] Task: Extend parent UI regression tests
-  - [ ] Cover visual/current-state updates for BGM, SFX, voice selection, Preview, Profiles, Progress, install, and Reset controls.
-  - [ ] Cover selected profile states in Profiles and Learning Progress without changing the active profile from the report.
-  - [ ] Cover explicit close, page navigation, cancel, delete, and reset interactions.
-  - [ ] Preserve voice-listener cleanup, pinch-zoom restoration, parent-lock gating, and local persistence.
+- [x] Task: Extend parent UI regression tests [53b2657]
+  - [x] Cover visual/current-state updates for BGM, SFX, voice selection, Preview, Profiles, Progress, install, and Reset controls. *(Affordance-cohesion suite: PF listener deltas motion/RM, toggle track+knob flip via setX/setFillStyle, chevron pager, row cards, ✕ close, stroked destructive modals.)*
+  - [x] Cover selected profile states in Profiles and Learning Progress without changing the active profile from the report. *(Viewed-profile ring follows chip taps; read-only pin asserts getActiveProfile unchanged.)*
+  - [x] Cover explicit close, page navigation, cancel, delete, and reset interactions. *(Close destroys backdrop; pager test rewritten to ‹ › with clamping at bounds; delete/reset modal flows re-pinned.)*
+  - [x] Preserve voice-listener cleanup, pinch-zoom restoration, parent-lock gating, and local persistence. *(Existing suites green: 70 SettingsPanel tests total.)*
 
-- [ ] Task: Improve Settings and Progress in place
-  - [ ] Preserve the fixed-panel and overlay architecture, parent lock, existing data, and 18-game/6-per-page report.
-  - [ ] Replace ambiguous text-only affordances with clear visual rows, state treatments, toggle presentation, chevrons, and selected outlines using Phaser primitives or existing assets.
-  - [ ] Add consistent press feedback to parent controls and profile/action items.
-  - [ ] Make close, previous/next, cancel, and destructive actions visually distinct and difficult to trigger accidentally.
-  - [ ] Improve profile and report scanning without adding cloud data, new storage fields, or a new navigation framework.
-  - [ ] Keep parent-facing copy available while preserving textless child gameplay.
+- [x] Task: Improve Settings and Progress in place [88050e0]
+  - [x] Preserve the fixed-panel and overlay architecture, parent lock, existing data, and 18-game/6-per-page report.
+  - [x] Replace ambiguous text-only affordances with clear visual rows, state treatments, toggle presentation, chevrons, and selected outlines using Phaser primitives or existing assets. *(400×68 row cards; track-and-knob toggles where knob position is the non-color cue; dimmed-at-bounds prev/next chevrons; 80px viewed ring in Progress, 112px active ring in Profiles.)*
+  - [x] Add consistent press feedback to parent controls and profile/action items. *(attachPressFeedback after every gameplay handler: toggles, rows, voice chip, preview, install, chips, chevrons, avatars, delete/play-time actions, modal buttons.)*
+  - [x] Make close, previous/next, cancel, and destructive actions visually distinct and difficult to trigger accidentally. *(Explicit ✕ on main panel; danger-tinted stroked emphasis cards for Delete/Reset behind two-step confirm modals via bucket-aware createModalButton.)*
+  - [x] Improve profile and report scanning without adding cloud data, new storage fields, or a new navigation framework. *(Same overlays, same storage schema, Phaser primitives only.)*
+  - [x] Keep parent-facing copy available while preserving textless child gameplay. *(All labels retained verbatim; no child-facing scenes touched.)*
 
 - [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Run SettingsPanel, profile, progress, voice, and persistence tests.
