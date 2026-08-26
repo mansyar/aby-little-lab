@@ -71,6 +71,7 @@ export class WordMatchScene extends GameSceneBase {
       centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
       centerY + PICTURE_Y_OFFSET,
       {
+        muted: !load().settings.sfxEnabled,
         onSpeak: () => {
           const round = this.rounds[this.roundIndex];
           if (!round) return; // Celebration after the final round — nothing to speak.

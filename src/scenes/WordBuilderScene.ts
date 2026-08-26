@@ -107,6 +107,7 @@ export class WordBuilderScene extends GameSceneBase {
       centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
       centerY + PICTURE_Y_OFFSET,
       {
+        muted: !load().settings.sfxEnabled,
         onSpeak: () => {
           const word = this.words[this.wordIndex];
           if (!word) return; // Celebration after the final word — nothing to speak.
