@@ -45,7 +45,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Ensure new listeners/tweens are cleaned up through existing scene lifecycle behavior.
   - [x] Keep all gameplay text-independent and preserve existing touch targets.
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
+- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
   - [ ] Run targeted scene, interaction, and reduced-motion tests.
   - [ ] Manually verify one representative game from each interaction family plus Back and progress controls.
   - [ ] Confirm no visual feedback introduces pressure, penalties, or accidental navigation.
