@@ -51,7 +51,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Confirm no visual feedback introduces pressure, penalties, or accidental navigation.
   - [x] Obtain user confirmation and create the phase checkpoint. *(Confirmed 2026-08-26)*
 
-## Phase 3 — Hub and profile-picker hierarchy
+## Phase 3 — Hub and profile-picker hierarchy [checkpoint: 26d6f85]
 
 - [x] Task: Write Hub/profile regression coverage [1123961]
   - [x] Extend `src/__tests__/scenes/hubScene.test.ts` for selected-profile indication, profile-picker selection, pressed tile state, earned/sticker state, and daily-limit state. *(13 tests; chip + picker rings RED→GREEN; minimal ring implementation included to keep gates green)*
@@ -67,11 +67,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Add only subtle domain grouping accents; do not introduce categories, tabs, carousel navigation, or new instructional text. *(none added: no domain taxonomy exists and inventing one = new IA, excluded by spec)*
   - [x] Verify no clipping or overlap with Settings, profile controls, mascot, stickers, or play-time indicators. *(geometry unchanged except label offset +2 inside tile; in-bounds pins pass)*
 
-- [~] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-  - [ ] Run Hub/navigation/profile tests and quality checks for changed code.
-  - [ ] Manually inspect 1024×768 and narrow-landscape layouts with fresh, earned, switched-profile, and time-limit states.
-  - [ ] Verify reduced-motion behavior and touch-target sizes.
-  - [ ] Obtain user confirmation and create the phase checkpoint.
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`) [26d6f85]
+  - [x] Run Hub/navigation/profile tests and quality checks for changed code. *(64 files green; lint + build pass)*
+  - [x] Manually inspect 1024×768 and narrow-landscape layouts with fresh, earned, switched-profile, and time-limit states.
+  - [x] Verify reduced-motion behavior and touch-target sizes.
+  - [x] Obtain user confirmation and create the phase checkpoint. *(Confirmed 2026-08-26)*
 
 ## Phase 4 — Parent Settings and Learning Progress affordances
 
