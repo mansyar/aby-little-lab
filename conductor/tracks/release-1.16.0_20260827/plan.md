@@ -85,16 +85,16 @@ Prepare the release branch with the version bump using the established mechanism
 
 Create and audit all release-facing documentation in DRAFT state; finalize numbers only after live verification.
 
-- [ ] Task: Create `docs/release-notes-v1.16.0.md` (DRAFT)
-  - [ ] Sections: What's New — **UI/UX Cohesion** (shared press feedback, speaker visual states active/muted/unavailable, Settings & Learning Progress affordances, Hub tile hierarchy + active-profile rings) + **offline-first Hoot fix**; Improvements; Bug Fixes (v1.15.0 Ligne offline known issue resolved); Known Issues — remove the Ligne offline entry, retain only the accepted per-device storage / cloud-sync-out-of-scope note; Installation; Feedback. Mark header `DRAFT — pending production verification`.
-  - [ ] Update any explicit version table entry in `docs/release-notes-v1.16.0.md` (and `README.md`'s version badge/table if present) to `1.16.0`.
-- [ ] Task: Stage `docs/device-testing-checklist.md` — add a new v1.16.0 execution record section (all four classes pending, plus offline-relaunch-with-Ligne rows), including `prefers-reduced-motion` and console-health rows.
-- [ ] Task: Stage `docs/release-checklist.md` — add v1.16.0 preparation, deployment-verification, and sign-off sections mirroring the house release tracks (quality gates, validators, deployment, live checks).
-- [ ] Task: Audit other product docs
-  - [ ] Scan `conductor/product.md`, `conductor/tech-stack.md` (PWA cache table), `README.md`, `docs/PRD.md`, `docs/TDD.md` for stale references to "Ligne offline first-visit fallback is expected" or stale version numbers and patch only confirmed gaps.
-  - [ ] Update `conductor/tech-stack.md` Ligne/pilot "Current phase" line if it still reads as pilot-only (optional — only if stale).
-- [ ] Task: Commit documentation
-  - [ ] `docs(release): draft v1.16.0 release notes and checklists`.
+- [x] Task: Create `docs/release-notes-v1.16.0.md` (DRAFT)
+  - [x] DRAFT created with all required sections: What's New (UI/UX Cohesion shared press feedback, speaker states, Settings/Progress affordances, Hub hierarchy + active-profile rings; offline-first Hoot), Improvements, Bug Fixes (v1.15.0 Ligne offline known issue resolved), Known Issues (Ligne offline entry removed; per-device storage / cloud-sync note retained), Installation, Release Verification (placeholder pending Phase 8), Feedback. Header marked `DRAFT — pending production verification`.
+  - [x] No explicit version table exists in the new notes (they target 1.16.0 directly). README's historical Releases table is stale (tops at v1.4.0) but predates this release — left for the Phase 10 finalize audit, not patched here (surgical-change principle).
+- [x] Task: Stage `docs/device-testing-checklist.md` — added a v1.16.0 execution record section (4-class matrix PENDING, offline-relaunch-with-Ligne rows incl. clearing site data + reload with no network request fails, re-launch-from-primed-precache, reduced-motion tween-Hoot with no WASM fetch, console-health rows).
+- [x] Task: Stage `docs/release-checklist.md` — added v1.16.0 RC-gates prep section (quality gates, validators, precache/WASM contract) + Verify Deployment placeholders for Phase 8 (PR/merge, tag, live 200s, sw.js precache incl. wasm, live smoke, device sign-off).
+- [x] Task: Audit other product docs
+  - [x] Scanned `conductor/product.md`, `conductor/tech-stack.md`, `README.md`, `docs/PRD.md`, `docs/TDD.md`. Only confirmed gap: `docs/perf-baseline.md` Ligne WASM delivery row still said "CacheFirst runtime cache, excluded from precache" — **patched** to "precached (v1.16.0+)". No stale "Ligne offline first-visit fallback" or stale version numbers found in the audited files.
+  - [x] No Ligne/pilot "Current phase" line reads as pilot-only in `tech-stack.md` — no patch needed.
+- [x] Task: Commit documentation
+  - [x] `docs(release): draft v1.16.0 release notes and checklists` **`d173571`** (git note attached).
 - [ ] Task: Phase Verification & Checkpoint — Phase 4
   - [ ] `conductor(plan): Mark phase 'Phase 4 - Release Documentation (DRAFT)' as complete` and checkpoint.
 
