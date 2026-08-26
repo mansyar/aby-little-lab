@@ -273,8 +273,7 @@ const HINT_ARC_RADIUS = 12;
 const HINT_COOL_COLOR = 0x68d391;
 /** Warm (5 minutes or fewer remaining) color for the hint arc. */
 const HINT_WARM_COLOR = 0xed8936;
-/** Alpha applied to game tiles while the daily limit is reached. */
-/** Alpha of Hub tiles while the daily limit locks them. */
+/** Alpha applied to Hub tiles while the daily limit locks them. */
 const TIME_UP_TILE_ALPHA = 0.45;
 
 /** Static scale for locked tiles — a non-color "unavailable" size cue. */
