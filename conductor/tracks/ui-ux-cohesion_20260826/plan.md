@@ -73,7 +73,7 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Verify reduced-motion behavior and touch-target sizes.
   - [x] Obtain user confirmation and create the phase checkpoint. *(Confirmed 2026-08-26)*
 
-## Phase 4 — Parent Settings and Learning Progress affordances
+## Phase 4 — Parent Settings and Learning Progress affordances [checkpoint: b758d6a]
 
 - [x] Task: Extend parent UI regression tests [53b2657]
   - [x] Cover visual/current-state updates for BGM, SFX, voice selection, Preview, Profiles, Progress, install, and Reset controls. *(Affordance-cohesion suite: PF listener deltas motion/RM, toggle track+knob flip via setX/setFillStyle, chevron pager, row cards, ✕ close, stroked destructive modals.)*
@@ -89,11 +89,11 @@ No technology-stack deviation is anticipated. If implementation requires a new d
   - [x] Improve profile and report scanning without adding cloud data, new storage fields, or a new navigation framework. *(Same overlays, same storage schema, Phaser primitives only.)*
   - [x] Keep parent-facing copy available while preserving textless child gameplay. *(All labels retained verbatim; no child-facing scenes touched.)*
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to `workflow.md`)
-  - [ ] Run SettingsPanel, profile, progress, voice, and persistence tests.
-  - [ ] Manually verify all parent-gated flows with audio on/off, multiple profiles, reset/delete cancellation, and narrow landscape.
-  - [ ] Verify controls remain at least 64×64px and important controls approach 96×96px.
-  - [ ] Obtain user confirmation and create the phase checkpoint.
+- [x] Task: Phase Verification & Checkpoint (Refer to `workflow.md`) [b758d6a]
+  - [x] Run SettingsPanel, profile, progress, voice, and persistence tests. *(70 SettingsPanel tests incl. 9 new cohesion contracts; full suite 64/64 green.)*
+  - [x] Manually verify all parent-gated flows with audio on/off, multiple profiles, reset/delete cancellation, and narrow landscape. *(Steps 1-7 presented; user confirmed on 2026-08-27.)*
+  - [x] Verify controls remain at least 64×64px and important controls approach 96×96px. *(Toggles/rows keep 96×96 hit areas; ✕, chevrons, and modal buttons sized at 96×96.)*
+  - [x] Obtain user confirmation and create the phase checkpoint. *(Checkpoint b758d6a, 2026-08-27.)*
 
 ## Phase 5 — Speaker and audio-visual feedback
 
