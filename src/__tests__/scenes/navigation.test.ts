@@ -86,7 +86,11 @@ vi.mock("phaser", () => {
 
     constructor() {
       this.add = {
-        rectangle: vi.fn(() => createMockGameObject(this)),
+        rectangle: vi.fn((...args: unknown[]) => {
+          const obj = createMockGameObject(this);
+          (obj as { args?: unknown[] }).args = args;
+          return obj;
+        }),
         text: vi.fn(() => createMockGameObject(this)),
         image: vi.fn(() => createMockGameObject(this)),
         container: vi.fn(() => createMockGameObject(this)),
@@ -1233,11 +1237,14 @@ describe("scene navigation flow", () => {
       if (!chip) throw new Error("chip not created");
       triggerPointerupOn(chip);
 
-      // The overlay is the full-screen rectangle added when the picker opened.
+      // The overlay is the full-screen (1024×768) rectangle added when the
+      // picker opened. Match by geometry: decorative rectangles such as the
+      // active-profile ring may be created after it.
       const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
-      const overlay = rectangleMock.mock.results.at(-1)?.value as
-        | Record<string, MockFn>
-        | undefined;
+      const overlay = rectangleMock.mock.results
+        .map((r) => r.value as { args?: number[] } & Record<string, MockFn>)
+        .filter((r) => r.args?.[2] === 1024)
+        .at(-1);
       if (!overlay) throw new Error("overlay not created");
       triggerPointerupOn(overlay);
 
@@ -7000,7 +7007,11 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      const tiles = getRectangles(scene);
+      // Game tiles are 160×116 rectangles; smaller rectangles are decorative
+      // rings/markers outside the locked-tile treatment.
+      const tiles = getRectangles(scene).filter(
+        (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 150,
+      );
       expect(tiles.length).toBeGreaterThanOrEqual(10);
       for (const tile of tiles) {
         expect(getMockFn(tile.setAlpha)).toHaveBeenCalledWith(TIME_UP_TILE_ALPHA);
@@ -7142,8 +7153,11 @@ describe("scene navigation flow", () => {
       const scene = new HubScene();
       scene.create();
 
-      // p1 active -> locked and dimmed from the start.
-      const tiles = getRectangles(scene);
+      // p1 active -> locked and dimmed from the start. Only game tiles
+      // (160×116) participate; decorative rectangles are excluded.
+      const tiles = getRectangles(scene).filter(
+        (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 150,
+      );
       for (const tile of tiles) {
         expect(getMockFn(tile.disableInteractive)).toHaveBeenCalled();
       }

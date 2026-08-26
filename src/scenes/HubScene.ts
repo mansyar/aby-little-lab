@@ -534,6 +534,18 @@ export class HubScene extends Phaser.Scene {
       PROFILE_AVATAR_TEXTURES[active.avatarId],
     );
     chip.setScale(AVATAR_CHIP_DISPLAY / AVATAR_TEXTURE_SIZE);
+
+    // Flat storybook ring so the active profile is unambiguous without
+    // relying on scale alone (spec FR2).
+    const ring = this.add.rectangle(
+      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
+      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
+      AVATAR_CHIP_DISPLAY + 20,
+      AVATAR_CHIP_DISPLAY + 20,
+    );
+    ring.setFillStyle(0x000000, 0);
+    ring.setStrokeStyle(4, 0x2d3748, 1); // thick flat outline (#2D3748)
+    ring.setDepth(-1);
     // Frame-based default hit area covers the visible chip exactly (custom
     // rects are tested in texture-local space and miss on 512px textures).
     chip.setInteractive();
@@ -574,6 +586,20 @@ export class HubScene extends Phaser.Scene {
       avatar.setInteractive();
       const baseScale = PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE;
       avatar.setScale(profile.id === activeId ? baseScale * 1.15 : baseScale);
+      if (profile.id === activeId) {
+        // Selection ring behind the enlarged active avatar; destroyed with
+        // the picker on close via profilePickerObjects.
+        const marker = this.add.rectangle(
+          x,
+          y,
+          PICKER_AVATAR_DISPLAY + 16,
+          PICKER_AVATAR_DISPLAY + 16,
+        );
+        marker.setFillStyle(0x000000, 0);
+        marker.setStrokeStyle(4, 0x2d3748, 1);
+        marker.setDepth(PICKER_DEPTH);
+        this.profilePickerObjects.push(marker);
+      }
       avatar.on("pointerup", () => {
         if (profile.id !== activeId) {
           switchProfile(profile.id);
