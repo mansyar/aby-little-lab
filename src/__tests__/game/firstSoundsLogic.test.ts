@@ -179,9 +179,7 @@ describe("generatePhonicsRound (adaptive band)", () => {
     let observed = 0;
     for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
       for (const [a, b] of SOUND_CONFUSABLE_PAIRS) {
-        const distractors = generatePhonicsRound(a, 3).choices.filter(
-          (choice) => choice !== a,
-        );
+        const distractors = generatePhonicsRound(a, 3).choices.filter((choice) => choice !== a);
         if (distractors.includes(b)) observed++;
       }
     }
