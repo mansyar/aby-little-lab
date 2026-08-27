@@ -64,11 +64,11 @@ to the child.
 
 ## Phase 3 — Wiring & Parent Surface
 
-- [ ] Task 3.1: Wire the four scenes (TDD)
+- [x] Task 3.1: Wire the four scenes (TDD) (4370cbd)
   - Failing tests: each scene calls `getAdaptiveBandShift(<gameId>)` at `create()` and
     passes it to its generator (assert via mocked facade + logic spies across
     toggle/window combinations; OFF and fresh-profile produce the classic ladder).
-- [ ] Task 3.2: SettingsPanel toggle row (TDD)
+- [~] Task 3.2: SettingsPanel toggle row (TDD)
   - Failing tests: "Adaptive Difficulty" row renders with the established switch-toggle
     pattern; defaults ON; toggling persists through the storage facade; consistent with
     existing rows (labels, a11y, touch target).
