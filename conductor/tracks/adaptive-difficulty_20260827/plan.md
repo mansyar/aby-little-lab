@@ -82,7 +82,7 @@ to the child.
     (`GameProgress.recent`, `Settings.adaptiveDifficulty`), facade, toggle.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-[checkpoint: pending]
+[checkpoint: cf1762a]
 
 ## Phase 4 — Full Verification & Handoff
 
