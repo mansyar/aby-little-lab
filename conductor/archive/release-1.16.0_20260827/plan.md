@@ -247,6 +247,12 @@ Complete release records and archive the track.
 
 Address any `conductor-review` findings and record their resolution per workflow. No new feature scope.
 
-- [ ] Task: Apply review suggestions (if any)
-  - [ ] Each fix traces to a review comment; update the owning phase/plan entry, implement minimally, re-verify the affected gates, and commit with `fix(conductor): apply review suggestions for track 'v1.16.0 Release Execution'`.
-- [ ] Task: Re-verify affected phases and close the review checkpoint
+- [x] Task: Apply review suggestions (if any)
+  - [x] **conductor-review (2026-08-26): No findings.** Code reviewed (`vite.config.ts` Ligne precache, `scripts/validate-pwa.js` contract, `AudioManager.test.ts` isolation); `pnpm run check` clean (137 files, no fixes), full suite pass (64 files / 1565 tests). Two Low process notes only (metadata timestamp quirk; deferred device matrix) — non-blocking, already documented. No review suggestions to apply.
+- [x] Task: Re-verify affected phases and close the review checkpoint
+  - [x] Re-verified: all code-under-review gates green on master (`pnpm run check` clean, `CI=true pnpm test` 1565/1565, PWA 15/15, bundle PASS from Phase 5 record). No review suggestions → no affected-phase loop-back required. **Review checkpoint closed 2026-08-26 — no findings.**
+
+### Review decision (2026-08-26)
+
+- **Recommendation:** No Critical/High/Medium findings — release is clean.
+- **Actions:** None required (no review suggestions). Track remains archived; Phase 11 closed with no findings.
