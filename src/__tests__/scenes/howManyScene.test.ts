@@ -240,6 +240,33 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+/** Controllable getAdaptiveBandShift facade plus a recorder for the generator call. */
+const { getAdaptiveBandShiftMock, createPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  createPlaythroughMock: vi.fn(),
+}));
+
+/** Delegates storage to its real implementation, exposing a spy-able band-shift facade. */
+vi.mock("../../utils/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/storage")>();
+  return {
+    ...actual,
+    getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+  };
+});
+
+/** Delegates the generator to its real implementation while recording the shift. */
+vi.mock("../../game/countLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/countLogic")>();
+  return {
+    ...actual,
+    createPlaythrough: (shift: -1 | 0 | 1 = 0) => {
+      createPlaythroughMock(shift);
+      return actual.createPlaythrough(shift);
+    },
+  };
+});
+
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -852,5 +879,57 @@ describe("HowManyScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    getAdaptiveBandShiftMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+    createPlaythroughMock.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("passes the facade's band shift to createPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new HowManyScene();
+    scene.create();
+
+    expect(createPlaythroughMock).toHaveBeenCalledWith(1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new HowManyScene();
+    scene.create();
+
+    expect(createPlaythroughMock).toHaveBeenCalledWith(0);
+  });
+
+  it("keeps the child UI textless under a shifted ladder", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new HowManyScene();
+    scene.create();
+
+    // The only alphabetic label is the shared parent-facing "← Back" chrome —
+    // every child-facing prompt (rounds, feedback, celebration) stays image- or
+    // numeral-based, shifted ladder or not.
+    const labels = scene.add.text.mock.calls.map((call) => String(call[2] ?? ""));
+    const alphabetic = labels.filter((label) => /[a-zA-Z]/.test(label));
+    expect(alphabetic).toEqual(["← Back"]);
   });
 });

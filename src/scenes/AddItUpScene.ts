@@ -3,6 +3,7 @@ import { type AddItUpRound, buildPlaythrough, isCorrect } from "../game/addItUpL
 import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -77,7 +78,7 @@ export class AddItUpScene extends GameSceneBase {
     // No speaker button — the target is read from the visible dots, so there
     // is nothing to speak; the game is fully playable without audio.
 
-    this.rounds = buildPlaythrough();
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("add-it-up"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

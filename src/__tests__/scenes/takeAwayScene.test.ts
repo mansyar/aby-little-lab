@@ -229,6 +229,33 @@ vi.mock("../../components/ParentLock", () => ({
   ParentLock: MockParentLock,
 }));
 
+/** Controllable getAdaptiveBandShift facade plus a recorder for the generator call. */
+const { getAdaptiveBandShiftMock, buildPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  buildPlaythroughMock: vi.fn(),
+}));
+
+/** Delegates storage to its real implementation, exposing a spy-able band-shift facade. */
+vi.mock("../../utils/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/storage")>();
+  return {
+    ...actual,
+    getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+  };
+});
+
+/** Delegates the generator to its real implementation while recording the shift. */
+vi.mock("../../game/takeAwayLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/takeAwayLogic")>();
+  return {
+    ...actual,
+    buildPlaythrough: (shift: -1 | 0 | 1 = 0) => {
+      buildPlaythroughMock(shift);
+      return actual.buildPlaythrough(shift);
+    },
+  };
+});
+
 import type { TakeAwayRound } from "../../game/takeAwayLogic";
 import { TakeAwayScene } from "../../scenes/TakeAwayScene";
 import { earnSticker } from "../../utils/storage";
@@ -757,5 +784,44 @@ describe("TakeAwayScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    getAdaptiveBandShiftMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+    buildPlaythroughMock.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("passes the facade's band shift to buildPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new TakeAwayScene();
+    scene.create();
+
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new TakeAwayScene();
+    scene.create();
+
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
   });
 });

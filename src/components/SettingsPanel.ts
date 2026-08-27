@@ -238,12 +238,17 @@ export class SettingsPanel {
     closeButton.on("pointerdown", () => this.destroy());
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
+    // Row pitch ~56px keeps all eight 68px cards on-canvas and inside the
+    // 760px panel (bottom row +345 → card bottom +379, matching v1.16.0).
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, centerY + 55, "SFX", settings.sfxEnabled);
-    this.createProfilesRow(centerX, centerY + 125);
-    this.createProgressRow(centerX, centerY + 185);
-    this.createResetRow(centerX, centerY + 245);
-    this.createInstallRow(centerX, centerY + 305);
+    this.createToggle(centerX, centerY + 11, "SFX", settings.sfxEnabled);
+    this.createToggle(centerX, centerY + 67, "Adaptive", settings.adaptiveDifficulty, (next) => {
+      updateSettings({ adaptiveDifficulty: next });
+    });
+    this.createProfilesRow(centerX, centerY + 123);
+    this.createProgressRow(centerX, centerY + 178);
+    this.createResetRow(centerX, centerY + 234);
+    this.createInstallRow(centerX, centerY + 290);
     this.createVoiceRow(centerX, centerY + 345);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
@@ -291,12 +296,15 @@ export class SettingsPanel {
    * Creates one inflated, touch-friendly settings toggle: a labeled row card
    * plus a track-and-knob switch whose knob side encodes the state (never
    * color alone).
+   * @param onChange - Optional persistence hook; when provided it replaces the
+   *   built-in audio handling (used by non-audio toggles such as Adaptive).
    */
   private createToggle(
     x: number,
     y: number,
     label: string,
     enabled: boolean,
+    onChange?: (nextEnabled: boolean) => void,
   ): Phaser.GameObjects.Text {
     this.addRowCard(x, y);
 
@@ -345,7 +353,9 @@ export class SettingsPanel {
       enabled = nextEnabled;
       const audio = AudioManager.getInstance();
 
-      if (label === "BGM") {
+      if (onChange) {
+        onChange(nextEnabled);
+      } else if (label === "BGM") {
         audio.setBGMEnabled(nextEnabled);
         if (nextEnabled) audio.playBGM();
         else audio.pauseBGM();
@@ -763,6 +773,22 @@ export class SettingsPanel {
         ),
       );
     }
+
+    // Static parent-facing note: difficulty bands adapt to recent accuracy.
+    // Child-facing game UIs stay textless; this lives only where parents read.
+    this.overlayObjects.push(
+      this.scene.add
+        .text(
+          centerX,
+          centerY + 320,
+          "Difficulty adapts to your kid's recent answers · disable in Settings",
+          textStyle({
+            color: DISABLED_COLOR,
+            fontSize: "20px",
+          }),
+        )
+        .setOrigin(0.5),
+    );
   }
 
   /** Destroys the Learning Progress overlay (not the panel). */

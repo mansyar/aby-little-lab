@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BASE_LADDER, type BandShift, shiftLadder } from "../../game/adaptiveLogic";
 import { COUNT_ITEMS } from "../../game/countLogic";
 import {
   type ComparisonMode,
@@ -138,6 +139,49 @@ describe("createPlaythrough", () => {
     vi.restoreAllMocks();
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = createPlaythrough();
+    expect(second).toEqual(first);
+  });
+});
+
+describe("createPlaythrough(shift)", () => {
+  /** All shifts the facade can produce. */
+  const SHIFTS: readonly BandShift[] = [-1, 0, 1];
+
+  it("keeps the shifted band ladder and the 3/3 mode mix across many samples", {
+    timeout: 20_000,
+  }, () => {
+    for (const shift of SHIFTS) {
+      const ladder = shiftLadder(BASE_LADDER, shift);
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = createPlaythrough(shift);
+        expect(playthrough).toHaveLength(ladder.length);
+        ladder.forEach((band, roundIndex) => {
+          expectValidRound(playthrough[roundIndex], (band - 1) as 0 | 1 | 2);
+        });
+        const modes = playthrough.map((round) => round.mode);
+        expect(modes.filter((mode) => mode === "more")).toHaveLength(3);
+        expect(modes.filter((mode) => mode === "less")).toHaveLength(3);
+      }
+    }
+  });
+
+  it("keeps exactly one correct side in every shifted round", { timeout: 20_000 }, () => {
+    for (const shift of SHIFTS) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        for (const round of createPlaythrough(shift)) {
+          const sides: GroupSide[] = ["left", "right"];
+          expect(sides.filter((side) => evaluateRound(round, side))).toHaveLength(1);
+        }
+      }
+    }
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = createPlaythrough(-1);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = createPlaythrough(-1);
     expect(second).toEqual(first);
   });
 });

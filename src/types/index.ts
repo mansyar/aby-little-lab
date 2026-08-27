@@ -35,6 +35,11 @@ export interface GameProgress {
   wrong: number;
   /** ISO timestamp of the most recent play, or null when never played. */
   lastPlayedAt: string | null;
+  /**
+   * Rolling window of the last `WINDOW_SIZE` tap results (true = correct),
+   * folded in when a session completes; drives adaptive band shifts.
+   */
+  recent: boolean[];
 }
 
 /** One day of aggregated play activity (key "YYYY-MM-DD", local). */
@@ -48,6 +53,11 @@ export interface Settings {
   sfxEnabled: boolean;
   /** Preferred TTS voice URI (device-level); null = browser default voice. */
   preferredVoiceURI: string | null;
+  /**
+   * Parent-gated adaptive band ladders (device-level); true by default.
+   * Off restores the fixed classic ladder for every game.
+   */
+  adaptiveDifficulty: boolean;
 }
 
 /**

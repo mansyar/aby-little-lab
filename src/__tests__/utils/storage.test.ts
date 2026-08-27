@@ -5,6 +5,7 @@ import {
   deleteProfile,
   earnSticker,
   getActiveProfile,
+  getAdaptiveBandShift,
   getAvailableAvatars,
   getPlayTime,
   getProfiles,
@@ -343,6 +344,10 @@ describe("Storage utilities", () => {
       expect(settings.bgmEnabled).toBe(true);
       expect(settings.sfxEnabled).toBe(true);
     });
+
+    it("defaults adaptive difficulty to enabled", () => {
+      expect(getSettings().adaptiveDifficulty).toBe(true);
+    });
   });
 
   describe("updateSettings", () => {
@@ -371,6 +376,18 @@ describe("Storage utilities", () => {
       updateSettings({ bgmEnabled: false });
       const result = load();
       expect(result.settings.bgmEnabled).toBe(false);
+    });
+
+    it("persists the adaptive difficulty toggle while preserving audio settings", () => {
+      updateSettings({ adaptiveDifficulty: false });
+      let settings = getSettings();
+      expect(settings.adaptiveDifficulty).toBe(false);
+      expect(settings.bgmEnabled).toBe(true);
+      expect(settings.sfxEnabled).toBe(true);
+
+      updateSettings({ adaptiveDifficulty: true });
+      settings = getSettings();
+      expect(settings.adaptiveDifficulty).toBe(true);
     });
   });
 
@@ -446,6 +463,7 @@ describe("Storage utilities", () => {
         bgmEnabled: false,
         sfxEnabled: true,
         preferredVoiceURI: null,
+        adaptiveDifficulty: true,
       });
     });
 
@@ -667,6 +685,7 @@ describe("progress recording", () => {
       correct: 0,
       wrong: 0,
       lastPlayedAt: null,
+      recent: [],
     });
   });
 
@@ -748,6 +767,7 @@ describe("progress recording", () => {
       correct: 0,
       wrong: 0,
       lastPlayedAt: null,
+      recent: [],
     });
     expect(getProgress()["odd-one-out"]).toEqual({
       plays: 0,
@@ -755,6 +775,7 @@ describe("progress recording", () => {
       correct: 0,
       wrong: 0,
       lastPlayedAt: null,
+      recent: [],
     });
     expect(getActiveProfile().activity).toEqual([]);
   });
@@ -766,5 +787,66 @@ describe("progress recording", () => {
     expect(getActiveProfile().activity).toEqual([]);
     // v1 sticker survived migration.
     expect(load().stickers["shape-sorter"].earned).toBe(true);
+  });
+});
+
+describe("adaptive band shift", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns 0 on a fresh install (window below the minimum sample)", () => {
+    expect(getAdaptiveBandShift("how-many")).toBe(0);
+  });
+
+  it("returns +1 when recent accuracy reaches the up threshold", () => {
+    recordGameResult("how-many", 9, 1);
+
+    expect(getAdaptiveBandShift("how-many")).toBe(1);
+  });
+
+  it("returns 0 for accuracy between the thresholds", () => {
+    recordGameResult("more-less", 8, 2);
+
+    expect(getAdaptiveBandShift("more-less")).toBe(0);
+  });
+
+  it("returns -1 when recent accuracy falls below the down threshold", () => {
+    recordGameResult("how-many", 1, 9);
+
+    expect(getAdaptiveBandShift("how-many")).toBe(-1);
+  });
+
+  it("returns 0 when the window holds fewer than the minimum sample", () => {
+    recordGameResult("add-it-up", 5, 0);
+
+    expect(getAdaptiveBandShift("add-it-up")).toBe(0);
+  });
+
+  it("returns 0 for every game when the toggle is off", () => {
+    recordGameResult("how-many", 9, 1);
+    updateSettings({ adaptiveDifficulty: false });
+
+    expect(getAdaptiveBandShift("how-many")).toBe(0);
+  });
+
+  it("reads the active profile's window only", () => {
+    recordGameResult("how-many", 9, 1);
+    const firstProfile = getActiveProfile().id;
+
+    addProfile("dog");
+    expect(getActiveProfile().id).not.toBe(firstProfile);
+    expect(getAdaptiveBandShift("how-many")).toBe(0);
+
+    switchProfile(firstProfile);
+    expect(getAdaptiveBandShift("how-many")).toBe(1);
+  });
+
+  it("reflects the latest folded window after multiple sessions", () => {
+    recordGameResult("take-away", 4, 2);
+    expect(getAdaptiveBandShift("take-away")).toBe(0);
+
+    recordGameResult("take-away", 0, 6);
+    expect(getAdaptiveBandShift("take-away")).toBe(-1);
   });
 });

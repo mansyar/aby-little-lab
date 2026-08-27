@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BASE_LADDER, type BandShift, shiftLadder } from "../../game/adaptiveLogic";
 import {
   ADD_IT_UP_BANDS,
   type AddItUpRound,
@@ -169,6 +170,58 @@ describe("buildPlaythrough", () => {
     vi.restoreAllMocks();
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = buildPlaythrough();
+    expect(second).toEqual(first);
+  });
+});
+
+describe("buildPlaythrough(shift)", () => {
+  /** All shifts the facade can produce. */
+  const SHIFTS: readonly BandShift[] = [-1, 0, 1];
+
+  it("keeps the shifted band ladder and validity across many samples", { timeout: 20_000 }, () => {
+    for (const shift of SHIFTS) {
+      const ladder = shiftLadder(BASE_LADDER, shift);
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = buildPlaythrough(shift);
+        expect(playthrough).toHaveLength(ladder.length);
+        ladder.forEach((band, roundIndex) => {
+          expectValidRound(playthrough[roundIndex], band);
+        });
+      }
+    }
+  });
+
+  it("never repeats an addend pair at any shifted ladder", { timeout: 20_000 }, () => {
+    for (const shift of SHIFTS) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = buildPlaythrough(shift);
+        const keys = playthrough.map((round) =>
+          pairKey(round.addends[0].count, round.addends[1].count),
+        );
+        expect(new Set(keys).size).toBe(keys.length);
+      }
+    }
+  });
+
+  it("never exhausts a band's pair pool at the extreme shifted ladders", {
+    timeout: 20_000,
+  }, () => {
+    // shift -1: [1,1,1,1,2,2] needs 4 of band 1's 6 pairs.
+    // shift +1: [2,2,3,3,3,3] needs 2 of band 2's 15 and 4 of band 3's 45.
+    expect(() => {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        buildPlaythrough(-1);
+        buildPlaythrough(1);
+      }
+    }).not.toThrow();
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = buildPlaythrough(1);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = buildPlaythrough(1);
     expect(second).toEqual(first);
   });
 });

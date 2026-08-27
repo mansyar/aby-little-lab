@@ -1,0 +1,9 @@
+{
+  "id": "adaptive-difficulty_20260827",
+  "title": "Adaptive Difficulty (Numeracy Four)",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-08-27",
+  "updatedAt": "2026-08-27",
+  "summary": "Per-profile adaptive band ladders (max ±1 step) for How Many?, More or Less, Add It Up, and Take Away, driven by a rolling 10-tap accuracy window stored as an additive progress field, gated by a parent Settings toggle (default on) with an explanatory note in the Learning Progress report; invisible to the child and no-fail."
+}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { WINDOW_SIZE } from "../../game/adaptiveLogic";
 import {
   addActivity,
   createDefaultProgress,
@@ -28,6 +29,7 @@ function gp(overrides: Partial<GameProgress> = {}): GameProgress {
     correct: 0,
     wrong: 0,
     lastPlayedAt: null,
+    recent: [],
     ...overrides,
   };
 }
@@ -41,6 +43,7 @@ describe("progressLogic", () => {
         correct: 0,
         wrong: 0,
         lastPlayedAt: null,
+        recent: [],
       });
     });
   });
@@ -93,6 +96,36 @@ describe("progressLogic", () => {
       } as GameProgress);
       expect(normalized.lastPlayedAt).toBe("2026-08-05T10:00:00.000Z");
     });
+
+    it("backfills the recent window as empty for old saves", () => {
+      const normalized = normalizeProgress({
+        plays: 4,
+        wins: 3,
+        correct: 20,
+        wrong: 5,
+        lastPlayedAt: "2026-08-05T10:00:00.000Z",
+      } as GameProgress);
+      expect(normalized.recent).toEqual([]);
+    });
+
+    it("keeps a valid recent window unchanged", () => {
+      const window = [true, false, true];
+      expect(normalizeProgress({ recent: window } as GameProgress).recent).toEqual(window);
+    });
+
+    it("sanitizes invalid recent windows (non-array, non-boolean entries)", () => {
+      expect(normalizeProgress({ recent: "nope" } as unknown as GameProgress).recent).toEqual([]);
+      expect(
+        normalizeProgress({ recent: [true, "yes", 1, false] } as unknown as GameProgress).recent,
+      ).toEqual([true, false]);
+    });
+
+    it("trims oversized recent windows to the last WINDOW_SIZE taps", () => {
+      const oversized = [...Array.from({ length: 14 }, () => true), false, false];
+      const normalized = normalizeProgress({ recent: oversized } as GameProgress);
+      expect(normalized.recent).toHaveLength(WINDOW_SIZE);
+      expect(normalized.recent).toEqual([...Array.from({ length: 8 }, () => true), false, false]);
+    });
   });
 
   describe("normalizeProgressMap", () => {
@@ -111,12 +144,14 @@ describe("progressLogic", () => {
 
   describe("recordPlay", () => {
     it("increments plays and stamps last-played, leaving other stats untouched", () => {
-      const next = recordPlay(gp({ plays: 2, wins: 1, correct: 8, wrong: 2 }), DAY);
+      const next = recordPlay(gp({ plays: 2, wins: 1, correct: 8, wrong: 2, recent: [true] }), DAY);
       expect(next.plays).toBe(3);
       expect(next.wins).toBe(1);
       expect(next.correct).toBe(8);
       expect(next.wrong).toBe(2);
       expect(next.lastPlayedAt).toBe(DAY.toISOString());
+      // Starting a session never folds taps into the window.
+      expect(next.recent).toEqual([true]);
     });
   });
 
@@ -144,6 +179,25 @@ describe("progressLogic", () => {
       const next = recordResult(gp(), { correct: -2, wrong: 5, win: true }, DAY);
       expect(next.correct).toBe(0);
       expect(next.wrong).toBe(5);
+    });
+
+    it("folds the session aggregate into the rolling window", () => {
+      const next = recordResult(gp({ recent: [true, false] }), {
+        correct: 3,
+        wrong: 2,
+        win: true,
+      });
+      expect(next.recent).toEqual([true, false, true, true, true, false, false]);
+    });
+
+    it("folds into a fresh window for old saves without one", () => {
+      const next = recordResult(gp(), { correct: 1, wrong: 1, win: false });
+      expect(next.recent).toEqual([true, false]);
+    });
+
+    it("ignores negative counts when folding the window too", () => {
+      const next = recordResult(gp({ recent: [true] }), { correct: -2, wrong: 1, win: true });
+      expect(next.recent).toEqual([true, false]);
     });
   });
 
@@ -284,6 +338,8 @@ describe("progressLogic", () => {
           correct: 15,
           wrong: 3,
           lastPlayedAt: THREE_DAYS_LATER.toISOString(),
+          // Last 10 taps across the three sessions (5+1, 4+2, 6+0).
+          recent: [true, true, false, false, true, true, true, true, true, true],
         }),
       );
       expect(isMastered(progress)).toBe(true);

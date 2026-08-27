@@ -3,6 +3,7 @@ import { buildPlaythrough, isCorrect, type TakeAwayRound } from "../game/takeAwa
 import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -78,7 +79,7 @@ export class TakeAwayScene extends GameSceneBase {
     // No speaker button — the target is read from the visible dots, so there
     // is nothing to speak; the game is fully playable without audio.
 
-    this.rounds = buildPlaythrough();
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("take-away"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

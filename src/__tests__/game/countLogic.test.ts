@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BASE_LADDER, type BandShift, shiftLadder } from "../../game/adaptiveLogic";
 import {
   COUNT_ITEMS,
   type CountGroup,
@@ -171,6 +172,74 @@ describe("createPlaythrough", () => {
     vi.restoreAllMocks();
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = createPlaythrough();
+    expect(second).toEqual(first);
+  });
+});
+
+describe("createPlaythrough(shift)", () => {
+  /** All shifts the facade can produce. */
+  const SHIFTS: readonly BandShift[] = [-1, 0, 1];
+
+  it("keeps the shifted band ladder across many samples", { timeout: 20_000 }, () => {
+    for (const shift of SHIFTS) {
+      const ladder = shiftLadder(BASE_LADDER, shift);
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = createPlaythrough(shift);
+        expect(playthrough).toHaveLength(ladder.length);
+        ladder.forEach((band, roundIndex) => {
+          const bandIndex = (band - 1) as 0 | 1 | 2;
+          expectValidRound(playthrough[roundIndex], bandIndex);
+        });
+      }
+    }
+  });
+
+  it("keeps per-band targets distinct until the band's target pool runs out", {
+    timeout: 20_000,
+  }, () => {
+    for (const shift of SHIFTS) {
+      const ladder = shiftLadder(BASE_LADDER, shift);
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = createPlaythrough(shift);
+        for (const band of [1, 2, 3] as const) {
+          const targets = playthrough
+            .filter((_, index) => ladder[index] === band)
+            .map((r) => r.target);
+          const max = ROUND_BANDS[band - 1].max;
+          // The first min(rounds, max) draws of a band never repeat a target;
+          // beyond that the used-target set resets (shift -1 asks band 1 for
+          // 4 rounds from a pool of 3).
+          const limit = Math.min(targets.length, max);
+          const seen = new Set<number>();
+          for (let k = 0; k < limit; k++) {
+            expect(seen.has(targets[k])).toBe(false);
+            seen.add(targets[k]);
+          }
+        }
+      }
+    }
+  });
+
+  it("falls back to reuse when band 1 must serve more rounds than it has targets", () => {
+    // shift -1 ladder [1,1,1,1,2,2]: band 1 (pool of 3) serves 4 rounds.
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = createPlaythrough(-1);
+      const bandOneTargets = playthrough.slice(0, 4).map((round) => round.target);
+      expect(new Set(bandOneTargets).size).toBeLessThanOrEqual(3);
+      // The reset still draws only from the band's range.
+      for (const target of bandOneTargets) {
+        expect(target).toBeGreaterThanOrEqual(1);
+        expect(target).toBeLessThanOrEqual(3);
+      }
+    }
+  });
+
+  it("is deterministic under a fixed random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const first = createPlaythrough(1);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const second = createPlaythrough(1);
     expect(second).toEqual(first);
   });
 });

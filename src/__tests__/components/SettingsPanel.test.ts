@@ -264,7 +264,7 @@ describe("SettingsPanel creation and display", () => {
     );
   });
 
-  it("gives both toggle labels inflated touch targets of at least 64px", () => {
+  it("gives every toggle label inflated touch targets of at least 64px", () => {
     const scene = createScene();
 
     new SettingsPanel(scene as never);
@@ -276,9 +276,11 @@ describe("SettingsPanel creation and display", () => {
           scene.add.text.mock.calls[index]?.[2] === "BGM: ON" ||
           scene.add.text.mock.calls[index]?.[2] === "BGM: OFF" ||
           scene.add.text.mock.calls[index]?.[2] === "SFX: ON" ||
-          scene.add.text.mock.calls[index]?.[2] === "SFX: OFF",
+          scene.add.text.mock.calls[index]?.[2] === "SFX: OFF" ||
+          scene.add.text.mock.calls[index]?.[2] === "Adaptive: ON" ||
+          scene.add.text.mock.calls[index]?.[2] === "Adaptive: OFF",
       );
-    expect(toggleObjects).toHaveLength(2);
+    expect(toggleObjects).toHaveLength(3);
     for (const toggle of toggleObjects) {
       expect(toggle.setInteractive).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -294,6 +296,19 @@ describe("SettingsPanel creation and display", () => {
       expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
       expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
     }
+  });
+
+  it("renders an Adaptive toggle defaulting to ON", () => {
+    const scene = createScene();
+
+    new SettingsPanel(scene as never);
+
+    expect(scene.add.text).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.any(Number),
+      "Adaptive: ON",
+      expect.objectContaining({ color: "#68d391" }),
+    );
   });
 });
 
@@ -361,6 +376,41 @@ describe("SettingsPanel interaction", () => {
     expect(mockAudio.playCorrect).toHaveBeenCalled();
     expect(sfxToggle.setText).toHaveBeenCalledWith("SFX: ON");
     expect(sfxToggle.setColor).toHaveBeenCalledWith("#68d391");
+  });
+
+  it("disables Adaptive, persists it, and updates its label", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const toggle = findTextByLabel(scene, "Adaptive: ON") as MockGameObject;
+
+    triggerPointerdown(toggle);
+
+    expect(toggle.setText).toHaveBeenCalledWith("Adaptive: OFF");
+    expect(toggle.setColor).toHaveBeenCalledWith("#a0aec0");
+    expect(getSettings().adaptiveDifficulty).toBe(false);
+    expect(getSettings().bgmEnabled).toBe(true);
+    expect(getSettings().sfxEnabled).toBe(true);
+    expect(mockAudio.setBGMEnabled).not.toHaveBeenCalled();
+    expect(mockAudio.setSFXEnabled).not.toHaveBeenCalled();
+  });
+
+  it("enables Adaptive from a stored OFF save and persists it", () => {
+    localStorage.setItem(
+      "abby-little-lab:v1",
+      JSON.stringify({
+        stickers: {},
+        settings: { bgmEnabled: true, sfxEnabled: true, adaptiveDifficulty: false },
+      }),
+    );
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const toggle = findTextByLabel(scene, "Adaptive: OFF") as MockGameObject;
+
+    triggerPointerdown(toggle);
+
+    expect(toggle.setText).toHaveBeenCalledWith("Adaptive: ON");
+    expect(toggle.setColor).toHaveBeenCalledWith("#68d391");
+    expect(getSettings().adaptiveDifficulty).toBe(true);
   });
 
   it("destroys every panel object when the backdrop is tapped", () => {
@@ -1098,6 +1148,25 @@ describe("SettingsPanel progress report", () => {
     expect(bars).toHaveLength(7);
   });
 
+  it("explains adaptive difficulty to parents inside the report", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    const noteCall = scene.add.text.mock.calls.find(
+      (call) => typeof call[2] === "string" && call[2].includes("adapt"),
+    );
+    expect(noteCall).toBeDefined();
+    // Tells the parent what it does AND where to disable it.
+    expect(noteCall?.[2]).toContain("Settings");
+    // Muted footer styling keeps it secondary to the report rows.
+    expect(noteCall?.[3]).toEqual(expect.objectContaining({ color: "#a0aec0" }));
+    // Informational only — never a parent control.
+    const noteObject = scene.add.text.mock.results[scene.add.text.mock.calls.indexOf(noteCall)]
+      ?.value as MockGameObject;
+    expect(noteObject.setInteractive).not.toHaveBeenCalled();
+  });
+
   it("shows per-game plays, accuracy, and last played from progress data", () => {
     recordGamePlay("shape-sorter");
     recordGameResult("shape-sorter", 6, 2);
@@ -1418,12 +1487,30 @@ describe("SettingsPanel affordance cohesion", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    // Six rows: BGM, SFX, Profiles, Progress, Reset, Voice.
+    // Seven rows: BGM, SFX, Adaptive, Profiles, Progress, Reset, Voice.
     const cards = getRectangles(scene).filter((r) => {
       const [, , w, h] = r.args ?? [];
       return w === 400 && h === 68;
     });
-    expect(cards).toHaveLength(6);
+    expect(cards).toHaveLength(7);
+  });
+
+  it("keeps every settings row card inside the panel and the canvas", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    // Panel card: 760px tall, centered at (512, 384) → spans 4..764.
+    const rowCards = getRectangles(scene).filter((r) => {
+      const [, , w, h] = r.args ?? [];
+      return w === 400 && h === 68;
+    });
+    expect(rowCards.length).toBeGreaterThan(0);
+
+    for (const card of rowCards) {
+      const [, y, , h] = card.args ?? [];
+      expect((y as number) - (h as number) / 2).toBeGreaterThanOrEqual(4);
+      expect((y as number) + (h as number) / 2).toBeLessThanOrEqual(764);
+    }
   });
 
   it("offers an explicit close button on the main panel", () => {
