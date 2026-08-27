@@ -58,7 +58,7 @@ byte-identical to classic behavior.
 - [x] Task 3.2: `musicalMemoryLogic` start-length shift (TDD) (b1c8b59)
   - `startLengthFor(shift)`: 1/2/3; `winLengthFor(start)`: 5/6/7; `MAX_RUN = 2` holds;
     round count stays 5 (`PROGRESS_DOT_COUNT = 5` valid); `isWin` default signature kept.
-- [~] Task 3.3: Wire `MemoryMatchScene` + `MusicalMemoryScene`
+- [x] Task 3.3: Wire `MemoryMatchScene` + `MusicalMemoryScene` (c940c3c)
   - Musical Memory: store `startLength`/`winTarget` at `create()`, use in
     `generateSequence` and `isWin`; dots unchanged.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
