@@ -1,3 +1,4 @@
+import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { COUNT_ITEMS } from "./countLogic";
 import { shuffle } from "./shapeSorterLogic";
 
@@ -45,13 +46,14 @@ export function createRound(band: 1 | 2 | 3, mode: ComparisonMode): MoreLessRoun
 }
 
 /**
- * Generates a playthrough of 6 rounds, easy-first: 2 rounds per band
- * (1-3, then 1-5, then 1-10). The comparison modes are shuffled so every
- * playthrough asks exactly 3 "more" and 3 "less" questions. Difficulty is
- * fixed across replays.
+ * Generates a playthrough of 6 rounds, easy-first. `shift` (-1 | 0 | 1, from
+ * the child's recent performance — see adaptiveLogic) nudges the classic
+ * [1,1,2,2,3,3] band ladder before rounds are built, clamped to bands 1..3.
+ * The comparison modes are shuffled so every playthrough asks exactly 3
+ * "more" and 3 "less" questions.
  */
-export function createPlaythrough(): MoreLessRound[] {
-  const bands = [1, 1, 2, 2, 3, 3] as const;
+export function createPlaythrough(shift: BandShift = 0): MoreLessRound[] {
+  const bands = shiftLadder(BASE_LADDER, shift);
   const modes = shuffle(["more", "more", "more", "less", "less", "less"]) as ComparisonMode[];
   return bands.map((band, index) => createRound(band, modes[index]));
 }
