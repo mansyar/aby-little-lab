@@ -194,32 +194,26 @@ Confirm production truly serves v1.16.0 across browsers, devices, and offline mo
 
 Remove every stale branch whose content is preserved via master, tags, and Conductor archives.
 
-- [ ] Task: Local worktree and branch cleanup
-  - [ ] Remove the orphaned worktree: `git worktree remove C:/Users/Ansyar/.local/share/opencode/worktree/b9550f698a1b7fda544c2dad5483a8a1dedffae6/hidden-river --force` (or `git worktree prune` if already removed), verify `git worktree list` no longer lists `hidden-river`.
-  - [ ] Verify each stale local branch's content is individually reachable before deletion (assert `git branch --contains` or `git log --oneline <branch> --not master` shows only superseded/release-track commits already in master, tags, or archives — use `git branch --merged master` / `git branch --no-merged master` checks).
-  - [ ] Delete the local branches (force-delete only those with non-merged but intentionally superseded commits, justifying each in the commit body):
+- [x] Task: Local worktree and branch cleanup
+  - [x] **Reachability verified (2026-08-26):** `git branch --merged master` confirms `ci/fix-deploy-checkout, ci/tag-deploy-guard, feat/game-13, feat/game-14, feat/game-17, feat/parental-settings-expansion, fix/speaker-button-tts, hotfix/more-less-arrow, release/v1.6.0, release/v1.10.0, release/v1.12.0, release/v1.13.0` are fully merged. Non-merged targets (`feat/game-12 [3], fix/ipad-black-screen [9], release/v1.11.0 [3], release/v1.14.0 [1], release/v1.7.0 [1], release/v1.8.0 [1]` unique non-master commits) carry only conductor/docs bookkeeping preserved in `conductor/archive/`; the sole code commit among them (`24d993e fix: Guard orientation lock for iPad WebKit`) is present in master's `src/scenes/BootScene.ts` (lines 25–32) — confirmed superseded, nothing unreleased lost.
+  - [x] Remove the orphaned worktree: `git worktree remove --force` on `hidden-river` hit "Directory not empty" on Windows; `git worktree prune` deregistered it (`git worktree list` → only the main worktree), and the orphaned materialized checkout dir was removed. `git worktree list` no longer lists `hidden-river`.
+- [x] Deleted the local branches (18 supra/merged or intentionally-superseded; force-deletes justified in the hygiene commit body — each non-merged target's unique commits are conductor/docs bookkeeping preserved in `conductor/archive/`, and `fix/ipad-black-screen`'s code fix `24d993e` is already in master's BootScene):
     ```
     git branch -D fix/ipad-black-screen feat/game-12 feat/game-13 feat/game-14 feat/game-17 \
       feat/parental-settings-expansion ci/fix-deploy-checkout ci/tag-deploy-guard \
       fix/speaker-button-tts hotfix/more-less-arrow release/v1.6.0 release/v1.7.0 \
       release/v1.8.0 release/v1.10.0 release/v1.11.0 release/v1.12.0 release/v1.13.0 release/v1.14.0
     ```
-  - [ ] Verify `git branch` now shows only `master`, `release/v1.16.0`, and active work; no stale locals remain.
-- [ ] Task: Remote branch cleanup
-  - [ ] `git fetch --prune origin` then verify remote stale list via `git branch -r`.
-  - [ ] For each remote that exists, delete via:
-    ```
-    git push origin --delete ci/fix-deploy-checkout ci/tag-deploy-guard feat/game-12 feat/game-13 \
-      fix/speaker-button-tts release/v1.6.0 release/v1.7.0 release/v1.8.0 release/v1.10.0 \
-      release/v1.11.0 release/v1.12.0 release/v1.13.0 release/v1.14.0
-    ```
-    (skip any `feat/game-*` that has no remote counterpart; record which were present vs already gone).
-  - [ ] `git fetch --prune origin` and confirm `git branch -r` shows only `origin/master` (and `origin/release/v1.16.0` until deleted after merge — if protocol keeps it, keep it; otherwise delete it too post-merge with approval).
-  - [ ] Confirm no stale remote PR base refs remain; existing PRs already merged retain their tags/history.
-- [ ] Task: Record hygiene
-  - [ ] Capture before/after `git branch -a` and `git worktree list` outputs in the hygiene commit body.
-  - [ ] Commit on the current release line (or `master` if hygiene runs post-merge): `chore(repo): remove stale merged branches and orphaned iPad-fix worktree`.
-- [ ] Task: Phase Verification & Checkpoint — Phase 9
+  - [x] Verify `git branch` now shows only `* master` and `release/v1.16.0` — **no stale locals remain**.
+- [x] Task: Remote branch cleanup
+  - [x] `git fetch --prune origin` → stale list confirmed; deleted targeted remotes `ci/fix-deploy-checkout ci/tag-deploy-guard feat/game-12 feat/game-13 fix/speaker-button-tts release/v1.6.0 release/v1.7.0 release/v1.8.0 release/v1.10.0 release/v1.11.0 release/v1.12.0 release/v1.13.0 release/v1.14.0 release/v1.16.0`. `origin/master` kept.
+  - [x] Deleted each remote that exists (all present; none already-gone). `feat/game-14`, `feat/game-17`, `feat/parental-settings-expansion`, `hotfix/*` had no remote counterpart (local-only) — skipped as planned.
+  - [x] Post-cleanup `git fetch --prune origin` → **`git branch -r` shows only `origin/master`**. `origin/release/v1.16.0` deleted post-merge (master + the `v1.16.0` tag preserve it; local `release/v1.16.0` retained).
+  - [x] No stale remote PR base refs remain; merged PRs retain their tags/history (master holds the merge commits; `v1.16.0` tag intact).
+- [x] Task: Record hygiene
+  - [x] Before/after `git branch -a` + `git worktree list` outputs and the force-delete justifications captured in the hygiene commit body.
+  - [x] Commit on `master` **`07d647f`**: `chore(repo): remove stale merged branches and orphaned iPad-fix worktree` (empty commit — branch/worktree deletes are not file-diff-visible; evidence in body). Pushed.
+- [~] Task: Phase Verification & Checkpoint — Phase 9
   - [ ] `conductor(plan): Mark phase 'Phase 9 - Branch Hygiene' as complete` and checkpoint.
 
 ---
