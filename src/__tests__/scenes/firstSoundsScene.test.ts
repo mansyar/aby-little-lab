@@ -259,6 +259,27 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+const { getAdaptiveBandShiftMock, generatePhonicsPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  generatePhonicsPlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/firstSoundsLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/firstSoundsLogic")>();
+  return {
+    ...actual,
+    generatePhonicsPlaythrough: (...args: Parameters<typeof actual.generatePhonicsPlaythrough>) => {
+      generatePhonicsPlaythroughMock(...args);
+      return actual.generatePhonicsPlaythrough(...args);
+    },
+  };
+});
+
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -828,5 +849,44 @@ describe("FirstSoundsScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    getAdaptiveBandShiftMock.mockClear();
+    generatePhonicsPlaythroughMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("passes the facade's band shift to generatePhonicsPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new FirstSoundsScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("first-sounds");
+    expect(generatePhonicsPlaythroughMock).toHaveBeenCalledWith(6, 1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new FirstSoundsScene();
+    scene.create();
+    expect(generatePhonicsPlaythroughMock).toHaveBeenCalledWith(6, 0);
   });
 });

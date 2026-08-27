@@ -6,7 +6,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakLetter, speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { getAdaptiveBandShift, load } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough. */
@@ -81,7 +81,7 @@ export class FirstSoundsScene extends GameSceneBase {
       },
     );
 
-    this.rounds = generatePhonicsPlaythrough(ROUND_COUNT);
+    this.rounds = generatePhonicsPlaythrough(ROUND_COUNT, getAdaptiveBandShift("first-sounds"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
