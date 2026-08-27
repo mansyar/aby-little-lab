@@ -45,8 +45,8 @@ byte-identical to classic behavior.
 - [x] Task 2.2: `alphabetLogic` band semantics (TDD) (ba9768e)
   - Band 1: targets ∈ A–J, classic guards; band 2: byte-identical classic; band 3:
     same-family distractors allowed, target never among choices, 4 unique choices.
-- [ ] Task 2.3: Wire `FirstSoundsScene` + `AlphabetScene`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.3: Wire `FirstSoundsScene` + `AlphabetScene` (4cb6624)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Memory family (Memory Match + Musical Memory)
 
