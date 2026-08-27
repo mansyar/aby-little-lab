@@ -156,3 +156,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Adaptive Difficulty (Numeracy Four) — Per-Profile ±1 Band Ladders from a Rolling Tap Window** *Link: [./archive/adaptive-difficulty_20260827/index.md](./archive/adaptive-difficulty_20260827/index.md)* (Archived)
+
+---
+
+- [~] **Track: Adaptive Literacy & Memory (Six-Game Extension)** *Link: [./tracks/adaptive-literacy/index.md](./tracks/adaptive-literacy/index.md)*
