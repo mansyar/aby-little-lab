@@ -67,12 +67,12 @@ byte-identical to classic behavior.
 
 ## Phase 4 — Facade coverage, record audit, docs, full verification
 
-- [x] Task 4.1: Facade tests for the six new game ids (TDD)
+- [x] Task 4.1: Facade tests for the six new game ids (TDD) (bba9d1c)
   - `getAdaptiveBandShift`: toggle off → 0; ≥ 90% over ≥ 6 taps → +1; < 60% → −1;
     < 6 taps → 0, for each of word-match, word-builder, first-sounds, alphabet-match,
     memory-match, musical-memory.
-- [ ] Task 4.2: Record-path audit (no TDD unless a gap is found)
-- [ ] Task 4.3: Docs amendments (no TDD)
+- [x] Task 4.2: Record-path audit (no TDD unless a gap is found) — PASS: recordCorrect/recordWrong verified in all six scenes, no changes needed
+- [x] Task 4.3: Docs amendments (no TDD)
   - `product.md` §3.2 dated extension to the six games; `tech-stack.md` design update.
 - [ ] Task 4.4: Quality gates (full verification)
   - `pnpm run check` · `CI=true pnpm test` · `pnpm run build` + PWA validation · dev-server smoke.
