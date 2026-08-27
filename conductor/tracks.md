@@ -152,3 +152,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: v1.16.0 Release Execution — UI/UX Cohesion + Ligne Offline-First Mascot** *Link: [./archive/release-1.16.0_20260827/index.md](./archive/release-1.16.0_20260827/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Adaptive Difficulty (Numeracy Four) — Per-Profile ±1 Band Ladders from a Rolling Tap Window** *Link: [./tracks/adaptive-difficulty_20260827/index.md](./tracks/adaptive-difficulty_20260827/index.md)*
