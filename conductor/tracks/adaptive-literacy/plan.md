@@ -22,6 +22,8 @@ byte-identical to classic behavior.
 
 ## Phase 1 — First Words family (Find the Word + Build the Word)
 
+[checkpoint: 5e22a1d]
+
 - [x] Task 1.1: `wordLogic` tier-split shift (TDD) (5d2c3c6)
   - Failing tests (`src/__tests__/game/wordLogic.test.ts`): `generateWordPlaythrough(
     roundCount, shift)` tier sequences `[3×6]` / `[3,3,3,3,3,4]` / `[3,3,3,3,4,4]` at
@@ -32,7 +34,7 @@ byte-identical to classic behavior.
   - `WordMatchScene:83` → `generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift("word-match"))`;
     `WordBuilderScene:119` → `generateWordBuildPlaythrough(WORD_COUNT, getAdaptiveBandShift("word-builder"))`;
     confirm per-tap recording already wired.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Discrimination guards (First Sounds + Find the Letter)
 
