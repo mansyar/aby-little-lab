@@ -72,7 +72,7 @@ to the child.
   - Failing tests: "Adaptive Difficulty" row renders with the established switch-toggle
     pattern; defaults ON; toggling persists through the storage facade; consistent with
     existing rows (labels, a11y, touch target).
-- [ ] Task 3.3: Learning Progress explanatory note (TDD)
+- [x] Task 3.3: Learning Progress explanatory note (TDD) (ddd1ece)
   - Failing tests: report renders the static parent-facing note (what adaptive difficulty
     does + where to disable); child-facing game UI unchanged (textless).
 - [ ] Task 3.4: Documentation (no TDD)
