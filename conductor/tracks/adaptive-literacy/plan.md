@@ -28,7 +28,7 @@ byte-identical to classic behavior.
     shift −1/0/+1 with unique targets, 4 unique choices incl. target, no shared first
     letters; `generateWordBuildPlaythrough(wordCount, shift)` tiers `[3,3,3]` / `[3,3,4]` /
     `[3,4,4]`, no repeats; shift-0 fixtures equal the classic `roundCount − 1` split.
-- [ ] Task 1.2: Wire `WordMatchScene` + `WordBuilderScene`
+- [x] Task 1.2: Wire `WordMatchScene` + `WordBuilderScene` (43e0803)
   - `WordMatchScene:83` → `generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift("word-match"))`;
     `WordBuilderScene:119` → `generateWordBuildPlaythrough(WORD_COUNT, getAdaptiveBandShift("word-builder"))`;
     confirm per-tap recording already wired.
