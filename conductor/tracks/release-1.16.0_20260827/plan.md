@@ -222,12 +222,12 @@ Remove every stale branch whose content is preserved via master, tags, and Condu
 
 Complete release records and archive the track.
 
-- [ ] Task: Update project records
-  - [ ] Confirm `conductor/product.md`, `conductor/tech-stack.md`, `docs/PRD.md`, `docs/TDD.md`, `README.md` reflect the FINAL release state (version `1.16.0`, precache note, resolved known issue) — patch only confirmed stale lines.
-  - [ ] Confirm `docs/perf-baseline.md` (if maintained) notes the new precache size and WASM cost.
-  - [ ] Confirm `conductor/tracks/release-1.16.0_20260827/plan.md` task marks and `metadata.json` status are current; record all SHAs, PR number, tag next to deployment and live verification details in the archive notes.
-  - [ ] Commit: `docs(conductor): record v1.16.0 release execution and verification`.
-- [ ] Task: Perform track self-review
+- [x] Task: Update project records
+  - [x] Confirmed `conductor/product.md`, `conductor/tech-stack.md`, `docs/PRD.md`, `docs/TDD.md` have no stale v1.16.0/Ligne-offline refs (Phase 4 audit). **README.md** gained the FINAL v1.16.0 row in the Releases table.
+  - [x] `docs/perf-baseline.md` notes the new precache size/WASM cost (patched in Phase 4: "WASM precached (v1.16.0+)", 46 entries / 3354.86 KiB).
+  - [x] `plan.md` task marks current; **`metadata.json` → `status: "completed"`** with `releasedAt`, `tag: v1.16.0`, `pr: 28`, `mergeCommit: 93c0af3`, `deployRun: 33023037193`.
+  - [x] Commit **`959109f`**: `docs(conductor): record v1.16.0 release execution and verification` (README + metadata.json). Pushed.
+- [~] Task: Perform track self-review
   - [ ] Verify line coverage of: the three FR-2 caching-contract validator checks, the offline smoke exercised on live, the version bump, and each hygiene deletion's reachability evidence.
   - [ ] Confirm the plan is the source of truth — every commit traces to a task; any deviation is reconciled back into the plan before proceeding.
   - [ ] Address review findings (if any) by looping to the owning phase — do not layer unplanned fixes.
