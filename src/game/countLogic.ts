@@ -1,3 +1,4 @@
+import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /**
@@ -58,19 +59,28 @@ export function createRound(band: 1 | 2 | 3, target?: number): CountRound {
 }
 
 /**
- * Generates a playthrough of 6 rounds, easy-first: 2 rounds per band
- * (1-3, then 1-5, then 1-10). Difficulty is fixed across replays.
- * The two rounds of each band always get distinct targets so the child is
- * never asked the same count twice.
+ * Generates a playthrough of 6 rounds, easy-first. `shift` (-1 | 0 | 1, from
+ * the child's recent performance — see adaptiveLogic) nudges the classic
+ * [1,1,2,2,3,3] band ladder before rounds are drawn, clamped to bands 1..3.
+ * The two rounds of each band get distinct targets whenever the band's target
+ * pool allows; a shifted ladder can ask a band for more rounds than it has
+ * targets (e.g. band 1 serves 4 rounds at shift -1 with a pool of 3), in
+ * which case the per-band used set resets and reuse begins.
  */
-export function createPlaythrough(): CountRound[] {
-  const rounds: CountRound[] = [];
-  for (const band of [1, 2, 3] as const) {
+export function createPlaythrough(shift: BandShift = 0): CountRound[] {
+  const ladder = shiftLadder(BASE_LADDER, shift);
+  const usedTargets = new Map<1 | 2 | 3, number[]>();
+  return ladder.map((band) => {
     const config = ROUND_BANDS[band - 1];
-    const targets = shuffle(Array.from({ length: config.max }, (_, i) => i + 1)).slice(0, 2);
-    rounds.push(createRound(band, targets[0]), createRound(band, targets[1]));
-  }
-  return rounds;
+    const used = usedTargets.get(band) ?? [];
+    const fullPool = Array.from({ length: config.max }, (_, i) => i + 1);
+    const available = fullPool.filter((target) => !used.includes(target));
+    // Reset the per-band used set when every target has been drawn.
+    const pool = available.length > 0 ? available : fullPool;
+    const target = shuffle(pool)[0];
+    usedTargets.set(band, [...used, target]);
+    return createRound(band, target);
+  });
 }
 
 /** Returns whether the tapped group holds the round's target count. */
