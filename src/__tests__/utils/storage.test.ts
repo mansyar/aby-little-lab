@@ -850,3 +850,36 @@ describe("adaptive band shift", () => {
     expect(getAdaptiveBandShift("take-away")).toBe(-1);
   });
 });
+
+describe.each([
+  ["word-match"],
+  ["word-builder"],
+  ["first-sounds"],
+  ["alphabet-match"],
+  ["memory-match"],
+  ["musical-memory"],
+] as const)("adaptive band shift (%s)", (gameId) => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns 0 on a fresh install (window below the minimum sample)", () => {
+    expect(getAdaptiveBandShift(gameId)).toBe(0);
+  });
+
+  it("returns +1 when recent accuracy reaches the up threshold", () => {
+    recordGameResult(gameId, 9, 1);
+    expect(getAdaptiveBandShift(gameId)).toBe(1);
+  });
+
+  it("returns -1 when recent accuracy falls below the down threshold", () => {
+    recordGameResult(gameId, 1, 9);
+    expect(getAdaptiveBandShift(gameId)).toBe(-1);
+  });
+
+  it("returns 0 for every game when the toggle is off", () => {
+    recordGameResult(gameId, 9, 1);
+    updateSettings({ adaptiveDifficulty: false });
+    expect(getAdaptiveBandShift(gameId)).toBe(0);
+  });
+});

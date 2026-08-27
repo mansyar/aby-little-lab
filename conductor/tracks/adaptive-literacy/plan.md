@@ -67,7 +67,7 @@ byte-identical to classic behavior.
 
 ## Phase 4 — Facade coverage, record audit, docs, full verification
 
-- [ ] Task 4.1: Facade tests for the six new game ids (TDD)
+- [x] Task 4.1: Facade tests for the six new game ids (TDD)
   - `getAdaptiveBandShift`: toggle off → 0; ≥ 90% over ≥ 6 taps → +1; < 60% → −1;
     < 6 taps → 0, for each of word-match, word-builder, first-sounds, alphabet-match,
     memory-match, musical-memory.
