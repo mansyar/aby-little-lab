@@ -1,0 +1,9 @@
+{
+  "id": "adaptive-literacy_20260814",
+  "title": "Adaptive Literacy & Memory (Six-Game Extension)",
+  "type": "feature",
+  "status": "planned",
+  "createdAt": "2026-08-14",
+  "updatedAt": "2026-08-14",
+  "summary": "Extends the shipped adaptive band-ladder system (track adaptive-difficulty_20260827) from the four numeracy games to the six literacy/memory games — Find the Word, Build the Word, First Sounds, Find the Letter, Memory Match, and Musical Memory. Each game defines BASE_LADDER plus per-band invariants over shifts [-1, 0, +1], reads its per-profile rolling 10-tap window shift at create() and passes it into its pure generator. Shift 0 is byte-identical to classic behavior (fixture-proven); no new UI, storage, or Settings changes."
+}
