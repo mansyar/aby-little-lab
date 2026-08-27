@@ -44,12 +44,12 @@ to the child.
 
 ## Phase 2 — Shifted Ladders in Game Logic
 
-- [ ] Task 2.1: How Many? — `createPlaythrough(shift?)` (TDD)
+- [x] Task 2.1: How Many? — `createPlaythrough(shift?)` (TDD) (520f52d)
   - Failing tests (loop over shifts −1/0/+1, many seeds): 6 rounds; band of each round
     equals shifted ladder; per-band distinct targets with reset-on-exhaustion fallback
     (band 1 serves 4 rounds at shift −1 with pool of 3); group counts distinct, exactly
     one correct group, groups shuffled; all counts ≤ shifted band max.
-- [ ] Task 2.2: More or Less — `createPlaythrough(shift?)` (TDD)
+- [~] Task 2.2: More or Less — `createPlaythrough(shift?)` (TDD)
   - Failing tests: ladder equals shifted base; 3× more / 3× less mix; counts within
     shifted band max; sides never tie.
 - [ ] Task 2.3: Add It Up — `buildPlaythrough(shift?)` (TDD)
