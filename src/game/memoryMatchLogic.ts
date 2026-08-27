@@ -1,3 +1,5 @@
+import type { BandId, BandShift } from "./adaptiveLogic";
+import { BASE_LADDER, shiftLadder } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** Difficulty bands for Memory Match rounds (fixed across replays). */
@@ -68,6 +70,11 @@ export function bandForRound(roundIndex: number): MemoryBand {
   return (["easy", "easy", "medium", "medium", "hard", "hard"] as const)[roundIndex] ?? "hard";
 }
 
+/** Maps an adaptive band id (1 easy … 3 hard) to a Memory Match band. */
+function bandIdToMemoryBand(band: BandId): MemoryBand {
+  return band === 1 ? "easy" : band === 2 ? "medium" : "hard";
+}
+
 /**
  * Builds one round by sampling `pairs` distinct textures from the pool,
  * duplicating them, and shuffling the layout so each texture appears twice.
@@ -84,9 +91,14 @@ export function buildRound(band: MemoryBand): MemoryRound {
   return { band, rows, cols, textures, layout };
 }
 
-/** Generates a playthrough of 6 rounds, easy-first through the bands. */
-export function buildPlaythrough(): MemoryRound[] {
-  return Array.from({ length: 6 }, (_, i) => buildRound(bandForRound(i)));
+/**
+ * Generates a playthrough of 6 rounds, easy-first through the bands. The
+ * adaptive shift moves every round one band down (-1) or up (+1), clamped
+ * to easy/hard; the default shift 0 reproduces the classic ladder exactly.
+ */
+export function buildPlaythrough(shift: BandShift = 0): MemoryRound[] {
+  const ladder = shiftLadder(BASE_LADDER, shift);
+  return ladder.map((band) => buildRound(bandIdToMemoryBand(band)));
 }
 
 /**
