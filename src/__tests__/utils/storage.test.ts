@@ -667,6 +667,7 @@ describe("progress recording", () => {
       correct: 0,
       wrong: 0,
       lastPlayedAt: null,
+      recent: [],
     });
   });
 
@@ -748,6 +749,7 @@ describe("progress recording", () => {
       correct: 0,
       wrong: 0,
       lastPlayedAt: null,
+      recent: [],
     });
     expect(getProgress()["odd-one-out"]).toEqual({
       plays: 0,
@@ -755,6 +757,7 @@ describe("progress recording", () => {
       correct: 0,
       wrong: 0,
       lastPlayedAt: null,
+      recent: [],
     });
     expect(getActiveProfile().activity).toEqual([]);
   });

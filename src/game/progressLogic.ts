@@ -1,12 +1,14 @@
 import type { DayActivity, GameId, GameProgress } from "../types";
 import { GAME_IDS } from "../types";
+import { WINDOW_SIZE, updateRecentWindow } from "./adaptiveLogic";
 import { todayKey } from "./playTimeLogic";
 
 /**
  * Pure logic for per-profile learning progress. Each profile tracks, per
  * game: how many sessions were started (plays), how many were completed
  * (wins — every completed session is a win by design), correct/wrong answer
- * taps, and the last time the game was played. A separate activity list
+ * taps, the last time the game was played, and a rolling window of recent
+ * tap results driving adaptive difficulty. A separate activity list
  * aggregates plays per day (pruned to the last 7 days) for the report's
  * activity strip.
  */
@@ -19,7 +21,7 @@ export const ACTIVITY_DAYS = 7;
 
 /** Fresh per-game progress: zeroed stats and no last-played timestamp. */
 export function createDefaultProgress(): GameProgress {
-  return { plays: 0, wins: 0, correct: 0, wrong: 0, lastPlayedAt: null };
+  return { plays: 0, wins: 0, correct: 0, wrong: 0, lastPlayedAt: null, recent: [] };
 }
 
 /** Fresh progress map: zeroed stats for every game id. */
@@ -36,12 +38,17 @@ export function normalizeProgress(raw: Partial<GameProgress> | null | undefined)
     typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : 0;
   const stamp = (value: unknown): string | null =>
     typeof value === "string" && value !== "" ? value : null;
+  const window = (value: unknown): boolean[] =>
+    Array.isArray(value)
+      ? value.filter((tap) => typeof tap === "boolean").slice(-WINDOW_SIZE)
+      : [];
   return {
     plays: count(raw?.plays),
     wins: count(raw?.wins),
     correct: count(raw?.correct),
     wrong: count(raw?.wrong),
     lastPlayedAt: stamp(raw?.lastPlayedAt),
+    recent: window(raw?.recent),
   };
 }
 
@@ -68,17 +75,22 @@ export function recordPlay(
 /**
  * Records a completed session result: accumulates correct/wrong taps and
  * increments wins when the session was a win. Negative counts are ignored.
+ * The per-session aggregate is also folded into the rolling recent-tap
+ * window (correct taps first) that drives adaptive band shifts.
  */
 export function recordResult(
   progress: Partial<GameProgress> | null | undefined,
   result: { correct: number; wrong: number; win: boolean },
 ): GameProgress {
   const p = normalizeProgress(progress);
+  const correct = Math.max(0, result.correct);
+  const wrong = Math.max(0, result.wrong);
   return {
     ...p,
     wins: p.wins + (result.win ? 1 : 0),
-    correct: p.correct + Math.max(0, result.correct),
-    wrong: p.wrong + Math.max(0, result.wrong),
+    correct: p.correct + correct,
+    wrong: p.wrong + wrong,
+    recent: updateRecentWindow(p.recent, { correct, wrong }),
   };
 }
 
