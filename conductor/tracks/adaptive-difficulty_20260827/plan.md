@@ -38,7 +38,7 @@ to the child.
 - [x] Task 1.4: Storage facade `getAdaptiveBandShift(gameId)` (TDD) (9c1d893)
   - Failing tests: returns 0 when toggle off; 0 when window empty or sample < 6;
     otherwise `bandShiftFor(window)`.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Shifted Ladders in Game Logic
 
