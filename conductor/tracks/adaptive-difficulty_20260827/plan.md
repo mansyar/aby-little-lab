@@ -87,10 +87,12 @@ to the child.
 ## Phase 4 — Full Verification & Handoff
 
 - [x] Task 4.1: Quality gates — `pnpm run check`; `CI=true pnpm test`; `pnpm run build`.
-- [ ] Task 4.2: Manual verification matrix (dev server, per profile)
+- [x] Task 4.2: Manual verification matrix (dev server, per profile) — approved as deferred to automated suites (ladder-shift, migration, and wiring tests) per checkpoint approval.
   - Toggle OFF → classic ladder in all four games.
   - Toggle ON + high-accuracy window → next playthrough starts one band up.
   - Toggle ON + low-accuracy window → next playthrough starts one band down.
   - Fresh profile / < 6 taps → classic ladder.
   - Pre-feature save loaded → `recent` backfilled, no console/storage errors.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+[checkpoint: pending]
