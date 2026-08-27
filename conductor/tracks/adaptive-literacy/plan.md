@@ -52,7 +52,7 @@ byte-identical to classic behavior.
 
 ## Phase 3 — Memory family (Memory Match + Musical Memory)
 
-[checkpoint: PENDING]
+[checkpoint: 52b54ef]
 
 - [x] Task 3.1: `memoryMatchLogic` ladder shift (TDD) (33cb9a4)
   - `buildPlaythrough(shift)` = `shiftLadder(BASE_LADDER, shift)` mapped BandId→MemoryBand
