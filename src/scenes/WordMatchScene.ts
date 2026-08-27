@@ -6,7 +6,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { getAdaptiveBandShift, load } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough. */
@@ -80,7 +80,7 @@ export class WordMatchScene extends GameSceneBase {
       },
     );
 
-    this.rounds = generateWordPlaythrough(ROUND_COUNT);
+    this.rounds = generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift("word-match"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
