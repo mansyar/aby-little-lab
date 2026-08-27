@@ -239,12 +239,15 @@ export class SettingsPanel {
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, centerY + 55, "SFX", settings.sfxEnabled);
-    this.createProfilesRow(centerX, centerY + 125);
-    this.createProgressRow(centerX, centerY + 185);
-    this.createResetRow(centerX, centerY + 245);
-    this.createInstallRow(centerX, centerY + 305);
-    this.createVoiceRow(centerX, centerY + 345);
+    this.createToggle(centerX, centerY + 15, "SFX", settings.sfxEnabled);
+    this.createToggle(centerX, centerY + 75, "Adaptive", settings.adaptiveDifficulty, (next) => {
+      updateSettings({ adaptiveDifficulty: next });
+    });
+    this.createProfilesRow(centerX, centerY + 140);
+    this.createProgressRow(centerX, centerY + 196);
+    this.createResetRow(centerX, centerY + 252);
+    this.createInstallRow(centerX, centerY + 308);
+    this.createVoiceRow(centerX, centerY + 344);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
@@ -291,12 +294,15 @@ export class SettingsPanel {
    * Creates one inflated, touch-friendly settings toggle: a labeled row card
    * plus a track-and-knob switch whose knob side encodes the state (never
    * color alone).
+   * @param onChange - Optional persistence hook; when provided it replaces the
+   *   built-in audio handling (used by non-audio toggles such as Adaptive).
    */
   private createToggle(
     x: number,
     y: number,
     label: string,
     enabled: boolean,
+    onChange?: (nextEnabled: boolean) => void,
   ): Phaser.GameObjects.Text {
     this.addRowCard(x, y);
 
@@ -345,7 +351,9 @@ export class SettingsPanel {
       enabled = nextEnabled;
       const audio = AudioManager.getInstance();
 
-      if (label === "BGM") {
+      if (onChange) {
+        onChange(nextEnabled);
+      } else if (label === "BGM") {
         audio.setBGMEnabled(nextEnabled);
         if (nextEnabled) audio.playBGM();
         else audio.pauseBGM();
