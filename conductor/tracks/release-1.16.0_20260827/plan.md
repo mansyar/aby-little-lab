@@ -190,7 +190,7 @@ Confirm production truly serves v1.16.0 across browsers, devices, and offline mo
 
 ---
 
-## Phase 9 — Branch Hygiene (Full Cleanup, Local + Remote)
+## Phase 9 — Branch Hygiene (Full Cleanup, Local + Remote) [checkpoint: 77512aa]
 
 Remove every stale branch whose content is preserved via master, tags, and Conductor archives.
 
@@ -213,8 +213,8 @@ Remove every stale branch whose content is preserved via master, tags, and Condu
 - [x] Task: Record hygiene
   - [x] Before/after `git branch -a` + `git worktree list` outputs and the force-delete justifications captured in the hygiene commit body.
   - [x] Commit on `master` **`07d647f`**: `chore(repo): remove stale merged branches and orphaned iPad-fix worktree` (empty commit — branch/worktree deletes are not file-diff-visible; evidence in body). Pushed.
-- [~] Task: Phase Verification & Checkpoint — Phase 9
-  - [ ] `conductor(plan): Mark phase 'Phase 9 - Branch Hygiene' as complete` and checkpoint.
+- [x] Task: Phase Verification & Checkpoint — Phase 9
+  - [x] `conductor(plan): Mark phase 'Phase 9 - Branch Hygiene' as complete` and checkpoint **`77512aa`** (git note attached).
 
 ---
 
