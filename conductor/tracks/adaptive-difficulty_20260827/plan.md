@@ -86,7 +86,7 @@ to the child.
 
 ## Phase 4 — Full Verification & Handoff
 
-- [ ] Task 4.1: Quality gates — `pnpm run check`; `CI=true pnpm test`; `pnpm run build`.
+- [x] Task 4.1: Quality gates — `pnpm run check`; `CI=true pnpm test`; `pnpm run build`.
 - [ ] Task 4.2: Manual verification matrix (dev server, per profile)
   - Toggle OFF → classic ladder in all four games.
   - Toggle ON + high-accuracy window → next playthrough starts one band up.
