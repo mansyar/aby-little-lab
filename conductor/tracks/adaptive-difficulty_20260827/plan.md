@@ -68,7 +68,7 @@ to the child.
   - Failing tests: each scene calls `getAdaptiveBandShift(<gameId>)` at `create()` and
     passes it to its generator (assert via mocked facade + logic spies across
     toggle/window combinations; OFF and fresh-profile produce the classic ladder).
-- [~] Task 3.2: SettingsPanel toggle row (TDD)
+- [x] Task 3.2: SettingsPanel toggle row (TDD) (a69cffd)
   - Failing tests: "Adaptive Difficulty" row renders with the established switch-toggle
     pattern; defaults ON; toggling persists through the storage facade; consistent with
     existing rows (labels, a11y, touch target).
