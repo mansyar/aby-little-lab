@@ -159,4 +159,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Adaptive Literacy & Memory (Six-Game Extension)** *Link: [./tracks/adaptive-literacy/index.md](./tracks/adaptive-literacy/index.md)*
+- [x] **Track: Adaptive Literacy & Memory (Six-Game Extension)** *Link: [./archive/adaptive-literacy_20260814/index.md](./archive/adaptive-literacy_20260814/index.md)* (Archived)
