@@ -95,4 +95,4 @@ to the child.
   - Pre-feature save loaded → `recent` backfilled, no console/storage errors.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-[checkpoint: pending]
+[checkpoint: 8b8ec8b]
