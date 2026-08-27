@@ -52,16 +52,18 @@ byte-identical to classic behavior.
 
 ## Phase 3 — Memory family (Memory Match + Musical Memory)
 
+[checkpoint: PENDING]
+
 - [x] Task 3.1: `memoryMatchLogic` ladder shift (TDD) (33cb9a4)
   - `buildPlaythrough(shift)` = `shiftLadder(BASE_LADDER, shift)` mapped BandId→MemoryBand
     (1→easy, 2→medium, 3→hard); band invariants per round (grid, pairs, layout, pool).
 - [x] Task 3.2: `musicalMemoryLogic` start-length shift (TDD) (b1c8b59)
   - `startLengthFor(shift)`: 1/2/3; `winLengthFor(start)`: 5/6/7; `MAX_RUN = 2` holds;
     round count stays 5 (`PROGRESS_DOT_COUNT = 5` valid); `isWin` default signature kept.
-- [x] Task 3.3: Wire `MemoryMatchScene` + `MusicalMemoryScene` (c940c3c)
+- [x] Task 3.3: Wire `MemoryMatchScene` + `MusicalMemoryScene` (c940c3c) (c940c3c)
   - Musical Memory: store `startLength`/`winTarget` at `create()`, use in
     `generateSequence` and `isWin`; dots unchanged.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Facade coverage, record audit, docs, full verification
 
