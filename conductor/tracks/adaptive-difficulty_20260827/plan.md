@@ -80,7 +80,9 @@ to the child.
     the four numeracy games only (start-band adaptation, max ±1).
   - `tech-stack.md` dated Design Update: adaptiveLogic module, additive storage fields
     (`GameProgress.recent`, `Settings.adaptiveDifficulty`), facade, toggle.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+[checkpoint: pending]
 
 ## Phase 4 — Full Verification & Handoff
 
