@@ -1,3 +1,5 @@
+import type { BandId, BandShift } from "./adaptiveLogic";
+import { shiftLadder } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** The 26 uppercase letters used in the Find the Letter game. */
@@ -84,17 +86,38 @@ export function isConfusableWith(letter: Letter, other: Letter): boolean {
   );
 }
 
-/** Builds one round for a target: 3 unique distractors, all positions shuffled. */
-export function generateRound(target: Letter): AlphabetRound {
+/** Classic ladder: every round sits in the classic band; a shift moves all rounds. */
+const LETTER_BASE_LADDER: readonly BandId[] = [2, 2, 2, 2, 2, 2];
+
+/** Easy-band target pool: the first ten letters, matching the taught sequence. */
+const EASY_LETTERS: readonly Letter[] = ALPHABET.slice(0, 10);
+
+/**
+ * Builds one round for a target: 3 unique distractors, all positions shuffled.
+ * Distractors never share the target's confusable family — unless the hard
+ * band explicitly invites that discrimination skill.
+ */
+export function generateRound(target: Letter, band: BandId = 2): AlphabetRound {
+  const allowSameFamily = band === 3;
   const distractors = shuffle(
-    ALPHABET.filter((letter) => letter !== target && !isConfusableWith(target, letter)),
+    ALPHABET.filter(
+      (letter) => letter !== target && (allowSameFamily || !isConfusableWith(target, letter)),
+    ),
   ).slice(0, 3);
   return { target, choices: shuffle([target, ...distractors]) };
 }
 
-/** Generates a playthrough of rounds (6 by default), each with a unique target letter. */
-export function generatePlaythrough(roundCount = 6): AlphabetRound[] {
-  return shuffle(ALPHABET)
+/**
+ * Generates a playthrough of rounds (6 by default), each with a unique target
+ * letter. The whole run shares one band: classic draws from the full alphabet,
+ * easy (shift -1) draws only from A-J, hard (shift +1) keeps the full alphabet
+ * and allows same-family distractors. The default shift 0 reproduces the
+ * classic playthrough exactly.
+ */
+export function generatePlaythrough(roundCount = 6, shift: BandShift = 0): AlphabetRound[] {
+  const band = shiftLadder(LETTER_BASE_LADDER, shift)[0] ?? 2;
+  const pool = band === 1 ? EASY_LETTERS : ALPHABET;
+  return shuffle(pool)
     .slice(0, roundCount)
-    .map((target) => generateRound(target));
+    .map((target) => generateRound(target, band));
 }
