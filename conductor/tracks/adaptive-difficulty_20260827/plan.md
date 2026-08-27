@@ -28,7 +28,7 @@ to the child.
     `[1,1,2,2,3,3]` / `[2,2,3,3,3,3]`.
   - Implement with constants `WINDOW_SIZE = 10`, `MIN_SAMPLE = 6`, `UP_THRESHOLD = 0.9`,
     `DOWN_THRESHOLD = 0.6`.
-- [ ] Task 1.2: Additive `recent: boolean[]` on `GameProgress` (TDD)
+- [x] Task 1.2: Additive `recent: boolean[]` on `GameProgress` (TDD) (61c23ac)
   - Failing tests (`progressLogic`): `normalizeProgress` backfills `recent = []` for old
     saves; sanitizes invalid shapes (non-array, oversized, non-boolean entries);
     `recordResult` folds session aggregates into the window (cap 10); cumulative
