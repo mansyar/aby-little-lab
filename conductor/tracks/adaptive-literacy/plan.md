@@ -42,7 +42,7 @@ byte-identical to classic behavior.
   - Uniform effective band `clamp(2 + shift, 1, 3)`. Band 1: targets ⊆ phonics letters
     minus {B, P}, classic guards; band 2: byte-identical classic; band 3: sound-confusable
     distractors allowed (B/P, D/T), visual families still excluded.
-- [~] Task 2.2: `alphabetLogic` band semantics (TDD)
+- [x] Task 2.2: `alphabetLogic` band semantics (TDD) (ba9768e)
   - Band 1: targets ∈ A–J, classic guards; band 2: byte-identical classic; band 3:
     same-family distractors allowed, target never among choices, 4 unique choices.
 - [ ] Task 2.3: Wire `FirstSoundsScene` + `AlphabetScene`
