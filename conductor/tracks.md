@@ -155,4 +155,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Adaptive Difficulty (Numeracy Four) — Per-Profile ±1 Band Ladders from a Rolling Tap Window** *Link: [./tracks/adaptive-difficulty_20260827/index.md](./tracks/adaptive-difficulty_20260827/index.md)*
+- [~] **Track: Adaptive Difficulty (Numeracy Four) — Per-Profile ±1 Band Ladders from a Rolling Tap Window** *Link: [./tracks/adaptive-difficulty_20260827/index.md](./tracks/adaptive-difficulty_20260827/index.md)*
