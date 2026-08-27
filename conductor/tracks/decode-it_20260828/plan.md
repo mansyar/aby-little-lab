@@ -17,12 +17,12 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
 
 ## Phase 1 — Word Pool + Pure Logic (TDD)
 
-- [ ] Task 1.1: Expand WORD_POOL 18→22 with 4 new decodable words + item SVGs (TDD fixture update)
+- [x] Task 1.1: Expand WORD_POOL 18→22 with 4 new decodable words + item SVGs (TDD fixture update) — e5ed52e
   - Add words FOX, CUP, MAP, BED — new textures `sm_fox`, `sm_cup`, `sm_map`, `sm_bed` under `src/assets/svg/items/` (storybook flat, `#2D3748` 4–6px outline, soft vibrant; FOX = orange fox head, CUP = teal cup, MAP = parchment map, BED = wooden bed) — reuse new textures as prompt images; letters already exist so no new glyph SVGs.
   - Update `src/game/wordLogic.ts` WORD_POOL / pool helpers or new `src/game/decodeLogic.ts` reusing wordLogic pool via import; preload count 162→166 (4 items; tile/sticker counted in Phase 3).
   - Failing tests (`src/__tests__/game/decodeLogic.test.ts`): pool contains 22 words, new words resolve to textures, 3-letter vs 4-letter tier partition (12 vs 10) correct, WORD_TO_TEXTURE mapping covers all 22.
 
-- [ ] Task 1.2: `decodeLogic` playthrough generation (TDD)
+- [~] Task 1.2: `decodeLogic` playthrough generation (TDD)
   - `buildRound(band, rng)` → `{ target, promptTexture, choices: string[4] }` with 4 unique choices incl. target, no two choices share first letter, confusable-family exclusion via `isConfusableWith` (families [C,G,O,Q], [I,L,T], [M,W]), prompt texture via WORD_POOL.
   - `buildPlaythrough(rng, shift = 0)` → 6 rounds: rounds 1–3 sample targets from 3-letter tier pool (12 words), rounds 4–6 from 4-letter tier (10 words), 6 unique targets per playthrough, position shuffle, deterministic given rng.
   - `isCorrect(round, choiceIndex)` → boolean; `shift` handling via `shiftLadder([1,1,2,2,3,3], shift)` mapped to tiers for future ±1 plumbing (shift 0 = classic fixture above; −1 → [1,1,1,1,2,2] = 4 easy + 2 hard; +1 → [2,2,3,3,3,3] = 2 easy + 4 hard). Guard shift 0 byte-identical.
