@@ -238,7 +238,7 @@ Complete release records and archive the track.
   - [x] `git mv conductor/tracks/release-1.16.0_20260827 conductor/archive/release-1.16.0_20260827` (history preserved).
   - [x] `conductor/tracks.md` entry updated `[~]` → **`[x] … (Archived)`** (link → `./archive/release-1.16.0_20260827/index.md`).
   - [x] Commit + push the archive (done in the Phase 10 record commit).
-- [ ] Task: Phase Verification & Checkpoint — Phase 10
+- [~] Task: Phase Verification & Checkpoint — Phase 10
   - [ ] `conductor(plan): Mark phase 'Phase 10 - Finalize and Archive' as complete` and checkpoint.
 
 ---
