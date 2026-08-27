@@ -75,7 +75,7 @@ to the child.
 - [x] Task 3.3: Learning Progress explanatory note (TDD) (ddd1ece)
   - Failing tests: report renders the static parent-facing note (what adaptive difficulty
     does + where to disable); child-facing game UI unchanged (textless).
-- [ ] Task 3.4: Documentation (no TDD)
+- [x] Task 3.4: Documentation (no TDD) (0278389)
   - `product.md` §3.2 dated amendment (2026-08-27): "difficulty stays fixed" retired for
     the four numeracy games only (start-band adaptation, max ±1).
   - `tech-stack.md` dated Design Update: adaptiveLogic module, additive storage fields
