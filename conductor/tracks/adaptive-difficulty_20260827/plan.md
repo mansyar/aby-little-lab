@@ -55,10 +55,10 @@ to the child.
 - [x] Task 2.3: Add It Up — `buildPlaythrough(shift?)` (TDD) (7488320)
   - Failing tests: pair uniqueness across playthrough at all shifts; no pool-exhaustion
     throw at any shifted ladder; options distinct and include target; sums ≤ shifted band max.
-- [~] Task 2.4: Take Away — `buildPlaythrough(shift?)` (TDD)
+- [x] Task 2.4: Take Away — `buildPlaythrough(shift?)` (TDD) (370e755)
   - Failing tests: pair uniqueness at all shifts; subtrahend ≥ 1; difference > 0;
     minuend ≤ shifted band max; options distinct and include target.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Wiring & Parent Surface
 
