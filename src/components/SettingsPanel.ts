@@ -245,9 +245,9 @@ export class SettingsPanel {
     });
     this.createProfilesRow(centerX, centerY + 140);
     this.createProgressRow(centerX, centerY + 196);
-    this.createResetRow(centerX, centerY + 252);
-    this.createInstallRow(centerX, centerY + 308);
-    this.createVoiceRow(centerX, centerY + 344);
+    this.createResetRow(centerX, centerY + 284);
+    this.createInstallRow(centerX, centerY + 340);
+    this.createVoiceRow(centerX, centerY + 380);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
@@ -771,6 +771,22 @@ export class SettingsPanel {
         ),
       );
     }
+
+    // Static parent-facing note: difficulty bands adapt to recent accuracy.
+    // Child-facing game UIs stay textless; this lives only where parents read.
+    this.overlayObjects.push(
+      this.scene.add
+        .text(
+          centerX,
+          centerY + 320,
+          "Difficulty adapts to your kid's recent answers · disable in Settings",
+          textStyle({
+            color: DISABLED_COLOR,
+            fontSize: "20px",
+          }),
+        )
+        .setOrigin(0.5),
+    );
   }
 
   /** Destroys the Learning Progress overlay (not the panel). */

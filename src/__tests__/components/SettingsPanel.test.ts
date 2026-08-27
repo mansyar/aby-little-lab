@@ -1148,6 +1148,25 @@ describe("SettingsPanel progress report", () => {
     expect(bars).toHaveLength(7);
   });
 
+  it("explains adaptive difficulty to parents inside the report", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+
+    const noteCall = scene.add.text.mock.calls.find(
+      (call) => typeof call[2] === "string" && call[2].includes("adapt"),
+    );
+    expect(noteCall).toBeDefined();
+    // Tells the parent what it does AND where to disable it.
+    expect(noteCall?.[2]).toContain("Settings");
+    // Muted footer styling keeps it secondary to the report rows.
+    expect(noteCall?.[3]).toEqual(expect.objectContaining({ color: "#a0aec0" }));
+    // Informational only — never a parent control.
+    const noteObject = scene.add.text.mock.results[scene.add.text.mock.calls.indexOf(noteCall)]
+      ?.value as MockGameObject;
+    expect(noteObject.setInteractive).not.toHaveBeenCalled();
+  });
+
   it("shows per-game plays, accuracy, and last played from progress data", () => {
     recordGamePlay("shape-sorter");
     recordGameResult("shape-sorter", 6, 2);

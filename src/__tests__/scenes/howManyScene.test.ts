@@ -919,4 +919,17 @@ describe("adaptive band shift wiring", () => {
 
     expect(createPlaythroughMock).toHaveBeenCalledWith(0);
   });
+
+  it("keeps the child UI textless under a shifted ladder", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new HowManyScene();
+    scene.create();
+
+    // The only alphabetic label is the shared parent-facing "← Back" chrome —
+    // every child-facing prompt (rounds, feedback, celebration) stays image- or
+    // numeral-based, shifted ladder or not.
+    const labels = scene.add.text.mock.calls.map((call) => String(call[2] ?? ""));
+    const alphabetic = labels.filter((label) => /[a-zA-Z]/.test(label));
+    expect(alphabetic).toEqual(["← Back"]);
+  });
 });
