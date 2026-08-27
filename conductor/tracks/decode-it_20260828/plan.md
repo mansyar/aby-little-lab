@@ -22,7 +22,7 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
   - Update `src/game/wordLogic.ts` WORD_POOL / pool helpers or new `src/game/decodeLogic.ts` reusing wordLogic pool via import; preload count 162→166 (4 items; tile/sticker counted in Phase 3).
   - Failing tests (`src/__tests__/game/decodeLogic.test.ts`): pool contains 22 words, new words resolve to textures, 3-letter vs 4-letter tier partition (12 vs 10) correct, WORD_TO_TEXTURE mapping covers all 22.
 
-- [~] Task 1.2: `decodeLogic` playthrough generation (TDD)
+- [x] Task 1.2: `decodeLogic` playthrough generation (TDD) — d417d3f
   - `buildRound(band, rng)` → `{ target, promptTexture, choices: string[4] }` with 4 unique choices incl. target, no two choices share first letter, confusable-family exclusion via `isConfusableWith` (families [C,G,O,Q], [I,L,T], [M,W]), prompt texture via WORD_POOL.
   - `buildPlaythrough(rng, shift = 0)` → 6 rounds: rounds 1–3 sample targets from 3-letter tier pool (12 words), rounds 4–6 from 4-letter tier (10 words), 6 unique targets per playthrough, position shuffle, deterministic given rng.
   - `isCorrect(round, choiceIndex)` → boolean; `shift` handling via `shiftLadder([1,1,2,2,3,3], shift)` mapped to tiers for future ±1 plumbing (shift 0 = classic fixture above; −1 → [1,1,1,1,2,2] = 4 easy + 2 hard; +1 → [2,2,3,3,3,3] = 2 easy + 4 hard). Guard shift 0 byte-identical.
