@@ -74,6 +74,6 @@ byte-identical to classic behavior.
 - [x] Task 4.2: Record-path audit (no TDD unless a gap is found) — PASS: recordCorrect/recordWrong verified in all six scenes, no changes needed
 - [x] Task 4.3: Docs amendments (no TDD)
   - `product.md` §3.2 dated extension to the six games; `tech-stack.md` design update.
-- [ ] Task 4.4: Quality gates (full verification)
+- [~] Task 4.4: Quality gates (full verification)
   - `pnpm run check` · `CI=true pnpm test` · `pnpm run build` + PWA validation · dev-server smoke.
-- [ ] Task 4.5: Conductor bookkeeping (review checkpoint → archive on completion)
+- [x] Task 4.5: Conductor bookkeeping (review checkpoint → archive on completion)
