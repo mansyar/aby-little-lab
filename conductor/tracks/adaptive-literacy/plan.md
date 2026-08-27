@@ -22,7 +22,7 @@ byte-identical to classic behavior.
 
 ## Phase 1 — First Words family (Find the Word + Build the Word)
 
-- [ ] Task 1.1: `wordLogic` tier-split shift (TDD)
+- [x] Task 1.1: `wordLogic` tier-split shift (TDD) (5d2c3c6)
   - Failing tests (`src/__tests__/game/wordLogic.test.ts`): `generateWordPlaythrough(
     roundCount, shift)` tier sequences `[3×6]` / `[3,3,3,3,3,4]` / `[3,3,3,3,4,4]` at
     shift −1/0/+1 with unique targets, 4 unique choices incl. target, no shared first
