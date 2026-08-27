@@ -160,3 +160,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Adaptive Literacy & Memory (Six-Game Extension)** *Link: [./archive/adaptive-literacy_20260814/index.md](./archive/adaptive-literacy_20260814/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Game 19 — Decode It** *Link: [./tracks/decode-it_20260828/index.md](./tracks/decode-it_20260828/index.md)*

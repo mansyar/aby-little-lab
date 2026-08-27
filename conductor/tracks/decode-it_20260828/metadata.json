@@ -1,0 +1,10 @@
+{
+  "trackId": "decode-it_20260828",
+  "type": "feature",
+  "title": "Game 19 — Decode It",
+  "branch": "feature/decode-it",
+  "status": "new",
+  "createdAt": "2026-08-28",
+  "spec": "./spec.md",
+  "plan": "./plan.md"
+}
