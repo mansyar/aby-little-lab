@@ -49,13 +49,13 @@ to the child.
     equals shifted ladder; per-band distinct targets with reset-on-exhaustion fallback
     (band 1 serves 4 rounds at shift −1 with pool of 3); group counts distinct, exactly
     one correct group, groups shuffled; all counts ≤ shifted band max.
-- [~] Task 2.2: More or Less — `createPlaythrough(shift?)` (TDD)
+- [x] Task 2.2: More or Less — `createPlaythrough(shift?)` (TDD) (666efbb)
   - Failing tests: ladder equals shifted base; 3× more / 3× less mix; counts within
     shifted band max; sides never tie.
-- [ ] Task 2.3: Add It Up — `buildPlaythrough(shift?)` (TDD)
+- [x] Task 2.3: Add It Up — `buildPlaythrough(shift?)` (TDD) (7488320)
   - Failing tests: pair uniqueness across playthrough at all shifts; no pool-exhaustion
     throw at any shifted ladder; options distinct and include target; sums ≤ shifted band max.
-- [ ] Task 2.4: Take Away — `buildPlaythrough(shift?)` (TDD)
+- [~] Task 2.4: Take Away — `buildPlaythrough(shift?)` (TDD)
   - Failing tests: pair uniqueness at all shifts; subtrahend ≥ 1; difference > 0;
     minuend ≤ shifted band max; options distinct and include target.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
