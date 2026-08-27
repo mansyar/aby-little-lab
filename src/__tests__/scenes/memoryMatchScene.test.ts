@@ -229,6 +229,27 @@ vi.mock("../../components/ParentLock", () => ({
   ParentLock: MockParentLock,
 }));
 
+const { getAdaptiveBandShiftMock, buildPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  buildPlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/memoryMatchLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/memoryMatchLogic")>();
+  return {
+    ...actual,
+    buildPlaythrough: (shift?: -1 | 0 | 1) => {
+      buildPlaythroughMock(shift);
+      return actual.buildPlaythrough(shift);
+    },
+  };
+});
+
 import type { MemoryRound } from "../../game/memoryMatchLogic";
 import { MemoryMatchScene } from "../../scenes/MemoryMatchScene";
 import { earnSticker, getProfiles } from "../../utils/storage";
@@ -782,5 +803,44 @@ describe("MemoryMatchScene round flow", () => {
         expect(count).toBe(2);
       }
     }
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    getAdaptiveBandShiftMock.mockClear();
+    buildPlaythroughMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("passes the facade's band shift to buildPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new MemoryMatchScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("memory-match");
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new MemoryMatchScene();
+    scene.create();
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
   });
 });
