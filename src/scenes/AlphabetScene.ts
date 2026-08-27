@@ -6,7 +6,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakLetter } from "../utils/speech";
-import { load } from "../utils/storage";
+import { getAdaptiveBandShift, load } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough. */
@@ -81,7 +81,7 @@ export class AlphabetScene extends GameSceneBase {
       },
     );
 
-    this.rounds = generatePlaythrough(ROUND_COUNT);
+    this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("alphabet-match"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

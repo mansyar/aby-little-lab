@@ -1,3 +1,5 @@
+import type { BandId, BandShift } from "./adaptiveLogic";
+import { shiftLadder } from "./adaptiveLogic";
 import { isConfusableWith, type Letter } from "./alphabetLogic";
 import { shuffle } from "./shapeSorterLogic";
 import { getWord } from "./wordLogic";
@@ -58,6 +60,14 @@ function isSoundConfusableWith(letter: Letter, other: Letter): boolean {
   return SOUND_CONFUSABLE_PAIRS.some((pair) => pair.includes(letter) && pair.includes(other));
 }
 
+/** Classic ladder: every round sits in the classic band; a shift moves all rounds. */
+const SOUND_BASE_LADDER: readonly BandId[] = [2, 2, 2, 2, 2, 2];
+
+/** Easy-band target pool: the phonics letters without the B/P confusable pair. */
+const EASY_SOUND_LETTERS: readonly Letter[] = PHONICS_LETTERS.filter(
+  (letter) => letter !== "B" && letter !== "P",
+);
+
 /** Returns the uppercase initial letter of a word, e.g. "CAT" → "C". */
 export function firstLetterOf(word: string): Letter {
   // The phonics pool is curated uppercase words; assert is safe by construction.
@@ -78,18 +88,20 @@ export interface PhonicsRound {
 
 /**
  * Builds one First Sounds round: 3 distractors from the phonics letters that
- * are neither sound-confusable (B/P, D/T) nor visually confusable (alphabet
- * families) with the target. All positions are shuffled.
+ * are never visually confusable (alphabet families) with the target, and —
+ * unless the hard band explicitly invites that skill — also never
+ * sound-confusable (B/P, D/T). All positions are shuffled.
  */
-export function generatePhonicsRound(target: Letter): PhonicsRound {
+export function generatePhonicsRound(target: Letter, band: BandId = 2): PhonicsRound {
+  const allowSoundConfusable = band === 3;
   const words = PHONICS_POOL.filter((entry) => firstLetterOf(entry.word) === target);
   const word = shuffle(words)[0];
   const distractors = shuffle(
     PHONICS_LETTERS.filter(
       (letter) =>
         letter !== target &&
-        !isSoundConfusableWith(target, letter) &&
-        !isConfusableWith(target, letter),
+        !isConfusableWith(target, letter) &&
+        (allowSoundConfusable || !isSoundConfusableWith(target, letter)),
     ),
   ).slice(0, 3);
   return {
@@ -102,10 +114,15 @@ export function generatePhonicsRound(target: Letter): PhonicsRound {
 
 /**
  * Generates a First Sounds playthrough of rounds (6 by default), each with a
- * unique target letter from the 9 phonics letters, shuffled, no repeats.
+ * unique target letter, shuffled, no repeats. The whole run shares one band:
+ * classic draws all 9 phonics letters, easy (shift -1) drops the B/P pair to
+ * 7 gentler letters, hard (shift +1) keeps all 9 and allows sound-confusable
+ * distractors. The default shift 0 reproduces the classic playthrough exactly.
  */
-export function generatePhonicsPlaythrough(roundCount = 6): PhonicsRound[] {
-  return shuffle(PHONICS_LETTERS)
+export function generatePhonicsPlaythrough(roundCount = 6, shift: BandShift = 0): PhonicsRound[] {
+  const band = shiftLadder(SOUND_BASE_LADDER, shift)[0] ?? 2;
+  const pool = band === 1 ? EASY_SOUND_LETTERS : PHONICS_LETTERS;
+  return shuffle(pool)
     .slice(0, roundCount)
-    .map((target) => generatePhonicsRound(target));
+    .map((target) => generatePhonicsRound(target, band));
 }

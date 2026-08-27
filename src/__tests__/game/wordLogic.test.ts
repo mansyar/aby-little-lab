@@ -231,6 +231,60 @@ describe("generateWordPlaythrough", () => {
   });
 });
 
+describe("generateWordPlaythrough (adaptive shift)", () => {
+  function tierSequence(rounds: WordRound[]): number[] {
+    return rounds.map((round) => getWord(round.target)?.tier ?? 0);
+  }
+
+  it("serves an all-3-letter ladder at shift -1 (easy)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = tierSequence(generateWordPlaythrough(6, -1));
+      expect(tiers).toEqual([3, 3, 3, 3, 3, 3]);
+    }
+  });
+
+  it("keeps the classic 5+1 tier split at shift 0", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = tierSequence(generateWordPlaythrough(6, 0));
+      expect(tiers.filter((tier) => tier === 3)).toHaveLength(5);
+      expect(tiers.filter((tier) => tier === 4)).toHaveLength(1);
+      expect(tiers).toEqual([...tiers].sort((a, b) => a - b));
+    }
+  });
+
+  it("serves two 4-letter rounds at shift +1 (hard)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = tierSequence(generateWordPlaythrough(6, 1));
+      expect(tiers).toEqual([3, 3, 3, 3, 4, 4]);
+    }
+  });
+
+  it("keeps every round valid and uniquely targeted at every shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = generateWordPlaythrough(6, shift);
+        const targets = playthrough.map((round) => round.target);
+        expect(new Set(targets).size).toBe(targets.length);
+        for (const round of playthrough) {
+          expectValidWordRound(round);
+        }
+      }
+    }
+  });
+
+  it("is deterministic under a fixed random sequence for each shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const first = generateWordPlaythrough(6, shift);
+      vi.restoreAllMocks();
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const second = generateWordPlaythrough(6, shift);
+      expect(second).toEqual(first);
+      vi.restoreAllMocks();
+    }
+  });
+});
+
 describe("generateWordBuildPlaythrough", () => {
   it("returns the requested number of pool words", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
@@ -288,6 +342,48 @@ describe("generateWordBuildPlaythrough", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = generateWordBuildPlaythrough();
     expect(second).toEqual(first);
+  });
+});
+
+describe("generateWordBuildPlaythrough (adaptive shift)", () => {
+  it("serves three 3-letter builds at shift -1 (easy)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = generateWordBuildPlaythrough(3, -1).map((entry) => entry.tier);
+      expect(tiers).toEqual([3, 3, 3]);
+    }
+  });
+
+  it("keeps the classic 2+1 tier split at shift 0", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = generateWordBuildPlaythrough(3, 0).map((entry) => entry.tier);
+      expect(tiers).toEqual([3, 3, 4]);
+    }
+  });
+
+  it("serves two 4-letter builds at shift +1 (hard)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const tiers = generateWordBuildPlaythrough(3, 1).map((entry) => entry.tier);
+      expect(tiers).toEqual([3, 4, 4]);
+    }
+  });
+
+  it("never repeats a word at any shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const words = generateWordBuildPlaythrough(3, shift).map((entry) => entry.word);
+        expect(new Set(words).size).toBe(words.length);
+      }
+    }
+  });
+
+  it("keeps every build within the pool at every shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        for (const entry of generateWordBuildPlaythrough(3, shift)) {
+          expect(WORD_POOL).toContain(entry);
+        }
+      }
+    }
   });
 });
 

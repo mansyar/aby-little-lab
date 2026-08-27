@@ -6,13 +6,15 @@ import {
   generateSequence,
   isRoundComplete,
   isWin,
-  START_LENGTH,
+  startLengthFor,
   validateInput,
   WIN_TARGET,
+  winLengthFor,
 } from "../game/musicalMemoryLogic";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Frog texture keys in index order (0=green, 1=blue, 2=red). */
@@ -96,6 +98,8 @@ export class MusicalMemoryScene extends GameSceneBase {
   private sequence: number[] = [];
   private inputIndex = 0;
   private roundCount = 0;
+  /** Win length for the current playthrough; classic default until create() adapts it. */
+  private winTarget = WIN_TARGET;
   /** Guards overlapping sequence playbacks so a stale completion cannot clear the speaker. */
   private sequencePlayId = 0;
 
@@ -112,7 +116,9 @@ export class MusicalMemoryScene extends GameSceneBase {
     this.createReplayButton();
     this.createProgressDots(PROGRESS_DOT_COUNT);
 
-    this.sequence = generateSequence(START_LENGTH);
+    const startLength = startLengthFor(getAdaptiveBandShift("musical-memory"));
+    this.winTarget = winLengthFor(startLength);
+    this.sequence = generateSequence(startLength);
     this.inputIndex = 0;
     this.playSequence();
 
@@ -268,7 +274,7 @@ export class MusicalMemoryScene extends GameSceneBase {
     }
     this.roundCount++;
 
-    if (isWin(this.sequence.length, WIN_TARGET)) {
+    if (isWin(this.sequence.length, this.winTarget)) {
       this.completeGame("musical-memory");
     } else {
       this.sequence = appendNote(this.sequence);

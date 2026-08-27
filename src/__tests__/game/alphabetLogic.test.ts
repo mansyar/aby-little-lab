@@ -144,3 +144,131 @@ describe("generatePlaythrough", () => {
     expect(second).toEqual(first);
   });
 });
+
+const BAND_FAMILIES: ReadonlyArray<readonly string[]> = [
+  ["C", "G", "O", "Q"],
+  ["I", "L", "T"],
+  ["M", "W"],
+];
+
+/** True when a round pairs the target with a distractor from its own visual family. */
+function hasSameFamilyDistractor(round: AlphabetRound): boolean {
+  return round.choices.some(
+    (choice) =>
+      choice !== round.target &&
+      BAND_FAMILIES.some((family) => family.includes(round.target) && family.includes(choice)),
+  );
+}
+
+describe("generateRound (adaptive band)", () => {
+  it("easy and classic bands never offer a same-family distractor", () => {
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      for (const family of BAND_FAMILIES) {
+        for (const target of family) {
+          for (const band of [1, 2] as const) {
+            const round = generateRound(target as Letter, band);
+            const distractors = round.choices.filter((choice) => choice !== target);
+            for (const familyLetter of family) {
+              if (familyLetter !== target) {
+                expect(distractors).not.toContain(familyLetter);
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it("hard band may offer same-family distractors (the stretched skill)", () => {
+    let seen = 0;
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      const round = generateRound("C", 3);
+      if (hasSameFamilyDistractor(round)) {
+        seen++;
+      }
+      expect(round.choices.filter((choice) => choice === "C")).toHaveLength(1);
+    }
+    expect(seen).toBeGreaterThan(0);
+  });
+
+  it("hard band still produces structurally valid rounds", () => {
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      expectValidRound(generateRound(ALPHABET[sample % 26], 3));
+    }
+  });
+
+  it("is deterministic under a fixed random sequence for every band", () => {
+    for (const band of [1, 2, 3] as const) {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const first = generateRound("C", band);
+      vi.restoreAllMocks();
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const second = generateRound("C", band);
+      expect(second).toEqual(first);
+      expectValidRound(first);
+    }
+  });
+});
+
+describe("generatePlaythrough (adaptive shift)", () => {
+  const EASY_LETTERS = new Set(ALPHABET.slice(0, 10));
+
+  it("draws easy targets only from A-J at shift -1, with classic guards", () => {
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      const playthrough = generatePlaythrough(6, -1);
+      expect(playthrough).toHaveLength(6);
+      const targets = playthrough.map((round) => round.target);
+      expect(new Set(targets).size).toBe(6);
+      for (const round of playthrough) {
+        expect(EASY_LETTERS.has(round.target)).toBe(true);
+        expectValidRound(round);
+        expect(hasSameFamilyDistractor(round)).toBe(false);
+      }
+    }
+  });
+
+  it("keeps classic behavior at shift 0 (targets still span the full alphabet)", () => {
+    const seen = new Set<Letter>();
+    for (let i = 0; i < 50; i++) {
+      for (const round of generatePlaythrough(6, 0)) {
+        seen.add(round.target);
+        expect(hasSameFamilyDistractor(round)).toBe(false);
+      }
+    }
+    expect(seen).toEqual(new Set(ALPHABET));
+  });
+
+  it("pairs same-family distractors only in the hard band", () => {
+    let seenHard = 0;
+    for (let i = 0; i < 50; i++) {
+      for (const round of generatePlaythrough(6, 1)) {
+        expectValidRound(round);
+        if (hasSameFamilyDistractor(round)) {
+          seenHard++;
+        }
+      }
+    }
+    expect(seenHard).toBeGreaterThan(0);
+
+    let seenEasy = 0;
+    for (let i = 0; i < 50; i++) {
+      for (const round of generatePlaythrough(6, -1)) {
+        if (hasSameFamilyDistractor(round)) {
+          seenEasy++;
+        }
+      }
+    }
+    expect(seenEasy).toBe(0);
+  });
+
+  it("is deterministic under a fixed random sequence for every shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const first = generatePlaythrough(6, shift);
+      vi.restoreAllMocks();
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const second = generatePlaythrough(6, shift);
+      expect(second).toEqual(first);
+    }
+  });
+});

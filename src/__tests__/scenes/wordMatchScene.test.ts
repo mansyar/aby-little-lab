@@ -258,6 +258,33 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+/** Controllable getAdaptiveBandShift facade plus a recorder for the generator call. */
+const { getAdaptiveBandShiftMock, generateWordPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  generateWordPlaythroughMock: vi.fn(),
+}));
+
+/** Delegates storage to its real implementation, exposing a spy-able band-shift facade. */
+vi.mock("../../utils/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/storage")>();
+  return {
+    ...actual,
+    getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+  };
+});
+
+/** Delegates the generator to its real implementation while recording the shift. */
+vi.mock("../../game/wordLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/wordLogic")>();
+  return {
+    ...actual,
+    generateWordPlaythrough: (roundCount: number, shift: -1 | 0 | 1 = 0) => {
+      generateWordPlaythroughMock(roundCount, shift);
+      return actual.generateWordPlaythrough(roundCount, shift);
+    },
+  };
+});
+
 import * as wordLogic from "../../game/wordLogic";
 import { getWord } from "../../game/wordLogic";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
@@ -941,5 +968,43 @@ describe("WordMatchScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    getAdaptiveBandShiftMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+    generateWordPlaythroughMock.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("passes the facade's band shift to generateWordPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new WordMatchScene();
+    scene.create();
+
+    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new WordMatchScene();
+    scene.create();
+
+    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 0);
   });
 });

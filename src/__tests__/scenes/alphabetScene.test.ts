@@ -258,6 +258,27 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+const { getAdaptiveBandShiftMock, generatePlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  generatePlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/alphabetLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/alphabetLogic")>();
+  return {
+    ...actual,
+    generatePlaythrough: (...args: Parameters<typeof actual.generatePlaythrough>) => {
+      generatePlaythroughMock(...args);
+      return actual.generatePlaythrough(...args);
+    },
+  };
+});
+
 import { generatePlaythrough } from "../../game/alphabetLogic";
 import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
@@ -786,5 +807,44 @@ describe("AlphabetScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    getAdaptiveBandShiftMock.mockClear();
+    generatePlaythroughMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("passes the facade's band shift to generatePlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new AlphabetScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("alphabet-match");
+    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new AlphabetScene();
+    scene.create();
+    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 0);
   });
 });

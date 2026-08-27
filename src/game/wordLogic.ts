@@ -1,3 +1,4 @@
+import type { BandShift } from "./adaptiveLogic";
 import { ALPHABET } from "./alphabetLogic";
 import { shuffle } from "./shapeSorterLogic";
 
@@ -81,11 +82,15 @@ export function generateWordRound(target: FirstWord): WordRound {
  * unique target word, ordered easy-first like the builder: 3-letter words
  * lead, 4-letter words follow, random within each tier, no repeats. With the
  * default 6 rounds this yields five 3-letter rounds then one 4-letter round.
+ *
+ * The adaptive `shift` (-1 | 0 | 1) moves the tier split point: -1 serves an
+ * all-3-letter ladder, +1 brings a second 4-letter round forward. The default
+ * 0 reproduces the classic split exactly.
  */
-export function generateWordPlaythrough(roundCount = 6): WordRound[] {
+export function generateWordPlaythrough(roundCount = 6, shift: BandShift = 0): WordRound[] {
   const tier3 = shuffle(WORD_POOL.filter((entry) => entry.tier === 3));
   const tier4 = shuffle(WORD_POOL.filter((entry) => entry.tier === 4));
-  const earlyCount = Math.min(tier3.length, Math.max(0, roundCount - 1));
+  const earlyCount = Math.min(tier3.length, Math.max(0, roundCount - 1 - shift));
   return [...tier3.slice(0, earlyCount), ...tier4.slice(0, roundCount - earlyCount)]
     .slice(0, roundCount)
     .map((target) => generateWordRound(target));
@@ -95,11 +100,15 @@ export function generateWordPlaythrough(roundCount = 6): WordRound[] {
  * Generates a Build the Word playthrough, easy-first: 3-letter words lead,
  * 4-letter words follow, random within each tier, no repeats. With the
  * default 3 words this yields two 3-letter words then one 4-letter word.
+ *
+ * The adaptive `shift` (-1 | 0 | 1) moves the tier split point: -1 serves an
+ * all-3-letter ladder, +1 brings a second 4-letter build forward. The default
+ * 0 reproduces the classic split exactly.
  */
-export function generateWordBuildPlaythrough(wordCount = 3): FirstWord[] {
+export function generateWordBuildPlaythrough(wordCount = 3, shift: BandShift = 0): FirstWord[] {
   const tier3 = shuffle(WORD_POOL.filter((entry) => entry.tier === 3));
   const tier4 = shuffle(WORD_POOL.filter((entry) => entry.tier === 4));
-  const earlyCount = Math.min(tier3.length, Math.max(0, wordCount - 1));
+  const earlyCount = Math.min(tier3.length, Math.max(0, wordCount - 1 - shift));
   return [...tier3.slice(0, earlyCount), ...tier4.slice(0, wordCount - earlyCount)].slice(
     0,
     wordCount,

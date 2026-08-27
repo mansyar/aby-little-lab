@@ -1,3 +1,5 @@
+import type { BandShift } from "./adaptiveLogic";
+
 /** The number of frogs the child can tap (green / blue / red). */
 export const FROG_COUNT = 3;
 
@@ -9,6 +11,22 @@ export const WIN_TARGET = 6;
 
 /** The longest run of consecutive same-frog notes a sequence may contain. */
 export const MAX_RUN = 2;
+
+/**
+ * The starting sequence length for an adaptive shift: easy (-1) starts at 1,
+ * classic at 2, hard (+1) at 3. Growth and the 5-round shape are unchanged.
+ */
+export function startLengthFor(shift: BandShift): number {
+  return Math.min(3, Math.max(1, START_LENGTH + shift));
+}
+
+/**
+ * The win length for a given starting length: always 4 rounds of growth
+ * after the start, so a playthrough stays 5 rounds at every shift.
+ */
+export function winLengthFor(start: number): number {
+  return start + (WIN_TARGET - START_LENGTH);
+}
 
 /**
  * Picks a random frog index (0..FROG_COUNT-1), avoiding a third consecutive

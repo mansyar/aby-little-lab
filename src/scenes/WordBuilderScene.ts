@@ -9,7 +9,7 @@ import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { getAdaptiveBandShift, load } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of words per playthrough. */
@@ -116,7 +116,7 @@ export class WordBuilderScene extends GameSceneBase {
       },
     );
 
-    this.words = generateWordBuildPlaythrough(WORD_COUNT);
+    this.words = generateWordBuildPlaythrough(WORD_COUNT, getAdaptiveBandShift("word-builder"));
     this.wordIndex = 0;
     this.inputLocked = false;
     this.renderRound();

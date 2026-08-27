@@ -178,6 +178,68 @@ describe("buildPlaythrough", () => {
   });
 });
 
+describe("buildPlaythrough (adaptive shift)", () => {
+  it("shifts the ladder down at shift -1 (easy x4, medium x2)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      expect(buildPlaythrough(-1).map((round) => round.band)).toEqual([
+        "easy",
+        "easy",
+        "easy",
+        "easy",
+        "medium",
+        "medium",
+      ]);
+    }
+  });
+
+  it("keeps the classic ladder at shift 0", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      expect(buildPlaythrough(0).map((round) => round.band)).toEqual([
+        "easy",
+        "easy",
+        "medium",
+        "medium",
+        "hard",
+        "hard",
+      ]);
+    }
+  });
+
+  it("shifts the ladder up at shift +1 (medium x2, hard x4)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      expect(buildPlaythrough(1).map((round) => round.band)).toEqual([
+        "medium",
+        "medium",
+        "hard",
+        "hard",
+        "hard",
+        "hard",
+      ]);
+    }
+  });
+
+  it("keeps every shifted round structurally valid", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let i = 0; i < 20; i++) {
+        for (const round of buildPlaythrough(shift)) {
+          expectValidRound(round);
+        }
+      }
+    }
+  });
+
+  it("is deterministic under a fixed random sequence for every shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const first = buildPlaythrough(shift);
+      vi.restoreAllMocks();
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const second = buildPlaythrough(shift);
+      expect(second).toEqual(first);
+    }
+  });
+});
+
 describe("isPair", () => {
   it("returns true only when two different indices share a texture", () => {
     // Exhaustive per round (every index pair); a few rounds guard layout variety.

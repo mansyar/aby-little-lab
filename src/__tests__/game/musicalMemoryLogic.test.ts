@@ -7,8 +7,10 @@ import {
   isRoundComplete,
   isWin,
   START_LENGTH,
+  startLengthFor,
   validateInput,
   WIN_TARGET,
+  winLengthFor,
 } from "../../game/musicalMemoryLogic";
 
 afterEach(() => {
@@ -206,5 +208,41 @@ describe("mistake handling (no-fail design)", () => {
     // Even after a mistake, the sequence length hasn't changed
     validateInput(seq, 0, 2); // wrong tap
     expect(isWin(seq.length)).toBe(false); // still at round 1, not won
+  });
+});
+
+describe("start-length shift (adaptive)", () => {
+  it("maps shifts to starting lengths 1 / 2 / 3", () => {
+    expect(startLengthFor(-1)).toBe(1);
+    expect(startLengthFor(0)).toBe(START_LENGTH);
+    expect(startLengthFor(1)).toBe(3);
+  });
+
+  it("maps starting lengths to win lengths 5 / 6 / 7", () => {
+    expect(winLengthFor(1)).toBe(5);
+    expect(winLengthFor(2)).toBe(6);
+    expect(winLengthFor(3)).toBe(7);
+  });
+
+  it("keeps the classic default win target untouched", () => {
+    expect(winLengthFor(START_LENGTH)).toBe(WIN_TARGET);
+  });
+
+  it("keeps 5 rounds at every shift (winLength - start + 1)", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const start = startLengthFor(shift);
+      const win = winLengthFor(start);
+      expect(win - start + 1).toBe(5);
+    }
+  });
+
+  it("grows the easy starting sequence under the same run cap", () => {
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValue(0.0);
+    const seq = generateSequence(startLengthFor(-1));
+    expect(seq).toHaveLength(1);
+    for (let i = 2; i < seq.length; i++) {
+      expect(seq[i] === seq[i - 1] && seq[i - 1] === seq[i - 2]).toBe(false);
+    }
   });
 });

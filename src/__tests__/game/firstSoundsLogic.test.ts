@@ -150,6 +150,122 @@ describe("generatePhonicsRound", () => {
   });
 });
 
+describe("generatePhonicsRound (adaptive band)", () => {
+  it("keeps every band structurally valid", () => {
+    for (const band of [1, 2, 3] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const target = PHONICS_LETTERS[i % PHONICS_LETTERS.length];
+        expectValidRound(generatePhonicsRound(target, band));
+      }
+    }
+  });
+
+  it("bands 1 and 2 never offer a sound-confusable partner", () => {
+    for (const band of [1, 2] as const) {
+      for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+        for (const [a, b] of SOUND_CONFUSABLE_PAIRS) {
+          for (const target of [a, b]) {
+            const distractors = generatePhonicsRound(target, band).choices.filter(
+              (choice) => choice !== target,
+            );
+            expect(distractors).not.toContain(target === a ? b : a);
+          }
+        }
+      }
+    }
+  });
+
+  it("the hard band may pair sound-confusable letters (B/P, D/T)", () => {
+    let observed = 0;
+    for (let sample = 0; sample < VARIETY_SAMPLES; sample++) {
+      for (const [a, b] of SOUND_CONFUSABLE_PAIRS) {
+        const distractors = generatePhonicsRound(a, 3).choices.filter((choice) => choice !== a);
+        if (distractors.includes(b)) observed++;
+      }
+    }
+    expect(observed).toBeGreaterThan(0);
+  });
+
+  it("the hard band still excludes visually confusable same-family distractors", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const target = PHONICS_LETTERS[i % PHONICS_LETTERS.length];
+      const distractors = generatePhonicsRound(target, 3).choices.filter(
+        (choice) => choice !== target,
+      );
+      for (const distractor of distractors) {
+        expect(isConfusableWith(target, distractor)).toBe(false);
+      }
+    }
+  });
+});
+
+describe("generatePhonicsPlaythrough (adaptive shift)", () => {
+  function targetsOf(rounds: PhonicsRound[]): Letter[] {
+    return rounds.map((round) => round.target);
+  }
+
+  it("draws easy targets from the 7 letters excluding B and P at shift -1", () => {
+    const easyPool = PHONICS_LETTERS.filter((letter) => letter !== "B" && letter !== "P");
+    expect(easyPool).toHaveLength(7);
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const targets = targetsOf(generatePhonicsPlaythrough(6, -1));
+      expect(targets).toHaveLength(6);
+      expect(new Set(targets).size).toBe(6);
+      for (const target of targets) {
+        expect(easyPool).toContain(target);
+      }
+    }
+  });
+
+  it("keeps unique classic targets at shift 0", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const targets = targetsOf(generatePhonicsPlaythrough(6, 0));
+      expect(targets).toHaveLength(6);
+      expect(new Set(targets).size).toBe(6);
+      for (const target of targets) {
+        expect(PHONICS_LETTERS).toContain(target);
+      }
+    }
+  });
+
+  it("draws targets from all 9 letters at shift +1", () => {
+    const seen = new Set<Letter>();
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const targets = targetsOf(generatePhonicsPlaythrough(6, 1));
+      expect(new Set(targets).size).toBe(6);
+      for (const target of targets) {
+        seen.add(target);
+        expect(PHONICS_LETTERS).toContain(target);
+      }
+    }
+    expect(seen).toEqual(new Set(PHONICS_LETTERS));
+  });
+
+  it("offers sound-confusable distractors only in the hard band", () => {
+    for (const shift of [-1, 0] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        for (const round of generatePhonicsPlaythrough(6, shift)) {
+          const distractors = round.choices.filter((choice) => choice !== round.target);
+          for (const [a, b] of SOUND_CONFUSABLE_PAIRS) {
+            if (round.target === a) expect(distractors).not.toContain(b);
+            if (round.target === b) expect(distractors).not.toContain(a);
+          }
+        }
+      }
+    }
+  });
+
+  it("keeps every round valid at every shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        for (const round of generatePhonicsPlaythrough(6, shift)) {
+          expectValidRound(round);
+        }
+      }
+    }
+  });
+});
+
 describe("generatePhonicsPlaythrough", () => {
   it("returns the requested number of valid rounds", () => {
     const playthrough = generatePhonicsPlaythrough(6);

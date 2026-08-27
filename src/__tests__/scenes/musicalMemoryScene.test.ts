@@ -240,6 +240,32 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
+const { getAdaptiveBandShiftMock, generateSequenceMock, isWinMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  generateSequenceMock: vi.fn(),
+  isWinMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/musicalMemoryLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/musicalMemoryLogic")>();
+  return {
+    ...actual,
+    generateSequence: (length: number) => {
+      generateSequenceMock(length);
+      return actual.generateSequence(length);
+    },
+    isWin: (sequenceLength: number, target: number) => {
+      isWinMock(sequenceLength, target);
+      return actual.isWin(sequenceLength, target);
+    },
+  };
+});
+
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
 import {
   countListeners,
@@ -402,5 +428,72 @@ describe("MusicalMemoryScene replay drives the speaker grammar", () => {
     fireLastDelayedCall(scene);
     expect(speaker.clearTint).toHaveBeenCalled();
     expect(speaker.setAlpha).toHaveBeenLastCalledWith(1);
+  });
+});
+
+describe("adaptive band shift wiring", () => {
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+    getAdaptiveBandShiftMock.mockClear();
+    generateSequenceMock.mockClear();
+    isWinMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  /** Fires the most recently scheduled delayed call (the sequence completion). */
+  function fireLastDelayedCall(scene: MusicalMemoryScene): void {
+    const callback = scene.time.delayedCall.mock.calls.at(-1)?.[1];
+    if (typeof callback !== "function") {
+      throw new Error("completion delayed call not found");
+    }
+    (callback as () => void)();
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it.each([
+    [-1, 1],
+    [0, 2],
+    [1, 3],
+  ] as const)("starts the sequence at the shifted length for shift %i", (shift, start) => {
+    getAdaptiveBandShiftMock.mockReturnValue(shift);
+    const scene = new MusicalMemoryScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("musical-memory");
+    expect(generateSequenceMock).toHaveBeenCalledWith(start);
+  });
+
+  it("checks the win against the shifted win length after a completed round", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(-1);
+    const scene = new MusicalMemoryScene();
+    scene.create();
+
+    // Finish the auto-play so input unlocks.
+    fireLastDelayedCall(scene);
+
+    // Tap the frog the 1-note easy sequence ends with.
+    const sequence = (scene as unknown as { sequence: number[] }).sequence;
+    expect(sequence).toHaveLength(1);
+    const frogControls = getInteractiveImages(scene).slice(0, 3); // frogs only
+    fireFirstHandler(frogControls[sequence[0]]!, "pointerdown");
+
+    expect(isWinMock).toHaveBeenCalledWith(1, 5);
   });
 });
