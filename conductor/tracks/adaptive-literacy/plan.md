@@ -38,6 +38,8 @@ byte-identical to classic behavior.
 
 ## Phase 2 — Discrimination guards (First Sounds + Find the Letter)
 
+[checkpoint: 5e024bc]
+
 - [x] Task 2.1: `firstSoundsLogic` band semantics (TDD) (ee74cc8)
   - Uniform effective band `clamp(2 + shift, 1, 3)`. Band 1: targets ⊆ phonics letters
     minus {B, P}, classic guards; band 2: byte-identical classic; band 3: sound-confusable
@@ -50,7 +52,7 @@ byte-identical to classic behavior.
 
 ## Phase 3 — Memory family (Memory Match + Musical Memory)
 
-- [ ] Task 3.1: `memoryMatchLogic` ladder shift (TDD)
+- [~] Task 3.1: `memoryMatchLogic` ladder shift (TDD)
   - `buildPlaythrough(shift)` = `shiftLadder(BASE_LADDER, shift)` mapped BandId→MemoryBand
     (1→easy, 2→medium, 3→hard); band invariants per round (grid, pairs, layout, pool).
 - [ ] Task 3.2: `musicalMemoryLogic` start-length shift (TDD)
