@@ -1487,12 +1487,30 @@ describe("SettingsPanel affordance cohesion", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    // Six rows: BGM, SFX, Profiles, Progress, Reset, Voice.
+    // Seven rows: BGM, SFX, Adaptive, Profiles, Progress, Reset, Voice.
     const cards = getRectangles(scene).filter((r) => {
       const [, , w, h] = r.args ?? [];
       return w === 400 && h === 68;
     });
     expect(cards).toHaveLength(7);
+  });
+
+  it("keeps every settings row card inside the panel and the canvas", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    // Panel card: 760px tall, centered at (512, 384) → spans 4..764.
+    const rowCards = getRectangles(scene).filter((r) => {
+      const [, , w, h] = r.args ?? [];
+      return w === 400 && h === 68;
+    });
+    expect(rowCards.length).toBeGreaterThan(0);
+
+    for (const card of rowCards) {
+      const [, y, , h] = card.args ?? [];
+      expect((y as number) - (h as number) / 2).toBeGreaterThanOrEqual(4);
+      expect((y as number) + (h as number) / 2).toBeLessThanOrEqual(764);
+    }
   });
 
   it("offers an explicit close button on the main panel", () => {

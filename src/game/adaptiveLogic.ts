@@ -67,5 +67,9 @@ export function bandShiftFor(recent: readonly boolean[]): BandShift {
  * Returns a new array; the input is never mutated.
  */
 export function shiftLadder(ladder: readonly BandId[], shift: BandShift): BandId[] {
-  return ladder.map((band) => Math.min(3, Math.max(1, band + shift)) as BandId);
+  return ladder.map(
+    (band) =>
+      // The clamp provably yields 1..3, so narrowing number to BandId is safe.
+      Math.min(3, Math.max(1, band + shift)) as BandId,
+  );
 }

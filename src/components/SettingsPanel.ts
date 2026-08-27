@@ -238,16 +238,18 @@ export class SettingsPanel {
     closeButton.on("pointerdown", () => this.destroy());
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
+    // Row pitch ~56px keeps all eight 68px cards on-canvas and inside the
+    // 760px panel (bottom row +345 → card bottom +379, matching v1.16.0).
     this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, centerY + 15, "SFX", settings.sfxEnabled);
-    this.createToggle(centerX, centerY + 75, "Adaptive", settings.adaptiveDifficulty, (next) => {
+    this.createToggle(centerX, centerY + 11, "SFX", settings.sfxEnabled);
+    this.createToggle(centerX, centerY + 67, "Adaptive", settings.adaptiveDifficulty, (next) => {
       updateSettings({ adaptiveDifficulty: next });
     });
-    this.createProfilesRow(centerX, centerY + 140);
-    this.createProgressRow(centerX, centerY + 196);
-    this.createResetRow(centerX, centerY + 284);
-    this.createInstallRow(centerX, centerY + 340);
-    this.createVoiceRow(centerX, centerY + 380);
+    this.createProfilesRow(centerX, centerY + 123);
+    this.createProgressRow(centerX, centerY + 178);
+    this.createResetRow(centerX, centerY + 234);
+    this.createInstallRow(centerX, centerY + 290);
+    this.createVoiceRow(centerX, centerY + 345);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
