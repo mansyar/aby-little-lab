@@ -28,11 +28,11 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
   - `isCorrect(round, choiceIndex)` → boolean; `shift` handling via `shiftLadder([1,1,2,2,3,3], shift)` mapped to tiers for future ±1 plumbing (shift 0 = classic fixture above; −1 → [1,1,1,1,2,2] = 4 easy + 2 hard; +1 → [2,2,3,3,3,3] = 2 easy + 4 hard). Guard shift 0 byte-identical.
   - Failing tests: all invariants + fixture playthrough at shift 0 locked (mirror `wordLogic.test.ts` / `colorMatchLogic.test.ts` conventions).
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — e3b2da6 [checkpoint: e3b2da6]
 
 ## Phase 2 — Scene & Prompt Audio
 
-- [ ] Task 2.1: `DecodeItScene` (inherits GameSceneBase) — visual flow (TDD where logic, visual verification otherwise)
+- [~] Task 2.1: `DecodeItScene` (inherits GameSceneBase) — visual flow (TDD where logic, visual verification otherwise)
   - `src/scenes/DecodeItScene.ts` key `DecodeIt` extends `GameSceneBase`: `create()` reads `decodeLogic.buildPlaythrough(getAdaptiveBandShift('decode-it'))` (shift pluggable, default 0), renders prompt image (180px) top-center + 4 word cards row (160px cards, 128px letters, ≥96px touch, centered spacing), speaker button (frame hit area) replay, card tap → `isCorrect` → success flash (`--success` `#68D391`) + chime (`playCorrect`) + mascot cheer + `recordCorrect()` + dot pop 700ms (`NEXT_ROUND_DELAY`) / wiggle ±4° + soft tone (`playIncorrect`) + mascot nod + `recordWrong()` no penalty, `inputLocked` during transitions/celebration, `progressDots` 6 via `createProgressDots(6)` / `fillProgressDot`, `createBackButton` / `createCornerMascot` / `completeGame('decode-it')` + `{ justEarned: "decode-it" }`, shutdown cleanup via `registerShutdownCleanup`, relaunch resets `inputLocked` + `progressDots`.
   - Failing tests (`src/__tests__/scenes/decodeItScene.test.ts`): prompt renders, correct advances after 700ms, wrong stays with wiggle, speaker guarded during win, auto-return after 6, ParentLock hold exits to Hub, inputLocked resets on `create()` relaunch.
 
