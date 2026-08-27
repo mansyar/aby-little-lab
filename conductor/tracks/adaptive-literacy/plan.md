@@ -38,11 +38,11 @@ byte-identical to classic behavior.
 
 ## Phase 2 — Discrimination guards (First Sounds + Find the Letter)
 
-- [ ] Task 2.1: `firstSoundsLogic` band semantics (TDD)
+- [x] Task 2.1: `firstSoundsLogic` band semantics (TDD) (ee74cc8)
   - Uniform effective band `clamp(2 + shift, 1, 3)`. Band 1: targets ⊆ phonics letters
     minus {B, P}, classic guards; band 2: byte-identical classic; band 3: sound-confusable
     distractors allowed (B/P, D/T), visual families still excluded.
-- [ ] Task 2.2: `alphabetLogic` band semantics (TDD)
+- [~] Task 2.2: `alphabetLogic` band semantics (TDD)
   - Band 1: targets ∈ A–J, classic guards; band 2: byte-identical classic; band 3:
     same-family distractors allowed, target never among choices, 4 unique choices.
 - [ ] Task 2.3: Wire `FirstSoundsScene` + `AlphabetScene`
