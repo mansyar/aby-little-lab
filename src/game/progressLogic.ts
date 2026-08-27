@@ -1,6 +1,6 @@
 import type { DayActivity, GameId, GameProgress } from "../types";
 import { GAME_IDS } from "../types";
-import { WINDOW_SIZE, updateRecentWindow } from "./adaptiveLogic";
+import { updateRecentWindow, WINDOW_SIZE } from "./adaptiveLogic";
 import { todayKey } from "./playTimeLogic";
 
 /**
@@ -39,9 +39,7 @@ export function normalizeProgress(raw: Partial<GameProgress> | null | undefined)
   const stamp = (value: unknown): string | null =>
     typeof value === "string" && value !== "" ? value : null;
   const window = (value: unknown): boolean[] =>
-    Array.isArray(value)
-      ? value.filter((tap) => typeof tap === "boolean").slice(-WINDOW_SIZE)
-      : [];
+    Array.isArray(value) ? value.filter((tap) => typeof tap === "boolean").slice(-WINDOW_SIZE) : [];
   return {
     plays: count(raw?.plays),
     wins: count(raw?.wins),

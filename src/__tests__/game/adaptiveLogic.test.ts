@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  bandShiftFor,
   BASE_LADDER,
+  bandShiftFor,
   DOWN_THRESHOLD,
   MIN_SAMPLE,
   shiftLadder,
@@ -48,18 +48,7 @@ describe("updateRecentWindow", () => {
     expect(updated).toHaveLength(WINDOW_SIZE);
     // Chronological order across the trim boundary: the 3 oldest correct
     // taps drop off, leaving 3 true, 2 false, then the newly appended taps.
-    expect(updated).toEqual([
-      true,
-      true,
-      true,
-      false,
-      false,
-      true,
-      true,
-      true,
-      false,
-      false,
-    ]);
+    expect(updated).toEqual([true, true, true, false, false, true, true, true, false, false]);
   });
 
   it("accepts an empty session without changing the window", () => {

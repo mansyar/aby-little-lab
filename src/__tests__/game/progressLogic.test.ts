@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { WINDOW_SIZE } from "../../game/adaptiveLogic";
 import {
   addActivity,
   createDefaultProgress,
@@ -14,7 +15,6 @@ import {
   recordResult,
   relativeLastPlayed,
 } from "../../game/progressLogic";
-import { WINDOW_SIZE } from "../../game/adaptiveLogic";
 import type { DayActivity, GameProgress } from "../../types";
 import { GAME_IDS } from "../../types";
 
@@ -124,11 +124,7 @@ describe("progressLogic", () => {
       const oversized = [...Array.from({ length: 14 }, () => true), false, false];
       const normalized = normalizeProgress({ recent: oversized } as GameProgress);
       expect(normalized.recent).toHaveLength(WINDOW_SIZE);
-      expect(normalized.recent).toEqual([
-        ...Array.from({ length: 8 }, () => true),
-        false,
-        false,
-      ]);
+      expect(normalized.recent).toEqual([...Array.from({ length: 8 }, () => true), false, false]);
     });
   });
 

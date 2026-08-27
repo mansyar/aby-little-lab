@@ -1,5 +1,5 @@
-import { bandShiftFor } from "../game/adaptiveLogic";
 import type { BandShift } from "../game/adaptiveLogic";
+import { bandShiftFor } from "../game/adaptiveLogic";
 import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
 import {
   addProfile as addProfileToV2,
