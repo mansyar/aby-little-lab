@@ -20,7 +20,7 @@ to the child.
 
 ## Phase 1 — Adaptive Core (logic + storage)
 
-- [ ] Task 1.1: New pure module `src/game/adaptiveLogic.ts` (TDD)
+- [x] Task 1.1: New pure module `src/game/adaptiveLogic.ts` (TDD) (9b5a169)
   - Failing tests (`src/__tests__/game/adaptiveLogic.test.ts`):
     `updateRecentWindow` folds `{correct, wrong}` aggregates (trues then falses) and trims
     to `WINDOW_SIZE = 10`; `bandShiftFor`: `[]` → 0, sample < 6 → 0, 9/10 → +1, 8/10 → 0,
