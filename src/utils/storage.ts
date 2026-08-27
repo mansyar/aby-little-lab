@@ -1,3 +1,5 @@
+import { bandShiftFor } from "../game/adaptiveLogic";
+import type { BandShift } from "../game/adaptiveLogic";
 import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
 import {
   addProfile as addProfileToV2,
@@ -238,4 +240,14 @@ export function getProgress(profileId?: string): Record<GameId, GameProgress> {
   const id = profileId ?? v2.activeProfileId;
   const profile = v2.profiles.find((p) => p.id === id) ?? v2.profiles[0];
   return normalizeProgressMap(profile.progress);
+}
+
+/**
+ * Band shift (-1 | 0 | 1) for the active profile's recent performance in a game,
+ * derived from the rolling tap window. Returns 0 when the adaptive difficulty
+ * toggle is off or the window holds too few taps to judge.
+ */
+export function getAdaptiveBandShift(gameId: GameId): BandShift {
+  if (!getSettings().adaptiveDifficulty) return 0;
+  return bandShiftFor(getProgress()[gameId].recent);
 }
