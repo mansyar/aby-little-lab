@@ -33,9 +33,9 @@ to the child.
     saves; sanitizes invalid shapes (non-array, oversized, non-boolean entries);
     `recordResult` folds session aggregates into the window (cap 10); cumulative
     `plays/wins/correct/wrong` untouched. Type added in `src/types.ts`.
-- [ ] Task 1.3: Settings flag `adaptiveDifficulty` default `true` (TDD)
+- [x] Task 1.3: Settings flag `adaptiveDifficulty` default `true` (TDD) (4f2405d)
   - Failing tests: settings normalize backfill; persistence round-trip via storage facade.
-- [ ] Task 1.4: Storage facade `getAdaptiveBandShift(gameId)` (TDD)
+- [x] Task 1.4: Storage facade `getAdaptiveBandShift(gameId)` (TDD) (9c1d893)
   - Failing tests: returns 0 when toggle off; 0 when window empty or sample < 6;
     otherwise `bandShiftFor(window)`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
