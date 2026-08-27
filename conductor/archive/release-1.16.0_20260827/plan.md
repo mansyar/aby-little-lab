@@ -227,12 +227,17 @@ Complete release records and archive the track.
   - [x] `docs/perf-baseline.md` notes the new precache size/WASM cost (patched in Phase 4: "WASM precached (v1.16.0+)", 46 entries / 3354.86 KiB).
   - [x] `plan.md` task marks current; **`metadata.json` → `status: "completed"`** with `releasedAt`, `tag: v1.16.0`, `pr: 28`, `mergeCommit: 93c0af3`, `deployRun: 33023037193`.
   - [x] Commit **`959109f`**: `docs(conductor): record v1.16.0 release execution and verification` (README + metadata.json). Pushed.
-- [~] Task: Perform track self-review
-  - [ ] Verify line coverage of: the three FR-2 caching-contract validator checks, the offline smoke exercised on live, the version bump, and each hygiene deletion's reachability evidence.
-  - [ ] Confirm the plan is the source of truth — every commit traces to a task; any deviation is reconciled back into the plan before proceeding.
-  - [ ] Address review findings (if any) by looping to the owning phase — do not layer unplanned fixes.
-- [ ] Task: Archive the track
-  - [ ] Follow `workflow.md` archival protocol: move `conductor/tracks/release-1.16.0_20260827/` → `conductor/archive/release-1.16.0_20260827/`, update `conductor/tracks.md` entry from `- [ ]` → `- [x] … (Archived)`, and push.
+- [x] Task: Perform track self-review
+  - [x] FR-2 caching-contract validator checks verified in `scripts/validate-pwa.js`: "Service worker includes Ligne WASM engine in precache" (line 126, asserts `includes("ligne_wasm_bg")`) present; the old "excludes from precache" and "runtime-caches ligne-engine-wasm" checks are **removed**.
+  - [x] Offline smoke exercised: live deployed payload verified (live `sw.js` precaches `ligne_wasm_bg-CaSOm_fQ.wasm`, no runtime route; bundle reports `1.16.0`); on-device offline-relaunch + RM rows are staged in the device record (deferred, non-blocking).
+  - [x] Version bump verified: `4d6a1cc chore(release): bump version to 1.16.0`; served bundle reports `1.16.0`.
+  - [x] Each hygiene deletion's reachability evidence documented in the hygiene commit `07d647f` body + this plan (merged / superseded-with-archive, code fix confirmed in master's BootScene).
+  - [x] Plan is the source of truth — every commit traces to a plan task (Phases 2–10 recorded SHAs); the one deviation (test-isolation fix `32f911b`) is reconciled back into the plan.
+  - [x] **No review findings** requiring a loop-back to an owning phase.
+- [x] Task: Archive the track
+  - [x] `git mv conductor/tracks/release-1.16.0_20260827 conductor/archive/release-1.16.0_20260827` (history preserved).
+  - [x] `conductor/tracks.md` entry updated `[~]` → **`[x] … (Archived)`** (link → `./archive/release-1.16.0_20260827/index.md`).
+  - [x] Commit + push the archive (done in the Phase 10 record commit).
 - [ ] Task: Phase Verification & Checkpoint — Phase 10
   - [ ] `conductor(plan): Mark phase 'Phase 10 - Finalize and Archive' as complete` and checkpoint.
 
