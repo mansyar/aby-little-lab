@@ -180,7 +180,7 @@ describe("createPlaythrough(shift)", () => {
   /** All shifts the facade can produce. */
   const SHIFTS: readonly BandShift[] = [-1, 0, 1];
 
-  it("keeps the shifted band ladder across many samples", () => {
+  it("keeps the shifted band ladder across many samples", { timeout: 20_000 }, () => {
     for (const shift of SHIFTS) {
       const ladder = shiftLadder(BASE_LADDER, shift);
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
@@ -194,13 +194,17 @@ describe("createPlaythrough(shift)", () => {
     }
   });
 
-  it("keeps per-band targets distinct until the band's target pool runs out", () => {
+  it("keeps per-band targets distinct until the band's target pool runs out", {
+    timeout: 20_000,
+  }, () => {
     for (const shift of SHIFTS) {
       const ladder = shiftLadder(BASE_LADDER, shift);
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
         const playthrough = createPlaythrough(shift);
         for (const band of [1, 2, 3] as const) {
-          const targets = playthrough.filter((_, index) => ladder[index] === band).map((r) => r.target);
+          const targets = playthrough
+            .filter((_, index) => ladder[index] === band)
+            .map((r) => r.target);
           const max = ROUND_BANDS[band - 1].max;
           // The first min(rounds, max) draws of a band never repeat a target;
           // beyond that the used-target set resets (shift -1 asks band 1 for

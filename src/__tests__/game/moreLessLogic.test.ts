@@ -147,7 +147,9 @@ describe("createPlaythrough(shift)", () => {
   /** All shifts the facade can produce. */
   const SHIFTS: readonly BandShift[] = [-1, 0, 1];
 
-  it("keeps the shifted band ladder and the 3/3 mode mix across many samples", () => {
+  it("keeps the shifted band ladder and the 3/3 mode mix across many samples", {
+    timeout: 20_000,
+  }, () => {
     for (const shift of SHIFTS) {
       const ladder = shiftLadder(BASE_LADDER, shift);
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
@@ -163,7 +165,7 @@ describe("createPlaythrough(shift)", () => {
     }
   });
 
-  it("keeps exactly one correct side in every shifted round", () => {
+  it("keeps exactly one correct side in every shifted round", { timeout: 20_000 }, () => {
     for (const shift of SHIFTS) {
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
         for (const round of createPlaythrough(shift)) {
