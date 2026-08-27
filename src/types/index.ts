@@ -53,6 +53,11 @@ export interface Settings {
   sfxEnabled: boolean;
   /** Preferred TTS voice URI (device-level); null = browser default voice. */
   preferredVoiceURI: string | null;
+  /**
+   * Parent-gated adaptive band ladders (device-level); true by default.
+   * Off restores the fixed classic ladder for every game.
+   */
+  adaptiveDifficulty: boolean;
 }
 
 /**

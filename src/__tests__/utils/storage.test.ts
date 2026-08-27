@@ -343,6 +343,10 @@ describe("Storage utilities", () => {
       expect(settings.bgmEnabled).toBe(true);
       expect(settings.sfxEnabled).toBe(true);
     });
+
+    it("defaults adaptive difficulty to enabled", () => {
+      expect(getSettings().adaptiveDifficulty).toBe(true);
+    });
   });
 
   describe("updateSettings", () => {
@@ -371,6 +375,18 @@ describe("Storage utilities", () => {
       updateSettings({ bgmEnabled: false });
       const result = load();
       expect(result.settings.bgmEnabled).toBe(false);
+    });
+
+    it("persists the adaptive difficulty toggle while preserving audio settings", () => {
+      updateSettings({ adaptiveDifficulty: false });
+      let settings = getSettings();
+      expect(settings.adaptiveDifficulty).toBe(false);
+      expect(settings.bgmEnabled).toBe(true);
+      expect(settings.sfxEnabled).toBe(true);
+
+      updateSettings({ adaptiveDifficulty: true });
+      settings = getSettings();
+      expect(settings.adaptiveDifficulty).toBe(true);
     });
   });
 
@@ -446,6 +462,7 @@ describe("Storage utilities", () => {
         bgmEnabled: false,
         sfxEnabled: true,
         preferredVoiceURI: null,
+        adaptiveDifficulty: true,
       });
     });
 

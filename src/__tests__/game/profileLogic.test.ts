@@ -76,7 +76,12 @@ describe("profileLogic", () => {
       expect(v2.activeProfileId).toBe("p1");
       expect(v2.profiles).toHaveLength(1);
       expect(v2.profiles[0]).toMatchObject({ id: "p1", avatarId: "cat", createdAt: NOW });
-      expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null });
+      expect(v2.settings).toEqual({
+        bgmEnabled: true,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      });
     });
 
     it("moves v1 stickers and settings into profile p1", () => {
@@ -88,7 +93,12 @@ describe("profileLogic", () => {
         earned: true,
         earnedAt: "2026-07-28T00:00:00.000Z",
       });
-      expect(v2.settings).toEqual({ bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null });
+      expect(v2.settings).toEqual({
+        bgmEnabled: false,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      });
       expect(v2.activeProfileId).toBe("p1");
     });
 
@@ -109,7 +119,12 @@ describe("profileLogic", () => {
         NOW,
       );
       expect(v2.profiles).toHaveLength(1);
-      expect(v2.settings).toEqual({ bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null });
+      expect(v2.settings).toEqual({
+        bgmEnabled: true,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      });
     });
 
     it("gives migrated profile p1 an unlimited default play time", () => {
@@ -190,6 +205,22 @@ describe("profileLogic", () => {
       const normalized = normalizeV2(v2, NOW);
 
       expect(normalized.settings.preferredVoiceURI).toBeNull();
+    });
+
+    it("defaults adaptive difficulty to enabled for saves from before the feature", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      delete (v2.settings as Partial<ProfileV2["settings"]>).adaptiveDifficulty;
+      const normalized = normalizeV2(v2, NOW);
+
+      expect(normalized.settings.adaptiveDifficulty).toBe(true);
+    });
+
+    it("preserves a stored adaptive difficulty preference through normalize", () => {
+      const v2 = migrateV1(v1Save(), NOW);
+      v2.settings.adaptiveDifficulty = false;
+      const normalized = normalizeV2(JSON.parse(JSON.stringify(v2)), NOW);
+
+      expect(normalized.settings.adaptiveDifficulty).toBe(false);
     });
 
     it("backfills play time on profiles from before the feature", () => {
