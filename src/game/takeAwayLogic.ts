@@ -1,3 +1,4 @@
+import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { COUNT_ITEMS } from "./countLogic";
 import { shuffle } from "./shapeSorterLogic";
 
@@ -89,12 +90,15 @@ export function buildRound(
 }
 
 /**
- * Generates a playthrough of 6 rounds, easy-first: 2 rounds per band
- * (minuends ≤4, then ≤6, then ≤10). No minuend-subtrahend pair repeats
- * within a playthrough. Difficulty is fixed across replays.
+ * Generates a playthrough of 6 rounds, easy-first. `shift` (-1 | 0 | 1, from
+ * the child's recent performance — see adaptiveLogic) nudges the classic
+ * [1,1,2,2,3,3] band ladder before rounds are built, clamped to bands 1..3.
+ * No minuend-subtrahend pair repeats within a playthrough; every shifted
+ * ladder keeps enough unused pairs per band (band 1 serves 4 rounds at
+ * shift -1 from a pool of 6).
  */
-export function buildPlaythrough(): TakeAwayRound[] {
-  const bands: readonly BandId[] = [1, 1, 2, 2, 3, 3];
+export function buildPlaythrough(shift: BandShift = 0): TakeAwayRound[] {
+  const bands = shiftLadder(BASE_LADDER, shift);
   const usedPairs = new Set<string>();
   return bands.map((band) => {
     const round = buildRound(band, usedPairs);
