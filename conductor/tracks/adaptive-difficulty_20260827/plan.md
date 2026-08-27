@@ -20,6 +20,8 @@ to the child.
 
 ## Phase 1 — Adaptive Core (logic + storage)
 
+[checkpoint: e824df3]
+
 - [x] Task 1.1: New pure module `src/game/adaptiveLogic.ts` (TDD) (9b5a169)
   - Failing tests (`src/__tests__/game/adaptiveLogic.test.ts`):
     `updateRecentWindow` folds `{correct, wrong}` aggregates (trues then falses) and trims
