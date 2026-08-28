@@ -1,3 +1,4 @@
+import { type BandId, type BandShift, BASE_LADDER, shiftLadder } from "./adaptiveLogic";
 import { ALL_SHAPES, type ShapeType, shuffle } from "./shapeSorterLogic";
 
 /** The three repeating pattern types used in the Pattern Builder game. */
@@ -53,20 +54,30 @@ function isConfusableWith(shape: ShapeType, other: ShapeType): boolean {
   );
 }
 
-/** Picks a gap index: the end (3) half the time, otherwise a middle slot (1 or 2). */
-function pickGapIndex(): number {
+/** Picks a gap index per band: bands 1–2 always hide the end (3); band 3 ends 50% / middle 50%. */
+function pickGapIndex(band: BandId): number {
+  if (band < 3) {
+    return 3;
+  }
   if (Math.random() < 0.5) {
     return 3;
   }
   return 1 + Math.floor(Math.random() * 2);
 }
 
-/** Generates a single valid Pattern Builder round. */
-export function generateRound(): PatternRound {
-  const patternType = pickFrom(PATTERN_TYPES);
+/**
+ * Generates a single valid Pattern Builder round at the given band. Band 1
+ * serves only the simplest question (an `ABAB` row with the end slot hidden);
+ * band 2 widens to every pattern type while keeping the end gap; band 3
+ * matches today's draw — any type, end or middle gap. The confusable-family
+ * distractor guard holds in every band: it is an ambiguity guard, not a
+ * difficulty knob.
+ */
+export function generateRound(band: BandId = 3): PatternRound {
+  const patternType = band === 1 ? "ABAB" : pickFrom(PATTERN_TYPES);
   const [a, b] = shuffle(ALL_SHAPES).slice(0, 2);
   const row = buildPatternRow(patternType, a, b);
-  const gapIndex = pickGapIndex();
+  const gapIndex = pickGapIndex(band);
   const correct = row[gapIndex];
   const distractors = shuffle(
     ALL_SHAPES.filter((shape) => shape !== correct && !isConfusableWith(correct, shape)),
@@ -75,9 +86,19 @@ export function generateRound(): PatternRound {
   return { patternType, row, gapIndex, choices };
 }
 
-/** Generates a full playthrough of rounds (6 by default, matching the other games). */
-export function generatePlaythrough(roundCount = 6): PatternRound[] {
-  return Array.from({ length: roundCount }, () => generateRound());
+/**
+ * Generates a full playthrough of rounds (6 by default, matching the other
+ * games), walking the classic easy-first ladder `BASE_LADDER` shifted by the
+ * profile's adaptive band shift: −1 eases every round one band down (clamped),
+ * +1 steps one band up. Shift 0 serves the documented easy-first classic
+ * ladder `[1,1,2,2,3,3]` — two band-1 rounds (ABAB, end gap), two band-2
+ * rounds (any type, end gap), then two band-3 rounds (any type, any gap) —
+ * matching the shape of every other band-based mini-game. The shift is chosen
+ * by the caller once per playthrough and never changes mid-game.
+ */
+export function generatePlaythrough(roundCount = 6, shift: BandShift = 0): PatternRound[] {
+  const ladder = shiftLadder(BASE_LADDER, shift);
+  return Array.from({ length: roundCount }, (_, round) => generateRound(ladder[round] ?? 3));
 }
 
 /** Returns the shape that fills the round's gap. */

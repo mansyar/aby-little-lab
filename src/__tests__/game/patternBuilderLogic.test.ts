@@ -207,3 +207,76 @@ describe("generatePlaythrough", () => {
     expect(first).not.toEqual(second);
   });
 });
+
+describe("generatePlaythrough (adaptive shift)", () => {
+  it("serves the classic easy-first ladder at shift 0", () => {
+    const playthrough = generatePlaythrough(6, 0);
+    expect(playthrough).toHaveLength(6);
+    for (const round of playthrough) {
+      expectValidRound(round);
+    }
+    // Ladder [1,1,2,2,3,3]: rounds 1-2 are the easiest (ABAB, end gap only).
+    expect(playthrough[0].patternType).toBe("ABAB");
+    expect(playthrough[0].gapIndex).toBe(3);
+    expect(playthrough[1].patternType).toBe("ABAB");
+    expect(playthrough[1].gapIndex).toBe(3);
+    // Rounds 3-4 serve any pattern type with an end gap.
+    expect(playthrough[2].gapIndex).toBe(3);
+    expect(playthrough[3].gapIndex).toBe(3);
+    // Rounds 5-6 serve any pattern type with any gap (today's draw).
+  });
+
+  it("serves end-gap rounds only while struggling (shift -1), easiest rounds first", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = generatePlaythrough(6, -1);
+      // Ladder [1,1,1,1,2,2]: every round hides the end slot.
+      for (const round of playthrough) {
+        expect(round.gapIndex).toBe(3);
+        expectValidRound(round);
+      }
+      // Rounds 1-4 are band 1: ABAB only.
+      for (const round of playthrough.slice(0, 4)) {
+        expect(round.patternType).toBe("ABAB");
+      }
+    }
+  });
+
+  it("keeps today's uniform draw while thriving (shift +1)", () => {
+    const patternTypes = new Set<PatternType>();
+    const gapIndexes = new Set<number>();
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      // Ladder [2,2,3,3,3,3] clamps band 2 to 3: every round uses today's draw.
+      const playthrough = generatePlaythrough(6, 1);
+      for (const round of playthrough) {
+        expectValidRound(round);
+        patternTypes.add(round.patternType);
+        gapIndexes.add(round.gapIndex);
+      }
+    }
+    expect(patternTypes).toEqual(new Set(["ABAB", "AABB", "ABB"]));
+    expect(gapIndexes).toEqual(new Set([1, 2, 3]));
+  });
+
+  it("covers all pattern types and gap positions across many classic playthroughs", () => {
+    const patternTypes = new Set<PatternType>();
+    const gapIndexes = new Set<number>();
+    for (let i = 0; i < 30; i++) {
+      for (const round of generatePlaythrough(6, 0)) {
+        patternTypes.add(round.patternType);
+        gapIndexes.add(round.gapIndex);
+      }
+    }
+    expect(patternTypes).toEqual(new Set(["ABAB", "AABB", "ABB"]));
+    expect(gapIndexes).toEqual(new Set([1, 2, 3]));
+  });
+
+  it("produces different playthroughs per shift under the same random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.42);
+    const struggling = generatePlaythrough(6, -1);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.42);
+    const thriving = generatePlaythrough(6, 1);
+    vi.restoreAllMocks();
+    expect(struggling).not.toEqual(thriving);
+  });
+});
