@@ -45,7 +45,11 @@ export function buildRound(band: 1 | 2 | 3): NumberOrderRound {
   const solution = [...sampled].sort((a, b) => a - b);
   let shuffled = shuffle(solution);
   // Guard: if shuffled is already ascending, reshuffle once (deterministic via Math.random mock)
-  if (isAscending(shuffled) && shuffled.length === solution.length && shuffled.every((v, i) => v === solution[i])) {
+  if (
+    isAscending(shuffled) &&
+    shuffled.length === solution.length &&
+    shuffled.every((v, i) => v === solution[i])
+  ) {
     shuffled = shuffle(solution);
   }
   return { band, shuffled, solution };
