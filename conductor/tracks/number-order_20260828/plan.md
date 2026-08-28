@@ -17,7 +17,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 
 ## Phase 1 — Pure Logic (TDD)
 
-- [ ] Task 1.1: `numberOrderLogic` — round/playthrough generation (TDD)
+- [x] Task 1.1: `numberOrderLogic` — round/playthrough generation (TDD) [f5ef42e]
   - Create `src/game/numberOrderLogic.ts` with pure functions: `bands` constants (`BAND_RANGES = {1:[1,5], 2:[1,8], 3:[1,10]}`, `BAND_COUNTS = {1:3, 2:4, 3:5}`), `buildRound(band, rng): { shuffled: number[], solution: number[] }` (sample `count` unique numbers from range, `solution = sorted`, `shuffled = shuffle(solution, rng)` with not-ascending guard reshuffle once), `buildPlaythrough(rng, shift=0): 6×rounds` using `shiftLadder([1,1,2,2,3,3], shift)` mapped to bands, `isCorrect(placed: number[], solution: number[]): boolean` (length+value equality), `solutionFor(range,count,rng)` helper private.
   - Failing tests (`src/__tests__/game/numberOrderLogic.test.ts`): bands produce correct count+range, shuffled not-ascending, solution ascending, isCorrect true only for exact match, shift 0 = classic fixture (lock 6-round bands `[1,1,2,2,3,3]`), shift −1 = `[1,1,1,1,2,2]` (4×3,2×4), shift +1 = `[2,2,3,3,3,3]` (2×4,4×5), uniqueness per round, determinism given seed.
 
