@@ -65,7 +65,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
   - `conductor/tech-stack.md` Design Update add Game 20 entry, scenes 22→23, sceneRegistry 22→23 loaders, preload 168→170, project structure tree add `NumberOrderScene.ts` + `numberOrderLogic.ts` + `tile_number_order`/`sticker_number_order`, update tech-stack change log.
   - `README.md` (optional if release-signalled) bump Hub tile count / mini-game count 19→20; otherwise leave for release track.
 
-- [ ] Task 4.4: Quality gates (full verification)
+- [x] Task 4.4: Quality gates (full verification)
   - `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` + dev-server smoke: Boot → Preload → Hub (**20 tiles 5×4, no clipping**, play-time arc/justEarned still fit) → Number Order 6 rounds (verify bands r1–2×3@1-5, r3–4×4@1-8, r5–6×5@1-10, tap-to-hear numerals, drag-swap+tap-return, auto-validate correct 700ms advance / wrong wiggle+bounce-home) → win celebration (rays+confetti ~700ms, 3000ms auto-return with `justEarned:'number-order'` → Hub shelf shimmer) → ParentLock 3s hold exit; `prefers-reduced-motion` disables bob/drift/burst + shortens pops/wiggle; offline precache smoke.
 
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
