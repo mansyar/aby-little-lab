@@ -40,11 +40,11 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
   - Reuse `speakWord(word)` (rate 0.8, en-US) for target at round start, respects SFX toggle + silent fallback when SpeechSynthesis unavailable, `unlockSpeechForUserGesture` already wired via Hub; speaker button calls same utterance; guard when API missing.
   - Tests: speech mock asserts word spoken once per round, silent when SFX off, no throw when `speechSynthesis` undefined (mirror `speech.test.ts`).
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — 60752a9 [checkpoint: 60752a9]
 
 ## Phase 3 — Assets, Preload, Hub & Registry
 
-- [ ] Task 3.1: Tile, sticker + preload wiring (no TDD — visual)
+- [~] Task 3.1: Tile, sticker + preload wiring (no TDD — visual)
   - `src/assets/svg/ui/tile_decode_it.svg` (4 mini word cards, magnifying-glass + sparkle motif, flat fills, thick `#2D3748` 4–6px outline, soft vibrant, per `docs/SVG_STYLE.md`) + `src/assets/svg/stickers/sticker_decode_it.svg` (cream badge `#FFF8E7`, decoded word card with star/magnifier, thick outline) + 4 item SVGs per Phase 1 (if not already created).
   - `PreloadScene` imports the 6 new SVGs; preload count 162 → 168 (4 items + tile + sticker); icons follow SVG contact-sheet style; verify via `pnpm dev` manual + `BootScene.ensureGlyphFontLoaded` guarantees Baloo 2 for letter compositing.
   - Verify: `pnpm run build` precache includes new assets, sticker shelf renders correctly on Hub.
