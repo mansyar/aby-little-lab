@@ -22,8 +22,8 @@
 
 ## Phase 4: Scene wiring
 
-- [ ] Task 4.1 — Wire the three scenes to `getAdaptiveBandShift` (one line each, mirroring existing call sites); confirm shift computed once in `create`.
-- [ ] Task 4.2 — Coverage; commit `feat(scenes): pass adaptive shift to games 07/14/15` + git note; mark tasks `[x]` + SHA.
+- [x] Task 4.1 — Wire the three scenes to `getAdaptiveBandShift` (one line each, mirroring existing call sites); confirm shift computed once in `create`. Pattern Builder keeps the explicit `ROUND_COUNT` per the codebase convention `(ROUND_COUNT, shift)` (alphabet/decode shape). (b6c4157)
+- [x] Task 4.2 — Coverage; commit `feat(scenes): pass adaptive shift to games 07/14/15` + git note; mark tasks `[x]` + SHA. Scene tests follow the established `vi.hoisted` facade-mock pattern (2 tests per scene). Full suite green (69 files / 1803 tests). (b6c4157)
 
 ## Phase 5: Verification & checkpoint
 
