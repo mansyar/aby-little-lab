@@ -60,7 +60,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
   - Verify `recordCorrect()` / `recordWrong()` counters flushed via `completeGame()` → `progressLogic.recordResult` (per-profile plays/wins/correct/wrong/lastPlayedAt/recent window accuracy, ★ mastery at ≥3 wins), `recordGamePlay('number-order')` on Hub tile tap (nav-locked so duplicate launch can't double-count), Learning Progress overlay: row for `number-order` (accuracy bar + %, relative last-played, 7-day activity strip additive `activity`, paging `6+6+6+2` with 20 games), no mid-game time-limit cutoff, play-time `addPlayTime` only on `endPlaySession`.
   - If gaps found, add minimal wiring + tests; else PASS with note in git notes.
 
-- [ ] Task 4.3: Docs amendments (no TDD)
+- [x] Task 4.3: Docs amendments (no TDD) [3c7b93f]
   - `conductor/product.md` § Games table add Game 20 row (milestone: *numeral sequencing / ordinality*, mechanic: *drag shuffled numerals 3–5 into ascending slots, 6 rounds, easy-first 1–5/1–8/1–10 incl. adaptive ±1*), Hub note 19→20 tiles 5×3+4→5×4, progress note 6+6+6+1→6+6+6+2, changelog add 2026-08-28 Game 20 entry, adaptive note numeracy 4→5 (or 5+6 literacy-memory if counting new game in numeracy).
   - `conductor/tech-stack.md` Design Update add Game 20 entry, scenes 22→23, sceneRegistry 22→23 loaders, preload 168→170, project structure tree add `NumberOrderScene.ts` + `numberOrderLogic.ts` + `tile_number_order`/`sticker_number_order`, update tech-stack change log.
   - `README.md` (optional if release-signalled) bump Hub tile count / mini-game count 19→20; otherwise leave for release track.
