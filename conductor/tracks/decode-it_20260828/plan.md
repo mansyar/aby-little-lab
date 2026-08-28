@@ -44,12 +44,12 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
 
 ## Phase 3 — Assets, Preload, Hub & Registry
 
-- [~] Task 3.1: Tile, sticker + preload wiring (no TDD — visual)
+- [x] Task 3.1: Tile, sticker + preload wiring (no TDD — visual) — 01b7269
   - `src/assets/svg/ui/tile_decode_it.svg` (4 mini word cards, magnifying-glass + sparkle motif, flat fills, thick `#2D3748` 4–6px outline, soft vibrant, per `docs/SVG_STYLE.md`) + `src/assets/svg/stickers/sticker_decode_it.svg` (cream badge `#FFF8E7`, decoded word card with star/magnifier, thick outline) + 4 item SVGs per Phase 1 (if not already created).
   - `PreloadScene` imports the 6 new SVGs; preload count 162 → 168 (4 items + tile + sticker); icons follow SVG contact-sheet style; verify via `pnpm dev` manual + `BootScene.ensureGlyphFontLoaded` guarantees Baloo 2 for letter compositing.
   - Verify: `pnpm run build` precache includes new assets, sticker shelf renders correctly on Hub.
 
-- [ ] Task 3.2: GameId, registry, Hub grid (TDD for storage/registry, visual for layout)
+- [x] Task 3.2: GameId, registry, Hub grid (TDD for storage/registry, visual for layout) — 6df0cc1, 5eef1a1 (GameId GAME_IDS backfilled in b61b583; 5eef1a1 adds Progress rows 19, test expectations 19 tiles / 168 preload, SVG fixes)
   - `src/types/index.ts` / `src/game/profileLogic.ts` `GameId` += `decode-it`, `GAME_IDS` gains entry for per-key backfill (additive v2 merge — `load()` backfills `stickers["decode-it"]` as `{ earned:false, earnedAt:null }` for old saves, no storage key change). Profile/sticker/progress maps extend identically.
   - `src/scenes/sceneRegistry.ts` add lazy loader `DecodeIt` → `() => import("./DecodeItScene.ts")` via `ensureSceneLoaded` (22nd loader; shell scenes remain static). `HubScene` `GAME_TILES` 19th entry `{ sceneKey: "DecodeIt", gameId: "decode-it", tileKey: "tile_decode_it" }` — **grid becomes 5×3+4 (rows 5/5/5/4, row 4 holds 4 left-aligned tiles, generic `col = i % 5` / `row = floor(i/5)` layout, sticker shelf + play-time arc fit check at 1024×768 — tiles 160×150, spacing 40, startY 119 precedent)**; tile tap awaits `ensureSceneLoaded(scene, "DecodeIt")` then `transitionToScene("DecodeIt")`.
   - Failing tests: `src/__tests__/utils/storage.test.ts` asserts backfill for `decode-it` key, `src/__tests__/scenes/sceneRegistry.test.ts` asserts lazy loader resolves, `src/__tests__/scenes/navigation.test.ts` asserts Hub has 19 tiles and tile tap transitions, `profileLogic.test.ts` covers GAME_IDS.
