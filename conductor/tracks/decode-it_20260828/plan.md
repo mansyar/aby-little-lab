@@ -58,15 +58,15 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
 
 ## Phase 4 — Adaptive, Progress Audit, Docs & Full Verification
 
-- [~] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD)
+- [x] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD) — 07f9eaa
   - Thread `getAdaptiveBandShift('decode-it')` at `create()` into `buildPlaythrough(rng, shift)` via `shiftLadder([1,1,2,2,3,3], shift)` (−1 → [1,1,1,1,2,2], 0 → [1,1,2,2,3,3], +1 → [2,2,3,3,3,3]) mapped to word tiers; shift 0 fixture byte-identical to classic (regression lock); respects `Settings.adaptiveDifficulty` toggle (device-level, default ON, 10-tap window, UP_THRESHOLD 0.9 / DOWN_THRESHOLD 0.6, MIN_SAMPLE 6). No new toggle UI.
   - Failing tests: `src/__tests__/game/adaptiveLogic.test.ts` facade for `decode-it` id (toggle off →0, <6 taps →0, ≥90% over ≥6 →+1, <60% →−1) + `decodeLogic.test.ts` tier-split shift sequences (`earlyCount = roundCount − 1 − shift` style for word tiers).
 
-- [ ] Task 4.2: Record-path & progress audit (no TDD unless gap)
+- [x] Task 4.2: Record-path & progress audit (no TDD unless gap) — 07f9eaa (audit PASS; DecodeItScene uses recordCorrect/recordWrong/completeGame→recordResult, no gap)
   - Verify `recordCorrect()` / `recordWrong()` counters flushed via `completeGame()` → `recordResult` (accuracy in parent Learning Progress), `recordGamePlay('decode-it')` on Hub tile tap (nav-locked), Learning Progress overlay row for `decode-it` (plays/wins/accuracy bar + %, ★ mastery after 3 wins, relative last-played, 7-day activity strip, paging 6+6+6+1 with 19 games), no mid-game time-limit cutoff (Play-Time Limits never interrupts).
   - If gaps found, add minimal wiring + tests; else PASS with note in git notes.
 
-- [ ] Task 4.3: Docs amendments (no TDD)
+- [x] Task 4.3: Docs amendments (no TDD) — docs: product.md (19 games, 19 tiles, progress 6+6+6+1, changelog 19, adaptive 7) + tech-stack.md (scenes 21→22, sceneRegistry 22, preload 162→168, project structure, design update)
   - `conductor/product.md` §3.1 add Game 19 row (milestone: *early decoding / word recognition*, mechanic: *picture+spoken word → tap written word among 4 cards, 6 rounds, easy-first 3→4 letter bands*), §3.2 note adaptive now covers decode-it, add changelog entry dated 2026-08-28.
   - `conductor/tech-stack.md` add Design Update (Game 19 — Decode It) + preload 162→168, scene count 21→22, sceneRegistry note, project structure tree (`DecodeItScene`, `decodeLogic`, new item SVGs).
 
