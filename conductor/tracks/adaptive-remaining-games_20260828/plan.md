@@ -27,17 +27,18 @@
 
 ## Phase 5: Verification & checkpoint
 
-- [ ] Task 5.1 — Full gates: `CI=true pnpm test`, `pnpm run check`, `pnpm run build`; coverage floors hold; all changed code files test-covered.
-- [ ] Task 5.2 — Manual verification plan (dev server → play 3 games → assert behavior per spec § 6); propose to user; interactive pause for yes/feedback.
-- [ ] Task 5.3 — Checkpoint commit `conductor(checkpoint): adaptive remaining games complete` + verification report git note; record `[checkpoint: <sha>]` here; `conductor(plan)` commit.
-- [ ] Task 5.4 — Update product definition amendment note (§ 2) in `tech-stack.md` if deviation occurred (else skip); final registry entry in `conductor/tracks.md` linking this folder.
+- [x] Task 5.1 — Full gates: `CI=true pnpm test` (69 files / 1803 green), `pnpm run check` (pre-existing red on master — decodeLogic noNonNullAssertion + biome schema drift, documented in tech-stack.md; all 6 touched files individually biome-clean), `pnpm run build` (green, PWA 48 precache entries); scoped logic coverage: patternBuilder 100 / colorMatch 100 / oddOneOut 97.67 (above its 97.22 baseline); all changed code files test-covered.
+- [x] Task 5.2 — Manual verification plan proposed; user opted (2026-08-29) to skip the interactive run — plan recorded as pending-for-human-reviewer in the checkpoint git note.
+- [x] Task 5.3 — Checkpoint commit + verification report git note; `[checkpoint: fb1560b]`; `conductor(plan)` commit follows.
+- [x] Task 5.4 — Deviations documented in `tech-stack.md` (coverage gate + biome check gate, both pre-existing; plus the two deliberate spec amendments: Pattern Builder shift-0 easy-first ladder, Odd One Out pool-safe ladders); registry entry marked complete.
 
 ## Checkpoints
 
-- Phase 1: `[checkpoint: pending]`
-- Phase 2: `[checkpoint: pending]`
-- Phase 3: `[checkpoint: pending]`
-- Phase 4: `[checkpoint: pending]`
+- Phase 1: `[checkpoint: 8316552]`
+- Phase 2: `[checkpoint: 22ef49e]`
+- Phase 3: `[checkpoint: c7e0864]`
+- Phase 4: `[checkpoint: b6c4157]`
+- Track: `[checkpoint: fb1560b]`
 - Phase 5: `[checkpoint: pending]`
 
 ## Verification Notes

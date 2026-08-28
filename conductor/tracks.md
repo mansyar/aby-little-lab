@@ -171,4 +171,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Adaptive Difficulty — Remaining Games (Pattern Builder, Odd One Out, Color Match)** *Link: [./tracks/adaptive-remaining-games_20260828/index.md](./tracks/adaptive-remaining-games_20260828/index.md)*
+- [x] **Track: Adaptive Difficulty - Remaining Games (Pattern Builder, Odd One Out, Color Match)** *Link: [./tracks/adaptive-remaining-games_20260828/index.md](./tracks/adaptive-remaining-games_20260828/index.md)*

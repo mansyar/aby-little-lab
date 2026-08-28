@@ -1,6 +1,6 @@
 # Track: Adaptive Difficulty — Remaining Games (Pattern Builder, Odd One Out, Color Match)
 
-**ID:** `adaptive-remaining-games_20260828` · **Type:** Feature · **Status:** new · **Branch:** `feature/adaptive-remaining-games`
+**ID:** `adaptive-remaining-games_20260828` · **Type:** Feature · **Status:** complete · **Branch:** `feature/adaptive-remaining-games`
 **Created:** 2026-08-28
 
 - **Spec:** [./spec.md](./spec.md) — Source of Truth for scope
