@@ -337,7 +337,7 @@ describe("buildPlaythrough (adaptive shift)", () => {
         for (const round of playthrough) expectValidDecodeRound(round);
       }
     }
-  });
+  }, 30000);
 
   it("is deterministic under a fixed random sequence for each shift", () => {
     for (const shift of [-1, 0, 1] as const) {

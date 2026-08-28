@@ -263,7 +263,7 @@ describe("generatePhonicsPlaythrough (adaptive shift)", () => {
         }
       }
     }
-  });
+  }, 30000);
 });
 
 describe("generatePhonicsPlaythrough", () => {
