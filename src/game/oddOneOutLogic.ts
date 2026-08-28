@@ -1,3 +1,4 @@
+import { type BandId, type BandShift, BASE_LADDER } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** Visual category used to pick group/odd textures and define difficulty bands. */
@@ -146,17 +147,31 @@ function pickItem(
  *
  * - Band 1 (easy): the odd one is from a DIFFERENT category than the group.
  * - Band 2 (mid): same category, a different item (frogs excluded).
- * - Band 3 (hard): the same frog in a different color.
+ * - Band 3 (hard): the same frog in a different color. The group pick falls
+ *   back to reusing a frog already used as an odd when the 3-texture pool
+ *   cannot serve a fresh one — group cards repeating across rounds is
+ *   harmless, while odds are required to stay unique.
  */
 export function createRound(
-  band: 1 | 2 | 3,
+  band: BandId,
   usedOddTextures: ReadonlySet<string> = new Set(),
 ): OddOneRound {
   const oddSlot = Math.floor(Math.random() * 4);
 
   if (band === 3) {
     const odd = pickItem(FROG_ITEMS, usedOddTextures);
-    const group = pickItem(FROG_ITEMS, usedOddTextures, odd.texture);
+    // Odds stay unique, so the tiny 3-frog pool can exhaust the strict group
+    // pick (a third band-3 round in one playthrough). Group cards repeat
+    // across rounds harmlessly — only odds must stay unique — so fall back to
+    // any frog other than this round's odd.
+    const group =
+      shuffle(FROG_ITEMS).find(
+        (item) => item.texture !== odd.texture && !usedOddTextures.has(item.texture),
+      ) ?? shuffle(FROG_ITEMS).find((item) => item.texture !== odd.texture);
+    if (!group) {
+      // Unreachable with FROG_ITEMS (3 textures); guards a future pool of 1.
+      throw new Error("Odd One Out frog pool exhausted for the requested round");
+    }
     return { groupTexture: group.texture, oddTexture: odd.texture, oddSlot };
   }
 
@@ -177,15 +192,40 @@ export function createRound(
 }
 
 /**
- * Generates a playthrough of 6 rounds, easy-first: 2 rounds per band
- * (cross-category, then same-category different item, then frog color
- * variants). The odd texture is unique across the playthrough. Difficulty
- * is fixed across replays.
+ * Per-shift band ladders for a playthrough. Classic is the untouched
+ * easy-first ladder. Thriving deliberately deviates from
+ * `shiftLadder(BASE_LADDER, 1)` (`[2,2,3,3,3,3]`, four band-3 rounds): the
+ * 3-texture frog pool plus unique odds cannot serve that many band-3 rounds,
+ * so band 3 caps at three and the freed round drops to band 1 — see the track
+ * spec's § 3.2 note. Struggling likewise deviates from the strict clamp
+ * `shiftLadder(BASE_LADDER, -1)` (`[1,1,1,1,2,2]`): four band-1 rounds plus
+ * two band-2 rounds can exhaust a 6-texture category pool (see the spec's
+ * ladder note), so struggling serves all band 1 instead.
  */
-export function createPlaythrough(): OddOneRound[] {
-  const bands = [1, 1, 2, 2, 3, 3] as const;
+function ladderFor(shift: BandShift): readonly BandId[] {
+  switch (shift) {
+    case -1:
+      return [1, 1, 1, 1, 1, 1];
+    case 1:
+      return [1, 2, 2, 3, 3, 3];
+    default:
+      return BASE_LADDER;
+  }
+}
+
+/**
+ * Generates a playthrough of 6 rounds walking the classic easy-first ladder
+ * `[1,1,2,2,3,3]` (2 rounds per band: cross-category, then same-category
+ * different item, then frog color variants), shifted by the profile's
+ * adaptive band shift: −1 eases every round one band down (clamped), +1 caps
+ * band 3 at three rounds and re-serves the freed round as band 1. Shift 0 is
+ * byte-identical to the classic playthrough. The shift is chosen by the
+ * caller once per playthrough and never changes mid-game. The odd texture is
+ * unique across the playthrough.
+ */
+export function createPlaythrough(shift: BandShift = 0): OddOneRound[] {
   const usedOddTextures = new Set<string>();
-  return bands.map((band) => {
+  return ladderFor(shift).map((band) => {
     const round = createRound(band, usedOddTextures);
     usedOddTextures.add(round.oddTexture);
     return round;
