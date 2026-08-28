@@ -203,11 +203,13 @@ export class NumberOrderScene extends GameSceneBase {
     });
 
     container.on("dragstart", () => {
+      if (this.inputLocked) return;
       card.dragging = true;
       this.children.bringToTop(container);
     });
 
     container.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
+      if (this.inputLocked) return;
       container.setPosition(dragX, dragY);
     });
 
@@ -217,6 +219,8 @@ export class NumberOrderScene extends GameSceneBase {
 
     container.on("dragend", () => {
       card.dragging = false;
+      // Validation/wiggle owns the board while locked — leave positions alone.
+      if (this.inputLocked) return;
       // If not placed (i.e., dropped on empty area), bounce home
       // For placed cards, handleDrop already snapped; dragend handles misses
       if (card.slotIndex === null) {
@@ -407,11 +411,14 @@ export class NumberOrderScene extends GameSceneBase {
     this.recordWrong();
     this.mascot?.nod();
 
+    // Wiggle the card containers only — the bg is a child of the container,
+    // so adding both to targets would double-apply the tilt (bg is already
+    // carried by the container; numerals ride along too).
     const targets: Phaser.GameObjects.GameObject[] = [];
     for (const slot of this.slots) {
       const card = slot.occupiedBy;
       if (card) {
-        targets.push(card.container as unknown as Phaser.GameObjects.GameObject, card.bg);
+        targets.push(card.container);
       }
     }
     const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;

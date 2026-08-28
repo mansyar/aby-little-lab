@@ -1,6 +1,20 @@
 import type Phaser from "phaser";
 import { motionDuration, motionScale } from "./motion";
 
+/**
+ * Minimal shape both a Phaser GameObjects.Image and a GameObjects.Container
+ * satisfy, used by the drag helpers below. Shape Sorter drags Images; Number
+ * Order drags Containers (numeral cards), which are not Images — so the
+ * helpers accept any transform-tweenable target instead of `Image` only.
+ */
+export type DragTarget = Phaser.GameObjects.GameObject &
+  Phaser.GameObjects.Components.Transform & {
+    /** Register drag lifecycle handlers (subset of EventEmitter). */
+    on(event: "dragstart" | "dragend", listener: () => void): void;
+    /** Owning scene, used as the tween target source. */
+    scene: Phaser.Scene;
+  };
+
 /** Scale applied to a draggable object while it is being dragged. */
 const DRAG_LIFT_SCALE = 1.1;
 
@@ -78,7 +92,7 @@ export interface DragLiftOptions {
  * restored. Amplitudes and durations are reduced under reduced motion.
  * Only the visual state is touched — drag/position logic is left untouched.
  */
-export function attachDragLift(obj: Phaser.GameObjects.Image, options?: DragLiftOptions): void {
+export function attachDragLift(obj: DragTarget, options?: DragLiftOptions): void {
   const baseScaleX = obj.scaleX;
   const baseScaleY = obj.scaleY;
 
@@ -169,12 +183,7 @@ export function attachDropZoneHighlight(
  * Tweens an object to the given slot position with a springy Back.out ease,
  * replacing an instant snap. Reduced motion shortens the tween.
  */
-export function snapToSlot(
-  scene: Phaser.Scene,
-  obj: Phaser.GameObjects.Image,
-  x: number,
-  y: number,
-): void {
+export function snapToSlot(scene: Phaser.Scene, obj: DragTarget, x: number, y: number): void {
   scene.tweens.add({
     targets: obj,
     x,
