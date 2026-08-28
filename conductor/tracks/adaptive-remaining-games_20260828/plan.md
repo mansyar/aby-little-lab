@@ -12,8 +12,8 @@
 
 ## Phase 2: Pure logic — Odd One Out
 
-- [ ] Task 2.1 — Ladder shift (`createPlaythrough(shift = 0)`): band ladder from `shiftLadder` with band-3 cap ≤ 3 per playthrough (frog pool guard, § 3.2); `createRound`, `isCorrect`, `promptFor` unchanged; odds remain unique within a playthrough.
-- [ ] Task 2.2 — Coverage + red-green evidence; commit `feat(game14): band ladder for odd one out` + git note; mark tasks `[x]` + SHA.
+- [x] Task 2.1 — Ladder shift (`createPlaythrough(shift = 0)`): band ladder from `ladderFor(shift)` with band-3 cap ≤ 3 per playthrough (frog pool guard, § 3.2); `createRound`'s odd pick, `isCorrect`, `promptFor` unchanged; odds remain unique within a playthrough. **Two pool-safety deviations from § 3.2's first draft, both documented:** struggling ladder is all band 1 (the strict clamp `[1,1,1,1,2,2]` can exhaust a 6-texture category pool — coverage run exposed it, plain run missed it), and the band-3 group pick gains a two-stage fallback (strict first — byte-identical whenever it succeeds — then any other frog). (22ef49e)
+- [x] Task 2.2 — Coverage + red-green evidence; commit `feat(odd-one-out): shift-aware band ladder with a pool-safe frog cap` + git note; tasks marked `[x]` + SHA. Scoped `oddOneOutLogic.ts` coverage 97.67 lines / 95.23 branches / 100 functions — better than master baseline (97.22 / 90.9); full suite green (69 files / 1793 tests). (22ef49e)
 
 ## Phase 3: Pure logic — Color Match
 
