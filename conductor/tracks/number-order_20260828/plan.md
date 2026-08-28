@@ -34,7 +34,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 
 - [x] Task: Phase Verification & Checkpoint [6856e87]
 
-## Phase 3 — Assets, Preload, Hub & Registry
+## Phase 3 — Assets, Preload, Hub & Registry [checkpoint: 6cf14a2]
 
 - [x] Task 3.1: Tile + sticker + preload wiring (no TDD — visual) [7dc00d5]
   - `src/assets/svg/ui/tile_number_order.svg` — 4 mini numeral cards stepping 1→2→3 with right arrow + sparkle, flat fills, thick `#2D3748` 4–6px outline, soft palette (`--primary #2B6CB0`, `--success #68D391`, accent `#F6E05E`), 512×512 viewBox per `docs/SVG_STYLE.md`.
@@ -48,7 +48,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
   - `HubScene` `GAME_TILES` 20th entry `{ sceneKey: 'NumberOrder', gameId: 'number-order', tileKey: 'tile_number_order' }` — grid becomes **5×4** (rows 5/5/5/5, row comment update, generic `col = i % 5` / `row = floor(i/5)` handles remainder; verify `startY` 119 + `tileHeight` 116 + spacing 22 still fit sticker shelf + play-time arc at bottom at 1024×768 — adjust only if manual smoke reveals clip, else keep).
   - Failing tests: `src/__tests__/utils/storage.test.ts` asserts backfill for `number-order` key, `src/__tests__/scenes/sceneRegistry.test.ts` asserts 23rd loader resolves, `src/__tests__/scenes/navigation.test.ts` asserts Hub has 20 tiles in 5×4 and tile tap calls `ensureSceneLoaded` → `transitionToScene('NumberOrder')`, `src/__tests__/game/profileLogic.test.ts` covers GAME_IDS paging `6+6+6+2`.
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Adaptive, Progress Audit, Docs & Full Verification
 
