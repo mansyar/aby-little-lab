@@ -50,7 +50,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4 — Adaptive, Progress Audit, Docs & Full Verification
+## Phase 4 — Adaptive, Progress Audit, Docs & Full Verification [checkpoint: 0e27c7c]
 
 - [x] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD) [eb92d22]
   - Thread `getAdaptiveBandShift('number-order')` at `NumberOrderScene.create()` into `numberOrderLogic.buildPlaythrough(rng, shift)` via `shiftLadder([1,1,2,2,3,3], shift)` (−1→`[1,1,1,1,2,2]`, 0→`[1,1,2,2,3,3]`, +1→`[2,2,3,3,3,3]`) mapped to numeral bands; shift 0 fixture proves byte-identity vs classic fixtures; respects `Settings.adaptiveDifficulty` toggle (device-level, default ON, WINDOW_SIZE 10, MIN_SAMPLE 6, UP 0.9 / DOWN 0.6).
@@ -68,4 +68,4 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 - [x] Task 4.4: Quality gates (full verification)
   - `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` + dev-server smoke: Boot → Preload → Hub (**20 tiles 5×4, no clipping**, play-time arc/justEarned still fit) → Number Order 6 rounds (verify bands r1–2×3@1-5, r3–4×4@1-8, r5–6×5@1-10, tap-to-hear numerals, drag-swap+tap-return, auto-validate correct 700ms advance / wrong wiggle+bounce-home) → win celebration (rays+confetti ~700ms, 3000ms auto-return with `justEarned:'number-order'` → Hub shelf shimmer) → ParentLock 3s hold exit; `prefers-reduced-motion` disables bob/drift/burst + shortens pops/wiggle; offline precache smoke.
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
