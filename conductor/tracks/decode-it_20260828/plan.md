@@ -70,7 +70,7 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
   - `conductor/product.md` §3.1 add Game 19 row (milestone: *early decoding / word recognition*, mechanic: *picture+spoken word → tap written word among 4 cards, 6 rounds, easy-first 3→4 letter bands*), §3.2 note adaptive now covers decode-it, add changelog entry dated 2026-08-28.
   - `conductor/tech-stack.md` add Design Update (Game 19 — Decode It) + preload 162→168, scene count 21→22, sceneRegistry note, project structure tree (`DecodeItScene`, `decodeLogic`, new item SVGs).
 
-- [ ] Task 4.4: Quality gates (full verification)
+- [x] Task 4.4: Quality gates (full verification) — 242500c (+ check 0e/23w, 1759/1759 tests, build 2.81s DecodeIt 4.06kB, PWA 15/15, Hub 19 smoke 700ms/700+3000ms)
   - `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` + dev-server smoke: Boot → Preload → Hub (19 tiles, 5×3+4, no clipping) → Decode It 6 rounds (picture+speech → 4 word cards) → correct/wrong feedback → win celebration + sticker `decode-it` + 3s auto-return with `justEarned` → Hub shelf shimmer; speaker replay test; ParentLock 3s hold exit; `prefers-reduced-motion` disables loops/shortens pops; offline precache smoke.
 
 - [ ] Task 4.5: Conductor bookkeeping (review checkpoint → archive on completion)
