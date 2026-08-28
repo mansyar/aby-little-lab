@@ -168,3 +168,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Game 20 — Number Order — Line Them Up (5×4 Grid Completer)** *Link: [./tracks/number-order_20260828/index.md](./tracks/number-order_20260828/index.md)*
+
+---
+
+- [ ] **Track: Adaptive Difficulty — Remaining Games (Pattern Builder, Odd One Out, Color Match)** *Link: [./tracks/adaptive-remaining-games_20260828/index.md](./tracks/adaptive-remaining-games_20260828/index.md)*
