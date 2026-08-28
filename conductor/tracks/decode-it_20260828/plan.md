@@ -54,11 +54,11 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
   - `src/scenes/sceneRegistry.ts` add lazy loader `DecodeIt` → `() => import("./DecodeItScene.ts")` via `ensureSceneLoaded` (22nd loader; shell scenes remain static). `HubScene` `GAME_TILES` 19th entry `{ sceneKey: "DecodeIt", gameId: "decode-it", tileKey: "tile_decode_it" }` — **grid becomes 5×3+4 (rows 5/5/5/4, row 4 holds 4 left-aligned tiles, generic `col = i % 5` / `row = floor(i/5)` layout, sticker shelf + play-time arc fit check at 1024×768 — tiles 160×150, spacing 40, startY 119 precedent)**; tile tap awaits `ensureSceneLoaded(scene, "DecodeIt")` then `transitionToScene("DecodeIt")`.
   - Failing tests: `src/__tests__/utils/storage.test.ts` asserts backfill for `decode-it` key, `src/__tests__/scenes/sceneRegistry.test.ts` asserts lazy loader resolves, `src/__tests__/scenes/navigation.test.ts` asserts Hub has 19 tiles and tile tap transitions, `profileLogic.test.ts` covers GAME_IDS.
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — a4ac086 [checkpoint: a4ac086]
 
 ## Phase 4 — Adaptive, Progress Audit, Docs & Full Verification
 
-- [ ] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD)
+- [~] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD)
   - Thread `getAdaptiveBandShift('decode-it')` at `create()` into `buildPlaythrough(rng, shift)` via `shiftLadder([1,1,2,2,3,3], shift)` (−1 → [1,1,1,1,2,2], 0 → [1,1,2,2,3,3], +1 → [2,2,3,3,3,3]) mapped to word tiers; shift 0 fixture byte-identical to classic (regression lock); respects `Settings.adaptiveDifficulty` toggle (device-level, default ON, 10-tap window, UP_THRESHOLD 0.9 / DOWN_THRESHOLD 0.6, MIN_SAMPLE 6). No new toggle UI.
   - Failing tests: `src/__tests__/game/adaptiveLogic.test.ts` facade for `decode-it` id (toggle off →0, <6 taps →0, ≥90% over ≥6 →+1, <60% →−1) + `decodeLogic.test.ts` tier-split shift sequences (`earlyCount = roundCount − 1 − shift` style for word tiers).
 
