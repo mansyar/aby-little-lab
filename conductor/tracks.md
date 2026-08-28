@@ -163,4 +163,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Game 19 — Decode It** *Link: [./tracks/decode-it_20260828/index.md](./tracks/decode-it_20260828/index.md)*
+- [x] **Track: Game 19 — Decode It** *Link: [./archive/decode-it_20260828/index.md](./archive/decode-it_20260828/index.md)* (Archived)
