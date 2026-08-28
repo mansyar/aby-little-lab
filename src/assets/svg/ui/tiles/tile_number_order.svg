@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- ascending staircase: 3 numeral cards 1→2→3 -->
+  <rect x="70" y="260" width="100" height="120" rx="18" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <text x="120" y="340" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', sans-serif" font-size="64" font-weight="800" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" paint-order="stroke">1</text>
+  <rect x="206" y="200" width="100" height="120" rx="18" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <text x="256" y="280" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', sans-serif" font-size="64" font-weight="800" fill="#68D391" stroke="#2D3748" stroke-width="4" paint-order="stroke">2</text>
+  <rect x="342" y="140" width="100" height="120" rx="18" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <text x="392" y="220" text-anchor="middle" dominant-baseline="middle" font-family="'Baloo 2', sans-serif" font-size="64" font-weight="800" fill="#ED8936" stroke="#2D3748" stroke-width="4" paint-order="stroke">3</text>
+  <!-- stepped arrow -->
+  <path d="M 170 320 L 206 320 L 206 260 L 342 260 L 342 202" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 170 320 L 206 320 L 206 260 L 342 260 L 342 202" fill="none" stroke="#F6E05E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 372 188 L 392 140 L 412 188 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <!-- sparkles -->
+  <path d="M 388 98 L 392 110 L 404 114 L 392 118 L 388 130 L 384 118 L 372 114 L 384 110 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 100 112 L 103 120 L 111 123 L 103 126 L 100 134 L 97 126 L 89 123 L 97 120 Z" fill="#90CDF4" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 130 390 L 133 398 L 141 401 L 133 404 L 130 412 L 127 404 L 119 401 L 127 398 Z" fill="#68D391" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+</svg>
