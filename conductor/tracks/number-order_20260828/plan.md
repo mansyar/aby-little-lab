@@ -42,7 +42,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
   - `PreloadScene` imports the 2 new SVGs (`tile_number_order`, `sticker_number_order`); preload count 168 → 170; verify crisp rasterization at 512 via `pnpm dev` manual + ensure no Baloo2 font regression (numerals are SVG textures, not glyph compositing, but HUD still uses Baloo2).
   - Verify: `pnpm run build` precache includes new assets, sticker shelf renders correctly on Hub (56px display, just-earned 1.15× burst).
 
-- [ ] Task 3.2: GameId, registry, Hub 5×4 grid (TDD for storage/registry, visual for layout)
+- [~] Task 3.2: GameId, registry, Hub 5×4 grid (TDD for storage/registry, visual for layout)
   - `src/types/index.ts` / `src/game/profileLogic.ts` `GameId` `+= 'number-order'`, `GAME_IDS` gains entry (additive v2 merge — `load()` backfills `stickers['number-order']` as `{ earned:false, earnedAt:null }`, `progress['number-order']` default, `activity` pruned to 7 days).
   - `src/scenes/sceneRegistry.ts` 23rd loader `NumberOrder → () => import('./NumberOrderScene.ts')` via `ensureSceneLoaded` (shell remains static: Boot/Preload/Hub static, game scenes lazy).
   - `HubScene` `GAME_TILES` 20th entry `{ sceneKey: 'NumberOrder', gameId: 'number-order', tileKey: 'tile_number_order' }` — grid becomes **5×4** (rows 5/5/5/5, row comment update, generic `col = i % 5` / `row = floor(i/5)` handles remainder; verify `startY` 119 + `tileHeight` 116 + spacing 22 still fit sticker shelf + play-time arc at bottom at 1024×768 — adjust only if manual smoke reveals clip, else keep).

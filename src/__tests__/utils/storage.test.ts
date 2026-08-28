@@ -250,6 +250,45 @@ describe("Storage utilities", () => {
       expect(result.settings.bgmEnabled).toBe(true);
       expect(result.settings.sfxEnabled).toBe(false);
     });
+
+    it("migrates a save from before Game 20 by backfilling the number-order sticker entry", () => {
+      // Simulate a save from before Number Order shipped: no "number-order" key.
+      const oldSave = {
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+          "animal-trace": { earned: false, earnedAt: null },
+          "pop-freeze": { earned: false, earnedAt: null },
+          "shadow-match": { earned: false, earnedAt: null },
+          "musical-memory": { earned: false, earnedAt: null },
+          "big-small": { earned: false, earnedAt: null },
+          "pattern-builder": { earned: false, earnedAt: null },
+          "alphabet-match": { earned: false, earnedAt: null },
+          "word-match": { earned: false, earnedAt: null },
+          "word-builder": { earned: false, earnedAt: null },
+          "how-many": { earned: false, earnedAt: null },
+          "first-sounds": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+          "more-less": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+          "odd-one-out": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+          "color-match": { earned: true, earnedAt: "2026-08-08T00:00:00.000Z" },
+          "add-it-up": { earned: false, earnedAt: null },
+          "take-away": { earned: false, earnedAt: null },
+          "memory-match": { earned: false, earnedAt: null },
+          "decode-it": { earned: true, earnedAt: "2026-08-28T00:00:00.000Z" },
+        },
+        settings: { bgmEnabled: true, sfxEnabled: false },
+      };
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
+
+      const result = load();
+
+      // The new game gets a fresh unearned entry instead of crashing.
+      expect(result.stickers["number-order"]).toEqual({ earned: false, earnedAt: null });
+      // Existing progress and settings are preserved.
+      expect(result.stickers["decode-it"].earned).toBe(true);
+      expect(result.stickers["shape-sorter"].earned).toBe(true);
+      expect(result.settings.bgmEnabled).toBe(true);
+      expect(result.settings.sfxEnabled).toBe(false);
+    });
   });
 
   describe("save", () => {
