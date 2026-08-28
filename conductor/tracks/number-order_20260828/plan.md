@@ -52,7 +52,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 
 ## Phase 4 — Adaptive, Progress Audit, Docs & Full Verification
 
-- [ ] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD)
+- [x] Task 4.1: Adaptive band wiring (reuse existing plumbing, TDD) [eb92d22]
   - Thread `getAdaptiveBandShift('number-order')` at `NumberOrderScene.create()` into `numberOrderLogic.buildPlaythrough(rng, shift)` via `shiftLadder([1,1,2,2,3,3], shift)` (−1→`[1,1,1,1,2,2]`, 0→`[1,1,2,2,3,3]`, +1→`[2,2,3,3,3,3]`) mapped to numeral bands; shift 0 fixture proves byte-identity vs classic fixtures; respects `Settings.adaptiveDifficulty` toggle (device-level, default ON, WINDOW_SIZE 10, MIN_SAMPLE 6, UP 0.9 / DOWN 0.6).
   - Failing tests: `src/__tests__/game/adaptiveLogic.test.ts` facade for `number-order` id (toggle OFF→0, <6 taps→0, ≥90% over ≥6→+1, <60%→−1) + `numberOrderLogic.test.ts` shift sequences assert count/range per round under ±1.
 
