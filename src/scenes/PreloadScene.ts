@@ -122,6 +122,7 @@ import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
 import stickerMemoryMatchSvg from "../assets/svg/stickers/sticker_memory_match.svg?raw";
 import stickerMoreLessSvg from "../assets/svg/stickers/sticker_more_less.svg?raw";
 import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
+import stickerNumberOrderSvg from "../assets/svg/stickers/sticker_number_order.svg?raw";
 import stickerOddOneOutSvg from "../assets/svg/stickers/sticker_odd_one_out.svg?raw";
 import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_builder.svg?raw";
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
@@ -159,6 +160,7 @@ import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
 import tileMemoryMatchSvg from "../assets/svg/ui/tiles/tile_memory_match.svg?raw";
 import tileMoreLessSvg from "../assets/svg/ui/tiles/tile_more_less.svg?raw";
 import tileMusicalMemorySvg from "../assets/svg/ui/tiles/tile_musical_memory.svg?raw";
+import tileNumberOrderSvg from "../assets/svg/ui/tiles/tile_number_order.svg?raw";
 import tileOddOneOutSvg from "../assets/svg/ui/tiles/tile_odd_one_out.svg?raw";
 import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.svg?raw";
 import tilePopFreezeSvg from "../assets/svg/ui/tiles/tile_pop_freeze.svg?raw";
@@ -323,6 +325,7 @@ export const SHAPE_ASSETS = [
   { key: "sticker_take_away", svg: stickerTakeAwaySvg },
   { key: "sticker_memory_match", svg: stickerMemoryMatchSvg },
   { key: "sticker_decode_it", svg: stickerDecodeItSvg },
+  { key: "sticker_number_order", svg: stickerNumberOrderSvg },
   { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
   { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
   { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
@@ -342,6 +345,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_take_away", svg: tileTakeAwaySvg },
   { key: "tile_memory_match", svg: tileMemoryMatchSvg },
   { key: "tile_decode_it", svg: tileDecodeItSvg },
+  { key: "tile_number_order", svg: tileNumberOrderSvg },
 ] as const;
 
 /**

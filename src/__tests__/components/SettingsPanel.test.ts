@@ -1195,7 +1195,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 19 game rows with explicit chevrons", () => {
+  it("pages through all 20 game rows with explicit chevrons (6+6+6+2)", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
@@ -1226,6 +1226,7 @@ describe("SettingsPanel progress report", () => {
     triggerPointerdown(nextChevron() as MockGameObject);
     expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
     expect(findTextByLabel(scene, "Decode It")).toBeDefined();
+    expect(findTextByLabel(scene, "Number Order")).toBeDefined();
 
     // The last page clamps instead of wrapping around.
     triggerPointerdown(nextChevron() as MockGameObject);
