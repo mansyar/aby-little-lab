@@ -17,8 +17,8 @@
 
 ## Phase 3: Pure logic — Color Match
 
-- [ ] Task 3.1 — Split-point playthrough (`buildPlaythrough(shift = 0)`): `3 - shift` easy rounds, rest hard pool; shift 0 byte-identical; `buildRound`, `COLOR_POOLS`, `COLOR_CARDS`, `isCorrect`, `promptFor` unchanged.
-- [ ] Task 3.2 — Coverage + red-green evidence; commit `feat(game15): split-point color match ladder` + git note; mark tasks `[x]` + SHA.
+- [x] Task 3.1 — Split-point playthrough (`buildPlaythrough(shift = 0)`): `3 - shift` easy rounds, rest hard pool; shift 0 byte-identical; `buildRound`, `COLOR_POOLS`, `COLOR_CARDS`, `isCorrect`, `promptFor` unchanged. Hard-side assertions are distributional (a hard round can draw all-basic cards by chance); easy-side strict. (c7e0864)
+- [x] Task 3.2 — Coverage + red-green evidence; commit `feat(color-match): split-point band ladder from the shared adaptive shift` + git note; tasks marked `[x]` + SHA. Scoped `colorMatchLogic.ts` coverage 100 across all metrics; full suite green (69 files / 1797 tests). (c7e0864)
 
 ## Phase 4: Scene wiring
 
