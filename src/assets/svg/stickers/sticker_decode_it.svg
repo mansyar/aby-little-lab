@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="240" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <!-- word card -->
+  <rect x="100" y="150" width="312" height="150" rx="22" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <!-- letters CAT as shapes -->
+  <g transform="translate(158 225) scale(0.42) translate(-256 -225)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 196 120 A 90 90 0 1 0 196 330" stroke="#2D3748" stroke-width="56"/>
+    <path d="M 196 120 A 90 90 0 1 0 196 330" stroke="#4299E1" stroke-width="36"/>
+  </g>
+  <g transform="translate(256 225) scale(0.42) translate(-256 -225)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 126 400 L 256 70 L 386 400 M 176 290 L 336 290" stroke="#2D3748" stroke-width="56"/>
+    <path d="M 126 400 L 256 70 L 386 400 M 176 290 L 336 290" stroke="#FC8181" stroke-width="36"/>
+  </g>
+  <g transform="translate(354 225) scale(0.42) translate(-256 -225)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 166 70 L 346 70 M 256 70 L 256 400" stroke="#2D3748" stroke-width="56"/>
+    <path d="M 166 70 L 346 70 M 256 70 L 256 400" stroke="#ED8936" stroke-width="36"/>
+  </g>
+  <!-- magnifying glass overlap bottom right -->
+  <circle cx="360" cy="320" r="42" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="360" cy="320" r="28" fill="#FFFFFF" stroke="#2D3748" stroke-width="4"/>
+  <rect x="385" y="345" width="36" height="12" rx="6" fill="#ED8936" stroke="#2D3748" stroke-width="4" transform="rotate(45 403 351)"/>
+  <!-- star badge top -->
+  <path d="M 256 58 L 268 88 L 300 88 L 274 108 L 282 138 L 256 118 L 230 138 L 238 108 L 212 88 L 244 88 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 400 90 L 404 100 L 414 104 L 404 108 L 400 118 L 396 108 L 386 104 L 396 100 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 108 360 L 112 370 L 122 374 L 112 378 L 108 388 L 104 378 L 94 374 L 104 370 Z" fill="#68D391" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+</svg>
