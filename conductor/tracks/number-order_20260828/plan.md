@@ -32,7 +32,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 - [x] Task 2.2: TTS wiring audit (reuse, no new API) [9ce2a8c] — reuse `speakNumber` SFX-gated, audit PASS (no gap, no commit)
   - Reuse `speakNumber` from `src/utils/speech.ts` (rate 0.9, en-US, SFX-gated, silent fallback) — already verified in Task 2.1 tests; add mirror assertions to `src/__tests__/utils/speech.test.ts` if gap (speakNumber called with numeral, respects SFX toggle, no throw when `speechSynthesis` undefined). Verify `unlockSpeechForUserGesture` inherited via Hub first tap (no scene change).
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint [6856e87]
 
 ## Phase 3 — Assets, Preload, Hub & Registry
 
