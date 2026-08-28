@@ -5,7 +5,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { getAdaptiveBandShift, load } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -66,7 +66,7 @@ export class OddOneOutScene extends GameSceneBase {
       },
     );
 
-    this.rounds = createPlaythrough();
+    this.rounds = createPlaythrough(getAdaptiveBandShift("odd-one-out"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

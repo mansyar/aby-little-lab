@@ -251,6 +251,27 @@ import {
   getInteractiveRects,
 } from "../helpers/pressFeedback";
 
+const { getAdaptiveBandShiftMock, generatePlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  generatePlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/patternBuilderLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/patternBuilderLogic")>();
+  return {
+    ...actual,
+    generatePlaythrough: (...args: Parameters<typeof actual.generatePlaythrough>) => {
+      generatePlaythroughMock(...args);
+      return actual.generatePlaythrough(...args);
+    },
+  };
+});
+
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -634,5 +655,27 @@ describe("PatternBuilderScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("PatternBuilderScene adaptive shift", () => {
+  beforeEach(() => {
+    getAdaptiveBandShiftMock.mockClear();
+    generatePlaythroughMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  it("passes the facade's band shift to generatePlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new PatternBuilderScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("pattern-builder");
+    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new PatternBuilderScene();
+    scene.create();
+    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 0);
   });
 });

@@ -10,7 +10,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { load } from "../utils/storage";
+import { getAdaptiveBandShift, load } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (3 per band). */
@@ -86,7 +86,7 @@ export class ColorMatchScene extends GameSceneBase {
       },
     );
 
-    this.rounds = buildPlaythrough();
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("color-match"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
