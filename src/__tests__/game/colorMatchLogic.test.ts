@@ -173,6 +173,83 @@ describe("buildPlaythrough", () => {
   });
 });
 
+describe("buildPlaythrough (adaptive shift)", () => {
+  /** Easy rounds can never draw orange/purple; hard rounds can (so the hard side is asserted distributionally). */
+  function isEasyOnly(round: ColorMatchRound): boolean {
+    return round.cards.every((card) => COLOR_POOLS.easy.includes(card.colorId));
+  }
+
+  it("serves the classic 3+3 split at shift 0, byte-identical to the no-arg call", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = buildPlaythrough(0);
+      // Rounds 1-3: easy — cards drawn from the 4-color pool only.
+      for (const round of playthrough.slice(0, 3)) {
+        expect(isEasyOnly(round)).toBe(true);
+        expectValidRound(round);
+      }
+      // Rounds 4-6: hard — structurally valid.
+      for (const round of playthrough.slice(3)) {
+        expectValidRound(round);
+      }
+    }
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const withZero = buildPlaythrough(0);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const bare = buildPlaythrough();
+    expect(withZero).toEqual(bare);
+  });
+
+  it("eases to a 4+2 split while struggling (shift -1)", () => {
+    const sawExtraColor: boolean[] = [false, false];
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = buildPlaythrough(-1);
+      // Rounds 1-4: easy — cards drawn from the 4-color pool only.
+      for (const round of playthrough.slice(0, 4)) {
+        expect(isEasyOnly(round)).toBe(true);
+        expectValidRound(round);
+      }
+      // Rounds 5-6: hard — across many samples the extra colors appear.
+      for (const round of playthrough.slice(4)) {
+        expectValidRound(round);
+      }
+      playthrough.slice(4).forEach((round, offset) => {
+        if (!isEasyOnly(round)) sawExtraColor[offset] = true;
+      });
+    }
+    expect(sawExtraColor).toEqual([true, true]);
+  });
+
+  it("steps up to a 2+4 split while thriving (shift +1)", () => {
+    const sawExtraColor: boolean[] = [false, false, false, false];
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = buildPlaythrough(1);
+      // Rounds 1-2: easy — cards drawn from the 4-color pool only.
+      for (const round of playthrough.slice(0, 2)) {
+        expect(isEasyOnly(round)).toBe(true);
+        expectValidRound(round);
+      }
+      // Rounds 3-6: hard — across many samples the extra colors appear.
+      for (const round of playthrough.slice(2)) {
+        expectValidRound(round);
+      }
+      playthrough.slice(2).forEach((round, offset) => {
+        if (!isEasyOnly(round)) sawExtraColor[offset] = true;
+      });
+    }
+    expect(sawExtraColor).toEqual([true, true, true, true]);
+  });
+
+  it("produces different playthroughs per shift under the same random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const struggling = buildPlaythrough(-1);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const thriving = buildPlaythrough(1);
+    expect(struggling).not.toEqual(thriving);
+  });
+});
+
 describe("isCorrect", () => {
   it("returns true only for the card whose color matches the target", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
