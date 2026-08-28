@@ -1,0 +1,15 @@
+{
+  "trackId": "adaptive-remaining-games_20260828",
+  "title": "Adaptive Difficulty — Remaining Games (Pattern Builder, Odd One Out, Color Match)",
+  "type": "feature",
+  "status": "in-progress",
+  "branch": "feature/adaptive-remaining-games",
+  "createdAt": "2026-08-28",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "games": ["pattern-builder", "odd-one-out", "color-match"],
+  "dependsOn": [
+    "adaptive-difficulty_20260827",
+    "adaptive-literacy_20260828"
+  ]
+}
