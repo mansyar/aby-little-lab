@@ -16,7 +16,8 @@ export type GameId =
   | "color-match"
   | "add-it-up"
   | "take-away"
-  | "memory-match";
+  | "memory-match"
+  | "decode-it";
 
 export interface StickerData {
   earned: boolean;
@@ -108,6 +109,7 @@ export const GAME_IDS: GameId[] = [
   "add-it-up",
   "take-away",
   "memory-match",
+  "decode-it",
 ];
 
 export interface Profile {

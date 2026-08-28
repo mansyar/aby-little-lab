@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fox head - orange flat, thick outline storybook style -->
+  <ellipse cx="256" cy="300" rx="150" ry="130" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+  <!-- Ears -->
+  <path d="M 140 200 L 110 80 L 210 150 Z" fill="#ED8936" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 372 200 L 402 80 L 302 150 Z" fill="#ED8936" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 150 190 L 135 110 L 195 155 Z" fill="#FBD38D" stroke="#2D3748" stroke-width="4"/>
+  <path d="M 362 190 L 377 110 L 317 155 Z" fill="#FBD38D" stroke="#2D3748" stroke-width="4"/>
+  <!-- Muzzle - cream -->
+  <ellipse cx="256" cy="350" rx="90" ry="70" fill="#FFF8E7" stroke="#2D3748" stroke-width="5"/>
+  <!-- Nose -->
+  <ellipse cx="256" cy="320" rx="22" ry="18" fill="#2D3748"/>
+  <ellipse cx="252" cy="316" rx="6" ry="4" fill="white"/>
+  <!-- Eyes -->
+  <ellipse cx="205" cy="265" rx="28" ry="34" fill="white" stroke="#2D3748" stroke-width="5"/>
+  <ellipse cx="307" cy="265" rx="28" ry="34" fill="white" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="205" cy="275" r="12" fill="#2D3748"/>
+  <circle cx="307" cy="275" r="12" fill="#2D3748"/>
+  <circle cx="202" cy="268" r="4" fill="white"/>
+  <circle cx="304" cy="268" r="4" fill="white"/>
+  <!-- Cheek blush -->
+  <ellipse cx="170" cy="310" rx="18" ry="10" fill="#FBD38D"/>
+  <ellipse cx="342" cy="310" rx="18" ry="10" fill="#FBD38D"/>
+</svg>

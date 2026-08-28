@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Teal cup body -->
+  <rect x="140" y="150" width="220" height="260" rx="32" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <!-- Cup rim highlight -->
+  <rect x="140" y="150" width="220" height="40" rx="20" fill="#81E6D9" stroke="#2D3748" stroke-width="5"/>
+  <!-- Handle -->
+  <path d="M 360 190 Q 430 190 430 270 Q 430 350 360 350" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 360 200 Q 415 200 415 270 Q 415 340 360 340" fill="#4FD1C5" stroke="#2D3748" stroke-width="5"/>
+  <!-- Liquid surface -->
+  <ellipse cx="250" cy="170" rx="90" ry="18" fill="#FBD38D" stroke="#2D3748" stroke-width="4"/>
+  <!-- Steam swirls -->
+  <path d="M 200 110 Q 210 90 190 70" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 250 100 Q 260 80 240 60" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 300 110 Q 310 90 290 70" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Cup face detail - simple smile -->
+  <circle cx="212" cy="270" r="14" fill="#2D3748"/>
+  <circle cx="288" cy="270" r="14" fill="#2D3748"/>
+  <circle cx="209" cy="266" r="4" fill="white"/>
+  <circle cx="285" cy="266" r="4" fill="white"/>
+  <path d="M 230 310 Q 250 330 270 310" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
+</svg>

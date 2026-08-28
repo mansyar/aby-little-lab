@@ -99,7 +99,7 @@ const MODAL_BUTTON_HEIGHT = 64;
 const DANGER_HEX = 0xfc8181;
 const PRIMARY_HEX = 0x2b6cb0;
 
-/** The 18 games in hub order, for the Learning Progress report rows. */
+/** The 19 games in hub order, for the Learning Progress report rows. */
 const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
   { gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
   { gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
@@ -119,6 +119,7 @@ const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey
   { gameId: "add-it-up", label: "Add It Up", tileKey: "tile_add_it_up" },
   { gameId: "take-away", label: "Take Away", tileKey: "tile_take_away" },
   { gameId: "memory-match", label: "Memory Match", tileKey: "tile_memory_match" },
+  { gameId: "decode-it", label: "Decode It", tileKey: "tile_decode_it" },
 ];
 
 /** "Off" for an unlimited budget, otherwise "15m"-style labels. */

@@ -12,16 +12,20 @@ import smAirplaneSvg from "../assets/svg/items/airplane.svg?raw";
 import foodAppleSvg from "../assets/svg/items/apple.svg?raw";
 import smBallSvg from "../assets/svg/items/ball.svg?raw";
 import foodBananaSvg from "../assets/svg/items/banana.svg?raw";
+import smBedSvg from "../assets/svg/items/bed.svg?raw";
 import smBoatSvg from "../assets/svg/items/boat.svg?raw";
 import foodBoneSvg from "../assets/svg/items/bone.svg?raw";
 import smBugSvg from "../assets/svg/items/bug.svg?raw";
 import smCarSvg from "../assets/svg/items/car.svg?raw";
 import foodCarrotSvg from "../assets/svg/items/carrot.svg?raw";
+import smCupSvg from "../assets/svg/items/cup.svg?raw";
 import smDuckSvg from "../assets/svg/items/duck.svg?raw";
 import foodFishSvg from "../assets/svg/items/fish.svg?raw";
+import smFoxSvg from "../assets/svg/items/fox.svg?raw";
 import smHatSvg from "../assets/svg/items/hat.svg?raw";
 import smHouseSvg from "../assets/svg/items/house.svg?raw";
 import lilypadSvg from "../assets/svg/items/lilypad.svg?raw";
+import smMapSvg from "../assets/svg/items/map.svg?raw";
 import smMushroomSvg from "../assets/svg/items/mushroom.svg?raw";
 import foodPeanutSvg from "../assets/svg/items/peanut.svg?raw";
 import smSunSvg from "../assets/svg/items/sun.svg?raw";
@@ -112,6 +116,7 @@ import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.sv
 import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
 import stickerColorMatchSvg from "../assets/svg/stickers/sticker_color_match.svg?raw";
+import stickerDecodeItSvg from "../assets/svg/stickers/sticker_decode_it.svg?raw";
 import stickerFirstSoundsSvg from "../assets/svg/stickers/sticker_first_sounds.svg?raw";
 import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
 import stickerMemoryMatchSvg from "../assets/svg/stickers/sticker_memory_match.svg?raw";
@@ -148,6 +153,7 @@ import tileAlphabetSvg from "../assets/svg/ui/tiles/tile_alphabet.svg?raw";
 import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw";
 import tileBigSmallSvg from "../assets/svg/ui/tiles/tile_big_small.svg?raw";
 import tileColorMatchSvg from "../assets/svg/ui/tiles/tile_color_match.svg?raw";
+import tileDecodeItSvg from "../assets/svg/ui/tiles/tile_decode_it.svg?raw";
 import tileFirstSoundsSvg from "../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
 import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
 import tileMemoryMatchSvg from "../assets/svg/ui/tiles/tile_memory_match.svg?raw";
@@ -229,6 +235,10 @@ export const SHAPE_ASSETS = [
   { key: "sm_duck", svg: smDuckSvg },
   { key: "sm_hat", svg: smHatSvg },
   { key: "sm_sun", svg: smSunSvg },
+  { key: "sm_bed", svg: smBedSvg },
+  { key: "sm_cup", svg: smCupSvg },
+  { key: "sm_fox", svg: smFoxSvg },
+  { key: "sm_map", svg: smMapSvg },
   { key: "sm_shadow_house", svg: smShadowHouseSvg },
   { key: "sm_shadow_tree", svg: smShadowTreeSvg },
   { key: "sm_shadow_car", svg: smShadowCarSvg },
@@ -312,6 +322,7 @@ export const SHAPE_ASSETS = [
   { key: "sticker_add_it_up", svg: stickerAddItUpSvg },
   { key: "sticker_take_away", svg: stickerTakeAwaySvg },
   { key: "sticker_memory_match", svg: stickerMemoryMatchSvg },
+  { key: "sticker_decode_it", svg: stickerDecodeItSvg },
   { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
   { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
   { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
@@ -330,6 +341,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_add_it_up", svg: tileAddItUpSvg },
   { key: "tile_take_away", svg: tileTakeAwaySvg },
   { key: "tile_memory_match", svg: tileMemoryMatchSvg },
+  { key: "tile_decode_it", svg: tileDecodeItSvg },
 ] as const;
 
 /**
