@@ -32,11 +32,11 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
 
 ## Phase 2 — Scene & Prompt Audio
 
-- [~] Task 2.1: `DecodeItScene` (inherits GameSceneBase) — visual flow (TDD where logic, visual verification otherwise)
+- [x] Task 2.1: `DecodeItScene` (inherits GameSceneBase) — visual flow (TDD where logic, visual verification otherwise) — b61b583
   - `src/scenes/DecodeItScene.ts` key `DecodeIt` extends `GameSceneBase`: `create()` reads `decodeLogic.buildPlaythrough(getAdaptiveBandShift('decode-it'))` (shift pluggable, default 0), renders prompt image (180px) top-center + 4 word cards row (160px cards, 128px letters, ≥96px touch, centered spacing), speaker button (frame hit area) replay, card tap → `isCorrect` → success flash (`--success` `#68D391`) + chime (`playCorrect`) + mascot cheer + `recordCorrect()` + dot pop 700ms (`NEXT_ROUND_DELAY`) / wiggle ±4° + soft tone (`playIncorrect`) + mascot nod + `recordWrong()` no penalty, `inputLocked` during transitions/celebration, `progressDots` 6 via `createProgressDots(6)` / `fillProgressDot`, `createBackButton` / `createCornerMascot` / `completeGame('decode-it')` + `{ justEarned: "decode-it" }`, shutdown cleanup via `registerShutdownCleanup`, relaunch resets `inputLocked` + `progressDots`.
   - Failing tests (`src/__tests__/scenes/decodeItScene.test.ts`): prompt renders, correct advances after 700ms, wrong stays with wiggle, speaker guarded during win, auto-return after 6, ParentLock hold exits to Hub, inputLocked resets on `create()` relaunch.
 
-- [ ] Task 2.2: TTS wiring via `src/utils/speech.ts` (no new API)
+- [x] Task 2.2: TTS wiring via `src/utils/speech.ts` (no new API) — b61b583 (no new code; verified via DecodeItScene integration — speakWord rate0.8 SFX-gated, 2 scene tests + speech.test.ts)
   - Reuse `speakWord(word)` (rate 0.8, en-US) for target at round start, respects SFX toggle + silent fallback when SpeechSynthesis unavailable, `unlockSpeechForUserGesture` already wired via Hub; speaker button calls same utterance; guard when API missing.
   - Tests: speech mock asserts word spoken once per round, silent when SFX off, no throw when `speechSynthesis` undefined (mirror `speech.test.ts`).
 
