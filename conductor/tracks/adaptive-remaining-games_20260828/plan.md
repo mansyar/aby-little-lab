@@ -6,9 +6,9 @@
 
 ## Phase 1: Pure logic — Pattern Builder
 
-- [ ] Task 1.1 — Band-aware round generation (`patternBuilderLogic.ts`): `generateRound(band)` per-band table (1: ABAB+end; 2: any+end; 3: any+end/middle); keep confusable distractor guard in all bands; all structural invariants preserved (6 rounds via ladder, 4-shape rows, gap ≠ 0, 3 unique choices, exactly one correct).
-- [ ] Task 1.2 — Ladder shift (`generatePlaythrough(shift = 0)`): `shiftLadder(BASE_LADDER, shift)` per-round bands; drop `roundCount` param (verify no caller/test uses it); shift 0 easy-first `[1,1,2,2,3,3]` (documented § 3.1 exception).
-- [ ] Task 1.3 — Coverage + red-green evidence for tasks 1.1–1.2; commit `feat(game07): band-aware pattern builder rounds` + git note; mark tasks `[x]` + SHA.
+- [x] Task 1.1 — Band-aware round generation (`patternBuilderLogic.ts`): `generateRound(band)` per-band table (1: ABAB+end; 2: any+end; 3: any+end/middle); keep confusable distractor guard in all bands; all structural invariants preserved (6 rounds via ladder, 4-shape rows, gap ≠ 0, 3 unique choices, exactly one correct). (8316552)
+- [x] Task 1.2 — Ladder shift (`generatePlaythrough(roundCount = 6, shift = 0)`): `shiftLadder(BASE_LADDER, shift)` per-round bands; **`roundCount` kept** — drop-conditional verified: existing tests (`generatePlaythrough(5)`) and the new shift tests call it, and the codebase convention is `(roundCount, shift)` (alphabetLogic, decodeLogic); shift 0 easy-first `[1,1,2,2,3,3]` (documented § 3.1 exception). (8316552)
+- [x] Task 1.3 — Coverage + red-green evidence for tasks 1.1–1.2; commit `feat(pattern-builder): serve per-band rounds from the shared adaptive band shift` + git note; tasks marked `[x]` + SHA. Scoped `patternBuilderLogic.ts` coverage 100% lines; full suite green (69 files / 1787 tests). Global coverage gate pre-existing red — documented, user-approved (tech-stack.md note 2026-08-28). (8316552)
 
 ## Phase 2: Pure logic — Odd One Out
 
