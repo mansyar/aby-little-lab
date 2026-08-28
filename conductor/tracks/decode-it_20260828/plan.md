@@ -73,6 +73,8 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
 - [x] Task 4.4: Quality gates (full verification) — 242500c (+ check 0e/23w, 1759/1759 tests, build 2.81s DecodeIt 4.06kB, PWA 15/15, Hub 19 smoke 700ms/700+3000ms)
   - `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` + dev-server smoke: Boot → Preload → Hub (19 tiles, 5×3+4, no clipping) → Decode It 6 rounds (picture+speech → 4 word cards) → correct/wrong feedback → win celebration + sticker `decode-it` + 3s auto-return with `justEarned` → Hub shelf shimmer; speaker replay test; ParentLock 3s hold exit; `prefers-reduced-motion` disables loops/shortens pops; offline precache smoke.
 
+- [x] Task: Review Fixes (Apply review suggestions for track 'decode-it_20260828') — 7954665
+
 - [ ] Task 4.5: Conductor bookkeeping (review checkpoint → archive on completion)
 
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — bb034b9 [checkpoint: bb034b9]
