@@ -130,13 +130,13 @@ import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.s
 import stickerTakeAwaySvg from "../assets/svg/stickers/sticker_take_away.svg?raw";
 import stickerWordBuilderSvg from "../assets/svg/stickers/sticker_word_builder.svg?raw";
 import stickerWordMatchSvg from "../assets/svg/stickers/sticker_word_match.svg?raw";
+import toyTeddyBearSvg from "../assets/svg/toys/teddy_bear.svg?raw";
 import toyBallSvg from "../assets/svg/toys/toy_ball.svg?raw";
 import toyBlockSvg from "../assets/svg/toys/toy_block.svg?raw";
 import toyBoxSvg from "../assets/svg/toys/toy_box.svg?raw";
 import toyCarSvg from "../assets/svg/toys/toy_car.svg?raw";
 import toyDrumSvg from "../assets/svg/toys/toy_drum.svg?raw";
 import toyRocketSvg from "../assets/svg/toys/toy_rocket.svg?raw";
-import toyTeddyBearSvg from "../assets/svg/toys/toy_teddy_bear.svg?raw";
 import arrowDownSvg from "../assets/svg/ui/arrow_down.svg?raw";
 import arrowUpSvg from "../assets/svg/ui/arrow_up.svg?raw";
 import bubbleSvg from "../assets/svg/ui/bubble.svg?raw";

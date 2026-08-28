@@ -381,12 +381,12 @@ describe("HubScene session-start recording", () => {
     expect(getProgress()["shape-sorter"].plays).toBe(1);
   });
 
-  it("renders all 18 tiles fully inside the 1024×768 canvas (5×3+3 grid)", () => {
+  it("renders all 19 tiles fully inside the 1024×768 canvas (5×3+4 grid)", () => {
     const scene = new HubScene();
     scene.create();
 
     const tiles = mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
-    expect(tiles).toHaveLength(18);
+    expect(tiles).toHaveLength(19);
 
     for (const tile of tiles) {
       const [x, y, width, height] = tile.args as number[];
@@ -551,13 +551,13 @@ describe("HubScene profile and hierarchy cohesion", () => {
     expect(tile.handlers.pointercancel).toBeDefined();
   });
 
-  it("preserves the 5×3+3 grid geometry at 1024×768", () => {
+  it("preserves the 5×3+4 grid geometry at 1024×768", () => {
     setReducedMotion(false);
     const scene = new HubScene();
     scene.create();
 
     const tiles = getNavTiles();
-    expect(tiles).toHaveLength(18);
+    expect(tiles).toHaveLength(19);
 
     const rows = new Map<number, MockObject[]>();
     for (const tile of tiles) {
@@ -567,7 +567,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
       else rows.set(y, [tile]);
     }
     const rowSizes = [...rows.keys()].sort((a, b) => a - b).map((y) => rows.get(y)?.length ?? 0);
-    expect(rowSizes).toEqual([5, 5, 5, 3]);
+    expect(rowSizes).toEqual([5, 5, 5, 4]);
 
     for (const [, row] of rows) {
       const xs = row.map((t) => t.args?.[0] as number).sort((a, b) => a - b);
@@ -596,7 +596,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     const emptySlots = mockRegistry.filter(
       (obj) => obj.kind === "graphics" && obj.arc.mock.calls.some((call) => call[2] === 28),
     );
-    expect(emptySlots).toHaveLength(16);
+    expect(emptySlots).toHaveLength(17);
   });
 
   it("locks tiles with a moon badge once the daily limit is reached", () => {
@@ -676,7 +676,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     scene.create();
 
     const navTiles = getNavTiles();
-    expect(navTiles).toHaveLength(18);
+    expect(navTiles).toHaveLength(19);
     const motionTargets = scene.tweens.add.mock.calls.filter((call) => {
       const config = call[0] as { targets?: unknown };
       return navTiles.includes(config.targets as MockObject);

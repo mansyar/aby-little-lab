@@ -1141,7 +1141,7 @@ describe("SettingsPanel progress report", () => {
     // Explicit prev/next chevron controls and the 7-day strip.
     expect(findTextByLabel(scene, "‹")).toBeDefined();
     expect(findTextByLabel(scene, "›")).toBeDefined();
-    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
     expect(findTextByLabel(scene, "Last 7 days · 0 plays")).toBeDefined();
     // Activity strip bars are 24px wide; the toggle knobs are 24×24 squares.
     const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24 && call[3] !== 24);
@@ -1195,7 +1195,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 18 game rows with explicit chevrons", () => {
+  it("pages through all 19 game rows with explicit chevrons", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
@@ -1206,33 +1206,40 @@ describe("SettingsPanel progress report", () => {
     expect(nextChevron()).toBeDefined();
     expect(prevChevron()).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
-    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
     expect(pageOneRow.destroy).toHaveBeenCalled();
-    expect(findTextByLabel(scene, "2 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "2 / 4")).toBeDefined();
     expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
     expect(findTextByLabel(scene, "First Sounds")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Take Away")).toBeUndefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "3 / 4")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeDefined();
     expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
+    expect(findTextByLabel(scene, "Decode It")).toBeUndefined();
+
+    triggerPointerdown(nextChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "Decode It")).toBeDefined();
 
     // The last page clamps instead of wrapping around.
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "3 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
 
     // Previous pages walk back to the first page, which also clamps.
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "2 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "3 / 4")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "2 / 4")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "1 / 3")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
+    triggerPointerdown(prevChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
   });
 
   it("spaces consecutive progress rows at least 56px apart", () => {
@@ -1378,7 +1385,7 @@ describe("SettingsPanel affordance cohesion", () => {
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
 
-    const pageLabel = () => findLastTextByLabel(scene, "1 / 3");
+    const pageLabel = () => findLastTextByLabel(scene, "1 / 4");
     expect(pageLabel()).toBeDefined();
 
     // The ambiguous single More/Back button is gone.
@@ -1393,15 +1400,17 @@ describe("SettingsPanel affordance cohesion", () => {
 
     triggerPointerdown(next);
     triggerPointerdown(next);
-    expect(findLastTextByLabel(scene, "3 / 3")).toBeDefined();
     triggerPointerdown(next);
-    expect(findLastTextByLabel(scene, "3 / 3")).toBeDefined(); // clamped
+    expect(findLastTextByLabel(scene, "4 / 4")).toBeDefined();
+    triggerPointerdown(next);
+    expect(findLastTextByLabel(scene, "4 / 4")).toBeDefined(); // clamped
 
     triggerPointerdown(prev);
     triggerPointerdown(prev);
-    expect(findLastTextByLabel(scene, "1 / 3")).toBeDefined();
     triggerPointerdown(prev);
-    expect(findLastTextByLabel(scene, "1 / 3")).toBeDefined(); // clamped
+    expect(findLastTextByLabel(scene, "1 / 4")).toBeDefined();
+    triggerPointerdown(prev);
+    expect(findLastTextByLabel(scene, "1 / 4")).toBeDefined(); // clamped
   });
 
   it("highlights the viewed profile in the progress report", () => {

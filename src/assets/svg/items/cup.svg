@@ -12,7 +12,7 @@
   <path d="M 200 110 Q 210 90 190 70" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
   <path d="M 250 100 Q 260 80 240 60" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
   <path d="M 300 110 Q 310 90 290 70" stroke="#2D3748" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <!-- Cup face detail — simple smile -->
+  <!-- Cup face detail - simple smile -->
   <circle cx="212" cy="270" r="14" fill="#2D3748"/>
   <circle cx="288" cy="270" r="14" fill="#2D3748"/>
   <circle cx="209" cy="266" r="4" fill="white"/>
