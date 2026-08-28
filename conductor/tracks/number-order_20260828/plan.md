@@ -36,7 +36,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
 
 ## Phase 3 — Assets, Preload, Hub & Registry
 
-- [ ] Task 3.1: Tile + sticker + preload wiring (no TDD — visual)
+- [x] Task 3.1: Tile + sticker + preload wiring (no TDD — visual) [7dc00d5]
   - `src/assets/svg/ui/tile_number_order.svg` — 4 mini numeral cards stepping 1→2→3 with right arrow + sparkle, flat fills, thick `#2D3748` 4–6px outline, soft palette (`--primary #2B6CB0`, `--success #68D391`, accent `#F6E05E`), 512×512 viewBox per `docs/SVG_STYLE.md`.
   - `src/assets/svg/stickers/sticker_number_order.svg` — cream badge `#FFF8E7` with 1-2-3 stepping blocks + gold star, thick outline, 512×512.
   - `PreloadScene` imports the 2 new SVGs (`tile_number_order`, `sticker_number_order`); preload count 168 → 170; verify crisp rasterization at 512 via `pnpm dev` manual + ensure no Baloo2 font regression (numerals are SVG textures, not glyph compositing, but HUD still uses Baloo2).
