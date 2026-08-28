@@ -56,7 +56,7 @@ Add Game 20 where kids **drag shuffled numerals into ascending order** — 6 rou
   - Thread `getAdaptiveBandShift('number-order')` at `NumberOrderScene.create()` into `numberOrderLogic.buildPlaythrough(rng, shift)` via `shiftLadder([1,1,2,2,3,3], shift)` (−1→`[1,1,1,1,2,2]`, 0→`[1,1,2,2,3,3]`, +1→`[2,2,3,3,3,3]`) mapped to numeral bands; shift 0 fixture proves byte-identity vs classic fixtures; respects `Settings.adaptiveDifficulty` toggle (device-level, default ON, WINDOW_SIZE 10, MIN_SAMPLE 6, UP 0.9 / DOWN 0.6).
   - Failing tests: `src/__tests__/game/adaptiveLogic.test.ts` facade for `number-order` id (toggle OFF→0, <6 taps→0, ≥90% over ≥6→+1, <60%→−1) + `numberOrderLogic.test.ts` shift sequences assert count/range per round under ±1.
 
-- [ ] Task 4.2: Record-path & progress audit (no TDD unless gap)
+- [x] Task 4.2: Record-path & progress audit (no TDD unless gap) [eb92d22 — audit PASS, no commit]
   - Verify `recordCorrect()` / `recordWrong()` counters flushed via `completeGame()` → `progressLogic.recordResult` (per-profile plays/wins/correct/wrong/lastPlayedAt/recent window accuracy, ★ mastery at ≥3 wins), `recordGamePlay('number-order')` on Hub tile tap (nav-locked so duplicate launch can't double-count), Learning Progress overlay: row for `number-order` (accuracy bar + %, relative last-played, 7-day activity strip additive `activity`, paging `6+6+6+2` with 20 games), no mid-game time-limit cutoff, play-time `addPlayTime` only on `endPlaySession`.
   - If gaps found, add minimal wiring + tests; else PASS with note in git notes.
 
