@@ -59,11 +59,11 @@ Product definition (§ cross-game systems, Adaptive Difficulty): "…numeracy fi
 
 **Band design:** keep the three existing band strategies unchanged. Only the ladder becomes shift-aware:
 
-- shift −1 → `[1,1,1,1,2,2]` (= clamp of `BASE_LADDER − 1`)
+- shift -1 → `[1,1,1,1,1,1]` (all band 1) - **deliberate deviation from the strict clamp** `shiftLadder(BASE_LADDER, -1)` (`[1,1,1,1,2,2]`): four band-1 rounds can consume up to four items of one 6-texture category (odd or group, at most one per round) and two band-2 rounds on that same category would then demand four more, so the last round's odd pick finds no candidate and `pickItem` throws. All band-1 caps any category at one consumption per round across 6 rounds = the pool size, so every odd pick always has a candidate.
 - shift 0 → `[1,1,2,2,3,3]` (classic, byte-identical)
-- shift +1 → `[1,2,2,3,3,3]` — **deliberate deviation from pure `shiftLadder`**, which would give `[2,2,3,3,3,3]` (four band-3 rounds). `FROG_ITEMS` holds only 3 textures and odds must stay unique, so band-3 rounds are capped at 3 per playthrough; the freed round drops to band 1 (cross-category), keeping the ladder easy-first-ordered and the pool-exhaustion guard (`pickItem` throws only on misuse) untriggerable through normal play.
+- shift +1 → `[1,2,2,3,3,3]` - **deliberate deviation from pure `shiftLadder`**, which would give `[2,2,3,3,3,3]` (four band-3 rounds). `FROG_ITEMS` holds only 3 textures and odds must stay unique, so band-3 rounds are capped at 3 per playthrough; the freed round drops to band 1 (cross-category), keeping the ladder easy-first-ordered and the pool-exhaustion guard (`pickItem` throws only on misuse) untriggerable through normal play. **Implementation note (added 2026-08-28, during Task 2.1):** three band-3 rounds consume three distinct odd frogs from a 3-texture pool, and the strict group pick (`pickItem(FROG_ITEMS, usedOdds, odd)`) would then find no candidate — it excludes used-odd textures too. Group cards repeating across rounds is harmless (the three group cards of a round are identical by design; only odds are required to stay unique), so the band-3 group pick gains a two-stage fallback: strict pick first (byte-identical to today whenever it succeeds, preserving shift-0 behavior), then any frog other than the round's odd. With this fallback the exhaustion throw becomes truly unreachable in normal play; band strategies, `createRound`'s odd pick, `isCorrect`, and `promptFor` are unchanged.
 
-**API change:** `createPlaythrough(shift: BandShift = 0)`. `createRound`, `isCorrect`, `promptFor` unchanged.
+**API change:** `createPlaythrough(shift: BandShift = 0)`. Band-3 group pick gains the documented fallback; the odd pick, `isCorrect`, and `promptFor` are unchanged.
 
 ### 3.3 Color Match (`src/game/colorMatchLogic.ts`)
 
