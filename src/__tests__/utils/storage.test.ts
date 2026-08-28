@@ -898,6 +898,7 @@ describe.each([
   ["memory-match"],
   ["musical-memory"],
   ["decode-it"],
+  ["number-order"],
 ] as const)("adaptive band shift (%s)", (gameId) => {
   beforeEach(() => {
     localStorage.clear();

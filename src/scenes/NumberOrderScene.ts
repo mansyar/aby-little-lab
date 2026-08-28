@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { buildPlaythrough, isCorrect } from "../game/numberOrderLogic";
-import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, snapToSlot } from "../utils/dragJuice";
 import { isReducedMotion, motionDuration } from "../utils/motion";
@@ -63,7 +62,7 @@ export class NumberOrderScene extends GameSceneBase {
     this.createBackButton();
     this.createProgressDots(ROUND_COUNT);
 
-    this.rounds = buildPlaythrough(getAdaptiveBandShift("number-order" as GameId));
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("number-order"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
@@ -395,7 +394,7 @@ export class NumberOrderScene extends GameSceneBase {
     this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
       this.roundIndex++;
       if (this.roundIndex >= this.rounds.length) {
-        this.completeGame("number-order" as GameId);
+        this.completeGame("number-order");
       } else {
         this.inputLocked = false;
         this.renderRound();
