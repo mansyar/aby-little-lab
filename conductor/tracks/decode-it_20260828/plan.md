@@ -75,4 +75,4 @@ Add Game 19 where the child sees a picture and hears the spoken word (classic pr
 
 - [ ] Task 4.5: Conductor bookkeeping (review checkpoint → archive on completion)
 
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — bb034b9 [checkpoint: bb034b9]
