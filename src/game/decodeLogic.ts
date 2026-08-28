@@ -34,10 +34,10 @@ export interface DecodeRound {
  * are shuffled. Confusable exclusion also applies pairwise among distractors.
  */
 export function buildRound(target: FirstWord): DecodeRound {
-  const targetFirst = target.word[0]! as Letter;
+  const targetFirst = target.word.charAt(0) as Letter;
   const candidates = DECODE_POOL.filter((entry) => {
     if (entry.word === target.word) return false;
-    const candFirst = entry.word[0]! as Letter;
+    const candFirst = entry.word.charAt(0) as Letter;
     if (candFirst === targetFirst) return false;
     if (isConfusableWith(candFirst, targetFirst)) return false;
     return true;
@@ -49,7 +49,7 @@ export function buildRound(target: FirstWord): DecodeRound {
   const usedFirsts: Letter[] = [];
   for (const cand of shuffled) {
     if (distractors.length >= 3) break;
-    const candFirst = cand.word[0]! as Letter;
+    const candFirst = cand.word.charAt(0) as Letter;
     const conflictsWithUsed = usedFirsts.some(
       (used) => used === candFirst || isConfusableWith(used, candFirst),
     );
@@ -65,9 +65,15 @@ export function buildRound(target: FirstWord): DecodeRound {
     );
     for (const cand of shuffle(fallbackPool)) {
       if (distractors.length >= 3) break;
-      const candFirst = cand.word[0]! as Letter;
+      const candFirst = cand.word.charAt(0) as Letter;
       if (candFirst === targetFirst) continue;
-      if (distractors.some((d) => d[0] === candFirst)) continue;
+      if (isConfusableWith(candFirst, targetFirst)) continue;
+      if (
+        distractors.some(
+          (d) => d.charAt(0) === candFirst || isConfusableWith(d.charAt(0) as Letter, candFirst),
+        )
+      )
+        continue;
       distractors.push(cand.word);
     }
   }

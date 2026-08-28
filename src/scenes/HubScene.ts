@@ -183,7 +183,7 @@ export const GAME_TILES: readonly GameTile[] = [
 
 const TILE_WIDTH = 160;
 /**
- * 19 tiles render as 5×5×5×4 (rows 5/5/5/4). Height and spacing are sized so the
+ * 19 tiles render as 5×3+4 (rows 5/5/5/4). Height and spacing are sized so the
  * 4 rows fit inside 768 with the same 119px top/bottom margins as the 15-tile
  * grid — clearing the top-band controls (avatar chip / Settings, bottom edge
  * 116) while keeping every tile and its sticker shelf on-canvas.
