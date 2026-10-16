@@ -13,7 +13,7 @@
 ## Phase 2 — v1.17.0 release notes
 
 - [x] Task 2.1: Author `docs/release-notes-v1.17.0.md` from git history (v1.16.0 notes structure: Highlights → Changes → Verification → Known issues). [5313155]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [0894492]
 
 ## Phase 3 — PRD / TDD amendments
 
@@ -30,7 +30,7 @@
 ## Checkpoints
 
 - Phase 1: `[checkpoint: 16be6a3]`
-- Phase 2: `[checkpoint: pending]`
+- Phase 2: `[checkpoint: 0894492]`
 - Phase 3: `[checkpoint: pending]`
 - Phase 4: `[checkpoint: pending]`
 - Track: `[checkpoint: pending]`
