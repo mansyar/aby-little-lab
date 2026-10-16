@@ -6,7 +6,7 @@
 
 ## Phase 1 — README refresh
 
-- [ ] Task 1.1: Mini-games table 18 → 20 rows (Decode It + Number Order with milestone + ✅ status; replay-variety paragraph appended).
+- [x] Task 1.1: Mini-games table 18 → 20 rows (Decode It + Number Order with milestone + ✅ status; replay-variety paragraph appended). [1534a68]
 - [ ] Task 1.2: Counts + structure (1101/45 → fresh full-suite figures; scenes/registry/preload/Hub 5×4 text).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
