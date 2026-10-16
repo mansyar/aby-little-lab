@@ -226,7 +226,7 @@ new Phaser.Game(config);
 
 ### Bundle Code Splitting & Lazy Scene Loading (2026-08-02)
 
-**Design decision:** only the shell scenes (`BootScene`, `PreloadScene`, `HubScene`) are statically registered; the eight game scenes are lazy-loaded so the startup bundle excludes their code (track `code-splitting_20260802`, archived at `conductor/archive/code-splitting_20260802/`).
+**Design decision:** only the shell scenes (`BootScene`, `PreloadScene`, `HubScene`) are statically registered; the twenty game scenes are lazy-loaded (23 registry loaders incl. aliases) so the startup bundle excludes their code (track `code-splitting_20260802`, archived at `conductor/archive/code-splitting_20260802/`; Games 19–20 registered by their own tracks in 2026-08).
 
 **Phaser 4.2.1 limitation (verified in `SceneManager.js`):** the `scene` array does **not** support async/lazy loaders. `SceneType` includes `Function`, but `createSceneFromFunction` invokes `new scene()` synchronously — no promise is awaited, so a dynamic-import function cannot be used as an array entry. The supported pattern is runtime registration: `await import()` the scene module, then `scene.add(key, SceneClass)` before `scene.start(key)`.
 
@@ -503,6 +503,8 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `tile_add_it_up.svg` | 512×512 | Hub | Game 16 tile icon — two dot-cards (2 blue vs 3 green dots) joined by a chunky plus, yellow answer card with 5 blue dots |
 | `tile_take_away.svg` | 512×512 | Hub | Game 17 tile icon — two dot-cards (4 blue vs 2 green dots) joined by a chunky minus, yellow answer card with 2 blue dots |
 | `tile_memory_match.svg` | 512×512 | Hub | Game 18 tile icon — three mini-cards: two face-down cream cards flanking a face-up card with a blue star |
+| `tile_decode_it.svg` | 512×512 | Hub | Game 19 tile icon — 4 mini word cards with magnifier + sparkle motif |
+| `tile_number_order.svg` | 512×512 | Hub | Game 20 tile icon — ascending 1→2→3 staircase + arrow + sparkle motif |
 | `shelf.svg` | 512×512 | Game 4 | Shadow display shelf |
 | `lock_icon.svg` | 512×512 | Global | Parental lock indicator |
 | `star.svg` | 512×512 | Game 3 / Global | Bonus star, rating |

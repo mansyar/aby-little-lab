@@ -238,6 +238,28 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
 - **Phaser Engine Logic:** Tap an unrevealed, unmatched card → flip + pop. First pick stores the index; second pick evaluates `isPair` — match: both cards lock face-up with a 250ms green success flash (revert), `playCorrect` + mascot cheer + `recordCorrect`; mismatch: `playIncorrect` + mascot nod + per-card wiggle, flip both back after 800ms + `recordWrong` (each matched pair = one correct, each mismatched pair = one wrong, so parent Learning Progress accuracy stays meaningful). Winning flushes the session counters via `GameSceneBase.completeGame()` — plays/wins flow unchanged from the Hub tile tap. No speaker button, no speech (third speech-free game).
 - **Accessibility:** All cards ≥ 96px touch (150/132/120px by band); the back button uses the shared 96px hit area. Visual working memory is the learning content — the face-down cards are the prompt and matching identical textures is the answer, no written instructions anywhere (extends the Game 8 zero-text amendment). No audio dependency: fully playable with SFX off. All tweens are reduced-motion-aware. No-fail design.
 
+### GAME 19 — Decode It (Early Decoding / Word Recognition) ✅ Implemented
+
+- **Milestone:** Early decoding — match a pictured, spoken word to its written form.
+- **Mechanics:** Each round shows a picture (180px) and speaks the word aloud (SFX-gated, speaker replay); four word cards below (2×2 grid, 160px cards, ≥96px touch) show distinct written words and the child taps the one matching the picture + spoken word. 6 rounds per playthrough, easy-first bands: rounds 1–3 sample the 12 tier-3 (3-letter) words, rounds 4–6 the 10 tier-4 (4-letter) pool; 6 unique targets per playthrough with no shared first letter and no confusable-family overlap within a round. Adaptive ±1 band shifts the tier split (4+2 / 3+3 / 2+4); shift 0 is byte-identical to classic.
+- **Round Logic:** Pure functions in `src/game/decodeLogic.ts` (`buildRound`/`buildPlaythrough`/`isCorrect` with guards) — testable without Phaser. Word pool 22 (18 + FOX/CUP/MAP/BED with 4 new storybook SVGs).
+- **SVG Requirements:** `tile_decode_it.svg`, `sticker_decode_it.svg`, plus `fox.svg`/`cup.svg`/`map.svg`/`bed.svg` item art. Preload 162 → 168.
+- **Phaser Engine Logic:** Correct tap: success flash + chime + mascot cheer + progress-dot pop, 700ms advance. Wrong tap: wiggle ±4° + nod, no penalty. After 6 rounds: shared win celebration + first-time sticker + 3s auto-return with `{ justEarned: "decode-it" }`. Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Picture + spoken word is the prompt and written word cards are the answer set; letters are the learning content, no written instructions anywhere (extends the Game 8 zero-text amendment). Fully playable visually with SFX off. All tweens reduced-motion-aware. No-fail design.
+
+### GAME 20 — Number Order (Numeral Sequencing / Ordinality) ✅ Implemented
+
+- **Milestone:** Numeral sequencing — arrange shuffled numerals in ascending order.
+- **Mechanics:** Each round shows dashed empty-slot outlines on top and shuffled numeral cards below (140×160, ≥96px touch); the child drags each card into a slot so the row reads ascending. Drag lift/tilt juice + `Back.out` snap, occupied-slot swap, tap-to-return; tapping a card speaks its numeral aloud (`speakNumber`, SFX-gated, silent fallback). 6 rounds per playthrough, easy-first bands: rounds 1–2 arrange 3 numerals from 1–5, rounds 3–4 arrange 4 from 1–8, rounds 5–6 arrange 5 from 1–10. The round auto-validates when the last slot fills: ascending → success flash + chime + cheer + dot pop, 700ms advance; out of order → wiggle + nod + bounce-back, no penalty. Adaptive ±1 band via `getAdaptiveBandShift("number-order")` (−1 → [1,1,1,1,2,2], 0 → classic [1,1,2,2,3,3], +1 → [2,2,3,3,3,3]).
+- **Round Logic:** Pure functions in `src/game/numberOrderLogic.ts` (`buildRound` samples unique numerals, sorts ascending for the solution, shuffles with an ascending-guard reshuffle; `buildPlaythrough(shift)` maps the shifted ladder; `isCorrect` exact-order check) — testable without Phaser.
+- **SVG Requirements:** `tile_number_order.svg` (ascending staircase motif), `sticker_number_order.svg` (cream badge, 1-2-3 stepping blocks + star). Preload 168 → 170. Zero new object art (numeral cards are Phaser text).
+- **Phaser Engine Logic:** Scene `src/scenes/NumberOrderScene.ts` key `NumberOrder` extends `GameSceneBase` (drag via shared `dragJuice`, `inputLocked` during transitions, 6 progress dots, `completeGame("number-order")` + 3s auto-return with `{ justEarned: "number-order" }`). Parental lock (hold 3s) exits to Hub at any time.
+- **Accessibility:** Shuffled numeral cards are the prompt and ascending slot order is the answer; numerals are the learning content, no written instructions anywhere (extends the Game 8 zero-text amendment). No prompt voice; fully playable with SFX off. All tweens reduced-motion-aware. No-fail design.
+
+### Adaptive Difficulty (15 games)
+
+- Per-profile ±1 band ladders from a rolling 10-tap window (≥90% nudges up, <60% nudges down, re-evaluated fresh each session, never mid-game; invisible to kids; Settings toggle, default ON). Covers the numeracy five (How Many?, More or Less, Add It Up, Take Away, Number Order), the literacy & memory seven (Find the Word, Build the Word, First Sounds, Find the Letter, Memory Match, Musical Memory, Decode It), plus Pattern Builder, Odd One Out, and Color Match. The five fixed-difficulty games (Shape Sorter, Shadow Match, Big vs. Small, Pop & Freeze, Animal Trace) stay fixed by design.
+
 ---
 
 ## 5. Game Flow & Navigation
@@ -259,13 +281,13 @@ this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 })
     │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
     │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
     │  sticker, Games 9 & 10 letter/animal/food/object textures +
-     │  stickers — all 18 games'
+     │  stickers — all 20 games'
     │  assets loaded)
     │
     ▼
 [HubScene]
     │
-    ├── Display 18 game tiles (grid, 5×3 + 3 — row 4 holds 3 left-aligned tiles)
+    ├── Display 20 game tiles (grid, 5×4 — four rows of five)
     ├── Display sticker shelf (earned thumbnails + empty-slot outlines)
     ├── Hold Settings for 3s ──────► [Settings modal]
     │                                 ├── Toggle persisted BGM/SFX settings
