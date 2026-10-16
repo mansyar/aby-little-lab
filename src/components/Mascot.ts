@@ -54,7 +54,7 @@ export const MASCOT_CORNER_MARGIN = 90;
 
 /**
  * Places a non-interactive mascot in the bottom-right corner of a scene,
- * behind gameplay z-order. Used by the Hub and all six game scenes.
+ * behind gameplay z-order. Used by the Hub and all twenty game scenes.
  */
 export function createCornerMascot(scene: Phaser.Scene): Mascot {
   return new Mascot(
