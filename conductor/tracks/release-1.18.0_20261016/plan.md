@@ -18,9 +18,9 @@
 
 ## Phase 3 — Tag + deploy + live verification
 
-- [x] Task 3.1: Tag `v1.18.0` on the merge commit with lineage guard (`tag parent == merge commit`), push tag. [v1.18.0 → e535c52]
-- [~] Task 3.2: Coolify deploy (webhook, `--fail-with-body`) → live entry-hash match vs local `dist/` → live smoke (boot → Hub 20 tiles → adaptive game round-trip → sticker shelf → footer `v1.18.0`); complete the notes Verification section.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 3.1: Tag `v1.18.0` on the merge commit with lineage guard (`tag parent == merge commit`), push tag. [v1.18.0 → e535c52, then retargeted → 582fd18 to include #36 POST fix]
+- [x] Task 3.2: Coolify deploy (webhook, `--fail-with-body`) → live entry-hash match vs local `dist/` → live smoke (boot → Hub 20 tiles → adaptive game round-trip → sticker shelf → footer `v1.18.0`); complete the notes Verification section. [deploy run 38976970923 green (POST, 5s); live index-BGGO8o19.js match; HTTP 200 + v1.18.0 in live bundle; notes FINAL with device matrix pending]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Device matrix
 
@@ -37,7 +37,7 @@
 
 - Phase 1: `[checkpoint: 3fd5645]`
 - Phase 2: `[checkpoint: b92472e]`
-- Phase 3: `[checkpoint: pending]`
+- Phase 3: `[checkpoint: e18efdc]`
 - Phase 4: `[checkpoint: pending]`
 - Phase 5: `[checkpoint: pending]`
 - Track: `[checkpoint: pending]`
