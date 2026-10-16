@@ -13,7 +13,7 @@
 - [x] Task 1.2: Delete `src/__tests__/components/LigneMascot.test.ts`; run
   the mascot suite and confirm the new tests fail for the right reason
   (no implementation yet) and nothing else breaks. [be143a7 — deletion rode along in the Task 1.1 commit]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Single-path mascot (GREEN)
 
@@ -27,38 +27,39 @@
 - [x] Task 2.3: Delete `src/components/LigneMascot.ts`,
   `src/assets/ligne/hoot.ligne` + `hoot.ligne.json`, and
   `src/preview/ligne-hoot.ts`; full test suite green. [755d575 + preview-hoot.html/public/hoot.ligne/hoot.svg also removed]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Build config + validators (measured proof)
 
-- [ ] Task 3.1: Remove `@ligne-engine/web` + `@ligne-engine/bundler` from
+- [x] Task 3.1: Remove `@ligne-engine/web` + `@ligne-engine/bundler` from
   `package.json` (regenerate lockfile), the `ligne()` plugin and
   `.ligne`/`.wasm` globs from `vite.config.ts`, and the bundler types entry
-  from `tsconfig.json`.
-- [ ] Task 3.2: `scripts/validate-pwa.js` Ligne precache assertions become
-  absence checks; run `pnpm run check` + production build.
-- [ ] Task 3.3: Record measured proof — `dist/` has zero `.wasm`/`.ligne`
+  from `tsconfig.json`. [9d2f82f]
+- [x] Task 3.2: `scripts/validate-pwa.js` Ligne precache assertions become
+  absence checks; run `pnpm run check` + production build. [9d2f82f]
+- [x] Task 3.3: Record measured proof — `dist/` has zero `.wasm`/`.ligne`
   files, precache ≤ ~1.9 MB (from 3.38 MB); case-insensitive `ligne` search
   over `src/`, `scripts/`, `vite.config.ts`, `tsconfig.json`, `package.json`
-  returns nothing.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+  returns nothing. [9d2f82f + cd25408 (gate fixes: guarded optional chain, dead helpers marked intentional)]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Docs sweep
 
-- [ ] Task 4.1: Update `conductor/product.md` (mascot line),
+- [x] Task 4.1: Update `conductor/product.md` (mascot line),
   `conductor/tech-stack.md` (design-update entry), `docs/TDD.md` (mascot
-  section), and `docs/device-testing-checklist.md` (Ligne offline-first rows).
-- [ ] Task 4.2: Append the post-removal precache addendum to
-  `docs/perf-baseline.md` with the measured Phase 3 numbers.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+  section), and `docs/device-testing-checklist.md` (Ligne offline-first rows). [21f3d84 — product.md already tween-only, no change]
+- [x] Task 4.2: Append the post-removal precache addendum to
+  `docs/perf-baseline.md` with the measured Phase 3 numbers. [21f3d84]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Checkpoints
 
-- Phase 1: `[checkpoint: pending]`
-- Phase 2: `[checkpoint: pending]`
-- Phase 3: `[checkpoint: pending]`
-- Phase 4: `[checkpoint: pending]`
-- Track: `[checkpoint: pending]`
+- Phase 1: `[checkpoint: a4a00e9]`
+- Phase 2: `[checkpoint: 43b791b]`
+- Phase 3: `[checkpoint: 7970595]`
+- Phase 4: `[checkpoint: 931962f]`
+- Track: `[checkpoint: pending-pr]`
 
 ## Verification Notes
 
