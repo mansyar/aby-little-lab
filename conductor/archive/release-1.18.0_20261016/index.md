@@ -1,6 +1,6 @@
 # Track: v1.18.0 Release Execution — Adaptive-Remaining + Docs Refresh
 
-**ID:** `release-1.18.0_20261016` · **Type:** Chore / Release · **Status:** new · **Branch:** `release/v1.18.0`
+**ID:** `release-1.18.0_20261016` · **Type:** Chore / Release · **Status:** complete · **Branch:** `release/v1.18.0` (deleted after merge)
 **Created:** 2026-10-16 · **Base tag:** `v1.17.0` → **Target:** `1.18.0`
 
 - **Spec:** [./spec.md](./spec.md) — Source of Truth for scope

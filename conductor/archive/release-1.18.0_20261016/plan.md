@@ -24,23 +24,23 @@
 
 ## Phase 4 — Device matrix
 
-- [ ] Task 4.1: 4-class matrix (iPad/iPadOS, iPhone/iOS, Android tablet/phone) + desktop smoke (install/update, offline relaunch, touch targets, landscape lock, reduced-motion spot). Deferral only by explicit user decision, recorded in the checkpoint note (v1.14.1 precedent).
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 4.1: 4-class matrix (iPad/iPadOS, iPhone/iOS, Android tablet/phone) + desktop smoke (install/update, offline relaunch, touch targets, landscape lock, reduced-motion spot). Deferral only by explicit user decision, recorded in the checkpoint note (v1.14.1 precedent). [DEFERRED by user decision 2026-10-16 — desktop smoke green (HTTP 200 + live hash match + v1.18.0 in live bundle); device-class rows recorded PENDING in docs/device-testing-checklist.md]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Branch hygiene + archive
 
-- [ ] Task 5.1: Stale branch cleanup (full local + remote mode; `release/v1.18.0` deleted last, after merge).
-- [ ] Task 5.2: Finalize notes, mark registry `[x]`, archive the track.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 5.1: Stale branch cleanup (full local + remote mode; `release/v1.18.0` deleted last, after merge). [remote release/v1.18.0 + local release/v1.18.0 deleted; stale local release/v1.16.0 (1 unmerged conductor-only commit, content preserved in archive) deleted; only master remains local + remote]
+- [x] Task 5.2: Finalize notes, mark registry `[x]`, archive the track.
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Checkpoints
 
 - Phase 1: `[checkpoint: 3fd5645]`
 - Phase 2: `[checkpoint: b92472e]`
 - Phase 3: `[checkpoint: e18efdc]`
-- Phase 4: `[checkpoint: pending]`
-- Phase 5: `[checkpoint: pending]`
-- Track: `[checkpoint: pending]`
+- Phase 4: `[checkpoint: deferred-device-matrix]`
+- Phase 5: `[checkpoint: pending-commit]`
+- Track: `[checkpoint: pending-commit]`
 
 ## Verification Notes
 
