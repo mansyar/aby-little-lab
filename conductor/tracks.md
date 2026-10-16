@@ -180,3 +180,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: v1.18.0 Release Execution — Adaptive-Remaining + Docs Refresh** *Link: [./archive/release-1.18.0_20261016/index.md](./archive/release-1.18.0_20261016/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Drop Ligne Engine — Tween/SVG-Only Mascot** *Link: [./tracks/drop-ligne-mascot_20261016/index.md](./tracks/drop-ligne-mascot_20261016/index.md)*
