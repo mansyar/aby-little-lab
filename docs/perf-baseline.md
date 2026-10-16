@@ -77,3 +77,65 @@ the first Ligne request began 107.3 ms after the page load event, confirming
 that the `.ligne`, JS bridge, and WASM engine were not on the measured boot
 critical path. The tween mascot remains available immediately and the Ligne
 runtime replaces it asynchronously.
+
+## Track Baseline — hub-phone-ux-perf_20261017 — 2026-10-17
+
+Phase 1 "before" numbers for the Phone-Scale Hub UX + Boot/Texture Performance
+Hardening track (spec NFR + acceptance evidence).
+
+### Method
+
+Same production-preview Navigation Timing method as the baseline above
+(`pnpm run build` → `pnpm exec vite preview --port 4173`), with two hardening
+lessons from this run:
+
+1. **One cold load per fresh browser context.** In-context reload samples
+   (even with `Network.clearBrowserCache`) were contaminated by background
+   service-worker precache work and CDP session overhead — inflated readings
+   of 22–52 s that do not reflect boot. Every number below is a single
+   navigation in a freshly opened headless Chromium context (1024×768).
+2. **4× CPU throttle applied before navigation** via CDP
+   `Emulation.setCPUThrottlingRate`, as the low-end-device proxy.
+
+### Results (2026-10-17, build with 170-asset preload)
+
+| Metric | Measured | Target | Status |
+|---|---:|---:|---|
+| Boot, cold load ×3 (reference desktop) | 1927 / 2036 / 2162 ms (median **2036 ms**) | < 3000 ms | PASS |
+| DOM content loaded (same runs) | ~332–358 ms | — | — |
+| JS heap at boot (same runs) | ~18 MB | < 150 MB total | — |
+| Network requests at boot | 12 (SVGs are inlined base64 data URIs — no network fetch) | — | expected |
+| **Boot, 4× CPU throttle ×2** | 16005 / 16290 ms (median **~16.1 s**) | < 3000 ms | **FAIL (~5.4× budget)** |
+| PWA precache | 48 entries, 3382 KiB | — | — |
+
+The 4×-throttled result supersedes the 2026-08-09 follow-up estimate
+("~2.5 s worst case"): the real throttled cost includes JS parse/compile of
+the ~1.37 MB Phaser vendor chunk plus the 170-SVG rasterization, and lands
+~5× over budget. The reference profile remains comfortably inside budget
+(median 2036 ms, consistent with the 2065 ms 2026-08-24 record).
+
+### Texture memory audit (analytic, preload-time)
+
+All 170 SVG assets rasterize at a uniform `SVG_RASTER_SIZE = 512`
+(`src/scenes/PreloadScene.ts`), inlined as base64 data URIs in the JS bundle:
+
+- Per-texture RGBA: 512 × 512 × 4 B = 1,048,576 B (1 MiB)
+- 170 textures ≈ **178 MB** GPU-resident potential once uploaded
+  (+ ~33% ≈ 237 MB if mipmaps are generated)
+- Most consumers display far below 512 px (Hub tiles ~160×116, stickers ~256)
+
+This exceeds the < 150 MB total memory NFR when combined with heap + runtime
+buffers, and is the primary optimization target of Phase 3 (per-use tiers).
+
+### Verification notes
+
+- Hub rendered correctly after boot in every run (all 20 tiles, mascot,
+  profile avatar, Settings); screenshot captured 2026-10-17.
+- Only console error: `favicon.ico` 404 (cosmetic, unrelated to this track).
+
+### Decision
+
+Proceed with the planned optimization phases (per-use raster tiers, storage
+memoization, font-gate concurrency, bgm trim). The 4×-throttled boot failure
+makes the texture-tier work the highest-value item; "after" numbers will be
+recorded in Phase 6 against this baseline.
