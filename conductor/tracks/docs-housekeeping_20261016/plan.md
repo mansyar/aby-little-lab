@@ -19,11 +19,11 @@
 
 - [x] Task 3.1: `docs/PRD.md` — Games 19–20 entries + adaptive coverage 12 → 15. [007a318]
 - [x] Task 3.2: `docs/TDD.md` — registry 22 → 23 loaders, preload 168 → 170, Hub 5×3+4 → 5×4, paging 6+6+6+1 → 6+6+6+2, adaptive facade ids. [007a318]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [dbbe5d8]
 
 ## Phase 4 — Archive, registry fix & full verification
 
-- [ ] Task 4.1: Archive `number-order_20260828` (`conductor/tracks/` → `conductor/archive/`) + fix `tracks.md` link to `./archive/…` with `(Archived)`.
+- [~] Task 4.1: Archive `number-order_20260828` (`conductor/tracks/` → `conductor/archive/`) + fix `tracks.md` link to `./archive/…` with `(Archived)`.
 - [ ] Task 4.2: Full gates — `pnpm run check` · `CI=true pnpm test` · `pnpm run build` + relative-link review (`tracks.md` → archive `index.md`, README anchors, notes cross-links).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
@@ -31,7 +31,7 @@
 
 - Phase 1: `[checkpoint: 16be6a3]`
 - Phase 2: `[checkpoint: 0894492]`
-- Phase 3: `[checkpoint: pending]`
+- Phase 3: `[checkpoint: dbbe5d8]`
 - Phase 4: `[checkpoint: pending]`
 - Track: `[checkpoint: pending]`
 
