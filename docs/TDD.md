@@ -364,7 +364,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 - **Cancellation:** `pointerup`, `pointerout`, and `pointercancel` all cancel the hold and fire `onFailure` exactly once; `destroy()` (scene shutdown) cancels without firing callbacks.
 - **Exactly-once success:** the delayed-call callback checks `holdActive`, nulls the timer, clears the ring, then invokes `onSuccess()`; stale callbacks after cancel/destroy/shutdown are no-ops.
 - **Circular progress ring:** on `pointerdown`, a `Graphics` ring (48px radius, `#68D391` at 0.6 alpha, depth 10000) is drawn around the target center via `slice()` + `fillPath()`, animated with a `tweens.add` value tween over the hold duration. The ring and tween are destroyed on cancel, completion, and `destroy()` — no display objects leak.
-- **Hit areas:** protected controls (all eighteen game Back buttons, Hub Settings, Musical Memory Replay) use `setInteractive({ hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96), hitAreaCallback: Phaser.Geom.Rectangle.Contains })`. Phaser anchors custom hit areas at the **top-left of the display bounds** (`pointWithinHitArea` adds `displayOriginX/Y`), independent of `setOrigin` — hence `Rectangle(0, 0, 96, 96)` for every protected control. The shared replay `SpeakerButton` (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Musical Memory) uses a *centered* hit area (`Rectangle(-48, -48, 96, 96)`) because its icon texture is centered on its origin; press feedback attaches the same way (2026-08-06).
+- **Hit areas:** protected controls (all twenty game Back buttons, Hub Settings, Musical Memory Replay) use `setInteractive({ hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96), hitAreaCallback: Phaser.Geom.Rectangle.Contains })`. Phaser anchors custom hit areas at the **top-left of the display bounds** (`pointWithinHitArea` adds `displayOriginX/Y`), independent of `setOrigin` — hence `Rectangle(0, 0, 96, 96)` for every protected control. The shared replay `SpeakerButton` (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Musical Memory) uses a *centered* hit area (`Rectangle(-48, -48, 96, 96)`) because its icon texture is centered on its origin; press feedback attaches the same way (2026-08-06).
 
 ### Game IDs
 
@@ -566,8 +566,8 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 
 | File | Dimensions | Used In | Notes |
 |---|---|---|---|
-| `mascot_idle.svg` | 512×512 | Hub + all eighteen games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
-| `mascot_celebrate.svg` | 512×512 | Hub + all eighteen games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
+| `mascot_idle.svg` | 512×512 | Hub + all twenty games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
+| `mascot_celebrate.svg` | 512×512 | Hub + all twenty games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
 
 > **Note:** The mascot is **tween-only** — no sprite sheets or particle emitters. Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
 
@@ -625,7 +625,7 @@ Track `conductor/archive/uiux-hardening_20260805/` — consolidated audit remedi
 - **Audio unlock:** Hub `input.on("pointerdown")` calls `AudioManager.resume()`.
 - **Settings readability:** font bumps (see §6), footer under the title, `viewportZoom.ts` pinch-zoom while open.
 - **Find the Letter textures:** AlphabetScene renders target + cards from `letter_*` SVG textures (256px / 128px) instead of system-font text.
-- **Polish:** sticker tween delayed 400ms/250ms in all eighteen scenes; idle attract wiggles 2 rotating tiles; Preload brand lockup; Shadow Match objects 112px; `sleep_zzz` glyph; footer reposition.
+- **Polish:** sticker tween delayed 400ms/250ms in all twenty scenes; idle attract wiggles 2 rotating tiles; Preload brand lockup; Shadow Match objects 112px; `sleep_zzz` glyph; footer reposition.
 
 ---
 
@@ -664,7 +664,7 @@ The Hub implements the engagement track (FR1–FR5):
 ### `completionEffect.ts`
 
 - `createCompletionSplash(scene, x, y)` — bounded success effect for correct in-game actions; self-cleaning (destroys on tween complete), never clouds the play area.
-- `createWinCelebration(scene, x, y)` — the shared completion effect used by all eighteen games (replaces per-game bespoke win tweens):
+- `createWinCelebration(scene, x, y)` — the shared completion effect used by all twenty games (replaces per-game bespoke win tweens):
   - 10 rays + 10 drifting confetti bits (`WIN_CONFETTI_COUNT = 10`), `WIN_STANDARD_DURATION = 700ms`, ray burst scale 1.25×.
   - Colors: `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea`.
   - Reduced motion: `WIN_REDUCED_DURATION = 300ms`, 6 rays, burst scale 1.0×, **no particles**.
@@ -683,7 +683,7 @@ The Hub implements the engagement track (FR1–FR5):
 | Bubble pop shrink (Pop & Freeze!) | 200 ms | 120 ms |
 | Wake wobble (Pop & Freeze!) | 300 ms, 1.15× base | 180 ms, 1.05× base |
 | Frog bounce (Musical Memory) | 200 ms, 1.2× base | 120 ms, 1.05× base |
-| Sticker pops (all eighteen games) | 300 ms | 180 ms |
+| Sticker pops (all twenty games) | 300 ms | 180 ms |
 
 ### Per-game juice (2026-08-01)
 
@@ -721,7 +721,7 @@ The Mascot Companion track (archived at `conductor/archive/mascot-companion_2026
 - `idleLoop()` — Hub-only: 3px vertical bob (`Sine.inOut`, 2500ms yoyo, `repeat: -1`) + periodic squash-blink (`scaleY 0.92`, 150ms, `repeatDelay 3700ms`). No-op under reduced motion.
 - `destroy()` — removes the sprite, any active cheer/blink tweens, and the sparkle ring.
 - `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `wave()` after the scene entrance, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
-- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all eighteen games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
+- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all twenty games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
 
 Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 317 integration tests in `src/__tests__/scenes/navigation.test.ts` (Hub navigation, profile switcher, PWA toasts, mascot, engagement/idle, sticker shelf, touch regression, and play-time enforcement).
 

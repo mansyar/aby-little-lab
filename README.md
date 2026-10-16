@@ -167,7 +167,7 @@ Every game layers scene-level animation juice on top of its core rules (no gamep
 
 The Hub is the child's landing screen, built for gentle, playful engagement:
 
-- **Tile icons** — every tile shows a distinct storybook icon (80px, `src/assets/svg/ui/tiles/`) above a small text label, so the 18 games are identifiable at a glance without reading (2026-08-06).
+- **Tile icons** — every tile shows a distinct storybook icon (80px, `src/assets/svg/ui/tiles/`) above a small text label, so the 20 games are identifiable at a glance without reading (2026-08-06).
 - **Staggered entrance** — tiles, labels, icons, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
 - **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
 - **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned slots show a dashed empty-slot outline so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session. The shelf always shows the active profile's collection and re-renders on profile switch.
