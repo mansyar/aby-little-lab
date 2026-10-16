@@ -231,7 +231,8 @@ function getCards(scene: unknown): Array<Record<string, MockFn>> {
   return containerMock.mock.results.map((r) => r.value as Record<string, MockFn>);
 }
 
-function fireDrop(scene: unknown, zone: unknown): void {
+// Unused drop helper kept for future drop-path tests (underscore = intentional).
+function _fireDrop(scene: unknown, zone: unknown): void {
   const card = getCards(scene).at(-1) as Record<string, MockFn>;
   const dropHandler = getMockFn(card.on).mock.calls.find((c) => c[0] === "drop")?.[1];
   if (typeof dropHandler === "function") {
@@ -239,7 +240,8 @@ function fireDrop(scene: unknown, zone: unknown): void {
   }
 }
 
-function fireDragEnd(scene: unknown): void {
+// Unused dragend helper kept for future drop-path tests (underscore = intentional).
+function _fireDragEnd(scene: unknown): void {
   const card = getCards(scene).at(-1) as Record<string, MockFn>;
   const dragEndHandler = getMockFn(card.on).mock.calls.find((c) => c[0] === "dragend")?.[1];
   if (typeof dragEndHandler === "function") {

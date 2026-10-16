@@ -6698,7 +6698,10 @@ describe("scene navigation flow", () => {
 
             const angleTweens = findMascotAngleTweens(scene, mascot);
             // Entry curious() tilts first; the incorrect-action nod comes last.
-            expect((angleTweens[0]?.angle as { to: number }).to).toBe(10);
+            const entry = angleTweens[0];
+            expect(entry).toBeDefined();
+            if (!entry) return;
+            expect((entry.angle as { to: number }).to).toBe(10);
             const nod = angleTweens[angleTweens.length - 1];
             expect(nod).toBeDefined();
             if (!nod) return;
