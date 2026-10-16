@@ -18,8 +18,8 @@
 
 ## Phase 3 — Tag + deploy + live verification
 
-- [~] Task 3.1: Tag `v1.18.0` on the merge commit with lineage guard (`tag parent == merge commit`), push tag.
-- [ ] Task 3.2: Coolify deploy (webhook, `--fail-with-body`) → live entry-hash match vs local `dist/` → live smoke (boot → Hub 20 tiles → adaptive game round-trip → sticker shelf → footer `v1.18.0`); complete the notes Verification section.
+- [x] Task 3.1: Tag `v1.18.0` on the merge commit with lineage guard (`tag parent == merge commit`), push tag. [v1.18.0 → e535c52]
+- [~] Task 3.2: Coolify deploy (webhook, `--fail-with-body`) → live entry-hash match vs local `dist/` → live smoke (boot → Hub 20 tiles → adaptive game round-trip → sticker shelf → footer `v1.18.0`); complete the notes Verification section.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Device matrix
