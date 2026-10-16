@@ -85,6 +85,6 @@ jobs:
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
           curl --fail-with-body --silent --show-error \
-            --request GET \
+            --request POST \
             --url "$DEPLOY_WEBHOOK" \
             --header "Authorization: Bearer $COOLIFY_TOKEN"
