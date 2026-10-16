@@ -17,16 +17,16 @@
 
 ## Phase 2 — Single-path mascot (GREEN)
 
-- [ ] Task 2.1: Strip Ligne from `src/components/Mascot.ts` — remove the
+- [x] Task 2.1: Strip Ligne from `src/components/Mascot.ts` — remove the
   `ligne` field, all `if (this.ligne)` branches, `pendingLigneReaction`,
   `activateLigne`, and the `LigneMascot`/`LigneMascotLoader` imports;
-  `createCornerMascot` drops the loader param and the auto-activation.
-- [ ] Task 2.2: Implement `curious()` tilt-hop and `flapGreeting()` wave-hop
+  `createCornerMascot` drops the loader param and the auto-activation. [215688d]
+- [x] Task 2.2: Implement `curious()` tilt-hop and `flapGreeting()` wave-hop
   via `motionDuration` / `motionScale` gating (same two SVG poses, no new
-  assets); mascot suite green.
-- [ ] Task 2.3: Delete `src/components/LigneMascot.ts`,
+  assets); mascot suite green. [215688d]
+- [x] Task 2.3: Delete `src/components/LigneMascot.ts`,
   `src/assets/ligne/hoot.ligne` + `hoot.ligne.json`, and
-  `src/preview/ligne-hoot.ts`; full test suite green.
+  `src/preview/ligne-hoot.ts`; full test suite green. [755d575 + preview-hoot.html/public/hoot.ligne/hoot.svg also removed]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Build config + validators (measured proof)
