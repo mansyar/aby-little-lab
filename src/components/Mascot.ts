@@ -1,11 +1,5 @@
 import type Phaser from "phaser";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
-import {
-  activateLigneMascot,
-  type LigneMascot,
-  type LigneMascotLoader,
-  loadLigneMascot,
-} from "./LigneMascot";
 
 const IDLE_TEXTURE = "mascot_idle";
 const CELEBRATE_TEXTURE = "mascot_celebrate";
@@ -41,9 +35,15 @@ const BLINK_DURATION = 150;
 const BLINK_REPEAT_DELAY = 3700;
 
 const MASCOT_DEPTH = -1;
-// WASM compilation can exceed three seconds on lower-powered devices. The
-// fallback remains visible throughout, so a generous timeout has no UX cost.
-const LIGNE_LOAD_TIMEOUT_MS = 10_000;
+
+const CURIOUS_TILT = 10;
+const CURIOUS_REDUCED_TILT = 5;
+const CURIOUS_HOP = 6;
+const CURIOUS_DURATION = 220;
+const CURIOUS_REDUCED_DURATION = 140;
+
+const GREETING_REPEAT = 3;
+const GREETING_HOP = 6;
 const SPARKLE_DEPTH = 0;
 
 /** Default mascot scale for scene placement. */
@@ -56,19 +56,13 @@ export const MASCOT_CORNER_MARGIN = 90;
  * Places a non-interactive mascot in the bottom-right corner of a scene,
  * behind gameplay z-order. Used by the Hub and all six game scenes.
  */
-export function createCornerMascot(scene: Phaser.Scene, load?: LigneMascotLoader): Mascot {
-  const mascot = new Mascot(
+export function createCornerMascot(scene: Phaser.Scene): Mascot {
+  return new Mascot(
     scene,
     scene.scale.width - MASCOT_CORNER_MARGIN,
     scene.scale.height - MASCOT_CORNER_MARGIN,
     MASCOT_SCALE,
   );
-  if (load) {
-    void mascot.activateLigne(load);
-  } else if (import.meta.env.MODE !== "test") {
-    void mascot.activateLigne();
-  }
-  return mascot;
 }
 
 /**
@@ -90,8 +84,6 @@ export class Mascot {
   private cheerTween?: Phaser.Tweens.Tween;
   /** The squash-blink loop, paused while cheering so it never fights the bounce. */
   private blinkTween?: Phaser.Tweens.Tween;
-  private ligne?: LigneMascot;
-  private pendingLigneReaction?: (mascot: LigneMascot) => void;
   private destroyed = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number, scale: number) {
@@ -105,11 +97,6 @@ export class Mascot {
 
   /** Gentle wing/body sway — used on Hub load. */
   wave(): void {
-    if (this.ligne) {
-      this.ligne.wave();
-      return;
-    }
-    this.pendingLigneReaction = (mascot) => mascot.wave();
     this.addTween({
       targets: this.image,
       angle: { from: 0, to: motionScale(WAVE_ANGLE, WAVE_REDUCED_ANGLE) },
@@ -122,11 +109,6 @@ export class Mascot {
 
   /** Gentle rotate — pairs with the soft incorrect tone (no negative connotation). */
   nod(): void {
-    if (this.ligne) {
-      this.ligne.nod();
-      return;
-    }
-    this.pendingLigneReaction = (mascot) => mascot.nod();
     this.addTween({
       targets: this.image,
       angle: { from: 0, to: motionScale(NOD_ANGLE, NOD_REDUCED_ANGLE) },
@@ -139,11 +121,6 @@ export class Mascot {
 
   /** Bounce + sparkle ring while wearing the celebrate pose, then back to idle. */
   cheer(big = false): void {
-    if (this.ligne) {
-      this.ligne.cheer(big);
-      return;
-    }
-    this.pendingLigneReaction = (mascot) => mascot.cheer(big);
     this.image.setTexture(CELEBRATE_TEXTURE);
     this.cheerTween?.remove();
     this.blinkTween?.pause();
@@ -170,10 +147,6 @@ export class Mascot {
 
   /** Slow bob with a periodic squash-blink. Disabled under reduced motion. */
   idleLoop(): void {
-    if (this.ligne) {
-      this.ligne.idleLoop();
-      return;
-    }
     if (this.reduced) {
       return;
     }
@@ -196,49 +169,59 @@ export class Mascot {
     });
   }
 
-  /** Queues the game-entry reaction for Ligne without changing tween fallback motion. */
+  /** Head-tilt with a small hop — the game-entry reaction. */
   curious(): void {
-    if (this.ligne) {
-      this.ligne.curious();
+    if (this.reduced) {
+      this.addTween({
+        targets: this.image,
+        angle: { from: 0, to: CURIOUS_REDUCED_TILT },
+        duration: CURIOUS_REDUCED_DURATION,
+        yoyo: true,
+        repeat: 1,
+        ease: "Sine.inOut",
+      });
       return;
     }
-    this.pendingLigneReaction = (mascot) => mascot.curious();
-  }
-
-  /** Uses the existing fallback wave while reserving Ligne's richer greeting. */
-  flapGreeting(): void {
-    if (this.ligne) {
-      this.ligne.flapGreeting();
-      return;
-    }
-    this.wave();
-    this.pendingLigneReaction = (mascot) => mascot.flapGreeting();
-  }
-
-  /** Starts the post-boot Ligne hot-swap without delaying scene creation. */
-  async activateLigne(
-    load: LigneMascotLoader = (placement) => loadLigneMascot(this.scene, placement),
-  ): Promise<void> {
-    const ligne = await activateLigneMascot({
-      fallback: this.image,
-      placement: {
-        x: this.image.x,
-        y: this.image.y,
-        scale: this.baseScale,
-        depth: MASCOT_DEPTH,
-      },
-      load,
-      timeoutMs: LIGNE_LOAD_TIMEOUT_MS,
-      reducedMotion: this.reduced,
+    this.addTween({
+      targets: this.image,
+      angle: { from: 0, to: CURIOUS_TILT },
+      y: this.image.y - CURIOUS_HOP,
+      duration: CURIOUS_DURATION,
+      yoyo: true,
+      repeat: 1,
+      ease: "Sine.inOut",
     });
-    if (!ligne) return;
-    if (this.destroyed) {
-      ligne.destroy();
+  }
+
+  /** Double-wave with a hop — the Hub greeting. */
+  flapGreeting(): void {
+    if (this.reduced) {
+      this.addTween({
+        targets: this.image,
+        angle: { from: 0, to: motionScale(WAVE_ANGLE, WAVE_REDUCED_ANGLE) },
+        duration: motionDuration(WAVE_DURATION, WAVE_REDUCED_DURATION),
+        yoyo: true,
+        repeat: 1,
+        ease: "Sine.inOut",
+      });
       return;
     }
-    this.ligne = ligne;
-    this.pendingLigneReaction?.(ligne);
-    this.pendingLigneReaction = undefined;
+    this.addTween({
+      targets: this.image,
+      angle: { from: 0, to: WAVE_ANGLE },
+      duration: WAVE_DURATION,
+      yoyo: true,
+      repeat: GREETING_REPEAT,
+      ease: "Sine.inOut",
+    });
+    this.addTween({
+      targets: this.image,
+      y: this.image.y - GREETING_HOP,
+      duration: WAVE_DURATION,
+      yoyo: true,
+      repeat: 1,
+      ease: "Sine.inOut",
+    });
   }
 
   /** Stops all tweens and removes the image and any sparkle ring. */
@@ -253,9 +236,6 @@ export class Mascot {
     this.blinkTween = undefined;
     this.sparkle?.destroy();
     this.sparkle = null;
-    this.ligne?.destroy();
-    this.ligne = undefined;
-    this.pendingLigneReaction = undefined;
     this.image.destroy();
   }
 

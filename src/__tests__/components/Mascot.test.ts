@@ -410,7 +410,6 @@ describe("Mascot", () => {
       expect(harness.scene.add.image).toHaveBeenCalledWith(934, 678, "mascot_idle");
       expect(harness.image.setScale).toHaveBeenCalledWith(0.2);
     });
-
   });
 
   describe("destroy()", () => {
