@@ -77,3 +77,23 @@ the first Ligne request began 107.3 ms after the page load event, confirming
 that the `.ligne`, JS bridge, and WASM engine were not on the measured boot
 critical path. The tween mascot remains available immediately and the Ligne
 runtime replaces it asynchronously.
+
+## Ligne Removal Addendum — 2026-10-16
+
+Track: `drop-ligne-mascot_20261016`. The Ligne engine is deleted (tween/SVG-only
+mascot). Measured from the production Vite build on the reference machine:
+
+| Metric | Before (v1.18.0) | After | Delta |
+|---|---:|---:|---|
+| Precache payload | 3382.30 KiB / 48 entries | 1643.13 KiB / 42 entries | **−51%** |
+| `dist/` total | 4.7 MB | 3.0 MB | −1.7 MB (WASM engine + bridge + `.ligne` + dev copy) |
+| `.wasm` / `.ligne` in `dist/` | 3 files | 0 | gone (PWA validator now asserts absence) |
+| Shell entry | — | 171.2 kB | still ≤ 200 kB ceiling |
+| Phaser vendor | 1342.6 kB | 1342.6 kB | unchanged |
+
+Runtime effects (by construction, not re-measured): no WASM compilation on
+low-end devices, no per-frame DOM-canvas compositor overlay, no 10 s
+activation timeout — the tween Hoot renders from scene creation on every
+device class, reduced-motion path unchanged. Boot budget (< 3 s) was never on
+the Ligne path (engine loaded post-load-event), so boot time is unaffected;
+install/update payload is roughly halved.

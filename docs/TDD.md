@@ -84,7 +84,7 @@ aby-little-lab/
     │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
     │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay + context-aware install control (Install App / How to Install / hidden)
     │   ├── PwaToast.ts             # Hub lifecycle toast (update-ready + offline-ready, app-styled, reduced-motion-aware)
-    │   ├── Mascot.ts               # Professor Hoot mascot (wave/nod/cheer/idleLoop + createCornerMascot factory; tween-only, reduced-motion-aware)
+    │   ├── Mascot.ts               # Professor Hoot mascot (wave/nod/cheer/curious/flapGreeting/idleLoop + createCornerMascot factory; tween-only, reduced-motion-aware)
     │   └── SpeakerButton.ts        # Shared 96×96 replay speaker button (textless SVG icon, press feedback, 2026-08-06)
     ├── audio/
     │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
@@ -569,7 +569,7 @@ A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits bet
 | `mascot_idle.svg` | 512×512 | Hub + all twenty games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
 | `mascot_celebrate.svg` | 512×512 | Hub + all twenty games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
 
-> **Note:** The mascot is **tween-only** — no sprite sheets or particle emitters. Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
+> **Note:** The mascot is **tween-only** — no sprite sheets, particle emitters, or WASM engine (the Ligne pilot was removed; see the tech-stack removal entry). Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer, curious tilt-hop, flap-greeting double-wave) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
 
 ### Audio Assets (`public/audio/`)
 
@@ -720,10 +720,10 @@ The Mascot Companion track (archived at `conductor/archive/mascot-companion_2026
 - `cheer(big = false)` — swap to the celebrate pose, wings-up scale pop (1.1×/1.2×, 180ms/260ms `Back.out`; reduced: pose swap only, no bounce) plus a self-cleaning Graphics sparkle ring (r 32/48) on `big`. An in-flight cheer is **retired** (its tween is removed) before a new one starts, so rapid correct taps never stack scale tweens; the blink loop pauses during a cheer and resumes on complete.
 - `idleLoop()` — Hub-only: 3px vertical bob (`Sine.inOut`, 2500ms yoyo, `repeat: -1`) + periodic squash-blink (`scaleY 0.92`, 150ms, `repeatDelay 3700ms`). No-op under reduced motion.
 - `destroy()` — removes the sprite, any active cheer/blink tweens, and the sparkle ring.
-- `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `wave()` after the scene entrance, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
+- `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `flapGreeting()` after the Hub entrance and `curious()` on game-scene entry, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
 - **Scene wiring:** Hub waves on load, cheers on `justEarned`; all twenty games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
 
-Covered by 27 component tests (`src/__tests__/components/Mascot.test.ts`: reactions, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus 317 integration tests in `src/__tests__/scenes/navigation.test.ts` (Hub navigation, profile switcher, PWA toasts, mascot, engagement/idle, sticker shelf, touch regression, and play-time enforcement).
+Covered by 32 component tests (`src/__tests__/components/Mascot.test.ts`: reactions incl. curious tilt-hop and flap-greeting double-wave, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus the integration tests in `src/__tests__/scenes/navigation.test.ts` (Hub navigation, profile switcher, PWA toasts, mascot incl. the entry curious tilt, engagement/idle, sticker shelf, touch regression, and play-time enforcement).
 
 ### Test coverage
 
