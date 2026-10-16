@@ -108,6 +108,11 @@ describe("createRound", () => {
     }
   });
 
+  it("throws when a caller fully consumes the pool (misuse guard)", () => {
+    const used = new Set(["frog_green", "frog_blue", "frog_red"]);
+    expect(() => createRound(3, used)).toThrow("Odd One Out pool exhausted");
+  });
+
   it("varies group texture, odd texture, and odd slot across samples", () => {
     const groups = new Set<string>();
     const odds = new Set<string>();
@@ -182,6 +187,90 @@ describe("createPlaythrough", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const second = createPlaythrough();
     expect(second).toEqual(first);
+  });
+});
+
+describe("createPlaythrough (adaptive shift)", () => {
+  it("serves the classic easy-first ladder at shift 0, byte-identical to the no-arg call", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = createPlaythrough(0);
+      // Rounds 1-2: band 1 — cross-category.
+      for (const round of playthrough.slice(0, 2)) {
+        expect(categoryOf(round.oddTexture)).not.toBe(categoryOf(round.groupTexture));
+      }
+      // Rounds 3-4: band 2 — same category, different item.
+      for (const round of playthrough.slice(2, 4)) {
+        expect(categoryOf(round.oddTexture)).toBe(categoryOf(round.groupTexture));
+        expect(categoryOf(round.groupTexture)).not.toBe("frog");
+      }
+      // Rounds 5-6: band 3 — frog color variants.
+      for (const round of playthrough.slice(4)) {
+        expect(categoryOf(round.oddTexture)).toBe("frog");
+        expect(categoryOf(round.groupTexture)).toBe("frog");
+        expect(round.oddTexture).not.toBe(round.groupTexture);
+      }
+    }
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const withZero = createPlaythrough(0);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const bare = createPlaythrough();
+    expect(withZero).toEqual(bare);
+  });
+
+  it("eases every round to cross-category while struggling (shift -1)", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = createPlaythrough(-1);
+      // All-band-1 ladder (pool-safe clamp): every round is cross-category.
+      for (const round of playthrough) {
+        expect(categoryOf(round.oddTexture)).not.toBe(categoryOf(round.groupTexture));
+      }
+      // Frog color variants never appear while struggling.
+      const frogRounds = playthrough.filter((round) => categoryOf(round.oddTexture) === "frog");
+      expect(frogRounds).toHaveLength(0);
+    }
+  });
+
+  it("caps band 3 at three frog rounds while thriving (shift +1), completing without exhausting the frog pool", () => {
+    for (let i = 0; i < VARIETY_SAMPLES; i++) {
+      const playthrough = createPlaythrough(1);
+      // Ladder [1,2,2,3,3,3]: frog rounds exactly at positions 4-6.
+      const frogIndexes = playthrough
+        .map((round, index) => (categoryOf(round.oddTexture) === "frog" ? index : -1))
+        .filter((index) => index >= 0);
+      expect(frogIndexes).toEqual([3, 4, 5]);
+      for (const round of playthrough.slice(3)) {
+        expect(categoryOf(round.oddTexture)).toBe("frog");
+        expect(categoryOf(round.groupTexture)).toBe("frog");
+        expect(round.oddTexture).not.toBe(round.groupTexture);
+      }
+      // Round 1 stays cross-category; rounds 2-3 stay same-category non-frog.
+      expect(categoryOf(playthrough[0].oddTexture)).not.toBe(
+        categoryOf(playthrough[0].groupTexture),
+      );
+      for (const round of playthrough.slice(1, 3)) {
+        expect(categoryOf(round.oddTexture)).toBe(categoryOf(round.groupTexture));
+      }
+    }
+  });
+
+  it("never repeats an odd texture across the 6 rounds at any shift", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let i = 0; i < VARIETY_SAMPLES; i++) {
+        const playthrough = createPlaythrough(shift);
+        const odds = playthrough.map((round) => round.oddTexture);
+        expect(new Set(odds).size).toBe(6);
+      }
+    }
+  });
+
+  it("produces different playthroughs per shift under the same random sequence", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const struggling = createPlaythrough(-1);
+    vi.restoreAllMocks();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const thriving = createPlaythrough(1);
+    expect(struggling).not.toEqual(thriving);
   });
 });
 

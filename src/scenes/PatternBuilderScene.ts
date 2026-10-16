@@ -9,6 +9,7 @@ import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Shape texture keys indexed by ShapeType. */
@@ -83,7 +84,7 @@ export class PatternBuilderScene extends GameSceneBase {
     this.progressDots.length = 0;
     this.createProgressDots(ROUND_COUNT);
 
-    this.rounds = generatePlaythrough(ROUND_COUNT);
+    this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("pattern-builder"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

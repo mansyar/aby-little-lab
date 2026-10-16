@@ -253,6 +253,27 @@ import {
   getInteractiveRects,
 } from "../helpers/pressFeedback";
 
+const { getAdaptiveBandShiftMock, buildPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  buildPlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/colorMatchLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/colorMatchLogic")>();
+  return {
+    ...actual,
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
+    },
+  };
+});
+
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -752,5 +773,27 @@ describe("ColorMatchScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("ColorMatchScene adaptive shift", () => {
+  beforeEach(() => {
+    getAdaptiveBandShiftMock.mockClear();
+    buildPlaythroughMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  it("passes the facade's band shift to buildPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new ColorMatchScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("color-match");
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new ColorMatchScene();
+    scene.create();
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
   });
 });

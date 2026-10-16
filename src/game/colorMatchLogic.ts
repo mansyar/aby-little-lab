@@ -1,3 +1,4 @@
+import type { BandShift } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** Named colors used in Color Match rounds. */
@@ -63,16 +64,20 @@ export function buildRound(pool: readonly ColorId[]): ColorMatchRound {
 }
 
 /**
- * Generates a playthrough of 6 rounds, easy-first: 3 rounds from the
- * 4-color pool, then 3 from the 6-color pool. Difficulty is fixed across
- * replays.
+ * Generates a playthrough of 6 rounds, easy-first, split between the two
+ * color pools by the profile's adaptive band shift: −1 eases to 4 easy + 2
+ * hard rounds, 0 serves the classic 3 + 3 (byte-identical), +1 steps up to
+ * 2 easy + 4 hard — mirroring the established shape of `startLengthFor`
+ * in Musical Memory. The shift is chosen by the caller once per playthrough
+ * and never changes mid-game. Difficulty is fixed across replays for a given
+ * shift.
  */
-export function buildPlaythrough(): ColorMatchRound[] {
+export function buildPlaythrough(shift: BandShift = 0): ColorMatchRound[] {
   const rounds: ColorMatchRound[] = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 3 - shift; i++) {
     rounds.push(buildRound(COLOR_POOLS.easy));
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 3 + shift; i++) {
     rounds.push(buildRound(COLOR_POOLS.hard));
   }
   return rounds;

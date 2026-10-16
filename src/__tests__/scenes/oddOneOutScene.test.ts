@@ -251,6 +251,27 @@ import {
   getInteractiveRects,
 } from "../helpers/pressFeedback";
 
+const { getAdaptiveBandShiftMock, createPlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  createPlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/oddOneOutLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/oddOneOutLogic")>();
+  return {
+    ...actual,
+    createPlaythrough: (...args: Parameters<typeof actual.createPlaythrough>) => {
+      createPlaythroughMock(...args);
+      return actual.createPlaythrough(...args);
+    },
+  };
+});
+
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -706,5 +727,27 @@ describe("OddOneOutScene press feedback cohesion", () => {
       expect(countListeners(control, "pointerup")).toBe(1);
       expect(countListeners(control, "pointercancel")).toBe(1);
     }
+  });
+});
+
+describe("OddOneOutScene adaptive shift", () => {
+  beforeEach(() => {
+    getAdaptiveBandShiftMock.mockClear();
+    createPlaythroughMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+  });
+
+  it("passes the facade's band shift to createPlaythrough", () => {
+    getAdaptiveBandShiftMock.mockReturnValue(1);
+    const scene = new OddOneOutScene();
+    scene.create();
+    expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("odd-one-out");
+    expect(createPlaythroughMock).toHaveBeenCalledWith(1);
+  });
+
+  it("requests the classic ladder when the facade returns 0", () => {
+    const scene = new OddOneOutScene();
+    scene.create();
+    expect(createPlaythroughMock).toHaveBeenCalledWith(0);
   });
 });
