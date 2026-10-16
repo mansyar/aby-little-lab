@@ -7,7 +7,7 @@
 ## Phase 1 — Version bump + release notes
 
 - [x] Task 1.1: Bump `package.json` `1.17.0` → `1.18.0` (single string; verify no lockfile churn via `git status --porcelain`). [7da0516]
-- [~] Task 1.2: Author `docs/release-notes-v1.18.0.md` (v1.16.0 structure; Verification section left `Pending` until Phase 3).
+- [x] Task 1.2: Author `docs/release-notes-v1.18.0.md` (v1.16.0 structure; Verification section left `Pending` until Phase 3). [f511174]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Quality gates + PR
