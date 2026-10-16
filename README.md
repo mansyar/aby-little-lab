@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **1101 tests across 45 files**, ~98% lines / ~97% statements coverage (all shared motion/feedback/storage/transition/play-time/count/typography/viewport utilities and the SpeakerButton component at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **1803 tests across 69 files**, all green (verified 2026-10-16 on `feature/docs-housekeeping-refresh`).
 
 ## Code Quality
 
@@ -75,7 +75,7 @@ src/
 ├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 20 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
 ├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions), SpeakerButton (shared replay control)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, profileLogic, playTimeLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter/word playthrough, profile CRUD, per-profile daily play-time budgets)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, countLogic, firstSoundsLogic, moreLessLogic, oddOneOutLogic, colorMatchLogic, addItUpLogic, takeAwayLogic, memoryMatchLogic, decodeLogic, numberOrderLogic, adaptiveLogic, profileLogic, playTimeLogic, progressLogic, voiceLogic: round generation, sequence memory, band ladders with ±1 adaptive shifts, profile CRUD, per-profile daily play-time budgets, progress windows)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, PlayTime, AppStorage, Profile, ProfileV2)
 ├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + typography (typography.ts) + settings pinch-zoom (viewportZoom.ts) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
 ├── assets/                # SVG assets bundled into the game (incl. ui/tiles/ tile icons, icon_speaker, sleep_zzz)
@@ -105,8 +105,10 @@ src/
 | 16 | Add It Up | Early numeracy (early addition) | ✅ Implemented |
 | 17 | Take Away | Early numeracy (early subtraction) | ✅ Implemented |
 | 18 | Memory Match | Working memory & visual discrimination | ✅ Implemented |
+| 19 | Decode It | Early decoding / word recognition | ✅ Implemented |
+| 20 | Number Order | Numeral sequencing / ordinality | ✅ Implemented |
 
-**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys; Find the Letter: 6 of 26 letters; Find the Word: 6 of 18 words, no two cards sharing a first letter; Build the Word: 3 words per playthrough, 2× 3-letter + 1× 4-letter, 6 tiles with distractors; First Sounds: 6 of 9 first letters from a curated 12-word pool; More or Less: 6 rounds with 3 "more" + 3 "less" prompts and distinct counts, 2 per band 1–3 / 1–5 / 1–10; Odd One Out: 6 rounds with a unique odd item per session, 2 per band — cross-category, same-category different item, frog color variants; Color Match: 6 rounds drawing 4 distinct colors per round from the 4-color pool (rounds 1–3) then the 6-color pool (rounds 4–6); Add It Up: 6 rounds with unique addend pairs per session, 2 per band ≤4 / ≤6 / ≤10; Take Away: 6 rounds with unique subtraction pairs per session (minuend > subtrahend, never 0), 2 per band ≤4 / ≤6 / ≤10; Memory Match: 6 rounds across progressive grids — 2×3 (3 pairs), then 3×4 (6 pairs), then 4×4 (8 pairs) — with shuffled pairs drawn from a 16-texture mixed-category pool (animals, toys, small items)), with round sizes and difficulty fixed.
+**Replay variety** — all content-driven games draw from expanded, shuffled item pools each playthrough (Shape Sorter: 6 shapes; Animal Trace: 6 animal-food pairs; Shadow Match: 6 of 8 objects with matching silhouettes; Big vs. Small: 6 toys; Pop & Freeze: 6 sleeping-animal decoys; Find the Letter: 6 of 26 letters; Find the Word: 6 of 18 words, no two cards sharing a first letter; Build the Word: 3 words per playthrough, 2× 3-letter + 1× 4-letter, 6 tiles with distractors; First Sounds: 6 of 9 first letters from a curated 12-word pool; More or Less: 6 rounds with 3 "more" + 3 "less" prompts and distinct counts, 2 per band 1–3 / 1–5 / 1–10; Odd One Out: 6 rounds with a unique odd item per session, 2 per band — cross-category, same-category different item, frog color variants; Color Match: 6 rounds drawing 4 distinct colors per round from the 4-color pool (rounds 1–3) then the 6-color pool (rounds 4–6); Add It Up: 6 rounds with unique addend pairs per session, 2 per band ≤4 / ≤6 / ≤10; Take Away: 6 rounds with unique subtraction pairs per session (minuend > subtrahend, never 0), 2 per band ≤4 / ≤6 / ≤10; Memory Match: 6 rounds across progressive grids — 2×3 (3 pairs), then 3×4 (6 pairs), then 4×4 (8 pairs) — with shuffled pairs drawn from a 16-texture mixed-category pool (animals, toys, small items); Decode It: 6 rounds, easy-first 3-letter then 4-letter tiers with 6 unique targets per playthrough; Number Order: 6 rounds dragging 3/4/5 shuffled numerals into ascending slots (ranges 1–5/1–8/1–10, easy-first)), with round sizes and difficulty fixed except for the ±1 adaptive band shift in the 15 adaptive games.
 
 ## Parental Lock & Touch UX
 
@@ -165,7 +167,7 @@ Every game layers scene-level animation juice on top of its core rules (no gamep
 
 The Hub is the child's landing screen, built for gentle, playful engagement:
 
-- **Tile icons** — every tile shows a distinct storybook icon (80px, `src/assets/svg/ui/tiles/`) above a small text label, so the 18 games are identifiable at a glance without reading (2026-08-06).
+- **Tile icons** — every tile shows a distinct storybook icon (80px, `src/assets/svg/ui/tiles/`) above a small text label, so the 20 games are identifiable at a glance without reading (2026-08-06).
 - **Staggered entrance** — tiles, labels, icons, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
 - **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
 - **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned slots show a dashed empty-slot outline so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session. The shelf always shows the active profile's collection and re-renders on profile switch.

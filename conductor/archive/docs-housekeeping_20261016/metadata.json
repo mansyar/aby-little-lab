@@ -1,0 +1,1 @@
+{"branch": "feature/docs-housekeeping-refresh", "createdAt": "2026-10-16", "dependsOn": ["number-order_20260828", "adaptive-remaining-games_20260828"], "plan": "plan.md", "spec": "spec.md", "status": "new", "title": "Docs & Housekeeping Refresh — 20-Game Suite Alignment", "trackId": "docs-housekeeping_20261016", "type": "chore"}
