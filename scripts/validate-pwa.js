@@ -119,12 +119,16 @@ const checks = [
     },
   },
   {
-    name: "Service worker includes Hoot asset in precache",
-    test: () => readPrecacheManifest().includes(".ligne"),
+    // The Ligne engine was removed (tween/SVG-only mascot): no .ligne
+    // animation asset may remain in the precache.
+    name: "Service worker precache contains no Ligne animation asset",
+    test: () => !readPrecacheManifest().includes(".ligne"),
   },
   {
-    name: "Service worker includes Ligne WASM engine in precache",
-    test: () => readPrecacheManifest().includes("ligne_wasm_bg"),
+    // The Ligne engine was removed (tween/SVG-only mascot): no WASM engine
+    // may remain in the precache.
+    name: "Service worker precache contains no Ligne WASM engine",
+    test: () => !readPrecacheManifest().includes("ligne_wasm_bg"),
   },
   {
     name: "Service worker includes navigation route",

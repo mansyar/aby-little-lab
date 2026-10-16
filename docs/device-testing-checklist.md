@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - Ligne removal (post-v1.18.0, track `drop-ligne-mascot_20261016`)
+
+- **Target:** local production build (tween/SVG-only Professor Hoot — Ligne engine deleted)
+- **Scope:** mascot only — no gameplay, storage, or audio changes; the v1.16.0 Ligne offline-first rows below are historical (they describe the removed engine) and are superseded by these rows for all future releases
+- **Checks:** Hub boots with the tween Hoot immediately (no engine load, no `ligne_wasm` request in the network panel); game entry plays the curious tilt-hop; Hub entrance plays the flap-greeting double-wave; win still cheers with sparkle; reduced-motion shows tilt-only reactions with no hop; offline relaunch boots a clean Hub from the precache (now ~1.6 MB / 42 entries)
+- **Result:** **PENDING — to be executed against the next release candidate** (automated gates green: check, mascot/components/scenes suites, PWA 15/15, bundle shell ≤ 200 kB)
+- **Issues found:** pending
+
 ## Execution Record - v1.18.0 (2026-10-16)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.18.0 — Adaptive-Complete Suite + Docs Alignment; tag `v1.18.0` → `582fd18`, release track `conductor/archive/release-1.18.0_20261016/`)
