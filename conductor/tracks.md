@@ -172,3 +172,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Adaptive Difficulty - Remaining Games (Pattern Builder, Odd One Out, Color Match)** *Link: [./archive/adaptive-remaining-games_20260828/index.md](./archive/adaptive-remaining-games_20260828/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Docs & Housekeeping Refresh — 20-Game Suite Alignment** *Link: [./tracks/docs-housekeeping_20261016/index.md](./tracks/docs-housekeeping_20261016/index.md)*
