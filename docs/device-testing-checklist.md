@@ -4,6 +4,15 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.18.0 (2026-10-16)
+
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.18.0 — Adaptive-Complete Suite + Docs Alignment; tag `v1.18.0` → `582fd18`, release track `conductor/archive/release-1.18.0_20261016/`)
+- **Scope:** release-only delta (version string + notes + Coolify POST webhook fix) over the v1.17.0 delta (adaptive-remaining batch + docs refresh) — no gameplay, asset, or storage changes; live entry-hash match + HTTP smoke verified at release time
+- **Devices:** iPad (iPadOS 15+), iPhone (iOS 15+), Android tablet (Android 10+), Android phone (Android 10+) — **pending**
+- **Checks:** install/update prompt, offline relaunch from precache, touch targets ≥ 44px, landscape lock, reduced-motion spot, boot → Hub 20 tiles → adaptive game round-trip → sticker shelf → footer `v1.18.0`
+- **Result:** **desktop automated smoke PASSED 2026-10-16** (`HTTP 200`, title `Aby's Little Lab`, live `assets/index-BGGO8o19.js` == local `dist/` build, `v1.18.0` string in live bundle). **Device-class execution PENDING** (deferred by user decision — desktop smoke is green, release-only diff with zero `src/` changes, release not blocked; this record will be completed when the user runs the device checks)
+- **Issues found:** none on the desktop smoke (no Critical/High/Medium/Low)
+
 ## Execution Record - UI/UX Cohesion pass (2026-08-27)
 
 - **Target:** local `pnpm dev` build (pre-release v1.15.0+ — UI/UX Cohesion track `conductor/tracks/ui-ux-cohesion_20260826/`)
