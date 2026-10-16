@@ -61,6 +61,10 @@
 - Phase 4: `[checkpoint: 931962f]`
 - Track: `[checkpoint: pending-pr]`
 
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions ba7b269
+
 ## Verification Notes
 
 - If any scene or test imports a removed Ligne symbol, STOP and fix the
