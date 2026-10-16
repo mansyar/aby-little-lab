@@ -6243,14 +6243,14 @@ describe("scene navigation flow", () => {
         );
     }
 
-    /** Returns the angle tween targeting the mascot (nod), if any. */
-    function findMascotAngleTween(
+    /** Returns all angle tweens targeting the mascot (entry curious tilt, then nods). */
+    function findMascotAngleTweens(
       scene: unknown,
       mascot: Record<string, MockFn>,
-    ): Record<string, unknown> | undefined {
+    ): Array<Record<string, unknown>> {
       return getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add)
         .mock.calls.map((call) => call[0] as Record<string, unknown>)
-        .find(
+        .filter(
           (config) =>
             config.targets === mascot && typeof config.angle === "object" && config.angle !== null,
         );
@@ -6696,7 +6696,10 @@ describe("scene navigation flow", () => {
             const mascot = getMascot(scene);
             game.sim.incorrect?.(scene);
 
-            const nod = findMascotAngleTween(scene, mascot);
+            const angleTweens = findMascotAngleTweens(scene, mascot);
+            // Entry curious() tilts first; the incorrect-action nod comes last.
+            expect((angleTweens[0]?.angle as { to: number }).to).toBe(10);
+            const nod = angleTweens[angleTweens.length - 1];
             expect(nod).toBeDefined();
             if (!nod) return;
             expect((nod.angle as { to: number }).to).toBe(6);
@@ -6731,9 +6734,11 @@ describe("scene navigation flow", () => {
 
       const mascot = getMascot(scene);
       const draggables = getDraggables(scene, "shape_");
+      const tweensBefore = findMascotAngleTweens(scene, mascot).length;
       dragEnd(draggables[0].obj);
 
-      expect(findMascotAngleTween(scene, mascot)).toBeUndefined();
+      // The entry curious() tilt predates the release; mid-air adds no nod.
+      expect(findMascotAngleTweens(scene, mascot)).toHaveLength(tweensBefore);
       vi.restoreAllMocks();
     });
   });
