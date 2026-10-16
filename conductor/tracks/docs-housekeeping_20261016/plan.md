@@ -25,15 +25,15 @@
 
 - [x] Task 4.1: Archive `number-order_20260828` (`conductor/tracks/` → `conductor/archive/`) + fix `tracks.md` link to `./archive/…` with `(Archived)`. [125678d]
 - [x] Task 4.2: Full gates — `pnpm run check` · `CI=true pnpm test` · `pnpm run build` + relative-link review (`tracks.md` → archive `index.md`, README anchors, notes cross-links). [build-ok]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [e88b1c7]
 
 ## Checkpoints
 
 - Phase 1: `[checkpoint: 16be6a3]`
 - Phase 2: `[checkpoint: 0894492]`
 - Phase 3: `[checkpoint: dbbe5d8]`
-- Phase 4: `[checkpoint: pending]`
-- Track: `[checkpoint: pending]`
+- Phase 4: `[checkpoint: e88b1c7]`
+- Track: `[checkpoint: pending — awaiting review]`
 
 ## Verification Notes
 
