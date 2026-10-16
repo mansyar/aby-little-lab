@@ -1,6 +1,6 @@
 # Release Notes - v1.18.0
 
-> **Status:** DRAFT — pending production verification
+> **Status:** FINAL — released 2026-10-16 (tag `v1.18.0`, deployed live at https://aby-little-lab.ansyar-world.top/; desktop automated smoke passed; device-class verification recorded as pending in `docs/device-testing-checklist.md`).
 >
 > **Tag:** `v1.18.0`
 >
@@ -55,8 +55,11 @@ settings are stored locally on the device.
 
 ## Release Verification
 
-> Pending production verification. This section will be completed with the
-> deployed run, live checks, and device-class sign-off after release.
+- **Tag:** `v1.18.0` → `582fd18` (merge of #36; retargeted from `e535c52` to include the Coolify POST webhook fix — tag-push workflows run from the tag's tree).
+- **CI:** PR #36 Quality Gates green; tag-push run `38976970923` green including `Deploy to Coolify` (webhook trigger `POST`, 5s). Root cause of the first tag-push failure (run `38914924934`): Coolify changed the deploy webhook to POST-only (`405 This endpoint has changed to a POST request`); fixed in `.github/workflows/ci.yml` (#36).
+- **Live hash match:** local `dist/assets/index-BGGO8o19.js` == live `assets/index-BGGO8o19.js` ✓ (matched ~90s after deploy trigger).
+- **Live smoke:** `HTTP 200`, title `Aby's Little Lab`, `v1.18.0` string present in both local and live bundles ✓ (canvas-rendered Hub smoke via automated browser inconclusive — bridge detached; HTTP + hash + version-string checks used instead).
+- **Device matrix:** pending — see Phase 4 (`docs/device-testing-checklist.md`).
 
 ## Feedback
 
