@@ -13,12 +13,12 @@
 ## Phase 2 — Quality gates + PR
 
 - [x] Task 2.1: Full gates — `pnpm run check` ✅ · `pnpm run build` ✅ · `validate-pwa` 15/15 ✅ · `validate-bundle` ✅ · CI Quality Gates ✅ (run 38914426068 incl. Tests — local timeout flake proven environmental, user-approved CI arbitration 2026-10-17).
-- [~] Task 2.2: Push `release/v1.18.0`, open PR to `master`, `gh run watch --exit-status` to green, merge (no other commits to `master` except via this PR).
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task 2.2: Push `release/v1.18.0`, open PR to `master`, `gh run watch --exit-status` to green, merge (no other commits to `master` except via this PR). [PR #35, CI 38914426068]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [b92472e]
 
 ## Phase 3 — Tag + deploy + live verification
 
-- [ ] Task 3.1: Tag `v1.18.0` on the merge commit with lineage guard (`tag parent == merge commit`), push tag.
+- [~] Task 3.1: Tag `v1.18.0` on the merge commit with lineage guard (`tag parent == merge commit`), push tag.
 - [ ] Task 3.2: Coolify deploy (webhook, `--fail-with-body`) → live entry-hash match vs local `dist/` → live smoke (boot → Hub 20 tiles → adaptive game round-trip → sticker shelf → footer `v1.18.0`); complete the notes Verification section.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
@@ -36,7 +36,7 @@
 ## Checkpoints
 
 - Phase 1: `[checkpoint: 3fd5645]`
-- Phase 2: `[checkpoint: pending]`
+- Phase 2: `[checkpoint: b92472e]`
 - Phase 3: `[checkpoint: pending]`
 - Phase 4: `[checkpoint: pending]`
 - Phase 5: `[checkpoint: pending]`
