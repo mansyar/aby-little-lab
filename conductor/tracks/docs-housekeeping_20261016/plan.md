@@ -23,8 +23,8 @@
 
 ## Phase 4 — Archive, registry fix & full verification
 
-- [~] Task 4.1: Archive `number-order_20260828` (`conductor/tracks/` → `conductor/archive/`) + fix `tracks.md` link to `./archive/…` with `(Archived)`.
-- [ ] Task 4.2: Full gates — `pnpm run check` · `CI=true pnpm test` · `pnpm run build` + relative-link review (`tracks.md` → archive `index.md`, README anchors, notes cross-links).
+- [x] Task 4.1: Archive `number-order_20260828` (`conductor/tracks/` → `conductor/archive/`) + fix `tracks.md` link to `./archive/…` with `(Archived)`. [125678d]
+- [x] Task 4.2: Full gates — `pnpm run check` · `CI=true pnpm test` · `pnpm run build` + relative-link review (`tracks.md` → archive `index.md`, README anchors, notes cross-links). [build-ok]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Checkpoints
