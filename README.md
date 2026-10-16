@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **1101 tests across 45 files**, ~98% lines / ~97% statements coverage (all shared motion/feedback/storage/transition/play-time/count/typography/viewport utilities and the SpeakerButton component at 100%, `speech.ts` at 92%; the `ensureSceneLoaded` lazy-registration logic is 100% function-covered).
+Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **1803 tests across 69 files**, all green (verified 2026-10-16 on `feature/docs-housekeeping-refresh`).
 
 ## Code Quality
 
@@ -75,7 +75,7 @@ src/
 ├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 20 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
 ├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions), SpeakerButton (shared replay control)
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, profileLogic, playTimeLogic: shuffle, match detection, path progress, bubble spawning, round generation, sequence memory, scale sorting, pattern building, letter/word playthrough, profile CRUD, per-profile daily play-time budgets)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, countLogic, firstSoundsLogic, moreLessLogic, oddOneOutLogic, colorMatchLogic, addItUpLogic, takeAwayLogic, memoryMatchLogic, decodeLogic, numberOrderLogic, adaptiveLogic, profileLogic, playTimeLogic, progressLogic, voiceLogic: round generation, sequence memory, band ladders with ±1 adaptive shifts, profile CRUD, per-profile daily play-time budgets, progress windows)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, PlayTime, AppStorage, Profile, ProfileV2)
 ├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + typography (typography.ts) + settings pinch-zoom (viewportZoom.ts) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
 ├── assets/                # SVG assets bundled into the game (incl. ui/tiles/ tile icons, icon_speaker, sleep_zzz)
