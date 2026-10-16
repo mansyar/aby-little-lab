@@ -39,8 +39,8 @@
 - Phase 2: `[checkpoint: b92472e]`
 - Phase 3: `[checkpoint: e18efdc]`
 - Phase 4: `[checkpoint: deferred-device-matrix]`
-- Phase 5: `[checkpoint: pending-commit]`
-- Track: `[checkpoint: pending-commit]`
+- Phase 5: `[checkpoint: a596085]`
+- Track: `[checkpoint: a596085]`
 
 ## Verification Notes
 
