@@ -176,3 +176,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Docs & Housekeeping Refresh — 20-Game Suite Alignment** *Link: [./archive/docs-housekeeping_20261016/index.md](./archive/docs-housekeeping_20261016/index.md)* (Archived)
+
+---
+
+- [ ] **Track: v1.18.0 Release Execution — Adaptive-Remaining + Docs Refresh** *Link: [./tracks/release-1.18.0_20261016/index.md](./tracks/release-1.18.0_20261016/index.md)*
