@@ -17,8 +17,8 @@
 
 ## Phase 3 — PRD / TDD amendments
 
-- [ ] Task 3.1: `docs/PRD.md` — Games 19–20 entries + adaptive coverage 12 → 15.
-- [ ] Task 3.2: `docs/TDD.md` — registry 22 → 23 loaders, preload 168 → 170, Hub 5×3+4 → 5×4, paging 6+6+6+1 → 6+6+6+2, adaptive facade ids.
+- [x] Task 3.1: `docs/PRD.md` — Games 19–20 entries + adaptive coverage 12 → 15. [007a318]
+- [x] Task 3.2: `docs/TDD.md` — registry 22 → 23 loaders, preload 168 → 170, Hub 5×3+4 → 5×4, paging 6+6+6+1 → 6+6+6+2, adaptive facade ids. [007a318]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Archive, registry fix & full verification
