@@ -12,7 +12,7 @@
 
 ## Phase 2 — Quality gates + PR
 
-- [~] Task 2.1: Full gates — `pnpm run check` ✅ · `pnpm run build` ✅ · `validate-pwa` 15/15 ✅ · `validate-bundle` ✅ · `CI=true pnpm vitest run` ⚠️ LOCAL FLAKE (3 runs: 11/18/14 fails, 100% `Test timed out`, 0 assertion failures, varying sets; same tests 61/61 green in isolation; zero `src/` changes in release diff; user-approved 2026-10-17 to let CI arbitrate).
+- [x] Task 2.1: Full gates — `pnpm run check` ✅ · `pnpm run build` ✅ · `validate-pwa` 15/15 ✅ · `validate-bundle` ✅ · CI Quality Gates ✅ (run 38914426068 incl. Tests — local timeout flake proven environmental, user-approved CI arbitration 2026-10-17).
 - [~] Task 2.2: Push `release/v1.18.0`, open PR to `master`, `gh run watch --exit-status` to green, merge (no other commits to `master` except via this PR).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
