@@ -18,7 +18,7 @@
 ## Phase 3 — PRD / TDD amendments
 
 - [x] Task 3.1: `docs/PRD.md` — Games 19–20 entries + adaptive coverage 12 → 15. [007a318]
-- [x] Task 3.2: `docs/TDD.md` — registry 22 → 23 loaders, preload 168 → 170, Hub 5×3+4 → 5×4, paging 6+6+6+1 → 6+6+6+2, adaptive facade ids. [007a318]
+- [x] Task 3.2: `docs/TDD.md` — registry eight → twenty scenes + tile rows 19–20. [007a318] (Note: preload counts, 6+6+6+2 paging, and adaptive facade ids have no TDD section to update — verified by grep; no edit made.)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [dbbe5d8]
 
 ## Phase 4 — Archive, registry fix & full verification
@@ -33,7 +33,10 @@
 - Phase 2: `[checkpoint: 0894492]`
 - Phase 3: `[checkpoint: dbbe5d8]`
 - Phase 4: `[checkpoint: e88b1c7]`
-- Track: `[checkpoint: pending — awaiting review]`
+- Track: `[checkpoint: pending — review fixes applied bbd52a8]`
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions [bbd52a8]
 
 ## Verification Notes
 
