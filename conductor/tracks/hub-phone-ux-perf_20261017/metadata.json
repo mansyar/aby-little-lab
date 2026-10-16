@@ -1,0 +1,10 @@
+{
+  "trackId": "hub-phone-ux-perf_20261017",
+  "title": "Phone-Scale Hub UX + Boot/Texture Performance Hardening",
+  "type": "chore",
+  "status": "new",
+  "createdAt": "2026-10-17",
+  "branch": "feature/hub-phone-ux-and-boot-perf",
+  "spec": "./spec.md",
+  "plan": "./plan.md"
+}

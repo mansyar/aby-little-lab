@@ -180,3 +180,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: v1.18.0 Release Execution — Adaptive-Remaining + Docs Refresh** *Link: [./archive/release-1.18.0_20261016/index.md](./archive/release-1.18.0_20261016/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Phone-Scale Hub UX + Boot/Texture Performance Hardening** *Link: [./hub-phone-ux-perf_20261017/index.md](./hub-phone-ux-perf_20261017/index.md)*
