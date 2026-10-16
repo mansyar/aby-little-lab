@@ -1,4 +1,4 @@
-import { type BandId, type BandShift, BASE_LADDER } from "./adaptiveLogic";
+import { BASE_LADDER, type BandId, type BandShift } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** Visual category used to pick group/odd textures and define difficulty bands. */

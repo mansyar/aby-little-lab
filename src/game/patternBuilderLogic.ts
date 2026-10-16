@@ -1,4 +1,4 @@
-import { type BandId, type BandShift, BASE_LADDER, shiftLadder } from "./adaptiveLogic";
+import { BASE_LADDER, type BandId, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { ALL_SHAPES, type ShapeType, shuffle } from "./shapeSorterLogic";
 
 /** The three repeating pattern types used in the Pattern Builder game. */

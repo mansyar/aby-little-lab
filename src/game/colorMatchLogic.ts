@@ -1,4 +1,4 @@
-import { type BandShift } from "./adaptiveLogic";
+import type { BandShift } from "./adaptiveLogic";
 import { shuffle } from "./shapeSorterLogic";
 
 /** Named colors used in Color Match rounds. */
