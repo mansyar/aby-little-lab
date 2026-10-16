@@ -8,11 +8,11 @@
 
 - [x] Task 1.1: Bump `package.json` `1.17.0` → `1.18.0` (single string; verify no lockfile churn via `git status --porcelain`). [7da0516]
 - [x] Task 1.2: Author `docs/release-notes-v1.18.0.md` (v1.16.0 structure; Verification section left `Pending` until Phase 3). [f511174]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [3fd5645]
 
 ## Phase 2 — Quality gates + PR
 
-- [ ] Task 2.1: Full gates — `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` (+ bundle validation per CI).
+- [~] Task 2.1: Full gates — `pnpm run check` · `CI=true pnpm test` · `pnpm run build` · `node scripts/validate-pwa.js` (+ bundle validation per CI).
 - [ ] Task 2.2: Push `release/v1.18.0`, open PR to `master`, `gh run watch --exit-status` to green, merge (no other commits to `master` except via this PR).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
@@ -35,7 +35,7 @@
 
 ## Checkpoints
 
-- Phase 1: `[checkpoint: pending]`
+- Phase 1: `[checkpoint: 3fd5645]`
 - Phase 2: `[checkpoint: pending]`
 - Phase 3: `[checkpoint: pending]`
 - Phase 4: `[checkpoint: pending]`
