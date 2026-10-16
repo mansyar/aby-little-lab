@@ -12,7 +12,7 @@
 
 ## Phase 2 — v1.17.0 release notes
 
-- [ ] Task 2.1: Author `docs/release-notes-v1.17.0.md` from git history (v1.16.0 notes structure: Highlights → Changes → Verification → Known issues).
+- [x] Task 2.1: Author `docs/release-notes-v1.17.0.md` from git history (v1.16.0 notes structure: Highlights → Changes → Verification → Known issues). [5313155]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — PRD / TDD amendments
