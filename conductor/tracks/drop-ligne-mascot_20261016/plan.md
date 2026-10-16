@@ -7,12 +7,12 @@
 
 ## Phase 1 — Tests first (RED)
 
-- [ ] Task 1.1: Extend `src/__tests__/components/Mascot.test.ts` with failing
+- [x] Task 1.1: Extend `src/__tests__/components/Mascot.test.ts` with failing
   expectations for the new `curious()` tilt-hop and `flapGreeting()`
-  wave-hop tweens, including reduced-motion variants (pose-swap, no bounce).
-- [ ] Task 1.2: Delete `src/__tests__/components/LigneMascot.test.ts`; run
+  wave-hop tweens, including reduced-motion variants (pose-swap, no bounce). [be143a7]
+- [x] Task 1.2: Delete `src/__tests__/components/LigneMascot.test.ts`; run
   the mascot suite and confirm the new tests fail for the right reason
-  (no implementation yet) and nothing else breaks.
+  (no implementation yet) and nothing else breaks. [be143a7 — deletion rode along in the Task 1.1 commit]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Single-path mascot (GREEN)
