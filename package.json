@@ -15,12 +15,10 @@
     "check": "biome check"
   },
   "dependencies": {
-    "@ligne-engine/web": "^0.2.1",
     "phaser": "^4.2.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",
-    "@ligne-engine/bundler": "^0.1.0",
     "@vitest/coverage-v8": "^4.1.10",
     "happy-dom": "^18.0.1",
     "serve": "^14.2.6",
