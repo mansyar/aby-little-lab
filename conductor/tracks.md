@@ -175,4 +175,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Docs & Housekeeping Refresh — 20-Game Suite Alignment** *Link: [./tracks/docs-housekeeping_20261016/index.md](./tracks/docs-housekeeping_20261016/index.md)*
+- [x] **Track: Docs & Housekeeping Refresh — 20-Game Suite Alignment** *Link: [./archive/docs-housekeeping_20261016/index.md](./archive/docs-housekeeping_20261016/index.md)* (Archived)
