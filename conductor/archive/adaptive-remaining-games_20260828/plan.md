@@ -47,3 +47,7 @@
 - Frog-cap test: shift +1 playthrough has ≤ 3 band-3 rounds, all band-3 odds distinct frogs.
 - Distribution tests run ≥ 200 iterations; assert 0 invariant violations, no flaky thresholds.
 - Deviation protocol: any departure → STOP, document in `tech-stack.md` (dated), then continue per user direction.
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions 63c35f0
