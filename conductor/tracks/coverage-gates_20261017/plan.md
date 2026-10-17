@@ -18,8 +18,10 @@
 
 ## Phase 2 — Remaining scene branches + glue
 
-- [~] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
-  remaining ~80s scene files until global branches clear 85.5%. [d877148 — trio done; remainder pending gate measurement]
+- [x] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
+  remaining ~80s scene files until global branches clear 85.5%. [d877148 — trio done; gate measurement 2026-10-17:
+  lines 97.43% (≥95.5 ✓), branches 89.38% (≥85.5 ✓), functions 93.34%,
+  statements 98.63% — goal met, no further scene work needed for the gate]
 - [x] Task 2.0: Repair all tsc errors in test files (review follow-up —
   unblocks every gate run: 474 → 0, zero production changes, zero
   weakened assertions; tsc/vitest/check/build all green). [23a75ec]
