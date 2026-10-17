@@ -184,3 +184,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Drop Ligne Engine — Tween/SVG-Only Mascot** *Link: [./tracks/drop-ligne-mascot_20261016/index.md](./tracks/drop-ligne-mascot_20261016/index.md)*
+
+---
+
+- [ ] **Track: Coverage-Gate Repair — Test the Untested Glue** *Link: [./tracks/coverage-gates_20261017/index.md](./tracks/coverage-gates_20261017/index.md)*
