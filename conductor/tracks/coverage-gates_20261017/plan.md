@@ -7,7 +7,7 @@
 
 ## Phase 1 — Baseline + registry loaders
 
-- [ ] Task 1.1: Run `pnpm run test:coverage`, record the red baseline
+- [~] Task 1.1: Run `pnpm run test:coverage`, record the red baseline
   (per-module lines/branches for the FR-1–FR-4 targets) in the checkpoint note.
 - [ ] Task 1.2: Write `sceneRegistry` loader tests with mocked dynamic
   imports — `ensureSceneLoaded` success, failure, concurrent-call dedup —
