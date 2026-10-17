@@ -104,7 +104,13 @@ vi.mock("phaser", () => {
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn> & {
+      width: number;
+      height: number;
+      displaySize: { width: number; height: number };
+    };
+    /** Scene-level input handlers captured from input.on, keyed by event. */
+    sceneInputHandlers!: Record<string, MockFn[]>;
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -126,7 +132,11 @@ vi.mock("phaser", () => {
           return obj;
         }),
         container: vi.fn((..._args: unknown[]) => createMockGameObject(this, "container")),
-        circle: vi.fn((..._args: unknown[]) => createMockGameObject(this, "circle")),
+        circle: vi.fn((...args: unknown[]) => {
+          const obj = createMockGameObject(this, "circle");
+          obj.args = args;
+          return obj;
+        }),
         graphics: vi.fn((..._args: unknown[]) => createMockGameObject(this, "graphics")),
         zone: vi.fn((..._args: unknown[]) => createMockGameObject(this, "zone")),
         particles: vi.fn((..._args: unknown[]) => createMockGameObject(this, "particles")),
@@ -151,7 +161,9 @@ vi.mock("phaser", () => {
         off: vi.fn(),
       };
       this.input = {
-        on: vi.fn(),
+        on: vi.fn((event: string, handler: MockFn) => {
+          (this.sceneInputHandlers[event] ??= []).push(handler);
+        }),
         off: vi.fn(),
         setDraggable: vi.fn(),
       };
@@ -173,7 +185,9 @@ vi.mock("phaser", () => {
         on: vi.fn(),
         width: 1024,
         height: 768,
+        displaySize: { width: 1024, height: 768 },
       };
+      this.sceneInputHandlers = {};
       this.time = {
         delayedCall: vi.fn(() => ({ remove: vi.fn() })),
         addEvent: vi.fn(),
@@ -313,6 +327,178 @@ import {
 function getHandler(kind: string, event: string): ((...args: unknown[]) => unknown) | undefined {
   return mockRegistry.find((obj) => obj.kind === kind && obj.handlers[event])?.handlers[event];
 }
+
+describe("HubScene paged grid (narrow viewports)", () => {
+  let matchMediaMock: MockFn;
+
+  /** Builds a Hub on a small-phone landscape viewport (844x390 CSS px). */
+  function createNarrowHub(): HubScene {
+    const scene = new HubScene();
+    (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
+      width: 844,
+      height: 390,
+    };
+    scene.create();
+    return scene;
+  }
+
+  /** All paged-size tile rectangles (176x196) in creation order. */
+  function pagedRects(): MockObj[] {
+    return mockRegistry.filter((obj) => {
+      const [, , w, h] = (obj.args ?? []) as unknown[];
+      return obj.kind === "rectangle" && w === 176 && h === 196;
+    });
+  }
+
+  /** The page-dot circles in creation order. */
+  function pageDots(): MockObj[] {
+    return mockRegistry.filter((obj) => {
+      const [, y, r] = (obj.args ?? []) as unknown[];
+      return obj.kind === "circle" && y === 640 && r === 8;
+    });
+  }
+
+  beforeEach(() => {
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockRegistry.length = 0;
+    mockRecordGamePlay.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("renders exactly one page of 10 larger tiles and no wide tiles", () => {
+    createNarrowHub();
+
+    expect(pagedRects().length).toBe(10);
+    const wideTiles = mockRegistry.filter((obj) => {
+      const [, , w, h] = (obj.args ?? []) as unknown[];
+      return obj.kind === "rectangle" && w === 160 && h === 116;
+    });
+    expect(wideTiles.length).toBe(0);
+  });
+
+  it("maps page-1 tiles to games 11-20 (How Many? first)", () => {
+    const scene = createNarrowHub();
+
+    // Flip to page 2 via the second dot.
+    pageDots()[1].handlers.pointerup?.();
+
+    const afterFlip = pagedRects().length;
+    expect(afterFlip).toBe(20); // outgoing page lingers (slide timer mocked)
+    const pageOneFirst = pagedRects()[10];
+    pageOneFirst.handlers.pointerup?.();
+
+    expect(mockRecordGamePlay).toHaveBeenCalledWith("how-many");
+    expect(scene).toBeDefined();
+  });
+
+  it("shows two textless page dots, active page highlighted", () => {
+    createNarrowHub();
+
+    const dots = pageDots();
+    expect(dots.length).toBe(2);
+    // Active dot bright, inactive dot dim.
+    expect(dots[0].setAlpha).toHaveBeenCalledWith(expect.closeTo(0.9, 5));
+    expect(dots[1].setAlpha).toHaveBeenCalledWith(expect.closeTo(0.25, 5));
+  });
+
+  it("flips pages on a horizontal swipe inside the grid region", () => {
+    const scene = createNarrowHub();
+
+    scene_input_down(scene, 512, 300);
+    scene_input_move(scene, 400, 300);
+    scene_input_up(scene, 400, 300);
+
+    // Page 2 was built (outgoing page lingers under the mock timers).
+    expect(pagedRects().length).toBe(20);
+    // Dots flipped: second dot is now the active one.
+    const dots = pageDots();
+    const lastAlphaSecond = (dots[1].setAlpha as MockFn).mock.calls.at(-1)?.[0];
+    expect(lastAlphaSecond).toBeCloseTo(0.9, 5);
+  });
+
+  it("ignores vertical drags", () => {
+    const scene = createNarrowHub();
+
+    scene_input_down(scene, 512, 200);
+    scene_input_move(scene, 512, 330);
+    scene_input_up(scene, 512, 330);
+
+    expect(pagedRects().length).toBe(10);
+  });
+
+  it("ignores swipes that start outside the grid region", () => {
+    const scene = createNarrowHub();
+
+    // Avatar-chip band (top-left), well outside the paged grid bounds.
+    scene_input_down(scene, 60, 60);
+    scene_input_move(scene, 200, 60);
+    scene_input_up(scene, 300, 60);
+
+    expect(pagedRects().length).toBe(10);
+  });
+
+  it("swallows tile taps once a swipe is in flight", () => {
+    const scene = createNarrowHub();
+
+    scene_input_down(scene, 512, 300);
+    scene_input_move(scene, 400, 300); // past the 60px threshold -> swiping
+    const tile = pagedRects()[0];
+    tile.handlers.pointerup?.();
+
+    expect(mockRecordGamePlay).not.toHaveBeenCalled();
+  });
+
+  it("builds the same single page without slide tweens under reduced motion", () => {
+    matchMediaMock = vi.fn(() => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    createNarrowHub();
+
+    expect(pagedRects().length).toBe(10);
+    const dots = pageDots();
+    expect(dots.length).toBe(2);
+  });
+
+  /** Fires a scene-level pointer event through the captured input handlers. */
+  function scene_input_down(
+    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
+    x: number,
+    y: number,
+  ): void {
+    for (const handler of scene.sceneInputHandlers.pointerdown ?? []) handler({ x, y });
+  }
+  function scene_input_move(
+    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
+    x: number,
+    y: number,
+  ): void {
+    for (const handler of scene.sceneInputHandlers.pointermove ?? []) handler({ x, y });
+  }
+  function scene_input_up(
+    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
+    x: number,
+    y: number,
+  ): void {
+    for (const handler of scene.sceneInputHandlers.pointerup ?? []) handler({ x, y });
+  }
+});
 
 describe("HubScene session-start recording", () => {
   let matchMediaMock: MockFn;
