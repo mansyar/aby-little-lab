@@ -42,8 +42,11 @@
 
 ## Phase 4 — Gate green with margin
 
-- [ ] Task 4.1: Run the full `test:coverage` gate — lines ≥ 95.5%,
+- [x] Task 4.1: Run the full `test:coverage` gate — lines ≥ 95.5%,
   branches ≥ 85.5% — plus full gates (`check`, suite, build, validators).
+  [ALL GREEN 2026-10-17: coverage 1828/1828, lines 98.2%, branches 89.38%,
+  funcs 97.62%, stmts 99.05%; check clean; CI suite 68 files/1828 tests;
+  build ok; bundle validator PASS; PWA validator 15/15]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Checkpoints
