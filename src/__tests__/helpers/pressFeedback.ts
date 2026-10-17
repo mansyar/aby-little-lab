@@ -11,7 +11,7 @@ interface MockedFn {
 }
 
 /** A mocked Phaser game object: members are vi.fn mocks keyed by name. */
-type MockGameObject = Record<string, MockedFn>;
+export type MockGameObject = Record<string, MockedFn>;
 
 function asMockFn(value: unknown): MockedFn {
   return value as MockedFn;
@@ -48,13 +48,13 @@ export function countListeners(obj: MockGameObject, event: string): number {
 
 /** Interactive rectangles created by the scene (choice cards / letter tiles). */
 export function getInteractiveRects(scene: unknown): MockGameObject[] {
-  const rectangle = asMockFn((scene as MockGameObject).add.rectangle);
+  const rectangle = asMockFn((scene as { add: MockGameObject }).add.rectangle);
   return rectangle.mock.results.map((result) => result.value).filter(isInteractive);
 }
 
 /** Interactive images created by the scene (e.g. Musical Memory frogs). */
 export function getInteractiveImages(scene: unknown): MockGameObject[] {
-  const image = asMockFn((scene as MockGameObject).add.image);
+  const image = asMockFn((scene as { add: MockGameObject }).add.image);
   return image.mock.results.map((result) => result.value).filter(isInteractive);
 }
 

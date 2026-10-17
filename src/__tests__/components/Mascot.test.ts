@@ -32,6 +32,8 @@ interface MockTween {
 interface MockImage {
   x: number;
   y: number;
+  /** Absent by design: the mascot stays touch-inert. */
+  setInteractive?: MockFn;
   setScale: MockFn;
   setDepth: MockFn;
   setVisible: MockFn;
@@ -207,6 +209,68 @@ describe("Mascot", () => {
     });
   });
 
+  describe("curious()", () => {
+    it("tilts and hops with a yoyo tween", () => {
+      const mascot = createMascot(harness.scene);
+      mascot.curious();
+
+      const tween = getTweenConfigs(harness.scene)[0];
+      expect(tween.targets).toBe(harness.image);
+      expect(tween.angle).toEqual({ from: 0, to: 10 });
+      expect(tween.y).toBe(94); // 100 - 6px hop
+      expect(tween.yoyo).toBe(true);
+      expect(tween.repeat).toBe(1);
+    });
+
+    it("lasts about 440ms (220ms out and back)", () => {
+      const mascot = createMascot(harness.scene);
+      mascot.curious();
+      expect(getTweenConfigs(harness.scene)[0].duration).toBe(220);
+    });
+
+    it("tilts gently with no hop under reduced motion", () => {
+      stubMatchMedia(true);
+      const mascot = createMascot(harness.scene);
+      mascot.curious();
+
+      const tween = getTweenConfigs(harness.scene)[0];
+      expect(tween.angle).toEqual({ from: 0, to: 5 });
+      expect(tween.duration).toBe(140);
+      expect(tween.y).toBeUndefined();
+    });
+  });
+
+  describe("flapGreeting()", () => {
+    it("double-waves with a hop", () => {
+      const mascot = createMascot(harness.scene);
+      mascot.flapGreeting();
+
+      const configs = getTweenConfigs(harness.scene);
+      const wave = configs[0];
+      expect(wave.targets).toBe(harness.image);
+      expect(wave.angle).toEqual({ from: 0, to: 8 });
+      expect(wave.yoyo).toBe(true);
+      expect(wave.repeat).toBe(3);
+
+      const hop = configs[1];
+      expect(hop.targets).toBe(harness.image);
+      expect(hop.y).toBe(94); // 100 - 6px hop
+      expect(hop.yoyo).toBe(true);
+      expect(hop.repeat).toBe(1);
+    });
+
+    it("uses a single gentle tilt with no hop under reduced motion", () => {
+      stubMatchMedia(true);
+      const mascot = createMascot(harness.scene);
+      mascot.flapGreeting();
+
+      const configs = getTweenConfigs(harness.scene);
+      expect(configs).toHaveLength(1);
+      expect(configs[0].angle).toEqual({ from: 0, to: 4 });
+      expect(configs[0].duration).toBe(120);
+    });
+  });
+
   describe("cheer()", () => {
     it("switches to the celebrate pose", () => {
       const mascot = createMascot(harness.scene);
@@ -347,81 +411,6 @@ describe("Mascot", () => {
       createCornerMascot(harness.scene as never);
       expect(harness.scene.add.image).toHaveBeenCalledWith(934, 678, "mascot_idle");
       expect(harness.image.setScale).toHaveBeenCalledWith(0.2);
-    });
-
-    it("hot-swaps to a loaded Ligne mascot and delegates reactions", async () => {
-      const ligne = {
-        wave: vi.fn(),
-        nod: vi.fn(),
-        cheer: vi.fn(),
-        curious: vi.fn(),
-        flapGreeting: vi.fn(),
-        idleLoop: vi.fn(),
-        destroy: vi.fn(),
-      };
-      const load = vi.fn(async () => ligne as never);
-      const mascot = createCornerMascot(harness.scene as never, load);
-      await vi.waitFor(() => expect(harness.image.setVisible).toHaveBeenCalledWith(false));
-
-      mascot.wave();
-      mascot.nod();
-      mascot.cheer(true);
-      mascot.idleLoop();
-
-      expect(load).toHaveBeenCalledWith({ x: 934, y: 678, scale: 0.2, depth: -1 });
-      expect(ligne.wave).toHaveBeenCalledOnce();
-      expect(ligne.nod).toHaveBeenCalledOnce();
-      expect(ligne.cheer).toHaveBeenCalledWith(true);
-      expect(ligne.idleLoop).toHaveBeenCalledOnce();
-    });
-
-    it("replays a queued Ligne greeting after the lazy load completes", async () => {
-      const ligne = {
-        wave: vi.fn(),
-        nod: vi.fn(),
-        cheer: vi.fn(),
-        curious: vi.fn(),
-        flapGreeting: vi.fn(),
-        idleLoop: vi.fn(),
-        destroy: vi.fn(),
-      };
-      let resolveLoad: ((mascot: never) => void) | undefined;
-      const load = vi.fn(
-        () =>
-          new Promise<never>((resolve) => {
-            resolveLoad = resolve;
-          }),
-      );
-      const mascot = createCornerMascot(harness.scene as never, load);
-
-      mascot.flapGreeting();
-      resolveLoad?.(ligne as never);
-      await vi.waitFor(() => expect(ligne.flapGreeting).toHaveBeenCalledOnce());
-    });
-
-    it("allows the Ligne WASM runtime more than three seconds to initialize", async () => {
-      vi.useFakeTimers();
-      const ligne = {
-        wave: vi.fn(),
-        nod: vi.fn(),
-        cheer: vi.fn(),
-        curious: vi.fn(),
-        flapGreeting: vi.fn(),
-        idleLoop: vi.fn(),
-        destroy: vi.fn(),
-      };
-      const load = vi.fn(
-        () =>
-          new Promise<never>((resolve) => {
-            setTimeout(() => resolve(ligne as never), 4_000);
-          }),
-      );
-
-      createCornerMascot(harness.scene as never, load);
-      await vi.advanceTimersByTimeAsync(4_000);
-
-      expect(harness.image.setVisible).toHaveBeenCalledWith(false);
-      expect(ligne.destroy).not.toHaveBeenCalled();
     });
   });
 

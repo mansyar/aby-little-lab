@@ -1,3 +1,4 @@
+import type { Mock } from "vitest";
 import { ParentLock } from "../../components/ParentLock";
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -85,8 +86,8 @@ function createMockScene(): MockScene {
 describe("ParentLock", () => {
   let mockScene: MockScene;
   let mockTarget: MockTarget;
-  let onSuccess: MockFn;
-  let onFailure: MockFn;
+  let onSuccess: Mock<() => void>;
+  let onFailure: Mock<() => void>;
   let mockTimerEvent: MockTimerEvent;
   let mockTweenEvent: MockTweenEvent;
 
@@ -100,8 +101,8 @@ describe("ParentLock", () => {
     });
     mockScene.tweens.add.mockReturnValue(mockTweenEvent);
     mockTarget = createMockTarget();
-    onSuccess = vi.fn();
-    onFailure = vi.fn();
+    onSuccess = vi.fn(() => {});
+    onFailure = vi.fn(() => {});
   });
 
   function createLock() {

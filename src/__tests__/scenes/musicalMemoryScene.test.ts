@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -62,14 +62,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -241,7 +241,7 @@ const { mockSpeech } = vi.hoisted(() => ({
 vi.mock("../../utils/speech", () => mockSpeech);
 
 const { getAdaptiveBandShiftMock, generateSequenceMock, isWinMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   generateSequenceMock: vi.fn(),
   isWinMock: vi.fn(),
 }));
@@ -272,6 +272,7 @@ import {
   expectPressFeedbackContract,
   fireFirstHandler,
   getInteractiveImages,
+  type MockGameObject,
 } from "../helpers/pressFeedback";
 
 describe("MusicalMemoryScene press feedback cohesion", () => {
@@ -396,18 +397,20 @@ describe("MusicalMemoryScene replay drives the speaker grammar", () => {
   });
 
   /** The replay button glyph (the icon_speaker image). */
-  function getSpeakerImage(scene: MusicalMemoryScene): Record<string, MockFn> {
-    const calls = scene.add.image.mock.calls;
+  function getSpeakerImage(scene: unknown): MockGameObject {
+    const imageMock = (scene as unknown as { add: { image: MockFn } }).add.image;
+    const calls = imageMock.mock.calls;
     const index = calls.findIndex((call) => call[2] === "icon_speaker");
     if (index === -1) throw new Error("speaker image not found");
-    const value = scene.add.image.mock.results[index]?.value;
+    const value = imageMock.mock.results[index]?.value;
     if (!value) throw new Error("speaker image result missing");
-    return value as Record<string, MockFn>;
+    return value as MockGameObject;
   }
 
   /** Fires the most recently scheduled delayed call (the sequence completion). */
-  function fireLastDelayedCall(scene: MusicalMemoryScene): void {
-    const callback = scene.time.delayedCall.mock.calls.at(-1)?.[1];
+  function fireLastDelayedCall(scene: unknown): void {
+    const delayedCall = (scene as unknown as { time: { delayedCall: MockFn } }).time.delayedCall;
+    const callback = delayedCall.mock.calls.at(-1)?.[1];
     if (typeof callback !== "function") {
       throw new Error("completion delayed call not found");
     }
@@ -454,8 +457,9 @@ describe("adaptive band shift wiring", () => {
   });
 
   /** Fires the most recently scheduled delayed call (the sequence completion). */
-  function fireLastDelayedCall(scene: MusicalMemoryScene): void {
-    const callback = scene.time.delayedCall.mock.calls.at(-1)?.[1];
+  function fireLastDelayedCall(scene: unknown): void {
+    const delayedCall = (scene as unknown as { time: { delayedCall: MockFn } }).time.delayedCall;
+    const callback = delayedCall.mock.calls.at(-1)?.[1];
     if (typeof callback !== "function") {
       throw new Error("completion delayed call not found");
     }

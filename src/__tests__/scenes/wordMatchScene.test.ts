@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -51,7 +51,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -61,14 +61,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -260,7 +260,7 @@ vi.mock("../../utils/speech", () => mockSpeech);
 
 /** Controllable getAdaptiveBandShift facade plus a recorder for the generator call. */
 const { getAdaptiveBandShiftMock, generateWordPlaythroughMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   generateWordPlaythroughMock: vi.fn(),
 }));
 
@@ -443,24 +443,25 @@ describe("WordMatchScene shell", () => {
     const scene = new WordMatchScene();
     scene.create();
 
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const mascotCall = imageMock.mock.calls.find((call) => call[2] === "mascot_idle");
     expect(mascotCall).toBeDefined();
 
-    const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
     const backCall = textMock.mock.calls.find((call) => call[2] === "← Back");
     expect(backCall).toBeDefined();
+    if (!backCall) throw new Error("back button text not found");
     const backIndex = textMock.mock.calls.indexOf(backCall);
     expect(getMockFn(textMock.mock.results[backIndex].value.setInteractive)).toHaveBeenCalled();
 
     expect(mockParentLockInstances).toHaveLength(1);
     expect((mockParentLockInstances[0] as { onSuccess: unknown }).onSuccess).toBeDefined();
 
-    const circleMock = getMockFn((scene as { add: Record<string, unknown> }).add.circle);
+    const circleMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.circle);
     expect(circleMock.mock.calls).toHaveLength(6);
 
-    expect((scene as { rounds: unknown[] }).rounds).toHaveLength(6);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { rounds: unknown[] }).rounds).toHaveLength(6);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("parental lock hold success exits to the Hub", () => {
@@ -474,14 +475,16 @@ describe("WordMatchScene shell", () => {
 
     onSuccess();
     const fadeOutMock = getMockFn(
-      (scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
+      (scene as unknown as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
     );
     const fadeOutCall = fadeOutMock.mock.calls.at(-1);
     expect(fadeOutCall).toBeDefined();
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
     }
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 });
 
@@ -531,8 +534,9 @@ describe("WordMatchScene round rendering", () => {
     expect(getMockFn(cards[0].setStrokeStyle)).toHaveBeenCalled();
 
     // Cards are at least 160px tall — comfortably above the 96px touch target.
-    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
-      .calls;
+    const rectCalls = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+    ).mock.calls;
     const cardCalls = rectCalls.filter((call) => CARD_ROW_YS.includes(call[1] as number));
     expect(cardCalls).toHaveLength(4);
     for (const call of cardCalls) {
@@ -549,12 +553,11 @@ describe("WordMatchScene round rendering", () => {
         expect(getMockFn(letters[j].setDisplaySize)).toHaveBeenCalledWith(80, 80);
       }
       const keys = (
-        getMockFn((scene as { add: Record<string, unknown> }).add.image).mock.calls as Array<
-          [number, number, string]
-        >
+        getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image).mock
+          .calls as Array<[number, number, string]>
       ).filter((call) => typeof call[2] === "string" && call[2].startsWith("letter_"));
       const cardLetterKeys = keys.filter((call) => {
-        const [x, y] = call as [number, number];
+        const [x, y] = call as unknown as [number, number];
         const row = y === CARD_ROW_YS[0] ? 0 : 1;
         const col = x < scene.cameras.main.centerX ? 0 : 1;
         return row * 2 + col === i;
@@ -598,8 +601,9 @@ describe("WordMatchScene round rendering", () => {
     scene.create();
 
     // add.rectangle(x, y, width, height, color) — position is the center.
-    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
-      .calls as Array<[number, number, number, number]>;
+    const rectCalls = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+    ).mock.calls as Array<[number, number, number, number]>;
     const FOUR_LETTER_CARD_WIDTH = 4 * 80 + 3 * 8 + 2 * 30; // 404
     let widePairs = 0;
     for (const rowY of CARD_ROW_YS) {
@@ -676,7 +680,7 @@ describe("WordMatchScene interaction", () => {
     expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
 
     fireNextRoundDelay(scene);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(1);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
 
     // The new round re-renders and speaks its own target word.
     const secondRound = getCurrentRound(scene);
@@ -684,11 +688,13 @@ describe("WordMatchScene interaction", () => {
     expect(getCardRects(scene)).toHaveLength(8);
 
     // The previous round's prompt picture is destroyed on re-render.
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const promptResults = imageMock.mock.results.filter(
-      (_, i) => imageMock.mock.calls[i]?.[2] === getWord(firstRoundTarget(scene)).promptTexture,
+      (_, i) => imageMock.mock.calls[i]?.[2] === getWord(firstRoundTarget(scene))?.promptTexture,
     );
-    expect(getMockFn(promptResults[0].value as Record<string, MockFn>).destroy).toHaveBeenCalled();
+    expect(
+      getMockFn((promptResults[0].value as Record<string, MockFn>).destroy),
+    ).toHaveBeenCalled();
   });
 
   function firstRoundTarget(scene: unknown): string {
@@ -709,7 +715,7 @@ describe("WordMatchScene interaction", () => {
 
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
     expect(mockAudio.playCorrect).not.toHaveBeenCalled();
-    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
 
     // Professor Hoot nods along with the soft incorrect tone.
     const mascot = getMascotImage(scene);
@@ -735,12 +741,12 @@ describe("WordMatchScene interaction", () => {
     const round = getCurrentRound(scene);
 
     tapCard(scene, round.choices.indexOf(round.target));
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // A tap while locked is ignored (no second correct chime, no advance).
     tapCard(scene, round.choices.indexOf(round.target));
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
   });
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
@@ -802,7 +808,7 @@ describe("WordMatchScene completion", () => {
     }
 
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
@@ -815,12 +821,14 @@ describe("WordMatchScene completion", () => {
     // First completion awards the sticker and shows the reveal animation.
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     const stickerImage = getMockFn(
-      (scene as { add: Record<string, unknown> }).add.image,
+      (scene as unknown as { add: Record<string, unknown> }).add.image,
     ).mock.calls.find((call) => call[2] === "sticker_word_match");
     expect(stickerImage).toBeDefined();
 
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub", {
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub", {
       justEarned: "word-match",
     });
   });
@@ -861,7 +869,9 @@ describe("WordMatchScene completion", () => {
 
     // The correct-answer splash is the first graphics drawn after the tap
     // (the mascot cheer may add its own sparkle graphics afterwards).
-    const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+    const graphicsMock = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.graphics,
+    );
     expect(graphicsMock.mock.results.length).toBeGreaterThan(0);
     const graphics = graphicsMock.mock.results[0].value as Record<string, MockFn>;
     expect(getMockFn(graphics.lineStyle)).toHaveBeenCalled();
@@ -879,7 +889,9 @@ describe("WordMatchScene completion", () => {
 
     expect(mockAudio.playSticker).not.toHaveBeenCalled();
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("re-launching after completion unlocks input so choices are clickable again", () => {
@@ -889,12 +901,12 @@ describe("WordMatchScene completion", () => {
     for (let i = 0; i < 6; i++) {
       completeRound(scene);
     }
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Returning to the Hub and tapping the tile again calls create() on the
     // same scene instance (Phaser restart) — input must be unlocked.
     scene.create();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
 
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);

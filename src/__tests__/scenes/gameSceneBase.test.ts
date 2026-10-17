@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mascot } from "../../components/Mascot";
 import type { SpeakerButton } from "../../components/SpeakerButton";
 import type { GameId } from "../../types";
 
@@ -11,7 +12,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -52,7 +53,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -62,14 +63,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -238,7 +239,7 @@ const { mockRecordGameResult } = vi.hoisted(() => ({
 
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();
-  mockRecordGameResult.mockImplementation((gameId: string, correct: number, wrong: number) => {
+  mockRecordGameResult.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
     actual.recordGameResult(gameId, correct, wrong);
   });
   return { ...actual, recordGameResult: mockRecordGameResult };

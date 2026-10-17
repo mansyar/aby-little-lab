@@ -78,6 +78,26 @@ that the `.ligne`, JS bridge, and WASM engine were not on the measured boot
 critical path. The tween mascot remains available immediately and the Ligne
 runtime replaces it asynchronously.
 
+## Ligne Removal Addendum — 2026-10-16
+
+Track: `drop-ligne-mascot_20261016`. The Ligne engine is deleted (tween/SVG-only
+mascot). Measured from the production Vite build on the reference machine:
+
+| Metric | Before (v1.18.0) | After | Delta |
+|---|---:|---:|---|
+| Precache payload | 3382.30 KiB / 48 entries | 1643.13 KiB / 42 entries | **−51%** |
+| `dist/` total | 4.7 MB | 3.0 MB | −1.7 MB (WASM engine + bridge + `.ligne` + dev copy) |
+| `.wasm` / `.ligne` in `dist/` | 3 files | 0 | gone (PWA validator now asserts absence) |
+| Shell entry | — | 171.2 kB | still ≤ 200 kB ceiling |
+| Phaser vendor | 1342.6 kB | 1342.6 kB | unchanged |
+
+Runtime effects (by construction, not re-measured): no WASM compilation on
+low-end devices, no per-frame DOM-canvas compositor overlay, no 10 s
+activation timeout — the tween Hoot renders from scene creation on every
+device class, reduced-motion path unchanged. Boot budget (< 3 s) was never on
+the Ligne path (engine loaded post-load-event), so boot time is unaffected;
+install/update payload is roughly halved.
+
 ## Track Baseline — hub-phone-ux-perf_20261017 — 2026-10-17
 
 Phase 1 "before" numbers for the Phone-Scale Hub UX + Boot/Texture Performance
@@ -186,3 +206,10 @@ Notes:
 - Hub on narrow viewports (≤ 64/116 FIT scale) now pages 10 tiles per page
   (5×2, 176×196 tiles, 96 px icons) — see the paged-Hub rows in
   `docs/device-testing-checklist.md` for the device pass.
+- Post-merge reconciliation (2026-10-18, after merging `drop-ligne-mascot_20261016`
+  and the coverage-gates track into this branch): the Ligne removal above
+  supersedes the payload rows recorded here — precache is now **42 entries /
+  2189.6 KiB** (including the trimmed 503.4 KiB bgm) versus the 48 / 3927.3 KiB
+  measured with Ligne present, and `scripts/validate-boot.js` re-measured at a
+  **0.64 s median** on the merged tree. The texture-tier (−78% GPU memory) and
+  paged-Hub results are unaffected by the merge.

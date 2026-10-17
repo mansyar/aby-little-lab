@@ -228,7 +228,7 @@ export class HowManyScene extends GameSceneBase {
     const rect = this.cardRects[groupIndex];
     rect.setFillStyle(this.SUCCESS_COLOR, 1);
     this.time.delayedCall(250, () => {
-      if (!rect.destroyed) rect.setFillStyle(this.CARD_BG_COLOR, 1);
+      if (!rect.isDestroyed) rect.setFillStyle(this.CARD_BG_COLOR, 1);
     });
 
     this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
