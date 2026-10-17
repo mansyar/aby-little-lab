@@ -41,7 +41,7 @@ happy-dom).
 
 ## Checkpoints
 
-- Phase 1: `[checkpoint: pending-commit]`
+- Phase 1: `[checkpoint: e67e669]`
 - Phase 2: `[checkpoint: pending]`
 - Phase 3: `[checkpoint: pending]`
 - Phase 4: `[checkpoint: pending]`
