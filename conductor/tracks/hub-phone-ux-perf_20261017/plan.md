@@ -48,4 +48,4 @@
 - [x] Task: Record after-numbers in `docs/perf-baseline.md` (boot, memory, texture audit before/after); update product.md changelog `[commit: 7317967]`
 - [x] Task: Full 4-device-class verification incl. narrow phone: ≥64px targets, crisp icons at paged sizes, swipe+dots UX, no tablet regression (checklist rows executed) `[commit: 3d52057]`
 - [x] Task: Final review readiness: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, coverage ≥ threshold `[doc: biome check exit 0 (21 pre-existing warnings + 1 info); suite 71 files/1849 green; build green; coverage global gate red as documented pre-existing gap (v1.17.0 baseline lines 94.2/branches 82.14) — this track: lines 94.2 (== baseline), branches 82.82 (improved), touched modules healthy (storage 100 lines, HubScene 97.15 lines, src/game 97.87/91.66) per the user-approved 2026-08-28 scoped-coverage policy]`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 3c460d1]`
