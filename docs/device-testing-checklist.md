@@ -4,6 +4,15 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — Hub Phone UX + Boot/Texture Perf device pass (2026-10-17/18)
+
+- **Target:** LAN preview of the `feature/hub-phone-ux-and-boot-perf` branch build (`vite preview --host`, port 4173; latest dist incl. paged Hub, texture tiers, resize handling)
+- **Scope:** track `conductor/tracks/hub-phone-ux-perf_20261017/` — adaptive paged Hub on narrow viewports (5×2 tiles ×2 pages, swipe + textless dots, RM-aware slide, fixed furniture), per-use texture raster tiers, storage memoization, bgm re-encode, CI boot gate
+- **Devices:** user-verified on personal phone and tablet via LAN URLs (device models not recorded); automated desktop Chromium checks (1024×768 + 844×390 + live resize both ways, zero console errors) run by the agent
+- **Checks:** the "Adaptive Paged Grid" rows below plus tablet 5×4 regression, Games 11–20 lazy-load round-trip rows, audio + offline basics
+- **Result:** **PASSED — user reported all rows pass** (2026-10-18); no Critical/High/Medium/Low findings reported
+- **Issues found:** none reported
+
 ## Execution Record - v1.18.0 (2026-10-16)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.18.0 — Adaptive-Complete Suite + Docs Alignment; tag `v1.18.0` → `582fd18`, release track `conductor/archive/release-1.18.0_20261016/`)
@@ -231,15 +240,15 @@ pnpm exec serve dist -l 3000
 - [ ] Professor Hoot mascot sits in the bottom-right corner: waves on load, cheers on a just-earned sticker, then bobs/blinks on the idle loop
 - [ ] Mascot is touch-inert — tapping where Hoot stands still reaches the tile/control underneath
 
-#### Hub Screen — Adaptive Paged Grid (narrow phones; placeholder — rows to be finalized when the paged Hub lands)
-- [ ] On narrow landscape phones the Hub pages to 2 pages of 10 tiles; effective tile touch targets stay ≥64px (after FIT scaling)
-- [ ] Textless page dots under the grid show the active page; dots are tappable
-- [ ] Horizontal swipe within the tile-grid region flips pages; touches outside the grid (mascot, settings hold-zone, profile chip, Back) never page
-- [ ] Fixed furniture (mascot, settings hold-zone, profile chip, play-time arc) occupies identical positions on both pages; the sticker shelf stays attached to its tile
-- [ ] Idle attract wiggles only visible tiles; paging is kid-initiated
-- [ ] Page resets to page 1 on scene re-entry
-- [ ] Page-slide transition is reduced-motion-aware (instant/short under OS reduced motion)
-- [ ] On tablets/wide screens the Hub remains the single 5×4 grid with no paging UI (byte-identical behavior)
+#### Hub Screen — Adaptive Paged Grid (narrow phones)
+- [x] On narrow landscape phones the Hub pages to 2 pages of 10 tiles; effective tile touch targets stay ≥64px (after FIT scaling)
+- [x] Textless page dots under the grid show the active page; dots are tappable
+- [x] Horizontal swipe within the tile-grid region flips pages; touches outside the grid (mascot, settings hold-zone, profile chip, Back) never page
+- [x] Fixed furniture (mascot, settings hold-zone, profile chip, play-time arc) occupies identical positions on both pages; the sticker shelf stays attached to its tile
+- [x] Idle attract wiggles only visible tiles; paging is kid-initiated
+- [x] Page resets to page 1 on scene re-entry
+- [x] Page-slide transition is reduced-motion-aware (instant/short under OS reduced motion)
+- [x] On tablets/wide screens the Hub remains the single 5×4 grid with no paging UI (byte-identical behavior)
 
 #### Game 1: Shape Sorter
 - [ ] Game loads correctly
