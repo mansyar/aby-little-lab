@@ -139,3 +139,22 @@ Proceed with the planned optimization phases (per-use raster tiers, storage
 memoization, font-gate concurrency, bgm trim). The 4×-throttled boot failure
 makes the texture-tier work the highest-value item; "after" numbers will be
 recorded in Phase 6 against this baseline.
+
+## Font-Gate Finding — hub-phone-ux-perf_20261017 — 2026-10-17
+
+The planned "font-gate concurrency" task was resolved as a **measured no-op**.
+
+- **Measurement** (fresh-context, prod preview, `document.fonts.load`
+  instrumented via `addInitScript`): kicked at ~442ms, resolved at ~480ms —
+  the gate waits only **~38ms** in the typical case.
+- **Why**: the Baloo 2 woff2 is already fetched by the browser at HTML parse
+  time (`@font-face` + SW precache); `ensureGlyphFontLoaded()` merely awaits
+  an in-flight fetch. There is no fetch left to overlap with loader batches.
+- **Why no code change**: splitting the loader into a non-glyph batch → font
+  gate → glyph batch risks the documented Arial-fallback regression (track
+  `baloo2-glyphs_20260811`): if the non-glyph batch drains before the font
+  promise resolves, the scene advances and the glyph batch never enqueues.
+  A two-phase split would also restart the progress bar (loader totals reset
+  on `start()`).
+- **Resolution** (user-approved): keep the gate as-is; timeout cap
+  (2500ms) unchanged; record this finding instead of restructuring.
