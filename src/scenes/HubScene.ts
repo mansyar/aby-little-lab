@@ -690,7 +690,7 @@ export class HubScene extends Phaser.Scene {
       graphics.fillCircle(cx - 5, cy - 4, HINT_ARC_RADIUS + 1);
     } else {
       const remaining = getRemainingMinutes(playTime);
-      const ratio = Math.max(0, Math.min(1, remaining / (playTime.limitMinutes ?? 1)));
+      const ratio = Math.max(0, Math.min(1, (remaining ?? 0) / (playTime.limitMinutes ?? 1)));
       const endAngle = -Math.PI / 2 + ratio * Math.PI * 2;
       graphics.fillStyle(isNearLimit(playTime) ? HINT_WARM_COLOR : HINT_COOL_COLOR, 1);
       graphics.slice(cx, cy, HINT_ARC_RADIUS, -Math.PI / 2, endAngle, false);

@@ -20,6 +20,18 @@ const SHAPE_TEXTURES: Record<ShapeType, string> = {
   star: "shape_star",
   heart: "shape_heart",
   crescent: "shape_crescent",
+  oval: "shape_oval",
+  rectangle: "shape_rectangle",
+  diamond: "shape_diamond",
+  pentagon: "shape_pentagon",
+  hexagon: "shape_hexagon",
+  octagon: "shape_octagon",
+  trapezoid: "shape_trapezoid",
+  semicircle: "shape_semicircle",
+  arrow: "shape_arrow",
+  plus: "shape_plus",
+  ring: "shape_ring",
+  teardrop: "shape_teardrop",
 };
 
 /** Number of rounds per playthrough. */

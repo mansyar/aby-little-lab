@@ -603,7 +603,7 @@ describe("TakeAwayScene round flow", () => {
     tapCard(scene, targetSlot);
 
     const rect = cards[targetSlot];
-    (rect as unknown as { destroyed: boolean }).destroyed = true;
+    (rect as unknown as { isDestroyed: boolean }).isDestroyed = true;
     const delayedCallMock = getMockFn(
       (scene as { time: Record<string, unknown> }).time.delayedCall,
     );

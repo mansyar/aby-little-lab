@@ -583,7 +583,7 @@ describe("OddOneOutScene round flow", () => {
 
     tapCard(scene, round.oddSlot);
 
-    (rect as unknown as { destroyed: boolean }).destroyed = true;
+    (rect as unknown as { isDestroyed: boolean }).isDestroyed = true;
     const delayedCallMock = getMockFn(
       (scene as { time: Record<string, unknown> }).time.delayedCall,
     );

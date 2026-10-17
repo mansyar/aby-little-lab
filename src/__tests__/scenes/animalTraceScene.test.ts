@@ -472,13 +472,21 @@ describe("AnimalTraceScene session state", () => {
     expect(pulse).toBeDefined();
     if (!pulse) return;
     // Simulate an active pair so the redraw branch runs.
-    const graphics = { clear: vi.fn(), lineStyle: vi.fn(), strokePoints: vi.fn() };
+    const graphics = {
+      clear: vi.fn(),
+      fillStyle: vi.fn(),
+      fillCircle: vi.fn(),
+      lineStyle: vi.fn(),
+      strokeCircle: vi.fn(),
+      strokePoints: vi.fn(),
+    };
     (scene as unknown as { currentPair: unknown }).currentPair = {
       pathGraphics: graphics,
       pathPoints: [
         { x: 0, y: 0 },
         { x: 10, y: 10 },
       ],
+      progress: { currentPoint: 0 },
     };
     (pulse[0] as { onUpdate: () => void }).onUpdate();
     expect(graphics.clear).toHaveBeenCalled();
