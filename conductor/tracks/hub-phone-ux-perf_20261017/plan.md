@@ -10,7 +10,7 @@
   - [ ] Add throttle re-measure section (the deferred `perf-baseline.md` follow-up)
   - [ ] Record current texture memory estimate (170×512² audit)
 - [x] Task: Refresh `docs/device-testing-checklist.md` rows from 17→20 games (5×4 grid, 20 stickers, 20 progress rows, 20 Back buttons, 2-page Hub rows placeholder) `[commit: f0f6062]`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 2f1f5e5]`
 
 ## Phase 2 — Storage Memoization (TDD)
 
