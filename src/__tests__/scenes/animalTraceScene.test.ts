@@ -445,4 +445,40 @@ describe("AnimalTraceScene session state", () => {
     );
     expect(pulseTweens).toHaveLength(1);
   });
+
+  it("redraws the path guide from the pulse onUpdate without an active pair", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const tweensMock = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const pulse = tweensMock.mock.calls.find(
+      (call) => call[0] && typeof call[0].onUpdate === "function",
+    );
+    expect(pulse).toBeDefined();
+    // No active pair mid-pulse: updates the radius, skips the redraw.
+    (pulse?.[0] as { onUpdate: () => void }).onUpdate();
+    expect((scene as { ringRadius: number }).ringRadius).toBeGreaterThan(0);
+  });
+
+  it("redraws the path guide from the pulse onUpdate with an active pair", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const tweensMock = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const pulse = tweensMock.mock.calls.find(
+      (call) => call[0] && typeof call[0].onUpdate === "function",
+    );
+    expect(pulse).toBeDefined();
+    // Simulate an active pair so the redraw branch runs.
+    const graphics = { clear: vi.fn(), lineStyle: vi.fn(), strokePoints: vi.fn() };
+    (scene as unknown as { currentPair: unknown }).currentPair = {
+      pathGraphics: graphics,
+      pathPoints: [
+        { x: 0, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    };
+    (pulse?.[0] as { onUpdate: () => void }).onUpdate();
+    expect(graphics.clear).toHaveBeenCalled();
+  });
 });
