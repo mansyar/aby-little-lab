@@ -540,6 +540,61 @@ describe("OddOneOutScene round flow", () => {
     expect((wiggleTween[0] as { yoyo: boolean }).yoyo).toBe(true);
   });
 
+  it("does nothing when the speaker is tapped after the final round (celebration guard)", () => {
+    const scene = new OddOneOutScene();
+    scene.create();
+    mockSpeech.speakWord.mockClear();
+
+    (scene as { roundIndex: number }).roundIndex = 99;
+    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } })
+      .speaker.button;
+    const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdownCall).toBeDefined();
+    if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+      (pointerdownCall[1] as () => void)();
+    }
+
+    expect(mockSpeech.speakWord).not.toHaveBeenCalled();
+  });
+
+  it("re-speaks the current odd item when the speaker is tapped mid-round", () => {
+    const scene = new OddOneOutScene();
+    scene.create();
+    mockSpeech.speakWord.mockClear();
+
+    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } })
+      .speaker.button;
+    const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdownCall).toBeDefined();
+    if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+      (pointerdownCall[1] as () => void)();
+    }
+
+    const round = getCurrentRound(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(promptFor(round.oddTexture), true);
+  });
+
+  it("skips the flash revert when the card is destroyed before the 250ms timer", () => {
+    const scene = new OddOneOutScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+    const cards = getCardRects(scene);
+    const rect = cards[round.oddSlot];
+
+    tapCard(scene, round.oddSlot);
+
+    (rect as unknown as { destroyed: boolean }).destroyed = true;
+    const delayedCallMock = getMockFn(
+      (scene as { time: Record<string, unknown> }).time.delayedCall,
+    );
+    const revertCall = delayedCallMock.mock.calls.find((call) => call[0] === 250);
+    expect(revertCall).toBeDefined();
+    if (revertCall && typeof revertCall[1] === "function") {
+      (revertCall[1] as () => void)();
+    }
+    expect(getMockFn(rect.setFillStyle)).toHaveBeenCalledTimes(1);
+  });
+
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
     const scene = new OddOneOutScene();
     scene.create();
