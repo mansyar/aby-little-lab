@@ -806,6 +806,22 @@ describe("DecodeItScene completion", () => {
     }
   });
 
+  it("re-speaks the current target word when the speaker is tapped mid-round", () => {
+    const scene = new DecodeItScene();
+    scene.create();
+    mockSpeech.speakWord.mockClear();
+
+    const speakerImage = getSpeakerImage(scene);
+    const pointerdown = getMockFn(speakerImage.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdown).toBeDefined();
+    if (pointerdown && typeof pointerdown[1] === "function") {
+      (pointerdown[1] as () => void)();
+    }
+
+    const round = getCurrentRound(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(round.target, true);
+  });
+
   it("shows a splash burst at the tapped card on a correct answer", () => {
     const scene = new DecodeItScene();
     scene.create();

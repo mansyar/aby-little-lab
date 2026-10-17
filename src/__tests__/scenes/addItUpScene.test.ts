@@ -593,6 +593,28 @@ describe("AddItUpScene round flow", () => {
     expect(wrongItems.length).toBeGreaterThan(0);
   });
 
+  it("skips the flash revert when the answer card is destroyed before the 250ms timer", () => {
+    const scene = new AddItUpScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+    const targetSlot = round.answerOptions.indexOf(round.target);
+    const cards = getAnswerCardRects(scene);
+
+    tapCard(scene, targetSlot);
+
+    const rect = cards[targetSlot];
+    (rect as unknown as { destroyed: boolean }).destroyed = true;
+    const delayedCallMock = getMockFn(
+      (scene as { time: Record<string, unknown> }).time.delayedCall,
+    );
+    const revertCall = delayedCallMock.mock.calls.find((call) => call[0] === 250);
+    expect(revertCall).toBeDefined();
+    if (revertCall && typeof revertCall[1] === "function") {
+      (revertCall[1] as () => void)();
+    }
+    expect(getMockFn(rect.setFillStyle)).toHaveBeenCalledTimes(1);
+  });
+
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
     const scene = new AddItUpScene();
     scene.create();
