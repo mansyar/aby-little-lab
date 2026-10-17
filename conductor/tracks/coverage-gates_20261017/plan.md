@@ -5,28 +5,32 @@
 > per module family, then the full gate. Commit style `<type>(<scope>): <desc>`
 > with git-note task records.
 
-## Phase 1 — Baseline + registry loaders
+## Phase 1 — Baseline + highest-deficit scenes
 
-- [~] Task 1.1: Run `pnpm run test:coverage`, record the red baseline
-  (per-module lines/branches for the FR-1–FR-4 targets) in the checkpoint note.
-- [ ] Task 1.2: Write `sceneRegistry` loader tests with mocked dynamic
-  imports — `ensureSceneLoaded` success, failure, concurrent-call dedup —
-  plus registry key completeness (RED → GREEN).
+- [x] Task 1.1: Run `pnpm run test:coverage`, record the red baseline
+  (1795/1795 green; lines 94.25%, branches 83.51%; deficit spread across
+  ~15 scene files, glue suites already exist) in the checkpoint note.
+  [baseline: /tmp/cov-baseline.log]
+- [ ] Task 1.2: Cover ColorMatch (64%), OddOneOut / PopFreeze (71%),
+  AnimalTrace (78%) uncovered branches — wrong-tap variants,
+  replay/relaunch paths, guard clauses (RED → GREEN).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Preload flow
+## Phase 2 — Remaining scene branches + glue
 
-- [ ] Task 2.1: Write `PreloadScene` raster / texture-registration tests
-  with mocked loader primitives, including error paths (RED → GREEN).
+- [ ] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
+  remaining ~80s scene files until global branches clear 85.5%.
+- [ ] Task 2.2: Cover `PreloadScene` dev-profiling branches (424–433) and
+  `pwaBridge` update/offline branches (45–51).
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Bridge paths + near-miss sweep
+## Phase 3 — Registry lines + lines top-up
 
-- [ ] Task 3.1: Write `pwaBridge` / `PwaToast` tests — install prompt,
-  update flow, controller change — with mocked service-worker globals
-  (RED → GREEN).
-- [ ] Task 3.2: Sweep every module the baseline flags under 90% lines to
-  ≥ 90% (tests only, no refactors).
+- [ ] Task 3.1: Cover the 20 `sceneRegistry` dynamic-import one-liners via
+  `vi.mock` interception or stubbed-module invocation (no real Phaser in
+happy-dom).
+- [ ] Task 3.2: If lines still lag 95.5%, cover flagged line gaps
+  (NumberOrderScene, decodeLogic) until both numbers clear with margin.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Gate green with margin

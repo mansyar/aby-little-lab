@@ -5,27 +5,32 @@
 ## Overview
 
 The global coverage gate (`test:coverage`: lines 95, statements 90,
-functions 88, branches 85) has been red since August 2026 on untested glue
-code — no feature track has owned it (documented in the 2026-08-28
-tech-stack note: lines 94.2% / branches 82.14%, driven by `sceneRegistry`
-21.73% lines / 12.19% functions, `PreloadScene` 77.77% lines,
-`pwaBridge`/`PwaToast` ~87% lines). This track earns the missing coverage
-with real tests so the gate goes green with margin.
+functions 88, branches 85) has been red since August 2026 — no feature track
+has owned it (documented in the 2026-08-28 tech-stack note). The October 17
+baseline (1795/1795 green; lines 94.25%, branches 83.51%) shows the deficit
+is spread across ~15 scene files at ~80% branches each — not concentrated in
+glue (all glue suites now exist: registry 100% branches, preload 25%, bridge
+71%). This track earns the missing branch coverage file-by-file so the gate
+goes green with margin.
 
 ## Functional Requirements
 
-- **FR-1 — Registry loader tests.** Mock dynamic scene imports to exercise
-  `ensureSceneLoaded` end-to-end: successful load, load failure, and
-  concurrent-call dedup (if present). Assert registry key completeness
-  against the shipped scenes.
-- **FR-2 — Preload tests.** Cover the `PreloadScene` raster and
-  texture-registration flow with mocked loader primitives, including error
-  paths.
-- **FR-3 — Bridge tests.** Cover the install-prompt, update-flow, and
-  controller-change paths of `pwaBridge` / `PwaToast` with mocked
-  service-worker globals.
-- **FR-4 — Near-miss sweep.** Any module the baseline report flags under
-  90% lines gets tests to ≥ 90%. No drive-by refactors of covered code.
+- **FR-1 — Scene branch sweep (highest deficit first).** Cover the
+  uncovered branches flagged in the baseline: ColorMatch (64%),
+  OddOneOut / PopFreeze (71%), AnimalTrace (78%), AddItUp / TakeAway /
+  DecodeIt (80–81%), then the remaining ~80s scene files — wrong-tap
+  variants, replay/relaunch paths, guard clauses — until the global branch
+  number clears 85.5%.
+- **FR-2 — Glue branches.** `PreloadScene` dev-profiling branches (lines
+  424–433), `pwaBridge` update/offline branches (lines 45–51), and any other
+  glue branch the report flags.
+- **FR-3 — Registry loader lines.** Cover the 20 dynamic-import one-liners
+  (`sceneRegistry.ts` lines 12–31) via `vi.mock` module interception or
+  per-loader invocation with stubbed scene modules — without pulling real
+  Phaser scenes into happy-dom.
+- **FR-4 — Lines top-up.** If lines (94.25% → need 95.5%) still lag after
+  FR-1–FR-3, cover flagged line gaps (e.g. NumberOrderScene 44%, decodeLogic
+  branches 56%) until both numbers clear with margin.
 
 ## Non-Functional Requirements
 
