@@ -211,7 +211,7 @@ export class MemoryMatchScene extends GameSceneBase {
       const rect = this.cardRects[index];
       rect.setFillStyle(this.SUCCESS_COLOR, 1);
       this.time.delayedCall(FLASH_DURATION, () => {
-        if (!rect.destroyed) rect.setFillStyle(this.CARD_BG_COLOR, 1);
+        if (!rect.isDestroyed) rect.setFillStyle(this.CARD_BG_COLOR, 1);
       });
     }
 

@@ -1,4 +1,5 @@
 import { todayKey } from "../../game/playTimeLogic";
+import { createDefaultStickers } from "../../game/profileLogic";
 import type { AppStorage, GameId } from "../../types";
 import {
   addProfile,
@@ -295,6 +296,7 @@ describe("Storage utilities", () => {
     it("writes storage data that can be read back by load", () => {
       const data: AppStorage = {
         stickers: {
+          ...createDefaultStickers(),
           "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
           "animal-trace": { earned: false, earnedAt: null },
           "pop-freeze": { earned: false, earnedAt: null },
@@ -307,6 +309,8 @@ describe("Storage utilities", () => {
         settings: {
           bgmEnabled: false,
           sfxEnabled: true,
+          preferredVoiceURI: null,
+          adaptiveDifficulty: true,
         },
       };
 
@@ -765,8 +769,16 @@ describe("progress recording", () => {
     recordGameResult("shape-sorter", 5, 1);
 
     save({
-      stickers: { "shape-sorter": { earned: true, earnedAt: "2026-08-05T00:00:00.000Z" } },
-      settings: { bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null },
+      stickers: {
+        ...createDefaultStickers(),
+        "shape-sorter": { earned: true, earnedAt: "2026-08-05T00:00:00.000Z" },
+      },
+      settings: {
+        bgmEnabled: false,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      },
     });
     earnSticker("color-match");
     expect(getProgress()["shape-sorter"].plays).toBe(1);

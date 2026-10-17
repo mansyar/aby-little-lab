@@ -32,6 +32,8 @@ interface MockTween {
 interface MockImage {
   x: number;
   y: number;
+  /** Absent by design: the mascot stays touch-inert. */
+  setInteractive?: MockFn;
   setScale: MockFn;
   setDepth: MockFn;
   setVisible: MockFn;

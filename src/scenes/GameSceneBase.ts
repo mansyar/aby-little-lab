@@ -40,7 +40,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   private sessionWrong = 0;
 
   /** Delay before the next round after a correct answer (ms). */
-  protected readonly NEXT_ROUND_DELAY = 700;
+  protected readonly NEXT_ROUND_DELAY: number = 700;
 
   /** Auto-return delay to Hub after completion (ms). */
   protected readonly AUTO_RETURN_DELAY = 3000;
@@ -64,25 +64,25 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected readonly OUTLINE_WIDTH = 4;
 
   /** Y position of progress dots from top of screen. */
-  protected readonly PROGRESS_DOT_Y = 60;
+  protected readonly PROGRESS_DOT_Y: number = 60;
 
   /** Spacing between progress dots (px). */
-  protected readonly PROGRESS_DOT_SPACING = 40;
+  protected readonly PROGRESS_DOT_SPACING: number = 40;
 
   /** Radius of progress dots (px). */
-  protected readonly PROGRESS_DOT_RADIUS = 8;
+  protected readonly PROGRESS_DOT_RADIUS: number = 8;
 
   /** Progress dot pop peak scale. */
   protected readonly DOT_POP_SCALE = 1.4;
 
   /** Reduced-motion progress dot pop peak scale. */
-  protected readonly DOT_POP_REDUCED_SCALE = 1.2;
+  protected readonly DOT_POP_REDUCED_SCALE: number = 1.2;
 
   /** Progress dot pop duration (ms). */
-  protected readonly DOT_POP_DURATION = 250;
+  protected readonly DOT_POP_DURATION: number = 250;
 
   /** Reduced-motion progress dot pop duration (ms). */
-  protected readonly DOT_POP_REDUCED_DURATION = 150;
+  protected readonly DOT_POP_REDUCED_DURATION: number = 150;
 
   /** Display size of the sticker image in the unlock animation. */
   protected readonly STICKER_DISPLAY_SIZE = 256;

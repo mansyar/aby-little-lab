@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -50,7 +50,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -60,14 +60,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -387,6 +387,54 @@ describe("PopFreezeScene spawn and tap routing", () => {
     const tweenMock = getMockFn((scene as unknown as { tweens: { add: MockFn } }).tweens.add);
     const looping = tweenMock.mock.calls.filter((call) => call[0]?.repeat === -1);
     expect(looping).toHaveLength(0);
+  });
+
+  it("syncs sleeping overlays with their bubble in update() and skips poppables", () => {
+    const scene = new PopFreezeScene();
+    scene.create();
+
+    const imageMock = getMockFn((scene as unknown as { add: { image: MockFn } }).add.image);
+    const animal = imageMock.mock.results.find((r) => {
+      const key = imageMock.mock.calls[imageMock.mock.results.indexOf(r)]?.[2];
+      return typeof key === "string" && key.startsWith("animal_");
+    })?.value as Record<string, MockFn>;
+    const zzz = imageMock.mock.results
+      .map((r) => r.value as Record<string, MockFn>)
+      .find((obj) =>
+        getMockFn(imageMock).mock.calls.some(
+          (call, i) =>
+            call[2] === "sleep_zzz" && getMockFn(imageMock).mock.results[i]?.value === obj,
+        ),
+      );
+    expect(animal).toBeDefined();
+    expect(zzz).toBeDefined();
+    if (!zzz) throw new Error("sleep zzz not found");
+
+    const bubbles = getBubbles(scene);
+    (bubbles[0] as unknown as { x: number; y: number }).x = 111;
+    (bubbles[0] as unknown as { x: number; y: number }).y = 222;
+    scene.update();
+
+    expect(getMockFn(animal.setPosition)).toHaveBeenCalled();
+    expect(getMockFn(zzz.setPosition)).toHaveBeenCalled();
+  });
+
+  it("destroys the popped bubble when its shrink tween completes", () => {
+    const scene = new PopFreezeScene();
+    scene.create();
+
+    const bubbles = getBubbles(scene);
+    tapBubble(bubbles[1]);
+
+    const tweenMock = getMockFn((scene as unknown as { tweens: { add: MockFn } }).tweens.add);
+    const shrink = tweenMock.mock.calls.find(
+      (call) => call[0]?.targets === bubbles[1] && call[0]?.scaleX === 0,
+    );
+    expect(shrink).toBeDefined();
+    if (shrink && typeof shrink[0].onComplete === "function") {
+      shrink[0].onComplete();
+    }
+    expect(getMockFn(bubbles[1].destroy)).toHaveBeenCalled();
   });
 
   it("breathes the sleeping animal with a looping tween in normal motion", () => {

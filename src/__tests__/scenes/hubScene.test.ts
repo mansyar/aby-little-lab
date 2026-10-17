@@ -9,6 +9,18 @@ interface MockObject {
   allHandlers: Array<{ name: string; cb: (...args: unknown[]) => unknown }>;
   /** Constructor arguments captured by the factory mock (e.g. rectangle x/y/w/h). */
   args?: unknown[];
+  /** Mocked Phaser game-object methods (mirrors the factory literal below). */
+  setScale: MockFn;
+  setAlpha: MockFn;
+  setInteractive: MockFn;
+  disableInteractive: MockFn;
+  setStrokeStyle: MockFn;
+  setFillStyle: MockFn;
+  fillStyle: MockFn;
+  fillCircle: MockFn;
+  slice: MockFn;
+  arc: MockFn;
+  destroy: MockFn;
 }
 
 const { mockAudio, mockRecordGamePlay, mockRegistry } = vi.hoisted(() => {
@@ -97,14 +109,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -291,13 +303,14 @@ vi.mock("../../scenes/sceneRegistry", () => ({
  */
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();
-  mockRecordGamePlay.mockImplementation((gameId: string) => {
+  mockRecordGamePlay.mockImplementation((gameId: GameId) => {
     actual.recordGamePlay(gameId);
   });
   return { ...actual, recordGamePlay: mockRecordGamePlay };
 });
 
 import { HubScene } from "../../scenes/HubScene";
+import type { GameId } from "../../types";
 import {
   addProfile,
   earnSticker,
@@ -531,7 +544,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
 
     const tile = getNavTiles()[0];
     // Press feedback attaches when the entrance tween completes; simulate it.
-    const entrance = scene.tweens.add.mock.calls
+    const entrance = (scene.tweens.add as MockFn).mock.calls
       .map((call) => call[0] as { targets?: unknown[]; onComplete?: () => void })
       .find(
         (config) =>
@@ -677,7 +690,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
 
     const navTiles = getNavTiles();
     expect(navTiles).toHaveLength(20);
-    const motionTargets = scene.tweens.add.mock.calls.filter((call) => {
+    const motionTargets = (scene.tweens.add as MockFn).mock.calls.filter((call) => {
       const config = call[0] as { targets?: unknown };
       return navTiles.includes(config.targets as MockObject);
     });

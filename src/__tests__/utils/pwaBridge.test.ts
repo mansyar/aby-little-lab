@@ -1,4 +1,10 @@
-import { createPwaBridge, type PwaBridge, type RegisterSWFn } from "../../utils/pwaBridge";
+import {
+  createPwaBridge,
+  getPwaBridge,
+  initPwaBridge,
+  type PwaBridge,
+  type RegisterSWFn,
+} from "../../utils/pwaBridge";
 
 /** Captures the callbacks the bridge passes to registerSW. */
 interface CapturedCallbacks {
@@ -34,6 +40,15 @@ describe("PWA registration bridge", () => {
     createPwaBridge(registerSW);
 
     expect(captured.immediate).toBe(true);
+  });
+
+  it("exposes the app-wide singleton via init/get (null before init)", () => {
+    expect(getPwaBridge()).toBeNull();
+
+    const { registerSW } = createFakeRegisterSW();
+    const bridge = initPwaBridge(registerSW);
+
+    expect(getPwaBridge()).toBe(bridge);
   });
 
   it("exposes the update action to reload with the new version", () => {

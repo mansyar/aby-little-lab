@@ -412,6 +412,8 @@ export class PreloadScene extends Phaser.Scene {
       progressBox.destroy();
     });
 
+    /* v8 ignore next -- dev-only profiling block: statically removed from
+       production builds and unreachable when MODE=test. */
     if (import.meta.env.DEV) {
       // Boot-time profiling (dev-only): aggregate SVG load/rasterization cost.
       // The entire block is statically removed from production builds.

@@ -46,11 +46,7 @@ function createMockScene(): {
 }
 
 function stubReducedMotion(matches: boolean): void {
-  vi.stubGlobal(
-    "window",
-    { matchMedia: vi.fn(() => ({ matches })) },
-    { original: globalThis.window },
-  );
+  vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches })) });
 }
 
 function getTweenCalls(scene: ReturnType<typeof createMockScene>): Array<Record<string, unknown>> {

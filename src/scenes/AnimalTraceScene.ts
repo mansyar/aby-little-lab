@@ -196,7 +196,11 @@ export class AnimalTraceScene extends GameSceneBase {
       onUpdate: () => {
         this.ringRadius = pulseTarget.r;
         if (this.currentPair) {
-          this.redrawPathGuide(this.currentPair.pathGraphics, this.currentPair.pathPoints);
+          this.redrawPathGuide(
+            this.currentPair.pathGraphics,
+            this.currentPair.pathPoints,
+            this.currentPair.progress.currentPoint,
+          );
         }
       },
     });

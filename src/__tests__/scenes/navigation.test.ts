@@ -17,7 +17,7 @@ vi.mock("../../utils/fonts", () => ({
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -61,7 +61,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -71,14 +71,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -350,7 +350,7 @@ function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
 }
 
 import { generatePathPoints } from "../../game/animalTraceLogic";
-import { getCorrectShape } from "../../game/patternBuilderLogic";
+import { getCorrectShape, type PatternRound } from "../../game/patternBuilderLogic";
 import { endPlaySession, startPlaySession } from "../../game/playTimeLogic";
 import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
@@ -907,8 +907,10 @@ describe("scene navigation flow", () => {
 
       const title = getTextObject(scene, "Aby's Little Lab");
       expect(title).toBeDefined();
+      if (!title) throw new Error("preload title text not found");
       const tagline = getTextObject(scene, "Fun little games");
       expect(tagline).toBeDefined();
+      if (!tagline) throw new Error("preload tagline text not found");
 
       const loadOnMock = getMockFn(scene.load.on);
       const completeCall = loadOnMock.mock.calls.find((call) => call[0] === "complete");
@@ -1207,9 +1209,9 @@ describe("scene navigation flow", () => {
       );
       // Both chip and picker avatar use the active profile's texture.
       expect(
-        getMockFn((scene as { add: Record<string, unknown> }).add.image).mock.calls.filter(
-          (call) => call[2] === "animal_cat",
-        ),
+        getMockFn(
+          (scene as unknown as { add: Record<string, unknown> }).add.image,
+        ).mock.calls.filter((call) => call[2] === "animal_cat"),
       ).toHaveLength(2);
     });
 
@@ -1247,7 +1249,9 @@ describe("scene navigation flow", () => {
       // The overlay is the full-screen (1024×768) rectangle added when the
       // picker opened. Match by geometry: decorative rectangles such as the
       // active-profile ring may be created after it.
-      const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
+      const rectangleMock = getMockFn(
+        (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+      );
       const overlay = rectangleMock.mock.results
         .map((r) => r.value as { args?: number[] } & Record<string, MockFn>)
         .filter((r) => r.args?.[2] === 1024)
@@ -1268,14 +1272,14 @@ describe("scene navigation flow", () => {
       scene.create();
 
       // p2 shelf render: shape-sorter is NOT earned.
-      expect(hasSticker.mock.results[0]?.value).toBe(false);
+      expect((hasSticker as MockFn).mock.results[0]?.value).toBe(false);
 
       // Switch back to p1 and re-render: shape-sorter IS earned.
       switchProfile("p1");
-      scene.rerenderStickerShelf();
+      (scene as unknown as { rerenderStickerShelf: () => void }).rerenderStickerShelf();
 
-      expect(hasSticker.mock.results[20]?.value).toBe(true);
-      expect(hasSticker.mock.calls).toHaveLength(40);
+      expect((hasSticker as MockFn).mock.results[20]?.value).toBe(true);
+      expect((hasSticker as MockFn).mock.calls).toHaveLength(40);
     });
   });
 
@@ -2375,6 +2379,7 @@ describe("scene navigation flow", () => {
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const shapeTween = tweenCalls.find((c) => c[0]?.targets === shape.obj);
       expect(shapeTween).toBeDefined();
+      if (!shapeTween) throw new Error("shape bounce-back tween not found");
       expect(shapeTween[0].x).toBe(shape.originX);
       expect(shapeTween[0].y).toBe(shape.originY);
 
@@ -4015,6 +4020,7 @@ describe("scene navigation flow", () => {
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const objTween = tweenCalls.find((c) => c[0]?.targets === object.obj);
       expect(objTween).toBeDefined();
+      if (!objTween) throw new Error("object bounce-back tween not found");
       expect(objTween[0].x).toBe(object.originX);
       expect(objTween[0].y).toBe(object.originY);
 
@@ -4758,7 +4764,7 @@ describe("scene navigation flow", () => {
 
       // Child taps the first note correctly (inputIndex 0 -> 1)
       tapFrog(frogs, 0);
-      expect((scene as { inputIndex: number }).inputIndex).toBe(1);
+      expect((scene as unknown as { inputIndex: number }).inputIndex).toBe(1);
       expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
 
       // Child asks to hear the sequence again mid-round…
@@ -4767,13 +4773,13 @@ describe("scene navigation flow", () => {
       fireDelayedCallsFrom(scene, delayedCallsBefore);
 
       // …and the replay restarts input at the first note.
-      expect((scene as { inputIndex: number }).inputIndex).toBe(0);
+      expect((scene as unknown as { inputIndex: number }).inputIndex).toBe(0);
 
       // Tapping the FIRST note again must be judged correct, not measured
       // against the stale second-note position.
       clearAudioMocks();
       tapFrog(frogs, 0);
-      expect((scene as { inputIndex: number }).inputIndex).toBe(1);
+      expect((scene as unknown as { inputIndex: number }).inputIndex).toBe(1);
       expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
     });
 
@@ -5191,7 +5197,7 @@ describe("scene navigation flow", () => {
       const frogs = getFrogs(scene);
 
       completeAllRounds(scene, frogs);
-      expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+      expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
       // Returning to the Hub and tapping the tile again calls create() on the
       // same scene instance; playSequence re-locks during playback and
@@ -5200,7 +5206,7 @@ describe("scene navigation flow", () => {
       const freshFrogs = getFrogs(scene);
       fireDelayedCallsFrom(scene, 0);
 
-      expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+      expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
       const noteCallsBefore = mockAudio.playFrogNote.mock.calls.length;
       tapFrog(freshFrogs, 1);
       expect(mockAudio.playFrogNote.mock.calls.length).toBe(noteCallsBefore + 1);
@@ -5240,13 +5246,9 @@ describe("scene navigation flow", () => {
     });
 
     /** Returns the current round of the scene. */
-    function getCurrentRound(scene: unknown): {
-      choices: string[];
-      row: string[];
-      gapIndex: number;
-    } {
+    function getCurrentRound(scene: unknown): PatternRound {
       const s = scene as {
-        rounds: Array<{ choices: string[]; row: string[]; gapIndex: number }>;
+        rounds: PatternRound[];
         roundIndex: number;
       };
       return s.rounds[s.roundIndex];
@@ -5410,7 +5412,7 @@ describe("scene navigation flow", () => {
       if (!nextRoundCall) return;
       (nextRoundCall[1] as () => void)();
 
-      expect((scene as { roundIndex: number }).roundIndex).toBe(1);
+      expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
     });
 
     it("tapping a wrong card wiggles it gently and does not advance the round", () => {
@@ -5426,7 +5428,7 @@ describe("scene navigation flow", () => {
 
       expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
       expect(mockAudio.playCorrect).not.toHaveBeenCalled();
-      expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+      expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
 
       // Professor Hoot nods along with the soft incorrect tone.
       const mascot = getMascotImage(scene);
@@ -5514,12 +5516,12 @@ describe("scene navigation flow", () => {
       for (let i = 0; i < 6; i++) {
         completeRound(scene);
       }
-      expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+      expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
       // Returning to the Hub and tapping the tile again calls create() on the
       // same scene instance (Phaser restart) — input must be unlocked.
       scene.create();
-      expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+      expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
 
       const round = getCurrentRound(scene);
       const correctIndex = round.choices.indexOf(getCorrectShape(round));
@@ -5747,6 +5749,7 @@ describe("scene navigation flow", () => {
       const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
       const toyTween = tweenCalls.find((c) => c[0]?.targets === toy.obj);
       expect(toyTween).toBeDefined();
+      if (!toyTween) throw new Error("toy bounce-back tween not found");
       expect(toyTween[0].x).toBe(toy.originX);
       expect(toyTween[0].y).toBe(toy.originY);
 

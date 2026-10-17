@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -50,7 +50,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -60,14 +60,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -342,7 +342,7 @@ describe("AnimalTraceScene session state", () => {
     // The last scheduled action after the relaunch must be the next-pair
     // delay (1000ms), never a round-completion auto-return (3000ms).
     const delayedCallMock = getMockFn(
-      (scene as { time: Record<string, unknown> }).time.delayedCall,
+      (scene as unknown as { time: Record<string, unknown> }).time.delayedCall,
     );
     const lastCall = delayedCallMock.mock.calls.at(-1);
     expect(lastCall?.[0]).toBe(1000);
@@ -377,7 +377,7 @@ describe("AnimalTraceScene session state", () => {
     const state = scene as unknown as { progressDots: unknown[] };
     expect(state.progressDots).toHaveLength(3);
     // Only 3 dots are drawn per session, not accumulated.
-    const circleMock = getMockFn((scene as { add: Record<string, unknown> }).add.circle);
+    const circleMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.circle);
     expect(circleMock).toHaveBeenCalledTimes(6);
   });
 
@@ -399,12 +399,15 @@ describe("AnimalTraceScene session state", () => {
     scene.create();
 
     // Path graphics is the single graphics object created for the path.
-    const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+    const graphicsMock = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.graphics,
+    );
     expect(graphicsMock).toHaveBeenCalledTimes(1);
     const graphics = graphicsMock.mock.results[0].value as Record<string, MockFn>;
 
-    const points = (scene as { currentPair: { pathPoints: Array<{ x: number; y: number }> } })
-      .currentPair.pathPoints;
+    const points = (
+      scene as unknown as { currentPair: { pathPoints: Array<{ x: number; y: number }> } }
+    ).currentPair.pathPoints;
 
     // Fresh pair: the ring sits on the first interior waypoint (index 1).
     expect(graphics.strokeCircle).toHaveBeenCalledWith(
@@ -430,7 +433,9 @@ describe("AnimalTraceScene session state", () => {
     const scene = new AnimalTraceScene();
     scene.create();
 
-    const tweensMock = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweensMock = getMockFn(
+      (scene as unknown as { tweens: Record<string, unknown> }).tweens.add,
+    );
     const pulseTweens = tweensMock.mock.calls.filter((call) => call[0] && "onUpdate" in call[0]);
     expect(pulseTweens).toHaveLength(0);
   });
@@ -439,10 +444,62 @@ describe("AnimalTraceScene session state", () => {
     const scene = new AnimalTraceScene();
     scene.create();
 
-    const tweensMock = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweensMock = getMockFn(
+      (scene as unknown as { tweens: Record<string, unknown> }).tweens.add,
+    );
     const pulseTweens = tweensMock.mock.calls.filter(
       (call) => call[0] && typeof call[0].onUpdate === "function" && call[0].repeat === -1,
     );
     expect(pulseTweens).toHaveLength(1);
+  });
+
+  it("redraws the path guide from the pulse onUpdate without an active pair", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const tweensMock = getMockFn(
+      (scene as unknown as { tweens: Record<string, unknown> }).tweens.add,
+    );
+    const pulse = tweensMock.mock.calls.find(
+      (call) => call[0] && typeof call[0].onUpdate === "function",
+    );
+    expect(pulse).toBeDefined();
+    if (!pulse) return;
+    // No active pair mid-pulse: updates the radius, skips the redraw.
+    (pulse[0] as { onUpdate: () => void }).onUpdate();
+    expect((scene as unknown as { ringRadius: number }).ringRadius).toBeGreaterThan(0);
+  });
+
+  it("redraws the path guide from the pulse onUpdate with an active pair", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const tweensMock = getMockFn(
+      (scene as unknown as { tweens: Record<string, unknown> }).tweens.add,
+    );
+    const pulse = tweensMock.mock.calls.find(
+      (call) => call[0] && typeof call[0].onUpdate === "function",
+    );
+    expect(pulse).toBeDefined();
+    if (!pulse) return;
+    // Simulate an active pair so the redraw branch runs.
+    const graphics = {
+      clear: vi.fn(),
+      fillStyle: vi.fn(),
+      fillCircle: vi.fn(),
+      lineStyle: vi.fn(),
+      strokeCircle: vi.fn(),
+      strokePoints: vi.fn(),
+    };
+    (scene as unknown as { currentPair: unknown }).currentPair = {
+      pathGraphics: graphics,
+      pathPoints: [
+        { x: 0, y: 0 },
+        { x: 10, y: 10 },
+      ],
+      progress: { currentPoint: 0 },
+    };
+    (pulse[0] as { onUpdate: () => void }).onUpdate();
+    expect(graphics.clear).toHaveBeenCalled();
   });
 });

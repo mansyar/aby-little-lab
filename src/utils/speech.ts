@@ -138,10 +138,13 @@ function speakText(text: string, enabled: boolean, rate: number): boolean {
     utterance.text = text;
     utterance.lang = "en-US";
     utterance.rate = rate;
-    // Apply the stored voice preference when it resolves; otherwise the
-    // platform's default voice pronounces (never throws).
+    // Apply the stored voice preference when it resolves; otherwise leave
+    // the voice untouched so the platform's default pronounces (never throws).
     const voices = speechSynthesis.getVoices?.() ?? [];
-    utterance.voice = resolveVoice(voices, preferredVoiceURI) ?? undefined;
+    const resolvedVoice = resolveVoice(voices, preferredVoiceURI);
+    if (resolvedVoice) {
+      utterance.voice = resolvedVoice;
+    }
     if (needsInterrupt) {
       window.setTimeout(() => {
         try {

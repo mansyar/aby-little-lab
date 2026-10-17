@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -62,14 +62,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -230,7 +230,7 @@ vi.mock("../../components/ParentLock", () => ({
 }));
 
 const { getAdaptiveBandShiftMock, buildPlaythroughMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   buildPlaythroughMock: vi.fn(),
 }));
 
@@ -461,8 +461,9 @@ describe("MemoryMatchScene round flow", () => {
       expect(getMockFn(card.setInteractive)).toHaveBeenCalled();
       expect(getMockFn(card.setStrokeStyle)).toHaveBeenCalled();
     }
-    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
-      .calls;
+    const rectCalls = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+    ).mock.calls;
     for (const call of rectCalls) {
       if (typeof call[2] === "number" && call[2] >= 96) {
         expect(call[2]).toBeGreaterThanOrEqual(96);
@@ -497,8 +498,9 @@ describe("MemoryMatchScene round flow", () => {
     expect(mockAudio.playPop).toHaveBeenCalledTimes(1);
     // The reveal flip collapses to scaleX 0...
     const cards = getCardRects(scene);
-    const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
-      .calls;
+    const tweenCalls = getMockFn(
+      (scene as unknown as { tweens: Record<string, unknown> }).tweens.add,
+    ).mock.calls;
     const flipCall = tweenCalls.find((call) => {
       const config = call[0] as { targets?: unknown; scaleX?: number; delay?: number } | undefined;
       return config?.scaleX === 0 && config.delay === undefined;
@@ -552,8 +554,9 @@ describe("MemoryMatchScene round flow", () => {
     expect(getMockFn(mascot.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
 
     // Both cards stay revealed (no flip-back tween for a matched pair).
-    const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
-      .calls;
+    const tweenCalls = getMockFn(
+      (scene as unknown as { tweens: Record<string, unknown> }).tweens.add,
+    ).mock.calls;
     const flipBackCalls = tweenCalls.filter((call) => {
       const config = call[0] as
         | { targets?: unknown[]; scaleX?: number; delay?: number }
@@ -578,7 +581,7 @@ describe("MemoryMatchScene round flow", () => {
 
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
     expect(mockAudio.playCorrect).not.toHaveBeenCalled();
-    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
 
     // Professor Hoot nods along with the soft incorrect tone.
     const mascot = getMascotImage(scene);
@@ -606,8 +609,8 @@ describe("MemoryMatchScene round flow", () => {
     const backs = getCardBacks(scene);
     expect(getMockFn(backs[0].setVisible)).toHaveBeenCalledWith(true);
     expect(getMockFn(backs[mismatchIndex].setVisible)).toHaveBeenCalledWith(true);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
   });
 
   it("locks input during the mismatch pause so extra taps are ignored", () => {
@@ -618,14 +621,14 @@ describe("MemoryMatchScene round flow", () => {
 
     tapCard(scene, 0);
     tapCard(scene, mismatchIndex);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     const popsBefore = mockAudio.playPop.mock.calls.length;
     tapCard(scene, 2);
     expect(mockAudio.playPop.mock.calls.length).toBe(popsBefore);
 
     fireDelayedCall(scene, 800);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("completing all pairs fills the progress dot and advances rounds after 700ms (easy 2x3, then medium 3x4)", () => {
@@ -640,13 +643,13 @@ describe("MemoryMatchScene round flow", () => {
     expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
 
     // Round 2 is the second easy band: still 2 rows x 3 cols = 6 cards.
-    expect((scene as { roundIndex: number }).roundIndex).toBe(1);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
     expect(getCurrentRound(scene).band).toBe("easy");
     expect(getCardRects(scene)).toHaveLength(6);
 
     // Round 3 moves up to the medium band: 3 rows x 4 cols = 12 cards.
     completeRound(scene);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(2);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(2);
     const thirdRound = getCurrentRound(scene);
     expect(thirdRound.band).toBe("medium");
     expect(thirdRound.rows).toBe(3);
@@ -664,7 +667,7 @@ describe("MemoryMatchScene round flow", () => {
     }
 
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
@@ -677,7 +680,7 @@ describe("MemoryMatchScene round flow", () => {
     // First completion awards the sticker and shows the reveal animation.
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     const stickerImage = getMockFn(
-      (scene as { add: Record<string, unknown> }).add.image,
+      (scene as unknown as { add: Record<string, unknown> }).add.image,
     ).mock.calls.find((call) => call[2] === "sticker_memory_match");
     expect(stickerImage).toBeDefined();
 
@@ -693,7 +696,9 @@ describe("MemoryMatchScene round flow", () => {
     }
 
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub", {
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub", {
       justEarned: "memory-match",
     });
   });
@@ -709,7 +714,9 @@ describe("MemoryMatchScene round flow", () => {
 
     expect(mockAudio.playSticker).not.toHaveBeenCalled();
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
@@ -719,12 +726,12 @@ describe("MemoryMatchScene round flow", () => {
     for (let i = 0; i < 6; i++) {
       completeRound(scene);
     }
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Returning to the Hub and tapping the tile again calls create() on the
     // same scene instance (Phaser restart) — input must be unlocked.
     scene.create();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
 
     const popsBefore = mockAudio.playPop.mock.calls.length;
     tapCard(scene, 0);
@@ -743,14 +750,16 @@ describe("MemoryMatchScene round flow", () => {
     // The hold success starts the Hub transition synchronously (fade-out).
     onSuccess();
     const fadeOutMock = getMockFn(
-      (scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
+      (scene as unknown as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
     );
     const fadeOutCall = fadeOutMock.mock.calls.at(-1);
     expect(fadeOutCall).toBeDefined();
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
     }
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("uses smaller wiggle amplitude and shorter flip durations under reduced motion", () => {
@@ -787,7 +796,7 @@ describe("MemoryMatchScene round flow", () => {
   it("generates a valid playthrough for the scene (6 rounds, progressive bands)", () => {
     const scene = new MemoryMatchScene();
     scene.create();
-    const rounds = (scene as { rounds: MemoryRound[] }).rounds;
+    const rounds = (scene as unknown as { rounds: MemoryRound[] }).rounds;
 
     expect(rounds).toHaveLength(6);
     const bands = rounds.map((round) => round.band);

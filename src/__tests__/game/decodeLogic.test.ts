@@ -22,7 +22,7 @@ function expectValidDecodeRound(round: DecodeRound): void {
     expect(DECODE_POOL.some((entry) => entry.word === choice)).toBe(true);
   }
   expect(round.choices.filter((choice) => choice === round.target)).toHaveLength(1);
-  const firstLetters = round.choices.map((choice) => choice[0]!);
+  const firstLetters = round.choices.map((choice) => choice[0]);
   expect(new Set(firstLetters).size).toBe(4);
   // Confusable guard: no two choices share a confusable family with target or each other
   // (C,G,O,Q) (I,L,T) (M,W) — mirror alphabetLogic families
@@ -35,15 +35,15 @@ function expectValidDecodeRound(round: DecodeRound): void {
     families.some((f) => f.includes(a) && f.includes(b));
   for (const choice of round.choices) {
     if (choice !== round.target) {
-      expect(isConfusable(choice[0]!, round.target[0]!)).toBe(false);
+      expect(isConfusable(choice[0], round.target[0])).toBe(false);
       expect(choice[0]).not.toBe(round.target[0]);
     }
   }
   // Pairwise distinct families among distractors
   for (let i = 0; i < round.choices.length; i++) {
     for (let j = i + 1; j < round.choices.length; j++) {
-      const a = round.choices[i]![0]!;
-      const b = round.choices[j]![0]!;
+      const a = round.choices[i][0];
+      const b = round.choices[j][0];
       if (a !== b) expect(isConfusable(a, b)).toBe(false);
     }
   }
@@ -180,7 +180,7 @@ describe("DECODE_POOL", () => {
 describe("buildRound", () => {
   it("produces structurally valid rounds for every pool word across many samples", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
-      const target = DECODE_POOL[i % DECODE_POOL.length]!;
+      const target = DECODE_POOL[i % DECODE_POOL.length];
       expectValidDecodeRound(buildRound(target));
     }
   });
@@ -214,14 +214,14 @@ describe("buildRound", () => {
       const round = buildRound(entry);
       for (const choice of round.choices) {
         if (choice !== entry.word) {
-          expect(isConfusable(choice[0]!, entry.word[0]!)).toBe(false);
+          expect(isConfusable(choice[0], entry.word[0])).toBe(false);
         }
       }
       // pairwise among choices
       for (let i = 0; i < round.choices.length; i++) {
         for (let j = i + 1; j < round.choices.length; j++) {
-          const a = round.choices[i]![0]!;
-          const b = round.choices[j]![0]!;
+          const a = round.choices[i][0];
+          const b = round.choices[j][0];
           if (a !== b) expect(isConfusable(a, b)).toBe(false);
         }
       }
@@ -230,10 +230,10 @@ describe("buildRound", () => {
 
   it("is deterministic under a fixed random sequence", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildRound(DECODE_POOL[0]!);
+    const first = buildRound(DECODE_POOL[0]);
     vi.restoreAllMocks();
     vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildRound(DECODE_POOL[0]!);
+    const second = buildRound(DECODE_POOL[0]);
     expect(second).toEqual(first);
     expectValidDecodeRound(first);
   });
@@ -355,7 +355,7 @@ describe("buildPlaythrough (adaptive shift)", () => {
 describe("isCorrect", () => {
   it("returns true only for the target index", () => {
     for (let i = 0; i < VARIETY_SAMPLES; i++) {
-      const round = buildRound(DECODE_POOL[i % DECODE_POOL.length]!);
+      const round = buildRound(DECODE_POOL[i % DECODE_POOL.length]);
       const targetIdx = round.choices.indexOf(round.target);
       for (let idx = 0; idx < 4; idx++) {
         expect(isCorrect(round, idx)).toBe(idx === targetIdx);
@@ -364,7 +364,7 @@ describe("isCorrect", () => {
   });
 
   it("returns false for out-of-range indices", () => {
-    const round = buildRound(DECODE_POOL[0]!);
+    const round = buildRound(DECODE_POOL[0]);
     expect(isCorrect(round, -1)).toBe(false);
     expect(isCorrect(round, 4)).toBe(false);
   });

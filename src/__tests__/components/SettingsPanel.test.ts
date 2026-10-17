@@ -1157,6 +1157,7 @@ describe("SettingsPanel progress report", () => {
       (call) => typeof call[2] === "string" && call[2].includes("adapt"),
     );
     expect(noteCall).toBeDefined();
+    if (!noteCall) throw new Error("adaptive note text not found");
     // Tells the parent what it does AND where to disable it.
     expect(noteCall?.[2]).toContain("Settings");
     // Muted footer styling keeps it secondary to the report rows.

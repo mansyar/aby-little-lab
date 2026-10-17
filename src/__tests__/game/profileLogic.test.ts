@@ -3,12 +3,13 @@ import {
   addProfile,
   availableAvatarIds,
   createDefaultProfile,
+  createDefaultStickers,
   deleteProfile,
   migrateV1,
   normalizeV2,
   switchActiveProfile,
 } from "../../game/profileLogic";
-import type { AppStorage, AvatarId, ProfileV2 } from "../../types";
+import type { AppStorage, AvatarId, GameId, ProfileV2, StickerData } from "../../types";
 import { DEFAULT_AVATAR_ID, MAX_PROFILES } from "../../types";
 
 const NOW = "2026-08-04T12:00:00.000Z";
@@ -16,6 +17,7 @@ const NOW = "2026-08-04T12:00:00.000Z";
 function v1Save(overrides: Partial<AppStorage> = {}): Partial<AppStorage> {
   return {
     stickers: {
+      ...createDefaultStickers(),
       "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
       "animal-trace": { earned: false, earnedAt: null },
       "pop-freeze": { earned: false, earnedAt: null },
@@ -27,7 +29,12 @@ function v1Save(overrides: Partial<AppStorage> = {}): Partial<AppStorage> {
       "word-match": { earned: false, earnedAt: null },
       "word-builder": { earned: false, earnedAt: null },
     },
-    settings: { bgmEnabled: false, sfxEnabled: true, preferredVoiceURI: null },
+    settings: {
+      bgmEnabled: false,
+      sfxEnabled: true,
+      preferredVoiceURI: null,
+      adaptiveDifficulty: true,
+    },
     ...overrides,
   };
 }
@@ -104,7 +111,7 @@ describe("profileLogic", () => {
 
     it("backfills sticker keys missing from the v1 save", () => {
       const oldSave = v1Save();
-      delete oldSave.stickers?.["pattern-builder"];
+      delete (oldSave.stickers as Partial<Record<GameId, StickerData>>)?.["pattern-builder"];
       const v2 = migrateV1(oldSave, NOW);
 
       expect(v2.profiles[0].stickers["pattern-builder"]).toEqual({
