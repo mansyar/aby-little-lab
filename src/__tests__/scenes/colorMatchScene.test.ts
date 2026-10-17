@@ -591,8 +591,8 @@ describe("ColorMatchScene round flow", () => {
 
     // Force the speaker's onSpeak past the final round, then tap it.
     (scene as { roundIndex: number }).roundIndex = 99;
-    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } })
-      .speaker.button;
+    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } }).speaker
+      .button;
     const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
     expect(pointerdownCall).toBeDefined();
     if (pointerdownCall && typeof pointerdownCall[1] === "function") {
@@ -607,8 +607,8 @@ describe("ColorMatchScene round flow", () => {
     scene.create();
     mockSpeech.speakWord.mockClear();
 
-    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } })
-      .speaker.button;
+    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } }).speaker
+      .button;
     const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
     expect(pointerdownCall).toBeDefined();
     if (pointerdownCall && typeof pointerdownCall[1] === "function") {

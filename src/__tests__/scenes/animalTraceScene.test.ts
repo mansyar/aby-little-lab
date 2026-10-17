@@ -455,8 +455,9 @@ describe("AnimalTraceScene session state", () => {
       (call) => call[0] && typeof call[0].onUpdate === "function",
     );
     expect(pulse).toBeDefined();
+    if (!pulse) return;
     // No active pair mid-pulse: updates the radius, skips the redraw.
-    (pulse?.[0] as { onUpdate: () => void }).onUpdate();
+    (pulse[0] as { onUpdate: () => void }).onUpdate();
     expect((scene as { ringRadius: number }).ringRadius).toBeGreaterThan(0);
   });
 
@@ -469,6 +470,7 @@ describe("AnimalTraceScene session state", () => {
       (call) => call[0] && typeof call[0].onUpdate === "function",
     );
     expect(pulse).toBeDefined();
+    if (!pulse) return;
     // Simulate an active pair so the redraw branch runs.
     const graphics = { clear: vi.fn(), lineStyle: vi.fn(), strokePoints: vi.fn() };
     (scene as unknown as { currentPair: unknown }).currentPair = {
@@ -478,7 +480,7 @@ describe("AnimalTraceScene session state", () => {
         { x: 10, y: 10 },
       ],
     };
-    (pulse?.[0] as { onUpdate: () => void }).onUpdate();
+    (pulse[0] as { onUpdate: () => void }).onUpdate();
     expect(graphics.clear).toHaveBeenCalled();
   });
 });

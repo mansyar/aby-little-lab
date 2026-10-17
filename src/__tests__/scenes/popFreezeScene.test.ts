@@ -403,8 +403,7 @@ describe("PopFreezeScene spawn and tap routing", () => {
       .find((obj) =>
         getMockFn(imageMock).mock.calls.some(
           (call, i) =>
-            call[2] === "sleep_zzz" &&
-            getMockFn(imageMock).mock.results[i]?.value === obj,
+            call[2] === "sleep_zzz" && getMockFn(imageMock).mock.results[i]?.value === obj,
         ),
       );
     expect(animal).toBeDefined();
