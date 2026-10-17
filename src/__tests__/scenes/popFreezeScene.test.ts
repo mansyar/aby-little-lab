@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -7,184 +8,9 @@ type MockFn = ReturnType<typeof vi.fn>;
  * resolves to MockScene. Each instance gets fresh mock methods in the
  * constructor, enabling per-test isolation.
  */
-vi.mock("phaser", () => {
-  /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
-    return {
-      setInteractive: vi.fn().mockReturnThis(),
-      disableInteractive: vi.fn(),
-      on: vi.fn().mockReturnThis(),
-      off: vi.fn().mockReturnThis(),
-      setOrigin: vi.fn().mockReturnThis(),
-      setScale: vi.fn().mockReturnThis(),
-      setTexture: vi.fn().mockReturnThis(),
-      setDepth: vi.fn().mockReturnThis(),
-      setStyle: vi.fn().mockReturnThis(),
-      setFontSize: vi.fn().mockReturnThis(),
-      setText: vi.fn().mockReturnThis(),
-      setColor: vi.fn().mockReturnThis(),
-      setVisible: vi.fn().mockReturnThis(),
-      setAlpha: vi.fn().mockReturnThis(),
-      setPosition: vi.fn().mockReturnThis(),
-      setSize: vi.fn().mockReturnThis(),
-      setDisplaySize: vi.fn().mockReturnThis(),
-      setStrokeStyle: vi.fn().mockReturnThis(),
-      setFillStyle: vi.fn().mockReturnThis(),
-      setVelocity: vi.fn().mockReturnThis(),
-      setCollideWorldBounds: vi.fn().mockReturnThis(),
-      setBounce: vi.fn().mockReturnThis(),
-      setCircle: vi.fn().mockReturnThis(),
-      fillStyle: vi.fn().mockReturnThis(),
-      fillCircle: vi.fn().mockReturnThis(),
-      slice: vi.fn().mockReturnThis(),
-      fillPath: vi.fn().mockReturnThis(),
-      clear: vi.fn().mockReturnThis(),
-      getCenter: vi.fn(() => ({ x: 0, y: 0 })),
-      beginPath: vi.fn().mockReturnThis(),
-      moveTo: vi.fn().mockReturnThis(),
-      lineTo: vi.fn().mockReturnThis(),
-      strokePath: vi.fn().mockReturnThis(),
-      lineStyle: vi.fn().mockReturnThis(),
-      strokeRect: vi.fn().mockReturnThis(),
-      strokeCircle: vi.fn().mockReturnThis(),
-      destroy: vi.fn(),
-      scaleX: 1,
-      scaleY: 1,
-      scene: scene as MockFn,
-    };
-  }
-
-  class MockScene {
-    add!: Record<string, MockFn>;
-    scene!: Record<string, MockFn>;
-    load!: Record<string, MockFn>;
-    input!: Record<string, MockFn>;
-    cameras!: {
-      main: Record<string, MockFn | number> & {
-        centerX: number;
-        centerY: number;
-        width: number;
-        height: number;
-      };
-    };
-    scale!: Record<string, MockFn | number> & { width: number; height: number };
-    time!: Record<string, MockFn>;
-    tweens!: Record<string, MockFn>;
-    sys!: { events: Record<string, MockFn> };
-    events!: Record<string, MockFn>;
-    children!: Record<string, MockFn>;
-    physics!: { add: Record<string, MockFn>; world: Record<string, MockFn> };
-
-    constructor() {
-      this.add = {
-        rectangle: vi.fn(() => createMockGameObject(this)),
-        text: vi.fn(() => createMockGameObject(this)),
-        image: vi.fn(() => createMockGameObject(this)),
-        container: vi.fn(() => createMockGameObject(this)),
-        circle: vi.fn(() => createMockGameObject(this)),
-        graphics: vi.fn(() => createMockGameObject(this)),
-        zone: vi.fn(() => createMockGameObject(this)),
-        particles: vi.fn(() => createMockGameObject(this)),
-      };
-      this.scene = {
-        start: vi.fn(),
-        stop: vi.fn(),
-        launch: vi.fn(),
-        get: vi.fn(),
-        switch: vi.fn(),
-        sleep: vi.fn(),
-        wake: vi.fn(),
-        pause: vi.fn(),
-        resume: vi.fn(),
-      };
-      this.load = {
-        svg: vi.fn(),
-        image: vi.fn(),
-        audio: vi.fn(),
-        on: vi.fn(),
-        once: vi.fn(),
-        off: vi.fn(),
-      };
-      this.input = {
-        on: vi.fn(),
-        off: vi.fn(),
-        setDraggable: vi.fn(),
-      };
-      this.cameras = {
-        main: {
-          setBackgroundColor: vi.fn(),
-          fadeIn: vi.fn(),
-          fadeOut: vi.fn(),
-          setZoom: vi.fn(),
-          zoomTo: vi.fn(),
-          centerX: 512,
-          centerY: 384,
-          width: 1024,
-          height: 768,
-        },
-      };
-      this.scale = {
-        setSize: vi.fn(),
-        on: vi.fn(),
-        width: 1024,
-        height: 768,
-      };
-      this.time = {
-        delayedCall: vi.fn(() => ({ remove: vi.fn() })),
-        addEvent: vi.fn(),
-      };
-      this.tweens = {
-        add: vi.fn(() => ({ remove: vi.fn(), stop: vi.fn() })),
-      };
-      this.sys = {
-        events: {
-          on: vi.fn(),
-          once: vi.fn(),
-          off: vi.fn(),
-        },
-      };
-      this.events = this.sys.events;
-      this.children = {
-        forEach: vi.fn(),
-      };
-      this.physics = {
-        add: {
-          image: vi.fn(() => createMockGameObject()),
-        },
-        world: {
-          setBoundsCollision: vi.fn(),
-          setBounds: vi.fn(),
-        },
-      };
-    }
-  }
-
-  /** Mock for Phaser.Geom.Rectangle — must be a class to support `new`. */
-  class MockRectangle {
-    static Contains = vi.fn(() => true);
-
-    constructor(
-      readonly x: number,
-      readonly y: number,
-      readonly width: number,
-      readonly height: number,
-    ) {}
-  }
-
-  return {
-    default: {
-      Scene: MockScene,
-      Game: vi.fn(),
-      Scale: { FIT: 0, CENTER_BOTH: 0 },
-      AUTO: "AUTO",
-      Geom: { Rectangle: MockRectangle },
-    },
-    Scene: MockScene,
-    Game: vi.fn(),
-    Scale: { FIT: 0, CENTER_BOTH: 0 },
-    AUTO: "AUTO",
-    Geom: { Rectangle: MockRectangle },
-  };
+vi.mock("phaser", async () => {
+  const { createPhaserModuleMock } = await import("../helpers/phaserMock");
+  return createPhaserModuleMock().module;
 });
 
 /** Mock AudioManager so scene tests can verify audio calls without real AudioContext. */
@@ -250,16 +76,11 @@ function getMockFn(fn: unknown): MockFn {
 }
 
 describe("PopFreezeScene spawn and tap routing", () => {
-  let matchMediaMock: MockFn;
+  let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
-    matchMediaMock = vi.fn(() => ({
-      matches: false,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal("matchMedia", matchMediaMock);
+    matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
     Object.values(mockAudio).forEach((fn) => {
@@ -458,16 +279,9 @@ describe("PopFreezeScene spawn and tap routing", () => {
 });
 
 describe("PopFreezeScene completion and sticker flow", () => {
-  let matchMediaMock: MockFn;
-
   beforeEach(() => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
-    matchMediaMock = vi.fn(() => ({
-      matches: false,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal("matchMedia", matchMediaMock);
+    stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
     Object.values(mockAudio).forEach((fn) => {

@@ -1,23 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sceneEntrance, transitionToScene } from "../../utils/sceneTransitions";
+import { stubMatchMedia } from "../helpers/matchMediaStub";
 
-const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const BG_BASE_RGB = { r: 250, g: 249, b: 246 }; // 0xfaf9f6
-
-/** Stubs window.matchMedia so tests can simulate reduced-motion preferences. */
-function stubMatchMedia(matches: boolean): void {
-  const matchMedia = vi.fn().mockImplementation((query: string) => ({
-    matches: query === REDUCED_MOTION_QUERY ? matches : false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  }));
-  vi.stubGlobal("matchMedia", matchMedia);
-}
 
 /** Creates a minimal scene mock exposing only the camera + scene.start APIs. */
 function createMockScene(): {

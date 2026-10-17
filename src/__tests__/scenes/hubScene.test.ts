@@ -1,29 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
+import { type MockObject, mockRegistry } from "../helpers/phaserMock";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
-interface MockObject {
-  kind: string;
-  handlers: Record<string, (...args: unknown[]) => unknown>;
-  /** Every registered handler in order (real Phaser fires all of them). */
-  allHandlers: Array<{ name: string; cb: (...args: unknown[]) => unknown }>;
-  /** Constructor arguments captured by the factory mock (e.g. rectangle x/y/w/h). */
-  args?: unknown[];
-  /** Mocked Phaser game-object methods (mirrors the factory literal below). */
-  setScale: MockFn;
-  setAlpha: MockFn;
-  setInteractive: MockFn;
-  disableInteractive: MockFn;
-  setStrokeStyle: MockFn;
-  setFillStyle: MockFn;
-  fillStyle: MockFn;
-  fillCircle: MockFn;
-  slice: MockFn;
-  arc: MockFn;
-  destroy: MockFn;
-}
-
-const { mockAudio, mockRecordGamePlay, mockRegistry } = vi.hoisted(() => {
+const { mockAudio, mockRecordGamePlay } = vi.hoisted(() => {
   const mockAudio = {
     init: vi.fn(),
     resume: vi.fn(),
@@ -38,8 +19,7 @@ const { mockAudio, mockRecordGamePlay, mockRegistry } = vi.hoisted(() => {
     playIdleCall: vi.fn(),
   };
   const mockRecordGamePlay = vi.fn();
-  const mockRegistry: MockObject[] = [];
-  return { mockAudio, mockRecordGamePlay, mockRegistry };
+  return { mockAudio, mockRecordGamePlay };
 });
 
 /**
@@ -47,232 +27,9 @@ const { mockAudio, mockRecordGamePlay, mockRegistry } = vi.hoisted(() => {
  * to MockScene. Every created game object records its event handlers in
  * mockRegistry so tests can drive interactions (e.g. tile taps) directly.
  */
-vi.mock("phaser", () => {
-  function createMockGameObject(scene?: unknown, kind = "generic"): MockObject {
-    const obj: MockObject & Record<string, unknown> = {
-      kind,
-      handlers: {},
-      allHandlers: [],
-      setInteractive: vi.fn().mockReturnThis(),
-      disableInteractive: vi.fn(),
-      on: vi.fn(function (this: MockObject, name: string, cb: (...args: unknown[]) => unknown) {
-        this.handlers[name] = cb;
-        this.allHandlers.push({ name, cb });
-        return this;
-      }),
-      off: vi.fn().mockReturnThis(),
-      setOrigin: vi.fn().mockReturnThis(),
-      setScale: vi.fn().mockReturnThis(),
-      setTexture: vi.fn().mockReturnThis(),
-      setDepth: vi.fn().mockReturnThis(),
-      setStyle: vi.fn().mockReturnThis(),
-      setFontSize: vi.fn().mockReturnThis(),
-      setText: vi.fn().mockReturnThis(),
-      setColor: vi.fn().mockReturnThis(),
-      setVisible: vi.fn().mockReturnThis(),
-      setAlpha: vi.fn().mockReturnThis(),
-      setPosition: vi.fn().mockReturnThis(),
-      setSize: vi.fn().mockReturnThis(),
-      setDisplaySize: vi.fn().mockReturnThis(),
-      setStrokeStyle: vi.fn().mockReturnThis(),
-      setFillStyle: vi.fn().mockReturnThis(),
-      setVelocity: vi.fn().mockReturnThis(),
-      setCollideWorldBounds: vi.fn().mockReturnThis(),
-      setBounce: vi.fn().mockReturnThis(),
-      setCircle: vi.fn().mockReturnThis(),
-      fillStyle: vi.fn().mockReturnThis(),
-      fillCircle: vi.fn().mockReturnThis(),
-      slice: vi.fn().mockReturnThis(),
-      fillPath: vi.fn().mockReturnThis(),
-      clear: vi.fn().mockReturnThis(),
-      getCenter: vi.fn(() => ({ x: 0, y: 0 })),
-      beginPath: vi.fn().mockReturnThis(),
-      moveTo: vi.fn().mockReturnThis(),
-      lineTo: vi.fn().mockReturnThis(),
-      strokePath: vi.fn().mockReturnThis(),
-      arc: vi.fn().mockReturnThis(),
-      lineStyle: vi.fn().mockReturnThis(),
-      strokeRect: vi.fn().mockReturnThis(),
-      strokeCircle: vi.fn().mockReturnThis(),
-      destroy: vi.fn(),
-      scaleX: 1,
-      scaleY: 1,
-      scene,
-    };
-    mockRegistry.push(obj);
-    return obj;
-  }
-
-  class MockScene {
-    add!: Record<string, MockFn>;
-    scene!: Record<string, MockFn>;
-    load!: Record<string, MockFn>;
-    input!: Record<string, MockFn>;
-    cameras!: {
-      main: Record<string, MockFn | number> & {
-        centerX: number;
-        centerY: number;
-        width: number;
-        height: number;
-      };
-    };
-    scale!: Record<string, MockFn | number> & {
-      width: number;
-      height: number;
-      displaySize: { width: number; height: number };
-    };
-    /** Scene-level input handlers captured from input.on, keyed by event. */
-    sceneInputHandlers!: Record<string, MockFn[]>;
-    /** Scale-manager handlers captured from scale.on, keyed by event. */
-    scaleHandlers!: Record<string, MockFn[]>;
-    /** Scene-event handlers captured from events.on, keyed by event. */
-    eventsHandlers!: Record<string, MockFn[]>;
-    time!: Record<string, MockFn>;
-    tweens!: Record<string, MockFn>;
-    sys!: { events: Record<string, MockFn> };
-    events!: Record<string, MockFn>;
-    children!: Record<string, MockFn>;
-    physics!: { add: Record<string, MockFn>; world: Record<string, MockFn> };
-
-    constructor() {
-      this.add = {
-        rectangle: vi.fn((...args: unknown[]) => {
-          const obj = createMockGameObject(this, "rectangle");
-          obj.args = args;
-          return obj;
-        }),
-        text: vi.fn((..._args: unknown[]) => createMockGameObject(this, "text")),
-        image: vi.fn((...args: unknown[]) => {
-          const obj = createMockGameObject(this, "image");
-          obj.args = args;
-          return obj;
-        }),
-        container: vi.fn((..._args: unknown[]) => createMockGameObject(this, "container")),
-        circle: vi.fn((...args: unknown[]) => {
-          const obj = createMockGameObject(this, "circle");
-          obj.args = args;
-          return obj;
-        }),
-        graphics: vi.fn((..._args: unknown[]) => createMockGameObject(this, "graphics")),
-        zone: vi.fn((..._args: unknown[]) => createMockGameObject(this, "zone")),
-        particles: vi.fn((..._args: unknown[]) => createMockGameObject(this, "particles")),
-      };
-      this.scene = {
-        start: vi.fn(),
-        stop: vi.fn(),
-        launch: vi.fn(),
-        get: vi.fn(),
-        switch: vi.fn(),
-        sleep: vi.fn(),
-        wake: vi.fn(),
-        pause: vi.fn(),
-        resume: vi.fn(),
-      };
-      this.load = {
-        svg: vi.fn(),
-        image: vi.fn(),
-        audio: vi.fn(),
-        on: vi.fn(),
-        once: vi.fn(),
-        off: vi.fn(),
-      };
-      this.input = {
-        on: vi.fn((event: string, handler: MockFn) => {
-          const existing = this.sceneInputHandlers[event] ?? [];
-          existing.push(handler);
-          this.sceneInputHandlers[event] = existing;
-        }),
-        off: vi.fn(),
-        setDraggable: vi.fn(),
-      };
-      this.cameras = {
-        main: {
-          setBackgroundColor: vi.fn(),
-          fadeIn: vi.fn(),
-          fadeOut: vi.fn(),
-          setZoom: vi.fn(),
-          zoomTo: vi.fn(),
-          centerX: 512,
-          centerY: 384,
-          width: 1024,
-          height: 768,
-        },
-      };
-      this.scale = {
-        setSize: vi.fn(),
-        on: vi.fn((event: string, handler: MockFn) => {
-          const existing = this.scaleHandlers[event] ?? [];
-          existing.push(handler);
-          this.scaleHandlers[event] = existing;
-        }),
-        off: vi.fn(),
-        width: 1024,
-        height: 768,
-        displaySize: { width: 1024, height: 768 },
-      };
-      this.sceneInputHandlers = {};
-      this.scaleHandlers = {};
-      this.eventsHandlers = {};
-      this.time = {
-        delayedCall: vi.fn(() => ({ remove: vi.fn() })),
-        addEvent: vi.fn(),
-      };
-      this.tweens = {
-        add: vi.fn(() => ({ remove: vi.fn(), stop: vi.fn() })),
-      };
-      this.sys = {
-        events: {
-          on: vi.fn((event: string, handler: MockFn) => {
-            const existing = this.eventsHandlers[event] ?? [];
-            existing.push(handler);
-            this.eventsHandlers[event] = existing;
-          }),
-          once: vi.fn(),
-          off: vi.fn(),
-        },
-      };
-      this.events = this.sys.events;
-      this.children = {
-        forEach: vi.fn(),
-      };
-      this.physics = {
-        add: {
-          image: vi.fn((..._args: unknown[]) => createMockGameObject(this, "physics-image")),
-        },
-        world: {
-          setBoundsCollision: vi.fn(),
-          setBounds: vi.fn(),
-        },
-      };
-    }
-  }
-
-  /** Mock for Phaser.Geom.Rectangle — must be a class to support `new`. */
-  class MockRectangle {
-    static Contains = vi.fn(() => true);
-
-    constructor(
-      readonly x: number,
-      readonly y: number,
-      readonly width: number,
-      readonly height: number,
-    ) {}
-  }
-
-  return {
-    default: {
-      Scene: MockScene,
-      Game: vi.fn(),
-      Scale: { FIT: 0, CENTER_BOTH: 0 },
-      AUTO: "AUTO",
-      Geom: { Rectangle: MockRectangle },
-    },
-    Scene: MockScene,
-    Game: vi.fn(),
-    Scale: { FIT: 0, CENTER_BOTH: 0 },
-    AUTO: "AUTO",
-    Geom: { Rectangle: MockRectangle },
-  };
+vi.mock("phaser", async () => {
+  const { createPhaserModuleMock } = await import("../helpers/phaserMock");
+  return createPhaserModuleMock().module;
 });
 
 /** Mock AudioManager so create() can start/resume audio without real AudioContext. */
@@ -359,8 +116,6 @@ function getHandler(kind: string, event: string): ((...args: unknown[]) => unkno
 }
 
 describe("HubScene paged grid (narrow viewports)", () => {
-  let matchMediaMock: MockFn;
-
   /** Builds a Hub on a small-phone landscape viewport (844x390 CSS px). */
   function createNarrowHub(): HubScene {
     const scene = new HubScene();
@@ -389,12 +144,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
   }
 
   beforeEach(() => {
-    matchMediaMock = vi.fn(() => ({
-      matches: false,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal("matchMedia", matchMediaMock);
+    stubMatchMedia(false);
     localStorage.clear();
     mockRegistry.length = 0;
     mockRecordGamePlay.mockClear();
@@ -493,12 +243,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
   });
 
   it("builds the same single page without slide tweens under reduced motion", () => {
-    matchMediaMock = vi.fn(() => ({
-      matches: true,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal("matchMedia", matchMediaMock);
+    stubMatchMedia(true);
     createNarrowHub();
 
     expect(pagedRects().length).toBe(10);
@@ -644,15 +389,8 @@ describe("HubScene paged grid (narrow viewports)", () => {
 });
 
 describe("HubScene session-start recording", () => {
-  let matchMediaMock: MockFn;
-
   beforeEach(() => {
-    matchMediaMock = vi.fn(() => ({
-      matches: false,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal("matchMedia", matchMediaMock);
+    stubMatchMedia(false);
     localStorage.clear();
     mockRegistry.length = 0;
     mockRecordGamePlay.mockClear();
@@ -728,17 +466,10 @@ describe("HubScene session-start recording", () => {
 });
 
 describe("HubScene profile and hierarchy cohesion", () => {
-  let matchMediaMock: MockFn;
+  let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    matchMediaMock = vi.fn(() => ({
-      matches: false,
-      media: "(prefers-reduced-motion: reduce)",
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal("matchMedia", matchMediaMock);
+    matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockRegistry.length = 0;
     mockRecordGamePlay.mockClear();
@@ -755,13 +486,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
 
   /** Toggles the `prefers-reduced-motion` media query result. */
   function setReducedMotion(reduced: boolean): void {
-    matchMediaMock.mockImplementation(() => ({
-      matches: reduced,
-      media: "(prefers-reduced-motion: reduce)",
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
+    matchMediaMock.setReducedMotion(reduced);
   }
 
   function getNavTiles(): MockObject[] {
