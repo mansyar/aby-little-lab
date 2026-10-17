@@ -158,3 +158,31 @@ The planned "font-gate concurrency" task was resolved as a **measured no-op**.
   on `start()`).
 - **Resolution** (user-approved): keep the gate as-is; timeout cap
   (2500ms) unchanged; record this finding instead of restructuring.
+
+## After-Numbers — hub-phone-ux-perf_20261017 — 2026-10-17
+
+Measured after landing the track's optimizations (per-use texture raster
+tiers, storage memoization, bgm re-encode, adaptive paged Hub). Same
+fresh-context cold-load methodology as the baseline above.
+
+| Metric | Before (2026-10-17 baseline) | After | Δ |
+|---|---|---|---|
+| Prod cold boot, median of 3 fresh contexts (1024×768) | 2036 ms (1927/2036/2162) | **808 ms** (815/808/749) | **−60%** |
+| Prod cold boot under 4× CPU throttle (diagnostic, low-end proxy) | ~16.1 s (16005/16290) — ~5.4× over the 3 s budget | **~4.2 s** (4333/4036) | **−74%** |
+| GPU texture bytes, 170 SVG textures | 178 MiB (uniform 512², ~237 MiB with mipmaps) | **39 MiB** (33×160² + 135×256² + 2×512² × 4 B) | **−78%** |
+| JS heap after Hub settle | ~18 MB | ~16–18 MB | unchanged |
+| PWA precache total | 4680.2 KiB | **3927.3 KiB** (48 entries) | −752.9 KiB (bgm 1260→503 KiB @128 kbps) |
+| Storage reads on hot paths | JSON.parse + normalize per getter call | memoized v2 state (raw-string staleness guard) | parse eliminated on repeat reads |
+
+Notes:
+
+- Boot budget verdict: **< 3 s PASS** unthrottled; the 4×-throttled
+  diagnostic no longer catastrophically overruns (was ~5.4×, now ~1.4× on
+  this desktop proxy — real low-end device verification remains a device-pass
+  item, not a lab number).
+- CI enforcement: `scripts/validate-boot.js` gates the median of 3
+  fresh-context cold loads against the 3000 ms budget (local medians across
+  runs: 0.63–1.75 s on this machine).
+- Hub on narrow viewports (≤ 64/116 FIT scale) now pages 10 tiles per page
+  (5×2, 176×196 tiles, 96 px icons) — see the paged-Hub rows in
+  `docs/device-testing-checklist.md` for the device pass.
