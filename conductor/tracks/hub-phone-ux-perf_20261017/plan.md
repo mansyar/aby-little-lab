@@ -24,7 +24,7 @@
 - [x] Task: Write failing unit tests for tier-selection helper (asset→tier mapping: tile icons/stickers ~128–160 sized for largest display context, game cards ~256, heroes 512; default fallback) `[commit: 435626a]`
 - [x] Task: Implement tier map + helper; refactor `PreloadScene.ts` `SVG_RASTER_SIZE` per-asset tiering (170-entry table gains a tier field) `[commit: 435626a]`
 - [x] Task: Verify preload count unchanged (170), all scenes still find textures, visual spot-check dev build; commit `[commit: 435626a]`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 5c87bf2]`
 
 ## Phase 4 — Boot Quick Wins
 
