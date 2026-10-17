@@ -31,11 +31,13 @@
 
 ## Phase 3 — Registry lines + lines top-up
 
-- [~] Task 3.1: Cover the 20 `sceneRegistry` dynamic-import one-liners via
+- [x] Task 3.1: Cover the 20 `sceneRegistry` dynamic-import one-liners via
   `vi.mock` interception or stubbed-module invocation (no real Phaser in
-happy-dom).
-- [ ] Task 3.2: If lines still lag 95.5%, cover flagged line gaps
+  happy-dom). [54f52da — registry 100% stmts/branches/funcs/lines; full
+  gate 1828/1828, lines 98.2%, branches 89.38%]
+- [x] Task 3.2: If lines still lag 95.5%, cover flagged line gaps
   (NumberOrderScene, decodeLogic) until both numbers clear with margin.
+  [SKIPPED as unneeded — lines 98.2% already clear 95.5% with margin]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Gate green with margin
