@@ -19,9 +19,9 @@
 ## Phase 2 — Remaining scene branches + glue
 
 - [~] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
-  remaining ~80s scene files until global branches clear 85.5%.
-- [ ] Task 2.2: Cover `PreloadScene` dev-profiling branches (424–433) and
-  `pwaBridge` update/offline branches (45–51).
+  remaining ~80s scene files until global branches clear 85.5%. [d877148 — trio done; remainder pending gate measurement]
+- [x] Task 2.2: Cover `PreloadScene` dev-profiling branches (424–433) and
+  `pwaBridge` update/offline branches (45–51). [d877148, 5c13e3e]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Registry lines + lines top-up
