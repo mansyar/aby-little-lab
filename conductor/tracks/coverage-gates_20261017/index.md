@@ -1,6 +1,6 @@
 # Track: Coverage-Gate Repair — Test the Untested Glue
 
-**ID:** `coverage-gates_20261017` · **Type:** Chore · **Status:** new · **Branch:** `chore/coverage-gates`
+**ID:** `coverage-gates_20261017` · **Type:** Chore · **Status:** done · **Branch:** `chore/coverage-gates`
 **Created:** 2026-10-17 · **Depends on:** `drop-ligne-mascot_20261016`
 
 - **Spec:** [./spec.md](./spec.md) — Source of Truth for scope
