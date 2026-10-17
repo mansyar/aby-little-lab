@@ -30,7 +30,7 @@
 
 - [x] Task: TDD/verify font-gate concurrency (`src/utils/fonts.ts`): `ensureGlyphFontLoaded()` overlaps early loader batches; timeout semantics preserved; boot ≤ baseline `[doc: measured-no-op — see perf-baseline.md; user-approved deviation]`
 - [ ] Task: Re-encode `public/bgm.mp3` (1.29 MB → smaller) with quality check; verify precache manifest still includes it; PWA offline smoke `[commit: fe0197b]`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 9b1b22d]`
 
 ## Phase 5 — Adaptive Paged Hub (TDD where logic-bearing)
 
