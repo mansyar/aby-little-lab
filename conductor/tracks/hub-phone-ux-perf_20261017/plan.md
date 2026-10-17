@@ -14,8 +14,8 @@
 
 ## Phase 2 — Storage Memoization (TDD)
 
-- [ ] Task: Write failing unit tests for module-scope v2-state cache (read caching, write invalidation, stale-after-mutate, normalize-once semantics) in `src/__tests__/`
-- [ ] Task: Implement cache in `src/utils/storage.ts` (memoize `ensureV2()` parse/normalize, invalidate on `mutate()`/writes); no call-site changes
+- [~] Task: Write failing unit tests for module-scope v2-state cache (read caching, write invalidation, stale-after-mutate, normalize-once semantics) in `src/__tests__/`
+- [~] Task: Implement cache in `src/utils/storage.ts` (memoize `ensureV2()` parse/normalize, invalidate on `mutate()`/writes); no call-site changes
 - [ ] Task: Verify existing storage tests + full suite green; commit
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
