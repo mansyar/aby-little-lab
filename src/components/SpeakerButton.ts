@@ -42,9 +42,10 @@ export interface SpeakerButtonOptions {
  * - neutral: unpainted glyph after end/error; interruptions can never leave
  *   a stale active state because superseded utterances emit nothing.
  *
- * Uses the engine's frame-based default hit area: the 512x512 texture
- * rasterizes at the display size, so the interactive region covers the visible
- * icon exactly (a 96px ideal touch target). Custom hit areas on Image objects
+ * Uses the engine's frame-based default hit area: the texture rasterizes at
+ * its per-use tier size and displays at the configured size, so the
+ * interactive region covers the visible icon exactly (a 96px ideal touch
+ * target). Custom hit areas on Image objects
  * are tested in texture-local space (+displayOrigin), NOT centered on the
  * object position — a centered (-48,-48,96,96) rect would be dead.
  */

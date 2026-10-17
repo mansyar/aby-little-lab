@@ -4,6 +4,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -18,11 +19,8 @@ const ANSWER_CARD_SIZE = 170;
 /** Display size of the minus/equals cue images (px). */
 const SYMBOL_DISPLAY_SIZE = 96;
 
-/** Original SVG texture size (used for scale calculations). */
-const SVG_SIZE = 512;
-
 /** Target scale for the minus/equals cue images (display size / texture size). */
-const SYMBOL_SCALE = SYMBOL_DISPLAY_SIZE / SVG_SIZE;
+const SYMBOL_SCALE = SYMBOL_DISPLAY_SIZE / textureSizeFor("minus");
 
 /** Vertical offset of the equation row above screen center (px). */
 const PROMPT_Y_OFFSET = 140;

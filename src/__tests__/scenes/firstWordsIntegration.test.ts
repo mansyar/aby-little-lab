@@ -483,7 +483,7 @@ describe("First Words integration flows", () => {
     expect(stickerCalls.map((c) => c[2])).toEqual(
       expect.arrayContaining(["sticker_word_match", "sticker_word_builder"]),
     );
-    const earnedScale = 56 / 512;
+    const earnedScale = 56 / 256;
     for (const call of stickerCalls) {
       const index = imageMock.mock.calls.indexOf(call);
       const image = imageMock.mock.results[index].value;

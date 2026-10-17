@@ -15,6 +15,7 @@ import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Frog texture keys in index order (0=green, 1=blue, 2=red). */
@@ -38,14 +39,11 @@ const FAST_NOTE_DELAY = 480;
 /** Sequences of this length or longer play at the faster note delay. */
 const FAST_NOTE_DELAY_LENGTH = 5;
 
-/** Original SVG texture size (used for scale calculations). */
-const SVG_SIZE = 512;
-
 /** Scale factor for frog bounce animation (relative to display size). */
-const BOUNCE_SCALE = (FROG_SIZE / SVG_SIZE) * 1.2;
+const BOUNCE_SCALE = (FROG_SIZE / textureSizeFor("frog_green")) * 1.2;
 
 /** Scale factor for the frog bounce under reduced motion (relative to display size). */
-const BOUNCE_REDUCED_SCALE = (FROG_SIZE / SVG_SIZE) * 1.05;
+const BOUNCE_REDUCED_SCALE = (FROG_SIZE / textureSizeFor("frog_green")) * 1.05;
 
 /** Duration of frog bounce animation (ms). */
 const BOUNCE_DURATION = 200;

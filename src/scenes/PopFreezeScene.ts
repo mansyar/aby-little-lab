@@ -12,13 +12,14 @@ import {
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { textureSizeFor } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Display size for each bubble (exceeds 96px ideal touch target). */
 const BUBBLE_DISPLAY_SIZE = 96;
 
 /** Base scale factor: display size divided by SVG raster size (512px). */
-const BUBBLE_BASE_SCALE = BUBBLE_DISPLAY_SIZE / 512;
+const BUBBLE_BASE_SCALE = BUBBLE_DISPLAY_SIZE / textureSizeFor("bubble");
 
 /** Duration of the pop shrink animation (ms). */
 const POP_DURATION = 200;

@@ -27,6 +27,7 @@ import {
   recordPlayTime,
   switchProfile,
 } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 import { ensureSceneLoaded } from "./sceneRegistry";
 
@@ -203,7 +204,7 @@ const GRID_ROWS = 4;
 /** Display size of the game icon artwork on each tile (px). */
 const TILE_ICON_DISPLAY = 64;
 /** Tile icon textures are rasterized at this size (matches PreloadScene). */
-const TILE_ICON_TEXTURE_SIZE = 512;
+const TILE_ICON_TEXTURE_SIZE = textureSizeFor("tile_shape_sorter");
 /** Vertical offset of the tile icon above the tile center (px). */
 const TILE_ICON_Y_OFFSET = -40;
 /** Vertical offset of the secondary text label below the tile center (px). */
@@ -238,7 +239,7 @@ const DECORATION_DRIFT_MAX = 6000;
 /** Display size of sticker thumbnails on the shelf (px). */
 const STICKER_DISPLAY_SIZE = 56;
 /** Sticker textures are rasterized at this size (matches PreloadScene). */
-const STICKER_TEXTURE_SIZE = 512;
+const STICKER_TEXTURE_SIZE = textureSizeFor("sticker_shape_sorter");
 /** Base scale for sticker thumbnails (56px from a 512px texture). */
 const STICKER_SCALE = STICKER_DISPLAY_SIZE / STICKER_TEXTURE_SIZE;
 /** Alpha of the dashed empty-slot outline for unearned stickers. */
@@ -270,7 +271,7 @@ const WIGGLE_PHASE_OFFSET = 120;
 /** How many tiles wiggle during an attract cue (rotating pick). */
 const ATTRACT_WIGGLE_COUNT = 2;
 /** Avatar textures are rasterized at this size (matches PreloadScene). */
-const AVATAR_TEXTURE_SIZE = 512;
+const AVATAR_TEXTURE_SIZE = textureSizeFor(PROFILE_AVATAR_TEXTURES.cat);
 /** Display size of the active-profile avatar chip (px). */
 const AVATAR_CHIP_DISPLAY = 72;
 /** Touch target size of the avatar chip (px). */
@@ -1013,7 +1014,7 @@ export class HubScene extends Phaser.Scene {
    * @param targets - Display objects to animate.
    * @param onComplete - Optional callback invoked when the entrance finishes.
    * @param targetScale - Scale to end at (defaults to 1; pre-sized objects pass
-   *   their display scale, e.g. tile icons at 80/512).
+   *   their display scale, e.g. tile icons at display / texture-tier size).
    */
   private animateEntrance(
     targets: Phaser.GameObjects.GameObject[],

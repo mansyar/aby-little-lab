@@ -11,6 +11,7 @@ import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakNumber } from "../utils/speech";
 import { getAdaptiveBandShift, load } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -19,11 +20,8 @@ const ROUND_COUNT = 6;
 /** Display size of the big target numeral (px). */
 const TARGET_DISPLAY_SIZE = 240;
 
-/** Original SVG texture size (used for scale calculations). */
-const SVG_SIZE = 512;
-
 /** Target scale for the numeral image (display size / texture size). */
-const TARGET_SCALE = TARGET_DISPLAY_SIZE / SVG_SIZE;
+const TARGET_SCALE = TARGET_DISPLAY_SIZE / textureSizeFor("numeral_5");
 
 /** Vertical offset of the target numeral from screen center (px). */
 const TARGET_Y_OFFSET = -190;

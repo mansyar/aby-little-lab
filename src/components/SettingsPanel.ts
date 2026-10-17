@@ -25,6 +25,7 @@ import {
   setPlayTimeLimit,
   updateSettings,
 } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
 
@@ -43,7 +44,7 @@ const TOGGLE_WIDTH = 240;
 const TOGGLE_HEIGHT = 96;
 const ROW_HEIGHT = 64;
 /** Avatar textures are rasterized at this size (matches PreloadScene). */
-const AVATAR_TEXTURE_SIZE = 512;
+const AVATAR_TEXTURE_SIZE = textureSizeFor(PROFILE_AVATAR_TEXTURES.cat);
 /** Daily play-time limit options cycled by the per-profile chip (null = Off). */
 const PLAY_TIME_OPTIONS: ReadonlyArray<number | null> = [null, 15, 30, 45, 60];
 /** Sample phrase spoken by the voice preview button. */

@@ -495,7 +495,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
       fresh.create();
     }
 
-    const baseScale = 96 / 512; // PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE
+    const baseScale = 96 / 256; // PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE
     const activeScale = baseScale * 1.15;
     fireAll(getChipImage(), "pointerup");
 
@@ -652,7 +652,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     const before = getActiveProfile().id;
     fireAll(getChipImage(), "pointerup");
 
-    const baseScale = 96 / 512;
+    const baseScale = 96 / 256;
     const other = mockRegistry.find(
       (obj) =>
         obj.kind === "image" &&

@@ -507,7 +507,7 @@ describe("GameSceneBase scaffold", () => {
         const t = call[0]?.targets;
         return (
           (Array.isArray(t) ? t.includes(stickerImage) : t === stickerImage) &&
-          call[0]?.scaleX === 0.5
+          call[0]?.scaleX === 1
         );
       });
       expect(revealTween).toBeDefined();

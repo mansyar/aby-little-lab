@@ -11,6 +11,7 @@ import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
 import { getAdaptiveBandShift, load } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -19,11 +20,8 @@ const ROUND_COUNT = 6;
 /** Display size of the big comparison arrow (px). */
 const ARROW_DISPLAY_SIZE = 256;
 
-/** Original SVG texture size (used for scale calculations). */
-const SVG_SIZE = 512;
-
 /** Target scale for the arrow image (display size / texture size). */
-const ARROW_SCALE = ARROW_DISPLAY_SIZE / SVG_SIZE;
+const ARROW_SCALE = ARROW_DISPLAY_SIZE / textureSizeFor("arrow_more");
 
 /** Vertical offset of the arrow from screen center (px). */
 const ARROW_Y_OFFSET = -160;
