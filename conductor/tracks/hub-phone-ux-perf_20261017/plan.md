@@ -38,13 +38,14 @@
 - [x] Task: Implement paging logic module (pure, `src/game/` or `src/utils/` following existing patterns) `[commit: bdfca9f]`
 - [x] Task: Implement HubScene adaptive layout: narrow → 2 pages of larger tiles (≥64px effective after FIT), wide → byte-identical 5×4 `[commit: 786429d]`
 - [x] Task: Implement swipe gesture (grid region only) + textless page dots + reduced-motion-aware slide transition `[commit: 786429d]`
+- [x] Task: Resize handling (user-requested addition): re-classify viewport on scale-manager resize, rebuild grid only on classification flip, detach listener on shutdown `[commit: 9f40282]`
 - [x] Task: Verify fixed furniture anchors identical on both pages; idle attract on visible tiles only; manual narrow-viewport smoke via dev server `[verified: 844x390 screenshots page 1 + swipe-to-page 2; attract scoped via per-page attractTargets reset + tests]`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: de2f6d8]`
 
 ## Phase 6 — CI Boot Gate, Device Pass & Acceptance
 
-- [ ] Task: Add CI boot-time gate (script + workflow step; fails if prod boot exceeds 3s budget; headroom threshold per spec)
-- [ ] Task: Record after-numbers in `docs/perf-baseline.md` (boot, memory, texture audit before/after); update product.md changelog
-- [ ] Task: Full 4-device-class verification incl. narrow phone: ≥64px targets, crisp icons at paged sizes, swipe+dots UX, no tablet regression (checklist rows executed)
+- [x] Task: Add CI boot-time gate (script + workflow step; fails if prod boot exceeds 3s budget; headroom threshold per spec) `[commit: c9a57dd]`
+- [x] Task: Record after-numbers in `docs/perf-baseline.md` (boot, memory, texture audit before/after); update product.md changelog `[commit: 7317967]`
+- [~] Task: Full 4-device-class verification incl. narrow phone: ≥64px targets, crisp icons at paged sizes, swipe+dots UX, no tablet regression (checklist rows executed)
 - [ ] Task: Final review readiness: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, coverage ≥ threshold
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
