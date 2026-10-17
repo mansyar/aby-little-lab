@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -51,7 +51,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -61,14 +61,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -260,7 +260,7 @@ vi.mock("../../utils/speech", () => mockSpeech);
 
 /** Controllable getAdaptiveBandShift facade plus a recorder for the generator call. */
 const { getAdaptiveBandShiftMock, generateWordBuildPlaythroughMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   generateWordBuildPlaythroughMock: vi.fn(),
 }));
 
@@ -362,39 +362,47 @@ describe("WordBuilderScene shell", () => {
     const scene = new WordBuilderScene();
     scene.create();
 
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     expect(imageMock.mock.calls.some((call) => call[2] === "mascot_idle")).toBe(true);
 
-    const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
     const backCall = textMock.mock.calls.find((call) => call[2] === "← Back");
     expect(backCall).toBeDefined();
+    if (!backCall) throw new Error("back button text not found");
     const backIndex = textMock.mock.calls.indexOf(backCall);
     expect(getMockFn(textMock.mock.results[backIndex].value.setInteractive)).toHaveBeenCalled();
     expect(mockParentLockInstances).toHaveLength(1);
     expect(mockParentLockInstances[0].onSuccess).toBeDefined();
 
-    const circleMock = getMockFn((scene as { add: Record<string, unknown> }).add.circle);
+    const circleMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.circle);
     expect(circleMock.mock.calls).toHaveLength(3);
 
-    expect((scene as { words: unknown[] }).words).toHaveLength(3);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { words: unknown[] }).words).toHaveLength(3);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("returns to the Hub when the parent lock succeeds", () => {
     const scene = new WordBuilderScene();
     scene.create();
 
-    mockParentLockInstances[0].onSuccess();
+    expect(mockParentLockInstances).toHaveLength(1);
+    const parentLock = mockParentLockInstances[0];
+    const onSuccess = parentLock.onSuccess as () => void;
+    expect(onSuccess).toBeDefined();
+
+    onSuccess();
 
     const fadeOutMock = getMockFn(
-      (scene as { cameras: { main: Record<string, unknown> } }).cameras.main.fadeOut,
+      (scene as unknown as { cameras: { main: Record<string, unknown> } }).cameras.main.fadeOut,
     );
     expect(fadeOutMock).toHaveBeenCalled();
     const fadeOutCall = fadeOutMock.mock.calls.at(-1);
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
     }
-    expect((scene as { scene: Record<string, unknown> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, unknown> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 });
 
@@ -513,7 +521,7 @@ describe("WordBuilderScene interaction", () => {
     expect(mockAudio.playPop).toHaveBeenCalledTimes(1);
 
     // The letter itself flies to the slot: no new image is created there.
-    const s = scene as {
+    const s = scene as unknown as {
       add: Record<string, MockFn>;
       slotXs: number[];
       slotImages: Array<Record<string, MockFn> | null>;
@@ -550,7 +558,9 @@ describe("WordBuilderScene interaction", () => {
     // At the smallest supported phone (FIT scale ~0.49) a 110px tile renders
     // at ~54px — below the 64px touch floor. The tile side must be at least
     // 64 / 0.49 = ~131px in the 1024px base canvas.
-    const rectangleMock = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle);
+    const rectangleMock = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+    );
     const tileCalls = rectangleMock.mock.calls.filter((call) => call[1] === TILE_Y);
     expect(tileCalls.length).toBeGreaterThan(0);
     for (const call of tileCalls) {
@@ -648,7 +658,7 @@ describe("WordBuilderScene interaction", () => {
     const slots = getPlacedSlots(scene);
     expect(slots).toHaveLength(2);
     // The letters are the flown tile letters, locked in word order.
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const keyOf = (img: Record<string, MockFn>): string => {
       const callIndex = imageMock.mock.results.findIndex((r) => r.value === img);
       return imageMock.mock.calls[callIndex][2] as string;
@@ -670,7 +680,7 @@ describe("WordBuilderScene interaction", () => {
     }
 
     expect(getPlacedSlots(scene)).toHaveLength(word.length);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     tapTile(scene, 0);
     expect(getPlacedSlots(scene)).toHaveLength(word.length);
@@ -760,12 +770,12 @@ describe("WordBuilderScene completion", () => {
     const dots = getProgressDots(scene);
     expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
     expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalled();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     fireWordLinger(scene);
 
-    expect((scene as { wordIndex: number }).wordIndex).toBe(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { wordIndex: number }).wordIndex).toBe(1);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
     expect(getTileValues(scene)).toHaveLength(6);
     expect(getTileRects(scene)).toHaveLength(12);
   });
@@ -780,7 +790,7 @@ describe("WordBuilderScene completion", () => {
     }
 
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     const celebration = getMockFn(scene.tweens.add).mock.calls.find((call) => {
       const t = call[0] as { scaleX?: number; scaleY?: number; alpha?: number };
@@ -848,12 +858,12 @@ describe("WordBuilderScene completion", () => {
       fillWord(scene);
       fireWordLinger(scene);
     }
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Returning to the Hub and tapping the tile again calls create() on the
     // same scene instance (Phaser restart) — input must be unlocked.
     scene.create();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
 
     const word = getCurrentWord(scene);
     const popCallsBefore = mockAudio.playPop.mock.calls.length;
@@ -914,7 +924,9 @@ describe("WordBuilderScene round rendering", () => {
     scene.create();
 
     const word = getCurrentWord(scene);
-    const expectedTiles = generateLetterTiles(getWord(word)?.word);
+    const entry = getWord(word);
+    if (!entry) throw new Error("current word entry not found");
+    const expectedTiles = generateLetterTiles(entry.word);
     const tiles = getTileRects(scene);
     expect(tiles).toHaveLength(6);
     for (const tile of tiles) {
@@ -927,7 +939,9 @@ describe("WordBuilderScene round rendering", () => {
     expect(letters.map((l) => l.key)).toEqual(
       expectedTiles.map((letter) => `letter_${letter.toLowerCase()}`),
     );
-    const firstLetterMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const firstLetterMock = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.image,
+    );
     const letterCall = firstLetterMock.mock.calls.find((c) => c[1] === TILE_Y);
     if (letterCall) {
       const letterIndex = firstLetterMock.mock.calls.indexOf(letterCall);

@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -50,7 +50,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -60,14 +60,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -408,6 +408,7 @@ describe("PopFreezeScene spawn and tap routing", () => {
       );
     expect(animal).toBeDefined();
     expect(zzz).toBeDefined();
+    if (!zzz) throw new Error("sleep zzz not found");
 
     const bubbles = getBubbles(scene);
     (bubbles[0] as unknown as { x: number; y: number }).x = 111;

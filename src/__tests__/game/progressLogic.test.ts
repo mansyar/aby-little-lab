@@ -157,11 +157,11 @@ describe("progressLogic", () => {
 
   describe("recordResult", () => {
     it("accumulates correct/wrong and increments wins on a win", () => {
-      const next = recordResult(
-        gp({ plays: 1, wins: 1, correct: 8, wrong: 2 }),
-        { correct: 6, wrong: 1, win: true },
-        DAY,
-      );
+      const next = recordResult(gp({ plays: 1, wins: 1, correct: 8, wrong: 2 }), {
+        correct: 6,
+        wrong: 1,
+        win: true,
+      });
       expect(next.wins).toBe(2);
       expect(next.correct).toBe(14);
       expect(next.wrong).toBe(3);
@@ -169,14 +169,14 @@ describe("progressLogic", () => {
     });
 
     it("does not increment wins when win is false", () => {
-      const next = recordResult(gp({ wins: 1 }), { correct: 4, wrong: 3, win: false }, DAY);
+      const next = recordResult(gp({ wins: 1 }), { correct: 4, wrong: 3, win: false });
       expect(next.wins).toBe(1);
       expect(next.correct).toBe(4);
       expect(next.wrong).toBe(3);
     });
 
     it("ignores negative counts", () => {
-      const next = recordResult(gp(), { correct: -2, wrong: 5, win: true }, DAY);
+      const next = recordResult(gp(), { correct: -2, wrong: 5, win: true });
       expect(next.correct).toBe(0);
       expect(next.wrong).toBe(5);
     });
@@ -320,15 +320,15 @@ describe("progressLogic", () => {
       let activity: DayActivity[] = [];
 
       progress = recordPlay(progress, DAY);
-      progress = recordResult(progress, { correct: 5, wrong: 1, win: true }, DAY);
+      progress = recordResult(progress, { correct: 5, wrong: 1, win: true });
       activity = pruneActivity(addActivity(activity, DAY), DAY);
 
       progress = recordPlay(progress, NEXT_DAY);
-      progress = recordResult(progress, { correct: 4, wrong: 2, win: true }, NEXT_DAY);
+      progress = recordResult(progress, { correct: 4, wrong: 2, win: true });
       activity = pruneActivity(addActivity(activity, NEXT_DAY), NEXT_DAY);
 
       progress = recordPlay(progress, THREE_DAYS_LATER);
-      progress = recordResult(progress, { correct: 6, wrong: 0, win: true }, THREE_DAYS_LATER);
+      progress = recordResult(progress, { correct: 6, wrong: 0, win: true });
       activity = pruneActivity(addActivity(activity, THREE_DAYS_LATER), THREE_DAYS_LATER);
 
       expect(progress).toEqual(

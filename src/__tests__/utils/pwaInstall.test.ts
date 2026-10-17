@@ -1,3 +1,4 @@
+import type { Mock } from "vitest";
 import {
   createInstallTracker,
   detectIOS,
@@ -5,7 +6,7 @@ import {
   type InstallTrackerDeps,
 } from "../../utils/pwaInstall";
 
-type ListenerMap = Map<string, (event?: unknown) => void>;
+type ListenerMap = Map<string, (event: unknown) => void>;
 
 /** Builds fake browser wiring that records added/removed listeners. */
 function createFakeDeps(
@@ -15,24 +16,26 @@ function createFakeDeps(
   deps: InstallTrackerDeps;
   listeners: ListenerMap;
   promptEvent: {
-    preventDefault: ReturnType<typeof vi.fn>;
-    prompt: ReturnType<typeof vi.fn>;
+    preventDefault: Mock<() => void>;
+    prompt: Mock<() => Promise<void>>;
     userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
   };
 } {
   const listeners: ListenerMap = new Map();
   const promptEvent = {
-    preventDefault: vi.fn(),
-    prompt: vi.fn().mockResolvedValue(undefined),
+    preventDefault: vi.fn(() => {}),
+    prompt: vi.fn((): Promise<void> => Promise.resolve()),
     userChoice: Promise.resolve({ outcome: "accepted" as const }),
   };
   return {
     deps: {
       userAgent,
       isStandalone: () => standalone,
-      addEventListener: vi.fn((type: string, listener: () => void) => {
-        listeners.set(type, listener);
-      }),
+      addEventListener: vi.fn(
+        (type: "beforeinstallprompt" | "appinstalled", listener: (event: unknown) => void) => {
+          listeners.set(type, listener);
+        },
+      ),
       removeEventListener: vi.fn((type: string) => {
         listeners.delete(type);
       }),
@@ -154,7 +157,7 @@ describe("createInstallTracker", () => {
 
     const appInstalled = listeners.get("appinstalled");
     expect(appInstalled).toBeDefined();
-    appInstalled?.();
+    appInstalled?.(undefined);
 
     expect(tracker.getState()).toBe("hidden");
   });

@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -50,7 +50,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -60,14 +60,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -252,7 +252,7 @@ import {
 } from "../helpers/pressFeedback";
 
 const { getAdaptiveBandShiftMock, generatePlaythroughMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   generatePlaythroughMock: vi.fn(),
 }));
 
@@ -410,7 +410,7 @@ describe("PatternBuilderScene round flow", () => {
     const gapIndex = rectMock.mock.calls.findIndex((call) => Math.abs(call[1] - rowY) < 0.001);
     expect(gapIndex).toBeGreaterThanOrEqual(0);
     expect(
-      getMockFn(rectMock.mock.results[gapIndex].value as Record<string, MockFn>).setStrokeStyle,
+      getMockFn((rectMock.mock.results[gapIndex].value as Record<string, MockFn>).setStrokeStyle),
     ).toHaveBeenCalled();
   });
 

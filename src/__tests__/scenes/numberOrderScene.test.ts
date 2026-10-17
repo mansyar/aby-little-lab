@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 type MockFn = ReturnType<typeof vi.fn>;
 
 vi.mock("phaser", () => {
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -41,17 +41,18 @@ vi.mock("phaser", () => {
     scene!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
+    events!: Record<string, MockFn>;
     children!: Record<string, MockFn>;
 
     constructor() {
@@ -207,7 +208,7 @@ const { mockCompletionEffect } = vi.hoisted(() => ({
 vi.mock("../../utils/completionEffect", () => mockCompletionEffect);
 
 const { getAdaptiveBandShiftMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
 }));
 
 vi.mock("../../utils/storage", async (importOriginal) => {
@@ -271,17 +272,17 @@ describe("NumberOrderScene shell", () => {
     const scene = new NumberOrderScene();
     scene.create();
 
-    const textMock = getMockFn((scene as { add: Record<string, unknown> }).add.text);
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
     expect(textMock.mock.calls.find((call) => call[2] === "← Back")).toBeDefined();
 
     expect(mockParentLockInstances).toHaveLength(1);
     expect((mockParentLockInstances[0] as { onSuccess: unknown }).onSuccess).toBeDefined();
 
-    const circleMock = getMockFn((scene as { add: Record<string, unknown> }).add.circle);
+    const circleMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.circle);
     expect(circleMock.mock.calls).toHaveLength(6);
 
-    expect((scene as { rounds: unknown[] }).rounds).toHaveLength(6);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { rounds: unknown[] }).rounds).toHaveLength(6);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("renders 3 cards, zones, and dashed outlines for the first (easy band) round", () => {
@@ -294,7 +295,9 @@ describe("NumberOrderScene shell", () => {
 
     expect(getCards(scene)).toHaveLength(3);
     expect(getZones(scene)).toHaveLength(3);
-    const graphicsMock = getMockFn((scene as { add: Record<string, unknown> }).add.graphics);
+    const graphicsMock = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.graphics,
+    );
     expect(graphicsMock.mock.calls).toHaveLength(3);
   });
 });
@@ -394,7 +397,7 @@ describe("NumberOrderScene interactions", () => {
     expect(mockSpeech.speakNumber).toHaveBeenCalledTimes(1);
     expect(mockSpeech.speakNumber).toHaveBeenCalledWith(cards[0].numeral, expect.anything());
 
-    (scene as { inputLocked: boolean }).inputLocked = true;
+    (scene as unknown as { inputLocked: boolean }).inputLocked = true;
     tap();
     expect(mockSpeech.speakNumber).toHaveBeenCalledTimes(1);
   });
@@ -410,7 +413,7 @@ describe("NumberOrderScene interactions", () => {
     drag(undefined as never, 111 as never, 222 as never);
     expect(cards[0].container.setPosition).toHaveBeenCalledWith(111, 222);
 
-    (scene as { inputLocked: boolean }).inputLocked = true;
+    (scene as unknown as { inputLocked: boolean }).inputLocked = true;
     getMockFn(cards[1].container.setPosition).mockClear();
     const drag2 = lastHandler(cards[1].container, "drag");
     drag2(undefined as never, 5 as never, 6 as never);
@@ -421,7 +424,7 @@ describe("NumberOrderScene interactions", () => {
     const scene = new NumberOrderScene();
     scene.create();
     const { cards, slots } = internals(scene);
-    const tweens = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     const before = tweens.mock.calls.length;
     drop(scene, cards[0], 0);
     expect(cards[0].slotIndex).toBe(0);
@@ -461,7 +464,7 @@ describe("NumberOrderScene interactions", () => {
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
     const occupant = cards[0];
-    const tweens = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     tweens.mockClear();
     drop(scene, cards[1], 0);
     expect(cards[1].slotIndex).toBe(0);
@@ -478,12 +481,15 @@ describe("NumberOrderScene interactions", () => {
     const scene = new NumberOrderScene();
     scene.create();
     const { cards, slots } = internals(scene);
-    (scene as { inputLocked: boolean }).inputLocked = true;
+    (scene as unknown as { inputLocked: boolean }).inputLocked = true;
     drop(scene, cards[0], 0);
     expect(cards[0].slotIndex).toBeNull();
     expect(slots[0].occupiedBy).toBeNull();
-    (scene as { inputLocked: boolean }).inputLocked = false;
-    (scene as { handleDrop: (c: TestCard, z: unknown) => void }).handleDrop(cards[0], {});
+    (scene as unknown as { inputLocked: boolean }).inputLocked = false;
+    (scene as unknown as { handleDrop: (c: TestCard, z: unknown) => void }).handleDrop(
+      cards[0],
+      {},
+    );
     expect(cards[0].slotIndex).toBeNull();
   });
 
@@ -514,7 +520,7 @@ describe("NumberOrderScene interactions", () => {
     const card = cards[0];
     card.container.x = 0;
     card.container.y = 0;
-    const tweens = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     tweens.mockClear();
     lastHandler(card.container, "dragend")();
     const home = tweens.mock.calls.find(
@@ -522,7 +528,7 @@ describe("NumberOrderScene interactions", () => {
     );
     expect(home).toBeDefined();
     expect((home as unknown as Array<{ x: number }>)[0].x).toBe(card.originX);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("bounces a missed placed drag back to its slot on dragend", () => {
@@ -533,7 +539,7 @@ describe("NumberOrderScene interactions", () => {
     const card = cards[0];
     card.container.x = 0;
     card.container.y = 0;
-    const tweens = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     tweens.mockClear();
     lastHandler(card.container, "dragend")();
     const back = tweens.mock.calls.find(
@@ -548,14 +554,14 @@ describe("NumberOrderScene interactions", () => {
     scene.create();
     const round = getCurrentRound(scene);
     fillBoard(scene, round.solution);
-    (scene as { tryAutoValidate: () => void }).tryAutoValidate();
+    (scene as unknown as { tryAutoValidate: () => void }).tryAutoValidate();
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
     const callbacks = delayedCallbacks(scene);
     expect(callbacks.length).toBeGreaterThan(0);
     callbacks[callbacks.length - 1]();
-    expect((scene as { roundIndex: number }).roundIndex).toBe(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("wiggles and bounces home on an incorrect full board", () => {
@@ -565,9 +571,9 @@ describe("NumberOrderScene interactions", () => {
     fillBoard(scene, [...round.solution].reverse());
     // Guard: reversed must actually be wrong for distinct ascending solutions
     expect([...round.solution].reverse()).not.toEqual(round.solution);
-    (scene as { tryAutoValidate: () => void }).tryAutoValidate();
+    (scene as unknown as { tryAutoValidate: () => void }).tryAutoValidate();
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
-    const tweens = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     const wiggle = tweens.mock.calls
       .map((c) => c[0] as { onComplete?: () => void })
       .find((c) => typeof c.onComplete === "function");
@@ -575,7 +581,7 @@ describe("NumberOrderScene interactions", () => {
     wiggle?.onComplete?.();
     const { slots } = internals(scene);
     expect(slots.every((s) => s.occupiedBy === null)).toBe(true);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("does not validate a partially filled board", () => {
@@ -583,16 +589,16 @@ describe("NumberOrderScene interactions", () => {
     scene.create();
     const { cards } = internals(scene);
     drop(scene, cards[0], 0);
-    (scene as { tryAutoValidate: () => void }).tryAutoValidate();
+    (scene as unknown as { tryAutoValidate: () => void }).tryAutoValidate();
     expect(mockAudio.playCorrect).not.toHaveBeenCalled();
     expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
   it("completes the game with a win on the final round", () => {
     const scene = new NumberOrderScene();
     scene.create();
-    const s = scene as {
+    const s = scene as unknown as {
       rounds: Array<{ solution: number[] }>;
       roundIndex: number;
       renderRound: () => void;
@@ -612,9 +618,13 @@ describe("NumberOrderScene interactions", () => {
   it("lays out two images for numeral 10 and one for single numerals", () => {
     const scene = new NumberOrderScene();
     scene.create();
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const before = imageMock.mock.calls.length;
-    (scene as { createCard: (n: number, x: number, y: number) => void }).createCard(10, 100, 260);
+    (scene as unknown as { createCard: (n: number, x: number, y: number) => void }).createCard(
+      10,
+      100,
+      260,
+    );
     const added = imageMock.mock.calls.slice(before).map((c) => c[2] as string);
     expect(added).toContain("numeral_1");
     expect(added).toContain("numeral_0");
@@ -623,7 +633,7 @@ describe("NumberOrderScene interactions", () => {
   it("tolerates destroy failures when clearing a round", () => {
     const scene = new NumberOrderScene();
     scene.create();
-    const s = scene as {
+    const s = scene as unknown as {
       roundObjects: Array<{ destroy: MockFn }>;
       slots: Array<{ zone: { destroy: MockFn }; outline: { destroy: MockFn } }>;
       clearRound: () => void;
@@ -645,7 +655,7 @@ describe("NumberOrderScene interactions", () => {
     const scene = new NumberOrderScene();
     scene.create();
     const { slots } = internals(scene);
-    const s = scene as { isOverAnyZone: (x: number, y: number) => boolean };
+    const s = scene as unknown as { isOverAnyZone: (x: number, y: number) => boolean };
     expect(s.isOverAnyZone(slots[0].x, slots[0].y)).toBe(true);
     expect(s.isOverAnyZone(-9999, -9999)).toBe(false);
   });
@@ -654,9 +664,11 @@ describe("NumberOrderScene interactions", () => {
     const scene = new NumberOrderScene();
     scene.create();
     const { cards } = internals(scene);
-    const tweens = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add);
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     const before = tweens.mock.calls.length;
-    (scene as { returnCardToSource: (c: TestCard) => void }).returnCardToSource(cards[0]);
+    (scene as unknown as { returnCardToSource: (c: TestCard) => void }).returnCardToSource(
+      cards[0],
+    );
     expect(tweens.mock.calls.length).toBe(before);
   });
 });

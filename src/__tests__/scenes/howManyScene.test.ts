@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -62,14 +62,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -242,7 +242,7 @@ vi.mock("../../utils/speech", () => mockSpeech);
 
 /** Controllable getAdaptiveBandShift facade plus a recorder for the generator call. */
 const { getAdaptiveBandShiftMock, createPlaythroughMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   createPlaythroughMock: vi.fn(),
 }));
 
@@ -462,7 +462,7 @@ describe("HowManyScene round flow", () => {
       return (Array.isArray(t) ? t.includes(target) : t === target) && call[0]?.scaleX === 0.46875;
     });
     expect(popTween).toBeDefined();
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     expect(imageMock.mock.calls.some((call) => call[2] === `numeral_${round.target}`)).toBe(true);
 
     // Band 1 shows 3 interactive cards with thick outlines.
@@ -474,8 +474,9 @@ describe("HowManyScene round flow", () => {
     }
 
     // Cards meet the 96×96 ideal touch target (200px side).
-    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
-      .calls;
+    const rectCalls = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+    ).mock.calls;
     for (const call of rectCalls) {
       if (call[2] === 200) {
         expect(call[2]).toBeGreaterThanOrEqual(96);
@@ -517,7 +518,7 @@ describe("HowManyScene round flow", () => {
     // row: x 392, y 419 (centerY 384 + CARDS_Y_OFFSET 140 - 105).
     const cardX = 512 - 120;
     const cardY = 384 + 140 - 105;
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const numeralCall = imageMock.mock.calls.findIndex((call) => call[2] === "numeral_10");
     expect(numeralCall).toBeGreaterThanOrEqual(0);
     if (numeralCall < 0) return;
@@ -591,7 +592,7 @@ describe("HowManyScene round flow", () => {
     expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
 
     fireNextRoundDelay(scene);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(1);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
 
     // The new round re-renders and speaks its own target number.
     const secondRound = getCurrentRound(scene);
@@ -599,7 +600,7 @@ describe("HowManyScene round flow", () => {
 
     // The previous round's target numeral is destroyed on re-render — no
     // stale target objects accumulate across rounds.
-    const imageMock = getMockFn((scene as { add: Record<string, unknown> }).add.image);
+    const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const targetResults: Array<Record<string, MockFn>> = [];
     for (let i = 0; i < imageMock.mock.calls.length; i++) {
       const key = imageMock.mock.calls[i][2];
@@ -625,7 +626,7 @@ describe("HowManyScene round flow", () => {
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
     expect(mockAudio.playCorrect).not.toHaveBeenCalled();
     expect(getMockFn(rect.setFillStyle)).not.toHaveBeenCalledWith(0x68d391, 1);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
 
     // Professor Hoot nods along with the soft incorrect tone.
     const mascot = getMascotImage(scene);
@@ -655,7 +656,7 @@ describe("HowManyScene round flow", () => {
     }
 
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
@@ -668,12 +669,14 @@ describe("HowManyScene round flow", () => {
     // First completion awards the sticker and shows the reveal animation.
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     const stickerImage = getMockFn(
-      (scene as { add: Record<string, unknown> }).add.image,
+      (scene as unknown as { add: Record<string, unknown> }).add.image,
     ).mock.calls.find((call) => call[2] === "sticker_how_many");
     expect(stickerImage).toBeDefined();
 
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub", {
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub", {
       justEarned: "how-many",
     });
   });
@@ -715,7 +718,9 @@ describe("HowManyScene round flow", () => {
 
     expect(mockAudio.playSticker).not.toHaveBeenCalled();
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
@@ -725,12 +730,12 @@ describe("HowManyScene round flow", () => {
     for (let i = 0; i < 6; i++) {
       completeRound(scene);
     }
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Returning to the Hub and tapping the tile again calls create() on the
     // same scene instance (Phaser restart) — input must be unlocked.
     scene.create();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
 
     const round = getCurrentRound(scene);
     const correctIndex = round.groups.findIndex((group) => group.count === round.target);
@@ -751,14 +756,16 @@ describe("HowManyScene round flow", () => {
     // The hold success starts the Hub transition synchronously (fade-out).
     onSuccess();
     const fadeOutMock = getMockFn(
-      (scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
+      (scene as unknown as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
     );
     const fadeOutCall = fadeOutMock.mock.calls.at(-1);
     expect(fadeOutCall).toBeDefined();
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
     }
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
@@ -787,7 +794,7 @@ describe("HowManyScene round flow", () => {
     const scene = new HowManyScene();
     scene.create();
     const rounds = (
-      scene as {
+      scene as unknown as {
         rounds: Array<{ target: number; groups: Array<{ count: number; texture: string }> }>;
       }
     ).rounds;
@@ -928,7 +935,8 @@ describe("adaptive band shift wiring", () => {
     // The only alphabetic label is the shared parent-facing "← Back" chrome —
     // every child-facing prompt (rounds, feedback, celebration) stays image- or
     // numeral-based, shifted ladder or not.
-    const labels = scene.add.text.mock.calls.map((call) => String(call[2] ?? ""));
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
+    const labels = textMock.mock.calls.map((call) => String(call[2] ?? ""));
     const alphabetic = labels.filter((label) => /[a-zA-Z]/.test(label));
     expect(alphabetic).toEqual(["← Back"]);
   });

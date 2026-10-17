@@ -26,7 +26,7 @@ function createMockScene(): {
   events: {
     on: ReturnType<typeof vi.fn>;
     once: ReturnType<typeof vi.fn>;
-    emit: ReturnType<typeof vi.fn>;
+    emit: ReturnType<typeof vi.fn<(event: string) => void>>;
   };
 } {
   const handlers: Record<string, Array<{ fn: () => void; once: boolean }>> = {};

@@ -9,7 +9,7 @@ type MockFn = ReturnType<typeof vi.fn>;
  */
 vi.mock("phaser", () => {
   /** Creates a mock game object with chainable methods used by Phaser scenes. */
-  function createMockGameObject(scene?: unknown): Record<string, MockFn> {
+  function createMockGameObject(scene?: unknown): Record<string, MockFn | number> {
     return {
       setInteractive: vi.fn().mockReturnThis(),
       disableInteractive: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock("phaser", () => {
       destroy: vi.fn(),
       scaleX: 1,
       scaleY: 1,
-      scene,
+      scene: scene as MockFn,
     };
   }
 
@@ -62,14 +62,14 @@ vi.mock("phaser", () => {
     load!: Record<string, MockFn>;
     input!: Record<string, MockFn>;
     cameras!: {
-      main: Record<string, MockFn> & {
+      main: Record<string, MockFn | number> & {
         centerX: number;
         centerY: number;
         width: number;
         height: number;
       };
     };
-    scale!: Record<string, MockFn> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & { width: number; height: number };
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -252,7 +252,7 @@ import {
 } from "../helpers/pressFeedback";
 
 const { getAdaptiveBandShiftMock, createPlaythroughMock } = vi.hoisted(() => ({
-  getAdaptiveBandShiftMock: vi.fn((): -1 | 0 | 1 => 0),
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
   createPlaythroughMock: vi.fn(),
 }));
 
@@ -434,8 +434,9 @@ describe("OddOneOutScene round flow", () => {
       expect(getMockFn(card.setInteractive)).toHaveBeenCalled();
       expect(getMockFn(card.setStrokeStyle)).toHaveBeenCalled();
     }
-    const rectCalls = getMockFn((scene as { add: Record<string, unknown> }).add.rectangle).mock
-      .calls;
+    const rectCalls = getMockFn(
+      (scene as unknown as { add: Record<string, unknown> }).add.rectangle,
+    ).mock.calls;
     for (const call of rectCalls) {
       if (typeof call[2] === "number" && call[2] >= 200) {
         expect(call[2]).toBeGreaterThanOrEqual(96);
@@ -493,7 +494,7 @@ describe("OddOneOutScene round flow", () => {
     expect(getMockFn(dots[1].setAlpha)).not.toHaveBeenCalledWith(1);
 
     fireNextRoundDelay(scene);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(1);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
 
     // The new round re-renders and speaks its own odd item.
     const secondRound = getCurrentRound(scene);
@@ -519,7 +520,7 @@ describe("OddOneOutScene round flow", () => {
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
     expect(mockAudio.playCorrect).not.toHaveBeenCalled();
     expect(getMockFn(rect.setFillStyle)).not.toHaveBeenCalledWith(0x68d391, 1);
-    expect((scene as { roundIndex: number }).roundIndex).toBe(0);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(0);
 
     // Professor Hoot nods along with the soft incorrect tone.
     const mascot = getMascotImage(scene);
@@ -545,7 +546,7 @@ describe("OddOneOutScene round flow", () => {
     scene.create();
     mockSpeech.speakWord.mockClear();
 
-    (scene as { roundIndex: number }).roundIndex = 99;
+    (scene as unknown as { roundIndex: number }).roundIndex = 99;
     const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } }).speaker
       .button;
     const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
@@ -585,7 +586,7 @@ describe("OddOneOutScene round flow", () => {
 
     (rect as unknown as { isDestroyed: boolean }).isDestroyed = true;
     const delayedCallMock = getMockFn(
-      (scene as { time: Record<string, unknown> }).time.delayedCall,
+      (scene as unknown as { time: Record<string, unknown> }).time.delayedCall,
     );
     const revertCall = delayedCallMock.mock.calls.find((call) => call[0] === 250);
     expect(revertCall).toBeDefined();
@@ -604,7 +605,7 @@ describe("OddOneOutScene round flow", () => {
     }
 
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
@@ -617,12 +618,14 @@ describe("OddOneOutScene round flow", () => {
     // First completion awards the sticker and shows the reveal animation.
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     const stickerImage = getMockFn(
-      (scene as { add: Record<string, unknown> }).add.image,
+      (scene as unknown as { add: Record<string, unknown> }).add.image,
     ).mock.calls.find((call) => call[2] === "sticker_odd_one_out");
     expect(stickerImage).toBeDefined();
 
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub", {
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub", {
       justEarned: "odd-one-out",
     });
   });
@@ -638,7 +641,9 @@ describe("OddOneOutScene round flow", () => {
 
     expect(mockAudio.playSticker).not.toHaveBeenCalled();
     fireAutoReturn(scene);
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
@@ -648,12 +653,12 @@ describe("OddOneOutScene round flow", () => {
     for (let i = 0; i < 6; i++) {
       completeRound(scene);
     }
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(true);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
 
     // Returning to the Hub and tapping the tile again calls create() on the
     // same scene instance (Phaser restart) — input must be unlocked.
     scene.create();
-    expect((scene as { inputLocked: boolean }).inputLocked).toBe(false);
+    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
 
     const round = getCurrentRound(scene);
     const correctCallsBefore = mockAudio.playCorrect.mock.calls.length;
@@ -673,14 +678,16 @@ describe("OddOneOutScene round flow", () => {
     // The hold success starts the Hub transition synchronously (fade-out).
     onSuccess();
     const fadeOutMock = getMockFn(
-      (scene as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
+      (scene as unknown as { cameras: { main: Record<string, MockFn> } }).cameras.main.fadeOut,
     );
     const fadeOutCall = fadeOutMock.mock.calls.at(-1);
     expect(fadeOutCall).toBeDefined();
     if (fadeOutCall && typeof fadeOutCall[4] === "function") {
       (fadeOutCall[4] as () => void)();
     }
-    expect((scene as { scene: Record<string, MockFn> }).scene.start).toHaveBeenCalledWith("Hub");
+    expect(
+      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+    ).toHaveBeenCalledWith("Hub");
   });
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
@@ -707,7 +714,7 @@ describe("OddOneOutScene round flow", () => {
   it("generates a valid playthrough for the scene (6 rounds, 3 identical + 1 odd each)", () => {
     const scene = new OddOneOutScene();
     scene.create();
-    const rounds = (scene as { rounds: OddOneRound[] }).rounds;
+    const rounds = (scene as unknown as { rounds: OddOneRound[] }).rounds;
 
     expect(rounds).toHaveLength(6);
     for (const round of rounds) {

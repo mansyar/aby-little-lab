@@ -26,7 +26,7 @@ vi.mock("../../utils/pressFeedback", () => ({
 
 const speech = vi.hoisted(() => ({
   isSpeechSupported: vi.fn(() => true),
-  onSpeechLifecycle: vi.fn(() => vi.fn()),
+  onSpeechLifecycle: vi.fn((_listener: LifecycleListener) => vi.fn()),
 }));
 vi.mock("../../utils/speech", () => speech);
 
