@@ -187,4 +187,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Coverage-Gate Repair — Test the Untested Glue** *Link: [./tracks/coverage-gates_20261017/index.md](./tracks/coverage-gates_20261017/index.md)*
+- [x] **Track: Coverage-Gate Repair — Test the Untested Glue** *Link: [./archive/coverage-gates_20261017/index.md](./archive/coverage-gates_20261017/index.md)* (Archived)
