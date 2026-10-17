@@ -17,7 +17,7 @@
 - [x] Task: Write failing unit tests for module-scope v2-state cache (read caching, write invalidation, stale-after-mutate, normalize-once semantics) in `src/__tests__/` `[commit: ca60303]`
 - [x] Task: Implement cache in `src/utils/storage.ts` (memoize `ensureV2()` parse/normalize, invalidate on `mutate()`/writes); no call-site changes `[commit: ca60303]`
 - [x] Task: Verify existing storage tests + full suite green; commit `[commit: ca60303]`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: 10b2c81]`
 
 ## Phase 3 — Per-Use Texture Raster Tiers
 
