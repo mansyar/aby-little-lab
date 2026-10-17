@@ -38,7 +38,7 @@
 - [x] Task 3.2: If lines still lag 95.5%, cover flagged line gaps
   (NumberOrderScene, decodeLogic) until both numbers clear with margin.
   [SKIPPED as unneeded — lines 98.2% already clear 95.5% with margin]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Gate green with margin
 
@@ -50,7 +50,7 @@
 
 - Phase 1: `[checkpoint: e67e669]`
 - Phase 2: `[checkpoint: a95fdd2]`
-- Phase 3: `[checkpoint: pending]`
+- Phase 3: `[checkpoint: 242d705]`
 - Phase 4: `[checkpoint: pending]`
 - Track: `[checkpoint: pending]`
 
