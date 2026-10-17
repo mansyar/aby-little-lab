@@ -584,6 +584,65 @@ describe("ColorMatchScene round flow", () => {
     expect((wiggleTween[0] as { yoyo: boolean }).yoyo).toBe(true);
   });
 
+  it("does nothing when the speaker is tapped after the final round (celebration guard)", () => {
+    const scene = new ColorMatchScene();
+    scene.create();
+    mockSpeech.speakWord.mockClear();
+
+    // Force the speaker's onSpeak past the final round, then tap it.
+    (scene as { roundIndex: number }).roundIndex = 99;
+    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } })
+      .speaker.button;
+    const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdownCall).toBeDefined();
+    if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+      (pointerdownCall[1] as () => void)();
+    }
+
+    expect(mockSpeech.speakWord).not.toHaveBeenCalled();
+  });
+
+  it("re-speaks the current target color when the speaker is tapped mid-round", () => {
+    const scene = new ColorMatchScene();
+    scene.create();
+    mockSpeech.speakWord.mockClear();
+
+    const speakerBtn = (scene as unknown as { speaker: { button: Record<string, MockFn> } })
+      .speaker.button;
+    const pointerdownCall = getMockFn(speakerBtn.on).mock.calls.find((c) => c[0] === "pointerdown");
+    expect(pointerdownCall).toBeDefined();
+    if (pointerdownCall && typeof pointerdownCall[1] === "function") {
+      (pointerdownCall[1] as () => void)();
+    }
+
+    const round = getCurrentRound(scene);
+    expect(mockSpeech.speakWord).toHaveBeenCalledWith(promptFor(round.targetColorId), true);
+  });
+
+  it("skips the flash revert when the card is destroyed before the 250ms timer", () => {
+    const scene = new ColorMatchScene();
+    scene.create();
+    const round = getCurrentRound(scene);
+    const targetSlot = round.cards.findIndex((card) => card.colorId === round.targetColorId);
+    const cards = getCardRects(scene);
+
+    tapCard(scene, targetSlot);
+
+    // Destroy the card before the 250ms revert fires.
+    const rect = cards[targetSlot];
+    (rect as unknown as { destroyed: boolean }).destroyed = true;
+    const delayedCallMock = getMockFn(
+      (scene as { time: Record<string, unknown> }).time.delayedCall,
+    );
+    const revertCall = delayedCallMock.mock.calls.find((call) => call[0] === 250);
+    expect(revertCall).toBeDefined();
+    if (revertCall && typeof revertCall[1] === "function") {
+      (revertCall[1] as () => void)();
+    }
+    // setFillStyle ran once (flash); the revert never re-applied the bg.
+    expect(getMockFn(rect.setFillStyle)).toHaveBeenCalledTimes(1);
+  });
+
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
     const scene = new ColorMatchScene();
     scene.create();
