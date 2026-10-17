@@ -192,3 +192,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Phone-Scale Hub UX + Boot/Texture Performance Hardening** *Link: [./archive/hub-phone-ux-perf_20261017/index.md](./archive/hub-phone-ux-perf_20261017/index.md)* (Archived)
+
+---
+
+- [ ] **Track: God-File Decomposition — HubScene & SettingsPanel** *Link: [./tracks/god-file-decomposition_20261018/index.md](./tracks/god-file-decomposition_20261018/index.md)*
