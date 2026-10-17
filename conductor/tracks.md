@@ -183,4 +183,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Phone-Scale Hub UX + Boot/Texture Performance Hardening** *Link: [./hub-phone-ux-perf_20261017/index.md](./hub-phone-ux-perf_20261017/index.md)*
+- [x] **Track: Phone-Scale Hub UX + Boot/Texture Performance Hardening** *Link: [./archive/hub-phone-ux-perf_20261017/index.md](./archive/hub-phone-ux-perf_20261017/index.md)* (Archived)
