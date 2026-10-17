@@ -20,6 +20,9 @@
 
 - [~] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
   remaining ~80s scene files until global branches clear 85.5%. [d877148 — trio done; remainder pending gate measurement]
+- [x] Task 2.0: Repair all tsc errors in test files (review follow-up —
+  unblocks every gate run: 474 → 0, zero production changes, zero
+  weakened assertions; tsc/vitest/check/build all green). [23a75ec]
 - [x] Task 2.2: Cover `PreloadScene` dev-profiling branches (424–433) and
   `pwaBridge` update/offline branches (45–51). [d877148, 5c13e3e]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
