@@ -39,7 +39,7 @@
 - [x] Task: Implement HubScene adaptive layout: narrow → 2 pages of larger tiles (≥64px effective after FIT), wide → byte-identical 5×4 `[commit: 786429d]`
 - [x] Task: Implement swipe gesture (grid region only) + textless page dots + reduced-motion-aware slide transition `[commit: 786429d]`
 - [x] Task: Verify fixed furniture anchors identical on both pages; idle attract on visible tiles only; manual narrow-viewport smoke via dev server `[verified: 844x390 screenshots page 1 + swipe-to-page 2; attract scoped via per-page attractTargets reset + tests]`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `[checkpoint: de2f6d8]`
 
 ## Phase 6 — CI Boot Gate, Device Pass & Acceptance
 
