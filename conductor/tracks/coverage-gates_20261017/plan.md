@@ -11,14 +11,14 @@
   (1795/1795 green; lines 94.25%, branches 83.51%; deficit spread across
   ~15 scene files, glue suites already exist) in the checkpoint note.
   [baseline: /tmp/cov-baseline.log]
-- [ ] Task 1.2: Cover ColorMatch (64%), OddOneOut / PopFreeze (71%),
+- [x] Task 1.2: Cover ColorMatch (64%), OddOneOut / PopFreeze (71%),
   AnimalTrace (78%) uncovered branches — wrong-tap variants,
-  replay/relaunch paths, guard clauses (RED → GREEN).
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+  replay/relaunch paths, guard clauses (RED → GREEN). [70a45e2, 266817d, c187622 + pop-freeze commit]
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Remaining scene branches + glue
 
-- [ ] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
+- [~] Task 2.1: Cover AddItUp / TakeAway / DecodeIt (80–81%) plus the
   remaining ~80s scene files until global branches clear 85.5%.
 - [ ] Task 2.2: Cover `PreloadScene` dev-profiling branches (424–433) and
   `pwaBridge` update/offline branches (45–51).
@@ -41,7 +41,7 @@ happy-dom).
 
 ## Checkpoints
 
-- Phase 1: `[checkpoint: pending]`
+- Phase 1: `[checkpoint: pending-commit]`
 - Phase 2: `[checkpoint: pending]`
 - Phase 3: `[checkpoint: pending]`
 - Phase 4: `[checkpoint: pending]`
