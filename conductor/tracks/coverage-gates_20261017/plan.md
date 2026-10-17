@@ -27,11 +27,11 @@
   weakened assertions; tsc/vitest/check/build all green). [23a75ec]
 - [x] Task 2.2: Cover `PreloadScene` dev-profiling branches (424–433) and
   `pwaBridge` update/offline branches (45–51). [d877148, 5c13e3e]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Registry lines + lines top-up
 
-- [ ] Task 3.1: Cover the 20 `sceneRegistry` dynamic-import one-liners via
+- [~] Task 3.1: Cover the 20 `sceneRegistry` dynamic-import one-liners via
   `vi.mock` interception or stubbed-module invocation (no real Phaser in
 happy-dom).
 - [ ] Task 3.2: If lines still lag 95.5%, cover flagged line gaps
@@ -47,7 +47,7 @@ happy-dom).
 ## Checkpoints
 
 - Phase 1: `[checkpoint: e67e669]`
-- Phase 2: `[checkpoint: pending]`
+- Phase 2: `[checkpoint: a95fdd2]`
 - Phase 3: `[checkpoint: pending]`
 - Phase 4: `[checkpoint: pending]`
 - Track: `[checkpoint: pending]`
