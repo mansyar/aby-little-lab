@@ -936,3 +936,97 @@ describe.each([
     expect(getAdaptiveBandShift(gameId)).toBe(0);
   });
 });
+
+describe("v2 state cache (memoization)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns the identical normalized state for consecutive reads of unchanged storage", () => {
+    // First read parses + normalizes; a second read must reuse the cached
+    // state (same object identity) instead of re-parsing localStorage.
+    const first = getProfiles();
+    const second = getProfiles();
+    expect(second).toBe(first);
+    expect(getSettings()).toBe(getSettings());
+  });
+
+  it("reflects writes immediately: reads after updateSettings return the new state", () => {
+    const before = getSettings();
+
+    updateSettings({ sfxEnabled: false });
+
+    const after = getSettings();
+    expect(after.sfxEnabled).toBe(false);
+    expect(after.bgmEnabled).toBe(true);
+    expect(after).not.toBe(before);
+  });
+
+  it("save() updates the cached state (write-through)", () => {
+    getSettings(); // prime the cache
+
+    save({
+      stickers: {
+        "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
+        "animal-trace": { earned: false, earnedAt: null },
+        "pop-freeze": { earned: false, earnedAt: null },
+        "shadow-match": { earned: false, earnedAt: null },
+        "musical-memory": { earned: false, earnedAt: null },
+        "big-small": { earned: false, earnedAt: null },
+        "pattern-builder": { earned: false, earnedAt: null },
+        "alphabet-match": { earned: false, earnedAt: null },
+      },
+      settings: { bgmEnabled: false, sfxEnabled: true },
+    });
+
+    expect(getSettings().bgmEnabled).toBe(false);
+    expect(hasSticker("shape-sorter")).toBe(true);
+  });
+
+  it("detects an external localStorage write and re-reads it", () => {
+    getSettings(); // prime the cache
+
+    localStorage.setItem(
+      V2_KEY,
+      JSON.stringify({
+        activeProfileId: "p1",
+        profiles: [
+          { id: "p1", avatarId: "cat", createdAt: "2026-08-04T00:00:00.000Z", stickers: {} },
+        ],
+        settings: { bgmEnabled: true, sfxEnabled: false },
+      }),
+    );
+
+    expect(getSettings().sfxEnabled).toBe(false);
+    expect(getSettings().bgmEnabled).toBe(true);
+  });
+
+  it("re-migrates a fresh default when the v2 key is removed externally", () => {
+    earnSticker("shape-sorter"); // prime the cache with an earned sticker
+    expect(hasSticker("shape-sorter")).toBe(true);
+
+    localStorage.removeItem(V2_KEY);
+
+    expect(hasSticker("shape-sorter")).toBe(false);
+    expect(getActiveProfile().id).toBe("p1");
+  });
+
+  it("falls back to defaults when the stored v2 JSON becomes corrupt after a cached read", () => {
+    getSettings(); // prime the cache
+
+    localStorage.setItem(V2_KEY, "not-json");
+
+    expect(() => getSettings()).not.toThrow();
+    expect(getSettings().bgmEnabled).toBe(true);
+    expect(getSettings().sfxEnabled).toBe(true);
+  });
+
+  it("keeps reads consistent across a mutate-decline (declined writes leave the cache valid)", () => {
+    // switchProfile with an unknown id declines (returns false, persists nothing).
+    expect(switchProfile("nope")).toBe(false);
+
+    // The cached state must remain the real state, not the declined proposal.
+    expect(getActiveProfile().id).toBe("p1");
+    expect(getSettings().sfxEnabled).toBe(true);
+  });
+});

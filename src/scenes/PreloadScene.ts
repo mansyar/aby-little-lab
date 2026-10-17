@@ -170,11 +170,14 @@ import tileTakeAwaySvg from "../assets/svg/ui/tiles/tile_take_away.svg?raw";
 import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
 import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
+import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
-const SVG_RASTER_SIZE = 512;
-
-/** Raw SVG asset table: key → SVG source string, rasterized by the SVG loader at `SVG_RASTER_SIZE`. */
+/**
+ * Raw SVG asset table: key → SVG source string, rasterized by the SVG loader
+ * at the per-use tier size for each key (see `src/utils/textureTiers.ts` —
+ * sized for the asset's largest display context, not a uniform 512²).
+ */
 export const SHAPE_ASSETS = [
   { key: "shape_circle", svg: shapeCircleSvg },
   { key: "shape_square", svg: shapeSquareSvg },
@@ -360,9 +363,9 @@ function toDataUri(svg: string): string {
 /**
  * Preload scene — displays a progress bar while assets load.
  *
- * Loads all shape SVG assets at high resolution for rasterization, registers
- * load event listeners for progress tracking, then transitions to the Hub
- * scene once all assets are loaded.
+ * Loads all shape SVG assets rasterized at their per-use tier size
+ * (`textureSizeFor`), registers load event listeners for progress tracking,
+ * then transitions to the Hub scene once all assets are loaded.
  */
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -439,9 +442,10 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     for (const asset of SHAPE_ASSETS) {
+      const size = textureSizeFor(asset.key);
       this.load.svg(asset.key, toDataUri(asset.svg), {
-        width: SVG_RASTER_SIZE,
-        height: SVG_RASTER_SIZE,
+        width: size,
+        height: size,
       });
     }
   }

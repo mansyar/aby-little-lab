@@ -141,8 +141,10 @@ vi.mock("phaser", () => {
       this.scale = {
         setSize: vi.fn(),
         on: vi.fn(),
+        off: vi.fn(),
         width: 1024,
         height: 768,
+        displaySize: { width: 1024, height: 768 },
       };
       this.time = {
         delayedCall: vi.fn(() => ({ remove: vi.fn() })),
@@ -1504,11 +1506,11 @@ describe("scene navigation flow", () => {
 
       // Icon entrances appear in GAME_TILES order, one per tile, each ending
       // at its own display scale (typography-heavy tiles render smaller) so
-      // the entrance pop never resets them to the native 512px texture size.
+      // the entrance pop never resets them to the native texture size.
       const iconEntrances = entrances.filter((config) => config.targets.length === 1);
       expect(iconEntrances).toHaveLength(GAME_TILES.length);
       iconEntrances.forEach((config, i) => {
-        const expected = (GAME_TILES[i].iconDisplay ?? 64) / 512;
+        const expected = (GAME_TILES[i].iconDisplay ?? 64) / 160;
         expect(config.scaleX).toBe(expected);
         expect(config.scaleY).toBe(expected);
       });
@@ -1561,7 +1563,7 @@ describe("scene navigation flow", () => {
         expect(iconTween).toBeDefined();
         // Tile and label breathe from scale 1; the icon from its display scale.
         expect(group?.scaleX).toBe(1.025);
-        const iconScale = ((tile.iconDisplay ?? 64) / 512) * 1.025;
+        const iconScale = ((tile.iconDisplay ?? 64) / 160) * 1.025;
         expect(iconTween?.scaleX).toBeCloseTo(iconScale, 10);
       });
     });
@@ -1731,8 +1733,8 @@ describe("scene navigation flow", () => {
   });
 
   describe("Hub engagement sticker shelf", () => {
-    /** Sticker textures are rasterized at 512px; the shelf displays them at 56px. */
-    const STICKER_BASE_SCALE = 56 / 512;
+    /** Sticker textures are rasterized at their card tier (256px); the shelf displays them at 56px. */
+    const STICKER_BASE_SCALE = 56 / 256;
 
     it("replaces the star markers with one real sticker thumbnail per game (textless, touch-inert)", () => {
       earnSticker("shape-sorter");
@@ -3509,8 +3511,8 @@ describe("scene navigation flow", () => {
       expect(wakeTween).toBeDefined();
       if (!wakeTween) return;
       expect(wakeTween[0].duration).toBe(180);
-      expect(wakeTween[0].scaleX).toBeCloseTo((96 / 512) * 1.05, 5);
-      expect(wakeTween[0].scaleY).toBeCloseTo((96 / 512) * 1.05, 5);
+      expect(wakeTween[0].scaleX).toBeCloseTo((96 / 256) * 1.05, 5);
+      expect(wakeTween[0].scaleY).toBeCloseTo((96 / 256) * 1.05, 5);
     });
 
     it("emits self-cleaning droplet circles when a bubble pops", () => {
@@ -4668,8 +4670,8 @@ describe("scene navigation flow", () => {
       const latestTween = getMockFn(scene.tweens.add).mock.calls[tweensAfter - 1][0];
       expect(latestTween.targets).toBe(frogs[1]);
       expect(latestTween.duration).toBe(120);
-      expect(latestTween.scaleX).toBeCloseTo((128 / 512) * 1.05, 5);
-      expect(latestTween.scaleY).toBeCloseTo((128 / 512) * 1.05, 5);
+      expect(latestTween.scaleX).toBeCloseTo((128 / 256) * 1.05, 5);
+      expect(latestTween.scaleY).toBeCloseTo((128 / 256) * 1.05, 5);
     });
 
     it("correct tap advances input index; completing the full sequence triggers round success", () => {

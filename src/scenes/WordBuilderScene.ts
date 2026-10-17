@@ -245,9 +245,10 @@ export class WordBuilderScene extends GameSceneBase {
 
     if (stillNeeded) {
       // Size the placed letter purely via display size. Calling setScale after
-      // setDisplaySize would overwrite the scale factor (80/512) with the pop
-      // scale and render the letter at the full 512px texture size, overflowing
-      // the slot — so the settle pop tweens displayWidth/displayHeight instead.
+      // setDisplaySize would overwrite the display-derived scale factor with
+      // the pop scale and render the letter at the full raster texture size,
+      // overflowing the slot — so the settle pop tweens displayWidth and
+      // displayHeight instead.
       const copy = this.add
         .image(slotX, slotY, `letter_${chosen.toLowerCase()}`)
         .setDisplaySize(

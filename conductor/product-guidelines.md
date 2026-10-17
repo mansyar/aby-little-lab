@@ -63,6 +63,8 @@
 - Collision bounds are inflated beyond visual size to reduce fine-motor frustration.
 - Drag interactions use generous drop zones — the snap radius is forgiving.
 - No multi-touch requirements. All interactions are single-finger.
+- Texture rasters are tiered per use (`src/utils/textureTiers.ts`): icon 160 / card 256 / hero 512. New scenes must pick display sizes from `textureSizeFor()` instead of assuming a fixed raster size — this cut GPU texture memory ~78% (v1.19-era Hub track).
+- Narrow-viewport layouts follow the Hub's paged-grid pattern (`src/game/hubPaging.ts`): classify with `fitDisplayScale` + `isNarrowViewport` (threshold = the 64px touch floor), page only on narrow devices, and keep wide layouts byte-identical to desktop.
 
 ### Parental Lock
 - Hold-for-3-seconds mechanism on a designated UI element (e.g., settings icon, back button).

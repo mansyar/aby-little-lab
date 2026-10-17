@@ -188,3 +188,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Coverage-Gate Repair — Test the Untested Glue** *Link: [./archive/coverage-gates_20261017/index.md](./archive/coverage-gates_20261017/index.md)* (Archived)
+
+---
+
+- [x] **Track: Phone-Scale Hub UX + Boot/Texture Performance Hardening** *Link: [./archive/hub-phone-ux-perf_20261017/index.md](./archive/hub-phone-ux-perf_20261017/index.md)* (Archived)

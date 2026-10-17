@@ -116,7 +116,17 @@ vi.mock("phaser", () => {
         height: number;
       };
     };
-    scale!: Record<string, MockFn | number> & { width: number; height: number };
+    scale!: Record<string, MockFn | number> & {
+      width: number;
+      height: number;
+      displaySize: { width: number; height: number };
+    };
+    /** Scene-level input handlers captured from input.on, keyed by event. */
+    sceneInputHandlers!: Record<string, MockFn[]>;
+    /** Scale-manager handlers captured from scale.on, keyed by event. */
+    scaleHandlers!: Record<string, MockFn[]>;
+    /** Scene-event handlers captured from events.on, keyed by event. */
+    eventsHandlers!: Record<string, MockFn[]>;
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -138,7 +148,11 @@ vi.mock("phaser", () => {
           return obj;
         }),
         container: vi.fn((..._args: unknown[]) => createMockGameObject(this, "container")),
-        circle: vi.fn((..._args: unknown[]) => createMockGameObject(this, "circle")),
+        circle: vi.fn((...args: unknown[]) => {
+          const obj = createMockGameObject(this, "circle");
+          obj.args = args;
+          return obj;
+        }),
         graphics: vi.fn((..._args: unknown[]) => createMockGameObject(this, "graphics")),
         zone: vi.fn((..._args: unknown[]) => createMockGameObject(this, "zone")),
         particles: vi.fn((..._args: unknown[]) => createMockGameObject(this, "particles")),
@@ -163,7 +177,11 @@ vi.mock("phaser", () => {
         off: vi.fn(),
       };
       this.input = {
-        on: vi.fn(),
+        on: vi.fn((event: string, handler: MockFn) => {
+          const existing = this.sceneInputHandlers[event] ?? [];
+          existing.push(handler);
+          this.sceneInputHandlers[event] = existing;
+        }),
         off: vi.fn(),
         setDraggable: vi.fn(),
       };
@@ -182,10 +200,19 @@ vi.mock("phaser", () => {
       };
       this.scale = {
         setSize: vi.fn(),
-        on: vi.fn(),
+        on: vi.fn((event: string, handler: MockFn) => {
+          const existing = this.scaleHandlers[event] ?? [];
+          existing.push(handler);
+          this.scaleHandlers[event] = existing;
+        }),
+        off: vi.fn(),
         width: 1024,
         height: 768,
+        displaySize: { width: 1024, height: 768 },
       };
+      this.sceneInputHandlers = {};
+      this.scaleHandlers = {};
+      this.eventsHandlers = {};
       this.time = {
         delayedCall: vi.fn(() => ({ remove: vi.fn() })),
         addEvent: vi.fn(),
@@ -195,7 +222,11 @@ vi.mock("phaser", () => {
       };
       this.sys = {
         events: {
-          on: vi.fn(),
+          on: vi.fn((event: string, handler: MockFn) => {
+            const existing = this.eventsHandlers[event] ?? [];
+            existing.push(handler);
+            this.eventsHandlers[event] = existing;
+          }),
           once: vi.fn(),
           off: vi.fn(),
         },
@@ -326,6 +357,291 @@ import {
 function getHandler(kind: string, event: string): ((...args: unknown[]) => unknown) | undefined {
   return mockRegistry.find((obj) => obj.kind === kind && obj.handlers[event])?.handlers[event];
 }
+
+describe("HubScene paged grid (narrow viewports)", () => {
+  let matchMediaMock: MockFn;
+
+  /** Builds a Hub on a small-phone landscape viewport (844x390 CSS px). */
+  function createNarrowHub(): HubScene {
+    const scene = new HubScene();
+    (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
+      width: 844,
+      height: 390,
+    };
+    scene.create();
+    return scene;
+  }
+
+  /** All paged-size tile rectangles (176x196) in creation order. */
+  function pagedRects(): MockObj[] {
+    return mockRegistry.filter((obj) => {
+      const [, , w, h] = (obj.args ?? []) as unknown[];
+      return obj.kind === "rectangle" && w === 176 && h === 196;
+    });
+  }
+
+  /** The page-dot circles in creation order. */
+  function pageDots(): MockObj[] {
+    return mockRegistry.filter((obj) => {
+      const [, y, r] = (obj.args ?? []) as unknown[];
+      return obj.kind === "circle" && y === 640 && r === 8;
+    });
+  }
+
+  beforeEach(() => {
+    matchMediaMock = vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    localStorage.clear();
+    mockRegistry.length = 0;
+    mockRecordGamePlay.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("renders exactly one page of 10 larger tiles and no wide tiles", () => {
+    createNarrowHub();
+
+    expect(pagedRects().length).toBe(10);
+    const wideTiles = mockRegistry.filter((obj) => {
+      const [, , w, h] = (obj.args ?? []) as unknown[];
+      return obj.kind === "rectangle" && w === 160 && h === 116;
+    });
+    expect(wideTiles.length).toBe(0);
+  });
+
+  it("maps page-1 tiles to games 11-20 (How Many? first)", () => {
+    const scene = createNarrowHub();
+
+    // Flip to page 2 via the second dot.
+    pageDots()[1].handlers.pointerup?.();
+
+    const afterFlip = pagedRects().length;
+    expect(afterFlip).toBe(20); // outgoing page lingers (slide timer mocked)
+    const pageOneFirst = pagedRects()[10];
+    pageOneFirst.handlers.pointerup?.();
+
+    expect(mockRecordGamePlay).toHaveBeenCalledWith("how-many");
+    expect(scene).toBeDefined();
+  });
+
+  it("shows two textless page dots, active page highlighted", () => {
+    createNarrowHub();
+
+    const dots = pageDots();
+    expect(dots.length).toBe(2);
+    // Active dot bright, inactive dot dim.
+    expect(dots[0].setAlpha).toHaveBeenCalledWith(expect.closeTo(0.9, 5));
+    expect(dots[1].setAlpha).toHaveBeenCalledWith(expect.closeTo(0.25, 5));
+  });
+
+  it("flips pages on a horizontal swipe inside the grid region", () => {
+    const scene = createNarrowHub();
+
+    scene_input_down(scene, 512, 300);
+    scene_input_move(scene, 400, 300);
+    scene_input_up(scene, 400, 300);
+
+    // Page 2 was built (outgoing page lingers under the mock timers).
+    expect(pagedRects().length).toBe(20);
+    // Dots flipped: second dot is now the active one.
+    const dots = pageDots();
+    const lastAlphaSecond = (dots[1].setAlpha as MockFn).mock.calls.at(-1)?.[0];
+    expect(lastAlphaSecond).toBeCloseTo(0.9, 5);
+  });
+
+  it("ignores vertical drags", () => {
+    const scene = createNarrowHub();
+
+    scene_input_down(scene, 512, 200);
+    scene_input_move(scene, 512, 330);
+    scene_input_up(scene, 512, 330);
+
+    expect(pagedRects().length).toBe(10);
+  });
+
+  it("ignores swipes that start outside the grid region", () => {
+    const scene = createNarrowHub();
+
+    // Avatar-chip band (top-left), well outside the paged grid bounds.
+    scene_input_down(scene, 60, 60);
+    scene_input_move(scene, 200, 60);
+    scene_input_up(scene, 300, 60);
+
+    expect(pagedRects().length).toBe(10);
+  });
+
+  it("swallows tile taps once a swipe is in flight", () => {
+    const scene = createNarrowHub();
+
+    scene_input_down(scene, 512, 300);
+    scene_input_move(scene, 400, 300); // past the 60px threshold -> swiping
+    const tile = pagedRects()[0];
+    tile.handlers.pointerup?.();
+
+    expect(mockRecordGamePlay).not.toHaveBeenCalled();
+  });
+
+  it("builds the same single page without slide tweens under reduced motion", () => {
+    matchMediaMock = vi.fn(() => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    vi.stubGlobal("matchMedia", matchMediaMock);
+    createNarrowHub();
+
+    expect(pagedRects().length).toBe(10);
+    const dots = pageDots();
+    expect(dots.length).toBe(2);
+  });
+
+  /** Fires a scene-level pointer event through the captured input handlers. */
+  function scene_input_down(
+    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
+    x: number,
+    y: number,
+  ): void {
+    for (const handler of scene.sceneInputHandlers.pointerdown ?? []) handler({ x, y });
+  }
+  function scene_input_move(
+    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
+    x: number,
+    y: number,
+  ): void {
+    for (const handler of scene.sceneInputHandlers.pointermove ?? []) handler({ x, y });
+  }
+  function scene_input_up(
+    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
+    x: number,
+    y: number,
+  ): void {
+    for (const handler of scene.sceneInputHandlers.pointerup ?? []) handler({ x, y });
+  }
+
+  /** All wide-grid tile rectangles (160x116) in creation order. */
+  function wideRects(): MockObj[] {
+    return mockRegistry.filter((obj) => {
+      const [, , w, h] = (obj.args ?? []) as unknown[];
+      return obj.kind === "rectangle" && w === 160 && h === 116;
+    });
+  }
+
+  /** Fires the Phaser scale-manager resize event with a new display size. */
+  function fireResize(
+    scene: HubScene & { scaleHandlers: Record<string, MockFn[]> },
+    width: number,
+    height: number,
+  ): void {
+    (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
+      width,
+      height,
+    };
+    for (const handler of scene.scaleHandlers.resize ?? []) handler.call(scene);
+  }
+
+  it("registers a resize listener on the scale manager", () => {
+    const scene = createNarrowHub();
+    expect(scene.scaleHandlers.resize?.length).toBe(1);
+  });
+
+  it("rebuilds as a paged grid when a resize crosses below the touch floor", () => {
+    const scene = new HubScene();
+    scene.create();
+    expect(wideRects().length).toBe(20);
+    expect(pageDots().length).toBe(0);
+    const wideBefore = wideRects().length;
+
+    fireResize(scene, 844, 390);
+
+    // The registry accumulates destroyed objects, so "rebuild" is asserted as
+    // newly-created paged tiles and zero additional wide tiles.
+    expect(pagedRects().length).toBe(10);
+    expect(wideRects().length).toBe(wideBefore);
+    expect(pageDots().length).toBe(2);
+  });
+
+  it("rebuilds the wide grid when a resize crosses back above the threshold", () => {
+    const scene = createNarrowHub();
+    expect(pagedRects().length).toBe(10);
+    const pagedBefore = pagedRects().length;
+    const dotsBefore = pageDots().length;
+
+    fireResize(scene, 1024, 768);
+
+    expect(wideRects().length).toBe(20);
+    expect(pagedRects().length).toBe(pagedBefore);
+    expect(pageDots().length).toBe(dotsBefore);
+  });
+
+  it("leaves the grid untouched when a resize stays in the same classification", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    fireResize(scene, 1600, 900);
+
+    expect(wideRects().length).toBe(20);
+    expect(pagedRects().length).toBe(0);
+    expect(pageDots().length).toBe(0);
+  });
+
+  it("resets to page 1 tiles when re-classifying after paging", () => {
+    const scene = createNarrowHub();
+    // Flip to page 2 via the second page dot, then cross back to wide.
+    const secondDot = pageDots()[1];
+    secondDot.handlers.pointerup?.[0]?.();
+    expect(pagedRects().length).toBe(10);
+    fireResize(scene, 1024, 768);
+    // The rebuilt wide grid must contain all 20 games.
+    expect(wideRects().length).toBe(20);
+  });
+
+  it("unregisters the resize listener on shutdown", () => {
+    const scene = createNarrowHub();
+    const shutdown = (scene as unknown as { eventsHandlers: Record<string, MockFn[]> })
+      .eventsHandlers.shutdown?.[0];
+    expect(shutdown).toBeDefined();
+    shutdown?.();
+    expect(scene.scale.off).toHaveBeenCalledWith("resize", expect.any(Function), scene);
+  });
+
+  it("ignores swipes while the profile picker overlay is open", () => {
+    const scene = createNarrowHub();
+    // Open the picker by tapping the avatar chip (image at 68, 68).
+    const chip = mockRegistry.find(
+      (obj) => obj.kind === "image" && obj.args?.[0] === 68 && obj.args?.[1] === 68,
+    );
+    if (!chip) throw new Error("profile chip image not found");
+    // Fire every pointerup handler (press feedback + open) in dispatch order.
+    for (const { name, cb } of chip.allHandlers) {
+      if (name === "pointerup") cb();
+    }
+
+    const dotsBefore = pageDots().reduce((sum, dot) => sum + dot.setAlpha.mock.calls.length, 0);
+    const rectsBefore = pagedRects().length;
+
+    // A full swipe inside the grid region while the picker is open must not
+    // flip the page behind the overlay.
+    scene_input_down(scene, 422, 193);
+    scene_input_move(scene, 362, 193);
+    scene_input_up(scene, 302, 193);
+
+    expect(pagedRects().length).toBe(rectsBefore);
+    expect(pageDots().reduce((sum, dot) => sum + dot.setAlpha.mock.calls.length, 0)).toBe(
+      dotsBefore,
+    );
+  });
+});
 
 describe("HubScene session-start recording", () => {
   let matchMediaMock: MockFn;
@@ -508,7 +824,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
       fresh.create();
     }
 
-    const baseScale = 96 / 512; // PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE
+    const baseScale = 96 / 256; // PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE
     const activeScale = baseScale * 1.15;
     fireAll(getChipImage(), "pointerup");
 
@@ -665,7 +981,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     const before = getActiveProfile().id;
     fireAll(getChipImage(), "pointerup");
 
-    const baseScale = 96 / 512;
+    const baseScale = 96 / 256;
     const other = mockRegistry.find(
       (obj) =>
         obj.kind === "image" &&

@@ -41,8 +41,21 @@ function readV1(): Partial<AppStorage> | null {
   }
 }
 
+function readV2Raw(): string | null {
+  return localStorage.getItem(V2_KEY);
+}
+
+/**
+ * Module-scope memo of the last parsed/normalized v2 state, keyed by the raw
+ * localStorage string. `getItem` + a string comparison is far cheaper than
+ * `JSON.parse` + `normalizeV2`, which per-tap call sites were paying on every
+ * read. The guard keeps external `localStorage` writes (and `clear()`) correct:
+ * any raw change — external edit, removal, or corruption — forces a re-parse.
+ */
+let v2Cache: { raw: string | null; state: ProfileV2 } | null = null;
+
 function readV2(): ProfileV2 | null {
-  const raw = localStorage.getItem(V2_KEY);
+  const raw = readV2Raw();
   if (raw === null) return null;
   try {
     return normalizeV2(JSON.parse(raw) as Partial<ProfileV2>);
@@ -53,15 +66,22 @@ function readV2(): ProfileV2 | null {
 
 /** Returns the current v2 state, migrating a v1 save (or fresh install) on first access. */
 function ensureV2(): ProfileV2 {
+  const raw = readV2Raw();
+  if (v2Cache !== null && v2Cache.raw === raw) return v2Cache.state;
   const existing = readV2();
-  if (existing !== null) return existing;
+  if (existing !== null) {
+    v2Cache = { raw, state: existing };
+    return existing;
+  }
   const v2 = migrateV1(readV1());
   saveV2(v2);
   return v2;
 }
 
 function saveV2(v2: ProfileV2): void {
-  localStorage.setItem(V2_KEY, JSON.stringify(v2));
+  const raw = JSON.stringify(v2);
+  localStorage.setItem(V2_KEY, raw);
+  v2Cache = { raw, state: v2 };
 }
 
 /**

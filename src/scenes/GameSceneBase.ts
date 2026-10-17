@@ -12,6 +12,7 @@ import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker, recordGameResult } from "../utils/storage";
+import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
 /**
@@ -88,7 +89,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected readonly STICKER_DISPLAY_SIZE = 256;
 
   /** Original SVG texture size (used for scale calculations). */
-  protected readonly SVG_SIZE = 512;
+  protected readonly SVG_SIZE = textureSizeFor("sticker_shape_sorter");
 
   /** Target scale for the sticker image (display size / texture size). */
   protected readonly STICKER_SCALE = this.STICKER_DISPLAY_SIZE / this.SVG_SIZE;

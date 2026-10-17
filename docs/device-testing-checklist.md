@@ -4,6 +4,15 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — Hub Phone UX + Boot/Texture Perf device pass (2026-10-17/18)
+
+- **Target:** LAN preview of the `feature/hub-phone-ux-and-boot-perf` branch build (`vite preview --host`, port 4173; latest dist incl. paged Hub, texture tiers, resize handling)
+- **Scope:** track `conductor/tracks/hub-phone-ux-perf_20261017/` — adaptive paged Hub on narrow viewports (5×2 tiles ×2 pages, swipe + textless dots, RM-aware slide, fixed furniture), per-use texture raster tiers, storage memoization, bgm re-encode, CI boot gate
+- **Devices:** user-verified on personal phone and tablet via LAN URLs (device models not recorded); automated desktop Chromium checks (1024×768 + 844×390 + live resize both ways, zero console errors) run by the agent
+- **Checks:** the "Adaptive Paged Grid" rows below plus tablet 5×4 regression, Games 11–20 lazy-load round-trip rows, audio + offline basics
+- **Result:** **PASSED — user reported all rows pass** (2026-10-18); no Critical/High/Medium/Low findings reported
+- **Issues found:** none reported
+
 ## Execution Record - Ligne removal (post-v1.18.0, track `drop-ligne-mascot_20261016`)
 
 - **Target:** local production build (tween/SVG-only Professor Hoot — Ligne engine deleted)
@@ -226,18 +235,28 @@ pnpm exec serve dist -l 3000
 - [ ] No crashes or freezes during boot
 
 #### Hub Screen
-- [ ] All 11 game tiles are visible (5×3 grid) — each shows a distinct storybook icon above its label
+- [ ] All 20 game tiles are visible (5×4 grid) — each shows a distinct storybook icon above its label
 - [ ] Tiles, labels, icons, and stickers enter with a staggered wave (40ms apart), not all at once
 - [ ] Tiles gently bob on an idle loop after entering
-- [ ] Sticker shelf shows eleven 56px stickers: earned at full color with shimmer, unearned slots show dashed empty-slot outlines
+- [ ] Sticker shelf shows twenty 56px stickers: earned at full color with shimmer, unearned slots show dashed empty-slot outlines
 - [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replaying an earned game shows no highlight
 - [ ] Press and hold a game tile: it squishes and stays; release on the tile springs it back and starts the game; release off the tile does not navigate
 - [ ] After ~25s idle, two tiles wiggle (rotating pick) and a soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
-- [ ] Protected controls (Settings, all eleven game Back buttons) plus the replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, Musical Memory) respond to taps near the visible control (96×96px hit areas — no precision tapping)
+- [ ] Protected controls (Settings, all twenty game Back buttons) plus the replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, Musical Memory) respond to taps near the visible control (96×96px hit areas — no precision tapping)
 - [ ] Professor Hoot mascot sits in the bottom-right corner: waves on load, cheers on a just-earned sticker, then bobs/blinks on the idle loop
 - [ ] Mascot is touch-inert — tapping where Hoot stands still reaches the tile/control underneath
+
+#### Hub Screen — Adaptive Paged Grid (narrow phones)
+- [x] On narrow landscape phones the Hub pages to 2 pages of 10 tiles; effective tile touch targets stay ≥64px (after FIT scaling)
+- [x] Textless page dots under the grid show the active page; dots are tappable
+- [x] Horizontal swipe within the tile-grid region flips pages; touches outside the grid (mascot, settings hold-zone, profile chip, Back) never page
+- [x] Fixed furniture (mascot, settings hold-zone, profile chip, play-time arc) occupies identical positions on both pages; the sticker shelf stays attached to its tile
+- [x] Idle attract wiggles only visible tiles; paging is kid-initiated
+- [x] Page resets to page 1 on scene re-entry
+- [x] Page-slide transition is reduced-motion-aware (instant/short under OS reduced motion)
+- [x] On tablets/wide screens the Hub remains the single 5×4 grid with no paging UI (byte-identical behavior)
 
 #### Game 1: Shape Sorter
 - [ ] Game loads correctly
@@ -372,6 +391,14 @@ pnpm exec serve dist -l 3000
 - [ ] New-pool words spot check: DUCK/BEAR/BONE/STAR/DRUM render with correct prompt art at ~180px and spell with the usual 6 tiles
 - [ ] Replay check: after winning, re-entering the game keeps tiles tappable (input-lock regression fixed)
 
+#### Games 11–20: How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order
+- [ ] Each game loads correctly from its lazy chunk with no console errors
+- [ ] Each game completes a full 6-round playthrough with correct-answer feedback (chime + flash + mascot cheer + progress dot pop)
+- [ ] Wrong taps give gentle no-penalty feedback (wiggle/nod) in every game
+- [ ] First-completion sticker awarded once per game; replay shows no duplicate award
+- [ ] Each game returns to the Hub after completion (~3s auto-return)
+- [ ] All card/answer touch targets stay ≥64px on the narrow phone (after FIT scaling)
+
 ### C. Cross-Game Features
 
 #### Sticker System
@@ -412,9 +439,9 @@ pnpm exec serve dist -l 3000
 - [ ] No ring artifacts remain after a cancelled hold or after leaving the scene
 
 #### Mascot Companion
-- [ ] Hoot appears in the same bottom-right corner on the Hub and in all eleven games (consistent placement, behind gameplay z-order)
+- [ ] Hoot appears in the same bottom-right corner on the Hub and in all twenty games (consistent placement, behind gameplay z-order)
 - [ ] Hoot cheers on correct actions in every game (pose swap + bounce; bigger cheer + sparkle ring on win)
-- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small, Pattern Builder, Find the Letter, Find the Word, Build the Word)
+- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small, Pattern Builder, Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order)
 - [ ] Rapid correct taps: Hoot finishes gracefully — no stuck pose, no runaway bounce (in-flight cheer retired)
 - [ ] Hoot disappears when leaving a scene and never lingers into the next scene
 
@@ -495,8 +522,8 @@ pnpm exec serve dist -l 3000
 - [ ] BGM and SFX settings persist after closing and reopening the app
 - [ ] SFX feedback remains synthesized and no removed SFX MP3 URL is requested
 - [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the crossfade transition
-- [ ] Each of the eleven games shows at most one short splash/ray for a success or completion action
-- [ ] All eleven games play the shared win celebration (rays + confetti) on completion, which cleans itself up; the first-time sticker reveal pops after the confetti (~400ms), not on top of it
+- [ ] Each of the twenty games shows at most one short splash/ray for a success or completion action
+- [ ] All twenty games play the shared win celebration (rays + confetti) on completion, which cleans itself up; the first-time sticker reveal pops after the confetti (~400ms), not on top of it
 - [ ] Back, Replay, Settings, and Hub tile controls squish on press and spring back on release
 - [ ] No completion effect remains on screen or obscures the next interaction
 - [ ] Reduced-motion mode disables or simplifies the splash/ray

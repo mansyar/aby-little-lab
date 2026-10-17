@@ -454,12 +454,12 @@ describe("HowManyScene round flow", () => {
     expect(round.target).toBeLessThanOrEqual(3);
 
     // The target numeral is displayed with the matching numeral texture and
-    // pops in from scale 0 to its display scale (240 / 512).
+    // pops in from scale 0 to its display scale (240 / 256).
     const target = getTargetImage(scene);
     expect(getMockFn(target.setScale)).toHaveBeenCalledWith(0);
     const popTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
       const t = call[0]?.targets;
-      return (Array.isArray(t) ? t.includes(target) : t === target) && call[0]?.scaleX === 0.46875;
+      return (Array.isArray(t) ? t.includes(target) : t === target) && call[0]?.scaleX === 0.9375;
     });
     expect(popTween).toBeDefined();
     const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);

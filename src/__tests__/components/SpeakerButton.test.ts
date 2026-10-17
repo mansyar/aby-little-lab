@@ -117,18 +117,18 @@ describe("SpeakerButton", () => {
     new SpeakerButton(scene as never, 100, 200, { onSpeak: vi.fn() });
 
     // Mirrors InputManager.pointWithinHitArea: the tap is transformed into
-    // texture-local space (displayOrigin = half the 512x512 raster) before the
-    // hit area is tested. The engine's default hit area is the full frame.
+    // texture-local space (displayOrigin = half the icon-tier raster) before
+    // the hit area is tested. The engine's default hit area is the full frame.
     const config = scene.image.setInteractive.mock.calls[0]?.[0] as
       | { hitArea: { x: number; y: number; width: number; height: number } }
       | undefined;
     const subject = {
       x: 100,
       y: 200,
-      scale: 96 / 512,
-      displayOriginX: 512 / 2,
-      displayOriginY: 512 / 2,
-      hitArea: config?.hitArea ?? { x: 0, y: 0, width: 512, height: 512 },
+      scale: 96 / 160,
+      displayOriginX: 160 / 2,
+      displayOriginY: 160 / 2,
+      hitArea: config?.hitArea ?? { x: 0, y: 0, width: 160, height: 160 },
     };
 
     // Taps on the center and edges of the visible icon hit.

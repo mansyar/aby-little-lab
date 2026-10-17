@@ -456,12 +456,12 @@ describe("MoreLessScene round flow", () => {
     // Round 1 is band 1 (counts 1-3) with two cards.
     expect(Math.max(round.left.count, round.right.count)).toBeLessThanOrEqual(3);
 
-    // The arrow cue pops in from scale 0 to its display scale (256 / 512).
+    // The arrow cue pops in from scale 0 to its display scale (256 / 256).
     const arrow = getArrowImage(scene);
     expect(getMockFn(arrow.setScale)).toHaveBeenCalledWith(0);
     const popTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
       const t = call[0]?.targets;
-      return (Array.isArray(t) ? t.includes(arrow) : t === arrow) && call[0]?.scaleX === 0.5;
+      return (Array.isArray(t) ? t.includes(arrow) : t === arrow) && call[0]?.scaleX === 1;
     });
     expect(popTween).toBeDefined();
     const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);

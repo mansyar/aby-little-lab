@@ -48,6 +48,12 @@ jobs:
       - name: PWA validation
         run: node scripts/validate-pwa.js
 
+      - name: Boot-time validation
+        run: |
+          node node_modules/vite/bin/vite.js preview --port 4173 --strictPort &
+          sleep 3
+          node scripts/validate-boot.js
+
   deploy:
     name: Deploy to Coolify
     needs: quality-gates
