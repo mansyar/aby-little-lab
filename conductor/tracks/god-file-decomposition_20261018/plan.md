@@ -11,11 +11,11 @@ fix; every extraction moves code verbatim before any adjustment.
 
 ## Phase 1 — Shared Test Helpers (foundation first)
 
-- [ ] Task: Extract `matchMedia` stub into `src/__tests__/helpers/matchMediaStub.ts`; write helper self-tests
-- [ ] Task: Extract shared Phaser mock into `src/__tests__/helpers/phaserMock.ts` (seeded from the largest inline mock, `navigation.test.ts`)
-- [ ] Task: Migrate the ~15 scene test files to the shared helpers; delete duplicated stubs
-- [ ] Task: Verify full suite green + coverage ≥ thresholds (`CI=true pnpm test`)
-- [ ] Task: Commit (`refactor(test): extract shared matchMedia stub + Phaser mock helpers`)
+- [x] Task: Extract `matchMedia` stub into `src/__tests__/helpers/matchMediaStub.ts`; write helper self-tests (7 self-tests; `stubMatchMedia` extended with stateful `setReducedMotion`)
+- [x] Task: Extract shared Phaser mock into `src/__tests__/helpers/phaserMock.ts` (seeded from the largest inline mock, `navigation.test.ts`) (21 self-tests; superset includes `scene.add`, `children.bringToTop`, and a working `sys.events` emitter with `emit`)
+- [x] Task: Migrate the ~15 scene test files to the shared helpers; delete duplicated stubs (21 phaser-mock files + 22 matchMedia-stub files migrated; whole-window stubs in navigation/SettingsPanel.test/dragJuice intentionally kept — they stub `window`, not `matchMedia` alone)
+- [x] Task: Verify full suite green + coverage ≥ thresholds (`CI=true pnpm test`) (1906/1906 pass, 72 files; coverage stmts 97.94 / branch 89.21 / funcs 97.25 / lines 98.81 — all above thresholds; `biome check` at pre-existing warning level only)
+- [x] Task: Commit (`refactor(test): extract shared matchMedia stub + Phaser mock helpers`) [0d4834e]
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — HubScene Decomposition (1,382 L)
