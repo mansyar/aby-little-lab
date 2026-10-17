@@ -601,6 +601,33 @@ describe("HubScene paged grid (narrow viewports)", () => {
     shutdown?.();
     expect(scene.scale.off).toHaveBeenCalledWith("resize", expect.any(Function), scene);
   });
+
+  it("ignores swipes while the profile picker overlay is open", () => {
+    const scene = createNarrowHub();
+    // Open the picker by tapping the avatar chip (image at 68, 68).
+    const chip = mockRegistry.find(
+      (obj) => obj.kind === "image" && obj.args?.[0] === 68 && obj.args?.[1] === 68,
+    );
+    if (!chip) throw new Error("profile chip image not found");
+    // Fire every pointerup handler (press feedback + open) in dispatch order.
+    for (const { name, cb } of chip.allHandlers) {
+      if (name === "pointerup") cb();
+    }
+
+    const dotsBefore = pageDots().reduce((sum, dot) => sum + dot.setAlpha.mock.calls.length, 0);
+    const rectsBefore = pagedRects().length;
+
+    // A full swipe inside the grid region while the picker is open must not
+    // flip the page behind the overlay.
+    scene_input_down(scene, 422, 193);
+    scene_input_move(scene, 362, 193);
+    scene_input_up(scene, 302, 193);
+
+    expect(pagedRects().length).toBe(rectsBefore);
+    expect(pageDots().reduce((sum, dot) => sum + dot.setAlpha.mock.calls.length, 0)).toBe(
+      dotsBefore,
+    );
+  });
 });
 
 describe("HubScene session-start recording", () => {

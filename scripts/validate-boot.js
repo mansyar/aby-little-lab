@@ -22,7 +22,8 @@
  *   1. Default playwright registry (local dev machines with browsers
  *      installed, e.g. via the playwright CLI).
  *   2. System Chrome via channel "chrome" (GitHub ubuntu runners).
- *   3. BOOT_BROWSER_PATH environment variable (explicit executable).
+ *   3. System Edge via channel "msedge" (Windows fallback).
+ *   4. BOOT_BROWSER_PATH environment variable (explicit executable).
  *
  * Usage: node scripts/validate-boot.js   (run `pnpm run build` first)
  */

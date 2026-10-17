@@ -1337,6 +1337,9 @@ export class HubScene extends Phaser.Scene {
     const gridBottom = last.y + last.height / 2;
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       this.swiping = false;
+      // An open overlay (profile picker / settings panel) owns the gesture;
+      // never start a page swipe underneath it.
+      if (this.profilePickerOpen || this.settingsPanel) return;
       if (
         pointer.x >= gridLeft &&
         pointer.x <= gridRight &&
