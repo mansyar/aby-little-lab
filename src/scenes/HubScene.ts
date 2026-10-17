@@ -394,6 +394,10 @@ export class HubScene extends Phaser.Scene {
   private startAudioFn: () => void = () => {};
   /** True once a horizontal drag past the swipe threshold was detected. */
   private swiping = false;
+  /** Every grid object owned by the classic wide 5x4 layout (rebuilt on resize). */
+  private wideObjects: Phaser.GameObjects.GameObject[] = [];
+  /** Guards against double-wiring the scene-level swipe handlers. */
+  private swipeWired = false;
 
   constructor() {
     super({ key: "Hub" });
@@ -427,10 +431,6 @@ export class HubScene extends Phaser.Scene {
       this.createDecorations();
     }
 
-    const startX =
-      (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
-    const startY =
-      (this.cameras.main.height - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2;
     const startAudio = (): void => {
       // First gesture in the session also unlocks iOS/WebKit speech (a silent
       // warm-up utterance), otherwise programmatic TTS is silently dropped.
@@ -443,100 +443,18 @@ export class HubScene extends Phaser.Scene {
 
     // Narrow viewports (phones) get the paged 5x2 grid of larger tiles so
     // every tile stays above the 64px touch floor after FIT scaling; wide
-    // viewports keep the classic 5x4 grid exactly as before.
+    // viewports keep the classic 5x4 grid exactly as before. A later resize
+    // that flips the classification rebuilds the grid (handleViewportChange).
     this.hubPage = 0;
-    const display = this.scale?.displaySize;
-    this.paged = isNarrowViewport(
-      display?.width ?? this.cameras.main.width,
-      display?.height ?? this.cameras.main.height,
-    );
+    this.classifyViewport();
     if (this.paged) {
       this.createPageDots();
       this.wireSwipeGestures();
       this.buildPageGrid(0);
     } else {
-      for (let i = 0; i < GAME_TILES.length; i++) {
-        const col = i % GRID_COLS;
-        const row = Math.floor(i / GRID_COLS);
-        const x = startX + col * (TILE_WIDTH + TILE_SPACING) + TILE_WIDTH / 2;
-        const y = startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2;
-
-        const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
-        // Flat storybook outline, matching every game scene's card language.
-        tile.setStrokeStyle(4, 0x2d3748);
-        tile.setInteractive();
-        this.attractTargets.push(tile);
-        // Navigate on release so the press squish is visible while holding;
-        // releasing outside the tile (pointerout/pointercancel) cancels.
-        // Locked tiles (daily limit reached) swallow the tap entirely.
-        tile.on("pointerup", () => {
-          if (this.timeUp || this.navLocked) return;
-          this.navLocked = true;
-          startAudio();
-          startPlaySession(getActiveProfile().id);
-          recordGamePlay(GAME_TILES[i].gameId);
-          if (this.shouldNudge()) {
-            this.showPlayTimeNudge(i);
-          } else {
-            this.launchGame(i);
-          }
-        });
-
-        const iconDisplay = GAME_TILES[i].iconDisplay ?? TILE_ICON_DISPLAY;
-        const iconY = y + (GAME_TILES[i].iconOffsetY ?? TILE_ICON_Y_OFFSET);
-        const icon = this.add.image(x, iconY, GAME_TILES[i].tileKey);
-        icon.setDisplaySize(iconDisplay, iconDisplay);
-
-        const label = this.add.text(
-          x,
-          y + TILE_LABEL_Y_OFFSET,
-          GAME_TILES[i].label,
-          textStyle({
-            fontSize: "17px",
-            color: "#ffffff",
-          }),
-        );
-        label.setOrigin(0.5);
-
-        // The tile and label pop to scale 1; the icon gets its own entrance that
-        // ends at its display scale (from the 512px texture) so the pop does not
-        // reset it to the native size. Typography-heavy tiles use a smaller size.
-        this.animateEntrance([tile, label], () => {
-          attachPressFeedback(tile, { spring: true });
-        });
-        this.animateEntrance([icon], undefined, iconDisplay / TILE_ICON_TEXTURE_SIZE);
-
-        if (!reducedMotion) {
-          // Breathe pulse: scale-only wave so the icon/label/shelf geometry
-          // stays fixed (a vertical bob could collide with the fixed slots).
-          // Starts after the entrance pop settles; staggered per tile for a
-          // travelling wave. Icon scales from its own display scale.
-          const breatheDelay = ENTRANCE_DURATION + 50 + i * BOB_PHASE_OFFSET;
-          this.tweens.add({
-            targets: [tile, label],
-            scaleX: BOB_AMPLITUDE,
-            scaleY: BOB_AMPLITUDE,
-            duration: BOB_DURATION,
-            yoyo: true,
-            repeat: -1,
-            ease: "Sine.inOut",
-            delay: breatheDelay,
-          });
-          this.tweens.add({
-            targets: [icon],
-            scaleX: iconDisplay * BOB_AMPLITUDE * (1 / TILE_ICON_TEXTURE_SIZE),
-            scaleY: iconDisplay * BOB_AMPLITUDE * (1 / TILE_ICON_TEXTURE_SIZE),
-            duration: BOB_DURATION,
-            yoyo: true,
-            repeat: -1,
-            ease: "Sine.inOut",
-            delay: breatheDelay,
-          });
-        }
-
-        this.createShelfSticker(i, x, y);
-      }
+      this.buildWideGrid();
     }
+    this.scale.on("resize", this.handleViewportChange, this);
 
     this.createPlayTimeIndicator();
 
@@ -606,6 +524,9 @@ export class HubScene extends Phaser.Scene {
       for (const dot of this.pageDots) dot.destroy();
       this.pageDots = [];
       this.destroyPageGrid();
+      // Detach the viewport listener so a resize while the scene is inactive
+      // cannot rebuild a dead scene's objects.
+      this.scale?.off("resize", this.handleViewportChange, this);
     });
   }
 
@@ -1042,6 +963,158 @@ export class HubScene extends Phaser.Scene {
     }
   }
 
+  /** Classifies the current viewport into the paged (narrow) or wide mode. */
+  private classifyViewport(): void {
+    const display = this.scale?.displaySize;
+    this.paged = isNarrowViewport(
+      display?.width ?? this.cameras.main.width,
+      display?.height ?? this.cameras.main.height,
+    );
+  }
+
+  /**
+   * Re-classifies the viewport when the scale manager reports a resize and
+   * rebuilds the grid only when the narrow/wide classification flips. The
+   * canvas is a fixed 1024x768 in game coordinates, so a same-classification
+   * resize (e.g. a window growing on desktop) needs no relayout. The page
+   * resets to the first page on a classification flip.
+   */
+  private handleViewportChange(): void {
+    const wasPaged = this.paged;
+    this.classifyViewport();
+    if (this.paged === wasPaged) return;
+    this.hubPage = 0;
+    if (this.paged) {
+      this.destroyWideGrid();
+      if (this.pageDots.length === 0) this.createPageDots();
+      this.wireSwipeGestures();
+      this.buildPageGrid(0);
+    } else {
+      this.destroyPageGrid();
+      for (const dot of this.pageDots) dot.destroy();
+      this.pageDots = [];
+      this.buildWideGrid();
+    }
+  }
+
+  /** Destroys every object owned by the classic wide grid (tiles + shelf). */
+  private destroyWideGrid(): void {
+    for (const obj of this.wideObjects) obj.destroy();
+    this.wideObjects = [];
+    for (const sticker of this.stickerImages) sticker.destroy();
+    this.stickerImages = [];
+    for (const graphics of this.emptySlotGraphics) graphics.destroy();
+    this.emptySlotGraphics = [];
+  }
+
+  /**
+   * Builds the classic 5x4 wide grid — the original 20-tile layout kept
+   * byte-identical for desktop and tablet viewports.
+   */
+  private buildWideGrid(): void {
+    const reducedMotion = isReducedMotion();
+    this.wideObjects = [];
+    this.stickerImages = [];
+    this.emptySlotGraphics = [];
+    this.attractTargets = [];
+    this.entranceIndex = 0;
+    const startX =
+      (this.cameras.main.width - GRID_COLS * TILE_WIDTH - (GRID_COLS - 1) * TILE_SPACING) / 2;
+    const startY =
+      (this.cameras.main.height - GRID_ROWS * TILE_HEIGHT - (GRID_ROWS - 1) * TILE_SPACING) / 2;
+
+    for (let i = 0; i < GAME_TILES.length; i++) {
+      const col = i % GRID_COLS;
+      const row = Math.floor(i / GRID_COLS);
+      const x = startX + col * (TILE_WIDTH + TILE_SPACING) + TILE_WIDTH / 2;
+      const y = startY + row * (TILE_HEIGHT + TILE_SPACING) + TILE_HEIGHT / 2;
+
+      const tile = this.add.rectangle(x, y, TILE_WIDTH, TILE_HEIGHT, 0x2b6cb0);
+      // Flat storybook outline, matching every game scene's card language.
+      tile.setStrokeStyle(4, 0x2d3748);
+      tile.setInteractive();
+      this.attractTargets.push(tile);
+      // Navigate on release so the press squish is visible while holding;
+      // releasing outside the tile (pointerout/pointercancel) cancels.
+      // Locked tiles (daily limit reached) swallow the tap entirely.
+      tile.on("pointerup", () => {
+        if (this.timeUp || this.navLocked) return;
+        this.navLocked = true;
+        this.startAudioFn();
+        startPlaySession(getActiveProfile().id);
+        recordGamePlay(GAME_TILES[i].gameId);
+        if (this.shouldNudge()) {
+          this.showPlayTimeNudge(i);
+        } else {
+          this.launchGame(i);
+        }
+      });
+      this.wideObjects.push(tile);
+
+      const iconDisplay = GAME_TILES[i].iconDisplay ?? TILE_ICON_DISPLAY;
+      const iconY = y + (GAME_TILES[i].iconOffsetY ?? TILE_ICON_Y_OFFSET);
+      const icon = this.add.image(x, iconY, GAME_TILES[i].tileKey);
+      icon.setDisplaySize(iconDisplay, iconDisplay);
+      this.wideObjects.push(icon);
+
+      const label = this.add.text(
+        x,
+        y + TILE_LABEL_Y_OFFSET,
+        GAME_TILES[i].label,
+        textStyle({
+          fontSize: "17px",
+          color: "#ffffff",
+        }),
+      );
+      label.setOrigin(0.5);
+      this.wideObjects.push(label);
+
+      // The tile and label pop to scale 1; the icon gets its own entrance that
+      // ends at its display scale (from its raster tier) so the pop does not
+      // reset it to the native size. Typography-heavy tiles use a smaller size.
+      this.animateEntrance([tile, label], () => {
+        attachPressFeedback(tile, { spring: true });
+      });
+      this.animateEntrance([icon], undefined, iconDisplay / TILE_ICON_TEXTURE_SIZE);
+
+      if (!reducedMotion) {
+        // Breathe pulse: scale-only wave so the icon/label/shelf geometry
+        // stays fixed (a vertical bob could collide with the fixed slots).
+        // Starts after the entrance pop settles; staggered per tile for a
+        // travelling wave. Icon scales from its own display scale.
+        const breatheDelay = ENTRANCE_DURATION + 50 + i * BOB_PHASE_OFFSET;
+        this.tweens.add({
+          targets: [tile, label],
+          scaleX: BOB_AMPLITUDE,
+          scaleY: BOB_AMPLITUDE,
+          duration: BOB_DURATION,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.inOut",
+          delay: breatheDelay,
+        });
+        this.tweens.add({
+          targets: [icon],
+          scaleX: iconDisplay * BOB_AMPLITUDE * (1 / TILE_ICON_TEXTURE_SIZE),
+          scaleY: iconDisplay * BOB_AMPLITUDE * (1 / TILE_ICON_TEXTURE_SIZE),
+          duration: BOB_DURATION,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.inOut",
+          delay: breatheDelay,
+        });
+      }
+
+      this.createShelfSticker(i, x, y);
+    }
+
+    if (this.timeUp) {
+      // A resize rebuild after the daily limit is reached must lock the new
+      // tiles too — the limit is profile-wide, not per layout.
+      this.applyTimeUpLock();
+    }
+  }
+
   /**
    * Builds one page of the paged (narrow-viewport) grid.
    *
@@ -1189,7 +1262,7 @@ export class HubScene extends Phaser.Scene {
    * slide completes.
    */
   private flipTo(page: number): void {
-    if (page < 0 || page >= PAGE_COUNT || page === this.hubPage) return;
+    if (!this.paged || page < 0 || page >= PAGE_COUNT || page === this.hubPage) return;
     const direction = page > this.hubPage ? 1 : -1;
     this.hubPage = page;
     this.updatePageDots();
@@ -1251,6 +1324,11 @@ export class HubScene extends Phaser.Scene {
 
   /** Wires horizontal swipe gestures, scoped to the paged grid region. */
   private wireSwipeGestures(): void {
+    // Scene-level handlers cannot be removed without an off() per event, so
+    // they are wired exactly once per scene instance instead. flipTo() ignores
+    // calls while the wide layout is active.
+    if (this.swipeWired) return;
+    this.swipeWired = true;
     const first = pagedTilePosition(0);
     const last = pagedTilePosition(9);
     const gridLeft = first.x - first.width / 2;

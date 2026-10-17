@@ -141,8 +141,10 @@ vi.mock("phaser", () => {
       this.scale = {
         setSize: vi.fn(),
         on: vi.fn(),
+        off: vi.fn(),
         width: 1024,
         height: 768,
+        displaySize: { width: 1024, height: 768 },
       };
       this.time = {
         delayedCall: vi.fn(() => ({ remove: vi.fn() })),

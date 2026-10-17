@@ -111,6 +111,10 @@ vi.mock("phaser", () => {
     };
     /** Scene-level input handlers captured from input.on, keyed by event. */
     sceneInputHandlers!: Record<string, MockFn[]>;
+    /** Scale-manager handlers captured from scale.on, keyed by event. */
+    scaleHandlers!: Record<string, MockFn[]>;
+    /** Scene-event handlers captured from events.on, keyed by event. */
+    eventsHandlers!: Record<string, MockFn[]>;
     time!: Record<string, MockFn>;
     tweens!: Record<string, MockFn>;
     sys!: { events: Record<string, MockFn> };
@@ -162,7 +166,9 @@ vi.mock("phaser", () => {
       };
       this.input = {
         on: vi.fn((event: string, handler: MockFn) => {
-          (this.sceneInputHandlers[event] ??= []).push(handler);
+          const existing = this.sceneInputHandlers[event] ?? [];
+          existing.push(handler);
+          this.sceneInputHandlers[event] = existing;
         }),
         off: vi.fn(),
         setDraggable: vi.fn(),
@@ -182,12 +188,19 @@ vi.mock("phaser", () => {
       };
       this.scale = {
         setSize: vi.fn(),
-        on: vi.fn(),
+        on: vi.fn((event: string, handler: MockFn) => {
+          const existing = this.scaleHandlers[event] ?? [];
+          existing.push(handler);
+          this.scaleHandlers[event] = existing;
+        }),
+        off: vi.fn(),
         width: 1024,
         height: 768,
         displaySize: { width: 1024, height: 768 },
       };
       this.sceneInputHandlers = {};
+      this.scaleHandlers = {};
+      this.eventsHandlers = {};
       this.time = {
         delayedCall: vi.fn(() => ({ remove: vi.fn() })),
         addEvent: vi.fn(),
@@ -197,7 +210,11 @@ vi.mock("phaser", () => {
       };
       this.sys = {
         events: {
-          on: vi.fn(),
+          on: vi.fn((event: string, handler: MockFn) => {
+            const existing = this.eventsHandlers[event] ?? [];
+            existing.push(handler);
+            this.eventsHandlers[event] = existing;
+          }),
           once: vi.fn(),
           off: vi.fn(),
         },
@@ -498,6 +515,92 @@ describe("HubScene paged grid (narrow viewports)", () => {
   ): void {
     for (const handler of scene.sceneInputHandlers.pointerup ?? []) handler({ x, y });
   }
+
+  /** All wide-grid tile rectangles (160x116) in creation order. */
+  function wideRects(): MockObj[] {
+    return mockRegistry.filter((obj) => {
+      const [, , w, h] = (obj.args ?? []) as unknown[];
+      return obj.kind === "rectangle" && w === 160 && h === 116;
+    });
+  }
+
+  /** Fires the Phaser scale-manager resize event with a new display size. */
+  function fireResize(
+    scene: HubScene & { scaleHandlers: Record<string, MockFn[]> },
+    width: number,
+    height: number,
+  ): void {
+    (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
+      width,
+      height,
+    };
+    for (const handler of scene.scaleHandlers.resize ?? []) handler.call(scene);
+  }
+
+  it("registers a resize listener on the scale manager", () => {
+    const scene = createNarrowHub();
+    expect(scene.scaleHandlers.resize?.length).toBe(1);
+  });
+
+  it("rebuilds as a paged grid when a resize crosses below the touch floor", () => {
+    const scene = new HubScene();
+    scene.create();
+    expect(wideRects().length).toBe(20);
+    expect(pageDots().length).toBe(0);
+    const wideBefore = wideRects().length;
+
+    fireResize(scene, 844, 390);
+
+    // The registry accumulates destroyed objects, so "rebuild" is asserted as
+    // newly-created paged tiles and zero additional wide tiles.
+    expect(pagedRects().length).toBe(10);
+    expect(wideRects().length).toBe(wideBefore);
+    expect(pageDots().length).toBe(2);
+  });
+
+  it("rebuilds the wide grid when a resize crosses back above the threshold", () => {
+    const scene = createNarrowHub();
+    expect(pagedRects().length).toBe(10);
+    const pagedBefore = pagedRects().length;
+    const dotsBefore = pageDots().length;
+
+    fireResize(scene, 1024, 768);
+
+    expect(wideRects().length).toBe(20);
+    expect(pagedRects().length).toBe(pagedBefore);
+    expect(pageDots().length).toBe(dotsBefore);
+  });
+
+  it("leaves the grid untouched when a resize stays in the same classification", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    fireResize(scene, 1600, 900);
+
+    expect(wideRects().length).toBe(20);
+    expect(pagedRects().length).toBe(0);
+    expect(pageDots().length).toBe(0);
+  });
+
+  it("resets to page 1 tiles when re-classifying after paging", () => {
+    const scene = createNarrowHub();
+    // Flip to page 2 via the second page dot, then cross back to wide.
+    const secondDot = pageDots()[1];
+    secondDot.handlers.pointerup?.[0]?.();
+    expect(pagedRects().length).toBe(10);
+    fireResize(scene, 1024, 768);
+    // The rebuilt wide grid must contain all 20 games.
+    expect(wideRects().length).toBe(20);
+  });
+
+  it("unregisters the resize listener on shutdown", () => {
+    const scene = createNarrowHub();
+    const shutdown = (scene as unknown as { eventsHandlers: Record<string, MockFn[]> })
+      .eventsHandlers.shutdown?.[0];
+    expect(shutdown).toBeDefined();
+    shutdown?.();
+    expect(scene.scale.off).toHaveBeenCalledWith("resize", expect.any(Function), scene);
+  });
 });
 
 describe("HubScene session-start recording", () => {
