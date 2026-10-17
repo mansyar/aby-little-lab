@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  fitDisplayScale,
+  isNarrowViewport,
   NARROW_SCALE_THRESHOLD,
   PAGE_COUNT,
   PAGE_SIZE,
-  fitDisplayScale,
-  isNarrowViewport,
+  pagedTilePosition,
   pageOf,
   pageTileIndexes,
-  pagedTilePosition,
 } from "../../game/hubPaging";
 
 /**
@@ -53,12 +53,9 @@ describe("isNarrowViewport", () => {
     expect(NARROW_SCALE_THRESHOLD).toBeCloseTo(64 / 116, 4);
     // Exactly at the threshold is still wide (>= keeps the 5x4 grid).
     const boundaryScale = 64 / 116;
-    expect(
-      isNarrowViewport(
-        boundaryScale * CANVAS.width,
-        boundaryScale * CANVAS.height,
-      ),
-    ).toBe(false);
+    expect(isNarrowViewport(boundaryScale * CANVAS.width, boundaryScale * CANVAS.height)).toBe(
+      false,
+    );
     // Just below it, paging kicks in.
     expect(
       isNarrowViewport(

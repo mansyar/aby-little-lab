@@ -63,7 +63,9 @@ export function isNarrowViewport(
   baseWidth = 1024,
   baseHeight = 768,
 ): boolean {
-  return fitDisplayScale(displayWidth, displayHeight, baseWidth, baseHeight) < NARROW_SCALE_THRESHOLD;
+  return (
+    fitDisplayScale(displayWidth, displayHeight, baseWidth, baseHeight) < NARROW_SCALE_THRESHOLD
+  );
 }
 
 /**

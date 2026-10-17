@@ -34,11 +34,11 @@
 
 ## Phase 5 — Adaptive Paged Hub (TDD where logic-bearing)
 
-- [ ] Task: Write failing unit tests for paging logic: narrow-threshold classification, 20-tile page assignment (1–10 / 11–20), page state reset on re-entry
-- [ ] Task: Implement paging logic module (pure, `src/game/` or `src/utils/` following existing patterns)
-- [ ] Task: Implement HubScene adaptive layout: narrow → 2 pages of larger tiles (≥64px effective after FIT), wide → byte-identical 5×4
-- [ ] Task: Implement swipe gesture (grid region only) + textless page dots + reduced-motion-aware slide transition
-- [ ] Task: Verify fixed furniture anchors identical on both pages; idle attract on visible tiles only; manual narrow-viewport smoke via dev server
+- [x] Task: Write failing unit tests for paging logic: narrow-threshold classification, 20-tile page assignment (1–10 / 11–20), page state reset on re-entry `[commit: bdfca9f]`
+- [x] Task: Implement paging logic module (pure, `src/game/` or `src/utils/` following existing patterns) `[commit: bdfca9f]`
+- [x] Task: Implement HubScene adaptive layout: narrow → 2 pages of larger tiles (≥64px effective after FIT), wide → byte-identical 5×4 `[commit: 786429d]`
+- [x] Task: Implement swipe gesture (grid region only) + textless page dots + reduced-motion-aware slide transition `[commit: 786429d]`
+- [x] Task: Verify fixed furniture anchors identical on both pages; idle attract on visible tiles only; manual narrow-viewport smoke via dev server `[verified: 844x390 screenshots page 1 + swipe-to-page 2; attract scoped via per-page attractTargets reset + tests]`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6 — CI Boot Gate, Device Pass & Acceptance
