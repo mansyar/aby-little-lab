@@ -57,4 +57,4 @@
 
 ## Phase: Review Fixes
 
-- [~] Task: Apply review suggestions
+- [x] Task: Apply review suggestions 1ef715e - labelled prompt teardown (label + glyph released together, with a repeat-call regression test; 23 helper tests) and product.md now states the TTS voice drives all twenty games. Gates after the fix: typecheck clean, biome clean (1 pre-existing warning), 94 files / 2002 tests.
