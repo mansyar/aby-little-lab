@@ -195,4 +195,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: God-File Decomposition — HubScene & SettingsPanel** *Link: [./tracks/god-file-decomposition_20261018/index.md](./tracks/god-file-decomposition_20261018/index.md)*
+- [x] **Track: God-File Decomposition — HubScene & SettingsPanel** *Link: [./archive/god-file-decomposition_20261018/index.md](./archive/god-file-decomposition_20261018/index.md)* (Archived)
