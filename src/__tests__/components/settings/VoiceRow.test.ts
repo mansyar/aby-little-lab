@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { MockScene, mockRegistry, type MockFn, type MockObject } from "../../helpers/phaserMock";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import { type MockFn, type MockObject, MockScene, mockRegistry } from "../../helpers/phaserMock";
 
 vi.mock("phaser", async () => {
   const { createPhaserModuleMock } = await import("../../helpers/phaserMock");
@@ -30,7 +30,9 @@ function makeVoice(voiceURI: string, name: string, lang: string): SpeechSynthesi
 function tap(obj: MockObject): void {
   const handlers = obj.allHandlers.filter((entry) => entry.name === "pointerdown");
   if (handlers.length === 0) throw new Error("no pointerdown handler");
-  handlers.forEach((entry) => entry.cb());
+  handlers.forEach((entry) => {
+    entry.cb();
+  });
 }
 
 /** The row's chip text: the only text whose label starts with "Voice:". */

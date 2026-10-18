@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MockScene, mockRegistry, type MockFn, type MockObject } from "../../helpers/phaserMock";
+import { type MockFn, type MockObject, MockScene, mockRegistry } from "../../helpers/phaserMock";
 
 vi.mock("phaser", async () => {
   const { createPhaserModuleMock } = await import("../../helpers/phaserMock");
@@ -24,16 +24,16 @@ import { getProfiles, load } from "../../../utils/storage";
 function tap(obj: MockObject): void {
   const handlers = obj.allHandlers.filter((entry) => entry.name === "pointerdown");
   if (handlers.length === 0) throw new Error("no pointerdown handler");
-  handlers.forEach((entry) => entry.cb());
+  handlers.forEach((entry) => {
+    entry.cb();
+  });
 }
 
 /** Finds a live text object by its literal label. */
 function liveText(bucket: MockObject[], label: string): MockObject {
   const found = bucket.find(
     (obj) =>
-      obj.kind === "text" &&
-      obj.args?.[2] === label &&
-      !(obj.destroy as MockFn).mock.calls.length,
+      obj.kind === "text" && obj.args?.[2] === label && !(obj.destroy as MockFn).mock.calls.length,
   );
   if (!found) throw new Error(`text "${label}" not found`);
   return found;

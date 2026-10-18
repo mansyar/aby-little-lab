@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MockScene, mockRegistry, type MockFn, type MockObject } from "../../helpers/phaserMock";
+import { type MockFn, type MockObject, MockScene, mockRegistry } from "../../helpers/phaserMock";
 
 vi.mock("phaser", async () => {
   const { createPhaserModuleMock } = await import("../../helpers/phaserMock");
@@ -13,7 +13,9 @@ import type { InstallTracker } from "../../../utils/pwaInstall";
 function tap(obj: MockObject): void {
   const handlers = obj.allHandlers.filter((entry) => entry.name === "pointerdown");
   if (handlers.length === 0) throw new Error("no pointerdown handler");
-  handlers.forEach((entry) => entry.cb());
+  handlers.forEach((entry) => {
+    entry.cb();
+  });
 }
 
 /** Builds a fake install tracker with a controllable state. */
@@ -83,9 +85,7 @@ describe("InstallRow", () => {
     const live = overlayObjects.filter((obj) => !(obj.destroy as MockFn).mock.calls.length);
     const titles = live.filter((obj) => obj.kind === "text" && obj.args?.[2] === "Install on iOS");
     expect(titles).toHaveLength(1);
-    const stepTexts = live
-      .filter((obj) => obj.kind === "text")
-      .map((obj) => String(obj.args?.[2]));
+    const stepTexts = live.filter((obj) => obj.kind === "text").map((obj) => String(obj.args?.[2]));
     expect(stepTexts).toContain("1. Tap the Share icon");
     expect(stepTexts).toContain("2. Choose Add to Home Screen");
     expect(stepTexts).toContain("3. Open Aby's Little Lab offline");
