@@ -287,8 +287,8 @@ aby-little-lab/
         │   ├── sceneLifecycle.test.ts  # shared mascot reactions, shutdown cleanup, cross-scene touch regressions
         │   ├── bootScene.test.ts
         │   ├── sceneRegistry.test.ts
-        │   ├── <game>Scene.test.ts     # scene-level suite per game (bigSmallScene, shadowMatchScene, …)
-        │   └── <game>Flow.test.ts      # drag/drop/completion flows (shapeSorterFlow, animalTraceFlow, …)
+        │   ├── <game>Scene.test.ts     # scene-level suite per game where the flow suite needs a sibling
+        │   └── <game>Flow.test.ts      # drag/drop/completion flows (shapeSorterFlow, bigSmallFlow, …)
         └── utils/
             ├── storage.test.ts
             ├── motion.test.ts
