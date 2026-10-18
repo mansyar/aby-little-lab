@@ -2,20 +2,22 @@
 
 ## Phase 1 — Typed Mock Foundation
 
-- [ ] Task: Add `typecheck` script and record the baseline error inventory
-    - [ ] Add `"typecheck": "tsc --noEmit"` to `package.json`
-    - [ ] Group the current 116 test-tree errors (+7 helper errors) by class so progress is measurable: callable-mock, invalid-interface-extends, stale fixture shape, stale scene casts, `mockImplementation` access
-- [ ] Task: Fix the shared helpers first (they unblock the majority of files)
-    - [ ] Make `MockFn` genuinely callable under Vitest 4's `Mock<Procedure | Constructable>`
-    - [ ] Convert `MatchMediaStub` from `interface extends MockFn` to a type alias exposing `mockImplementation`
-    - [ ] Type `phaserMock` factory captures (`args`, `mockRegistry`, `MockScene` subsystem records) without consumer-side casts
-    - [ ] Verify both helper self-suites stay green (`phaserMock.test.ts`, `matchMediaStub.test.ts`)
-- [ ] Task: Clear remaining test-file errors by class, assertions untouched
-    - [ ] Constructor mocks (`new`-only) in component and settings suites
-    - [ ] Stale fixture literals in `storage.test.ts` (complete sticker map, full `Settings`)
-    - [ ] `InstallRow` / `ResetModal` deps fixtures missing `overlayObjects` / `onProgressReset`
-    - [ ] `HubScene` handler-cast helpers (`MockObj`, `sceneInputHandlers`, `scaleHandlers`)
-- [ ] Task: Verify the gate — `tsc --noEmit` exits 0 and the full suite is unchanged (≥1,980 tests)
+- [x] Task: Add `typecheck` script and record the baseline error inventory
+    - [x] Add `"typecheck": "tsc --noEmit"` to `package.json`
+    - [x] Group the current 116 test-tree errors (+7 helper errors) by class so progress is measurable: callable-mock, invalid-interface-extends, stale fixture shape, stale scene casts, `mockImplementation` access
+- [x] Task: Fix the shared helpers first (they unblock the majority of files)
+    - [x] Make `MockFn` genuinely callable under Vitest 4's `Mock<Procedure | Constructable>` — `ReturnType<typeof vi.fn>` instantiates the generic with its full constraint; spelling the signature out (`ReturnType<typeof vi.fn<(...args: any[]) => any>>`, one documented `biome-ignore`, mirrors Vitest's own `Procedure`) fixed ~70 errors at a stroke
+    - [x] Convert `MatchMediaStub` from `interface extends MockFn` to a type alias exposing `setReducedMotion`, built with `Object.assign` instead of a cast
+    - [x] Type `phaserMock` factory captures (`on` handler param is now `MockFn`) and give `MockScene.scale` an explicit shape instead of a `Record<… | number>` intersection
+    - [x] Verify both helper self-suites stay green (`phaserMock.test.ts`, `matchMediaStub.test.ts`)
+- [x] Task: Clear remaining test-file errors by class, assertions untouched
+    - [x] `hubScene.test.ts` — drop its stale local `MockFn`, `MockObj` → `MockObject`, and read handler capture maps through `sceneInputHandlers()` / `scaleHandlers()` accessors instead of unsatisfiable `HubScene & { … }` intersections
+    - [x] `PwaToasts.test.ts` — type the `PwaToast` constructor mock's params and read call args through a `toastOptions(index)` guard instead of indexing an untyped tuple
+    - [x] `ProfileChip.test.ts` — fixtures passed `"Second"` (a profile *name*) where an `AvatarId` belongs; now `addProfile("dog")`
+    - [x] `InstallRow.test.ts` — two deps objects missing `overlayObjects`
+    - [x] `phaserMock.test.ts` — registry fixture typed `MockObject[]`; `storage.test.ts` — fixtures now spread `createDefaultStickers()` / `getSettings()` instead of hand-listing subsets
+    - [x] `InstallRow` / `ResetModal` deps fixtures missing `overlayObjects` / `onProgressReset`
+- [x] Task: Verify the gate — `tsc --noEmit` exits 0 and the full suite is unchanged (1,980 tests, 83 files)
 - [ ] Task: Commit (`chore(test): make the test tree typecheck cleanly with typed mock helpers`)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
