@@ -56,3 +56,7 @@
 
 - Track created 2026-10-18 from a post-v1.18.0 codebase audit (PR #41 merged).
 - Baseline: production `src/` typechecks clean; ~116 errors in `src/__tests__/` + 7 in helpers; suite 1,980 tests across 83 files.
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions 1d92468
