@@ -20,7 +20,7 @@ fix; every extraction moves code verbatim before any adjustment.
 
 ## Phase 2 — HubScene Decomposition (1,382 L)
 
-- [ ] Task: Extract `GAME_TILES` table → `src/game/hubTiles.ts` (pure data module)
+- [x] Task: Extract `GAME_TILES` table → `src/game/hubTiles.ts` (pure data module) (with `GameTile` interface + 3 contract tests; `navigation.test.ts` imports updated)
 - [ ] Task: Extract play-time session module (accrual / budget arc / nudge / lock decisions) → pure module, TDD
 - [ ] Task: Extract tile-grid rendering (paged + classic layouts) into focused module(s) with tests
 - [ ] Task: Extract profile avatar chip + toast wiring modules with tests
