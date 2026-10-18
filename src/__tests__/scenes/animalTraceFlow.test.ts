@@ -6,6 +6,7 @@ import {
   completeFadeOuts,
   getMockFn,
   mockAudio,
+  mockSpeech,
 } from "../helpers/sceneFlowHarness";
 
 /**
@@ -654,5 +655,27 @@ describe("AnimalTraceScene completion and sticker flow", () => {
     completePath(scene);
 
     expect(getMockFn(dots[0].setAlpha)).toHaveBeenCalledWith(1);
+  });
+});
+
+describe("AnimalTraceScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new AnimalTraceScene();
+    scene.create();
+
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
+    const call = textMock.mock.calls.find((c) => c[2] === "Trace the line to the animal's food.");
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(
+      "Trace the line to the animal's food.",
+      true,
+    );
   });
 });

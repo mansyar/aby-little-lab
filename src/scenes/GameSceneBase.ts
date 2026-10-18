@@ -108,7 +108,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected readonly SPEAKER_OFFSET = 70;
 
   /** Y position of the shared spoken-instruction line (clear of the progress dots). */
-  protected readonly INSTRUCTION_Y = 128;
+  protected readonly INSTRUCTION_Y = 112;
 
   /** Wrap width of the instruction line, bounding it short of the replay glyph. */
   protected readonly INSTRUCTION_WRAP_WIDTH = 620;

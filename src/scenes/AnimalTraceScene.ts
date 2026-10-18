@@ -113,6 +113,7 @@ export class AnimalTraceScene extends GameSceneBase {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+    this.createSpokenInstruction("Trace the line to the animal's food.");
 
     // Reset all per-session state so a relaunch starts a fresh round.
     this.currentPairIndex = 0;

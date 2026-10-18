@@ -5,6 +5,7 @@ import {
   completeFadeOuts,
   getMockFn,
   mockAudio,
+  mockSpeech,
   triggerAllPointerdowns,
 } from "../helpers/sceneFlowHarness";
 
@@ -635,5 +636,24 @@ describe("ShapeSorterScene completion and sticker flow", () => {
     completeFadeOuts(scene);
 
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub");
+  });
+});
+
+describe("ShapeSorterScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new ShapeSorterScene();
+    scene.create();
+
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
+    const call = textMock.mock.calls.find((c) => c[2] === "Drag each shape into its hole.");
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith("Drag each shape into its hole.", true);
   });
 });

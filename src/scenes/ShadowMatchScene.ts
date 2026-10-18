@@ -101,6 +101,7 @@ export class ShadowMatchScene extends GameSceneBase {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+    this.createSpokenInstruction("Drag each picture onto its shadow.");
 
     this.initRound();
 

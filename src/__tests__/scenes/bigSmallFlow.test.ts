@@ -5,6 +5,7 @@ import {
   completeFadeOuts,
   getMockFn,
   mockAudio,
+  mockSpeech,
 } from "../helpers/sceneFlowHarness";
 
 /**
@@ -773,5 +774,24 @@ describe("BigSmallScene completion and sticker flow", () => {
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
       justEarned: "big-small",
     });
+  });
+});
+
+describe("BigSmallScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new BigSmallScene();
+    scene.create();
+
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
+    const call = textMock.mock.calls.find((c) => c[2] === "Put the big toys in the big box.");
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith("Put the big toys in the big box.", true);
   });
 });

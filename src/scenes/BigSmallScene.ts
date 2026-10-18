@@ -108,6 +108,7 @@ export class BigSmallScene extends GameSceneBase {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+    this.createSpokenInstruction("Put the big toys in the big box.");
 
     this.initRound();
 

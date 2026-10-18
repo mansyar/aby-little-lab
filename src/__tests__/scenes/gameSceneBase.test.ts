@@ -440,7 +440,7 @@ describe("GameSceneBase scaffold", () => {
       const textMock = addMock(scene, "text");
       const call = textMock.mock.calls.at(-1);
       expect(call?.[0]).toBe(512);
-      expect(call?.[1]).toBe(128);
+      expect(call?.[1]).toBe(112);
       expect(call?.[2]).toBe(COPY);
       const label = textMock.mock.results.at(-1)?.value as Record<string, MockFn>;
       expect(getMockFn(label.setOrigin)).toHaveBeenCalledWith(0.5);
@@ -449,7 +449,7 @@ describe("GameSceneBase scaffold", () => {
       const imageMock = addMock(scene, "image");
       const glyphCall = imageMock.mock.calls.find((c) => c[2] === "icon_speaker");
       expect(glyphCall?.[0]).toBe(858);
-      expect(glyphCall?.[1]).toBe(128);
+      expect(glyphCall?.[1]).toBe(112);
       expect(getMockFn(glyph.setDisplaySize)).toHaveBeenCalledWith(96, 96);
     });
 

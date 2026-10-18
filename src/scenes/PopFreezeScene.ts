@@ -98,6 +98,7 @@ export class PopFreezeScene extends GameSceneBase {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+    this.createSpokenInstruction("Pop the bubbles, but not the sleeping animals.");
 
     this.initRound();
 

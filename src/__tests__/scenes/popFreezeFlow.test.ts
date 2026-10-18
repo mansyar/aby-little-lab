@@ -7,6 +7,7 @@ import {
   getMockFn,
   getTextObject,
   mockAudio,
+  mockSpeech,
 } from "../helpers/sceneFlowHarness";
 
 /**
@@ -633,5 +634,29 @@ describe("PopFreezeScene completion and sticker flow", () => {
     const imageCalls = getMockFn(scene.add.image).mock.calls;
     const keys = imageCalls.map((call) => call[2] as string);
     expect(keys).toContain("sticker_pop_freeze");
+  });
+});
+
+describe("PopFreezeScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new PopFreezeScene();
+    scene.create();
+
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
+    const call = textMock.mock.calls.find(
+      (c) => c[2] === "Pop the bubbles, but not the sleeping animals.",
+    );
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(
+      "Pop the bubbles, but not the sleeping animals.",
+      true,
+    );
   });
 });
