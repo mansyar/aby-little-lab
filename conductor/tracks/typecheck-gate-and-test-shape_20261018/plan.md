@@ -18,8 +18,8 @@
     - [x] `phaserMock.test.ts` — registry fixture typed `MockObject[]`; `storage.test.ts` — fixtures now spread `createDefaultStickers()` / `getSettings()` instead of hand-listing subsets
     - [x] `InstallRow` / `ResetModal` deps fixtures missing `overlayObjects` / `onProgressReset`
 - [x] Task: Verify the gate — `tsc --noEmit` exits 0 and the full suite is unchanged (1,980 tests, 83 files)
-- [ ] Task: Commit (`chore(test): make the test tree typecheck cleanly with typed mock helpers`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Commit (`chore(test): make the test tree typecheck cleanly with typed mock helpers`; commit 2617e29)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
 
 ## Phase 2 — Split `navigation.test.ts` (5,842 L)
 
