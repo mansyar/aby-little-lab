@@ -58,3 +58,7 @@ fix; every extraction moves code verbatim before any adjustment.
 ## Progress Notes
 
 - Track initialized 2026-10-18 from v1.18.0 codebase analysis.
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions (High: re-arm `swipeWired` in `HubGrid.resetForVisit()` — Phaser clears scene input listeners on shutdown, so paging gestures died after the first game; Medium: `HubGrid` shelf sticker scale now derives per sticker via `displayScale(stickerKey, STICKER_DISPLAY_SIZE)` instead of the `sticker_shape_sorter` hardcode; Medium: `ProgressOverlay` row icons scale via `displayScale(row.tileKey, 28)` instead of the avatar tier constant; 3 regression tests added; suite 1980/1980; commit 18a6197)
