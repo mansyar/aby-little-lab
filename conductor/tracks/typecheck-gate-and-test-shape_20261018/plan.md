@@ -48,7 +48,7 @@
 - [x] Task: Update `conductor/tech-stack.md` CI section with the typecheck gate and new suite layout (dated amendment + tests-tree and helpers-tree refresh)
 - [x] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot` (check 0 with the pre-existing warning; typecheck 0; 94 files / 1,982 tests; shell 176.8 kB ≤ 200 kB; PWA 15/15; boot median 1.96 s ≤ 3.0 s)
 - [x] Task: Commit (`chore(ci): add typecheck gate and document suite layout`)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 300fa46)
 
 ---
 
