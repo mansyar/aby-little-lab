@@ -23,17 +23,13 @@
 
 ## Phase 2 — Split `navigation.test.ts` (5,842 L)
 
-- [ ] Task: Extract a shared hub-scene harness (scene factory, handler accessors, storage seeding) used by all four suites
-- [ ] Task: Record the original test/assertion counts as the move baseline
-- [ ] Task: Create the four suites, moving test bodies verbatim
-    - [ ] `hubNavigation.test.ts` — hub entry, tile taps, paging, swipe, album shelf
-    - [ ] `profileSwitching.test.ts` — chip, picker, active-profile changes, per-profile shelf
-    - [ ] `settingsWiring.test.ts` — panel open/close, toggles, voices, overlays, reset
-    - [ ] `gameLaunch.test.ts` — scene launch, audio unlock, play-time, auto-return
-- [ ] Task: Delete `navigation.test.ts` only after the combined assertion count matches the baseline exactly
-- [ ] Task: Verify — full suite green, no test file above ~1,600 lines, `typecheck` still clean
-- [ ] Task: Commit (`refactor(test): split navigation suite into four focused files`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Extract a shared hub-scene harness (scene factory, handler accessors, storage seeding) used by all four suites (note: final shape approved by user was "co-locate + shared harness": `src/__tests__/helpers/sceneFlowHarness.ts` holds the 11 audio spies, speech/PWA-bridge/settings-panel/PWA-toast doubles, storage spies with `restoreStorageSpies()`, and all 24 object/tween/touch-target helpers moved verbatim; scene-registry tables live separately in `src/__tests__/helpers/gameScenes.ts` because importing scenes from a module loaded inside `vi.mock` factories deadlocks the mock graph)
+- [x] Task: Record the original test/assertion counts as the move baseline (353 tests / 701 `expect(` calls)
+- [x] Task: Create the focused suites, moving test bodies verbatim (12 files: hub integration split into `navigation.test.ts` 773 L, `hubEngagement.test.ts` 868 L, `hubPlayTime.test.ts` 412 L, plus `bootScene.test.ts` 240 L and `sceneLifecycle.test.ts` 908 L; each game's flow describes co-located with its scene suite — `shapeSorterFlow` 703, `animalTraceFlow` 720, `popFreezeFlow` 697, `shadowMatchScene` 740, `musicalMemoryFlow` 943, `patternBuilderFlow` 444, `bigSmallScene` 826 L. Largest file 943 L vs 7,013 L before)
+- [x] Task: Delete `navigation.test.ts` only after the combined assertion count matches the baseline exactly (701 = 701, and 353 = 353 tests)
+- [x] Task: Verify — full suite green, no test file above ~1,600 lines, `typecheck` still clean (94 files / 1,980 tests; `tsc --noEmit` exit 0; `biome check` clean bar the pre-existing musicalMemory warning)
+- [x] Task: Commit (`refactor(test): split navigation suite into focused scene-flow files`)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Missing Scene Suites
 
