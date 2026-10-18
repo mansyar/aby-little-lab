@@ -292,7 +292,10 @@ describe("HubScene paged grid (narrow viewports)", () => {
       width,
       height,
     };
-    for (const handler of scene.scaleHandlers.resize ?? []) handler.call(scene);
+    // The resize handler is registered with the grid as its `this` context
+    // (Phaser calls fn.call(context)), so dispatch it the same way.
+    const grid = (scene as unknown as { grid: unknown }).grid;
+    for (const handler of scene.scaleHandlers.resize ?? []) handler.call(grid);
   }
 
   it("registers a resize listener on the scale manager", () => {
@@ -357,7 +360,11 @@ describe("HubScene paged grid (narrow viewports)", () => {
       .eventsHandlers.shutdown?.[0];
     expect(shutdown).toBeDefined();
     shutdown?.();
-    expect(scene.scale.off).toHaveBeenCalledWith("resize", expect.any(Function), scene);
+    expect(scene.scale.off).toHaveBeenCalledWith(
+      "resize",
+      expect.any(Function),
+      (scene as unknown as { grid: unknown }).grid,
+    );
   });
 
   it("ignores swipes while the profile picker overlay is open", () => {

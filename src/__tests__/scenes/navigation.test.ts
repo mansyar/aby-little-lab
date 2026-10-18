@@ -153,6 +153,7 @@ function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
 }
 
 import { generatePathPoints } from "../../game/animalTraceLogic";
+import { GAME_TILES } from "../../game/hubTiles";
 import { getCorrectShape, type PatternRound } from "../../game/patternBuilderLogic";
 import { endPlaySession, startPlaySession } from "../../game/playTimeLogic";
 import { AlphabetScene } from "../../scenes/AlphabetScene";
@@ -161,7 +162,6 @@ import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { BootScene } from "../../scenes/BootScene";
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
-import { GAME_TILES } from "../../game/hubTiles";
 import { HubScene } from "../../scenes/HubScene";
 import { MoreLessScene } from "../../scenes/MoreLessScene";
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
@@ -1050,7 +1050,9 @@ describe("scene navigation flow", () => {
 
       // Switch back to p1 and re-render: shape-sorter IS earned.
       switchProfile("p1");
-      (scene as unknown as { rerenderStickerShelf: () => void }).rerenderStickerShelf();
+      (
+        scene as unknown as { grid: { rerenderStickerShelf: () => void } }
+      ).grid.rerenderStickerShelf();
 
       expect((hasSticker as MockFn).mock.results[20]?.value).toBe(true);
       expect((hasSticker as MockFn).mock.calls).toHaveLength(40);
