@@ -38,10 +38,10 @@
 
 ## Phase 4 — Docs, Gates and Device Pass
 
-- [ ] Task: Update README (per-game voice coverage note + parent-facing explanation) and `conductor/tech-stack.md` (dated amendment for the shared instruction API)
-- [ ] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot`
+- [x] Task: Update README (per-game voice coverage note + parent-facing explanation) and `conductor/tech-stack.md` (dated amendment for the shared instruction API) — README gained a "Spoken rules" paragraph listing all twenty voices, the Add It Up bullet no longer claims silence, and the touch-UX line now covers the speaker glyph in all twenty games
+- [x] Task: Run all gates: `pnpm run check` (clean, only the pre-existing musicalMemory warning + biome schema info), `pnpm typecheck` (clean), `CI=true pnpm test` (94 files / 2,001 tests), `pnpm run build` (ok, precache 41 entries), `validate-bundle` (shell 176.7 kB <= 200 kB), `validate-pwa` (15/15), `validate-boot` (median 0.96 s)
 - [ ] Task: Manual smoke on desktop + phone-scale: all ten speak once, replay works, SFX-off is silent and dimmed, no overlap
-- [ ] Task: Commit (`docs: document voice-first instructions across the suite`)
+- [x] Task: Commit (`docs: document voice-first instructions across the suite`) (commit c8a6d11)
 
 ---
 
@@ -49,4 +49,4 @@
 
 - Track created 2026-10-18 on branch `feature/voice-first-instructions` off `origin/master` (`62bdbc0`).
 - Baseline: 94 test files / 1,982 tests; `SpeakerButton` present in 10 of 20 game scenes; the other ten show no prompt at all in four cases (ShapeSorter, AnimalTrace, PopFreeze, MemoryMatch) and text-only prompts in six.
-- Environment note: this machine is heavily loaded during the pass (other Vite servers, ~27 node processes, CPU spikes). Full-suite runs intermittently report `Test timed out in 5000ms` in unrelated logic suites; every timed-out file passed when re-run alone or with `--testTimeout=30000`, so those are contention artefacts, not regressions.
+- Environment note: this machine is heavily loaded during the pass (other Vite servers, ~27 node processes, CPU spikes). Full-suite runs intermittently report `Test timed out in 5000ms` in unrelated logic suites; every timed-out file passed when re-run alone or with `--testTimeout=30000`, so those are contention artefacts, not regressions. The final green run used `--testTimeout=30000`.
