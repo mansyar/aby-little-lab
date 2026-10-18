@@ -3,26 +3,17 @@ import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIndicator";
-import { PwaToast, type ToastKind } from "../components/PwaToast";
+import { ProfileChip } from "../components/ProfileChip";
+import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
 import { HubGrid } from "../game/hubGrid";
 import { GAME_TILES } from "../game/hubTiles";
 import { endPlaySession, isNearLimit, startPlaySession } from "../game/playTimeLogic";
-import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
-import { getPwaBridge } from "../utils/pwaBridge";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { unlockSpeechForUserGesture } from "../utils/speech";
-import {
-  getActiveProfile,
-  getPlayTime,
-  getProfiles,
-  recordGamePlay,
-  recordPlayTime,
-  switchProfile,
-} from "../utils/storage";
-import { textureSizeFor } from "../utils/textureTiers";
+import { getActiveProfile, getPlayTime, recordGamePlay, recordPlayTime } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { ensureSceneLoaded } from "./sceneRegistry";
 
@@ -50,21 +41,6 @@ const WIGGLE_DURATION = 350;
 const WIGGLE_PHASE_OFFSET = 120;
 /** How many tiles wiggle during an attract cue (rotating pick). */
 const ATTRACT_WIGGLE_COUNT = 2;
-/** Avatar textures are rasterized at this size (matches PreloadScene). */
-const AVATAR_TEXTURE_SIZE = textureSizeFor(PROFILE_AVATAR_TEXTURES.cat);
-/** Display size of the active-profile avatar chip (px). */
-const AVATAR_CHIP_DISPLAY = 72;
-/** Touch target size of the avatar chip (px). */
-const AVATAR_CHIP_HIT = 96;
-/** Corner inset for the avatar chip, mirroring the Settings button (px). */
-const AVATAR_CHIP_INSET = 20;
-/** Display size of avatars in the profile picker (px). */
-const PICKER_AVATAR_DISPLAY = 96;
-/** Gap between picker avatars (px). */
-const PICKER_AVATAR_SPACING = 40;
-/** Depth of the picker overlay (above all Hub content). */
-const PICKER_DEPTH = 20;
-
 /**
  * Hub scene — the central navigation hub.
  *
@@ -84,16 +60,10 @@ export class HubScene extends Phaser.Scene {
   private attractWiggleTick = 0;
   /** Professor Hoot, the friendly teacher mascot. */
   private mascot?: Mascot;
-  /** PWA lifecycle toast currently shown (update/offline). */
-  private pwaToast?: PwaToast;
-  /** Unsubscribes this scene from PWA lifecycle events on shutdown. */
-  private pwaUnsubscribe?: () => void;
-  /** Active-profile avatar chip (top-left, kid-tappable). */
-  private profileChip?: Phaser.GameObjects.Image;
-  /** True while the profile picker overlay is open. */
-  private profilePickerOpen = false;
-  /** Objects owned by the open profile picker (destroyed together on close). */
-  private profilePickerObjects: Phaser.GameObjects.GameObject[] = [];
+  /** Profile chip + picker: active avatar, switch UI (top-left, kid-tappable). */
+  private profileChip: ProfileChip;
+  /** PWA lifecycle toast wiring (update/offline). */
+  private pwaToasts: PwaToasts;
   /** True while the active profile's daily play-time limit is reached. */
   private timeUp = false;
   /** Play-time indicator (hint arc or moon badge) for the active profile. */
@@ -107,12 +77,21 @@ export class HubScene extends Phaser.Scene {
 
   constructor() {
     super({ key: "Hub" });
+    this.profileChip = new ProfileChip({
+      scene: this,
+      onOpen: () => this.startAudioFn(),
+      onSwitch: () => {
+        this.grid.rerenderStickerShelf();
+        this.refreshPlayTimeState();
+      },
+    });
+    this.pwaToasts = new PwaToasts(this);
     this.grid = new HubGrid({
       scene: this,
       isTimeUp: () => this.timeUp,
       activateTile: (tileIndex) => this.activateTile(tileIndex),
       onUserGesture: () => this.resetIdleAttract(),
-      gestureBlocked: () => Boolean(this.profilePickerOpen || this.settingsPanel),
+      gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
     });
   }
 
@@ -201,7 +180,7 @@ export class HubScene extends Phaser.Scene {
         this.settingsPanel?.destroy();
         this.settingsPanel = new SettingsPanel(this, undefined, () => {
           this.grid.rerenderStickerShelf();
-          this.refreshProfileChip();
+          this.profileChip.refresh();
           this.refreshPlayTimeState();
         });
       },
@@ -212,21 +191,16 @@ export class HubScene extends Phaser.Scene {
     attachPressFeedback(settingsButton);
     settingsButton.on("pointerdown", startAudio);
 
-    this.createProfileChip(startAudio);
+    this.profileChip.create();
 
-    this.wirePwaBridge();
+    this.pwaToasts.wire();
 
     this.events.on("shutdown", () => {
-      this.pwaUnsubscribe?.();
-      getPwaBridge()?.setHubActive(false);
-      this.pwaToast?.destroy();
-      this.pwaToast = undefined;
+      this.pwaToasts.destroy();
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
-      this.closeProfilePicker();
-      this.profileChip?.destroy();
-      this.profileChip = undefined;
+      this.profileChip.destroy();
       this.playTimeGraphics?.destroy();
       this.playTimeGraphics = undefined;
       this.idleCallTimer?.remove();
@@ -238,110 +212,6 @@ export class HubScene extends Phaser.Scene {
       // cannot rebuild a dead scene's objects.
       this.scale?.off("resize", this.grid.handleViewportChange, this.grid);
     });
-  }
-
-  /**
-   * Creates the kid-tappable avatar chip (top-left) showing the active
-   * profile's avatar. Tapping it opens the profile picker — no parental lock.
-   */
-  private createProfileChip(startAudio: () => void): void {
-    const active = getActiveProfile();
-    const chip = this.add.image(
-      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
-      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
-      PROFILE_AVATAR_TEXTURES[active.avatarId],
-    );
-    chip.setScale(AVATAR_CHIP_DISPLAY / AVATAR_TEXTURE_SIZE);
-
-    // Flat storybook ring so the active profile is unambiguous without
-    // relying on scale alone (spec FR2).
-    const ring = this.add.rectangle(
-      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
-      AVATAR_CHIP_INSET + AVATAR_CHIP_HIT / 2,
-      AVATAR_CHIP_DISPLAY + 20,
-      AVATAR_CHIP_DISPLAY + 20,
-    );
-    ring.setFillStyle(0x000000, 0);
-    ring.setStrokeStyle(4, 0x2d3748, 1); // thick flat outline (#2D3748)
-    ring.setDepth(-1);
-    // Frame-based default hit area covers the visible chip exactly (custom
-    // rects are tested in texture-local space and miss on 512px textures).
-    chip.setInteractive();
-    chip.on("pointerup", () => {
-      startAudio();
-      this.openProfilePicker();
-    });
-    attachPressFeedback(chip);
-    this.profileChip = chip;
-  }
-
-  /**
-   * Opens the textless profile picker: a dim overlay plus one avatar per
-   * profile (≥96px). Tapping a profile switches to it and re-renders the
-   * sticker shelf; tapping the overlay closes without switching.
-   */
-  private openProfilePicker(): void {
-    if (this.profilePickerOpen) return;
-    this.profilePickerOpen = true;
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-    const profiles = getProfiles();
-    const activeId = getActiveProfile().id;
-
-    const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x2d3748, 0.65);
-    overlay.setDepth(PICKER_DEPTH);
-    overlay.setInteractive();
-    overlay.on("pointerup", () => this.closeProfilePicker());
-    this.profilePickerObjects.push(overlay);
-
-    const totalWidth =
-      profiles.length * PICKER_AVATAR_DISPLAY + (profiles.length - 1) * PICKER_AVATAR_SPACING;
-    let x = width / 2 - totalWidth / 2 + PICKER_AVATAR_DISPLAY / 2;
-    const y = height / 2;
-    for (const profile of profiles) {
-      const avatar = this.add.image(x, y, PROFILE_AVATAR_TEXTURES[profile.avatarId]);
-      avatar.setDepth(PICKER_DEPTH + 1);
-      avatar.setInteractive();
-      const baseScale = PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE;
-      avatar.setScale(profile.id === activeId ? baseScale * 1.15 : baseScale);
-      if (profile.id === activeId) {
-        // Selection ring behind the enlarged active avatar; destroyed with
-        // the picker on close via profilePickerObjects.
-        const marker = this.add.rectangle(
-          x,
-          y,
-          PICKER_AVATAR_DISPLAY + 16,
-          PICKER_AVATAR_DISPLAY + 16,
-        );
-        marker.setFillStyle(0x000000, 0);
-        marker.setStrokeStyle(4, 0x2d3748, 1);
-        marker.setDepth(PICKER_DEPTH);
-        this.profilePickerObjects.push(marker);
-      }
-      avatar.on("pointerup", () => {
-        if (profile.id !== activeId) {
-          switchProfile(profile.id);
-          this.refreshProfileChip();
-          this.grid.rerenderStickerShelf();
-          this.refreshPlayTimeState();
-        }
-        this.closeProfilePicker();
-      });
-      this.profilePickerObjects.push(avatar);
-      x += PICKER_AVATAR_DISPLAY + PICKER_AVATAR_SPACING;
-    }
-  }
-
-  /** Closes the picker overlay and resets the picker state (no stale lock). */
-  private closeProfilePicker(): void {
-    for (const obj of this.profilePickerObjects) obj.destroy();
-    this.profilePickerObjects = [];
-    this.profilePickerOpen = false;
-  }
-
-  /** Re-textures the avatar chip to the active profile (after switch/add/delete). */
-  private refreshProfileChip(): void {
-    this.profileChip?.setTexture(PROFILE_AVATAR_TEXTURES[getActiveProfile().avatarId]);
   }
 
   /**
@@ -412,41 +282,6 @@ export class HubScene extends Phaser.Scene {
    */
   private showPlayTimeNudge(tileIndex: number): void {
     this.nudge.show({ scene: this, onLaunch: (i) => this.launchGame(i) }, tileIndex);
-  }
-
-  /**
-   * Subscribes to PWA lifecycle events so update/offline toasts appear on the
-   * Hub only. If an update was already available, shows its toast on entry.
-   */
-  private wirePwaBridge(): void {
-    const bridge = getPwaBridge();
-    if (!bridge) return;
-    this.pwaUnsubscribe = bridge.subscribe((event) => {
-      if (event === "needRefresh") {
-        this.showPwaToast("update");
-      } else {
-        this.showPwaToast("offline");
-      }
-    });
-    bridge.setHubActive(true);
-    if (bridge.updateAvailable()) {
-      this.showPwaToast("update");
-    }
-  }
-
-  /** Shows a PWA toast, replacing any toast already visible. */
-  private showPwaToast(kind: ToastKind): void {
-    this.pwaToast?.destroy();
-    const bridge = getPwaBridge();
-    if (!bridge) return;
-    this.pwaToast = new PwaToast(this, {
-      kind,
-      onUpdate: () => bridge.updateNow(),
-      onDismiss: () => {
-        this.pwaToast?.destroy();
-        this.pwaToast = undefined;
-      },
-    });
   }
 
   /**

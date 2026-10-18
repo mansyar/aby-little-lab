@@ -976,7 +976,9 @@ describe("scene navigation flow", () => {
       if (!chip) throw new Error("chip not created");
       triggerPointerupOn(chip);
 
-      expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(true);
+      expect(
+        (scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen(),
+      ).toBe(true);
       // No 3s parental hold involved: the 3000ms hold callback never fired.
       expect(getMockFn(scene.time.delayedCall).mock.calls.some((call) => call[0] === 3000)).toBe(
         false,
@@ -1004,7 +1006,9 @@ describe("scene navigation flow", () => {
       triggerPointerupOn(pickerAvatar);
 
       expect(getActiveProfile().id).toBe("p1");
-      expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
+      expect(
+        (scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen(),
+      ).toBe(false);
       // Shelf re-rendered: 20 more sticker lookups after the initial 20.
       expect(hasSticker).toHaveBeenCalledTimes(40);
       // Chip re-textured to the newly active profile.
@@ -1034,7 +1038,9 @@ describe("scene navigation flow", () => {
       triggerPointerupOn(overlay);
 
       expect(getActiveProfile().id).toBe("p2");
-      expect((scene as unknown as { profilePickerOpen: boolean }).profilePickerOpen).toBe(false);
+      expect(
+        (scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen(),
+      ).toBe(false);
       expect(hasSticker).toHaveBeenCalledTimes(20);
     });
 
