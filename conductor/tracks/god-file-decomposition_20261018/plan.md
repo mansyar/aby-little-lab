@@ -33,9 +33,9 @@ fix; every extraction moves code verbatim before any adjustment.
 - [x] Task: Extract shared modal/row primitives with tests (→ `src/components/settings/primitives.ts`: `addRowCard`, `createRow` (dedupes the Profiles/Progress/Reset row shape), `createModalButton` + shared palette/constants; TDD 7 self-tests; phaserMock text factory now captures args (+1 self-test); SettingsPanel's 75 tests pass unchanged; commit 631d15d)
 - [x] Task: Extract Profiles overlay + delete-profile modal with tests (ProfilesOverlay.ts; PLAY_TIME_OPTIONS/ACTIVE_RING_SIZE/playTimeLabel moved verbatim; deps {scene, overlayObjects shared bucket, modalObjects, onProgressReset}; TDD 8 self-tests — tap() fires ALL pointerdown handlers via allHandlers (attachPressFeedback shadowed handlers.map), delete located as texts("Delete").at(-1); commit 4ba831f)
 - [x] Task: Extract Learning Progress overlay with tests (ProgressOverlay.ts 346 L — chips + viewed ring, paged rows with accuracy bars + MASTERY_STAR + relativeLastPlayed, chevrons, 7-day activity strip, adaptive-difficulty note; read-only profile switching; TDD 7 self-tests; SettingsPanel −325 lines → 590 L total, under the ~600 target; commit 1fe4eee)
-- [ ] Task: Extract Voice row, Install row, reset modal, iOS how-to overlay with tests
-- [ ] Task: Slim `SettingsPanel.ts` to composition only; verify component tests pass unchanged
-- [ ] Task: Commit (`refactor(settings): decompose SettingsPanel into overlay components`)
+- [x] Task: Extract Voice row, Install row, reset modal, iOS how-to overlay with tests (VoiceRow.ts — chip cycling + Preview + voiceChanged() re-sync; InstallRow.ts — state-aware row + iOS overlay; ResetModal.ts — two-step confirm; TDD 18 self-tests; commit 2aa5e6a)
+- [x] Task: Slim `SettingsPanel.ts` to composition only; verify component tests pass unchanged (1,245 → 293 L; retains constructor panel assembly + audio/adaptive toggles + voiceschanged wiring that delegates to VoiceRow; components 228/228, full suite 1976/1976)
+- [x] Task: Commit (`refactor(settings): decompose SettingsPanel into overlay components`; commit 2aa5e6a)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Sticker-Scale Quirk Verify & Fix
