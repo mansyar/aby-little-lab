@@ -19,7 +19,7 @@
     - [x] `InstallRow` / `ResetModal` deps fixtures missing `overlayObjects` / `onProgressReset`
 - [x] Task: Verify the gate — `tsc --noEmit` exits 0 and the full suite is unchanged (1,980 tests, 83 files)
 - [x] Task: Commit (`chore(test): make the test tree typecheck cleanly with typed mock helpers`; commit 2617e29)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 230daa5)
 
 ## Phase 2 — Split `navigation.test.ts` (5,842 L)
 
@@ -29,7 +29,7 @@
 - [x] Task: Delete `navigation.test.ts` only after the combined assertion count matches the baseline exactly (701 = 701, and 353 = 353 tests)
 - [x] Task: Verify — full suite green, no test file above ~1,600 lines, `typecheck` still clean (94 files / 1,980 tests; `tsc --noEmit` exit 0; `biome check` clean bar the pre-existing musicalMemory warning)
 - [x] Task: Commit (`refactor(test): split navigation suite into focused scene-flow files`)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 005b9a0)
 
 ## Phase 3 — Missing Scene Suites
 
