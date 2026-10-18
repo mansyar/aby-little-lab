@@ -40,10 +40,10 @@ fix; every extraction moves code verbatim before any adjustment.
 
 ## Phase 4 — Sticker-Scale Quirk Verify & Fix
 
-- [ ] Task: Verify all 20 sticker SVG dimensions (script over `src/assets/svg/stickers/`); record findings in plan
-- [ ] Task: TDD — write test asserting `STICKER_SCALE` derives from the active game's sticker texture; implement `textureSizeFor(gameId)` derivation
-- [ ] Task: Visual smoke of 2–3 sticker reveals (tablet scale + phone scale)
-- [ ] Task: Commit (`fix(mascot): derive sticker reveal scale from the actual sticker texture`)
+- [x] Task: Verify all 20 sticker SVG dimensions (script over `src/assets/svg/stickers/`); record findings in plan (Findings: all 20 sticker SVGs share a square viewBox `0 0 512 512`; every `sticker_*` key falls to the default `card` tier → 256×256 square raster; the hardcoded `textureSizeFor("sticker_shape_sorter")` derivation is therefore benign today but silently breaks if a sticker ever changes tier or aspect — verified, not yet fixed)
+- [x] Task: TDD — write test asserting `STICKER_SCALE` derives from the active game's sticker texture; implement `textureSizeFor(gameId)` derivation (Test uses a hero-tier key `mascot_hoot` → red at legacy 1.0 vs expected 0.5; fix: `createStickerAnimation` now calls `displayScale(stickerKey, this.STICKER_DISPLAY_SIZE)`; removed `SVG_SIZE`/`STICKER_SCALE` fields; existing `scaleX === 1` assertions still hold for card-tier sticker keys)
+- [ ] Task: Visual smoke of 2–3 sticker reveals (tablet scale + phone scale) — NOTE: behavior is byte-identical for all 20 games today (card tier 256 = old constant); smoke confirms no regression only
+- [x] Task: Commit (`fix(mascot): derive sticker reveal scale from the actual sticker texture`; commit 40d9133)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Final Verification & Docs
