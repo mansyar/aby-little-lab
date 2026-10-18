@@ -280,14 +280,15 @@ aby-little-lab/
         │   ├── alphabetLogic.test.ts
         │   └── wordLogic.test.ts
         │   └── moreLessLogic.test.ts
-        ├── scenes/
-        │   ├── navigation.test.ts
+        ├── scenes/                     # one suite per scene; game flows live beside their scene suite
+        │   ├── navigation.test.ts      # Preload transition + Hub entry, profile switcher, PWA toasts, mascot
+        │   ├── hubEngagement.test.ts   # tile press feedback, sticker shelf, idle attract, touch targets
+        │   ├── hubPlayTime.test.ts     # play-time limit enforcement
+        │   ├── sceneLifecycle.test.ts  # shared mascot reactions, shutdown cleanup, cross-scene touch regressions
+        │   ├── bootScene.test.ts
         │   ├── sceneRegistry.test.ts
-        │   ├── alphabetScene.test.ts
-        │   ├── wordMatchScene.test.ts
-        │   ├── wordBuilderScene.test.ts
-        │   └── firstWordsIntegration.test.ts
-        │   └── moreLessScene.test.ts
+        │   ├── <game>Scene.test.ts     # scene-level suite per game (bigSmallScene, shadowMatchScene, …)
+        │   └── <game>Flow.test.ts      # drag/drop/completion flows (shapeSorterFlow, animalTraceFlow, …)
         └── utils/
             ├── storage.test.ts
             ├── motion.test.ts
@@ -299,6 +300,8 @@ aby-little-lab/
         helpers/                       # Shared test doubles (imported by 20+ suites)
         ├── phaserMock.ts              # MockScene + createMockGameObject + module mock factory (+ self-tests)
         ├── matchMediaStub.ts          # Stateful matchMedia stub keyed on the reduced-motion query (+ self-tests)
+        ├── sceneFlowHarness.ts        # Scene-flow doubles: audio/speech/PWA/storage spies + object & tween helpers
+        ├── gameScenes.ts              # GAME_SCENES / GAME_SCENE_KEYS tables (kept out of the harness to avoid mock cycles)
         ├── pressFeedback.ts
         └── hitTest.ts
 ```
@@ -314,6 +317,8 @@ aby-little-lab/
 > **2026-10-17 — CI/CD Amendment (Coolify webhook GET → POST):** Coolify changed the deploy webhook endpoint to POST-only — the GET trigger started returning `405 {"message":"This endpoint has changed to a POST request."}` (observed on the v1.18.0 tag-push deploy, run 38914924934; Bearer auth unchanged). `.github/workflows/ci.yml` now triggers with `--request POST`.
 
 > **2026-10-18 — CI/CD Amendment (Boot-Time Gate):** New `scripts/validate-boot.js` wired into CI quality gates after `pnpm run build` (alongside `validate-bundle.js` and `validate-pwa.js`). Method: serves the production build via `vite preview`, then runs 3 fresh-browser-context cold loads; each sample is the Navigation Timing duration after the game canvas mounts + 5s settle. Gate = **median ≤ 3000 ms** (product boot budget), failing with exit 1. The script does not spawn its own server (spawning from the measuring process destabilized CDP on Windows) — CI starts `vite preview` as a separate background step first; locally, serve `dist/` then run `node scripts/validate-boot.js`. Local medians at introduction: 0.63–1.75 s (pre-track baseline 2036 ms).
+
+> **2026-10-18 — CI/CD Amendment (Typecheck Gate + Test Suite Shape):** `package.json` gained `typecheck` (`tsc --noEmit`, the existing strict config over `src`), run as its own CI step between `pnpm run check` and the tests. It is a separate step rather than folded into `check` so a type failure is distinguishable from a lint failure in the PR checks. Enabling it meant fixing ~116 pre-existing errors that only ever lived in `src/__tests__/` (production `src/` was already clean): the root cause of most was `MockFn = ReturnType<typeof vi.fn>`, which instantiates Vitest's generic with its full `Procedure | Constructable` constraint and yields a non-callable `Mock<Constructable | Procedure>` — now `ReturnType<typeof vi.fn<(...args: any[]) => any>>`. `MatchMediaStub` became a type alias with `setReducedMotion` attached via `Object.assign`. `@ts-nocheck`, `any` casts and blanket `as` suppressions are disallowed in tests; fixtures were fixed properly instead (avatar ids, missing `overlayObjects`, complete sticker/settings objects, guarded tuple access). Same change shrank the 7,013-line `navigation.test.ts` into 12 focused files (353 tests / 701 assertions preserved exactly): hub integration in `navigation` / `hubEngagement` / `hubPlayTime`, lifecycle in `sceneLifecycle` / `bootScene`, and each game's drag/drop/completion flows co-located beside its scene suite (`<game>Flow.test.ts`). Shared plumbing moved to `src/__tests__/helpers/sceneFlowHarness.ts`; the scene table lives separately in `helpers/gameScenes.ts` because a harness that imports scenes deadlocks the `vi.mock` graph (harness → scene → mocked module → harness). Largest test file is now ~950 L, suite 1,982 tests across 94 files.
 
 > **2026-08-06 — Design Update (Shape Sorter Variety & Multi-Round):** Game 1 shape pool expanded 6 → 18 shapes (12 new hand-authored geometric shapes: oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring, teardrop — each with its own distinct soft/vibrant color) plus 12 matching `cutout_*` SVGs, all in `src/assets/svg/shapes/` (no separate cutouts folder). Preload SVG count 118 → 142 (24 new `?raw` imports + `SHAPE_ASSETS` entries; `SHAPE_ASSETS` is now exported for testability). Sessions became 3 rounds × 3 shapes — `generatePlaythrough(roundCount)` in `src/game/shapeSorterLogic.ts` shuffles the 18-pool once and slices 3 per round (9 unique shapes per session, difficulty fixed); `ShapeSorterScene` renders 3 progress dots above the slots that fill with a 1 → 1.4 → 1 `Back.out` pop on round completion, tears down and re-inits rounds after ~1.2s, and gates the win/sticker/auto-return to the final round. Pattern Builder is intentionally unaffected (its `SHAPE_TEXTURES` map still uses the original 6 shape textures). New scene tests: `src/__tests__/scenes/shapeSorterScene.test.ts` (8 tests); navigation suite updated for round-aware completion.
 
