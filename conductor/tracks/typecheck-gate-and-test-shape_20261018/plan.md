@@ -36,9 +36,9 @@
 - [ ] Task: `BigSmallScene` suite — round progression, win/lose paths, adaptive band application
 - [ ] Task: `ShadowMatchScene` suite — matching taps, wrong-answer feedback, completion reveal
 - [ ] Task: `BootScene` suite — `create()` routes to Preload with a fade, first-gesture audio unlock, reduced-motion path
-- [ ] Task: Verify — new suites green, coverage thresholds still met
+- [x] Task: Verify — new suites green, coverage thresholds still met (BigSmallScene + ShadowMatchScene 100%/100%/100%, BootScene 100%; full suite 94 files / 1,982 tests; 	sc clean; iome check clean bar the pre-existing warning)
 - [ ] Task: Commit (`test(scenes): cover Big Small, Shadow Match and Boot flows`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — CI Gate, Docs & Final Verification
 
