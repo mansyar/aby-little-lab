@@ -184,7 +184,7 @@ aby-little-lab/
     ├── scenes/
     │   ├── BootScene.ts
     │   ├── PreloadScene.ts
-    │   ├── HubScene.ts
+    │   ├── HubScene.ts             # Hub composition shell (~370 L): owns mascot/decor/settings/play-time wiring; tile grid, profile chip and PWA toasts live in dedicated modules
     │   ├── GameSceneBase.ts         # Shared scaffold for all 20 game scenes (back button, mascot, progress dots, win/sticker/auto-return)
     │   ├── ShapeSorterScene.ts
     │   ├── AnimalTraceScene.ts
@@ -207,7 +207,19 @@ aby-little-lab/
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   ├── ParentLock.ts
-    │   └── SettingsPanel.ts
+    │   ├── SpeakerButton.ts       # Shared replay control (96px hit area)
+    │   ├── ProfileChip.ts         # Avatar chip + profile picker overlay
+    │   ├── PlayTimeIndicator.ts   # Budget arc/moon badge + full-screen nudge
+    │   ├── PwaToast.ts            # Single update/offline toast banner
+    │   ├── PwaToasts.ts           # PWA bridge subscription + toast lifecycle
+    │   ├── SettingsPanel.ts       # Parental panel composition shell (~293 L)
+    │   └── settings/
+    │       ├── primitives.ts      # Row/button builders, toggle + shared colors/sizes
+    │       ├── ProfilesOverlay.ts # Profile manager (add / play-time cycle / delete confirm)
+    │       ├── ProgressOverlay.ts # Per-profile learning report (paged rows, accuracy, 7-day strip)
+    │       ├── ResetModal.ts      # Two-step sticker reset
+    │       ├── VoiceRow.ts        # TTS voice chip + preview
+    │       └── InstallRow.ts      # Install prompt / iOS how-to overlay
     ├── audio/
     │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis
     ├── game/
@@ -224,7 +236,10 @@ aby-little-lab/
     │   ├── firstSoundsLogic.ts    # Pure game logic (phonics pool, first-letter rounds, win detection)
     │   ├── moreLessLogic.ts       # Pure game logic (quantity comparison, more/less rounds, win detection)
     │   ├── colorMatchLogic.ts     # Pure game logic (color pools, 4-card rounds, swatch target, win detection)
-    │   └── oddOneOutLogic.ts      # Pure game logic (odd-one-out pools, bands, round/playthrough generation, evaluation)
+    │   ├── oddOneOutLogic.ts      # Pure game logic (odd-one-out pools, bands, round/playthrough generation, evaluation)
+    │   ├── hubTiles.ts            # Hub tile metadata (single source of truth for the 20 tiles: gameId, label, texture, icon sizing)
+    │   ├── hubPaging.ts           # Narrow-viewport paging math (page count, slot geometry, page tile indexes)
+    │   └── hubGrid.ts             # Hub tile-grid renderer: wide/paged build, swipe + dot paging, sticker shelf, time-up lock
     ├── utils/
     │   ├── storage.ts             # localStorage persistence layer
     │   ├── motion.ts              # reduced-motion helpers (isReducedMotion, durations, scales)
@@ -281,6 +296,11 @@ aby-little-lab/
             ├── sceneTransitions.test.ts
             ├── speech.test.ts
             └── completionEffect.test.ts
+        helpers/                       # Shared test doubles (imported by 20+ suites)
+        ├── phaserMock.ts              # MockScene + createMockGameObject + module mock factory (+ self-tests)
+        ├── matchMediaStub.ts          # Stateful matchMedia stub keyed on the reduced-motion query (+ self-tests)
+        ├── pressFeedback.ts
+        └── hitTest.ts
 ```
 
 ## 8. CI/CD
@@ -296,6 +316,8 @@ aby-little-lab/
 > **2026-10-18 — CI/CD Amendment (Boot-Time Gate):** New `scripts/validate-boot.js` wired into CI quality gates after `pnpm run build` (alongside `validate-bundle.js` and `validate-pwa.js`). Method: serves the production build via `vite preview`, then runs 3 fresh-browser-context cold loads; each sample is the Navigation Timing duration after the game canvas mounts + 5s settle. Gate = **median ≤ 3000 ms** (product boot budget), failing with exit 1. The script does not spawn its own server (spawning from the measuring process destabilized CDP on Windows) — CI starts `vite preview` as a separate background step first; locally, serve `dist/` then run `node scripts/validate-boot.js`. Local medians at introduction: 0.63–1.75 s (pre-track baseline 2036 ms).
 
 > **2026-08-06 — Design Update (Shape Sorter Variety & Multi-Round):** Game 1 shape pool expanded 6 → 18 shapes (12 new hand-authored geometric shapes: oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring, teardrop — each with its own distinct soft/vibrant color) plus 12 matching `cutout_*` SVGs, all in `src/assets/svg/shapes/` (no separate cutouts folder). Preload SVG count 118 → 142 (24 new `?raw` imports + `SHAPE_ASSETS` entries; `SHAPE_ASSETS` is now exported for testability). Sessions became 3 rounds × 3 shapes — `generatePlaythrough(roundCount)` in `src/game/shapeSorterLogic.ts` shuffles the 18-pool once and slices 3 per round (9 unique shapes per session, difficulty fixed); `ShapeSorterScene` renders 3 progress dots above the slots that fill with a 1 → 1.4 → 1 `Back.out` pop on round completion, tears down and re-inits rounds after ~1.2s, and gates the win/sticker/auto-return to the final round. Pattern Builder is intentionally unaffected (its `SHAPE_TEXTURES` map still uses the original 6 shape textures). New scene tests: `src/__tests__/scenes/shapeSorterScene.test.ts` (8 tests); navigation suite updated for round-aware completion.
+
+> **2026-10-18 — Design Update (God-File Decomposition):** `HubScene` (1,382 → 370 L) and `SettingsPanel` (1,245 → 293 L) reduced to composition shells with byte-identical behavior. Hub: tile data → `src/game/hubTiles.ts` (20 entries, `alphabet-match` keeps its historic `tile_alphabet` texture), tile-grid rendering/paging/swipe/sticker shelf/time-up lock → `src/game/hubGrid.ts` (injected `HubGridDeps`: `isTimeUp`, `activateTile`, `onUserGesture`, `gestureBlocked`), avatar chip + picker → `ProfileChip.ts`, PWA bridge subscription/toasts → `PwaToasts.ts`, play-time arc/badge/nudge → `PlayTimeIndicator.ts`. Settings: shared row/button/toggle/constants → `components/settings/primitives.ts`; Profiles, Learning Progress, reset confirmation, Voice row and Install row each extracted to their own module sharing the panel's `overlayObjects` / `modalObjects` buckets (mutual-close semantics preserved). Rule of thumb now enforced: no file under `src/scenes` or `src/components` above ~600 L. Also fixed a latent quirk: `GameSceneBase` derived the sticker reveal scale from `textureSizeFor("sticker_shape_sorter")` for all 20 games; it now derives from the sticker actually revealed via `displayScale(stickerKey, STICKER_DISPLAY_SIZE)` (identical output today — every sticker is card-tier 256 of a 512 viewBox — but correct if any sticker changes tier). Test suites stopped hand-rolling their own Phaser mock and `matchMedia` stub: `src/__tests__/helpers/phaserMock.ts` + `matchMediaStub.ts` replace ~4,800 lines of duplicated inline mocks across 22 suites (194 tests removed; total suite 1,977 green).
 
 > **2026-08-06 — Design Update (SVG Visual Polish):** All 142 SVGs in `src/assets/svg/` redrawn to the "Storybook Flat" quality bar (flat fills, `#2D3748` 4–6px outlines, soft-vibrant palette, silhouette-first) across 9 phases + 2 user-feedback rounds. `docs/SVG_STYLE.md` added as the asset style source of truth, with a contact-sheet renderer (`scripts/render-svg-contact-sheets.mjs`) and rendered sheets in `docs/svg-contact-sheets/`. Per user decision (Phase 9d), the 26 letter + 10 numeral SVGs were **reverted** to system-font Arial `<text>` versions (bold 400px, `#2B6CB0` fill, `#2D3748` 14px stroke, `paint-order="stroke fill"`) — custom-path letterforms are not to be reintroduced without product sign-off; stroked-text metrics are retained for sticker/tile accents only. No file renames/deletions (filenames = texture keys), no TS/source changes; 979/979 tests green.
 

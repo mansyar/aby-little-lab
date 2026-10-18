@@ -73,14 +73,14 @@ public/
 src/
 ├── main.ts                # Phaser game config & shell scene register (game scenes lazy-loaded)
 ├── scenes/                # BootScene, PreloadScene, HubScene (shell) + 20 lazy-loaded game scenes + sceneRegistry (dynamic-import loaders)
-├── components/            # ParentLock and SettingsPanel parental modal, Mascot (Professor Hoot, tween-only reactions), SpeakerButton (shared replay control)
+├── components/            # Shell UI: Mascot (Professor Hoot, tween-only reactions), SpeakerButton (shared replay control), ParentLock, ProfileChip (avatar chip + picker), PlayTimeIndicator (budget arc/nudge), PwaToasts (update/offline), PwaToast; settings/ holds the parental panel decomposed into SettingsPanel (composition) + primitives (rows/buttons/constants) + ProfilesOverlay, ProgressOverlay, ResetModal, VoiceRow, InstallRow
 ├── audio/                 # AudioManager (BGM/SFX + frog note & gameplay SFX synthesis)
-├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, countLogic, firstSoundsLogic, moreLessLogic, oddOneOutLogic, colorMatchLogic, addItUpLogic, takeAwayLogic, memoryMatchLogic, decodeLogic, numberOrderLogic, adaptiveLogic, profileLogic, playTimeLogic, progressLogic, voiceLogic: round generation, sequence memory, band ladders with ±1 adaptive shifts, profile CRUD, per-profile daily play-time budgets, progress windows)
+├── game/                  # Pure game logic (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic, alphabetLogic, wordLogic, countLogic, firstSoundsLogic, moreLessLogic, oddOneOutLogic, colorMatchLogic, addItUpLogic, takeAwayLogic, memoryMatchLogic, decodeLogic, numberOrderLogic, adaptiveLogic, profileLogic, playTimeLogic, progressLogic, voiceLogic: round generation, sequence memory, band ladders with ±1 adaptive shifts, profile CRUD, per-profile daily play-time budgets, progress windows) + hub modules (hubTiles tile metadata, hubPaging page math, hubGrid tile-grid rendering & gestures)
 ├── types/                 # Shared interfaces (GameId, StickerData, Settings, PlayTime, AppStorage, Profile, ProfileV2)
 ├── utils/                 # Motion & feedback (motion, sceneTransitions, completionEffect, pressFeedback, dragJuice) + typography (typography.ts) + settings pinch-zoom (viewportZoom.ts) + localStorage CRUD (storage.ts) + letter/word TTS (speech.ts)
 ├── assets/                # SVG assets bundled into the game (incl. ui/tiles/ tile icons, icon_speaker, sleep_zzz)
 ├── styles/                # Global CSS (@font-face for Baloo 2)
-└── __tests__/             # Unit tests (audio, components, game, scenes, utils)
+└── __tests__/             # Unit tests (audio, components, game, scenes, utils) + helpers/ (shared Phaser scene mock, matchMedia stub, press feedback & hit-test doubles)
 ```
 
 ## Mini-Games

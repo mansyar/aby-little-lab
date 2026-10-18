@@ -1,22 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { attachPressFeedback } from "../../utils/pressFeedback";
-
-const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-
-/** Stubs window.matchMedia so tests can simulate reduced-motion preferences. */
-function stubMatchMedia(matches: boolean): void {
-  const matchMedia = vi.fn().mockImplementation((query: string) => ({
-    matches: query === REDUCED_MOTION_QUERY ? matches : false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  }));
-  vi.stubGlobal("matchMedia", matchMedia);
-}
+import { stubMatchMedia } from "../helpers/matchMediaStub";
 
 interface MockControl {
   scaleX: number;

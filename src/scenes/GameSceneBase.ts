@@ -12,7 +12,7 @@ import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { transitionToScene } from "../utils/sceneTransitions";
 import { earnSticker, hasSticker, recordGameResult } from "../utils/storage";
-import { textureSizeFor } from "../utils/textureTiers";
+import { displayScale } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
 /**
@@ -87,12 +87,6 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
   /** Display size of the sticker image in the unlock animation. */
   protected readonly STICKER_DISPLAY_SIZE = 256;
-
-  /** Original SVG texture size (used for scale calculations). */
-  protected readonly SVG_SIZE = textureSizeFor("sticker_shape_sorter");
-
-  /** Target scale for the sticker image (display size / texture size). */
-  protected readonly STICKER_SCALE = this.STICKER_DISPLAY_SIZE / this.SVG_SIZE;
 
   /** Duration of sticker reveal animation (ms). */
   protected readonly WIN_TWEEN_DURATION = 300;
@@ -227,8 +221,8 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
     this.tweens.add({
       targets: stickerImage,
-      scaleX: this.STICKER_SCALE,
-      scaleY: this.STICKER_SCALE,
+      scaleX: displayScale(stickerKey, this.STICKER_DISPLAY_SIZE),
+      scaleY: displayScale(stickerKey, this.STICKER_DISPLAY_SIZE),
       duration: motionDuration(this.WIN_TWEEN_DURATION, 180),
       delay: motionDuration(400, 250),
       ease: "Back.out",

@@ -1,0 +1,10 @@
+{
+  "trackId": "god-file-decomposition_20261018",
+  "type": "refactor",
+  "status": "new",
+  "createdAt": "2026-10-18",
+  "updatedAt": "2026-10-18",
+  "branch": "refactor/god-file-decomposition",
+  "spec": "./spec.md",
+  "plan": "./plan.md"
+}
