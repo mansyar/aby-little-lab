@@ -26,7 +26,7 @@ fix; every extraction moves code verbatim before any adjustment.
 - [x] Task: Extract profile avatar chip + toast wiring modules with tests (→ `src/components/ProfileChip.ts` (chip + textless picker, 150 L, TDD 5 self-tests) and `src/components/PwaToasts.ts` (bridge subscription + update/offline toasts, 50 L, TDD 4 self-tests); navigation.test.ts: 3 mechanical seam updates reading `profileChip.isOpen()` instead of the removed `profilePickerOpen` field)
 - [x] Task: Slim `HubScene.ts` to orchestration only; verify `hubScene.test.ts` + `navigation.test.ts` pass unchanged (HubScene 1,246 → 370 lines; two mechanical seam adjustments where tests dispatched the resize handler with the scene as `this` (context is now the grid) and one direct `rerenderStickerShelf` call in navigation.test.ts; full suite 1926/1926, check clean)
 - [x] Task: Commit (`refactor(hub): decompose HubScene into focused modules`) (grid extraction ab2f21c; chip/toast extraction 91ea28b; suite now 1935/1935 across 77 files, biome check clean — only the pre-existing musicalMemory warning)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) [checkpoint: d21fbd8]
 
 ## Phase 3 — SettingsPanel Decomposition (1,245 L)
 
