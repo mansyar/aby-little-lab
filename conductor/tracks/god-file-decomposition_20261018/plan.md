@@ -51,7 +51,7 @@ fix; every extraction moves code verbatim before any adjustment.
 - [x] Task: Run all gates: `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot` (check clean — 1 pre-existing warning; CI suite 1977/1977 across 83 files; build ok phaser 1342.6 kB / shell 176.7 kB; bundle PASS ≤ 200 kB; PWA 15/15 incl. BGM precache; boot median 1.72 s over 3 cold loads ≤ 3.0 s)
 - [x] Task: Update README Project Structure section for the new module layout (components/ incl. settings/ subdir + ProfileChip/PlayTimeIndicator/PwaToasts; game/ hub modules; __tests__/helpers/; commit 6521fc9)
 - [x] Task: Full manual smoke pass (hub paging on narrow viewport, all Settings overlays, game round + sticker reveal) (approved by user — paging/swipe, profile chip, all Settings overlays, voice preview, sticker reveal all verified)
-- [x] Task: Commit docs + final checkpoint (checkpoint: pending)
+- [x] Task: Commit docs + final checkpoint (checkpoint: f6b0e6a)
 
 ---
 
