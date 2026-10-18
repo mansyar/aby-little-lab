@@ -1,30 +1,15 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
-import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
-import {
-  formatAccuracyPercent,
-  getAccuracy,
-  isMastered,
-  relativeLastPlayed,
-} from "../game/progressLogic";
 import { availableVoiceOptions, type VoiceOption } from "../game/voiceLogic";
-import type { GameId } from "../types";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
 import { setPreferredVoiceURI, speakWord } from "../utils/speech";
-import {
-  getActiveProfile,
-  getProfiles,
-  getProgress,
-  getSettings,
-  resetProgress,
-  updateSettings,
-} from "../utils/storage";
+import { getSettings, resetProgress, updateSettings } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
 import { ProfilesOverlay } from "./settings/ProfilesOverlay";
+import { ProgressOverlay } from "./settings/ProgressOverlay";
 import {
-  AVATAR_TEXTURE_SIZE,
   addRowCard,
   BACKDROP_ALPHA,
   BACKDROP_COLOR,
@@ -55,57 +40,6 @@ import {
 const VOICE_PREVIEW_TEXT = "Hi! I can talk.";
 /** Longest voice label shown in the chip before truncation. */
 const VOICE_LABEL_MAX = 24;
-/** Game rows shown per page in the Learning Progress overlay. */
-const PROGRESS_PAGE_SIZE = 6;
-/** Vertical pitch between progress rows (two text lines each). */
-const PROGRESS_ROW_PITCH = 56;
-/** Center-relative Y of the first progress row. */
-const PROGRESS_ROW_START_Y = -150;
-/** Center-relative Y of the 7-day activity strip label. */
-const PROGRESS_STRIP_LABEL_Y = 230;
-/** Center-relative Y of the 7-day activity bars. */
-const PROGRESS_STRIP_Y = 265;
-/** Width of one activity bar. */
-const PROGRESS_BAR_WIDTH = 24;
-/** Number of day bars in the 7-day activity strip. */
-const PROGRESS_BAR_COUNT = 7;
-/** Height of the tallest activity bar. */
-const PROGRESS_BAR_HEIGHT = 36;
-/** Horizontal gap between activity bars. */
-const PROGRESS_BAR_GAP = 6;
-/** Track color for the per-game accuracy bar. */
-const ACCURACY_TRACK_COLOR = 0xe8e0d0;
-/** Fill color for the per-game accuracy bar. */
-const ACCURACY_FILL_COLOR = 0x68d391;
-/** Mastery badge shown next to games with at least 3 wins. */
-const MASTERY_STAR = "★";
-/** Outline ring behind the viewed profile chip in Learning Progress. */
-const VIEWED_RING_SIZE = 80;
-
-/** The 20 games in hub order, for the Learning Progress report rows. */
-const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
-  { gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
-  { gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
-  { gameId: "pop-freeze", label: "Pop & Freeze", tileKey: "tile_pop_freeze" },
-  { gameId: "shadow-match", label: "Shadow Match", tileKey: "tile_shadow_match" },
-  { gameId: "musical-memory", label: "Musical Memory", tileKey: "tile_musical_memory" },
-  { gameId: "big-small", label: "Big & Small", tileKey: "tile_big_small" },
-  { gameId: "pattern-builder", label: "Pattern Builder", tileKey: "tile_pattern_builder" },
-  { gameId: "alphabet-match", label: "Find the Letter", tileKey: "tile_alphabet" },
-  { gameId: "word-match", label: "Find the Word", tileKey: "tile_word_match" },
-  { gameId: "word-builder", label: "Build the Word", tileKey: "tile_word_builder" },
-  { gameId: "how-many", label: "How Many?", tileKey: "tile_how_many" },
-  { gameId: "first-sounds", label: "First Sounds", tileKey: "tile_first_sounds" },
-  { gameId: "more-less", label: "More or Less", tileKey: "tile_more_less" },
-  { gameId: "odd-one-out", label: "Odd One Out", tileKey: "tile_odd_one_out" },
-  { gameId: "color-match", label: "Color Match", tileKey: "tile_color_match" },
-  { gameId: "add-it-up", label: "Add It Up", tileKey: "tile_add_it_up" },
-  { gameId: "take-away", label: "Take Away", tileKey: "tile_take_away" },
-  { gameId: "memory-match", label: "Memory Match", tileKey: "tile_memory_match" },
-  { gameId: "decode-it", label: "Decode It", tileKey: "tile_decode_it" },
-  { gameId: "number-order", label: "Number Order", tileKey: "tile_number_order" },
-];
-
 /** Truncates a long voice label for the narrow chip, e.g. "en-US — Goog…". */
 function truncateLabel(label: string, max = VOICE_LABEL_MAX): string {
   return label.length <= max ? label : `${label.slice(0, max - 1)}…`;
@@ -117,16 +51,13 @@ export class SettingsPanel {
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly modalObjects: Phaser.GameObjects.GameObject[] = [];
+  private readonly progressOverlay: ProgressOverlay;
   private readonly profilesOverlay: ProfilesOverlay;
   private readonly installTracker: InstallTracker;
   private resetRowText: Phaser.GameObjects.Text | null = null;
   private voiceChip: Phaser.GameObjects.Text | null = null;
   private voiceOptions: VoiceOption[] = [];
   private voiceIndex = 0;
-  /** Current page (0-based) of the Learning Progress overlay. */
-  private progressPage = 0;
-  /** Profile whose report is shown; null means the active profile. */
-  private progressProfileId: string | null = null;
   private readonly onProgressReset?: () => void;
 
   /** Rebuilds the voice picker list when the platform loads voices late. */
@@ -165,6 +96,7 @@ export class SettingsPanel {
       modalObjects: this.modalObjects,
       onProgressReset: () => this.onProgressReset?.(),
     });
+    this.progressOverlay = new ProgressOverlay({ scene, overlayObjects: this.overlayObjects });
     this.installTracker =
       installTracker ??
       createInstallTracker({
@@ -479,260 +411,9 @@ export class SettingsPanel {
     );
   }
 
-  /**
-   * Opens the per-profile Learning Progress report: profile switcher, paged
-   * per-game rows (plays, accuracy bar + %, mastery star, last played), and
-   * the 7-day activity strip. Read-only: switching the viewed profile never
-   * changes the active profile.
-   */
+  /** Delegates to the extracted ProgressOverlay component. */
   private openProgressOverlay(): void {
-    this.closeProgressOverlay();
-    this.progressPage = 0;
-    this.progressProfileId = getActiveProfile().id;
-    this.renderProgressOverlay();
-  }
-
-  /** Renders (or re-renders) the Learning Progress overlay content. */
-  private renderProgressOverlay(): void {
-    this.closeProgressOverlay();
-    const { width, height } = this.scene.cameras.main;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const viewedId = this.progressProfileId ?? getActiveProfile().id;
-    const progress = getProgress(viewedId);
-
-    const backdrop = this.scene.add
-      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
-      .setInteractive();
-    backdrop.on("pointerdown", () => this.closeProgressOverlay());
-    this.overlayObjects.push(backdrop);
-    this.overlayObjects.push(
-      this.scene.add
-        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
-        .setStrokeStyle(4, OUTLINE_COLOR),
-    );
-    this.overlayObjects.push(
-      this.scene.add
-        .text(
-          centerX,
-          centerY - 250,
-          "Learning Progress",
-          textStyle({
-            color: "#2d3748",
-            fontSize: "36px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-
-    const close = this.scene.add
-      .text(
-        centerX + PANEL_WIDTH / 2 - 32,
-        centerY - 250,
-        "X",
-        textStyle({
-          color: "#2d3748",
-          fontSize: "32px",
-        }),
-      )
-      .setOrigin(0.5);
-    close.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_HEIGHT / 2,
-        -TOGGLE_HEIGHT / 2,
-        TOGGLE_HEIGHT,
-        TOGGLE_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    close.on("pointerdown", () => this.closeProgressOverlay());
-    this.overlayObjects.push(close);
-
-    const profiles = getProfiles();
-    profiles.forEach((profile, index) => {
-      const x = centerX + (index - (profiles.length - 1) / 2) * 56;
-      // Persistent outline marks the profile being viewed (never color alone).
-      if (profile.id === viewedId) {
-        const ring = this.scene.add.rectangle(x, centerY - 195, VIEWED_RING_SIZE, VIEWED_RING_SIZE);
-        ring.setStrokeStyle(4, OUTLINE_COLOR, 1);
-        this.overlayObjects.push(ring);
-      }
-      const chip = this.scene.add.image(
-        x,
-        centerY - 195,
-        PROFILE_AVATAR_TEXTURES[profile.avatarId],
-      );
-      chip.setScale(64 / AVATAR_TEXTURE_SIZE);
-      chip.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      chip.on("pointerdown", () => {
-        if (profile.id !== viewedId) {
-          this.progressProfileId = profile.id;
-          this.renderProgressOverlay();
-        }
-      });
-      attachPressFeedback(chip);
-      this.overlayObjects.push(chip);
-    });
-
-    const pageStart = this.progressPage * PROGRESS_PAGE_SIZE;
-    const pageEnd = Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_GAME_ROWS.length);
-    for (let i = pageStart; i < pageEnd; i += 1) {
-      const row = PROGRESS_GAME_ROWS[i];
-      const y = centerY + PROGRESS_ROW_START_Y + (i - pageStart) * PROGRESS_ROW_PITCH;
-      const game = progress[row.gameId];
-      const accuracy = getAccuracy(game);
-
-      const icon = this.scene.add.image(centerX - 182, y, row.tileKey);
-      icon.setScale(28 / AVATAR_TEXTURE_SIZE);
-      this.overlayObjects.push(icon);
-
-      const name = this.scene.add
-        .text(
-          centerX - 158,
-          y,
-          `${isMastered(game) ? `${MASTERY_STAR} ` : ""}${row.label}`,
-          textStyle({
-            color: "#2d3748",
-            fontSize: "30px",
-          }),
-        )
-        .setOrigin(0, 0.5);
-      this.overlayObjects.push(name);
-
-      const stats = this.scene.add
-        .text(
-          centerX - 158,
-          y + 26,
-          `${game.plays} plays · ${formatAccuracyPercent(game)} · ${relativeLastPlayed(game.lastPlayedAt)}`,
-          textStyle({
-            color: PRIMARY_COLOR,
-            fontSize: "26px",
-          }),
-        )
-        .setOrigin(0, 0.5);
-      this.overlayObjects.push(stats);
-
-      const track = this.scene.add.rectangle(centerX + 130, y, 120, 10, ACCURACY_TRACK_COLOR);
-      this.overlayObjects.push(track);
-      if (accuracy !== null) {
-        const fill = this.scene.add.rectangle(
-          centerX + 70 + (accuracy * 120) / 2,
-          y,
-          Math.max(2, Math.round(accuracy * 120)),
-          10,
-          ACCURACY_FILL_COLOR,
-        );
-        this.overlayObjects.push(fill);
-      }
-    }
-
-    const pageCount = Math.ceil(PROGRESS_GAME_ROWS.length / PROGRESS_PAGE_SIZE);
-    this.overlayObjects.push(
-      this.scene.add
-        .text(
-          centerX - 20,
-          centerY + 175,
-          `${this.progressPage + 1} / ${pageCount}`,
-          textStyle({
-            color: DISABLED_COLOR,
-            fontSize: "30px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-
-    /**
-     * Adds one explicit page-navigation chevron. The handler stays registered
-     * at the bounds but no-ops, so the affordance never disappears while the
-     * dimmed styling signals that the edge is reached.
-     */
-    const addPageChevron = (glyph: string, x: number, delta: number): void => {
-      const enabled = delta < 0 ? this.progressPage > 0 : this.progressPage + 1 < pageCount;
-      const chevron = this.scene.add
-        .text(
-          x,
-          centerY + 175,
-          glyph,
-          textStyle({
-            color: enabled ? PRIMARY_COLOR : DISABLED_COLOR,
-            fontSize: "40px",
-          }),
-        )
-        .setOrigin(0.5);
-      chevron.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      chevron.on("pointerdown", () => {
-        const nextPage = this.progressPage + delta;
-        if (nextPage < 0 || nextPage >= pageCount) return;
-        this.progressPage = nextPage;
-        this.renderProgressOverlay();
-      });
-      attachPressFeedback(chevron);
-      this.overlayObjects.push(chevron);
-    };
-    addPageChevron("‹", centerX - 110, -1);
-    addPageChevron("›", centerX + 110, 1);
-
-    const activity = getProfiles().find((profile) => profile.id === viewedId)?.activity ?? [];
-    const totalPlays = activity.reduce((sum, entry) => sum + entry.plays, 0);
-    this.overlayObjects.push(
-      this.scene.add
-        .text(
-          centerX,
-          centerY + PROGRESS_STRIP_LABEL_Y,
-          `Last 7 days · ${totalPlays} plays`,
-          textStyle({
-            color: "#2d3748",
-            fontSize: "30px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-    const maxPlays = Math.max(1, ...activity.map((entry) => entry.plays));
-    const startX =
-      centerX - ((PROGRESS_BAR_COUNT - 1) * (PROGRESS_BAR_WIDTH + PROGRESS_BAR_GAP)) / 2;
-    for (let i = 0; i < PROGRESS_BAR_COUNT; i += 1) {
-      const entry = activity[i];
-      const plays = entry?.plays ?? 0;
-      const barHeight =
-        plays === 0 ? 4 : Math.max(10, Math.round((PROGRESS_BAR_HEIGHT * plays) / maxPlays));
-      this.overlayObjects.push(
-        this.scene.add.rectangle(
-          startX + i * (PROGRESS_BAR_WIDTH + PROGRESS_BAR_GAP),
-          centerY + PROGRESS_STRIP_Y,
-          PROGRESS_BAR_WIDTH,
-          barHeight,
-          ACCURACY_FILL_COLOR,
-        ),
-      );
-    }
-
-    // Static parent-facing note: difficulty bands adapt to recent accuracy.
-    // Child-facing game UIs stay textless; this lives only where parents read.
-    this.overlayObjects.push(
-      this.scene.add
-        .text(
-          centerX,
-          centerY + 320,
-          "Difficulty adapts to your kid's recent answers · disable in Settings",
-          textStyle({
-            color: DISABLED_COLOR,
-            fontSize: "20px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-  }
-
-  /** Destroys the Learning Progress overlay (not the panel). */
-  private closeProgressOverlay(): void {
-    for (const object of this.overlayObjects) object.destroy();
-    this.overlayObjects.length = 0;
+    this.progressOverlay.open();
   }
 
   /**
