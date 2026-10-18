@@ -196,3 +196,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: God-File Decomposition — HubScene & SettingsPanel** *Link: [./archive/god-file-decomposition_20261018/index.md](./archive/god-file-decomposition_20261018/index.md)* (Archived)
+
+---
+
+- [ ] **Track: Typecheck Gate + Test Suite Shape** *Link: [./tracks/typecheck-gate-and-test-shape_20261018/index.md](./tracks/typecheck-gate-and-test-shape_20261018/index.md)*

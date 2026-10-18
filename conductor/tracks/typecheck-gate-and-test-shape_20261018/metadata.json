@@ -1,0 +1,10 @@
+{
+  "trackId": "typecheck-gate-and-test-shape_20261018",
+  "type": "chore",
+  "status": "new",
+  "createdAt": "2026-10-18",
+  "updatedAt": "2026-10-18",
+  "branch": "chore/typecheck-gate-and-test-shape",
+  "spec": "./spec.md",
+  "plan": "./plan.md"
+}
