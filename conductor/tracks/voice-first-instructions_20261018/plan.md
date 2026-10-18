@@ -54,3 +54,7 @@
 - Track created 2026-10-18 on branch `feature/voice-first-instructions` off `origin/master` (`62bdbc0`).
 - Baseline: 94 test files / 1,982 tests; `SpeakerButton` present in 10 of 20 game scenes; the other ten show no prompt at all in four cases (ShapeSorter, AnimalTrace, PopFreeze, MemoryMatch) and text-only prompts in six.
 - Environment note: this machine is heavily loaded during the pass (other Vite servers, ~27 node processes, CPU spikes). Full-suite runs intermittently report `Test timed out in 5000ms` in unrelated logic suites; every timed-out file passed when re-run alone or with `--testTimeout=30000`, so those are contention artefacts, not regressions. The final green run used `--testTimeout=30000`.
+
+## Phase: Review Fixes
+
+- [~] Task: Apply review suggestions

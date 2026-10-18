@@ -34,6 +34,9 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
   /** Replay glyph created by {@link createSpokenInstruction}; destroyed on shutdown. */
   private instructionSpeaker?: SpeakerButton;
+
+  /** Instruction line created by {@link createSpokenInstruction}; destroyed with the glyph. */
+  private instructionLabel?: Phaser.GameObjects.Text;
   protected readonly audioManager: AudioManager;
   protected progressDots: Phaser.GameObjects.Arc[] = [];
   protected inputLocked = false;
@@ -197,9 +200,11 @@ export abstract class GameSceneBase extends Phaser.Scene {
       )
       .setOrigin(0.5);
 
-    // Scene instances are reused across visits: drop any glyph from the
-    // previous visit before wiring a fresh one.
+    // Scene instances are reused across visits: drop the previous prompt (line
+    // plus glyph) before wiring a fresh one.
+    this.instructionLabel?.destroy();
     this.instructionSpeaker?.destroy();
+    this.instructionLabel = label;
     this.instructionSpeaker = new SpeakerButton(
       this,
       centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
@@ -308,6 +313,8 @@ export abstract class GameSceneBase extends Phaser.Scene {
       this.mascot = undefined;
       this.speaker?.destroy();
       this.speaker = undefined;
+      this.instructionLabel?.destroy();
+      this.instructionLabel = undefined;
       this.instructionSpeaker?.destroy();
       this.instructionSpeaker = undefined;
     });

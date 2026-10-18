@@ -511,6 +511,21 @@ describe("GameSceneBase scaffold", () => {
 
       expect(getMockFn(glyph.destroy)).toHaveBeenCalled();
     });
+
+    it("replaces the previous prompt when called again on the same scene", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+      const firstLabel = addMock(scene, "text").mock.results[0]?.value as MockObject;
+      const firstGlyph = instructionGlyph(scene);
+
+      scene.testCreateSpokenInstruction("A different rule.");
+
+      expect(getMockFn(firstLabel.destroy)).toHaveBeenCalled();
+      expect(getMockFn(firstGlyph.destroy)).toHaveBeenCalled();
+      expect(
+        addMock(scene, "text").mock.calls.filter((c) => c[2] === "A different rule."),
+      ).toHaveLength(1);
+    });
   });
 
   describe("registerShutdownCleanup", () => {
