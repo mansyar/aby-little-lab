@@ -44,7 +44,7 @@ fix; every extraction moves code verbatim before any adjustment.
 - [x] Task: TDD — write test asserting `STICKER_SCALE` derives from the active game's sticker texture; implement `textureSizeFor(gameId)` derivation (Test uses a hero-tier key `mascot_hoot` → red at legacy 1.0 vs expected 0.5; fix: `createStickerAnimation` now calls `displayScale(stickerKey, this.STICKER_DISPLAY_SIZE)`; removed `SVG_SIZE`/`STICKER_SCALE` fields; existing `scaleX === 1` assertions still hold for card-tier sticker keys)
 - [ ] Task: Visual smoke of 2–3 sticker reveals (tablet scale + phone scale) — NOTE: behavior is byte-identical for all 20 games today (card tier 256 = old constant); smoke confirms no regression only
 - [x] Task: Commit (`fix(mascot): derive sticker reveal scale from the actual sticker texture`; commit 40d9133)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 0d9b68b)
 
 ## Phase 5 — Final Verification & Docs
 
