@@ -517,6 +517,21 @@ describe("BigSmallScene drag and drop", () => {
     expect(shrinkTween?.[0]?.ease).toBe("Sine.in");
   });
 
+  it("follows the pointer while a toy is dragged", () => {
+    const scene = new BigSmallScene();
+    scene.create();
+
+    const toy = getToys(scene)[0];
+    const dragCallbacks = getMockFn(toy.obj.on)
+      .mock.calls.filter((c) => c[0] === "drag")
+      .map((c) => c[1] as (pointer: unknown, x: number, y: number) => void);
+    expect(dragCallbacks.length).toBeGreaterThan(0);
+
+    for (const callback of dragCallbacks) callback(null, 420, 500);
+
+    expect(getMockFn(toy.obj.setPosition)).toHaveBeenCalledWith(420, 500);
+  });
+
   it("does not restore the drag-lift scale for a toy that was sorted", () => {
     const scene = new BigSmallScene();
     scene.create();

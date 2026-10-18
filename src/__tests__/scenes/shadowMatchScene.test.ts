@@ -352,6 +352,21 @@ describe("ShadowMatchScene drag and drop", () => {
     expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
   });
 
+  it("follows the pointer while an object is dragged", () => {
+    const scene = new ShadowMatchScene();
+    scene.create();
+
+    const object = getObjects(scene)[0];
+    const dragCallbacks = getMockFn(object.obj.on)
+      .mock.calls.filter((c) => c[0] === "drag")
+      .map((c) => c[1] as (pointer: unknown, x: number, y: number) => void);
+    expect(dragCallbacks.length).toBeGreaterThan(0);
+
+    for (const callback of dragCallbacks) callback(null, 300, 450);
+
+    expect(getMockFn(object.obj.setPosition)).toHaveBeenCalledWith(300, 450);
+  });
+
   it("lifts and tilts the object on drag start and restores it on drag end", () => {
     const scene = new ShadowMatchScene();
     scene.create();
