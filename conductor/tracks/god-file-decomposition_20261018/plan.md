@@ -21,7 +21,7 @@ fix; every extraction moves code verbatim before any adjustment.
 ## Phase 2 — HubScene Decomposition (1,382 L)
 
 - [x] Task: Extract `GAME_TILES` table → `src/game/hubTiles.ts` (pure data module) (with `GameTile` interface + 3 contract tests; `navigation.test.ts` imports updated)
-- [x] Task: Extract play-time session module (accrual / budget arc / nudge / lock decisions) → pure module, TDD (accrual and budget decisions already live in `src/game/playTimeLogic.ts`; extracted the remaining Phaser-coupled presentation — hint arc, moon badge, nudge overlay — into `src/components/PlayTimeIndicator.ts`, TDD, 7 self-tests green)
+- [x] Task: Extract play-time session module (accrual / budget arc / nudge / lock decisions) → pure module, TDD (accrual and budget decisions already live in `src/game/playTimeLogic.ts`; extracted the remaining Phaser-coupled presentation — hint arc, moon badge, nudge overlay — into `src/components/PlayTimeIndicator.ts`, TDD, 7 self-tests green; committed with 057aa26, HubScene wiring [32d6561]; HubScene now 1,168 lines)
 - [ ] Task: Extract tile-grid rendering (paged + classic layouts) into focused module(s) with tests
 - [ ] Task: Extract profile avatar chip + toast wiring modules with tests
 - [ ] Task: Slim `HubScene.ts` to orchestration only; verify `hubScene.test.ts` + `navigation.test.ts` pass unchanged
