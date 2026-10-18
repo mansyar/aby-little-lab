@@ -15,6 +15,7 @@
     - Reuse `SpeakerButton`, `textStyle`, `load().settings.sfxEnabled`, `speakInstruction`-style gating
 - [x] Task: Verify tests pass and the ten existing speaking games are untouched (no edits to their files) — targeted suites 54/54 green, tsc clean, biome clean; no speaking-game file touched
 - [x] Task: Commit (`feat(scenes): add shared spoken-instruction helper to GameSceneBase`) (commit 82817e5)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — verified by the helper + speech suites (54/54), `tsc` and biome clean; full-tree gates re-run at Phase 4 (no per-phase note: the phase's evidence is its commit)
 
 ## Phase 2 — Drag-and-Drop Five
 
@@ -25,6 +26,7 @@
 - [x] Task: Pop & Freeze — instruction at the shared band; bubbles drift anywhere, so this is the one game where the prompt can be overlapped in motion
 - [x] Task: Verify — every suite asserts the copy is rendered and `speakSentence(copy, true)` fired on create; the shared helper's own tests cover replay and the muted/off state. Targeted runs 54/54 (helper) and 121/121 (five flows); tsc clean; biome clean
 - [x] Task: Commit (`feat(scenes): speak the rule in the drag-and-drop five`) (commit b6ed833)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — verified by the five flow suites (121/121), `tsc` and biome clean; full-tree gates re-run at Phase 4
 
 ## Phase 3 — Reasoning Five
 
@@ -35,13 +37,15 @@
 - [x] Task: Take Away — same as Add It Up
 - [x] Task: Verify — each suite asserts copy + auto-speak; the instruction is created once in `create()` (outside `renderRound`), so round rebuilds never re-speak. Targeted runs 76/76 across the five; tsc clean; biome clean
 - [x] Task: Commit (`feat(scenes): speak the rule in the reasoning five`) (commit f6546c8)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — verified by the five reasoning suites (76/76), `tsc` and biome clean; full-tree gates re-run at Phase 4
 
 ## Phase 4 — Docs, Gates and Device Pass
 
 - [x] Task: Update README (per-game voice coverage note + parent-facing explanation) and `conductor/tech-stack.md` (dated amendment for the shared instruction API) — README gained a "Spoken rules" paragraph listing all twenty voices, the Add It Up bullet no longer claims silence, and the touch-UX line now covers the speaker glyph in all twenty games
 - [x] Task: Run all gates: `pnpm run check` (clean, only the pre-existing musicalMemory warning + biome schema info), `pnpm typecheck` (clean), `CI=true pnpm test` (94 files / 2,001 tests), `pnpm run build` (ok, precache 41 entries), `validate-bundle` (shell 176.7 kB <= 200 kB), `validate-pwa` (15/15), `validate-boot` (median 0.96 s)
-- [ ] Task: Manual smoke on desktop + phone-scale: all ten speak once, replay works, SFX-off is silent and dimmed, no overlap
+- [x] Task: Manual smoke on desktop + phone-scale: all ten speak once, replay works, SFX-off is silent and dimmed, no overlap — approved by user on the local dev server
 - [x] Task: Commit (`docs: document voice-first instructions across the suite`) (commit c8a6d11)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
 
 ---
 
