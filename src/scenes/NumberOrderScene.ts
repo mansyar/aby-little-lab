@@ -61,6 +61,7 @@ export class NumberOrderScene extends GameSceneBase {
     this.createCornerMascot();
     this.createBackButton();
     this.createProgressDots(ROUND_COUNT);
+    this.createSpokenInstruction("Put the numbers in order, smallest first.");
 
     this.rounds = buildPlaythrough(getAdaptiveBandShift("number-order"));
     this.roundIndex = 0;

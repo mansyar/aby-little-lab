@@ -150,7 +150,12 @@ describe("MemoryMatchScene round flow", () => {
     const faces = new Map<string, Array<Record<string, MockFn>>>();
     for (let i = 0; i < imageMock.mock.calls.length; i++) {
       const key = imageMock.mock.calls[i][2];
-      if (typeof key !== "string" || key === "mascot_idle" || key === "card_back") {
+      if (
+        typeof key !== "string" ||
+        key === "mascot_idle" ||
+        key === "card_back" ||
+        key === "icon_speaker"
+      ) {
         continue;
       }
       const img = imageMock.mock.results[i].value as Record<string, MockFn>;
@@ -659,5 +664,21 @@ describe("adaptive band shift wiring", () => {
     const scene = new MemoryMatchScene();
     scene.create();
     expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+  });
+});
+
+describe("MemoryMatchScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows the rule when the round starts", () => {
+    const scene = new MemoryMatchScene();
+    scene.create();
+
+    const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add
+      .text;
+    const call = addText.mock.calls.find((c) => c[2] === "Turn over two cards to find a pair.");
+    expect(call).toBeDefined();
   });
 });

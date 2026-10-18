@@ -95,6 +95,7 @@ export class PatternBuilderScene extends GameSceneBase {
     // Reset per-session state so a relaunch starts with fresh progress dots.
     this.progressDots.length = 0;
     this.createProgressDots(ROUND_COUNT);
+    this.createSpokenInstruction("Pick the shape that finishes the pattern.");
 
     this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("pattern-builder"));
     this.roundIndex = 0;

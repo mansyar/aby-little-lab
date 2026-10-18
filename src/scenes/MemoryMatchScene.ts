@@ -84,6 +84,7 @@ export class MemoryMatchScene extends GameSceneBase {
     this.createCornerMascot();
     this.createBackButton();
     this.createProgressDots(ROUND_COUNT);
+    this.createSpokenInstruction("Turn over two cards to find a pair.");
 
     this.rounds = buildPlaythrough(getAdaptiveBandShift("memory-match"));
     this.roundIndex = 0;

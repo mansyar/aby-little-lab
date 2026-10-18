@@ -49,6 +49,7 @@ vi.mock("../../components/ParentLock", () => ({
 const { mockSpeech } = vi.hoisted(() => ({
   mockSpeech: {
     speakNumber: vi.fn(() => true),
+    speakSentence: vi.fn(() => true),
     speakWord: vi.fn(() => true),
     isSpeechSupported: vi.fn(() => true),
     onSpeechLifecycle: vi.fn(() => vi.fn()),
@@ -515,5 +516,30 @@ describe("NumberOrderScene interactions", () => {
       cards[0],
     );
     expect(tweens.mock.calls.length).toBe(before);
+  });
+});
+
+describe("NumberOrderScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new NumberOrderScene();
+    scene.create();
+
+    const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add
+      .text;
+    const call = addText.mock.calls.find(
+      (c) => c[2] === "Put the numbers in order, smallest first.",
+    );
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(
+      "Put the numbers in order, smallest first.",
+      true,
+    );
   });
 });

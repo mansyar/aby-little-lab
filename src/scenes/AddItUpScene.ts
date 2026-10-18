@@ -72,9 +72,7 @@ export class AddItUpScene extends GameSceneBase {
     this.createCornerMascot();
     this.createBackButton();
     this.createProgressDots(ROUND_COUNT);
-
-    // No speaker button — the target is read from the visible dots, so there
-    // is nothing to speak; the game is fully playable without audio.
+    this.createSpokenInstruction("Add the groups and pick the total.");
 
     this.rounds = buildPlaythrough(getAdaptiveBandShift("add-it-up"));
     this.roundIndex = 0;
