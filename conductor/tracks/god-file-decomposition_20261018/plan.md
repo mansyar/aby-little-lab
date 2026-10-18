@@ -22,9 +22,9 @@ fix; every extraction moves code verbatim before any adjustment.
 
 - [x] Task: Extract `GAME_TILES` table → `src/game/hubTiles.ts` (pure data module) (with `GameTile` interface + 3 contract tests; `navigation.test.ts` imports updated)
 - [x] Task: Extract play-time session module (accrual / budget arc / nudge / lock decisions) → pure module, TDD (accrual and budget decisions already live in `src/game/playTimeLogic.ts`; extracted the remaining Phaser-coupled presentation — hint arc, moon badge, nudge overlay — into `src/components/PlayTimeIndicator.ts`, TDD, 7 self-tests green; committed with 057aa26, HubScene wiring [32d6561]; HubScene now 1,168 lines)
-- [ ] Task: Extract tile-grid rendering (paged + classic layouts) into focused module(s) with tests
+- [x] Task: Extract tile-grid rendering (paged + classic layouts) into focused module(s) with tests (→ `src/game/hubGrid.ts`, `HubGrid` class owning wide 5x4 / paged 5x2 layouts, page dots, swipe gestures, sticker shelf, entrance/breathe/sparkle animation; scene supplies orchestration via `HubGridDeps` callbacks; TDD 10 self-tests green)
 - [ ] Task: Extract profile avatar chip + toast wiring modules with tests
-- [ ] Task: Slim `HubScene.ts` to orchestration only; verify `hubScene.test.ts` + `navigation.test.ts` pass unchanged
+- [x] Task: Slim `HubScene.ts` to orchestration only; verify `hubScene.test.ts` + `navigation.test.ts` pass unchanged (HubScene 1,246 → 497 lines; two mechanical seam adjustments where tests dispatched the resize handler with the scene as `this` (context is now the grid) and one direct `rerenderStickerShelf` call in navigation.test.ts; full suite 1926/1926, check clean)
 - [ ] Task: Commit (`refactor(hub): decompose HubScene into focused modules`)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
