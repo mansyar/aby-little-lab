@@ -38,7 +38,7 @@
 - [x] Task: `BootScene` suite — `create()` routes to Preload with a fade, first-gesture audio unlock, reduced-motion path (covered by `bootScene.test.ts` from the split: Preload transition, glyph-font wait, orientation lock + rejection + missing API, AudioManager init, stored TTS voice, 100% lines/branches; gesture audio unlock belongs to Hub and is covered in `hubEngagement.test.ts`)
 - [x] Task: Verify — new suites green, coverage thresholds still met (Big Small and Shadow Match scenes at 100% lines/functions/branches, Boot at 100%; full suite 94 files / 1,982 tests; typecheck clean; biome clean bar the pre-existing warning)
 - [x] Task: Commit (`test(scenes): cover Big Small, Shadow Match and Boot flows`; commit 1983ea7)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 14be3a4)
 
 ## Phase 4 — CI Gate, Docs & Final Verification
 
