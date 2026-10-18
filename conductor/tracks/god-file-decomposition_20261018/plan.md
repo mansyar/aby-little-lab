@@ -16,7 +16,7 @@ fix; every extraction moves code verbatim before any adjustment.
 - [x] Task: Migrate the ~15 scene test files to the shared helpers; delete duplicated stubs (21 phaser-mock files + 22 matchMedia-stub files migrated; whole-window stubs in navigation/SettingsPanel.test/dragJuice intentionally kept — they stub `window`, not `matchMedia` alone)
 - [x] Task: Verify full suite green + coverage ≥ thresholds (`CI=true pnpm test`) (1906/1906 pass, 72 files; coverage stmts 97.94 / branch 89.21 / funcs 97.25 / lines 98.81 — all above thresholds; `biome check` at pre-existing warning level only)
 - [x] Task: Commit (`refactor(test): extract shared matchMedia stub + Phaser mock helpers`) [0d4834e]
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (suite + coverage + biome verified; user approved checkpoint)
 
 ## Phase 2 — HubScene Decomposition (1,382 L)
 
