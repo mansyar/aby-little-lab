@@ -103,6 +103,10 @@ class TestScene extends GameSceneBase {
     this.completeGame(gameId);
   }
 
+  testCreateStickerAnimation(stickerKey: string): void {
+    this.createStickerAnimation(stickerKey);
+  }
+
   testRegisterShutdownCleanup(): void {
     this.registerShutdownCleanup();
   }
@@ -356,6 +360,23 @@ describe("GameSceneBase scaffold", () => {
       scene.testCompleteGame("first-sounds");
       const imageMock = getMockFn(scene.add.image);
       expect(imageMock.mock.calls.some((c) => c[2] === "sticker_first_sounds")).toBe(true);
+    });
+
+    it("derives the reveal scale from the passed sticker texture's tier", () => {
+      const scene = new TestScene();
+      // "mascot_hoot" is a hero-tier key (512 px raster); a correct derivation
+      // scales 256 px display to 0.5, not the legacy constant 1.0.
+      scene.testCreateStickerAnimation("mascot_hoot");
+      const imageMock = getMockFn(scene.add.image);
+      const created = imageMock.mock.results.at(-1)?.value as Record<string, MockFn>;
+      expect(getMockFn(created.setScale)).toHaveBeenCalledWith(0);
+      const revealTween = getMockFn(scene.tweens.add).mock.calls.find((call) => {
+        const t = call[0]?.targets;
+        return Array.isArray(t) ? t.includes(created) : t === created;
+      });
+      expect(revealTween).toBeDefined();
+      expect(revealTween?.[0].scaleX).toBeCloseTo(0.5);
+      expect(revealTween?.[0].scaleY).toBeCloseTo(0.5);
     });
   });
 
