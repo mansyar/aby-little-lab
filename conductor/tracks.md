@@ -199,4 +199,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Typecheck Gate + Test Suite Shape** *Link: [./tracks/typecheck-gate-and-test-shape_20261018/index.md](./tracks/typecheck-gate-and-test-shape_20261018/index.md)*
+- [~] **Track: Typecheck Gate + Test Suite Shape** *Link: [./tracks/typecheck-gate-and-test-shape_20261018/index.md](./tracks/typecheck-gate-and-test-shape_20261018/index.md)*
