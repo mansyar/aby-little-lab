@@ -30,7 +30,7 @@ fix; every extraction moves code verbatim before any adjustment.
 
 ## Phase 3 — SettingsPanel Decomposition (1,245 L)
 
-- [ ] Task: Extract shared modal/row primitives with tests
+- [x] Task: Extract shared modal/row primitives with tests (→ `src/components/settings/primitives.ts`: `addRowCard`, `createRow` (dedupes the Profiles/Progress/Reset row shape), `createModalButton` + shared palette/constants; TDD 7 self-tests; phaserMock text factory now captures args (+1 self-test); SettingsPanel's 75 tests pass unchanged; commit 631d15d)
 - [ ] Task: Extract Profiles overlay + delete-profile modal with tests
 - [ ] Task: Extract Learning Progress overlay with tests
 - [ ] Task: Extract Voice row, Install row, reset modal, iOS how-to overlay with tests
