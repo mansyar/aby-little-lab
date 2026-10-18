@@ -176,6 +176,14 @@ describe("MockScene", () => {
     expect(img.args).toEqual(["sticker", 5, 6]);
   });
 
+  it("captures text args too", () => {
+    const scene = new MockScene();
+
+    const label = scene.add.text(512, 384, "Settings", { fontSize: "36px" });
+
+    expect(label.args).toEqual([512, 384, "Settings", { fontSize: "36px" }]);
+  });
+
   it("exposes the 1024x768 canvas metrics", () => {
     const scene = new MockScene();
 

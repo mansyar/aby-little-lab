@@ -25,26 +25,36 @@ import {
   setPlayTimeLimit,
   updateSettings,
 } from "../utils/storage";
-import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
+import {
+  AVATAR_TEXTURE_SIZE,
+  addRowCard,
+  BACKDROP_ALPHA,
+  BACKDROP_COLOR,
+  createModalButton,
+  createRow,
+  DANGER_COLOR,
+  DISABLED_COLOR,
+  ENABLED_COLOR,
+  OUTLINE_COLOR,
+  OVERLAY_ALPHA,
+  PANEL_COLOR,
+  PANEL_HEIGHT,
+  PANEL_WIDTH,
+  PRIMARY_COLOR,
+  ROW_HEIGHT,
+  TOGGLE_HEIGHT,
+  TOGGLE_KNOB_COLOR,
+  TOGGLE_KNOB_OFFSET,
+  TOGGLE_KNOB_SIZE,
+  TOGGLE_TRACK_HEIGHT,
+  TOGGLE_TRACK_OFF_COLOR,
+  TOGGLE_TRACK_ON_COLOR,
+  TOGGLE_TRACK_WIDTH,
+  TOGGLE_WIDTH,
+} from "./settings/primitives";
 
-const BACKDROP_COLOR = 0x000000;
-const BACKDROP_ALPHA = 0.6;
-const OVERLAY_ALPHA = 0.75;
-const PANEL_COLOR = 0xfff8e7;
-const OUTLINE_COLOR = 0x2d3748;
-const ENABLED_COLOR = "#68d391";
-const DISABLED_COLOR = "#a0aec0";
-const PRIMARY_COLOR = "#2b6cb0";
-const DANGER_COLOR = "#fc8181";
-const PANEL_WIDTH = 480;
-const PANEL_HEIGHT = 760;
-const TOGGLE_WIDTH = 240;
-const TOGGLE_HEIGHT = 96;
-const ROW_HEIGHT = 64;
-/** Avatar textures are rasterized at this size (matches PreloadScene). */
-const AVATAR_TEXTURE_SIZE = textureSizeFor(PROFILE_AVATAR_TEXTURES.cat);
 /** Daily play-time limit options cycled by the per-profile chip (null = Off). */
 const PLAY_TIME_OPTIONS: ReadonlyArray<number | null> = [null, 15, 30, 45, 60];
 /** Sample phrase spoken by the voice preview button. */
@@ -75,30 +85,10 @@ const ACCURACY_TRACK_COLOR = 0xe8e0d0;
 const ACCURACY_FILL_COLOR = 0x68d391;
 /** Mastery badge shown next to games with at least 3 wins. */
 const MASTERY_STAR = "★";
-/** Background card behind each main-panel settings row. */
-const ROW_CARD_WIDTH = 400;
-const ROW_CARD_HEIGHT = 68;
-/** Slightly deeper cream than the panel so rows read as tappable. */
-const ROW_CARD_COLOR = 0xf6efdd;
-/** Toggle switch presentation: a track plus a knob whose side encodes state. */
-const TOGGLE_TRACK_WIDTH = 64;
-const TOGGLE_TRACK_HEIGHT = 32;
-const TOGGLE_KNOB_SIZE = 24;
-/** Knob center offset from the track center when on/off. */
-const TOGGLE_KNOB_OFFSET = 16;
-const TOGGLE_TRACK_ON_COLOR = 0x68d391;
-const TOGGLE_TRACK_OFF_COLOR = 0xa0aec0;
-const TOGGLE_KNOB_COLOR = 0xfff8e7;
 /** Outline ring behind the viewed profile chip in Learning Progress. */
 const VIEWED_RING_SIZE = 80;
 /** Outline ring behind the active profile row in the Profiles manager. */
 const ACTIVE_RING_SIZE = 112;
-/** Emphasized confirm-button card in modals (destructive or primary). */
-const MODAL_BUTTON_WIDTH = 240;
-const MODAL_BUTTON_HEIGHT = 64;
-/** Numeric twins of the CSS danger/primary colors for shape strokes. */
-const DANGER_HEX = 0xfc8181;
-const PRIMARY_HEX = 0x2b6cb0;
 
 /** The 20 games in hub order, for the Learning Progress report rows. */
 const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
@@ -288,13 +278,6 @@ export class SettingsPanel {
     restorePinchZoom();
   }
 
-  /** Draws the flat background card behind one settings row. */
-  private addRowCard(x: number, y: number): void {
-    const card = this.scene.add.rectangle(x, y, ROW_CARD_WIDTH, ROW_CARD_HEIGHT, ROW_CARD_COLOR);
-    card.setStrokeStyle(2, OUTLINE_COLOR, 1);
-    this.objects.push(card);
-  }
-
   /**
    * Creates one inflated, touch-friendly settings toggle: a labeled row card
    * plus a track-and-knob switch whose knob side encodes the state (never
@@ -309,7 +292,7 @@ export class SettingsPanel {
     enabled: boolean,
     onChange?: (nextEnabled: boolean) => void,
   ): Phaser.GameObjects.Text {
-    this.addRowCard(x, y);
+    addRowCard(this.scene, x, y, this.objects);
 
     const switchX = x + 170;
     const track = this.scene.add.rectangle(
@@ -386,7 +369,7 @@ export class SettingsPanel {
   private createInstallRow(x: number, y: number): void {
     const state = this.installTracker.getState();
     if (state === "hidden") return;
-    this.addRowCard(x, y);
+    addRowCard(this.scene, x, y, this.objects);
 
     const label = state === "installable" ? "Install App" : "How to Install";
     const button = this.scene.add
@@ -427,7 +410,7 @@ export class SettingsPanel {
    */
   private createVoiceRow(x: number, y: number): void {
     this.syncVoiceSelection();
-    this.addRowCard(x, y);
+    addRowCard(this.scene, x, y, this.objects);
 
     const chip = this.scene.add
       .text(
@@ -490,58 +473,16 @@ export class SettingsPanel {
 
   /** Adds the parental "Profiles" row that opens the profile manager overlay. */
   private createProfilesRow(x: number, y: number): void {
-    this.addRowCard(x, y);
-    const row = this.scene.add
-      .text(
-        x,
-        y,
-        "Profiles",
-        textStyle({
-          color: PRIMARY_COLOR,
-          fontSize: "32px",
-        }),
-      )
-      .setOrigin(0.5);
-    row.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH,
-        ROW_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    row.on("pointerdown", () => this.openProfilesOverlay());
-    attachPressFeedback(row);
-    this.objects.push(row);
+    createRow(this.scene, x, y, this.objects, "Profiles", PRIMARY_COLOR, () =>
+      this.openProfilesOverlay(),
+    );
   }
 
   /** Adds the parental "Progress" row that opens the Learning Progress overlay. */
   private createProgressRow(x: number, y: number): void {
-    this.addRowCard(x, y);
-    const row = this.scene.add
-      .text(
-        x,
-        y,
-        "Progress",
-        textStyle({
-          color: PRIMARY_COLOR,
-          fontSize: "32px",
-        }),
-      )
-      .setOrigin(0.5);
-    row.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH,
-        ROW_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    row.on("pointerdown", () => this.openProgressOverlay());
-    attachPressFeedback(row);
-    this.objects.push(row);
+    createRow(this.scene, x, y, this.objects, "Progress", PRIMARY_COLOR, () =>
+      this.openProgressOverlay(),
+    );
   }
 
   /**
@@ -960,8 +901,14 @@ export class SettingsPanel {
     }
 
     this.overlayObjects.push(
-      this.createModalButton(centerX, centerY + 220, "Close", PRIMARY_COLOR, () =>
-        this.closeProfilesOverlay(),
+      createModalButton(
+        this.scene,
+        centerX,
+        centerY + 220,
+        this.overlayObjects,
+        "Close",
+        PRIMARY_COLOR,
+        () => this.closeProfilesOverlay(),
       ),
     );
   }
@@ -1015,9 +962,11 @@ export class SettingsPanel {
         .setOrigin(0.5),
     );
     this.modalObjects.push(
-      this.createModalButton(
+      createModalButton(
+        this.scene,
         centerX,
         centerY + 45,
+        this.overlayObjects,
         "Cancel",
         PRIMARY_COLOR,
         () => this.closeDeleteProfileModal(),
@@ -1025,9 +974,11 @@ export class SettingsPanel {
       ),
     );
     this.modalObjects.push(
-      this.createModalButton(
+      createModalButton(
+        this.scene,
         centerX,
         centerY + 125,
+        this.overlayObjects,
         "Delete",
         DANGER_COLOR,
         () => this.confirmDeleteProfile(profileId),
@@ -1150,31 +1101,15 @@ export class SettingsPanel {
 
   /** Adds the parental "Reset Progress" row that clears all stickers. */
   private createResetRow(x: number, y: number): void {
-    this.addRowCard(x, y);
-    const row = this.scene.add
-      .text(
-        x,
-        y,
-        "Reset Progress",
-        textStyle({
-          color: DANGER_COLOR,
-          fontSize: "32px",
-        }),
-      )
-      .setOrigin(0.5);
-    row.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH,
-        ROW_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    row.on("pointerdown", () => this.showResetModal());
-    attachPressFeedback(row);
-    this.resetRowText = row;
-    this.objects.push(row);
+    this.resetRowText = createRow(
+      this.scene,
+      x,
+      y,
+      this.objects,
+      "Reset Progress",
+      DANGER_COLOR,
+      () => this.showResetModal(),
+    );
   }
 
   /** Shows the two-step "Reset all stickers?" confirmation modal. */
@@ -1220,71 +1155,28 @@ export class SettingsPanel {
         .setOrigin(0.5),
     );
     this.overlayObjects.push(
-      this.createModalButton(centerX, centerY + 45, "Cancel", PRIMARY_COLOR, () =>
-        this.closeResetModal(),
+      createModalButton(
+        this.scene,
+        centerX,
+        centerY + 45,
+        this.overlayObjects,
+        "Cancel",
+        PRIMARY_COLOR,
+        () => this.closeResetModal(),
       ),
     );
     this.overlayObjects.push(
-      this.createModalButton(
+      createModalButton(
+        this.scene,
         centerX,
         centerY + 125,
+        this.overlayObjects,
         "Reset",
         DANGER_COLOR,
         () => this.confirmReset(),
         { emphasized: true },
       ),
     );
-  }
-
-  /**
-   * Creates a tappable modal button with an inflated touch target. Destructive
-   * or primary confirmations get an emphasized stroked card behind the label so
-   * they are visually distinct from plain dismiss buttons; everything lands in
-   * the caller's cleanup bucket.
-   */
-  private createModalButton(
-    x: number,
-    y: number,
-    label: string,
-    color: string,
-    onClick: () => void,
-    options?: { emphasized?: boolean; bucket?: Phaser.GameObjects.GameObject[] },
-  ): Phaser.GameObjects.Text {
-    const bucket = options?.bucket ?? this.overlayObjects;
-    if (options?.emphasized) {
-      const card = this.scene.add.rectangle(
-        x,
-        y,
-        MODAL_BUTTON_WIDTH,
-        MODAL_BUTTON_HEIGHT,
-        PANEL_COLOR,
-      );
-      card.setStrokeStyle(3, color === DANGER_COLOR ? DANGER_HEX : PRIMARY_HEX, 1);
-      bucket.push(card);
-    }
-    const button = this.scene.add
-      .text(
-        x,
-        y,
-        label,
-        textStyle({
-          color,
-          fontSize: "30px",
-        }),
-      )
-      .setOrigin(0.5);
-    button.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH,
-        ROW_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
-    button.on("pointerdown", onClick);
-    attachPressFeedback(button);
-    return button;
   }
 
   /** Closes the reset confirmation modal without changing any data. */

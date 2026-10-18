@@ -186,7 +186,11 @@ export class MockScene {
         obj.args = args;
         return obj;
       }),
-      text: vi.fn(() => createMockGameObject(this, "text", reg)),
+      text: vi.fn((...args: unknown[]) => {
+        const obj = createMockGameObject(this, "text", reg);
+        obj.args = args;
+        return obj;
+      }),
       image: vi.fn((...args: unknown[]) => {
         const obj = createMockGameObject(this, "image", reg);
         obj.args = args;
