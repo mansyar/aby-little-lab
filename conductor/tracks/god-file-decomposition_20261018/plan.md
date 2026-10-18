@@ -36,7 +36,7 @@ fix; every extraction moves code verbatim before any adjustment.
 - [x] Task: Extract Voice row, Install row, reset modal, iOS how-to overlay with tests (VoiceRow.ts — chip cycling + Preview + voiceChanged() re-sync; InstallRow.ts — state-aware row + iOS overlay; ResetModal.ts — two-step confirm; TDD 18 self-tests; commit 2aa5e6a)
 - [x] Task: Slim `SettingsPanel.ts` to composition only; verify component tests pass unchanged (1,245 → 293 L; retains constructor panel assembly + audio/adaptive toggles + voiceschanged wiring that delegates to VoiceRow; components 228/228, full suite 1976/1976)
 - [x] Task: Commit (`refactor(settings): decompose SettingsPanel into overlay components`; commit 2aa5e6a)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: c44739a)
 
 ## Phase 4 — Sticker-Scale Quirk Verify & Fix
 
