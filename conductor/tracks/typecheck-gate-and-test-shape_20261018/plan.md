@@ -42,13 +42,13 @@
 
 ## Phase 4 — CI Gate, Docs & Final Verification
 
-- [ ] Task: Add the dedicated Typecheck step to `.github/workflows/ci.yml` before the test step
-- [ ] Task: Negative verification — inject a type error in `src/` and in a test file, confirm `pnpm typecheck` fails, then revert both
-- [ ] Task: Update README development commands with `pnpm typecheck`
-- [ ] Task: Update `conductor/tech-stack.md` CI section with the typecheck gate and new suite layout
-- [ ] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot`
-- [ ] Task: Commit (`chore(ci): add typecheck gate and document suite layout`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Add the dedicated Typecheck step to `.github/workflows/ci.yml` before the test step (own step, after `pnpm run check`, so a type failure is distinguishable from a lint failure)
+- [x] Task: Negative verification — inject a type error in `src/` and in a test file, confirm `pnpm typecheck` fails, then revert both (both probes reported `TS2322`, exit 1; after reverting, exit 0)
+- [x] Task: Update README development commands with `pnpm typecheck` (plus refreshed testing counts/thresholds and the CI gate list)
+- [x] Task: Update `conductor/tech-stack.md` CI section with the typecheck gate and new suite layout (dated amendment + tests-tree and helpers-tree refresh)
+- [x] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot` (check 0 with the pre-existing warning; typecheck 0; 94 files / 1,982 tests; shell 176.8 kB ≤ 200 kB; PWA 15/15; boot median 1.96 s ≤ 3.0 s)
+- [x] Task: Commit (`chore(ci): add typecheck gate and document suite layout`)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
 
 ---
 
