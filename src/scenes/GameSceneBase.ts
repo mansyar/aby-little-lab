@@ -5,13 +5,14 @@ import {
   type Mascot,
 } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import type { SpeakerButton } from "../components/SpeakerButton";
+import { SpeakerButton } from "../components/SpeakerButton";
 import type { GameId } from "../types";
 import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { transitionToScene } from "../utils/sceneTransitions";
-import { earnSticker, hasSticker, recordGameResult } from "../utils/storage";
+import { speakSentence } from "../utils/speech";
+import { earnSticker, getSettings, hasSticker, recordGameResult } from "../utils/storage";
 import { displayScale } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
@@ -30,6 +31,9 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected parentLock?: ParentLock;
   protected mascot?: Mascot;
   protected speaker?: SpeakerButton;
+
+  /** Replay glyph created by {@link createSpokenInstruction}; destroyed on shutdown. */
+  private instructionSpeaker?: SpeakerButton;
   protected readonly audioManager: AudioManager;
   protected progressDots: Phaser.GameObjects.Arc[] = [];
   protected inputLocked = false;
@@ -103,6 +107,15 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /** Horizontal gap between the arrow/target and the replay button (px). */
   protected readonly SPEAKER_OFFSET = 70;
 
+  /** Y position of the shared spoken-instruction line (clear of the progress dots). */
+  protected readonly INSTRUCTION_Y = 128;
+
+  /** Wrap width of the instruction line, bounding it short of the replay glyph. */
+  protected readonly INSTRUCTION_WRAP_WIDTH = 620;
+
+  /** Gap between the instruction line's box edge and the replay glyph (px). */
+  protected readonly INSTRUCTION_SPEAKER_GAP = 36;
+
   constructor(key: string) {
     super({ key });
     this.audioManager = AudioManager.getInstance();
@@ -146,6 +159,61 @@ export abstract class GameSceneBase extends Phaser.Scene {
     this.mascot = createCornerMascotComponent(this);
     this.mascot.curious();
     return this.mascot;
+  }
+
+  /**
+   * Narrates the game's rule for pre-readers: a one-line instruction plus a
+   * speaker glyph that replays it.
+   *
+   * The line is spoken once here, when the round is set up, and the glyph
+   * replays it on tap. Both go through {@link speakSentence}, which re-reads
+   * the SFX toggle on every call, so a mid-session change is honoured. Call
+   * from `create()` (outside any per-round teardown) and before
+   * `registerShutdownCleanup()` so the glyph's speech subscription is released
+   * on shutdown.
+   *
+   * @param text - The instruction sentence to show and speak.
+   * @param options - Optional centre overrides for games whose art needs the
+   *   line elsewhere; the glyph follows the line horizontally.
+   * @returns The instruction text object.
+   */
+  protected createSpokenInstruction(
+    text: string,
+    options: { x?: number; y?: number } = {},
+  ): Phaser.GameObjects.Text {
+    const centerX = options.x ?? this.cameras.main.centerX;
+    const y = options.y ?? this.INSTRUCTION_Y;
+    const label = this.add
+      .text(
+        centerX,
+        y,
+        text,
+        textStyle({
+          fontSize: "26px",
+          color: "#2d3748",
+          align: "center",
+          wordWrap: { width: this.INSTRUCTION_WRAP_WIDTH },
+        }),
+      )
+      .setOrigin(0.5);
+
+    // Scene instances are reused across visits: drop any glyph from the
+    // previous visit before wiring a fresh one.
+    this.instructionSpeaker?.destroy();
+    this.instructionSpeaker = new SpeakerButton(
+      this,
+      centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
+      y,
+      {
+        muted: !getSettings().sfxEnabled,
+        onSpeak: () => {
+          speakSentence(text, getSettings().sfxEnabled);
+        },
+      },
+    );
+    speakSentence(text, getSettings().sfxEnabled);
+
+    return label;
   }
 
   /** Creates `count` progress dots at the top of the screen, dimmed by default. */
@@ -240,6 +308,8 @@ export abstract class GameSceneBase extends Phaser.Scene {
       this.mascot = undefined;
       this.speaker?.destroy();
       this.speaker = undefined;
+      this.instructionSpeaker?.destroy();
+      this.instructionSpeaker = undefined;
     });
   }
 

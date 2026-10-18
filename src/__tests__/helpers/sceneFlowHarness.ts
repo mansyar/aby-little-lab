@@ -36,6 +36,7 @@ export const mockSpeech = {
   speakLetter: vi.fn(() => true),
   speakWord: vi.fn(() => true),
   speakNumber: vi.fn(() => true),
+  speakSentence: vi.fn(() => true),
   setPreferredVoiceURI: vi.fn(),
 };
 

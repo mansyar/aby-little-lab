@@ -5,6 +5,7 @@ import {
   setPreferredVoiceURI,
   speakLetter,
   speakNumber,
+  speakSentence,
   speakWord,
   unlockSpeechForUserGesture,
 } from "../../utils/speech";
@@ -185,6 +186,34 @@ describe("speech", () => {
       vi.unstubAllGlobals();
       expect(() => speakNumber(3, true)).not.toThrow();
       expect(speakNumber(3, true)).toBe(false);
+    });
+  });
+
+  describe("speakSentence", () => {
+    it("returns false and does nothing when disabled", () => {
+      expect(speakSentence("Drag each shape into its hole.", false)).toBe(false);
+      expect(speak).not.toHaveBeenCalled();
+      expect(cancel).not.toHaveBeenCalled();
+    });
+
+    it("speaks the whole instruction at a gentle rate when enabled", () => {
+      const copy = "Drag each shape into its hole.";
+      const result = speakSentence(copy, true);
+
+      expect(result).toBe(true);
+      expect(speak).toHaveBeenCalledTimes(1);
+      const utterance = Utterance.mock.instances[0];
+      expect(utterance.text).toBe(copy);
+      expect(utterance.lang).toBe("en-US");
+      expect(utterance.rate).toBeGreaterThanOrEqual(0.8);
+      expect(utterance.rate).toBeLessThanOrEqual(1);
+      expect(speak).toHaveBeenCalledWith(utterance);
+    });
+
+    it("never throws when speechSynthesis is unavailable", () => {
+      vi.unstubAllGlobals();
+      expect(() => speakSentence("Put the numbers in order.", true)).not.toThrow();
+      expect(speakSentence("Put the numbers in order.", true)).toBe(false);
     });
   });
 
