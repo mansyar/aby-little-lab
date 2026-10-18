@@ -29,7 +29,7 @@
 - [x] Task: Delete `navigation.test.ts` only after the combined assertion count matches the baseline exactly (701 = 701, and 353 = 353 tests)
 - [x] Task: Verify — full suite green, no test file above ~1,600 lines, `typecheck` still clean (94 files / 1,980 tests; `tsc --noEmit` exit 0; `biome check` clean bar the pre-existing musicalMemory warning)
 - [x] Task: Commit (`refactor(test): split navigation suite into focused scene-flow files`)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 005b9a0)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 71f2da5)
 
 ## Phase 3 — Missing Scene Suites
 
