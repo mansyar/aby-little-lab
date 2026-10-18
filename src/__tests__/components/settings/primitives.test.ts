@@ -27,11 +27,11 @@ function textObj(): MockObject {
   return found;
 }
 
-/** Fires every registered pointerdown handler on the object. */
+/** Fires every registered pointerdown handler on the object (Phaser fires all). */
 function tap(obj: MockObject): void {
-  const handler = obj.handlers.pointerdown as MockFn | undefined;
-  if (!handler) throw new Error("no pointerdown handler");
-  handler();
+  const handlers = obj.allHandlers.filter((entry) => entry.name === "pointerdown");
+  if (handlers.length === 0) throw new Error("no pointerdown handler");
+  for (const entry of handlers) entry.cb();
 }
 
 beforeEach(() => {

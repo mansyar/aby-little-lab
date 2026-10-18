@@ -8,25 +8,21 @@ import {
   relativeLastPlayed,
 } from "../game/progressLogic";
 import { availableVoiceOptions, type VoiceOption } from "../game/voiceLogic";
-import { type GameId, MAX_PROFILES } from "../types";
+import type { GameId } from "../types";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
 import { setPreferredVoiceURI, speakWord } from "../utils/speech";
 import {
-  addProfile,
-  deleteProfile,
   getActiveProfile,
-  getAvailableAvatars,
-  getPlayTime,
   getProfiles,
   getProgress,
   getSettings,
   resetProgress,
-  setPlayTimeLimit,
   updateSettings,
 } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
+import { ProfilesOverlay } from "./settings/ProfilesOverlay";
 import {
   AVATAR_TEXTURE_SIZE,
   addRowCard,
@@ -55,8 +51,6 @@ import {
   TOGGLE_WIDTH,
 } from "./settings/primitives";
 
-/** Daily play-time limit options cycled by the per-profile chip (null = Off). */
-const PLAY_TIME_OPTIONS: ReadonlyArray<number | null> = [null, 15, 30, 45, 60];
 /** Sample phrase spoken by the voice preview button. */
 const VOICE_PREVIEW_TEXT = "Hi! I can talk.";
 /** Longest voice label shown in the chip before truncation. */
@@ -87,8 +81,6 @@ const ACCURACY_FILL_COLOR = 0x68d391;
 const MASTERY_STAR = "★";
 /** Outline ring behind the viewed profile chip in Learning Progress. */
 const VIEWED_RING_SIZE = 80;
-/** Outline ring behind the active profile row in the Profiles manager. */
-const ACTIVE_RING_SIZE = 112;
 
 /** The 20 games in hub order, for the Learning Progress report rows. */
 const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
@@ -114,11 +106,6 @@ const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey
   { gameId: "number-order", label: "Number Order", tileKey: "tile_number_order" },
 ];
 
-/** "Off" for an unlimited budget, otherwise "15m"-style labels. */
-function playTimeLabel(limitMinutes: number | null): string {
-  return limitMinutes === null ? "Off" : `${limitMinutes}m`;
-}
-
 /** Truncates a long voice label for the narrow chip, e.g. "en-US — Goog…". */
 function truncateLabel(label: string, max = VOICE_LABEL_MAX): string {
   return label.length <= max ? label : `${label.slice(0, max - 1)}…`;
@@ -130,6 +117,7 @@ export class SettingsPanel {
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly modalObjects: Phaser.GameObjects.GameObject[] = [];
+  private readonly profilesOverlay: ProfilesOverlay;
   private readonly installTracker: InstallTracker;
   private resetRowText: Phaser.GameObjects.Text | null = null;
   private voiceChip: Phaser.GameObjects.Text | null = null;
@@ -171,6 +159,12 @@ export class SettingsPanel {
   constructor(scene: Phaser.Scene, installTracker?: InstallTracker, onProgressReset?: () => void) {
     this.scene = scene;
     this.onProgressReset = onProgressReset;
+    this.profilesOverlay = new ProfilesOverlay({
+      scene,
+      overlayObjects: this.overlayObjects,
+      modalObjects: this.modalObjects,
+      onProgressReset: () => this.onProgressReset?.(),
+    });
     this.installTracker =
       installTracker ??
       createInstallTracker({
@@ -747,258 +741,7 @@ export class SettingsPanel {
    * after add/delete so the list always reflects persisted state.
    */
   private openProfilesOverlay(): void {
-    this.closeProfilesOverlay();
-    const { width, height } = this.scene.cameras.main;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const profiles = getProfiles();
-    const available = getAvailableAvatars();
-
-    const backdrop = this.scene.add
-      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
-      .setInteractive();
-    backdrop.on("pointerdown", () => this.closeProfilesOverlay());
-    this.overlayObjects.push(backdrop);
-    this.overlayObjects.push(
-      this.scene.add
-        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
-        .setStrokeStyle(4, OUTLINE_COLOR),
-    );
-    this.overlayObjects.push(
-      this.scene.add
-        .text(
-          centerX,
-          centerY - 250,
-          "Profiles",
-          textStyle({
-            color: "#2d3748",
-            fontSize: "36px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-
-    profiles.forEach((profile, index) => {
-      const y = centerY - 194 + index * 80;
-      // Persistent outline marks the ACTIVE profile (read-only in the report,
-      // authoritative here) so it is never identified by position alone.
-      if (profile.id === getActiveProfile().id) {
-        const ring = this.scene.add.rectangle(centerX - 110, y, ACTIVE_RING_SIZE, ACTIVE_RING_SIZE);
-        ring.setStrokeStyle(4, OUTLINE_COLOR, 1);
-        this.overlayObjects.push(ring);
-      }
-      const avatar = this.scene.add.image(
-        centerX - 110,
-        y,
-        PROFILE_AVATAR_TEXTURES[profile.avatarId],
-      );
-      avatar.setScale(96 / AVATAR_TEXTURE_SIZE);
-      attachPressFeedback(avatar);
-      this.overlayObjects.push(avatar);
-      const remove = this.scene.add
-        .text(
-          centerX + 60,
-          y,
-          "Delete",
-          textStyle({
-            color: DANGER_COLOR,
-            fontSize: "30px",
-          }),
-        )
-        .setOrigin(0.5);
-      remove.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(
-          -TOGGLE_WIDTH / 2,
-          -ROW_HEIGHT / 2,
-          TOGGLE_WIDTH,
-          ROW_HEIGHT,
-        ),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      remove.on("pointerdown", () => this.showDeleteProfileModal(profile.id));
-      attachPressFeedback(remove);
-      this.overlayObjects.push(remove);
-
-      const limit = getPlayTime(profile.id).limitMinutes;
-      const chip = this.scene.add
-        .text(
-          centerX - 10,
-          y,
-          `Play Time: ${playTimeLabel(limit)}`,
-          textStyle({
-            color: PRIMARY_COLOR,
-            fontSize: "26px",
-          }),
-        )
-        .setOrigin(0.5);
-      chip.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(
-          -TOGGLE_WIDTH / 4,
-          -ROW_HEIGHT / 2,
-          TOGGLE_WIDTH / 2,
-          ROW_HEIGHT,
-        ),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      chip.on("pointerdown", () => {
-        const current = getPlayTime(profile.id).limitMinutes;
-        const index = PLAY_TIME_OPTIONS.indexOf(current);
-        const safeIndex = index === -1 ? 0 : index;
-        const next = PLAY_TIME_OPTIONS[(safeIndex + 1) % PLAY_TIME_OPTIONS.length];
-        setPlayTimeLimit(profile.id, next);
-        chip.setText(`Play Time: ${playTimeLabel(next)}`);
-        // Keep the Hub's indicator and lock state in sync with the new limit.
-        this.onProgressReset?.();
-      });
-      attachPressFeedback(chip);
-      this.overlayObjects.push(chip);
-    });
-
-    if (profiles.length >= MAX_PROFILES) {
-      this.overlayObjects.push(
-        this.scene.add
-          .text(
-            centerX,
-            centerY + 116,
-            "Profile limit reached",
-            textStyle({
-              color: DISABLED_COLOR,
-              fontSize: "30px",
-            }),
-          )
-          .setOrigin(0.5),
-      );
-    } else {
-      this.overlayObjects.push(
-        this.scene.add
-          .text(
-            centerX,
-            centerY + 96,
-            "Add Profile",
-            textStyle({
-              color: PRIMARY_COLOR,
-              fontSize: "30px",
-            }),
-          )
-          .setOrigin(0.5),
-      );
-      const totalWidth = available.length * 80 + (available.length - 1) * 36;
-      let x = centerX - totalWidth / 2 + 40;
-      const y = centerY + 146;
-      for (const avatarId of available) {
-        const avatar = this.scene.add.image(x, y, PROFILE_AVATAR_TEXTURES[avatarId]);
-        avatar.setScale(80 / AVATAR_TEXTURE_SIZE);
-        avatar.setInteractive();
-        avatar.on("pointerdown", () => {
-          addProfile(avatarId);
-          this.openProfilesOverlay();
-          this.onProgressReset?.();
-        });
-        attachPressFeedback(avatar);
-        this.overlayObjects.push(avatar);
-        x += 80 + 36;
-      }
-    }
-
-    this.overlayObjects.push(
-      createModalButton(
-        this.scene,
-        centerX,
-        centerY + 220,
-        this.overlayObjects,
-        "Close",
-        PRIMARY_COLOR,
-        () => this.closeProfilesOverlay(),
-      ),
-    );
-  }
-
-  /** Destroys the profile manager overlay (not the panel). */
-  private closeProfilesOverlay(): void {
-    for (const object of this.overlayObjects) object.destroy();
-    this.overlayObjects.length = 0;
-  }
-
-  /** Shows the two-step "Delete profile?" confirmation modal. */
-  private showDeleteProfileModal(profileId: string): void {
-    const { width, height } = this.scene.cameras.main;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    const modalBackdrop = this.scene.add
-      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
-      .setInteractive();
-    modalBackdrop.on("pointerdown", () => this.closeDeleteProfileModal());
-    this.modalObjects.push(modalBackdrop);
-    this.modalObjects.push(
-      this.scene.add
-        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
-        .setStrokeStyle(4, OUTLINE_COLOR),
-    );
-    this.modalObjects.push(
-      this.scene.add
-        .text(
-          centerX,
-          centerY - 105,
-          "Delete profile?",
-          textStyle({
-            color: "#2d3748",
-            fontSize: "36px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-    this.modalObjects.push(
-      this.scene.add
-        .text(
-          centerX,
-          centerY - 25,
-          "This profile's stickers will be lost.",
-          textStyle({
-            color: "#2d3748",
-            fontSize: "30px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
-    this.modalObjects.push(
-      createModalButton(
-        this.scene,
-        centerX,
-        centerY + 45,
-        this.overlayObjects,
-        "Cancel",
-        PRIMARY_COLOR,
-        () => this.closeDeleteProfileModal(),
-        { bucket: this.modalObjects },
-      ),
-    );
-    this.modalObjects.push(
-      createModalButton(
-        this.scene,
-        centerX,
-        centerY + 125,
-        this.overlayObjects,
-        "Delete",
-        DANGER_COLOR,
-        () => this.confirmDeleteProfile(profileId),
-        { bucket: this.modalObjects, emphasized: true },
-      ),
-    );
-  }
-
-  /** Closes the delete confirmation modal, keeping the profile overlay open. */
-  private closeDeleteProfileModal(): void {
-    for (const object of this.modalObjects) object.destroy();
-    this.modalObjects.length = 0;
-  }
-
-  /** Deletes the profile, then rebuilds the profile overlay. */
-  private confirmDeleteProfile(profileId: string): void {
-    deleteProfile(profileId);
-    this.closeDeleteProfileModal();
-    this.openProfilesOverlay();
-    this.onProgressReset?.();
+    this.profilesOverlay.open();
   }
 
   /** Shows the iOS "Add to Home Screen" instructions overlay. */
