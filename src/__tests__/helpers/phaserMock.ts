@@ -7,7 +7,20 @@ import { vi } from "vitest";
  * superset of every per-file copy it replaces.
  */
 
-export type MockFn = ReturnType<typeof vi.fn>;
+/**
+ * A callable mock function.
+ *
+ * Vitest's `vi.fn()` defaults to `Mock<Procedure>`, but `ReturnType<typeof vi.fn>`
+ * instantiates the generic with its full constraint (`Procedure | Constructable`),
+ * which is not callable — that is the source of the historical
+ * `TS2348: Mock<Constructable | Procedure> is not callable` noise across the test
+ * tree. Spelling the signature out keeps mocks callable while still accepting
+ * every implementation shape (`() => value`, `(x: string) => x`, `(...args) => …`).
+ * The `any` mirrors Vitest's own internal `Procedure` type; it exists here once,
+ * not at each of the hundreds of call sites.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: mirrors Vitest's internal `Procedure` type
+export type MockFn = ReturnType<typeof vi.fn<(...args: any[]) => any>>;
 
 export interface MockHandlerEntry {
   name: string;
@@ -89,7 +102,7 @@ export function createMockGameObject(
     allHandlers: [],
     setInteractive: vi.fn().mockReturnThis(),
     disableInteractive: vi.fn(),
-    on: vi.fn(function (this: MockObject, name: string, cb: (...args: unknown[]) => unknown) {
+    on: vi.fn(function (this: MockObject, name: string, cb: MockFn) {
       this.handlers[name] = cb;
       this.allHandlers.push({ name, cb });
       return this;
@@ -158,7 +171,10 @@ export class MockScene {
       height: number;
     };
   };
-  scale!: Record<string, MockFn | number> & {
+  scale!: {
+    setSize: MockFn;
+    on: MockFn;
+    off: MockFn;
     width: number;
     height: number;
     displaySize: { width: number; height: number };

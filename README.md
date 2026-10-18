@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 80% for lines, functions, branches, and statements. Current state: **1803 tests across 69 files**, all green (verified 2026-10-16 on `feature/docs-housekeeping-refresh`).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements. Current state: **1,982 tests across 94 files**, all green (verified 2026-10-18).
 
 ## Code Quality
 
@@ -59,9 +59,12 @@ pnpm format
 
 # Check (lint + format)
 pnpm check
+
+# Typecheck (tsc --noEmit, covers src/ and src/__tests__/)
+pnpm typecheck
 ```
 
-The project uses Biome with double quotes, 2-space indentation, and 100-character line width.
+The project uses Biome with double quotes, 2-space indentation, and 100-character line width. `pnpm typecheck` runs the strict TypeScript compiler over the whole `src` tree, test files included, so mocks and fixtures stay type-safe; CI runs it as its own step before the test suite.
 
 ## Project Structure
 
@@ -225,7 +228,7 @@ Open `http://localhost:8080` for a local smoke test. For production PWA installa
 
 GitHub Actions (`.github/workflows/ci.yml`) runs the full quality-gate suite before anything reaches production:
 
-- **Pull requests** — the `Quality Gates` job runs `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, and `node scripts/validate-pwa.js`. The PR must be green before merging (enable branch protection on `master` to require this check).
+- **Pull requests** — the `Quality Gates` job runs `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, and `node scripts/validate-boot.js`. The PR must be green before merging (enable branch protection on `master` to require this check).
 - **Merge to `master`** — after the gates pass, the `Deploy to Coolify` job fires the Coolify Deploy Webhook, and Coolify rebuilds the app from the repo's Dockerfile and ships the new version.
 
 One-time setup:

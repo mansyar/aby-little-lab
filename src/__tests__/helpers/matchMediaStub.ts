@@ -8,7 +8,9 @@ import { vi } from "vitest";
 
 export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
-export type MockFn = ReturnType<typeof vi.fn>;
+/** Mirrors the callable-mock rationale documented in `phaserMock.MockFn`. */
+// biome-ignore lint/suspicious/noExplicitAny: mirrors Vitest's internal `Procedure` type
+export type MockFn = ReturnType<typeof vi.fn<(...args: any[]) => any>>;
 
 /** The subset of `MediaQueryList` production code and tests rely on. */
 export interface MediaQueryListStub {
@@ -47,27 +49,36 @@ export function createMatchMediaMock(reducedMotion: boolean): MockFn {
  */
 export function stubMatchMedia(reducedMotion = false): MatchMediaStub {
   let reduced = reducedMotion;
-  const matchMedia = vi.fn(
-    (query: string): MediaQueryListStub => ({
-      matches: query === REDUCED_MOTION_QUERY ? reduced : false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }),
-  ) as MatchMediaStub;
-  matchMedia.setReducedMotion = (value: boolean) => {
-    reduced = value;
-  };
+  const matchMedia: MatchMediaStub = Object.assign(
+    vi.fn(
+      (query: string): MediaQueryListStub => ({
+        matches: query === REDUCED_MOTION_QUERY ? reduced : false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }),
+    ),
+    {
+      /** Toggles the `prefers-reduced-motion` result for subsequent queries. */
+      setReducedMotion(value: boolean): void {
+        reduced = value;
+      },
+    },
+  );
   vi.stubGlobal("matchMedia", matchMedia);
   return matchMedia;
 }
 
-/** The mock returned by {@link stubMatchMedia}. */
-export interface MatchMediaStub extends MockFn {
+/**
+ * The mock returned by {@link stubMatchMedia}: a callable `matchMedia` mock plus
+ * a helper for flipping the reduced-motion answer mid-test. A type alias (not an
+ * interface) because interfaces cannot extend Vitest's `Mock` type.
+ */
+export type MatchMediaStub = MockFn & {
   /** Toggles the `prefers-reduced-motion` result for subsequent queries. */
   setReducedMotion(reduced: boolean): void;
-}
+};

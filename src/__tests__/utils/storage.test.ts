@@ -967,16 +967,10 @@ describe("v2 state cache (memoization)", () => {
 
     save({
       stickers: {
+        ...createDefaultStickers(),
         "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
-        "animal-trace": { earned: false, earnedAt: null },
-        "pop-freeze": { earned: false, earnedAt: null },
-        "shadow-match": { earned: false, earnedAt: null },
-        "musical-memory": { earned: false, earnedAt: null },
-        "big-small": { earned: false, earnedAt: null },
-        "pattern-builder": { earned: false, earnedAt: null },
-        "alphabet-match": { earned: false, earnedAt: null },
       },
-      settings: { bgmEnabled: false, sfxEnabled: true },
+      settings: { ...getSettings(), bgmEnabled: false, sfxEnabled: true },
     });
 
     expect(getSettings().bgmEnabled).toBe(false);

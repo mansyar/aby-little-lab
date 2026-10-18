@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
-import { type MockObject, mockRegistry } from "../helpers/phaserMock";
-
-type MockFn = ReturnType<typeof vi.fn>;
+import { type MockFn, type MockObject, mockRegistry } from "../helpers/phaserMock";
 
 const { mockAudio, mockRecordGamePlay } = vi.hoisted(() => {
   const mockAudio = {
@@ -115,6 +113,16 @@ function getHandler(kind: string, event: string): ((...args: unknown[]) => unkno
   return mockRegistry.find((obj) => obj.kind === kind && obj.handlers[event])?.handlers[event];
 }
 
+/** Scene-level input handlers captured by the mock Phaser input plugin. */
+function sceneInputHandlers(scene: HubScene): Record<string, MockFn[]> {
+  return (scene as unknown as { sceneInputHandlers: Record<string, MockFn[]> }).sceneInputHandlers;
+}
+
+/** Scale-manager handlers captured by the mock Phaser scale plugin. */
+function scaleHandlers(scene: HubScene): Record<string, MockFn[]> {
+  return (scene as unknown as { scaleHandlers: Record<string, MockFn[]> }).scaleHandlers;
+}
+
 describe("HubScene paged grid (narrow viewports)", () => {
   /** Builds a Hub on a small-phone landscape viewport (844x390 CSS px). */
   function createNarrowHub(): HubScene {
@@ -128,7 +136,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
   }
 
   /** All paged-size tile rectangles (176x196) in creation order. */
-  function pagedRects(): MockObj[] {
+  function pagedRects(): MockObject[] {
     return mockRegistry.filter((obj) => {
       const [, , w, h] = (obj.args ?? []) as unknown[];
       return obj.kind === "rectangle" && w === 176 && h === 196;
@@ -136,7 +144,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
   }
 
   /** The page-dot circles in creation order. */
-  function pageDots(): MockObj[] {
+  function pageDots(): MockObject[] {
     return mockRegistry.filter((obj) => {
       const [, y, r] = (obj.args ?? []) as unknown[];
       return obj.kind === "circle" && y === 640 && r === 8;
@@ -252,30 +260,18 @@ describe("HubScene paged grid (narrow viewports)", () => {
   });
 
   /** Fires a scene-level pointer event through the captured input handlers. */
-  function scene_input_down(
-    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
-    x: number,
-    y: number,
-  ): void {
-    for (const handler of scene.sceneInputHandlers.pointerdown ?? []) handler({ x, y });
+  function scene_input_down(scene: HubScene, x: number, y: number): void {
+    for (const handler of sceneInputHandlers(scene).pointerdown ?? []) handler({ x, y });
   }
-  function scene_input_move(
-    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
-    x: number,
-    y: number,
-  ): void {
-    for (const handler of scene.sceneInputHandlers.pointermove ?? []) handler({ x, y });
+  function scene_input_move(scene: HubScene, x: number, y: number): void {
+    for (const handler of sceneInputHandlers(scene).pointermove ?? []) handler({ x, y });
   }
-  function scene_input_up(
-    scene: HubScene & { sceneInputHandlers: Record<string, MockFn[]> },
-    x: number,
-    y: number,
-  ): void {
-    for (const handler of scene.sceneInputHandlers.pointerup ?? []) handler({ x, y });
+  function scene_input_up(scene: HubScene, x: number, y: number): void {
+    for (const handler of sceneInputHandlers(scene).pointerup ?? []) handler({ x, y });
   }
 
   /** All wide-grid tile rectangles (160x116) in creation order. */
-  function wideRects(): MockObj[] {
+  function wideRects(): MockObject[] {
     return mockRegistry.filter((obj) => {
       const [, , w, h] = (obj.args ?? []) as unknown[];
       return obj.kind === "rectangle" && w === 160 && h === 116;
@@ -283,11 +279,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
   }
 
   /** Fires the Phaser scale-manager resize event with a new display size. */
-  function fireResize(
-    scene: HubScene & { scaleHandlers: Record<string, MockFn[]> },
-    width: number,
-    height: number,
-  ): void {
+  function fireResize(scene: HubScene, width: number, height: number): void {
     (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
       width,
       height,
@@ -295,12 +287,12 @@ describe("HubScene paged grid (narrow viewports)", () => {
     // The resize handler is registered with the grid as its `this` context
     // (Phaser calls fn.call(context)), so dispatch it the same way.
     const grid = (scene as unknown as { grid: unknown }).grid;
-    for (const handler of scene.scaleHandlers.resize ?? []) handler.call(grid);
+    for (const handler of scaleHandlers(scene).resize ?? []) handler.call(grid);
   }
 
   it("registers a resize listener on the scale manager", () => {
     const scene = createNarrowHub();
-    expect(scene.scaleHandlers.resize?.length).toBe(1);
+    expect(scaleHandlers(scene).resize?.length).toBe(1);
   });
 
   it("rebuilds as a paged grid when a resize crosses below the touch floor", () => {

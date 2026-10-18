@@ -24,8 +24,11 @@ vi.mock("../../utils/pwaBridge", () => ({
   getPwaBridge: () => bridgeMock,
 }));
 
+/** Options the panel passes to `new PwaToast(scene, options)`. */
+type ToastOptions = { kind: string };
+
 const toastCtor = vi.hoisted(() =>
-  vi.fn(function (this: Record<string, unknown>) {
+  vi.fn(function (this: Record<string, unknown>, _scene: unknown, _options: ToastOptions) {
     this.destroy = vi.fn();
     this.update = vi.fn();
   }),
@@ -35,6 +38,13 @@ vi.mock("../../components/PwaToast", () => ({
 }));
 
 import { PwaToasts } from "../../components/PwaToasts";
+
+/** Options of the toast constructed at `index` (throws when none was created). */
+function toastOptions(index = 0): ToastOptions {
+  const call = toastCtor.mock.calls[index];
+  if (!call) throw new Error(`no toast constructed at index ${index}`);
+  return call[1];
+}
 
 function makeToasts(): { toasts: PwaToasts; scene: MockScene } {
   const scene = new MockScene();
@@ -63,7 +73,7 @@ describe("PwaToasts", () => {
     expect(bridgeMock.subscribe).toHaveBeenCalledTimes(1);
     expect(bridgeMock.setHubActive).toHaveBeenCalledWith(true);
     expect(toastCtor).toHaveBeenCalledTimes(1);
-    expect(toastCtor.mock.calls[0]?.[1].kind).toBe("update");
+    expect(toastOptions().kind).toBe("update");
   });
 
   it("shows an update toast on the needRefresh event", () => {
@@ -74,7 +84,7 @@ describe("PwaToasts", () => {
     bridgeMock.listeners[0]?.("needRefresh");
 
     expect(toastCtor).toHaveBeenCalledTimes(1);
-    expect(toastCtor.mock.calls[0]?.[1].kind).toBe("update");
+    expect(toastOptions().kind).toBe("update");
   });
 
   it("shows an offline toast on the offline event", () => {
@@ -84,7 +94,7 @@ describe("PwaToasts", () => {
 
     bridgeMock.listeners[0]?.("offline");
 
-    expect(toastCtor.mock.calls[0]?.[1].kind).toBe("offline");
+    expect(toastOptions().kind).toBe("offline");
   });
 
   it("destroy() unsubscribes, clears hub-active and kills the toast", () => {

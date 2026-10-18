@@ -36,6 +36,9 @@ jobs:
       - name: Lint & format check
         run: pnpm run check
 
+      - name: Typecheck
+        run: pnpm run typecheck
+
       - name: Tests
         run: CI=true pnpm test
 
