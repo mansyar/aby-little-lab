@@ -49,6 +49,7 @@ describe("InstallRow", () => {
     new InstallRow({
       scene: scene as never,
       objects: objects as never,
+      overlayObjects: overlayObjects as never,
       installTracker: tracker("hidden"),
     }).create(512, 384);
 
@@ -61,6 +62,7 @@ describe("InstallRow", () => {
     new InstallRow({
       scene: scene as never,
       objects: objects as never,
+      overlayObjects: overlayObjects as never,
       installTracker: fake,
     }).create(512, 384);
 

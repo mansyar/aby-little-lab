@@ -81,7 +81,7 @@ describe("ProfileChip", () => {
   });
 
   it("opens the picker on chip tap: dim overlay plus one avatar per profile", () => {
-    addProfile("Second");
+    addProfile("dog");
     const { chip, onOpen } = makeChip();
     chip.create();
     tap(chipImage());
@@ -103,7 +103,7 @@ describe("ProfileChip", () => {
   });
 
   it("switches profiles on another avatar's tap, notifies the scene and closes", () => {
-    addProfile("Second");
+    addProfile("dog");
     const { chip, onSwitch } = makeChip();
     chip.create();
     tap(chipImage());
@@ -120,7 +120,7 @@ describe("ProfileChip", () => {
   });
 
   it("closing via the dim overlay does not switch profiles", () => {
-    addProfile("Second");
+    addProfile("dog");
     const { chip, onSwitch } = makeChip();
     chip.create();
     tap(chipImage());

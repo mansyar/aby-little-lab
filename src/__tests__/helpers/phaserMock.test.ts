@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   createMockGameObject,
   createPhaserModuleMock,
+  type MockObject,
   MockPath,
   MockRectangle,
   MockScene,
@@ -113,7 +114,7 @@ describe("createMockGameObject", () => {
   });
 
   it("registers itself in the provided registry", () => {
-    const registry: unknown[] = [];
+    const registry: MockObject[] = [];
     const obj = createMockGameObject(undefined, "rectangle", registry);
 
     expect(registry).toEqual([obj]);
