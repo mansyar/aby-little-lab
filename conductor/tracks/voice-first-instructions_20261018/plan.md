@@ -45,7 +45,7 @@
 - [x] Task: Run all gates: `pnpm run check` (clean, only the pre-existing musicalMemory warning + biome schema info), `pnpm typecheck` (clean), `CI=true pnpm test` (94 files / 2,001 tests), `pnpm run build` (ok, precache 41 entries), `validate-bundle` (shell 176.7 kB <= 200 kB), `validate-pwa` (15/15), `validate-boot` (median 0.96 s)
 - [x] Task: Manual smoke on desktop + phone-scale: all ten speak once, replay works, SFX-off is silent and dimmed, no overlap — approved by user on the local dev server
 - [x] Task: Commit (`docs: document voice-first instructions across the suite`) (commit c8a6d11)
-- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: pending)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) (checkpoint: 19393d8)
 
 ---
 
