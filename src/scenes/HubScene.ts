@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
+import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIndicator";
 import { PwaToast, type ToastKind } from "../components/PwaToast";
 import { SettingsPanel } from "../components/SettingsPanel";
 import {
@@ -11,13 +12,7 @@ import {
   pageTileIndexes,
 } from "../game/hubPaging";
 import { GAME_TILES } from "../game/hubTiles";
-import {
-  endPlaySession,
-  getRemainingMinutes,
-  isLimitReached,
-  isNearLimit,
-  startPlaySession,
-} from "../game/playTimeLogic";
+import { endPlaySession, isNearLimit, startPlaySession } from "../game/playTimeLogic";
 import { PROFILE_AVATAR_TEXTURES } from "../game/profileLogic";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
@@ -131,21 +126,11 @@ const PICKER_AVATAR_DISPLAY = 96;
 const PICKER_AVATAR_SPACING = 40;
 /** Depth of the picker overlay (above all Hub content). */
 const PICKER_DEPTH = 20;
-/** Radius of the play-time hint arc / moon badge (px). */
-const HINT_ARC_RADIUS = 12;
-/** Cool (plenty of time remaining) color for the hint arc. */
-const HINT_COOL_COLOR = 0x68d391;
-/** Warm (5 minutes or fewer remaining) color for the hint arc. */
-const HINT_WARM_COLOR = 0xed8936;
 /** Alpha applied to Hub tiles while the daily limit locks them. */
 const TIME_UP_TILE_ALPHA = 0.45;
 
-/** Static scale for locked tiles — a non-color "unavailable" size cue. */
+/** Static scale for locked tiles - a non-color "unavailable" size cue. */
 const TIME_UP_TILE_SCALE = 0.97;
-/** How long the pre-game nudge overlay stays before launching (ms). */
-const NUDGE_DELAY = 2000;
-/** Depth of the pre-game nudge overlay (above all Hub content). */
-const NUDGE_DEPTH = 20;
 
 /**
  * Paged (narrow-viewport) grid geometry and interaction constants. Tile size,
@@ -218,7 +203,7 @@ export class HubScene extends Phaser.Scene {
   /** Play-time indicator (hint arc or moon badge) for the active profile. */
   private playTimeGraphics?: Phaser.GameObjects.Graphics;
   /** True while the pre-game nudge overlay is showing. */
-  private nudgeActive = false;
+  private nudge = new PlayTimeNudge();
   /** True after a tile tap began navigation; blocks double-tap double-records. */
   private navLocked = false;
   /** True when this visit uses the paged (narrow-viewport) grid. */
@@ -255,7 +240,7 @@ export class HubScene extends Phaser.Scene {
     this.idleAttractActive = false;
     this.attractTargets = [];
     this.timeUp = false;
-    this.nudgeActive = false;
+    this.nudge = new PlayTimeNudge();
     // Phaser reuses this instance across visits (auto-return re-runs create()),
     // so clear the launch guard or every tile tap after the first game is dead.
     this.navLocked = false;
@@ -497,30 +482,15 @@ export class HubScene extends Phaser.Scene {
    * reached. No-op when the profile has no limit set.
    */
   private createPlayTimeIndicator(): void {
-    const playTime = getPlayTime();
-    if (playTime.limitMinutes === null) return;
-    const graphics = this.add.graphics();
-    this.playTimeGraphics = graphics;
-    graphics.setDepth(-1);
-    const cx = this.cameras.main.width / 2;
-    const cy = this.cameras.main.height - 16;
-    if (isLimitReached(playTime)) {
-      this.timeUp = true;
-      this.applyTimeUpLock();
-      this.mascot?.wave();
-      graphics.fillStyle(0x2d3748, 1);
-      graphics.fillCircle(cx, cy, HINT_ARC_RADIUS + 6);
-      graphics.fillStyle(0xfff8e7, 1);
-      graphics.fillCircle(cx - 5, cy - 4, HINT_ARC_RADIUS + 1);
-    } else {
-      const remaining = getRemainingMinutes(playTime);
-      const ratio = Math.max(0, Math.min(1, (remaining ?? 0) / (playTime.limitMinutes ?? 1)));
-      const endAngle = -Math.PI / 2 + ratio * Math.PI * 2;
-      graphics.fillStyle(isNearLimit(playTime) ? HINT_WARM_COLOR : HINT_COOL_COLOR, 1);
-      graphics.slice(cx, cy, HINT_ARC_RADIUS, -Math.PI / 2, endAngle, false);
-      graphics.fillPath();
-      graphics.fillCircle(cx, cy, 3);
-    }
+    this.playTimeGraphics =
+      createPlayTimeIndicator({
+        scene: this,
+        onLimitReached: () => {
+          this.timeUp = true;
+          this.applyTimeUpLock();
+          this.mascot?.wave();
+        },
+      }) ?? undefined;
   }
 
   /**
@@ -546,34 +516,7 @@ export class HubScene extends Phaser.Scene {
    * launching the game — a soft "almost done" signal without harsh cutoffs.
    */
   private showPlayTimeNudge(tileIndex: number): void {
-    if (this.nudgeActive) return;
-    this.nudgeActive = true;
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-    const cx = width / 2;
-    const cy = height / 2;
-    const objects: Phaser.GameObjects.GameObject[] = [];
-    const overlay = this.add.rectangle(cx, cy, width, height, 0x2d3748, 0.6);
-    overlay.setDepth(NUDGE_DEPTH);
-    overlay.setInteractive();
-    objects.push(overlay);
-    const hourglass = this.add.graphics();
-    hourglass.setDepth(NUDGE_DEPTH + 1);
-    hourglass.fillStyle(0xffffff, 1);
-    hourglass.beginPath();
-    hourglass.moveTo(cx - 36, cy - 40);
-    hourglass.lineTo(cx + 36, cy - 40);
-    hourglass.lineTo(cx, cy);
-    hourglass.lineTo(cx - 36, cy + 40);
-    hourglass.lineTo(cx + 36, cy + 40);
-    hourglass.lineTo(cx, cy);
-    hourglass.fillPath();
-    objects.push(hourglass);
-    this.time.delayedCall(NUDGE_DELAY, () => {
-      for (const obj of objects) obj.destroy();
-      this.nudgeActive = false;
-      this.launchGame(tileIndex);
-    });
+    this.nudge.show({ scene: this, onLaunch: (i) => this.launchGame(i) }, tileIndex);
   }
 
   /**
