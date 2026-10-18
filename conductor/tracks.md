@@ -200,3 +200,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Typecheck Gate + Test Suite Shape** *Link: [./archive/typecheck-gate-and-test-shape_20261018/index.md](./archive/typecheck-gate-and-test-shape_20261018/index.md)* (Archived)
+
+- [ ] **Track: Voice-First Instructions for the Silent Ten** *Link: [./tracks/voice-first-instructions_20261018/index.md](./tracks/voice-first-instructions_20261018/index.md)*
