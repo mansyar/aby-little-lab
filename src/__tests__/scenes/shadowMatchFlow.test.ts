@@ -5,6 +5,7 @@ import {
   completeFadeOuts,
   getMockFn,
   mockAudio,
+  mockSpeech,
 } from "../helpers/sceneFlowHarness";
 
 /**
@@ -689,5 +690,27 @@ describe("ShadowMatchScene completion and sticker flow", () => {
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
       justEarned: "shadow-match",
     });
+  });
+});
+
+describe("ShadowMatchScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new ShadowMatchScene();
+    scene.create();
+
+    const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
+    const call = textMock.mock.calls.find((c) => c[2] === "Drag each picture onto its shadow.");
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(
+      "Drag each picture onto its shadow.",
+      true,
+    );
   });
 });

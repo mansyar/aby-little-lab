@@ -83,6 +83,9 @@ export class ShapeSorterScene extends GameSceneBase {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+    // Progress dots sit at y=100 here, so the instruction line drops below them
+    // and above the shape slots (y=200).
+    this.createSpokenInstruction("Drag each shape into its hole.", { y: 126 });
 
     this.playthrough = generatePlaythrough(ROUND_COUNT);
     this.roundIndex = 0;

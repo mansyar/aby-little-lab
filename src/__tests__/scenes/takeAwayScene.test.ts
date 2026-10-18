@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
+import { mockSpeech } from "../helpers/sceneFlowHarness";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -11,6 +12,11 @@ type MockFn = ReturnType<typeof vi.fn>;
 vi.mock("phaser", async () => {
   const { createPhaserModuleMock } = await import("../helpers/phaserMock");
   return createPhaserModuleMock().module;
+});
+
+vi.mock("../../utils/speech", async () => {
+  const { mockSpeech } = await import("../helpers/sceneFlowHarness");
+  return mockSpeech;
 });
 
 /** Mock AudioManager so scene tests can verify audio calls without real AudioContext. */
@@ -651,5 +657,30 @@ describe("adaptive band shift wiring", () => {
     scene.create();
 
     expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+  });
+});
+
+describe("TakeAwayScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new TakeAwayScene();
+    scene.create();
+
+    const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add
+      .text;
+    const call = addText.mock.calls.find(
+      (c) => c[2] === "Take some away and pick how many are left.",
+    );
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(
+      "Take some away and pick how many are left.",
+      true,
+    );
   });
 });

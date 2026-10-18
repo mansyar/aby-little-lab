@@ -73,9 +73,7 @@ export class TakeAwayScene extends GameSceneBase {
     this.createCornerMascot();
     this.createBackButton();
     this.createProgressDots(ROUND_COUNT);
-
-    // No speaker button — the target is read from the visible dots, so there
-    // is nothing to speak; the game is fully playable without audio.
+    this.createSpokenInstruction("Take some away and pick how many are left.");
 
     this.rounds = buildPlaythrough(getAdaptiveBandShift("take-away"));
     this.roundIndex = 0;

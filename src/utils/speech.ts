@@ -208,3 +208,16 @@ const NUMBER_WORDS = [
 export function speakNumber(number: number, enabled: boolean): boolean {
   return speakText(NUMBER_WORDS[number] ?? String(number), enabled, 0.9);
 }
+
+/**
+ * Speaks a full instruction sentence (en-US) if enabled and supported.
+ *
+ * Sentences are narrated at the same gentle rate as a letter or number: slow
+ * enough for a toddler to follow, fast enough to survive a whole sentence.
+ * @param sentence - The instruction to read out (e.g. "Drag each shape into its hole.").
+ * @param enabled - Whether speech is allowed (SFX toggle).
+ * @returns True when an utterance was actually dispatched.
+ */
+export function speakSentence(sentence: string, enabled: boolean): boolean {
+  return speakText(sentence, enabled, 0.9);
+}

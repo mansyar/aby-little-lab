@@ -1,0 +1,10 @@
+{
+  "trackId": "voice-first-instructions_20261018",
+  "type": "feature",
+  "status": "new",
+  "createdAt": "2026-10-18",
+  "updatedAt": "2026-10-18",
+  "branch": "feature/voice-first-instructions",
+  "spec": "./spec.md",
+  "plan": "./plan.md"
+}

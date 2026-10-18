@@ -6,6 +6,7 @@ import {
   expectTouchTargetSize,
   getMockFn,
   mockAudio,
+  mockSpeech,
 } from "../helpers/sceneFlowHarness";
 
 /**
@@ -378,5 +379,30 @@ describe("PatternBuilderScene round flow", () => {
     const correctCallsBefore = mockAudio.playCorrect.mock.calls.length;
     tapCard(scene, correctIndex);
     expect(mockAudio.playCorrect.mock.calls.length).toBe(correctCallsBefore + 1);
+  });
+});
+
+describe("PatternBuilderScene spoken instruction", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    for (const fn of Object.values(mockSpeech)) {
+      fn.mockClear();
+    }
+  });
+
+  it("shows and speaks the rule when the round starts", () => {
+    const scene = new PatternBuilderScene();
+    scene.create();
+
+    const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add
+      .text;
+    const call = addText.mock.calls.find(
+      (c) => c[2] === "Pick the shape that finishes the pattern.",
+    );
+    expect(call).toBeDefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(
+      "Pick the shape that finishes the pattern.",
+      true,
+    );
   });
 });

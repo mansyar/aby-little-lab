@@ -3,6 +3,7 @@ import type { Mascot } from "../../components/Mascot";
 import type { SpeakerButton } from "../../components/SpeakerButton";
 import type { GameId } from "../../types";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
+import type { MockObject } from "../helpers/phaserMock";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -58,6 +59,22 @@ vi.mock("../../components/ParentLock", () => ({
   ParentLock: MockParentLock,
 }));
 
+/** Mock speech so instruction prompts can be asserted without Web Speech. */
+const { mockSpeech } = vi.hoisted(() => ({
+  mockSpeech: {
+    isSpeechSupported: vi.fn(() => true),
+    onSpeechLifecycle: vi.fn(() => vi.fn()),
+    unlockSpeechForUserGesture: vi.fn(),
+    speakLetter: vi.fn(() => true),
+    speakWord: vi.fn(() => true),
+    speakNumber: vi.fn(() => true),
+    speakSentence: vi.fn(() => true),
+    setPreferredVoiceURI: vi.fn(),
+  },
+}));
+
+vi.mock("../../utils/speech", () => mockSpeech);
+
 /** Spy on recordGameResult (calls through to the real implementation). */
 const { mockRecordGameResult } = vi.hoisted(() => ({
   mockRecordGameResult: vi.fn(),
@@ -72,7 +89,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
 });
 
 import { GameSceneBase } from "../../scenes/GameSceneBase";
-import { earnSticker, hasSticker } from "../../utils/storage";
+import { earnSticker, hasSticker, updateSettings } from "../../utils/storage";
 
 /**
  * Concrete test subclass exposing the protected scaffold methods so the
@@ -105,6 +122,13 @@ class TestScene extends GameSceneBase {
 
   testCreateStickerAnimation(stickerKey: string): void {
     this.createStickerAnimation(stickerKey);
+  }
+
+  testCreateSpokenInstruction(
+    text: string,
+    options?: { x?: number; y?: number },
+  ): Phaser.GameObjects.Text {
+    return this.createSpokenInstruction(text, options);
   }
 
   testRegisterShutdownCleanup(): void {
@@ -174,6 +198,9 @@ describe("GameSceneBase scaffold", () => {
     mockParentLockInstances.length = 0;
     mockParentLockOptions.length = 0;
     for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+    for (const fn of Object.values(mockSpeech)) {
       fn.mockClear();
     }
   });
@@ -377,6 +404,127 @@ describe("GameSceneBase scaffold", () => {
       expect(revealTween).toBeDefined();
       expect(revealTween?.[0].scaleX).toBeCloseTo(0.5);
       expect(revealTween?.[0].scaleY).toBeCloseTo(0.5);
+    });
+  });
+
+  describe("createSpokenInstruction", () => {
+    const COPY = "Drag each shape into its hole.";
+
+    /** Returns the add.* mock for a factory name (text/image/...). */
+    function addMock(scene: unknown, factory: "text" | "image"): MockFn {
+      return getMockFn((scene as { add: Record<string, unknown> }).add[factory]);
+    }
+
+    /** Returns the speaker glyph created for the instruction line. */
+    function instructionGlyph(scene: unknown): Record<string, MockFn> {
+      const imageMock = addMock(scene, "image");
+      const index = imageMock.mock.calls.findIndex((call) => call[2] === "icon_speaker");
+      expect(index).toBeGreaterThanOrEqual(0);
+      return imageMock.mock.results[index].value as Record<string, MockFn>;
+    }
+
+    /** Taps the speaker glyph, firing every pointerdown handler like Phaser does. */
+    function tapGlyph(scene: unknown): void {
+      const glyph = instructionGlyph(scene) as unknown as MockObject;
+      const handlers = glyph.allHandlers.filter((entry) => entry.name === "pointerdown");
+      expect(handlers.length).toBeGreaterThan(0);
+      for (const entry of handlers) {
+        entry.cb();
+      }
+    }
+
+    it("renders the prompt line with the copy at the default band", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+
+      const textMock = addMock(scene, "text");
+      const call = textMock.mock.calls.at(-1);
+      expect(call?.[0]).toBe(512);
+      expect(call?.[1]).toBe(112);
+      expect(call?.[2]).toBe(COPY);
+      const label = textMock.mock.results.at(-1)?.value as Record<string, MockFn>;
+      expect(getMockFn(label.setOrigin)).toHaveBeenCalledWith(0.5);
+
+      const glyph = instructionGlyph(scene);
+      const imageMock = addMock(scene, "image");
+      const glyphCall = imageMock.mock.calls.find((c) => c[2] === "icon_speaker");
+      expect(glyphCall?.[0]).toBe(858);
+      expect(glyphCall?.[1]).toBe(112);
+      expect(getMockFn(glyph.setDisplaySize)).toHaveBeenCalledWith(96, 96);
+    });
+
+    it("speaks the instruction once when the round is set up", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+
+      expect(mockSpeech.speakSentence).toHaveBeenCalledTimes(1);
+      expect(mockSpeech.speakSentence).toHaveBeenCalledWith(COPY, true);
+    });
+
+    it("stays silent and dims the glyph when the SFX toggle is off", () => {
+      updateSettings({ sfxEnabled: false });
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+
+      expect(mockSpeech.speakSentence).toHaveBeenCalledWith(COPY, false);
+      const glyph = instructionGlyph(scene);
+      expect(getMockFn(glyph.setTint)).toHaveBeenCalledWith(0xa0aec0);
+      expect(getMockFn(glyph.setAlpha)).toHaveBeenCalledWith(0.6);
+    });
+
+    it("replays the instruction and re-reads the SFX setting on tap", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+      expect(mockSpeech.speakSentence).toHaveBeenCalledTimes(1);
+
+      // The parent can flip the toggle between rounds; the replay honours it.
+      updateSettings({ sfxEnabled: false });
+      tapGlyph(scene);
+
+      expect(mockSpeech.speakSentence).toHaveBeenCalledTimes(2);
+      expect(mockSpeech.speakSentence).toHaveBeenLastCalledWith(COPY, false);
+    });
+
+    it("honours per-game x and y overrides for the line and the glyph", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY, { x: 300, y: 220 });
+
+      const textCall = addMock(scene, "text").mock.calls.at(-1);
+      expect(textCall?.[0]).toBe(300);
+      expect(textCall?.[1]).toBe(220);
+
+      const glyphCall = addMock(scene, "image").mock.calls.find((c) => c[2] === "icon_speaker");
+      expect(glyphCall?.[0]).toBe(646);
+      expect(glyphCall?.[1]).toBe(220);
+    });
+
+    it("destroys the speaker glyph on shutdown", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+      const glyph = instructionGlyph(scene);
+      scene.testRegisterShutdownCleanup();
+
+      const shutdownCall = getMockFn(scene.events.on).mock.calls.find((c) => c[0] === "shutdown");
+      const handler = shutdownCall?.[1] as (() => void) | undefined;
+      expect(handler).toBeDefined();
+      handler?.();
+
+      expect(getMockFn(glyph.destroy)).toHaveBeenCalled();
+    });
+
+    it("replaces the previous prompt when called again on the same scene", () => {
+      const scene = new TestScene();
+      scene.testCreateSpokenInstruction(COPY);
+      const firstLabel = addMock(scene, "text").mock.results[0]?.value as MockObject;
+      const firstGlyph = instructionGlyph(scene);
+
+      scene.testCreateSpokenInstruction("A different rule.");
+
+      expect(getMockFn(firstLabel.destroy)).toHaveBeenCalled();
+      expect(getMockFn(firstGlyph.destroy)).toHaveBeenCalled();
+      expect(
+        addMock(scene, "text").mock.calls.filter((c) => c[2] === "A different rule."),
+      ).toHaveLength(1);
     });
   });
 
