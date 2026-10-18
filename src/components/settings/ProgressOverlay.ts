@@ -9,6 +9,7 @@ import {
 import type { GameId } from "../../types";
 import { attachPressFeedback } from "../../utils/pressFeedback";
 import { getActiveProfile, getProfiles, getProgress } from "../../utils/storage";
+import { displayScale } from "../../utils/textureTiers";
 import { textStyle } from "../../utils/typography";
 import {
   AVATAR_TEXTURE_SIZE,
@@ -201,7 +202,9 @@ export class ProgressOverlay {
       const accuracy = getAccuracy(game);
 
       const icon = scene.add.image(centerX - 182, y, row.tileKey);
-      icon.setScale(28 / AVATAR_TEXTURE_SIZE);
+      // Tile icons rasterize at the icon tier, avatars at card tier — derive
+      // this row's scale from its own key rather than the avatar constant.
+      icon.setScale(displayScale(row.tileKey, 28));
       this.deps.overlayObjects.push(icon);
 
       const name = scene.add

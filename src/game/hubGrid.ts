@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { hasSticker } from "../utils/storage";
-import { textureSizeFor } from "../utils/textureTiers";
+import { displayScale, textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 import { isNarrowViewport, PAGE_COUNT, pagedTilePosition, pageTileIndexes } from "./hubPaging";
 import { GAME_TILES } from "./hubTiles";
@@ -43,10 +43,6 @@ const BOB_DURATION = 2500;
 const BOB_PHASE_OFFSET = 200;
 /** Display size of sticker thumbnails on the shelf (px). */
 const STICKER_DISPLAY_SIZE = 56;
-/** Sticker textures are rasterized at this size (matches PreloadScene). */
-const STICKER_TEXTURE_SIZE = textureSizeFor("sticker_shape_sorter");
-/** Base scale for sticker thumbnails (56px from a 512px texture). */
-const STICKER_SCALE = STICKER_DISPLAY_SIZE / STICKER_TEXTURE_SIZE;
 /** Alpha of the dashed empty-slot outline for unearned stickers. */
 const EMPTY_SLOT_ALPHA = 0.55;
 /** Stroke width of the dashed empty-slot outline (px). */
@@ -167,6 +163,10 @@ export class HubGrid {
     this.entranceIndex = 0;
     this.attractTargets = [];
     this.navLocked = false;
+    // Phaser clears a scene's input listeners on shutdown while this instance
+    // survives the revisit, so the swipe wiring must be re-armed each visit —
+    // otherwise paging gestures stay dead for the rest of the session.
+    this.swipeWired = false;
   }
 
   /** Classifies the current viewport into the paged (narrow) or wide mode. */
@@ -585,21 +585,22 @@ export class HubGrid {
     const stickerY = y + tileHeight / 2 - 13;
 
     if (earned) {
-      const sticker = this.deps.scene.add.image(
-        stickerX,
-        stickerY,
-        `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`,
-      );
+      // Derive the thumbnail scale from THIS sticker's raster tier instead of a
+      // single hardcoded key, so a future tier change cannot shrink or grow
+      // only some of the twenty shelf stickers.
+      const stickerKey = `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`;
+      const stickerScale = displayScale(stickerKey, STICKER_DISPLAY_SIZE);
+      const sticker = this.deps.scene.add.image(stickerX, stickerY, stickerKey);
       this.stickerImages.push(sticker as Phaser.GameObjects.Image);
       if (GAME_TILES[index].gameId === this.justEarned) {
-        sticker.setScale(STICKER_SCALE * JUST_EARNED_SCALE);
-        this.animateJustEarned(sticker as Phaser.GameObjects.Image);
+        sticker.setScale(stickerScale * JUST_EARNED_SCALE);
+        this.animateJustEarned(sticker as Phaser.GameObjects.Image, stickerScale);
       } else {
-        sticker.setScale(STICKER_SCALE);
+        sticker.setScale(stickerScale);
         this.animateEntrance(
           [sticker],
           () => this.addSparkle(sticker as Phaser.GameObjects.Image),
-          STICKER_SCALE,
+          stickerScale,
         );
       }
     } else {
@@ -702,7 +703,7 @@ export class HubGrid {
    * Brings the just-earned sticker in with a larger Back.out bounce and a
    * sparkle burst (scale pulse + shimmer). Under reduced motion only alpha.
    */
-  private animateJustEarned(sticker: Phaser.GameObjects.Image): void {
+  private animateJustEarned(sticker: Phaser.GameObjects.Image, stickerScale: number): void {
     const index = this.entranceIndex;
     this.entranceIndex += 1;
     const config: Phaser.Types.Tweens.TweenBuilderConfig = {
@@ -715,9 +716,9 @@ export class HubGrid {
     sticker.setAlpha(0);
     if (!isReducedMotion()) {
       sticker.setScale(0);
-      config.scaleX = JUST_EARNED_SCALE * STICKER_SCALE;
-      config.scaleY = JUST_EARNED_SCALE * STICKER_SCALE;
-      config.onComplete = () => this.addJustEarnedBurst(sticker);
+      config.scaleX = JUST_EARNED_SCALE * stickerScale;
+      config.scaleY = JUST_EARNED_SCALE * stickerScale;
+      config.onComplete = () => this.addJustEarnedBurst(sticker, stickerScale);
     }
     this.deps.scene.tweens.add(config);
   }
@@ -736,13 +737,13 @@ export class HubGrid {
   }
 
   /** Sparkle burst for the just-earned sticker: shimmer plus scale pulse. */
-  private addJustEarnedBurst(sticker: Phaser.GameObjects.Image): void {
+  private addJustEarnedBurst(sticker: Phaser.GameObjects.Image, stickerScale: number): void {
     this.addSparkle(sticker);
     if (isReducedMotion()) return;
     this.deps.scene.tweens.add({
       targets: sticker,
-      scaleX: BURST_SCALE * STICKER_SCALE,
-      scaleY: BURST_SCALE * STICKER_SCALE,
+      scaleX: BURST_SCALE * stickerScale,
+      scaleY: BURST_SCALE * stickerScale,
       duration: BURST_DURATION,
       yoyo: true,
       repeat: -1,

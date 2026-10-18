@@ -230,4 +230,35 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
 
     expect(rects(176, 196).length).toBe(10);
   });
+
+  it("re-arms swipe wiring after a scene shutdown (revisit)", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+
+    // Phaser's InputPlugin.shutdown() drops every scene input listener while
+    // the Hub scene instance survives, so simulate that on the mock scene.
+    scene.sceneInputHandlers = {};
+    grid.resetForVisit();
+    grid.wireSwipeGestures();
+
+    expect(scene.sceneInputHandlers.pointerdown?.length).toBe(1);
+  });
+
+  it("derives each shelf sticker's scale from its own texture tier", () => {
+    earnSticker("shape-sorter");
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.buildWideGrid();
+
+    const sticker = mockRegistry.find(
+      (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
+    );
+    if (!sticker) throw new Error("earned sticker thumbnail not created");
+    // Card tier: 256px raster scaled to the 56px shelf slot.
+    expect((sticker.setScale as MockFn).mock.calls[0]?.[0]).toBeCloseTo(56 / 256, 5);
+  });
 });

@@ -73,6 +73,21 @@ describe("ProgressOverlay", () => {
     expect(bucket.length).toBeGreaterThan(0);
   });
 
+  it("scales row icons from the icon texture tier, not the avatar tier", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+
+    overlay.open();
+
+    const icon = rowIcons()[0];
+    if (!icon) throw new Error("no row icon");
+    // tile_* textures rasterize at 160px, so a 28px icon is 28/160 (not 28/256).
+    expect((icon.setScale as MockFn).mock.calls[0]?.[0]).toBeCloseTo(28 / 160, 5);
+  });
+
   it("tapping the close button empties the bucket and destroys objects", () => {
     const scene = new MockScene();
     const bucket: MockObject[] = [];
