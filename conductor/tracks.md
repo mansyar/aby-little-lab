@@ -205,4 +205,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Gameplay Hitbox Fixes + Art Readability Pass** *Link: [./tracks/gameplay-and-art-pass_20261019/index.md](./tracks/gameplay-and-art-pass_20261019/index.md)* (Archived)
+- [~] **Track: Gameplay Hitbox Fixes + Art Readability Pass** *Link: [./tracks/gameplay-and-art-pass_20261019/index.md](./tracks/gameplay-and-art-pass_20261019/index.md)*

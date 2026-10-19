@@ -2,7 +2,7 @@
 
 ## Phase 1 — Memory Match card scale
 
-- [ ] Task: Write failing tests for display-scale preservation
+- [~] Task: Write failing tests for display-scale preservation
     - [ ] Deal tween ends at each part's post-`setDisplaySize` scale: rect 1, `card_back` `size / 256`, face `size * ITEM_FILL / 256`
     - [ ] Flip-back restores the same per-part scale, never 1 for an image part
     - [ ] Cover all three bands (150 / 132 / 120)
