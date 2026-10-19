@@ -80,3 +80,52 @@ export function drawScenarios(rng: () => number = Math.random): Scenario[] {
   ).slice(0, ROUND_COUNT - EMOTIONS.length);
   return shuffleWith([...guaranteed, ...extras], rng);
 }
+
+/** Whether a round contrasts distinct or deliberately confusable expressions. */
+export type ContrastKind = "distinct" | "confusable";
+
+/** One rung of the easy-first contrast ladder. */
+export interface RoundContrast {
+  /** The two emotions the round is designed to contrast. */
+  pair: readonly [Emotion, Emotion];
+  /** Third card used when the target is one of the pair. */
+  third: Emotion;
+  /** Which contrast family this rung belongs to. */
+  kind: ContrastKind;
+}
+
+/** Rounds 1–3: happy vs angry, the most distinct pair of the four. */
+const DISTINCT_ROUND: RoundContrast = { pair: ["happy", "angry"], third: "sad", kind: "distinct" };
+
+/** Rounds 4–6: sad vs scared, both drawn with downturned features. */
+const CONFUSABLE_ROUND: RoundContrast = {
+  pair: ["sad", "scared"],
+  third: "happy",
+  kind: "confusable",
+};
+
+/**
+ * The fixed easy-first ladder. Indexes 0–2 contrast the maximally distinct
+ * happy/angry pair; indexes 3–5 contrast the easily confused sad/scared pair.
+ */
+export const ROUND_CONTRASTS: readonly RoundContrast[] = [
+  DISTINCT_ROUND,
+  DISTINCT_ROUND,
+  DISTINCT_ROUND,
+  CONFUSABLE_ROUND,
+  CONFUSABLE_ROUND,
+  CONFUSABLE_ROUND,
+];
+
+/**
+ * Builds the three emotion cards for one round. Both emotions of the round's
+ * contrast pair always appear; the third card is the target itself, or — when
+ * the target is already in the pair — the ladder's designated extra. The
+ * result is always three distinct emotions that include the target.
+ */
+export function buildRoundChoices(roundIndex: number, target: Emotion): Emotion[] {
+  const contrast = ROUND_CONTRASTS[roundIndex];
+  const cards: Emotion[] = [...contrast.pair];
+  cards.push(cards.includes(target) ? contrast.third : target);
+  return cards;
+}

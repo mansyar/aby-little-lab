@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildRoundChoices,
   drawScenarios,
   EMOTIONS,
+  ROUND_CONTRASTS,
   ROUND_COUNT,
   SCENARIO_POOL,
 } from "../../game/feelingsFacesLogic";
@@ -89,5 +91,90 @@ describe("drawScenarios", () => {
       ),
     );
     expect(runs.size).toBeGreaterThan(1);
+  });
+});
+
+describe("ROUND_CONTRASTS", () => {
+  it("provides one rung per round", () => {
+    expect(ROUND_CONTRASTS).toHaveLength(ROUND_COUNT);
+  });
+
+  it("opens with the maximally distinct happy/angry contrast for rounds 1–3", () => {
+    for (const index of [0, 1, 2]) {
+      const contrast = ROUND_CONTRASTS[index];
+      expect(contrast.kind).toBe("distinct");
+      expect(contrast.pair).toEqual(["happy", "angry"]);
+    }
+  });
+
+  it("closes with the confusable sad/scared contrast for rounds 4–6", () => {
+    for (const index of [3, 4, 5]) {
+      const contrast = ROUND_CONTRASTS[index];
+      expect(contrast.kind).toBe("confusable");
+      expect(contrast.pair).toEqual(["sad", "scared"]);
+    }
+  });
+
+  it("pairs two different emotions from the deck", () => {
+    for (const contrast of ROUND_CONTRASTS) {
+      expect(contrast.pair).toHaveLength(2);
+      expect(new Set(contrast.pair).size).toBe(2);
+      expect(EMOTIONS).toContain(contrast.pair[0]);
+      expect(EMOTIONS).toContain(contrast.pair[1]);
+    }
+  });
+
+  it("keeps each third card outside its own pair", () => {
+    for (const contrast of ROUND_CONTRASTS) {
+      expect(contrast.pair).not.toContain(contrast.third);
+      expect(EMOTIONS).toContain(contrast.third);
+    }
+  });
+});
+
+describe("buildRoundChoices", () => {
+  it("returns three distinct cards including the target for every round", () => {
+    for (let index = 0; index < ROUND_COUNT; index++) {
+      for (const target of EMOTIONS) {
+        const choices = buildRoundChoices(index, target);
+        expect(choices).toHaveLength(3);
+        expect(new Set(choices).size).toBe(3);
+        expect(choices.filter((choice) => choice === target)).toHaveLength(1);
+      }
+    }
+  });
+
+  it("always shows both emotions of the round's contrast pair", () => {
+    for (let index = 0; index < ROUND_COUNT; index++) {
+      for (const target of EMOTIONS) {
+        const choices = buildRoundChoices(index, target);
+        for (const emotion of ROUND_CONTRASTS[index].pair) {
+          expect(choices).toContain(emotion);
+        }
+      }
+    }
+  });
+
+  it("puts the ladder's third card beside a target that is in the pair", () => {
+    expect(buildRoundChoices(0, "happy")).toEqual(["happy", "angry", "sad"]);
+    expect(buildRoundChoices(0, "angry")).toEqual(["happy", "angry", "sad"]);
+    expect(buildRoundChoices(4, "sad")).toEqual(["sad", "scared", "happy"]);
+    expect(buildRoundChoices(4, "scared")).toEqual(["sad", "scared", "happy"]);
+  });
+
+  it("keeps a target outside the pair as the third card", () => {
+    expect(buildRoundChoices(0, "scared")).toEqual(["happy", "angry", "scared"]);
+    expect(buildRoundChoices(5, "angry")).toEqual(["sad", "scared", "angry"]);
+  });
+
+  it("uses the distinct pair early and the confusable pair late for every target", () => {
+    for (const target of EMOTIONS) {
+      for (const index of [0, 1, 2]) {
+        expect(buildRoundChoices(index, target).slice(0, 2)).toEqual(["happy", "angry"]);
+      }
+      for (const index of [3, 4, 5]) {
+        expect(buildRoundChoices(index, target).slice(0, 2)).toEqual(["sad", "scared"]);
+      }
+    }
   });
 });
