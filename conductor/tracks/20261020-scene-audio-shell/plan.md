@@ -17,31 +17,34 @@
   `src/scenes/AddItUpScene.ts`, `src/scenes/TakeAwayScene.ts`,
   `src/scenes/sceneRegistry.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `352671f`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-1.md`
 
-- [ ] **P1.T1: Create the `ChoiceRoundScene` base** — covers: FR-1
-  - [ ] **P1.T1.1: Define the subclass contract** (round-content build, choice
+- [x] **P1.T1: Create the `ChoiceRoundScene` base** — covers: FR-1
+  - [x] **P1.T1.1: Define the subclass contract** (round-content build, choice
     targets, optional per-game correct/wrong extras, advance delay) and the
     round teardown that destroys them.
-  - [ ] **P1.T1.2: Port the shared handlers** — input lock, chime,
+  - [x] **P1.T1.2: Port the shared handlers** — input lock, chime,
     `recordCorrect`, mascot cheer, progress-dot pop, `NEXT_ROUND_DELAY`
     advance; wrong path with `recordWrong`, soft tone, mascot nod, and the
     reduced-motion-aware wiggle.
-  - [ ] **P1.T1.3: Add a choice-target factory** that creates the ≥96 px hit
+  - [x] **P1.T1.3: Add a choice-target factory** that creates the ≥96 px hit
     area and press feedback once, so no subclass repeats the hit-area
     geometry.
-- [ ] **P1.T2: Move Add It Up and Take Away onto `GroupMathScene`** — covers: FR-2
-  - [ ] **P1.T2.1: Implement `GroupMathScene`** as a config-driven scene
+- [x] **P1.T2: Move Add It Up and Take Away onto `GroupMathScene`** — covers: FR-2
+  - [x] **P1.T2.1: Implement `GroupMathScene`** as a config-driven scene
     (operation cue, item layout, logic module, game id, instruction line).
-  - [ ] **P1.T2.2: Reduce `AddItUpScene` and `TakeAwayScene` to thin
+  - [x] **P1.T2.2: Reduce `AddItUpScene` and `TakeAwayScene` to thin
     subclasses** that pin their config, keeping module paths, scene keys and
     registry entries untouched.
-  - [ ] **P1.T2.3: Verify per-game identity is intact** — adaptive band shift,
+  - [x] **P1.T2.3: Verify per-game identity is intact** — adaptive band shift,
     `recordGameResult` id, sticker key, spoken rule, progress-dot count.
-- [ ] **P1.T3: Base unit tests** — covers: FR-1
-  - [ ] **P1.T3.1: Test the hook contract** — order of build/teardown, single
+- [x] **P1.T3: Base unit tests** — covers: FR-1
+  - [x] **P1.T3.1: Test the hook contract** — order of build/teardown, single
     advance per correct tap while locked, completion at the last round.
-  - [ ] **P1.T3.2: Test the wrong-answer path** — wiggle amplitudes and
+  - [x] **P1.T3.2: Test the wrong-answer path** — wiggle amplitudes and
     durations under normal and reduced motion, no advance, no dot fill.
 
 <!--
