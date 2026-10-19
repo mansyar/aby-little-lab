@@ -57,7 +57,7 @@ for social-emotional content have nothing to open.
 | FR-3 | Exactly one card per round matches the scenario's emotion; tapping it plays the correct chime + splash and advances | must |
 | FR-4 | An incorrect tap wiggles the card, plays the gentle "try again" tone, re-speaks the scenario once, and keeps the same round — no penalty, no advance | must |
 | FR-5 | The scenario pool holds 16 entries (4 per emotion); each playthrough draws 6 without repetition in shuffled order | must |
-| FR-6 | Rounds 1–3 use maximally distinct expression contrasts; rounds 4–6 use confusable contrasts (sad vs. scared, happy vs. angry) | should |
+| FR-6 | Rounds 1–3 use maximally distinct expression contrasts (happy vs. angry); rounds 4–6 use confusable contrasts (sad vs. scared) | should |
 | FR-7 | The rule "Tap the face that shows how Aby feels." appears as one written line beside the speaker glyph, is spoken once at round 1 setup, and is replayable on tap | must |
 | FR-8 | When no TTS voice is available (or SFX is off) the scenario appears as a short written caption and the speaker glyph is dimmed; the round remains completable | must |
 | FR-9 | Completing all 6 rounds triggers the win animation, awards the heart sticker on first completion only, and auto-returns to the Hub after 3 s | must |

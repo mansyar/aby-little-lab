@@ -14,22 +14,26 @@
 - **Covers:** FR-5, FR-6, FR-11, AC-4, AC-5, AC-9
 - **Touches:** `src/game/feelingsFacesLogic.ts`, `src/__tests__/game/feelingsFacesLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/game/feelingsFacesLogic.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Scenario pool + types** — covers: FR-11
-  - [ ] **P1.T1.1: Define `Emotion` union (happy/sad/angry/scared) and `Scenario { id, emotion, text }`**
-  - [ ] **P1.T1.2: Author 16 scenarios (4 per emotion), all ≤ 60 chars, gentle-and-resolvable tone**
-- [ ] **P1.T2: Playthrough draw** — covers: FR-5
-  - [ ] **P1.T2.1: Seeded `drawScenarios(rng)` returning 6 with no repeats, covering all 4 emotions at least once**
-- [ ] **P1.T3: Contrast ladder** — covers: FR-6
-  - [ ] **P1.T3.1: Rounds 1–3 use maximally distinct pairs; rounds 4–6 use confusable pairs**
-  - [ ] **P1.T3.2: `buildRoundChoices()` returns 3 distinct emotion cards with the target guaranteed present**
-- [ ] **P1.T4: Round scoring state machine** — covers: FR-3, FR-4
-  - [ ] **P1.T4.1: Pure `answer(round, emotion)` → `{correct, nextRound, taps}`; wrong answers never advance**
-- [ ] **P1.T5: Unit suite** — covers: AC-4, AC-5, AC-9
-  - [ ] **P1.T5.1: 20-run draw determinism/no-repeat test**
-  - [ ] **P1.T5.2: Contrast table test for each round index**
-  - [ ] **P1.T5.3: Scenario-content guard test (length, safe-tone word blocklist)**
+**Result:** verified
+**Checkpoint:** 92c5f49
+**Evidence:** conductor/tracks/20261020-feelings-faces/verification/phase-1.md
+
+- [x] **P1.T1: Scenario pool + types** — covers: FR-11
+  - [x] **P1.T1.1: Define `Emotion` union (happy/sad/angry/scared) and `Scenario { id, emotion, text }`**
+  - [x] **P1.T1.2: Author 16 scenarios (4 per emotion), all ≤ 60 chars, gentle-and-resolvable tone**
+- [x] **P1.T2: Playthrough draw** — covers: FR-5
+  - [x] **P1.T2.1: Seeded `drawScenarios(rng)` returning 6 with no repeats, covering all 4 emotions at least once**
+- [x] **P1.T3: Contrast ladder** — covers: FR-6
+  - [x] **P1.T3.1: Rounds 1–3 use maximally distinct pairs; rounds 4–6 use confusable pairs**
+  - [x] **P1.T3.2: `buildRoundChoices()` returns 3 distinct emotion cards with the target guaranteed present**
+- [x] **P1.T4: Round scoring state machine** — covers: FR-3, FR-4
+  - [x] **P1.T4.1: Pure `answer(round, emotion)` → `{correct, nextRound, taps}`; wrong answers never advance**
+- [x] **P1.T5: Unit suite** — covers: AC-4, AC-5, AC-9
+  - [x] **P1.T5.1: 20-run draw determinism/no-repeat test**
+  - [x] **P1.T5.2: Contrast table test for each round index**
+  - [x] **P1.T5.3: Scenario-content guard test (length, safe-tone word blocklist)**
 
 ## Phase 2: Art and suite registration
 

@@ -56,3 +56,12 @@ None. Only the two `Touches` paths were created or modified.
 - Round cards = the round's contrast pair plus the target; when the target is already in the pair, the ladder's designated third card (sad for early rounds, happy for late rounds) fills the third slot. This always yields three distinct emotions with the target present, without needing an RNG.
 - `answer(round, emotion).taps` is the round's cumulative tap count after the answer (correct and wrong combined); the scene should carry it into the round state and reset it on advance.
 - Coverage was not part of this phase's command; the suite exercises every exported function and both sides of every conditional.
+
+## Primary verification
+
+- **Date:** 2026-10-20
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/game/feelingsFacesLogic.test.ts`
+- **Exit:** 0 — Biome clean apart from the pre-existing `musicalMemoryScene.test.ts:294` warning, `tsc --noEmit` clean, 30/30 tests pass.
+- **Tree:** clean at `92c5f49`. Files in `bd074d0..92c5f49` are the two `Touches` paths, this evidence file, and `f6b11ac` (orchestrator commit syncing `.opencode/agents/conductor-phase.md` with the updated skill template — outside this phase's scope, accepted as pre-existing).
+- **Squash:** skipped — the range contains `f6b11ac`, which the phase subagent did not author, so the task commits are retained intact.
+- **Spec correction:** FR-6's parenthetical was clarified to state the implemented ladder (happy/angry early, sad/scared late). The ID was not renumbered and no requirement changed.
