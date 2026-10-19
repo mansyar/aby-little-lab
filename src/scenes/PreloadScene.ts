@@ -8,6 +8,10 @@ import animalFrogRedSvg from "../assets/svg/animals/frog_red.svg?raw";
 import animalMonkeySvg from "../assets/svg/animals/monkey.svg?raw";
 import animalPigSvg from "../assets/svg/animals/pig.svg?raw";
 import animalRabbitSvg from "../assets/svg/animals/rabbit.svg?raw";
+import faceAngrySvg from "../assets/svg/feelings/face_angry.svg?raw";
+import faceHappySvg from "../assets/svg/feelings/face_happy.svg?raw";
+import faceSadSvg from "../assets/svg/feelings/face_sad.svg?raw";
+import faceScaredSvg from "../assets/svg/feelings/face_scared.svg?raw";
 import smAirplaneSvg from "../assets/svg/items/airplane.svg?raw";
 import foodAppleSvg from "../assets/svg/items/apple.svg?raw";
 import smBallSvg from "../assets/svg/items/ball.svg?raw";
@@ -117,6 +121,7 @@ import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.s
 import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
 import stickerColorMatchSvg from "../assets/svg/stickers/sticker_color_match.svg?raw";
 import stickerDecodeItSvg from "../assets/svg/stickers/sticker_decode_it.svg?raw";
+import stickerFeelingsFacesSvg from "../assets/svg/stickers/sticker_feelings_faces.svg?raw";
 import stickerFirstSoundsSvg from "../assets/svg/stickers/sticker_first_sounds.svg?raw";
 import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
 import stickerMemoryMatchSvg from "../assets/svg/stickers/sticker_memory_match.svg?raw";
@@ -149,6 +154,7 @@ import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
 import minusSvg from "../assets/svg/ui/minus.svg?raw";
 import plusSvg from "../assets/svg/ui/plus.svg?raw";
 import sleepZzzSvg from "../assets/svg/ui/sleep_zzz.svg?raw";
+import tileFeelingsFacesSvg from "../assets/svg/ui/tile_feelings_faces.svg?raw";
 import tileAddItUpSvg from "../assets/svg/ui/tiles/tile_add_it_up.svg?raw";
 import tileAlphabetSvg from "../assets/svg/ui/tiles/tile_alphabet.svg?raw";
 import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw";
@@ -349,6 +355,12 @@ export const SHAPE_ASSETS = [
   { key: "tile_memory_match", svg: tileMemoryMatchSvg },
   { key: "tile_decode_it", svg: tileDecodeItSvg },
   { key: "tile_number_order", svg: tileNumberOrderSvg },
+  { key: "face_happy", svg: faceHappySvg },
+  { key: "face_sad", svg: faceSadSvg },
+  { key: "face_angry", svg: faceAngrySvg },
+  { key: "face_scared", svg: faceScaredSvg },
+  { key: "tile_feelings_faces", svg: tileFeelingsFacesSvg },
+  { key: "sticker_feelings_faces", svg: stickerFeelingsFacesSvg },
 ] as const;
 
 /**

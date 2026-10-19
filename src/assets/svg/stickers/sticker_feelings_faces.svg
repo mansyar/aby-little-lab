@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="236" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <!-- a soft-red heart with a happy face: feelings + reward in one flat badge -->
+  <g transform="translate(256 266) scale(0.72) translate(-256 -240)">
+    <path d="M 256 420 C 140 340 80 260 80 170 C 80 100 150 60 200 90 C 220 105 240 130 256 160 C 272 130 292 105 312 90 C 362 60 432 100 432 170 C 432 260 372 340 256 420 Z" fill="#FC8181" stroke="#2D3748" stroke-width="7" stroke-linejoin="round"/>
+  </g>
+  <circle cx="222" cy="232" r="12" fill="#2D3748"/>
+  <circle cx="290" cy="232" r="12" fill="#2D3748"/>
+  <path d="M 220 264 Q 256 298 292 264" fill="none" stroke="#2D3748" stroke-width="11" stroke-linecap="round"/>
+</svg>
