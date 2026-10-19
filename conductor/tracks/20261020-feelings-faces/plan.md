@@ -42,7 +42,7 @@
 - **Covers:** FR-9 (sticker asset), NFR-4, NFR-5, NFR-7
 - **Touches:** `src/assets/svg/feelings/**`, `src/assets/svg/ui/tile_feelings_faces.svg`, `src/assets/svg/stickers/sticker_feelings_faces.svg`, `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `src/__tests__/assets/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/preloadScene.test.ts src/__tests__/assets && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 > **Adjustment (2026-10-20):** all id/registry wiring moved to Phase 3. `GameId` is
 > counted by progress, storage, grid, paging, navigation, and lifecycle suites, so the
