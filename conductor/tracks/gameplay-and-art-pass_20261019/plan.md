@@ -51,11 +51,11 @@
 
 ## Phase 5 — Style guide + contact sheets
 
-- [ ] Task: Write `docs/svg-style.md` (512 grid, 8 px margin, 6/4/3 outline weights, palette tokens, 96 px rule, asset inventory)
-- [ ] Task: Regenerate all 11 sheets with `node scripts/render-svg-contact-sheets.mjs --png`
-- [ ] Task: Verify the counts (items 23, shapes 36, stickers 20, tiles 20, ui 11) and that the changed assets appear
-- [ ] Task: Commit (`docs(art): add the SVG style guide and refresh contact sheets`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write `docs/svg-style.md` (512 grid, 8 px margin, 6/4/3 outline weights, palette tokens, 96 px rule, asset inventory) *(db7f3b9)*
+- [x] Task: Regenerate all 11 sheets with `node scripts/render-svg-contact-sheets.mjs --png` *(db7f3b9)*
+- [x] Task: Verify the counts (items 23, shapes 36, stickers 20, tiles 20, ui 11) and that the changed assets appear
+- [x] Task: Commit (`docs(art): add the SVG style guide and refresh contact sheets`) *(db7f3b9)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6 — Gates and manual smoke
 
