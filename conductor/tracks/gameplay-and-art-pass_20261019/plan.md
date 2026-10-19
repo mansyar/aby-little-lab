@@ -2,13 +2,13 @@
 
 ## Phase 1 — Memory Match card scale
 
-- [~] Task: Write failing tests for display-scale preservation
-    - [ ] Deal tween ends at each part's post-`setDisplaySize` scale: rect 1, `card_back` `size / 256`, face `size * ITEM_FILL / 256`
-    - [ ] Flip-back restores the same per-part scale, never 1 for an image part
-    - [ ] Cover all three bands (150 / 132 / 120)
-- [ ] Task: Implement scale capture and per-part tween targets in `renderRound()` and `flipCard()`
-- [ ] Task: Verify the targeted Memory Match suite is green and `pnpm typecheck` is clean
-- [ ] Task: Commit (`fix(memory-match): preserve card display scale through deal and flip`)
+- [x] Task: Write failing tests for display-scale preservation *(d56b7b6)*
+    - [x] Deal tween ends at each part's post-`setDisplaySize` scale: rect 1, `card_back` `size / 256`, face `size * ITEM_FILL / 256`
+    - [x] Flip-back restores the same per-part scale, never 1 for an image part
+    - [x] Cover all three bands (150 / 132 / 120)
+- [x] Task: Implement scale capture and per-part tween targets in `renderRound()` and `flipCard()` *(3dbb5bc)*
+- [x] Task: Verify the targeted Memory Match suite is green and `pnpm typecheck` is clean
+- [x] Task: Commit (`fix(memory-match): preserve card display scale through deal and flip`) *(3dbb5bc)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2 — Number Order hit area + snap easing
