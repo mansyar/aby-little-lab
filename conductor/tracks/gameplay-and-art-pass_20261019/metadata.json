@@ -1,0 +1,11 @@
+{
+  "trackId": "gameplay-and-art-pass_20261019",
+  "type": "bug",
+  "status": "new",
+  "createdAt": "2026-10-19",
+  "updatedAt": "2026-10-19",
+  "branch": "feature/gameplay-and-art-pass",
+  "spec": "./spec.md",
+  "plan": "./plan.md",
+  "dependsOn": []
+}
