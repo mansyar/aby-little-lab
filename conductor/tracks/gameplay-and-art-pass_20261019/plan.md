@@ -40,14 +40,14 @@
 
 ## Phase 4 — Remaining art assets
 
-- [ ] Task: Fix `items/bone.svg` contrast (tan fill + top highlight, keep the 6 px outline)
-- [ ] Task: Redraw `items/ball.svg` as a beach ball (alternating segments)
-- [ ] Task: Rework `items/map.svg` to remove the face pareidolia (asymmetric islands, S-curve route, X + compass)
-- [ ] Task: Add a freeze cue to `ui/tiles/tile_pop_freeze.svg` (snowflake + frost rim)
-- [ ] Task: Differentiate `animals/monkey.svg` with a light face patch and a protruding muzzle
-- [ ] Task: Render a working contact sheet and verify each asset at 96 px
-- [ ] Task: Commit (`fix(art): improve readability of bone, ball, map, tile and monkey`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Fix `items/bone.svg` contrast (tan fill + top highlight, keep the 6 px outline) *(3f3cb9f)*
+- [x] Task: Redraw `items/ball.svg` as a beach ball (alternating segments) *(3f3cb9f)*
+- [x] Task: Rework `items/map.svg` to remove the face pareidolia (asymmetric islands, S-curve route, X + compass) *(3f3cb9f)*
+- [x] Task: Add a freeze cue to `ui/tiles/tile_pop_freeze.svg` (snowflake + frost rim) *(3f3cb9f)*
+- [x] Task: Differentiate `animals/monkey.svg` with a light face patch and a protruding muzzle *(3f3cb9f)*
+- [x] Task: Render a working contact sheet and verify each asset at 96 px
+- [x] Task: Commit (`fix(art): improve readability of bone, ball, map, tile and monkey`) *(3f3cb9f)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5 — Style guide + contact sheets
 
