@@ -11,7 +11,7 @@
 - [x] Task: Commit (`fix(memory-match): preserve card display scale through deal and flip`) *(3dbb5bc)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2 — Number Order hit area + snap easing
+## Phase 2 — Number Order hit area + snap easing [checkpoint: 05513ef]
 
 - [x] Task: Write failing hit-area tests using `src/__tests__/helpers/hitTest.ts` *(3107dc1)*
     - [x] A tap at the container centre hits
