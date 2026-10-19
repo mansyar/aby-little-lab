@@ -46,3 +46,37 @@ export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "scared-hallway", emotion: "scared", text: "The hallway is dark at bedtime." },
   { id: "scared-dog", emotion: "scared", text: "A big dog barks behind the fence." },
 ];
+
+/** How many rounds one playthrough presents. */
+export const ROUND_COUNT = 6;
+
+/** Returns a shuffled copy of `items` using the injected RNG (Fisher-Yates). */
+function shuffleWith<T>(items: readonly T[], rng: () => number): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/**
+ * Draws one playthrough of six scenarios: one per emotion first, so all four
+ * emotions always appear, then two more from the unused pool, then shuffles
+ * the six into presentation order. No scenario repeats within a run.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function drawScenarios(rng: () => number = Math.random): Scenario[] {
+  const guaranteed = EMOTIONS.map((emotion) => {
+    const scenarios = SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion);
+    return shuffleWith(scenarios, rng)[0];
+  });
+  const drawnIds = new Set(guaranteed.map((scenario) => scenario.id));
+  const extras = shuffleWith(
+    SCENARIO_POOL.filter((scenario) => !drawnIds.has(scenario.id)),
+    rng,
+  ).slice(0, ROUND_COUNT - EMOTIONS.length);
+  return shuffleWith([...guaranteed, ...extras], rng);
+}
