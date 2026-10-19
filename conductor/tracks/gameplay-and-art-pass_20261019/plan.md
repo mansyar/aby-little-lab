@@ -59,10 +59,29 @@
 
 ## Phase 6 — Gates and manual smoke
 
-- [ ] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test --testTimeout=30000`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot`
-- [ ] Task: Manual smoke on the dev server: Memory Match all three bands, Number Order drag/drop, cat in Animal Trace / Pop & Freeze / Memory Match / Odd One Out / Word Match, profile avatar
-- [ ] Task: Fix any fallout and commit
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test --testTimeout=30000`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot`
+- [x] Task: Manual smoke on the dev server: Memory Match all three bands, Number Order drag/drop, cat in Animal Trace / Pop & Freeze / Memory Match / Odd One Out / Word Match, profile avatar
+- [x] Task: Fix any fallout and commit (`fix(number-order): keep dropped cards in their slots`) *(c1ce7e0)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+Manual smoke findings (Playwright against the dev server, screenshots reviewed):
+
+- Memory Match: a 6-card round opens and item art fills the card faces at the
+  per-part display scale (`cardScales()`), so faces are no longer cropped.
+- Number Order: cards can be grabbed mid-drag at the centre and at the lower-right
+  corner; a wrong-order full board now auto-validates and wiggles. Found and fixed
+  a pre-existing defect where the gesture's trailing `pointerup` ran tap-to-return
+  and undid every successful drop (the game was unplayable) — see the fix commit.
+- Cat: reads unmistakably as a cat at every size it ships at — large in Animal
+  Trace, a card face in Odd One Out, the prompt art in Find the Word, a sleeping
+  bubble in Pop & Freeze, and the profile avatar on the hub.
+- Monkey: the heart face patch, muzzle and tuft separate it from the dog in
+  Pop & Freeze.
+- Gates (re-run on the tree including the fix): `check` exit 0 (one pre-existing
+  `noNonNullAssertion` warning at
+  `src/__tests__/scenes/musicalMemoryScene.test.ts:294`), typecheck clean,
+  94 files / 2,007 tests, build OK, `validate-bundle` PASS, `validate-pwa` 15/15,
+  `validate-boot` PASS (median 1.05 s over 3 cold loads, budget 3.0 s).
 
 ---
 
