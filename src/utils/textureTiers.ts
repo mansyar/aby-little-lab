@@ -2,8 +2,8 @@
  * Per-use texture raster tiers.
  *
  * All SVG assets were historically rasterized at a uniform 512×512
- * (`SVG_RASTER_SIZE` in PreloadScene), costing ~178 MB of potential GPU
- * texture memory (170 × 512² × 4 B RGBA) while most consumers display them
+ * (`SVG_RASTER_SIZE` in PreloadScene), costing ~184 MB of potential GPU
+ * texture memory (176 × 512² × 4 B RGBA) while most consumers display them
  * far smaller (Hub tile icons at 64 px, letters at 128 px, gameplay cards at
  * 256 px). Tiers size each texture for its **largest display context**:
  *

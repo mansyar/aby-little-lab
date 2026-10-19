@@ -119,8 +119,10 @@ export class FeelingsFacesScene extends GameSceneBase {
     this.inputLocked = false;
     this.renderRound();
 
-    this.events.on("shutdown", () => this.destroyRuleLine());
+    // Shared cleanup first: the parent lock, mascot and speaker are torn down
+    // even if the scene's own rule-line teardown is never reached.
     this.registerShutdownCleanup();
+    this.events.on("shutdown", () => this.destroyRuleLine());
   }
 
   /**

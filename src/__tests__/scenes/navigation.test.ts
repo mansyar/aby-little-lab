@@ -372,6 +372,8 @@ describe("HubScene", () => {
     expect(hasSticker).toHaveBeenCalledTimes(21);
   });
 
+  // 21 fresh Hub instantiations per pass now; under full-suite coverage load
+  // this can exceed the 5s default, so give it explicit headroom.
   it("navigates to each game scene when respective tile is clicked", async () => {
     // A fresh Hub per navigation mirrors reality: once a transition starts,
     // the guard blocks further transitions on that instance until shutdown
@@ -390,7 +392,7 @@ describe("HubScene", () => {
       expect(ensureSceneLoaded).toHaveBeenCalledWith(scene, GAME_SCENE_KEYS[i]);
       expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(GAME_SCENE_KEYS[i]);
     }
-  });
+  }, 15000);
 
   it("launches a different game after auto-returning to the same scene instance", async () => {
     // Production replays ONE HubScene instance across visits: Phaser keeps
