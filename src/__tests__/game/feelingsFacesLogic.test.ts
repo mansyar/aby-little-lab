@@ -4,12 +4,12 @@ import {
   buildRoundChoices,
   drawScenarios,
   EMOTIONS,
+  type Emotion,
   ROUND_CONTRASTS,
   ROUND_COUNT,
   type RoundState,
   SCENARIO_POOL,
   type Scenario,
-  type Emotion,
 } from "../../game/feelingsFacesLogic";
 
 /** Deterministic generator so draw tests never depend on Math.random. */
@@ -78,7 +78,7 @@ describe("drawScenarios", () => {
     expect(drawScenarios()).toHaveLength(ROUND_COUNT);
   });
 
-  it("never repeats a scenario within a run and covers every emotion", () => {
+  it("never repeats a scenario within a run and covers every emotion over 20 runs", () => {
     for (let seed = 1; seed <= 20; seed++) {
       const drawn = drawScenarios(seededRng(seed));
       expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
@@ -260,5 +260,61 @@ describe("answer", () => {
     };
     answer(round, "happy");
     expect(round).toEqual(before);
+  });
+});
+
+/** Words that would break the gentle, no-injury/loss/violence tone (FR-11). */
+const UNSAFE_WORDS: readonly string[] = [
+  "hurt",
+  "hurts",
+  "blood",
+  "bleed",
+  "die",
+  "dead",
+  "death",
+  "kill",
+  "kills",
+  "hit",
+  "hits",
+  "fight",
+  "fights",
+  "punch",
+  "slap",
+  "bite",
+  "bites",
+  "scream",
+  "screams",
+  "crash",
+  "crashes",
+  "broken",
+  "danger",
+  "dangerous",
+  "gun",
+  "knife",
+  "monster",
+  "monsters",
+  "lost",
+  "lose",
+  "gone",
+];
+
+/** Lowercase word tokens, so "sinks" never matches the blocked word "ink". */
+function wordsIn(text: string): string[] {
+  return text.toLowerCase().match(/[a-z]+/g) ?? [];
+}
+
+describe("SCENARIO_POOL safe-content guard", () => {
+  it("never uses injury, loss, or violence words", () => {
+    for (const scenario of SCENARIO_POOL) {
+      for (const word of wordsIn(scenario.text)) {
+        expect(UNSAFE_WORDS).not.toContain(word);
+      }
+    }
+  });
+
+  it("keeps every spoken line inside the 60-character limit", () => {
+    for (const scenario of SCENARIO_POOL) {
+      expect(scenario.text.length).toBeLessThanOrEqual(60);
+    }
   });
 });
