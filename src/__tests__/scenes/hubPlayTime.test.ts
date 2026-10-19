@@ -161,10 +161,10 @@ describe("Hub play-time enforcement", () => {
     const scene = new HubScene();
     scene.create();
 
-    // Game tiles are 160×116 rectangles; smaller rectangles are decorative
+    // Game tiles are 144×116 rectangles; smaller rectangles are decorative
     // rings/markers outside the locked-tile treatment.
     const tiles = getRectangles(scene).filter(
-      (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 150,
+      (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 140,
     );
     expect(tiles.length).toBeGreaterThanOrEqual(10);
     for (const tile of tiles) {
@@ -308,9 +308,9 @@ describe("Hub play-time enforcement", () => {
     scene.create();
 
     // p1 active -> locked and dimmed from the start. Only game tiles
-    // (160×116) participate; decorative rectangles are excluded.
+    // (144×116) participate; decorative rectangles are excluded.
     const tiles = getRectangles(scene).filter(
-      (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 150,
+      (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 140,
     );
     for (const tile of tiles) {
       expect(getMockFn(tile.disableInteractive)).toHaveBeenCalled();

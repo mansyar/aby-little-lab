@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
+import { HUB_TILE_COUNT } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 
 describe("GAME_TILES", () => {
-  it("holds exactly 20 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
-    expect(GAME_TILES).toHaveLength(20);
+  it("holds exactly 21 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
+    expect(GAME_TILES).toHaveLength(21);
     const gameIds = new Set(GAME_TILES.map((t) => t.gameId));
     const sceneKeys = new Set(GAME_TILES.map((t) => t.sceneKey));
     const tileKeys = new Set(GAME_TILES.map((t) => t.tileKey));
-    expect(gameIds.size).toBe(20);
-    expect(sceneKeys.size).toBe(20);
-    expect(tileKeys.size).toBe(20);
+    expect(gameIds.size).toBe(21);
+    expect(sceneKeys.size).toBe(21);
+    expect(tileKeys.size).toBe(21);
+  });
+
+  it("keeps the hub paging constant in step with the tile list", () => {
+    expect(HUB_TILE_COUNT).toBe(GAME_TILES.length);
   });
 
   it("uses the canonical tileKey for every gameId", () => {
@@ -35,6 +40,7 @@ describe("GAME_TILES", () => {
       "memory-match": "tile_memory_match",
       "decode-it": "tile_decode_it",
       "number-order": "tile_number_order",
+      "feelings-faces": "tile_feelings_faces",
     };
     for (const tile of GAME_TILES) {
       expect(tile.tileKey).toBe(expected[tile.gameId]);
@@ -62,5 +68,13 @@ describe("GAME_TILES", () => {
       expect(tile.iconDisplay).toBe(52);
       expect(tile.iconOffsetY).toBe(-44);
     }
+  });
+
+  it("appends Feelings Faces as tile 21, after Number Order", () => {
+    const last = GAME_TILES.at(-1);
+    expect(last?.gameId).toBe("feelings-faces");
+    expect(last?.sceneKey).toBe("FeelingsFaces");
+    expect(last?.label).toBe("Feelings Faces");
+    expect(GAME_TILES.at(-2)?.gameId).toBe("number-order");
   });
 });

@@ -373,8 +373,8 @@ describe("Hub engagement tile press feedback", () => {
 });
 
 describe("Hub engagement sticker shelf", () => {
-  /** Sticker textures are rasterized at their card tier (256px); the shelf displays them at 56px. */
-  const STICKER_BASE_SCALE = 56 / 256;
+  /** Sticker textures are rasterized at their card tier (256px); the shelf displays them at 22px. */
+  const STICKER_BASE_SCALE = 22 / 256;
 
   it("replaces the star markers with one real sticker thumbnail per game (textless, touch-inert)", () => {
     earnSticker("shape-sorter");
@@ -405,10 +405,10 @@ describe("Hub engagement sticker shelf", () => {
     const scene = new HubScene();
     scene.create();
 
-    // Fresh profile: nothing earned -> 20 dashed outlines, no ghost thumbnails.
+    // Fresh profile: nothing earned -> 21 dashed outlines, no ghost thumbnails.
     expect(getStickerImages(scene)).toHaveLength(0);
     const slots = getEmptySlots(scene);
-    expect(slots).toHaveLength(20);
+    expect(slots).toHaveLength(21);
     for (const slot of slots) {
       expect(getMockFn(slot.setInteractive)).not.toHaveBeenCalled();
       expect(getMockFn(slot.arc).mock.calls.length).toBeGreaterThanOrEqual(5);
@@ -532,7 +532,7 @@ describe("Hub engagement sticker shelf", () => {
     const oldStickerImages = getStickerImages(scene);
     expect(oldStickerImages).toHaveLength(1);
     const oldSlots = getEmptySlots(scene);
-    expect(oldSlots).toHaveLength(19);
+    expect(oldSlots).toHaveLength(20);
 
     // The real panel calls resetProgress() before notifying the Hub; mirror it.
     resetProgress();
@@ -550,7 +550,7 @@ describe("Hub engagement sticker shelf", () => {
     const liveSlots = getEmptySlots(scene).filter(
       (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
     );
-    expect(liveSlots).toHaveLength(20);
+    expect(liveSlots).toHaveLength(21);
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
     for (const obj of liveSlots) {
       const targetsSticker = (call: { targets?: unknown }): boolean => {

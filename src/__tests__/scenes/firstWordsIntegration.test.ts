@@ -143,11 +143,11 @@ function fireObjectEvent(obj: unknown, event: string): void {
 /** The tile rectangles added by HubScene (index = GAME_TILES position). */
 function getTileRects(scene: unknown): unknown[] {
   const rectMock = getMockFn((scene as { add: { rectangle: unknown } }).add.rectangle);
-  // Game tiles are the only 160×116 rectangles; smaller ones are decorative
+  // Game tiles are the only 144×116 rectangles; smaller ones are decorative
   // rings or markers.
   return rectMock.mock.results
     .map((r) => r.value as { args?: number[] })
-    .filter((r) => r.args?.[2] === 160);
+    .filter((r) => r.args?.[2] === 144);
 }
 
 describe("First Words integration flows", () => {
@@ -191,7 +191,7 @@ describe("First Words integration flows", () => {
     const hub = new HubScene();
     hub.create();
     const tiles = getTileRects(hub);
-    expect(tiles).toHaveLength(20);
+    expect(tiles).toHaveLength(21);
     fireObjectEvent(tiles[8], "pointerup");
     await new Promise((resolve) => setTimeout(resolve, 0)); // flush dynamic import
     completeFadeOuts(hub);
@@ -284,7 +284,7 @@ describe("First Words integration flows", () => {
     expect(stickerCalls.map((c) => c[2])).toEqual(
       expect.arrayContaining(["sticker_word_match", "sticker_word_builder"]),
     );
-    const earnedScale = 56 / 256;
+    const earnedScale = 22 / 256;
     for (const call of stickerCalls) {
       const index = imageMock.mock.calls.indexOf(call);
       const image = imageMock.mock.results[index].value;

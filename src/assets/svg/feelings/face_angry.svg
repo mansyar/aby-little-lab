@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Aby: one preschooler, four expressions. The shirt, head, hair and nose
+       are byte-identical in all four face SVGs; only brows, eyes and mouth
+       change, so every feeling reads by shape alone. Big round head, no neck. -->
+  <path d="M 48 504 L 48 474 C 48 432 90 400 140 352 C 176 388 204 402 256 404 C 308 402 336 388 372 352 C 422 400 464 432 464 474 L 464 504 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="248" rx="160" ry="164" fill="#F0D5B4" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 104 300 C 94 168 168 80 256 80 C 344 80 418 168 408 300 C 400 252 390 214 376 188 Q 250 158 136 188 C 122 214 112 252 104 300 Z" fill="#A0522D" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 252 300 Q 256 318 266 314" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <!-- angry: a steep brow V pressed down to the nose + an open shouting mouth
+       (rounded inverted D). Blush is reinforcement only; the brow V and the
+       open mouth carry the feeling in grayscale and at 48 px. -->
+  <path d="M 156 208 L 214 254" fill="none" stroke="#2D3748" stroke-width="12" stroke-linecap="round"/>
+  <path d="M 356 208 L 298 254" fill="none" stroke="#2D3748" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="178" cy="272" rx="30" ry="14" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <ellipse cx="334" cy="272" rx="30" ry="14" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="178" cy="272" r="12" fill="#2D3748"/>
+  <circle cx="334" cy="272" r="12" fill="#2D3748"/>
+  <path d="M 204 348 Q 256 336 308 348 C 308 380 288 394 256 394 C 224 394 204 380 204 348 Z" fill="#2D3748" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <circle cx="156" cy="330" r="22" fill="#FED7D7"/>
+  <circle cx="356" cy="330" r="22" fill="#FED7D7"/>
+</svg>

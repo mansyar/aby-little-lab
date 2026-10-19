@@ -1,6 +1,7 @@
 import { AlphabetScene } from "../../scenes/AlphabetScene";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
+import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { MoreLessScene } from "../../scenes/MoreLessScene";
@@ -32,6 +33,7 @@ export const GAME_SCENES = [
   { name: "HowManyScene", SceneClass: HowManyScene },
   { name: "FirstSoundsScene", SceneClass: FirstSoundsScene },
   { name: "MoreLessScene", SceneClass: MoreLessScene },
+  { name: "FeelingsFacesScene", SceneClass: FeelingsFacesScene },
 ] as const;
 
 /** Phaser scene keys registered by the game configuration. */
@@ -56,4 +58,5 @@ export const GAME_SCENE_KEYS = [
   "MemoryMatch",
   "DecodeIt",
   "NumberOrder",
+  "FeelingsFaces",
 ] as const;

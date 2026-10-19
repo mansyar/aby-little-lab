@@ -9,6 +9,7 @@ vi.mock("phaser", async () => {
 
 import { HubGrid, type HubGridDeps } from "../../game/hubGrid";
 import { earnSticker } from "../../utils/storage";
+import { textureSizeFor } from "../../utils/textureTiers";
 
 /** Count rectangles of a given size in the mock registry. */
 function rects(w: number, h: number): MockObject[] {
@@ -16,6 +17,21 @@ function rects(w: number, h: number): MockObject[] {
     const [, , rw, rh] = (obj.args ?? []) as unknown[];
     return obj.kind === "rectangle" && rw === w && rh === h;
   });
+}
+
+/**
+ * Phaser lays a Text object out in a line box of roughly 1.2em, centred on its
+ * origin, so this is the label's bottom edge in logical px.
+ */
+const LABEL_LINE_HEIGHT_RATIO = 1.2;
+
+/** Bottom edge of the label drawn at `tileX` (tiles and labels share an x). */
+function labelBottom(tileX: number): number {
+  const label = mockRegistry.find((obj) => obj.kind === "text" && obj.args?.[0] === tileX);
+  if (!label) throw new Error("tile label not created");
+  const style = label.args?.[3] as { fontSize?: string } | undefined;
+  const fontSize = Number.parseFloat(style?.fontSize ?? "");
+  return (label.args?.[1] as number) + (fontSize * LABEL_LINE_HEIGHT_RATIO) / 2;
 }
 
 /** Dispatch a scene-level input event on the mock scene. */
@@ -43,7 +59,7 @@ function makeDeps(overrides: Partial<HubGridDeps> = {}): {
   return { deps, scene, activate };
 }
 
-describe("HubGrid — classic wide 5x4 grid", () => {
+describe("HubGrid — classic wide 6x4 grid", () => {
   beforeEach(() => {
     stubMatchMedia(false);
     localStorage.clear();
@@ -56,18 +72,18 @@ describe("HubGrid — classic wide 5x4 grid", () => {
     localStorage.clear();
   });
 
-  it("builds 20 tiles of 160x116 with icons and labels", () => {
+  it("builds 21 tiles of 144x116 with icons and labels", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
 
     grid.buildWideGrid();
 
-    expect(rects(160, 116).length).toBe(20);
+    expect(rects(144, 116).length).toBe(21);
     const images = mockRegistry.filter((obj) => obj.kind === "image");
     const texts = mockRegistry.filter((obj) => obj.kind === "text");
-    // 20 icons + 20 sticker slots would be more; the wide grid adds 20 icons.
-    expect(images.length).toBe(20);
-    expect(texts.length).toBe(20);
+    // 21 icons + 21 sticker slots would be more; the wide grid adds 21 icons.
+    expect(images.length).toBe(21);
+    expect(texts.length).toBe(21);
   });
 
   it("activates a tile on tap exactly once (navLocked blocks double-taps)", () => {
@@ -123,12 +139,54 @@ describe("HubGrid — classic wide 5x4 grid", () => {
       (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
     );
     expect(stickers.length).toBe(1);
-    // 19 unearned slots: each dashed ring has 10 arc segments.
+    // 20 unearned slots: each dashed ring has 10 arc segments.
     const slotGraphics = mockRegistry.filter((obj) => obj.kind === "graphics");
     for (const g of slotGraphics) {
       expect(g.arc).toHaveBeenCalledTimes(10);
     }
-    expect(slotGraphics.length).toBe(19);
+    expect(slotGraphics.length).toBe(20);
+  });
+
+  it("keeps the earned sticker below the tile label and above the tile's bottom edge", () => {
+    earnSticker("shape-sorter");
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.buildWideGrid();
+
+    const tile = rects(144, 116)[0];
+    const tileX = tile.args?.[0] as number;
+    const tileY = tile.args?.[1] as number;
+    const tileBottom = tileY + (tile.args?.[3] as number) / 2;
+
+    const sticker = mockRegistry.find(
+      (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
+    );
+    if (!sticker) throw new Error("earned sticker thumbnail not created");
+    const scale = (sticker.setScale as MockFn).mock.calls[0]?.[0] as number;
+    const size = textureSizeFor("sticker_shape_sorter") * scale;
+    const centreY = sticker.args?.[1] as number;
+
+    // Regression guard: a 56px plaque on this 144x116 tile spanned +17..+73,
+    // covering the game name and spilling past the tile's bottom edge.
+    expect(centreY - size / 2).toBeGreaterThanOrEqual(labelBottom(tileX));
+    expect(centreY + size / 2).toBeLessThanOrEqual(tileBottom);
+  });
+
+  it("keeps the dashed empty-slot ring below the tile label too", () => {
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.buildWideGrid();
+
+    const ring = mockRegistry.find((obj) => obj.kind === "graphics");
+    if (!ring) throw new Error("empty-slot ring not created");
+    const [centreX, centreY] = (ring.setPosition as MockFn).mock.calls[0] as [number, number];
+    const radius = (ring.arc as MockFn).mock.calls[0]?.[2] as number;
+    const tile = rects(144, 116).find((obj) => obj.args?.[0] === centreX);
+    if (!tile) throw new Error("tile for the empty-slot ring not found");
+    const tileBottom = (tile.args?.[1] as number) + (tile.args?.[3] as number) / 2;
+
+    expect(centreY - radius).toBeGreaterThanOrEqual(labelBottom(centreX));
+    expect(centreY + radius).toBeLessThanOrEqual(tileBottom);
   });
 
   it("runs no breathe tweens under reduced motion", () => {
@@ -171,7 +229,45 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(activate).toHaveBeenCalledWith(10);
   });
 
-  it("shows two page dots with the active page highlighted", () => {
+  it("builds only the remaining tile on the last page", () => {
+    const { deps, activate } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.buildPageGrid(2);
+
+    expect(rects(176, 196).length).toBe(1);
+
+    const tile = grid.attractTargets[0] as unknown as MockObject;
+    tile.handlers.pointerup?.();
+
+    // Page 3 holds the 21st game (Feelings Faces).
+    expect(activate).toHaveBeenCalledWith(20);
+  });
+
+  it("keeps a paged sticker shelf below the tile label as well", () => {
+    earnSticker("shape-sorter");
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.buildPageGrid(0);
+
+    const tile = rects(176, 196)[0];
+    const tileX = tile.args?.[0] as number;
+    const tileY = tile.args?.[1] as number;
+    const tileBottom = tileY + (tile.args?.[3] as number) / 2;
+
+    const sticker = mockRegistry.find(
+      (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
+    );
+    if (!sticker) throw new Error("earned sticker thumbnail not created");
+    const scale = (sticker.setScale as MockFn).mock.calls[0]?.[0] as number;
+    const size = textureSizeFor("sticker_shape_sorter") * scale;
+    const centreY = sticker.args?.[1] as number;
+
+    // The paged label sits lower (+48, 20px) but its tile is taller (+98).
+    expect(centreY - size / 2).toBeGreaterThanOrEqual(labelBottom(tileX));
+    expect(centreY + size / 2).toBeLessThanOrEqual(tileBottom);
+  });
+
+  it("shows one page dot per page with the active page highlighted", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
     grid.hubPage = 0;
@@ -181,7 +277,7 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
       const [, y, r] = (obj.args ?? []) as unknown[];
       return obj.kind === "circle" && y === 640 && r === 8;
     });
-    expect(dots.length).toBe(2);
+    expect(dots.length).toBe(3);
     expect(dots[0].setAlpha).toHaveBeenCalledWith(expect.closeTo(0.9, 5));
     expect(dots[1].setAlpha).toHaveBeenCalledWith(expect.closeTo(0.25, 5));
   });
@@ -258,7 +354,7 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
       (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
     );
     if (!sticker) throw new Error("earned sticker thumbnail not created");
-    // Card tier: 256px raster scaled to the 56px shelf slot.
-    expect((sticker.setScale as MockFn).mock.calls[0]?.[0]).toBeCloseTo(56 / 256, 5);
+    // Card tier: 256px raster scaled to the 22px shelf slot.
+    expect((sticker.setScale as MockFn).mock.calls[0]?.[0]).toBeCloseTo(22 / 256, 5);
   });
 });

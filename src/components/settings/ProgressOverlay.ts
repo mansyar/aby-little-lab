@@ -52,7 +52,7 @@ const ACCURACY_TRACK_COLOR = 0xe8e0d0;
 /** Fill color for the per-game accuracy bar. */
 const ACCURACY_FILL_COLOR = 0x68d391;
 
-/** The 20 games in hub order, for the Learning Progress report rows. */
+/** The 21 games in hub order, for the Learning Progress report rows. */
 const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
   { gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
   { gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
@@ -74,6 +74,7 @@ const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey
   { gameId: "memory-match", label: "Memory Match", tileKey: "tile_memory_match" },
   { gameId: "decode-it", label: "Decode It", tileKey: "tile_decode_it" },
   { gameId: "number-order", label: "Number Order", tileKey: "tile_number_order" },
+  { gameId: "feelings-faces", label: "Feelings Faces", tileKey: "tile_feelings_faces" },
 ];
 
 export interface ProgressOverlayDeps {

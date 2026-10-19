@@ -5,6 +5,7 @@ import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { ColorMatchScene } from "../../scenes/ColorMatchScene";
 import { DecodeItScene } from "../../scenes/DecodeItScene";
+import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { MemoryMatchScene } from "../../scenes/MemoryMatchScene";
@@ -22,7 +23,7 @@ import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 
 /**
- * Stub the 20 scene modules so invoking the real dynamic-import loaders
+ * Stub the 21 scene modules so invoking the real dynamic-import loaders
  * never pulls Phaser scenes into happy-dom — each loader should resolve
  * to its module's named scene export.
  */
@@ -86,12 +87,15 @@ vi.mock("../../scenes/DecodeItScene", () => ({
 vi.mock("../../scenes/NumberOrderScene", () => ({
   NumberOrderScene: class NumberOrderSceneStub {},
 }));
+vi.mock("../../scenes/FeelingsFacesScene", () => ({
+  FeelingsFacesScene: class FeelingsFacesSceneStub {},
+}));
 
 /** Fake scene class returned by test loaders. */
 class FakeScene {}
 
 describe("sceneRegistry", () => {
-  it("maps exactly the 20 game scene keys", () => {
+  it("maps exactly the 21 game scene keys", () => {
     expect(Object.keys(sceneLoaders).sort()).toEqual([
       "AddItUp",
       "Alphabet",
@@ -99,6 +103,7 @@ describe("sceneRegistry", () => {
       "BigSmall",
       "ColorMatch",
       "DecodeIt",
+      "FeelingsFaces",
       "FirstSounds",
       "HowMany",
       "MemoryMatch",
@@ -174,6 +179,7 @@ describe("sceneRegistry", () => {
       MemoryMatch: MemoryMatchScene,
       DecodeIt: DecodeItScene,
       NumberOrder: NumberOrderScene,
+      FeelingsFaces: FeelingsFacesScene,
     };
 
     expect(Object.keys(sceneLoaders).sort()).toEqual(Object.keys(expectedByKey).sort());

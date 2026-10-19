@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Aby: one preschooler, four expressions. The shirt, head, hair and nose
+       are byte-identical in all four face SVGs; only brows, eyes and mouth
+       change, so every feeling reads by shape alone. Big round head, no neck. -->
+  <path d="M 48 504 L 48 474 C 48 432 90 400 140 352 C 176 388 204 402 256 404 C 308 402 336 388 372 352 C 422 400 464 432 464 474 L 464 504 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="248" rx="160" ry="164" fill="#F0D5B4" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 104 300 C 94 168 168 80 256 80 C 344 80 418 168 408 300 C 400 252 390 214 376 188 Q 250 158 136 188 C 122 214 112 252 104 300 Z" fill="#A0522D" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 252 300 Q 256 318 266 314" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <!-- scared: raised brows + wide round eyes with small pupils + a small open oval mouth -->
+  <path d="M 146 206 Q 178 186 210 204" fill="none" stroke="#2D3748" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 366 206 Q 334 186 302 204" fill="none" stroke="#2D3748" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="178" cy="272" r="38" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="334" cy="272" r="38" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="178" cy="266" r="11" fill="#2D3748"/>
+  <circle cx="334" cy="266" r="11" fill="#2D3748"/>
+  <ellipse cx="256" cy="366" rx="22" ry="26" fill="#2D3748" stroke="#2D3748" stroke-width="4"/>
+</svg>

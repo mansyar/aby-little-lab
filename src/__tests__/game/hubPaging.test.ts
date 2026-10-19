@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   fitDisplayScale,
+  HUB_TILE_COUNT,
   isNarrowViewport,
   NARROW_SCALE_THRESHOLD,
   PAGE_COUNT,
@@ -51,7 +52,7 @@ describe("isNarrowViewport", () => {
 
   it("uses the tile min-edge 64px floor as the threshold (64 / 116)", () => {
     expect(NARROW_SCALE_THRESHOLD).toBeCloseTo(64 / 116, 4);
-    // Exactly at the threshold is still wide (>= keeps the 5x4 grid).
+    // Exactly at the threshold is still wide (>= keeps the wide grid).
     const boundaryScale = 64 / 116;
     expect(isNarrowViewport(boundaryScale * CANVAS.width, boundaryScale * CANVAS.height)).toBe(
       false,
@@ -72,28 +73,36 @@ describe("pageTileIndexes", () => {
     expect(pageTileIndexes(1)).toEqual([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
   });
 
+  it("clamps the last page to the tiles that remain", () => {
+    expect(pageTileIndexes(2)).toEqual([20]);
+  });
+
   it("maps every tile index back to its page", () => {
     expect(pageOf(0)).toBe(0);
     expect(pageOf(9)).toBe(0);
     expect(pageOf(10)).toBe(1);
     expect(pageOf(19)).toBe(1);
+    expect(pageOf(20)).toBe(2);
   });
 
-  it("covers all 20 tiles exactly once across pages", () => {
-    const all = [...pageTileIndexes(0), ...pageTileIndexes(1)].sort((a, b) => a - b);
-    expect(all).toEqual([...Array(20).keys()]);
+  it("covers all 21 tiles exactly once across pages", () => {
+    const all = [...pageTileIndexes(0), ...pageTileIndexes(1), ...pageTileIndexes(2)].sort(
+      (a, b) => a - b,
+    );
+    expect(all).toEqual([...Array(21).keys()]);
   });
 
   it("rejects out-of-range pages", () => {
-    expect(() => pageTileIndexes(2)).toThrow();
+    expect(() => pageTileIndexes(3)).toThrow();
     expect(() => pageTileIndexes(-1)).toThrow();
   });
 });
 
 describe("page constants", () => {
-  it("splits 20 tiles into 2 pages of 10", () => {
+  it("splits 21 tiles into 3 pages (10 + 10 + 1)", () => {
     expect(PAGE_SIZE).toBe(10);
-    expect(PAGE_COUNT).toBe(2);
+    expect(PAGE_COUNT).toBe(3);
+    expect(HUB_TILE_COUNT).toBe(21);
   });
 });
 
@@ -109,7 +118,7 @@ describe("pagedTilePosition", () => {
   });
 
   it("keeps every tile center inside the canvas with a margin", () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < PAGE_SIZE; i++) {
       const { x, y } = pagedTilePosition(i);
       expect(x).toBeGreaterThan(0);
       expect(x).toBeLessThan(CANVAS.width);
@@ -119,18 +128,50 @@ describe("pagedTilePosition", () => {
   });
 
   it("uses tiles whose min edge clears the 64px floor on a 740x360 phone", () => {
-    const tile = pagedTilePosition(0, CANVAS.width, CANVAS.height);
+    const tile = pagedTilePosition(0, PAGE_SIZE, CANVAS.width, CANVAS.height);
     const scale = fitDisplayScale(740, 360);
     expect(Math.min(tile.width, tile.height) * scale).toBeGreaterThanOrEqual(64);
   });
 
   it("keeps tiles clear of the top control band and the bottom mascot band", () => {
-    for (let i = 0; i < 10; i++) {
-      const { x, y, width, height } = pagedTilePosition(i, CANVAS.width, CANVAS.height);
+    for (let i = 0; i < PAGE_SIZE; i++) {
+      const { x, y, width, height } = pagedTilePosition(i, PAGE_SIZE, CANVAS.width, CANVAS.height);
       expect(y - height / 2).toBeGreaterThanOrEqual(116); // avatar chip / Settings band
       expect(y + height / 2).toBeLessThanOrEqual(620); // corner mascot band
       expect(x - width / 2).toBeGreaterThanOrEqual(0);
       expect(x + width / 2).toBeLessThanOrEqual(CANVAS.width);
     }
+  });
+
+  it("keeps a full page's geometry unchanged (5x2, centred)", () => {
+    // startX 32 + 88 = 120 for column 0; row 1 top at 178 + 216 = 394.
+    const first = pagedTilePosition(0);
+    const last = pagedTilePosition(PAGE_SIZE - 1);
+    expect(first.x).toBeCloseTo(120, 6);
+    expect(first.y).toBeCloseTo(276, 6);
+    expect(last.x).toBeCloseTo(904, 6);
+    expect(last.y).toBeCloseTo(492, 6);
+    // Symmetric about the canvas centre-x: equal 32px margins.
+    expect(first.x - first.width / 2).toBeCloseTo(32, 6);
+    expect(CANVAS.width - (last.x + last.width / 2)).toBeCloseTo(32, 6);
+  });
+
+  it("leaves page 1 (a full page of ten) identical to the default layout", () => {
+    const page = pageTileIndexes(1);
+    expect(page).toHaveLength(PAGE_SIZE);
+    page.forEach((_globalIndex, slot) => {
+      expect(pagedTilePosition(slot, page.length)).toEqual(pagedTilePosition(slot));
+    });
+  });
+
+  it("centres a one-tile page at the canvas centre-x on the first row", () => {
+    const page = pageTileIndexes(PAGE_COUNT - 1);
+    expect(page).toHaveLength(1);
+    const lone = pagedTilePosition(0, page.length);
+    expect(lone.x).toBeCloseTo(CANVAS.width / 2, 6);
+    // Vertically still the first row, so the page box keeps its vertical anchor.
+    expect(lone.y).toBeCloseTo(pagedTilePosition(0).y, 6);
+    expect(lone.x - lone.width / 2).toBeGreaterThan(0);
+    expect(lone.x + lone.width / 2).toBeLessThan(CANVAS.width);
   });
 });

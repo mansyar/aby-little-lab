@@ -82,7 +82,7 @@ describe("displayScale helper", () => {
 
 describe("tier coverage over SHAPE_ASSETS", () => {
   it("resolves every registered asset key to a known tier size", () => {
-    expect(SHAPE_ASSETS).toHaveLength(170);
+    expect(SHAPE_ASSETS).toHaveLength(176);
     for (const asset of SHAPE_ASSETS) {
       const size = textureSizeFor(asset.key);
       expect([TEXTURE_SIZES.icon, TEXTURE_SIZES.card, TEXTURE_SIZES.hero]).toContain(size);

@@ -71,3 +71,34 @@ describe("PreloadScene SHAPE_ASSETS", () => {
     expect(keys).toContain("arrow_less");
   });
 });
+
+/** Feelings Faces — the four Aby expressions plus the tile and sticker art. */
+const FEELINGS_KEYS = [
+  "face_happy",
+  "face_sad",
+  "face_angry",
+  "face_scared",
+  "tile_feelings_faces",
+  "sticker_feelings_faces",
+];
+
+describe("PreloadScene feelings faces textures", () => {
+  it("registers all six feelings keys exactly once", () => {
+    const keys = SHAPE_ASSETS.map((a) => a.key);
+    for (const key of FEELINGS_KEYS) {
+      expect(
+        keys.filter((k) => k === key),
+        key,
+      ).toHaveLength(1);
+    }
+  });
+
+  it("loads real 512px SVG markup for every feelings key", () => {
+    for (const key of FEELINGS_KEYS) {
+      const entry = SHAPE_ASSETS.find((a) => a.key === key);
+      expect(entry, `${key} is missing from SHAPE_ASSETS`).toBeDefined();
+      expect(entry?.svg, key).toContain("<svg");
+      expect(entry?.svg, key).toContain('viewBox="0 0 512 512"');
+    }
+  });
+});
