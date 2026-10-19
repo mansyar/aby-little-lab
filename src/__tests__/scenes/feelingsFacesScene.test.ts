@@ -553,7 +553,7 @@ describe("FeelingsFacesScene round flow", () => {
     expect(mockSpeech.speakSentence).toHaveBeenCalledWith(RULE_LINE, true);
   });
 
-  it("waits for voiceschanged before deciding the caption on an async voice engine", () => {
+  it("adapts the displayed round when the voice list settles on an async engine", () => {
     let voices: Array<{ voiceURI: string; lang: string; name: string }> = [];
     const listeners: Array<() => void> = [];
     vi.stubGlobal("speechSynthesis", {
@@ -569,19 +569,29 @@ describe("FeelingsFacesScene round flow", () => {
     expect(getCaption(scene)).toBeUndefined();
     expect(mockSpeech.speakSentence).toHaveBeenCalledWith(RULE_LINE, true);
 
-    // The engine reports its voices late: the next round stays spoken.
+    // The engine settles on an empty list mid-round: the displayed round
+    // gains its caption without advancing.
+    voices = [];
+    for (const listener of listeners) listener();
+    expect(getCaption(scene)).toBeDefined();
+    expect(internals(scene).roundIndex).toBe(0);
+
+    // Voices arrive later: the caption clears and the round speaks.
     voices = [{ voiceURI: "test-voice", lang: "en-US", name: "Test" }];
     for (const listener of listeners) listener();
+    expect(getCaption(scene)).toBeUndefined();
+    const round = getCurrentRound(scene);
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(round.text, true);
+
+    // The next round stays spoken.
     tapCard(scene, targetCardIndex(scene));
     fireNextRoundDelay(scene);
     expect(internals(scene).roundIndex).toBe(1);
     expect(getCaption(scene)).toBeUndefined();
 
-    // If the engine settles on an empty list, the caption takes over.
+    // A later settle on an empty list captions the displayed round again.
     voices = [];
     for (const listener of listeners) listener();
-    tapCard(scene, targetCardIndex(scene));
-    fireNextRoundDelay(scene);
     expect(getCaption(scene)).toBeDefined();
   });
 

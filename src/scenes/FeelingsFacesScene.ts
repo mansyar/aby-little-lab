@@ -124,7 +124,31 @@ export class FeelingsFacesScene extends GameSceneBase {
     const synth = window.speechSynthesis as SpeechSynthesis | undefined;
     this.voicesCache = synth?.getVoices?.() ?? [];
     this.voicesSettled = true;
+    this.applyCaptionState();
   };
+
+  /**
+   * Re-evaluates the caption fallback for the currently displayed round after
+   * the voice list settles. When the decision flips, the rule line is rebuilt
+   * with the correct glyph presentation and the caption appears or clears
+   * without touching the round's cards or taps.
+   */
+  private applyCaptionState(): void {
+    const fallback = this.captionFallbackActive();
+    if (fallback === this.captionFallback) return;
+    this.captionFallback = fallback;
+    const scenario = this.rounds[this.roundIndex];
+    if (!scenario) return;
+    this.createRuleLine();
+    if (fallback) {
+      this.renderCaption(scenario);
+      return;
+    }
+    this.caption?.destroy();
+    this.caption = undefined;
+    // The scenario was never spoken while the fallback was up; speak it now.
+    this.speakScenario(scenario, false);
+  }
 
   create(): void {
     sceneEntrance(this);
@@ -275,8 +299,10 @@ export class FeelingsFacesScene extends GameSceneBase {
       return;
     }
     this.time.delayedCall(OPENING_SPEECH_DELAY, () => {
-      // The child may already have answered; only the opening round waits.
-      if (this.roundIndex !== 0) return;
+      // The child may already have answered, or the voice list may have
+      // settled empty since; only speak if the opening round is still up
+      // and still on the spoken path.
+      if (this.roundIndex !== 0 || this.captionFallback) return;
       speakSentence(scenario.text, getSettings().sfxEnabled);
     });
   }
