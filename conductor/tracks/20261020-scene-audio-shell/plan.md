@@ -64,18 +64,21 @@ The primary appends after acceptance:
   `src/scenes/DecodeItScene.ts`, `src/scenes/HowManyScene.ts`,
   `src/scenes/FirstSoundsScene.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `a854a1e`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-2.md`
 
-- [ ] **P2.T1: Migrate the letter/word grid pair** — covers: FR-1
-  - [ ] **P2.T1.1: Extend the base with the variable card-content hook** the
+- [x] **P2.T1: Migrate the letter/word grid pair** — covers: FR-1
+  - [x] **P2.T1.1: Extend the base with the variable card-content hook** the
     glyph/word cards need (per-card width, per-card content objects).
-  - [ ] **P2.T1.2: Migrate Alphabet and WordMatch** to the base.
-- [ ] **P2.T2: Migrate the 2×2 text/number pair** — covers: FR-1
-  - [ ] **P2.T2.1: Migrate DecodeIt** (picture prompt, letter cards).
-  - [ ] **P2.T2.2: Migrate HowMany** (numeral prompt, count cards).
-- [ ] **P2.T3: Migrate First Sounds** — covers: FR-1
-  - [ ] **P2.T3.1: Migrate the scene** to the base.
-  - [ ] **P2.T3.2: Preserve the correct-answer letter narration** and the
+  - [x] **P2.T1.2: Migrate Alphabet and WordMatch** to the base.
+- [x] **P2.T2: Migrate the 2×2 text/number pair** — covers: FR-1
+  - [x] **P2.T2.1: Migrate DecodeIt** (picture prompt, letter cards).
+  - [x] **P2.T2.2: Migrate HowMany** (numeral prompt, count cards).
+- [x] **P2.T3: Migrate First Sounds** — covers: FR-1
+  - [x] **P2.T3.1: Migrate the scene** to the base.
+  - [x] **P2.T3.2: Preserve the correct-answer letter narration** and the
     prompt re-speak on repeat, without double-speaking.
 
 ## Phase 3: Migrate the remaining five + Feelings Faces
