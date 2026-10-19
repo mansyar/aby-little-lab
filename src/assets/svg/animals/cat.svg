@@ -1,22 +1,62 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <g transform="rotate(-20 182 176)">
-    <path d="M 140 176 Q 130 96 172 70 Q 210 48 226 94 Q 234 132 224 176 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M 152 158 Q 148 112 172 94 Q 194 78 206 102 Q 210 128 206 158 Z" fill="#F687B3" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Head and ears as one silhouette: the ear edges rise off the skull curve,
+       so the bases blend into the head with no seam. Wider than it is tall. -->
+  <path d="M 104 300
+           C 104 246 130 216 150 196
+           Q 136 140 142 88
+           Q 144 74 158 80
+           Q 206 108 236 164
+           C 244 182 268 182 276 164
+           Q 306 108 354 80
+           Q 368 74 370 88
+           Q 376 140 362 196
+           C 382 216 408 246 408 300
+           C 408 372 340 422 256 422
+           C 172 422 104 372 104 300 Z"
+        fill="#D4A056" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Inner ears: soft pink panels tucked inside each ear, no outline so they
+       read as part of the ear rather than separate shapes. -->
+  <g fill="#F687B3">
+    <path d="M 164 108 Q 158 146 160 178 Q 186 164 206 156 Q 186 130 164 108 Z"/>
+    <path d="M 348 108 Q 354 146 352 178 Q 326 164 306 156 Q 326 130 348 108 Z"/>
   </g>
-  <g transform="rotate(20 330 176)">
-    <path d="M 372 176 Q 382 96 340 70 Q 302 48 286 94 Q 278 132 288 176 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M 360 158 Q 364 112 340 94 Q 318 78 306 102 Q 302 128 306 158 Z" fill="#F687B3" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Tabby forehead "M", softened to three short rounded strokes. -->
+  <g stroke="#A67C52" stroke-linecap="round" fill="none">
+    <path d="M 256 200 L 256 240" stroke-width="9"/>
+    <path d="M 228 206 L 236 242" stroke-width="9"/>
+    <path d="M 284 206 L 276 242" stroke-width="9"/>
   </g>
-  <circle cx="256" cy="285" r="140" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
-  <ellipse cx="256" cy="325" rx="70" ry="55" fill="#FFF8E7" stroke="#2D3748" stroke-width="4"/>
-  <circle cx="200" cy="260" r="18" fill="#2D3748"/>
-  <circle cx="312" cy="260" r="18" fill="#2D3748"/>
-  <circle cx="206" cy="254" r="6" fill="#FFFFFF"/>
-  <circle cx="318" cy="254" r="6" fill="#FFFFFF"/>
-  <path d="M 244 310 L 256 325 L 268 310 Z" fill="#F687B3" stroke="#2D3748" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M 220 345 Q 256 370 292 345" fill="none" stroke="#2D3748" stroke-width="5" stroke-linecap="round"/>
-  <line x1="150" y1="315" x2="200" y2="320" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
-  <line x1="150" y1="340" x2="200" y2="335" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
-  <line x1="362" y1="315" x2="312" y2="320" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
-  <line x1="362" y1="340" x2="312" y2="335" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Eyes: round, friendly green eyes with vertical slit pupils. -->
+  <g stroke="#2D3748" stroke-width="4">
+    <ellipse cx="197" cy="270" rx="33" ry="27" transform="rotate(-7 197 270)" fill="#68D391"/>
+    <ellipse cx="315" cy="270" rx="33" ry="27" transform="rotate(7 315 270)" fill="#68D391"/>
+    <ellipse cx="197" cy="270" rx="8.5" ry="20" fill="#2D3748" stroke="none"/>
+    <ellipse cx="315" cy="270" rx="8.5" ry="20" fill="#2D3748" stroke="none"/>
+    <circle cx="189" cy="258" r="6" fill="#FFFFFF" stroke="none"/>
+    <circle cx="307" cy="258" r="6" fill="#FFFFFF" stroke="none"/>
+  </g>
+
+  <!-- Muzzle: a wide, shallow cream patch across the lower face. -->
+  <path d="M 256 314 Q 246 302 214 302 Q 176 302 176 334 Q 176 384 256 396 Q 336 384 336 334 Q 336 302 298 302 Q 266 302 256 314 Z"
+        fill="#FFF8E7" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Nose and the W-shaped mouth. -->
+  <path d="M 238 318 L 274 318 L 256 338 Z" fill="#F687B3" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <g stroke="#2D3748" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 256 338 Q 256 362 230 362 Q 214 362 208 348"/>
+    <path d="M 256 338 Q 256 362 282 362 Q 298 362 304 348"/>
+  </g>
+
+  <!-- Whiskers: three gently curved rows per side, spanning past the head. -->
+  <g stroke="#2D3748" stroke-width="3.5" stroke-linecap="round" fill="none">
+    <path d="M 186 348 Q 120 338 54 332"/>
+    <path d="M 184 364 Q 116 366 46 366"/>
+    <path d="M 188 380 Q 122 392 56 398"/>
+    <path d="M 326 348 Q 392 338 458 332"/>
+    <path d="M 328 364 Q 396 366 466 366"/>
+    <path d="M 324 380 Q 390 392 456 398"/>
+  </g>
 </svg>
