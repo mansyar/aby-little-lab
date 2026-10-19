@@ -75,26 +75,30 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-7, FR-8, FR-9, FR-10, AC-1, AC-2, AC-3, AC-6, AC-7, AC-8
 - **Touches:** `src/scenes/FeelingsFacesScene.ts`, `src/scenes/sceneRegistry.ts`, `src/game/hubTiles.ts`, `src/types/index.ts`, `src/__tests__/scenes/feelingsFacesScene.test.ts`, `src/__tests__/game/hubTiles.test.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/__tests__/game/hubPaging.test.ts`, `src/__tests__/game/progressLogic.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/navigation.test.ts`, `src/__tests__/scenes/sceneLifecycle.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `src/__tests__/scenes/firstWordsIntegration.test.ts`, `src/__tests__/helpers/gameScenes.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/feelingsFacesScene.test.ts src/__tests__/scenes/sceneRegistry.test.ts src/__tests__/game/hubTiles.test.ts src/__tests__/game/hubGrid.test.ts src/__tests__/game/hubPaging.test.ts src/__tests__/game/progressLogic.test.ts src/__tests__/scenes/navigation.test.ts src/__tests__/scenes/sceneLifecycle.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Scene skeleton** — covers: FR-2
-  - [ ] **P3.T1.1: Extend `GameSceneBase`; lay out 3 face cards + rule line + speaker glyph**
-- [ ] **P3.T2: Round rendering + speech** — covers: FR-2, FR-7
-  - [ ] **P3.T2.1: Render the ladder's 3 distinct faces per round**
-  - [ ] **P3.T2.2: Speak scenario; rule line spoken once and replayable**
-- [ ] **P3.T3: Feedback loop** — covers: FR-3, FR-4
-  - [ ] **P3.T3.1: Correct: chime + splash + advance**
-  - [ ] **P3.T3.2: Incorrect: wiggle, gentle tone, re-speak once, same round**
-- [ ] **P3.T4: Fallback + completion** — covers: FR-8, FR-9
-  - [ ] **P3.T4.1: Caption fallback + dimmed speaker when no voice or SFX off**
-  - [ ] **P3.T4.2: Win animation, one-time sticker, 3 s return to hub**
-- [ ] **P3.T5: Registration + progress** — covers: FR-1, FR-10
-  - [ ] **P3.T5.1: Add `feelings-faces` to `GameId` + `GAME_IDS` and fix every count assertion**
-  - [ ] **P3.T5.2: Add lazy loader to `sceneRegistry`**
-  - [ ] **P3.T5.3: Append hub tile 21 and update the tile/registry tests**
-  - [ ] **P3.T5.4: Count plays/accuracy; mastery star after 3 wins**
-- [ ] **P3.T6: Scene tests** — covers: AC-2, AC-3, AC-6, AC-7, AC-8
-  - [ ] **P3.T6.1: 6-round traversal, wrong-tap no-advance, caption fallback, sticker-once, progress row**
+**Result:** verified
+**Checkpoint:** eb8ecf6
+**Evidence:** conductor/tracks/20261020-feelings-faces/verification/phase-3.md
+
+- [x] **P3.T1: Scene skeleton** — covers: FR-2
+  - [x] **P3.T1.1: Extend `GameSceneBase`; lay out 3 face cards + rule line + speaker glyph**
+- [x] **P3.T2: Round rendering + speech** — covers: FR-2, FR-7
+  - [x] **P3.T2.1: Render the ladder's 3 distinct faces per round**
+  - [x] **P3.T2.2: Speak scenario; rule line spoken once and replayable**
+- [x] **P3.T3: Feedback loop** — covers: FR-3, FR-4
+  - [x] **P3.T3.1: Correct: chime + splash + advance**
+  - [x] **P3.T3.2: Incorrect: wiggle, gentle tone, re-speak once, same round**
+- [x] **P3.T4: Fallback + completion** — covers: FR-8, FR-9
+  - [x] **P3.T4.1: Caption fallback + dimmed speaker when no voice or SFX off**
+  - [x] **P3.T4.2: Win animation, one-time sticker, 3 s return to hub**
+- [x] **P3.T5: Registration + progress** — covers: FR-1, FR-10
+  - [x] **P3.T5.1: Add `feelings-faces` to `GameId` + `GAME_IDS` and fix every count assertion**
+  - [x] **P3.T5.2: Add lazy loader to `sceneRegistry`**
+  - [x] **P3.T5.3: Append hub tile 21 and update the tile/registry tests**
+  - [x] **P3.T5.4: Count plays/accuracy; mastery star after 3 wins**
+- [x] **P3.T6: Scene tests** — covers: AC-2, AC-3, AC-6, AC-7, AC-8
+  - [x] **P3.T6.1: 6-round traversal, wrong-tap no-advance, caption fallback, sticker-once, progress row**
 
 ## Phase 4: Flow, full gate, docs
 
