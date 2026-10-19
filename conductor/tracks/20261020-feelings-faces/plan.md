@@ -75,7 +75,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-7, FR-8, FR-9, FR-10, AC-1, AC-2, AC-3, AC-6, AC-7, AC-8
 - **Touches:** `src/scenes/FeelingsFacesScene.ts`, `src/scenes/sceneRegistry.ts`, `src/game/hubTiles.ts`, `src/types/index.ts`, `src/__tests__/scenes/feelingsFacesScene.test.ts`, `src/__tests__/game/hubTiles.test.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/__tests__/game/hubPaging.test.ts`, `src/__tests__/game/progressLogic.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/navigation.test.ts`, `src/__tests__/scenes/sceneLifecycle.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `src/__tests__/scenes/firstWordsIntegration.test.ts`, `src/__tests__/helpers/gameScenes.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/feelingsFacesScene.test.ts src/__tests__/scenes/sceneRegistry.test.ts src/__tests__/game/hubTiles.test.ts src/__tests__/game/hubGrid.test.ts src/__tests__/game/hubPaging.test.ts src/__tests__/game/progressLogic.test.ts src/__tests__/scenes/navigation.test.ts src/__tests__/scenes/sceneLifecycle.test.ts`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Scene skeleton** — covers: FR-2
   - [ ] **P3.T1.1: Extend `GameSceneBase`; lay out 3 face cards + rule line + speaker glyph**
