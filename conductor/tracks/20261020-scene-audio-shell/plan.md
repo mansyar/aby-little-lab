@@ -64,7 +64,7 @@ The primary appends after acceptance:
   `src/scenes/DecodeItScene.ts`, `src/scenes/HowManyScene.ts`,
   `src/scenes/FirstSoundsScene.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Migrate the letter/word grid pair** — covers: FR-1
   - [ ] **P2.T1.1: Extend the base with the variable card-content hook** the
