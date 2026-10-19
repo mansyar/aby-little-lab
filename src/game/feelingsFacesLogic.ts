@@ -129,3 +129,40 @@ export function buildRoundChoices(roundIndex: number, target: Emotion): Emotion[
   cards.push(cards.includes(target) ? contrast.third : target);
   return cards;
 }
+
+/** The state of one round: the scenario, the cards, and the taps so far. */
+export interface RoundState {
+  /** Zero-based round index, 0–5. */
+  index: number;
+  /** The scenario spoken this round. */
+  scenario: Scenario;
+  /** The three cards on screen; exactly one matches the scenario's emotion. */
+  choices: Emotion[];
+  /** Taps already recorded on this round, correct and wrong combined. */
+  taps: number;
+}
+
+/** The outcome of one tap on a round. */
+export interface AnswerResult {
+  /** True when the tapped emotion matches the scenario's emotion. */
+  correct: boolean;
+  /** Round to show next: unchanged on a wrong tap, `index + 1` on a correct one. */
+  nextRound: number;
+  /** Taps recorded on this round after this answer, correct and wrong combined. */
+  taps: number;
+}
+
+/**
+ * Scores one tap. A correct tap advances the playthrough — `nextRound` is the
+ * following index, and `ROUND_COUNT` means the playthrough is complete. A wrong
+ * tap leaves `nextRound` at the current index, so the child stays on the same
+ * round and can try again. The round state itself is never mutated.
+ */
+export function answer(round: RoundState, emotion: Emotion): AnswerResult {
+  const correct = emotion === round.scenario.emotion;
+  return {
+    correct,
+    nextRound: correct ? round.index + 1 : round.index,
+    taps: round.taps + 1,
+  };
+}

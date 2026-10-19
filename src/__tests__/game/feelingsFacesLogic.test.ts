@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  answer,
   buildRoundChoices,
   drawScenarios,
   EMOTIONS,
   ROUND_CONTRASTS,
   ROUND_COUNT,
+  type RoundState,
   SCENARIO_POOL,
+  type Scenario,
+  type Emotion,
 } from "../../game/feelingsFacesLogic";
 
 /** Deterministic generator so draw tests never depend on Math.random. */
@@ -15,6 +19,15 @@ function seededRng(seed: number): () => number {
     state = (state * 1664525 + 1013904223) >>> 0;
     return state / 0x100000000;
   };
+}
+
+/** Returns a pooled scenario for the given emotion (the pool holds four each). */
+function scenarioFor(emotion: Emotion): Scenario {
+  const found = SCENARIO_POOL.find((scenario) => scenario.emotion === emotion);
+  if (!found) {
+    throw new Error(`No scenario for ${emotion}`);
+  }
+  return found;
 }
 
 describe("EMOTIONS", () => {
@@ -176,5 +189,76 @@ describe("buildRoundChoices", () => {
         expect(buildRoundChoices(index, target).slice(0, 2)).toEqual(["sad", "scared"]);
       }
     }
+  });
+});
+
+describe("answer", () => {
+  function makeRound(index: number, emotion: Emotion, taps = 0): RoundState {
+    return {
+      index,
+      scenario: scenarioFor(emotion),
+      choices: buildRoundChoices(index, emotion),
+      taps,
+    };
+  }
+
+  it("advances to the next round and counts the tap on a correct answer", () => {
+    expect(answer(makeRound(2, "sad"), "sad")).toEqual({ correct: true, nextRound: 3, taps: 1 });
+  });
+
+  it("keeps the same round on a wrong answer", () => {
+    expect(answer(makeRound(2, "sad"), "happy")).toEqual({ correct: false, nextRound: 2, taps: 1 });
+  });
+
+  it("never advances however many wrong taps come first", () => {
+    let round = makeRound(4, "scared");
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const result = answer(round, "angry");
+      expect(result.correct).toBe(false);
+      expect(result.nextRound).toBe(4);
+      expect(result.taps).toBe(attempt);
+      round = { ...round, taps: result.taps };
+    }
+    expect(answer(round, "scared")).toEqual({ correct: true, nextRound: 5, taps: 4 });
+  });
+
+  it("signals completion after a correct answer on the last round", () => {
+    expect(answer(makeRound(ROUND_COUNT - 1, "happy"), "happy")).toEqual({
+      correct: true,
+      nextRound: ROUND_COUNT,
+      taps: 1,
+    });
+  });
+
+  it("treats every card other than the scenario's emotion as wrong", () => {
+    for (let index = 0; index < ROUND_COUNT; index++) {
+      const round = makeRound(index, "sad");
+      const wrongCards = round.choices.filter((card) => card !== round.scenario.emotion);
+      for (const wrong of wrongCards) {
+        const result = answer(round, wrong);
+        expect(result.correct).toBe(false);
+        expect(result.nextRound).toBe(index);
+      }
+    }
+  });
+
+  it("accepts the scenario's own emotion on every round", () => {
+    for (let index = 0; index < ROUND_COUNT; index++) {
+      const round = makeRound(index, "scared");
+      const result = answer(round, round.scenario.emotion);
+      expect(result.correct).toBe(true);
+      expect(result.nextRound).toBe(index + 1);
+    }
+  });
+
+  it("does not mutate the round it scores", () => {
+    const round = makeRound(1, "angry", 2);
+    const before: RoundState = {
+      ...round,
+      scenario: { ...round.scenario },
+      choices: [...round.choices],
+    };
+    answer(round, "happy");
+    expect(round).toEqual(before);
   });
 });
