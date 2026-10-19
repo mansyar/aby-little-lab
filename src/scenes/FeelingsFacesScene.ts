@@ -58,21 +58,6 @@ function faceKey(emotion: Emotion): string {
 }
 
 /**
- * True when the scenario cannot actually be heard: the SFX toggle is off, the
- * browser has no speech engine, or no voice is installed. The round then shows
- * the scenario as a short written caption and dims the replay glyph so a parent
- * can read it aloud while the round stays fully completable.
- */
-function captionFallbackActive(): boolean {
-  if (!getSettings().sfxEnabled || !isSpeechSupported()) {
-    return true;
-  }
-  const synth = window.speechSynthesis as SpeechSynthesis | undefined;
-  const voices = synth?.getVoices?.() ?? [];
-  return voices.length === 0;
-}
-
-/**
  * Feelings Faces scene — a short everyday scenario is spoken aloud and the
  * child taps the face that shows how Aby feels. Each round shows three
  * distinct faces; the easy-first ladder contrasts happy/angry early and the
@@ -101,10 +86,45 @@ export class FeelingsFacesScene extends GameSceneBase {
   private taps = 0;
   /** True when the current round shows the written caption instead of speech. */
   private captionFallback = false;
+  /** Voice list captured from the last voiceschanged event. */
+  private voicesCache: SpeechSynthesisVoice[] = [];
+  /** True once the engine has fired voiceschanged, making `voicesCache` authoritative. */
+  private voicesSettled = false;
 
   constructor() {
     super("FeelingsFaces");
   }
+
+  /**
+   * True when the scenario cannot actually be heard: the SFX toggle is off, the
+   * browser has no speech engine, or no voice is installed. The round then shows
+   * the scenario as a short written caption and dims the replay glyph so a parent
+   * can read it aloud while the round stays fully completable.
+   *
+   * Chrome populates its voice list asynchronously, so an empty first
+   * `getVoices()` read is treated as "unknown" — the spoken path is kept until
+   * `voiceschanged` settles the list. Engines without a change event cannot
+   * populate late, so their empty list decides immediately.
+   */
+  private captionFallbackActive(): boolean {
+    if (!getSettings().sfxEnabled || !isSpeechSupported()) {
+      return true;
+    }
+    const synth = window.speechSynthesis as SpeechSynthesis | undefined;
+    const canWatch = typeof synth?.addEventListener === "function";
+    const voices = this.voicesSettled ? this.voicesCache : (synth?.getVoices?.() ?? []);
+    if (voices.length > 0) {
+      return false;
+    }
+    return !canWatch || this.voicesSettled;
+  }
+
+  /** Captures the settled voice list; the caption decision defers to it afterwards. */
+  private readonly handleVoicesChanged = (): void => {
+    const synth = window.speechSynthesis as SpeechSynthesis | undefined;
+    this.voicesCache = synth?.getVoices?.() ?? [];
+    this.voicesSettled = true;
+  };
 
   create(): void {
     sceneEntrance(this);
@@ -114,6 +134,9 @@ export class FeelingsFacesScene extends GameSceneBase {
     this.createProgressDots(ROUND_COUNT);
     this.createRuleLine();
 
+    const synth = window.speechSynthesis as SpeechSynthesis | undefined;
+    synth?.addEventListener?.("voiceschanged", this.handleVoicesChanged);
+
     this.rounds = drawScenarios();
     this.roundIndex = 0;
     this.inputLocked = false;
@@ -122,7 +145,10 @@ export class FeelingsFacesScene extends GameSceneBase {
     // Shared cleanup first: the parent lock, mascot and speaker are torn down
     // even if the scene's own rule-line teardown is never reached.
     this.registerShutdownCleanup();
-    this.events.on("shutdown", () => this.destroyRuleLine());
+    this.events.on("shutdown", () => {
+      synth?.removeEventListener?.("voiceschanged", this.handleVoicesChanged);
+      this.destroyRuleLine();
+    });
   }
 
   /**
@@ -155,12 +181,12 @@ export class FeelingsFacesScene extends GameSceneBase {
       centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
       y,
       {
-        muted: captionFallbackActive(),
+        muted: this.captionFallbackActive(),
         onSpeak: () => speakSentence(RULE_LINE, getSettings().sfxEnabled),
       },
     );
 
-    if (!captionFallbackActive()) {
+    if (!this.captionFallbackActive()) {
       speakSentence(RULE_LINE, getSettings().sfxEnabled);
     }
   }
@@ -186,7 +212,7 @@ export class FeelingsFacesScene extends GameSceneBase {
 
     this.choices = buildRoundChoices(this.roundIndex, scenario.emotion);
     this.taps = 0;
-    this.captionFallback = captionFallbackActive();
+    this.captionFallback = this.captionFallbackActive();
 
     this.createCards(this.choices);
     if (this.captionFallback) {

@@ -131,19 +131,19 @@ export interface HubGridDeps {
 }
 
 /**
- * Renders the Hub's game-tile grid — the classic 5x4 wide layout, the paged
- * 5x2 narrow-viewport layout, the page dots and swipe gestures, and the
- * sticker shelf under each tile. The Hub scene supplies orchestration
- * (navigation, play-time, audio) through the deps object; this class owns all
- * grid objects and their lifecycle.
+ * Renders the Hub's game-tile grid — the 6x4 wide layout (rows 6/6/6/3 over
+ * 21 tiles), the paged 5x2 narrow-viewport layout, the page dots and swipe
+ * gestures, and the sticker shelf under each tile. The Hub scene supplies
+ * orchestration (navigation, play-time, audio) through the deps object; this
+ * class owns all grid objects and their lifecycle.
  */
 export class HubGrid {
   private deps: HubGridDeps;
   /** True when this visit uses the paged (narrow-viewport) grid. */
   paged = false;
-  /** Current page in paged mode (0 or 1); reset on every visit to the Hub. */
+  /** Current page in paged mode (0..PAGE_COUNT - 1); reset on every visit to the Hub. */
   hubPage = 0;
-  /** Every grid object owned by the classic wide 5x4 layout (rebuilt on resize). */
+  /** Every grid object owned by the wide 6x4 layout (rebuilt on resize). */
   wideObjects: Phaser.GameObjects.GameObject[] = [];
   /** Every grid object owned by the current page (destroyed on flip). */
   pageObjects: Phaser.GameObjects.GameObject[] = [];
@@ -221,7 +221,7 @@ export class HubGrid {
     }
   }
 
-  /** Destroys every object owned by the classic wide grid (tiles + shelf). */
+  /** Destroys every object owned by the wide grid (tiles + shelf). */
   destroyWideGrid(): void {
     for (const obj of this.wideObjects) obj.destroy();
     this.wideObjects = [];
@@ -250,8 +250,8 @@ export class HubGrid {
   }
 
   /**
-   * Builds the classic 5x4 wide grid — the original 20-tile layout kept
-   * byte-identical for desktop and tablet viewports.
+   * Builds the 6x4 wide grid — rows 6/6/6/3 over 21 tiles at 144px, for
+   * desktop and tablet viewports.
    */
   buildWideGrid(): void {
     const reducedMotion = isReducedMotion();

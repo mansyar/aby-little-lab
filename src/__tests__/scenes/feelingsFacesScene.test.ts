@@ -553,6 +553,38 @@ describe("FeelingsFacesScene round flow", () => {
     expect(mockSpeech.speakSentence).toHaveBeenCalledWith(RULE_LINE, true);
   });
 
+  it("waits for voiceschanged before deciding the caption on an async voice engine", () => {
+    let voices: Array<{ voiceURI: string; lang: string; name: string }> = [];
+    const listeners: Array<() => void> = [];
+    vi.stubGlobal("speechSynthesis", {
+      getVoices: () => voices,
+      addEventListener: (_type: string, listener: () => void) => listeners.push(listener),
+      removeEventListener: () => {},
+    });
+    const scene = new FeelingsFacesScene();
+    scene.create();
+
+    // Chrome populates voices asynchronously: an empty first read is
+    // "unknown", so the spoken path is kept rather than muted outright.
+    expect(getCaption(scene)).toBeUndefined();
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(RULE_LINE, true);
+
+    // The engine reports its voices late: the next round stays spoken.
+    voices = [{ voiceURI: "test-voice", lang: "en-US", name: "Test" }];
+    for (const listener of listeners) listener();
+    tapCard(scene, targetCardIndex(scene));
+    fireNextRoundDelay(scene);
+    expect(internals(scene).roundIndex).toBe(1);
+    expect(getCaption(scene)).toBeUndefined();
+
+    // If the engine settles on an empty list, the caption takes over.
+    voices = [];
+    for (const listener of listeners) listener();
+    tapCard(scene, targetCardIndex(scene));
+    fireNextRoundDelay(scene);
+    expect(getCaption(scene)).toBeDefined();
+  });
+
   it("records wins and accuracy on the progress row, starring after three wins", () => {
     const scene = new FeelingsFacesScene();
     playThrough(scene);

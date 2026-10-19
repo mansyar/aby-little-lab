@@ -32,16 +32,16 @@ Full loop exercised in real Chrome at 1024x768 against the dev build: hub (21 ti
 
 | Criterion | Verdict | Phase evidence |
 |---|---|---|
-| AC-1 hub renders and launches game 21 | met | phase-3, phase-4 |
-| AC-2 six rounds, spoken scenario, 3 faces | met | phase-3 |
-| AC-3 correct tap advances with feedback | met | phase-3 |
-| AC-4 20-run draw variety, all emotions, deterministic per seed | met | phase-1 |
-| AC-5 easy-first contrast ladder | met | phase-1 |
-| AC-6 gentle wrong-tap handling, re-speak once | met | phase-3 |
-| AC-7 no-TTS caption fallback keeps round completable | met | phase-3 |
-| AC-8 progress plays/wins/accuracy + mastery star, row 21 | met | phase-3 |
-| AC-9 scenario pool shape, <= 60 chars, safe content | met | phase-1 |
-| AC-10 full CI parity green | met | phase-4 (this gate) |
+| AC-1 — Hub renders 21 tiles; the 21st launches game 21 | met | phase-3, phase-4 |
+| AC-2 — Six rounds, 3 distinct faces each, one spoken scenario per round | met | phase-3 |
+| AC-3 — Correct tap advances with splash/chime; wrong tap stays on the round and re-speaks once | met | phase-3 |
+| AC-4 — 20-run draw variety, all emotions, deterministic per seed | met | phase-1 |
+| AC-5 — Easy-first contrast ladder (rounds 1–3 happy/angry, 4–6 sad/scared) | met | phase-1 |
+| AC-6 — Caption fallback with speech mocked empty; round stays completable | met | phase-3 |
+| AC-7 — Sticker awarded exactly once and persisted per profile | met | phase-3 |
+| AC-8 — Progress plays/wins/accuracy + mastery star, row 21 | met | phase-3 |
+| AC-9 — Scenario pool shape, <= 60 chars, safe content | met | phase-1 |
+| AC-10 — Full CI parity green | met | phase-4 (this gate) |
 | NFR-1..NFR-7 (perf, touch, motion/audio gates, strict TS, art style, payload, docs) | met | phase-1..4 |
 
 ## Known follow-ups (non-blocking, recorded for review)

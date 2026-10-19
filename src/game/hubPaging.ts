@@ -4,7 +4,7 @@
  * On narrow viewports the single tile grid would scale every tile below the
  * 64px touch-target floor (product-guidelines.md), so the Hub splits its
  * games into pages of 10 and lays each page out as a 5x2 grid of much larger
- * tiles. Wide viewports keep the byte-identical wide grid.
+ * tiles. Wide viewports keep the 6x4 wide grid.
  *
  * All geometry is expressed in the fixed 1024x768 logical canvas space;
  * Phaser's FIT scale mode maps it onto the physical screen.
@@ -33,7 +33,7 @@ const WIDE_TILE_HEIGHT = 116;
 /**
  * FIT display scale below which the wide grid's tiles fall under the 64px
  * touch-target floor (measured on the tile's min edge, its height):
- * 64 / 116 ≈ 0.5517. At or above this scale the 5x4 grid is kept as-is.
+ * 64 / 116 ≈ 0.5517. At or above this scale the 6x4 grid is kept as-is.
  */
 export const NARROW_SCALE_THRESHOLD = 64 / WIDE_TILE_HEIGHT;
 
@@ -60,7 +60,7 @@ export function fitDisplayScale(
 }
 
 /**
- * True when the viewport is narrow enough that the wide 5x4 grid would drop
+ * True when the viewport is narrow enough that the wide 6x4 grid would drop
  * tiles below the 64px touch-target floor — those viewports get the paged
  * grid instead.
  */
