@@ -166,3 +166,13 @@ P4.T3.1 is the only gap. `conductor/product.md` needs three edits:
 - The pre-existing `musicalMemoryScene.test.ts:294` non-null-assertion warning and
   the biome schema-version info are unchanged and were deliberately left alone.
 - No `any`, no Biome suppressions, no lowered thresholds, no weakened tests.
+
+## Primary verification
+
+- **Date:** 2026-10-20
+- **Command:** pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js — exit 0.
+- **Detail:** 98 files / 2,090 tests passed (both plain and coverage runs); coverage lines 98.99% / functions 97.97% / branches 89.65% / statements 98.15% — every threshold cleared; shell entry index-BaYoZ85p.js 189.3 kB (<= 200 kB, validator PASS); PWA validator 15/15. pnpm check clean apart from the pre-existing musicalMemoryScene.test.ts:294 warning and the biome schema-version info.
+- **P4.T3.1:** conductor/product.md was edited by the primary agent (the phase subagent is denied product docs): game table row 21, twenty-one counts across mascot/TTS/spoken-rules/progress, the Game 21 textless-cues amendment, the hub 6x4 note, and a Game 21 changelog entry.
+- **Coverage-load flake fix:** the navigation test's 21-fresh-hub loop timed out at the 5 s default in the first full-coverage run (it passed solo and in the plain suite run); the test now carries an explicit 15 s timeout (8807eaf). The re-run under full load passed.
+- **Squash:** the phase range c947b23..8807eaf (5 commits: flow suite, docs, evidence record, product.md completion, timeout fix) contained no merge or foreign commits and was squashed to 34b2f22.
+- **Deviations accepted:** the FeelingsFacesScene.ts shutdown-registration reorder (5 lines, outside Touches, required by the widened GAME_SCENES lifecycle cases) and the primary-authored conductor/product.md change above.

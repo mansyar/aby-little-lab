@@ -107,18 +107,22 @@
 - **Covers:** AC-10, NFR-1, NFR-2, NFR-3, NFR-6
 - **Touches:** `src/__tests__/scenes/feelingsFacesFlow.test.ts`, `conductor/product.md`, `docs/SVG_STYLE.md`, `src/utils/textureTiers.ts`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Flow suite** — covers: AC-1
-  - [ ] **P4.T1.1: Hub tile → 6 rounds → sticker → hub flow**
-- [ ] **P4.T2: Suite-wide expectations** — covers: AC-1
-  - [ ] **P4.T2.1: Update `GAME_SCENES`/`GAME_SCENE_KEYS`, nav and lifecycle counts from 20 to 21**
-- [ ] **P4.T3: Documentation** — covers: NFR-6
-  - [ ] **P4.T3.1: `product.md` — game table row 21 + changelog + cross-game systems note**
-  - [ ] **P4.T3.2: `README.md` — "Twenty" → "Twenty-one", game table row, scene/test counts**
-  - [ ] **P4.T3.3: Refresh the stale asset counts in `docs/SVG_STYLE.md` §8 and the `textureTiers.ts` header comment**
-- [ ] **P4.T4: Full verification** — covers: AC-10
-  - [ ] **P4.T4.1: Run full CI parity and write `verification/phase-4.md`**
+- [x] **P4.T1: Flow suite** — covers: AC-1
+  - [x] **P4.T1.1: Hub tile → 6 rounds → sticker → hub flow**
+- [x] **P4.T2: Suite-wide expectations** — covers: AC-1
+  - [x] **P4.T2.1: Update `GAME_SCENES`/`GAME_SCENE_KEYS`, nav and lifecycle counts from 20 to 21**
+- [x] **P4.T3: Documentation** — covers: NFR-6
+  - [x] **P4.T3.1: `product.md` — game table row 21 + changelog + cross-game systems note**
+  - [x] **P4.T3.2: `README.md` — "Twenty" → "Twenty-one", game table row, scene/test counts**
+  - [x] **P4.T3.3: Refresh the stale asset counts in `docs/SVG_STYLE.md` §8 and the `textureTiers.ts` header comment**
+- [x] **P4.T4: Full verification** — covers: AC-10
+  - [x] **P4.T4.1: Run full CI parity and write `verification/phase-4.md`**
+
+**Result:** verified
+**Checkpoint:** 34b2f22
+**Evidence:** conductor/tracks/20261020-feelings-faces/verification/phase-4.md
 
 <!--
 The primary appends after acceptance:
