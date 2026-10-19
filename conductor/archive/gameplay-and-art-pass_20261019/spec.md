@@ -71,7 +71,7 @@ Decision: switch the shared helper to `Cubic.out` (all four games).
   Match "CAT", profile avatar).
 - **FR5** The five other assets are fixed as described, with no key or manifest
   changes.
-- **FR6** `docs/svg-style.md` records: 512 grid + 8 px margin, outline weights
+- **FR6** `docs/SVG_STYLE.md` records: 512 grid + 8 px margin, outline weights
   (6 outer / 4 inner / 3 detail), canonical palette tokens, the "must read at
   96 px" rule, and the full asset inventory.
 - **FR7** All 11 committed contact sheets are regenerated from current sources
@@ -97,13 +97,13 @@ Decision: switch the shared helper to `Cubic.out` (all four games).
 2. Number Order: `tapHits` confirms center-inside hit, 1 px outside miss, and the
    hit region centred on the card at `(70,80)` display origin.
 3. A snap tween's endpoint equals the slot position and its ease is `Cubic.out`.
-4. Blind check: a rendered 96 px cat is identified as a **cat** (not rabbit/fox)
-   by the vision check, and is clearly distinct from rabbit and fox in a
+4. Blind check: a rendered 96 px cat is identified as a **cat** (not rabbit or
+   dog) by the vision check, and is clearly distinct from rabbit and dog in a
    side-by-side sheet.
 5. bone/ball/map/tile_pop_freeze/monkey are visibly improved in the regenerated
    sheets.
-6. `docs/svg-style.md` exists and the committed sheets show items 23, shapes 36,
-   stickers 20, tiles 20, ui 11.
+6. `docs/SVG_STYLE.md` exists and the committed sheets show items 23, shapes 18
+   plus cutouts 18 (all 36 shape assets), stickers 20, tiles 20, ui 11.
 7. All gates pass.
 
 ## Out of scope
