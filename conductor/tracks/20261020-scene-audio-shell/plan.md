@@ -91,7 +91,7 @@ The primary appends after acceptance:
   `src/scenes/OddOneOutScene.ts`, `src/scenes/NumberOrderScene.ts`,
   `src/scenes/PatternBuilderScene.ts`, `src/scenes/FeelingsFacesScene.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Migrate the comparison pair** — covers: FR-1
   - [ ] **P3.T1.1: Migrate MoreLess** (arrow cue, two dot-group cards).
