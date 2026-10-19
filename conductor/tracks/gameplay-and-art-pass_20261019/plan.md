@@ -24,7 +24,7 @@
 - [x] Task: Commit (`fix(number-order): align the card hit area and stop the snap overshoot`) *(b3e13c8)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3 — Cat head redraw
+## Phase 3 — Cat head redraw [checkpoint: 9d6b638]
 
 - [x] Task: Collect a cat-face reference and write the silhouette checklist (triangular ears, wide low head, cheek-pad muzzle, W mouth, whiskers, forehead M, slit pupils) *(b31ec9c)*
     - [x] Compare the reference beside rabbit and dog at 96 px (the pack has no fox)
