@@ -180,8 +180,9 @@ export function attachDropZoneHighlight(
 }
 
 /**
- * Tweens an object to the given slot position with a springy Back.out ease,
- * replacing an instant snap. Reduced motion shortens the tween.
+ * Tweens an object to the given slot position with a decelerating Cubic.out
+ * ease, replacing an instant snap. A spring overshoot used to push the card
+ * past the slot before settling. Reduced motion shortens the tween.
  */
 export function snapToSlot(scene: Phaser.Scene, obj: DragTarget, x: number, y: number): void {
   scene.tweens.add({
@@ -189,6 +190,6 @@ export function snapToSlot(scene: Phaser.Scene, obj: DragTarget, x: number, y: n
     x,
     y,
     duration: motionDuration(SNAP_DURATION, SNAP_REDUCED_DURATION),
-    ease: "Back.out",
+    ease: "Cubic.out",
   });
 }

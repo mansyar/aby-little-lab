@@ -1,9 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <path d="M 170 220 A 58 58 0 1 0 170 292 Q 256 262 342 292 A 58 58 0 1 0 342 220 Q 256 250 170 220 Z" fill="#FFF8E7" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
-  <circle cx="120" cy="225" r="5" fill="#B7791F" opacity="0.6"/>
-  <circle cx="140" cy="290" r="5" fill="#B7791F" opacity="0.6"/>
-  <circle cx="375" cy="225" r="5" fill="#B7791F" opacity="0.6"/>
-  <circle cx="355" cy="290" r="5" fill="#B7791F" opacity="0.6"/>
-  <path d="M 113 200 Q 121 218 115 236" fill="none" stroke="#D69E2E" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
-  <path d="M 401 276 Q 393 294 399 312" fill="none" stroke="#D69E2E" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+  <!-- Tan bone: the outline is a dark underlay of the same knuckle-and-shaft
+       union, so the rim stays an even 6 px with no internal seams. -->
+  <g fill="#2D3748">
+    <rect x="170" y="212" width="172" height="88" rx="18"/>
+    <circle cx="170" cy="216" r="52"/>
+    <circle cx="170" cy="296" r="52"/>
+    <circle cx="342" cy="216" r="52"/>
+    <circle cx="342" cy="296" r="52"/>
+  </g>
+  <g fill="#F6AD55">
+    <rect x="176" y="218" width="160" height="76" rx="14"/>
+    <circle cx="170" cy="216" r="46"/>
+    <circle cx="170" cy="296" r="46"/>
+    <circle cx="342" cy="216" r="46"/>
+    <circle cx="342" cy="296" r="46"/>
+  </g>
+  <!-- Top sheen: a cream band along the shaft and each upper knuckle. -->
+  <g fill="none" stroke="#FEEBC8" stroke-linecap="round">
+    <path d="M 186 240 Q 256 270 326 240" stroke-width="13"/>
+    <path d="M 140 196 Q 158 178 186 186" stroke-width="11"/>
+    <path d="M 372 196 Q 354 178 326 186" stroke-width="11"/>
+  </g>
 </svg>

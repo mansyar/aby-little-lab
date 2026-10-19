@@ -1,14 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="175" fill="#E53E3E" stroke="#2D3748" stroke-width="6"/>
-  <polygon points="256,216 218,244 232,288 280,288 294,244" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
-  <polygon points="256,122 223.7,145.5 236,183.5 276,183.5 288.3,145.5" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <polygon points="161,191 128.7,214.6 141,252.6 181,252.6 193.3,214.6" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <polygon points="197.2,302.9 164.9,326.5 177.2,364.5 217.2,364.5 229.5,326.5" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <polygon points="314.8,302.9 282.5,326.5 294.8,364.5 334.8,364.5 347.1,326.5" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <polygon points="351.1,191.1 318.8,214.6 331.1,252.6 371.1,252.6 383.4,214.6" fill="#FFFFFF" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
-  <line x1="256" y1="216" x2="256" y2="156" stroke="#2D3748" stroke-width="4"/>
-  <line x1="218" y1="244" x2="161" y2="225" stroke="#2D3748" stroke-width="4"/>
-  <line x1="232" y1="288" x2="197" y2="337" stroke="#2D3748" stroke-width="4"/>
-  <line x1="280" y1="288" x2="315" y2="337" stroke="#2D3748" stroke-width="4"/>
-  <line x1="294" y1="244" x2="351" y2="225" stroke="#2D3748" stroke-width="4"/>
+  <defs>
+    <clipPath id="beachBall">
+      <circle cx="256" cy="256" r="172"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="256" cy="256" r="175" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+
+  <!-- Beach-ball gores: longitude boundaries at x = 256 + 172 sin(theta), so the
+       middle panels are wide and the edge panels narrow, as on a real ball. -->
+  <g clip-path="url(#beachBall)">
+    <path d="M 256 84 C 174 84 107 161 107 256 C 107 351 174 428 256 428
+             C 209 428 170 351 170 256 C 170 161 209 84 256 84 Z" fill="#E53E3E"/>
+    <path d="M 256 84 L 256 428 L 256 428
+             C 304 428 342 351 342 256 C 342 161 304 84 256 84 Z" fill="#3182CE"/>
+    <path d="M 256 84 C 338 84 405 161 405 256 C 405 351 338 428 256 428
+             C 374 428 470 351 470 256 C 470 161 374 84 256 84 Z" fill="#F6AD55"/>
+  </g>
+
+  <!-- Seams between the gores. -->
+  <g fill="none" stroke="#2D3748" stroke-width="4">
+    <path d="M 256 84 C 174 84 107 161 107 256 C 107 351 174 428 256 428"/>
+    <path d="M 256 84 C 209 84 170 161 170 256 C 170 351 209 428 256 428"/>
+    <path d="M 256 84 L 256 428"/>
+    <path d="M 256 84 C 304 84 342 161 342 256 C 342 351 304 428 256 428"/>
+    <path d="M 256 84 C 338 84 405 161 405 256 C 405 351 338 428 256 428"/>
+  </g>
+
+  <!-- Poles and a soft specular sheen. -->
+  <ellipse cx="256" cy="90" rx="24" ry="9" fill="#F7FAFC" stroke="#2D3748" stroke-width="4"/>
+  <ellipse cx="256" cy="422" rx="24" ry="9" fill="#F7FAFC" stroke="#2D3748" stroke-width="4"/>
+  <path d="M 128 200 Q 158 146 216 112" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.45"/>
+  <circle cx="256" cy="256" r="175" fill="none" stroke="#2D3748" stroke-width="6"/>
 </svg>

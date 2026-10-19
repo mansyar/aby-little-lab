@@ -27,7 +27,7 @@ interface NumeralCard {
   originX: number;
   originY: number;
   slotIndex: number | null;
-  dragging: boolean;
+  justDropped: boolean;
 }
 
 interface Slot {
@@ -164,13 +164,11 @@ export class NumberOrderScene extends GameSceneBase {
 
     const container = this.add.container(x, y, [bg, ...numeralImages]);
     container.setSize(CARD_WIDTH, CARD_HEIGHT);
+    // Containers hit-test in a local space where the display origin (half the
+    // size) is added to the tap, so the centred card occupies (0,0)-(w,h).
+    // A centred rect would shift the live region up-left by half a card.
     container.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -CARD_WIDTH / 2,
-        -CARD_HEIGHT / 2,
-        CARD_WIDTH,
-        CARD_HEIGHT,
-      ),
+      hitArea: new Phaser.Geom.Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     // Phaser containers with setSize need explicit input enabled; also make draggable
@@ -183,29 +181,34 @@ export class NumberOrderScene extends GameSceneBase {
       originX: x,
       originY: y,
       slotIndex: null,
-      dragging: false,
+      justDropped: false,
     };
 
     // Lift juice (visual)
     attachDragLift(container as unknown as Phaser.GameObjects.Image);
 
     container.on("pointerdown", () => {
+      // A new gesture begins; only a pointerup from a gesture that dropped
+      // something is exempt from tap-to-return. Phaser fires dragstart before
+      // pointerdown, so this reset cannot live in dragstart.
+      card.justDropped = false;
       if (this.inputLocked) return;
       // Speak on any tap (SFX-gated, silent fallback)
       speakNumber(numeral, load().settings.sfxEnabled);
     });
 
     container.on("pointerup", () => {
+      const justDropped = card.justDropped;
+      card.justDropped = false;
       if (this.inputLocked) return;
-      // Tap-to-return: if placed and not dragging, return home
-      if (!card.dragging && card.slotIndex !== null) {
+      // Tap-to-return: a drop's trailing pointerup is not a tap.
+      if (!justDropped && card.slotIndex !== null) {
         this.returnCardToSource(card);
       }
     });
 
     container.on("dragstart", () => {
       if (this.inputLocked) return;
-      card.dragging = true;
       this.children.bringToTop(container);
     });
 
@@ -219,7 +222,8 @@ export class NumberOrderScene extends GameSceneBase {
     });
 
     container.on("dragend", () => {
-      card.dragging = false;
+      // The pointerup that follows this dragend belongs to the drag, not a tap.
+      card.justDropped = true;
       // Validation/wiggle owns the board while locked — leave positions alone.
       if (this.inputLocked) return;
       // If not placed (i.e., dropped on empty area), bounce home

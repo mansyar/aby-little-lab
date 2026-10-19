@@ -1,14 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <circle cx="120" cy="180" r="60" fill="#A0522D" stroke="#2D3748" stroke-width="5"/>
-  <circle cx="392" cy="180" r="60" fill="#A0522D" stroke="#2D3748" stroke-width="5"/>
-  <circle cx="120" cy="180" r="30" fill="#D4A373" stroke="#2D3748" stroke-width="3"/>
-  <circle cx="392" cy="180" r="30" fill="#D4A373" stroke="#2D3748" stroke-width="3"/>
-  <circle cx="256" cy="256" r="160" fill="#A0522D" stroke="#2D3748" stroke-width="6"/>
-  <ellipse cx="256" cy="290" rx="100" ry="90" fill="#D4A373" stroke="#2D3748" stroke-width="4"/>
-  <circle cx="200" cy="230" r="18" fill="#2D3748"/>
-  <circle cx="312" cy="230" r="18" fill="#2D3748"/>
-  <circle cx="206" cy="224" r="6" fill="#FFFFFF"/>
-  <circle cx="318" cy="224" r="6" fill="#FFFFFF"/>
-  <ellipse cx="256" cy="285" rx="14" ry="10" fill="#2D3748"/>
-  <path d="M 220 320 Q 256 345 292 320" fill="none" stroke="#2D3748" stroke-width="5" stroke-linecap="round"/>
+  <!-- Side ears -->
+  <circle cx="118" cy="196" r="58" fill="#A0522D" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="394" cy="196" r="58" fill="#A0522D" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="118" cy="196" r="30" fill="#D4A373" stroke="#2D3748" stroke-width="3"/>
+  <circle cx="394" cy="196" r="30" fill="#D4A373" stroke="#2D3748" stroke-width="3"/>
+
+  <!-- Head with a small hair tuft -->
+  <circle cx="256" cy="252" r="158" fill="#A0522D" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 232 106 Q 242 70 258 98 Q 272 68 284 106 Q 258 94 232 106 Z"
+        fill="#A0522D" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Heart-shaped light face patch: the monkey's main read at small sizes. -->
+  <path d="M 256 178 C 214 150 166 176 170 224 C 174 268 214 310 256 330
+           C 298 310 338 268 342 224 C 346 176 298 150 256 178 Z"
+        fill="#D4A373" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Protruding muzzle: it breaks the head silhouette at the bottom. -->
+  <ellipse cx="256" cy="376" rx="80" ry="58" fill="#F0D5B4" stroke="#2D3748" stroke-width="4"/>
+  <ellipse cx="234" cy="364" rx="10" ry="7" fill="#2D3748"/>
+  <ellipse cx="278" cy="364" rx="10" ry="7" fill="#2D3748"/>
+  <path d="M 230 396 Q 256 416 282 396" fill="none" stroke="#2D3748" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Eyes -->
+  <circle cx="204" cy="256" r="17" fill="#2D3748"/>
+  <circle cx="308" cy="256" r="17" fill="#2D3748"/>
+  <circle cx="210" cy="250" r="6" fill="#FFFFFF"/>
+  <circle cx="314" cy="250" r="6" fill="#FFFFFF"/>
 </svg>

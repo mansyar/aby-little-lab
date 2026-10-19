@@ -204,7 +204,7 @@ describe("attachDropZoneHighlight", () => {
 });
 
 describe("snapToSlot", () => {
-  it("tweens the object to the slot with a springy Back.out ease", () => {
+  it("tweens the object to the slot with a smooth Cubic.out ease", () => {
     const scene = createMockScene();
     const obj = createMockObject();
     snapToSlot(scene as never, obj as unknown as Phaser.GameObjects.Image, 300, 400);
@@ -214,7 +214,7 @@ describe("snapToSlot", () => {
     expect(tween.x).toBe(300);
     expect(tween.y).toBe(400);
     expect(tween.duration).toBe(200);
-    expect(tween.ease).toBe("Back.out");
+    expect(tween.ease).toBe("Cubic.out");
   });
 
   it("shortens the tween under reduced motion", () => {

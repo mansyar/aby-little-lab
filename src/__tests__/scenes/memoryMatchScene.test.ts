@@ -216,6 +216,40 @@ describe("MemoryMatchScene round flow", () => {
     }
   }
 
+  /** Reads a private per-round card array from the scene. */
+  function cardParts(
+    scene: unknown,
+    key: "cardRects" | "cardBacks" | "cardFaces",
+  ): Array<Record<string, unknown>> {
+    return (scene as unknown as Record<string, Array<Record<string, unknown>>>)[key];
+  }
+
+  /** Returns the scaleX of the deal tween targeting `target`, if any. */
+  function dealtScaleX(scene: unknown, target: unknown): number | undefined {
+    const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
+      .calls;
+    const config = tweenCalls
+      .map((call) => call[0] as { targets?: unknown[]; scaleX?: number; delay?: number })
+      .find((c) => c.delay !== undefined && (c.targets ?? []).includes(target));
+    return config?.scaleX;
+  }
+
+  /** Returns the scaleX of the grow-back flip tween targeting `target`, if any. */
+  function grownScaleX(scene: unknown, target: unknown): number | undefined {
+    const tweenCalls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
+      .calls;
+    const config = tweenCalls
+      .map((call) => call[0] as { targets?: unknown[]; scaleX?: number; delay?: number })
+      .findLast(
+        (c) =>
+          c.delay === undefined &&
+          typeof c.scaleX === "number" &&
+          c.scaleX !== 0 &&
+          (c.targets ?? []).includes(target),
+      );
+    return config?.scaleX;
+  }
+
   /** Fires a delayedCall with the given delay, invoking its callback. */
   function fireDelayedCall(scene: unknown, delay: number): void {
     const delayedCallMock = getMockFn(
@@ -307,6 +341,64 @@ describe("MemoryMatchScene round flow", () => {
     }
 
     expect(getProgressDots(scene)).toHaveLength(6);
+  });
+
+  it("deals card art at the card size instead of its native 256px raster", () => {
+    const scene = new MemoryMatchScene();
+    scene.create();
+
+    const backs = cardParts(scene, "cardBacks");
+    expect(backs).toHaveLength(6);
+    for (const back of backs) {
+      expect(dealtScaleX(scene, back)).toBeCloseTo(150 / 256, 5);
+    }
+
+    for (const face of cardParts(scene, "cardFaces")) {
+      expect(dealtScaleX(scene, face)).toBeCloseTo((150 * 0.58) / 256, 5);
+    }
+
+    for (const rect of cardParts(scene, "cardRects")) {
+      expect(dealtScaleX(scene, rect)).toBe(1);
+    }
+  });
+
+  it("sizes dealt art to every difficulty band (150 / 132 / 120)", () => {
+    for (const [band, size] of [
+      ["easy", 150],
+      ["medium", 132],
+      ["hard", 120],
+    ] as const) {
+      const scene = new MemoryMatchScene();
+      scene.create();
+      const s = scene as unknown as {
+        rounds: MemoryRound[];
+        roundIndex: number;
+        renderRound(): void;
+      };
+      s.rounds[s.roundIndex] = { ...s.rounds[s.roundIndex], band };
+      s.renderRound();
+
+      const backs = cardParts(scene, "cardBacks");
+      expect(backs.length).toBeGreaterThan(0);
+      for (const back of backs) {
+        expect(dealtScaleX(scene, back)).toBeCloseTo(size / 256, 5);
+      }
+      for (const face of cardParts(scene, "cardFaces")) {
+        expect(dealtScaleX(scene, face)).toBeCloseTo((size * 0.58) / 256, 5);
+      }
+    }
+  });
+
+  it("flips a card back to its sized art scale instead of full raster size", () => {
+    const scene = new MemoryMatchScene();
+    scene.create();
+    tapCard(scene, 0);
+    fireFlipHalf(scene, 0);
+
+    const back = cardParts(scene, "cardBacks")[0];
+    const face = cardParts(scene, "cardFaces")[0];
+    expect(grownScaleX(scene, back)).toBeCloseTo(150 / 256, 5);
+    expect(grownScaleX(scene, face)).toBeCloseTo((150 * 0.58) / 256, 5);
   });
 
   it("tapping a face-down card pops and reveals it via a scaleX flip", () => {

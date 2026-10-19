@@ -10,6 +10,7 @@ import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
+import { displayScale } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -95,6 +96,25 @@ export class MemoryMatchScene extends GameSceneBase {
   }
 
   /**
+   * Resting scale of every part of a card. The base rectangle is authored at
+   * the card size, but the back and face are square rasters from the `card`
+   * texture tier (256 px) and must be scaled down to fit — the face to
+   * `ITEM_FILL` of the card. Deal and flip animations must end at these
+   * values, never at 1, or the art overflows the card.
+   */
+  private cardScales(
+    band: MemoryBand,
+    faceKey: string,
+  ): { rect: number; back: number; face: number } {
+    const size = CARD_SIZE[band];
+    return {
+      rect: 1,
+      back: displayScale("card_back", size),
+      face: displayScale(faceKey, size * ITEM_FILL),
+    };
+  }
+
+  /**
    * Renders the current round: a face-down card grid whose layout comes from
    * the pure logic round. Each card is a white base rectangle carrying a
    * card-back image on top and a hidden face texture underneath, popped in
@@ -128,27 +148,32 @@ export class MemoryMatchScene extends GameSceneBase {
       attachPressFeedback(rect);
       this.cardRects.push(rect);
 
-      const face = this.add
-        .image(x, y, round.layout[i])
-        .setDisplaySize(size * ITEM_FILL, size * ITEM_FILL)
-        .setVisible(false);
+      const scales = this.cardScales(round.band, round.layout[i]);
+
+      const face = this.add.image(x, y, round.layout[i]).setScale(scales.face).setVisible(false);
       this.cardFaces.push(face);
 
-      const back = this.add.image(x, y, "card_back").setDisplaySize(size, size);
+      const back = this.add.image(x, y, "card_back").setScale(scales.back);
       this.cardBacks.push(back);
 
-      // Staggered deal pop-in for the whole card stack.
-      for (const part of [rect, back, face]) {
+      // Staggered deal pop-in for the whole card stack. Each part grows to its
+      // own resting scale — the images are 256 px rasters, so 1 would overflow.
+      const parts: Array<[Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image, number]> = [
+        [rect, scales.rect],
+        [back, scales.back],
+        [face, scales.face],
+      ];
+      for (const [part, scale] of parts) {
         part.setScale(0);
+        this.tweens.add({
+          targets: [part],
+          scaleX: scale,
+          scaleY: scale,
+          duration: motionDuration(DEAL_DURATION, DEAL_REDUCED_DURATION),
+          delay: i * DEAL_STAGGER,
+          ease: "Back.out",
+        });
       }
-      this.tweens.add({
-        targets: [rect, back, face],
-        scaleX: 1,
-        scaleY: 1,
-        duration: motionDuration(DEAL_DURATION, DEAL_REDUCED_DURATION),
-        delay: i * DEAL_STAGGER,
-        ease: "Back.out",
-      });
     }
   }
 
@@ -269,21 +294,31 @@ export class MemoryMatchScene extends GameSceneBase {
     const rect = this.cardRects[cardIndex];
     const back = this.cardBacks[cardIndex];
     const face = this.cardFaces[cardIndex];
+    const round = this.rounds[this.roundIndex];
+    const scales = this.cardScales(round.band, round.layout[cardIndex]);
+    const halfDuration = motionDuration(FLIP_HALF_DURATION, FLIP_HALF_REDUCED_DURATION);
 
     this.tweens.add({
       targets: [rect, back, face],
       scaleX: 0,
-      duration: motionDuration(FLIP_HALF_DURATION, FLIP_HALF_REDUCED_DURATION),
+      duration: halfDuration,
       ease: "Sine.in",
       onComplete: () => {
         back.setVisible(!faceUp);
         face.setVisible(faceUp);
-        this.tweens.add({
-          targets: [rect, back, face],
-          scaleX: 1,
-          duration: motionDuration(FLIP_HALF_DURATION, FLIP_HALF_REDUCED_DURATION),
-          ease: "Sine.out",
-        });
+        const parts: Array<[Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image, number]> = [
+          [rect, scales.rect],
+          [back, scales.back],
+          [face, scales.face],
+        ];
+        for (const [part, scale] of parts) {
+          this.tweens.add({
+            targets: [part],
+            scaleX: scale,
+            duration: halfDuration,
+            ease: "Sine.out",
+          });
+        }
       },
     });
   }
