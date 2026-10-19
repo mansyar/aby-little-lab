@@ -80,6 +80,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
 });
 
 import { NumberOrderScene } from "../../scenes/NumberOrderScene";
+import { tapHits } from "../helpers/hitTest";
 
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -210,6 +211,41 @@ describe("NumberOrderScene interactions", () => {
     expect(all.length).toBeGreaterThan(0);
     return all[all.length - 1];
   }
+
+  /**
+   * Builds the engine-accurate hit-test subject for a card container. Phaser
+   * adds the display origin (half of `setSize`) before testing the hit area,
+   * so the visible, centred card occupies `(0,0)-(w,h)` in that local space.
+   */
+  function hitSubject(card: TestCard) {
+    const config = getMockFn(card.container.setInteractive).mock.calls[0]?.[0] as
+      | { hitArea: { x: number; y: number; width: number; height: number } }
+      | undefined;
+    if (!config) throw new Error("card container is not interactive");
+    const size = getMockFn(card.container.setSize).mock.calls[0] as [number, number];
+    return {
+      x: card.originX,
+      y: card.originY,
+      scale: 1,
+      displayOriginX: size[0] / 2,
+      displayOriginY: size[1] / 2,
+      hitArea: config.hitArea,
+    };
+  }
+
+  it("hit-tests the visible card: centre and lower-right hit, outside taps miss", () => {
+    const scene = new NumberOrderScene();
+    scene.create();
+    const card = internals(scene).cards[0];
+    const subject = hitSubject(card);
+
+    // The whole visible card is tappable...
+    expect(tapHits(subject, card.originX, card.originY)).toBe(true);
+    expect(tapHits(subject, card.originX + 40, card.originY + 40)).toBe(true);
+    // ...and nothing outside its edges is.
+    expect(tapHits(subject, card.originX + 71, card.originY)).toBe(false);
+    expect(tapHits(subject, card.originX - 100, card.originY - 100)).toBe(false);
+  });
 
   function drop(scene: unknown, card: TestCard, slotIndex: number): void {
     const { slots } = internals(scene);

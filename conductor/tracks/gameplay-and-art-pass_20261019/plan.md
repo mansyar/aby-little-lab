@@ -13,7 +13,7 @@
 
 ## Phase 2 — Number Order hit area + snap easing
 
-- [ ] Task: Write failing hit-area tests using `src/__tests__/helpers/hitTest.ts`
+- [~] Task: Write failing hit-area tests using `src/__tests__/helpers/hitTest.ts`
     - [ ] A tap at the container centre hits
     - [ ] A tap 1 px outside the visible card misses
     - [ ] A tap in the old up-left quadrant (e.g. `x-100, y-100`) misses
