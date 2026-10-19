@@ -8,3 +8,9 @@ coverage
 test-out.txt
 
 gate*.txt
+
+.art-preview/
+
+# Regenerated contact-sheet PNGs are scratch; the tracked baseline lives in
+# docs/svg-contact-sheets/baseline/.
+docs/svg-contact-sheets/*.png

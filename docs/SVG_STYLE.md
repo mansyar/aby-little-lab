@@ -1,8 +1,8 @@
 # SVG Style Spec — Aby's Little Lab
 
-**Purpose:** Single source of truth for the visual quality bar of every asset in `src/assets/svg/`. All 142 SVGs must conform to the rules below so the library reads as one consistent set. Style system: **Storybook Flat** (see `conductor/product-guidelines.md` §2).
+**Purpose:** Single source of truth for the visual quality bar of every asset in `src/assets/svg/`. All 170 SVGs must conform to the rules below so the library reads as one consistent set. Style system: **Storybook Flat** (see `conductor/product-guidelines.md` §2).
 
-**Canvas contract:** Every SVG is 512×512 viewBox, rasterized at 512px by the game (`SVG_RASTER_SIZE` in `PreloadScene.ts`). **Never rename or delete files** — filenames are texture keys.
+**Canvas contract:** Every SVG is 512×512 viewBox, rasterized at 512px by the game (`SVG_RASTER_SIZE` in `PreloadScene.ts`). Artwork and its outline stay inside a **512 grid with an 8px safe margin** (no path edge closer than x/y 8 or 504) so nothing clips when rasterized. **Never rename or delete files** — filenames are texture keys.
 
 ---
 
@@ -11,12 +11,13 @@
 | Rule | Spec |
 |---|---|
 | **Fills** | Flat, solid colors only. **No gradients, no 3D, no shadows** (the `shadows/` set is the one exception — it IS the shadow). |
-| **Outlines** | `#2D3748`, 4–6px wide at 512 base. Every hero element carries the dark outline. Outline is the primary style signal — assets without it look broken (see old `bubble`). |
+| **Outlines** | `#2D3748` at 512 base, three weights: **6px** for a hero silhouette (animal head, item body, tile icon), **4px** for secondary shapes (inner ears, muzzle patches, seams, eyes), **3px** for fine details (nostrils, whisker roots). Never below 3px — thinner lines vanish after rasterization. |
 | **Palette** | Soft vibrant hues (below). Never neon, never pure RGB primaries, never muddy/dark desaturated fills. |
 | **Background** | Transparent unless an asset is inherently a badge/tile (stickers, tiles), which use cream `#FFF8E7`. |
 | **Silhouette-first** | Every asset must be **recognizable as a solid `#2D3748` silhouette**. If it fails this test, the composition is wrong. |
 | **Color independence** | Color is never the sole differentiator (letter shapes, animal variants must differ by form too). |
 | **Min element size** | No design element smaller than ~10% of canvas (≈50px @512). Tiny details disappear after rasterization. |
+| **96px rule** | Every asset must be identifiable in a 96×96 render on both the white (`#FAF9F6`) and cream (`#FFF8E7`) card backgrounds. This is the acceptance test; tiles are additionally checked at 48px. |
 | **Targeting** | Assets are seen by 3–5 year-olds at small sizes: tiles at ~48px, stickers as thumbnails, game pieces at ~128–200px. Composition must survive downscaling. |
 
 ## 2. Color Palette
@@ -38,6 +39,20 @@ Soft vibrant rotation (for letters, numerals, and variety fills):
 | Pink | `#F687B3` | sweet accent |
 
 Pastel variants (for cutouts / secondary elements): `#FEEBC8` (cream-yellow), `#FED7D7` (blush), `#BEE3F8` (sky), `#C6F6D5` (mint), `#E9D8FD` (lavender), `#B2F5EA` (seafoam).
+
+Asset-specific tokens (fixed, do not substitute):
+
+| Token | Hex | Used by |
+|---|---|---|
+| Fur tan | `#D4A056` | `animals/cat`, `animals/dog` |
+| Tabby stripe | `#A67C52` | `animals/cat` forehead stripes |
+| Monkey fur | `#A0522D` | `animals/monkey` head + ears |
+| Monkey muzzle | `#F0D5B4` | `animals/monkey` face patch + muzzle |
+| Ball red | `#E53E3E` | beach-ball gore, `map` X mark |
+| Ball blue | `#3182CE` | beach-ball gore, `tile_pop_freeze` snowflake |
+| Frost | `#90CDF4` | `tile_pop_freeze` dashed rim |
+| Bone tan | `#F6AD55` | `items/bone` |
+| Parchment | `#FEEBC8` | `items/map` paper |
 
 **Rule:** max 3 hues per asset (outline excluded). One dominant hue + one accent + one neutral.
 
@@ -95,5 +110,25 @@ Each `cutout_X` mirrors `shape_X` geometry in the same hue family:
 
 - Re-render contact sheets: `node scripts/render-svg-contact-sheets.mjs` → `docs/svg-contact-sheets/` (HTML for humans, PNG via headless Chrome when available).
 - Silhouette test: mentally replace every fill with `#2D3748`; asset must stay identifiable.
-- Small-size test: scale to 48–64px; concept must survive.
+- Small-size test: render at **96×96** on both `#FAF9F6` and `#FFF8E7`; the concept must be nameable without context. Tiles must also survive **48×48**.
+- Blind-identification test: for a redraw, show the 96px render to someone (or a vision model) with no context and ask them to name it in one word. A wrong or hedged answer is a failed asset.
 - No `<text>` in `letters/` or `numbers/`; no gradient/`<defs>` misuse; outlines present on hero elements.
+
+## 8. Asset Inventory
+
+170 SVGs, all texture keys — counts by folder:
+
+| Folder | Count | Notes |
+|---|---|---|
+| `animals/` | 9 | cat, dog, rabbit, monkey, elephant, pig, frog (blue / green / red) |
+| `items/` | 23 | includes bone, beach ball, map |
+| `letters/` | 26 | bundled Baloo 2 glyphs (§4) |
+| `numbers/` | 10 | 0–9 |
+| `shadows/` | 8 | solid silhouettes paired with `items/` |
+| `shapes/` | 36 | 18 `shape_*` + 18 `cutout_*` (§6) |
+| `stickers/` | 20 | cream circle scenes |
+| `toys/` | 7 | |
+| `ui/` | 11 | mascots, icons, `bubble` |
+| `ui/tiles/` | 20 | game tile faces |
+
+Contact-sheet categories are `ui`, `animals`, `toys`, `items`, `letters`, `numbers`, `shadows`, `shapes`, `cutouts`, `stickers`, `tiles` — 11 sheets, one per folder above (with `shapes` split in two).
