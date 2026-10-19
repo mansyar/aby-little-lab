@@ -56,4 +56,5 @@ export const GAME_SCENE_KEYS = [
   "MemoryMatch",
   "DecodeIt",
   "NumberOrder",
+  "FeelingsFaces",
 ] as const;

@@ -1,20 +1,27 @@
 /**
  * Hub paging logic (pure module).
  *
- * On narrow viewports the single 5x4 tile grid would scale every tile below
- * the 64px touch-target floor (product-guidelines.md), so the Hub splits its
- * 20 games into two pages of 10 and lays each page out as a 5x2 grid of
- * much larger tiles. Wide viewports keep the byte-identical 5x4 grid.
+ * On narrow viewports the single tile grid would scale every tile below the
+ * 64px touch-target floor (product-guidelines.md), so the Hub splits its
+ * games into pages of 10 and lays each page out as a 5x2 grid of much larger
+ * tiles. Wide viewports keep the byte-identical wide grid.
  *
  * All geometry is expressed in the fixed 1024x768 logical canvas space;
  * Phaser's FIT scale mode maps it onto the physical screen.
  */
 
-/** Tiles per page (20 games / 2 pages). */
+/** Tiles per page (the first two pages of a 21-game hub). */
 export const PAGE_SIZE = 10;
 
-/** Number of Hub pages in paged mode. */
-export const PAGE_COUNT = 2;
+/** Number of Hub pages in paged mode: 21 games as 10 + 10 + 1. */
+export const PAGE_COUNT = 3;
+
+/**
+ * Total number of Hub tiles. Duplicated here as a documented constant so this
+ * module stays dependency-free; `GAME_TILES.length` in hubTiles.ts is the
+ * source of truth and hubPaging.test.ts asserts the two agree.
+ */
+export const HUB_TILE_COUNT = 21;
 
 /**
  * The wide-layout tile height (HubScene's TILE_HEIGHT) that the threshold is
@@ -69,15 +76,17 @@ export function isNarrowViewport(
 }
 
 /**
- * Tile indexes shown on the given page: page 0 shows games 1-10, page 1
- * shows games 11-20 (matching the wide grid's reading order).
+ * Tile indexes shown on the given page: page 0 shows games 1-10, page 1 shows
+ * games 11-20, and the last page shows whatever remains (matching the wide
+ * grid's reading order).
  */
 export function pageTileIndexes(page: number): number[] {
   if (!Number.isInteger(page) || page < 0 || page >= PAGE_COUNT) {
     throw new RangeError(`page must be 0..${PAGE_COUNT - 1}, got ${page}`);
   }
   const start = page * PAGE_SIZE;
-  return Array.from({ length: PAGE_SIZE }, (_, i) => start + i);
+  const remaining = Math.max(0, HUB_TILE_COUNT - start);
+  return Array.from({ length: Math.min(PAGE_SIZE, remaining) }, (_, i) => start + i);
 }
 
 /** The page a tile index belongs to. */
@@ -86,17 +95,23 @@ export function pageOf(tileIndex: number): number {
 }
 
 /**
- * Center position and size of a paged tile (0-9 within a page) in the
- * logical canvas space: 5 columns x 2 rows, centered with margins that clear
- * the top control band (avatar chip / Settings, 116px) and the bottom corner
- * mascot band (~148px).
+ * Center position and size of a paged tile (0..PAGE_SIZE-1 within a page) in
+ * the logical canvas space: 5 columns x 2 rows, centered with margins that
+ * clear the top control band (avatar chip / Settings, 116px) and the bottom
+ * corner mascot band (~148px).
+ *
+ * `tilesOnPage` (default: a full page) narrows the column box so a partial
+ * page reads as centred instead of hugging the left edge: a 1-tile page sits at
+ * the canvas centre-x, while the two-row vertical box is kept so every row
+ * stays clear of the top and bottom bands. Full pages are byte-identical.
  */
 export function pagedTilePosition(
   indexInPage: number,
+  tilesOnPage = PAGE_SIZE,
   canvasWidth = 1024,
   canvasHeight = 768,
 ): { x: number; y: number; width: number; height: number } {
-  const cols = 5;
+  const cols = Math.min(5, Math.max(1, Math.ceil(tilesOnPage)));
   const rows = 2;
   const gridW = cols * PAGED_TILE_WIDTH + (cols - 1) * PAGED_TILE_SPACING;
   const gridH = rows * PAGED_TILE_HEIGHT + (rows - 1) * PAGED_TILE_SPACING;

@@ -56,6 +56,13 @@ describe("progressLogic", () => {
         expect(map[gameId]).toEqual(gp());
       }
     });
+
+    it("covers all 21 games, with Feelings Faces last in hub order", () => {
+      const map = createDefaultProgressMap();
+      expect(Object.keys(map)).toHaveLength(21);
+      expect(GAME_IDS.at(-1)).toBe("feelings-faces");
+      expect(map["feelings-faces"]).toEqual(gp());
+    });
   });
 
   describe("normalizeProgress", () => {

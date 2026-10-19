@@ -157,4 +157,10 @@ export const GAME_TILES: readonly GameTile[] = [
     iconDisplay: 52,
     iconOffsetY: -44,
   },
+  {
+    sceneKey: "FeelingsFaces",
+    gameId: "feelings-faces",
+    label: "Feelings Faces",
+    tileKey: "tile_feelings_faces",
+  },
 ];

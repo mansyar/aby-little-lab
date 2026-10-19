@@ -290,6 +290,49 @@ describe("Storage utilities", () => {
       expect(result.settings.bgmEnabled).toBe(true);
       expect(result.settings.sfxEnabled).toBe(false);
     });
+
+    it("migrates a save from before Game 21 by backfilling the feelings-faces sticker entry", () => {
+      // Simulate a save from before Feelings Faces shipped: every Game 20 key
+      // is present, but there is no "feelings-faces" entry.
+      const gameTwentyIds: GameId[] = [
+        "shape-sorter",
+        "animal-trace",
+        "pop-freeze",
+        "shadow-match",
+        "musical-memory",
+        "big-small",
+        "pattern-builder",
+        "alphabet-match",
+        "word-match",
+        "word-builder",
+        "how-many",
+        "first-sounds",
+        "more-less",
+        "odd-one-out",
+        "color-match",
+        "add-it-up",
+        "take-away",
+        "memory-match",
+        "decode-it",
+        "number-order",
+      ];
+      const oldSave = {
+        stickers: Object.fromEntries(
+          gameTwentyIds.map((gameId) => [gameId, { earned: false, earnedAt: null }]),
+        ),
+        settings: { bgmEnabled: true, sfxEnabled: true },
+      };
+      localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
+
+      const result = load();
+
+      // The new game gets a fresh unearned entry instead of crashing.
+      expect(result.stickers["feelings-faces"]).toEqual({ earned: false, earnedAt: null });
+      // Existing entries are preserved.
+      for (const gameId of gameTwentyIds) {
+        expect(result.stickers[gameId]).toEqual({ earned: false, earnedAt: null });
+      }
+    });
   });
 
   describe("save", () => {

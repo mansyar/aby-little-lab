@@ -7,16 +7,17 @@ import { textStyle } from "../utils/typography";
 import { isNarrowViewport, PAGE_COUNT, pagedTilePosition, pageTileIndexes } from "./hubPaging";
 import { GAME_TILES } from "./hubTiles";
 
-const TILE_WIDTH = 160;
+const TILE_WIDTH = 144;
 /**
- * 20 tiles render as 5x4 (rows 5/5/5/5). Height and spacing are sized so the
+ * 21 tiles render as 6x4 (rows 6/6/6/3). Height and spacing are sized so the
  * 4 rows fit inside 768 with the same 119px top/bottom margins as the 15-tile
  * grid - clearing the top-band controls (avatar chip / Settings, bottom edge
- * 116) while keeping every tile and its sticker shelf on-canvas.
+ * 116) while keeping every tile and its sticker shelf on-canvas. The width is
+ * the widest that keeps 6 columns inside 1024 with the 22px spacing.
  */
 const TILE_HEIGHT = 116;
 const TILE_SPACING = 22;
-const GRID_COLS = 5;
+const GRID_COLS = 6;
 const GRID_ROWS = 4;
 /** Display size of the game icon artwork on each tile (px). */
 const TILE_ICON_DISPLAY = 64;
@@ -41,8 +42,19 @@ const BOB_AMPLITUDE = 1.025;
 const BOB_DURATION = 2500;
 /** Phase offset between tile breathe loops (ms). */
 const BOB_PHASE_OFFSET = 200;
-/** Display size of sticker thumbnails on the shelf (px). */
-const STICKER_DISPLAY_SIZE = 56;
+/**
+ * Display size of sticker thumbnails / empty-slot rings on a wide tile (px).
+ *
+ * The shelf has to live in the band between the label and the tile's bottom
+ * edge: the label baseline sits at +20 and its 17px box ends around +30, and
+ * the tile's bottom edge is at +58 (TILE_HEIGHT 116). 22px is the largest
+ * plaque that clears the label and keeps a 3px inset from the edge — a 56px
+ * plaque (sized for the old 160x116 tile with no bottom inset) covered the
+ * game name once the grid reflowed.
+ */
+const STICKER_DISPLAY_SIZE = 22;
+/** Gap between the shelf's bottom edge and the tile's bottom edge (px). */
+const STICKER_SHELF_INSET = 3;
 /** Alpha of the dashed empty-slot outline for unearned stickers. */
 const EMPTY_SLOT_ALPHA = 0.55;
 /** Stroke width of the dashed empty-slot outline (px). */
@@ -73,6 +85,12 @@ const PAGED_ICON_Y_OFFSET = -58;
 const PAGED_LABEL_Y_OFFSET = 48;
 /** Label font size on paged tiles (px). */
 const PAGED_LABEL_FONT_SIZE = 20;
+/**
+ * Display size of sticker thumbnails / empty-slot rings on a paged tile (px).
+ * The 196px-tall tile keeps the same label-to-bottom band proportion as the
+ * wide tile, so the plaque is proportionally larger but still below the label.
+ */
+const PAGED_STICKER_DISPLAY_SIZE = 30;
 /** Duration of the page slide transition (ms). */
 const PAGE_SLIDE_DURATION = 300;
 /** Minimum horizontal travel for a swipe to flip pages (logical px). */
@@ -352,8 +370,9 @@ export class HubGrid {
     this.entranceIndex = 0;
     const reducedMotion = isReducedMotion();
 
-    pageTileIndexes(page).forEach((globalIndex, slot) => {
-      const pos = pagedTilePosition(slot);
+    const indexes = pageTileIndexes(page);
+    indexes.forEach((globalIndex, slot) => {
+      const pos = pagedTilePosition(slot, indexes.length);
       const x = pos.x + (slideFrom ?? 0);
       const { y, width, height } = pos;
       const slideIn = slideFrom !== null && !reducedMotion;
@@ -431,7 +450,7 @@ export class HubGrid {
         });
       }
 
-      this.createShelfSticker(globalIndex, x, y, height);
+      this.createShelfSticker(globalIndex, x, y, height, PAGED_STICKER_DISPLAY_SIZE);
       if (slideIn) {
         // Slide only the shelf pieces this tile just created (the lists were
         // reset at the top of this build, so slice from the pre-create mark).
@@ -576,20 +595,27 @@ export class HubGrid {
   }
 
   /** Creates one shelf sticker thumbnail for the given tile, reflecting storage. */
-  createShelfSticker(index: number, x: number, y: number, tileHeight = TILE_HEIGHT): void {
+  createShelfSticker(
+    index: number,
+    x: number,
+    y: number,
+    tileHeight = TILE_HEIGHT,
+    shelfSize = STICKER_DISPLAY_SIZE,
+  ): void {
     const earned = hasSticker(GAME_TILES[index].gameId);
     const stickerX = x;
-    // Sits 13px above the tile bottom edge so the dashed slot / thumbnail
-    // clears the label's bob range (label bottom at +25.5px + 4px bob =
-    // +29.5px; circle top at +34px on the wide grid).
-    const stickerY = y + tileHeight / 2 - 13;
+    // The shelf hangs off the tile's bottom edge with a fixed inset, so it sits
+    // BELOW the label instead of over the game name: on a wide tile the plaque
+    // spans +33..+55 (label box ends ~+30, tile edge +58); on a paged tile
+    // +65..+95 (label ends ~+60, tile edge +98).
+    const stickerY = y + tileHeight / 2 - STICKER_SHELF_INSET - shelfSize / 2;
 
     if (earned) {
       // Derive the thumbnail scale from THIS sticker's raster tier instead of a
       // single hardcoded key, so a future tier change cannot shrink or grow
       // only some of the twenty shelf stickers.
       const stickerKey = `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`;
-      const stickerScale = displayScale(stickerKey, STICKER_DISPLAY_SIZE);
+      const stickerScale = displayScale(stickerKey, shelfSize);
       const sticker = this.deps.scene.add.image(stickerX, stickerY, stickerKey);
       this.stickerImages.push(sticker as Phaser.GameObjects.Image);
       if (GAME_TILES[index].gameId === this.justEarned) {
@@ -604,7 +630,7 @@ export class HubGrid {
         );
       }
     } else {
-      this.drawEmptySlot(stickerX, stickerY);
+      this.drawEmptySlot(stickerX, stickerY, shelfSize / 2);
     }
   }
 
@@ -612,13 +638,12 @@ export class HubGrid {
    * Draws a dashed circle outline where an unearned sticker will appear,
    * communicating the collection goal textlessly in place of a dimmed ghost.
    */
-  drawEmptySlot(x: number, y: number): void {
+  drawEmptySlot(x: number, y: number, radius = STICKER_DISPLAY_SIZE / 2): void {
     const graphics = this.deps.scene.add.graphics();
     // Anchor the object at the slot center and draw the dashed ring around
     // (0, 0), so page-slide tweens can move the slot by its position.
     graphics.setPosition(x, y);
     this.emptySlotGraphics.push(graphics);
-    const radius = STICKER_DISPLAY_SIZE / 2;
     graphics.lineStyle(EMPTY_SLOT_LINE_WIDTH, 0xffffff, EMPTY_SLOT_ALPHA);
     const segment = (Math.PI * 2) / EMPTY_SLOT_DASH_COUNT / 2;
     for (let i = 0; i < EMPTY_SLOT_DASH_COUNT; i++) {
@@ -660,8 +685,8 @@ export class HubGrid {
       // (with fresh sticker state) whenever it is flipped to.
       const active = pageTileIndexes(this.hubPage);
       active.forEach((globalIndex, slot) => {
-        const pos = pagedTilePosition(slot);
-        this.createShelfSticker(globalIndex, pos.x, pos.y, pos.height);
+        const pos = pagedTilePosition(slot, active.length);
+        this.createShelfSticker(globalIndex, pos.x, pos.y, pos.height, PAGED_STICKER_DISPLAY_SIZE);
       });
       return;
     }

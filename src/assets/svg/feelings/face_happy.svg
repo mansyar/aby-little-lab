@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Aby — one preschooler, four expressions. The shirt, head, hair and nose
+  <!-- Aby: one preschooler, four expressions. The shirt, head, hair and nose
        are byte-identical in all four face SVGs; only brows, eyes and mouth
        change, so every feeling reads by shape alone. Big round head, no neck. -->
   <path d="M 48 504 L 48 474 C 48 432 90 400 140 352 C 176 388 204 402 256 404 C 308 402 336 388 372 352 C 422 400 464 432 464 474 L 464 504 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
