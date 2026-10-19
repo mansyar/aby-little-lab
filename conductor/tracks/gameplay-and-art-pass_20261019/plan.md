@@ -26,17 +26,17 @@
 
 ## Phase 3 — Cat head redraw
 
-- [ ] Task: Collect a cat-face reference and write the silhouette checklist (triangular ears, wide low head, cheek-pad muzzle, W mouth, whiskers, forehead M, slit pupils)
-    - [ ] Render the reference beside the current rabbit and fox at 96 px for comparison
-- [ ] Task: Redraw `animals/cat.svg`
-    - [ ] Brown tabby palette with `#2D3748` outlines at 6 / 4 / 3
-    - [ ] Head wider than tall; sharp triangular ears; stripes and whiskers
-- [ ] Task: Verify the redraw at 56 / 96 / 160 / 256 px
-    - [ ] Blind identification: the vision check answers "cat"
-    - [ ] Side-by-side with rabbit and fox shows no shared silhouette
-    - [ ] All six consumers still load `animal_cat`
-- [ ] Task: Commit (`feat(art): redraw the cat head so it reads as a cat`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Collect a cat-face reference and write the silhouette checklist (triangular ears, wide low head, cheek-pad muzzle, W mouth, whiskers, forehead M, slit pupils) *(b31ec9c)*
+    - [x] Compare the reference beside rabbit and dog at 96 px (the pack has no fox)
+- [x] Task: Redraw `animals/cat.svg` *(b31ec9c)*
+    - [x] Brown tabby palette (`#D4A056` fill, `#A67C52` stripes) with `#2D3748` outlines at 6 / 4 / 3
+    - [x] Head wider than tall; sharp triangular ears; stripes and whiskers
+- [x] Task: Verify the redraw at 56 / 96 / 160 / 256 px
+    - [x] Blind identification: the vision check answers "cat"
+    - [x] Side-by-side with rabbit and dog shows no shared silhouette
+    - [x] All six consumers still load `animal_cat` (texture key unchanged)
+- [x] Task: Commit (`feat(art): redraw the cat head so it reads as a cat`) *(b31ec9c)*
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4 — Remaining art assets
 
