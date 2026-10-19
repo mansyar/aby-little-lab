@@ -57,7 +57,7 @@
 - [x] Task: Commit (`docs(art): add the SVG style guide and refresh contact sheets`) *(db7f3b9)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 6 — Gates and manual smoke
+## Phase 6 - Gates and manual smoke [checkpoint: bba1447]
 
 - [x] Task: Run all gates: `pnpm run check`, `pnpm typecheck`, `CI=true pnpm test --testTimeout=30000`, `pnpm run build`, `validate-bundle`, `validate-pwa`, `validate-boot`
 - [x] Task: Manual smoke on the dev server: Memory Match all three bands, Number Order drag/drop, cat in Animal Trace / Pop & Freeze / Memory Match / Odd One Out / Word Match, profile avatar
