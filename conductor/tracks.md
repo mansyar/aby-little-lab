@@ -207,4 +207,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Gameplay Hitbox Fixes + Art Readability Pass** *Link: [./archive/gameplay-and-art-pass_20261019/index.md](./archive/gameplay-and-art-pass_20261019/index.md)* (Archived)
 
-- [~] **Track: Feelings Faces — Game 21 (Social-Emotional Learning)** — [20261020-feelings-faces](./tracks/20261020-feelings-faces/index.md) — feature — medium
+- [x] **Track: Feelings Faces — Game 21 (Social-Emotional Learning)** — [20261020-feelings-faces](./tracks/20261020-feelings-faces/index.md) — feature — medium
