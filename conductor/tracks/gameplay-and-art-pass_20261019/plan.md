@@ -49,7 +49,7 @@
 - [x] Task: Commit (`fix(art): improve readability of bone, ball, map, tile and monkey`) *(3f3cb9f)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5 — Style guide + contact sheets
+## Phase 5 — Style guide + contact sheets [checkpoint: 75075ac]
 
 - [x] Task: Write `docs/svg-style.md` (512 grid, 8 px margin, 6/4/3 outline weights, palette tokens, 96 px rule, asset inventory) *(db7f3b9)*
 - [x] Task: Regenerate all 11 sheets with `node scripts/render-svg-contact-sheets.mjs --png` *(db7f3b9)*
