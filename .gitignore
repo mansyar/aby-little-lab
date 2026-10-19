@@ -4,6 +4,7 @@ coverage
 *.local
 .DS_Store
 .playwright-cli/
+.freebuff/
 
 test-out.txt
 
