@@ -164,13 +164,11 @@ export class NumberOrderScene extends GameSceneBase {
 
     const container = this.add.container(x, y, [bg, ...numeralImages]);
     container.setSize(CARD_WIDTH, CARD_HEIGHT);
+    // Containers hit-test in a local space where the display origin (half the
+    // size) is added to the tap, so the centred card occupies (0,0)-(w,h).
+    // A centred rect would shift the live region up-left by half a card.
     container.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -CARD_WIDTH / 2,
-        -CARD_HEIGHT / 2,
-        CARD_WIDTH,
-        CARD_HEIGHT,
-      ),
+      hitArea: new Phaser.Geom.Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     // Phaser containers with setSize need explicit input enabled; also make draggable

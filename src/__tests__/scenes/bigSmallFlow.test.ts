@@ -263,13 +263,13 @@ describe("BigSmallScene drag and drop", () => {
     const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
     dropCallback(null, slot.zone);
 
-    // Correct drop animates to box position via a 200ms Back.out snap tween.
+    // Correct drop animates to box position via a 200ms Cubic.out snap tween.
     const snapTween = getMockFn(scene.tweens.add).mock.calls.find(
       (call) =>
         call[0]?.targets === toy.obj &&
         call[0]?.x === slot.x &&
         call[0]?.y === slot.y &&
-        call[0]?.ease === "Back.out",
+        call[0]?.ease === "Cubic.out",
     );
     expect(snapTween).toBeDefined();
     if (!snapTween) return;

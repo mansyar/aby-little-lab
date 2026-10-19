@@ -215,14 +215,14 @@ describe("ShapeSorterScene drag and drop", () => {
     const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
     dropCallback(null, slot.zone);
 
-    // Correct drop animates to slot center via a 200ms Back.out snap tween
+    // Correct drop animates to slot center via a 200ms Cubic.out snap tween
     // (no instant setPosition snap).
     const snapTween = getMockFn(scene.tweens.add).mock.calls.find(
       (call) =>
         call[0]?.targets === shape.obj &&
         call[0]?.x === slot.x &&
         call[0]?.y === slot.y &&
-        call[0]?.ease === "Back.out",
+        call[0]?.ease === "Cubic.out",
     );
     expect(snapTween).toBeDefined();
     if (!snapTween) return;
