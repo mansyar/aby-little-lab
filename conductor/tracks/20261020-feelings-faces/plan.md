@@ -107,7 +107,7 @@
 - **Covers:** AC-10, NFR-1, NFR-2, NFR-3, NFR-6
 - **Touches:** `src/__tests__/scenes/feelingsFacesFlow.test.ts`, `conductor/product.md`, `docs/SVG_STYLE.md`, `src/utils/textureTiers.ts`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Flow suite** — covers: AC-1
   - [ ] **P4.T1.1: Hub tile → 6 rounds → sticker → hub flow**
