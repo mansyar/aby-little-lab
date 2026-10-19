@@ -17,7 +17,7 @@
   `src/scenes/AddItUpScene.ts`, `src/scenes/TakeAwayScene.ts`,
   `src/scenes/sceneRegistry.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Create the `ChoiceRoundScene` base** — covers: FR-1
   - [ ] **P1.T1.1: Define the subclass contract** (round-content build, choice
