@@ -35,30 +35,38 @@
   - [x] **P1.T5.2: Contrast table test for each round index**
   - [x] **P1.T5.3: Scenario-content guard test (length, safe-tone word blocklist)**
 
-## Phase 2: Art and suite registration
+## Phase 2: Art and asset preload
 
 - **Goal:** All six new assets exist, preloaded and sized, with the preload suite green.
 - **Depends on:** Phase 1
 - **Covers:** FR-9 (sticker asset), NFR-4, NFR-5, NFR-7
 - **Touches:** `src/assets/svg/feelings/**`, `src/assets/svg/ui/tile_feelings_faces.svg`, `src/assets/svg/stickers/sticker_feelings_faces.svg`, `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `src/__tests__/assets/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/preloadScene.test.ts src/__tests__/assets && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+
+**Result:** verified
+**Checkpoint:** e6ff082
+**Evidence:** conductor/tracks/20261020-feelings-faces/verification/phase-2.md
 
 > **Adjustment (2026-10-20):** all id/registry wiring moved to Phase 3. `GameId` is
 > counted by progress, storage, grid, paging, navigation, and lifecycle suites, so the
 > new id, the tile, and the scene must land in one commit set or every count assertion
 > breaks.
+>
+> **Revision 1 (2026-10-20):** after a visual review the art took one rework pass —
+> preschool proportions, no neck or collar, a shape-level angry cue, a single-face tile,
+> and a palette-red sticker. Payload dropped to 8,636 bytes.
 
-- [ ] **P2.T1: Four expression SVGs** — covers: NFR-5
-  - [ ] **P2.T1.1: Draw Aby happy/sad/angry/scared in the flat storybook style, shapes distinct without color**
-- [ ] **P2.T2: Tile + sticker SVGs** — covers: FR-9
-  - [ ] **P2.T2.1: `tile_feelings_faces.svg` icon**
-  - [ ] **P2.T2.2: `sticker_feelings_faces.svg` heart badge**
-  - [ ] **P2.T2.3: Confirm total added payload ≤ 40 KB**
-- [ ] **P2.T3: Preload registration** — covers: NFR-4
-  - [ ] **P2.T3.1: Preload the six assets under their texture keys**
-- [ ] **P2.T4: Preload tests** — covers: NFR-4
-  - [ ] **P2.T4.1: Extend `preloadScene` asset expectations**
+- [x] **P2.T1: Four expression SVGs** — covers: NFR-5
+  - [x] **P2.T1.1: Draw Aby happy/sad/angry/scared in the flat storybook style, shapes distinct without color**
+- [x] **P2.T2: Tile + sticker SVGs** — covers: FR-9
+  - [x] **P2.T2.1: `tile_feelings_faces.svg` icon**
+  - [x] **P2.T2.2: `sticker_feelings_faces.svg` heart badge**
+  - [x] **P2.T2.3: Confirm total added payload ≤ 40 KB**
+- [x] **P2.T3: Preload registration** — covers: NFR-4
+  - [x] **P2.T3.1: Preload the six assets under their texture keys**
+- [x] **P2.T4: Preload tests** — covers: NFR-4
+  - [x] **P2.T4.1: Extend `preloadScene` asset expectations**
 
 ## Phase 3: Gameplay scene
 
@@ -93,7 +101,7 @@
 - **Goal:** End-to-end flow coverage, full CI parity green, and product documentation updated.
 - **Depends on:** Phase 3
 - **Covers:** AC-10, NFR-1, NFR-2, NFR-3, NFR-6
-- **Touches:** `src/__tests__/scenes/feelingsFacesFlow.test.ts`, `conductor/product.md`, `README.md`
+- **Touches:** `src/__tests__/scenes/feelingsFacesFlow.test.ts`, `conductor/product.md`, `docs/SVG_STYLE.md`, `src/utils/textureTiers.ts`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
 
@@ -104,6 +112,7 @@
 - [ ] **P4.T3: Documentation** — covers: NFR-6
   - [ ] **P4.T3.1: `product.md` — game table row 21 + changelog + cross-game systems note**
   - [ ] **P4.T3.2: `README.md` — "Twenty" → "Twenty-one", game table row, scene/test counts**
+  - [ ] **P4.T3.3: Refresh the stale asset counts in `docs/SVG_STYLE.md` §8 and the `textureTiers.ts` header comment**
 - [ ] **P4.T4: Full verification** — covers: AC-10
   - [ ] **P4.T4.1: Run full CI parity and write `verification/phase-4.md`**
 

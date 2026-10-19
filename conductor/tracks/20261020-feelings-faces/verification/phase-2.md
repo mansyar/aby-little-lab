@@ -140,3 +140,13 @@ Every path still uses only `M`/`L`/`Q`/`C`/`Z` (no `H`/`V` shorthand), all art s
 
 Preload wiring and the `preloadScene` expectations were untouched by the revision (the six keys and their sizes did not change), and `.conductor/evidence/feelings-faces-preview.html` needed no regeneration — it references the SVG files by path with no embedded geometry, so it shows the revised art at 180/140/96/48 px and in grayscale.
 
+## Primary verification
+
+- **Date:** 2026-10-20
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/preloadScene.test.ts src/__tests__/assets && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Exit:** 0 — Biome clean apart from the pre-existing warning, `tsc --noEmit` clean, 4 files / 134 tests, bundle validator passed (shell 190.3 kB ≤ 200 kB, Phaser vendor chunk present), PWA validator 15/15.
+- **Visual review:** rendered at 180 px, grayscale, 96 px, 48 px, and on a dark surface. Revision 1 accepted: the character reads as a preschooler, angry separates from sad at 48 px by mouth and brow shape, the tile is a single legible face, and the sticker sits in the palette.
+- **Tree:** clean at `e6ff082`; phase commits squashed into one because every commit in `0097cf7..HEAD` was authored by the phase subagent.
+- **Out-of-Touches change:** `src/__tests__/utils/textureTiers.test.ts` count assertion 170 → 176, recorded as a deviation by the subagent.
+- **Carried to Phase 4:** stale asset counts in `docs/SVG_STYLE.md` §8 and the `textureTiers.ts` header comment.
+
