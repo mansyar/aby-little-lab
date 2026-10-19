@@ -12,7 +12,7 @@
 - **Goal:** one choice-round base serves two games, Add It Up and Take Away share
   one implementation, and both existing suites pass unchanged.
 - **Depends on:** none
-- **Covers:** FR-1, FR-2, AC-2, AC-3
+- **Covers:** FR-1, FR-2, AC-2, AC-3, AC-7, NFR-1, NFR-2, NFR-4, NFR-5, NFR-8
 - **Touches:** `src/scenes/ChoiceRoundScene.ts`, `src/scenes/GroupMathScene.ts`,
   `src/scenes/AddItUpScene.ts`, `src/scenes/TakeAwayScene.ts`,
   `src/scenes/sceneRegistry.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`
@@ -56,7 +56,7 @@ The primary appends after acceptance:
 - **Goal:** five more choice scenes extend the base, with unchanged card
   content and unchanged suites.
 - **Depends on:** Phase 1
-- **Covers:** FR-1, AC-3
+- **Covers:** FR-1, AC-3, NFR-2, NFR-5, NFR-7, NFR-8
 - **Touches:** `src/scenes/AlphabetScene.ts`, `src/scenes/WordMatchScene.ts`,
   `src/scenes/DecodeItScene.ts`, `src/scenes/HowManyScene.ts`,
   `src/scenes/FirstSoundsScene.ts`
@@ -80,7 +80,7 @@ The primary appends after acceptance:
 - **Goal:** all thirteen choice scenes run on the base; only game-specific
   content remains in each file.
 - **Depends on:** Phase 2
-- **Covers:** FR-1, AC-3, AC-4
+- **Covers:** FR-1, AC-3, AC-4, NFR-2, NFR-4, NFR-5, NFR-7, NFR-8
 - **Touches:** `src/scenes/MoreLessScene.ts`, `src/scenes/ColorMatchScene.ts`,
   `src/scenes/OddOneOutScene.ts`, `src/scenes/NumberOrderScene.ts`,
   `src/scenes/PatternBuilderScene.ts`, `src/scenes/FeelingsFacesScene.ts`
@@ -104,7 +104,7 @@ The primary appends after acceptance:
 - **Goal:** a single narrator serves every per-round prompt, owns the caption
   fallback, and no scene constructs a speaker glyph directly.
 - **Depends on:** Phase 3
-- **Covers:** FR-3, FR-4, FR-5, AC-1, AC-4
+- **Covers:** FR-3, FR-4, FR-5, AC-1, AC-4, NFR-2, NFR-3, NFR-7, NFR-8
 - **Touches:** `src/scenes/GameSceneBase.ts`, `src/components/RoundNarrator.ts`,
   `src/scenes/AlphabetScene.ts`, `src/scenes/WordMatchScene.ts`,
   `src/scenes/WordBuilderScene.ts`, `src/scenes/HowManyScene.ts`,
@@ -145,7 +145,7 @@ The primary appends after acceptance:
 - **Goal:** narration owns the audio foreground, hidden time is not play time,
   and both behaviours are documented.
 - **Depends on:** Phase 4
-- **Covers:** FR-6, FR-7, FR-8, FR-9, FR-10, AC-5, AC-6, AC-7, AC-8, AC-9
+- **Covers:** FR-6, FR-7, FR-8, FR-9, FR-10, AC-5, AC-6, AC-7, AC-8, AC-9, NFR-1, NFR-2, NFR-6, NFR-7, NFR-8
 - **Touches:** `src/audio/AudioManager.ts`, `src/game/playTimeLogic.ts`,
   `src/scenes/HubScene.ts`, `src/__tests__/audio/AudioManager.test.ts`,
   `src/__tests__/game/playTimeLogic.test.ts`, `README.md`,
