@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { todayKey } from "../../game/playTimeLogic";
 import type { PlayTime } from "../../types";
 import { MockScene, mockRegistry } from "../helpers/phaserMock";
 
-/** normalizePlayTime resets usage on stale dates, so fixtures must be "today". */
-const TODAY = new Date().toISOString().slice(0, 10);
+/** normalizePlayTime resets usage on stale dates, so fixtures must be "today" (local, not UTC). */
+const TODAY = todayKey();
 
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();
