@@ -88,6 +88,9 @@ The primary agent provides:
 
 ## Review rules
 
+- Run git commands plain, with no pipes or chaining (`| cat`, `| head`,
+  `| grep`, `&&` are all denied by your shell policy). For reading or searching
+  files, use the native `read`, `grep`, and `glob` tools.
 - Review only what the diff introduces or directly causes. Do not report
   pre-existing issues unless the diff makes them worse.
 - Do not speculate. Every finding needs a concrete `file:line` and a fix.
@@ -119,9 +122,9 @@ it and the test or evidence that verifies it. Mark gaps explicitly.
 
 Return one of:
 
-- `BLOCK` - at least one Critical or High finding.
-- `PASS WITH FINDINGS` - only Medium/Low findings.
-- `PASS` - no findings.
+- `BLOCK` — at least one Critical or High finding.
+- `PASS WITH FINDINGS` — only Medium/Low findings.
+- `PASS` — no findings.
 
 ## Report contract
 
