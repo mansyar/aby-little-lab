@@ -37,33 +37,36 @@
 
 ## Phase 2: Art and suite registration
 
-- **Goal:** All six new assets exist, are preloaded, and the game is addressable by hub/progress/sticker systems.
+- **Goal:** All six new assets exist and are preloaded, and the game id is addressable by the progress and sticker systems.
 - **Depends on:** Phase 1
-- **Covers:** FR-1, FR-9, NFR-4, NFR-5, NFR-7
-- **Touches:** `src/assets/svg/feelings/**`, `src/assets/svg/ui/tile_feelings_faces.svg`, `src/assets/svg/stickers/sticker_feelings_faces.svg`, `src/scenes/PreloadScene.ts`, `src/types/index.ts`, `src/game/hubTiles.ts`
-- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/preloadScene.test.ts && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Covers:** FR-9 (sticker asset), NFR-4, NFR-5, NFR-7
+- **Touches:** `src/assets/svg/feelings/**`, `src/assets/svg/ui/tile_feelings_faces.svg`, `src/assets/svg/stickers/sticker_feelings_faces.svg`, `src/scenes/PreloadScene.ts`, `src/types/index.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/preloadScene.test.ts src/__tests__/assets && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
+
+> **Adjustment (2026-10-20):** the hub tile moved to Phase 3. `hubTiles.test.ts` and
+> `sceneRegistry.test.ts` assert tile/loader parity, so a tile cannot land before its
+> scene exists without breaking the suite.
 
 - [ ] **P2.T1: Four expression SVGs** — covers: NFR-5
   - [ ] **P2.T1.1: Draw Aby happy/sad/angry/scared in the flat storybook style, shapes distinct without color**
-- [ ] **P2.T2: Tile + sticker SVGs** — covers: FR-1, FR-9
+- [ ] **P2.T2: Tile + sticker SVGs** — covers: FR-9
   - [ ] **P2.T2.1: `tile_feelings_faces.svg` icon**
   - [ ] **P2.T2.2: `sticker_feelings_faces.svg` heart badge**
   - [ ] **P2.T2.3: Confirm total added payload ≤ 40 KB**
-- [ ] **P2.T3: Registration** — covers: FR-1
+- [ ] **P2.T3: Registration** — covers: FR-9
   - [ ] **P2.T3.1: Add `feelings-faces` to `GameId` + `GAME_IDS`**
-  - [ ] **P2.T3.2: Append hub tile entry (tile 21)**
-  - [ ] **P2.T3.3: Preload the six assets**
-- [ ] **P2.T4: Registration tests** — covers: AC-1
-  - [ ] **P2.T4.1: Extend `hubTiles`/`preloadScene` asset expectations**
+  - [ ] **P2.T3.2: Preload the six assets**
+- [ ] **P2.T4: Registration tests** — covers: NFR-4
+  - [ ] **P2.T4.1: Extend `preloadScene`/asset expectations**
 
 ## Phase 3: Gameplay scene
 
 - **Goal:** A playable 6-round game wired to the hub, TTS, feedback, sticker award, and per-profile progress.
 - **Depends on:** Phase 2
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-7, FR-8, FR-9, FR-10, AC-1, AC-2, AC-3, AC-6, AC-7, AC-8
-- **Touches:** `src/scenes/FeelingsFacesScene.ts`, `src/scenes/sceneRegistry.ts`, `src/__tests__/scenes/feelingsFacesScene.test.ts`
-- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/feelingsFacesScene.test.ts src/__tests__/scenes/sceneRegistry.test.ts`
+- **Touches:** `src/scenes/FeelingsFacesScene.ts`, `src/scenes/sceneRegistry.ts`, `src/game/hubTiles.ts`, `src/__tests__/scenes/feelingsFacesScene.test.ts`, `src/__tests__/game/hubTiles.test.ts`, `src/__tests__/helpers/gameScenes.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/scenes/feelingsFacesScene.test.ts src/__tests__/scenes/sceneRegistry.test.ts src/__tests__/game/hubTiles.test.ts`
 - **Status:** pending
 
 - [ ] **P3.T1: Scene skeleton** — covers: FR-2
@@ -79,7 +82,8 @@
   - [ ] **P3.T4.2: Win animation, one-time sticker, 3 s return to hub**
 - [ ] **P3.T5: Registration + progress** — covers: FR-1, FR-10
   - [ ] **P3.T5.1: Add lazy loader to `sceneRegistry`**
-  - [ ] **P3.T5.2: Count plays/accuracy; mastery star after 3 wins**
+  - [ ] **P3.T5.2: Append hub tile 21 and update the tile/registry tests**
+  - [ ] **P3.T5.3: Count plays/accuracy; mastery star after 3 wins**
 - [ ] **P3.T6: Scene tests** — covers: AC-2, AC-3, AC-6, AC-7, AC-8
   - [ ] **P3.T6.1: 6-round traversal, wrong-tap no-advance, caption fallback, sticker-once, progress row**
 
