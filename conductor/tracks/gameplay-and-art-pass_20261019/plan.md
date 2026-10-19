@@ -1,6 +1,6 @@
 # Implementation Plan: Gameplay Hitbox Fixes + Art Readability Pass
 
-## Phase 1 — Memory Match card scale
+## Phase 1 — Memory Match card scale [checkpoint: 78dce15]
 
 - [x] Task: Write failing tests for display-scale preservation *(d56b7b6)*
     - [x] Deal tween ends at each part's post-`setDisplaySize` scale: rect 1, `card_back` `size / 256`, face `size * ITEM_FILL / 256`
