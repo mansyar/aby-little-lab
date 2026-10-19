@@ -13,15 +13,15 @@
 
 ## Phase 2 — Number Order hit area + snap easing
 
-- [~] Task: Write failing hit-area tests using `src/__tests__/helpers/hitTest.ts`
-    - [ ] A tap at the container centre hits
-    - [ ] A tap 1 px outside the visible card misses
-    - [ ] A tap in the old up-left quadrant (e.g. `x-100, y-100`) misses
-- [ ] Task: Write a failing test asserting `snapToSlot` uses `Cubic.out` and targets the slot position
-- [ ] Task: Fix the hit area to `Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT)`
-- [ ] Task: Change `snapToSlot` to `Cubic.out` and update its doc comment (shared by Shape Sorter, Shadow Match, Big vs. Small, Number Order)
-- [ ] Task: Verify the Number Order and `dragJuice` suites are green and `pnpm typecheck` is clean
-- [ ] Task: Commit (`fix(number-order): align the card hit area and stop the snap overshoot`)
+- [x] Task: Write failing hit-area tests using `src/__tests__/helpers/hitTest.ts` *(3107dc1)*
+    - [x] A tap at the container centre hits
+    - [x] A tap 1 px outside the visible card misses
+    - [x] A tap in the old up-left quadrant (e.g. `x-100, y-100`) misses
+- [x] Task: Write a failing test asserting `snapToSlot` uses `Cubic.out` and targets the slot position *(3107dc1)*
+- [x] Task: Fix the hit area to `Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT)` *(b3e13c8)*
+- [x] Task: Change `snapToSlot` to `Cubic.out` and update its doc comment (shared by Shape Sorter, Shadow Match, Big vs. Small, Number Order) *(b3e13c8)*
+- [x] Task: Verify the Number Order and `dragJuice` suites are green and `pnpm typecheck` is clean
+- [x] Task: Commit (`fix(number-order): align the card hit area and stop the snap overshoot`) *(b3e13c8)*
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3 — Cat head redraw
