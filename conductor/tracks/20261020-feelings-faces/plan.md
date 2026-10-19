@@ -14,7 +14,7 @@
 - **Covers:** FR-5, FR-6, FR-11, AC-4, AC-5, AC-9
 - **Touches:** `src/game/feelingsFacesLogic.ts`, `src/__tests__/game/feelingsFacesLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run src/__tests__/game/feelingsFacesLogic.test.ts`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Scenario pool + types** — covers: FR-11
   - [ ] **P1.T1.1: Define `Emotion` union (happy/sad/angry/scared) and `Scenario { id, emotion, text }`**
