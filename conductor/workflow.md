@@ -1,275 +1,289 @@
-<protect>
 # Project Workflow
 
 ## Guiding Principles
 
-1. **The Plan is the Source of Truth:** All work must be tracked in `plan.md`
-2. **The Tech Stack is Deliberate:** Changes to the tech stack must be documented in `tech-stack.md` *before* implementation
-3. **Test-Driven Development:** Write unit tests before implementing functionality
-4. **High Code Coverage:** Aim for the project's configured coverage threshold (default guidance: >80%) for all modules
-5. **User Experience First:** Every decision should prioritize user experience
-6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
+1. **The plan is the source of truth.** Every phase, task, result, checkpoint,
+   and evidence link lives in `plan.md`.
+2. **The tech stack is deliberate.** A change to the stack is recorded in
+   `tech-stack.md` before the implementation depends on it.
+3. **Verification is agent-executed.** The phase subagent runs the configured
+   checks and writes evidence. The user is not asked to manually verify routine
+   work.
+4. **Evidence over assertion.** A phase is complete only when the configured
+   checks pass and the evidence file exists.
+5. **No silent debt.** A finding is fixed, explicitly accepted with a reason, or
+   tracked as an issue. It is never quietly ignored.
+6. **Stay inside the phase contract.** `Touches` defines the expected blast
+   radius. A required deviation is allowed, recorded, and reviewed.
+7. **Non-interactive and CI-aware.** Prefer commands that terminate. Always pass
+   `--run` (or `CI=true`) to Vitest; never leave a watch process running.
+8. **The app must stay offline-first.** Any change that adds a runtime network
+   dependency to the game shell is a product decision, not an implementation
+   detail.
 
-## AI Agent Behavioral Guidelines
+## Workflow Config
 
-When an AI agent (such as Claude, Cursor, Roo, or Conductor itself) is executing tasks in this repository, it MUST adhere to the following code of conduct:
-
-**1. Think Before Coding**
-- State assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-**2. Simplicity First**
-- Write the minimum code that solves the problem. Nothing speculative.
-- No features beyond what was asked. No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- Ask: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-**3. Surgical Changes**
-- Touch only what you must. Clean up only your own mess.
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken. Match existing style.
-- Remove imports/variables/functions that YOUR changes made unused, but don't delete pre-existing dead code unless asked.
-
-**4. Goal-Driven Execution**
-- Define success criteria and loop until verified.
-- Transform tasks into verifiable goals (e.g., "Fix the bug" → "Write a test that reproduces it, then make it pass").
-- For multi-step tasks, state a brief plan and verify each step.
-
-## Task Workflow
-
-All tasks follow a strict lifecycle:
-
-### Standard Task Workflow
-
-1. **Select Task:** Choose the next available task from `plan.md` in sequential order
-
-2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
-
-3. **Write Tests (TDD where applicable):**
-   - For logic-bearing code (functions, algorithms, business rules, data transformations), follow TDD: write failing tests first (Red phase), then implement to pass (Green phase).
-   - For tasks where TDD is impractical (UI/visual changes, documentation, config, scaffolding, refactoring existing tested code), write tests alongside or after implementation, or verify via existing tests.
-   - **When using TDD:** Run the tests and confirm they fail as expected before implementing. Do not proceed to implementation until you have failing tests.
-
-4. **Implement to Pass Tests (Green Phase):**
-   - Write the minimum amount of application code necessary to make the failing tests pass.
-   - Run the test suite again and confirm that all tests now pass. This is the "Green" phase.
-
-5. **Refactor (Optional but Recommended):**
-   - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
-   - Rerun tests to ensure they still pass after refactoring.
-
-6. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
-   ```bash
-   pytest --cov=app --cov-report=html
-   ```
-   Target: meet the project's configured coverage threshold (default guidance: >80%) for new code. The specific tools and commands will vary by language and framework.
-
-7. **Document Deviations:** If implementation differs from tech stack:
-   - **STOP** implementation
-   - Update `tech-stack.md` with new design
-   - Add dated note explaining the change
-   - Resume implementation
-
-8. **Commit Code Changes:**
-   - Stage all code changes related to the task.
-   - Propose a clear, concise commit message e.g, `feat(ui): Create basic HTML structure for calculator`.
-   - Perform the commit.
-
-9. **Attach Task Summary with Git Notes:**
-   - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%H"`).
-   - **Step 9.2: Draft Note Content:** Create a detailed summary for the completed task. This should include the task name, a summary of changes, a list of all created/modified files, and the core "why" for the change.
-   - **Step 9.3: Attach Note:** Use the `git notes` command to attach the summary to the commit.
-     ```bash
-     # The note content from the previous step is passed via the -m flag.
-     git notes add -m "<note content>" <commit_hash>
-     ```
-
-10. **Get and Record Task Commit SHA:**
-    - **Step 10.1: Update Plan:** Read `plan.md`, find the line for the completed task, update its status from `[~]` to `[x]`, and append the first 7 characters of the *just-completed commit's* commit hash.
-    - **Step 10.2: Write Plan:** Write the updated content back to `plan.md`.
-
-11. **Commit Plan Update:**
-    - **Action:** Stage the modified `plan.md` file.
-    - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
-    - **Note:** This separate commit exists because step 10 records the task commit's SHA (from step 8) into `plan.md` — the SHA can't be known before committing. Two commits are expected here, not noise.
-
-### Phase Completion Verification and Checkpointing Protocol
-
-**Trigger:** This protocol is executed immediately after a task is completed that also concludes a phase in `plan.md`.
-
-1.  **Announce Protocol Start:** Inform the user that the phase is complete and the verification and checkpointing protocol has begun.
-
-2.  **Ensure Test Coverage for Phase Changes:**
-    -   **Step 2.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `plan.md` to find the Git commit SHA of the *previous* phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.
-    -   **Step 2.2: List Changed Files:** Execute `git diff --name-only <previous_checkpoint_sha> HEAD` to get a precise list of all files modified during this phase.
-    -   **Step 2.3: Verify and Create Tests:** For each file in the list:
-        -   **CRITICAL:** First, check its extension. Exclude non-code files (e.g., `.json`, `.md`, `.yaml`).
-        -   For each remaining code file, verify a corresponding test file exists.
-        -   If a test file is missing, you **must** create one. Before writing the test, **first, analyze other test files in the repository to determine the correct naming convention and testing style.** The new tests **must** validate the functionality described in this phase's tasks (`plan.md`).
-
-3.  **Execute Automated Tests with Proactive Debugging:**
-    -   Before execution, you **must** announce the exact shell command you will use to run the tests.
-    -   **Example Announcement:** "I will now run the automated test suite to verify the phase. **Command:** `CI=true npm test`"
-    -   Execute the announced command.
-    -   If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
-
-4.  **Propose a Detailed, Actionable Manual Verification Plan:**
-    -   **CRITICAL:** To generate the plan, first analyze `product.md`, `product-guidelines.md`, and `plan.md` to determine the user-facing goals of the completed phase.
-    -   You **must** generate a step-by-step plan that walks the user through the verification process, including any necessary commands and specific, expected outcomes.
-    -   The plan you present to the user **must** follow this format:
-
-        **For a Frontend Change:**
-        ```
-        The automated tests have passed. For manual verification, please follow these steps:
-
-        **Manual Verification Steps:**
-        1.  **Start the development server with the command:** `npm run dev`
-        2.  **Open your browser to:** `http://localhost:3000`
-        3.  **Confirm that you see:** The new user profile page, with the user's name and email displayed correctly.
-        ```
-
-        **For a Backend Change:**
-        ```
-        The automated tests have passed. For manual verification, please follow these steps:
-
-        **Manual Verification Steps:**
-        1.  **Ensure the server is running.**
-        2.  **Execute the following command in your terminal:** `curl -X POST http://localhost:8080/api/v1/users -d '{"name": "test"}'`
-        3.  **Confirm that you receive:** A JSON response with a status of `201 Created`.
-        ```
-
-5.  **Await Explicit User Feedback (interactive sessions only):**
-    -   After presenting the detailed plan, ask the user for confirmation: "**Does this meet your expectations? Please confirm with yes or provide feedback on what needs to be changed.**"
-    -   **Interactive sessions:** PAUSE and await the user's response. Do not proceed without an explicit yes or confirmation.
-    -   **Non-interactive / CI sessions:** Proceed to step 6. Attach the manual verification plan to the checkpoint git note (step 7), marking manual verification as "pending — to be performed by a human reviewer." This keeps the workflow CI-compatible per Principle 6 (Non-Interactive & CI-Aware).
-
-6.  **Create Checkpoint Commit:**
-    -   Stage all changes. If no changes occurred in this step, proceed with an empty commit.
-    -   Perform the commit with a clear and concise message (e.g., `conductor(checkpoint): Checkpoint end of Phase X`).
-
-7.  **Attach Auditable Verification Report using Git Notes:**
-    -   **Step 7.1: Draft Note Content:** Create a detailed verification report including the automated test command, the manual verification steps, and the user's confirmation.
-    -   **Step 7.2: Attach Note:** Use the `git notes` command and the full commit hash from the previous step to attach the full report to the checkpoint commit.
-
-8.  **Get and Record Phase Checkpoint SHA:**
-    -   **Step 8.1: Get Commit Hash:** Obtain the hash of the *just-created checkpoint commit* (`git log -1 --format="%H"`).
-    -   **Step 8.2: Update Plan:** Read `plan.md`, find the heading for the completed phase, and append the first 7 characters of the commit hash in the format `[checkpoint: <sha>]`.
-    -   **Step 8.3: Write Plan:** Write the updated content back to `plan.md`.
-
-9. **Commit Plan Update:**
-    - **Action:** Stage the modified `plan.md` file.
-    - **Action:** Commit this change with a descriptive message following the format `conductor(plan): Mark phase '<PHASE NAME>' as complete`.
-
-10.  **Announce Completion:** Inform the user that the phase is complete and the checkpoint has been created, with the detailed verification report attached as a git note.
-
-### Quality Gates
-
-Before marking any task complete, verify:
-
-- [ ] All tests pass
-- [ ] Code coverage meets the project's configured threshold (default guidance: >80%)
-- [ ] Code follows project's code style guidelines (as defined in `code_styleguides/`)
-- [ ] All public functions/methods are documented (e.g., docstrings, JSDoc, GoDoc)
-- [ ] Type safety is enforced (e.g., type hints, TypeScript types, Go types)
-- [ ] No linting or static analysis errors (using the project's configured tools)
-- [ ] Works correctly on mobile & tablet
-- [ ] Documentation updated if needed
-- [ ] No security vulnerabilities introduced
+```yaml
+project:
+  type: "browser game / PWA (client-side)"
+  languages: ["TypeScript", "HTML", "CSS", "JSON"]
+commands:
+  setup: "pnpm install --frozen-lockfile"
+  dev: "pnpm dev"
+  test: "pnpm test -- --run"
+  coverage: "pnpm test:coverage"
+  lint: "pnpm check"
+  format: "pnpm format"
+  typecheck: "pnpm typecheck"
+  build: "pnpm build"
+  verify_phase: "pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js"
+coverage:
+  gate: "lines 95 / functions 88 / branches 85 / statements 90"
+  scope: "project"
+verification:
+  layers: ["static", "unit", "build-artifact", "smoke"]
+  retry: 2
+  manual_exceptions: ["Coolify deploy secrets", "real-device PWA install/landscape check"]
+git:
+  base_branch: "master"
+  fetch: true
+  commit_style: "conventional"
+  task_commits: true
+  phase_squash: true
+review:
+  strict: true
+  issues:
+    enabled: true
+    auto_create: true
+    min_severity: "medium"
+    group_low: true
+    labels: ["tech-debt", "conductor"]
+pr:
+  enabled: true
+  tool: "gh"
+  base: "master"
+```
 
 ## Development Commands
 
-**AI AGENT INSTRUCTION: This section should be adapted to the project's specific language, framework, and build tools.**
-
 ### Setup
+
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
+Node 22 and pnpm 11.7.0 are the CI-pinned versions; keep local versions at or
+above them. Do not edit `pnpm-lock.yaml` by hand.
+
 ### Daily Development
+
 ```bash
-pnpm dev          # Start Vite dev server
-pnpm test         # Run Vitest test suite
-pnpm run lint     # Run Biome linter
-pnpm run format   # Format code with Biome
+# Start the dev server
+pnpm dev
+
+# Run tests once (never in watch mode inside a phase)
+pnpm test -- --run
+
+# Coverage with the configured thresholds
+pnpm test:coverage
+
+# Lint + format check (Biome)
+pnpm check
+
+# Rewrite formatting
+pnpm format
+
+# Typecheck
+pnpm typecheck
+
+# Production build
+pnpm build
 ```
 
 ### Before Committing
+
 ```bash
-pnpm run check    # Run Biome lint + format check
-CI=true pnpm test # Run tests in single-execution mode (no watch)
-pnpm run build    # Verify production build succeeds
+pnpm check && pnpm typecheck && pnpm test -- --run
 ```
 
-## Testing Requirements
+The full pre-phase-acceptance gate is:
 
-### Unit Testing
-- Every module must have corresponding tests.
-- Use appropriate test setup/teardown mechanisms (e.g., fixtures, beforeEach/afterEach).
-- Mock external dependencies.
-- Test both success and failure cases.
+```bash
+pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js
+```
 
-### Integration Testing
-- Test complete user flows (boot → hub → game → sticker award → hub)
-- Verify localStorage persistence (stickers, settings)
-- Test PWA offline functionality
-- Test screen orientation lock behavior
-- Verify parental lock gates exit correctly
+### Boot Smoke Check
 
-### Mobile & Tablet Testing
-> Applies to this project — it is a PWA targeting tablets and phones.
-- Test on actual tablet (iPad/Android) and phone when possible
-- Use Safari Web Inspector (iOS) and Chrome DevTools remote debugging (Android)
-- Test touch interactions (drag, tap, hold-for-3s parental lock)
-- Verify touch targets meet 64×64px minimum (96×96px ideal)
-- Verify landscape orientation auto-rotate works
-- Check performance on 3G/4G
-- Verify offline functionality (PWA service worker)
+CI serves the built output and asserts the app boots. Reproduce it locally when
+a phase touches boot, preload, PWA, or asset loading:
 
-## Code Review Process
+```bash
+# bash
+node node_modules/vite/bin/vite.js preview --port 4173 --strictPort &
+sleep 3
+node scripts/validate-boot.js
+```
 
-### Self-Review Checklist
-Before requesting review:
+```powershell
+# PowerShell
+Start-Process -NoNewWindow node "node_modules/vite/bin/vite.js","preview","--port","4173","--strictPort"
+Start-Sleep -Seconds 3
+node scripts/validate-boot.js
+```
 
-1. **Functionality**
-   - Feature works as specified
-   - Edge cases handled
-   - Error messages are user-friendly
+Stop the preview server afterwards. Port 4173 must be free; if it is not, kill
+the previous preview rather than changing the port, because the validator
+assumes it.
 
-2. **Code Quality**
-   - Follows style guide
-   - DRY principle applied
-   - Clear variable/function names
-   - Appropriate comments
+## Phase & Task Workflow
 
-3. **Testing**
-   - Unit tests comprehensive
-   - Integration tests pass
-   - Coverage adequate (meets project's configured threshold)
+Implementation is executed one phase at a time by a phase subagent. The primary
+agent owns `plan.md`, `metadata.json`, the registry, and review artifacts.
 
-4. **Security**
-   - No hardcoded secrets
-   - Input validation present
-   - SQL injection prevented
-   - XSS protection in place
+### Task Lifecycle
 
-5. **Performance**
-   - Database queries optimized
-   - Images optimized
-   - Caching implemented where needed
+1. Read the phase contract in `plan.md`, the relevant requirements in `spec.md`,
+   and the applicable style guides in `conductor/code_styleguides/`.
+2. Work through the phase's tasks in order.
+3. Write or update the failing test before the implementation (this project is
+   test-first; see the coverage gate below).
+4. Implement the smallest change that satisfies the task.
+5. Run the targeted checks for the task.
+6. Commit the task with a conventional commit message.
+7. Report the task's status and commit SHA to the primary agent.
 
-6. **Mobile & Tablet Experience**
-    - Touch targets adequate (64×64px minimum, 96×96px ideal)
-    - Text readable without zooming
-    - Performance acceptable on mobile
-    - Landscape orientation works correctly
-    - Offline mode functional (PWA)
+The subagent does **not** edit `plan.md`. The primary marks tasks complete after
+it accepts the phase.
+
+### Deviations
+
+- If the phase goal requires a file outside `Touches`, make the smallest
+  necessary change and record it in the report under `deviations`.
+- If the work requires a product or design decision, stop and report `blocked`.
+- Do not silently expand scope, add a dependency, or migrate unrelated code.
+- Do not "improve" adjacent code, comments, or formatting. Match the surrounding
+  style even when you would write it differently.
+
+### Phase Completion
+
+1. Run the phase's `Verification` command exactly as written in `plan.md`.
+2. Run `verify_phase` when it is configured and different from the phase command.
+3. Run the boot smoke check when the phase touches boot, preload, PWA, or assets.
+4. Write the evidence file using the configured evidence path.
+5. Return the structured report to the primary agent.
+6. Do not merge, rebase, reset, push, open a PR, or edit Conductor state files.
+
+## Verification Strategy
+
+### Layers
+
+- **Static:** Biome lint/format check and `tsc --noEmit`.
+- **Unit:** Vitest over `src/__tests__/**/*.test.ts` in `happy-dom`.
+- **Build artifact:** production `vite build` plus `validate-bundle.js`
+  (Phaser vendor chunk isolation) and `validate-pwa.js` (manifest, service
+  worker, icons).
+- **Smoke:** `validate-boot.js` against `vite preview` on port 4173.
+
+No integration, contract, E2E, or visual-diff layer exists today. Do not add one
+inside a track without a spec decision.
+
+### Commands
+
+| Layer | Command | Required |
+| --- | --- | --- |
+| static | `pnpm check` and `pnpm typecheck` | yes |
+| unit | `pnpm test -- --run` | yes |
+| coverage | `pnpm test:coverage` | yes |
+| build-artifact | `pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js` | yes |
+| smoke | `node scripts/validate-boot.js` (preview on :4173) | yes when boot/preload/PWA/assets change |
+
+### Services and Fixtures
+
+- **Services:** none in the app; `vite dev` (5173) and `vite preview` (4173) are
+  the only local servers.
+- **Containers:** none.
+- **Database:** none. Persistence is `localStorage` via `src/utils/storage.ts`;
+  tests stub it, they never touch a real store.
+- **Fixtures/seed data:** in-test factories and the shared helpers in
+  `src/__tests__/helpers/` (`phaserMock`, `sceneFlowHarness`, `gameScenes`,
+  `matchMediaStub`).
+- **Environment variables:** `__APP_VERSION__` is injected from `package.json` at
+  build time. No `.env` file is required.
+- **Start/stop commands:** start `pnpm dev` / `vite preview`; stop by killing the
+  process. Nothing needs tearing down between phases.
+
+### Pass Criteria
+
+- Every required command exits `0`.
+- Coverage stays at or above lines 95 / functions 88 / branches 85 /
+  statements 90 across `src/**/*.ts` (excluding tests, `main.ts`, `src/types/**`,
+  as configured in `vite.config.ts`).
+- Every acceptance criterion has a test or a documented evidence artifact.
+- No new Critical or High review findings remain.
+- No new dependency is added without a `tech-stack.md` entry and bundle-size
+  impact noted.
+
+### Evidence
+
+Write a report to:
+
+```text
+conductor/tracks/<track-id>/verification/phase-<n>.md
+```
+
+Include: title; track, phase, date, branch, base and head commits; result
+(`verified`, `failed`, `blocked`, or `partial`); a commands table (layer,
+command, exit, summary); an acceptance-criteria table (ID, criterion, evidence,
+status); evidence paths; deviations; and notes. Put binaries, screenshots,
+contact sheets, and large reports under `.conductor/evidence/`; that directory is
+gitignored. The report itself is committed with the track.
+
+### Fallback Ladder
+
+1. Run the full configured layer.
+2. If port 4173 is occupied, stop the stale preview and retry.
+3. If a check still cannot run (for example a missing local browser for
+   Playwright-based scripts), run the narrowest reliable subset and mark the
+   phase `partial` with the reason.
+4. Stop and ask the user only for credentials, hardware, or an external
+   approval.
+
+### Retry Policy
+
+- A failed check may be fixed and re-run at most **2** times.
+- If it still fails, report `failed` with the command and output.
+- Never mark a phase `verified` when a required check did not run.
+
+### Human-Only Exceptions
+
+- **Coolify deploy secrets** (`COOLIFY_DEPLOY_WEBHOOK`, `COOLIFY_TOKEN`) exist
+  only in GitHub Actions.
+- **Real-device PWA check:** installing to the home screen, landscape lock, and
+  fullscreen behavior need a physical tablet or phone. Follow
+  `docs/device-testing-checklist.md`.
+- **Release tagging** (`vX.Y.Z`) and pushing to `master` are human decisions.
+
+## Quality Gates
+
+Before a phase is accepted:
+
+- [ ] Required tests pass
+- [ ] Coverage gate is met (lines 95 / functions 88 / branches 85 / statements 90)
+- [ ] `pnpm check` passes with no new warnings
+- [ ] Typecheck passes
+- [ ] Build passes
+- [ ] Bundle and PWA validators pass
+- [ ] Boot smoke check passes when boot/preload/PWA/assets changed
+- [ ] Code follows `conductor/code_styleguides/`
+- [ ] No secrets, credentials, analytics, ads, or PII are introduced
+- [ ] Public behavior is documented when it changed (`README.md`, `docs/`)
+- [ ] Evidence is written and linked in `plan.md`
 
 ## Commit Guidelines
 
 ### Message Format
-```
+
+```text
 <type>(<scope>): <description>
 
 [optional body]
@@ -278,76 +292,84 @@ Before requesting review:
 ```
 
 ### Types
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `style`: Formatting, missing semicolons, etc.
-- `refactor`: Code change that neither fixes a bug nor adds a feature
-- `test`: Adding missing tests
-- `chore`: Maintenance tasks
+
+- `feat`: new feature or game behavior
+- `fix`: bug fix
+- `docs`: documentation only
+- `style`: formatting or art-only changes
+- `refactor`: behavior-preserving change
+- `test`: tests only
+- `chore`: maintenance, tooling, assets
+- `conductor`: Conductor state, tracks, and checkpoints
 
 ### Examples
+
 ```bash
-git commit -m "feat(auth): Add remember me functionality"
-git commit -m "fix(posts): Correct excerpt generation for short posts"
-git commit -m "test(comments): Add tests for emoji reaction limits"
-git commit -m "style(mobile): Improve button touch targets"
+git commit -m "feat(hub): add paged tile grid with large hit areas"
+git commit -m "fix(memory-match): keep flipped pair visible through mismatch delay"
+git commit -m "test(hub): cover play-time lock state"
 ```
+
+Task-level commits are made by the phase subagent. The primary squashes them
+into one phase commit on acceptance, unless a foreign commit landed in the range.
+The plan update is a separate state commit.
 
 ## Definition of Done
 
-A task is complete when:
+A track is complete when:
 
-1. All code implemented to specification
-2. Unit tests written and passing
-3. Code coverage meets project requirements
-4. Documentation complete (if applicable)
-5. Code passes all configured linting and static analysis checks
-6. Works beautifully on mobile & tablet
-7. Implementation notes added to `plan.md`
-8. Changes committed with proper message
-9. Git note with task summary attached to the commit
+1. Every phase is `verified` with a checkpoint and evidence.
+2. The integrated verification on the track branch passes.
+3. Review is `PASS`, or every finding is fixed, accepted with a reason, or
+   tracked as an issue. No Critical or High finding remains unresolved without an
+   explicit user override recorded in `review.md`.
+4. Post-review documentation sync is complete.
+5. The registry and `metadata.json` show the track as complete.
+6. The branch is pushed and a PR into `master` is open, or `pr_state:
+   "unavailable"` records that PR creation could not run.
+
+## Release & Deployment
+
+Deployment is tag-driven and owned by CI.
+
+1. Merge the track PR into `master`; CI runs the full quality gates on the merge.
+2. Bump `version` in `package.json` (the app version shown in the parental
+   Settings panel comes from it). Update `pnpm-lock.yaml` only through pnpm.
+3. Tag `vX.Y.Z` and push the tag. Only strict semver tags deploy.
+4. The deploy job asserts the tag points to a `master` commit, checks that both
+   Coolify secrets are configured, then calls the Coolify deploy webhook.
+5. Verify the deployed build on a real device: install prompt, offline reload,
+   landscape lock, audio after the first tap.
+
+A tag that is not on `master` lineage is refused by CI. Never force-push a tag to
+work around the guard; cut a new one.
 
 ## Emergency Procedures
 
 ### Critical Bug in Production
-1. Create hotfix branch from main
-2. Write failing test for bug
-3. Implement minimal fix
-4. Test thoroughly (including tablet/phone, if applicable)
-5. Rebuild and redeploy PWA
-6. Document in plan.md
 
-## Deployment Workflow
+1. Branch from `master` with a `fix/` branch.
+2. Write a failing regression test.
+3. Implement the minimal fix.
+4. Run the full verification strategy, including the boot smoke check.
+5. Open a PR immediately; do not batch unrelated work.
 
-### Pre-Deployment Checklist
-- [ ] All tests passing
-- [ ] Coverage >80%
-- [ ] No linting errors
-- [ ] Mobile & tablet testing complete
-- [ ] PWA build succeeds (`pnpm run build`)
-- [ ] Service worker generates correctly
+### Security Breach
 
-### Deployment Steps
-1. Merge feature branch to main
-2. Tag release with version
-3. Build PWA (`pnpm run build`)
-4. Deploy `dist/` to hosting (local sideload or static host)
-5. Verify deployment
-6. Test critical paths (boot → hub → game → sticker)
-7. Monitor for errors
+1. Rotate the affected Coolify token or webhook.
+2. Review Actions logs and deploy history.
+3. Patch the vulnerability and cut a new tag.
+4. Document the incident in the track archive.
 
-### Post-Deployment
-1. Check error logs
-2. Gather user feedback
-3. Plan next iteration
+### Corrupt Local Save
+
+Parental Settings → Reset clears the profile store. A support flow can reproduce
+this with `localStorage.clear()`. Never ship a migration that silently wipes
+progress without recording it in the spec.
 
 ## Continuous Improvement
 
-- Review workflow weekly
-- Update based on pain points
-- Document lessons learned
-- Optimize for user happiness
-- Keep things simple and maintainable
-
-</protect>
+- Review this workflow after each track.
+- Update commands and verification layers when tooling or CI changes.
+- Record recurring review findings as process improvements.
+- Keep the process as small as the project allows.
