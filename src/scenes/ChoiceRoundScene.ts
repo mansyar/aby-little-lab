@@ -10,6 +10,14 @@ const MIN_HIT_AREA = 96;
 /** How long the correct card keeps its success fill before reverting (ms). */
 const SUCCESS_FLASH_DURATION = 250;
 
+/** Shape overrides for a choice card whose content is not square. */
+export interface ChoiceCardShape {
+  /** Card width (px). Defaults to the square `size` argument. */
+  readonly width?: number;
+  /** Card height (px). Defaults to the square `size` argument. */
+  readonly height?: number;
+}
+
 /**
  * Shared round lifecycle for the tap-a-choice games.
  *
@@ -35,6 +43,12 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
   /** Every display object the current round owns, destroyed by {@link clearRound}. */
   private roundObjects: Phaser.GameObjects.GameObject[] = [];
 
+  /**
+   * Objects drawn inside each choice card, indexed like {@link choiceTargets}.
+   * They wiggle with their card and are destroyed with the round.
+   */
+  protected cardContents: Phaser.GameObjects.GameObject[][] = [];
+
   /** Total number of rounds in this scene's playthrough. */
   protected abstract totalRounds(): number;
 
@@ -52,10 +66,10 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
 
   /**
    * Display objects that should wiggle with a wrong choice, besides the card
-   * itself (typically the card's own dot-group).
+   * itself. Defaults to the content attached to that card.
    */
-  protected wiggleTargets(_index: number): Phaser.GameObjects.GameObject[] {
-    return [];
+  protected wiggleTargets(index: number): Phaser.GameObjects.GameObject[] {
+    return this.cardContents[index] ?? [];
   }
 
   /** Optional per-game correct-answer extras, run after the shared feedback. */
@@ -80,6 +94,7 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
     }
     this.roundObjects.length = 0;
     this.choiceTargets.length = 0;
+    this.cardContents.length = 0;
     this.clearRoundContent();
   }
 
@@ -90,21 +105,42 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
   }
 
   /**
+   * Attaches content to a choice card: it wiggles with the card on a wrong
+   * answer and is destroyed with the rest of the round.
+   */
+  protected attachCardContent(index: number, objects: Phaser.GameObjects.GameObject[]): void {
+    this.cardContents[index] = objects;
+    for (const obj of objects) {
+      this.trackRoundObject(obj);
+    }
+  }
+
+  /**
    * Creates one interactive choice card at `(x, y)` with a hit area no smaller
    * than the 96 px touch floor and the shared press feedback. The gameplay
    * handler is registered before the squish so the tap is read first.
+   *
+   * `size` is the square edge for most games; pass `shape` when the card is
+   * wider or taller than its content's natural square (e.g. a word card).
    */
   protected createChoiceTarget(
     x: number,
     y: number,
     size: number,
     choiceIndex: number,
+    shape: ChoiceCardShape = {},
   ): Phaser.GameObjects.Rectangle {
-    const hitAreaSize = Math.max(size, MIN_HIT_AREA);
-    const card = this.add.rectangle(x, y, size, size, this.CARD_BG_COLOR);
+    const width = shape.width ?? size;
+    const height = shape.height ?? size;
+    const card = this.add.rectangle(x, y, width, height, this.CARD_BG_COLOR);
     card.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
     card.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, hitAreaSize, hitAreaSize),
+      hitArea: new Phaser.Geom.Rectangle(
+        0,
+        0,
+        Math.max(width, MIN_HIT_AREA),
+        Math.max(height, MIN_HIT_AREA),
+      ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
     card.on("pointerdown", () => this.handleChoice(choiceIndex));
@@ -128,18 +164,22 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
 
   /**
    * Handles a correct answer: the chime plays, the answer is recorded, the
-   * mascot cheers, the tapped card flashes success, the progress dot pops, and
-   * the next round starts after the shared delay (completion after the last).
+   * scene's own celebration runs (splash, reinforcement speech), the mascot
+   * cheers, the tapped card flashes success, the progress dot pops, and the
+   * next round starts after the shared delay (completion after the last).
+   *
+   * {@link onCorrect} runs before the cheer so a splash is the round's first
+   * graphics object; the mascot's sparkle would otherwise claim that slot.
    */
   private handleCorrect(index: number): void {
     this.inputLocked = true;
     this.audioManager.playCorrect();
     this.recordCorrect();
+    this.onCorrect(index);
     this.mascot?.cheer();
     this.fillProgressDot(this.roundIndex);
 
     this.flashChoice(index);
-    this.onCorrect(index);
 
     this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
       this.advanceRound();
