@@ -90,6 +90,8 @@ export class FeelingsFacesScene extends GameSceneBase {
   private voicesCache: SpeechSynthesisVoice[] = [];
   /** True once the engine has fired voiceschanged, making `voicesCache` authoritative. */
   private voicesSettled = false;
+  /** Pending opening-speech timer, tracked so a voice-settle flip can cancel it. */
+  private openingSpeechTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super("FeelingsFaces");
@@ -139,13 +141,19 @@ export class FeelingsFacesScene extends GameSceneBase {
     this.captionFallback = fallback;
     const scenario = this.rounds[this.roundIndex];
     if (!scenario) return;
-    this.createRuleLine();
+    // Rebuild the glyph with the correct presentation, never re-speaking the
+    // rule — it was already spoken for this round (or is unavailable).
+    this.createRuleLine(false);
     if (fallback) {
       this.renderCaption(scenario);
       return;
     }
     this.caption?.destroy();
     this.caption = undefined;
+    // A pending opening-speech timer would re-speak the scenario at 2.6s;
+    // cancel it before speaking inline.
+    this.openingSpeechTimer?.remove();
+    this.openingSpeechTimer = undefined;
     // The scenario was never spoken while the fallback was up; speak it now.
     this.speakScenario(scenario, false);
   }
@@ -181,7 +189,7 @@ export class FeelingsFacesScene extends GameSceneBase {
    * because the caption fallback also dims the glyph when the engine has no
    * voice installed, which the helper's SFX-only muted flag cannot express.
    */
-  private createRuleLine(): void {
+  private createRuleLine(speakRule = true): void {
     this.destroyRuleLine();
     const centerX = this.cameras.main.centerX;
     const y = this.INSTRUCTION_Y;
@@ -210,7 +218,7 @@ export class FeelingsFacesScene extends GameSceneBase {
       },
     );
 
-    if (!this.captionFallbackActive()) {
+    if (speakRule && !this.captionFallbackActive()) {
       speakSentence(RULE_LINE, getSettings().sfxEnabled);
     }
   }
@@ -298,7 +306,8 @@ export class FeelingsFacesScene extends GameSceneBase {
       speakSentence(scenario.text, getSettings().sfxEnabled);
       return;
     }
-    this.time.delayedCall(OPENING_SPEECH_DELAY, () => {
+    this.openingSpeechTimer = this.time.delayedCall(OPENING_SPEECH_DELAY, () => {
+      this.openingSpeechTimer = undefined;
       // The child may already have answered, or the voice list may have
       // settled empty since; only speak if the opening round is still up
       // and still on the spoken path.

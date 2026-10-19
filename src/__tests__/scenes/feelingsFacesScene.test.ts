@@ -568,6 +568,8 @@ describe("FeelingsFacesScene round flow", () => {
     // "unknown", so the spoken path is kept rather than muted outright.
     expect(getCaption(scene)).toBeUndefined();
     expect(mockSpeech.speakSentence).toHaveBeenCalledWith(RULE_LINE, true);
+    const scenarioCalls = (text: string) =>
+      getMockFn(mockSpeech.speakSentence).mock.calls.filter((call) => call[0] === text).length;
 
     // The engine settles on an empty list mid-round: the displayed round
     // gains its caption without advancing.
@@ -576,12 +578,24 @@ describe("FeelingsFacesScene round flow", () => {
     expect(getCaption(scene)).toBeDefined();
     expect(internals(scene).roundIndex).toBe(0);
 
-    // Voices arrive later: the caption clears and the round speaks.
+    // Voices arrive later: the caption clears, the scenario speaks inline,
+    // and the still-pending opening timer is cancelled rather than left to
+    // re-speak the scenario at 2.6s.
     voices = [{ voiceURI: "test-voice", lang: "en-US", name: "Test" }];
     for (const listener of listeners) listener();
     expect(getCaption(scene)).toBeUndefined();
     const round = getCurrentRound(scene);
-    expect(mockSpeech.speakSentence).toHaveBeenCalledWith(round.text, true);
+    expect(scenarioCalls(round.text)).toBe(1);
+    const delayedCall = getMockFn(internals(scene).time.delayedCall);
+    const openingCallIndex = delayedCall.mock.calls.findIndex(
+      (call) => call[0] === OPENING_SPEECH_DELAY,
+    );
+    const openingTimer = delayedCall.mock.results[openingCallIndex]?.value as {
+      remove: MockFn;
+    };
+    expect(openingTimer.remove).toHaveBeenCalled();
+    // The rule line is never re-spoken by the settle rebuilds.
+    expect(scenarioCalls(RULE_LINE)).toBe(1);
 
     // The next round stays spoken.
     tapCard(scene, targetCardIndex(scene));
@@ -593,6 +607,35 @@ describe("FeelingsFacesScene round flow", () => {
     voices = [];
     for (const listener of listeners) listener();
     expect(getCaption(scene)).toBeDefined();
+  });
+
+  it("keeps the deferred opening speech silent once the caption fallback engages", () => {
+    let voices: Array<{ voiceURI: string; lang: string; name: string }> = [];
+    const listeners: Array<() => void> = [];
+    vi.stubGlobal("speechSynthesis", {
+      getVoices: () => voices,
+      addEventListener: (_type: string, listener: () => void) => listeners.push(listener),
+      removeEventListener: () => {},
+    });
+    const scene = new FeelingsFacesScene();
+    scene.create();
+    const scenarioCalls = (text: string) =>
+      getMockFn(mockSpeech.speakSentence).mock.calls.filter((call) => call[0] === text).length;
+    const openingRound = getCurrentRound(scene);
+
+    // The engine settles voiceless before the opening speech fires: the
+    // round switches to its caption and the deferred line never speaks.
+    voices = [];
+    for (const listener of listeners) listener();
+    expect(getCaption(scene)).toBeDefined();
+    fireOpeningSpeech(scene);
+    expect(scenarioCalls(openingRound.text)).toBe(0);
+
+    // Voices arriving afterwards still recovers the spoken path exactly once.
+    voices = [{ voiceURI: "test-voice", lang: "en-US", name: "Test" }];
+    for (const listener of listeners) listener();
+    expect(getCaption(scene)).toBeUndefined();
+    expect(scenarioCalls(openingRound.text)).toBe(1);
   });
 
   it("records wins and accuracy on the progress row, starring after three wins", () => {
