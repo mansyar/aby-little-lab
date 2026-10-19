@@ -38,7 +38,7 @@
 - [x] Task: Commit (`feat(art): redraw the cat head so it reads as a cat`) *(b31ec9c)*
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4 — Remaining art assets
+## Phase 4 — Remaining art assets [checkpoint: b666382]
 
 - [x] Task: Fix `items/bone.svg` contrast (tan fill + top highlight, keep the 6 px outline) *(3f3cb9f)*
 - [x] Task: Redraw `items/ball.svg` as a beach ball (alternating segments) *(3f3cb9f)*
