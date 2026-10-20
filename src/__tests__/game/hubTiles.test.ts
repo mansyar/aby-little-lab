@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HUB_TILE_COUNT } from "../../game/hubPaging";
+import { PAGE_SIZE, pageCount } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 
 describe("GAME_TILES", () => {
@@ -13,8 +13,9 @@ describe("GAME_TILES", () => {
     expect(tileKeys.size).toBe(22);
   });
 
-  it("keeps the hub paging constant in step with the tile list", () => {
-    expect(HUB_TILE_COUNT).toBe(GAME_TILES.length);
+  it("derives the hub page count from the tile list, not a constant", () => {
+    expect(pageCount()).toBe(Math.ceil(GAME_TILES.length / PAGE_SIZE));
+    expect(pageCount()).toBe(3);
   });
 
   it("uses the canonical tileKey for every gameId", () => {

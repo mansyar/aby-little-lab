@@ -8,6 +8,7 @@ vi.mock("phaser", async () => {
 });
 
 import { ProgressOverlay } from "../../../components/settings/ProgressOverlay";
+import { GAME_REGISTRY } from "../../../game/gameRegistry";
 import { addProfile, getProfiles, load } from "../../../utils/storage";
 
 /** Registry objects whose destroy has not been called (current render). */
@@ -71,6 +72,22 @@ describe("ProgressOverlay", () => {
     expect(liveTexts("‹")).toHaveLength(1);
     expect(liveTexts("›")).toHaveLength(1);
     expect(bucket.length).toBeGreaterThan(0);
+  });
+
+  it("derives its rows from the registry, in hub order", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+
+    overlay.open();
+
+    const firstPage = GAME_REGISTRY.slice(0, 6);
+    expect(rowIcons().map((icon) => icon.args?.[2])).toEqual(firstPage.map((game) => game.tileKey));
+    for (const game of firstPage) {
+      expect(liveTexts(game.label)).toHaveLength(1);
+    }
   });
 
   it("scales row icons from the icon texture tier, not the avatar tier", () => {

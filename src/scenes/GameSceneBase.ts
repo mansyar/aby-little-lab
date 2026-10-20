@@ -11,6 +11,7 @@ import { RoundNarrator } from "../components/RoundNarrator";
 import type { SpeakerButton } from "../components/SpeakerButton";
 import { preloadArtGroups } from "../game/art/registry";
 import type { ArtGroup } from "../game/art/types";
+import { stickerKeyForGame } from "../game/gameRegistry";
 import type { GameId } from "../types";
 import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
@@ -381,8 +382,8 @@ export abstract class GameSceneBase extends Phaser.Scene {
     });
   }
 
-  /** Returns the sticker texture key for a game id (e.g. `more-less` → `sticker_more_less`). */
+  /** Returns the sticker texture key for a game id, resolved from the registry. */
   protected stickerKeyFor(gameId: GameId): string {
-    return `sticker_${gameId.replaceAll("-", "_")}`;
+    return stickerKeyForGame(gameId);
   }
 }

@@ -219,3 +219,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Docs & Dead-Code Truth Pass** — [20261020-docs-truth-pass](./archive/20261020-docs-truth-pass/index.md) — chore — medium (Archived)
+
+- [x] **Track: Game Metadata Single Source of Truth** — [20261020-game-metadata-source](./archive/20261020-game-metadata-source/index.md) — refactor — medium (Archived)

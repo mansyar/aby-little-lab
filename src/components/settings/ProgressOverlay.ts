@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { GAME_REGISTRY } from "../../game/gameRegistry";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import {
   formatAccuracyPercent,
@@ -52,31 +53,13 @@ const ACCURACY_TRACK_COLOR = 0xe8e0d0;
 /** Fill color for the per-game accuracy bar. */
 const ACCURACY_FILL_COLOR = 0x68d391;
 
-/** The 22 games in hub order, for the Learning Progress report rows. */
-const PROGRESS_GAME_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> = [
-  { gameId: "shape-sorter", label: "Shape Sorter", tileKey: "tile_shape_sorter" },
-  { gameId: "animal-trace", label: "Animal Trace", tileKey: "tile_animal_trace" },
-  { gameId: "pop-freeze", label: "Pop & Freeze", tileKey: "tile_pop_freeze" },
-  { gameId: "shadow-match", label: "Shadow Match", tileKey: "tile_shadow_match" },
-  { gameId: "musical-memory", label: "Musical Memory", tileKey: "tile_musical_memory" },
-  { gameId: "big-small", label: "Big & Small", tileKey: "tile_big_small" },
-  { gameId: "pattern-builder", label: "Pattern Builder", tileKey: "tile_pattern_builder" },
-  { gameId: "alphabet-match", label: "Find the Letter", tileKey: "tile_alphabet" },
-  { gameId: "word-match", label: "Find the Word", tileKey: "tile_word_match" },
-  { gameId: "word-builder", label: "Build the Word", tileKey: "tile_word_builder" },
-  { gameId: "how-many", label: "How Many?", tileKey: "tile_how_many" },
-  { gameId: "first-sounds", label: "First Sounds", tileKey: "tile_first_sounds" },
-  { gameId: "more-less", label: "More or Less", tileKey: "tile_more_less" },
-  { gameId: "odd-one-out", label: "Odd One Out", tileKey: "tile_odd_one_out" },
-  { gameId: "color-match", label: "Color Match", tileKey: "tile_color_match" },
-  { gameId: "add-it-up", label: "Add It Up", tileKey: "tile_add_it_up" },
-  { gameId: "take-away", label: "Take Away", tileKey: "tile_take_away" },
-  { gameId: "memory-match", label: "Memory Match", tileKey: "tile_memory_match" },
-  { gameId: "decode-it", label: "Decode It", tileKey: "tile_decode_it" },
-  { gameId: "number-order", label: "Number Order", tileKey: "tile_number_order" },
-  { gameId: "feelings-faces", label: "Feelings Faces", tileKey: "tile_feelings_faces" },
-  { gameId: "story-order", label: "Story Order", tileKey: "tile_story_order" },
-];
+/**
+ * One Learning Progress row per registry entry, in Hub order: the label and
+ * tile icon are the game's own, so a new game gets its row without an edit
+ * here. Paging below stays fixed at `PROGRESS_PAGE_SIZE` rows per page.
+ */
+const PROGRESS_ROWS: ReadonlyArray<{ gameId: GameId; label: string; tileKey: string }> =
+  GAME_REGISTRY.map(({ gameId, label, tileKey }) => ({ gameId, label, tileKey }));
 
 export interface ProgressOverlayDeps {
   scene: Phaser.Scene;
@@ -196,9 +179,9 @@ export class ProgressOverlay {
     });
 
     const pageStart = this.page * PROGRESS_PAGE_SIZE;
-    const pageEnd = Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_GAME_ROWS.length);
+    const pageEnd = Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_ROWS.length);
     for (let i = pageStart; i < pageEnd; i += 1) {
-      const row = PROGRESS_GAME_ROWS[i];
+      const row = PROGRESS_ROWS[i];
       const y = centerY + PROGRESS_ROW_START_Y + (i - pageStart) * PROGRESS_ROW_PITCH;
       const game = progress[row.gameId];
       const accuracy = getAccuracy(game);
@@ -249,7 +232,7 @@ export class ProgressOverlay {
       }
     }
 
-    const pageCount = Math.ceil(PROGRESS_GAME_ROWS.length / PROGRESS_PAGE_SIZE);
+    const pageCount = Math.ceil(PROGRESS_ROWS.length / PROGRESS_PAGE_SIZE);
     this.deps.overlayObjects.push(
       scene.add
         .text(
