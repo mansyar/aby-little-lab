@@ -13,17 +13,20 @@
 - **Covers:** FR-2, AC-2
 - **Touches:** `src/game/storyOrderLogic.ts`, `src/__tests__/game/storyOrderLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** 6cafe2e
+- **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-1.md
 
-- [ ] **P1.T1: Story pool and round types** — covers: FR-2
-  - [ ] **P1.T1.1: Define the 8-story pool** with stable ids, three panel texture keys per story, and an `obvious` / `subtle` ladder tag
-  - [ ] **P1.T1.2: Define `StoryOrderRound`** (story id, shuffled panel order, solution order) with injectable RNG
-- [ ] **P1.T2: Playthrough generation** — covers: FR-2
-  - [ ] **P1.T2.1: `buildPlaythrough()`** returns 3 obvious + 3 subtle rounds, drawn without repeats
-  - [ ] **P1.T2.2: Guard against an already-solved shuffle** (reshuffle once so the round always requires work)
-- [ ] **P1.T3: Correctness check** — covers: FR-2
-  - [ ] **P1.T3.1: `isCorrect(placed, solution)`** compares same length, order and values
-  - [ ] **P1.T3.2: Unit tests** — seeded determinism, ladder split, no-repeat, shuffle guard, short/wrong strips
+- [x] **P1.T1: Story pool and round types** — covers: FR-2
+  - [x] **P1.T1.1: Define the 8-story pool** with stable ids, three panel texture keys per story, and an `obvious` / `subtle` ladder tag
+  - [x] **P1.T1.2: Define `StoryOrderRound`** (story id, shuffled panel order, solution order) with injectable RNG
+- [x] **P1.T2: Playthrough generation** — covers: FR-2
+  - [x] **P1.T2.1: `buildPlaythrough()`** returns 3 obvious + 3 subtle rounds, drawn without repeats
+  - [x] **P1.T2.2: Guard against an already-solved shuffle** (reshuffle once so the round always requires work)
+- [x] **P1.T3: Correctness check** — covers: FR-2
+  - [x] **P1.T3.1: `isCorrect(placed, solution)`** compares same length, order and values
+  - [x] **P1.T3.2: Unit tests** — seeded determinism, ladder split, no-repeat, shuffle guard, short/wrong strips
 
 ## Phase 2: Panel art and game art module
 
