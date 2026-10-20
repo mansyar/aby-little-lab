@@ -59,7 +59,7 @@
 - **Covers:** FR-1, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, NFR-1, NFR-4, NFR-5, NFR-7, AC-3, AC-4, AC-5, AC-6, AC-7, AC-9, AC-11
 - **Touches:** `src/scenes/StoryOrderScene.ts`, `src/scenes/sceneRegistry.ts`, `src/scenes/PreloadScene.ts`, `src/types/index.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `src/__tests__/utils/storage.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Scene skeleton and lazy art load** — covers: FR-1, FR-8, NFR-1, NFR-6
   - [ ] **P3.T1.1: `StoryOrderScene`** (key `StoryOrder`) extends `ChoiceRoundScene`, runs `preload()` against `storyOrderArt`, and is registered in `sceneRegistry`
