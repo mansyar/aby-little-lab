@@ -133,7 +133,7 @@
 - **Covers:** FR-9, AC-9
 - **Touches:** `conductor/tracks/drop-ligne-mascot_20261016/**`, `conductor/archive/drop-ligne-mascot_20261016/**`, `conductor/tracks.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P6.T1: Prove Ligne is absent** — covers: FR-9
   - [ ] **P6.T1.1: Collect the evidence** — no `@ligne-engine` in `package.json` or the lockfile, no `.ligne` or `ligne_wasm` in `dist/`, validator passes, `755d575` deleted the files.
