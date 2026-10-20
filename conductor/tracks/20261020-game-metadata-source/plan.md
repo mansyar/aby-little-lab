@@ -11,7 +11,7 @@
 
 - **Goal:** `gameRegistry.ts` is the only declaration of the 22 games, and `GAME_TILES` derives from it with byte-identical values.
 - **Depends on:** none
-- **Covers:** FR-1, FR-2, FR-8, AC-1, AC-5
+- **Covers:** FR-1, FR-2, FR-8, NFR-1, NFR-3, AC-1, AC-5
 - **Touches:** `src/game/gameRegistry.ts`, `src/game/hubTiles.ts`, `src/__tests__/gameRegistry.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
 - **Status:** pending
@@ -55,7 +55,7 @@
 
 - **Goal:** `SHELL_ASSETS` is built from files at build time in registry order; a missing or duplicated asset fails at module evaluation with the key in the message.
 - **Depends on:** Phase 1
-- **Covers:** FR-5, FR-9, NFR-5, AC-3, AC-6
+- **Covers:** FR-5, FR-9, NFR-1, NFR-2, NFR-5, AC-3, AC-6
 - **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/**`
 - **Verification:** `pnpm test -- --run && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
@@ -92,7 +92,7 @@
 
 - **Goal:** docs describe the registry truthfully and the complete verification ladder passes.
 - **Depends on:** Phase 4
-- **Covers:** FR-10, AC-5, AC-6, AC-7, AC-8
+- **Covers:** FR-10, NFR-2, NFR-4, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `docs/TDD.md`, `docs/PRD.md`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
