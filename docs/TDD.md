@@ -353,7 +353,7 @@ where `size = textureSizeFor(asset.key)` ([§3.4](#34-texture-tiers)). `toDataUr
 
 ### 3.4 Texture tiers
 
-Historically every SVG was rasterised at 512×512, which reserved ~184 MB of GPU texture memory (176 textures × 512² × 4 B) while most consumers display far smaller. `src/utils/textureTiers.ts` sizes each texture for its largest display context:
+Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (178 textures x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. `src/utils/textureTiers.ts` sizes each texture for its largest display context:
 
 | Tier | Size | Applied to |
 | --- | --- | --- |
@@ -381,7 +381,7 @@ The pattern generalises: any future art that only one game needs belongs in a `<
 | Story Order chunk | ~33.9 kB, includes all 24 panel SVGs | build output |
 | Precache entries | 45 (1,695 KiB) | `precache  45 entries` from the PWA build step |
 
-The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and all 178 boot textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell: `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and all 178 boot textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
 ---
 

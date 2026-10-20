@@ -507,7 +507,7 @@ Rasterising every entry at 512 by 512 wasted GPU memory, because most art displa
 - **256 px (card)** — everything else: gameplay art, stickers and prompt targets, and also letters and numerals, because no rule matches `letter_*` or `numeral_*` and an unmatched key takes this default.
 - **512 px (hero)** — the two `mascot_*` poses, whose scale maths assumes a full-size texture.
 
-Display code scales from the tier size rather than assuming 512. Over the 178-entry boot set that resolves to 35 icon, 141 card and 2 hero textures, so the raster costs `(35 × 160² + 141 × 256² + 2 × 512²) × 4 B = 42,643,456 B`, a little over 40.7 MiB, down from the 178 MiB a uniform 512 px raster would have reserved.
+Display code scales from the tier size rather than assuming 512. Over the 178-entry boot set that resolves to 35 icon, 141 card and 2 hero textures, so the raster costs `(35 × 160² + 141 × 256² + 2 × 512²) × 4 B = 42,643,456 B`, about 40.7 MiB (40.67), down from the 178 MiB a uniform 512 px raster would have reserved.
 
 Story Order's 24 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces and its tile and sticker are in the boot set.
 

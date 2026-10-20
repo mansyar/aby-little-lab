@@ -269,7 +269,7 @@ pnpm exec serve dist -l 3000
 - [x] Idle attract wiggles only visible tiles; paging is kid-initiated
 - [x] Page resets to page 1 on scene re-entry
 - [x] Page-slide transition is reduced-motion-aware (instant/short under OS reduced motion)
-- [x] On tablets/wide screens the Hub remains the single 5×4 grid with no paging UI (byte-identical behavior)
+- [x] On tablets/wide screens the Hub remains the single 6×4 grid with no paging UI (byte-identical behavior)
 
 #### Game 1: Shape Sorter
 - [ ] Game loads correctly

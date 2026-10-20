@@ -123,3 +123,23 @@ Review fixes are appended by conductor-review as `## Phase R1: Review Fixes`.
 **Result:** verified
 **Checkpoint:** b409aed
 **Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-R1.md
+
+## Phase R2: Re-review Fixes
+
+- **Goal:** Close the five findings the round-2 re-review raised against the fix
+  commit - including the contradiction the R1 deviation created in the device
+  checklist.
+- **Depends on:** Phase R1
+- **Covers:** N1, N2, N3, N4, N5
+- **Touches:** `docs/device-testing-checklist.md`, `docs/PRD.md`, `docs/TDD.md`,
+  `conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-R2.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** verified
+- [x] **R2.T1: Fix the wide-screen grid line** - covers: N1
+- [x] **R2.T2: Fix the MiB rounding direction** - covers: N2
+- [x] **R2.T3: Reconcile the 176-versus-178 texture count** - covers: N3
+- [x] **R2.T4: Re-point the squashed SHAs in phase-R1 evidence** - covers: N4
+- [x] **R2.T5: Give the per-chunk figures one owner** - covers: N5
+**Result:** verified
+**Checkpoint:** pending
+**Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-R2.md

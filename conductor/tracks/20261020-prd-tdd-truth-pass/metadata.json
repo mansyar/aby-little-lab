@@ -13,14 +13,14 @@
   "base_branch": "master",
   "base_sha": "8cb5de46f7a57b37250eed12caa05eb5f6a7c082",
   "progress": {
-    "phases_total": 4,
-    "phases_verified": 4,
-    "tasks_total": 48,
-    "tasks_done": 48
+    "phases_total": 5,
+    "phases_verified": 5,
+    "tasks_total": 53,
+    "tasks_done": 53
   },
   "last_checkpoint": "b409aed",
   "review_verdict": "BLOCK",
-  "review_rounds": 1,
+  "review_rounds": 2,
   "doc_sync": "pending",
   "pr_url": null,
   "pr_state": null,

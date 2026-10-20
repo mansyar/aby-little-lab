@@ -98,7 +98,7 @@ PRD's game-chunk range was corrected (Deviations).
 
 ## Commands
 
-Run at HEAD of this phase (`ddf75db`), after the last content edit:
+Run at the phase checkpoint `b409aed` (squashed), after the last content edit:
 
 | Command | Exit code |
 | --- | --- |
@@ -141,7 +141,7 @@ a docs-only track:
 
 ## Primary verification
 
-Independent chain at `ddf75db` (the final content commit; `2689c8e` adds only this
+Independent chain at the phase checkpoint `b409aed` (this phase was squashed into that single commit; the pre-squash SHAs this file used to cite - `ddf75db`, `2689c8e` - are unreachable from the branch and are named here only so the record is not silently rewritten. The content commit and this file
 evidence file), run by the primary:
 
 | Command | Result |
