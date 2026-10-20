@@ -204,22 +204,46 @@ and the new median sits at 14% of it. The 4x-throttled figure is the one that
 matters for the low-end tablet story: it moved from ~4.2 s to ~1.7 s because the
 boot no longer rasterizes 178 textures (53 remain).
 
-**First tap (AC-8)** - three games, fresh context per game, service worker
-blocked so the game chunk is a real network fetch:
+**First tap (AC-8), superseded by the review-fix measurement.** This first
+recording tapped three games, called Memory Match the worst union (it is not —
+Find the Word, Word Builder, Decode It and First Sounds each declare seven groups
+/ 83 keys), and reported the cross-game median as the headline. Review finding F2
+replaced it. The numbers below are kept only as the record of what Phase 4
+originally claimed.
 
 | Game | tap -> chunk headers | tap -> chunk loaded | tap -> first frame (budgeted) |
 | --- | --- | --- | --- |
-| median | 62.5 ms | 47.4 ms | **200.1 ms** |
-| worst (Memory Match) | 60.7 ms | 43.3 ms | 235.8 ms |
+| median | 62.5 ms | 47.4 ms | 200.1 ms |
+| worst recorded (Memory Match) | 60.7 ms | 43.3 ms | 235.8 ms |
 
-Budget is 400 ms median; the median uses half of it and the worst single game is
-235.8 ms. Two honest caveats, both stated in the script's own header:
+**Corrected evidence (Phase R1).** The criterion is an increment — "adds <= 400 ms
+versus the same tap today" — so it is measured as one: a build of the pre-track
+commit `f377bf8` was built into `.conductor/base-build` and served beside the
+current build, and `scripts/measure-first-tap.mjs` ran three times against each,
+alternating (medians below). The script now taps five games including the widest
+union and fails on the worst total, not the average.
+
+| Game (art keys) | pre-track | this track | delta |
+| --- | --- | --- | --- |
+| Shape Sorter (36) | 282.7 ms | 263.8 ms | -18.9 ms |
+| Find the Letter (46) | 265.6 ms | 249.4 ms | -16.2 ms |
+| Find the Word (83) | 268.8 ms | 317.2 ms | +48.4 ms |
+| Add It Up (48) | 233.5 ms | 224.3 ms | -9.2 ms |
+| Memory Match (37) | 251.9 ms | 333.9 ms | +82.0 ms |
+
+Worst increment **82 ms**, widest-union game **+48 ms**, absolute totals
+224–334 ms — all inside the 400 ms budget. Run-to-run variance on this machine is
+large (repeat runs put the absolute worst between 277.8 and 464.1 ms and
+4×-throttled boot between 1,697 and 6,072 ms), which is why the increment is
+measured back to back rather than against one historical number.
+
+Two honest caveats, both stated in the script's own header:
 
 1. Stage C is "chunk on the main thread plus one paint opportunity", not "the
    game is fully interactive". The scene's own art rasterization happens after
    that frame, while the loading cue is on screen. With 53 textures removed from
-   boot, that work is now per-game and bounded by the cue; it is not inside this
-   200 ms.
+   boot, that work is now per-game and bounded by the cue; it is not inside the
+   budgeted number.
 2. The measurement blocks the service worker. In production the PWA precaches
    every art chunk, so a repeat visit is faster than this cold number; the number
    is a pessimistic bound, chosen deliberately.

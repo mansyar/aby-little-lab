@@ -242,6 +242,18 @@ describe("AlphabetScene round flow", () => {
     }
   }
 
+  /** Fires `event` on every loader handler the scene registered (`on` and `once`). */
+  function fireLoaderEvent(scene: unknown, event: string, ...args: unknown[]): void {
+    const load = (scene as { load: Record<string, MockFn> }).load;
+    for (const registration of [load.on, load.once]) {
+      for (const call of registration.mock.calls) {
+        if (call[0] === event) {
+          (call[1] as (...handlerArgs: unknown[]) => void)(...args);
+        }
+      }
+    }
+  }
+
   it("renders a big target letter, 6 progress dots, and 4 interactive cards", () => {
     const scene = new AlphabetScene();
     scene.create();
@@ -341,6 +353,33 @@ describe("AlphabetScene round flow", () => {
     expect(
       getMockFn((targetResults[1].value as Record<string, MockFn>).destroy),
     ).not.toHaveBeenCalled();
+  });
+
+  it("draws one placeholder for a failed letter load and still plays a round", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const scene = new AlphabetScene();
+
+    // The scene declares `letters` in preload; a cold TextureManager means
+    // every key is queued.
+    scene.preload();
+    expect(getMockFn(scene.load.svg)).toHaveBeenCalledTimes(26);
+
+    // The real failure path: one declared SVG errors, then the loader completes.
+    fireLoaderEvent(scene, "loaderror", { key: "letter_a" });
+    fireLoaderEvent(scene, "complete");
+
+    const warnings = warnSpy.mock.calls.filter((call) => String(call[0]).includes('"letter_a"'));
+    expect(warnings).toHaveLength(1);
+    expect(scene.textures.exists("letter_a")).toBe(true);
+    expect(getMockFn(scene.textures.createCanvas)).toHaveBeenCalledWith("letter_a", 256, 256);
+
+    // The placeholder stands in for the missing art: the round still builds,
+    // answers, and advances.
+    scene.create();
+    completeRound(scene);
+    expect((scene as unknown as { roundIndex: number }).roundIndex).toBe(1);
+
+    scene.events.emit("shutdown");
   });
 
   it("tapping a wrong card wiggles gently and does not advance the round", () => {

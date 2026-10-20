@@ -41,7 +41,7 @@ shell entry fell from **195.4 KiB to 129.1 KiB** and cold boot from **808 ms to
 | AC-5 | Missing key warns once and draws a placeholder, never throws | **PASS** | `placeholder.test.ts` |
 | AC-6 | `validate-pwa` fails when an art chunk is absent from the manifest | **PASS** | proven by deleting one `sw.js` entry in phase 5 |
 | AC-7 | Boot medians improve; CI gate unchanged | **PASS** | 808 → 419.5 ms; 4×-throttled ~4.2 s → 1,697.2 ms; gate still 3 s |
-| AC-8 | Cold first tap ≤ 400 ms | **PASS** | median 200.1 ms, worst game 235.8 ms |
+| AC-8 | Cold first tap for the worst game, +≤400 ms vs pre-track | **PASS** | worst increment **+82 ms** (Memory Match), widest union (Find the Word, 83 keys) **+48 ms**, measured against a build of `f377bf8` back to back; absolute 224–334 ms. Corrected in Phase R1 (F2) — the original 200.1/235.8 ms figures came from the wrong "worst" game and a median gate |
 | AC-9 | Docs match shipped behaviour | **PASS** | README, `tech-stack.md`, `TDD.md` §3.3/§3.5/§3.6/§11.3, `perf-baseline.md` addendum |
 
 ## Cross-phase checks

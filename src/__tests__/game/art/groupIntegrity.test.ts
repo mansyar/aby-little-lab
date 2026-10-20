@@ -114,8 +114,11 @@ const SHELL_KEYS: readonly string[] = [
   "toy_teddy_bear",
 ];
 
-/** How many SVGs the boot preloader carries today (the canonical 178). */
-const SHELL_ASSET_COUNT = 178;
+/**
+ * Every texture key the app can ask for today: 53 shell keys plus the 125
+ * game-only group keys.
+ */
+const TOTAL_APP_ASSETS = 178;
 
 const AVATAR_KEYS: readonly string[] = [
   "animal_cat",
@@ -192,6 +195,6 @@ describe("art group inventory", () => {
     expect(shellOverlaps.sort()).toEqual([...AVATAR_KEYS].sort());
 
     const union = new Set([...allGroupKeys, ...SHELL_KEYS]);
-    expect(union.size).toBe(SHELL_ASSET_COUNT);
+    expect(union.size).toBe(TOTAL_APP_ASSETS);
   });
 });

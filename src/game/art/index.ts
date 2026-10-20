@@ -15,6 +15,7 @@ export { items } from "./items";
 export { letters } from "./letters";
 export { music } from "./music";
 export { numerals } from "./numerals";
+export { ensureArtTexture } from "./placeholder";
 export { preloadArtGroups } from "./registry";
 export { shadows } from "./shadows";
 export { shapes } from "./shapes";

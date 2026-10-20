@@ -13,8 +13,44 @@ vi.mock("phaser", () => {
   return { ...phaserMock, default: phaserMock };
 });
 
+import {
+  animals,
+  cutouts,
+  faces,
+  food,
+  glyphs,
+  items,
+  letters,
+  music,
+  numerals,
+  shadows,
+  shapes,
+  toys,
+} from "../../game/art";
+import type { ArtGroup } from "../../game/art/types";
 import { SHELL_ASSETS } from "../../scenes/PreloadScene";
 import { displayScale, TEXTURE_SIZES, textureSizeFor } from "../../utils/textureTiers";
+
+const GROUPS: readonly ArtGroup[] = [
+  shapes,
+  cutouts,
+  letters,
+  numerals,
+  animals,
+  food,
+  items,
+  shadows,
+  toys,
+  faces,
+  music,
+  glyphs,
+];
+
+/** Every key the app can ask for: the shell's set plus every group's. */
+const APP_ASSETS = [...SHELL_ASSETS, ...GROUPS.flatMap((group) => group.assets)];
+
+/** The 178 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
+const APP_ASSET_COUNT = 178;
 
 describe("textureSizeFor tier mapping", () => {
   it("maps Hub tile icons to the icon tier (displayed at ~64px, headroom for paged tiles)", () => {
@@ -80,10 +116,11 @@ describe("displayScale helper", () => {
   });
 });
 
-describe("tier coverage over SHELL_ASSETS", () => {
-  it("resolves every registered shell asset key to a known tier size", () => {
+describe("tier coverage over every app asset", () => {
+  it("resolves every shell and group key to a known tier size", () => {
     expect(SHELL_ASSETS).toHaveLength(53);
-    for (const asset of SHELL_ASSETS) {
+    expect(new Set(APP_ASSETS.map((asset) => asset.key)).size).toBe(APP_ASSET_COUNT);
+    for (const asset of APP_ASSETS) {
       const size = textureSizeFor(asset.key);
       expect([TEXTURE_SIZES.icon, TEXTURE_SIZES.card, TEXTURE_SIZES.hero]).toContain(size);
     }
@@ -91,8 +128,8 @@ describe("tier coverage over SHELL_ASSETS", () => {
 
   it("cuts total GPU texture bytes by more than half versus the uniform 512px baseline", () => {
     const bytesAt = (size: number) => size * size * 4; // RGBA
-    const baseline = SHELL_ASSETS.length * bytesAt(512);
-    const tiered = SHELL_ASSETS.reduce((sum, a) => sum + bytesAt(textureSizeFor(a.key)), 0);
+    const baseline = APP_ASSETS.length * bytesAt(512);
+    const tiered = APP_ASSETS.reduce((sum, a) => sum + bytesAt(textureSizeFor(a.key)), 0);
     expect(tiered).toBeLessThan(baseline / 2);
   });
 });

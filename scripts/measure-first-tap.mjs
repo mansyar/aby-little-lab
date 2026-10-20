@@ -34,8 +34,8 @@
  *   # 4x-throttled boot, then first tap — always stops the server it started)
  *   node scripts/measure-first-tap.mjs --with-preview
  *
- * Exits non-zero only when the median TOTAL exceeds TOTAL_BUDGET_MS (or when a
- * measurement cannot run at all).
+ * Exits non-zero only when the worst game's TOTAL exceeds TOTAL_BUDGET_MS (or
+ * when a measurement cannot run at all).
  */
 
 import { spawn, spawnSync } from "node:child_process";
@@ -71,12 +71,15 @@ const CHUNK_TIMEOUT_MS = 8000;
 
 /**
  * Tile indexes are positions in `GAME_TILES` (src/game/hubTiles.ts). The set
- * spans three different art-group declarations plus Memory Match, the widest
- * union (animals + items + toys + glyphs).
+ * spans three different art-group declarations plus Find the Word, the widest
+ * union: seven groups and 83 keys (Word Builder, Decode It and First Sounds
+ * declare the same seven). The budget is applied to the worst game, not to the
+ * median across games, so one slow union cannot hide behind three fast ones.
  */
 const TARGETS = [
   { name: "Shape Sorter", scene: "ShapeSorter", tileIndex: 0 },
   { name: "Find the Letter", scene: "Alphabet", tileIndex: 7 },
+  { name: "Find the Word", scene: "WordMatch", tileIndex: 8 },
   { name: "Add It Up", scene: "AddItUp", tileIndex: 15 },
   { name: "Memory Match", scene: "MemoryMatch", tileIndex: 17 },
 ];
@@ -407,7 +410,10 @@ async function runEvidenceSuite(log) {
         suite.throttledBoot.samplesMs.join(" / "),
     );
     suite.taps = await measureBudget("first tap", measureFirstTap());
-    log(`first tap median total ${suite.taps.medians.totalMs} ms`);
+    log(
+      `first tap worst game ${suite.taps.worst.game} at ${suite.taps.worst.totalMs} ms ` +
+        `(median across games ${suite.taps.medians.totalMs} ms)`,
+    );
   } finally {
     stopPreview(server);
   }
@@ -434,7 +440,7 @@ function printTapTable(taps) {
       `  ${taps.medians.totalMs.toFixed(1).padStart(6)}`,
   );
   console.log(`\n  worst game: ${taps.worst.game} at ${taps.worst.totalMs.toFixed(1)} ms (C)`);
-  console.log(`  budget: median C <= ${taps.budgetMs} ms`);
+  console.log(`  budget: worst game C <= ${taps.budgetMs} ms`);
 }
 
 async function main() {
@@ -449,14 +455,18 @@ async function main() {
       console.log("");
       printTapTable(suite.taps);
     }
-    if (suite.taps.medians.totalMs > TOTAL_BUDGET_MS) {
+    if (suite.taps.worst.totalMs > TOTAL_BUDGET_MS) {
       console.error(
-        `\nFAIL: median total ${suite.taps.medians.totalMs} ms exceeds ${TOTAL_BUDGET_MS} ms`,
+        `\nFAIL: worst game ${suite.taps.worst.game} total ${suite.taps.worst.totalMs} ms ` +
+          `exceeds ${TOTAL_BUDGET_MS} ms`,
       );
       process.exitCode = 1;
       return;
     }
-    console.log(`\nPASS: median total ${suite.taps.medians.totalMs} ms`);
+    console.log(
+      `\nPASS: worst game ${suite.taps.worst.game} total ${suite.taps.worst.totalMs} ms ` +
+        `(median across games ${suite.taps.medians.totalMs} ms)`,
+    );
     return;
   }
 
@@ -464,12 +474,18 @@ async function main() {
   if (asJson) console.log(JSON.stringify(taps, null, 2));
   else printTapTable(taps);
 
-  if (taps.medians.totalMs > TOTAL_BUDGET_MS) {
-    console.error(`\nFAIL: median total ${taps.medians.totalMs} ms exceeds ${TOTAL_BUDGET_MS} ms`);
+  if (taps.worst.totalMs > TOTAL_BUDGET_MS) {
+    console.error(
+      `\nFAIL: worst game ${taps.worst.game} total ${taps.worst.totalMs} ms ` +
+        `exceeds ${TOTAL_BUDGET_MS} ms`,
+    );
     process.exitCode = 1;
     return;
   }
-  console.log(`\nPASS: median total ${taps.medians.totalMs} ms`);
+  console.log(
+    `\nPASS: worst game ${taps.worst.game} total ${taps.worst.totalMs} ms ` +
+      `(median across games ${taps.medians.totalMs} ms)`,
+  );
 }
 
 main().catch((error) => {

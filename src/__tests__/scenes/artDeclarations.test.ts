@@ -35,29 +35,8 @@ import storyOrderArtSource from "../../game/storyOrderArt.ts?raw";
 import storyOrderLogicSource from "../../game/storyOrderLogic.ts?raw";
 import takeAwayLogicSource from "../../game/takeAwayLogic.ts?raw";
 import wordLogicSource from "../../game/wordLogic.ts?raw";
-import addItUpSceneSource from "../../scenes/AddItUpScene.ts?raw";
-import alphabetSceneSource from "../../scenes/AlphabetScene.ts?raw";
-import animalTraceSceneSource from "../../scenes/AnimalTraceScene.ts?raw";
-import bigSmallSceneSource from "../../scenes/BigSmallScene.ts?raw";
-import colorMatchSceneSource from "../../scenes/ColorMatchScene.ts?raw";
-import decodeItSceneSource from "../../scenes/DecodeItScene.ts?raw";
-import feelingsFacesSceneSource from "../../scenes/FeelingsFacesScene.ts?raw";
-import firstSoundsSceneSource from "../../scenes/FirstSoundsScene.ts?raw";
-import howManySceneSource from "../../scenes/HowManyScene.ts?raw";
-import memoryMatchSceneSource from "../../scenes/MemoryMatchScene.ts?raw";
-import moreLessSceneSource from "../../scenes/MoreLessScene.ts?raw";
-import musicalMemorySceneSource from "../../scenes/MusicalMemoryScene.ts?raw";
-import numberOrderSceneSource from "../../scenes/NumberOrderScene.ts?raw";
-import oddOneOutSceneSource from "../../scenes/OddOneOutScene.ts?raw";
-import patternBuilderSceneSource from "../../scenes/PatternBuilderScene.ts?raw";
-import popFreezeSceneSource from "../../scenes/PopFreezeScene.ts?raw";
 import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
-import shadowMatchSceneSource from "../../scenes/ShadowMatchScene.ts?raw";
-import shapeSorterSceneSource from "../../scenes/ShapeSorterScene.ts?raw";
 import storyOrderSceneSource from "../../scenes/StoryOrderScene.ts?raw";
-import takeAwaySceneSource from "../../scenes/TakeAwayScene.ts?raw";
-import wordBuilderSceneSource from "../../scenes/WordBuilderScene.ts?raw";
-import wordMatchSceneSource from "../../scenes/WordMatchScene.ts?raw";
 
 /** The one scene that owns its art through the story-order preloader instead. */
 const STORY_ORDER_SCENE = "StoryOrderScene";
@@ -145,36 +124,43 @@ interface SceneSource {
 }
 
 /**
- * The 22 game scenes, read as text.
+ * Every scene module under `src/scenes`, read as text.
  *
- * These are `?raw` imports rather than real imports so the scan can see what a
- * scene *names* instead of what it does at runtime — the point is to catch a
- * scene that draws a key it never declared, which no runtime test can see.
+ * Discovered rather than hand-listed, so a scene added tomorrow is scanned the
+ * day it lands instead of silently escaping the check until someone remembers
+ * an import. The scan is a text scan because it looks at what a scene *names*,
+ * not what it does at runtime — the point is to catch a scene that draws a key
+ * it never declared, which no runtime test can see.
  */
-const SCENES: readonly SceneSource[] = [
-  { name: "AddItUpScene", source: addItUpSceneSource },
-  { name: "AlphabetScene", source: alphabetSceneSource },
-  { name: "AnimalTraceScene", source: animalTraceSceneSource },
-  { name: "BigSmallScene", source: bigSmallSceneSource },
-  { name: "ColorMatchScene", source: colorMatchSceneSource },
-  { name: "DecodeItScene", source: decodeItSceneSource },
-  { name: "FeelingsFacesScene", source: feelingsFacesSceneSource },
-  { name: "FirstSoundsScene", source: firstSoundsSceneSource },
-  { name: "HowManyScene", source: howManySceneSource },
-  { name: "MemoryMatchScene", source: memoryMatchSceneSource },
-  { name: "MoreLessScene", source: moreLessSceneSource },
-  { name: "MusicalMemoryScene", source: musicalMemorySceneSource },
-  { name: "NumberOrderScene", source: numberOrderSceneSource },
-  { name: "OddOneOutScene", source: oddOneOutSceneSource },
-  { name: "PatternBuilderScene", source: patternBuilderSceneSource },
-  { name: "PopFreezeScene", source: popFreezeSceneSource },
-  { name: "ShadowMatchScene", source: shadowMatchSceneSource },
-  { name: "ShapeSorterScene", source: shapeSorterSceneSource },
-  { name: "StoryOrderScene", source: storyOrderSceneSource },
-  { name: "TakeAwayScene", source: takeAwaySceneSource },
-  { name: "WordBuilderScene", source: wordBuilderSceneSource },
-  { name: "WordMatchScene", source: wordMatchSceneSource },
+const SCENE_SOURCES: Readonly<Record<string, string>> = import.meta.glob<string>(
+  "../../scenes/*Scene.ts",
+  { query: "?raw", import: "default", eager: true },
+);
+
+/**
+ * Scenes that are not games: the boot shell, the menu, and the two shared
+ * abstract bases (`ChoiceRoundScene`, `GroupMathScene`). Every other scene
+ * must declare the art it draws.
+ */
+const NON_GAME_SCENES: readonly string[] = [
+  "BootScene",
+  "ChoiceRoundScene",
+  "GroupMathScene",
+  "HubScene",
+  "PreloadScene",
 ];
+
+/** `../../scenes/WordMatchScene.ts` → `WordMatchScene`. */
+function sceneNameOf(path: string): string {
+  const file = path.slice(path.lastIndexOf("/") + 1);
+  return file.slice(0, -".ts".length);
+}
+
+/** The 22 game scenes, read as text. */
+const SCENES: readonly SceneSource[] = Object.entries(SCENE_SOURCES)
+  .map(([path, source]) => ({ name: sceneNameOf(path), source }))
+  .filter((scene) => !NON_GAME_SCENES.includes(scene.name))
+  .sort((a, b) => (a.name < b.name ? -1 : 1));
 
 /**
  * Game modules a scene may draw a key from, by file name.
@@ -338,9 +324,18 @@ function sorted(ids: Iterable<string>): string[] {
 }
 
 describe("game scene art declarations", () => {
-  it("scans all 22 game scenes", () => {
+  it("discovers all 22 game scenes, so a new one cannot escape the scan", () => {
+    const discovered = Object.keys(SCENE_SOURCES).map(sceneNameOf);
+
+    // The inventory itself is the tripwire: a 23rd game changes this number,
+    // and its own declaration checks run in the same pass.
     expect(SCENES).toHaveLength(22);
     expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(22);
+
+    // Every exclusion is a scene the glob really found; a stale name here
+    // would let a non-game module slip into the game-scene checks.
+    expect(discovered).toHaveLength(SCENES.length + NON_GAME_SCENES.length);
+    expect(discovered).toEqual(expect.arrayContaining([...NON_GAME_SCENES]));
   });
 
   it("reads every game module a scene imports", () => {

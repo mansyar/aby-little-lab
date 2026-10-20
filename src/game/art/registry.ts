@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 import { toDataUri } from "../../utils/svgDataUri";
 import { textureSizeFor } from "../../utils/textureTiers";
+import { ensureArtTexture } from "./placeholder";
 import type { ArtGroup } from "./types";
 
 /** One scene's in-flight loads and the listeners that keep them honest. */
@@ -9,8 +10,11 @@ interface SceneLoads {
   readonly events: Phaser.Events.EventEmitter;
   /** Keys this scene queued and that have not settled yet. */
   readonly keys: Set<string>;
+  /** Keys whose file errored in this scene, still owed a placeholder. */
+  readonly failed: Set<string>;
   readonly onFileComplete: (key: string) => void;
   readonly onLoadError: (file: Phaser.Loader.File) => void;
+  readonly onComplete: () => void;
   readonly onShutdown: () => void;
 }
 
@@ -52,8 +56,10 @@ function detachScene(scene: Phaser.Scene): void {
     keyOwners.delete(key);
   }
   record.keys.clear();
+  record.failed.clear();
   record.load.off("filecomplete", record.onFileComplete);
   record.load.off("loaderror", record.onLoadError);
+  record.load.off("complete", record.onComplete);
   record.events.off("shutdown", record.onShutdown);
 }
 
@@ -62,18 +68,34 @@ function attachScene(scene: Phaser.Scene): SceneLoads {
   const existing = sceneLoads.get(scene);
   if (existing !== undefined) return existing;
 
+  const failed = new Set<string>();
   const record: SceneLoads = {
     load: scene.load,
     events: scene.events,
     keys: new Set<string>(),
-    onFileComplete: (key: string): void => releaseKey(key),
-    onLoadError: (file: Phaser.Loader.File): void => releaseKey(file.key),
+    failed,
+    onFileComplete: (key: string): void => {
+      releaseKey(key);
+      failed.delete(key);
+    },
+    onLoadError: (file: Phaser.Loader.File): void => {
+      // Release for a later retry, but remember the key: the loader's
+      // `complete` is the one moment a placeholder can be drawn before the
+      // scene's `create` asks for the texture.
+      releaseKey(file.key);
+      failed.add(file.key);
+    },
+    onComplete: (): void => {
+      for (const key of failed) ensureArtTexture(scene, key);
+      failed.clear();
+    },
     onShutdown: (): void => detachScene(scene),
   };
 
   sceneLoads.set(scene, record);
   record.load.on("filecomplete", record.onFileComplete);
   record.load.on("loaderror", record.onLoadError);
+  record.load.on("complete", record.onComplete);
   record.events.on("shutdown", record.onShutdown);
   return record;
 }
@@ -86,6 +108,11 @@ function attachScene(scene: Phaser.Scene): SceneLoads {
  * satisfied as-is (that is how `mascot_idle` works as a word prompt without a
  * game group), a key still in flight is skipped until its load settles, and a
  * scene that shuts down mid-load hands its keys back for the next attempt.
+ *
+ * A file that errors is released for a later retry and remembered; when the
+ * loader completes, that key is drawn as the neutral placeholder instead of
+ * Phaser's `__MISSING` checkerboard, so a corrupt or absent SVG degrades the
+ * art rather than the round.
  *
  * Call it from a scene's `preload`, where `scene.load` is queueing.
  */

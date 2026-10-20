@@ -245,24 +245,50 @@ after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
 | Boot textures rasterized | 178 | **53** | −125 |
 | Prod cold boot, median of 3 fresh contexts | 808 ms (815/808/749) | **419.5 ms** (488.1/398.1/419.5) | **−48%** |
 | Prod cold boot under 4× CPU throttle | ~4.2 s (4333/4036) | **1697.2 ms** (1877.3/1697.2/1656.4) | **−2.5 s** |
-| Cold first tap → first frame (3 games) | not measured | **200.1 ms median**, 235.8 ms worst (Memory Match) | new 400 ms budget, met |
-| Game art chunks | 0 — every texture rode the shell | **9 chunks, 3.1–16.5 kB**; `cutouts`, `shadows`, `faces` inline into their only consumer | 9 new, under the ≤ 12 ceiling |
+| Cold first tap -> first frame (5 games) | not measured | **+82 ms worst** (Memory Match), **+48 ms** for the widest union (Find the Word); absolute totals 224-334 ms | new 400 ms budget, met |
+| Game art chunks | 0 — every texture rode the shell | **9 chunks, 3.1–16.5 kB**; `cutouts`, `shadows`, `faces` inline into their only consumer | 9 art chunks, none added after Phase 3 |
 | PWA precache | 42 entries / 2189.6 KiB | **53 entries / 1701.34 KiB** | +11 entries, −488.3 KiB |
 
 ### Notes
 
-- Tap breakdown (median): 62.5 ms tap → chunk headers, 47.4 ms tap → chunk
-  loaded, 200.1 ms tap → first frame. Worst game 60.7 / 43.3 / 235.8 ms. The
-  budget is measured evidence, not a CI gate: `measure-first-tap.mjs` is not
-  wired into `verify_phase`, CI or any npm script.
+- Tap breakdown, corrected after review (F2). The first recording tapped the
+  wrong "worst" game and gated on the cross-game median. The script now taps
+  five games including **Find the Word** (seven groups, 83 keys - the widest
+  union, shared with Word Builder, Decode It and First Sounds) and fails on the
+  **worst** total, not the average.
+- The criterion is an increment ("adds <= 400 ms versus the same tap today"), so
+  it is measured as one. A build of the pre-track commit (`f377bf8`) was built
+  into `.conductor/base-build` and served alongside the current build; the script
+  ran three times against each, alternating, with `PREVIEW_URL` selecting the
+  target. Medians of three rounds on this machine (2026-10-20, service worker
+  blocked, 1024x768):
+
+  | Game (art keys) | pre-track | this track | delta |
+  | --- | --- | --- | --- |
+  | Shape Sorter (36) | 282.7 ms | 263.8 ms | -18.9 ms |
+  | Find the Letter (46) | 265.6 ms | 249.4 ms | -16.2 ms |
+  | Find the Word (83) | 268.8 ms | 317.2 ms | **+48.4 ms** |
+  | Add It Up (48) | 233.5 ms | 224.3 ms | -9.2 ms |
+  | Memory Match (37) | 251.9 ms | 333.9 ms | **+82.0 ms** |
+
+  The worst increment is **82 ms**, and the widest-union game adds **48 ms** -
+  both far inside the 400 ms budget. Negative deltas are run-to-run noise larger
+  than the art cost for a small union, which is itself the point: deferred
+  rasterization is not visible at tap time. Absolute cold totals 224-334 ms.
+- Run-to-run variance on this machine is large. Repeating the measurement
+  minutes apart produced absolute worst-case totals between 277.8 and 464.1 ms
+  and 4x-throttled boot medians between 1,697 and 6,072 ms, because background
+  processes contend for the same cores. That is why the increment is measured
+  back to back against a built baseline instead of against one historical
+  number, and why `validate-boot.js` - the only number enforced in CI, at a
+  3000 ms median - remains the guarantee.
 - Two caveats on the tap number. It stops at the first frame the game paints
-  behind its loading cue — the scene's own art rasterization continues after
-  that frame and is not inside the 200 ms. And with the service worker blocked
-  the chunk fetch is a cold network round trip, so a warm precache can only be
-  faster.
+  behind its loading cue - the scene's own art rasterization continues after
+  that frame - and with the service worker blocked the chunk fetch is a cold
+  network round trip, so a warm precache can only be faster.
 - CI is unchanged: `validate-boot.js` still gates the median of 3 cold loads at
-  3000 ms, and 419.5 ms is 14% of that. The 4× figure moved for a measurable
-  reason — boot no longer rasterizes 125 textures — not because the gate moved.
+  3000 ms. The 4x figure moved for a measurable reason - boot no longer
+  rasterizes 125 textures - not because the gate moved.
 - GPU texture memory is unchanged in kind: the same keys resolve to the same
   `textureSizeFor` tiers, only the moment they are rasterized moved. The
   texture-tier (−78%) result above still holds.

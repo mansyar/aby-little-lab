@@ -61,6 +61,16 @@ function cueDots(): MockObject[] {
   return mockRegistry.filter((object) => object.kind === "circle");
 }
 
+/** The cue's mascot image — the only image this scene double creates. */
+function cueMascots(): MockObject[] {
+  return mockRegistry.filter((object) => object.kind === "image");
+}
+
+/** True when the object's `destroy` spy has fired. */
+function wasDestroyed(object: MockObject): boolean {
+  return spyOf(object, "destroy").mock.calls.length > 0;
+}
+
 /** A mock object's chainable method as an assertable spy. */
 function spyOf(object: MockObject, method: string): MockFn {
   return object[method] as unknown as MockFn;
@@ -127,14 +137,26 @@ describe("GameSceneBase.preloadArt", () => {
     expect(cueDots()).toHaveLength(3);
   });
 
-  it("builds a fresh cue on the next visit", () => {
+  it("destroys the old cue on shutdown and builds one fresh cue on the next visit", () => {
     const scene = withPresentTextures(new TestScene());
     scene.showArt([letters]);
 
+    const firstCue = [...cueDots(), ...cueMascots()];
+    expect(firstCue).toHaveLength(4);
+    expect(firstCue.filter(wasDestroyed)).toHaveLength(0);
+
     scene.events.emit("shutdown");
+
+    // The cue's own shutdown hook frees its objects; the scene is a singleton,
+    // so a leaked set would accumulate one cue per visit.
+    expect(firstCue.filter(wasDestroyed)).toHaveLength(4);
+
     scene.showArt([letters]);
 
-    // Three dots per cue: the destroyed cue's three are gone, three new ones exist.
-    expect(cueDots()).toHaveLength(6);
+    // Exactly one live cue: three dots and a mascot, none of them the old ones.
+    const live = mockRegistry.filter((object) => !wasDestroyed(object));
+    expect(live.filter((object) => object.kind === "circle")).toHaveLength(3);
+    expect(live.filter((object) => object.kind === "image")).toHaveLength(1);
+    expect(live.some((object) => firstCue.includes(object))).toBe(false);
   });
 });
