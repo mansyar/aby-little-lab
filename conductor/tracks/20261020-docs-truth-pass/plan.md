@@ -133,14 +133,18 @@
 - **Covers:** FR-9, AC-9
 - **Touches:** `conductor/tracks/drop-ligne-mascot_20261016/**`, `conductor/archive/drop-ligne-mascot_20261016/**`, `conductor/tracks.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P6.T1: Prove Ligne is absent** — covers: FR-9
-  - [ ] **P6.T1.1: Collect the evidence** — no `@ligne-engine` in `package.json` or the lockfile, no `.ligne` or `ligne_wasm` in `dist/`, validator passes, `755d575` deleted the files.
-- [ ] **P6.T2: Archive the track** — covers: FR-9
-  - [ ] **P6.T2.1: Move the folder** — to `conductor/archive/drop-ligne-mascot_20261016/`.
-  - [ ] **P6.T2.2: Update the metadata and index** — `status: "complete"`, `archived_at`, `archive_path`, `doc_sync: "updated"`, plus a one-line retroactive note in `index.md`.
-- [ ] **P6.T3: Update the registry ledger** — covers: FR-9
-  - [ ] **P6.T3.1: Rewrite the line in place** — marker `[x]`, link to `./archive/drop-ligne-mascot_20261016/index.md`, `(Archived)` suffix; never remove the line.
-- [ ] **P6.T4: Verify the state** — covers: FR-9
-  - [ ] **P6.T4.1: Check folder, link and evidence** — no track folder remains, the link resolves, the phase evidence records the commands.
+- [x] **P6.T1: Prove Ligne is absent** — covers: FR-9
+  - [x] **P6.T1.1: Collect the evidence** — no `@ligne-engine` in `package.json` or the lockfile, no `.ligne` or `ligne_wasm` in `dist/`, validator passes, `755d575` deleted the files.
+- [x] **P6.T2: Archive the track** — covers: FR-9
+  - [x] **P6.T2.1: Move the folder** — to `conductor/archive/drop-ligne-mascot_20261016/`.
+  - [x] **P6.T2.2: Update the metadata and index** — `status: "complete"`, `archived_at`, `archive_path`, `doc_sync: "updated"`, plus a one-line retroactive note in `index.md`.
+- [x] **P6.T3: Update the registry ledger** — covers: FR-9
+  - [x] **P6.T3.1: Rewrite the line in place** — marker `[x]`, link to `./archive/drop-ligne-mascot_20261016/index.md`, `(Archived)` suffix; never remove the line.
+- [x] **P6.T4: Verify the state** — covers: FR-9
+  - [x] **P6.T4.1: Check folder, link and evidence** - no track folder remains, the link resolves, the phase evidence records the commands.
+
+- **Result:** verified. Ligne is gone by every measure this phase could take: no `@ligne-engine` entry in `package.json` or the lockfile, no `.ligne` or `.wasm` file in `dist/`, `scripts/validate-pwa.js` asserting the absence on every build, and `755d575` (2026-10-17) as the commit that deleted the engine and its dual-path code. The stale track moved to `conductor/archive/drop-ligne-mascot_20261016/` with history intact, its metadata now reads `complete` with `archived_at`, `archive_path` and `doc_sync: updated`, and `index.md` carries an archive note saying the work landed ahead of the track. The registry line keeps its `[x]`, points at the archive path and ends in `(Archived)`. Two references to the old path remain on purpose: the dated 2026-10-16 entry in `tech-stack.md` (frozen history) and this track's own spec, which must keep describing the before-state.
+- **Checkpoint:** `bd35e19`
+- **Evidence:** [`verification/phase-6.md`](./verification/phase-6.md)
