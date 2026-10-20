@@ -36,7 +36,7 @@
 - **Covers:** FR-5, FR-6, FR-7, FR-8, AC-4, AC-5, AC-6, AC-7
 - **Touches:** `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Rebuild the structural sections from the filesystem** — covers: FR-6, AC-4, AC-5
   - [ ] **P2.T1.1: Regenerate the directory tree** — walk `git ls-files src` and write the real tree (29 scene files including bases, 15 component files with `settings/`, 30 logic modules, 14 utils, new assets folders).
