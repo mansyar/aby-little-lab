@@ -5,7 +5,7 @@
 - **Date:** 2026-10-20
 - **Branch:** `refactor/20261020-shell-diet-lazy-art`
 - **Base:** `09a12bcaabd913a14437febb9ee7bf64b2649caf`
-- **Head:** `c83ea3cb8a40f071ba64b6fecb807171b8ab92f4`
+- **Head:** `4423b1117f2c09e5d803aa9a90ce15ff8d6ea9fb` (squashed phase commit)
 - **Result:** verified (rework attempt 1 of 2 fixed one lifecycle defect)
 
 ## Summary
@@ -116,3 +116,24 @@ None. All changes stay inside `src/game/art/**` and `src/__tests__/game/art/**`;
 - Phase 2 can build the shared loading cue on top of `preloadArtGroups`; phase 3
   wires groups into the 22 scenes; phase 4 shrinks `PreloadScene` to the 53-key
   shell set.
+
+## Primary verification
+
+- **Verified by:** primary agent (independent re-run, 2026-10-20)
+- **Scope:** `git diff --name-only 09a12bc..HEAD` touched only `src/game/art/**`,
+  `src/__tests__/game/art/**` and this evidence file. `src/scenes/**` untouched,
+  confirmed by the file list rather than by report.
+- **Command chain re-run from a clean tree:** `pnpm check` exit 0 (only the two
+  pre-existing non-blocking diagnostics), `pnpm typecheck` exit 0,
+  `pnpm test -- --run` exit 0 with 105 files / 2,223 tests, `pnpm test:coverage`
+  exit 0 at statements 98.11%, branches 90.46%, functions 98.15%, lines 98.97%.
+- **Defect found by this review:** the original `queuedKeys` set was released
+  only on `filecomplete`/`loaderror`. Because Phaser's loader reports nothing for
+  files in flight at scene shutdown, a child leaving a game mid-load would have
+  stranded those keys permanently, and every later visit to that game would skip
+  them. Rework attempt 1 (`c83ea3c`) fixed it with per-scene ownership and a
+  `shutdown` release, plus two failing-first tests. Verified by inspection of
+  `registry.ts` and by the two new tests named above.
+- **Residual, accepted:** the `owner === undefined` branch in `releaseKey` is
+  unreachable by design (a file settling after its scene already released it) and
+  is kept as a no-op; `registry.ts` line coverage is 100%.
