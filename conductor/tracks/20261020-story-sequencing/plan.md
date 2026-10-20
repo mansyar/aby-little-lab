@@ -109,7 +109,7 @@
 - **Covers:** FR-10, NFR-8, AC-10
 - **Touches:** `conductor/product.md`, `README.md`, `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Product definition** — covers: FR-10
   - [ ] **P5.T1.1: Game table row 22**, game count, hub grid/paging figures, progress rows and preload count
