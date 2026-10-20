@@ -119,35 +119,15 @@ src/
 
 ## Parental Lock & Touch UX
 
-Settings access (Hub **Settings**) and app exit (each game's **← Back**) are gated by a **hold-for-3-seconds** parental lock:
+Settings access and every game's Back button are gated by a **hold-for-3-seconds** parental lock: a continuous press on a 96×96px target, a green ring filling from twelve o'clock, one hold at a time, and release, pointer-out or pointer-cancel leaving no partial state. The same 96px targets cover the replay glyph in all twenty-two games. Behind that hold sit the version footer, Reset Progress, Install, the profile manager and the play-time limits.
 
-- A circular progress ring (green fill, 48px radius) shows the hold filling from 12 o'clock.
-- Only **one hold runs at a time** — duplicate touches during a hold are ignored, and the action fires exactly once.
-- Early release, pointer leaving the control, or pointer cancel **never** triggers the action.
-- The ring is cleared on release, cancel, and scene shutdown — no leftover display objects.
-
-The protected controls (Hub Settings, all twenty-two game Back buttons) and the shared replay speaker button — present in **all twenty-two** games, narrating either the round target or the one-line rule — expose explicit **96×96px hit areas**, so children can tap near the visible control without precision aiming. Phaser hit areas are anchored at the top-left of a control's bounds, not its origin — keep `Rectangle(0, 0, 96, 96)` even for right-aligned controls; the centered speaker icon uses `Rectangle(-48, -48, 96, 96)`.
-
-The Settings modal provides independently persisted BGM and SFX toggles with 96px touch targets; tapping outside the panel closes it. Enabling SFX plays a short confirmation chime. BGM playback begins after eligible user interaction and uses the packaged `/audio/bgm.mp3` loop; narration ducks it and a hidden document pauses it (see Audio focus under Motion & Feedback).
-
-Parent-facing additions (all behind the 3-second hold, never visible to the child during play):
-
-- **Version footer** — a muted `v{version}` readout **under the title** (clear of the install row, moved 2026-08-06), sourced from `package.json` via a Vite `define` (`__APP_VERSION__`), so parents and support can tell which build is installed even though the PWA updates silently.
-- **Reset Progress** — a danger-colored row that opens a two-step confirm modal ("Reset all stickers?" with Cancel/Reset). Reset clears the sticker collection (all twenty-two stickers become unearned) **while preserving the BGM/SFX settings**, then the row shows "Progress cleared" and the Hub's sticker shelf re-renders immediately — dimming every thumbnail without a reload. Useful for a second child, a hand-me-down device, or a fresh start.
-- **Install control** — a context-aware row: "Install App" where a browser prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, hidden once the app is installed (see PWA Release Readiness).
-- **Profile manager** — up to 4 kid profiles, each with its own sticker collection; the Hub's top-left avatar chip (kid-tappable) switches profiles without parental input, while adding/removing profiles happens behind the hold (two-step delete). Profiles use 6 textless animal avatars (cat, dog, pig, frog, duck, bear) reusing existing art; old saves auto-migrate to the first profile.
-- **Play-time limits** — a per-profile daily cap (Off/15/30/45/60 minutes) via a chip in Profiles; usage accrues while games run and resets each day — a hidden or backgrounded tab accrues nothing, because only visible minutes are banked into the session. The Hub shows a textless remaining-budget arc (turns orange ≤5 min), a 2s hourglass nudge delays launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge — no mid-game cutoffs, off by default (2026-08-05).
-- **Typography & readability (2026-08-06)** — a bundled Baloo 2 rounded font replaces Phaser's default Courier everywhere (precached, shared `textStyle()` helper); Settings text is larger (30–36px); the version footer moved under the title; pinch-zoom is allowed while the Settings panel is open so parents can zoom in on a phone.
+Product rules: [PRD §5.2](docs/PRD.md#52-touch-targets), [PRD §5.3](docs/PRD.md#53-the-parental-lock). Implementation: [TDD §5.3](docs/TDD.md#53-parentlock), [TDD §5.5](docs/TDD.md#55-settingspanel-and-the-settings-group).
 
 ## Motion & Feedback
 
-All animation is driven by a shared motion system (`src/utils/`):
+One motion system drives the app: a 300ms crossfade into a 180ms fade-in on every navigation, the same ten-ray celebration in all twenty-two games with the sticker reveal ~400ms later, a 95% press squish with a `Back.out` settle, and reduced motion that shortens durations, drops particles and disables press feedback while gameplay stays whole. Narration owns the foreground: music ducks to 8% over a 120ms ramp, a 15s watchdog restores it, and a hidden document pauses music, speech and the play clock.
 
-- **Scene transitions** — every navigation path (boot → hub, hub ↔ game, completion returns) plays a 300ms crossfade to the app background, then a 180ms fade-in with a subtle entrance zoom.
-- **Win celebration** — all twenty-two games share one choreographed completion effect: 10 rays + 10 drifting confetti bits (~700ms) that clean themselves up and never block the next interaction; the first-time sticker reveal pops ~400ms later so the confetti clears first.
-- **Press feedback** — Back, Replay, Settings, and Hub game tiles squish to 95% of their base scale while pressed; tiles spring back with a `Back.out` overshoot (150ms), other controls restore instantly. Hub tiles navigate **on release** so the squish stays visible while holding; dragging off the tile cancels the navigation.
-- **Reduced motion** — the `motion` utility (`isReducedMotion`/`motionDuration`/`motionScale`) governs every tween in the app: durations shorten (~40%), amplitudes soften, the celebration simplifies (6 rays, no confetti), press feedback is disabled, Hub entrances fade without scale (no bob, wiggle, sparkle, or burst), the idle attract plays chime-only, and gameplay stays fully functional under `prefers-reduced-motion`.
-- **Audio focus** — narration owns the foreground. `AudioManager` subscribes to the speech lifecycle once at `init()` and ducks the BGM to 8% of its level over a 120ms ramp on `speech:start`, restoring it on `speech:end`/`speech:error`, after a 15s watchdog if the engine never reports the end (it re-arms while `speechSynthesis.speaking` is still true), on teardown, and on either settings toggle — so a ducked level is never left behind or persisted. A hidden document is not audio time either: the BGM pauses (remembering whether it was really playing), in-flight speech is cancelled, and the play session pauses; on return the BGM resumes only if it had been playing and is still enabled, and the session continues without charging the hidden minutes. Two hide/show cycles charge each visible slice once. Both behaviours no-op where `document.visibilityState` does not exist.
+Product rules: [PRD §5.6](docs/PRD.md#56-motion-and-feedback), [PRD §5.7](docs/PRD.md#57-reduced-motion), [PRD §6.4](docs/PRD.md#64-audio-focus). Implementation: [TDD §8.3](docs/TDD.md#83-background-music-ducking-and-the-watchdog), [TDD §9](docs/TDD.md#9-motion-and-feedback).
 
 ## Per-Game Juice
 
@@ -174,79 +154,50 @@ Every game layers scene-level animation juice on top of its core rules (no gamep
 
 ## Hub Experience
 
-The Hub is the child's landing screen, built for gentle, playful engagement:
+The Hub is twenty-two storybook tiles, each a 64px icon above a small text label with a sticker shelf beneath, entering in a 40ms stagger and bobbing while idle; after ~25s without input two tiles wiggle to a two-note chime that repeats every ~10s. The avatar chip switches profile without a PIN, and the play-time arc, hourglass nudge and moon badge follow the active limit and refresh on every switch.
 
-- **Tile icons** — every tile shows a distinct storybook icon (64px, `src/assets/svg/ui/tiles/`) above a small text label, so the 22 games are identifiable at a glance without reading (2026-08-06).
-- **Staggered entrance** — tiles, labels, icons, and stickers wave in one-by-one (40ms apart, 300ms `Sine.out` fade + scale-up). Under reduced motion, entrances fade only.
-- **Idle float** — tiles gently bob on a 2.5s sine loop with a phase offset, and four low-contrast dots drift slowly behind the grid (both skipped under reduced motion).
-- **Sticker shelf** — each game's real SVG sticker thumbnail (56px) sits under its tile: earned stickers shimmer (800ms alpha loop), unearned slots show a dashed empty-slot outline so the collection goal stays visible, and a just-earned sticker bounces in larger (`Back.out` to 1.15×) with a sparkle burst. Game scenes pass `{ justEarned: <gameId> }` on auto-return when a sticker is earned that session. The shelf always shows the active profile's collection and re-renders on profile switch.
-- **Profile chip** — a kid-tappable avatar chip (96px target) in the top-left opens a textless profile picker; switching profiles re-renders the sticker shelf and play-time state instantly.
-- **Play-time state** — with a daily cap set, a small textless arc at the bottom-center shows remaining budget (cool green; orange ≤5 min), a 2s hourglass nudge precedes game launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge (mascot waves once). All refresh live on profile switch or settings change.
-- **Idle attract** — after ~25s without input, two tiles wiggle gently (4° rotation wobble; the pick rotates each cue) and a soft two-tone chime (`AudioManager.playIdleCall()`) plays, repeating every ~10s while idle. Any pointer input resets the timer (and resumes the audio context, so the chime is audible on a fresh load); reduced motion plays the chime without the wiggle.
+Product rules: [PRD §1.5](docs/PRD.md#15-session-flow), [PRD §4.4](docs/PRD.md#44-stickers), [PRD §4.6](docs/PRD.md#46-play-time-limits), [PRD §5.6](docs/PRD.md#56-motion-and-feedback). Implementation: [TDD §5.6](docs/TDD.md#56-profilechip-and-playtimeindicator), [TDD §7.1](docs/TDD.md#71-the-module-list).
 
 ## Professor Hoot Mascot
 
-Professor Hoot — a round owl in a tiny lab coat — is the app's friendly teacher mascot, rendered from two static SVG poses (`mascot_idle.svg`, `mascot_celebrate.svg`) with tween-only animation (no sprite sheets, no particle emitters, no new audio):
+Professor Hoot is an owl in a lab coat drawn from two static SVG poses (`mascot_idle.svg`, `mascot_celebrate.svg`) and moved only by tweens. He waves on the Hub, cheers correct answers in every game, nods at a wrong one (never in Animal Trace, which has no wrong answer), joins the win, and is destroyed with the scene; reduced motion leaves him still.
 
-- **Hub** — Hoot sits in the bottom-right corner (0.2× scale, touch-inert, behind gameplay z-order): waves on load, cheers when the visit follows a newly earned sticker (`justEarned` scene data), then settles into a slow bob with a periodic squash-blink idle loop.
-- **All twenty-two games** — Hoot stands in the same corner in every game scene: cheers on a correct action (wings up + bounce + self-cleaning sparkle ring), nods gently on an incorrect action (paired with the soft incorrect SFX; Animal Trace has no nod path — it is a no-fail game), and does a bigger cheer alongside the shared win celebration. The mascot is destroyed on scene shutdown.
-- **Implementation** — `src/components/Mascot.ts` (wave/cheer/nod/idleLoop + `createCornerMascot()` shared factory). Overlapping cheers retire the in-flight tween and pause the blink loop so rapid pops never stack tweens. Reactions reuse the existing SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`) — no new audio files.
-- **Reduced motion** — the idle loop is disabled and reactions become minimal (gentle wave/nod, pose swap without bounce or sparkle).
+Product rules: [PRD §4.3](docs/PRD.md#43-the-mascot). Implementation: [TDD §5.2](docs/TDD.md#52-mascot).
 
 ## UI & Typography (2026-08-06)
 
-The UI/UX Hardening track (archived at `conductor/archive/uiux-hardening_20260805/`) shipped the consolidated audit remediation:
+One bundled face, Baloo 2, replaces Phaser's Courier everywhere: precached with the shell, declared in `src/styles/style.css`, and applied through `textStyle()` from `src/utils/typography.ts`. Find the Letter draws its target and cards from the `letter_*` SVGs at 256/128px, Pop & Freeze uses the `sleep_zzz` glyph, the loading screen carries the brand lockup, and the win sticker lands ~400ms after the celebration.
 
-- **Baloo 2 typography** — a bundled variable font (WOFF2, `public/fonts/baloo2-latin.woff2`, precached, `@font-face` in `src/styles/style.css`) replaces Phaser's default Courier everywhere. `src/utils/typography.ts` provides `FONT_FAMILY`, size presets, and a `textStyle()` helper applied to every Text object.
-- **Find the Letter SVG letters** — the game now renders the target and answer cards from the preloaded `letter_*` SVG textures (256px target / 128px card glyphs), matching the Word games' letterforms.
-- **Sleep glyph** — Pop & Freeze sleeping decoys show a storybook `sleep_zzz` glyph instead of the old "Zzz" text.
-- **Preload branding** — the loading screen shows "Aby's Little Lab" + tagline above the progress bar.
-- **Win sticker timing** — the sticker reveal pops ~400ms after the celebration so the rays/confetti clear first.
+Product rules: [PRD §5.1](docs/PRD.md#51-visual-language), [PRD §3.8](docs/PRD.md#38-find-the-letter). Implementation: [TDD §5.8](docs/TDD.md#58-typography-and-fonts), [TDD §3.2](docs/TDD.md#32-bootscene).
 
 ## PWA Release Readiness
 
-Production builds generate `dist/manifest.webmanifest` and an auto-updating service worker. The service worker precaches the bundled game assets, PWA icon, and `/audio/bgm.mp3` so the installed app can launch and play offline after its first online load.
+`pnpm run build` writes `dist/manifest.webmanifest` and the service worker that precaches the shell, every game chunk, the icons, the font and `/audio/bgm.mp3`, so the installed app launches and plays offline after one online load. `node scripts/validate-pwa.js` fails the build when a game chunk is missing from that precache. Installation and offline both need HTTPS, or localhost for a same-device smoke test.
 
-Run the release checks with `pnpm run build` followed by `node scripts/validate-pwa.js`. Use an HTTPS private static host or tunnel for phone/tablet installation, offline, and update testing; `http://localhost` is suitable only for same-device smoke tests.
+Product rules: [PRD §1.4](docs/PRD.md#14-platforms-install-and-offline), [PRD §4.10](docs/PRD.md#410-install-and-update). Implementation: [TDD §11.2](docs/TDD.md#112-pwa-configuration), [TDD §11.3](docs/TDD.md#113-validator-scripts).
 
 ## Bundle Code Splitting (2026-08-02)
 
-The twenty-two game scenes are **lazy-loaded** so the startup bundle only contains the app shell (Phaser + Boot/Preload/Hub):
+Only Boot, Preload and Hub load at startup; the other twenty-two scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (2026-10-20): a 129.1 KiB shell entry (30.02 kB gzip) against the 200 kB gate, 41 JavaScript chunks, cold boot 419.5 ms against the 3 s gate, and a cold first tap costing at most 82 ms against the 400 ms budget.
 
-- `src/scenes/sceneRegistry.ts` maps each game's scene key to a dynamic `import()` loader. A Hub tile tap awaits `ensureSceneLoaded()` (import + runtime `scene.add()`), and only then starts the crossfade transition.
-- **Phaser 4 limitation:** the `scene` array does not support async/lazy loaders — function entries are invoked with `new` synchronously. Runtime registration after a dynamic import is the supported pattern.
-- **Build output (2026-10-20):** a **129.1 KiB** shell entry (132.21 kB minified, 30.02 kB gzip) against the 200 kB gate that `scripts/validate-bundle.js` enforces, plus the 1.37 MB cached Phaser vendor chunk. The shell carries the boot textures and the three shell scenes only; each game's art now rides that game's own chunk, fetched on its first tap. The build emits 41 JavaScript chunks (22 game scenes, nine art-group chunks — the other three groups inline into their only consumer — the shared bases, the Phaser vendor chunk and the workbox helper). Rollup auto-hoists shared modules (game logic, `dragJuice`, `completionEffect`) and any art group two games draw from.
-- **Cold boot (2026-10-20, reference desktop, median of three fresh browser contexts):** **419.5 ms**, down from 808 ms on 2026-10-17; under 4× CPU throttle **1697.2 ms**, down from ~4.2 s, because boot rasterizes 53 textures instead of 178. Both sit inside the 3 s `scripts/validate-boot.js` gate. Cold first tap of a game costs **48 ms more for the widest-union game** (Find the Word, seven groups / 83 keys) and **82 ms more in the worst case** (Memory Match) than the same tap on a build of the pre-track commit measured back to back on the same machine; absolute cold totals stay at 224-334 ms against a 400 ms budget. `scripts/measure-first-tap.mjs` reproduces the boot and first-tap numbers (`--with-preview` starts and stops its own preview server, and `PREVIEW_URL` points it at another build for the before/after comparison); it is evidence, not a gate.
-- **Art ownership (2026-10-20):** `src/scenes/PreloadScene.ts` ships only the 53-key shell set — 22 tile icons, 22 stickers, two mascot poses, `icon_speaker` and the six avatar keys — and nothing else. Every other texture belongs to one of twelve named groups under `src/game/art/` (`shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music`, `glyphs`); a game scene names the groups it draws in its own `preload()` and `preloadArtGroups()` rasterizes them behind the shared loading cue. Story Order keeps its own `src/game/storyOrderArt.ts` for the same reason. The 178 keys are unchanged — only their payload moved (178 = 53 shell + 125 game-only; the six avatars are the one deliberate shell/game overlap). `src/__tests__/game/art/shellOwnership.test.ts` fails the suite if a game-only import or key returns to the shell, and `src/game/hubTiles.ts` remains the single roster of the 22 tiles (`gameId`, label, texture, icon sizing): a new game adds a group and a `preloadArtGroups()` call, never an import in `PreloadScene`.
-- **Offline is unchanged:** the service worker precaches every emitted chunk (53 precache entries, 1,702.03 KiB, including the Baloo 2 font and `/audio/bgm.mp3`), so all games still play offline after the first load. `scripts/validate-pwa.js` fails the build when any emitted JavaScript chunk is missing from that manifest, so a game chunk that is not precached cannot reach a child's device.
-- Structural acceptance: the entry chunk contains zero game-scene constructor registrations (verified via `super({ key: ... })` inspection of `dist/assets`).
+Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), [PRD §7](docs/PRD.md#7-performance-and-asset-budget). Implementation, measurements and art ownership: [TDD §3.5](docs/TDD.md#35-in-chunk-art), [TDD §3.6](docs/TDD.md#36-what-the-budget-costs).
 
 ## Docker Deployment
 
-The production image builds the Vite app in a Node stage and serves the generated `dist/` files with Nginx:
+The image builds the Vite app in a `node:22-alpine` stage and serves `dist/` from `nginx:1.27-alpine`:
 
 ```bash
 docker build -t aby-little-lab .
 docker run --rm -p 8080:80 aby-little-lab
 ```
 
-Open `http://localhost:8080` for a local smoke test. For production PWA installation and offline testing, terminate TLS at your hosting provider or reverse proxy and serve the container over HTTPS.
+Then open `http://localhost:8080`; production terminates TLS in front of the container. See [TDD §11.5](docs/TDD.md#115-container-and-host).
 
 ## CI/CD
 
-GitHub Actions (`.github/workflows/ci.yml`) runs the full quality-gate suite before anything reaches production:
+`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa` and `validate-boot` against a preview server. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
 
-- **Pull requests** — the `Quality Gates` job runs `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, and `node scripts/validate-boot.js`. The PR must be green before merging (enable branch protection on `master` to require this check).
-- **Merge to `master`** — after the gates pass, the `Deploy to Coolify` job fires the Coolify Deploy Webhook, and Coolify rebuilds the app from the repo's Dockerfile and ships the new version.
-
-One-time setup:
-
-1. In Coolify, open **Keys & Tokens → API Tokens**, create a token with the **`deploy`** permission, and copy it.
-2. In Coolify, open the application → **Webhooks** → copy the **Deploy Webhook** URL.
-3. In GitHub, go to **Settings → Secrets and variables → Actions** and add two repository secrets:
-   - **`COOLIFY_DEPLOY_WEBHOOK`** — the Deploy Webhook URL
-   - **`COOLIFY_TOKEN`** — the API token (with `deploy` permission)
-4. (Recommended) Enable branch protection on `master` with "Require status checks" → `Quality Gates`, so only gate-verified code can be merged.
+One-time setup: a Coolify API token with the `deploy` permission, the app's Deploy Webhook URL, the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` secrets, and branch protection requiring `Quality Gates`. Intent: [PRD §8.2](docs/PRD.md#82-deploy-path); implementation and setup steps: [TDD §11.4](docs/TDD.md#114-github-actions), [TDD §11.5](docs/TDD.md#115-container-and-host).
 
 ## Releases
 
