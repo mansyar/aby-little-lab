@@ -163,29 +163,32 @@ The primary appends after acceptance:
   `src/__tests__/game/playTimeLogic.test.ts`, `README.md`,
   `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `3a1b3e4`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-5.md`
 
-- [ ] **P5.T1: Duck BGM under speech** — covers: FR-6, FR-7
-  - [ ] **P5.T1.1: Add duck/restore to `AudioManager`** with the short ramp and
+- [x] **P5.T1: Duck BGM under speech** — covers: FR-6, FR-7
+  - [x] **P5.T1.1: Add duck/restore to `AudioManager`** with the short ramp and
     a restore path that also runs on scene shutdown and setting changes.
-  - [ ] **P5.T1.2: Subscribe once at init** to the speech lifecycle; re-entrant
+  - [x] **P5.T1.2: Subscribe once at init** to the speech lifecycle; re-entrant
     utterances must not restore early.
-  - [ ] **P5.T1.3: Add the watchdog** that restores BGM when no end event
+  - [x] **P5.T1.3: Add the watchdog** that restores BGM when no end event
     arrives, and never persists a ducked level.
-- [ ] **P5.T2: Handle document visibility** — covers: FR-8, FR-9
-  - [ ] **P5.T2.1: Pause and resume BGM** on hide/show, only resuming what was
+- [x] **P5.T2: Handle document visibility** — covers: FR-8, FR-9
+  - [x] **P5.T2.1: Pause and resume BGM** on hide/show, only resuming what was
     playing and is still enabled; cancel in-flight speech on hide.
-  - [ ] **P5.T2.2: Pause and resume play-time accrual** in `playTimeLogic`,
+  - [x] **P5.T2.2: Pause and resume play-time accrual** in `playTimeLogic`,
     wiring the pause into `HubScene`/`AudioManager` ownership points.
-  - [ ] **P5.T2.3: Prove idempotence** — two hide/show cycles accrue the
+  - [x] **P5.T2.3: Prove idempotence** — two hide/show cycles accrue the
     visible slice once and never count hidden time.
-- [ ] **P5.T3: Audio-focus tests** — covers: FR-6, FR-7, FR-8, FR-9, AC-5, AC-6
-  - [ ] **P5.T3.1: Duck/restore/watchdog tests** at the `AudioManager` level.
-  - [ ] **P5.T3.2: Visibility tests** at the play-time and audio level.
-- [ ] **P5.T4: Documentation** — covers: FR-10, AC-9
-  - [ ] **P5.T4.1: Update `conductor/tech-stack.md`** with the base, the
+- [x] **P5.T3: Audio-focus tests** — covers: FR-6, FR-7, FR-8, FR-9, AC-5, AC-6
+  - [x] **P5.T3.1: Duck/restore/watchdog tests** at the `AudioManager` level.
+  - [x] **P5.T3.2: Visibility tests** at the play-time and audio level.
+- [x] **P5.T4: Documentation** — covers: FR-10, AC-9
+  - [x] **P5.T4.1: Update `conductor/tech-stack.md`** with the base, the
     narrator, and the audio-focus policy.
-  - [ ] **P5.T4.2: Update `README.md`** architecture/motion sections so the
+  - [x] **P5.T4.2: Update `README.md`** architecture/motion sections so the
     described structure matches the code.
 
 <!--
@@ -200,5 +203,5 @@ Review fixes are appended by `conductor-review` as:
 - **Verification:** ...
 - **Status:** pending
 
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
+- [x] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
 -->

@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T10:23:59+11:00",
-  "updated_at": "2026-10-20T11:15:37+11:00",
+  "updated_at": "2026-10-20T11:30:34+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "refactor/20261020-scene-audio-shell",
@@ -14,11 +14,11 @@
   "base_sha": "c92e5c481b1f87e8b28f1d30eb4e8989156253fb",
   "progress": {
     "phases_total": 5,
-    "phases_verified": 4,
+    "phases_verified": 5,
     "tasks_total": 56,
-    "tasks_done": 41
+    "tasks_done": 56
   },
-  "last_checkpoint": "bd2e66f",
+  "last_checkpoint": "3a1b3e4",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",
