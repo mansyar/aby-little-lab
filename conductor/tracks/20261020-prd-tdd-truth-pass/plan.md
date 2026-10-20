@@ -11,7 +11,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, AC-1, AC-2, AC-3
 - **Touches:** `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Establish the fact base before writing** — covers: FR-1
   - [ ] **P1.T1.1: Collect every number the PRD will state** — game count from `GAME_IDS`, adaptive split from `getAdaptiveBandShift` usage, boot SVG count from `SHAPE_ASSETS`, shell size from the latest `validate-bundle` run, test count from the suite. Record command → value in the phase evidence file.
