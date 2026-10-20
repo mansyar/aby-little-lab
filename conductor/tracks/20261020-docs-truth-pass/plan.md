@@ -65,7 +65,7 @@
 - **Covers:** FR-2, FR-3, FR-12, AC-2, AC-3, AC-12
 - **Touches:** `README.md`, `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Add a feedback line to each PRD game spec** — covers: FR-3
   - [ ] **P3.T1.1: Cover §3.1-§3.22** — one line per game, preserving reduced-motion variants.
