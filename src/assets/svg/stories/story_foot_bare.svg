@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A foot gets dressed - 1 of 3. A bare foot: heel, ankle, instep, five toes, no covering. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 150 392 C 136 386 132 366 138 348 C 144 330 160 322 176 322 C 190 300 192 272 192 246 C 192 216 226 208 236 232 C 244 250 244 274 240 296 C 262 306 292 318 320 330 C 336 300 360 298 366 316 C 378 312 386 322 382 332 C 392 336 394 348 386 354 C 396 358 396 370 388 374 C 396 378 394 390 384 392 L 150 392 Z" fill="#F0D5B4" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 366 316 L 350 322" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 382 332 L 364 336" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 386 354 L 368 356" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 388 374 L 370 374" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 246 370 Q 296 352 332 366" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+</svg>

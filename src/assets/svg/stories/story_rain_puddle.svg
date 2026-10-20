@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Rain falls - 3 of 3. The cloud is gone; a blue puddle is left behind. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 196 300 C 204 314 210 322 210 330 C 210 338 203 343 196 343 C 189 343 182 338 182 330 C 182 322 188 314 196 300 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 300 314 C 308 328 314 336 314 344 C 314 352 307 357 300 357 C 293 357 286 352 286 344 C 286 336 292 328 300 314 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 258 270 C 264 281 269 287 269 293 C 269 299 264 303 258 303 C 252 303 247 299 247 293 C 247 287 252 281 258 270 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="392" rx="122" ry="26" fill="#63B3ED" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 196 386 Q 256 372 316 386" fill="none" stroke="#2B6CB0" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 232 396 Q 256 390 282 396" fill="none" stroke="#2B6CB0" stroke-width="4" stroke-linecap="round"/>
+</svg>

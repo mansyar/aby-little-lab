@@ -176,6 +176,7 @@ import tileTakeAwaySvg from "../assets/svg/ui/tiles/tile_take_away.svg?raw";
 import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
 import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
 import { transitionToScene } from "../utils/sceneTransitions";
+import { toDataUri } from "../utils/svgDataUri";
 import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
@@ -362,15 +363,6 @@ export const SHAPE_ASSETS = [
   { key: "tile_feelings_faces", svg: tileFeelingsFacesSvg },
   { key: "sticker_feelings_faces", svg: stickerFeelingsFacesSvg },
 ] as const;
-
-/**
- * Converts raw SVG markup into a base64 data URI that Phaser can load.
- * Phaser's XHRLoader detects `data:` URLs and decodes them via `atob`,
- * so the SVG must be properly base64-encoded to avoid `InvalidCharacterError`.
- */
-function toDataUri(svg: string): string {
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
-}
 
 /**
  * Preload scene — displays a progress bar while assets load.

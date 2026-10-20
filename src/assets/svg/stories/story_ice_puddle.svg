@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Ice cream melts - 3 of 3. The empty cone lies beside a melted puddle. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 136 330 L 136 384 L 268 356 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 150 336 L 244 354 M 150 372 L 238 358" fill="none" stroke="#D69E2E" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="136" cy="357" rx="16" ry="27" fill="#C05621" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 286 386 C 288 364 318 352 356 354 C 396 356 420 370 414 382 C 404 392 340 396 306 392 C 292 390 286 389 286 386 Z" fill="#F687B3" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 320 372 Q 344 364 366 372" fill="none" stroke="#FED7E2" stroke-width="5" stroke-linecap="round"/>
+</svg>

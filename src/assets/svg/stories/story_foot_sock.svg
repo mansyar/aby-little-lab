@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A foot gets dressed - 2 of 3. The same foot in a white sock with a ribbed cuff. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 198 374 L 198 262 L 152 262 C 148 292 146 344 150 392 L 330 392 C 356 392 370 384 374 372 C 388 376 398 366 392 356 C 404 348 398 334 384 332 C 390 320 380 308 366 308 C 370 296 358 288 346 294 C 340 280 322 284 314 298 C 302 318 288 332 270 342 C 246 356 218 368 198 374 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="140" y="240" width="66" height="28" rx="10" fill="#FFF8E7" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 156 248 L 156 260" fill="none" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 172 248 L 172 260" fill="none" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 188 248 L 188 260" fill="none" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 174 340 C 194 348 214 346 230 336" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+</svg>

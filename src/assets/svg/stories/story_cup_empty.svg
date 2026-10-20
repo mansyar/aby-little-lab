@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A cup is poured - 3 of 3. Same cup upright and empty: open interior, no water. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 168 200 L 194 372 C 196 380 202 384 210 384 L 302 384 C 310 384 316 380 318 372 L 344 200 Z" fill="#BEE3F8" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 176 206 L 200 366 C 202 372 206 374 212 374 L 300 374 C 306 374 310 372 312 366 L 336 206 Z" fill="#90CDF4" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="200" rx="88" ry="22" fill="#90CDF4" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 214 232 L 210 318" fill="none" stroke="#BEE3F8" stroke-width="6" stroke-linecap="round"/>
+</svg>

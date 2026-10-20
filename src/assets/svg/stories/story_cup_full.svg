@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A cup is poured - 1 of 3. Full cup, water line just under the rim. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 168 200 L 194 372 C 196 380 202 384 210 384 L 302 384 C 310 384 316 380 318 372 L 344 200 Z" fill="#BEE3F8" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 176 240 Q 256 266 336 240 L 316 372 Q 256 384 196 372 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 196 258 Q 252 276 316 258" fill="none" stroke="#90CDF4" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="256" cy="200" rx="88" ry="22" fill="#90CDF4" stroke="#2D3748" stroke-width="6"/>
+</svg>

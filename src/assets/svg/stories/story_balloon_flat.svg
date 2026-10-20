@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A balloon fills - 1 of 3. A flat, wrinkled balloon lying on the ground. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 150 390 C 128 388 124 366 144 358 C 136 342 158 330 176 340 C 186 326 208 328 216 342 C 228 328 252 332 258 346 C 272 332 296 336 302 350 C 316 340 338 346 344 360 C 366 356 384 368 382 382 C 380 390 366 392 350 392 L 172 392 C 160 392 154 392 150 390 Z" fill="#FC8181" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 196 354 L 182 372" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 288 350 L 276 368" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 382 366 L 404 358 L 398 382 Z" fill="#E53E3E" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 400 372 C 420 368 430 380 424 392" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+</svg>

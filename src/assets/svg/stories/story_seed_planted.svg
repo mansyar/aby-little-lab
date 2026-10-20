@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A seed grows - 1 of 3. Seed resting on the soil in a pot. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <rect x="156" y="272" width="200" height="32" rx="12" fill="#ED8936" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 164 304 L 348 304 L 326 384 L 186 384 Z" fill="#C05621" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 172 292 Q 256 232 340 292 Z" fill="#A0522D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 256 206 C 278 222 282 250 256 270 C 230 250 234 222 256 206 Z" fill="#6B4423" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 250 232 Q 258 242 252 256" fill="none" stroke="#A0522D" stroke-width="4" stroke-linecap="round"/>
+</svg>

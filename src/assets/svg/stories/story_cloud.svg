@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Rain falls - 1 of 3. One puffy cloud, no rain yet. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 148 296 C 120 296 108 276 116 258 C 100 236 118 212 144 216 C 150 186 184 172 208 188 C 226 164 266 164 282 188 C 312 176 344 194 346 220 C 372 220 388 240 380 262 C 396 280 382 300 358 300 L 160 300 C 152 300 148 298 148 296 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+</svg>
