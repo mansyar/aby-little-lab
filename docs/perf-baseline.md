@@ -213,3 +213,60 @@ Notes:
   measured with Ligne present, and `scripts/validate-boot.js` re-measured at a
   **0.64 s median** on the merged tree. The texture-tier (−78% GPU memory) and
   paged-Hub results are unaffected by the merge.
+
+## Shell Diet — Lazy Art Groups — 2026-10-20
+
+Track `conductor/tracks/20261020-shell-diet-lazy-art`, branch
+`refactor/20261020-shell-diet-lazy-art`. The 178-entry boot table was split:
+53 keys stay in the shell (22 tile icons, 22 stickers, 2 mascot poses,
+`icon_speaker`, 6 avatars) and the other 125 move into twelve named groups under
+`src/game/art/`, each rasterized by the game scene that draws it. Baselines are
+this track's own before-numbers (shell 195.4 KiB, 808 ms cold, ~4.2 s throttled);
+after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
+
+### Method
+
+- Shell size: `pnpm build` then `node scripts/validate-bundle.js` (minified bytes
+  of `dist/assets/index-*.js`).
+- Boot and first tap: `node scripts/measure-first-tap.mjs --with-preview --json`,
+  which starts `vite preview` on port 4173 itself, runs three cold loads of the
+  production build in fresh contexts at 1024×768 (`validate-boot.js`
+  methodology, median of 3), then three 4×-CPU-throttled loads
+  (`Emulation.setCPUThrottlingRate` 4, diagnostic only), then taps one Hub tile
+  per game in a fresh context. The service worker is blocked during the tap
+  pass, so the numbers are a cold-network bound rather than a warm-precache one.
+- The host refuses commands that start or stop a server, so Phase 4's executor
+  could not run the boot/tap script; the primary agent ran it afterwards on the
+  same checkpoint. The phase file keeps both attempts and the refusal.
+
+| Metric | Before (track baseline) | After (2026-10-20) | Δ |
+|---|---|---|---|
+| Shell entry, minified | 195.4 KiB / 200.1 kB | **129.1 KiB** (132.21 kB, 30.02 kB gzip) | **−66.3 KiB**, 40.9 KiB under the 200 KiB gate |
+| Boot textures rasterized | 178 | **53** | −125 |
+| Prod cold boot, median of 3 fresh contexts | 808 ms (815/808/749) | **419.5 ms** (488.1/398.1/419.5) | **−48%** |
+| Prod cold boot under 4× CPU throttle | ~4.2 s (4333/4036) | **1697.2 ms** (1877.3/1697.2/1656.4) | **−2.5 s** |
+| Cold first tap → first frame (3 games) | not measured | **200.1 ms median**, 235.8 ms worst (Memory Match) | new 400 ms budget, met |
+| Game art chunks | 0 — every texture rode the shell | **9 chunks, 3.1–16.5 kB**; `cutouts`, `shadows`, `faces` inline into their only consumer | 9 new, under the ≤ 12 ceiling |
+| PWA precache | 42 entries / 2189.6 KiB | **53 entries / 1701.34 KiB** | +11 entries, −488.3 KiB |
+
+### Notes
+
+- Tap breakdown (median): 62.5 ms tap → chunk headers, 47.4 ms tap → chunk
+  loaded, 200.1 ms tap → first frame. Worst game 60.7 / 43.3 / 235.8 ms. The
+  budget is measured evidence, not a CI gate: `measure-first-tap.mjs` is not
+  wired into `verify_phase`, CI or any npm script.
+- Two caveats on the tap number. It stops at the first frame the game paints
+  behind its loading cue — the scene's own art rasterization continues after
+  that frame and is not inside the 200 ms. And with the service worker blocked
+  the chunk fetch is a cold network round trip, so a warm precache can only be
+  faster.
+- CI is unchanged: `validate-boot.js` still gates the median of 3 cold loads at
+  3000 ms, and 419.5 ms is 14% of that. The 4× figure moved for a measurable
+  reason — boot no longer rasterizes 125 textures — not because the gate moved.
+- GPU texture memory is unchanged in kind: the same keys resolve to the same
+  `textureSizeFor` tiers, only the moment they are rasterized moved. The
+  texture-tier (−78%) result above still holds.
+- Offline first play after one online visit still works for every game: the
+  service worker precaches all 41 emitted `dist/assets/*.js` chunks, and
+  `scripts/validate-pwa.js` now fails the build when any chunk is missing from
+  that manifest (proved by deleting one entry from a built `sw.js`).

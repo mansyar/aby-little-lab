@@ -15,6 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DIST_DIR = path.join(__dirname, "..", "dist");
+const ASSETS_DIR = path.join(DIST_DIR, "assets");
 
 function readServiceWorker() {
   return fs.readFileSync(path.join(DIST_DIR, "sw.js"), "utf8");
@@ -33,6 +34,41 @@ function readPrecacheManifest() {
     if (depth === 0) return serviceWorker.slice(start, index + 1);
   }
   return "";
+}
+
+/**
+ * Chunks workbox itself refuses to precache, by bare file name.
+ *
+ * Empty on purpose: every emitted chunk is currently under workbox's default
+ * `maximumFileSizeToCacheInBytes` (2 MiB), so every one of them is listed. Add
+ * a name here only when workbox genuinely cannot take the file, and say why —
+ * never to silence a chunk that is simply missing from the manifest.
+ */
+const PRECACHE_ALLOWLIST = new Set();
+
+/**
+ * The emitted JavaScript chunks and how many of them the service worker
+ * precaches. Shared by the check and its printed note so the reader sees the
+ * rule working (`N chunks, M precached`) on a pass as well as a failure.
+ */
+function precacheCoverage() {
+  const manifest = readPrecacheManifest();
+  const precached = new Set(Array.from(manifest.matchAll(/url:"([^"]+)"/g), (match) => match[1]));
+
+  const chunks = fs.existsSync(ASSETS_DIR)
+    ? fs
+        .readdirSync(ASSETS_DIR)
+        .filter((file) => file.endsWith(".js"))
+        .sort()
+    : [];
+
+  return {
+    chunks,
+    precached: chunks.filter((file) => precached.has(`assets/${file}`)).length,
+    missing: chunks.filter(
+      (file) => !precached.has(`assets/${file}`) && !PRECACHE_ALLOWLIST.has(file),
+    ),
+  };
 }
 
 // Validation checks
@@ -119,6 +155,22 @@ const checks = [
     },
   },
   {
+    // FR-7 / NFR-2: every emitted chunk — shell, vendor, and each game's lazy
+    // art chunk — must be in the precache manifest, or the first offline play
+    // of that game is a failed request on a child's device instead of a build
+    // failure here. Entries are `{url:"assets/x.js",revision:…}`.
+    name: "Service worker precaches every emitted JavaScript chunk",
+    test: () => {
+      const { chunks, missing } = precacheCoverage();
+      return chunks.length > 0 && missing.length === 0;
+    },
+    note: () => {
+      const { chunks, precached, missing } = precacheCoverage();
+      const summary = `${chunks.length} chunks, ${precached} precached`;
+      return missing.length > 0 ? `${summary}, missing: ${missing.join(", ")}` : summary;
+    },
+  },
+  {
     // The Ligne engine was removed (tween/SVG-only mascot): no .ligne
     // animation asset may remain in the precache.
     name: "Service worker precache contains no Ligne animation asset",
@@ -155,6 +207,9 @@ for (const check of checks) {
     } else {
       console.log(`✗ ${check.name}`);
       failed++;
+    }
+    if (check.note) {
+      console.log(`  ${check.note()}`);
     }
   } catch (error) {
     console.log(`✗ ${check.name} (Error: ${error.message})`);
