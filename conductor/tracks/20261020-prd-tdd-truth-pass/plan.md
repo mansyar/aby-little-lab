@@ -11,20 +11,23 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, AC-1, AC-2, AC-3
 - **Touches:** `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Establish the fact base before writing** — covers: FR-1
-  - [ ] **P1.T1.1: Collect every number the PRD will state** — game count from `GAME_IDS`, adaptive split from `getAdaptiveBandShift` usage, boot SVG count from `SHAPE_ASSETS`, shell size from the latest `validate-bundle` run, test count from the suite. Record command → value in the phase evidence file.
-  - [ ] **P1.T1.2: Read the current PRD end to end and label every section** — keep, rewrite, or remove, with a one-line reason. Saved in the evidence file so the rewrite is auditable against the original.
-- [ ] **P1.T2: Restructure the document** — covers: FR-1, FR-4
-  - [ ] **P1.T2.1: Rewrite the front matter and curriculum map** — product definition, audience, the 22 games grouped by developmental domain, and the cross-game systems summary that the per-game sections lean on.
-  - [ ] **P1.T2.2: Rewrite the cross-game systems and asset-budget sections** — shared bases, narrator, mascot, stickers, profiles, play time, progress, adaptive difficulty with its 15/7 split, voice selection, and the 178-boot-SVG / 195.4 kB shell / in-chunk game art reality.
-- [ ] **P1.T3: Rewrite the per-game specifications** — covers: FR-2, AC-2
-  - [ ] **P1.T3.1: Rework games 1–20 to the new template** — mechanic, rounds and pool, difficulty model, narration type, art specifics; no claim carried over that the source does not support.
-  - [ ] **P1.T3.2: Add games 21 and 22** — Feelings Faces (contrast ladder, re-speak on wrong, caption fallback) and Story Order (3-panel strips, 8-story pool, retry in place, whole-strip validation).
-- [ ] **P1.T4: Close the PRD out** — covers: AC-1, AC-3
-  - [ ] **P1.T4.1: Sweep stale phrasing** — every `twenty`/`20 game` hit read and either corrected or justified as current.
-  - [ ] **P1.T4.2: Add the table of contents and check anchors** — every entry resolves to a real heading; section numbering is consistent.
+- [x] **P1.T1: Establish the fact base before writing** — covers: FR-1
+  - [x] **P1.T1.1: Collect every number the PRD will state** — game count from `GAME_IDS`, adaptive split from `getAdaptiveBandShift` usage, boot SVG count from `SHAPE_ASSETS`, shell size from the latest `validate-bundle` run, test count from the suite. Record command → value in the phase evidence file.
+  - [x] **P1.T1.2: Read the current PRD end to end and label every section** — keep, rewrite, or remove, with a one-line reason. Saved in the evidence file so the rewrite is auditable against the original.
+- [x] **P1.T2: Restructure the document** — covers: FR-1, FR-4
+  - [x] **P1.T2.1: Rewrite the front matter and curriculum map** — product definition, audience, the 22 games grouped by developmental domain, and the cross-game systems summary that the per-game sections lean on.
+  - [x] **P1.T2.2: Rewrite the cross-game systems and asset-budget sections** — shared bases, narrator, mascot, stickers, profiles, play time, progress, adaptive difficulty with its 15/7 split, voice selection, and the 178-boot-SVG / 195.4 kB shell / in-chunk game art reality.
+- [x] **P1.T3: Rewrite the per-game specifications** — covers: FR-2, AC-2
+  - [x] **P1.T3.1: Rework games 1–20 to the new template** — mechanic, rounds and pool, difficulty model, narration type, art specifics; no claim carried over that the source does not support.
+  - [x] **P1.T3.2: Add games 21 and 22** — Feelings Faces (contrast ladder, re-speak on wrong, caption fallback) and Story Order (3-panel strips, 8-story pool, retry in place, whole-strip validation).
+- [x] **P1.T4: Close the PRD out** — covers: AC-1, AC-3
+  - [x] **P1.T4.1: Sweep stale phrasing** — every `twenty`/`20 game` hit read and either corrected or justified as current.
+  - [x] **P1.T4.2: Add the table of contents and check anchors** — every entry resolves to a real heading; section numbering is consistent.
+**Result:** verified
+**Checkpoint:** a5f14e5
+**Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-1.md
 
 ## Phase 2: TDD restructure
 
