@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { SpeakerButton } from "../components/SpeakerButton";
 import {
   answer,
@@ -8,14 +8,13 @@ import {
   ROUND_COUNT,
   type Scenario,
 } from "../game/feelingsFacesLogic";
+import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { isReducedMotion, motionDuration } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { isSpeechSupported, speakSentence } from "../utils/speech";
 import { getSettings } from "../utils/storage";
 import { textStyle } from "../utils/typography";
-import { GameSceneBase } from "./GameSceneBase";
+import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** The spoken, written rule beside the replay glyph. */
 const RULE_LINE = "Tap the face that shows how Aby feels.";
@@ -66,11 +65,7 @@ function faceKey(emotion: Emotion): string {
  * leaving the round. Six rounds win the game: shared celebration + sticker on
  * first completion.
  */
-export class FeelingsFacesScene extends GameSceneBase {
-  /** Face card backgrounds of the current round. */
-  private readonly cardRects: Phaser.GameObjects.Rectangle[] = [];
-  /** Face images of the current round, parallel to `cardRects`. */
-  private readonly cardFaces: Phaser.GameObjects.Image[] = [];
+export class FeelingsFacesScene extends ChoiceRoundScene {
   /** Written scenario caption, present only while the caption fallback is on. */
   private caption?: Phaser.GameObjects.Text;
   /** Rule line written above the cards ("Tap the face that shows how Aby feels."). */
@@ -79,7 +74,6 @@ export class FeelingsFacesScene extends GameSceneBase {
   private ruleSpeaker?: SpeakerButton;
   /** The six scenarios drawn for this playthrough. */
   private rounds: Scenario[] = [];
-  private roundIndex = 0;
   /** The three emotions on the current round's cards. */
   private choices: Emotion[] = [];
   /** Taps recorded on the current round (correct and wrong combined). */
@@ -183,6 +177,76 @@ export class FeelingsFacesScene extends GameSceneBase {
     });
   }
 
+  protected totalRounds(): number {
+    return this.rounds.length;
+  }
+
+  protected gameId(): GameId {
+    return "feelings-faces";
+  }
+
+  /**
+   * Runs the round through the logic module and keeps the running tap count.
+   * A correct tap advances the playthrough, a wrong tap leaves the child on the
+   * round (the base never advances on a wrong answer).
+   */
+  protected isChoiceCorrect(index: number): boolean {
+    const scenario = this.rounds[this.roundIndex];
+    const tapped = this.choices[index];
+    if (!scenario || tapped === undefined) return false;
+
+    const result = answer(
+      { index: this.roundIndex, scenario, choices: this.choices, taps: this.taps },
+      tapped,
+    );
+    this.taps = result.taps;
+    return result.correct;
+  }
+
+  /**
+   * Renders the current round: the ladder's three distinct faces and — in
+   * caption mode — the scenario as a short written line. The scenario is spoken
+   * (or captioned) for every round.
+   */
+  protected buildRoundContent(): void {
+    const scenario = this.rounds[this.roundIndex];
+    if (!scenario) return;
+
+    this.choices = buildRoundChoices(this.roundIndex, scenario.emotion);
+    this.taps = 0;
+    this.captionFallback = this.captionFallbackActive();
+
+    this.createCards(this.choices);
+    if (this.captionFallback) {
+      this.renderCaption(scenario);
+    }
+    this.speakScenario(scenario, this.roundIndex === 0);
+  }
+
+  /** Drops the written caption of the round that is being torn down. */
+  protected clearRoundContent(): void {
+    this.caption?.destroy();
+    this.caption = undefined;
+  }
+
+  /** Bursts a splash at the face the child tapped, on top of the shared chime. */
+  protected onCorrect(index: number): void {
+    const card = this.choiceTargets[index];
+    if (!card) return;
+    createCompletionSplash(this, card.x, card.y);
+  }
+
+  /**
+   * A wrong tap re-speaks the scenario once, so the child can listen again
+   * before choosing. The base has already played the tone, recorded the miss,
+   * nodded and wiggled the card with its face.
+   */
+  protected onWrong(_index: number): void {
+    const scenario = this.rounds[this.roundIndex];
+    if (!scenario || this.captionFallback) return;
+    speakSentence(scenario.text, getSettings().sfxEnabled);
+  }
+
   /**
    * Writes the rule line and its replay glyph, speaking the rule once at round
    * setup. Built from the shared SpeakerButton rather than the base helper
@@ -231,28 +295,6 @@ export class FeelingsFacesScene extends GameSceneBase {
     this.ruleSpeaker = undefined;
   }
 
-  /**
-   * Renders the current round: the ladder's three distinct faces and — in
-   * caption mode — the scenario as a short written line. Previous objects are
-   * destroyed. The scenario is spoken (or captioned) for every round.
-   */
-  private renderRound(): void {
-    this.clearRound();
-
-    const scenario = this.rounds[this.roundIndex];
-    if (!scenario) return;
-
-    this.choices = buildRoundChoices(this.roundIndex, scenario.emotion);
-    this.taps = 0;
-    this.captionFallback = this.captionFallbackActive();
-
-    this.createCards(this.choices);
-    if (this.captionFallback) {
-      this.renderCaption(scenario);
-    }
-    this.speakScenario(scenario, this.roundIndex === 0);
-  }
-
   /** Creates the three face cards with their tap handling. */
   private createCards(choices: readonly Emotion[]): void {
     const centerX = this.cameras.main.centerX;
@@ -261,20 +303,12 @@ export class FeelingsFacesScene extends GameSceneBase {
 
     for (let i = 0; i < choices.length; i++) {
       const x = centerX + (i - (choices.length - 1) / 2) * pitch;
-      const card = this.add.rectangle(x, cardsY, CARD_WIDTH, CARD_HEIGHT, this.CARD_BG_COLOR);
-      card.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
-      card.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      card.on("pointerdown", () => this.handleChoice(i));
-      attachPressFeedback(card);
-      this.cardRects.push(card);
+      this.createChoiceTarget(x, cardsY, CARD_WIDTH, i, { height: CARD_HEIGHT });
 
       const face = this.add
         .image(x, cardsY, faceKey(choices[i]))
         .setDisplaySize(FACE_SIZE, FACE_SIZE);
-      this.cardFaces.push(face);
+      this.attachCardContent(i, [face]);
     }
   }
 
@@ -314,100 +348,5 @@ export class FeelingsFacesScene extends GameSceneBase {
       if (this.roundIndex !== 0 || this.captionFallback) return;
       speakSentence(scenario.text, getSettings().sfxEnabled);
     });
-  }
-
-  /** Destroys all display objects created for the current round. */
-  private clearRound(): void {
-    this.caption?.destroy();
-    this.caption = undefined;
-    for (const card of this.cardRects) {
-      card.destroy();
-    }
-    this.cardRects.length = 0;
-    for (const face of this.cardFaces) {
-      face.destroy();
-    }
-    this.cardFaces.length = 0;
-  }
-
-  /**
-   * Handles a tap on a face card. Scoring comes from the logic module: a
-   * correct tap advances the playthrough, a wrong tap leaves `nextRound` at
-   * the current index so the child stays on the round.
-   */
-  private handleChoice(cardIndex: number): void {
-    if (this.inputLocked) return;
-    const scenario = this.rounds[this.roundIndex];
-    const tapped = this.choices[cardIndex];
-    if (!scenario || tapped === undefined) return;
-
-    const result = answer(
-      { index: this.roundIndex, scenario, choices: this.choices, taps: this.taps },
-      tapped,
-    );
-    this.taps = result.taps;
-
-    if (result.correct) {
-      this.handleCorrect(cardIndex, result.nextRound);
-    } else {
-      this.handleIncorrect(cardIndex, scenario);
-    }
-  }
-
-  /**
-   * Handles a correct tap: a splash bursts at the tapped card, the correct
-   * chime plays, Professor Hoot cheers, the progress dot pops, and the next
-   * rung of the ladder starts after a short delay (completion after round six).
-   */
-  private handleCorrect(cardIndex: number, nextRound: number): void {
-    this.inputLocked = true;
-    const card = this.cardRects[cardIndex];
-    if (card) {
-      createCompletionSplash(this, card.x, card.y);
-    }
-    this.audioManager.playCorrect();
-    this.recordCorrect();
-    this.mascot?.cheer();
-    this.fillProgressDot(this.roundIndex);
-
-    this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
-      this.roundIndex = nextRound;
-      if (this.roundIndex >= ROUND_COUNT) {
-        this.completeGame("feelings-faces");
-      } else {
-        this.inputLocked = false;
-        this.renderRound();
-      }
-    });
-  }
-
-  /**
-   * Handles a wrong tap: the card wiggles, a gentle tone plays, and the
-   * scenario is re-spoken once so the child can listen again. The round never
-   * advances and the input is never locked, so repeated wrong taps cannot lock
-   * the child out or skip a round.
-   */
-  private handleIncorrect(cardIndex: number, scenario: Scenario): void {
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
-
-    const rect = this.cardRects[cardIndex];
-    const face = this.cardFaces[cardIndex];
-    if (rect && face) {
-      const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-      this.tweens.add({
-        targets: [rect, face],
-        angle,
-        duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-        yoyo: true,
-        repeat: this.WIGGLE_REPEATS,
-        ease: "Sine.inOut",
-      });
-    }
-
-    if (!this.captionFallback) {
-      speakSentence(scenario.text, getSettings().sfxEnabled);
-    }
   }
 }

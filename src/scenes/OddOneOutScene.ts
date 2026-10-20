@@ -1,12 +1,10 @@
-import Phaser from "phaser";
 import { SpeakerButton } from "../components/SpeakerButton";
 import { createPlaythrough, isCorrect, type OddOneRound, promptFor } from "../game/oddOneOutLogic";
-import { isReducedMotion, motionDuration } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
+import type { GameId } from "../types";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
 import { getAdaptiveBandShift, load } from "../utils/storage";
-import { GameSceneBase } from "./GameSceneBase";
+import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Number of rounds per playthrough (2 per band). */
 const ROUND_COUNT = 6;
@@ -31,13 +29,8 @@ const ITEM_SIZE = 150;
  * category, frog color variants) win the game: shared celebration + sticker
  * on first completion.
  */
-export class OddOneOutScene extends GameSceneBase {
-  /** Card backgrounds of the current round. */
-  private readonly cardRects: Phaser.GameObjects.Rectangle[] = [];
-  /** Item images of each card of the current round. */
-  private readonly cardItems: Phaser.GameObjects.Image[] = [];
+export class OddOneOutScene extends ChoiceRoundScene {
   private rounds: OddOneRound[] = [];
-  private roundIndex = 0;
 
   constructor() {
     super("OddOneOut");
@@ -74,14 +67,24 @@ export class OddOneOutScene extends GameSceneBase {
     this.registerShutdownCleanup();
   }
 
-  /**
-   * Renders the current round: the 2x2 card grid (3 identical + 1 odd) with
-   * the odd item's name spoken aloud via TTS when SFX is enabled. Previous
-   * objects are destroyed.
-   */
-  private renderRound(): void {
-    this.clearRound();
+  protected totalRounds(): number {
+    return this.rounds.length;
+  }
 
+  protected gameId(): GameId {
+    return "odd-one-out";
+  }
+
+  protected isChoiceCorrect(index: number): boolean {
+    const round = this.rounds[this.roundIndex];
+    return isCorrect(round, index);
+  }
+
+  /**
+   * Renders the 2x2 card grid (3 identical + 1 odd) with the odd item's name
+   * spoken aloud via TTS when SFX is enabled.
+   */
+  protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
     const { sfxEnabled } = load().settings;
     speakWord(promptFor(round.oddTexture), sfxEnabled);
@@ -97,90 +100,12 @@ export class OddOneOutScene extends GameSceneBase {
       const x = leftX + col * (CARD_SIZE + GRID_SPACING) + CARD_SIZE / 2;
       const y = topY + row * (CARD_SIZE + GRID_SPACING) + CARD_SIZE / 2;
 
-      const card = this.add.rectangle(x, y, CARD_SIZE, CARD_SIZE, this.CARD_BG_COLOR);
-      card.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
-      card.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, CARD_SIZE, CARD_SIZE),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      card.on("pointerdown", () => this.handleChoice(i));
-      attachPressFeedback(card);
-      this.cardRects.push(card);
-
+      this.createChoiceTarget(x, y, CARD_SIZE, i);
       const texture = i === round.oddSlot ? round.oddTexture : round.groupTexture;
       const item = this.add.image(x, y, texture).setDisplaySize(ITEM_SIZE, ITEM_SIZE);
-      this.cardItems.push(item);
+      this.attachCardContent(i, [item]);
     }
   }
 
-  /** Destroys all display objects created for the current round. */
-  private clearRound(): void {
-    for (const card of this.cardRects) {
-      card.destroy();
-    }
-    this.cardRects.length = 0;
-    for (const item of this.cardItems) {
-      item.destroy();
-    }
-    this.cardItems.length = 0;
-  }
-
-  /** Handles a tap on a card: correct advances, wrong wiggles. */
-  private handleChoice(cardIndex: number): void {
-    if (this.inputLocked) return;
-    const round = this.rounds[this.roundIndex];
-    if (isCorrect(round, cardIndex)) {
-      this.handleCorrect(cardIndex);
-    } else {
-      this.handleIncorrect(cardIndex);
-    }
-  }
-
-  /**
-   * Handles a correct answer: the correct chime plays, the card flashes the
-   * success color, Professor Hoot cheers, the progress dot pops, and the next
-   * round starts after a short delay (completion after the final round).
-   */
-  private handleCorrect(cardIndex: number): void {
-    this.inputLocked = true;
-    this.audioManager.playCorrect();
-    this.recordCorrect();
-    this.mascot?.cheer();
-    this.fillProgressDot(this.roundIndex);
-
-    const rect = this.cardRects[cardIndex];
-    rect.setFillStyle(this.SUCCESS_COLOR, 1);
-    this.time.delayedCall(250, () => {
-      if (!rect.isDestroyed) rect.setFillStyle(this.CARD_BG_COLOR, 1);
-    });
-
-    this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
-      this.roundIndex++;
-      if (this.roundIndex >= this.rounds.length) {
-        this.completeGame("odd-one-out");
-      } else {
-        this.inputLocked = false;
-        this.renderRound();
-      }
-    });
-  }
-
-  /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
-  private handleIncorrect(cardIndex: number): void {
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
-
-    const rect = this.cardRects[cardIndex];
-    const item = this.cardItems[cardIndex];
-    const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-    this.tweens.add({
-      targets: [rect, item],
-      angle,
-      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-      yoyo: true,
-      repeat: this.WIGGLE_REPEATS,
-      ease: "Sine.inOut",
-    });
-  }
+  protected clearRoundContent(): void {}
 }
