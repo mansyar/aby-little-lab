@@ -1,4 +1,3 @@
-import { SpeakerButton } from "../components/SpeakerButton";
 import {
   buildPlaythrough,
   type ColorMatchRound,
@@ -8,7 +7,7 @@ import {
 import type { GameId } from "../types";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Number of rounds per playthrough (3 per band). */
@@ -63,19 +62,15 @@ export class ColorMatchScene extends ChoiceRoundScene {
     // "Hear it again" — re-speaks the current target color's name on demand.
     const centerX = this.cameras.main.centerX;
     const swatchY = this.cameras.main.centerY - SWATCH_Y_OFFSET;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + SWATCH_SIZE / 2 + this.SPEAKER_OFFSET,
-      swatchY,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return; // Celebration after the final round — nothing to speak.
-          speakWord(promptFor(round.targetColorId), load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + SWATCH_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: swatchY,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakWord(promptFor(round.targetColorId), getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.rounds = buildPlaythrough(getAdaptiveBandShift("color-match"));
     this.roundIndex = 0;
@@ -104,7 +99,7 @@ export class ColorMatchScene extends ChoiceRoundScene {
    */
   protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakWord(promptFor(round.targetColorId), sfxEnabled);
 
     const centerX = this.cameras.main.centerX;

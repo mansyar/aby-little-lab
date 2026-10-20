@@ -5,7 +5,9 @@ import {
   type Mascot,
 } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import { SpeakerButton } from "../components/SpeakerButton";
+import type { RoundNarratorOptions } from "../components/RoundNarrator";
+import { RoundNarrator } from "../components/RoundNarrator";
+import type { SpeakerButton } from "../components/SpeakerButton";
 import type { GameId } from "../types";
 import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
@@ -30,12 +32,14 @@ import { textStyle } from "../utils/typography";
 export abstract class GameSceneBase extends Phaser.Scene {
   protected parentLock?: ParentLock;
   protected mascot?: Mascot;
-  protected speaker?: SpeakerButton;
 
-  /** Replay glyph created by {@link createSpokenInstruction}; destroyed on shutdown. */
-  private instructionSpeaker?: SpeakerButton;
+  /** Per-round narrator owning the replay glyph; destroyed on shutdown. */
+  protected narrator?: RoundNarrator;
 
-  /** Instruction line created by {@link createSpokenInstruction}; destroyed with the glyph. */
+  /** Glyph injected directly (no narrator), e.g. by tests; destroyed on shutdown. */
+  private standaloneSpeaker?: SpeakerButton;
+
+  /** Instruction line created by {@link createSpokenInstruction}; destroyed on shutdown. */
   private instructionLabel?: Phaser.GameObjects.Text;
   protected readonly audioManager: AudioManager;
   protected progressDots: Phaser.GameObjects.Arc[] = [];
@@ -125,6 +129,29 @@ export abstract class GameSceneBase extends Phaser.Scene {
   }
 
   /**
+   * The scene's replay glyph, whether the narrator owns it or it was injected
+   * directly. Reading it after a caption flip always returns the live glyph.
+   */
+  protected get speaker(): SpeakerButton | undefined {
+    return this.narrator?.glyph ?? this.standaloneSpeaker;
+  }
+
+  protected set speaker(glyph: SpeakerButton | undefined) {
+    this.standaloneSpeaker = glyph;
+  }
+
+  /**
+   * Creates this scene's narrator, replacing any previous one — scene
+   * instances are reused across visits, so the old glyph and rule line go
+   * first. The narrator is destroyed by {@link registerShutdownCleanup}.
+   */
+  protected createRoundNarrator(options: RoundNarratorOptions): RoundNarrator {
+    this.narrator?.destroy();
+    this.narrator = new RoundNarrator(this, options);
+    return this.narrator;
+  }
+
+  /**
    * Creates the "← Back" control with a parental hold-to-exit lock and press
    * feedback. The lock's success transitions back to the Hub.
    */
@@ -200,23 +227,18 @@ export abstract class GameSceneBase extends Phaser.Scene {
       )
       .setOrigin(0.5);
 
-    // Scene instances are reused across visits: drop the previous prompt (line
-    // plus glyph) before wiring a fresh one.
+    // Scene instances are reused across visits: drop the previous prompt line
+    // before wiring a fresh one (the narrator replaces its own glyph).
     this.instructionLabel?.destroy();
-    this.instructionSpeaker?.destroy();
     this.instructionLabel = label;
-    this.instructionSpeaker = new SpeakerButton(
-      this,
-      centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
+    this.createRoundNarrator({
+      x: centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
       y,
-      {
-        muted: !getSettings().sfxEnabled,
-        onSpeak: () => {
-          speakSentence(text, getSettings().sfxEnabled);
-        },
+      replay: () => {
+        speakSentence(text, getSettings().sfxEnabled);
       },
-    );
-    speakSentence(text, getSettings().sfxEnabled);
+      announce: text,
+    });
 
     return label;
   }
@@ -304,19 +326,20 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
   /**
    * Registers the shutdown handler that destroys the parent lock, mascot,
-   * and speaker. Call from `create()` after creating those instances.
+   * narrator (glyph and rule line), any injected glyph and the instruction
+   * line. Call from `create()` after creating those instances.
    */
   protected registerShutdownCleanup(): void {
     this.events.on("shutdown", () => {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
-      this.speaker?.destroy();
-      this.speaker = undefined;
+      this.narrator?.destroy();
+      this.narrator = undefined;
+      this.standaloneSpeaker?.destroy();
+      this.standaloneSpeaker = undefined;
       this.instructionLabel?.destroy();
       this.instructionLabel = undefined;
-      this.instructionSpeaker?.destroy();
-      this.instructionSpeaker = undefined;
     });
   }
 

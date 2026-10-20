@@ -1,5 +1,4 @@
 import type Phaser from "phaser";
-import { SpeakerButton } from "../components/SpeakerButton";
 import {
   appendNote,
   FROG_COUNT,
@@ -162,12 +161,11 @@ export class MusicalMemoryScene extends GameSceneBase {
 
   /** Creates the replay button at the bottom of the screen (textless speaker glyph). */
   private createReplayButton(): void {
-    this.speaker = new SpeakerButton(
-      this,
-      this.cameras.main.centerX,
-      this.cameras.main.height - 80,
-      { onSpeak: () => this.handleReplay() },
-    );
+    this.createRoundNarrator({
+      x: this.cameras.main.centerX,
+      y: this.cameras.main.height - 80,
+      replay: () => this.handleReplay(),
+    });
   }
 
   /**
@@ -180,7 +178,7 @@ export class MusicalMemoryScene extends GameSceneBase {
     this.sequencePlayId++;
     const id = this.sequencePlayId;
     // The speaker glyph mirrors the audible playback (active while playing).
-    this.speaker?.setActive(true);
+    this.narrator?.setActive(true);
     // Long sequences play faster so later rounds don't drag.
     const delay = this.sequence.length >= FAST_NOTE_DELAY_LENGTH ? FAST_NOTE_DELAY : NOTE_DELAY;
     for (let i = 0; i < this.sequence.length; i++) {
@@ -191,7 +189,7 @@ export class MusicalMemoryScene extends GameSceneBase {
     }
     this.time.delayedCall(this.sequence.length * delay, () => {
       if (this.sequencePlayId === id) {
-        this.speaker?.setActive(false);
+        this.narrator?.setActive(false);
         this.inputLocked = false;
       }
     });

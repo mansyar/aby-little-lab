@@ -1,10 +1,9 @@
-import { SpeakerButton } from "../components/SpeakerButton";
 import { generatePhonicsPlaythrough, type PhonicsRound } from "../game/firstSoundsLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakLetter, speakWord } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Number of rounds per playthrough. */
@@ -58,19 +57,15 @@ export class FirstSoundsScene extends ChoiceRoundScene {
     // "Hear it again" — re-speaks the current target word on demand.
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY + PICTURE_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return; // Celebration after the final round — nothing to speak.
-          speakWord(round.word, load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY + PICTURE_Y_OFFSET,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakWord(round.word, getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.rounds = generatePhonicsPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
     this.roundIndex = 0;
@@ -108,7 +103,7 @@ export class FirstSoundsScene extends ChoiceRoundScene {
         .setDisplaySize(PICTURE_SIZE, PICTURE_SIZE),
     );
 
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakWord(round.word, sfxEnabled);
 
     const cardsY = centerY + CARDS_Y_OFFSET;
@@ -131,6 +126,6 @@ export class FirstSoundsScene extends ChoiceRoundScene {
   protected onCorrect(index: number): void {
     const card = this.choiceTargets[index];
     createCompletionSplash(this, card.x, card.y);
-    speakLetter(this.rounds[this.roundIndex].target, load().settings.sfxEnabled);
+    speakLetter(this.rounds[this.roundIndex].target, getSettings().sfxEnabled);
   }
 }

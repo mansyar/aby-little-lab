@@ -1,9 +1,8 @@
-import { SpeakerButton } from "../components/SpeakerButton";
 import { createPlaythrough, isCorrect, type OddOneRound, promptFor } from "../game/oddOneOutLogic";
 import type { GameId } from "../types";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Number of rounds per playthrough (2 per band). */
@@ -45,19 +44,15 @@ export class OddOneOutScene extends ChoiceRoundScene {
     // "Hear it again" — re-speaks the current odd item's name on demand.
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + CARD_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY - GRID_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return; // Celebration after the final round — nothing to speak.
-          speakWord(promptFor(round.oddTexture), load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + CARD_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY - GRID_Y_OFFSET,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakWord(promptFor(round.oddTexture), getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.rounds = createPlaythrough(getAdaptiveBandShift("odd-one-out"));
     this.roundIndex = 0;
@@ -86,7 +81,7 @@ export class OddOneOutScene extends ChoiceRoundScene {
    */
   protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakWord(promptFor(round.oddTexture), sfxEnabled);
 
     const centerX = this.cameras.main.centerX;

@@ -1,10 +1,9 @@
-import { SpeakerButton } from "../components/SpeakerButton";
 import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakLetter } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Number of rounds per playthrough. */
@@ -57,20 +56,15 @@ export class AlphabetScene extends ChoiceRoundScene {
     // "Hear it again" — re-speaks the current target letter on demand.
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + TARGET_DISPLAY_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY + TARGET_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return; // Celebration after the final round — nothing to speak.
-          const { sfxEnabled } = load().settings;
-          speakLetter(round.target, sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + TARGET_DISPLAY_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY + TARGET_Y_OFFSET,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakLetter(round.target, getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
     this.roundIndex = 0;
@@ -105,7 +99,7 @@ export class AlphabetScene extends ChoiceRoundScene {
         .setDisplaySize(TARGET_DISPLAY_SIZE, TARGET_DISPLAY_SIZE),
     );
 
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakLetter(round.target, sfxEnabled);
 
     const cardsY = centerY + CARDS_Y_OFFSET;

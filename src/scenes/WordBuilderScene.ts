@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import { SpeakerButton } from "../components/SpeakerButton";
 import {
   type FirstWord,
   generateLetterTiles,
@@ -9,7 +8,7 @@ import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Number of words per playthrough. */
@@ -102,19 +101,15 @@ export class WordBuilderScene extends GameSceneBase {
     // "Hear it again" — re-speaks the current target word on demand.
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY + PICTURE_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const word = this.words[this.wordIndex];
-          if (!word) return; // Celebration after the final word — nothing to speak.
-          speakWord(word.word, load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY + PICTURE_Y_OFFSET,
+      replay: () => {
+        const word = this.words[this.wordIndex];
+        if (!word) return; // Celebration after the final word — nothing to speak.
+        speakWord(word.word, getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.words = generateWordBuildPlaythrough(WORD_COUNT, getAdaptiveBandShift("word-builder"));
     this.wordIndex = 0;
@@ -132,7 +127,7 @@ export class WordBuilderScene extends GameSceneBase {
     this.clearRound();
 
     const word = this.words[this.wordIndex];
-    speakWord(word.word, load().settings.sfxEnabled);
+    speakWord(word.word, getSettings().sfxEnabled);
 
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;

@@ -1,5 +1,4 @@
 import type Phaser from "phaser";
-import { SpeakerButton } from "../components/SpeakerButton";
 import {
   type CountGroup,
   type CountRound,
@@ -10,7 +9,7 @@ import type { GameId } from "../types";
 import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakNumber } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { textureSizeFor } from "../utils/textureTiers";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
@@ -70,19 +69,15 @@ export class HowManyScene extends ChoiceRoundScene {
     // "Hear it again" — re-speaks the current target number on demand.
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + TARGET_DISPLAY_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY + TARGET_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return; // Celebration after the final round — nothing to speak.
-          speakNumber(round.target, load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + TARGET_DISPLAY_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY + TARGET_Y_OFFSET,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakNumber(round.target, getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.rounds = createPlaythrough(getAdaptiveBandShift(this.gameId()));
     this.roundIndex = 0;
@@ -128,7 +123,7 @@ export class HowManyScene extends ChoiceRoundScene {
       ease: "Back.out",
     });
 
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakNumber(round.target, sfxEnabled);
 
     this.createCards(round);

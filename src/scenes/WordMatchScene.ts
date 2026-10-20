@@ -1,11 +1,10 @@
 import type Phaser from "phaser";
-import { SpeakerButton } from "../components/SpeakerButton";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Number of rounds per playthrough. */
@@ -58,19 +57,15 @@ export class WordMatchScene extends ChoiceRoundScene {
     // "Hear it again" — re-speaks the current target word on demand.
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY + PICTURE_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return; // Celebration after the final round — nothing to speak.
-          speakWord(round.target, load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY + PICTURE_Y_OFFSET,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakWord(round.target, getSettings().sfxEnabled);
       },
-    );
+    });
 
     this.rounds = generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
     this.roundIndex = 0;
@@ -105,7 +100,7 @@ export class WordMatchScene extends ChoiceRoundScene {
         .setDisplaySize(PICTURE_SIZE, PICTURE_SIZE),
     );
 
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakWord(round.target, sfxEnabled);
 
     for (let i = 0; i < round.choices.length; i++) {

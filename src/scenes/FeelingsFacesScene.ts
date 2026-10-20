@@ -1,5 +1,4 @@
 import type Phaser from "phaser";
-import { SpeakerButton } from "../components/SpeakerButton";
 import {
   answer,
   buildRoundChoices,
@@ -11,7 +10,7 @@ import {
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
-import { isSpeechSupported, speakSentence } from "../utils/speech";
+import { speakSentence } from "../utils/speech";
 import { getSettings } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
@@ -64,92 +63,27 @@ function faceKey(emotion: Emotion): string {
  * wrong taps wiggle, play a gentle tone, and re-speak the scenario once without
  * leaving the round. Six rounds win the game: shared celebration + sticker on
  * first completion.
+ *
+ * When the scenario cannot be heard (SFX off, no speech engine, or an engine
+ * that settles on an empty voice list) the round shows it as a caption
+ * instead. That decision — and the voice-settle state machine behind it —
+ * lives in the shared {@link RoundNarrator}; this scene only reacts to a flip
+ * by writing or clearing the caption for the round on screen.
  */
 export class FeelingsFacesScene extends ChoiceRoundScene {
   /** Written scenario caption, present only while the caption fallback is on. */
   private caption?: Phaser.GameObjects.Text;
-  /** Rule line written above the cards ("Tap the face that shows how Aby feels."). */
-  private ruleLabel?: Phaser.GameObjects.Text;
-  /** Replay glyph beside the rule line. */
-  private ruleSpeaker?: SpeakerButton;
   /** The six scenarios drawn for this playthrough. */
   private rounds: Scenario[] = [];
   /** The three emotions on the current round's cards. */
   private choices: Emotion[] = [];
   /** Taps recorded on the current round (correct and wrong combined). */
   private taps = 0;
-  /** True when the current round shows the written caption instead of speech. */
-  private captionFallback = false;
-  /** Voice list captured from the last voiceschanged event. */
-  private voicesCache: SpeechSynthesisVoice[] = [];
-  /** True once the engine has fired voiceschanged, making `voicesCache` authoritative. */
-  private voicesSettled = false;
   /** Pending opening-speech timer, tracked so a voice-settle flip can cancel it. */
   private openingSpeechTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super("FeelingsFaces");
-  }
-
-  /**
-   * True when the scenario cannot actually be heard: the SFX toggle is off, the
-   * browser has no speech engine, or no voice is installed. The round then shows
-   * the scenario as a short written caption and dims the replay glyph so a parent
-   * can read it aloud while the round stays fully completable.
-   *
-   * Chrome populates its voice list asynchronously, so an empty first
-   * `getVoices()` read is treated as "unknown" — the spoken path is kept until
-   * `voiceschanged` settles the list. Engines without a change event cannot
-   * populate late, so their empty list decides immediately.
-   */
-  private captionFallbackActive(): boolean {
-    if (!getSettings().sfxEnabled || !isSpeechSupported()) {
-      return true;
-    }
-    const synth = window.speechSynthesis as SpeechSynthesis | undefined;
-    const canWatch = typeof synth?.addEventListener === "function";
-    const voices = this.voicesSettled ? this.voicesCache : (synth?.getVoices?.() ?? []);
-    if (voices.length > 0) {
-      return false;
-    }
-    return !canWatch || this.voicesSettled;
-  }
-
-  /** Captures the settled voice list; the caption decision defers to it afterwards. */
-  private readonly handleVoicesChanged = (): void => {
-    const synth = window.speechSynthesis as SpeechSynthesis | undefined;
-    this.voicesCache = synth?.getVoices?.() ?? [];
-    this.voicesSettled = true;
-    this.applyCaptionState();
-  };
-
-  /**
-   * Re-evaluates the caption fallback for the currently displayed round after
-   * the voice list settles. When the decision flips, the rule line is rebuilt
-   * with the correct glyph presentation and the caption appears or clears
-   * without touching the round's cards or taps.
-   */
-  private applyCaptionState(): void {
-    const fallback = this.captionFallbackActive();
-    if (fallback === this.captionFallback) return;
-    this.captionFallback = fallback;
-    const scenario = this.rounds[this.roundIndex];
-    if (!scenario) return;
-    // Rebuild the glyph with the correct presentation, never re-speaking the
-    // rule — it was already spoken for this round (or is unavailable).
-    this.createRuleLine(false);
-    if (fallback) {
-      this.renderCaption(scenario);
-      return;
-    }
-    this.caption?.destroy();
-    this.caption = undefined;
-    // A pending opening-speech timer would re-speak the scenario at 2.6s;
-    // cancel it before speaking inline.
-    this.openingSpeechTimer?.remove();
-    this.openingSpeechTimer = undefined;
-    // The scenario was never spoken while the fallback was up; speak it now.
-    this.speakScenario(scenario, false);
   }
 
   create(): void {
@@ -160,21 +94,13 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createRuleLine();
 
-    const synth = window.speechSynthesis as SpeechSynthesis | undefined;
-    synth?.addEventListener?.("voiceschanged", this.handleVoicesChanged);
-
     this.rounds = drawScenarios();
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
 
-    // Shared cleanup first: the parent lock, mascot and speaker are torn down
-    // even if the scene's own rule-line teardown is never reached.
+    // The narrator releases the voiceschanged subscription and the glyph.
     this.registerShutdownCleanup();
-    this.events.on("shutdown", () => {
-      synth?.removeEventListener?.("voiceschanged", this.handleVoicesChanged);
-      this.destroyRuleLine();
-    });
   }
 
   protected totalRounds(): number {
@@ -214,10 +140,10 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
 
     this.choices = buildRoundChoices(this.roundIndex, scenario.emotion);
     this.taps = 0;
-    this.captionFallback = this.captionFallbackActive();
+    this.narrator?.refreshCaptionFallback();
 
     this.createCards(this.choices);
-    if (this.captionFallback) {
+    if (this.narrator?.isCaptioning) {
       this.renderCaption(scenario);
     }
     this.speakScenario(scenario, this.roundIndex === 0);
@@ -239,60 +165,53 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
   /**
    * A wrong tap re-speaks the scenario once, so the child can listen again
    * before choosing. The base has already played the tone, recorded the miss,
-   * nodded and wiggled the card with its face.
+   * nodded and wiggled the card with its face. Nothing is re-spoken while the
+   * caption is up: the written line is already on screen.
    */
   protected onWrong(_index: number): void {
     const scenario = this.rounds[this.roundIndex];
-    if (!scenario || this.captionFallback) return;
+    if (!scenario || this.narrator?.isCaptioning) return;
     speakSentence(scenario.text, getSettings().sfxEnabled);
   }
 
   /**
-   * Writes the rule line and its replay glyph, speaking the rule once at round
-   * setup. Built from the shared SpeakerButton rather than the base helper
-   * because the caption fallback also dims the glyph when the engine has no
-   * voice installed, which the helper's SFX-only muted flag cannot express.
+   * Writes the rule line and its replay glyph through the shared narrator,
+   * which speaks the rule once at setup and owns the glyph's caption-aware
+   * muted presentation.
    */
-  private createRuleLine(speakRule = true): void {
-    this.destroyRuleLine();
+  private createRuleLine(): void {
     const centerX = this.cameras.main.centerX;
     const y = this.INSTRUCTION_Y;
-
-    this.ruleLabel = this.add
-      .text(
-        centerX,
-        y,
-        RULE_LINE,
-        textStyle({
-          fontSize: "26px",
-          color: "#2d3748",
-          align: "center",
-          wordWrap: { width: this.INSTRUCTION_WRAP_WIDTH },
-        }),
-      )
-      .setOrigin(0.5);
-
-    this.ruleSpeaker = new SpeakerButton(
-      this,
-      centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
+    this.createRoundNarrator({
+      x: centerX + this.INSTRUCTION_WRAP_WIDTH / 2 + this.INSTRUCTION_SPEAKER_GAP,
       y,
-      {
-        muted: this.captionFallbackActive(),
-        onSpeak: () => speakSentence(RULE_LINE, getSettings().sfxEnabled),
-      },
-    );
-
-    if (speakRule && !this.captionFallbackActive()) {
-      speakSentence(RULE_LINE, getSettings().sfxEnabled);
-    }
+      replay: () => speakSentence(RULE_LINE, getSettings().sfxEnabled),
+      label: { text: RULE_LINE, x: centerX, y, wrapWidth: this.INSTRUCTION_WRAP_WIDTH },
+      announce: RULE_LINE,
+      caption: { onChange: (captioning) => this.applyCaption(captioning) },
+    });
   }
 
-  /** Destroys the rule line and releases the glyph's speech subscription. */
-  private destroyRuleLine(): void {
-    this.ruleLabel?.destroy();
-    this.ruleLabel = undefined;
-    this.ruleSpeaker?.destroy();
-    this.ruleSpeaker = undefined;
+  /**
+   * Adapts the round on screen when the narrator's caption decision flips. The
+   * narrator has already rebuilt the rule line and glyph for the new state.
+   * The scenario was never spoken while the fallback was up, so turning speech
+   * back on speaks it once, inline.
+   */
+  private applyCaption(captioning: boolean): void {
+    const scenario = this.rounds[this.roundIndex];
+    if (!scenario) return;
+    if (captioning) {
+      this.renderCaption(scenario);
+      return;
+    }
+    this.caption?.destroy();
+    this.caption = undefined;
+    // A pending opening-speech timer would re-speak the scenario at 2.6s;
+    // cancel it before speaking inline.
+    this.openingSpeechTimer?.remove();
+    this.openingSpeechTimer = undefined;
+    this.speakScenario(scenario, false);
   }
 
   /** Creates the three face cards with their tap handling. */
@@ -335,7 +254,7 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
    * later round speaks immediately.
    */
   private speakScenario(scenario: Scenario, afterRule: boolean): void {
-    if (this.captionFallback) return;
+    if (this.narrator?.isCaptioning) return;
     if (!afterRule) {
       speakSentence(scenario.text, getSettings().sfxEnabled);
       return;
@@ -345,7 +264,7 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
       // The child may already have answered, or the voice list may have
       // settled empty since; only speak if the opening round is still up
       // and still on the spoken path.
-      if (this.roundIndex !== 0 || this.captionFallback) return;
+      if (this.roundIndex !== 0 || this.narrator?.isCaptioning) return;
       speakSentence(scenario.text, getSettings().sfxEnabled);
     });
   }
