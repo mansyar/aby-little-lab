@@ -1,9 +1,8 @@
 # Release Notes - v1.19.0
 
 > **Status:** FINAL - released 2026-10-20 (tag `v1.19.0`, deployed live at
-> https://aby-little-lab.ansyar-world.top/). Desktop smoke passed; the
-> device-class pass is recorded as pending in
-> `docs/device-testing-checklist.md`.
+> https://aby-little-lab.ansyar-world.top/). Desktop smoke and the device pass
+> both green; device record in `docs/device-testing-checklist.md`.
 >
 > **Tag:** `v1.19.0`
 >
@@ -87,8 +86,9 @@ v1.18.0.
 - **Live check:** `HTTP 200`, title `Aby's Little Lab`, live
   `assets/index-DcE17GRj.js` == local `dist/` build (197,004 bytes), `v1.19.0`
   present in the served bundle.
-- **Device matrix:** pending - see the v1.19.0 execution record in
-  `docs/device-testing-checklist.md`.
+- **Device matrix:** PASSED 2026-10-20 - confirmed by the user on their own
+  devices (Hub, Feelings Faces, narration over music, background/foreground).
+  Record: `docs/device-testing-checklist.md`, v1.19.0.
 
 ## Feedback
 

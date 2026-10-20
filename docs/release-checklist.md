@@ -697,8 +697,8 @@ Please report issues at [GitHub Issues URL]
 **Verify Deployment - v1.19.0 (2026-10-20):**
 - [x] Annotated tag `v1.19.0` on `master` (`eb305af`) pushed - CI run `39354622324`: Quality Gates PASS, Deploy to Coolify PASS (webhook fired)
 - [x] Live entry hash matches the local `dist/` build - live `assets/index-DcE17GRj.js` == local build (197,004 bytes), `1.19.0` present in the served bundle, HTTP 200, title `Aby's Little Lab`
-- [ ] Live browser smoke - Hub 21 tiles (6x4, rows 6/6/6/3), Feelings Faces round-trip, Settings footer `v1.19.0`, service worker controlling (HTTP/hash/version checks only from the release run)
-- [ ] Device testing on v1.19.0 - recorded in `docs/device-testing-checklist.md` (v1.19.0 record, pending)
+- [x] Live browser smoke - Hub 21 tiles (6x4, rows 6/6/6/3), Feelings Faces round-trip, Settings footer `v1.19.0`, service worker controlling - confirmed by the user on their devices
+- [x] Device testing on v1.19.0 - **PASSED 2026-10-20** (user-confirmed on their devices; recorded in `docs/device-testing-checklist.md` v1.19.0 record)
 
 **Approval:**
 - [x] Code quality meets standards
