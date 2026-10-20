@@ -141,7 +141,9 @@ None. All findings are addressed in Phase R1.
 
 ## Doc sync
 
-pending — the post-review sync sets this to `updated` or `none`.
+updated — README (structure, spoken rules, audio focus, play time),
+`conductor/tech-stack.md` (bases, narrator, audio policy, tree) and
+`conductor/product.md` (play-time bullet, audio section, changelog).
 
 ## History
 
