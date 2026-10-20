@@ -110,17 +110,21 @@
 - **Covers:** FR-6, FR-7, FR-8, FR-10, AC-6, AC-7, AC-8, AC-10
 - **Touches:** `src/main.ts`, `src/components/SettingsPanel.ts`, `vite.config.ts`, comment-only sweep paths, `.gitkeep` paths
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P5.T1: Fix the `main.ts` lazy-scene comment** — covers: FR-6
-- [ ] **P5.T2: Sweep stale source comments** — covers: FR-6
-  - [ ] **P5.T2.1: Search and correct** — `rg` for "7 game", "seven game", "20-tile", "12 game", "170 preloaded" and "Ligne" in `src`; correct false comments only.
-- [ ] **P5.T3: Delete the orphan JSDoc block** — covers: FR-7
-  - [ ] **P5.T3.1: Remove lines 303-313** — confirm no live method lost documentation.
-- [ ] **P5.T4: Fix the Vite JSON import** — covers: FR-8
-  - [ ] **P5.T4.1: Add the import attribute** — `with { type: "json" }`; confirm the warning is gone from test and build output.
-- [ ] **P5.T5: Remove redundant `.gitkeep` files** — covers: FR-10
-  - [ ] **P5.T5.1: Delete only where tracked files exist** — list every removed path in the evidence.
+- [x] **P5.T1: Fix the `main.ts` lazy-scene comment** — covers: FR-6
+- [x] **P5.T2: Sweep stale source comments** — covers: FR-6
+  - [x] **P5.T2.1: Search and correct** — `rg` for "7 game", "seven game", "20-tile", "12 game", "170 preloaded" and "Ligne" in `src`; correct false comments only.
+- [x] **P5.T3: Delete the orphan JSDoc block** — covers: FR-7
+  - [x] **P5.T3.1: Remove lines 303-313** — confirm no live method lost documentation.
+- [x] **P5.T4: Fix the Vite JSON import** — covers: FR-8
+  - [x] **P5.T4.1: Add the import attribute** — `with { type: "json" }`; confirm the warning is gone from test and build output.
+- [x] **P5.T5: Remove redundant `.gitkeep` files** — covers: FR-10
+  - [x] **P5.T5.1: Delete only where tracked files exist** - list every removed path in the evidence.
+
+- **Result:** verified. `src/main.ts` now says all 22 game scenes are lazy-loaded, and the sweep caught one more false count (`HubScene`'s "grid of 12 game tiles"); the remaining numeric comments are real constants or dated notes and were left alone. The six orphan JSDoc blocks are gone from `SettingsPanel.ts` with their behaviours documented where they now live (`InstallRow`, `ResetModal`). `vite.config.ts` imports `package.json` with `with { type: "json" }`, and the `configLoader: 'native'` warning is absent from check, typecheck, test and build output. Fourteen `.gitkeep` markers were removed from directories that hold tracked files; `src/assets/audio` keeps its marker because it holds nothing else. Gate green at 110 files / 2,305 tests, build still 53 precache entries over 41 chunks, validators pass.
+- **Checkpoint:** `11ed38c`
+- **Evidence:** [`verification/phase-5.md`](./verification/phase-5.md)
 
 ## Phase 6: Close the Executed Ligne Track
 
