@@ -37,9 +37,9 @@
 - **Goal:** progress rows, paging maths and sticker lookups read the registry; no 22-item copy or `replace(/-/g,"_")` literal survives outside it.
 - **Depends on:** Phase 1
 - **Covers:** FR-3, FR-4, FR-6, AC-1, AC-2, AC-4
-- **Touches:** `src/components/settings/ProgressOverlay.ts`, `src/game/hubPaging.ts`, `src/scenes/GameSceneBase.ts`, `src/game/hubGrid.ts`, `src/__tests__/**`
+- **Touches:** `src/components/settings/ProgressOverlay.ts`, `src/game/hubPaging.ts`, `src/game/gameRegistry.ts`, `src/scenes/GameSceneBase.ts`, `src/game/hubGrid.ts`, `src/__tests__/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Progress rows derive from the registry** — covers: FR-3
   - [ ] **P2.T1.1:** Delete `PROGRESS_GAME_ROWS`; derive `{gameId, label, tileKey}` from the registry.
