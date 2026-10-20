@@ -142,7 +142,7 @@ shell side.
 - **Goal:** Resolve review findings F1, F2, F3, F4, F5, F6 and F7.
 - **Depends on:** Phase 5
 - **Covers:** F1, F2, F3, F4, F5, F6, F7
-- **Touches:** `src/game/art/**`, `src/scenes/GameSceneBase.ts`, `src/__tests__/game/art/**`, `src/__tests__/scenes/**`, `src/__tests__/utils/textureTiers.test.ts`, `scripts/measure-first-tap.mjs`, `README.md`, `docs/perf-baseline.md`, `conductor/tracks/20261020-shell-diet-lazy-art/verification/**`
+- **Touches:** `src/game/art/**`, `src/scenes/GameSceneBase.ts`, `src/__tests__/game/art/**`, `src/__tests__/scenes/**`, `src/__tests__/helpers/phaserMock.ts`, `src/__tests__/utils/textureTiers.test.ts`, `scripts/measure-first-tap.mjs`, `README.md`, `docs/perf-baseline.md`, `conductor/tracks/20261020-shell-diet-lazy-art/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-boot.js`
 - **Status:** pending
 
