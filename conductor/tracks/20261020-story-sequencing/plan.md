@@ -87,17 +87,20 @@
 - **Covers:** FR-1, FR-9, AC-1, AC-8
 - **Touches:** `src/game/hubTiles.ts`, `src/game/hubPaging.ts`, `src/components/settings/ProgressOverlay.ts`, `src/__tests__/game/hubPaging.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/components/SettingsPanel.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** bf42d87
+- **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-4.md
 
-- [ ] **P4.T1: Hub tile and grid** — covers: FR-1, AC-1, AC-8
-  - [ ] **P4.T1.1: 22nd `GAME_TILES` entry** with its icon, label and sticker key
-  - [ ] **P4.T1.2: Wide grid renders 22 tiles as rows 6/6/6/4** with the layout comments and constants corrected
-- [ ] **P4.T2: Paged hub** — covers: FR-9, AC-8
-  - [ ] **P4.T2.1: `HUB_TILE_COUNT` 21 → 22** and page maths to 10 + 10 + 2, partial page centred
-  - [ ] **P4.T2.2: Paging tests** — three pages, 22 indexes, tile count agreement with `GAME_TILES.length`
-- [ ] **P4.T3: Learning Progress** — covers: FR-9, AC-8
-  - [ ] **P4.T3.1: 22nd progress row** (Story Order, last), pages 6 + 6 + 6 + 4
-  - [ ] **P4.T3.2: Settings test** asserts 22 rows and that the new row reads its own progress record
+- [x] **P4.T1: Hub tile and grid** — covers: FR-1, AC-1, AC-8
+  - [x] **P4.T1.1: 22nd `GAME_TILES` entry** with its icon, label and sticker key
+  - [x] **P4.T1.2: Wide grid renders 22 tiles as rows 6/6/6/4** with the layout comments and constants corrected
+- [x] **P4.T2: Paged hub** — covers: FR-9, AC-8
+  - [x] **P4.T2.1: `HUB_TILE_COUNT` 21 → 22** and page maths to 10 + 10 + 2, partial page centred
+  - [x] **P4.T2.2: Paging tests** — three pages, 22 indexes, tile count agreement with `GAME_TILES.length`
+- [x] **P4.T3: Learning Progress** — covers: FR-9, AC-8
+  - [x] **P4.T3.1: 22nd progress row** (Story Order, last), pages 6 + 6 + 6 + 4
+  - [x] **P4.T3.2: Settings test** asserts 22 rows and that the new row reads its own progress record
 
 ## Phase 5: Documentation sync
 
