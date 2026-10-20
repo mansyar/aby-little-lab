@@ -2,11 +2,11 @@
   "id": "20261020-game-metadata-source",
   "title": "Game Metadata Single Source of Truth",
   "type": "refactor",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T23:07:01+11:00",
-  "updated_at": "2026-10-21T00:42:00+11:00",
+  "updated_at": "2026-10-21T00:45:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "refactor/20261020-game-metadata-source",
@@ -29,6 +29,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-21T00:45:00+11:00",
+  "archive_path": "conductor/archive/20261020-game-metadata-source"
 }
