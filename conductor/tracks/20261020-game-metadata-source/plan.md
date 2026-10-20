@@ -14,19 +14,23 @@
 - **Covers:** FR-1, FR-2, FR-8, NFR-1, NFR-3, AC-1, AC-5
 - **Touches:** `src/game/gameRegistry.ts`, `src/game/hubTiles.ts`, `src/__tests__/gameRegistry.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Create the registry module** — covers: FR-1, FR-8
-  - [ ] **P1.T1.1:** Export `GameRegistryEntry` with required `gameId`, `sceneKey`, `label`, `tileKey`, `stickerKey` and optional `iconDisplay`, `iconOffsetY`.
-  - [ ] **P1.T1.2:** Transcribe the 22 entries in Hub order from `hubTiles.ts`; change no value, including `tile_alphabet` and `sticker_alphabet_match`.
-  - [ ] **P1.T1.3:** Prove purity: the module imports nothing from Phaser, DOM, storage or `src/scenes/`.
-  - [ ] **P1.T1.4:** Add the type-level coverage check so a `GameId` with no entry fails `pnpm typecheck` (not at runtime).
-- [ ] **P1.T2: Derive `GAME_TILES`** — covers: FR-2
-  - [ ] **P1.T2.1:** Map registry entries to the existing `GameTile` shape; keep the exported name and type so `HubScene`/`hubGrid` compile untouched.
-  - [ ] **P1.T2.2:** Test that the derived array deep-equals the pre-track 22 tuples, optional icon fields included.
-- [ ] **P1.T3: Registry-internal tests** — covers: FR-7
-  - [ ] **P1.T3.1:** Fail on duplicate `gameId`, `tileKey`, `stickerKey` or `sceneKey`, naming the offending value.
-  - [ ] **P1.T3.2:** Assert registry order equals PRD §2.2 order.
+- [x] **P1.T1: Create the registry module** — covers: FR-1, FR-8
+  - [x] **P1.T1.1:** Export `GameRegistryEntry` with required `gameId`, `sceneKey`, `label`, `tileKey`, `stickerKey` and optional `iconDisplay`, `iconOffsetY`.
+  - [x] **P1.T1.2:** Transcribe the 22 entries in Hub order from `hubTiles.ts`; change no value, including `tile_alphabet` and `sticker_alphabet_match`.
+  - [x] **P1.T1.3:** Prove purity: the module imports nothing from Phaser, DOM, storage or `src/scenes/`.
+  - [x] **P1.T1.4:** Add the type-level coverage check so a `GameId` with no entry fails `pnpm typecheck` (not at runtime).
+- [x] **P1.T2: Derive `GAME_TILES`** — covers: FR-2
+  - [x] **P1.T2.1:** Map registry entries to the existing `GameTile` shape; keep the exported name and type so `HubScene`/`hubGrid` compile untouched.
+  - [x] **P1.T2.2:** Test that the derived array deep-equals the pre-track 22 tuples, optional icon fields included.
+- [x] **P1.T3: Registry-internal tests** — covers: FR-7
+  - [x] **P1.T3.1:** Fail on duplicate `gameId`, `tileKey`, `stickerKey` or `sceneKey`, naming the offending value.
+  - [x] **P1.T3.2:** Assert registry order equals PRD §2.2 order.
+
+**Result:** verified
+**Checkpoint:** a7bc1a2
+**Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-1.md
 
 ## Phase 2: Consumers derive
 
