@@ -29,7 +29,7 @@ import {
   toys,
 } from "../../game/art";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
-import { SHELL_ASSETS } from "../../scenes/PreloadScene";
+import { GAME_SHELL_KEYS, SHELL_ASSETS, shellSourceMap } from "../../scenes/PreloadScene";
 import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
 
 /** Raw SVG sources on disk, discovered independently of the scene module. */
@@ -176,5 +176,20 @@ describe("PreloadScene source scan", () => {
     const literalKeys = [...preloadSceneSource.matchAll(TABLE_ENTRY)].map((match) => match[1]);
     const groupOwned = literalKeys.filter((key) => groupKeySet.has(key));
     expect(groupOwned.sort()).toEqual([...AVATAR_KEYS].sort());
+  });
+});
+
+describe("shell asset guards", () => {
+  it("throws when two files claim one texture key", () => {
+    expect(() =>
+      shellSourceMap({
+        "../assets/svg/ui/tiles/tile_x.svg": "<svg/>",
+        "../assets/svg/ui/tile_x.svg": "<svg/>",
+      }),
+    ).toThrow(/duplicate shell asset: tile_x/);
+  });
+
+  it("globbed keys and registry keys are the same set, both ways", () => {
+    expect([...GAME_SHELL_KEYS].sort()).toEqual([...GAME_KEYS].sort());
   });
 });

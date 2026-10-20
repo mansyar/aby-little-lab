@@ -23,11 +23,10 @@ export interface ShellAsset {
 /**
  * Maps SVG source paths to their texture keys, rejecting a duplicated key.
  *
- * Only `tile_*` and `sticker_*` files are shell assets. The UI directory also
- * holds glyphs and mascot poses that are imported by name below, and game art
- * lives under `src/game/art/`, shipping in the game's own chunk.
+ * Exported for its unit test: the shell table calls it at module evaluation, so
+ * the duplicate guard can only be exercised through this function.
  */
-function shellSourceMap(globbed: Record<string, string>): Map<string, string> {
+export function shellSourceMap(globbed: Record<string, string>): Map<string, string> {
   const sources = new Map<string, string>();
   for (const [path, svg] of Object.entries(globbed)) {
     const key = path.slice(path.lastIndexOf("/") + 1).replace(/\.svg$/, "");
@@ -40,8 +39,19 @@ function shellSourceMap(globbed: Record<string, string>): Map<string, string> {
   return sources;
 }
 
+/**
+ * The SVG sources the shell can draw from: tile icons (including the one that
+ * sits beside the `ui/tiles/` directory rather than inside it) and stickers.
+ * The globs are deliberately narrow - `ui/**` would also inline the glyphs
+ * that belong to the lazy `game/art/glyphs.ts` group.
+ */
 const gameShellSources = shellSourceMap({
-  ...import.meta.glob<string>("../assets/svg/ui/**/*.svg", {
+  ...import.meta.glob<string>("../assets/svg/ui/tile_*.svg", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  }),
+  ...import.meta.glob<string>("../assets/svg/ui/tiles/*.svg", {
     eager: true,
     query: "?raw",
     import: "default",
@@ -53,12 +63,25 @@ const gameShellSources = shellSourceMap({
   }),
 });
 
-/** Resolves a registry asset key, failing loudly when no SVG file carries it. */
+/** The keys the globs resolved. Exported so a test can check both directions. */
+export const GAME_SHELL_KEYS: readonly string[] = [...gameShellSources.keys()];
+
+/** Keys already claimed by the table, so a repeated registry key fails loudly. */
+const usedShellKeys = new Set<string>();
+
+/**
+ * Resolves a registry asset key, failing loudly when no SVG file carries it or
+ * when two registry entries name the same key.
+ */
 function shellAsset(key: string): ShellAsset {
+  if (usedShellKeys.has(key)) {
+    throw new Error(`duplicate shell asset key: ${key}`);
+  }
   const svg = gameShellSources.get(key);
   if (svg === undefined) {
     throw new Error(`no shell SVG for registry asset key: ${key}`);
   }
+  usedShellKeys.add(key);
   return { key, svg };
 }
 

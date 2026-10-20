@@ -28,8 +28,8 @@ export function pageCount(tileCount: number = GAME_REGISTRY.length): number {
 
 /**
  * The wide-layout tile height (HubScene's TILE_HEIGHT) that the threshold is
- * derived from. Duplicated here as a documented constant so this module stays
- * dependency-free; a comment in HubScene ties the two together.
+ * derived from. Kept here as a documented constant so this module needs no
+ * runtime import from `HubScene`; a comment there ties the two together.
  */
 const WIDE_TILE_HEIGHT = 116;
 

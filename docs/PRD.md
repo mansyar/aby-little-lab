@@ -360,7 +360,7 @@ Every game scene extends one shared base. `GameSceneBase` owns the parts no game
 
 Each game is a separately built chunk, registered in a lazy scene registry and fetched before the crossfade into the game. The Hub and the shell never contain a game's code, which keeps the entry chunk under its budget and lets a returning player skip chunks they have already cached.
 
-Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 44 game assets all derive from it, so adding a game is one entry plus its scene and art rather than several lists to keep in step.
+Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 44 game assets all derive from it, so adding a game is one entry plus its scene, its art and its scene-loader row, with the id list checked by the type checker and the invariant suite rather than several lists kept in step by hand.
 
 ### 4.2 One narrator, spoken rules and prompts
 
