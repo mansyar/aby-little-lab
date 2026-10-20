@@ -98,12 +98,21 @@ by reading source.
 | FR-3 | The PRD documents the cross-game systems as they exist: the shared scene bases (`GameSceneBase` → `ChoiceRoundScene` → `GroupMathScene`), the single `RoundNarrator`, the mascot, stickers, four profiles, play-time limits that count only visible minutes, Learning Progress, adaptive difficulty on 15 of 22 games with the seven fixed ones named, and preferred-voice selection. | must |
 | FR-4 | `docs/PRD.md` states the asset-budget reality: 178 SVGs rasterised at boot, tiered by `textureSizeFor()`, a 195.4 kB shell entry against a 200 kB gate, and game art that loads with the game's chunk. | must |
 | FR-5 | `docs/TDD.md` is restructured around the shipped implementation: toolchain, boot and asset budget, scene architecture and the lazy scene registry, component inventory, storage schema v2, logic modules, motion and feedback, audio, testing strategy, build, PWA and CI. | must |
-| FR-6 | `docs/TDD.md`'s directory tree, asset manifest and asset summary match the working tree: 29 scene files (bases included), 15 component files, 30 logic modules, 14 utils, 207 SVGs across 11 folders with correct per-folder counts, and the `settings/` component group. | must |
+| FR-6 | `docs/TDD.md`'s directory tree, asset manifest and asset summary match the working tree: 29 scene files (bases included), 15 component files, 30 logic modules, 14 utils, the tracked SVG corpus (202 files at the time of writing) across 11 folders with correct per-folder counts, and the `settings/` component group. | must |
 | FR-7 | `docs/TDD.md` documents storage schema v2 in full: profiles (max 4, avatars, per-profile stickers and progress), `GameId` for 22 games, `playTime` with `limitMinutes`/`usedMinutes`/`lastUsedDate`, `Settings` including `adaptiveDifficulty` and `preferredVoiceURI`, plus the v1 → v2 migration rule and the known write-failure behaviour (unguarded `localStorage.setItem`). | must |
 | FR-8 | `docs/TDD.md` documents the audio system as built: `AudioManager` singleton, SFX names, BGM element, duck-to-8 %-over-120 ms under narration with watchdog restore, `visibilitychange` pause/cancel/resume, and the fact that the duck level is never persisted. | must |
 | FR-9 | `conductor/product.md` carries exactly one `## Changelog — Game 20` section and exactly one per other game, with no body text lost. | must |
 | FR-10 | A cross-document facts table records, for each shared number (game count, adaptive games, boot SVGs, shell size, test count, coverage), the value and where it is written, and all documents agree with it. | should |
 
+### FR-6 / AC-5 corrective note (2026-10-20)
+
+The first draft of this spec quoted a 207-file SVG corpus. That figure came from a
+Recurse count that included five `.gitkeep` placeholders. The tracked corpus is
+**202** `.svg` files, confirmed with `git ls-files` before Phase 2, and the
+per-folder counts below are the corrected ones: animals 9, feelings 4, items 23,
+letters 26, numbers 10, shadows 8, shapes 36, stickers 22, stories 24, toys 7,
+ui 33. FR-6 and AC-5 now carry those numbers; the requirement itself (manifest
+matches the tree) is unchanged.
 ## Non-Functional Requirements
 
 | ID | Requirement |
@@ -123,7 +132,7 @@ by reading source.
 | AC-2 | Both documents contain sections for Game 21 and Game 22, and `rg "Feelings Faces" docs/PRD.md docs/TDD.md` returns hits for both. | FR-2 |
 | AC-3 | PRD states the adaptive split explicitly: 15 adaptive games and the seven fixed ones by name; the count matches `rg -l getAdaptiveBandShift src/scenes` (14 files, 15 games via `GroupMathScene`). | FR-3 |
 | AC-4 | TDD's directory tree lists every file under `src/` — verified by diffing the tree's file list against `git ls-files src`. | FR-6 |
-| AC-5 | TDD's asset manifest per-folder counts match `Get-ChildItem src/assets/svg -Directory` output (207 total across 11 folders). | FR-6 |
+| AC-5 | TDD's asset manifest per-folder counts match the tracked corpus (202 total across 11 folders: animals 9, feelings 4, items 23, letters 26, numbers 10, shadows 8, shapes 36, stickers 22, stories 24, toys 7, ui 33). | FR-6 |
 | AC-6 | TDD documents the storage schema fields named in FR-7, and states the unguarded-write behaviour that `src/utils/storage.ts:81-85` exhibits. | FR-7 |
 | AC-7 | TDD documents duck, watchdog, visibility and the never-persisted duck level, each matching `src/audio/AudioManager.ts`. | FR-8 |
 | AC-8 | `rg -c "^## Changelog — Game 20" conductor/product.md` returns 1. | FR-9 |

@@ -1,466 +1,568 @@
-# Product Requirement Document (PRD)
+# Aby's Little Lab Product Requirements Document
+
+Aby's Little Lab is a set of 22 preschool mini-games delivered as one installable web app. This document is the product record: what the app is, what each game asks a child to do, and the rules every game follows. The implementation record is [TDD.md](./TDD.md).
 
 | Field | Value |
-|---|---|
-| **Project Name** | Aby's Little Lab |
-| **Target Audience** | Preschoolers (Age 3–5 / 36–60 Months) |
-| **Platform** | PWA / Mobile Web (Tablet & Phone) |
-| **Tech Stack** | Phaser 4, TypeScript 7, Vite 8, HTML5, Web Audio API |
-| **Visual Pipeline** | AI-Generated SVG (Vector Native) |
-| **Distribution** | Local Sideload / Private PWA (hosted: Docker + Nginx on a private VPS via Coolify, auto-deployed from CI) |
+| --- | --- |
+| Product | Aby's Little Lab |
+| Audience | Preschoolers aged 36 to 60 months, playing with a parent or caregiver nearby |
+| Games | 22 mini-games, one per Hub tile |
+| Platforms | Tablets and phones in landscape, and desktop browsers |
+| Delivery | Private installable web app, self-hosted, installed from the browser |
+| Offline | Full play after the first install |
+| Data | On-device only. Profiles, stickers, progress and play time never leave the device |
+| Runtime | Phaser 4, TypeScript, Vite, Web Audio, SpeechSynthesis |
 
----
+## Contents
 
-## 1. Executive Summary & Core Objectives
+- [1. Product definition and audience](#1-product-definition-and-audience)
+  - [1.1 What the product is](#11-what-the-product-is)
+  - [1.2 Who it is for](#12-who-it-is-for)
+  - [1.3 Product principles](#13-product-principles)
+  - [1.4 Platforms, install and offline](#14-platforms-install-and-offline)
+  - [1.5 Session flow](#15-session-flow)
+- [2. Curriculum map](#2-curriculum-map)
+  - [2.1 How the games are grouped](#21-how-the-games-are-grouped)
+  - [2.2 The 22 games by domain](#22-the-22-games-by-domain)
+- [3. Game specifications](#3-game-specifications)
+- [4. Cross-game systems](#4-cross-game-systems)
+  - [4.1 Shared scene bases and lazy loading](#41-shared-scene-bases-and-lazy-loading)
+  - [4.2 One narrator, spoken rules and prompts](#42-one-narrator-spoken-rules-and-prompts)
+  - [4.3 The mascot](#43-the-mascot)
+  - [4.4 Stickers](#44-stickers)
+  - [4.5 Profiles](#45-profiles)
+  - [4.6 Play-time limits](#46-play-time-limits)
+  - [4.7 Learning Progress](#47-learning-progress)
+  - [4.8 Adaptive difficulty](#48-adaptive-difficulty)
+  - [4.9 Preferred voice](#49-preferred-voice)
+  - [4.10 Install and update](#410-install-and-update)
+- [5. Interaction, touch and motion](#5-interaction-touch-and-motion)
+  - [5.1 Visual language](#51-visual-language)
+  - [5.2 Touch targets](#52-touch-targets)
+  - [5.3 The parental lock](#53-the-parental-lock)
+  - [5.4 Textless cues](#54-textless-cues)
+  - [5.5 Screen, orientation and letterboxing](#55-screen-orientation-and-letterboxing)
+  - [5.6 Motion and feedback](#56-motion-and-feedback)
+  - [5.7 Reduced motion](#57-reduced-motion)
+- [6. Audio](#6-audio)
+  - [6.1 Sound effects](#61-sound-effects)
+  - [6.2 Music](#62-music)
+  - [6.3 Speech](#63-speech)
+  - [6.4 Audio focus](#64-audio-focus)
+  - [6.5 Toggles](#65-toggles)
+- [7. Performance and asset budget](#7-performance-and-asset-budget)
+  - [7.1 The boot asset set](#71-the-boot-asset-set)
+  - [7.2 Shell and game chunks](#72-shell-and-game-chunks)
+  - [7.3 Art that travels with a game](#73-art-that-travels-with-a-game)
+  - [7.4 Runtime targets](#74-runtime-targets)
+- [8. Release readiness](#8-release-readiness)
+  - [8.1 Gates](#81-gates)
+  - [8.2 Deploy path](#82-deploy-path)
+  - [8.3 Definition of done](#83-definition-of-done)
+- [9. See also](#9-see-also)
 
-This document defines the production requirements for an ad-free, distraction-free developmental game suite tailored for 3–5 year-old preschoolers. The app packages **18 distinct mini-games** into a single lightweight web app targeting fundamental cognitive, motor, and reasoning benchmarks.
+## 1. Product definition and audience
 
-**Key Strategic Pivot:** To ensure maximum crispness across high-DPI retina displays (iPads, Android tablets, and phones) without large asset file sizes, all graphical assets are built using an **AI-Generated SVG Pipeline**. Phaser 4 rasterizes these scalable vectors dynamically at load time into crisp bitmaps, matching exact target display resolutions.
+### 1.1 What the product is
 
-### UX & Touch Architecture Requirements
+Aby's Little Lab is 22 small games with one shared Hub. Each game teaches one skill and asks for one gesture: tap the card that matches, drag the shape into its hole, trace the line, put the story in order. A playthrough lasts between three and six rounds, ends in a celebration, and returns to the Hub on its own.
 
-- **Touch-First Ergonomics:** Touch targets are strictly set to a minimum of 64×64px (ideally 96×96px) with inflated collision bounds to prevent toddler fine-motor frustration. Protected controls (all Back buttons, Hub Settings, Musical Memory Replay) and the shared replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Musical Memory) implement the 96×96px ideal with explicit hit areas anchored to their display bounds.
-- **Textless Visual Cues:** Zero text dependency for gameplay. All prompts rely on visual animations, color coding, spatial affordances, and audio chime feedback. *(2026-08-02 amendment — Game 8:* letters are the **learning content** (like shapes or animals), not UI instructions; no written instructions appear anywhere in the app. *)*
-- **Interface Containment:** Embedded "Hold for 3 Seconds" parental lock to prevent accidental menu navigation or app exits during active play. The hold shows a circular progress ring, runs one hold at a time (duplicate touches ignored), and never triggers on early release, pointer leaving the control, or pointer cancel.
-- **Responsive Scale:** Phaser Scale Manager enforces a locked 1024×768 landscape base resolution with dynamic centered letterboxing (`Phaser.Scale.FIT`). Phones auto-rotate to landscape on launch via the Screen Orientation API + manifest `orientation: landscape` lock.
+There is no score, no timer, no lives and no fail state. A wrong tap plays a soft tone, nudges the piece back, and leaves the round open so the child can try again. The reward is a sticker for finishing a game the first time, kept on a shelf under that game's tile.
 
----
+Every instruction a child needs is spoken, or played as a note sequence where the notes are the lesson. Everything else on screen is a picture, a glyph, or the learning content itself. A parent reaches settings, profiles, progress and exit through a three second press that a toddler is unlikely to hold.
 
-## 2. AI-Generated SVG Visual Asset Pipeline
+### 1.2 Who it is for
 
-### SVG Vector Generation Workflow
+The child is between 36 and 60 months old. They cannot read, they may not know their letters or numerals yet, and they play in short bursts with an adult nearby. The games assume no prior knowledge: the first round of every game is the easiest one it has.
 
-1. **Generation:** Produce raw vector assets using any AI SVG generator or hand-crafted vectors. The output must be clean, single-layer SVGs with simple paths.
-2. **ViewBox Standardization:** Clean SVGs to remove redundant metadata, enforce tight bounding boxes (zero excess canvas), and eliminate complex filters that break browser rasterization.
-3. **Shadow Asset Derivation:** For Game 4 (Shadow Match), duplicate primary colored SVG paths, unify union fills, and set color to dark flat slate `#2D3748`.
-4. **Resolution-Aware Preloading:** Pass width/height parameters into Phaser's SVG loader to force high-res rasterization at boot:
+The adult is the second user. They choose a profile and an avatar, set a daily play-time limit, pick a voice, read the Learning Progress view, install the app, and reset progress. All of that sits behind the parental lock.
 
-```typescript
-this.load.svg('bear_sprite', 'assets/svg/bear.svg', { width: 512, height: 512 });
+The device is usually a tablet in a stand or a phone held sideways. The app is designed for a fixed 1024 by 768 landscape frame, scaled to fit and letterboxed on anything else.
+
+### 1.3 Product principles
+
+- **No fail state.** Wrong answers cost nothing and are never counted against the child. A round stays open until it is solved.
+- **No advertising, no tracking, no account.** Play does not depend on the network. Profiles, stickers, progress and play time are stored on the device.
+- **One mechanic per game.** The gesture is the lesson, so a child who has learned the gesture can concentrate on the content.
+- **Textless cues.** Every instruction is spoken, and the child-facing cue is a glyph, a picture or an animation. A short written line beside the speaker glyph is there for the adult, not for the child to read. Letters, numerals, words and colour names are learning content, not instructions, so they may appear as text.
+- **Calm feedback.** Short chimes, a colour splash and a bounce. No flashing, no shaking, no negative sound.
+- **Parent gate on everything that changes state.** Settings, profiles, Learning Progress, reset and leaving a game all require the parental hold.
+- **Gentle ramp.** The first round of a game is its easiest, and adaptive games adjust between playthroughs only, never mid-round.
+
+### 1.4 Platforms, install and offline
+
+The app is a single web build that installs as a PWA. It runs full screen in landscape, with the manifest asking for fullscreen and falling back to standalone. Installing is offered from the Settings panel, which shows "Install App" on Chrome, Edge and Android, an iOS Safari how-to on iOS, and nothing once the app is already installed.
+
+Offline play is a product requirement, not a bonus: after the first load the service worker serves the shell, the game chunks, the icons, the bundled font and the music loop from cache. A cold boot with no network is expected to behave exactly like a warm one.
+
+The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a private VPS, deployed through Coolify from CI). HTTPS is required for the service worker and for installability; localhost is enough for smoke tests.
+
+### 1.5 Session flow
+
+1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
+2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
+3. **Hub.** Shows the 22 game tiles, each with its sticker shelf, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
+4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round.
+5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
+
+The Hub fits all 22 tiles in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and two) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
+
+## 2. Curriculum map
+
+### 2.1 How the games are grouped
+
+The 22 games are grouped by the developmental skill they are built around. The grouping is a product view, not a claim about assessment: a game practises its domain first and leans on others in passing. Numeracy games use visual discrimination, literacy games use working memory, and every drag game is fine motor practice.
+
+The nine domains are cognitive reasoning, fine motor, inhibitory control, visual discrimination, working memory, early literacy, early numeracy, social-emotional learning and narrative sequencing.
+
+### 2.2 The 22 games by domain
+
+Games are numbered in Hub order, which is the order used throughout this document.
+
+| # | Game | Domain | What the child practises | Spec |
+| --- | --- | --- | --- | --- |
+| 1 | Shape Sorter | Cognitive reasoning | Matching a shape to its cut-out hole by silhouette | [3.1](#31-shape-sorter) |
+| 2 | Animal Trace | Fine motor | Tracing a dotted path with one finger | [3.2](#32-animal-trace) |
+| 3 | Pop & Freeze | Inhibitory control | Popping bubbles while leaving the sleeping animals alone | [3.3](#33-pop--freeze) |
+| 4 | Shadow Match | Visual discrimination | Matching an object to its dark silhouette | [3.4](#34-shadow-match) |
+| 5 | Musical Memory | Working memory | Repeating an expanding note sequence on three frogs | [3.5](#35-musical-memory) |
+| 6 | Big vs. Small | Cognitive reasoning | Sorting the same toy by size into the big or small box | [3.6](#36-big-vs-small) |
+| 7 | Pattern Builder | Cognitive reasoning | Choosing the shape that continues a repeating pattern | [3.7](#37-pattern-builder) |
+| 8 | Find the Letter | Early literacy | Recognising a letter shape among four cards | [3.8](#38-find-the-letter) |
+| 9 | Find the Word | Early literacy | Matching a printed word to a picture and spoken word | [3.9](#39-find-the-word) |
+| 10 | Build the Word | Early literacy | Placing letters in order to spell a pictured word | [3.10](#310-build-the-word) |
+| 11 | How Many? | Early numeracy | Matching a spoken numeral to a group of that size | [3.11](#311-how-many) |
+| 12 | First Sounds | Early literacy | Picking the letter that starts a spoken word | [3.12](#312-first-sounds) |
+| 13 | More or Less | Early numeracy | Comparing two groups using more and less | [3.13](#313-more-or-less) |
+| 14 | Odd One Out | Cognitive reasoning | Finding the item that does not belong | [3.14](#314-odd-one-out) |
+| 15 | Color Match | Visual discrimination | Matching an object's colour to a swatch | [3.15](#315-color-match) |
+| 16 | Add It Up | Early numeracy | Combining two dot groups and naming the total | [3.16](#316-add-it-up) |
+| 17 | Take Away | Early numeracy | Removing dots from a group and naming what is left | [3.17](#317-take-away) |
+| 18 | Memory Match | Working memory | Holding card positions in mind while turning pairs | [3.18](#318-memory-match) |
+| 19 | Decode It | Early literacy | Reading short words among distractors that look alike | [3.19](#319-decode-it) |
+| 20 | Number Order | Early numeracy | Putting numerals in ascending order | [3.20](#320-number-order) |
+| 21 | Feelings Faces | Social-emotional | Naming an emotion from a short everyday scenario | [3.21](#321-feelings-faces) |
+| 22 | Story Order | Narrative sequencing | Putting three pictures in first, next, last order | [3.22](#322-story-order) |
+
+Domain counts: cognitive reasoning 4, fine motor 1, inhibitory control 1, visual discrimination 2, working memory 2, early literacy 5, early numeracy 5, social-emotional 1, narrative sequencing 1.
+
+## 3. Game specifications
+
+Every game below uses the same five fields: the mechanic the child performs, the round structure and content pool, the difficulty model, how it is narrated, and the art it uses. Difficulty is either an adaptive band ladder, described once in [4.8](#48-adaptive-difficulty), or a fixed easy-first ladder.
+
+### 3.1 Shape Sorter
+
+- **Mechanic.** Drag each shape tile into the matching cut-out hole on the board. The shape and the hole match by silhouette, so the child compares form rather than colour.
+- **Rounds and pool.** Three rounds of three shapes, nine unique shapes per playthrough, drawn from a pool of 18: circle, square, triangle, star, heart, crescent, oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring and teardrop.
+- **Difficulty.** Fixed. Three rounds of three, no band ladder.
+- **Narration.** One rule line: "Drag each shape into its hole." Spoken once at scene entry, replayable from the speaker glyph. No per-round prompt.
+- **Art and assets.** 18 filled shape SVGs plus 18 matching cut-out SVGs in the boot set, each shape with its own flat colour. Tile and sticker icons for the Hub.
+
+### 3.2 Animal Trace
+
+- **Mechanic.** Trace the dotted path from an animal to its food with one finger. The traced line lights up as the finger passes each waypoint.
+- **Rounds and pool.** Three of six animal and food pairs per playthrough: monkey and banana, rabbit and carrot, cat and fish, dog and bone, elephant and peanut, pig and apple. Three progress dots.
+- **Difficulty.** Fixed. Three pairs, no band ladder.
+- **Narration.** Rule line: "Trace the line to the animal's food." No per-round prompt.
+- **Art and assets.** Six animal SVGs and six food SVGs from the boot set. The path itself is computed at runtime from a curve, not pre-drawn art.
+
+### 3.3 Pop & Freeze
+
+- **Mechanic.** Pop floating bubbles by tapping them, while leaving the bubbles with a sleeping animal alone. Tapping a sleeping animal plays a wake tone and nothing else.
+- **Rounds and pool.** One continuous board. Five bubbles float at once, one or two of them sleeping animals. Six pops complete the game, with bubbles respawning as they are popped.
+- **Difficulty.** Fixed. Six pops, one to two sleeping decoys, no band ladder.
+- **Narration.** Rule line: "Pop the bubbles, but not the sleeping animals." The sleeping-animal tone is the in-game correction.
+- **Art and assets.** Bubble and sleep glyph SVGs, plus animal heads reused from the boot set. Tile and sticker icons.
+
+### 3.4 Shadow Match
+
+- **Mechanic.** Drag each picture onto its matching dark silhouette. Objects lift, tilt slightly, and settle into the shadow.
+- **Rounds and pool.** Six objects per playthrough from a pool of eight: house, tree, car, boat, ball, umbrella, airplane, mushroom. Six matches complete the game.
+- **Difficulty.** Fixed. Six of eight objects, no band ladder.
+- **Narration.** Rule line: "Drag each picture onto its shadow." No per-round prompt.
+- **Art and assets.** Eight object SVGs and eight shadow SVGs in the boot set, the shadows drawn as flat dark silhouettes at the icon tier.
+
+### 3.5 Musical Memory
+
+- **Mechanic.** Listen to the frogs sing a short sequence, then tap the frogs in the same order. Three frogs, tuned to C4, E4 and G4.
+- **Rounds and pool.** The sequence starts at two notes and grows by one note per completed round. Five rounds at every shift, so the last sequence is four notes longer than the first. Sequences are generated so the same frog never sings more than two notes in a row.
+- **Difficulty.** Adaptive. The band ladder moves the starting length one note in either direction (one, two or three notes), and the five round shape is the same at every shift.
+- **Narration.** The notes are the prompt, so there is no spoken rule or target. A speaker glyph replays the sequence at any time and is the only narration control.
+- **Art and assets.** Three frog colours and a lily pad from the boot set, with a ripple ring drawn at runtime around each frog as it sings.
+
+### 3.6 Big vs. Small
+
+- **Mechanic.** Drag each toy into the big box or the small box according to its size. The same toy appears at both sizes.
+- **Rounds and pool.** Three of six toy types per playthrough (teddy bear, car, ball, block, rocket, drum), each shown big and small, so six toys to sort. Six placements complete the game.
+- **Difficulty.** Fixed. Big toys render at 1.5 times base scale and small toys at 0.7, which is a wide, pre-reader-safe gap.
+- **Narration.** Rule line: "Put the big toys in the big box." No per-round prompt.
+- **Art and assets.** Seven toy SVGs including the box, from the boot set. Tile and sticker icons.
+
+### 3.7 Pattern Builder
+
+- **Mechanic.** Tap the shape that finishes the pattern. The pattern strip has four slots, three filled and one gap.
+- **Rounds and pool.** Six rounds. Each round has four slots with three filled and one gap, six shapes to choose from, and exactly three answer choices. The first slot is never the gap.
+- **Difficulty.** Adaptive. The band ladder shifts the pattern type and the gap: the easiest band always hides the last slot on an ABAB row, the middle band widens to ABAB, AABB or ABB with the last slot still hidden, and the top band may hide a middle slot instead.
+- **Narration.** Rule line: "Pick the shape that finishes the pattern." No per-round prompt.
+- **Art and assets.** Reuses the Shape Sorter shape SVGs. Tile and sticker icons.
+
+### 3.8 Find the Letter
+
+- **Mechanic.** Tap the card showing the target letter. The target is shown large and spoken.
+- **Rounds and pool.** Six rounds, six unique letters per playthrough from the 26 letter set, four cards per round.
+- **Difficulty.** Adaptive. The band ladder shifts the letter range: a child who is still learning sees a narrow early-alphabet set, a child who is accurate sees the wider pool.
+- **Narration.** Per-round target: the letter is spoken as it appears. The speaker glyph repeats it.
+- **Art and assets.** 26 letter SVGs. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. Tile and sticker icons.
+
+### 3.9 Find the Word
+
+- **Mechanic.** Tap the printed word that matches the picture and the spoken word.
+- **Rounds and pool.** Six rounds. An 18 word pool, eight three-letter words and ten four-letter words. Four word cards per round, never two starting with the same letter.
+- **Difficulty.** Adaptive. The band ladder shifts the mix of three and four letter words. A child who is finding it hard sees only three-letter words.
+- **Narration.** Per-round target: the word is spoken at a slow rate while the picture shows its meaning.
+- **Art and assets.** 18 prompt pictures. Most reuse boot art; four new SVGs (sun, hat, bug, duck) were added for this game. Tile and sticker icons.
+
+### 3.10 Build the Word
+
+- **Mechanic.** Build the pictured word by tapping letter tiles into empty slots, in order. Placed letters can be tapped to take them back.
+- **Rounds and pool.** Three words per playthrough, easy first: two three-letter words then one four-letter word.
+- **Difficulty.** Adaptive. The band ladder shifts the word tiers; the easy-first order is fixed.
+- **Narration.** Per-round target: the word is spoken when the round opens, and the replay glyph repeats it.
+- **Art and assets.** Letter SVGs for the tiles and the prompt picture from the boot set. Extra tiles are distractors drawn from the same word's letters plus nearby letters. Tile and sticker icons.
+
+### 3.11 How Many?
+
+- **Mechanic.** Tap the group that has the target number of items. The numeral is shown large and spoken.
+- **Rounds and pool.** Six rounds, two per band: 1 to 3, 1 to 5, 1 to 10. Three or four group cards per round, built from eight counting objects.
+- **Difficulty.** Adaptive. The band ladder shifts the number range.
+- **Narration.** Per-round target: the numeral is spoken as it appears.
+- **Art and assets.** Numeral SVGs and eight counting-object textures from the boot set. Tile and sticker icons.
+
+### 3.12 First Sounds
+
+- **Mechanic.** Tap the letter that starts the spoken word for the picture shown.
+- **Rounds and pool.** Six rounds from a 12 word pool with nine distinct initial letters. The pool avoids confusable pairs (b and p, d and t, g and k, s and z) and visually similar letter families.
+- **Difficulty.** Adaptive. The band ladder shifts which words and distractors appear.
+- **Narration.** Per-round target: the word is spoken, and the picture shows it.
+- **Art and assets.** Four letter cards from the 26 letter SVGs and prompt pictures from the boot set. Tile and sticker icons.
+
+### 3.13 More or Less
+
+- **Mechanic.** Tap the group with more items, or the group with fewer, following a large arrow cue.
+- **Rounds and pool.** Six rounds, three asking for more and three for fewer. Two group cards per round, with bands of 1 to 3, 1 to 5 and 1 to 10.
+- **Difficulty.** Adaptive. The band ladder shifts the number range.
+- **Narration.** Per-round target: the comparison word ("more" or "less") is spoken, and the arrow repeats it visually.
+- **Art and assets.** Up and down arrow SVGs, group cards built from the counting-object textures. Tile and sticker icons.
+
+### 3.14 Odd One Out
+
+- **Mechanic.** Tap the card that does not belong in a 2 by 2 grid of four cards.
+- **Rounds and pool.** Six rounds across three kinds of difference: different category, same category but a different item, and near-identical items such as three frog colours. The pool is 33 textures: six animals, three frogs, six toys and 18 shapes.
+- **Difficulty.** Adaptive. The band ladder shifts the mix of difference kinds across the six rounds.
+- **Narration.** Per-round target: the odd item is named when the round opens.
+- **Art and assets.** Reuses animal, toy and shape SVGs from the boot set. Tile and sticker icons.
+
+### 3.15 Color Match
+
+- **Mechanic.** Tap the object whose colour matches the swatch shown at the top of the screen.
+- **Rounds and pool.** Six rounds. The first rounds use a four colour pool (red, blue, yellow, green); later rounds add orange and purple. Four cards per round, each a different colour.
+- **Difficulty.** Adaptive. The band ladder shifts how early the larger colour pool appears.
+- **Narration.** Per-round target: the colour name is spoken.
+- **Art and assets.** The swatch is drawn at runtime rather than shipped as art. Objects reuse existing SVGs, one per colour: red heart, blue frog, yellow crescent, green rectangle, orange circle, purple square. Tile and sticker icons.
+
+### 3.16 Add It Up
+
+- **Mechanic.** Count the dots on two group cards joined by a plus sign, then tap the answer card whose group matches the total.
+- **Rounds and pool.** Six rounds. Bands are sums up to 4, up to 6 and up to 10. Four answer cards per round, each a distinct total, and no repeated addend pair within a playthrough.
+- **Difficulty.** Adaptive. The band ladder shifts the maximum sum. All round mechanics come from the shared group-math base; this game pins only the rule set.
+- **Narration.** Rule line: "Add the groups and pick the total." No per-round question voice; the equation is the prompt.
+- **Art and assets.** Plus and equals SVGs, dot-group cards built from the counting-object textures. Tile and sticker icons.
+
+### 3.17 Take Away
+
+- **Mechanic.** Count the dots on the first group, take away the dots in the second group joined by a minus sign, then tap the answer card for what is left.
+- **Rounds and pool.** Six rounds. Bands are totals up to 4, up to 6 and up to 10. The starting group is always larger than the group removed, so the answer is never zero and never negative.
+- **Difficulty.** Adaptive. The band ladder shifts the maximum total, same as Add It Up.
+- **Narration.** Rule line: "Take some away and pick how many are left." No per-round question voice.
+- **Art and assets.** Minus and equals SVGs, dot-group cards from the counting-object textures. Tile and sticker icons.
+
+### 3.18 Memory Match
+
+- **Mechanic.** Turn over two cards at a time to find a pair, holding the positions in mind between turns.
+- **Rounds and pool.** Six rounds. The grid grows across the ladder: three pairs in a 2 by 3 grid, six pairs in a 3 by 4 grid, eight pairs in a 4 by 4 grid. Pairs are drawn from a 16 texture pool of six animals, six toys and four small items.
+- **Difficulty.** Adaptive. The band ladder shifts the grid size.
+- **Narration.** Rule line: "Turn over two cards to find a pair." No per-round prompt.
+- **Art and assets.** 16 pair textures and a card back from the boot set. Tile and sticker icons.
+
+### 3.19 Decode It
+
+- **Mechanic.** See the picture and hear the word, then tap the printed word that names it among four cards.
+- **Rounds and pool.** Six rounds, easy first. Rounds one to three use three-letter words and rounds four to six use four-letter words, drawn from a 22 word pool. Four word cards per round, guarded against distractors that share the target's first letter or a confusable letter shape.
+- **Difficulty.** Adaptive. The band ladder shifts the split between three and four letter words, so a stronger reader meets four-letter words a round or two earlier.
+- **Narration.** Per-round target: the target word is spoken while the picture shows its meaning, and the speaker glyph repeats it.
+- **Art and assets.** The pool shares 18 words with Find the Word and adds four (fox, cup, map, bed). Four new item SVGs. Tile and sticker icons.
+
+### 3.20 Number Order
+
+- **Mechanic.** Drag shuffled numeral cards into dashed slots to put them in ascending order. The board checks itself when the last slot fills. Tapping a numeral speaks it.
+- **Rounds and pool.** Six rounds across three bands: three numerals from 1 to 5, four numerals from 1 to 8, five numerals from 1 to 10.
+- **Difficulty.** Adaptive. The band ladder shifts both the count and the range.
+- **Narration.** Rule line: "Put the numbers in order, smallest first." Numerals are spoken on tap rather than as a round prompt.
+- **Art and assets.** Numeral SVGs, with dashed slot outlines drawn at runtime. Tile and sticker icons.
+
+### 3.21 Feelings Faces
+
+- **Mechanic.** Hear a short scenario about Aby, then tap the face that shows how Aby feels. Three face cards per round, drawn from four faces: happy, sad, angry and scared.
+- **Rounds and pool.** Six rounds from a pool of 16 scenarios, four per emotion. Each playthrough uses one scenario per emotion plus two more, with no repeats. Every round includes the target emotion among three distinct faces.
+- **Difficulty.** Fixed ladder, with a built-in contrast ramp: rounds one to three use clearly distinct emotions (happy against angry), rounds four to six use the easily confused pair (sad against scared).
+- **Narration.** Rule line: "Tap the face that shows how Aby feels." Each round then speaks its scenario. A wrong tap re-speaks the scenario once and leaves the round open. When there is no voice or sound is off, the scenario appears as a caption and the glyph dims.
+- **Art and assets.** Four face SVGs, plus a tile and a sticker icon. No new audio.
+
+### 3.22 Story Order
+
+- **Mechanic.** Drag three shuffled panels into three slots, marked by one, two and three pips, to tell the story first, next, last. Panels can be swapped between slots, withdrawn by tapping, and dropped back into the tray.
+- **Rounds and pool.** Six rounds from a pool of eight three-panel stories, four obvious (seed to flower, flat balloon to aloft, egg to duckling, ice cream to puddle) and four subtle (whole banana to peel, full cup to empty, bare foot to shoe, cloud to puddle). Three stories from each band, no repeats.
+- **Difficulty.** Fixed ladder. Rounds one to three use obvious stories, rounds four to six use subtle ones.
+- **Narration.** Rule line: "Put the story in order, first to last." No per-round narration; the panels are the prompt.
+- **Art and assets.** 24 panel SVGs. These are the only game art that travels with a game chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
+
+## 4. Cross-game systems
+
+### 4.1 Shared scene bases and lazy loading
+
+Every game scene extends one shared base. `GameSceneBase` owns the parts no game should reimplement: the parental lock on the Back button, the corner mascot, the speaker glyph and its narrator, progress dots, audio access, the instruction line, the win celebration, sticker award and return to the Hub, and shutdown cleanup.
+
+`ChoiceRoundScene` sits on top of it and owns the prompt-plus-cards loop: rendering a round, tearing it down, allowing exactly one advance per tap, the 250 ms success flash, filling a progress dot, the reduced-motion wiggle, and the wrong-answer path. Fourteen of the 22 games are built on it: twelve extend `ChoiceRoundScene` directly (Find the Letter, Find the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Decode It, Number Order, Pattern Builder, Feelings Faces, Story Order) and two extend it through `GroupMathScene` (Add It Up, Take Away).
+
+`GroupMathScene` adds the two-card equation row and the operation cue. Add It Up and Take Away are roughly 25 line subclasses that pin only the instruction, the game id, the cue and the round builders.
+
+Each game is a separately built chunk, registered in a lazy scene registry and fetched before the crossfade into the game. The Hub and the shell never contain a game's code, which keeps the entry chunk under its budget and lets a returning player skip chunks they have already cached.
+
+### 4.2 One narrator, spoken rules and prompts
+
+Narration has one construction site. `RoundNarrator` builds the speaker glyph, the spoken line, the visible label where a rule is shown, the replay handler, the mute state and the caption fallback. Nothing else in the app constructs a speaker button in production.
+
+Narration comes in three shapes:
+
+- **A spoken rule line**, once at scene entry, replayable. Twelve games use one: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Pattern Builder, Memory Match, Number Order, Add It Up, Take Away, Feelings Faces and Story Order.
+- **A spoken round target**, re-spoken each round. Nine games use one: Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match and Decode It.
+- **A replay glyph with no speech of its own**, in Musical Memory, where the note sequence is the prompt.
+
+Speech is off when sound is off or when the device has no voice. In that state the glyph dims, captions take over where a game has them, and gameplay continues silently rather than blocking.
+
+### 4.3 The mascot
+
+Professor Hoot is a teacher owl drawn in two static poses, idle and celebrating. He appears in the Hub and in the corner of every game scene, where he reacts to correct answers and to the win. He is tweened only, never a second animation system, he has no voice of his own, and he is destroyed with the scene. With reduced motion on, his reactions shorten rather than disappear.
+
+### 4.4 Stickers
+
+Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: full colour and shimmering when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
+
+### 4.5 Profiles
+
+The app supports up to four profiles on one device, each with one of six avatars (cat, dog, pig, frog, duck, bear) and a default of the cat. The active profile is shown as a chip on the Hub; tapping it switches profile without a PIN, because switching profile is not a destructive action. Creating or deleting a profile requires the parental hold. Stickers, progress, activity and play time are stored per profile. A device with no stored data starts with one default profile.
+
+### 4.6 Play-time limits
+
+A parent can set a daily limit per profile: off, 15, 30, 45 or 60 minutes. Only visible minutes count. The play clock runs from a Hub tile tap to the return to the Hub, banks time in slices, pauses when the document is hidden, and never charges a backgrounded tab. The budget resets on the local calendar date.
+
+The limit is shown, never enforced mid-game. The Hub shows a textless remaining-time arc, which turns warm at five minutes or less, and an hourglass nudge appears at five minutes. At the cap, game tiles dim and show a moon badge, and starting a new game is refused; a game already in progress is always allowed to finish. Limits are off by default.
+
+### 4.7 Learning Progress
+
+Learning Progress is a parent-facing overlay behind the parental hold, showing one profile at a time with avatar chips to switch between them. For each game it shows the number of plays, an accuracy bar with a percentage, a mastery star once the game has been won three times, and when it was last played in relative terms. Games are listed six rows to a page, with chevrons and a page label, and a seven-day activity strip sits at the bottom.
+
+Progress is recorded on device as an additive part of the profile: a play when a Hub tile is tapped, a tap for every answer, and a win when a game completes. Existing profiles backfill these fields on read, so upgrading never loses stickers or settings.
+
+### 4.8 Adaptive difficulty
+
+Fifteen of the 22 games adapt. The other seven are fixed: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Feelings Faces and Story Order.
+
+An adaptive game keeps a rolling window of the profile's last ten taps for that game. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 60 percent moves it down one, and anything between leaves it alone. Bands are clamped to the game's supported range (1 to 3), so the ladder can never leave the game's difficulty.
+
+The result is applied as a shift to the game's classic easy-first ladder, which is `[1, 1, 2, 2, 3, 3]` for the band games. The shift is computed per profile, once at the start of a playthrough, and never mid-round. It is invisible to the child: no badge, no message, no sound. Adaptive difficulty can be turned off in Settings, and it is on by default.
+
+The fifteen adaptive games are Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order, Pattern Builder and Musical Memory. They live in 14 scene files because Add It Up and Take Away share the group-math scene. What shifts differs by game: number ranges in the numeracy games, word tiers in the word games, letter ranges in Find the Letter, grid size in Memory Match, starting sequence length in Musical Memory, colour pool in Color Match and pattern type in Pattern Builder.
+
+### 4.9 Preferred voice
+
+Settings offers a Voice row listing the device voices plus "Default (device)". The choice is stored as a voice URI and applies to every spoken line in the app: rule lines, round targets, prompts and the preview button. A Preview button speaks a sample phrase so the parent can hear the voice before committing, and the preview obeys the sound toggle. If the stored voice disappears from the device, the app falls back to the device default rather than going silent.
+
+### 4.10 Install and update
+
+The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to where it does not, and nothing when the app is already installed.
+
+Updates are prompt-based. A new service worker is downloaded but not activated until the parent accepts. The Hub shows a small toast with "Update now" and "Later"; accepting activates the new version and reloads, declining leaves the current version running. A second toast confirms when the app is ready to play offline.
+
+## 5. Interaction, touch and motion
+
+### 5.1 Visual language
+
+The palette is warm paper with a dark outline. Every surface is flat; there are no gradients on gameplay art.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--bg-base` | `#FAF9F6` | Screen background and fade colour |
+| `--bg-hub` | `#FFF8E7` | Hub background |
+| `--primary` | `#2B6CB0` | Primary UI and theme colour |
+| `--outline` | `#2D3748` | Outlines, text and silhouettes |
+| `--success` | `#68D391` | Correct feedback, progress rings |
+| `--error` | `#FC8181` | Soft error tone surfaces |
+
+| Sprite colour | Value |
+| --- | --- |
+| Orange | `#F6AD55` |
+| Teal | `#4FD1C5` |
+| Purple | `#9F7AEA` |
+| Pink | `#F687B3` |
+| Green | `#48BB78` |
+| Blue | `#3182CE` |
+| Red | `#E53E3E` |
+| Coral | `#FC8181` |
+| Golden brown | `#D69E2E` |
+| Yellow | `#ECC94B` |
+
+Design rules: thick dark strokes drawn at the 512 base size, flat fills, no gradients, no neon and no pure primaries. Type is the bundled Baloo 2 face, which is precached with the shell so it renders offline on the first frame.
+
+### 5.2 Touch targets
+
+The minimum interactive target is 64 by 64 px, the ideal is 96 by 96 px, and small art may sit inside a larger invisible hit area. Targets are inflated rather than drawn larger, so a 40 px glyph can still have a 96 px hit box.
+
+Protected controls, meaning the ones that change state rather than play, always use the larger target: every Back button, the Hub settings hold, the replay controls, and the parental-lock row. Taps navigate on release, not on press, so a child who touches and slides away does not trigger anything.
+
+### 5.3 The parental lock
+
+Anything parent-facing requires a continuous three second press on a 96 by 96 px target. A circular ring fills from 0.6 alpha success green while the press is held. Only one hold can run at a time, and it cancels immediately on release, pointer-out or pointer-cancel, leaving no partial state.
+
+The lock gates the Settings panel, the Back button inside a game, profile creation and deletion, Learning Progress, and Reset Progress. It is deliberately boring to a child and quick for an adult.
+
+### 5.4 Textless cues
+
+A child who cannot read must be able to play from pictures and speech alone. Every instruction is spoken first, and its on-screen form is a single short line beside the speaker glyph, sized for an adult to read at a glance rather than for a child to decode. Rounds also cue themselves with a glyph, an arrow, a picture or an animation, so the task makes sense with the line ignored.
+
+The exception is learning content. Letters, numerals, printed words and colour names are what the games teach, so they appear as text and are also spoken.
+
+### 5.5 Screen, orientation and letterboxing
+
+The game renders into a fixed 1024 by 768 landscape frame with `Phaser.Scale.FIT` and centred letterboxing. On a wider or narrower viewport the frame scales uniformly and the extra space is background colour, never a stretched scene and never a cropped one.
+
+The app asks the platform to lock orientation to landscape on boot and the manifest declares landscape. Where the lock is refused, which is normal on iOS, the layout still fits and the app relies on the device being held sideways. Pinch zoom is disabled outside the Settings panel and allowed inside it, so a parent can enlarge small text without the child zooming mid-round.
+
+### 5.6 Motion and feedback
+
+Scene changes are a 300 ms fade to the background colour into a 180 ms fade-in with a 1.02 zoom. The win celebration is ten rays and ten confetti pieces in the sprite palette, about 700 ms long, with the sticker reveal roughly 400 ms later. Correct answers flash and chime; wrong answers wiggle the piece and play a soft tone, with no shake and no red flash on the child's work.
+
+Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, and an idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
+
+### 5.7 Reduced motion
+
+The app reads the operating system's reduced-motion preference and never overrides it. When it is set, durations shorten (fades drop from 300 to 180 ms, celebrations from 700 to 300 ms), amplitudes shrink, the celebration uses six rays and no confetti, idle wiggles become a two degree sway, and the celebrate pose holds still. Nothing that carries information is motion-only, so no game becomes unplayable with motion reduced.
+
+## 6. Audio
+
+### 6.1 Sound effects
+
+All sound effects are synthesized with the Web Audio API at runtime. No audio file is shipped for an effect.
+
+| Event | Sound |
+| --- | --- |
+| Tap or soft interaction | Short soft pop |
+| Correct answer | Three-note ascending chime, C5, E5, G5 |
+| Wrong answer | Two-note falling tone, G4 then C4 |
+| Bubble popped | Short 800 Hz pop |
+| Sleeping animal tapped | Gentle two-note wake, E4 then A4 |
+| Game complete | Four-note rising win, C5, E5, G5, C6 |
+| Sticker awarded | Two bright notes, C6 and E6 |
+| Idle Hub call | Two quiet notes, E5 and G5, at low gain |
+
+Feedback is layered but never loud: a correct tap is a chime plus a colour splash, and no game uses particle emitters.
+
+### 6.2 Music
+
+There is one music loop, a single ambient track shipped as `bgm.mp3` and precached with the shell. It plays at low volume, starts only after the first interaction (browsers refuse audio before that), and is independent of the effect toggle. The music element is not duplicated per scene; one manager owns it for the life of the app.
+
+### 6.3 Speech
+
+Spoken lines use the platform's speech synthesis with the parent's chosen voice, falling back to the device default. Words are spoken below the default rate so a preschooler can follow them; short targets such as numerals are spoken slightly faster. Speech respects the sound toggle: with sound off, nothing is spoken, captions take over where a game offers them, and the replay glyph dims.
+
+### 6.4 Audio focus
+
+Narration outranks music. When a spoken line starts, the music ducks to eight percent of its normal volume over a 120 ms ramp. It returns when the speech ends, when speech errors, when either audio toggle changes, or when a 15 second watchdog expires, so a browser that never fires the speech end event cannot leave the music stuck quiet. The ducked level is never written to storage: it is runtime state, and a reload always starts at full music volume.
+
+When the document becomes hidden the app pauses the music, cancels in-flight speech, releases any duck, and stops the play-time clock. Returning to the document restores only what was actually playing and enabled before.
+
+### 6.5 Toggles
+
+Music and sound effects are two independent toggles in the Settings panel, each persisted per device. Turning effects off silences chimes, pops, spoken lines and the preview button while leaving music alone; turning music off leaves effects alone. Both are read at startup, so a muted device boots muted.
+
+## 7. Performance and asset budget
+
+### 7.1 The boot asset set
+
+The boot set is 178 SVG entries, rasterised during Preload so that no game stalls on a first draw. The set covers the shared art every game draws on: shapes and cut-outs, animals and foods, small items and shadows, letters, numerals, counting objects, toys, faces, UI glyphs, mascot poses, and the tile and sticker icons for the games.
+
+Rasterising every entry at 512 by 512 wasted GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers: 160 px for icons, letter and numeral cards and small UI glyphs, 256 px for gameplay cards, stickers and prompt targets, and 512 px for the mascot. Keys are matched by prefix, and anything unmatched defaults to the middle tier so new art is safe by default. Display code scales from the tier size rather than assuming 512, and the tiering cut texture memory from roughly 178 MiB to roughly 39 MiB.
+
+Story Order's 24 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces and its tile and sticker are in the boot set.
+
+### 7.2 Shell and game chunks
+
+The build produces three kinds of JavaScript:
+
+- **The shell entry**, which contains the boot, preload, Hub, settings, storage, audio and shared scene bases. It is gated at 200 kB minified.
+- **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
+- **One chunk per game**, plus a small shared chunk for the choice-round base and a shared chunk for drag behaviour.
+
+At version 1.20.0 the shell entry measured 195.4 kB against the 200 kB gate, the Phaser chunk measured 1342.6 kB, and game chunks ranged from about 0.5 kB to about 34 kB, the largest being Story Order because it carries its own art.
+
+### 7.3 Art that travels with a game
+
+Game art belongs in the game's chunk when only that game uses it. Story Order is the case that matters: its 24 panel drawings are imported as raw markup by the story scene and rasterised by that scene's own preload, so the strings live in the lazy chunk instead of the shell. A test asserts that the boot preload never imports them, which keeps the rule from eroding.
+
+Every other drawing is shared by two or more games, so it belongs in the boot set and is paid for once.
+
+### 7.4 Runtime targets
+
+| Target | Value |
+| --- | --- |
+| Frame rate | 60 fps, never below 30 on low-end hardware |
+| Cold boot | Under 3 seconds median on a mid-range tablet, enforced in CI |
+| Memory | Under 150 MB |
+| Touch response | Under 16 ms from tap to visual change |
+| Audio response | Under 50 ms from tap to sound |
+| Offline | Full play after the first load, including music and font |
+
+The boot budget is not aspirational: CI loads the production build in headless Chromium, samples several cold boots and fails the build if the median exceeds three seconds.
+
+## 8. Release readiness
+
+### 8.1 Gates
+
+A change is ready to merge only when the full chain passes locally and the CI gates pass on the pull request:
+
+```
+pnpm check
+pnpm typecheck
+pnpm test -- --run
+pnpm test:coverage
+pnpm build
+node scripts/validate-bundle.js
+node scripts/validate-pwa.js
 ```
 
-### Standardized Prompt Engineering Matrix
+`validate-bundle` enforces the shell budget and the single Phaser vendor chunk. `validate-pwa` checks the manifest, the service worker, the icons, the precached music and the navigation route. CI adds `validate-boot` against a preview server, which enforces the three second median.
 
-> **Note:** Game 1 (Shape Sorter) SVGs are currently **hand-authored** flat vectors (18 shapes + 18 cutout slots + 1 sticker), not AI-generated. The AI generation pipeline will be adopted for subsequent games.
+### 8.2 Deploy path
 
-| Asset Type | Target Mini-Game | Recommended AI Generation Prompt |
-|---|---|---|
-| Geometric Shapes | Game 1 (Shape Sorter) | "Flat vector icon of simple geometric [shape], vibrant soft non-primary color, thick dark stroke outline, flat design, white background, no gradients --no 3d, shading" |
-| Character Sprites | Game 2 & Game 5 | "Cute flat cartoon [animal], friendly expression, simple smooth curves, thick outline, storybook illustration vector, white background --no complex textures" |
-| Object Items | Game 4 & Game 6 | "Flat vector toy [item], bright toddler colors, simple silhouette shape, clean paths, isolated on white background" |
-| UI Elements | Global Hub / Frames | "Vector UI wooden tray frame, rounded corners, flat cartoon style, clean outline, toy aesthetic" |
+Every pull request that touches code runs the gates; documentation-only changes are filtered out of the CI path. A merge to master runs the gates again but does not deploy. Deployment is triggered only by a strict version tag whose commit is on master: CI verifies the lineage, then calls the Coolify deploy webhook with the repository's deploy token. That is why a docs track can merge without a rebuild.
 
----
+### 8.3 Definition of done
 
-## 3. Comprehensive Mini-Game Specifications
+A game or feature is done when: it has a spec entry here and an implementation section in the TDD; it follows the five field template; its narration goes through the single narrator; it respects the touch, motion, audio focus and reduced-motion contracts; its art is either in the boot set with a tier or in its own chunk; its logic is pure and tested; and the full gate chain passes at the merge commit.
 
-### Cross-Game Systems
+## 9. See also
 
-- **Sticker Collection:** Each mini-game awards a unique themed sticker on completion. Stickers display as a shelf of real SVG thumbnails under each Hub tile: earned stickers render at full alpha with a gentle shimmer loop, unearned slots show dashed empty-slot outlines (touch-inert Graphics) so the collection goal stays visible, and a just-earned sticker bounces in larger with a sparkle burst on auto-return. Earned stickers persist across sessions via localStorage.
-- **Replay Variety:** Each playthrough randomly shuffles which shapes, items, or animals appear, but difficulty stays fixed across replays.
-- **Feedback:** Correct actions trigger a pleasant chime + Graphics-based splash (the project uses Graphics shapes only — no `add.particles` emitters). Incorrect actions give a gentle "try again" animation with no penalty; dropping on empty space bounces back silently (no incorrect SFX).
-- **Scene Transitions:** Every navigation path (boot → preload → hub, hub ↔ game, completion returns) plays a crossfade transition: 300ms fade to the app background `#FAF9F6`, then a 180ms fade-in with a subtle 1.02 zoom entrance. No instant scene switches remain.
-- **Win Celebration:** All twenty games share one choreographed completion effect — 10 rays + 10 drifting confetti bits (~700ms, self-cleaning, `#68D391`/`#4FD1C5`/`#F687B3`/`#F6AD55`/`#9F7AEA`). Per-game bespoke win tweens were replaced by this single implementation. The first-time sticker reveal pops ~400ms after the celebration starts (250ms reduced motion) so the rays/confetti clear first.
-- **Press Feedback:** Interactive controls (all Back buttons, Hub Settings, Musical Memory Replay, the shared replay SpeakerButton) and Hub game tiles squish to 95% of their base scale while pressed and spring back on release/pointer-out/cancel; Hub tiles spring with a `Back.out` overshoot (150ms). Hub tiles navigate **on release** (release on the tile) so the squish stays visible while holding; releasing off the tile cancels navigation.
-- **Reduced Motion:** One motion utility (`isReducedMotion`, `motionDuration`, `motionScale`) governs every animation. With `prefers-reduced-motion` active, durations shorten (~40%, e.g., 300→180ms, 200→120ms), amplitudes soften (e.g., 1.15×→1.05×), the celebration simplifies (6 rays, no confetti), and press feedback is disabled — gameplay remains fully functional.
-- **Mascot Companion (Professor Hoot):** A friendly teacher owl mascot (two static SVG poses, tween-only animation — no sprite sheets, no particle emitters, no new audio) who lives in the bottom-right corner of the Hub and all twenty game scenes: waves on Hub load, cheers on a newly earned sticker, cheers on correct actions, nods on incorrect actions, and joins the win celebration with a bigger cheer. Touch-inert, rendered behind gameplay z-order, reactions reuse the shared SFX (`playCorrect`/`playIncorrect`/`playWin`/`playSticker`), and everything runs through `motion.ts` (reduced-motion: no idle loop, gentle wave/nod, pose swap without bounce or sparkle). Destroyed on scene shutdown.
-
-### GAME 1 — Shape Sorter (Cognitive Reasoning & Categorization) ✅ Implemented
-
-- **Milestone:** Matching and sorting geometric shapes (18 total: Circle, Square, Triangle, Star, Heart, Crescent, Oval, Rectangle, Diamond, Pentagon, Hexagon, Octagon, Trapezoid, Semicircle, Arrow, Plus, Ring, Teardrop).
-- **Mechanics:** 3 rounds of 3 shapes per playthrough (9 unique shapes per session — no repeats across rounds) drawn from the 18-shape pool via `generatePlaythrough(3)`. Each round shows 3 cut-out SVG slot frames at the top and 3 colored SVG shapes at the bottom (positions shuffled independently). Player drags shape to matching slot. A progress dot fills for each completed round; the win + sticker award happen only after round 3.
-- **SVG Requirements:** `shape_circle.svg` … `shape_teardrop.svg` (18 shapes, 512×512px, hand-authored flat vectors). Cutouts: `cutout_*.svg` (same paths, 30% opacity fill + dashed `#2D3748` stroke). Sticker: `sticker_shape_sorter.svg`.
-- **Shape Colors:** Circle `#F6AD55` (orange), Square `#9F7AEA` (purple), Triangle `#4FD1C5` (teal), Star `#F687B3` (pink), Heart `#E53E3E` (red), Crescent `#ECC94B` (yellow), Oval `#63B3ED` (sky blue), Rectangle `#48BB78` (green), Diamond `#ED64A6` (rose), Pentagon `#B7791F` (golden brown), Hexagon `#4C51BF` (indigo), Octagon `#D69E2E` (amber), Trapezoid `#38B2AC` (turquoise), Semicircle `#F56565` (coral), Arrow `#9AE6B4` (mint), Plus `#FBB6CE` (blush), Ring `#A0AEC0` (soft gray-blue), Teardrop `#B2F5EA` (aqua) — all soft/vibrant non-primary, color-independent design.
-- **Phaser Engine Logic:** Uses Phaser Pointer Drag and Zone detection (`this.add.zone()`). Pieces lift to 1.1× scale with a 4° tilt on drag start (1.05×, no tilt under reduced motion) and restore on release; drop zones pulse a soft outline while dragging over them. Correct drops snap to center via a 200ms `Back.out` tween (120ms reduced) with synthesized chime + Graphics splash. Incorrect drops bounce back with gentle wobble (no penalty); dropping on empty space bounces back silently (no incorrect SFX). Completing a round fills its progress dot with a 1 → 1.4 → 1 `Back.out` pop (1.15 reduced); the next round re-renders fresh shapes after ~1.2s; the win celebration, sticker award, and 3s auto-return to Hub happen only after the final round.
-- **Accessibility:** All juice amplitudes/durations soften when `prefers-reduced-motion` is active.
-- **Game Logic:** Pure functions in `src/game/shapeSorterLogic.ts` (Fisher-Yates shuffle, match detection, shape selection, `generatePlaythrough(roundCount)` producing 9-unique-shape sessions).
-
-### GAME 2 — Animal Trace-and-Connect (Fine Motor Precision) ✅ Implemented
-
-- **Milestone:** Pre-writing motor coordination and line tracing control.
-- **Mechanics:** 3 of 6 animal-food pairs randomly selected per playthrough (Fisher-Yates shuffle). Animal sprite sits on the left; its food sprite sits on the right. A thick dotted curve connects them, generated programmatically at runtime. Child traces the path with a finger to move the animal toward the food. Lifting the finger or straying pauses the animal (no reset, no penalty); resuming continues from the same position. A progress indicator (3 dots) shows completed paths.
-- **Animal-Food Pairs:** Monkey → Banana, Rabbit → Carrot, Cat → Fish, Dog → Bone, Elephant → Peanut, Pig → Apple.
-- **SVG Requirements:** `monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`, `elephant.svg`, `pig.svg` (animals, `assets/svg/animals/`); `banana.svg`, `carrot.svg`, `fish.svg`, `bone.svg`, `peanut.svg`, `apple.svg` (food, `assets/svg/items/`); `sticker_animal_trace.svg`. Dotted path is generated at runtime via `Phaser.Curves.Path` + Graphics — not a static SVG.
-- **Phaser Engine Logic:** Defines a `Phaser.Curves.Path` per pair (gentle multi-point curve). On `pointermove` while pointer is down, checks pointer proximity to next path waypoint (generous 60px tolerance). The animal hops between waypoints with a small arc tween (~120ms per hop; straight and faster under reduced motion). Finger lift/stray pauses at current position; resume continues from same spot. Reaching food triggers completion chime + Graphics splash and the food sprite wiggles (±4°, 3 yoyo repeats); the path's progress dot pops 1 → 1.4 → 1 with `Back.out` instead of alpha-only. All 3 paths traced → win animation + sticker award (first time only) + auto-return to Hub after 3s.
-- **Game Logic:** Pure functions in `src/game/animalTraceLogic.ts` (pair selection/shuffle, path progress tracking, completion detection, waypoint generation) — testable without Phaser.
-- **Accessibility:** Hop arcs, food wiggle, and dot pops are reduced/gentler when `prefers-reduced-motion` is active. No-fail design (no penalties for deviation/lift).
-
-### GAME 3 — Pop & Freeze! (Reflexes & Inhibitory Control) ✅ Implemented
-
-- **Milestone:** Visual reaction time and impulse control (Stop-and-Go processing).
-- **Mechanics:** 5 bubbles float around the screen concurrently via Arcade Physics with world-bounds bouncing. 1–2 of these are "sleeping-animal" decoy bubbles (containing a sleeping animal inside). The child pops standard bubbles by tapping them. Tapping a sleeping-animal bubble triggers a gentle wobble and wake-up sound with **no penalty** — the bubble remains on screen. The round is won after **6 pops**. Popped bubbles respawn to maintain the concurrent count (with 1–2 sleeping maintained).
-- **SVG Requirements:** `bubble.svg` (512×512, translucent round bubble with highlight, storybook style). Reuses the 6 existing animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`, `elephant.svg`, `pig.svg` from Game 2) as sleeping-animal content inside bubbles — no separate sleeping-animal art. Sleeping decoys show a storybook sleep glyph (`sleep_zzz.svg`, 40px) instead of text. Sticker: `sticker_pop_freeze.svg`.
-- **Phaser Engine Logic:** Arcade Physics images with random velocity (30–80 px/s gentle drift) and world-bounds bounce (`setCollideWorldBounds` + `setBounce(1, 1)`). `pointerdown` triggers pop (shrink animation + synthesized pop SFX + Graphics splash + 3 teal droplet circles radiating from the pop point with a self-cleaning fade + respawn) or wake (wobble animation + synthesized wake SFX, no penalty). Sleeping-animal decoys breathe on a 1.0 → 1.03 yoyo loop (~1.5s; disabled under reduced motion). The round is won after **6 pops**. Completion triggers win animation + sticker award (first time only) + auto-return to Hub after 3s.
-- **Game Logic:** Pure functions in `src/game/popFreezeLogic.ts` (round state, Fisher-Yates shuffle, bubble type selection maintaining 1–2 sleeping, spawn config generation with on-screen position clamping, pop registration with win detection, wake registration with no penalty) — testable without Phaser.
-- **Accessibility:** Droplet bursts are shorter/gentler when `prefers-reduced-motion` is active, and the breathing loop is disabled entirely. Touch targets at 96×96px (exceeds 64px minimum). No-fail design (no penalties for waking sleeping animals).
-
-### GAME 4 — Shadow Match (Visual Discrimination & Spatial Awareness) ✅ Implemented
-
-- **Milestone:** Differentiating forms and visual outlines independent of color.
-- **Mechanics:** 6 of 8 dark silhouette SVG shadows sit in a row at the top of the screen. 6 of 8 full-color SVG objects lie below (objects and shadows always share the same 6-item set — every object has a matching shadow — with positions shuffled independently per playthrough). Child drags each colored object onto its matching dark silhouette. Match all 6 to win.
-- **Object Set:** House, Tree, Car, Boat, Ball, Umbrella, Airplane, Mushroom — 8 maximally distinct outline shapes satisfying color-independent accessibility.
-- **SVG Requirements:** 8 object SVGs in `assets/svg/items/` (`house.svg`, `tree.svg`, `car.svg`, `boat.svg`, `ball.svg`, `umbrella.svg`, `airplane.svg`, `mushroom.svg`) — 512×512px, flat fills, thick `#2D3748` outlines 4–6px, soft/vibrant palette. 8 shadow silhouette SVGs in `assets/svg/shadows/` (`shadow_house.svg`, `shadow_tree.svg`, `shadow_car.svg`, `shadow_boat.svg`, `shadow_ball.svg`, `shadow_umbrella.svg`, `shadow_airplane.svg`, `shadow_mushroom.svg`) — derived by duplicating each object's paths, unioning fills, setting color to `#2D3748`. Sticker: `sticker_shadow_match.svg`.
-- **Phaser Engine Logic:** Reuses Shape Sorter's drag/drop architecture (Phaser Pointer Drag + Zone detection). On correct drop: snaps object to silhouette center via 200ms `Back.out` tween, the silhouette stamps with a 1.1× pulse + white fill flash (self-cleaning), the matched object dims to 50% alpha, and a synthesized correct SFX + Graphics splash play; object is marked as matched (locked in place). On incorrect drop: gentle bounce-back to origin + synthesized incorrect SFX, no penalty. Dropping on empty space bounces back silently (no incorrect SFX). Completion triggers win animation + sticker award (first time only) + auto-return to Hub after 3s.
-- **Accessibility:** Silhouettes differ by outline shape, not just darkness (color-independent design). Objects render at 112px (above the 96×96px ideal touch target). Stamp/dim effects soften when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
-- **Game Logic:** Pure functions in `src/game/shadowMatchLogic.ts` (Fisher-Yates shuffle, independent object/shadow position generation, match detection, win detection) — testable without Phaser.
-
-### GAME 5 — Musical Memory Simon (Working Memory & Auditory Recall) ✅ Implemented
-
-- **Milestone:** Sequential direction following and audio pattern retention.
-- **Mechanics:** 3 colorful SVG frogs on lily pads emit distinct musical notes (C4, E4, G4) and scale up in sequence. Child repeats the sequence. Each successful round adds one note, starting at 2 notes and winning at length 6 (5 rounds). A speaker-icon replay button (96×96, shared `SpeakerButton` component) lets the child re-listen to the current sequence on demand.
-- **SVG Requirements:** `frog_green.svg`, `frog_blue.svg`, `frog_red.svg`, `lilypad.svg` (512×512px, flat fills, thick `#2D3748` outlines 4–6px, storybook style). Sticker: `sticker_musical_memory.svg`.
-- **Phaser Engine Logic:** Sequence stored in a typed array (`number[]`). Sequence auto-plays at round start with each frog scaling up + playing its note and emitting an expanding ripple ring (self-cleaning fade; input locked during playback, unlocked after). Lily pads drift gently ±3px on a 3s loop (disabled under reduced motion). Evaluates user tap order against array indices. On wrong tap: plays a gentle incorrect tone, re-plays the sequence, and retries the same round (no-fail, no progress lost). On round success: pops the next progress dot (1 → 1.4 → 1 `Back.out`, 5 dots total), grows the sequence by 1, and auto-plays the next round. Completion at length 6 triggers win animation + sticker award (first time only) + auto-return to Hub after 3s. Input is locked during the win celebration. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Frogs distinguished by color AND position AND note (not color-only). Ripple/drift/dot-pop effects soften or disable when `prefers-reduced-motion` is active. No-fail design (no penalties for wrong taps).
-- **Game Logic:** Pure functions in `src/game/musicalMemoryLogic.ts` (sequence generation, note appending, input validation, round completion, win detection) — testable without Phaser.
-
-### GAME 6 — Big vs. Small Cleaner (Scale & Quantitative Reasoning) ✅ Implemented
-
-- **Milestone:** Categorizing spatial size concepts ("Big" vs "Small").
-- **Mechanics:** 3 of 6 toy types randomly selected per playthrough (Fisher-Yates shuffle). Each selected toy type spawns at two scales: big (1.5×) and small (0.7×), yielding 6 toys per round. Two toy box containers sit at the top of the screen — one rendered at 1.5× scale ("BIG" box) and one at 0.7× scale ("SMALL" box). Child drags each toy into the box whose scale category matches the toy's. Match all 6 to win.
-- **Toy Set:** Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Rocket, Toy Drum — 6 toy types with maximally distinct silhouettes.
-- **SVG Requirements:** `teddy_bear.svg`, `toy_car.svg`, `toy_ball.svg`, `toy_block.svg`, `toy_rocket.svg`, `toy_drum.svg` (512×512px, flat fills, thick `#2D3748` outlines 4–6px, storybook style, in `assets/svg/toys/`). `toy_box.svg` (512×512px, open container, rendered at both 1.5× and 0.7× scales — the box itself teaches the size concept). Sticker: `sticker_big_small.svg` (big orange ball + small purple ball on cream circle background).
-- **Toy Colors:** Teddy Bear golden brown (`#D69E2E`), Toy Car coral (`#FC8181`), Toy Ball teal (`#4FD1C5`), Toy Block purple (`#9F7AEA`), Toy Rocket blue (`#3182CE`), Toy Drum yellow (`#ECC94B`) — all soft/vibrant non-primary.
-- **Phaser Engine Logic:** Reuses Shape Sorter / Shadow Match's drag/drop architecture (Phaser Pointer Drag + Zone detection). Each toy image is created at `TOY_BASE_SIZE × toy.scale` (96px base × 1.5 = 144px for big, 96px × 0.7 = 67px for small — exceeding the 64px minimum touch target). Box zones use `DROP_ZONE_SIZE = 160px`. On correct drop: the toy shrinks into the box with a 150ms tween, the box lid wiggles (±3°, 3 yoyo repeats), the box briefly bumps to 1.05×, a synthesized correct SFX + Graphics splash play, and the toy is marked as sorted (locked in place via `disableInteractive`). On incorrect drop: gentle bounce-back to origin via `Back.out` tween + synthesized incorrect SFX, no penalty. Dropping on empty space bounces back silently. Completion triggers the shared win celebration (rays + confetti) + sticker award (first time only) + auto-return to Hub after 3s.
-- **Accessibility:** Big toys (144px) and small toys (67px) both exceed the 64px minimum touch target. Size categories are visually distinct (1.5× vs 0.7× ratio). Box-reaction tweens soften when `prefers-reduced-motion` is active. No-fail design (no penalties for mismatches).
-- **Game Logic:** Pure functions in `src/game/bigSmallLogic.ts` (Fisher-Yates shuffle, toy type selection, toy instance creation with dual scales, box creation, round generation with independent toy shuffling, scale-category match detection, win detection) — testable without Phaser.
-
-### GAME 7 — Pattern Builder (Sequential Pattern Recognition) ✅ Implemented
-
-- **Milestone:** Recognizing and completing simple repeating sequences.
-- **Mechanics:** 4 slots show 3 filled shapes and 1 marked empty gap; 3 answer cards sit below. Child taps the shape that completes the pattern. 5 rounds per playthrough; each round draws a fresh pattern from a 6-shape pool with 3 unique choices (no duplicate answers).
-- **Pattern Types:** ABAB, AABB, ABB — built from two distinct shapes chosen from the 6-shape pool (circle, square, triangle, star, heart, crescent). The gap appears at the end (50%) or in the middle (50%, never the first slot).
-- **SVG Requirements:** Reuses the 6 existing Game 1 shape SVGs (`shape_circle.svg` … `shape_crescent.svg`) — no new gameplay assets. Sticker: `sticker_pattern_builder.svg` (ABAB row of an orange circle + teal rounded square with a dashed gap slot on the cream badge).
-- **Phaser Engine Logic:** Tap-to-fill (no drag). Correct tap: the chosen card shape tweens into the gap with a 200ms `Back.out` snap (120ms reduced) + ascending chime, the progress dot pops 1 → 1.4 → 1 `Back.out`, and the next round starts after 700ms. Incorrect tap: the card wiggles ±4° (`Sine.inOut`, 350ms, 3 yoyo repeats; gentler ±2°/200ms under reduced motion) + soft descending tone, no penalty, no progression loss. After 5 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "pattern-builder" }`. Parental lock (hold 3s) exits to Hub at any time. Mascot: cheer on correct, nod on incorrect, big cheer on win.
-- **Accessibility:** Cards and slots are 120–128px (exceeding the 64px minimum and the 96×96px ideal). Shapes are distinguished by silhouette AND color. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Zero text — gameplay is purely visual.
-- **Game Logic:** Pure functions in `src/game/patternBuilderLogic.ts` (pattern row generation, gap placement, distractor selection, 3-unique-choice generation, playthrough generation, correct-shape lookup) — testable without Phaser.
-
-### GAME 8 — Find the Letter (Alphabet Recognition) ✅ Implemented
-
-- **Milestone:** Early literacy — recognizing uppercase letter shapes.
-- **Mechanics:** A large target letter rendered from the preloaded letter SVG texture (256px display, ~200px visual glyph) appears top-center and is **spoken aloud** via browser SpeechSynthesis (`speechSynthesis.speak`, en-US, gentle rate; respects the SFX toggle; silent graceful fallback if unsupported — the visual letter remains the primary cue). A speaker-icon replay button (96×96) next to it re-names the letter on demand. 4 letter cards (160px each) sit below; the child taps the card matching the target. 6 rounds per playthrough; each playthrough draws 6 **unique** letters uniformly from A–Z (no duplicates; difficulty stays fixed — 4 choices every round, per the replay-variety principle).
-- **Letter Set:** Uppercase A–Z only. All 26 letter SVGs use identical styling (`#2B6CB0` fill, `#2D3748` stroke, bold bundled Baloo 2 with Arial fallback — 2026-08-11) so letters are recognized by **shape only** — no color-as-cue.
-- **SVG Requirements:** `letter_a.svg` … `letter_z.svg` (512×512px, bold uppercase letterforms, `assets/svg/letters/`). Sticker: `sticker_alphabet_match.svg` ("ABC" on the cream badge).
-- **Phaser Engine Logic:** Tap-to-answer (no drag). Correct tap: ascending chime + mascot cheer + progress dot pop (`Back.out`, 1.4×/1.2× reduced), next round after 700ms. Incorrect tap: soft descending tone + mascot nod + card wiggle ±4° (`Sine.inOut`, 350ms, 3 yoyo repeats; ±2°/200ms reduced), no penalty, no progression loss. After 6 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "alphabet-match" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Target glyph (~200px visual from a 256px SVG texture) and cards (160px, letter glyphs from the letter SVG textures) far exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Letters are the learning content — no written instructions anywhere.
-- **Game Logic:** Pure functions in `src/game/alphabetLogic.ts` (26-letter alphabet, playthrough generation with unique targets, round generation with 4 unique choices, answer evaluation, win detection) — testable without Phaser. TTS wrapper in `src/utils/speech.ts`.
-
-### GAME 9 — Find the Word (Sight-Word Recognition) ✅ Implemented
-
-- **Milestone:** Early literacy — matching a spoken/pictured word to its printed form.
-- **Mechanics:** A picture prompt (~180px, top-center) appears and the word is **spoken aloud** via browser SpeechSynthesis (`speechSynthesis.speak`, en-US, rate 0.8; respects the SFX toggle; silent graceful fallback if unsupported — the picture remains the primary cue). A speaker-icon replay button (96×96) re-hears the word on demand. 4 word cards in a 2×2 grid sit below; the child taps the card matching the prompt. 6 rounds per playthrough; each playthrough draws 6 **unique** words from an 18-word pool. Cards render as the word's letters composed from the shared letter textures (~80px/letter, min card height 160px).
-- **Word Pool:** 18 words — 3-letter tier: CAT, DOG, PIG, CAR, OWL, SUN, HAT, BUG; 4-letter tier: FROG, BALL, FISH, BOAT, TREE, BONE, STAR, DRUM, BEAR, DUCK. Pictures reuse existing textures where possible (`animal_cat/dog/pig`, `sm_car`, `frog_red`, `sm_ball`, `food_fish`, `sm_boat`, `sm_tree`, plus `mascot_idle` for OWL, `food_bone`, `shape_star`, `toy_drum`, `toy_teddy_bear` for BEAR) and 4 new SVGs for SUN/HAT/BUG/DUCK (`sm_sun`, `sm_hat`, `sm_bug`, `sm_duck`). Uppercase printed words only.
-- **Pre-Reader Guard:** No two answer cards in a round share a first letter, so pre-readers can match by first-letter shape alone.
-- **SVG Requirements:** 4 picture SVGs added in `src/assets/svg/items/` (`sun.svg`, `hat.svg`, `bug.svg`, `duck.svg`, registered as `sm_sun`/`sm_hat`/`sm_bug`/`sm_duck`); every other new word reuses existing animal/food/object/toy/shape/mascot art. Words compose from existing letter textures. Sticker: `sticker_word_match.svg` ("CAT" on the cream badge).
-- **Phaser Engine Logic:** Tap-to-answer (no drag). Correct tap: ascending chime + mascot cheer + progress dot pop (`Back.out`, 1.4×/1.2× reduced), next round after 700ms. Incorrect tap: soft descending tone + mascot nod + card wiggle ±4° (`Sine.inOut`, 350ms, 3 yoyo repeats; ±2°/200ms reduced), no penalty, no progression loss. After 6 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "word-match" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Cards (min 160px high, ~240px wide) far exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Words are the learning content — no written instructions anywhere.
-- **Game Logic:** Pure functions in `src/game/wordLogic.ts` (18-word pool with tiers, playthrough generation with unique targets, round generation with 4 unique choices and the no-shared-first-letter guard, answer evaluation, win detection) — testable without Phaser. Word TTS via `src/utils/speech.ts` (`speakWord`, rate 0.8).
-
-### GAME 10 — Build the Word (Spelling) ✅ Implemented
-
-- **Milestone:** Early literacy — spelling a spoken/pictured word by ordering its letters.
-- **Mechanics:** A picture prompt (~180px, top-center) appears and the word is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). A row of empty slots (one 120px box per letter) sits mid-screen with 6 letter tiles (~110px) below. The child spells the word by tapping the correct letter tiles in order — slots fill strictly left-to-right and lock in. 3 words per playthrough, easy-first: 2× 3-letter words then 1× 4-letter word (no repeats within a playthrough).
-- **Letter Tiles:** 6 tiles per word — the word's unique letters plus 2–3 distractor letters **not** in the word (drawn from A–Z), shuffled. Tiles compose from the shared letter textures (`letter_a`…`letter_z`).
-- **SVG Requirements:** Same picture set as Game 9 (4 new SVGs `sun`/`hat`/`bug`/`duck`; all other words reuse existing art). Sticker: `sticker_word_builder.svg` ("DOG" on the cream badge).
-- **Phaser Engine Logic:** Correct letter: soft tick (`playPop`) + settle-pop into the next empty slot (`Back.out` 1.15× → 1, 150ms), tile locks in (re-tap ignored). Incorrect letter: soft descending tone + mascot nod + tile wiggle ±4° (gentler under reduced motion), no penalty. Finished word: chime + mascot cheer + progress dot pop, lingers 1.2s, then the next word renders. After 3 words: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "word-builder" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Slots (120px) and tiles (110px) exceed the 64px minimum touch target and 96×96px ideal. All tweens are reduced-motion-aware. No-fail design (wrong taps never penalize progress). Words are the learning content — no written instructions anywhere.
-- **Game Logic:** Pure functions in `src/game/wordLogic.ts` (easy-first playthrough generation, letter-tile generation with distractors, sequential spelling state) — testable without Phaser.
-
-### GAME 11 — How Many? (Early Numeracy: Counting & Number Recognition) ✅ Implemented
-
-- **Milestone:** Early numeracy — counting a small set of objects and matching it to a target number.
-- **Mechanics:** A large target numeral (~240px) pops in top-center and is **spoken aloud** (en-US, rate 0.9; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). Below it sit 3–4 object-group cards (200×200px, ≥96px touch): rounds 1–2 show 3 cards with counts 1–3, rounds 3–6 show 4 cards with counts 1–5 then 1–10. Each card shows N small item copies (~42px loose grid) of one item type. The child taps the group whose count matches the target. 6 rounds per playthrough, 2 per progressive band; win on 6 correct.
-- **Count Logic:** Within a round all group counts are distinct and exactly one matches the target; group positions and item types are shuffled per round. Item types come from existing textures only (`shape_star`, `sm_ball`, `food_apple`, `food_fish`, `food_carrot`, `sm_sun`, `sm_house`, `sm_duck`) — zero new object assets. Pure functions in `src/game/countLogic.ts` (playthrough/round generation, answer evaluation, win detection) — testable without Phaser.
-- **SVG Requirements:** 10 numeral SVGs `numeral_0.svg`…`numeral_9.svg` (512×512, `#2B6CB0` fill / `#2D3748` stroke, bundled Baloo 2 with Arial fallback — identical styling to the letter set so recognition is digit-shape only) + `sticker_how_many.svg` ("3" + star sparkle on the cream badge).
-- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "how-many" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Cards (200px) and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Numerals are the learning content — displayed large and spoken; no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 12 — First Sounds (Early Literacy: Phonemic Awareness) ✅ Implemented
-
-- **Milestone:** Early literacy — phonemic awareness: hearing the first sound of a spoken word and mapping it to its letter.
-- **Mechanics:** A picture prompt (~180px, top-center) appears and the word is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). Below it sits a single row of 4 letter cards (160×160px, ≥96px touch). The child taps the letter card that makes the word's first sound. 6 rounds per playthrough; win on 6 correct.
-- **Word Pool:** A curated 12-word subset of the shared 18-word pool (`CAT DOG PIG SUN HAT BUG OWL TREE STAR BALL FROG FISH`) with **maximally distinct initial sounds** — 9 distinct first letters (C D P O S H B F T), avoiding the confusable b/p, d/t, g/k, s/z pairs. Prompt textures reuse existing art (`animal_cat/dog/pig`, `sm_sun/hat/bug`, `mascot_idle`→OWL, `sm_tree`, `shape_star`, `sm_ball`, `frog_red`, `food_fish`) — zero new object assets.
-- **Round Logic:** Each round picks one word for the target letter and 3 distractor letters that are neither sound-confusable with the target (B/P, D/T pairs) nor visually confusable (reusing the Alphabet families [C,G,O,Q], [I,L,T], [M,W] from `alphabetLogic.ts`). Targets are 6 unique letters per playthrough drawn uniformly from the 9. Pure functions in `src/game/firstSoundsLogic.ts` (pool derivation from `WORD_POOL`, playthrough/round generation, evaluation) — testable without Phaser.
-- **SVG Requirements:** Reuses the existing letter textures (`letter_a`…`letter_z`) and word-pool textures; new assets are `tile_first_sounds.svg` (letter "A" + green sound-wave arcs, matching the tile family) and `sticker_first_sounds.svg` ("A" + sound waves on the cream badge).
-- **Phaser Engine Logic:** Correct tap: splash + chime (`playCorrect`) + the correct letter spoken back (`speakLetter`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "first-sounds" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Cards (160px) and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Letters are the learning content — spoken and tappable; no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 13 — More or Less (Early Numeracy: Quantity Comparison) ✅ Implemented
-
-- **Milestone:** Early numeracy — comparing two small quantities and identifying which has MORE or FEWER items.
-- **Mechanics:** A large arrow cue (~256px) pops in top-center — **up arrow = "more", down arrow = "less"** — and the comparison word is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). Below it sit two group cards (220×220px, ≥96px touch), each showing N small item copies (~48px loose grid) of one item type from the shared counting set. The child taps the group that has more/fewer items than the other. 6 rounds per playthrough (3 "more" + 3 "less", shuffled), easy-first bands 1–3 / 1–5 / 1–10; win on 6 correct.
-- **Round Logic:** Within a round the two group counts are always distinct (never equal), so exactly one card satisfies the prompt; card sides, item types, and counts shuffle per round. Item types come from existing textures only (`COUNT_ITEMS`: `shape_star`, `sm_ball`, `food_apple`, `food_fish`, `food_carrot`, `sm_sun`, `sm_house`, `sm_duck`) — zero new object assets. Pure functions in `src/game/moreLessLogic.ts` (playthrough/round generation, more-vs-less evaluation, win detection) — testable without Phaser.
-- **SVG Requirements:** `arrow_up.svg` + `arrow_down.svg` (chunky storybook arrows, `#2B6CB0` fill / `#2D3748` stroke, matching the numeral visual language) + `tile_more_less.svg` (two dot-cards + up arrow on the transparent tile) + `sticker_more_less.svg` (two mini-cards + arrow on the cream badge).
-- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "more-less" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Cards (220px), arrow cue (~256px), and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Quantity comparison is the learning content — the arrow + spoken word are the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 14 — Odd One Out (Visual Discrimination & Categorization) ✅ Implemented
-
-- **Milestone:** Visual discrimination — spotting the one card that is different among otherwise-identical cards.
-- **Mechanics:** A 2×2 grid of 4 cards (~256px, ≥96px touch) shows exactly **3 identical textures (the group) + 1 distinct (the odd one)**; the odd item's name is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). The child taps the card that is different. 6 rounds per playthrough, easy-first: rounds 1–2 cross-category (e.g. 3 animals + 1 shape), rounds 3–4 same-category different item (e.g. 3 cats + 1 dog, 3 stars + 1 circle), rounds 5–6 near-identical (e.g. 3 green frogs + 1 blue frog); win on 6 correct.
-- **Round Logic:** The odd texture is unique per playthrough (never repeated within a session). Group/odd textures always differ. Band 1 picks the odd from a different category than the group; band 2 keeps both within one non-frog category but a different item; band 3 uses the frog color variants only (frog pool reserved for band 3 so the 3-frog set never starves later rounds). Item art comes from existing textures only (`ANIMAL_ITEMS` 6, `FROG_ITEMS` 3, `TOY_ITEMS` 6, `SHAPE_ITEMS` 18 — 33 total) — zero new object assets. Pure functions in `src/game/oddOneOutLogic.ts` (playthrough/round generation with band rules, odd-slot placement, `isCorrect(round, slot)` evaluation) — testable without Phaser.
-- **SVG Requirements:** `tile_odd_one_out.svg` (2×2 mini-cards with one visually distinct — an orange triangle among blue circles) + `sticker_odd_one_out.svg` (same motif on the cream badge). No new object art.
-- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "odd-one-out" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Cards (256px) and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Category/type/color differences are the learning content — the spoken item name is the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 15 — Color Match (Color Recognition) ✅ Implemented
-
-- **Milestone:** Color recognition — matching a spoken color name to its color among differently-colored objects.
-- **Mechanics:** A large prompt swatch (Phaser Graphics, 110px, 8px `#2D3748` outline, filled with the target color) sits top-center; the target color's name is **spoken aloud** (en-US, rate 0.8; SFX-gated, silent fallback; a speaker-icon replay button re-hears it on demand). Below, a 2×2 grid of 4 cards (~220px, ≥96px touch) shows **4 distinct colors** — objects of different colors — and the child taps the one matching the swatch. 6 rounds per playthrough, easy-first: rounds 1–3 draw 4 colors from the 4-color pool (red, blue, yellow, green), rounds 4–6 from the 6-color pool (+ orange, purple); win on 6 correct.
-- **Round Logic:** `buildRound(pool)` samples 4 shuffled distinct colors from the band's pool; the target is one sampled color, and the swatch fill equals that color's source-SVG hex so the child matches by eye. Color → texture mapping reuses existing textures only (`COLOR_CARDS`: red → `shape_heart` #E53E3E, blue → `frog_blue` #3182CE, yellow → `shape_crescent` #ECC94B, green → `shape_rectangle` #48BB78, orange → `shape_circle` #F6AD55, purple → `shape_square` #9F7AEA) — zero new object assets. Pure functions in `src/game/colorMatchLogic.ts` (band-aware playthrough generation, round building, `isCorrect(cards, index, target)` evaluation) — testable without Phaser.
-- **SVG Requirements:** `tile_color_match.svg` (2×2 swatch cards, white star on the red card) + `sticker_color_match.svg` (same motif on the cream badge). No new object art.
-- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "color-match" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Swatch (110px), cards (220px), and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Color names are the learning content — the large swatch + spoken color name are the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). TTS silenced when SFX is off or SpeechSynthesis is unavailable; the game stays fully playable visually. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 16 — Add It Up (Early Addition) ✅ Implemented
-
-- **Milestone:** Early addition — combining two counted groups into a total, answered visually.
-- **Mechanics:** An equation row sits top-center: two dot-group cards (~180px) joined by a big "+" cue with an "=" cue at the end (96px chunky storybook symbols, `plus.svg` + `equals.svg`) — purely visual, **no spoken prompt**. Below, a centered row of 4 answer cards (~170px, ≥96px touch) shows dot-groups of candidate totals; the child counts both addend groups and taps the card whose total matches. 6 rounds per playthrough, easy-first bands: sums ≤ 4 (rounds 1–2), ≤ 6 (rounds 3–4), ≤ 10 (rounds 5–6); win on 6 correct.
-- **Round Logic:** `buildRound(band)` picks an unused addend pair (a, b ≥ 1, a + b ≤ bandMax) — pairs never repeat order-insensitively within a playthrough (`usedPairs` set); the two addend cards use **two distinct** item types, while the 4 answer cards share a **single** item type and show **4 distinct totals** in [1..bandMax], exactly one equal to the target. Item art reuses the 8 `COUNT_ITEMS` textures (star, ball, apple, fish, carrot, sun, house, duck) — zero new object assets. Pure functions in `src/game/addItUpLogic.ts` (`buildPlaythrough`, `buildRound`, `isCorrect(options, index, target)`) — testable without Phaser.
-- **SVG Requirements:** `plus.svg` + `equals.svg` (symbol cues), `tile_add_it_up.svg` (two dot-cards + chunky plus, highlighted answer card) + `sticker_add_it_up.svg` (same motif on the cream badge). No new object art.
-- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "add-it-up" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Addend cards (180px), answer cards (170px), and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Early addition is the learning content — the two dot-group cards joined by a big "+" cue are the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). No audio dependency: the game is fully playable with SFX off and on devices without SpeechSynthesis. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 17 — Take Away (Early Subtraction) ✅ Implemented
-
-- **Milestone:** Early subtraction — taking one counted group away from another, answered visually.
-- **Mechanics:** An equation row sits top-center: two prompt dot-group cards (~180px) joined by a big "−" cue with an "=" cue at the end (96px chunky storybook symbols, `minus.svg` + `equals.svg`) — purely visual, **no spoken prompt**. Below, a centered row of 4 answer cards (~170px, ≥96px touch) shows dot-groups of candidate differences; the child counts the first group, "takes away" the second, and taps the card whose difference matches. 6 rounds per playthrough, easy-first bands (mirror Add It Up): minuend ≤ 4 (rounds 1–2), ≤ 6 (rounds 3–4), ≤ 10 (rounds 5–6); differences are always ≥ 1 (minuend > subtrahend, never 3−3=0); win on 6 correct.
-- **Round Logic:** `buildRound(band)` picks an unused subtraction pair (minuend > subtrahend ≥ 1, minuend ≤ bandMax) — ordered pairs never repeat within a playthrough (`usedPairs` set keyed `"a-b"`); the two prompt cards use **two distinct** item types, while the 4 answer cards share a **single** item type and show **4 distinct totals** in [1..bandMax], exactly one equal to the target. Item art reuses the 8 `COUNT_ITEMS` textures (star, ball, apple, fish, carrot, sun, house, duck) — zero new object assets. Pure functions in `src/game/takeAwayLogic.ts` (`buildPlaythrough`, `buildRound`, `isCorrect(options, index, target)`) — testable without Phaser.
-- **SVG Requirements:** `minus.svg` (symbol cue), `tile_take_away.svg` (two dot-cards + chunky minus, highlighted answer card) + `sticker_take_away.svg` (same motif on the cream badge). No new object art.
-- **Phaser Engine Logic:** Correct tap: green flash + chime (`playCorrect`) + mascot cheer + progress-dot pop, next round after ~0.7s. Incorrect tap: gentle wiggle ±4° (gentler under reduced motion) + soft descending tone + mascot nod, no penalty — the child retries. After 6 correct: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "take-away" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Prompt cards (180px), answer cards (170px), and the back button (96px hit area) exceed the 64px minimum and 96×96px ideal touch targets. Early subtraction is the learning content — the two dot-group cards joined by a big "−" cue are the prompt, no written instructions anywhere (extends the Game 8 zero-text amendment). No audio dependency: the game is fully playable with SFX off and on devices without SpeechSynthesis. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 18 — Memory Match (Visual Working Memory) ✅ Implemented
-
-- **Milestone:** Visual working memory — hold card positions in mind and match identical textures.
-- **Mechanics:** A face-down grid of paired cards deals in with a staggered pop; the child flips two cards at a time and matches identical textures. 6 rounds per playthrough, easy-first progressive grids: rounds 1–2 = 2×3 grid / 3 pairs (150px cards), rounds 3–4 = 3×4 / 6 pairs (132px), rounds 5–6 = 4×4 / 8 pairs (120px) — all cards ≥ 96px touch. Cards are rounded-rect bases with the `card_back.svg` texture face-down; a flip is a `scaleX` 1 → 0 → 1 animation with the face swapped at the midpoint (~180ms, ~120ms reduced motion) plus a soft pop. Matching a pair flashes both cards green with the correct chime + mascot cheer; a mismatch wiggles both cards (±4°, gentler under reduced motion) with a soft tone + mascot nod, then flips them back after an 800ms pause — **no penalty**; input is locked during all transitions. Every pair matched → progress-dot pop and the next round after ~0.7s. After 6 rounds: shared win celebration (rays + confetti), sticker award + sticker animation (first completion only), auto-return to Hub after 3s with `{ justEarned: "memory-match" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Round Logic:** `buildRound(band)` shuffles the 16-texture mixed-category pool (`MEMORY_POOL`: 6 animals, 6 toys, 4 small items), takes `BAND_PAIRS[band]` textures, doubles + shuffles them into the grid layout; `buildPlaythrough()` returns 6 rounds, 2 per band easy-first (`bandForRound`: easy / easy / medium / medium / hard / hard). Pure functions in `src/game/memoryMatchLogic.ts` (`buildPlaythrough`, `buildRound`, `isPair(layout, a, b)`, `isRoundComplete(matched)`) — testable without Phaser. Zero new object art — the pool reuses existing animal/toy/small-item textures.
-- **SVG Requirements:** `tile_memory_match.svg` (3 mini-cards with a blue star motif), `sticker_memory_match.svg` (same motif on the cream badge), `card_back.svg` (face-down card back, star motif; placed at `src/assets/svg/ui/card_back.svg`). Preload 159 → 162.
-- **Phaser Engine Logic:** Tap an unrevealed, unmatched card → flip + pop. First pick stores the index; second pick evaluates `isPair` — match: both cards lock face-up with a 250ms green success flash (revert), `playCorrect` + mascot cheer + `recordCorrect`; mismatch: `playIncorrect` + mascot nod + per-card wiggle, flip both back after 800ms + `recordWrong` (each matched pair = one correct, each mismatched pair = one wrong, so parent Learning Progress accuracy stays meaningful). Winning flushes the session counters via `GameSceneBase.completeGame()` — plays/wins flow unchanged from the Hub tile tap. No speaker button, no speech (third speech-free game).
-- **Accessibility:** All cards ≥ 96px touch (150/132/120px by band); the back button uses the shared 96px hit area. Visual working memory is the learning content — the face-down cards are the prompt and matching identical textures is the answer, no written instructions anywhere (extends the Game 8 zero-text amendment). No audio dependency: fully playable with SFX off. All tweens are reduced-motion-aware. No-fail design.
-
-### GAME 19 — Decode It (Early Decoding / Word Recognition) ✅ Implemented
-
-- **Milestone:** Early decoding — match a pictured, spoken word to its written form.
-- **Mechanics:** Each round shows a picture (180px) and speaks the word aloud (SFX-gated, speaker replay); four word cards below (2×2 grid, 160px cards, ≥96px touch) show distinct written words and the child taps the one matching the picture + spoken word. 6 rounds per playthrough, easy-first bands: rounds 1–3 sample the 12 tier-3 (3-letter) words, rounds 4–6 the 10 tier-4 (4-letter) pool; 6 unique targets per playthrough with no shared first letter and no confusable-family overlap within a round. Adaptive ±1 band shifts the tier split (4+2 / 3+3 / 2+4); shift 0 is byte-identical to classic.
-- **Round Logic:** Pure functions in `src/game/decodeLogic.ts` (`buildRound`/`buildPlaythrough`/`isCorrect` with guards) — testable without Phaser. Word pool 22 (18 + FOX/CUP/MAP/BED with 4 new storybook SVGs).
-- **SVG Requirements:** `tile_decode_it.svg`, `sticker_decode_it.svg`, plus `fox.svg`/`cup.svg`/`map.svg`/`bed.svg` item art. Preload 162 → 168.
-- **Phaser Engine Logic:** Correct tap: success flash + chime + mascot cheer + progress-dot pop, 700ms advance. Wrong tap: wiggle ±4° + nod, no penalty. After 6 rounds: shared win celebration + first-time sticker + 3s auto-return with `{ justEarned: "decode-it" }`. Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Picture + spoken word is the prompt and written word cards are the answer set; letters are the learning content, no written instructions anywhere (extends the Game 8 zero-text amendment). Fully playable visually with SFX off. All tweens reduced-motion-aware. No-fail design.
-
-### GAME 20 — Number Order (Numeral Sequencing / Ordinality) ✅ Implemented
-
-- **Milestone:** Numeral sequencing — arrange shuffled numerals in ascending order.
-- **Mechanics:** Each round shows dashed empty-slot outlines on top and shuffled numeral cards below (140×160, ≥96px touch); the child drags each card into a slot so the row reads ascending. Drag lift/tilt juice + `Back.out` snap, occupied-slot swap, tap-to-return; tapping a card speaks its numeral aloud (`speakNumber`, SFX-gated, silent fallback). 6 rounds per playthrough, easy-first bands: rounds 1–2 arrange 3 numerals from 1–5, rounds 3–4 arrange 4 from 1–8, rounds 5–6 arrange 5 from 1–10. The round auto-validates when the last slot fills: ascending → success flash + chime + cheer + dot pop, 700ms advance; out of order → wiggle + nod + bounce-back, no penalty. Adaptive ±1 band via `getAdaptiveBandShift("number-order")` (−1 → [1,1,1,1,2,2], 0 → classic [1,1,2,2,3,3], +1 → [2,2,3,3,3,3]).
-- **Round Logic:** Pure functions in `src/game/numberOrderLogic.ts` (`buildRound` samples unique numerals, sorts ascending for the solution, shuffles with an ascending-guard reshuffle; `buildPlaythrough(shift)` maps the shifted ladder; `isCorrect` exact-order check) — testable without Phaser.
-- **SVG Requirements:** `tile_number_order.svg` (ascending staircase motif), `sticker_number_order.svg` (cream badge, 1-2-3 stepping blocks + star). Preload 168 → 170. Zero new object art (numeral cards are Phaser text).
-- **Phaser Engine Logic:** Scene `src/scenes/NumberOrderScene.ts` key `NumberOrder` extends `GameSceneBase` (drag via shared `dragJuice`, `inputLocked` during transitions, 6 progress dots, `completeGame("number-order")` + 3s auto-return with `{ justEarned: "number-order" }`). Parental lock (hold 3s) exits to Hub at any time.
-- **Accessibility:** Shuffled numeral cards are the prompt and ascending slot order is the answer; numerals are the learning content, no written instructions anywhere (extends the Game 8 zero-text amendment). No prompt voice; fully playable with SFX off. All tweens reduced-motion-aware. No-fail design.
-
-### Adaptive Difficulty (15 games)
-
-- Per-profile ±1 band ladders from a rolling 10-tap window (≥90% nudges up, <60% nudges down, re-evaluated fresh each session, never mid-game; invisible to kids; Settings toggle, default ON). Covers the numeracy five (How Many?, More or Less, Add It Up, Take Away, Number Order), the literacy & memory seven (Find the Word, Build the Word, First Sounds, Find the Letter, Memory Match, Musical Memory, Decode It), plus Pattern Builder, Odd One Out, and Color Match. The five fixed-difficulty games (Shape Sorter, Shadow Match, Big vs. Small, Pop & Freeze, Animal Trace) stay fixed by design.
-
----
-
-## 5. Game Flow & Navigation
-
-### Scene State Machine
-
-```
-[BootScene]
-    │
-    │  Lock landscape orientation
-    │  Initialize audio & storage systems
-    │
-    ▼
-[PreloadScene]
-    │
-    │  Show brand lockup + progress bar
-    │  Load & rasterize SVG assets (Game 1 shapes + sticker, Game 2
-    │  animals/food + sticker, Game 3 bubble + sticker, Game 4 objects/
-    │  shadows + sticker, Game 5 frogs + lily pad + sticker, Game 6
-    │  toys/box + sticker, Game 7 shapes + sticker, Game 8 letters +
-    │  sticker, Games 9 & 10 letter/animal/food/object textures +
-     │  stickers — all 20 games'
-    │  assets loaded)
-    │
-    ▼
-[HubScene]
-    │
-    ├── Display 20 game tiles (grid, 5×4 — four rows of five)
-    ├── Display sticker shelf (earned thumbnails + empty-slot outlines)
-    ├── Hold Settings for 3s ──────► [Settings modal]
-    │                                 ├── Toggle persisted BGM/SFX settings
-    │                                 └── Tap backdrop to return to Hub
-    │
-    ├── Tap game tile ──────────────────► [Game Scene]   (scene lazy-loaded on first tap)
-    │                                        │
-    │                                        ├── Initialize with randomized items
-    │                                        ├── Gameplay loop
-    │                                        │
-    │                                        ├── On correct completion:
-    │                                        │     ├── Win animation + SFX
-    │                                        │     ├── Award sticker (if first time)
-    │                                        │     └── Auto-return to Hub (3s delay)
-    │                                        │
-    │                                        └── Hold 3s (parental lock) ──► [HubScene]
-    │                                                │
-    ◄────────────────────────────────────────────────┘
-    │
-```
-
-### Navigation Rules
-
-- **BootScene → PreloadScene → HubScene:** BootScene locks landscape orientation and initializes systems, then transitions to PreloadScene which displays a brand lockup ("Aby's Little Lab" + tagline) above a progress bar before transitioning to HubScene. Both transitions are crossfades.
-- **HubScene → GameScene:** Tap on a game tile — navigation fires on **release** (see Press Feedback). The tapped game's chunk is lazy-loaded (dynamic import + runtime scene registration via `sceneRegistry.ensureSceneLoaded`) before the 300ms crossfade transition with entrance zoom starts.
-- **GameScene → HubScene:** Auto-return after game completion (3s delay with win celebration, then crossfade) OR parental lock (hold 3s, then crossfade).
-- **HubScene → Settings modal:** Holding Settings for 3 seconds opens the parental modal. Parents can independently toggle BGM and SFX; toggles persist in localStorage. A context-aware install row appears below the toggles (see §9). A "Reset Progress" row (danger color, two-step confirm) clears the sticker collection while keeping audio settings. A muted version footer (`v${__APP_VERSION__}`) sits under the title, clear of the install row. Font sizes are 30–36px for phone readability, and pinch-zoom is allowed while the panel is open. Tapping the dark backdrop closes the modal and returns to the Hub.
-
-> **Release decision (2026-08-02):** Parental Settings expansion shipped — the Settings panel shows the app version in a non-interactive muted footer (sourced from `package.json` via a Vite `define`, so it auto-updates on version bumps) and gains a parental-gated, two-step-confirmed **Reset Progress** action. Reset calls the pure `resetProgress()` in `src/utils/storage.ts`: it clears all eight stickers while preserving BGM/SFX settings, then the row shows "Progress cleared" in place. The Hub re-renders its sticker shelf via an `onProgressReset` callback, so earned stickers go dim immediately without a reload. Everything stays textless for kids — both features live inside the parental modal behind the 3-second hold.
-
-> **Release decision (2026-08-05):** Play-Time Limits shipped — a per-profile daily play-time cap (Off / 15 / 30 / 45 / 60 min) configured via a chip in Settings → Profiles. Usage accrues per profile from session start (tile tap) to Hub return via pure logic in `src/game/playTimeLogic.ts` (local-date rollover). The Hub shows a textless remaining-budget arc (warm at ≤5 min), a 2s hourglass nudge delays launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge. Off by default; no mid-game cutoffs; respects reduced motion.
-
-> **Release decision (2026-08-09):** Parent Progress Insights shipped (track archived at `conductor/archive/parent-progress-insights_20260809/`) — a parental-gated, per-profile **Learning Progress** report. A new Settings row (between Profiles and Reset) opens an overlay showing, for each of the 18 games: plays, accuracy (correct taps / total taps, rendered as a green fill bar + percent), a mastery star after 3 wins, and relative last-played ("Today" / "Yesterday" / "3d ago"). Avatar chips at the top switch the report between profiles without changing the active profile; rows page 6 + 6 + 6; a 7-day activity strip shows plays per day. Data is recorded on-device via the additive `progress`/`activity` fields on each profile (normalize-on-read backfill, no migration bump): session starts at the Hub tile-tap choke point, correct/wrong taps at each scene's single feedback call site (Pop & Freeze and Animal Trace have no right/wrong taps by design), and wins flush at `GameSceneBase.completeGame()`. All instrumentation and the report live behind the 3-second parental lock; kids never see it. 1260 tests across 54 files; coverage 96.74/88.58/92.14/98.
-
-> **Release decision (2026-08-06):** UI/UX Hardening shipped (track archived at `conductor/archive/uiux-hardening_20260805/`) — the consolidated remediation of the 2026-08-05 UI/UX audit. (1) **Typography:** a bundled Baloo 2 variable font (WOFF2 at `public/fonts/baloo2-latin.woff2`, precached via `vite.config.ts` `includeAssets`) replaces Phaser's default Courier everywhere, applied through a shared `textStyle()` helper (`src/utils/typography.ts`); (2) **Hub tile icons:** each tile gained a distinct storybook SVG icon (11 `tile_*` assets, 80px above a smaller 15px secondary label) so the 11-game grid is identifiable without text; (3) **Sticker shelf:** unearned stickers now render as dashed empty-slot outlines instead of dim ghost images; (4) **Replay affordance:** a shared 96×96 `SpeakerButton` component re-speaks the prompt in Find the Letter / Find the Word / Build the Word / How Many? and replaces Musical Memory's emoji replay; (5) **Audio unlock:** the first pointerdown anywhere on the Hub resumes the AudioContext, so the idle-attract chime is audible on a fresh load; (6) **Settings readability:** font sizes raised to 30–36px, the version footer moved under the title (clear of the install row), and pinch-zoom is permitted only while the Settings panel is open (`src/utils/viewportZoom.ts`); (7) **Polish:** Preload shows a brand lockup, idle attract wiggles only two rotating tiles, the win sticker pops 400ms after the celebration, Shadow Match objects grew 96→112px, Pop & Freeze's "Zzz" text became a storybook sleep glyph (`sleep_zzz`), and Find the Letter renders letters from the preloaded letter SVG textures (256px target / 128px card glyphs). 955 tests across 36 files.
-- **Sticker Award:** On first completion of a game, a sticker unlock animation plays before returning to Hub. Subsequent completions skip the sticker animation.
-
-> **Release decision (2026-08-01):** The parental lock was hardened across Hub Settings and all seven game Back controls: one hold per active pointer (duplicate `pointerdown` ignored), cancellation on release/pointer-out/`pointercancel`/scene shutdown, exactly one success callback per completed hold, and no stale timers or callbacks after the scene is destroyed. A circular progress fill (48px radius, `--success` `#68D391` at 0.6 alpha, rendered above scene UI) shows hold progress and is always cleaned up on cancel, completion, or shutdown. All protected controls expose explicit 96×96px hit areas; Phaser anchors hit areas at the top-left of a control's display bounds (not its origin), so rectangles are specified as `Rectangle(0, 0, 96, 96)`.
-
-> **Release decision (2026-08-01):** A unified motion & feedback system was introduced. `src/utils/motion.ts` centralizes reduced-motion handling (`isReducedMotion`, `motionDuration`, `motionScale`); every animation in the app consults it — scene crossfades (300ms/180ms), the shared win celebration, press feedback (disabled under reduced motion), and all gameplay tweens (bounce-backs 300→180ms, bubble pop 200→120ms, wake wobble 300→180ms at 1.05× instead of 1.15×, frog bounce 200→120ms at 1.05× instead of 1.2×, sticker pops 300→180ms). Celebration: 10 rays + 10 confetti bits, 700ms standard / 300ms reduced, burst scale 1.25× / 1.0×, 6 rays and no particles when reduced. Covered by 445 tests across 15 files (~99% coverage).
-
-> **Release decision (2026-08-01):** The Hub engagement track shipped staggered entrance (40ms per element, 300ms `Sine.out`, fade-only under reduced motion), idle life (2.5s ±4px bob loop with 200ms phase offsets; 4 low-contrast drift dots), a real SVG sticker shelf (56px thumbnails; earned shimmer at 0.75 alpha, unearned dimmed to 0.3 alpha/0.85 scale, just-earned `Back.out` 1.15× entrance + 500ms sparkle burst; game scenes pass `{ justEarned: gameId }` via scene-start data on first completion only), and idle attract (25s idle → 4° tile wiggle + soft `playIdleCall()` E5+G5 chime at 0.12 gain, repeating every 10s, reset on any pointer input, cleared on shutdown, chime-only under reduced motion). Two user-reported bugs were fixed during verification: `Camera.zoomTo` crash (camera Zoom effects resolve ease strings against their own EaseMap — pass `"Sine"`, not `"Sine.out"`) and sticker thumbnails rendering at full 512px texture size (entrance/burst tweens now scale relative to `STICKER_SCALE = 56/512`). Hub tiles navigate on release per user feedback. Covered by 445 tests across 15 files.
-
-> **Release decision (2026-08-01):** The Per-Game Juice track added scene-level animation juice to all six games — zero gameplay-rule changes, zero new assets, Graphics-only effects (the app never uses `add.particles`). A shared helper `src/utils/dragJuice.ts` (`attachDragLift`, `attachDropZoneHighlight`, `snapToSlot`) powers the drag scenes (Shape Sorter, Shadow Match, Big vs. Small): pieces lift to 1.1× + 4° tilt on drag start (1.05×, no tilt reduced) and restore on release; drop zones pulse a soft outline (6px `--primary` stroke, yoyo pulse) while dragging over them; correct drops animate to the slot center with a 200ms `Back.out` tween (120ms reduced) instead of instant `setPosition`. Per-game reactions: Big vs. Small shrinks the toy into the box (150ms) with a ±3° lid wiggle (3 yoyo repeats) and a 1.05× box bump; Shadow Match stamps the silhouette (1.1× pulse + white fill flash, self-cleaning) and dims the matched object to 50% alpha; Animal Trace hops the animal between waypoints (two-phase arc tween, ~120ms/hop), wiggles the food (±4°, 3 yoyo repeats) on arrival, and pops progress dots 1 → 1.4 → 1 `Back.out`; Pop & Freeze emits 3 teal droplet circles from the pop point (self-cleaning fade) and gives sleeping-animal decoys a 1.0 → 1.03 breathing yoyo loop (~1.5s, disabled under reduced motion, removed on scene shutdown); Musical Memory emits expanding ripple rings on frog taps (self-cleaning fade), drifts lily pads ±3px on a 3s loop (disabled reduced), and pops progress dots on fill. Review fixes: Shape Sorter now bounces silently on empty-floor dragend (incorrect SFX only on zone drops, matching Shadow Match/Big vs. Small) and the breathing tween is cleaned up on shutdown. Covered by 490 tests across 16 files.
-
-> **RELEASED — 2026-08-01 (Mascot Companion track):** 555 tests across 17 files.
->
-> **Mascot companion:** Professor Hoot was added as a static-pose + tween-only mascot — no sprite sheets, no particle emitters, no new audio. Reactions reuse the existing shared SFX (correct/incorrect/win/sticker), animations run through `motion.ts` (reduced-motion-aware), and the mascot is touch-inert (never blocks taps) and rendered behind gameplay z-order. Deployed to the Hub (wave/cheer/idleLoop) and all six game scenes (cheer on correct, nod on incorrect, big cheer on win, destroyed on shutdown). This is a celebration-surface addition: it does not add new learning content, but reinforces feedback loops through a consistent, gentle companion presence.
-
-> **Release decision (2026-08-02):** Game 7 (Pattern Builder) shipped — a tap-to-complete pattern game (ABAB/AABB/ABB, 6-shape pool, gap at end or middle, 3 unique choices, 5 rounds, zero text). Reuses the six Game 1 shape SVGs; the only new asset is `sticker_pattern_builder.svg`. The Hub grid grew to 4×2 (7 tiles) and the localStorage `GameId` union includes `pattern-builder`. Correct taps snap with `Back.out` + chime + dot pop; wrong taps wiggle with no penalty; mascot cheer/nod/big-cheer paths are covered by scene tests. 592 tests across 18 files (~98.8% lines, ~98.0% statements). During manual verification, `load()` was found to crash on saves from before Game 7 shipped (missing `pattern-builder` sticker key); it now merges saved data over defaults per key, so pre-existing saves migrate cleanly and any future game ids backfill automatically.
->
-> **Release decision (2026-08-02):** Game 8 (Find the Letter) shipped — an uppercase letter-recognition game (6 unique letters per playthrough drawn uniformly from A–Z, 4 unique cards per round, 6 rounds to win). New dependency: browser SpeechSynthesis for letter names (en-US, gentle rate, respects the SFX toggle, graceful silent fallback). New assets: 26 letter SVGs (`assets/svg/letters/`, identical styling so recognition is shape-only) + `sticker_alphabet_match.svg`. The Hub grid is now 4×2 (8 tiles) and the `GameId` union includes `alphabet-match`. This track amends the "Zero text dependency" principle: letters are the learning content, not UI instructions — no written instructions appear anywhere. 706 tests across 25 files (~96%+ lines, 80% thresholds still enforced). Storage migration is automatic via the existing per-key merge (`load()` backfills the new sticker key for old saves).
-
----
-
-## 6. Color Palette & Design Tokens
-
-### Core Palette
-
-| Token | Hex | Usage |
-|---|---|---|
-| `--bg-base` | `#FAF9F6` | App background, game background (warm off-white) |
-| `--bg-hub` | `#FFF8E7` | Hub scene background (warm cream) |
-| `--primary` | `#2B6CB0` | Theme color, UI accents, manifest theme_color |
-| `--outline` | `#2D3748` | Thick stroke outlines on all SVGs, shadow asset fill |
-| `--success` | `#68D391` | Correct action feedback (chime + particle color) |
-| `--error` | `#FC8181` | Incorrect action feedback (gentle, non-threatening) |
-
-### Game Sprite Colors
-
-| Token | Hex | Used In |
-|---|---|---|
-| `--orange` | `#F6AD55` | Game 1 (circle shape), Game 6 (toy box, teddy inner ears/muzzle, toy ball center, sticker big ball) |
-| `--teal` | `#4FD1C5` | Game 1 (triangle shape), Game 6 (toy ball) |
-| `--purple` | `#9F7AEA` | Game 1 (square shape), Game 6 (toy block, sticker small ball) |
-| `--pink` | `#F687B3` | Game 1 (star shape) |
-| `--green` | `#48BB78` | Game 5 (green frog → C4) |
-| `--blue` | `#3182CE` | Game 5 (blue frog → E4) |
-| `--red` | `#E53E3E` | Game 5 (red frog → G4) |
-| `--coral` | `#FC8181` | Game 6 (toy car) |
-| `--golden-brown` | `#D69E2E` | Game 6 (teddy bear body) |
-| `--yellow` | `#ECC94B` | Game 6 (toy box opening, toy block star) |
-
-### Design Rules
-
-- All SVG sprites use a thick dark stroke (`--outline`, 4–6px equivalent at 512px base).
-- Backgrounds use flat fills, no gradients.
-- Feedback animations use `--success` (green) and `--error` (soft red) particle bursts.
-- All colors are soft/vibrant — no neon, no pure RGB primaries.
-
----
-
-## 7. Audio Design Specification
-
-### Sound Effects (SFX)
-
-| Event | Sound | Source | Used In |
-|---|---|---|---|
-| Generic tap | Soft pop | Web Audio API (synthesized) | All games (UI taps) |
-| Correct match | Ascending chime (3-note: C5, E5, G5) | Web Audio API (synthesized) | Games 1, 2, 4, 6 |
-| Incorrect match | Soft descending tone (G4 → C4) | Web Audio API (synthesized) | Games 1, 4, 6 |
-| Bubble pop | Bright percussive blip (800 Hz, 0.08s) | Web Audio API (synthesized) | Game 3 |
-| Sleeping animal tapped | Soft rousing tone (E4 + A4 dual oscillator) | Web Audio API (synthesized) | Game 3 |
-| Game complete | Win fanfare (4-note arpeggio: C5, E5, G5, C6) | Web Audio API (synthesized) | All games |
-| Sticker earned | Sparkle (2-note: C6, E6) | Web Audio API (synthesized) | All games (first completion) |
-
-> **Note:** All gameplay SFX (generic tap, correct, incorrect, win, sticker) are **synthesized via Web Audio API** — no MP3 files are needed. This reduces asset overhead and keeps feedback responsive across devices. Game 3's pop and wake sounds are also synthesized.
-
-### Synthesized Audio (Web Audio API)
-
-| Note / Tone | Frequency | Used In |
-|---|---|---|
-| C4 | 261.63 Hz | Game 5 (green frog) |
-| E4 | 329.63 Hz | Game 5 (blue frog), Game 3 (wake tone, dual oscillator with A4) |
-| G4 | 392.00 Hz | Game 5 (red frog) |
-| A4 | 440.00 Hz | Game 3 (wake tone, dual oscillator with E4) |
-| 800 Hz | 800.00 Hz | Game 3 (bubble pop — short percussive blip, 0.08s) |
-| C5, E5, G5 | 523.25, 659.25, 783.99 Hz | Gameplay SFX — correct (ascending chime) |
-| G4, C4 | 392.00, 261.63 Hz | Gameplay SFX — incorrect (soft descending) |
-| C5, E5, G5, C6 | 523.25, 659.25, 783.99, 1046.5 Hz | Gameplay SFX — win (celebratory arpeggio) |
-| C6, E6 | 1046.5, 1318.51 Hz | Gameplay SFX — sticker (sparkle) |
-| E5, G5 | 659.25, 783.99 Hz | Idle attract — idle call (gentle two-tone chime, 0.12 gain) |
-
-Game 5 frog notes, gameplay feedback SFX (correct, incorrect, win, sticker), Game 3 pop/wake sounds, and the idle-attract chime are all synthesized via Web Audio API oscillators — no audio files needed for these. The AudioManager exposes these as `playPop()`, `playWake()`, `playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`, and `playIdleCall()` methods, all respecting the SFX toggle setting.
-
-### Background Music (BGM)
-
-| File | Usage |
-|---|---|
-| `bgm.mp3` | Single gentle ambient loop, played at low volume across all scenes |
-
-- BGM is initialized in BootScene and loops continuously after playback begins.
-- BGM can be toggled on/off via parental settings (persisted in localStorage).
-- SFX can also be toggled independently.
-- The settings modal plays the synthesized correct chime when SFX is enabled. The packaged `/audio/bgm.mp3` loop plays after eligible user interaction and follows the persisted BGM setting.
-
-> **Release decision (2026-07-31):** The supplied loop is packaged at `public/audio/bgm.mp3` so Vite serves it at `/audio/bgm.mp3`. Playback uses a gentle 0.3 volume and waits for eligible user interaction to respect browser autoplay policies.
-
-### Audio Format
-
-- Packaged audio file (`bgm.mp3`): **MP3** for broad device compatibility; gameplay SFX are synthesized with Web Audio API.
-- Synthesized tones: **Web Audio API** (no file overhead).
-
----
-
-## 8. Performance Targets
-
-| Metric | Target | Rationale |
-|---|---|---|
-| Frame rate | 60fps (min 30fps on low-end phones) | Smooth animations for toddler engagement |
-| Boot/load time | < 3 seconds (mid-range tablet) | Prevent attention loss during loading |
-| Memory usage | < 150MB total | SVG rasterization at 512×512 is lightweight; keep buffer for audio |
-| Offline capability | Full gameplay after the first HTTPS PWA load/install | vite-plugin-pwa precaches all build assets, including `/audio/bgm.mp3` |
-| Touch input latency | < 16ms (1 frame) | Immediate feedback for fine-motor activities |
-| Audio latency | < 50ms | Synchronized SFX with visual feedback |
-
-> **Release decision (2026-08-02):** Bundle code splitting shipped (performance chore, archived at `conductor/archive/code-splitting_20260802/`). The seven game scenes are **lazy-loaded**: a Hub tile tap dynamically imports and registers the scene before the crossfade transition starts. The startup bundle dropped from 1,473 kB to 1,444 kB (372.5 KB gzip) and each game loads as its own 3–5 KB chunk only when first tapped; Rollup auto-hoists shared modules (game logic, drag juice, completion effect). **Offline capability is unchanged** — the service worker precaches every emitted chunk (20 precache entries), so all games still play after the first offline load. The boot/load-time target is aided by moving game code out of the startup parse path. Navigation tests assert `ensureSceneLoaded` fires per tile; 667 tests across 22 files (~96.7% lines / ~98.2% statements).
-
----
-
-## 9. Release Readiness Decisions
-
-- Production builds generate `manifest.webmanifest` and a prompt-based service worker through `vite-plugin-pwa` (updates are deferred to the parent-facing Hub toast, not silent).
-- The service worker precaches the bundled game assets, PWA icon, and BGM for offline play.
-- The parental Settings panel provides a context-aware install control: "Install App" where a browser install prompt is available (Chrome/Android/Edge), "How to Install" with Share → Add to Home Screen guidance on iOS Safari, and hidden once the app is installed.
-- Phone/tablet installation, offline, and update validation must use an HTTPS private static host or tunnel; `http://localhost` is reserved for same-device smoke tests.
-
-> **Release decision (2026-08-02):** The app is deployed as a Docker + Nginx image on a private VPS managed by **Coolify** (builds from the repo Dockerfile; Nginx serves the PWA with correct SW/cache headers). A **GitHub Actions** pipeline (`.github/workflows/ci.yml`) enforces the quality gates — `pnpm run check`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-pwa.js` — on every pull request and `master` push; on green, a **Deploy to Coolify** job fires the Bearer-authenticated Coolify Deploy Webhook, so production updates only after all gates pass. Setup requires two repository secrets (`COOLIFY_DEPLOY_WEBHOOK`, `COOLIFY_TOKEN` with `deploy` permission) and, recommended, branch protection on `master` requiring the "Quality Gates" check. Docs-only pushes skip CI via `paths-ignore`. Full pipeline details in [README.md](../README.md) "CI/CD" section and [TDD.md](./TDD.md) §9.
-
-> **Release decision (2026-08-02):** PWA install & update UX shipped — `registerType: "prompt"` with a Hub toast ("New version ready!" with Update now / Later, plus a one-time "Ready to play offline!" toast); 192px + maskable 512px manifest icons; iOS meta tags (`apple-mobile-web-app-capable`, `apple-touch-icon`, `theme-color`). Install flow verified on Android; iOS flow documented in the device-testing checklist (no iOS device available at release time).
-
-> **Release decision (2026-08-02):** **v1.1.0 released** (chore track `release-1.1.0-mechanics_20260802`, archived at `conductor/archive/release-1.1.0-mechanics_20260802/`) — the first version-bump release through the automated pipeline. `package.json` bumped `1.0.0 → 1.1.0` (commit `78e5634`); release notes finalized; annotated tag `v1.1.0` pushed; CI run `30745388316` (Quality Gates 52s ✓ → Deploy to Coolify 5s ✓) rebuilt and shipped the new build. Live verification: entry chunk `index-BRXHqYbm.js` matches the local build, `1.1.0` embedded in the served bundle (version footer data), `sw.js`/manifest 200. Manual device checks completed 2026-08-03 — all items passed (`docs/device-testing-checklist.md`). This track set the release precedent: gates green → bump → tag → push → verify live hash.
-
-## See Also
-
-- [TDD.md](./TDD.md) — Technical Design Document (tech stack details, directory structure, PWA/Phaser configuration, localStorage schema, full asset manifest)
+- [TDD.md](./TDD.md) for the implementation record: scenes, components, storage schema, audio manager, build and PWA configuration.
+- `conductor/product.md` for the product overview and the per-milestone changelog.
+- `conductor/product-guidelines.md` for voice, tone and visual conventions.
+- `conductor/tech-stack.md` for the toolchain.

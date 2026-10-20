@@ -37,7 +37,7 @@
 
 - [ ] **P2.T1: Rebuild the structural sections from the filesystem** — covers: FR-6, AC-4, AC-5
   - [ ] **P2.T1.1: Regenerate the directory tree** — walk `git ls-files src` and write the real tree (29 scene files including bases, 15 component files with `settings/`, 30 logic modules, 14 utils, new assets folders).
-  - [ ] **P2.T1.2: Rebuild the asset manifest and summary** — per-folder counts (animals 10, feelings 4, items 24, letters 26, numbers 10, shadows 8, shapes 37, stickers 23, stories 24, toys 7, ui 34 = 207), the 178 boot entries, texture tiers, and which art loads per game chunk.
+  - [ ] **P2.T1.2: Rebuild the asset manifest and summary** — per-folder counts (animals 9, feelings 4, items 23, letters 26, numbers 10, shadows 8, shapes 36, stickers 22, stories 24, toys 7, ui 33 = 202, verified with `git ls-files`), the 178 boot entries, texture tiers, and which art loads per game chunk.
 - [ ] **P2.T2: Document the runtime architecture** — covers: FR-5
   - [ ] **P2.T2.1: Scene architecture and lazy registry** — `GameSceneBase` → `ChoiceRoundScene` → `GroupMathScene` inheritance, `sceneRegistry` dynamic imports, shell versus game chunk.
   - [ ] **P2.T2.2: Components and shared systems** — `RoundNarrator` (glyph, label, replay, mute, caption state machine), mascot, `ParentLock`, `SettingsPanel` and the `settings/` group, PWA toasts, profile chip, play-time indicator.
