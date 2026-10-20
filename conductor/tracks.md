@@ -183,7 +183,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Drop Ligne Engine — Tween/SVG-Only Mascot** *Link: [./tracks/drop-ligne-mascot_20261016/index.md](./tracks/drop-ligne-mascot_20261016/index.md)*
+- [x] **Track: Drop Ligne Engine — Tween/SVG-Only Mascot** *Link: [./archive/drop-ligne-mascot_20261016/index.md](./archive/drop-ligne-mascot_20261016/index.md)* (Archived)
 
 ---
 
@@ -215,3 +215,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: PRD & TDD Truth Pass** - [20261020-prd-tdd-truth-pass](./archive/20261020-prd-tdd-truth-pass/index.md) - chore - medium (Archived)
 
 - [x] **Track: Shell Diet: Per-Game Lazy Art Chunks** - [20261020-shell-diet-lazy-art](./archive/20261020-shell-diet-lazy-art/index.md) - refactor - high (Archived)
+
+---
+
+- [x] **Track: Docs & Dead-Code Truth Pass** — [20261020-docs-truth-pass](./archive/20261020-docs-truth-pass/index.md) — chore — medium (Archived)

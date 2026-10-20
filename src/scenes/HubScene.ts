@@ -44,7 +44,7 @@ const ATTRACT_WIGGLE_COUNT = 2;
 /**
  * Hub scene — the central navigation hub.
  *
- * Displays a grid of 12 game tiles, a sticker book showing earned stickers,
+ * Displays a grid of 22 game tiles, a sticker book showing earned stickers,
  * and a settings button gated behind a parental lock.
  */
 export class HubScene extends Phaser.Scene {

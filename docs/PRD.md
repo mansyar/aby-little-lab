@@ -101,7 +101,7 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 
 1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
 2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
-3. **Hub.** Shows the 22 game tiles, each with its sticker shelf, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
+3. **Hub.** Shows the 22 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
 4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
@@ -148,13 +148,14 @@ Domain counts: cognitive reasoning 4, fine motor 1, inhibitory control 1, visual
 
 ## 3. Game specifications
 
-Every game below uses the same five fields: the mechanic the child performs, the round structure and content pool, the difficulty model, how it is narrated, and the art it uses. Difficulty is either an adaptive band ladder, described once in [4.8](#48-adaptive-difficulty), or a fixed easy-first ladder.
+Every game below uses the same six fields: the mechanic the child performs, the round structure and content pool, the difficulty model, how it reacts to a right and a wrong move, how it is narrated, and the art it uses. Difficulty is either an adaptive band ladder, described once in [4.8](#48-adaptive-difficulty), or a fixed easy-first ladder.
 
 ### 3.1 Shape Sorter
 
 - **Mechanic.** Drag each shape tile into the matching cut-out hole on the board. The shape and the hole match by silhouette, so the child compares form rather than colour.
 - **Rounds and pool.** Three rounds of three shapes, nine unique shapes per playthrough, drawn from a pool of 18: circle, square, triangle, star, heart, crescent, oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring and teardrop.
 - **Difficulty.** Fixed. Three rounds of three, no band ladder.
+- **Feedback.** A dragged shape lifts to 1.1 times its display size with a 4 degree tilt, 1.05 times and level under reduced motion, while its matching hole pulses an outline. A correct drop snaps to the slot centre over 200 ms (120 ms reduced) with the chime and a progress dot, and a wrong drop bounces back; the incorrect tone plays only on a drop onto a hole, so a shape lifted and released in place stays silent.
 - **Narration.** One rule line: "Drag each shape into its hole." Spoken once at scene entry, replayable from the speaker glyph. No per-round prompt.
 - **Art and assets.** 18 filled shape SVGs plus 18 matching cut-out SVGs in the boot set, each shape with its own flat colour. Tile and sticker icons for the Hub.
 
@@ -163,6 +164,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Trace the dotted path from an animal to its food with one finger. The traced line lights up as the finger passes each waypoint.
 - **Rounds and pool.** Three of six animal and food pairs per playthrough: monkey and banana, rabbit and carrot, cat and fish, dog and bone, elephant and peanut, pig and apple. Three progress dots.
 - **Difficulty.** Fixed. Three pairs, no band ladder.
+- **Feedback.** The animal hops between waypoints in two 60 ms halves (one shorter half under reduced motion) and the food wiggles 4 degrees three times when it arrives, while each waypoint pops its progress dot from 1 to 1.4 and back. There is no wrong answer, so the mascot never nods in this game.
 - **Narration.** Rule line: "Trace the line to the animal's food." No per-round prompt.
 - **Art and assets.** Six animal SVGs and six food SVGs from the boot set. The path itself is computed at runtime from a curve, not pre-drawn art.
 
@@ -171,6 +173,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Pop floating bubbles by tapping them, while leaving the bubbles with a sleeping animal alone. Tapping a sleeping animal plays a wake tone and nothing else.
 - **Rounds and pool.** One continuous board. Five bubbles float at once, one or two of them sleeping animals. Six pops complete the game, with bubbles respawning as they are popped.
 - **Difficulty.** Fixed. Six pops, one to two sleeping decoys, no band ladder.
+- **Feedback.** A pop shrinks the bubble over 200 ms (120 ms reduced) and releases three teal droplets that radiate and fade. Sleeping decoys breathe on a 1.0 to 1.03 loop that stops under reduced motion, and tapping one plays the wake tone with a 1.15 times wobble (1.05 times over 180 ms reduced) and no penalty.
 - **Narration.** Rule line: "Pop the bubbles, but not the sleeping animals." The sleeping-animal tone is the in-game correction.
 - **Art and assets.** Bubble and sleep glyph SVGs, plus animal heads reused from the boot set. Tile and sticker icons.
 
@@ -179,6 +182,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Drag each picture onto its matching dark silhouette. Objects lift, tilt slightly, and settle into the shadow.
 - **Rounds and pool.** Six objects per playthrough from a pool of eight: house, tree, car, boat, ball, umbrella, airplane, mushroom. Six matches complete the game.
 - **Difficulty.** Fixed. Six of eight objects, no band ladder.
+- **Feedback.** A correct drop snaps the picture into its silhouette over 200 ms of Cubic.out (120 ms reduced), stamps the shadow with a 1.1 times pulse (smaller under reduced motion) over a brief white fill flash, and dims the matched object to 50 percent alpha with the chime and a progress dot; a wrong drop bounces back.
 - **Narration.** Rule line: "Drag each picture onto its shadow." No per-round prompt.
 - **Art and assets.** Eight object SVGs and eight shadow SVGs in the boot set, the shadows drawn as flat dark silhouettes at the icon tier.
 
@@ -187,6 +191,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Listen to the frogs sing a short sequence, then tap the frogs in the same order. Three frogs, tuned to C4, E4 and G4.
 - **Rounds and pool.** The sequence starts at two notes and grows by one note per completed round. Five rounds at every shift, so the last sequence is four notes longer than the first. Sequences are generated so the same frog never sings more than two notes in a row.
 - **Difficulty.** Adaptive. The band ladder moves the starting length one note in either direction (one, two or three notes), and the five round shape is the same at every shift.
+- **Feedback.** Every frog tap bounces the frog (1.2 times over 200 ms, 1.05 times over 120 ms reduced) and emits an expanding ripple ring, lily pads drift 3 px up and down on a 3 s loop that stops under reduced motion, and a completed sequence pops its progress dot. A wrong tap plays the soft tone, nods the mascot and replays the sequence from its first note.
 - **Narration.** The notes are the prompt, so there is no spoken rule or target. A speaker glyph replays the sequence at any time and is the only narration control.
 - **Art and assets.** Three frog colours and a lily pad from the boot set, with a ripple ring drawn at runtime around each frog as it sings.
 
@@ -195,14 +200,16 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Drag each toy into the big box or the small box according to its size. The same toy appears at both sizes.
 - **Rounds and pool.** Three of six toy types per playthrough (teddy bear, car, ball, block, rocket, drum), each shown big and small, so six toys to sort. Six placements complete the game.
 - **Difficulty.** Fixed. Big toys render at 1.5 times base scale and small toys at 0.7, which is a wide, pre-reader-safe gap.
+- **Feedback.** Toys drag with the shared lift and drop-zone highlight of Shape Sorter, and a correct drop shrinks the toy into the box over 150 ms while the lid wiggles 3 degrees three times and the box bumps to 1.05 times scale with the splash; a wrong drop bounces back with the soft tone and no penalty.
 - **Narration.** Rule line: "Put the big toys in the big box." No per-round prompt.
 - **Art and assets.** Seven toy SVGs including the box, from the boot set. Tile and sticker icons.
 
 ### 3.7 Pattern Builder
 
 - **Mechanic.** Tap the shape that finishes the pattern. The pattern strip has four slots, three filled and one gap.
-- **Rounds and pool.** Six rounds. Each round has four slots with three filled and one gap, six shapes to choose from, and exactly three answer choices. The first slot is never the gap.
+- **Rounds and pool.** Six rounds. Each round has four slots with three filled and one gap, and three answer choices drawn from the 18 shapes. The first slot is never the gap.
 - **Difficulty.** Adaptive. The band ladder shifts the pattern type and the gap: the easiest band always hides the last slot on an ABAB row, the middle band widens to ABAB, AABB or ABB with the last slot still hidden, and the top band may hide a middle slot instead.
+- **Feedback.** A correct tap flashes the card in the success green, chimes, cheers the mascot and pops the progress dot before the next round opens 700 ms later; a wrong tap plays the soft tone and wiggles the card 4 degrees three times (2 degrees over 200 ms under reduced motion) with a mascot nod and no penalty.
 - **Narration.** Rule line: "Pick the shape that finishes the pattern." No per-round prompt.
 - **Art and assets.** Reuses the Shape Sorter shape SVGs. Tile and sticker icons.
 
@@ -211,14 +218,16 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Tap the card showing the target letter. The target is shown large and spoken.
 - **Rounds and pool.** Six rounds, six unique letters per playthrough from the 26 letter set, four cards per round.
 - **Difficulty.** Adaptive. The band ladder shifts the letter range: a child who is still learning sees a narrow early-alphabet set, a child who is accurate sees the wider pool.
+- **Feedback.** The target letter pops in at 256 px and is re-named from the speaker glyph on demand. A correct tap flashes the card green, chimes and pops the progress dot before the next round opens 700 ms later; a wrong tap wiggles the card 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the letter is spoken as it appears. The speaker glyph repeats it.
-- **Art and assets.** 26 letter SVGs. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. Tile and sticker icons.
+- **Art and assets.** 26 letter SVGs. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. The target renders at 256 px and the answer cards at 128 px from the same `letter_*` textures, so the letterforms match the word games. Tile and sticker icons.
 
 ### 3.9 Find the Word
 
 - **Mechanic.** Tap the printed word that matches the picture and the spoken word.
 - **Rounds and pool.** Six rounds. An 18 word pool, eight three-letter words and ten four-letter words. Four word cards per round, never two starting with the same letter.
 - **Difficulty.** Adaptive. The band ladder shifts the mix of three and four letter words. A child who is finding it hard sees only three-letter words.
+- **Feedback.** The prompt picture pops in and every card squishes on press. A correct tap flashes the card green with the chime and a progress dot; a wrong tap wiggles the card 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the word is spoken at a slow rate while the picture shows its meaning.
 - **Art and assets.** 18 prompt pictures. Most reuse boot art; four new SVGs (sun, hat, bug, duck) were added for this game. Tile and sticker icons.
 
@@ -227,22 +236,25 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Build the pictured word by tapping letter tiles into empty slots, in order. Placed letters can be tapped to take them back.
 - **Rounds and pool.** Three words per playthrough, easy first: two three-letter words then one four-letter word.
 - **Difficulty.** Adaptive. The band ladder shifts the word tiers; the easy-first order is fixed.
+- **Feedback.** A correct letter tile settles into the next empty slot with a Back.out pop and a soft tick, and a wrong tile wiggles with the soft tone and no penalty. A finished word lingers 1.2 s on a chime and a Hoot cheer before the next word appears.
 - **Narration.** Per-round target: the word is spoken when the round opens, and the replay glyph repeats it.
-- **Art and assets.** Letter SVGs for the tiles and the prompt picture from the boot set. Extra tiles are distractors drawn from the same word's letters plus nearby letters. Tile and sticker icons.
+- **Art and assets.** Letter SVGs for the tiles and the prompt picture from the boot set. Extra tiles are two or three distractors drawn from the alphabet minus the word's own letters, shuffled in with the word's letters. Tile and sticker icons.
 
 ### 3.11 How Many?
 
 - **Mechanic.** Tap the group that has the target number of items. The numeral is shown large and spoken.
 - **Rounds and pool.** Six rounds, two per band: 1 to 3, 1 to 5, 1 to 10. Three or four group cards per round, built from eight counting objects.
 - **Difficulty.** Adaptive. The band ladder shifts the number range.
+- **Feedback.** The numeral pops in large and is re-heard from the speaker glyph on demand. A correct tap flashes the group card green with the chime and a progress dot; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the numeral is spoken as it appears.
 - **Art and assets.** Numeral SVGs and eight counting-object textures from the boot set. Tile and sticker icons.
 
 ### 3.12 First Sounds
 
 - **Mechanic.** Tap the letter that starts the spoken word for the picture shown.
-- **Rounds and pool.** Six rounds from a 12 word pool with nine distinct initial letters. The pool avoids confusable pairs (b and p, d and t, g and k, s and z) and visually similar letter families.
+- **Rounds and pool.** Six rounds from a 12 word pool with nine distinct initial letters. The pool avoids the confusable pairs (b and p, d and t) and visually similar letter families.
 - **Difficulty.** Adaptive. The band ladder shifts which words and distractors appear.
+- **Feedback.** A correct tap flashes the letter card green, chimes, pops the progress dot and speaks the letter back; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the word is spoken, and the picture shows it.
 - **Art and assets.** Four letter cards from the 26 letter SVGs and prompt pictures from the boot set. Tile and sticker icons.
 
@@ -251,6 +263,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Tap the group with more items, or the group with fewer, following a large arrow cue.
 - **Rounds and pool.** Six rounds, three asking for more and three for fewer. Two group cards per round, with bands of 1 to 3, 1 to 5 and 1 to 10.
 - **Difficulty.** Adaptive. The band ladder shifts the number range.
+- **Feedback.** The arrow cue pops in large and stays beside the two groups. A correct tap flashes the card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Per-round target: the comparison word ("more" or "less") is spoken, and the arrow repeats it visually.
 - **Art and assets.** Up and down arrow SVGs, group cards built from the counting-object textures. Tile and sticker icons.
 
@@ -259,6 +272,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Tap the card that does not belong in a 2 by 2 grid of four cards.
 - **Rounds and pool.** Six rounds across three kinds of difference: different category, same category but a different item, and near-identical items such as three frog colours. The pool is 33 textures: six animals, three frogs, six toys and 18 shapes.
 - **Difficulty.** Adaptive. The band ladder shifts the mix of difference kinds across the six rounds.
+- **Feedback.** A correct tap flashes the card green with the chime and a dot pop, and a wrong tap wiggles it with a gentle mascot nod and no penalty. The odd item's name is re-heard from the speaker glyph at any point in the round.
 - **Narration.** Per-round target: the odd item is named when the round opens.
 - **Art and assets.** Reuses animal, toy and shape SVGs from the boot set. Tile and sticker icons.
 
@@ -267,6 +281,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Tap the object whose colour matches the swatch shown at the top of the screen.
 - **Rounds and pool.** Six rounds. The first rounds use a four colour pool (red, blue, yellow, green); later rounds add orange and purple. Four cards per round, each a different colour.
 - **Difficulty.** Adaptive. The band ladder shifts how early the larger colour pool appears.
+- **Feedback.** The swatch stays on screen all round so the colour can be compared again. A correct tap flashes the card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Per-round target: the colour name is spoken.
 - **Art and assets.** The swatch is drawn at runtime rather than shipped as art. Objects reuse existing SVGs, one per colour: red heart, blue frog, yellow crescent, green rectangle, orange circle, purple square. Tile and sticker icons.
 
@@ -275,6 +290,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Count the dots on two group cards joined by a plus sign, then tap the answer card whose group matches the total.
 - **Rounds and pool.** Six rounds. Bands are sums up to 4, up to 6 and up to 10. Four answer cards per round, each a distinct total, and no repeated addend pair within a playthrough.
 - **Difficulty.** Adaptive. The band ladder shifts the maximum sum. All round mechanics come from the shared group-math base; this game pins only the rule set.
+- **Feedback.** The plus and equals cues pop in with the round. A correct tap flashes the answer card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Rule line: "Add the groups and pick the total." No per-round question voice; the equation is the prompt.
 - **Art and assets.** Plus and equals SVGs, dot-group cards built from the counting-object textures. Tile and sticker icons.
 
@@ -283,6 +299,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Count the dots on the first group, take away the dots in the second group joined by a minus sign, then tap the answer card for what is left.
 - **Rounds and pool.** Six rounds. Bands are totals up to 4, up to 6 and up to 10. The starting group is always larger than the group removed, so the answer is never zero and never negative.
 - **Difficulty.** Adaptive. The band ladder shifts the maximum total, same as Add It Up.
+- **Feedback.** The minus and equals cues pop in with the round. A correct tap flashes the answer card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Rule line: "Take some away and pick how many are left." No per-round question voice.
 - **Art and assets.** Minus and equals SVGs, dot-group cards from the counting-object textures. Tile and sticker icons.
 
@@ -291,6 +308,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Turn over two cards at a time to find a pair, holding the positions in mind between turns.
 - **Rounds and pool.** Six rounds. The grid grows across the ladder: three pairs in a 2 by 3 grid, six pairs in a 3 by 4 grid, eight pairs in a 4 by 4 grid. Pairs are drawn from a 16 texture pool of six animals, six toys and four small items.
 - **Difficulty.** Adaptive. The band ladder shifts the grid size.
+- **Feedback.** Cards deal in face down on a 40 ms per card stagger and turn with a scaleX 1 to 0 to 1 flip (180 ms a half, 120 ms reduced). A matched pair flashes green with the chime and a Hoot cheer; a mismatch wiggles both cards 4 degrees three times and turns them back after an 800 ms pause, with no penalty.
 - **Narration.** Rule line: "Turn over two cards to find a pair." No per-round prompt.
 - **Art and assets.** 16 pair textures and a card back from the boot set. Tile and sticker icons.
 
@@ -299,6 +317,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** See the picture and hear the word, then tap the printed word that names it among four cards.
 - **Rounds and pool.** Six rounds, easy first. Rounds one to three use three-letter words and rounds four to six use four-letter words, drawn from a 22 word pool. Four word cards per round, guarded against distractors that share the target's first letter or a confusable letter shape.
 - **Difficulty.** Adaptive. The band ladder shifts the split between three and four letter words, so a stronger reader meets four-letter words a round or two earlier.
+- **Feedback.** The target word is re-heard from the speaker glyph. A correct tap flashes the card green with the chime and a dot pop before the next word 700 ms later; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the target word is spoken while the picture shows its meaning, and the speaker glyph repeats it.
 - **Art and assets.** The pool shares 18 words with Find the Word and adds four (fox, cup, map, bed). Four new item SVGs. Tile and sticker icons.
 
@@ -307,6 +326,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Drag shuffled numeral cards into dashed slots to put them in ascending order. The board checks itself when the last slot fills. Tapping a numeral speaks it.
 - **Rounds and pool.** Six rounds across three bands: three numerals from 1 to 5, four numerals from 1 to 8, five numerals from 1 to 10.
 - **Difficulty.** Adaptive. The band ladder shifts both the count and the range.
+- **Feedback.** A card dropped into a slot snaps into place with the shared lift and snap juice. A correct board bursts the shared splash, chimes and fills the progress dot; a wrong board wiggles every placed card and then bounces them home, so the child rebuilds the order.
 - **Narration.** Rule line: "Put the numbers in order, smallest first." Numerals are spoken on tap rather than as a round prompt.
 - **Art and assets.** Numeral SVGs, with dashed slot outlines drawn at runtime. Tile and sticker icons.
 
@@ -315,6 +335,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Hear a short scenario about Aby, then tap the face that shows how Aby feels. Three face cards per round, drawn from four faces: happy, sad, angry and scared.
 - **Rounds and pool.** Six rounds from a pool of 16 scenarios, four per emotion. Each playthrough uses one scenario per emotion plus two more, with no repeats. Every round includes the target emotion among three distinct faces.
 - **Difficulty.** Fixed ladder, with a built-in contrast ramp: rounds one to three use clearly distinct emotions (happy against angry), rounds four to six use the easily confused pair (sad against scared).
+- **Feedback.** Three face cards rise in under the spoken scenario and squish on press. A correct tap splashes colour at the card, fills its progress dot on a Back.out pop and cheers Hoot before the 700 ms advance; a wrong tap wiggles the card and its face 4 degrees three times (2 degrees over 200 ms reduced), nods the mascot and re-speaks the scenario, with no penalty.
 - **Narration.** Rule line: "Tap the face that shows how Aby feels." Each round then speaks its scenario. A wrong tap re-speaks the scenario once and leaves the round open. When there is no voice or sound is off, the scenario appears as a caption and the glyph dims.
 - **Art and assets.** Four face SVGs, plus a tile and a sticker icon. No new audio.
 
@@ -323,6 +344,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Mechanic.** Drag three shuffled panels into three slots, marked by one, two and three pips, to tell the story first, next, last. Panels can be swapped between slots, withdrawn by tapping, and dropped back into the tray.
 - **Rounds and pool.** Six rounds from a pool of eight three-panel stories, four obvious (seed to flower, flat balloon to aloft, egg to duckling, ice cream to puddle) and four subtle (whole banana to peel, full cup to empty, bare foot to shoe, cloud to puddle). Three stories from each band, no repeats.
 - **Difficulty.** Fixed ladder. Rounds one to three use obvious stories, rounds four to six use subtle ones.
+- **Feedback.** Panels squash on press and tilt as they lift, and a panel dropped on an occupied slot swaps with the one already there, so nothing is ever rejected. A correct order splashes colour at the strip's centre, chimes and fills the dot; a wrong order wiggles every placed panel, leaves them where the child put them and re-judges only when the completed order changes.
 - **Narration.** Rule line: "Put the story in order, first to last." No per-round narration; the panels are the prompt.
 - **Art and assets.** 24 panel SVGs. These are the only game art that travels with a game chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
 
@@ -356,7 +378,7 @@ Professor Hoot is a teacher owl drawn in two static poses, idle and celebrating.
 
 ### 4.4 Stickers
 
-Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: full colour and shimmering when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
+Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: a small thumbnail on a cream plaque, full colour and shimmering on an 800 ms alpha loop when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
 
 ### 4.5 Profiles
 
@@ -366,7 +388,7 @@ The app supports up to four profiles on one device, each with one of six avatars
 
 A parent can set a daily limit per profile: off, 15, 30, 45 or 60 minutes. Only visible minutes count. The play clock runs from a Hub tile tap to the return to the Hub, banks time in slices, pauses when the document is hidden, and never charges a backgrounded tab. The budget resets on the local calendar date.
 
-The limit is shown, never enforced mid-game. The Hub shows a textless remaining-time arc, which turns warm at five minutes or less, and an hourglass nudge appears at five minutes. At the cap, game tiles dim and show a moon badge, and starting a new game is refused; a game already in progress is always allowed to finish. Limits are off by default.
+The limit is shown, never enforced mid-game. The Hub shows a textless remaining-time arc, which turns warm at five minutes or less, and an hourglass nudge appears at five minutes. At the cap, game tiles dim and show a moon badge, the mascot waves once, and starting a new game is refused; a game already in progress is always allowed to finish. Limits are off by default.
 
 ### 4.7 Learning Progress
 
@@ -390,7 +412,7 @@ Settings offers a Voice row listing the device voices plus "Default (device)". T
 
 ### 4.10 Install and update
 
-The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to where it does not, and nothing when the app is already installed.
+The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to where it does not (Share, then Add to Home Screen), and nothing when the app is already installed.
 
 Updates are prompt-based. A new service worker is downloaded but not activated until the parent accepts. The Hub shows a small toast with "Update now" and "Later"; accepting activates the new version and reloads, declining leaves the current version running. A second toast confirms when the app is ready to play offline.
 
@@ -432,7 +454,7 @@ Protected controls, meaning the ones that change state rather than play, always 
 
 ### 5.3 The parental lock
 
-Anything parent-facing requires a continuous three second press on a 96 by 96 px target. A circular ring fills from 0.6 alpha success green while the press is held. Only one hold can run at a time, and it cancels immediately on release, pointer-out or pointer-cancel, leaving no partial state.
+Anything parent-facing requires a continuous three second press on a 96 by 96 px target. A circular ring fills from 0.6 alpha success green while the press is held, starting at twelve o'clock. Only one hold can run at a time, and it cancels immediately on release, pointer-out or pointer-cancel, clearing the ring and leaving no partial state.
 
 The lock gates the Settings panel, the Back button inside a game, profile creation and deletion, Learning Progress, and Reset Progress. It is deliberately boring to a child and quick for an adult.
 
@@ -452,11 +474,11 @@ The app asks the platform to lock orientation to landscape on boot and the manif
 
 Scene changes are a 300 ms fade to the background colour into a 180 ms fade-in with a 1.02 zoom. The win celebration is ten rays and ten confetti pieces in the sprite palette, about 700 ms long, with the sticker reveal roughly 400 ms later. Correct answers flash and chime; wrong answers wiggle the piece and play a soft tone, with no shake and no red flash on the child's work.
 
-Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, and an idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
+Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, 40 ms apart over 300 ms, while idle tiles bob on a 2.5 second loop with four low-contrast dots drifting behind the grid. An idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input, repeating every ten seconds while it stays idle. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
 
 ### 5.7 Reduced motion
 
-The app reads the operating system's reduced-motion preference and never overrides it. When it is set, durations shorten (fades drop from 300 to 180 ms, celebrations from 700 to 300 ms), amplitudes shrink, the celebration uses six rays and no confetti, idle wiggles become a two degree sway, and the celebrate pose holds still. Nothing that carries information is motion-only, so no game becomes unplayable with motion reduced.
+The app reads the operating system's reduced-motion preference and never overrides it. When it is set, durations shorten (fades drop from 300 to 180 ms, celebrations from 700 to 300 ms), amplitudes shrink, the celebration uses six rays and no confetti, idle wiggles become a two degree sway, Hub entrances fade without scale, press feedback is disabled, and the celebrate pose holds still. Nothing that carries information is motion-only, so no game becomes unplayable with motion reduced.
 
 ## 6. Audio
 
@@ -493,7 +515,7 @@ When the document becomes hidden the app pauses the music, cancels in-flight spe
 
 ### 6.5 Toggles
 
-Music and sound effects are two independent toggles in the Settings panel, each persisted per device. Turning effects off silences chimes, pops, spoken lines and the preview button while leaving music alone; turning music off leaves effects alone. Both are read at startup, so a muted device boots muted.
+Music and sound effects are two independent toggles in the Settings panel, each persisted per device. Turning effects off silences chimes, pops, spoken lines and the preview button while leaving music alone; turning music off leaves effects alone. Turning effects back on plays the correct-answer chime as confirmation. Both are read at startup, so a muted device boots muted.
 
 ## 7. Performance and asset budget
 

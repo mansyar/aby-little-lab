@@ -37,6 +37,7 @@
    - [5.5 SettingsPanel and the settings group](#55-settingspanel-and-the-settings-group)
    - [5.6 ProfileChip and PlayTimeIndicator](#56-profilechip-and-playtimeindicator)
    - [5.7 PwaToast and PwaToasts](#57-pwatost-and-pwatoasts)
+   - [5.8 Typography and fonts](#58-typography-and-fonts)
 6. [State and storage](#6-state-and-storage)
    - [6.1 Keys and cache](#61-keys-and-cache)
    - [6.2 Schema v2](#62-schema-v2)
@@ -375,7 +376,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 
 **Story Order** keeps its own table for the same reason: `src/game/storyOrderArt.ts` imports the 24 panels as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 24 SVG strings land in the Story Order chunk.
 
-**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or registers a key outside the 53-key shell list. It also asserts the counts — 131 group keys, 125 game-only, 24 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, and `storyOrderArt.test.ts` keeps the single-module assertion.
+**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or registers a key outside the 53-key shell list. It also asserts the counts — 131 group keys, 125 game-only, 24 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, and `storyOrderArt.test.ts` keeps the single-module assertion. Adding a game means adding an art group and a `preloadArtGroups()` call in its scene; `PreloadScene` never gains an import for it.
 
 **Measured budgets.** The shell entry is 129.1 KiB against the 200 KiB gate in `validate-bundle.js`; cold boot is 419.5 ms median (1697.2 ms at 4× CPU throttle) against the 3000 ms `validate-boot.js` gate; and a cold first tap of a game adds **82 ms at worst** (Memory Match) and **48 ms for the widest art union** (Find the Word, 83 keys) against the 400 ms budget, with absolute totals of 224–334 ms. That is an increment, not a standalone latency: the criterion is "adds <= 400 ms versus the same tap", so `scripts/measure-first-tap.mjs` measures the current build back to back against a build of the pre-track commit `f377bf8`, taps five games and fails on the worst total rather than the cross-game median. Evidence, not a gate. `docs/perf-baseline.md` carries the before/after tables.
 
@@ -385,12 +386,14 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | --- | --- | --- |
 | Boot textures | 53 (22 tiles, 22 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Game art | 12 groups, 131 keys; nine emit chunks of 3.1–16.5 kB and `cutouts`, `shadows`, `faces` inline into their only consumer | build output |
-| Shell entry | 129.1 kB (132.21 kB as Vite prints it), gated at 200 kB | `node scripts/validate-bundle.js` |
+| Shell entry | 129.1 kB (132.21 kB as Vite prints it, 30.02 kB gzip), gated at 200 kB | `node scripts/validate-bundle.js` |
 | Phaser vendor chunk | 1342.6 kB as the validator reports it (1,374.8 kB as the Vite build prints it — same 1,374,822 bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
 | Story Order chunk | ~33.9 kB, includes all 24 panel SVGs | build output |
-| Precache entries | 53 (1,701.34 KiB) | `precache  53 entries` from the PWA build step |
+| Precache entries | 53 (1,702.03 KiB) | `precache  53 entries` from the PWA build step |
 
 The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+
+At 1.20.0 the build emits 41 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the shared bases, the Phaser vendor chunk and the workbox helper. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload or Hub.
 
 ---
 
@@ -540,7 +543,7 @@ Caption state machine — used by Feelings Faces, the one prompt with a written 
 
 ### 5.3 ParentLock
 
-`src/components/ParentLock.ts` gates adult-only controls behind a hold. `DEFAULT_HOLD_DURATION = 3000` ms, one hold per active pointer, ring radius 48 px in `0x68d391` at 0.6 alpha, depth 10000, animated by a value tween. `pointerup`, `pointerout` and `pointercancel` cancel the hold and fire `onFailure` once; `destroy()` cancels silently; success fires exactly once. Hit areas are `Rectangle(0, 0, 96, 96)` anchored at the object's top-left display bounds, which is why the back button's lock works independently of `setOrigin`. The PRD covers why adult actions are gated ([`docs/PRD.md#53-the-parental-lock`](./PRD.md#53-the-parental-lock)).
+`src/components/ParentLock.ts` gates adult-only controls behind a hold. `DEFAULT_HOLD_DURATION = 3000` ms, one hold per active pointer, ring radius 48 px in `0x68d391` at 0.6 alpha, depth 10000, animated by a value tween that starts at twelve o'clock. `pointerup`, `pointerout` and `pointercancel` cancel the hold and fire `onFailure` once; `destroy()` cancels silently; success fires exactly once. The ring is cleared on release, cancel and shutdown, so no display object survives the interaction. Hit areas are `Rectangle(0, 0, 96, 96)` anchored at the object's top-left display bounds, which is why the back button's lock works independently of `setOrigin`. The PRD covers why adult actions are gated ([`docs/PRD.md#53-the-parental-lock`](./PRD.md#53-the-parental-lock)).
 
 ### 5.4 SpeakerButton
 
@@ -548,7 +551,7 @@ Caption state machine — used by Feelings Faces, the one prompt with a written 
 
 ### 5.5 SettingsPanel and the settings group
 
-`src/components/SettingsPanel.ts` renders the parental controls above `HubScene`. It owns the backdrop (`0x000000` at `BACKDROP_ALPHA 0.6`), a `PANEL_WIDTH = 480` × `PANEL_HEIGHT = 760` cream panel (`0xfff8e7`), and three toggles plus a voice chip:
+`src/components/SettingsPanel.ts` renders the parental controls above `HubScene`. It owns the backdrop (`0x000000` at `BACKDROP_ALPHA 0.6`, which closes the panel when tapped), a `PANEL_WIDTH = 480` × `PANEL_HEIGHT = 760` cream panel (`0xfff8e7`), and three toggles plus a voice chip:
 
 | Control | Behaviour |
 | --- | --- |
@@ -557,7 +560,7 @@ Caption state machine — used by Feelings Faces, the one prompt with a written 
 | Adaptive | `Settings.adaptiveDifficulty`, persisted, ON by default |
 | Voice | cycles `availableVoiceOptions()` with 24-character truncation and a "Hi! I can talk." preview through `VoiceRow` |
 
-Rows sit at fixed offsets from the panel centre: Profiles `+123`, Progress `+178`, Reset `+234`, Install `+290`, Voice `+345`. Rows are `ROW_CARD_WIDTH = 400` × `ROW_CARD_HEIGHT = 68` cards behind 32 px labels; toggles are `TOGGLE_WIDTH = 240` × `TOGGLE_HEIGHT = 96` hit areas drawn as a 64×32 track with a 24 px knob offset ±16. `ROW_HEIGHT = 64` is the minimum row pitch. The footer shows `v${__APP_VERSION__}` in 24 px `DISABLED_COLOR` (`#a0aec0`) at `centerY - 75`.
+Rows sit at fixed offsets from the panel centre: Profiles `+123`, Progress `+178`, Reset `+234`, Install `+290`, Voice `+345`. Rows are `ROW_CARD_WIDTH = 400` × `ROW_CARD_HEIGHT = 68` cards behind 32 px labels; toggles are `TOGGLE_WIDTH = 240` × `TOGGLE_HEIGHT = 96` hit areas drawn as a 64×32 track with a 24 px knob offset ±16. `ROW_HEIGHT = 64` is the minimum row pitch. The footer shows `v${__APP_VERSION__}` in 24 px `DISABLED_COLOR` (`#a0aec0`) at `centerY - 75`. Turning Sounds back on plays `playCorrect()` as the confirmation chime.
 
 While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewport so parents can zoom; `restorePinchZoom()` puts it back on close.
 
@@ -568,7 +571,7 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 | `primitives.ts` | palette, panel/toggle/row dimensions, `addRowCard`, `createRow`, toggle drawing |
 | `ProfilesOverlay.ts` | profile list, add/delete/switch, per-profile limit chips (Off/15/30/45/60) |
 | `ProgressOverlay.ts` | per-game learning stats: 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip |
-| `ResetModal.ts` | two-step destructive confirm; on success calls `resetProgress()` and the panel's `onProgressReset` |
+| `ResetModal.ts` | two-step destructive confirm (`Reset all stickers?` with Cancel/Reset); on success calls `resetProgress()`, leaves settings untouched, sets the row to `Progress cleared`, and calls the panel's `onProgressReset` so the Hub shelf re-renders immediately |
 | `VoiceRow.ts` | voice chip cycling and preview |
 | `InstallRow.ts` | install state row driven by `createInstallTracker()` — `installable`, `ios-howto` or hidden |
 
@@ -581,6 +584,16 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 ### 5.7 PwaToast and PwaToasts
 
 `PwaToast.ts` draws one 520×150 cream toast with 200×72 buttons (primary `#2b6cb0`, secondary `#a0aec0`). `PwaToasts.ts` owns the lifecycle: it subscribes through `pwaBridge` and surfaces an update-available toast (action: reload into the waiting service worker) and an offline toast. `registerType: "prompt"` in the PWA config is what makes the update toast possible instead of a silent takeover.
+
+### 5.8 Typography and fonts
+
+`public/fonts/baloo2-latin.woff2` is the only bundled face. It is declared by `@font-face` in `src/styles/style.css`, copied verbatim into `dist/` like the rest of `public/`, and precached with the shell, so text renders in Baloo 2 from the first offline frame.
+
+`src/utils/typography.ts` is the single source of text styling: `FONT_FAMILY`, four size presets (`FONT_SIZE_SMALL` 18, `FONT_SIZE_MEDIUM` 24, `FONT_SIZE_LARGE` 32, `FONT_SIZE_XLARGE` 40) and `textStyle()`, which merges the bundled family under whatever props the caller passes. Every `Text` object is built through it, so no scene names a font family of its own.
+
+The face also backs the letter and numeral SVGs, which set `font-family` on a `<text>` element; that dependency is why `BootScene` gates on `ensureGlyphFontLoaded()` ([§3.2](#32-bootscene)).
+
+The parental Settings panel is the one surface that runs larger than the game presets: a 36 px panel title, 32-34 px row and toggle labels, and 30 px buttons, which is what the readability pass bought when the face replaced the bundled monospace.
 
 ---
 
@@ -699,7 +712,7 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 | `decodeLogic.ts` | Decode It word/letter mapping |
 | `feelingsFacesLogic.ts` | contrast ladder of faces and prompts |
 | `firstSoundsLogic.ts` | phonics rounds from a 12-word subset |
-| `hubGrid.ts` | tile layout, paging and sticker shelf rendering |
+| `hubGrid.ts` | tile layout, 64 px tile icons, paging and sticker shelf rendering |
 | `hubPaging.ts` | page maths for the tile grid |
 | `hubTiles.ts` | `GAME_TILES` metadata: id, title, icon key, scene key |
 | `memoryMatchLogic.ts` | pair generation, flip rules, adaptive tier split |
@@ -877,13 +890,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-103 test files, 2,208 tests. The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+110 test files, 2,305 tests (verified 2026-10-20). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage is lines 98.96, functions 98.14, branches 90.54, statements 98.13 across 103 files and 2,208 tests.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-20) is lines 98.59, functions 96.34, branches about 90 (90.66-90.73 across runs), statements 97.8 across 110 files and 2,305 tests.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 73.8 % lines, 74.54 % statements, 83.33 % functions and 56.66 % branches; its uncovered lines 63–77 are the fallback distractor path, which a pool of 22 words never forces.
 
@@ -947,9 +960,13 @@ VitePWA({
 
 Deploy is tag-gated; master pushes never deploy. The PRD's release path section describes the intent ([`docs/PRD.md#82-deploy-path`](./PRD.md#82-deploy-path)).
 
+One-time setup spans Coolify and the repo settings: an API token with the `deploy` permission (Keys & Tokens → API Tokens), the application's Deploy Webhook URL (Webhooks), the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` repository secrets, and branch protection on `master` with "Require status checks" set to `Quality Gates`. The workflow cannot enforce that last one itself, so without it an ungated pull request can still merge.
+
 ### 11.5 Container and host
 
 The `Dockerfile` is two stages: `node:22-alpine` with `corepack prepare pnpm@11.7.0`, `pnpm install --frozen-lockfile`, `pnpm run build`; then `nginx:1.27-alpine` with `nginx.conf` and `dist/` copied in, port 80 exposed and a `wget --spider` healthcheck. The host is a private VPS running Coolify behind Nginx.
+
+Locally the image builds with `docker build -t aby-little-lab .` and smoke-tests with `docker run --rm -p 8080:80 aby-little-lab`, which serves the app at `http://localhost:8080`. The container speaks plain HTTP on port 80, so production terminates TLS at the hosting provider or reverse proxy in front of it; installability and offline both depend on that.
 
 ---
 
@@ -957,4 +974,5 @@ The `Dockerfile` is two stages: `node:22-alpine` with `corepack prepare pnpm@11.
 
 - [`docs/PRD.md`](./PRD.md) — product definition, curriculum map, per-game rules, cross-game systems, performance targets.
 - [`conductor/tech-stack.md`](../conductor/tech-stack.md) — dated stack decisions and the history behind them.
+- [`conductor/archive/uiux-hardening_20260805/`](../conductor/archive/uiux-hardening_20260805/) — the archived UI/UX hardening track behind the Baloo 2 typography, Hub tile icons and press-feedback pass.
 - [`docs/release-checklist.md`](./release-checklist.md) — the manual device pass that complements the CI gates.
