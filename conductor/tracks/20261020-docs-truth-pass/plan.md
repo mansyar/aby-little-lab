@@ -41,7 +41,7 @@
 - **Covers:** FR-2, FR-3, FR-11, AC-2, AC-3
 - **Touches:** `README.md`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Inventory the facts in the nine sections** — covers: FR-3
   - [ ] **P2.T1.1: List the sections and facts** — Motion & Feedback, UI & Typography, PWA Release Readiness, Bundle Code Splitting, Docker, CI/CD, Parental Lock & Touch UX, Hub Experience, Professor Hoot.
