@@ -87,7 +87,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
 
 import { GAME_TILES } from "../../game/hubTiles";
 import { HubScene } from "../../scenes/HubScene";
-import { PreloadScene } from "../../scenes/PreloadScene";
+import { PreloadScene, SHELL_ASSETS } from "../../scenes/PreloadScene";
 import { ensureSceneLoaded } from "../../scenes/sceneRegistry";
 import {
   addProfile,
@@ -189,57 +189,53 @@ describe("PreloadScene", () => {
     expect(getMockFn(tagline.destroy)).toHaveBeenCalled();
   });
 
-  it("loads all 178 shape, letter, numeral, animal/food, toy, sticker, bubble, card back, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
+  it("loads exactly the 53 shell SVGs during preload", () => {
     const scene = new PreloadScene();
     scene.preload();
 
     const svgCalls = getMockFn(scene.load.svg).mock.calls;
-    expect(svgCalls).toHaveLength(178);
+    expect(svgCalls).toHaveLength(53);
+    expect(svgCalls.map((call) => call[0] as string)).toEqual(
+      SHELL_ASSETS.map((asset) => asset.key),
+    );
   });
 
-  it("loads shape SVGs with correct keys", () => {
+  it("loads the Hub tile and sticker SVGs and no game-only art", () => {
     const scene = new PreloadScene();
     scene.preload();
 
     const svgCalls = getMockFn(scene.load.svg).mock.calls;
     const keys = svgCalls.map((call) => call[0] as string);
 
-    expect(keys).toContain("shape_circle");
-    expect(keys).toContain("shape_square");
-    expect(keys).toContain("shape_triangle");
-    expect(keys).toContain("shape_star");
-    expect(keys).toContain("shape_heart");
-    expect(keys).toContain("shape_crescent");
-    expect(keys).toContain("cutout_circle");
-    expect(keys).toContain("cutout_square");
-    expect(keys).toContain("cutout_triangle");
-    expect(keys).toContain("cutout_star");
-    expect(keys).toContain("cutout_heart");
-    expect(keys).toContain("cutout_crescent");
+    expect(keys).toContain("tile_shape_sorter");
+    expect(keys).toContain("tile_feelings_faces");
     expect(keys).toContain("sticker_shape_sorter");
+    expect(keys).toContain("icon_speaker");
+
+    // Game art is rasterized by each game's own preload (Phase 4 shell diet).
+    expect(keys).not.toContain("shape_circle");
+    expect(keys).not.toContain("cutout_circle");
+    expect(keys).not.toContain("letter_a");
+    expect(keys).not.toContain("numeral_0");
+    expect(keys).not.toContain("animal_monkey");
+    expect(keys).not.toContain("food_banana");
+    expect(keys).not.toContain("bubble");
   });
 
-  it("loads animal and food SVGs with correct keys", () => {
+  it("keeps only the six avatar keys that render before any game loads", () => {
     const scene = new PreloadScene();
     scene.preload();
 
     const svgCalls = getMockFn(scene.load.svg).mock.calls;
     const keys = svgCalls.map((call) => call[0] as string);
 
-    expect(keys).toContain("animal_monkey");
-    expect(keys).toContain("animal_rabbit");
     expect(keys).toContain("animal_cat");
     expect(keys).toContain("animal_dog");
-    expect(keys).toContain("animal_elephant");
     expect(keys).toContain("animal_pig");
-    expect(keys).toContain("food_banana");
-    expect(keys).toContain("food_carrot");
-    expect(keys).toContain("food_fish");
-    expect(keys).toContain("food_bone");
-    expect(keys).toContain("food_peanut");
-    expect(keys).toContain("food_apple");
+    expect(keys).toContain("frog_red");
+    expect(keys).toContain("sm_duck");
+    expect(keys).toContain("toy_teddy_bear");
     expect(keys).toContain("sticker_animal_trace");
-    expect(keys).toContain("bubble");
     expect(keys).toContain("sticker_pop_freeze");
   });
 

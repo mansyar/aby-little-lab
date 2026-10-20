@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 /**
- * Mock Phaser minimally: only the SHAPE_ASSETS coverage block imports
+ * Mock Phaser minimally: only the SHELL_ASSETS coverage block imports
  * PreloadScene, which needs `Phaser.Scene` at import time (real Phaser
  * probes a canvas 2D context on import, which happy-dom does not provide).
  */
@@ -13,7 +13,7 @@ vi.mock("phaser", () => {
   return { ...phaserMock, default: phaserMock };
 });
 
-import { SHAPE_ASSETS } from "../../scenes/PreloadScene";
+import { SHELL_ASSETS } from "../../scenes/PreloadScene";
 import { displayScale, TEXTURE_SIZES, textureSizeFor } from "../../utils/textureTiers";
 
 describe("textureSizeFor tier mapping", () => {
@@ -80,10 +80,10 @@ describe("displayScale helper", () => {
   });
 });
 
-describe("tier coverage over SHAPE_ASSETS", () => {
-  it("resolves every registered asset key to a known tier size", () => {
-    expect(SHAPE_ASSETS).toHaveLength(178);
-    for (const asset of SHAPE_ASSETS) {
+describe("tier coverage over SHELL_ASSETS", () => {
+  it("resolves every registered shell asset key to a known tier size", () => {
+    expect(SHELL_ASSETS).toHaveLength(53);
+    for (const asset of SHELL_ASSETS) {
       const size = textureSizeFor(asset.key);
       expect([TEXTURE_SIZES.icon, TEXTURE_SIZES.card, TEXTURE_SIZES.hero]).toContain(size);
     }
@@ -91,8 +91,8 @@ describe("tier coverage over SHAPE_ASSETS", () => {
 
   it("cuts total GPU texture bytes by more than half versus the uniform 512px baseline", () => {
     const bytesAt = (size: number) => size * size * 4; // RGBA
-    const baseline = SHAPE_ASSETS.length * bytesAt(512);
-    const tiered = SHAPE_ASSETS.reduce((sum, a) => sum + bytesAt(textureSizeFor(a.key)), 0);
+    const baseline = SHELL_ASSETS.length * bytesAt(512);
+    const tiered = SHELL_ASSETS.reduce((sum, a) => sum + bytesAt(textureSizeFor(a.key)), 0);
     expect(tiered).toBeLessThan(baseline / 2);
   });
 });
