@@ -111,13 +111,17 @@
 - **Covers:** FR-10, NFR-2, NFR-4, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `docs/TDD.md`, `docs/PRD.md`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P5.T1: TDD §7.1** — covers: FR-10
-  - [ ] **P5.T1.1:** Add the registry row; correct the `hubTiles`/`hubPaging`/`PreloadScene` descriptions that still claim hand-maintained lists.
-- [ ] **P5.T2: README and PRD** — covers: FR-10
-  - [ ] **P5.T2.1:** Update the README structure line to name the registry.
-  - [ ] **P5.T2.2:** PRD §4.1 gains one sentence that game identity is declared once; no product-behavior prose changes.
-- [ ] **P5.T3: Full ladder + hub evidence** — covers: AC-6, AC-7
-  - [ ] **P5.T3.1:** Run the full `verify_phase` command and record output in `verification/phase-5.md`.
-  - [ ] **P5.T3.2:** Capture all three paged Hub views plus the wide layout from a local preview as evidence under `.conductor/evidence/` (screenshot only — no new CI layer), confirming 22 tiles, icons rendering, and an earned sticker shown as earned.
+- [x] **P5.T1: TDD §7.1** — covers: FR-10
+  - [x] **P5.T1.1:** Add the registry row; correct the `hubTiles`/`hubPaging`/`PreloadScene` descriptions that still claim hand-maintained lists.
+- [x] **P5.T2: README and PRD** — covers: FR-10
+  - [x] **P5.T2.1:** Update the README structure line to name the registry.
+  - [x] **P5.T2.2:** PRD §4.1 gains one sentence that game identity is declared once; no product-behavior prose changes.
+- [x] **P5.T3: Full ladder + hub evidence** — covers: AC-6, AC-7
+  - [x] **P5.T3.1:** Run the full `verify_phase` command and record output in `verification/phase-5.md`.
+  - [x] **P5.T3.2:** Capture all three paged Hub views plus the wide layout from a local preview as evidence under `.conductor/evidence/` (screenshot only — no new CI layer), confirming 22 tiles, icons rendering, and an earned sticker shown as earned.
+
+**Result:** verified
+**Checkpoint:** 0289476
+**Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-5.md
