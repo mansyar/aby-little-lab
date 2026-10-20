@@ -36,20 +36,23 @@
 - **Covers:** FR-5, FR-6, FR-7, FR-8, AC-4, AC-5, AC-6, AC-7
 - **Touches:** `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Rebuild the structural sections from the filesystem** — covers: FR-6, AC-4, AC-5
-  - [ ] **P2.T1.1: Regenerate the directory tree** — walk `git ls-files src` and write the real tree (29 scene files including bases, 15 component files with `settings/`, 30 logic modules, 14 utils, new assets folders).
-  - [ ] **P2.T1.2: Rebuild the asset manifest and summary** — per-folder counts (animals 9, feelings 4, items 23, letters 26, numbers 10, shadows 8, shapes 36, stickers 22, stories 24, toys 7, ui 33 = 202, verified with `git ls-files`), the 178 boot entries, texture tiers, and which art loads per game chunk.
-- [ ] **P2.T2: Document the runtime architecture** — covers: FR-5
-  - [ ] **P2.T2.1: Scene architecture and lazy registry** — `GameSceneBase` → `ChoiceRoundScene` → `GroupMathScene` inheritance, `sceneRegistry` dynamic imports, shell versus game chunk.
-  - [ ] **P2.T2.2: Components and shared systems** — `RoundNarrator` (glyph, label, replay, mute, caption state machine), mascot, `ParentLock`, `SettingsPanel` and the `settings/` group, PWA toasts, profile chip, play-time indicator.
-- [ ] **P2.T3: Document state, audio and motion** — covers: FR-7, FR-8, AC-6, AC-7
-  - [ ] **P2.T3.1: Storage schema v2** — profiles, stickers, progress, `playTime`, `Settings` fields, `GameId` list, v1 → v2 migration, cache behaviour and the unguarded-write limitation at `storage.ts:81-85`.
-  - [ ] **P2.T3.2: Audio and motion** — SFX names, BGM, duck and watchdog, visibility pause, never-persisted duck level, `motion.ts` and the reduced-motion contract.
-- [ ] **P2.T4: Close the TDD out** — covers: FR-5
-  - [ ] **P2.T4.1: Testing, build, PWA and CI sections** — 103 files / 2,208 tests, helpers, coverage thresholds, the three validator scripts, Coolify tag deploy.
-  - [ ] **P2.T4.2: Table of contents, cross-links and a final consistency read** — anchors resolve; the TDD links to the PRD instead of restating product intent.
+- [x] **P2.T1: Rebuild the structural sections from the filesystem** — covers: FR-6, AC-4, AC-5
+  - [x] **P2.T1.1: Regenerate the directory tree** — walk `git ls-files src` and write the real tree (29 scene files including bases, 15 component files with `settings/`, 30 logic modules, 14 utils, new assets folders).
+  - [x] **P2.T1.2: Rebuild the asset manifest and summary** — per-folder counts (animals 9, feelings 4, items 23, letters 26, numbers 10, shadows 8, shapes 36, stickers 22, stories 24, toys 7, ui 33 = 202, verified with `git ls-files`), the 178 boot entries, texture tiers, and which art loads per game chunk.
+- [x] **P2.T2: Document the runtime architecture** — covers: FR-5
+  - [x] **P2.T2.1: Scene architecture and lazy registry** — `GameSceneBase` → `ChoiceRoundScene` → `GroupMathScene` inheritance, `sceneRegistry` dynamic imports, shell versus game chunk.
+  - [x] **P2.T2.2: Components and shared systems** — `RoundNarrator` (glyph, label, replay, mute, caption state machine), mascot, `ParentLock`, `SettingsPanel` and the `settings/` group, PWA toasts, profile chip, play-time indicator.
+- [x] **P2.T3: Document state, audio and motion** — covers: FR-7, FR-8, AC-6, AC-7
+  - [x] **P2.T3.1: Storage schema v2** — profiles, stickers, progress, `playTime`, `Settings` fields, `GameId` list, v1 → v2 migration, cache behaviour and the unguarded-write limitation at `storage.ts:81-85`.
+  - [x] **P2.T3.2: Audio and motion** — SFX names, BGM, duck and watchdog, visibility pause, never-persisted duck level, `motion.ts` and the reduced-motion contract.
+- [x] **P2.T4: Close the TDD out** — covers: FR-5
+  - [x] **P2.T4.1: Testing, build, PWA and CI sections** — 103 files / 2,208 tests, helpers, coverage thresholds, the three validator scripts, Coolify tag deploy.
+  - [x] **P2.T4.2: Table of contents, cross-links and a final consistency read** — anchors resolve; the TDD links to the PRD instead of restating product intent.
+**Result:** verified
+**Checkpoint:** 9656dd6
+**Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-2.md
 
 ## Phase 3: Cross-document consistency
 
