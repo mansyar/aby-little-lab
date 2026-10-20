@@ -16,7 +16,7 @@
     "phases_total": 6,
     "phases_verified": 6,
     "tasks_total": 63,
-    "tasks_done": 70
+    "tasks_done": 63
   },
   "last_checkpoint": "22aabc8",
   "review_verdict": "PASS WITH FINDINGS",
