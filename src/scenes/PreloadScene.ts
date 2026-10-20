@@ -133,6 +133,7 @@ import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_bui
 import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
 import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
 import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
+import stickerStoryOrderSvg from "../assets/svg/stickers/sticker_story_order.svg?raw";
 import stickerTakeAwaySvg from "../assets/svg/stickers/sticker_take_away.svg?raw";
 import stickerWordBuilderSvg from "../assets/svg/stickers/sticker_word_builder.svg?raw";
 import stickerWordMatchSvg from "../assets/svg/stickers/sticker_word_match.svg?raw";
@@ -172,6 +173,7 @@ import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.s
 import tilePopFreezeSvg from "../assets/svg/ui/tiles/tile_pop_freeze.svg?raw";
 import tileShadowMatchSvg from "../assets/svg/ui/tiles/tile_shadow_match.svg?raw";
 import tileShapeSorterSvg from "../assets/svg/ui/tiles/tile_shape_sorter.svg?raw";
+import tileStoryOrderSvg from "../assets/svg/ui/tiles/tile_story_order.svg?raw";
 import tileTakeAwaySvg from "../assets/svg/ui/tiles/tile_take_away.svg?raw";
 import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
 import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
@@ -336,6 +338,7 @@ export const SHAPE_ASSETS = [
   { key: "sticker_memory_match", svg: stickerMemoryMatchSvg },
   { key: "sticker_decode_it", svg: stickerDecodeItSvg },
   { key: "sticker_number_order", svg: stickerNumberOrderSvg },
+  { key: "sticker_story_order", svg: stickerStoryOrderSvg },
   { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
   { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
   { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
@@ -356,6 +359,7 @@ export const SHAPE_ASSETS = [
   { key: "tile_memory_match", svg: tileMemoryMatchSvg },
   { key: "tile_decode_it", svg: tileDecodeItSvg },
   { key: "tile_number_order", svg: tileNumberOrderSvg },
+  { key: "tile_story_order", svg: tileStoryOrderSvg },
   { key: "face_happy", svg: faceHappySvg },
   { key: "face_sad", svg: faceSadSvg },
   { key: "face_angry", svg: faceAngrySvg },

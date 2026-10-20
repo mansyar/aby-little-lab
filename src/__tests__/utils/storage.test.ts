@@ -333,6 +333,55 @@ describe("Storage utilities", () => {
         expect(result.stickers[gameId]).toEqual({ earned: false, earnedAt: null });
       }
     });
+
+    it("backfills story-order on a v2 save written before the game exists", () => {
+      // A save from the 21-game era: no story-order sticker or progress row.
+      const profile = {
+        id: "p1",
+        avatarId: "cat",
+        createdAt: "2026-09-01T00:00:00.000Z",
+        stickers: {
+          "shape-sorter": { earned: true, earnedAt: "2026-09-02T00:00:00.000Z" },
+          "feelings-faces": { earned: true, earnedAt: "2026-09-03T00:00:00.000Z" },
+        },
+        playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey(new Date()) },
+        progress: {
+          "shape-sorter": {
+            plays: 4,
+            wins: 2,
+            correct: 9,
+            wrong: 1,
+            lastPlayedAt: "2026-09-02T00:00:00.000Z",
+            recent: [true],
+          },
+        },
+      };
+      localStorage.setItem(
+        V2_KEY,
+        JSON.stringify({
+          activeProfileId: "p1",
+          profiles: [profile],
+          settings: { bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null },
+        }),
+      );
+
+      const result = load();
+
+      expect(result.stickers["story-order"]).toEqual({ earned: false, earnedAt: null });
+      expect(hasSticker("story-order")).toBe(false);
+      // Existing stickers and progress survive the backfill.
+      expect(result.stickers["shape-sorter"].earned).toBe(true);
+      expect(result.stickers["feelings-faces"].earned).toBe(true);
+      expect(getProgress()["shape-sorter"].wins).toBe(2);
+      expect(getProgress()["story-order"]).toEqual({
+        plays: 0,
+        wins: 0,
+        correct: 0,
+        wrong: 0,
+        lastPlayedAt: null,
+        recent: [],
+      });
+    });
   });
 
   describe("save", () => {
