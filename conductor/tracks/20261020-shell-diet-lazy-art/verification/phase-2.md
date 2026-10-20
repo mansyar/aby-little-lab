@@ -5,7 +5,7 @@
 - **Date:** 2026-10-20
 - **Branch:** `refactor/20261020-shell-diet-lazy-art`
 - **Base:** `d538b5e`
-- **Head:** `898bf1d`
+- **Head:** `af436bf` (squashed phase commit)
 - **Result:** verified
 
 ## Summary
@@ -78,11 +78,18 @@ Additional Phase 2 behaviour covered by tests:
 - `src/game/art/placeholder.ts`
 - `src/__tests__/components/ArtLoadingCue.test.ts`
 - `src/__tests__/game/art/placeholder.test.ts`
-- Commits: `15e0cfd` (cue), `fb1db95` (placeholder), `c77e888` (cue tests), `898bf1d` (placeholder tests)
+- Commits: `af436bf` (squashed phase commit: cue, placeholder, both test files; the five task commits were squashed per `phase_squash`)
 
 ## Deviations
 
-None. Every file written is inside the Phase 2 Touches globs
+One API-shape deviation from the plan text, recorded rather than silently
+absorbed: `P2.T1.2` named two free functions (`showArtLoadingCue` /
+`clearArtLoadingCue`), but the brief specified a single factory returning
+`{ show, clear, destroy }`, and that is what shipped — a scene needs one handle to
+destroy on shutdown, and two free functions would have needed a scene-keyed
+registry to find the objects again. The plan task text was corrected to match.
+
+Every file written is inside the Phase 2 Touches globs
 (`src/components/ArtLoadingCue.ts`, `src/game/art/placeholder.ts`,
 `src/__tests__/components/ArtLoadingCue.test.ts`,
 `src/__tests__/game/art/placeholder.test.ts`) plus this evidence file.
@@ -121,6 +128,28 @@ None. Every file written is inside the Phase 2 Touches globs
 
 ## Primary verification
 
-The chain above was run once, end to end, after the last commit, at `898bf1d`;
-`pnpm build` was run once afterwards as a supplementary check and left the working
-tree clean.
+The chain above was run once, end to end, after the last task commit (squashed
+into `af436bf`); `pnpm build` was run once afterwards as a supplementary check and
+left the working tree clean.
+
+## Primary verification (independent re-run)
+
+- **Verified by:** primary agent on 2026-10-20, from a clean tree, with no cache
+  reuse.
+- **Scope:** `git diff --name-only ab938b8..HEAD` touched only
+  `src/components/ArtLoadingCue.ts`, `src/game/art/placeholder.ts`, the two test
+  files and this evidence file. `src/scenes/**` and `src/game/art/registry.ts`
+  untouched — Phase 2 ships no behaviour change.
+- **Commands:** `pnpm check` exit 0 (same two pre-existing diagnostics),
+  `pnpm typecheck` exit 0, `pnpm test -- --run` exit 0 with 107 files / 2,244
+  tests, `pnpm test:coverage` exit 0 at statements 98.16%, branches 90.72%,
+  functions 98.17%, lines 98.99%.
+- **Code review findings, none blocking:** the dot pulse stagger delays each
+  dot's first cycle and then syncs them, which reads as a single gentle breath —
+  acceptable for a cue that may sit behind a 300 ms load. `clear()` resets alpha
+  and scale explicitly before stopping tweens, so a cue cleared mid-cycle cannot
+  leave a dot dimmed. `texturePresent` tolerates a scene double with no
+  `TextureManager`, which is what keeps the cue usable from Phase 3 scene tests.
+- **Residual, accepted:** `destroy()` is registered with `events.once`, so a cue
+  destroyed by hand cannot be resurrected by a later shutdown event.
+

@@ -36,16 +36,19 @@
 - **Covers:** FR-5, FR-6, AC-5
 - **Touches:** `src/components/ArtLoadingCue.ts`, `src/game/art/placeholder.ts`, `src/__tests__/components/ArtLoadingCue.test.ts`, `src/__tests__/game/art/placeholder.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** af436bf
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-2.md
 
-- [ ] **P2.T1: Loading cue** — covers: FR-5
-  - [ ] **P2.T1.1: Hoot plus three pulsing dots, textless, opacity-only under reduced motion, self-clearing**
-  - [ ] **P2.T1.2: `showArtLoadingCue(scene)` / `clearArtLoadingCue(scene)` wired so a scene can start and stop it around a group load**
-- [ ] **P2.T2: Placeholder path** — covers: FR-6
-  - [ ] **P2.T2.1: Neutral outlined placeholder texture plus a single `console.warn` per missing key**
-- [ ] **P2.T3: Component tests** — covers: FR-5, AC-5
-  - [ ] **P2.T3.1: Cue lifecycle, reduced-motion branch, cleanup on shutdown**
-  - [ ] **P2.T3.2: Missing key yields placeholder and the round remains completable**
+- [x] **P2.T1: Loading cue** - covers: FR-5
+  - [x] **P2.T1.1: Hoot plus three pulsing dots, textless, opacity-only under reduced motion, self-clearing**
+  - [x] **P2.T1.2: `createArtLoadingCue(scene)` returning `{ show, clear, destroy }`, wired so a scene can start and stop it around a group load**
+- [x] **P2.T2: Placeholder path** - covers: FR-6
+  - [x] **P2.T2.1: Neutral outlined placeholder texture plus a single `console.warn` per missing key**
+- [x] **P2.T3: Component tests** - covers: FR-5, AC-5
+  - [x] **P2.T3.1: Cue lifecycle, reduced-motion branch, cleanup on shutdown**
+  - [x] **P2.T3.2: Missing key yields placeholder and the round remains completable**
 
 ## Phase 3: Declare art groups in all 22 game scenes
 
