@@ -147,7 +147,7 @@
 - [x] **R1.T7: Resolve L4** - covers: L4
   - [x] **R1.T7.1: Re-point the phase-2 art rework rows** at the squashed commit
 - **Result:** verified
-- **Checkpoint:** PENDING
+- **Checkpoint:** e83f692
 - **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-R1.md
 
 <!--
