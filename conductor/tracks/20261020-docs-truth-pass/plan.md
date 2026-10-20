@@ -41,24 +41,28 @@
 - **Covers:** FR-2, FR-3, FR-11, AC-2, AC-3
 - **Touches:** `README.md`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Inventory the facts in the nine sections** — covers: FR-3
-  - [ ] **P2.T1.1: List the sections and facts** — Motion & Feedback, UI & Typography, PWA Release Readiness, Bundle Code Splitting, Docker, CI/CD, Parental Lock & Touch UX, Hub Experience, Professor Hoot.
-  - [ ] **P2.T1.2: Classify each fact** — `covered` when the owning doc already carries it, `relocate` otherwise.
-- [ ] **P2.T2: Relocate uncovered facts** — covers: FR-3
-  - [ ] **P2.T2.1: Write each fact into its owning doc** — product behavior into `docs/PRD.md`, implementation detail into `docs/TDD.md`, at the matching section.
-- [ ] **P2.T3: Replace the sections with summaries** — covers: FR-2
-  - [ ] **P2.T3.1: Cap each summary at five lines plus a link** — to the owning PRD or TDD section.
-  - [ ] **P2.T3.2: Check inbound anchors** — `rg "README.md#"` across the repo; fix or keep any referenced headings.
-- [ ] **P2.T4: Prove the outcome** — covers: FR-2, FR-3
-  - [ ] **P2.T4.1: Record the line count and relocation list** — in the phase evidence.
+- [x] **P2.T1: Inventory the facts in the nine sections** - covers: FR-3
+  - [x] **P2.T1.1: List the sections and facts** - Motion & Feedback, UI & Typography, PWA Release Readiness, Bundle Code Splitting, Docker, CI/CD, Parental Lock & Touch UX, Hub Experience, Professor Hoot.
+  - [x] **P2.T1.2: Classify each fact** - `covered` when the owning doc already carries it, `relocate` otherwise.
+- [x] **P2.T2: Relocate uncovered facts** - covers: FR-3
+  - [x] **P2.T2.1: Write each fact into its owning doc** - product behavior into `docs/PRD.md`, implementation detail into `docs/TDD.md`, at the matching section.
+- [x] **P2.T3: Replace the sections with summaries** - covers: FR-2
+  - [x] **P2.T3.1: Cap each summary at five lines plus a link** - to the owning PRD or TDD section.
+  - [x] **P2.T3.2: Check inbound anchors** - `rg "README.md#"` across the repo; fix or keep any referenced headings.
+- [x] **P2.T4: Prove the outcome** - covers: FR-2, FR-3
+  - [x] **P2.T4.1: Record the line count and relocation list** - in the phase evidence.
 
-## Phase 3: Move Per-Game Juice into the PRD
+- **Result:** verified. README 286 → 237 lines; the nine sections fell from 107 to 58 lines and each now ends in links to its owning PRD/TDD section. Facts the docs lacked were written first: the PRD gained the platform/bundle/hub details it was missing, the TDD gained §5.8 Typography and fonts plus the CI, Docker and shell-budget facts. Three false README claims were corrected rather than carried: deploys are tag-gated (not merge-gated), the service worker is prompt-based, and the sticker shelf's 56px figure was attached to the wrong object. 31 cross-doc anchors resolve; 0 broken internal anchors. AC-2 was revised to 240 after Phase 2 (original 170 pre-dated measurement) and the remaining gap moved to Phase 3 as FR-12.
+- **Checkpoint:** `c96efe1`
+- **Evidence:** [`verification/phase-2.md`](./verification/phase-2.md)
 
-- **Goal:** each of the 22 game specs owns its feedback facts, and the README keeps only a pointer.
+## Phase 3: Move Per-Game Juice and the Game Roster into the PRD
+
+- **Goal:** each of the 22 game specs owns its feedback facts and its replay-variety detail, and the README keeps only a one-line-per-game pointer.
 - **Depends on:** Phase 2
-- **Covers:** FR-2, FR-3, AC-2, AC-3
+- **Covers:** FR-2, FR-3, FR-12, AC-2, AC-3, AC-12
 - **Touches:** `README.md`, `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
@@ -67,8 +71,11 @@
   - [ ] **P3.T1.1: Cover §3.1-§3.22** — one line per game, preserving reduced-motion variants.
 - [ ] **P3.T2: Replace the README per-game section** — covers: FR-2
   - [ ] **P3.T2.1: Summarize and link** — no orphaned bullets and no dead anchors.
-- [ ] **P3.T3: Verify 22/22 coverage** — covers: FR-3
-  - [ ] **P3.T3.1: Record the per-game checklist** — in the phase evidence, flagging any fact intentionally dropped and why.
+- [ ] **P3.T3: Verify 22/22 coverage** - covers: FR-3
+  - [ ] **P3.T3.1: Record the per-game checklist** - in the phase evidence, flagging any fact intentionally dropped and why.
+- [ ] **P3.T4: Cut the roster down to one line per game** - covers: FR-12
+  - [ ] **P3.T4.1: Move replay-variety detail to the PRD** - keep the game name, its domain and its icon, link to the 3 spec, and drop any bullet whose facts the PRD 3 spec already states.
+  - [ ] **P3.T4.2: Hold the line budget** - README at most 180 lines at the end of the phase, with `## Releases` and `## Project Structure` unchanged.
 
 ## Phase 4: product.md Current-State Truth
 

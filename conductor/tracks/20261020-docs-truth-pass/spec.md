@@ -78,6 +78,7 @@ drift compounds with every release.
 | FR-9 | `drop-ligne-mascot_20261016` is closed: absence of Ligne is proven, the folder moves to `conductor/archive/drop-ligne-mascot_20261016/`, metadata records `status: "complete"` plus `archived_at` and `archive_path`, and the `conductor/tracks.md` ledger line points at the archive. | must |
 | FR-10 | `.gitkeep` files are removed only from directories that already contain tracked files. | should |
 | FR-11 | Every corrected claim is backed in the phase evidence by the source, command output or test result that proves it. | must |
+| FR-12 | The README's 22-game roster drops its per-game replay-variety detail: one line per game, linking to the game specs in `docs/PRD.md` §3, where that detail already lives. (Added 2026-10-20 after Phase 2 measured the README at 237 lines.) | must |
 
 ## Non-Functional Requirements
 
@@ -95,7 +96,7 @@ drift compounds with every release.
 | ID | Criterion | Verifies |
 | --- | --- | --- |
 | AC-1 | README has zero empty headings. Its counts equal a `pnpm test -- --run` run captured in the phase evidence and carry a verified date. | FR-1 |
-| AC-2 | README is at most 170 lines, every trimmed section links to its owning doc, and no other file links to a removed anchor. | FR-2 |
+| AC-2 | README is at most 240 lines once Phase 2 lands and at most 180 at track end; every trimmed section links to its owning doc, and no other file links to a removed anchor. (Revised 2026-10-20: the original 170 ceiling was an estimate made before measuring, and the plan left the roster to Phase 3; 240 after Phase 2, 180 at track end.) | FR-2 |
 | AC-3 | The relocation list names every moved fact, and a `rg` search finds each one in the PRD or TDD. | FR-3 |
 | AC-4 | TDD counts equal the same captured run, and the lowest-covered-file claim is re-measured or absent. | FR-4 |
 | AC-5 | The product.md adaptive text matches `WINDOW_SIZE = 10`, `MIN_SAMPLE = 6`, 0.9 and 0.6, and `git diff` shows no changed line inside a dated changelog entry. | FR-5 |
@@ -105,6 +106,7 @@ drift compounds with every release.
 | AC-9 | No `drop-ligne-mascot_20261016` remains under `conductor/tracks/`, the archive metadata shows the archived state, the registry line resolves to it, and `package.json` plus the lockfile contain no Ligne dependency. | FR-9 |
 | AC-10 | No `.gitkeep` remains in a directory that holds tracked files. | FR-10 |
 | AC-11 | Each phase evidence file records the commands run, their exit codes, and the audit or verification output. | FR-11 |
+| AC-12 | No README game line repeats a replay-variety detail that the PRD already carries; each line names the game and links to its spec. | FR-12 |
 
 ## Edge Cases
 
@@ -130,7 +132,10 @@ drift compounds with every release.
 - **Assumption:** `conductor/product.md` dated changelog entries are frozen
   history, per the user's decision on 2026-10-20.
 - **Assumption:** a README of at most 170 lines is a target, not a hard gate; a
-  section holding unique facts may push it higher.
+  section holding unique facts may push it higher. **Amended 2026-10-20** after
+  Phase 2 measured 237 lines: the ceiling is 240 once the nine sections are
+  summaries and 180 at track end, and the gap is closed by trimming the game
+  roster (new FR-12/AC-12), not by dropping setup facts.
 - **Assumption:** the Ligne track closes as executed and archived because
   `755d575` performed its work; `conductor/migration-report.md:30` recommends
   recreating it, which this track supersedes because the outcome already landed.
