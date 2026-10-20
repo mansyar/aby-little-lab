@@ -215,3 +215,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: PRD & TDD Truth Pass** - [20261020-prd-tdd-truth-pass](./archive/20261020-prd-tdd-truth-pass/index.md) - chore - medium (Archived)
 
 - [x] **Track: Shell Diet: Per-Game Lazy Art Chunks** - [20261020-shell-diet-lazy-art](./archive/20261020-shell-diet-lazy-art/index.md) - refactor - high (Archived)
+
+---
+
+- [ ] **Track: Docs & Dead-Code Truth Pass** — [20261020-docs-truth-pass](./tracks/20261020-docs-truth-pass/index.md) — chore — medium
