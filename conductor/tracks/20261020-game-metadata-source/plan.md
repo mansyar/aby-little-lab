@@ -90,15 +90,19 @@
 - **Covers:** FR-7, AC-2, AC-4
 - **Touches:** `src/__tests__/gameRegistry.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Scene-loader bijection** — covers: FR-7
-  - [ ] **P4.T1.1:** Assert `sceneLoaders` keys and registry `sceneKey` values are the same set, in both directions, so neither a stray loader nor an unregistered game ships.
-- [ ] **P4.T2: Storage id agreement** — covers: FR-7
-  - [ ] **P4.T2.1:** Assert `GAME_IDS` order equals registry `gameId` order.
-- [ ] **P4.T3: Asset resolution** — covers: AC-4
-  - [ ] **P4.T3.1:** Assert every registry `tileKey`/`stickerKey` resolves to exactly one shell asset.
-  - [ ] **P4.T3.2:** Demonstrate the guard bites: a temporarily broken fixture entry fails the suite with the key in the message; reverted before commit.
+- [x] **P4.T1: Scene-loader bijection** — covers: FR-7
+  - [x] **P4.T1.1:** Assert `sceneLoaders` keys and registry `sceneKey` values are the same set, in both directions, so neither a stray loader nor an unregistered game ships.
+- [x] **P4.T2: Storage id agreement** — covers: FR-7
+  - [x] **P4.T2.1:** Assert `GAME_IDS` order equals registry `gameId` order.
+- [x] **P4.T3: Asset resolution** — covers: AC-4
+  - [x] **P4.T3.1:** Assert every registry `tileKey`/`stickerKey` resolves to exactly one shell asset.
+  - [x] **P4.T3.2:** Demonstrate the guard bites: a temporarily broken fixture entry fails the suite with the key in the message; reverted before commit.
+
+**Result:** verified
+**Checkpoint:** f29ad9d
+**Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-4.md
 
 ## Phase 5: Docs and the full gate
 
