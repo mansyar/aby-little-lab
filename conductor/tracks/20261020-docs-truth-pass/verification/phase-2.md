@@ -35,7 +35,7 @@ pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm
 | --- | --- | --- |
 | AC-2 | Every trimmed README section links to the owning doc | **Met.** All nine sections now end with an explicit `Product rules:` / `Implementation:` link line into `docs/PRD.md` and `docs/TDD.md`. |
 | AC-2 | No other file links to a removed anchor | **Met.** `rg "README\.md#"` across the repo returns only the plan's own check phrase and the phase-1 evidence line that quotes it; `rg "\)\#"` inside `README.md` returns nothing. Every README link added this phase points at a PRD/TDD heading verified in the file, not at a README anchor. |
-| AC-2 | README ≤ 170 lines | **Not met in this phase: 237 lines** (from 286). The nine sections lost 49 of their 107 lines; the floor this phase can reach is bounded by sections it may not touch (Mini-Games table 26 lines, Project Structure 19, Releases 17, Documentation 15) plus `## Per-Game Juice`, which Phase 3 owns. Per the track's stated assumption the 170-line figure is a target, not a gate. |
+| AC-2 | README ≤ 170 lines | **Not met in this phase: 237 lines** (from 286). The nine sections went from 107 lines to 58, a net −49; the floor this phase can reach is bounded by sections it may not touch (Mini-Games table 26 lines, Project Structure 19, Releases 17, Documentation 15) plus `## Per-Game Juice`, which Phase 3 owns. Per the track's stated assumption the 170-line figure is a target, not a gate. |
 | AC-3 | A relocation list names every moved fact and `rg` finds each in PRD/TDD | **Met** for every relocated fact (table below). Covered facts were confirmed by reading the owning section before dropping the README text; the `rg` sweep of the relocated phrases is in "Anchor and relocation checks". |
 
 ## Relocation table
@@ -121,9 +121,10 @@ pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm
 | --- | --- |
 | README before this phase (`99728bc`) | 286 |
 | README after this phase (`541a758`) | **237** |
-| Removed from the nine sections | 107 |
-| Replaced by summaries | 58 |
+| Body lines deleted by git in the nine sections | 67 |
+| Body lines added by git (summary + link line per section) | 18 |
 | Net change | −49 |
+| The nine sections including their headings and blank lines | 107 → 58 |
 
 `## Per-Game Juice` (22 lines) was left untouched, as the brief assigns it to Phase 3.
 
