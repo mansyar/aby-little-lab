@@ -5,7 +5,7 @@
 - Branch: `feat/20261020-story-sequencing`
 - Range: `95d044e..b3dff94` (production code, tests, scripts, assets; `conductor/` excluded)
 - Date: 2026-10-20
-- Verdict: **PASS WITH FINDINGS**
+- Verdict: **PASS**
 
 ## Summary
 
@@ -92,10 +92,27 @@ None beyond the above findings.
 
 ## Doc sync
 
-Pending until Phase R1 lands.
+Synced: product.md (22 mini-games, changelog, rule-narrator count, drop-outside wording), README.md (tests, table, replay variety, spoken rules, juice, bundle, shell figure), conductor/tech-stack.md (scenes, bases, tree, art-placement note).
 
+## Round 2 (re-review)
+
+The re-review confirmed all seven round-1 findings genuinely closed, and raised
+five findings against the fix phase itself:
+
+| ID | Severity | Finding | Resolution |
+| --- | --- | --- | --- |
+| F1 | High | `pnpm check` was red at `e83f692` - the new test block was unformatted - while the evidence claimed exit 0 | Formatted, check re-run, phase-R1 row corrected to say it was red (Phase R2) |
+| F2 | Medium | Phaser's zero drag threshold turned a wobbly tap into a drag that self-dropped, so tap-to-return stayed flaky on a real finger | `input.dragDistanceThreshold = 10` plus threshold and tap-tail tests |
+| F3 | Low | FR-3 / AC-3 kept their old sentence and contradicted it in an amendment | Bodies rewritten to the shipped behaviour, dated notes kept as provenance, orientation asserted |
+| F4 | Low | A ticked R1 task claimed a product-changelog edit that had not landed | Changelog now matches AC-3; R1.T1.1 retitled to `pointerdown` |
+| F5 | Low | The tap case fired `pointerdown` before `dragstart` and mis-stated why the strip must be incomplete | Engine order and corrected rationale |
+
+F2 is worth recording as a reminder: a flag that distinguishes tap from drag
+cannot be written by the drag handler alone while the engine's threshold is zero,
+because every tap *is* a drag at that setting.
 ## History
 
 | Round | Verdict | Findings | Remaining |
 | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 3 Medium, 4 Low | 7 |
+| 2 | BLOCK (fix phase) -> PASS after Phase R2 | 1 High, 1 Medium, 3 Low, all against the fix commit | 0 |

@@ -25,9 +25,9 @@
 | --- | --- |
 | `pnpm check` | pass - 206 files, 1 pre-existing warning, 1 schema info note |
 | `pnpm typecheck` | pass, no output |
-| `pnpm test -- --run` | pass - 103 files / 2,205 tests |
+| `pnpm test -- --run` | pass - 103 files / 2,208 tests |
 | `pnpm test:coverage` | pass - 98.11 statements / 90.54 branches / 98.04 functions / 98.94 lines |
-| `pnpm build` | pass - `StoryOrderScene-D5FX6gb5.js` 33.36 kB, shell `index-cmeS8uaq.js` 200.12 kB raw |
+| `pnpm build` | pass - `StoryOrderScene-D5FX6gb5.js` 33.92 kB, shell `index-cmeS8uaq.js` 200.12 kB raw |
 | `node scripts/validate-bundle.js` | pass - shell 195.4 kB ≤ 200 kB, Phaser vendor chunk present |
 | `node scripts/validate-pwa.js` | pass - 15 / 15 |
 
@@ -69,3 +69,14 @@
   unrelated doc drift).
 - Shell headroom is now 4.6 kB; the next art-heavy game must follow Story Order's
   in-chunk pattern or raise the gate deliberately.
+
+## Post-review addendum (2026-10-20)
+
+Round 2 of review raised five findings against the fix phase: a formatter error
+that left `pnpm check` red, Phaser's zero drag threshold making tap-to-return
+flaky on a real finger, and three record inaccuracies. Phase R2 closed all five.
+Final integrated figures at `fa9544c`: 103 files / **2,208 tests**, coverage
+98.13 / 90.54 / 98.14 / 98.96, `StoryOrderScene` **33.92 kB**, shell **195.4 kB**
+of 200 kB, 45 precache entries, PWA 15/15, zero panel keys in the boot shell.
+The board also gained two assertions (10 px drag slack, strip above the tray)
+that were spec'd but previously untested.
