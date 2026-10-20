@@ -163,7 +163,7 @@ The primary appends after acceptance:
   `src/__tests__/game/playTimeLogic.test.ts`, `README.md`,
   `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Duck BGM under speech** — covers: FR-6, FR-7
   - [ ] **P5.T1.1: Add duck/restore to `AudioManager`** with the short ramp and
