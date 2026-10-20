@@ -201,7 +201,10 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** review findings
 - **Touches:** ...
 - **Verification:** ...
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `22aabc8`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-R1.md`
 
 - [x] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
 -->
@@ -213,12 +216,15 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** M1, M2, L1, L2, L3, L4, L5
 - **Touches:** `src/scenes/ChoiceRoundScene.ts`, `src/scenes/NumberOrderScene.ts`, `src/components/RoundNarrator.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`, `src/__tests__/audio/AudioManager.test.ts`, `conductor/tracks/20261020-scene-audio-shell/spec.md`, `conductor/tracks/20261020-scene-audio-shell/verification/phase-2.md`, `conductor/tracks/20261020-scene-audio-shell/verification/integrated.md`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `22aabc8`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-R1.md`
 
-- [ ] **R1.T1: Record the shared success flash** — covers: M1
-- [ ] **R1.T2: Amend NFR-1 and restate the NFR-1 row** — covers: M2
-- [ ] **R1.T3: Pin the correct-answer ordering in the base suite** — covers: L1
-- [ ] **R1.T4: Pin the pre-init duck contract** — covers: L2
-- [ ] **R1.T5: Route Number Order through the settings facade** — covers: L3
-- [ ] **R1.T6: Document the narrator's refresh contract** — covers: L4
-- [ ] **R1.T7: Centre the inflated hit area and test it** — covers: L5
+- [x] **R1.T1: Record the shared success flash** — covers: M1
+- [x] **R1.T2: Amend NFR-1 and restate the NFR-1 row** — covers: M2
+- [x] **R1.T3: Pin the correct-answer ordering in the base suite** — covers: L1
+- [x] **R1.T4: Pin the pre-init duck contract** — covers: L2
+- [x] **R1.T5: Route Number Order through the settings facade** — covers: L3
+- [x] **R1.T6: Document the narrator's refresh contract** — covers: L4
+- [x] **R1.T7: Centre the inflated hit area and test it** — covers: L5
