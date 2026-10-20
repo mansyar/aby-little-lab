@@ -141,5 +141,5 @@ Review fixes are appended by conductor-review as `## Phase R1: Review Fixes`.
 - [x] **R2.T4: Re-point the squashed SHAs in phase-R1 evidence** - covers: N4
 - [x] **R2.T5: Give the per-chunk figures one owner** - covers: N5
 **Result:** verified
-**Checkpoint:** pending
+**Checkpoint:** 65431f5
 **Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-R2.md
