@@ -170,13 +170,16 @@ shell side.
 - **Covers:** F8, F9, F10, F11, F12, F13, F14
 - **Touches:** `docs/TDD.md`, `conductor/tech-stack.md`, `conductor/tracks/20261020-shell-diet-lazy-art/verification/**`, `docs/perf-baseline.md`, `src/__tests__/helpers/phaserMock.ts`, `src/__tests__/game/art/preloadArtGroups.test.ts`, `src/__tests__/components/ArtLoadingCue.test.ts`, `src/__tests__/scenes/preloadArt.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-boot.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** d5eda08
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-R2.md
 
-- [ ] **R2.T1: Resolve F8 - the retracted first-tap figures in TDD and tech-stack** - covers: F8
-  - [ ] **R2.T1.1: Rewrite the TDD "Measured budgets" sentence as an increment and mark phase-5 evidence superseded**
-- [ ] **R2.T2: Resolve F9 - disclose the serving-path asymmetry** - covers: F9
-  - [ ] **R2.T2.1: State which server each build ran on and that the deltas are upper bounds**
-- [ ] **R2.T3: Resolve F10 and F11 - the art-key count and the corroboration sentence** - covers: F10, F11
-- [ ] **R2.T4: Resolve F12 - point AC-5 at the scene test** - covers: F12
-- [ ] **R2.T5: Resolve F13 - the failed-key test describes unreachable retry** - covers: F13
-- [ ] **R2.T6: Resolve F14 - restore the required createCanvas in the scene doubles** - covers: F14
+- [x] **R2.T1: Resolve F8 - the retracted first-tap figures in TDD and tech-stack** - covers: F8
+  - [x] **R2.T1.1: Rewrite the TDD "Measured budgets" sentence as an increment and mark phase-5 evidence superseded**
+- [x] **R2.T2: Resolve F9 - disclose the serving-path asymmetry** - covers: F9
+  - [x] **R2.T2.1: State which server each build ran on and that the deltas are upper bounds**
+- [x] **R2.T3: Resolve F10 and F11 - the art-key count and the corroboration sentence** - covers: F10, F11
+- [x] **R2.T4: Resolve F12 - point AC-5 at the scene test** - covers: F12
+- [x] **R2.T5: Resolve F13 - the failed-key test describes unreachable retry** - covers: F13
+- [x] **R2.T6: Resolve F14 - restore the required createCanvas in the scene doubles** - covers: F14
