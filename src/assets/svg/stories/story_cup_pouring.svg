@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A cup is poured - 2 of 3. The cup tilts and water falls into a second cup. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <g transform="translate(-40 -40) rotate(34 268 300)">
+    <path d="M 168 200 L 194 372 C 196 380 202 384 210 384 L 302 384 C 310 384 316 380 318 372 L 344 200 Z" fill="#BEE3F8" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M 208 236 Q 262 254 328 238 L 324 262 Q 266 278 214 258 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+    <ellipse cx="256" cy="200" rx="88" ry="22" fill="#90CDF4" stroke="#2D3748" stroke-width="6"/>
+  </g>
+  <path d="M 347 222 C 352 258 356 288 358 316" fill="none" stroke="#2D3748" stroke-width="16" stroke-linecap="round"/>
+  <path d="M 347 222 C 352 258 356 288 358 316" fill="none" stroke="#2B6CB0" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 324 318 L 338 382 L 390 382 L 404 318 Z" fill="#BEE3F8" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 330 334 Q 364 346 398 334 L 390 376 Q 364 382 338 376 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <ellipse cx="364" cy="318" rx="40" ry="12" fill="#90CDF4" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="360" cy="296" r="7" fill="#2B6CB0" stroke="#2D3748" stroke-width="3"/>
+</svg>

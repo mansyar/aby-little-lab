@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Ice cream melts - 1 of 3. One whole pink scoop on a crisp cone. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 194 244 L 318 244 L 256 390 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 202 262 L 280 348 M 310 262 L 232 348" fill="none" stroke="#D69E2E" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 218 300 L 294 300" fill="none" stroke="#D69E2E" stroke-width="4" stroke-linecap="round"/>
+  <rect x="188" y="230" width="136" height="26" rx="12" fill="#ED8936" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="256" cy="196" r="62" fill="#F687B3" stroke="#2D3748" stroke-width="6"/>
+  <ellipse cx="230" cy="172" rx="16" ry="24" fill="#FED7E2" transform="rotate(-24 230 172)"/>
+</svg>

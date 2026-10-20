@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A banana is eaten - 3 of 3. Only the empty peel, splayed open. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 154 306 C 168 232 262 194 358 206 C 384 209 392 230 374 238 C 296 232 226 262 200 316 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 196 306 C 220 264 288 240 366 244 C 330 262 268 282 216 322 Z" fill="#D69E2E" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 176 330 C 150 352 148 380 172 390 C 190 396 198 382 188 374 C 176 364 178 348 194 334 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 236 320 C 214 352 220 388 248 396 C 266 400 272 384 258 376 C 240 366 238 342 250 326 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 330 300 C 326 340 348 380 372 388 C 388 394 396 378 382 370 C 362 358 352 336 352 304 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <ellipse cx="372" cy="222" rx="11" ry="8" fill="#A0522D" stroke="#2D3748" stroke-width="4"/>
+</svg>

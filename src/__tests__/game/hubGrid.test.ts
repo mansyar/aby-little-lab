@@ -72,18 +72,18 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     localStorage.clear();
   });
 
-  it("builds 21 tiles of 144x116 with icons and labels", () => {
+  it("builds 22 tiles of 144x116 with icons and labels", () => {
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
 
     grid.buildWideGrid();
 
-    expect(rects(144, 116).length).toBe(21);
+    expect(rects(144, 116).length).toBe(22);
     const images = mockRegistry.filter((obj) => obj.kind === "image");
     const texts = mockRegistry.filter((obj) => obj.kind === "text");
-    // 21 icons + 21 sticker slots would be more; the wide grid adds 21 icons.
-    expect(images.length).toBe(21);
-    expect(texts.length).toBe(21);
+    // 22 icons + 22 sticker slots would be more; the wide grid adds 22 icons.
+    expect(images.length).toBe(22);
+    expect(texts.length).toBe(22);
   });
 
   it("activates a tile on tap exactly once (navLocked blocks double-taps)", () => {
@@ -139,12 +139,12 @@ describe("HubGrid — classic wide 6x4 grid", () => {
       (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
     );
     expect(stickers.length).toBe(1);
-    // 20 unearned slots: each dashed ring has 10 arc segments.
+    // 21 unearned slots: each dashed ring has 10 arc segments.
     const slotGraphics = mockRegistry.filter((obj) => obj.kind === "graphics");
     for (const g of slotGraphics) {
       expect(g.arc).toHaveBeenCalledTimes(10);
     }
-    expect(slotGraphics.length).toBe(20);
+    expect(slotGraphics.length).toBe(21);
   });
 
   it("keeps the earned sticker below the tile label and above the tile's bottom edge", () => {
@@ -229,18 +229,21 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(activate).toHaveBeenCalledWith(10);
   });
 
-  it("builds only the remaining tile on the last page", () => {
+  it("builds the two remaining tiles on the last page", () => {
     const { deps, activate } = makeDeps();
     const grid = new HubGrid(deps);
     grid.buildPageGrid(2);
 
-    expect(rects(176, 196).length).toBe(1);
+    expect(rects(176, 196).length).toBe(2);
 
-    const tile = grid.attractTargets[0] as unknown as MockObject;
-    tile.handlers.pointerup?.();
-
-    // Page 3 holds the 21st game (Feelings Faces).
+    const tiles = grid.attractTargets as unknown as MockObject[];
+    tiles[0].handlers.pointerup?.();
+    // Page 3 holds games 21-22 (Feelings Faces, then Story Order).
     expect(activate).toHaveBeenCalledWith(20);
+
+    grid.navLocked = false;
+    tiles[1].handlers.pointerup?.();
+    expect(activate).toHaveBeenLastCalledWith(21);
   });
 
   it("keeps a paged sticker shelf below the tile label as well", () => {

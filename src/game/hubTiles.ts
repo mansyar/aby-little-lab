@@ -163,4 +163,10 @@ export const GAME_TILES: readonly GameTile[] = [
     label: "Feelings Faces",
     tileKey: "tile_feelings_faces",
   },
+  {
+    sceneKey: "StoryOrder",
+    gameId: "story-order",
+    label: "Story Order",
+    tileKey: "tile_story_order",
+  },
 ];

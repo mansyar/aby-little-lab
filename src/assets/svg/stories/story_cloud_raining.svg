@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Rain falls - 2 of 3. The same cloud, now dropping rain. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 148 296 C 120 296 108 276 116 258 C 100 236 118 212 144 216 C 150 186 184 172 208 188 C 226 164 266 164 282 188 C 312 176 344 194 346 220 C 372 220 388 240 380 262 C 396 280 382 300 358 300 L 160 300 C 152 300 148 298 148 296 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 152 318 C 160 332 166 340 166 348 C 166 356 159 361 152 361 C 145 361 138 356 138 348 C 138 340 144 332 152 318 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 220 342 C 228 356 234 364 234 372 C 234 380 227 385 220 385 C 213 385 206 380 206 372 C 206 364 212 356 220 342 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 286 314 C 294 328 300 336 300 344 C 300 352 293 357 286 357 C 279 357 272 352 272 344 C 272 336 278 328 286 314 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M 352 340 C 360 354 366 362 366 370 C 366 378 359 383 352 383 C 345 383 338 378 338 370 C 338 362 344 354 352 340 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+</svg>

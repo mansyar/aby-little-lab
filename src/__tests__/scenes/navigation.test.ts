@@ -189,12 +189,12 @@ describe("PreloadScene", () => {
     expect(getMockFn(tagline.destroy)).toHaveBeenCalled();
   });
 
-  it("loads all 176 shape, letter, numeral, animal/food, toy, sticker, bubble, card back, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
+  it("loads all 178 shape, letter, numeral, animal/food, toy, sticker, bubble, card back, sleep glyph, tile icon, speaker icon, and mascot SVGs during preload", () => {
     const scene = new PreloadScene();
     scene.preload();
 
     const svgCalls = getMockFn(scene.load.svg).mock.calls;
-    expect(svgCalls).toHaveLength(176);
+    expect(svgCalls).toHaveLength(178);
   });
 
   it("loads shape SVGs with correct keys", () => {
@@ -323,7 +323,7 @@ describe("HubScene", () => {
     scene.create();
 
     const icons = getTileIcons(scene);
-    expect(icons).toHaveLength(21);
+    expect(icons).toHaveLength(22);
     expect(new Set(icons.map((i) => i.key))).toEqual(
       new Set([
         "tile_shape_sorter",
@@ -347,6 +347,7 @@ describe("HubScene", () => {
         "tile_decode_it",
         "tile_number_order",
         "tile_feelings_faces",
+        "tile_story_order",
       ]),
     );
     // Icons render at their per-tile display size (>=64px default; the
@@ -369,10 +370,10 @@ describe("HubScene", () => {
     const scene = new HubScene();
     scene.create();
 
-    expect(hasSticker).toHaveBeenCalledTimes(21);
+    expect(hasSticker).toHaveBeenCalledTimes(22);
   });
 
-  // 21 fresh Hub instantiations per pass now; under full-suite coverage load
+  // 22 fresh Hub instantiations per pass now; under full-suite coverage load
   // this can exceed the 5s default, so give it explicit headroom.
   it("navigates to each game scene when respective tile is clicked", async () => {
     // A fresh Hub per navigation mirrors reality: once a transition starts,
@@ -507,8 +508,8 @@ describe("Hub profile switcher", () => {
     expect((scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen()).toBe(
       false,
     );
-    // Shelf re-rendered: 21 more sticker lookups after the initial 21.
-    expect(hasSticker).toHaveBeenCalledTimes(42);
+    // Shelf re-rendered: 22 more sticker lookups after the initial 22.
+    expect(hasSticker).toHaveBeenCalledTimes(44);
     // Chip re-textured to the newly active profile.
     expect(getMockFn(chip.setTexture)).toHaveBeenCalledWith("animal_cat");
   });
@@ -539,7 +540,7 @@ describe("Hub profile switcher", () => {
     expect((scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen()).toBe(
       false,
     );
-    expect(hasSticker).toHaveBeenCalledTimes(21);
+    expect(hasSticker).toHaveBeenCalledTimes(22);
   });
 
   it("renders the sticker shelf for the active profile only", () => {
@@ -558,9 +559,9 @@ describe("Hub profile switcher", () => {
       scene as unknown as { grid: { rerenderStickerShelf: () => void } }
     ).grid.rerenderStickerShelf();
 
-    // The re-render starts at call 21 (one shelf lookup per tile on each pass).
-    expect((hasSticker as MockFn).mock.results[21]?.value).toBe(true);
-    expect((hasSticker as MockFn).mock.calls).toHaveLength(42);
+    // The re-render starts at call 22 (one shelf lookup per tile on each pass).
+    expect((hasSticker as MockFn).mock.results[22]?.value).toBe(true);
+    expect((hasSticker as MockFn).mock.calls).toHaveLength(44);
   });
 });
 

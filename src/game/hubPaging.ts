@@ -10,10 +10,10 @@
  * Phaser's FIT scale mode maps it onto the physical screen.
  */
 
-/** Tiles per page (the first two pages of a 21-game hub). */
+/** Tiles per page (the first two pages of a 22-game hub). */
 export const PAGE_SIZE = 10;
 
-/** Number of Hub pages in paged mode: 21 games as 10 + 10 + 1. */
+/** Number of Hub pages in paged mode: 22 games as 10 + 10 + 2. */
 export const PAGE_COUNT = 3;
 
 /**
@@ -21,7 +21,7 @@ export const PAGE_COUNT = 3;
  * module stays dependency-free; `GAME_TILES.length` in hubTiles.ts is the
  * source of truth and hubPaging.test.ts asserts the two agree.
  */
-export const HUB_TILE_COUNT = 21;
+export const HUB_TILE_COUNT = 22;
 
 /**
  * The wide-layout tile height (HubScene's TILE_HEIGHT) that the threshold is

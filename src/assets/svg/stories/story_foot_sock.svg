@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A foot gets dressed - 2 of 3. The same foot in a white sock. The cuff is wider than
+       the ankle so the silhouette (not the fill) tells this panel from the bare foot, and a toe seam
+       plus a ribbed cuff add two more shape cues that survive grayscale. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 198 374 L 198 286 L 152 286 C 148 306 146 344 150 392 L 330 392 C 356 392 370 384 374 372 C 388 376 398 366 392 356 C 404 348 398 334 384 332 C 390 320 380 308 366 308 C 370 296 358 288 346 294 C 340 280 322 284 314 298 C 302 318 288 332 270 342 C 246 356 218 368 198 374 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="122" y="252" width="104" height="46" rx="16" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 142 262 L 142 288" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 160 262 L 160 288" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 178 262 L 178 288" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 196 262 L 196 288" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 214 262 L 214 288" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 174 340 C 194 348 214 346 230 336" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 356 348 C 368 344 378 336 382 326" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -42,6 +42,7 @@ const categories = {
   shadows: list('shadows'),
   shapes: list('shapes', (f) => f.startsWith('shape_')),
   cutouts: list('shapes', (f) => f.startsWith('cutout_')),
+  stories: list('stories'),
   stickers: list('stickers'),
   tiles: list('ui/tiles'),
 };

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A banana is eaten - 1 of 3. One whole banana with stem and tip. -->
+  <rect x="48" y="384" width="416" height="30" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 138 344 Q 178 148 368 184 C 392 188 398 212 378 220 Q 300 216 236 262 Q 210 282 200 330 C 194 362 160 386 142 372 C 134 366 134 356 138 344 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 168 328 Q 240 214 352 200" fill="none" stroke="#D69E2E" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="380" cy="200" rx="12" ry="9" fill="#A0522D" stroke="#2D3748" stroke-width="4"/>
+  <ellipse cx="148" cy="368" rx="11" ry="8" fill="#A0522D" stroke="#2D3748" stroke-width="4"/>
+</svg>
