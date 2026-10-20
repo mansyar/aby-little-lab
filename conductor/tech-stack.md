@@ -55,12 +55,14 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 23 scenes (Boot, Preload, Hub, 20 game scenes)
+- **Scenes:** 24 scenes (Boot, Preload, Hub, 21 game scenes)
 
 > **2026-08-02 — Design Update (Bundle Code Splitting):** Game scenes are lazy-loaded via runtime registration. `src/scenes/sceneRegistry.ts` maps each game scene key to a dynamic-import loader and exposes `ensureSceneLoaded(scene, key)` (no-op if already registered, else `import()` + `scene.add(key, SceneClass)`); HubScene awaits it before transitioning into a game. Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the `scene` array — functions there are invoked with `new` (constructor form only, no promise handling in `SceneManager`). Shell scenes (Boot/Preload/Hub) remain statically registered in `main.ts`. Rollup hoists shared modules into shared chunks automatically; no `manualChunks` config.
 
 > **2026-08-08 — Design Update (Game Scene Scaffold Extraction):** All 13 game scenes now extend the shared abstract base `src/scenes/GameSceneBase.ts` (`GameSceneBase extends Phaser.Scene`, constructor takes the scene key). The base owns the duplicated per-scene skeleton: `createBackButton()` (text "← Back" + 96×96 hit area + `ParentLock` hold-to-exit transitioning to Hub + press feedback), `createCornerMascot()` (Professor Hoot bottom-right), `createProgressDots(count)` / `fillProgressDot(index)` (top-of-screen dots, pop tween, reduced-motion aware; `count` parameterized — 6 default games, 5 Musical Memory, 3 Shape Sorter/Animal Trace, 0 for Shadow Match/Big Small/Pop Freeze), `completeGame(gameId)` (win SFX, mascot big cheer, `createWinCelebration`, first-completion sticker award + reveal animation with the key derived from `gameId` via `stickerKeyFor` (`-` → `_`), 3s `AUTO_RETURN_DELAY` auto-return to Hub carrying `{justEarned}` when earned), `registerShutdownCleanup()` (destroys parentLock/mascot/speaker on scene `shutdown`), and shared protected constants (`NEXT_ROUND_DELAY` 700, `AUTO_RETURN_DELAY` 3000, `WIGGLE_*`, `OUTLINE_WIDTH`, `PROGRESS_DOT_*`, `DOT_POP_*`, `STICKER_*`, `WIN_TWEEN_DURATION`, `SUCCESS_COLOR`, `CARD_BG_COLOR`, `OUTLINE_COLOR`, `SPEAKER_OFFSET`). Subclasses keep their per-game mechanics (rounds, cards, drag, scoring, Arcade physics) and may redeclare protected constants to override defaults (e.g. `ShapeSorterScene`: `PROGRESS_DOT_Y` 100 / `RADIUS` 18 / `SPACING` 64, `DOT_POP_REDUCED_SCALE` 1.15, `DOT_POP_DURATION` 220 / `REDUCED` 140, `NEXT_ROUND_DELAY` 1200). `progressDots` is intentionally reassignable so scenes can reset the array on `create()` relaunch (Shape Sorter, Pattern Builder). `sceneRegistry.ts` unchanged — all 13 loaders still map to the same scene classes. Test coverage: `src/__tests__/scenes/gameSceneBase.test.ts` (11 tests); full suite 46 files / 1112 tests green; Biome clean. Zero user-visible behavior change.
 - **Input:** Touch-first, single-finger interactions
+
+> **2026-10-20 - Design Update (Shared Choice-Round Shell + Audio Focus):** The 21 game scenes now sit on two shared abstract bases below `GameSceneBase`: `src/scenes/ChoiceRoundScene.ts` (round prompt + card grid + correct/wrong/advance loop, including the 700 ms advance, progress-dot fill, success flash and reduced-motion wiggle) and `src/scenes/GroupMathScene.ts` (two dot-group prompt cards + an equation row with a plus/minus cue, itself below `ChoiceRoundScene`). Thirteen choice games use them: Alphabet, Word Match, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Decode It, Number Order, Pattern Builder and Feelings Faces directly, plus Add It Up and Take Away through `GroupMathScene` (each is now a ~25-line config subclass; their scene keys, `gameId`s, sticker keys and spoken rules are unchanged). `src/components/RoundNarrator.ts` is the single prompt narrator: it owns the replay glyph and, for the rule-line games, the centred caption line - created by `GameSceneBase.createRoundNarrator` / `createSpokenInstruction`, spoken once per round, replayable on tap, dimmed when SFX is off or speech is unavailable. `GameSceneBase`'s `speaker` accessor delegates to the narrator, and no scene constructs a `SpeakerButton` any more. Feelings Faces' caption fallback (unknown-until-`voiceschanged`, settled-empty decision, displayed-round re-evaluation, no re-speak on flip) moved into the narrator unchanged. **Audio focus** is owned by the `AudioManager` singleton and wired once in `init()`, never per scene: it subscribes to `onSpeechLifecycle` and ducks the BGM to `BGM_VOLUME x 0.08` over a 120 ms ramp on `speech:start`, restoring on `speech:end`/`speech:error`, on a 15 s watchdog (re-armed while `speechSynthesis.speaking` is still true), on `destroy()`, and on either settings toggle - a ducked level is never persisted and the settings schema is unchanged. `document.visibilitychange` pauses the BGM (remembering whether it was really playing), cancels in-flight speech and releases the duck; on return it resumes only if it had been playing and BGM is still enabled. Play-time accrual follows the same rule: `src/game/playTimeLogic.ts` banks visible milliseconds, adds `pausePlaySession()` / `resumePlaySession()`, and attaches the visibility watcher in `startPlaySession()` / detaches it in `endPlaySession()`, so hidden minutes never count toward a profile's daily budget on any scene, not just the Hub, and repeated hide/show cycles bank each visible slice once. Both behaviours stay inert where `document.visibilityState` does not exist (older WebViews, non-DOM hosts).
 - **Audio:** Web Audio API for synthesized tones and SFX, HTML5 Audio for the MP3 BGM only
 - **Motion:** All juice animations respect `prefers-reduced-motion` via `utils/motion.ts` (reduced amplitudes/durations; loops like breathing/drift disabled)
 
@@ -185,7 +187,9 @@ aby-little-lab/
     │   ├── BootScene.ts
     │   ├── PreloadScene.ts
     │   ├── HubScene.ts             # Hub composition shell (~370 L): owns mascot/decor/settings/play-time wiring; tile grid, profile chip and PWA toasts live in dedicated modules
-    │   ├── GameSceneBase.ts         # Shared scaffold for all 20 game scenes (back button, mascot, progress dots, win/sticker/auto-return)
+    │   ├── GameSceneBase.ts         # Shared scaffold for all 21 game scenes (back button, mascot, progress dots, win/sticker/auto-return, narrator)
+    │   ├── ChoiceRoundScene.ts      # Abstract base for the 13 choice games (round prompt, card grid, correct/wrong/advance loop)
+    │   ├── GroupMathScene.ts        # Abstract base below ChoiceRoundScene: dot-group cards + equation row (Add It Up, Take Away)
     │   ├── ShapeSorterScene.ts
     │   ├── AnimalTraceScene.ts
     │   ├── PopFreezeScene.ts
@@ -197,17 +201,21 @@ aby-little-lab/
     │   ├── WordMatchScene.ts
     │   ├── WordBuilderScene.ts
     │   ├── HowManyScene.ts
+    │   ├── FirstSoundsScene.ts
     │   ├── MoreLessScene.ts
     │   ├── OddOneOutScene.ts
     │   ├── ColorMatchScene.ts
     │   ├── AddItUpScene.ts
     │   ├── TakeAwayScene.ts
     │   ├── MemoryMatchScene.ts
+    │   ├── NumberOrderScene.ts
+    │   ├── FeelingsFacesScene.ts
     │   └── DecodeItScene.ts
     ├── components/
     │   ├── Mascot.ts              # Tween-only owl mascot (wave/cheer/nod/idleLoop)
     │   ├── ParentLock.ts
     │   ├── SpeakerButton.ts       # Shared replay control (96px hit area)
+    │   ├── RoundNarrator.ts       # Single prompt narrator: caption line + speaker glyph, spoken once and replayable
     │   ├── ProfileChip.ts         # Avatar chip + profile picker overlay
     │   ├── PlayTimeIndicator.ts   # Budget arc/moon badge + full-screen nudge
     │   ├── PwaToast.ts            # Single update/offline toast banner
@@ -221,7 +229,7 @@ aby-little-lab/
     │       ├── VoiceRow.ts        # TTS voice chip + preview
     │       └── InstallRow.ts      # Install prompt / iOS how-to overlay
     ├── audio/
-    │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis
+    │   └── AudioManager.ts        # SFX, BGM, Web Audio API synthesis, audio focus (narration duck, hidden-document pause)
     ├── game/
     │   ├── shapeSorterLogic.ts    # Pure game logic (shuffle, match detection)
     │   ├── animalTraceLogic.ts    # Pure game logic (path tracing, pair selection)
@@ -237,7 +245,8 @@ aby-little-lab/
     │   ├── moreLessLogic.ts       # Pure game logic (quantity comparison, more/less rounds, win detection)
     │   ├── colorMatchLogic.ts     # Pure game logic (color pools, 4-card rounds, swatch target, win detection)
     │   ├── oddOneOutLogic.ts      # Pure game logic (odd-one-out pools, bands, round/playthrough generation, evaluation)
-    │   ├── hubTiles.ts            # Hub tile metadata (single source of truth for the 20 tiles: gameId, label, texture, icon sizing)
+    │   ├── playTimeLogic.ts       # Daily-budget logic + visibility-aware play sessions (visible minutes only)
+    │   ├── hubTiles.ts            # Hub tile metadata (single source of truth for the 21 tiles: gameId, label, texture, icon sizing)
     │   ├── hubPaging.ts           # Narrow-viewport paging math (page count, slot geometry, page tile indexes)
     │   └── hubGrid.ts             # Hub tile-grid renderer: wide/paged build, swipe + dot paging, sticker shelf, time-up lock
     ├── utils/

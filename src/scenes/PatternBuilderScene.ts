@@ -1,16 +1,16 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import {
   generatePlaythrough,
   getCorrectShape,
   type PatternRound,
 } from "../game/patternBuilderLogic";
 import type { ShapeType } from "../game/shapeSorterLogic";
+import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { isReducedMotion, motionDuration } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
+import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
-import { GameSceneBase } from "./GameSceneBase";
+import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Shape texture keys indexed by ShapeType. */
 const SHAPE_TEXTURES: Record<ShapeType, string> = {
@@ -71,9 +71,9 @@ const GAP_SLOT_COLOR = 0xfaf9f6;
  * Pattern Builder scene — the child completes a 4-shape repeating pattern
  * (ABAB/AABB/ABB) by tapping the missing shape from 3 answer cards. Correct
  * taps snap the shape into the gap; incorrect taps wiggle gently (no-fail).
- * Five rounds win the game: shared celebration + sticker on first completion.
+ * Six rounds win the game: shared celebration + sticker on first completion.
  */
-export class PatternBuilderScene extends GameSceneBase {
+export class PatternBuilderScene extends ChoiceRoundScene {
   /** Slot/gap objects of the current round (destroyed on re-render). */
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
   /** Answer card backgrounds of the current round. */
@@ -81,7 +81,6 @@ export class PatternBuilderScene extends GameSceneBase {
   /** Answer card shape images of the current round. */
   private readonly cardShapes: Phaser.GameObjects.Image[] = [];
   private rounds: PatternRound[] = [];
-  private roundIndex = 0;
 
   constructor() {
     super("PatternBuilder");
@@ -105,13 +104,24 @@ export class PatternBuilderScene extends GameSceneBase {
     this.registerShutdownCleanup();
   }
 
+  protected totalRounds(): number {
+    return this.rounds.length;
+  }
+
+  protected gameId(): GameId {
+    return "pattern-builder";
+  }
+
+  protected isChoiceCorrect(index: number): boolean {
+    const round = this.rounds[this.roundIndex];
+    return round.choices[index] === getCorrectShape(round);
+  }
+
   /**
    * Renders the current round: 4 slots (3 filled shapes + 1 outlined gap)
-   * and 3 answer cards below the row. Previous round objects are destroyed.
+   * and 3 answer cards below the row.
    */
-  private renderRound(): void {
-    this.clearRound();
-
+  protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
     const centerX = this.cameras.main.centerX;
     const rowY = this.cameras.main.centerY + ROW_Y_OFFSET;
@@ -132,31 +142,8 @@ export class PatternBuilderScene extends GameSceneBase {
     this.createCards(round);
   }
 
-  /** Creates the 3 answer cards with their shape images and tap handling. */
-  private createCards(round: PatternRound): void {
-    const centerX = this.cameras.main.centerX;
-    const cardsY = this.cameras.main.centerY + CARDS_Y_OFFSET;
-
-    for (let i = 0; i < round.choices.length; i++) {
-      const x = centerX + (i - 1) * CARD_SPACING;
-      const card = this.add.rectangle(x, cardsY, CARD_SIZE, CARD_SIZE, 0xffffff);
-      card.setStrokeStyle(this.OUTLINE_WIDTH, 0x2d3748, 1);
-      card.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, CARD_SIZE, CARD_SIZE),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      card.on("pointerdown", () => this.handleChoice(i));
-      attachPressFeedback(card);
-      this.cardRects.push(card);
-
-      const shape = this.add.image(x, cardsY, SHAPE_TEXTURES[round.choices[i]]);
-      shape.setDisplaySize(CARD_SIZE, CARD_SIZE);
-      this.cardShapes.push(shape);
-    }
-  }
-
-  /** Destroys all display objects created for the current round. */
-  private clearRound(): void {
+  /** Destroys the pattern row and the answer cards of the current round. */
+  protected clearRoundContent(): void {
     for (const obj of this.roundObjects) {
       obj.destroy();
     }
@@ -171,32 +158,16 @@ export class PatternBuilderScene extends GameSceneBase {
     this.cardShapes.length = 0;
   }
 
-  /** Handles a tap on an answer card: correct fills the gap, wrong wiggles. */
-  private handleChoice(choiceIndex: number): void {
-    if (this.inputLocked) return;
-    const round = this.rounds[this.roundIndex];
-    if (round.choices[choiceIndex] === getCorrectShape(round)) {
-      this.handleCorrect(choiceIndex);
-    } else {
-      this.handleIncorrect(choiceIndex);
-    }
-  }
-
   /**
-   * Handles a correct answer: the tapped shape flies to the gap slot with a
-   * Back.out snap, a chime plays, the progress dot fills, and the next round
-   * starts after a short delay (completion after the final round).
+   * Flies the tapped shape into the gap with a Back.out snap, bursting a splash
+   * at the slot it is landing in. The filled slot replaces the answer card once
+   * the shape has landed.
    */
-  private handleCorrect(choiceIndex: number): void {
-    this.inputLocked = true;
-    this.audioManager.playCorrect();
-    this.recordCorrect();
-    this.mascot?.cheer();
-
+  protected onCorrect(index: number): void {
     const round = this.rounds[this.roundIndex];
     const targetX = this.cameras.main.centerX + (round.gapIndex - 1.5) * SLOT_SPACING;
     const targetY = this.cameras.main.centerY + ROW_Y_OFFSET;
-    const shape = this.cardShapes[choiceIndex];
+    const shape = this.cardShapes[index];
 
     // Burst at the gap the shape is flying into.
     createCompletionSplash(this, targetX, targetY);
@@ -209,45 +180,30 @@ export class PatternBuilderScene extends GameSceneBase {
       ease: "Back.out",
       onComplete: () => {
         shape.destroy();
-        this.cardRects[choiceIndex]?.destroy();
-        this.cardRects.splice(choiceIndex, 1);
-        this.cardShapes.splice(choiceIndex, 1);
+        this.cardRects[index]?.destroy();
+        this.cardRects.splice(index, 1);
+        this.cardShapes.splice(index, 1);
 
         const slot = this.add.image(targetX, targetY, SHAPE_TEXTURES[getCorrectShape(round)]);
         slot.setDisplaySize(SLOT_SIZE, SLOT_SIZE);
         this.roundObjects.push(slot);
-
-        this.fillProgressDot(this.roundIndex);
-
-        this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
-          this.roundIndex++;
-          if (this.roundIndex >= this.rounds.length) {
-            this.completeGame("pattern-builder");
-          } else {
-            this.inputLocked = false;
-            this.renderRound();
-          }
-        });
       },
     });
   }
 
-  /** Handles an incorrect answer: a gentle wiggle, soft tone, no penalty. */
-  private handleIncorrect(choiceIndex: number): void {
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
+  /** Creates the 3 answer cards with their shape images. */
+  private createCards(round: PatternRound): void {
+    const centerX = this.cameras.main.centerX;
+    const cardsY = this.cameras.main.centerY + CARDS_Y_OFFSET;
 
-    const rect = this.cardRects[choiceIndex];
-    const shape = this.cardShapes[choiceIndex];
-    const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-    this.tweens.add({
-      targets: [rect, shape],
-      angle,
-      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-      yoyo: true,
-      repeat: this.WIGGLE_REPEATS,
-      ease: "Sine.inOut",
-    });
+    for (let i = 0; i < round.choices.length; i++) {
+      const x = centerX + (i - 1) * CARD_SPACING;
+      this.cardRects.push(this.createChoiceTarget(x, cardsY, CARD_SIZE, i));
+
+      const shape = this.add.image(x, cardsY, SHAPE_TEXTURES[round.choices[i]]);
+      shape.setDisplaySize(CARD_SIZE, CARD_SIZE);
+      this.cardShapes.push(shape);
+      this.attachCardContent(i, [shape]);
+    }
   }
 }

@@ -1,12 +1,13 @@
 import Phaser from "phaser";
 import { buildPlaythrough, isCorrect } from "../game/numberOrderLogic";
+import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, snapToSlot } from "../utils/dragJuice";
-import { isReducedMotion, motionDuration } from "../utils/motion";
+import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakNumber } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
-import { GameSceneBase } from "./GameSceneBase";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
+import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 const ROUND_COUNT = 6;
 const SOURCE_Y = 260;
@@ -42,12 +43,11 @@ interface Slot {
  * Number Order — Line Them Up scene.
  * Child drags shuffled numerals (3–5) from the top source row into the
  * bottom slot row to produce ascending order. Tap a numeral to hear it.
- * Auto-validates when every slot is filled; correct advances, wrong wiggles
- * and bounces home.
+ * The whole board is the answer, so it reports through
+ * {@link resolveWholeRound}: correct advances, wrong wiggles and bounces home.
  */
-export class NumberOrderScene extends GameSceneBase {
+export class NumberOrderScene extends ChoiceRoundScene {
   private rounds: ReturnType<typeof buildPlaythrough> = [];
-  private roundIndex = 0;
   private cards: NumeralCard[] = [];
   private slots: Slot[] = [];
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
@@ -70,8 +70,24 @@ export class NumberOrderScene extends GameSceneBase {
     this.registerShutdownCleanup();
   }
 
-  private renderRound(): void {
-    this.clearRound();
+  protected totalRounds(): number {
+    return this.rounds.length;
+  }
+
+  protected gameId(): GameId {
+    return "number-order";
+  }
+
+  /**
+   * This game has no choice cards — the filled board is the answer, so nothing
+   * ever asks whether one card is correct. See {@link tryAutoValidate}.
+   */
+  protected isChoiceCorrect(): boolean {
+    return false;
+  }
+
+  /** Renders the dashed slot row and the shuffled source cards above it. */
+  protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
     if (!round) return;
 
@@ -101,9 +117,89 @@ export class NumberOrderScene extends GameSceneBase {
       const x = sourcePositions[i];
       this.createCard(numeral, x, SOURCE_Y);
     }
+  }
 
-    // Drop handling via zones is handled per-card drop event; also need swap highlight?
-    // Enable drop zone highlight pulse? Optional, keep minimal.
+  /**
+   * Tears the board down. A drag game's objects can already be gone by the time
+   * the round ends, so a failed destroy must not leave the rest of the board
+   * behind (the slot row is released first, then the cards).
+   */
+  protected override clearRound(): void {
+    for (const obj of this.roundObjects) {
+      try {
+        obj.destroy();
+      } catch {
+        // Already destroyed — the rest of the board still has to be released.
+      }
+    }
+    this.roundObjects.length = 0;
+    this.clearRoundContent();
+  }
+
+  /** Drops the slot row and the card list. */
+  protected clearRoundContent(): void {
+    for (const slot of this.slots) {
+      try {
+        slot.zone.destroy();
+        slot.outline.destroy();
+      } catch {
+        // Already destroyed — keep going.
+      }
+    }
+    this.slots = [];
+    this.cards = [];
+  }
+
+  /** A wrong board wiggles the placed cards, not a tapped card. */
+  protected override wiggleTargets(): Phaser.GameObjects.GameObject[] {
+    const targets: Phaser.GameObjects.GameObject[] = [];
+    for (const slot of this.slots) {
+      const card = slot.occupiedBy;
+      if (card) {
+        targets.push(card.container);
+      }
+    }
+    return targets;
+  }
+
+  /**
+   * Keeps the board inert while the wrong answer wiggles: the cards are about
+   * to bounce home, so a drag in the middle of it would fight the tween. The
+   * input opens again once the bounce starts.
+   */
+  protected override onWrong(): void {
+    this.inputLocked = true;
+  }
+
+  /** Bounces every placed card home once the wiggle has finished. */
+  protected override onWiggleComplete(): void {
+    for (const slot of this.slots) {
+      const card = slot.occupiedBy;
+      if (card) {
+        this.tweens.add({
+          targets: card.container,
+          x: card.originX,
+          y: card.originY,
+          duration: motionDuration(250, 150),
+          ease: "Back.out",
+        });
+        card.slotIndex = null;
+        card.bg.setFillStyle(this.CARD_BG_COLOR, 1);
+      }
+      slot.occupiedBy = null;
+    }
+    this.inputLocked = false;
+  }
+
+  /** Flashes the filled slots green and bursts a splash at the board center. */
+  protected override onCorrect(): void {
+    for (const slot of this.slots) {
+      const card = slot.occupiedBy;
+      if (card) card.bg.setFillStyle(this.SUCCESS_COLOR, 1);
+    }
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    createCompletionSplash(this, centerX, centerY);
   }
 
   private computePositions(count: number, width: number): number[] {
@@ -194,7 +290,7 @@ export class NumberOrderScene extends GameSceneBase {
       card.justDropped = false;
       if (this.inputLocked) return;
       // Speak on any tap (SFX-gated, silent fallback)
-      speakNumber(numeral, load().settings.sfxEnabled);
+      speakNumber(numeral, getSettings().sfxEnabled);
     });
 
     container.on("pointerup", () => {
@@ -370,112 +466,13 @@ export class NumberOrderScene extends GameSceneBase {
     });
   }
 
+  /** Validates the board once every slot is filled; the base runs the answer. */
   private tryAutoValidate(): void {
     if (this.inputLocked) return;
     if (this.slots.some((s) => s.occupiedBy === null)) return;
     // All slots filled — validate
-    this.inputLocked = true;
     const round = this.rounds[this.roundIndex];
     const placed = this.slots.map((s) => s.occupiedBy?.numeral ?? -1);
-    const correct = isCorrect(placed, round.solution);
-    if (correct) {
-      this.handleCorrect();
-    } else {
-      this.handleIncorrect();
-    }
-  }
-
-  private handleCorrect(): void {
-    // Flash success on slots
-    for (const slot of this.slots) {
-      const card = slot.occupiedBy;
-      if (card) card.bg.setFillStyle(this.SUCCESS_COLOR, 1);
-    }
-    // Also splash
-    const centerX = this.cameras.main.centerX;
-    const centerY = this.cameras.main.centerY;
-    createCompletionSplash(this, centerX, centerY);
-    this.audioManager.playCorrect();
-    this.recordCorrect();
-    this.mascot?.cheer();
-    this.fillProgressDot(this.roundIndex);
-
-    this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
-      this.roundIndex++;
-      if (this.roundIndex >= this.rounds.length) {
-        this.completeGame("number-order");
-      } else {
-        this.inputLocked = false;
-        this.renderRound();
-      }
-    });
-  }
-
-  private handleIncorrect(): void {
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
-
-    // Wiggle the card containers only — the bg is a child of the container,
-    // so adding both to targets would double-apply the tilt (bg is already
-    // carried by the container; numerals ride along too).
-    const targets: Phaser.GameObjects.GameObject[] = [];
-    for (const slot of this.slots) {
-      const card = slot.occupiedBy;
-      if (card) {
-        targets.push(card.container);
-      }
-    }
-    const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-    this.tweens.add({
-      targets,
-      angle,
-      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-      yoyo: true,
-      repeat: this.WIGGLE_REPEATS,
-      ease: "Sine.inOut",
-      onComplete: () => {
-        // Bounce all placed cards home
-        for (const slot of this.slots) {
-          const card = slot.occupiedBy;
-          if (card) {
-            this.tweens.add({
-              targets: card.container,
-              x: card.originX,
-              y: card.originY,
-              duration: motionDuration(250, 150),
-              ease: "Back.out",
-            });
-            card.slotIndex = null;
-            card.bg.setFillStyle(this.CARD_BG_COLOR, 1);
-          }
-          slot.occupiedBy = null;
-        }
-        this.inputLocked = false;
-      },
-    });
-    // Reset fill after wiggle? Keep pending until bounce.
-  }
-
-  private clearRound(): void {
-    for (const obj of this.roundObjects) {
-      try {
-        obj.destroy();
-      } catch {
-        // ignore
-      }
-    }
-    this.roundObjects.length = 0;
-    for (const s of this.slots) {
-      try {
-        s.zone.destroy();
-        s.outline.destroy();
-      } catch {
-        // ignore
-      }
-    }
-    this.slots = [];
-    // Cards containers already destroyed via roundObjects, but ensure list cleared
-    this.cards = [];
+    this.resolveWholeRound(isCorrect(placed, round.solution));
   }
 }

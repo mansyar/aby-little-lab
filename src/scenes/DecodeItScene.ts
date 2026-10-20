@@ -1,13 +1,11 @@
-import Phaser from "phaser";
-import { SpeakerButton } from "../components/SpeakerButton";
+import type Phaser from "phaser";
 import { buildPlaythrough, type DecodeRound, getDecodeWord, isCorrect } from "../game/decodeLogic";
+import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { isReducedMotion, motionDuration } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
-import { GameSceneBase } from "./GameSceneBase";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
+import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 const ROUND_COUNT = 6;
 const PICTURE_SIZE = 180;
@@ -26,12 +24,8 @@ const CARD_COL_X_OFFSET = 210;
  * confusable-family guards. Six rounds win the game: shared celebration +
  * sticker on first completion.
  */
-export class DecodeItScene extends GameSceneBase {
-  private readonly cardRects: Phaser.GameObjects.Rectangle[] = [];
-  private readonly cardLetters: Phaser.GameObjects.Image[][] = [];
-  private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
+export class DecodeItScene extends ChoiceRoundScene {
   private rounds: DecodeRound[] = [];
-  private roundIndex = 0;
 
   constructor() {
     super("DecodeIt");
@@ -45,21 +39,17 @@ export class DecodeItScene extends GameSceneBase {
 
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.speaker = new SpeakerButton(
-      this,
-      centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
-      centerY + PICTURE_Y_OFFSET,
-      {
-        muted: !load().settings.sfxEnabled,
-        onSpeak: () => {
-          const round = this.rounds[this.roundIndex];
-          if (!round) return;
-          speakWord(round.target, load().settings.sfxEnabled);
-        },
+    this.createRoundNarrator({
+      x: centerX + PICTURE_SIZE / 2 + this.SPEAKER_OFFSET,
+      y: centerY + PICTURE_Y_OFFSET,
+      replay: () => {
+        const round = this.rounds[this.roundIndex];
+        if (!round) return; // Celebration after the final round — nothing to speak.
+        speakWord(round.target, getSettings().sfxEnabled);
       },
-    );
+    });
 
-    this.rounds = buildPlaythrough(ROUND_COUNT, getAdaptiveBandShift("decode-it"));
+    this.rounds = buildPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
@@ -67,128 +57,70 @@ export class DecodeItScene extends GameSceneBase {
     this.registerShutdownCleanup();
   }
 
-  private renderRound(): void {
-    this.clearRound();
+  protected totalRounds(): number {
+    return this.rounds.length;
+  }
 
+  protected gameId(): GameId {
+    return "decode-it";
+  }
+
+  protected isChoiceCorrect(index: number): boolean {
+    return isCorrect(this.rounds[this.roundIndex], index);
+  }
+
+  /** Renders the prompt picture (word spoken aloud) and the 4 word cards. */
+  protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
 
-    const prompt = this.add.image(
-      centerX,
-      centerY + PICTURE_Y_OFFSET,
-      getDecodeWord(round.target)?.promptTexture ?? "",
+    const promptTexture = getDecodeWord(round.target)?.promptTexture ?? "";
+    this.trackRoundObject(
+      this.add
+        .image(centerX, centerY + PICTURE_Y_OFFSET, promptTexture)
+        .setDisplaySize(PICTURE_SIZE, PICTURE_SIZE),
     );
-    prompt.setDisplaySize(PICTURE_SIZE, PICTURE_SIZE);
-    this.roundObjects.push(prompt);
 
-    const { sfxEnabled } = load().settings;
+    const { sfxEnabled } = getSettings();
     speakWord(round.target, sfxEnabled);
 
-    this.createCards(round);
+    for (let i = 0; i < round.choices.length; i++) {
+      this.createWordCard(round.choices[i], i);
+    }
   }
 
-  private createCards(round: DecodeRound): void {
+  protected clearRoundContent(): void {}
+
+  /** A splash bursts at the tapped card on a correct answer. */
+  protected onCorrect(index: number): void {
+    const card = this.choiceTargets[index];
+    createCompletionSplash(this, card.x, card.y);
+  }
+
+  /** Creates one word card with the word composed from letter textures. */
+  private createWordCard(word: string, index: number): void {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
+    const row = Math.floor(index / 2);
+    const col = index % 2;
+    const cardX = centerX + (col === 0 ? -CARD_COL_X_OFFSET : CARD_COL_X_OFFSET);
+    const cardY = centerY + CARD_ROW_Y_OFFSETS[row];
+    const contentWidth = word.length * LETTER_SIZE + (word.length - 1) * LETTER_GAP;
 
-    for (let i = 0; i < round.choices.length; i++) {
-      const word = round.choices[i];
-      const row = Math.floor(i / 2);
-      const col = i % 2;
-      const cardX = centerX + (col === 0 ? -CARD_COL_X_OFFSET : CARD_COL_X_OFFSET);
-      const cardY = centerY + CARD_ROW_Y_OFFSETS[row];
-      const contentWidth = word.length * LETTER_SIZE + (word.length - 1) * LETTER_GAP;
-      const cardWidth = contentWidth + CARD_PADDING * 2;
-
-      const card = this.add.rectangle(cardX, cardY, cardWidth, CARD_HEIGHT, 0xffffff);
-      card.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
-      card.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, 0, cardWidth, CARD_HEIGHT),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
-      card.on("pointerdown", () => this.handleChoice(i));
-      attachPressFeedback(card);
-      this.cardRects.push(card);
-
-      const letters: Phaser.GameObjects.Image[] = [];
-      const startX = cardX - contentWidth / 2 + LETTER_SIZE / 2;
-      for (let j = 0; j < word.length; j++) {
-        const letter = this.add.image(
-          startX + j * (LETTER_SIZE + LETTER_GAP),
-          cardY,
-          `letter_${word[j].toLowerCase()}`,
-        );
-        letter.setDisplaySize(LETTER_SIZE, LETTER_SIZE);
-        letters.push(letter);
-      }
-      this.cardLetters.push(letters);
-    }
-  }
-
-  private clearRound(): void {
-    for (const obj of this.roundObjects) {
-      obj.destroy();
-    }
-    this.roundObjects.length = 0;
-    for (const card of this.cardRects) {
-      card.destroy();
-    }
-    this.cardRects.length = 0;
-    for (const letters of this.cardLetters) {
-      for (const letter of letters) {
-        letter.destroy();
-      }
-    }
-    this.cardLetters.length = 0;
-  }
-
-  private handleChoice(choiceIndex: number): void {
-    if (this.inputLocked) return;
-    const round = this.rounds[this.roundIndex];
-    if (isCorrect(round, choiceIndex)) {
-      this.handleCorrect(choiceIndex);
-    } else {
-      this.handleIncorrect(choiceIndex);
-    }
-  }
-
-  private handleCorrect(choiceIndex: number): void {
-    this.inputLocked = true;
-    const card = this.cardRects[choiceIndex];
-    if (card) {
-      createCompletionSplash(this, card.x, card.y);
-    }
-    this.audioManager.playCorrect();
-    this.recordCorrect();
-    this.mascot?.cheer();
-    this.fillProgressDot(this.roundIndex);
-
-    this.time.delayedCall(this.NEXT_ROUND_DELAY, () => {
-      this.roundIndex++;
-      if (this.roundIndex >= this.rounds.length) {
-        this.completeGame("decode-it");
-      } else {
-        this.inputLocked = false;
-        this.renderRound();
-      }
+    this.createChoiceTarget(cardX, cardY, CARD_HEIGHT, index, {
+      width: contentWidth + CARD_PADDING * 2,
+      height: CARD_HEIGHT,
     });
-  }
 
-  private handleIncorrect(choiceIndex: number): void {
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
-
-    const targets = [this.cardRects[choiceIndex], ...this.cardLetters[choiceIndex]];
-    const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-    this.tweens.add({
-      targets,
-      angle,
-      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-      yoyo: true,
-      repeat: this.WIGGLE_REPEATS,
-      ease: "Sine.inOut",
-    });
+    const letters: Phaser.GameObjects.Image[] = [];
+    const startX = cardX - contentWidth / 2 + LETTER_SIZE / 2;
+    for (let j = 0; j < word.length; j++) {
+      const letter = this.add
+        .image(startX + j * (LETTER_SIZE + LETTER_GAP), cardY, `letter_${word[j].toLowerCase()}`)
+        .setDisplaySize(LETTER_SIZE, LETTER_SIZE);
+      letters.push(letter);
+    }
+    this.attachCardContent(index, letters);
   }
 }
