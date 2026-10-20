@@ -214,4 +214,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Story Order - Game 22 (Story Sequencing)** - [20261020-story-sequencing](./archive/20261020-story-sequencing/index.md) - feature - medium (Archived)
 - [x] **Track: PRD & TDD Truth Pass** - [20261020-prd-tdd-truth-pass](./archive/20261020-prd-tdd-truth-pass/index.md) - chore - medium (Archived)
 
-- [ ] **Track: Shell Diet: Per-Game Lazy Art Chunks** — [20261020-shell-diet-lazy-art](./tracks/20261020-shell-diet-lazy-art/index.md) — refactor — high
+- [~] **Track: Shell Diet: Per-Game Lazy Art Chunks** — [20261020-shell-diet-lazy-art](./tracks/20261020-shell-diet-lazy-art/index.md) — refactor — high
