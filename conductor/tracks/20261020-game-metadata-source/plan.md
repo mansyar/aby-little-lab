@@ -139,5 +139,5 @@
 - [x] **R1.T3: Assert the glob and the registry agree in both directions** — covers: L4
 - [x] **R1.T4: Correct the docs** — covers: L1, L2, L3, L5
 **Result:** verified
-**Checkpoint:** 0368d35
+**Checkpoint:** abd47b0
 **Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-R1.md
