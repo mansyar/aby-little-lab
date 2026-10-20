@@ -34,9 +34,9 @@
 - **Goal:** a textless, reduced-motion-aware cue shows while an art load is pending and a missing key degrades to a placeholder with one warning instead of throwing.
 - **Depends on:** Phase 1
 - **Covers:** FR-5, FR-6, AC-5
-- **Touches:** `src/components/ArtLoadingCue.ts`, `src/game/art/placeholder.ts`, `src/__tests__/components/ArtLoadingCue.test.ts`
+- **Touches:** `src/components/ArtLoadingCue.ts`, `src/game/art/placeholder.ts`, `src/__tests__/components/ArtLoadingCue.test.ts`, `src/__tests__/game/art/placeholder.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Loading cue** — covers: FR-5
   - [ ] **P2.T1.1: Hoot plus three pulsing dots, textless, opacity-only under reduced motion, self-clearing**
