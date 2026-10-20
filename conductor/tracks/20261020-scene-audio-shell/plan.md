@@ -91,17 +91,20 @@ The primary appends after acceptance:
   `src/scenes/OddOneOutScene.ts`, `src/scenes/NumberOrderScene.ts`,
   `src/scenes/PatternBuilderScene.ts`, `src/scenes/FeelingsFacesScene.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `5630c9c`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-3.md`
 
-- [ ] **P3.T1: Migrate the comparison pair** — covers: FR-1
-  - [ ] **P3.T1.1: Migrate MoreLess** (arrow cue, two dot-group cards).
-  - [ ] **P3.T1.2: Migrate ColorMatch** (swatch cue, four colour cards).
-- [ ] **P3.T2: Migrate the remaining grid pair** — covers: FR-1
-  - [ ] **P3.T2.1: Migrate OddOneOut** (2×2 grid, unique odd item).
-  - [ ] **P3.T2.2: Migrate NumberOrder** (ordered numeral slots).
-- [ ] **P3.T3: Migrate Feelings Faces** — covers: FR-1, AC-4
-  - [ ] **P3.T3.1: Migrate the three-face round** to the base.
-  - [ ] **P3.T3.2: Keep the re-speak-on-wrong and caption-hook behaviour**
+- [x] **P3.T1: Migrate the comparison pair** — covers: FR-1
+  - [x] **P3.T1.1: Migrate MoreLess** (arrow cue, two dot-group cards).
+  - [x] **P3.T1.2: Migrate ColorMatch** (swatch cue, four colour cards).
+- [x] **P3.T2: Migrate the remaining grid pair** — covers: FR-1
+  - [x] **P3.T2.1: Migrate OddOneOut** (2×2 grid, unique odd item).
+  - [x] **P3.T2.2: Migrate NumberOrder** (ordered numeral slots).
+- [x] **P3.T3: Migrate Feelings Faces** — covers: FR-1, AC-4
+  - [x] **P3.T3.1: Migrate the three-face round** to the base.
+  - [x] **P3.T3.2: Keep the re-speak-on-wrong and caption-hook behaviour**
     identical while the caption state machine is still in the scene (it moves
     in Phase 4).
 
