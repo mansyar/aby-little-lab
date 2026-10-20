@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-8, NFR-1, NFR-3, AC-1, AC-5
 - **Touches:** `src/game/gameRegistry.ts`, `src/game/hubTiles.ts`, `src/__tests__/gameRegistry.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Create the registry module** — covers: FR-1, FR-8
   - [ ] **P1.T1.1:** Export `GameRegistryEntry` with required `gameId`, `sceneKey`, `label`, `tileKey`, `stickerKey` and optional `iconDisplay`, `iconOffsetY`.
