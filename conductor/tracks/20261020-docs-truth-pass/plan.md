@@ -88,7 +88,7 @@
 - **Covers:** FR-5, FR-11, AC-5
 - **Touches:** `conductor/product.md`, `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Correct the adaptive sentence** — covers: FR-5
   - [ ] **P4.T1.1: Match the code** — 6-tap minimum inside a 10-tap window, 0.9 up and 0.6 down, clamped bands, toggle honored.
