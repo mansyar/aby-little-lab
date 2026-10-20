@@ -80,9 +80,9 @@ no-ops.
 - **Goal:** `PreloadScene` owns only the shell set (22 tiles, 22 stickers, 2 mascot poses, `icon_speaker`, 6 avatar keys); shell entry <= 170 KiB; games get their art from their own chunks.
 - **Depends on:** Phase 3
 - **Covers:** FR-4, NFR-1, NFR-3, AC-1, AC-7, AC-8
-- **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`
+- **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `scripts/measure-first-tap.mjs`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`, then against `pnpm preview`: `node scripts/validate-boot.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Trim `PreloadScene`** — covers: FR-4
   - [ ] **P4.T1.1: Rename `SHAPE_ASSETS` to `SHELL_ASSETS` and drop the moved entries with their imports**
