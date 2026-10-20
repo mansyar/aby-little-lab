@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T13:32:31+11:00",
-  "updated_at": "2026-10-20T14:05:55+11:00",
+  "updated_at": "2026-10-20T14:20:40+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261020-story-sequencing",
@@ -14,11 +14,11 @@
   "base_sha": "95d044e5e660d5db3715b5aba08a3584927d46f5",
   "progress": {
     "phases_total": 5,
-    "phases_verified": 2,
+    "phases_verified": 3,
     "tasks_total": 50,
-    "tasks_done": 20
+    "tasks_done": 35
   },
-  "last_checkpoint": "d167eb2",
+  "last_checkpoint": "d95394d",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

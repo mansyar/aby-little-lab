@@ -59,23 +59,26 @@
 - **Covers:** FR-1, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, NFR-1, NFR-4, NFR-5, NFR-7, AC-3, AC-4, AC-5, AC-6, AC-7, AC-9, AC-11
 - **Touches:** `src/scenes/StoryOrderScene.ts`, `src/scenes/sceneRegistry.ts`, `src/scenes/PreloadScene.ts`, `src/types/index.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `src/__tests__/utils/storage.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** d95394d
+- **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-3.md
 
-- [ ] **P3.T1: Scene skeleton and lazy art load** — covers: FR-1, FR-8, NFR-1, NFR-6
-  - [ ] **P3.T1.1: `StoryOrderScene`** (key `StoryOrder`) extends `ChoiceRoundScene`, runs `preload()` against `storyOrderArt`, and is registered in `sceneRegistry`
-  - [ ] **P3.T1.2: Boot art only** — tile and sticker added to `PreloadScene` (176 → 178), no panel SVG at boot
-- [ ] **P3.T2: Board and drag interaction** — covers: FR-3, FR-4, NFR-5
-  - [ ] **P3.T2.1: Source row + three ordinal-pip slots** at 1024×768 with ≥ 96 px hit areas and grayscale-distinct panels
-  - [ ] **P3.T2.2: Drag lift/tilt, snap, slot swap, and return-home on a drop outside a slot** (reuse `dragJuice`), without validating
-- [ ] **P3.T3: Round resolution** — covers: FR-5, FR-6, FR-7, NFR-4
-  - [ ] **P3.T3.1: Validate on the third fill** through `resolveWholeRound`; wrong order wiggles and keeps panels in place
-  - [ ] **P3.T3.2: Rule line, narrator glyph, progress dots, and `completeGame("story-order")`** with celebration, sticker and 3 s return
-- [ ] **P3.T4: Types and storage compatibility** — covers: NFR-7
-  - [ ] **P3.T4.1: `GameId` + `GAME_IDS`** gain `story-order`, so old saves backfill the key
-  - [ ] **P3.T4.2: Storage test** proves a pre-existing v2 save without the key loads, gains it, and keeps stickers and progress
-- [ ] **P3.T5: Scene tests** — covers: AC-3, AC-4, AC-5, AC-6, AC-7
-  - [ ] **P3.T5.1: Drag/swap/drop-outside/validation tests** through the Phaser mock, including the no-double-advance guard
-  - [ ] **P3.T5.2: Art isolation test** — after `pnpm build`, assert no panel texture key appears in the shell chunk
+- [x] **P3.T1: Scene skeleton and lazy art load** — covers: FR-1, FR-8, NFR-1, NFR-6
+  - [x] **P3.T1.1: `StoryOrderScene`** (key `StoryOrder`) extends `ChoiceRoundScene`, runs `preload()` against `storyOrderArt`, and is registered in `sceneRegistry`
+  - [x] **P3.T1.2: Boot art only** — tile and sticker added to `PreloadScene` (176 → 178), no panel SVG at boot
+- [x] **P3.T2: Board and drag interaction** — covers: FR-3, FR-4, NFR-5
+  - [x] **P3.T2.1: Source row + three ordinal-pip slots** at 1024×768 with ≥ 96 px hit areas and grayscale-distinct panels
+  - [x] **P3.T2.2: Drag lift/tilt, snap, slot swap, and return-home on a drop outside a slot** (reuse `dragJuice`), without validating
+- [x] **P3.T3: Round resolution** — covers: FR-5, FR-6, FR-7, NFR-4
+  - [x] **P3.T3.1: Validate on the third fill** through `resolveWholeRound`; wrong order wiggles and keeps panels in place
+  - [x] **P3.T3.2: Rule line, narrator glyph, progress dots, and `completeGame("story-order")`** with celebration, sticker and 3 s return
+- [x] **P3.T4: Types and storage compatibility** — covers: NFR-7
+  - [x] **P3.T4.1: `GameId` + `GAME_IDS`** gain `story-order`, so old saves backfill the key
+  - [x] **P3.T4.2: Storage test** proves a pre-existing v2 save without the key loads, gains it, and keeps stickers and progress
+- [x] **P3.T5: Scene tests** — covers: AC-3, AC-4, AC-5, AC-6, AC-7
+  - [x] **P3.T5.1: Drag/swap/drop-outside/validation tests** through the Phaser mock, including the no-double-advance guard
+  - [x] **P3.T5.2: Art isolation test** — after `pnpm build`, assert no panel texture key appears in the shell chunk
 
 ## Phase 4: Hub, progress and paging integration
 
