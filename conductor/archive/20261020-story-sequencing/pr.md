@@ -1,3 +1,5 @@
+**PR:** [#47](https://github.com/mansyar/aby-little-lab/pull/47) — eat/20261020-story-sequencing → master — Quality Gates passing.
+
 ## Summary
 
 Game 22, **Story Order** — a drag-to-slot sequencing game — plus the
