@@ -185,3 +185,49 @@ drawn from the remaining alphabet.
 4. The gate run above was taken with only the PRD change present, so the from-scratch
    evidence for the `product.md` edit is a docs-only diff and needs no re-run — but a
    re-run after the edit is free of risk and cheap enough to prefer.
+
+## 10. Primary verification (text edit applied by the primary)
+
+The phase executor could not write conductor/product.md (sandbox refusal), so the primary applied the two product.md edits and re-ran the whole gate.
+
+### Edit 1 - adaptive sentence, line 58
+
+Before:
+
+> Strong recent performance (>=90% over >=10 taps) nudges the ladder up; struggling (<60%) nudges it down; with too few taps or the toggle off, the classic ladder is used.
+
+After:
+
+> Strong recent performance (>=90% across that 10-tap window, once at least 6 taps are in it) nudges the ladder up; struggling (<60%) nudges it down; anything between leaves the ladder steady, every step is clamped to the game's own band range, and with fewer than 6 taps or the toggle off the classic ladder is used.
+
+Source: `src/game/adaptiveLogic.ts` (WINDOW_SIZE 10, MIN_SAMPLE 6, UP 0.9, DOWN 0.6, shiftLadder clamped to 1-3) and `getAdaptiveBandShift()` in `src/utils/storage.ts` (0 when the toggle is off).
+
+### Edit 2 - paged phone layout, line 85
+
+The audit found the paged layout absent from the current-state sections, which made "6x4 at 144px" read as universal. One clause added:
+
+> ... 22 game tiles grid (6x4 at 144px - rows 6/6/6/4) on wide viewports, collapsing to three pages of 5x2 (10 + 10 + 2) with swipe and page dots below the touch floor on phones ...
+
+Source: `src/game/hubPaging.ts` (PAGE_SIZE 10, PAGE_COUNT 3, PAGED_TILE 176x196, NARROW_SCALE_THRESHOLD = 64 / 116, documented as the wide tile's min edge falling under the 64px floor).
+
+### Dated-history proof
+
+- `git diff -U0 conductor/product.md | rg '^[+-]> \*\*'` -> 0 lines.
+- Dated `> **20...` entries in the file: 14, unchanged.
+- Diff: 2 insertions, 2 deletions, both inside current-state lines 58 and 85.
+
+### Gate re-run (docs-only change)
+
+| Step | Exit |
+| --- | --- |
+| `pnpm check` | 0 |
+| `pnpm typecheck` | 0 |
+| `CI=true pnpm test -- --run` | 0 (110 files, 2,305 tests) |
+| `pnpm test:coverage` | 0 |
+| `pnpm build` | 0 |
+| `node scripts/validate-bundle.js` | 0 |
+| `node scripts/validate-pwa.js` | 0 |
+
+Coverage this run: statements 97.78 (5112/5228), branches 90.66 (1233/1360), functions 96.34 (1027/1066), lines 98.59 (4756/4824). Branches moved 90.73 -> 90.66 between runs with no code change, so the branch figure is data-dependent; the docs should quote it as approximate (tracked for the docs sync).
+
+Raw outputs: `.conductor/evidence/phase-4-primary-*.txt`.
