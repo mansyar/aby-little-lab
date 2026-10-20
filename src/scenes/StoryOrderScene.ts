@@ -248,9 +248,9 @@ export class StoryOrderScene extends ChoiceRoundScene {
     attachDragLift(container as unknown as Phaser.GameObjects.Image);
 
     container.on("pointerdown", () => {
-      // A new gesture begins; only a pointerup from a gesture that dropped
-      // something is exempt from tap-to-return. Phaser fires dragstart before
-      // pointerdown, so this reset cannot live in dragstart.
+      // A new gesture begins as a potential tap. Only real movement (or a drop)
+      // marks it as a drag, so the trailing pointerup of a drag is exempt from
+      // tap-to-return while a clean tap still returns the panel.
       panel.justDropped = false;
     });
 
@@ -271,6 +271,8 @@ export class StoryOrderScene extends ChoiceRoundScene {
 
     container.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
       if (this.inputLocked) return;
+      // Movement means this gesture is a drag, so its pointerup is not a tap.
+      panel.justDropped = true;
       container.setPosition(dragX, dragY);
     });
 
@@ -279,8 +281,8 @@ export class StoryOrderScene extends ChoiceRoundScene {
     });
 
     container.on("dragend", () => {
-      // The pointerup that follows this dragend belongs to the drag, not a tap.
-      panel.justDropped = true;
+      // Whether this gesture moved is already recorded (drag/drop); the
+      // pointerup that follows belongs to the drag, not a tap.
       // Validation/wiggle owns the board while locked — leave positions alone.
       if (this.inputLocked) return;
       if (panel.slotIndex === null) {
@@ -325,6 +327,8 @@ export class StoryOrderScene extends ChoiceRoundScene {
 
   private handleDrop(panel: StoryPanel, zone: Phaser.GameObjects.Zone): void {
     if (this.inputLocked) return;
+    // A drop is never a tap, whatever the pointerup that follows it looks like.
+    panel.justDropped = true;
     const destIdx = this.slots.findIndex((s) => s.zone === zone);
     if (destIdx === -1) return;
     const destSlot = this.slots[destIdx];

@@ -120,13 +120,13 @@ pass unmodified.
 The primary agent rendered `docs/svg-contact-sheets/stories.png` and inspected
 all 24 panels. Most passed; three defects failed AC-11 / NFR-3 because a child
 who cannot read could not tell the order from them. Each was fixed in
-`src/assets/svg/stories/` only:
+`src/assets/svg/stories/` only, and the phase was squashed into `d167eb2` afterwards, so the table points at the commit that carries the art:
 
 | Defect found | Cause | Fix | Commit |
 | --- | --- | --- | --- |
-| `story_balloon_round` and `story_balloon_aloft` were nearly indistinguishable | both showed a round balloon just above the ground with a short string; only a small height/tilt change separated them | `_round` keeps the inflated oval sitting on the band (bottom at y≈354) with a short straight string tied to the ground; `_aloft` is now clearly airborne — balloon top at y≈62, ~100 px higher, 17% smaller, 12° tilt, with a long curled string trailing ~150 px down to the band. `story_balloon_flat` untouched. | `2676230` |
-| `story_foot_bare` read as a pale stump with cramped toes, beside a sock and a shoe that both read correctly | the anchored silhouette was a wedge with the ankle merged into the heel, so there was no heel, no instep and no room for five toes | redrawn on the same framing and stage position as the sock/shoe (x 132-396, sole on y=392): heel bulge, ankle column, sloping instep, five toe lobes with four separation strokes plus an arch crease, skin `#F0D5B4`. | `fb4a8fd` |
-| the cloud trio used a pale blue sky rectangle while the other 21 panels are cream + ground line | a `#BEE3F8` sky band underlay only the rain story | sky band removed from `story_cloud`, `story_cloud_raining` and `story_rain_puddle`, so all 24 panels share one stage. Drops kept; the two puddles still differ by shape (lobed body beside a tipped cone vs a wide ellipse with ripple arcs), not colour. | `382b612` |
+| `story_balloon_round` and `story_balloon_aloft` were nearly indistinguishable | both showed a round balloon just above the ground with a short string; only a small height/tilt change separated them | `_round` keeps the inflated oval sitting on the band (bottom at y≈354) with a short straight string tied to the ground; `_aloft` is now clearly airborne — balloon top at y≈62, ~100 px higher, 17% smaller, 12° tilt, with a long curled string trailing ~150 px down to the band. `story_balloon_flat` untouched. | `d167eb2` (squashed) |
+| `story_foot_bare` read as a pale stump with cramped toes, beside a sock and a shoe that both read correctly | the anchored silhouette was a wedge with the ankle merged into the heel, so there was no heel, no instep and no room for five toes | redrawn on the same framing and stage position as the sock/shoe (x 132-396, sole on y=392): heel bulge, ankle column, sloping instep, five toe lobes with four separation strokes plus an arch crease, skin `#F0D5B4`. | `d167eb2` (squashed) |
+| the cloud trio used a pale blue sky rectangle while the other 21 panels are cream + ground line | a `#BEE3F8` sky band underlay only the rain story | sky band removed from `story_cloud`, `story_cloud_raining` and `story_rain_puddle`, so all 24 panels share one stage. Drops kept; the two puddles still differ by shape (lobed body beside a tipped cone vs a wide ellipse with ripple arcs), not colour. | `d167eb2` (squashed) |
 
 ## Visual QA status (read this)
 

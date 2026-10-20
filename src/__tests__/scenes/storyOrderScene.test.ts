@@ -457,12 +457,43 @@ describe("StoryOrderScene interactions", () => {
     expect(slots[0].occupiedBy).toBe(panel);
   });
 
-  it("returns a placed panel on an explicit tap, then revalidates a refilled strip", () => {
+  it("routes a real pointer sequence through the container's drop wire", () => {
+    const scene = new StoryOrderScene();
+    scene.create();
+    const { panels, slots } = internals(scene);
+    const panel = panels[0];
+
+    lastHandler(panel.container, "pointerdown")();
+    lastHandler(panel.container, "dragstart")();
+    (lastHandler(panel.container, "drag") as (...a: unknown[]) => void)(
+      {},
+      slots[0].x,
+      slots[0].y,
+    );
+    panel.container.x = slots[0].x;
+    panel.container.y = slots[0].y;
+    (lastHandler(panel.container, "drop") as (...a: unknown[]) => void)({}, slots[0].zone);
+    lastHandler(panel.container, "dragend")();
+    lastHandler(panel.container, "pointerup")();
+
+    expect(panel.slotIndex).toBe(0);
+    expect(slots[0].occupiedBy).toBe(panel);
+  });
+
+  it("returns a placed panel on a real tap, then revalidates a refilled strip", () => {
     const scene = new StoryOrderScene();
     scene.create();
     const { slots } = internals(scene);
-    fillBoard(scene, getCurrentRound(scene).solution);
+    const solution = getCurrentRound(scene).solution;
+    // Leave the strip incomplete: a complete strip resolves on the tap's own
+    // dragend, so tap-to-return is an incomplete-board gesture.
+    fillBoard(scene, solution.slice(0, 2));
     const tapped = slots[0].occupiedBy as TestPanel;
+    // A tap: the engine fires dragstart/dragend with zero thresholds but never
+    // a drag move or drop, so this gesture is still a tap.
+    lastHandler(tapped.container, "pointerdown")();
+    lastHandler(tapped.container, "dragstart")();
+    lastHandler(tapped.container, "dragend")();
     lastHandler(tapped.container, "pointerup")();
 
     expect(slots[0].occupiedBy).toBeNull();
