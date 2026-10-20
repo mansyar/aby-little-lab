@@ -724,8 +724,8 @@ Please report issues at [GitHub Issues URL]
 
 **Verify Deployment - v1.20.0 (2026-10-20):**
 - [x] Annotated tag `v1.20.0` on `master` pushed - CI run Quality Gates PASS, Deploy to Coolify PASS (webhook fired)
-- [ ] Live entry hash matches the local `dist/` build - live `assets/index-Dhenc0xK.js` == local build (200,120 bytes), `1.20.0` present in the served bundle
-- [ ] Live browser smoke - Hub 22 tiles (6/6/6/4), Story Order round-trip, Settings footer `v1.20.0`, service worker controlling
+- [x] Live entry hash matches the local `dist/` build - live `assets/index-Dhenc0xK.js` == local build (200,123 bytes both), `1.20.0` present in the served bundle
+- [x] Live browser smoke (scope recorded) - HTTP 200, title `Aby's Little Lab`, Hub rendered **22 tiles** in rows 6/6/6/4 with Story Order present and its storybook tile art, Hoot in the corner, "Ready to play offline!" precache toast. The in-canvas remainder (Story Order round-trip, Settings footer, drag feel) needs pointer input the automated browser cannot inject into the Phaser canvas - moved to the device row.
 - [ ] Device testing on v1.20.0 - recorded in `docs/device-testing-checklist.md` (pending)
 
 **Approval:**

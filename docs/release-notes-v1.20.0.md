@@ -81,12 +81,13 @@ and progress row automatically.
 ## Release Verification
 
 - **Tag:** `v1.20.0` on `master` (merge commit `71d6166`, PR #47).
-- **CI:** tag push runs Quality Gates and Deploy to Coolify.
+- **CI:** tag push `v1.20.0` - run `39368865610`: Quality Gates PASS (1m49s), Deploy to Coolify PASS (webhook fired).
 - **Gates at release:** 103 test files / 2,208 tests, coverage 98.13 / 90.54 /
   98.14 / 98.96, shell 195.4 kB, PWA 15/15.
-- **Live check:** entry-asset hash matches the local `dist/` build; Hub shows 22
-  tiles.
-- **Device matrix:** pending.
+- **Live check:** `assets/index-Dhenc0xK.js` on the live site is byte-identical to
+  the local build (200,123 bytes) and carries `1.20.0`; Hub renders 22 tiles in
+  rows 6/6/6/4 with the Story Order tile.
+- **Device matrix:** pending - see `docs/device-testing-checklist.md`.
 
 ## Feedback
 
