@@ -13,7 +13,7 @@
 - **Covers:** FR-2, AC-2
 - **Touches:** `src/game/storyOrderLogic.ts`, `src/__tests__/game/storyOrderLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Story pool and round types** — covers: FR-2
   - [ ] **P1.T1.1: Define the 8-story pool** with stable ids, three panel texture keys per story, and an `obvious` / `subtle` ladder tag
