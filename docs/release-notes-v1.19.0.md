@@ -82,10 +82,11 @@ v1.18.0.
 ## Release Verification
 
 - **Tag:** `v1.19.0` -> merge of PR #46 on `master`.
-- **CI:** Quality Gates on PR #46 green (`14f...` run) then the tag push runs
-  Quality Gates + Deploy to Coolify.
-- **Live check:** `HTTP 200`, title `Aby's Little Lab`, live entry hash matches
-  the local `dist/` build, `v1.19.0` string present in the live bundle.
+- **CI:** PR #46 Quality Gates green; tag-push run `39354622324` green including
+  `Deploy to Coolify` (webhook fired ~90 s after the tag).
+- **Live check:** `HTTP 200`, title `Aby's Little Lab`, live
+  `assets/index-DcE17GRj.js` == local `dist/` build (197,004 bytes), `v1.19.0`
+  present in the served bundle.
 - **Device matrix:** pending - see the v1.19.0 execution record in
   `docs/device-testing-checklist.md`.
 
