@@ -90,7 +90,7 @@
 - **Covers:** FR-7, AC-2, AC-4
 - **Touches:** `src/__tests__/gameRegistry.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Scene-loader bijection** — covers: FR-7
   - [ ] **P4.T1.1:** Assert `sceneLoaders` keys and registry `sceneKey` values are the same set, in both directions, so neither a stray loader nor an unregistered game ships.
