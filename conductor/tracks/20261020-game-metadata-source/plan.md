@@ -39,21 +39,25 @@
 - **Covers:** FR-3, FR-4, FR-6, AC-1, AC-2, AC-4
 - **Touches:** `src/components/settings/ProgressOverlay.ts`, `src/game/hubPaging.ts`, `src/game/gameRegistry.ts`, `src/scenes/GameSceneBase.ts`, `src/game/hubGrid.ts`, `src/__tests__/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Progress rows derive from the registry** — covers: FR-3
-  - [ ] **P2.T1.1:** Delete `PROGRESS_GAME_ROWS`; derive `{gameId, label, tileKey}` from the registry.
-  - [ ] **P2.T1.2:** Test that the overlay has one row per registry entry, in order, with unchanged labels and icons.
-- [ ] **P2.T2: Paging maths derives from length** — covers: FR-4
-  - [ ] **P2.T2.1:** Replace `HUB_TILE_COUNT` with a `tileCount` parameter defaulting to `GAME_REGISTRY.length`; derive `PAGE_COUNT` from it.
-  - [ ] **P2.T2.2:** Make `pageTileIndexes` return a short final page instead of assuming `PAGE_SIZE`.
-  - [ ] **P2.T2.3:** Test with a synthetic 23-tile count: three pages, last page of 3, no `RangeError` from `pageOf`.
-- [ ] **P2.T3: One sticker-key definition** — covers: FR-6
-  - [ ] **P2.T3.1:** Export the convention once; `GameSceneBase.stickerKeyFor` delegates to it.
-  - [ ] **P2.T3.2:** Replace `hubGrid.ts:617`'s inline `replace` with the shared lookup; grep-confirm no other site builds the string.
-  - [ ] **P2.T3.3:** Test all 22 keys against the registry-provided `stickerKey`.
-- [ ] **P2.T4: Regression sweep** — covers: AC-5
-  - [ ] **P2.T4.1:** Run the full unit suite; record the count in the phase evidence (must be ≥ the pre-track 2,305).
+- [x] **P2.T1: Progress rows derive from the registry** — covers: FR-3
+  - [x] **P2.T1.1:** Delete `PROGRESS_GAME_ROWS`; derive `{gameId, label, tileKey}` from the registry.
+  - [x] **P2.T1.2:** Test that the overlay has one row per registry entry, in order, with unchanged labels and icons.
+- [x] **P2.T2: Paging maths derives from length** — covers: FR-4
+  - [x] **P2.T2.1:** Replace `HUB_TILE_COUNT` with a `tileCount` parameter defaulting to `GAME_REGISTRY.length`; derive `PAGE_COUNT` from it.
+  - [x] **P2.T2.2:** Make `pageTileIndexes` return a short final page instead of assuming `PAGE_SIZE`.
+  - [x] **P2.T2.3:** Test with a synthetic 23-tile count: three pages, last page of 3, no `RangeError` from `pageOf`.
+- [x] **P2.T3: One sticker-key definition** — covers: FR-6
+  - [x] **P2.T3.1:** Export the convention once; `GameSceneBase.stickerKeyFor` delegates to it.
+  - [x] **P2.T3.2:** Replace `hubGrid.ts:617`'s inline `replace` with the shared lookup; grep-confirm no other site builds the string.
+  - [x] **P2.T3.3:** Test all 22 keys against the registry-provided `stickerKey`.
+- [x] **P2.T4: Regression sweep** — covers: AC-5
+  - [x] **P2.T4.1:** Run the full unit suite; record the count in the phase evidence (must be ≥ the pre-track 2,305).
+
+**Result:** verified
+**Checkpoint:** c4be760
+**Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-2.md
 
 ## Phase 3: Shell preload derives
 
