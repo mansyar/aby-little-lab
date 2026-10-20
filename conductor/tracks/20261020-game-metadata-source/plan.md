@@ -141,3 +141,15 @@
 **Result:** verified
 **Checkpoint:** abd47b0
 **Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-R1.md
+## Phase R2: Review Fixes
+
+- **Goal:** Close the round-2 findings: the TDD still documents the pre-fix globs, the glob shape is unguarded, the precache figure is stale, three hyphens survived the dash pass, and the duplicate-key throw has no committed test.
+- **Depends on:** Phase R1
+- **Covers:** R2-F1, R2-F2, R2-F3, R2-F4
+- **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `docs/TDD.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** pending
+
+- [ ] **R2.T1: Extract the shell-table builder so the duplicate-key throw is testable, and test it** — covers: R2-F2
+- [ ] **R2.T2: Pin the glob shape in the source scan so the wide glob cannot come back** — covers: R2-F1
+- [ ] **R2.T3: Describe the three narrow globs in TDD 3.3, correct the precache figure and finish the dash pass** — covers: R2-F1, R2-F3, R2-F4
