@@ -200,6 +200,7 @@ src/
 │   ├── decodeLogic.ts
 │   ├── feelingsFacesLogic.ts
 │   ├── firstSoundsLogic.ts
+│   ├── gameRegistry.ts
 │   ├── hubGrid.ts
 │   ├── hubPaging.ts
 │   ├── hubTiles.ts
@@ -338,7 +339,7 @@ The font gate exists because the letter and numeral SVGs set `font-family="'Balo
 
 ### 3.3 PreloadScene and the boot asset table
 
-`src/scenes/PreloadScene.ts` imports each shell SVG with Vite's `?raw` suffix and exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 178 keys in the app, 53 of them in the shell.
+`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries - the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through two eager Vite globs (`../assets/svg/ui/**/*.svg` and `../assets/svg/stickers/*.svg`, `{ eager: true, query: "?raw" }`). Two files sharing a key, or a registry key with no file, throws at module evaluation naming the key. Only the nine non-game rows stay literal, because they belong to the shell rather than to a game. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 178 keys in the app, 53 of them in the shell.
 
 `preload()` draws a brand lockup (title at `centerY - 110`, tagline at `centerY - 70`, a 300×30 progress bar over a 320×50 box) and wires `load.on("progress")` and `load.on("complete")` to it. In development only, a `/* v8 ignore next */`-guarded block profiles per-file load time and logs `[preload] N files in Xms`; the block is statically removed from production builds.
 
@@ -376,7 +377,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 
 **Story Order** keeps its own table for the same reason: `src/game/storyOrderArt.ts` imports the 24 panels as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 24 SVG strings land in the Story Order chunk.
 
-**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or registers a key outside the 53-key shell list. It also asserts the counts — 131 group keys, 125 game-only, 24 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, and `storyOrderArt.test.ts` keeps the single-module assertion. Adding a game means adding an art group and a `preloadArtGroups()` call in its scene; `PreloadScene` never gains an import for it.
+**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or spells a game key out in the shell table. It pins the registered set against its own literal 53-key list - read from `SHELL_ASSETS` at runtime, not from the scene's source - so the derivation cannot quietly change the shell. It also asserts the counts - 131 group keys, 125 game-only, 24 story panels, six shared avatar files - so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, `storyOrderArt.test.ts` keeps the single-module assertion, and `preloadScene.test.ts` checks each derived key against the SVG file named after it. Adding a game means adding an art group and a `preloadArtGroups()` call in its scene; `PreloadScene` never gains an import for it.
 
 **Measured budgets.** The shell entry is 129.1 KiB against the 200 KiB gate in `validate-bundle.js`; cold boot is 419.5 ms median (1697.2 ms at 4× CPU throttle) against the 3000 ms `validate-boot.js` gate; and a cold first tap of a game adds **82 ms at worst** (Memory Match) and **48 ms for the widest art union** (Find the Word, 83 keys) against the 400 ms budget, with absolute totals of 224–334 ms. That is an increment, not a standalone latency: the criterion is "adds <= 400 ms versus the same tap", so `scripts/measure-first-tap.mjs` measures the current build back to back against a build of the pre-track commit `f377bf8`, taps five games and fails on the worst total rather than the cross-game median. Evidence, not a gate. `docs/perf-baseline.md` carries the before/after tables.
 
@@ -712,9 +713,10 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 | `decodeLogic.ts` | Decode It word/letter mapping |
 | `feelingsFacesLogic.ts` | contrast ladder of faces and prompts |
 | `firstSoundsLogic.ts` | phonics rounds from a 12-word subset |
+| `gameRegistry.ts` | the one declaration of the 22 games - `gameId`, `sceneKey`, `label`, `tileKey`, `stickerKey` and the icon overrides - plus `stickerKeyForGame`; `GameId` coverage is enforced by the type checker |
 | `hubGrid.ts` | tile layout, 64 px tile icons, paging and sticker shelf rendering |
-| `hubPaging.ts` | page maths for the tile grid |
-| `hubTiles.ts` | `GAME_TILES` metadata: id, title, icon key, scene key |
+| `hubPaging.ts` | page maths for the tile grid, with the tile count defaulting to the registry length |
+| `hubTiles.ts` | `GAME_TILES`, derived from `gameRegistry` for the Hub grid |
 | `memoryMatchLogic.ts` | pair generation, flip rules, adaptive tier split |
 | `moreLessLogic.ts` | comparison round generation |
 | `musicalMemoryLogic.ts` | sequence length bands (`startLengthFor`, `winLengthFor`) |

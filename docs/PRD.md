@@ -360,6 +360,8 @@ Every game scene extends one shared base. `GameSceneBase` owns the parts no game
 
 Each game is a separately built chunk, registered in a lazy scene registry and fetched before the crossfade into the game. The Hub and the shell never contain a game's code, which keeps the entry chunk under its budget and lets a returning player skip chunks they have already cached.
 
+Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 44 game assets all derive from it, so adding a game is one entry plus its scene and art rather than several lists to keep in step.
+
 ### 4.2 One narrator, spoken rules and prompts
 
 Narration has one construction site. `RoundNarrator` builds the speaker glyph, the spoken line, the visible label where a rule is shown, the replay handler, the mute state and the caption fallback. Nothing else in the app constructs a speaker button in production.
