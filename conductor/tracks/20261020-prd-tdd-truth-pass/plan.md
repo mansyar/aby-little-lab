@@ -83,3 +83,40 @@ Review fixes are appended by conductor-review as `## Phase R1: Review Fixes`.
 **Checkpoint:** 6ead8ac
 **Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-3.md
 
+## Phase R1: Review Fixes
+
+- **Goal:** Close the eight review findings so the documents state only what the
+  source does - including the PRD/TDD contradiction on texture tiers.
+- **Depends on:** Phase 3
+- **Covers:** F1, F2, F3, F4, F5, F6, F7, F8
+- **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/device-testing-checklist.md`,
+  `conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-R1.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Correct the texture-tier mapping** - covers: F1, F5
+  - [ ] **R1.T1.1: Rewrite PRD 7.1's tier sentence** so letters and numerals are
+    card tier, name the keys that are actually icon tier, and state the memory
+    arithmetic (35 icon + 141 card + 2 hero ≈ 40.7 MiB).
+- [ ] **R1.T2: Correct the coverage claim** - covers: F2
+  - [ ] **R1.T2.1: Replace the `sceneRegistry.ts` claim with `decodeLogic.ts`
+    (73.8 % lines / 56.66 % branches, uncovered 63-77) and quote the run.
+- [ ] **R1.T3: Correct the chunk composition** - covers: F3
+  - [ ] **R1.T3.1: Fix TDD 3.6 and PRD 7.2** so the shell holds the three shell
+    scenes, the components and the 178 boot textures, and the hoisted shared
+    chunks are listed separately, matching `README.md:219` and the build output.
+- [ ] **R1.T4: Correct the settings-to-restore claim** - covers: F4
+  - [ ] **R1.T4.1: State that `setBGMEnabled` restores unconditionally and
+    `setSFXEnabled` only when disabling (`AudioManager.ts:172-194`).**
+- [ ] **R1.T5: Remove the duplicated mechanism** - covers: F6
+  - [ ] **R1.T5.1: Keep the PRD's behavioural statement and link to TDD 7.3 /
+    8.3 for the ladder and the duck constants.**
+- [ ] **R1.T6: Fix the absolute shared-art claim** - covers: F7
+  - [ ] **R1.T6.1: Reword "shared by two or more games" to a claim the corpus
+    supports (a game plus the Hub, or several games).**
+- [ ] **R1.T7: Correct the device checklist** - covers: F8
+  - [ ] **R1.T7.1: Fix the four "twenty game(s)" lines in
+    `docs/device-testing-checklist.md` to twenty-two.**
+- [ ] **R1.T8: Re-verify the whole track** - covers: F1-F8
+  - [ ] **R1.T8.1: Re-run the chain and the claim audit, and record the
+    before/after for each finding in `verification/phase-R1.md`.**
