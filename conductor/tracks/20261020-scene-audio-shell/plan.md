@@ -123,7 +123,7 @@ The primary appends after acceptance:
   `src/scenes/FeelingsFacesScene.ts`,
   `src/__tests__/components/roundNarrator.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Build the narrator helper** — covers: FR-3, FR-4
   - [ ] **P4.T1.1: Own the glyph** — creation, placement beside the prompt,
