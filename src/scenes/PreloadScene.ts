@@ -66,30 +66,35 @@ const gameShellSources = shellSourceMap({
 /** The keys the globs resolved. Exported so a test can check both directions. */
 export const GAME_SHELL_KEYS: readonly string[] = [...gameShellSources.keys()];
 
-/** Keys already claimed by the table, so a repeated registry key fails loudly. */
-const usedShellKeys = new Set<string>();
-
 /**
- * Resolves a registry asset key, failing loudly when no SVG file carries it or
- * when two registry entries name the same key.
+ * Builds the shell rows for a list of registry asset keys, failing loudly when a
+ * key has no SVG file or when two keys repeat. Exported for its unit test: the
+ * table below calls it at module evaluation, so both guards are only reachable
+ * through this function.
  */
-function shellAsset(key: string): ShellAsset {
-  if (usedShellKeys.has(key)) {
-    throw new Error(`duplicate shell asset key: ${key}`);
-  }
-  const svg = gameShellSources.get(key);
-  if (svg === undefined) {
-    throw new Error(`no shell SVG for registry asset key: ${key}`);
-  }
-  usedShellKeys.add(key);
-  return { key, svg };
+export function buildShellAssets(
+  keys: readonly string[],
+  sources: ReadonlyMap<string, string> = gameShellSources,
+): ShellAsset[] {
+  const used = new Set<string>();
+  return keys.map((key) => {
+    if (used.has(key)) {
+      throw new Error(`duplicate shell asset key: ${key}`);
+    }
+    const svg = sources.get(key);
+    if (svg === undefined) {
+      throw new Error(`no shell SVG for registry asset key: ${key}`);
+    }
+    used.add(key);
+    return { key, svg };
+  });
 }
 
 /**
  * The boot shell's raw SVG table: key → SVG source string, rasterized by the
  * SVG loader at the per-use tier size for each key (see
  * `src/utils/textureTiers.ts` — sized for the asset's largest display context,
- * not a uniform 512²).
+ * not a uniform 512px).
  *
  * The 44 game entries are derived: every registry entry names its `tileKey` and
  * `stickerKey`, and the sources come from the eager glob above, so a new game
@@ -103,8 +108,10 @@ function shellAsset(key: string): ShellAsset {
  * prompt in `wordLogic`.
  */
 export const SHELL_ASSETS: readonly ShellAsset[] = [
-  ...GAME_REGISTRY.map((game) => shellAsset(game.tileKey)),
-  ...GAME_REGISTRY.map((game) => shellAsset(game.stickerKey)),
+  ...buildShellAssets([
+    ...GAME_REGISTRY.map((game) => game.tileKey),
+    ...GAME_REGISTRY.map((game) => game.stickerKey),
+  ]),
   { key: "mascot_idle", svg: mascotIdleSvg },
   { key: "mascot_celebrate", svg: mascotCelebrateSvg },
   { key: "icon_speaker", svg: iconSpeakerSvg },

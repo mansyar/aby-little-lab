@@ -29,7 +29,12 @@ import {
   toys,
 } from "../../game/art";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
-import { GAME_SHELL_KEYS, SHELL_ASSETS, shellSourceMap } from "../../scenes/PreloadScene";
+import {
+  buildShellAssets,
+  GAME_SHELL_KEYS,
+  SHELL_ASSETS,
+  shellSourceMap,
+} from "../../scenes/PreloadScene";
 import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
 
 /** Raw SVG sources on disk, discovered independently of the scene module. */
@@ -191,5 +196,37 @@ describe("shell asset guards", () => {
 
   it("globbed keys and registry keys are the same set, both ways", () => {
     expect([...GAME_SHELL_KEYS].sort()).toEqual([...GAME_KEYS].sort());
+  });
+  it("pins the narrow globs so game-only glyphs stay in their chunk", () => {
+    expect(preloadSceneSource).not.toMatch(/assets\/svg\/ui\/\*\*/);
+    expect(preloadSceneSource).toMatch(/assets\/svg\/ui\/tile_\*\.svg/);
+    expect(preloadSceneSource).toMatch(/assets\/svg\/ui\/tiles\/\*\.svg/);
+    expect(GAME_SHELL_KEYS).not.toContain("sleep_zzz");
+  });
+});
+
+describe("buildShellAssets", () => {
+  const sources = new Map([
+    ["tile_a", "<svg>a</svg>"],
+    ["sticker_a", "<svg>s</svg>"],
+  ]);
+
+  it("resolves one row per key, in the order given", () => {
+    expect(buildShellAssets(["tile_a", "sticker_a"], sources)).toEqual([
+      { key: "tile_a", svg: "<svg>a</svg>" },
+      { key: "sticker_a", svg: "<svg>s</svg>" },
+    ]);
+  });
+
+  it("throws when two registry entries claim one key", () => {
+    expect(() => buildShellAssets(["tile_a", "tile_a"], sources)).toThrow(
+      /duplicate shell asset key: tile_a/,
+    );
+  });
+
+  it("throws when a key has no SVG file", () => {
+    expect(() => buildShellAssets(["tile_missing"], sources)).toThrow(
+      /no shell SVG for registry asset key: tile_missing/,
+    );
   });
 });

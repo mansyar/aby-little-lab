@@ -148,8 +148,11 @@
 - **Covers:** R2-F1, R2-F2, R2-F3, R2-F4
 - **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **R2.T1: Extract the shell-table builder so the duplicate-key throw is testable, and test it** — covers: R2-F2
-- [ ] **R2.T2: Pin the glob shape in the source scan so the wide glob cannot come back** — covers: R2-F1
-- [ ] **R2.T3: Describe the three narrow globs in TDD 3.3, correct the precache figure and finish the dash pass** — covers: R2-F1, R2-F3, R2-F4
+- [x] **R2.T1: Extract the shell-table builder so the duplicate-key throw is testable, and test it** — covers: R2-F2
+- [x] **R2.T2: Pin the glob shape in the source scan so the wide glob cannot come back** — covers: R2-F1
+- [x] **R2.T3: Describe the three narrow globs in TDD 3.3, correct the precache figure and finish the dash pass** — covers: R2-F1, R2-F3, R2-F4
+**Result:** verified
+**Checkpoint:** to-be-recorded
+**Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-R2.md
