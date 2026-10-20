@@ -87,7 +87,7 @@
 - **Covers:** FR-1, FR-9, AC-1, AC-8
 - **Touches:** `src/game/hubTiles.ts`, `src/game/hubPaging.ts`, `src/components/settings/ProgressOverlay.ts`, `src/__tests__/game/hubPaging.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/components/SettingsPanel.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Hub tile and grid** — covers: FR-1, AC-1, AC-8
   - [ ] **P4.T1.1: 22nd `GAME_TILES` entry** with its icon, label and sticker key
