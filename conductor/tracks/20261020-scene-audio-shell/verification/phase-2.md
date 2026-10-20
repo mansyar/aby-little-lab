@@ -109,9 +109,10 @@ largest of the five despite being one of the smallest sources.
 
 - Round keys, module paths, class names, `gameId`s, sticker keys, spoken
   instructions, band-shift ids, progress-dot counts and every layout constant.
-- Kid-visible timing: 700 ms advance, 250 ms success flash, chime → record →
-  scene hook → cheer → dot pop on correct, soft tone → record → nod → wiggle on
-  wrong (angle 4°/2°, 350/200 ms, 3 yoyos).
+- Kid-visible timing: 700 ms advance, and a 250 ms success flash (pre-existing
+  in How Many, newly applied to the four games listed under Deviations below),
+  with chime → record → scene hook → cheer → dot pop on correct, soft tone →
+  record → nod → wiggle on wrong (angle 4°/2°, 350/200 ms, 3 yoyos).
 - Narration is single-shot: one cue per round (`speakLetter` / `speakWord` /
   `speakNumber`), and First Sounds' correct-answer letter name still plays
   exactly once (inside `onCorrect`, before the cheer). The speaker button

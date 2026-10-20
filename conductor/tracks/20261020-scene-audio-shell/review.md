@@ -5,7 +5,7 @@
 - **Branch:** `refactor/20261020-scene-audio-shell`
 - **Range:** `c92e5c481b1f87e8b28f1d30eb4e8989156253fb..2c80a11`
 - **Date:** 2026-10-20
-- **Verdict:** PASS WITH FINDINGS
+- **Verdict:** PASS
 
 ## Summary
 
@@ -148,3 +148,32 @@ pending — the post-review sync sets this to `updated` or `none`.
 | Round | Verdict | Findings | Fixed |
 | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 2 medium, 5 low | Phase R1 |
+| 2 | PASS | 0 remaining | four record nits corrected during the re-review |
+
+## Round 2 (re-review)
+
+The re-reviewer checked the fix delta `5709e77..HEAD` against every original
+finding and closed all seven, each at a specific line:
+
+- **M1** closed — the product changelog, the Phase 2 evidence subsection and the
+  integrated NFR-5 row now agree, and the base commit confirms six games gained
+  the flash (Feelings Faces had only the splash on a correct tap).
+- **M2** closed — `spec.md` carries the dated NFR-1 amendment; the arithmetic is
+  self-consistent (shared 7.98 kB + 21 scene chunks 64.44 kB = 72.42 kB payload;
+  76.81 kB with the two choice-base chunks; shell 192.4 kB of 200 kB).
+- **L1** closed — the renamed test asserts the exact order
+  `["correct:0", "cheer", "dot"]` and fails against the pre-fix order.
+- **L2** closed — the pre-init test now pins no element, no timer and no throw.
+- **L3** closed — `NumberOrderScene` reads `getSettings()`; `getSettings()` is
+  `load().settings`, so behaviour is identical and the tap no longer re-parses
+  the blob.
+- **L4** closed — the docstring states the contract; behaviour untouched.
+- **L5** closed and verified inert — every shipped card is ≥ 128 px, so the
+  centring offset is exactly zero; the new `SmallCardScene` case takes the
+  sub-floor path with a 96×96 rect at `(-16, -16)`.
+
+Four new Low record nits were raised in that round (an absent NFR-5 note, a
+stale "flash preserved" bullet, a stale test count, and a docstring that
+over-claimed when the glyph rebuilds). All four were corrected in the re-review
+commit — documentation and one comment, no behaviour change. `pnpm check`,
+`pnpm typecheck` and 2,149 tests pass on the final tree.

@@ -128,6 +128,15 @@ two choice-base chunks load only with a choice game (`ChoiceRoundScene` 2.36 kB,
 `GroupMathScene` 2.03 kB), bringing game-only code to 76.81 kB. The shell entry
 is 192.4 kB against its unchanged 200 kB ceiling.
 
+### NFR-5 note (2026-10-20)
+
+The clause above is kept as written. The 250 ms success flash was already the
+behaviour of seven choice games before this track and now also applies to
+Alphabet, Word Match, Decode It, First Sounds, Pattern Builder and Feelings
+Faces, in the same success colour, so the chime is paired with a visual
+everywhere. The 700 ms advance, the 3,000 ms auto-return and the SFX order are
+unchanged.
+
 ## Acceptance Criteria
 
 | ID | Criterion | Verifies |

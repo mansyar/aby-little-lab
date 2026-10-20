@@ -127,9 +127,10 @@ export class RoundNarrator {
    *
    * Deliberately silent: it neither rebuilds the glyph and label nor calls
    * `caption.onChange`. A notification here would land mid-render and re-enter
-   * the scene's speak path, saying the round's sentence twice. The rendered
-   * presentation catches up at the next rebuild (the voice-list settle or the
-   * next round's own render).
+   * the scene's speak path, saying the round's sentence twice. The scene reads
+   * the decision and paints or clears its own caption; the glyph and label are
+   * rebuilt only when the voice list settles, where `applyCaptionState` calls
+   * `rebuild()`.
    */
   refreshCaptionFallback(): void {
     if (this.options.caption) {
