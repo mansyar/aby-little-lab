@@ -593,6 +593,8 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 
 The face also backs the letter and numeral SVGs, which set `font-family` on a `<text>` element; that dependency is why `BootScene` gates on `ensureGlyphFontLoaded()` ([§3.2](#32-bootscene)).
 
+The parental Settings panel is the one surface that runs larger than the game presets: a 36 px panel title, 32-34 px row and toggle labels, and 30 px buttons, which is what the readability pass bought when the face replaced the bundled monospace.
+
 ---
 
 ## 6. State and storage
@@ -894,7 +896,7 @@ Per-scene flow suites drive a scene through a whole playthrough with the mocked 
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-20) is lines 98.59, functions 96.34, branches 90.73, statements 97.8 across 110 files and 2,305 tests.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-20) is lines 98.59, functions 96.34, branches about 90 (90.66-90.73 across runs), statements 97.8 across 110 files and 2,305 tests.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 73.8 % lines, 74.54 % statements, 83.33 % functions and 56.66 % branches; its uncovered lines 63–77 are the fallback distractor path, which a pool of 22 words never forces.
 

@@ -83,4 +83,4 @@ Branch coverage moves between runs with no code change (90.73 in Phase 4, 90.66 
 
 - `src/__tests__/scenes/navigation.test.ts:305` still titles a test "creates 7 game tiles". The test asserts add order, not a count, so nothing fails; it falls outside AC-6's wording and outside this track's scope.
 - `conductor/tech-stack.md:381` keeps a dated 2026-10-16 entry naming the Ligne track's old path. Dated entries are frozen; the archived track's `## Archive note` is the pointer.
-- Branch coverage reads 90.66-90.73 depending on the run; documentation says "≈90 %" and defers to `vite.config.ts`.
+- Branch coverage reads 90.66-90.73 depending on the run; TDD §10.3 records that range and still names the 85 gate in `vite.config.ts`. Review round 1 also fixed the Shadow Match ease, the Settings type-size fact and the Phase 6 checkpoint: see `review.md` and `verification/phase-r1.md`.

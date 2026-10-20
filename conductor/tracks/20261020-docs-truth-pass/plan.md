@@ -146,5 +146,22 @@
   - [x] **P6.T4.1: Check folder, link and evidence** - no track folder remains, the link resolves, the phase evidence records the commands.
 
 - **Result:** verified. Ligne is gone by every measure this phase could take: no `@ligne-engine` entry in `package.json` or the lockfile, no `.ligne` or `.wasm` file in `dist/`, `scripts/validate-pwa.js` asserting the absence on every build, and `755d575` (2026-10-17) as the commit that deleted the engine and its dual-path code. The stale track moved to `conductor/archive/drop-ligne-mascot_20261016/` with history intact, its metadata now reads `complete` with `archived_at`, `archive_path` and `doc_sync: updated`, and `index.md` carries an archive note saying the work landed ahead of the track. The registry line keeps its `[x]`, points at the archive path and ends in `(Archived)`. Two references to the old path remain on purpose: the dated 2026-10-16 entry in `tech-stack.md` (frozen history) and this track's own spec, which must keep describing the before-state.
-- **Checkpoint:** `bd35e19`
+- **Checkpoint:** `6c3660c`
 - **Evidence:** [`verification/phase-6.md`](./verification/phase-6.md)
+
+## Phase R1: Review Fixes
+
+- **Goal:** every finding from `review.md` round 1 is fixed or explicitly accepted with a reason, and the gate stays green.
+- **Depends on:** Phase 6
+- **Covers:** FR-3, FR-4, AC-3, AC-4
+- **Touches:** `docs/PRD.md`, `docs/TDD.md`, `conductor/archive/drop-ligne-mascot_20261016/index.md`, `conductor/tracks.md`, `plan.md`, `metadata.json`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** verified
+
+- [x] **R1.T1: Correct the Shadow Match ease** - covers: FR-3
+- [x] **R1.T2: Restore the Settings type size to the owning doc** - covers: AC-3
+- [x] **R1.T3: Point the Phase 6 checkpoint at the phase's work** - covers: AC-11
+- [x] **R1.T4: Fix the archive note, the coverage range and the ledger newline** - covers: FR-4, AC-4
+
+- **Result:** verified. All three medium findings and all three low findings are fixed; none needed a re-roll. The Shadow Match bullet now says `Cubic.out` (the ease `snapToSlot()` actually uses), the Settings type size lives in TDD §5.8 where the phase-2 relocation table said it was, the Phase 6 checkpoint points at `6c3660c`, the archived Ligne note reads `refactor(mascot)` with its code spans intact, the coverage snapshot quotes a range instead of one run's branch figure, and the ledger already ended with a newline when checked. Two residues are accepted and recorded in `verification/integrated.md` §6.
+- **Evidence:** [`verification/phase-r1.md`](./verification/phase-r1.md)

@@ -182,7 +182,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Mechanic.** Drag each picture onto its matching dark silhouette. Objects lift, tilt slightly, and settle into the shadow.
 - **Rounds and pool.** Six objects per playthrough from a pool of eight: house, tree, car, boat, ball, umbrella, airplane, mushroom. Six matches complete the game.
 - **Difficulty.** Fixed. Six of eight objects, no band ladder.
-- **Feedback.** A correct drop snaps the picture into its silhouette over 200 ms of Back.out (120 ms reduced), stamps the shadow with a 1.1 times pulse (smaller under reduced motion) over a brief white fill flash, and dims the matched object to 50 percent alpha with the chime and a progress dot; a wrong drop bounces back.
+- **Feedback.** A correct drop snaps the picture into its silhouette over 200 ms of Cubic.out (120 ms reduced), stamps the shadow with a 1.1 times pulse (smaller under reduced motion) over a brief white fill flash, and dims the matched object to 50 percent alpha with the chime and a progress dot; a wrong drop bounces back.
 - **Narration.** Rule line: "Drag each picture onto its shadow." No per-round prompt.
 - **Art and assets.** Eight object SVGs and eight shadow SVGs in the boot set, the shadows drawn as flat dark silhouettes at the icon tier.
 
