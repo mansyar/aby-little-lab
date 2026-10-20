@@ -187,7 +187,7 @@ games" with the seven named fixed games, which is what the PRD and TDD already s
 
 ## Commands
 
-Chain, run as written from the phase base (no source edit in this phase; docs only):
+Chain, run as written at `2cf8f40` (no source edit in this phase; docs only):
 
 ```
 pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js
@@ -203,9 +203,11 @@ pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm
 | `node scripts/validate-bundle.js` | exit 0 — Phaser chunk 1342.6 kB, shell 195.4 kB ≤ 200 kB |
 | `node scripts/validate-pwa.js` | exit 0 — 15 passed, 0 failed |
 
-Footprint: `git diff --stat 1ee9605..HEAD` — this phase adds
-`conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-3.md` and nothing else.
-`git log --merges 1ee9605..HEAD` is empty.
+Footprint: `git diff --stat 1ee9605..HEAD` — one file changed =
+`conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-3.md` (215 insertions), and
+nothing else. `git log --merges 1ee9605..HEAD` is empty. Nothing outside `docs/` and
+`conductor/` was touched across the whole track, and nothing under `src/`, `scripts/`,
+`public/` or `package.json` changed.
 
 ---
 
