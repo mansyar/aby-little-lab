@@ -2,11 +2,11 @@
   "id": "20261020-prd-tdd-truth-pass",
   "title": "PRD & TDD Truth Pass",
   "type": "chore",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T18:40:00+11:00",
-  "updated_at": "2026-10-20T22:05:00+11:00",
+  "updated_at": "2026-10-20T22:25:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261020-prd-tdd-truth-pass",
@@ -21,7 +21,7 @@
   "last_checkpoint": "65431f5",
   "review_verdict": "PASS",
   "review_rounds": 2,
-  "doc_sync": "pending",
+  "doc_sync": "complete",
   "pr_url": null,
   "pr_state": null,
   "merged_at": null,
@@ -29,6 +29,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-20T22:25:00+11:00",
+  "archive_path": "conductor/archive/20261020-prd-tdd-truth-pass"
 }
