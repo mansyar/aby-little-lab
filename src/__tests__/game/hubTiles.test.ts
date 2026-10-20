@@ -3,14 +3,14 @@ import { HUB_TILE_COUNT } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 
 describe("GAME_TILES", () => {
-  it("holds exactly 21 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
-    expect(GAME_TILES).toHaveLength(21);
+  it("holds exactly 22 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
+    expect(GAME_TILES).toHaveLength(22);
     const gameIds = new Set(GAME_TILES.map((t) => t.gameId));
     const sceneKeys = new Set(GAME_TILES.map((t) => t.sceneKey));
     const tileKeys = new Set(GAME_TILES.map((t) => t.tileKey));
-    expect(gameIds.size).toBe(21);
-    expect(sceneKeys.size).toBe(21);
-    expect(tileKeys.size).toBe(21);
+    expect(gameIds.size).toBe(22);
+    expect(sceneKeys.size).toBe(22);
+    expect(tileKeys.size).toBe(22);
   });
 
   it("keeps the hub paging constant in step with the tile list", () => {
@@ -41,6 +41,7 @@ describe("GAME_TILES", () => {
       "decode-it": "tile_decode_it",
       "number-order": "tile_number_order",
       "feelings-faces": "tile_feelings_faces",
+      "story-order": "tile_story_order",
     };
     for (const tile of GAME_TILES) {
       expect(tile.tileKey).toBe(expected[tile.gameId]);
@@ -70,11 +71,16 @@ describe("GAME_TILES", () => {
     }
   });
 
-  it("appends Feelings Faces as tile 21, after Number Order", () => {
+  it("keeps Feelings Faces as tile 21 and appends Story Order as tile 22", () => {
+    const feelings = GAME_TILES[20];
+    expect(feelings?.gameId).toBe("feelings-faces");
+    expect(feelings?.sceneKey).toBe("FeelingsFaces");
+    expect(feelings?.label).toBe("Feelings Faces");
+    expect(GAME_TILES[19]?.gameId).toBe("number-order");
+
     const last = GAME_TILES.at(-1);
-    expect(last?.gameId).toBe("feelings-faces");
-    expect(last?.sceneKey).toBe("FeelingsFaces");
-    expect(last?.label).toBe("Feelings Faces");
-    expect(GAME_TILES.at(-2)?.gameId).toBe("number-order");
+    expect(last?.gameId).toBe("story-order");
+    expect(last?.sceneKey).toBe("StoryOrder");
+    expect(last?.label).toBe("Story Order");
   });
 });

@@ -74,7 +74,7 @@ describe("pageTileIndexes", () => {
   });
 
   it("clamps the last page to the tiles that remain", () => {
-    expect(pageTileIndexes(2)).toEqual([20]);
+    expect(pageTileIndexes(2)).toEqual([20, 21]);
   });
 
   it("maps every tile index back to its page", () => {
@@ -83,13 +83,15 @@ describe("pageTileIndexes", () => {
     expect(pageOf(10)).toBe(1);
     expect(pageOf(19)).toBe(1);
     expect(pageOf(20)).toBe(2);
+    expect(pageOf(21)).toBe(2);
   });
 
-  it("covers all 21 tiles exactly once across pages", () => {
+  it("covers all 22 tiles exactly once across pages", () => {
     const all = [...pageTileIndexes(0), ...pageTileIndexes(1), ...pageTileIndexes(2)].sort(
       (a, b) => a - b,
     );
-    expect(all).toEqual([...Array(21).keys()]);
+    expect(all).toEqual([...Array(HUB_TILE_COUNT).keys()]);
+    expect(all).toEqual([...Array(22).keys()]);
   });
 
   it("rejects out-of-range pages", () => {
@@ -99,10 +101,10 @@ describe("pageTileIndexes", () => {
 });
 
 describe("page constants", () => {
-  it("splits 21 tiles into 3 pages (10 + 10 + 1)", () => {
+  it("splits 22 tiles into 3 pages (10 + 10 + 2)", () => {
     expect(PAGE_SIZE).toBe(10);
     expect(PAGE_COUNT).toBe(3);
-    expect(HUB_TILE_COUNT).toBe(21);
+    expect(HUB_TILE_COUNT).toBe(22);
   });
 });
 
@@ -164,14 +166,21 @@ describe("pagedTilePosition", () => {
     });
   });
 
-  it("centres a one-tile page at the canvas centre-x on the first row", () => {
+  it("centres the two-tile last page at the canvas centre-x on the first row", () => {
     const page = pageTileIndexes(PAGE_COUNT - 1);
-    expect(page).toHaveLength(1);
-    const lone = pagedTilePosition(0, page.length);
-    expect(lone.x).toBeCloseTo(CANVAS.width / 2, 6);
+    expect(page).toHaveLength(2);
+    expect(page).toEqual([20, 21]);
+    const first = pagedTilePosition(0, page.length);
+    const second = pagedTilePosition(1, page.length);
+    // Two 176px columns with 20px spacing: 32 + 176 + 20 + 176 + 32 = 436 wide box.
+    expect(first.x).toBeCloseTo(CANVAS.width / 2 - (176 + 20) / 2, 6);
+    expect(second.x).toBeCloseTo(CANVAS.width / 2 + (176 + 20) / 2, 6);
+    // The pair is symmetric about the canvas centre.
+    expect((first.x + second.x) / 2).toBeCloseTo(CANVAS.width / 2, 6);
     // Vertically still the first row, so the page box keeps its vertical anchor.
-    expect(lone.y).toBeCloseTo(pagedTilePosition(0).y, 6);
-    expect(lone.x - lone.width / 2).toBeGreaterThan(0);
-    expect(lone.x + lone.width / 2).toBeLessThan(CANVAS.width);
+    expect(first.y).toBeCloseTo(pagedTilePosition(0).y, 6);
+    expect(second.y).toBeCloseTo(pagedTilePosition(0).y, 6);
+    expect(first.x - first.width / 2).toBeGreaterThan(0);
+    expect(second.x + second.width / 2).toBeLessThan(CANVAS.width);
   });
 });

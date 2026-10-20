@@ -193,6 +193,37 @@ describe("HubScene paged grid (narrow viewports)", () => {
     expect(scene).toBeDefined();
   });
 
+  it("builds the last page as two centred tiles", () => {
+    createNarrowHub();
+
+    pageDots()[2].handlers.pointerup?.();
+
+    // The outgoing page lingers under the mock slide timer: 10 + 2 rects.
+    const rects = pagedRects();
+    expect(rects.length).toBe(12);
+    const incoming = rects.slice(10);
+    expect(incoming).toHaveLength(2);
+
+    // Two 176px columns centred on the 1024px canvas: 414 and 610 about 512.
+    // The incoming page is created a canvas-width to the right and slides in.
+    const shifted = incoming.map((tile) => (tile.args?.[0] as number) - 1024);
+    const xs = shifted.sort((a, b) => a - b);
+    expect(xs[0]).toBeCloseTo(414, 5);
+    expect(xs[1]).toBeCloseTo(610, 5);
+    expect((xs[0] + xs[1]) / 2).toBeCloseTo(512, 5);
+  });
+
+  it("launches Story Order from the 22nd tile on the last page", () => {
+    createNarrowHub();
+
+    pageDots()[2].handlers.pointerup?.();
+    const incoming = pagedRects().slice(10);
+    expect(incoming).toHaveLength(2);
+    incoming[1].handlers.pointerup?.();
+
+    expect(mockRecordGamePlay).toHaveBeenCalledWith("story-order");
+  });
+
   it("shows one textless page dot per page, active page highlighted", () => {
     createNarrowHub();
 
@@ -299,7 +330,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
   it("rebuilds as a paged grid when a resize crosses below the touch floor", () => {
     const scene = new HubScene();
     scene.create();
-    expect(wideRects().length).toBe(21);
+    expect(wideRects().length).toBe(22);
     expect(pageDots().length).toBe(0);
     const wideBefore = wideRects().length;
 
@@ -320,7 +351,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
 
     fireResize(scene, 1024, 768);
 
-    expect(wideRects().length).toBe(21);
+    expect(wideRects().length).toBe(22);
     expect(pagedRects().length).toBe(pagedBefore);
     expect(pageDots().length).toBe(dotsBefore);
   });
@@ -331,7 +362,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
 
     fireResize(scene, 1600, 900);
 
-    expect(wideRects().length).toBe(21);
+    expect(wideRects().length).toBe(22);
     expect(pagedRects().length).toBe(0);
     expect(pageDots().length).toBe(0);
   });
@@ -343,8 +374,8 @@ describe("HubScene paged grid (narrow viewports)", () => {
     secondDot.handlers.pointerup?.[0]?.();
     expect(pagedRects().length).toBe(10);
     fireResize(scene, 1024, 768);
-    // The rebuilt wide grid must contain all 21 games.
-    expect(wideRects().length).toBe(21);
+    // The rebuilt wide grid must contain all 22 games.
+    expect(wideRects().length).toBe(22);
   });
 
   it("unregisters the resize listener on shutdown", () => {
@@ -448,12 +479,12 @@ describe("HubScene session-start recording", () => {
     expect(getProgress()["shape-sorter"].plays).toBe(1);
   });
 
-  it("renders all 21 tiles fully inside the 1024×768 canvas (6×4 grid)", () => {
+  it("renders all 22 tiles fully inside the 1024×768 canvas (6×4 grid)", () => {
     const scene = new HubScene();
     scene.create();
 
     const tiles = mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
-    expect(tiles).toHaveLength(21);
+    expect(tiles).toHaveLength(22);
 
     for (const tile of tiles) {
       const [x, y, width, height] = tile.args as number[];
@@ -611,7 +642,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     scene.create();
 
     const tiles = getNavTiles();
-    expect(tiles).toHaveLength(21);
+    expect(tiles).toHaveLength(22);
 
     const rows = new Map<number, MockObject[]>();
     for (const tile of tiles) {
@@ -621,7 +652,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
       else rows.set(y, [tile]);
     }
     const rowSizes = [...rows.keys()].sort((a, b) => a - b).map((y) => rows.get(y)?.length ?? 0);
-    expect(rowSizes).toEqual([6, 6, 6, 3]);
+    expect(rowSizes).toEqual([6, 6, 6, 4]);
 
     for (const [, row] of rows) {
       const xs = row.map((t) => t.args?.[0] as number).sort((a, b) => a - b);
@@ -650,7 +681,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     const emptySlots = mockRegistry.filter(
       (obj) => obj.kind === "graphics" && obj.arc.mock.calls.some((call) => call[2] === 11),
     );
-    expect(emptySlots).toHaveLength(19);
+    expect(emptySlots).toHaveLength(20);
   });
 
   it("locks tiles with a moon badge once the daily limit is reached", () => {
@@ -730,7 +761,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     scene.create();
 
     const navTiles = getNavTiles();
-    expect(navTiles).toHaveLength(21);
+    expect(navTiles).toHaveLength(22);
     const motionTargets = (scene.tweens.add as MockFn).mock.calls.filter((call) => {
       const config = call[0] as { targets?: unknown };
       return navTiles.includes(config.targets as MockObject);

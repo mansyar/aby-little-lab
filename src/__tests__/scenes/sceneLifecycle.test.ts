@@ -693,7 +693,7 @@ describe("scene shutdown cleanup", () => {
     const firstVisit = getStickerImages(scene);
     expect(firstVisit).toHaveLength(1);
     const firstVisitSlots = getEmptySlots(scene);
-    expect(firstVisitSlots).toHaveLength(20);
+    expect(firstVisitSlots).toHaveLength(21);
 
     // Leave the Hub (shutdown clears the tracked shelf) and return: create()
     // re-runs on every visit via scene.start.
@@ -723,12 +723,12 @@ describe("scene shutdown cleanup", () => {
     for (const { obj } of firstVisit) {
       expect(getMockFn(obj.destroy)).not.toHaveBeenCalled();
     }
-    // The reset cleared everything: the re-rendered shelf holds 21 fresh
+    // The reset cleared everything: the re-rendered shelf holds 22 fresh
     // empty slots (the stale first-visit objects still exist, untouched).
     const fresh = getEmptySlots(scene).filter(
       (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
     );
-    expect(fresh).toHaveLength(21);
+    expect(fresh).toHaveLength(22);
   });
 });
 

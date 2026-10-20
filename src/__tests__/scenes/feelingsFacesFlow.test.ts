@@ -184,7 +184,7 @@ afterEach(() => {
 });
 
 describe("Feelings Faces hub entry", () => {
-  it("renders 21 tiles with Feelings Faces as the 21st", () => {
+  it("renders 22 tiles with Feelings Faces as the 21st and Story Order as the 22nd", () => {
     const hub = new HubScene();
     hub.create();
     completeHubEntrances(hub);
@@ -192,10 +192,11 @@ describe("Feelings Faces hub entry", () => {
     const tiles = getRectangles(hub).filter((obj) =>
       getMockFn(obj.on).mock.calls.some((call) => call[0] === "pointerup"),
     );
-    expect(tiles).toHaveLength(21);
+    expect(tiles).toHaveLength(22);
     const icons = getTileIcons(hub).map((icon) => icon.key);
-    expect(icons).toHaveLength(21);
-    expect(icons.at(-1)).toBe("tile_feelings_faces");
+    expect(icons).toHaveLength(22);
+    expect(icons.at(-2)).toBe("tile_feelings_faces");
+    expect(icons.at(-1)).toBe("tile_story_order");
     expect(getTextObject(hub, "Feelings Faces")).toBeDefined();
   });
 
@@ -278,7 +279,7 @@ describe("Feelings Faces playthrough", () => {
     completeHubEntrances(hub);
 
     expect(getStickerImageSafe(hub, "sticker_feelings_faces")).toBeDefined();
-    expect(getEmptySlots(hub), "21 tiles minus the one earned sticker").toHaveLength(20);
+    expect(getEmptySlots(hub), "22 tiles minus the one earned sticker").toHaveLength(21);
   });
 
   it("does not award a second sticker on a replay and returns without justEarned", () => {

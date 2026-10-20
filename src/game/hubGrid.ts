@@ -9,7 +9,7 @@ import { GAME_TILES } from "./hubTiles";
 
 const TILE_WIDTH = 144;
 /**
- * 21 tiles render as 6x4 (rows 6/6/6/3). Height and spacing are sized so the
+ * 22 tiles render as 6x4 (rows 6/6/6/4). Height and spacing are sized so the
  * 4 rows fit inside 768 with the same 119px top/bottom margins as the 15-tile
  * grid - clearing the top-band controls (avatar chip / Settings, bottom edge
  * 116) while keeping every tile and its sticker shelf on-canvas. The width is
@@ -131,8 +131,8 @@ export interface HubGridDeps {
 }
 
 /**
- * Renders the Hub's game-tile grid — the 6x4 wide layout (rows 6/6/6/3 over
- * 21 tiles), the paged 5x2 narrow-viewport layout, the page dots and swipe
+ * Renders the Hub's game-tile grid — the 6x4 wide layout (rows 6/6/6/4 over
+ * 22 tiles), the paged 5x2 narrow-viewport layout, the page dots and swipe
  * gestures, and the sticker shelf under each tile. The Hub scene supplies
  * orchestration (navigation, play-time, audio) through the deps object; this
  * class owns all grid objects and their lifecycle.
@@ -250,7 +250,7 @@ export class HubGrid {
   }
 
   /**
-   * Builds the 6x4 wide grid — rows 6/6/6/3 over 21 tiles at 144px, for
+   * Builds the 6x4 wide grid — rows 6/6/6/4 over 22 tiles at 144px, for
    * desktop and tablet viewports.
    */
   buildWideGrid(): void {

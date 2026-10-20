@@ -1196,7 +1196,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
   });
 
-  it("pages through all 20 game rows with explicit chevrons (6+6+6+2)", () => {
+  it("pages through all 22 game rows with explicit chevrons (6+6+6+4)", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
@@ -1207,6 +1207,7 @@ describe("SettingsPanel progress report", () => {
     expect(nextChevron()).toBeDefined();
     expect(prevChevron()).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
+    expect(findTextByLabel(scene, "Story Order")).toBeUndefined();
     expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
@@ -1223,11 +1224,20 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
     expect(findTextByLabel(scene, "Decode It")).toBeUndefined();
+    expect(findTextByLabel(scene, "Story Order")).toBeUndefined();
 
+    const lastPageMark = scene.add.text.mock.calls.length;
     triggerPointerdown(nextChevron() as MockGameObject);
     expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
     expect(findTextByLabel(scene, "Decode It")).toBeDefined();
     expect(findTextByLabel(scene, "Number Order")).toBeDefined();
+    expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
+    expect(findTextByLabel(scene, "Story Order")).toBeDefined();
+    // The last page holds the remaining four rows (22 = 6 + 6 + 6 + 4).
+    const lastPageRows = scene.add.text.mock.calls
+      .slice(lastPageMark)
+      .filter((call) => call[0] === 354 && call[3]?.fontSize === "30px");
+    expect(lastPageRows).toHaveLength(4);
 
     // The last page clamps instead of wrapping around.
     triggerPointerdown(nextChevron() as MockGameObject);
@@ -1242,6 +1252,26 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
     expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
+  });
+
+  it("shows Story Order as the 22nd row, reading its own progress record", () => {
+    recordGamePlay("story-order");
+
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    for (let page = 0; page < 3; page += 1) {
+      triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
+    }
+
+    expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "Story Order")).toBeDefined();
+    expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
+    // Exactly one row reports a play: story-order's own record.
+    const statsCalls = scene.add.text.mock.calls.filter(
+      (call) => call[0] === 354 && call[2] === "1 plays · — · Today",
+    );
+    expect(statsCalls).toHaveLength(1);
   });
 
   it("spaces consecutive progress rows at least 56px apart", () => {
