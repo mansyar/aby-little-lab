@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-4, FR-11, AC-1, AC-4
 - **Touches:** `README.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Capture the measured facts** — covers: FR-11
   - [ ] **P1.T1.1: Run the suite once** — record file and test totals from `pnpm test -- --run`.
