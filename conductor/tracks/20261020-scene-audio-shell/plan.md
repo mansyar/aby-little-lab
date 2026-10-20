@@ -123,30 +123,33 @@ The primary appends after acceptance:
   `src/scenes/FeelingsFacesScene.ts`,
   `src/__tests__/components/roundNarrator.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `bd2e66f`
+- **Evidence:** `conductor/tracks/20261020-scene-audio-shell/verification/phase-4.md`
 
-- [ ] **P4.T1: Build the narrator helper** — covers: FR-3, FR-4
-  - [ ] **P4.T1.1: Own the glyph** — creation, placement beside the prompt,
+- [x] **P4.T1: Build the narrator helper** — covers: FR-3, FR-4
+  - [x] **P4.T1.1: Own the glyph** — creation, placement beside the prompt,
     muted state from `getSettings()`, replay handler, active-speech visual
     state from `onSpeechLifecycle`.
-  - [ ] **P4.T1.2: Own the lifecycle** — replace its own glyph on rerender,
+  - [x] **P4.T1.2: Own the lifecycle** — replace its own glyph on rerender,
     destroy on scene shutdown, unsubscribe exactly once.
-- [ ] **P4.T2: Migrate the eleven hand-rolled sites** — covers: FR-3
-  - [ ] **P4.T2.1: Migrate the prompt-reading games** (Alphabet, WordMatch,
+- [x] **P4.T2: Migrate the eleven hand-rolled sites** — covers: FR-3
+  - [x] **P4.T2.1: Migrate the prompt-reading games** (Alphabet, WordMatch,
     WordBuilder, HowMany, FirstSounds, MoreLess, OddOneOut, ColorMatch,
     DecodeIt) to the helper.
-  - [ ] **P4.T2.2: Migrate the two remaining sites** — Musical Memory's replay
+  - [x] **P4.T2.2: Migrate the two remaining sites** — Musical Memory's replay
     and the Feelings Faces rule line.
-- [ ] **P4.T3: Move the caption-fallback state machine** — covers: FR-5
-  - [ ] **P4.T3.1: Move unknown-until-`voiceschanged`, settled-empty decision,
+- [x] **P4.T3: Move the caption-fallback state machine** — covers: FR-5
+  - [x] **P4.T3.1: Move unknown-until-`voiceschanged`, settled-empty decision,
     and displayed-round re-evaluation into the narrator, including engines that
     never fire the event.
-  - [ ] **P4.T3.2: Guarantee no re-speak on flip-to-spoken** and no caption
+  - [x] **P4.T3.2: Guarantee no re-speak on flip-to-spoken** and no caption
     while the round is mid-transition.
-- [ ] **P4.T4: Narrator unit tests** — covers: FR-4, FR-5, AC-4
-  - [ ] **P4.T4.1: Test mute, replay, lifecycle subscribe/unsubscribe and
+- [x] **P4.T4: Narrator unit tests** — covers: FR-4, FR-5, AC-4
+  - [x] **P4.T4.1: Test mute, replay, lifecycle subscribe/unsubscribe and
     rerender replacement.**
-  - [ ] **P4.T4.2: Test the caption machine** — unknown → settled-empty,
+  - [x] **P4.T4.2: Test the caption machine** — unknown → settled-empty,
     settle re-evaluation, no re-speak on flip, engine without the event.
 
 ## Phase 5: Audio focus, visibility, and docs
