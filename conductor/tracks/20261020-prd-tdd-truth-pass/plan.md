@@ -92,7 +92,7 @@ Review fixes are appended by conductor-review as `## Phase R1: Review Fixes`.
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/device-testing-checklist.md`,
   `conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Correct the texture-tier mapping** - covers: F1, F5
   - [ ] **R1.T1.1: Rewrite PRD 7.1's tier sentence** so letters and numerals are
