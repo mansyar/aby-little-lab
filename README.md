@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements. Current state: **2,148 tests across 100 files**, all green (verified 2026-10-20).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements. Current state: **2,149 tests across 100 files**, all green (verified 2026-10-20).
 
 ## Code Quality
 
@@ -249,7 +249,10 @@ One-time setup:
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
-| **v1.16.0** | 2026-08-27 | UI/UX Cohesion (shared press feedback, speaker states, Settings/Learning Progress affordances, Hub hierarchy + active-profile rings) + Ligne Offline-First Hoot (engine precached — animated Hoot on first offline visit) | `v1.16.0` |
+| **v1.19.0** | 2026-10-20 | Game 21 - Feelings Faces (social-emotional learning, 16-scenario pool, contrast ladder, heart sticker) + shared choice-round shell for 13 games, one narrator for every prompt, BGM ducking under narration, backgrounded play clock paused | `v1.19.0` |
+| **v1.18.0** | 2026-10-16 | Adaptive Difficulty complete across 15 games + docs aligned with the 20-game suite | `v1.18.0` |
+| **v1.17.0** | 2026-10-16 | Adaptive difficulty for the final nine games (literacy/memory batch + remaining three) | `v1.17.0` |
+| **v1.16.0** | 2026-08-27 | UI/UX Cohesion (shared press feedback, speaker states, Settings/Learning Progress affordances, Hub hierarchy + active-profile rings) + Ligne Offline-First Hoot (engine precached - animated Hoot on first offline visit) | `v1.16.0` |
 | **v1.4.0** | 2026-08-04 | Multi-Kid Profiles — up to 4 kid profiles with own sticker collections, 6 textless animal avatars, parental-gated profile management, automatic v1 migration | `v1.4.0` |
 | **v1.3.0** | 2026-08-04 | First Words word pool expansion (9→18 words, no shared first letters) + replay reliability fix | `v1.3.0` |
 | **v1.2.1** | 2026-08-03 | Build the Word slot letter size fix; deployed via the automated pipeline (CI run `30800890115`, Quality Gates + Coolify) | `v1.2.1` |
@@ -265,6 +268,8 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [TDD.md](docs/TDD.md) - Technical Design Document
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
+- [release-notes-v1.19.0.md](docs/release-notes-v1.19.0.md) - v1.19.0 release notes (Feelings Faces + shared shell and audio focus, released)
+- [release-notes-v1.18.0.md](docs/release-notes-v1.18.0.md) - v1.18.0 release notes (adaptive-complete suite, released)
 - [release-notes-v1.4.0.md](docs/release-notes-v1.4.0.md) - v1.4.0 release notes (Multi-Kid Profiles, released)
 - [release-notes-v1.3.0.md](docs/release-notes-v1.3.0.md) - v1.3.0 release notes (First Words word pool expansion, released)
 - [release-notes-v1.2.1.md](docs/release-notes-v1.2.1.md) - v1.2.1 release notes (Build the Word slot letter fix, released)

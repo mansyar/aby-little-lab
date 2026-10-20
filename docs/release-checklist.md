@@ -55,6 +55,13 @@
 
 > **v1.14.0 prep (Game 17 — Take Away, complete 17-game suite, 2026-08-10):** Release track `conductor/tracks/release-1.14.0_20260810/`. Baseline gates on local `master` all green — Biome clean (125 files), **1309/1309 tests (58 files)**, build OK (17 lazy game chunks + separate Phaser vendor chunk, 35 precache entries / 1566.27 KiB), `validate-pwa` 13/13, `validate-bundle` PASS. Release branch `release/v1.14.0` created; version bumped to `1.14.0` (`2e4d39d`); release notes rewritten (`docs/release-notes-v1.14.0.md`, DRAFT); device execution record replaced with the current v1.14.0 record (pending execution). **In-track source fix (user-approved, regression-first):** the parent Learning Progress report listed only 15 games — missing Add It Up (shipped in v1.13.0) and Take Away; both rows added to `PROGRESS_GAME_ROWS` with regression tests asserting all 17 rows page 8 + 8 + 1.
 
+> **v1.19.0 prep (Game 21 - Feelings Faces + Shared Choice-Round Shell + Audio Focus, 2026-10-20):** Released directly from `master` (no release branch, same shape as v1.5.0) after two reviewed and merged tracks: `conductor/archive/20261020-feelings-faces/` (PR #45) and `conductor/archive/20261020-scene-audio-shell/` (PR #46).
+> - [x] Baseline gates green on `master` at the merge commit `1ce8544` - Biome clean (199 files, 1 pre-existing warning), **2,149 tests (100 files)**, coverage 98.07 statements / 90.28 branches / 98.15 functions / 98.93 lines, build OK (44 precache entries), `validate-pwa` 15/15, `validate-bundle` PASS (shell 192.4 kB <= 200 kB)
+> - [x] Both tracks reviewed to PASS (feelings-faces 3 rounds, scene-audio-shell 2 rounds) and archived; no open findings
+> - [x] Version bumped to `1.19.0`; release notes authored (`docs/release-notes-v1.19.0.md`, FINAL)
+> - [x] Release notes + checklist + README releases table updated (the README table was stale at v1.16.0 before this release)
+> - [x] Device-class verification - **pending** by user decision (non-blocking; desktop HTTP/hash smoke is the release gate). The one item worth a real ear: the 8% BGM duck level and 120 ms ramp under narration.
+> - [x] Pre-existing doc drift recorded, not fixed here: `docs/PRD.md` and `docs/TDD.md` still describe twenty games and do not mention Feelings Faces; `conductor/product.md` keeps two duplicate Game 20 changelog sections and an "18 mini-games" header line. Both are candidates for the documentation truth pass.
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
@@ -681,3 +688,22 @@ Please report issues at [GitHub Issues URL]
 - [ ] Service worker + manifest served — `sw.js` 200 (precache manifest includes `ligne_wasm_bg-*.wasm`), `manifest.webmanifest` 200
 - [ ] Live smoke — Hub 18 tiles; Cohesion behaviors (press feedback, speaker states, Settings/Progress affordances, profile rings); Settings footer `v1.16.0`; **offline relaunch → Ligne Hoot (non-RM)** and **tween Hoot (RM, no WASM fetch)**; zero console/network errors
 - [ ] Device testing on v1.16.0 — recorded in `docs/device-testing-checklist.md` (v1.16.0 record, 4-class matrix + offline-relaunch + reduced-motion + console-health rows)
+
+## Final Sign-Off - v1.19.0
+
+**Version:** 1.19.0
+**Status:** RELEASED - 2026-10-20 (Game 21 - Feelings Faces + Shared Choice-Round Shell + Audio Focus; released directly from `master`, tag `v1.19.0`; desktop HTTP/hash smoke passed, device-class verification pending by user decision)
+
+**Verify Deployment - v1.19.0 (2026-10-20):**
+- [ ] Annotated tag `v1.19.0` on `master` pushed - CI Quality Gates + Deploy to Coolify PASS, live updated
+- [ ] Live entry hash matches the local `dist/` build; `v1.19.0` present in the live bundle
+- [ ] Live smoke - Hub 21 tiles (6x4, rows 6/6/6/3), Feelings Faces round-trip, Settings footer `v1.19.0`, service worker controlling
+- [ ] Device testing on v1.19.0 - recorded in `docs/device-testing-checklist.md` (v1.19.0 record, pending)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (2,149/2,149)
+- [x] Documentation complete (release notes, README, tech-stack, product)
+- [x] Security review passed (no new dependencies, no new network calls)
+- [x] Performance targets met (shell 192.4 kB of 200 kB; boot gate green in CI)
+- [x] Ready for release
