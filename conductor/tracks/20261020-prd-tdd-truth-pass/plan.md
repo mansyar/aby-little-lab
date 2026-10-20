@@ -61,7 +61,7 @@
 - **Covers:** FR-9, FR-10, AC-8, AC-9, AC-10
 - **Touches:** `conductor/product.md`, `docs/PRD.md`, `docs/TDD.md`, `README.md`, `conductor/tech-stack.md`, `conductor/tracks/20261020-prd-tdd-truth-pass/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Repair `product.md`** — covers: FR-9, AC-8
   - [ ] **P3.T1.1: Remove the duplicate Game 20 changelog heading** — one heading, both bodies preserved under it; verify no text lost by diffing the removed block.
