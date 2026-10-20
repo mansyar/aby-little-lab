@@ -381,7 +381,7 @@ The pattern generalises: any future art that only one game needs belongs in a `<
 | Story Order chunk | ~33.9 kB, includes all 24 panel SVGs | build output |
 | Precache entries | 45 (1,695 KiB) | `precache  45 entries` from the PWA build step |
 
-The shell carries the three shell scenes, the 15 components, the 30 logic modules, the 14 utils and all 178 boot textures as strings. Game scenes are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and all 178 boot textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell: `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
 ---
 
@@ -802,7 +802,7 @@ Public wrappers: `speakLetter` (rate 0.9), `speakWord` (0.8), `speakNumber` (0.9
 
 ### 8.6 Toggles and persistence
 
-`setBGMEnabled(enabled)` and `setSFXEnabled(enabled)` set the flag, persist it through `updateSettings`, and call `restoreBGM()` on every call — disabling audio mid-narration must not leave the element parked at the ducked level. Disabling BGM also pauses it immediately.
+`setBGMEnabled(enabled)` and `setSFXEnabled(enabled)` set the flag and persist it through `updateSettings`. `setBGMEnabled` calls `restoreBGM()` unconditionally, then pauses the element when disabling; `setSFXEnabled` calls it only when disabling, because SFX off means nothing is speaking. Either way the rule is the same: disabling audio mid-narration must not leave the element parked at the ducked level.
 
 ---
 
@@ -876,7 +876,7 @@ Per-scene flow suites drive a scene through a whole playthrough with the mocked 
 
 Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage is lines 98.96, functions 98.14, branches 90.54, statements 98.13 across 103 files and 2,208 tests.
 
-`src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` sits lowest because its loaders are only exercised through injected stubs.
+`src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 73.8 % lines, 74.54 % statements, 83.33 % functions and 56.66 % branches; its uncovered lines 63–77 are the fallback distractor path, which a pool of 22 words never forces.
 
 ### 10.4 What unit tests cannot cover
 

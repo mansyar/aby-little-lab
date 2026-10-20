@@ -378,9 +378,9 @@ Progress is recorded on device as an additive part of the profile: a play when a
 
 Fifteen of the 22 games adapt. The other seven are fixed: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Feelings Faces and Story Order.
 
-An adaptive game keeps a rolling window of the profile's last ten taps for that game. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 60 percent moves it down one, and anything between leaves it alone. Bands are clamped to the game's supported range (1 to 3), so the ladder can never leave the game's difficulty.
+An adaptive game keeps a rolling window of the profile's last ten taps for that game. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 60 percent moves it down one, and anything between leaves it alone. Bands are clamped to the game's supported range, so the ladder can never leave the game's difficulty.
 
-The result is applied as a shift to the game's classic easy-first ladder, which is `[1, 1, 2, 2, 3, 3]` for the band games. The shift is computed per profile, once at the start of a playthrough, and never mid-round. It is invisible to the child: no badge, no message, no sound. Adaptive difficulty can be turned off in Settings, and it is on by default.
+The result is applied as a shift to the game's classic easy-first ladder at the start of a playthrough: once per profile, never mid-round, so difficulty can move by one band between visits but never inside a round. The ladder's values and its clamp are the TDD's to state ([TDD §7.3](./TDD.md#73-adaptive-banding)). It is invisible to the child: no badge, no message, no sound. Adaptive difficulty can be turned off in Settings, and it is on by default.
 
 The fifteen adaptive games are Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order, Pattern Builder and Musical Memory. They live in 14 scene files because Add It Up and Take Away share the group-math scene. What shifts differs by game: number ranges in the numeracy games, word tiers in the word games, letter ranges in Find the Letter, grid size in Memory Match, starting sequence length in Musical Memory, colour pool in Color Match and pattern type in Pattern Builder.
 
@@ -487,7 +487,7 @@ Spoken lines use the platform's speech synthesis with the parent's chosen voice,
 
 ### 6.4 Audio focus
 
-Narration outranks music. When a spoken line starts, the music ducks to eight percent of its normal volume over a 120 ms ramp. It returns when the speech ends, when speech errors, when either audio toggle changes, or when a 15 second watchdog expires, so a browser that never fires the speech end event cannot leave the music stuck quiet. The ducked level is never written to storage: it is runtime state, and a reload always starts at full music volume.
+Narration outranks music. A spoken line ducks the music, and full volume returns when the speech ends, when speech errors, when either audio toggle is turned off, or when the watchdog expires, so a browser that never fires the speech end event cannot leave the music stuck quiet. The duck level, the ramp and the watchdog interval are the TDD's ([TDD §8.3](./TDD.md#83-background-music-ducking-and-the-watchdog)). The ducked level is never written to storage: it is runtime state, and a reload always starts at full music volume.
 
 When the document becomes hidden the app pauses the music, cancels in-flight speech, releases any duck, and stops the play-time clock. Returning to the document restores only what was actually playing and enabled before.
 
@@ -499,9 +499,15 @@ Music and sound effects are two independent toggles in the Settings panel, each 
 
 ### 7.1 The boot asset set
 
-The boot set is 178 SVG entries, rasterised during Preload so that no game stalls on a first draw. The set covers the shared art every game draws on: shapes and cut-outs, animals and foods, small items and shadows, letters, numerals, counting objects, toys, faces, UI glyphs, mascot poses, and the tile and sticker icons for the games.
+The boot set is 178 SVG entries, rasterised during Preload so that no game stalls on a first draw. The set covers the art the games draw on: shapes and cut-outs, animals and foods, small items and shadows, letters, numerals, counting objects, toys, faces, UI glyphs, mascot poses, and the tile and sticker icons for the games.
 
-Rasterising every entry at 512 by 512 wasted GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers: 160 px for icons, letter and numeral cards and small UI glyphs, 256 px for gameplay cards, stickers and prompt targets, and 512 px for the mascot. Keys are matched by prefix, and anything unmatched defaults to the middle tier so new art is safe by default. Display code scales from the tier size rather than assuming 512, and the tiering cut texture memory from roughly 178 MiB to roughly 39 MiB.
+Rasterising every entry at 512 by 512 wasted GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers, chosen by an ordered rule list where the first match wins:
+
+- **160 px (icon)** — the 22 `tile_*` game icons, the eight `sm_shadow_*` silhouettes and the five exact keys `minus`, `plus`, `equals`, `sleep_zzz` and `icon_speaker`.
+- **256 px (card)** — everything else: gameplay art, stickers and prompt targets, and also letters and numerals, because no rule matches `letter_*` or `numeral_*` and an unmatched key takes this default.
+- **512 px (hero)** — the two `mascot_*` poses, whose scale maths assumes a full-size texture.
+
+Display code scales from the tier size rather than assuming 512. Over the 178-entry boot set that resolves to 35 icon, 141 card and 2 hero textures, so the raster costs `(35 × 160² + 141 × 256² + 2 × 512²) × 4 B = 42,643,456 B`, a little over 40.7 MiB, down from the 178 MiB a uniform 512 px raster would have reserved.
 
 Story Order's 24 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces and its tile and sticker are in the boot set.
 
@@ -509,17 +515,17 @@ Story Order's 24 panels are not in the boot set; they travel with that game's ch
 
 The build produces three kinds of JavaScript:
 
-- **The shell entry**, which contains the boot, preload, Hub, settings, storage, audio and shared scene bases. It is gated at 200 kB minified.
+- **The shell entry**, which contains the three shell scenes (Boot, Preload and Hub), the components the Hub and its settings overlays use, the storage, audio and speech utilities they import, and the 178 boot textures as strings. It is gated at 200 kB minified.
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
-- **One chunk per game**, plus a small shared chunk for the choice-round base and a shared chunk for drag behaviour.
+- **One chunk per game**, plus the chunks Rollup hoists out of them because several games share the code: `GameSceneBase` (7.98 kB), `ChoiceRoundScene` (2.36 kB), `GroupMathScene` (2.02 kB), `dragJuice` (1.03 kB) and shared game logic such as `wordLogic` (1.95 kB), `countLogic` (0.81 kB), `alphabetLogic` (0.51 kB) and `shapeSorterLogic` (0.45 kB). The shared bases do not ride in the shell.
 
-At version 1.20.0 the shell entry measured 195.4 kB against the 200 kB gate, the Phaser chunk measured 1342.6 kB, and game chunks ranged from about 0.5 kB to about 34 kB, the largest being Story Order because it carries its own art.
+At version 1.20.0 the shell entry measured 195.4 kB against the 200 kB gate, the Phaser chunk measured 1342.6 kB, and game chunks ranged from about 1.2 kB to about 34 kB, the largest being Story Order because it carries its own art.
 
 ### 7.3 Art that travels with a game
 
 Game art belongs in the game's chunk when only that game uses it. Story Order is the case that matters: its 24 panel drawings are imported as raw markup by the story scene and rasterised by that scene's own preload, so the strings live in the lazy chunk instead of the shell. A test asserts that the boot preload never imports them, which keeps the rule from eroding.
 
-Every other drawing is shared by two or more games, so it belongs in the boot set and is paid for once.
+Nothing else is per-game art. The rest of the boot set either serves several games — the shape, cut-out and animal drawings are reused across the pool of games — or belongs to a single consumer: one tile icon per game, one sticker per game, Shadow Match's eight silhouettes and Feelings Faces' four faces. All of it is in the boot set, so it is paid for once rather than per game.
 
 ### 7.4 Runtime targets
 
