@@ -2,11 +2,11 @@
   "id": "20261020-story-sequencing",
   "title": "Story Order - Game 22 (Story Sequencing)",
   "type": "feature",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T13:32:31+11:00",
-  "updated_at": "2026-10-20T17:40:00+11:00",
+  "updated_at": "2026-10-20T17:50:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261020-story-sequencing",
@@ -19,9 +19,9 @@
     "tasks_done": 69
   },
   "last_checkpoint": "fa9544c",
-  "review_verdict": "PASS WITH FINDINGS",
+  "review_verdict": "PASS",
   "review_rounds": 2,
-  "doc_sync": "pending",
+  "doc_sync": "done",
   "pr_url": null,
   "pr_state": null,
   "merged_at": null,
@@ -29,6 +29,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-20T17:50:00+11:00",
+  "archive_path": "conductor/archive/20261020-story-sequencing"
 }

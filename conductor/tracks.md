@@ -211,4 +211,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Shared Choice-Round Shell + Audio Focus** — [20261020-scene-audio-shell](./archive/20261020-scene-audio-shell/index.md) — refactor — medium (Archived)
 
-- [~] **Track: Story Order - Game 22 (Story Sequencing)** - [20261020-story-sequencing](./tracks/20261020-story-sequencing/index.md) - feature - medium
+- [x] **Track: Story Order - Game 22 (Story Sequencing)** - [20261020-story-sequencing](./archive/20261020-story-sequencing/index.md) - feature - medium (Archived)
