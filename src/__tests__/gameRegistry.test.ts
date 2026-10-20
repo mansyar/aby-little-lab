@@ -1,8 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+/** PreloadScene only needs `Phaser.Scene` at import time; its table is module scope. */
+vi.mock("phaser", () => {
+  const phaserMock = { Scene: class Scene {}, Scale: { FIT: "FIT" } };
+  return { ...phaserMock, default: phaserMock };
+});
+
 import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
 import registrySource from "../game/gameRegistry.ts?raw";
+import { PAGE_SIZE, pageCount, pageOf, pageTileIndexes } from "../game/hubPaging";
 import { GAME_TILES, type GameTile } from "../game/hubTiles";
-import type { GameId } from "../types";
+import { SHELL_ASSETS } from "../scenes/PreloadScene";
+import { sceneLoaders } from "../scenes/sceneRegistry";
+import { GAME_IDS, type GameId } from "../types";
 
 /**
  * Registry and derived-tile guards (FR-1, FR-2, FR-8).
@@ -278,5 +288,61 @@ describe("stickerKeyForGame", () => {
     expect(() => stickerKeyForGame("not-a-game" as GameId)).toThrow(
       /no registry entry for game id: not-a-game/,
     );
+  });
+});
+
+describe("the 22 game invariants", () => {
+  it("keeps GAME_IDS in registry order", () => {
+    expect(GAME_IDS).toEqual(GAME_REGISTRY.map((game) => game.gameId));
+  });
+
+  it("registers exactly one scene loader per registry scene key, and none besides", () => {
+    const loaderKeys = Object.keys(sceneLoaders).sort();
+    const registryKeys = GAME_REGISTRY.map((game) => game.sceneKey).sort();
+
+    expect(loaderKeys).toEqual(registryKeys);
+    for (const key of loaderKeys) {
+      expect(typeof sceneLoaders[key], key).toBe("function");
+    }
+  });
+
+  it("resolves every registry tile and sticker to exactly one shell asset", () => {
+    const counts = new Map<string, number>();
+    for (const asset of SHELL_ASSETS) counts.set(asset.key, (counts.get(asset.key) ?? 0) + 1);
+
+    for (const game of GAME_REGISTRY) {
+      expect(counts.get(game.tileKey), game.tileKey).toBe(1);
+      expect(counts.get(game.stickerKey), game.stickerKey).toBe(1);
+    }
+  });
+
+  it("holds no duplicate shell key", () => {
+    const keys = SHELL_ASSETS.map((asset) => asset.key);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("pages every registered tile exactly once at the derived page count", () => {
+    const pages = pageCount();
+    expect(pages).toBe(Math.ceil(GAME_REGISTRY.length / PAGE_SIZE));
+
+    const covered = Array.from({ length: pages }, (_, page) => pageTileIndexes(page)).flat();
+    expect(covered).toEqual(GAME_REGISTRY.map((_, index) => index));
+
+    for (let index = 0; index < GAME_REGISTRY.length; index++) {
+      expect(pageOf(index)).toBeLessThan(pages);
+    }
+  });
+
+  it("stays coherent when a 23rd game is added", () => {
+    const tileCount = GAME_REGISTRY.length + 1;
+    const pages = pageCount(tileCount);
+
+    expect(pages).toBe(Math.ceil(tileCount / PAGE_SIZE));
+
+    const covered = Array.from({ length: pages }, (_, page) =>
+      pageTileIndexes(page, tileCount),
+    ).flat();
+    expect(covered).toEqual(Array.from({ length: tileCount }, (_, index) => index));
+    expect(pageOf(tileCount - 1)).toBe(pages - 1);
   });
 });
