@@ -218,4 +218,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Docs & Dead-Code Truth Pass** — [20261020-docs-truth-pass](./tracks/20261020-docs-truth-pass/index.md) — chore — medium
+- [~] **Track: Docs & Dead-Code Truth Pass** — [20261020-docs-truth-pass](./tracks/20261020-docs-truth-pass/index.md) — chore — medium
