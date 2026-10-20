@@ -157,7 +157,7 @@
 - **Covers:** review findings F1, F2, F3, F4, F5
 - **Touches:** `src/scenes/StoryOrderScene.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `conductor/tracks/20261020-story-sequencing/spec.md`, `conductor/product.md`, `conductor/tracks/20261020-story-sequencing/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
 - [x] **R2.T1: Resolve F1** - covers: F1
   - [x] **R2.T1.1: Format the new test block** and re-run `pnpm check` before claiming it
@@ -173,7 +173,7 @@
 - [x] **R2.T5: Resolve F5** - covers: F5
   - [x] **R2.T5.1: Fire the tap case in engine order** and reword its rationale
 - **Result:** verified
-- **Checkpoint:** PENDING
+- **Checkpoint:** fa9544c
 - **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-R2.md
 <!--
 After acceptance, the primary appends to each phase:
