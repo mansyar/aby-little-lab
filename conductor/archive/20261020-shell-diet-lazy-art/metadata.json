@@ -2,11 +2,11 @@
   "id": "20261020-shell-diet-lazy-art",
   "title": "Shell Diet: Per-Game Lazy Art Chunks",
   "type": "refactor",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-10-20T07:18:02Z",
-  "updated_at": "2026-10-20T11:35:00Z",
+  "updated_at": "2026-10-20T11:38:00Z",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "refactor/20261020-shell-diet-lazy-art",
@@ -29,6 +29,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-20T11:38:00Z",
+  "archive_path": "conductor/archive/20261020-shell-diet-lazy-art"
 }
