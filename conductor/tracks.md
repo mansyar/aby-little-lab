@@ -209,4 +209,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Feelings Faces - Game 21 (Social-Emotional Learning)** - [20261020-feelings-faces](./archive/20261020-feelings-faces/index.md) - feature - medium (Archived)
 
-- [~] **Track: Shared Choice-Round Shell + Audio Focus** — [20261020-scene-audio-shell](./tracks/20261020-scene-audio-shell/index.md) — refactor — medium
+- [x] **Track: Shared Choice-Round Shell + Audio Focus** — [20261020-scene-audio-shell](./archive/20261020-scene-audio-shell/index.md) — refactor — medium (Archived)
