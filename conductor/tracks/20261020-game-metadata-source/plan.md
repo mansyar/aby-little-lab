@@ -111,7 +111,7 @@
 - **Covers:** FR-10, NFR-2, NFR-4, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `docs/TDD.md`, `docs/PRD.md`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: TDD §7.1** — covers: FR-10
   - [ ] **P5.T1.1:** Add the registry row; correct the `hubTiles`/`hubPaging`/`PreloadScene` descriptions that still claim hand-maintained lists.
