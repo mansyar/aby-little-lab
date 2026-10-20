@@ -1,5 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+/** PreloadScene needs only `Phaser.Scene` at import time; SHELL_ASSETS is module scope. */
+vi.mock("phaser", () => {
+  const phaserMock = { Scene: class Scene {}, Scale: { FIT: "FIT" } };
+  return { ...phaserMock, default: phaserMock };
+});
+
 import storyOrderArtSource from "../../../game/storyOrderArt.ts?raw";
+import { SHELL_ASSETS } from "../../../scenes/PreloadScene";
 import preloadSceneSource from "../../../scenes/PreloadScene.ts?raw";
 
 /**
@@ -194,10 +202,8 @@ function mergeKeys(modules: readonly SourceModule[]): Map<string, string> {
   return merged;
 }
 
-/** The keys written into the shell table in `PreloadScene` itself. */
-const shellKeysInSource: readonly string[] = [...SHELL_MODULE.source.matchAll(TABLE_ENTRY)].map(
-  (match) => match[1],
-);
+/** The keys the shell actually registers at runtime, after the registry derivation. */
+const shellKeysRegistered: readonly string[] = SHELL_ASSETS.map((asset) => asset.key);
 
 /** Every SVG file `PreloadScene` imports, registered in the table or not. */
 const shellSvgImports = new Set(
@@ -234,7 +240,7 @@ describe("shell ownership", () => {
   it("ships exactly the 53 documented shell keys, with no extras or omissions", () => {
     expect(SHELL_KEYS).toHaveLength(53);
     expect(new Set(SHELL_KEYS).size).toBe(53);
-    expect([...shellKeysInSource].sort()).toEqual([...SHELL_KEYS].sort());
+    expect([...shellKeysRegistered].sort()).toEqual([...SHELL_KEYS].sort());
   });
 
   it("imports no module of the art registry, and only types if it ever does", () => {

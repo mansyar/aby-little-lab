@@ -28,8 +28,21 @@ import {
   shapes,
   toys,
 } from "../../game/art";
+import { GAME_REGISTRY } from "../../game/gameRegistry";
 import { SHELL_ASSETS } from "../../scenes/PreloadScene";
 import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
+
+/** Raw SVG sources on disk, discovered independently of the scene module. */
+const UI_SVGS = import.meta.glob<string>("../../assets/svg/ui/**/*.svg", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+const STICKER_SVGS = import.meta.glob<string>("../../assets/svg/stickers/*.svg", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
 
 /** The twelve art groups — the owner of every key the shell no longer ships. */
 const GROUPS: readonly ArtGroup[] = [
@@ -94,44 +107,74 @@ describe("PreloadScene SHELL_ASSETS", () => {
   });
 });
 
-/** `import x from "../assets/svg/…?raw"` — the only way a raw SVG enters the shell. */
-const SVG_IMPORT = /import\s+(\w+)\s+from\s+"(\.\.\/assets\/svg\/[^"?]+\.svg\?raw)"/g;
-
-/** One `{ key: "…", svg: X }` row of the shell table. */
+/** `{ key: "…", svg: X }` — only the non-game rows stay literal after derivation. */
 const TABLE_ENTRY = /\{\s*key:\s*"([a-z0-9_]+)",\s*svg:\s*(\w+)\s*\}/g;
 
-describe("PreloadScene source scan", () => {
-  it("resolves every SVG import to exactly one shell-table row", () => {
-    const imported = new Map<string, string>();
-    for (const match of preloadSceneSource.matchAll(SVG_IMPORT)) {
-      imported.set(match[1], match[2]);
-    }
+/** The 44 game keys in derived order: every tile, then every sticker. */
+const GAME_KEYS: readonly string[] = [
+  ...GAME_REGISTRY.map((game) => game.tileKey),
+  ...GAME_REGISTRY.map((game) => game.stickerKey),
+];
 
-    const registered = new Map<string, string>();
-    for (const match of preloadSceneSource.matchAll(TABLE_ENTRY)) {
-      registered.set(match[1], match[2]);
-    }
+/**
+ * The nine non-game shell keys, in table order. No registry entry owns them, so
+ * they stay literal and are asserted as such.
+ */
+const NON_GAME_KEYS: readonly string[] = [
+  "mascot_idle",
+  "mascot_celebrate",
+  "icon_speaker",
+  "animal_cat",
+  "animal_dog",
+  "animal_pig",
+  "frog_red",
+  "sm_duck",
+  "toy_teddy_bear",
+];
 
-    // One import per shell key, and the table names each of them exactly once.
-    expect(imported.size).toBe(SHELL_ASSETS.length);
-    expect(registered.size).toBe(SHELL_ASSETS.length);
+/** Raw SVG sources keyed by file stem. */
+function svgSourcesByStem(globbed: Record<string, string>): Map<string, string> {
+  const sources = new Map<string, string>();
+  for (const [path, svg] of Object.entries(globbed)) {
+    sources.set(path.slice(path.lastIndexOf("/") + 1, -".svg".length), svg);
+  }
+  return sources;
+}
 
-    for (const [identifier, path] of imported) {
-      const keys = [...registered].filter(([, id]) => id === identifier).map(([key]) => key);
-      expect(keys, `${path} is imported but no shell key registers it`).toHaveLength(1);
-    }
-
-    for (const [key, identifier] of registered) {
-      expect(imported.has(identifier), `${key} registers an identifier it never imports`).toBe(
-        true,
-      );
-      expect(shellKeys, key).toContain(key);
-    }
+describe("PreloadScene game block", () => {
+  it("derives every tile then every sticker in registry order", () => {
+    expect(shellKeys.slice(0, GAME_KEYS.length)).toEqual(GAME_KEYS);
+    expect(GAME_KEYS).toHaveLength(GAME_REGISTRY.length * 2);
   });
 
-  it("keeps every game-only key out of the shell table", () => {
-    const sourceKeys = [...preloadSceneSource.matchAll(TABLE_ENTRY)].map((match) => match[1]);
-    const groupOwned = sourceKeys.filter((key) => groupKeySet.has(key));
+  it("puts the nine non-game keys after the derived block, unchanged", () => {
+    expect(shellKeys.slice(GAME_KEYS.length)).toEqual([...NON_GAME_KEYS]);
+  });
+
+  it("takes each game key's SVG from the file named after it", () => {
+    const files = new Map([...svgSourcesByStem(UI_SVGS), ...svgSourcesByStem(STICKER_SVGS)]);
+    const shellByKey = new Map(SHELL_ASSETS.map((asset) => [asset.key, asset.svg]));
+
+    for (const key of GAME_KEYS) {
+      expect(files.get(key), `${key} has no SVG file`).toBe(shellByKey.get(key));
+    }
+  });
+});
+
+describe("PreloadScene source scan", () => {
+  it("keeps only the non-game rows literal in the shell table", () => {
+    const literalKeys = [...preloadSceneSource.matchAll(TABLE_ENTRY)].map((match) => match[1]);
+    expect(literalKeys).toEqual([...NON_GAME_KEYS]);
+  });
+
+  it("spells no game key out by hand", () => {
+    expect(preloadSceneSource).not.toMatch(/key: "(?:tile|sticker)_/);
+    expect(preloadSceneSource).not.toMatch(/from "\.\.\/assets\/svg\/(?:ui\/tiles|stickers)\//);
+  });
+
+  it("keeps every game-only key out of the literal rows", () => {
+    const literalKeys = [...preloadSceneSource.matchAll(TABLE_ENTRY)].map((match) => match[1]);
+    const groupOwned = literalKeys.filter((key) => groupKeySet.has(key));
     expect(groupOwned.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 });

@@ -4,58 +4,63 @@ import animalDogSvg from "../assets/svg/animals/dog.svg?raw";
 import animalFrogRedSvg from "../assets/svg/animals/frog_red.svg?raw";
 import animalPigSvg from "../assets/svg/animals/pig.svg?raw";
 import smDuckSvg from "../assets/svg/items/duck.svg?raw";
-import stickerAddItUpSvg from "../assets/svg/stickers/sticker_add_it_up.svg?raw";
-import stickerAlphabetSvg from "../assets/svg/stickers/sticker_alphabet_match.svg?raw";
-import stickerAnimalTraceSvg from "../assets/svg/stickers/sticker_animal_trace.svg?raw";
-import stickerBigSmallSvg from "../assets/svg/stickers/sticker_big_small.svg?raw";
-import stickerColorMatchSvg from "../assets/svg/stickers/sticker_color_match.svg?raw";
-import stickerDecodeItSvg from "../assets/svg/stickers/sticker_decode_it.svg?raw";
-import stickerFeelingsFacesSvg from "../assets/svg/stickers/sticker_feelings_faces.svg?raw";
-import stickerFirstSoundsSvg from "../assets/svg/stickers/sticker_first_sounds.svg?raw";
-import stickerHowManySvg from "../assets/svg/stickers/sticker_how_many.svg?raw";
-import stickerMemoryMatchSvg from "../assets/svg/stickers/sticker_memory_match.svg?raw";
-import stickerMoreLessSvg from "../assets/svg/stickers/sticker_more_less.svg?raw";
-import stickerMusicalMemorySvg from "../assets/svg/stickers/sticker_musical_memory.svg?raw";
-import stickerNumberOrderSvg from "../assets/svg/stickers/sticker_number_order.svg?raw";
-import stickerOddOneOutSvg from "../assets/svg/stickers/sticker_odd_one_out.svg?raw";
-import stickerPatternBuilderSvg from "../assets/svg/stickers/sticker_pattern_builder.svg?raw";
-import stickerPopFreezeSvg from "../assets/svg/stickers/sticker_pop_freeze.svg?raw";
-import stickerShadowMatchSvg from "../assets/svg/stickers/sticker_shadow_match.svg?raw";
-import stickerShapeSorterSvg from "../assets/svg/stickers/sticker_shape_sorter.svg?raw";
-import stickerStoryOrderSvg from "../assets/svg/stickers/sticker_story_order.svg?raw";
-import stickerTakeAwaySvg from "../assets/svg/stickers/sticker_take_away.svg?raw";
-import stickerWordBuilderSvg from "../assets/svg/stickers/sticker_word_builder.svg?raw";
-import stickerWordMatchSvg from "../assets/svg/stickers/sticker_word_match.svg?raw";
 import toyTeddyBearSvg from "../assets/svg/toys/teddy_bear.svg?raw";
 import iconSpeakerSvg from "../assets/svg/ui/icon_speaker.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
 import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
-import tileFeelingsFacesSvg from "../assets/svg/ui/tile_feelings_faces.svg?raw";
-import tileAddItUpSvg from "../assets/svg/ui/tiles/tile_add_it_up.svg?raw";
-import tileAlphabetSvg from "../assets/svg/ui/tiles/tile_alphabet.svg?raw";
-import tileAnimalTraceSvg from "../assets/svg/ui/tiles/tile_animal_trace.svg?raw";
-import tileBigSmallSvg from "../assets/svg/ui/tiles/tile_big_small.svg?raw";
-import tileColorMatchSvg from "../assets/svg/ui/tiles/tile_color_match.svg?raw";
-import tileDecodeItSvg from "../assets/svg/ui/tiles/tile_decode_it.svg?raw";
-import tileFirstSoundsSvg from "../assets/svg/ui/tiles/tile_first_sounds.svg?raw";
-import tileHowManySvg from "../assets/svg/ui/tiles/tile_how_many.svg?raw";
-import tileMemoryMatchSvg from "../assets/svg/ui/tiles/tile_memory_match.svg?raw";
-import tileMoreLessSvg from "../assets/svg/ui/tiles/tile_more_less.svg?raw";
-import tileMusicalMemorySvg from "../assets/svg/ui/tiles/tile_musical_memory.svg?raw";
-import tileNumberOrderSvg from "../assets/svg/ui/tiles/tile_number_order.svg?raw";
-import tileOddOneOutSvg from "../assets/svg/ui/tiles/tile_odd_one_out.svg?raw";
-import tilePatternBuilderSvg from "../assets/svg/ui/tiles/tile_pattern_builder.svg?raw";
-import tilePopFreezeSvg from "../assets/svg/ui/tiles/tile_pop_freeze.svg?raw";
-import tileShadowMatchSvg from "../assets/svg/ui/tiles/tile_shadow_match.svg?raw";
-import tileShapeSorterSvg from "../assets/svg/ui/tiles/tile_shape_sorter.svg?raw";
-import tileStoryOrderSvg from "../assets/svg/ui/tiles/tile_story_order.svg?raw";
-import tileTakeAwaySvg from "../assets/svg/ui/tiles/tile_take_away.svg?raw";
-import tileWordBuilderSvg from "../assets/svg/ui/tiles/tile_word_builder.svg?raw";
-import tileWordMatchSvg from "../assets/svg/ui/tiles/tile_word_match.svg?raw";
+import { GAME_REGISTRY } from "../game/gameRegistry";
 import { transitionToScene } from "../utils/sceneTransitions";
 import { toDataUri } from "../utils/svgDataUri";
 import { textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
+
+/** A boot-shell texture: its key and the raw SVG source it rasterizes from. */
+export interface ShellAsset {
+  readonly key: string;
+  readonly svg: string;
+}
+
+/**
+ * Maps SVG source paths to their texture keys, rejecting a duplicated key.
+ *
+ * Only `tile_*` and `sticker_*` files are shell assets. The UI directory also
+ * holds glyphs and mascot poses that are imported by name below, and game art
+ * lives under `src/game/art/`, shipping in the game's own chunk.
+ */
+function shellSourceMap(globbed: Record<string, string>): Map<string, string> {
+  const sources = new Map<string, string>();
+  for (const [path, svg] of Object.entries(globbed)) {
+    const key = path.slice(path.lastIndexOf("/") + 1).replace(/\.svg$/, "");
+    if (!key.startsWith("tile_") && !key.startsWith("sticker_")) continue;
+    if (sources.has(key)) {
+      throw new Error(`duplicate shell asset: ${key} (${path})`);
+    }
+    sources.set(key, svg);
+  }
+  return sources;
+}
+
+const gameShellSources = shellSourceMap({
+  ...import.meta.glob<string>("../assets/svg/ui/**/*.svg", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  }),
+  ...import.meta.glob<string>("../assets/svg/stickers/*.svg", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  }),
+});
+
+/** Resolves a registry asset key, failing loudly when no SVG file carries it. */
+function shellAsset(key: string): ShellAsset {
+  const svg = gameShellSources.get(key);
+  if (svg === undefined) {
+    throw new Error(`no shell SVG for registry asset key: ${key}`);
+  }
+  return { key, svg };
+}
 
 /**
  * The boot shell's raw SVG table: key → SVG source string, rasterized by the
@@ -63,11 +68,10 @@ import { textStyle } from "../utils/typography";
  * `src/utils/textureTiers.ts` — sized for the asset's largest display context,
  * not a uniform 512²).
  *
- * This is the documented shell set (FR-4): the 22 Hub tile icons, the 22 earned
- * stickers, the two mascot poses, the speaker glyph, and the six avatar keys.
- * Everything else a game draws lives in a named group under `src/game/art/` and
- * is rasterized by that game's own `preload` through
- * `GameSceneBase.preloadArt`, so it ships in the game's chunk instead of here.
+ * The 44 game entries are derived: every registry entry names its `tileKey` and
+ * `stickerKey`, and the sources come from the eager glob above, so a new game
+ * needs one registry row and its two SVG files — no edit here. A missing or
+ * duplicated file throws at module evaluation, naming the key.
  *
  * The six avatars (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`,
  * `sm_duck`, `toy_teddy_bear`) stay eager because `ProfileChip` and the Settings
@@ -75,51 +79,9 @@ import { textStyle } from "../utils/typography";
  * shell and a game group share. `mascot_idle` stays because it is also a word
  * prompt in `wordLogic`.
  */
-export const SHELL_ASSETS = [
-  { key: "tile_shape_sorter", svg: tileShapeSorterSvg },
-  { key: "tile_animal_trace", svg: tileAnimalTraceSvg },
-  { key: "tile_pop_freeze", svg: tilePopFreezeSvg },
-  { key: "tile_shadow_match", svg: tileShadowMatchSvg },
-  { key: "tile_musical_memory", svg: tileMusicalMemorySvg },
-  { key: "tile_big_small", svg: tileBigSmallSvg },
-  { key: "tile_first_sounds", svg: tileFirstSoundsSvg },
-  { key: "tile_pattern_builder", svg: tilePatternBuilderSvg },
-  { key: "tile_alphabet", svg: tileAlphabetSvg },
-  { key: "tile_word_match", svg: tileWordMatchSvg },
-  { key: "tile_word_builder", svg: tileWordBuilderSvg },
-  { key: "tile_how_many", svg: tileHowManySvg },
-  { key: "tile_more_less", svg: tileMoreLessSvg },
-  { key: "tile_odd_one_out", svg: tileOddOneOutSvg },
-  { key: "tile_color_match", svg: tileColorMatchSvg },
-  { key: "tile_add_it_up", svg: tileAddItUpSvg },
-  { key: "tile_take_away", svg: tileTakeAwaySvg },
-  { key: "tile_memory_match", svg: tileMemoryMatchSvg },
-  { key: "tile_decode_it", svg: tileDecodeItSvg },
-  { key: "tile_number_order", svg: tileNumberOrderSvg },
-  { key: "tile_story_order", svg: tileStoryOrderSvg },
-  { key: "tile_feelings_faces", svg: tileFeelingsFacesSvg },
-  { key: "sticker_shape_sorter", svg: stickerShapeSorterSvg },
-  { key: "sticker_animal_trace", svg: stickerAnimalTraceSvg },
-  { key: "sticker_pop_freeze", svg: stickerPopFreezeSvg },
-  { key: "sticker_shadow_match", svg: stickerShadowMatchSvg },
-  { key: "sticker_musical_memory", svg: stickerMusicalMemorySvg },
-  { key: "sticker_big_small", svg: stickerBigSmallSvg },
-  { key: "sticker_first_sounds", svg: stickerFirstSoundsSvg },
-  { key: "sticker_pattern_builder", svg: stickerPatternBuilderSvg },
-  { key: "sticker_word_match", svg: stickerWordMatchSvg },
-  { key: "sticker_word_builder", svg: stickerWordBuilderSvg },
-  { key: "sticker_alphabet_match", svg: stickerAlphabetSvg },
-  { key: "sticker_how_many", svg: stickerHowManySvg },
-  { key: "sticker_more_less", svg: stickerMoreLessSvg },
-  { key: "sticker_odd_one_out", svg: stickerOddOneOutSvg },
-  { key: "sticker_color_match", svg: stickerColorMatchSvg },
-  { key: "sticker_add_it_up", svg: stickerAddItUpSvg },
-  { key: "sticker_take_away", svg: stickerTakeAwaySvg },
-  { key: "sticker_memory_match", svg: stickerMemoryMatchSvg },
-  { key: "sticker_decode_it", svg: stickerDecodeItSvg },
-  { key: "sticker_number_order", svg: stickerNumberOrderSvg },
-  { key: "sticker_story_order", svg: stickerStoryOrderSvg },
-  { key: "sticker_feelings_faces", svg: stickerFeelingsFacesSvg },
+export const SHELL_ASSETS: readonly ShellAsset[] = [
+  ...GAME_REGISTRY.map((game) => shellAsset(game.tileKey)),
+  ...GAME_REGISTRY.map((game) => shellAsset(game.stickerKey)),
   { key: "mascot_idle", svg: mascotIdleSvg },
   { key: "mascot_celebrate", svg: mascotCelebrateSvg },
   { key: "icon_speaker", svg: iconSpeakerSvg },
@@ -129,7 +91,7 @@ export const SHELL_ASSETS = [
   { key: "frog_red", svg: animalFrogRedSvg },
   { key: "sm_duck", svg: smDuckSvg },
   { key: "toy_teddy_bear", svg: toyTeddyBearSvg },
-] as const;
+];
 
 /**
  * Preload scene — displays a progress bar while the shell assets load.
