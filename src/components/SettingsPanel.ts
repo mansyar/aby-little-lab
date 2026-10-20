@@ -299,16 +299,4 @@ export class SettingsPanel {
   private openProfilesOverlay(): void {
     this.profilesOverlay.open();
   }
-
-  /** Shows the iOS "Add to Home Screen" instructions overlay. */
-
-  /** Destroys the iOS instructions overlay (not the panel). */
-
-  /** Adds the parental "Reset Progress" row that clears all stickers. */
-
-  /** Shows the two-step "Reset all stickers?" confirmation modal. */
-
-  /** Closes the reset confirmation modal without changing any data. */
-
-  /** Clears the sticker collection and shows inline confirmation. */
 }
