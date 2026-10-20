@@ -125,3 +125,16 @@
 **Result:** verified
 **Checkpoint:** 0289476
 **Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-5.md
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1, F2, L1, L2, L3, L4 and L5.
+- **Depends on:** Phase 5
+- **Covers:** F1, F2, L1, L2, L3, L4, L5
+- **Touches:** `src/scenes/PreloadScene.ts`, `src/game/hubPaging.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `docs/TDD.md`, `docs/PRD.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Narrow the shell globs so no game-only glyph ships eagerly** — covers: F1
+- [ ] **R1.T2: Make a duplicate registry asset key throw at module evaluation, and test both module-eval throws** — covers: F2
+- [ ] **R1.T3: Assert the glob and the registry agree in both directions** — covers: L4
+- [ ] **R1.T4: Correct the docs** — covers: L1, L2, L3, L5

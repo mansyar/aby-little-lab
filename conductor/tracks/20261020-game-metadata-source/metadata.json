@@ -19,7 +19,7 @@
     "tasks_done": 49
   },
   "last_checkpoint": "0289476",
-  "review_verdict": null,
+  "review_verdict": "BLOCK",
   "review_rounds": 0,
   "doc_sync": "pending",
   "pr_url": null,
