@@ -174,7 +174,7 @@ export class MockScene {
   add!: Record<string, MockFn>;
   scene!: Record<string, MockFn>;
   load!: Record<string, MockFn>;
-  textures!: { exists: MockFn; createCanvas?: MockFn };
+  textures!: { exists: MockFn; createCanvas: MockFn };
   input!: Record<string, MockFn>;
   cameras!: {
     main: Record<string, MockFn | number> & {

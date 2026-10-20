@@ -38,7 +38,7 @@ shell entry fell from **195.4 KiB to 129.1 KiB** and cold boot from **808 ms to
 | AC-2 | Group integrity (keys, ownership, 178 union) | **PASS** | `groupIntegrity.test.ts` |
 | AC-3 | Each key rasterized once per tier, repeat-safe registry | **PASS** | `preloadArtGroups.test.ts` |
 | AC-4 | Every scene declares what it draws; shell draws no game-only art | **PASS** | `artDeclarations.test.ts`, `shellOwnership.test.ts` |
-| AC-5 | Missing key warns once and draws a placeholder, never throws | **PASS** | `placeholder.test.ts` |
+| AC-5 | Missing key warns once and draws a placeholder, never throws | **PASS** | `alphabetScene.test.ts` — the scene-level test drives a failed declared letter load through `loaderror` + `complete`: exactly one warning, a tier-sized placeholder at 256×256, and a round that still answers and advances. `placeholder.test.ts` covers the drawing helper as a secondary unit test |
 | AC-6 | `validate-pwa` fails when an art chunk is absent from the manifest | **PASS** | proven by deleting one `sw.js` entry in phase 5 |
 | AC-7 | Boot medians improve; CI gate unchanged | **PASS** | 808 → 419.5 ms; 4×-throttled ~4.2 s → 1,697.2 ms; gate still 3 s |
 | AC-8 | Cold first tap for the worst game, +≤400 ms vs pre-track | **PASS** | worst increment **+82 ms** (Memory Match), widest union (Find the Word, 83 keys) **+48 ms**, measured against a build of `f377bf8` back to back; absolute 224–334 ms. Corrected in Phase R1 (F2) — the original 200.1/235.8 ms figures came from the wrong "worst" game and a median gate |

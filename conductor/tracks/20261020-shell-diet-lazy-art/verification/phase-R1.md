@@ -105,15 +105,23 @@ served with `npx serve dist -l 4174` beside the current build on `4173`;
 | Game (art keys) | pre-track | this track | delta |
 | --- | --- | --- | --- |
 | Shape Sorter (36) | 282.7 ms | 263.8 ms | -18.9 ms |
-| Find the Letter (46) | 265.6 ms | 249.4 ms | -16.2 ms |
+| Find the Letter (26) | 265.6 ms | 249.4 ms | -16.2 ms |
 | Find the Word (83) | 268.8 ms | 317.2 ms | +48.4 ms |
 | Add It Up (48) | 233.5 ms | 224.3 ms | -9.2 ms |
 | Memory Match (37) | 251.9 ms | 333.9 ms | +82.0 ms |
 
 Worst increment **82 ms**, widest-union game **+48 ms**, absolute 224-334 ms; the
-400 ms budget is met with room. Forecasts of the widest union (-2 ms/texture for
-47 extra textures) match the observed +48 ms, so the increment is art work and
-not measurement drift.
+400 ms budget is met with room. The deltas sit inside this machine's run-to-run
+spread (below), so the absolute totals against the 400 ms budget, not the
+per-game deltas, are the number that matters.
+
+**Serving asymmetry (F9).** The two builds were not served the same way: the
+pre-track build ran from `.conductor/base-build` on `npx serve dist -l 4174` and
+the current build on `vite preview` at 4173. `serve` compresses by default and
+Vite preview does not, and stage B of the metric is the chunk transfer, so the
+current build was measured on the harder path. The asymmetry biases *this*
+track's numbers upward, so every delta above is an upper bound on the real cost;
+it does not affect the conclusion the budget draws.
 
 The machine is noisy: repeating the same measurement minutes apart produced
 absolute worst totals between 277.8 and 464.1 ms and 4x-throttled boot medians

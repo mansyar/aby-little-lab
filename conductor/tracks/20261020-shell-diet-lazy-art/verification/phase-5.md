@@ -113,7 +113,8 @@ panel assertions, ordering, markup contract and Latin-1 checks are unchanged).
   1697.2 ms at 4× throttle versus ~4.2 s, both inside the 3 s `validate-boot`
   gate; first tap 200.1 ms median / 235.8 ms worst against the 400 ms budget,
   with `scripts/measure-first-tap.mjs --with-preview` named as the evidence and
-  explicitly not a gate.
+  explicitly not a gate. *(Superseded by Phase R1 (F2) and Phase R2: those
+  first-tap figures are retracted — see `phase-R1.md`.)*
 - "Art ownership (2026-10-20)": the 53-key shell set enumerated, the twelve named
   groups, per-scene `preloadArtGroups()`, Story Order's own module, 178 = 53 + 125
   with the six avatars overlapping, `shellOwnership.test.ts` as the guard, and
@@ -142,12 +143,18 @@ panel assertions, ordering, markup contract and Latin-1 checks are unchanged).
 (shell 195.4 → 129.1 KiB, boot textures 178 → 53, 808 → 419.5 ms, ~4.2 s →
 1697.2 ms, first tap 200.1 / 235.8 ms, 9 art chunks, precache 42 → 53 entries and
 2189.6 → 1701.34 KiB) and notes on the two tap caveats, the unchanged CI gate and
-the unchanged texture-tier result.
+the unchanged texture-tier result. *(The first-tap pair is superseded by Phase R1
+(F2) / Phase R2: it came from the wrong "worst" game and a median gate — see
+`phase-R1.md`.)*
 
 `conductor/tech-stack.md` — **not written; blocked for the primary.** The
 intended entry, to append after the 2026-10-16 Drop Ligne Engine blockquote:
 
 > **2026-10-20 — Design Update (Shell Diet — Art Ownership):** The boot shell and game art are separate budgets. `PreloadScene` ships the 53-key shell set and nothing else (22 tiles, 22 stickers, `mascot_idle`, `mascot_celebrate`, `icon_speaker`, 6 avatars); a game's art belongs to a named group under `src/game/art/` (`shapes` 18, `cutouts` 18, `letters` 26, `numerals` 10, `animals` 6, `food` 6, `items` 16, `shadows` 8, `toys` 7, `faces` 4, `music` 4, `glyphs` 8 = 131 keys, 125 game-only), declared by that scene and rasterized in its own `preload` through `preloadArtGroups(scene, groups)`. Enforcement rule: never import game art in `PreloadScene` — a new game adds a group and a `preloadArtGroups` call in its own scene. `src/__tests__/game/art/shellOwnership.test.ts` fails on a game-only SVG or registry import in the shell, `groupIntegrity.test.ts` fails on a key in two groups, and `scripts/validate-pwa.js` fails when any emitted chunk is missing from the precache manifest. Runtime failure path: the textless loading cue (FR-5) while a group loads, the neutral placeholder plus one `console.warn` for a missing key (FR-6). Measured: shell 195.4 → 129.1 KiB (200 kB gate), cold boot 808 → 419.5 ms, 4×-throttled ~4.2 s → 1697.2 ms, cold first tap 200.1 ms median / 235.8 ms worst (400 ms budget), precache 53 entries / 1701.34 KiB.
+
+*(Superseded by Phase R1 (F2) / Phase R2: the blockquote's first-tap pair is
+retracted — it is replaced by the +82 ms worst / +48 ms widest-union increment in
+`conductor/tech-stack.md`; see `phase-R1.md`.)*
 
 ## P5.T4 — commands
 

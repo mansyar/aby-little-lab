@@ -26,6 +26,9 @@ class CueScene extends MockScene {
   readonly available = new Set<string>(["mascot_idle"]);
   readonly textures = {
     exists: vi.fn((key: string) => this.available.has(key)),
+    // The cue never draws a placeholder, but a scene double must still carry
+    // the method: `false` here means the manager refused to make a canvas.
+    createCanvas: vi.fn((): null => null),
   };
 }
 

@@ -235,6 +235,11 @@ after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
   (`Emulation.setCPUThrottlingRate` 4, diagnostic only), then taps one Hub tile
   per game in a fresh context. The service worker is blocked during the tap
   pass, so the numbers are a cold-network bound rather than a warm-precache one.
+- Comparison servers are not symmetric: the pre-track build ran on
+  `npx serve dist -l 4174` and the current build on `vite preview` at 4173.
+  `serve` compresses by default and Vite preview does not, and stage B of the
+  metric is the chunk transfer, so the current build was the disadvantaged side.
+  The deltas below are therefore **upper bounds** on the real cost.
 - The host refuses commands that start or stop a server, so Phase 4's executor
   could not run the boot/tap script; the primary agent ran it afterwards on the
   same checkpoint. The phase file keeps both attempts and the refusal.
@@ -266,7 +271,7 @@ after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
   | Game (art keys) | pre-track | this track | delta |
   | --- | --- | --- | --- |
   | Shape Sorter (36) | 282.7 ms | 263.8 ms | -18.9 ms |
-  | Find the Letter (46) | 265.6 ms | 249.4 ms | -16.2 ms |
+  | Find the Letter (26) | 265.6 ms | 249.4 ms | -16.2 ms |
   | Find the Word (83) | 268.8 ms | 317.2 ms | **+48.4 ms** |
   | Add It Up (48) | 233.5 ms | 224.3 ms | -9.2 ms |
   | Memory Match (37) | 251.9 ms | 333.9 ms | **+82.0 ms** |

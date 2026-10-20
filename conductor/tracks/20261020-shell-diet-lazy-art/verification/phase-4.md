@@ -226,7 +226,7 @@ union and fails on the worst total, not the average.
 | Game (art keys) | pre-track | this track | delta |
 | --- | --- | --- | --- |
 | Shape Sorter (36) | 282.7 ms | 263.8 ms | -18.9 ms |
-| Find the Letter (46) | 265.6 ms | 249.4 ms | -16.2 ms |
+| Find the Letter (26) | 265.6 ms | 249.4 ms | -16.2 ms |
 | Find the Word (83) | 268.8 ms | 317.2 ms | +48.4 ms |
 | Add It Up (48) | 233.5 ms | 224.3 ms | -9.2 ms |
 | Memory Match (37) | 251.9 ms | 333.9 ms | +82.0 ms |

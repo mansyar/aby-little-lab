@@ -18,11 +18,28 @@ import {
 import { textureSizeFor } from "../../../utils/textureTiers";
 import { MockScene } from "../../helpers/phaserMock";
 
-/** A loader mock that also answers `textures.exists` from the keys it holds. */
+/**
+ * A loader mock that answers `textures.exists` from the keys it holds and
+ * registers a canvas key when the placeholder path creates one, like the real
+ * manager does.
+ */
 class ArtScene extends MockScene {
   readonly loadedKeys: Set<string>;
   readonly textures = {
     exists: vi.fn((key: string) => this.loadedKeys.has(key)),
+    createCanvas: vi.fn((key: string) => {
+      this.loadedKeys.add(key);
+      return {
+        context: {
+          fillStyle: "",
+          strokeStyle: "",
+          lineWidth: 0,
+          fillRect: vi.fn(),
+          strokeRect: vi.fn(),
+        },
+        refresh: vi.fn(),
+      };
+    }),
   };
 
   /** `loadedKeys` is shared between scenes to model the one game-wide cache. */
@@ -200,16 +217,34 @@ describe("preloadArtGroups", () => {
     expect(registeredKeys(second)).toEqual(["face_happy"]);
   });
 
-  it("releases a failed key so a later call can retry it", () => {
+  it("draws a placeholder when the load completes and never re-queues the key", () => {
     const scene = createScene();
-    preloadArtGroups(asScene(scene), [glyphs]);
-    expect(scene.load.svg).toHaveBeenCalledTimes(8);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      preloadArtGroups(asScene(scene), [glyphs]);
+      expect(scene.load.svg).toHaveBeenCalledTimes(8);
 
-    emitLoaderEvent(scene, "loaderror", { key: "bubble" });
+      emitLoaderEvent(scene, "loaderror", { key: "bubble" });
+      emitLoaderEvent(scene, "complete");
 
-    preloadArtGroups(asScene(scene), [glyphs]);
-    const keys = registeredKeys(scene);
-    expect(keys).toHaveLength(9);
-    expect(keys[8]).toBe("bubble");
+      // The shipped flow draws the neutral placeholder once, at its tier size,
+      // instead of leaving Phaser's __MISSING frame - and says so once.
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(scene.textures.createCanvas).toHaveBeenCalledWith(
+        "bubble",
+        textureSizeFor("bubble"),
+        textureSizeFor("bubble"),
+      );
+      expect(scene.textures.exists("bubble")).toBe(true);
+
+      // The placeholder is a real texture in the shared manager, so a later
+      // preload sees the key present and does not queue it again.
+      const queuedBeforeRetry = registeredKeys(scene);
+      preloadArtGroups(asScene(scene), [glyphs]);
+      expect(registeredKeys(scene)).toEqual(queuedBeforeRetry);
+      expect(scene.load.svg).toHaveBeenCalledTimes(8);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

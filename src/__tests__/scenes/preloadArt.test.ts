@@ -45,14 +45,13 @@ class TestScene extends GameSceneBase {
 }
 
 /**
- * Gives the double a TextureManager holding every key, which is the shipped
- * state in this phase: the shell still ships all game art, so the registry
- * short-circuits and nothing is queued.
+ * Points the double's TextureManager at "everything is already loaded", which
+ * is the shipped state in this phase: the shell still ships all game art, so the
+ * registry short-circuits and nothing is queued. Only `exists` is overridden —
+ * `createCanvas` stays the real `MockScene` stub.
  */
 function withPresentTextures(scene: TestScene): TestScene {
-  (scene as unknown as { textures: { exists: (key: string) => boolean } }).textures = {
-    exists: (): boolean => true,
-  };
+  (scene.textures as unknown as { exists: MockFn }).exists.mockReturnValue(true);
   return scene;
 }
 
