@@ -109,14 +109,17 @@
 - **Covers:** FR-10, NFR-8, AC-10
 - **Touches:** `conductor/product.md`, `README.md`, `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P5.T1: Product definition** — covers: FR-10
-  - [ ] **P5.T1.1: Game table row 22**, game count, hub grid/paging figures, progress rows and preload count
-  - [ ] **P5.T1.2: Game 22 changelog section** recording the mechanic, ladder, 8-story pool and the lazy panel-art decision
-- [ ] **P5.T2: README and tech stack** — covers: FR-10
-  - [ ] **P5.T2.1: README** game table row, replay variety, spoken-rule narrator count, project structure, test count
-  - [ ] **P5.T2.2: Tech stack** scene count 24 → 25, tree entries for scene/art module/story SVGs, tile count 22, dated note on lazy game art
+- [x] **P5.T1: Product definition** — covers: FR-10
+  - [x] **P5.T1.1: Game table row 22**, game count, hub grid/paging figures, progress rows and preload count
+  - [x] **P5.T1.2: Game 22 changelog section** recording the mechanic, ladder, 8-story pool and the lazy panel-art decision
+- [x] **P5.T2: README and tech stack** — covers: FR-10
+  - [x] **P5.T2.1: README** game table row, replay variety, spoken-rule narrator count, project structure, test count
+  - [x] **P5.T2.2: Tech stack** scene count 24 → 25, tree entries for scene/art module/story SVGs, tile count 22, dated note on lazy game art
+- **Result:** verified
+- **Checkpoint:** 2782229
+- **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-5.md
 
 <!--
 After acceptance, the primary appends to each phase:
