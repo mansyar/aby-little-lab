@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T21:18:54+11:00",
-  "updated_at": "2026-10-20T21:47:27+11:00",
+  "updated_at": "2026-10-20T22:01:10+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261020-docs-truth-pass",
@@ -14,11 +14,11 @@
   "base_sha": "8d16d4fd31e80688f231e042508b20d1bd297515",
   "progress": {
     "phases_total": 6,
-    "phases_verified": 2,
-    "tasks_total": 25,
-    "tasks_done": 11
+    "phases_verified": 3,
+    "tasks_total": 26,
+    "tasks_done": 15
   },
-  "last_checkpoint": "c96efe1",
+  "last_checkpoint": "4dfaf9a",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

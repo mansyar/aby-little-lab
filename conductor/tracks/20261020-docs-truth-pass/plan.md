@@ -65,24 +65,28 @@
 - **Covers:** FR-2, FR-3, FR-12, AC-2, AC-3, AC-12
 - **Touches:** `README.md`, `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Add a feedback line to each PRD game spec** — covers: FR-3
-  - [ ] **P3.T1.1: Cover §3.1-§3.22** — one line per game, preserving reduced-motion variants.
-- [ ] **P3.T2: Replace the README per-game section** — covers: FR-2
-  - [ ] **P3.T2.1: Summarize and link** — no orphaned bullets and no dead anchors.
-- [ ] **P3.T3: Verify 22/22 coverage** - covers: FR-3
-  - [ ] **P3.T3.1: Record the per-game checklist** - in the phase evidence, flagging any fact intentionally dropped and why.
-- [ ] **P3.T4: Cut the roster down to one line per game** - covers: FR-12
-  - [ ] **P3.T4.1: Move replay-variety detail to the PRD** - keep the game name, its domain and its icon, link to the 3 spec, and drop any bullet whose facts the PRD 3 spec already states.
-  - [ ] **P3.T4.2: Hold the line budget** - README at most 215 lines at the end of the phase, with `## Releases` and `## Project Structure` unchanged.
+- [x] **P3.T1: Add a feedback line to each PRD game spec** — covers: FR-3
+  - [x] **P3.T1.1: Cover §3.1-§3.22** — one line per game, preserving reduced-motion variants.
+- [x] **P3.T2: Replace the README per-game section** - covers: FR-2
+  - [x] **P3.T2.1: Summarize and link** — no orphaned bullets and no dead anchors.
+- [x] **P3.T3: Verify 22/22 coverage** - covers: FR-3
+  - [x] **P3.T3.1: Record the per-game checklist** - in the phase evidence, flagging any fact intentionally dropped and why.
+- [x] **P3.T4: Cut the roster down to one line per game** - covers: FR-12
+  - [x] **P3.T4.1: Move replay-variety detail to the PRD** - keep the game name, its domain and its icon, link to the 3 spec, and drop any bullet whose facts the PRD 3 spec already states.
+  - [x] **P3.T4.2: Hold the line budget** - README at most 215 lines at the end of the phase, with `## Releases` and `## Project Structure` unchanged.
+
+- **Result:** verified. README 237 -> 214 lines (roster 31 -> 27, per-game juice 23 -> 4), inside the 215 ceiling. The PRD gained 22 `**Feedback.**` bullets (132 field bullets, six per game) and its §3 intro names the sixth field. Reading the README numbers against `src/game/` proved three of them stale - Shape Sorter "6 shapes" where the code takes 3 per round from 18, Animal Trace "6 pairs" where `selectThreePairs()` takes 3 of 6, Pop & Freeze "6 decoys" where the code floats 1-2 at a time - so they were dropped rather than carried across. Two wrong PRD claims were corrected in place: Pattern Builder "six shapes to choose from" (three choices from the 18-shape pool) and First Sounds confusable pairs (only B/P and D/T exist in `SOUND_CONFUSABLE_PAIRS`). The roster now uses the hub labels from `src/game/hubTiles.ts` instead of README-only suffixes. All twelve rule strings were confirmed present in the PRD before the README paragraph was dropped; 53 cross-doc anchors resolve, 0 broken.
+- **Checkpoint:** `4dfaf9a`
+- **Evidence:** [`verification/phase-3.md`](./verification/phase-3.md)
 
 ## Phase 4: product.md Current-State Truth
 
 - **Goal:** current-state adaptive and layout claims match the code, and dated history is byte-identical.
 - **Depends on:** none
-- **Covers:** FR-5, AC-5
-- **Touches:** `conductor/product.md`
+- **Covers:** FR-5, FR-11, AC-5
+- **Touches:** `conductor/product.md`, `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
 
@@ -92,6 +96,8 @@
   - [ ] **P4.T2.1: Verify against code** — 22 games, 6×4 tile grid at 144px, 5×2 paged layout, domain counts; fix only failures.
 - [ ] **P4.T3: Prove history was not rewritten** — covers: NFR-4
   - [ ] **P4.T3.1: Inspect the diff** — `git diff -U0 conductor/product.md` shows no changed line inside a dated `> **YYYY-MM-DD**` entry.
+- [ ] **P4.T4: Fix the Build the Word distractor claim** — covers: FR-11
+  - [ ] **P4.T4.1: Match the code** — PRD 3.10 says distractors come from nearby letters; `generateLetterTiles` in `src/game/wordLogic.ts` draws them from the remaining alphabet, so state what the code does.
 
 ## Phase 5: Code Comments, Dead JSDoc, Vite Warning
 
