@@ -4,6 +4,7 @@
 - **Branch:** `refactor/20261020-scene-audio-shell` → `master`
 - **Type:** refactor · **Priority:** medium
 - **Base:** `c92e5c4`
+- **PR:** [#46](https://github.com/mansyar/aby-little-lab/pull/46)
 - **Review:** PASS (2 rounds) — see `review.md`
 
 ## What this does
