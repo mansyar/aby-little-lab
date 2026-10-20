@@ -14,17 +14,20 @@
 - **Covers:** FR-1, FR-2, AC-2, AC-3
 - **Touches:** `src/game/art/**`, `src/__tests__/game/art/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** 4423b11
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-1.md
 
-- [ ] **P1.T1: Art group model and loader** — covers: FR-1, FR-2
-  - [ ] **P1.T1.1: Define `ArtGroup`/`ArtAsset` types and `preloadArtGroups(scene, groups)`** that skips keys already in the TextureManager, uses `toDataUri` + `textureSizeFor`, and is safe under concurrent calls
-  - [ ] **P1.T1.2: Add the group-id to group-table contract** so scenes pass statically imported group modules (Phaser's `preload` is synchronous, so groups cannot be dynamically imported there)
-- [ ] **P1.T2: Twelve group modules** — covers: FR-1
-  - [ ] **P1.T2.1: `shapes` (18), `cutouts` (18), `letters` (26), `numerals` (10)**
-  - [ ] **P1.T2.2: `animals` (6), `food` (6), `items` (16), `shadows` (8), `toys` (7), `faces` (4), `music` (4), `glyphs` (8)**
-- [ ] **P1.T3: Registry and group tests** — covers: AC-2, AC-3
-  - [ ] **P1.T3.1: Group integrity** — non-empty, key-unique within a group, no key in two groups, every key matches `^[a-z0-9_]+$`
-  - [ ] **P1.T3.2: Loader behaviour** — each key rasterized once at `textureSizeFor(key)`, second call is a no-op, concurrent scenes do not duplicate
+- [x] **P1.T1: Art group model and loader** - covers: FR-1, FR-2
+  - [x] **P1.T1.1: Define `ArtGroup`/`ArtAsset` types and `preloadArtGroups(scene, groups)`** that skips keys already in the TextureManager, uses `toDataUri` + `textureSizeFor`, and is safe under concurrent calls
+  - [x] **P1.T1.2: Add the group-id to group-table contract** so scenes pass statically imported group modules (Phaser's `preload` is synchronous, so groups cannot be dynamically imported there)
+- [x] **P1.T2: Twelve group modules** - covers: FR-1
+  - [x] **P1.T2.1: `shapes` (18), `cutouts` (18), `letters` (26), `numerals` (10)**
+  - [x] **P1.T2.2: `animals` (6), `food` (6), `items` (16), `shadows` (8), `toys` (7), `faces` (4), `music` (4), `glyphs` (8)**
+- [x] **P1.T3: Registry and group tests** - covers: AC-2, AC-3
+  - [x] **P1.T3.1: Group integrity** - non-empty, key-unique within a group, no key in two groups, every key matches `^[a-z0-9_]+$`
+  - [x] **P1.T3.2: Loader behaviour** - each key rasterized once at `textureSizeFor(key)`, second call is a no-op, concurrent scenes do not duplicate; primary review added the interrupted-load case (scene shutdown releases its in-flight keys)
 
 ## Phase 2: Shared loading cue and missing-key placeholder
 

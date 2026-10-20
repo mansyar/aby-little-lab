@@ -78,7 +78,7 @@ the six avatars (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`,
 - `src/__tests__/game/art/groupIntegrity.test.ts` — AC-2
 - `src/__tests__/game/art/preloadArtGroups.test.ts` — AC-3, including the shutdown-lifecycle pair
 - `coverage/index.html`, `coverage/src/game/art/registry.ts.html` — registry at 97.36% statements / 90% branches / 100% functions / 100% lines
-- Commits: `f22b37a` (types + registry), `3da94de` (twelve groups + index), `e92e47b` (tests), `c83ea3c` (shutdown release fix + failing-first tests)
+- Commits: `4423b11` (squashed phase commit: types + registry + twelve groups + tests + shutdown-release fix; the six task commits were squashed per `phase_squash`)
 
 ## Deviations
 
