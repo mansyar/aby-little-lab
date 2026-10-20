@@ -109,17 +109,20 @@ shell side.
 - **Covers:** FR-7, FR-8, FR-9, NFR-2, NFR-5, AC-6, AC-9
 - **Touches:** `scripts/validate-pwa.js`, `src/__tests__/game/art/**`, `README.md`, `conductor/tech-stack.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-boot.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** b63af7b
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-5.md
 
-- [ ] **P5.T1: Precache assertion** — covers: FR-7, NFR-2
-  - [ ] **P5.T1.1: `validate-pwa` fails when any emitted art chunk is missing from the precache manifest**
-- [ ] **P5.T2: Ownership guard** — covers: FR-8
-  - [ ] **P5.T2.1: Static scan asserting no game-only art import reaches the shell, replacing the Story-Order-only assertion**
-- [ ] **P5.T3: Documentation sync** — covers: FR-9
-  - [ ] **P5.T3.1: README bundle/boot section plus `tech-stack.md` art-ownership rule**
-  - [ ] **P5.T3.2: `TDD.md` bundle chapter plus `perf-baseline.md` addendum with measured before/after**
-- [ ] **P5.T4: Integrated evidence** — covers: NFR-5
-  - [ ] **P5.T4.1: Full gate run recorded in `verification/phase-5.md`, including a manual offline first-play check**
+- [x] **P5.T1: Precache assertion** — covers: FR-7, NFR-2
+  - [x] **P5.T1.1: `validate-pwa` fails when any emitted art chunk is missing from the precache manifest**
+- [x] **P5.T2: Ownership guard** — covers: FR-8
+  - [x] **P5.T2.1: Static scan asserting no game-only art import reaches the shell, replacing the Story-Order-only assertion**
+- [x] **P5.T3: Documentation sync** — covers: FR-9
+  - [x] **P5.T3.1: README bundle/boot section plus `tech-stack.md` art-ownership rule**
+  - [x] **P5.T3.2: `TDD.md` bundle chapter plus `perf-baseline.md` addendum with measured before/after**
+- [x] **P5.T4: Integrated evidence** — covers: NFR-5
+  - [x] **P5.T4.1: Full gate run recorded in `verification/phase-5.md`, including a manual offline first-play check**
 
 ## Risks carried into execution
 
