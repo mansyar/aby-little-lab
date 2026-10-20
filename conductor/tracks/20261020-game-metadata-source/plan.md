@@ -66,7 +66,7 @@
 - **Covers:** FR-5, FR-9, NFR-1, NFR-2, NFR-5, AC-3, AC-6
 - **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/**`
 - **Verification:** `pnpm test -- --run && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Glob-derive the game assets** — covers: FR-5, NFR-5
   - [ ] **P3.T1.1:** Replace the 44 game `?raw` imports with two eager raw globs over `assets/svg/ui/**/*.svg` and `assets/svg/stickers/*.svg`, filtered to `tile_`/`sticker_` stems (this must pick up `ui/tile_feelings_faces.svg` as well as `ui/tiles/*`).
