@@ -57,16 +57,19 @@
 - **Covers:** FR-3, AC-4
 - **Touches:** `src/scenes/*.ts`, `src/__tests__/scenes/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** 62dc293
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-3.md
 
-- [ ] **P3.T1: Declare groups for the 15 choice/math games** — covers: FR-3
-  - [ ] **P3.T1.1: Alphabet, WordMatch, WordBuilder, DecodeIt, FirstSounds, HowMany, MoreLess, OddOneOut, ColorMatch, MemoryMatch**
-  - [ ] **P3.T1.2: PatternBuilder, AddItUp, TakeAway, FeelingsFaces, PopFreeze**
-- [ ] **P3.T2: Declare groups for the 7 drag/sequence games** — covers: FR-3
-  - [ ] **P3.T2.1: ShapeSorter, ShadowMatch, BigSmall, NumberOrder, AnimalTrace, MusicalMemory, StoryOrder**
-- [ ] **P3.T3: Declaration coverage test** — covers: AC-4
-  - [ ] **P3.T3.1: Source scan resolves each scene's declared group ids and fails when a literal or prefix key it draws is not covered**
-  - [ ] **P3.T3.2: Assert `storyOrderArt.ts` remains the only game-owned art module and that the scan's allowlist is explicit**
+- [x] **P3.T1: Declare groups for the 15 choice/math games** - covers: FR-3
+  - [x] **P3.T1.1: Alphabet, WordMatch, WordBuilder, DecodeIt, FirstSounds, HowMany, MoreLess, OddOneOut, ColorMatch, MemoryMatch**
+  - [x] **P3.T1.2: PatternBuilder, AddItUp, TakeAway, FeelingsFaces, PopFreeze**
+- [x] **P3.T2: Declare groups for the 7 drag/sequence games** - covers: FR-3
+  - [x] **P3.T2.1: ShapeSorter, ShadowMatch, BigSmall, NumberOrder, AnimalTrace, MusicalMemory, StoryOrder** (Story Order declares none; it owns its art)
+- [x] **P3.T3: Declaration coverage test** - covers: AC-4
+  - [x] **P3.T3.1: Source scan resolves each scene's declared group ids and fails when a literal or prefix key it draws is not covered**
+  - [x] **P3.T3.2: Assert `storyOrderArt.ts` remains the only game-owned art module and that the scan's allowlist is explicit**
 
 All textures still come from the shell in this phase, so there is deliberately
 **no bundle change yet**; the registry sees every key already present and

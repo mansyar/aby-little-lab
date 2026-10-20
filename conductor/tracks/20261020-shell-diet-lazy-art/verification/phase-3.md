@@ -5,7 +5,7 @@
 - **Date:** 2026-10-20
 - **Branch:** `refactor/20261020-shell-diet-lazy-art`
 - **Base:** `8d94b5a`
-- **Head:** `81ad674` (squashed phase commit; the three task commits and the evidence commit were squashed per `phase_squash`)
+- **Head:** squashed phase commit (the checkpoint SHA is recorded in `plan.md`; the three task commits and this file's commit were squashed per `phase_squash`)
 - **Result:** verified
 
 ## Summary
