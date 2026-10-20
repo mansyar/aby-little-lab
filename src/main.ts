@@ -27,7 +27,7 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  // Shell scenes only — the 7 game scenes are lazy-loaded and registered
+  // Shell scenes only — all 22 game scenes are lazy-loaded and registered
   // at runtime via ensureSceneLoaded() when a Hub tile is tapped.
   scene: [BootScene, PreloadScene, HubScene],
 };
