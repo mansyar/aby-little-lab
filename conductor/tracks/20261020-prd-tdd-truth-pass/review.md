@@ -5,7 +5,8 @@
 - **Branch:** `chore/20261020-prd-tdd-truth-pass`
 - **Range:** `8cb5de4..3009347`
 - **Date:** 2026-10-20
-- **Verdict:** BLOCK (1 High, 3 Medium, 4 Low)
+- **Verdict:** PASS
+- **Rounds:** 2 (round 1 BLOCK with 8 findings; round 2 PASS WITH FINDINGS with 5 against the fix commit; all closed in Phase R2)
 
 ## Summary
 
@@ -117,10 +118,31 @@ None. F1–F8 are all correctable in this track.
 
 ## Doc sync
 
-Pending — fixed by Phase R1, then re-verified.
+Complete. conductor/product.md (C1-C7), docs/PRD.md, docs/TDD.md and docs/device-testing-checklist.md are all corrected in this track; README.md and conductor/tech-stack.md were audited and were already accurate.
 
 ## History
 
 | Round | Verdict | Findings | Open after round |
 | --- | --- | --- | --- |
 | 1 | BLOCK | 1 High, 3 Medium, 4 Low | 8 |
+| 2 | PASS WITH FINDINGS -> PASS after Phase R2 | 5 (1 Medium, 4 Low) introduced by the fix commit | 0 |
+
+## Round 2 (re-review)
+
+Verdict **PASS WITH FINDINGS**: all eight round-1 findings verified as genuinely
+corrected against source, build output and a fresh coverage run — including F1, where
+the PRD and TDD now agree and `src/__tests__/utils/textureTiers.test.ts:30-35` asserts
+the card-tier resolution for `letter_a` / `numeral_9`.
+
+The fix commit introduced five new defects, all closed in Phase R2 (`65431f5`):
+
+| ID | Sev | Defect | Resolution |
+| --- | --- | --- | --- |
+| N1 | Medium | `docs/device-testing-checklist.md:272` still said 5×4 while the R1 deviation had corrected `:251` to 6×4 — the deviation made the file self-contradictory | corrected to 6×4; only the historical execution record at `:12` keeps the old wording |
+| N2 | Low | "a little over 40.7 MiB" where 42,643,456 B is 40.668 MiB | "about 40.7 MiB (40.67)" |
+| N3 | Low | TDD stated the historical cost as 176 textures / ~184 MB while the PRD and the TDD's own boot count say 178 | reconciled to 178 textures / ~186.6 MB (178 MiB) |
+| N4 | Low | phase-R1 evidence cited pre-squash SHAs unreachable from a fresh clone | re-pointed to `b409aed`; the old SHAs survive only as an explanatory note |
+| N5 | Low | the eight per-chunk sizes were stated verbatim in both PRD and TDD with no owner | TDD links PRD §7.2 as the owner |
+
+Final state: 5 phases verified, 53 tasks, gates green at `65431f5`, footprint
+`docs/` + `conductor/` only.

@@ -61,3 +61,25 @@
 2. Coverage's second decimal moves between identical runs (98.11/90.46 and 98.13/90.54 both observed on the same tree). Thresholds clear by several points either way, but a future drift guard should not assert an exact coverage figure.
 3. No automated drift guard was added (explicitly out of scope). The facts table is the manual artefact; nothing stops these documents going stale again.
 4. `docs/release-notes-*.md` and the dated changelog entries in `product.md` / `tech-stack.md` retain their historical counts (170 SVGs, 20-tile hub) on purpose — they are records, not current-state claims.
+
+## Post-review addendum (2026-10-20)
+
+Two review rounds and their fixes changed the figures this file recorded. Final state
+at `65431f5`:
+
+- **Phases:** 5 verified (P1, P2, P3, R1, R2), 53 tasks, 0 unchecked.
+- **Review:** round 1 BLOCK (1 High, 3 Medium, 4 Low) — four false claims, including a
+  PRD/TDD contradiction on texture tiers. Round 2 PASS WITH FINDINGS — all eight
+  closed, five new defects introduced by the fix commit. Phase R2 closed those five.
+- **Gates (unchanged by the docs work):** `pnpm check` exit 0, typecheck exit 0,
+  103 files / 2,208 tests, coverage 98.13 / 90.54 / 98.14 / 98.96, build
+  `index-Dhenc0xK.js` 200.12 kB, shell 195.4 kB of the 200 kB gate, PWA 15/15.
+- **Footprint:** `docs/PRD.md`, `docs/TDD.md`, `docs/device-testing-checklist.md`,
+  `conductor/product.md` plus the track's own registry, spec, plan, metadata, review
+  and verification files. Nothing under `src/`, `scripts/`, `public/` or
+  `package.json`.
+- **Still open, by design:** `src/utils/textureTiers.ts:8-12` comments that letters and
+  numerals sit at the icon tier — the origin of round 1's High finding, and a code
+  comment a docs-only track may not touch. Also `src/main.ts:30` ("7 game scenes") and
+  two stale spots in `docs/device-testing-checklist.md` (the 56 px sticker count and a
+  "2 pages of 10 tiles" line against `hubPaging`'s `PAGE_COUNT = 3`).
