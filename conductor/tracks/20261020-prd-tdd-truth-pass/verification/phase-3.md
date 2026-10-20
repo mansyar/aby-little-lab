@@ -215,3 +215,53 @@ nothing else. `git log --merges 1ee9605..HEAD` is empty. Nothing outside `docs/`
 
 None. Nothing outside the brief's `Touches` was modified, and no source file, script,
 `package.json` or score corpus was touched.
+
+## Primary completion of C1–C7 and primary verification
+
+The executor could not edit `conductor/product.md` (its permission policy denies
+`edit` under `conductor/**` except `tracks/*/verification/**`), so it specified the
+seven corrections and stopped. The primary applied them, one targeted edit each, at
+`1ee9605`:
+
+| # | Applied to `conductor/product.md` | Verified by |
+| --- | --- | --- |
+| C1 | `The app packages **22 distinct mini-games**` | `rg -n "22 distinct mini-games"` → 1 |
+| C2 | `### 3.1 Twenty-Two Mini-Games` | `rg -n "3\.1 Twenty"` → 1 |
+| C3 | adaptive parenthetical now names the nine + Color Match, Odd One Out and Pattern Builder, and names the seven fixed games | facts table row 3; PRD §4.8 |
+| C4 | `rasterized at three tiers — icon 160px, card 256px, hero 512px` | `src/utils/textureTiers.ts` |
+| C5 | `**HubScene:** 22 game tiles grid (6×4 at 144px — rows 6/6/6/4)` | `src/game/hubGrid.ts` |
+| C6 | `All fourteen choice games extend them` | facts table row 2 |
+| C7 | the second `## Changelog — Game 20 (2026-08-28)` heading and its blank line deleted; both bodies kept | heading count 2 → 1; `each card into a slot (drag lift/tilt juice` → 1; `an aligned pair of rows` → 1 |
+
+`conductor/product.md` diff: **6 insertions, 8 deletions**, zero CRLF lines (LF
+preserved — checked with a `\r\n` count of 0, because a whole-file rewrite of that
+file has silently converted it to CRLF before).
+
+### Acceptance criteria after completion
+
+| AC | Was | Now | Proving command |
+| --- | --- | --- | --- |
+| AC-8 (one Game 20 heading) | FAIL (2) | **PASS** (1) | `[regex]::Matches(product.md, '^## Changelog … Game 20 \(2026-08-28\)')` → 1 |
+| AC-9 (every document agrees with the facts table) | PARTIAL (C1–C7 open) | **PASS** | C1–C7 applied; PRD/TDD/README already agreed |
+| AC-10 (footprint) | PASS | **PASS** | `git diff --stat <base_sha>..HEAD` touches `docs/` and `conductor/` only |
+
+`conductor/tech-stack.md` was audited and left unchanged: it notes the same
+cosmetic enumeration the executor flagged (states fourteen, lists eleven direct
+plus two via `GroupMathScene`, then names Story Order in the next sentence), which
+is accurate prose rather than a false number.
+
+### Gate chain at the final commit
+
+`pnpm check` exit 0 (206 files, the one pre-existing `musicalMemoryScene.test.ts:294`
+warning plus the biome schema info); `pnpm typecheck` exit 0; 103 files / 2,208 tests
+pass; coverage **98.11 / 90.46 / 98.14 / 98.96** this run (the same tree measured
+98.13 / 90.54 an hour earlier — the second decimal moves between runs, thresholds
+clear by several points either way); build `index-Dhenc0xK.js` 200.12 kB with
+`StoryOrderScene` 33.92 kB; `validate-bundle` PASS (shell 195.4 kB of 200 kB);
+`validate-pwa` 15/15.
+
+### Carry-over for a future pass
+
+`src/main.ts:30` still says "Shell scenes only — the 7 game scenes are lazy-loaded":
+the count should be 22. Out of scope for a docs-only track (NFR-1) and recorded here
+so it is not lost.
