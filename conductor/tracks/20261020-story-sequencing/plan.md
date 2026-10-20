@@ -35,7 +35,7 @@
 - **Covers:** FR-8, NFR-3, NFR-6, AC-11
 - **Touches:** `src/assets/svg/stories/`, `src/game/storyOrderArt.ts`, `scripts/render-svg-contact-sheets.mjs`, `src/__tests__/game/storyOrderArt.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Author the 24 story panels** — covers: FR-8
   - [ ] **P2.T1.1: Obvious pool art** — seed/sprout/flower, flat/round/aloft balloon, egg/cracking/duckling, scoop/dripping/puddle
