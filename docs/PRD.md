@@ -238,7 +238,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the word tiers; the easy-first order is fixed.
 - **Feedback.** A correct letter tile settles into the next empty slot with a Back.out pop and a soft tick, and a wrong tile wiggles with the soft tone and no penalty. A finished word lingers 1.2 s on a chime and a Hoot cheer before the next word appears.
 - **Narration.** Per-round target: the word is spoken when the round opens, and the replay glyph repeats it.
-- **Art and assets.** Letter SVGs for the tiles and the prompt picture from the boot set. Extra tiles are distractors drawn from the same word's letters plus nearby letters. Tile and sticker icons.
+- **Art and assets.** Letter SVGs for the tiles and the prompt picture from the boot set. Extra tiles are two or three distractors drawn from the alphabet minus the word's own letters, shuffled in with the word's letters. Tile and sticker icons.
 
 ### 3.11 How Many?
 
