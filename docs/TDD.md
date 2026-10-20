@@ -284,7 +284,7 @@ src/
 
 ### 2.3 Asset corpus
 
-202 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). `src/assets/svg/stories/` is the only folder that is not part of the boot set.
+202 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). Only the 53 shell keys' files are rasterized at boot; every other texture a game draws is reached through `src/game/art/` or that game's own art module (see [§3.5](#35-in-chunk-art)).
 
 | Folder | Files | What it holds |
 | --- | --- | --- |
@@ -337,7 +337,7 @@ The font gate exists because the letter and numeral SVGs set `font-family="'Balo
 
 ### 3.3 PreloadScene and the boot asset table
 
-`src/scenes/PreloadScene.ts` imports each boot SVG with Vite's `?raw` suffix and exports `SHAPE_ASSETS`, an array of **178** `{ key, svg }` entries. The keys are the texture keys used everywhere else, e.g. `shape_circle`, `cutout_star`, `animal_cat`, `food_banana`, `sm_house`, `sm_shadow_house`, `letter_a`, `numeral_7`, `sticker_story_order`, `tile_story_order`, `face_happy`, `mascot_idle`.
+`src/scenes/PreloadScene.ts` imports each shell SVG with Vite's `?raw` suffix and exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 178 keys in the app, 53 of them in the shell.
 
 `preload()` draws a brand lockup (title at `centerY - 110`, tagline at `centerY - 70`, a 300×30 progress bar over a 320×50 box) and wires `load.on("progress")` and `load.on("complete")` to it. In development only, a `/* v8 ignore next */`-guarded block profiles per-file load time and logs `[preload] N files in Xms`; the block is statically removed from production builds.
 
@@ -367,21 +367,30 @@ The file's header comment groups letters and numerals under `icon`, but the rule
 
 ### 3.5 In-chunk art
 
-Story Order's 24 panel drawings are the first art that does not ride in the shell. `src/game/storyOrderArt.ts` imports them as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 24 SVG strings land in the Story Order chunk. `src/__tests__/game/storyOrderArt.test.ts` asserts that `PreloadScene` never imports the module — the boundary is a test, not a convention.
+Game art leaves the shell by two mechanisms, and both are ordinary static modules: Phaser's `preload` is synchronous, so art can never be dynamically imported into it.
 
-The pattern generalises: any future art that only one game needs belongs in a `<game>Art.ts` module under `src/game/` and a `preload()` in that scene, not in the 178-entry boot table.
+**The twelve groups.** `src/game/art/` holds one module per group, each a frozen `ArtGroup` table of `{ key, svg }` rows imported with `?raw`: `shapes` (18), `cutouts` (18), `letters` (26), `numerals` (10), `animals` (6), `food` (6), `items` (16), `shadows` (8), `toys` (7), `faces` (4), `music` (4) and `glyphs` (8) — 131 keys, of which the six avatars also stay in the shell, leaving 125 that only a game draws. A scene names the groups it draws in its own `preload()` and passes them to `preloadArtGroups(scene, groups)` in `src/game/art/registry.ts`, which registers each key the `TextureManager` does not already hold at that key's `textureSizeFor` tier ([§3.4](#34-texture-tiers)). The call is idempotent by design: an already-present texture is satisfied as-is — that is how `mascot_idle` works as a word prompt without a group — and a key still in flight is skipped, so two games sharing `shape_*`, `sm_*` or `frog_*` neither re-rasterize nor collide. Ownership is per scene: the registry listens for `filecomplete`, `loaderror` and the scene's `shutdown`, and a scene that shuts down mid-load releases exactly the keys it queued. Without that, a child who left a game while its art was still loading would leave those keys guarded for the rest of the session and every later visit would show missing textures.
+
+**Loading feedback and the missing-key path.** A scene shows the shared textless cue from `src/components/ArtLoadingCue.ts` (`createArtLoadingCue(scene)`) while its groups load and clears it when they land; the cue is opacity-only under reduced motion and never waits on the network. A key that is missing despite its declaration degrades to the neutral placeholder from `src/game/art/placeholder.ts`, logs one `console.warn` per key, and leaves the round completable (FR-6) — never an exception, never a blocked loader.
+
+**Story Order** keeps its own table for the same reason: `src/game/storyOrderArt.ts` imports the 24 panels as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 24 SVG strings land in the Story Order chunk.
+
+**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or registers a key outside the 53-key shell list. It also asserts the counts — 131 group keys, 125 game-only, 24 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, and `storyOrderArt.test.ts` keeps the single-module assertion.
+
+**Measured budgets.** The shell entry is 129.1 KiB against the 200 KiB gate in `validate-bundle.js`; cold boot is 419.5 ms median (1697.2 ms at 4× CPU throttle) against the 3000 ms `validate-boot.js` gate; and a cold first tap of a game adds **82 ms at worst** (Memory Match) and **48 ms for the widest art union** (Find the Word, 83 keys) against the 400 ms budget, with absolute totals of 224–334 ms. That is an increment, not a standalone latency: the criterion is "adds <= 400 ms versus the same tap", so `scripts/measure-first-tap.mjs` measures the current build back to back against a build of the pre-track commit `f377bf8`, taps five games and fails on the worst total rather than the cross-game median. Evidence, not a gate. `docs/perf-baseline.md` carries the before/after tables.
 
 ### 3.6 What the budget costs
 
 | Measurement | Value | Source |
 | --- | --- | --- |
-| Boot textures | 178 | `SHAPE_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Shell entry | 195.4 kB, gated at 200 kB | `node scripts/validate-bundle.js` |
+| Boot textures | 53 (22 tiles, 22 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
+| Game art | 12 groups, 131 keys; nine emit chunks of 3.1–16.5 kB and `cutouts`, `shadows`, `faces` inline into their only consumer | build output |
+| Shell entry | 129.1 kB (132.21 kB as Vite prints it), gated at 200 kB | `node scripts/validate-bundle.js` |
 | Phaser vendor chunk | 1342.6 kB as the validator reports it (1,374.8 kB as the Vite build prints it — same 1,374,822 bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
 | Story Order chunk | ~33.9 kB, includes all 24 panel SVGs | build output |
-| Precache entries | 45 (1,695 KiB) | `precache  45 entries` from the PWA build step |
+| Precache entries | 53 (1,701.34 KiB) | `precache  53 entries` from the PWA build step |
 
-The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and all 178 boot textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
 ---
 
@@ -919,7 +928,7 @@ VitePWA({
 | Script | Checks |
 | --- | --- |
 | `validate-bundle.js` | exactly one `phaser-*.js` vendor chunk; every `index-*.js` shell entry ≤ `200 * 1024` bytes |
-| `validate-pwa.js` | 15 named checks over `dist/sw.js` and `dist/manifest.webmanifest`: files exist, manifest name/orientation/display/`display_override`, `precacheAndRoute` present, BGM precached, no `.ligne` or `ligne_wasm_bg` asset, `NavigationRoute` registered |
+| `validate-pwa.js` | 16 named checks over `dist/sw.js` and `dist/manifest.webmanifest`: files exist, manifest name/orientation/display/`display_override`, `precacheAndRoute` present, **every emitted `dist/assets/*.js` chunk present in the precache manifest** (so a lazily loaded game or art group is offline-capable, or the build fails), BGM precached, no `.ligne` or `ligne_wasm_bg` asset, `NavigationRoute` registered |
 | `validate-boot.js` | drives the production build through `playwright-core`: three cold loads, samples Navigation Timing after canvas mount + 5 s settle, fails when the median exceeds 3000 ms |
 | `render-svg-contact-sheets.mjs` | developer tool, not a gate: renders per-category contact sheets from the SVG corpus (categories include `stories`) for art review |
 

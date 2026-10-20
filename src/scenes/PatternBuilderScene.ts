@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { shapes } from "../game/art/shapes";
 import {
   generatePlaythrough,
   getCorrectShape,
@@ -84,6 +85,10 @@ export class PatternBuilderScene extends ChoiceRoundScene {
 
   constructor() {
     super("PatternBuilder");
+  }
+
+  preload(): void {
+    this.preloadArt([shapes]);
   }
 
   create(): void {

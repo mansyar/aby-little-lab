@@ -1,4 +1,8 @@
 import Phaser from "phaser";
+import { animals } from "../game/art/animals";
+import { glyphs } from "../game/art/glyphs";
+import { items } from "../game/art/items";
+import { toys } from "../game/art/toys";
 import {
   buildPlaythrough,
   isPair,
@@ -78,6 +82,10 @@ export class MemoryMatchScene extends GameSceneBase {
 
   constructor() {
     super("MemoryMatch");
+  }
+
+  preload(): void {
+    this.preloadArt([animals, glyphs, items, toys]);
   }
 
   create(): void {

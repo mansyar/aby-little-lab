@@ -1,4 +1,5 @@
 import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
+import { letters } from "../game/art/letters";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -45,6 +46,10 @@ export class AlphabetScene extends ChoiceRoundScene {
 
   constructor() {
     super("Alphabet");
+  }
+
+  preload(): void {
+    this.preloadArt([letters]);
   }
 
   create(): void {

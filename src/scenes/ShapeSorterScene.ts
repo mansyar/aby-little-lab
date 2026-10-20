@@ -1,4 +1,6 @@
 import type Phaser from "phaser";
+import { cutouts } from "../game/art/cutouts";
+import { shapes } from "../game/art/shapes";
 import { generatePlaythrough, isMatch, type ShapeType, shuffle } from "../game/shapeSorterLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
@@ -77,6 +79,10 @@ export class ShapeSorterScene extends GameSceneBase {
 
   constructor() {
     super("ShapeSorter");
+  }
+
+  preload(): void {
+    this.preloadArt([cutouts, shapes]);
   }
 
   create(): void {

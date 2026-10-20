@@ -213,3 +213,91 @@ Notes:
   measured with Ligne present, and `scripts/validate-boot.js` re-measured at a
   **0.64 s median** on the merged tree. The texture-tier (−78% GPU memory) and
   paged-Hub results are unaffected by the merge.
+
+## Shell Diet — Lazy Art Groups — 2026-10-20
+
+Track `conductor/tracks/20261020-shell-diet-lazy-art`, branch
+`refactor/20261020-shell-diet-lazy-art`. The 178-entry boot table was split:
+53 keys stay in the shell (22 tile icons, 22 stickers, 2 mascot poses,
+`icon_speaker`, 6 avatars) and the other 125 move into twelve named groups under
+`src/game/art/`, each rasterized by the game scene that draws it. Baselines are
+this track's own before-numbers (shell 195.4 KiB, 808 ms cold, ~4.2 s throttled);
+after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
+
+### Method
+
+- Shell size: `pnpm build` then `node scripts/validate-bundle.js` (minified bytes
+  of `dist/assets/index-*.js`).
+- Boot and first tap: `node scripts/measure-first-tap.mjs --with-preview --json`,
+  which starts `vite preview` on port 4173 itself, runs three cold loads of the
+  production build in fresh contexts at 1024×768 (`validate-boot.js`
+  methodology, median of 3), then three 4×-CPU-throttled loads
+  (`Emulation.setCPUThrottlingRate` 4, diagnostic only), then taps one Hub tile
+  per game in a fresh context. The service worker is blocked during the tap
+  pass, so the numbers are a cold-network bound rather than a warm-precache one.
+- Comparison servers are not symmetric: the pre-track build ran on
+  `npx serve dist -l 4174` and the current build on `vite preview` at 4173.
+  `serve` compresses by default and Vite preview does not, and stage B of the
+  metric is the chunk transfer, so the current build was the disadvantaged side.
+  The deltas below are therefore **upper bounds** on the real cost.
+- The host refuses commands that start or stop a server, so Phase 4's executor
+  could not run the boot/tap script; the primary agent ran it afterwards on the
+  same checkpoint. The phase file keeps both attempts and the refusal.
+
+| Metric | Before (track baseline) | After (2026-10-20) | Δ |
+|---|---|---|---|
+| Shell entry, minified | 195.4 KiB / 200.1 kB | **129.1 KiB** (132.21 kB, 30.02 kB gzip) | **−66.3 KiB**, 40.9 KiB under the 200 KiB gate |
+| Boot textures rasterized | 178 | **53** | −125 |
+| Prod cold boot, median of 3 fresh contexts | 808 ms (815/808/749) | **419.5 ms** (488.1/398.1/419.5) | **−48%** |
+| Prod cold boot under 4× CPU throttle | ~4.2 s (4333/4036) | **1697.2 ms** (1877.3/1697.2/1656.4) | **−2.5 s** |
+| Cold first tap -> first frame (5 games) | not measured | **+82 ms worst** (Memory Match), **+48 ms** for the widest union (Find the Word); absolute totals 224-334 ms | new 400 ms budget, met |
+| Game art chunks | 0 — every texture rode the shell | **9 chunks, 3.1–16.5 kB**; `cutouts`, `shadows`, `faces` inline into their only consumer | 9 art chunks, none added after Phase 3 |
+| PWA precache | 42 entries / 2189.6 KiB | **53 entries / 1701.34 KiB** | +11 entries, −488.3 KiB |
+
+### Notes
+
+- Tap breakdown, corrected after review (F2). The first recording tapped the
+  wrong "worst" game and gated on the cross-game median. The script now taps
+  five games including **Find the Word** (seven groups, 83 keys - the widest
+  union, shared with Word Builder, Decode It and First Sounds) and fails on the
+  **worst** total, not the average.
+- The criterion is an increment ("adds <= 400 ms versus the same tap today"), so
+  it is measured as one. A build of the pre-track commit (`f377bf8`) was built
+  into `.conductor/base-build` and served alongside the current build; the script
+  ran three times against each, alternating, with `PREVIEW_URL` selecting the
+  target. Medians of three rounds on this machine (2026-10-20, service worker
+  blocked, 1024x768):
+
+  | Game (art keys) | pre-track | this track | delta |
+  | --- | --- | --- | --- |
+  | Shape Sorter (36) | 282.7 ms | 263.8 ms | -18.9 ms |
+  | Find the Letter (26) | 265.6 ms | 249.4 ms | -16.2 ms |
+  | Find the Word (83) | 268.8 ms | 317.2 ms | **+48.4 ms** |
+  | Add It Up (48) | 233.5 ms | 224.3 ms | -9.2 ms |
+  | Memory Match (37) | 251.9 ms | 333.9 ms | **+82.0 ms** |
+
+  The worst increment is **82 ms**, and the widest-union game adds **48 ms** -
+  both far inside the 400 ms budget. Negative deltas are run-to-run noise larger
+  than the art cost for a small union, which is itself the point: deferred
+  rasterization is not visible at tap time. Absolute cold totals 224-334 ms.
+- Run-to-run variance on this machine is large. Repeating the measurement
+  minutes apart produced absolute worst-case totals between 277.8 and 464.1 ms
+  and 4x-throttled boot medians between 1,697 and 6,072 ms, because background
+  processes contend for the same cores. That is why the increment is measured
+  back to back against a built baseline instead of against one historical
+  number, and why `validate-boot.js` - the only number enforced in CI, at a
+  3000 ms median - remains the guarantee.
+- Two caveats on the tap number. It stops at the first frame the game paints
+  behind its loading cue - the scene's own art rasterization continues after
+  that frame - and with the service worker blocked the chunk fetch is a cold
+  network round trip, so a warm precache can only be faster.
+- CI is unchanged: `validate-boot.js` still gates the median of 3 cold loads at
+  3000 ms. The 4x figure moved for a measurable reason - boot no longer
+  rasterizes 125 textures - not because the gate moved.
+- GPU texture memory is unchanged in kind: the same keys resolve to the same
+  `textureSizeFor` tiers, only the moment they are rasterized moved. The
+  texture-tier (−78%) result above still holds.
+- Offline first play after one online visit still works for every game: the
+  service worker precaches all 41 emitted `dist/assets/*.js` chunks, and
+  `scripts/validate-pwa.js` now fails the build when any chunk is missing from
+  that manifest (proved by deleting one entry from a built `sw.js`).

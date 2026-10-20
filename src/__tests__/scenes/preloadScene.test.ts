@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 /**
  * Mock Phaser minimally: PreloadScene only needs `Phaser.Scene` at import
- * time (SHAPE_ASSETS is a module-scope constant; real Phaser probes a canvas
+ * time (SHELL_ASSETS is a module-scope constant; real Phaser probes a canvas
  * 2D context on import, which happy-dom does not provide).
  */
 vi.mock("phaser", () => {
@@ -13,92 +13,125 @@ vi.mock("phaser", () => {
   return { ...phaserMock, default: phaserMock };
 });
 
-import { SHAPE_ASSETS } from "../../scenes/PreloadScene";
+import {
+  type ArtGroup,
+  animals,
+  cutouts,
+  faces,
+  food,
+  glyphs,
+  items,
+  letters,
+  music,
+  numerals,
+  shadows,
+  shapes,
+  toys,
+} from "../../game/art";
+import { SHELL_ASSETS } from "../../scenes/PreloadScene";
+import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
 
-/** The 12 shape types added by the shape-sorter-rounds-variety track. */
-const NEW_SHAPES = [
-  "oval",
-  "rectangle",
-  "diamond",
-  "pentagon",
-  "hexagon",
-  "octagon",
-  "trapezoid",
-  "semicircle",
-  "arrow",
-  "plus",
-  "ring",
-  "teardrop",
+/** The twelve art groups — the owner of every key the shell no longer ships. */
+const GROUPS: readonly ArtGroup[] = [
+  shapes,
+  cutouts,
+  letters,
+  numerals,
+  animals,
+  food,
+  items,
+  shadows,
+  toys,
+  faces,
+  music,
+  glyphs,
 ];
 
-describe("PreloadScene SHAPE_ASSETS", () => {
-  it("registers all 12 new shape textures with SVG content", () => {
-    for (const shape of NEW_SHAPES) {
-      const entry = SHAPE_ASSETS.find((a) => a.key === `shape_${shape}`);
-      expect(entry, `shape_${shape} is missing from SHAPE_ASSETS`).toBeDefined();
-      expect(entry?.svg).toContain("<svg");
+const groupKeys = (group: ArtGroup): string[] => group.assets.map((asset) => asset.key);
+const allGroupKeys = GROUPS.flatMap(groupKeys);
+const groupKeySet = new Set(allGroupKeys);
+
+/**
+ * The one deliberate shell/game overlap (FR-4): these six avatars stay eager
+ * because `ProfileChip` and the Settings avatar picker render before any game
+ * scene loads. Asserted explicitly rather than compared by prefix, exactly as
+ * `groupIntegrity.test.ts` does.
+ */
+const AVATAR_KEYS: readonly string[] = [
+  "animal_cat",
+  "animal_dog",
+  "animal_pig",
+  "frog_red",
+  "sm_duck",
+  "toy_teddy_bear",
+];
+
+/** How many SVGs the shell and the twelve groups carry together. */
+const CANONICAL_ASSET_COUNT = 178;
+
+const shellKeys = SHELL_ASSETS.map((asset) => asset.key);
+
+describe("PreloadScene SHELL_ASSETS", () => {
+  it("carries exactly the 53 documented shell keys, all unique", () => {
+    expect(SHELL_ASSETS).toHaveLength(53);
+    expect(new Set(shellKeys).size).toBe(shellKeys.length);
+  });
+
+  it("holds non-empty SVG markup for every shell key", () => {
+    for (const asset of SHELL_ASSETS) {
+      expect(asset.svg.trimStart().startsWith("<svg"), asset.key).toBe(true);
     }
   });
 
-  it("registers all 12 new cutout textures with SVG content", () => {
-    for (const shape of NEW_SHAPES) {
-      const entry = SHAPE_ASSETS.find((a) => a.key === `cutout_${shape}`);
-      expect(entry, `cutout_${shape} is missing from SHAPE_ASSETS`).toBeDefined();
-      expect(entry?.svg).toContain("<svg");
-    }
+  it("leaves every game-only key to its group, with the six avatars the only overlap", () => {
+    const overlaps = shellKeys.filter((key) => groupKeySet.has(key));
+    expect(overlaps.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 
-  it("keeps the original 6 shape textures registered", () => {
-    for (const shape of ["circle", "square", "triangle", "star", "heart", "crescent"]) {
-      expect(SHAPE_ASSETS.some((a) => a.key === `shape_${shape}`)).toBe(true);
-      expect(SHAPE_ASSETS.some((a) => a.key === `cutout_${shape}`)).toBe(true);
-    }
-  });
-
-  it("registers exactly 18 shape and 18 cutout textures", () => {
-    const shapes = SHAPE_ASSETS.filter((a) => a.key.startsWith("shape_"));
-    const cutouts = SHAPE_ASSETS.filter((a) => a.key.startsWith("cutout_"));
-    expect(shapes).toHaveLength(18);
-    expect(cutouts).toHaveLength(18);
-  });
-
-  it("registers the More or Less arrow textures under the keys the scene looks up", () => {
-    // MoreLessScene renders `arrow_${round.mode}` where mode is "more" | "less".
-    // These keys must exist in SHAPE_ASSETS or Phaser falls back to its
-    // 32x32 missing-texture square (the v1.10.0 arrow bug).
-    const keys = SHAPE_ASSETS.map((a) => a.key);
-    expect(keys).toContain("arrow_more");
-    expect(keys).toContain("arrow_less");
+  it("leaves the shell and the groups owning 178 keys in total", () => {
+    const union = new Set([...shellKeys, ...allGroupKeys]);
+    expect(union.size).toBe(CANONICAL_ASSET_COUNT);
   });
 });
 
-/** Feelings Faces — the four Aby expressions plus the tile and sticker art. */
-const FEELINGS_KEYS = [
-  "face_happy",
-  "face_sad",
-  "face_angry",
-  "face_scared",
-  "tile_feelings_faces",
-  "sticker_feelings_faces",
-];
+/** `import x from "../assets/svg/…?raw"` — the only way a raw SVG enters the shell. */
+const SVG_IMPORT = /import\s+(\w+)\s+from\s+"(\.\.\/assets\/svg\/[^"?]+\.svg\?raw)"/g;
 
-describe("PreloadScene feelings faces textures", () => {
-  it("registers all six feelings keys exactly once", () => {
-    const keys = SHAPE_ASSETS.map((a) => a.key);
-    for (const key of FEELINGS_KEYS) {
-      expect(
-        keys.filter((k) => k === key),
-        key,
-      ).toHaveLength(1);
+/** One `{ key: "…", svg: X }` row of the shell table. */
+const TABLE_ENTRY = /\{\s*key:\s*"([a-z0-9_]+)",\s*svg:\s*(\w+)\s*\}/g;
+
+describe("PreloadScene source scan", () => {
+  it("resolves every SVG import to exactly one shell-table row", () => {
+    const imported = new Map<string, string>();
+    for (const match of preloadSceneSource.matchAll(SVG_IMPORT)) {
+      imported.set(match[1], match[2]);
+    }
+
+    const registered = new Map<string, string>();
+    for (const match of preloadSceneSource.matchAll(TABLE_ENTRY)) {
+      registered.set(match[1], match[2]);
+    }
+
+    // One import per shell key, and the table names each of them exactly once.
+    expect(imported.size).toBe(SHELL_ASSETS.length);
+    expect(registered.size).toBe(SHELL_ASSETS.length);
+
+    for (const [identifier, path] of imported) {
+      const keys = [...registered].filter(([, id]) => id === identifier).map(([key]) => key);
+      expect(keys, `${path} is imported but no shell key registers it`).toHaveLength(1);
+    }
+
+    for (const [key, identifier] of registered) {
+      expect(imported.has(identifier), `${key} registers an identifier it never imports`).toBe(
+        true,
+      );
+      expect(shellKeys, key).toContain(key);
     }
   });
 
-  it("loads real 512px SVG markup for every feelings key", () => {
-    for (const key of FEELINGS_KEYS) {
-      const entry = SHAPE_ASSETS.find((a) => a.key === key);
-      expect(entry, `${key} is missing from SHAPE_ASSETS`).toBeDefined();
-      expect(entry?.svg, key).toContain("<svg");
-      expect(entry?.svg, key).toContain('viewBox="0 0 512 512"');
-    }
+  it("keeps every game-only key out of the shell table", () => {
+    const sourceKeys = [...preloadSceneSource.matchAll(TABLE_ENTRY)].map((match) => match[1]);
+    const groupOwned = sourceKeys.filter((key) => groupKeySet.has(key));
+    expect(groupOwned.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 });

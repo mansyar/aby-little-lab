@@ -1,4 +1,11 @@
 import type Phaser from "phaser";
+import { animals } from "../game/art/animals";
+import { food } from "../game/art/food";
+import { items } from "../game/art/items";
+import { letters } from "../game/art/letters";
+import { music } from "../game/art/music";
+import { shapes } from "../game/art/shapes";
+import { toys } from "../game/art/toys";
 import { buildPlaythrough, type DecodeRound, getDecodeWord, isCorrect } from "../game/decodeLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
@@ -29,6 +36,10 @@ export class DecodeItScene extends ChoiceRoundScene {
 
   constructor() {
     super("DecodeIt");
+  }
+
+  preload(): void {
+    this.preloadArt([animals, food, items, letters, music, shapes, toys]);
   }
 
   create(): void {

@@ -1,4 +1,6 @@
 import type Phaser from "phaser";
+import { animals } from "../game/art/animals";
+import { glyphs } from "../game/art/glyphs";
 import {
   type BubbleConfig,
   createRoundState,
@@ -92,6 +94,10 @@ export class PopFreezeScene extends GameSceneBase {
 
   constructor() {
     super("PopFreeze");
+  }
+
+  preload(): void {
+    this.preloadArt([animals, glyphs]);
   }
 
   create(): void {

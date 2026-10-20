@@ -157,11 +157,24 @@ export function createMockGameObject(
   return obj;
 }
 
+/** A canvas texture the placeholder path can draw into and refresh. */
+export interface MockCanvasTexture {
+  readonly context: {
+    fillStyle: string;
+    strokeStyle: string;
+    lineWidth: number;
+    fillRect: MockFn;
+    strokeRect: MockFn;
+  };
+  readonly refresh: MockFn;
+}
+
 /** Mock Phaser Scene base class with fully mocked subsystems. */
 export class MockScene {
   add!: Record<string, MockFn>;
   scene!: Record<string, MockFn>;
   load!: Record<string, MockFn>;
+  textures!: { exists: MockFn; createCanvas: MockFn };
   input!: Record<string, MockFn>;
   cameras!: {
     main: Record<string, MockFn | number> & {
@@ -241,6 +254,25 @@ export class MockScene {
       on: vi.fn(),
       once: vi.fn(),
       off: vi.fn(),
+    };
+    // Empty by default, like a cold TextureManager: keys created here are the
+    // ones a scene generated itself (the missing-art placeholder path).
+    const canvasKeys = new Set<string>();
+    this.textures = {
+      exists: vi.fn((key: string) => canvasKeys.has(key)),
+      createCanvas: vi.fn((key: string): MockCanvasTexture => {
+        canvasKeys.add(key);
+        return {
+          context: {
+            fillStyle: "",
+            strokeStyle: "",
+            lineWidth: 0,
+            fillRect: vi.fn(),
+            strokeRect: vi.fn(),
+          },
+          refresh: vi.fn(),
+        };
+      }),
     };
     this.input = {
       on: vi.fn((event: string, handler: MockFn) => {

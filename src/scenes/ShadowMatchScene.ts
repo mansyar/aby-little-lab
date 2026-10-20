@@ -1,4 +1,6 @@
 import type Phaser from "phaser";
+import { items } from "../game/art/items";
+import { shadows } from "../game/art/shadows";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
@@ -95,6 +97,10 @@ export class ShadowMatchScene extends GameSceneBase {
 
   constructor() {
     super("ShadowMatch");
+  }
+
+  preload(): void {
+    this.preloadArt([items, shadows]);
   }
 
   create(): void {

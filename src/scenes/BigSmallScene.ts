@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { toys } from "../game/art/toys";
 import {
   type BoxInstance,
   generateRound,
@@ -102,6 +103,10 @@ export class BigSmallScene extends GameSceneBase {
 
   constructor() {
     super("BigSmall");
+  }
+
+  preload(): void {
+    this.preloadArt([toys]);
   }
 
   create(): void {

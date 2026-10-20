@@ -1,3 +1,5 @@
+import { music } from "../game/art/music";
+import { shapes } from "../game/art/shapes";
 import {
   buildPlaythrough,
   type ColorMatchRound,
@@ -51,6 +53,10 @@ export class ColorMatchScene extends ChoiceRoundScene {
 
   constructor() {
     super("ColorMatch");
+  }
+
+  preload(): void {
+    this.preloadArt([music, shapes]);
   }
 
   create(): void {
