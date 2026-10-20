@@ -121,6 +121,31 @@
 - **Checkpoint:** 2782229
 - **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-5.md
 
+## Phase R1: Review Fixes
+
+- **Goal:** Close the round-1 review findings - make the tap-to-return path real, reconcile FR-3/AC-3 with the built board, and repair the four record and art nits.
+- **Depends on:** Phase 5
+- **Covers:** review findings M1, M2, M3, L1, L2, L3, L4
+- **Touches:** `src/scenes/StoryOrderScene.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `conductor/tracks/20261020-story-sequencing/spec.md`, `conductor/product.md`, `README.md`, `src/assets/svg/stories/story_foot_sock.svg`, `docs/svg-contact-sheets/stories.png`, `conductor/tracks/20261020-story-sequencing/verification/phase-2.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Resolve M1** - covers: M1
+  - [ ] **R1.T1.1: Set `justDropped` in `handleDrop` and clear it in `dragstart`** so a real tap returns a placed panel and a real drop does not
+  - [ ] **R1.T1.2: Drive the real handlers in tests** - a drag/drop sequence that ends in `pointerup`, and a plain tap sequence
+- [ ] **R1.T2: Resolve M2** - covers: M2
+  - [ ] **R1.T2.1: Amend FR-3** with a dated note recording slots-above-tray and why
+- [ ] **R1.T3: Resolve M3** - covers: M3
+  - [ ] **R1.T3.1: Amend AC-3** to separate tray panels (home) from placed panels (back to slot)
+  - [ ] **R1.T3.2: Correct the product changelog** wording to match
+- [ ] **R1.T4: Resolve L1** - covers: L1
+  - [ ] **R1.T4.1: README shell figure** to 195.4 kB
+- [ ] **R1.T5: Resolve L2** - covers: L2
+  - [ ] **R1.T5.1: product.md rule-narrator count** to twelve and a Game 22 changelog heading
+- [ ] **R1.T6: Resolve L3** - covers: L3
+  - [ ] **R1.T6.1: Give the sock a silhouette cue** and re-render the story contact sheet
+- [ ] **R1.T7: Resolve L4** - covers: L4
+  - [ ] **R1.T7.1: Re-point the phase-2 art rework rows** at the squashed commit
 <!--
 After acceptance, the primary appends to each phase:
 
