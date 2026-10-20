@@ -122,3 +122,12 @@ evidence file are the only other writes.
   measured line.
 - Line counts after this phase: `README.md` 286 lines (trimming to ≤170 is Phase 2's AC-2),
   `docs/TDD.md` unchanged in length.
+
+## Primary verification
+
+- Date: 2026-10-20
+- Command: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- Exit code: 0
+- Result: verified independently by the primary agent after the phase report.
+- Measured: 110 test files / 2,305 tests passing; coverage statements 97.8, branches 90.73, functions 96.34, lines 98.59; precache 53 entries (1,702.03 KiB); bundle gate 129.1 kB shell (<= 200 kB); PWA validator 16/16.
+- Additional check: README has 31 headings and 0 with an empty body (script over heading spans).

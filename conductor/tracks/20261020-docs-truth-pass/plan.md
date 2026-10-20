@@ -14,22 +14,25 @@
 - **Covers:** FR-1, FR-4, FR-11, AC-1, AC-4
 - **Touches:** `README.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** `daafe4d`
+- **Evidence:** `conductor/tracks/20261020-docs-truth-pass/verification/phase-1.md`
 
-- [ ] **P1.T1: Capture the measured facts** — covers: FR-11
-  - [ ] **P1.T1.1: Run the suite once** — record file and test totals from `pnpm test -- --run`.
-  - [ ] **P1.T1.2: Run coverage once** — record the four metrics and the lowest-covered file from `pnpm test:coverage`.
-- [ ] **P1.T2: Correct README counts** — covers: FR-1
-  - [ ] **P1.T2.1: Replace the stale totals** — 2,208 tests across 103 files becomes the measured numbers plus `verified YYYY-MM-DD`.
-  - [ ] **P1.T2.2: Name the authority** — state that CI and `vite.config.ts` thresholds are the source of truth.
-- [ ] **P1.T3: Resolve the empty `## Parental Controls` heading** — covers: FR-1
-  - [ ] **P1.T3.1: Write or fold the section** — source the body from PRD §4.5/4.6, or merge it into the existing parental content; no empty heading remains.
-- [ ] **P1.T4: Refresh TDD §10.2/10.3** — covers: FR-4
-  - [ ] **P1.T4.1: Update counts and the coverage snapshot** — use the values captured in P1.T1.
-  - [ ] **P1.T4.2: Re-measure the lowest-file claim** — correct the `decodeLogic.ts` 73.8% sentence or remove it.
-- [ ] **P1.T5: Verify the other numeric claims** — covers: FR-1, FR-11
-  - [ ] **P1.T5.1: Check against build output** — precache entries and KiB, 53-key shell set, 178 texture keys, shell entry size.
-  - [ ] **P1.T5.2: Record the verified-unchanged list** — in the phase evidence.
+- [x] **P1.T1: Capture the measured facts** — covers: FR-11
+  - [x] **P1.T1.1: Run the suite once** — record file and test totals from `pnpm test -- --run`.
+  - [x] **P1.T1.2: Run coverage once** — record the four metrics and the lowest-covered file from `pnpm test:coverage`.
+- [x] **P1.T2: Correct README counts** — covers: FR-1
+  - [x] **P1.T2.1: Replace the stale totals** — 2,208 tests across 103 files becomes the measured numbers plus `verified YYYY-MM-DD`.
+  - [x] **P1.T2.2: Name the authority** — state that CI and `vite.config.ts` thresholds are the source of truth.
+- [x] **P1.T3: Resolve the empty `## Parental Controls` heading** — covers: FR-1
+  - [x] **P1.T3.1: Write or fold the section** — source the body from PRD §4.5/4.6, or merge it into the existing parental content; no empty heading remains.
+- [x] **P1.T4: Refresh TDD §10.2/10.3** — covers: FR-4
+  - [x] **P1.T4.1: Update counts and the coverage snapshot** — use the values captured in P1.T1.
+  - [x] **P1.T4.2: Re-measure the lowest-file claim** — correct the `decodeLogic.ts` 73.8% sentence or remove it.
+- [x] **P1.T5: Verify the other numeric claims** — covers: FR-1, FR-11
+  - [x] **P1.T5.1: Check against build output** — precache entries and KiB, 53-key shell set, 178 texture keys, shell entry size.
+  - [x] **P1.T5.2: Record the verified-unchanged list** — in the phase evidence.
 
 ## Phase 2: De-duplicate the README Systems Sections
 
