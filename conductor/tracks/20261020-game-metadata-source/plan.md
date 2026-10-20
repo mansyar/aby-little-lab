@@ -154,5 +154,5 @@
 - [x] **R2.T2: Pin the glob shape in the source scan so the wide glob cannot come back** — covers: R2-F1
 - [x] **R2.T3: Describe the three narrow globs in TDD 3.3, correct the precache figure and finish the dash pass** — covers: R2-F1, R2-F3, R2-F4
 **Result:** verified
-**Checkpoint:** to-be-recorded
+**Checkpoint:** 29acd0c
 **Evidence:** conductor/tracks/20261020-game-metadata-source/verification/phase-R2.md
