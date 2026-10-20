@@ -131,7 +131,7 @@
 - **Status:** verified
 
 - [x] **R1.T1: Resolve M1** - covers: M1
-  - [x] **R1.T1.1: Set `justDropped` in `handleDrop` and clear it in `dragstart`** so a real tap returns a placed panel and a real drop does not
+  - [x] **R1.T1.1: Set `justDropped` in `handleDrop` and clear it on `pointerdown`** so a real tap returns a placed panel and a real drop does not
   - [x] **R1.T1.2: Drive the real handlers in tests** - a drag/drop sequence that ends in `pointerup`, and a plain tap sequence
 - [x] **R1.T2: Resolve M2** - covers: M2
   - [x] **R1.T2.1: Amend FR-3** with a dated note recording slots-above-tray and why
@@ -150,6 +150,31 @@
 - **Checkpoint:** e83f692
 - **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-R1.md
 
+## Phase R2: Re-review Fixes
+
+- **Goal:** Close the five findings the round-2 re-review raised against the fix phase itself: the formatter error that left `pnpm check` red, the zero drag threshold that made tap-to-return flaky on a real finger, and three record inaccuracies.
+- **Depends on:** Phase R1
+- **Covers:** review findings F1, F2, F3, F4, F5
+- **Touches:** `src/scenes/StoryOrderScene.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `conductor/tracks/20261020-story-sequencing/spec.md`, `conductor/product.md`, `conductor/tracks/20261020-story-sequencing/verification/phase-R1.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Status:** in_progress
+
+- [x] **R2.T1: Resolve F1** - covers: F1
+  - [x] **R2.T1.1: Format the new test block** and re-run `pnpm check` before claiming it
+  - [x] **R2.T1.2: Correct the phase-R1 evidence row** that claimed a green check
+- [x] **R2.T2: Resolve F2** - covers: F2
+  - [x] **R2.T2.1: Set `input.dragDistanceThreshold = 10`** in `create()` so a wobbly tap is still a tap
+  - [x] **R2.T2.2: Pin the threshold and the tap tail in tests**
+- [x] **R2.T3: Resolve F3** - covers: F3
+  - [x] **R2.T3.1: Rewrite the FR-3 and AC-3 sentences** to the shipped behaviour, keeping the dated notes as provenance
+  - [x] **R2.T3.2: Assert the board orientation** (strip above the tray) in the scene suite
+- [x] **R2.T4: Resolve F4** - covers: F4
+  - [x] **R2.T4.1: Make the product changelog wording match AC-3** so the ticked task is true
+- [x] **R2.T5: Resolve F5** - covers: F5
+  - [x] **R2.T5.1: Fire the tap case in engine order** and reword its rationale
+- **Result:** verified
+- **Checkpoint:** PENDING
+- **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-R2.md
 <!--
 After acceptance, the primary appends to each phase:
 

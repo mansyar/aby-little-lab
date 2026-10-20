@@ -75,6 +75,11 @@ export class StoryOrderScene extends ChoiceRoundScene {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+    // Phaser starts a drag on the first pointermove (threshold 0), and a drag
+    // that ends over the panel's own slot is indistinguishable from a drop. Ten
+    // pixels of slack keeps a preschooler's slightly wobbly tap a tap, so it
+    // still withdraws a placed panel instead of being swallowed as a drag.
+    this.input.dragDistanceThreshold = 10;
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the story in order, first to last.");
 

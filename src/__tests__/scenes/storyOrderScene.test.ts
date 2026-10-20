@@ -465,11 +465,7 @@ describe("StoryOrderScene interactions", () => {
 
     lastHandler(panel.container, "pointerdown")();
     lastHandler(panel.container, "dragstart")();
-    (lastHandler(panel.container, "drag") as (...a: unknown[]) => void)(
-      {},
-      slots[0].x,
-      slots[0].y,
-    );
+    (lastHandler(panel.container, "drag") as (...a: unknown[]) => void)({}, slots[0].x, slots[0].y);
     panel.container.x = slots[0].x;
     panel.container.y = slots[0].y;
     (lastHandler(panel.container, "drop") as (...a: unknown[]) => void)({}, slots[0].zone);
@@ -485,14 +481,16 @@ describe("StoryOrderScene interactions", () => {
     scene.create();
     const { slots } = internals(scene);
     const solution = getCurrentRound(scene).solution;
-    // Leave the strip incomplete: a complete strip resolves on the tap's own
-    // dragend, so tap-to-return is an incomplete-board gesture.
+    // Leave the strip incomplete: a completed strip has already been resolved
+    // (advancing, or locking the board on a wrong order), so a tap that
+    // withdraws a panel is an in-progress gesture.
     fillBoard(scene, solution.slice(0, 2));
     const tapped = slots[0].occupiedBy as TestPanel;
-    // A tap: the engine fires dragstart/dragend with zero thresholds but never
-    // a drag move or drop, so this gesture is still a tap.
-    lastHandler(tapped.container, "pointerdown")();
+    // A tap, in engine order (drag-down precedes the game-object down event):
+    // dragstart/dragend fire, but the 10 px threshold keeps jitter from
+    // becoming a drag move, so no drop is routed and this is still a tap.
     lastHandler(tapped.container, "dragstart")();
+    lastHandler(tapped.container, "pointerdown")();
     lastHandler(tapped.container, "dragend")();
     lastHandler(tapped.container, "pointerup")();
 
@@ -503,6 +501,24 @@ describe("StoryOrderScene interactions", () => {
     fillBoard(scene, getCurrentRound(scene).solution);
     validate(scene);
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives a wobbly tap 10 px of slack before it counts as a drag", () => {
+    const scene = new StoryOrderScene();
+    scene.create();
+
+    expect(
+      (scene.input as unknown as { dragDistanceThreshold: number }).dragDistanceThreshold,
+    ).toBe(10);
+  });
+
+  it("puts the ordered strip above the shuffled tray", () => {
+    const scene = new StoryOrderScene();
+    scene.create();
+    const { panels, slots } = internals(scene);
+    const trayY = panels[0].originY;
+
+    expect(slots.every((slot) => slot.y < trayY)).toBe(true);
   });
 
   it("moves a placed panel into another empty slot", () => {

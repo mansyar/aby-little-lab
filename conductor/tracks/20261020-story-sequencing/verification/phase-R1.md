@@ -22,7 +22,7 @@
 
 | Command | Result |
 | --- | --- |
-| `pnpm check` | exit 0 - 206 files, 1 pre-existing warning, 1 schema info |
+| `pnpm check` | **was red at this checkpoint** - the new test block was left unformatted, so the command exited 1 while this row claimed exit 0. Corrected in Phase R2 (F1); check is green from `ca3e71b`'s successor. |
 | `pnpm typecheck` | exit 0 |
 | `pnpm test -- --run` | 103 files / 2,206 tests (2,205 + the new drop-wire case) |
 | `pnpm test:coverage` | 98.13 statements / 90.54 branches / 98.14 functions / 98.96 lines |
