@@ -1,755 +1,951 @@
 # Technical Design Document (TDD)
 
 **Project:** Aby's Little Lab
-**Companion document:** [PRD.md](./PRD.md)
+**Scope:** implementation reference for the shipped app — toolchain, files, classes, data flow, constants.
+**Companion:** [`docs/PRD.md`](./PRD.md) owns product intent, audience, per-game rules and the reasons behind the behaviour. Where this document describes *what* a mechanism does, the PRD is the place to look for *why*.
+
+## Contents
+
+1. [Toolchain and commands](#1-toolchain-and-commands)
+   - [1.1 Versions](#11-versions)
+   - [1.2 Package scripts](#12-package-scripts)
+   - [1.3 Biome](#13-biome)
+   - [1.4 TypeScript and Vitest configuration](#14-typescript-and-vitest-configuration)
+2. [Repository layout](#2-repository-layout)
+   - [2.1 Root](#21-root)
+   - [2.2 Source tree](#22-source-tree)
+   - [2.3 Asset corpus](#23-asset-corpus)
+3. [Boot and the asset budget](#3-boot-and-the-asset-budget)
+   - [3.1 Phaser configuration](#31-phaser-configuration)
+   - [3.2 BootScene](#32-bootscene)
+   - [3.3 PreloadScene and the boot asset table](#33-preloadscene-and-the-boot-asset-table)
+   - [3.4 Texture tiers](#34-texture-tiers)
+   - [3.5 In-chunk art](#35-in-chunk-art)
+   - [3.6 What the budget costs](#36-what-the-budget-costs)
+4. [Scene architecture](#4-scene-architecture)
+   - [4.1 Shell scenes and the lazy registry](#41-shell-scenes-and-the-lazy-registry)
+   - [4.2 GameSceneBase](#42-gamescenebase)
+   - [4.3 ChoiceRoundScene](#43-choiceroundscene)
+   - [4.4 GroupMathScene](#44-groupmathscene)
+   - [4.5 Which game extends what](#45-which-game-extends-what)
+   - [4.6 Lifecycle and shutdown](#46-lifecycle-and-shutdown)
+5. [Components](#5-components)
+   - [5.1 RoundNarrator](#51-roundnarrator)
+   - [5.2 Mascot](#52-mascot)
+   - [5.3 ParentLock](#53-parentlock)
+   - [5.4 SpeakerButton](#54-speakerbutton)
+   - [5.5 SettingsPanel and the settings group](#55-settingspanel-and-the-settings-group)
+   - [5.6 ProfileChip and PlayTimeIndicator](#56-profilechip-and-playtimeindicator)
+   - [5.7 PwaToast and PwaToasts](#57-pwatost-and-pwatoasts)
+6. [State and storage](#6-state-and-storage)
+   - [6.1 Keys and cache](#61-keys-and-cache)
+   - [6.2 Schema v2](#62-schema-v2)
+   - [6.3 Facade functions](#63-facade-functions)
+   - [6.4 Migration and normalisation](#64-migration-and-normalisation)
+   - [6.5 The write path and its limitation](#65-the-write-path-and-its-limitation)
+7. [Game logic modules](#7-game-logic-modules)
+   - [7.1 The module list](#71-the-module-list)
+   - [7.2 The round contract](#72-the-round-contract)
+   - [7.3 Adaptive banding](#73-adaptive-banding)
+   - [7.4 Randomness](#74-randomness)
+8. [Audio](#8-audio)
+   - [8.1 AudioManager lifecycle](#81-audiomanager-lifecycle)
+   - [8.2 Sound effects](#82-sound-effects)
+   - [8.3 Background music, ducking and the watchdog](#83-background-music-ducking-and-the-watchdog)
+   - [8.4 Visibility policy](#84-visibility-policy)
+   - [8.5 Speech](#85-speech)
+   - [8.6 Toggles and persistence](#86-toggles-and-persistence)
+9. [Motion and feedback](#9-motion-and-feedback)
+   - [9.1 Reduced-motion helpers](#91-reduced-motion-helpers)
+   - [9.2 Scene transitions](#92-scene-transitions)
+   - [9.3 Press, drag and completion feedback](#93-press-drag-and-completion-feedback)
+   - [9.4 Tween values](#94-tween-values)
+10. [Testing](#10-testing)
+    - [10.1 Runner and mocks](#101-runner-and-mocks)
+    - [10.2 Suite shape](#102-suite-shape)
+    - [10.3 Coverage gates](#103-coverage-gates)
+    - [10.4 What unit tests cannot cover](#104-what-unit-tests-cannot-cover)
+11. [Build, PWA and CI](#11-build-pwa-and-ci)
+    - [11.1 Vite build](#111-vite-build)
+    - [11.2 PWA configuration](#112-pwa-configuration)
+    - [11.3 Validator scripts](#113-validator-scripts)
+    - [11.4 GitHub Actions](#114-github-actions)
+    - [11.5 Container and host](#115-container-and-host)
+12. [See also](#12-see-also)
 
 ---
 
-## 1. Technology Stack
+## 1. Toolchain and commands
 
-| Component | Technology | Version | Rationale |
-|---|---|---|---|
-| Game Engine | Phaser 4 | 4.2.1 | Latest stable 2D framework with SVG rasterization, Arcade Physics, scene management |
-| Language | TypeScript | 7.0.2 | Type safety for scenes, components, shared interfaces |
-| Build Tool | Vite | 8.1.5 | Fast HMR dev server, ES module bundling, plugin ecosystem |
-| PWA | vite-plugin-pwa | 1.3.0 | Auto-generated service worker + manifest, precaching, prompt-based updates |
-| Testing | Vitest | 4.1.10 | Native Vite integration, fast test runner |
-| Coverage | @vitest/coverage-v8 | 4.1.10 | V8-based code coverage provider |
-| Test Environment | happy-dom | 18.0.1 | Lightweight DOM implementation for unit tests |
-| Linting/Formatting | Biome | 2.5.5 | All-in-one linter and formatter |
-| Package Manager | pnpm | 11.7.0 | Fast, disk-efficient, strict dependency resolution — pinned via corepack in the Dockerfile and `pnpm/action-setup` in CI (2026-08-02) |
-| Audio | Web Audio API | Browser native | Synthesized tones for Game 5 frog notes + gameplay SFX (correct, incorrect, win, sticker) + Game 3 pop/wake sounds + idle-attract chime — no file overhead |
+### 1.1 Versions
 
-### Dependencies (`package.json`)
+| Tool | Version | Where pinned |
+| --- | --- | --- |
+| Node.js | 22 | `Dockerfile`, `.github/workflows/ci.yml` |
+| pnpm | 11.7.0 | `corepack prepare pnpm@11.7.0` in `Dockerfile`; `pnpm/action-setup@v6` in CI |
+| TypeScript | `^7.0.2` | `package.json` |
+| Phaser | `^4.2.1` | `package.json` (only runtime dependency) |
+| Vite | `^8.1.5` | `package.json` |
+| vite-plugin-pwa | `^1.3.0` | `package.json` |
+| Vitest + `@vitest/coverage-v8` | `^4.1.10` | `package.json` |
+| happy-dom | `^18.0.1` | `package.json` |
+| Biome | `^2.5.5` | `package.json` |
+| `playwright-core` | `^1.64.1` | `package.json` — used by `scripts/validate-boot.js` only |
+| `serve` | `^14.2.6` | `package.json` |
+| `workbox-window` | `^7.4.1` | `package.json` — `registerType: "prompt"` plumbing |
 
-```json
-{
-  "dependencies": {
-    "phaser": "^4.2.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.5",
-    "@vitest/coverage-v8": "^4.1.10",
-    "happy-dom": "^18.0.1",
-    "typescript": "^7.0.2",
-    "vite": "^8.1.5",
-    "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.10"
-  }
-}
-```
+`phaser` is the only entry under `dependencies`; everything else is a dev dependency.
+
+### 1.2 Package scripts
+
+| Script | Command | Used by |
+| --- | --- | --- |
+| `dev` | `vite` | local development |
+| `build` | `vite build` | CI, Docker |
+| `preview` | `vite preview` | `validate-boot.js` target |
+| `test` | `vitest` | local watch |
+| `test:coverage` | `vitest run --coverage` | local gate |
+| `typecheck` | `tsc --noEmit` | CI |
+| `check` | `biome check` | CI |
+| `lint` | `biome lint` | local |
+| `format` | `biome format --write` | local |
+
+### 1.3 Biome
+
+`biome.json` scopes the tool to `src/**/*.ts`, `scripts/**/*.js` and `vite.config.ts`. Formatter: 2-space indent, line width 100, double quotes, semicolons always, trailing commas in all positions. Linter runs the `recommended` preset with `source.organizeImports` on.
+
+The `$schema` field is pinned to 2.5.5 while `package.json` allows any 2.5.x, so an install that resolves 2.5.10 reports a schema-version info message on every run and still exits 0. Existing warnings (one `noNonNullAssertion` in a scene test) are reported, not fatal.
+
+### 1.4 TypeScript and Vitest configuration
+
+`tsconfig.json` targets ES2023 with `module: ESNext`, `moduleResolution: bundler`, `strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`, `resolveJsonModule`, `skipLibCheck`, and `types: ["vitest/globals"]`. `include` is `src`, so `scripts/` is type-checked by Biome only.
+
+Vitest is configured inside `vite.config.ts`: `environment: "happy-dom"`, `globals: true`, `include: ["src/__tests__/**/*.test.ts"]`. Coverage uses the v8 provider with `text` and `html` reporters over `src/**/*.ts`, excluding `src/__tests__/**`, `src/main.ts` and `src/types/**`; thresholds are lines 95, functions 88, branches 85, statements 90.
 
 ---
 
-## 2. Project Directory Structure
+## 2. Repository layout
+
+### 2.1 Root
 
 ```
-aby-little-lab/
-├── index.html                      # Vite entry point
-├── package.json                    # Dependencies & scripts
-├── tsconfig.json                   # TypeScript compiler config
-├── vite.config.ts                  # Vite + vite-plugin-pwa + Vitest configuration
-├── biome.json                      # Biome linter/formatter config (double quotes, 2-space)
+/
+├── index.html                    # #game-container, viewport meta, iOS meta, theme colour
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── tsconfig.json
+├── vite.config.ts                # build, PWA, Vitest and coverage config in one file
+├── biome.json
+├── Dockerfile                    # node:22-alpine build → nginx:1.27-alpine runtime
+├── .dockerignore
+├── nginx.conf
 ├── public/
-│   ├── audio/                      # Runtime audio served at /audio/ (BGM)
-│   ├── fonts/                      # Bundled Baloo 2 variable font (WOFF2, precached, 2026-08-06)
-│   └── icons/                      # PWA icons (192px, 512px, maskable)
+│   ├── audio/bgm.mp3
+│   ├── fonts/baloo2-latin.woff2
+│   └── icons/{icon-192.png, icon-512.png, icon-maskable-512.png}
+├── scripts/
+│   ├── validate-bundle.js
+│   ├── validate-pwa.js
+│   ├── validate-boot.js
+│   └── render-svg-contact-sheets.mjs
+├── .github/workflows/ci.yml
+├── docs/
+├── conductor/
 └── src/
-    ├── main.ts                     # Phaser 4 game config & shell scene register (game scenes lazy-loaded via sceneRegistry)
-    ├── vite-env.d.ts               # Vite type declarations
-    ├── scenes/
-    │   ├── BootScene.ts            # Orientation lock & system initialization
-    │   ├── PreloadScene.ts         # Progress bar & asset preloading
-    │   ├── HubScene.ts             # Game selection grid, sticker shelf, idle attract & settings parental lock; tile taps lazy-load game scenes
-    │   ├── sceneRegistry.ts        # Lazy scene registry (per-key dynamic-import loaders + ensureSceneLoaded runtime registration, 2026-08-02)
-    │   ├── ShapeSorterScene.ts     # Mini-Game 1
-    │   ├── AnimalTraceScene.ts     # Mini-Game 2
-    │   ├── PopFreezeScene.ts       # Mini-Game 3
-    │   ├── ShadowMatchScene.ts     # Mini-Game 4
-    │   ├── MusicalMemoryScene.ts   # Mini-Game 5
-    │   ├── BigSmallScene.ts        # Mini-Game 6
-    │   ├── PatternBuilderScene.ts  # Mini-Game 7
-    │   ├── AlphabetScene.ts        # Mini-Game 8
-    │   ├── WordMatchScene.ts       # Mini-Game 9
-    │   ├── WordBuilderScene.ts     # Mini-Game 10
-    │   ├── HowManyScene.ts         # Mini-Game 11
-    │   ├── FirstSoundsScene.ts     # Mini-Game 12
-    │   └── MoreLessScene.ts        # Mini-Game 13
-    │   └── OddOneOutScene.ts       # Mini-Game 14
-    │   └── ColorMatchScene.ts      # Mini-Game 15
-    │   └── AddItUpScene.ts         # Mini-Game 16
-    │   └── TakeAwayScene.ts        # Mini-Game 17
-    │   └── MemoryMatchScene.ts     # Mini-Game 18
-    ├── components/
-    │   ├── ParentLock.ts           # Hardened long-press gate (hold 3s, one hold at a time, pointercancel-safe, circular progress ring, full cleanup)
-    │   ├── SettingsPanel.ts        # Parental BGM/SFX modal overlay + context-aware install control (Install App / How to Install / hidden)
-    │   ├── PwaToast.ts             # Hub lifecycle toast (update-ready + offline-ready, app-styled, reduced-motion-aware)
-    │   ├── Mascot.ts               # Professor Hoot mascot (wave/nod/cheer/curious/flapGreeting/idleLoop + createCornerMascot factory; tween-only, reduced-motion-aware)
-    │   └── SpeakerButton.ts        # Shared 96×96 replay speaker button (textless SVG icon, press feedback, 2026-08-06)
-    ├── audio/
-    │   └── AudioManager.ts         # BGM/SFX playback (HTML5 Audio) + frog note synthesis + gameplay SFX synthesis + Game 3 pop/wake synthesis (Web Audio API); singleton via getInstance()
-    ├── game/
-    │   ├── shapeSorterLogic.ts    # Pure game logic (Fisher-Yates shuffle, shape selection, match detection)
-    │   ├── animalTraceLogic.ts    # Pure game logic (pair selection/shuffle, path progress, completion detection, waypoint generation)
-    │   ├── popFreezeLogic.ts     # Pure game logic (round state, bubble type selection, spawn config, pop/wake registration)
-    │   ├── shadowMatchLogic.ts   # Pure game logic (independent shuffle, round generation, match detection, win detection)
-    │   ├── musicalMemoryLogic.ts # Pure game logic (sequence generation, note appending, input validation, round/win detection)
-    │   ├── bigSmallLogic.ts     # Pure game logic (toy selection, dual-scale instance creation, round generation, scale-category match detection, win detection)
-    │   ├── patternBuilderLogic.ts # Pure game logic (pattern row generation, gap placement, 3-unique-choice generation, playthrough generation)
-    │   ├── alphabetLogic.ts       # Pure game logic (letter playthrough generation, round generation with 4 unique choices, evaluation, win detection)
-    │   └── moreLessLogic.ts       # Pure game logic (quantity comparison, more/less round generation, evaluation, win detection)
-    │   └── oddOneOutLogic.ts      # Pure game logic (visual discrimination pools, banded round/playthrough generation, evaluation)
-    ├── types/
-    │   └── index.ts                # Shared interfaces (GameId, StickerData, Settings, AppStorage)
-    ├── utils/
-    │   ├── storage.ts              # localStorage CRUD (load, save, earnSticker, hasSticker, getSettings, updateSettings, resetProgress)
-    │   ├── motion.ts               # Reduced-motion helpers (isReducedMotion, motionDuration, motionScale)
-    │   ├── sceneTransitions.ts     # Crossfade scene transitions (transitionToScene, sceneEntrance)
-    │   ├── completionEffect.ts     # Bounded success effects (createCompletionSplash, createWinCelebration)
-    │   ├── dragJuice.ts            # Per-game drag juice (attachDragLift, attachDropZoneHighlight, snapToSlot)
-    │   ├── pressFeedback.ts        # Press squish + optional spring-back feedback (attachPressFeedback)
-    │   ├── speech.ts               # TTS letter pronunciation (speakLetter, isSpeechSupported; en-US, SFX-toggle aware, graceful fallback)
-    │   ├── pwaBridge.ts            # Testable wrapper around virtual:pwa-register (needRefresh/offlineReady events, Hub-active queue, updateNow)
-    │   ├── pwaInstall.ts           # Install-state machine (installable/ios-howto/hidden), beforeinstallprompt capture, iOS UA detection
-    │   ├── typography.ts           # Baloo 2 font family + size presets + textStyle() helper (2026-08-06)
-    │   └── viewportZoom.ts         # Pinch-zoom viewport toggle for the Settings panel (allow/restore, 2026-08-06)
-    ├── assets/
-    │   └── svg/                    # AI-Generated SVG Assets
-    │       ├── shapes/             # Circle, Square, Triangle, Star, Heart, Crescent SVGs + cutouts
-    │       ├── animals/            # Monkey, Rabbit, Cat, Dog, Elephant, Pig (Game 2 + reused as Game 3 sleeping-animal content) + Frog variants (Game 5)
-    │       ├── items/              # Banana, Carrot, Fish, Bone, Peanut, Apple (Game 2 food) + House, Tree, Car, Boat, Ball, Umbrella, Airplane, Mushroom (Game 4 objects) + Lily Pad (Game 5)
-    │       ├── toys/               # Teddy Bear, Toy Car, Toy Ball, Toy Block, Toy Rocket, Toy Drum, Toy Box (Game 6)
-    │       ├── shadows/            # Shadow silhouettes for Game 4 (shadow_house, shadow_tree, shadow_car, shadow_boat, shadow_ball, shadow_umbrella — #2D3748 fill)
-    │       ├── letters/            # Uppercase letter SVGs for Game 8 (letter_a..letter_z — identical #2B6CB0 fill / #2D3748 stroke styling)
-    │       ├── stickers/           # Reward stickers (one per mini-game)
-    │       ├── ui/                 # Bubbles, sleep glyph, speaker icon + Mascot poses
-    │       └── ui/tiles/           # 14 storybook game-tile icons (2026-08-06, +1 on 2026-08-07, +2 on 2026-08-08)
-    ├── styles/
-    │   └── style.css               # Touch locks (-webkit-user-select, touch-action: none)
-    └── __tests__/
-        ├── audio/                  # AudioManager tests (BGM/SFX/synthesis + singleton)
-        ├── components/             # ParentLock, Mascot tests
-        ├── game/                   # Game logic tests (shapeSorterLogic, animalTraceLogic, popFreezeLogic, shadowMatchLogic, musicalMemoryLogic, bigSmallLogic, patternBuilderLogic)
-        ├── scenes/                 # Scene-level tests (navigation incl. lazy scene registration, drag/drop, completion, registry)
-        └── utils/                  # Storage, motion, sceneTransitions, completionEffect, dragJuice, and pressFeedback tests
 ```
+
+`public/` is copied verbatim into `dist/`; nothing there is imported by application code. The BGM file lives in `public/audio/`, not `src/assets/audio/` (that folder holds only a `.gitkeep`).
+
+### 2.2 Source tree
+
+Every production file under `src/` is listed below. Test files live under `src/__tests__/` and are described in [§10](#10-testing) instead.
+
+```
+src/
+├── main.ts                                # Phaser.Game config + PWA bridge
+├── vite-env.d.ts
+├── styles/
+│   └── style.css                          # page background, font-face, #game-container
+├── audio/
+│   └── AudioManager.ts                    # singleton: SFX, BGM, ducking, visibility
+├── types/
+│   └── index.ts                           # GameId, Settings, ProfileV2, GameProgress, …
+├── components/                            # 15 files
+│   ├── Mascot.ts
+│   ├── ParentLock.ts
+│   ├── PlayTimeIndicator.ts
+│   ├── ProfileChip.ts
+│   ├── PwaToast.ts
+│   ├── PwaToasts.ts
+│   ├── RoundNarrator.ts
+│   ├── SettingsPanel.ts
+│   ├── SpeakerButton.ts
+│   └── settings/
+│       ├── InstallRow.ts
+│       ├── ProfilesOverlay.ts
+│       ├── ProgressOverlay.ts
+│       ├── ResetModal.ts
+│       ├── VoiceRow.ts
+│       └── primitives.ts
+├── game/                                  # 30 files — pure logic, no Phaser imports
+│   ├── adaptiveLogic.ts
+│   ├── addItUpLogic.ts
+│   ├── alphabetLogic.ts
+│   ├── animalTraceLogic.ts
+│   ├── bigSmallLogic.ts
+│   ├── colorMatchLogic.ts
+│   ├── countLogic.ts
+│   ├── decodeLogic.ts
+│   ├── feelingsFacesLogic.ts
+│   ├── firstSoundsLogic.ts
+│   ├── hubGrid.ts
+│   ├── hubPaging.ts
+│   ├── hubTiles.ts
+│   ├── memoryMatchLogic.ts
+│   ├── moreLessLogic.ts
+│   ├── musicalMemoryLogic.ts
+│   ├── numberOrderLogic.ts
+│   ├── oddOneOutLogic.ts
+│   ├── patternBuilderLogic.ts
+│   ├── playTimeLogic.ts
+│   ├── popFreezeLogic.ts
+│   ├── profileLogic.ts
+│   ├── progressLogic.ts
+│   ├── shadowMatchLogic.ts
+│   ├── shapeSorterLogic.ts
+│   ├── storyOrderArt.ts
+│   ├── storyOrderLogic.ts
+│   ├── takeAwayLogic.ts
+│   ├── voiceLogic.ts
+│   └── wordLogic.ts
+├── scenes/                                # 29 files
+│   ├── AddItUpScene.ts
+│   ├── AlphabetScene.ts
+│   ├── AnimalTraceScene.ts
+│   ├── BigSmallScene.ts
+│   ├── BootScene.ts
+│   ├── ChoiceRoundScene.ts
+│   ├── ColorMatchScene.ts
+│   ├── DecodeItScene.ts
+│   ├── FeelingsFacesScene.ts
+│   ├── FirstSoundsScene.ts
+│   ├── GameSceneBase.ts
+│   ├── GroupMathScene.ts
+│   ├── HowManyScene.ts
+│   ├── HubScene.ts
+│   ├── MemoryMatchScene.ts
+│   ├── MoreLessScene.ts
+│   ├── MusicalMemoryScene.ts
+│   ├── NumberOrderScene.ts
+│   ├── OddOneOutScene.ts
+│   ├── PatternBuilderScene.ts
+│   ├── PopFreezeScene.ts
+│   ├── PreloadScene.ts
+│   ├── ShadowMatchScene.ts
+│   ├── ShapeSorterScene.ts
+│   ├── StoryOrderScene.ts
+│   ├── TakeAwayScene.ts
+│   ├── WordBuilderScene.ts
+│   ├── WordMatchScene.ts
+│   └── sceneRegistry.ts
+├── utils/                                 # 14 files
+│   ├── completionEffect.ts
+│   ├── dragJuice.ts
+│   ├── fonts.ts
+│   ├── motion.ts
+│   ├── pressFeedback.ts
+│   ├── pwaBridge.ts
+│   ├── pwaInstall.ts
+│   ├── sceneTransitions.ts
+│   ├── speech.ts
+│   ├── storage.ts
+│   ├── svgDataUri.ts
+│   ├── textureTiers.ts
+│   ├── typography.ts
+│   └── viewportZoom.ts
+└── assets/
+    ├── audio/                             # empty at runtime; BGM ships from public/
+    └── svg/                               # 202 tracked illustrations, 11 folders
+        ├── animals/                       # 9 files
+        ├── feelings/                      # 4 files
+        ├── items/                         # 23 files
+        ├── letters/                       # 26 files
+        ├── numbers/                       # 10 files
+        ├── shadows/                       # 8 files
+        ├── shapes/                        # 36 files
+        ├── stickers/                      # 22 files
+        ├── stories/                       # 24 files
+        ├── toys/                          # 7 files
+        └── ui/                            # 33 files, of which 21 in ui/tiles/
+```
+
+`.gitkeep` placeholders are tracked in `src/assets/audio/`, `src/assets/svg/{animals,items,shapes,stickers,ui}/`, `src/audio/`, `src/components/`, `src/scenes/`, `src/types/` and `src/utils/`; they are not listed.
+
+### 2.3 Asset corpus
+
+202 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). `src/assets/svg/stories/` is the only folder that is not part of the boot set.
+
+| Folder | Files | What it holds |
+| --- | --- | --- |
+| `animals/` | 9 | `cat`, `dog`, `elephant`, `monkey`, `pig`, `rabbit`, `frog_green`, `frog_blue`, `frog_red` |
+| `feelings/` | 4 | `face_happy`, `face_sad`, `face_angry`, `face_scared` |
+| `items/` | 23 | `airplane`, `apple`, `ball`, `banana`, `bed`, `boat`, `bone`, `bug`, `car`, `carrot`, `cup`, `duck`, `fish`, `fox`, `hat`, `house`, `lilypad`, `map`, `mushroom`, `peanut`, `sun`, `tree`, `umbrella` |
+| `letters/` | 26 | `letter_a` … `letter_z` |
+| `numbers/` | 10 | `numeral_0` … `numeral_9` |
+| `shadows/` | 8 | `shadow_airplane`, `_ball`, `_boat`, `_car`, `_house`, `_mushroom`, `_tree`, `_umbrella` |
+| `shapes/` | 36 | 18 `shape_*` outlines and their 18 `cutout_*` filled twins |
+| `stickers/` | 22 | `sticker_<game>` in `snake_case`, one per game |
+| `stories/` | 24 | 8 story strips of 3 panels (`story_*`) — loaded with the Story Order chunk only |
+| `toys/` | 7 | `teddy_bear`, `toy_ball`, `toy_block`, `toy_box`, `toy_car`, `toy_drum`, `toy_rocket` |
+| `ui/` | 33 | 12 shared UI glyphs (`arrow_up`, `arrow_down`, `bubble`, `card_back`, `equals`, `icon_speaker`, `mascot_idle`, `mascot_celebrate`, `minus`, `plus`, `sleep_zzz`, `tile_feelings_faces`) plus 21 `ui/tiles/tile_*` Hub tiles |
+| **Total** | **202** | |
+
+`shadows/` art is derived from the matching `items/` silhouette rather than drawn separately. Art rules — palette, stroke weights, the 512×512 grid, ASCII-only markup — live in [`docs/SVG_STYLE.md`](./SVG_STYLE.md).
 
 ---
 
-## 3. PWA Configuration (`vite.config.ts`)
+## 3. Boot and the asset budget
 
-The PWA manifest and service worker are configured via `vite-plugin-pwa`. No source `manifest.json` or `sw.js` files are maintained; production builds generate `manifest.webmanifest`, `sw.js`, and the Workbox runtime. Emitted build assets are precached, and `includeAssets` explicitly adds the runtime BGM file and the bundled Baloo 2 font from `public/` (2026-08-06). `registerType: "prompt"` means updates are deferred until the user taps "Update now" on the Hub toast (`src/components/PwaToast.ts` via `src/utils/pwaBridge.ts`).
+### 3.1 Phaser configuration
 
-```typescript
-/// <reference types="vitest/config" />
-import { defineConfig } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
+`src/main.ts` holds the only `Phaser.GameConfig`:
 
-export default defineConfig({
-  plugins: [
-    VitePWA({
-      registerType: "prompt",
-      includeAssets: ["audio/bgm.mp3", "fonts/baloo2-latin.woff2"],
-      manifest: {
-        name: "Aby's Little Lab",
-        short_name: "Aby Lab",
-        start_url: "./index.html",
-        display: "standalone",
-        orientation: "landscape",
-        background_color: "#FAF9F6",
-        theme_color: "#2B6CB0",
-        icons: [
-          { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-          { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-        ],
-      },
-    }),
-  ],
-  test: {
-    environment: "happy-dom",
-    globals: true,
-    include: ["src/__tests__/**/*.test.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "html"],
-      include: ["src/**/*.ts"],
-      exclude: ["src/__tests__/**", "src/main.ts", "src/types/**"],
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80,
-      },
-    },
-  },
-});
+```ts
+type: Phaser.AUTO,
+width: 1024, height: 768,
+parent: "game-container",
+dom: { createContainer: true },
+transparent: true,
+scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
+scene: [BootScene, PreloadScene, HubScene],
 ```
 
-After `pnpm run build`, run `node scripts/validate-pwa.js` to verify the generated manifest, service worker, icon, BGM asset, and precache entries. Phone/tablet installation and offline checks must use an HTTPS private static host or tunnel.
+`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame.
+
+### 3.2 BootScene
+
+`BootScene.create()` is `async` and runs four steps in order:
+
+1. `AudioManager.getInstance().init()`.
+2. `setPreferredVoiceURI(getSettings().preferredVoiceURI)` — the stored voice is applied before any scene speaks.
+3. `screen.orientation.lock("landscape")`, guarded by `typeof orientation.lock === "function"` and a swallowed rejection. iOS WebKit exposes `screen.orientation` without `lock()`; calling it throws synchronously and would strand the app on a black screen.
+4. `await ensureGlyphFontLoaded()` from `src/utils/fonts.ts`, then `this.scene.start("Preload")`.
+
+The font gate exists because the letter and numeral SVGs set `font-family="'Baloo 2', Arial, …"` on a `<text>` element, and Phaser rasterises SVG text once at load time. Without the gate the glyphs silently fall back to Arial on first visit. `ensureGlyphFontLoaded()` never throws: it races `document.fonts.load` against a 2.5 s timeout and resolves either way.
+
+### 3.3 PreloadScene and the boot asset table
+
+`src/scenes/PreloadScene.ts` imports each boot SVG with Vite's `?raw` suffix and exports `SHAPE_ASSETS`, an array of **178** `{ key, svg }` entries. The keys are the texture keys used everywhere else, e.g. `shape_circle`, `cutout_star`, `animal_cat`, `food_banana`, `sm_house`, `sm_shadow_house`, `letter_a`, `numeral_7`, `sticker_story_order`, `tile_story_order`, `face_happy`, `mascot_idle`.
+
+`preload()` draws a brand lockup (title at `centerY - 110`, tagline at `centerY - 70`, a 300×30 progress bar over a 320×50 box) and wires `load.on("progress")` and `load.on("complete")` to it. In development only, a `/* v8 ignore next */`-guarded block profiles per-file load time and logs `[preload] N files in Xms`; the block is statically removed from production builds.
+
+Each entry is registered with:
+
+```ts
+this.load.svg(asset.key, toDataUri(asset.svg), { width: size, height: size });
+```
+
+where `size = textureSizeFor(asset.key)` ([§3.4](#34-texture-tiers)). `toDataUri()` in `src/utils/svgDataUri.ts` is one line — `data:image/svg+xml;base64,${btoa(svg)}` — because Phaser's XHR loader decodes `data:` URLs with `atob`, and `btoa` throws on anything outside Latin-1, which is why every asset's markup stays ASCII.
+
+`create()` calls `transitionToScene(this, "Hub")`.
+
+### 3.4 Texture tiers
+
+Historically every SVG was rasterised at 512×512, which reserved ~184 MB of GPU texture memory (176 textures × 512² × 4 B) while most consumers display far smaller. `src/utils/textureTiers.ts` sizes each texture for its largest display context:
+
+| Tier | Size | Applied to |
+| --- | --- | --- |
+| `icon` | 160 | `tile_*`, `sm_shadow_*`, and the exact keys `minus`, `plus`, `equals`, `sleep_zzz`, `icon_speaker` |
+| `card` | 256 | default — gameplay art, stickers, letters, numerals, story panels |
+| `hero` | 512 | `mascot_*` (the `MASCOT_SCALE = 0.2` maths assumes a 512 px texture) |
+
+`tierForKey()` walks an ordered rule list (first match wins) and `textureSizeFor()` resolves the size. `displayScale(key, displaySize)` returns `displaySize / textureSizeFor(key)` and replaces hard-coded `displaySize / 512` at call sites, so scales stay correct as tiers change.
+
+The file's header comment groups letters and numerals under `icon`, but the rule table has no letter or numeral entry, so `letter_*` and `numeral_*` resolve to `card` (256 px). The rule table is what runs.
+
+### 3.5 In-chunk art
+
+Story Order's 24 panel drawings are the first art that does not ride in the shell. `src/game/storyOrderArt.ts` imports them as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 24 SVG strings land in the Story Order chunk. `src/__tests__/game/storyOrderArt.test.ts` asserts that `PreloadScene` never imports the module — the boundary is a test, not a convention.
+
+The pattern generalises: any future art that only one game needs belongs in a `<game>Art.ts` module under `src/game/` and a `preload()` in that scene, not in the 178-entry boot table.
+
+### 3.6 What the budget costs
+
+| Measurement | Value | Source |
+| --- | --- | --- |
+| Boot textures | 178 | `SHAPE_ASSETS` in `src/scenes/PreloadScene.ts` |
+| Shell entry | 195.4 kB, gated at 200 kB | `node scripts/validate-bundle.js` |
+| Phaser vendor chunk | 1342.6 kB as the validator reports it (1,374.8 kB as the Vite build prints it — same 1,374,822 bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
+| Story Order chunk | ~33.9 kB, includes all 24 panel SVGs | build output |
+| Precache entries | 45 (1,695 KiB) | `precache  45 entries` from the PWA build step |
+
+The shell carries the three shell scenes, the 15 components, the 30 logic modules, the 14 utils and all 178 boot textures as strings. Game scenes are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
 ---
 
-## 4. Phaser Scale Manager Configuration (`src/main.ts`)
+## 4. Scene architecture
 
-```typescript
-import "./styles/style.css";
-import { registerSW } from "virtual:pwa-register";
-import Phaser from "phaser";
-import { BootScene } from "./scenes/BootScene";
-import { HubScene } from "./scenes/HubScene";
-import { PreloadScene } from "./scenes/PreloadScene";
-import { initPwaBridge } from "./utils/pwaBridge";
+### 4.1 Shell scenes and the lazy registry
 
-const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  width: 1024,
-  height: 768,
-  parent: "game-container",
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { x: 0, y: 0 },
-    },
-  },
-  // Shell scenes only — the 8 game scenes are lazy-loaded and registered
-  // at runtime via ensureSceneLoaded() when a Hub tile is tapped.
-  scene: [BootScene, PreloadScene, HubScene],
-};
+Only `BootScene`, `PreloadScene` and `HubScene` are registered at construction time. The other 22 scenes are registered on demand.
 
-new Phaser.Game(config);
+`src/scenes/sceneRegistry.ts` exports `sceneLoaders`, a `Record<sceneKey, () => Promise<SceneType>>` with one dynamic import per game, keyed identically to the `sceneKey` values in `GAME_TILES`. `ensureSceneLoaded(scene, key, loaders = sceneLoaders)`:
+
+1. returns immediately when `scene.scene.get(key)` already exists;
+2. awaits the loader;
+3. re-checks `scene.scene.get(key)` **after** the await, then `scene.scene.add(key, sceneClass)`.
+
+The second check is not redundant. Phaser 4's `SceneManager.add` does not reject duplicates — it silently leaks a second instance — so a fast double-tap on a Hub tile would otherwise register two copies. The third parameter exists so tests can inject stub loaders.
+
+Phaser 4 cannot express this in the config `scene` array: entries there are invoked with `new`, so no loader function can be async. Hub tile taps therefore do `void ensureSceneLoaded(this, tile.sceneKey).then(() => transitionToScene(this, tile.sceneKey))`.
+
+### 4.2 GameSceneBase
+
+`src/scenes/GameSceneBase.ts` is an abstract `Phaser.Scene` whose constructor takes the scene key and obtains the `AudioManager` singleton. It owns everything every game used to duplicate:
+
+| Member | Behaviour |
+| --- | --- |
+| `createBackButton()` | "← Back" text at (20, 20) with a 96×96 hit rectangle, wrapped in `ParentLock`, then `attachPressFeedback` |
+| `createCornerMascot()` | bottom-right mascot via `createCornerMascotComponent`, then `curious()` |
+| `createRoundNarrator(options)` | destroys any previous narrator (scene instances are reused across visits) and builds a new `RoundNarrator` |
+| `createSpokenInstruction(text, options)` | centred 26 px wrapped label plus a narrator glyph offset right by `INSTRUCTION_SPEAKER_GAP` |
+| `createProgressDots(count)` / `fillProgressDot(index)` | outlined dots at `PROGRESS_DOT_Y = 60`, `PROGRESS_DOT_SPACING = 40`, `PROGRESS_DOT_RADIUS = 8`; filling tweens `DOT_POP_SCALE 1.4` (reduced 1.2) over 250 ms (reduced 150 ms) |
+| `recordCorrect()` / `recordWrong()` | increment session counters flushed by `completeGame()` |
+| `completeGame(gameId)` | locks input, `recordGameResult`, `playWin()`, big mascot cheer, win celebration, first-time sticker award + sticker animation, then a 3 s `AUTO_RETURN_DELAY` return to the Hub carrying `{ justEarned }` |
+| `registerShutdownCleanup()` | on `shutdown`, destroys the parent lock, mascot, narrator, standalone speaker and instruction label |
+| `speaker` getter/setter | prefers the narrator's glyph; the setter only ever fills the `standaloneSpeaker` slot, so no scene builds a `SpeakerButton` by hand |
+
+Shared constants: `NEXT_ROUND_DELAY = 700`, `AUTO_RETURN_DELAY = 3000`, wiggle `4°`/`2°` over 350/200 ms repeating 3×, `OUTLINE_WIDTH = 4`, `STICKER_DISPLAY_SIZE = 256`, `WIN_TWEEN_DURATION = 300`, `SUCCESS_COLOR = 0x68d391`, `CARD_BG_COLOR = 0xffffff`, `OUTLINE_COLOR = 0x2d3748`, `SPEAKER_OFFSET = 70`, `INSTRUCTION_Y = 112`, `INSTRUCTION_WRAP_WIDTH = 620`, `INSTRUCTION_SPEAKER_GAP = 36`. `stickerKeyFor(gameId)` converts `-` to `_` before the `sticker_` prefix.
+
+### 4.3 ChoiceRoundScene
+
+`src/scenes/ChoiceRoundScene.ts` implements the shared round loop for tap-one-card games. It owns the round prompt, the card grid, correct/wrong feedback, the 700 ms advance, progress-dot filling, the success flash and the reduced-motion wiggle.
+
+Subclasses implement:
+
+```ts
+totalRounds(): number
+gameId(): GameId
+buildRoundContent(): void
+isChoiceCorrect(index: number): boolean
+clearRoundContent(): void
 ```
 
-### Bundle Code Splitting & Lazy Scene Loading (2026-08-02)
+and may override `wiggleTargets(index)` (default: the tapped card's content), `onCorrect(index)` (before shared feedback), `onWrong(index)` (after it) and `onWiggleComplete(index)`.
 
-**Design decision:** only the shell scenes (`BootScene`, `PreloadScene`, `HubScene`) are statically registered; the twenty game scenes are lazy-loaded (23 registry loaders incl. aliases) so the startup bundle excludes their code (track `code-splitting_20260802`, archived at `conductor/archive/code-splitting_20260802/`; Games 19–20 registered by their own tracks in 2026-08).
+Lifecycle: `renderRound()` = `clearRound()` + `buildRoundContent()`. `clearRound()` destroys every tracked object and empties `choiceTargets`, `cardContents` and `roundDisplayObjects`. `createChoiceTarget(x, y, size, index, shape?)` draws the card and registers `pointerdown` **before** `attachPressFeedback`, so the game handler always runs first. Hit areas are inflated to `MIN_HIT_AREA = 96` px and offset to stay centred, which keeps small cards tappable.
 
-**Phaser 4.2.1 limitation (verified in `SceneManager.js`):** the `scene` array does **not** support async/lazy loaders. `SceneType` includes `Function`, but `createSceneFromFunction` invokes `new scene()` synchronously — no promise is awaited, so a dynamic-import function cannot be used as an array entry. The supported pattern is runtime registration: `await import()` the scene module, then `scene.add(key, SceneClass)` before `scene.start(key)`.
+Answer flow: `handleCorrect` locks input, plays the correct SFX, records the tap, runs `onCorrect`, cheers the mascot, fills the dot, flashes the card for `SUCCESS_FLASH_DURATION = 250` ms and schedules `advanceRound` after `NEXT_ROUND_DELAY`. `handleIncorrect` plays the incorrect SFX, records the tap, nods the mascot and wiggles the targets with `Sine.inOut`, then runs `onWrong`. `advanceRound` either completes the game or re-renders.
 
-**`src/scenes/sceneRegistry.ts`:**
+`resolveWholeRound(correct)` is the whole-board variant used by Story Order: it routes to the same handlers with `WHOLE_ROUND = -1`, skipping the single-card flash; subclasses must supply `wiggleTargets` (and usually `onWiggleComplete`).
 
-```typescript
-export const sceneLoaders: Record<string, () => Promise<Phaser.Types.Scenes.SceneType>> = {
-  ShapeSorter: () => import("./ShapeSorterScene").then((m) => m.ShapeSorterScene),
-  // ...same pattern for AnimalTrace, PopFreeze, ShadowMatch, MusicalMemory, BigSmall, PatternBuilder
-};
+### 4.4 GroupMathScene
 
-export async function ensureSceneLoaded(scene, key, loaders = sceneLoaders): Promise<void> {
-  if (scene.scene.get(key)) return; // already registered
-  const sceneClass = await loaders[key]();
-  if (!scene.scene.get(key)) scene.scene.add(key, sceneClass); // idempotent under concurrent taps
+`src/scenes/GroupMathScene.ts` adds the two-dot-group equation layout on top of `ChoiceRoundScene`. It is generic over a round type and driven entirely by one `config`:
+
+```ts
+interface GroupMathConfig<Round> {
+  instruction: string;
+  gameId: GameId;
+  operationCue: "plus" | "minus";
+  buildPlaythrough: (shift: BandShift) => Round[];
+  isCorrect: (options, selectedIndex, target) => boolean;
+  promptCards: (round) => readonly [GroupMathCard, GroupMathCard];
 }
 ```
 
-**Hub wiring:** the tile `pointerup` handler runs `void ensureSceneLoaded(this, GAME_TILES[i].sceneKey).then(() => transitionToScene(this, GAME_TILES[i].sceneKey))` — the chunk loads before the fade-out starts the target scene.
+`GROUP_MATH_ROUND_COUNT = 6` (two per band). Layout constants: `PROMPT_CARD_SIZE = 180`, `ANSWER_CARD_SIZE = 170`, `SYMBOL_DISPLAY_SIZE = 96`, `PROMPT_CARD_COUNT = 2`, `PROMPT_Y_OFFSET = 140`, `ANSWERS_Y_OFFSET = 170`, `ITEM_SIZE = 38`, `ITEMS_PER_ROW = 4`, `ITEM_GAP = 3`, both spacings 24. `create()` runs `sceneEntrance`, corner mascot, back button, progress dots, spoken instruction, then `rounds = config.buildPlaythrough(getAdaptiveBandShift(config.gameId))`. `buildRoundContent()` draws the equation row (card, cue, card, equals) above four answer cards, each holding a centred dot group. `wiggleTargets(index)` wiggles the prompt cards after the tapped answer card.
 
-**Race safety:** `SceneManager.add` on an already-registered key does **not** throw for instances — it silently pushes a duplicate instance into `this.scenes`. `ensureSceneLoaded` therefore re-checks registration after the import resolves, and the review-fix test covers two concurrent loads registering exactly once.
+### 4.5 Which game extends what
 
-**Build output:** the entry chunk (~1.44 MB / 372 KB gzip, dominated by Phaser) contains only the shell; each game scene ships as its own 3–5 KB chunk (`dist/assets/<SceneName>-*.js`). Rollup auto-hoists shared modules (`shapeSorterLogic`, `dragJuice`, `completionEffect`) into common chunks — no `manualChunks` config. PWA precache is unchanged: `generateSW` precaches every emitted chunk (20 entries), preserving full offline play.
+| # | Game | Scene | Base | Logic | Adaptive |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Shape Sorter | `ShapeSorterScene` | `GameSceneBase` | `shapeSorterLogic` | fixed |
+| 2 | Animal Trace | `AnimalTraceScene` | `GameSceneBase` | `animalTraceLogic` | fixed |
+| 3 | Pop & Freeze | `PopFreezeScene` | `GameSceneBase` | `popFreezeLogic` | fixed |
+| 4 | Shadow Match | `ShadowMatchScene` | `GameSceneBase` | `shadowMatchLogic` | fixed |
+| 5 | Musical Memory | `MusicalMemoryScene` | `GameSceneBase` | `musicalMemoryLogic` | adaptive |
+| 6 | Big vs. Small | `BigSmallScene` | `GameSceneBase` | `bigSmallLogic` | fixed |
+| 7 | Pattern Builder | `PatternBuilderScene` | `ChoiceRoundScene` | `patternBuilderLogic`, `shapeSorterLogic` | adaptive |
+| 8 | Find the Letter | `AlphabetScene` | `ChoiceRoundScene` | `alphabetLogic` | adaptive |
+| 9 | Find the Word | `WordMatchScene` | `ChoiceRoundScene` | `wordLogic` | adaptive |
+| 10 | Build the Word | `WordBuilderScene` | `GameSceneBase` | `wordLogic` | adaptive |
+| 11 | How Many? | `HowManyScene` | `ChoiceRoundScene` | `countLogic` | adaptive |
+| 12 | First Sounds | `FirstSoundsScene` | `ChoiceRoundScene` | `firstSoundsLogic` | adaptive |
+| 13 | More or Less | `MoreLessScene` | `ChoiceRoundScene` | `moreLessLogic` | adaptive |
+| 14 | Odd One Out | `OddOneOutScene` | `ChoiceRoundScene` | `oddOneOutLogic` | adaptive |
+| 15 | Color Match | `ColorMatchScene` | `ChoiceRoundScene` | `colorMatchLogic` | adaptive |
+| 16 | Add It Up | `AddItUpScene` | `GroupMathScene` | `addItUpLogic` | adaptive |
+| 17 | Take Away | `TakeAwayScene` | `GroupMathScene` | `takeAwayLogic` | adaptive |
+| 18 | Memory Match | `MemoryMatchScene` | `GameSceneBase` | `memoryMatchLogic` | adaptive |
+| 19 | Decode It | `DecodeItScene` | `ChoiceRoundScene` | `decodeLogic` | adaptive |
+| 20 | Number Order | `NumberOrderScene` | `ChoiceRoundScene` | `numberOrderLogic` | adaptive |
+| 21 | Feelings Faces | `FeelingsFacesScene` | `ChoiceRoundScene` | `feelingsFacesLogic` | fixed |
+| 22 | Story Order | `StoryOrderScene` | `ChoiceRoundScene` (own drag board, `resolveWholeRound`) | `storyOrderLogic` + `storyOrderArt` | fixed |
 
-**Structural acceptance checks:** the entry chunk contains zero game-scene constructor registrations (`super({ key: ... })` grep over `dist/assets` finds only `Boot`, `Preload`, `Hub` in the entry; each scene chunk contains exactly its own key).
+Twelve scenes extend `ChoiceRoundScene` directly, two reach it through `GroupMathScene`, and eight extend `GameSceneBase` directly. Fifteen games call `getAdaptiveBandShift`; the seven fixed ones are games 1, 2, 3, 4, 6, 21 and 22. The PRD explains the pedagogy ([`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty)).
+
+### 4.6 Lifecycle and shutdown
+
+Scene instances are reused. `create()` therefore rebuilds state each visit and `registerShutdownCleanup()` — called at the end of `create()` by every game scene — destroys the objects that would otherwise leak across visits: parent lock, mascot, narrator, standalone speaker, instruction label. `ChoiceRoundScene.clearRound()` handles per-round objects separately.
+
+The normal game path is: Hub tile → `ensureSceneLoaded` → `transitionToScene` → `create()` → rounds → `completeGame()` → `AUTO_RETURN_DELAY` → `transitionToScene(this, "Hub")` with `{ justEarned }` when a sticker was newly earned. `HubScene` reads `justEarned` to play the shelf highlight on arrival.
 
 ---
 
-## 5. Screen Orientation Auto-Rotate (`src/scenes/BootScene.ts`)
+## 5. Components
 
-On phone launch, attempt to lock the screen to landscape orientation. The manifest `orientation: landscape` serves as the primary hint; this JS call provides an additional programmatic lock for installed PWAs.
+All 15 components are plain classes that take a `Phaser.Scene`; none extends a scene.
 
-```typescript
-// Attempt programmatic landscape lock (works in standalone/installed PWA mode)
-if (screen.orientation) {
-    screen.orientation.lock("landscape").catch(() => {
-        // Not all browsers/devices support programmatic orientation lock.
-        // The manifest `orientation: landscape` acts as a fallback.
-    });
-}
-```
+### 5.1 RoundNarrator
+
+`src/components/RoundNarrator.ts` is the single "hear it again" narrator. It owns the replay glyph (`SpeakerButton`), the optional written label, the mute presentation and the caption fallback, so no scene builds a `SpeakerButton` directly.
+
+Options: `{ x, y, replay, announce?, label?, caption? }`. On construction it creates the glyph, creates the label when configured, subscribes to `voiceschanged` when a caption is configured, and speaks `announce` once through `speakSentence` unless captions are active.
+
+Caption state machine — used by Feelings Faces, the one prompt with a written form:
+
+1. **Immediate caption** when `!getSettings().sfxEnabled` or when speech is unsupported.
+2. Otherwise the engine's voice list decides, and it is asynchronous: an empty first `getVoices()` read means "unknown", not "no voices".
+3. With an event-capable engine the decision waits for `voiceschanged`; when that fires, the voice list is cached, `voicesSettled` is set and `applyCaptionState()` runs.
+4. An engine without `addEventListener` cannot populate late, so its empty list decides immediately.
+5. A flip rebuilds the label and glyph in place and calls `onChange(captioning)`, so the scene can re-render the round. The rule line is never re-spoken by this path.
+
+`refreshCaptionFallback()` re-reads the decision at a round boundary deliberately silently — no rebuild and no `onChange` — because a notification mid-render would re-enter the scene's speak path and say the sentence twice. `setActive(active)` forwards to the glyph's pulse. `destroy()` removes the listener and destroys the glyph and label.
+
+### 5.2 Mascot
+
+`src/components/Mascot.ts` draws professor mascot poses from the `mascot_idle` and `mascot_celebrate` textures at `MASCOT_SCALE = 0.2`, positioned by `createCornerMascot(scene)` at `MASCOT_CORNER_MARGIN = 90` from the corner, behind gameplay at `MASCOT_DEPTH = -1` and touch-inert.
+
+| Method | Normal | Reduced motion |
+| --- | --- | --- |
+| `wave()` | 8° over 200 ms `Sine.inOut` | 4° over 120 ms |
+| `nod()` | 6° over 150 ms | 3° over 90 ms |
+| `cheer(big)` | celebrate pose, 1.1× over 180 ms (`big`: 1.2× over 260 ms) `Back.out`, self-cleaning sparkle ring r 36 (big 48), colour `0xffd166` | pose swap only |
+| `curious()` | 10° tilt + 6 px hop over 220 ms | 5° / 140 ms |
+| `idleLoop()` | 3 px bob 2500 ms yoyo, squash-blink `scaleY 0.92` every 3700 ms | no-op |
+
+`cheer` retires any in-flight cheer before starting, and pauses the blink while celebrating. Hub wiring: greeting flap on entrance, `idleLoop()` while idle, cheer on `justEarned`. Games wire cheer to correct taps and to the win, and nod to incorrect taps — Animal Trace does not nod, because it has no wrong answer.
+
+### 5.3 ParentLock
+
+`src/components/ParentLock.ts` gates adult-only controls behind a hold. `DEFAULT_HOLD_DURATION = 3000` ms, one hold per active pointer, ring radius 48 px in `0x68d391` at 0.6 alpha, depth 10000, animated by a value tween. `pointerup`, `pointerout` and `pointercancel` cancel the hold and fire `onFailure` once; `destroy()` cancels silently; success fires exactly once. Hit areas are `Rectangle(0, 0, 96, 96)` anchored at the object's top-left display bounds, which is why the back button's lock works independently of `setOrigin`. The PRD covers why adult actions are gated ([`docs/PRD.md#53-the-parental-lock`](./PRD.md#53-the-parental-lock)).
+
+### 5.4 SpeakerButton
+
+`src/components/SpeakerButton.ts` is the replay glyph: a 96 px `icon_speaker` image with a 96×96 **centred** hit rectangle (`Rectangle(-48, -48, 96, 96)`), press feedback, `onSpeak` on pointerdown and an active pulse (`ACTIVE_PULSE_MS = 600`, alpha 0.6→1) while speech plays. Muted presentation is `MUTED_TINT 0xa0aec0` at `MUTED_ALPHA 0.6`; active is `ACTIVE_TINT 0x68d391`. It is constructed by `RoundNarrator` and, in tests, injected through `GameSceneBase`'s speaker setter.
+
+### 5.5 SettingsPanel and the settings group
+
+`src/components/SettingsPanel.ts` renders the parental controls above `HubScene`. It owns the backdrop (`0x000000` at `BACKDROP_ALPHA 0.6`), a `PANEL_WIDTH = 480` × `PANEL_HEIGHT = 760` cream panel (`0xfff8e7`), and three toggles plus a voice chip:
+
+| Control | Behaviour |
+| --- | --- |
+| Music | `AudioManager.setBGMEnabled`, persisted |
+| Sounds | `AudioManager.setSFXEnabled`, persisted; captions the Feelings Faces prompt |
+| Adaptive | `Settings.adaptiveDifficulty`, persisted, ON by default |
+| Voice | cycles `availableVoiceOptions()` with 24-character truncation and a "Hi! I can talk." preview through `VoiceRow` |
+
+Rows sit at fixed offsets from the panel centre: Profiles `+123`, Progress `+178`, Reset `+234`, Install `+290`, Voice `+345`. Rows are `ROW_CARD_WIDTH = 400` × `ROW_CARD_HEIGHT = 68` cards behind 32 px labels; toggles are `TOGGLE_WIDTH = 240` × `TOGGLE_HEIGHT = 96` hit areas drawn as a 64×32 track with a 24 px knob offset ±16. `ROW_HEIGHT = 64` is the minimum row pitch. The footer shows `v${__APP_VERSION__}` in 24 px `DISABLED_COLOR` (`#a0aec0`) at `centerY - 75`.
+
+While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewport so parents can zoom; `restorePinchZoom()` puts it back on close.
+
+`src/components/settings/` holds the rest:
+
+| File | Responsibility |
+| --- | --- |
+| `primitives.ts` | palette, panel/toggle/row dimensions, `addRowCard`, `createRow`, toggle drawing |
+| `ProfilesOverlay.ts` | profile list, add/delete/switch, per-profile limit chips (Off/15/30/45/60) |
+| `ProgressOverlay.ts` | per-game learning stats: 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip |
+| `ResetModal.ts` | two-step destructive confirm; on success calls `resetProgress()` and the panel's `onProgressReset` |
+| `VoiceRow.ts` | voice chip cycling and preview |
+| `InstallRow.ts` | install state row driven by `createInstallTracker()` — `installable`, `ios-howto` or hidden |
+
+### 5.6 ProfileChip and PlayTimeIndicator
+
+`src/components/ProfileChip.ts` is the kid-tappable avatar in the top-left: a 72 px avatar with a 96×96 hit area inset 20 px, opening a `PICKER_DEPTH = 20` picker of 96 px avatars spaced 40 px apart. Switching profiles triggers the Hub's `onSwitch`, which re-renders the sticker shelf and the play-time state.
+
+`src/components/PlayTimeIndicator.ts` renders the active profile's remaining budget as a textless arc: `HINT_ARC_RADIUS = 12`, cool `0x68d391` turning warm `0xed8936` within five minutes of the limit, replaced by a moon badge once the limit is reached. `PlayTimeNudge` is the pre-launch delay: `NUDGE_DELAY = 2000` ms at `NUDGE_DEPTH = 20`.
+
+### 5.7 PwaToast and PwaToasts
+
+`PwaToast.ts` draws one 520×150 cream toast with 200×72 buttons (primary `#2b6cb0`, secondary `#a0aec0`). `PwaToasts.ts` owns the lifecycle: it subscribes through `pwaBridge` and surfaces an update-available toast (action: reload into the waiting service worker) and an offline toast. `registerType: "prompt"` in the PWA config is what makes the update toast possible instead of a silent takeover.
 
 ---
 
-## 6. localStorage Schema
+## 6. State and storage
 
-All app state is stored under a single localStorage key as a JSON object.
+`src/utils/storage.ts` is the only module that touches `localStorage`. Everything else calls its exports.
 
-**Key:** `abby-little-lab:v1`
+### 6.1 Keys and cache
 
-```typescript
-type GameId =
-  | "shape-sorter"
-  | "animal-trace"
-  | "pop-freeze"
-  | "shadow-match"
-  | "musical-memory"
-  | "big-small"
-  | "pattern-builder"
-  | "alphabet-match"
-  | "word-match"
-  | "word-builder";
+| Key | Meaning |
+| --- | --- |
+| `abby-little-lab:v2` | current state (`ProfileV2`) |
+| `abby-little-lab:v1` | legacy single-profile state; read for migration and never deleted |
 
-interface StickerData {
-  earned: boolean;
-  earnedAt: string | null; // ISO timestamp, null if not earned
-}
+`v2Cache` is a module-scope memo of `{ raw, state }`. `ensureV2()` compares the current `getItem` string with the cached `raw` and returns the memo on a match, which avoids `JSON.parse` + `normalizeV2` on every tap. Any external write, removal or corruption changes the raw string and forces a re-parse.
 
-interface Settings {
-  bgmEnabled: boolean;
-  sfxEnabled: boolean;
-}
+### 6.2 Schema v2
 
-interface AppStorage {
-  stickers: Record<GameId, StickerData>;
-  settings: Settings;
-}
-```
-
-**Migration (2026-08-02):** `load()` merges saved data over defaults per key (`stickers` and `settings`), so saves created before a game shipped keep working — every `GameId` always resolves to an entry (new games backfill as unearned) and existing progress/settings are preserved. Empty storage and corrupted JSON fall back to defaults.
-
-**Key:** `abby-little-lab:v2` (profile-aware schema, 2026-08-04)
-
-```typescript
-interface StickerData {
-  earned: boolean;
-  earnedAt: string | null; // ISO timestamp, null if not earned
-}
-
-interface Settings {
-  bgmEnabled: boolean;
-  sfxEnabled: boolean;
-}
-
-interface PlayTime {
-  limitMinutes: number | null; // daily cap in minutes; null = unlimited (default)
-  usedMinutes: number; // minutes used toward the limit on lastUsedDate
-  lastUsedDate: string; // local "YYYY-MM-DD" key; usage resets when it changes
+```ts
+interface ProfileV2 {
+  activeProfileId: string;
+  profiles: Profile[];          // 1..MAX_PROFILES (4)
+  settings: Settings;           // device-global
 }
 
 interface Profile {
-  id: string; // "p1"..."p4"
-  avatarId: AvatarId; // "cat" | "dog" | "pig" | "frog" | "duck" | "bear"
-  createdAt: string; // ISO timestamp
+  id: string;                   // "p1".."p4"
+  avatarId: AvatarId;           // cat | dog | pig | frog | duck | bear
+  createdAt: string;
   stickers: Record<GameId, StickerData>;
-  playTime: PlayTime; // per-profile daily budget (2026-08-05)
+  playTime: PlayTime;
+  progress: Record<GameId, GameProgress>;
+  activity: DayActivity[];      // today + 6 prior days, pruned on write
 }
 
-interface ProfileV2 {
-  activeProfileId: string;
-  profiles: Profile[];
-  settings: Settings; // device-level, shared by all profiles
+interface StickerData { earned: boolean; earnedAt: string | null }
+interface Settings {
+  bgmEnabled: boolean;
+  sfxEnabled: boolean;
+  preferredVoiceURI: string | null;   // null = platform default
+  adaptiveDifficulty: boolean;        // true by default
+}
+interface PlayTime {
+  limitMinutes: number | null;        // null = unlimited
+  usedMinutes: number;
+  lastUsedDate: string;               // local "YYYY-MM-DD"
+}
+interface GameProgress {
+  plays: number; wins: number; correct: number; wrong: number;
+  lastPlayedAt: string | null; recent: boolean[];
+}
+interface DayActivity { day: string; plays: number }
+```
+
+`GameId` is a 22-member string union in `src/types/index.ts`, and `GAME_IDS` repeats it in hub order. `MAX_PROFILES = 4`, `DEFAULT_AVATAR_ID = "cat"`, `AVATAR_IDS = ["cat","dog","pig","frog","duck","bear"]`. `AppStorage` (`{ stickers, settings }`) survives as the shape `load()`/`save()` speak, not as a stored format.
+
+Sticker keys are `sticker_<game_id_with_underscores>`; `Profile.avatarId` maps to an existing boot texture through `PROFILE_AVATAR_TEXTURES` in `src/game/profileLogic.ts` (`cat` → `animal_cat`, `dog` → `animal_dog`, `pig` → `animal_pig`, `frog` → `frog_red`, `duck` → `sm_duck`, `bear` → `toy_teddy_bear`). Avatars are textless by design ([`docs/PRD.md#45-profiles`](./PRD.md#45-profiles)).
+
+### 6.3 Facade functions
+
+| Group | Exports |
+| --- | --- |
+| Read/write state | `load`, `save`, `ensureV2` (internal), `mutate` (internal) |
+| Stickers | `earnSticker`, `hasSticker`, `resetProgress` |
+| Settings | `getSettings`, `updateSettings` |
+| Profiles | `getProfiles`, `getActiveProfile`, `addProfile`, `deleteProfile`, `switchProfile`, `getAvailableAvatars` |
+| Play time | `getPlayTime`, `setPlayTimeLimit`, `recordPlayTime` |
+| Progress | `recordGamePlay`, `recordGameResult`, `getProgress` |
+| Adaptive | `getAdaptiveBandShift` |
+
+Every mutator goes through `mutate(fn)`: apply a pure transform to the current state, persist when the transform returns non-null, return the new state. `resetProgress()`, `earnSticker()`, `recordGamePlay()` and `recordGameResult()` act on the **active** profile; `settings` is device-global; `setPlayTimeLimit()`/`recordPlayTime()` take an explicit `profileId`.
+
+`getAdaptiveBandShift(gameId)` returns `0` when `settings.adaptiveDifficulty` is off, otherwise `bandShiftFor(getProgress()[gameId].recent)`.
+
+### 6.4 Migration and normalisation
+
+`ensureV2()`:
+
+1. reads the raw v2 string; on a cache hit, returns the memo;
+2. parses and normalises; if that succeeds, caches and returns;
+3. otherwise calls `migrateV1(readV1())`, saves the result and returns it.
+
+`migrateV1()` in `src/game/profileLogic.ts` turns a v1 save into one profile `p1` with avatar `cat`, carrying the old stickers over, and fills every other field from defaults. The v1 key is left in place, so a downgrade still finds its data. `normalizeV2()` backfills missing fields on every read: unknown stickers/progress entries default, counters must be non-negative integers, `recent` keeps only booleans and the last `WINDOW_SIZE` entries, `activity` is pruned to seven days.
+
+### 6.5 The write path and its limitation
+
+`saveV2()` at `src/utils/storage.ts:81-85` is:
+
+```ts
+function saveV2(v2: ProfileV2): void {
+  const raw = JSON.stringify(v2);
+  localStorage.setItem(V2_KEY, raw);
+  v2Cache = { raw, state: v2 };
 }
 ```
 
-**Migration (2026-08-04):** `ensureV2()` migrates a `v1` save into the first profile (`p1`) on first access — the `v1` key is never destroyed, and settings stay global. `normalizeV2()` backfills missing `stickers` keys and per-profile `playTime` fields (2026-08-05) so pre-feature saves work untouched. Storage lives in `src/utils/storage.ts` (thin facade over the pure logic in `src/game/profileLogic.ts` and `src/game/playTimeLogic.ts`).
+The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode rejection or a blocked-storage exception propagates to the caller of any facade mutator, and the in-memory cache is not updated, so the write is simply lost. Reads are defensive — `readV1` and `readV2` both swallow `JSON.parse` failures and resolve to defaults — so a corrupt store degrades to a fresh profile rather than a crash. There is no `try/catch`, no write-failure flag and no user-visible signal on the write side.
 
-### Settings Panel
+---
 
-`SettingsPanel` is created by `HubScene` after the Settings `ParentLock` succeeds. It renders a black 0.6-alpha backdrop and a cream, outlined modal. Its 96px-high BGM and SFX text hit areas exceed the 64px touch-target minimum.
+## 7. Game logic modules
 
-Each control delegates to the `AudioManager` singleton: BGM toggles persist through `setBGMEnabled()` and start or pause playback; SFX toggles persist through `setSFXEnabled()` and play `playCorrect()` only when enabled. Tapping the backdrop destroys every panel object. `HubScene` also destroys an open panel during shutdown.
+### 7.1 The module list
 
-Below the toggles, an install row renders based on `InstallTracker.getState()` (see `src/utils/pwaInstall.ts`): **"Install App"** (state `installable`) calls `tracker.prompt()` on tap to trigger the deferred `beforeinstallprompt`; **"How to Install"** (state `ios-howto`) opens an iOS instructions overlay (Share → Add to Home Screen steps + Close); state `hidden` (installed/standalone) renders nothing. The tracker is injectable in tests and defaults to real browser event wiring.
+`src/game/` holds the pure layer: no Phaser imports, no DOM, no storage reads (except the play-time session machinery, which needs `document.visibilityState`). Every module here is unit-tested directly.
 
-A danger-colored **"Reset Progress"** row (24px text, 240×64 hit area) sits between the install row and the footer. Tapping it opens a two-step confirm modal ("Reset all stickers?" with Cancel / Reset buttons, both 240×64): Cancel destroys the overlay without changes; Reset calls `resetProgress()` from `src/utils/storage.ts`, closes the overlay, and updates the row in place to "Progress cleared" (muted). The panel shows a muted, non-interactive version footer (`v${__APP_VERSION__}`, 24px, `#A0AEC0`) **under the title** (centerY−75, clear of the install row — moved 2026-08-06); `__APP_VERSION__` is injected by Vite's `define` from `package.json` `version`. Font sizes were raised for phone readability (2026-08-06): title 36px, toggles 34px, rows 30–32px, modal titles 36px, modal bodies/buttons 30px. While the panel is open, pinch-zoom is permitted via `src/utils/viewportZoom.ts` (`allowPinchZoom()` on open, `restorePinchZoom()` on destroy) — the app's `index.html` locks `user-scalable=no` otherwise.
+| Module | Responsibility |
+| --- | --- |
+| `adaptiveLogic.ts` | band window, shift calculation, ladder shifting |
+| `addItUpLogic.ts` | Add It Up rounds and answer checking |
+| `alphabetLogic.ts` | Find the Letter rounds, `isConfusableWith` |
+| `animalTraceLogic.ts` | trace-path point sets and completion test |
+| `bigSmallLogic.ts` | Big vs. Small pair generation and classification |
+| `colorMatchLogic.ts` | colour round generation |
+| `countLogic.ts` | How Many? bands and group cards |
+| `decodeLogic.ts` | Decode It word/letter mapping |
+| `feelingsFacesLogic.ts` | contrast ladder of faces and prompts |
+| `firstSoundsLogic.ts` | phonics rounds from a 12-word subset |
+| `hubGrid.ts` | tile layout, paging and sticker shelf rendering |
+| `hubPaging.ts` | page maths for the tile grid |
+| `hubTiles.ts` | `GAME_TILES` metadata: id, title, icon key, scene key |
+| `memoryMatchLogic.ts` | pair generation, flip rules, adaptive tier split |
+| `moreLessLogic.ts` | comparison round generation |
+| `musicalMemoryLogic.ts` | sequence length bands (`startLengthFor`, `winLengthFor`) |
+| `numberOrderLogic.ts` | ordering rounds |
+| `oddOneOutLogic.ts` | odd-item selection and prompt text |
+| `patternBuilderLogic.ts` | pattern sequences and missing-tile answers |
+| `playTimeLogic.ts` | daily budgets, day rollover, visible-time session accounting |
+| `popFreezeLogic.ts` | bubble spawn timing and pop targets |
+| `profileLogic.ts` | profile CRUD, avatar map, `migrateV1`, `normalizeV2` |
+| `progressLogic.ts` | per-game stats, mastery, accuracy, 7-day activity |
+| `shadowMatchLogic.ts` | shadow/object pairing and win test |
+| `shapeSorterLogic.ts` | shape sets, `ShapeType`, matching |
+| `storyOrderArt.ts` | 24 story panel SVGs + `preloadStoryOrderArt` (the one module here that touches Phaser types) |
+| `storyOrderLogic.ts` | `STORY_POOL`, shuffling, whole-strip validation |
+| `takeAwayLogic.ts` | Take Away rounds and answer checking |
+| `voiceLogic.ts` | `availableVoiceOptions`, `resolveVoice` |
+| `wordLogic.ts` | word pools and word-round generation |
 
-`resetProgress()` (2026-08-02) clears every sticker (`earned: false`, `earnedAt: null`) while preserving `settings`; it reuses `load()`'s migration-safe merging, so it also repairs corrupt storage. The panel's optional third constructor argument `onProgressReset` fires after a confirmed reset; `HubScene` passes a callback that destroys and re-creates the sticker shelf images (`createShelfSticker()` / `rerenderStickerShelf()`), re-reading storage so the Hub reflects the reset immediately. Tests cover the callback contract and the re-render (old thumbnails destroyed, 7 fresh dimmed thumbnails).
+### 7.2 The round contract
 
-### ParentLock (hardened, 2026-08-01)
+Most game modules expose two things: a playthrough builder and a correctness test.
 
-`ParentLock` gates Hub Settings and every game Back control behind a 3-second hold (`DEFAULT_HOLD_DURATION = 3000`). Hardening decisions:
+```ts
+buildPlaythrough(shift: BandShift): Round[]     // or generatePlaythrough(count, shift)
+isCorrect(round, selectedIndex): boolean
+```
 
-- **Single hold per active pointer:** a second `pointerdown` while a hold is active is ignored (`holdActive` guard).
-- **Cancellation:** `pointerup`, `pointerout`, and `pointercancel` all cancel the hold and fire `onFailure` exactly once; `destroy()` (scene shutdown) cancels without firing callbacks.
-- **Exactly-once success:** the delayed-call callback checks `holdActive`, nulls the timer, clears the ring, then invokes `onSuccess()`; stale callbacks after cancel/destroy/shutdown are no-ops.
-- **Circular progress ring:** on `pointerdown`, a `Graphics` ring (48px radius, `#68D391` at 0.6 alpha, depth 10000) is drawn around the target center via `slice()` + `fillPath()`, animated with a `tweens.add` value tween over the hold duration. The ring and tween are destroyed on cancel, completion, and `destroy()` — no display objects leak.
-- **Hit areas:** protected controls (all twenty game Back buttons, Hub Settings, Musical Memory Replay) use `setInteractive({ hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96), hitAreaCallback: Phaser.Geom.Rectangle.Contains })`. Phaser anchors custom hit areas at the **top-left of the display bounds** (`pointWithinHitArea` adds `displayOriginX/Y`), independent of `setOrigin` — hence `Rectangle(0, 0, 96, 96)` for every protected control. The shared replay `SpeakerButton` (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Musical Memory) uses a *centered* hit area (`Rectangle(-48, -48, 96, 96)`) because its icon texture is centered on its origin; press feedback attaches the same way (2026-08-06).
+The scene builds the playthrough once in `create()` (never per round), then renders index by index. Because the builder is a pure function of `shift`, the same seed of inputs always produces the same ladder for the same profile state — the "adaptive" part is the shift, not randomness.
 
-### Game IDs
+Games that do not fit the shape expose their own equivalents: `shapeSorterLogic.generatePlaythrough`/`isMatch`, `shadowMatchLogic.generateRound`/`isMatch`/`isWin`, `musicalMemoryLogic`'s sequence length helpers, and `animalTraceLogic`'s path completion test.
 
-| Game ID | Game |
-|---|---|
-| `shape-sorter` | Game 1 |
-| `animal-trace` | Game 2 |
-| `pop-freeze` | Game 3 |
-| `shadow-match` | Game 4 |
-| `musical-memory` | Game 5 |
-| `big-small` | Game 6 |
-| `pattern-builder` | Game 7 |
-| `alphabet-match` | Game 8 |
-| `word-match` | Game 9 |
-| `word-builder` | Game 10 |
-| `how-many` | Game 11 |
-| `first-sounds` | Game 12 |
-| `more-less` | Game 13 |
-| `odd-one-out` | Game 14 |
-| `color-match` | Game 15 |
-| `add-it-up` | Game 16 |
-| `take-away` | Game 17 |
-| `memory-match` | Game 18 |
+### 7.3 Adaptive banding
 
-### Example State
+`src/game/adaptiveLogic.ts`:
 
-```json
-{
-  "stickers": {
-    "shape-sorter": { "earned": true, "earnedAt": "2024-08-01T00:00:00.000Z" },
-    "animal-trace": { "earned": false, "earnedAt": null },
-    "pop-freeze": { "earned": true, "earnedAt": "2024-08-02T00:00:00.000Z" },
-    "shadow-match": { "earned": false, "earnedAt": null },
-    "musical-memory": { "earned": false, "earnedAt": null },
-    "big-small": { "earned": false, "earnedAt": null },
-    "pattern-builder": { "earned": false, "earnedAt": null },
-    "alphabet-match": { "earned": false, "earnedAt": null }
+| Constant | Value | Meaning |
+| --- | --- | --- |
+| `WINDOW_SIZE` | 10 | taps retained in `GameProgress.recent` |
+| `MIN_SAMPLE` | 6 | taps needed before a shift is possible |
+| `UP_THRESHOLD` | 0.9 | accuracy ≥ 0.9 shifts up |
+| `DOWN_THRESHOLD` | 0.6 | accuracy < 0.6 shifts down |
+| `BASE_LADDER` | `[1, 1, 2, 2, 3, 3]` | default six-round band ladder |
+
+`updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
+
+Per-game adaptation uses the same shift differently: tier games split rounds into bands and drop the hardest band when the shift is up (`earlyCount = roundCount - 1 - shift`), Memory Match shifts its ladder, Musical Memory maps the shift to a start length of 1/2/3 and a win length of 5/6/7, and First Sounds keeps a uniform band. The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty).
+
+### 7.4 Randomness
+
+Shuffling uses `Math.random` by default. Where a module needs determinism it takes an optional RNG parameter — `storyOrderLogic.buildRound`/`buildPlaythrough` accept an injectable RNG so tests can pin a strip, and the builder guarantees a non-identity permutation even for a degenerate RNG (a reshuffle guard plus a one-step rotation). Other modules are tested by asserting invariants (counts, bands, membership) rather than exact order.
+
+---
+
+## 8. Audio
+
+`src/audio/AudioManager.ts` is a singleton: `AudioManager.getInstance()` lazily constructs it, and `BootScene` calls `init()` once.
+
+### 8.1 AudioManager lifecycle
+
+`init()` creates the `AudioContext`, reads `getSettings()` into `bgmEnabled`/`sfxEnabled`, creates a looping `HTMLAudioElement` for `/audio/bgm.mp3` at `BGM_VOLUME = 0.3`, unsubscribes any previous speech listener before subscribing `onSpeechLifecycle(handleSpeechEvent)`, and installs the visibility watcher. `resume()` resumes a suspended context — it is called from the Hub's first `pointerdown`, because browsers start audio contexts suspended until a gesture.
+
+`destroy()` clears the ramp and watchdog, unsubscribes the speech listener, removes the visibility listener, resets the duck state, pauses BGM, closes the context and drops the element.
+
+### 8.2 Sound effects
+
+`SFX_NAMES = ["pop", "correct", "incorrect", "wake", "win", "sticker"]` and `SfxName` is derived from it. Every effect is synthesized with Web Audio — sine oscillators through a gain node, no audio files:
+
+| Effect | Notes |
+| --- | --- |
+| `pop` | 800 Hz, 80 ms |
+| `correct` | C5 / E5 / G5 arpeggio |
+| `incorrect` | G4 then C4 |
+| `wake` | E4 then A4 |
+| `win` | C5 / E5 / G5 / C6 arpeggio |
+| `sticker` | C6 then E6 |
+| `playIdleCall` | E5 + G5 at gain 0.12, for the Hub attract cue |
+| `playFrogNote` | sine, 0.5 s, gain 0.3 — Musical Memory's frog notes C4 / E4 / G4 |
+
+Each is a no-op unless `sfxEnabled` and the context exists. The PRD covers the sound design intent ([`docs/PRD.md#61-sound-effects`](./PRD.md#61-sound-effects)).
+
+### 8.3 Background music, ducking and the watchdog
+
+`BGM_FILE = "/audio/bgm.mp3"`, played through an `HTMLAudioElement` with `loop = true` and `volume = BGM_VOLUME`. Speech is treated as foreground: while narration is in flight the music drops to `BGM_DUCKED_VOLUME = BGM_VOLUME * 0.08` (2.4 % of full scale), ramped over `BGM_RAMP_DURATION = 120` ms in `BGM_RAMP_STEP = 20` ms steps — six steps, which reads as a fade rather than a jump.
+
+Ducking is driven by speech lifecycle events, not by scenes: `speech:start` → `duckBGM()`, `speech:end` / `speech:error` → `restoreBGM()`. `speech.ts` reports only the most recently dispatched utterance, so a superseded utterance cannot restore the music mid-speech. `duckBGM()` is idempotent, so re-entrant narration re-aims at the same floor instead of stacking ramps. `restoreBGM()` clears the watchdog, returns early when not ducked, and ramps back to `BGM_VOLUME`.
+
+`BGM_DUCK_WATCHDOG = 15000` ms guards the case where an engine swallows `onend` — a cancelled utterance, a scene shutdown, a hidden tab. When it fires, `isEngineSpeaking()` decides: still speaking, re-arm; otherwise restore. A music bed parked at 8 % is worse than an early restore.
+
+The ducked level is **never persisted**. The only audio state written to storage is `bgmEnabled` and `sfxEnabled`; `ducked` is runtime-only and `restoreBGM()` is called on every path that could otherwise leave it stuck (toggles, visibility, destroy).
+
+### 8.4 Visibility policy
+
+The manager installs one `visibilitychange` listener when `document.visibilityState` is a string; hosts without it (older WebViews, non-DOM tests) stay inert.
+
+- **Hidden**: remember whether music was actually playing (`resumeBGMWhenVisible`), `window.speechSynthesis.cancel()`, restore the duck (so the element is not left quiet), then pause BGM.
+- **Visible again**: resume only when music was playing *and* `bgmEnabled`, then clear the flag. Music that was paused by the user stays paused.
+
+Speech is cancelled rather than resumed: a half-heard sentence resumed minutes later is worse than silence. The next round boundary re-speaks.
+
+### 8.5 Speech
+
+`src/utils/speech.ts` wraps `speechSynthesis`. `isSpeechSupported()` guards every path. `unlockSpeechForUserGesture()` dispatches a silent warm-up utterance once per page session from the first real gesture, because iOS and WebKit keep the synthesis session locked until an utterance is dispatched inside a gesture; the flag stays clear on failure so the next interaction retries.
+
+`speakText()` computes `needsInterrupt` from `speaking || pending`, cancels and calls `resume()` (which un-sticks some engines), then either speaks immediately or — when interrupting — after `INTERRUPT_DEFER_MS = 100`, giving the platform's asynchronous cancel time to complete. `resolveVoice(getVoices(), preferredVoiceURI)` assigns `utterance.voice` when it resolves. Utterances carry a sequence token and only the current token may emit lifecycle events, which is what keeps the duck state honest.
+
+Public wrappers: `speakLetter` (rate 0.9), `speakWord` (0.8), `speakNumber` (0.9, via `NUMBER_WORDS`), `speakSentence` (0.9). All take an `enabled` flag and are silenced by the SFX toggle.
+
+### 8.6 Toggles and persistence
+
+`setBGMEnabled(enabled)` and `setSFXEnabled(enabled)` set the flag, persist it through `updateSettings`, and call `restoreBGM()` on every call — disabling audio mid-narration must not leave the element parked at the ducked level. Disabling BGM also pauses it immediately.
+
+---
+
+## 9. Motion and feedback
+
+### 9.1 Reduced-motion helpers
+
+`src/utils/motion.ts` is three functions: `isReducedMotion()` reads `window.matchMedia("(prefers-reduced-motion: reduce)").matches` with a `typeof` guard, `motionDuration(normal, reduced)` and `motionScale(normal, reduced)` select between the pair. All three are consulted at call time, never cached, so a mid-session OS change is honoured. Under reduced motion the contract is: shorter durations, smaller amplitudes, and no ambient loops — Pop & Freeze's breathing tween is `tween.remove()`d, the mascot's idle loop no-ops, and the commit effect drops its particles. The PRD states the product rule ([`docs/PRD.md#57-reduced-motion`](./PRD.md#57-reduced-motion)).
+
+### 9.2 Scene transitions
+
+`src/utils/sceneTransitions.ts`:
+
+- `transitionToScene(scene, key, data?)` — 300 ms fade out to `0xfaf9f6`, start the target scene, then 180 ms fade in.
+- `sceneEntrance(scene)` — 180 ms fade in with a 1.02 → 1 zoom.
+
+Both pass `"Sine"` as an ease-map key rather than `"Sine.out"`. Camera Zoom effects resolve ease strings against their own `EaseMap`, where the dotted name is `undefined` and the tween crashes at runtime. A bare `scene.start` exists only for Boot's initial launch.
+
+### 9.3 Press, drag and completion feedback
+
+| Module | Behaviour |
+| --- | --- |
+| `pressFeedback.ts` | `attachPressFeedback(obj, { spring })` captures the scale at attach, squishes to `base × 0.95` on pointerdown, restores on pointerup/out/cancel, and springs back over 150 ms `Back.out` when `spring` is set; no-op under reduced motion |
+| `dragJuice.ts` | `attachDragLift` lifts to `motionScale(1.1, 1.05)` with a `motionScale(4, 0)`° tilt; `attachDropZoneHighlight` strokes zones at `lineStyle(6, 0x2b6cb0, 0.9)` with a repeating `Sine.inOut` pulse; `snapToSlot` settles over 200 ms `Back.out` |
+| `completionEffect.ts` | `createCompletionSplash` is a bounded, self-cleaning burst of 8 gold rays (`0xffd166`) over 420 ms, reduced to 180 ms; `createWinCelebration` draws 10 gold rays plus 10 confetti pieces in `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea` over 700 ms, reduced to 6 rays and no particles over 300 ms |
+
+Press feedback is always attached **after** the object's primary handler, so a tap's game effect is never delayed by presentation. Every completion effect is Graphics-based; `add.particles` is not used anywhere.
+
+### 9.4 Tween values
+
+| Interaction | Normal | Reduced |
+| --- | --- | --- |
+| Rejection wiggle | 4° / 350 ms × 3 | 2° / 200 ms × 3 |
+| Bubble pop shrink | 200 ms | 120 ms |
+| Wake wobble | 300 ms, 1.15× | 180 ms, 1.05× |
+| Frog bounce | 200 ms, 1.2× | 120 ms, 1.05× |
+| Sticker pop | 300 ms, after 400 ms | 180 ms, after 250 ms |
+| Progress dot pop | 250 ms, 1.4× | 150 ms, 1.2× |
+| Drag lift | 120 ms, 1.1× | 80 ms, 1.05× |
+| Snap to slot | 200 ms | 120 ms |
+| Hint arc pulse | 400 ms | 240 ms |
+| Win celebration | 700 ms, 10 rays | 300 ms, 6 rays |
+
+Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big vs. Small drag with lift + zone highlight + snap; Big vs. Small adds a 150 ms shrink, a ±3° × 3 lid wiggle and a 1.05× bump; Shadow Match stamps at 1.1×, flashes white for 150 ms and dims to 0.5 alpha; Animal Trace hops in two 60 ms halves with a ±4° × 3 wiggle and a 1.4× dot pop; Pop & Freeze releases three teal droplets; Musical Memory ripples at 1.6× and drifts ±3 px over 1500 ms. Shape Sorter's silent-bounce rule: the incorrect SFX plays only when a piece is dropped on a zone, not when it is merely picked up.
+
+---
+
+## 10. Testing
+
+### 10.1 Runner and mocks
+
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). Five shared helpers:
+
+| Helper | Purpose |
+| --- | --- |
+| `phaserMock.ts` | `MockScene`, `createMockGameObject`, the module mock factory, plus self-tests |
+| `matchMediaStub.ts` | stateful `matchMedia` keyed on the reduced-motion query, with `setReducedMotion` |
+| `sceneFlowHarness.ts` | audio, speech, PWA and storage spies; object and tween helpers for flow tests |
+| `gameScenes.ts` | `GAME_SCENES` / `GAME_SCENE_KEYS` table, kept out of the harness so a harness import cannot deadlock the `vi.mock` graph |
+| `hitTest.ts`, `pressFeedback.ts` | hit-area and press-feedback assertions shared by component suites |
+
+`typecheck` covers tests too, and the test tree is held to the same rules as source: no `@ts-nocheck`, no `any` casts, no blanket `as`. Making that true required typing the mock factory as `ReturnType<typeof vi.fn<(...args: any[]) => any>>` rather than `ReturnType<typeof vi.fn>`, which instantiates Vitest's generic with a wider constraint.
+
+### 10.2 Suite shape
+
+103 test files, 2,208 tests. The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+
+Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
+
+### 10.3 Coverage gates
+
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage is lines 98.96, functions 98.14, branches 90.54, statements 98.13 across 103 files and 2,208 tests.
+
+`src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` sits lowest because its loaders are only exercised through injected stubs.
+
+### 10.4 What unit tests cannot cover
+
+happy-dom supplies no canvas, no audio graph and no screen. The following are device checks, not unit tests:
+
+- real rasterisation of the 178 SVGs (glyph fallback, tier sharpness);
+- actual audio mixing, ducking audibility and voice availability;
+- orientation lock and PWA install/update on iOS Safari, Android Chrome and desktop;
+- the cold-load budget, which is `scripts/validate-boot.js`'s job in CI.
+
+---
+
+## 11. Build, PWA and CI
+
+### 11.1 Vite build
+
+`vite.config.ts` defines `__APP_VERSION__` from `package.json` (the Settings footer's only source of truth) and configures `build.rolldownOptions.output.codeSplitting.groups` with one group for `/[\\/]node_modules[\\/]phaser[\\/]/` named `phaser`. Isolating the engine means the service worker caches it once and app updates download only the shell delta — and `validate-bundle.js` enforces both halves of that.
+
+### 11.2 PWA configuration
+
+```ts
+VitePWA({
+  registerType: "prompt",
+  includeAssets: ["audio/bgm.mp3", "fonts/baloo2-latin.woff2"],
+  workbox: { globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"] },
+  manifest: {
+    name: "Aby's Little Lab", short_name: "Aby Lab", start_url: "./index.html",
+    display_override: ["fullscreen", "standalone"], display: "standalone",
+    orientation: "landscape",
+    background_color: "#FAF9F6", theme_color: "#2B6CB0",
+    icons: [192, 512, maskable 512],
   },
-  "settings": {
-    "bgmEnabled": true,
-    "sfxEnabled": true
-  }
-}
+})
 ```
 
----
+`registerType: "prompt"` means a new service worker waits for the parent to accept the update toast; nothing reloads under a child mid-game. The manifest's `orientation: "landscape"` is the fallback for the runtime lock attempted in `BootScene`. Installation requires HTTPS (or localhost) on a private static host or a tunnel.
 
-## 7. Asset Manifest
+### 11.3 Validator scripts
 
-### SVG Assets — Shapes (`assets/svg/shapes/`)
+| Script | Checks |
+| --- | --- |
+| `validate-bundle.js` | exactly one `phaser-*.js` vendor chunk; every `index-*.js` shell entry ≤ `200 * 1024` bytes |
+| `validate-pwa.js` | 15 named checks over `dist/sw.js` and `dist/manifest.webmanifest`: files exist, manifest name/orientation/display/`display_override`, `precacheAndRoute` present, BGM precached, no `.ligne` or `ligne_wasm_bg` asset, `NavigationRoute` registered |
+| `validate-boot.js` | drives the production build through `playwright-core`: three cold loads, samples Navigation Timing after canvas mount + 5 s settle, fails when the median exceeds 3000 ms |
+| `render-svg-contact-sheets.mjs` | developer tool, not a gate: renders per-category contact sheets from the SVG corpus (categories include `stories`) for art review |
 
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `shape_circle.svg` | 512×512 | Game 1 | Colored fill (`#F6AD55`), thick `#2D3748` outline |
-| `shape_square.svg` | 512×512 | Game 1 | Colored fill (`#9F7AEA`), thick `#2D3748` outline |
-| `shape_triangle.svg` | 512×512 | Game 1 | Colored fill (`#4FD1C5`), thick `#2D3748` outline |
-| `shape_star.svg` | 512×512 | Game 1 | Colored fill (`#F687B3`), thick `#2D3748` outline |
-| `shape_heart.svg` | 512×512 | Game 1 | Colored fill (`#E53E3E`), thick `#2D3748` outline |
-| `shape_crescent.svg` | 512×512 | Game 1 | Colored fill (`#ECC94B`), thick `#2D3748` outline |
-| `cutout_circle.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
-| `cutout_square.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
-| `cutout_triangle.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
-| `cutout_star.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
-| `cutout_heart.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
-| `cutout_crescent.svg` | 512×512 | Game 1 | 30% opacity fill, dashed `#2D3748` stroke |
+`validate-boot.js` deliberately does not start its own server — spawning one destabilised CDP on Windows — so CI starts `vite preview` as a separate step. Measured medians at introduction were 0.63–1.75 s against a 2036 ms baseline; [`docs/perf-baseline.md`](./perf-baseline.md) keeps the per-run numbers.
 
-### SVG Assets — Animals (`assets/svg/animals/`)
+### 11.4 GitHub Actions
 
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `monkey.svg` | 512×512 | Game 2 | Character sprite (left side) — brown (#A0522D) |
-| `rabbit.svg` | 512×512 | Game 2 | Character sprite (left side) |
-| `cat.svg` | 512×512 | Game 2 | Character sprite (left side) |
-| `dog.svg` | 512×512 | Game 2 | Character sprite (left side) |
-| `elephant.svg` | 512×512 | Game 2 | Character sprite (left side) — gray (#A0AEC0), curled trunk |
-| `pig.svg` | 512×512 | Game 2 | Character sprite (left side) — pink (#F687B3), snout (#FBB6CE), curly tail |
-| `elephant.svg` | 512×512 | Game 2 | Character sprite (left side) — gray (#A0AEC0), curled trunk |
-| `pig.svg` | 512×512 | Game 2 | Character sprite (left side) — pink (#F687B3), snout (#FBB6CE), curly tail |
-| `frog_green.svg` | 512×512 | Game 5 | Note: C4 (261.63 Hz) |
-| `frog_blue.svg` | 512×512 | Game 5 | Note: E4 (329.63 Hz) |
-| `frog_red.svg` | 512×512 | Game 5 | Note: G4 (392.00 Hz) |
+`.github/workflows/ci.yml`, `permissions: contents: read`:
 
-> **Note:** Game 3 (Pop & Freeze!) reuses the 4 existing animal SVGs (`monkey.svg`, `rabbit.svg`, `cat.svg`, `dog.svg`) as sleeping-animal content inside translucent bubbles — no separate sleeping-animal SVGs were created.
+| Job | Runs on | Steps |
+| --- | --- | --- |
+| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `pnpm/action-setup@v6` (11.7.0), `setup-node@v7` (Node 22, pnpm store cached), `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, then `vite preview` on port 4173 and `node scripts/validate-boot.js` |
+| Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
-### SVG Assets — Items (`assets/svg/items/`)
+`paths-ignore` skips CI for `conductor/**`, `docs/**`, `README.md` and `**/*.md`. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.
 
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `banana.svg` | 512×512 | Game 2 | Food target (right side) — pairs with monkey |
-| `carrot.svg` | 512×512 | Game 2 | Food target (right side) — pairs with rabbit |
-| `fish.svg` | 512×512 | Game 2 | Food target (right side) — pairs with cat |
-| `bone.svg` | 512×512 | Game 2 | Food target (right side) — pairs with dog |
-| `peanut.svg` | 512×512 | Game 2 | Food target (right side) — pairs with elephant |
-| `apple.svg` | 512×512 | Game 2 | Food target (right side) — pairs with pig |
-| `house.svg` | 512×512 | Game 4 | Colored object — yellow walls (#F6E05E), orange roof (#F6AD55), thick `#2D3748` outline |
-| `tree.svg` | 512×512 | Game 4 | Colored object — green canopy (#48BB78), brown trunk (#A0522D), thick `#2D3748` outline |
-| `car.svg` | 512×512 | Game 4 | Colored object — red body (#F56565), thick `#2D3748` outline |
-| `boat.svg` | 512×512 | Game 4 | Colored object — blue hull (#4299E1), thick `#2D3748` outline |
-| `ball.svg` | 512×512 | Game 4 | Colored object — yellow (#ECC94B), thick `#2D3748` outline |
-| `umbrella.svg` | 512×512 | Game 4 | Colored object — purple (#9F7AEA), thick `#2D3748` outline |
-| `airplane.svg` | 512×512 | Game 4 | Colored object — fuselage (#BEE3F8), fin/wings (#3182CE), thick `#2D3748` outline |
-| `mushroom.svg` | 512×512 | Game 4 | Colored object — red cap (#E53E3E) with white spots, cream stem (#FFF8E7), thick `#2D3748` outline |
+Deploy is tag-gated; master pushes never deploy. The PRD's release path section describes the intent ([`docs/PRD.md#82-deploy-path`](./PRD.md#82-deploy-path)).
 
-### SVG Assets — Toys (`assets/svg/toys/`)
+### 11.5 Container and host
 
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `teddy_bear.svg` | 512×512 | Game 6 | Golden brown body (#D69E2E), inner ears/muzzle (#F6AD55), sorted by scale (big/small) |
-| `toy_car.svg` | 512×512 | Game 6 | Coral body (#FC8181), light blue windows (#BEE3F8), sorted by scale (big/small) |
-| `toy_ball.svg` | 512×512 | Game 6 | Teal base (#4FD1C5), orange center circle (#F6AD55), sorted by scale (big/small) |
-| `toy_block.svg` | 512×512 | Game 6 | Purple body (#9F7AEA), yellow star (#ECC94B), sorted by scale (big/small) |
-| `toy_rocket.svg` | 512×512 | Game 6 | Blue body (#3182CE), red nose/fins (#E53E3E), flame (#F6AD55), sorted by scale (big/small) |
-| `toy_drum.svg` | 512×512 | Game 6 | Yellow body (#ECC94B), cream top (#FFF8E7), brown bottom (#D69E2E), sorted by scale (big/small) |
-| `toy_box.svg` | 512×512 | Game 6 | Orange body (#F6AD55), yellow opening (#ECC94B) — rendered at both 1.5× (big) and 0.7× (small) scales |
-
-### SVG Assets — UI (`assets/svg/ui/`)
-
-| File | Dimensions | Usage | Notes |
-|---|---|---|---|
-| `wooden_tray.svg` | 512×512 | Hub | Game tile frame |
-| `tile_shape_sorter.svg` | 512×512 | Hub | Game 1 tile icon |
-| `tile_animal_trace.svg` | 512×512 | Hub | Game 2 tile icon |
-| `tile_pop_freeze.svg` | 512×512 | Hub | Game 3 tile icon |
-| `tile_shadow_match.svg` | 512×512 | Hub | Game 4 tile icon |
-| `tile_musical_memory.svg` | 512×512 | Hub | Game 5 tile icon |
-| `tile_big_small.svg` | 512×512 | Hub | Game 6 tile icon |
-| `tile_pattern_builder.svg` | 512×512 | Hub | Game 7 tile icon |
-| `tile_alphabet.svg` | 512×512 | Hub | Game 8 tile icon |
-| `tile_word_match.svg` | 512×512 | Hub | Game 9 tile icon |
-| `tile_word_builder.svg` | 512×512 | Hub | Game 10 tile icon |
-| `tile_how_many.svg` | 512×512 | Hub | Game 11 tile icon |
-| `tile_first_sounds.svg` | 512×512 | Hub | Game 12 tile icon |
-| `tile_more_less.svg` | 512×512 | Hub | Game 13 tile icon — two dot-cards (3 blue vs 5 green dots) + up arrow |
-| `tile_odd_one_out.svg` | 512×512 | Hub | Game 14 tile icon — 2×2 mini-cards with one visually distinct (orange triangle among blue circles) |
-| `tile_color_match.svg` | 512×512 | Hub | Game 15 tile icon — 2×2 swatch cards (red/blue/yellow/green) with a white star on the red card |
-| `tile_add_it_up.svg` | 512×512 | Hub | Game 16 tile icon — two dot-cards (2 blue vs 3 green dots) joined by a chunky plus, yellow answer card with 5 blue dots |
-| `tile_take_away.svg` | 512×512 | Hub | Game 17 tile icon — two dot-cards (4 blue vs 2 green dots) joined by a chunky minus, yellow answer card with 2 blue dots |
-| `tile_memory_match.svg` | 512×512 | Hub | Game 18 tile icon — three mini-cards: two face-down cream cards flanking a face-up card with a blue star |
-| `tile_decode_it.svg` | 512×512 | Hub | Game 19 tile icon — 4 mini word cards with magnifier + sparkle motif |
-| `tile_number_order.svg` | 512×512 | Hub | Game 20 tile icon — ascending 1→2→3 staircase + arrow + sparkle motif |
-| `shelf.svg` | 512×512 | Game 4 | Shadow display shelf |
-| `lock_icon.svg` | 512×512 | Global | Parental lock indicator |
-| `star.svg` | 512×512 | Game 3 / Global | Bonus star, rating |
-| `dotted_path.svg` | 512×512 | Game 2 | Trace path guide *(superseded — path now generated at runtime via `Phaser.Curves.Path` + Graphics)* |
-| `bubble.svg` | 512×512 | Game 3 | Translucent round bubble (`#BEE3F8`, fill-opacity 0.4) with `#2D3748` outline and highlight |
-| `lilypad.svg` | 512×512 | Game 5 | Frog platform |
-| `sleep_zzz.svg` | 512×512 | Game 3 | Sleeping-decoy sleep glyph — three rounded "Z" strokes (replaces the old "Zzz" text, 2026-08-06) |
-| `icon_speaker.svg` | 512×512 | Global | Shared replay speaker button — speaker cone + two green sound-wave arcs (2026-08-06) |
-| `arrow_up.svg` | 512×512 | Game 13 | "More" prompt cue — chunky up arrow, `#2B6CB0` fill / `#2D3748` stroke 26 |
-| `arrow_down.svg` | 512×512 | Game 13 | "Less" prompt cue — chunky down arrow, `#2B6CB0` fill / `#2D3748` stroke 26 |
-
-### SVG Assets — Shadows (`assets/svg/shadows/`)
-
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `shadow_house.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `house.svg` paths |
-| `shadow_tree.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `tree.svg` paths |
-| `shadow_car.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `car.svg` paths |
-| `shadow_boat.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `boat.svg` paths |
-| `shadow_ball.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `ball.svg` paths |
-| `shadow_umbrella.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill (handle as stroke), derived from `umbrella.svg` paths |
-| `shadow_airplane.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `airplane.svg` paths |
-| `shadow_mushroom.svg` | 512×512 | Game 4 | Silhouette — `#2D3748` fill, derived from `mushroom.svg` paths |
-
-### SVG Assets — Stickers (`assets/svg/stickers/`)
-
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `sticker_shape_sorter.svg` | 512×512 | Game 1 | Unique themed sticker |
-| `sticker_animal_trace.svg` | 512×512 | Game 2 | Unique themed sticker |
-| `sticker_pop_freeze.svg` | 512×512 | Game 3 | Unique themed sticker |
-| `sticker_shadow_match.svg` | 512×512 | Game 4 | Unique themed sticker |
-| `sticker_musical_memory.svg` | 512×512 | Game 5 | Unique themed sticker |
-| `sticker_big_small.svg` | 512×512 | Game 6 | Unique themed sticker |
-| `sticker_pattern_builder.svg` | 512×512 | Game 7 | Unique themed sticker — ABAB row (orange circle + teal rounded square) with dashed gap slot on the cream badge |
-| `sticker_alphabet_match.svg` | 512×512 | Game 8 | Unique themed sticker — "ABC" letterforms on the cream badge |
-| `sticker_word_match.svg` | 512×512 | Game 9 | Unique themed sticker |
-| `sticker_word_builder.svg` | 512×512 | Game 10 | Unique themed sticker |
-| `sticker_how_many.svg` | 512×512 | Game 11 | Unique themed sticker |
-| `sticker_first_sounds.svg` | 512×512 | Game 12 | Unique themed sticker |
-| `sticker_more_less.svg` | 512×512 | Game 13 | Unique themed sticker — two mini-cards + up arrow on the cream badge |
-| `sticker_odd_one_out.svg` | 512×512 | Game 14 | Unique themed sticker — 2×2 mini-cards with one highlighted on the cream badge |
-| `sticker_color_match.svg` | 512×512 | Game 15 | Unique themed sticker — 2×2 swatch cards with the red one starred on the cream badge |
-| `sticker_add_it_up.svg` | 512×512 | Game 16 | Unique themed sticker — dot-cards + chunky plus with the yellow answer card on the cream badge |
-| `sticker_take_away.svg` | 512×512 | Game 17 | Unique themed sticker — dot-cards + chunky minus with the yellow answer card on the cream badge |
-| `sticker_memory_match.svg` | 512×512 | Game 18 | Unique themed sticker — three mini-cards (two face-down cream, one face-up blue star) on the cream badge |
-| `plus.svg` | 512×512 | Game 16 | Symbol cue — chunky "+" (arrow_up.svg precedent) |
-| `minus.svg` | 512×512 | Game 17 | Symbol cue — chunky "−" horizontal bar (plus.svg precedent) |
-| `equals.svg` | 512×512 | Game 16 | Symbol cue — chunky "=" (arrow_up.svg precedent) |
-| `card_back.svg` | 512×512 | Game 18 | Face-down card back — cream rounded card with two yellow corner dots and a blue star |
-
-### SVG Assets — Letters (`assets/svg/letters/`)
-
-| File | Dimensions | Game | Notes |
-|---|---|---|---|
-| `letter_a.svg` … `letter_z.svg` | 512×512 | Game 8/9/10 | Bold uppercase letterforms (`Arial`-class sans-serif, 400px), identical `#2B6CB0` fill / `#2D3748` stroke styling for all 26 — letters are distinguished by shape only (no color-as-cue). Find the Letter renders target + cards from these textures (256px / 128px, 2026-08-06) |
-
-### Mascot Poses (`src/assets/svg/ui/`)
-
-| File | Dimensions | Used In | Notes |
-|---|---|---|---|
-| `mascot_idle.svg` | 512×512 | Hub + all twenty games | Professor Hoot neutral pose (idle bob + blink loop on Hub) |
-| `mascot_celebrate.svg` | 512×512 | Hub + all twenty games | Arms-up cheer pose (bounce + sparkle ring via Graphics) |
-
-> **Note:** The mascot is **tween-only** — no sprite sheets, particle emitters, or WASM engine (the Ligne pilot was removed; see the tech-stack removal entry). Poses are rasterized at 512×512 from `?raw` SVG imports; reactions (wave, nod, cheer, big cheer, curious tilt-hop, flap-greeting double-wave) are animations over these two static poses. The sparkle ring is a self-cleaning Phaser Graphics circle.
-
-### Audio Assets (`public/audio/`)
-
-| File | Format | Used In | Notes |
-|---|---|---|---|
-| `bgm.mp3` | MP3 | All scenes | Ambient loop at 0.3 volume, served at `/audio/bgm.mp3` and precached for offline play |
-
-> **Note:** Game 3's bubble pop and sleeping-animal wake sounds are **synthesized via Web Audio API** (`AudioManager.playPop()` at 800 Hz / 0.08s, `AudioManager.playWake()` with E4 + A4 dual oscillators) — no MP3 files needed for these.
->
-> **Note:** Gameplay SFX (correct, incorrect, win, sticker) used by Games 1, 2, 4, and 6 are **synthesized via Web Audio API** (`AudioManager.playCorrect()`, `playIncorrect()`, `playWin()`, `playSticker()`) — no MP3 files needed for these. Game 4 reuses these existing synthesized methods; no new audio synthesis was added for the Shadow Match track. Game 6 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Big vs. Small Cleaner track. Game 7 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Pattern Builder track. Game 8 similarly reuses these existing synthesized methods; no new audio synthesis was added for the Find the Letter track (letter **names** use browser SpeechSynthesis via `src/utils/speech.ts`, not Web Audio).
-
-### Font (`public/fonts/`, 2026-08-06)
-
-| File | Format | Used In | Notes |
-|---|---|---|---|
-| `baloo2-latin.woff2` | WOFF2 | All text | Baloo 2 variable font (wght 100–800), Latin subset, ~33 KB; declared via `@font-face` in `src/styles/style.css` and added to `vite.config.ts` `includeAssets` so the PWA precaches it; applied through `textStyle()` from `src/utils/typography.ts` |
-
-### PWA Icons (`public/icons/`)
-
-| File | Dimensions | Notes |
-|---|---|---|
-| `icon-192.png` | 192×192 | App icon for manifest + `apple-touch-icon` |
-| `icon-512.png` | 512×512 | App icon for PWA manifest |
-| `icon-maskable-512.png` | 512×512 | Maskable variant (`purpose: "any maskable"`), content within the safe zone |
-
-### Asset Summary
-
-| Type | Count |
-|---|---|
-| SVG — shapes | 36 (18 shapes + 18 cutouts) |
-| SVG — animals | 9 |
-| SVG — items | 19 (6 Game 2 food + 8 Game 4 objects + 4 Game 9/10 word pictures + lily pad) |
-| SVG — toys | 7 (6 toys + 1 box, Game 6) |
-| SVG — shadows | 8 (Game 4 silhouettes) |
-| SVG — letters | 26 (Game 8/9/10 letterforms) |
-| SVG — numerals | 10 (Game 11, 0–9) |
-| SVG — stickers | 14 (one per mini-game) |
-| SVG — UI shared | 5 (bubble, 2 mascot poses, `sleep_zzz`, `icon_speaker`) |
-| SVG — tile icons | 12 (storybook game-tile icons, 2026-08-06; +1 on 2026-08-07) |
-| Audio (MP3) | 1 |
-| Font (WOFF2) | 1 (Baloo 2, 2026-08-06) |
-| PWA icons (PNG) | 3 |
-| **SVG total (registered in PreloadScene)** | **142** |
-
-### UI/UX Hardening (2026-08-06)
-
-Track `conductor/archive/uiux-hardening_20260805/` — consolidated audit remediation:
-
-- **Typography:** `src/utils/typography.ts` exports `FONT_FAMILY` (`"Baloo 2", "Comic Sans MS", "Segoe Print", "Chalkboard SE", system-ui, sans-serif`), size presets, and `textStyle(style)` which returns `{ fontFamily: FONT_FAMILY, ...style }`. Every `add.text` call in the app wraps its style object in `textStyle()`, replacing Phaser's default Courier. The variable font file `public/fonts/baloo2-latin.woff2` is precached.
-- **Hub tile icons:** 12 `tile_*` SVGs in `src/assets/svg/ui/tiles/`; `GAME_TILES` entries carry `tileKey`; tiles render the icon (80px) above a 15px secondary label (label font 18→15px to make room).
-- **Empty-slot sticker shelf:** unearned slots draw a dashed outline (`drawEmptySlot`), earned slots show the real sticker; `animateUnearned` was removed.
-- **Speaker replay:** `src/components/SpeakerButton.ts` (96×96, centered hit area `Rectangle(-48,-48,96,96)`, press feedback, `onSpeak` callback). Used in Alphabet/WordMatch/WordBuilder/HowMany/FirstSounds (beside the prompt) and replaces Musical Memory's emoji replay button.
-- **Audio unlock:** Hub `input.on("pointerdown")` calls `AudioManager.resume()`.
-- **Settings readability:** font bumps (see §6), footer under the title, `viewportZoom.ts` pinch-zoom while open.
-- **Find the Letter textures:** AlphabetScene renders target + cards from `letter_*` SVG textures (256px / 128px) instead of system-font text.
-- **Polish:** sticker tween delayed 400ms/250ms in all twenty scenes; idle attract wiggles 2 rotating tiles; Preload brand lockup; Shadow Match objects 112px; `sleep_zzz` glyph; footer reposition.
+The `Dockerfile` is two stages: `node:22-alpine` with `corepack prepare pnpm@11.7.0`, `pnpm install --frozen-lockfile`, `pnpm run build`; then `nginx:1.27-alpine` with `nginx.conf` and `dist/` copied in, port 80 exposed and a `wget --spider` healthcheck. The host is a private VPS running Coolify behind Nginx.
 
 ---
 
-## 8. Motion & Feedback System
+## 12. See also
 
-All animation and feedback utilities live in `src/utils/` and are wired into every scene. They were introduced by the Cross-Cutting Motion track (2026-08-01, archived at `conductor/archive/cross-cutting-motion_20260801/`).
-
-### `motion.ts`
-
-Single source of truth for reduced-motion behavior:
-
-- `isReducedMotion()` — reads `window.matchMedia("(prefers-reduced-motion: reduce)")`.
-- `motionDuration(normal, reduced)` — returns `reduced` when reduced motion is active, else `normal`.
-- `motionScale(normal, reduced)` — same pattern for scale amplitudes.
-
-Every tween in the app consults these helpers **at call time** (not module load), so a mid-session OS setting change takes effect immediately.
-
-### HubScene engagement systems
-
-The Hub implements the engagement track (FR1–FR5):
-
-- **Entrance & idle life:** tiles/labels/icons/stickers enter with a 40ms stagger (`ENTRANCE_STAGGER`), 300ms `Sine.out` alpha + scale; tiles and labels then bob on a 2.5s ±4px `Sine.inOut` loop (200ms phase offsets). Four low-contrast dots drift behind the grid (4000–6000ms loops, depth −1). All skipped or alpha-only under reduced motion.
-- **Tile icons (2026-08-06):** each tile renders its storybook icon texture (`GAME_TILES[i].tileKey`, 80px, 32px above tile center) with the text label as a small 15px secondary line below center — the 12-game grid is identifiable without text.
-- **Sticker shelf:** real sticker textures (`sticker_<gameId>` keys, rasterized at 512px) rendered at `STICKER_SCALE = 56/512`:
-  - Earned: full alpha, 800ms shimmer loop (`SPARKLE_ALPHA 0.75`).
-  - Unearned: a dashed empty-slot outline instead of a dimmed ghost (`drawEmptySlot`: 10 white arc dashes, 0.55 alpha, touch-inert Graphics; no sticker image is created) (2026-08-06).
-  - Just earned: `Back.out` entrance to 1.15× + 500ms sparkle burst (scale pulse to 1.25× + shimmer). Triggered via `init({ justEarned })` from scene-start data; game scenes pass it only when the sticker was earned that session (replays pass no data). The shelf is touch-inert (no `setInteractive`).
-- **Idle attract:** `scheduleIdleAttract()` arms a 25s timer; `triggerIdleAttract()` plays `AudioManager.playIdleCall()` (E5+G5, gain 0.12), starts a 4° rotation wiggle on **two rotating tiles** (`ATTRACT_WIGGLE_COUNT = 2`, pick advances via `attractWiggleTick`; 350ms `Sine.inOut` yoyo, 120ms offsets, once per idle period), and re-arms at 10s intervals. Any `input.on("pointerdown")` calls `resetIdleAttract()` (removes the pending timer, re-arms 25s) **and** `AudioManager.getInstance().resume()` (idempotent) so the idle-attract chime is audible on a fresh load before the first tile tap (2026-08-06). Shutdown removes the timer; reduced motion plays the chime only (no wiggle).
-
-### `sceneTransitions.ts`
-
-- `transitionToScene(scene, key, data?)` — 300ms fade-out to the app background `0xfaf9f6`, starts the target scene (with `data` when provided), then 180ms fade-in. Used for every navigation path (boot → preload → hub, hub → game, game → hub, parental-lock exits). Game scenes pass `{ justEarned: gameId }` to the Hub on first-time sticker earns.
-- `sceneEntrance(scene)` — 180ms fade-in with a subtle zoom from 1.02 → 1 at scene start. The zoom ease is the canonical EaseMap key `"Sine"` — camera **Zoom effects resolve ease strings against their own EaseMap**, so dotted keys like `"Sine.out"` are not found and leave the effect's ease undefined (runtime crash).
-- The only remaining bare `scene.start` call is BootScene's initial launch (intentional — there is nothing to fade from).
-
-### `completionEffect.ts`
-
-- `createCompletionSplash(scene, x, y)` — bounded success effect for correct in-game actions; self-cleaning (destroys on tween complete), never clouds the play area.
-- `createWinCelebration(scene, x, y)` — the shared completion effect used by all twenty games (replaces per-game bespoke win tweens):
-  - 10 rays + 10 drifting confetti bits (`WIN_CONFETTI_COUNT = 10`), `WIN_STANDARD_DURATION = 700ms`, ray burst scale 1.25×.
-  - Colors: `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea`.
-  - Reduced motion: `WIN_REDUCED_DURATION = 300ms`, 6 rays, burst scale 1.0×, **no particles**.
-  - Fully self-cleaning; uses Graphics, never `add.particles`.
-
-### `pressFeedback.ts`
-
-- `attachPressFeedback(obj, options?)` — captures `obj.scaleX` at attach time; `pointerdown` squishes to `baseScale × 0.95`; `pointerup`/`pointerout`/`pointercancel` restore `baseScale` — instantly by default, or with a 150ms `Back.out` spring when `options.spring` is set. No-op under reduced motion.
-- Wired to the eight game Back controls, Musical Memory Replay, Hub Settings, and every Hub game tile (with `{ spring: true }`, attached on entrance completion so the base scale is captured at 1.0). Registered **after** the primary handlers (ParentLock/hold, replay, audio), so listener order preserves control behavior. Hub tiles navigate on `pointerup` so the press squish stays visible while holding.
-
-### Gameplay tween values (normal → reduced)
-
-| Tween | Normal | Reduced |
-|---|---|---|
-| Bounce-backs (Shape Sorter, Shadow Match, Big vs. Small) | 300 ms | 180 ms |
-| Bubble pop shrink (Pop & Freeze!) | 200 ms | 120 ms |
-| Wake wobble (Pop & Freeze!) | 300 ms, 1.15× base | 180 ms, 1.05× base |
-| Frog bounce (Musical Memory) | 200 ms, 1.2× base | 120 ms, 1.05× base |
-| Sticker pops (all twenty games) | 300 ms | 180 ms |
-
-### Per-game juice (2026-08-01)
-
-The Per-Game Juice track (archived at `conductor/archive/per-game-juice_20260801/`) added scene-level juice to every game — zero gameplay-rule changes, zero new assets, Graphics-only effects (the app never uses `add.particles`). Every value below consults `motionDuration`/`motionScale` at call time.
-
-#### `dragJuice.ts`
-
-- `attachDragLift(obj, options?)` — on `dragstart` tweens the object to `base × motionScale(1.1, 1.05)` scale and `motionScale(4, 0)` degrees tilt (`Sine.out`, 120ms/80ms); on `dragend` restores base scale and 0° (150ms/100ms). `options.skipRestore` lets a scene suppress the restore (Big vs. Small, whose toy already shrank into the box).
-- `attachDropZoneHighlight(scene, zones)` — registers `dragenter`/`dragleave`/`dragend` on `scene.input`; on enter creates a Graphics outline (`lineStyle(6, 0x2b6cb0, 0.9)`, `strokeRect` around the zone) and pulses it on a `repeat: -1` `Sine.inOut` yoyo (400ms/240ms, scale `motionScale(1.06, 1.02)`), destroying it on leave/end.
-- `snapToSlot(scene, obj, x, y)` — 200ms/120ms `Back.out` tween that replaces the old instant `setPosition` on correct drops.
-
-#### Per-game reactions (normal → reduced)
-
-| Game | Reaction | Values |
-|---|---|---|
-| Shape Sorter / Shadow Match / Big vs. Small | Drag lift + tilt, zone highlight, snap tween | lift 1.1×/1.05× + 4°/0°, snap 200ms/120ms `Back.out` |
-| Big vs. Small | Toy shrink into box, lid wiggle, box bump | shrink 150ms/90ms `Sine.in`, wiggle ±3° 200ms/120ms ×3 yoyo, bump 1.05×/1.02× 250ms/150ms |
-| Shadow Match | Silhouette stamp + fill flash, matched-object dim | stamp 1.1×/1.05× 200ms/120ms yoyo, flash white fill 150ms/90ms alpha fade self-cleaning, dim → 0.5 alpha 200ms/120ms |
-| Animal Trace | Hop arc, food wiggle, progress-dot pop | hop 60+60ms/36+36ms `Sine.inOut`, apex −6px/0px; wiggle ±4°/±2° 200ms/120ms ×3 yoyo; dot pop 1.4×/1.2× 250ms/150ms `Back.out` yoyo |
-| Pop & Freeze | Pop droplets, sleeping breathing | 3 teal droplets grow 1.2×/1.05×, fade 300ms/180ms, self-cleaning; breathing 1.0→1.03 yoyo 750ms/phase `repeat: -1`, disabled under reduced motion, `tween.remove()` on shutdown |
-| Musical Memory | Ripple ring, lily pad drift, dot pop | ripple grow 1.6×/1.3×, fade 400ms/240ms, self-cleaning; drift ±3px y 1500ms yoyo loop, disabled under reduced motion; dot pop 1.4×/1.2× 250ms/150ms `Back.out` |
-
-Shape Sorter also adopted the silent-bounce rule already used by Shadow Match and Big vs. Small: the incorrect SFX only plays when the piece was dropped on a zone; dropping on empty floor bounces back silently.
-
-### Mascot companion (2026-08-01)
-
-The Mascot Companion track (archived at `conductor/archive/mascot-companion_20260801/`) added Professor Hoot — a static-pose, tween-only teacher owl. Two SVGs (`mascot_idle.svg`, `mascot_celebrate.svg`, 512×512, `?raw` imports rasterized in PreloadScene as `mascot_idle`/`mascot_celebrate`). No sprite sheets, no particle emitters, no new audio — reactions reuse `AudioManager`'s shared synthesized SFX.
-
-#### `Mascot.ts`
-
-- `new Mascot(scene, x, y, scale)` — creates the sprite at `MASCOT_DEPTH = -1` (behind gameplay z-order), touch-inert (no interactive listeners; scene input isn't affected).
-- `wave()` — gentle left-right angle tween (8°, 200ms `Sine.inOut`; reduced 4°, 120ms).
-- `nod()` — forward tilt (6°, 150ms; reduced 3°, 90ms).
-- `cheer(big = false)` — swap to the celebrate pose, wings-up scale pop (1.1×/1.2×, 180ms/260ms `Back.out`; reduced: pose swap only, no bounce) plus a self-cleaning Graphics sparkle ring (r 32/48) on `big`. An in-flight cheer is **retired** (its tween is removed) before a new one starts, so rapid correct taps never stack scale tweens; the blink loop pauses during a cheer and resumes on complete.
-- `idleLoop()` — Hub-only: 3px vertical bob (`Sine.inOut`, 2500ms yoyo, `repeat: -1`) + periodic squash-blink (`scaleY 0.92`, 150ms, `repeatDelay 3700ms`). No-op under reduced motion.
-- `destroy()` — removes the sprite, any active cheer/blink tweens, and the sparkle ring.
-- `createCornerMascot(scene)` — shared factory: bottom-right corner via `MASCOT_SCALE = 0.2` / `MASCOT_CORNER_MARGIN = 90`, fires `flapGreeting()` after the Hub entrance and `curious()` on game-scene entry, `cheer()` when scene data `justEarned` is set (Hub), and `idleLoop()` on the Hub.
-- **Scene wiring:** Hub waves on load, cheers on `justEarned`; all twenty games cheer on correct actions (beside `playCorrect`/`playPop`/round-success), nod on incorrect (`playIncorrect`/`playWake`; Animal Trace has no nod — it's a no-fail game), big cheer on win (beside `playWin`), and destroy on shutdown. Shape Sorter's nod is gated to zone drops, matching the silent-bounce rule.
-
-Covered by 32 component tests (`src/__tests__/components/Mascot.test.ts`: reactions incl. curious tilt-hop and flap-greeting double-wave, big cheer, reduced-motion paths, retire-in-flight-cheer, blink pause/resume, cleanup) plus the integration tests in `src/__tests__/scenes/navigation.test.ts` (Hub navigation, profile switcher, PWA toasts, mascot incl. the entry curious tilt, engagement/idle, sticker shelf, touch regression, and play-time enforcement).
-
-### Test coverage
-
-955 tests across 36 files (2026-08-06); all motion, transitions, completion-effect, drag-juice, press-feedback, speech, play-time, mascot, count, typography, viewport-zoom, and SpeakerButton utilities/components at 100% coverage; scenes ≥ 93% lines; `sceneRegistry.ts` reports low lines because the dynamic-import loader wrappers are not invoked in unit tests (they would pull real Phaser scenes into happy-dom) — the `ensureSceneLoaded` logic itself is 100% function-covered and the loaders are structurally verified against the production build. Total project ~97% lines. Coverage thresholds remain 80% for lines, functions, branches, and statements.
-
----
-
-## 9. CI/CD Pipeline (2026-08-02)
-
-Production is hosted on a private VPS (Docker + Nginx) managed by **Coolify**, which builds the image from the repo's `Dockerfile`. Since 2026-08-02, deployments are gated by **GitHub Actions** (`.github/workflows/ci.yml`):
-
-### Workflow
-
-| Event | Runs | Result |
-|---|---|---|
-| `pull_request` (opened/synchronize/reopened) | **Quality Gates** job | Status check on the PR; deploy job structurally skipped |
-| `push` to `master` (post-merge) | **Quality Gates** job → **Deploy to Coolify** job | On green, fires the Coolify Deploy Webhook; Coolify rebuilds from the repo Dockerfile and redeploys |
-
-- **Quality Gates** (ubuntu-latest, Node 22, pnpm 11.7.0 via `pnpm/action-setup@v6`, pnpm store cached via `setup-node` `cache: pnpm`, `pnpm install --frozen-lockfile`), sequential steps: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`.
-- **Deploy to Coolify** (`needs: quality-gates`, `if: github.event_name == 'push' && github.ref == 'refs/heads/master'`): fails fast if secrets are missing, then `curl --fail-with-body` GET to the webhook URL with `Authorization: Bearer $COOLIFY_TOKEN`.
-- **Secrets** (repository settings → Secrets and variables → Actions):
-  - `COOLIFY_DEPLOY_WEBHOOK` — Deploy Webhook URL from Coolify → the app → Webhooks.
-  - `COOLIFY_TOKEN` — Coolify API token (Keys & Tokens → API Tokens) with the `deploy` permission. The webhook endpoint returns 401 without a Bearer token.
-- **Docs-only pushes** (`conductor/**`, `docs/**`, `README.md`, `**/*.md`) skip CI via `paths-ignore` — no needless production rebuilds.
-- **Branch protection:** recommended on `master`, requiring the "Quality Gates" status check before merge (set in GitHub → Settings → Branches; not enforced from the repo).
-- The workflow declares explicit `permissions: contents: read` and pins action majors (`checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6`) to avoid deprecated runner runtimes.
-- **Release history (executed end-to-end):** **v1.1.0** (2026-08-02) — first tag-based release through this pipeline. `npm version 1.1.0 --no-git-tag-version` + `chore(release): Bump version to 1.1.0`; annotated tag `v1.1.0`; push to `master` → CI run `30745388316` (Quality Gates 52s ✓, Deploy to Coolify 5s ✓); live verification via entry-chunk hash match (`index-BRXHqYbm.js`) and `1.1.0` present in the served bundle. Chore track archived at `conductor/archive/release-1.1.0-mechanics_20260802/`.
-- **v1.4.0** (2026-08-04) — Multi-Kid Profiles release via the same pipeline. `npm version 1.4.0 --no-git-tag-version` + `chore(release): Bump version to 1.4.0` (`6464d8a`); release branch `release/v1.4.0` → PR → merge to `master` (Quality Gates → Deploy to Coolify); annotated tag `v1.4.0`; live verification via entry-chunk hash match and `1.4.0` in the served bundle; device testing 2026-08-04 on iPad, Android tablet, iPhone, Android phone (all passed). Release track archived at `conductor/archive/release-1.4.0_20260804/` on completion of the track.
-- **Play-Time Limits (2026-08-05)** — feature track implemented on `master` (not yet released; pending a release-execution track). Adds a per-profile daily cap (Off/15/30/45/60 min) configured via a chip in Settings → Profiles; session accounting (`startPlaySession`/`endPlaySession` in `src/game/playTimeLogic.ts`, `recordPlayTime` in `src/utils/storage.ts`) accrues usage from Hub tile tap to Hub return; Hub renders a textless remaining-budget arc (warm ≤5 min), a 2s hourglass nudge delays launch once 5 min remain, and at the cap tiles dim and lock behind a moon badge. Off by default; no mid-game cutoffs; reduced-motion aware. Track archived at `conductor/archive/play-time-limits_20260805/`.
+- [`docs/PRD.md`](./PRD.md) — product definition, curriculum map, per-game rules, cross-game systems, performance targets.
+- [`conductor/tech-stack.md`](../conductor/tech-stack.md) — dated stack decisions and the history behind them.
+- [`docs/release-checklist.md`](./release-checklist.md) — the manual device pass that complements the CI gates.
