@@ -96,7 +96,7 @@ drift compounds with every release.
 | ID | Criterion | Verifies |
 | --- | --- | --- |
 | AC-1 | README has zero empty headings. Its counts equal a `pnpm test -- --run` run captured in the phase evidence and carry a verified date. | FR-1 |
-| AC-2 | README is at most 240 lines once Phase 2 lands and at most 180 at track end; every trimmed section links to its owning doc, and no other file links to a removed anchor. (Revised 2026-10-20: the original 170 ceiling was an estimate made before measuring, and the plan left the roster to Phase 3; 240 after Phase 2, 180 at track end.) | FR-2 |
+| AC-2 | README is at most 240 lines once Phase 2 lands and at most 215 at track end; every trimmed section links to its owning doc, and no other file links to a removed anchor. (Revised 2026-10-20 against measurement: Phase 2 landed at 237, and the roster plus juice trim is worth 24 lines - 31→24 and 23→6 - so 215 is reachable without dismantling the release history and docs index. The original 170 was an estimate made before measuring.) | FR-2 |
 | AC-3 | The relocation list names every moved fact, and a `rg` search finds each one in the PRD or TDD. | FR-3 |
 | AC-4 | TDD counts equal the same captured run, and the lowest-covered-file claim is re-measured or absent. | FR-4 |
 | AC-5 | The product.md adaptive text matches `WINDOW_SIZE = 10`, `MIN_SAMPLE = 6`, 0.9 and 0.6, and `git diff` shows no changed line inside a dated changelog entry. | FR-5 |
@@ -134,8 +134,10 @@ drift compounds with every release.
 - **Assumption:** a README of at most 170 lines is a target, not a hard gate; a
   section holding unique facts may push it higher. **Amended 2026-10-20** after
   Phase 2 measured 237 lines: the ceiling is 240 once the nine sections are
-  summaries and 180 at track end, and the gap is closed by trimming the game
-  roster (new FR-12/AC-12), not by dropping setup facts.
+  summaries and 215 at track end. Phase 3 closes the gap by trimming the game
+  roster and the per-game juice (new FR-12/AC-12), which is worth 24 of the 237.
+  Reaching the original 170 would also mean deleting the release history and the
+  docs index, which are README content rather than duplication.
 - **Assumption:** the Ligne track closes as executed and archived because
   `755d575` performed its work; `conductor/migration-report.md:30` recommends
   recreating it, which this track supersedes because the outcome already landed.

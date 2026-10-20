@@ -75,7 +75,7 @@
   - [ ] **P3.T3.1: Record the per-game checklist** - in the phase evidence, flagging any fact intentionally dropped and why.
 - [ ] **P3.T4: Cut the roster down to one line per game** - covers: FR-12
   - [ ] **P3.T4.1: Move replay-variety detail to the PRD** - keep the game name, its domain and its icon, link to the 3 spec, and drop any bullet whose facts the PRD 3 spec already states.
-  - [ ] **P3.T4.2: Hold the line budget** - README at most 180 lines at the end of the phase, with `## Releases` and `## Project Structure` unchanged.
+  - [ ] **P3.T4.2: Hold the line budget** - README at most 215 lines at the end of the phase, with `## Releases` and `## Project Structure` unchanged.
 
 ## Phase 4: product.md Current-State Truth
 
