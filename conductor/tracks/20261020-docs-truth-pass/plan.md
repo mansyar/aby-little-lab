@@ -88,16 +88,20 @@
 - **Covers:** FR-5, FR-11, AC-5
 - **Touches:** `conductor/product.md`, `docs/PRD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Correct the adaptive sentence** — covers: FR-5
-  - [ ] **P4.T1.1: Match the code** — 6-tap minimum inside a 10-tap window, 0.9 up and 0.6 down, clamped bands, toggle honored.
-- [ ] **P4.T2: Audit the remaining current-state claims** — covers: FR-5
-  - [ ] **P4.T2.1: Verify against code** — 22 games, 6×4 tile grid at 144px, 5×2 paged layout, domain counts; fix only failures.
-- [ ] **P4.T3: Prove history was not rewritten** — covers: NFR-4
-  - [ ] **P4.T3.1: Inspect the diff** — `git diff -U0 conductor/product.md` shows no changed line inside a dated `> **YYYY-MM-DD**` entry.
-- [ ] **P4.T4: Fix the Build the Word distractor claim** — covers: FR-11
-  - [ ] **P4.T4.1: Match the code** — PRD 3.10 says distractors come from nearby letters; `generateLetterTiles` in `src/game/wordLogic.ts` draws them from the remaining alphabet, so state what the code does.
+- [x] **P4.T1: Correct the adaptive sentence** — covers: FR-5
+  - [x] **P4.T1.1: Match the code** — 6-tap minimum inside a 10-tap window, 0.9 up and 0.6 down, clamped bands, toggle honored.
+- [x] **P4.T2: Audit the remaining current-state claims** — covers: FR-5
+  - [x] **P4.T2.1: Verify against code** — 22 games, 6×4 tile grid at 144px, 5×2 paged layout, domain counts; fix only failures.
+- [x] **P4.T3: Prove history was not rewritten** — covers: NFR-4
+  - [x] **P4.T3.1: Inspect the diff** — `git diff -U0 conductor/product.md` shows no changed line inside a dated `> **YYYY-MM-DD**` entry.
+- [x] **P4.T4: Fix the Build the Word distractor claim** — covers: FR-11
+  - [x] **P4.T4.1: Match the code** — PRD 3.10 says distractors come from nearby letters; `generateLetterTiles` in `src/game/wordLogic.ts` draws them from the remaining alphabet, so state what the code does.
+
+- **Result:** verified. The audit confirmed twelve of thirteen current-state claims against code and changed only what was wrong: the Adaptive Difficulty sentence now states the ten-tap window, the six-tap minimum, 0.9 up and 0.6 down, the steady middle, the clamp and the toggle (previously "≥90% over ≥10 taps"), and the hub line now names the paged phone layout (three 5×2 pages, 10 + 10 + 2) that the wide-grid sentence had made invisible. Roster order, domain counts (4/1/1/2/2/5/5/1/1 = 22), `TILE_WIDTH = 144` with 6×4 rows 6/6/6/4, the 160/256/512 texture tiers and the eight §3.1 mechanic counts all verified correct and left byte-identical. All 14 dated `> **YYYY-MM-DD**` entries are untouched - `git diff -U0 conductor/product.md` has zero `^[+-]> \*\*` lines. PRD §3.10 now says the distractor tiles come from the alphabet minus the word's own letters, which is what `generateLetterTiles` does.
+- **Checkpoint:** `9d47921`
+- **Evidence:** [`verification/phase-4.md`](./verification/phase-4.md)
 
 ## Phase 5: Code Comments, Dead JSDoc, Vite Warning
 
