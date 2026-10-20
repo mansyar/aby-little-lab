@@ -109,7 +109,7 @@ shell side.
 - **Covers:** FR-7, FR-8, FR-9, NFR-2, NFR-5, AC-6, AC-9
 - **Touches:** `scripts/validate-pwa.js`, `src/__tests__/game/art/**`, `README.md`, `conductor/tech-stack.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-boot.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Precache assertion** — covers: FR-7, NFR-2
   - [ ] **P5.T1.1: `validate-pwa` fails when any emitted art chunk is missing from the precache manifest**
