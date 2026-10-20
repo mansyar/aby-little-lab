@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   addPlayTime,
   createDefaultPlayTime,
@@ -7,6 +7,8 @@ import {
   isLimitReached,
   isNearLimit,
   normalizePlayTime,
+  pausePlaySession,
+  resumePlaySession,
   setLimit,
   startPlaySession,
   todayKey,
@@ -216,6 +218,141 @@ describe("playTimeLogic", () => {
     it("records zero minutes for a very short session", () => {
       startPlaySession("p1", DAY.getTime());
       expect(endPlaySession(DAY.getTime() + 10 * 1000)?.minutes).toBe(0);
+    });
+  });
+
+  describe("visibility-aware sessions", () => {
+    const MINUTE = 60 * 1000;
+    const T0 = DAY.getTime();
+    let visibility: DocumentVisibilityState = "visible";
+
+    function at(minutes: number): void {
+      vi.setSystemTime(T0 + minutes * MINUTE);
+    }
+
+    function setVisibility(next: DocumentVisibilityState): void {
+      visibility = next;
+      document.dispatchEvent(new Event("visibilitychange"));
+    }
+
+    function hide(minutes: number): void {
+      at(minutes);
+      visibility = "hidden";
+      document.dispatchEvent(new Event("visibilitychange"));
+    }
+
+    function show(minutes: number): void {
+      at(minutes);
+      visibility = "visible";
+      document.dispatchEvent(new Event("visibilitychange"));
+    }
+
+    /** Ends the session and returns its banked minutes, failing if none was active. */
+    function recordedMinutes(now = Date.now()): number {
+      const ended = endPlaySession(now);
+      if (ended === null) throw new Error("expected an active play session");
+      return ended.minutes;
+    }
+
+    beforeEach(() => {
+      endPlaySession();
+      visibility = "visible";
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => visibility,
+      });
+      vi.useFakeTimers();
+      at(0);
+    });
+
+    afterEach(() => {
+      endPlaySession();
+      vi.useRealTimers();
+      Reflect.deleteProperty(document, "visibilityState");
+    });
+
+    it("accrues only the visible minutes while the document is hidden", () => {
+      startPlaySession("p1", Date.now());
+      hide(2);
+      show(12);
+      at(17);
+      expect(recordedMinutes()).toBe(7);
+    });
+
+    it("charges the visible slice once across two hide/show cycles", () => {
+      startPlaySession("p1", Date.now());
+      hide(2);
+      show(12);
+      hide(15);
+      show(25);
+      at(30);
+      expect(recordedMinutes()).toBe(10);
+    });
+
+    it("charges nothing for a hide with no visible time between", () => {
+      startPlaySession("p1", Date.now());
+      hide(0);
+      show(0);
+      expect(recordedMinutes()).toBe(0);
+    });
+
+    it("ignores repeated hide and show events", () => {
+      startPlaySession("p1", Date.now());
+      hide(2);
+      hide(5);
+      show(10);
+      show(10);
+      at(12);
+      expect(recordedMinutes()).toBe(4);
+    });
+
+    it("records the visible total when the session ends while hidden", () => {
+      startPlaySession("p1", Date.now());
+      hide(2);
+      at(20);
+      expect(recordedMinutes()).toBe(2);
+    });
+
+    it("starts paused when the document is already hidden", () => {
+      visibility = "hidden";
+      startPlaySession("p1", Date.now());
+      show(10);
+      at(15);
+      expect(recordedMinutes()).toBe(5);
+    });
+
+    it("never resumes while the document is still hidden", () => {
+      visibility = "hidden";
+      startPlaySession("p1", Date.now());
+      at(5);
+      resumePlaySession();
+      expect(recordedMinutes()).toBe(0);
+    });
+
+    it("keeps pause and resume idempotent outside the document events", () => {
+      startPlaySession("p1", T0);
+      pausePlaySession(T0 + 3 * MINUTE);
+      pausePlaySession(T0 + 5 * MINUTE);
+      resumePlaySession(T0 + 5 * MINUTE);
+      resumePlaySession(T0 + 7 * MINUTE);
+      expect(endPlaySession(T0 + 9 * MINUTE)?.minutes).toBe(7);
+    });
+
+    it("ignores pause and resume with no active session", () => {
+      expect(() => pausePlaySession(T0)).not.toThrow();
+      expect(() => resumePlaySession(T0)).not.toThrow();
+      expect(endPlaySession()).toBeNull();
+    });
+
+    it("is inert where the document has no visibilityState", () => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => undefined,
+      });
+      startPlaySession("p1", Date.now());
+      at(10);
+      expect(() => setVisibility("hidden")).not.toThrow();
+      expect(recordedMinutes()).toBe(10);
     });
   });
 });

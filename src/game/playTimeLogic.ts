@@ -97,30 +97,102 @@ export function setLimit(
 
 interface ActiveSession {
   profileId: string;
-  startedAt: number;
+  /** Visible milliseconds banked before the current running stretch. */
+  visibleMs: number;
+  /** When the current visible stretch began; null while the document is hidden. */
+  runningSince: number | null;
 }
 
 let activeSession: ActiveSession | null = null;
 
 /**
- * Starts a play session for a profile. Only one session can be active at a
- * time; starting a new one discards any previous unfinished session.
+ * Visible time only is play time: a hidden tab must not burn a profile's daily
+ * budget, so the session banks visible slices and the watcher below drives the
+ * pause/resume. Only platforms that expose `document.visibilityState` take part
+ * (older WebViews, non-DOM hosts stay inert instead of throwing).
  */
-export function startPlaySession(profileId: string, now = Date.now()): void {
-  activeSession = { profileId, startedAt: now };
+function canObserveVisibility(): boolean {
+  return typeof document !== "undefined" && typeof document.visibilityState === "string";
+}
+
+function isDocumentHidden(): boolean {
+  return canObserveVisibility() && document.visibilityState === "hidden";
+}
+
+function handleVisibilityChange(): void {
+  if (activeSession === null) return;
+  if (isDocumentHidden()) {
+    pausePlaySession();
+  } else {
+    resumePlaySession();
+  }
+}
+
+function watchVisibility(): void {
+  if (!canObserveVisibility()) return;
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+}
+
+function unwatchVisibility(): void {
+  if (typeof document === "undefined") return;
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+}
+
+/** Banked visible time plus the current stretch, clamped against a backwards clock. */
+function visibleElapsedMs(session: ActiveSession, now: number): number {
+  if (session.runningSince === null) return session.visibleMs;
+  return session.visibleMs + Math.max(0, now - session.runningSince);
 }
 
 /**
- * Ends the active play session, returning the whole minutes elapsed since it
- * started (rounded to the nearest minute, clamped to 0 when the clock went
- * backwards). Returns null when no session is active. The session is cleared
- * regardless.
+ * Starts a play session for a profile. Only one session can be active at a
+ * time; starting a new one discards any previous unfinished session. The
+ * document visibility watcher is attached here so the session is paused for as
+ * long as it lives — across scene boundaries, not just on the Hub.
+ */
+export function startPlaySession(profileId: string, now = Date.now()): void {
+  // A session that begins in an already-hidden tab starts paused.
+  activeSession = {
+    profileId,
+    visibleMs: 0,
+    runningSince: isDocumentHidden() ? null : now,
+  };
+  watchVisibility();
+}
+
+/**
+ * Stops accruing time for the active session (document hidden). Idempotent:
+ * banking again without an intervening resume adds nothing.
+ */
+export function pausePlaySession(now = Date.now()): void {
+  const session = activeSession;
+  if (session === null || session.runningSince === null) return;
+  session.visibleMs += Math.max(0, now - session.runningSince);
+  session.runningSince = null;
+}
+
+/**
+ * Resumes accrual after a hidden stretch — but never while the document is
+ * still hidden, so a stray resume cannot charge background time. Idempotent.
+ */
+export function resumePlaySession(now = Date.now()): void {
+  const session = activeSession;
+  if (session === null || session.runningSince !== null || isDocumentHidden()) return;
+  session.runningSince = now;
+}
+
+/**
+ * Ends the active play session, returning the whole visible minutes elapsed
+ * since it started (rounded to the nearest minute, clamped to 0 when the clock
+ * went backwards). Hidden minutes are excluded. Returns null when no session is
+ * active. The session is cleared regardless.
  */
 export function endPlaySession(now = Date.now()): { profileId: string; minutes: number } | null {
   const session = activeSession;
   activeSession = null;
+  unwatchVisibility();
   if (session === null) return null;
-  const elapsed = now - session.startedAt;
+  const elapsed = visibleElapsedMs(session, now);
   const minutes = elapsed <= 0 ? 0 : Math.round(elapsed / 60_000);
   return { profileId: session.profileId, minutes };
 }
