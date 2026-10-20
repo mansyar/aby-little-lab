@@ -144,17 +144,20 @@ shell side.
 - **Covers:** F1, F2, F3, F4, F5, F6, F7
 - **Touches:** `src/game/art/**`, `src/scenes/GameSceneBase.ts`, `src/__tests__/game/art/**`, `src/__tests__/scenes/**`, `src/__tests__/helpers/phaserMock.ts`, `src/__tests__/utils/textureTiers.test.ts`, `scripts/measure-first-tap.mjs`, `README.md`, `docs/perf-baseline.md`, `conductor/tracks/20261020-shell-diet-lazy-art/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-boot.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** c74986d
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-R1.md
 
-- [ ] **R1.T1: Resolve F1 - wire the missing-key placeholder** - covers: F1
-  - [ ] **R1.T1.1: Registry records per-scene failed keys and draws a placeholder for each from the load-complete path**
-  - [ ] **R1.T1.2: Scene test proves one warning, a tier-sized placeholder and a completable round**
-- [ ] **R1.T2: Resolve F2 - measure the real worst game and gate on it** - covers: F2
-  - [ ] **R1.T2.1: Add the widest-union game to the targets and gate on the worst total**
-  - [ ] **R1.T2.2: Re-record the first-tap numbers in the phase-4 and integrated evidence**
-- [ ] **R1.T3: Resolve F3 - derive the declaration scan's scene list** - covers: F3
-  - [ ] **R1.T3.1: Discover scenes with `import.meta.glob` and assert the discovered count**
-- [ ] **R1.T4: Resolve F4 - rename the corpus constant** - covers: F4
-- [ ] **R1.T5: Resolve F5 - make the cue-disposal assertion real** - covers: F5
-- [ ] **R1.T6: Resolve F6 - reconcile the art-chunk count in the docs** - covers: F6
-- [ ] **R1.T7: Resolve F7 - restore corpus-wide tier assertions** - covers: F7
+- [x] **R1.T1: Resolve F1 - wire the missing-key placeholder** - covers: F1
+  - [x] **R1.T1.1: Registry records per-scene failed keys and draws a placeholder for each from the load-complete path**
+  - [x] **R1.T1.2: Scene test proves one warning, a tier-sized placeholder and a completable round**
+- [x] **R1.T2: Resolve F2 - measure the real worst game and gate on it** - covers: F2
+  - [x] **R1.T2.1: Add the widest-union game to the targets and gate on the worst total**
+  - [x] **R1.T2.2: Re-record the first-tap numbers in the phase-4 and integrated evidence**
+- [x] **R1.T3: Resolve F3 - derive the declaration scan's scene list** - covers: F3
+  - [x] **R1.T3.1: Discover scenes with `import.meta.glob` and assert the discovered count**
+- [x] **R1.T4: Resolve F4 - rename the corpus constant** - covers: F4
+- [x] **R1.T5: Resolve F5 - make the cue-disposal assertion real** - covers: F5
+- [x] **R1.T6: Resolve F6 - reconcile the art-chunk count in the docs** - covers: F6
+- [x] **R1.T7: Resolve F7 - restore corpus-wide tier assertions** - covers: F7
