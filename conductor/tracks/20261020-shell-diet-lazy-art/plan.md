@@ -80,18 +80,27 @@ no-ops.
 - **Goal:** `PreloadScene` owns only the shell set (22 tiles, 22 stickers, 2 mascot poses, `icon_speaker`, 6 avatar keys); shell entry <= 170 KiB; games get their art from their own chunks.
 - **Depends on:** Phase 3
 - **Covers:** FR-4, NFR-1, NFR-3, AC-1, AC-7, AC-8
-- **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `scripts/measure-first-tap.mjs`
+- **Touches:** `src/scenes/PreloadScene.ts`, `src/__tests__/scenes/preloadScene.test.ts`, `src/__tests__/scenes/navigation.test.ts`, `src/__tests__/utils/textureTiers.test.ts`, `scripts/measure-first-tap.mjs`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`, then against `pnpm preview`: `node scripts/validate-boot.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** 4f0a47c
+- **Evidence:** conductor/tracks/20261020-shell-diet-lazy-art/verification/phase-4.md
 
-- [ ] **P4.T1: Trim `PreloadScene`** — covers: FR-4
-  - [ ] **P4.T1.1: Rename `SHAPE_ASSETS` to `SHELL_ASSETS` and drop the moved entries with their imports**
-  - [ ] **P4.T1.2: Document the shell set and why the 6 avatar keys stay eager (ProfileChip renders before any game)**
-- [ ] **P4.T2: Update shell tests** — covers: AC-1
-  - [ ] **P4.T2.1: Replace shape/cutout assertions with shell-set assertions and a "no game-only key" guard**
-- [ ] **P4.T3: Measure the cut** — covers: AC-7, AC-8
-  - [ ] **P4.T3.1: Record shell entry size and cold plus 4x-throttled boot medians versus 195.4 KiB and ~4.2 s**
-  - [ ] **P4.T3.2: Measure cold first tap for the widest game (Memory Match ring: animals + items + toys + glyphs) and confirm <= 400 ms over baseline**
+- [x] **P4.T1: Trim `PreloadScene`** — covers: FR-4
+  - [x] **P4.T1.1: Rename `SHAPE_ASSETS` to `SHELL_ASSETS` and drop the moved entries with their imports**
+  - [x] **P4.T1.2: Document the shell set and why the 6 avatar keys stay eager (ProfileChip renders before any game)**
+- [x] **P4.T2: Update shell tests** — covers: AC-1
+  - [x] **P4.T2.1: Replace shape/cutout assertions with shell-set assertions and a "no game-only key" guard**
+- [x] **P4.T3: Measure the cut** — covers: AC-7, AC-8
+  - [x] **P4.T3.1: Record shell entry size and cold plus 4x-throttled boot medians versus 195.4 KiB and ~4.2 s**
+  - [x] **P4.T3.2: Measure cold first tap for the widest game (Memory Match ring: animals + items + toys + glyphs) and confirm <= 400 ms over baseline**
+
+`navigation.test.ts` and `textureTiers.test.ts` were widened into `Touches` during
+the phase: both imported `SHAPE_ASSETS` and asserted the 178-key table, so the
+rename made them red by design. They now assert the 53-key shell set from the
+shell side.
+
 
 ## Phase 5: Precache guarantee, ownership guard, and docs
 
