@@ -57,7 +57,7 @@
 - **Covers:** FR-3, AC-4
 - **Touches:** `src/scenes/*.ts`, `src/__tests__/scenes/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Declare groups for the 15 choice/math games** — covers: FR-3
   - [ ] **P3.T1.1: Alphabet, WordMatch, WordBuilder, DecodeIt, FirstSounds, HowMany, MoreLess, OddOneOut, ColorMatch, MemoryMatch**
