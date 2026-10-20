@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GAME_REGISTRY } from "../game/gameRegistry";
+import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
 import registrySource from "../game/gameRegistry.ts?raw";
 import { GAME_TILES, type GameTile } from "../game/hubTiles";
 import type { GameId } from "../types";
@@ -258,5 +258,25 @@ describe("GAME_TILES", () => {
 
   it("holds one tile per registry entry", () => {
     expect(GAME_TILES).toHaveLength(GAME_REGISTRY.length);
+  });
+});
+
+describe("stickerKeyForGame", () => {
+  it("resolves the registry sticker key for every game", () => {
+    for (const game of GAME_REGISTRY) {
+      expect(stickerKeyForGame(game.gameId)).toBe(game.stickerKey);
+    }
+  });
+
+  it("keeps the documented convention and its one divergence", () => {
+    expect(stickerKeyForGame("more-less")).toBe("sticker_more_less");
+    // Find the Letter shares the alphabet art, so its key is shortened.
+    expect(stickerKeyForGame("alphabet-match")).toBe("sticker_alphabet_match");
+  });
+
+  it("throws for a game id the registry does not know", () => {
+    expect(() => stickerKeyForGame("not-a-game" as GameId)).toThrow(
+      /no registry entry for game id: not-a-game/,
+    );
   });
 });

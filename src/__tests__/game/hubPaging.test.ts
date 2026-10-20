@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { GAME_REGISTRY } from "../../game/gameRegistry";
 import {
   fitDisplayScale,
-  HUB_TILE_COUNT,
   isNarrowViewport,
   NARROW_SCALE_THRESHOLD,
-  PAGE_COUNT,
   PAGE_SIZE,
+  pageCount,
   pagedTilePosition,
   pageOf,
   pageTileIndexes,
@@ -86,25 +86,41 @@ describe("pageTileIndexes", () => {
     expect(pageOf(21)).toBe(2);
   });
 
-  it("covers all 22 tiles exactly once across pages", () => {
-    const all = [...pageTileIndexes(0), ...pageTileIndexes(1), ...pageTileIndexes(2)].sort(
-      (a, b) => a - b,
-    );
-    expect(all).toEqual([...Array(HUB_TILE_COUNT).keys()]);
+  it("covers every tile exactly once across pages", () => {
+    const all = Array.from({ length: pageCount() }, (_, page) => pageTileIndexes(page))
+      .flat()
+      .sort((a, b) => a - b);
+    expect(all).toEqual([...Array(GAME_REGISTRY.length).keys()]);
     expect(all).toEqual([...Array(22).keys()]);
   });
 
   it("rejects out-of-range pages", () => {
-    expect(() => pageTileIndexes(3)).toThrow();
+    expect(() => pageTileIndexes(pageCount())).toThrow();
     expect(() => pageTileIndexes(-1)).toThrow();
   });
 });
 
 describe("page constants", () => {
-  it("splits 22 tiles into 3 pages (10 + 10 + 2)", () => {
+  it("splits the registry's 22 tiles into 3 pages (10 + 10 + 2)", () => {
     expect(PAGE_SIZE).toBe(10);
-    expect(PAGE_COUNT).toBe(3);
-    expect(HUB_TILE_COUNT).toBe(22);
+    expect(GAME_REGISTRY).toHaveLength(22);
+    expect(pageCount()).toBe(3);
+    expect(pageTileIndexes(pageCount() - 1)).toEqual([20, 21]);
+  });
+});
+
+describe("a 23rd game", () => {
+  it("needs no paging edit: 10 + 10 + 3 pages", () => {
+    expect(pageCount(23)).toBe(3);
+    expect(pageTileIndexes(2, 23)).toEqual([20, 21, 22]);
+  });
+
+  it("maps the new last tile to the last page", () => {
+    expect(pageOf(22)).toBe(2);
+  });
+
+  it("still rejects the page after the last one", () => {
+    expect(() => pageTileIndexes(3, 23)).toThrow(RangeError);
   });
 });
 
@@ -167,7 +183,7 @@ describe("pagedTilePosition", () => {
   });
 
   it("centres the two-tile last page at the canvas centre-x on the first row", () => {
-    const page = pageTileIndexes(PAGE_COUNT - 1);
+    const page = pageTileIndexes(pageCount() - 1);
     expect(page).toHaveLength(2);
     expect(page).toEqual([20, 21]);
     const first = pagedTilePosition(0, page.length);

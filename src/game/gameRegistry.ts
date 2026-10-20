@@ -231,3 +231,19 @@ type MissingGameIds = Exclude<GameId, (typeof GAME_REGISTRY)[number]["gameId"]>;
  * naming the missing game, before any test runs.
  */
 export const GAME_ID_COVERAGE: Record<MissingGameIds, true> = {};
+
+/**
+ * The sticker texture key for a game id, resolved from its registry entry.
+ *
+ * The `sticker_<game_id>` convention lives here once. `GameSceneBase` awards a
+ * sticker by this key and `hubGrid` draws the shelf by it, so a game whose key
+ * deliberately diverges from the convention (none today) can never be awarded
+ * one texture and rendered from another.
+ */
+export function stickerKeyForGame(gameId: GameId): string {
+  const entry = GAME_REGISTRY.find((game) => game.gameId === gameId);
+  if (entry === undefined) {
+    throw new Error(`no registry entry for game id: ${gameId}`);
+  }
+  return entry.stickerKey;
+}

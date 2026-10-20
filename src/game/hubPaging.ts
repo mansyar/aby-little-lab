@@ -1,3 +1,5 @@
+import { GAME_REGISTRY } from "./gameRegistry";
+
 /**
  * Hub paging logic (pure module).
  *
@@ -6,22 +8,23 @@
  * games into pages of 10 and lays each page out as a 5x2 grid of much larger
  * tiles. Wide viewports keep the 6x4 wide grid.
  *
+ * The tile total comes from the registry, so adding a game changes the page
+ * count on its own: 22 games are 10 + 10 + 2, 23 are 10 + 10 + 3.
+ *
  * All geometry is expressed in the fixed 1024x768 logical canvas space;
  * Phaser's FIT scale mode maps it onto the physical screen.
  */
 
-/** Tiles per page (the first two pages of a 22-game hub). */
+/** Tiles per page (the first two pages of the current Hub). */
 export const PAGE_SIZE = 10;
 
-/** Number of Hub pages in paged mode: 22 games as 10 + 10 + 2. */
-export const PAGE_COUNT = 3;
-
 /**
- * Total number of Hub tiles. Duplicated here as a documented constant so this
- * module stays dependency-free; `GAME_TILES.length` in hubTiles.ts is the
- * source of truth and hubPaging.test.ts asserts the two agree.
+ * Number of Hub pages in paged mode for the given tile count. Defaults to the
+ * registry, which is the only declaration of how many games exist.
  */
-export const HUB_TILE_COUNT = 22;
+export function pageCount(tileCount: number = GAME_REGISTRY.length): number {
+  return Math.ceil(tileCount / PAGE_SIZE);
+}
 
 /**
  * The wide-layout tile height (HubScene's TILE_HEIGHT) that the threshold is
@@ -78,14 +81,16 @@ export function isNarrowViewport(
 /**
  * Tile indexes shown on the given page: page 0 shows games 1-10, page 1 shows
  * games 11-20, and the last page shows whatever remains (matching the wide
- * grid's reading order).
+ * grid's reading order). The final page is short when the tile count is not a
+ * multiple of `PAGE_SIZE`, so a 23rd game needs no edit here.
  */
-export function pageTileIndexes(page: number): number[] {
-  if (!Number.isInteger(page) || page < 0 || page >= PAGE_COUNT) {
-    throw new RangeError(`page must be 0..${PAGE_COUNT - 1}, got ${page}`);
+export function pageTileIndexes(page: number, tileCount: number = GAME_REGISTRY.length): number[] {
+  const pages = pageCount(tileCount);
+  if (!Number.isInteger(page) || page < 0 || page >= pages) {
+    throw new RangeError(`page must be 0..${pages - 1}, got ${page}`);
   }
   const start = page * PAGE_SIZE;
-  const remaining = Math.max(0, HUB_TILE_COUNT - start);
+  const remaining = Math.max(0, tileCount - start);
   return Array.from({ length: Math.min(PAGE_SIZE, remaining) }, (_, i) => start + i);
 }
 

@@ -4,7 +4,8 @@ import { attachPressFeedback } from "../utils/pressFeedback";
 import { hasSticker } from "../utils/storage";
 import { displayScale, textureSizeFor } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
-import { isNarrowViewport, PAGE_COUNT, pagedTilePosition, pageTileIndexes } from "./hubPaging";
+import { stickerKeyForGame } from "./gameRegistry";
+import { isNarrowViewport, pageCount, pagedTilePosition, pageTileIndexes } from "./hubPaging";
 import { GAME_TILES } from "./hubTiles";
 
 const TILE_WIDTH = 144;
@@ -141,7 +142,7 @@ export class HubGrid {
   private deps: HubGridDeps;
   /** True when this visit uses the paged (narrow-viewport) grid. */
   paged = false;
-  /** Current page in paged mode (0..PAGE_COUNT - 1); reset on every visit to the Hub. */
+  /** Current page in paged mode (0..pageCount() - 1); reset on every visit to the Hub. */
   hubPage = 0;
   /** Every grid object owned by the wide 6x4 layout (rebuilt on resize). */
   wideObjects: Phaser.GameObjects.GameObject[] = [];
@@ -484,7 +485,7 @@ export class HubGrid {
    */
   flipTo(page: number): void {
     const scene = this.deps.scene;
-    if (!this.paged || page < 0 || page >= PAGE_COUNT || page === this.hubPage) return;
+    if (!this.paged || page < 0 || page >= pageCount() || page === this.hubPage) return;
     const direction = page > this.hubPage ? 1 : -1;
     this.hubPage = page;
     this.updatePageDots();
@@ -524,9 +525,10 @@ export class HubGrid {
   /** Creates the two textless page dots below the paged grid. */
   createPageDots(): void {
     const scene = this.deps.scene;
-    for (let page = 0; page < PAGE_COUNT; page++) {
+    const pages = pageCount();
+    for (let page = 0; page < pages; page++) {
       const dot = scene.add.circle(
-        scene.cameras.main.width / 2 + (page - (PAGE_COUNT - 1) / 2) * PAGE_DOTS_SPACING,
+        scene.cameras.main.width / 2 + (page - (pages - 1) / 2) * PAGE_DOTS_SPACING,
         PAGE_DOTS_Y,
         PAGE_DOTS_RADIUS,
         0x2d3748,
@@ -614,7 +616,7 @@ export class HubGrid {
       // Derive the thumbnail scale from THIS sticker's raster tier instead of a
       // single hardcoded key, so a future tier change cannot shrink or grow
       // only some of the twenty shelf stickers.
-      const stickerKey = `sticker_${GAME_TILES[index].gameId.replace(/-/g, "_")}`;
+      const stickerKey = stickerKeyForGame(GAME_TILES[index].gameId);
       const stickerScale = displayScale(stickerKey, shelfSize);
       const sticker = this.deps.scene.add.image(stickerX, stickerY, stickerKey);
       this.stickerImages.push(sticker as Phaser.GameObjects.Image);
