@@ -61,16 +61,16 @@
 - **Covers:** FR-9, FR-10, AC-8, AC-9, AC-10
 - **Touches:** `conductor/product.md`, `docs/PRD.md`, `docs/TDD.md`, `README.md`, `conductor/tech-stack.md`, `conductor/tracks/20261020-prd-tdd-truth-pass/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Repair `product.md`** — covers: FR-9, AC-8
-  - [ ] **P3.T1.1: Remove the duplicate Game 20 changelog heading** — one heading, both bodies preserved under it; verify no text lost by diffing the removed block.
-- [ ] **P3.T2: Build the facts table and reconcile** — covers: FR-10, AC-9
-  - [ ] **P3.T2.1: Write the facts table** — game count, adaptive split, boot SVGs, shell size, test count and coverage, each with the document that states it and the command that produced it.
-  - [ ] **P3.T2.2: Reconcile every disagreement found** — fix the document that is wrong, and record each correction in the evidence file; do not change a number without re-running the command that produces it.
-- [ ] **P3.T3: Verify the whole track** — covers: AC-10
-  - [ ] **P3.T3.1: Claim-by-claim audit** — read both rewritten documents against their sources one last time; every count, file path and feature claim traceable.
-  - [ ] **P3.T3.2: Confirm the docs-only footprint** — `git diff --stat <base>..HEAD` touches `docs/` and `conductor/` only, the full gate chain passes at the final commit, and the evidence file records both.
+- [x] **P3.T1: Repair `product.md`** — covers: FR-9, AC-8
+  - [x] **P3.T1.1: Remove the duplicate Game 20 changelog heading** — one heading, both bodies preserved under it; verify no text lost by diffing the removed block.
+- [x] **P3.T2: Build the facts table and reconcile** — covers: FR-10, AC-9
+  - [x] **P3.T2.1: Write the facts table** — game count, adaptive split, boot SVGs, shell size, test count and coverage, each with the document that states it and the command that produced it.
+  - [x] **P3.T2.2: Reconcile every disagreement found** — fix the document that is wrong, and record each correction in the evidence file; do not change a number without re-running the command that produces it.
+- [x] **P3.T3: Verify the whole track** — covers: AC-10
+  - [x] **P3.T3.1: Claim-by-claim audit** — read both rewritten documents against their sources one last time; every count, file path and feature claim traceable.
+  - [x] **P3.T3.2: Confirm the docs-only footprint** — `git diff --stat <base>..HEAD` touches `docs/` and `conductor/` only, the full gate chain passes at the final commit, and the evidence file records both.
 
 <!--
 After a phase is accepted the primary appends:
@@ -79,3 +79,7 @@ After a phase is accepted the primary appends:
 **Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-<n>.md
 Review fixes are appended by conductor-review as `## Phase R1: Review Fixes`.
 -->
+**Result:** verified
+**Checkpoint:** 6ead8ac
+**Evidence:** conductor/tracks/20261020-prd-tdd-truth-pass/verification/phase-3.md
+

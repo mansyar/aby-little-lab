@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-20T18:40:00+11:00",
-  "updated_at": "2026-10-20T20:05:00+11:00",
+  "updated_at": "2026-10-20T20:45:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261020-prd-tdd-truth-pass",
@@ -14,11 +14,11 @@
   "base_sha": "8cb5de46f7a57b37250eed12caa05eb5f6a7c082",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 2,
+    "phases_verified": 3,
     "tasks_total": 32,
-    "tasks_done": 24
+    "tasks_done": 32
   },
-  "last_checkpoint": "9656dd6",
+  "last_checkpoint": "6ead8ac",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",
