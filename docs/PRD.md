@@ -101,7 +101,7 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 
 1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
 2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
-3. **Hub.** Shows the 22 game tiles, each with its sticker shelf, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
+3. **Hub.** Shows the 22 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
 4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
@@ -212,7 +212,7 @@ Every game below uses the same five fields: the mechanic the child performs, the
 - **Rounds and pool.** Six rounds, six unique letters per playthrough from the 26 letter set, four cards per round.
 - **Difficulty.** Adaptive. The band ladder shifts the letter range: a child who is still learning sees a narrow early-alphabet set, a child who is accurate sees the wider pool.
 - **Narration.** Per-round target: the letter is spoken as it appears. The speaker glyph repeats it.
-- **Art and assets.** 26 letter SVGs. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. Tile and sticker icons.
+- **Art and assets.** 26 letter SVGs. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. The target renders at 256 px and the answer cards at 128 px from the same `letter_*` textures, so the letterforms match the word games. Tile and sticker icons.
 
 ### 3.9 Find the Word
 
@@ -356,7 +356,7 @@ Professor Hoot is a teacher owl drawn in two static poses, idle and celebrating.
 
 ### 4.4 Stickers
 
-Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: full colour and shimmering when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
+Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: a small thumbnail on a cream plaque, full colour and shimmering on an 800 ms alpha loop when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
 
 ### 4.5 Profiles
 
@@ -366,7 +366,7 @@ The app supports up to four profiles on one device, each with one of six avatars
 
 A parent can set a daily limit per profile: off, 15, 30, 45 or 60 minutes. Only visible minutes count. The play clock runs from a Hub tile tap to the return to the Hub, banks time in slices, pauses when the document is hidden, and never charges a backgrounded tab. The budget resets on the local calendar date.
 
-The limit is shown, never enforced mid-game. The Hub shows a textless remaining-time arc, which turns warm at five minutes or less, and an hourglass nudge appears at five minutes. At the cap, game tiles dim and show a moon badge, and starting a new game is refused; a game already in progress is always allowed to finish. Limits are off by default.
+The limit is shown, never enforced mid-game. The Hub shows a textless remaining-time arc, which turns warm at five minutes or less, and an hourglass nudge appears at five minutes. At the cap, game tiles dim and show a moon badge, the mascot waves once, and starting a new game is refused; a game already in progress is always allowed to finish. Limits are off by default.
 
 ### 4.7 Learning Progress
 
@@ -390,7 +390,7 @@ Settings offers a Voice row listing the device voices plus "Default (device)". T
 
 ### 4.10 Install and update
 
-The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to where it does not, and nothing when the app is already installed.
+The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to where it does not (Share, then Add to Home Screen), and nothing when the app is already installed.
 
 Updates are prompt-based. A new service worker is downloaded but not activated until the parent accepts. The Hub shows a small toast with "Update now" and "Later"; accepting activates the new version and reloads, declining leaves the current version running. A second toast confirms when the app is ready to play offline.
 
@@ -432,7 +432,7 @@ Protected controls, meaning the ones that change state rather than play, always 
 
 ### 5.3 The parental lock
 
-Anything parent-facing requires a continuous three second press on a 96 by 96 px target. A circular ring fills from 0.6 alpha success green while the press is held. Only one hold can run at a time, and it cancels immediately on release, pointer-out or pointer-cancel, leaving no partial state.
+Anything parent-facing requires a continuous three second press on a 96 by 96 px target. A circular ring fills from 0.6 alpha success green while the press is held, starting at twelve o'clock. Only one hold can run at a time, and it cancels immediately on release, pointer-out or pointer-cancel, clearing the ring and leaving no partial state.
 
 The lock gates the Settings panel, the Back button inside a game, profile creation and deletion, Learning Progress, and Reset Progress. It is deliberately boring to a child and quick for an adult.
 
@@ -452,11 +452,11 @@ The app asks the platform to lock orientation to landscape on boot and the manif
 
 Scene changes are a 300 ms fade to the background colour into a 180 ms fade-in with a 1.02 zoom. The win celebration is ten rays and ten confetti pieces in the sprite palette, about 700 ms long, with the sticker reveal roughly 400 ms later. Correct answers flash and chime; wrong answers wiggle the piece and play a soft tone, with no shake and no red flash on the child's work.
 
-Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, and an idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
+Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, 40 ms apart over 300 ms, while idle tiles bob on a 2.5 second loop with four low-contrast dots drifting behind the grid. An idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input, repeating every ten seconds while it stays idle. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
 
 ### 5.7 Reduced motion
 
-The app reads the operating system's reduced-motion preference and never overrides it. When it is set, durations shorten (fades drop from 300 to 180 ms, celebrations from 700 to 300 ms), amplitudes shrink, the celebration uses six rays and no confetti, idle wiggles become a two degree sway, and the celebrate pose holds still. Nothing that carries information is motion-only, so no game becomes unplayable with motion reduced.
+The app reads the operating system's reduced-motion preference and never overrides it. When it is set, durations shorten (fades drop from 300 to 180 ms, celebrations from 700 to 300 ms), amplitudes shrink, the celebration uses six rays and no confetti, idle wiggles become a two degree sway, Hub entrances fade without scale, press feedback is disabled, and the celebrate pose holds still. Nothing that carries information is motion-only, so no game becomes unplayable with motion reduced.
 
 ## 6. Audio
 
@@ -493,7 +493,7 @@ When the document becomes hidden the app pauses the music, cancels in-flight spe
 
 ### 6.5 Toggles
 
-Music and sound effects are two independent toggles in the Settings panel, each persisted per device. Turning effects off silences chimes, pops, spoken lines and the preview button while leaving music alone; turning music off leaves effects alone. Both are read at startup, so a muted device boots muted.
+Music and sound effects are two independent toggles in the Settings panel, each persisted per device. Turning effects off silences chimes, pops, spoken lines and the preview button while leaving music alone; turning music off leaves effects alone. Turning effects back on plays the correct-answer chime as confirmation. Both are read at startup, so a muted device boots muted.
 
 ## 7. Performance and asset budget
 
