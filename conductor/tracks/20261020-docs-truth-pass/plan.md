@@ -110,7 +110,7 @@
 - **Covers:** FR-6, FR-7, FR-8, FR-10, AC-6, AC-7, AC-8, AC-10
 - **Touches:** `src/main.ts`, `src/components/SettingsPanel.ts`, `vite.config.ts`, comment-only sweep paths, `.gitkeep` paths
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Fix the `main.ts` lazy-scene comment** — covers: FR-6
 - [ ] **P5.T2: Sweep stale source comments** — covers: FR-6
