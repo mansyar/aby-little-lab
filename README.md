@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements. Current state: **2,205 tests across 103 files**, all green (verified 2026-10-20).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements. Current state: **2,208 tests across 103 files**, all green (verified 2026-10-20).
 
 ## Code Quality
 
@@ -252,6 +252,7 @@ One-time setup:
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
+| **v1.20.0** | 2026-10-20 | Game 22 - Story Order (3-panel story sequencing, 8-story pool, retry in place, ordinal pips) + game art moved into the game's own chunk so the boot shell stayed inside its 200 kB gate | `v1.20.0` |
 | **v1.19.0** | 2026-10-20 | Game 21 - Feelings Faces (social-emotional learning, 16-scenario pool, contrast ladder, heart sticker) + shared choice-round shell for 13 games, one narrator for every prompt, BGM ducking under narration, backgrounded play clock paused | `v1.19.0` |
 | **v1.18.0** | 2026-10-16 | Adaptive Difficulty complete across 15 games + docs aligned with the 20-game suite | `v1.18.0` |
 | **v1.17.0** | 2026-10-16 | Adaptive difficulty for the final nine games (literacy/memory batch + remaining three) | `v1.17.0` |
@@ -271,6 +272,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [TDD.md](docs/TDD.md) - Technical Design Document
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
+- [release-notes-v1.20.0.md](docs/release-notes-v1.20.0.md) - v1.20.0 release notes (Story Order + in-chunk game art, released)
 - [release-notes-v1.19.0.md](docs/release-notes-v1.19.0.md) - v1.19.0 release notes (Feelings Faces + shared shell and audio focus, released)
 - [release-notes-v1.18.0.md](docs/release-notes-v1.18.0.md) - v1.18.0 release notes (adaptive-complete suite, released)
 - [release-notes-v1.4.0.md](docs/release-notes-v1.4.0.md) - v1.4.0 release notes (Multi-Kid Profiles, released)

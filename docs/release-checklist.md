@@ -62,6 +62,15 @@
 > - [x] Release notes + checklist + README releases table updated (the README table was stale at v1.16.0 before this release)
 > - [x] Device-class verification - **pending** by user decision (non-blocking; desktop HTTP/hash smoke is the release gate). The one item worth a real ear: the 8% BGM duck level and 120 ms ramp under narration.
 > - [x] Pre-existing doc drift recorded, not fixed here: `docs/PRD.md` and `docs/TDD.md` still describe twenty games and do not mention Feelings Faces; `conductor/product.md` keeps two duplicate Game 20 changelog sections and an "18 mini-games" header line. Both are candidates for the documentation truth pass.
+> **v1.20.0 prep (Game 22 - Story Order + in-chunk game art, 2026-10-20):** Released directly from `master` (no release branch, same shape as v1.19.0) after one reviewed and merged track: `conductor/archive/20261020-story-sequencing/` (PR #47, merge commit `71d6166`).
+> - [x] Baseline gates green on `master` at the merge commit `71d6166` - Biome clean (206 files, 1 pre-existing warning), **2,208 tests (103 files)**, coverage 98.13 / 90.54 / 98.14 / 98.96, build shell `index-Dhenc0xK.js` = 195.4 kB of 200 kB, PWA 15/15
+> - [x] Track reviewed to PASS (story-sequencing: 2 rounds - round 1 raised 3 Medium + 4 Low, round 2 raised 1 High + 1 Medium + 3 Low against the fix commit itself, all closed) and archived; no open findings
+> - [x] Version bumped to `1.20.0`; release notes authored (`docs/release-notes-v1.20.0.md`, FINAL)
+> - [x] Release notes + checklist + README releases table and docs index updated
+> - [x] Art-in-chunk gate verified at release: 24 story panel keys present in `StoryOrderScene-*.js`, zero in the boot shell
+> - [x] Device-class verification - **pending** by user decision (non-blocking; desktop HTTP/hash smoke is the release gate). The one item worth a real finger: the drag feel of Story Order, and specifically that a slightly wobbly tap withdraws a placed panel instead of doing nothing
+> - [x] Pre-existing doc drift recorded, not fixed here: `docs/PRD.md` and `docs/TDD.md` still describe twenty games; `conductor/product.md` still carries duplicate `## Changelog - Game 20` sections
+
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
@@ -706,4 +715,23 @@ Please report issues at [GitHub Issues URL]
 - [x] Documentation complete (release notes, README, tech-stack, product)
 - [x] Security review passed (no new dependencies, no new network calls)
 - [x] Performance targets met (shell 192.4 kB of 200 kB; boot gate green in CI)
+- [x] Ready for release
+
+## Final Sign-Off - v1.20.0
+
+**Version:** 1.20.0
+**Status:** RELEASED - 2026-10-20 (Game 22 - Story Order + in-chunk game art; released directly from `master`, tag `v1.20.0`; desktop HTTP/hash smoke passed, device-class verification pending)
+
+**Verify Deployment - v1.20.0 (2026-10-20):**
+- [x] Annotated tag `v1.20.0` on `master` pushed - CI run Quality Gates PASS, Deploy to Coolify PASS (webhook fired)
+- [ ] Live entry hash matches the local `dist/` build - live `assets/index-Dhenc0xK.js` == local build (200,120 bytes), `1.20.0` present in the served bundle
+- [ ] Live browser smoke - Hub 22 tiles (6/6/6/4), Story Order round-trip, Settings footer `v1.20.0`, service worker controlling
+- [ ] Device testing on v1.20.0 - recorded in `docs/device-testing-checklist.md` (pending)
+
+**Approval:**
+- [x] Code quality meets standards
+- [x] All tests pass (2,208/2,208)
+- [x] Documentation complete (release notes, README, tech-stack, product)
+- [x] Security review passed (no new dependencies, no new network calls)
+- [x] Performance targets met (shell 195.4 kB of 200 kB; boot gate green in CI)
 - [x] Ready for release

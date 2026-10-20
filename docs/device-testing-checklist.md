@@ -13,6 +13,13 @@ This checklist ensures comprehensive testing across target devices before releas
 - **Result:** **PASSED — user reported all rows pass** (2026-10-18); no Critical/High/Medium/Low findings reported
 - **Issues found:** none reported
 
+## Execution Record - v1.20.0 (2026-10-20)
+
+- **Target:** live URL (v1.20.0 - Game 22 Story Order + in-chunk game art; tag `v1.20.0`; track archived under `conductor/archive/20261020-story-sequencing/`)
+- **Scope:** Game 22 (new game, 26 new assets: 24 story panels + tile + sticker; preload 176 -> 178) plus art that loads with the game chunk instead of the boot shell. No storage migration: the save schema is unchanged from v1.19.0.
+- **Checks:** install/update prompt, offline relaunch from precache, touch targets >= 96px on the three panels and three slots, landscape lock, reduced-motion spot (Story Order wrong-order wiggle 2deg/200ms), boot -> Hub 22 tiles (6/6/6/4) -> Story Order round-trip -> storybook sticker -> Hub shelf, footer `v1.20.0`, **drag feel** (a panel lifts, tilts and snaps; a slightly wobbly tap withdraws a placed panel instead of doing nothing), **retry in place** (wrong order leaves panels where the child put them), Settings -> Progress rows for 22 games, first-tap chunk load (Story Order chunk fetched from the service worker with the network off).
+- **Result:** **PENDING** - desktop automated smoke (`HTTP 200`, title `Aby's Little Lab`, live entry hash == local build) at release; device-class execution pending by user decision. The single item worth a real finger is the drag/tap distinction.
+
 ## Execution Record - v1.19.0 (2026-10-20)
 
 - **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.19.0 - Game 21 Feelings Faces + Shared Choice-Round Shell + Audio Focus; tag `v1.19.0`; both tracks archived under `conductor/archive/20261020-feelings-faces/` and `conductor/archive/20261020-scene-audio-shell/`)
