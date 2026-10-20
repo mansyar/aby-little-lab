@@ -121,9 +121,15 @@ export class RoundNarrator {
   }
 
   /**
-   * Re-reads the caption decision at a round boundary without notifying the
-   * scene: the round about to be drawn asks this before it renders, the same
-   * way the scene used to cache the decision per round.
+   * Re-reads the caption decision at a round boundary so the scene can branch
+   * on {@link isCaptioning} before it speaks its own text, the same way the
+   * scene used to cache the decision per round.
+   *
+   * Deliberately silent: it neither rebuilds the glyph and label nor calls
+   * `caption.onChange`. A notification here would land mid-render and re-enter
+   * the scene's speak path, saying the round's sentence twice. The rendered
+   * presentation catches up at the next rebuild (the voice-list settle or the
+   * next round's own render).
    */
   refreshCaptionFallback(): void {
     if (this.options.caption) {

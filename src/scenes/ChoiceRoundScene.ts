@@ -134,8 +134,9 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
 
   /**
    * Creates one interactive choice card at `(x, y)` with a hit area no smaller
-   * than the 96 px touch floor and the shared press feedback. The gameplay
-   * handler is registered before the squish so the tap is read first.
+   * than the 96 px touch floor, centred on the card, and the shared press
+   * feedback. The gameplay handler is registered before the squish so the tap
+   * is read first.
    *
    * `size` is the square edge for most games; pass `shape` when the card is
    * wider or taller than its content's natural square (e.g. a word card).
@@ -151,12 +152,16 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
     const height = shape.height ?? size;
     const card = this.add.rectangle(x, y, width, height, this.CARD_BG_COLOR);
     card.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
+    // A card under the floor gains its extra touch area evenly on all sides,
+    // so the tap target stays centred on what the child can see.
+    const hitWidth = Math.max(width, MIN_HIT_AREA);
+    const hitHeight = Math.max(height, MIN_HIT_AREA);
     card.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
-        0,
-        0,
-        Math.max(width, MIN_HIT_AREA),
-        Math.max(height, MIN_HIT_AREA),
+        (width - hitWidth) / 2,
+        (height - hitHeight) / 2,
+        hitWidth,
+        hitHeight,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });

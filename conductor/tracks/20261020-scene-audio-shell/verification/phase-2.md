@@ -121,8 +121,21 @@ largest of the five despite being one of the smallest sources.
 
 ## Deviations
 
-None. No file outside the brief's `Touches` was modified, and no test file was
+No file outside the brief's `Touches` was modified, and no test file was
 touched.
+
+### The shared success flash, recorded after review (2026-10-20)
+
+This section originally said "None" and that was wrong about one thing. The
+base's correct path flashes the tapped card in the success colour for 250 ms,
+so **Alphabet, Word Match, Decode It and First Sounds** — none of which had a
+success fill at the base commit — all gained a visible flash. It is a
+deliberate unification rather than an accident: `0x68d391` for 250 ms is the
+colour and duration every other choice game already used, and the flash pairs
+the chime with a visual. Nothing else in a round's feedback moved (same SFX
+order, same 700 ms advance), and the 250 ms flash is now the shared contract
+for every choice game. Feelings Faces gained the same flash in Phase 3;
+Pattern Builder's timing exception is recorded there.
 
 ## Notes for the primary agent
 

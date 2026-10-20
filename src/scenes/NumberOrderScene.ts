@@ -6,7 +6,7 @@ import { attachDragLift, snapToSlot } from "../utils/dragJuice";
 import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakNumber } from "../utils/speech";
-import { getAdaptiveBandShift, load } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 const ROUND_COUNT = 6;
@@ -290,7 +290,7 @@ export class NumberOrderScene extends ChoiceRoundScene {
       card.justDropped = false;
       if (this.inputLocked) return;
       // Speak on any tap (SFX-gated, silent fallback)
-      speakNumber(numeral, load().settings.sfxEnabled);
+      speakNumber(numeral, getSettings().sfxEnabled);
     });
 
     container.on("pointerup", () => {

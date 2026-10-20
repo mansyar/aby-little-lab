@@ -657,9 +657,16 @@ describe("AudioManager", () => {
     });
 
     it("does not duck before init", () => {
+      const elementsBefore = mockAudios.length;
       const fresh = new AudioManager();
-      fresh.duckBGM();
-      fresh.restoreBGM();
+
+      expect(() => {
+        fresh.duckBGM();
+        fresh.restoreBGM();
+      }).not.toThrow();
+
+      expect(mockAudios).toHaveLength(elementsBefore);
+      expect(vi.getTimerCount()).toBe(0);
       expect(cancelSpeech).not.toHaveBeenCalled();
     });
 

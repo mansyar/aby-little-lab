@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mascot } from "../../components/Mascot";
 import type { GameId } from "../../types";
+import { tapHits } from "../helpers/hitTest";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 import type { MockObject } from "../helpers/phaserMock";
 import { expectPressFeedbackContract, type MockGameObject } from "../helpers/pressFeedback";
@@ -130,10 +132,15 @@ class TestChoiceScene extends ChoiceRoundScene {
  * extra objects that move with a wrong choice, and tap callbacks.
  */
 class ExtrasChoiceScene extends TestChoiceScene {
-  /** Order of the per-game extras, so "after the shared feedback" is checkable. */
+  /** Order of the per-game extras against the shared feedback, for ordering checks. */
   readonly extrasLog: string[] = [];
   /** Objects dragged into the wrong-answer wiggle. */
   extras: Phaser.GameObjects.GameObject[] = [];
+
+  /** The corner mascot, so a test can order the shared cheer against the extras. */
+  get mascotForTest(): Mascot | undefined {
+    return this.mascot;
+  }
 
   protected wiggleTargets(index: number): Phaser.GameObjects.GameObject[] {
     this.extrasLog.push(`targets:${index}`);
@@ -146,6 +153,18 @@ class ExtrasChoiceScene extends TestChoiceScene {
 
   protected onWrong(index: number): void {
     this.extrasLog.push(`wrong:${index}`);
+  }
+}
+
+/**
+ * Choice scene with cards below the 96 px touch floor, so the centred hit area
+ * can be measured against a card that needs inflating.
+ */
+class SmallCardScene extends TestChoiceScene {
+  protected buildRoundContent(): void {
+    this.lifecycle.push("build");
+    this.createChoiceTarget(200, 300, 64, 0);
+    this.createChoiceTarget(300, 300, 64, 1);
   }
 }
 
@@ -387,13 +406,49 @@ describe("ChoiceRoundScene round lifecycle", () => {
     expect(wiggle?.targets).toContain(extra);
   });
 
-  it("runs the per-game correct extras after the shared feedback", () => {
+  it("runs the per-game correct extras before the cheer and the dot", () => {
     const scene = new ExtrasChoiceScene();
     scene.start();
+    const mascot = scene.mascotForTest;
+    expect(mascot).toBeDefined();
+    if (!mascot) return;
+    vi.spyOn(mascot, "cheer").mockImplementation(() => {
+      scene.extrasLog.push("cheer");
+    });
+    const dot = scene.dots[0];
+    getMockFn(dot.setAlpha).mockImplementation(() => {
+      scene.extrasLog.push("dot");
+      return dot;
+    });
 
     scene.tap(0);
 
-    expect(scene.extrasLog).toContain("correct:0");
+    const order = scene.extrasLog.filter((entry) => ["correct:0", "cheer", "dot"].includes(entry));
+    expect(order).toEqual(["correct:0", "cheer", "dot"]);
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
+  });
+
+  it("centres the touch floor on a card narrower than it", () => {
+    const scene = new SmallCardScene();
+    scene.start();
+    const card = scene.currentCards[0];
+
+    const options = getMockFn(card.setInteractive).mock.calls[0]?.[0] as {
+      hitArea: { x: number; y: number; width: number; height: number };
+    };
+    expect(options.hitArea.width).toBe(96);
+    expect(options.hitArea.height).toBe(96);
+    expect(options.hitArea.x).toBe(-16);
+    expect(options.hitArea.y).toBe(-16);
+
+    const subject = {
+      x: 200,
+      y: 300,
+      scale: 1,
+      displayOriginX: 32,
+      displayOriginY: 32,
+      hitArea: options.hitArea,
+    };
+    expect(tapHits(subject, 200, 300)).toBe(true);
   });
 });
