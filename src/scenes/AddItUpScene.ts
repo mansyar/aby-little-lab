@@ -1,4 +1,8 @@
 import { type AddItUpRound, buildPlaythrough, isCorrect } from "../game/addItUpLogic";
+import { food } from "../game/art/food";
+import { glyphs } from "../game/art/glyphs";
+import { items } from "../game/art/items";
+import { shapes } from "../game/art/shapes";
 import { type GroupMathConfig, GroupMathScene } from "./GroupMathScene";
 
 /**
@@ -21,5 +25,9 @@ export class AddItUpScene extends GroupMathScene<AddItUpRound> {
 
   constructor() {
     super("AddItUp");
+  }
+
+  preload(): void {
+    this.preloadArt([food, glyphs, items, shapes]);
   }
 }

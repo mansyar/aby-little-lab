@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { type ArtLoadingCue, createArtLoadingCue } from "../components/ArtLoadingCue";
 import {
   createCornerMascot as createCornerMascotComponent,
   type Mascot,
@@ -8,6 +9,8 @@ import { ParentLock } from "../components/ParentLock";
 import type { RoundNarratorOptions } from "../components/RoundNarrator";
 import { RoundNarrator } from "../components/RoundNarrator";
 import type { SpeakerButton } from "../components/SpeakerButton";
+import { preloadArtGroups } from "../game/art/registry";
+import type { ArtGroup } from "../game/art/types";
 import type { GameId } from "../types";
 import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
@@ -41,6 +44,10 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
   /** Instruction line created by {@link createSpokenInstruction}; destroyed on shutdown. */
   private instructionLabel?: Phaser.GameObjects.Text;
+
+  /** This visit's art-load cue, created by the first {@link preloadArt} call. */
+  private artCue?: ArtLoadingCue;
+
   protected readonly audioManager: AudioManager;
   protected progressDots: Phaser.GameObjects.Arc[] = [];
   protected inputLocked = false;
@@ -126,6 +133,37 @@ export abstract class GameSceneBase extends Phaser.Scene {
   constructor(key: string) {
     super({ key });
     this.audioManager = AudioManager.getInstance();
+  }
+
+  /**
+   * Rasterizes the game art `groups` this scene draws and shows the shared
+   * textless cue while the load is pending.
+   *
+   * Call from `preload` — that is where Phaser is still queueing loads. The cue
+   * is created once per visit, however many calls this scene makes, and it is
+   * taken down both on the loader's `complete` and on `create`, so a scene whose
+   * art is already in the TextureManager (every key still ships in the shell for
+   * now) cannot leave it on screen. Its own `shutdown` hook destroys it, which is
+   * why no extra cleanup is registered here.
+   */
+  protected preloadArt(groups: readonly ArtGroup[]): void {
+    const cue = this.artCue ?? this.createArtCue();
+    cue.show();
+    preloadArtGroups(this, groups);
+  }
+
+  /** Builds this visit's cue and wires the two events that take it back down. */
+  private createArtCue(): ArtLoadingCue {
+    const cue = createArtLoadingCue(this);
+    this.artCue = cue;
+    this.load.once("complete", () => cue.clear());
+    this.events.once("create", () => cue.clear());
+    // Scene instances are reused across visits: forget the destroyed cue so the
+    // next visit builds a fresh one.
+    this.events.once("shutdown", () => {
+      this.artCue = undefined;
+    });
+    return cue;
   }
 
   /**

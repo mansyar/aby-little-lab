@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { numerals } from "../game/art/numerals";
 import { buildPlaythrough, isCorrect } from "../game/numberOrderLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
@@ -54,6 +55,10 @@ export class NumberOrderScene extends ChoiceRoundScene {
 
   constructor() {
     super("NumberOrder");
+  }
+
+  preload(): void {
+    this.preloadArt([numerals]);
   }
 
   create(): void {

@@ -1,3 +1,7 @@
+import { animals } from "../game/art/animals";
+import { music } from "../game/art/music";
+import { shapes } from "../game/art/shapes";
+import { toys } from "../game/art/toys";
 import { createPlaythrough, isCorrect, type OddOneRound, promptFor } from "../game/oddOneOutLogic";
 import type { GameId } from "../types";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -33,6 +37,10 @@ export class OddOneOutScene extends ChoiceRoundScene {
 
   constructor() {
     super("OddOneOut");
+  }
+
+  preload(): void {
+    this.preloadArt([animals, music, shapes, toys]);
   }
 
   create(): void {

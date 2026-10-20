@@ -1,4 +1,8 @@
 import type Phaser from "phaser";
+import { food } from "../game/art/food";
+import { items } from "../game/art/items";
+import { numerals } from "../game/art/numerals";
+import { shapes } from "../game/art/shapes";
 import {
   type CountGroup,
   type CountRound,
@@ -58,6 +62,10 @@ export class HowManyScene extends ChoiceRoundScene {
 
   constructor() {
     super("HowMany");
+  }
+
+  preload(): void {
+    this.preloadArt([food, items, numerals, shapes]);
   }
 
   create(): void {

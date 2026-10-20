@@ -9,6 +9,8 @@ import {
   type PathProgress,
   selectThreePairs,
 } from "../game/animalTraceLogic";
+import { animals } from "../game/art/animals";
+import { food } from "../game/art/food";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -107,6 +109,10 @@ export class AnimalTraceScene extends GameSceneBase {
 
   constructor() {
     super("AnimalTrace");
+  }
+
+  preload(): void {
+    this.preloadArt([animals, food]);
   }
 
   create(): void {

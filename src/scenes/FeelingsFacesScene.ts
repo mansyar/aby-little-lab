@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { faces } from "../game/art/faces";
 import {
   answer,
   buildRoundChoices,
@@ -84,6 +85,10 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
 
   constructor() {
     super("FeelingsFaces");
+  }
+
+  preload(): void {
+    this.preloadArt([faces]);
   }
 
   create(): void {

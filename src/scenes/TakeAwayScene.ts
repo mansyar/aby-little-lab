@@ -1,3 +1,7 @@
+import { food } from "../game/art/food";
+import { glyphs } from "../game/art/glyphs";
+import { items } from "../game/art/items";
+import { shapes } from "../game/art/shapes";
 import { buildPlaythrough, isCorrect, type TakeAwayRound } from "../game/takeAwayLogic";
 import { type GroupMathConfig, GroupMathScene } from "./GroupMathScene";
 
@@ -22,5 +26,9 @@ export class TakeAwayScene extends GroupMathScene<TakeAwayRound> {
 
   constructor() {
     super("TakeAway");
+  }
+
+  preload(): void {
+    this.preloadArt([food, glyphs, items, shapes]);
   }
 }

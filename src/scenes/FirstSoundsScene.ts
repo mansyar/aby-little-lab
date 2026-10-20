@@ -1,3 +1,10 @@
+import { animals } from "../game/art/animals";
+import { food } from "../game/art/food";
+import { items } from "../game/art/items";
+import { letters } from "../game/art/letters";
+import { music } from "../game/art/music";
+import { shapes } from "../game/art/shapes";
+import { toys } from "../game/art/toys";
 import { generatePhonicsPlaythrough, type PhonicsRound } from "../game/firstSoundsLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
@@ -46,6 +53,10 @@ export class FirstSoundsScene extends ChoiceRoundScene {
 
   constructor() {
     super("FirstSounds");
+  }
+
+  preload(): void {
+    this.preloadArt([animals, food, items, letters, music, shapes, toys]);
   }
 
   create(): void {

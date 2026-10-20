@@ -1,4 +1,8 @@
 import type Phaser from "phaser";
+import { food } from "../game/art/food";
+import { glyphs } from "../game/art/glyphs";
+import { items } from "../game/art/items";
+import { shapes } from "../game/art/shapes";
 import {
   createPlaythrough,
   evaluateRound,
@@ -56,6 +60,10 @@ export class MoreLessScene extends ChoiceRoundScene {
 
   constructor() {
     super("MoreLess");
+  }
+
+  preload(): void {
+    this.preloadArt([food, glyphs, items, shapes]);
   }
 
   create(): void {

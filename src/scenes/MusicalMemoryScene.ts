@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { music } from "../game/art/music";
 import {
   appendNote,
   FROG_COUNT,
@@ -102,6 +103,10 @@ export class MusicalMemoryScene extends GameSceneBase {
 
   constructor() {
     super("MusicalMemory");
+  }
+
+  preload(): void {
+    this.preloadArt([music]);
   }
 
   create(): void {
