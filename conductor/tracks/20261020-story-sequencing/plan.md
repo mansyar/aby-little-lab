@@ -35,19 +35,22 @@
 - **Covers:** FR-8, NFR-3, NFR-6, AC-11
 - **Touches:** `src/assets/svg/stories/`, `src/game/storyOrderArt.ts`, `scripts/render-svg-contact-sheets.mjs`, `src/__tests__/game/storyOrderArt.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** d167eb2
+- **Evidence:** conductor/tracks/20261020-story-sequencing/verification/phase-2.md
 
-- [ ] **P2.T1: Author the 24 story panels** — covers: FR-8
-  - [ ] **P2.T1.1: Obvious pool art** — seed/sprout/flower, flat/round/aloft balloon, egg/cracking/duckling, scoop/dripping/puddle
-  - [ ] **P2.T1.2: Subtle pool art** — whole/peeled/peel banana, full/pouring/empty cup, bare foot/sock/shoe, cloud/raining cloud/puddle
-- [ ] **P2.T2: Tile and sticker art** — covers: FR-8, FR-9
-  - [ ] **P2.T2.1: `tile_story_order.svg`** (three stacked panels motif) and `sticker_story_order.svg` (storybook badge)
-- [ ] **P2.T3: Game-local art module** — covers: FR-8, NFR-1
-  - [ ] **P2.T3.1: `storyOrderArt.ts`** imports the 24 panels as `?raw` and exports keyed `{ key, svg }` entries plus a load function using the existing `toDataUri` approach
-  - [ ] **P2.T3.2: Prove the module never reaches the shell** — the module is imported only by the story game chunk; a unit test asserts 24 keys and no duplicate texture keys
-- [ ] **P2.T4: Visual QA** — covers: NFR-3, AC-11
-  - [ ] **P2.T4.1: Add a `stories` category** to `render-svg-contact-sheets.mjs` and render the sheet
-  - [ ] **P2.T4.2: Grayscale check** — record in the phase evidence that every panel stays distinguishable with colour removed
+- [x] **P2.T1: Author the 24 story panels** — covers: FR-8
+  - [x] **P2.T1.1: Obvious pool art** — seed/sprout/flower, flat/round/aloft balloon, egg/cracking/duckling, scoop/dripping/puddle
+  - [x] **P2.T1.2: Subtle pool art** — whole/peeled/peel banana, full/pouring/empty cup, bare foot/sock/shoe, cloud/raining cloud/puddle
+- [x] **P2.T2: Tile and sticker art** — covers: FR-8, FR-9
+  - [x] **P2.T2.1: `tile_story_order.svg`** (three stacked panels motif) and `sticker_story_order.svg` (storybook badge)
+- [x] **P2.T3: Game-local art module** — covers: FR-8, NFR-1
+  - [x] **P2.T3.1: `storyOrderArt.ts`** imports the 24 panels as `?raw` and exports keyed `{ key, svg }` entries plus a load function using the existing `toDataUri` approach
+  - [x] **P2.T3.2: Prove the module never reaches the shell** — the module is imported only by the story game chunk; a unit test asserts 24 keys and no duplicate texture keys
+- [x] **P2.T4: Visual QA** — covers: NFR-3, AC-11
+  - [x] **P2.T4.1: Add a `stories` category** to `render-svg-contact-sheets.mjs` and render the sheet
+  - [x] **P2.T4.2: Grayscale check** — record in the phase evidence that every panel stays distinguishable with colour removed
 
 ## Phase 3: Story Order scene
 
