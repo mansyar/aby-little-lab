@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, AC-2, AC-3
 - **Touches:** `src/game/art/**`, `src/__tests__/game/art/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Art group model and loader** — covers: FR-1, FR-2
   - [ ] **P1.T1.1: Define `ArtGroup`/`ArtAsset` types and `preloadArtGroups(scene, groups)`** that skips keys already in the TextureManager, uses `toDataUri` + `textureSizeFor`, and is safe under concurrent calls
