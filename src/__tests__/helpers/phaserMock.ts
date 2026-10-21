@@ -198,6 +198,13 @@ export class MockScene {
   scaleHandlers!: Record<string, MockFn[]>;
   /** Scene-event handlers captured from events.on, keyed by event. */
   eventsHandlers!: Record<string, MockFn[]>;
+  /**
+   * Live scene-event registrations, keyed by event.
+   *
+   * A `once` registration is retired once it has fired, so this is the list of
+   * handlers still attached to the scene's event emitter.
+   */
+  eventStore!: Record<string, Array<{ fn: MockFn; once: boolean }>>;
   time!: Record<string, MockFn>;
   tweens!: Record<string, MockFn>;
   sys!: { events: Record<string, MockFn> };
@@ -318,7 +325,7 @@ export class MockScene {
     this.tweens = {
       add: vi.fn(() => ({ remove: vi.fn(), stop: vi.fn() })),
     };
-    const eventStore: Record<string, Array<{ fn: MockFn; once: boolean }>> = {};
+    this.eventStore = {};
     const record = (event: string, fn: MockFn) => {
       const existing = this.eventsHandlers[event] ?? [];
       existing.push(fn);
@@ -327,20 +334,20 @@ export class MockScene {
     this.sys = {
       events: {
         on: vi.fn((event: string, fn: MockFn) => {
-          const list = eventStore[event] ?? [];
+          const list = this.eventStore[event] ?? [];
           list.push({ fn, once: false });
-          eventStore[event] = list;
+          this.eventStore[event] = list;
           record(event, fn);
         }),
         once: vi.fn((event: string, fn: MockFn) => {
-          const list = eventStore[event] ?? [];
+          const list = this.eventStore[event] ?? [];
           list.push({ fn, once: true });
-          eventStore[event] = list;
+          this.eventStore[event] = list;
           record(event, fn);
         }),
         off: vi.fn(),
         emit: vi.fn((event: string) => {
-          const list = eventStore[event];
+          const list = this.eventStore[event];
           if (!list) return;
           for (let i = list.length - 1; i >= 0; i--) {
             const entry = list[i];
@@ -364,6 +371,17 @@ export class MockScene {
         setBounds: vi.fn(),
       },
     };
+  }
+
+  /**
+   * Counts the handlers still attached to `event` on the scene's event emitter.
+   *
+   * A `once` handler is retired once it has fired, so this is how a test
+   * observes whether a scene's per-visit registration is still hanging around
+   * after the visit that registered it is over.
+   */
+  liveEventHandlerCount(event: string): number {
+    return (this.eventStore[event] ?? []).length;
   }
 }
 

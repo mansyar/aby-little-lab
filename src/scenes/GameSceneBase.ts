@@ -356,22 +356,31 @@ export abstract class GameSceneBase extends Phaser.Scene {
    * the shared reduced-motion-aware wiggle. Scenes that need more (a bounce
    * home, a flip-back) add it after calling this helper; scenes with their own
    * wrong path never have to touch it.
+   *
+   * `onComplete` runs once the wiggle has ended, so a scene can release its
+   * input again when the shake is over. It is released even when there is
+   * nothing to wiggle: a scene waiting for that callback must never be left
+   * locked.
    */
-  protected reactWrong(targets?: Phaser.GameObjects.GameObject[]): void {
+  protected reactWrong(targets?: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
     this.audioManager.playIncorrect();
     this.recordWrong();
     this.mascot?.nod();
 
-    if (targets && targets.length > 0) {
-      this.tweens.add({
-        targets,
-        angle: motionScale(this.WIGGLE_ANGLE, this.WIGGLE_REDUCED_ANGLE),
-        duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-        yoyo: true,
-        repeat: this.WIGGLE_REPEATS,
-        ease: "Sine.inOut",
-      });
+    if (!targets || targets.length === 0) {
+      onComplete?.();
+      return;
     }
+
+    this.tweens.add({
+      targets,
+      angle: motionScale(this.WIGGLE_ANGLE, this.WIGGLE_REDUCED_ANGLE),
+      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
+      yoyo: true,
+      repeat: this.WIGGLE_REPEATS,
+      ease: "Sine.inOut",
+      onComplete,
+    });
   }
 
   /**
@@ -420,9 +429,13 @@ export abstract class GameSceneBase extends Phaser.Scene {
    * Registers the shutdown handler that destroys the parent lock, mascot,
    * narrator (glyph and rule line), any injected glyph, the instruction line
    * and the progress dots. Call from `create()` after creating those instances.
+   *
+   * Registered with `once`, like the audio context above: scene instances are
+   * reused across visits, so a handler that outlived its visit would pile up
+   * one shutdown cleanup per visit.
    */
   protected registerShutdownCleanup(): void {
-    this.events.on("shutdown", () => {
+    this.events.once("shutdown", () => {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;

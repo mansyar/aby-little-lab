@@ -94,6 +94,18 @@ import { GameSceneBase } from "../../scenes/GameSceneBase";
 import { earnSticker, hasSticker, updateSettings } from "../../utils/storage";
 
 /**
+ * Every scene module, read as text.
+ *
+ * The shared wrong-answer reaction must exist in exactly one place, so the
+ * check reads the sources instead of the runtime: a second call site is a
+ * second implementation, even when only one of them runs in a given test.
+ */
+const SCENE_SOURCES: Readonly<Record<string, string>> = import.meta.glob<string>(
+  "../../scenes/*.ts",
+  { query: "?raw", import: "default", eager: true },
+);
+
+/**
  * Concrete test subclass exposing the protected scaffold methods so the
  * base-class behavior can be exercised directly.
  */
@@ -149,8 +161,8 @@ class TestScene extends GameSceneBase {
     this.recordWrong();
   }
 
-  testReactWrong(targets?: Phaser.GameObjects.GameObject[]): void {
-    this.reactWrong(targets);
+  testReactWrong(targets?: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
+    this.reactWrong(targets, onComplete);
   }
 
   getDots(): Phaser.GameObjects.Arc[] {
@@ -169,6 +181,27 @@ class TestScene extends GameSceneBase {
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
+}
+
+/**
+ * Finds the scene's registered "shutdown" handler, whichever registration it
+ * used: a per-visit cleanup is registered with `once`, a lasting listener with
+ * `on`.
+ */
+function shutdownHandler(scene: unknown): (() => void) | undefined {
+  const events = (scene as { events: Record<string, MockFn> }).events;
+  for (const register of [events.on, events.once]) {
+    const call = getMockFn(register).mock.calls.find((c) => c[0] === "shutdown");
+    if (call?.[1]) return call[1] as () => void;
+  }
+  return undefined;
+}
+
+/** Counts the handlers still attached to `event` on the scene's event emitter. */
+function liveHandlerCount(scene: unknown, event: string): number {
+  return (
+    scene as unknown as { liveEventHandlerCount(event: string): number }
+  ).liveEventHandlerCount(event);
 }
 
 /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
@@ -544,8 +577,7 @@ describe("GameSceneBase scaffold", () => {
       const glyph = instructionGlyph(scene);
       scene.testRegisterShutdownCleanup();
 
-      const shutdownCall = getMockFn(scene.events.on).mock.calls.find((c) => c[0] === "shutdown");
-      const handler = shutdownCall?.[1] as (() => void) | undefined;
+      const handler = shutdownHandler(scene);
       expect(handler).toBeDefined();
       handler?.();
 
@@ -577,11 +609,9 @@ describe("GameSceneBase scaffold", () => {
       scene.testSetSpeaker(speaker);
       scene.testRegisterShutdownCleanup();
 
-      const onMock = getMockFn(scene.events.on);
-      const shutdownCall = onMock.mock.calls.find((c) => c[0] === "shutdown");
-      expect(shutdownCall).toBeDefined();
-      const handler = shutdownCall?.[1] as () => void;
-      handler();
+      const handler = shutdownHandler(scene);
+      expect(handler).toBeDefined();
+      handler?.();
 
       expect(getMockFn(mockParentLockInstances[0]?.destroy)).toHaveBeenCalled();
       expect(getMockFn(speaker.destroy)).toHaveBeenCalled();
@@ -589,6 +619,25 @@ describe("GameSceneBase scaffold", () => {
       const mascotImage = getMascotImage(scene);
       expect(getMockFn(mascotImage.destroy)).toHaveBeenCalled();
       expect(scene.getMascot()).toBeUndefined();
+    });
+
+    it("registers the cleanup once per visit and leaves no handler behind", () => {
+      const scene = new TestScene();
+
+      scene.testRegisterShutdownCleanup();
+      expect(liveHandlerCount(scene, "shutdown")).toBe(1);
+
+      scene.events.emit("shutdown");
+
+      // The handler that has already run is gone, so the next visit adds one
+      // entry instead of stacking on top of the one it already ran.
+      expect(liveHandlerCount(scene, "shutdown")).toBe(0);
+
+      scene.testRegisterShutdownCleanup();
+      expect(liveHandlerCount(scene, "shutdown")).toBe(1);
+
+      scene.events.emit("shutdown");
+      expect(liveHandlerCount(scene, "shutdown")).toBe(0);
     });
   });
 
@@ -630,11 +679,9 @@ describe("GameSceneBase scaffold", () => {
       scene.testRecordCorrect();
       scene.testRegisterShutdownCleanup();
 
-      const onMock = getMockFn(scene.events.on);
-      const shutdownCall = onMock.mock.calls.find((c) => c[0] === "shutdown");
-      expect(shutdownCall).toBeDefined();
-      const handler = shutdownCall?.[1] as () => void;
-      handler();
+      const handler = shutdownHandler(scene);
+      expect(handler).toBeDefined();
+      handler?.();
 
       expect(mockRecordGameResult).not.toHaveBeenCalled();
     });
@@ -722,6 +769,29 @@ describe("GameSceneBase scaffold", () => {
       scene.testCompleteGame("shape-sorter");
       expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 0, 1);
     });
+
+    it("hands the completion callback to the wiggle tween", () => {
+      const scene = new TestScene();
+      const target = { x: 0 } as unknown as Phaser.GameObjects.GameObject;
+      const onComplete = vi.fn();
+
+      scene.testReactWrong([target], onComplete);
+
+      const wiggle = wiggleTween(scene);
+      expect(wiggle?.onComplete).toBe(onComplete);
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it("releases the completion callback even when there is nothing to wiggle", () => {
+      const scene = new TestScene();
+      const onComplete = vi.fn();
+
+      scene.testReactWrong(undefined, onComplete);
+
+      // Nothing wiggles, but the completion is still released: a game that
+      // unlocks its input from it must never stay locked.
+      expect(onComplete).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("game context registration", () => {
@@ -749,5 +819,18 @@ describe("GameSceneBase scaffold", () => {
 
       expect(mockAudio.clearGameContext).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe("the shared wrong-answer reaction", () => {
+  it("calls playIncorrect from exactly one place in src/scenes", () => {
+    const callSites = Object.entries(SCENE_SOURCES)
+      .map(([path, source]) => ({
+        file: path.slice(path.lastIndexOf("/") + 1),
+        calls: source.split("playIncorrect(").length - 1,
+      }))
+      .filter((entry) => entry.calls > 0);
+
+    expect(callSites).toEqual([{ file: "GameSceneBase.ts", calls: 1 }]);
   });
 });

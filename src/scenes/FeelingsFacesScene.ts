@@ -168,9 +168,9 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
 
   /**
    * A wrong tap re-speaks the scenario once, so the child can listen again
-   * before choosing. The base has already played the tone, recorded the miss,
-   * nodded and wiggled the card with its face. Nothing is re-spoken while the
-   * caption is up: the written line is already on screen.
+   * before choosing. The base's tone, the recorded miss, the nod and the
+   * card's wiggle follow this line. Nothing is re-spoken while the caption is
+   * up: the written line is already on screen.
    */
   protected onWrong(_index: number): void {
     const scenario = this.rounds[this.roundIndex];
