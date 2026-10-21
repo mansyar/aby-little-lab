@@ -50,7 +50,7 @@ The primary appends after acceptance:
 - **Touches:** `src/audio/AudioManager.ts`, `src/game/audioIdentity.ts`,
   `src/__tests__/audio/*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Apply parameters in the trio synth** — covers: FR-3, AC-3
   - [ ] **P2.T1.1: Correct and incorrect voices consume pitch, timbre, tempo, and contour from the resolved identity**
