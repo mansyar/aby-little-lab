@@ -72,7 +72,7 @@
 - **Covers:** FR-2, FR-3, FR-4, NFR-4, NFR-5, AC-4, AC-5, AC-6
 - **Touches:** `README.md`, `docs/release-notes-v1.21.0.md`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Correct the README** — covers: FR-2
   - [ ] **P2.T1.1:** The suite figures and the build-output paragraph.
