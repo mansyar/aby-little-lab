@@ -145,7 +145,7 @@
 - **Covers:** F1, F2, F3, F4, F5
 - **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/ChoiceRoundScene.ts`, `src/game/progressLogic.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`, `src/__tests__/helpers/sceneFlowHarness.ts`, `src/__tests__/helpers/sceneFlowHarness.test.ts`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Restore the shipped order of the wrong-answer reaction** — covers: F1
   - [ ] **R1.T1.1:** Give the base helper an explicit pre-wiggle callback so the
