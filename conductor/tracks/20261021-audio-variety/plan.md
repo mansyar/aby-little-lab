@@ -121,7 +121,7 @@ Review fixes are appended by `conductor-review` as:
 - **Touches:** `src/game/audioIdentity.ts`,
   `src/__tests__/game/audioIdentity.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1 (plan.md Phase 2 header status)** — covers: F1 (primary-only conductor-state fix)
 - [ ] **R1.T2: Resolve F2 + F3 (tempo-bounds comment; incorrect-contour monotonicity assertion)** — covers: F2, F3
