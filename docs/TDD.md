@@ -760,7 +760,7 @@ Games that do not fit the shape expose their own equivalents: `shapeSorterLogic.
 | `DOWN_THRESHOLD` | 0.6 | accuracy < 0.6 shifts down |
 | `BASE_LADDER` | `[1, 1, 2, 2, 3, 3]` | default six-round band ladder |
 
-`updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
+`updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. A session's taps are folded into the window when the session ends: `GameSceneBase` records them on completion, and on shutdown it also records the taps of a session the child abandoned. That flush writes the window only - `recordTaps` in `src/game/progressLogic.ts` leaves the cumulative `correct`, `wrong`, `wins` and `plays` counters to completed sessions - and it zeroes the session counters afterwards, so a reused scene instance cannot report the same taps a second time. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
 
 Per-game adaptation uses the same shift differently: tier games split rounds into bands and drop the hardest band when the shift is up (`earlyCount = roundCount - 1 - shift`), Memory Match shifts its ladder, Musical Memory maps the shift to a start length of 1/2/3 and a win length of 5/6/7, and First Sounds keeps a uniform band. The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty).
 
