@@ -56,6 +56,7 @@
    - [8.4 Visibility policy](#84-visibility-policy)
    - [8.5 Speech](#85-speech)
    - [8.6 Toggles and persistence](#86-toggles-and-persistence)
+   - [8.7 The per-game audio identity](#87-the-per-game-audio-identity)
 9. [Motion and feedback](#9-motion-and-feedback)
    - [9.1 Reduced-motion helpers](#91-reduced-motion-helpers)
    - [9.2 Scene transitions](#92-scene-transitions)
@@ -149,7 +150,8 @@ Vitest is configured inside `vite.config.ts`: `environment: "happy-dom"`, `globa
 │   ├── validate-bundle.js
 │   ├── validate-pwa.js
 │   ├── validate-boot.js
-│   └── render-svg-contact-sheets.mjs
+│   ├── render-svg-contact-sheets.mjs
+│   └── measure-first-tap.mjs
 ├── .github/workflows/ci.yml
 ├── docs/
 ├── conductor/
@@ -172,7 +174,8 @@ src/
 │   └── AudioManager.ts                    # singleton: SFX, BGM, ducking, visibility
 ├── types/
 │   └── index.ts                           # GameId, Settings, ProfileV2, GameProgress, …
-├── components/                            # 15 files
+├── components/                            # 16 files
+│   ├── ArtLoadingCue.ts
 │   ├── Mascot.ts
 │   ├── ParentLock.ts
 │   ├── PlayTimeIndicator.ts
@@ -189,15 +192,17 @@ src/
 │       ├── ResetModal.ts
 │       ├── VoiceRow.ts
 │       └── primitives.ts
-├── game/                                  # 30 files — pure logic, no Phaser imports
+├── game/                                  # 55 files: 33 modules, art/ (16), hub/ (6)
 │   ├── adaptiveLogic.ts
 │   ├── addItUpLogic.ts
 │   ├── alphabetLogic.ts
 │   ├── animalTraceLogic.ts
+│   ├── audioIdentity.ts
 │   ├── bigSmallLogic.ts
 │   ├── colorMatchLogic.ts
 │   ├── countLogic.ts
 │   ├── decodeLogic.ts
+│   ├── dragBoard.ts
 │   ├── feelingsFacesLogic.ts
 │   ├── firstSoundsLogic.ts
 │   ├── gameRegistry.ts
@@ -220,7 +225,31 @@ src/
 │   ├── storyOrderLogic.ts
 │   ├── takeAwayLogic.ts
 │   ├── voiceLogic.ts
-│   └── wordLogic.ts
+│   ├── wordLogic.ts
+│   ├── art/                               # 16 files — the lazy art groups
+│   │   ├── animals.ts
+│   │   ├── cutouts.ts
+│   │   ├── faces.ts
+│   │   ├── food.ts
+│   │   ├── glyphs.ts
+│   │   ├── index.ts
+│   │   ├── items.ts
+│   │   ├── letters.ts
+│   │   ├── music.ts
+│   │   ├── numerals.ts
+│   │   ├── placeholder.ts
+│   │   ├── registry.ts
+│   │   ├── shadows.ts
+│   │   ├── shapes.ts
+│   │   ├── toys.ts
+│   │   └── types.ts
+│   └── hub/                               # 6 files — the decomposed Hub grid
+│       ├── gridBuilder.ts
+│       ├── gridLayout.ts
+│       ├── hubGridConstants.ts
+│       ├── pageBoard.ts
+│       ├── stickerShelf.ts
+│       └── timeUpDim.ts
 ├── scenes/                                # 29 files
 │   ├── AddItUpScene.ts
 │   ├── AlphabetScene.ts
@@ -282,6 +311,8 @@ src/
         └── ui/                            # 33 files, of which 21 in ui/tiles/
 ```
 
+The `src/game/` logic modules are importable without Phaser, with one exception: `hub/gridBuilder.ts` imports it at runtime. `dragBoard.ts`, `hubGrid.ts`, `storyOrderArt.ts`, `art/registry.ts` and `art/placeholder.ts` import Phaser types only, so they cost nothing at runtime either.
+
 `.gitkeep` placeholders are tracked in `src/assets/audio/`, `src/assets/svg/{animals,items,shapes,stickers,ui}/`, `src/audio/`, `src/components/`, `src/scenes/`, `src/types/` and `src/utils/`; they are not listed.
 
 ### 2.3 Asset corpus
@@ -339,7 +370,7 @@ The font gate exists because the letter and numeral SVGs set `font-family="'Balo
 
 ### 3.3 PreloadScene and the boot asset table
 
-`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through three eager raw globs — `../assets/svg/ui/tile_*.svg`, `../assets/svg/ui/tiles/*.svg` and `../assets/svg/stickers/*.svg`, written `{ eager: true, query: "?raw" }`. The patterns are deliberately narrower than "everything under `ui/`": the `ui/` directory also holds the glyph SVGs that belong to the lazy `game/art/glyphs.ts` group, and globbing `ui/**` would inline them into the entry chunk for keys the table never reads. The `tile_`/`sticker_` stem filter stays as defence in depth. Two files sharing a key, two registry entries naming one key, or a registry key with no file, throws at module evaluation naming the key. Only the nine non-game rows stay literal, because they belong to the shell rather than to a game. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 178 keys in the app, 53 of them in the shell.
+`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through three eager raw globs — `../assets/svg/ui/tile_*.svg`, `../assets/svg/ui/tiles/*.svg` and `../assets/svg/stickers/*.svg`, written `{ eager: true, query: "?raw" }`. The patterns are deliberately narrower than "everything under `ui/`": the `ui/` directory also holds the glyph SVGs that belong to the lazy `game/art/glyphs.ts` group, and globbing `ui/**` would inline them into the entry chunk for keys the table never reads. The `tile_`/`sticker_` stem filter stays as defence in depth. Two files sharing a key, two registry entries naming one key, or a registry key with no file, throws at module evaluation naming the key. Only the nine non-game rows stay literal, because they belong to the shell rather than to a game. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 208 texture keys in the app, 53 of them in the shell, over a corpus of 202 art files.
 
 `preload()` draws a brand lockup (title at `centerY - 110`, tagline at `centerY - 70`, a 300×30 progress bar over a 320×50 box) and wires `load.on("progress")` and `load.on("complete")` to it. In development only, a `/* v8 ignore next */`-guarded block profiles per-file load time and logs `[preload] N files in Xms`; the block is statically removed from production builds.
 
@@ -355,7 +386,7 @@ where `size = textureSizeFor(asset.key)` ([§3.4](#34-texture-tiers)). `toDataUr
 
 ### 3.4 Texture tiers
 
-Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (178 textures x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. `src/utils/textureTiers.ts` sizes each texture for its largest display context:
+Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (the 178-key boot set of the time x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. The corpus has grown since to 202 art files and 208 texture keys. `src/utils/textureTiers.ts` sizes each texture for its largest display context, and the rule applies per key wherever that key lives - shell, lazy art group or Story Order panel:
 
 | Tier | Size | Applied to |
 | --- | --- | --- |
@@ -379,7 +410,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 
 **The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or spells a game key out in the shell table. It pins the registered set against its own literal 53-key list — read from `SHELL_ASSETS` at runtime, not from the scene's source — so the derivation cannot quietly change the shell. It also asserts the counts — 131 group keys, 125 game-only, 24 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, `storyOrderArt.test.ts` keeps the single-module assertion, and `preloadScene.test.ts` checks each derived key against the SVG file named after it. Adding a game means adding an art group and a `preloadArtGroups()` call in its scene; `PreloadScene` never gains an import for it.
 
-**Measured budgets.** The shell entry is 130.1 KiB (133.2 kB as Vite prints it) against the 200 kB gate in `validate-bundle.js`; cold boot is 419.5 ms median (1697.2 ms at 4× CPU throttle) against the 3000 ms `validate-boot.js` gate; and a cold first tap of a game adds **82 ms at worst** (Memory Match) and **48 ms for the widest art union** (Find the Word, 83 keys) against the 400 ms budget, with absolute totals of 224–334 ms. That is an increment, not a standalone latency: the criterion is "adds <= 400 ms versus the same tap", so `scripts/measure-first-tap.mjs` measures the current build back to back against a build of the pre-track commit `f377bf8`, taps five games and fails on the worst total rather than the cross-game median. Evidence, not a gate. `docs/perf-baseline.md` carries the before/after tables.
+**Measured budgets.** The shell entry is 134.6 kB as `validate-bundle.js` reports it (137.8 kB as Vite prints it — the same size in binary and decimal units) against the 200 kB gate. Cold boot is gated at 3000 ms by `validate-boot.js`; the measured medians and the 4× CPU throttle figures live in `docs/perf-baseline.md`, which records the shell-diet track's run of 2026-10-20 (419.5 ms median, 1697.2 ms at 4× throttle). A cold first tap of a game adds **82 ms at worst** (Memory Match) and **48 ms for the widest art union** (Find the Word, 83 keys) against the 400 ms budget, with absolute totals of 224–334 ms, measured on that same 2026-10-20 run. That is an increment, not a standalone latency: the criterion is "adds <= 400 ms versus the same tap". `scripts/measure-first-tap.mjs` opens a fresh browser context per game so the game chunk is not cached, taps one tile and records the tap-to-first-frame total; it fails when the worst game's total exceeds the 400 ms budget rather than when the cross-game median does. It is not wired into CI, so it is evidence rather than a gate. `docs/perf-baseline.md` carries the before/after tables.
 
 ### 3.6 What the budget costs
 
@@ -387,14 +418,14 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | --- | --- | --- |
 | Boot textures | 53 (22 tiles, 22 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Game art | 12 groups, 131 keys; nine emit chunks of 3.1–16.5 kB and `cutouts`, `shadows`, `faces` inline into their only consumer | build output |
-| Shell entry | 133.2 kB as Vite prints it (130.1 KiB), gated at 200 kB | `node scripts/validate-bundle.js` |
+| Shell entry | 134.6 kB as `validate-bundle.js` reports it (137.8 kB as Vite prints it), gated at 200 kB | `node scripts/validate-bundle.js` |
 | Phaser vendor chunk | 1342.6 kB as the validator reports it (1,374.8 kB as the Vite build prints it — same 1,374,822 bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
-| Story Order chunk | ~33.9 kB, includes all 24 panel SVGs | build output |
-| Precache entries | 53 (about 1,703 KiB) | `precache  53 entries` from the PWA build step |
+| Story Order chunk | ~31.8 kB, includes all 24 panel SVGs | build output |
+| Precache entries | 54 (about 1,708 KiB) | `precache  54 entries` from the PWA build step |
 
-The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. Rollup hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 7.98 kB, `ChoiceRoundScene` 2.36 kB, `GroupMathScene` 2.02 kB, `dragJuice` 1.03 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB, `alphabetLogic` 0.51 kB and `shapeSorterLogic` 0.45 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 4.29 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.45 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
-At 1.20.0 the build emits 41 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the shared bases, the Phaser vendor chunk and the workbox helper. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload or Hub.
+The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload or Hub.
 
 ---
 
@@ -420,17 +451,20 @@ Phaser 4 cannot express this in the config `scene` array: entries there are invo
 
 | Member | Behaviour |
 | --- | --- |
+| `init()` | resolves the registry entry from the scene key, stores the game id, tells the `AudioManager` which game's audio identity to use ([§8.2](#82-sound-effects)), and registers two shutdown hooks: one clears the audio context, the other flushes the pending taps |
 | `createBackButton()` | "← Back" text at (20, 20) with a 96×96 hit rectangle, wrapped in `ParentLock`, then `attachPressFeedback` |
 | `createCornerMascot()` | bottom-right mascot via `createCornerMascotComponent`, then `curious()` |
 | `createRoundNarrator(options)` | destroys any previous narrator (scene instances are reused across visits) and builds a new `RoundNarrator` |
 | `createSpokenInstruction(text, options)` | centred 26 px wrapped label plus a narrator glyph offset right by `INSTRUCTION_SPEAKER_GAP` |
 | `createProgressDots(count)` / `fillProgressDot(index)` | outlined dots at `PROGRESS_DOT_Y = 60`, `PROGRESS_DOT_SPACING = 40`, `PROGRESS_DOT_RADIUS = 8`; filling tweens `DOT_POP_SCALE 1.4` (reduced 1.2) over 250 ms (reduced 150 ms) |
-| `recordCorrect()` / `recordWrong()` | increment session counters flushed by `completeGame()` |
+| `preloadArt(groups)` / `createArtCue()` | rasterises the art groups the scene draws and shows the shared textless cue while they load ([§3.5](#35-in-chunk-art)). The cue is created once per visit, however many groups the scene declares, and is taken down both on the loader's `complete` and on `create`; the scene's own `shutdown` hook destroys it |
+| `reactWrong(targets?, onComplete?, onPreWiggle?)` | plays the incorrect cue in the game's own voice, records the wrong tap, nods the mascot, and wiggles the given targets with the reduced-motion-aware angle, releasing `onComplete` when the wiggle ends |
+| `recordCorrect()` / `recordWrong()` | increment session counters, which reach the rolling adaptive window either when `completeGame()` banks a completed session or when the scene shuts down mid-game |
 | `completeGame(gameId)` | locks input, `recordGameResult`, `playWin()`, big mascot cheer, win celebration, first-time sticker award + sticker animation, then a 3 s `AUTO_RETURN_DELAY` return to the Hub carrying `{ justEarned }` |
 | `registerShutdownCleanup()` | on `shutdown`, destroys the parent lock, mascot, narrator, standalone speaker and instruction label |
 | `speaker` getter/setter | prefers the narrator's glyph; the setter only ever fills the `standaloneSpeaker` slot, so no scene builds a `SpeakerButton` by hand |
 
-Shared constants: `NEXT_ROUND_DELAY = 700`, `AUTO_RETURN_DELAY = 3000`, wiggle `4°`/`2°` over 350/200 ms repeating 3×, `OUTLINE_WIDTH = 4`, `STICKER_DISPLAY_SIZE = 256`, `WIN_TWEEN_DURATION = 300`, `SUCCESS_COLOR = 0x68d391`, `CARD_BG_COLOR = 0xffffff`, `OUTLINE_COLOR = 0x2d3748`, `SPEAKER_OFFSET = 70`, `INSTRUCTION_Y = 112`, `INSTRUCTION_WRAP_WIDTH = 620`, `INSTRUCTION_SPEAKER_GAP = 36`. `stickerKeyFor(gameId)` converts `-` to `_` before the `sticker_` prefix.
+Shared constants: `NEXT_ROUND_DELAY = 700`, `AUTO_RETURN_DELAY = 3000`, wiggle `4°`/`2°` over 350/200 ms repeating 3×, `OUTLINE_WIDTH = 4`, `STICKER_DISPLAY_SIZE = 256`, `WIN_TWEEN_DURATION = 300`, `SUCCESS_COLOR = 0x68d391`, `CARD_BG_COLOR = 0xffffff`, `OUTLINE_COLOR = 0x2d3748`, `SPEAKER_OFFSET = 70`, `INSTRUCTION_Y = 112`, `INSTRUCTION_WRAP_WIDTH = 620`, `INSTRUCTION_SPEAKER_GAP = 36`. `stickerKeyFor(gameId)` delegates to the registry: the `sticker_<game id>` convention is declared once in `src/game/gameRegistry.ts`, so a game id and its sticker key cannot drift apart.
 
 ### 4.3 ChoiceRoundScene
 
@@ -480,7 +514,7 @@ interface GroupMathConfig<Round> {
 | 3 | Pop & Freeze | `PopFreezeScene` | `GameSceneBase` | `popFreezeLogic` | fixed |
 | 4 | Shadow Match | `ShadowMatchScene` | `GameSceneBase` | `shadowMatchLogic` | fixed |
 | 5 | Musical Memory | `MusicalMemoryScene` | `GameSceneBase` | `musicalMemoryLogic` | adaptive |
-| 6 | Big vs. Small | `BigSmallScene` | `GameSceneBase` | `bigSmallLogic` | fixed |
+| 6 | Big & Small | `BigSmallScene` | `GameSceneBase` | `bigSmallLogic` | fixed |
 | 7 | Pattern Builder | `PatternBuilderScene` | `ChoiceRoundScene` | `patternBuilderLogic`, `shapeSorterLogic` | adaptive |
 | 8 | Find the Letter | `AlphabetScene` | `ChoiceRoundScene` | `alphabetLogic` | adaptive |
 | 9 | Find the Word | `WordMatchScene` | `ChoiceRoundScene` | `wordLogic` | adaptive |
@@ -496,9 +530,9 @@ interface GroupMathConfig<Round> {
 | 19 | Decode It | `DecodeItScene` | `ChoiceRoundScene` | `decodeLogic` | adaptive |
 | 20 | Number Order | `NumberOrderScene` | `ChoiceRoundScene` | `numberOrderLogic` | adaptive |
 | 21 | Feelings Faces | `FeelingsFacesScene` | `ChoiceRoundScene` | `feelingsFacesLogic` | fixed |
-| 22 | Story Order | `StoryOrderScene` | `ChoiceRoundScene` (own drag board, `resolveWholeRound`) | `storyOrderLogic` + `storyOrderArt` | fixed |
+| 22 | Story Order | `StoryOrderScene` | `ChoiceRoundScene` (shared `DragBoard`, `resolveWholeRound`) | `storyOrderLogic` + `storyOrderArt` | fixed |
 
-Twelve scenes extend `ChoiceRoundScene` directly, two reach it through `GroupMathScene`, and eight extend `GameSceneBase` directly. Fifteen games call `getAdaptiveBandShift`; the seven fixed ones are games 1, 2, 3, 4, 6, 21 and 22. The PRD explains the pedagogy ([`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty)).
+Twelve scenes extend `ChoiceRoundScene` directly, two reach it through `GroupMathScene`, and eight extend `GameSceneBase` directly. Fifteen games call `getAdaptiveBandShift`; the seven fixed ones are Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order. The PRD explains the pedagogy ([`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty)).
 
 ### 4.6 Lifecycle and shutdown
 
@@ -510,7 +544,7 @@ The normal game path is: Hub tile → `ensureSceneLoaded` → `transitionToScene
 
 ## 5. Components
 
-All 15 components are plain classes that take a `Phaser.Scene`; none extends a scene.
+Sixteen modules live in `src/components/`. Most are plain classes that take a `Phaser.Scene`; `ArtLoadingCue.ts` is a factory that returns an `ArtLoadingCue` handle, because the cue owns its own tweens and its own shutdown hook. None extends a scene.
 
 ### 5.1 RoundNarrator
 
@@ -699,7 +733,7 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 
 ### 7.1 The module list
 
-`src/game/` holds the pure layer: no Phaser imports, no DOM, no storage reads (except the play-time session machinery, which needs `document.visibilityState`). Every module here is unit-tested directly.
+`src/game/` holds the app's logic layer: no DOM, no storage reads (except the play-time session machinery, which needs `document.visibilityState`). Most modules are Phaser-free; `dragBoard.ts`, `hubGrid.ts`, `storyOrderArt.ts`, `art/registry.ts` and `art/placeholder.ts` import Phaser types only, and `hub/gridBuilder.ts` imports it at runtime. Every module here is unit-tested directly.
 
 | Module | Responsibility |
 | --- | --- |
@@ -707,14 +741,16 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 | `addItUpLogic.ts` | Add It Up rounds and answer checking |
 | `alphabetLogic.ts` | Find the Letter rounds, `isConfusableWith` |
 | `animalTraceLogic.ts` | trace-path point sets and completion test |
-| `bigSmallLogic.ts` | Big vs. Small pair generation and classification |
+| `audioIdentity.ts` | the per-game audio identities - pitch offset, waveform, tempo and the correct/incorrect/win contours - and `identityForGameId` ([§8.7](#87-the-per-game-audio-identity)) |
+| `bigSmallLogic.ts` | Big & Small pair generation and classification |
 | `colorMatchLogic.ts` | colour round generation |
 | `countLogic.ts` | How Many? bands and group cards |
 | `decodeLogic.ts` | Decode It word/letter mapping |
+| `dragBoard.ts` | the shared drag shell: slots, pieces, drop validation, wrong-answer behaviour and tap-to-withdraw ([§9.3](#93-press-drag-and-completion-feedback)) |
 | `feelingsFacesLogic.ts` | contrast ladder of faces and prompts |
 | `firstSoundsLogic.ts` | phonics rounds from a 12-word subset |
 | `gameRegistry.ts` | the one declaration of the 22 games — `gameId`, `sceneKey`, `label`, `tileKey`, `stickerKey` and the icon overrides — plus `stickerKeyForGame`; `GameId` coverage is enforced by the type checker |
-| `hubGrid.ts` | tile layout, 64 px tile icons, paging and sticker shelf rendering |
+| `hubGrid.ts` | the Hub grid orchestrator: it delegates to `hub/gridBuilder` (tiles and page dots), `hub/pageBoard` (paging, page dots and the swipe gesture), `hub/stickerShelf` (earned stickers) and `hub/timeUpDim` (the play-time dim) |
 | `hubPaging.ts` | page maths for the tile grid, with the tile count defaulting to the registry length |
 | `hubTiles.ts` | `GAME_TILES`, derived from `gameRegistry` for the Hub grid |
 | `memoryMatchLogic.ts` | pair generation, flip rules, adaptive tier split |
@@ -729,11 +765,13 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 | `progressLogic.ts` | per-game stats, mastery, accuracy, 7-day activity |
 | `shadowMatchLogic.ts` | shadow/object pairing and win test |
 | `shapeSorterLogic.ts` | shape sets, `ShapeType`, matching |
-| `storyOrderArt.ts` | 24 story panel SVGs + `preloadStoryOrderArt` (the one module here that touches Phaser types) |
+| `storyOrderArt.ts` | 24 story panel SVGs + `preloadStoryOrderArt` (imports Phaser types only) |
 | `storyOrderLogic.ts` | `STORY_POOL`, shuffling, whole-strip validation |
 | `takeAwayLogic.ts` | Take Away rounds and answer checking |
 | `voiceLogic.ts` | `availableVoiceOptions`, `resolveVoice` |
 | `wordLogic.ts` | word pools and word-round generation |
+| `art/` | the twelve lazy art groups and their loader - 131 keys that travel with the game that draws them - plus the placeholder a failed key degrades to ([§3.5](#35-in-chunk-art)) |
+| `hub/` | the decomposed Hub grid: tile layout, page board, sticker shelf and the time-up dim |
 
 ### 7.2 The round contract
 
@@ -762,7 +800,18 @@ Games that do not fit the shape expose their own equivalents: `shapeSorterLogic.
 
 `updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. A session's taps are folded into the window when the session ends: `GameSceneBase` records them on completion, and on shutdown it also records the taps of a session the child abandoned. That flush writes the window only - `recordTaps` in `src/game/progressLogic.ts` leaves the cumulative `correct`, `wrong` and `wins` counters to completed sessions, and the `plays` counter alone is counted elsewhere, when the child starts a game from the Hub - and it zeroes the session counters afterwards, so a reused scene instance cannot report the same taps a second time. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
 
-Per-game adaptation uses the same shift differently: tier games split rounds into bands and drop the hardest band when the shift is up (`earlyCount = roundCount - 1 - shift`), Memory Match shifts its ladder, Musical Memory maps the shift to a start length of 1/2/3 and a win length of 5/6/7, and First Sounds keeps a uniform band. The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty).
+Fifteen of the 22 games read the shift. The seven that do not - Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order - have a fixed ladder. Their taps still reach the window, because the flush is unconditional.
+
+The same shift reaches the fifteen games in six different ways:
+
+- **A shifted band ladder** - `shiftLadder(BASE_LADDER, shift)` - in `addItUpLogic`, `countLogic`, `moreLessLogic`, `takeAwayLogic`, `numberOrderLogic`, `memoryMatchLogic` and `patternBuilderLogic`.
+- **One shifted band for the whole playthrough** - `shiftLadder(LETTER_BASE_LADDER, shift)[0]` and `shiftLadder(SOUND_BASE_LADDER, shift)[0]` - in `alphabetLogic`, which widens the letter range, and `firstSoundsLogic`, which widens the word pool and its distractors.
+- **A tier split** - `earlyCount = roundCount - 1 - shift` - in `wordLogic` for Find the Word, and `wordCount - 1 - shift` for Build the Word.
+- **Its own tier split** - `earlyCount = classicEasy - shift`, with `classicEasy = roundCount / 2` - in `decodeLogic`. Decode It's classic ladder opens with three easy rounds rather than five, so it cannot use the word games' formula.
+- **A colour-pool split** - `3 - shift` easy rounds and `3 + shift` hard rounds - in `colorMatchLogic`, which divides its six rounds between the four-colour and the six-colour pool.
+- **Its own ladder** - `ladderFor(shift)` - in `oddOneOutLogic`: down serves all six rounds at band 1, and up caps band 3 at three rounds and re-serves the freed round at band 1, because the three-frog pool cannot serve four band-3 rounds. `musicalMemoryLogic` maps the shift onto its starting sequence length instead, with `startLengthFor(shift)` giving one, two or three notes and a win length of five, six or seven.
+
+The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty).
 
 ### 7.4 Randomness
 
@@ -787,15 +836,15 @@ Shuffling uses `Math.random` by default. Where a module needs determinism it tak
 | Effect | Notes |
 | --- | --- |
 | `pop` | 800 Hz, 80 ms |
-| `correct` | C5 / E5 / G5 arpeggio |
-| `incorrect` | G4 then C4 |
+| `correct` | the current game's own correct contour, transposed and timed by its identity ([§8.7](#87-the-per-game-audio-identity)) |
+| `incorrect` | the current game's own incorrect contour, forced gently descending |
 | `wake` | E4 then A4 |
-| `win` | C5 / E5 / G5 / C6 arpeggio |
+| `win` | the current game's own win contour, with the tempo clamped to the celebration budget |
 | `sticker` | C6 then E6 |
 | `playIdleCall` | E5 + G5 at gain 0.12, for the Hub attract cue |
 | `playFrogNote` | sine, 0.5 s, gain 0.3 — Musical Memory's frog notes C4 / E4 / G4 |
 
-Each is a no-op unless `sfxEnabled` and the context exists. The PRD covers the sound design intent ([`docs/PRD.md#61-sound-effects`](./PRD.md#61-sound-effects)).
+`pop`, `wake`, `sticker` and the two Hub cues are shared by every game. `correct`, `incorrect` and `win` are the per-game trio: the `AudioManager` resolves the current game's identity and plays that game's own contours, so the same event is a different set of notes from one game to the next ([§8.7](#87-the-per-game-audio-identity)). Each effect is a no-op unless `sfxEnabled` and the context exists. The PRD covers the sound design intent ([`docs/PRD.md#61-sound-effects`](./PRD.md#61-sound-effects)).
 
 ### 8.3 Background music, ducking and the watchdog
 
@@ -828,6 +877,29 @@ Public wrappers: `speakLetter` (rate 0.9), `speakWord` (0.8), `speakNumber` (0.9
 
 `setBGMEnabled(enabled)` and `setSFXEnabled(enabled)` set the flag and persist it through `updateSettings`. `setBGMEnabled` calls `restoreBGM()` unconditionally, then pauses the element when disabling; `setSFXEnabled` calls it only when disabling, because SFX off means nothing is speaking. Either way the rule is the same: disabling audio mid-narration must not leave the element parked at the ducked level.
 
+### 8.7 The per-game audio identity
+
+`src/game/audioIdentity.ts` gives every game its own voice for the feedback trio. The module is pure data and pure logic — it knows nothing about Web Audio — so the synth consumes the resolved values without a structural rewrite.
+
+| Field | Range | Meaning |
+| --- | --- | --- |
+| `pitchOffsetSemitones` | −5 to +5 (`MAX_PITCH_OFFSET_SEMITONES = 5`) | transposes every note of the trio |
+| `waveform` | `sine`, `triangle`, `square`, `sawtooth` | the oscillator shape |
+| `tempo` | `MIN_TEMPO = 0.75` to `MAX_TEMPO = 1.5` | a duration and spacing multiplier, 1 being the original timing |
+| `contours` | `correct`, `incorrect`, `win` | the three note sets, as semitone offsets from the cue's anchor note |
+
+`AUDIO_IDENTITIES` is a `Partial<Record<GameId, AudioIdentity>>` with one row for each of the 22 registry games. The `Partial` is deliberate: a registered game missing from the table fails the registry-iteration test rather than silently playing the default voice. `identityForGameId(gameId)` resolves an id to its identity and clamps it; an unregistered id, `null` or `undefined` falls back to `DEFAULT_IDENTITY` (no offset, sine, tempo 1, contours `[0, 4, 7]`, `[0, -7]`, `[0, 4, 7, 12]`), so resolution is total and deterministic.
+
+The table is a literal, but the values follow four formulas over the game's zero-based index in the registry: `waveform = ["sine", "triangle", "square", "sawtooth"][index % 4]`, `pitch = (index % 11) - 5`, `tempo = 1 + ((index % 5) - 2) × 0.125` and the contour set is the one `index % 4` selects. Because the waveform and the contour set are chosen by the same index, four pairings are in use — sine with the first contour set, triangle with the second, square with the third, sawtooth with the fourth — and the pitch (eleven values from −5 to +5) and tempo (five values from 0.75 to 1.25) are what make all 22 identities distinct.
+
+`GameSceneBase.init()` calls `audioManager.setGameContext(entry.gameId)` and the scene's shutdown hook calls `clearGameContext()`, so the `AudioManager.resolveTrioIdentity()` always names the game that is on screen.
+
+Three helpers keep the trio safe:
+
+- `descendingContour(offsets)` clamps every offset to ±`MAX_CONTOUR_OFFSET_SEMITONES = 12` and then floors each note at its predecessor, so an incorrect cue can never rise. A wrong answer settles; it never rebukes.
+- `winTempoForBudget(tempo, baseEndSeconds)` clamps the tempo to the window `WIN_MIN_END_SECONDS = 0.3` to `WIN_MAX_END_SECONDS = 0.8`, so the win celebration always lands between a third and four-fifths of a second however fast the game's own tempo is. The tempo bounds alone do not enforce this — at `MAX_TEMPO` the default win cue would end at 0.825 s — so the clamp is applied where the budget is spent.
+- `normalizeIdentity(identity)` clamps a stored identity to the same ranges before it is used, so a value that drifts out of range bends instead of breaking playback.
+
 ---
 
 ## 9. Motion and feedback
@@ -852,8 +924,13 @@ Both pass `"Sine"` as an ease-map key rather than `"Sine.out"`. Camera Zoom effe
 | `pressFeedback.ts` | `attachPressFeedback(obj, { spring })` captures the scale at attach, squishes to `base × 0.95` on pointerdown, restores on pointerup/out/cancel, and springs back over 150 ms `Back.out` when `spring` is set; no-op under reduced motion |
 | `dragJuice.ts` | `attachDragLift` lifts to `motionScale(1.1, 1.05)` with a `motionScale(4, 0)`° tilt; `attachDropZoneHighlight` strokes zones at `lineStyle(6, 0x2b6cb0, 0.9)` with a repeating `Sine.inOut` pulse; `snapToSlot` settles over 200 ms `Back.out` |
 | `completionEffect.ts` | `createCompletionSplash` is a bounded, self-cleaning burst of 8 gold rays (`0xffd166`) over 420 ms, reduced to 180 ms; `createWinCelebration` draws 10 gold rays plus 10 confetti pieces in `0x68d391`, `0x4fd1c5`, `0xf687b3`, `0xf6ad55`, `0x9f7aea` over 700 ms, reduced to 6 rays and no particles over 300 ms |
+| `dragBoard.ts` | the shared drag shell. `new DragBoard({ scene, zoneSize, wrongAnswerBehavior, validationTiming, tapWithdraw, dragDistanceThreshold, bounceDuration, bounceReducedDuration, isLocked, callbacks })` registers slots and pieces up front; a piece lifted further than `DEFAULT_DRAG_DISTANCE_THRESHOLD = 10` px counts as a drag rather than a tap, a drop is validated per drop or per round (`"per-drop"` or `"round-full"`), and a wrong answer either bounces the piece home over 300 ms (180 ms reduced) or leaves it in place for a retry (`"bounce-home"` or `"retry-in-place"`). A placed piece can be withdrawn with a tap when `tapWithdraw` is set, and the swap into a slot runs over `SWAP_DURATION = 200` ms, 120 ms under reduced motion |
 
 Press feedback is always attached **after** the object's primary handler, so a tap's game effect is never delayed by presentation. Every completion effect is Graphics-based; `add.particles` is not used anywhere.
+
+`dragBoard.ts` is the shell the drag games are meant to share, and `NumberOrderScene` and `StoryOrderScene` use it. The other three - Shape Sorter, Shadow Match and Big & Small - still hand-roll their own scaffolding over `dragJuice`, which is one of the known debts listed in [roadmap.md](./roadmap.md).
+
+`GameSceneBase.reactWrong()` is the wrong-answer path every game shares: it plays the incorrect cue in the game's own voice, records the wrong tap, nods the mascot and, when the scene passes targets, wiggles them with the reduced-motion-aware angle before releasing `onComplete`. It is the no-fail path - nothing is lost, nothing is blocked, and the piece is simply nudged back into place.
 
 ### 9.4 Tween values
 
@@ -870,7 +947,7 @@ Press feedback is always attached **after** the object's primary handler, so a t
 | Hint arc pulse | 400 ms | 240 ms |
 | Win celebration | 700 ms, 10 rays | 300 ms, 6 rays |
 
-Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big vs. Small drag with lift + zone highlight + snap; Big vs. Small adds a 150 ms shrink, a ±3° × 3 lid wiggle and a 1.05× bump; Shadow Match stamps at 1.1×, flashes white for 150 ms and dims to 0.5 alpha; Animal Trace hops in two 60 ms halves with a ±4° × 3 wiggle and a 1.4× dot pop; Pop & Freeze releases three teal droplets; Musical Memory ripples at 1.6× and drifts ±3 px over 1500 ms. Shape Sorter's silent-bounce rule: the incorrect SFX plays only when a piece is dropped on a zone, not when it is merely picked up.
+Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big & Small drag with lift + zone highlight + snap; Big & Small adds a 150 ms shrink, a ±3° × 3 lid wiggle and a 1.05× bump; Shadow Match stamps at 1.1×, flashes white for 150 ms and dims to 0.5 alpha; Animal Trace hops in two 60 ms halves with a ±4° × 3 wiggle and a 1.4× dot pop; Pop & Freeze releases three teal droplets; Musical Memory ripples at 1.6× and drifts ±3 px over 1500 ms. Shape Sorter's silent-bounce rule: the incorrect SFX plays only when a piece is dropped on a zone, not when it is merely picked up.
 
 ---
 
@@ -892,13 +969,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-110 test files, 2,305 tests (verified 2026-10-20). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+118 test files, 2,488 tests (verified 2026-10-22). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-20) is lines 98.59, functions 96.34, branches about 90 (90.66-90.73 across runs), statements 97.8 across 110 files and 2,305 tests.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-22) is statements 97.92, branches 91.62, functions 96.58 and lines 98.69 across 118 files and 2,488 tests.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 73.8 % lines, 74.54 % statements, 83.33 % functions and 56.66 % branches; its uncovered lines 63–77 are the fallback distractor path, which a pool of 22 words never forces.
 
@@ -906,7 +983,7 @@ Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite
 
 happy-dom supplies no canvas, no audio graph and no screen. The following are device checks, not unit tests:
 
-- real rasterisation of the 178 SVGs (glyph fallback, tier sharpness);
+- real rasterisation of the 202 SVGs (glyph fallback, tier sharpness);
 - actual audio mixing, ducking audibility and voice availability;
 - orientation lock and PWA install/update on iOS Safari, Android Chrome and desktop;
 - the cold-load budget, which is `scripts/validate-boot.js`'s job in CI.
@@ -975,6 +1052,7 @@ Locally the image builds with `docker build -t aby-little-lab .` and smoke-tests
 ## 12. See also
 
 - [`docs/PRD.md`](./PRD.md) — product definition, curriculum map, per-game rules, cross-game systems, performance targets.
+- [`docs/roadmap.md`](./roadmap.md) — what is known to be broken and what is planned next.
 - [`conductor/tech-stack.md`](../conductor/tech-stack.md) — dated stack decisions and the history behind them.
 - [`conductor/archive/uiux-hardening_20260805/`](../conductor/archive/uiux-hardening_20260805/) — the archived UI/UX hardening track behind the Baloo 2 typography, Hub tile icons and press-feedback pass.
 - [`docs/release-checklist.md`](./release-checklist.md) — the manual device pass that complements the CI gates.
