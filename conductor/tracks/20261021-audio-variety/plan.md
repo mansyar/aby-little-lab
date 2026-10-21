@@ -52,11 +52,15 @@ The primary appends after acceptance:
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
 - **Status:** in_progress
 
-- [ ] **P2.T1: Apply parameters in the trio synth** — covers: FR-3, AC-3
-  - [ ] **P2.T1.1: Correct and incorrect voices consume pitch, timbre, tempo, and contour from the resolved identity**
-  - [ ] **P2.T1.2: Win voice consumes identity while staying within the celebration duration budget**
-- [ ] **P2.T2: Semantic & constraint tests** — covers: AC-3, NFR-1, NFR-2
-  - [ ] **P2.T2.1: Pin pitch/waveform/duration/contour semantics for representative identities; assert the incorrect cue stays gentle-descending and the win cue stays within budget**
+- [x] **P2.T1: Apply parameters in the trio synth** — covers: FR-3, AC-3
+  - [x] **P2.T1.1: Correct and incorrect voices consume pitch, timbre, tempo, and contour from the resolved identity**
+  - [x] **P2.T1.2: Win voice consumes identity while staying within the celebration duration budget**
+- [x] **P2.T2: Semantic & constraint tests** — covers: AC-3, NFR-1, NFR-2
+  - [x] **P2.T2.1: Pin pitch/waveform/duration/contour semantics for representative identities; assert the incorrect cue stays gentle-descending and the win cue stays within budget**
+
+**Result:** verified
+**Checkpoint:** 5554cf2
+**Evidence:** conductor/tracks/20261021-audio-variety/verification/phase-2.md
 
 <!--
 The primary appends after acceptance:
