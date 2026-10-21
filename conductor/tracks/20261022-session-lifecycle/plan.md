@@ -101,7 +101,7 @@
   `src/__tests__/utils/storage.test.ts`,
   `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Add a narrow tap-recording path** — covers: FR-3
   - [ ] **P3.T1.1:** Add a pure function to `src/game/progressLogic.ts` that
