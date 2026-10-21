@@ -77,12 +77,15 @@ The primary appends after acceptance:
 - **Covers:** FR-3, AC-3
 - **Touches:** `src/scenes/GameSceneBase.ts`, `src/__tests__/scenes/GameSceneBase*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** fdb6779
+**Evidence:** conductor/tracks/20261021-drag-board-shell/verification/phase-4.md
 
-- [ ] **P4.T1: Add reaction helpers** — covers: FR-3
-  - [ ] **P4.T1.1: Wiggle + nod + gentle-tone helper (respects `motion.ts` reduced-motion and no-fail philosophy)**
-  - [ ] **P4.T1.2: Override path intact — helper is default, `onWrong()` overrides still take precedence**
-- [ ] **P4.T2: Unit tests for helpers and override precedence** — covers: FR-3, AC-3
+- [x] **P4.T1: Add reaction helpers** — covers: FR-3
+  - [x] **P4.T1.1: Wiggle + nod + gentle-tone helper (respects `motion.ts` reduced-motion and no-fail philosophy)**
+  - [x] **P4.T1.2: Override path intact — helper is default, `onWrong()` overrides still take precedence**
+- [x] **P4.T2: Unit tests for helpers and override precedence** — covers: FR-3, AC-3
 
 ## Phase 5: Migrate the 8 direct games to the reaction helpers
 

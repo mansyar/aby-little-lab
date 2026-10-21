@@ -59,3 +59,10 @@
 - The verification command failed twice before passing, each fixed once within the retry policy: (1) typecheck errors in the new tests (invalid `as GameObject` cast, missing test helpers on the custom scene subclass — resolved via `as unknown as` cast and subclassing `TestScene`); (2) the wiggle-detection test helper matched the Mascot's own nod tween (which also carries an `angle` key) — resolved by matching only the helper's numeric wiggle angle.
 - The pre-existing Biome warning in `musicalMemoryScene.test.ts` and the biome.json schema-version notice were not introduced by this phase and were left untouched.
 - Coverage gate and bundle checks are Phase 5's full gate, not this phase's verification command.
+
+## Primary verification
+
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Exit code:** 0
+- **Result:** verified by primary agent
+- **Summary:** biome check exit 0 (same two pre-existing findings only); `tsc --noEmit` clean; 112 test files / 2,377 tests passed (2,372 prior + 5 new reactWrong helper tests). Diff `cd3218e..eeb5828` matches Touches exactly (GameSceneBase.ts + gameSceneBase.test.ts + evidence); no deviations. Purely additive — no scene touched, no game migrated (AC-3 migration portion deferred to Phase 5 by plan); override precedence covered by tests.
