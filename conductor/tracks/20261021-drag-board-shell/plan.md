@@ -77,7 +77,7 @@ The primary appends after acceptance:
 - **Covers:** FR-3, AC-3
 - **Touches:** `src/scenes/GameSceneBase.ts`, `src/__tests__/scenes/GameSceneBase*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Add reaction helpers** — covers: FR-3
   - [ ] **P4.T1.1: Wiggle + nod + gentle-tone helper (respects `motion.ts` reduced-motion and no-fail philosophy)**
