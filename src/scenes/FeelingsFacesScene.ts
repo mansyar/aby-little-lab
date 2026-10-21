@@ -95,7 +95,6 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
-    this.progressDots = [];
     this.createProgressDots(ROUND_COUNT);
     this.createRuleLine();
 

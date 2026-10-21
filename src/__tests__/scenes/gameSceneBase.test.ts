@@ -297,6 +297,40 @@ describe("GameSceneBase scaffold", () => {
       expect(scene.getDots()).toHaveLength(5);
       expect(getMockFn(scene.add.circle).mock.calls).toHaveLength(5);
     });
+
+    it("replaces the previous visit's dots so a second visit fills its own dot", () => {
+      const scene = new TestScene();
+      scene.testRegisterShutdownCleanup();
+
+      // First visit.
+      scene.testCreateProgressDots(3);
+      const firstVisitDots = [...scene.getDots()];
+      expect(firstVisitDots).toHaveLength(3);
+
+      // Phaser destroys the display list when the scene shuts down, but the
+      // scene instance is reused on the next visit.
+      scene.events.emit("shutdown");
+
+      // Second visit on the same instance.
+      scene.testCreateProgressDots(3);
+      const secondVisitDots = [...scene.getDots()];
+
+      // The tracked set holds only this visit's dots: the previous visit's
+      // dots were destroyed with the display list.
+      expect(scene.getDots()).toHaveLength(3);
+      expect(scene.getDots()).not.toContain(firstVisitDots[0]);
+
+      // The fill lands on this visit's first dot, never on the stale one.
+      scene.testFillProgressDot(0);
+      expect(getMockFn(secondVisitDots[0].setAlpha)).toHaveBeenCalledWith(1);
+      expect(getMockFn(firstVisitDots[0].setAlpha)).not.toHaveBeenCalled();
+
+      // The next visit registers its own shutdown cleanup, which releases the
+      // dots so the scene holds no references to destroyed objects.
+      scene.testRegisterShutdownCleanup();
+      scene.events.emit("shutdown");
+      expect(scene.getDots()).toHaveLength(0);
+    });
   });
 
   describe("fillProgressDot", () => {

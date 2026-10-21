@@ -302,8 +302,16 @@ export abstract class GameSceneBase extends Phaser.Scene {
     return label;
   }
 
-  /** Creates `count` progress dots at the top of the screen, dimmed by default. */
+  /**
+   * Creates `count` progress dots at the top of the screen, dimmed by default.
+   *
+   * Scene instances are reused across visits and Phaser destroys the display
+   * list on shutdown, so any dots left over from a previous visit are replaced
+   * rather than appended to: otherwise {@link fillProgressDot} would write to
+   * destroyed circles and the visible dots would never fill.
+   */
   protected createProgressDots(count: number): void {
+    this.progressDots = [];
     const startX = this.cameras.main.centerX - ((count - 1) * this.PROGRESS_DOT_SPACING) / 2;
     for (let i = 0; i < count; i++) {
       const dot = this.add.circle(
@@ -410,8 +418,8 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
   /**
    * Registers the shutdown handler that destroys the parent lock, mascot,
-   * narrator (glyph and rule line), any injected glyph and the instruction
-   * line. Call from `create()` after creating those instances.
+   * narrator (glyph and rule line), any injected glyph, the instruction line
+   * and the progress dots. Call from `create()` after creating those instances.
    */
   protected registerShutdownCleanup(): void {
     this.events.on("shutdown", () => {
@@ -424,6 +432,9 @@ export abstract class GameSceneBase extends Phaser.Scene {
       this.standaloneSpeaker = undefined;
       this.instructionLabel?.destroy();
       this.instructionLabel = undefined;
+      // The dots are destroyed with the display list: release them so the
+      // scene holds no references to destroyed objects.
+      this.progressDots = [];
     });
   }
 
