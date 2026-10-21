@@ -330,6 +330,38 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(rects(176, 196).length).toBe(10);
   });
 
+  it("swaps pages instantly under reduced motion (no slide tweens)", () => {
+    const { deps, scene } = makeDeps();
+    stubMatchMedia(true);
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+    grid.buildPageGrid(0);
+
+    const firstPageTiles = rects(176, 196);
+
+    fireSceneInput(scene, "pointerdown", { x: 512, y: 300 });
+    fireSceneInput(scene, "pointerup", { x: 400, y: 300 });
+
+    // Reduced motion skips the slide-out: the outgoing page is destroyed
+    // before the incoming one builds, so every page-0 tile has its destroy()
+    // called and exactly one page's worth (10) of new tiles is created. The
+    // mock registry is append-only (destroy is a recording stub), so
+    // destruction is asserted per object rather than by registry count.
+    for (const tile of firstPageTiles) {
+      expect(tile.destroy).toHaveBeenCalled();
+    }
+    expect(rects(176, 196).length).toBe(firstPageTiles.length + 10);
+    const slides = (scene.tweens.add as MockFn).mock.calls.filter(
+      (call) =>
+        (call[0] as { ease?: string }).ease === "Cubic.in" ||
+        (call[0] as { ease?: string }).ease === "Cubic.out",
+    );
+    expect(slides.length).toBe(0);
+  });
+
   it("re-arms swipe wiring after a scene shutdown (revisit)", () => {
     const { deps, scene } = makeDeps();
     const grid = new HubGrid(deps);
@@ -359,5 +391,84 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     if (!sticker) throw new Error("earned sticker thumbnail not created");
     // Card tier: 256px raster scaled to the 22px shelf slot.
     expect((sticker.setScale as MockFn).mock.calls[0]?.[0]).toBeCloseTo(22 / 256, 5);
+  });
+
+  it("re-applies the time-up lock to each page it flips to", () => {
+    const { deps, scene } = makeDeps({ isTimeUp: () => true });
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+    grid.buildPageGrid(0);
+
+    grid.flipTo(1);
+
+    const tiles = grid.attractTargets as unknown as MockObject[];
+    expect(tiles.length).toBe(10);
+    for (const tile of tiles) {
+      expect(tile.setAlpha).toHaveBeenCalledWith(0.45);
+      expect(tile.setScale).toHaveBeenCalledWith(0.97);
+      expect(tile.disableInteractive).toHaveBeenCalled();
+    }
+  });
+
+  it("lets a just-earned award ride a page transition without losing its burst", () => {
+    earnSticker("how-many");
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+    grid.justEarned = "how-many";
+    grid.buildPageGrid(0);
+
+    grid.flipTo(1);
+
+    // After flipTo(1), the page-1 shelf contains the just-earned sticker
+    // ("how-many" is game index 10 → page 1). Collect it now so the next
+    // transition's slide-out timer can be checked against it.
+    const shelfStickers = mockRegistry.filter(
+      (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
+    );
+    expect(shelfStickers.length).toBeGreaterThan(0);
+
+    // The just-earned entrance tween targets the incoming page's shelf.
+    const entrances = (scene.tweens.add as MockFn).mock.calls.filter(
+      (call) =>
+        (call[0] as { ease?: string }).ease === "Back.out" &&
+        (call[0] as { scaleX?: number }).scaleX !== undefined,
+    );
+    expect(entrances.length).toBe(1);
+
+    // The slide-out timer then destroys the outgoing shelf per object.
+    fireSceneInput(scene, "pointerdown", { x: 512, y: 300 });
+    fireSceneInput(scene, "pointermove", { x: 400, y: 300 });
+    fireSceneInput(scene, "pointerup", { x: 400, y: 300 });
+    const timer = (scene.time.delayedCall as MockFn).mock.calls.at(-1)?.[1] as () => void;
+    timer();
+    for (const sticker of shelfStickers) {
+      expect(sticker.destroy).toHaveBeenCalled();
+    }
+  });
+
+  it("releases every grid object on shutdown", () => {
+    earnSticker("how-many"); // page 1 game, so the built shelf includes its sticker image
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.buildPageGrid(1);
+
+    const built = mockRegistry.slice();
+    expect(
+      built.some((obj) => obj.kind === "image" && String(obj.args?.[2]).startsWith("sticker_")),
+    ).toBe(true);
+    grid.destroy();
+
+    for (const obj of built) {
+      expect(obj.destroy).toHaveBeenCalled();
+    }
   });
 });
