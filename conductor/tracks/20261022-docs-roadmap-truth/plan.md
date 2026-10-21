@@ -15,49 +15,53 @@
 - **Covers:** FR-1, FR-3, NFR-1, NFR-4, NFR-5, AC-1, AC-2, AC-3, AC-5
 - **Touches:** `docs/roadmap.md`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Create `docs/roadmap.md`** — covers: FR-3
-  - [ ] **P1.T1.1:** Write the **Known Issues** section from the audit's standing
+- [x] **P1.T1: Create `docs/roadmap.md`** — covers: FR-3
+  - [x] **P1.T1.1:** Write the **Known Issues** section from the audit's standing
     debts: real-device testing deferred since v1.0; the seven games excluded
     from adaptive banding; the three hand-rolled drag games; the missing
     storage schema version; the install-prompt scope bug; the navigation
     chunk-load failure path; play-time banking on a killed app; the five
     duplicate `shuffle` copies; the repository-hygiene items.
-  - [ ] **P1.T1.2:** Write the **Future Work / Roadmap** section, ordered by
+  - [x] **P1.T1.2:** Write the **Future Work / Roadmap** section, ordered by
     value, each item naming the track that would deliver it.
-  - [ ] **P1.T1.3:** Give every Known Issue a one-line symptom, the file where
+  - [x] **P1.T1.3:** Give every Known Issue a one-line symptom, the file where
     it lives, and how a reader would notice it.
-- [ ] **P1.T2: Correct the PRD** — covers: FR-1
-  - [ ] **P1.T2.1:** §7.1 — the boot set: 53 shell keys, 125 game art keys in 12
+- [x] **P1.T2: Correct the PRD** — covers: FR-1
+  - [x] **P1.T2.1:** §7.1 — the boot set: 53 shell keys, 125 game art keys in 12
     lazy groups, the 202-SVG corpus, the tier rule.
-  - [ ] **P1.T2.2:** §7.2 — the shell entry size, the chunk list, the precache
+  - [x] **P1.T2.2:** §7.2 — the shell entry size, the chunk list, the precache
     count, the measured build.
-  - [ ] **P1.T2.3:** §7.3 — replace "Nothing else is per-game art" with the
+  - [x] **P1.T2.3:** §7.3 — replace "Nothing else is per-game art" with the
     lazy-group model.
-  - [ ] **P1.T2.4:** The twelve §3.x "Art and assets" lines — lazy, not boot set.
-  - [ ] **P1.T2.5:** §6.1 — the sound-effect table, now a per-game trio.
-  - [ ] **P1.T2.6:** §4.8 — the adaptive-banding description: the 15/7 split, the
+  - [x] **P1.T2.4:** The twelve §3.x "Art and assets" lines — lazy, not boot set.
+  - [x] **P1.T2.5:** §6.1 — the sound-effect table, now a per-game trio.
+  - [x] **P1.T2.6:** §4.8 — the adaptive-banding description: the 15/7 split, the
     window semantics, and the six shift strategies.
-  - [ ] **P1.T2.7:** Link `docs/roadmap.md`; align the game heading and its
+  - [x] **P1.T2.7:** Link `docs/roadmap.md`; align the game heading and its
     anchor with the shipped "Big & Small" label.
-- [ ] **P1.T3: Correct the TDD** — covers: FR-1
-  - [ ] **P1.T3.1:** §2.1 and §2.2 — the scripts list and the source tree,
+- [x] **P1.T3: Correct the TDD** — covers: FR-1
+  - [x] **P1.T3.1:** §2.1 and §2.2 — the scripts list and the source tree,
     including `src/game/art/`, `src/game/hub/`, `audioIdentity.ts` and
     `dragBoard.ts`.
-  - [ ] **P1.T3.2:** §3.3–§3.6 — the shell, the tiers, the in-chunk art, the
+  - [x] **P1.T3.2:** §3.3–§3.6 — the shell, the tiers, the in-chunk art, the
     measured budgets.
-  - [ ] **P1.T3.3:** §4.2 and §4.5 — the base-class member tables and the
+  - [x] **P1.T3.3:** §4.2 and §4.5 — the base-class member tables and the
     game-to-base mapping.
-  - [ ] **P1.T3.4:** §7.1 and §7.3 — the module list and the adaptive banding.
-  - [ ] **P1.T3.5:** §8 — the audio chapter, including the per-game identity.
-  - [ ] **P1.T3.6:** §10.2–§10.4 — the suite size, the coverage snapshot, the
+  - [x] **P1.T3.4:** §7.1 and §7.3 — the module list and the adaptive banding.
+  - [x] **P1.T3.5:** §8 — the audio chapter, including the per-game identity.
+  - [x] **P1.T3.6:** §10.2–§10.4 — the suite size, the coverage snapshot, the
     SVG count.
-  - [ ] **P1.T3.7:** Link `docs/roadmap.md`.
-- [ ] **P1.T4: Record the fact table in the evidence file** — covers: AC-1, AC-2, AC-3
-  - [ ] **P1.T4.1:** For every corrected figure, record the command or the file
+  - [x] **P1.T3.7:** Link `docs/roadmap.md`.
+- [x] **P1.T4: Record the fact table in the evidence file** — covers: AC-1, AC-2, AC-3
+  - [x] **P1.T4.1:** For every corrected figure, record the command or the file
     it was derived from.
-  - [ ] **P1.T4.2:** Re-run the phase verification command.
+  - [x] **P1.T4.2:** Re-run the phase verification command.
+
+**Result:** verified
+**Checkpoint:** abd1272
+**Evidence:** conductor/tracks/20261022-docs-roadmap-truth/verification/phase-1.md
 
 ## Phase 2: The Reader-Facing Docs
 
