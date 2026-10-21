@@ -489,10 +489,13 @@ describe("NumberOrderScene interactions", () => {
     fillBoard(scene, [...round.solution].reverse());
     // Guard: reversed must actually be wrong for distinct ascending solutions
     expect([...round.solution].reverse()).not.toEqual(round.solution);
+    const bouncedCard = internals(scene).cards[0];
+    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
+    const before = tweens.mock.calls.length;
     validate(scene);
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
-    const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     const wiggle = tweens.mock.calls
+      .slice(before)
       .map((c) => c[0] as { onComplete?: () => void })
       .find((c) => typeof c.onComplete === "function");
     expect(wiggle).toBeDefined();
@@ -500,6 +503,15 @@ describe("NumberOrderScene interactions", () => {
     const { slots } = internals(scene);
     expect(slots.every((s) => s.occupiedBy === null)).toBe(true);
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
+    // Duration parity with the pre-shell scene: the wiggle-complete bounce
+    // home has always run motionDuration(250, 150), not the shell's 300/180.
+    const homeTween = tweens.mock.calls
+      .slice(before)
+      .map((c) => c[0] as { targets: unknown; duration: number })
+      .filter((c) => c.targets === bouncedCard.container)
+      .at(-1);
+    expect(homeTween).toBeDefined();
+    expect(homeTween?.duration).toBe(250);
   });
 
   it("does not validate a partially filled board", () => {

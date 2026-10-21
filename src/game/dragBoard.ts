@@ -21,10 +21,10 @@ export type ValidationTiming = "per-drop" | "round-full";
  */
 export const DEFAULT_DRAG_DISTANCE_THRESHOLD = 10;
 
-/** Bounce-to-source tween duration (ms) — shared by both current boards. */
+/** Default bounce-to-source tween duration (ms) — Story Order's timing. */
 const BOUNCE_DURATION = 300;
 
-/** Bounce-to-source tween duration under reduced motion (ms). */
+/** Default bounce-to-source tween duration under reduced motion (ms). */
 const BOUNCE_REDUCED_DURATION = 180;
 
 /** Slot↔slot swap tween duration (ms). */
@@ -92,6 +92,10 @@ export interface DragBoardOptions<TPiece extends BoardPiece> {
   readonly tapWithdraw: boolean;
   /** Pointer travel (px) before a gesture counts as a drag. Default 10. */
   readonly dragDistanceThreshold?: number;
+  /** Bounce-to-source tween duration (ms). Default 300 (Story Order's timing). */
+  readonly bounceDuration?: number;
+  /** Bounce-to-source tween duration under reduced motion (ms). Default 180. */
+  readonly bounceReducedDuration?: number;
   /** Reads the scene's input lock, so the shell shares the scene's one lock. */
   readonly isLocked: () => boolean;
   /** Scene-owned reactions the shell reports into. */
@@ -118,6 +122,8 @@ export class DragBoard<TPiece extends BoardPiece> {
   private readonly wrongAnswerBehavior: WrongAnswerBehavior;
   private readonly validationTiming: ValidationTiming;
   private readonly tapWithdraw: boolean;
+  private readonly bounceDuration: number;
+  private readonly bounceReducedDuration: number;
   private readonly isLocked: () => boolean;
   private readonly callbacks: DragBoardCallbacks<TPiece>;
   private slots: BoardSlot<TPiece>[] = [];
@@ -134,6 +140,8 @@ export class DragBoard<TPiece extends BoardPiece> {
     this.wrongAnswerBehavior = options.wrongAnswerBehavior;
     this.validationTiming = options.validationTiming;
     this.tapWithdraw = options.tapWithdraw;
+    this.bounceDuration = options.bounceDuration ?? BOUNCE_DURATION;
+    this.bounceReducedDuration = options.bounceReducedDuration ?? BOUNCE_REDUCED_DURATION;
     this.isLocked = options.isLocked;
     this.callbacks = options.callbacks ?? {};
     this.scene.input.dragDistanceThreshold =
@@ -306,12 +314,15 @@ export class DragBoard<TPiece extends BoardPiece> {
       piece.container,
       piece.originX,
       piece.originY,
-      BOUNCE_DURATION,
-      BOUNCE_REDUCED_DURATION,
+      this.bounceDuration,
+      this.bounceReducedDuration,
     );
   }
 
   private snap(piece: TPiece, slot: BoardSlot<TPiece>): void {
+    // DragTarget is a structural shape (transform + scene + drag-event `on`)
+    // any draggable container satisfies; the double cast only bridges Phaser's
+    // EventEmitter `on` overloads, not a real type mismatch.
     snapToSlot(this.scene, piece.container as unknown as DragTarget, slot.x, slot.y);
   }
 
@@ -367,8 +378,8 @@ export class DragBoard<TPiece extends BoardPiece> {
         occupant.container,
         occupant.originX,
         occupant.originY,
-        BOUNCE_DURATION,
-        BOUNCE_REDUCED_DURATION,
+        this.bounceDuration,
+        this.bounceReducedDuration,
       );
       this.snap(piece, destSlot);
     }
@@ -390,7 +401,7 @@ export class DragBoard<TPiece extends BoardPiece> {
     if (!slot) return;
     if (container.x === slot.x && container.y === slot.y) return;
     if (this.isOverAnyZone(container.x, container.y)) return;
-    this.tweenTo(container, slot.x, slot.y, BOUNCE_DURATION, BOUNCE_REDUCED_DURATION);
+    this.tweenTo(container, slot.x, slot.y, this.bounceDuration, this.bounceReducedDuration);
   }
 
   /**

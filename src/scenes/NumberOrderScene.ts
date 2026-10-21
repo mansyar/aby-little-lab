@@ -70,6 +70,11 @@ export class NumberOrderScene extends ChoiceRoundScene {
       validationTiming: "per-drop",
       tapWithdraw: true,
       dragDistanceThreshold: 0,
+      // Behavior preservation: Number Order has always bounced home with
+      // motionDuration(250, 150) — quicker than the shell's shared 300/180,
+      // which is Story Order's timing — so the old pair is passed explicitly.
+      bounceDuration: 250,
+      bounceReducedDuration: 150,
       isLocked: () => this.inputLocked,
       callbacks: {
         onTap: (card) => speakNumber(card.numeral, getSettings().sfxEnabled),

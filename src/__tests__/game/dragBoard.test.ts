@@ -81,6 +81,8 @@ interface HarnessOptions {
   validationTiming?: ValidationTiming;
   tapWithdraw?: boolean;
   dragDistanceThreshold?: number;
+  bounceDuration?: number;
+  bounceReducedDuration?: number;
 }
 
 function createHarness(options: HarnessOptions = {}): Harness {
@@ -117,6 +119,8 @@ function createHarness(options: HarnessOptions = {}): Harness {
     validationTiming: options.validationTiming ?? "per-drop",
     tapWithdraw: options.tapWithdraw ?? true,
     dragDistanceThreshold: options.dragDistanceThreshold,
+    bounceDuration: options.bounceDuration,
+    bounceReducedDuration: options.bounceReducedDuration,
     isLocked: () => harness.locked,
     callbacks: harness.callbacks,
   });
@@ -567,6 +571,54 @@ describe("DragBoard", () => {
       expect(pieceA.slotIndex).toBe(0);
       expect(pieceB.slotIndex).toBe(1);
       expect(tweenCalls(harness).length).toBe(tweensBefore);
+    });
+  });
+
+  describe("bounce duration option", () => {
+    it("defaults the bounce tweens to the shared 300/180 durations", () => {
+      const harness = createHarness();
+      harness.board.addSlot(100, 200);
+      const piece = harness.makePiece("a", 100, 40);
+      placePiece(harness, piece, 0);
+
+      harness.board.applyWrongAnswer();
+
+      expect(tweensFor(harness, piece.container).at(-1)?.duration).toBe(300);
+
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+      placePiece(harness, piece, 0);
+      harness.board.applyWrongAnswer();
+
+      expect(tweensFor(harness, piece.container).at(-1)?.duration).toBe(180);
+    });
+
+    it("honors a bounceDuration/bounceReducedDuration override", () => {
+      const harness = createHarness({
+        bounceDuration: 250,
+        bounceReducedDuration: 150,
+      });
+      harness.board.addSlot(100, 200);
+      const piece = harness.makePiece("a", 100, 40);
+      placePiece(harness, piece, 0);
+
+      // Wrong-answer bounce-home uses the override.
+      harness.board.applyWrongAnswer();
+
+      expect(tweensFor(harness, piece.container).at(-1)?.duration).toBe(250);
+
+      // Tray-to-slot displacement shares the same bounce timing.
+      placePiece(harness, piece, 0);
+      const displacer = harness.makePiece("c", 250, 40);
+      dropOnto(harness, displacer, 0);
+
+      expect(tweensFor(harness, piece.container).at(-1)?.duration).toBe(250);
+
+      // Reduced motion picks the override's reduced duration.
+      vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
+      placePiece(harness, piece, 0);
+      harness.board.applyWrongAnswer();
+
+      expect(tweensFor(harness, piece.container).at(-1)?.duration).toBe(150);
     });
   });
 
