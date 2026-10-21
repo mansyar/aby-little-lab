@@ -94,7 +94,7 @@ The primary appends after acceptance:
 - **Covers:** FR-3, FR-4, AC-3, AC-4
 - **Touches:** `src/scenes/{ShapeSorter,AnimalTrace,PopFreeze,ShadowMatch,MusicalMemory,BigSmall,MemoryMatch,WordBuilder}Scene.ts` + matching test files
 - **Verification:** full gate — `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Migrate the 8 scenes' inline reactions to helpers** — covers: FR-3
   - [ ] **P5.T1.1: One-to-four scenes per sub-step, suite green after each migration**
