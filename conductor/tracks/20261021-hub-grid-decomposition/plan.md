@@ -114,11 +114,14 @@ The primary appends after acceptance:
 - **Covers:** F1, F2, F3, F4, F5
 - **Touches:** `src/__tests__/game/hubGrid.test.ts`, `src/game/hubGrid.ts`, `conductor/tracks/20261021-hub-grid-decomposition/verification/phase-4.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** f0c485c
+- **Evidence:** conductor/tracks/20261021-hub-grid-decomposition/verification/phase-R1.md
 
-- [ ] **R1.T1: Resolve F1 and F3** — covers: F1, F3
-  - [ ] **R1.T1.1: Fix the just-earned page-transition test to collect page-1 stickers after flipTo(1) and assert their destruction by the slide-out timer (F1)**
-  - [ ] **R1.T1.2: Fix the shutdown-release test to earn a page-1 sticker so destroy() covers a non-empty sticker list (F3)**
-- [ ] **R1.T2: Resolve F2, F4, F5** — covers: F2, F4, F5
-  - [ ] **R1.T2.1: Correct the page-dots field doc in hubGrid.ts (F2)**
-  - [ ] **R1.T2.2: Correct the gridBuilder line count and add the private→public ledger line to phase-4.md (F4, F5)**
+- [x] **R1.T1: Resolve F1 and F3** — covers: F1, F3
+  - [x] **R1.T1.1: Fix the just-earned page-transition test to collect page-1 stickers after flipTo(1) and assert their destruction by the slide-out timer (F1)**
+  - [x] **R1.T1.2: Fix the shutdown-release test to earn a page-1 sticker so destroy() covers a non-empty sticker list (F3)**
+- [x] **R1.T2: Resolve F2, F4, F5** — covers: F2, F4, F5
+  - [x] **R1.T2.1: Correct the page-dots field doc in hubGrid.ts (F2)**
+  - [x] **R1.T2.2: Correct the gridBuilder line count and add the private→public ledger line to phase-4.md (F4, F5)**

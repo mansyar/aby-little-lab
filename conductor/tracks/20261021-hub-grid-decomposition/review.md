@@ -5,7 +5,7 @@
 - **Branch:** refactor/20261021-hub-grid-decomposition
 - **Range:** `9976057..c40d39c` (excluding `conductor/`)
 - **Date:** 2026-10-21
-- **Verdict:** PASS WITH FINDINGS (round 1; F1–F5 dispatched to Phase R1)
+- **Verdict:** PASS (round 2; all round-1 findings fixed in Phase R1)
 
 ## Summary
 
@@ -57,33 +57,23 @@ None.
 
 ### Medium
 
-- **F1** — `src/__tests__/game/hubGrid.test.ts:416-450` — In "lets a just-earned
-  award ride a page transition without losing its burst", `shelfStickers` is
-  collected right after `buildPageGrid(0)`, but `earnSticker("how-many")` earns
-  game index 10 (page 1), so page 0 has zero earned stickers and the final
-  destroy loop iterates an **empty array** — it asserts nothing. The swipe also
-  settles to `hubPage+1 = 2`, so the fired `at(-1)` delayedCall is `flipTo(2)`'s
-  timer, not the page-0 shelf the comment claims. **Fix:** collect stickers
-  after `grid.flipTo(1)`, keep the swipe + timer fire, assert each collected
-  sticker was destroyed by the slide-out timer. **Requirement:** FR-4. **Test
-  gap:** non-vacuous outgoing-shelf destruction assertion.
+None — F1 was **fixed in Phase R1 (`f0c485c`)**: the just-earned
+page-transition test now collects the page-1 shelf after `flipTo(1)` with a
+non-empty guard, and asserts each collected sticker's destruction by the
+`flipTo(2)` slide-out timer; comments updated to match.
 
 ### Low
 
-- **F2** — `src/game/hubGrid.ts:52` — Field doc says "The two textless page
-  dots" but there are 3 pages (`pageCount()` = 3, pinned in pageBoard tests).
-  **Fix:** "The textless page dots (one per page; paged mode only)."
-- **F3** — `src/__tests__/game/hubGrid.test.ts:452-466` — The shutdown-release
-  test earns "shape-sorter" (page 0) but builds page 1, so `stickerImages` is
-  empty; no test exercises `destroy()` with a non-empty sticker list. **Fix:**
-  use `earnSticker("how-many")` (page 1) so shutdown covers sticker-image
-  destruction.
-- **F4** — `verification/phase-4.md:21` — Evidence reports gridBuilder.ts at 324
-  lines; committed file is 317. **Fix:** update the evidence line.
-- **F5** — `src/game/hubGrid.ts:21,58-61` — Phase 4 widened `deps`,
-  `entranceIndex`, `swipes` from private to public so concern-module functions
-  can operate on the instance; inherent to the extraction pattern but not
-  itemized in the FR-3 ledger. **Fix:** add a ledger line to phase-4.md.
+- **F2** — **Fixed in Phase R1 (`f0c485c`)**: field doc corrected to "The
+  textless page dots (one per page; paged mode only)." (1:1 swap, 200-line
+  count preserved).
+- **F3** — **Fixed in Phase R1 (`f0c485c`)**: shutdown test earns `how-many`
+  (page 1) with an explicit non-empty `sticker_` assertion; `destroy()` now
+  covers sticker-image destruction.
+- **F4** — **Fixed in Phase R1 (`f0c485c`)**: phase-4.md evidence corrected to
+  317 lines.
+- **F5** — **Fixed in Phase R1 (`f0c485c`)**: FR-3 ledger gained the
+  private→public field-widening line.
 
 ## Overrides
 
@@ -107,14 +97,15 @@ verified non-load-bearing (reducedMotion local, stickerX alias). No task drops.
 
 ## Debt
 
-None yet — all findings dispatched to Phase R1.
+None — F1–F5 fixed in Phase R1 (`f0c485c`).
 
 ## Doc sync
 
-pending
+none
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 4 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 0 | 5 |
