@@ -225,4 +225,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Hub Grid Decomposition** — [20261021-hub-grid-decomposition](./archive/20261021-hub-grid-decomposition/index.md) — refactor — medium
 - [x] **Track: Audio Variety & Feedback Depth** - [20261021-audio-variety](./archive/20261021-audio-variety/index.md) - feature - medium
 
-- [~] **Track: Session Lifecycle Integrity** — [20261022-session-lifecycle](./tracks/20261022-session-lifecycle/index.md) — bug — high
+- [x] **Track: Session Lifecycle Integrity** - [20261022-session-lifecycle](./archive/20261022-session-lifecycle/index.md) - bug - high
