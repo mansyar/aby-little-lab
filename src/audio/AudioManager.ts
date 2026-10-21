@@ -1,3 +1,5 @@
+import { type AudioIdentity, identityForGameId } from "../game/audioIdentity";
+import type { GameId } from "../types";
 import { onSpeechLifecycle, type SpeechLifecycleEvent } from "../utils/speech";
 import { getSettings, updateSettings } from "../utils/storage";
 
@@ -50,6 +52,8 @@ export class AudioManager {
   private watchingVisibility = false;
   /** True when the BGM was audible at the moment the document was hidden. */
   private resumeBGMWhenVisible = false;
+  /** Game id of the scene currently on stage; null when no game context is registered. */
+  private gameContext: GameId | null = null;
 
   /** Returns the shared AudioManager singleton instance. */
   static getInstance(): AudioManager {
@@ -162,6 +166,31 @@ export class AudioManager {
         this.playSticker();
         break;
     }
+  }
+
+  /**
+   * Sets the game context whose audio identity colors the feedback trio
+   * (correct / incorrect / win). Called by `GameSceneBase.init()` when a
+   * game scene comes on stage; non-game scenes never set a context, so the
+   * trio keeps its default voice there.
+   */
+  setGameContext(gameId: GameId): void {
+    this.gameContext = gameId;
+  }
+
+  /** Clears the game context; the trio falls back to the default voice. */
+  clearGameContext(): void {
+    this.gameContext = null;
+  }
+
+  /**
+   * Resolves the trio's identity from the registered game context. Unregistered
+   * game ids and a missing context resolve to the default voice, so this is
+   * total and never throws. Playback does not consume the identity yet (Phase 2
+   * wires it into the synth), so resolving is currently behavior-neutral.
+   */
+  resolveTrioIdentity(): AudioIdentity {
+    return identityForGameId(this.gameContext);
   }
 
   /**
@@ -464,6 +493,7 @@ export class AudioManager {
     this.watchingVisibility = false;
     this.resumeBGMWhenVisible = false;
     this.ducked = false;
+    this.gameContext = null;
     this.pauseBGM();
     if (this.audioContext) {
       this.audioContext.close();

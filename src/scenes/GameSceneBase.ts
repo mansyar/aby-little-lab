@@ -11,7 +11,7 @@ import { RoundNarrator } from "../components/RoundNarrator";
 import type { SpeakerButton } from "../components/SpeakerButton";
 import { preloadArtGroups } from "../game/art/registry";
 import type { ArtGroup } from "../game/art/types";
-import { stickerKeyForGame } from "../game/gameRegistry";
+import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
 import type { GameId } from "../types";
 import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
@@ -131,9 +131,29 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /** Gap between the instruction line's box edge and the replay glyph (px). */
   protected readonly INSTRUCTION_SPEAKER_GAP = 36;
 
+  /** Scene key this scene was constructed with; used to resolve the registry entry. */
+  private readonly constructedSceneKey: string;
+
   constructor(key: string) {
     super({ key });
+    this.constructedSceneKey = key;
     this.audioManager = AudioManager.getInstance();
+  }
+
+  /**
+   * Registers this visit's audio identity with the shared AudioManager so the
+   * feedback trio (correct / incorrect / win) can take on the game's voice.
+   * Scenes not in the registry keep the default voice. The context is dropped
+   * on shutdown because scene instances are reused across visits.
+   */
+  init(): void {
+    const entry = GAME_REGISTRY.find((game) => game.sceneKey === this.constructedSceneKey);
+    if (entry) {
+      this.audioManager.setGameContext(entry.gameId);
+    }
+    this.events.once("shutdown", () => {
+      this.audioManager.clearGameContext();
+    });
   }
 
   /**

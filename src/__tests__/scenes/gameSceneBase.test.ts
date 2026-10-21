@@ -31,6 +31,8 @@ const { mockAudio } = vi.hoisted(() => ({
     playWake: vi.fn(),
     playFrogNote: vi.fn(),
     playIdleCall: vi.fn(),
+    setGameContext: vi.fn(),
+    clearGameContext: vi.fn(),
   },
 }));
 
@@ -96,8 +98,8 @@ import { earnSticker, hasSticker, updateSettings } from "../../utils/storage";
  * base-class behavior can be exercised directly.
  */
 class TestScene extends GameSceneBase {
-  constructor() {
-    super("TestScene");
+  constructor(sceneKey = "TestScene") {
+    super(sceneKey);
   }
 
   testCreateBackButton(): Phaser.GameObjects.Text {
@@ -685,6 +687,33 @@ describe("GameSceneBase scaffold", () => {
       // The custom path still counts the wrong answer toward learning progress.
       scene.testCompleteGame("shape-sorter");
       expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 0, 1);
+    });
+  });
+
+  describe("game context registration", () => {
+    it("registers the game context for a registered scene key on init", () => {
+      const scene = new TestScene("ShapeSorter");
+
+      scene.init();
+
+      expect(mockAudio.setGameContext).toHaveBeenCalledWith("shape-sorter");
+    });
+
+    it("does not register a context for keys outside the registry", () => {
+      const scene = new TestScene();
+
+      scene.init();
+
+      expect(mockAudio.setGameContext).not.toHaveBeenCalled();
+    });
+
+    it("clears the context when the scene shuts down", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+
+      scene.events.emit("shutdown");
+
+      expect(mockAudio.clearGameContext).toHaveBeenCalledTimes(1);
     });
   });
 });

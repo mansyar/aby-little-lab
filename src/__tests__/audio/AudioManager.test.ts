@@ -1,4 +1,6 @@
 import { AudioManager } from "../../audio/AudioManager";
+import { DEFAULT_IDENTITY, identityForGameId } from "../../game/audioIdentity";
+import type { GameId } from "../../types";
 import { load } from "../../utils/storage";
 
 /**
@@ -748,6 +750,35 @@ describe("AudioManager", () => {
       manager.destroy();
       expect(speechHarness.listeners.size).toBe(0);
       expect(() => setDocumentVisibility("hidden")).not.toThrow();
+    });
+  });
+
+  describe("game context", () => {
+    it("resolves the default identity when no context is registered", () => {
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+
+    it("resolves the registered game's identity", () => {
+      manager.setGameContext("more-less");
+      expect(manager.resolveTrioIdentity()).toEqual(identityForGameId("more-less"));
+    });
+
+    it("falls back to the default identity for an unknown game id", () => {
+      // Deliberate wrong type: unknown runtime ids must degrade to the default voice.
+      manager.setGameContext("not-a-game" as GameId);
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+
+    it("resolves the default identity after the context is cleared", () => {
+      manager.setGameContext("shape-sorter");
+      manager.clearGameContext();
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+
+    it("clears the context on destroy", () => {
+      manager.setGameContext("shape-sorter");
+      manager.destroy();
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
     });
   });
 });
