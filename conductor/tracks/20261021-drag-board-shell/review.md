@@ -5,7 +5,7 @@
 - **Branch:** `refactor/20261021-drag-board-shell`
 - **Range:** `6133e71f9e09714a57a9374acb78ba189b6a4a1c..dc3466e` (code diff excludes `conductor/`)
 - **Date:** 2026-10-21
-- **Verdict:** `PASS WITH FINDINGS` (round 1; F1/F2 dispatched to Phase R1)
+- **Verdict:** `PASS` (round 2; both round-1 findings fixed in Phase R1)
 
 ## Summary
 
@@ -55,20 +55,8 @@ The extraction is faithful: `DragBoard` reproduces both drag scenes' scaffolding
 
 ### Low
 
-- **F1 - Number Order bounce-home duration unified without documentation**
-  - **File:** `src/game/dragBoard.ts:24-28` (manifests at `src/scenes/NumberOrderScene.ts:180-188`)
-  - **What:** The shell's shared `BOUNCE_DURATION`/`BOUNCE_REDUCED_DURATION` (300/180 ms) now also drives Number Order's wiggle-complete bounce-home; the old scene used `motionDuration(250, 150)`. Story Order's old bounce was 300/180, so the shared constant fits Story but drifts Number Order by +50 ms (normal) / +30 ms (reduced).
-  - **Why:** The track claims zero user-visible behavior change (NFR-2); the drift is real and undocumented in the verification evidence.
-  - **Fix:** Restore exact parity — add an optional `bounceDuration`/`bounceReducedDuration` pair to `DragBoardOptions` and pass 250/150 from Number Order; pin the wiggle-complete bounce duration in `numberOrderScene.test.ts`.
-  - **Requirement:** NFR-2
-  - **Test gap:** duration assertion for the wiggle-complete bounce
-- **F2 - Unjustified double type assertion in the shell**
-  - **File:** `src/game/dragBoard.ts:314-316`
-  - **What:** `piece.container as unknown as DragTarget` carries no justifying comment, unlike the scenes' analogous `attachDragLift` casts which each carry a rationale.
-  - **Why:** Style guide requires justification for type assertions; a future `snapToSlot` signature change would surface as a runtime mismatch instead of a type error.
-  - **Fix:** Add a one-line structural-compatibility comment (matching the scenes' pattern).
-  - **Requirement:** none
-  - **Test gap:** none
+- **F1 - Number Order bounce-home duration unified without documentation** — **FIXED in Phase R1 (c28e37c)**: optional `bounceDuration`/`bounceReducedDuration` added to `DragBoardOptions` (defaults 300/180, Story Order untouched); Number Order passes 250/150 restoring exact old behavior; wiggle-complete bounce duration pinned in `numberOrderScene.test.ts`; two new shell tests cover the default and the override.
+- **F2 - Unjustified double type assertion in the shell** — **FIXED in Phase R1 (c28e37c)**: structural-compatibility comment added above the `DragTarget` cast; `snapToSlot` signature untouched.
 
 ## Overrides
 
@@ -86,14 +74,15 @@ The extraction is faithful: `DragBoard` reproduces both drag scenes' scaffolding
 
 ## Debt
 
-- <none — F1/F2 are being fixed in Phase R1>
+- <none — F1/F2 fixed in Phase R1>
 
 ## Doc sync
 
-`pending`
+`none` - R1 restored exact behavior parity (no net behavior change); the tech-stack design-update entry already describes the shell and its options accurately.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 2 (in Phase R1) |
+| 2 | PASS | 0 | 0 | 0 | 0 | 2 |

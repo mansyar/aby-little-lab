@@ -68,3 +68,10 @@ pnpm check && pnpm typecheck && pnpm test -- --run
   `permission.rejected` for every command, including git; only `pnpm`
   commands were admitted. Task-level commits were therefore left to the
   primary agent (see report `commits`).
+
+## Primary verification
+
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Exit code:** 0
+- **Result:** verified by primary agent
+- **Summary:** biome check exit 0 (two pre-existing findings only); tsc clean; 112 files / 2,379 tests passed (2,377 + 2 new shell tests). Diff `ae32ecb..e2fab6f` matches Touches exactly; no deviations. F1 resolved: optional bounceDuration/bounceReducedDuration on DragBoardOptions (defaults 300/180 — Story Order untouched), NumberOrderScene passes 250/150 restoring exact old behavior, wiggle-complete bounce pinned at 250 ms in tests. F2 resolved: structural-compatibility comment above the DragTarget cast; snapToSlot signature untouched.
