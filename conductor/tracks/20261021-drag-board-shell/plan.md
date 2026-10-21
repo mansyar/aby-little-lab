@@ -60,12 +60,15 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, AC-1, AC-2
 - **Touches:** `src/scenes/NumberOrderScene.ts`, `src/__tests__/scenes/NumberOrder*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** b93ab74
+**Evidence:** conductor/tracks/20261021-drag-board-shell/verification/phase-3.md
 
-- [ ] **P3.T1: Replace Number Order's scaffolding with DragBoard** — covers: FR-2
-  - [ ] **P3.T1.1: Migrate slot registration, hover, snapping; `tryAutoValidate` on drop preserved**
-  - [ ] **P3.T1.2: Bounce-back-to-source-row wrong-answer behavior preserved**
-- [ ] **P3.T2: Mechanically re-wire Number Order tests; confirm all assertions pass unchanged** — covers: NFR-2
+- [x] **P3.T1: Replace Number Order's scaffolding with DragBoard** — covers: FR-2
+  - [x] **P3.T1.1: Migrate slot registration, hover, snapping; `tryAutoValidate` on drop preserved**
+  - [x] **P3.T1.2: Bounce-back-to-source-row wrong-answer behavior preserved**
+- [x] **P3.T2: Mechanically re-wire Number Order tests; confirm all assertions pass unchanged** — covers: NFR-2
 
 ## Phase 4: Wrong-answer reaction helpers on GameSceneBase
 
