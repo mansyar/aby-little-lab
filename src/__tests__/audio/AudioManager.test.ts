@@ -1,4 +1,12 @@
 import { AudioManager } from "../../audio/AudioManager";
+import {
+  AUDIO_IDENTITIES,
+  DEFAULT_IDENTITY,
+  descendingContour,
+  identityForGameId,
+  winTempoForBudget,
+} from "../../game/audioIdentity";
+import type { GameId } from "../../types";
 import { load } from "../../utils/storage";
 
 /**
@@ -53,6 +61,16 @@ interface MockOscillator {
 interface MockGainNode {
   gain: { value: number };
   connect: MockFn;
+}
+
+/**
+ * One synthesized note captured with its own oscillator and gain node, so
+ * trio notes can be asserted individually instead of through the shared
+ * harness mocks.
+ */
+interface CapturedNote {
+  oscillator: MockOscillator;
+  gainNode: MockGainNode;
 }
 
 interface MockAudioContext {
@@ -748,6 +766,321 @@ describe("AudioManager", () => {
       manager.destroy();
       expect(speechHarness.listeners.size).toBe(0);
       expect(() => setDocumentVisibility("hidden")).not.toThrow();
+    });
+  });
+
+  describe("game context", () => {
+    it("resolves the default identity when no context is registered", () => {
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+
+    it("resolves the registered game's identity", () => {
+      manager.setGameContext("more-less");
+      expect(manager.resolveTrioIdentity()).toEqual(identityForGameId("more-less"));
+    });
+
+    it("falls back to the default identity for an unknown game id", () => {
+      // Deliberate wrong type: unknown runtime ids must degrade to the default voice.
+      manager.setGameContext("not-a-game" as GameId);
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+
+    it("resolves the default identity after the context is cleared", () => {
+      manager.setGameContext("shape-sorter");
+      manager.clearGameContext();
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+
+    it("clears the context on destroy", () => {
+      manager.setGameContext("shape-sorter");
+      manager.destroy();
+      expect(manager.resolveTrioIdentity()).toEqual(DEFAULT_IDENTITY);
+    });
+  });
+
+  describe("trio identity synthesis", () => {
+    /** Correct/win anchor note (C5). */
+    const C5 = 523.25;
+
+    /** Frequency `semitones` above `anchor` (equal temperament). */
+    function semitoneHz(anchor: number, semitones: number): number {
+      return anchor * 2 ** (semitones / 12);
+    }
+
+    /** Audible synthesis parameters of one captured note (ctx time starts at 0). */
+    function noteSpec(note: CapturedNote) {
+      const startOffset = note.oscillator.start.mock.calls[0][0] as number;
+      const stopAt = note.oscillator.stop.mock.calls[0][0] as number;
+      return {
+        waveform: note.oscillator.type,
+        frequency: note.oscillator.frequency.value,
+        gain: note.gainNode.gain.value,
+        startOffset,
+        duration: stopAt - startOffset,
+      };
+    }
+
+    let notes: CapturedNote[] = [];
+
+    /**
+     * Swaps the shared harness mocks for per-note capture. playTone pairs one
+     * createOscillator with one createGain per note, in that order, so a
+     * captured gain is handed straight to the next createGain call. Call it
+     * again between cues to reset the capture.
+     */
+    function capturePerNote(): void {
+      notes = [];
+      let pendingGain: MockGainNode = { gain: { value: 0 }, connect: vi.fn() };
+      mockAudioContext.createOscillator = vi.fn(() => {
+        pendingGain = { gain: { value: 0 }, connect: vi.fn() };
+        const oscillator: MockOscillator = {
+          type: "sine",
+          frequency: { value: 0 },
+          connect: vi.fn(),
+          start: vi.fn(),
+          stop: vi.fn(),
+        };
+        notes.push({ oscillator, gainNode: pendingGain });
+        return oscillator;
+      });
+      mockAudioContext.createGain = vi.fn(() => pendingGain);
+    }
+
+    it("keeps the default identity a fixed point of today's voices", () => {
+      manager.init();
+      capturePerNote();
+
+      manager.playCorrect();
+      const correct = notes.map(noteSpec);
+      expect(correct).toHaveLength(3);
+      expect(correct[0]).toEqual({
+        waveform: "sine",
+        frequency: 523.25,
+        gain: 0.3,
+        startOffset: 0,
+        duration: 0.15,
+      });
+      expect(correct[1].frequency).toBeCloseTo(659.25, 2); // E5, today's hardcoded tone
+      expect(correct[1].waveform).toBe("sine");
+      expect(correct[1].gain).toBe(0.3);
+      expect(correct[1].startOffset).toBe(0.12);
+      // Durations are read back as stopAt - startOffset, so float sums need
+      // a tolerance; the synthesis itself is exact.
+      expect(correct[1].duration).toBeCloseTo(0.15, 6);
+      expect(correct[2].frequency).toBeCloseTo(783.99, 2); // G5
+      expect(correct[2].startOffset).toBe(0.24);
+      expect(correct[2].duration).toBeCloseTo(0.2, 6);
+
+      capturePerNote();
+      manager.playIncorrect();
+      const incorrect = notes.map(noteSpec);
+      expect(incorrect).toHaveLength(2);
+      expect(incorrect[0]).toEqual({
+        waveform: "sine",
+        frequency: 392.0,
+        gain: 0.2,
+        startOffset: 0,
+        duration: 0.15,
+      });
+      expect(incorrect[1].frequency).toBeCloseTo(261.63, 2); // C4
+      expect(incorrect[1].startOffset).toBe(0.12);
+      expect(incorrect[1].duration).toBeCloseTo(0.2, 6);
+
+      capturePerNote();
+      manager.playWin();
+      const win = notes.map(noteSpec);
+      expect(win).toHaveLength(4);
+      expect(win[0]).toEqual({
+        waveform: "sine",
+        frequency: 523.25,
+        gain: 0.3,
+        startOffset: 0,
+        duration: 0.12,
+      });
+      expect(win[1].frequency).toBeCloseTo(659.25, 2); // E5
+      expect(win[1].startOffset).toBe(0.1);
+      expect(win[1].duration).toBeCloseTo(0.12, 6);
+      expect(win[2].frequency).toBeCloseTo(783.99, 2); // G5
+      expect(win[2].startOffset).toBe(0.2);
+      expect(win[3].frequency).toBe(1046.5); // exact octave above C5
+      expect(win[3].startOffset).toBeCloseTo(0.3, 6); // 3 * 0.1, float-rounded
+      expect(win[3].duration).toBeCloseTo(0.25, 6);
+      expect(win[3].startOffset + win[3].duration).toBeCloseTo(0.55, 5);
+    });
+
+    it("transposes every note by the identity's pitch offset", () => {
+      manager.init();
+      manager.setGameContext("how-many"); // pitch +5, correct contour [0, 5, 9]
+      capturePerNote();
+      manager.playCorrect();
+      const specs = notes.map(noteSpec);
+      expect(specs).toHaveLength(3);
+      expect(specs[0].frequency).toBeCloseTo(semitoneHz(C5, 5), 6);
+      expect(specs[1].frequency).toBeCloseTo(semitoneHz(C5, 10), 6);
+      expect(specs[2].frequency).toBeCloseTo(semitoneHz(C5, 14), 6);
+    });
+
+    it("shapes the notes with the identity's waveform", () => {
+      manager.init();
+      manager.setGameContext("pop-freeze"); // square
+      capturePerNote();
+      manager.playCorrect();
+      for (const note of notes) {
+        expect(note.oscillator.type).toBe("square");
+      }
+
+      manager.setGameContext("shadow-match"); // sawtooth
+      capturePerNote();
+      manager.playWin();
+      for (const note of notes) {
+        expect(note.oscillator.type).toBe("sawtooth");
+      }
+    });
+
+    it("slows note spacing and duration for a slow identity", () => {
+      manager.init();
+      manager.setGameContext("musical-memory"); // tempo 1.25, default contours
+      capturePerNote();
+      manager.playCorrect();
+      const specs = notes.map(noteSpec);
+      expect(specs[0].startOffset).toBe(0);
+      expect(specs[1].startOffset).toBeCloseTo(0.15, 6); // 0.12 * 1.25
+      expect(specs[2].startOffset).toBeCloseTo(0.3, 6); // 0.24 * 1.25
+      expect(specs[0].duration).toBeCloseTo(0.1875, 6); // 0.15 * 1.25
+      expect(specs[2].duration).toBeCloseTo(0.25, 6); // 0.2 * 1.25
+    });
+
+    it("speeds note spacing and duration up for a fast identity", () => {
+      manager.init();
+      manager.setGameContext("shape-sorter"); // tempo 0.75, default contours
+      capturePerNote();
+      manager.playIncorrect();
+      const specs = notes.map(noteSpec);
+      expect(specs[1].startOffset).toBeCloseTo(0.09, 6); // 0.12 * 0.75
+      expect(specs[1].duration).toBeCloseTo(0.15, 6); // 0.2 * 0.75
+    });
+
+    it("honors the identity's melodic contour", () => {
+      manager.init();
+      manager.setGameContext("pop-freeze"); // pitch -3, correct contour [0, 5, 9]
+      capturePerNote();
+      manager.playCorrect();
+      const specs = notes.map(noteSpec);
+      expect(specs[0].frequency).toBeCloseTo(semitoneHz(C5, -3), 6); // A4
+      expect(specs[1].frequency).toBeCloseTo(semitoneHz(C5, 2), 6);
+      expect(specs[2].frequency).toBeCloseTo(semitoneHz(C5, 6), 6);
+    });
+
+    it("synthesizes the default voice for an unknown game id", () => {
+      manager.init();
+      // Deliberate wrong type: unknown runtime ids must keep the default voice.
+      manager.setGameContext("not-a-game" as GameId);
+      capturePerNote();
+      manager.playCorrect();
+      const specs = notes.map(noteSpec);
+      expect(specs[0].frequency).toBe(523.25);
+      expect(specs[0].waveform).toBe("sine");
+      expect(specs[1].startOffset).toBe(0.12);
+      expect(specs[2].startOffset).toBe(0.24);
+    });
+
+    it("is deterministic: the same identity synthesizes identical notes", () => {
+      manager.init();
+      manager.setGameContext("how-many");
+      capturePerNote();
+      manager.playCorrect();
+      const first = notes.map(noteSpec);
+      capturePerNote();
+      manager.playCorrect();
+      expect(notes.map(noteSpec)).toEqual(first);
+    });
+
+    it("keeps the incorrect cue gently descending for every identity (NFR-1)", () => {
+      manager.init();
+      for (const gameId of Object.keys(AUDIO_IDENTITIES) as GameId[]) {
+        const identity = AUDIO_IDENTITIES[gameId];
+        if (!identity) continue;
+        manager.setGameContext(gameId);
+        capturePerNote();
+        manager.playIncorrect();
+        const specs = notes.map(noteSpec);
+        expect(specs, gameId).toHaveLength(identity.contours.incorrect.length);
+        for (let i = 1; i < specs.length; i++) {
+          expect(specs[i].frequency, gameId).toBeLessThanOrEqual(specs[i - 1].frequency);
+        }
+        // Gentle: never more than an octave below the cue's transposed anchor
+        // (the pitch offset shifts register on purpose; the guard bounds the
+        // contour's own descent).
+        const first = specs[0];
+        const last = specs[specs.length - 1];
+        expect(last.frequency, gameId).toBeGreaterThanOrEqual(first.frequency / 2);
+      }
+    });
+
+    it("keeps the win cue inside the celebration budget for every identity (NFR-2)", () => {
+      manager.init();
+      for (const gameId of Object.keys(AUDIO_IDENTITIES) as GameId[]) {
+        manager.setGameContext(gameId);
+        capturePerNote();
+        manager.playWin();
+        const specs = notes.map(noteSpec);
+        expect(specs.length).toBeGreaterThan(0);
+        const last = specs[specs.length - 1];
+        const end = last.startOffset + last.duration;
+        // Sub-nanosecond float tolerance on the read-back duration sum.
+        expect(end, gameId).toBeGreaterThanOrEqual(0.3 - 1e-9);
+        expect(end, gameId).toBeLessThanOrEqual(0.8 + 1e-9);
+      }
+    });
+
+    it("clamps an over-fast win tempo to the budget's upper bound", () => {
+      manager.init();
+      capturePerNote();
+      vi.spyOn(manager, "resolveTrioIdentity").mockReturnValue({
+        ...DEFAULT_IDENTITY,
+        tempo: 1.5,
+      });
+      manager.playWin();
+      const specs = notes.map(noteSpec);
+      const last = specs[specs.length - 1];
+      expect(last.startOffset + last.duration).toBeCloseTo(0.8, 5);
+      expect(specs[1].startOffset).toBeCloseTo(0.1 * (0.8 / 0.55), 5);
+    });
+
+    it("clamps an over-slow win tempo to the budget's lower bound", () => {
+      manager.init();
+      capturePerNote();
+      vi.spyOn(manager, "resolveTrioIdentity").mockReturnValue({
+        ...DEFAULT_IDENTITY,
+        tempo: 0.4,
+      });
+      manager.playWin();
+      const specs = notes.map(noteSpec);
+      const last = specs[specs.length - 1];
+      expect(last.startOffset + last.duration).toBeCloseTo(0.3, 5);
+    });
+  });
+
+  describe("trio no-fail guards", () => {
+    it("flattens a rising incorrect contour instead of inverting the cue", () => {
+      expect(descendingContour([0, 5, 9])).toEqual([0, 0, 0]);
+      expect(descendingContour([0, -3, -1])).toEqual([0, -3, -3]);
+    });
+
+    it("caps the descent at the documented contour range", () => {
+      expect(descendingContour([0, -40, -60])).toEqual([0, -12, -12]);
+    });
+
+    it("keeps a descending contour untouched", () => {
+      expect(descendingContour([0, -7])).toEqual([0, -7]);
+      expect(descendingContour([0, -3])).toEqual([0, -3]);
+    });
+
+    it("clamps the win tempo into the celebration budget for the base timing", () => {
+      // Today's base win timing: last note starts at 0.3 s and rings 0.25 s.
+      expect(winTempoForBudget(1.5, 0.55)).toBeCloseTo(0.8 / 0.55, 5);
+      expect(winTempoForBudget(1.25, 0.55)).toBe(1.25); // inside the budget: untouched
+      expect(winTempoForBudget(0.4, 0.55)).toBeCloseTo(0.3 / 0.55, 5);
     });
   });
 });

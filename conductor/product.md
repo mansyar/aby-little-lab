@@ -107,6 +107,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 ## 8. Audio Design
 
 - **SFX (Web Audio API):** pop, correct, incorrect, wake, win, sticker — synthesized at runtime; no MP3 files needed
+- **Per-game sonic identity** *(2026-10-21)*: the correct/incorrect/win cues are voiced per game — pitch, timbre, tempo and melodic contour from a central identity table — so each game sounds recognizably its own; pop/wake/sticker, the frog notes and BGM stay universal, and the incorrect cue remains a gentle descending tone in every game.
 - **Synthesized frog notes (Web Audio API):** Game 5 notes (C4=261.63Hz, E4=329.63Hz, G4=392.00Hz)
 - **BGM:** Single gentle ambient loop (`bgm.mp3`), toggleable via parental settings
 - **Audio toggles:** BGM and SFX independently toggleable, persisted in localStorage

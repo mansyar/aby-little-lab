@@ -1,0 +1,32 @@
+{
+  "id": "20261021-audio-variety",
+  "title": "Audio Variety & Feedback Depth",
+  "type": "feature",
+  "status": "complete",
+  "priority": "medium",
+  "depends_on": [],
+  "created_at": "2026-10-21T00:00:00Z",
+  "updated_at": "2026-10-21T00:00:00Z",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261021-audio-variety",
+  "base_branch": "master",
+  "base_sha": "f33885c41a2009a4e5d6c47e482d879df24f8014",
+  "progress": {
+    "phases_total": 3,
+    "phases_verified": 3,
+    "tasks_total": 7,
+    "tasks_done": 7
+  },
+  "last_checkpoint": "080c704",
+  "review_verdict": "PASS",
+  "review_rounds": 2,
+  "doc_sync": "none",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/54",
+  "pr_state": "open",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-10-21T00:00:00Z",
+  "archive_path": "conductor/archive/20261021-audio-variety"
+}
