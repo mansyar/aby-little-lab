@@ -2,7 +2,7 @@
   "id": "20261021-hub-grid-decomposition",
   "title": "Hub Grid Decomposition",
   "type": "refactor",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-21T00:00:00Z",
@@ -18,7 +18,7 @@
     "tasks_total": 8,
     "tasks_done": 8
   },
-  "last_checkpoint": "c40d39c",
+  "last_checkpoint": "f0c485c",
   "review_verdict": "PASS",
   "review_rounds": 2,
   "doc_sync": "none",
@@ -29,6 +29,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-21T00:00:00Z",
+  "archive_path": "conductor/archive/20261021-hub-grid-decomposition"
 }
