@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, AC-1
 - **Touches:** `src/game/dragBoard.ts` (new), `src/__tests__/game/dragBoard.test.ts` (new)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Implement DragBoard shell** — covers: FR-1, FR-2
   - [ ] **P1.T1.1: Slot/drop-zone registration and hover detection (`isOverAnyZone` equivalent)**
