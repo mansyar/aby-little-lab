@@ -17,7 +17,7 @@ Only the primary agent writes this file.
   `src/scenes/GameSceneBase.ts`, `src/__tests__/game/audioIdentity.test.ts`
   (new), `src/__tests__/audio/*`, `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Identity schema & table** — covers: FR-1, FR-3
   - [ ] **P1.T1.1: Define the AudioIdentity schema (pitch offset in semitones, timbre/waveform, tempo/duration multiplier, per-cue melodic contour) with bounded-range validation and a documented default identity**
