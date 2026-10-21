@@ -93,6 +93,7 @@ function getCurrentRound(scene: unknown): { shuffled: string[]; solution: string
 }
 
 interface TestPanel {
+  id: string;
   container: Record<string, MockFn> & { x?: number; y?: number };
   bg: Record<string, MockFn>;
   key: string;
@@ -104,15 +105,29 @@ interface TestPanel {
 
 interface TestSlot {
   zone: Record<string, MockFn>;
-  outline: Record<string, MockFn>;
   x: number;
   y: number;
   occupiedBy: TestPanel | null;
 }
 
+/**
+ * The drag board surface the tests exercise, viewed through the mock zone.
+ * Typed loosely on purpose: the real shell is generic over the scene's panel
+ * type, whose mock containers only share the mock record shape.
+ */
+interface TestBoard {
+  getSlots(): TestSlot[];
+  isOverAnyZone(x: number, y: number): boolean;
+}
+
 function internals(scene: unknown): { panels: TestPanel[]; slots: TestSlot[] } {
-  const s = scene as { panels: TestPanel[]; slots: TestSlot[] };
-  return { panels: s.panels, slots: s.slots };
+  // Slots live on the shared drag board now; the scene keeps no local copy.
+  const s = scene as unknown as { panels: TestPanel[]; board: TestBoard };
+  return { panels: s.panels, slots: s.board.getSlots() };
+}
+
+function boardOf(scene: unknown): TestBoard {
+  return (scene as unknown as { board: TestBoard }).board;
 }
 
 function handlersOf(
@@ -132,8 +147,8 @@ function lastHandler(container: Record<string, MockFn>, event: string): (...a: n
 
 function drop(scene: unknown, panel: TestPanel, slotIndex: number): void {
   const { slots } = internals(scene);
-  (scene as { handleDrop: (p: TestPanel, z: unknown) => void }).handleDrop(
-    panel,
+  (lastHandler(panel.container, "drop") as (pointer: unknown, zone: unknown) => void)(
+    undefined,
     slots[slotIndex].zone,
   );
 }
@@ -148,7 +163,11 @@ function fillBoard(scene: unknown, order: string[]): void {
 }
 
 function validate(scene: unknown): void {
-  (scene as { tryAutoValidate: () => void }).tryAutoValidate();
+  // The shell validates when a drag ends; with no registered pieces no
+  // gesture can end, so an empty board cannot reach validation.
+  const panels = internals(scene).panels;
+  if (panels.length === 0) return;
+  (lastHandler(panels[0].container, "dragend") as () => void)();
 }
 
 function delayedCallbacks(scene: unknown): Array<() => void> {
@@ -398,8 +417,8 @@ describe("StoryOrderScene interactions", () => {
     expect(slots[0].occupiedBy).toBeNull();
 
     (scene as unknown as { inputLocked: boolean }).inputLocked = false;
-    (scene as unknown as { handleDrop: (p: TestPanel, z: unknown) => void }).handleDrop(
-      panels[0],
+    (lastHandler(panels[0].container, "drop") as (pointer: unknown, zone: unknown) => void)(
+      undefined,
       {},
     );
     expect(panels[0].slotIndex).toBeNull();
@@ -486,12 +505,10 @@ describe("StoryOrderScene interactions", () => {
     // withdraws a panel is an in-progress gesture.
     fillBoard(scene, solution.slice(0, 2));
     const tapped = slots[0].occupiedBy as TestPanel;
-    // A tap, in engine order (drag-down precedes the game-object down event):
-    // dragstart/dragend fire, but the 10 px threshold keeps jitter from
-    // becoming a drag move, so no drop is routed and this is still a tap.
-    lastHandler(tapped.container, "dragstart")();
+    // A clean tap fires only pointerdown/pointerup: with the 10 px threshold,
+    // dragstart/dragend imply real movement, so the trailing pointerup of a
+    // drag is (correctly) not treated as a tap-to-return.
     lastHandler(tapped.container, "pointerdown")();
-    lastHandler(tapped.container, "dragend")();
     lastHandler(tapped.container, "pointerup")();
 
     expect(slots[0].occupiedBy).toBeNull();
@@ -661,20 +678,18 @@ describe("StoryOrderScene interactions", () => {
     scene.create();
     const s = scene as unknown as {
       roundObjects: Array<{ destroy: MockFn }>;
-      slots: Array<{ zone: { destroy: MockFn }; outline: { destroy: MockFn } }>;
+      board: { getSlots: () => Array<{ zone: { destroy: MockFn } }> };
       clearRound: () => void;
     };
     s.roundObjects[0].destroy = vi.fn(() => {
       throw new Error("boom");
     }) as unknown as MockFn;
-    s.slots[0].zone.destroy = vi.fn(() => {
-      throw new Error("boom");
-    }) as unknown as MockFn;
-    s.slots[0].outline.destroy = vi.fn(() => {
+    // The shell owns the drop zones; its clear tolerates an already-gone zone.
+    s.board.getSlots()[0].zone.destroy = vi.fn(() => {
       throw new Error("boom");
     }) as unknown as MockFn;
     expect(() => s.clearRound()).not.toThrow();
-    expect(s.slots).toHaveLength(0);
+    expect(s.board.getSlots()).toHaveLength(0);
   });
 
   it("does nothing when the round is missing or the slice is stale", () => {
@@ -682,21 +697,19 @@ describe("StoryOrderScene interactions", () => {
     scene.create();
     const { panels, slots } = internals(scene);
 
-    // A tray panel has nothing to return.
+    // A tray panel has nothing to return: tapping it must not move anything.
     const tweensBefore = tweenConfigs(scene).length;
-    (scene as unknown as { returnPanelToSource: (p: TestPanel) => void }).returnPanelToSource(
-      panels[1],
-    );
+    lastHandler(panels[1].container, "pointerdown")();
+    lastHandler(panels[1].container, "pointerup")();
     expect(tweenConfigs(scene)).toHaveLength(tweensBefore);
 
     // A stale slot index must not throw a tap-to-return.
     drop(scene, panels[0], 0);
-    (scene as unknown as { slots: TestSlot[] }).slots = [];
-    expect(() =>
-      (scene as unknown as { returnPanelToSource: (p: TestPanel) => void }).returnPanelToSource(
-        panels[0],
-      ),
-    ).not.toThrow();
+    panels[0].slotIndex = 5;
+    expect(() => {
+      lastHandler(panels[0].container, "pointerdown")();
+      lastHandler(panels[0].container, "pointerup")();
+    }).not.toThrow();
 
     // A missing round leaves the board empty and never validates.
     (scene as unknown as { roundIndex: number }).roundIndex = 99;
@@ -713,16 +726,16 @@ describe("StoryOrderScene interactions", () => {
     const scene = new StoryOrderScene();
     scene.create();
     const { slots } = internals(scene);
+    const board = boardOf(scene);
     const s = scene as unknown as {
-      isOverAnyZone: (x: number, y: number) => boolean;
       wiggleTargets: () => unknown[];
     };
-    expect(s.isOverAnyZone(slots[0].x, slots[0].y)).toBe(true);
-    expect(s.isOverAnyZone(-9999, -9999)).toBe(false);
+    expect(board.isOverAnyZone(slots[0].x, slots[0].y)).toBe(true);
+    expect(board.isOverAnyZone(-9999, -9999)).toBe(false);
 
     drop(scene, internals(scene).panels[0], 0);
     expect(s.wiggleTargets()).toHaveLength(1);
-    slots[0].occupiedBy = null;
+    board.getSlots()[0].occupiedBy = null;
     expect(s.wiggleTargets()).toHaveLength(0);
   });
 });
