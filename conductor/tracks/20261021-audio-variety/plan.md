@@ -50,9 +50,9 @@ The primary appends after acceptance:
 - **Touches:** `src/audio/AudioManager.ts`, `src/game/audioIdentity.ts`,
   `src/__tests__/audio/*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [x] **P2.T1: Apply parameters in the trio synth** — covers: FR-3, AC-3
+- [x] **P2.T1: Apply parameters in the trio synth** - covers: FR-3, AC-3
   - [x] **P2.T1.1: Correct and incorrect voices consume pitch, timbre, tempo, and contour from the resolved identity**
   - [x] **P2.T1.2: Win voice consumes identity while staying within the celebration duration budget**
 - [x] **P2.T2: Semantic & constraint tests** — covers: AC-3, NFR-1, NFR-2
@@ -110,5 +110,18 @@ Review fixes are appended by `conductor-review` as:
 - **Verification:** ...
 - **Status:** pending
 
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
+- [ ] **R1.T1: Resolve <finding ID>** - covers: <finding ID>
 -->
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1, F2, F3.
+- **Depends on:** Phase 3
+- **Covers:** F1, F2, F3
+- **Touches:** `src/game/audioIdentity.ts`,
+  `src/__tests__/game/audioIdentity.test.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Status:** pending
+
+- [ ] **R1.T1: Resolve F1 (plan.md Phase 2 header status)** — covers: F1 (primary-only conductor-state fix)
+- [ ] **R1.T2: Resolve F2 + F3 (tempo-bounds comment; incorrect-contour monotonicity assertion)** — covers: F2, F3
