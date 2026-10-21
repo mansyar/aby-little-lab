@@ -25,7 +25,22 @@ import {
   TILE_LABEL_Y_OFFSET,
   TILE_WIDTH,
 } from "./hub/hubGridConstants";
-import { isNarrowViewport, pageCount, pagedTilePosition, pageTileIndexes } from "./hubPaging";
+import {
+  isPagedViewport,
+  PAGE_DOT_COLOR,
+  PAGE_DOT_HIT,
+  PAGE_DOTS_RADIUS,
+  PAGE_DOTS_Y,
+  PAGE_SLIDE_DURATION,
+  pageDotAlpha,
+  pageDotX,
+  paintPageDots,
+  SwipeGesture,
+  slidePageIn,
+  slidePageOut,
+  swipeRegion,
+} from "./hub/pageBoard";
+import { pageCount, pagedTilePosition, pageTileIndexes } from "./hubPaging";
 import { GAME_TILES } from "./hubTiles";
 
 /**
@@ -59,11 +74,11 @@ const BURST_SCALE = 1.25;
 const BURST_DURATION = 500;
 
 /**
- * Paged (narrow-viewport) grid constants. Tile size, spacing and centering
- * live in src/game/hubPaging.ts (PAGED_TILE_*), and the per-tile icon/label
- * furniture offsets live in src/game/hub/hubGridConstants.ts (PAGED_ICON_*,
- * PAGED_LABEL_*); the remaining constants below cover the paged interaction
- * and shelf presentation.
+ * Paged (narrow-viewport) shelf constant. Tile size, spacing and centering
+ * live in src/game/hubPaging.ts (PAGED_TILE_*), the per-tile icon/label
+ * furniture offsets in src/game/hub/hubGridConstants.ts (PAGED_ICON_*,
+ * PAGED_LABEL_*), and the paged interaction constants in
+ * src/game/hub/pageBoard.ts (PAGE_*).
  */
 /**
  * Display size of sticker thumbnails / empty-slot rings on a paged tile (px).
@@ -71,22 +86,6 @@ const BURST_DURATION = 500;
  * wide tile, so the plaque is proportionally larger but still below the label.
  */
 const PAGED_STICKER_DISPLAY_SIZE = 30;
-/** Duration of the page slide transition (ms). */
-const PAGE_SLIDE_DURATION = 300;
-/** Minimum horizontal travel for a swipe to flip pages (logical px). */
-const SWIPE_MIN_DISTANCE = 60;
-/** Y position of the textless page dots (below the grid, above the arc). */
-const PAGE_DOTS_Y = 640;
-/** Horizontal spacing between the page dots (px). */
-const PAGE_DOTS_SPACING = 32;
-/** Radius of a page dot (px). */
-const PAGE_DOTS_RADIUS = 8;
-/** Alpha of the active (filled) page dot. */
-const PAGE_DOT_ACTIVE_ALPHA = 0.9;
-/** Alpha of the inactive page dot. */
-const PAGE_DOT_INACTIVE_ALPHA = 0.25;
-/** Tappable hit size around each page dot (px, logical). */
-const PAGE_DOT_HIT = 64;
 
 /** Alpha applied to Hub tiles while the daily limit locks them. */
 const TIME_UP_TILE_ALPHA = 0.45;
@@ -141,10 +140,8 @@ export class HubGrid {
   justEarned?: string;
   /** Delay between consecutive entrance elements (ms) — shared counter. */
   private entranceIndex = 0;
-  /** True once a horizontal drag past the swipe threshold was detected. */
-  private swiping = false;
-  /** Start point of an in-flight swipe, when it began in the grid region. */
-  private swipeStart?: { x: number; y: number };
+  /** Swipe state machine for the paged grid's horizontal page gestures. */
+  private swipes = new SwipeGesture();
   /** Guards against double-wiring the scene-level swipe handlers. */
   private swipeWired = false;
 
@@ -169,11 +166,7 @@ export class HubGrid {
 
   /** Classifies the current viewport into the paged (narrow) or wide mode. */
   classifyViewport(): void {
-    const display = this.deps.scene.scale?.displaySize;
-    this.paged = isNarrowViewport(
-      display?.width ?? this.deps.scene.cameras.main.width,
-      display?.height ?? this.deps.scene.cameras.main.height,
-    );
+    this.paged = isPagedViewport(this.deps.scene);
   }
 
   /**
@@ -339,7 +332,7 @@ export class HubGrid {
       // Same release-to-navigate contract as the wide grid; a horizontal drag
       // (swipe) releases the gesture to the page flip instead of the tile.
       tile.on("pointerup", () => {
-        if (this.deps.isTimeUp() || this.navLocked || this.swiping) return;
+        if (this.deps.isTimeUp() || this.navLocked || this.swipes.swiping) return;
         this.navLocked = true;
         this.deps.activateTile(globalIndex);
       });
@@ -371,15 +364,7 @@ export class HubGrid {
       });
 
       if (slideIn) {
-        const settleX = pos.x;
-        for (const obj of [tile, icon, label]) {
-          scene.tweens.add({
-            targets: obj,
-            x: settleX,
-            duration: PAGE_SLIDE_DURATION,
-            ease: "Cubic.out",
-          });
-        }
+        slidePageIn(scene, [tile, icon, label], pos.x);
       }
 
       // Breathe pulse: scale-only wave owned by gridLayout; no-op under
@@ -389,19 +374,13 @@ export class HubGrid {
       this.createShelfSticker(globalIndex, x, y, height, PAGED_STICKER_DISPLAY_SIZE);
       if (slideIn) {
         // Slide only the shelf pieces this tile just created (the lists were
-        // reset at the top of this build, so slice from the pre-create mark).
-        const delta = pos.x - x;
-        for (const obj of [
-          ...this.stickerImages.slice(stickerMark),
-          ...this.emptySlotGraphics.slice(slotMark),
-        ]) {
-          scene.tweens.add({
-            targets: obj,
-            x: obj.x + delta,
-            duration: PAGE_SLIDE_DURATION,
-            ease: "Cubic.out",
-          });
-        }
+        // reset at the top of this build, so slice from the pre-create mark);
+        // they all sit at the tile's x, so they settle at pos.x too.
+        slidePageIn(
+          scene,
+          [...this.stickerImages.slice(stickerMark), ...this.emptySlotGraphics.slice(slotMark)],
+          pos.x,
+        );
       }
     });
 
@@ -436,15 +415,7 @@ export class HubGrid {
     ] as Array<Phaser.GameObjects.GameObject & { x: number }>;
     const canvasWidth = scene.cameras.main.width;
     this.buildPageGrid(page, direction * canvasWidth);
-    const shift = -direction * canvasWidth;
-    for (const obj of outgoing) {
-      scene.tweens.add({
-        targets: obj,
-        x: obj.x + shift,
-        duration: PAGE_SLIDE_DURATION,
-        ease: "Cubic.in",
-      });
-    }
+    slidePageOut(scene, outgoing, -direction * canvasWidth);
     scene.time.delayedCall(PAGE_SLIDE_DURATION, () => {
       for (const obj of outgoing) obj.destroy();
     });
@@ -452,23 +423,21 @@ export class HubGrid {
 
   /** Re-paints the page dots to highlight the active page. */
   updatePageDots(): void {
-    this.pageDots.forEach((dot, page) => {
-      dot.setAlpha(page === this.hubPage ? PAGE_DOT_ACTIVE_ALPHA : PAGE_DOT_INACTIVE_ALPHA);
-    });
+    paintPageDots(this.pageDots, this.hubPage);
   }
 
-  /** Creates the two textless page dots below the paged grid. */
+  /** Creates the textless page dots below the paged grid. */
   createPageDots(): void {
     const scene = this.deps.scene;
     const pages = pageCount();
     for (let page = 0; page < pages; page++) {
       const dot = scene.add.circle(
-        scene.cameras.main.width / 2 + (page - (pages - 1) / 2) * PAGE_DOTS_SPACING,
+        pageDotX(page, pages, scene.cameras.main.width),
         PAGE_DOTS_Y,
         PAGE_DOTS_RADIUS,
-        0x2d3748,
+        PAGE_DOT_COLOR,
       );
-      dot.setAlpha(page === this.hubPage ? PAGE_DOT_ACTIVE_ALPHA : PAGE_DOT_INACTIVE_ALPHA);
+      dot.setAlpha(pageDotAlpha(page, this.hubPage));
       dot.setInteractive({
         hitArea: new Phaser.Geom.Rectangle(
           -PAGE_DOT_HIT / 2,
@@ -494,40 +463,17 @@ export class HubGrid {
     if (this.swipeWired) return;
     this.swipeWired = true;
     const scene = this.deps.scene;
-    const first = pagedTilePosition(0);
-    const last = pagedTilePosition(9);
-    const gridLeft = first.x - first.width / 2;
-    const gridRight = last.x + last.width / 2;
-    const gridTop = first.y - first.height / 2;
-    const gridBottom = last.y + last.height / 2;
+    const region = swipeRegion();
     scene.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      this.swiping = false;
-      // An open overlay (profile picker / settings panel) owns the gesture;
-      // never start a page swipe underneath it.
-      if (this.deps.gestureBlocked()) return;
-      if (
-        pointer.x >= gridLeft &&
-        pointer.x <= gridRight &&
-        pointer.y >= gridTop &&
-        pointer.y <= gridBottom
-      ) {
-        this.swipeStart = { x: pointer.x, y: pointer.y };
-      }
+      this.swipes.begin(pointer, region, this.deps.gestureBlocked());
     });
     scene.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-      if (!this.swipeStart || this.swiping) return;
-      if (Math.abs(pointer.x - this.swipeStart.x) >= SWIPE_MIN_DISTANCE) {
-        this.swiping = true;
-      }
+      this.swipes.track(pointer);
     });
     scene.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      const start = this.swipeStart;
-      this.swipeStart = undefined;
-      if (!start) return;
-      const dx = pointer.x - start.x;
-      const dy = pointer.y - start.y;
-      if (Math.abs(dx) < SWIPE_MIN_DISTANCE || Math.abs(dx) <= Math.abs(dy)) return;
-      this.flipTo(this.hubPage + (dx < 0 ? 1 : -1));
+      const target = this.swipes.settle(pointer, this.hubPage);
+      if (target === null) return;
+      this.flipTo(target);
     });
   }
 

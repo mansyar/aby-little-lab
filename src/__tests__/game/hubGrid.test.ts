@@ -330,6 +330,38 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     expect(rects(176, 196).length).toBe(10);
   });
 
+  it("swaps pages instantly under reduced motion (no slide tweens)", () => {
+    const { deps, scene } = makeDeps();
+    stubMatchMedia(true);
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+    grid.buildPageGrid(0);
+
+    const firstPageTiles = rects(176, 196);
+
+    fireSceneInput(scene, "pointerdown", { x: 512, y: 300 });
+    fireSceneInput(scene, "pointerup", { x: 400, y: 300 });
+
+    // Reduced motion skips the slide-out: the outgoing page is destroyed
+    // before the incoming one builds, so every page-0 tile has its destroy()
+    // called and exactly one page's worth (10) of new tiles is created. The
+    // mock registry is append-only (destroy is a recording stub), so
+    // destruction is asserted per object rather than by registry count.
+    for (const tile of firstPageTiles) {
+      expect(tile.destroy).toHaveBeenCalled();
+    }
+    expect(rects(176, 196).length).toBe(firstPageTiles.length + 10);
+    const slides = (scene.tweens.add as MockFn).mock.calls.filter(
+      (call) =>
+        (call[0] as { ease?: string }).ease === "Cubic.in" ||
+        (call[0] as { ease?: string }).ease === "Cubic.out",
+    );
+    expect(slides.length).toBe(0);
+  });
+
   it("re-arms swipe wiring after a scene shutdown (revisit)", () => {
     const { deps, scene } = makeDeps();
     const grid = new HubGrid(deps);

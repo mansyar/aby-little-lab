@@ -2,10 +2,12 @@ import { textureSizeFor } from "../../utils/textureTiers";
 
 /**
  * Shared named constants for the Hub tile grid, extracted from the
- * `hubGrid.ts` orchestrator. Concern-specific constants (sticker shelf,
- * page slide/dots/swipe, time-up dimming) still live beside their inline
- * code in `hubGrid.ts` and move with those extractions in later phases;
- * this module holds the layout/entrance constants every grid concern reads.
+ * `hubGrid.ts` orchestrator. Concern-specific constants live beside their
+ * concern's code: the sticker shelf and time-up dimming constants are still
+ * inline in `hubGrid.ts` (they move with those extractions in a later
+ * phase), and the paged interaction constants (page slide/dots/swipe) live
+ * in `src/game/hub/pageBoard.ts`; this module holds the layout/entrance
+ * constants every grid concern reads.
  */
 
 /** Wide (6x4) grid tile size and spacing (px). */
