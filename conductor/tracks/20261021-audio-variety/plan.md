@@ -80,12 +80,16 @@ The primary appends after acceptance:
   `src/__tests__/game/audioIdentity.test.ts`,
   `conductor/tracks/20261021-audio-variety/verification/*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: User-audited tuning pass** — covers: FR-4, AC-4
-  - [ ] **P3.T1.1: Batched listen pass with the user (game families), table adjustments applied and recorded**
-- [ ] **P3.T2: Full gate** — covers: NFR-3, NFR-4, NFR-5, AC-4
-  - [ ] **P3.T2.1: Run the full verify_phase gate; record coverage (95/88/85/90), bundle headroom, and PWA results in evidence**
+**Result:** verified
+**Checkpoint:** ba10a2c
+**Evidence:** conductor/tracks/20261021-audio-variety/verification/phase-3.md
+
+- [x] **P3.T1: User-audited tuning pass** - covers: FR-4, AC-4
+  - [x] **P3.T1.1: Batched listen pass with the user (game families), table adjustments applied and recorded** — outcome: user verdict "All good as-is"; formula defaults ship as final, no table adjustments needed
+- [x] **P3.T2: Full gate** - covers: NFR-3, NFR-4, NFR-5, AC-4
+  - [x] **P3.T2.1: Run the full verify_phase gate; record coverage (95/88/85/90), bundle headroom, and PWA results in evidence**
 
 <!--
 The primary appends after acceptance:
