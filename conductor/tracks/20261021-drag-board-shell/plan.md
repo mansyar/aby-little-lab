@@ -43,12 +43,15 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, AC-1, AC-2
 - **Touches:** `src/scenes/StoryOrderScene.ts`, `src/__tests__/scenes/StoryOrder*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run` (Story Order suite assertions unchanged except re-wiring)
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** 7996475
+**Evidence:** conductor/tracks/20261021-drag-board-shell/verification/phase-2.md
 
-- [ ] **P2.T1: Replace Story Order's hand-rolled scaffolding with DragBoard** — covers: FR-2
-  - [ ] **P2.T1.1: Migrate slot registration, hover, snapping, tap-withdraw; preserve `key|key|key` signature guard**
-  - [ ] **P2.T1.2: Preserve retry-in-place wiggle + panel-stays-where-placed behavior**
-- [ ] **P2.T2: Mechanically re-wire Story Order tests to the shell; confirm all assertions pass unchanged** — covers: NFR-2
+- [x] **P2.T1: Replace Story Order's hand-rolled scaffolding with DragBoard** — covers: FR-2
+  - [x] **P2.T1.1: Migrate slot registration, hover, snapping, tap-withdraw; preserve `key|key|key` signature guard**
+  - [x] **P2.T1.2: Preserve retry-in-place wiggle + panel-stays-where-placed behavior**
+- [x] **P2.T2: Mechanically re-wire Story Order tests to the shell; confirm all assertions pass unchanged** — covers: NFR-2
 
 ## Phase 3: Rewire Number Order onto the shell
 
