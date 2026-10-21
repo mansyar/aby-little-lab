@@ -14,11 +14,11 @@
   "base_sha": "9976057d5739f8a77aa14590f1964cf5c3a29bbb",
   "progress": {
     "phases_total": 4,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 8,
-    "tasks_done": 2
+    "tasks_done": 4
   },
-  "last_checkpoint": "c8f3b33",
+  "last_checkpoint": "d16d4b7",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",
