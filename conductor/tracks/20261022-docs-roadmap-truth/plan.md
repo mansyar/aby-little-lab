@@ -15,7 +15,7 @@
 - **Covers:** FR-1, FR-3, NFR-1, NFR-4, NFR-5, AC-1, AC-2, AC-3, AC-5
 - **Touches:** `docs/roadmap.md`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Create `docs/roadmap.md`** — covers: FR-3
   - [ ] **P1.T1.1:** Write the **Known Issues** section from the audit's standing
