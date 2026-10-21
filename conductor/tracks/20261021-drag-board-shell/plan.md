@@ -60,7 +60,7 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, AC-1, AC-2
 - **Touches:** `src/scenes/NumberOrderScene.ts`, `src/__tests__/scenes/NumberOrder*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Replace Number Order's scaffolding with DragBoard** — covers: FR-2
   - [ ] **P3.T1.1: Migrate slot registration, hover, snapping; `tryAutoValidate` on drop preserved**
