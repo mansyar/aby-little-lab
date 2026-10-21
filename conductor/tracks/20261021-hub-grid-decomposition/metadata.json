@@ -2,7 +2,7 @@
   "id": "20261021-hub-grid-decomposition",
   "title": "Hub Grid Decomposition",
   "type": "refactor",
-  "status": "new",
+  "status": "in_progress",
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-21T00:00:00Z",
