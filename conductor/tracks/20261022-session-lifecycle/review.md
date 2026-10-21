@@ -3,9 +3,9 @@
 - **Track:** `20261022-session-lifecycle`
 - **Type:** `bug`
 - **Branch:** `fix/20261022-session-lifecycle`
-- **Range:** `cbf017ecf9eaf65e4fda5a1e8a2efc635193cc5d..b325250`
+- **Range:** `cbf017ecf9eaf65e4fda5a1e8a2efc635193cc5d..a91165f`
 - **Date:** 2026-10-22
-- **Verdict:** `PASS WITH FINDINGS`
+- **Verdict:** `PASS` (round 2 — round 1 returned PASS WITH FINDINGS; all five findings fixed in Phase R1, one new Low finding fixed in the doc sync)
 
 ## Summary
 
@@ -249,16 +249,47 @@ implemented and verified by a phase evidence file:
 
 ## Debt
 
-- <none — every finding is fixed in Phase R1; nothing was deferred>
+- <none — every finding is fixed; nothing was deferred>
 
 ## Doc sync
 
-`pending` — the post-review documentation sync runs after Phase R1 and will
-cover the two files this track touched (`docs/PRD.md` §4.8, `docs/TDD.md`
-§7.3), including the F3 correction in both.
+`updated` — the post-review documentation sync covers:
+
+- `docs/PRD.md` §4.8 and `docs/TDD.md` §7.3 — the adaptive-window description
+  rewritten for the abandoned-session flush, and the F3 correction in both
+  (the accuracy and the win count describe completed sessions; the play count
+  counts every game the child starts).
+- `docs/TDD.md` §4.5 — the `onWrong` / `handleIncorrect` sequencing corrected
+  to the restored order (tone → record → nod → `onWrong` → wiggle).
+- `src/game/progressLogic.ts`, `src/scenes/GameSceneBase.ts`,
+  `src/utils/storage.ts` — the same play-count claim corrected in the three
+  code comments that carried it.
+- `src/__tests__/scenes/gameSceneBase.test.ts` — the F6 comment corrected so
+  it describes the test's setup rather than contradicting the assertion under
+  it.
+
+## Round 2
+
+Round 2 re-reviewed the R1 diff (`d8429e6..a91165f`) and confirmed that all
+five round-1 findings are genuinely resolved — F1's fix restores the shipped
+order, F2 and F3's comments match the code, F4's helper now models Phaser's
+`once` semantics, and F5's renamed test matches its contract. It raised one
+new Low finding:
+
+- **F6 - A comment in the renamed shutdown test contradicts the assertion
+  beneath it** — `src/__tests__/scenes/gameSceneBase.test.ts`. The comment
+  claimed the abandoned session's taps "are flushed to the rolling window by
+  the shutdown path instead" while the line below asserted that the tap flush
+  was *not* called (the test never calls `init()`, which is where the flush
+  handler is registered). **Fixed** in the doc sync: the comment now explains
+  the test's setup and points at the "abandoned session flush" block, which
+  owns the abandoned-session contract. `pnpm check` exit 0 and the three
+  affected suites pass (59 tests).
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 4 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 0 | 6 |
+

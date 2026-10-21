@@ -446,11 +446,11 @@ isChoiceCorrect(index: number): boolean
 clearRoundContent(): void
 ```
 
-and may override `wiggleTargets(index)` (default: the tapped card's content), `onCorrect(index)` (before shared feedback), `onWrong(index)` (after it) and `onWiggleComplete(index)`.
+and may override `wiggleTargets(index)` (default: the tapped card's content), `onCorrect(index)` (before shared feedback), `onWrong(index)` (after the shared tone and the nod, before the wiggle completes) and `onWiggleComplete(index)`.
 
 Lifecycle: `renderRound()` = `clearRound()` + `buildRoundContent()`. `clearRound()` destroys every tracked object and empties `choiceTargets`, `cardContents` and `roundDisplayObjects`. `createChoiceTarget(x, y, size, index, shape?)` draws the card and registers `pointerdown` **before** `attachPressFeedback`, so the game handler always runs first. Hit areas are inflated to `MIN_HIT_AREA = 96` px and offset to stay centred, which keeps small cards tappable.
 
-Answer flow: `handleCorrect` locks input, plays the correct SFX, records the tap, runs `onCorrect`, cheers the mascot, fills the dot, flashes the card for `SUCCESS_FLASH_DURATION = 250` ms and schedules `advanceRound` after `NEXT_ROUND_DELAY`. `handleIncorrect` plays the incorrect SFX, records the tap, nods the mascot and wiggles the targets with `Sine.inOut`, then runs `onWrong`. `advanceRound` either completes the game or re-renders.
+Answer flow: `handleCorrect` locks input, plays the correct SFX, records the tap, runs `onCorrect`, cheers the mascot, fills the dot, flashes the card for `SUCCESS_FLASH_DURATION = 250` ms and schedules `advanceRound` after `NEXT_ROUND_DELAY`. `handleIncorrect` plays the incorrect SFX, records the tap, nods the mascot, runs `onWrong` and then wiggles the targets with `Sine.inOut`, releasing `onWiggleComplete` when the wiggle ends. `advanceRound` either completes the game or re-renders.
 
 `resolveWholeRound(correct)` is the whole-board variant used by Story Order: it routes to the same handlers with `WHOLE_ROUND = -1`, skipping the single-card flash; subclasses must supply `wiggleTargets` (and usually `onWiggleComplete`).
 

@@ -3,7 +3,7 @@
 - **Track:** 20261022-session-lifecycle — Session Lifecycle Integrity
 - **Branch:** fix/20261022-session-lifecycle
 - **Base:** master @ cbf017ecf9eaf65e4fda5a1e8a2efc635193cc5d
-- **Head:** 09e37a8 (phase 3 state commit)
+- **Head:** a91165f (the review-fix phase, plus the post-review doc sync)
 - **Date:** 2026-10-22
 - **Result:** verified
 
@@ -12,15 +12,19 @@
 The configured `verify_phase` gate is
 `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`.
 
+The numbers below are the **final** state, after Phase R1 (the review fixes).
+The gate was also run before Phase R1; that run is recorded in the per-phase
+evidence files.
+
 | Layer | Command | Exit | Summary |
 | --- | --- | --- | --- |
-| static | `pnpm check` | 0 | 246 files checked. 1 warning (`src/__tests__/scenes/musicalMemoryScene.test.ts:294`, non-null assertion) and 1 info (`biome.json` `$schema` 2.5.5 vs CLI 2.5.10). Both predate this track, in files this track does not touch, and are unchanged. |
+| static | `pnpm check` | 0 | 247 files checked. 1 warning (`src/__tests__/scenes/musicalMemoryScene.test.ts:294`, non-null assertion) and 1 info (`biome.json` `$schema` 2.5.5 vs CLI 2.5.10). Both predate this track, in files this track does not touch, and are unchanged. |
 | static | `pnpm typecheck` | 0 | `tsc --noEmit` clean. |
 | unit | `pnpm test -- --run` | 1 | 7 failed files / 10 failed tests — **every one a wall-clock timeout** (5,000 / 15,000 / 20,000 ms) in files this track does not touch. No assertion failure. The failing set differs between runs. |
-| unit | `pnpm test -- --run --maxWorkers=2` | 0 | **117 test files passed, 2486 tests passed, 0 failed** (the documented fallback for this machine). |
-| unit | `pnpm test:coverage -- --maxWorkers=2` | 0 | 117 files / 2486 tests passed. Coverage: **Statements 97.92%** (gate 90), **Branches 91.62%** (gate 85), **Functions 96.58%** (gate 88), **Lines 98.69%** (gate 95). All four gates hold, and all four are above the previous track's figures. |
+| unit | `pnpm test -- --run --maxWorkers=2` | 0 | **118 test files passed, 2488 tests passed, 0 failed** (the documented fallback for this machine). |
+| unit | `pnpm test:coverage -- --maxWorkers=2` | 0 | 118 files / 2488 tests passed. Coverage: **Statements 97.92%** (gate 90), **Branches 91.62%** (gate 85), **Functions 96.58%** (gate 88), **Lines 98.69%** (gate 95). All four gates hold. |
 | build-artifact | `pnpm build` | 0 | Build succeeded. |
-| build-artifact | `node scripts/validate-bundle.js` | 0 | Phaser vendor chunk present (`phaser-P1E8uaLi.js`, 1342.6 kB); shell entry `index-BZo7qqQ3.js` = **134.6 kB** (≤ 200 kB). |
+| build-artifact | `node scripts/validate-bundle.js` | 0 | Phaser vendor chunk present (`phaser-P1E8uaLi.js`, 1342.6 kB); shell entry `index-BrQ7goBH.js` = **134.6 kB** (≤ 200 kB). |
 | build-artifact | `node scripts/validate-pwa.js` | 0 | **16 passed, 0 failed.** |
 
 The `--maxWorkers=2` variant of the two test segments is accepted under the
@@ -44,6 +48,8 @@ under the stabilized form. No test code was changed to work around a timeout.
 - `conductor/tracks/20261022-session-lifecycle/verification/phase-1.md` — Progress-Dot Lifecycle
 - `conductor/tracks/20261022-session-lifecycle/verification/phase-2.md` — One Reaction, One Registration
 - `conductor/tracks/20261022-session-lifecycle/verification/phase-3.md` — Abandoned Session Reaches the Adaptive Window
+- `conductor/tracks/20261022-session-lifecycle/verification/phase-R1.md` — Review Fixes
+- `conductor/tracks/20261022-session-lifecycle/review.md` — the review, round 1 and round 2
 - `.conductor/evidence/20261022-session-lifecycle/` — raw failing-run logs (gitignored)
 
 ## Deviations

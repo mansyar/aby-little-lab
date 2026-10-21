@@ -708,8 +708,10 @@ describe("GameSceneBase scaffold", () => {
       expect(handler).toBeDefined();
       handler?.();
 
-      // The completed result is not written; the abandoned session's taps are
-      // flushed to the rolling window by the shutdown path instead.
+      // The completed result is not written. The tap flush is a separate
+      // shutdown handler, registered in init(), which this test does not call
+      // — the abandoned-session flush is covered by the "abandoned session
+      // flush" block below.
       expect(mockRecordGameResult).not.toHaveBeenCalled();
       expect(mockRecordGameTaps).not.toHaveBeenCalled();
     });
