@@ -1,0 +1,32 @@
+{
+  "id": "20261022-session-lifecycle",
+  "title": "Session Lifecycle Integrity",
+  "type": "bug",
+  "status": "new",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-22T00:00:00Z",
+  "updated_at": "2026-10-22T00:00:00Z",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "fix/20261022-session-lifecycle",
+  "base_branch": "master",
+  "base_sha": "cbf017ecf9eaf65e4fda5a1e8a2efc635193cc5d",
+  "progress": {
+    "phases_total": 3,
+    "phases_verified": 0,
+    "tasks_total": 7,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}
