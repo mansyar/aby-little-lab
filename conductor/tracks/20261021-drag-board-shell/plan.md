@@ -127,7 +127,7 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** F1, F2
 - **Touches:** `src/game/dragBoard.ts`, `src/scenes/NumberOrderScene.ts`, `src/__tests__/game/dragBoard.test.ts`, `src/__tests__/scenes/numberOrderScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1 — restore exact bounce-home duration parity for Number Order** — covers: F1
 - [ ] **R1.T2: Resolve F2 — justify the shell's type assertion** — covers: F2
