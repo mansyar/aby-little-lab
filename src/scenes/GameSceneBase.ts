@@ -18,7 +18,13 @@ import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { transitionToScene } from "../utils/sceneTransitions";
 import { speakSentence } from "../utils/speech";
-import { earnSticker, getSettings, hasSticker, recordGameResult } from "../utils/storage";
+import {
+  earnSticker,
+  getSettings,
+  hasSticker,
+  recordGameResult,
+  recordGameTaps,
+} from "../utils/storage";
 import { displayScale } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
@@ -134,6 +140,13 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /** Scene key this scene was constructed with; used to resolve the registry entry. */
   private readonly constructedSceneKey: string;
 
+  /**
+   * Game id this scene resolved to in the registry, or undefined for a scene
+   * that is not a game. The shutdown flush needs it to know which game the
+   * pending taps belong to.
+   */
+  private resolvedGameId?: GameId;
+
   constructor(key: string) {
     super({ key });
     this.constructedSceneKey = key;
@@ -145,15 +158,42 @@ export abstract class GameSceneBase extends Phaser.Scene {
    * feedback trio (correct / incorrect / win) can take on the game's voice.
    * Scenes not in the registry keep the default voice. The context is dropped
    * on shutdown because scene instances are reused across visits.
+   *
+   * The same shutdown carries the pending taps of an abandoned session into
+   * the rolling adaptive window: a child who backs out mid-game still made
+   * those taps, so they still inform the next difficulty shift.
    */
   init(): void {
     const entry = GAME_REGISTRY.find((game) => game.sceneKey === this.constructedSceneKey);
     if (entry) {
+      this.resolvedGameId = entry.gameId;
       this.audioManager.setGameContext(entry.gameId);
     }
     this.events.once("shutdown", () => {
       this.audioManager.clearGameContext();
     });
+    this.events.once("shutdown", () => {
+      this.flushPendingTaps();
+    });
+  }
+
+  /**
+   * Folds an abandoned session's taps into the rolling adaptive window.
+   *
+   * Only the window moves: the cumulative counters, the win count and the
+   * play count describe completed sessions. The session counters are zeroed
+   * after the write because scene instances are reused across visits — left
+   * standing, the next visit would carry this visit's taps and report them a
+   * second time. A completed session has already zeroed them, so it is never
+   * flushed twice.
+   */
+  private flushPendingTaps(): void {
+    const gameId = this.resolvedGameId;
+    if (gameId === undefined) return;
+    if (this.sessionCorrect === 0 && this.sessionWrong === 0) return;
+    recordGameTaps(gameId, this.sessionCorrect, this.sessionWrong);
+    this.sessionCorrect = 0;
+    this.sessionWrong = 0;
   }
 
   /**

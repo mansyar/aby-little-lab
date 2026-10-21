@@ -77,21 +77,44 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-/** Spy on recordGameResult (calls through to the real implementation). */
-const { mockRecordGameResult } = vi.hoisted(() => ({
+/** Spies on the storage writers (calls through to the real implementation). */
+const { mockRecordGameResult, mockRecordGameTaps, storageHolder } = vi.hoisted(() => ({
   mockRecordGameResult: vi.fn(),
+  mockRecordGameTaps: vi.fn(),
+  storageHolder: { actual: undefined as undefined | typeof import("../../utils/storage") },
 }));
 
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();
-  mockRecordGameResult.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
-    actual.recordGameResult(gameId, correct, wrong);
-  });
-  return { ...actual, recordGameResult: mockRecordGameResult };
+  storageHolder.actual = actual;
+  return {
+    ...actual,
+    recordGameResult: mockRecordGameResult,
+    recordGameTaps: mockRecordGameTaps,
+  };
 });
 
+/**
+ * Points the spies at the real storage writers. The suite restores all mocks
+ * after every test, so the call-through is re-armed before each one.
+ */
+function spyThroughRealStorage(): void {
+  mockRecordGameResult.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
+    storageHolder.actual?.recordGameResult(gameId, correct, wrong);
+  });
+  mockRecordGameTaps.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
+    storageHolder.actual?.recordGameTaps(gameId, correct, wrong);
+  });
+}
+
 import { GameSceneBase } from "../../scenes/GameSceneBase";
-import { earnSticker, hasSticker, updateSettings } from "../../utils/storage";
+import {
+  earnSticker,
+  getProgress,
+  hasSticker,
+  recordGamePlay,
+  updateSettings,
+} from "../../utils/storage";
 
 /**
  * Every scene module, read as text.
@@ -236,6 +259,7 @@ describe("GameSceneBase scaffold", () => {
     localStorage.clear();
     mockParentLockInstances.length = 0;
     mockParentLockOptions.length = 0;
+    spyThroughRealStorage();
     for (const fn of Object.values(mockAudio)) {
       fn.mockClear();
     }
@@ -684,6 +708,99 @@ describe("GameSceneBase scaffold", () => {
       handler?.();
 
       expect(mockRecordGameResult).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("abandoned session flush", () => {
+    beforeEach(() => {
+      mockRecordGameResult.mockClear();
+      mockRecordGameTaps.mockClear();
+    });
+
+    it("resolves the game id from the registry and flushes the pending taps on shutdown", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).toHaveBeenCalledTimes(1);
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1);
+    });
+
+    it("folds the abandoned taps into the rolling window and nothing else", () => {
+      // A completed session before this one: its cumulative counters stay.
+      mockRecordGameResult("shape-sorter", 5, 1);
+      recordGamePlay("shape-sorter");
+
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+
+      scene.events.emit("shutdown");
+
+      const progress = getProgress()["shape-sorter"];
+      // The window grew by the abandoned session's three taps.
+      expect(progress.recent).toEqual([true, true, true, true, true, false, true, true, false]);
+      // The cumulative counters, the win count and the play count did not.
+      expect(progress.correct).toBe(5);
+      expect(progress.wrong).toBe(1);
+      expect(progress.wins).toBe(1);
+      expect(progress.plays).toBe(1);
+    });
+
+    it("zeroes the session counters so the next visit reports only its own taps", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+
+      scene.events.emit("shutdown");
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1);
+
+      // Second visit on the same scene instance: Phaser reuses it.
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testCompleteGame("shape-sorter");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0);
+    });
+
+    it("writes nothing at shutdown when the session was completed", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testCompleteGame("shape-sorter");
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0);
+      // The completed session already flushed its own taps: no second write.
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
+    });
+
+    it("writes nothing at shutdown when the session recorded no taps", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
+    });
+
+    it("writes nothing for a scene key that is not in the registry", () => {
+      const scene = new TestScene("TestScene");
+      scene.init();
+      scene.testRecordCorrect();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
     });
   });
 

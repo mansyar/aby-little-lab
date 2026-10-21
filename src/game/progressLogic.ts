@@ -92,6 +92,26 @@ export function recordResult(
   };
 }
 
+/**
+ * Folds a session's taps into the rolling window and nothing else.
+ *
+ * A session the child abandons still happened, so its taps still inform
+ * adaptive difficulty — but they must not touch the cumulative counters, the
+ * win count or the play count: those describe completed sessions only.
+ */
+export function recordTaps(
+  progress: Partial<GameProgress> | null | undefined,
+  taps: { correct: number; wrong: number },
+): GameProgress {
+  const p = normalizeProgress(progress);
+  const correct = Math.max(0, taps.correct);
+  const wrong = Math.max(0, taps.wrong);
+  return {
+    ...p,
+    recent: updateRecentWindow(p.recent, { correct, wrong }),
+  };
+}
+
 /** Correct-answer ratio (0..1), or null when no taps have been recorded. */
 export function getAccuracy(progress: Partial<GameProgress> | null | undefined): number | null {
   const p = normalizeProgress(progress);
