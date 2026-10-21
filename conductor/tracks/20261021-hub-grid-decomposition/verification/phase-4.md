@@ -18,7 +18,7 @@ nothing).
   It owns `HubGridDeps`, the object lists, input wiring (`wireSwipeGestures`),
   viewport classification, and the build/destroy lifecycle; every other
   concern delegates to `src/game/hub/` modules.
-- New module `src/game/hub/gridBuilder.ts` (324 lines): `destroyWideGrid`,
+- New module `src/game/hub/gridBuilder.ts` (317 lines): `destroyWideGrid`,
   `destroyPageGrid`, `buildWideGrid`, `buildPageGrid`, `createPageDots`,
   `rerenderStickerShelf`, and `flipTo` (the page-flip slide mechanics moved
   here from the orchestrator — gridBuilder already imports pageBoard and
@@ -75,6 +75,10 @@ uncapped full run earlier in the track.
   global and hold at 97.88 / 91.52 / 96.42 / 98.67).
 - FR-3 cleanup ledger across the track (final): named constants
   (BOB_SETTLE_DELAY, PAGE_DOT_COLOR), dead-code removals (2), comment-accuracy
-  edits (~10), renames confined to moved code. No timing dedup was applied —
+  edits (~10), renames confined to moved code. No timing dedup was applied -
   no visually-indistinguishable timing pairs were found beyond the ones
   already shared through the constants module.
+- Field visibility: `deps`, `entranceIndex`, and `swipes` were widened from
+  `private` to `public` so the `src/game/hub/` module functions can operate on
+  the HubGrid instance (type-only import, no runtime cycle). Inherent to the
+  extraction design; module exports and behavior unchanged.

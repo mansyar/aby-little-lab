@@ -49,7 +49,7 @@ export class HubGrid {
   emptySlotGraphics: Phaser.GameObjects.Graphics[] = [];
   /** Tiles used as wiggle targets by the attract cue. */
   attractTargets: Phaser.GameObjects.Rectangle[] = [];
-  /** The two textless page dots (paged mode only). */
+  /** The textless page dots (one per page; paged mode only). */
   pageDots: Phaser.GameObjects.Arc[] = [];
   /** True after a tile tap began navigation; blocks double-tap double-records. */
   navLocked = false;

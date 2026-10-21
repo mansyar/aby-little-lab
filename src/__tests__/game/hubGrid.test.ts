@@ -424,11 +424,15 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     grid.justEarned = "how-many";
     grid.buildPageGrid(0);
 
+    grid.flipTo(1);
+
+    // After flipTo(1), the page-1 shelf contains the just-earned sticker
+    // ("how-many" is game index 10 → page 1). Collect it now so the next
+    // transition's slide-out timer can be checked against it.
     const shelfStickers = mockRegistry.filter(
       (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
     );
-
-    grid.flipTo(1);
+    expect(shelfStickers.length).toBeGreaterThan(0);
 
     // The just-earned entrance tween targets the incoming page's shelf.
     const entrances = (scene.tweens.add as MockFn).mock.calls.filter(
@@ -450,7 +454,7 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
   });
 
   it("releases every grid object on shutdown", () => {
-    earnSticker("shape-sorter");
+    earnSticker("how-many"); // page 1 game, so the built shelf includes its sticker image
     const { deps, scene } = makeDeps();
     const grid = new HubGrid(deps);
     narrowViewport(scene);
@@ -458,6 +462,9 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     grid.buildPageGrid(1);
 
     const built = mockRegistry.slice();
+    expect(
+      built.some((obj) => obj.kind === "image" && String(obj.args?.[2]).startsWith("sticker_")),
+    ).toBe(true);
     grid.destroy();
 
     for (const obj of built) {
