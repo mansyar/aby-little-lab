@@ -63,7 +63,7 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, AC-1, AC-3
 - **Touches:** `src/game/hub/**`, `src/game/hubGrid.ts`, `src/__tests__/game/hub/**`, `src/__tests__/game/hubGrid*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Extract the sticker shelf** — covers: FR-1, FR-4
   - [ ] **P3.T1.1: Extract sparkle/burst logic into a src/game/hub/ module; orchestrator delegates**
