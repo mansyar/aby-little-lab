@@ -17,29 +17,33 @@
   `src/scenes/FeelingsFacesScene.ts`, `src/scenes/ShapeSorterScene.ts`,
   `src/scenes/PatternBuilderScene.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P1.T1: Write the failing second-visit regression test** — covers: FR-1, AC-1
-  - [ ] **P1.T1.1:** In `src/__tests__/scenes/gameSceneBase.test.ts`, add a test
+- [x] **P1.T1: Write the failing second-visit regression test** — covers: FR-1, AC-1
+  - [x] **P1.T1.1:** In `src/__tests__/scenes/gameSceneBase.test.ts`, add a test
     that uses the existing `TestScene` scaffold: create dots, emit the scene's
     `shutdown` event, create the dots again on the same instance, then assert
     that the tracked set holds only the current visit's dots and that
     `fillProgressDot(0)` targets the current visit's dot (the mock object
     records `setAlpha` calls).
-  - [ ] **P1.T1.2:** Run the new test against the unmodified base and record
+  - [x] **P1.T1.2:** Run the new test against the unmodified base and record
     that it fails for the right reason — the tracked set still holds the
     previous visit's entries at the low indices, so the fill lands on a stale
     dot.
-- [ ] **P1.T2: Move progress-dot ownership into the base class** — covers: FR-1, AC-2
-  - [ ] **P1.T2.1:** `createProgressDots` replaces any previous set instead of
+- [x] **P1.T2: Move progress-dot ownership into the base class** — covers: FR-1, AC-2
+  - [x] **P1.T2.1:** `createProgressDots` replaces any previous set instead of
     appending to it, and the shutdown path releases the array so the scene
     holds no references to destroyed objects.
-  - [ ] **P1.T2.2:** Delete the four now-redundant per-scene resets
+  - [x] **P1.T2.2:** Delete the four now-redundant per-scene resets
     (`AnimalTraceScene.ts:128`, `FeelingsFacesScene.ts:98`,
     `ShapeSorterScene.ts:98`, `PatternBuilderScene.ts:100`) — the base now
     guarantees the invariant for all 22 games.
-  - [ ] **P1.T2.3:** Re-run the regression test and the phase verification
+  - [x] **P1.T2.3:** Re-run the regression test and the phase verification
     command; confirm the new test passes and no existing test changed outcome.
+
+**Result:** verified
+**Checkpoint:** 0e229e5
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-1.md
 
 ## Phase 2: One Reaction, One Registration
 
@@ -101,7 +105,7 @@
   `src/__tests__/utils/storage.test.ts`,
   `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** pending
 
 - [ ] **P3.T1: Add a narrow tap-recording path** — covers: FR-3
   - [ ] **P3.T1.1:** Add a pure function to `src/game/progressLogic.ts` that
