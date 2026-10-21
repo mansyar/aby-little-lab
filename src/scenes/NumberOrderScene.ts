@@ -1,10 +1,10 @@
 import Phaser from "phaser";
 import { numerals } from "../game/art/numerals";
+import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import { buildPlaythrough, isCorrect } from "../game/numberOrderLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { attachDragLift, snapToSlot } from "../utils/dragJuice";
-import { motionDuration } from "../utils/motion";
+import { attachDragLift } from "../utils/dragJuice";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakNumber } from "../utils/speech";
 import { getAdaptiveBandShift, getSettings } from "../utils/storage";
@@ -19,25 +19,11 @@ const DROP_ZONE_SIZE = 160;
 const NUMERAL_SINGLE_SIZE = 80;
 const NUMERAL_TEN_SIZE = 56;
 const NUMERAL_TEN_OFFSET = 22;
-const BOUNCE_DURATION = 300;
-const BOUNCE_REDUCED_DURATION = 180;
 
-interface NumeralCard {
-  container: Phaser.GameObjects.Container;
+/** A draggable numeral card registered with the shared drag board. */
+interface NumeralCard extends BoardPiece {
   bg: Phaser.GameObjects.Rectangle;
   numeral: number;
-  originX: number;
-  originY: number;
-  slotIndex: number | null;
-  justDropped: boolean;
-}
-
-interface Slot {
-  zone: Phaser.GameObjects.Zone;
-  outline: Phaser.GameObjects.Graphics;
-  x: number;
-  y: number;
-  occupiedBy: NumeralCard | null;
 }
 
 /**
@@ -46,11 +32,17 @@ interface Slot {
  * bottom slot row to produce ascending order. Tap a numeral to hear it.
  * The whole board is the answer, so it reports through
  * {@link resolveWholeRound}: correct advances, wrong wiggles and bounces home.
+ *
+ * All slot registration, hover tracking, snapping, slot↔slot swaps,
+ * tray↔slot displacement, tap-to-return, and missed-drop corrections live in
+ * the shared {@link DragBoard} shell; this scene renders the dashed slot
+ * outlines, speaks taps, and validates the board — per-drop timing, where the
+ * scene answers only once every slot is filled.
  */
 export class NumberOrderScene extends ChoiceRoundScene {
   private rounds: ReturnType<typeof buildPlaythrough> = [];
   private cards: NumeralCard[] = [];
-  private slots: Slot[] = [];
+  private board: DragBoard<NumeralCard> | null = null;
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
 
   constructor() {
@@ -65,6 +57,26 @@ export class NumberOrderScene extends ChoiceRoundScene {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
+
+    // Behavior preservation: Number Order has always run tap-to-return with
+    // no movement threshold (any pointerup on a placed card returns it), so
+    // the shell's default 10 px tap-vs-drag slack is switched off here
+    // instead of silently adopted.
+    this.board?.destroy();
+    this.board = new DragBoard<NumeralCard>({
+      scene: this,
+      zoneSize: DROP_ZONE_SIZE,
+      wrongAnswerBehavior: "bounce-home",
+      validationTiming: "per-drop",
+      tapWithdraw: true,
+      dragDistanceThreshold: 0,
+      isLocked: () => this.inputLocked,
+      callbacks: {
+        onTap: (card) => speakNumber(card.numeral, getSettings().sfxEnabled),
+        onValidate: (placedIds) => this.validateBoard(placedIds),
+      },
+    });
+
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the numbers in order, smallest first.");
 
@@ -85,7 +97,7 @@ export class NumberOrderScene extends ChoiceRoundScene {
 
   /**
    * This game has no choice cards — the filled board is the answer, so nothing
-   * ever asks whether one card is correct. See {@link tryAutoValidate}.
+   * ever asks whether one card is correct. See {@link validateBoard}.
    */
   protected isChoiceCorrect(): boolean {
     return false;
@@ -94,7 +106,8 @@ export class NumberOrderScene extends ChoiceRoundScene {
   /** Renders the dashed slot row and the shuffled source cards above it. */
   protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
-    if (!round) return;
+    const board = this.board;
+    if (!round || !board) return;
 
     const count = round.shuffled.length;
     const slotPositions = this.computePositions(count, this.scale.width);
@@ -111,9 +124,7 @@ export class NumberOrderScene extends ChoiceRoundScene {
       this.drawDashedRect(outline, -CARD_WIDTH / 2, -CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT);
       this.roundObjects.push(outline);
 
-      const zone = this.add.zone(sx, SLOT_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
-      zone.setInteractive({ dropZone: true });
-      this.slots.push({ zone, outline, x: sx, y: SLOT_Y, occupiedBy: null });
+      board.addSlot(sx, SLOT_Y);
     }
 
     // Cards (top shuffled)
@@ -141,30 +152,19 @@ export class NumberOrderScene extends ChoiceRoundScene {
     this.clearRoundContent();
   }
 
-  /** Drops the slot row and the card list. */
+  /**
+   * Removes everything built for the current round. The drop zones are owned
+   * by the shared drag board (whose clear tolerates already-gone zones), so
+   * only the scene-owned card list is reset here.
+   */
   protected clearRoundContent(): void {
-    for (const slot of this.slots) {
-      try {
-        slot.zone.destroy();
-        slot.outline.destroy();
-      } catch {
-        // Already destroyed — keep going.
-      }
-    }
-    this.slots = [];
+    this.board?.clear();
     this.cards = [];
   }
 
   /** A wrong board wiggles the placed cards, not a tapped card. */
   protected override wiggleTargets(): Phaser.GameObjects.GameObject[] {
-    const targets: Phaser.GameObjects.GameObject[] = [];
-    for (const slot of this.slots) {
-      const card = slot.occupiedBy;
-      if (card) {
-        targets.push(card.container);
-      }
-    }
-    return targets;
+    return (this.board?.placedPieces() ?? []).map((card) => card.container);
   }
 
   /**
@@ -178,29 +178,19 @@ export class NumberOrderScene extends ChoiceRoundScene {
 
   /** Bounces every placed card home once the wiggle has finished. */
   protected override onWiggleComplete(): void {
-    for (const slot of this.slots) {
-      const card = slot.occupiedBy;
-      if (card) {
-        this.tweens.add({
-          targets: card.container,
-          x: card.originX,
-          y: card.originY,
-          duration: motionDuration(250, 150),
-          ease: "Back.out",
-        });
-        card.slotIndex = null;
-        card.bg.setFillStyle(this.CARD_BG_COLOR, 1);
-      }
-      slot.occupiedBy = null;
+    for (const card of this.board?.placedPieces() ?? []) {
+      card.bg.setFillStyle(this.CARD_BG_COLOR, 1);
     }
+    // The shell owns the bounce-home policy: every placed card tweens back to
+    // its source position and every slot frees.
+    this.board?.applyWrongAnswer();
     this.inputLocked = false;
   }
 
   /** Flashes the filled slots green and bursts a splash at the board center. */
   protected override onCorrect(): void {
-    for (const slot of this.slots) {
-      const card = slot.occupiedBy;
-      if (card) card.bg.setFillStyle(this.SUCCESS_COLOR, 1);
+    for (const card of this.board?.placedPieces() ?? []) {
+      card.bg.setFillStyle(this.SUCCESS_COLOR, 1);
     }
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
@@ -272,10 +262,9 @@ export class NumberOrderScene extends ChoiceRoundScene {
       hitArea: new Phaser.Geom.Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
-    // Phaser containers with setSize need explicit input enabled; also make draggable
-    this.input.setDraggable(container);
 
     const card: NumeralCard = {
+      id: String(numeral),
       container,
       bg,
       numeral,
@@ -288,79 +277,9 @@ export class NumberOrderScene extends ChoiceRoundScene {
     // Lift juice (visual)
     attachDragLift(container as unknown as Phaser.GameObjects.Image);
 
-    container.on("pointerdown", () => {
-      // A new gesture begins; only a pointerup from a gesture that dropped
-      // something is exempt from tap-to-return. Phaser fires dragstart before
-      // pointerdown, so this reset cannot live in dragstart.
-      card.justDropped = false;
-      if (this.inputLocked) return;
-      // Speak on any tap (SFX-gated, silent fallback)
-      speakNumber(numeral, getSettings().sfxEnabled);
-    });
-
-    container.on("pointerup", () => {
-      const justDropped = card.justDropped;
-      card.justDropped = false;
-      if (this.inputLocked) return;
-      // Tap-to-return: a drop's trailing pointerup is not a tap.
-      if (!justDropped && card.slotIndex !== null) {
-        this.returnCardToSource(card);
-      }
-    });
-
-    container.on("dragstart", () => {
-      if (this.inputLocked) return;
-      this.children.bringToTop(container);
-    });
-
-    container.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
-      if (this.inputLocked) return;
-      container.setPosition(dragX, dragY);
-    });
-
-    container.on("drop", (_pointer: unknown, target: unknown) => {
-      this.handleDrop(card, target as Phaser.GameObjects.Zone);
-    });
-
-    container.on("dragend", () => {
-      // The pointerup that follows this dragend belongs to the drag, not a tap.
-      card.justDropped = true;
-      // Validation/wiggle owns the board while locked — leave positions alone.
-      if (this.inputLocked) return;
-      // If not placed (i.e., dropped on empty area), bounce home
-      // For placed cards, handleDrop already snapped; dragend handles misses
-      if (card.slotIndex === null) {
-        // Card was at source and dropped on empty: snap back to origin (lift restores)
-        // The lift's dragend restores scale; we just ensure position
-        if (!this.isOverAnyZone(container.x, container.y)) {
-          this.tweens.add({
-            targets: container,
-            x: card.originX,
-            y: card.originY,
-            duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-            ease: "Back.out",
-          });
-        }
-      } else {
-        // Card is placed; if drop didn't result in valid zone change, it may need position correction
-        // But placed cards have slot position; if dragend without drop (missed zone), bounce to its slot position
-        const slot = this.slots[card.slotIndex];
-        if (slot && (container.x !== slot.x || container.y !== slot.y)) {
-          // Check if we already handled drop; if drop missed, return to slot center
-          if (!this.isOverAnyZone(container.x, container.y)) {
-            this.tweens.add({
-              targets: container,
-              x: slot.x,
-              y: slot.y,
-              duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-              ease: "Back.out",
-            });
-          }
-        }
-      }
-      // After any drag that resulted in full board, try auto-validate
-      this.tryAutoValidate();
-    });
+    // The shell owns every gesture handler — draggability, drops, swaps,
+    // displacement, tap-to-return, and the missed-drop corrections.
+    this.board?.addPiece(card);
 
     this.cards.push(card);
     this.roundObjects.push(
@@ -368,116 +287,18 @@ export class NumberOrderScene extends ChoiceRoundScene {
       ...numeralImages,
       container as unknown as Phaser.GameObjects.GameObject,
     );
-    // Avoid double-adding: container already contains bg/images, but we pushed them for destroy tracking separately.
-    // Keep cards list for lifecycle.
   }
 
-  private isOverAnyZone(x: number, y: number): boolean {
-    return this.slots.some((s) => {
-      const half = DROP_ZONE_SIZE / 2;
-      return x >= s.x - half && x <= s.x + half && y >= s.y - half && y <= s.y + half;
-    });
-  }
-
-  private handleDrop(card: NumeralCard, zone: Phaser.GameObjects.Zone): void {
-    if (this.inputLocked) return;
-    const destIdx = this.slots.findIndex((s) => s.zone === zone);
-    if (destIdx === -1) return;
-    const destSlot = this.slots[destIdx];
-    const srcIdx = card.slotIndex;
-
-    if (destSlot.occupiedBy === card) {
-      // Dropped back onto its own slot — just snap
-      snapToSlot(
-        this as unknown as Phaser.Scene,
-        card.container as unknown as Phaser.GameObjects.Image,
-        destSlot.x,
-        destSlot.y,
-      );
-      return;
-    }
-
-    if (destSlot.occupiedBy === null) {
-      // Empty slot — move
-      if (srcIdx !== null) {
-        this.slots[srcIdx].occupiedBy = null;
-      }
-      destSlot.occupiedBy = card;
-      card.slotIndex = destIdx;
-      snapToSlot(
-        this as unknown as Phaser.Scene,
-        card.container as unknown as Phaser.GameObjects.Image,
-        destSlot.x,
-        destSlot.y,
-      );
-    } else {
-      // Occupied — swap
-      const occupant = destSlot.occupiedBy;
-      if (srcIdx !== null) {
-        // Swap between two slots
-        const srcSlot = this.slots[srcIdx];
-        srcSlot.occupiedBy = occupant;
-        occupant.slotIndex = srcIdx;
-        destSlot.occupiedBy = card;
-        card.slotIndex = destIdx;
-        // Animate occupant to source slot
-        this.tweens.add({
-          targets: occupant.container,
-          x: srcSlot.x,
-          y: srcSlot.y,
-          duration: motionDuration(200, 120),
-          ease: "Back.out",
-        });
-        snapToSlot(
-          this as unknown as Phaser.Scene,
-          card.container as unknown as Phaser.GameObjects.Image,
-          destSlot.x,
-          destSlot.y,
-        );
-      } else {
-        // Dragged from source onto occupied slot — occupant returns to source origin
-        destSlot.occupiedBy = card;
-        card.slotIndex = destIdx;
-        occupant.slotIndex = null;
-        // occupant back to its source origin
-        this.tweens.add({
-          targets: occupant.container,
-          x: occupant.originX,
-          y: occupant.originY,
-          duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-          ease: "Back.out",
-        });
-        snapToSlot(
-          this as unknown as Phaser.Scene,
-          card.container as unknown as Phaser.GameObjects.Image,
-          destSlot.x,
-          destSlot.y,
-        );
-      }
-    }
-  }
-
-  private returnCardToSource(card: NumeralCard): void {
-    if (card.slotIndex === null) return;
-    const slot = this.slots[card.slotIndex];
-    if (slot) slot.occupiedBy = null;
-    card.slotIndex = null;
-    this.tweens.add({
-      targets: card.container,
-      x: card.originX,
-      y: card.originY,
-      duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-      ease: "Back.out",
-    });
-  }
-
-  /** Validates the board once every slot is filled; the base runs the answer. */
-  private tryAutoValidate(): void {
-    if (this.inputLocked) return;
-    if (this.slots.some((s) => s.occupiedBy === null)) return;
-    // All slots filled — validate
+  /**
+   * Validates a full board. The shell reports every drag end (per-drop
+   * timing); this scene answers only once every slot is filled — the base
+   * runs the answer.
+   */
+  private validateBoard(placedIds: readonly (string | null)[]): void {
+    if (placedIds.some((id) => id === null)) return;
     const round = this.rounds[this.roundIndex];
-    const placed = this.slots.map((s) => s.occupiedBy?.numeral ?? -1);
+    if (!round) return;
+    const placed = placedIds.map((id) => Number(id));
     this.resolveWholeRound(isCorrect(placed, round.solution));
   }
 }

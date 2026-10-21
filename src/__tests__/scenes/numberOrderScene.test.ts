@@ -175,6 +175,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   interface TestCard {
+    id: string;
     container: Record<string, MockFn> & { x?: number; y?: number };
     bg: Record<string, MockFn>;
     numeral: number;
@@ -186,15 +187,29 @@ describe("NumberOrderScene interactions", () => {
 
   interface TestSlot {
     zone: Record<string, MockFn>;
-    outline: Record<string, MockFn>;
     x: number;
     y: number;
     occupiedBy: TestCard | null;
   }
 
+  /**
+   * The drag board surface the tests exercise, viewed through the mock zone.
+   * Typed loosely on purpose: the real shell is generic over the scene's card
+   * type, whose mock containers only share the mock record shape.
+   */
+  interface TestBoard {
+    getSlots(): TestSlot[];
+    isOverAnyZone(x: number, y: number): boolean;
+  }
+
   function internals(scene: unknown): { cards: TestCard[]; slots: TestSlot[] } {
-    const s = scene as { cards: TestCard[]; slots: TestSlot[] };
-    return { cards: s.cards, slots: s.slots };
+    // Slots live on the shared drag board now; the scene keeps no local copy.
+    const s = scene as unknown as { cards: TestCard[]; board: TestBoard };
+    return { cards: s.cards, slots: s.board.getSlots() };
+  }
+
+  function boardOf(scene: unknown): TestBoard {
+    return (scene as unknown as { board: TestBoard }).board;
   }
 
   function handlersOf(
@@ -249,8 +264,8 @@ describe("NumberOrderScene interactions", () => {
 
   function drop(scene: unknown, card: TestCard, slotIndex: number): void {
     const { slots } = internals(scene);
-    (scene as { handleDrop: (c: TestCard, z: unknown) => void }).handleDrop(
-      card,
+    (lastHandler(card.container, "drop") as (pointer: unknown, zone: unknown) => void)(
+      undefined,
       slots[slotIndex].zone,
     );
   }
@@ -262,6 +277,14 @@ describe("NumberOrderScene interactions", () => {
       expect(card).toBeDefined();
       drop(scene, card as TestCard, i);
     }
+  }
+
+  function validate(scene: unknown): void {
+    // The shell validates when a drag ends; with no registered pieces no
+    // gesture can end, so an empty board cannot reach validation.
+    const cards = internals(scene).cards;
+    if (cards.length === 0) return;
+    (lastHandler(cards[0].container, "dragend") as () => void)();
   }
 
   function delayedCallbacks(scene: unknown): Array<() => void> {
@@ -367,8 +390,8 @@ describe("NumberOrderScene interactions", () => {
     expect(cards[0].slotIndex).toBeNull();
     expect(slots[0].occupiedBy).toBeNull();
     (scene as unknown as { inputLocked: boolean }).inputLocked = false;
-    (scene as unknown as { handleDrop: (c: TestCard, z: unknown) => void }).handleDrop(
-      cards[0],
+    (lastHandler(cards[0].container, "drop") as (pointer: unknown, zone: unknown) => void)(
+      undefined,
       {},
     );
     expect(cards[0].slotIndex).toBeNull();
@@ -380,8 +403,10 @@ describe("NumberOrderScene interactions", () => {
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
     expect(slots[0].occupiedBy).toBe(cards[0]);
-    const pointerup = lastHandler(cards[0].container, "pointerup");
-    pointerup();
+    // A clean tap fires only pointerdown/pointerup: a drop's trailing
+    // pointerup belongs to the gesture that dropped, not to a tap.
+    lastHandler(cards[0].container, "pointerdown")();
+    lastHandler(cards[0].container, "pointerup")();
     expect(cards[0].slotIndex).toBeNull();
     expect(slots[0].occupiedBy).toBeNull();
   });
@@ -447,7 +472,7 @@ describe("NumberOrderScene interactions", () => {
     scene.create();
     const round = getCurrentRound(scene);
     fillBoard(scene, round.solution);
-    (scene as unknown as { tryAutoValidate: () => void }).tryAutoValidate();
+    validate(scene);
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
     const callbacks = delayedCallbacks(scene);
@@ -464,7 +489,7 @@ describe("NumberOrderScene interactions", () => {
     fillBoard(scene, [...round.solution].reverse());
     // Guard: reversed must actually be wrong for distinct ascending solutions
     expect([...round.solution].reverse()).not.toEqual(round.solution);
-    (scene as unknown as { tryAutoValidate: () => void }).tryAutoValidate();
+    validate(scene);
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
     const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     const wiggle = tweens.mock.calls
@@ -482,7 +507,7 @@ describe("NumberOrderScene interactions", () => {
     scene.create();
     const { cards } = internals(scene);
     drop(scene, cards[0], 0);
-    (scene as unknown as { tryAutoValidate: () => void }).tryAutoValidate();
+    validate(scene);
     expect(mockAudio.playCorrect).not.toHaveBeenCalled();
     expect(mockAudio.playIncorrect).not.toHaveBeenCalled();
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
@@ -495,13 +520,12 @@ describe("NumberOrderScene interactions", () => {
       rounds: Array<{ solution: number[] }>;
       roundIndex: number;
       renderRound: () => void;
-      tryAutoValidate: () => void;
     };
     s.roundIndex = s.rounds.length - 1;
     s.renderRound();
     const last = s.rounds[s.roundIndex];
     fillBoard(scene, last.solution);
-    s.tryAutoValidate();
+    validate(scene);
     expect(mockAudio.playCorrect).toHaveBeenCalled();
     const callbacks = delayedCallbacks(scene);
     callbacks[callbacks.length - 1]();
@@ -528,40 +552,36 @@ describe("NumberOrderScene interactions", () => {
     scene.create();
     const s = scene as unknown as {
       roundObjects: Array<{ destroy: MockFn }>;
-      slots: Array<{ zone: { destroy: MockFn }; outline: { destroy: MockFn } }>;
+      board: { getSlots: () => Array<{ zone: { destroy: MockFn } }> };
       clearRound: () => void;
     };
     s.roundObjects[0].destroy = vi.fn(() => {
       throw new Error("boom");
     }) as unknown as MockFn;
-    s.slots[0].zone.destroy = vi.fn(() => {
-      throw new Error("boom");
-    }) as unknown as MockFn;
-    s.slots[0].outline.destroy = vi.fn(() => {
+    // The shell owns the drop zones; its clear tolerates an already-gone zone.
+    s.board.getSlots()[0].zone.destroy = vi.fn(() => {
       throw new Error("boom");
     }) as unknown as MockFn;
     expect(() => s.clearRound()).not.toThrow();
-    expect(s.slots).toHaveLength(0);
+    expect(s.board.getSlots()).toHaveLength(0);
   });
 
   it("detects whether a point is over any drop zone", () => {
     const scene = new NumberOrderScene();
     scene.create();
     const { slots } = internals(scene);
-    const s = scene as unknown as { isOverAnyZone: (x: number, y: number) => boolean };
-    expect(s.isOverAnyZone(slots[0].x, slots[0].y)).toBe(true);
-    expect(s.isOverAnyZone(-9999, -9999)).toBe(false);
+    const board = boardOf(scene);
+    expect(board.isOverAnyZone(slots[0].x, slots[0].y)).toBe(true);
+    expect(board.isOverAnyZone(-9999, -9999)).toBe(false);
   });
 
-  it("returnCardToSource is a no-op for source cards", () => {
+  it("pointerup on a source card returns nothing home", () => {
     const scene = new NumberOrderScene();
     scene.create();
     const { cards } = internals(scene);
     const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
     const before = tweens.mock.calls.length;
-    (scene as unknown as { returnCardToSource: (c: TestCard) => void }).returnCardToSource(
-      cards[0],
-    );
+    lastHandler(cards[0].container, "pointerup")();
     expect(tweens.mock.calls.length).toBe(before);
   });
 });
