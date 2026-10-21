@@ -111,10 +111,6 @@
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
 - **Status:** verified
 
-**Result:** verified
-**Checkpoint:** 48d81a8
-**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-3.md
-
 - [x] **P3.T1: Add a narrow tap-recording path** — covers: FR-3
   - [x] **P3.T1.1:** Add a pure function to `src/game/progressLogic.ts` that
     folds a session's correct/wrong taps into the rolling recent-tap window
@@ -137,6 +133,47 @@
     did not.
   - [x] **P3.T2.4:** Re-run the phase verification command; confirm every new
     test passes and no existing test changed outcome.
+
+**Result:** verified
+**Checkpoint:** 48d81a8
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-3.md
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1, F2, F3, F4, F5.
+- **Depends on:** Phase 3
+- **Covers:** F1, F2, F3, F4, F5
+- **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/ChoiceRoundScene.ts`, `src/game/progressLogic.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`, `src/__tests__/helpers/sceneFlowHarness.ts`, `src/__tests__/helpers/sceneFlowHarness.test.ts`, `docs/PRD.md`, `docs/TDD.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Status:** pending
+
+- [ ] **R1.T1: Restore the shipped order of the wrong-answer reaction** — covers: F1
+  - [ ] **R1.T1.1:** Give the base helper an explicit pre-wiggle callback so the
+    scene's `onWrong` hook runs after the incorrect tone, the wrong-tap count
+    and the mascot nod, and before the wiggle tween — the order the app
+    shipped before this track.
+  - [ ] **R1.T1.2:** Keep `onWrong` strictly before `onWiggleComplete`, including
+    the path where the base releases the completion synchronously because
+    there is nothing to wiggle.
+  - [ ] **R1.T1.3:** Add a test that records the order of the incorrect tone and
+    the subclass's `onWrong` hook, and assert the tone comes first.
+- [ ] **R1.T2: Correct the `onWrong` doc comment** — covers: F2
+  - [ ] **R1.T2.1:** Update the comment to state the restored contract: the
+    extras run after the shared tone and before the wiggle completes.
+- [ ] **R1.T3: Correct the play-count claim in all four places** — covers: F3
+  - [ ] **R1.T3.1:** Reword `docs/PRD.md` §4.8, `docs/TDD.md` §7.3,
+    `src/game/progressLogic.ts` and `src/scenes/GameSceneBase.ts` so they say
+    that the accuracy and the win count describe completed sessions, while the
+    play count still counts every game the child starts, abandoned or not.
+- [ ] **R1.T4: Make `triggerShutdown` model Phaser's `once` semantics** — covers: F4
+  - [ ] **R1.T4.1:** Drive the scene's own emitter (`events.emit("shutdown")`)
+    instead of walking the raw registration mocks, so a `once` handler that
+    has already fired is not invoked again.
+  - [ ] **R1.T4.2:** Add a helper test asserting that a `once` shutdown handler
+    fires once across two `triggerShutdown` calls.
+- [ ] **R1.T5: Rename the stale shutdown test** — covers: F5
+  - [ ] **R1.T5.1:** Rename the test to say it guards the *completed result*,
+    not the whole flush, and assert that the tap flush did not run.
 
 <!--
 The primary appends after acceptance:
