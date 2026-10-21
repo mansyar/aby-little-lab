@@ -254,9 +254,7 @@ export class ShadowMatchScene extends GameSceneBase {
   private handleDragEnd(data: ObjectData): void {
     if (!data.matched) {
       if (data.droppedOnZone) {
-        this.audioManager.playIncorrect();
-        this.recordWrong();
-        this.mascot?.nod();
+        this.reactWrong();
       }
       this.tweens.add({
         targets: data.obj,

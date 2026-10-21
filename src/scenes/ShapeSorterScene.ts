@@ -240,9 +240,7 @@ export class ShapeSorterScene extends GameSceneBase {
   private handleDragEnd(shape: ShapeData): void {
     if (!shape.placed) {
       if (shape.droppedOnZone) {
-        this.audioManager.playIncorrect();
-        this.recordWrong();
-        this.mascot?.nod();
+        this.reactWrong();
       }
       this.tweens.add({
         targets: shape.obj,

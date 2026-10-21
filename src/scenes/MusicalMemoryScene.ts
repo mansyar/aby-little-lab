@@ -253,9 +253,7 @@ export class MusicalMemoryScene extends GameSceneBase {
       }
     } else {
       this.inputIndex = result.nextIndex;
-      this.audioManager.playIncorrect();
-      this.recordWrong();
-      this.mascot?.nod();
+      this.reactWrong();
       this.playSequence();
     }
   }

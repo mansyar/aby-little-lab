@@ -10,7 +10,7 @@ import {
   type MemoryBand,
   type MemoryRound,
 } from "../game/memoryMatchLogic";
-import { isReducedMotion, motionDuration } from "../utils/motion";
+import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
@@ -270,21 +270,14 @@ export class MemoryMatchScene extends GameSceneBase {
    */
   private handleMismatch(first: number, second: number): void {
     this.inputLocked = true;
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
-
-    const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-    for (const index of [first, second]) {
-      this.tweens.add({
-        targets: [this.cardRects[index], this.cardBacks[index], this.cardFaces[index]],
-        angle,
-        duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-        yoyo: true,
-        repeat: this.WIGGLE_REPEATS,
-        ease: "Sine.inOut",
-      });
-    }
+    this.reactWrong([
+      this.cardRects[first],
+      this.cardBacks[first],
+      this.cardFaces[first],
+      this.cardRects[second],
+      this.cardBacks[second],
+      this.cardFaces[second],
+    ]);
 
     this.time.delayedCall(MISMATCH_PAUSE, () => {
       this.flipCard(first, false);
