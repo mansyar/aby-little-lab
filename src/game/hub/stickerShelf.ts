@@ -1,6 +1,11 @@
 import { isReducedMotion } from "../../utils/motion";
-import type { EntranceScene } from "./gridLayout";
-import { ENTRANCE_DURATION, ENTRANCE_STAGGER } from "./hubGridConstants";
+import { hasSticker } from "../../utils/storage";
+import { displayScale } from "../../utils/textureTiers";
+import { stickerKeyForGame } from "../gameRegistry";
+import type { HubGrid } from "../hubGrid";
+import { GAME_TILES } from "../hubTiles";
+import { animateEntrance, type EntranceScene } from "./gridLayout";
+import { ENTRANCE_DURATION, ENTRANCE_STAGGER, TILE_HEIGHT } from "./hubGridConstants";
 
 /**
  * Sticker-shelf presentation logic, extracted from the `hubGrid.ts`
@@ -213,4 +218,65 @@ export function animateJustEarned(
     config.onComplete = () => addJustEarnedBurst(scene, sticker, stickerScale);
   }
   scene.tweens.add(config);
+}
+
+/**
+ * Creates one shelf sticker thumbnail for the given tile, reflecting storage:
+ * an earned sticker gets its tier-scaled thumbnail (with the just-earned
+ * burst or the gentle entrance + sparkle), an unearned one gets the dashed
+ * empty-slot ring. Object creation moved here from the orchestrator; the
+ * sticker/slot lists and the entrance counter stay on the grid.
+ */
+export function createShelfSticker(
+  grid: HubGrid,
+  index: number,
+  x: number,
+  y: number,
+  tileHeight = TILE_HEIGHT,
+  shelfSize = STICKER_DISPLAY_SIZE,
+): void {
+  const scene = grid.deps.scene;
+  const earned = hasSticker(GAME_TILES[index].gameId);
+  const stickerY = shelfStickerY(y, tileHeight, shelfSize);
+
+  if (earned) {
+    // Derive the thumbnail scale from THIS sticker's raster tier instead of a
+    // single hardcoded key, so a future tier change cannot shrink or grow
+    // only some of the twenty shelf stickers.
+    const stickerKey = stickerKeyForGame(GAME_TILES[index].gameId);
+    const stickerScale = displayScale(stickerKey, shelfSize);
+    const sticker = scene.add.image(x, stickerY, stickerKey);
+    grid.stickerImages.push(sticker);
+    if (GAME_TILES[index].gameId === grid.justEarned) {
+      animateJustEarned(scene, sticker, stickerScale, grid.entranceIndex++);
+    } else {
+      sticker.setScale(stickerScale);
+      animateEntrance(scene, [sticker], grid.entranceIndex++, {
+        onComplete: () => addSparkle(scene, sticker),
+        targetScale: stickerScale,
+      });
+    }
+  } else {
+    drawEmptySlot(grid, x, stickerY, shelfSize / 2);
+  }
+}
+
+/**
+ * Draws a dashed circle outline where an unearned sticker will appear,
+ * communicating the collection goal textlessly in place of a dimmed ghost.
+ * Anchored at the slot center so page-slide tweens can move it by position.
+ */
+export function drawEmptySlot(
+  grid: HubGrid,
+  x: number,
+  y: number,
+  radius = STICKER_DISPLAY_SIZE / 2,
+): void {
+  const graphics = grid.deps.scene.add.graphics();
+  // Anchor the object at the slot center and draw the dashed ring around
+  // (0, 0), so page-slide tweens can move the slot by its position.
+  graphics.setPosition(x, y);
+  grid.emptySlotGraphics.push(graphics);
+  drawDashedSlotRing(graphics, radius);
+  fadeSlotIn(grid.deps.scene, graphics, grid.entranceIndex++);
 }
