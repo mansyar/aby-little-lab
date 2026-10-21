@@ -63,14 +63,17 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, AC-1, AC-3
 - **Touches:** `src/game/hub/**`, `src/game/hubGrid.ts`, `src/__tests__/game/hub/**`, `src/__tests__/game/hubGrid*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** bb7ff5e
+- **Evidence:** conductor/tracks/20261021-hub-grid-decomposition/verification/phase-3.md
 
-- [ ] **P3.T1: Extract the sticker shelf** — covers: FR-1, FR-4
-  - [ ] **P3.T1.1: Extract sparkle/burst logic into a src/game/hub/ module; orchestrator delegates**
-  - [ ] **P3.T1.2: Module unit tests (sparkle, burst, reduced-motion, award racing a page transition)**
-- [ ] **P3.T2: Extract time-up dimming** — covers: FR-1, FR-4
-  - [ ] **P3.T2.1: Extract dimming logic into a src/game/hub/ module; orchestrator delegates; interacts correctly with the paging board**
-  - [ ] **P3.T2.2: Module unit tests (dim state, dim-while-paged edge, shutdown cleanup)**
+- [x] **P3.T1: Extract the sticker shelf** — covers: FR-1, FR-4
+  - [x] **P3.T1.1: Extract sparkle/burst logic into a src/game/hub/ module; orchestrator delegates**
+  - [x] **P3.T1.2: Module unit tests (sparkle, burst, reduced-motion, award racing a page transition)**
+- [x] **P3.T2: Extract time-up dimming** — covers: FR-1, FR-4
+  - [x] **P3.T2.1: Extract dimming logic into a src/game/hub/ module; orchestrator delegates; interacts correctly with the paging board**
+  - [x] **P3.T2.2: Module unit tests (dim state, dim-while-paged edge, shutdown cleanup)**
 
 <!--
 The primary appends after acceptance:
