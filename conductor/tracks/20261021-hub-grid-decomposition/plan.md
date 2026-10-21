@@ -114,7 +114,7 @@ The primary appends after acceptance:
 - **Covers:** F1, F2, F3, F4, F5
 - **Touches:** `src/__tests__/game/hubGrid.test.ts`, `src/game/hubGrid.ts`, `conductor/tracks/20261021-hub-grid-decomposition/verification/phase-4.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1 and F3** — covers: F1, F3
   - [ ] **R1.T1.1: Fix the just-earned page-transition test to collect page-1 stickers after flipTo(1) and assert their destruction by the slide-out timer (F1)**
