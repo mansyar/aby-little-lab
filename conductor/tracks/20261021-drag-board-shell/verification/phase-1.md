@@ -113,3 +113,10 @@ the implementation existed.
   the scene's own `isLocked` closure sharing `inputLocked`.
 - No build/bundle validation in this phase's verification command; the shell is
   one small module (no new dependencies).
+
+## Primary verification
+
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Exit code:** 0
+- **Result:** verified by primary agent
+- **Summary:** biome check exit 0 (1 pre-existing warning in musicalMemoryScene.test.ts, 1 pre-existing biome schema info); `tsc --noEmit` clean; 112 test files / 2,372 tests passed including the 39 new DragBoard tests. Diff `410d0fe..d2292de` matches Touches exactly (dragBoard.ts + dragBoard.test.ts + evidence file). Deviations reviewed and accepted (dragJuice real path correction, format reflow of own new file, shutdown self-registration preserving FR-4).

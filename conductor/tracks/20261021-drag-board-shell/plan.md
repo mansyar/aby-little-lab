@@ -14,17 +14,20 @@
 - **Covers:** FR-1, FR-2, AC-1
 - **Touches:** `src/game/dragBoard.ts` (new), `src/__tests__/game/dragBoard.test.ts` (new)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** d0ef7da
+**Evidence:** conductor/tracks/20261021-drag-board-shell/verification/phase-1.md
 
-- [ ] **P1.T1: Implement DragBoard shell** — covers: FR-1, FR-2
-  - [ ] **P1.T1.1: Slot/drop-zone registration and hover detection (`isOverAnyZone` equivalent)**
-  - [ ] **P1.T1.2: Snap wiring over `dragJuice` (`snapToSlot`), slot↔slot swap, tray↔slot displacement**
-  - [ ] **P1.T1.3: Tap-vs-drag discrimination (10px threshold) and tap-withdraw policy**
-  - [ ] **P1.T1.4: Policy parameters — wrong-answer behavior (`bounce-home` vs `retry-in-place`), validation timing (per-drop vs round-full)**
-- [ ] **P1.T2: Unit tests for all policy combinations** — covers: FR-1, AC-2
-  - [ ] **P1.T2.1: Bounce-home policy suite**
-  - [ ] **P1.T2.2: Retry-in-place + tap-withdraw suite**
-  - [ ] **P1.T2.3: Shutdown-cleanup registration with `GameSceneBase` registry; `prefers-reduced-motion` degradation**
+- [x] **P1.T1: Implement DragBoard shell** — covers: FR-1, FR-2
+  - [x] **P1.T1.1: Slot/drop-zone registration and hover detection (`isOverAnyZone` equivalent)**
+  - [x] **P1.T1.2: Snap wiring over `dragJuice` (`snapToSlot`), slot↔slot swap, tray↔slot displacement**
+  - [x] **P1.T1.3: Tap-vs-drag discrimination (10px threshold) and tap-withdraw policy**
+  - [x] **P1.T1.4: Policy parameters — wrong-answer behavior (`bounce-home` vs `retry-in-place`), validation timing (per-drop vs round-full)**
+- [x] **P1.T2: Unit tests for all policy combinations** — covers: FR-1, AC-2
+  - [x] **P1.T2.1: Bounce-home policy suite**
+  - [x] **P1.T2.2: Retry-in-place + tap-withdraw suite**
+  - [x] **P1.T2.3: Shutdown-cleanup registration with `GameSceneBase` registry; `prefers-reduced-motion` degradation**
 
 <!--
 The primary appends after acceptance:
