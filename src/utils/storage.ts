@@ -257,8 +257,9 @@ export function recordGameResult(gameId: GameId, correct: number, wrong: number)
 
 /**
  * Records an abandoned session's taps on the ACTIVE profile: the rolling
- * window only. The cumulative counters, the win count and the play count
- * describe completed sessions and stay untouched.
+ * window only. The cumulative counters and the win count describe completed
+ * sessions and stay untouched; the play count is not touched either, because
+ * it counts every game the child starts, abandoned or not.
  */
 export function recordGameTaps(gameId: GameId, correct: number, wrong: number): void {
   mutate((v2) => ({
