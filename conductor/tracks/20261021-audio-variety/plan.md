@@ -80,7 +80,7 @@ The primary appends after acceptance:
   `src/__tests__/game/audioIdentity.test.ts`,
   `conductor/tracks/20261021-audio-variety/verification/*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: User-audited tuning pass** — covers: FR-4, AC-4
   - [ ] **P3.T1.1: Batched listen pass with the user (game families), table adjustments applied and recorded**
