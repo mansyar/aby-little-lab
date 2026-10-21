@@ -1,10 +1,10 @@
 import Phaser from "phaser";
+import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import { preloadStoryOrderArt } from "../game/storyOrderArt";
 import { buildPlaythrough, isCorrect } from "../game/storyOrderLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { attachDragLift, snapToSlot } from "../utils/dragJuice";
-import { motionDuration } from "../utils/motion";
+import { attachDragLift } from "../utils/dragJuice";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
@@ -20,27 +20,11 @@ const TRAY_GAP = 40;
 const PIP_RADIUS = 5;
 const PIP_GAP = 14;
 const PIP_OFFSET_Y = SLOT_SIZE / 2 + 16;
-const BOUNCE_DURATION = 300;
-const BOUNCE_REDUCED_DURATION = 180;
-const SWAP_DURATION = 200;
-const SWAP_REDUCED_DURATION = 120;
 
-interface StoryPanel {
-  container: Phaser.GameObjects.Container;
+/** A draggable story card registered with the shared drag board. */
+interface StoryPanel extends BoardPiece {
   bg: Phaser.GameObjects.Rectangle;
   key: string;
-  originX: number;
-  originY: number;
-  slotIndex: number | null;
-  justDropped: boolean;
-}
-
-interface Slot {
-  zone: Phaser.GameObjects.Zone;
-  outline: Phaser.GameObjects.Graphics;
-  x: number;
-  y: number;
-  occupiedBy: StoryPanel | null;
 }
 
 /**
@@ -55,13 +39,19 @@ interface Slot {
  *
  * The 24 panel drawings are rasterized by this scene's own `preload`, so they
  * load with the lazy game chunk rather than the boot shell.
+ *
+ * All slot registration, hover tracking, snapping, slot↔slot swaps,
+ * tray↔slot displacement, tap-to-withdraw, missed-drop corrections, and the
+ * `key|key|key` re-validation guard live in the shared {@link DragBoard}
+ * shell; this scene only renders visuals and validates the whole strip
+ * (retry-in-place, round-full timing).
  */
 export class StoryOrderScene extends ChoiceRoundScene {
   private rounds: ReturnType<typeof buildPlaythrough> = [];
   private panels: StoryPanel[] = [];
-  private slots: Slot[] = [];
+  private board: DragBoard<StoryPanel> | null = null;
+  /** Round-scoped graphics and containers kept for tolerant teardown. */
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
-  private lastValidatedSignature: string | null = null;
 
   constructor() {
     super("StoryOrder");
@@ -75,11 +65,24 @@ export class StoryOrderScene extends ChoiceRoundScene {
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
-    // Phaser starts a drag on the first pointermove (threshold 0), and a drag
-    // that ends over the panel's own slot is indistinguishable from a drop. Ten
-    // pixels of slack keeps a preschooler's slightly wobbly tap a tap, so it
-    // still withdraws a placed panel instead of being swallowed as a drag.
-    this.input.dragDistanceThreshold = 10;
+
+    // The shell owns the 10 px tap-vs-drag threshold (wobble slack), every
+    // gesture handler, and the validation guard. Story Order keeps its policy:
+    // a wrong strip stays exactly in place (retry-in-place) and only a full
+    // strip validates (round-full).
+    this.board?.destroy();
+    this.board = new DragBoard<StoryPanel>({
+      scene: this,
+      zoneSize: DROP_ZONE_SIZE,
+      wrongAnswerBehavior: "retry-in-place",
+      validationTiming: "round-full",
+      tapWithdraw: true,
+      isLocked: () => this.inputLocked,
+      callbacks: {
+        onValidate: (placedIds) => this.validateStrip(placedIds),
+      },
+    });
+
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the story in order, first to last.");
 
@@ -106,9 +109,9 @@ export class StoryOrderScene extends ChoiceRoundScene {
   /** Renders the three ordinal slots above the shuffled tray of panels. */
   protected buildRoundContent(): void {
     const round = this.rounds[this.roundIndex];
-    if (!round) return;
+    const board = this.board;
+    if (!round || !board) return;
 
-    this.lastValidatedSignature = null;
     const count = round.shuffled.length;
     const slotPositions = this.rowPositions(count, SLOT_SIZE, SLOT_GAP);
     const trayPositions = this.rowPositions(count, PANEL_SIZE, TRAY_GAP);
@@ -122,9 +125,7 @@ export class StoryOrderScene extends ChoiceRoundScene {
       this.drawOrdinalPips(outline, i + 1);
       this.roundObjects.push(outline);
 
-      const zone = this.add.zone(sx, SLOT_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
-      zone.setInteractive({ dropZone: true });
-      this.slots.push({ zone, outline, x: sx, y: SLOT_Y, occupiedBy: null });
+      board.addSlot(sx, SLOT_Y);
     }
 
     for (let i = 0; i < count; i++) {
@@ -148,30 +149,19 @@ export class StoryOrderScene extends ChoiceRoundScene {
     this.clearRoundContent();
   }
 
+  /**
+   * Removes everything built for the current round. The drop zones are owned
+   * by the shared drag board (whose clear tolerates already-gone zones), so
+   * only the scene-owned panel list is reset here.
+   */
   protected clearRoundContent(): void {
-    for (const slot of this.slots) {
-      try {
-        slot.zone.destroy();
-        slot.outline.destroy();
-      } catch {
-        // Already destroyed — keep going.
-      }
-    }
-    this.slots = [];
+    this.board?.clear();
     this.panels = [];
-    this.lastValidatedSignature = null;
   }
 
   /** A wrong strip wiggles the panels where they sit — nothing moves home. */
   protected override wiggleTargets(): Phaser.GameObjects.GameObject[] {
-    const targets: Phaser.GameObjects.GameObject[] = [];
-    for (const slot of this.slots) {
-      const panel = slot.occupiedBy;
-      if (panel) {
-        targets.push(panel.container);
-      }
-    }
-    return targets;
+    return (this.board?.placedPieces() ?? []).map((panel) => panel.container);
   }
 
   /** Keeps the board inert for the wiggle; the panels themselves do not move. */
@@ -238,9 +228,9 @@ export class StoryOrderScene extends ChoiceRoundScene {
       hitArea: new Phaser.Geom.Rectangle(0, 0, PANEL_SIZE, PANEL_SIZE),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
-    this.input.setDraggable(container);
 
     const panel: StoryPanel = {
+      id: key,
       container,
       bg,
       key,
@@ -252,178 +242,27 @@ export class StoryOrderScene extends ChoiceRoundScene {
 
     attachDragLift(container as unknown as Phaser.GameObjects.Image);
 
-    container.on("pointerdown", () => {
-      // A new gesture begins as a potential tap. Only real movement (or a drop)
-      // marks it as a drag, so the trailing pointerup of a drag is exempt from
-      // tap-to-return while a clean tap still returns the panel.
-      panel.justDropped = false;
-    });
-
-    container.on("pointerup", () => {
-      const justDropped = panel.justDropped;
-      panel.justDropped = false;
-      if (this.inputLocked) return;
-      // Tap-to-return: a drop's trailing pointerup is not a tap.
-      if (!justDropped && panel.slotIndex !== null) {
-        this.returnPanelToSource(panel);
-      }
-    });
-
-    container.on("dragstart", () => {
-      if (this.inputLocked) return;
-      this.children.bringToTop(container);
-    });
-
-    container.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
-      if (this.inputLocked) return;
-      // Movement means this gesture is a drag, so its pointerup is not a tap.
-      panel.justDropped = true;
-      container.setPosition(dragX, dragY);
-    });
-
-    container.on("drop", (_pointer: unknown, target: unknown) => {
-      this.handleDrop(panel, target as Phaser.GameObjects.Zone);
-    });
-
-    container.on("dragend", () => {
-      // Whether this gesture moved is already recorded (drag/drop); the
-      // pointerup that follows belongs to the drag, not a tap.
-      // Validation/wiggle owns the board while locked — leave positions alone.
-      if (this.inputLocked) return;
-      if (panel.slotIndex === null) {
-        if (!this.isOverAnyZone(container.x, container.y)) {
-          this.tweens.add({
-            targets: container,
-            x: panel.originX,
-            y: panel.originY,
-            duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-            ease: "Back.out",
-          });
-        }
-      } else {
-        const slot = this.slots[panel.slotIndex];
-        if (
-          slot &&
-          (container.x !== slot.x || container.y !== slot.y) &&
-          !this.isOverAnyZone(container.x, container.y)
-        ) {
-          this.tweens.add({
-            targets: container,
-            x: slot.x,
-            y: slot.y,
-            duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-            ease: "Back.out",
-          });
-        }
-      }
-      this.tryAutoValidate();
-    });
+    // The shell owns every gesture handler: tap-vs-drag, drops, swaps,
+    // tap-to-withdraw, and the missed-drop corrections.
+    this.board?.addPiece(panel);
 
     this.panels.push(panel);
     this.roundObjects.push(bg, art, container as unknown as Phaser.GameObjects.GameObject);
   }
 
-  private isOverAnyZone(x: number, y: number): boolean {
-    return this.slots.some((s) => {
-      const half = DROP_ZONE_SIZE / 2;
-      return x >= s.x - half && x <= s.x + half && y >= s.y - half && y <= s.y + half;
-    });
-  }
-
-  private handleDrop(panel: StoryPanel, zone: Phaser.GameObjects.Zone): void {
-    if (this.inputLocked) return;
-    // A drop is never a tap, whatever the pointerup that follows it looks like.
-    panel.justDropped = true;
-    const destIdx = this.slots.findIndex((s) => s.zone === zone);
-    if (destIdx === -1) return;
-    const destSlot = this.slots[destIdx];
-    const srcIdx = panel.slotIndex;
-
-    if (destSlot.occupiedBy === panel) {
-      this.snapPanel(panel, destSlot);
-      return;
-    }
-
-    if (destSlot.occupiedBy === null) {
-      if (srcIdx !== null) {
-        this.slots[srcIdx].occupiedBy = null;
-      }
-      destSlot.occupiedBy = panel;
-      panel.slotIndex = destIdx;
-      this.snapPanel(panel, destSlot);
-      return;
-    }
-
-    const occupant = destSlot.occupiedBy;
-    if (srcIdx !== null) {
-      // Swap the two placed panels.
-      const srcSlot = this.slots[srcIdx];
-      srcSlot.occupiedBy = occupant;
-      occupant.slotIndex = srcIdx;
-      destSlot.occupiedBy = panel;
-      panel.slotIndex = destIdx;
-      this.tweens.add({
-        targets: occupant.container,
-        x: srcSlot.x,
-        y: srcSlot.y,
-        duration: motionDuration(SWAP_DURATION, SWAP_REDUCED_DURATION),
-        ease: "Back.out",
-      });
-    } else {
-      // Came from the tray: the occupant returns to its own tray spot.
-      destSlot.occupiedBy = panel;
-      panel.slotIndex = destIdx;
-      occupant.slotIndex = null;
-      this.tweens.add({
-        targets: occupant.container,
-        x: occupant.originX,
-        y: occupant.originY,
-        duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-        ease: "Back.out",
-      });
-    }
-    this.snapPanel(panel, destSlot);
-  }
-
-  private snapPanel(panel: StoryPanel, slot: Slot): void {
-    snapToSlot(
-      this as unknown as Phaser.Scene,
-      panel.container as unknown as Phaser.GameObjects.Image,
-      slot.x,
-      slot.y,
-    );
-  }
-
-  private returnPanelToSource(panel: StoryPanel): void {
-    if (panel.slotIndex === null) return;
-    const slot = this.slots[panel.slotIndex];
-    if (slot) slot.occupiedBy = null;
-    panel.slotIndex = null;
-    // The strip is no longer complete, so re-filling it must validate again.
-    this.lastValidatedSignature = null;
-    this.tweens.add({
-      targets: panel.container,
-      x: panel.originX,
-      y: panel.originY,
-      duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-      ease: "Back.out",
-    });
-  }
-
   /**
-   * Validates a complete strip. The signature guard re-checks only when the
-   * completed order actually changed, so a drag that leaves the strip as it
-   * was cannot wiggle the child again.
+   * Validates a complete strip. The shell's signature guard re-checks only
+   * when the completed order actually changed, so a drag that leaves the
+   * strip as it was cannot wiggle the child again.
    */
-  private tryAutoValidate(): void {
-    if (this.inputLocked) return;
-    if (this.slots.some((s) => s.occupiedBy === null)) return;
+  private validateStrip(placedIds: readonly (string | null)[]): void {
     const round = this.rounds[this.roundIndex];
     if (!round) return;
-    const placed = this.slots.map((s) => s.occupiedBy?.key ?? "");
-    const signature = placed.join("|");
-    if (signature === this.lastValidatedSignature) return;
-    this.lastValidatedSignature = signature;
-    this.resolveWholeRound(isCorrect(placed, round.solution));
+    this.resolveWholeRound(
+      isCorrect(
+        placedIds.map((id) => id ?? ""),
+        round.solution,
+      ),
+    );
   }
 }

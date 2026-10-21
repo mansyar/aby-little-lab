@@ -147,6 +147,10 @@ class TestScene extends GameSceneBase {
     this.recordWrong();
   }
 
+  testReactWrong(targets?: Phaser.GameObjects.GameObject[]): void {
+    this.reactWrong(targets);
+  }
+
   getDots(): Phaser.GameObjects.Arc[] {
     return this.progressDots;
   }
@@ -597,6 +601,90 @@ describe("GameSceneBase scaffold", () => {
       handler();
 
       expect(mockRecordGameResult).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("reactWrong", () => {
+    beforeEach(() => {
+      mockRecordGameResult.mockClear();
+    });
+
+    /** Returns the first tween call carrying the helper's numeric wiggle angle. */
+    function wiggleTween(scene: unknown): Record<string, unknown> | undefined {
+      const calls = getMockFn((scene as { tweens: Record<string, unknown> }).tweens.add).mock
+        .calls as Array<Array<Record<string, unknown>>>;
+      return calls.find((call) => typeof call[0]?.angle === "number")?.[0];
+    }
+
+    it("plays the gentle incorrect tone, records the wrong answer, and nods Professor Hoot", () => {
+      const scene = new TestScene();
+      const mascot = scene.testCreateCornerMascot();
+      const nodSpy = vi.spyOn(mascot, "nod");
+
+      scene.testReactWrong();
+
+      expect(getMockFn(mockAudio.playIncorrect)).toHaveBeenCalledTimes(1);
+      expect(nodSpy).toHaveBeenCalledTimes(1);
+      // No targets, no wiggle — the tone + nod reaction runs on its own.
+      expect(wiggleTween(scene)).toBeUndefined();
+    });
+
+    it("stays gentle when no mascot exists", () => {
+      const scene = new TestScene();
+
+      scene.testReactWrong();
+
+      expect(getMockFn(mockAudio.playIncorrect)).toHaveBeenCalledTimes(1);
+      expect(wiggleTween(scene)).toBeUndefined();
+    });
+
+    it("wiggles the given targets with the shared wiggle", () => {
+      const scene = new TestScene();
+      const target = { x: 0 } as unknown as Phaser.GameObjects.GameObject;
+
+      scene.testReactWrong([target]);
+
+      const wiggle = wiggleTween(scene);
+      expect(wiggle).toBeDefined();
+      expect(wiggle?.angle).toBe(4);
+      expect(wiggle?.duration).toBe(350);
+      expect(wiggle?.yoyo).toBe(true);
+      expect(wiggle?.repeat).toBe(3);
+      expect(wiggle?.ease).toBe("Sine.inOut");
+      // The wiggle must never count as a penalty: no input lock either way.
+      expect(scene.getInputLocked()).toBe(false);
+    });
+
+    it("degrades the wiggle to the reduced-motion angle and duration", () => {
+      setReducedMotion(true);
+      const scene = new TestScene();
+      const target = { x: 0 } as unknown as Phaser.GameObjects.GameObject;
+
+      scene.testReactWrong([target]);
+
+      const wiggle = wiggleTween(scene);
+      expect(wiggle?.angle).toBe(2);
+      expect(wiggle?.duration).toBe(200);
+    });
+
+    it("keeps custom wrong paths authoritative — overrides never route through the helper", () => {
+      // Mirrors games that own their reaction (e.g. Feelings Faces' onWrong
+      // override): the shared helper only fires when a scene invokes it.
+      class CustomScene extends TestScene {
+        onWrong(): void {
+          this.recordWrong();
+        }
+      }
+      const scene = new CustomScene();
+      scene.testCreateCornerMascot();
+
+      scene.onWrong();
+
+      expect(getMockFn(mockAudio.playIncorrect)).not.toHaveBeenCalled();
+      expect(wiggleTween(scene)).toBeUndefined();
+      // The custom path still counts the wrong answer toward learning progress.
+      scene.testCompleteGame("shape-sorter");
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 0, 1);
     });
   });
 });

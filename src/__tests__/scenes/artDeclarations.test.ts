@@ -198,6 +198,13 @@ const GAME_MODULES: ReadonlyMap<string, string> = new Map([
   ["wordLogic", wordLogicSource],
 ]);
 
+/**
+ * Game modules a scene imports that carry interaction logic, not texture keys
+ * (e.g. the shared ordered-drag-board shell). They draw nothing, so they stay
+ * out of {@link GAME_MODULES} but must not fail the import scan either.
+ */
+const NON_ART_GAME_MODULES: readonly string[] = ["dragBoard"];
+
 interface SourceLiteral {
   readonly value: string;
   /** Offset of the opening quote, used to tell a draw site from prose. */
@@ -342,6 +349,7 @@ describe("game scene art declarations", () => {
     const unknown = new Set<string>();
     for (const scene of SCENES) {
       for (const match of scene.source.matchAll(SCENE_GAME_IMPORT)) {
+        if (NON_ART_GAME_MODULES.includes(match[1])) continue;
         if (!GAME_MODULES.has(match[1])) unknown.add(`${scene.name}: ${match[1]}`);
       }
     }

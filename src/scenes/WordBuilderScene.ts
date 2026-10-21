@@ -11,7 +11,7 @@ import {
   generateLetterTiles,
   generateWordBuildPlaythrough,
 } from "../game/wordLogic";
-import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
+import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
@@ -222,18 +222,7 @@ export class WordBuilderScene extends GameSceneBase {
     const expected = word.word[this.filledSlots];
 
     if (chosen !== expected) {
-      this.audioManager.playIncorrect();
-      this.recordWrong();
-      this.mascot?.nod();
-      const reduced = isReducedMotion();
-      this.tweens.add({
-        targets: [this.tileRects[tileIndex], this.tileLetterImages[tileIndex]],
-        angle: reduced ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE,
-        duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-        yoyo: true,
-        repeat: this.WIGGLE_REPEATS,
-        ease: "Sine.inOut",
-      });
+      this.reactWrong([this.tileRects[tileIndex], this.tileLetterImages[tileIndex]]);
       return;
     }
 

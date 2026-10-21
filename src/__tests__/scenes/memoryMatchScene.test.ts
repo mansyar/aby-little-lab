@@ -502,14 +502,12 @@ describe("MemoryMatchScene round flow", () => {
     );
     expect(nodTween).toBeDefined();
 
-    // Both cards wiggle: one gentle tween per card (rect + back + face).
+    // Both cards wiggle: one shared gentle tween over both cards (rect + back + face each).
     const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
       (call) => (call[0] as { angle?: number })?.angle === 4,
     );
-    expect(wiggleTweens).toHaveLength(2);
-    const wiggleTargets = wiggleTweens.flatMap(
-      (call) => (call[0] as { targets?: unknown[] }).targets ?? [],
-    );
+    expect(wiggleTweens).toHaveLength(1);
+    const wiggleTargets = (wiggleTweens[0][0] as { targets?: unknown[] }).targets ?? [];
     expect(wiggleTargets).toContain(cards[0]);
     expect(wiggleTargets).toContain(cards[mismatchIndex]);
     expect((wiggleTweens[0][0] as { yoyo: boolean }).yoyo).toBe(true);
@@ -684,14 +682,12 @@ describe("MemoryMatchScene round flow", () => {
     tapCard(scene, 0);
     tapCard(scene, mismatchIndex);
 
-    // Reduced-motion wiggle: one gentle tween per card at a smaller angle.
+    // Reduced-motion wiggle: one shared gentle tween over both cards at a smaller angle.
     const wiggleTweens = getMockFn(scene.tweens.add).mock.calls.filter(
       (call) => (call[0] as { angle?: number })?.angle === 2,
     );
-    expect(wiggleTweens).toHaveLength(2);
-    const wiggleTargets = wiggleTweens.flatMap(
-      (call) => (call[0] as { targets?: unknown[] }).targets ?? [],
-    );
+    expect(wiggleTweens).toHaveLength(1);
+    const wiggleTargets = (wiggleTweens[0][0] as { targets?: unknown[] }).targets ?? [];
     expect(wiggleTargets).toContain(getCardRects(scene)[0]);
     expect((wiggleTweens[0][0] as { duration: number }).duration).toBe(200);
 

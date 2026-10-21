@@ -322,6 +322,31 @@ export abstract class GameSceneBase extends Phaser.Scene {
   }
 
   /**
+   * Shared wrong-answer reaction: the gentle descending incorrect tone, a
+   * learning-progress record, and Professor Hoot's nod — never a penalty, so
+   * the child simply tries again. When `targets` is given they also receive
+   * the shared reduced-motion-aware wiggle. Scenes that need more (a bounce
+   * home, a flip-back) add it after calling this helper; scenes with their own
+   * wrong path never have to touch it.
+   */
+  protected reactWrong(targets?: Phaser.GameObjects.GameObject[]): void {
+    this.audioManager.playIncorrect();
+    this.recordWrong();
+    this.mascot?.nod();
+
+    if (targets && targets.length > 0) {
+      this.tweens.add({
+        targets,
+        angle: motionScale(this.WIGGLE_ANGLE, this.WIGGLE_REDUCED_ANGLE),
+        duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
+        yoyo: true,
+        repeat: this.WIGGLE_REPEATS,
+        ease: "Sine.inOut",
+      });
+    }
+  }
+
+  /**
    * Handles game completion: plays the win SFX, runs the shared celebration,
    * awards the sticker on first completion, and auto-returns to the Hub after
    * the auto-return delay, carrying `justEarned` when a sticker was earned.

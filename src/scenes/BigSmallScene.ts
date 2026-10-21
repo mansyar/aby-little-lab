@@ -258,9 +258,7 @@ export class BigSmallScene extends GameSceneBase {
   private handleDragEnd(data: ToyData): void {
     if (!data.sorted) {
       if (data.droppedOnZone) {
-        this.audioManager.playIncorrect();
-        this.recordWrong();
-        this.mascot?.nod();
+        this.reactWrong();
       }
       this.tweens.add({
         targets: data.obj,
