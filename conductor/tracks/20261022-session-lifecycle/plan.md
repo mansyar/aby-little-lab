@@ -56,7 +56,7 @@
   `src/__tests__/scenes/choiceRoundScene.test.ts`,
   `src/__tests__/helpers/phaserMock.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Write the failing tests for the shared reaction and the
   handler registration** — covers: FR-2, FR-4, AC-3, AC-5
