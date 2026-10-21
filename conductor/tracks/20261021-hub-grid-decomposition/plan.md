@@ -89,13 +89,16 @@ The primary appends after acceptance:
 - **Covers:** FR-2, FR-3, AC-2, AC-4, NFR-1, NFR-2, NFR-3
 - **Touches:** `src/game/hub/**`, `src/game/hubGrid.ts`, `src/__tests__/game/hub/**`, `src/__tests__/game/hubGrid*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** c40d39c
+- **Evidence:** conductor/tracks/20261021-hub-grid-decomposition/verification/phase-4.md
 
-- [ ] **P4.T1: Slim the orchestrator** — covers: FR-2, FR-3
-  - [ ] **P4.T1.1: Dead-code sweep (test-confirmed) and internal renames; itemize every cleanup by class in evidence**
-  - [ ] **P4.T1.2: Record line count (≤200) and confirm HubScene still imports only hubGrid.ts**
-- [ ] **P4.T2: Run the full gate** — covers: AC-4, NFR-2
-  - [ ] **P4.T2.1: Full verify_phase command; record coverage (95/88/85/90), bundle size (shell ≤ 200 kB), and PWA results in evidence**
+- [x] **P4.T1: Slim the orchestrator** — covers: FR-2, FR-3
+  - [x] **P4.T1.1: Dead-code sweep (test-confirmed) and internal renames; itemize every cleanup by class in evidence**
+  - [x] **P4.T1.2: Record line count (≤200) and confirm HubScene still imports only hubGrid.ts**
+- [x] **P4.T2: Run the full gate** — covers: AC-4, NFR-2
+  - [x] **P4.T2.1: Full verify_phase command; record coverage (95/88/85/90), bundle size (shell ≤ 200 kB), and PWA results in evidence**
 
 <!--
 The primary appends after acceptance:
