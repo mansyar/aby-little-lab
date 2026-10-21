@@ -56,43 +56,47 @@
   `src/__tests__/scenes/choiceRoundScene.test.ts`,
   `src/__tests__/helpers/phaserMock.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Write the failing tests for the shared reaction and the
+- [x] **P2.T1: Write the failing tests for the shared reaction and the
   handler registration** — covers: FR-2, FR-4, AC-3, AC-5
-  - [ ] **P2.T1.1:** Assert that a wrong answer in a `ChoiceRoundScene` game
+  - [x] **P2.T1.1:** Assert that a wrong answer in a `ChoiceRoundScene` game
     plays the incorrect tone once, records one wrong tap, nods the mascot,
     wiggles the tapped card and the scene's own wiggle targets, and still
     fires `onWiggleComplete` and the overridable `onWrong` hook.
-  - [ ] **P2.T1.2:** Assert the shared reaction has a single implementation —
+  - [x] **P2.T1.2:** Assert the shared reaction has a single implementation —
     the incorrect tone is requested from exactly one place in `src/scenes`.
-  - [ ] **P2.T1.3:** Assert the shutdown cleanup handler does not survive a
+  - [x] **P2.T1.3:** Assert the shutdown cleanup handler does not survive a
     shutdown. The mock keeps its live handler list private, so add a
     read-only `liveEventHandlerCount(event)` accessor to
     `src/__tests__/helpers/phaserMock.ts` (no change to any existing mock
     behavior) and assert the count returns to zero after the shutdown fires.
-  - [ ] **P2.T1.4:** Run the new tests against the unmodified base and record
+  - [x] **P2.T1.4:** Run the new tests against the unmodified base and record
     that they fail for the expected reasons.
-- [ ] **P2.T2: Consolidate the wrong-answer reaction** — covers: FR-2, AC-3
-  - [ ] **P2.T2.1:** Give `GameSceneBase.reactWrong` an optional
+- [x] **P2.T2: Consolidate the wrong-answer reaction** — covers: FR-2, AC-3
+  - [x] **P2.T2.1:** Give `GameSceneBase.reactWrong` an optional
     wiggle-completion callback so a caller can react when the wiggle ends.
     The tone, the wrong-tap count, the mascot nod and the wiggle tween itself
     stay in the base helper.
-  - [ ] **P2.T2.2:** Make `ChoiceRoundScene.handleIncorrect` build its own
+  - [x] **P2.T2.2:** Make `ChoiceRoundScene.handleIncorrect` build its own
     wiggle targets — its `wiggleTargets(index)` plus the tapped card — and
     delegate the shared steps to `reactWrong`, keeping its `onWrong(index)`
     hook and its `onWiggleComplete(index)` completion.
-  - [ ] **P2.T2.3:** Confirm the observable feel is unchanged — tone, tap
+  - [x] **P2.T2.3:** Confirm the observable feel is unchanged — tone, tap
     count, nod, wiggle angle, duration, repeat count and ease — for the six
     games that already used the base helper and the fourteen that used the
     choice-round copy.
-- [ ] **P2.T3: Register the shutdown cleanup once per visit** — covers: FR-4, AC-5
-  - [ ] **P2.T3.1:** Switch `registerShutdownCleanup` from `events.on` to
+- [x] **P2.T3: Register the shutdown cleanup once per visit** — covers: FR-4, AC-5
+  - [x] **P2.T3.1:** Switch `registerShutdownCleanup` from `events.on` to
     `events.once`, matching the pattern `init()` already uses at
     `GameSceneBase.ts:154`, so a fired handler is removed instead of
     accumulating one entry per visit.
-  - [ ] **P2.T3.2:** Re-run the new tests and the phase verification command;
+  - [x] **P2.T3.2:** Re-run the new tests and the phase verification command;
     confirm they pass and no existing test changed outcome.
+
+**Result:** verified
+**Checkpoint:** 34c3a31
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-2.md
 
 ## Phase 3: Abandoned Session Reaches the Adaptive Window
 
