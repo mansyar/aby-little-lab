@@ -223,4 +223,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Game Metadata Single Source of Truth** — [20261020-game-metadata-source](./archive/20261020-game-metadata-source/index.md) — refactor — medium (Archived)
 - [x] **Track: Drag-Board Shell Unification** — [20261021-drag-board-shell](./archive/20261021-drag-board-shell/index.md) — refactor — medium
 - [x] **Track: Hub Grid Decomposition** — [20261021-hub-grid-decomposition](./archive/20261021-hub-grid-decomposition/index.md) — refactor — medium
-- [~] **Track: Audio Variety & Feedback Depth** - [20261021-audio-variety](./tracks/20261021-audio-variety/index.md) - feature - medium
+- [x] **Track: Audio Variety & Feedback Depth** - [20261021-audio-variety](./archive/20261021-audio-variety/index.md) - feature - medium
