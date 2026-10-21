@@ -94,13 +94,16 @@ The primary appends after acceptance:
 - **Covers:** FR-3, FR-4, AC-3, AC-4
 - **Touches:** `src/scenes/{ShapeSorter,AnimalTrace,PopFreeze,ShadowMatch,MusicalMemory,BigSmall,MemoryMatch,WordBuilder}Scene.ts` + matching test files
 - **Verification:** full gate — `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
+**Result:** verified
+**Checkpoint:** 2bd05c0
+**Evidence:** conductor/tracks/20261021-drag-board-shell/verification/phase-5.md
 
-- [ ] **P5.T1: Migrate the 8 scenes' inline reactions to helpers** — covers: FR-3
-  - [ ] **P5.T1.1: One-to-four scenes per sub-step, suite green after each migration**
-  - [ ] **P5.T1.2: Note any scene whose sequence differs materially and leave it local**
-- [ ] **P5.T2: Confirm no visible behavior change across the 8 games' suites** — covers: NFR-2, AC-4
-  - [ ] **P5.T2.1: Full gate green, coverage gate 95/88/85/90 holds, shell bundle ≤ 195.4 kB current size**
+- [x] **P5.T1: Migrate the 8 scenes' inline reactions to helpers** — covers: FR-3
+  - [x] **P5.T1.1: One-to-four scenes per sub-step, suite green after each migration**
+  - [x] **P5.T1.2: Note any scene whose sequence differs materially and leave it local**
+- [x] **P5.T2: Confirm no visible behavior change across the 8 games' suites** — covers: NFR-2, AC-4
+  - [x] **P5.T2.1: Full gate green, coverage gate 95/88/85/90 holds, shell bundle ≤ 195.4 kB current size**
 
 <!--
 Review fixes are appended by `conductor-review` as:

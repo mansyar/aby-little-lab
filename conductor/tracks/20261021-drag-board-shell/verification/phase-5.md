@@ -81,3 +81,10 @@ their matching test files).
 - Bundle headroom improved: shell entry 130.1 kB vs 195.4 kB budget.
 - Full suite ran twice green (after each of the last two batches and in the
   final gate), confirming no cross-scene regressions.
+
+## Primary verification
+
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
+- **Exit code:** 0
+- **Result:** verified by primary agent
+- **Summary:** biome check exit 0 (same two pre-existing findings only); tsc clean; 112 files / 2,377 tests passed; coverage S 97.78 / B 90.88 / F 96.52 / L 98.63 (all above the 90/85/88/95 gates); build green; validate-bundle PASS (shell entry 130.1 kB <= 200 kB; dragBoard ships as a 4.03 kB lazy chunk; GameSceneBase chunk 11.23 kB); PWA 16/16. Diff `a8e2905..ab0d648` matches Touches exactly (6 migrated scenes + memoryMatchScene.test.ts + evidence); no deviations. Animal Trace & Pop & Freeze documented as no-wrong-path-by-design; BigSmall box-lid wiggle kept local (materially different, accepted).
