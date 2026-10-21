@@ -109,29 +109,33 @@
   `src/__tests__/utils/storage.test.ts`,
   `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Add a narrow tap-recording path** — covers: FR-3
-  - [ ] **P3.T1.1:** Add a pure function to `src/game/progressLogic.ts` that
+**Result:** verified
+**Checkpoint:** 48d81a8
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-3.md
+
+- [x] **P3.T1: Add a narrow tap-recording path** — covers: FR-3
+  - [x] **P3.T1.1:** Add a pure function to `src/game/progressLogic.ts` that
     folds a session's correct/wrong taps into the rolling recent-tap window
     and changes nothing else — not the cumulative `correct`/`wrong` counters,
     not `wins`, not `plays`.
-  - [ ] **P3.T1.2:** Add the matching entry point in `src/utils/storage.ts`
+  - [x] **P3.T1.2:** Add the matching entry point in `src/utils/storage.ts`
     that writes it for the active profile, mirroring how
     `recordGameResult` targets the active profile.
-  - [ ] **P3.T1.3:** Cover both with unit tests that assert the window moves
+  - [x] **P3.T1.3:** Cover both with unit tests that assert the window moves
     and the cumulative counters, wins and plays do not.
-- [ ] **P3.T2: Flush the pending taps on shutdown** — covers: FR-3, AC-4
-  - [ ] **P3.T2.1:** Have `GameSceneBase` remember the game id it resolved
+- [x] **P3.T2: Flush the pending taps on shutdown** — covers: FR-3, AC-4
+  - [x] **P3.T2.1:** Have `GameSceneBase` remember the game id it resolved
     from the registry so the shutdown path knows which game the pending taps
     belong to.
-  - [ ] **P3.T2.2:** On shutdown, flush the pending taps when the session was
+  - [x] **P3.T2.2:** On shutdown, flush the pending taps when the session was
     not completed. A completed session has already zeroed its counters, so
     it must not be flushed twice; a session with no taps writes nothing.
-  - [ ] **P3.T2.3:** Add a test that abandons a game mid-session and asserts
+  - [x] **P3.T2.3:** Add a test that abandons a game mid-session and asserts
     the rolling window changed while the cumulative counters, wins and plays
     did not.
-  - [ ] **P3.T2.4:** Re-run the phase verification command; confirm every new
+  - [x] **P3.T2.4:** Re-run the phase verification command; confirm every new
     test passes and no existing test changed outcome.
 
 <!--
