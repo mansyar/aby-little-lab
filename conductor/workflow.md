@@ -62,6 +62,9 @@ pr:
   enabled: true
   tool: "gh"
   base: "master"
+  watch_ci: true
+  watch_timeout_minutes: 15
+  merge_method: "merge"
 ```
 
 ## Development Commands
