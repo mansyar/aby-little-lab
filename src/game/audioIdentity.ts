@@ -3,11 +3,10 @@ import type { GameId } from "../types";
 /**
  * Per-game sonic identity for the synthesized feedback trio
  * (correct / incorrect / win). This module is pure data + pure logic: it
- * knows nothing about Web Audio, so Phase 2 can hand the resolved values to
- * the existing synth without any structural rewrite.
- *
- * Until the trio actually consumes these parameters (Phase 2) resolving an
- * identity is behavior-neutral: every cue sounds exactly as it did before.
+ * knows nothing about Web Audio, so the synth can consume the resolved
+ * values without any structural rewrite. Resolving an identity is pure and
+ * repeatable; the trio's `AudioManager` voices map these parameters onto
+ * oscillator frequency, waveform type, note timing, and melodic contour.
  */
 
 /** Waveforms the trio oscillators may use (the constant-shape OscillatorType subset). */
@@ -229,6 +228,41 @@ function clampContour(offsets: readonly number[]): number[] {
   return offsets.map((offset) =>
     clamp(offset, -MAX_CONTOUR_OFFSET_SEMITONES, MAX_CONTOUR_OFFSET_SEMITONES),
   );
+}
+
+/** Celebration duration budget for the win cue (NFR-2), in seconds. */
+export const WIN_MIN_END_SECONDS = 0.3;
+export const WIN_MAX_END_SECONDS = 0.8;
+
+/**
+ * No-fail guard for the incorrect cue (NFR-1): forces a contour to stay
+ * non-increasing from its anchor note, so no identity — tuned now or later —
+ * can turn the gentle descending tone into a rising or harsh one. Each
+ * offset is first clamped into its documented ±12-semitone range, which also
+ * caps the total descent, then every later note is floored at its
+ * predecessor. A contour that would rise collapses onto the anchor's level
+ * instead of inverting the cue's character.
+ */
+export function descendingContour(offsets: readonly number[]): number[] {
+  const result: number[] = [];
+  let ceiling = 0;
+  for (const offset of clampContour(offsets)) {
+    const value = Math.min(offset, ceiling);
+    result.push(value);
+    ceiling = value;
+  }
+  return result;
+}
+
+/**
+ * Tempo actually used to play the win cue: the identity's tempo clamped so
+ * the cue's last note ends inside the 300–800 ms celebration budget
+ * (NFR-2). The synth supplies `baseEndSeconds` — the cue's last-note end
+ * time at tempo 1 — because note timing lives with the synth, while the
+ * budget policy lives with the identity ranges it guards.
+ */
+export function winTempoForBudget(tempo: number, baseEndSeconds: number): number {
+  return clamp(tempo, WIN_MIN_END_SECONDS / baseEndSeconds, WIN_MAX_END_SECONDS / baseEndSeconds);
 }
 
 /**

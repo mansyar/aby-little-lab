@@ -1,4 +1,10 @@
-import { type AudioIdentity, identityForGameId } from "../game/audioIdentity";
+import {
+  type AudioIdentity,
+  descendingContour,
+  identityForGameId,
+  type TimbreWaveform,
+  winTempoForBudget,
+} from "../game/audioIdentity";
 import type { GameId } from "../types";
 import { onSpeechLifecycle, type SpeechLifecycleEvent } from "../utils/speech";
 import { getSettings, updateSettings } from "../utils/storage";
@@ -25,6 +31,50 @@ const BGM_DUCK_WATCHDOG = 15000;
 
 const FROG_NOTE_DURATION = 0.5;
 const FROG_NOTE_GAIN = 0.3;
+
+/**
+ * Per-cue synth voice for the feedback trio: the anchor note every contour
+ * offset hangs from, today's note spacing and durations, and the gain each
+ * cue has always used. The identity bends these — transposition, waveform,
+ * tempo — so the default identity reproduces today's voices exactly.
+ */
+interface TrioVoice {
+  readonly anchorHz: number;
+  /** Seconds between consecutive note starts at tempo 1. */
+  readonly stepSeconds: number;
+  /** Duration of every note except the last, at tempo 1. */
+  readonly noteDurationSeconds: number;
+  /** Duration of the final note, at tempo 1. */
+  readonly finalDurationSeconds: number;
+  readonly gain: number;
+}
+
+/** Correct voice: C5 anchor under today's ascending chime. */
+const CORRECT_VOICE: TrioVoice = {
+  anchorHz: 523.25,
+  stepSeconds: 0.12,
+  noteDurationSeconds: 0.15,
+  finalDurationSeconds: 0.2,
+  gain: 0.3,
+};
+
+/** Incorrect voice: G4 anchor under today's gentle descending fifth. */
+const INCORRECT_VOICE: TrioVoice = {
+  anchorHz: 392.0,
+  stepSeconds: 0.12,
+  noteDurationSeconds: 0.15,
+  finalDurationSeconds: 0.2,
+  gain: 0.2,
+};
+
+/** Win voice: C5 anchor under today's celebratory arpeggio + octave. */
+const WIN_VOICE: TrioVoice = {
+  anchorHz: 523.25,
+  stepSeconds: 0.1,
+  noteDurationSeconds: 0.12,
+  finalDurationSeconds: 0.25,
+  gain: 0.3,
+};
 
 /**
  * Manages all audio for the application: BGM loop, synthesized SFX, and frog notes.
@@ -186,8 +236,9 @@ export class AudioManager {
   /**
    * Resolves the trio's identity from the registered game context. Unregistered
    * game ids and a missing context resolve to the default voice, so this is
-   * total and never throws. Playback does not consume the identity yet (Phase 2
-   * wires it into the synth), so resolving is currently behavior-neutral.
+   * total and never throws. The correct/incorrect/win synth reads the resolved
+   * identity to voice its notes; `pop`, `wake`, `sticker`, and frog notes stay
+   * universal.
    */
   resolveTrioIdentity(): AudioIdentity {
     return identityForGameId(this.gameContext);
@@ -247,39 +298,63 @@ export class AudioManager {
   }
 
   /**
-   * Plays a pleasant ascending chime (C5, E5, G5) using the Web Audio API.
-   * Does nothing if SFX is disabled or not initialized.
+   * Plays a pleasant ascending chime using the Web Audio API, voiced by the
+   * registered game's audio identity (pitch, timbre, tempo, contour). Does
+   * nothing if SFX is disabled or not initialized.
    */
   playCorrect(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 523.25, 0, 0.15, 0.3);
-    this.playTone(ctx, 659.25, 0.12, 0.15, 0.3);
-    this.playTone(ctx, 783.99, 0.24, 0.2, 0.3);
+    const identity = this.resolveTrioIdentity();
+    this.playContourCue(
+      this.audioContext,
+      CORRECT_VOICE,
+      identity.contours.correct,
+      identity.pitchOffsetSemitones,
+      identity.tempo,
+      identity.waveform,
+    );
   }
 
   /**
-   * Plays a soft descending tone (G4, C4) using the Web Audio API.
-   * Does nothing if SFX is disabled or not initialized.
+   * Plays a soft descending tone using the Web Audio API, voiced by the
+   * registered game's audio identity (pitch, timbre, tempo, contour). The
+   * no-fail guard keeps the cue gently descending for every identity
+   * (NFR-1). Does nothing if SFX is disabled or not initialized.
    */
   playIncorrect(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 392.0, 0, 0.15, 0.2);
-    this.playTone(ctx, 261.63, 0.12, 0.2, 0.2);
+    const identity = this.resolveTrioIdentity();
+    this.playContourCue(
+      this.audioContext,
+      INCORRECT_VOICE,
+      descendingContour(identity.contours.incorrect),
+      identity.pitchOffsetSemitones,
+      identity.tempo,
+      identity.waveform,
+    );
   }
 
   /**
-   * Plays a celebratory arpeggio (C5, E5, G5, C6) using the Web Audio API.
-   * Does nothing if SFX is disabled or not initialized.
+   * Plays a celebratory arpeggio using the Web Audio API, voiced by the
+   * registered game's audio identity (pitch, timbre, contour, and a tempo
+   * clamped so the celebration always ends inside the 300–800 ms budget,
+   * NFR-2). Does nothing if SFX is disabled or not initialized.
    */
   playWin(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 523.25, 0, 0.12, 0.3);
-    this.playTone(ctx, 659.25, 0.1, 0.12, 0.3);
-    this.playTone(ctx, 783.99, 0.2, 0.12, 0.3);
-    this.playTone(ctx, 1046.5, 0.3, 0.25, 0.3);
+    const identity = this.resolveTrioIdentity();
+    const contour = identity.contours.win;
+    const baseEndSeconds =
+      (contour.length - 1) * WIN_VOICE.stepSeconds + WIN_VOICE.finalDurationSeconds;
+    const tempo = winTempoForBudget(identity.tempo, baseEndSeconds);
+    this.playContourCue(
+      this.audioContext,
+      WIN_VOICE,
+      contour,
+      identity.pitchOffsetSemitones,
+      tempo,
+      identity.waveform,
+    );
   }
 
   /**
@@ -328,11 +403,14 @@ export class AudioManager {
 
   /**
    * Plays a single synthesized tone at a given frequency with staggered start.
+   * `waveform` defaults to sine, today's oscillator shape for every cue; the
+   * identity-driven trio passes its timbre through.
    * @param ctx - The AudioContext to use for synthesis.
    * @param frequency - The frequency of the tone in Hz.
    * @param startOffset - Delay before the tone starts, in seconds.
    * @param duration - Duration of the tone in seconds.
    * @param gainValue - Volume level (0.0 to 1.0).
+   * @param waveform - Oscillator shape of the tone.
    */
   private playTone(
     ctx: AudioContext,
@@ -340,11 +418,12 @@ export class AudioManager {
     startOffset: number,
     duration: number,
     gainValue: number,
+    waveform: OscillatorType = "sine",
   ): void {
     const oscillator = ctx.createOscillator();
     const gainNode = ctx.createGain();
 
-    oscillator.type = "sine";
+    oscillator.type = waveform;
     oscillator.frequency.value = frequency;
 
     gainNode.gain.value = gainValue;
@@ -355,6 +434,38 @@ export class AudioManager {
     const now = ctx.currentTime;
     oscillator.start(now + startOffset);
     oscillator.stop(now + startOffset + duration);
+  }
+
+  /**
+   * Voices one trio cue: every contour note hangs a semitone-ratio frequency
+   * off the cue's anchor, transposed by the identity's pitch offset, shaped
+   * by its waveform, and timed by its tempo (note spacing and durations both
+   * scale). The default identity reproduces today's voices exactly: offsets
+   * of 0/4/7 semitones above the anchor are today's hardcoded chime tones,
+   * to within 0.01 Hz of equal-temperament rounding.
+   */
+  private playContourCue(
+    ctx: AudioContext,
+    voice: TrioVoice,
+    contour: readonly number[],
+    pitchOffsetSemitones: number,
+    tempo: number,
+    waveform: TimbreWaveform,
+  ): void {
+    const lastIndex = contour.length - 1;
+    contour.forEach((offset, index) => {
+      const frequency = voice.anchorHz * 2 ** ((offset + pitchOffsetSemitones) / 12);
+      const duration =
+        (index === lastIndex ? voice.finalDurationSeconds : voice.noteDurationSeconds) * tempo;
+      this.playTone(
+        ctx,
+        frequency,
+        index * voice.stepSeconds * tempo,
+        duration,
+        voice.gain,
+        waveform,
+      );
+    });
   }
 
   /**
