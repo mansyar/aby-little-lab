@@ -17,17 +17,21 @@ Only the primary agent writes this file.
   `src/scenes/GameSceneBase.ts`, `src/__tests__/game/audioIdentity.test.ts`
   (new), `src/__tests__/audio/*`, `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Identity schema & table** — covers: FR-1, FR-3
-  - [ ] **P1.T1.1: Define the AudioIdentity schema (pitch offset in semitones, timbre/waveform, tempo/duration multiplier, per-cue melodic contour) with bounded-range validation and a documented default identity**
-  - [ ] **P1.T1.2: Write formula-derived identity entries for all 22 GAME_REGISTRY gameIds**
-- [ ] **P1.T2: Game-context resolution** — covers: FR-2
-  - [ ] **P1.T2.1: Add the AudioManager game-context API (set/clear) with identity lookup for the correct/incorrect/win cues and unknown-gameId fallback to the default**
-  - [ ] **P1.T2.2: Register the context in GameSceneBase at init and clear it at shutdown (~3 lines)**
-- [ ] **P1.T3: Foundation tests** — covers: AC-1, AC-2
-  - [ ] **P1.T3.1: Registry-iteration test proving all 22 gameIds resolve to non-default identities**
-  - [ ] **P1.T3.2: Resolution and fallback tests (sampled games route through identity params; unknown id yields the default)**
+- [x] **P1.T1: Identity schema & table** — covers: FR-1, FR-3
+  - [x] **P1.T1.1: Define the `AudioIdentity` schema (pitch offset in semitones, timbre/waveform, tempo/duration multiplier, per-cue melodic contour) with bounded-range validation and a documented default identity**
+  - [x] **P1.T1.2: Write formula-derived identity entries for all 22 GAME_REGISTRY gameIds**
+- [x] **P1.T2: Game-context resolution** — covers: FR-2
+  - [x] **P1.T2.1: Add the AudioManager game-context API (set/clear) with identity lookup for the correct/incorrect/win cues and unknown-gameId fallback to the default**
+  - [x] **P1.T2.2: Register the context in GameSceneBase at init and clear it at shutdown (~3 lines)**
+- [x] **P1.T3: Foundation tests** — covers: AC-1, AC-2
+  - [x] **P1.T3.1: Registry-iteration test proving all 22 gameIds resolve to non-default identities**
+  - [x] **P1.T3.2: Resolution and fallback tests (sampled games route through identity params; unknown id yields the default)**
+
+**Result:** verified
+**Checkpoint:** ba7b37b
+**Evidence:** conductor/tracks/20261021-audio-variety/verification/phase-1.md
 
 <!--
 The primary appends after acceptance:
