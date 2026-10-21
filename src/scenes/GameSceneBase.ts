@@ -180,12 +180,12 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /**
    * Folds an abandoned session's taps into the rolling adaptive window.
    *
-   * Only the window moves: the cumulative counters, the win count and the
-   * play count describe completed sessions. The session counters are zeroed
-   * after the write because scene instances are reused across visits — left
-   * standing, the next visit would carry this visit's taps and report them a
-   * second time. A completed session has already zeroed them, so it is never
-   * flushed twice.
+   * Only the window moves: the cumulative counters and the win count describe
+   * completed sessions, while the play count still counts every game the child
+   * starts, abandoned or not. The session counters are zeroed after the write
+   * because scene instances are reused across visits — left standing, the next
+   * visit would carry this visit's taps and report them a second time. A
+   * completed session has already zeroed them, so it is never flushed twice.
    */
   private flushPendingTaps(): void {
     const gameId = this.resolvedGameId;
@@ -401,11 +401,20 @@ export abstract class GameSceneBase extends Phaser.Scene {
    * input again when the shake is over. It is released even when there is
    * nothing to wiggle: a scene waiting for that callback must never be left
    * locked.
+   *
+   * `onPreWiggle` runs after the shared tone, the record and the nod, and
+   * before the wiggle starts — so a scene's own extras stay behind the shared
+   * feedback and still land before the wiggle completion.
    */
-  protected reactWrong(targets?: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
+  protected reactWrong(
+    targets?: Phaser.GameObjects.GameObject[],
+    onComplete?: () => void,
+    onPreWiggle?: () => void,
+  ): void {
     this.audioManager.playIncorrect();
     this.recordWrong();
     this.mascot?.nod();
+    onPreWiggle?.();
 
     if (!targets || targets.length === 0) {
       onComplete?.();

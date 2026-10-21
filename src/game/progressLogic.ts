@@ -96,8 +96,9 @@ export function recordResult(
  * Folds a session's taps into the rolling window and nothing else.
  *
  * A session the child abandons still happened, so its taps still inform
- * adaptive difficulty — but they must not touch the cumulative counters, the
- * win count or the play count: those describe completed sessions only.
+ * adaptive difficulty — but they must not touch the cumulative counters or the
+ * win count: those describe completed sessions only. The play count is not
+ * touched either: it counts every game the child starts, abandoned or not.
  */
 export function recordTaps(
   progress: Partial<GameProgress> | null | undefined,

@@ -473,6 +473,21 @@ describe("ChoiceRoundScene round lifecycle", () => {
     );
   });
 
+  it("plays the incorrect tone before the scene's wrong-answer hook", () => {
+    const scene = new ExtrasChoiceScene();
+    scene.start();
+    mockAudio.playIncorrect.mockImplementationOnce(() => {
+      scene.extrasLog.push("tone");
+    });
+
+    scene.tap(1);
+
+    // The tone leads the scene's own extras: a game that re-speaks on a wrong
+    // tap (Feelings Faces) must not talk over the error cue.
+    const order = scene.extrasLog.filter((entry) => entry === "tone" || entry === "wrong:1");
+    expect(order).toEqual(["tone", "wrong:1"]);
+  });
+
   it("releases the wiggle completion even when there is nothing to wiggle", () => {
     const scene = new ExtrasChoiceScene();
     scene.start();

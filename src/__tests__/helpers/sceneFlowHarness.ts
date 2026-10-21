@@ -212,20 +212,16 @@ export function triggerAllPointerups(scene: unknown): void {
   }
 }
 
-/** Triggers the shutdown event on a scene, invoking any registered shutdown callbacks. */
+/**
+ * Triggers the shutdown event on a scene, invoking any registered shutdown callbacks.
+ *
+ * The scene's own emitter does the work, so the helper inherits Phaser's
+ * semantics: a `once` registration is retired once it has fired, while an
+ * `on` registration stays live for the next shutdown.
+ */
 export function triggerShutdown(scene: unknown): void {
-  const events = (scene as { events: Record<string, unknown> }).events;
-  // Both registration styles are live listeners: a scene registers its
-  // per-visit cleanup with `once` and a lasting listener with `on`, and only
-  // the scene's own emitter knows about both.
-  for (const register of [events.on, events.once]) {
-    const registerMock = getMockFn(register);
-    for (const call of registerMock.mock.calls) {
-      if (call[0] === "shutdown" && typeof call[1] === "function") {
-        (call[1] as () => void)();
-      }
-    }
-  }
+  const events = (scene as { events: { emit: (name: string) => void } }).events;
+  events.emit("shutdown");
 }
 
 /**

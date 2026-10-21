@@ -668,6 +668,7 @@ describe("GameSceneBase scaffold", () => {
   describe("session progress recording", () => {
     beforeEach(() => {
       mockRecordGameResult.mockClear();
+      mockRecordGameTaps.mockClear();
     });
 
     it("flushes accumulated correct and wrong taps as a win on completion", () => {
@@ -698,7 +699,7 @@ describe("GameSceneBase scaffold", () => {
       expect(mockRecordGameResult).toHaveBeenNthCalledWith(2, "shape-sorter", 0, 0);
     });
 
-    it("does not flush results when the scene shuts down without completing", () => {
+    it("does not record a completed result when the scene shuts down without completing", () => {
       const scene = new TestScene();
       scene.testRecordCorrect();
       scene.testRegisterShutdownCleanup();
@@ -707,7 +708,10 @@ describe("GameSceneBase scaffold", () => {
       expect(handler).toBeDefined();
       handler?.();
 
+      // The completed result is not written; the abandoned session's taps are
+      // flushed to the rolling window by the shutdown path instead.
       expect(mockRecordGameResult).not.toHaveBeenCalled();
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
     });
   });
 

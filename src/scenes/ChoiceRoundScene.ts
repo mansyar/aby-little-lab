@@ -85,7 +85,10 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
   /** Optional per-game correct-answer extras, run before the shared feedback. */
   protected onCorrect(_index: number): void {}
 
-  /** Optional per-game wrong-answer extras, run after the shared feedback. */
+  /**
+   * Optional per-game wrong-answer extras, run after the shared tone and the
+   * mascot's nod, and before the wiggle completes.
+   */
   protected onWrong(_index: number): void {}
 
   /**
@@ -258,9 +261,9 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
    * the game adds — and hands the shared steps to the base helper, which owns
    * the tone, the recording and the mascot's nod.
    *
-   * The game's own `onWrong` runs first: it locks the input while the wiggle
-   * is on screen, and the completion that releases it again can run straight
-   * away when there is nothing to wiggle.
+   * The game's own `onWrong` runs after the shared feedback and before the
+   * wiggle completes: it locks the input while the wiggle is on screen, and
+   * the completion that releases it again runs last.
    */
   private handleIncorrect(index: number): void {
     const targets: Phaser.GameObjects.GameObject[] = [...this.wiggleTargets(index)];
@@ -268,10 +271,14 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
       targets.unshift(this.choiceTargets[index]);
     }
 
-    this.onWrong(index);
-
-    this.reactWrong(targets, () => {
-      this.onWiggleComplete(index);
-    });
+    this.reactWrong(
+      targets,
+      () => {
+        this.onWiggleComplete(index);
+      },
+      () => {
+        this.onWrong(index);
+      },
+    );
   }
 }
