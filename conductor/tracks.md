@@ -226,3 +226,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Audio Variety & Feedback Depth** - [20261021-audio-variety](./archive/20261021-audio-variety/index.md) - feature - medium
 
 - [x] **Track: Session Lifecycle Integrity** - [20261022-session-lifecycle](./archive/20261022-session-lifecycle/index.md) - bug - high
+
+- [ ] **Track: Docs & Roadmap Truth Pass** - [20261022-docs-roadmap-truth](./tracks/20261022-docs-roadmap-truth/index.md) - chore - high
