@@ -55,6 +55,15 @@ describe("audio identity table", () => {
           expect(offset).toBeLessThanOrEqual(MAX_CONTOUR_OFFSET_SEMITONES);
         }
       }
+      // NFR-1: the incorrect contour must already be non-increasing in the
+      // table. A rising entry would be silently flattened by
+      // `descendingContour` at play time and pass every behavioral test.
+      for (let i = 1; i < identity.contours.incorrect.length; i++) {
+        expect(
+          identity.contours.incorrect[i],
+          `${gameId} incorrect contour rises at index ${i}`,
+        ).toBeLessThanOrEqual(identity.contours.incorrect[i - 1]);
+      }
     }
   });
 });

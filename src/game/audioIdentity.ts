@@ -17,8 +17,10 @@ export const MAX_PITCH_OFFSET_SEMITONES = 5;
 
 /**
  * Tempo (duration/spacing multiplier) bounds. Below 1 is snappier, above 1
- * is slower; 1 means today's exact timing. Kept tight so even the slowest
- * identity stays inside the win cue's 300–800 ms celebration budget.
+ * is slower; 1 means today's exact timing. These bounds alone do NOT keep
+ * the win cue inside its 300–800 ms celebration budget: at MAX_TEMPO the
+ * default win cue ends at 0.55 s × 1.5 = 0.825 s > 0.8 s. That budget is
+ * enforced by {@link winTempoForBudget}, which clamps the win cue's tempo.
  */
 export const MIN_TEMPO = 0.75;
 export const MAX_TEMPO = 1.5;
