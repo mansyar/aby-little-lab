@@ -40,7 +40,7 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, AC-1
 - **Touches:** `src/game/hub/**`, `src/game/hubGrid.ts`, `src/__tests__/game/hub/**`, `src/__tests__/game/hubGrid*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Extract the paging board** — covers: FR-1, FR-2, FR-4
   - [ ] **P2.T1.1: Extract page state machine (computation, dots, swipe, slide) into a src/game/hub/ module; orchestrator delegates; wide-viewport layouts byte-identical**
