@@ -77,21 +77,56 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-/** Spy on recordGameResult (calls through to the real implementation). */
-const { mockRecordGameResult } = vi.hoisted(() => ({
+/** Spies on the storage writers (calls through to the real implementation). */
+const { mockRecordGameResult, mockRecordGameTaps, storageHolder } = vi.hoisted(() => ({
   mockRecordGameResult: vi.fn(),
+  mockRecordGameTaps: vi.fn(),
+  storageHolder: { actual: undefined as undefined | typeof import("../../utils/storage") },
 }));
 
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();
-  mockRecordGameResult.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
-    actual.recordGameResult(gameId, correct, wrong);
-  });
-  return { ...actual, recordGameResult: mockRecordGameResult };
+  storageHolder.actual = actual;
+  return {
+    ...actual,
+    recordGameResult: mockRecordGameResult,
+    recordGameTaps: mockRecordGameTaps,
+  };
 });
 
+/**
+ * Points the spies at the real storage writers. The suite restores all mocks
+ * after every test, so the call-through is re-armed before each one.
+ */
+function spyThroughRealStorage(): void {
+  mockRecordGameResult.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
+    storageHolder.actual?.recordGameResult(gameId, correct, wrong);
+  });
+  mockRecordGameTaps.mockImplementation((gameId: GameId, correct: number, wrong: number) => {
+    storageHolder.actual?.recordGameTaps(gameId, correct, wrong);
+  });
+}
+
 import { GameSceneBase } from "../../scenes/GameSceneBase";
-import { earnSticker, hasSticker, updateSettings } from "../../utils/storage";
+import {
+  earnSticker,
+  getProgress,
+  hasSticker,
+  recordGamePlay,
+  updateSettings,
+} from "../../utils/storage";
+
+/**
+ * Every scene module, read as text.
+ *
+ * The shared wrong-answer reaction must exist in exactly one place, so the
+ * check reads the sources instead of the runtime: a second call site is a
+ * second implementation, even when only one of them runs in a given test.
+ */
+const SCENE_SOURCES: Readonly<Record<string, string>> = import.meta.glob<string>(
+  "../../scenes/*.ts",
+  { query: "?raw", import: "default", eager: true },
+);
 
 /**
  * Concrete test subclass exposing the protected scaffold methods so the
@@ -149,8 +184,8 @@ class TestScene extends GameSceneBase {
     this.recordWrong();
   }
 
-  testReactWrong(targets?: Phaser.GameObjects.GameObject[]): void {
-    this.reactWrong(targets);
+  testReactWrong(targets?: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
+    this.reactWrong(targets, onComplete);
   }
 
   getDots(): Phaser.GameObjects.Arc[] {
@@ -169,6 +204,27 @@ class TestScene extends GameSceneBase {
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
+}
+
+/**
+ * Finds the scene's registered "shutdown" handler, whichever registration it
+ * used: a per-visit cleanup is registered with `once`, a lasting listener with
+ * `on`.
+ */
+function shutdownHandler(scene: unknown): (() => void) | undefined {
+  const events = (scene as { events: Record<string, MockFn> }).events;
+  for (const register of [events.on, events.once]) {
+    const call = getMockFn(register).mock.calls.find((c) => c[0] === "shutdown");
+    if (call?.[1]) return call[1] as () => void;
+  }
+  return undefined;
+}
+
+/** Counts the handlers still attached to `event` on the scene's event emitter. */
+function liveHandlerCount(scene: unknown, event: string): number {
+  return (
+    scene as unknown as { liveEventHandlerCount(event: string): number }
+  ).liveEventHandlerCount(event);
 }
 
 /** Fires the auto-return delay (3000ms) and the fade-out completion callback. */
@@ -203,6 +259,7 @@ describe("GameSceneBase scaffold", () => {
     localStorage.clear();
     mockParentLockInstances.length = 0;
     mockParentLockOptions.length = 0;
+    spyThroughRealStorage();
     for (const fn of Object.values(mockAudio)) {
       fn.mockClear();
     }
@@ -296,6 +353,40 @@ describe("GameSceneBase scaffold", () => {
       scene.testCreateProgressDots(5);
       expect(scene.getDots()).toHaveLength(5);
       expect(getMockFn(scene.add.circle).mock.calls).toHaveLength(5);
+    });
+
+    it("replaces the previous visit's dots so a second visit fills its own dot", () => {
+      const scene = new TestScene();
+      scene.testRegisterShutdownCleanup();
+
+      // First visit.
+      scene.testCreateProgressDots(3);
+      const firstVisitDots = [...scene.getDots()];
+      expect(firstVisitDots).toHaveLength(3);
+
+      // Phaser destroys the display list when the scene shuts down, but the
+      // scene instance is reused on the next visit.
+      scene.events.emit("shutdown");
+
+      // Second visit on the same instance.
+      scene.testCreateProgressDots(3);
+      const secondVisitDots = [...scene.getDots()];
+
+      // The tracked set holds only this visit's dots: the previous visit's
+      // dots were destroyed with the display list.
+      expect(scene.getDots()).toHaveLength(3);
+      expect(scene.getDots()).not.toContain(firstVisitDots[0]);
+
+      // The fill lands on this visit's first dot, never on the stale one.
+      scene.testFillProgressDot(0);
+      expect(getMockFn(secondVisitDots[0].setAlpha)).toHaveBeenCalledWith(1);
+      expect(getMockFn(firstVisitDots[0].setAlpha)).not.toHaveBeenCalled();
+
+      // The next visit registers its own shutdown cleanup, which releases the
+      // dots so the scene holds no references to destroyed objects.
+      scene.testRegisterShutdownCleanup();
+      scene.events.emit("shutdown");
+      expect(scene.getDots()).toHaveLength(0);
     });
   });
 
@@ -510,8 +601,7 @@ describe("GameSceneBase scaffold", () => {
       const glyph = instructionGlyph(scene);
       scene.testRegisterShutdownCleanup();
 
-      const shutdownCall = getMockFn(scene.events.on).mock.calls.find((c) => c[0] === "shutdown");
-      const handler = shutdownCall?.[1] as (() => void) | undefined;
+      const handler = shutdownHandler(scene);
       expect(handler).toBeDefined();
       handler?.();
 
@@ -543,11 +633,9 @@ describe("GameSceneBase scaffold", () => {
       scene.testSetSpeaker(speaker);
       scene.testRegisterShutdownCleanup();
 
-      const onMock = getMockFn(scene.events.on);
-      const shutdownCall = onMock.mock.calls.find((c) => c[0] === "shutdown");
-      expect(shutdownCall).toBeDefined();
-      const handler = shutdownCall?.[1] as () => void;
-      handler();
+      const handler = shutdownHandler(scene);
+      expect(handler).toBeDefined();
+      handler?.();
 
       expect(getMockFn(mockParentLockInstances[0]?.destroy)).toHaveBeenCalled();
       expect(getMockFn(speaker.destroy)).toHaveBeenCalled();
@@ -556,11 +644,31 @@ describe("GameSceneBase scaffold", () => {
       expect(getMockFn(mascotImage.destroy)).toHaveBeenCalled();
       expect(scene.getMascot()).toBeUndefined();
     });
+
+    it("registers the cleanup once per visit and leaves no handler behind", () => {
+      const scene = new TestScene();
+
+      scene.testRegisterShutdownCleanup();
+      expect(liveHandlerCount(scene, "shutdown")).toBe(1);
+
+      scene.events.emit("shutdown");
+
+      // The handler that has already run is gone, so the next visit adds one
+      // entry instead of stacking on top of the one it already ran.
+      expect(liveHandlerCount(scene, "shutdown")).toBe(0);
+
+      scene.testRegisterShutdownCleanup();
+      expect(liveHandlerCount(scene, "shutdown")).toBe(1);
+
+      scene.events.emit("shutdown");
+      expect(liveHandlerCount(scene, "shutdown")).toBe(0);
+    });
   });
 
   describe("session progress recording", () => {
     beforeEach(() => {
       mockRecordGameResult.mockClear();
+      mockRecordGameTaps.mockClear();
     });
 
     it("flushes accumulated correct and wrong taps as a win on completion", () => {
@@ -591,18 +699,114 @@ describe("GameSceneBase scaffold", () => {
       expect(mockRecordGameResult).toHaveBeenNthCalledWith(2, "shape-sorter", 0, 0);
     });
 
-    it("does not flush results when the scene shuts down without completing", () => {
+    it("does not record a completed result when the scene shuts down without completing", () => {
       const scene = new TestScene();
       scene.testRecordCorrect();
       scene.testRegisterShutdownCleanup();
 
-      const onMock = getMockFn(scene.events.on);
-      const shutdownCall = onMock.mock.calls.find((c) => c[0] === "shutdown");
-      expect(shutdownCall).toBeDefined();
-      const handler = shutdownCall?.[1] as () => void;
-      handler();
+      const handler = shutdownHandler(scene);
+      expect(handler).toBeDefined();
+      handler?.();
 
+      // The completed result is not written. The tap flush is a separate
+      // shutdown handler, registered in init(), which this test does not call
+      // — the abandoned-session flush is covered by the "abandoned session
+      // flush" block below.
       expect(mockRecordGameResult).not.toHaveBeenCalled();
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("abandoned session flush", () => {
+    beforeEach(() => {
+      mockRecordGameResult.mockClear();
+      mockRecordGameTaps.mockClear();
+    });
+
+    it("resolves the game id from the registry and flushes the pending taps on shutdown", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).toHaveBeenCalledTimes(1);
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1);
+    });
+
+    it("folds the abandoned taps into the rolling window and nothing else", () => {
+      // A completed session before this one: its cumulative counters stay.
+      mockRecordGameResult("shape-sorter", 5, 1);
+      recordGamePlay("shape-sorter");
+
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+
+      scene.events.emit("shutdown");
+
+      const progress = getProgress()["shape-sorter"];
+      // The window grew by the abandoned session's three taps.
+      expect(progress.recent).toEqual([true, true, true, true, true, false, true, true, false]);
+      // The cumulative counters, the win count and the play count did not.
+      expect(progress.correct).toBe(5);
+      expect(progress.wrong).toBe(1);
+      expect(progress.wins).toBe(1);
+      expect(progress.plays).toBe(1);
+    });
+
+    it("zeroes the session counters so the next visit reports only its own taps", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordCorrect();
+      scene.testRecordWrong();
+
+      scene.events.emit("shutdown");
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1);
+
+      // Second visit on the same scene instance: Phaser reuses it.
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testCompleteGame("shape-sorter");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0);
+    });
+
+    it("writes nothing at shutdown when the session was completed", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testCompleteGame("shape-sorter");
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0);
+      // The completed session already flushed its own taps: no second write.
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
+    });
+
+    it("writes nothing at shutdown when the session recorded no taps", () => {
+      const scene = new TestScene("ShapeSorter");
+      scene.init();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
+    });
+
+    it("writes nothing for a scene key that is not in the registry", () => {
+      const scene = new TestScene("TestScene");
+      scene.init();
+      scene.testRecordCorrect();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).not.toHaveBeenCalled();
     });
   });
 
@@ -688,6 +892,29 @@ describe("GameSceneBase scaffold", () => {
       scene.testCompleteGame("shape-sorter");
       expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 0, 1);
     });
+
+    it("hands the completion callback to the wiggle tween", () => {
+      const scene = new TestScene();
+      const target = { x: 0 } as unknown as Phaser.GameObjects.GameObject;
+      const onComplete = vi.fn();
+
+      scene.testReactWrong([target], onComplete);
+
+      const wiggle = wiggleTween(scene);
+      expect(wiggle?.onComplete).toBe(onComplete);
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it("releases the completion callback even when there is nothing to wiggle", () => {
+      const scene = new TestScene();
+      const onComplete = vi.fn();
+
+      scene.testReactWrong(undefined, onComplete);
+
+      // Nothing wiggles, but the completion is still released: a game that
+      // unlocks its input from it must never stay locked.
+      expect(onComplete).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("game context registration", () => {
@@ -715,5 +942,18 @@ describe("GameSceneBase scaffold", () => {
 
       expect(mockAudio.clearGameContext).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe("the shared wrong-answer reaction", () => {
+  it("calls playIncorrect from exactly one place in src/scenes", () => {
+    const callSites = Object.entries(SCENE_SOURCES)
+      .map(([path, source]) => ({
+        file: path.slice(path.lastIndexOf("/") + 1),
+        calls: source.split("playIncorrect(").length - 1,
+      }))
+      .filter((entry) => entry.calls > 0);
+
+    expect(callSites).toEqual([{ file: "GameSceneBase.ts", calls: 1 }]);
   });
 });

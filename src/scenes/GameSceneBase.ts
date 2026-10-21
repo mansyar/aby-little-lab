@@ -18,7 +18,13 @@ import { motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { transitionToScene } from "../utils/sceneTransitions";
 import { speakSentence } from "../utils/speech";
-import { earnSticker, getSettings, hasSticker, recordGameResult } from "../utils/storage";
+import {
+  earnSticker,
+  getSettings,
+  hasSticker,
+  recordGameResult,
+  recordGameTaps,
+} from "../utils/storage";
 import { displayScale } from "../utils/textureTiers";
 import { textStyle } from "../utils/typography";
 
@@ -134,6 +140,13 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /** Scene key this scene was constructed with; used to resolve the registry entry. */
   private readonly constructedSceneKey: string;
 
+  /**
+   * Game id this scene resolved to in the registry, or undefined for a scene
+   * that is not a game. The shutdown flush needs it to know which game the
+   * pending taps belong to.
+   */
+  private resolvedGameId?: GameId;
+
   constructor(key: string) {
     super({ key });
     this.constructedSceneKey = key;
@@ -145,15 +158,42 @@ export abstract class GameSceneBase extends Phaser.Scene {
    * feedback trio (correct / incorrect / win) can take on the game's voice.
    * Scenes not in the registry keep the default voice. The context is dropped
    * on shutdown because scene instances are reused across visits.
+   *
+   * The same shutdown carries the pending taps of an abandoned session into
+   * the rolling adaptive window: a child who backs out mid-game still made
+   * those taps, so they still inform the next difficulty shift.
    */
   init(): void {
     const entry = GAME_REGISTRY.find((game) => game.sceneKey === this.constructedSceneKey);
     if (entry) {
+      this.resolvedGameId = entry.gameId;
       this.audioManager.setGameContext(entry.gameId);
     }
     this.events.once("shutdown", () => {
       this.audioManager.clearGameContext();
     });
+    this.events.once("shutdown", () => {
+      this.flushPendingTaps();
+    });
+  }
+
+  /**
+   * Folds an abandoned session's taps into the rolling adaptive window.
+   *
+   * Only the window moves: the cumulative counters and the win count describe
+   * completed sessions, while the play count still counts every game the child
+   * starts, abandoned or not. The session counters are zeroed after the write
+   * because scene instances are reused across visits — left standing, the next
+   * visit would carry this visit's taps and report them a second time. A
+   * completed session has already zeroed them, so it is never flushed twice.
+   */
+  private flushPendingTaps(): void {
+    const gameId = this.resolvedGameId;
+    if (gameId === undefined) return;
+    if (this.sessionCorrect === 0 && this.sessionWrong === 0) return;
+    recordGameTaps(gameId, this.sessionCorrect, this.sessionWrong);
+    this.sessionCorrect = 0;
+    this.sessionWrong = 0;
   }
 
   /**
@@ -302,8 +342,16 @@ export abstract class GameSceneBase extends Phaser.Scene {
     return label;
   }
 
-  /** Creates `count` progress dots at the top of the screen, dimmed by default. */
+  /**
+   * Creates `count` progress dots at the top of the screen, dimmed by default.
+   *
+   * Scene instances are reused across visits and Phaser destroys the display
+   * list on shutdown, so any dots left over from a previous visit are replaced
+   * rather than appended to: otherwise {@link fillProgressDot} would write to
+   * destroyed circles and the visible dots would never fill.
+   */
   protected createProgressDots(count: number): void {
+    this.progressDots = [];
     const startX = this.cameras.main.centerX - ((count - 1) * this.PROGRESS_DOT_SPACING) / 2;
     for (let i = 0; i < count; i++) {
       const dot = this.add.circle(
@@ -348,22 +396,40 @@ export abstract class GameSceneBase extends Phaser.Scene {
    * the shared reduced-motion-aware wiggle. Scenes that need more (a bounce
    * home, a flip-back) add it after calling this helper; scenes with their own
    * wrong path never have to touch it.
+   *
+   * `onComplete` runs once the wiggle has ended, so a scene can release its
+   * input again when the shake is over. It is released even when there is
+   * nothing to wiggle: a scene waiting for that callback must never be left
+   * locked.
+   *
+   * `onPreWiggle` runs after the shared tone, the record and the nod, and
+   * before the wiggle starts — so a scene's own extras stay behind the shared
+   * feedback and still land before the wiggle completion.
    */
-  protected reactWrong(targets?: Phaser.GameObjects.GameObject[]): void {
+  protected reactWrong(
+    targets?: Phaser.GameObjects.GameObject[],
+    onComplete?: () => void,
+    onPreWiggle?: () => void,
+  ): void {
     this.audioManager.playIncorrect();
     this.recordWrong();
     this.mascot?.nod();
+    onPreWiggle?.();
 
-    if (targets && targets.length > 0) {
-      this.tweens.add({
-        targets,
-        angle: motionScale(this.WIGGLE_ANGLE, this.WIGGLE_REDUCED_ANGLE),
-        duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-        yoyo: true,
-        repeat: this.WIGGLE_REPEATS,
-        ease: "Sine.inOut",
-      });
+    if (!targets || targets.length === 0) {
+      onComplete?.();
+      return;
     }
+
+    this.tweens.add({
+      targets,
+      angle: motionScale(this.WIGGLE_ANGLE, this.WIGGLE_REDUCED_ANGLE),
+      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
+      yoyo: true,
+      repeat: this.WIGGLE_REPEATS,
+      ease: "Sine.inOut",
+      onComplete,
+    });
   }
 
   /**
@@ -410,11 +476,15 @@ export abstract class GameSceneBase extends Phaser.Scene {
 
   /**
    * Registers the shutdown handler that destroys the parent lock, mascot,
-   * narrator (glyph and rule line), any injected glyph and the instruction
-   * line. Call from `create()` after creating those instances.
+   * narrator (glyph and rule line), any injected glyph, the instruction line
+   * and the progress dots. Call from `create()` after creating those instances.
+   *
+   * Registered with `once`, like the audio context above: scene instances are
+   * reused across visits, so a handler that outlived its visit would pile up
+   * one shutdown cleanup per visit.
    */
   protected registerShutdownCleanup(): void {
-    this.events.on("shutdown", () => {
+    this.events.once("shutdown", () => {
       this.parentLock?.destroy();
       this.mascot?.destroy();
       this.mascot = undefined;
@@ -424,6 +494,9 @@ export abstract class GameSceneBase extends Phaser.Scene {
       this.standaloneSpeaker = undefined;
       this.instructionLabel?.destroy();
       this.instructionLabel = undefined;
+      // The dots are destroyed with the display list: release them so the
+      // scene holds no references to destroyed objects.
+      this.progressDots = [];
     });
   }
 

@@ -446,11 +446,11 @@ isChoiceCorrect(index: number): boolean
 clearRoundContent(): void
 ```
 
-and may override `wiggleTargets(index)` (default: the tapped card's content), `onCorrect(index)` (before shared feedback), `onWrong(index)` (after it) and `onWiggleComplete(index)`.
+and may override `wiggleTargets(index)` (default: the tapped card's content), `onCorrect(index)` (before shared feedback), `onWrong(index)` (after the shared tone and the nod, before the wiggle completes) and `onWiggleComplete(index)`.
 
 Lifecycle: `renderRound()` = `clearRound()` + `buildRoundContent()`. `clearRound()` destroys every tracked object and empties `choiceTargets`, `cardContents` and `roundDisplayObjects`. `createChoiceTarget(x, y, size, index, shape?)` draws the card and registers `pointerdown` **before** `attachPressFeedback`, so the game handler always runs first. Hit areas are inflated to `MIN_HIT_AREA = 96` px and offset to stay centred, which keeps small cards tappable.
 
-Answer flow: `handleCorrect` locks input, plays the correct SFX, records the tap, runs `onCorrect`, cheers the mascot, fills the dot, flashes the card for `SUCCESS_FLASH_DURATION = 250` ms and schedules `advanceRound` after `NEXT_ROUND_DELAY`. `handleIncorrect` plays the incorrect SFX, records the tap, nods the mascot and wiggles the targets with `Sine.inOut`, then runs `onWrong`. `advanceRound` either completes the game or re-renders.
+Answer flow: `handleCorrect` locks input, plays the correct SFX, records the tap, runs `onCorrect`, cheers the mascot, fills the dot, flashes the card for `SUCCESS_FLASH_DURATION = 250` ms and schedules `advanceRound` after `NEXT_ROUND_DELAY`. `handleIncorrect` plays the incorrect SFX, records the tap, nods the mascot, runs `onWrong` and then wiggles the targets with `Sine.inOut`, releasing `onWiggleComplete` when the wiggle ends. `advanceRound` either completes the game or re-renders.
 
 `resolveWholeRound(correct)` is the whole-board variant used by Story Order: it routes to the same handlers with `WHOLE_ROUND = -1`, skipping the single-card flash; subclasses must supply `wiggleTargets` (and usually `onWiggleComplete`).
 
@@ -760,7 +760,7 @@ Games that do not fit the shape expose their own equivalents: `shapeSorterLogic.
 | `DOWN_THRESHOLD` | 0.6 | accuracy < 0.6 shifts down |
 | `BASE_LADDER` | `[1, 1, 2, 2, 3, 3]` | default six-round band ladder |
 
-`updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
+`updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. A session's taps are folded into the window when the session ends: `GameSceneBase` records them on completion, and on shutdown it also records the taps of a session the child abandoned. That flush writes the window only - `recordTaps` in `src/game/progressLogic.ts` leaves the cumulative `correct`, `wrong` and `wins` counters to completed sessions, and the `plays` counter alone is counted elsewhere, when the child starts a game from the Hub - and it zeroes the session counters afterwards, so a reused scene instance cannot report the same taps a second time. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
 
 Per-game adaptation uses the same shift differently: tier games split rounds into bands and drop the hardest band when the shift is up (`earlyCount = roundCount - 1 - shift`), Memory Match shifts its ladder, Musical Memory maps the shift to a start length of 1/2/3 and a win length of 5/6/7, and First Sounds keeps a uniform band. The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptive-difficulty).
 

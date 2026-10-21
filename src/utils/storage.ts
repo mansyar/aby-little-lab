@@ -16,6 +16,7 @@ import {
   pruneActivity,
   recordPlay,
   recordResult,
+  recordTaps,
 } from "../game/progressLogic";
 import type {
   AppStorage,
@@ -247,6 +248,29 @@ export function recordGameResult(gameId: GameId, correct: number, wrong: number)
             progress: {
               ...p.progress,
               [gameId]: recordResult(p.progress[gameId], { correct, wrong, win: true }),
+            },
+          }
+        : p,
+    ),
+  }));
+}
+
+/**
+ * Records an abandoned session's taps on the ACTIVE profile: the rolling
+ * window only. The cumulative counters and the win count describe completed
+ * sessions and stay untouched; the play count is not touched either, because
+ * it counts every game the child starts, abandoned or not.
+ */
+export function recordGameTaps(gameId: GameId, correct: number, wrong: number): void {
+  mutate((v2) => ({
+    ...v2,
+    profiles: v2.profiles.map((p) =>
+      p.id === v2.activeProfileId
+        ? {
+            ...p,
+            progress: {
+              ...p.progress,
+              [gameId]: recordTaps(p.progress[gameId], { correct, wrong }),
             },
           }
         : p,

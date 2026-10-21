@@ -125,7 +125,6 @@ export class AnimalTraceScene extends GameSceneBase {
     this.currentPairIndex = 0;
     this.completedPaths = 0;
     this.currentPair = undefined;
-    this.progressDots = [];
     this.ringRadius = NEXT_RING_RADIUS;
     this.pathPulseTween = undefined;
 

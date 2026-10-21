@@ -16,6 +16,7 @@ import {
   load,
   recordGamePlay,
   recordGameResult,
+  recordGameTaps,
   recordPlayTime,
   resetProgress,
   save,
@@ -930,6 +931,47 @@ describe("progress recording", () => {
     expect(getActiveProfile().activity).toEqual([]);
     // v1 sticker survived migration.
     expect(load().stickers["shape-sorter"].earned).toBe(true);
+  });
+
+  it("records an abandoned session's taps on the active profile only", () => {
+    recordGamePlay("shape-sorter");
+    const firstProfile = getActiveProfile().id;
+
+    addProfile("dog");
+    const secondProfile = getActiveProfile().id;
+
+    recordGameTaps("shape-sorter", 3, 1);
+
+    expect(getProgress(secondProfile)["shape-sorter"].recent).toEqual([true, true, true, false]);
+    // The other profile's progress is untouched.
+    expect(getProgress(firstProfile)["shape-sorter"].recent).toEqual([]);
+  });
+
+  it("moves only the rolling window, leaving the cumulative counters, wins and plays alone", () => {
+    recordGamePlay("shape-sorter");
+    recordGameResult("shape-sorter", 5, 1);
+
+    recordGameTaps("shape-sorter", 3, 1);
+
+    const progress = getProgress()["shape-sorter"];
+    expect(progress.recent).toEqual([true, true, true, true, true, false, true, true, true, false]);
+    expect(progress.wins).toBe(1);
+    expect(progress.correct).toBe(5);
+    expect(progress.wrong).toBe(1);
+    expect(progress.plays).toBe(1);
+  });
+
+  it("leaves other games untouched when an abandoned session is recorded", () => {
+    recordGameTaps("shape-sorter", 2, 0);
+
+    expect(getProgress()["color-match"]).toEqual({
+      plays: 0,
+      wins: 0,
+      correct: 0,
+      wrong: 0,
+      lastPlayedAt: null,
+      recent: [],
+    });
   });
 });
 

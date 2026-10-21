@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import type { GameId } from "../types";
-import { isReducedMotion, motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { GameSceneBase } from "./GameSceneBase";
 
@@ -86,7 +85,10 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
   /** Optional per-game correct-answer extras, run before the shared feedback. */
   protected onCorrect(_index: number): void {}
 
-  /** Optional per-game wrong-answer extras, run after the shared feedback. */
+  /**
+   * Optional per-game wrong-answer extras, run after the shared tone and the
+   * mascot's nod, and before the wiggle completes.
+   */
   protected onWrong(_index: number): void {}
 
   /**
@@ -254,29 +256,29 @@ export abstract class ChoiceRoundScene extends GameSceneBase {
   /**
    * Handles an incorrect answer: a gentle wiggle and soft tone, no penalty, so
    * the child can simply try again.
+   *
+   * The scene keeps the choice of what wiggles — the tapped card and whatever
+   * the game adds — and hands the shared steps to the base helper, which owns
+   * the tone, the recording and the mascot's nod.
+   *
+   * The game's own `onWrong` runs after the shared feedback and before the
+   * wiggle completes: it locks the input while the wiggle is on screen, and
+   * the completion that releases it again runs last.
    */
   private handleIncorrect(index: number): void {
-    this.audioManager.playIncorrect();
-    this.recordWrong();
-    this.mascot?.nod();
-
     const targets: Phaser.GameObjects.GameObject[] = [...this.wiggleTargets(index)];
     if (index !== WHOLE_ROUND) {
       targets.unshift(this.choiceTargets[index]);
     }
-    const angle = isReducedMotion() ? this.WIGGLE_REDUCED_ANGLE : this.WIGGLE_ANGLE;
-    this.tweens.add({
+
+    this.reactWrong(
       targets,
-      angle,
-      duration: motionDuration(this.WIGGLE_DURATION, this.WIGGLE_REDUCED_DURATION),
-      yoyo: true,
-      repeat: this.WIGGLE_REPEATS,
-      ease: "Sine.inOut",
-      onComplete: () => {
+      () => {
         this.onWiggleComplete(index);
       },
-    });
-
-    this.onWrong(index);
+      () => {
+        this.onWrong(index);
+      },
+    );
   }
 }

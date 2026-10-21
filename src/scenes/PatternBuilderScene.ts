@@ -96,8 +96,6 @@ export class PatternBuilderScene extends ChoiceRoundScene {
     this.createCornerMascot();
     this.createBackButton();
 
-    // Reset per-session state so a relaunch starts with fresh progress dots.
-    this.progressDots.length = 0;
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Pick the shape that finishes the pattern.");
 

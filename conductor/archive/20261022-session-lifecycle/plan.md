@@ -1,0 +1,202 @@
+# Session Lifecycle Integrity — Implementation Plan
+
+> **Branch:** `fix/20261022-session-lifecycle`
+> **Base:** `master` @ `cbf017e`
+>
+> Phase states are `pending`, `in_progress`, `verified`, `failed`, or `blocked`.
+> Only the primary agent writes this file. Phase subagents report results and
+> the primary records them.
+
+## Phase 1: Progress-Dot Lifecycle
+
+- **Goal:** `GameSceneBase` owns the progress dots, so every game fills its
+  visible dots from the first round of every visit.
+- **Depends on:** none
+- **Covers:** FR-1, AC-1, AC-2
+- **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/AnimalTraceScene.ts`,
+  `src/scenes/FeelingsFacesScene.ts`, `src/scenes/ShapeSorterScene.ts`,
+  `src/scenes/PatternBuilderScene.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Status:** verified
+
+- [x] **P1.T1: Write the failing second-visit regression test** — covers: FR-1, AC-1
+  - [x] **P1.T1.1:** In `src/__tests__/scenes/gameSceneBase.test.ts`, add a test
+    that uses the existing `TestScene` scaffold: create dots, emit the scene's
+    `shutdown` event, create the dots again on the same instance, then assert
+    that the tracked set holds only the current visit's dots and that
+    `fillProgressDot(0)` targets the current visit's dot (the mock object
+    records `setAlpha` calls).
+  - [x] **P1.T1.2:** Run the new test against the unmodified base and record
+    that it fails for the right reason — the tracked set still holds the
+    previous visit's entries at the low indices, so the fill lands on a stale
+    dot.
+- [x] **P1.T2: Move progress-dot ownership into the base class** — covers: FR-1, AC-2
+  - [x] **P1.T2.1:** `createProgressDots` replaces any previous set instead of
+    appending to it, and the shutdown path releases the array so the scene
+    holds no references to destroyed objects.
+  - [x] **P1.T2.2:** Delete the four now-redundant per-scene resets
+    (`AnimalTraceScene.ts:128`, `FeelingsFacesScene.ts:98`,
+    `ShapeSorterScene.ts:98`, `PatternBuilderScene.ts:100`) — the base now
+    guarantees the invariant for all 22 games.
+  - [x] **P1.T2.3:** Re-run the regression test and the phase verification
+    command; confirm the new test passes and no existing test changed outcome.
+
+**Result:** verified
+**Checkpoint:** 0e229e5
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-1.md
+
+## Phase 2: One Reaction, One Registration
+
+- **Goal:** The shared wrong-answer reaction has exactly one implementation,
+  and the shutdown cleanup handler is registered once per visit.
+- **Depends on:** Phase 1
+- **Covers:** FR-2, FR-4, AC-3, AC-5
+- **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/ChoiceRoundScene.ts`,
+  `src/__tests__/scenes/gameSceneBase.test.ts`,
+  `src/__tests__/scenes/choiceRoundScene.test.ts`,
+  `src/__tests__/helpers/phaserMock.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Status:** verified
+
+- [x] **P2.T1: Write the failing tests for the shared reaction and the
+  handler registration** — covers: FR-2, FR-4, AC-3, AC-5
+  - [x] **P2.T1.1:** Assert that a wrong answer in a `ChoiceRoundScene` game
+    plays the incorrect tone once, records one wrong tap, nods the mascot,
+    wiggles the tapped card and the scene's own wiggle targets, and still
+    fires `onWiggleComplete` and the overridable `onWrong` hook.
+  - [x] **P2.T1.2:** Assert the shared reaction has a single implementation —
+    the incorrect tone is requested from exactly one place in `src/scenes`.
+  - [x] **P2.T1.3:** Assert the shutdown cleanup handler does not survive a
+    shutdown. The mock keeps its live handler list private, so add a
+    read-only `liveEventHandlerCount(event)` accessor to
+    `src/__tests__/helpers/phaserMock.ts` (no change to any existing mock
+    behavior) and assert the count returns to zero after the shutdown fires.
+  - [x] **P2.T1.4:** Run the new tests against the unmodified base and record
+    that they fail for the expected reasons.
+- [x] **P2.T2: Consolidate the wrong-answer reaction** — covers: FR-2, AC-3
+  - [x] **P2.T2.1:** Give `GameSceneBase.reactWrong` an optional
+    wiggle-completion callback so a caller can react when the wiggle ends.
+    The tone, the wrong-tap count, the mascot nod and the wiggle tween itself
+    stay in the base helper.
+  - [x] **P2.T2.2:** Make `ChoiceRoundScene.handleIncorrect` build its own
+    wiggle targets — its `wiggleTargets(index)` plus the tapped card — and
+    delegate the shared steps to `reactWrong`, keeping its `onWrong(index)`
+    hook and its `onWiggleComplete(index)` completion.
+  - [x] **P2.T2.3:** Confirm the observable feel is unchanged — tone, tap
+    count, nod, wiggle angle, duration, repeat count and ease — for the six
+    games that already used the base helper and the fourteen that used the
+    choice-round copy.
+- [x] **P2.T3: Register the shutdown cleanup once per visit** — covers: FR-4, AC-5
+  - [x] **P2.T3.1:** Switch `registerShutdownCleanup` from `events.on` to
+    `events.once`, matching the pattern `init()` already uses at
+    `GameSceneBase.ts:154`, so a fired handler is removed instead of
+    accumulating one entry per visit.
+  - [x] **P2.T3.2:** Re-run the new tests and the phase verification command;
+    confirm they pass and no existing test changed outcome.
+
+**Result:** verified
+**Checkpoint:** 34c3a31
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-2.md
+
+## Phase 3: Abandoned Session Reaches the Adaptive Window
+
+- **Goal:** A game the child backs out of still contributes its taps to the
+  rolling adaptive window — and to nothing else.
+- **Depends on:** Phase 2
+- **Covers:** FR-3, AC-4
+- **Touches:** `src/game/progressLogic.ts`, `src/utils/storage.ts`,
+  `src/scenes/GameSceneBase.ts`, `src/__tests__/game/progressLogic.test.ts`,
+  `src/__tests__/utils/storage.test.ts`,
+  `src/__tests__/scenes/gameSceneBase.test.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Status:** verified
+
+- [x] **P3.T1: Add a narrow tap-recording path** — covers: FR-3
+  - [x] **P3.T1.1:** Add a pure function to `src/game/progressLogic.ts` that
+    folds a session's correct/wrong taps into the rolling recent-tap window
+    and changes nothing else — not the cumulative `correct`/`wrong` counters,
+    not `wins`, not `plays`.
+  - [x] **P3.T1.2:** Add the matching entry point in `src/utils/storage.ts`
+    that writes it for the active profile, mirroring how
+    `recordGameResult` targets the active profile.
+  - [x] **P3.T1.3:** Cover both with unit tests that assert the window moves
+    and the cumulative counters, wins and plays do not.
+- [x] **P3.T2: Flush the pending taps on shutdown** — covers: FR-3, AC-4
+  - [x] **P3.T2.1:** Have `GameSceneBase` remember the game id it resolved
+    from the registry so the shutdown path knows which game the pending taps
+    belong to.
+  - [x] **P3.T2.2:** On shutdown, flush the pending taps when the session was
+    not completed. A completed session has already zeroed its counters, so
+    it must not be flushed twice; a session with no taps writes nothing.
+  - [x] **P3.T2.3:** Add a test that abandons a game mid-session and asserts
+    the rolling window changed while the cumulative counters, wins and plays
+    did not.
+  - [x] **P3.T2.4:** Re-run the phase verification command; confirm every new
+    test passes and no existing test changed outcome.
+
+**Result:** verified
+**Checkpoint:** 48d81a8
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-3.md
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1, F2, F3, F4, F5.
+- **Depends on:** Phase 3
+- **Covers:** F1, F2, F3, F4, F5
+- **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/ChoiceRoundScene.ts`, `src/game/progressLogic.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`, `src/__tests__/scenes/choiceRoundScene.test.ts`, `src/__tests__/helpers/sceneFlowHarness.ts`, `src/__tests__/helpers/sceneFlowHarness.test.ts`, `docs/PRD.md`, `docs/TDD.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Status:** verified
+
+- [x] **R1.T1: Restore the shipped order of the wrong-answer reaction** — covers: F1
+  - [x] **R1.T1.1:** Give the base helper an explicit pre-wiggle callback so the
+    scene's `onWrong` hook runs after the incorrect tone, the wrong-tap count
+    and the mascot nod, and before the wiggle tween — the order the app
+    shipped before this track.
+  - [x] **R1.T1.2:** Keep `onWrong` strictly before `onWiggleComplete`, including
+    the path where the base releases the completion synchronously because
+    there is nothing to wiggle.
+  - [x] **R1.T1.3:** Add a test that records the order of the incorrect tone and
+    the subclass's `onWrong` hook, and assert the tone comes first.
+- [x] **R1.T2: Correct the `onWrong` doc comment** — covers: F2
+  - [x] **R1.T2.1:** Update the comment to state the restored contract: the
+    extras run after the shared tone and before the wiggle completes.
+- [x] **R1.T3: Correct the play-count claim in all four places** — covers: F3
+  - [x] **R1.T3.1:** Reword `docs/PRD.md` §4.8, `docs/TDD.md` §7.3,
+    `src/game/progressLogic.ts` and `src/scenes/GameSceneBase.ts` so they say
+    that the accuracy and the win count describe completed sessions, while the
+    play count still counts every game the child starts, abandoned or not.
+- [x] **R1.T4: Make `triggerShutdown` model Phaser's `once` semantics** — covers: F4
+  - [x] **R1.T4.1:** Drive the scene's own emitter (`events.emit("shutdown")`)
+    instead of walking the raw registration mocks, so a `once` handler that
+    has already fired is not invoked again.
+  - [x] **R1.T4.2:** Add a helper test asserting that a `once` shutdown handler
+    fires once across two `triggerShutdown` calls.
+- [x] **R1.T5: Rename the stale shutdown test** — covers: F5
+  - [x] **R1.T5.1:** Rename the test to say it guards the *completed result*,
+    not the whole flush, and assert that the tap flush did not run.
+
+**Result:** verified
+**Checkpoint:** cc7d1c5
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-R1.md
+
+<!--
+The primary appends after acceptance:
+**Result:** verified
+**Checkpoint:** <short-sha>
+**Evidence:** conductor/tracks/20261022-session-lifecycle/verification/phase-1.md
+-->
+
+<!--
+Review fixes are appended by `conductor-review` as:
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings ...
+- **Depends on:** Phase 3
+- **Covers:** review findings
+- **Touches:** ...
+- **Verification:** ...
+- **Status:** pending
+
+- [x] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
+-->

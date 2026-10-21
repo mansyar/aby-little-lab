@@ -95,7 +95,6 @@ export class ShapeSorterScene extends GameSceneBase {
 
     this.playthrough = generatePlaythrough(ROUND_COUNT);
     this.roundIndex = 0;
-    this.progressDots = [];
     this.createProgressDots(ROUND_COUNT);
     this.initRound();
 

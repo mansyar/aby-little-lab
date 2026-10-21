@@ -41,7 +41,8 @@ export interface GameProgress {
   lastPlayedAt: string | null;
   /**
    * Rolling window of the last `WINDOW_SIZE` tap results (true = correct),
-   * folded in when a session completes; drives adaptive band shifts.
+   * folded in when a session ends — completed or abandoned; drives adaptive
+   * band shifts.
    */
   recent: boolean[];
 }

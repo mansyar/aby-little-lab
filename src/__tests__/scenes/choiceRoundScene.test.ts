@@ -104,6 +104,16 @@ class TestChoiceScene extends ChoiceRoundScene {
     handler?.cb();
   }
 
+  /** Answers the round as a whole, as a board-style game does. */
+  answerWholeRound(correct: boolean): void {
+    this.resolveWholeRound(correct);
+  }
+
+  /** Completes the game so the recorded taps are flushed. */
+  completeNow(): void {
+    this.completeGame(this.gameId());
+  }
+
   protected buildRoundContent(): void {
     this.lifecycle.push("build");
     this.createChoiceTarget(300, 400, 170, 0);
@@ -154,6 +164,10 @@ class ExtrasChoiceScene extends TestChoiceScene {
   protected onWrong(index: number): void {
     this.extrasLog.push(`wrong:${index}`);
   }
+
+  protected onWiggleComplete(index: number): void {
+    this.extrasLog.push(`wiggleComplete:${index}`);
+  }
 }
 
 /**
@@ -176,6 +190,7 @@ interface TweenConfig {
   yoyo?: unknown;
   repeat?: unknown;
   ease?: unknown;
+  onComplete?: () => void;
 }
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
@@ -404,6 +419,92 @@ describe("ChoiceRoundScene round lifecycle", () => {
     expect(scene.extrasLog).toContain("wrong:1");
     const wiggle = findWiggle(scene, card);
     expect(wiggle?.targets).toContain(extra);
+  });
+
+  it("answers a wrong tap with the shared reaction: one tone, one wrong tap, a nod, one wiggle", () => {
+    const scene = new ExtrasChoiceScene();
+    scene.start();
+    const extra = scene.add.image(0, 0, "extra_target") as unknown as Phaser.GameObjects.GameObject;
+    scene.extras = [extra];
+    const card = scene.currentCards[1];
+
+    scene.tap(1);
+
+    // One soft tone, no chime: the wrong answer is a nudge, never a penalty.
+    expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
+    expect(mockAudio.playCorrect).not.toHaveBeenCalled();
+
+    // Professor Hoot nods.
+    expect(findNod(scene, getMascotImage(scene))).toBeDefined();
+
+    // The card and the game's own extra targets share a single wiggle.
+    const wiggle = findWiggle(scene, card);
+    expect(wiggle?.targets).toContain(card);
+    expect(wiggle?.targets).toContain(extra);
+    expect(wiggle?.angle).toBe(4);
+    expect(wiggle?.duration).toBe(350);
+    expect(wiggle?.yoyo).toBe(true);
+    expect(wiggle?.repeat).toBe(3);
+    expect(wiggle?.ease).toBe("Sine.inOut");
+
+    // Exactly one wrong tap is recorded toward learning progress.
+    scene.completeNow();
+    expect(mockRecordGameResult).toHaveBeenCalledTimes(1);
+    expect(mockRecordGameResult).toHaveBeenCalledWith("take-away", 0, 1);
+  });
+
+  it("runs the wrong-answer hook before the wiggle completion", () => {
+    const scene = new ExtrasChoiceScene();
+    scene.start();
+    const card = scene.currentCards[1];
+
+    scene.tap(1);
+
+    // The game's wrong-answer hook locks its input; the completion releases
+    // it again, so the hook has to run first.
+    expect(scene.extrasLog).toContain("wrong:1");
+    expect(scene.extrasLog).not.toContain("wiggleComplete:1");
+
+    const wiggle = findWiggle(scene, card);
+    wiggle?.onComplete?.();
+
+    expect(scene.extrasLog.indexOf("wrong:1")).toBeLessThan(
+      scene.extrasLog.indexOf("wiggleComplete:1"),
+    );
+  });
+
+  it("plays the incorrect tone before the scene's wrong-answer hook", () => {
+    const scene = new ExtrasChoiceScene();
+    scene.start();
+    mockAudio.playIncorrect.mockImplementationOnce(() => {
+      scene.extrasLog.push("tone");
+    });
+
+    scene.tap(1);
+
+    // The tone leads the scene's own extras: a game that re-speaks on a wrong
+    // tap (Feelings Faces) must not talk over the error cue.
+    const order = scene.extrasLog.filter((entry) => entry === "tone" || entry === "wrong:1");
+    expect(order).toEqual(["tone", "wrong:1"]);
+  });
+
+  it("releases the wiggle completion even when there is nothing to wiggle", () => {
+    const scene = new ExtrasChoiceScene();
+    scene.start();
+    scene.extras = [];
+
+    scene.answerWholeRound(false);
+
+    // Nothing to wiggle: the completion still has to be released, or a game
+    // that unlocks its board from it would stay locked for the child.
+    const wiggle = tweenConfigs(scene).find((config) => typeof config.onComplete === "function");
+    wiggle?.onComplete?.();
+
+    expect(scene.extrasLog).toContain("wrong:-1");
+    expect(scene.extrasLog).toContain("wiggleComplete:-1");
+    expect(scene.extrasLog.indexOf("wrong:-1")).toBeLessThan(
+      scene.extrasLog.indexOf("wiggleComplete:-1"),
+    );
   });
 
   it("runs the per-game correct extras before the cheer and the dot", () => {

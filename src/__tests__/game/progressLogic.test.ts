@@ -13,6 +13,7 @@ import {
   pruneActivity,
   recordPlay,
   recordResult,
+  recordTaps,
   relativeLastPlayed,
 } from "../../game/progressLogic";
 import type { DayActivity, GameProgress } from "../../types";
@@ -206,6 +207,57 @@ describe("progressLogic", () => {
     it("ignores negative counts when folding the window too", () => {
       const next = recordResult(gp({ recent: [true] }), { correct: -2, wrong: 1, win: true });
       expect(next.recent).toEqual([true, false]);
+    });
+  });
+
+  describe("recordTaps", () => {
+    it("folds the taps into the rolling window, correct taps first", () => {
+      const next = recordTaps(gp({ recent: [true, false] }), { correct: 3, wrong: 2 });
+      expect(next.recent).toEqual([true, false, true, true, true, false, false]);
+    });
+
+    it("folds into a fresh window for old saves without one", () => {
+      const next = recordTaps(gp(), { correct: 1, wrong: 1 });
+      expect(next.recent).toEqual([true, false]);
+    });
+
+    it("caps the window at the last WINDOW_SIZE taps", () => {
+      const next = recordTaps(gp({ recent: Array.from({ length: WINDOW_SIZE }, () => true) }), {
+        correct: 2,
+        wrong: 1,
+      });
+      expect(next.recent).toHaveLength(WINDOW_SIZE);
+      expect(next.recent).toEqual([...Array.from({ length: WINDOW_SIZE - 1 }, () => true), false]);
+    });
+
+    it("leaves the cumulative counters, wins, plays and last-played untouched", () => {
+      const next = recordTaps(
+        gp({ plays: 2, wins: 1, correct: 8, wrong: 2, lastPlayedAt: "2026-08-05T10:00:00.000Z" }),
+        { correct: 3, wrong: 1 },
+      );
+      expect(next.wins).toBe(1);
+      expect(next.correct).toBe(8);
+      expect(next.wrong).toBe(2);
+      expect(next.plays).toBe(2);
+      expect(next.lastPlayedAt).toBe("2026-08-05T10:00:00.000Z");
+    });
+
+    it("ignores negative counts", () => {
+      const next = recordTaps(gp({ recent: [true] }), { correct: -2, wrong: 1 });
+      expect(next.recent).toEqual([true, false]);
+      expect(next.correct).toBe(0);
+      expect(next.wrong).toBe(0);
+    });
+
+    it("does not mutate the input", () => {
+      const input = gp({ correct: 8, recent: [true] });
+
+      const next = recordTaps(input, { correct: 1, wrong: 1 });
+
+      expect(input.recent).toEqual([true]);
+      expect(input.correct).toBe(8);
+      expect(next.recent).toEqual([true, true, false]);
+      expect(next).not.toBe(input);
     });
   });
 
