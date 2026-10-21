@@ -12,8 +12,6 @@ import {
   wideTileCenter,
 } from "./hub/gridLayout";
 import {
-  ENTRANCE_DURATION,
-  ENTRANCE_STAGGER,
   PAGED_ICON_DISPLAY,
   PAGED_ICON_Y_OFFSET,
   PAGED_LABEL_FONT_SIZE,
@@ -40,58 +38,18 @@ import {
   slidePageOut,
   swipeRegion,
 } from "./hub/pageBoard";
+import {
+  addSparkle,
+  animateJustEarned,
+  drawDashedSlotRing,
+  fadeSlotIn,
+  PAGED_STICKER_DISPLAY_SIZE,
+  STICKER_DISPLAY_SIZE,
+  shelfStickerY,
+} from "./hub/stickerShelf";
+import { applyTimeUpLock, restoreTiles } from "./hub/timeUpDim";
 import { pageCount, pagedTilePosition, pageTileIndexes } from "./hubPaging";
 import { GAME_TILES } from "./hubTiles";
-
-/**
- * Display size of sticker thumbnails / empty-slot rings on a wide tile (px).
- *
- * The shelf has to live in the band between the label and the tile's bottom
- * edge: the label baseline sits at +20 and its 17px box ends around +30, and
- * the tile's bottom edge is at +58 (TILE_HEIGHT 116). 22px is the largest
- * plaque that clears the label and keeps a 3px inset from the edge — a 56px
- * plaque (sized for the old 160x116 tile with no bottom inset) covered the
- * game name once the grid reflowed.
- */
-const STICKER_DISPLAY_SIZE = 22;
-/** Gap between the shelf's bottom edge and the tile's bottom edge (px). */
-const STICKER_SHELF_INSET = 3;
-/** Alpha of the dashed empty-slot outline for unearned stickers. */
-const EMPTY_SLOT_ALPHA = 0.55;
-/** Stroke width of the dashed empty-slot outline (px). */
-const EMPTY_SLOT_LINE_WIDTH = 4;
-/** Number of dashes in the empty-slot circle. */
-const EMPTY_SLOT_DASH_COUNT = 10;
-/** Entrance scale for the just-earned sticker. */
-const JUST_EARNED_SCALE = 1.15;
-/** Duration of the gentle sparkle shimmer loop (ms). */
-const SPARKLE_DURATION = 800;
-/** Peak alpha of the sparkle shimmer loop. */
-const SPARKLE_ALPHA = 0.75;
-/** Scale of the just-earned sparkle burst pulse. */
-const BURST_SCALE = 1.25;
-/** Duration of the just-earned sparkle burst pulse (ms). */
-const BURST_DURATION = 500;
-
-/**
- * Paged (narrow-viewport) shelf constant. Tile size, spacing and centering
- * live in src/game/hubPaging.ts (PAGED_TILE_*), the per-tile icon/label
- * furniture offsets in src/game/hub/hubGridConstants.ts (PAGED_ICON_*,
- * PAGED_LABEL_*), and the paged interaction constants in
- * src/game/hub/pageBoard.ts (PAGE_*).
- */
-/**
- * Display size of sticker thumbnails / empty-slot rings on a paged tile (px).
- * The 196px-tall tile keeps the same label-to-bottom band proportion as the
- * wide tile, so the plaque is proportionally larger but still below the label.
- */
-const PAGED_STICKER_DISPLAY_SIZE = 30;
-
-/** Alpha applied to Hub tiles while the daily limit locks them. */
-const TIME_UP_TILE_ALPHA = 0.45;
-
-/** Static scale for locked tiles - a non-color "unavailable" size cue. */
-const TIME_UP_TILE_SCALE = 0.97;
 
 /** Everything the grid needs from the Hub scene, so rendering lives here and orchestration stays there. */
 export interface HubGridDeps {
@@ -487,11 +445,9 @@ export class HubGrid {
   ): void {
     const earned = hasSticker(GAME_TILES[index].gameId);
     const stickerX = x;
-    // The shelf hangs off the tile's bottom edge with a fixed inset, so it sits
-    // BELOW the label instead of over the game name: on a wide tile the plaque
-    // spans +33..+55 (label box ends ~+30, tile edge +58); on a paged tile
-    // +65..+95 (label ends ~+60, tile edge +98).
-    const stickerY = y + tileHeight / 2 - STICKER_SHELF_INSET - shelfSize / 2;
+    // Shelf placement (below the label, hanging off the tile's bottom edge)
+    // is stickerShelf.shelfStickerY's math.
+    const stickerY = shelfStickerY(y, tileHeight, shelfSize);
 
     if (earned) {
       // Derive the thumbnail scale from THIS sticker's raster tier instead of a
@@ -502,12 +458,11 @@ export class HubGrid {
       const sticker = this.deps.scene.add.image(stickerX, stickerY, stickerKey);
       this.stickerImages.push(sticker as Phaser.GameObjects.Image);
       if (GAME_TILES[index].gameId === this.justEarned) {
-        sticker.setScale(stickerScale * JUST_EARNED_SCALE);
-        this.animateJustEarned(sticker as Phaser.GameObjects.Image, stickerScale);
+        animateJustEarned(this.deps.scene, sticker, stickerScale, this.entranceIndex++);
       } else {
         sticker.setScale(stickerScale);
         animateEntrance(this.deps.scene, [sticker], this.entranceIndex++, {
-          onComplete: () => this.addSparkle(sticker as Phaser.GameObjects.Image),
+          onComplete: () => addSparkle(this.deps.scene, sticker),
           targetScale: stickerScale,
         });
       }
@@ -526,30 +481,8 @@ export class HubGrid {
     // (0, 0), so page-slide tweens can move the slot by its position.
     graphics.setPosition(x, y);
     this.emptySlotGraphics.push(graphics);
-    graphics.lineStyle(EMPTY_SLOT_LINE_WIDTH, 0xffffff, EMPTY_SLOT_ALPHA);
-    const segment = (Math.PI * 2) / EMPTY_SLOT_DASH_COUNT / 2;
-    for (let i = 0; i < EMPTY_SLOT_DASH_COUNT; i++) {
-      const start = i * segment * 2;
-      graphics.beginPath();
-      graphics.arc(0, 0, radius, start, start + segment, false);
-      graphics.strokePath();
-    }
-    const index = this.entranceIndex;
-    this.entranceIndex += 1;
-    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
-      targets: graphics,
-      alpha: EMPTY_SLOT_ALPHA,
-      delay: index * ENTRANCE_STAGGER,
-      duration: ENTRANCE_DURATION,
-      ease: "Sine.out",
-    };
-    if (isReducedMotion()) {
-      // Reduced motion skips the fade-in and lands directly at final alpha.
-      graphics.setAlpha(EMPTY_SLOT_ALPHA);
-    } else {
-      graphics.setAlpha(0);
-      this.deps.scene.tweens.add(config);
-    }
+    drawDashedSlotRing(graphics, radius);
+    fadeSlotIn(this.deps.scene, graphics, this.entranceIndex++);
   }
 
   /**
@@ -584,71 +517,11 @@ export class HubGrid {
    * daily play-time limit is reached (locked tiles swallow taps).
    */
   applyTimeUpLock(): void {
-    for (const tile of this.attractTargets) {
-      tile.setAlpha(TIME_UP_TILE_ALPHA);
-      tile.setScale(TIME_UP_TILE_SCALE);
-      tile.disableInteractive();
-    }
+    applyTimeUpLock(this.attractTargets);
   }
 
   /** Re-enables every tile after a time-up lock clears. */
   restoreTiles(): void {
-    for (const tile of this.attractTargets) {
-      tile.setAlpha(1);
-      tile.setScale(1);
-      tile.setInteractive();
-    }
-  }
-
-  /**
-   * Brings the just-earned sticker in with a larger Back.out bounce and a
-   * sparkle burst (scale pulse + shimmer). Under reduced motion only alpha.
-   */
-  private animateJustEarned(sticker: Phaser.GameObjects.Image, stickerScale: number): void {
-    const index = this.entranceIndex;
-    this.entranceIndex += 1;
-    const config: Phaser.Types.Tweens.TweenBuilderConfig = {
-      targets: sticker,
-      alpha: 1,
-      delay: index * ENTRANCE_STAGGER,
-      duration: ENTRANCE_DURATION,
-      ease: "Back.out",
-    };
-    sticker.setAlpha(0);
-    if (!isReducedMotion()) {
-      sticker.setScale(0);
-      config.scaleX = JUST_EARNED_SCALE * stickerScale;
-      config.scaleY = JUST_EARNED_SCALE * stickerScale;
-      config.onComplete = () => this.addJustEarnedBurst(sticker, stickerScale);
-    }
-    this.deps.scene.tweens.add(config);
-  }
-
-  /** Gentle alpha shimmer loop for earned stickers (no-op under reduced motion). */
-  private addSparkle(sticker: Phaser.GameObjects.Image): void {
-    if (isReducedMotion()) return;
-    this.deps.scene.tweens.add({
-      targets: sticker,
-      alpha: SPARKLE_ALPHA,
-      duration: SPARKLE_DURATION,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.inOut",
-    });
-  }
-
-  /** Sparkle burst for the just-earned sticker: shimmer plus scale pulse. */
-  private addJustEarnedBurst(sticker: Phaser.GameObjects.Image, stickerScale: number): void {
-    this.addSparkle(sticker);
-    if (isReducedMotion()) return;
-    this.deps.scene.tweens.add({
-      targets: sticker,
-      scaleX: BURST_SCALE * stickerScale,
-      scaleY: BURST_SCALE * stickerScale,
-      duration: BURST_DURATION,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.inOut",
-    });
+    restoreTiles(this.attractTargets);
   }
 }

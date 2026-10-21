@@ -392,4 +392,76 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     // Card tier: 256px raster scaled to the 22px shelf slot.
     expect((sticker.setScale as MockFn).mock.calls[0]?.[0]).toBeCloseTo(22 / 256, 5);
   });
+
+  it("re-applies the time-up lock to each page it flips to", () => {
+    const { deps, scene } = makeDeps({ isTimeUp: () => true });
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+    grid.buildPageGrid(0);
+
+    grid.flipTo(1);
+
+    const tiles = grid.attractTargets as unknown as MockObject[];
+    expect(tiles.length).toBe(10);
+    for (const tile of tiles) {
+      expect(tile.setAlpha).toHaveBeenCalledWith(0.45);
+      expect(tile.setScale).toHaveBeenCalledWith(0.97);
+      expect(tile.disableInteractive).toHaveBeenCalled();
+    }
+  });
+
+  it("lets a just-earned award ride a page transition without losing its burst", () => {
+    earnSticker("how-many");
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.wireSwipeGestures();
+    grid.justEarned = "how-many";
+    grid.buildPageGrid(0);
+
+    const shelfStickers = mockRegistry.filter(
+      (obj) => obj.kind === "image" && ((obj.args?.[2] as string) ?? "").startsWith("sticker_"),
+    );
+
+    grid.flipTo(1);
+
+    // The just-earned entrance tween targets the incoming page's shelf.
+    const entrances = (scene.tweens.add as MockFn).mock.calls.filter(
+      (call) =>
+        (call[0] as { ease?: string }).ease === "Back.out" &&
+        (call[0] as { scaleX?: number }).scaleX !== undefined,
+    );
+    expect(entrances.length).toBe(1);
+
+    // The slide-out timer then destroys the outgoing shelf per object.
+    fireSceneInput(scene, "pointerdown", { x: 512, y: 300 });
+    fireSceneInput(scene, "pointermove", { x: 400, y: 300 });
+    fireSceneInput(scene, "pointerup", { x: 400, y: 300 });
+    const timer = (scene.time.delayedCall as MockFn).mock.calls.at(-1)?.[1] as () => void;
+    timer();
+    for (const sticker of shelfStickers) {
+      expect(sticker.destroy).toHaveBeenCalled();
+    }
+  });
+
+  it("releases every grid object on shutdown", () => {
+    earnSticker("shape-sorter");
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    narrowViewport(scene);
+    grid.classifyViewport();
+    grid.buildPageGrid(1);
+
+    const built = mockRegistry.slice();
+    grid.destroy();
+
+    for (const obj of built) {
+      expect(obj.destroy).toHaveBeenCalled();
+    }
+  });
 });
