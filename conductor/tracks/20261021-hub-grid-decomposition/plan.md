@@ -14,14 +14,17 @@
 - **Covers:** FR-1, FR-2, FR-3, AC-1, AC-3
 - **Touches:** `src/game/hub/**` (new), `src/game/hubGrid.ts`, `src/__tests__/game/hub/**` (new), `src/__tests__/game/hubGrid*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified
+- **Checkpoint:** c8f3b33
+- **Evidence:** conductor/tracks/20261021-hub-grid-decomposition/verification/phase-1.md
 
-- [ ] **P1.T1: Concern inventory & shared foundation** — covers: FR-1, FR-3
-  - [ ] **P1.T1.1: Inventory the four concerns in hubGrid.ts and record the module map (which lines/constants/helpers belong to which concern) in evidence**
-  - [ ] **P1.T1.2: Create src/game/hub/ with a shared constants module (named constants per FR-3) consumed by the orchestrator**
-- [ ] **P1.T2: Extract grid layout + entrance bob** — covers: FR-1, FR-2, FR-4
-  - [ ] **P1.T2.1: Extract grid layout and entrance-bob logic into a src/game/hub/ module; orchestrator delegates; HubScene untouched**
-  - [ ] **P1.T2.2: Module unit tests (layout math, entrance bob, reduced-motion variant)**
+- [x] **P1.T1: Concern inventory & shared foundation** — covers: FR-1, FR-3
+  - [x] **P1.T1.1: Inventory the four concerns in hubGrid.ts and record the module map (which lines/constants/helpers belong to which concern) in evidence**
+  - [x] **P1.T1.2: Create src/game/hub/ with a shared constants module (named constants per FR-3) consumed by the orchestrator**
+- [x] **P1.T2: Extract grid layout + entrance bob** — covers: FR-1, FR-2, FR-4
+  - [x] **P1.T2.1: Extract grid layout and entrance-bob logic into a src/game/hub/ module; orchestrator delegates; HubScene untouched**
+  - [x] **P1.T2.2: Module unit tests (layout math, entrance bob, reduced-motion variant)**
 
 <!--
 The primary appends after acceptance:

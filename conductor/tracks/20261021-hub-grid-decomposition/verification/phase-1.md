@@ -188,3 +188,12 @@ the answer cannot differ mid-build.
   `SWIPE_*`, `PAGE_DOT_*` constants plus `classifyViewport`,
   `handleViewportChange`, `flipTo`, `updatePageDots`, `createPageDots`,
   `wireSwipeGestures` and the slide fragments inside `buildPageGrid`.
+
+## Primary verification
+
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run`
+- **Exit:** 0
+- **Result:** 237 files checked by Biome (same two pre-existing findings only: biome.json schema 2.5.5-vs-CLI-2.5.10 info; musicalMemoryScene.test.ts:294 noNonNullAssertion warning); tsc clean; Vitest 113 files / 2390 tests passed (2379 existing + 11 new gridLayout tests).
+- **Diff check:** git diff fd389db..HEAD matches Touches exactly (src/game/hub/hubGridConstants.ts, src/game/hub/gridLayout.ts, src/game/hubGrid.ts, src/__tests__/game/hub/gridLayout.test.ts, verification/phase-1.md). No deviations.
+- **Line-count note:** hubGrid.ts measured 773 lines at base (matching the spec) and 708 after extraction (subagent's 822 was a counting-method artifact; spec numbers are accurate).
+- **Acceptance:** AC-1 partially satisfied (concern 1 extracted; concerns 2-4 remain by design for Phases 2-3); AC-3 satisfied for this phase's cleanups (1 named constant, 1 dead-code removal, 2 comment-accuracy edits, all itemized in evidence); FR-4 satisfied for the extracted module (11 new tests).
