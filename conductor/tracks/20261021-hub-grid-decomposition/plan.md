@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, AC-1, AC-3
 - **Touches:** `src/game/hub/**` (new), `src/game/hubGrid.ts`, `src/__tests__/game/hub/**` (new), `src/__tests__/game/hubGrid*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Concern inventory & shared foundation** — covers: FR-1, FR-3
   - [ ] **P1.T1.1: Inventory the four concerns in hubGrid.ts and record the module map (which lines/constants/helpers belong to which concern) in evidence**
