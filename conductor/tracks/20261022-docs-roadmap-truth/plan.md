@@ -237,7 +237,7 @@
 - **Covers:** FR-1, FR-2, FR-5, NFR-4, AC-4, AC-7
 - **Touches:** `docs/release-checklist.md`, `docs/TDD.md`, `docs/SVG_STYLE.md`, `scripts/validate-docs.js`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R2.T1: Add the typecheck row to the release checklist's gate list** — covers: F1
   - [ ] **R2.T1.1:** §1 of `docs/release-checklist.md` gains a `pnpm typecheck`
