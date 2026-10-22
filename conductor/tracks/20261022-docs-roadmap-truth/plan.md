@@ -148,38 +148,42 @@
 - **Covers:** FR-2, FR-5, NFR-1, NFR-2, NFR-3, NFR-4, NFR-6, NFR-7, AC-7, AC-8
 - **Touches:** `scripts/validate-docs.js`, `.github/workflows/ci.yml`, `conductor/workflow.md`, `docs/TDD.md` (the validator table in §11.3 only), `README.md` (the CI description and the build paragraph's timing figures)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Write `scripts/validate-docs.js`** — covers: FR-5
-  - [ ] **P4.T1.1:** Every `docs/release-notes-v*.md` is linked from the README's
+- [x] **P4.T1: Write `scripts/validate-docs.js`** — covers: FR-5
+  - [x] **P4.T1.1:** Every `docs/release-notes-v*.md` is linked from the README's
     Docs index.
-  - [ ] **P4.T1.2:** Every relative link in `README.md` and `docs/*.md` resolves
+  - [x] **P4.T1.2:** Every relative link in `README.md` and `docs/*.md` resolves
     to a file; every anchor link resolves to a heading in its target.
-  - [ ] **P4.T1.3:** The PRD, the README and the TDD's game table describe
+  - [x] **P4.T1.3:** The PRD, the README and the TDD's game table describe
     exactly the games in `GAME_REGISTRY`.
-  - [ ] **P4.T1.4:** `docs/roadmap.md` carries both required sections; no
+  - [x] **P4.T1.4:** `docs/roadmap.md` carries both required sections; no
     document references a `conductor/tracks/` path that does not exist.
-  - [ ] **P4.T1.5:** A per-failure report on stdout and a non-zero exit. Node
+  - [x] **P4.T1.5:** A per-failure report on stdout and a non-zero exit. Node
     standard library only; no network.
-- [ ] **P4.T2: Prove the guard fails on drift** — covers: AC-7
-  - [ ] **P4.T2.1:** Three deliberate drifts — a broken link, an unlinked
+- [x] **P4.T2: Prove the guard fails on drift** — covers: AC-7
+  - [x] **P4.T2.1:** Three deliberate drifts — a broken link, an unlinked
     release-note file, a missing PRD game heading — each makes the script exit
     non-zero with a per-failure report. Revert each.
-  - [ ] **P4.T2.2:** A clean tree makes the script exit `0`.
-- [ ] **P4.T3: Wire it in** — covers: FR-5, AC-7, AC-8
-  - [ ] **P4.T3.1:** A `Document validation` step in the CI `Quality Gates` job.
-  - [ ] **P4.T3.2:** The `verify_phase` command in `conductor/workflow.md`.
-  - [ ] **P4.T3.3:** The script in the TDD's §11.3 validator table and in the
+  - [x] **P4.T2.2:** A clean tree makes the script exit `0`.
+- [x] **P4.T3: Wire it in** — covers: FR-5, AC-7, AC-8
+  - [x] **P4.T3.1:** A `Document validation` step in the CI `Quality Gates` job.
+  - [x] **P4.T3.2:** The `verify_phase` command in `conductor/workflow.md`.
+  - [x] **P4.T3.3:** The script in the TDD's §11.3 validator table and in the
     README's CI description.
-- [ ] **P4.T4: Correct the README's cold first-tap sentence** — covers: FR-2,
+- [x] **P4.T4: Correct the README's cold first-tap sentence** — covers: FR-2,
   NFR-4
-  - [ ] **P4.T4.1:** The build paragraph says the 82 ms figure is the *increment*
+  - [x] **P4.T4.1:** The build paragraph says the 82 ms figure is the *increment*
     the shell-diet track measured against a built pre-track baseline, not the
     absolute cost of a cold first tap, and it points at `docs/perf-baseline.md`
     for the absolute measurement and its date. The 400 ms budget is the budget
     for the absolute figure.
-  - [ ] **P4.T4.2:** The timing figures stay dated, and the cold-boot figure
+  - [x] **P4.T4.2:** The timing figures stay dated, and the cold-boot figure
     names the 2026-10-22 re-measurement alongside the 2026-10-20 one.
+
+**Result:** verified
+**Checkpoint:** 25b26ec
+**Evidence:** conductor/tracks/20261022-docs-roadmap-truth/verification/phase-4.md
 
 <!--
 The primary appends after acceptance:
