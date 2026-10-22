@@ -36,7 +36,7 @@ commands:
   format: "pnpm format"
   typecheck: "pnpm typecheck"
   build: "pnpm build"
-  verify_phase: "pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js"
+  verify_phase: "pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js"
 coverage:
   gate: "lines 95 / functions 88 / branches 85 / statements 90"
   scope: "project"
@@ -112,7 +112,7 @@ pnpm check && pnpm typecheck && pnpm test -- --run
 The full pre-phase-acceptance gate is:
 
 ```bash
-pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js
+pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js
 ```
 
 ### Boot Smoke Check
@@ -198,6 +198,7 @@ inside a track without a spec decision.
 | unit | `pnpm test -- --run` | yes |
 | coverage | `pnpm test:coverage` | yes |
 | build-artifact | `pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js` | yes |
+| documents | `node scripts/validate-docs.js` | yes |
 | smoke | `node scripts/validate-boot.js` (preview on :4173) | yes when boot/preload/PWA/assets change |
 
 ### Services and Fixtures

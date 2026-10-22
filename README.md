@@ -155,7 +155,7 @@ Product rules: [PRD §1.4](docs/PRD.md#14-platforms-install-and-offline), [PRD �
 
 ## Bundle Code Splitting (2026-08-02)
 
-Only Boot, Preload and Hub load at startup; the other twenty-two scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures measured 2026-10-22): a 134.6 kB shell entry (31.53 kB gzip) against the 200 kB gate and 42 JavaScript chunks; the timing figures were measured on 2026-10-20 — cold boot 419.5 ms against the 3 s gate, and a cold first tap costing at most 82 ms against the 400 ms budget.
+Only Boot, Preload and Hub load at startup; the other twenty-two scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures measured 2026-10-22): a 134.6 kB shell entry (31.53 kB gzip) against the 200 kB gate and 42 JavaScript chunks. Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
 
 Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), [PRD §7](docs/PRD.md#7-performance-and-asset-budget). Implementation, measurements and art ownership: [TDD §3.5](docs/TDD.md#35-in-chunk-art), [TDD §3.6](docs/TDD.md#36-what-the-budget-costs).
 
@@ -172,7 +172,7 @@ Then open `http://localhost:8080`; production terminates TLS in front of the con
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa` and `validate-boot` against a preview server. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
+`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs` and `validate-boot` against a preview server. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
 
 One-time setup: a Coolify API token with the `deploy` permission, the app's Deploy Webhook URL, the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` secrets, and branch protection requiring `Quality Gates`. Intent: [PRD §8.2](docs/PRD.md#82-deploy-path); implementation and setup steps: [TDD §11.4](docs/TDD.md#114-github-actions), [TDD §11.5](docs/TDD.md#115-container-and-host).
 

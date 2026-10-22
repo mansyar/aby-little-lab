@@ -36,7 +36,7 @@
    - [5.4 SpeakerButton](#54-speakerbutton)
    - [5.5 SettingsPanel and the settings group](#55-settingspanel-and-the-settings-group)
    - [5.6 ProfileChip and PlayTimeIndicator](#56-profilechip-and-playtimeindicator)
-   - [5.7 PwaToast and PwaToasts](#57-pwatost-and-pwatoasts)
+   - [5.7 PwaToast and PwaToasts](#57-pwatoast-and-pwatoasts)
    - [5.8 Typography and fonts](#58-typography-and-fonts)
 6. [State and storage](#6-state-and-storage)
    - [6.1 Keys and cache](#61-keys-and-cache)
@@ -1022,6 +1022,7 @@ VitePWA({
 | `validate-bundle.js` | exactly one `phaser-*.js` vendor chunk; every `index-*.js` shell entry ≤ `200 * 1024` bytes |
 | `validate-pwa.js` | 16 named checks over `dist/sw.js` and `dist/manifest.webmanifest`: files exist, manifest name/orientation/display/`display_override`, `precacheAndRoute` present, **every emitted `dist/assets/*.js` chunk present in the precache manifest** (so a lazily loaded game or art group is offline-capable, or the build fails), BGM precached, no `.ligne` or `ligne_wasm_bg` asset, `NavigationRoute` registered |
 | `validate-boot.js` | drives the production build through `playwright-core`: three cold loads, samples Navigation Timing after canvas mount + 5 s settle, fails when the median exceeds 3000 ms |
+| `validate-docs.js` | asserts the durable invariants between the documents and the code: every `docs/release-notes-v*.md` is linked from the README's Documentation index, every relative link resolves and every anchor matches a heading, the README, the PRD and the TDD describe exactly the games in `GAME_REGISTRY`, `docs/roadmap.md` carries both `Known Issues` and `Future Work / Roadmap`, and no document points at a Conductor path that does not exist |
 | `render-svg-contact-sheets.mjs` | developer tool, not a gate: renders per-category contact sheets from the SVG corpus (categories include `stories`) for art review |
 
 `validate-boot.js` deliberately does not start its own server — spawning one destabilised CDP on Windows — so CI starts `vite preview` as a separate step. Measured medians at introduction were 0.63–1.75 s against a 2036 ms baseline; [`docs/perf-baseline.md`](./perf-baseline.md) keeps the per-run numbers.
