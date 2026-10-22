@@ -72,27 +72,31 @@
 - **Covers:** FR-2, FR-3, FR-4, NFR-4, NFR-5, AC-4, AC-5, AC-6
 - **Touches:** `README.md`, `docs/release-notes-v1.21.0.md`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Correct the README** — covers: FR-2
-  - [ ] **P2.T1.1:** The suite figures and the build-output paragraph.
-  - [ ] **P2.T1.2:** The scene hierarchy and the file-tree lists.
-  - [ ] **P2.T1.3:** The Releases table and the Docs index — every
+- [x] **P2.T1: Correct the README** — covers: FR-2
+  - [x] **P2.T1.1:** The suite figures and the build-output paragraph.
+  - [x] **P2.T1.2:** The scene hierarchy and the file-tree lists.
+  - [x] **P2.T1.3:** The Releases table and the Docs index — every
     `docs/release-notes-v*.md` on disk linked.
-  - [ ] **P2.T1.4:** The "Big & Small" naming, the idle-tile wording, and every
+  - [x] **P2.T1.4:** The "Big & Small" naming, the idle-tile wording, and every
     `docs/PRD.md#anchor` link.
-  - [ ] **P2.T1.5:** The compact **Known Issues** section and the roadmap link.
-- [ ] **P2.T2: Write the release notes for the eight tracks** — covers: FR-4
-  - [ ] **P2.T2.1:** `docs/release-notes-v1.21.0.md` — the *Unreleased* banner
+  - [x] **P2.T1.5:** The compact **Known Issues** section and the roadmap link.
+- [x] **P2.T2: Write the release notes for the eight tracks** — covers: FR-4
+  - [x] **P2.T2.1:** `docs/release-notes-v1.21.0.md` — the *Unreleased* banner
     and one entry per track for PRs #48 through #55.
-  - [ ] **P2.T2.2:** The disposition of the v1.20.0 Known Issues — which are
+  - [x] **P2.T2.2:** The disposition of the v1.20.0 Known Issues — which are
     resolved, which stand.
-  - [ ] **P2.T2.3:** The changes a parent would notice, in plain language.
-- [ ] **P2.T3: Fix the product changelog** — covers: FR-2
-  - [ ] **P2.T3.1:** Collapse the duplicate "Game 20 — Number Order" entry to the
+  - [x] **P2.T2.3:** The changes a parent would notice, in plain language.
+- [x] **P2.T3: Fix the product changelog** — covers: FR-2
+  - [x] **P2.T3.1:** Collapse the duplicate "Game 20 — Number Order" entry to the
     one that agrees with the shipped ladder.
-  - [ ] **P2.T3.2:** Continue the changelog for the eight tracks, in the
+  - [x] **P2.T3.2:** Continue the changelog for the eight tracks, in the
     existing per-track style.
+
+**Result:** verified
+**Checkpoint:** 18884a6
+**Evidence:** conductor/tracks/20261022-docs-roadmap-truth/verification/phase-2.md
 
 ## Phase 3: The Checklists and the Perf Baseline
 
