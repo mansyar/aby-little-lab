@@ -417,7 +417,7 @@ evidence files:
 | 3 - The Checklists and the Perf Baseline | `3683c13` | `verification/phase-3.md` |
 | 4 - The Guard | `25b26ec` | `verification/phase-4.md` |
 | R1 - Review Fixes (round 1) | `f0227f3` | `verification/phase-R1.md` |
-| R2 - Review Fixes (round 2) | see `plan.md` | `verification/phase-R2.md` |
+| R2 - Review Fixes (round 2) | `dab033e` | `verification/phase-R2.md` |
 
 Every task in `plan.md` was implemented and verified; none was dropped. The
 diff stays inside each phase's `Touches` except for the deviations recorded in
