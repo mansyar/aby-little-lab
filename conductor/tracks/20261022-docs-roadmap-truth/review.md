@@ -3,9 +3,9 @@
 - **Track:** `20261022-docs-roadmap-truth`
 - **Type:** chore
 - **Branch:** `chore/20261022-docs-roadmap-truth`
-- **Range:** `ab00187ed4a0ff6bd779ef9d9a33880f8c6b6b42..87a0a53`
+- **Range:** `ab00187ed4a0ff6bd779ef9d9a33880f8c6b6b42..HEAD`
 - **Date:** 2026-10-22
-- **Verdict:** `PASS WITH FINDINGS` (round 1)
+- **Verdict:** `PASS` (round 2 — round 1 returned PASS WITH FINDINGS; all six round-1 findings fixed in Phase R1, all five round-2 findings fixed in Phase R2)
 
 ## Summary
 
@@ -61,24 +61,24 @@ workflow's fallback ladder.
 | ID | Implemented by | Verified by | Status |
 |---|---|---|---|
 | FR-1 | P1.T2 (`docs/PRD.md`), P1.T3 (`docs/TDD.md`) | Re-derived from the code: `PreloadScene.SHELL_ASSETS` = 53 keys (pinned by `shellOwnership.test.ts`); `src/game/art/types.ts` = 12 groups / 131 keys / 125 game-only; 202 SVGs; 8 `GameSceneBase` / 12 `ChoiceRoundScene` / 2 via `GroupMathScene`; 15 adaptive games and 7 fixed; 22 identities with a 0.3-0.8 s win budget; the TDD's §2.2 tree matching the filesystem file-for-file. | covered |
-| FR-2 | P2.T1, P2.T3, P3.T2, P3.T3, P3.T4 | The README's suite figures, scene tree, file trees, 24-row Releases table and 24-link Documentation index; the collapsed Game 20 entry; the perf baseline's dated 2026-10-22 re-measurement; the refreshed checklist gates, the deleted obsolete DRAFT block and the three repaired paths. Residual contradictions: F2, F3, F5, F6. | partial |
+| FR-2 | P2.T1, P2.T3, P3.T2, P3.T3, P3.T4, R1.T2, R1.T3, R1.T4, R1.T5, R1.T6, R2.T1, R2.T4 | The README's suite figures, scene tree, file trees, 24-row Releases table and 24-link Documentation index; the collapsed Game 20 entry; the perf baseline's dated 2026-10-22 re-measurement; the refreshed checklist gates, the deleted obsolete DRAFT block and the three repaired paths. The round-1 residuals (F2-F6) and the round-2 residuals (F1-F5) are all corrected; the primary's own correction fixed the last rasterisation claim in `docs/SVG_STYLE.md:5`. | covered |
 | FR-3 | P1.T1 (`docs/roadmap.md`), P2.T1, P3.T2 | `docs/roadmap.md` carries exactly two `##` sections - Known Issues and Future Work / Roadmap - and the README carries six one-line bullets that link to it rather than copy it. | covered |
 | FR-4 | P2.T2 (`docs/release-notes-v1.21.0.md`) | The Unreleased banner, one `### PR #48` ... `### PR #55` entry each in merge order cross-checked against the archived track specs, the v1.20.0 Known Issues dispositioned bullet by bullet, `package.json` still `1.20.0` and no `v1.21.0` tag. | covered |
-| FR-5 | P4.T1 (`scripts/validate-docs.js`), P4.T3 (CI, `workflow.md`, TDD §11.3, README) | All 489 lines read: standard library only, no network, no snapshot value. Checks 1-4 implemented correctly. **Gap: check 5 cannot see the backticked Conductor paths it exists to guard (F1).** | partial |
+| FR-5 | P4.T1 (`scripts/validate-docs.js`), P4.T3 (CI, `workflow.md`, TDD §11.3, README), R1.T1, R2.T5 | All lines read: standard library only, no network, no snapshot value. Checks 1-4 implemented correctly. Check 5 now reads the backticked Conductor paths it exists to guard - the round-1 gap - and the path part is optional as of Phase R2, so a bare directory reference is seen too. The primary reproduced the drift independently: a backticked path that exists nowhere exits 1 with a per-failure report, a path that exists only under `conductor/archive/` still resolves through the deliberate fallback, and the clean tree exits 0. | covered |
 | NFR-1 | no `src/` change in any phase | `git diff ab00187..HEAD -- src/` is empty; the only new executable artefact is `scripts/validate-docs.js`, which ships in no bundle. | covered |
 | NFR-2 | - | `package.json` and `pnpm-lock.yaml` unchanged; the script is an ES module matching `validate-bundle.js` and imports only `node:fs`, `node:path`, `node:url`. | covered |
 | NFR-3 | all four phases | Every gate segment exits 0; the two pre-existing Biome items are unchanged and outside every phase's `Touches`. | covered |
-| NFR-4 | P1.T4 and P3.T1 fact tables | Nearly every corrected figure re-derives from the code or carries its measurement date; the 40.7 MiB boot-raster figure was removed rather than restated. Exceptions: F2, F3, F4, F5, F6. | partial |
+| NFR-4 | P1.T4 and P3.T1 fact tables, R1 and R2 | Every corrected figure re-derives from the code or carries its measurement date; the 40.7 MiB boot-raster figure was removed rather than restated. The round-1 exceptions (F2-F6) and the round-2 exceptions (F1-F5) are all corrected, and the `docs/SVG_STYLE.md` canvas contract now names the tiers instead of the removed uniform-512 rule. | covered |
 | NFR-5 | P2.T1, P2.T2, P3.* | The PRD and TDD stay technical, the release notes stay parent-facing, and no child-facing copy changed (no `src/` change). | covered |
 | NFR-6 | P4.T1 | The validator contains no test count, bundle size, chunk count or precache count; its five checks are structural. | covered |
 | NFR-7 | P4.T1 | No network import anywhere in the script. | covered |
 | AC-1 | P1.T2 | `docs/PRD.md` §7.1-§7.3 describe the 53-key shell, the 12 groups / 131 keys / 125 game-only, the 202-SVG corpus and Story Order's 24 panels; the 21 §3.x art lines name the lazy art group. | covered |
 | AC-2 | P1.T3 | `docs/TDD.md` §2.1-§2.2 match the filesystem file-for-file, including `art/` (16), `hub/` (6), `audioIdentity.ts` and `dragBoard.ts`; §10.2 reads "118 test files, 2,488 tests (verified 2026-10-22)". | covered |
 | AC-3 | P1.T2, P1.T3 | The per-game audio identity is described in PRD §6.1 and TDD §8.7 and matches `src/game/audioIdentity.ts`; TDD §4.5's game-to-base table and §7.3's six shift strategies match the code. | covered |
-| AC-4 | P2.T1, P3.T2, P3.T3, P3.T4 | The game, page, sticker, chunk, precache and PWA-check arithmetic all re-derives. Residual contradictions: F2, F3, F5, F6. | partial |
+| AC-4 | P2.T1, P3.T2, P3.T3, P3.T4, R1.T2, R1.T3, R1.T4, R1.T5, R1.T6, R2.T1, R2.T3, R2.T4 | The game, page, sticker, chunk, precache and PWA-check arithmetic all re-derives, and the last two path references the review found - the TDD's script tree and its CI step list - now name the document validator. The round-1 and round-2 residuals are all closed. | covered |
 | AC-5 | P1.T1, P2.T1, P3.T2 | As FR-3: two sections, the four links plus the README's own, and no second copy of either list. | covered |
 | AC-6 | P2.T2 | As FR-4. | covered |
-| AC-7 | P4.T1, P4.T2, P4.T3 | The CI step and the `verify_phase` wiring are present by reading; the three required drifts each produced a non-zero exit and a per-failure report and were reverted. The reviewer could not re-execute the script, so the drift proof is evidence-based. | covered |
+| AC-7 | P4.T1, P4.T2, P4.T3, R1.T1, R2.T5 | The CI step and the `verify_phase` wiring are present by reading. Five deliberate drifts now each produce a non-zero exit and a per-failure report and are reverted - the three from Phase 4, the backticked-path one from Phase R1 and the slash-less one from Phase R2 - and the primary reproduced the Phase R1 drift independently, outside the phase agent's helper. | covered |
 | AC-8 | all four phases | Every segment the reviewer could run exits 0; the integrated run in `verification/integrated.md` records all eight, including `validate-docs`. | covered |
 
 ## Findings
@@ -271,10 +271,139 @@ None.
 - **Requirement:** FR-2, NFR-4, AC-4
 - **Test gap:** none
 
+## Round 2
+
+The round-2 review re-read the Phase R1 diff (`095256f..HEAD`) and confirmed
+that **all six round-1 findings are genuinely fixed**, each for the right
+reason and not by suppressing the check:
+
+- **F1 (round 1)** — `scripts/validate-docs.js` now has `unfencedLines()`
+  (fenced code blocks nulled, inline spans intact) with `renderedLines()`
+  layered on top of it, so the link check is byte-identical and the
+  Conductor-path check can finally read the backticked paths every document
+  writes. A backticked path that exists nowhere exits 1 with a per-failure
+  report; the archive fallback still resolves a path whose track has been
+  archived, which is load-bearing for `conductor/tech-stack.md:393`.
+- **F2 (round 1)** — the release checklist's gate list now has the
+  `validate-docs` row and says "eight steps", matching `ci.yml`.
+- **F3 (round 1)** — "breathe", not "bob", in the three idle-tile descriptions,
+  with the mascot's own bob left alone.
+- **F4 (round 1)** — the roadmap's repository-hygiene paragraph now matches the
+  tree: 110 tracked PNGs, 122 tracked HTML sheets, twelve ignored root PNGs,
+  and the "regenerated" comment living in `.gitignore`.
+- **F5 (round 1)** — the release notes name the 82 ms as an increment over the
+  built `f377bf8` baseline and the absolute 2026-10-22 measurement beside it.
+- **F6 (round 1)** — the Learning Progress row no longer expects the chevrons
+  to wrap.
+
+Round 2 raised **five Low findings**, no Critical, no High, no Medium. All
+five are fixed in Phase R2.
+
+### Round 2 findings
+
+#### F1 (Low) - The release checklist's gate list has no `typecheck` row
+
+- **File:** `docs/release-checklist.md:6-16`
+- **What:** §1 "Code Quality Gates" lists `pnpm check`, the tests, the coverage
+  gates, the build, `validate-bundle.js`, `validate-pwa.js`,
+  `validate-docs.js` and the boot smoke check - but no `pnpm typecheck`, even
+  though the CI sentence a few lines below names `pnpm run typecheck` as the
+  second of the eight gate commands and the Step 2 command fence runs it.
+- **Why:** the checklist is the list a release manager follows; a gate CI
+  enforces is missing from it.
+- **Fix:** add the row in CI order with the measured result. **Fixed in Phase
+  R2** (`docs/release-checklist.md:7`): "- [x] Run `pnpm typecheck` (TypeScript
+  type check, `tsc --noEmit`) - **2026-10-22:** PASS (no diagnostics)". No
+  historical v1.1.0 comparison was written, because no typecheck figure from
+  that run exists anywhere in the repository and none was invented.
+- **Requirement:** FR-2, NFR-4, AC-4
+- **Test gap:** none
+
+#### F2 (Low) - The TDD's script tree omits the document validator
+
+- **File:** `docs/TDD.md:149-154` (the finding cited §2.2; the only `scripts/`
+  tree in the document is in §2.1 - the root tree - and that is the one
+  corrected)
+- **What:** the tree lists five scripts and not `validate-docs.js`, which this
+  track added, so a reader looking for the validator the TDD describes in
+  §11.3 cannot find it.
+- **Why:** §2.1 is the tree the TDD claims to list.
+- **Fix:** add `validate-docs.js` to the tree, in the tree's existing order.
+  **Fixed in Phase R2** (`docs/TDD.md:153`): it sits with the other three
+  `validate-*.js` scripts, before the two `.mjs` helpers.
+- **Requirement:** FR-1, NFR-4, AC-2
+- **Test gap:** none
+
+#### F3 (Low) - The TDD's CI step list omits the document validator
+
+- **File:** `docs/TDD.md:1036`
+- **What:** the §11.4 `Quality Gates` row lists the commands CI runs and stops
+  at `node scripts/validate-pwa.js` before the boot check, while `ci.yml` runs
+  `node scripts/validate-docs.js` between them.
+- **Why:** the TDD's record of CI contradicts the workflow it documents.
+- **Fix:** insert the command in the position `ci.yml` uses. **Fixed in Phase
+  R2** (`docs/TDD.md:1037`): `validate-pwa` -> `validate-docs` -> the boot
+  check, read from `ci.yml`, not assumed.
+- **Requirement:** FR-1, NFR-4, AC-2
+- **Test gap:** none
+
+#### F4 (Low) - `docs/SVG_STYLE.md`'s asset inventory is stale
+
+- **File:** `docs/SVG_STYLE.md:3, 119-135`
+- **What:** the document says "All 176 SVGs" and "176 SVGs, all texture keys",
+  gives `stickers/` 21 and `ui/tiles/` 20, has no `stories/` row, and names 11
+  contact-sheet categories while the folder's root carries 12 sheets.
+- **Why:** after Phase 1 corrected the release notes to a 202-SVG corpus, this
+  governed document still said 176 - the same class of doc-versus-code
+  contradiction the track exists to remove.
+- **Fix:** restate §8 from the tree. **Fixed in Phase R2** (`docs/SVG_STYLE.md`
+  lines 3, 119, 130, 131, 134, 136): 202 SVGs, `stickers/` 22, a new
+  `stories/` row of 24 (`story_*` panels), `ui/tiles/` 21, and twelve
+  contact-sheet categories naming `stories`.
+- **Requirement:** FR-1, NFR-4, AC-1, AC-4
+- **Test gap:** none
+
+#### F5 (Low) - The Conductor-path check needs a trailing slash
+
+- **File:** `scripts/validate-docs.js:47`
+- **What:** `CONDUCTOR_PATH_RE` was
+  `/(?:[A-Za-z0-9_.-]+\/)*conductor\/(?:tracks|archive)\/[^\s`<>()[\]"',;|!?]*/g`
+  - the `/` after `tracks`/`archive` is required, so a reference to one of
+  the directories on its own is invisible to the check.
+- **Why:** FR-5's invariant was enforced only for the slash-terminated
+  spelling.
+- **Fix:** make the path part optional. **Fixed in Phase R2**
+  (`scripts/validate-docs.js:55`), with the greedy optional group, the
+  `isTemplate` skip, the trailing `[.:]+` strip and the archive fallback all
+  unchanged.
+- **Requirement:** FR-5, AC-7
+- **Test gap:** none
+- **Note:** the phase measured the finding's premise and found it partly
+  mistaken - the mandatory `/` sits between `tracks` and the track id, so a
+  path written *without* a trailing slash (`conductor/tracks/<id>`) already
+  matched. The fix is still strictly broader (a bare `conductor/tracks` or
+  `conductor/archive` is now matched and resolved, and both are real
+  directories, so no false positive), and the required drift proof holds: a
+  path that exists under neither directory exits 1 with a per-failure report.
+
+### One correction the primary made
+
+Verifying Phase R2, the primary found a residual contradiction of the same
+class in a file the phase already touched: `docs/SVG_STYLE.md:5` still said
+every SVG is "rasterized at 512px by the game (`SVG_RASTER_SIZE` in
+`PreloadScene.ts`)". That symbol no longer exists - the uniform 512 px
+rasterisation was replaced by the icon 160 / card 256 / hero 512 tiers in
+`src/utils/textureTiers.ts`. AC-4 forbids a document pointing at something the
+repository contradicts, and the file was inside Phase R2's `Touches`, so the
+primary corrected the sentence as part of the phase acceptance. The
+`docs/perf-baseline.md` record of 2026-10-17 keeps its own dated wording and
+its supersede note, and `src/utils/textureTiers.ts` keeps its historical doc
+comment; neither was touched.
+
 ## Overrides
 
 None. The project's `review.strict` is `true`, so every finding above is fixed
-in Phase R1 rather than filed or deferred.
+in Phase R1 (round 1) and Phase R2 (round 2) rather than filed or deferred.
 
 ## Plan compliance
 
@@ -287,6 +416,8 @@ evidence files:
 | 2 - The Reader-Facing Docs | `18884a6` | `verification/phase-2.md` |
 | 3 - The Checklists and the Perf Baseline | `3683c13` | `verification/phase-3.md` |
 | 4 - The Guard | `25b26ec` | `verification/phase-4.md` |
+| R1 - Review Fixes (round 1) | `f0227f3` | `verification/phase-R1.md` |
+| R2 - Review Fixes (round 2) | see `plan.md` | `verification/phase-R2.md` |
 
 Every task in `plan.md` was implemented and verified; none was dropped. The
 diff stays inside each phase's `Touches` except for the deviations recorded in
@@ -312,23 +443,51 @@ exiting 0.
 
 ## Debt
 
-None deferred. Six findings: one Medium and five Low, all fixed in Phase R1.
-The Low findings are grouped into one fix phase because each is a single-line
-or single-paragraph correction in a document, and because the Medium finding
-(F1) must be fixed in the same phase so the guard's own drift proof can be
-extended in the same run.
+None deferred. Eleven findings across two rounds: one Medium and ten Low, all
+fixed. Round 1's findings were grouped into one fix phase because each is a
+single-line or single-paragraph correction in a document, and because the
+Medium finding (F1) must be fixed in the same phase so the guard's own drift
+proof can be extended in the same run. Round 2's five Low findings were
+grouped for the same reason, and because F5's regex change had to land in the
+same phase as its own drift proof.
 
 ## Doc sync
 
-`pending` - the post-review documentation sync runs after Phase R1. It will
-cover the same files the findings touch (`scripts/validate-docs.js`,
-`docs/release-checklist.md`, `docs/PRD.md`, `docs/roadmap.md`,
-`docs/release-notes-v1.21.0.md`, `docs/device-testing-checklist.md`) and the
-`docs/TDD.md` §11.3 validator table, if F1's fix changes the script's
-behaviour.
+`updated` - the post-review documentation sync ran after Phase R2 and covered:
+
+- `docs/PRD.md` §4.8 and §5.6 and `docs/TDD.md` §4.5, §7.3, §9.3 and §10 -
+  rewritten for the abandoned-session flush, the per-game audio identity, the
+  `onWrong` ordering, the idle-tile "breathe" wording and the suite figures.
+- `docs/release-checklist.md` - the gate list now carries all eight CI steps
+  (including `pnpm typecheck` and `validate-docs`), the Biome file count, the
+  "breathe" wording, and the three broken Conductor paths repaired.
+- `docs/device-testing-checklist.md` - the sticker and page arithmetic, the
+  rows for Games 21 and 22, everything shipped after 2026-10-20, the
+  "breathe" wording, the chevron behaviour, and the three broken paths
+  repaired.
+- `docs/roadmap.md` - the nine Known Issues and the Future Work list, with
+  the repository-hygiene entry corrected against the tree.
+- `docs/release-notes-v1.21.0.md` - the eight unnoted tracks, the v1.20.0
+  Known Issues disposition, the art-group counts and the first-tap figures.
+- `docs/SVG_STYLE.md` - the asset inventory restated from the tree, and the
+  canvas contract's rasterisation rule corrected from the uniform 512 px to
+  the icon 160 / card 256 / hero 512 tiers.
+- `docs/TDD.md` §2.1 and §11.4 - the script tree and the CI step list now
+  include the document validator.
+- `conductor/product.md` §3.1 - the game-6 label aligned with the shipped
+  label, the duplicate Game 20 changelog entry collapsed, and the changelog
+  continued for the eight tracks.
+- `README.md` - the suite and build figures, the scene hierarchy, the file
+  lists, the Releases table, the Documentation index, the naming and anchor
+  links, a compact Known Issues section, and the cold first-tap sentence
+  corrected to name the 82 ms as an increment.
+
+No second copy of the Known Issues list exists: `docs/roadmap.md` is the
+single home, and the README, PRD, TDD and perf baseline link to it.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 |---|---|---|---|---|---|---|
 | 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 5 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 5 | 11 |

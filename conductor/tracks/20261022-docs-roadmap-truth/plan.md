@@ -237,28 +237,32 @@
 - **Covers:** FR-1, FR-2, FR-5, NFR-4, AC-4, AC-7
 - **Touches:** `docs/release-checklist.md`, `docs/TDD.md`, `docs/SVG_STYLE.md`, `scripts/validate-docs.js`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R2.T1: Add the typecheck row to the release checklist's gate list** — covers: F1
-  - [ ] **R2.T1.1:** §1 of `docs/release-checklist.md` gains a `pnpm typecheck`
+- [x] **R2.T1: Add the typecheck row to the release checklist's gate list** — covers: F1
+  - [x] **R2.T1.1:** §1 of `docs/release-checklist.md` gains a `pnpm typecheck`
     row, placed in the order CI runs it, with the current result.
-- [ ] **R2.T2: List the document validator in the TDD's source tree** — covers: F2
-  - [ ] **R2.T2.1:** §2.2's `scripts/` tree gains `validate-docs.js`, in the
+- [x] **R2.T2: List the document validator in the TDD's source tree** — covers: F2
+  - [x] **R2.T2.1:** §2.2's `scripts/` tree gains `validate-docs.js`, in the
     order the tree lists the other validators.
-- [ ] **R2.T3: List the document validator in the TDD's CI table** — covers: F3
-  - [ ] **R2.T3.1:** The §11.4 `Quality Gates` step list gains
+- [x] **R2.T3: List the document validator in the TDD's CI table** — covers: F3
+  - [x] **R2.T3.1:** The §11.4 `Quality Gates` step list gains
     `node scripts/validate-docs.js`, in the position `.github/workflows/ci.yml`
     runs it.
-- [ ] **R2.T4: Restate the asset inventory in `docs/SVG_STYLE.md`** — covers: F4
-  - [ ] **R2.T4.1:** The corpus total, the per-folder counts, the `stories/`
+- [x] **R2.T4: Restate the asset inventory in `docs/SVG_STYLE.md`** — covers: F4
+  - [x] **R2.T4.1:** The corpus total, the per-folder counts, the `stories/`
     row and the contact-sheet category list match the tree.
-- [ ] **R2.T5: Let the Conductor-path check see a path written without a trailing slash** — covers: F5
-  - [ ] **R2.T5.1:** `CONDUCTOR_PATH_RE` matches `conductor/tracks` and
+- [x] **R2.T5: Let the Conductor-path check see a path written without a trailing slash** — covers: F5
+  - [x] **R2.T5.1:** `CONDUCTOR_PATH_RE` matches `conductor/tracks` and
     `conductor/archive` with or without a trailing path segment, and the
     archive fallback still applies.
-  - [ ] **R2.T5.2:** A fifth deliberate drift — a Conductor path written
+  - [x] **R2.T5.2:** A fifth deliberate drift — a Conductor path written
     without its trailing slash that exists nowhere — makes the script exit
     non-zero with a per-failure report. Revert it, and leave nothing behind.
+
+**Result:** verified
+**Checkpoint:** dab033e
+**Evidence:** conductor/tracks/20261022-docs-roadmap-truth/verification/phase-R2.md
 
 <!--
 The primary appends after acceptance:
