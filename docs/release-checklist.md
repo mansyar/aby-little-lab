@@ -3,14 +3,22 @@
 ## Pre-Release Preparation
 
 ### 1. Code Quality Gates
-- [x] Run `pnpm run check` (linting/formatting) — **2026-08-02:** biome clean (51 files)
-- [x] Run `CI=true pnpm test` (all tests pass) — **2026-08-02:** 667/667 tests, 22 files (includes lazy scene-registry tests)
-- [x] Run `pnpm run build` (production build succeeds) — **2026-08-02:** OK (entry `index-NPwwI8ke.js` + 7 lazy game-scene chunks, 19 precache entries)
-- [x] Verify code coverage meets threshold (>80%) — ~96.7% lines / ~98.2% statements (CI-enforced)
-- [x] Review all changes since last release — first release; all 17 prior tracks reviewed and archived
-- [x] Ensure no security vulnerabilities introduced — pnpm supply-chain policy passed; no hardcoded secrets
+- [x] Run `pnpm check` (Biome lint + format check) — **2026-10-22:** biome clean (248 files, 1 pre-existing warning in `src/__tests__/scenes/musicalMemoryScene.test.ts`); the v1.1.0 run was clean on 51 files
+- [x] Run `pnpm typecheck` (TypeScript type check, `tsc --noEmit`) — **2026-10-22:** PASS (no diagnostics)
+- [x] Run `pnpm test -- --run` (all tests pass) — **2026-10-22:** 2,488 tests in 118 files, all passed; the v1.1.0 run was 667/667 in 22 files
+- [x] Run `pnpm test:coverage` (coverage gates) — **2026-10-22:** statements 97.92 % / branches 91.62 % / functions 96.58 % / lines 98.69 %
+- [x] Run `pnpm build` (production build succeeds) — **2026-10-22:** OK (entry `index-BrQ7goBH.js` = 134.6 kB, 42 JavaScript chunks, 54 precache entries); the v1.1.0 run was entry `index-NPwwI8ke.js` + 7 lazy game-scene chunks, 19 precache entries
+- [x] Verify code coverage meets the enforced thresholds (lines 95 / functions 88 / branches 85 / statements 90, `vite.config.ts`) — **2026-10-22:** all four met; the v1.1.0 template threshold was ">80 %"
+- [x] Run `node scripts/validate-bundle.js` (Phaser isolated in its own vendor chunk, shell entry ≤ 200 kB) — **2026-10-22:** PASS (vendor `phaser-P1E8uaLi.js` 1342.6 kB, shell 134.6 kB)
+- [x] Run `node scripts/validate-pwa.js` (16 checks) — **2026-10-22:** 16/16 passed; the v1.1.0 run was 13/13
+- [x] Run `node scripts/validate-docs.js` (documents agree with the code) — **2026-10-22:** PASS (5 checks, 0 failures)
+- [x] Run the boot smoke check (`node scripts/validate-boot.js` against `vite preview` on port 4173) — **2026-10-22:** PASS (median of 3 cold loads 1115 ms, samples 1419 / 1115 / 1025 ms, budget < 3000 ms)
+- [x] Review all changes since last release — **2026-10-22:** the eight tracks merged since v1.20.0 (PRs #48–#55) are listed in the v1.21.0 prep block below; the v1.1.0 run covered the then-17 prior tracks
+- [x] Ensure no security vulnerabilities introduced — **v1.1.0 (2026-08-02):** pnpm supply-chain policy passed; no hardcoded secrets
 
 > **CI enforcement (2026-08-02):** The four gates above are automatically enforced by GitHub Actions (`.github/workflows/ci.yml`, job **Quality Gates**: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`) on every pull request and `master` push. Local runs remain valid as a fast pre-push sanity check; CI is the release gate. Enable branch protection on `master` requiring the "Quality Gates" check to make them merge-blocking.
+
+> **CI enforcement (2026-10-22, current):** The **Quality Gates** job now runs eight steps — `pnpm run check` → `pnpm run typecheck` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-bundle.js` → `node scripts/validate-pwa.js` → `node scripts/validate-docs.js` → the boot smoke check (`vite preview --port 4173 --strictPort` + `node scripts/validate-boot.js`). The 2026-08-02 quote above is kept as the record of what CI enforced then.
 
 > **Code splitting (2026-08-02):** The bundle-splitting chore (archived at `conductor/archive/code-splitting_20260802/`) lazy-loads the seven game scenes. Post-build verification: entry chunk `dist/assets/index-*.js` contains no game-scene constructor registrations (only `Boot`/`Preload`/`Hub` via `super({ key: ... })` inspection), each of the 7 `*Scene-*.js` chunks contains exactly its own scene key, and `sw.js` precaches all 19 emitted entries — offline play is unaffected. Verified manually on device: no game chunk fetched before its tile is tapped; each game boots, plays, and returns to the Hub; re-taps do not re-fetch.
 
@@ -21,7 +29,7 @@
 > - [x] Merge `feat/game-8` → `master` — **2026-08-02:** PR #7 merged (`3544a0e`)
 > - [x] Manual device checks (PWA install, offline, TTS voice, performance metrics) — **2026-08-03:** executed `docs/device-testing-checklist.md` against the live URL, all items passed
 
-> **v1.1.0 release mechanics (2026-08-02):** Track `conductor/tracks/release-1.1.0-mechanics_20260802/` — version bumped to `1.1.0` (`78e5634`), release notes finalized, tag + deploy in progress (recorded under Release Process → v1.1.0).
+> **v1.1.0 release mechanics (2026-08-02):** Track `conductor/archive/release-1.1.0-mechanics_20260802/` — version bumped to `1.1.0` (`78e5634`), release notes finalized, tag + deploy in progress (recorded under Release Process → v1.1.0).
 
 > **v1.2.0 prep (First Words — Games 9 & 10, 2026-08-03):** Track archived at `conductor/archive/first-words_20260803/` (reviewed — 1 Low finding fixed in `8568f4a`).
 > - [x] All four quality gates green on `release/v1.2.0`: Biome clean (72 files), **771/771 tests (29 files)**, build OK (**10 lazy game chunks, 24 precache entries**), `validate-pwa` 13/13
@@ -53,7 +61,7 @@
 > - [x] Device checklist updated with Multi-Kid Profiles rows (`docs/device-testing-checklist.md`) — **executed 2026-08-04 on iPad, Android tablet, iPhone, Android phone, all items passed**
 > - [x] Release notes drafted (`docs/release-notes-v1.4.0.md`) — finalized by the release track
 
-> **v1.14.0 prep (Game 17 — Take Away, complete 17-game suite, 2026-08-10):** Release track `conductor/tracks/release-1.14.0_20260810/`. Baseline gates on local `master` all green — Biome clean (125 files), **1309/1309 tests (58 files)**, build OK (17 lazy game chunks + separate Phaser vendor chunk, 35 precache entries / 1566.27 KiB), `validate-pwa` 13/13, `validate-bundle` PASS. Release branch `release/v1.14.0` created; version bumped to `1.14.0` (`2e4d39d`); release notes rewritten (`docs/release-notes-v1.14.0.md`, DRAFT); device execution record replaced with the current v1.14.0 record (pending execution). **In-track source fix (user-approved, regression-first):** the parent Learning Progress report listed only 15 games — missing Add It Up (shipped in v1.13.0) and Take Away; both rows added to `PROGRESS_GAME_ROWS` with regression tests asserting all 17 rows page 8 + 8 + 1.
+> **v1.14.0 prep (Game 17 — Take Away, complete 17-game suite, 2026-08-10):** Release track `conductor/archive/release-1.14.0_20260810/`. Baseline gates on local `master` all green — Biome clean (125 files), **1309/1309 tests (58 files)**, build OK (17 lazy game chunks + separate Phaser vendor chunk, 35 precache entries / 1566.27 KiB), `validate-pwa` 13/13, `validate-bundle` PASS. Release branch `release/v1.14.0` created; version bumped to `1.14.0` (`2e4d39d`); release notes rewritten (`docs/release-notes-v1.14.0.md`, DRAFT); device execution record replaced with the current v1.14.0 record (pending execution). **In-track source fix (user-approved, regression-first):** the parent Learning Progress report listed only 15 games — missing Add It Up (shipped in v1.13.0) and Take Away; both rows added to `PROGRESS_GAME_ROWS` with regression tests asserting all 17 rows page 8 + 8 + 1.
 
 > **v1.19.0 prep (Game 21 - Feelings Faces + Shared Choice-Round Shell + Audio Focus, 2026-10-20):** Released directly from `master` (no release branch, same shape as v1.5.0) after two reviewed and merged tracks: `conductor/archive/20261020-feelings-faces/` (PR #45) and `conductor/archive/20261020-scene-audio-shell/` (PR #46).
 > - [x] Baseline gates green on `master` at the merge commit `1ce8544` - Biome clean (199 files, 1 pre-existing warning), **2,149 tests (100 files)**, coverage 98.07 statements / 90.28 branches / 98.15 functions / 98.93 lines, build OK (44 precache entries), `validate-pwa` 15/15, `validate-bundle` PASS (shell 192.4 kB <= 200 kB)
@@ -71,12 +79,26 @@
 > - [x] Device-class verification - **pending** by user decision (non-blocking; desktop HTTP/hash smoke is the release gate). The one item worth a real finger: the drag feel of Story Order, and specifically that a slightly wobbly tap withdraws a placed panel instead of doing nothing
 > - [x] Pre-existing doc drift recorded, not fixed here: `docs/PRD.md` and `docs/TDD.md` still describe twenty games; `conductor/product.md` still carries duplicate `## Changelog - Game 20` sections
 
+> **v1.21.0 prep (the eight tracks merged since v1.20.0, 2026-10-22):** The release notes are authored at `docs/release-notes-v1.21.0.md` and carry the *Unreleased* banner. **Nothing has shipped**: `package.json` still reads `1.20.0`, no `v1.21.0` tag exists, and the version bump and the tag stay a human release decision (see *Release & Deployment* in `conductor/workflow.md`).
+> - [x] **PR #48 — The PRD and the TDD, rewritten** (`conductor/archive/20261020-prd-tdd-truth-pass/`) — documentation only
+> - [x] **PR #49 — The shell diet: every game brings its own art** (`conductor/archive/20261020-shell-diet-lazy-art/`) — the boot set is 53 keys and a game's own art rides its chunk
+> - [x] **PR #50 — The docs and the dead code, swept** (`conductor/archive/20261020-docs-truth-pass/`) — documentation only
+> - [x] **PR #51 — The 22 games, declared once** (`conductor/archive/20261020-game-metadata-source/`) — `src/game/gameRegistry.ts` is the one list the Hub, the progress rows and the sticker shelf read
+> - [x] **PR #52 — One drag board for the two ordering games** (`conductor/archive/20261021-drag-board-shell/`) — `src/game/dragBoard.ts`; a placed card can be swapped, a tap withdraws it
+> - [x] **PR #53 — The Hub grid, taken apart** (`conductor/archive/20261021-hub-grid-decomposition/`) — six modules under `src/game/hub/`
+> - [x] **PR #54 — Every game gets its own voice** (`conductor/archive/20261021-audio-variety/`) — 22 per-game audio identities
+> - [x] **PR #55 — The session lifecycle, made whole** (`conductor/archive/20261022-session-lifecycle/`) — the progress dots fill again in every game
+> - [x] Gates green on this branch (2026-10-22): Biome clean (247 files, 1 pre-existing warning), **2,488 tests in 118 files**, coverage statements 97.92 % / branches 91.62 % / functions 96.58 % / lines 98.69 % (gates 90 / 85 / 88 / 95), `pnpm build` OK (shell `index-BrQ7goBH.js` = 134.6 kB, 42 JavaScript chunks, 54 precache entries), `validate-bundle` PASS, `validate-pwa` 16/16, boot smoke check PASS (median of 3 cold loads 1115 ms ≤ 3000 ms)
+> - [ ] Version bump to `1.21.0` — **not done**: `package.json` still reads `1.20.0`. The bump and the `v1.21.0` tag are a human release decision
+> - [ ] Device-class verification — **pending**: the device rows for this batch are unchecked in `docs/device-testing-checklist.md`; they need real hardware
+> - [ ] Release notes finalized — drafted at `docs/release-notes-v1.21.0.md`; the *Unreleased* banner is dropped when the release actually ships
+
 ### 2. PWA Validation
-- [x] Run `node scripts/validate-pwa.js` — **2026-08-02:** 13/13 passed
+- [x] Run `node scripts/validate-pwa.js` — **2026-10-22:** 16/16 passed; the v1.1.0 run was 13/13
 - [x] Verify manifest.webmanifest is valid — valid, served from live URL
 - [x] Verify the manifest requests fullscreen where supported and retains standalone as the fallback display mode — `display_override: ["fullscreen","standalone"]` + `display: standalone`
 - [x] When system home/back/navigation bars remain visible, record them as platform-controlled limitations rather than app-rendered controls — platform-controlled (documented)
-- [x] Verify service worker is generated — `sw.js` generated, 19 precache entries (1447.87 KiB; includes all lazy game chunks)
+- [x] Verify service worker is generated — `sw.js` generated, 54 precache entries (1707.70 KiB; includes every emitted JavaScript chunk — 42 of 42); the v1.1.0 run precached 19 entries
 - [x] Verify all assets are precached — SW precache verified by validate-pwa
 - [x] Test offline functionality — **2026-08-03:** verified on installed PWA (device pass)
 - [x] Test installation on target devices — **2026-08-03:** device-testing-checklist executed, passed
@@ -98,7 +120,7 @@
 - [x] With Reduce Motion enabled: transitions, celebration, and gameplay tweens shorten (~40%); celebration renders 6 rays with no confetti; press feedback is disabled; Hub entrances fade without scale, no bob/wiggle/sparkle, and the idle attract plays chime-only; game completion still works — validated in motion tracks
 
 ### 4b. Touch UX & Parental Lock
-- [x] Protected controls (Settings, all seven game Back buttons, Musical Memory Replay) expose 96×96px hit areas — validated (ParentLock tests)
+- [x] Protected controls (Settings, all 22 game Back buttons, the per-round replay speaker glyph) expose 96×96px hit areas — validated (ParentLock tests)
 - [x] A 3-second hold shows the circular progress ring and triggers the action exactly once — validated (ParentLock tests)
 - [x] Duplicate touches during a hold do not double-trigger the action — validated
 - [x] Early release, pointer leaving the control, and pointer cancel never trigger the action — validated
@@ -106,17 +128,19 @@
 
 ### 4c. Hub Engagement
 - [x] Tiles, labels, and stickers enter with a 40ms stagger wave (fade-only under reduced motion) — validated in hub-engagement track
-- [x] Tiles bob gently on a 2.5s idle loop — validated
-- [x] Sticker shelf shows seven 56px thumbnails: earned shimmer, unearned dimmed (30% alpha) — validated
+- [x] Tiles breathe gently on a 2.5s idle loop (a 2.5% scale pulse) — validated
+- [x] Sticker shelf shows 22 thumbnails — 22px on a wide-grid tile, 30px on a paged tile: earned shimmer, unearned drawn as a dashed empty-slot ring (55% alpha) — validated
 - [x] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replays show no highlight — validated
 - [x] After ~25s idle, tiles wiggle + soft two-tone chime plays, repeating every ~10s; any touch resets the timer — validated
 - [x] Reduced-motion: idle chime plays without the wiggle — validated
 
 ### 4d. Per-Game Juice
-- [x] Drag scenes (Shape Sorter, Shadow Match, Big vs. Small): pieces lift (1.1× + tilt) on drag start and restore on release — validated in per-game-juice track
+- [x] Drag scenes (Shape Sorter, Shadow Match, Big & Small, Number Order, Story Order): pieces lift (1.1× + tilt) on drag start and restore on release — validated in per-game-juice track
+- [x] Number Order and Story Order share the drag-board shell (`src/game/dragBoard.ts`): a placed card can be swapped with the card in another slot, and a tap withdraws it back to its source — validated (dragBoard tests)
+- [x] The two ordering games keep their own wrong-answer behaviour: Number Order bounces the card home, Story Order leaves the strip exactly where the child put it and re-opens it — validated
 - [x] Drag scenes: drop zones pulse a soft outline while dragging over; correct drops settle with a 200ms snap tween (no teleport) — validated
 - [x] Incorrect drops bounce back with wobble; dropping on empty floor bounces silently (no incorrect SFX in any drag game) — validated
-- [x] Big vs. Small: toy shrinks into box (150ms), lid wiggles ±3°, box bumps 1.05× — splash still appears — validated
+- [x] Big & Small: toy shrinks into box (150ms), lid wiggles ±3°, box bumps 1.05× — splash still appears — validated
 - [x] Shadow Match: silhouette stamps (pulse + brief white flash, self-cleaning) and matched object dims to 50% — validated
 - [x] Animal Trace: animal hops with arc between waypoints; food wiggles on arrival; progress dots pop 1 → 1.4 → 1 — validated
 - [x] Pop & Freeze: pop emits 3 small droplet circles that fade out (self-cleaning); sleeping decoys breathe on a gentle loop — validated
@@ -129,7 +153,7 @@
 
 ### 4e. Mascot Companion
 - [x] Hub: Professor Hoot appears bottom-right (touch-inert, behind tiles), waves on load, cheers on a just-earned sticker, then settles into the bob/blink idle loop — validated in mascot-companion track
-- [x] Every game: Hoot cheers on a correct action (pose swap + bounce; big cheer on win with sparkle ring) and nods on an incorrect action (Animal Trace excepted — it has no incorrect path) — validated
+- [x] Every game: Hoot cheers on a correct action (pose swap + bounce; big cheer on win with sparkle ring) and nods on an incorrect action (Animal Trace excepted — it has no incorrect path) — the nod covers the other 21 games: Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big & Small, Pattern Builder, Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order, Feelings Faces, Story Order — validated
 - [x] Rapid correct taps: Hoot does not stack or freeze mid-animation (in-flight cheer is retired; blink pauses during cheer and resumes after) — validated
 - [x] Hoot never blocks taps, stays behind gameplay z-order, and is gone after leaving a scene (no lingering sprites across scene changes) — validated
 - [x] Reduced-motion: no idle loop; reactions are pose swaps / gentle wave-nod without bounce or sparkle; correct/incorrect audio still plays — validated
@@ -137,28 +161,44 @@
 
 ### 5. Documentation
 - [x] README.md is up to date — CI/CD + deployment docs present
-- [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` … `docs/release-notes-v1.4.0.md`
+- [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` … `docs/release-notes-v1.21.0.md` (24 files; the v1.21.0 notes are authored, not shipped)
 - [x] Deployment guide complete — README CI docs + this checklist's automated pipeline note
-- [x] Device testing checklist complete — **2026-08-03:** executed against live URL, all sections A–G passed; **2026-08-04:** v1.4.0 Multi-Kid Profiles execution record added (all devices passed)
+- [x] Device testing checklist complete — **2026-08-03:** executed against live URL, all sections A–G passed; **2026-08-04:** v1.4.0 Multi-Kid Profiles execution record added (all devices passed); **2026-10-22:** the v1.21.0 batch's device rows are added and left unchecked — the pass needs real hardware and has not been run
 
 ## Release Process
 
 > **Automated pipeline (2026-08-08):** Production deploys are automated and **tag-gated**. Pull requests and `master` pushes run only the Quality Gates job (check → test → build → validate-pwa). Pushing a strict semver tag (`v1.10.0`-style) runs Quality Gates on the tagged commit and, when green, the **Deploy to Coolify** job fires the Coolify Deploy Webhook (Bearer-authenticated) — but only if the tag points to a commit on `master` (master-lineage guard). Coolify rebuilds the Docker image from the repo's `Dockerfile` and redeploys the app on the VPS. The manual steps below are preserved for local smoke-testing and for emergency releases where CI is unavailable.
 
-### Step 1: Create Release Branch
+### Step 1: Release Branch — not created (the release ships straight from `master`)
+Since **v1.19.0** and **v1.20.0** the release ships directly from `master`: the track's pull request is merged into `master`, the Quality Gates job runs on that merge, and the version tag is cut on the `master` commit in Step 4. No `release/vX.Y.Z` branch is created any more.
+
 ```bash
-git checkout -b release/v1.0.0
+# The release ships from master's merge commit - there is no release branch to create:
+git log --oneline -1 master
 ```
+
+The pre-v1.19 flow (`git checkout -b release/v1.0.0`, merged back into `master` in Step 6) survives as the manual path for an emergency release when CI is unavailable, and is the flow the v1.1.0 – v1.16.0 records above describe.
 
 ### Step 2: Final Testing
 ```bash
-# Run all quality checks (CI enforces these too — see Quality Gates job)
+# Run the full gate (CI enforces the same steps - see the Quality Gates job)
 pnpm run check
-CI=true pnpm test
+pnpm run typecheck
+pnpm test -- --run
+pnpm test:coverage
 pnpm run build
 
-# Validate PWA
+# Build-artifact validators
+node scripts/validate-bundle.js
 node scripts/validate-pwa.js
+
+# Document validator
+node scripts/validate-docs.js
+
+# Boot smoke check: serve the built output on 4173, then stop the preview
+node node_modules/vite/bin/vite.js preview --port 4173 --strictPort &
+sleep 3
+node scripts/validate-boot.js
 ```
 
 ### Step 3: Version Update
@@ -192,6 +232,8 @@ git push origin v1.0.0
 ```
 
 Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing the version tag (Step 6) triggers the automated pipeline: **Quality Gates → Deploy to Coolify** (Coolify rebuilds from the repo Dockerfile). The deployed site updates only after all gates pass.
+
+> **Current flow (since v1.19.0):** the merge into `master` already happened through the track's pull request, so only the tag push remains — `git push origin vX.Y.Z`. The `git merge release/v1.0.0` line above is the manual, emergency path.
 
 ### Step 7: Verify Deployment (automated path)
 - [x] CI run for the `master` push: Quality Gates green, Deploy to Coolify job green — **2026-08-02:** run `30722232904` (Quality Gates 48s ✓, Deploy to Coolify 6s ✓)
@@ -380,16 +422,24 @@ Merging to `master` runs the Quality Gates job only — **no deploy**. Pushing t
 # Revert to previous version
 git revert HEAD
 
-# Push — CI gates it, then the Coolify Deploy Webhook redeploys automatically
+# Push — CI gates it, but a master push does NOT deploy: the deploy is tag-gated
 git push origin master
+
+# Cut the next patch tag on the reverted master commit and push it —
+# that tag runs Quality Gates → Deploy to Coolify
+git tag -a vX.Y.Z+1 -m "Rollback: revert <released version>"
+git push origin vX.Y.Z+1
 ```
+
+> **Corrected 2026-10-22:** the old wording here said that pushing to `master` redeploys automatically. It does not — since the 2026-08-08 tag-gated pipeline, a `master` push runs the Quality Gates job only, and the Coolify deploy fires from the **tag**. A rollback therefore needs a revert commit on `master` **and** a new tag.
 
 #### Tag-based Rollback
 ```bash
 # Checkout previous release, push a branch/PR, merge when green
 git checkout v0.9.0
 git push origin HEAD:master  # via PR if branch protection is enabled
-# CI gates + Coolify auto-deploy applies the old build
+# CI gates + Coolify auto-deploy applies the old build — cut and push a new
+# patch tag for that master commit, because the deploy job only runs on a tag
 ```
 
 ### Communication Plan
@@ -401,7 +451,7 @@ git push origin HEAD:master  # via PR if branch protection is enabled
 ## Release Notes Template
 
 ```markdown
-# Release v1.0.0
+# Release vX.Y.Z
 
 ## What's New
 - Feature 1
@@ -417,7 +467,7 @@ git push origin HEAD:master  # via PR if branch protection is enabled
 - Fix 2
 
 ## Known Issues
-- Issue 1 (workaround available)
+- Issue 1 (workaround available) — the standing-debt list lives once, in `docs/roadmap.md`; a release note says which of those this release resolves
 - Issue 2 (fix in progress)
 
 ## Installation
@@ -433,14 +483,14 @@ Please report issues at [GitHub Issues URL]
 
 ### Pre-Release Security Review
 - [x] No hardcoded secrets or API keys — secrets live in GitHub Actions secrets only (`COOLIFY_DEPLOY_WEBHOOK`, `COOLIFY_TOKEN`)
-- [x] Input validation present — game logic validated (652 tests)
+- [x] Input validation present — game logic validated (2,488 tests in 118 files; the v1.1.0 count was 652)
 - [x] XSS protection in place — no dynamic HTML injection; Vite defaults
 - [x] No SQL injection vulnerabilities — no backend database
 - [x] Secure data storage (localStorage) — `abby-little-lab:v1`, no sensitive data
 - [x] No sensitive data in logs — no logging of user data
 
 ### Dependencies
-- [x] All dependencies up to date — pnpm lockfile verified (458 packages)
+- [x] All dependencies up to date — pnpm lockfile verified (`pnpm install --frozen-lockfile` is clean; the v1.1.0 count was 458 packages)
 - [x] No known vulnerabilities — pnpm supply-chain policy passed
 - [x] License compatibility verified — dependency audit in CI
 
@@ -459,6 +509,20 @@ Please report issues at [GitHub Issues URL]
 - Memory: < 150MB — target met
 - Touch latency: < 16ms — target met
 - Audio latency: < 50ms — target met
+
+### Actual Metrics (measured on the current build, 2026-10-22)
+
+The 2026-08-03 block above is the device pass for v1.0.0 and keeps its numbers.
+The block below is the automated measurement of the build that would ship as
+v1.21.0 — the eight tracks merged since v1.20.0 (PRs #48–#55). Full method
+and the three runs behind every figure are in `docs/perf-baseline.md`
+(*Shell Diet Re-measurement — 2026-10-22*).
+
+- [x] Boot time: median of 3 cold loads in fresh browser contexts = **1115 / 1132 / 1392 ms** across three runs (samples 1419 / 1115 / 1025 ms in the run that gates) — target < 3 s **met**
+- [ ] Cold first tap → first frame: median across five games **351–392 ms**, worst game **462–640 ms** — the 400 ms budget is **not demonstrated** by this measurement (see the note in `docs/perf-baseline.md`); it needs the increment measurement against a built baseline on the same host, and a device pass
+- [x] Shell entry size: `index-BrQ7goBH.js` = **134.6 kB** (31.53 kB gzip) — budget ≤ 200 kB **met**
+- [x] JavaScript chunks emitted / precached: **42 / 42** — the service worker precaches every one of them, plus **54** entries in total
+- [ ] Frame rate, memory, touch latency, audio latency — still to be measured on a real device; the automated gates do not cover them
 
 ## Final Sign-Off
 
@@ -683,20 +747,6 @@ Please report issues at [GitHub Issues URL]
 - [x] Security review passed
 - [x] Performance targets met
 - [x] Ready for release
-
-### v1.16.0 — Release Candidate Gates (DRAFT, release/v1.16.0)
-
-> **v1.16.0 prep (UI/UX Cohesion + Ligne Offline-First Hoot, 2026-08-27):** Release track `conductor/tracks/release-1.16.0_20260827/` (base `v1.15.0`, branch `release/v1.16.0`). Baseline gates on the RC — Biome clean (137 files, 0 errors), **1565/1565 tests (64 files)**, coverage thresholds met (95/88/85/90), build OK (precache **46 entries / 3354.86 KiB** — includes the precached Ligne WASM engine `ligne_wasm_bg-*.wasm`; shell `index-*.js` 161.06 kB ≤ 200 kB; Phaser vendor chunk separate), `validate-pwa` **15/15** (new contract: Ligne WASM precached, no runtime cache for it), `validate-bundle` PASS.
-> - Note: the one local test-isolation flake (stale `node:`-dependent BGM filesystem tests) was fixed out-of-band as `32f911b`.
-> - Release branch `release/v1.16.0` created at track init; version bumped to `1.16.0` (`4d6a1cc`); release notes drafted (`docs/release-notes-v1.16.0.md`, DRAFT); device execution record staged (`docs/device-testing-checklist.md` — pending).
-
-**Verify Deployment — v1.16.0 (pending, filled in Phase 8):**
-- [ ] PR (`release/v1.16.0` → master) merged — CI Quality Gates PASS on PR; Deploy skipped on PR (tag-guard by design)
-- [ ] Annotated tag `v1.16.0` on master merge commit + pushed — CI run Quality Gates + Deploy to Coolify PASS; webhook fired; live updated
-- [ ] App loads correctly on the live URL — 200; serves release build (version `1.16.0` in bundle/footer)
-- [ ] Service worker + manifest served — `sw.js` 200 (precache manifest includes `ligne_wasm_bg-*.wasm`), `manifest.webmanifest` 200
-- [ ] Live smoke — Hub 18 tiles; Cohesion behaviors (press feedback, speaker states, Settings/Progress affordances, profile rings); Settings footer `v1.16.0`; **offline relaunch → Ligne Hoot (non-RM)** and **tween Hoot (RM, no WASM fetch)**; zero console/network errors
-- [ ] Device testing on v1.16.0 — recorded in `docs/device-testing-checklist.md` (v1.16.0 record, 4-class matrix + offline-relaunch + reduced-motion + console-health rows)
 
 ## Final Sign-Off - v1.19.0
 

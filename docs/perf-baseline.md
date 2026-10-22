@@ -1,5 +1,9 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
+> **Live figures — measured 2026-10-22.** The numbers in the section **Shell Diet Re-measurement — 2026-10-22** at the end of this file describe the current build: shell entry `index-BrQ7goBH.js` at 134.6 kB, **42** JavaScript chunks, **54** precache entries. Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17) and the Shell Diet (2026-10-20). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+>
+> The standing debts and the planned work behind these numbers live in one place: [`docs/roadmap.md`](roadmap.md).
+
 Track: `perf-bundle-hardening_20260809`, Phase 3 (measure-first). Date: 2026-08-09.
 
 ## Method
@@ -147,6 +151,16 @@ All 170 SVG assets rasterize at a uniform `SVG_RASTER_SIZE = 512`
 This exceeds the < 150 MB total memory NFR when combined with heap + runtime
 buffers, and is the primary optimization target of Phase 3 (per-use tiers).
 
+> **Superseded 2026-10-20 (Shell Diet — Lazy Art Groups).** The uniform
+> `SVG_RASTER_SIZE = 512` rule above describes the build of 2026-10-17 and is
+> kept as the record of that audit. The rule no longer holds: a key now
+> rasterises at the tier of wherever it lives — icon 160 / card 256 / hero 512
+> (`src/utils/textureTiers.ts`) — and the game art is lazy, so a texture is
+> only paid for when its game is opened. The 170-asset preload the audit
+> describes was split into a 53-key boot set and twelve lazy art groups. See
+> *Shell Diet — Lazy Art Groups — 2026-10-20* and *Shell Diet
+> Re-measurement — 2026-10-22* below.
+
 ### Verification notes
 
 - Hub rendered correctly after boot in every run (all 20 tiles, mascot,
@@ -216,7 +230,7 @@ Notes:
 
 ## Shell Diet — Lazy Art Groups — 2026-10-20
 
-Track `conductor/tracks/20261020-shell-diet-lazy-art`, branch
+Track `conductor/archive/20261020-shell-diet-lazy-art`, branch
 `refactor/20261020-shell-diet-lazy-art`. The 178-entry boot table was split:
 53 keys stay in the shell (22 tile icons, 22 stickers, 2 mascot poses,
 `icon_speaker`, 6 avatars) and the other 125 move into twelve named groups under
@@ -301,3 +315,104 @@ after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
   service worker precaches all 41 emitted `dist/assets/*.js` chunks, and
   `scripts/validate-pwa.js` now fails the build when any chunk is missing from
   that manifest (proved by deleting one entry from a built `sw.js`).
+
+## Shell Diet Re-measurement — 2026-10-22
+
+Track `20261022-docs-roadmap-truth`, Phase 3 (the checklists and the perf
+baseline). This is the live section: the build measured here carries the eight
+tracks merged since v1.20.0 (PRs #48–#55), and the numbers below are the ones
+the header at the top of this file points at.
+
+### Method
+
+- Shell size, chunk count and precache count: `pnpm build`, then
+  `node scripts/validate-bundle.js` and `node scripts/validate-pwa.js`.
+- Cold boot: `node scripts/validate-boot.js` against the production build
+  served by `vite preview` on port 4173 — three cold loads, each in a **fresh
+  browser context** at 1024×768, and the **median of the three** is the number
+  the 3 s product budget gates on. The script was run three times; the samples
+  of all three runs are listed rather than the best one.
+- Cold first tap: `node scripts/measure-first-tap.mjs` — a fresh context per
+  game, the service worker blocked so the game's chunk is a real network round
+  trip, one Hub tile tapped, and three stages timed: tap → chunk headers, tap
+  → chunk body, tap → first frame. **The third stage is the budgeted one.**
+  The script was run three times; every run is listed.
+
+### Cold boot (three cold loads per run, fresh context each)
+
+| Run | Samples (ms) | Median (ms) | Verdict (budget < 3000 ms) |
+|---|---|---|---|
+| 1 | 1736 / 1045 / 1392 | **1392** | PASS |
+| 2 | 1376 / 1044 / 1132 | **1132** | PASS |
+| 3 (the phase's boot smoke check, after the gate's rebuild) | 1419 / 1115 / 1025 | **1115** | PASS |
+
+The three medians span 1115–1392 ms, well inside the 3 s budget. They are
+higher than the 419.5 ms the Shell Diet track recorded on 2026-10-20 — a
+different host, and the boot medians on this machine have always been the
+slowest of the ones recorded here (the 2026-10-17 record already noted local
+medians of 0.63–1.75 s for the same script).
+
+### Cold first tap → first frame (five games, absolute totals in ms)
+
+| Game | Run 1 | Run 2 | Run 3 | Worst seen |
+|---|---|---|---|---|
+| Shape Sorter | 405.0 | 374.1 | 378.1 | 405.0 |
+| Find the Letter | 391.5 | 351.1 | 389.9 | 391.5 |
+| Find the Word | 343.5 | 462.2 | 329.9 | 462.2 |
+| Add It Up | 351.2 | 309.1 | 351.1 | 351.2 |
+| Memory Match | 640.2 | 288.8 | 580.2 | 640.2 |
+| **Median across the five** | **391.5** | **351.1** | **378.1** | — |
+| **Worst game** | 640.2 (Memory Match) | 462.2 (Find the Word) | 580.2 (Memory Match) | **640.2** |
+
+**The 400 ms first-tap budget is not demonstrated by this measurement.** The
+worst game came in at 640.2 / 462.2 / 580.2 ms — above the script's 400 ms
+absolute gate in all three runs — while the median across the five games stayed
+between 351.1 and 391.5 ms. The script exited non-zero each time for that
+reason.
+
+What the number is and is not:
+
+- The 2026-10-20 record met its budget with a different quantity: an
+  **increment** of +82 ms (worst game) against a built baseline of the
+  pre-track commit `f377bf8`, with absolute totals of 224–334 ms. The script
+  today has no pre-track build to subtract, so it measures the absolute total
+  and applies the 400 ms budget to it. The two are not comparable like for
+  like.
+- The measurement is noisy by construction. The 2026-10-20 record already
+  measured absolute worst-case totals spread over 277.8–464.1 ms when the
+  measurement was repeated minutes apart, and the failing game moved between
+  runs here (Memory Match in runs 1 and 3, Find the Word in run 2).
+- The host is slower today than it was on 2026-10-20: the same boot script
+  returns 1115–1392 ms here against 419.5 ms on the shell-diet host, so the
+  whole machine is roughly 3× slower and the tap numbers carry that same
+  factor. On the same footing as the 2026-10-20 absolutes (224–334 ms), today's
+  288.8–640.2 ms is in the same order of magnitude.
+- The two caveats from the 2026-10-20 record still hold: the timing stops at
+  the first frame the game paints behind its loading cue, and the service
+  worker is blocked, so the chunk fetch is a cold round trip that a warm
+  precache would beat.
+
+**Open question, not a verdict:** whether the cold first tap is inside its
+budget on the target hardware is not settled by this run. It needs the
+increment measurement the shell-diet track used (a built pre-track baseline on
+the same host, back to back) and a device pass. It is recorded here as a
+measured, dated figure and is a candidate for `docs/roadmap.md`.
+
+### Build figures (2026-10-22)
+
+| Figure | Value | Source |
+|---|---|---|
+| Shell entry (minified) | `index-BrQ7goBH.js` = **134.6 kB** (137.79 kB as Vite prints it, 31.53 kB gzip) | `node scripts/validate-bundle.js` |
+| Shell entry budget | ≤ 200 kB | `scripts/validate-bundle.js` |
+| Phaser vendor chunk | `phaser-P1E8uaLi.js` = 1342.6 kB | `node scripts/validate-bundle.js` |
+| JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
+| Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
+| Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
+| Test suite | 118 files / 2,488 tests | `pnpm test -- --run` |
+| Coverage | statements 97.92 % / branches 91.62 % / functions 96.58 % / lines 98.69 % | `pnpm test:coverage` |
+
+The Shell Diet section above keeps its own numbers (129.1 KiB, 41 chunks, 53
+precache entries) — that is what the build of 2026-10-20 measured. The 42
+chunks and 54 precache entries above are one chunk and one entry more, from
+the tracks that landed after it.
+

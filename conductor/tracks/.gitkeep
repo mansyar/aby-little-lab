@@ -1,0 +1,6 @@
+This file keeps the tracks directory in the repository.
+
+Git cannot track an empty directory, so without this placeholder the directory
+disappears from a fresh checkout and `conductor/index.md`'s "Tracks Directory"
+link points at nothing. Every track's artifacts live here while it is active
+and move to `conductor/archive/<track-id>/` when it completes.

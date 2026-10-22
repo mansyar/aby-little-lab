@@ -126,7 +126,7 @@ Games are numbered in Hub order, which is the order used throughout this documen
 | 3 | Pop & Freeze | Inhibitory control | Popping bubbles while leaving the sleeping animals alone | [3.3](#33-pop--freeze) |
 | 4 | Shadow Match | Visual discrimination | Matching an object to its dark silhouette | [3.4](#34-shadow-match) |
 | 5 | Musical Memory | Working memory | Repeating an expanding note sequence on three frogs | [3.5](#35-musical-memory) |
-| 6 | Big vs. Small | Cognitive reasoning | Sorting the same toy by size into the big or small box | [3.6](#36-big-vs-small) |
+| 6 | Big & Small | Cognitive reasoning | Sorting the same toy by size into the big or small box | [3.6](#36-big--small) |
 | 7 | Pattern Builder | Cognitive reasoning | Choosing the shape that continues a repeating pattern | [3.7](#37-pattern-builder) |
 | 8 | Find the Letter | Early literacy | Recognising a letter shape among four cards | [3.8](#38-find-the-letter) |
 | 9 | Find the Word | Early literacy | Matching a printed word to a picture and spoken word | [3.9](#39-find-the-word) |
@@ -157,7 +157,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Fixed. Three rounds of three, no band ladder.
 - **Feedback.** A dragged shape lifts to 1.1 times its display size with a 4 degree tilt, 1.05 times and level under reduced motion, while its matching hole pulses an outline. A correct drop snaps to the slot centre over 200 ms (120 ms reduced) with the chime and a progress dot, and a wrong drop bounces back; the incorrect tone plays only on a drop onto a hole, so a shape lifted and released in place stays silent.
 - **Narration.** One rule line: "Drag each shape into its hole." Spoken once at scene entry, replayable from the speaker glyph. No per-round prompt.
-- **Art and assets.** 18 filled shape SVGs plus 18 matching cut-out SVGs in the boot set, each shape with its own flat colour. Tile and sticker icons for the Hub.
+- **Art and assets.** 18 filled shape SVGs plus 18 matching cut-out SVGs, each shape with its own flat colour, loaded with the game from the `shapes` and `cutouts` art groups rather than the boot set. Tile and sticker icons for the Hub.
 
 ### 3.2 Animal Trace
 
@@ -166,7 +166,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Fixed. Three pairs, no band ladder.
 - **Feedback.** The animal hops between waypoints in two 60 ms halves (one shorter half under reduced motion) and the food wiggles 4 degrees three times when it arrives, while each waypoint pops its progress dot from 1 to 1.4 and back. There is no wrong answer, so the mascot never nods in this game.
 - **Narration.** Rule line: "Trace the line to the animal's food." No per-round prompt.
-- **Art and assets.** Six animal SVGs and six food SVGs from the boot set. The path itself is computed at runtime from a curve, not pre-drawn art.
+- **Art and assets.** Six animal SVGs and six food SVGs, loaded with the game from the `animals` and `food` art groups rather than the boot set. The path itself is computed at runtime from a curve, not pre-drawn art.
 
 ### 3.3 Pop & Freeze
 
@@ -175,7 +175,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Fixed. Six pops, one to two sleeping decoys, no band ladder.
 - **Feedback.** A pop shrinks the bubble over 200 ms (120 ms reduced) and releases three teal droplets that radiate and fade. Sleeping decoys breathe on a 1.0 to 1.03 loop that stops under reduced motion, and tapping one plays the wake tone with a 1.15 times wobble (1.05 times over 180 ms reduced) and no penalty.
 - **Narration.** Rule line: "Pop the bubbles, but not the sleeping animals." The sleeping-animal tone is the in-game correction.
-- **Art and assets.** Bubble and sleep glyph SVGs, plus animal heads reused from the boot set. Tile and sticker icons.
+- **Art and assets.** Bubble and sleep glyph SVGs, plus animal heads, loaded with the game from the `glyphs` and `animals` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.4 Shadow Match
 
@@ -184,7 +184,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Fixed. Six of eight objects, no band ladder.
 - **Feedback.** A correct drop snaps the picture into its silhouette over 200 ms of Cubic.out (120 ms reduced), stamps the shadow with a 1.1 times pulse (smaller under reduced motion) over a brief white fill flash, and dims the matched object to 50 percent alpha with the chime and a progress dot; a wrong drop bounces back.
 - **Narration.** Rule line: "Drag each picture onto its shadow." No per-round prompt.
-- **Art and assets.** Eight object SVGs and eight shadow SVGs in the boot set, the shadows drawn as flat dark silhouettes at the icon tier.
+- **Art and assets.** Eight object SVGs and eight shadow SVGs, loaded with the game from the `items` and `shadows` art groups rather than the boot set, the shadows drawn as flat dark silhouettes at the icon tier.
 
 ### 3.5 Musical Memory
 
@@ -193,16 +193,16 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder moves the starting length one note in either direction (one, two or three notes), and the five round shape is the same at every shift.
 - **Feedback.** Every frog tap bounces the frog (1.2 times over 200 ms, 1.05 times over 120 ms reduced) and emits an expanding ripple ring, lily pads drift 3 px up and down on a 3 s loop that stops under reduced motion, and a completed sequence pops its progress dot. A wrong tap plays the soft tone, nods the mascot and replays the sequence from its first note.
 - **Narration.** The notes are the prompt, so there is no spoken rule or target. A speaker glyph replays the sequence at any time and is the only narration control.
-- **Art and assets.** Three frog colours and a lily pad from the boot set, with a ripple ring drawn at runtime around each frog as it sings.
+- **Art and assets.** Three frog colours and a lily pad, loaded with the game from the `music` art group rather than the boot set, with a ripple ring drawn at runtime around each frog as it sings.
 
-### 3.6 Big vs. Small
+### 3.6 Big & Small
 
 - **Mechanic.** Drag each toy into the big box or the small box according to its size. The same toy appears at both sizes.
 - **Rounds and pool.** Three of six toy types per playthrough (teddy bear, car, ball, block, rocket, drum), each shown big and small, so six toys to sort. Six placements complete the game.
 - **Difficulty.** Fixed. Big toys render at 1.5 times base scale and small toys at 0.7, which is a wide, pre-reader-safe gap.
 - **Feedback.** Toys drag with the shared lift and drop-zone highlight of Shape Sorter, and a correct drop shrinks the toy into the box over 150 ms while the lid wiggles 3 degrees three times and the box bumps to 1.05 times scale with the splash; a wrong drop bounces back with the soft tone and no penalty.
 - **Narration.** Rule line: "Put the big toys in the big box." No per-round prompt.
-- **Art and assets.** Seven toy SVGs including the box, from the boot set. Tile and sticker icons.
+- **Art and assets.** Seven toy SVGs including the box, loaded with the game from the `toys` art group rather than the boot set. Tile and sticker icons.
 
 ### 3.7 Pattern Builder
 
@@ -211,7 +211,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the pattern type and the gap: the easiest band always hides the last slot on an ABAB row, the middle band widens to ABAB, AABB or ABB with the last slot still hidden, and the top band may hide a middle slot instead.
 - **Feedback.** A correct tap flashes the card in the success green, chimes, cheers the mascot and pops the progress dot before the next round opens 700 ms later; a wrong tap plays the soft tone and wiggles the card 4 degrees three times (2 degrees over 200 ms under reduced motion) with a mascot nod and no penalty.
 - **Narration.** Rule line: "Pick the shape that finishes the pattern." No per-round prompt.
-- **Art and assets.** Reuses the Shape Sorter shape SVGs. Tile and sticker icons.
+- **Art and assets.** Reuses the Shape Sorter shape SVGs, loaded with the game from the `shapes` art group. Tile and sticker icons.
 
 ### 3.8 Find the Letter
 
@@ -220,7 +220,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the letter range: a child who is still learning sees a narrow early-alphabet set, a child who is accurate sees the wider pool.
 - **Feedback.** The target letter pops in at 256 px and is re-named from the speaker glyph on demand. A correct tap flashes the card green, chimes and pops the progress dot before the next round opens 700 ms later; a wrong tap wiggles the card 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the letter is spoken as it appears. The speaker glyph repeats it.
-- **Art and assets.** 26 letter SVGs. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. The target renders at 256 px and the answer cards at 128 px from the same `letter_*` textures, so the letterforms match the word games. Tile and sticker icons.
+- **Art and assets.** 26 letter SVGs, loaded with the game from the `letters` art group rather than the boot set. Letters are drawn as shapes in the app's display style so recognition is about form, not decoration. The target renders at 256 px and the answer cards at 128 px from the same `letter_*` textures, so the letterforms match the word games. Tile and sticker icons.
 
 ### 3.9 Find the Word
 
@@ -229,7 +229,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the mix of three and four letter words. A child who is finding it hard sees only three-letter words.
 - **Feedback.** The prompt picture pops in and every card squishes on press. A correct tap flashes the card green with the chime and a progress dot; a wrong tap wiggles the card 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the word is spoken at a slow rate while the picture shows its meaning.
-- **Art and assets.** 18 prompt pictures. Most reuse boot art; four new SVGs (sun, hat, bug, duck) were added for this game. Tile and sticker icons.
+- **Art and assets.** 18 prompt pictures. Most reuse the art other games already draw; four SVGs (sun, hat, bug, duck) were added for this game. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.10 Build the Word
 
@@ -238,7 +238,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the word tiers; the easy-first order is fixed.
 - **Feedback.** A correct letter tile settles into the next empty slot with a Back.out pop and a soft tick, and a wrong tile wiggles with the soft tone and no penalty. A finished word lingers 1.2 s on a chime and a Hoot cheer before the next word appears.
 - **Narration.** Per-round target: the word is spoken when the round opens, and the replay glyph repeats it.
-- **Art and assets.** Letter SVGs for the tiles and the prompt picture from the boot set. Extra tiles are two or three distractors drawn from the alphabet minus the word's own letters, shuffled in with the word's letters. Tile and sticker icons.
+- **Art and assets.** Letter SVGs for the tiles and the prompt picture, loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Extra tiles are two or three distractors drawn from the alphabet minus the word's own letters, shuffled in with the word's letters. Tile and sticker icons.
 
 ### 3.11 How Many?
 
@@ -247,7 +247,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the number range.
 - **Feedback.** The numeral pops in large and is re-heard from the speaker glyph on demand. A correct tap flashes the group card green with the chime and a progress dot; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the numeral is spoken as it appears.
-- **Art and assets.** Numeral SVGs and eight counting-object textures from the boot set. Tile and sticker icons.
+- **Art and assets.** Numeral SVGs and eight counting-object textures, loaded with the game from the `numerals`, `items`, `food` and `shapes` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.12 First Sounds
 
@@ -256,7 +256,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts which words and distractors appear.
 - **Feedback.** A correct tap flashes the letter card green, chimes, pops the progress dot and speaks the letter back; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the word is spoken, and the picture shows it.
-- **Art and assets.** Four letter cards from the 26 letter SVGs and prompt pictures from the boot set. Tile and sticker icons.
+- **Art and assets.** Four letter cards from the 26 letter SVGs, plus prompt pictures, loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.13 More or Less
 
@@ -265,7 +265,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the number range.
 - **Feedback.** The arrow cue pops in large and stays beside the two groups. A correct tap flashes the card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Per-round target: the comparison word ("more" or "less") is spoken, and the arrow repeats it visually.
-- **Art and assets.** Up and down arrow SVGs, group cards built from the counting-object textures. Tile and sticker icons.
+- **Art and assets.** Up and down arrow SVGs, group cards built from the counting-object textures, loaded with the game from the `glyphs`, `items`, `food` and `shapes` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.14 Odd One Out
 
@@ -274,7 +274,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the mix of difference kinds across the six rounds.
 - **Feedback.** A correct tap flashes the card green with the chime and a dot pop, and a wrong tap wiggles it with a gentle mascot nod and no penalty. The odd item's name is re-heard from the speaker glyph at any point in the round.
 - **Narration.** Per-round target: the odd item is named when the round opens.
-- **Art and assets.** Reuses animal, toy and shape SVGs from the boot set. Tile and sticker icons.
+- **Art and assets.** Reuses animal, toy and shape SVGs, loaded with the game from the `animals`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.15 Color Match
 
@@ -283,7 +283,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts how early the larger colour pool appears.
 - **Feedback.** The swatch stays on screen all round so the colour can be compared again. A correct tap flashes the card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Per-round target: the colour name is spoken.
-- **Art and assets.** The swatch is drawn at runtime rather than shipped as art. Objects reuse existing SVGs, one per colour: red heart, blue frog, yellow crescent, green rectangle, orange circle, purple square. Tile and sticker icons.
+- **Art and assets.** The swatch is drawn at runtime rather than shipped as art. Objects reuse existing SVGs, one per colour: red heart, blue frog, yellow crescent, green rectangle, orange circle, purple square, loaded with the game from the `music` and `shapes` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.16 Add It Up
 
@@ -292,7 +292,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the maximum sum. All round mechanics come from the shared group-math base; this game pins only the rule set.
 - **Feedback.** The plus and equals cues pop in with the round. A correct tap flashes the answer card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Rule line: "Add the groups and pick the total." No per-round question voice; the equation is the prompt.
-- **Art and assets.** Plus and equals SVGs, dot-group cards built from the counting-object textures. Tile and sticker icons.
+- **Art and assets.** Plus and equals SVGs, dot-group cards built from the counting-object textures, loaded with the game from the `glyphs`, `items`, `food` and `shapes` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.17 Take Away
 
@@ -301,7 +301,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the maximum total, same as Add It Up.
 - **Feedback.** The minus and equals cues pop in with the round. A correct tap flashes the answer card green with the chime and a dot pop; a wrong tap wiggles it with a gentle mascot nod and no penalty.
 - **Narration.** Rule line: "Take some away and pick how many are left." No per-round question voice.
-- **Art and assets.** Minus and equals SVGs, dot-group cards from the counting-object textures. Tile and sticker icons.
+- **Art and assets.** Minus and equals SVGs, dot-group cards from the counting-object textures, loaded with the game from the `glyphs`, `items`, `food` and `shapes` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.18 Memory Match
 
@@ -310,7 +310,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the grid size.
 - **Feedback.** Cards deal in face down on a 40 ms per card stagger and turn with a scaleX 1 to 0 to 1 flip (180 ms a half, 120 ms reduced). A matched pair flashes green with the chime and a Hoot cheer; a mismatch wiggles both cards 4 degrees three times and turns them back after an 800 ms pause, with no penalty.
 - **Narration.** Rule line: "Turn over two cards to find a pair." No per-round prompt.
-- **Art and assets.** 16 pair textures and a card back from the boot set. Tile and sticker icons.
+- **Art and assets.** 16 pair textures and a card back, loaded with the game from the `animals`, `toys`, `items` and `glyphs` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.19 Decode It
 
@@ -319,7 +319,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts the split between three and four letter words, so a stronger reader meets four-letter words a round or two earlier.
 - **Feedback.** The target word is re-heard from the speaker glyph. A correct tap flashes the card green with the chime and a dot pop before the next word 700 ms later; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the target word is spoken while the picture shows its meaning, and the speaker glyph repeats it.
-- **Art and assets.** The pool shares 18 words with Find the Word and adds four (fox, cup, map, bed). Four new item SVGs. Tile and sticker icons.
+- **Art and assets.** The pool shares 18 words with Find the Word and adds four (fox, cup, map, bed). Four new item SVGs. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.20 Number Order
 
@@ -328,7 +328,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Adaptive. The band ladder shifts both the count and the range.
 - **Feedback.** A card dropped into a slot snaps into place with the shared lift and snap juice. A correct board bursts the shared splash, chimes and fills the progress dot; a wrong board wiggles every placed card and then bounces them home, so the child rebuilds the order.
 - **Narration.** Rule line: "Put the numbers in order, smallest first." Numerals are spoken on tap rather than as a round prompt.
-- **Art and assets.** Numeral SVGs, with dashed slot outlines drawn at runtime. Tile and sticker icons.
+- **Art and assets.** Numeral SVGs, loaded with the game from the `numerals` art group rather than the boot set, with dashed slot outlines drawn at runtime. Tile and sticker icons.
 
 ### 3.21 Feelings Faces
 
@@ -337,7 +337,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Fixed ladder, with a built-in contrast ramp: rounds one to three use clearly distinct emotions (happy against angry), rounds four to six use the easily confused pair (sad against scared).
 - **Feedback.** Three face cards rise in under the spoken scenario and squish on press. A correct tap splashes colour at the card, fills its progress dot on a Back.out pop and cheers Hoot before the 700 ms advance; a wrong tap wiggles the card and its face 4 degrees three times (2 degrees over 200 ms reduced), nods the mascot and re-speaks the scenario, with no penalty.
 - **Narration.** Rule line: "Tap the face that shows how Aby feels." Each round then speaks its scenario. A wrong tap re-speaks the scenario once and leaves the round open. When there is no voice or sound is off, the scenario appears as a caption and the glyph dims.
-- **Art and assets.** Four face SVGs, plus a tile and a sticker icon. No new audio.
+- **Art and assets.** Four face SVGs, loaded with the game from the `faces` art group rather than the boot set. The tile and sticker icons are in the boot set, as they are for every game. No new audio.
 
 ### 3.22 Story Order
 
@@ -346,7 +346,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Difficulty.** Fixed ladder. Rounds one to three use obvious stories, rounds four to six use subtle ones.
 - **Feedback.** Panels squash on press and tilt as they lift, and a panel dropped on an occupied slot swaps with the one already there, so nothing is ever rejected. A correct order splashes colour at the strip's centre, chimes and fills the dot; a wrong order wiggles every placed panel, leaves them where the child put them and re-judges only when the completed order changes.
 - **Narration.** Rule line: "Put the story in order, first to last." No per-round narration; the panels are the prompt.
-- **Art and assets.** 24 panel SVGs. These are the only game art that travels with a game chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
+- **Art and assets.** 24 panel SVGs. They travel with the Story Order chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
 
 ## 4. Cross-game systems
 
@@ -360,7 +360,7 @@ Every game scene extends one shared base. `GameSceneBase` owns the parts no game
 
 Each game is a separately built chunk, registered in a lazy scene registry and fetched before the crossfade into the game. The Hub and the shell never contain a game's code, which keeps the entry chunk under its budget and lets a returning player skip chunks they have already cached.
 
-Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 44 game assets all derive from it, so adding a game is one entry plus its scene, its art and its scene-loader row, with the id list checked by the type checker and the invariant suite rather than several lists kept in step by hand.
+Game identity is declared once. A single registry lists each game's id, scene key, title, tile key and sticker key; the Hub tiles, the Learning Progress rows, the paging counts and the boot shell's 44 per-game assets - 22 tile icons and 22 sticker icons - all derive from it, so adding a game is one entry plus its scene, its art and its scene-loader row, with the id list checked by the type checker and the invariant suite rather than several lists kept in step by hand.
 
 ### 4.2 One narrator, spoken rules and prompts
 
@@ -368,7 +368,7 @@ Narration has one construction site. `RoundNarrator` builds the speaker glyph, t
 
 Narration comes in three shapes:
 
-- **A spoken rule line**, once at scene entry, replayable. Twelve games use one: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Pattern Builder, Memory Match, Number Order, Add It Up, Take Away, Feelings Faces and Story Order.
+- **A spoken rule line**, once at scene entry, replayable. Twelve games use one: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Pattern Builder, Memory Match, Number Order, Add It Up, Take Away, Feelings Faces and Story Order.
 - **A spoken round target**, re-spoken each round. Nine games use one: Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match and Decode It.
 - **A replay glyph with no speech of its own**, in Musical Memory, where the note sequence is the prompt.
 
@@ -400,13 +400,20 @@ Progress is recorded on device as an additive part of the profile: a play when a
 
 ### 4.8 Adaptive difficulty
 
-Fifteen of the 22 games adapt. The other seven are fixed: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Feelings Faces and Story Order.
+Fifteen of the 22 games adapt. The other seven are fixed: Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order.
 
-An adaptive game keeps a rolling window of the profile's last ten taps for that game. Every tap feeds the window, whether the session is completed or abandoned - a child who backs out mid-game still made those taps, so they still inform the next shift. Only the window moves: the accuracy and the win count a parent sees describe completed sessions, while the play count still counts every game the child starts, abandoned or not. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 60 percent moves it down one, and anything between leaves it alone. Bands are clamped to the game's supported range, so the ladder can never leave the game's difficulty.
+An adaptive game keeps a rolling window of the profile's last ten taps for that game. Every tap feeds the window, whether the session is completed or abandoned - a child who backs out mid-game still made those taps, so they still inform the next shift. Only the window moves: the accuracy and the win count a parent sees describe completed sessions, while the play count still counts every game the child starts, abandoned or not. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 60 percent moves it down one, and anything between leaves it alone. Most games clamp the shifted band to the 1 to 3 range the ladder defines, but some games deliberately step outside the classic ladder's shape, as described below.
 
 The result is applied as a shift to the game's classic easy-first ladder at the start of a playthrough: once per profile, never mid-round, so difficulty can move by one band between visits but never inside a round. The ladder's values and its clamp are the TDD's to state ([TDD §7.3](./TDD.md#73-adaptive-banding)). It is invisible to the child: no badge, no message, no sound. Adaptive difficulty can be turned off in Settings, and it is on by default.
 
-The fifteen adaptive games are Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order, Pattern Builder and Musical Memory. They live in 14 scene files because Add It Up and Take Away share the group-math scene. What shifts differs by game: number ranges in the numeracy games, word tiers in the word games, letter ranges in Find the Letter, grid size in Memory Match, starting sequence length in Musical Memory, colour pool in Color Match and pattern type in Pattern Builder.
+The fifteen adaptive games are Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order, Pattern Builder and Musical Memory. They live in 14 scene files because Add It Up and Take Away share the group-math scene. The same shift reaches the fifteen games in six different ways:
+
+- **A shifted band ladder** - How Many?, More or Less, Add It Up, Take Away, Number Order, Memory Match and Pattern Builder - moves every round of the classic ladder one band up or down, clamped to bands 1 to 3.
+- **One shifted band for the whole playthrough** - Find the Letter and First Sounds - widens or narrows the letter range, or the word pool and its distractors, rather than splitting the rounds.
+- **A tier split** - Find the Word and Build the Word - moves the boundary between the easy and the hard tier, so a stronger reader meets four-letter words earlier.
+- **Its own tier split** - Decode It uses a different formula from the word games, because its classic ladder opens with three easy rounds rather than five.
+- **A colour-pool split** - Color Match divides its six rounds between an easy four-colour pool and a hard six-colour pool: three and three by default, four and two when the band drops, two and four when it rises.
+- **Its own ladder** - Odd One Out replaces the classic ladder outright: when the band drops every round is played at the easiest band, and when it rises band 3 is capped at three rounds with the freed round re-served at the easiest band. Musical Memory maps the shift onto its starting sequence length instead, so the game begins with one, two or three notes.
 
 ### 4.9 Preferred voice
 
@@ -476,7 +483,7 @@ The app asks the platform to lock orientation to landscape on boot and the manif
 
 Scene changes are a 300 ms fade to the background colour into a 180 ms fade-in with a 1.02 zoom. The win celebration is ten rays and ten confetti pieces in the sprite palette, about 700 ms long, with the sticker reveal roughly 400 ms later. Correct answers flash and chime; wrong answers wiggle the piece and play a soft tone, with no shake and no red flash on the child's work.
 
-Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, 40 ms apart over 300 ms, while idle tiles bob on a 2.5 second loop with four low-contrast dots drifting behind the grid. An idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input, repeating every ten seconds while it stays idle. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
+Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, 40 ms apart over 300 ms, while idle tiles breathe on a 2.5 second loop (a 2.5% scale pulse, not a vertical bob) with four low-contrast dots drifting behind the grid. An idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input, repeating every ten seconds while it stays idle. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
 
 ### 5.7 Reduced motion
 
@@ -491,13 +498,17 @@ All sound effects are synthesized with the Web Audio API at runtime. No audio fi
 | Event | Sound |
 | --- | --- |
 | Tap or soft interaction | Short soft pop |
-| Correct answer | Three-note ascending chime, C5, E5, G5 |
-| Wrong answer | Two-note falling tone, G4 then C4 |
+| Correct answer | The game's own ascending chime, from its own correct contour |
+| Wrong answer | The game's own gentle falling tone, from its own incorrect contour |
 | Bubble popped | Short 800 Hz pop |
 | Sleeping animal tapped | Gentle two-note wake, E4 then A4 |
-| Game complete | Four-note rising win, C5, E5, G5, C6 |
+| Game complete | The game's own rising win, from its own win contour |
 | Sticker awarded | Two bright notes, C6 and E6 |
 | Idle Hub call | Two quiet notes, E5 and G5, at low gain |
+
+Every game carries its own audio identity, so the same event is a different set of notes from one game to the next. An identity sets a pitch offset of up to five semitones, a waveform, a tempo between 0.75 and 1.5, and its own three contours: correct, incorrect and win. The twenty-two identities are built from four three-note correct contours, four two-note incorrect contours and four four-note win contours, so a child hears a consistent voice within a game and a different one between games.
+
+Two rules keep the trio gentle. The incorrect contour is forced gently descending for every identity, so no game can sound harsh. The win contour is always held inside a 300 to 800 millisecond celebration, and a game whose own tempo would run long has its tempo clamped to fit that budget. The pop, the wake tone, the sticker sparkle and the idle call are shared across the app and do not take a game identity. The TDD states the effect table ([§8.2](./TDD.md#82-sound-effects)) and the identity model ([§8.7](./TDD.md#87-the-per-game-audio-identity)).
 
 Feedback is layered but never loud: a correct tap is a chime plus a colour splash, and no game uses particle emitters.
 
@@ -523,33 +534,39 @@ Music and sound effects are two independent toggles in the Settings panel, each 
 
 ### 7.1 The boot asset set
 
-The boot set is 178 SVG entries, rasterised during Preload so that no game stalls on a first draw. The set covers the art the games draw on: shapes and cut-outs, animals and foods, small items and shadows, letters, numerals, counting objects, toys, faces, UI glyphs, mascot poses, and the tile and sticker icons for the games.
+The boot set is 53 keys, rasterised during Preload so that the shell never stalls on a first draw. It is deliberately small and deliberately shared: the 22 tile icons and 22 sticker icons the Hub needs, the two mascot poses, the shared speaker glyph, and the six profile avatars. Everything else a game draws is loaded with that game instead (see 7.3), so the shell does not pay for art a child may never open.
 
-Rasterising every entry at 512 by 512 wasted GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers, chosen by an ordered rule list where the first match wins:
+Rasterising every key at 512 by 512 would waste GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers, chosen by an ordered rule list where the first match wins:
 
-- **160 px (icon)** — the 22 `tile_*` game icons, the eight `sm_shadow_*` silhouettes and the five exact keys `minus`, `plus`, `equals`, `sleep_zzz` and `icon_speaker`.
+- **160 px (icon)** — any `tile_*` key, any `sm_shadow_*` key, and the five exact keys `minus`, `plus`, `equals`, `sleep_zzz` and `icon_speaker`.
 - **256 px (card)** — everything else: gameplay art, stickers and prompt targets, and also letters and numerals, because no rule matches `letter_*` or `numeral_*` and an unmatched key takes this default.
-- **512 px (hero)** — the two `mascot_*` poses, whose scale maths assumes a full-size texture.
+- **512 px (hero)** — any `mascot_*` key, whose scale maths assumes a full-size texture.
 
-Display code scales from the tier size rather than assuming 512. Over the 178-entry boot set that resolves to 35 icon, 141 card and 2 hero textures, so the raster costs `(35 × 160² + 141 × 256² + 2 × 512²) × 4 B = 42,643,456 B`, about 40.7 MiB (40.67), down from the 178 MiB a uniform 512 px raster would have reserved.
+The tier rule is applied per key wherever that key lives, not to one fixed set, so art loaded with a game is tiered by the same rule as a shell key. Display code scales from the tier size rather than assuming 512. The rule list and the tier sizes live in one place in the code, and the TDD states them ([TDD §3.4](./TDD.md#34-texture-tiers)).
 
-Story Order's 24 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces and its tile and sticker are in the boot set.
+Story Order's 24 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces are lazy group art, loaded with the game; only its tile icon and its sticker are in the boot set, as they are for every game.
 
 ### 7.2 Shell and game chunks
 
 The build produces three kinds of JavaScript:
 
-- **The shell entry**, which contains the three shell scenes (Boot, Preload and Hub), the components the Hub and its settings overlays use, the storage, audio and speech utilities they import, and the 178 boot textures as strings. It is gated at 200 kB minified.
+- **The shell entry**, which contains the three shell scenes (Boot, Preload and Hub), the components the Hub and its settings overlays use, the storage, audio and speech utilities they import, and the 53 boot textures as strings. It is gated at 200 kB minified.
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
-- **One chunk per game**, plus the chunks Rollup hoists out of them because several games share the code: `GameSceneBase` (7.98 kB), `ChoiceRoundScene` (2.36 kB), `GroupMathScene` (2.02 kB), `dragJuice` (1.03 kB) and shared game logic such as `wordLogic` (1.95 kB), `countLogic` (0.81 kB), `alphabetLogic` (0.51 kB) and `shapeSorterLogic` (0.45 kB). The shared bases do not ride in the shell.
+- **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-At version 1.20.0 the shell entry measured 195.4 kB against the 200 kB gate, the Phaser chunk measured 1342.6 kB, and game chunks ranged from about 1.2 kB to about 34 kB, the largest being Story Order because it carries its own art.
+Measured from the current build, the shell entry is 134.6 kB as `validate-bundle.js` reports it (137.8 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1342.6 kB, and the build emits 42 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 32 kB, the largest being Story Order because it carries its own 24 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 
-Game art belongs in the game's chunk when only that game uses it. Story Order is the case that matters: its 24 panel drawings are imported as raw markup by the story scene and rasterised by that scene's own preload, so the strings live in the lazy chunk instead of the shell. A test asserts that the boot preload never imports them, which keeps the rule from eroding.
+Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 149 of the app's 202 art files.
 
-Nothing else is per-game art. The rest of the boot set either serves several games — the shape, cut-out and animal drawings are reused across the pool of games — or belongs to a single consumer: one tile icon per game, one sticker per game, Shadow Match's eight silhouettes and Feelings Faces' four faces. All of it is in the boot set, so it is paid for once rather than per game.
+**Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 131 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 131 keys are also shell keys, the profile avatars, so 125 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
+
+**Story Order's own art.** Its 24 panel drawings are imported as raw markup by the story scene and rasterised by that scene's own preload, so the strings live in the lazy chunk instead of the shell.
+
+A scene that asks for art which fails to load falls back to a neutral placeholder rather than Phaser's missing-texture checkerboard, and a shared textless cue is shown while the art loads, so the child sees a deliberate loading mark rather than a broken picture.
+
+The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 53 shell keys, and fails if the shell ever imports a game-only key.
 
 ### 7.4 Runtime targets
 
@@ -588,11 +605,12 @@ Every pull request that touches code runs the gates; documentation-only changes 
 
 ### 8.3 Definition of done
 
-A game or feature is done when: it has a spec entry here and an implementation section in the TDD; it follows the five field template; its narration goes through the single narrator; it respects the touch, motion, audio focus and reduced-motion contracts; its art is either in the boot set with a tier or in its own chunk; its logic is pure and tested; and the full gate chain passes at the merge commit.
+A game or feature is done when: it has a spec entry here and an implementation section in the TDD; it follows the six field template; its narration goes through the single narrator; it respects the touch, motion, audio focus and reduced-motion contracts; its art is either in the boot set with a tier, in a lazy art group with a tier, or in its own chunk; its logic is pure and tested; and the full gate chain passes at the merge commit.
 
 ## 9. See also
 
 - [TDD.md](./TDD.md) for the implementation record: scenes, components, storage schema, audio manager, build and PWA configuration.
+- [roadmap.md](./roadmap.md) for what is known to be broken and what is planned next.
 - `conductor/product.md` for the product overview and the per-milestone changelog.
 - `conductor/product-guidelines.md` for voice, tone and visual conventions.
 - `conductor/tech-stack.md` for the toolchain.

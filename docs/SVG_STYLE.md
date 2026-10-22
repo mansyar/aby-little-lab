@@ -1,8 +1,8 @@
 # SVG Style Spec — Aby's Little Lab
 
-**Purpose:** Single source of truth for the visual quality bar of every asset in `src/assets/svg/`. All 176 SVGs must conform to the rules below so the library reads as one consistent set. Style system: **Storybook Flat** (see `conductor/product-guidelines.md` §2).
+**Purpose:** Single source of truth for the visual quality bar of every asset in `src/assets/svg/`. All 202 SVGs must conform to the rules below so the library reads as one consistent set. Style system: **Storybook Flat** (see `conductor/product-guidelines.md` §2).
 
-**Canvas contract:** Every SVG is 512×512 viewBox, rasterized at 512px by the game (`SVG_RASTER_SIZE` in `PreloadScene.ts`). Artwork and its outline stay inside a **512 grid with an 8px safe margin** (no path edge closer than x/y 8 or 504) so nothing clips when rasterized. **Never rename or delete files** — filenames are texture keys.
+**Canvas contract:** Every SVG is 512×512 viewBox, rasterized by the game at its per-use tier size - icon 160 px, card 256 px, hero 512 px (`src/utils/textureTiers.ts`) - sized for the asset's largest display context rather than at a uniform 512 px. Artwork and its outline stay inside a **512 grid with an 8px safe margin** (no path edge closer than x/y 8 or 504) so nothing clips when rasterized. **Never rename or delete files** — filenames are texture keys.
 
 ---
 
@@ -116,7 +116,7 @@ Each `cutout_X` mirrors `shape_X` geometry in the same hue family:
 
 ## 8. Asset Inventory
 
-176 SVGs, all texture keys — counts by folder:
+202 SVGs, all texture keys — counts by folder:
 
 | Folder | Count | Notes |
 |---|---|---|
@@ -127,9 +127,10 @@ Each `cutout_X` mirrors `shape_X` geometry in the same hue family:
 | `numbers/` | 10 | 0–9 |
 | `shadows/` | 8 | solid silhouettes paired with `items/` |
 | `shapes/` | 36 | 18 `shape_*` + 18 `cutout_*` (§6) |
-| `stickers/` | 21 | cream circle scenes |
+| `stickers/` | 22 | cream circle scenes |
+| `stories/` | 24 | Story Order panels (`story_*`) |
 | `toys/` | 7 | |
 | `ui/` | 12 | mascots, icons, `bubble`, `tile_feelings_faces` |
-| `ui/tiles/` | 20 | game tile faces |
+| `ui/tiles/` | 21 | game tile faces |
 
-Contact-sheet categories are `ui`, `animals`, `toys`, `items`, `letters`, `numbers`, `shadows`, `shapes`, `cutouts`, `stickers`, `tiles` — 11 sheets (with `shapes` split in two). `feelings/` has no sheet of its own, and `ui/tile_feelings_faces.svg` appears on the `ui` sheet rather than `tiles`.
+Contact-sheet categories are `ui`, `animals`, `toys`, `items`, `letters`, `numbers`, `shadows`, `shapes`, `cutouts`, `stickers`, `stories`, `tiles` — 12 sheets (with `shapes` split in two). `feelings/` has no sheet of its own, and `ui/tile_feelings_faces.svg` appears on the `ui` sheet rather than `tiles`.
