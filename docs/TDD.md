@@ -150,6 +150,7 @@ Vitest is configured inside `vite.config.ts`: `environment: "happy-dom"`, `globa
 │   ├── validate-bundle.js
 │   ├── validate-pwa.js
 │   ├── validate-boot.js
+│   ├── validate-docs.js
 │   ├── render-svg-contact-sheets.mjs
 │   └── measure-first-tap.mjs
 ├── .github/workflows/ci.yml
@@ -1033,7 +1034,7 @@ VitePWA({
 
 | Job | Runs on | Steps |
 | --- | --- | --- |
-| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `pnpm/action-setup@v6` (11.7.0), `setup-node@v7` (Node 22, pnpm store cached), `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, then `vite preview` on port 4173 and `node scripts/validate-boot.js` |
+| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `pnpm/action-setup@v6` (11.7.0), `setup-node@v7` (Node 22, pnpm store cached), `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then `vite preview` on port 4173 and `node scripts/validate-boot.js` |
 | Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
 `paths-ignore` skips CI for `conductor/**`, `docs/**`, `README.md` and `**/*.md`. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.

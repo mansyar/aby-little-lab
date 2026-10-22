@@ -46,9 +46,14 @@ const FENCE_RE = /^\s*(?:```|~~~)/;
 /**
  * A Conductor path anywhere in the prose, backticked ones included:
  * `conductor/tracks/…` or `conductor/archive/…`.
+ *
+ * The path part is optional, so a path written without its trailing segment -
+ * `conductor/tracks/20261022-docs-roadmap-truth` rather than
+ * `conductor/tracks/20261022-docs-roadmap-truth/` - is seen as well. The group
+ * is greedy, so a path that ends in a slash still matches whole.
  */
 const CONDUCTOR_PATH_RE =
-  /(?:[A-Za-z0-9_.-]+\/)*conductor\/(?:tracks|archive)\/[^\s`<>()[\]"',;|!?]*/g;
+  /(?:[A-Za-z0-9_.-]+\/)*conductor\/(?:tracks|archive)(?:\/[^\s`<>()[\]"',;|!?]*)?/g;
 
 // ---------------------------------------------------------------------------
 // Reading helpers

@@ -4,6 +4,7 @@
 
 ### 1. Code Quality Gates
 - [x] Run `pnpm check` (Biome lint + format check) — **2026-10-22:** biome clean (248 files, 1 pre-existing warning in `src/__tests__/scenes/musicalMemoryScene.test.ts`); the v1.1.0 run was clean on 51 files
+- [x] Run `pnpm typecheck` (TypeScript type check, `tsc --noEmit`) — **2026-10-22:** PASS (no diagnostics)
 - [x] Run `pnpm test -- --run` (all tests pass) — **2026-10-22:** 2,488 tests in 118 files, all passed; the v1.1.0 run was 667/667 in 22 files
 - [x] Run `pnpm test:coverage` (coverage gates) — **2026-10-22:** statements 97.92 % / branches 91.62 % / functions 96.58 % / lines 98.69 %
 - [x] Run `pnpm build` (production build succeeds) — **2026-10-22:** OK (entry `index-BrQ7goBH.js` = 134.6 kB, 42 JavaScript chunks, 54 precache entries); the v1.1.0 run was entry `index-NPwwI8ke.js` + 7 lazy game-scene chunks, 19 precache entries
