@@ -107,7 +107,7 @@
 - **Covers:** FR-2, FR-3, NFR-4, NFR-5, AC-4, AC-5
 - **Touches:** `docs/release-checklist.md`, `docs/device-testing-checklist.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`, plus the boot smoke check (`node node_modules/vite/bin/vite.js preview --port 4173 --strictPort`, then `node scripts/validate-boot.js`, then stop the preview)
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Re-measure the boot figures** — covers: FR-2
   - [ ] **P3.T1.1:** Start the preview on 4173, run `node scripts/validate-boot.js`,
