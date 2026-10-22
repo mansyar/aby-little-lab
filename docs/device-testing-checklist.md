@@ -267,7 +267,7 @@ pnpm exec serve dist -l 3000
 #### Hub Screen
 - [ ] All twenty-two game tiles are visible (6×4 grid) — each shows a distinct storybook icon above its label
 - [ ] Tiles, labels, icons, and stickers enter with a staggered wave (40ms apart), not all at once
-- [ ] Tiles gently bob on an idle loop after entering
+- [ ] Tiles gently breathe on an idle loop after entering (a 2.5% scale pulse)
 - [ ] Sticker shelf shows all 22 stickers — 22px on a wide-grid tile, 30px on a paged tile: earned at full color with shimmer, unearned slots show dashed empty-slot outlines
 - [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replaying an earned game shows no highlight
 - [ ] Press and hold a game tile: it squishes and stays; release on the tile springs it back and starts the game; release off the tile does not navigate
@@ -477,7 +477,7 @@ pnpm exec serve dist -l 3000
 - [ ] "Reset Progress" row opens the "Reset all stickers?" confirm modal; Cancel closes it without changes
 - [ ] Reset clears every sticker (Hub shelf dims immediately), preserves BGM/SFX settings, and the row shows "Progress cleared"
 - [ ] Reset persists after app close/reopen (stickers stay cleared, settings stay unchanged)
-- [ ] Learning Progress lists all 22 games in four pages of 6 + 6 + 6 + 4, each row showing the game's own name and tile icon, its play count and its accuracy bar; the footer counts the pages (1 / 4 … 4 / 4) and the chevrons wrap around
+- [ ] Learning Progress lists all 22 games in four pages of 6 + 6 + 6 + 4, each row showing the game's own name and tile icon, its play count and its accuracy bar; the footer counts the pages (1 / 4 … 4 / 4) and the chevrons step one page at a time, dimming at the first and last page rather than wrapping
 
 #### TTS Voice Selection (v1.12.0 candidate)
 - [ ] Voice row shows "Voice: Default (device)" on a fresh install (no stored preference)

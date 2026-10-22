@@ -49,12 +49,19 @@ Documentation only. No product change.
 - The boot screen no longer rasterises the whole picture library. The shell
   keeps only the 53 keys the Hub and the shared game chrome draw; a game's own
   art rides its own chunk and is drawn when that game is opened. The suite's
-  202 SVGs are grouped into 12 lazy art groups.
+  202 SVGs are grouped into 12 lazy art groups (131 keys, 125 of them
+  game-only); the other 71 files are the 47 the boot set alone draws, plus
+  Story Order's 24 panels.
 - Cold boot fell from 808 ms to 419.5 ms against the 3 s gate, and the
   4x-throttled boot from about 4.2 s to 1,697.2 ms (measured 2026-10-20).
 - A first tap on a game now shows Professor Hoot with three pulsing dots while
-  that game's art arrives, instead of a silent pause. The worst measured
-  first-tap cost is 82 ms against a 400 ms budget.
+  that game's art arrives, instead of a silent pause. The 82 ms measured on
+  2026-10-20 is the increment the lazy-art change added over a built baseline
+  from before the track (`f377bf8`), the quantity the 400 ms budget was set
+  against and met on that basis, not an absolute cost. The absolute cold first
+  tap measured on 2026-10-22 came in at 351-392 ms median and 462-640 ms
+  worst, so the 400 ms budget is not demonstrated by that measurement;
+  `docs/perf-baseline.md` keeps the per-run numbers.
 - The shell entry fell from 195.4 kB to 129.1 kB at the time of the track, well
   inside the 200 kB gate. It measures 134.6 kB today.
 

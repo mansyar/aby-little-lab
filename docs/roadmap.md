@@ -85,15 +85,16 @@ through `Math.random`. A reader notices it by searching `src/game/` for
 
 ### Repository hygiene
 
-A stray `test-out.txt` sits at the repository root; 120 PNGs under
+A stray `test-out.txt` sits at the repository root; 110 PNGs under
 `docs/svg-contact-sheets/` are tracked, even though `.gitignore` describes the
 regenerated sheets as scratch — its rule `docs/svg-contact-sheets/*.png` matches
-only the root of that folder, where there are no PNGs at all, so the twelve
-sheets in each of the ten subfolders are tracked in full, including the nine
-whose own comment calls them regenerated; and `.opencode/` (two agent files) is
-tracked without any ignore rule. A reader notices it by running
-`git ls-files docs/svg-contact-sheets .opencode` and getting a hundred and
-twenty PNGs back.
+only the twelve PNGs at the root of that folder, and gitignore's `*` does not
+cross `/`, so the eleven sheets in each of the ten subfolders stay tracked; the
+comment that calls the regenerated sheets scratch is in `.gitignore` itself, not
+in the sheets. 122 HTML contact sheets are tracked beside them, and `.opencode/`
+(two agent files) is tracked without any ignore rule. A reader notices it by
+running `git ls-files docs/svg-contact-sheets .opencode` and getting a hundred
+and ten PNGs back.
 
 ## Future Work / Roadmap
 

@@ -9,6 +9,12 @@
  * roadmap carries both of its sections, and no document points at a Conductor
  * path that does not exist.
  *
+ * The two scans over prose differ in what they blank. The link check blanks
+ * inline code spans as well as fenced blocks, because a backticked word is not
+ * an anchor. The Conductor-path check keeps inline code spans, because that
+ * is how the documents write their Conductor paths, and a check that cannot
+ * read them would pass vacuously.
+ *
  * It checks invariants, never snapshots. A number that moves - a new test, a
  * new chunk, a new release - never fails this script; only the documents and
  * the code genuinely parting company does.
@@ -37,7 +43,10 @@ const REGISTRY_FILE = path.join(ROOT, "src", "game", "gameRegistry.ts");
 const LINK_RE = /!?\[[^\]]*\]\(([^()\s]+)(?:\s+"[^"]*")?\)/g;
 /** A fenced code block delimiter. */
 const FENCE_RE = /^\s*(?:```|~~~)/;
-/** A Conductor path anywhere in the prose: `conductor/tracks/…` or `conductor/archive/…`. */
+/**
+ * A Conductor path anywhere in the prose, backticked ones included:
+ * `conductor/tracks/…` or `conductor/archive/…`.
+ */
 const CONDUCTOR_PATH_RE =
   /(?:[A-Za-z0-9_.-]+\/)*conductor\/(?:tracks|archive)\/[^\s`<>()[\]"',;|!?]*/g;
 
@@ -55,11 +64,13 @@ function relative(file) {
 }
 
 /**
- * The lines of a Markdown file as a reader sees them: fenced code blocks and
- * inline code spans are blanked out, because neither is rendered as text and
- * neither may be read as a link.
+ * The lines of a Markdown file with its fenced code blocks blanked out.
+ *
+ * A fenced code block is an example rather than a reference, so every line of
+ * one is nulled. Inline code spans are left intact: the Conductor-path check
+ * has to see the paths the documents write inside backticks.
  */
-function renderedLines(file) {
+function unfencedLines(file) {
   const lines = [];
   let inFence = false;
   for (const line of readLines(file)) {
@@ -68,9 +79,18 @@ function renderedLines(file) {
       lines.push(null);
       continue;
     }
-    lines.push(inFence ? null : line.replace(/`[^`]*`/g, ""));
+    lines.push(inFence ? null : line);
   }
   return lines;
+}
+
+/**
+ * The lines of a Markdown file as a reader sees them: fenced code blocks and
+ * inline code spans are blanked out, because neither is rendered as text and
+ * neither may be read as a link.
+ */
+function renderedLines(file) {
+  return unfencedLines(file).map((line) => (line === null ? null : line.replace(/`[^`]*`/g, "")));
 }
 
 /** The headings of a Markdown file, in order, with their text and line numbers. */
@@ -415,7 +435,7 @@ function checkRoadmap() {
 
 function checkConductorPaths() {
   for (const file of governedFiles()) {
-    renderedLines(file).forEach((line, index) => {
+    unfencedLines(file).forEach((line, index) => {
       if (line === null) return;
       for (const match of line.matchAll(CONDUCTOR_PATH_RE)) {
         const target = match[0].replace(/[.:]+$/, "");

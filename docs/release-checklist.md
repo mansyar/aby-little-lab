@@ -3,20 +3,21 @@
 ## Pre-Release Preparation
 
 ### 1. Code Quality Gates
-- [x] Run `pnpm check` (Biome lint + format check) — **2026-10-22:** biome clean (247 files, 1 pre-existing warning in `src/__tests__/scenes/musicalMemoryScene.test.ts`); the v1.1.0 run was clean on 51 files
+- [x] Run `pnpm check` (Biome lint + format check) — **2026-10-22:** biome clean (248 files, 1 pre-existing warning in `src/__tests__/scenes/musicalMemoryScene.test.ts`); the v1.1.0 run was clean on 51 files
 - [x] Run `pnpm test -- --run` (all tests pass) — **2026-10-22:** 2,488 tests in 118 files, all passed; the v1.1.0 run was 667/667 in 22 files
 - [x] Run `pnpm test:coverage` (coverage gates) — **2026-10-22:** statements 97.92 % / branches 91.62 % / functions 96.58 % / lines 98.69 %
 - [x] Run `pnpm build` (production build succeeds) — **2026-10-22:** OK (entry `index-BrQ7goBH.js` = 134.6 kB, 42 JavaScript chunks, 54 precache entries); the v1.1.0 run was entry `index-NPwwI8ke.js` + 7 lazy game-scene chunks, 19 precache entries
 - [x] Verify code coverage meets the enforced thresholds (lines 95 / functions 88 / branches 85 / statements 90, `vite.config.ts`) — **2026-10-22:** all four met; the v1.1.0 template threshold was ">80 %"
 - [x] Run `node scripts/validate-bundle.js` (Phaser isolated in its own vendor chunk, shell entry ≤ 200 kB) — **2026-10-22:** PASS (vendor `phaser-P1E8uaLi.js` 1342.6 kB, shell 134.6 kB)
 - [x] Run `node scripts/validate-pwa.js` (16 checks) — **2026-10-22:** 16/16 passed; the v1.1.0 run was 13/13
+- [x] Run `node scripts/validate-docs.js` (documents agree with the code) — **2026-10-22:** PASS (5 checks, 0 failures)
 - [x] Run the boot smoke check (`node scripts/validate-boot.js` against `vite preview` on port 4173) — **2026-10-22:** PASS (median of 3 cold loads 1115 ms, samples 1419 / 1115 / 1025 ms, budget < 3000 ms)
 - [x] Review all changes since last release — **2026-10-22:** the eight tracks merged since v1.20.0 (PRs #48–#55) are listed in the v1.21.0 prep block below; the v1.1.0 run covered the then-17 prior tracks
 - [x] Ensure no security vulnerabilities introduced — **v1.1.0 (2026-08-02):** pnpm supply-chain policy passed; no hardcoded secrets
 
 > **CI enforcement (2026-08-02):** The four gates above are automatically enforced by GitHub Actions (`.github/workflows/ci.yml`, job **Quality Gates**: `pnpm run check` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-pwa.js`) on every pull request and `master` push. Local runs remain valid as a fast pre-push sanity check; CI is the release gate. Enable branch protection on `master` requiring the "Quality Gates" check to make them merge-blocking.
 
-> **CI enforcement (2026-10-22, current):** The **Quality Gates** job now runs seven steps — `pnpm run check` → `pnpm run typecheck` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-bundle.js` → `node scripts/validate-pwa.js` → the boot smoke check (`vite preview --port 4173 --strictPort` + `node scripts/validate-boot.js`). The 2026-08-02 quote above is kept as the record of what CI enforced then.
+> **CI enforcement (2026-10-22, current):** The **Quality Gates** job now runs eight steps — `pnpm run check` → `pnpm run typecheck` → `CI=true pnpm test` → `pnpm run build` → `node scripts/validate-bundle.js` → `node scripts/validate-pwa.js` → `node scripts/validate-docs.js` → the boot smoke check (`vite preview --port 4173 --strictPort` + `node scripts/validate-boot.js`). The 2026-08-02 quote above is kept as the record of what CI enforced then.
 
 > **Code splitting (2026-08-02):** The bundle-splitting chore (archived at `conductor/archive/code-splitting_20260802/`) lazy-loads the seven game scenes. Post-build verification: entry chunk `dist/assets/index-*.js` contains no game-scene constructor registrations (only `Boot`/`Preload`/`Hub` via `super({ key: ... })` inspection), each of the 7 `*Scene-*.js` chunks contains exactly its own scene key, and `sw.js` precaches all 19 emitted entries — offline play is unaffected. Verified manually on device: no game chunk fetched before its tile is tapped; each game boots, plays, and returns to the Hub; re-taps do not re-fetch.
 
@@ -126,7 +127,7 @@
 
 ### 4c. Hub Engagement
 - [x] Tiles, labels, and stickers enter with a 40ms stagger wave (fade-only under reduced motion) — validated in hub-engagement track
-- [x] Tiles bob gently on a 2.5s idle loop — validated
+- [x] Tiles breathe gently on a 2.5s idle loop (a 2.5% scale pulse) — validated
 - [x] Sticker shelf shows 22 thumbnails — 22px on a wide-grid tile, 30px on a paged tile: earned shimmer, unearned drawn as a dashed empty-slot ring (55% alpha) — validated
 - [x] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replays show no highlight — validated
 - [x] After ~25s idle, tiles wiggle + soft two-tone chime plays, repeating every ~10s; any touch resets the timer — validated
@@ -189,6 +190,9 @@ pnpm run build
 # Build-artifact validators
 node scripts/validate-bundle.js
 node scripts/validate-pwa.js
+
+# Document validator
+node scripts/validate-docs.js
 
 # Boot smoke check: serve the built output on 4173, then stop the preview
 node node_modules/vite/bin/vite.js preview --port 4173 --strictPort &

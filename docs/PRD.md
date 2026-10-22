@@ -483,7 +483,7 @@ The app asks the platform to lock orientation to landscape on boot and the manif
 
 Scene changes are a 300 ms fade to the background colour into a 180 ms fade-in with a 1.02 zoom. The win celebration is ten rays and ten confetti pieces in the sprite palette, about 700 ms long, with the sticker reveal roughly 400 ms later. Correct answers flash and chime; wrong answers wiggle the piece and play a soft tone, with no shake and no red flash on the child's work.
 
-Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, 40 ms apart over 300 ms, while idle tiles bob on a 2.5 second loop with four low-contrast dots drifting behind the grid. An idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input, repeating every ten seconds while it stays idle. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
+Buttons and cards squish to 95 percent on press and settle with a short overshoot. Hub tiles enter staggered rather than all at once, 40 ms apart over 300 ms, while idle tiles breathe on a 2.5 second loop (a 2.5% scale pulse, not a vertical bob) with four low-contrast dots drifting behind the grid. An idle Hub wiggles two tiles and plays a quiet two-note call after 25 seconds of no input, repeating every ten seconds while it stays idle. Dragged pieces lift and tilt, and drop zones highlight while a piece is over them.
 
 ### 5.7 Reduced motion
 
