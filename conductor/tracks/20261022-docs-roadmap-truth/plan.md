@@ -185,6 +185,47 @@
 **Checkpoint:** 25b26ec
 **Evidence:** conductor/tracks/20261022-docs-roadmap-truth/verification/phase-4.md
 
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1, F2, F3, F4, F5 and F6
+- **Depends on:** Phase 4
+- **Covers:** FR-1, FR-2, FR-4, FR-5, NFR-4, AC-4, AC-6, AC-7
+- **Touches:** `scripts/validate-docs.js`, `docs/release-checklist.md`, `docs/PRD.md`, `docs/roadmap.md`, `docs/release-notes-v1.21.0.md`, `docs/device-testing-checklist.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Make the Conductor-path check see the paths it guards** — covers: F1
+  - [ ] **R1.T1.1:** `checkConductorPaths` scans lines with fenced code blocks
+    nulled but inline code spans left intact, so a backticked
+    `conductor/tracks/...` reference is seen.
+  - [ ] **R1.T1.2:** A fourth deliberate drift — reintroduce a backticked
+    `conductor/tracks/release-1.1.0-mechanics_20260802/` in
+    `docs/release-checklist.md` — makes the script exit non-zero with a
+    per-failure report. Revert it, and leave nothing behind.
+  - [ ] **R1.T1.3:** The clean tree still exits `0`, and the script's header
+    comment matches what it does.
+- [ ] **R1.T2: Bring the release checklist's gate rows up to date** — covers: F2
+  - [ ] **R1.T2.1:** §1 gains a `validate-docs` row; the Quality Gates step
+    list says eight steps and includes `node scripts/validate-docs.js`; the
+    Step 2 fence gains the same command.
+  - [ ] **R1.T2.2:** The Biome file count reads the number the current tree
+    actually checks.
+- [ ] **R1.T3: Say "breathe", not "bob", in the three places that describe the idle tile motion** — covers: F3
+  - [ ] **R1.T3.1:** `docs/PRD.md` §5.6, `docs/release-checklist.md` §4c and
+    `docs/device-testing-checklist.md` agree with `README.md` and with
+    `src/game/hub/hubGridConstants.ts`. The mascot's own bob is left alone.
+- [ ] **R1.T4: Correct the roadmap's repository-hygiene claims** — covers: F4
+  - [ ] **R1.T4.1:** The number of tracked contact-sheet PNGs, the fact that the
+    folder's root holds twelve PNGs the ignore rule does match, and the source
+    of the "regenerated" comment all state what the tree actually contains.
+- [ ] **R1.T5: Correct the two figures in the PR #49 entry** — covers: F5
+  - [ ] **R1.T5.1:** The lazy art groups are described with their real key
+    count, and the first-tap figure says it is an increment and points at the
+    absolute measurement.
+- [ ] **R1.T6: Correct the Learning Progress row's expected behaviour** — covers: F6
+  - [ ] **R1.T6.1:** The row says the chevrons dim at the first and last page
+    rather than wrap, matching `src/components/settings/ProgressOverlay.ts`.
+
 <!--
 The primary appends after acceptance:
 
