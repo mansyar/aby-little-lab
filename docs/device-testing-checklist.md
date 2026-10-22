@@ -4,10 +4,27 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record — the v1.21.0 batch (the eight tracks since v1.20.0, 2026-10-22)
+
+- **Target:** not deployed yet — the batch is unreleased (`package.json` still reads `1.20.0`, no `v1.21.0` tag), so there is no live URL to test. The rows below are the pass that has to be run against the first release candidate carrying these eight tracks.
+- **Scope:** the eight tracks merged since v1.20.0 (PRs #48–#55; the parent-facing notes are in `docs/release-notes-v1.21.0.md`):
+  - **PR #48 — the PRD and the TDD, rewritten** (`conductor/archive/20261020-prd-tdd-truth-pass/`) — documentation only; nothing a child or a parent sees changes.
+  - **PR #49 — the shell diet: every game brings its own art** (`conductor/archive/20261020-shell-diet-lazy-art/`) — the boot set is 53 keys and a game's own art arrives with its chunk, so the first tap on a game shows a brief loading cue (Professor Hoot with three pulsing dots) instead of a silent pause.
+  - **PR #50 — the docs and the dead code, swept** (`conductor/archive/20261020-docs-truth-pass/`) — documentation only; nothing a child or a parent sees changes.
+  - **PR #51 — the 22 games, declared once** (`conductor/archive/20261020-game-metadata-source/`) — the Hub, the Learning Progress rows and the sticker shelf read one list; nothing a child or a parent sees changes.
+  - **PR #52 — one drag board for the two ordering games** (`conductor/archive/20261021-drag-board-shell/`) — Number Order and Story Order share a board: a placed card can be swapped with the card in another slot, and a tap withdraws it to its source.
+  - **PR #53 — the Hub grid, taken apart** (`conductor/archive/20261021-hub-grid-decomposition/`) — six modules under `src/game/hub/`; the Hub renders and behaves exactly as before.
+  - **PR #54 — every game gets its own voice** (`conductor/archive/20261021-audio-variety/`) — the correct, incorrect and win sounds differ from game to game.
+  - **PR #55 — the session lifecycle, made whole** (`conductor/archive/20261022-session-lifecycle/`) — the progress dots fill again from the child's second playthrough, the not-quite cue plays after the game's own reaction, and backing out of a game still feeds the difficulty window.
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+) — **pending**
+- **Checks:** the rows added for this batch below (Games 21 and 22, the per-game audio identity, the shared drag board, the three-page paged Hub, the cold first-tap art cue, the Learning Progress pagination, the sticker shelf, the per-round replay speaker, the mascot nod list) plus the A–G rows above, which still apply.
+- **Result:** **PENDING** — the automated gates are green, but this pass needs real hardware and has not been run. Every device row below is unchecked on purpose.
+- **Issues found:** pending
+
 ## Execution Record — Hub Phone UX + Boot/Texture Perf device pass (2026-10-17/18)
 
 - **Target:** LAN preview of the `feature/hub-phone-ux-and-boot-perf` branch build (`vite preview --host`, port 4173; latest dist incl. paged Hub, texture tiers, resize handling)
-- **Scope:** track `conductor/tracks/hub-phone-ux-perf_20261017/` — adaptive paged Hub on narrow viewports (5×2 tiles ×2 pages, swipe + textless dots, RM-aware slide, fixed furniture), per-use texture raster tiers, storage memoization, bgm re-encode, CI boot gate
+- **Scope:** track `conductor/archive/hub-phone-ux-perf_20261017/` — adaptive paged Hub on narrow viewports (5×2 tiles ×2 pages, swipe + textless dots, RM-aware slide, fixed furniture), per-use texture raster tiers, storage memoization, bgm re-encode, CI boot gate
 - **Devices:** user-verified on personal phone and tablet via LAN URLs (device models not recorded); automated desktop Chromium checks (1024×768 + 844×390 + live resize both ways, zero console errors) run by the agent
 - **Checks:** the "Adaptive Paged Grid" rows below plus tablet 5×4 regression, Games 11–20 lazy-load round-trip rows, audio + offline basics
 - **Result:** **PASSED — user reported all rows pass** (2026-10-18); no Critical/High/Medium/Low findings reported
@@ -45,7 +62,7 @@ This checklist ensures comprehensive testing across target devices before releas
 
 ## Execution Record - UI/UX Cohesion pass (2026-08-27)
 
-- **Target:** local `pnpm dev` build (pre-release v1.15.0+ — UI/UX Cohesion track `conductor/tracks/ui-ux-cohesion_20260826/`)
+- **Target:** local `pnpm dev` build (pre-release v1.15.0+ — UI/UX Cohesion track `conductor/archive/ui-ux-cohesion_20260826/`)
 - **Scope:** shared interaction grammar (press feedback on all child/parent controls), Hub & profile-picker hierarchy (tile strokes/labels, active-profile rings, daily-limit state, RM-gated slots), Settings/Progress affordances (row cards, switch toggles, ✕ close, chevron pager, viewed/active rings, stroked destructive modals), speaker/audio-visual states (speaking pulse, muted/unavailable dimming, Musical Memory replay pulse, interruption safety)
 - **Devices:** desktop 1024×768, narrow landscape (~740×360), phone portrait, tablet (per user verification pass)
 - **Checks:** all 18 Hub entries; profile switching incl. picker ring movement; sticker shelf earned vs dashed; play-time limit state + restore; parent lock hold-gate; Settings row cards + toggles + ✕; Profiles active-row ring + stroked-red Delete modal + Cancel; Progress viewed-profile ring (read-only — active profile never changes from the report) + ‹ › pager dimmed at bounds; BGM/SFX real audio response; speaker pulse during speech, dim when SFX off, dim when speech unsupported; Musical Memory replay pulse; interruption leaves no stale pulse; OS reduced-motion — static states, no breathing/pulse tweens, instant slots; offline relaunch from precache; sticker persistence across reload; no-fail feedback unchanged; textless child gameplay preserved
@@ -54,7 +71,7 @@ This checklist ensures comprehensive testing across target devices before releas
 
 ## Execution Record - v1.16.0 (release/v1.16.0, pending verification)
 
-- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot; base `v1.15.0`, release track `conductor/tracks/release-1.16.0_20260827/`)
+- **Target:** live URL `https://aby-little-lab.ansyar-world.top/` (v1.16.0 — UI/UX Cohesion + Ligne Offline-First Hoot; base `v1.15.0`, release track `conductor/archive/release-1.16.0_20260827/`)
 - **Scope:** shared press feedback on every child tap control, speaker visual states (active/muted/unavailable), Settings & Learning Progress affordances (row cards, switch toggles, ✕ close, chevron pager), Hub tile hierarchy (strokes/labels) + active-profile rings, and the **offline-first Ligne mascot fix** (engine precached — animated Hoot on first offline visit; tween Hoot under reduced motion)
 - **Devices:** iPad (iPadOS 15+), iPhone (iOS 15+), Android tablet (Android 10+), Android phone (Android 10+) — **all four classes PENDING**
 - **Checks:** (carried UI/UX Cohesion rows from the pass above) press feedback on all child controls; speaker pulse while speaking, dimmed when SFX off, dimmed when speech unsupported; Settings row cards + toggles + ✕ + chevron pager + viewed/active rings; Hub tile hierarchy + active-profile rings + daily-limit state; **offline-relaunch rows —** clear site data, go offline, relaunch → animated Hoot (Ligne) appears with **no network request fails** for engine or mascot (no `404`/`Failed to fetch`); re-launch after a first online load primed the precache → Hoot still available offline; **reduced-motion rows —** with OS `prefers-reduced-motion`, the tween (lightweight) Hoot appears and **no WASM fetch is made** (accepted behavior); hot/refresh reload boots a clean Hub from the precache; **console-health rows —** zero console errors across Hub, a game, Settings, and offline relaunch
@@ -251,21 +268,24 @@ pnpm exec serve dist -l 3000
 - [ ] All twenty-two game tiles are visible (6×4 grid) — each shows a distinct storybook icon above its label
 - [ ] Tiles, labels, icons, and stickers enter with a staggered wave (40ms apart), not all at once
 - [ ] Tiles gently bob on an idle loop after entering
-- [ ] Sticker shelf shows twenty 56px stickers: earned at full color with shimmer, unearned slots show dashed empty-slot outlines
+- [ ] Sticker shelf shows all 22 stickers — 22px on a wide-grid tile, 30px on a paged tile: earned at full color with shimmer, unearned slots show dashed empty-slot outlines
 - [ ] Just-earned sticker bounces in larger with a sparkle burst after auto-return; replaying an earned game shows no highlight
 - [ ] Press and hold a game tile: it squishes and stays; release on the tile springs it back and starts the game; release off the tile does not navigate
 - [ ] After ~25s idle, two tiles wiggle (rotating pick) and a soft two-tone chime plays, repeating every ~10s; any touch resets the timer
 - [ ] Settings icon is accessible
 - [ ] Touch targets are adequate (64×64px minimum)
-- [ ] Protected controls (Settings, all twenty-two game Back buttons) plus the replay speaker button (Find the Letter, Find the Word, Build the Word, How Many?, Musical Memory) respond to taps near the visible control (96×96px hit areas — no precision tapping)
+- [ ] Protected controls (Settings, all twenty-two game Back buttons) plus the replay speaker glyph every game carries respond to taps near the visible control (96×96px hit areas — no precision tapping)
+- [ ] The first tap on a game shows a brief loading cue (Professor Hoot with three pulsing dots) while that game's art chunk arrives, then the game opens — the tap is never a silent pause
 - [ ] Professor Hoot mascot sits in the bottom-right corner: waves on load, cheers on a just-earned sticker, then bobs/blinks on the idle loop
 - [ ] Mascot is touch-inert — tapping where Hoot stands still reaches the tile/control underneath
 
 #### Hub Screen — Adaptive Paged Grid (narrow phones)
-- [x] On narrow landscape phones the Hub pages to 2 pages of 10 tiles; effective tile touch targets stay ≥64px (after FIT scaling)
+> **2026-10-22:** the rows in this block were verified on 2026-10-18 with 20 games, when the Hub paged to 2 pages. The Hub now holds 22 games, so it pages to 3 pages of 10 + 10 + 2; the rows that depend on the page count are unchecked and must be re-run.
+
+- [ ] On narrow landscape phones the Hub pages to 3 pages of 10 tiles (10 + 10 + 2, the 22 games); effective tile touch targets stay ≥64px (after FIT scaling)
 - [x] Textless page dots under the grid show the active page; dots are tappable
 - [x] Horizontal swipe within the tile-grid region flips pages; touches outside the grid (mascot, settings hold-zone, profile chip, Back) never page
-- [x] Fixed furniture (mascot, settings hold-zone, profile chip, play-time arc) occupies identical positions on both pages; the sticker shelf stays attached to its tile
+- [x] Fixed furniture (mascot, settings hold-zone, profile chip, play-time arc) occupies identical positions on every page; the sticker shelf stays attached to its tile
 - [x] Idle attract wiggles only visible tiles; paging is kid-initiated
 - [x] Page resets to page 1 on scene re-entry
 - [x] Page-slide transition is reduced-motion-aware (instant/short under OS reduced motion)
@@ -339,7 +359,7 @@ pnpm exec serve dist -l 3000
 - [ ] Sticker awarded on first completion
 - [ ] Returns to Hub after completion
 
-#### Game 6: Big vs. Small Cleaner
+#### Game 6: Big & Small
 - [ ] Game loads correctly
 - [ ] Toys of different sizes appear
 - [ ] Drag and drop works
@@ -411,6 +431,33 @@ pnpm exec serve dist -l 3000
 - [ ] First-completion sticker awarded once per game; replay shows no duplicate award
 - [ ] Each game returns to the Hub after completion (~3s auto-return)
 - [ ] All card/answer touch targets stay ≥64px on the narrow phone (after FIT scaling)
+- [ ] Number Order's board behaves as the shared drag-board rows below describe
+
+#### Game 21: Feelings Faces
+- [ ] Game loads correctly from its lazy chunk with no console errors
+- [ ] The rule line and its replay glyph are shown; the rule is spoken once, on the child's first interaction
+- [ ] The three face cards for the round are visible and recognizable
+- [ ] Tapping the face the rule asks for advances the round; a wrong face gives a gentle no-penalty wiggle and a nod
+- [ ] A full 6-round playthrough completes with correct-answer feedback (chime + flash + mascot cheer + progress dot pop)
+- [ ] The not-quite cue plays after the game's own reaction, not over it
+- [ ] Sticker awarded on first completion; the Hub shelf shows the Feelings Faces sticker
+- [ ] Returns to Hub after completion (auto-return ~3s)
+
+#### Game 22: Story Order
+- [ ] Game loads correctly from its lazy chunk with no console errors; the story-panel art arrives with the game chunk, not with the boot shell
+- [ ] The three ordinal slots and the shuffled tray are visible; every panel is distinguishable
+- [ ] A panel lifts and tilts on drag start and snaps into a slot on a correct drop
+- [ ] A wrong order leaves every panel exactly where the child put it and re-opens the board for one more try — no bounce-home, no penalty
+- [ ] The strip validates only when all three slots are filled
+- [ ] A full 6-round playthrough completes with correct-answer feedback (chime + flash + mascot cheer + progress dot pop)
+- [ ] Sticker awarded on first completion; the Hub shelf shows the storybook sticker
+- [ ] Returns to Hub after completion (auto-return ~3s)
+
+#### The shared drag board (Number Order and Story Order)
+- [ ] A placed card can be swapped with the card in another slot — the occupant slides over and both cards stay tappable
+- [ ] A tap on a placed card withdraws it back to its source row; a slightly wobbly tap still counts as a tap
+- [ ] The two games keep their own wrong-answer behaviour: Number Order bounces the card home, Story Order leaves the strip where it is and re-opens it
+- [ ] A drop on empty floor bounces silently (no incorrect SFX) in both games
 
 ### C. Cross-Game Features
 
@@ -430,6 +477,7 @@ pnpm exec serve dist -l 3000
 - [ ] "Reset Progress" row opens the "Reset all stickers?" confirm modal; Cancel closes it without changes
 - [ ] Reset clears every sticker (Hub shelf dims immediately), preserves BGM/SFX settings, and the row shows "Progress cleared"
 - [ ] Reset persists after app close/reopen (stickers stay cleared, settings stay unchanged)
+- [ ] Learning Progress lists all 22 games in four pages of 6 + 6 + 6 + 4, each row showing the game's own name and tile icon, its play count and its accuracy bar; the footer counts the pages (1 / 4 … 4 / 4) and the chevrons wrap around
 
 #### TTS Voice Selection (v1.12.0 candidate)
 - [ ] Voice row shows "Voice: Default (device)" on a fresh install (no stored preference)
@@ -454,7 +502,7 @@ pnpm exec serve dist -l 3000
 #### Mascot Companion
 - [ ] Hoot appears in the same bottom-right corner on the Hub and in all twenty-two games (consistent placement, behind gameplay z-order)
 - [ ] Hoot cheers on correct actions in every game (pose swap + bounce; bigger cheer + sparkle ring on win)
-- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big vs. Small, Pattern Builder, Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order)
+- [ ] Hoot nods on incorrect actions (Shape Sorter, Pop & Freeze, Shadow Match, Musical Memory, Big & Small, Pattern Builder, Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Add It Up, Take Away, Memory Match, Decode It, Number Order, Feelings Faces, Story Order — every game except Animal Trace, which has no incorrect path)
 - [ ] Rapid correct taps: Hoot finishes gracefully — no stuck pose, no runaway bounce (in-flight cheer retired)
 - [ ] Hoot disappears when leaving a scene and never lingers into the next scene
 
@@ -534,6 +582,8 @@ pnpm exec serve dist -l 3000
 - [ ] BGM continues when moving between Hub and games
 - [ ] BGM and SFX settings persist after closing and reopening the app
 - [ ] SFX feedback remains synthesized and no removed SFX MP3 URL is requested
+- [ ] Two different games sound different: the correct, incorrect and win cues each carry their own game's identity (pitch, timbre, tempo), so a parent can tell the games apart with their eyes shut — and the win cue stays inside 300–800 ms
+- [ ] The not-quite cue plays after the game's own reaction, not over it
 - [ ] Every navigation path (boot → hub, hub → game, game → hub) plays the crossfade transition
 - [ ] Each of the twenty-two games shows at most one short splash/ray for a success or completion action
 - [ ] All twenty-two games play the shared win celebration (rays + confetti) on completion, which cleans itself up; the first-time sticker reveal pops after the confetti (~400ms), not on top of it
