@@ -145,10 +145,10 @@
 - **Goal:** `scripts/validate-docs.js` asserts the durable document invariants
   and fails the build when the documents and the code part company.
 - **Depends on:** Phase 3
-- **Covers:** FR-5, NFR-1, NFR-2, NFR-3, NFR-6, NFR-7, AC-7, AC-8
-- **Touches:** `scripts/validate-docs.js`, `.github/workflows/ci.yml`, `conductor/workflow.md`, `docs/TDD.md` (the validator table in §11.3 only), `README.md` (the CI description only)
+- **Covers:** FR-2, FR-5, NFR-1, NFR-2, NFR-3, NFR-4, NFR-6, NFR-7, AC-7, AC-8
+- **Touches:** `scripts/validate-docs.js`, `.github/workflows/ci.yml`, `conductor/workflow.md`, `docs/TDD.md` (the validator table in §11.3 only), `README.md` (the CI description and the build paragraph's timing figures)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Write `scripts/validate-docs.js`** — covers: FR-5
   - [ ] **P4.T1.1:** Every `docs/release-notes-v*.md` is linked from the README's
@@ -171,6 +171,15 @@
   - [ ] **P4.T3.2:** The `verify_phase` command in `conductor/workflow.md`.
   - [ ] **P4.T3.3:** The script in the TDD's §11.3 validator table and in the
     README's CI description.
+- [ ] **P4.T4: Correct the README's cold first-tap sentence** — covers: FR-2,
+  NFR-4
+  - [ ] **P4.T4.1:** The build paragraph says the 82 ms figure is the *increment*
+    the shell-diet track measured against a built pre-track baseline, not the
+    absolute cost of a cold first tap, and it points at `docs/perf-baseline.md`
+    for the absolute measurement and its date. The 400 ms budget is the budget
+    for the absolute figure.
+  - [ ] **P4.T4.2:** The timing figures stay dated, and the cold-boot figure
+    names the 2026-10-22 re-measurement alongside the 2026-10-20 one.
 
 <!--
 The primary appends after acceptance:
