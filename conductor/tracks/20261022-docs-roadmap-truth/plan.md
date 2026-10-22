@@ -192,7 +192,7 @@
 - **Covers:** FR-1, FR-2, FR-4, FR-5, NFR-4, AC-4, AC-6, AC-7
 - **Touches:** `scripts/validate-docs.js`, `docs/release-checklist.md`, `docs/PRD.md`, `docs/roadmap.md`, `docs/release-notes-v1.21.0.md`, `docs/device-testing-checklist.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Make the Conductor-path check see the paths it guards** — covers: F1
   - [ ] **R1.T1.1:** `checkConductorPaths` scans lines with fenced code blocks
