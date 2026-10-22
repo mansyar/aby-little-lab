@@ -107,34 +107,38 @@
 - **Covers:** FR-2, FR-3, NFR-4, NFR-5, AC-4, AC-5
 - **Touches:** `docs/release-checklist.md`, `docs/device-testing-checklist.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`, plus the boot smoke check (`node node_modules/vite/bin/vite.js preview --port 4173 --strictPort`, then `node scripts/validate-boot.js`, then stop the preview)
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Re-measure the boot figures** — covers: FR-2
-  - [ ] **P3.T1.1:** Start the preview on 4173, run `node scripts/validate-boot.js`,
+- [x] **P3.T1: Re-measure the boot figures** — covers: FR-2
+  - [x] **P3.T1.1:** Start the preview on 4173, run `node scripts/validate-boot.js`,
     capture the cold-boot median, then stop the preview.
-  - [ ] **P3.T1.2:** Record the current shell entry size, the chunk count and
+  - [x] **P3.T1.2:** Record the current shell entry size, the chunk count and
     the precache count from the built bundle.
-- [ ] **P3.T2: Rewrite the perf baseline** — covers: FR-2
-  - [ ] **P3.T2.1:** A header saying which figures are live and when they were
+- [x] **P3.T2: Rewrite the perf baseline** — covers: FR-2
+  - [x] **P3.T2.1:** A header saying which figures are live and when they were
     measured.
-  - [ ] **P3.T2.2:** The Shell Diet section — the before/after table, the
+  - [x] **P3.T2.2:** The Shell Diet section — the before/after table, the
     per-game first-tap table, the superseded rasterisation and preload figures.
-  - [ ] **P3.T2.3:** Link `docs/roadmap.md`.
-- [ ] **P3.T3: Correct the release checklist** — covers: FR-2
-  - [ ] **P3.T3.1:** The PWA-check count, the precache count, the game count and
+  - [x] **P3.T2.3:** Link `docs/roadmap.md`.
+- [x] **P3.T3: Correct the release checklist** — covers: FR-2
+  - [x] **P3.T3.1:** The PWA-check count, the precache count, the game count and
     the thumbnail sizes.
-  - [ ] **P3.T3.2:** The three `conductor/tracks/release-*` path references.
-  - [ ] **P3.T3.3:** The obsolete v1.16.0 draft block and the release-branch
+  - [x] **P3.T3.2:** The three `conductor/tracks/release-*` path references.
+  - [x] **P3.T3.3:** The obsolete v1.16.0 draft block and the release-branch
     flow description.
-  - [ ] **P3.T3.4:** The v1.21.0 prep block — notes authored, gates run, version
+  - [x] **P3.T3.4:** The v1.21.0 prep block — notes authored, gates run, version
     bump and tag left to a human.
-- [ ] **P3.T4: Correct the device-testing checklist** — covers: FR-2
-  - [ ] **P3.T4.1:** The sticker count and size, the Hub page arithmetic.
-  - [ ] **P3.T4.2:** The rows for Games 21 and 22, and for what shipped after
+- [x] **P3.T4: Correct the device-testing checklist** — covers: FR-2
+  - [x] **P3.T4.1:** The sticker count and size, the Hub page arithmetic.
+  - [x] **P3.T4.2:** The rows for Games 21 and 22, and for what shipped after
     2026-10-20 — the per-game audio identity, the shared drag board's swap and
     tap-withdraw, the three-page paged Hub, the cold first-tap art cue, the
     22-tile Progress pagination.
-  - [ ] **P3.T4.3:** The broken `conductor/tracks/release-*` path references.
+  - [x] **P3.T4.3:** The broken `conductor/tracks/release-*` path references.
+
+**Result:** verified
+**Checkpoint:** 3683c13
+**Evidence:** conductor/tracks/20261022-docs-roadmap-truth/verification/phase-3.md
 
 ## Phase 4: The Guard
 
