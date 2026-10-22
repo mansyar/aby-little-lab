@@ -15,6 +15,11 @@
  * is how the documents write their Conductor paths, and a check that cannot
  * read them would pass vacuously.
  *
+ * A link to a directory counts as resolved only when the directory holds at
+ * least one file: git cannot track an empty directory, so a link to one is
+ * dead in a fresh checkout even though it resolves on the machine that wrote
+ * it.
+ *
  * It checks invariants, never snapshots. A number that moves - a new test, a
  * new chunk, a new release - never fails this script; only the documents and
  * the code genuinely parting company does.
@@ -265,6 +270,11 @@ function checkReleaseNoteIndex() {
 
 // ---------------------------------------------------------------------------
 // Check 2 - every relative link resolves, and every anchor matches a heading
+//
+// A link to a directory counts as resolved only when the directory holds at
+// least one file. Git cannot track an empty directory, so a link to one is
+// dead in a fresh checkout even though it resolves on the machine that wrote
+// it - a failure a local run cannot see on its own.
 // ---------------------------------------------------------------------------
 
 function checkLinks() {
@@ -276,9 +286,22 @@ function checkLinks() {
         fail(
           file,
           link.line,
-          `the link "${link.target}" to resolve to a file`,
-          `no such file: ${relative(resolved)}`,
+          `the link "${link.target}" to resolve to an existing file or directory`,
+          `no such path: ${relative(resolved)}`,
         );
+        continue;
+      }
+      if (fs.statSync(resolved).isDirectory()) {
+        // Git cannot track an empty directory, so a link to one is dead in a
+        // fresh checkout even though it resolves on the machine that wrote it.
+        if (fs.readdirSync(resolved).length === 0) {
+          fail(
+            file,
+            link.line,
+            `the directory the link "${link.target}" points at to hold at least one file`,
+            `the directory is empty, and git cannot track an empty directory, so the link is dead in a fresh checkout: ${relative(resolved)}`,
+          );
+        }
         continue;
       }
       if (anchor && !anchorSet(resolved).has(anchor)) {

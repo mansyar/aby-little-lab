@@ -150,3 +150,43 @@ no test was edited to work around a timeout.
   the version bump and the `v1.21.0` tag are human release decisions
   (`conductor/workflow.md` § Release & deployment), and the real-device pass is
   the first entry in `docs/roadmap.md`.
+
+## CI follow-up: the guard's first CI run caught a link a local run could not
+
+The pull request's first `Quality Gates` run failed at the new
+`Document validation` step, with one failure:
+
+```
+✗ conductor/index.md:16 — expected the link "./tracks/" to resolve to a file;
+  found no such file: conductor/tracks
+```
+
+**What happened.** `conductor/index.md` links the tracks directory. The last
+active track was archived in the same branch, so `conductor/tracks/` was left
+empty. Git cannot track an empty directory, so the directory existed on the
+machine that pushed the branch and did not exist in the CI checkout - where the
+link was therefore dead. The local run of the validator passed because
+`fs.existsSync` was true for the empty directory that was still on disk.
+
+**The fix, in two parts.**
+
+1. `conductor/tracks/.gitkeep` keeps the directory in the repository, so it
+   exists in every checkout and the link resolves. The file says why it is
+   there.
+2. `scripts/validate-docs.js` now treats a link to a directory as resolved
+   only when the directory holds at least one file, and says so in its report
+   ("git cannot track an empty directory, so the link is dead in a fresh
+   checkout"). The failure message for a missing target now reads "an existing
+   file or directory" rather than "a file", because a directory is a legitimate
+   target.
+
+The second part is the one that matters: the first part fixes this instance,
+the second makes the guard catch the class locally, where the mistake is
+visible, instead of only in CI.
+
+**The drift proof.** With `conductor/tracks/.gitkeep` moved aside, the
+validator exits 1 with the per-failure report above; with it restored, it
+exits 0 with 5 checks passed. A separate sweep of every relative link in the
+governed documents - resolving each target and asking whether it is present
+in `git ls-files` - now reports no link that a fresh checkout would not
+resolve.
