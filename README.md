@@ -243,11 +243,10 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 ## Known Issues
 
-The headline items. The full list - nine of them, each with the file the debt
+The headline items. The full list - eight of them, each with the file the debt
 lives in and how a reader would notice it - is in
 [docs/roadmap.md](docs/roadmap.md), which is the single home for them.
 
-- [The app has never had its full device pass](docs/roadmap.md) - the per-device rows in `docs/device-testing-checklist.md` are still unchecked.
 - [Seven of the 22 games never shift difficulty](docs/roadmap.md) - Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order keep a fixed band.
 - [Three of the five drag games still hand-roll their own drag](docs/roadmap.md) - only Number Order and Story Order use the shared `DragBoard`.
 - [A failed game-chunk load does nothing visible](docs/roadmap.md) - the tap is swallowed and the promise rejection goes unhandled.

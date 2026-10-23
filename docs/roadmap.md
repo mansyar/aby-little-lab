@@ -10,16 +10,6 @@ is what a reader would actually see.
 
 ## Known Issues
 
-### The real-device pass is still outstanding
-
-The per-device rows in `docs/device-testing-checklist.md` — install, offline
-relaunch, landscape lock, touch floors, the per-game passes — are still
-unchecked, and the four most recent release records (v1.14.1, v1.16.0, v1.18.0
-and v1.20.0) each close with device-class execution pending, deferred by user
-decision. A reader notices it by reading the newest execution record in
-`docs/device-testing-checklist.md` and finding "device-class execution PENDING"
-rather than a result.
-
 ### Seven games never shift their difficulty
 
 Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings
@@ -101,12 +91,7 @@ and ten PNGs back.
 The same material, ordered by how much each item would improve the product.
 The track named against each item is the track that would deliver it.
 
-1. **Finish the real-device pass.** Until a parent runs the checklist on a real
-   phone and a real tablet, the app has only ever been verified by a desktop
-   smoke test — and the drag-versus-tap distinction in Story Order is exactly
-   the kind of thing a headless browser cannot answer. Track:
-   *device-pass-completion*.
-2. **Let the seven fixed games adapt.** Seven of the 22 games ignore the band
+1. **Let the seven fixed games adapt.** Seven of the 22 games ignore the band
    shift the app already computes for them, so a child who has outgrown a round
    has no way past it in those games. Track: *adaptive-banding-completion*.
 3. **Move the three hand-rolled drag games onto the shared board.** Shape

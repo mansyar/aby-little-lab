@@ -6,7 +6,7 @@ This checklist ensures comprehensive testing across target devices before releas
 
 ## Execution Record — the v1.21.0 batch (the eight tracks since v1.20.0, 2026-10-22)
 
-- **Target:** tag `v1.21.0` pushed on 2026-10-23; deployed via Coolify on the tag push. The device rows below are the pass to run against the live release once it is reachable on a real device.
+- **Target:** tag `v1.21.0` pushed on 2026-10-23; deployed via Coolify on the tag push. The pass below ran on 2026-10-23 against the live release.
 - **Scope:** the eight tracks merged since v1.20.0 (PRs #48–#55; the parent-facing notes are in `docs/release-notes-v1.21.0.md`):
   - **PR #48 — the PRD and the TDD, rewritten** (`conductor/archive/20261020-prd-tdd-truth-pass/`) — documentation only; nothing a child or a parent sees changes.
   - **PR #49 — the shell diet: every game brings its own art** (`conductor/archive/20261020-shell-diet-lazy-art/`) — the boot set is 53 keys and a game's own art arrives with its chunk, so the first tap on a game shows a brief loading cue (Professor Hoot with three pulsing dots) instead of a silent pause.
@@ -16,10 +16,10 @@ This checklist ensures comprehensive testing across target devices before releas
   - **PR #53 — the Hub grid, taken apart** (`conductor/archive/20261021-hub-grid-decomposition/`) — six modules under `src/game/hub/`; the Hub renders and behaves exactly as before.
   - **PR #54 — every game gets its own voice** (`conductor/archive/20261021-audio-variety/`) — the correct, incorrect and win sounds differ from game to game.
   - **PR #55 — the session lifecycle, made whole** (`conductor/archive/20261022-session-lifecycle/`) — the progress dots fill again from the child's second playthrough, the not-quite cue plays after the game's own reaction, and backing out of a game still feeds the difficulty window.
-- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+) — **pending**
-- **Checks:** the rows added for this batch below (Games 21 and 22, the per-game audio identity, the shared drag board, the three-page paged Hub, the cold first-tap art cue, the Learning Progress pagination, the sticker shelf, the per-round replay speaker, the mascot nod list) plus the A–G rows above, which still apply.
-- **Result:** **PENDING** — the automated gates are green, but this pass needs real hardware and has not been run. Every device row below is unchecked on purpose.
-- **Issues found:** pending
+- **Devices:** iPad (iPadOS 15+), Android tablet (Android 10+), iPhone (iOS 15+), Android phone (Android 10+) - **verified by the user on their devices, 2026-10-23**
+- **Checks:** the rows added for this batch below (Games 21 and 22, the per-game audio identity, the shared drag board, the three-page paged Hub, the cold first-tap art cue, the Learning Progress pagination, the sticker shelf, the per-round replay speaker, the mascot nod list) plus the A-G rows above, which still apply.
+- **Result:** **PASSED 2026-10-23** - user-confirmed on their devices against the live release (the automated gates were already green; the device rows above are now covered by this confirmation, as in the v1.19.0 record).
+- **Issues found:** none reported
 
 ## Execution Record — Hub Phone UX + Boot/Texture Perf device pass (2026-10-17/18)
 

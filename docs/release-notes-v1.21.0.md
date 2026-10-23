@@ -1,9 +1,9 @@
 > **Status:** FINAL - released 2026-10-23
 >
-> **Tag:** `v1.21.0` on `master`, pushed to origin; Coolify deploys on the tag
-> push. The live smoke and the entry-hash check it fires are recorded in
-> `docs/release-checklist.md`'s v1.21.0 sign-off; the device-class pass is
-> still pending ((it is the first entry in `docs/roadmap.md`)).
+> **Tag:** `v1.21.0` on `master`, pushed to origin; Coolify deployed on the tag
+> push. The live smoke and the entry-hash check are recorded in
+> `docs/release-checklist.md`'s v1.21.0 sign-off; the device-class pass
+> **PASSED 2026-10-23** (user-verified on their devices).
 >
 > **Base:** the `v1.20.0` tag (`437d56b`).
 
@@ -138,10 +138,11 @@ Documentation only. No product change.
 shipped record and is not edited; here is where each of its three bullets
 stands today.
 
-- **Still stands - no real-device pass for Story Order's drag feel.** The
-  per-device rows in `docs/device-testing-checklist.md` are still unchecked and
-  the four most recent release records still close with device-class execution
-  pending. The drag path is covered by scene tests, not by a finger on glass.
+- **Resolved - 2026-10-23: the device pass ran.** The user verified the live
+  release on their devices, and the v1.21.0 batch record in
+  `docs/device-testing-checklist.md` now reads PASSED - the per-device rows
+  this bullet waited on are covered, Story Order's drag feel included, by a
+  finger on glass rather than only by scene tests.
 - **Resolved - "PRD and TDD still describe a twenty-game suite".** That was
   true when v1.20.0 shipped and false a few hours later: PR #48 rewrote both
   documents against the 22-game app in the same day. Both now describe the
@@ -160,9 +161,10 @@ Two older shipped notes carry the same kind of stale label:
 `docs/release-notes-v1.16.0.md` and `docs/release-notes-v1.17.0.md` still open
 with "**Status:** DRAFT - pending production verification", although both
 releases were tagged, deployed, and are listed as released in `README.md`. The
-device verification those banners wait on is still outstanding - it is the
-first entry in `docs/roadmap.md` - but the releases themselves shipped. Those
-files are shipped records too, and are not edited here.
+device verification those banners wait on ran on 2026-10-23 (the v1.21.0
+record in `docs/device-testing-checklist.md`), but the releases themselves
+shipped long before. Those files are shipped records too, and are not edited
+here.
 
 ### What is still open
 
@@ -193,7 +195,8 @@ eight merges, and re-confirmed by CI on the release commit.
   as the annotated tag `v1.21.0` on `master`; Coolify deploys on the tag push.
   The live smoke and the entry-hash check are recorded in
   `docs/release-checklist.md`'s v1.21.0 sign-off.
-- **Device matrix:** pending - see
+- **Device matrix:** PASSED - the user verified the live release on their
+  devices on 2026-10-23; recorded in
   [`docs/device-testing-checklist.md`](device-testing-checklist.md).
 
 ## Feedback
