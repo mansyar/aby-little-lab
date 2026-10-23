@@ -41,6 +41,16 @@ const WIGGLE_DURATION = 350;
 const WIGGLE_PHASE_OFFSET = 120;
 /** How many tiles wiggle during an attract cue (rotating pick). */
 const ATTRACT_WIGGLE_COUNT = 2;
+
+/**
+ * True where the document exposes a visibility state. Mirrors the play-time
+ * module's guard so a headless host (no document, or no `visibilityState`)
+ * stays inert instead of throwing on the visibility hook.
+ */
+function canObserveVisibility(): boolean {
+  return typeof document !== "undefined" && typeof document.visibilityState === "string";
+}
+
 /**
  * Hub scene — the central navigation hub.
  *
@@ -72,6 +82,16 @@ export class HubScene extends Phaser.Scene {
   private nudge = new PlayTimeNudge();
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
+  /**
+   * Document-visibility handler: re-reads the budget when the page returns to
+   * the foreground. A field so the shutdown hook can remove the exact
+   * reference create() attached.
+   */
+  private handleVisibilityChange = (): void => {
+    if (document.visibilityState === "visible") {
+      this.refreshPlayTimeState();
+    }
+  };
   /** Tile-grid renderer: layouts, page dots, swipes and the sticker shelf. */
   private grid: HubGrid;
 
@@ -212,6 +232,10 @@ export class HubScene extends Phaser.Scene {
       // cannot rebuild a dead scene's objects.
       this.scale?.off("resize", this.grid.handleViewportChange, this.grid);
     });
+
+    // Registered after the cleanup above so the first shutdown handler stays
+    // the scene teardown; this one only detaches the page-visibility hook.
+    this.watchPlayTimeVisibility();
   }
 
   /**
@@ -274,6 +298,21 @@ export class HubScene extends Phaser.Scene {
       this.timeUp = false;
     }
     this.createPlayTimeIndicator();
+  }
+
+  /**
+   * Refreshes the limit visuals when the page becomes visible again, so a Hub
+   * parked across midnight (or behind a limit change) tells the truth without
+   * a reload. The browser event is the only trigger — no timer, no polling —
+   * and the shutdown hook detaches the handler so repeated Hub creates cannot
+   * stack listeners.
+   */
+  private watchPlayTimeVisibility(): void {
+    if (!canObserveVisibility()) return;
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    this.events.once("shutdown", () => {
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+    });
   }
 
   /**

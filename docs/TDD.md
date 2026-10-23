@@ -49,6 +49,7 @@
    - [7.2 The round contract](#72-the-round-contract)
    - [7.3 Adaptive banding](#73-adaptive-banding)
    - [7.4 Randomness](#74-randomness)
+   - [7.5 Play-time sessions](#75-play-time-sessions)
 8. [Audio](#8-audio)
    - [8.1 AudioManager lifecycle](#81-audiomanager-lifecycle)
    - [8.2 Sound effects](#82-sound-effects)
@@ -734,7 +735,7 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 
 ### 7.1 The module list
 
-`src/game/` holds the app's logic layer: no DOM, no storage reads (except the play-time session machinery, which needs `document.visibilityState`). Most modules are Phaser-free; `dragBoard.ts`, `hubGrid.ts`, `storyOrderArt.ts`, `art/registry.ts` and `art/placeholder.ts` import Phaser types only, and `hub/gridBuilder.ts` imports it at runtime. Every module here is unit-tested directly.
+`src/game/` holds the app's logic layer: no DOM, no storage reads (except the play-time session machinery, which listens to `document.visibilitychange` and `window.pagehide`). Most modules are Phaser-free; `dragBoard.ts`, `hubGrid.ts`, `storyOrderArt.ts`, `art/registry.ts` and `art/placeholder.ts` import Phaser types only, and `hub/gridBuilder.ts` imports it at runtime. Every module here is unit-tested directly.
 
 | Module | Responsibility |
 | --- | --- |
@@ -760,7 +761,7 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 | `numberOrderLogic.ts` | ordering rounds |
 | `oddOneOutLogic.ts` | odd-item selection and prompt text |
 | `patternBuilderLogic.ts` | pattern sequences and missing-tile answers |
-| `playTimeLogic.ts` | daily budgets, day rollover, visible-time session accounting |
+| `playTimeLogic.ts` | daily budgets, day rollover, visible-time session accounting, banked through an injected sink with a ceil and a midnight clamp ([§7.5](#75-play-time-sessions)) |
 | `popFreezeLogic.ts` | bubble spawn timing and pop targets |
 | `profileLogic.ts` | profile CRUD, avatar map, `migrateV1`, `normalizeV2` |
 | `progressLogic.ts` | per-game stats, mastery, accuracy, 7-day activity |
@@ -827,6 +828,16 @@ The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptiv
 ### 7.4 Randomness
 
 Shuffling uses `Math.random` by default. Where a module needs determinism it takes an optional RNG parameter — `storyOrderLogic.buildRound`/`buildPlaythrough` accept an injectable RNG so tests can pin a strip, and the builder guarantees a non-identity permutation even for a degenerate RNG (a reshuffle guard plus a one-step rotation). Other modules are tested by asserting invariants (counts, bands, membership) rather than exact order.
+
+### 7.5 Play-time sessions
+
+`playTimeLogic.ts` holds at most one session: `startPlaySession(profileId)` banks whatever is already running, then opens a session with an accumulated `visibleMs` and a `runningSince` stamp that is `null` when the document starts out hidden. `pausePlaySession` and `resumePlaySession` move `runningSince` and accumulate `visibleMs`, and the module subscribes to `document`'s `visibilitychange` and `window`'s `pagehide` itself, so a hidden tab stops the clock and a page exit banks the session. Both subscriptions are installed only when the host exposes `document.visibilityState` and `window.addEventListener`, and they are removed when the session ends.
+
+A session ends through `endPlaySession()`, and three callers reach it: the Hub's `create()` on return to the Hub, the `pagehide` handler, and `startPlaySession()` when it banks the previous session. Banking goes through an injected sink — `setPlaySessionSink(sink)`, wired by `src/utils/storage.ts` to `recordPlayTime` at module scope — so the logic layer never reads storage and a test can observe banking without touching `localStorage`. `setPlaySessionSink(null)` detaches it.
+
+The minutes banked are `Math.ceil(visibleMs / 60000)`: a partly played minute counts, and a session with no visible time banks nothing. A session spanning local midnight is clamped to `min(visibleMs, now - localMidnight(now))` before the ceil, so the day that just ended is never written and the new day is charged exactly the portion played after midnight. Each bank writes one snapshot — `{limitMinutes, usedMinutes, lastUsedDate}` — rather than a delta.
+
+The accepted limitation is that banking is event-driven: a process killed with no `pagehide` and no visibility change cannot be banked, and the session in flight lives in memory only, so that time is lost. On the scene side, `HubScene` re-runs `refreshPlayTimeState()` on `visibilitychange` (adding the listener in `create()` and detaching it on `shutdown`), so a Hub parked across midnight or across a limit change re-reads the budget without a reload or a timer.
 
 ---
 
