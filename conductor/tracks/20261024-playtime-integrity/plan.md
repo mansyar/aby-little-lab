@@ -66,19 +66,23 @@ primary records them.
 - **Covers:** FR-5, AC-5, AC-6, NFR-1..NFR-6.
 - **Touches:** `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubPlayTime.test.ts`, `docs/PRD.md`, `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Refresh the limit visuals on visibility restore** — covers: FR-5
-  - [ ] **P3.T1.1:** In `HubScene`, register a `visibilitychange` listener (document → visible) that calls the existing private `refreshPlayTimeState()` (`src/scenes/HubScene.ts:269-281`) — no new render path, no timer. Register it where the scene can guarantee cleanup: attach in `create()` and remove on the scene's `shutdown` event (`this.events.once("shutdown", …)`), so repeated Hub creates cannot stack listeners. Use the same engine-agnostic document guard style the rest of the shell uses so a headless test host does not throw.
-  - [ ] **P3.T1.2:** Test in `src/__tests__/scenes/hubPlayTime.test.ts`: with a limit reached, dispatching `visibilitychange` after flipping the stored state re-creates the indicator (dim/locked) without a scene re-create; a shutdown-then-create cycle leaves exactly one listener.
-- [ ] **P3.T2: Sync the documents** — covers: NFR-1
-  - [ ] **P3.T2.1:** `docs/PRD.md` play-time section: state that only visible time counts, that a hidden/closed app banks what it accrued (with `pagehide`), that minutes are ceiled, and that a midnight-crossing session charges the new day only its post-midnight portion.
-  - [ ] **P3.T2.2:** `docs/TDD.md` play-time module section: document the session state machine (start → pause/resume on visibility → bank on pagehide / Hub return / a new start), the injected sink, the ceil + midnight clamp, and the accepted limitation that a process killed with no `pagehide`/visibility event cannot be banked.
-  - [ ] **P3.T2.3:** `docs/roadmap.md`: remove the "Play time is banked only when the child comes back to the Hub" Known Issue (it is this track); keep every other entry untouched.
-  - [ ] **P3.T2.4:** Run `node scripts/validate-docs.js` and record the 5/5 result.
-- [ ] **P3.T3: Prove the track against its own criteria** — covers: AC-6
-  - [ ] **P3.T3.1:** Walk AC-1..AC-5 against named tests/files and record each mapping in the evidence; every changed pre-existing expectation must be listed with its reason (NFR-1).
-  - [ ] **P3.T3.2:** Run the full `verify_phase` chain exactly as written above; it must exit 0 end to end.
+- [x] **P3.T1: Refresh the limit visuals on visibility restore** — covers: FR-5
+  - [x] **P3.T1.1:** In `HubScene`, register a `visibilitychange` listener (document → visible) that calls the existing private `refreshPlayTimeState()` (`src/scenes/HubScene.ts:269-281`) — no new render path, no timer. Register it where the scene can guarantee cleanup: attach in `create()` and remove on the scene's `shutdown` event (`this.events.once("shutdown", …)`), so repeated Hub creates cannot stack listeners. Use the same engine-agnostic document guard style the rest of the shell uses so a headless test host does not throw.
+  - [x] **P3.T1.2:** Test in `src/__tests__/scenes/hubPlayTime.test.ts`: with a limit reached, dispatching `visibilitychange` after flipping the stored state re-creates the indicator (dim/locked) without a scene re-create; a shutdown-then-create cycle leaves exactly one listener.
+- [x] **P3.T2: Sync the documents** — covers: NFR-1
+  - [x] **P3.T2.1:** `docs/PRD.md` play-time section: state that only visible time counts, that a hidden/closed app banks what it accrued (with `pagehide`), that minutes are ceiled, and that a midnight-crossing session charges the new day only its post-midnight portion.
+  - [x] **P3.T2.2:** `docs/TDD.md` play-time module section: document the session state machine (start → pause/resume on visibility → bank on pagehide / Hub return / a new start), the injected sink, the ceil + midnight clamp, and the accepted limitation that a process killed with no `pagehide`/visibility event cannot be banked.
+  - [x] **P3.T2.3:** `docs/roadmap.md`: remove the "Play time is banked only when the child comes back to the Hub" Known Issue (it is this track); keep every other entry untouched.
+  - [x] **P3.T2.4:** Run `node scripts/validate-docs.js` and record the 5/5 result.
+- [x] **P3.T3: Prove the track against its own criteria** — covers: AC-6
+  - [x] **P3.T3.1:** Walk AC-1..AC-5 against named tests/files and record each mapping in the evidence; every changed pre-existing expectation must be listed with its reason (NFR-1).
+  - [x] **P3.T3.2:** Run the full `verify_phase` chain exactly as written above; it must exit 0 end to end.
+
+**Result:** verified
+**Checkpoint:** ec55c57
+**Evidence:** conductor/tracks/20261024-playtime-integrity/verification/phase-3.md
 
 <!--
 After accepting a phase, the primary appends under it:
