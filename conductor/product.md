@@ -124,6 +124,27 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## Changelog - Adaptive Difficulty Completion (2026-10-23)
+
+> **2026-10-23 - Adaptive Difficulty Completion:** every game in the lab now
+> answers the difficulty band. Seven games had ignored the band shift the app
+> already computed for them, so a child who outgrew the round had no way past
+> it there. Each gained its own single difficulty dimension, selected by the
+> same band the other fifteen consume: Shape Sorter draws its shapes from an
+> ornamental, classic or confusable pool; Animal Trace paces its paths at four,
+> six or eight waypoints; Pop & Freeze widens or narrows how many bubbles
+> sleep; Shadow Match now owns twelve objects in six confusable pairs - the
+> easiest band never puts a lookalike pair on screen, the hardest puts three
+> of them there; Big & Small widens or narrows the size gap between its boxes;
+> Feelings Faces spends its six rounds on distinct emotions, the shipped mix,
+> or confusable ones, with its gentle scenario pool grown to twenty-four; and
+> Story Order orders its rounds as five obvious and one subtle, the shipped
+> three-and-three, or one obvious and five subtle, from a pool grown to eleven
+> stories (cake, laundry and the sun join). The new drawings follow the
+> Storybook Flat rules, live in the games' lazy art chunks, and leave the boot
+> shell at exactly fifty-three keys. At the classic band, or whenever a parent
+> turns adaptive difficulty off, every game plays exactly as it did before.
+
 ## Changelog - Docs & Roadmap Truth Pass (2026-10-22)
 
 > **2026-10-22 - Docs & Roadmap Truth Pass:** The written record brought back in line with the code, and a guard added so it cannot drift again. The PRD still described a 178-entry boot set, the TDD's source tree was wrong by more than twenty-five files and its audio chapter predated the per-game sonic identity, the README quoted a test count and a shell size from two releases ago, both checklists carried the arithmetic of the seven-game era and pointed at three Conductor paths that no longer exist, and the perf baseline's cold boot predated four tracks. All of it is corrected against figures re-derived from the code at review time, and every corrected figure now either comes from the code or carries the date it was measured. Two documents are new: `docs/roadmap.md` is the single home for the nine standing Known Issues and the Future Work list, each entry naming the symptom, the file and how a reader notices it - there was no roadmap anywhere before - and `docs/release-notes-v1.21.0.md` covers the eight tracks merged since v1.20.0 (PRs #48 to #55), what a parent would notice, and the disposition of each of the v1.20.0 Known Issues. The duplicate "Game 20" changelog entry is collapsed to the one that agrees with the shipped ladder. New `scripts/validate-docs.js` asserts the durable invariants - every release note is linked from the README, every relative link and anchor resolves, the README, the PRD and the TDD describe exactly the games in `GAME_REGISTRY`, the roadmap keeps both of its sections, and no document points at a Conductor path that does not exist - and runs as a step in CI and in the pre-phase-acceptance gate. It checks invariants, never snapshots, so adding a test or a game never fails the build before the documents have caught up. It found a dead table-of-contents anchor in the TDD on its first run. No game, no asset, no behaviour and no dependency changed; `src/` is untouched and the app stays offline-first.
