@@ -79,7 +79,7 @@
 > - [x] Device-class verification - **pending** by user decision (non-blocking; desktop HTTP/hash smoke is the release gate). The one item worth a real finger: the drag feel of Story Order, and specifically that a slightly wobbly tap withdraws a placed panel instead of doing nothing
 > - [x] Pre-existing doc drift recorded, not fixed here: `docs/PRD.md` and `docs/TDD.md` still describe twenty games; `conductor/product.md` still carries duplicate `## Changelog - Game 20` sections
 
-> **v1.21.0 prep (the eight tracks merged since v1.20.0, 2026-10-22):** The release notes are authored at `docs/release-notes-v1.21.0.md` and carry the *Unreleased* banner. **Nothing has shipped**: `package.json` still reads `1.20.0`, no `v1.21.0` tag exists, and the version bump and the tag stay a human release decision (see *Release & Deployment* in `conductor/workflow.md`).
+> **v1.21.0 prep (the eight tracks merged since v1.20.0, shipped 2026-10-23):** The release notes at `docs/release-notes-v1.21.0.md` are FINAL - the batch ships as `v1.21.0` (`package.json` bumped 2026-10-23, annotated tag on `master`, Coolify deploy on the tag push). The pre-release verification below ran on the implementation branch and in CI; the deployment smoke is recorded in the Final Sign-Off, and the device rows in `docs/device-testing-checklist.md` stay unchecked until the pass runs on real hardware.
 > - [x] **PR #48 — The PRD and the TDD, rewritten** (`conductor/archive/20261020-prd-tdd-truth-pass/`) — documentation only
 > - [x] **PR #49 — The shell diet: every game brings its own art** (`conductor/archive/20261020-shell-diet-lazy-art/`) — the boot set is 53 keys and a game's own art rides its chunk
 > - [x] **PR #50 — The docs and the dead code, swept** (`conductor/archive/20261020-docs-truth-pass/`) — documentation only
@@ -161,7 +161,7 @@
 
 ### 5. Documentation
 - [x] README.md is up to date — CI/CD + deployment docs present
-- [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` … `docs/release-notes-v1.21.0.md` (24 files; the v1.21.0 notes are authored, not shipped)
+- [x] Release notes prepared — see `docs/release-notes-v1.0.0.md` … `docs/release-notes-v1.21.0.md` (24 files; the v1.21.0 notes shipped with the release)
 - [x] Deployment guide complete — README CI docs + this checklist's automated pipeline note
 - [x] Device testing checklist complete — **2026-08-03:** executed against live URL, all sections A–G passed; **2026-08-04:** v1.4.0 Multi-Kid Profiles execution record added (all devices passed); **2026-10-22:** the v1.21.0 batch's device rows are added and left unchecked — the pass needs real hardware and has not been run
 
@@ -513,8 +513,8 @@ Please report issues at [GitHub Issues URL]
 ### Actual Metrics (measured on the current build, 2026-10-22)
 
 The 2026-08-03 block above is the device pass for v1.0.0 and keeps its numbers.
-The block below is the automated measurement of the build that would ship as
-v1.21.0 — the eight tracks merged since v1.20.0 (PRs #48–#55). Full method
+The block below is the automated measurement of the build that ships as
+v1.21.0 - the eight tracks merged since v1.20.0 (PRs #48-#55). Full method
 and the three runs behind every figure are in `docs/perf-baseline.md`
 (*Shell Diet Re-measurement — 2026-10-22*).
 
@@ -784,4 +784,23 @@ and the three runs behind every figure are in `docs/perf-baseline.md`
 - [x] Documentation complete (release notes, README, tech-stack, product)
 - [x] Security review passed (no new dependencies, no new network calls)
 - [x] Performance targets met (shell 195.4 kB of 200 kB; boot gate green in CI)
+- [x] Ready for release
+
+## Final Sign-Off - v1.21.0
+
+**Version:** 1.21.0
+**Status:** RELEASED - 2026-10-23 (eight tracks since v1.20.0, PRs #48-#55; released directly from `master`, tag `v1.21.0`; desktop HTTP/hash smoke passed, device-class verification pending)
+
+**Verify Deployment - v1.21.0 (2026-10-23):**
+- [x] Annotated tag `v1.21.0` on `master` (`1d455b1`) pushed - CI run `39907659828`: Quality Gates PASS, Deploy to Coolify PASS (webhook fired)
+- [x] Live entry hash matches the local `dist/` build - live `assets/index-no3ZnSJE.js` == local build (`1.21.0` present in the served bundle; Vite's content hash is the byte identity)
+- [x] Live HTTP smoke - `https://aby-little-lab.ansyar-world.top/` HTTP 200, title `Aby's Little Lab`, the served shell entry carries the release version. The in-canvas remainder (a game round-trip, Settings footer, the first-tap art cue) needs pointer input the automated check cannot inject into the Phaser canvas - covered by the device row below
+- [ ] Device testing on v1.21.0 - recorded in `docs/device-testing-checklist.md` (pending; the rows are the batch's pass)
+
+**Approval:**
+- [x] Code quality meets standards (Biome clean - the two pre-existing findings unchanged)
+- [x] All tests pass (2,488/2,488)
+- [x] Documentation complete (release notes, README, PRD, TDD, both checklists, perf baseline, roadmap)
+- [x] Security review passed (no new dependencies, no new network calls)
+- [x] Performance targets met (shell 134.6 kB of 200 kB; boot median 1.16 s in the release-commit smoke check; boot gate green in CI)
 - [x] Ready for release
