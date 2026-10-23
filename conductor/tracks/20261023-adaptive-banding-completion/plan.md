@@ -118,28 +118,32 @@ writes this file.
   `src/__tests__/game/art/shellOwnership.test.ts`,
   `src/__tests__/game/art/groupIntegrity.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` — plus the boot smoke check on port 4173 (`vite preview --strictPort`, then `node scripts/validate-boot.js`, then stop the preview), because the phase adds assets
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Shadow Match's four new objects + band selection** — covers:
+**Result:** verified
+**Checkpoint:** 6aed316
+**Evidence:** conductor/tracks/20261023-adaptive-banding-completion/verification/phase-3.md
+
+- [x] **P3.T1: Shadow Match's four new objects + band selection** — covers:
   FR-4, FR-8
-  - [ ] **P3.T1.1: Four new silhouette-clustered objects** — object and
+  - [x] **P3.T1.1: Four new silhouette-clustered objects** — object and
     shadow SVGs per `SVG_STYLE.md` (agent-authored; shown to the user before
     phase acceptance), extending the corpus to 12 objects
-  - [ ] **P3.T1.2: Band-aware round selection in `shadowMatchLogic.ts`**
+  - [x] **P3.T1.2: Band-aware round selection in `shadowMatchLogic.ts`**
     (easy excludes the most confusable, hard favours them, classic draws any
     6 of all as today; `isMatch` and the win target unchanged)
-  - [ ] **P3.T1.3: Ownership + integrity tests updated** (the new keys in
+  - [x] **P3.T1.3: Ownership + integrity tests updated** (the new keys in
     the lazy groups, none in the 53-key boot shell)
-- [ ] **P3.T2: Story Order's three new stories + band mix** — covers: FR-7,
+- [x] **P3.T2: Story Order's three new stories + band mix** — covers: FR-7,
   FR-8
-  - [ ] **P3.T2.1: Three new stories** (one easier-obvious, two
+  - [x] **P3.T2.1: Three new stories** (one easier-obvious, two
     harder-subtle; nine panels per `SVG_STYLE.md`, panel keys and the
     Story Ladder contract respected; agent-authored, shown before acceptance)
-  - [ ] **P3.T2.2: Band-aware mix in `storyOrderLogic.ts`** (5+1, 3+3, 1+5
+  - [x] **P3.T2.2: Band-aware mix in `storyOrderLogic.ts`** (5+1, 3+3, 1+5
     from pools grown to 5 obvious / 6 subtle; guards held; no repeats)
-  - [ ] **P3.T2.3: Ownership + integrity tests updated**
-- [ ] **P3.T3: Contact-sheet regeneration** — covers: FR-8
-  - [ ] **P3.T3.1: Regenerate the SVG contact sheets** over the grown corpus
+  - [x] **P3.T2.3: Ownership + integrity tests updated**
+- [x] **P3.T3: Contact-sheet regeneration** — covers: FR-8
+  - [x] **P3.T3.1: Regenerate the SVG contact sheets** over the grown corpus
     and review the new art rendered
 
 ## Phase 4: The documentation truth pass
