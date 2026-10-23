@@ -187,6 +187,14 @@ After accepting a phase, the primary appends under it:
 `conductor-review` appends its own phase if findings require fixes:
 
 ## Phase R1: Review Fixes
-...
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
+
+- **Goal:** Resolve review findings F1 and F2.
+- **Depends on:** Phase 4
+- **Covers:** F1, F2
+- **Touches:** `docs/TDD.md` (F1's file, `conductor/tracks/20261023-adaptive-banding-completion/verification/phase-3.md`, is Conductor prose the phase executor cannot edit — the primary corrects it during phase acceptance)
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** pending
+
+- [ ] **R1.T1: Reconcile the TDD's coverage snapshot** — covers: F2
+  - [ ] **R1.T1.1:** Update `docs/TDD.md` §10.3 to the integrated run's figures (statements 97.92, branches 91.81, functions 96.6, lines 98.7) and note that per-run coverage instrumentation varies by a fraction of a point between identical runs.
 -->
