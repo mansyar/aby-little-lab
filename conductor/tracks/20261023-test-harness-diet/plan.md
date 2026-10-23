@@ -16,7 +16,7 @@ primary agent writes this file.
 - **Covers:** FR-1, FR-2, FR-3, FR-4, NFR-1..NFR-4, AC-1..AC-4.
 - **Touches:** `vite.config.ts`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Commit the pool and the budget** — covers: FR-1
   - [ ] **P1.T1.1:** In `vite.config.ts`'s `test` block set `pool: "vmThreads"` and `testTimeout: 30000`, each with a one-line comment recording the measured reason (full suite 59–60 s vs ~8 min under forks on this host; the 5,000 ms default was marginal on a loaded machine).
