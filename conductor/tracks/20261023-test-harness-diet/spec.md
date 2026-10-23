@@ -90,7 +90,7 @@ configuration permanently and retires the workaround folklore.
 | NFR-2 | No new dependency; no network access; offline-first. | Must |
 | NFR-3 | Coverage gates (lines 95 / functions 88 / branches 85 / statements 90) hold under the new pool. | Must |
 | NFR-4 | CI behaviour does not regress: the `vmThreads` configuration is what CI itself runs, and this track's gate plus CI on the PR prove it. | Must |
-| NFR-7 | Exactly five inline per-test timeout overrides are removed so the committed 30,000 ms budget governs everywhere: `src/__tests__/game/countLogic.test.ts` (~:183), `src/__tests__/game/numberOrderLogic.test.ts` (~:144), `src/__tests__/game/addItUpLogic.test.ts` (~:181), `src/__tests__/game/takeAwayLogic.test.ts` (~:182), each `{ timeout: 20_000 }`, and `src/__tests__/scenes/navigation.test.ts` (~:392), positional `15000`. No test assertion, iteration count, or other test content changes; the suite stays 119 files / 2,556 tests. | Must |
+| NFR-7 | The five inline per-test timeout overrides surfaced by the gate runs are removed so the committed 30,000 ms budget governs them: `src/__tests__/game/countLogic.test.ts` (~:183), `src/__tests__/game/numberOrderLogic.test.ts` (~:144), `src/__tests__/game/addItUpLogic.test.ts` (~:181), `src/__tests__/game/takeAwayLogic.test.ts` (~:182), each `{ timeout: 20_000 }`, and `src/__tests__/scenes/navigation.test.ts` (~:392), positional `15000`. No test assertion, iteration count, or other test content changes; the suite stays 119 files / 2,556 tests. Pre-existing inline overrides elsewhere (nine further sites, including additional ones inside these same files) are out of scope for this track and are recorded as follow-up debt. | Must |
 
 ## Acceptance Criteria
 
