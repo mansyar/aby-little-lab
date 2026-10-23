@@ -145,6 +145,16 @@ function visibleElapsedMs(session: ActiveSession, now: number): number {
 }
 
 /**
+ * Start of the local day containing `now`, in epoch milliseconds. Built from the
+ * same `now` the session banks with so the boundary follows local time (and DST)
+ * rather than UTC.
+ */
+function localMidnight(now: number): number {
+  const date = new Date(now);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+}
+
+/**
  * Starts a play session for a profile. Only one session can be active at a
  * time; starting a new one discards any previous unfinished session. The
  * document visibility watcher is attached here so the session is paused for as
@@ -183,16 +193,22 @@ export function resumePlaySession(now = Date.now()): void {
 
 /**
  * Ends the active play session, returning the whole visible minutes elapsed
- * since it started (rounded to the nearest minute, clamped to 0 when the clock
- * went backwards). Hidden minutes are excluded. Returns null when no session is
- * active. The session is cleared regardless.
+ * since it started (ceiled, so any visible time banks at least a minute;
+ * clamped to 0 when the clock went backwards). Hidden minutes are excluded.
+ * Returns null when no session is active. The session is cleared regardless.
+ *
+ * The elapsed time is clamped to the part accrued since local midnight: the
+ * record is a single-day snapshot (`limitMinutes`, `usedMinutes`,
+ * `lastUsedDate`) with no per-day history, so a closed day's usage cannot be
+ * written and must not be charged to the new day.
  */
 export function endPlaySession(now = Date.now()): { profileId: string; minutes: number } | null {
   const session = activeSession;
   activeSession = null;
   unwatchVisibility();
   if (session === null) return null;
-  const elapsed = visibleElapsedMs(session, now);
-  const minutes = elapsed <= 0 ? 0 : Math.round(elapsed / 60_000);
+  const visibleMs = visibleElapsedMs(session, now);
+  const elapsed = Math.min(visibleMs, Math.max(0, now - localMidnight(now)));
+  const minutes = elapsed <= 0 ? 0 : Math.ceil(elapsed / 60_000);
   return { profileId: session.profileId, minutes };
 }

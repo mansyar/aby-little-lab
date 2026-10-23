@@ -131,7 +131,9 @@ describe("Hub play-time enforcement", () => {
   }
 
   it("records the elapsed session minutes on return to the hub", () => {
-    startPlaySession("p1", Date.now() - 3 * 60 * 1000);
+    // Mid-minute so the ceiled total is 3 however many ms the two clock reads
+    // straddle — an exact whole-minute start would ceil up to 4.
+    startPlaySession("p1", Date.now() - 2.5 * 60 * 1000);
     const scene = new HubScene();
     scene.create();
 
@@ -147,7 +149,7 @@ describe("Hub play-time enforcement", () => {
 
   it("records against the profile that started the session", () => {
     addProfile("dog"); // p2 becomes active.
-    startPlaySession("p2", Date.now() - 2 * 60 * 1000);
+    startPlaySession("p2", Date.now() - 1.5 * 60 * 1000); // Mid-minute: ceils to 2.
     const scene = new HubScene();
     scene.create();
 

@@ -193,7 +193,7 @@ describe("playTimeLogic", () => {
   });
 
   describe("play session", () => {
-    it("starts a session and ends it with rounded whole minutes", () => {
+    it("starts a session and ends it with ceiled whole minutes", () => {
       startPlaySession("p1", DAY.getTime());
       const session = endPlaySession(DAY.getTime() + 2.5 * 60 * 1000);
       expect(session).toEqual({ profileId: "p1", minutes: 3 });
@@ -215,9 +215,69 @@ describe("playTimeLogic", () => {
       expect(session?.minutes).toBe(0);
     });
 
-    it("records zero minutes for a very short session", () => {
+    it("banks a full minute for ten seconds of visible time", () => {
       startPlaySession("p1", DAY.getTime());
-      expect(endPlaySession(DAY.getTime() + 10 * 1000)?.minutes).toBe(0);
+      expect(endPlaySession(DAY.getTime() + 10 * 1000)?.minutes).toBe(1);
+    });
+  });
+
+  describe("minute conversion (ceil)", () => {
+    it("banks exactly one minute for any visible time under a minute", () => {
+      startPlaySession("p1", DAY.getTime());
+      expect(endPlaySession(DAY.getTime() + 1)?.minutes).toBe(1);
+
+      startPlaySession("p1", DAY.getTime());
+      expect(endPlaySession(DAY.getTime() + 59 * 1000)?.minutes).toBe(1);
+    });
+
+    it("banks 46 minutes for 45 minutes 29 seconds of visible time", () => {
+      startPlaySession("p1", DAY.getTime());
+      const elapsed = 45 * 60 * 1000 + 29 * 1000;
+      expect(endPlaySession(DAY.getTime() + elapsed)?.minutes).toBe(46);
+    });
+
+    it("banks zero for a session ended the moment it starts", () => {
+      startPlaySession("p1", DAY.getTime());
+      expect(endPlaySession(DAY.getTime())?.minutes).toBe(0);
+    });
+
+    it("banks zero when the clock went backwards", () => {
+      startPlaySession("p1", DAY.getTime());
+      expect(endPlaySession(DAY.getTime() - 60 * 1000)?.minutes).toBe(0);
+    });
+  });
+
+  describe("midnight boundary (clamp)", () => {
+    const MINUTE = 60 * 1000;
+    const BEFORE_MIDNIGHT = new Date(2026, 7, 5, 23, 58, 0);
+    const AFTER_MIDNIGHT = new Date(2026, 7, 6, 0, 2, 0);
+    const MIDDAY = new Date(2026, 7, 5, 12, 0, 0);
+
+    it("charges the new day only for post-midnight time", () => {
+      startPlaySession("p1", BEFORE_MIDNIGHT.getTime());
+      expect(endPlaySession(AFTER_MIDNIGHT.getTime())?.minutes).toBe(2);
+    });
+
+    it("leaves a session wholly inside one day unaffected", () => {
+      startPlaySession("p1", MIDDAY.getTime());
+      expect(endPlaySession(MIDDAY.getTime() + 45 * MINUTE)?.minutes).toBe(45);
+    });
+
+    it("banks zero for the new day when the session ends exactly at midnight", () => {
+      const midnight = new Date(2026, 7, 6, 0, 0, 0, 0);
+      startPlaySession("p1", BEFORE_MIDNIGHT.getTime());
+      expect(endPlaySession(midnight.getTime())?.minutes).toBe(0);
+    });
+
+    it("clamps a session paused before midnight and resumed after it", () => {
+      const pauseAt = new Date(2026, 7, 5, 23, 55, 0);
+      const resumeAt = new Date(2026, 7, 6, 0, 1, 0);
+      const endAt = new Date(2026, 7, 6, 0, 3, 0);
+      startPlaySession("p1", new Date(2026, 7, 5, 23, 50, 0).getTime());
+      pausePlaySession(pauseAt.getTime());
+      resumePlaySession(resumeAt.getTime());
+      // 7 visible minutes total, but only the 3 after midnight belong to today.
+      expect(endPlaySession(endAt.getTime())?.minutes).toBe(3);
     });
   });
 
