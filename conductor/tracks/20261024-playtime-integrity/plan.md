@@ -91,7 +91,7 @@ primary records them.
 - **Covers:** F1, F2, F3, F4.
 - **Touches:** `src/game/playTimeLogic.ts`, `src/__tests__/game/playTimeLogic.test.ts`, `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubPlayTime.test.ts`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Accrue post-midnight visible time per stretch** — covers: F1
   - [ ] **R1.T1.1:** Replace the wall-clock clamp in `endPlaySession()` (`src/game/playTimeLogic.ts:265`) with per-stretch accrual. Add `sinceMidnightMs` to `ActiveSession`; add a helper returning `max(0, end - max(start, localMidnight(end)))`; accumulate it in `pausePlaySession()` for the stretch being closed and in `endPlaySession()` for a still-running stretch; bank `Math.ceil(sinceMidnightMs / 60_000)` behind the existing `<= 0` guard. Remove the now-unused wall-clock clamp (and `visibleElapsedMs` if it becomes dead). Keep `visibleMs` only if something still needs total visible time.
