@@ -67,6 +67,10 @@ export default defineConfig(() => ({
     environment: "happy-dom",
     globals: true,
     include: ["src/__tests__/**/*.test.ts"],
+    // vmThreads: full suite 59-60 s vs ~8 min under the forks pool on this loaded host.
+    pool: "vmThreads",
+    // 30,000 ms: the 5,000 ms default was marginal on a loaded machine.
+    testTimeout: 30000,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

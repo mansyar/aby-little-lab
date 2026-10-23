@@ -966,7 +966,7 @@ Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big 
 
 ### 10.1 Runner and mocks
 
-Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). Five shared helpers:
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (119 files / 2,556 tests, measured 2026-10-23). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Five shared helpers:
 
 | Helper | Purpose |
 | --- | --- |
