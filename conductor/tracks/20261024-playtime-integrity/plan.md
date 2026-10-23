@@ -39,7 +39,7 @@ primary records them.
 - **Covers:** FR-1, FR-4, AC-1, AC-4.
 - **Touches:** `src/game/playTimeLogic.ts`, `src/utils/storage.ts`, `src/__tests__/game/playTimeLogic.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/hubPlayTime.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: An injectable banking sink** — covers: FR-1
   - [ ] **P2.T1.1:** In `src/game/playTimeLogic.ts` add a module-level sink — `export function setPlaySessionSink(sink: ((profileId: string, minutes: number) => void) | null): void` — plus an internal `bankSession(now)` that ends the active session, calls the sink when a session existed and the sink is set, and returns the `{profileId, minutes} | null` result. The module must keep importing nothing but `../types` (no import of `storage`, to preserve the dependency direction and avoid a cycle).
