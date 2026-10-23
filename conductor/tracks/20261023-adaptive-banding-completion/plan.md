@@ -30,7 +30,7 @@ writes this file.
   `src/__tests__/scenes/animalTraceScene.test.ts`,
   `src/__tests__/scenes/popFreezeScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Shape Sorter's band-selected shape pool** — covers: FR-1
   - [ ] **P1.T1.1: A failing band-shift test for the shape pool** (a seeded
