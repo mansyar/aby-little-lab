@@ -77,7 +77,7 @@ story panels 24 → 33; shell stays exactly 53 keys; app total 178 → 186.
 | `STORY_POOL` 8 → 11 | + cake (obvious), clothes + sun (subtle); 33 panels in `STORY_PANEL_ASSETS` pool order |
 | `mixFor(shift)` / `buildPlaythrough(rng, shift)` | {obvious:5, subtle:1} / {3,3} / {1,5}; obvious-then-subtle concatenation; default `(Math.random, 0)` byte-identical |
 | Story Order scene wiring | `buildPlaythrough(Math.random, getAdaptiveBandShift("story-order"))` in `create()` |
-| Ownership counts | shell 53 (unchanged); group keys 131 → 148; game-only 125 → 141; story panels 24 → 33; app total 178 → 186; avatars overlap still exactly 6 |
+| Ownership counts | shell 53 (unchanged); group keys 131 to 139 (+4 items, +4 shadows; story panels are a separate table, not a group); game-only 125 to 133; story panels 24 → 33; app total 178 → 186; avatars overlap still exactly 6 |
 | Full suite | 2556 tests / 119 files green (`--maxWorkers=1`) |
 | Coverage | 97.94 / 91.88 / 96.6 / 98.7 (gates 90/85/88/95) |
 | Boot smoke | median 1.10 s over 3 cold loads (1547 / 1036 / 1104 ms), ≤ 3.0 s budget |
