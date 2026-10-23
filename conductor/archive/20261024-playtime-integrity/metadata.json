@@ -2,7 +2,7 @@
   "id": "20261024-playtime-integrity",
   "title": "Play-Time Session Integrity",
   "type": "bug",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-10-24T00:00:00Z",
@@ -22,11 +22,11 @@
   "review_verdict": "PASS WITH FINDINGS",
   "review_rounds": 2,
   "doc_sync": "complete",
-  "pr_url": null,
-  "pr_state": null,
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/59",
+  "pr_state": "open",
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-24T00:00:00Z",
+  "archive_path": "conductor/archive/20261024-playtime-integrity"
 }

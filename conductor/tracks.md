@@ -235,4 +235,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Play-Time Session Integrity** - [20261024-playtime-integrity](./tracks/20261024-playtime-integrity/index.md) - bug - high
+- [x] **Track: Play-Time Session Integrity** - [20261024-playtime-integrity](./archive/20261024-playtime-integrity/index.md) - bug - high
