@@ -14,7 +14,7 @@ primary agent writes this file.
   its measured reason.
 - **Depends on:** none.
 - **Covers:** FR-1, FR-2, FR-3, FR-4, NFR-1..NFR-4, AC-1..AC-4.
-- **Touches:** `vite.config.ts`, `docs/TDD.md`
+- **Touches:** `vite.config.ts`, `docs/TDD.md`, `src/__tests__/game/countLogic.test.ts`, `src/__tests__/game/numberOrderLogic.test.ts`, `src/__tests__/game/addItUpLogic.test.ts`, `src/__tests__/game/takeAwayLogic.test.ts`, `src/__tests__/scenes/navigation.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** in_progress
 
@@ -26,6 +26,8 @@ primary agent writes this file.
   - [ ] **P1.T2.1:** Update `docs/TDD.md` §10.1 to describe the runner as the `vmThreads` pool with a 30,000 ms per-test budget, and record that the former `--maxWorkers=1` / `--testTimeout=30000` command-line workarounds are retired in favour of the committed configuration, with the before/after measurement.
 - [ ] **P1.T3: Prove the whole gate under the new configuration** — covers: FR-4
   - [ ] **P1.T3.1:** Run the full `verify_phase` chain exactly as written above; it must exit 0 end to end (AC-3). Record every segment's result in the evidence.
+- [ ] **P1.T4: Lift the five inline per-test timeouts** — covers: NFR-7
+  - [ ] **P1.T4.1:** Delete the five inline per-test timeout overrides found by the phase-1 gate runs — the `{ timeout: 20_000 }` options in `src/__tests__/game/countLogic.test.ts` (~:183), `src/__tests__/game/numberOrderLogic.test.ts` (~:144), `src/__tests__/game/addItUpLogic.test.ts` (~:181) and `src/__tests__/game/takeAwayLogic.test.ts` (~:182), and the positional `15000` in `src/__tests__/scenes/navigation.test.ts` (~:392) — so the committed 30,000 ms budget governs. No other test content changes.
 
 <!--
 After accepting a phase, the primary appends under it:
