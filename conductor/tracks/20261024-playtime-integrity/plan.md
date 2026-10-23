@@ -39,18 +39,22 @@ primary records them.
 - **Covers:** FR-1, FR-4, AC-1, AC-4.
 - **Touches:** `src/game/playTimeLogic.ts`, `src/utils/storage.ts`, `src/__tests__/game/playTimeLogic.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/hubPlayTime.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: An injectable banking sink** — covers: FR-1
-  - [ ] **P2.T1.1:** In `src/game/playTimeLogic.ts` add a module-level sink — `export function setPlaySessionSink(sink: ((profileId: string, minutes: number) => void) | null): void` — plus an internal `bankSession(now)` that ends the active session, calls the sink when a session existed and the sink is set, and returns the `{profileId, minutes} | null` result. The module must keep importing nothing but `../types` (no import of `storage`, to preserve the dependency direction and avoid a cycle).
-  - [ ] **P2.T1.2:** In `src/utils/storage.ts` register the sink once at module scope with `recordPlayTime` (`setPlaySessionSink(recordPlayTime)`), after the function declaration so the binding is initialised. Keep `recordPlayTime`'s signature unchanged.
-- [ ] **P2.T2: Flush on page exit** — covers: FR-1
-  - [ ] **P2.T2.1:** Attach a `pagehide` listener in `watchVisibility()` and remove it in `unwatchVisibility()` (both already exist, `src/game/playTimeLogic.ts:131-139`), so a page exit bank-and-clears the session. Guard on the same `canObserveVisibility()` capability check so non-DOM hosts stay inert. The pause/resume watcher must keep running for short app switches — `pagehide` is the terminal path only, and after it the session slot is empty so `endPlaySession()`/`unwatchVisibility()` stay idempotent.
-  - [ ] **P2.T2.2:** Do not double-bank: `HubScene.create()`'s existing `endPlaySession()` + `recordPlayTime()` path must be left as-is and yield `null` after a flush. Add a test asserting exactly one sink call for a pagehide-then-Hub-return sequence.
-- [ ] **P2.T3: A new session never discards an old one** — covers: FR-4
-  - [ ] **P2.T3.1:** In `startPlaySession()` (`src/game/playTimeLogic.ts:153-161`) call `bankSession(now)` before assigning the new session, replacing the current silent discard; update the comment that documents the discard.
-  - [ ] **P2.T3.2:** Tests: starting over a running session calls the sink once with the first session's profile and minutes, then tracks the new profile; starting with no session calls the sink zero times; a pagehide flush followed by `startPlaySession` still banks only the first session.
-  - [ ] **P2.T3.3:** Verify with `Select-String -Path src/game/playTimeLogic.ts -Pattern "Math.round"` that no rounding remains anywhere in the module, and record the empty result in the evidence.
+- [x] **P2.T1: An injectable banking sink** — covers: FR-1
+  - [x] **P2.T1.1:** In `src/game/playTimeLogic.ts` add a module-level sink — `export function setPlaySessionSink(sink: ((profileId: string, minutes: number) => void) | null): void` — plus an internal `bankSession(now)` that ends the active session, calls the sink when a session existed and the sink is set, and returns the `{profileId, minutes} | null` result. The module must keep importing nothing but `../types` (no import of `storage`, to preserve the dependency direction and avoid a cycle).
+  - [x] **P2.T1.2:** In `src/utils/storage.ts` register the sink once at module scope with `recordPlayTime` (`setPlaySessionSink(recordPlayTime)`), after the function declaration so the binding is initialised. Keep `recordPlayTime`'s signature unchanged.
+- [x] **P2.T2: Flush on page exit** — covers: FR-1
+  - [x] **P2.T2.1:** Attach a `pagehide` listener in `watchVisibility()` and remove it in `unwatchVisibility()` (both already exist, `src/game/playTimeLogic.ts:131-139`), so a page exit bank-and-clears the session. Guard on the same `canObserveVisibility()` capability check so non-DOM hosts stay inert. The pause/resume watcher must keep running for short app switches — `pagehide` is the terminal path only, and after it the session slot is empty so `endPlaySession()`/`unwatchVisibility()` stay idempotent.
+  - [x] **P2.T2.2:** Do not double-bank: `HubScene.create()`'s existing `endPlaySession()` + `recordPlayTime()` path must be left as-is and yield `null` after a flush. Add a test asserting exactly one sink call for a pagehide-then-Hub-return sequence.
+- [x] **P2.T3: A new session never discards an old one** — covers: FR-4
+  - [x] **P2.T3.1:** In `startPlaySession()` (`src/game/playTimeLogic.ts:153-161`) call `bankSession(now)` before assigning the new session, replacing the current silent discard; update the comment that documents the discard.
+  - [x] **P2.T3.2:** Tests: starting over a running session calls the sink once with the first session's profile and minutes, then tracks the new profile; starting with no session calls the sink zero times; a pagehide flush followed by `startPlaySession` still banks only the first session.
+  - [x] **P2.T3.3:** Verify with `Select-String -Path src/game/playTimeLogic.ts -Pattern "Math.round"` that no rounding remains anywhere in the module, and record the empty result in the evidence.
+
+**Result:** verified
+**Checkpoint:** d5f6223
+**Evidence:** conductor/tracks/20261024-playtime-integrity/verification/phase-2.md
 
 ## Phase 3: The Hub tells the truth, and the record says so
 
