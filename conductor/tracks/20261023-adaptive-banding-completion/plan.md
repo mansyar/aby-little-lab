@@ -155,20 +155,24 @@ writes this file.
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/roadmap.md`, `README.md`,
   `docs/SVG_STYLE.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: The technical docs** — covers: AC-4
-  - [ ] **P4.T1.1: PRD §4.8 and the TDD's shift chapter** describe 22/22,
+**Result:** verified
+**Checkpoint:** e437dcd
+**Evidence:** conductor/tracks/20261023-adaptive-banding-completion/verification/phase-4.md
+
+- [x] **P4.T1: The technical docs** — covers: AC-4
+  - [x] **P4.T1.1: PRD §4.8 and the TDD's shift chapter** describe 22/22,
     with the seven games' table rows and the shift-strategy note
-  - [ ] **P4.T1.2: `docs/SVG_STYLE.md` inventory counts** re-derive from the
+  - [x] **P4.T1.2: `docs/SVG_STYLE.md` inventory counts** re-derive from the
     grown corpus
-- [ ] **P4.T2: The reader-facing docs** — covers: AC-4
-  - [ ] **P4.T2.1: `docs/roadmap.md`** — the resolved Known Issue and its
+- [x] **P4.T2: The reader-facing docs** — covers: AC-4
+  - [x] **P4.T2.1: `docs/roadmap.md`** — the resolved Known Issue and its
     Future Work item removed (the remaining entries re-flow)
-  - [ ] **P4.T2.2: `README.md`** — the headline Known Issues list drops to
+  - [x] **P4.T2.2: `README.md`** — the headline Known Issues list drops to
     the remaining entries
-- [ ] **P4.T3: Guard + product changelog** — covers: AC-4
-  - [ ] **P4.T3.1: `validate-docs` green** (features/game headings and links
+- [x] **P4.T3: Guard + product changelog** — covers: AC-4
+  - [x] **P4.T3.1: `validate-docs` green** (features/game headings and links
     all still resolve); the `conductor/product.md` changelog entry is made
     by the primary during the post-phase doc sync (the phase executor cannot
     edit `conductor/**`)
