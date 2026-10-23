@@ -75,25 +75,29 @@ writes this file.
   `src/__tests__/scenes/bigSmallScene.test.ts`,
   `src/__tests__/scenes/feelingsFacesScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Big & Small's scale-contrast knob** — covers: FR-5
-  - [ ] **P2.T1.1: A failing band-shift test** (the big/small factor pair
+- [x] **P2.T1: Big & Small's scale-contrast knob** — covers: FR-5
+  - [x] **P2.T1.1: A failing band-shift test** (the big/small factor pair
     widens at −1, matches 1.5×/0.7× at 0, narrows at +1; both factors keep
     toy and box inside the canvas at every band)
-  - [ ] **P2.T1.2: Band-aware factors in `bigSmallLogic.ts`**
-  - [ ] **P2.T1.3: Scene wiring** — `BigSmallScene` passes the shift once in
+  - [x] **P2.T1.2: Band-aware factors in `bigSmallLogic.ts`**
+  - [x] **P2.T1.3: Scene wiring** — `BigSmallScene` passes the shift once in
     `create()`
-- [ ] **P2.T2: Feelings Faces' contrast split + scenario growth** — covers:
+- [x] **P2.T2: Feelings Faces' contrast split + scenario growth** — covers:
   FR-6
-  - [ ] **P2.T2.1: A failing band-shift test** (the distinct/confusable mix
+  - [x] **P2.T2.1: A failing band-shift test** (the distinct/confusable mix
     is 6/0, 3/3, 0/6; the four emotions still appear as targets at every
     band; no repeat)
-  - [ ] **P2.T2.2: The split-point knob in `feelingsFacesLogic.ts`**
-  - [ ] **P2.T2.3: Eight new scenarios** (2 more per emotion, ≤ 60
+  - [x] **P2.T2.2: The split-point knob in `feelingsFacesLogic.ts`**
+  - [x] **P2.T2.3: Eight new scenarios** (2 more per emotion, ≤ 60
     characters each, parents-facing gentle moments per the guidelines)
-  - [ ] **P2.T2.4: Scene wiring** — `FeelingsFacesScene` passes the shift
+  - [x] **P2.T2.4: Scene wiring** — `FeelingsFacesScene` passes the shift
     once in `create()`
+
+**Result:** verified
+**Checkpoint:** 5dd22fb
+**Evidence:** conductor/tracks/20261023-adaptive-banding-completion/verification/phase-2.md
 
 ## Phase 3: The two art games
 
