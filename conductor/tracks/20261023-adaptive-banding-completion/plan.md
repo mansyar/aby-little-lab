@@ -30,32 +30,36 @@ writes this file.
   `src/__tests__/scenes/animalTraceScene.test.ts`,
   `src/__tests__/scenes/popFreezeScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Shape Sorter's band-selected shape pool** — covers: FR-1
-  - [ ] **P1.T1.1: A failing band-shift test for the shape pool** (a seeded
+- [x] **P1.T1: Shape Sorter's band-selected shape pool** — covers: FR-1
+  - [x] **P1.T1.1: A failing band-shift test for the shape pool** (a seeded
     or pool-level test shows the easy and hard bands drawing from
     distinguishable pools, and shift 0 drawing all 18 as today)
-  - [ ] **P1.T1.2: `poolFor(shift)`/band-aware draw in `shapeSorterLogic.ts`**
+  - [x] **P1.T1.2: `poolFor(shift)`/band-aware draw in `shapeSorterLogic.ts`**
     (easy = the most ornamental / most distinct subset, classic = all 18,
     hard = the confusable geometric subset; no repeat within a playthrough)
-  - [ ] **P1.T1.3: Scene wiring** — `ShapeSorterScene` passes
+  - [x] **P1.T1.3: Scene wiring** — `ShapeSorterScene` passes
     `getAdaptiveBandShift(...)` once in `create()`, progress dots unchanged
-- [ ] **P1.T2: Animal Trace's waypoint bandwidth** — covers: FR-2
-  - [ ] **P1.T2.1: A failing band-shift test for the waypoint count**
-  - [ ] **P1.T2.2: Band-aware waypoints in `animalTraceLogic.ts` / the
+- [x] **P1.T2: Animal Trace's waypoint bandwidth** — covers: FR-2
+  - [x] **P1.T2.1: A failing band-shift test for the waypoint count**
+  - [x] **P1.T2.2: Band-aware waypoints in `animalTraceLogic.ts` / the
     scene's path generation** (4 / 6 / 8 points; drawing, progress and
     completion consume the round's waypoint count)
-  - [ ] **P1.T2.3: Scene wiring** — `AnimalTraceScene` passes the shift once
+  - [x] **P1.T2.3: Scene wiring** — `AnimalTraceScene` passes the shift once
     in `create()`
-- [ ] **P1.T3: Pop & Freeze's sleeping-bubble bounds** — covers: FR-3
-  - [ ] **P1.T3.1: A failing band-shift test for the sleeping bounds** (the
+- [x] **P1.T3: Pop & Freeze's sleeping-bubble bounds** — covers: FR-3
+  - [x] **P1.T3.1: A failing band-shift test for the sleeping bounds** (the
     spawn honours 0–1, 1–2 and 2–3 sleeping bubbles, and the wake flow at an
     all-poppable opening stays inert)
-  - [ ] **P1.T3.2: Band-aware bounds in `popFreezeLogic.ts`** (the bounds
+  - [x] **P1.T3.2: Band-aware bounds in `popFreezeLogic.ts`** (the bounds
     parameterized; `selectBubbleType` guards hold at the 0 floor)
-  - [ ] **P1.T3.3: Scene wiring** — `PopFreezeScene` passes the shift once in
+  - [x] **P1.T3.3: Scene wiring** — `PopFreezeScene` passes the shift once in
     `create()`
+
+**Result:** verified
+**Checkpoint:** 3629a81
+**Evidence:** conductor/tracks/20261023-adaptive-banding-completion/verification/phase-1.md
 
 ## Phase 2: The scale and scenario games
 
