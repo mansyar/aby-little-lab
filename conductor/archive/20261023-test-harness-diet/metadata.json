@@ -2,7 +2,7 @@
   "id": "20261023-test-harness-diet",
   "title": "Test Harness Diet",
   "type": "chore",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-10-23T00:00:00Z",
@@ -22,11 +22,11 @@
   "review_verdict": "PASS",
   "review_rounds": 1,
   "doc_sync": "updated",
-  "pr_url": null,
-  "pr_state": null,
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/58",
+  "pr_state": "open",
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-10-23T00:00:00Z",
+  "archive_path": "conductor/archive/20261023-test-harness-diet"
 }

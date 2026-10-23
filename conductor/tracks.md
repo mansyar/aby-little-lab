@@ -231,4 +231,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Adaptive Difficulty Completion** - [20261023-adaptive-banding-completion](./archive/20261023-adaptive-banding-completion/index.md) - feature - high
 
-- [~] **Track: Test Harness Diet** - [20261023-test-harness-diet](./tracks/20261023-test-harness-diet/index.md) - chore - high
+- [x] **Track: Test Harness Diet** - [20261023-test-harness-diet](./archive/20261023-test-harness-diet/index.md) - chore - high
