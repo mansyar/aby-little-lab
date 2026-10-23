@@ -273,15 +273,22 @@ export class HubScene extends Phaser.Scene {
    * the grid while time remains (warm when 5 minutes or fewer are left), or a
    * textless moon badge with dimmed, locked tiles once the daily limit is
    * reached. No-op when the profile has no limit set.
+   *
+   * `wasTimeUp` is the lock state before the refresh that called this, so the
+   * mascot waves once when the cap is first reached rather than on every
+   * foreground return the cap is re-read on. The lock itself is applied
+   * unconditionally — the visuals must converge whatever the call site.
    */
-  private createPlayTimeIndicator(): void {
+  private createPlayTimeIndicator(wasTimeUp = false): void {
     this.playTimeGraphics =
       createPlayTimeIndicator({
         scene: this,
         onLimitReached: () => {
           this.timeUp = true;
           this.grid.applyTimeUpLock();
-          this.mascot?.wave();
+          if (!wasTimeUp) {
+            this.mascot?.wave();
+          }
         },
       }) ?? undefined;
   }
@@ -293,11 +300,12 @@ export class HubScene extends Phaser.Scene {
   private refreshPlayTimeState(): void {
     this.playTimeGraphics?.destroy();
     this.playTimeGraphics = undefined;
+    const wasTimeUp = this.timeUp;
     if (this.timeUp) {
       this.grid.restoreTiles();
       this.timeUp = false;
     }
-    this.createPlayTimeIndicator();
+    this.createPlayTimeIndicator(wasTimeUp);
   }
 
   /**

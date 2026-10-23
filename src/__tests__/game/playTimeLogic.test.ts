@@ -248,7 +248,7 @@ describe("playTimeLogic", () => {
     });
   });
 
-  describe("midnight boundary (clamp)", () => {
+  describe("midnight boundary (per-stretch accrual)", () => {
     const MINUTE = 60 * 1000;
     const BEFORE_MIDNIGHT = new Date(2026, 7, 5, 23, 58, 0);
     const AFTER_MIDNIGHT = new Date(2026, 7, 6, 0, 2, 0);
@@ -270,15 +270,42 @@ describe("playTimeLogic", () => {
       expect(endPlaySession(midnight.getTime())?.minutes).toBe(0);
     });
 
-    it("clamps a session paused before midnight and resumed after it", () => {
+    it("charges only the post-midnight stretch of a session paused before midnight", () => {
       const pauseAt = new Date(2026, 7, 5, 23, 55, 0);
       const resumeAt = new Date(2026, 7, 6, 0, 1, 0);
       const endAt = new Date(2026, 7, 6, 0, 3, 0);
       startPlaySession("p1", new Date(2026, 7, 5, 23, 50, 0).getTime());
       pausePlaySession(pauseAt.getTime());
       resumePlaySession(resumeAt.getTime());
-      // 7 visible minutes total, but only the 3 after midnight belong to today.
-      expect(endPlaySession(endAt.getTime())?.minutes).toBe(3);
+      // The 5 minutes played before midnight belong to the closed day; only the
+      // 2 played after it are chargeable to the new day.
+      expect(endPlaySession(endAt.getTime())?.minutes).toBe(2);
+    });
+
+    it("drops pre-midnight visible time when the session resumes the next morning", () => {
+      const pauseAt = new Date(2026, 7, 5, 23, 55, 0);
+      const resumeAt = new Date(2026, 7, 6, 8, 0, 0);
+      const endAt = new Date(2026, 7, 6, 8, 5, 0);
+      startPlaySession("p1", new Date(2026, 7, 5, 23, 50, 0).getTime());
+      pausePlaySession(pauseAt.getTime());
+      resumePlaySession(resumeAt.getTime());
+      // 10 visible minutes in all, but only the 5 after the new midnight count.
+      expect(endPlaySession(endAt.getTime())?.minutes).toBe(5);
+    });
+
+    it("charges nothing to the new day when the session ends while hidden", () => {
+      const pauseAt = new Date(2026, 7, 5, 23, 59, 0);
+      startPlaySession("p1", new Date(2026, 7, 5, 23, 50, 0).getTime());
+      pausePlaySession(pauseAt.getTime());
+      // Hidden across the boundary and never resumed: no visible time today.
+      expect(endPlaySession(new Date(2026, 7, 6, 0, 5, 0).getTime())?.minutes).toBe(0);
+    });
+
+    it("charges only the last day's portion of a stretch spanning two midnights", () => {
+      startPlaySession("p1", new Date(2026, 7, 4, 23, 0, 0).getTime());
+      // Continuously visible for 26 hours: only the hour after the most recent
+      // midnight belongs to the day that will be written.
+      expect(endPlaySession(new Date(2026, 7, 6, 1, 0, 0).getTime())?.minutes).toBe(60);
     });
   });
 
@@ -431,6 +458,13 @@ describe("playTimeLogic", () => {
       window.dispatchEvent(new Event("pagehide"));
     }
 
+    /** A `pagehide` into the back/forward cache: the document is restored in place. */
+    function restorablePagehide(): void {
+      const event = new Event("pagehide") as Event & { persisted?: boolean };
+      event.persisted = true;
+      window.dispatchEvent(event);
+    }
+
     beforeEach(() => {
       endPlaySession();
       Object.defineProperty(document, "visibilityState", {
@@ -504,6 +538,32 @@ describe("playTimeLogic", () => {
         expect(() => pagehide()).not.toThrow();
         expect(banked).toHaveLength(0);
         expect(endPlaySession(T0 + 3 * MINUTE)?.minutes).toBe(3);
+      });
+
+      it("does not bank a restorable exit into the back/forward cache", () => {
+        startPlaySession("p1", T0);
+        at(2);
+        restorablePagehide();
+
+        // Nothing banked, and the session is still the live one: the restored
+        // document resumes accruing instead of running on with no session.
+        expect(banked).toHaveLength(0);
+        expect(endPlaySession(T0 + 4 * MINUTE)).toEqual({ profileId: "p1", minutes: 4 });
+
+        // A real exit afterwards banks the whole stretch, exactly once.
+        startPlaySession("p1", T0);
+        at(6);
+        pagehide();
+        expect(banked).toEqual([{ profileId: "p1", minutes: 6 }]);
+      });
+
+      it("banks a real exit even after a restorable one", () => {
+        startPlaySession("p1", T0);
+        at(2);
+        restorablePagehide();
+        at(5);
+        pagehide();
+        expect(banked).toEqual([{ profileId: "p1", minutes: 5 }]);
       });
     });
 

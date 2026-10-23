@@ -97,8 +97,14 @@ export function setLimit(
 
 interface ActiveSession {
   profileId: string;
-  /** Visible milliseconds banked before the current running stretch. */
-  visibleMs: number;
+  /** Visible milliseconds accrued since `accruedMidnight`, before the running stretch. */
+  sinceMidnightMs: number;
+  /**
+   * The local midnight `sinceMidnightMs` is measured from. Accrual rebases it
+   * whenever a stretch is closed in a later day, because the day that just
+   * ended is not chargeable to the new one.
+   */
+  accruedMidnight: number;
   /** When the current visible stretch began; null while the document is hidden. */
   runningSince: number | null;
 }
@@ -145,8 +151,13 @@ function handleVisibilityChange(): void {
 /**
  * A page exit is the last signal a device gives: bank what the session accrued
  * and clear the slot, so a Hub that is created afterwards banks nothing twice.
+ *
+ * The one exception is an exit into the back/forward cache (`persisted`): that
+ * document is restored in place, session and watchers included, so banking here
+ * would end a session that is about to resume and lose the rest of the stretch.
  */
-function handlePageHide(): void {
+function handlePageHide(event?: Event): void {
+  if ((event as { persisted?: boolean } | undefined)?.persisted === true) return;
   bankSession(Date.now());
 }
 
@@ -189,12 +200,6 @@ function unwatchVisibility(): void {
   }
 }
 
-/** Banked visible time plus the current stretch, clamped against a backwards clock. */
-function visibleElapsedMs(session: ActiveSession, now: number): number {
-  if (session.runningSince === null) return session.visibleMs;
-  return session.visibleMs + Math.max(0, now - session.runningSince);
-}
-
 /**
  * Start of the local day containing `now`, in epoch milliseconds. Built from the
  * same `now` the session banks with so the boundary follows local time (and DST)
@@ -203,6 +208,39 @@ function visibleElapsedMs(session: ActiveSession, now: number): number {
 function localMidnight(now: number): number {
   const date = new Date(now);
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+}
+
+/**
+ * The part of the visible stretch `start`..`end` that falls after the most
+ * recent local midnight. A stretch inside one day contributes its own length, a
+ * stretch that crosses a boundary only its post-midnight tail, and a backwards
+ * clock nothing.
+ */
+function visibleAfterMidnight(start: number, end: number): number {
+  return Math.max(0, end - Math.max(start, localMidnight(end)));
+}
+
+/**
+ * Moves the accumulator onto the local day containing `now`, dropping what a
+ * closed day accrued — that usage cannot be written (the record is a single-day
+ * snapshot) and must not be charged to the new day.
+ */
+function rebaseMidnight(session: ActiveSession, now: number): void {
+  const midnight = localMidnight(now);
+  if (midnight === session.accruedMidnight) return;
+  session.sinceMidnightMs = 0;
+  session.accruedMidnight = midnight;
+}
+
+/**
+ * Adds the post-midnight share of one closed visible stretch to the session
+ * accumulator, rebasing it first when the stretch is charged in a later day than
+ * the one it started in.
+ */
+function accrueSinceMidnight(session: ActiveSession, start: number, end: number): void {
+  if (end <= start) return;
+  rebaseMidnight(session, end);
+  session.sinceMidnightMs += visibleAfterMidnight(start, end);
 }
 
 /**
@@ -218,20 +256,22 @@ export function startPlaySession(profileId: string, now = Date.now()): void {
   // A session that begins in an already-hidden tab starts paused.
   activeSession = {
     profileId,
-    visibleMs: 0,
+    sinceMidnightMs: 0,
+    accruedMidnight: localMidnight(now),
     runningSince: isDocumentHidden() ? null : now,
   };
   watchVisibility();
 }
 
 /**
- * Stops accruing time for the active session (document hidden). Idempotent:
- * banking again without an intervening resume adds nothing.
+ * Stops accruing time for the active session (document hidden), banking the
+ * post-midnight share of the stretch that just closed. Idempotent: banking again
+ * without an intervening resume adds nothing.
  */
 export function pausePlaySession(now = Date.now()): void {
   const session = activeSession;
   if (session === null || session.runningSince === null) return;
-  session.visibleMs += Math.max(0, now - session.runningSince);
+  accrueSinceMidnight(session, session.runningSince, now);
   session.runningSince = null;
 }
 
@@ -246,24 +286,32 @@ export function resumePlaySession(now = Date.now()): void {
 }
 
 /**
- * Ends the active play session, returning the whole visible minutes elapsed
- * since it started (ceiled, so any visible time banks at least a minute;
- * clamped to 0 when the clock went backwards). Hidden minutes are excluded.
- * Returns null when no session is active. The session is cleared regardless.
+ * Ends the active play session, returning the visible minutes accrued since the
+ * most recent local midnight (ceiled, so any visible time banks at least a
+ * minute; 0 when it has been less than that or the clock went backwards). Hidden
+ * stretches contribute nothing. Returns null when no session is active. The
+ * session is cleared regardless.
  *
- * The elapsed time is clamped to the part accrued since local midnight: the
- * record is a single-day snapshot (`limitMinutes`, `usedMinutes`,
- * `lastUsedDate`) with no per-day history, so a closed day's usage cannot be
- * written and must not be charged to the new day.
+ * The accrued time is per stretch: each visible stretch contributes only the
+ * part that falls after local midnight, and a stretch closed in a later day
+ * drops what was accrued in the day before. So a session paused at 23:55,
+ * resumed at 00:01 and ended at 00:03 banks 2 minutes, not the 3 the wall clock
+ * has passed since midnight nor the 7 it was visible in total. The record is a
+ * single-day snapshot (`limitMinutes`, `usedMinutes`, `lastUsedDate`) with no
+ * per-day history, so a closed day's usage cannot be written and is not charged
+ * to the new day.
  */
 export function endPlaySession(now = Date.now()): { profileId: string; minutes: number } | null {
   const session = activeSession;
   activeSession = null;
   unwatchVisibility();
   if (session === null) return null;
-  const visibleMs = visibleElapsedMs(session, now);
-  const elapsed = Math.min(visibleMs, Math.max(0, now - localMidnight(now)));
-  const minutes = elapsed <= 0 ? 0 : Math.ceil(elapsed / 60_000);
+  rebaseMidnight(session, now);
+  if (session.runningSince !== null) {
+    accrueSinceMidnight(session, session.runningSince, now);
+  }
+  const accrual = session.sinceMidnightMs;
+  const minutes = accrual <= 0 ? 0 : Math.ceil(accrual / 60_000);
   return { profileId: session.profileId, minutes };
 }
 

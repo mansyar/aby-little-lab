@@ -72,6 +72,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   return { ensureSceneLoaded: mockEnsureSceneLoaded };
 });
 
+import { Mascot } from "../../components/Mascot";
 import { endPlaySession, startPlaySession } from "../../game/playTimeLogic";
 import { HubScene } from "../../scenes/HubScene";
 import { ensureSceneLoaded } from "../../scenes/sceneRegistry";
@@ -408,6 +409,50 @@ describe("Hub play-time enforcement", () => {
     for (const tile of tiles) {
       expect(getMockFn(tile.setAlpha)).toHaveBeenCalledWith(1);
       expect(getMockFn(tile.setInteractive)).toHaveBeenCalled();
+    }
+  });
+
+  it("waves the mascot once when the cap is re-read on foreground returns", () => {
+    setPlayTimeLimit("p1", 15);
+    recordPlayTime("p1", 15);
+    const wave = vi.spyOn(Mascot.prototype, "wave");
+    try {
+      const scene = new HubScene();
+      scene.create();
+
+      // Scenes created by earlier cases are still subscribed to the shared
+      // document, so count only this scene's own mascot: its wave is the last
+      // context recorded at create time.
+      const mascot = wave.mock.contexts.at(-1);
+      const wavesForThisScene = (): number =>
+        wave.mock.contexts.filter((context) => context === mascot).length;
+
+      // Reaching the cap on the way in is the one announcement.
+      expect(wavesForThisScene()).toBe(1);
+      const tiles = getRectangles(scene).filter(
+        (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 140,
+      );
+      const lockedOnce = getMockFn(tiles[0].setAlpha).mock.calls.filter(
+        (call) => call[0] === TIME_UP_TILE_ALPHA,
+      ).length;
+
+      // Every foreground return re-reads the budget — two dispatches, no repeat.
+      document.dispatchEvent(new Event("visibilitychange"));
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(wavesForThisScene()).toBe(1);
+
+      // The refresh still converged on the stored budget: the moon badge is
+      // redrawn and the tiles are re-locked, so nothing went stale.
+      const badge = getLastGraphics(scene);
+      expect(getMockFn(badge.fillCircle)).toHaveBeenCalled();
+      expect(getMockFn(badge.slice)).not.toHaveBeenCalled();
+      const lockedAgain = getMockFn(tiles[0].setAlpha).mock.calls.filter(
+        (call) => call[0] === TIME_UP_TILE_ALPHA,
+      ).length;
+      expect(lockedAgain).toBeGreaterThan(lockedOnce);
+      expect(getMockFn(tiles[0].disableInteractive).mock.calls.length).toBeGreaterThan(0);
+    } finally {
+      wave.mockRestore();
     }
   });
 
