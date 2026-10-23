@@ -155,7 +155,7 @@ writes this file.
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/roadmap.md`, `README.md`,
   `docs/SVG_STYLE.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: The technical docs** — covers: AC-4
   - [ ] **P4.T1.1: PRD §4.8 and the TDD's shift chapter** describe 22/22,
