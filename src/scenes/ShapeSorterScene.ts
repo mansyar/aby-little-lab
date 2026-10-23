@@ -6,6 +6,7 @@ import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Y position for cutout slots (top area). */
@@ -93,7 +94,7 @@ export class ShapeSorterScene extends GameSceneBase {
     // and above the shape slots (y=200).
     this.createSpokenInstruction("Drag each shape into its hole.", { y: 126 });
 
-    this.playthrough = generatePlaythrough(ROUND_COUNT);
+    this.playthrough = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("shape-sorter"));
     this.roundIndex = 0;
     this.createProgressDots(ROUND_COUNT);
     this.initRound();

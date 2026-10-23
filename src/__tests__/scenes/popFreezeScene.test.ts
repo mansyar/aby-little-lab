@@ -67,6 +67,15 @@ vi.mock("../../components/Mascot", () => ({
   createCornerMascot: () => mockMascot,
 }));
 
+const { getAdaptiveBandShiftMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
 import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
 
@@ -275,6 +284,43 @@ describe("PopFreezeScene spawn and tap routing", () => {
     );
     expect(breathe).toBeDefined();
     expect(breathe?.[0].duration).toBe(750);
+  });
+
+  describe("adaptive band wiring", () => {
+    beforeEach(() => {
+      getAdaptiveBandShiftMock.mockClear();
+      getAdaptiveBandShiftMock.mockReturnValue(0);
+    });
+
+    /** Counts animal-overlay image creations (one per sleeping bubble). */
+    function countAnimalOverlays(scene: PopFreezeScene): number {
+      const imageMock = getMockFn((scene as unknown as { add: { image: MockFn } }).add.image);
+      return imageMock.mock.calls.filter(
+        (call) => typeof call[2] === "string" && call[2].startsWith("animal_"),
+      ).length;
+    }
+
+    it("samples the band shift once in create() and honours the band bounds", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(1);
+      const scene = new PopFreezeScene();
+      scene.create();
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("pop-freeze");
+      // Hard band (Math.random 0.5): two sleeping bubbles are forced first.
+      expect(countAnimalOverlays(scene)).toBe(2);
+    });
+
+    it("easy band opens all-poppable and taps never wake (inert wake flow)", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(-1);
+      const scene = new PopFreezeScene();
+      scene.create();
+      // Math.random 0.5 sleeps the 50/50 roll (>= 0.5) on poppable every time.
+      expect(countAnimalOverlays(scene)).toBe(0);
+      const bubbles = getBubbles(scene);
+      tapBubble(bubbles[0]);
+      expect(getMockFn(mockAudio.playPop)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(mockAudio.playWake)).not.toHaveBeenCalled();
+    });
   });
 });
 

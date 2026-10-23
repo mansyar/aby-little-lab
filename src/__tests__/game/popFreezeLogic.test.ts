@@ -15,6 +15,7 @@ import {
   selectBubbleType,
   selectSleepingAnimal,
   shuffle,
+  sleepingBoundsFor,
   WIN_TARGET,
 } from "../../game/popFreezeLogic";
 
@@ -254,5 +255,87 @@ describe("shuffle", () => {
     const result2 = shuffle(input);
 
     expect(result1).not.toEqual(result2);
+  });
+});
+
+describe("sleepingBoundsFor", () => {
+  it("classic band keeps the shipped 1-2 sleeping bounds", () => {
+    expect(sleepingBoundsFor(0)).toEqual({ min: 1, max: 2 });
+  });
+
+  it("easy band relaxes the opening to 0-1 sleeping bubbles", () => {
+    expect(sleepingBoundsFor(-1)).toEqual({ min: 0, max: 1 });
+  });
+
+  it("hard band tightens the opening to 2-3 sleeping bubbles", () => {
+    expect(sleepingBoundsFor(1)).toEqual({ min: 2, max: 3 });
+  });
+});
+
+describe("selectBubbleType with band bounds", () => {
+  it("default bounds keep the shipped guards", () => {
+    expect(selectBubbleType(0)).toBe("sleeping");
+    expect(selectBubbleType(2)).toBe("poppable");
+  });
+
+  it("easy band: the 0 floor allows an all-poppable opening", () => {
+    // Seeded roll keeps the 50/50 branch deterministic: >= 0.5 means poppable.
+    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const bounds = sleepingBoundsFor(-1);
+    expect(selectBubbleType(0, bounds)).toBe("poppable");
+  });
+
+  it("hard band: spawns stay sleeping until the band's minimum is met", () => {
+    const bounds = sleepingBoundsFor(1);
+    expect(selectBubbleType(0, bounds)).toBe("sleeping");
+    expect(selectBubbleType(1, bounds)).toBe("sleeping");
+    expect(selectBubbleType(3, bounds)).toBe("poppable");
+  });
+});
+
+describe("generateInitialBubbles with band bounds", () => {
+  const worldWidth = 800;
+  const worldHeight = 600;
+  const bubbleSize = 96;
+
+  it("easy band can open all-poppable; the wake flow stays inert", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const bubbles = generateInitialBubbles(
+      worldWidth,
+      worldHeight,
+      bubbleSize,
+      sleepingBoundsFor(-1),
+    );
+    expect(bubbles).toHaveLength(CONCURRENT_BUBBLES);
+    expect(bubbles.filter((b) => b.type === "sleeping")).toHaveLength(0);
+    // No sleeping animal means no wake path: every spawn is a plain poppable.
+    for (const b of bubbles) {
+      expect(b.animal).toBeUndefined();
+    }
+  });
+
+  it("hard band forces 2-3 sleeping bubbles into the opening set", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const bubbles = generateInitialBubbles(
+      worldWidth,
+      worldHeight,
+      bubbleSize,
+      sleepingBoundsFor(1),
+    );
+    const sleeping = bubbles.filter((b) => b.type === "sleeping");
+    expect(sleeping.length).toBeGreaterThanOrEqual(2);
+    expect(sleeping.length).toBeLessThanOrEqual(3);
+    expect(bubbles).toHaveLength(CONCURRENT_BUBBLES);
+  });
+
+  it("bands open observably different mixes under one seed", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const countSleeping = (bs: BubbleConfig[]) => bs.filter((b) => b.type === "sleeping").length;
+    const easy = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(-1)));
+    const classic = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(0)));
+    const hard = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(1)));
+    expect(easy).toBe(0);
+    expect(classic).toBe(1);
+    expect(hard).toBe(2);
   });
 });

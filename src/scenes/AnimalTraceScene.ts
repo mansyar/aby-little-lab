@@ -8,12 +8,14 @@ import {
   isRoundComplete,
   type PathProgress,
   selectThreePairs,
+  waypointsFor,
 } from "../game/animalTraceLogic";
 import { animals } from "../game/art/animals";
 import { food } from "../game/art/food";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** X position for the animal sprite (left side). */
@@ -27,9 +29,6 @@ const SPRITE_Y = 384;
 
 /** Display size for animal and food sprites. */
 const SPRITE_SIZE = 128;
-
-/** Number of waypoints per path. */
-const PATH_POINTS = 6;
 
 /** Proximity tolerance for tracing (generous, per touch-ergonomics). */
 const TRACE_TOLERANCE = 60;
@@ -102,6 +101,8 @@ export class AnimalTraceScene extends GameSceneBase {
   private pairs: AnimalFoodPair[] = [];
   private currentPairIndex = 0;
   private completedPaths = 0;
+  /** Waypoints per traced path, sampled from the band once per session. */
+  private pathPointsCount = waypointsFor(0);
   private currentPair?: PairState;
   private isPointerDown = false;
   private ringRadius = NEXT_RING_RADIUS;
@@ -128,6 +129,7 @@ export class AnimalTraceScene extends GameSceneBase {
     this.ringRadius = NEXT_RING_RADIUS;
     this.pathPulseTween = undefined;
 
+    this.pathPointsCount = waypointsFor(getAdaptiveBandShift("animal-trace"));
     this.pairs = selectThreePairs();
     this.createProgressDots(3);
     this.renderPair(0);
@@ -159,7 +161,13 @@ export class AnimalTraceScene extends GameSceneBase {
     }
 
     const pair = this.pairs[index];
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      this.pathPointsCount,
+    );
 
     const animalSprite = this.add
       .image(ANIMAL_X, SPRITE_Y, `animal_${pair.animal}`)
@@ -174,7 +182,7 @@ export class AnimalTraceScene extends GameSceneBase {
     this.currentPair = {
       pair,
       pathPoints,
-      progress: createPathProgress(PATH_POINTS),
+      progress: createPathProgress(this.pathPointsCount),
       animalSprite,
       foodSprite,
       pathGraphics,

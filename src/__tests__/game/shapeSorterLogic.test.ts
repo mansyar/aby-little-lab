@@ -4,6 +4,7 @@ import {
   ALL_SHAPES,
   generatePlaythrough,
   isMatch,
+  poolFor,
   type ShapeType,
   shuffle,
 } from "../../game/shapeSorterLogic";
@@ -109,5 +110,70 @@ describe("isMatch", () => {
     expect(isMatch("star", "circle")).toBe(false);
     expect(isMatch("heart", "star")).toBe(false);
     expect(isMatch("crescent", "heart")).toBe(false);
+  });
+});
+
+describe("poolFor", () => {
+  it("classic band draws from the full 18-shape pool", () => {
+    expect(poolFor(0)).toEqual(ALL_SHAPES);
+  });
+
+  it("every band's pool holds enough unique shapes for a 3-round session", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const pool = poolFor(shift);
+      // 3 rounds x 3 shapes, all drawn without repeats from the pool.
+      expect(pool.length).toBeGreaterThanOrEqual(9);
+      expect(new Set(pool).size).toBe(pool.length);
+      for (const shape of pool) {
+        expect(ALL_SHAPES).toContain(shape);
+      }
+    }
+  });
+
+  it("easy and hard bands draw from distinguishable pools", () => {
+    const easy = poolFor(-1);
+    const hard = poolFor(1);
+    expect(easy).not.toEqual(hard);
+    // Ornamental silhouettes are easy-band only; the polygon family is hard-band only.
+    expect(hard).not.toContain("star");
+    expect(hard).not.toContain("heart");
+    expect(easy).not.toContain("hexagon");
+    expect(easy).not.toContain("octagon");
+  });
+});
+
+describe("generatePlaythrough with a band shift", () => {
+  it("draws a 3-round session entirely from the band's pool without repeats", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const playthrough = generatePlaythrough(3, shift);
+      expect(playthrough).toHaveLength(3);
+      const all = playthrough.flat();
+      expect(new Set(all).size).toBe(9);
+      const pool = poolFor(shift);
+      for (const shape of all) {
+        expect(pool).toContain(shape);
+      }
+    }
+  });
+
+  it("hard-band draws never include easy-band-only shapes (pools move observably)", () => {
+    const easyPool = poolFor(-1);
+    const hardPool = poolFor(1);
+    const easyOnly = easyPool.filter((s) => !hardPool.includes(s));
+    const hardOnly = hardPool.filter((s) => !easyPool.includes(s));
+    expect(easyOnly.length).toBeGreaterThan(0);
+    expect(hardOnly.length).toBeGreaterThan(0);
+    for (const shift of [-1, 1] as const) {
+      const draw = generatePlaythrough(3, shift).flat();
+      const expected = shift < 0 ? easyPool : hardPool;
+      for (const shape of draw) {
+        expect(expected).toContain(shape);
+      }
+    }
+  });
+
+  it("classic draws are identical with and without the shift argument", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    expect(generatePlaythrough(3, 0)).toEqual(generatePlaythrough(3));
   });
 });

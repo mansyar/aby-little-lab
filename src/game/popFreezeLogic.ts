@@ -1,3 +1,5 @@
+import type { BandShift } from "./adaptiveLogic";
+
 /** The six animal types used as sleeping-animal content in Pop & Freeze. */
 export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
 
@@ -25,6 +27,27 @@ export const MIN_SLEEPING = 1;
 
 /** Maximum number of sleeping-animal bubbles in the initial spawn. */
 export const MAX_SLEEPING = 2;
+
+/** Sleeping-animal bounds maintained by one band's spawn guards. */
+export interface SleepingBounds {
+  min: number;
+  max: number;
+}
+
+/** The shipped classic bounds: 1-2 sleeping-animal bubbles in play. */
+const CLASSIC_SLEEPING_BOUNDS: SleepingBounds = { min: MIN_SLEEPING, max: MAX_SLEEPING };
+
+/** Sleeping-bubble bounds for the band shift.
+ *
+ *  Easier bands open with fewer sleeping animals (the classic fixed wake flow
+ *  never triggers on an all-poppable opening), harder bands keep more animals
+ *  asleep. The classic band is the shipped 1-2 mix.
+ */
+export function sleepingBoundsFor(shift: BandShift = 0): SleepingBounds {
+  if (shift < 0) return { min: 0, max: 1 };
+  if (shift > 0) return { min: 2, max: 3 };
+  return CLASSIC_SLEEPING_BOUNDS;
+}
 
 /** A spawn configuration for a single bubble. */
 export interface BubbleConfig {
@@ -57,10 +80,13 @@ export function shuffle<T>(array: readonly T[]): T[] {
   return result;
 }
 
-/** Selects the bubble type for the next spawn, maintaining 1-2 sleeping bubbles. */
-export function selectBubbleType(sleepingCount: number): BubbleType {
-  if (sleepingCount < MIN_SLEEPING) return "sleeping";
-  if (sleepingCount >= MAX_SLEEPING) return "poppable";
+/** Selects the bubble type for the next spawn, maintaining the band's sleeping bounds. */
+export function selectBubbleType(
+  sleepingCount: number,
+  bounds: SleepingBounds = CLASSIC_SLEEPING_BOUNDS,
+): BubbleType {
+  if (sleepingCount < bounds.min) return "sleeping";
+  if (sleepingCount >= bounds.max) return "poppable";
   return Math.random() < 0.5 ? "sleeping" : "poppable";
 }
 
@@ -96,16 +122,17 @@ export function generateSpawnConfig(
   };
 }
 
-/** Generates the initial set of concurrent bubbles (mix of poppable + 1-2 sleeping). */
+/** Generates the initial set of concurrent bubbles (poppable + the band's sleeping mix). */
 export function generateInitialBubbles(
   worldWidth: number,
   worldHeight: number,
   bubbleSize: number,
+  bounds: SleepingBounds = CLASSIC_SLEEPING_BOUNDS,
 ): BubbleConfig[] {
   const bubbles: BubbleConfig[] = [];
   let sleepingCount = 0;
   for (let i = 0; i < CONCURRENT_BUBBLES; i++) {
-    const type = selectBubbleType(sleepingCount);
+    const type = selectBubbleType(sleepingCount, bounds);
     if (type === "sleeping") sleepingCount++;
     bubbles.push(generateSpawnConfig(worldWidth, worldHeight, bubbleSize, type));
   }
