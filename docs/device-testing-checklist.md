@@ -4,7 +4,15 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
-## Execution Record — the v1.21.0 batch (the eight tracks since v1.20.0, 2026-10-22)
+## Execution Record - v1.21.1 (2026-10-24)
+
+- **Target:** tag `v1.21.1` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
+- **Scope:** one track, `conductor/archive/20261024-playtime-integrity/` (PR #59) - the daily play-time budget, made honest: minutes round up, a session crossing local midnight charges the new day only its post-midnight part, every exit path banks (Hub return, page exit, new game start) through one injected sink, and the Hub re-reads the budget on `visibilitychange` instead of holding a stale arc. No new game, asset, storage schema or dependency; the save shape is unchanged from v1.20.0.
+- **Checks:** the manual rows from the PR description - a sub-minute game banks 1 minute; a limit spent before midnight is available again on the first foreground return after midnight; hidden-tab minutes are not charged; the mascot waves once when the cap is hit, not on each return; footer `v1.21.1`.
+- **Result:** **desktop automated smoke PASSED 2026-10-24** (`HTTP 200`, title `Aby's Little Lab`, live `assets/index-DQWxjwLK.js` byte-identical to the local `dist/` build). **Device-class execution PENDING** by user decision; the four manual rows above are the ones worth a real finger.
+- **Issues found:** none reported
+
+## Execution Record - the v1.21.0 batch (the eight tracks since v1.20.0, 2026-10-22)
 
 - **Target:** tag `v1.21.0` pushed on 2026-10-23; deployed via Coolify on the tag push. The pass below ran on 2026-10-23 against the live release.
 - **Scope:** the eight tracks merged since v1.20.0 (PRs #48–#55; the parent-facing notes are in `docs/release-notes-v1.21.0.md`):
