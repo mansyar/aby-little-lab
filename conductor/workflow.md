@@ -176,6 +176,11 @@ it accepts the phase.
 5. Return the structured report to the primary agent.
 6. Do not merge, rebase, reset, push, open a PR, or edit Conductor state files.
 
+The subagent's gate run in steps 1–3 is the phase's single full-gate record
+(see "Single full gate per phase" under Verification Strategy). The primary
+does not repeat it; the primary verifies independently with the narrower
+checks described there.
+
 ## Verification Strategy
 
 ### Layers
@@ -189,6 +194,21 @@ it accepts the phase.
 
 No integration, contract, E2E, or visual-diff layer exists today. Do not add one
 inside a track without a spec decision.
+
+### Single full gate per phase
+
+The full `verify_phase` gate runs **once per phase**, by the phase subagent, and
+that run — recorded in the phase's evidence file — is the phase's verification
+record. The primary's independent verification afterwards is deliberately
+narrower: a clean working tree, the files-changed-versus-`Touches` check, a
+source diff review, `pnpm check` and `pnpm typecheck`, targeted tests over the
+phase's `Touches` files, the build-artifact validators, and the acceptance
+criteria checked against the evidence. The primary re-runs the full gate once
+more at the track's integrated verification, where it also covers the
+cross-phase combination. A failed or missing subagent gate is a finding, never
+something the primary silently substitutes for: if the subagent's run is
+absent, untrusted, or failed, the primary runs the full gate itself and records
+both runs in the evidence.
 
 ### Commands
 
