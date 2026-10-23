@@ -6,7 +6,7 @@ This checklist ensures comprehensive testing across target devices before releas
 
 ## Execution Record — the v1.21.0 batch (the eight tracks since v1.20.0, 2026-10-22)
 
-- **Target:** not deployed yet — the batch is unreleased (`package.json` still reads `1.20.0`, no `v1.21.0` tag), so there is no live URL to test. The rows below are the pass that has to be run against the first release candidate carrying these eight tracks.
+- **Target:** tag `v1.21.0` pushed on 2026-10-23; deployed via Coolify on the tag push. The device rows below are the pass to run against the live release once it is reachable on a real device.
 - **Scope:** the eight tracks merged since v1.20.0 (PRs #48–#55; the parent-facing notes are in `docs/release-notes-v1.21.0.md`):
   - **PR #48 — the PRD and the TDD, rewritten** (`conductor/archive/20261020-prd-tdd-truth-pass/`) — documentation only; nothing a child or a parent sees changes.
   - **PR #49 — the shell diet: every game brings its own art** (`conductor/archive/20261020-shell-diet-lazy-art/`) — the boot set is 53 keys and a game's own art arrives with its chunk, so the first tap on a game shows a brief loading cue (Professor Hoot with three pulsing dots) instead of a silent pause.
