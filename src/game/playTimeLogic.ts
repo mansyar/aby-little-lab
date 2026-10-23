@@ -105,6 +105,20 @@ interface ActiveSession {
 
 let activeSession: ActiveSession | null = null;
 
+type PlaySessionSink = (profileId: string, minutes: number) => void;
+
+let sessionSink: PlaySessionSink | null = null;
+
+/**
+ * Registers the banking sink: the storage-layer writer that persists a
+ * completed session. The module owns *when* to bank but not *where*, so it can
+ * keep importing nothing beyond `../types` and stay free of a storage cycle.
+ * Pass null to unregister (non-persisting hosts, tests).
+ */
+export function setPlaySessionSink(sink: PlaySessionSink | null): void {
+  sessionSink = sink;
+}
+
 /**
  * Visible time only is play time: a hidden tab must not burn a profile's daily
  * budget, so the session banks visible slices and the watcher below drives the
@@ -128,14 +142,51 @@ function handleVisibilityChange(): void {
   }
 }
 
+/**
+ * A page exit is the last signal a device gives: bank what the session accrued
+ * and clear the slot, so a Hub that is created afterwards banks nothing twice.
+ */
+function handlePageHide(): void {
+  bankSession(Date.now());
+}
+
+/**
+ * True where the window can carry the page-exit listener. `pagehide` is a window
+ * event, so a host that exposes no window listener surface (a headless renderer,
+ * or a test double stubbing a partial `window`) must stay inert rather than
+ * throw on the exit path.
+ */
+function canObservePageExit(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.addEventListener === "function" &&
+    typeof window.removeEventListener === "function"
+  );
+}
+
+/**
+ * The pause/resume watcher stays attached for short app switches; `pagehide` is
+ * the terminal path beside it, so a closed tab cannot lose the session. Both are
+ * capability-guarded: a non-DOM host attaches nothing and stays inert.
+ */
 function watchVisibility(): void {
   if (!canObserveVisibility()) return;
   document.addEventListener("visibilitychange", handleVisibilityChange);
+  if (canObservePageExit()) {
+    window.addEventListener("pagehide", handlePageHide);
+  }
 }
 
 function unwatchVisibility(): void {
-  if (typeof document === "undefined") return;
-  document.removeEventListener("visibilitychange", handleVisibilityChange);
+  if (typeof document !== "undefined") {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }
+  // Removed by capability rather than by what watch attached: removal is only
+  // reachable where the listener surface exists, and removing an absent
+  // listener is a no-op.
+  if (canObservePageExit()) {
+    window.removeEventListener("pagehide", handlePageHide);
+  }
 }
 
 /** Banked visible time plus the current stretch, clamped against a backwards clock. */
@@ -156,11 +207,14 @@ function localMidnight(now: number): number {
 
 /**
  * Starts a play session for a profile. Only one session can be active at a
- * time; starting a new one discards any previous unfinished session. The
- * document visibility watcher is attached here so the session is paused for as
- * long as it lives — across scene boundaries, not just on the Hub.
+ * time, so an unfinished previous session is ended and banked first — visible
+ * time is never silently discarded. The document visibility watcher is attached
+ * here so the session is paused for as long as it lives — across scene
+ * boundaries, not just on the Hub.
  */
 export function startPlaySession(profileId: string, now = Date.now()): void {
+  // Bank the outgoing session before replacing the single slot.
+  bankSession(now);
   // A session that begins in an already-hidden tab starts paused.
   activeSession = {
     profileId,
@@ -211,4 +265,17 @@ export function endPlaySession(now = Date.now()): { profileId: string; minutes: 
   const elapsed = Math.min(visibleMs, Math.max(0, now - localMidnight(now)));
   const minutes = elapsed <= 0 ? 0 : Math.ceil(elapsed / 60_000);
   return { profileId: session.profileId, minutes };
+}
+
+/**
+ * The single bank path: ends the active session, hands its minutes to the
+ * registered sink, and returns what was banked. Ending clears the slot, so a
+ * session banks at most once however many exit paths fire.
+ */
+function bankSession(now = Date.now()): { profileId: string; minutes: number } | null {
+  const ended = endPlaySession(now);
+  if (ended !== null && sessionSink !== null) {
+    sessionSink(ended.profileId, ended.minutes);
+  }
+  return ended;
 }

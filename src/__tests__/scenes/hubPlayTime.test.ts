@@ -157,6 +157,20 @@ describe("Hub play-time enforcement", () => {
     expect(getPlayTime("p1").usedMinutes).toBe(0);
   });
 
+  it("banks one session once across a page exit and the hub return", () => {
+    startPlaySession("p1", Date.now() - 2.5 * 60 * 1000); // Mid-minute: ceils to 3.
+
+    window.dispatchEvent(new Event("pagehide"));
+    expect(getPlayTime("p1").usedMinutes).toBe(3);
+
+    // The flush cleared the slot, so the Hub's own endPlaySession yields null and
+    // the same session cannot be banked a second time.
+    const scene = new HubScene();
+    scene.create();
+
+    expect(getPlayTime("p1").usedMinutes).toBe(3);
+  });
+
   it("locks and dims tiles when the daily limit is reached", () => {
     setPlayTimeLimit("p1", 30);
     recordPlayTime("p1", 30);

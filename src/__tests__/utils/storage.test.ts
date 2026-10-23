@@ -1,4 +1,4 @@
-import { todayKey } from "../../game/playTimeLogic";
+import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
 import type { AppStorage, GameId } from "../../types";
 import {
@@ -775,6 +775,16 @@ describe("Storage utilities", () => {
       expect(playTime.usedMinutes).toBe(0);
       expect(playTime.lastUsedDate).toBe(todayKey());
       expect(playTime.limitMinutes).toBe(30);
+    });
+
+    it("banks a page-exit flush through recordPlayTime", () => {
+      setPlayTimeLimit("p1", 30);
+      startPlaySession("p1", Date.now() - 2.5 * 60 * 1000);
+
+      window.dispatchEvent(new Event("pagehide"));
+
+      expect(getPlayTime("p1").usedMinutes).toBe(3);
+      expect(endPlaySession()).toBeNull();
     });
   });
 });

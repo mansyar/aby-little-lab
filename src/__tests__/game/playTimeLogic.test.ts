@@ -10,6 +10,7 @@ import {
   pausePlaySession,
   resumePlaySession,
   setLimit,
+  setPlaySessionSink,
   startPlaySession,
   todayKey,
 } from "../../game/playTimeLogic";
@@ -413,6 +414,122 @@ describe("playTimeLogic", () => {
       at(10);
       expect(() => setVisibility("hidden")).not.toThrow();
       expect(recordedMinutes()).toBe(10);
+    });
+  });
+
+  describe("session banking (injected sink)", () => {
+    const MINUTE = 60 * 1000;
+    const T0 = DAY.getTime();
+    const banked: Array<{ profileId: string; minutes: number }> = [];
+
+    function at(minutes: number): void {
+      vi.setSystemTime(T0 + minutes * MINUTE);
+    }
+
+    /** A `pagehide` on the window — the page-exit signal the module listens for. */
+    function pagehide(): void {
+      window.dispatchEvent(new Event("pagehide"));
+    }
+
+    beforeEach(() => {
+      endPlaySession();
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => "visible",
+      });
+      vi.useFakeTimers();
+      at(0);
+      banked.length = 0;
+      setPlaySessionSink((profileId, minutes) => {
+        banked.push({ profileId, minutes });
+      });
+    });
+
+    afterEach(() => {
+      // Both the sink and the active session are module scope: reset them or the
+      // suite poisons later cases.
+      setPlaySessionSink(null);
+      endPlaySession();
+      vi.useRealTimers();
+      Reflect.deleteProperty(document, "visibilityState");
+    });
+
+    describe("page exit (pagehide)", () => {
+      it("banks the visible minutes when the page is exited", () => {
+        startPlaySession("p1", T0);
+        at(2.5);
+        pagehide();
+        expect(banked).toEqual([{ profileId: "p1", minutes: 3 }]);
+      });
+
+      it("clears the session so a later end banks nothing", () => {
+        startPlaySession("p1", T0);
+        at(4);
+        pagehide();
+        expect(endPlaySession(T0 + 6 * MINUTE)).toBeNull();
+        expect(banked).toEqual([{ profileId: "p1", minutes: 4 }]);
+      });
+
+      it("banks once even when the page-exit event repeats", () => {
+        startPlaySession("p1", T0);
+        at(2);
+        pagehide();
+        at(9);
+        pagehide();
+        expect(banked).toEqual([{ profileId: "p1", minutes: 2 }]);
+      });
+
+      it("banks only the visible time accrued before the exit", () => {
+        let state: DocumentVisibilityState = "visible";
+        Object.defineProperty(document, "visibilityState", {
+          configurable: true,
+          get: () => state,
+        });
+        startPlaySession("p1", T0);
+        at(2);
+        state = "hidden";
+        document.dispatchEvent(new Event("visibilitychange"));
+        at(20);
+        pagehide();
+        expect(banked).toEqual([{ profileId: "p1", minutes: 2 }]);
+      });
+
+      it("stays inert where the document has no visibilityState", () => {
+        Object.defineProperty(document, "visibilityState", {
+          configurable: true,
+          get: () => undefined,
+        });
+        startPlaySession("p1", T0);
+        at(3);
+        expect(() => pagehide()).not.toThrow();
+        expect(banked).toHaveLength(0);
+        expect(endPlaySession(T0 + 3 * MINUTE)?.minutes).toBe(3);
+      });
+    });
+
+    describe("starting over a running session", () => {
+      it("banks the running session, then tracks the new profile", () => {
+        startPlaySession("p1", T0);
+        at(5);
+        startPlaySession("p2", T0 + 5 * MINUTE);
+        expect(banked).toEqual([{ profileId: "p1", minutes: 5 }]);
+        expect(endPlaySession(T0 + 8 * MINUTE)).toEqual({ profileId: "p2", minutes: 3 });
+        expect(banked).toHaveLength(1);
+      });
+
+      it("banks nothing when no session is running", () => {
+        startPlaySession("p1", T0);
+        expect(banked).toHaveLength(0);
+      });
+
+      it("banks only the first session after a page-exit flush", () => {
+        startPlaySession("p1", T0);
+        at(4);
+        pagehide();
+        at(10);
+        startPlaySession("p2");
+        expect(banked).toEqual([{ profileId: "p1", minutes: 4 }]);
+      });
     });
   });
 });
