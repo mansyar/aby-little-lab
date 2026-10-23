@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,488 tests across 118 files**, all green (verified 2026-10-22).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,556 tests across 119 files**, all green (verified 2026-10-23).
 
 ## Code Quality
 
@@ -243,11 +243,10 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 ## Known Issues
 
-The headline items. The full list - eight of them, each with the file the debt
+The headline items. The full list - seven of them, each with the file the debt
 lives in and how a reader would notice it - is in
 [docs/roadmap.md](docs/roadmap.md), which is the single home for them.
 
-- [Seven of the 22 games never shift difficulty](docs/roadmap.md) - Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order keep a fixed band.
 - [Three of the five drag games still hand-roll their own drag](docs/roadmap.md) - only Number Order and Story Order use the shared `DragBoard`.
 - [A failed game-chunk load does nothing visible](docs/roadmap.md) - the tap is swallowed and the promise rejection goes unhandled.
 - [The stored save payload has no schema version](docs/roadmap.md) - a future format change would have to be inferred rather than recognised.

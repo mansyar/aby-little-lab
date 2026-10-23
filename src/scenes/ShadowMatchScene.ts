@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import type { BandShift } from "../game/adaptiveLogic";
 import { items } from "../game/art/items";
 import { shadows } from "../game/art/shadows";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
@@ -6,6 +7,7 @@ import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Y position for shadow silhouettes (top area). */
@@ -81,8 +83,10 @@ interface ShadowSlotData {
 /**
  * Shadow Match scene — drag colored objects to matching dark silhouettes.
  *
- * Round initialization generates 6 of 8 object-silhouette pairs with independently
- * shuffled positions. Objects are dragged via Phaser Pointer Drag to matching
+ * Round initialization generates 6 of 12 object-silhouette pairs, drawn by the
+ * profile's adaptive band shift: the easy band takes one object per confusable
+ * cluster, the hard band three full clusters, and the classic band any 6 of
+ * the pool. Objects are dragged via Phaser Pointer Drag to matching
  * shadow silhouettes. Correct drops snap to center with SFX + bounded splash/ray feedback;
  * incorrect drops bounce back gently with a soft tone.
  */
@@ -109,14 +113,14 @@ export class ShadowMatchScene extends GameSceneBase {
     this.createBackButton();
     this.createSpokenInstruction("Drag each picture onto its shadow.");
 
-    this.initRound();
+    this.initRound(getAdaptiveBandShift("shadow-match"));
 
     this.registerShutdownCleanup();
   }
 
   /** Initializes a new round: generates pairs, shuffles positions, renders shadows and objects. */
-  private initRound(): void {
-    this.round = generateRound();
+  private initRound(shift: BandShift = 0): void {
+    this.round = generateRound(shift);
     this.shadowSlots = [];
     this.objectData = [];
     this.matchedCount = 0;

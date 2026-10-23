@@ -7,6 +7,8 @@
  * deterministic.
  */
 
+import type { BandShift } from "./adaptiveLogic";
+
 /** The four emotions Aby can show. */
 export type Emotion = "happy" | "sad" | "angry" | "scared";
 
@@ -24,27 +26,38 @@ export interface Scenario {
 }
 
 /**
- * The 16-entry scenario pool: four situations per emotion. Every entry is a
+ * The 24-entry scenario pool: six situations per emotion. Every entry is a
  * gentle, everyday, resolvable moment — thunder, a loud vacuum, a dropped ice
- * cream, a friend taking a toy — with no injury, loss, or violence.
+ * cream, a friend taking a toy — with no injury, loss, or violence. The
+ * extender band's per-emotion draw needs at least six usable scenarios per
+ * emotion, so the shipped 16 entries stay verbatim and two more per emotion
+ * keep every draw fresh.
  */
 export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "happy-ladybug", emotion: "happy", text: "Aby finds a ladybug on a leaf." },
   { id: "happy-hug", emotion: "happy", text: "Aby's friend gives a big hug." },
   { id: "happy-sticker", emotion: "happy", text: "Aby gets a sticker for helping." },
   { id: "happy-truck", emotion: "happy", text: "Aby hears the ice cream truck coming." },
+  { id: "happy-bubbles", emotion: "happy", text: "Aby catches soap bubbles in the sun." },
+  { id: "happy-plant", emotion: "happy", text: "Aby's little seed grows its first leaf." },
   { id: "sad-blocks", emotion: "sad", text: "Aby's block tower falls down." },
   { id: "sad-ice-cream", emotion: "sad", text: "Aby drops the ice cream cone." },
   { id: "sad-boat", emotion: "sad", text: "Aby's paper boat sinks in the puddle." },
   { id: "sad-home", emotion: "sad", text: "Aby has to stop playing to go home." },
+  { id: "sad-rain", emotion: "sad", text: "Rain stops the trip to the playground." },
+  { id: "sad-balloon", emotion: "sad", text: "Aby's red balloon drifts away slowly." },
   { id: "angry-toy", emotion: "angry", text: "Aby's friend takes the toy Aby had." },
   { id: "angry-crayon", emotion: "angry", text: "Aby's little brother grabs the crayon." },
   { id: "angry-turn", emotion: "angry", text: "Aby has to wait a long turn." },
   { id: "angry-line", emotion: "angry", text: "Someone cuts in front of Aby in line." },
+  { id: "angry-tower", emotion: "angry", text: "Aby's sibling knocks over the tower." },
+  { id: "angry-puzzle", emotion: "angry", text: "The puzzle piece will not fit yet." },
   { id: "scared-thunder", emotion: "scared", text: "Thunder booms during the bedtime story." },
   { id: "scared-vacuum", emotion: "scared", text: "The vacuum roars in the next room." },
   { id: "scared-hallway", emotion: "scared", text: "The hallway is dark at bedtime." },
   { id: "scared-dog", emotion: "scared", text: "A big dog barks behind the fence." },
+  { id: "scared-mask", emotion: "scared", text: "The new face mask looks surprising." },
+  { id: "scared-swing", emotion: "scared", text: "The big swing goes higher than usual." },
 ];
 
 /** How many rounds one playthrough presents. */
@@ -118,13 +131,56 @@ export const ROUND_CONTRASTS: readonly RoundContrast[] = [
 ];
 
 /**
+ * The band's mix of distinct and confusable rounds, as an easy-first ladder.
+ *
+ * The classic band returns the shipped ladder object unchanged, so unshifted
+ * playthroughs are byte-identical to shipped behaviour. Below it the whole
+ * ladder contrasts the maximally distinct happy/angry pair; above it every
+ * rung contrasts the easily confused sad/scared pair. Each ladder still spans
+ * six rungs and keeps the four-emotion spread guarantee intact: both pair
+ * emotions show every round and the third card covers an outside emotion, so
+ * every target emotion stays reachable whatever the drawn scenarios.
+ */
+export function contrastSplitFor(shift: BandShift = 0): readonly RoundContrast[] {
+  if (shift < 0) {
+    return [
+      DISTINCT_ROUND,
+      DISTINCT_ROUND,
+      DISTINCT_ROUND,
+      DISTINCT_ROUND,
+      DISTINCT_ROUND,
+      DISTINCT_ROUND,
+    ];
+  }
+  if (shift > 0) {
+    return [
+      CONFUSABLE_ROUND,
+      CONFUSABLE_ROUND,
+      CONFUSABLE_ROUND,
+      CONFUSABLE_ROUND,
+      CONFUSABLE_ROUND,
+      CONFUSABLE_ROUND,
+    ];
+  }
+  return ROUND_CONTRASTS;
+}
+
+/**
  * Builds the three emotion cards for one round. Both emotions of the round's
  * contrast pair always appear; the third card is the target itself, or — when
  * the target is already in the pair — the ladder's designated extra. The
  * result is always three distinct emotions that include the target.
+ *
+ * `ladder` lets a band's mix (from `contrastSplitFor`) be threaded through;
+ * without it the shipped ladder is used, so existing call sites keep their
+ * outcome.
  */
-export function buildRoundChoices(roundIndex: number, target: Emotion): Emotion[] {
-  const contrast = ROUND_CONTRASTS[roundIndex];
+export function buildRoundChoices(
+  roundIndex: number,
+  target: Emotion,
+  ladder: readonly RoundContrast[] = ROUND_CONTRASTS,
+): Emotion[] {
+  const contrast = ladder[roundIndex];
   const cards: Emotion[] = [...contrast.pair];
   cards.push(cards.includes(target) ? contrast.third : target);
   return cards;

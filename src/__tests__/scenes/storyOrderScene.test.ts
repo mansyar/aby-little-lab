@@ -238,17 +238,19 @@ describe("StoryOrderScene shell", () => {
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
-  it("preloads only the 24 story panels, not the boot art", () => {
+  it("preloads only the 33 story panels, not the boot art", () => {
     const scene = new StoryOrderScene();
     scene.preload();
 
     const keys = getMockFn(
       (scene as unknown as { load: Record<string, unknown> }).load.svg,
     ).mock.calls.map((call) => call[0] as string);
-    expect(keys).toHaveLength(24);
-    expect(new Set(keys).size).toBe(24);
+    expect(keys).toHaveLength(33);
+    expect(new Set(keys).size).toBe(33);
     expect(keys).toContain("story_seed_planted");
     expect(keys).toContain("story_rain_puddle");
+    expect(keys).toContain("story_cake_whole");
+    expect(keys).toContain("story_sun_set");
   });
 
   it("renders three panels in the tray and three pip-marked ordinal slots", () => {

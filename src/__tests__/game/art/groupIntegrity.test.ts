@@ -29,8 +29,8 @@ const GROUP_INVENTORY: ReadonlyArray<readonly [ArtGroupId, number]> = [
   ["numerals", 10],
   ["animals", 6],
   ["food", 6],
-  ["items", 16],
-  ["shadows", 8],
+  ["items", 20],
+  ["shadows", 12],
   ["toys", 7],
   ["faces", 4],
   ["music", 4],
@@ -115,10 +115,10 @@ const SHELL_KEYS: readonly string[] = [
 ];
 
 /**
- * Every texture key the app can ask for today: 53 shell keys plus the 125
- * game-only group keys.
+ * Every texture key the app can ask for today: 53 shell keys plus the 133
+ * game-only group keys (131 prior + 4 Shadow Match items + 4 shadows).
  */
-const TOTAL_APP_ASSETS = 178;
+const TOTAL_APP_ASSETS = 186;
 
 const AVATAR_KEYS: readonly string[] = [
   "animal_cat",
@@ -185,7 +185,7 @@ describe("art group inventory", () => {
     expect(new Set(allGroupKeys).size).toBe(allGroupKeys.length);
   });
 
-  it("leaves exactly the 53 shell keys outside the groups, for 178 in total", () => {
+  it("leaves exactly the 53 shell keys outside the groups, for 186 in total", () => {
     const groupKeySet = new Set(allGroupKeys);
     const shellOverlaps = SHELL_KEYS.filter((key) => groupKeySet.has(key));
 

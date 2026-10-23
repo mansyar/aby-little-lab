@@ -69,6 +69,27 @@ vi.mock("../../components/ParentLock", () => ({
   },
 }));
 
+const { getAdaptiveBandShiftMock, generatePlaythroughMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
+  generatePlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/shapeSorterLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/shapeSorterLogic")>();
+  return {
+    ...actual,
+    generatePlaythrough: (...args: Parameters<typeof actual.generatePlaythrough>) => {
+      generatePlaythroughMock(...args);
+      return actual.generatePlaythrough(...args);
+    },
+  };
+});
+
 /** Internals of the scene accessed via cast (same pattern as wordMatch tests). */
 interface SceneInternals {
   playthrough: ShapeType[][];
@@ -276,5 +297,32 @@ describe("ShapeSorterScene multi-round sessions", () => {
     );
     expect(popTween).toBeDefined();
     expect(popTween?.[0]?.targets).toBe(freshDots[0]);
+  });
+
+  describe("adaptive band wiring", () => {
+    beforeEach(() => {
+      getAdaptiveBandShiftMock.mockReturnValue(0);
+    });
+
+    it("samples the band shift once in create() and passes it to generatePlaythrough", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(1);
+      createScene();
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("shape-sorter");
+      expect(generatePlaythroughMock).toHaveBeenCalledTimes(1);
+      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 1);
+    });
+
+    it("requests the classic pool when the facade returns 0", () => {
+      createScene();
+      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 0);
+    });
+
+    it("keeps three progress dots on every band", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(1);
+      const scene = createScene();
+      const dots = getMockFn(scene.add.circle).mock.results.map((r) => r.value as MockGameObject);
+      expect(dots).toHaveLength(3);
+    });
   });
 });

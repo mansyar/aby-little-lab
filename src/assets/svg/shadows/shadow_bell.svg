@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: silhouette of the hand bell with its clapper. -->
+  <circle cx="256" cy="62" r="18" fill="#2D3748"/>
+  <path d="M 256 80 C 178 80 152 150 150 226 C 148 294 122 324 112 350 L 400 350 C 390 324 364 294 362 226 C 360 150 334 80 256 80 Z" fill="#2D3748"/>
+  <ellipse cx="256" cy="352" rx="152" ry="24" fill="#2D3748"/>
+  <circle cx="256" cy="404" r="24" fill="#2D3748"/>
+</svg>

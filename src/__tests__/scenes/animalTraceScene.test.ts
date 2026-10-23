@@ -53,6 +53,15 @@ vi.mock("../../components/ParentLock", () => ({
   ParentLock: MockParentLock,
 }));
 
+const { getAdaptiveBandShiftMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { hasSticker } from "../../utils/storage";
 
@@ -306,5 +315,50 @@ describe("AnimalTraceScene session state", () => {
     };
     (pulse[0] as { onUpdate: () => void }).onUpdate();
     expect(graphics.clear).toHaveBeenCalled();
+  });
+
+  describe("adaptive band wiring", () => {
+    beforeEach(() => {
+      getAdaptiveBandShiftMock.mockClear();
+      getAdaptiveBandShiftMock.mockReturnValue(0);
+    });
+
+    it("samples the band shift once in create() and sizes the path for the band", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(1);
+      const scene = new AnimalTraceScene();
+      scene.create();
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("animal-trace");
+      const currentPair = (
+        scene as unknown as {
+          currentPair: {
+            pathPoints: Array<{ x: number; y: number }>;
+            progress: { totalPoints: number };
+          };
+        }
+      ).currentPair;
+      // Hard band lengthens the trace to 8 waypoints, progress tracks them.
+      expect(currentPair.pathPoints).toHaveLength(8);
+      expect(currentPair.progress.totalPoints).toBe(8);
+    });
+
+    it("traces an easy-band path across 4 waypoints and advances to the next pair", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(-1);
+      const scene = new AnimalTraceScene();
+      scene.create();
+      const currentPair = (
+        scene as unknown as {
+          currentPair: { pathPoints: Array<{ x: number; y: number }> };
+        }
+      ).currentPair;
+      // Easy band shortens the trace to 4 waypoints.
+      expect(currentPair.pathPoints).toHaveLength(4);
+      traceFullPath(scene);
+      // Path completes (no win before the third pair) and the next pair loads.
+      expect(getMockFn(mockAudio.playCorrect)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(mockAudio.playWin)).not.toHaveBeenCalled();
+      fireNextPairDelay(scene);
+      expect((scene as unknown as { currentPairIndex: number }).currentPairIndex).toBe(1);
+    });
   });
 });

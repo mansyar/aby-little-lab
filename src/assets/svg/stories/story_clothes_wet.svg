@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: The washed shirt is dripping wet - 1 of 3. Big drops fall. -->
+  <path d="M 48 148 Q 256 188 464 148" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <rect x="176" y="132" width="20" height="34" rx="6" fill="#A0522D" stroke="#2D3748" stroke-width="4"/>
+  <rect x="316" y="132" width="20" height="34" rx="6" fill="#A0522D" stroke="#2D3748" stroke-width="4"/>
+  <path d="M 196 172 L 156 192 L 136 242 L 176 260 L 186 238 L 186 372 Q 186 384 198 384 L 314 384 Q 326 384 326 372 L 326 238 L 336 260 L 376 242 L 356 192 L 316 172 Q 286 198 256 198 Q 226 198 196 172 Z" fill="#BEE3F8" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 206 416 C 212 428 215 434 215 440 C 215 447 210 452 204 452 C 198 452 193 447 193 440 C 193 434 199 428 206 416 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4"/>
+  <path d="M 256 428 C 262 440 265 446 265 452 C 265 459 260 464 254 464 C 248 464 243 459 243 452 C 243 446 249 440 256 428 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4"/>
+  <path d="M 306 414 C 312 426 315 432 315 438 C 315 445 310 450 304 450 C 298 450 293 445 293 438 C 293 432 299 426 306 414 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="4"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: silhouette of the cozy sock. -->
+  <path d="M 195 96 L 315 96 L 315 300 Q 315 322 336 330 L 396 354 Q 428 367 420 396 Q 412 424 378 416 L 228 380 Q 195 371 195 338 Z" fill="#2D3748"/>
+  <rect x="186" y="60" width="138" height="54" rx="16" fill="#2D3748"/>
+</svg>

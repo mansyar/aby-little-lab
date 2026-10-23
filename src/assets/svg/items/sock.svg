@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: cozy sock - cuff at the top, tube down, rounded toe to the right. -->
+  <path d="M 195 96 L 315 96 L 315 300 Q 315 322 336 330 L 396 354 Q 428 367 420 396 Q 412 424 378 416 L 228 380 Q 195 371 195 338 Z" fill="#FC8181" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="186" y="60" width="138" height="54" rx="16" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 216 70 L 216 104 M 246 70 L 246 104 M 276 70 L 276 104 M 306 70 L 306 104" stroke="#2D3748" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="384" cy="384" rx="30" ry="20" fill="#FED7D7" stroke="#2D3748" stroke-width="4"/>
+</svg>

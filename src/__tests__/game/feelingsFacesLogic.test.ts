@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   answer,
   buildRoundChoices,
+  contrastSplitFor,
   drawScenarios,
   EMOTIONS,
   type Emotion,
   ROUND_CONTRASTS,
   ROUND_COUNT,
+  type RoundContrast,
   type RoundState,
   SCENARIO_POOL,
   type Scenario,
@@ -19,6 +21,11 @@ function seededRng(seed: number): () => number {
     state = (state * 1664525 + 1013904223) >>> 0;
     return state / 0x100000000;
   };
+}
+
+/** The contrast kind of each rung, in order — the compact shape band tests compare. */
+function kindsOf(ladder: readonly RoundContrast[]): string[] {
+  return ladder.map((rung) => rung.kind);
 }
 
 /** Returns a pooled scenario for the given emotion (the pool holds four each). */
@@ -41,16 +48,43 @@ describe("EMOTIONS", () => {
 });
 
 describe("SCENARIO_POOL", () => {
-  it("holds four scenarios for every emotion", () => {
-    expect(SCENARIO_POOL).toHaveLength(16);
+  it("holds six scenarios for every emotion", () => {
+    expect(SCENARIO_POOL).toHaveLength(24);
     for (const emotion of EMOTIONS) {
-      expect(SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion)).toHaveLength(4);
+      expect(SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion)).toHaveLength(6);
     }
   });
 
   it("gives every scenario a unique id and a unique line", () => {
-    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(16);
-    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.text)).size).toBe(16);
+    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(24);
+    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.text)).size).toBe(24);
+  });
+
+  it("grows the shipped 16-entry pool by exactly 2 scenarios per emotion", () => {
+    const shippedIds = [
+      "happy-ladybug",
+      "happy-hug",
+      "happy-sticker",
+      "happy-truck",
+      "sad-blocks",
+      "sad-ice-cream",
+      "sad-boat",
+      "sad-home",
+      "angry-toy",
+      "angry-crayon",
+      "angry-turn",
+      "angry-line",
+      "scared-thunder",
+      "scared-vacuum",
+      "scared-hallway",
+      "scared-dog",
+    ];
+    for (const id of shippedIds) {
+      const scenario = SCENARIO_POOL.find((entry) => entry.id === id);
+      expect(scenario).toBeDefined();
+    }
+    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(16 + 8);
+    expect(SCENARIO_POOL.length - shippedIds.length).toBe(8);
   });
 
   it("keeps every line short enough for one spoken sentence", () => {
@@ -315,6 +349,124 @@ describe("SCENARIO_POOL safe-content guard", () => {
   it("keeps every spoken line inside the 60-character limit", () => {
     for (const scenario of SCENARIO_POOL) {
       expect(scenario.text.length).toBeLessThanOrEqual(60);
+    }
+  });
+});
+
+describe("contrastSplitFor", () => {
+  it("keeps the shipped 3+3 ladder object for the classic band", () => {
+    expect(contrastSplitFor(0)).toBe(ROUND_CONTRASTS);
+  });
+
+  it("defaults to the classic band", () => {
+    expect(contrastSplitFor()).toBe(ROUND_CONTRASTS);
+  });
+
+  it("plays six distinct rounds for the easy band", () => {
+    const ladder = contrastSplitFor(-1);
+    expect(ladder).toHaveLength(ROUND_COUNT);
+    expect(kindsOf(ladder)).toEqual([
+      "distinct",
+      "distinct",
+      "distinct",
+      "distinct",
+      "distinct",
+      "distinct",
+    ]);
+    for (const rung of ladder) {
+      expect(rung.pair).toEqual(["happy", "angry"]);
+      expect(rung.third).toBe("sad");
+    }
+  });
+
+  it("plays six confusable rounds for the hard band", () => {
+    const ladder = contrastSplitFor(1);
+    expect(ladder).toHaveLength(ROUND_COUNT);
+    expect(kindsOf(ladder)).toEqual([
+      "confusable",
+      "confusable",
+      "confusable",
+      "confusable",
+      "confusable",
+      "confusable",
+    ]);
+    for (const rung of ladder) {
+      expect(rung.pair).toEqual(["sad", "scared"]);
+      expect(rung.third).toBe("happy");
+    }
+  });
+
+  it("shifts the ladder in opposite directions per band", () => {
+    const easy = kindsOf(contrastSplitFor(-1));
+    const classic = kindsOf(contrastSplitFor(0));
+    const hard = kindsOf(contrastSplitFor(1));
+    expect(easy).not.toEqual(classic);
+    expect(classic).not.toEqual(hard);
+    expect(easy).not.toEqual(hard);
+  });
+});
+
+describe("buildRoundChoices band ladders", () => {
+  it("builds three distinct cards including the target under every band's ladder", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const ladder = contrastSplitFor(shift);
+      for (let index = 0; index < ROUND_COUNT; index++) {
+        for (const target of EMOTIONS) {
+          const choices = buildRoundChoices(index, target, ladder);
+          expect(choices).toHaveLength(3);
+          expect(new Set(choices).size).toBe(3);
+          expect(choices).toContain(target);
+          for (const emotion of ladder[index].pair) {
+            expect(choices).toContain(emotion);
+          }
+        }
+      }
+    }
+  });
+
+  it("keeps the shipped card sets when the classic ladder is passed", () => {
+    const ladder = contrastSplitFor(0);
+    for (let index = 0; index < ROUND_COUNT; index++) {
+      for (const target of EMOTIONS) {
+        expect(buildRoundChoices(index, target, ladder)).toEqual(buildRoundChoices(index, target));
+      }
+    }
+  });
+
+  it("swaps the round's contrast pair with the band", () => {
+    const easy = contrastSplitFor(-1);
+    const hard = contrastSplitFor(1);
+    expect(buildRoundChoices(3, "sad", easy)).toEqual(["happy", "angry", "sad"]);
+    expect(buildRoundChoices(3, "sad", hard)).toEqual(["sad", "scared", "happy"]);
+    expect(buildRoundChoices(0, "angry", hard)).toEqual(["sad", "scared", "angry"]);
+  });
+
+  it("plays observably different rounds per band from one seeded draw (AC-1)", () => {
+    for (let seed = 1; seed <= 6; seed++) {
+      const rng = seededRng(seed);
+      const scenarios = drawScenarios(rng);
+      const easy = scenarios.map((scenario, index) =>
+        buildRoundChoices(index, scenario.emotion, contrastSplitFor(-1)),
+      );
+      const classic = scenarios.map((scenario, index) =>
+        buildRoundChoices(index, scenario.emotion, contrastSplitFor(0)),
+      );
+      const hard = scenarios.map((scenario, index) =>
+        buildRoundChoices(index, scenario.emotion, contrastSplitFor(1)),
+      );
+      expect(easy).not.toEqual(classic);
+      expect(classic).not.toEqual(hard);
+      expect(easy).not.toEqual(hard);
+    }
+  });
+
+  it("spreads targets over all four emotions at every band", () => {
+    for (let seed = 1; seed <= 8; seed++) {
+      const drawn = drawScenarios(seededRng(seed));
+      expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
+      expect(drawn.map((scenario) => scenario.emotion)).toEqual(
+        expect.arrayContaining([...EMOTIONS]),
+      );
     }
   });
 });

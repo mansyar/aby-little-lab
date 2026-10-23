@@ -10,6 +10,7 @@ import {
   isWin,
   SELECT_COUNT,
   SMALL_SCALE,
+  scaleFactorsFor,
   selectToys,
   shuffle,
   type ToyType,
@@ -204,5 +205,167 @@ describe("isWin", () => {
     expect(isWin(3)).toBe(false);
     expect(isWin(4)).toBe(false);
     expect(isWin(5)).toBe(false);
+  });
+});
+
+/*
+ * Band-shift layout twins. The scene fixes its geometry (1024x768 canvas, toy
+ * row at y=580 over 7 slots, box row at y=200 over 3 slots) and multiplies the
+ * band's factors by these bases; the mirrored values here let the logic tests
+ * prove every band keeps sorted objects inside the canvas and above the 64px
+ * touch floor without booting Phaser. The 96px ideal target cannot hold for
+ * small items at any factor < 1 (classic 0.7x is already 67.2px), so the floor
+ * is the binding bound; widening stops where the canvas does.
+ */
+const CANVAS_WIDTH = 1024;
+const CANVAS_HEIGHT = 768;
+const TOY_DISPLAY_BASE = 96;
+const BOX_DISPLAY_BASE = 128;
+const TOY_ROW_Y = 580;
+const BOX_ROW_Y = 200;
+const TOUCH_FLOOR = 64;
+
+/** Mirrors the scene's spacing math: n items centered at spacing * (i + 1). */
+function rowCenters(count: number, canvasWidth: number): number[] {
+  const spacing = canvasWidth / (count + 1);
+  const centers: number[] = [];
+  for (let i = 1; i <= count; i++) {
+    centers.push(spacing * i);
+  }
+  return centers;
+}
+
+/** Every draggable item's display box must stay above the 64px touch floor. */
+function assertAboveTouchFloor(displaySize: number): void {
+  const message = `display size ${displaySize} must stay above the ${TOUCH_FLOOR}px floor`;
+  expect(displaySize, message).toBeGreaterThanOrEqual(TOUCH_FLOOR);
+}
+
+/** A display box must fit inside the canvas at every position its row allows. */
+function assertStaysInsideCanvas(displaySize: number, centers: number[], centerY: number): void {
+  for (const x of centers) {
+    expect(x - displaySize / 2).toBeGreaterThanOrEqual(0);
+    expect(x + displaySize / 2).toBeLessThanOrEqual(CANVAS_WIDTH);
+  }
+  expect(centerY - displaySize / 2).toBeGreaterThanOrEqual(0);
+  expect(centerY + displaySize / 2).toBeLessThanOrEqual(CANVAS_HEIGHT);
+}
+
+describe("scaleFactorsFor", () => {
+  it("classic band keeps the shipped 1.5/0.7 factors verbatim", () => {
+    expect(scaleFactorsFor(0)).toEqual({ big: BIG_SCALE, small: SMALL_SCALE });
+  });
+
+  it("easy band widens the contrast to 1.6/0.68", () => {
+    expect(scaleFactorsFor(-1)).toEqual({ big: 1.6, small: 0.68 });
+  });
+
+  it("hard band narrows the contrast to 1.35/0.8", () => {
+    expect(scaleFactorsFor(1)).toEqual({ big: 1.35, small: 0.8 });
+  });
+
+  it("the three bands sit on distinct contrast ratios in the right order", () => {
+    const contrast = (shift: -1 | 0 | 1) => {
+      const factors = scaleFactorsFor(shift);
+      return factors.big / factors.small;
+    };
+    const easy = contrast(-1);
+    const classic = contrast(0);
+    const hard = contrast(1);
+    expect(easy).toBeGreaterThan(classic);
+    expect(classic).toBeGreaterThan(hard);
+    expect(hard).toBeGreaterThan(1);
+    expect(new Set([easy, classic, hard]).size).toBe(3);
+  });
+
+  it("defaults to the classic factors", () => {
+    expect(scaleFactorsFor()).toEqual(scaleFactorsFor(0));
+  });
+});
+
+describe("scaleFactorsFor layout bounds", () => {
+  it("scales keep toys and boxes inside the canvas and above the touch floor at every band", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const factors = scaleFactorsFor(shift);
+      const round = generateRound(factors);
+
+      for (const toy of round.toys) {
+        const displaySize = TOY_DISPLAY_BASE * toy.scale;
+        assertStaysInsideCanvas(displaySize, rowCenters(6, CANVAS_WIDTH), TOY_ROW_Y);
+        assertAboveTouchFloor(displaySize);
+      }
+      for (const box of round.boxes) {
+        const displaySize = BOX_DISPLAY_BASE * box.scale;
+        assertStaysInsideCanvas(displaySize, rowCenters(2, CANVAS_WIDTH), BOX_ROW_Y);
+        assertAboveTouchFloor(displaySize);
+      }
+    }
+  });
+});
+
+describe("generateRound with band factors", () => {
+  it("stamps every toy and box scale from the band's factors", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const factors = scaleFactorsFor(shift);
+      const round = generateRound(factors);
+
+      expect(round.toys).toHaveLength(6);
+      for (const toy of round.toys) {
+        expect(toy.scale).toBe(toy.scaleCategory === "big" ? factors.big : factors.small);
+      }
+      expect(round.boxes).toHaveLength(2);
+      for (const box of round.boxes) {
+        expect(box.scale).toBe(box.scaleCategory === "big" ? factors.big : factors.small);
+      }
+      const categories = round.boxes.map((b) => b.scaleCategory).sort();
+      expect(categories).toEqual(["big", "small"]);
+    }
+  });
+
+  it("shifted factors draw observably different scales under one seed", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const classic = generateRound();
+    const easy = generateRound(scaleFactorsFor(-1));
+    const hard = generateRound(scaleFactorsFor(1));
+    expect(easy.toys.map((t) => t.scale)).not.toEqual(classic.toys.map((t) => t.scale));
+    expect(easy.boxes.map((b) => b.scale)).not.toEqual(classic.boxes.map((b) => b.scale));
+    expect(hard.toys.map((t) => t.scale)).not.toEqual(classic.toys.map((t) => t.scale));
+    expect(hard.boxes.map((b) => b.scale)).not.toEqual(classic.boxes.map((b) => b.scale));
+  });
+
+  it("classic draws are identical with and without the factors argument", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    expect(generateRound(scaleFactorsFor(0))).toEqual(generateRound());
+  });
+});
+
+describe("createToyInstances with band factors", () => {
+  it("stamps the band's big/small factors onto each scale category", () => {
+    const factors = scaleFactorsFor(-1);
+    const instances = createToyInstances(["ball"], factors);
+    expect(instances).toEqual([
+      { type: "ball", scaleCategory: "big", scale: factors.big },
+      { type: "ball", scaleCategory: "small", scale: factors.small },
+    ]);
+  });
+
+  it("keeps the shipped scales when no factors argument is passed", () => {
+    expect(createToyInstances(["ball"])).toEqual(createToyInstances(["ball"], scaleFactorsFor(0)));
+  });
+});
+
+describe("createBoxes with band factors", () => {
+  it("keeps one big and one small box at every band", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const boxes = createBoxes(scaleFactorsFor(shift));
+      expect(boxes).toHaveLength(2);
+      const categories = boxes.map((b) => b.scaleCategory).sort();
+      expect(categories).toEqual(["big", "small"]);
+    }
+  });
+
+  it("keeps the shipped scales when no factors argument is passed", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    expect(createBoxes(scaleFactorsFor(0))).toEqual(createBoxes());
   });
 });

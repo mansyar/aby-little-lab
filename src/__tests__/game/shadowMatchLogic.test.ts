@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   ALL_OBJECTS,
+  CONFUSABLE_CLUSTERS,
   generateRound,
   isMatch,
   isWin,
@@ -15,6 +16,26 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/** Deterministic Park-Miller generator, spied onto Math.random for a draw. */
+function seededRng(seed: number): () => number {
+  let state = seed % 2147483647;
+  if (state <= 0) state += 2147483646;
+  return () => {
+    state = (state * 16807) % 2147483647;
+    return (state - 1) / 2147483646;
+  };
+}
+
+/** Draws one round with a seeded rng spied onto Math.random. */
+function drawWithSeed(seed: number, shift: -1 | 0 | 1) {
+  const spy = vi.spyOn(Math, "random").mockImplementation(seededRng(seed));
+  try {
+    return generateRound(shift);
+  } finally {
+    spy.mockRestore();
+  }
+}
+
 describe("generateRound", () => {
   it("generates 6 objects with correct object IDs (house, tree, car, boat, ball, umbrella)", () => {
     const round = generateRound();
@@ -25,10 +46,76 @@ describe("generateRound", () => {
     expect(new Set(round.objects).size).toBe(6);
   });
 
-  it("expanded pool includes the new airplane and mushroom objects (8 total)", () => {
-    expect(ALL_OBJECTS).toHaveLength(8);
+  it("expanded pool includes the four new confusable objects (12 total)", () => {
+    expect(ALL_OBJECTS).toHaveLength(12);
     expect(ALL_OBJECTS).toContain("airplane");
     expect(ALL_OBJECTS).toContain("mushroom");
+    expect(ALL_OBJECTS).toContain("sock");
+    expect(ALL_OBJECTS).toContain("boot");
+    expect(ALL_OBJECTS).toContain("kite");
+    expect(ALL_OBJECTS).toContain("bell");
+  });
+
+  it("splits the 12 objects into 6 confusable clusters of 2", () => {
+    expect(CONFUSABLE_CLUSTERS).toHaveLength(6);
+    const members = CONFUSABLE_CLUSTERS.flat();
+    expect(members).toHaveLength(12);
+    expect(new Set(members).size).toBe(12);
+    for (const object of ALL_OBJECTS) {
+      expect(members).toContain(object);
+    }
+    for (const cluster of CONFUSABLE_CLUSTERS) {
+      expect(cluster).toHaveLength(2);
+    }
+  });
+
+  it("draws exactly one object per cluster in the easy band (no confusable pair)", () => {
+    const round = generateRound(-1);
+    expect(round.objects).toHaveLength(6);
+    const clustersOf = (object: ObjectType) =>
+      CONFUSABLE_CLUSTERS.filter((cluster) => cluster.includes(object));
+    for (const object of round.objects) {
+      expect(clustersOf(object)).toHaveLength(1);
+    }
+    const clusterIndexes = new Set(
+      round.objects.map((object) => CONFUSABLE_CLUSTERS.findIndex((c) => c.includes(object))),
+    );
+    expect(clusterIndexes.size).toBe(6);
+    expect(new Set(round.shadows)).toEqual(new Set(round.objects));
+  });
+
+  it("draws three full clusters in the hard band (confusable pairs together)", () => {
+    const round = generateRound(1);
+    expect(round.objects).toHaveLength(6);
+    const drawnClusters = CONFUSABLE_CLUSTERS.filter((cluster) =>
+      round.objects.includes(cluster[0]),
+    );
+    expect(drawnClusters).toHaveLength(3);
+    for (const cluster of drawnClusters) {
+      expect(round.objects).toContain(cluster[1]);
+    }
+    expect(new Set(round.objects).size).toBe(6);
+    expect(new Set(round.shadows)).toEqual(new Set(round.objects));
+  });
+
+  it("is deterministic per seed in every band (seeded rng spy)", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      const first = drawWithSeed(42, shift);
+      const second = drawWithSeed(42, shift);
+      expect(first).toEqual(second);
+    }
+  });
+
+  it("keeps the classic band an any-6-of-12 draw over the full pool", () => {
+    const seen = new Set<ObjectType>();
+    for (let seed = 1; seed <= 40; seed++) {
+      const round = drawWithSeed(seed, 0);
+      for (const object of round.objects) seen.add(object);
+      expect(round.objects).toHaveLength(6);
+    }
+    // Over 40 seeded draws the classic band must reach well beyond any
+    // fixed six-object subset of the 12-object pool.
+    expect(seen.size).toBeGreaterThanOrEqual(10);
   });
 
   it(`selects exactly ${ROUND_SIZE} of the ${ALL_OBJECTS.length} objects per round (${ALL_OBJECTS.length - ROUND_SIZE} excluded)`, () => {
@@ -59,8 +146,8 @@ describe("generateRound", () => {
 
   it("shuffles objects and shadows independently (replay variety)", () => {
     const spy = vi.spyOn(Math, "random");
-    // selection shuffle (8 elements, 7 calls) + objects shuffle (6 elements, 5 calls) use 0.5
-    for (let i = 0; i < 12; i++) spy.mockReturnValueOnce(0.5);
+    // selection shuffle (12 elements, 11 calls) + objects shuffle (6 elements, 5 calls) use 0.5
+    for (let i = 0; i < 16; i++) spy.mockReturnValueOnce(0.5);
     // shadows shuffle (6 elements, 5 calls) uses 0.1 → different ordering
     for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.1);
     const round = generateRound();

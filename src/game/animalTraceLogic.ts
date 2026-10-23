@@ -1,3 +1,5 @@
+import type { BandShift } from "./adaptiveLogic";
+
 /** The six animal types used in the Animal Trace game. */
 export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
 
@@ -62,6 +64,18 @@ export function isPathComplete(progress: PathProgress): boolean {
 /** Checks whether all 3 paths in the round have been completed. */
 export function isRoundComplete(completedPaths: number): boolean {
   return completedPaths >= 3;
+}
+
+/** Waypoints per traced path: 4 (easy) / 6 (classic) / 8 (hard).
+ *
+ *  The classic value matches the shipped path constant, and the curve
+ *  generator is waypoint-count agnostic, so every band produces a smooth,
+ *  traceable path while keeping the endpoints fixed.
+ */
+export function waypointsFor(shift: BandShift = 0): number {
+  if (shift < 0) return 4;
+  if (shift > 0) return 8;
+  return 6;
 }
 
 /** Generates evenly-spaced waypoints from start to end with a randomized gentle curve.

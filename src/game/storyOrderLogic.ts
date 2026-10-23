@@ -1,11 +1,13 @@
 /**
  * Pure logic for Story Order (Game 22).
  *
- * Owns the eight-story pool, the easy-first ladder split, the per-round panel
+ * Owns the eleven-story pool, the easy-first ladder split, the per-round panel
  * shuffle and the whole-strip correctness check. No Phaser, DOM, storage or
  * timers live here; every random decision is injectable so the scene and the
  * tests stay deterministic.
  */
+
+import type { BandShift } from "./adaptiveLogic";
 
 /** Which easy-first band a story belongs to. Rounds 1-3 are `obvious`. */
 export type StoryLadder = "obvious" | "subtle";
@@ -21,7 +23,7 @@ export interface Story {
 }
 
 /**
- * The eight-story pool: four obvious causes and four subtler ones. Panel keys
+ * The eleven-story pool: five obvious causes and six subtler ones. Panel keys
  * are fixed by the spec because the art is authored against them.
  */
 export const STORY_POOL: readonly Story[] = [
@@ -46,6 +48,11 @@ export const STORY_POOL: readonly Story[] = [
     panels: ["story_ice_scoop", "story_ice_dripping", "story_ice_puddle"],
   },
   {
+    id: "cake",
+    ladder: "obvious",
+    panels: ["story_cake_whole", "story_cake_candles", "story_cake_sliced"],
+  },
+  {
     id: "banana",
     ladder: "subtle",
     panels: ["story_banana_whole", "story_banana_peeled", "story_banana_peel"],
@@ -65,6 +72,16 @@ export const STORY_POOL: readonly Story[] = [
     ladder: "subtle",
     panels: ["story_cloud", "story_cloud_raining", "story_rain_puddle"],
   },
+  {
+    id: "clothes",
+    ladder: "subtle",
+    panels: ["story_clothes_wet", "story_clothes_drying", "story_clothes_dry"],
+  },
+  {
+    id: "sun",
+    ladder: "subtle",
+    panels: ["story_sun_rise", "story_sun_noon", "story_sun_set"],
+  },
 ];
 
 /** Every story id, in pool order. */
@@ -83,8 +100,19 @@ export const SUBTLE_POOL: readonly Story[] = STORY_POOL.filter(
 /** How many rounds one playthrough presents. */
 export const ROUND_COUNT = 6;
 
-/** How many rounds are drawn from each ladder band. */
+/** How many rounds each ladder contributes in the classic mix (shift 0). */
 export const ROUNDS_PER_BAND = ROUND_COUNT / 2;
+
+/**
+ * Rounds per ladder band for a playthrough's band shift. The classic mix keeps
+ * the balanced 3 + 3; the easy band leans obvious (5 + 1), the hard band leans
+ * subtle (1 + 5).
+ */
+export function mixFor(shift: BandShift = 0): { obvious: number; subtle: number } {
+  if (shift < 0) return { obvious: 5, subtle: 1 };
+  if (shift > 0) return { obvious: 1, subtle: 5 };
+  return { obvious: ROUNDS_PER_BAND, subtle: ROUNDS_PER_BAND };
+}
 
 /** One playable round: which story, the scrambled source row, and the answer. */
 export interface StoryOrderRound {
@@ -130,14 +158,19 @@ export function buildRound(story: Story, rng: () => number = Math.random): Story
 }
 
 /**
- * Draws one playthrough: three obvious stories then three subtle ones, with no
- * story repeated. Within a band the draw order is shuffled, so consecutive
- * playthroughs differ. `rng` must return a number in [0, 1); tests pass a
- * seeded generator so a playthrough is reproducible.
+ * Draws one playthrough of `ROUND_COUNT` stories from the band shift's
+ * obvious/subtle mix ({@link mixFor}), with no story repeated. The obvious
+ * rounds come first, then the subtle ones. Within a band the draw order is
+ * shuffled, so consecutive playthroughs differ. `rng` must return a number in
+ * [0, 1); tests pass a seeded generator so a playthrough is reproducible.
  */
-export function buildPlaythrough(rng: () => number = Math.random): StoryOrderRound[] {
-  const obvious = shuffleWith(OBVIOUS_POOL, rng).slice(0, ROUNDS_PER_BAND);
-  const subtle = shuffleWith(SUBTLE_POOL, rng).slice(0, ROUNDS_PER_BAND);
+export function buildPlaythrough(
+  rng: () => number = Math.random,
+  shift: BandShift = 0,
+): StoryOrderRound[] {
+  const mix = mixFor(shift);
+  const obvious = shuffleWith(OBVIOUS_POOL, rng).slice(0, mix.obvious);
+  const subtle = shuffleWith(SUBTLE_POOL, rng).slice(0, mix.subtle);
   return [...obvious, ...subtle].map((story) => buildRound(story, rng));
 }
 

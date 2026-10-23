@@ -9,11 +9,14 @@ import {
   type RoundState,
   registerPop,
   registerWake,
+  type SleepingBounds,
   selectBubbleType,
+  sleepingBoundsFor,
 } from "../game/popFreezeLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { textureSizeFor } from "../utils/textureTiers";
 import { GameSceneBase } from "./GameSceneBase";
 
@@ -91,6 +94,8 @@ export class PopFreezeScene extends GameSceneBase {
   private roundState: RoundState = createRoundState();
   private bubbles: BubbleData[] = [];
   private roundComplete = false;
+  /** Sleeping-animal bounds for the session, sampled from the band once. */
+  private sleepBounds: SleepingBounds = sleepingBoundsFor(0);
 
   constructor() {
     super("PopFreeze");
@@ -106,6 +111,7 @@ export class PopFreezeScene extends GameSceneBase {
     this.createBackButton();
     this.createSpokenInstruction("Pop the bubbles, but not the sleeping animals.");
 
+    this.sleepBounds = sleepingBoundsFor(getAdaptiveBandShift("pop-freeze"));
     this.initRound();
 
     this.registerShutdownCleanup();
@@ -123,6 +129,7 @@ export class PopFreezeScene extends GameSceneBase {
       this.scale.width,
       this.scale.height,
       BUBBLE_DISPLAY_SIZE,
+      this.sleepBounds,
     );
 
     for (const config of configs) {
@@ -282,7 +289,7 @@ export class PopFreezeScene extends GameSceneBase {
   /** Spawns a replacement bubble to maintain concurrent count (1-2 sleeping maintained). */
   private respawnBubble(): void {
     const sleepingCount = this.bubbles.filter((b) => b.config.type === "sleeping").length;
-    const type = selectBubbleType(sleepingCount);
+    const type = selectBubbleType(sleepingCount, this.sleepBounds);
     const config = generateSpawnConfig(
       this.scale.width,
       this.scale.height,

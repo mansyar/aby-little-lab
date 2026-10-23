@@ -3,16 +3,18 @@ import { faces } from "../game/art/faces";
 import {
   answer,
   buildRoundChoices,
+  contrastSplitFor,
   drawScenarios,
   type Emotion,
   ROUND_COUNT,
+  type RoundContrast,
   type Scenario,
 } from "../game/feelingsFacesLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakSentence } from "../utils/speech";
-import { getSettings } from "../utils/storage";
+import { getAdaptiveBandShift, getSettings } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
@@ -76,6 +78,8 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
   private caption?: Phaser.GameObjects.Text;
   /** The six scenarios drawn for this playthrough. */
   private rounds: Scenario[] = [];
+  /** The contrast ladder for the session, sampled from the band once. */
+  private ladder: readonly RoundContrast[] = contrastSplitFor(0);
   /** The three emotions on the current round's cards. */
   private choices: Emotion[] = [];
   /** Taps recorded on the current round (correct and wrong combined). */
@@ -98,6 +102,7 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createRuleLine();
 
+    this.ladder = contrastSplitFor(getAdaptiveBandShift("feelings-faces"));
     this.rounds = drawScenarios();
     this.roundIndex = 0;
     this.inputLocked = false;
@@ -142,7 +147,7 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
     const scenario = this.rounds[this.roundIndex];
     if (!scenario) return;
 
-    this.choices = buildRoundChoices(this.roundIndex, scenario.emotion);
+    this.choices = buildRoundChoices(this.roundIndex, scenario.emotion, this.ladder);
     this.taps = 0;
     this.narrator?.refreshCaptionFallback();
 

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: silhouette of the rain boot. -->
+  <path d="M 175 64 L 325 64 L 325 290 Q 325 312 346 320 L 408 344 Q 442 357 442 390 L 442 424 Q 442 444 422 444 L 195 444 Q 175 444 175 424 Z" fill="#2D3748"/>
+  <rect x="168" y="46" width="164" height="44" rx="12" fill="#2D3748"/>
+</svg>

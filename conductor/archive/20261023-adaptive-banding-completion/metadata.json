@@ -1,0 +1,32 @@
+{
+  "id": "20261023-adaptive-banding-completion",
+  "title": "Adaptive Difficulty Completion",
+  "type": "feature",
+  "status": "complete",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-23T00:00:00Z",
+  "updated_at": "2026-10-23T01:00:00Z",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261023-adaptive-banding-completion",
+  "base_branch": "master",
+  "base_sha": "a054e5a86af2790cafad68b9121afcd23c5aa046",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 4,
+    "tasks_total": 11,
+    "tasks_done": 11
+  },
+  "last_checkpoint": "a4a4592",
+  "review_verdict": "PASS",
+  "review_rounds": 2,
+  "doc_sync": "updated",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/57",
+  "pr_state": "open",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-10-23T00:00:00Z",
+  "archive_path": "conductor/archive/20261023-adaptive-banding-completion"
+}

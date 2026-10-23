@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: The sun rises - 1 of 3. Half the sun peeks over the horizon. -->
+  <rect x="32" y="380" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 176 380 A 80 80 0 0 1 336 380 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 256 268 L 256 228" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 172 306 L 142 276" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 340 306 L 370 276" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+</svg>

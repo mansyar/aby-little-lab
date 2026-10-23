@@ -10,6 +10,7 @@ import {
   isRoundComplete,
   selectThreePairs,
   shuffle,
+  waypointsFor,
 } from "../../game/animalTraceLogic";
 
 afterEach(() => {
@@ -178,5 +179,56 @@ describe("generatePathPoints", () => {
     // At least one intermediate point should differ between the two curves
     const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
     expect(midDiffer).toBe(true);
+  });
+
+  it("produces different curves at other waypoint counts too", () => {
+    const spy = vi.spyOn(Math, "random");
+    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2); // first call params
+    const result1 = generatePathPoints(200, 384, 824, 384, 8);
+
+    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.9); // second call params
+    const result2 = generatePathPoints(200, 384, 824, 384, 8);
+
+    const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
+    expect(midDiffer).toBe(true);
+  });
+});
+
+describe("waypointsFor", () => {
+  it("classic band traces 6 waypoints per path", () => {
+    expect(waypointsFor(0)).toBe(6);
+  });
+
+  it("easy band shortens the trace to 4 waypoints", () => {
+    expect(waypointsFor(-1)).toBe(4);
+  });
+
+  it("hard band lengthens the trace to 8 waypoints", () => {
+    expect(waypointsFor(1)).toBe(8);
+  });
+
+  it("band-shifted waypoint counts differ observably from classic", () => {
+    expect(new Set([waypointsFor(-1), waypointsFor(0), waypointsFor(1)]).size).toBe(3);
+  });
+
+  it("every band's path keeps endpoints pinned and completes after all waypoints", () => {
+    for (const waypoints of [4, 6, 8]) {
+      const points = generatePathPoints(200, 384, 824, 384, waypoints);
+      expect(points).toHaveLength(waypoints);
+      const xStep = (824 - 200) / (waypoints - 1);
+      points.forEach((p, i) => {
+        expect(p.x).toBeCloseTo(200 + xStep * i);
+      });
+      expect(points[0]).toEqual({ x: 200, y: 384 });
+      expect(points[waypoints - 1]).toEqual({ x: 824, y: 384 });
+
+      let progress = createPathProgress(waypoints);
+      expect(isPathComplete(progress)).toBe(false);
+      for (let i = 1; i < waypoints; i++) {
+        progress = advancePath(progress);
+      }
+      expect(progress.currentPoint).toBe(waypoints - 1);
+      expect(isPathComplete(progress)).toBe(true);
+    }
   });
 });

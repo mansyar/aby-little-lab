@@ -1,6 +1,6 @@
 # SVG Style Spec — Aby's Little Lab
 
-**Purpose:** Single source of truth for the visual quality bar of every asset in `src/assets/svg/`. All 202 SVGs must conform to the rules below so the library reads as one consistent set. Style system: **Storybook Flat** (see `conductor/product-guidelines.md` §2).
+**Purpose:** Single source of truth for the visual quality bar of every asset in `src/assets/svg/`. All 219 SVGs must conform to the rules below so the library reads as one consistent set. Style system: **Storybook Flat** (see `conductor/product-guidelines.md` §2).
 
 **Canvas contract:** Every SVG is 512×512 viewBox, rasterized by the game at its per-use tier size - icon 160 px, card 256 px, hero 512 px (`src/utils/textureTiers.ts`) - sized for the asset's largest display context rather than at a uniform 512 px. Artwork and its outline stay inside a **512 grid with an 8px safe margin** (no path edge closer than x/y 8 or 504) so nothing clips when rasterized. **Never rename or delete files** — filenames are texture keys.
 
@@ -116,19 +116,19 @@ Each `cutout_X` mirrors `shape_X` geometry in the same hue family:
 
 ## 8. Asset Inventory
 
-202 SVGs, all texture keys — counts by folder:
+219 SVGs, all texture keys — counts by folder:
 
 | Folder | Count | Notes |
 |---|---|---|
 | `animals/` | 9 | cat, dog, rabbit, monkey, elephant, pig, frog (blue / green / red) |
 | `feelings/` | 4 | `face_*` expressions (happy / sad / angry / scared) |
-| `items/` | 23 | includes bone, beach ball, map |
+| `items/` | 27 | includes bone, beach ball, map, bell, kite, sock, boot |
 | `letters/` | 26 | bundled Baloo 2 glyphs (§4) |
 | `numbers/` | 10 | 0–9 |
-| `shadows/` | 8 | solid silhouettes paired with `items/` |
+| `shadows/` | 12 | solid silhouettes paired with `items/` |
 | `shapes/` | 36 | 18 `shape_*` + 18 `cutout_*` (§6) |
 | `stickers/` | 22 | cream circle scenes |
-| `stories/` | 24 | Story Order panels (`story_*`) |
+| `stories/` | 33 | Story Order panels (`story_*`) |
 | `toys/` | 7 | |
 | `ui/` | 12 | mascots, icons, `bubble`, `tile_feelings_faces` |
 | `ui/tiles/` | 21 | game tile faces |
