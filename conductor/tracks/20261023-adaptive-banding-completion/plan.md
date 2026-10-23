@@ -118,7 +118,7 @@ writes this file.
   `src/__tests__/game/art/shellOwnership.test.ts`,
   `src/__tests__/game/art/groupIntegrity.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` — plus the boot smoke check on port 4173 (`vite preview --strictPort`, then `node scripts/validate-boot.js`, then stop the preview), because the phase adds assets
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Shadow Match's four new objects + band selection** — covers:
   FR-4, FR-8
