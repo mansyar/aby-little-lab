@@ -229,4 +229,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Docs & Roadmap Truth Pass** - [20261022-docs-roadmap-truth](./archive/20261022-docs-roadmap-truth/index.md) - chore - high
 
-- [~] **Track: Adaptive Difficulty Completion** - [20261023-adaptive-banding-completion](./tracks/20261023-adaptive-banding-completion/index.md) - feature - high
+- [x] **Track: Adaptive Difficulty Completion** - [20261023-adaptive-banding-completion](./archive/20261023-adaptive-banding-completion/index.md) - feature - high
