@@ -88,7 +88,7 @@ Verified independently by the primary (2026-10-23). The phase's single blocker w
 | Check | Result |
 |---|---|
 | Working tree | Clean after the phase commits |
-| Commits since phase base `d370347` | `af03881` (the F2 fix), `5b7ed7d` (the evidence) - exactly as reported, no merges |
+| Commits since phase base `d370347` | the F2 fix and the evidence were reported as `af03881`/`5b7ed7d` and then squashed into `a4a4592` before the record was finalized (the squash expanded the evidence file with this section) - exactly as reported, no merges; the shipped history continues with the conductor-state commits `f7c41fe` and `4bcaefc` |
 | Files changed vs Touches | `docs/TDD.md` + the evidence file, nothing else |
 | Diff review | One sentence rewritten in §10.3: the integrated run's figures (97.92 / 91.81 / 96.6 / 98.7, with denominators) plus the per-run instrumentation-variance clause; nothing else in the file changed; the build's shell hash `index-5BMI4mqt.js` is byte-identical to the integrated record (docs-only change) |
 | F1 (primary's fix) | `fbc3ca8` corrected both stale ownership-figure rows in `verification/phase-3.md` (the source-diff-review row and the AC-2 row) to 139/133; the review.md finding describes the first only - both carry the same defect class and both are corrected |

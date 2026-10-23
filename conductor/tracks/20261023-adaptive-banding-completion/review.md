@@ -5,7 +5,7 @@
 - **Branch:** `feat/20261023-adaptive-banding-completion`
 - **Range:** `a054e5a86af2790cafad68b9121afcd23c5aa046..76968c2`
 - **Date:** 2026-10-23
-- **Verdict:** `PASS WITH FINDINGS` (round 1)
+- **Verdict:** `PASS` (round 2 — round 1 returned PASS WITH FINDINGS; both findings fixed in Phase R1, one new Low fixed in the round-2 acceptance)
 
 ## Summary
 
@@ -126,15 +126,37 @@ boot smoke check, exiting 0.
 
 ## Debt
 
-None deferred. Two Low findings, both fixed: F1 by the primary (Conductor
-prose the phase executor cannot edit), F2 in the review-fix phase.
+None deferred. Round 1's two Low findings were fixed in Phase R1 (F2 in
+`docs/TDD.md`, F1 by the primary as the owner of the Conductor evidence).
+Round 2 raised one new Low (F3 — the phase-R1 evidence cited the pre-squash
+commit hashes `af03881`/`5b7ed7d` instead of the shipped `a4a4592`), fixed by
+the primary during the round-2 acceptance.
 
 ## Doc sync
 
-`pending` — the post-review documentation sync runs after the review-fix phase.
+`updated` — the post-review documentation sync ran with the fix phase itself:
+`docs/TDD.md` §10.3 now quotes the integrated run's reconciled coverage
+figures (F2), and the primary's corrections closed the two evidence-record
+defects (F1 in `verification/phase-3.md`, F3 in `verification/phase-R1.md`).
+No other shipped document changes after the review.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 |---|---|---|---|---|---|---|
-| 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 0 |
+| 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 2 |
+| 2 | PASS | 0 | 0 | 0 | 1 | 3 |
+
+### Round 2
+
+The round-2 review re-read the Phase R1 delta (`d370347..HEAD`) and confirmed
+both round-1 findings genuinely fixed: F1's two stale ownership rows corrected
+to 139/133, consistent with the committed `shellOwnership.test.ts`
+(139/133) and `groupIntegrity.test.ts` (186) assertions; F2's `docs/TDD.md`
+§10.3 quoting the integrated run's figures with denominators plus an accurate
+variance clause — the phase's own fresh coverage run (97.94/91.88) against the
+integrated 97.92/91.81 empirically confirming the variance the clause
+describes. Round 2 raised one new Low finding, F3: the phase-R1 evidence's
+primary-verification table cited the pre-squash commit hashes `af03881`/
+`5b7ed7d`, which the acceptance squash left unreachable; fixed by the primary
+(phase-R1.md now records the squash explicitly). Verdict after round 2: PASS.
