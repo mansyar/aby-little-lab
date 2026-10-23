@@ -1,9 +1,9 @@
-> **Status:** UNRELEASED - these notes are authored, not shipped.
+> **Status:** FINAL - released 2026-10-23
 >
-> **This document is a name, not a release.** `package.json` still reads
-> `1.20.0`, no `v1.21.0` tag exists, and nothing has been deployed. The version
-> bump, the tag and the deployment are human decisions under
-> `conductor/workflow.md`, and the release checklist records the steps.
+> **Tag:** `v1.21.0` on `master`, pushed to origin; Coolify deploys on the tag
+> push. The live smoke and the entry-hash check it fires are recorded in
+> `docs/release-checklist.md`'s v1.21.0 sign-off; the device-class pass is
+> still pending ((it is the first entry in `docs/roadmap.md`)).
 >
 > **Base:** the `v1.20.0` tag (`437d56b`).
 
@@ -147,9 +147,9 @@ stands today.
   documents against the 22-game app in the same day. Both now describe the
   shipped product.
 - **Resolved - "product.md still carries two duplicate Changelog - Game 20
-  sections".** The duplicate is collapsed in this same unreleased batch, and
-  the surviving entry is the one that agrees with the shipped difficulty
-  ladder.
+  sections".** The duplicate is collapsed in the same batch this release
+  carries, and the surviving entry is the one that agrees with the shipped
+  difficulty ladder.
 
 The other figures in the v1.20.0 notes - the shell size, the chunk count, the
 SVG count and the test counts - are that release's own measurements, not the
@@ -172,16 +172,15 @@ copied here.
 
 ## Installation
 
-Nothing to install yet - this document describes work that has been merged but
-not released. When the release happens the app updates itself the way it always
-has: reopen it, or accept the update prompt, and the new service worker takes
-over. No storage migration is required: none of these eight tracks changes the
+Nothing to install by hand. The app updates itself the way it always has:
+reopen it, or accept the update prompt, and the new service worker takes over.
+No storage migration is required: none of these eight tracks changes the
 saved progress format, the profile format or the sticker set.
 
 ## Release Verification
 
 The figures below were measured on 2026-10-22, on the branch that carries all
-eight merges.
+eight merges, and re-confirmed by CI on the release commit.
 
 - **Merged:** PRs #48, #49, #50, #51, #52, #53, #54 and #55, on `master` after
   the `v1.20.0` tag (`437d56b`).
@@ -190,9 +189,10 @@ eight merges.
   90 / 85 / 88 / 95 floors; shell entry 134.6 kB against the 200 kB gate; 42
   JavaScript chunks, all 42 precached, 54 precache entries in total; PWA
   validation 16/16.
-- **Still a human decision:** the version bump in `package.json`, the
-  `v1.21.0` tag, the deployment, and the live-entry hash check that follows it.
-  The steps are in [`docs/release-checklist.md`](release-checklist.md).
+- **Released:** `package.json` bumped to `1.21.0` on 2026-10-23 and dispatched
+  as the annotated tag `v1.21.0` on `master`; Coolify deploys on the tag push.
+  The live smoke and the entry-hash check are recorded in
+  `docs/release-checklist.md`'s v1.21.0 sign-off.
 - **Device matrix:** pending - see
   [`docs/device-testing-checklist.md`](device-testing-checklist.md).
 

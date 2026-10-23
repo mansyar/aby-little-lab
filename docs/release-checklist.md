@@ -89,9 +89,9 @@
 > - [x] **PR #54 — Every game gets its own voice** (`conductor/archive/20261021-audio-variety/`) — 22 per-game audio identities
 > - [x] **PR #55 — The session lifecycle, made whole** (`conductor/archive/20261022-session-lifecycle/`) — the progress dots fill again in every game
 > - [x] Gates green on this branch (2026-10-22): Biome clean (247 files, 1 pre-existing warning), **2,488 tests in 118 files**, coverage statements 97.92 % / branches 91.62 % / functions 96.58 % / lines 98.69 % (gates 90 / 85 / 88 / 95), `pnpm build` OK (shell `index-BrQ7goBH.js` = 134.6 kB, 42 JavaScript chunks, 54 precache entries), `validate-bundle` PASS, `validate-pwa` 16/16, boot smoke check PASS (median of 3 cold loads 1115 ms ≤ 3000 ms)
-> - [ ] Version bump to `1.21.0` — **not done**: `package.json` still reads `1.20.0`. The bump and the `v1.21.0` tag are a human release decision
+> - [x] Version bumped to `1.21.0` — **2026-10-23**: `pnpm version 1.21.0 --no-git-tag-version` (`package.json` reads `1.21.0`; the lockfile carries no app version and `pnpm install --frozen-lockfile` stays green)
+> - [x] Release notes finalized — **2026-10-23**: the *Unreleased* banner on `docs/release-notes-v1.21.0.md` dropped for FINAL; the README Releases row and Docs index updated
 > - [ ] Device-class verification — **pending**: the device rows for this batch are unchecked in `docs/device-testing-checklist.md`; they need real hardware
-> - [ ] Release notes finalized — drafted at `docs/release-notes-v1.21.0.md`; the *Unreleased* banner is dropped when the release actually ships
 
 ### 2. PWA Validation
 - [x] Run `node scripts/validate-pwa.js` — **2026-10-22:** 16/16 passed; the v1.1.0 run was 13/13
