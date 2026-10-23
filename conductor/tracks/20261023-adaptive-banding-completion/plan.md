@@ -75,7 +75,7 @@ writes this file.
   `src/__tests__/scenes/bigSmallScene.test.ts`,
   `src/__tests__/scenes/feelingsFacesScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Big & Small's scale-contrast knob** — covers: FR-5
   - [ ] **P2.T1.1: A failing band-shift test** (the big/small factor pair
