@@ -16,15 +16,19 @@ primary records them.
 - **Covers:** FR-2, FR-3, AC-2, AC-3.
 - **Touches:** `src/game/playTimeLogic.ts`, `src/__tests__/game/playTimeLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Ceil the banked minutes** — covers: FR-2
-  - [ ] **P1.T1.1:** In `endPlaySession()` (`src/game/playTimeLogic.ts:190-198`) replace `Math.round` with `Math.ceil` for the elapsed-to-minutes conversion. Zero elapsed must still return exactly `0` (no `Math.ceil(0)` behavioural surprise) — keep the `elapsed <= 0 ? 0 : …` guard. Update the doc comment's "rounded to the nearest minute" wording to say ceiled.
-  - [ ] **P1.T1.2:** Add unit tests: any visible time > 0 and < 60 s banks exactly 1 minute; 45 min 29 s banks 46; an untouched session (start then end immediately) banks 0; a backwards clock still banks 0.
-- [ ] **P1.T2: Charge the new day only for post-midnight time** — covers: FR-3
-  - [ ] **P1.T2.1:** Add a small local helper that returns today's local midnight in milliseconds (`new Date(y, m, d, 0, 0, 0, 0).getTime()`, built from the same `now` used for banking so DST/local-time arithmetic stays local). In `endPlaySession()`, clamp the elapsed milliseconds to `Math.min(elapsed, Math.max(0, now - localMidnight(now)))` **before** the ceil. Rationale to record in the code comment: the record is a single-day snapshot, so a closed day's usage cannot be written and must not be charged to the new day.
-  - [ ] **P1.T2.2:** Unit tests with an injected `now`: 23:58 → 00:02 with four minutes of visible time banks 2; a session wholly inside one day is unaffected by the clamp; a session ending exactly at midnight banks 0 for the new day; a session started before midnight but resumed after it (pause/resume across the boundary) still clamps correctly.
-  - [ ] **P1.T2.3:** Re-run the whole play-time unit suite and record every pre-existing expectation that the ceil/clamp legitimately changes (expected: none, since no existing test banks sub-minute or crosses midnight — confirm and state it in the evidence).
+- [x] **P1.T1: Ceil the banked minutes** — covers: FR-2
+  - [x] **P1.T1.1:** In `endPlaySession()` (`src/game/playTimeLogic.ts:190-198`) replace `Math.round` with `Math.ceil` for the elapsed-to-minutes conversion. Zero elapsed must still return exactly `0` (no `Math.ceil(0)` behavioural surprise) — keep the `elapsed <= 0 ? 0 : …` guard. Update the doc comment's "rounded to the nearest minute" wording to say ceiled.
+  - [x] **P1.T1.2:** Add unit tests: any visible time > 0 and < 60 s banks exactly 1 minute; 45 min 29 s banks 46; an untouched session (start then end immediately) banks 0; a backwards clock still banks 0.
+- [x] **P1.T2: Charge the new day only for post-midnight time** — covers: FR-3
+  - [x] **P1.T2.1:** Add a small local helper that returns today's local midnight in milliseconds (`new Date(y, m, d, 0, 0, 0, 0).getTime()`, built from the same `now` used for banking so DST/local-time arithmetic stays local). In `endPlaySession()`, clamp the elapsed milliseconds to `Math.min(elapsed, Math.max(0, now - localMidnight(now)))` **before** the ceil. Rationale to record in the code comment: the record is a single-day snapshot, so a closed day's usage cannot be written and must not be charged to the new day.
+  - [x] **P1.T2.2:** Unit tests with an injected `now`: 23:58 → 00:02 with four minutes of visible time banks 2; a session wholly inside one day is unaffected by the clamp; a session ending exactly at midnight banks 0 for the new day; a session started before midnight but resumed after it (pause/resume across the boundary) still clamps correctly.
+  - [x] **P1.T2.3:** Re-run the whole play-time unit suite and record every pre-existing expectation that the ceil/clamp legitimately changes (expected: none, since no existing test banks sub-minute or crosses midnight — confirm and state it in the evidence).
+
+**Result:** verified
+**Checkpoint:** 07a73dd
+**Evidence:** conductor/tracks/20261024-playtime-integrity/verification/phase-1.md
 
 ## Phase 2: Every exit path banks
 
