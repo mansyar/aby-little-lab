@@ -1,6 +1,11 @@
 import type { BandShift } from "../game/adaptiveLogic";
 import { bandShiftFor } from "../game/adaptiveLogic";
-import { addPlayTime, normalizePlayTime, setLimit } from "../game/playTimeLogic";
+import {
+  addPlayTime,
+  normalizePlayTime,
+  setLimit,
+  setPlaySessionSink,
+} from "../game/playTimeLogic";
 import {
   addProfile as addProfileToV2,
   availableAvatarIds,
@@ -295,3 +300,7 @@ export function getAdaptiveBandShift(gameId: GameId): BandShift {
   if (!getSettings().adaptiveDifficulty) return 0;
   return bandShiftFor(getProgress()[gameId].recent);
 }
+
+// The play-session module banks through a sink so it can stay free of a storage
+// import (and the cycle that would follow). `recordPlayTime` is its writer.
+setPlaySessionSink(recordPlayTime);

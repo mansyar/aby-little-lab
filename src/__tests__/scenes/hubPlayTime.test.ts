@@ -72,6 +72,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   return { ensureSceneLoaded: mockEnsureSceneLoaded };
 });
 
+import { Mascot } from "../../components/Mascot";
 import { endPlaySession, startPlaySession } from "../../game/playTimeLogic";
 import { HubScene } from "../../scenes/HubScene";
 import { ensureSceneLoaded } from "../../scenes/sceneRegistry";
@@ -131,7 +132,9 @@ describe("Hub play-time enforcement", () => {
   }
 
   it("records the elapsed session minutes on return to the hub", () => {
-    startPlaySession("p1", Date.now() - 3 * 60 * 1000);
+    // Mid-minute so the ceiled total is 3 however many ms the two clock reads
+    // straddle — an exact whole-minute start would ceil up to 4.
+    startPlaySession("p1", Date.now() - 2.5 * 60 * 1000);
     const scene = new HubScene();
     scene.create();
 
@@ -147,12 +150,26 @@ describe("Hub play-time enforcement", () => {
 
   it("records against the profile that started the session", () => {
     addProfile("dog"); // p2 becomes active.
-    startPlaySession("p2", Date.now() - 2 * 60 * 1000);
+    startPlaySession("p2", Date.now() - 1.5 * 60 * 1000); // Mid-minute: ceils to 2.
     const scene = new HubScene();
     scene.create();
 
     expect(getPlayTime("p2").usedMinutes).toBe(2);
     expect(getPlayTime("p1").usedMinutes).toBe(0);
+  });
+
+  it("banks one session once across a page exit and the hub return", () => {
+    startPlaySession("p1", Date.now() - 2.5 * 60 * 1000); // Mid-minute: ceils to 3.
+
+    window.dispatchEvent(new Event("pagehide"));
+    expect(getPlayTime("p1").usedMinutes).toBe(3);
+
+    // The flush cleared the slot, so the Hub's own endPlaySession yields null and
+    // the same session cannot be banked a second time.
+    const scene = new HubScene();
+    scene.create();
+
+    expect(getPlayTime("p1").usedMinutes).toBe(3);
   });
 
   it("locks and dims tiles when the daily limit is reached", () => {
@@ -359,5 +376,102 @@ describe("Hub play-time enforcement", () => {
     expect(
       getPlayTimeGraphics(scene).filter((o) => getMockFn(o.destroy).mock.calls.length === 0),
     ).toHaveLength(1);
+  });
+
+  it("re-evaluates the limit visuals when the document becomes visible again", () => {
+    setPlayTimeLimit("p1", 15);
+    recordPlayTime("p1", 15);
+    const scene = new HubScene();
+    scene.create();
+
+    // Locked: the moon badge, drawn from the budget read at create time.
+    const moon = getLastGraphics(scene);
+    expect(getMockFn(moon.slice)).not.toHaveBeenCalled();
+
+    // The budget is raised while the Hub is parked in a background tab.
+    setPlayTimeLimit("p1", 60);
+    const rectanglesBefore = getMockFn(scene.add.rectangle).mock.calls.length;
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    // The moon badge is replaced by a hint arc without re-creating the scene:
+    // no tile is rebuilt, the old badge is destroyed, the new one is an arc.
+    expect(getMockFn(scene.add.rectangle).mock.calls.length).toBe(rectanglesBefore);
+    expect(getMockFn(moon.destroy)).toHaveBeenCalled();
+    const arc = getLastGraphics(scene);
+    expect(getMockFn(arc.slice)).toHaveBeenCalled();
+    expect(getMockFn(arc.fillPath)).toHaveBeenCalled();
+
+    // And the previously locked tiles are tappable again.
+    const tiles = getRectangles(scene).filter(
+      (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 140,
+    );
+    expect(tiles.length).toBeGreaterThanOrEqual(10);
+    for (const tile of tiles) {
+      expect(getMockFn(tile.setAlpha)).toHaveBeenCalledWith(1);
+      expect(getMockFn(tile.setInteractive)).toHaveBeenCalled();
+    }
+  });
+
+  it("waves the mascot once when the cap is re-read on foreground returns", () => {
+    setPlayTimeLimit("p1", 15);
+    recordPlayTime("p1", 15);
+    const wave = vi.spyOn(Mascot.prototype, "wave");
+    try {
+      const scene = new HubScene();
+      scene.create();
+
+      // Scenes created by earlier cases are still subscribed to the shared
+      // document, so count only this scene's own mascot: its wave is the last
+      // context recorded at create time.
+      const mascot = wave.mock.contexts.at(-1);
+      const wavesForThisScene = (): number =>
+        wave.mock.contexts.filter((context) => context === mascot).length;
+
+      // Reaching the cap on the way in is the one announcement.
+      expect(wavesForThisScene()).toBe(1);
+      const tiles = getRectangles(scene).filter(
+        (r) => ((r as unknown as { args?: number[] }).args?.[2] ?? 0) >= 140,
+      );
+      const lockedOnce = getMockFn(tiles[0].setAlpha).mock.calls.filter(
+        (call) => call[0] === TIME_UP_TILE_ALPHA,
+      ).length;
+
+      // Every foreground return re-reads the budget — two dispatches, no repeat.
+      document.dispatchEvent(new Event("visibilitychange"));
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(wavesForThisScene()).toBe(1);
+
+      // The refresh still converged on the stored budget: the moon badge is
+      // redrawn and the tiles are re-locked, so nothing went stale.
+      const badge = getLastGraphics(scene);
+      expect(getMockFn(badge.fillCircle)).toHaveBeenCalled();
+      expect(getMockFn(badge.slice)).not.toHaveBeenCalled();
+      const lockedAgain = getMockFn(tiles[0].setAlpha).mock.calls.filter(
+        (call) => call[0] === TIME_UP_TILE_ALPHA,
+      ).length;
+      expect(lockedAgain).toBeGreaterThan(lockedOnce);
+      expect(getMockFn(tiles[0].disableInteractive).mock.calls.length).toBeGreaterThan(0);
+    } finally {
+      wave.mockRestore();
+    }
+  });
+
+  it("detaches the visibility listener on shutdown so a re-create leaves exactly one", () => {
+    setPlayTimeLimit("p1", 30);
+    const first = new HubScene();
+    first.create();
+    first.events.emit("shutdown");
+
+    const second = new HubScene();
+    second.create();
+
+    const firstGraphics = getMockFn(first.add.graphics).mock.calls.length;
+    const secondGraphics = getMockFn(second.add.graphics).mock.calls.length;
+
+    // One dispatch reaches one handler: the second scene refreshes once...
+    document.dispatchEvent(new Event("visibilitychange"));
+    expect(getMockFn(second.add.graphics).mock.calls.length).toBe(secondGraphics + 1);
+    // ...and the shutdown scene's dead listener is gone, so it draws nothing.
+    expect(getMockFn(first.add.graphics).mock.calls.length).toBe(firstGraphics);
   });
 });

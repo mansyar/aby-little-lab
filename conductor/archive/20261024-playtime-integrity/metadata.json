@@ -1,0 +1,32 @@
+{
+  "id": "20261024-playtime-integrity",
+  "title": "Play-Time Session Integrity",
+  "type": "bug",
+  "status": "complete",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-24T00:00:00Z",
+  "updated_at": "2026-10-24T00:00:00Z",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "fix/20261024-playtime-integrity",
+  "base_branch": "master",
+  "base_sha": "d14c5e638e3024f46fdc6421e5edfa60c7264263",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 4,
+    "tasks_total": 14,
+    "tasks_done": 14
+  },
+  "last_checkpoint": "c9bdc5b",
+  "review_verdict": "PASS WITH FINDINGS",
+  "review_rounds": 2,
+  "doc_sync": "complete",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/59",
+  "pr_state": "open",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-10-24T00:00:00Z",
+  "archive_path": "conductor/archive/20261024-playtime-integrity"
+}

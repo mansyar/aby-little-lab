@@ -232,3 +232,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Adaptive Difficulty Completion** - [20261023-adaptive-banding-completion](./archive/20261023-adaptive-banding-completion/index.md) - feature - high
 
 - [x] **Track: Test Harness Diet** - [20261023-test-harness-diet](./archive/20261023-test-harness-diet/index.md) - chore - high
+
+---
+
+- [x] **Track: Play-Time Session Integrity** - [20261024-playtime-integrity](./archive/20261024-playtime-integrity/index.md) - bug - high

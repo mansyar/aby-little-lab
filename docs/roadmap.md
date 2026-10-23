@@ -45,15 +45,6 @@ visible and the promise rejection goes unhandled. A reader notices it by
 throttling the network until a chunk request fails, then tapping a tile and
 watching the Hub do nothing.
 
-### Play time is banked only when the child comes back to the Hub
-
-`src/game/playTimeLogic.ts` writes a session only when `endPlaySession()` is
-called, and `src/scenes/HubScene.ts` calls it from `create()` — so an app killed
-mid-game banks nothing at all. The same rounding means a session shorter than
-30 seconds banks zero minutes. A reader notices it by playing for a minute,
-killing the app instead of returning to the Hub, and reopening it to find the
-play-time total unchanged.
-
 ### Five copies of the same shuffle, and an RNG seam in only two modules
 
 The `shuffle` helper is byte-identical in `src/game/bigSmallLogic.ts`,
