@@ -3,6 +3,7 @@ import {
   buildPlaythrough,
   buildRound,
   isCorrect,
+  mixFor,
   OBVIOUS_POOL,
   ROUND_COUNT,
   ROUNDS_PER_BAND,
@@ -45,9 +46,9 @@ function sequenceRng(values: readonly number[]): { rng: () => number; calls: () 
 }
 
 describe("STORY_POOL", () => {
-  it("holds eight stories with unique ids and three unique panels each", () => {
-    expect(STORY_POOL).toHaveLength(8);
-    expect(new Set(STORY_IDS).size).toBe(8);
+  it("holds eleven stories with unique ids and three unique panels each", () => {
+    expect(STORY_POOL).toHaveLength(11);
+    expect(new Set(STORY_IDS).size).toBe(11);
     expect(STORY_IDS).toEqual(STORY_POOL.map((story) => story.id));
     for (const story of STORY_POOL) {
       expect(story.panels).toHaveLength(3);
@@ -56,18 +57,24 @@ describe("STORY_POOL", () => {
     }
   });
 
-  it("uses 24 distinct panel keys across the pool", () => {
+  it("uses 33 distinct panel keys across the pool", () => {
     const panels = STORY_POOL.flatMap((story) => [...story.panels]);
-    expect(panels).toHaveLength(24);
-    expect(new Set(panels).size).toBe(24);
+    expect(panels).toHaveLength(33);
+    expect(new Set(panels).size).toBe(33);
   });
 
-  it("splits into four obvious and four subtle stories", () => {
-    expect(OBVIOUS_POOL).toHaveLength(4);
-    expect(SUBTLE_POOL).toHaveLength(4);
+  it("splits into five obvious and six subtle stories", () => {
+    expect(OBVIOUS_POOL).toHaveLength(5);
+    expect(SUBTLE_POOL).toHaveLength(6);
     expect(OBVIOUS_POOL.length + SUBTLE_POOL.length).toBe(STORY_POOL.length);
     for (const story of OBVIOUS_POOL) expect(story.ladder).toBe("obvious");
     for (const story of SUBTLE_POOL) expect(story.ladder).toBe("subtle");
+  });
+
+  it("maps each band shift to its obvious/subtle round mix", () => {
+    expect(mixFor(-1)).toEqual({ obvious: 5, subtle: 1 });
+    expect(mixFor(0)).toEqual({ obvious: 3, subtle: 3 });
+    expect(mixFor(1)).toEqual({ obvious: 1, subtle: 5 });
   });
 });
 
@@ -113,11 +120,34 @@ describe("buildPlaythrough", () => {
     }
   });
 
-  it("never repeats a story, across many seeds", () => {
-    for (let seed = 1; seed <= 50; seed++) {
-      const rounds = buildPlaythrough(seededRng(seed));
-      const ids = rounds.map((round) => round.storyId);
-      expect(new Set(ids).size).toBe(ROUND_COUNT);
+  it("pins the classic mix: default call and shift 0 draw the same 3 + 3 shape", () => {
+    const byDefault = buildPlaythrough(seededRng(77)).map((round) => round.storyId);
+    const shifted = buildPlaythrough(seededRng(77), 0).map((round) => round.storyId);
+    expect(byDefault).toEqual(shifted);
+    expect(byDefault).toHaveLength(6);
+  });
+
+  it("draws a 5 + 1 mix in the easy band, obvious rounds first", () => {
+    const rounds = buildPlaythrough(seededRng(13), -1);
+    expect(rounds).toHaveLength(ROUND_COUNT);
+    const ladders = rounds.map((round) => storyFor(round.storyId).ladder);
+    expect(ladders).toEqual(["obvious", "obvious", "obvious", "obvious", "obvious", "subtle"]);
+  });
+
+  it("draws a 1 + 5 mix in the hard band, obvious round first", () => {
+    const rounds = buildPlaythrough(seededRng(13), 1);
+    expect(rounds).toHaveLength(ROUND_COUNT);
+    const ladders = rounds.map((round) => storyFor(round.storyId).ladder);
+    expect(ladders).toEqual(["obvious", "subtle", "subtle", "subtle", "subtle", "subtle"]);
+  });
+
+  it("never repeats a story in any band, across many seeds", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      for (let seed = 1; seed <= 50; seed++) {
+        const rounds = buildPlaythrough(seededRng(seed), shift);
+        const ids = rounds.map((round) => round.storyId);
+        expect(new Set(ids).size).toBe(ROUND_COUNT);
+      }
     }
   });
 

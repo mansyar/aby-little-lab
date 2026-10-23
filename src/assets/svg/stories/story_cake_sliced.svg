@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: The cake is sliced - 3 of 3. A wedge is gone; one slice is served. -->
+  <ellipse cx="256" cy="416" rx="200" ry="26" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 126 408 L 126 304 Q 126 286 144 286 L 296 286 L 296 408 Z" fill="#FED7D7" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="118" y="258" width="186" height="48" rx="24" fill="#FC8181" stroke="#2D3748" stroke-width="5"/>
+  <rect x="126" y="330" width="170" height="14" rx="7" fill="#FFF8E7" stroke="#2D3748" stroke-width="4"/>
+  <polygon points="356,392 452,392 404,300" fill="#FED7D7" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="360" y="364" width="88" height="12" rx="6" fill="#FFF8E7" stroke="#2D3748" stroke-width="4"/>
+  <ellipse cx="404" cy="404" rx="76" ry="14" fill="#FFFFFF" stroke="#2D3748" stroke-width="4"/>
+</svg>

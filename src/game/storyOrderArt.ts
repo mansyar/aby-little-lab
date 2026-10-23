@@ -1,7 +1,7 @@
 /**
  * Story Order panel art (Game 22).
  *
- * The 24 panel drawings are imported as raw markup and rasterized by the story
+ * The 33 panel drawings are imported as raw markup and rasterized by the story
  * scene's own `preload` through `preloadStoryOrderArt`, so their SVG strings
  * live in the game's lazy chunk instead of the shell bundle. Nothing else may
  * import this module: `src/__tests__/game/storyOrderArt.test.ts` asserts that
@@ -15,6 +15,12 @@ import storyBalloonRoundSvg from "../assets/svg/stories/story_balloon_round.svg?
 import storyBananaPeelSvg from "../assets/svg/stories/story_banana_peel.svg?raw";
 import storyBananaPeeledSvg from "../assets/svg/stories/story_banana_peeled.svg?raw";
 import storyBananaWholeSvg from "../assets/svg/stories/story_banana_whole.svg?raw";
+import storyCakeCandlesSvg from "../assets/svg/stories/story_cake_candles.svg?raw";
+import storyCakeSlicedSvg from "../assets/svg/stories/story_cake_sliced.svg?raw";
+import storyCakeWholeSvg from "../assets/svg/stories/story_cake_whole.svg?raw";
+import storyClothesDrySvg from "../assets/svg/stories/story_clothes_dry.svg?raw";
+import storyClothesDryingSvg from "../assets/svg/stories/story_clothes_drying.svg?raw";
+import storyClothesWetSvg from "../assets/svg/stories/story_clothes_wet.svg?raw";
 import storyCloudSvg from "../assets/svg/stories/story_cloud.svg?raw";
 import storyCloudRainingSvg from "../assets/svg/stories/story_cloud_raining.svg?raw";
 import storyCupEmptySvg from "../assets/svg/stories/story_cup_empty.svg?raw";
@@ -33,6 +39,9 @@ import storyRainPuddleSvg from "../assets/svg/stories/story_rain_puddle.svg?raw"
 import storySeedFlowerSvg from "../assets/svg/stories/story_seed_flower.svg?raw";
 import storySeedPlantedSvg from "../assets/svg/stories/story_seed_planted.svg?raw";
 import storySeedSproutSvg from "../assets/svg/stories/story_seed_sprout.svg?raw";
+import storySunNoonSvg from "../assets/svg/stories/story_sun_noon.svg?raw";
+import storySunRiseSvg from "../assets/svg/stories/story_sun_rise.svg?raw";
+import storySunSetSvg from "../assets/svg/stories/story_sun_set.svg?raw";
 import { toDataUri } from "../utils/svgDataUri";
 import { textureSizeFor } from "../utils/textureTiers";
 
@@ -45,7 +54,7 @@ export interface StoryPanelAsset {
 }
 
 /**
- * The 24 story panels in `STORY_POOL` solution order: every story's three
+ * The 33 story panels in `STORY_POOL` solution order: every story's three
  * panels, first → last, with the stories in pool order.
  */
 export const STORY_PANEL_ASSETS: readonly StoryPanelAsset[] = [
@@ -61,6 +70,9 @@ export const STORY_PANEL_ASSETS: readonly StoryPanelAsset[] = [
   { key: "story_ice_scoop", svg: storyIceScoopSvg },
   { key: "story_ice_dripping", svg: storyIceDrippingSvg },
   { key: "story_ice_puddle", svg: storyIcePuddleSvg },
+  { key: "story_cake_whole", svg: storyCakeWholeSvg },
+  { key: "story_cake_candles", svg: storyCakeCandlesSvg },
+  { key: "story_cake_sliced", svg: storyCakeSlicedSvg },
   { key: "story_banana_whole", svg: storyBananaWholeSvg },
   { key: "story_banana_peeled", svg: storyBananaPeeledSvg },
   { key: "story_banana_peel", svg: storyBananaPeelSvg },
@@ -73,6 +85,12 @@ export const STORY_PANEL_ASSETS: readonly StoryPanelAsset[] = [
   { key: "story_cloud", svg: storyCloudSvg },
   { key: "story_cloud_raining", svg: storyCloudRainingSvg },
   { key: "story_rain_puddle", svg: storyRainPuddleSvg },
+  { key: "story_clothes_wet", svg: storyClothesWetSvg },
+  { key: "story_clothes_drying", svg: storyClothesDryingSvg },
+  { key: "story_clothes_dry", svg: storyClothesDrySvg },
+  { key: "story_sun_rise", svg: storySunRiseSvg },
+  { key: "story_sun_noon", svg: storySunNoonSvg },
+  { key: "story_sun_set", svg: storySunSetSvg },
 ];
 
 /**

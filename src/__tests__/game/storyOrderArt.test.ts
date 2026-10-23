@@ -11,8 +11,8 @@ const panelKeys = STORY_PANEL_ASSETS.map((panel) => panel.key);
 const FORBIDDEN_MARKUP = /<(linear|radial)gradient|<filter|<image|\.png|\.jpg|<text/i;
 
 describe("STORY_PANEL_ASSETS", () => {
-  it("holds exactly the 24 panels of the story pool, in solution order", () => {
-    expect(STORY_PANEL_ASSETS).toHaveLength(24);
+  it("holds exactly the 33 panels of the story pool, in solution order", () => {
+    expect(STORY_PANEL_ASSETS).toHaveLength(33);
     expect(panelKeys).toEqual(STORY_POOL.flatMap((story) => story.panels));
   });
 
@@ -55,9 +55,9 @@ describe("preloadStoryOrderArt", () => {
     preloadStoryOrderArt(scene);
 
     const calls = svg.mock.calls as Array<[string, string, { width: number; height: number }]>;
-    expect(calls).toHaveLength(24);
+    expect(calls).toHaveLength(33);
     expect(calls.map(([key]) => key)).toEqual(panelKeys);
-    expect(new Set(calls.map(([key]) => key)).size).toBe(24);
+    expect(new Set(calls.map(([key]) => key)).size).toBe(33);
     for (const [, uri, size] of calls) {
       expect(uri.startsWith("data:image/svg+xml;base64,")).toBe(true);
       expect(size).toEqual({ width: 256, height: 256 });

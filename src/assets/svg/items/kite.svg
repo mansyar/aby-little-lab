@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: diamond kite on the wind, tail streaming with two bows. -->
+  <polygon points="256,64 396,238 256,392 116,238" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 256 64 L 256 392 M 116 238 L 396 238" stroke="#2D3748" stroke-width="4"/>
+  <path d="M 256 392 Q 300 428 342 440 Q 374 449 398 436" fill="none" stroke="#2D3748" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="308,420 334,434 308,452" fill="#FC8181" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="362,416 338,434 364,452" fill="#4FD1C5" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+</svg>

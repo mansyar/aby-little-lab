@@ -6,6 +6,7 @@ import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift } from "../utils/dragJuice";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 const ROUND_COUNT = 6;
@@ -37,7 +38,7 @@ interface StoryPanel extends BoardPiece {
  * Order, a wrong board keeps every panel exactly where the child put it and
  * unlocks so one panel can be moved and retried.
  *
- * The 24 panel drawings are rasterized by this scene's own `preload`, so they
+ * The 33 panel drawings are rasterized by this scene's own `preload`, so they
  * load with the lazy game chunk rather than the boot shell.
  *
  * All slot registration, hover tracking, snapping, slot↔slot swaps,
@@ -86,7 +87,7 @@ export class StoryOrderScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the story in order, first to last.");
 
-    this.rounds = buildPlaythrough();
+    this.rounds = buildPlaythrough(Math.random, getAdaptiveBandShift("story-order"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

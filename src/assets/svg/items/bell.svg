@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: hand bell - dome body, flared rim, clapper swinging below. -->
+  <circle cx="256" cy="62" r="18" fill="#D69E2E" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 256 80 C 178 80 152 150 150 226 C 148 294 122 324 112 350 L 400 350 C 390 324 364 294 362 226 C 360 150 334 80 256 80 Z" fill="#D69E2E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="352" rx="152" ry="24" fill="#D69E2E" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="256" cy="404" r="24" fill="#2D3748"/>
+  <ellipse cx="204" cy="200" rx="24" ry="44" fill="#FEEBC8"/>
+</svg>

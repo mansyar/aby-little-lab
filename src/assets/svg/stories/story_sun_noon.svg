@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: The sun climbs to noon - 2 of 3. The whole sun rides high. -->
+  <rect x="32" y="420" width="448" height="28" rx="14" fill="#C6F6D5" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="256" cy="212" r="88" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 256 84 L 256 48" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 352 116 L 378 90" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 160 116 L 134 90" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 392 212 L 428 212" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 120 212 L 84 212" stroke="#D69E2E" stroke-width="9" stroke-linecap="round"/>
+</svg>

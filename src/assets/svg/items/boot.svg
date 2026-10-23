@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Shadow Match: rain boot - tall shaft, strap at the top, flat chunky sole. -->
+  <path d="M 175 64 L 325 64 L 325 290 Q 325 312 346 320 L 408 344 Q 442 357 442 390 L 442 424 Q 442 444 422 444 L 195 444 Q 175 444 175 424 Z" fill="#A0522D" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="168" y="46" width="164" height="44" rx="12" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+  <rect x="168" y="404" width="278" height="40" rx="12" fill="#2D3748"/>
+  <path d="M 205 130 L 205 380 M 250 130 L 250 380 M 295 130 L 295 380" stroke="#2D3748" stroke-width="4" opacity="0.35"/>
+</svg>
