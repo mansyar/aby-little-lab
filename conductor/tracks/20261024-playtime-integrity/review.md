@@ -2,12 +2,33 @@
 
 - **Track:** `20261024-playtime-integrity` (bug, high)
 - **Branch:** `fix/20261024-playtime-integrity`
-- **Range:** `d14c5e638e3024f46fdc6421e5edfa60c7264263..4a4d123` (`master..HEAD`)
+- **Range:** `d14c5e638e3024f46fdc6421e5edfa60c7264263..b2081df` (`master..HEAD`)
 - **Date:** 2026-10-24
-- **Round:** 1
-- **Verdict:** **BLOCK** — one High finding (F1) remains open.
+- **Round:** 2 (final)
+- **Verdict:** **PASS WITH FINDINGS** — round 1's High and three Lows are resolved; the
+  round-2 review found one new Low (F5, a documentation gap), fixed before the PR and
+  recorded below. No Critical or High remains.
 
-## Summary
+## Round 2 addendum
+
+Round 2 reviewed the delta `ef575fa..0f516d8` (phase R1) and re-read
+`src/game/playTimeLogic.ts` in full, because F1 was a defect in an accumulator.
+Verdict: **PASS WITH FINDINGS**.
+
+| Finding | Round 1 | Round 2 |
+| --- | --- | --- |
+| F1 (High) — wall-clock clamp mis-attributes midnight | open | **resolved** — clamp replaced by per-stretch accrual with an `accruedMidnight` anchor that rebases when a stretch closes in a later day. Nine shapes re-derived against the code and each matches a named assertion: 2 (pause 23:55 / resume 00:01 / end 00:03), 5 (resume 08:00), 0 (end exactly at midnight), 0 (end while paused across midnight), 60 (two-midnight stretch), 45 (same-day), and the backwards-clock no-op. No state leak, no double credit; the single changed pre-existing expectation (3 → 2) is the wrong one. |
+| F2 (Low) — bfcache exit banks | open | **resolved** — `persisted` returns before banking, session and listeners survive, a real exit still banks once; both directions pinned. |
+| F3 (Low) — PRD over-claims hiding banks | open | **resolved** — PRD now says hiding only pauses and names the three real banks; TDD documents per-stretch accrual with both worked numbers. |
+| F4 (Low) — mascot waves on every foreground return | open | **resolved** — the wave is gated on a newly-reached cap while `applyTimeUpLock()` and `restoreTiles()` stay unconditional, so the refresh still converges; pinned by a two-dispatch test on one scene. |
+| F5 (Low, new) — the bfcache eviction window was undocumented | — | **resolved before PR** — `docs/PRD.md` §4.6 and `docs/TDD.md` §7.5 now record that a page which enters the back/forward cache and is never restored banks nothing for that stretch, the one exit where a fired page-exit event deliberately does not bank. Documentation only; the code behaviour is the trade round 1 asked for. |
+
+The added `accruedMidnight` anchor is required, not incidental: without it a stretch
+that closes before midnight accrues against that day's midnight and the paused case
+would bank 7. Round 2 found no new correctness, race or contract defect, and every
+delta change sits inside the phase's declared `Touches`.
+
+## Summary (round 1)
 
 The structure of the track is sound and its seams are in the right places: the
 injected sink keeps `playTimeLogic.ts` importing only `../types`, the visibility
@@ -162,14 +183,17 @@ registration-order adjustment is documented and behaviourally neutral.
 
 ## Debt
 
-None yet — all four findings are assigned to Phase R1.
+None. Every finding from both rounds is fixed inside the track.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | BLOCK | 0 | 1 | 0 | 3 | — |
+| 1 | BLOCK | 0 | 1 | 0 | 3 | - |
+| 2 | PASS WITH FINDINGS | 0 | 0 | 0 | 1 | 4 + F5 (doc) |
 
 ## Doc sync
 
-`pending` — the post-review sync updates this to `updated` or `none`.
+`complete` — the phase and post-review documentation is synchronized: PRD §4.6, TDD
+§7.5/§7.1, and the roadmap Known Issue retired. `node scripts/validate-docs.js`
+passes 5/5 at `b2081df`.
