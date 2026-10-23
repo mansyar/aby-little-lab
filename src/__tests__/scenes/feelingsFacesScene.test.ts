@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Scenario } from "../../game/feelingsFacesLogic";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -64,7 +65,33 @@ const { mockSpeech } = vi.hoisted(() => ({
 
 vi.mock("../../utils/speech", () => mockSpeech);
 
-import { buildRoundChoices, ROUND_COUNT, type Scenario } from "../../game/feelingsFacesLogic";
+const { getAdaptiveBandShiftMock, drawScenariosMock, buildRoundChoicesMock } = vi.hoisted(() => ({
+  getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
+  drawScenariosMock: vi.fn(),
+  buildRoundChoicesMock: vi.fn(),
+}));
+
+vi.mock("../../utils/storage", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getAdaptiveBandShift: (gameId: string) => getAdaptiveBandShiftMock(gameId),
+}));
+
+vi.mock("../../game/feelingsFacesLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/feelingsFacesLogic")>();
+  return {
+    ...actual,
+    drawScenarios: (...args: Parameters<typeof actual.drawScenarios>) => {
+      drawScenariosMock(...args);
+      return actual.drawScenarios(...args);
+    },
+    buildRoundChoices: (...args: Parameters<typeof actual.buildRoundChoices>) => {
+      buildRoundChoicesMock(...args);
+      return actual.buildRoundChoices(...args);
+    },
+  };
+});
+
+import { buildRoundChoices, ROUND_COUNT } from "../../game/feelingsFacesLogic";
 import { isMastered } from "../../game/progressLogic";
 import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import type { GameProgress } from "../../types";
@@ -89,6 +116,16 @@ const AUTO_RETURN_DELAY = 3000;
 const MUTED_TINT = 0xa0aec0;
 const MUTED_ALPHA = 0.6;
 
+/** Rounds each threaded ladder rung down to its kind, for band assertions. */
+interface ThreadedRung {
+  kind: string;
+}
+
+function kindsOfThreaded(ladder: readonly ThreadedRung[] | undefined): string[] {
+  if (!ladder) return [];
+  return ladder.map((rung) => rung.kind);
+}
+
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -100,6 +137,7 @@ interface SceneInternals {
   choices: string[];
   inputLocked: boolean;
   taps: number;
+  ladder?: readonly ThreadedRung[];
   add: Record<string, unknown>;
   time: { delayedCall: unknown };
   tweens: { add: unknown };
@@ -690,5 +728,73 @@ describe("FeelingsFacesScene round flow", () => {
     tapCard(scene, targetCardIndex(scene));
     fireNextRoundDelay(scene);
     expect(internals(scene).roundIndex).toBe(1);
+  });
+
+  describe("adaptive band wiring", () => {
+    /** Creates a fresh scene with its round flow built. */
+    function createScene(): FeelingsFacesScene {
+      const scene = new FeelingsFacesScene();
+      scene.create();
+      return scene;
+    }
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      getAdaptiveBandShiftMock.mockReturnValue(0);
+    });
+
+    it("samples the band shift once in create() and adopts the hard band's ladder", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(1);
+      const scene = createScene();
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("feelings-faces");
+      expect(drawScenariosMock).toHaveBeenCalledTimes(1);
+      expect(kindsOfThreaded(internals(scene).ladder)).toEqual([
+        "confusable",
+        "confusable",
+        "confusable",
+        "confusable",
+        "confusable",
+        "confusable",
+      ]);
+    });
+
+    it("keeps the shipped 3+3 ladder when the facade returns 0", () => {
+      const scene = createScene();
+      expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("feelings-faces");
+      expect(drawScenariosMock).toHaveBeenCalledTimes(1);
+      expect(kindsOfThreaded(internals(scene).ladder)).toEqual([
+        "distinct",
+        "distinct",
+        "distinct",
+        "confusable",
+        "confusable",
+        "confusable",
+      ]);
+    });
+
+    it("adopts the all-distinct ladder on the easy band", () => {
+      getAdaptiveBandShiftMock.mockReturnValue(-1);
+      const scene = createScene();
+      expect(kindsOfThreaded(internals(scene).ladder)).toEqual([
+        "distinct",
+        "distinct",
+        "distinct",
+        "distinct",
+        "distinct",
+        "distinct",
+      ]);
+    });
+
+    it("keeps the six-round ladder and the one-scenario-per-round flow on every band", () => {
+      for (const shift of [-1, 0, 1] as const) {
+        getAdaptiveBandShiftMock.mockReturnValue(shift);
+        const scene = createScene();
+        const sceneInternals = internals(scene);
+        expect(sceneInternals.rounds).toHaveLength(6);
+        const ids = sceneInternals.rounds.map((scenario) => scenario.id);
+        expect(new Set(ids).size).toBe(6);
+      }
+    });
   });
 });

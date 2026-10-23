@@ -1,3 +1,5 @@
+import type { BandShift } from "./adaptiveLogic";
+
 /** The six toy types used in the Big vs. Small game. */
 export type ToyType = "teddy_bear" | "car" | "ball" | "block" | "rocket" | "drum";
 
@@ -22,6 +24,38 @@ export const BIG_SCALE = 1.5;
 
 /** Scale factor for small items. */
 export const SMALL_SCALE = 0.7;
+
+/** The per-category scale factors one band's geometry is stamped from. */
+export interface ScaleFactors {
+  big: number;
+  small: number;
+}
+
+/*
+ * Band factors chosen against the scene's fixed layout (1024x768 canvas, toy
+ * row y=580 with 96x96px bases over 7 slots, box row y=200 with 128px bases
+ * over 3 slots) and the 64px touch floor: easy's 1.6x big box is the widest
+ * object that still fits its 2-slot row (341px) with margin, easy's 0.68x
+ * small toy stays above the floor at 65.3px (the shipped 0.7x is already
+ * 67.2px, so the floor binds lower bands, not the canvas); hard's 1.35x/0.8x
+ * narrows the 1.5x/0.7x contrast ratio enough for a jamming toddler to feel
+ * while both small boxes (0.8x = 102.4px) keep comfortable targets.
+ */
+const EASY_SCALE_FACTORS = { big: 1.6, small: 0.68 } satisfies ScaleFactors;
+const HARD_SCALE_FACTORS = { big: 1.35, small: 0.8 } satisfies ScaleFactors;
+const CLASSIC_SCALE_FACTORS = { big: BIG_SCALE, small: SMALL_SCALE } satisfies ScaleFactors;
+
+/**
+ * Picks the per-category scale factors one band's toys and boxes are stamped
+ * from: the easy band widens the big/small contrast, the hard band narrows
+ * it. The classic band keeps the shipped fixed factors, so unshifted draws
+ * are byte-identical to shipped behaviour.
+ */
+export function scaleFactorsFor(shift: BandShift = 0): ScaleFactors {
+  if (shift < 0) return EASY_SCALE_FACTORS;
+  if (shift > 0) return HARD_SCALE_FACTORS;
+  return CLASSIC_SCALE_FACTORS;
+}
 
 /** Number of toy types to select per round (3 of 6). */
 export const SELECT_COUNT = 3;
@@ -55,31 +89,34 @@ export function selectToys(): ToyType[] {
 }
 
 /** Creates toy instances: 2 per type (big + small) = 6 total. */
-export function createToyInstances(types: readonly ToyType[]): ToyInstance[] {
+export function createToyInstances(
+  types: readonly ToyType[],
+  factors: ScaleFactors = CLASSIC_SCALE_FACTORS,
+): ToyInstance[] {
   const instances: ToyInstance[] = [];
   for (const type of types) {
-    instances.push({ type, scaleCategory: "big", scale: BIG_SCALE });
-    instances.push({ type, scaleCategory: "small", scale: SMALL_SCALE });
+    instances.push({ type, scaleCategory: "big", scale: factors.big });
+    instances.push({ type, scaleCategory: "small", scale: factors.small });
   }
   return instances;
 }
 
 /** Creates the two boxes (big and small) with shuffled left/right sides. */
-export function createBoxes(): BoxInstance[] {
+export function createBoxes(factors: ScaleFactors = CLASSIC_SCALE_FACTORS): BoxInstance[] {
   return shuffle([
-    { scaleCategory: "big", scale: BIG_SCALE },
-    { scaleCategory: "small", scale: SMALL_SCALE },
+    { scaleCategory: "big", scale: factors.big },
+    { scaleCategory: "small", scale: factors.small },
   ]);
 }
 
 /** Generates a round with shuffled toy positions and two boxes. */
-export function generateRound(): {
+export function generateRound(factors: ScaleFactors = CLASSIC_SCALE_FACTORS): {
   toys: ToyInstance[];
   boxes: BoxInstance[];
 } {
   const selected = selectToys();
-  const toys = shuffle(createToyInstances(selected));
-  const boxes = createBoxes();
+  const toys = shuffle(createToyInstances(selected, factors));
+  const boxes = createBoxes(factors);
   return { toys, boxes };
 }
 

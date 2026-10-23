@@ -6,12 +6,15 @@ import {
   isMatch,
   isWin,
   type ScaleCategory,
+  type ScaleFactors,
+  scaleFactorsFor,
   type ToyInstance,
 } from "../game/bigSmallLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
 import { motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
+import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
 
 /** Y position for boxes (top area). */
@@ -97,6 +100,8 @@ export class BigSmallScene extends GameSceneBase {
     toys: [],
     boxes: [],
   };
+  /** Scale factors for the session, sampled from the band once. */
+  private factors: ScaleFactors = scaleFactorsFor(0);
   private toyData: ToyData[] = [];
   private boxSlots: BoxSlotData[] = [];
   private sortedCount = 0;
@@ -115,6 +120,7 @@ export class BigSmallScene extends GameSceneBase {
     this.createBackButton();
     this.createSpokenInstruction("Put the big toys in the big box.");
 
+    this.factors = scaleFactorsFor(getAdaptiveBandShift("big-small"));
     this.initRound();
 
     this.registerShutdownCleanup();
@@ -122,7 +128,7 @@ export class BigSmallScene extends GameSceneBase {
 
   /** Initializes a new round: generates toys and boxes, renders them on screen. */
   private initRound(): void {
-    this.round = generateRound();
+    this.round = generateRound(this.factors);
     this.boxSlots = [];
     this.toyData = [];
     this.sortedCount = 0;
