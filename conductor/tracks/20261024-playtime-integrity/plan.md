@@ -66,7 +66,7 @@ primary records them.
 - **Covers:** FR-5, AC-5, AC-6, NFR-1..NFR-6.
 - **Touches:** `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubPlayTime.test.ts`, `docs/PRD.md`, `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Refresh the limit visuals on visibility restore** — covers: FR-5
   - [ ] **P3.T1.1:** In `HubScene`, register a `visibilitychange` listener (document → visible) that calls the existing private `refreshPlayTimeState()` (`src/scenes/HubScene.ts:269-281`) — no new render path, no timer. Register it where the scene can guarantee cleanup: attach in `create()` and remove on the scene's `shutdown` event (`this.events.once("shutdown", …)`), so repeated Hub creates cannot stack listeners. Use the same engine-agnostic document guard style the rest of the shell uses so a headless test host does not throw.
