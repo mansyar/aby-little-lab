@@ -16,7 +16,7 @@ primary records them.
 - **Covers:** FR-2, FR-3, AC-2, AC-3.
 - **Touches:** `src/game/playTimeLogic.ts`, `src/__tests__/game/playTimeLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Ceil the banked minutes** — covers: FR-2
   - [ ] **P1.T1.1:** In `endPlaySession()` (`src/game/playTimeLogic.ts:190-198`) replace `Math.round` with `Math.ceil` for the elapsed-to-minutes conversion. Zero elapsed must still return exactly `0` (no `Math.ceil(0)` behavioural surprise) — keep the `elapsed <= 0 ? 0 : …` guard. Update the doc comment's "rounded to the nearest minute" wording to say ceiled.
