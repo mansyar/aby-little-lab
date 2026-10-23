@@ -91,22 +91,26 @@ primary records them.
 - **Covers:** F1, F2, F3, F4.
 - **Touches:** `src/game/playTimeLogic.ts`, `src/__tests__/game/playTimeLogic.test.ts`, `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubPlayTime.test.ts`, `docs/PRD.md`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Accrue post-midnight visible time per stretch** — covers: F1
-  - [ ] **R1.T1.1:** Replace the wall-clock clamp in `endPlaySession()` (`src/game/playTimeLogic.ts:265`) with per-stretch accrual. Add `sinceMidnightMs` to `ActiveSession`; add a helper returning `max(0, end - max(start, localMidnight(end)))`; accumulate it in `pausePlaySession()` for the stretch being closed and in `endPlaySession()` for a still-running stretch; bank `Math.ceil(sinceMidnightMs / 60_000)` behind the existing `<= 0` guard. Remove the now-unused wall-clock clamp (and `visibleElapsedMs` if it becomes dead). Keep `visibleMs` only if something still needs total visible time.
-  - [ ] **R1.T1.2:** Correct `src/__tests__/game/playTimeLogic.test.ts:273-281` to expect 2 (not 3) and add: pause 23:55 / resume 00:01 / end 00:03 → 2; pause 23:55 / resume 08:00 / end 08:05 → 5 (not 10); a still-hidden-at-end variant where hidden minutes are never billed; and a two-midnight-spanning session that charges only the most recent day's visible time.
-- [ ] **R1.T2: Do not bank a restorable page exit** — covers: F2
-  - [ ] **R1.T2.1:** `handlePageHide` takes the event and returns early when `event.persisted`, so a bfcache exit leaves the session, its watchers and its paused state intact; a real exit still banks.
-  - [ ] **R1.T2.2:** Test: dispatch `pagehide` with `persisted: true` mid-session → no sink call and `endPlaySession()` still returns the session; a non-persisted `pagehide` still banks once.
-- [ ] **R1.T3: Correct the PRD claim** — covers: F3
-  - [ ] **R1.T3.1:** `docs/PRD.md` §4.6: bank on Hub return, page close/navigation away (`pagehide`) and a new game start; hiding only pauses; the gap is "a process killed without a page-exit event banks nothing, even if it was hidden first".
-  - [ ] **R1.T3.2:** `docs/TDD.md` §7.5: restate the accrual rule as per-stretch post-midnight accrual (no wall-clock clamp) and note the bfcache-persisted exception in the accepted-limitation paragraph.
-- [ ] **R1.T4: Wave once at the cap** — covers: F4
-  - [ ] **R1.T4.1:** In `HubScene.refreshPlayTimeState()`, capture the prior lock state and pass it so `onLimitReached` only calls `mascot.wave()` when the state newly became locked; `applyTimeUpLock()` / `restoreTiles()` stay unconditional.
-  - [ ] **R1.T4.2:** Test in `hubPlayTime.test.ts`: create at the cap, dispatch `visibilitychange` twice → one wave, while the badge/arc still matches the stored budget.
-- [ ] **R1.T5: Re-run the gate and record it** — covers: F1, F2, F3, F4
-  - [ ] **R1.T5.1:** Full verification chain; write `conductor/tracks/20261024-playtime-integrity/verification/phase-R1.md` with the finding-by-finding mapping and the red-then-green evidence for the corrected midnight expectations.
+- [x] **R1.T1: Accrue post-midnight visible time per stretch** — covers: F1
+  - [x] **R1.T1.1:** Replace the wall-clock clamp in `endPlaySession()` with per-stretch accrual. `ActiveSession` now carries `sinceMidnightMs` plus an `accruedMidnight` anchor; `visibleAfterMidnight(start, end)` returns one stretch's post-midnight tail, and the accumulator rebases onto the new day before adding it. Called from `pausePlaySession()` for the closing stretch and from `endPlaySession()` for a still-running one; banked as `Math.ceil(sinceMidnightMs / 60_000)` behind the `<= 0` guard. `visibleMs` and `visibleElapsedMs` are gone.
+  - [x] **R1.T1.2:** Corrected the paused-across-midnight expectation from 3 to 2 and added: 23:55 / 00:01 / 00:03 → 2; 23:55 / 08:00 / 08:05 → 5 (not 10); hidden-at-end across midnight → 0; a 26-hour continuous stretch → only its last day's 60 minutes.
+- [x] **R1.T2: Do not bank a restorable page exit** — covers: F2
+  - [x] **R1.T2.1:** `handlePageHide(event)` returns early when `event.persisted` is true, so a bfcache exit leaves the session, its watchers and its paused state intact; a real exit still banks.
+  - [x] **R1.T2.2:** Tests: a `persisted` exit makes no sink call and leaves `endPlaySession()` still returning the session; a plain `pagehide` still banks exactly once.
+- [x] **R1.T3: Correct the PRD claim** — covers: F3
+  - [x] **R1.T3.1:** `docs/PRD.md` §4.6 now says a session banks on the Hub return, on page close/navigation away (`pagehide`) and when a new game starts; hiding only pauses; the gap is a process killed without a page-exit event, even if the page was hidden first.
+  - [x] **R1.T3.2:** `docs/TDD.md` §7.5 documents per-stretch post-midnight accrual with both worked numbers and records the bfcache-persisted exception; the §7 module-table cell no longer says "midnight clamp".
+- [x] **R1.T4: Wave once at the cap** — covers: F4
+  - [x] **R1.T4.1:** `refreshPlayTimeState()` captures the prior lock state and passes it into `createPlayTimeIndicator(wasTimeUp)`, so `onLimitReached` waves only when the cap is newly reached; `applyTimeUpLock()` / `restoreTiles()` stay unconditional.
+  - [x] **R1.T4.2:** Test: create at the cap, dispatch `visibilitychange` twice → one wave for that scene's mascot, while the badge is redrawn and the tiles re-locked.
+- [x] **R1.T5: Re-run the gate and record it** — covers: F1, F2, F3, F4
+  - [x] **R1.T5.1:** Full verification chain green; `verification/phase-R1.md` records each finding's fix, the red-then-green transcript for the corrected midnight numbers, and the primary's independent re-derivation of the seven accrual cases.
+
+**Result:** verified
+**Checkpoint:** c9bdc5b
+**Evidence:** conductor/tracks/20261024-playtime-integrity/verification/phase-R1.md
 
 
 
