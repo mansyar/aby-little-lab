@@ -465,6 +465,8 @@ Design rules: thick dark strokes drawn at the 512 base size, flat fills, no grad
 
 The minimum interactive target is 64 by 64 px, the ideal is 96 by 96 px, and small art may sit inside a larger invisible hit area. Targets are inflated rather than drawn larger, so a 40 px glyph can still have a 96 px hit box. The one documented exception is the eight Settings rows, where eight rows inside the panel cap each band at 56 px tall and the full 400 px card width is what carries the target. That exception covers the three Settings toggles - Music, Sounds and Adaptive - as well as the rows that only navigate or cycle a value; a toggle's target is its row, not its drawn switch.
 
+Every custom hit area in the app is framed so the described target is where the drawing is - the parent-facing panels, overlays and the update toast through one origin-cancelling helper (`centredHitArea`), which cancels the display origin Phaser's input system adds before testing a custom area, the scene-level controls through rectangles written in the engine's own frame. The Learning Progress overlay holds the second accepted overlap after the Settings rows: each avatar chip has a 96 by 96 px floor on a 56 px chip pitch, adjacent bands overlap, and the later-drawn chip wins the seam.
+
 Protected controls, meaning the ones that change state rather than play, always use the larger target: every Back button, the Hub settings hold, the replay controls, and the parental-lock row. Taps navigate on release, not on press, so a child who touches and slides away does not trigger anything.
 
 ### 5.3 The parental lock
