@@ -92,8 +92,12 @@ export function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
   mockBridgeState.listener?.(event);
 }
 
-/** Scene registry stand-in: lazy scene loading resolves immediately. */
-export const mockEnsureSceneLoaded = vi.fn(async () => {});
+/**
+ * Scene registry stand-in: lazy scene loading resolves immediately. It keeps
+ * `ensureSceneLoaded`'s `(scene, key)` signature so callers can be asserted on
+ * the arguments they actually pass.
+ */
+export const mockEnsureSceneLoaded = vi.fn(async (_scene?: unknown, _key?: string) => {});
 
 /** Glyph-font gate stand-in: BootScene's await resolves immediately. */
 export const mockEnsureGlyphFontLoaded = vi.fn(() => Promise.resolve());

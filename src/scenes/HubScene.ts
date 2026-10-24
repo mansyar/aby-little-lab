@@ -15,7 +15,7 @@ import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { unlockSpeechForUserGesture } from "../utils/speech";
 import { getActiveProfile, getPlayTime, recordGamePlay, recordPlayTime } from "../utils/storage";
 import { textStyle } from "../utils/typography";
-import { ensureSceneLoaded } from "./sceneRegistry";
+import { loadSceneWithRetry } from "./sceneRegistry";
 
 /** Number of background decorations. */
 const DECORATION_COUNT = 4;
@@ -239,27 +239,35 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Launches the game at the given tile index: lazy-loads its chunk, then
-   * transitions via the shared fade-out.
-   */
-  private launchGame(tileIndex: number): void {
-    void ensureSceneLoaded(this, GAME_TILES[tileIndex].sceneKey).then(() => {
-      transitionToScene(this, GAME_TILES[tileIndex].sceneKey);
-    });
-  }
-
-  /**
-   * Activates a tile after the grid's tap guards pass: audio unlock/start,
-   * play-session start, gameplay record, then nudge-or-launch.
+   * Activates a tile after the grid's tap guards pass. The audio unlock stays
+   * on the gesture that triggered it; everything that belongs to a started
+   * game waits for the load (see `openGame`).
    */
   private activateTile(tileIndex: number): void {
     this.startAudioFn();
+    void this.openGame(tileIndex);
+  }
+
+  /**
+   * Loads the game's chunk and opens it when the load succeeded. Every side
+   * effect belongs to a game that actually opened, so the play session, the
+   * game-play record and the play-time nudge all sit behind the resolved load —
+   * a tap whose chunk never arrives charges neither time nor a play.
+   */
+  private async openGame(tileIndex: number): Promise<void> {
+    const loaded = await loadSceneWithRetry(this, GAME_TILES[tileIndex].sceneKey);
+    if (!loaded) {
+      // Nothing opened, so hand the grid its tap lock back: one dead chunk must
+      // not take every other tile with it.
+      this.grid.navLocked = false;
+      return;
+    }
     startPlaySession(getActiveProfile().id);
     recordGamePlay(GAME_TILES[tileIndex].gameId);
     if (this.shouldNudge()) {
       this.showPlayTimeNudge(tileIndex);
     } else {
-      this.launchGame(tileIndex);
+      transitionToScene(this, GAME_TILES[tileIndex].sceneKey);
     }
   }
 
@@ -326,9 +334,14 @@ export class HubScene extends Phaser.Scene {
   /**
    * Shows a textless nudge (dim overlay + hourglass) for NUDGE_DELAY ms before
    * launching the game — a soft "almost done" signal without harsh cutoffs.
+   * The chunk is already registered by `openGame`, so the nudge starts the fade
+   * directly: a second load — or a second play session — would charge twice.
    */
   private showPlayTimeNudge(tileIndex: number): void {
-    this.nudge.show({ scene: this, onLaunch: (i) => this.launchGame(i) }, tileIndex);
+    this.nudge.show(
+      { scene: this, onLaunch: (i) => transitionToScene(this, GAME_TILES[i].sceneKey) },
+      tileIndex,
+    );
   }
 
   /**

@@ -55,3 +55,33 @@ export async function ensureSceneLoaded(
     scene.scene.add(key, sceneClass);
   }
 }
+
+/**
+ * Loads a scene with one silent retry and reports the outcome instead of
+ * throwing, so a failed chunk download is a value the caller can branch on.
+ *
+ * `ensureSceneLoaded` keeps its throwing contract for direct callers; only the
+ * Hub needs a load that cannot leave an unhandled rejection behind. Each failed
+ * attempt is logged once, here, because this is the only place that knows a
+ * retry happened. A loader that throws synchronously is caught like a
+ * rejection: both mean that attempt failed.
+ *
+ * Resolves `true` once the scene is registered, `false` when every attempt
+ * failed. It never rejects.
+ */
+export async function loadSceneWithRetry(
+  scene: Phaser.Scene,
+  key: string,
+  loaders: Record<string, () => Promise<Phaser.Types.Scenes.SceneType>> = sceneLoaders,
+  attempts = 2,
+): Promise<boolean> {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      await ensureSceneLoaded(scene, key, loaders);
+      return true;
+    } catch (error) {
+      console.warn(`Scene "${key}" failed to load (attempt ${attempt} of ${attempts})`, error);
+    }
+  }
+  return false;
+}

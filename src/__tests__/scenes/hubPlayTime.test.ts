@@ -69,7 +69,15 @@ vi.mock("../../utils/pwaBridge", async () => {
 
 vi.mock("../../scenes/sceneRegistry", async () => {
   const { mockEnsureSceneLoaded } = await import("../helpers/sceneFlowHarness");
-  return { ensureSceneLoaded: mockEnsureSceneLoaded };
+  return {
+    ensureSceneLoaded: mockEnsureSceneLoaded,
+    // The Hub loads through the retrying wrapper; this double always succeeds so
+    // these cases keep observing the post-load behaviour they have asserted.
+    loadSceneWithRetry: vi.fn(async (scene: unknown, key: string) => {
+      await mockEnsureSceneLoaded(scene, key);
+      return true;
+    }),
+  };
 });
 
 import { Mascot } from "../../components/Mascot";
@@ -264,8 +272,9 @@ describe("Hub play-time enforcement", () => {
     triggerAllPointerups(scene);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Navigation deferred until the nudge dismisses.
-    expect(ensureSceneLoaded).not.toHaveBeenCalled();
+    // The chunk loads on the tap; the fade still waits for the nudge to dismiss.
+    expect(ensureSceneLoaded).toHaveBeenCalledTimes(1);
+    expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
 
     const nudgeCalls = getMockFn(scene.time.delayedCall).mock.calls.filter(
       (call) => call[0] === 2000,
@@ -277,7 +286,7 @@ describe("Hub play-time enforcement", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     completeFadeOuts(scene);
 
-    expect(ensureSceneLoaded).toHaveBeenCalled();
+    expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
   });
 
   it("launches games immediately when more than 5 minutes remain", async () => {
@@ -296,7 +305,7 @@ describe("Hub play-time enforcement", () => {
     );
   });
 
-  it("shows the nudge overlay under reduced motion without animating it", () => {
+  it("shows the nudge overlay under reduced motion without animating it", async () => {
     vi.stubGlobal("window", {
       matchMedia: vi.fn(() => ({ matches: true })),
     });
@@ -306,6 +315,8 @@ describe("Hub play-time enforcement", () => {
     scene.create();
 
     triggerAllPointerups(scene);
+    // The nudge now follows a resolved load instead of preceding it.
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     const hourglass = getLastGraphics(scene);
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;

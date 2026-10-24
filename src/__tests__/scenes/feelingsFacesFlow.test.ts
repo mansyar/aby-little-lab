@@ -75,7 +75,15 @@ vi.mock("../../utils/pwaBridge", async () => {
 
 vi.mock("../../scenes/sceneRegistry", async () => {
   const { mockEnsureSceneLoaded } = await import("../helpers/sceneFlowHarness");
-  return { ensureSceneLoaded: mockEnsureSceneLoaded };
+  return {
+    ensureSceneLoaded: mockEnsureSceneLoaded,
+    // The Hub loads through the retrying wrapper; this double always succeeds so
+    // these cases keep observing the post-load behaviour they have asserted.
+    loadSceneWithRetry: vi.fn(async (scene: unknown, key: string) => {
+      await mockEnsureSceneLoaded(scene, key);
+      return true;
+    }),
+  };
 });
 
 import { type Emotion, ROUND_COUNT, type Scenario } from "../../game/feelingsFacesLogic";

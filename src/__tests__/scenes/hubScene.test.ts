@@ -77,9 +77,10 @@ vi.mock("../../utils/speech", () => ({
   unlockSpeechForUserGesture: vi.fn(),
 }));
 
-/** Lazy chunk loading is not exercised here; resolve immediately. */
+/** Lazy chunk loading is not exercised here; the retrying wrapper reports success. */
 vi.mock("../../scenes/sceneRegistry", () => ({
   ensureSceneLoaded: vi.fn(() => Promise.resolve()),
+  loadSceneWithRetry: vi.fn(() => Promise.resolve(true)),
 }));
 
 /**
@@ -96,6 +97,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
 });
 
 import { HubScene } from "../../scenes/HubScene";
+import { loadSceneWithRetry } from "../../scenes/sceneRegistry";
 import type { GameId } from "../../types";
 import {
   addProfile,
@@ -111,6 +113,17 @@ import {
 /** Returns the first object of the given kind registered for an event. */
 function getHandler(kind: string, event: string): ((...args: unknown[]) => unknown) | undefined {
   return mockRegistry.find((obj) => obj.kind === kind && obj.handlers[event])?.handlers[event];
+}
+
+/**
+ * Awaits the load the Hub is waiting on, so its continuation runs first: the
+ * scene registered its `await` on this promise before the test did.
+ */
+async function settleLoad(): Promise<void> {
+  const pending = vi.mocked(loadSceneWithRetry).mock.results.at(-1)?.value as
+    | Promise<boolean>
+    | undefined;
+  if (pending) await pending;
 }
 
 /** Scene-level input handlers captured by the mock Phaser input plugin. */
@@ -178,7 +191,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
     expect(wideTiles.length).toBe(0);
   });
 
-  it("maps page-1 tiles to games 11-20 (How Many? first)", () => {
+  it("maps page-1 tiles to games 11-20 (How Many? first)", async () => {
     const scene = createNarrowHub();
 
     // Flip to page 2 via the second dot.
@@ -188,6 +201,8 @@ describe("HubScene paged grid (narrow viewports)", () => {
     expect(afterFlip).toBe(20); // outgoing page lingers (slide timer mocked)
     const pageOneFirst = pagedRects()[10];
     pageOneFirst.handlers.pointerup?.();
+    // The play is charged only once the load resolved.
+    await settleLoad();
 
     expect(mockRecordGamePlay).toHaveBeenCalledWith("how-many");
     expect(scene).toBeDefined();
@@ -213,13 +228,14 @@ describe("HubScene paged grid (narrow viewports)", () => {
     expect((xs[0] + xs[1]) / 2).toBeCloseTo(512, 5);
   });
 
-  it("launches Story Order from the 22nd tile on the last page", () => {
+  it("launches Story Order from the 22nd tile on the last page", async () => {
     createNarrowHub();
 
     pageDots()[2].handlers.pointerup?.();
     const incoming = pagedRects().slice(10);
     expect(incoming).toHaveLength(2);
     incoming[1].handlers.pointerup?.();
+    await settleLoad();
 
     expect(mockRecordGamePlay).toHaveBeenCalledWith("story-order");
   });
@@ -436,13 +452,14 @@ describe("HubScene session-start recording", () => {
     localStorage.clear();
   });
 
-  it("records a play for the tapped tile's game on the active profile", () => {
+  it("records a play for the tapped tile's game on the active profile", async () => {
     const scene = new HubScene();
     scene.create();
 
     const tapTile = getHandler("rectangle", "pointerup");
     expect(tapTile).toBeDefined();
     tapTile?.();
+    await settleLoad();
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(mockRecordGamePlay).toHaveBeenCalledWith("shape-sorter");
@@ -451,7 +468,7 @@ describe("HubScene session-start recording", () => {
     expect(getProgress()["color-match"].plays).toBe(0);
   });
 
-  it("ignores taps on other tiles once navigation has started", () => {
+  it("ignores taps on other tiles once navigation has started", async () => {
     const scene = new HubScene();
     scene.create();
 
@@ -461,12 +478,13 @@ describe("HubScene session-start recording", () => {
     expect(tapTiles.length).toBeGreaterThanOrEqual(2);
     tapTiles[0].handlers.pointerup?.();
     tapTiles[1].handlers.pointerup?.();
+    await settleLoad();
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(mockRecordGamePlay).toHaveBeenCalledWith("shape-sorter");
   });
 
-  it("does not double-record when a tile is tapped repeatedly", () => {
+  it("does not double-record when a tile is tapped repeatedly", async () => {
     const scene = new HubScene();
     scene.create();
 
@@ -474,6 +492,7 @@ describe("HubScene session-start recording", () => {
     expect(tapTile).toBeDefined();
     tapTile?.();
     tapTile?.();
+    await settleLoad();
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(getProgress()["shape-sorter"].plays).toBe(1);
