@@ -95,16 +95,25 @@ invites deleting folders the generator cannot reproduce.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **R1.T1: The comment names what the rule covers** - covers: F1, FR-2
-  - [ ] **R1.T1.1:** Make `.gitignore:16` name both extensions the rule handles, so the comment agrees with the four patterns and with what the track's plan and integrated verification claim about it: `# Generated contact-sheet PNGs and HTML are scratch; the tracked record is the baseline set.` Change nothing else in the file.
-- [ ] **R1.T2: The note is where the reader looks** - covers: F2, FR-5
-  - [ ] **R1.T2.1:** Add `.opencode/` to the §2.1 root tree in `docs/TDD.md` (the block that lists `index.html`, `package.json`, `scripts/`, `.github/workflows/ci.yml`, `docs/`, `conductor/`, `src/`), with a short trailing comment pointing at §11.3. Keep the §11.3 paragraph as the expansion; do not move or reword it.
-- [ ] **R1.T3: The sentence stops inviting a loss** - covers: F3, NFR-4
-  - [ ] **R1.T3.1:** Qualify the `docs/SVG_STYLE.md` §7 sentence: generated output outside `baseline/` is ignored and not committed, `baseline/` is the tracked record, and the historical per-phase folders (`final/`, `phase2`, `phase3`, `phase3-pilot`, `phase4`-`phase8`) are earlier corpus snapshots that only git history preserves - the current script renders today's corpus and would not recreate them.
-- [ ] **R1.T4: Gate** - covers: AC-5
-  - [ ] **R1.T4.1:** Run the full chain and write `conductor/tracks/20261024-repo-hygiene/verification/phase-R1.md` with the three diffs, the gate table, and the FR/AC mapping.
+- [x] **R1.T1: The comment names what the rule covers** - covers: F1, FR-2
+  - [x] **R1.T1.1:** Make `.gitignore:16` name both extensions the rule handles, so the comment agrees with the four patterns and with what the track's plan and integrated verification claim about it: `# Generated contact-sheet PNGs and HTML are scratch; the tracked record is the baseline set.` Change nothing else in the file.
+- [x] **R1.T2: The note is where the reader looks** - covers: F2, FR-5
+  - [x] **R1.T2.1:** Add `.opencode/` to the §2.1 root tree in `docs/TDD.md` (the block that lists `index.html`, `package.json`, `scripts/`, `.github/workflows/ci.yml`, `docs/`, `conductor/`, `src/`), with a short trailing comment pointing at §11.3. Keep the §11.3 paragraph as the expansion; do not move or reword it.
+- [x] **R1.T3: The sentence stops inviting a loss** - covers: F3, NFR-4
+  - [x] **R1.T3.1:** Qualify the `docs/SVG_STYLE.md` §7 sentence: generated output outside `baseline/` is ignored and not committed, `baseline/` is the tracked record, and the historical per-phase folders (`final/`, `phase2`, `phase3`, `phase3-pilot`, `phase4`-`phase8`) are earlier corpus snapshots that only git history preserves - the current script renders today's corpus and would not recreate them.
+- [x] **R1.T4: Gate** - covers: AC-5
+  - [x] **R1.T4.1:** Run the full chain and write `conductor/tracks/20261024-repo-hygiene/verification/phase-R1.md` with the three diffs, the gate table, and the FR/AC mapping.
+
+**Result:** verified
+**Checkpoint:** 4f639364
+**Evidence:** conductor/tracks/20261024-repo-hygiene/verification/phase-R1.md
+
+**Note:** The executor was denied `node scripts/validate-docs.js`; the primary ran
+it (5/5) and appended its own verification section to the evidence file, so the
+executor's seven green layers and the primary's docs layer together close the
+gate.
 
 <!--
 Phase completion is recorded by the primary agent only:
