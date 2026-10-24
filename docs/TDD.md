@@ -155,6 +155,7 @@ Vitest is configured inside `vite.config.ts`: `environment: "happy-dom"`, `globa
 │   ├── render-svg-contact-sheets.mjs
 │   └── measure-first-tap.mjs
 ├── .github/workflows/ci.yml
+├── .opencode/agents/             # Conductor subagents - versioned on purpose, see §11.3
 ├── docs/
 ├── conductor/
 └── src/

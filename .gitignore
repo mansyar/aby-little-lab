@@ -13,7 +13,7 @@ gate*.txt
 
 .art-preview/
 
-# Generated contact sheets are scratch; the tracked record is the baseline set.
+# Generated contact-sheet PNGs and HTML are scratch; the tracked record is the baseline set.
 # The patterns must be depth-independent: gitignore's `*` does not cross `/`.
 docs/svg-contact-sheets/**/*.png
 docs/svg-contact-sheets/**/*.html

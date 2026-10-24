@@ -108,7 +108,7 @@ Each `cutout_X` mirrors `shape_X` geometry in the same hue family:
 
 ## 7. Verification
 
-- Re-render contact sheets: `node scripts/render-svg-contact-sheets.mjs` → `docs/svg-contact-sheets/` (HTML for humans, PNG via headless Chrome when available). Everything written outside `docs/svg-contact-sheets/baseline/` is git-ignored and is not committed; `baseline/` is the tracked record.
+- Re-render contact sheets: `node scripts/render-svg-contact-sheets.mjs` → `docs/svg-contact-sheets/` (HTML for humans, PNG via headless Chrome when available). Everything written outside `docs/svg-contact-sheets/baseline/` is git-ignored and is not committed; `baseline/` is the tracked record. The historical per-phase folders — `final/`, `phase2`, `phase3`, `phase3-pilot`, `phase4` through `phase8` — are point-in-time snapshots of earlier corpora that only git history preserves, not scratch to be deleted: the current script renders today's corpus (`final/` holds 11 category sheets and no `stories`, where the script now writes 12 root sheets including `stories`) and would not recreate them.
 - Silhouette test: mentally replace every fill with `#2D3748`; asset must stay identifiable.
 - Small-size test: render at **96×96** on both `#FAF9F6` and `#FFF8E7`; the concept must be nameable without context. Tiles must also survive **48×48**.
 - Blind-identification test: for a redraw, show the 96px render to someone (or a vision model) with no context and ask them to name it in one word. A wrong or hedged answer is a failed asset.
