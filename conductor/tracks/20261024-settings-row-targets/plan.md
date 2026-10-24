@@ -54,7 +54,7 @@ exception as an accident.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **P2.T1: The technical record** - covers: FR-6
   - [ ] **P2.T1.1:** Rewrite the settings-row paragraph in `docs/TDD.md` (the one that currently calls `TOGGLE_HEIGHT` a hit height and `ROW_HEIGHT` a pitch): rows are `ROW_PITCH = 56` apart, each row's hit area is `ROW_HIT_WIDTH` x `ROW_PITCH` centred on the row card, the switch is inside it, and the offsets derive from the first row plus the pitch. State the reason the band is 56 tall rather than 64.
