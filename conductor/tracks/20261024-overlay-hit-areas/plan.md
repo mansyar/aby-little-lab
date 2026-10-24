@@ -109,7 +109,7 @@ mechanism, not just its symptom.
 test:coverage && pnpm build && node scripts/validate-bundle.js && node
 scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status: pending**
+**Status: in_progress**
 
 - [ ] **P2.T1: The documents name the frame rule**
   - [ ] **P2.T1.1:** Update the affected `docs/TDD.md` component rows
