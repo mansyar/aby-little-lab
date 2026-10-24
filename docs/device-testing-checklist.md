@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.21.3 (2026-10-24)
+
+- **Target:** tag `v1.21.3` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
+- **Scope:** one track, `conductor/archive/20261024-install-prompt-lifetime/` (PR #61) - the Settings install row now works on the platforms that offer a one-tap install. Capture starts at boot and lasts for the page, so a `beforeinstallprompt` that fired before Settings opened is still available; the panel borrows that tracker instead of building and destroying its own; and a prompt that has been used is no longer offered, so no tap lands on a button that cannot act. No new game, asset, storage schema or dependency; the save shape is unchanged from v1.21.2.
+- **Checks:** the manual rows from the PR description - "Install App" appears on Chrome/Edge/Android after the prompt has fired; it disappears on the next Settings open after a dismissal; a prompt arriving while Settings is open appears on the next open, not immediately; iOS still reads "How to Install"; an installed app shows no row; footer `v1.21.3`.
+- **Result:** **PASSED (desktop smoke) 2026-10-24** - `Quality Gates` and `Deploy to Coolify` both succeeded on the tag, and the live `assets/index-C99hcseA.js` (141547 bytes) is SHA-256 identical to the local `dist/` build. Device-class execution of the six manual rows is **PENDING**; the install row itself needs a real Chrome/Edge install prompt, which cannot be simulated locally.
+- **Issues found:** none reported
+
 ## Execution Record - v1.21.2 (2026-10-24)
 
 - **Target:** tag `v1.21.2` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
