@@ -3,7 +3,7 @@
 Track: `20261024-install-prompt-lifetime`
 Branch: `fix/20261024-install-prompt-lifetime`
 Phase base: `ae5cc522` (conductor state only)
-Commit: `59c5468c fix(pwa): pin install capture to boot order and correct the install docs`
+Commit: `15cc5b77 fix(pwa): pin install capture to boot order and correct the install docs`
 Covers: findings F1-F7; FR-1, FR-3, FR-4, FR-5; AC-4, AC-5, AC-6
 
 ## 1. What changed, per finding
@@ -66,14 +66,14 @@ $ git diff -- src/main.ts
 (no output)
 ```
 
-and `git show --stat 59c5468c` lists five files, none of them `src/main.ts`.
+and `git show --stat 15cc5b77` lists five files, none of them `src/main.ts`.
 Confirmed again after the commit with `git status --porcelain` (clean apart from
 this evidence file). The phase base tree and the committed tree therefore agree
 on `src/main.ts` byte for byte.
 
 ## 3. Commands
 
-Run layer by layer on the committed tree (`59c5468c`), each command exactly as
+Run layer by layer on the committed tree (`15cc5b77`), each command exactly as
 the brief spells it.
 
 | Layer | Command | Exit | Result |
@@ -150,7 +150,7 @@ must still run it to close AC-6.
 
 ## Primary verification
 
-Base `ae5cc522`, commits `59c5468c fix(pwa): pin install capture to boot order and correct the install docs` and `77964436 docs(conductor): verify phase R1 of install prompt lifetime`. The only reported blocker was the docs layer, denied to the subagent.
+Base `ae5cc522`, commits `15cc5b77 fix(pwa): pin install capture to boot order and correct the install docs` and `d94f66ff conductor(plan): Mark phase 'Review Fixes' as complete` - the phase work and this evidence were squashed into those two. The only reported blocker was the docs layer, denied to the subagent.
 
 | Layer | Command | Exit | Note |
 | --- | --- | --- | --- |
@@ -188,3 +188,32 @@ Base `ae5cc522`, commits `59c5468c fix(pwa): pin install capture to boot order a
 
 1. **Import depth corrected** from the brief's `../../../main.ts?raw` to `../../main.ts?raw` - the brief's path would have resolved outside `src/`. The mechanism is unchanged.
 2. **2631 tests, not the anticipated 2632**, because R1.T3 extended the existing AC-5 case instead of adding a second one. Better: the storage assertions and the read-path assertions now sit in one case that cannot drift apart.
+
+## Round 2 review fixes
+
+Round 2 confirmed F1-F7 resolved and raised three Low findings of its own.
+
+| Id | Finding | Fix |
+| --- | --- | --- |
+| N1 | The boot-order assertion matched the bare token `initInstallPrompt(`, so a comment mentioning the call could satisfy it after the real line was deleted. | The case now matches the statement: `/^initInstallPrompt\(\);$/m`, and compares that index with `new Phaser.Game(`. |
+| N2 | This evidence cited `59c5468c` / `77964436`, which the squash replaced. | The references now name `15cc5b77` (phase work) and `d94f66ff` (state commit). |
+| N3 | The PRD's "the row already on screen does not change" had no test. | `SettingsPanel.test.ts` now asserts `getState` was read once and the "Install App" label survives the tap that spends the prompt. |
+
+### N1 red proof
+
+With the call commented out in `src/main.ts` (leaving a line that mentions it),
+the tightened case fails:
+
+```
+AssertionError: expected -1 to be greater than -1
+```
+
+The previous token search would have found the mention and passed. `src/main.ts`
+was restored byte-identically (`git diff -- src/main.ts` empty) and the case is
+green again.
+
+### Code commits for this round
+
+Feature commit `fe57a9f7 test(pwa): pin the boot call and the snapshot read`,
+verified at the phase gate: 121 files / 2631 tests, coverage 97.99 / 92 / 96.69 /
+98.74, shell `index-D_wN43lj.js` 138.2 kB, PWA 16/16, docs 5/5.
