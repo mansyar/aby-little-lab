@@ -50,9 +50,9 @@ are ignored, and `.opencode/agents/` is versioned on purpose.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
-- [ ] **P2.T1: Roadmap and README** — covers: FR-5
+- [ ] **P2.T1: Roadmap and README** - covers: FR-5
   - [ ] **P2.T1.1:** Delete the "### Repository hygiene" Known Issue and the matching Future Work item, renumbering the survivors consecutively. Correct the README Known Issues count to the number of `###` headings that remain. Keep the other three Known Issues untouched, including their wording.
 - [ ] **P2.T2: The two decisions** — covers: FR-5, AC-5
   - [ ] **P2.T2.1:** In `docs/TDD.md`, add a short note where the developer tooling is described: `.opencode/agents/` is versioned because Conductor launches `conductor-phase` and `conductor-reviewer` from those files, and `conductor-implement`'s preflight reads them. One or two sentences, matched to the surrounding style.
