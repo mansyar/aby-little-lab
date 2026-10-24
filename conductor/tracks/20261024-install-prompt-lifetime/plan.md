@@ -124,7 +124,7 @@ accuracy nits (F2, F6, F7).
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **R1.T1: Pin the boot wiring** - covers: FR-1 (F1)
   - [ ] **R1.T1.1:** In `src/__tests__/utils/pwaInstall.test.ts`, import `../../../src/main.ts?raw` (the `?raw` pattern used by `src/__tests__/game/art/shellOwnership.test.ts`) and assert that `initInstallPrompt(` appears in the source and that its index is lower than the index of `new Phaser.Game(`. Explain in the test name that this is the once-per-page capture.
