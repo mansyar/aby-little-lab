@@ -159,8 +159,13 @@ export class VoiceRow {
    * actually render to, clamped so each half keeps `VOICE_MIN_HALF` and stays
    * inside the card. An anchor midpoint says nothing about label width: a long
    * voice label runs past the chip's half, so the tail of the chip's own text
-   * activates Preview, and the right edge of "Preview" falls beyond the card -
-   * onto the backdrop, which closes the panel.
+   * activates Preview.
+   *
+   * The outer edges are the union of the card and the rendered label, because a
+   * label can be wider than its half of the card: "Preview" at a 26 px font
+   * reaches past the card's right edge, and anything outside every band lands on
+   * the backdrop, whose tap closes the panel. Covering what is drawn is what
+   * keeps the visible word and the live area the same thing.
    *
    * A different voice changes the chip's width, which is why every label
    * change re-runs this rather than reusing the previous split.
@@ -198,15 +203,19 @@ export class VoiceRow {
       }
     }
 
+    const chipBounds = renderedBounds(chip);
+    const outerLeft = chipBounds ? Math.min(cardLeft, chipBounds.left) : cardLeft;
+    const outerRight = previewBounds ? Math.max(cardRight, previewBounds.right) : cardRight;
+
     // Both rectangles are written around each object's own position, because
     // `centredHitArea` cancels the displayOrigin the engine would otherwise add.
     this.applyHitArea(
       chip,
-      new Phaser.Geom.Rectangle(cardLeft - chipX, -ROW_PITCH / 2, splitX - cardLeft, ROW_PITCH),
+      new Phaser.Geom.Rectangle(outerLeft - chipX, -ROW_PITCH / 2, splitX - outerLeft, ROW_PITCH),
     );
     this.applyHitArea(
       preview,
-      new Phaser.Geom.Rectangle(splitX - previewX, -ROW_PITCH / 2, cardRight - splitX, ROW_PITCH),
+      new Phaser.Geom.Rectangle(splitX - previewX, -ROW_PITCH / 2, outerRight - splitX, ROW_PITCH),
     );
   }
 

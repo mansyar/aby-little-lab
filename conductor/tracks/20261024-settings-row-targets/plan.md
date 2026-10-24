@@ -108,6 +108,37 @@ three documentation gaps.
 
 **Note:** rework 2 (R1.T6) went beyond the six findings. The executor implemented round 1 inside a git-only sandbox, so nothing was run; verifying it as primary showed that both the original code and the round-1 fix were written in a frame the engine does not use, which is why the Voice row still failed after an apparently correct fix. The band geometry is unchanged; only the frame it is expressed in changed.
 
+## Phase R2: Review Fixes (round 2)
+
+**Goal:** Close the five findings from review round 2 - the tail of the Preview label still outside every band, the vertical engine case that could not fail, the untested `input` mutation path in the voice row, the truncated default label, and the TDD sentence that claims more than the Voice row does.
+
+**Depends on:** Phase R1
+
+**Covers:** F1, F2, F3, F4, F5 (round 2); FR-2, FR-4, FR-5, FR-6, AC-1, AC-4
+
+**Touches:** `src/components/settings/VoiceRow.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `docs/TDD.md`, `docs/PRD.md`
+
+**Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+
+**Status:** verified
+
+- [x] **R2.T1: The preview word keeps its whole band** - covers: F1, FR-2, FR-5
+  - [x] **R2.T1.1:** Take each Voice half's outer edge from the union of the card and the rendered label, so a word drawn past the card edge is still inside its own band. Prove it red by restoring the card edge.
+  - [x] **R2.T1.2:** Assert the preview's rendered extent lies inside the preview band, as the chip's already was, and bound the halves by the panel rather than the card.
+- [x] **R2.T2: The engine cases can fail** - covers: F2, F3, NFR-3, AC-1
+  - [x] **R2.T2.1:** Hoist `configOf`/`engineHits` to module scope and probe band-relative edges instead of the object's centre.
+  - [x] **R2.T2.2:** Rewrite the vertical case to call the real callback at display origins 0, 11 and 17 across four label sizes, one pixel inside and one outside each edge. Prove it red by deleting the vertical subtraction.
+  - [x] **R2.T2.3:** Add a voice case that drives the chip's callback and covers the `object.input` mutation path, asserting `setInteractive` is not called a second time.
+- [x] **R2.T3: The documents scope their claims** - covers: F4, F5, FR-4, FR-6
+  - [x] **R2.T3.1:** TDD: scope the 400 x 56 sentence to single-control rows, and describe the Voice row's carved band and its union with the rendered labels.
+  - [x] **R2.T3.2:** PRD Voice row: say a long name is shortened and that each half covers the whole of the word drawn in it.
+- [x] **R2.T4: Gate** - covers: AC-1, AC-4
+  - [x] **R2.T4.1:** Run the full chain and record it in `conductor/tracks/20261024-settings-row-targets/verification/phase-R2.md` with both red-then-green runs.
+
+**Result:** verified
+**Checkpoint:** pending
+**Evidence:** conductor/tracks/20261024-settings-row-targets/verification/phase-R2.md
+
 <!--
 Phase completion is recorded by the primary agent only:
 

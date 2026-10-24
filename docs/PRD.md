@@ -421,7 +421,7 @@ The seven games that joined them - Shape Sorter, Animal Trace, Pop & Freeze, Sha
 
 ### 4.9 Preferred voice
 
-Settings offers a Voice row listing the device voices plus "Default (device)". The choice is stored as a voice URI and applies to every spoken line in the app: rule lines, round targets, prompts and the preview button. A Preview button speaks a sample phrase so the parent can hear the voice before committing, and the preview obeys the sound toggle. If the stored voice disappears from the device, the app falls back to the device default rather than going silent.
+Settings offers a Voice row listing the device voices plus "Default (device)". The choice is stored as a voice URI and applies to every spoken line in the app: rule lines, round targets, prompts and the preview button. A long voice name is shortened so the name and the sample control keep separate halves of the row, and each half covers the whole of the word drawn in it. A Preview button speaks a sample phrase so the parent can hear the voice before committing, and the preview obeys the sound toggle. If the stored voice disappears from the device, the app falls back to the device default rather than going silent.
 
 ### 4.10 Install and update
 
