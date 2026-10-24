@@ -451,10 +451,12 @@ describe("boot wiring", () => {
    * rest, so only the real entry point can be wrong here.
    */
   it("starts install capture before the game is constructed", () => {
-    const indexOfInit = mainSource.indexOf("initInstallPrompt(");
-    const indexOfGame = mainSource.indexOf("new Phaser.Game(");
+    // Match the statement, not the token: a comment mentioning the call must
+    // not satisfy this case after the real line has been deleted.
+    const call = /^initInstallPrompt\(\);$/m.exec(mainSource);
+    const indexOfCall = call?.index ?? -1;
 
-    expect(indexOfInit).toBeGreaterThan(-1);
-    expect(indexOfGame).toBeGreaterThan(indexOfInit);
+    expect(indexOfCall).toBeGreaterThan(-1);
+    expect(mainSource.indexOf("new Phaser.Game(")).toBeGreaterThan(indexOfCall);
   });
 });

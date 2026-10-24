@@ -515,6 +515,11 @@ describe("SettingsPanel install control", () => {
     triggerPointerdown(installButton as MockGameObject);
 
     expect(tracker.prompt).toHaveBeenCalledTimes(1);
+
+    // The row is a snapshot read once per open, so spending the prompt does not
+    // rewrite the row already on screen - the next open is what drops it.
+    expect(tracker.getState).toHaveBeenCalledTimes(1);
+    expect(findTextByLabel(scene, "Install App")).toBeDefined();
   });
 
   it("gives the install button an inflated touch target of at least 64px", () => {
