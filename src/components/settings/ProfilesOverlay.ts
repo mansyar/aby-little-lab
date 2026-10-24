@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import { MAX_PROFILES } from "../../types";
 import { attachPressFeedback } from "../../utils/pressFeedback";
@@ -15,6 +15,7 @@ import { textStyle } from "../../utils/typography";
 import {
   AVATAR_TEXTURE_SIZE,
   BACKDROP_COLOR,
+  centredHitArea,
   createModalButton,
   DANGER_COLOR,
   DISABLED_COLOR,
@@ -118,15 +119,10 @@ export class ProfilesOverlay {
           }),
         )
         .setOrigin(0.5);
-      remove.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(
-          -TOGGLE_WIDTH / 2,
-          -ROW_HEIGHT / 2,
-          TOGGLE_WIDTH,
-          ROW_HEIGHT,
-        ),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
+      // Custom hit areas are tested in the engine frame: InputManager adds
+      // the displayOrigin before the callback, so centredHitArea cancels it
+      // and the band lands on the drawn word.
+      remove.setInteractive(centredHitArea(TOGGLE_WIDTH, ROW_HEIGHT));
       remove.on("pointerdown", () => this.showDeleteModal(profile.id));
       attachPressFeedback(remove);
       this.deps.overlayObjects.push(remove);
@@ -143,15 +139,8 @@ export class ProfilesOverlay {
           }),
         )
         .setOrigin(0.5);
-      chip.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(
-          -TOGGLE_WIDTH / 4,
-          -ROW_HEIGHT / 2,
-          TOGGLE_WIDTH / 2,
-          ROW_HEIGHT,
-        ),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
+      // Same engine frame as the Delete band (comment above).
+      chip.setInteractive(centredHitArea(TOGGLE_WIDTH / 2, ROW_HEIGHT));
       chip.on("pointerdown", () => {
         const current = getPlayTime(profile.id).limitMinutes;
         const index = PLAY_TIME_OPTIONS.indexOf(current);
