@@ -2,10 +2,12 @@
 
 - **Track:** `20261024-scene-load-failure` (bug, high)
 - **Branch:** `fix/20261024-scene-load-failure`
-- **Range:** `7a7c8e0c09f0339ee6e0ea30e457dabd6ac7f716..2c2b0c88` (base `master` to the doc-sync commit)
+- **Range:** `7a7c8e0c09f0339ee6e0ea30e457dabd6ac7f716..1f541687` (base `master` to the final fix commit)
 - **Date:** 2026-10-24
-- **Round:** 1
-- **Verdict:** **BLOCK** (two High findings)
+- **Round:** 2 (final)
+- **Verdict:** **PASS WITH FINDINGS** - round 1's two High findings and six Lows are
+  fixed, round 2's one Medium and one Low are fixed before the PR, and no Critical or
+  High remains.
 
 ## Summary
 
@@ -209,24 +211,64 @@ plumbing), which is recorded rather than smuggled.
 
 ## Debt
 
-Recorded here rather than as issues, all Low and all test ergonomics:
-
-- `settleLoad()` in `hubSceneLoad.test.ts` (and its copy in `hubScene.test.ts`)
-  silently no-ops when the load mock was never called, and the helper is duplicated.
-- The delegating `loadSceneWithRetry` double is copy-pasted across four scene suites
-  while `sceneFlowHarness` already owns the load double.
-
-Both are candidates for the shared test harness, not correctness risks: every current
-caller also asserts the load was called.
+None. Every finding from both rounds is fixed inside the track, including the two
+harness items round 1 deferred: `settleLoad()` moved to `sceneFlowHarness` behind a
+guard that fails loudly when there is no load to settle, and the four copied
+`loadSceneWithRetry` doubles collapsed into `createLoadSceneWithRetryDouble()`.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed since previous round |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | BLOCK | 0 | 2 | 4 | 6 | - |
+| 2 | PASS WITH FINDINGS | 0 | 0 | 1 | 1 | 12 + 2 harness items |
+
+## Round 2 addendum
+
+Scope `ef9c16b..5e86589` for the review of the fixes, plus a full re-read of the
+touched sources and a re-check of every round-1 finding against the code rather than
+against the evidence file.
+
+### Round 1 findings
+
+| Finding | Severity | Status | Evidence |
+| --- | --- | --- | --- |
+| F1 concurrent tap during a cue retry | High | resolved | `HubScene.ts:303-338` takes `launching` before the await and releases it on the cap and failure branches; the cue's `onRetry` re-arms `grid.navLocked`; the case at `hubSceneLoad.test.ts:372-405` taps a second tile while the retry is pending and pins one load, one session, one record, one transition |
+| F2 README advertises the retired bug | High | resolved | `README.md` drops the chunk-load and stale play-time bullets; the count matches the roadmap's five entries; the dated shell figure is re-measured |
+| F3 cue survives a board rebuild | Medium | resolved | `HubGridDeps.onBoardChange`, called once per `flipTo` and on a viewport flip; `HubScene` wires it to `hideLoadCue()` |
+| F4 parent surfaces untested | Medium | resolved | two suites cover the picker and the Settings unlock with a cue up |
+| F5 AC-1 unasserted | Medium | resolved | the retry-succeeds case asserts no cue before the failure and none after the settle |
+| F6 per-visit boolean | Low | resolved | `visitToken` bumped in `create()` and on shutdown, compared after the await; re-create case added |
+| F7 `scene` passed twice to the cue | Low | resolved | the factory owns it; `show()` no longer takes one |
+| F8 redundant assertion | Low | resolved | dropped |
+| F9 stale `main.ts` comment | Low | resolved | names `loadSceneWithRetry` |
+| F10 TDD over-claims | Low | resolved | the `openGame` sentence names `gridBuilder`'s lock, and the cue paragraph states the reuse-where-it-sits behaviour |
+| F11 phase-3 evidence mislabels AC-6 | Low | resolved | the row maps AC-6 to the one-cue and shutdown criteria |
+| F12 stale measured figures | Medium | resolved | PRD and TDD carry the current shell size and precache weight |
+
+### Round 2 findings
+
+| Finding | Severity | Status | Evidence |
+| --- | --- | --- | --- |
+| R2-F1 the viewport half of the F3 fix unasserted | Medium | resolved | `hubScene.test.ts` "drops the retry cue when a resize rebuilds the grid under it": wide tile, failing load, cue up, `fireResize` to 1024x768, cue floor destroyed. Red-then-green proven by removing `onBoardChange` from `handleViewportChange` (failure: "expected vi.fn() to be called at least once") |
+| R2-F2 dead `drawScene` alias | Low | resolved | `GameLoadCue` calls `scene.*` directly |
+
+### Checks at the final commit
+
+`git diff --shortstat 7a7c8e0..HEAD -- . ':!conductor'` = 20 files, +1409 / -75.
+`pnpm check` exit 0, `pnpm typecheck` exit 0, `pnpm test -- --run` exit 0 (121 files /
+2611 tests), `pnpm test:coverage` exit 0 (97.97 / 91.9 / 96.66 / 98.74), `pnpm build`
+exit 0, `node scripts/validate-bundle.js` exit 0 (shell `index-8NE0oYrd.js` 137.8 kB),
+`node scripts/validate-pwa.js` exit 0 (16/16), `node scripts/validate-docs.js` exit 0
+(5/5).
+
+### Requirements after round 2
+
+FR-1 through FR-6, NFR-1 through NFR-6 and AC-1 through AC-6 are all covered with
+named tests or document text; nothing is partial.
 
 ## Doc sync
 
-`complete` at `2c2b0c88` (PRD play flow and 4.7, TDD scene loading and the Hub launch
-path, roadmap Known Issues and Future Work). The README and the stale measured
-figures are the two gaps this round found and Phase R1 closes.
+`complete` at `1f541687` (PRD play flow and 4.7 plus the measured figures, TDD scene
+loading and the Hub launch path plus the same figures, roadmap Known Issues and Future
+Work, README Known Issues). `node scripts/validate-docs.js` reports 5/5.
