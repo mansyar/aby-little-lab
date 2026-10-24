@@ -246,3 +246,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 - [x] **Track: Repository Hygiene** - [20261024-repo-hygiene](./archive/20261024-repo-hygiene/index.md) - chore - low
+
+---
+- [ ] **Track: Settings Row Targets** - [20261024-settings-row-targets](./tracks/20261024-settings-row-targets/index.md) - bug - high
