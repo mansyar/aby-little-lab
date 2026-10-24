@@ -119,22 +119,30 @@ rectangle lives.
 - **Covers:** NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6 (documented evidence)
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: PRD and TDD** - covers: NFR-5
-  - [ ] **P3.T1.1:** `docs/PRD.md` gains the failure-path rule where the Hub's
+- [x] **P3.T1: PRD and TDD** - covers: NFR-5
+  - [x] **P3.T1.1:** `docs/PRD.md` gains the failure-path rule where the Hub's
     launch behaviour is described: one silent retry, then a textless retry cue
     while the Hub stays usable, and no play time charged for a game that does not
-    open.
-  - [ ] **P3.T1.2:** `docs/TDD.md` documents the retry policy, the loader seam,
+    open. (Landed in step 4 of the play flow; 4.7's "a play when a Hub tile is
+    tapped" also became "a play when a game opens from its Hub tile", which the
+    new ordering made necessary.)
+  - [x] **P3.T1.2:** `docs/TDD.md` documents the retry policy, the loader seam,
     the ordering rule (side effects only after a resolved load), the cue's
-    lifetime, and the post-shutdown guard — in the module table and the section
-    that describes scene loading.
-- [ ] **P3.T2: Roadmap and the ledger** - covers: NFR-5
-  - [ ] **P3.T2.1:** Remove the "A failed game-chunk load leaves the child with no
+    lifetime, and the post-shutdown guard - in the module table and the section
+    that describes scene loading. (No 7.1 table row changed; the component count
+    went sixteen to seventeen for `GameLoadCue`.)
+- [x] **P3.T2: Roadmap and the ledger** - covers: NFR-5
+  - [x] **P3.T2.1:** Remove the "A failed game-chunk load leaves the child with no
     feedback" Known Issue and only that entry, and remove the matching Future
     Work item ("Give a failed chunk load a visible failure path"), since this
     track delivers it. Leave the rest of the file's content intact; while there,
     fix the mis-numbered Future Work list (it reads 1, 2, 5, 6, 3, 4, 5) so the
     survivors number 1..6 in order.
-  - [ ] **P3.T2.2:** `node scripts/validate-docs.js` reports 5 passed, 0 failed.
+  - [x] **P3.T2.2:** `node scripts/validate-docs.js` reports 5 passed, 0 failed.
+    (Denied to the phase subagent; the primary ran it green at the phase HEAD.)
+
+**Result:** verified
+**Checkpoint:** 840e1e3
+**Evidence:** conductor/tracks/20261024-scene-load-failure/verification/phase-3.md
