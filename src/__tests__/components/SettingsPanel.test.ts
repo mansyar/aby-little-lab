@@ -21,6 +21,7 @@ import {
   switchProfile,
   updateSettings,
 } from "../../utils/storage";
+import { tapHits } from "../helpers/hitTest";
 
 const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
@@ -128,6 +129,9 @@ interface MockScene {
       height: number;
       width: number;
     };
+  };
+  children: {
+    bringToTop: MockFn;
   };
 }
 
@@ -268,7 +272,83 @@ function createScene(): MockScene {
         width: 1024,
       },
     },
+    children: { bringToTop: vi.fn() },
   };
+}
+
+/** The rendered extent a text object reports, as Phaser's `getBounds` does. */
+interface Bounds {
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
+}
+
+/** A text double that can report the extent of what it currently renders. */
+type MeasurableText = MockGameObject & { getBounds: () => Bounds };
+
+/** Per-character advance of a 26 px Baloo label, near enough to lay one out. */
+const GLYPH_WIDTH = 13;
+/** Line box of the panel's 26 px labels. */
+const LINE_HEIGHT = 34;
+
+/**
+ * Makes `scene.add.text` report rendered extents for the voice row's two
+ * labels, the way Phaser's `Text` does, and leaves every other label on the
+ * plain double. The extent follows `setText`, because cycling to another voice
+ * changes the chip's width.
+ */
+function measureVoiceText(scene: MockScene): void {
+  scene.add.text.mockImplementation((x: number, y: number, label: string) => {
+    const object = createGameObject() as MeasurableText;
+    let rendered = label;
+    object.setText.mockImplementation((next: string) => {
+      rendered = next;
+      return object;
+    });
+    if (label.startsWith("Voice:") || label === "Preview") {
+      const width = (): number => rendered.length * GLYPH_WIDTH;
+      object.getBounds = vi.fn(() => ({
+        bottom: y + LINE_HEIGHT / 2,
+        left: x - width() / 2,
+        right: x + width() / 2,
+        top: y - LINE_HEIGHT / 2,
+      }));
+    }
+    return object;
+  });
+}
+
+/**
+ * Resolves a custom hit area into scene coordinates the way `centredHitArea`
+ * intends: the callback subtracts the displayOrigin the engine adds, so the
+ * rectangle is measured from the object's own position - the centre of an
+ * origin-0.5 label - not from its top-left corner.
+ */
+function measuredHitRect(object: MeasurableText): HitRect {
+  const config = object.setInteractive.mock.calls.at(-1)?.[0] as
+    | { hitArea: { height: number; width: number; x: number; y: number } }
+    | undefined;
+  if (!config?.hitArea) throw new Error("No custom hit area");
+  const bounds = object.getBounds();
+  const centreX = (bounds.left + bounds.right) / 2;
+  const centreY = (bounds.top + bounds.bottom) / 2;
+  const { hitArea } = config;
+  return {
+    bottom: centreY + hitArea.y + hitArea.height,
+    left: centreX + hitArea.x,
+    right: centreX + hitArea.x + hitArea.width,
+    top: centreY + hitArea.y,
+  };
+}
+
+/** The args of the four corner coordinates of a row card, by its 400x68 size. */
+function lastRowCard(scene: MockScene): [number, number, number, number] {
+  const card = getRectangles(scene)
+    .filter(({ args }) => args?.[2] === 400 && args?.[3] === 68)
+    .at(-1);
+  if (!card?.args) throw new Error("no row card");
+  return card.args as [number, number, number, number];
 }
 
 describe("SettingsPanel creation and display", () => {
@@ -448,6 +528,107 @@ describe("SettingsPanel row geometry", () => {
       expect(trackY).toBeGreaterThanOrEqual(rect.top);
       expect(trackY).toBeLessThanOrEqual(rect.bottom);
     });
+  });
+
+  it("keeps the close button above the rows that share its corner", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+
+    const close = findTextByLabel(scene, "✕") as MockGameObject;
+    const closeRect = hitRectFor(scene, "✕");
+    // The BGM band reaches into the ✕'s 96x96 box, bottom right corner and all,
+    // so the shared corner is decided by input order rather than by geometry.
+    const bgmRect = hitRectFor(scene, "BGM: ON");
+    expect(bgmRect.left).toBeLessThan(closeRect.right);
+    expect(bgmRect.right).toBeGreaterThan(closeRect.left);
+    expect(bgmRect.top).toBeLessThan(closeRect.bottom);
+    expect(bgmRect.bottom).toBeGreaterThan(closeRect.top);
+
+    // Raised above the rows after the last of them exists, so no row can cover
+    // it; the overlays open later and still land on top of it.
+    expect(scene.children.bringToTop).toHaveBeenCalledWith(close);
+    const voiceIndex = scene.add.text.mock.calls.findIndex((call) =>
+      String(call[2]).startsWith("Voice:"),
+    );
+    expect(voiceIndex).toBeGreaterThanOrEqual(0);
+    expect(scene.children.bringToTop.mock.invocationCallOrder[0]).toBeGreaterThan(
+      scene.add.text.mock.invocationCallOrder[voiceIndex],
+    );
+  });
+});
+
+describe("SettingsPanel engine hit test", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  /**
+   * The engine adds `displayOrigin` before testing a custom area, so on an
+   * origin-0.5 label the origin is half the rendered text - a value that changes
+   * with every label. `centredHitArea` subtracts it back out, which is what makes
+   * these bands independent of the text; this case proves that through the
+   * engine's own arithmetic rather than through the test's rectangle model.
+   */
+  it("puts a band in the same place whatever the label's display origin is", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const toggle = findTextByLabel(scene, "BGM: ON") as MockGameObject;
+    const config = toggle.setInteractive.mock.calls[0]?.[0] as {
+      hitArea: { height: number; width: number; x: number; y: number };
+      hitAreaCallback: (area: unknown, x: number, y: number, object: unknown) => boolean;
+    };
+    const [x, y] = scene.add.text.mock.calls[0] as unknown as [number, number];
+
+    const probe = (displayOrigin: number, offsetX: number, offsetY: number): boolean =>
+      config.hitAreaCallback(config.hitArea, offsetX + displayOrigin, offsetY, {
+        displayOriginX: displayOrigin,
+        displayOriginY: 0,
+      });
+
+    // Same three points, measured from a narrow label and a wide one.
+    for (const displayOrigin of [0, 65, 137]) {
+      expect(probe(displayOrigin, 0, 0)).toBe(true);
+      expect(probe(displayOrigin, 169, 0)).toBe(true);
+      expect(probe(displayOrigin, 401, 0)).toBe(false);
+    }
+    expect(x).toBeTypeOf("number");
+    expect(y).toBeTypeOf("number");
+  });
+
+  it("leaves no vertical gap the engine can assign to two rows at once", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const labels = ["BGM: ON", "SFX: ON", "Adaptive: ON"];
+    const bands = labels.map((label) => {
+      const object = findTextByLabel(scene, label) as MockGameObject;
+      const config = object.setInteractive.mock.calls[0]?.[0] as {
+        hitArea: { height: number; width: number; x: number; y: number };
+      };
+      const index = scene.add.text.mock.calls.findIndex((call) => call[2] === label);
+      const [x, y] = scene.add.text.mock.calls[index] as unknown as [number, number];
+      const { hitArea } = config;
+      return {
+        subject: {
+          displayOriginX: hitArea.width / 2,
+          displayOriginY: 0,
+          hitArea,
+          scale: 1,
+          x,
+          y,
+        },
+        centreY: y,
+      };
+    });
+
+    for (let i = 1; i < bands.length; i += 1) {
+      const upper = bands[i - 1];
+      const lower = bands[i];
+      // One pixel above the lower band's top belongs to the upper row only.
+      const probeY = lower.centreY - ROW_PITCH / 2 - 1;
+      expect(tapHits(upper.subject, upper.subject.x + 40, probeY)).toBe(true);
+      expect(tapHits(lower.subject, lower.subject.x + 40, probeY)).toBe(false);
+    }
   });
 });
 
@@ -1280,24 +1461,77 @@ describe("SettingsPanel TTS voice selection", () => {
     expect(chip.setText).toHaveBeenCalledWith("Voice: Default (device)");
   });
 
-  it("gives the voice chip and preview the row pitch band", () => {
+  it("gives the voice chip and preview halves that abut inside the card", () => {
     stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
-    const chipConfig = chip.setInteractive.mock.calls[0]?.[0] as {
-      hitArea: { height: number; width: number };
-    };
-    const preview = findTextByLabel(scene, "Preview") as MockGameObject;
-    const previewConfig = preview.setInteractive.mock.calls[0]?.[0] as {
-      hitArea: { height: number; width: number };
-    };
-    // The row carries two controls, so one band is split between them: same
-    // pitch height, widths that add up to the card, and no overlap.
-    expect(chipConfig.hitArea.height).toBe(ROW_PITCH);
-    expect(previewConfig.hitArea.height).toBe(ROW_PITCH);
-    expect(chipConfig.hitArea.width + previewConfig.hitArea.width).toBe(ROW_HIT_WIDTH);
+    const [cardX, cardY, cardWidth, cardHeight] = lastRowCard(scene);
+    const chipRect = hitRectFor(scene, "Voice: Default (device)");
+    const previewRect = hitRectFor(scene, "Preview");
+
+    // The row carries two controls, so one band is split between them: the
+    // halves meet exactly, each keeps the pitch height, and neither is a sliver
+    // that a tap would miss.
+    expect(chipRect.right).toBe(previewRect.left);
+    for (const rect of [chipRect, previewRect]) {
+      expect(rect.bottom - rect.top).toBe(ROW_PITCH);
+      expect(rect.right - rect.left).toBeGreaterThanOrEqual(96);
+      expect(rect.left).toBeGreaterThanOrEqual(cardX - cardWidth / 2);
+      expect(rect.right).toBeLessThanOrEqual(cardX + cardWidth / 2);
+      expect(rect.top).toBeGreaterThanOrEqual(cardY - cardHeight / 2);
+      expect(rect.bottom).toBeLessThanOrEqual(cardY + cardHeight / 2);
+    }
+  });
+
+  it("splits its band where the rendered labels meet, not at their anchors", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    const scene = createScene();
+    measureVoiceText(scene);
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MeasurableText;
+    const preview = findTextByLabel(scene, "Preview") as MeasurableText;
+    const chipRect = measuredHitRect(chip);
+    const previewRect = measuredHitRect(preview);
+    const chipExtent = chip.getBounds();
+    const previewExtent = preview.getBounds();
+    const [cardX, , cardWidth] = lastRowCard(scene);
+
+    // The boundary falls in the gap between the two rendered labels, so no part
+    // of either label sits in the other's half.
+    expect(chipRect.right).toBeGreaterThanOrEqual(chipExtent.right);
+    expect(chipRect.right).toBeLessThanOrEqual(previewExtent.left);
+    // Each half keeps a generous target and stays inside the card, rather than
+    // leaving the preview's tail on the backdrop that closes the panel.
+    for (const rect of [chipRect, previewRect]) {
+      expect(rect.bottom - rect.top).toBe(ROW_PITCH);
+      expect(rect.right - rect.left).toBeGreaterThanOrEqual(96);
+      expect(rect.left).toBeGreaterThanOrEqual(cardX - cardWidth / 2);
+      expect(rect.right).toBeLessThanOrEqual(cardX + cardWidth / 2);
+    }
+    // The chip's own label is inside its half: the wide default voice is the
+    // case that used to overrun the midpoint and activate Preview.
+    expect(chipExtent.left).toBeGreaterThanOrEqual(chipRect.left);
+    expect(chipExtent.right).toBeLessThanOrEqual(chipRect.right);
+  });
+
+  it("leaves a chip label whole when its extent already fits its half", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    updateSettings({ preferredVoiceURI: "urn:zoe" });
+    const scene = createScene();
+    measureVoiceText(scene);
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: en-US — Zoe") as MeasurableText;
+    // No shorter budget was ever written: truncation is a fallback, not a
+    // blanket. The whole label therefore sits inside its own half.
+    for (const [label] of chip.setText.mock.calls) {
+      expect(label).toBe("Voice: en-US — Zoe");
+    }
+    const chipRect = measuredHitRect(chip);
+    expect(chipRect.left).toBeLessThanOrEqual(chip.getBounds().left);
+    expect(chipRect.right).toBeGreaterThanOrEqual(chip.getBounds().right);
   });
 
   it("Preview speaks the sample phrase with the selected voice when SFX is on", () => {

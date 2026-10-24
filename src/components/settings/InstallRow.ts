@@ -1,10 +1,11 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { attachPressFeedback } from "../../utils/pressFeedback";
 import type { InstallTracker } from "../../utils/pwaInstall";
 import { textStyle } from "../../utils/typography";
 import {
   addRowCard,
   BACKDROP_COLOR,
+  centredHitArea,
   type ObjectBucket,
   OUTLINE_COLOR,
   OVERLAY_ALPHA,
@@ -57,15 +58,7 @@ export class InstallRow {
         }),
       )
       .setOrigin(0.5);
-    button.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -ROW_HIT_WIDTH / 2,
-        -ROW_PITCH / 2,
-        ROW_HIT_WIDTH,
-        ROW_PITCH,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    button.setInteractive(centredHitArea(ROW_HIT_WIDTH, ROW_PITCH));
     button.on("pointerdown", () => {
       if (state === "installable") {
         void this.deps.installTracker.prompt();
@@ -115,15 +108,7 @@ export class InstallRow {
         }),
       )
       .setOrigin(0.5);
-    close.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
-        -TOGGLE_HEIGHT / 2,
-        TOGGLE_WIDTH,
-        TOGGLE_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    close.setInteractive(centredHitArea(TOGGLE_WIDTH, TOGGLE_HEIGHT));
     close.on("pointerdown", () => this.closeIosOverlay());
     this.deps.overlayObjects.push(close);
   }

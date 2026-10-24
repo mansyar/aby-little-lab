@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
@@ -12,6 +12,7 @@ import {
   addRowCard,
   BACKDROP_ALPHA,
   BACKDROP_COLOR,
+  centredHitArea,
   createRow,
   DISABLED_COLOR,
   ENABLED_COLOR,
@@ -139,10 +140,7 @@ export class SettingsPanel {
         }),
       )
       .setOrigin(0.5);
-    closeButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    closeButton.setInteractive(centredHitArea(96, 96));
     closeButton.on("pointerdown", () => this.destroy());
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
@@ -160,6 +158,12 @@ export class SettingsPanel {
     this.resetModal.createRow(centerX, rowY(5));
     this.installRow.create(centerX, rowY(6));
     this.voiceRow.create(centerX, rowY(7));
+    // The ✕ box overlaps the BGM band's top-right corner, and the rows are
+    // created after the ✕, so at equal depth the row would win that corner and
+    // toggle music. Raising the ✕ above the rows settles it - and only above
+    // the rows: the overlays open later and must still cover it, which a depth
+    // above theirs would break.
+    this.scene.children.bringToTop(closeButton);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
@@ -244,17 +248,9 @@ export class SettingsPanel {
         }),
       )
       .setOrigin(0.5);
-    // The label sits 40px left of the row center, so the band's origin shifts
+    // The label sits 40px left of the row center, so the band's offset shifts
     // back by 40: the rectangle must be centred on the card, not on the label.
-    toggle.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -ROW_HIT_WIDTH / 2 + 40,
-        -ROW_PITCH / 2,
-        ROW_HIT_WIDTH,
-        ROW_PITCH,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    toggle.setInteractive(centredHitArea(ROW_HIT_WIDTH, ROW_PITCH, 40));
     toggle.on("pointerdown", () => {
       const nextEnabled = !enabled;
       enabled = nextEnabled;

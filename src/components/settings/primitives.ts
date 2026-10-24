@@ -36,6 +36,40 @@ export const ROW_PITCH = 56;
 export const ROW_HIT_WIDTH = ROW_CARD_WIDTH;
 /** Slightly deeper cream than the panel so rows read as tappable. */
 export const ROW_CARD_COLOR = 0xf6efdd;
+
+/**
+ * A hit area measured from the object's position, not its top-left corner.
+ *
+ * Phaser adds each object's displayOrigin before testing a custom area
+ * (`InputManager.pointWithinHitArea`), which puts a Text's hit area in texture
+ * space: the displayOrigin of an origin-0.5 Text is half its rendered label, so a
+ * rectangle centred on the label would move every time the label text changed.
+ * Subtracting the display origin in the callback cancels that shift, so a
+ * rectangle written around the object's position is the rectangle the player
+ * actually touches, whatever the label says.
+ */
+export function centredHitArea(
+  width: number,
+  height: number,
+  offsetX = 0,
+  offsetY = 0,
+): {
+  hitArea: Phaser.Geom.Rectangle;
+  hitAreaCallback: Phaser.Types.Input.HitAreaCallback;
+} {
+  return {
+    hitArea: new Phaser.Geom.Rectangle(offsetX - width / 2, offsetY - height / 2, width, height),
+    hitAreaCallback: ((area, localX, localY, object) => {
+      const origin = object as unknown as {
+        displayOriginX?: number;
+        displayOriginY?: number;
+      };
+      const x = localX - (origin.displayOriginX ?? 0);
+      const y = localY - (origin.displayOriginY ?? 0);
+      return x >= area.x && x <= area.x + area.width && y >= area.y && y <= area.y + area.height;
+    }) as Phaser.Types.Input.HitAreaCallback,
+  };
+}
 /** Toggle switch presentation: a track plus a knob whose side encodes state. */
 export const TOGGLE_TRACK_WIDTH = 64;
 export const TOGGLE_TRACK_HEIGHT = 32;
@@ -77,15 +111,7 @@ export function createRow(
 ): Phaser.GameObjects.Text {
   addRowCard(scene, x, y, bucket);
   const row = scene.add.text(x, y, label, textStyle({ color, fontSize: "32px" })).setOrigin(0.5);
-  row.setInteractive({
-    hitArea: new Phaser.Geom.Rectangle(
-      -ROW_HIT_WIDTH / 2,
-      -ROW_PITCH / 2,
-      ROW_HIT_WIDTH,
-      ROW_PITCH,
-    ),
-    hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-  });
+  row.setInteractive(centredHitArea(ROW_HIT_WIDTH, ROW_PITCH));
   row.on("pointerdown", onClick);
   attachPressFeedback(row);
   bucket.push(row);
@@ -115,15 +141,7 @@ export function createModalButton(
     bucket.push(card);
   }
   const button = scene.add.text(x, y, label, textStyle({ color, fontSize: "30px" })).setOrigin(0.5);
-  button.setInteractive({
-    hitArea: new Phaser.Geom.Rectangle(
-      -TOGGLE_WIDTH / 2,
-      -ROW_HEIGHT / 2,
-      TOGGLE_WIDTH,
-      ROW_HEIGHT,
-    ),
-    hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-  });
+  button.setInteractive(centredHitArea(TOGGLE_WIDTH, ROW_HEIGHT));
   button.on("pointerdown", onClick);
   attachPressFeedback(button);
   return button;
