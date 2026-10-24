@@ -90,7 +90,7 @@ export function buildWideGrid(grid: HubGrid): void {
     tile.on("pointerup", () => {
       if (grid.deps.isTimeUp() || grid.navLocked) return;
       grid.navLocked = true;
-      grid.deps.activateTile(i);
+      grid.deps.activateTile(i, tile);
     });
     grid.wideObjects.push(tile);
 
@@ -175,7 +175,7 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     tile.on("pointerup", () => {
       if (grid.deps.isTimeUp() || grid.navLocked || grid.swipes.swiping) return;
       grid.navLocked = true;
-      grid.deps.activateTile(globalIndex);
+      grid.deps.activateTile(globalIndex, tile);
     });
     grid.pageObjects.push(tile);
 

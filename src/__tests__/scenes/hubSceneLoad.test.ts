@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { MockObject } from "../helpers/phaserMock";
 import {
   completeFadeOuts,
   getMockFn,
   getRectangles,
   mockEnsureSceneLoaded,
   triggerPointerupOn,
+  triggerShutdown,
 } from "../helpers/sceneFlowHarness";
 
 /**
@@ -97,7 +99,13 @@ import { GAME_TILES } from "../../game/hubTiles";
 import { endPlaySession, startPlaySession } from "../../game/playTimeLogic";
 import { HubScene } from "../../scenes/HubScene";
 import { loadSceneWithRetry } from "../../scenes/sceneRegistry";
-import { getPlayTime, recordGamePlay, recordPlayTime, setPlayTimeLimit } from "../../utils/storage";
+import {
+  getActiveProfile,
+  getPlayTime,
+  recordGamePlay,
+  recordPlayTime,
+  setPlayTimeLimit,
+} from "../../utils/storage";
 
 describe("Hub scene load", () => {
   /** The first tile of the wide grid: the tile every case taps. */
@@ -143,6 +151,43 @@ describe("Hub scene load", () => {
       | Promise<boolean>
       | undefined;
     if (pending) await pending;
+  }
+
+  /** The retry cue the scene is holding, or undefined when none is due. */
+  function cueOf(scene: HubScene): { isActive: () => boolean } | undefined {
+    return (scene as unknown as { loadCue?: { isActive: () => boolean } }).loadCue;
+  }
+
+  /** The cue's 96x96 hit floor: the only rectangle of that size the Hub adds. */
+  function cueRectOf(scene: HubScene): MockObject | undefined {
+    return getRectangles(scene)
+      .map((rect) => rect as unknown as MockObject)
+      .find((rect) => rect.args?.[2] === 96 && rect.args?.[3] === 96);
+  }
+
+  /** Taps the retry cue the way a child would. */
+  function tapCue(scene: HubScene): void {
+    const cue = cueRectOf(scene);
+    if (!cue) throw new Error("retry cue not on screen");
+    cue.handlers.pointerup?.();
+  }
+
+  /**
+   * Gives a mocked tile the runtime centre a real Phaser Rectangle carries.
+   * The double records its constructor args but does not copy them to x/y.
+   */
+  function placeTile(rect: Record<string, unknown>, x: number, y: number): void {
+    rect.x = x;
+    rect.y = y;
+  }
+
+  /** Every stored key and value, for "the failure path persisted nothing". */
+  function storageSnapshot(): string {
+    return JSON.stringify(
+      Object.keys(localStorage)
+        .sort()
+        .map((key) => [key, localStorage.getItem(key)]),
+    );
   }
 
   it("charges nothing and releases the grid when the load fails twice", async () => {
@@ -222,5 +267,182 @@ describe("Hub scene load", () => {
 
     completeFadeOuts(scene);
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(tile.sceneKey);
+  });
+
+  it("puts one cue over the tapped tile and leaves the rest of the Hub tappable", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+    const grid = gridOf(scene);
+    const firstTile = getRectangles(scene)[0];
+    placeTile(firstTile, 146, 268);
+
+    triggerPointerupOn(firstTile);
+    await settleLoad();
+
+    // The cue is visible, centred on the tile the child actually tapped.
+    const cue = cueOf(scene);
+    expect(cue?.isActive()).toBe(true);
+    expect(cueRectOf(scene)?.args?.slice(0, 4)).toEqual([146, 268, 96, 96]);
+    // And the grid is unlocked, so a different tile still reaches the Hub.
+    expect(grid.navLocked).toBe(false);
+
+    triggerPointerupOn(getRectangles(scene)[1]);
+    expect(grid.navLocked).toBe(true);
+
+    await settleLoad();
+
+    // Four attempts: two tiles, two attempts each — the second tap was heard.
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(4);
+    expect(grid.navLocked).toBe(false);
+    // The 96px floor covers a corner of its tile, not the whole grid: the
+    // second tap was not swallowed by the cue's interactive area.
+    expect(cueRectOf(scene)?.args?.[2]).toBe(96);
+  });
+
+  it("retries from the cue, destroys it, then opens the game", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad();
+
+    const cue = cueOf(scene);
+    expect(cue?.isActive()).toBe(true);
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(2);
+
+    // The chunk is reachable again: the cue's tap is the whole retry.
+    mockEnsureSceneLoaded.mockResolvedValue(undefined);
+    tapCue(scene);
+
+    // Gone before the retry resolves, so a success cannot leave it on screen.
+    expect(cue?.isActive()).toBe(false);
+    expect(cueOf(scene)).toBeUndefined();
+    expect(cueRectOf(scene)?.destroy).toHaveBeenCalled();
+
+    await settleLoad();
+
+    // Exactly one extra attempt, then the usual first-time success path.
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(3);
+    expect(startPlaySession).toHaveBeenCalledTimes(1);
+    expect(recordGamePlay).toHaveBeenCalledTimes(1);
+    expect(getMockFn(scene.cameras.main.fadeOut)).toHaveBeenCalled();
+
+    completeFadeOuts(scene);
+    expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(tile.sceneKey);
+  });
+
+  it("warns once per failed attempt, naming the key, and persists nothing", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+    const before = storageSnapshot();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad();
+
+    expect(console.warn).toHaveBeenCalledTimes(2);
+    for (const call of vi.mocked(console.warn).mock.calls) {
+      expect(String(call[0])).toContain(tile.sceneKey);
+    }
+    // Nothing about the failure is stored: no key, no value, no play record.
+    expect(storageSnapshot()).toBe(before);
+  });
+
+  it("keeps one cue across repeated failing taps", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad();
+    const cue = cueOf(scene);
+    expect(cue?.isActive()).toBe(true);
+
+    triggerPointerupOn(getRectangles(scene)[1]);
+    await settleLoad();
+
+    // The second failure reuses the cue instead of stacking another.
+    expect(cueOf(scene)).toBe(cue);
+    expect(cue?.isActive()).toBe(true);
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(4);
+    const cueFloors = getRectangles(scene)
+      .map((rect) => rect as unknown as MockObject)
+      .filter((rect) => rect.args?.[2] === 96);
+    expect(cueFloors).toHaveLength(1);
+  });
+
+  it("does not open a game whose chunk lands after the Hub shut down", async () => {
+    mockEnsureSceneLoaded.mockResolvedValue(undefined);
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    expect(() => triggerShutdown(scene)).not.toThrow();
+
+    // The load still settles quietly; the Hub has nothing left to do with it.
+    await expect(settleLoad()).resolves.toBeUndefined();
+
+    completeFadeOuts(scene);
+    expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    expect(getMockFn(scene.cameras.main.fadeOut)).not.toHaveBeenCalled();
+    expect(startPlaySession).not.toHaveBeenCalled();
+    expect(recordGamePlay).not.toHaveBeenCalled();
+    expect(cueOf(scene)).toBeUndefined();
+  });
+
+  it("discards a failed load that settles after the Hub shut down", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    expect(() => triggerShutdown(scene)).not.toThrow();
+
+    await expect(settleLoad()).resolves.toBeUndefined();
+
+    // No cue is hung over a screen that is already gone.
+    expect(cueOf(scene)).toBeUndefined();
+    expect(cueRectOf(scene)).toBeUndefined();
+    completeFadeOuts(scene);
+    expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    expect(startPlaySession).not.toHaveBeenCalled();
+    expect(recordGamePlay).not.toHaveBeenCalled();
+  });
+
+  it("refuses a cue retry once the daily cap has been reached", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+    const grid = gridOf(scene);
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad();
+    const cue = cueOf(scene);
+    expect(cue?.isActive()).toBe(true);
+
+    // The cap is reached while the cue is up, and the Hub re-reads it the way
+    // it does in the browser: a foreground return (see hubPlayTime.test.ts).
+    const profileId = getActiveProfile().id;
+    setPlayTimeLimit(profileId, 15);
+    recordPlayTime(profileId, 15);
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    mockEnsureSceneLoaded.mockResolvedValue(undefined);
+    tapCue(scene);
+    await settleLoad();
+
+    // The lock outranks the retry: no session, no play record and no game.
+    expect(startPlaySession).not.toHaveBeenCalled();
+    expect(recordGamePlay).not.toHaveBeenCalled();
+    completeFadeOuts(scene);
+    expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+
+    // The cue offers nothing at the cap, so it is gone — not left on screen
+    // inviting a tap that cannot work.
+    expect(cue?.isActive()).toBe(false);
+    expect(cueOf(scene)).toBeUndefined();
+    expect(grid.navLocked).toBe(false);
   });
 });

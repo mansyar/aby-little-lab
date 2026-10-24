@@ -18,10 +18,11 @@ export interface HubGridDeps {
   /** True while the daily play-time limit locks every tile. */
   isTimeUp: () => boolean;
   /**
-   * Activates a tile: audio unlock/start, play-session start, gameplay
-   * record, then nudge-or-launch (only after the grid's tap guards pass).
+   * Activates a tile after the grid's tap guards pass. The tile's rectangle
+   * rides along so a failed load can anchor its retry cue on the tapped tile;
+   * it is optional so callers that never surface a failure can omit it.
    */
-  activateTile: (tileIndex: number) => void;
+  activateTile: (tileIndex: number, tile?: Phaser.GameObjects.Rectangle) => void;
   /** Re-arms the idle-attract timer after a user gesture (page dot taps). */
   onUserGesture: () => void;
   /** True while an overlay (profile picker / settings panel) owns the pointer. */
