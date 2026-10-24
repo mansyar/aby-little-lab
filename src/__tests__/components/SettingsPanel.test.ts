@@ -1547,7 +1547,7 @@ describe("SettingsPanel play time", () => {
     expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
   });
 
-  it("cycles the limit from the whole visible chip label in the engine frame without closing the overlay", () => {
+  it("cycles the limit from the drawn chip label in the engine frame without closing the overlay", () => {
     setPlayTimeLimit("p1", 15);
     const scene = createScene();
     new SettingsPanel(scene as never);

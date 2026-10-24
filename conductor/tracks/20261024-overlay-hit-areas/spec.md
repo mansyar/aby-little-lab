@@ -41,8 +41,8 @@ Defect inventory:
 Every other custom hit area in the codebase is already correct: the Settings
 panel rows go through `centredHitArea()`, and the scene-level sites (back
 buttons, Memory Match cards, Word Builder tiles, the order-game containers,
-Choice round cards) write `(0, 0)`-based rectangles *with comments* that state
-the engine frame.
+Choice round cards) write `(0, 0)`-based rectangles in the engine's own frame (most with
+comments stating it).
 
 Reproductions (desktop Chromium):
 
@@ -110,7 +110,7 @@ above.
 | --- | --- | --- |
 | FR-1 | The PwaToast button hit area is installed through `centredHitArea(BUTTON_WIDTH, BUTTON_HEIGHT)` with the helper's callback. | Must |
 | FR-2 | The ProfilesOverlay Delete button uses `centredHitArea(TOGGLE_WIDTH, ROW_HEIGHT)`; the play-time chip uses `centredHitArea(TOGGLE_WIDTH / 2, ROW_HEIGHT)`. | Must |
-| FR-3 | The ProgressOverlay close button and both chevrons use `centredHitArea(TOGGLE_HEIGHT, TOGGLE_HEIGHT)`; the avatar chip uses `centredHitArea(96, 96)`. | Must |
+| FR-3 | The ProgressOverlay close button and both chevrons use `centredHitArea(TOGGLE_HEIGHT, TOGGLE_HEIGHT)`; the avatar chip uses `centredHitArea(96, 96)`. *(Correction (pre-review): the shipped call is `centredHitArea(96 / chipScale, 96 / chipScale)` - the band is written in the image's local frame because the engine divides the tap by drawn scale - the same 96x96 live zone on screen, per Deviation 1 in `verification/phase-1.md`.)* | Must |
 | FR-4 | Every band keeps today's intended width/height so visible target size and floors do not change. | Must |
 | FR-5 | A per-site engine-accurate regression test proves each band in the frame the engine hit-tests; the harness-level red proof for at least one site is recorded in phase evidence. | Must |
 

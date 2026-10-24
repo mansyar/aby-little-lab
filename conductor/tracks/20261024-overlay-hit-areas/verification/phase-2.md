@@ -3,6 +3,7 @@
 - Track: `20261024-overlay-hit-areas` · Phase 2 · 2026-10-24
 - Branch: `fix/20261024-overlay-hit-areas` · Result: **verified** (executor gate 7/8 green; `validate-docs.js` denied — see Blockers)
 - Base: `7ec6fa18` · Docs commit: `fff20677` (`docs(components): describe the hit-area frame rule for overlays and toast`)
+- Squash note (post-review): the docs work above ships as `303bfe1d docs(components): describe the hit-area frame rule for overlays and toast` (the phase squashed into one checkpoint commit, followed by `4b95f5d7 conductor(plan): Mark phase ... as complete`).
 - Evidence commit: this file's commit (`docs(conductor): record overlay hit areas phase 2 evidence`)
 
 ## Base

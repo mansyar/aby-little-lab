@@ -4,6 +4,7 @@
 - **Track init:** `7d7ace44` (conductor scaffold only)
 - **Verified at:** `4b95f5d7` (code and docs HEAD `303bfe1d`)
 - **Range:** 8 commits, 7 non-conductor files, +770 / -52
+- **Post-review note:** the review commit (`c7337dde docs(conductor): Synchronize docs for track '20261024-overlay-hit-areas'`) sits above this check-out and adds review-state files only; the range here reads to the verified head.
 
 ## What changed, per area
 

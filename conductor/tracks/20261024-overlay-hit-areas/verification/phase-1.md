@@ -4,6 +4,7 @@
 
 - Phase base: `485970d2` on `fix/20261024-overlay-hit-areas`.
 - Code + tests commit: `247c8567` — `fix(components): land overlay hit areas in the engine frame`.
+- Squash note (post-review): phases are squashed to their checkpoint by the primary; the work above ships as `88207888 fix(components): land overlay hit areas in the engine frame` (parent `485970d2`, followed by `679c198a conductor(plan): Mark phase ... as complete`).
 - Evidence commit: the commit that adds this file (`docs(conductor): record overlay hit areas phase 1 evidence`).
 
 ## What changed, per file
@@ -154,11 +155,21 @@ Run against the **un-fixed** code with the new tests already in place
   (`selects a chip from a tap inside its own band ...`):
 
   ```
-  AssertionError: expected 384 to be close to 96, received difference is 288, but expected 0.005
+  AssertionError: expected 24 to be close to 96, received difference is 72, but expected 0.005
   ```
 
   (the un-fixed 96×96 rectangle in the image-local frame never describes a
   96px scene-space band at scale 0.25 — the displaced frame signature).
+
+  > Provenance note (post-review): the originally recorded message here read
+  > `expected 384 to be close to 96, received difference is 288`. That text
+  > came from a superseded division-form probe in an earlier version of the
+  > test and does not match the committed assertion (`hitArea.width * scale`
+  > close to `96` at `SettingsPanel.test.ts:2201`). The message above is from
+  > a controlled un-fix re-run by the primary after review round 1: with
+  > `centredHitArea(96 / chipScale, ...)` reverted to the literal local rect,
+  > the committed probe produced exactly this failure, and the working file
+  > was restored clean afterwards.
 
 - Progress X close (`covers the drawn X glyph ...`):
 
