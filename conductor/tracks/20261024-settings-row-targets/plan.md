@@ -83,7 +83,7 @@ three documentation gaps.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **R1.T1: The split follows the labels** - covers: F1, FR-2, FR-5
   - [ ] **R1.T1.1:** In `VoiceRow.create`, create chip and preview first, then compute `splitX` as the midpoint of the gap between `chip.getBounds().right` and `preview.getBounds().left`, clamped into `[cardLeft + 96, cardRight - 96]`. Fall back to the anchor midpoint when both bounds report zero width (test doubles). Shorten the chip's truncation budget if the measured extents collide. Recompute the split and both hit rectangles after every `setText` on cycle, so a longer label cannot drift into the preview band.
