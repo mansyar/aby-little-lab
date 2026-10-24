@@ -20,17 +20,21 @@ already states.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **P1.T1: A rule that matches the comment** - covers: FR-2
-  - [ ] **P1.T1.1:** Replace the single `docs/svg-contact-sheets/*.png` line with depth-independent patterns plus the baseline re-include: `docs/svg-contact-sheets/**/*.png`, `docs/svg-contact-sheets/**/*.html`, then `!docs/svg-contact-sheets/baseline/**/*.png` and `!docs/svg-contact-sheets/baseline/**/*.html`. Rewrite the comment above them so it names both extensions and says the baseline folder is the tracked record. Do not touch any other rule, and do not add an ignore rule for `.opencode/`.
-  - [ ] **P1.T1.2:** Before staged changes exist, prove the pattern set with `git check-ignore -v` on four paths: `docs/svg-contact-sheets/final/animals.png` and `docs/svg-contact-sheets/animals.html` (must match a rule), `docs/svg-contact-sheets/baseline/animals.png` and `docs/svg-contact-sheets/baseline/animals.html` (must match nothing). Record the output.
-- [ ] **P1.T2: Untrack the regenerated sheets, keep the files** — covers: FR-1
-  - [ ] **P1.T2.1:** Remove every tracked path under `docs/svg-contact-sheets/` except `baseline/**` from the index with `git rm --cached` (210 paths: 99 PNG + 111 HTML). The files must remain on disk - verify with a directory count afterwards and a `git status --short` that shows deletions in the index but no missing files.
-  - [ ] **P1.T2.2:** Confirm the result: `git ls-files docs/svg-contact-sheets` lists exactly 22 paths, all under `baseline/`.
-- [ ] **P1.T3: Regenerating is silent** — covers: FR-3, AC-3
-  - [ ] **P1.T3.1:** Run `node scripts/render-svg-contact-sheets.mjs` (HTML only, no `--png`, so no Chrome is needed), then `git status --porcelain`. It must be empty. If the generator rewrites a tracked file, stop and report it rather than untracking more paths - that would mean a baseline file is machine-generated, which contradicts FR-1.
-  - [ ] **P1.T3.2:** Record in the evidence the before/after numbers: tracked paths under the folder (232 → 22), PNGs on disk (122, unchanged) and HTML on disk (122, unchanged).
+- [x] **P1.T1: A rule that matches the comment** - covers: FR-2
+  - [x] **P1.T1.1:** Replaced the single `docs/svg-contact-sheets/*.png` line with the four depth-independent patterns (`**/*.png`, `**/*.html` and the two `!...baseline/**` re-includes) and rewrote the comment to name both extensions and the baseline as the tracked record. No other rule touched, and no `.opencode/` rule added.
+  - [x] **P1.T1.2:** Proved the set with `git check-ignore --no-index -v`: `final/animals.png` -> `.gitignore:18`, `animals.html` -> `:19`, and both `baseline/` paths -> the `:20`/`:21` negations, i.e. re-included. `--no-index` was required because git consults the index by default and every probe path was still tracked. Cross-checked with `git ls-files -i -c --exclude-standard`: 210 matched, 0 under `baseline/`.
+- [x] **P1.T2: Untrack the regenerated sheets, keep the files** - covers: FR-1
+  - [x] **P1.T2.1:** `git rm --cached -r -q -- docs/svg-contact-sheets ":(exclude)docs/svg-contact-sheets/baseline"` exited 0: 210 staged `D ` deletions (99 PNG + 111 HTML), zero worktree ` D ` entries. The exclude pathspec replaced 210 positional arguments, which overflow the Windows command-line limit; the resulting set is the enumerated one.
+  - [x] **P1.T2.2:** `git ls-files docs/svg-contact-sheets` lists exactly 22 paths, all `baseline/**` (11 PNG + 11 HTML); 122 PNG and 122 HTML remain on disk.
+- [x] **P1.T3: Regenerating is silent** - covers: FR-3, AC-3
+  - [x] **P1.T3.1:** `node scripts/render-svg-contact-sheets.mjs` (HTML only) exited 0 and rewrote every root sheet. `git status --porcelain` then held 210 lines, every one a staged `D  docs/svg-contact-sheets/...` and nothing else - no modified or untracked path, no rewritten baseline file.
+  - [x] **P1.T3.2:** Recorded in the evidence: tracked paths 232 -> 22, PNGs on disk 122 (unchanged), HTML on disk 122 (unchanged).
+
+**Result:** verified
+**Checkpoint:** 2c8287cd
+**Evidence:** conductor/tracks/20261024-repo-hygiene/verification/phase-1.md
 
 ## Phase 2: The record says why
 
