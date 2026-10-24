@@ -1,0 +1,32 @@
+{
+  "id": "20261024-install-prompt-lifetime",
+  "title": "Install Prompt Lifetime",
+  "type": "bug",
+  "status": "in_progress",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-24T00:00:00Z",
+  "updated_at": "2026-10-24T05:53:08Z",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "fix/20261024-install-prompt-lifetime",
+  "base_branch": "master",
+  "base_sha": "329370f625b18108ddada527de990a0f8289defd",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 4,
+    "tasks_total": 24,
+    "tasks_done": 24
+  },
+  "last_checkpoint": "15cc5b77",
+  "review_verdict": "PASS WITH FINDINGS",
+  "review_rounds": 2,
+  "doc_sync": "complete",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}

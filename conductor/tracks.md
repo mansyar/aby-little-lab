@@ -240,3 +240,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: Scene Load Failure Path** - [20261024-scene-load-failure](./archive/20261024-scene-load-failure/index.md) - bug - high
+
+---
+- [~] **Track: Install Prompt Lifetime** - [20261024-install-prompt-lifetime](./tracks/20261024-install-prompt-lifetime/index.md) - bug - high

@@ -5,6 +5,7 @@ import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 import { initPwaBridge } from "./utils/pwaBridge";
+import { initInstallPrompt } from "./utils/pwaInstall";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -32,6 +33,11 @@ const config: Phaser.Types.Core.GameConfig = {
   // than throwing) when a Hub tile is tapped.
   scene: [BootScene, PreloadScene, HubScene],
 };
+
+// Start install-prompt capture before the game boots: the browser fires
+// beforeinstallprompt once per page load, so it must be caught before any
+// scene can open Settings or the offer is gone.
+initInstallPrompt();
 
 // Initialize the PWA bridge before the game boots so HubScene can receive
 // update/offline events the moment it becomes active.

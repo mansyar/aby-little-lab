@@ -357,7 +357,7 @@ physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
 scene: [BootScene, PreloadScene, HubScene],
 ```
 
-`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame.
+`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame. `initInstallPrompt()` runs first, so the browser's once-per-load offer is captured before any scene can open Settings.
 
 ### 3.2 BootScene
 
@@ -618,7 +618,11 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 | `ProgressOverlay.ts` | per-game learning stats: 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip |
 | `ResetModal.ts` | two-step destructive confirm (`Reset all stickers?` with Cancel/Reset); on success calls `resetProgress()`, leaves settings untouched, sets the row to `Progress cleared`, and calls the panel's `onProgressReset` so the Hub shelf re-renders immediately |
 | `VoiceRow.ts` | voice chip cycling and preview |
-| `InstallRow.ts` | install state row driven by `createInstallTracker()` — `installable`, `ios-howto` or hidden |
+| `InstallRow.ts` | install state row read from the app-lifetime tracker — `installable`, `ios-howto` or hidden |
+
+`src/utils/pwaInstall.ts` splits into an injectable core and a thin browser adapter. `createInstallTracker(deps)` is the core: it takes the user agent, the standalone predicate and the two listener methods as an object, decides between the three states, and is what the suites drive. `createBrowserInstallTracker()` is the only place `window` and `navigator` are read, and it goes inert where they are absent or partial - a scene suite's partial `window` stub gets a tracker that reports `hidden` and attaches nothing rather than a throw.
+
+The page holds one tracker for its life. `initInstallPrompt()` runs in `src/main.ts` before `new Phaser.Game`, beside `initPwaBridge` ([§3.1](#31-phaser-configuration)), and `getInstallPromptTracker()` returns that stored instance, creating it lazily for an entry point that never called init; a second init reuses the instance, so a page registers one listener pair. `SettingsPanel` borrows it as its default and leaves `destroy()` alone, so closing Settings never stops the capture. `promptAvailable` means a captured, unused prompt exists: spending it clears the flag, only a fresh `beforeinstallprompt` sets it again, and a refused prompt ends as spent too.
 
 ### 5.6 ProfileChip and PlayTimeIndicator
 
