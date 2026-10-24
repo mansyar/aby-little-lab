@@ -54,14 +54,19 @@ exception as an accident.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **P2.T1: The technical record** - covers: FR-6
-  - [ ] **P2.T1.1:** Rewrite the settings-row paragraph in `docs/TDD.md` (the one that currently calls `TOGGLE_HEIGHT` a hit height and `ROW_HEIGHT` a pitch): rows are `ROW_PITCH = 56` apart, each row's hit area is `ROW_HIT_WIDTH` x `ROW_PITCH` centred on the row card, the switch is inside it, and the offsets derive from the first row plus the pitch. State the reason the band is 56 tall rather than 64.
-- [ ] **P2.T2: The product record** - covers: FR-6
-  - [ ] **P2.T2.1:** In `docs/PRD.md` §5.2, keep 64x64 as the minimum and add the single documented exception: the eight Settings rows, where the pitch caps the band at 56 px and the 400 px width is what carries the target. One sentence, no new heading.
-- [ ] **P2.T3: Gate** - covers: AC-6
-  - [ ] **P2.T3.1:** Run the full chain and write `conductor/tracks/20261024-settings-row-targets/verification/phase-2.md` with the two doc diffs and the gate table.
+- [x] **P2.T1: The technical record** - covers: FR-6
+  - [x] **P2.T1.1:** Rewrite the settings-row paragraph in `docs/TDD.md` (the one that currently calls `TOGGLE_HEIGHT` a hit height and `ROW_HEIGHT` a pitch): rows are `ROW_PITCH = 56` apart, each row's hit area is `ROW_HIT_WIDTH` x `ROW_PITCH` centred on the row card, the switch is inside it, and the offsets derive from the first row plus the pitch. State the reason the band is 56 tall rather than 64.
+- [x] **P2.T2: The product record** - covers: FR-6
+  - [x] **P2.T2.1:** In `docs/PRD.md` §5.2, keep 64x64 as the minimum and add the single documented exception: the eight Settings rows, where the pitch caps the band at 56 px and the 400 px width is what carries the target. One sentence, no new heading.
+- [x] **P2.T3: Gate** - covers: AC-6
+  - [x] **P2.T3.1:** Run the full chain and write `conductor/tracks/20261024-settings-row-targets/verification/phase-2.md` with the two doc diffs and the gate table.
+
+**Result:** verified
+**Checkpoint:** f221ccd0
+**Evidence:** conductor/tracks/20261024-settings-row-targets/verification/phase-2.md
+**Note:** The docs layer was denied to the executor; the primary ran it (5/5) and appended its own section, which is what closes AC-6.
 
 <!--
 Phase completion is recorded by the primary agent only:
