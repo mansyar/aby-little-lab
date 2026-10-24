@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.21.2 (2026-10-24)
+
+- **Target:** tag `v1.21.2` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
+- **Scope:** one track, `conductor/archive/20261024-scene-load-failure/` (PR #60) - a game tile whose chunk cannot be fetched now retries once by itself, and when that retry also fails it shows a wordless retry ring on the tapped tile while the rest of the Hub stays usable, instead of swallowing the tap and leaving every tile dead. A game that never opens charges no play time and records no play. No new game, asset, storage schema or dependency; the save shape is unchanged from v1.21.1.
+- **Checks:** the manual rows from the PR description - offline tap leaves no charge and no record with a retry ring on that tile; restoring the network and tapping the ring opens the game once with one play charged; a second tile tapped during the retry is refused; a failed tap at the cap opens nothing and leaves no cue; a failed tap followed by Settings or the profile picker leaves no ring; reduced motion shows the ring without the pulse; footer `v1.21.2`.
+- **Result:** **PASSED (desktop smoke) 2026-10-24** - `Quality Gates` and `Deploy to Coolify` both succeeded on the tag, and the live `assets/index-DR4s70iB.js` (141146 bytes) is SHA-256 identical to the local `dist/` build. Device-class execution of the four manual rows is **PENDING**.
+- **Issues found:** none reported
+
 ## Execution Record - v1.21.1 (2026-10-24)
 
 - **Target:** tag `v1.21.1` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
