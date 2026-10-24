@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
@@ -12,6 +12,7 @@ import {
   addRowCard,
   BACKDROP_ALPHA,
   BACKDROP_COLOR,
+  centredHitArea,
   createRow,
   DISABLED_COLOR,
   ENABLED_COLOR,
@@ -20,7 +21,8 @@ import {
   PANEL_HEIGHT,
   PANEL_WIDTH,
   PRIMARY_COLOR,
-  TOGGLE_HEIGHT,
+  ROW_HIT_WIDTH,
+  ROW_PITCH,
   TOGGLE_KNOB_COLOR,
   TOGGLE_KNOB_OFFSET,
   TOGGLE_KNOB_SIZE,
@@ -28,10 +30,16 @@ import {
   TOGGLE_TRACK_OFF_COLOR,
   TOGGLE_TRACK_ON_COLOR,
   TOGGLE_TRACK_WIDTH,
-  TOGGLE_WIDTH,
 } from "./settings/primitives";
 import { ResetModal } from "./settings/ResetModal";
 import { VoiceRow } from "./settings/VoiceRow";
+
+/**
+ * Y offset of the first main-panel row from the panel center. The eight rows
+ * then step by `ROW_PITCH`, so the top row clears the title and version footer
+ * while the bottom card still ends inside the 760px panel.
+ */
+const FIRST_ROW_OFFSET = -47;
 
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
@@ -132,25 +140,30 @@ export class SettingsPanel {
         }),
       )
       .setOrigin(0.5);
-    closeButton.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    closeButton.setInteractive(centredHitArea(96, 96));
     closeButton.on("pointerdown", () => this.destroy());
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
-    // Row pitch ~56px keeps all eight 68px cards on-canvas and inside the
-    // 760px panel (bottom row +345 → card bottom +379, matching v1.16.0).
-    this.createToggle(centerX, centerY - 45, "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, centerY + 11, "SFX", settings.sfxEnabled);
-    this.createToggle(centerX, centerY + 67, "Adaptive", settings.adaptiveDifficulty, (next) => {
+    // Eight rows, one ROW_PITCH apart, which is also each row's hit band: the
+    // stack starts at -47 so the top row clears the title and version footer,
+    // and the bottom card ends at +379, inside the 760px panel.
+    const rowY = (index: number): number => centerY + FIRST_ROW_OFFSET + index * ROW_PITCH;
+    this.createToggle(centerX, rowY(0), "BGM", settings.bgmEnabled);
+    this.createToggle(centerX, rowY(1), "SFX", settings.sfxEnabled);
+    this.createToggle(centerX, rowY(2), "Adaptive", settings.adaptiveDifficulty, (next) => {
       updateSettings({ adaptiveDifficulty: next });
     });
-    this.createProfilesRow(centerX, centerY + 123);
-    this.createProgressRow(centerX, centerY + 178);
-    this.resetModal.createRow(centerX, centerY + 234);
-    this.installRow.create(centerX, centerY + 290);
-    this.voiceRow.create(centerX, centerY + 345);
+    this.createProfilesRow(centerX, rowY(3));
+    this.createProgressRow(centerX, rowY(4));
+    this.resetModal.createRow(centerX, rowY(5));
+    this.installRow.create(centerX, rowY(6));
+    this.voiceRow.create(centerX, rowY(7));
+    // The ✕ box overlaps the BGM band's top-right corner, and the rows are
+    // created after the ✕, so at equal depth the row would win that corner and
+    // toggle music. Raising the ✕ above the rows settles it - and only above
+    // the rows: the overlays open later and must still cover it, which a depth
+    // above theirs would break.
+    this.scene.children.bringToTop(closeButton);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
@@ -235,15 +248,9 @@ export class SettingsPanel {
         }),
       )
       .setOrigin(0.5);
-    toggle.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -(TOGGLE_WIDTH / 2 + 40),
-        -TOGGLE_HEIGHT / 2,
-        TOGGLE_WIDTH + 80,
-        TOGGLE_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    // The label sits 40px left of the row center, so the band's offset shifts
+    // back by 40: the rectangle must be centred on the card, not on the label.
+    toggle.setInteractive(centredHitArea(ROW_HIT_WIDTH, ROW_PITCH, 40));
     toggle.on("pointerdown", () => {
       const nextEnabled = !enabled;
       enabled = nextEnabled;

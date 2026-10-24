@@ -1,4 +1,5 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
+import { PANEL_WIDTH, ROW_HIT_WIDTH, ROW_PITCH } from "../../components/settings/primitives";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import {
   createInstallTracker,
@@ -128,6 +129,9 @@ interface MockScene {
       width: number;
     };
   };
+  children: {
+    bringToTop: MockFn;
+  };
 }
 
 function createGameObject(): MockGameObject {
@@ -197,6 +201,83 @@ function findTextByLabel(scene: MockScene, label: string): MockGameObject | unde
   return scene.add.text.mock.results[callIndex]?.value as MockGameObject | undefined;
 }
 
+interface HitRect {
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
+}
+
+/**
+ * Reads the hit-area config a text object was given, failing loudly when the
+ * control is not interactive at all.
+ */
+function configOf(object: MockGameObject): {
+  hitArea: { height: number; width: number; x: number; y: number };
+  hitAreaCallback: (area: unknown, localX: number, localY: number, object: unknown) => boolean;
+} {
+  const config = object.setInteractive.mock.calls[0]?.[0] as
+    | {
+        hitArea: { height: number; width: number; x: number; y: number };
+        hitAreaCallback: (
+          area: unknown,
+          localX: number,
+          localY: number,
+          object: unknown,
+        ) => boolean;
+      }
+    | undefined;
+  if (!config?.hitAreaCallback) throw new Error("No custom hit area callback");
+  return config;
+}
+
+/**
+ * Answers the engine's own question for a point in scene space: it adds the
+ * display origin to the local pointer before calling the callback, exactly as
+ * `InputManager.pointWithinHitArea` does, so a band that only looks right
+ * relative to the object's centre fails here.
+ */
+function engineHits(
+  config: ReturnType<typeof configOf>,
+  objectX: number,
+  objectY: number,
+  displayOriginX: number,
+  displayOriginY: number,
+  pointX: number,
+  pointY: number,
+): boolean {
+  return config.hitAreaCallback(
+    config.hitArea,
+    pointX - objectX + displayOriginX,
+    pointY - objectY + displayOriginY,
+    { displayOriginX, displayOriginY },
+  );
+}
+
+/**
+ * Resolves the custom hit area of the text object with the given label into
+ * scene coordinates, using the object's own position and rectangle. Deriving
+ * the geometry from the created objects (rather than from the layout
+ * constants) is what lets a constant drift away from the layout fail here.
+ */
+function hitRectFor(scene: MockScene, label: string): HitRect {
+  const callIndex = scene.add.text.mock.calls.findIndex((call) => call[2] === label);
+  if (callIndex < 0) throw new Error(`No text object labelled ${label}`);
+  const [x, y] = scene.add.text.mock.calls[callIndex] as unknown as [number, number];
+  const object = scene.add.text.mock.results[callIndex]?.value as MockGameObject;
+  const config = object.setInteractive.mock.calls[0]?.[0] as
+    | { hitArea: { height: number; width: number; x: number; y: number } }
+    | undefined;
+  if (!config?.hitArea) throw new Error(`No custom hit area on ${label}`);
+  const { hitArea } = config;
+  return {
+    bottom: y + hitArea.y + hitArea.height,
+    left: x + hitArea.x,
+    right: x + hitArea.x + hitArea.width,
+    top: y + hitArea.y,
+  };
+}
+
 /** Finds the display object created by the LAST text call with the given label. */
 function findLastTextByLabel(scene: MockScene, label: string): MockGameObject | undefined {
   let lastIndex = -1;
@@ -236,7 +317,83 @@ function createScene(): MockScene {
         width: 1024,
       },
     },
+    children: { bringToTop: vi.fn() },
   };
+}
+
+/** The rendered extent a text object reports, as Phaser's `getBounds` does. */
+interface Bounds {
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
+}
+
+/** A text double that can report the extent of what it currently renders. */
+type MeasurableText = MockGameObject & { getBounds: () => Bounds };
+
+/** Per-character advance of a 26 px Baloo label, near enough to lay one out. */
+const GLYPH_WIDTH = 13;
+/** Line box of the panel's 26 px labels. */
+const LINE_HEIGHT = 34;
+
+/**
+ * Makes `scene.add.text` report rendered extents for the voice row's two
+ * labels, the way Phaser's `Text` does, and leaves every other label on the
+ * plain double. The extent follows `setText`, because cycling to another voice
+ * changes the chip's width.
+ */
+function measureVoiceText(scene: MockScene): void {
+  scene.add.text.mockImplementation((x: number, y: number, label: string) => {
+    const object = createGameObject() as MeasurableText;
+    let rendered = label;
+    object.setText.mockImplementation((next: string) => {
+      rendered = next;
+      return object;
+    });
+    if (label.startsWith("Voice:") || label === "Preview") {
+      const width = (): number => rendered.length * GLYPH_WIDTH;
+      object.getBounds = vi.fn(() => ({
+        bottom: y + LINE_HEIGHT / 2,
+        left: x - width() / 2,
+        right: x + width() / 2,
+        top: y - LINE_HEIGHT / 2,
+      }));
+    }
+    return object;
+  });
+}
+
+/**
+ * Resolves a custom hit area into scene coordinates the way `centredHitArea`
+ * intends: the callback subtracts the displayOrigin the engine adds, so the
+ * rectangle is measured from the object's own position - the centre of an
+ * origin-0.5 label - not from its top-left corner.
+ */
+function measuredHitRect(object: MeasurableText): HitRect {
+  const config = object.setInteractive.mock.calls.at(-1)?.[0] as
+    | { hitArea: { height: number; width: number; x: number; y: number } }
+    | undefined;
+  if (!config?.hitArea) throw new Error("No custom hit area");
+  const bounds = object.getBounds();
+  const centreX = (bounds.left + bounds.right) / 2;
+  const centreY = (bounds.top + bounds.bottom) / 2;
+  const { hitArea } = config;
+  return {
+    bottom: centreY + hitArea.y + hitArea.height,
+    left: centreX + hitArea.x,
+    right: centreX + hitArea.x + hitArea.width,
+    top: centreY + hitArea.y,
+  };
+}
+
+/** The args of the four corner coordinates of a row card, by its 400x68 size. */
+function lastRowCard(scene: MockScene): [number, number, number, number] {
+  const card = getRectangles(scene)
+    .filter(({ args }) => args?.[2] === 400 && args?.[3] === 68)
+    .at(-1);
+  if (!card?.args) throw new Error("no row card");
+  return card.args as [number, number, number, number];
 }
 
 describe("SettingsPanel creation and display", () => {
@@ -305,7 +462,7 @@ describe("SettingsPanel creation and display", () => {
     );
   });
 
-  it("gives every toggle label inflated touch targets of at least 64px", () => {
+  it("gives every toggle label the row pitch band", () => {
     const scene = createScene();
 
     new SettingsPanel(scene as never);
@@ -334,8 +491,10 @@ describe("SettingsPanel creation and display", () => {
       const config = toggle.setInteractive.mock.calls[0]?.[0] as {
         hitArea: { height: number; width: number };
       };
-      expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
-      expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
+      // The row's pitch is its band: eight rows in a 760px panel cannot each be
+      // 64px tall without overlapping a neighbour (the documented exception).
+      expect(config.hitArea.width).toBe(ROW_HIT_WIDTH);
+      expect(config.hitArea.height).toBe(ROW_PITCH);
     }
   });
 
@@ -350,6 +509,168 @@ describe("SettingsPanel creation and display", () => {
       "Adaptive: ON",
       expect.objectContaining({ color: "#68d391" }),
     );
+  });
+});
+
+describe("SettingsPanel row geometry", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  /** The eight main-panel rows, top to bottom, with the install row visible. */
+  const ROW_LABELS = [
+    "BGM: ON",
+    "SFX: ON",
+    "Adaptive: ON",
+    "Profiles",
+    "Progress",
+    "Reset Progress",
+    "Install App",
+    "Voice: Default (device)",
+  ];
+
+  it("gives every row one band, so neighbours abut and never overlap", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+
+    const rects = ROW_LABELS.map((label) => hitRectFor(scene, label));
+
+    for (let index = 1; index < rects.length; index += 1) {
+      const gap = rects[index].top - rects[index - 1].bottom;
+      expect(gap).toBeGreaterThanOrEqual(0); // no overlap: the lower row cannot steal the tap
+      expect(gap).toBeLessThanOrEqual(1); // and no dead seam between them either
+    }
+
+    // One band height for the whole stack: the pitch is the band.
+    const heights = rects.map((rect) => rect.bottom - rect.top);
+    expect(new Set(heights).size).toBe(1);
+  });
+
+  it("spans each toggle's card and reaches its switch", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+
+    const cards = getRectangles(scene).filter(({ args }) => args?.[2] === 400 && args?.[3] === 68);
+    const tracks = getRectangles(scene).filter(({ args }) => args?.[2] === 64 && args?.[3] === 32);
+    const toggleLabels = ["BGM: ON", "SFX: ON", "Adaptive: ON"];
+    expect(cards.slice(0, 3)).toHaveLength(3);
+    expect(tracks.slice(0, 3)).toHaveLength(3);
+
+    toggleLabels.forEach((label, index) => {
+      const rect = hitRectFor(scene, label);
+      const [cardX, , cardWidth] = (cards[index]?.args ?? []) as [number, number, number];
+
+      // The band is the card: its empty space and the label hit the same row.
+      expect(rect.left).toBeLessThanOrEqual(cardX - cardWidth / 2);
+      expect(rect.right).toBeGreaterThanOrEqual(cardX + cardWidth / 2);
+
+      // The switch graphic is inside it, so the thing that looks like a button
+      // is the thing that is tappable.
+      const [trackX, trackY] = (tracks[index]?.args ?? []) as [number, number];
+      expect(trackX).toBeGreaterThanOrEqual(rect.left);
+      expect(trackX).toBeLessThanOrEqual(rect.right);
+      expect(trackY).toBeGreaterThanOrEqual(rect.top);
+      expect(trackY).toBeLessThanOrEqual(rect.bottom);
+    });
+  });
+
+  it("keeps the close button above the rows that share its corner", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+
+    const close = findTextByLabel(scene, "✕") as MockGameObject;
+    const closeRect = hitRectFor(scene, "✕");
+    // The BGM band reaches into the ✕'s 96x96 box, bottom right corner and all,
+    // so the shared corner is decided by input order rather than by geometry.
+    const bgmRect = hitRectFor(scene, "BGM: ON");
+    expect(bgmRect.left).toBeLessThan(closeRect.right);
+    expect(bgmRect.right).toBeGreaterThan(closeRect.left);
+    expect(bgmRect.top).toBeLessThan(closeRect.bottom);
+    expect(bgmRect.bottom).toBeGreaterThan(closeRect.top);
+
+    // Raised above the rows after the last of them exists, so no row can cover
+    // it; the overlays open later and still land on top of it.
+    expect(scene.children.bringToTop).toHaveBeenCalledWith(close);
+    const voiceIndex = scene.add.text.mock.calls.findIndex((call) =>
+      String(call[2]).startsWith("Voice:"),
+    );
+    expect(voiceIndex).toBeGreaterThanOrEqual(0);
+    expect(scene.children.bringToTop.mock.invocationCallOrder[0]).toBeGreaterThan(
+      scene.add.text.mock.invocationCallOrder[voiceIndex],
+    );
+  });
+});
+
+describe("SettingsPanel engine hit test", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  /**
+   * The engine adds `displayOrigin` before testing a custom area, so on an
+   * origin-0.5 label the origin is half the rendered text - a value that changes
+   * with every label. `centredHitArea` subtracts it back out, which is what makes
+   * these bands independent of the text; this case proves that through the
+   * engine's own arithmetic rather than through the test's rectangle model.
+   */
+  it("puts a band in the same place whatever the label's display origin is", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const config = configOf(findTextByLabel(scene, "BGM: ON") as MockGameObject);
+    const [x, y] = scene.add.text.mock.calls[0] as unknown as [number, number];
+    const left = x + config.hitArea.x;
+    const right = left + config.hitArea.width;
+
+    // The switch sits at +170 and the band ends at +200, so probe the switch and
+    // both edges. A callback that forgot to subtract the display origin answers
+    // false just inside the right edge as soon as the origin is non-zero.
+    for (const displayOriginX of [0, 65, 137]) {
+      expect(engineHits(config, x, y, displayOriginX, 0, x + 169, y)).toBe(true);
+      expect(engineHits(config, x, y, displayOriginX, 0, left + 1, y)).toBe(true);
+      expect(engineHits(config, x, y, displayOriginX, 0, right - 1, y)).toBe(true);
+      expect(engineHits(config, x, y, displayOriginX, 0, left - 1, y)).toBe(false);
+      expect(engineHits(config, x, y, displayOriginX, 0, right + 1, y)).toBe(false);
+    }
+  });
+
+  it("gives every row the same vertical band, whatever its font size is", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    // Three label sizes (34 px toggles, 32 px plain rows, 26 px voice) and two
+    // text objects in the voice row: nothing here may depend on type metrics.
+    const labels = ["BGM: ON", "Profiles", "Voice: Default (device)", "Preview"];
+    const rows = labels.map((label) => {
+      const index = scene.add.text.mock.calls.findIndex((call) => call[2] === label);
+      expect(index).toBeGreaterThanOrEqual(0);
+      const [x, y] = scene.add.text.mock.calls[index] as unknown as [number, number];
+      const object = scene.add.text.mock.results[index]?.value as MockGameObject;
+      const config = configOf(object);
+      const left = x + config.hitArea.x;
+      return {
+        config,
+        insideX: left + Math.min(40, config.hitArea.width - 1),
+        label,
+        x,
+        y,
+      };
+    });
+
+    for (const row of rows) {
+      // Half a 34 px line box, the worst case, and a third of it as the floor:
+      // one pixel inside each edge is in, one pixel outside each edge is out.
+      for (const originY of [0, 11, 17]) {
+        for (const insideY of [row.y - ROW_PITCH / 2 + 1, row.y + ROW_PITCH / 2 - 1]) {
+          expect(engineHits(row.config, row.x, row.y, 0, originY, row.insideX, insideY)).toBe(true);
+        }
+        for (const outsideY of [row.y - ROW_PITCH / 2 - 1, row.y + ROW_PITCH / 2 + 1]) {
+          expect(engineHits(row.config, row.x, row.y, 0, originY, row.insideX, outsideY)).toBe(
+            false,
+          );
+        }
+      }
+    }
   });
 });
 
@@ -454,6 +775,30 @@ describe("SettingsPanel interaction", () => {
     expect(getSettings().adaptiveDifficulty).toBe(true);
   });
 
+  it("toggles once when the switch region is tapped", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    const toggle = findTextByLabel(scene, "BGM: ON") as MockGameObject;
+    const rect = hitRectFor(scene, "BGM: ON");
+    // The switch graphic - the part that looks like a button - is inside the
+    // row's band now, so it activates the row rather than falling through.
+    const knob = getRectangles(scene).find(({ args }) => args?.[2] === 24 && args?.[3] === 24);
+    const [knobX, knobY] = (knob?.args ?? []) as [number, number];
+    expect(knobX).toBeGreaterThanOrEqual(rect.left);
+    expect(knobX).toBeLessThanOrEqual(rect.right);
+    expect(knobY).toBeGreaterThanOrEqual(rect.top);
+    expect(knobY).toBeLessThanOrEqual(rect.bottom);
+
+    triggerPointerdown(toggle);
+
+    // Exactly one handler run: one state flip, one label rewrite, no SFX.
+    expect(mockAudio.setBGMEnabled).toHaveBeenCalledTimes(1);
+    expect(mockAudio.setBGMEnabled).toHaveBeenCalledWith(false);
+    expect(mockAudio.setSFXEnabled).not.toHaveBeenCalled();
+    expect(toggle.setText).toHaveBeenCalledTimes(1);
+    expect(toggle.setText).toHaveBeenCalledWith("BGM: OFF");
+  });
+
   it("destroys every panel object when the backdrop is tapped", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
@@ -522,7 +867,7 @@ describe("SettingsPanel install control", () => {
     expect(findTextByLabel(scene, "Install App")).toBeDefined();
   });
 
-  it("gives the install button an inflated touch target of at least 64px", () => {
+  it("gives the install button the row pitch band", () => {
     const scene = createScene();
     const tracker = createFakeInstallTracker("installable");
     new SettingsPanel(scene as never, tracker);
@@ -531,8 +876,8 @@ describe("SettingsPanel install control", () => {
     const config = installButton.setInteractive.mock.calls[0]?.[0] as {
       hitArea: { height: number; width: number };
     };
-    expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
-    expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
+    expect(config.hitArea.width).toBe(ROW_HIT_WIDTH);
+    expect(config.hitArea.height).toBe(ROW_PITCH);
   });
 
   it("shows a How to Install button on iOS and opens the instructions overlay on tap", () => {
@@ -752,7 +1097,7 @@ describe("SettingsPanel reset progress", () => {
     expect(load().settings.sfxEnabled).toBe(true);
   });
 
-  it("gives the reset row and modal buttons inflated touch targets of at least 64px", () => {
+  it("gives the reset row the row pitch band and modal buttons at least 64px", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
@@ -760,8 +1105,10 @@ describe("SettingsPanel reset progress", () => {
     const rowConfig = row.setInteractive.mock.calls[0]?.[0] as {
       hitArea: { height: number; width: number };
     };
-    expect(rowConfig.hitArea.width).toBeGreaterThanOrEqual(64);
-    expect(rowConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+    // Row exception: the panel's pitch caps the band at ROW_PITCH; the modal
+    // buttons are laid out by the modal and keep the full 64px minimum.
+    expect(rowConfig.hitArea.width).toBe(ROW_HIT_WIDTH);
+    expect(rowConfig.hitArea.height).toBe(ROW_PITCH);
 
     triggerPointerdown(row);
     for (const label of ["Cancel", "Reset"]) {
@@ -906,14 +1253,16 @@ describe("SettingsPanel profile management", () => {
     expect(onProgressReset).toHaveBeenCalledTimes(2);
   });
 
-  it("gives profile controls inflated touch targets of at least 64px", () => {
+  it("gives the profile row the row pitch band and modal controls at least 64px", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
     const rowConfig = (findTextByLabel(scene, "Profiles") as MockGameObject).setInteractive.mock
       .calls[0]?.[0] as { hitArea: { height: number; width: number } };
-    expect(rowConfig.hitArea.width).toBeGreaterThanOrEqual(64);
-    expect(rowConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+    // Row exception: the panel's pitch caps the band at ROW_PITCH; the modal
+    // Delete button is laid out by the modal and keeps the 64px minimum.
+    expect(rowConfig.hitArea.width).toBe(ROW_HIT_WIDTH);
+    expect(rowConfig.hitArea.height).toBe(ROW_PITCH);
 
     triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
     const deleteConfig = (findTextByLabel(scene, "Delete") as MockGameObject).setInteractive.mock
@@ -1154,24 +1503,83 @@ describe("SettingsPanel TTS voice selection", () => {
     expect(chip.setText).toHaveBeenCalledWith("Voice: Default (device)");
   });
 
-  it("gives the voice chip and preview inflated touch targets of at least 64px", () => {
+  it("gives the voice chip and preview halves that abut inside the card", () => {
     stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
-    const chipConfig = chip.setInteractive.mock.calls[0]?.[0] as {
-      hitArea: { height: number; width: number };
-    };
-    expect(chipConfig.hitArea.width).toBeGreaterThanOrEqual(64);
-    expect(chipConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+    const [cardX, cardY, cardWidth, cardHeight] = lastRowCard(scene);
+    const chipRect = hitRectFor(scene, "Voice: Default (device)");
+    const previewRect = hitRectFor(scene, "Preview");
 
-    const preview = findTextByLabel(scene, "Preview") as MockGameObject;
-    const previewConfig = preview.setInteractive.mock.calls[0]?.[0] as {
-      hitArea: { height: number; width: number };
-    };
-    expect(previewConfig.hitArea.width).toBeGreaterThanOrEqual(64);
-    expect(previewConfig.hitArea.height).toBeGreaterThanOrEqual(64);
+    // The row carries two controls, so one band is split between them: the
+    // halves meet exactly, each keeps the pitch height, and neither is a sliver
+    // that a tap would miss.
+    expect(chipRect.right).toBe(previewRect.left);
+    for (const rect of [chipRect, previewRect]) {
+      expect(rect.bottom - rect.top).toBe(ROW_PITCH);
+      expect(rect.right - rect.left).toBeGreaterThanOrEqual(96);
+      expect(rect.left).toBeGreaterThanOrEqual(cardX - cardWidth / 2);
+      expect(rect.right).toBeLessThanOrEqual(cardX + cardWidth / 2);
+      expect(rect.top).toBeGreaterThanOrEqual(cardY - cardHeight / 2);
+      expect(rect.bottom).toBeLessThanOrEqual(cardY + cardHeight / 2);
+    }
+  });
+
+  it("splits its band where the rendered labels meet, not at their anchors", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    const scene = createScene();
+    measureVoiceText(scene);
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MeasurableText;
+    const preview = findTextByLabel(scene, "Preview") as MeasurableText;
+    const chipRect = measuredHitRect(chip);
+    const previewRect = measuredHitRect(preview);
+    const chipExtent = chip.getBounds();
+    const previewExtent = preview.getBounds();
+    const [cardX, , cardWidth] = lastRowCard(scene);
+
+    // The boundary falls in the gap between the two rendered labels, so no part
+    // of either label sits in the other's half.
+    expect(chipRect.right).toBeGreaterThanOrEqual(chipExtent.right);
+    expect(chipRect.right).toBeLessThanOrEqual(previewExtent.left);
+    // Each half is one band tall and keeps a generous target. The chip stays
+    // inside the card; the preview half reaches as far as its label does, which
+    // can pass the card's right edge, and still has to stay on the panel rather
+    // than leave the word's tail on the backdrop that closes the panel.
+    for (const rect of [chipRect, previewRect]) {
+      expect(rect.bottom - rect.top).toBe(ROW_PITCH);
+      expect(rect.right - rect.left).toBeGreaterThanOrEqual(96);
+      expect(rect.left).toBeGreaterThanOrEqual(cardX - cardWidth / 2);
+      expect(rect.right).toBeLessThanOrEqual(cardX + PANEL_WIDTH / 2);
+    }
+    expect(chipRect.right).toBeLessThanOrEqual(cardX + cardWidth / 2);
+    // The chip's own label is inside its half: the wide default voice is the
+    // case that used to overrun the midpoint and activate Preview.
+    expect(chipExtent.left).toBeGreaterThanOrEqual(chipRect.left);
+    expect(chipExtent.right).toBeLessThanOrEqual(chipRect.right);
+    // And so is the preview's, whatever it renders to.
+    expect(previewExtent.left).toBeGreaterThanOrEqual(previewRect.left);
+    expect(previewExtent.right).toBeLessThanOrEqual(previewRect.right);
+  });
+
+  it("leaves a chip label whole when its extent already fits its half", () => {
+    stubSynth([makeVoice("urn:zoe", "Zoe", "en-US")]);
+    updateSettings({ preferredVoiceURI: "urn:zoe" });
+    const scene = createScene();
+    measureVoiceText(scene);
+    new SettingsPanel(scene as never);
+
+    const chip = findTextByLabel(scene, "Voice: en-US — Zoe") as MeasurableText;
+    // No shorter budget was ever written: truncation is a fallback, not a
+    // blanket. The whole label therefore sits inside its own half.
+    for (const [label] of chip.setText.mock.calls) {
+      expect(label).toBe("Voice: en-US — Zoe");
+    }
+    const chipRect = measuredHitRect(chip);
+    expect(chipRect.left).toBeLessThanOrEqual(chip.getBounds().left);
+    expect(chipRect.right).toBeGreaterThanOrEqual(chip.getBounds().right);
   });
 
   it("Preview speaks the sample phrase with the selected voice when SFX is on", () => {
@@ -1187,6 +1595,55 @@ describe("SettingsPanel TTS voice selection", () => {
     const utterance = speak.mock.calls[0]?.[0] as MockUtterance;
     expect(utterance.text).toBe("Hi! I can talk.");
     expect(utterance.voice?.voiceURI).toBe("urn:zoe");
+  });
+
+  it("keeps the voice halves in the frame the engine tests, even after a label change", () => {
+    stubSynth([
+      makeVoice("urn:zoe", "Zoe", "en-US"),
+      makeVoice("urn:long", "A Rather Long Voice Name", "en-GB"),
+    ]);
+    const scene = createScene();
+    measureVoiceText(scene);
+    new SettingsPanel(scene as never);
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
+    const config = configOf(chip);
+    const bounds = (chip as unknown as MeasurableText).getBounds();
+    const chipX = (bounds.left + bounds.right) / 2;
+    const chipY = bounds.top + LINE_HEIGHT / 2;
+    const chipRect = measuredHitRect(chip as unknown as MeasurableText);
+
+    // The chip half reaches the card's left edge whatever the label renders to,
+    // and stops at the split, so a tap past it belongs to Preview.
+    for (const originX of [0, 90, 160]) {
+      expect(engineHits(config, chipX, chipY, originX, 17, chipRect.left + 1, chipY)).toBe(true);
+      expect(engineHits(config, chipX, chipY, originX, 17, chipRect.right + 1, chipY)).toBe(false);
+    }
+
+    // Cycling rewrites the chip's text and refits; the engine must see the new
+    // rectangle, which only happens because `applyHitArea` assigns to the
+    // existing `input` object instead of calling `setInteractive` again (a second
+    // call is ignored, so the stale rectangle would stay live).
+    const input = {
+      hitArea: { ...config.hitArea },
+      hitAreaCallback: config.hitAreaCallback,
+    };
+    (chip as unknown as { input: typeof input }).input = input;
+    const before = input.hitArea;
+    triggerPointerdown(chip);
+
+    expect(input.hitArea).not.toBe(before);
+    expect(chip.setInteractive).toHaveBeenCalledTimes(1);
+
+    // And the refitted rectangle behaves the same way in the engine frame.
+    const refit = { hitArea: input.hitArea, hitAreaCallback: input.hitAreaCallback };
+    const refitLeft = chipX + input.hitArea.x;
+    const refitRight = refitLeft + input.hitArea.width;
+    for (const originX of [0, 90, 160]) {
+      expect(engineHits(refit, chipX, chipY, originX, 17, refitLeft + 1, chipY)).toBe(true);
+      expect(engineHits(refit, chipX, chipY, originX, 17, refitRight + 1, chipY)).toBe(false);
+      expect(engineHits(refit, chipX, chipY, originX, 17, refitLeft + 1, chipY - 27)).toBe(true);
+      expect(engineHits(refit, chipX, chipY, originX, 17, refitLeft + 1, chipY - 29)).toBe(false);
+    }
   });
 
   it("Preview stays silent when SFX is off", () => {

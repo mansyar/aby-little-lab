@@ -83,10 +83,13 @@ describe("createRow", () => {
       hitArea: { x: number; y: number; width: number; height: number };
       hitAreaCallback: unknown;
     };
-    expect(config.hitArea.x).toBe(-120);
-    expect(config.hitArea.y).toBe(-32);
-    expect(config.hitArea.width).toBe(240);
-    expect(config.hitArea.height).toBe(64);
+    // One row pitch tall and the whole card wide: eight rows inside a 760px
+    // panel cannot each carry the 64px minimum, so the pitch is the band
+    // (documented exception, track 20261024-settings-row-targets).
+    expect(config.hitArea.x).toBe(-200);
+    expect(config.hitArea.y).toBe(-28);
+    expect(config.hitArea.width).toBe(400);
+    expect(config.hitArea.height).toBe(56);
   });
 });
 
