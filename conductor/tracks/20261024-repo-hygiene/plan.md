@@ -20,9 +20,9 @@ already states.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
-- [ ] **P1.T1: A rule that matches the comment** — covers: FR-2
+- [ ] **P1.T1: A rule that matches the comment** - covers: FR-2
   - [ ] **P1.T1.1:** Replace the single `docs/svg-contact-sheets/*.png` line with depth-independent patterns plus the baseline re-include: `docs/svg-contact-sheets/**/*.png`, `docs/svg-contact-sheets/**/*.html`, then `!docs/svg-contact-sheets/baseline/**/*.png` and `!docs/svg-contact-sheets/baseline/**/*.html`. Rewrite the comment above them so it names both extensions and says the baseline folder is the tracked record. Do not touch any other rule, and do not add an ignore rule for `.opencode/`.
   - [ ] **P1.T1.2:** Before staged changes exist, prove the pattern set with `git check-ignore -v` on four paths: `docs/svg-contact-sheets/final/animals.png` and `docs/svg-contact-sheets/animals.html` (must match a rule), `docs/svg-contact-sheets/baseline/animals.png` and `docs/svg-contact-sheets/baseline/animals.html` (must match nothing). Record the output.
 - [ ] **P1.T2: Untrack the regenerated sheets, keep the files** — covers: FR-1
