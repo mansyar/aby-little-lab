@@ -95,7 +95,7 @@ invites deleting folders the generator cannot reproduce.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **R1.T1: The comment names what the rule covers** - covers: F1, FR-2
   - [ ] **R1.T1.1:** Make `.gitignore:16` name both extensions the rule handles, so the comment agrees with the four patterns and with what the track's plan and integrated verification claim about it: `# Generated contact-sheet PNGs and HTML are scratch; the tracked record is the baseline set.` Change nothing else in the file.
