@@ -70,35 +70,46 @@
   `src/__tests__/game/hubGrid.test.ts`,
   `src/__tests__/scenes/hubSceneLoad.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: The retry cue** - covers: FR-2
-  - [ ] **P2.T1.1:** Add `src/components/GameLoadCue.ts` modelled on
+- [x] **P2.T1: The retry cue** - covers: FR-2
+  - [x] **P2.T1.1:** Add `src/components/GameLoadCue.ts` modelled on
     `PlayTimeNudge`'s shape (scene-plus-callback factory, `active` flag,
     `destroy()` that detaches every handler and the `shutdown` hook). It draws a
     textless circular-arrow glyph with a ring around the tapped tile, sized so
     its interactive area is at least 96x96 px, sits above the tiles and below the
     parent surfaces, and does nothing when already active (one cue at a time).
     Respect `isReducedMotion()` for the pulse: static ring, no animation loop.
-  - [ ] **P2.T1.2:** `GameLoadCue.test.ts` — colour and depth constants, one
+  - [x] **P2.T1.2:** `GameLoadCue.test.ts` — colour and depth constants, one
     instance under repeated `show()`, callback fires on pointerup, `destroy()` is
     idempotent and removes the shutdown hook, reduced motion skips the tween.
-- [ ] **P2.T2: Wiring, lifetime and the unlock** - covers: FR-3, FR-6
-  - [ ] **P2.T2.1:** `HubScene` owns one cue instance. On a failed load it shows
+- [x] **P2.T2: Wiring, lifetime and the unlock** - covers: FR-3, FR-6
+  - [x] **P2.T2.1:** `HubScene` owns one cue instance. On a failed load it shows
     the cue anchored to the tapped tile with a callback that re-enters
     `openGame(tileIndex)`; a successful retry destroys the cue before
     `transitionToScene`. Opening Settings or the profile chip destroys it, and the
     scene's `shutdown` destroys it. Clear `grid.navLocked` on failure so other
     tiles stay live (add a small method to `HubGrid` if reaching into the field
     from the scene reads poorly).
-  - [ ] **P2.T2.2:** Guard a resolution that arrives after shutdown: no
+  - [x] **P2.T2.2:** Guard a resolution that arrives after shutdown: no
     transition, no cue, no throw (`NFR-6`).
-  - [ ] **P2.T2.3:** Extend `hubSceneLoad.test.ts` for `AC-2` (cue visible, a
+  - [x] **P2.T2.3:** Extend `hubSceneLoad.test.ts` for `AC-2` (cue visible, a
     second tile reaches `activateTile`), `AC-3` (cue tap with a now-resolving
     loader destroys the cue and starts the transition), `AC-5` (one warn per
     failed attempt, zero storage writes) and `AC-6` (two failing taps do not
     stack cues; shutdown mid-flight is inert). Assert behaviour, not listener
     counts.
+  - [x] **P2.T2.4 (rework 1):** `openGame` consults `this.timeUp` before any side
+    effect, so a cue that outlives the moment the cap is reached cannot retry
+    into a game: it hides the cue, releases the lock and returns uncharged.
+
+**Result:** verified
+**Checkpoint:** 3749da6
+**Evidence:** conductor/tracks/20261024-scene-load-failure/verification/phase-2.md
+**Note:** this phase's `Touches` were widened by two files before it ran
+(`src/game/hub/gridBuilder.ts`, `src/__tests__/game/hubGrid.test.ts`) because
+the cue must anchor on the tapped tile and the grid is the only place that
+rectangle lives.
 
 ## Phase 3: The documents say what the Hub does
 
