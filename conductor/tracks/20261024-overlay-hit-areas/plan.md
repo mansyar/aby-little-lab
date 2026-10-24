@@ -30,40 +30,67 @@ NFR-1, NFR-2, NFR-3, NFR-5.
 test:coverage && pnpm build && node scripts/validate-bundle.js && node
 scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status: in_progress**
+**Status: verified**
 
-- [ ] **P1.T1: The toast buttons sit in the engine frame**
-  - [ ] **P1.T1.1:** Replace `PwaToast.createButton`'s hand-written rectangle
+- [x] **P1.T1: The toast buttons sit in the engine frame**
+  - [x] **P1.T1.1:** Replace `PwaToast.createButton`'s hand-written rectangle
         with `centredHitArea(BUTTON_WIDTH, BUTTON_HEIGHT)` (import from
         `./settings/primitives`); remove the now-unused direct `Phaser.Geom`
-        wiring if it has no other consumer in the file.
-  - [ ] **P1.T1.2:** In `PwaToast.test.ts` add an engine-accurate regression
+        wiring if it has no other consumer in the file. *(Landed; file now
+        type-imports Phaser only.)*
+  - [x] **P1.T1.2:** In `PwaToast.test.ts` add an engine-accurate regression
         describe: probe each button's drawn word centre and drawn edges live,
         one pixel outside the intended band dead; prove at least one assertion
-        red against the un-fixed code first and record the fixture.
-- [ ] **P1.T2: The Profiles overlay rows sit in the engine frame**
-  - [ ] **P1.T2.1:** Route the Delete button through
+        red against the un-fixed code first and record the fixture. *(Three
+        cases over origin triples; red = `expected undefined to be true`.)*
+- [x] **P1.T2: The Profiles overlay rows sit in the engine frame**
+  - [x] **P1.T2.1:** Route the Delete button through
         `centredHitArea(TOGGLE_WIDTH, ROW_HEIGHT)` and the play-time chip
         through `centredHitArea(TOGGLE_WIDTH / 2, ROW_HEIGHT)`, keeping
         handlers, press feedback and drawn positions untouched.
-  - [ ] **P1.T2.2:** In `SettingsPanel.test.ts` extend the overlay cases: the
+  - [x] **P1.T2.2:** In `SettingsPanel.test.ts` extend the overlay cases: the
         whole visible "Play Time: 15m" label cycles the limit and never closes
         the overlay (AC-3), and the Delete band is the installed rectangle in
         the engine frame; keep the existing handler-based cases untouched.
-- [ ] **P1.T3: The Progress overlay rows sit in the engine frame**
-  - [ ] **P1.T3.1:** Route the "X" close and both chevrons through
+        *(Landed as the right-third aim point: the 120 px band ends inside the
+        ~182 px drawn label by design; DISPATCHED pointerdown sets
+        `setText("Play Time: 30m")` and the backdrop survives. Spec AC-3 gets
+        a Correction (R1) clause in phase 2.)*
+- [x] **P1.T3: The Progress overlay rows sit in the engine frame**
+  - [x] **P1.T3.1:** Route the "X" close and both chevrons through
         `centredHitArea(TOGGLE_HEIGHT, TOGGLE_HEIGHT)` and the avatar chip
         through `centredHitArea(96, 96)` — same rule for the Image: band
-        centred on the drawn avatar.
-  - [ ] **P1.T3.2:** In `SettingsPanel.test.ts` add the chip-band probes: a tap
+        centred on the drawn avatar. *(Landed as Deviation 1: the chip's
+        rectangle lives in the image-local frame, so the call is
+        `centredHitArea(96 / chipScale, 96 / chipScale)` — the engine divides
+        the tap by drawn scale (InputManager.js:935 TransformXY) before the
+        callback, and a literal 96x96 local rect on a 0.25-scaled image leaves
+        a 24px live zone inside the drawn avatar. The scene-space band is the
+        intended 96x96. Accepted after primary re-derivation from Phaser
+        source.)*
+  - [x] **P1.T3.2:** In `SettingsPanel.test.ts` add the chip-band probes: a tap
         inside one chip's band selects that chip (wrong-profile reproduction
         fixed), a tap exactly at the seam selects the later chip (accepted
         overlap), and the X/chevron bands respond across their drawn glyph.
-- [ ] **P1.T4: Gate and evidence**
-  - [ ] **P1.T4.1:** Run the nine-layer verification chain, record the
+        *(Landed: `engineHitsScaled` models TransformXY + origin; own-band vs
+        seam both asserted with the later-drawn chip winning; X closes the
+        overlay after probes.)*
+- [x] **P1.T4: Gate and evidence**
+  - [x] **P1.T4.1:** Run the nine-layer verification chain, record the
         red-then-green proof and the per-site mapping in
         `verification/phase-1.md`; layers blocked by the sandbox are named in
-        the report so the primary can run them.
+        the report so the primary can run them. *(8/9 green for the executor;
+        the primary ran all — docs 5/5 — and added a mutation check:
+        `BUTTON_WIDTH + 4` fails 3/14 with `expected 204 to be 200`.)*
+
+**Result: verified**
+**Checkpoint: 88207888**
+**Evidence: conductor/tracks/20261024-overlay-hit-areas/verification/phase-1.md**
+
+<!-- primary-note: Phase 1 numbers: 121 files / 2648 tests (+8); coverage
+97.98 / 91.9 / 96.71 / 98.76; shell index-BdGRHjBx.js 138.4 kB <= 200 kB; PWA
+16/16; docs 5/5 (the executor was denied that layer; primary ran it). -->
+
 
 ## Phase 2: The record says what the frame is
 
