@@ -50,17 +50,21 @@ are ignored, and `.opencode/agents/` is versioned on purpose.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **P2.T1: Roadmap and README** - covers: FR-5
-  - [ ] **P2.T1.1:** Delete the "### Repository hygiene" Known Issue and the matching Future Work item, renumbering the survivors consecutively. Correct the README Known Issues count to the number of `###` headings that remain. Keep the other three Known Issues untouched, including their wording.
-- [ ] **P2.T2: The two decisions** — covers: FR-5, AC-5
-  - [ ] **P2.T2.1:** In `docs/TDD.md`, add a short note where the developer tooling is described: `.opencode/agents/` is versioned because Conductor launches `conductor-phase` and `conductor-reviewer` from those files, and `conductor-implement`'s preflight reads them. One or two sentences, matched to the surrounding style.
-  - [ ] **P2.T2.2:** In `docs/SVG_STYLE.md`, extend the re-render line to say the generated output outside `docs/svg-contact-sheets/baseline/` is git-ignored and is not committed.
-- [ ] **P2.T3: The stray file** — covers: FR-4, AC-4
-  - [ ] **P2.T3.1:** Delete `test-out.txt` from the working tree (`Remove-Item`). It is untracked and ignored, so this produces no commit; record the before/after `Test-Path` and the `git check-ignore -v test-out.txt` line in the evidence.
-- [ ] **P2.T4: Gate** — covers: AC-6
-  - [ ] **P2.T4.1:** Run the full chain and record it. `node scripts/validate-docs.js` must pass; note whether the shell entry hash is identical to the pre-track build (`index-C99hcseA.js`, 141547 bytes) - it should be, because nothing in `src/` changed.
+- [x] **P2.T1: Roadmap and README** - covers: FR-5
+  - [x] **P2.T1.1:** Deleted the "### Repository hygiene" Known Issue (heading and body) and the matching Future Work item. No renumbering was needed because the removed item was item 5, so the survivors were already consecutive 1-4 and no surviving text was edited. `README.md:246` now says "three of them", matching the three remaining `###` headings.
+- [x] **P2.T2: The two decisions** - covers: FR-5, AC-5
+  - [x] **P2.T2.1:** Added the note at the end of `docs/TDD.md` §11.3 (Validator scripts), where developer tooling is described: `.opencode/agents/` is versioned because `conductor-phase.md` and `conductor-reviewer.md` define the subagents the Conductor workflow launches, and `conductor-implement`'s preflight checks `conductor-phase.md` exists.
+  - [x] **P2.T2.2:** Extended the `SVG_STYLE.md` §7 re-render line: output written outside `docs/svg-contact-sheets/baseline/` is git-ignored and not committed, and `baseline/` is the tracked record.
+- [x] **P2.T3: The stray file** - covers: FR-4, AC-4
+  - [x] **P2.T3.1:** `test-out.txt` deleted by the primary (the executor's sandbox refused every filesystem command). Before: `Test-Path` True, 21982 bytes, `git check-ignore -v` = `.gitignore:10:test-out.txt`. After: absent, and `git status --porcelain` still empty because the file was untracked and ignored.
+- [x] **P2.T4: Gate** - covers: AC-6
+  - [x] **P2.T4.1:** Seven layers green from the executor; the primary re-ran `validate-bundle` (shell `index-C99hcseA.js`, 138.2 kB - identical to the pre-track build), `validate-pwa` (16/16) and `validate-docs` (5/5), the layer the executor was denied.
+
+**Result:** verified
+**Checkpoint:** 243830da
+**Evidence:** conductor/tracks/20261024-repo-hygiene/verification/phase-2.md
 
 ## Notes for the primary agent
 
