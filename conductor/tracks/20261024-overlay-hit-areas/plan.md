@@ -30,7 +30,7 @@ NFR-1, NFR-2, NFR-3, NFR-5.
 test:coverage && pnpm build && node scripts/validate-bundle.js && node
 scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status: pending**
+**Status: in_progress**
 
 - [ ] **P1.T1: The toast buttons sit in the engine frame**
   - [ ] **P1.T1.1:** Replace `PwaToast.createButton`'s hand-written rectangle
