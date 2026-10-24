@@ -19,7 +19,7 @@
   `src/__tests__/scenes/hubSceneLoad.test.ts`,
   `src/__tests__/scenes/hubPlayTime.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: A loader wrapper that retries once and never rejects** - covers: FR-1
   - [ ] **P1.T1.1:** Add `loadSceneWithRetry(scene, key, loaders = sceneLoaders, attempts = 2)`
