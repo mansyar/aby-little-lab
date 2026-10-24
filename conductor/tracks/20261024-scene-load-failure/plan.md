@@ -161,7 +161,7 @@ rectangle lives.
   `src/__tests__/components/GameLoadCue.test.ts`, `README.md`, `docs/PRD.md`,
   `docs/TDD.md`, `conductor/tracks/20261024-scene-load-failure/verification/phase-3.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: One launch at a time (F1)** - covers: FR-4
   - [ ] **R1.T1.1:** The cue's retry takes the grid's tap lock before it re-enters
