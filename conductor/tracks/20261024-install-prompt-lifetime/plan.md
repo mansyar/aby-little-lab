@@ -22,18 +22,22 @@ existed is still available when a parent opens it.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **P1.T1: A browser-wired tracker with an app-lifetime seam** — covers: FR-1
-  - [ ] **P1.T1.1:** Add `createBrowserInstallTracker()` to `src/utils/pwaInstall.ts`: builds the existing `InstallTrackerDeps` from `navigator.userAgent`, `window.matchMedia("(display-mode: standalone)")` and `window.addEventListener`/`removeEventListener`, then delegates to `createInstallTracker()`. Guard the same way the rest of the codebase guards engine-agnostic globals, so an environment without `window` or `matchMedia` still yields a tracker in the `hidden` state rather than throwing. Keep `createInstallTracker()` unchanged as the injectable core.
-  - [ ] **P1.T1.2:** Add `initInstallPrompt()` and `getInstallPromptTracker()`: init creates the browser tracker once and stores it; the getter returns the stored instance, creating it lazily if `initInstallPrompt()` was never called (a Hub-only entry, or a test that imports the panel first). A second `initInstallPrompt()` call must not register a second pair of listeners.
-  - [ ] **P1.T1.3:** Tests in `src/__tests__/utils/pwaInstall.test.ts`: the getter returns one stable instance across calls; `initInstallPrompt()` called twice leaves one instance and one listener pair; a fake-dep tracker still drives `installable`/`ios-howto`/`hidden` exactly as before.
-- [ ] **P1.T2: Boot starts the capture** — covers: FR-1
-  - [ ] **P1.T2.1:** Call `initInstallPrompt()` in `src/main.ts` before `new Phaser.Game`, beside the existing `initPwaBridge(registerSW)` call, with a one-line comment saying why it must run before any scene can open Settings.
-- [ ] **P1.T3: The panel borrows the tracker instead of owning it** — covers: FR-2
-  - [ ] **P1.T3.1:** In `src/components/SettingsPanel.ts`, default the constructor's tracker to `getInstallPromptTracker()` when none is injected, and delete the inline `createInstallTracker({...})` block. Update the constructor doc comment: the panel borrows an app-lifetime tracker, an injected one still wins for tests.
-  - [ ] **P1.T3.2:** Remove `this.installTracker.destroy()` from `destroy()` with a comment stating the panel does not own the tracker, so closing Settings must not stop capture. Keep every other teardown as is.
-  - [ ] **P1.T3.3:** Tests in `src/__tests__/components/SettingsPanel.test.ts`: (a) fire `beforeinstallprompt` on a real tracker built from fake deps, *then* construct the panel with it, and assert the "Install App" row exists; (b) with the same tracker, open and close the panel, fire the event after the close, reopen and assert the row appears — and assert the tracker's `removeEventListener` was never called; (c) the injected-`hidden` and injected-`ios-howto` cases keep their current expectations.
+- [x] **P1.T1: A browser-wired tracker with an app-lifetime seam** — covers: FR-1
+  - [x] **P1.T1.1:** Add `createBrowserInstallTracker()` to `src/utils/pwaInstall.ts`: builds the existing `InstallTrackerDeps` from `navigator.userAgent`, `window.matchMedia("(display-mode: standalone)")` and `window.addEventListener`/`removeEventListener`, then delegates to `createInstallTracker()`. Guard the same way the rest of the codebase guards engine-agnostic globals, so an environment without `window` or `matchMedia` still yields a tracker in the `hidden` state rather than throwing. Keep `createInstallTracker()` unchanged as the injectable core.
+  - [x] **P1.T1.2:** Add `initInstallPrompt()` and `getInstallPromptTracker()`: init creates the browser tracker once and stores it; the getter returns the stored instance, creating it lazily if `initInstallPrompt()` was never called (a Hub-only entry, or a test that imports the panel first). A second `initInstallPrompt()` call must not register a second pair of listeners.
+  - [x] **P1.T1.3:** Tests in `src/__tests__/utils/pwaInstall.test.ts`: the getter returns one stable instance across calls; `initInstallPrompt()` called twice leaves one instance and one listener pair; a fake-dep tracker still drives `installable`/`ios-howto`/`hidden` exactly as before.
+- [x] **P1.T2: Boot starts the capture** — covers: FR-1
+  - [x] **P1.T2.1:** Call `initInstallPrompt()` in `src/main.ts` before `new Phaser.Game`, beside the existing `initPwaBridge(registerSW)` call, with a one-line comment saying why it must run before any scene can open Settings.
+- [x] **P1.T3: The panel borrows the tracker instead of owning it** — covers: FR-2
+  - [x] **P1.T3.1:** In `src/components/SettingsPanel.ts`, default the constructor's tracker to `getInstallPromptTracker()` when none is injected, and delete the inline `createInstallTracker({...})` block. Update the constructor doc comment: the panel borrows an app-lifetime tracker, an injected one still wins for tests.
+  - [x] **P1.T3.2:** Remove `this.installTracker.destroy()` from `destroy()` with a comment stating the panel does not own the tracker, so closing Settings must not stop capture. Keep every other teardown as is.
+  - [x] **P1.T3.3:** Tests in `src/__tests__/components/SettingsPanel.test.ts`: (a) fire `beforeinstallprompt` on a real tracker built from fake deps, *then* construct the panel with it, and assert the "Install App" row exists; (b) with the same tracker, open and close the panel, fire the event after the close, reopen and assert the row appears — and assert the tracker's `removeEventListener` was never called; (c) the injected-`hidden` and injected-`ios-howto` cases keep their current expectations.
+
+**Result:** verified
+**Checkpoint:** 52f89530
+**Evidence:** conductor/tracks/20261024-install-prompt-lifetime/verification/phase-1.md
 
 ## Phase 2: A spent prompt is not offered again
 
