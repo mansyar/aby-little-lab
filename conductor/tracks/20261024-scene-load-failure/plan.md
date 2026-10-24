@@ -19,36 +19,43 @@
   `src/__tests__/scenes/hubSceneLoad.test.ts`,
   `src/__tests__/scenes/hubPlayTime.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: A loader wrapper that retries once and never rejects** - covers: FR-1
-  - [ ] **P1.T1.1:** Add `loadSceneWithRetry(scene, key, loaders = sceneLoaders, attempts = 2)`
+- [x] **P1.T1: A loader wrapper that retries once and never rejects** - covers: FR-1
+  - [x] **P1.T1.1:** Add `loadSceneWithRetry(scene, key, loaders = sceneLoaders, attempts = 2)`
     to `sceneRegistry.ts`, next to the existing `ensureSceneLoaded` (which keeps
     its current throwing contract for direct callers). It attempts the load,
     retries once on failure, logs one `console.warn` per failed attempt naming
     the scene key, and resolves to `true`/`false` — it must never reject.
     Treat a synchronous throw from a loader the same as a rejection.
-  - [ ] **P1.T1.2:** Extend `sceneRegistry.test.ts` with a resolving loader
+  - [x] **P1.T1.2:** Extend `sceneRegistry.test.ts` with a resolving loader
     (called once, `true`, no warn), a loader that rejects then resolves (called
     twice, `true`, one warn), and a loader that always rejects (called twice,
     `false`, two warns). Use an injected loader map, never a real import.
-- [ ] **P1.T2: The Hub charges only for a game that opens** - covers: FR-4
-  - [ ] **P1.T2.1:** Reorder `HubScene.activateTile`: keep the audio unlock at
+- [x] **P1.T2: The Hub charges only for a game that opens** - covers: FR-4
+  - [x] **P1.T2.1:** Reorder `HubScene.activateTile`: keep the audio unlock at
     tap time, then delegate to a private `openGame(tileIndex)` that awaits
     `loadSceneWithRetry(...)`; only after it resolves `true` does it start the
     play session, call `recordGamePlay`, and run the existing nudge-or-transition
     branch. On `false` it clears `grid.navLocked` and returns (Phase 2 adds the
     cue). `showPlayTimeNudge` therefore moves behind the successful load; keep
     its `onLaunch` pointing at the transition, not at a second load.
-  - [ ] **P1.T2.2:** New `hubSceneLoad.test.ts` proving a failing loader leaves
+  - [x] **P1.T2.2:** New `hubSceneLoad.test.ts` proving a failing loader leaves
     `usedMinutes` unchanged, calls neither `startPlaySession` nor
     `recordGamePlay`, shows no nudge, and leaves `navLocked` false; plus the
     mirror case where the first attempt fails and the second succeeds — exactly
     one session and one game record, and the game opens.
-  - [ ] **P1.T2.3:** Re-run the existing Hub suites and keep every expectation
+  - [x] **P1.T2.3:** Re-run the existing Hub suites and keep every expectation
     that is still correct. Tests that asserted the nudge or the session
     synchronously after a tap now need the load promise to settle first; record
     any expectation you change in the phase evidence with its reason.
+
+**Result:** verified
+**Checkpoint:** 6847990
+**Evidence:** conductor/tracks/20261024-scene-load-failure/verification/phase-1.md
+**Note:** five further test files changed (the shared harness double and four
+`vi.mock(".../sceneRegistry")` factories) because `HubScene` now imports
+`loadSceneWithRetry`; accepted and itemised in the phase evidence.
 
 ## Phase 2: A retry cue that keeps the Hub alive
 
