@@ -36,15 +36,6 @@ to the iOS how-to (or to nothing). A reader notices it by installing the app
 from a fresh tab, waiting for the prompt to fire, and then opening Settings
 too late to see the "Install App" row.
 
-### A failed game-chunk load leaves the child with no feedback
-
-`src/scenes/HubScene.ts` launches a game with `ensureSceneLoaded(...).then(...)`
-and no error path, and `src/scenes/sceneRegistry.ts` does not catch a rejected
-dynamic import. A tile tap on a failed chunk fetch therefore does nothing
-visible and the promise rejection goes unhandled. A reader notices it by
-throttling the network until a chunk request fails, then tapping a tile and
-watching the Hub do nothing.
-
 ### Five copies of the same shuffle, and an RNG seam in only two modules
 
 The `shuffle` helper is byte-identical in `src/game/bigSmallLogic.ts`,
@@ -81,19 +72,16 @@ The track named against each item is the track that would deliver it.
 2. **Version the stored payload.** A `schemaVersion` field would let a future
    format change be recognised instead of inferred, and would give the legacy
    `AppStorage` type somewhere to be retired to. Track: *storage-schema-version*.
-5. **Keep the install prompt alive for the life of the app.** Building the
+3. **Keep the install prompt alive for the life of the app.** Building the
    tracker once, at boot, would mean an install prompt offered at the first
    visit is still offered at the tenth. Track: *install-prompt-scope*.
-6. **Give a failed chunk load a visible failure path.** A tap that cannot open
-   a game should say so — a child needs to know the tap was heard. Track:
-   *scene-load-failure-path*.
-3. **Bank play time as it is earned.** Writing the visible minutes as they
+4. **Bank play time as it is earned.** Writing the visible minutes as they
    accrue would survive an app that is killed, and would stop a short session
    from banking nothing. Track: *play-time-banking*.
-4. **One shuffle, one RNG seam.** A single shared shuffle helper and an
+5. **One shuffle, one RNG seam.** A single shared shuffle helper and an
    injectable RNG across the logic modules would let the remaining 19
    per-game modules be tested without stubbing `Math.random`. Track:
    *shared-random-helpers*.
-5. **Clean up the repository.** The stray root file, the tracked contact-sheet
+6. **Clean up the repository.** The stray root file, the tracked contact-sheet
    PNGs and the tracked `.opencode/` directory all make the working tree
    noisier than it needs to be. Track: *repo-hygiene*.

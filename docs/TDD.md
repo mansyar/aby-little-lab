@@ -445,7 +445,9 @@ Only `BootScene`, `PreloadScene` and `HubScene` are registered at construction t
 
 The second check is not redundant. Phaser 4's `SceneManager.add` does not reject duplicates — it silently leaks a second instance — so a fast double-tap on a Hub tile would otherwise register two copies. The third parameter exists so tests can inject stub loaders.
 
-Phaser 4 cannot express this in the config `scene` array: entries there are invoked with `new`, so no loader function can be async. Hub tile taps therefore do `void ensureSceneLoaded(this, tile.sceneKey).then(() => transitionToScene(this, tile.sceneKey))`.
+Phaser 4 cannot express this in the config `scene` array: entries there are invoked with `new`, so no loader function can be async. `HubScene` therefore loads a tile's scene before it commits to anything: `activateTile` unlocks audio on the gesture and hands the tile's index and rectangle to `openGame`, which awaits `loadSceneWithRetry(this, key)` and acts only on the result.
+
+`loadSceneWithRetry(scene, key, loaders = sceneLoaders, attempts = 2)` is a thin wrapper over `ensureSceneLoaded` that reports the outcome as a value instead of throwing. It makes two attempts and resolves `true` once the scene is registered, or `false` when every attempt failed; it never rejects, and a loader that throws synchronously is caught exactly like a rejected import. Each failed attempt logs one `console.warn` naming the scene key and the attempt, because this is the only layer that knows a retry happened. `ensureSceneLoaded` keeps its throwing contract for direct callers, and `loaders` stays injectable, so the retry path is tested through stub loaders rather than a real rejected import.
 
 ### 4.2 GameSceneBase
 
@@ -540,13 +542,19 @@ Twelve scenes extend `ChoiceRoundScene` directly, two reach it through `GroupMat
 
 Scene instances are reused. `create()` therefore rebuilds state each visit and `registerShutdownCleanup()` — called at the end of `create()` by every game scene — destroys the objects that would otherwise leak across visits: parent lock, mascot, narrator, standalone speaker, instruction label. `ChoiceRoundScene.clearRound()` handles per-round objects separately.
 
-The normal game path is: Hub tile → `ensureSceneLoaded` → `transitionToScene` → `create()` → rounds → `completeGame()` → `AUTO_RETURN_DELAY` → `transitionToScene(this, "Hub")` with `{ justEarned }` when a sticker was newly earned. `HubScene` reads `justEarned` to play the shelf highlight on arrival.
+The normal game path is: Hub tile → `loadSceneWithRetry` → `transitionToScene` → `create()` → rounds → `completeGame()` → `AUTO_RETURN_DELAY` → `transitionToScene(this, "Hub")` with `{ justEarned }` when a sticker was newly earned. `HubScene` reads `justEarned` to play the shelf highlight on arrival.
+
+`HubScene.activateTile` keeps the audio unlock on the gesture itself — it runs it and then calls `void this.openGame(tileIndex, tile)` — and every other side effect of a launch lives in `openGame`. It awaits `loadSceneWithRetry` first, so the play session (`startPlaySession`), the game record (`recordGamePlay`) and the nudge-or-`transitionToScene` branch are reached only after a load resolves `true`; a tap whose chunk never arrives charges no play time, records no play and shows no play-time nudge.
+
+A resolved `false` releases `grid.navLocked` — the flag `hub/gridBuilder` sets at `pointerup`, before it calls `activateTile` — so the rest of the grid stays live, and raises the `GameLoadCue` over the rectangle of the tapped tile. The cue is one object at a time and `show()` is a no-op while it is active, so repeated failing taps cannot stack cues; tapping it destroys the cue and re-enters `openGame` with the same tile, so a retry opens the game through the same transition as a first-time success. It draws a ringed circular arrow with no text and no sound, on a 96×96 hit floor at `CUE_DEPTH = 12`: above the tiles at the default depth 0, below `PlayTimeNudge` and the profile picker at depth 20 and `ParentLock`'s hold ring at 10000. Under reduced motion the ring is static; otherwise a single tween pulses it.
+
+The cue's lifetime is the launch attempt: it is destroyed before the fade into a game that finally loads, before the Settings panel or the profile picker opens, on the scene's `shutdown`, and before a retry replaces it (`hideLoadCue()` is safe to call at any time, including when no cue exists). `openGame` also re-checks the daily cap after the load resolves and before any charge, so a cue that outlived the moment the limit was reached cannot open a game behind the time-up lock — it destroys the cue, releases the lock and returns uncharged. Finally, the `shutdown` handler sets `isShuttingDown` before it tears anything down, and `openGame` returns at the top of its post-load path when that flag is set, so a chunk that resolves after the Hub is gone neither transitions, nor raises a cue, nor throws.
 
 ---
 
 ## 5. Components
 
-Sixteen modules live in `src/components/`. Most are plain classes that take a `Phaser.Scene`; `ArtLoadingCue.ts` is a factory that returns an `ArtLoadingCue` handle, because the cue owns its own tweens and its own shutdown hook. None extends a scene.
+Seventeen modules live in `src/components/`. Most are plain classes that take a `Phaser.Scene`; `ArtLoadingCue.ts` and `GameLoadCue.ts` are factories that return a handle, because each cue owns its own tweens and its own shutdown hook. None extends a scene.
 
 ### 5.1 RoundNarrator
 
