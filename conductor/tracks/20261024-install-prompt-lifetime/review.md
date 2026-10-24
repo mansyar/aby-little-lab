@@ -2,10 +2,10 @@
 
 - **Track:** `20261024-install-prompt-lifetime` (bug, high)
 - **Branch:** `fix/20261024-install-prompt-lifetime`
-- **Range:** `329370f625b18108ddada527de990a0f8289defd..28deedbc`
+- **Range:** `329370f625b18108ddada527de990a0f8289defd..595bc028`
 - **Date:** 2026-10-24
-- **Round:** 1
-- **Verdict:** **PASS WITH FINDINGS** - no Critical or High; two Medium, four Low, all assigned to Phase R1.
+- **Round:** 2 (final)
+- **Verdict:** **PASS WITH FINDINGS** - round 1's two Medium and four Low are fixed in Phase R1; round 2's three Low findings were fixed before the PR. No Critical or High remains.
 
 ## Summary
 
@@ -196,7 +196,53 @@ takes every one.
 | Round | Verdict | Critical | High | Medium | Low | Deferred |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 0 | 0 | 2 | 4 | 0 |
+| 2 | PASS WITH FINDINGS | 0 | 0 | 0 | 3 | 0 |
 
+
+## Round 2 addendum
+
+Reviewed `ae5cc522..d94f66ff`, the Phase R1 delta.
+
+| Round 1 finding | Status | Evidence |
+| --- | --- | --- |
+| F1 Medium - the boot call was untested | resolved | `pwaInstall.test.ts` "boot wiring" case over `main.ts?raw`; red proof `expected 1288 to be greater than 1314` with the call moved below the game |
+| F2 Low - JSDoc named a "Hub-only host" | resolved | the parenthetical now names the test that builds the panel first |
+| F3 Low - AC-5 missed the read path | resolved | `getState()` and the `appinstalled` callback now run under the storage spy, before its five assertions |
+| F4 Medium - PRD promised the row was gone immediately | resolved | §1.4 and §4.10 say the next open has no row, a fresh browser offer is the only way back, and the on-screen row does not change |
+| F5 Low - iOS clause missed the standalone condition | resolved | both clauses say "neither installed nor running standalone" |
+| F6 Low - TDD §3.1 omitted the boot call | resolved | `:360` names `initInstallPrompt()` first and why |
+| F7 Low - phase-3 evidence cited squashed hashes | resolved | `dd1099c9`, 286 insertions |
+
+Round 2 found three Low items of its own, all fixed in `fe57a9f7` and recorded
+in `verification/phase-R1.md` § Round 2:
+
+| Id | Finding | Fix |
+| --- | --- | --- |
+| N1 | the boot assertion matched a bare token, so a comment could satisfy it | line-anchored `/^initInstallPrompt\(\);$/m`; re-proved red with the call commented out (`expected -1 to be greater than -1`) |
+| N2 | the Phase R1 evidence cited the pre-squash hashes | now `15cc5b77` and `d94f66ff` |
+| N3 | "the row already on screen does not change" was untested | the tap case asserts one `getState()` read and the surviving label |
+
+Round 2 re-ran what its sandbox allowed (`git diff`, `git log`, `git show`);
+`pnpm` and `node` were denied to it, so the gate numbers below are the
+primary's, run at `595bc028`.
+
+### Gate at the final commit
+
+| Layer | Result |
+| --- | --- |
+| `pnpm check` | exit 0, two pre-existing findings |
+| `pnpm typecheck` | exit 0 |
+| `pnpm test -- --run` | 121 files / 2631 tests |
+| `pnpm test:coverage` | 97.99 / 92 / 96.69 / 98.74 |
+| `pnpm build` | exit 0 |
+| `node scripts/validate-bundle.js` | phaser 1342.6 kB, shell `index-D_wN43lj.js` 138.2 kB |
+| `node scripts/validate-pwa.js` | 16 / 0 |
+| `node scripts/validate-docs.js` | 5 / 0 |
+
+### Requirements after round 2
+
+FR-1..FR-5, NFR-1..NFR-6, AC-1..AC-6 are all covered, each by a test or a
+validator run.
 ## Doc sync
 
 `complete` at `dd1099c9` (PRD §1.4/§4.10, TDD §5.5, roadmap retirement, README
