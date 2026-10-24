@@ -79,16 +79,21 @@ and stop listing the lost-prompt bug.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **P3.T1: PRD** — covers: FR-4
-  - [ ] **P3.T1.1:** §1.4 and §4.10 state that capture begins when the app boots, that the row reflects the browser's current offer rather than the moment the panel opened, that a used prompt is not offered again for the rest of the page's life, and that nothing is remembered across reloads. Keep the iOS and already-installed sentences true and unchanged in meaning.
-- [ ] **P3.T2: TDD** — covers: FR-1, FR-2, FR-3
-  - [ ] **P3.T2.1:** Update the `pwaInstall.ts` module row and add a short paragraph covering: the injectable core vs the browser adapter, the app-lifetime holder and where it is initialised, that the panel borrows it and does not destroy it, and the single-use flag. Leave the rest of the module table alone.
-- [ ] **P3.T3: Roadmap and README** — covers: AC-4, AC-6
-  - [ ] **P3.T3.1:** Delete the "The install prompt can disappear" Known Issue from `docs/roadmap.md` and its Future Work entry, renumbering the survivors consecutively so they read 1..n with no gaps.
-  - [ ] **P3.T3.2:** Check `README.md`'s Known Issues section: if it lists the install prompt, remove that bullet and correct the count; if it does not, leave it alone and say so in the evidence.
-  - [ ] **P3.T3.3:** Run `node scripts/validate-docs.js` and record the five checks.
+- [x] **P3.T1: PRD** — covers: FR-4
+  - [x] **P3.T1.1:** §1.4 and §4.10 state that capture begins when the app boots, that the row reflects the browser's current offer rather than the moment the panel opened, that a used prompt is not offered again for the rest of the page's life, and that nothing is remembered across reloads. Keep the iOS and already-installed sentences true and unchanged in meaning.
+- [x] **P3.T2: TDD** — covers: FR-1, FR-2, FR-3
+  - [x] **P3.T2.1:** Update the `pwaInstall.ts` module row and add a short paragraph covering: the injectable core vs the browser adapter, the app-lifetime holder and where it is initialised, that the panel borrows it and does not destroy it, and the single-use flag. Leave the rest of the module table alone.
+- [x] **P3.T3: Roadmap and README** — covers: AC-4, AC-6
+  - [x] **P3.T3.1:** Delete the "The install prompt can disappear" Known Issue from `docs/roadmap.md` and its Future Work entry, renumbering the survivors consecutively so they read 1..n with no gaps.
+  - [x] **P3.T3.2:** Check `README.md`'s Known Issues section: if it lists the install prompt, remove that bullet and correct the count; if it does not, leave it alone and say so in the evidence.
+  - [x] **P3.T3.3:** Run `node scripts/validate-docs.js` and record the five checks.
+
+**Result:** verified
+**Checkpoint:** dd1099c9
+**Evidence:** conductor/tracks/20261024-install-prompt-lifetime/verification/phase-3.md
+**Note:** the docs layer was denied to the phase subagent and run green (5/5) by the primary, who also appended a ## Primary verification section to the evidence.
 
 ## Notes for the primary agent
 

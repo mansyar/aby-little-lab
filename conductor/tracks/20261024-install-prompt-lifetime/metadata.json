@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-10-24T00:00:00Z",
-  "updated_at": "2026-10-24T04:55:27Z",
+  "updated_at": "2026-10-24T05:08:04Z",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "fix/20261024-install-prompt-lifetime",
@@ -14,14 +14,14 @@
   "base_sha": "329370f625b18108ddada527de990a0f8289defd",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 2,
+    "phases_verified": 3,
     "tasks_total": 16,
-    "tasks_done": 11
+    "tasks_done": 16
   },
-  "last_checkpoint": "e06fb292",
+  "last_checkpoint": "dd1099c9",
   "review_verdict": null,
   "review_rounds": 0,
-  "doc_sync": "pending",
+  "doc_sync": "complete",
   "pr_url": null,
   "pr_state": null,
   "reverted_at": null,
