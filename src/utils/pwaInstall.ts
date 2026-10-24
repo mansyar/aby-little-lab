@@ -8,6 +8,12 @@
  * - "installable": Chrome/Edge/Android captured a beforeinstallprompt.
  * - "ios-howto": iOS Safari, which has no install prompt; show instructions.
  * - "hidden": already installed/standalone, or unsupported.
+ *
+ * Lifetime: install events are page facts, not panel facts. The browser fires
+ * beforeinstallprompt once per page load, usually before the parental lock is
+ * even held, so capture starts at boot (`initInstallPrompt`) and the Settings
+ * panel borrows the tracker that results instead of owning one. A tracker
+ * created per panel would subscribe after the only event that matters.
  */
 
 export type InstallUiState = "installable" | "ios-howto" | "hidden";
@@ -107,4 +113,78 @@ export function createInstallTracker(deps: InstallTrackerDeps): InstallTracker {
       deps.removeEventListener("appinstalled", onAppInstalled);
     },
   };
+}
+
+/**
+ * True where the window can carry install-event listeners. Scene suites stub a
+ * partial `window` and non-DOM hosts expose none at all, so the browser adapter
+ * goes inert there rather than throwing - the same capability guard
+ * `playTimeLogic` applies to visibility events.
+ */
+function canObserveInstallEvents(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof navigator !== "undefined" &&
+    typeof window.addEventListener === "function" &&
+    typeof window.removeEventListener === "function"
+  );
+}
+
+/**
+ * Builds a tracker against the real browser globals.
+ *
+ * Deliberately thin: everything testable stays in `createInstallTracker`, which
+ * takes the same wiring as an injected object. Where the globals are absent or
+ * partial the tracker attaches nothing and reports "hidden", which is what an
+ * environment that cannot install the app should say.
+ */
+export function createBrowserInstallTracker(): InstallTracker {
+  if (!canObserveInstallEvents()) {
+    return createInstallTracker({
+      userAgent: "",
+      isStandalone: () => false,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    });
+  }
+
+  return createInstallTracker({
+    userAgent: navigator.userAgent,
+    isStandalone: () =>
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(display-mode: standalone)").matches,
+    addEventListener: (type, listener) => window.addEventListener(type, listener),
+    removeEventListener: (type, listener) => window.removeEventListener(type, listener),
+  });
+}
+
+/** The page's tracker, created on first use and kept for the page's life. */
+let installPromptTracker: InstallTracker | undefined;
+
+/** Returns the page's tracker, creating and storing it when it is missing. */
+function resolveInstallPromptTracker(): InstallTracker {
+  const existing = installPromptTracker;
+  if (existing !== undefined) return existing;
+
+  const created = createBrowserInstallTracker();
+  installPromptTracker = created;
+  return created;
+}
+
+/**
+ * Starts install-event capture for the page. Call once at boot, before any
+ * scene can open Settings; calling it again is a no-op, so the page never
+ * registers a second pair of listeners.
+ */
+export function initInstallPrompt(): void {
+  resolveInstallPromptTracker();
+}
+
+/**
+ * Returns the page's install tracker, creating it on first use so an entry
+ * point that never ran {@link initInstallPrompt} (a Hub-only host, or a test
+ * that builds the panel first) still gets a working one.
+ */
+export function getInstallPromptTracker(): InstallTracker {
+  return resolveInstallPromptTracker();
 }

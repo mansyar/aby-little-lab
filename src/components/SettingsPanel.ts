@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { attachPressFeedback } from "../utils/pressFeedback";
-import { createInstallTracker, type InstallTracker } from "../utils/pwaInstall";
+import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
 import { getSettings, updateSettings } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
@@ -54,12 +54,18 @@ export class SettingsPanel {
 
   /**
    * Creates the settings panel using the current persisted audio settings.
-   * @param installTracker - Injected install tracker (tests); defaults to a
-   *   tracker wired to real browser install events.
+   * @param installTracker - Install tracker to read; defaults to the
+   *   app-lifetime tracker that boot started, because the install event fires
+   *   once per page load and would otherwise be missed. An injected tracker
+   *   wins, which is how tests pin the install state.
    * @param onProgressReset - Called after a confirmed progress reset so the
    *   parent scene can re-render anything derived from the sticker collection.
    */
-  constructor(scene: Phaser.Scene, installTracker?: InstallTracker, onProgressReset?: () => void) {
+  constructor(
+    scene: Phaser.Scene,
+    installTracker: InstallTracker = getInstallPromptTracker(),
+    onProgressReset?: () => void,
+  ) {
     this.scene = scene;
     this.onProgressReset = onProgressReset;
     this.profilesOverlay = new ProfilesOverlay({
@@ -68,16 +74,7 @@ export class SettingsPanel {
       modalObjects: this.modalObjects,
       onProgressReset: () => this.onProgressReset?.(),
     });
-    this.installTracker =
-      installTracker ??
-      createInstallTracker({
-        userAgent: navigator.userAgent,
-        isStandalone: () =>
-          typeof window.matchMedia === "function" &&
-          window.matchMedia("(display-mode: standalone)").matches,
-        addEventListener: (type, listener) => window.addEventListener(type, listener),
-        removeEventListener: (type, listener) => window.removeEventListener(type, listener),
-      });
+    this.installTracker = installTracker;
     this.progressOverlay = new ProgressOverlay({ scene, overlayObjects: this.overlayObjects });
     this.installRow = new InstallRow({
       scene,
@@ -185,7 +182,9 @@ export class SettingsPanel {
     for (const object of this.overlayObjects) object.destroy();
     this.overlayObjects.length = 0;
     for (const object of this.objects) object.destroy();
-    this.installTracker.destroy();
+    // The tracker belongs to the page, not to this panel: it holds the only
+    // listener for an event that fires once per load, so closing Settings must
+    // not stop the capture. Do not restore a destroy() call here.
     restorePinchZoom();
   }
 

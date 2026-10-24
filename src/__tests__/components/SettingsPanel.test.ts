@@ -1,6 +1,11 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
-import type { InstallTracker, InstallUiState } from "../../utils/pwaInstall";
+import {
+  createInstallTracker,
+  type InstallTracker,
+  type InstallTrackerDeps,
+  type InstallUiState,
+} from "../../utils/pwaInstall";
 import {
   addProfile,
   earnSticker,
@@ -39,6 +44,42 @@ function createFakeInstallTracker(state: InstallUiState): InstallTracker {
     prompt: vi.fn().mockResolvedValue(true),
     destroy: vi.fn(),
   };
+}
+
+type InstallListenerMap = Map<string, (event: unknown) => void>;
+
+/** Browser wiring for a real install tracker, with its listeners addressable. */
+function createTrackerDeps(): {
+  deps: InstallTrackerDeps;
+  listeners: InstallListenerMap;
+  promptEvent: { preventDefault: () => void; prompt: () => Promise<void> };
+} {
+  const listeners: InstallListenerMap = new Map();
+  const promptEvent = { preventDefault: vi.fn(), prompt: vi.fn(() => Promise.resolve()) };
+  return {
+    deps: {
+      userAgent: "Android Chrome",
+      isStandalone: () => false,
+      addEventListener: (type, listener) => {
+        listeners.set(type, listener);
+      },
+      removeEventListener: vi.fn((type: string) => {
+        listeners.delete(type);
+      }),
+    },
+    listeners,
+    promptEvent,
+  };
+}
+
+/** Fires beforeinstallprompt at whatever listener the wiring currently holds. */
+function emitBeforeInstallPrompt(
+  listeners: InstallListenerMap,
+  promptEvent: { preventDefault: () => void; prompt: () => Promise<void> },
+): void {
+  const listener = listeners.get("beforeinstallprompt");
+  if (!listener) throw new Error("Expected beforeinstallprompt listener");
+  listener(promptEvent);
 }
 
 vi.mock("phaser", () => {
@@ -446,6 +487,10 @@ describe("SettingsPanel install control", () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("shows an Install App button when the tracker is installable", () => {
     const scene = createScene();
     const tracker = createFakeInstallTracker("installable");
@@ -511,6 +556,60 @@ describe("SettingsPanel install control", () => {
     const texts = scene.add.text.mock.calls.map((call) => call[2] as string);
     expect(texts).not.toContain("Install App");
     expect(texts).not.toContain("How to Install");
+  });
+
+  it("shows Install App for a prompt captured before the panel was constructed", () => {
+    const { deps, listeners, promptEvent } = createTrackerDeps();
+    const tracker = createInstallTracker(deps);
+    // The browser fires this once per page load, long before Settings opens.
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    const scene = createScene();
+    new SettingsPanel(scene as never, tracker);
+
+    expect(findTextByLabel(scene, "Install App")).toBeDefined();
+  });
+
+  it("keeps capturing after the panel closes and offers the later prompt next time", () => {
+    const { deps, listeners, promptEvent } = createTrackerDeps();
+    const tracker = createInstallTracker(deps);
+
+    const firstScene = createScene();
+    new SettingsPanel(firstScene as never, tracker).destroy();
+    // Fires while no panel exists at all.
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    const secondScene = createScene();
+    new SettingsPanel(secondScene as never, tracker);
+
+    expect(findTextByLabel(secondScene, "Install App")).toBeDefined();
+    expect(deps.removeEventListener).not.toHaveBeenCalled();
+  });
+
+  it("shows Install App for a prompt captured at boot, with no tracker injected", async () => {
+    const listeners: InstallListenerMap = new Map();
+    const promptEvent = { preventDefault: vi.fn(), prompt: vi.fn(() => Promise.resolve()) };
+    vi.stubGlobal("window", {
+      addEventListener: (type: string, listener: (event: unknown) => void) => {
+        listeners.set(type, listener);
+      },
+      removeEventListener: vi.fn(),
+      matchMedia: () => ({ matches: false }),
+    });
+    vi.stubGlobal("navigator", { userAgent: "Android Chrome" });
+
+    vi.resetModules();
+    const pwa = await import("../../utils/pwaInstall");
+    const { SettingsPanel: PanelAfterBoot } = await import("../../components/SettingsPanel");
+
+    // What main.ts does before Phaser boots, then the event the page receives.
+    pwa.initInstallPrompt();
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    const scene = createScene();
+    new PanelAfterBoot(scene as never);
+
+    expect(findTextByLabel(scene, "Install App")).toBeDefined();
   });
 });
 

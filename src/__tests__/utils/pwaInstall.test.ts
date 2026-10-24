@@ -1,5 +1,6 @@
 import type { Mock } from "vitest";
 import {
+  createBrowserInstallTracker,
   createInstallTracker,
   detectIOS,
   getInstallUiState,
@@ -53,6 +54,37 @@ function emitBeforeInstallPrompt(
   const listener = listeners.get("beforeinstallprompt");
   if (!listener) throw new Error("Expected beforeinstallprompt listener");
   listener(event);
+}
+
+/** Minimal `window` double carrying only what the browser adapter reads. */
+interface WindowDouble {
+  addEventListener: Mock<(type: string, listener: (event: unknown) => void) => void>;
+  removeEventListener: Mock<(type: string) => void>;
+  matchMedia: Mock<(query: string) => { matches: boolean }>;
+}
+
+/**
+ * Stubs the globals the browser adapter reaches through, and hands back the
+ * window double so a test can count the listeners it registered.
+ */
+function stubBrowser(options: { standalone?: boolean; userAgent?: string } = {}): WindowDouble {
+  const windowDouble: WindowDouble = {
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    matchMedia: vi.fn(() => ({ matches: options.standalone ?? false })),
+  };
+  vi.stubGlobal("window", windowDouble);
+  vi.stubGlobal("navigator", { userAgent: options.userAgent ?? "Android Chrome" });
+  return windowDouble;
+}
+
+/** Import alias for the module's own type, used by the dynamic-import helper. */
+type PwaInstallModule = typeof import("../../utils/pwaInstall");
+
+/** Imports a fresh copy so the page-lifetime holder starts empty. */
+async function loadFreshModule(): Promise<PwaInstallModule> {
+  vi.resetModules();
+  return import("../../utils/pwaInstall");
 }
 
 describe("getInstallUiState", () => {
@@ -193,5 +225,107 @@ describe("createInstallTracker", () => {
     );
     expect(deps.removeEventListener).toHaveBeenCalledWith("appinstalled", expect.any(Function));
     expect(listeners.size).toBe(0);
+  });
+});
+
+describe("createBrowserInstallTracker", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("subscribes to both install events and reports hidden before any signal", () => {
+    const windowDouble = stubBrowser();
+    const tracker = createBrowserInstallTracker();
+
+    expect(windowDouble.addEventListener).toHaveBeenCalledWith(
+      "beforeinstallprompt",
+      expect.any(Function),
+    );
+    expect(windowDouble.addEventListener).toHaveBeenCalledWith(
+      "appinstalled",
+      expect.any(Function),
+    );
+    expect(tracker.getState()).toBe("hidden");
+  });
+
+  it("reads the user agent for the iOS how-to", () => {
+    stubBrowser({ userAgent: "iPhone Safari" });
+
+    expect(createBrowserInstallTracker().getState()).toBe("ios-howto");
+  });
+
+  it("treats the standalone display mode as installed", () => {
+    stubBrowser({ userAgent: "iPhone Safari", standalone: true });
+
+    expect(createBrowserInstallTracker().getState()).toBe("hidden");
+  });
+
+  it("forwards teardown to the window listeners it registered", () => {
+    const windowDouble = stubBrowser();
+    const tracker = createBrowserInstallTracker();
+
+    tracker.destroy();
+
+    expect(windowDouble.removeEventListener).toHaveBeenCalledWith(
+      "beforeinstallprompt",
+      expect.any(Function),
+    );
+    expect(windowDouble.removeEventListener).toHaveBeenCalledWith(
+      "appinstalled",
+      expect.any(Function),
+    );
+  });
+
+  it("stays inert when the window cannot carry listeners", () => {
+    vi.stubGlobal("window", { matchMedia: () => ({ matches: false }) });
+    vi.stubGlobal("navigator", { userAgent: "Android Chrome" });
+
+    const tracker = createBrowserInstallTracker();
+
+    expect(tracker.getState()).toBe("hidden");
+    expect(() => tracker.destroy()).not.toThrow();
+  });
+
+  it("stays inert when there is no browser at all", () => {
+    vi.stubGlobal("window", undefined);
+    vi.stubGlobal("navigator", undefined);
+
+    const tracker = createBrowserInstallTracker();
+
+    expect(tracker.getState()).toBe("hidden");
+    expect(() => tracker.destroy()).not.toThrow();
+  });
+});
+
+describe("app-lifetime install tracker", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns the same tracker on every call", async () => {
+    stubBrowser();
+    const pwa = await loadFreshModule();
+
+    expect(pwa.getInstallPromptTracker()).toBe(pwa.getInstallPromptTracker());
+  });
+
+  it("registers one listener pair per page however often init runs", async () => {
+    const windowDouble = stubBrowser();
+    const pwa = await loadFreshModule();
+
+    pwa.initInstallPrompt();
+    pwa.initInstallPrompt();
+
+    expect(windowDouble.addEventListener).toHaveBeenCalledTimes(2);
+    expect(pwa.getInstallPromptTracker()).toBe(pwa.getInstallPromptTracker());
+  });
+
+  it("creates the tracker lazily for an entry point that skips init", async () => {
+    const windowDouble = stubBrowser();
+    const pwa = await loadFreshModule();
+
+    expect(windowDouble.addEventListener).not.toHaveBeenCalled();
+    expect(pwa.getInstallPromptTracker().getState()).toBe("hidden");
+    expect(windowDouble.addEventListener).toHaveBeenCalledTimes(2);
   });
 });
