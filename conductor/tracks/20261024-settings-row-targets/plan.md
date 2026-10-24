@@ -20,7 +20,7 @@ hit, and the switch becomes live.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **P1.T1: The pitch is the pitch** - covers: FR-1, FR-4
   - [ ] **P1.T1.1:** In `primitives.ts` add `ROW_PITCH = 56` as the main-panel row spacing and hit height, and `ROW_HIT_WIDTH = ROW_CARD_WIDTH`, with a comment saying why: eight rows in a 760 px panel cannot each be 64 px tall, so the pitch is the only non-overlapping band available, and the width is what keeps the target generous.
