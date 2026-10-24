@@ -1,8 +1,8 @@
 # Integrated verification - Settings Row Targets
 
 Base: `107404c6` (`master` at track start)
-Verified at: `d1054941` (code and docs HEAD `f221ccd0`)
-Range: 8 commits, 8 files, +223 / -61
+Verified at: `0bcfd9a1` (code and docs HEAD `49861d15`, after review rounds 1 and 2)
+Range: 16 commits, 8 files, +737 / -129
 
 ## What changed, by area
 
@@ -64,3 +64,29 @@ Both phase subagents were denied the docs layer; the primary ran it in both phas
 - **The band is 56 px tall, below the documented 64 px minimum.** That is the deliberate trade recorded in both documents: eight rows cannot each carry 64 px inside the panel, and a 400 px wide band that always hits the intended row was chosen over a 96 px tall one that steals 40 px from its neighbour. A pager or a submenu would remove the trade and remains available as future work.
 - **The modals and overlays were not measured.** Their own spacing may have a similar overlap; this track deliberately did not audit them.
 - **The switch's track overhangs the card by 2 px** at `centerX + 202` against a card edge at `+200`. That is pre-existing drawing, unchanged here, and the band covers the visible switch except for that 2 px sliver.
+
+## Post-review state
+
+The review rounds changed two things this file's first version did not know about,
+and both are load-bearing rather than cosmetic.
+
+| Round | Change | Why it matters |
+| --- | --- | --- |
+| R1 | `centredHitArea()` in `settings/primitives.ts`, applied to all six custom hit areas; the Voice rectangles rewritten in the position frame | Phaser adds `displayOriginX/Y` before testing a custom area, so the centre-based rectangles this track shipped first were half a label to the left and half a line up. The band *numbers* did not change; the frame they are expressed in did. |
+| R2 | Each Voice half's outer edge is the union of the card and the rendered label; the engine cases drive the real callback | "Preview" at 26 px reaches ~27 px past the card edge, so the tail of the visible word fell on the backdrop and closed the panel - the same class of defect, one level down. |
+
+Final gate at `49861d15`: `pnpm check` 0, `typecheck` 0,
+`test -- --run` 0 (121 files / 2640 tests), `test:coverage` 0
+(97.98 / 91.9 / 96.71 / 98.75), `build` 0, `validate-bundle` 0
+(phaser 1342.6 kB, shell `index-COHKw1P7.js` 138.8 kB),
+`validate-pwa` 0 (16/16), `validate-docs` 0 (5/5).
+
+The interaction review above still holds: one pitch, eight rows, the switch inside
+its band, the modal and overlay rows untouched at the 64 px floor, and nothing
+outside the settings components changed. What the rounds added is the evidence
+that the bands are in the frame the engine uses, which is stronger than the
+rectangle arithmetic the first version relied on.
+
+Residual, recorded as future work rather than debt inside this track: the overlays
+(`ProfilesOverlay.ts`, `ProgressOverlay.ts`, `PwaToast.ts`) still build
+centre-based rectangles by hand and are wrong by the same mechanism.
