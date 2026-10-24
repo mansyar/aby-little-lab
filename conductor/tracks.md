@@ -251,4 +251,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Settings Row Targets** - [20261024-settings-row-targets](./archive/20261024-settings-row-targets/index.md) - bug - high
 
 ---
-- [ ] **Track: Overlay Hit Areas** - [20261024-overlay-hit-areas](./tracks/20261024-overlay-hit-areas/index.md) - bug - high
+- [~] **Track: Overlay Hit Areas** - [20261024-overlay-hit-areas](./tracks/20261024-overlay-hit-areas/index.md) - bug - high
