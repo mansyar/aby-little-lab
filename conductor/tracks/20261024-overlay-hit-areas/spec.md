@@ -152,6 +152,15 @@ above.
 - Tracks: none (the Settings track that introduced the helper is archived).
 - External: none.
 
+**Correction (pre-review):** AC-3's "whole visible" promised more than FR-4's
+size rule can hold: the 120 px chip band intentionally ends inside the
+~182 px "Play Time: 15m" label, so the label's outermost characters still fall
+through to the backdrop. What the fix guarantees - and what AC-3's test
+asserts - is that the drawn label's right-third aim point (where a thumb
+lands) cycles the limit and the seam never closes the overlay. Verified in and
+carried through phase 1 (see `verification/phase-1.md`, "Spec nuance to
+correct").
+
 ## Open Questions & Assumptions
 
 - Assumption: each site keeps today's intended rectangle sizes (240 x 64,

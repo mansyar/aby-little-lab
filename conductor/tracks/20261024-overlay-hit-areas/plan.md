@@ -109,19 +109,33 @@ mechanism, not just its symptom.
 test:coverage && pnpm build && node scripts/validate-bundle.js && node
 scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status: in_progress**
+**Status: verified**
 
-- [ ] **P2.T1: The documents name the frame rule**
-  - [ ] **P2.T1.1:** Update the affected `docs/TDD.md` component rows
+- [x] **P2.T1: The documents name the frame rule**
+  - [x] **P2.T1.1:** Update the affected `docs/TDD.md` component rows
         (`PwaToast.ts`, `ProfilesOverlay.ts`, `ProgressOverlay.ts`) with one
         sentence establishing that every custom hit area of these controls
         goes through `centredHitArea()`; keep row format and column alignment.
-  - [ ] **P2.T2.1:** Extend `docs/PRD.md` section 5.2 minimally: all custom
+        *(Landed: the two table rows (+618/:619) name each surface's
+        exhaustive custom set; the §5.7 paragraph (:636) gained the
+        toast-button and avatar-chip sentences incl. the image-local
+        `96 / chipScale` frame.)*
+  - [x] **P2.T2.1:** Extend `docs/PRD.md` section 5.2 minimally: all custom
         hit areas in the app use the origin-cancelling helper, and the
         Learning Progress chip seam's overlap (96 px floor on a 56 px pitch)
-        is accepted; later-drawn chip wins.
-  - [ ] **P2.T3.1:** Run the nine-layer verification chain and record the AC-6
-        evidence in `verification/phase-2.md`.
+        is accepted; later-drawn chip wins. *(Landed as one paragraph; the
+        framing rule covers both helper sites and the scene-level engine-frame
+        rectangles so it is true against all of them.)*
+  - [x] **P2.T3.1:** Run the nine-layer verification chain and record the AC-6
+        evidence in `verification/phase-2.md`. *(Executor 7/8 - docs layer
+        denied; primary ran it 5/5 and appended Primary verification.)*
+
+**Result: verified**
+**Checkpoint: 303bfe1d**
+**Evidence: conductor/tracks/20261024-overlay-hit-areas/verification/phase-2.md**
+
+Note: the spec's AC-3 Correction (pre-review) was appended by the primary from
+phase 1's "Spec nuance to correct" note.
 
 ## Notes for the primary agent
 
