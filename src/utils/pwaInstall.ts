@@ -5,7 +5,7 @@
  * panel should show, plus a browser-event tracker that feeds it.
  *
  * States:
- * - "installable": Chrome/Edge/Android captured a beforeinstallprompt.
+ * - "installable": Chrome/Edge/Android holds an unused captured prompt.
  * - "ios-howto": iOS Safari, which has no install prompt; show instructions.
  * - "hidden": already installed/standalone, or unsupported.
  *
@@ -19,7 +19,10 @@
 export type InstallUiState = "installable" | "ios-howto" | "hidden";
 
 export interface InstallStateInput {
-  /** True once a beforeinstallprompt event has been captured. */
+  /**
+   * True while a captured beforeinstallprompt is still unused. Spending it in
+   * `prompt()` clears this; only a fresh browser event sets it again.
+   */
   promptAvailable: boolean;
   /** True once an appinstalled event has fired. */
   installed: boolean;
@@ -60,7 +63,10 @@ export interface InstallTrackerDeps {
 export interface InstallTracker {
   /** Current install UI state. */
   getState(): InstallUiState;
-  /** Shows the deferred install prompt; resolves true if it was shown. */
+  /**
+   * Shows the deferred install prompt; resolves true if it was shown. The
+   * captured event is single-use, so this ends the "installable" state.
+   */
   prompt(): Promise<boolean>;
   /** Stops tracking browser install events. */
   destroy(): void;
@@ -74,6 +80,9 @@ interface BeforeInstallPromptLike {
 
 /** Tracks install events and exposes the current install UI state. */
 export function createInstallTracker(deps: InstallTrackerDeps): InstallTracker {
+  // "A captured, unused prompt exists" - the flag and the deferred event are
+  // spent together, so the row stops advertising a prompt that has been used.
+  // Only a fresh beforeinstallprompt in `onBeforeInstallPrompt` restores it.
   let promptAvailable = false;
   let installed = false;
   let deferredPrompt: BeforeInstallPromptLike | null = null;
@@ -102,10 +111,20 @@ export function createInstallTracker(deps: InstallTrackerDeps): InstallTracker {
       });
     },
     async prompt(): Promise<boolean> {
-      if (!deferredPrompt) return false;
       const promptEvent = deferredPrompt;
+      if (!promptEvent) return false;
+      // Claiming the event is what spends it: the browser cannot re-offer a
+      // captured prompt, so availability drops before the dialog is awaited.
       deferredPrompt = null;
-      await promptEvent.prompt();
+      promptAvailable = false;
+      try {
+        await promptEvent.prompt();
+      } catch {
+        // A browser may refuse when the tap's gesture is no longer trusted.
+        // Nothing was shown, and the event is single-use regardless, so report
+        // the failure to the caller instead of throwing at a child's tap.
+        return false;
+      }
       return true;
     },
     destroy(): void {

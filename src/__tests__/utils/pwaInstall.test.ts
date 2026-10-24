@@ -212,6 +212,65 @@ describe("createInstallTracker", () => {
     await expect(tracker.prompt()).resolves.toBe(false);
   });
 
+  it("stops reporting installable once the captured prompt has been spent", async () => {
+    const { deps, listeners, promptEvent } = createFakeDeps("Android Chrome");
+    const tracker = createInstallTracker(deps);
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    await tracker.prompt();
+
+    expect(tracker.getState()).toBe("hidden");
+  });
+
+  it("keeps reporting the iOS how-to once the captured prompt has been spent", async () => {
+    const { deps, listeners, promptEvent } = createFakeDeps("iPhone Safari");
+    const tracker = createInstallTracker(deps);
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    await tracker.prompt();
+
+    // A spent prompt removes the button; it does not hide the instructions.
+    expect(tracker.getState()).toBe("ios-howto");
+  });
+
+  it("resolves false on a second prompt call without throwing", async () => {
+    const { deps, listeners, promptEvent } = createFakeDeps("Android Chrome");
+    const tracker = createInstallTracker(deps);
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    await tracker.prompt();
+
+    await expect(tracker.prompt()).resolves.toBe(false);
+    // The event is single-use, so the browser was asked exactly once.
+    expect(promptEvent.prompt).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves false and stays spent when the browser refuses the prompt", async () => {
+    const { deps, listeners, promptEvent } = createFakeDeps("Android Chrome");
+    promptEvent.prompt.mockRejectedValue(new Error("prompt() needs a user gesture"));
+    const tracker = createInstallTracker(deps);
+    emitBeforeInstallPrompt(listeners, promptEvent);
+
+    await expect(tracker.prompt()).resolves.toBe(false);
+    expect(tracker.getState()).toBe("hidden");
+  });
+
+  it("offers the prompt again when the browser captures a new event", async () => {
+    const { deps, listeners } = createFakeDeps("Android Chrome");
+    const tracker = createInstallTracker(deps);
+    const firstEvent = { preventDefault: vi.fn(), prompt: vi.fn(() => Promise.resolve()) };
+    const secondEvent = { preventDefault: vi.fn(), prompt: vi.fn(() => Promise.resolve()) };
+
+    emitBeforeInstallPrompt(listeners, firstEvent);
+    await expect(tracker.prompt()).resolves.toBe(true);
+    expect(tracker.getState()).toBe("hidden");
+
+    emitBeforeInstallPrompt(listeners, secondEvent);
+    expect(tracker.getState()).toBe("installable");
+    await expect(tracker.prompt()).resolves.toBe(true);
+    expect(secondEvent.prompt).toHaveBeenCalledTimes(1);
+  });
+
   it("destroy() removes both browser listeners", () => {
     const { deps, listeners, promptEvent } = createFakeDeps("Android Chrome");
     const tracker = createInstallTracker(deps);
@@ -294,6 +353,50 @@ describe("createBrowserInstallTracker", () => {
 
     expect(tracker.getState()).toBe("hidden");
     expect(() => tracker.destroy()).not.toThrow();
+  });
+});
+
+describe("install prompt is not persisted", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("neither reads nor writes storage across capture, prompt and teardown", async () => {
+    const listeners: ListenerMap = new Map();
+    vi.stubGlobal("window", {
+      addEventListener: (type: string, listener: (event: unknown) => void) => {
+        listeners.set(type, listener);
+      },
+      removeEventListener: (type: string) => {
+        listeners.delete(type);
+      },
+      matchMedia: () => ({ matches: false }),
+    });
+    vi.stubGlobal("navigator", { userAgent: "Android Chrome" });
+    const storage = {
+      clear: vi.fn(),
+      getItem: vi.fn(),
+      key: vi.fn(),
+      removeItem: vi.fn(),
+      setItem: vi.fn(),
+    };
+    vi.stubGlobal("localStorage", storage);
+
+    // One dismissal from end to end, through the real browser adapter.
+    const tracker = createBrowserInstallTracker();
+    emitBeforeInstallPrompt(listeners, {
+      preventDefault: () => undefined,
+      prompt: () => Promise.resolve(),
+    });
+    await expect(tracker.prompt()).resolves.toBe(true);
+    tracker.destroy();
+
+    // AC-5: the page carries the browser's own state and remembers nothing.
+    expect(storage.getItem).not.toHaveBeenCalled();
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(storage.removeItem).not.toHaveBeenCalled();
+    expect(storage.clear).not.toHaveBeenCalled();
+    expect(storage.key).not.toHaveBeenCalled();
   });
 });
 

@@ -558,6 +558,19 @@ describe("SettingsPanel install control", () => {
     expect(texts).not.toContain("How to Install");
   });
 
+  it("shows no install row once the captured prompt has been spent", async () => {
+    const { deps, listeners, promptEvent } = createTrackerDeps();
+    const tracker = createInstallTracker(deps);
+    emitBeforeInstallPrompt(listeners, promptEvent);
+    // The parent tapped Install App and dismissed the browser dialog.
+    await expect(tracker.prompt()).resolves.toBe(true);
+
+    const scene = createScene();
+    new SettingsPanel(scene as never, tracker);
+
+    expect(findTextByLabel(scene, "Install App")).toBeUndefined();
+  });
+
   it("shows Install App for a prompt captured before the panel was constructed", () => {
     const { deps, listeners, promptEvent } = createTrackerDeps();
     const tracker = createInstallTracker(deps);
