@@ -53,7 +53,7 @@ app can be installed, so no tap ever lands on a button that cannot act.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **P2.T1: `promptAvailable` means an unused prompt** — covers: FR-3
   - [ ] **P2.T1.1:** In `prompt()`, clear availability as part of spending the event: after `await promptEvent.prompt()` (and on a rejection, since the event is single-use either way), `promptAvailable` is `false`. A later `beforeinstallprompt` sets it back to `true`, which is the only way it can return. Rename or re-document the flag and the `InstallStateInput.promptAvailable` comment so the meaning is "a captured, unused prompt exists" rather than "an event has ever been seen".
