@@ -53,14 +53,18 @@ app can be installed, so no tap ever lands on a button that cannot act.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **P2.T1: `promptAvailable` means an unused prompt** — covers: FR-3
-  - [ ] **P2.T1.1:** In `prompt()`, clear availability as part of spending the event: after `await promptEvent.prompt()` (and on a rejection, since the event is single-use either way), `promptAvailable` is `false`. A later `beforeinstallprompt` sets it back to `true`, which is the only way it can return. Rename or re-document the flag and the `InstallStateInput.promptAvailable` comment so the meaning is "a captured, unused prompt exists" rather than "an event has ever been seen".
-  - [ ] **P2.T1.2:** Tests in `src/__tests__/utils/pwaInstall.test.ts`: after `prompt()`, `getState()` is `hidden` on an Android user agent and `ios-howto` on iOS; `prompt()` a second time resolves `false`; a fresh `beforeinstallprompt` after a dismissal makes the state `installable` again; the rejection path (`prompt()` throws) also ends in `hidden` without propagating.
-  - [ ] **P2.T1.3:** Test in `src/__tests__/components/SettingsPanel.test.ts`: a tracker whose prompt has already been spent renders no install row.
-- [ ] **P2.T2: Nothing is remembered** — covers: FR-5, AC-5
-  - [ ] **P2.T2.1:** Assert in `src/__tests__/utils/pwaInstall.test.ts` that a tracker + dismissal writes no storage: `pwaInstall.ts` has no storage import, so pin the property by asserting the storage module is not imported by the tracker path (a source check in the test is acceptable, or assert that a `localStorage`/`getItem`/`setItem` spy stays untouched while a fake prompt is spent). Choose whichever reads cleanest and note it in the evidence.
+- [x] **P2.T1: `promptAvailable` means an unused prompt** — covers: FR-3
+  - [x] **P2.T1.1:** In `prompt()`, clear availability as part of spending the event: after `await promptEvent.prompt()` (and on a rejection, since the event is single-use either way), `promptAvailable` is `false`. A later `beforeinstallprompt` sets it back to `true`, which is the only way it can return. Rename or re-document the flag and the `InstallStateInput.promptAvailable` comment so the meaning is "a captured, unused prompt exists" rather than "an event has ever been seen".
+  - [x] **P2.T1.2:** Tests in `src/__tests__/utils/pwaInstall.test.ts`: after `prompt()`, `getState()` is `hidden` on an Android user agent and `ios-howto` on iOS; `prompt()` a second time resolves `false`; a fresh `beforeinstallprompt` after a dismissal makes the state `installable` again; the rejection path (`prompt()` throws) also ends in `hidden` without propagating.
+  - [x] **P2.T1.3:** Test in `src/__tests__/components/SettingsPanel.test.ts`: a tracker whose prompt has already been spent renders no install row.
+- [x] **P2.T2: Nothing is remembered** — covers: FR-5, AC-5
+  - [x] **P2.T2.1:** Assert in `src/__tests__/utils/pwaInstall.test.ts` that a tracker + dismissal writes no storage: `pwaInstall.ts` has no storage import, so pin the property by asserting the storage module is not imported by the tracker path (a source check in the test is acceptable, or assert that a `localStorage`/`getItem`/`setItem` spy stays untouched while a fake prompt is spent). Choose whichever reads cleanest and note it in the evidence.
+
+**Result:** verified
+**Checkpoint:** e06fb292
+**Evidence:** conductor/tracks/20261024-install-prompt-lifetime/verification/phase-2.md
 
 ## Phase 3: The documents describe the row that is there
 
