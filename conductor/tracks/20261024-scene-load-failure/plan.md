@@ -119,7 +119,7 @@ rectangle lives.
 - **Covers:** NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6 (documented evidence)
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: PRD and TDD** - covers: NFR-5
   - [ ] **P3.T1.1:** `docs/PRD.md` gains the failure-path rule where the Hub's
@@ -132,7 +132,9 @@ rectangle lives.
     that describes scene loading.
 - [ ] **P3.T2: Roadmap and the ledger** - covers: NFR-5
   - [ ] **P3.T2.1:** Remove the "A failed game-chunk load leaves the child with no
-    feedback" Known Issue and only that entry; leave the rest of the file's
-    content intact. While there, fix the mis-numbered Future Work list
-    (1, 2, 5, 6, 3, 4, 5) so it reads in order.
+    feedback" Known Issue and only that entry, and remove the matching Future
+    Work item ("Give a failed chunk load a visible failure path"), since this
+    track delivers it. Leave the rest of the file's content intact; while there,
+    fix the mis-numbered Future Work list (it reads 1, 2, 5, 6, 3, 4, 5) so the
+    survivors number 1..6 in order.
   - [ ] **P3.T2.2:** `node scripts/validate-docs.js` reports 5 passed, 0 failed.
