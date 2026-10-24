@@ -243,3 +243,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 - [x] **Track: Install Prompt Lifetime** - [20261024-install-prompt-lifetime](./archive/20261024-install-prompt-lifetime/index.md) - bug - high
+
+---
+- [ ] **Track: Repository Hygiene** - [20261024-repo-hygiene](./tracks/20261024-repo-hygiene/index.md) - chore - low
