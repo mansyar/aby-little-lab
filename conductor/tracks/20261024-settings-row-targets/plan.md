@@ -136,7 +136,7 @@ three documentation gaps.
   - [x] **R2.T4.1:** Run the full chain and record it in `conductor/tracks/20261024-settings-row-targets/verification/phase-R2.md` with both red-then-green runs.
 
 **Result:** verified
-**Checkpoint:** pending
+**Checkpoint:** 49861d15
 **Evidence:** conductor/tracks/20261024-settings-row-targets/verification/phase-R2.md
 
 <!--
