@@ -243,7 +243,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 ## Known Issues
 
-The headline items. The full list - four of them, each with the file the debt
+The headline items. The full list - three of them, each with the file the debt
 lives in and how a reader would notice it - is in
 [docs/roadmap.md](docs/roadmap.md), which is the single home for them.
 
