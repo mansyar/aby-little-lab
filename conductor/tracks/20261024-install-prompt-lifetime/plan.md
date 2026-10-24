@@ -79,7 +79,7 @@ and stop listing the lost-prompt bug.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **P3.T1: PRD** — covers: FR-4
   - [ ] **P3.T1.1:** §1.4 and §4.10 state that capture begins when the app boots, that the row reflects the browser's current offer rather than the moment the panel opened, that a used prompt is not offered again for the rest of the page's life, and that nothing is remembered across reloads. Keep the iOS and already-installed sentences true and unchanged in meaning.
