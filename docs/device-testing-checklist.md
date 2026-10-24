@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.21.4 (2026-10-24)
+
+- **Target:** tag `v1.21.4` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
+- **Scope:** one track, `conductor/archive/20261024-settings-row-targets/` (PR #63) - the eight Settings rows now share one 56 px pitch and one 400 px band, so neighbours abut instead of overlapping and no tap lands on the row below the finger. The band spans the whole row card, so the switch is live as well as the label, and every custom hit area goes through `centredHitArea()` to cancel the `displayOrigin` Phaser adds before it tests. The Voice row keeps both halves covering the whole word, including "Preview", which renders past the card edge. Rows moved at most 2 px and the modal buttons and overlays keep their old target sizes. No new game, asset, storage schema or dependency; the save shape is unchanged from v1.21.3.
+- **Checks:** the manual rows from the PR description - each row responds anywhere across its card, including the switch; a tap just above or below a card boundary reaches the row under the finger, never its neighbour; BGM, SFX and Adaptive each flip exactly once with sound; the Voice chip's tail cycles the voice and the Preview label's tail speaks, neither closes the panel; Profiles, Progress, Reset and Install still open their own surfaces; footer `v1.21.4`.
+- **Result:** **PASSED (desktop smoke) 2026-10-24** - `Quality Gates` and `Deploy to Coolify` both succeeded on the tag, and the live `assets/index-DGgXxoKe.js` (142182 bytes) is SHA-256 identical to the local `dist/` build. Device-class execution of the six manual rows is **PENDING**; the 56 px band and the Voice row's two halves are the parts most worth a finger on real glass.
+- **Issues found:** none reported
+
 ## Execution Record - v1.21.3 (2026-10-24)
 
 - **Target:** tag `v1.21.3` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
