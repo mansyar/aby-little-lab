@@ -362,6 +362,28 @@ describe("HubScene paged grid (narrow viewports)", () => {
     expect(pageDots().length).toBe(dotsBefore);
   });
 
+  it("drops the retry cue when a resize rebuilds the grid under it", async () => {
+    const scene = createNarrowHub();
+    vi.mocked(loadSceneWithRetry).mockResolvedValueOnce(false);
+
+    // The cue's hit floor is the only 96x96 rectangle the Hub adds.
+    const cueFloors = () =>
+      mockRegistry.filter(
+        (obj) => obj.kind === "rectangle" && obj.args?.[2] === 96 && obj.args?.[3] === 96,
+      );
+    pagedRects()[0].handlers.pointerup?.();
+    await settleLoad(loadSceneWithRetry);
+    const cueFloor = cueFloors().at(-1);
+    if (!cueFloor) throw new Error("retry cue not on screen");
+
+    // Crossing back above the touch floor rebuilds every tile the cue could be
+    // anchored to, so the cue goes with them rather than sitting over a slot
+    // that now belongs to another game.
+    fireResize(scene, 1024, 768);
+
+    expect(cueFloor.destroy).toHaveBeenCalled();
+  });
+
   it("leaves the grid untouched when a resize stays in the same classification", () => {
     const scene = new HubScene();
     scene.create();

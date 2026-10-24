@@ -131,10 +131,9 @@ export function createGameLoadCue(scene: Phaser.Scene): GameLoadCue {
     active = true;
     onRetry = deps.onRetry;
 
-    // The one scene the factory took: the same scene owns the drawing, the
-    // tween and the `shutdown` hook, so the cue can never straddle two.
-    const drawScene = scene;
-    const cueGraphics = drawScene.add.graphics();
+    // The one scene the factory took owns the drawing, the tween and the
+    // `shutdown` hook, so the cue can never straddle two.
+    const cueGraphics = scene.add.graphics();
     // Drawn around its own origin so the pulse scales around the cue centre
     // rather than around the graphics object's default top-left.
     cueGraphics.setPosition(deps.x, deps.y);
@@ -144,7 +143,7 @@ export function createGameLoadCue(scene: Phaser.Scene): GameLoadCue {
 
     // Invisible, but a real 96x96 hit floor: taps on the ring retry, taps
     // anywhere else on the tile still reach the grid underneath.
-    const hit = drawScene.add.rectangle(deps.x, deps.y, CUE_HIT, CUE_HIT);
+    const hit = scene.add.rectangle(deps.x, deps.y, CUE_HIT, CUE_HIT);
     hit.setFillStyle(0x000000, 0);
     hit.setDepth(CUE_DEPTH);
     hit.setInteractive();
@@ -152,7 +151,7 @@ export function createGameLoadCue(scene: Phaser.Scene): GameLoadCue {
     hitArea = hit;
 
     if (isReducedMotion()) return;
-    pulse = drawScene.tweens.add({
+    pulse = scene.tweens.add({
       targets: cueGraphics,
       scale: PULSE_SCALE,
       duration: PULSE_DURATION,
