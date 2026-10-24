@@ -155,6 +155,7 @@ Vitest is configured inside `vite.config.ts`: `environment: "happy-dom"`, `globa
 │   ├── render-svg-contact-sheets.mjs
 │   └── measure-first-tap.mjs
 ├── .github/workflows/ci.yml
+├── .opencode/agents/             # Conductor subagents - versioned on purpose, see §11.3
 ├── docs/
 ├── conductor/
 └── src/
@@ -1060,6 +1061,8 @@ VitePWA({
 | `render-svg-contact-sheets.mjs` | developer tool, not a gate: renders per-category contact sheets from the SVG corpus (categories include `stories`) for art review |
 
 `validate-boot.js` deliberately does not start its own server — spawning one destabilised CDP on Windows — so CI starts `vite preview` as a separate step. Measured medians at introduction were 0.63–1.75 s against a 2036 ms baseline; [`docs/perf-baseline.md`](./perf-baseline.md) keeps the per-run numbers.
+
+`.opencode/agents/` is versioned on purpose: `conductor-phase.md` and `conductor-reviewer.md` define the subagents that the Conductor workflow launches, and `conductor-implement`'s preflight checks that `conductor-phase.md` is present, so untracking the directory would break a fresh clone. It is not scratch, and it carries no ignore rule.
 
 ### 11.4 GitHub Actions
 

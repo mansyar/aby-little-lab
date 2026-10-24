@@ -1,0 +1,32 @@
+{
+  "id": "20261024-repo-hygiene",
+  "title": "Repository Hygiene",
+  "type": "chore",
+  "status": "in_progress",
+  "priority": "low",
+  "depends_on": [],
+  "created_at": "2026-10-24T00:00:00Z",
+  "updated_at": "2026-10-24T08:53:19Z",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261024-repo-hygiene",
+  "base_branch": "master",
+  "base_sha": "97234c3c8322faac5c579f92293e940b2083b653",
+  "progress": {
+    "phases_total": 3,
+    "phases_verified": 3,
+    "tasks_total": 15,
+    "tasks_done": 15
+  },
+  "last_checkpoint": "4f639364",
+  "review_verdict": "PASS WITH FINDINGS",
+  "review_rounds": 2,
+  "doc_sync": "complete",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}

@@ -37,19 +37,6 @@ injected RNG. That leaves 19 of the 21 per-game logic modules testable only
 through `Math.random`. A reader notices it by searching `src/game/` for
 `export function shuffle` and finding five definitions.
 
-### Repository hygiene
-
-A stray `test-out.txt` sits at the repository root; 110 PNGs under
-`docs/svg-contact-sheets/` are tracked, even though `.gitignore` describes the
-regenerated sheets as scratch — its rule `docs/svg-contact-sheets/*.png` matches
-only the twelve PNGs at the root of that folder, and gitignore's `*` does not
-cross `/`, so the eleven sheets in each of the ten subfolders stay tracked; the
-comment that calls the regenerated sheets scratch is in `.gitignore` itself, not
-in the sheets. 122 HTML contact sheets are tracked beside them, and `.opencode/`
-(two agent files) is tracked without any ignore rule. A reader notices it by
-running `git ls-files docs/svg-contact-sheets .opencode` and getting a hundred
-and ten PNGs back.
-
 ## Future Work / Roadmap
 
 The same material, ordered by how much each item would improve the product.
@@ -70,6 +57,3 @@ The track named against each item is the track that would deliver it.
    injectable RNG across the logic modules would let the remaining 19
    per-game modules be tested without stubbing `Math.random`. Track:
    *shared-random-helpers*.
-5. **Clean up the repository.** The stray root file, the tracked contact-sheet
-   PNGs and the tracked `.opencode/` directory all make the working tree
-   noisier than it needs to be. Track: *repo-hygiene*.

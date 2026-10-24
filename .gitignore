@@ -13,6 +13,9 @@ gate*.txt
 
 .art-preview/
 
-# Regenerated contact-sheet PNGs are scratch; the tracked baseline lives in
-# docs/svg-contact-sheets/baseline/.
-docs/svg-contact-sheets/*.png
+# Generated contact-sheet PNGs and HTML are scratch; the tracked record is the baseline set.
+# The patterns must be depth-independent: gitignore's `*` does not cross `/`.
+docs/svg-contact-sheets/**/*.png
+docs/svg-contact-sheets/**/*.html
+!docs/svg-contact-sheets/baseline/**/*.png
+!docs/svg-contact-sheets/baseline/**/*.html
