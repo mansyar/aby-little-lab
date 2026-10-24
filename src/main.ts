@@ -28,7 +28,8 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   // Shell scenes only — all 22 game scenes are lazy-loaded and registered
-  // at runtime via ensureSceneLoaded() when a Hub tile is tapped.
+  // at runtime via loadSceneWithRetry() (retries once, reports failure rather
+  // than throwing) when a Hub tile is tapped.
   scene: [BootScene, PreloadScene, HubScene],
 };
 

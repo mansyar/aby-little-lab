@@ -90,7 +90,7 @@ export function buildWideGrid(grid: HubGrid): void {
     tile.on("pointerup", () => {
       if (grid.deps.isTimeUp() || grid.navLocked) return;
       grid.navLocked = true;
-      grid.deps.activateTile(i);
+      grid.deps.activateTile(i, tile);
     });
     grid.wideObjects.push(tile);
 
@@ -175,7 +175,7 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     tile.on("pointerup", () => {
       if (grid.deps.isTimeUp() || grid.navLocked || grid.swipes.swiping) return;
       grid.navLocked = true;
-      grid.deps.activateTile(globalIndex);
+      grid.deps.activateTile(globalIndex, tile);
     });
     grid.pageObjects.push(tile);
 
@@ -300,6 +300,9 @@ export function flipTo(grid: HubGrid, page: number): void {
   const direction = page > grid.hubPage ? 1 : -1;
   grid.hubPage = page;
   paintPageDots(grid.pageDots, grid.hubPage);
+  // The outgoing tiles die with this flip, so a cue anchored to one of them
+  // goes now — once per flip, whatever the motion path below.
+  grid.deps.onBoardChange?.();
   if (isReducedMotion()) {
     destroyPageGrid(grid);
     buildPageGrid(grid, page);

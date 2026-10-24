@@ -96,7 +96,8 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     tile.handlers.pointerup?.();
 
     expect(activate).toHaveBeenCalledTimes(1);
-    expect(activate).toHaveBeenCalledWith(0);
+    // The tile's own rectangle rides along so a failed load can anchor its cue.
+    expect(activate).toHaveBeenCalledWith(0, grid.attractTargets[0]);
   });
 
   it("swallows taps entirely while time is up", () => {
@@ -226,7 +227,7 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     tile.handlers.pointerup?.();
 
     // Page 2 starts at game index 10 (How Many?).
-    expect(activate).toHaveBeenCalledWith(10);
+    expect(activate).toHaveBeenCalledWith(10, grid.attractTargets[0]);
   });
 
   it("builds the two remaining tiles on the last page", () => {
@@ -239,11 +240,11 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     const tiles = grid.attractTargets as unknown as MockObject[];
     tiles[0].handlers.pointerup?.();
     // Page 3 holds games 21-22 (Feelings Faces, then Story Order).
-    expect(activate).toHaveBeenCalledWith(20);
+    expect(activate).toHaveBeenCalledWith(20, tiles[0]);
 
     grid.navLocked = false;
     tiles[1].handlers.pointerup?.();
-    expect(activate).toHaveBeenLastCalledWith(21);
+    expect(activate).toHaveBeenLastCalledWith(21, tiles[1]);
   });
 
   it("keeps a paged sticker shelf below the tile label as well", () => {

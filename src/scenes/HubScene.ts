@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import { createGameLoadCue, type GameLoadCue } from "../components/GameLoadCue";
 import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
 import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIndicator";
@@ -15,7 +16,7 @@ import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { unlockSpeechForUserGesture } from "../utils/speech";
 import { getActiveProfile, getPlayTime, recordGamePlay, recordPlayTime } from "../utils/storage";
 import { textStyle } from "../utils/typography";
-import { ensureSceneLoaded } from "./sceneRegistry";
+import { loadSceneWithRetry } from "./sceneRegistry";
 
 /** Number of background decorations. */
 const DECORATION_COUNT = 4;
@@ -80,6 +81,22 @@ export class HubScene extends Phaser.Scene {
   private playTimeGraphics?: Phaser.GameObjects.Graphics;
   /** True while the pre-game nudge overlay is showing. */
   private nudge = new PlayTimeNudge();
+  /** Textless retry cue for a game chunk that failed to load; absent when none is due. */
+  private loadCue?: GameLoadCue;
+  /**
+   * Identifies the current visit to the Hub. `create()` and the `shutdown`
+   * handler each bump it, and a launch compares the value it captured before
+   * its await with the value it finds after it. Phaser reuses the scene
+   * instance, so a boolean reset in `create()` would let a load that settles
+   * after the next `create()` act on the new visit; a counter cannot (NFR-6).
+   */
+  private visitToken = 0;
+  /**
+   * True while a game launch is in flight. A cue retry and a tile tap can
+   * otherwise race two loads, and both would charge a game the child never
+   * opened (FR-4).
+   */
+  private launching = false;
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
   /**
@@ -99,7 +116,12 @@ export class HubScene extends Phaser.Scene {
     super({ key: "Hub" });
     this.profileChip = new ProfileChip({
       scene: this,
-      onOpen: () => this.startAudioFn(),
+      onOpen: () => {
+        // The picker is the Hub's front-most surface: a retry cue must not
+        // survive behind it (FR-6).
+        this.hideLoadCue();
+        this.startAudioFn();
+      },
       onSwitch: () => {
         this.grid.rerenderStickerShelf();
         this.refreshPlayTimeState();
@@ -109,9 +131,10 @@ export class HubScene extends Phaser.Scene {
     this.grid = new HubGrid({
       scene: this,
       isTimeUp: () => this.timeUp,
-      activateTile: (tileIndex) => this.activateTile(tileIndex),
+      activateTile: (tileIndex, tile) => this.activateTile(tileIndex, tile),
       onUserGesture: () => this.resetIdleAttract(),
       gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
+      onBoardChange: () => this.hideLoadCue(),
     });
   }
 
@@ -124,6 +147,14 @@ export class HubScene extends Phaser.Scene {
     const reducedMotion = isReducedMotion();
     this.idleAttractActive = false;
     this.timeUp = false;
+    // A new visit: a launch still in flight belongs to the previous one, and
+    // its resolution must not act on this one.
+    this.visitToken += 1;
+    this.launching = false;
+    // Phaser reuses this instance across visits: a cue left from the previous
+    // visit is gone with its scene, but the field must not point at it.
+    this.loadCue?.destroy();
+    this.loadCue = undefined;
     this.nudge = new PlayTimeNudge();
     // Phaser reuses this instance across visits (auto-return re-runs create()),
     // so clear the launch guard or every tile tap after the first game is dead.
@@ -197,6 +228,9 @@ export class HubScene extends Phaser.Scene {
       scene: this,
       target: settingsButton,
       onSuccess: () => {
+        // Settings owns the screen once the lock opens: drop the retry cue so
+        // it cannot outlive the Hub's front-most surface (FR-6).
+        this.hideLoadCue();
         this.settingsPanel?.destroy();
         this.settingsPanel = new SettingsPanel(this, undefined, () => {
           this.grid.rerenderStickerShelf();
@@ -216,6 +250,10 @@ export class HubScene extends Phaser.Scene {
     this.pwaToasts.wire();
 
     this.events.on("shutdown", () => {
+      // From here on a load in flight resolves against a dead visit; end it
+      // before anything else so a late `openGame` continuation stops early.
+      this.visitToken += 1;
+      this.hideLoadCue();
       this.pwaToasts.destroy();
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
@@ -239,28 +277,93 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Launches the game at the given tile index: lazy-loads its chunk, then
-   * transitions via the shared fade-out.
+   * Activates a tile after the grid's tap guards pass. The audio unlock stays
+   * on the gesture that triggered it; everything that belongs to a started
+   * game waits for the load (see `openGame`).
    */
-  private launchGame(tileIndex: number): void {
-    void ensureSceneLoaded(this, GAME_TILES[tileIndex].sceneKey).then(() => {
-      transitionToScene(this, GAME_TILES[tileIndex].sceneKey);
-    });
+  private activateTile(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): void {
+    this.startAudioFn();
+    void this.openGame(tileIndex, tile);
   }
 
   /**
-   * Activates a tile after the grid's tap guards pass: audio unlock/start,
-   * play-session start, gameplay record, then nudge-or-launch.
+   * Loads the game's chunk and opens it when the load succeeded. Every side
+   * effect belongs to a game that actually opened, so the play session, the
+   * game-play record and the play-time nudge all sit behind the resolved load —
+   * a tap whose chunk never arrives charges neither time nor a play.
+   *
+   * One launch runs at a time: a launch already in flight refuses a second one,
+   * and this method is the only place that decides a launch is over, so the tap
+   * lock a failed launch hands back and the cue's retry cannot race a second
+   * chain into the same play record.
+   *
+   * The tapped tile rides along so a failure can anchor the retry cue on it.
    */
-  private activateTile(tileIndex: number): void {
-    this.startAudioFn();
+  private async openGame(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): Promise<void> {
+    if (this.launching) return;
+    const visit = this.visitToken;
+    this.launching = true;
+    const loaded = await loadSceneWithRetry(this, GAME_TILES[tileIndex].sceneKey);
+    // The Hub can go away mid-load, and Phaser reuses the instance, so the
+    // resolution only acts on the visit that started it: acting on any other
+    // would start a transition on a dead scene, or hang a cue over a screen
+    // nobody sees (NFR-6).
+    if (visit !== this.visitToken) return;
+    // The cap outranks a retry: the grid checks time-up when a tile is tapped,
+    // but a cue outlives that moment, so it is checked again before any charge.
+    if (this.timeUp) {
+      this.hideLoadCue();
+      this.launching = false;
+      this.grid.navLocked = false;
+      return;
+    }
+    if (!loaded) {
+      // Nothing opened, so hand the grid its tap lock back: one dead chunk must
+      // not take every other tile with it. The launch itself is over.
+      this.launching = false;
+      this.grid.navLocked = false;
+      this.showLoadCue(tileIndex, tile);
+      return;
+    }
+    // Navigating away from the Hub now, so the in-flight flag stays set until
+    // the scene shuts down.
+    this.hideLoadCue();
     startPlaySession(getActiveProfile().id);
     recordGamePlay(GAME_TILES[tileIndex].gameId);
     if (this.shouldNudge()) {
       this.showPlayTimeNudge(tileIndex);
     } else {
-      this.launchGame(tileIndex);
+      transitionToScene(this, GAME_TILES[tileIndex].sceneKey);
     }
+  }
+
+  /**
+   * Puts the textless retry cue over the tapped tile, or the scene centre when
+   * the tap did not come with a tile. A destroyed cue is terminal (its shutdown
+   * hook is detached), so each failure that needs a surface builds a fresh one;
+   * `show()` still keeps it to one cue at a time (FR-6).
+   */
+  private showLoadCue(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): void {
+    this.loadCue ??= createGameLoadCue(this);
+    this.loadCue.show({
+      x: tile?.x ?? this.cameras.main.width / 2,
+      y: tile?.y ?? this.cameras.main.height / 2,
+      onRetry: () => {
+        // The retry is a tap on a live grid, so it takes the same tap lock a
+        // tile tap does. Without it a second tile can start a parallel load and
+        // charge a game that never opens (FR-4).
+        this.grid.navLocked = true;
+        // Drop the cue before retrying so a success cannot leave it on screen.
+        this.hideLoadCue();
+        void this.openGame(tileIndex, tile);
+      },
+    });
+  }
+
+  /** Removes the retry cue, if one is up. Safe to call at any time. */
+  private hideLoadCue(): void {
+    this.loadCue?.destroy();
+    this.loadCue = undefined;
   }
 
   /** True when the active profile has 5 minutes or fewer remaining. */
@@ -326,9 +429,14 @@ export class HubScene extends Phaser.Scene {
   /**
    * Shows a textless nudge (dim overlay + hourglass) for NUDGE_DELAY ms before
    * launching the game — a soft "almost done" signal without harsh cutoffs.
+   * The chunk is already registered by `openGame`, so the nudge starts the fade
+   * directly: a second load — or a second play session — would charge twice.
    */
   private showPlayTimeNudge(tileIndex: number): void {
-    this.nudge.show({ scene: this, onLaunch: (i) => this.launchGame(i) }, tileIndex);
+    this.nudge.show(
+      { scene: this, onLaunch: (i) => transitionToScene(this, GAME_TILES[i].sceneKey) },
+      tileIndex,
+    );
   }
 
   /**

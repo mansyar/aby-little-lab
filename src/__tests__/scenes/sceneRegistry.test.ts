@@ -18,7 +18,7 @@ import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { StoryOrderScene } from "../../scenes/StoryOrderScene";
-import { ensureSceneLoaded, sceneLoaders } from "../../scenes/sceneRegistry";
+import { ensureSceneLoaded, loadSceneWithRetry, sceneLoaders } from "../../scenes/sceneRegistry";
 import { TakeAwayScene } from "../../scenes/TakeAwayScene";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
@@ -226,5 +226,102 @@ describe("sceneRegistry", () => {
     // Both taps imported the chunk, but the scene is registered only once.
     expect(loader).toHaveBeenCalledTimes(2);
     expect(add).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads once and resolves true without warning when the first attempt succeeds", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const loader = vi.fn(async (): Promise<typeof FakeScene> => FakeScene);
+    const add = vi.fn();
+    const scene = {
+      scene: {
+        get: () => null as unknown,
+        add,
+      },
+    };
+
+    const loaded = await loadSceneWithRetry(scene as never, "ShapeSorter", {
+      ShapeSorter: loader,
+    });
+
+    expect(loaded).toBe(true);
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(add).toHaveBeenCalledWith("ShapeSorter", FakeScene);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("retries a rejected load once and resolves true", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const loader = vi
+      .fn(async (): Promise<typeof FakeScene> => FakeScene)
+      .mockRejectedValueOnce(new Error("chunk unavailable"))
+      .mockResolvedValueOnce(FakeScene);
+    const add = vi.fn();
+    const scene = {
+      scene: {
+        get: () => null as unknown,
+        add,
+      },
+    };
+
+    const loaded = await loadSceneWithRetry(scene as never, "ShapeSorter", {
+      ShapeSorter: loader,
+    });
+
+    expect(loaded).toBe(true);
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(add).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain("ShapeSorter");
+    warn.mockRestore();
+  });
+
+  it("resolves false after two failed attempts and warns once per attempt", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const loader = vi.fn(async (): Promise<typeof FakeScene> => {
+      throw new Error("offline");
+    });
+    const add = vi.fn();
+    const scene = {
+      scene: {
+        get: () => null as unknown,
+        add,
+      },
+    };
+
+    const loaded = await loadSceneWithRetry(scene as never, "AnimalTrace", {
+      AnimalTrace: loader,
+    });
+
+    expect(loaded).toBe(false);
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(add).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledTimes(2);
+    for (const call of warn.mock.calls) {
+      expect(call[0]).toContain("AnimalTrace");
+    }
+    warn.mockRestore();
+  });
+
+  it("treats a synchronous loader throw as a failed attempt instead of escaping", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const loader = vi.fn((): Promise<typeof FakeScene> => {
+      throw new Error("thrown before any await");
+    });
+    const scene = {
+      scene: {
+        get: () => null as unknown,
+        add: vi.fn(),
+      },
+    };
+
+    const loaded = await loadSceneWithRetry(scene as never, "PopFreeze", {
+      PopFreeze: loader,
+    });
+
+    expect(loaded).toBe(false);
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
   });
 });

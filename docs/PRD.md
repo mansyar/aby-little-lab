@@ -102,7 +102,7 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
 2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
 3. **Hub.** Shows the 22 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
-4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round.
+4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round. If it cannot be fetched, the Hub tries again by itself. When that retry fails too, the rest of the Hub stays usable and a wordless retry ring appears on the tile the child tapped; tapping the ring tries the same game again. A game that never opens charges no play time and records no play.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
 The Hub fits all 22 tiles in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and two) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
@@ -396,7 +396,7 @@ The limit is shown, never enforced mid-game. The Hub shows a textless remaining-
 
 Learning Progress is a parent-facing overlay behind the parental hold, showing one profile at a time with avatar chips to switch between them. For each game it shows the number of plays, an accuracy bar with a percentage, a mastery star once the game has been won three times, and when it was last played in relative terms. Games are listed six rows to a page, with chevrons and a page label, and a seven-day activity strip sits at the bottom.
 
-Progress is recorded on device as an additive part of the profile: a play when a Hub tile is tapped, a tap for every answer, and a win when a game completes. Existing profiles backfill these fields on read, so upgrading never loses stickers or settings.
+Progress is recorded on device as an additive part of the profile: a play when a game opens from its Hub tile, a tap for every answer, and a win when a game completes. Existing profiles backfill these fields on read, so upgrading never loses stickers or settings.
 
 ### 4.8 Adaptive difficulty
 
@@ -556,7 +556,7 @@ The build produces three kinds of JavaScript:
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
 - **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-Measured from the current build, the shell entry is 134.6 kB as `validate-bundle.js` reports it (137.8 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1342.6 kB, and the build emits 42 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 33 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
+Measured from the current build, the shell entry is 137.8 kB as `validate-bundle.js` reports it (141.15 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1342.6 kB, and the build emits 42 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 33 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 

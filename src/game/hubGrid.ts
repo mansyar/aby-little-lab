@@ -18,14 +18,21 @@ export interface HubGridDeps {
   /** True while the daily play-time limit locks every tile. */
   isTimeUp: () => boolean;
   /**
-   * Activates a tile: audio unlock/start, play-session start, gameplay
-   * record, then nudge-or-launch (only after the grid's tap guards pass).
+   * Activates a tile after the grid's tap guards pass. The tile's rectangle
+   * rides along so a failed load can anchor its retry cue on the tapped tile;
+   * it is optional so callers that never surface a failure can omit it.
    */
-  activateTile: (tileIndex: number) => void;
+  activateTile: (tileIndex: number, tile?: Phaser.GameObjects.Rectangle) => void;
   /** Re-arms the idle-attract timer after a user gesture (page dot taps). */
   onUserGesture: () => void;
   /** True while an overlay (profile picker / settings panel) owns the pointer. */
   gestureBlocked: () => boolean;
+  /**
+   * Notifies the grid's owner that the tiles were rebuilt (a page flip or a
+   * viewport rebuild). Anything anchored to a tile's rectangle — the retry cue
+   * — has to go with the tile, or it lands over a different game's slot.
+   */
+  onBoardChange?: () => void;
 }
 
 /**
@@ -89,6 +96,9 @@ export class HubGrid {
     const wasPaged = this.paged;
     this.classifyViewport();
     if (this.paged === wasPaged) return;
+    // The board is about to be rebuilt, so the tiles anchoring a cue are about
+    // to die underneath it.
+    this.deps.onBoardChange?.();
     this.hubPage = 0;
     if (this.paged) {
       this.destroyWideGrid();

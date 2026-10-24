@@ -155,7 +155,7 @@ Product rules: [PRD §1.4](docs/PRD.md#14-platforms-install-and-offline), [PRD �
 
 ## Bundle Code Splitting (2026-08-02)
 
-Only Boot, Preload and Hub load at startup; the other twenty-two scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures measured 2026-10-22): a 134.6 kB shell entry (31.53 kB gzip) against the 200 kB gate and 42 JavaScript chunks. Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
+Only Boot, Preload and Hub load at startup; the other twenty-two scenes arrive through `ensureSceneLoaded()` on a tile tap, ahead of the crossfade, and each game's art rides its own chunk. Build output (shell and chunk figures re-measured 2026-10-24): a 137.8 kB shell entry (32.56 kB gzip) against the 200 kB gate and 42 JavaScript chunks. Cold boot was 419.5 ms on 2026-10-20 against the 3 s gate; the 2026-10-22 re-measurement returned medians of 1392 / 1132 / 1115 ms, and this track's boot smoke check the same day returned a 1.25 s median — every run inside the gate, on a host roughly 3× slower than the 2026-10-20 one. Cold first tap: the 82 ms recorded on 2026-10-20 is the increment the lazy-art change added over a built pre-track baseline (`f377bf8`) — the quantity the 400 ms budget was set against, and met on that basis — not an absolute cost. The absolute cold-first-tap measurement on 2026-10-22 put the median across five games at 351–392 ms and the worst game at 462–640 ms on this host, so the 400 ms budget is not demonstrated by that measurement; [`docs/perf-baseline.md`](docs/perf-baseline.md) keeps the per-run numbers.
 
 Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), [PRD §7](docs/PRD.md#7-performance-and-asset-budget). Implementation, measurements and art ownership: [TDD §3.5](docs/TDD.md#35-in-chunk-art), [TDD §3.6](docs/TDD.md#36-what-the-budget-costs).
 
@@ -243,14 +243,12 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 ## Known Issues
 
-The headline items. The full list - seven of them, each with the file the debt
+The headline items. The full list - five of them, each with the file the debt
 lives in and how a reader would notice it - is in
 [docs/roadmap.md](docs/roadmap.md), which is the single home for them.
 
 - [Three of the five drag games still hand-roll their own drag](docs/roadmap.md) - only Number Order and Story Order use the shared `DragBoard`.
-- [A failed game-chunk load does nothing visible](docs/roadmap.md) - the tap is swallowed and the promise rejection goes unhandled.
 - [The stored save payload has no schema version](docs/roadmap.md) - a future format change would have to be inferred rather than recognised.
-- [Play time is banked only when the child returns to the Hub](docs/roadmap.md) - an app killed mid-game banks nothing, and a session under 30 seconds banks zero minutes.
 
 ## License
 
