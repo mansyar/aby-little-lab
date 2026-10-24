@@ -161,46 +161,55 @@ rectangle lives.
   `src/__tests__/components/GameLoadCue.test.ts`, `README.md`, `docs/PRD.md`,
   `docs/TDD.md`, `conductor/tracks/20261024-scene-load-failure/verification/phase-3.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: One launch at a time (F1)** - covers: FR-4
-  - [ ] **R1.T1.1:** The cue's retry takes the grid's tap lock before it re-enters
-    the launch, and a launch already in flight is refused, so a second tile tapped
-    while the retry's chunk is pending cannot start a parallel chain.
-  - [ ] **R1.T1.2:** Test: fail a load, tap the cue, tap a second tile before the
-    retry settles, assert one load in flight, one play session, one game record and
-    one transition.
-- [ ] **R1.T2: AC-1 is actually asserted (F5)** - covers: AC-1
-  - [ ] **R1.T2.1:** The retry-succeeds case asserts no cue exists after the load
-    settles and that no cue rectangle was drawn before the first failure.
-- [ ] **R1.T3: The cue never outlives its board (F3)** - covers: FR-2, FR-6
-  - [ ] **R1.T3.1:** A page flip or a viewport rebuild hides the cue, because the
+- [x] **R1.T1: One launch at a time (F1)** - covers: FR-4
+  - [x] **R1.T1.1:** `launching` refuses a second `openGame` and the cue's retry
+    re-arms `grid.navLocked`, so a tile tapped while the retry's chunk is pending
+    cannot start a parallel chain.
+  - [x] **R1.T1.2:** Test: fail a load, tap the cue, tap a second tile before the
+    retry settles, assert one play session, one game record and one transition.
+- [x] **R1.T2: AC-1 is actually asserted (F5)** - covers: AC-1
+  - [x] **R1.T2.1:** The retry-succeeds case proves no 96x96 cue floor existed
+    before the failure, and a new case pins the harness guard.
+- [x] **R1.T3: The cue never outlives its board (F3)** - covers: FR-2, FR-6
+  - [x] **R1.T3.1:** A page flip or a viewport rebuild hides the cue, because the
     tile it was anchored to is destroyed underneath it.
-  - [ ] **R1.T3.2:** Test: paged grid, cue up, flip the page, assert the cue is gone
+  - [x] **R1.T3.2:** Test: paged grid, cue up, flip the page, assert the cue is gone
     and no cue rectangle remains.
-- [ ] **R1.T4: The parent-surface exits are proven (F4)** - covers: FR-6
-  - [ ] **R1.T4.1:** Two tests - cue up then open the profile picker; cue up then run
+- [x] **R1.T4: The parent-surface exits are proven (F4)** - covers: FR-6
+  - [x] **R1.T4.1:** Two tests - cue up then open the profile picker; cue up then run
     the Settings unlock - each asserting the cue is gone and its objects destroyed.
-- [ ] **R1.T5: A per-visit token replaces the shutdown boolean (F6)** - covers: NFR-6
-  - [ ] **R1.T5.1:** Capture a visit token before the load and compare it after, so a
+- [x] **R1.T5: A per-visit token replaces the shutdown boolean (F6)** - covers: NFR-6
+  - [x] **R1.T5.1:** Capture a visit token before the load and compare it after, so a
     load that settles after the Hub is recreated cannot act on the new visit.
-  - [ ] **R1.T5.2:** Test: raise a load, shut the Hub down, create it again, settle
+  - [x] **R1.T5.2:** Test: raise a load, shut the Hub down, create it again, settle
     the load, assert no charge, no record, no transition.
-- [ ] **R1.T6: Cue and comment hygiene (F7, F8, F9)** - covers: NFR-4
-  - [ ] **R1.T6.1:** `GameLoadCue` takes the scene once (at the factory), and `show()`
+- [x] **R1.T6: Cue and comment hygiene (F7, F8, F9)** - covers: NFR-4
+  - [x] **R1.T6.1:** `GameLoadCue` takes the scene once (at the factory), and `show()`
     no longer accepts one.
-  - [ ] **R1.T6.2:** Drop the redundant width assertion whose comment over-claims.
-  - [ ] **R1.T6.3:** `src/main.ts` names `loadSceneWithRetry` as the Hub's load entry
+  - [x] **R1.T6.2:** Drop the redundant width assertion whose comment over-claims.
+  - [x] **R1.T6.3:** `src/main.ts` names `loadSceneWithRetry` as the Hub's load entry
     point.
-- [ ] **R1.T7: The documents stop over-claiming (F2, F10, F11, F12)** - covers: NFR-5
-  - [ ] **R1.T7.1:** `README.md` drops the retired chunk-load bullet and the stale
+- [x] **R1.T7: The documents stop over-claiming (F2, F10, F11, F12)** - covers: NFR-5
+  - [x] **R1.T7.1:** `README.md` drops the retired chunk-load bullet and the stale
     play-time bullet, and its count matches the roadmap's actual entry count.
-  - [ ] **R1.T7.2:** `docs/TDD.md` stops saying every launch side effect lives in
+  - [x] **R1.T7.2:** `docs/TDD.md` stops saying every launch side effect lives in
     `openGame`, and stops implying the cue follows the most recently tapped tile.
-  - [ ] **R1.T7.3:** The measured size figures in `docs/PRD.md` and `docs/TDD.md`
+  - [x] **R1.T7.3:** The measured size figures in `docs/PRD.md` and `docs/TDD.md`
     match what the current build reports.
-  - [ ] **R1.T7.4:** `verification/phase-3.md` maps AC-6 to the one-cue and shutdown
+  - [x] **R1.T7.4:** `verification/phase-3.md` maps AC-6 to the one-cue and shutdown
     criteria instead of the roadmap retirement.
-- [ ] **R1.T8: Verify the fixes** - covers: NFR-5
-  - [ ] **R1.T8.1:** The full gate is green and `verification/phase-R1.md` records the
+- [x] **R1.T8: Verify the fixes** - covers: NFR-5
+  - [x] **R1.T8.1:** The full gate is green and `verification/phase-R1.md` records the
     red-then-green for each behavioural fix.
+- [x] **R1.T9 (rework 2): Retire the test-harness debt** - covers: NFR-4
+  - [x] **R1.T9.1:** `settleLoad` lives in `sceneFlowHarness.ts` and asserts a load
+    was actually started before awaiting it, so a case cannot pass by asserting
+    nothing.
+  - [x] **R1.T9.2:** The four copy-pasted `loadSceneWithRetry` doubles are one
+    exported factory called from each suite's mock factory.
+
+**Result:** verified
+**Checkpoint:** 10a7739
+**Evidence:** conductor/tracks/20261024-scene-load-failure/verification/phase-R1.md
