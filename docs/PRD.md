@@ -91,7 +91,9 @@ The device is usually a tablet in a stand or a phone held sideways. The app is d
 
 ### 1.4 Platforms, install and offline
 
-The app is a single web build that installs as a PWA. It runs full screen in landscape, with the manifest asking for fullscreen and falling back to standalone. Installing is offered from the Settings panel, which shows "Install App" on Chrome, Edge and Android, an iOS Safari how-to on iOS, and nothing once the app is already installed.
+The app is a single web build that installs as a PWA. It runs full screen in landscape, with the manifest asking for fullscreen and falling back to standalone. Installing is offered from the Settings panel, which shows "Install App" on Chrome, Edge and Android, an iOS Safari how-to wherever the app is not installed and no prompt is available, and nothing once the app is installed or running standalone. Listening for the browser's install prompt starts when the app boots, not when Settings opens, because the browser makes its offer once per page load and often long before a parent asks for the panel.
+
+The row reports the browser's offer as of the moment the panel opens, and it is not live: a prompt that arrives while Settings is already open shows up the next time it opens. The offer is single use. Once "Install App" has been used the row is gone for the rest of that page's life, and nothing about the dismissal is stored, so a reload starts from whatever the browser offers then.
 
 Offline play is a product requirement, not a bonus: after the first load the service worker serves the shell, the game chunks, the icons, the bundled font and the music loop from cache. A cold boot with no network is expected to behave exactly like a warm one.
 
@@ -423,7 +425,9 @@ Settings offers a Voice row listing the device voices plus "Default (device)". T
 
 ### 4.10 Install and update
 
-The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to where it does not (Share, then Add to Home Screen), and nothing when the app is already installed.
+The Settings panel carries a context-aware install row: "Install App" where the browser supports prompting, an iOS Safari how-to wherever the app is not installed and no prompt is available (Share, then Add to Home Screen), and nothing once the app is installed or running standalone.
+
+Capture runs from boot for the life of the page, so a prompt the browser offered before the panel was ever opened is still there when it opens. The row is a snapshot of that offer taken when the panel opens: it does not update while the panel is open, so a prompt arriving then is picked up by the next opening. Using the prompt spends it - the row is gone for the rest of the page's life, a new offer from the browser is the only way it returns, and a refusal ends the same way. Nothing is remembered across reloads.
 
 Updates are prompt-based. A new service worker is downloaded but not activated until the parent accepts. The Hub shows a small toast with "Update now" and "Later"; accepting activates the new version and reloads, declining leaves the current version running. A second toast confirms when the app is ready to play offline.
 
