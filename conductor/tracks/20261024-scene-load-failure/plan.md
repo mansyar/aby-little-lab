@@ -65,10 +65,12 @@
 - **Depends on:** Phase 1
 - **Covers:** FR-2, FR-3, FR-5, FR-6, AC-2, AC-3, AC-5, AC-6
 - **Touches:** `src/components/GameLoadCue.ts`, `src/game/hubGrid.ts`,
-  `src/scenes/HubScene.ts`, `src/__tests__/components/GameLoadCue.test.ts`,
+  `src/game/hub/gridBuilder.ts`, `src/scenes/HubScene.ts`,
+  `src/__tests__/components/GameLoadCue.test.ts`,
+  `src/__tests__/game/hubGrid.test.ts`,
   `src/__tests__/scenes/hubSceneLoad.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: The retry cue** - covers: FR-2
   - [ ] **P2.T1.1:** Add `src/components/GameLoadCue.ts` modelled on
