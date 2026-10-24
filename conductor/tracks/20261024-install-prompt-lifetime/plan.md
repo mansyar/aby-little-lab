@@ -108,6 +108,40 @@ and stop listing the lost-prompt bug.
 - The bundle fingerprint will change. Expect a new `index-*.js` name in the
   evidence tables, and do not treat a changed hash as a regression.
 
+## Phase R1: Review Fixes
+
+**Goal:** Close every round-1 finding: the untested boot wiring (F1), the
+overstated PRD sentences (F4, F5), the narrow AC-5 case (F3), and the three
+accuracy nits (F2, F6, F7).
+
+**Depends on:** Phase 3
+
+**Covers:** findings F1-F7; FR-1, FR-3, FR-4, FR-5; AC-4, AC-5
+
+**Touches:** `src/__tests__/utils/pwaInstall.test.ts`, `src/utils/pwaInstall.ts`,
+`docs/PRD.md`, `docs/TDD.md`,
+`conductor/tracks/20261024-install-prompt-lifetime/verification/phase-3.md`
+
+**Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+
+**Status:** pending
+
+- [ ] **R1.T1: Pin the boot wiring** - covers: FR-1 (F1)
+  - [ ] **R1.T1.1:** In `src/__tests__/utils/pwaInstall.test.ts`, import `../../../src/main.ts?raw` (the `?raw` pattern used by `src/__tests__/game/art/shellOwnership.test.ts`) and assert that `initInstallPrompt(` appears in the source and that its index is lower than the index of `new Phaser.Game(`. Explain in the test name that this is the once-per-page capture.
+  - [ ] **R1.T1.2:** Prove it goes red: temporarily move the call below `new Phaser.Game` in `src/main.ts`, run the case, record the failure text, restore the file, and confirm the suite is green again.
+- [ ] **R1.T2: Tell the truth in the adapter's doc** - covers: F2
+  - [ ] **R1.T2.1:** Reword the `getInstallPromptTracker()` JSDoc parenthetical from "a Hub-only host, or a test that builds the panel first" to the real case - a test that constructs the panel before any boot code has run. Keep the first clause about lazy creation.
+- [ ] **R1.T3: Widen the AC-5 case** - covers: AC-5, FR-5 (F3)
+  - [ ] **R1.T3.1:** In the storage case, between the spend assertion and `destroy()`, call `tracker.getState()` and assert `hidden`, and invoke the captured `appinstalled` listener once. The five storage-method assertions stay after both, so a read or write on either route now fails the case.
+- [ ] **R1.T4: Correct the PRD's promise** - covers: FR-3, FR-4, AC-4 (F4, F5)
+  - [ ] **R1.T4.1:** In §1.4 and §4.10, replace "the row is gone for the rest of that page's life" with the accurate sequence: the next open has no row, it only returns if the browser makes a fresh offer, and the row already on screen does not change. Keep the existing "nothing is remembered across reloads" sentence.
+  - [ ] **R1.T4.2:** State the third iOS condition in both places: the how-to shows where the app is neither installed nor running standalone and no prompt is available.
+- [ ] **R1.T5: Complete the boot description in the TDD** - covers: FR-1 (F6)
+  - [ ] **R1.T5.1:** In §3.1 (`docs/TDD.md:360`), add one clause: `initInstallPrompt()` runs before `new Phaser.Game`, so the once-per-load offer is captured before any scene can open Settings.
+- [ ] **R1.T6: Correct the phase-3 evidence** - covers: AC-6 (F7)
+  - [ ] **R1.T6.1:** In `verification/phase-3.md`, replace the unreachable `bfa79874`/`419a2221` references with `dd1099c9` (both commits were squashed into it) and restate the measured insertion count for the range. Do not rewrite the rest of the evidence.
+- [ ] **R1.T7: Gate and evidence** - covers: AC-6
+  - [ ] **R1.T7.1:** Run the full chain layer by layer, then write `verification/phase-R1.md`: what changed per finding, the commands table, the red-then-green text for R1.T1.2, and the FR/AC mapping.
 <!--
 Phase completion is recorded by the primary agent only:
 
