@@ -463,7 +463,7 @@ Design rules: thick dark strokes drawn at the 512 base size, flat fills, no grad
 
 ### 5.2 Touch targets
 
-The minimum interactive target is 64 by 64 px, the ideal is 96 by 96 px, and small art may sit inside a larger invisible hit area. Targets are inflated rather than drawn larger, so a 40 px glyph can still have a 96 px hit box.
+The minimum interactive target is 64 by 64 px, the ideal is 96 by 96 px, and small art may sit inside a larger invisible hit area. Targets are inflated rather than drawn larger, so a 40 px glyph can still have a 96 px hit box. The one documented exception is the eight Settings rows, where eight rows inside the panel cap each band at 56 px tall and the full 400 px card width is what carries the target.
 
 Protected controls, meaning the ones that change state rather than play, always use the larger target: every Back button, the Hub settings hold, the replay controls, and the parental-lock row. Taps navigate on release, not on press, so a child who touches and slides away does not trigger anything.
 
