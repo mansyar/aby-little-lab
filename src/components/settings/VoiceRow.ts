@@ -9,14 +9,17 @@ import {
   ENABLED_COLOR,
   type ObjectBucket,
   PRIMARY_COLOR,
-  ROW_HEIGHT,
-  TOGGLE_WIDTH,
+  ROW_HIT_WIDTH,
+  ROW_PITCH,
 } from "./primitives";
 
 /** Sample phrase spoken by the voice preview button. */
 const VOICE_PREVIEW_TEXT = "Hi! I can talk.";
 /** Longest voice label shown in the chip before truncation. */
 const VOICE_LABEL_MAX = 24;
+/** Chip and Preview label offsets from the row center (their visual positions). */
+const VOICE_CHIP_OFFSET = -30;
+const VOICE_PREVIEW_OFFSET = 170;
 
 /** Truncates a long voice label for the narrow chip, e.g. "en-US — Goog…". */
 function truncateLabel(label: string, max = VOICE_LABEL_MAX): string {
@@ -48,10 +51,18 @@ export class VoiceRow {
   create(x: number, y: number): void {
     this.syncVoiceSelection();
     addRowCard(this.deps.scene, x, y, this.deps.bucket);
+    const cardLeft = x - ROW_HIT_WIDTH / 2;
+    const cardRight = x + ROW_HIT_WIDTH / 2;
+    const chipX = x + VOICE_CHIP_OFFSET;
+    const previewX = x + VOICE_PREVIEW_OFFSET;
+    // This row carries two controls, so it splits its single band at the
+    // midpoint between their labels: a full-width band on both would stack two
+    // identical rectangles and the preview, drawn last, would take every tap.
+    const splitX = (chipX + previewX) / 2;
 
     const chip = this.deps.scene.add
       .text(
-        x - 30,
+        chipX,
         y,
         `Voice: ${truncateLabel(this.voiceOptions[this.voiceIndex].label)}`,
         textStyle({
@@ -62,10 +73,10 @@ export class VoiceRow {
       .setOrigin(0.5);
     chip.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 4,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH / 2,
-        ROW_HEIGHT,
+        cardLeft - chipX,
+        -ROW_PITCH / 2,
+        splitX - cardLeft,
+        ROW_PITCH,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });
@@ -82,7 +93,7 @@ export class VoiceRow {
 
     const preview = this.deps.scene.add
       .text(
-        x + 170,
+        previewX,
         y,
         "Preview",
         textStyle({
@@ -93,10 +104,10 @@ export class VoiceRow {
       .setOrigin(0.5);
     preview.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 4,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH / 2,
-        ROW_HEIGHT,
+        splitX - previewX,
+        -ROW_PITCH / 2,
+        cardRight - splitX,
+        ROW_PITCH,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });

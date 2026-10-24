@@ -12,7 +12,8 @@ import {
   PANEL_HEIGHT,
   PANEL_WIDTH,
   PRIMARY_COLOR,
-  ROW_HEIGHT,
+  ROW_HIT_WIDTH,
+  ROW_PITCH,
   TOGGLE_HEIGHT,
   TOGGLE_WIDTH,
 } from "./primitives";
@@ -58,10 +59,10 @@ export class InstallRow {
       .setOrigin(0.5);
     button.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_WIDTH / 2,
-        -ROW_HEIGHT / 2,
-        TOGGLE_WIDTH,
-        ROW_HEIGHT,
+        -ROW_HIT_WIDTH / 2,
+        -ROW_PITCH / 2,
+        ROW_HIT_WIDTH,
+        ROW_PITCH,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
     });

@@ -24,6 +24,16 @@ export const AVATAR_TEXTURE_SIZE = textureSizeFor(PROFILE_AVATAR_TEXTURES.cat);
 /** Background card behind each main-panel settings row. */
 export const ROW_CARD_WIDTH = 400;
 export const ROW_CARD_HEIGHT = 68;
+/**
+ * Main-panel row pitch: the distance between adjacent row centers and the
+ * height of each row's hit band. Eight rows plus the title and version footer
+ * cannot each carry a 64px band inside the 760px panel without stealing taps
+ * from their neighbours, so the pitch is the only non-overlapping height
+ * available; the 400px band width is what keeps the target generous instead.
+ */
+export const ROW_PITCH = 56;
+/** Main-panel hit band width: the whole row card is live, label and switch alike. */
+export const ROW_HIT_WIDTH = ROW_CARD_WIDTH;
 /** Slightly deeper cream than the panel so rows read as tappable. */
 export const ROW_CARD_COLOR = 0xf6efdd;
 /** Toggle switch presentation: a track plus a knob whose side encodes state. */
@@ -69,10 +79,10 @@ export function createRow(
   const row = scene.add.text(x, y, label, textStyle({ color, fontSize: "32px" })).setOrigin(0.5);
   row.setInteractive({
     hitArea: new Phaser.Geom.Rectangle(
-      -TOGGLE_WIDTH / 2,
-      -ROW_HEIGHT / 2,
-      TOGGLE_WIDTH,
-      ROW_HEIGHT,
+      -ROW_HIT_WIDTH / 2,
+      -ROW_PITCH / 2,
+      ROW_HIT_WIDTH,
+      ROW_PITCH,
     ),
     hitAreaCallback: Phaser.Geom.Rectangle.Contains,
   });
