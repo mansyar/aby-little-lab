@@ -27,6 +27,12 @@ export interface HubGridDeps {
   onUserGesture: () => void;
   /** True while an overlay (profile picker / settings panel) owns the pointer. */
   gestureBlocked: () => boolean;
+  /**
+   * Notifies the grid's owner that the tiles were rebuilt (a page flip or a
+   * viewport rebuild). Anything anchored to a tile's rectangle — the retry cue
+   * — has to go with the tile, or it lands over a different game's slot.
+   */
+  onBoardChange?: () => void;
 }
 
 /**
@@ -90,6 +96,9 @@ export class HubGrid {
     const wasPaged = this.paged;
     this.classifyViewport();
     if (this.paged === wasPaged) return;
+    // The board is about to be rebuilt, so the tiles anchoring a cue are about
+    // to die underneath it.
+    this.deps.onBoardChange?.();
     this.hubPage = 0;
     if (this.paged) {
       this.destroyWideGrid();

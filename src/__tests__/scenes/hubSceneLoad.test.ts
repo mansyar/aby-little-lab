@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { MockObject } from "../helpers/phaserMock";
+import type { MockFn, MockObject } from "../helpers/phaserMock";
 import {
   completeFadeOuts,
+  fireAllObjectEvents,
   getMockFn,
   getRectangles,
+  getTextObject,
   mockEnsureSceneLoaded,
+  settleLoad,
   triggerPointerupOn,
   triggerShutdown,
 } from "../helpers/sceneFlowHarness";
@@ -133,8 +136,9 @@ describe("Hub scene load", () => {
   });
 
   /** The grid, as the production scene holds it. */
-  function gridOf(scene: HubScene): { navLocked: boolean } {
-    return (scene as unknown as { grid: { navLocked: boolean } }).grid;
+  function gridOf(scene: HubScene): { navLocked: boolean; flipTo: (page: number) => void } {
+    return (scene as unknown as { grid: { navLocked: boolean; flipTo: (page: number) => void } })
+      .grid;
   }
 
   /** The nudge overlay, as the production scene holds it. */
@@ -143,14 +147,18 @@ describe("Hub scene load", () => {
   }
 
   /**
-   * Awaits the load the Hub is waiting on, so its continuation runs first: the
-   * scene registered its `await` on this promise before the test did.
+   * Makes the next load hang until the returned function is called, so a test
+   * can act while a launch is genuinely still in flight.
    */
-  async function settleLoad(): Promise<void> {
-    const pending = vi.mocked(loadSceneWithRetry).mock.results.at(-1)?.value as
-      | Promise<boolean>
-      | undefined;
-    if (pending) await pending;
+  function holdNextLoad(): () => void {
+    let release: () => void = () => {};
+    mockEnsureSceneLoaded.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
+    );
+    return () => release();
   }
 
   /** The retry cue the scene is holding, or undefined when none is due. */
@@ -181,6 +189,30 @@ describe("Hub scene load", () => {
     rect.y = y;
   }
 
+  /** The profile chip's avatar image: the Hub draws it at (68, 68). */
+  function chipOf(scene: HubScene): Record<string, MockFn> {
+    const images = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
+    for (let i = 0; i < images.mock.calls.length; i += 1) {
+      const [x, y] = images.mock.calls[i] as [number, number];
+      if (x === 68 && y === 68) return images.mock.results[i].value as Record<string, MockFn>;
+    }
+    throw new Error("profile chip image not found");
+  }
+
+  /** The Settings label the parental lock guards. */
+  function settingsButtonOf(scene: HubScene): Record<string, MockFn> {
+    const button = getTextObject(scene, "Settings");
+    if (!button) throw new Error("settings button not found");
+    return button;
+  }
+
+  /** The runtime a timer created by `delayedCall(delay, ...)` is due to fire. */
+  function fireTimer(scene: HubScene, delay: number): void {
+    const timer = getMockFn(scene.time.delayedCall).mock.calls.find((call) => call[0] === delay);
+    if (!timer) throw new Error(`no ${delay}ms timer scheduled`);
+    (timer[1] as () => void)();
+  }
+
   /** Every stored key and value, for "the failure path persisted nothing". */
   function storageSnapshot(): string {
     return JSON.stringify(
@@ -200,7 +232,7 @@ describe("Hub scene load", () => {
     // The tap takes the lock before the load starts, exactly as production does.
     expect(grid.navLocked).toBe(true);
 
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(2);
     expect(mockEnsureSceneLoaded.mock.calls[0][1]).toBe(tile.sceneKey);
@@ -220,17 +252,24 @@ describe("Hub scene load", () => {
     expect(grid.navLocked).toBe(false);
   });
 
-  it("opens the game once when the retry succeeds", async () => {
+  it("opens the game once when the retry succeeds, without ever raising a cue", async () => {
     mockEnsureSceneLoaded
       .mockRejectedValueOnce(new Error("chunk blip"))
       .mockResolvedValueOnce(undefined);
     const scene = new HubScene();
     scene.create();
+    // Nothing is drawn for a load that has not failed yet: the cue's hit floor
+    // is the only 96x96 rectangle the Hub builds.
+    expect(cueRectOf(scene)).toBeUndefined();
 
     triggerPointerupOn(getRectangles(scene)[0]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(2);
+    // AC-1's "no cue ever appears": one attempt did fail, and the surface a
+    // failure raises still never existed — not raised and hidden again.
+    expect(cueOf(scene)).toBeUndefined();
+    expect(cueRectOf(scene)).toBeUndefined();
     expect(startPlaySession).toHaveBeenCalledTimes(1);
     expect(recordGamePlay).toHaveBeenCalledTimes(1);
     expect(recordGamePlay).toHaveBeenCalledWith(tile.gameId);
@@ -247,7 +286,7 @@ describe("Hub scene load", () => {
     scene.create();
 
     triggerPointerupOn(getRectangles(scene)[0]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(1);
     expect(startPlaySession).toHaveBeenCalledTimes(1);
@@ -278,7 +317,7 @@ describe("Hub scene load", () => {
     placeTile(firstTile, 146, 268);
 
     triggerPointerupOn(firstTile);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     // The cue is visible, centred on the tile the child actually tapped.
     const cue = cueOf(scene);
@@ -290,14 +329,11 @@ describe("Hub scene load", () => {
     triggerPointerupOn(getRectangles(scene)[1]);
     expect(grid.navLocked).toBe(true);
 
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     // Four attempts: two tiles, two attempts each — the second tap was heard.
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(4);
     expect(grid.navLocked).toBe(false);
-    // The 96px floor covers a corner of its tile, not the whole grid: the
-    // second tap was not swallowed by the cue's interactive area.
-    expect(cueRectOf(scene)?.args?.[2]).toBe(96);
   });
 
   it("retries from the cue, destroys it, then opens the game", async () => {
@@ -306,7 +342,7 @@ describe("Hub scene load", () => {
     scene.create();
 
     triggerPointerupOn(getRectangles(scene)[0]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     const cue = cueOf(scene);
     expect(cue?.isActive()).toBe(true);
@@ -321,7 +357,7 @@ describe("Hub scene load", () => {
     expect(cueOf(scene)).toBeUndefined();
     expect(cueRectOf(scene)?.destroy).toHaveBeenCalled();
 
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     // Exactly one extra attempt, then the usual first-time success path.
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(3);
@@ -333,6 +369,41 @@ describe("Hub scene load", () => {
     expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(tile.sceneKey);
   });
 
+  it("refuses a second launch while the cue's retry is in flight", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+    const grid = gridOf(scene);
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad(loadSceneWithRetry);
+    expect(cueOf(scene)?.isActive()).toBe(true);
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(2);
+
+    // The chunk is reachable again, but the retry hangs: this is the window in
+    // which a second tile used to start a parallel chain.
+    const release = holdNextLoad();
+    tapCue(scene);
+    // The retry is a tap, so it takes the grid's tap lock back.
+    expect(grid.navLocked).toBe(true);
+
+    // A second tile during the retry reaches the grid and is refused: the lock
+    // it checks, and the launch flag behind it, are both held.
+    triggerPointerupOn(getRectangles(scene)[1]);
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(3);
+
+    release();
+    await settleLoad(loadSceneWithRetry);
+
+    // One chain, one charge, one game opened.
+    expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(3);
+    expect(startPlaySession).toHaveBeenCalledTimes(1);
+    expect(recordGamePlay).toHaveBeenCalledTimes(1);
+    completeFadeOuts(scene);
+    expect(getMockFn(scene.scene.start)).toHaveBeenCalledTimes(1);
+    expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith(tile.sceneKey);
+  });
+
   it("warns once per failed attempt, naming the key, and persists nothing", async () => {
     mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
     const scene = new HubScene();
@@ -340,7 +411,7 @@ describe("Hub scene load", () => {
     const before = storageSnapshot();
 
     triggerPointerupOn(getRectangles(scene)[0]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(console.warn).toHaveBeenCalledTimes(2);
     for (const call of vi.mocked(console.warn).mock.calls) {
@@ -356,12 +427,12 @@ describe("Hub scene load", () => {
     scene.create();
 
     triggerPointerupOn(getRectangles(scene)[0]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     expect(cue?.isActive()).toBe(true);
 
     triggerPointerupOn(getRectangles(scene)[1]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     // The second failure reuses the cue instead of stacking another.
     expect(cueOf(scene)).toBe(cue);
@@ -373,6 +444,71 @@ describe("Hub scene load", () => {
     expect(cueFloors).toHaveLength(1);
   });
 
+  it("hides the cue when a page flip rebuilds the board under it", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    // A narrow viewport makes the Hub build the paged board, whose slot centres
+    // repeat on every page.
+    (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
+      width: 844,
+      height: 390,
+    };
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad(loadSceneWithRetry);
+    const cue = cueOf(scene);
+    const cueRect = cueRectOf(scene);
+    expect(cue?.isActive()).toBe(true);
+
+    gridOf(scene).flipTo(1);
+
+    // The tile the cue was anchored to went with the page, so the cue goes with
+    // it: left in place it would sit over the next page's tile in the same slot.
+    expect(cue?.isActive()).toBe(false);
+    expect(cueOf(scene)).toBeUndefined();
+    expect(cueRect?.destroy).toHaveBeenCalled();
+  });
+
+  it("clears the cue when the profile picker opens", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad(loadSceneWithRetry);
+    const cue = cueOf(scene);
+    const cueRect = cueRectOf(scene);
+    expect(cue?.isActive()).toBe(true);
+
+    // The chip opens the picker on pointerup, exactly as a child opens it.
+    fireAllObjectEvents(chipOf(scene), "pointerup");
+
+    expect(cue?.isActive()).toBe(false);
+    expect(cueOf(scene)).toBeUndefined();
+    expect(cueRect?.destroy).toHaveBeenCalled();
+  });
+
+  it("clears the cue when the Settings hold unlocks the panel", async () => {
+    mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    await settleLoad(loadSceneWithRetry);
+    const cue = cueOf(scene);
+    const cueRect = cueRectOf(scene);
+    expect(cue?.isActive()).toBe(true);
+
+    fireAllObjectEvents(settingsButtonOf(scene), "pointerdown");
+    // The parental lock completes its three-second hold through the scene timer.
+    fireTimer(scene, 3000);
+
+    expect(cue?.isActive()).toBe(false);
+    expect(cueOf(scene)).toBeUndefined();
+    expect(cueRect?.destroy).toHaveBeenCalled();
+  });
+
   it("does not open a game whose chunk lands after the Hub shut down", async () => {
     mockEnsureSceneLoaded.mockResolvedValue(undefined);
     const scene = new HubScene();
@@ -382,7 +518,7 @@ describe("Hub scene load", () => {
     expect(() => triggerShutdown(scene)).not.toThrow();
 
     // The load still settles quietly; the Hub has nothing left to do with it.
-    await expect(settleLoad()).resolves.toBeUndefined();
+    await expect(settleLoad(loadSceneWithRetry)).resolves.toBeUndefined();
 
     completeFadeOuts(scene);
     expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
@@ -400,7 +536,7 @@ describe("Hub scene load", () => {
     triggerPointerupOn(getRectangles(scene)[0]);
     expect(() => triggerShutdown(scene)).not.toThrow();
 
-    await expect(settleLoad()).resolves.toBeUndefined();
+    await expect(settleLoad(loadSceneWithRetry)).resolves.toBeUndefined();
 
     // No cue is hung over a screen that is already gone.
     expect(cueOf(scene)).toBeUndefined();
@@ -411,6 +547,28 @@ describe("Hub scene load", () => {
     expect(recordGamePlay).not.toHaveBeenCalled();
   });
 
+  it("discards a load that settles after the Hub was recreated for a new visit", async () => {
+    const release = holdNextLoad();
+    const scene = new HubScene();
+    scene.create();
+
+    triggerPointerupOn(getRectangles(scene)[0]);
+    triggerShutdown(scene);
+    // Phaser reuses the instance: the next visit runs `create()` again, which
+    // is exactly what used to reset a shutdown boolean and let a stale load
+    // charge the new visit.
+    scene.create();
+
+    release();
+    await settleLoad(loadSceneWithRetry);
+
+    expect(startPlaySession).not.toHaveBeenCalled();
+    expect(recordGamePlay).not.toHaveBeenCalled();
+    completeFadeOuts(scene);
+    expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
+    expect(cueOf(scene)).toBeUndefined();
+  });
+
   it("refuses a cue retry once the daily cap has been reached", async () => {
     mockEnsureSceneLoaded.mockRejectedValue(new Error("offline"));
     const scene = new HubScene();
@@ -418,7 +576,7 @@ describe("Hub scene load", () => {
     const grid = gridOf(scene);
 
     triggerPointerupOn(getRectangles(scene)[0]);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
     const cue = cueOf(scene);
     expect(cue?.isActive()).toBe(true);
 
@@ -431,7 +589,7 @@ describe("Hub scene load", () => {
 
     mockEnsureSceneLoaded.mockResolvedValue(undefined);
     tapCue(scene);
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     // The lock outranks the retry: no session, no play record and no game.
     expect(startPlaySession).not.toHaveBeenCalled();
@@ -444,5 +602,11 @@ describe("Hub scene load", () => {
     expect(cue?.isActive()).toBe(false);
     expect(cueOf(scene)).toBeUndefined();
     expect(grid.navLocked).toBe(false);
+  });
+
+  it("fails loudly when asked to settle a load the Hub never started", async () => {
+    // The harness guard: a `if (pending) await pending` that no-ops would let a
+    // case settle the wrong thing and still pass while asserting nothing.
+    await expect(settleLoad(loadSceneWithRetry)).rejects.toThrow(/found no load to settle/);
   });
 });

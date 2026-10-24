@@ -300,6 +300,9 @@ export function flipTo(grid: HubGrid, page: number): void {
   const direction = page > grid.hubPage ? 1 : -1;
   grid.hubPage = page;
   paintPageDots(grid.pageDots, grid.hubPage);
+  // The outgoing tiles die with this flip, so a cue anchored to one of them
+  // goes now — once per flip, whatever the motion path below.
+  grid.deps.onBoardChange?.();
   if (isReducedMotion()) {
     destroyPageGrid(grid);
     buildPageGrid(grid, page);

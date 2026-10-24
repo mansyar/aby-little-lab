@@ -44,7 +44,7 @@ describe("createGameLoadCue", () => {
   it("draws a textless ring and circular arrow centred on the tile", () => {
     const scene = new MockScene();
     const cue = createGameLoadCue(asScene(scene));
-    cue.show({ scene: asScene(scene), onRetry: vi.fn(), x: 146, y: 268 });
+    cue.show({ onRetry: vi.fn(), x: 146, y: 268 });
 
     expect(cue.isActive()).toBe(true);
     expect(scene.add.text).not.toHaveBeenCalled();
@@ -64,7 +64,6 @@ describe("createGameLoadCue", () => {
   it("covers a 96x96 hit floor and nothing larger", () => {
     const scene = new MockScene();
     createGameLoadCue(asScene(scene)).show({
-      scene: asScene(scene),
       onRetry: vi.fn(),
       x: 146,
       y: 268,
@@ -84,8 +83,8 @@ describe("createGameLoadCue", () => {
     const cue = createGameLoadCue(asScene(scene));
     const onRetry = vi.fn();
 
-    cue.show({ scene: asScene(scene), onRetry, x: 100, y: 200 });
-    cue.show({ scene: asScene(scene), onRetry, x: 700, y: 500 });
+    cue.show({ onRetry, x: 100, y: 200 });
+    cue.show({ onRetry, x: 700, y: 500 });
 
     expect(objectsOfKind("graphics")).toHaveLength(1);
     expect(objectsOfKind("rectangle")).toHaveLength(1);
@@ -98,7 +97,6 @@ describe("createGameLoadCue", () => {
     const scene = new MockScene();
     const onRetry = vi.fn();
     createGameLoadCue(asScene(scene)).show({
-      scene: asScene(scene),
       onRetry,
       x: 146,
       y: 268,
@@ -117,7 +115,7 @@ describe("createGameLoadCue", () => {
     const scene = new MockScene();
     const onRetry = vi.fn();
     const cue = createGameLoadCue(asScene(scene));
-    cue.show({ scene: asScene(scene), onRetry, x: 146, y: 268 });
+    cue.show({ onRetry, x: 146, y: 268 });
 
     const ring = ringOf();
     const floor = hitFloorOf();
@@ -141,7 +139,6 @@ describe("createGameLoadCue", () => {
   it("pulses the ring once and keeps it still under reduced motion", () => {
     const normal = new MockScene();
     createGameLoadCue(asScene(normal)).show({
-      scene: asScene(normal),
       onRetry: vi.fn(),
       x: 146,
       y: 268,
@@ -163,7 +160,6 @@ describe("createGameLoadCue", () => {
     motion.isReducedMotion.mockReturnValue(true);
     const reduced = new MockScene();
     createGameLoadCue(asScene(reduced)).show({
-      scene: asScene(reduced),
       onRetry: vi.fn(),
       x: 146,
       y: 268,
@@ -177,7 +173,7 @@ describe("createGameLoadCue", () => {
   it("stops its tween on destroy rather than leaving a loop behind", () => {
     const scene = new MockScene();
     const cue = createGameLoadCue(asScene(scene));
-    cue.show({ scene: asScene(scene), onRetry: vi.fn(), x: 146, y: 268 });
+    cue.show({ onRetry: vi.fn(), x: 146, y: 268 });
 
     const tween = scene.tweens.add.mock.results[0].value as { remove: () => void };
     cue.destroy();
@@ -188,7 +184,7 @@ describe("createGameLoadCue", () => {
   it("clears itself when the scene shuts down", () => {
     const scene = new MockScene();
     const cue = createGameLoadCue(asScene(scene));
-    cue.show({ scene: asScene(scene), onRetry: vi.fn(), x: 146, y: 268 });
+    cue.show({ onRetry: vi.fn(), x: 146, y: 268 });
 
     scene.events.emit("shutdown");
 

@@ -260,5 +260,8 @@ and Phase 2 landed:
 
 - AC-5: the PRD states the retry, the wordless ring, the usable Hub and the uncharged
   failed tap; the TDD states the mechanism. Satisfied.
-- AC-6: the roadmap no longer lists the failure path as a known issue or as future
-  work. Satisfied.
+- AC-6: two failing taps do not produce two cues, and shutdown with a load in
+  flight neither throws nor mutates the cueless state — the spec defines AC-6 that
+  way. Satisfied: the evidence is the AC-6 block above (line 149), which quotes TDD
+  §4.6 on the one-cue-at-a-time `show()` and on the shutdown guard. The roadmap's
+  retirement of the failure path is the documentation half of AC-5, not AC-6.

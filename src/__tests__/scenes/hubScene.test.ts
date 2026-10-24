@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 import { type MockFn, type MockObject, mockRegistry } from "../helpers/phaserMock";
+import { settleLoad } from "../helpers/sceneFlowHarness";
 
 const { mockAudio, mockRecordGamePlay } = vi.hoisted(() => {
   const mockAudio = {
@@ -115,17 +116,6 @@ function getHandler(kind: string, event: string): ((...args: unknown[]) => unkno
   return mockRegistry.find((obj) => obj.kind === kind && obj.handlers[event])?.handlers[event];
 }
 
-/**
- * Awaits the load the Hub is waiting on, so its continuation runs first: the
- * scene registered its `await` on this promise before the test did.
- */
-async function settleLoad(): Promise<void> {
-  const pending = vi.mocked(loadSceneWithRetry).mock.results.at(-1)?.value as
-    | Promise<boolean>
-    | undefined;
-  if (pending) await pending;
-}
-
 /** Scene-level input handlers captured by the mock Phaser input plugin. */
 function sceneInputHandlers(scene: HubScene): Record<string, MockFn[]> {
   return (scene as unknown as { sceneInputHandlers: Record<string, MockFn[]> }).sceneInputHandlers;
@@ -202,7 +192,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
     const pageOneFirst = pagedRects()[10];
     pageOneFirst.handlers.pointerup?.();
     // The play is charged only once the load resolved.
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledWith("how-many");
     expect(scene).toBeDefined();
@@ -235,7 +225,7 @@ describe("HubScene paged grid (narrow viewports)", () => {
     const incoming = pagedRects().slice(10);
     expect(incoming).toHaveLength(2);
     incoming[1].handlers.pointerup?.();
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledWith("story-order");
   });
@@ -459,7 +449,7 @@ describe("HubScene session-start recording", () => {
     const tapTile = getHandler("rectangle", "pointerup");
     expect(tapTile).toBeDefined();
     tapTile?.();
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(mockRecordGamePlay).toHaveBeenCalledWith("shape-sorter");
@@ -478,7 +468,7 @@ describe("HubScene session-start recording", () => {
     expect(tapTiles.length).toBeGreaterThanOrEqual(2);
     tapTiles[0].handlers.pointerup?.();
     tapTiles[1].handlers.pointerup?.();
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(mockRecordGamePlay).toHaveBeenCalledWith("shape-sorter");
@@ -492,7 +482,7 @@ describe("HubScene session-start recording", () => {
     expect(tapTile).toBeDefined();
     tapTile?.();
     tapTile?.();
-    await settleLoad();
+    await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledTimes(1);
     expect(getProgress()["shape-sorter"].plays).toBe(1);

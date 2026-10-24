@@ -52,8 +52,6 @@ const PULSE_SCALE = 1.06;
 const PULSE_DURATION = 900;
 
 export interface GameLoadCueDeps {
-  /** The scene to draw into: the same scene passed to `createGameLoadCue`. */
-  scene: Phaser.Scene;
   /** Called when the child taps the cue. */
   onRetry: () => void;
   /** Centre of the tile the cue sits on, in scene coordinates. */
@@ -133,7 +131,9 @@ export function createGameLoadCue(scene: Phaser.Scene): GameLoadCue {
     active = true;
     onRetry = deps.onRetry;
 
-    const drawScene = deps.scene;
+    // The one scene the factory took: the same scene owns the drawing, the
+    // tween and the `shutdown` hook, so the cue can never straddle two.
+    const drawScene = scene;
     const cueGraphics = drawScene.add.graphics();
     // Drawn around its own origin so the pulse scales around the cue centre
     // rather than around the graphics object's default top-left.

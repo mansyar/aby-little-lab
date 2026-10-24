@@ -99,6 +99,38 @@ export function emitPwaEvent(event: "needRefresh" | "offlineReady"): void {
  */
 export const mockEnsureSceneLoaded = vi.fn(async (_scene?: unknown, _key?: string) => {});
 
+/**
+ * The Hub's retrying-load double: it always succeeds, but delegates to
+ * {@link mockEnsureSceneLoaded} so a suite can still hold, fail or count one
+ * attempt. Shared because four suites declared the same six-line body inside
+ * their `vi.mock` factory.
+ */
+export function createLoadSceneWithRetryDouble() {
+  return vi.fn(async (scene: unknown, key: string) => {
+    await mockEnsureSceneLoaded(scene, key);
+    return true;
+  });
+}
+
+/**
+ * Awaits the load the Hub is waiting on, so its continuation runs first: the
+ * scene registered its `await` on this promise before the test did.
+ *
+ * Asserts that a load was actually started. A helper that silently no-ops when
+ * the mock was never called lets a case that settles the wrong thing pass
+ * while asserting nothing at all.
+ */
+export async function settleLoad(loadSceneWithRetry: unknown): Promise<void> {
+  const pending = (loadSceneWithRetry as MockFn).mock?.results.at(-1)?.value as
+    | Promise<boolean>
+    | undefined;
+  expect(
+    pending,
+    "settleLoad() found no load to settle: the Hub never called loadSceneWithRetry, so the assertions after this point were never exercised",
+  ).toBeDefined();
+  await pending;
+}
+
 /** Glyph-font gate stand-in: BootScene's await resolves immediately. */
 export const mockEnsureGlyphFontLoaded = vi.fn(() => Promise.resolve());
 
