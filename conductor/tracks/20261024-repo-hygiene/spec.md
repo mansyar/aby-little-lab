@@ -134,6 +134,13 @@ defect is the documentation, not the tracking.
 - **Deferred:** whether the generator should write outside `docs/` entirely
   (for example `.art-preview/`, which is already ignored). Not needed to satisfy
   this track.
+- **Correction (R1):** the nine historical folders under
+  `docs/svg-contact-sheets/` (`final/`, `phase2`, `phase3`, `phase3-pilot`,
+  `phase4`-`phase8`) are **not** regenerable sheet-for-sheet. They are
+  point-in-time snapshots of earlier corpora - `final/` holds 11 category sheets
+  and no `stories`, where today's script writes 12 root sheets - so untracking
+  them is safe only because git history keeps them; the current script would
+  write a different set. See `docs/SVG_STYLE.md` §7.
 
 ## References
 

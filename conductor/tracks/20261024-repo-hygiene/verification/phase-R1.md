@@ -3,10 +3,7 @@
 Track: `20261024-repo-hygiene` (chore, low) · Branch: `chore/20261024-repo-hygiene` ·
 Phase base: `71b962e8f12c7c9b23a14c2fa1fe03839c0d7bc4`
 
-**Result: the three findings are closed and the gate is green, with the docs layer run by the primary.** The executor landed all three edits and seven gate layers; its sandbox refused `node scripts/validate-docs.js`, which the primary ran green (5/5). See [Primary verification](#primary-verification). The executor's account below is kept as written, and its original opening sentence follows this note.
-0, and `node scripts/validate-docs.js` is refused by this executor's sandbox before
-execution - the same refusal Phase 2 hit.** That is a sandbox limit, not a failing
-check, and the primary has to run it (see [Blockers](#6-blockers)).
+**Result: the three findings are closed and the gate is green, with the docs layer run by the primary.** The executor landed all three edits and seven gate layers; its sandbox refused `node scripts/validate-docs.js` before execution - the same refusal Phase 2 hit, a sandbox limit rather than a failing check - and the primary ran it green (5/5). See [Primary verification](#primary-verification).
 
 Commits:
 
@@ -150,10 +147,11 @@ verification layer depends on that command.
 
 ### Scope
 
-`git diff --name-only 71b962e8..HEAD` is exactly the three Touches paths plus this
-evidence file: `.gitignore`, `docs/TDD.md`, `docs/SVG_STYLE.md`,
-`verification/phase-R1.md`. Nothing else moved, so the phase's blast radius is
-three documents and one comment.
+`git diff --name-only 71b962e8..4f639364` is exactly the three Touches paths plus
+this evidence file: `.gitignore`, `docs/TDD.md`, `docs/SVG_STYLE.md`,
+`verification/phase-R1.md`. The later `conductor(plan)` commit adds `plan.md` and
+`metadata.json` only. Nothing else moved, so the phase's blast radius is three
+documents and one comment.
 
 ### The three findings, checked against the diff
 
