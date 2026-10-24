@@ -2,7 +2,7 @@
   "id": "20261024-scene-load-failure",
   "title": "Scene Load Failure Path",
   "type": "bug",
-  "status": "new",
+  "status": "in_progress",
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-10-24T00:00:00Z",

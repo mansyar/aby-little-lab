@@ -239,4 +239,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Scene Load Failure Path** - [20261024-scene-load-failure](./tracks/20261024-scene-load-failure/index.md) - bug - high
+- [~] **Track: Scene Load Failure Path** - [20261024-scene-load-failure](./tracks/20261024-scene-load-failure/index.md) - bug - high
