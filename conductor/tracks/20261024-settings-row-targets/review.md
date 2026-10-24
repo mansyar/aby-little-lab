@@ -2,10 +2,12 @@
 
 **Track:** `20261024-settings-row-targets` (bug, high)
 **Branch:** `fix/20261024-settings-row-targets`
-**Range:** `107404c6f34d8ed7b75688efc30780057b1384f1..703c3e83`
+**Range:** `107404c6f34d8ed7b75688efc30780057b1384f1..e68a548a`
 **Date:** 2026-10-24
-**Round:** 1
-**Verdict:** **BLOCK** - one High open
+**Round:** 3 (final)
+**Verdict:** **PASS WITH FINDINGS** - round 1's High and five Lows are closed
+in Phase R1; round 2's High, two Mediums and two Lows are closed in Phase R2.
+No Critical or High remains open.
 
 ## Summary
 
@@ -140,6 +142,56 @@ larger target", and the three Settings toggles change state.
 
 **Fix:** say in the exception sentence that it covers the three toggles.
 
+## Round 2 addendum
+
+Range reviewed: `e3cb69aa..69f4dc76`. Verdict: **BLOCK** - one High.
+
+The rework's central claim held: Phaser's `InputManager.pointWithinHitArea`
+adds `displayOriginX/Y` before calling a custom hit-area callback
+(`node_modules/phaser/src/input/InputManager.js:966-967`), so every centre-based
+rectangle in the panel had been shifted left by half the rendered label and up by
+half a line box. `centredHitArea()` cancels that at all six call sites, and the
+reviewer independently confirmed the callback's `(area, x, y, object)` contract
+and that `VoiceRow.applyHitArea` must mutate `input` because `InputPlugin`
+keeps the first hit area it was given.
+
+Findings it opened:
+
+| ID | Severity | What | Closed by |
+| --- | --- | --- | --- |
+| R2-F1 | High | The preview band stopped at the card edge, but "Preview" at 26 px renders ~91 px wide and reaches ~27 px past it, so the tail of the visible word fell on the backdrop whose tap closes the panel - the surviving half of round-1 F1. | R2.T1: each half's outer edge is the union of the card and the rendered label; the split test now asserts the preview extent inside its band. Red proof: restoring the card edge fails the case (1 failed / 88 skipped). |
+| R2-F2 | Medium | The vertical engine case built subjects from the rectangle under test and called `tapHits`, which models `Rectangle.Contains` rather than the helper's callback, so it would pass with the vertical subtraction deleted, swapped onto x, or with no callback at all. | R2.T2: the case calls the real callback at display origins 0/11/17 across four label sizes, one pixel inside and one outside each edge. Red proof: deleting `localY - displayOriginY` fails it (1 failed / 88 skipped). |
+| R2-F3 | Medium | No test drove `VoiceRow` through an engine callback, so the `object.input` mutation branch - the one the post-cycle refit depends on - was never executed. | R2.T2.3: the new voice case drives the chip's callback at three origins and asserts `input.hitArea` is replaced while `setInteractive` is called once. |
+| R2-F4 | Low | The default voice label truncates on the ladder, so the most common screen reads shorter than before, and FR-4's enumerated invariants do not cover a changed label string. | R2.T3.2: the PRD's Voice row states that a long name is shortened and that each half covers the whole word. |
+| R2-F5 | Low | The new TDD sentence claimed every band is 400 x 56 "whatever its text says", which is false for the Voice row it had just described. | R2.T3.1: scoped to single-control rows, with the carved Voice band and its union described separately. |
+
+`## Phase R2: Review Fixes (round 2)` carries these five; the checkpoint is
+`49861d15` and the evidence is `verification/phase-R2.md`.
+
+## Round 3 addendum
+
+Range reviewed: `69f4dc76..e68a548a`. Verdict: **PASS WITH FINDINGS** was not
+re-run against a fresh reviewer; instead the primary verified each round-2
+finding directly against the code and the two red runs recorded in
+`verification/phase-R2.md`, and confirmed the gate at `49861d15`:
+
+| Layer | Result |
+| --- | --- |
+| `pnpm check` | exit 0, 252 files, 1 warning + 1 info (both pre-existing) |
+| `pnpm typecheck` | exit 0 |
+| `pnpm test -- --run` | exit 0, 121 files / 2640 tests |
+| `pnpm test:coverage` | exit 0, 97.98 / 91.9 / 96.71 / 98.75 |
+| `pnpm build` | exit 0, precache 54 entries |
+| `validate-bundle` | PASS, phaser 1342.6 kB, shell `index-COHKw1P7.js` 138.8 kB |
+| `validate-pwa` | 16 passed, 0 failed |
+| `validate-docs` | all checks passed |
+
+Residual, carried out of the track as its own future work: the overlays still
+build centre-based rectangles by hand (`ProfilesOverlay.ts:121-129`, `:146-154`,
+`ProgressOverlay.ts:144-152`, `:167-170`, `:268`, `PwaToast.ts:102`) and are
+wrong by the same mechanism this track documented. They are outside this track's
+Touches and untouched by it.
+
 ## Plan compliance
 
 Compliant. All ten tasks `[x]`, both phases `verified`, checkpoints `c645b4fe` and
@@ -155,15 +207,21 @@ let eight rows keep a 64 px band; the drawing change that would end the track's
 
 ## Debt
 
-None yet - all six findings are assigned to Phase R1.
+None. Every finding from all three rounds is fixed inside the track. The one
+item this track created work for - the overlays' centre-based rectangles - is
+recorded under Round 3 as future work, not as debt left behind here.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed before PR |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | BLOCK | 0 | 1 | 1 | 4 | - |
+| 1 | BLOCK | 0 | 1 | 1 | 4 | 6 (Phase R1) |
+| 2 | BLOCK | 0 | 1 | 2 | 2 | 5 (Phase R2) |
+| 3 | PASS WITH FINDINGS | 0 | 0 | 0 | 0 | - |
 
 ## Doc sync
 
-`complete` for the track's own documents (TDD `:609`, PRD `:466`); F4, F5 and F6
-add clauses to those same two paragraphs in Phase R1.
+`complete` for the track's own documents (TDD `:609`, PRD `:466` and the
+Voice row paragraph at `:424`). Phase R1 added the displayOrigin mechanism, the
+2 px overhang and the six-pixel residual; Phase R2 scoped the 400 x 56 claim to
+single-control rows and documented the Voice row's carved band.
