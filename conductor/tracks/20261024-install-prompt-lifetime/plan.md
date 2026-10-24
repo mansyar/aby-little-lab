@@ -22,7 +22,7 @@ existed is still available when a parent opens it.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** pending
+**Status:** in_progress
 
 - [ ] **P1.T1: A browser-wired tracker with an app-lifetime seam** — covers: FR-1
   - [ ] **P1.T1.1:** Add `createBrowserInstallTracker()` to `src/utils/pwaInstall.ts`: builds the existing `InstallTrackerDeps` from `navigator.userAgent`, `window.matchMedia("(display-mode: standalone)")` and `window.addEventListener`/`removeEventListener`, then delegates to `createInstallTracker()`. Guard the same way the rest of the codebase guards engine-agnostic globals, so an environment without `window` or `matchMedia` still yields a tracker in the `hidden` state rather than throwing. Keep `createInstallTracker()` unchanged as the injectable core.
