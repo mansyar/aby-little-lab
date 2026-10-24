@@ -1,4 +1,5 @@
 import type { Mock } from "vitest";
+import mainSource from "../../main.ts?raw";
 import {
   createBrowserInstallTracker,
   createInstallTracker,
@@ -389,6 +390,16 @@ describe("install prompt is not persisted", () => {
       prompt: () => Promise.resolve(),
     });
     await expect(tracker.prompt()).resolves.toBe(true);
+
+    // AC-5 covers the read path too: the state is derived from the recorded
+    // flags and the browser's own standalone mode, never from storage.
+    expect(tracker.getState()).toBe("hidden");
+
+    // The second callback route must be as storage-free as the first.
+    const appInstalled = listeners.get("appinstalled");
+    expect(appInstalled).toBeDefined();
+    appInstalled?.(undefined);
+
     tracker.destroy();
 
     // AC-5: the page carries the browser's own state and remembers nothing.
@@ -430,5 +441,20 @@ describe("app-lifetime install tracker", () => {
     expect(windowDouble.addEventListener).not.toHaveBeenCalled();
     expect(pwa.getInstallPromptTracker().getState()).toBe("hidden");
     expect(windowDouble.addEventListener).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("boot wiring", () => {
+  /**
+   * Capture is a page fact, so the boot module is the code that starts it.
+   * Every other suite injects its own tracker and the lazy getter covers the
+   * rest, so only the real entry point can be wrong here.
+   */
+  it("starts install capture before the game is constructed", () => {
+    const indexOfInit = mainSource.indexOf("initInstallPrompt(");
+    const indexOfGame = mainSource.indexOf("new Phaser.Game(");
+
+    expect(indexOfInit).toBeGreaterThan(-1);
+    expect(indexOfGame).toBeGreaterThan(indexOfInit);
   });
 });

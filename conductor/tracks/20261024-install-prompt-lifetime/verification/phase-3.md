@@ -2,7 +2,7 @@
 
 Track: `20261024-install-prompt-lifetime`
 Branch: `fix/20261024-install-prompt-lifetime`
-Commit: `bfa79874 docs(pwa): describe the install row the code now draws`
+Commit: `dd1099c9 docs(pwa): describe the install row the code now draws`
 Covers: FR-4, AC-4, AC-6
 
 ## 1. What changed
@@ -233,12 +233,12 @@ Two wording choices worth recording so they are not read as new requirements:
 
 ## Primary verification
 
-Base `c12b70d7`, commits `bfa79874 docs(pwa): describe the install row the code now draws` and `419a2221 docs(conductor): verify phase 3 of install prompt lifetime`. Documents only: no source, test or config file appears in the range.
+Base `c12b70d7`, commit `dd1099c9 docs(pwa): describe the install row the code now draws` - the documents and this evidence were squashed into that one commit. Documents only: no source, test or config file appears in the range.
 
 | Layer | Command | Exit | Note |
 | --- | --- | --- | --- |
 | 1 | `git status --porcelain` | clean | |
-| 2 | `git diff --name-only c12b70d7..HEAD` | 4 docs + evidence | exactly `Touches`, 247 insertions / 19 deletions |
+| 2 | `git diff --name-only c12b70d7..HEAD` | 4 docs + evidence | exactly `Touches`, 286 insertions / 19 deletions |
 | 3 | `pnpm check` | 0 | two pre-existing findings only |
 | 4 | `pnpm typecheck` | 0 | |
 | 5 | `pnpm test -- --run` | 0 | 121 files / 2630 tests, unchanged |

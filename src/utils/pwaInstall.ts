@@ -200,9 +200,9 @@ export function initInstallPrompt(): void {
 }
 
 /**
- * Returns the page's install tracker, creating it on first use so an entry
- * point that never ran {@link initInstallPrompt} (a Hub-only host, or a test
- * that builds the panel first) still gets a working one.
+ * Returns the page's install tracker, creating it on first use so a caller that
+ * never ran {@link initInstallPrompt} - for example a test that constructs the
+ * panel before any boot code has run - still gets a working one.
  */
 export function getInstallPromptTracker(): InstallTracker {
   return resolveInstallPromptTracker();

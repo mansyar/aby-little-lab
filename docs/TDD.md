@@ -357,7 +357,7 @@ physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
 scene: [BootScene, PreloadScene, HubScene],
 ```
 
-`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame.
+`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame. `initInstallPrompt()` runs first, so the browser's once-per-load offer is captured before any scene can open Settings.
 
 ### 3.2 BootScene
 
