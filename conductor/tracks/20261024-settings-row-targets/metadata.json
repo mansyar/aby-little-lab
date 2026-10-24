@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-10-24T00:00:00Z",
-  "updated_at": "2026-10-24T10:09:25Z",
+  "updated_at": "2026-10-24T10:36:56.402Z",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "fix/20261024-settings-row-targets",
@@ -14,11 +14,11 @@
   "base_sha": "107404c6f34d8ed7b75688efc30780057b1384f1",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 2,
-    "tasks_total": 16,
-    "tasks_done": 10
+    "phases_verified": 3,
+    "tasks_total": 19,
+    "tasks_done": 19
   },
-  "last_checkpoint": "f221ccd0",
+  "last_checkpoint": "2caf3158",
   "review_verdict": "BLOCK",
   "review_rounds": 1,
   "doc_sync": "complete",

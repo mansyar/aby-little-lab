@@ -83,20 +83,30 @@ three documentation gaps.
 
 **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 
-**Status:** in_progress
+**Status:** verified
 
-- [ ] **R1.T1: The split follows the labels** - covers: F1, FR-2, FR-5
-  - [ ] **R1.T1.1:** In `VoiceRow.create`, create chip and preview first, then compute `splitX` as the midpoint of the gap between `chip.getBounds().right` and `preview.getBounds().left`, clamped into `[cardLeft + 96, cardRight - 96]`. Fall back to the anchor midpoint when both bounds report zero width (test doubles). Shorten the chip's truncation budget if the measured extents collide. Recompute the split and both hit rectangles after every `setText` on cycle, so a longer label cannot drift into the preview band.
-  - [ ] **R1.T1.2:** Add a test that stubs `scene.add.text` so the chip and preview report known extents, and asserts the boundary lands in the gap, both bands are at least 96 wide and inside the card, and each label's extent lies inside its own band. Prove it red against the anchor-midpoint split.
-- [ ] **R1.T2: The voice assertion stops being a sum** - covers: F2, AC-2
-  - [ ] **R1.T2.1:** Replace the width-sum assertion with: each band at least 96 wide, both inside the card, and the halves abutting (`chipRect.right === previewRect.left`).
-- [ ] **R1.T3: The close button owns its box** - covers: F3, FR-4
-  - [ ] **R1.T3.1:** Put the close button above the rows for input purposes (depth above the row cards), and add a geometry test asserting no row band intersects the close button's rectangle.
-- [ ] **R1.T4: The three documentation gaps** - covers: F4, F5, F6, FR-6
-  - [ ] **R1.T4.1:** TDD settings paragraph: the band ends at the card edge while the 64 px track reaches 2 px past it, and the 68 px cards on a 56 px pitch leave a six-pixel strip above each band boundary that still activates the upper row.
-  - [ ] **R1.T4.2:** PRD §5.2: say the exception covers the three Settings toggles, so it cannot be read as contradicting the protected-controls sentence.
-- [ ] **R1.T5: Gate** - covers: AC-6, NFR-5
-  - [ ] **R1.T5.1:** Run the full chain and write `conductor/tracks/20261024-settings-row-targets/verification/phase-R1.md` with the diffs, the red-then-green text for R1.T1.2, the gate table and the FR/AC mapping.
+- [x] **R1.T1: The split follows the labels** - covers: F1, FR-2, FR-5
+  - [x] **R1.T1.1:** In `VoiceRow.create`, create chip and preview first, then compute `splitX` as the midpoint of the gap between `chip.getBounds().right` and `preview.getBounds().left`, clamped into `[cardLeft + 96, cardRight - 96]`. Fall back to the anchor midpoint when both bounds report zero width (test doubles). Shorten the chip's truncation budget if the measured extents collide. Recompute the split and both hit rectangles after every `setText` on cycle, so a longer label cannot drift into the preview band.
+  - [x] **R1.T1.2:** Add a test that stubs `scene.add.text` so the chip and preview report known extents, and asserts the boundary lands in the gap, both bands are at least 96 wide and inside the card, and each label's extent lies inside its own band. Prove it red against the anchor-midpoint split.
+- [x] **R1.T2: The voice assertion stops being a sum** - covers: F2, AC-2
+  - [x] **R1.T2.1:** Replace the width-sum assertion with: each band at least 96 wide, both inside the card, and the halves abutting (`chipRect.right === previewRect.left`).
+- [x] **R1.T3: The close button owns its box** - covers: F3, FR-4
+  - [x] **R1.T3.1:** Put the close button above the rows for input purposes (depth above the row cards), and add a geometry test asserting no row band intersects the close button's rectangle.
+- [x] **R1.T4: The three documentation gaps** - covers: F4, F5, F6, FR-6
+  - [x] **R1.T4.1:** TDD settings paragraph: the band ends at the card edge while the 64 px track reaches 2 px past it, and the 68 px cards on a 56 px pitch leave a six-pixel strip above each band boundary that still activates the upper row.
+  - [x] **R1.T4.2:** PRD §5.2: say the exception covers the three Settings toggles, so it cannot be read as contradicting the protected-controls sentence.
+- [x] **R1.T5: Gate** - covers: AC-6, NFR-5
+  - [x] **R1.T5.1:** Run the full chain and write `conductor/tracks/20261024-settings-row-targets/verification/phase-R1.md` with the diffs, the red-then-green text for R1.T1.2, the gate table and the FR/AC mapping.
+- [x] **R1.T6: The frame the engine hit-tests** - covers: F1, FR-2, AC-2
+  - [x] **R1.T6.1:** Add `centredHitArea()` to `settings/primitives.ts` and route every custom hit area in this track's files through it (`createRow`, `createModalButton`, the panel close button and toggle, the install button and the how-to close, both voice halves), rewriting the voice rectangles in the position frame. Phaser adds `displayOrigin` before testing a custom area, so the previous centre-based rectangles sat half a label to the left and half a line up.
+  - [x] **R1.T6.2:** Prove it through the engine arithmetic with two cases: the callback answers identically at display origins 0, 65 and 137, and the pixel above each toggle band belongs to the upper row only. Show the first case red by removing the two subtractions.
+  - [x] **R1.T6.3:** Record the mechanism in the TDD settings paragraph, so the docs explain why the bands do not move with the label text.
+
+**Result:** verified
+**Checkpoint:** 2caf3158
+**Evidence:** conductor/tracks/20261024-settings-row-targets/verification/phase-R1.md
+
+**Note:** rework 2 (R1.T6) went beyond the six findings. The executor implemented round 1 inside a git-only sandbox, so nothing was run; verifying it as primary showed that both the original code and the round-1 fix were written in a frame the engine does not use, which is why the Voice row still failed after an apparently correct fix. The band geometry is unchanged; only the frame it is expressed in changed.
 
 <!--
 Phase completion is recorded by the primary agent only:
