@@ -68,6 +68,36 @@ exception as an accident.
 **Evidence:** conductor/tracks/20261024-settings-row-targets/verification/phase-2.md
 **Note:** The docs layer was denied to the executor; the primary ran it (5/5) and appended its own section, which is what closes AC-6.
 
+## Phase R1: Review Fixes
+
+**Goal:** Close the six findings from review round 1 - the Voice row's split that
+sends the tail of the chip label to Preview and the right edge of Preview to the
+backdrop, the weakened voice assertion, the close button's lost corner, and the
+three documentation gaps.
+
+**Depends on:** Phase 2
+
+**Covers:** F1, F2, F3, F4, F5, F6; FR-2, FR-4, FR-5, FR-6, AC-2, AC-5
+
+**Touches:** `src/components/settings/VoiceRow.ts`, `src/components/SettingsPanel.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `docs/TDD.md`, `docs/PRD.md`
+
+**Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+
+**Status:** pending
+
+- [ ] **R1.T1: The split follows the labels** - covers: F1, FR-2, FR-5
+  - [ ] **R1.T1.1:** In `VoiceRow.create`, create chip and preview first, then compute `splitX` as the midpoint of the gap between `chip.getBounds().right` and `preview.getBounds().left`, clamped into `[cardLeft + 96, cardRight - 96]`. Fall back to the anchor midpoint when both bounds report zero width (test doubles). Shorten the chip's truncation budget if the measured extents collide. Recompute the split and both hit rectangles after every `setText` on cycle, so a longer label cannot drift into the preview band.
+  - [ ] **R1.T1.2:** Add a test that stubs `scene.add.text` so the chip and preview report known extents, and asserts the boundary lands in the gap, both bands are at least 96 wide and inside the card, and each label's extent lies inside its own band. Prove it red against the anchor-midpoint split.
+- [ ] **R1.T2: The voice assertion stops being a sum** - covers: F2, AC-2
+  - [ ] **R1.T2.1:** Replace the width-sum assertion with: each band at least 96 wide, both inside the card, and the halves abutting (`chipRect.right === previewRect.left`).
+- [ ] **R1.T3: The close button owns its box** - covers: F3, FR-4
+  - [ ] **R1.T3.1:** Put the close button above the rows for input purposes (depth above the row cards), and add a geometry test asserting no row band intersects the close button's rectangle.
+- [ ] **R1.T4: The three documentation gaps** - covers: F4, F5, F6, FR-6
+  - [ ] **R1.T4.1:** TDD settings paragraph: the band ends at the card edge while the 64 px track reaches 2 px past it, and the 68 px cards on a 56 px pitch leave a six-pixel strip above each band boundary that still activates the upper row.
+  - [ ] **R1.T4.2:** PRD §5.2: say the exception covers the three Settings toggles, so it cannot be read as contradicting the protected-controls sentence.
+- [ ] **R1.T5: Gate** - covers: AC-6, NFR-5
+  - [ ] **R1.T5.1:** Run the full chain and write `conductor/tracks/20261024-settings-row-targets/verification/phase-R1.md` with the diffs, the red-then-green text for R1.T1.2, the gate table and the FR/AC mapping.
+
 <!--
 Phase completion is recorded by the primary agent only:
 
