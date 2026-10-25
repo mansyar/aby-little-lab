@@ -745,7 +745,7 @@ Unparseable JSON takes the same corrupt path it took before version stamping exi
 
 A payload classified **unknown** — a future version this build cannot read — is write-protected: the raw `localStorage` bytes are never modified or removed, so they survive until a matching app version reads them. The session serves fresh defaults from memory; mutations during such a session apply to the in-memory state only and are discarded on reload. The protection is silent — there is no user-visible signal. The trade-off is deliberate: a rare older-app-reads-newer-data scenario must not destroy data, and losing one session's in-memory mutations is the cheaper failure. The `v2Cache` memo is keyed by the raw string, so it can never overwrite the protected bytes.
 
-Migrations are minimal: a per-version migrate step from the stored version to the current one, with no speculative registry. Version 1's step, `migrateFromVersion1()`, is the identity and stands as the template — each future version adds one step that accepts its stored shape and returns the current one.
+Migrations are minimal: a per-version migrate step from the stored version to the current one, with no speculative registry. Version 1's step, `migrateFromVersion1()`, is the identity and stands as the template — each future version adds one step that accepts its stored shape and returns the current one, **and extends the classifier to recognize the older stamped version as a known older version**; a bump that only adds a step would classify every existing stamped payload as unknown and write-protect it, leaving the new step unreachable.
 
 ### 6.6 The write path and its limitation
 
