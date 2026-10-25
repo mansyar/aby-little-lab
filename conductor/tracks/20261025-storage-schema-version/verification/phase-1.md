@@ -68,3 +68,17 @@ Implementation notes for the record:
 - NFR-3: shell entry 142.13 kB (was 138.4 kB at last note) — +3.7 kB from the versioning contract; well under the 200 kB gate.
 - Boot smoke not required this phase (no boot/preload/PWA/assets changes).
 - The only uncovered line in `storage.ts` is the defensive `catch` in `readV2` (L121), which is unreachable since `classifyStoredV2` has already parsed the same raw string; kept intentionally as a safety net. Coverage gates remain green project-wide.
+
+## Primary verification
+
+Independent verification by the primary (2026-10-25): working tree clean;
+git diff --name-only d114d679..HEAD = Touches + evidence only; commit chain
+matches the report with no merges (squash guard pass). Full gate re-run by the
+primary at the phase head: pnpm check 0 (pre-existing warning + biome info
+only), pnpm typecheck 0, pnpm test -- --run 0 (2673/2673 across 121 files),
+pnpm test:coverage 0 (gates 95/88/85/90 met; storage.ts 99.18/88.23/100/98.96),
+pnpm build 0, node scripts/validate-bundle.js 0, node scripts/validate-pwa.js 0,
+node scripts/validate-docs.js 0. AC spot-check: stamp test
+storage.test.ts:1216, legacy-classify-and-stamp :1225, v1-migration stamp
+:1244, byte-identical write-protect block :1298, cache guard :1316. Result:
+accepted; squashed to checkpoint b05a303a.

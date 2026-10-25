@@ -13,14 +13,18 @@
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** in_progress
 
-- [ ] **P1.T1: Versioning tests, red first** — covers: FR-1, FR-2, FR-4
-  - [ ] **P1.T1.1: Stamp test** — a fresh `saveV2` write round-trips through `JSON.parse` with top-level `schemaVersion === 1`; a legacy unstamped payload is classified as v1 and carries `schemaVersion: 1` after the next write, with its body otherwise unchanged. Red against the current unstamped writer.
-  - [ ] **P1.T1.2: Classification tests** — known `1` reads normally; unknown number (`99`) serves in-memory defaults and leaves the raw localStorage bytes byte-identical through mutations and reload; non-number version (`"1"`, `null`) takes the corrupt path (fresh defaults); the memo cache is never allowed to overwrite a write-protected payload. Red where the current reader guesses.
-  - [ ] **P1.T1.3: Regression guards** — existing precedence tests stay green: corrupt JSON → fresh defaults, v1-only storage still migrates, both keys present → v2 wins with the v1 key left in place.
-- [ ] **P1.T2: Implement the versioned contract** — covers: FR-1, FR-2, FR-3, FR-4
-  - [ ] **P1.T2.1: Stamp** — `SCHEMA_VERSION = 1` constant; `saveV2` writes the top-level `schemaVersion` field on the single write path.
-  - [ ] **P1.T2.2: Classify + protect** — the read path returns the version class (missing/known/unknown/corrupt) per the spec's classification table; unknown payloads are preserved raw and served as defaults in memory, silently (A2).
-  - [ ] **P1.T2.3: Identity step** — the minimal migration contract: a per-version migrate step where version `1` is the identity, as the template for future versions. No speculative registry.
+- [x] **P1.T1: Versioning tests, red first** — covers: FR-1, FR-2, FR-4
+  - [x] **P1.T1.1: Stamp test** — a fresh `saveV2` write round-trips through `JSON.parse` with top-level `schemaVersion === 1`; a legacy unstamped payload is classified as v1 and carries `schemaVersion: 1` after the next write, with its body otherwise unchanged. Red against the current unstamped writer.
+  - [x] **P1.T1.2: Classification tests** — known `1` reads normally; unknown number (`99`) serves in-memory defaults and leaves the raw localStorage bytes byte-identical through mutations and reload; non-number version (`"1"`, `null`) takes the corrupt path (fresh defaults); the memo cache is never allowed to overwrite a write-protected payload. Red where the current reader guesses.
+  - [x] **P1.T1.3: Regression guards** — existing precedence tests stay green: corrupt JSON → fresh defaults, v1-only storage still migrates, both keys present → v2 wins with the v1 key left in place.
+- [x] **P1.T2: Implement the versioned contract** — covers: FR-1, FR-2, FR-3, FR-4
+  - [x] **P1.T2.1: Stamp** — `SCHEMA_VERSION = 1` constant; `saveV2` writes the top-level `schemaVersion` field on the single write path.
+  - [x] **P1.T2.2: Classify + protect** — the read path returns the version class (missing/known/unknown/corrupt) per the spec's classification table; unknown payloads are preserved raw and served as defaults in memory, silently (A2).
+  - [x] **P1.T2.3: Identity step** — the minimal migration contract: a per-version migrate step where version `1` is the identity, as the template for future versions. No speculative registry.
+
+**Result:** verified
+**Checkpoint:** `b05a303a`
+**Evidence:** conductor/tracks/20261025-storage-schema-version/verification/phase-1.md
 
 ## Phase 2: Retire the legacy load/save pair
 
