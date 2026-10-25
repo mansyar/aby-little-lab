@@ -1,5 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** The six toy types used in the Big vs. Small game. */
 export type ToyType = "teddy_bear" | "car" | "ball" | "block" | "rocket" | "drum";
@@ -74,9 +74,14 @@ export interface BoxInstance {
   scale: number;
 }
 
-/** Randomly selects 3 of 6 toy types from the pool. */
-export function selectToys(): ToyType[] {
-  return shuffle(ALL_TOYS).slice(0, SELECT_COUNT);
+/**
+ * Randomly selects 3 of 6 toy types from the pool.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function selectToys(rng: Rng = Math.random): ToyType[] {
+  return shuffle(ALL_TOYS, rng).slice(0, SELECT_COUNT);
 }
 
 /** Creates toy instances: 2 per type (big + small) = 6 total. */
@@ -92,22 +97,40 @@ export function createToyInstances(
   return instances;
 }
 
-/** Creates the two boxes (big and small) with shuffled left/right sides. */
-export function createBoxes(factors: ScaleFactors = CLASSIC_SCALE_FACTORS): BoxInstance[] {
-  return shuffle([
-    { scaleCategory: "big", scale: factors.big },
-    { scaleCategory: "small", scale: factors.small },
-  ]);
+/**
+ * Creates the two boxes (big and small) with shuffled left/right sides.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function createBoxes(
+  factors: ScaleFactors = CLASSIC_SCALE_FACTORS,
+  rng: Rng = Math.random,
+): BoxInstance[] {
+  return shuffle(
+    [
+      { scaleCategory: "big", scale: factors.big },
+      { scaleCategory: "small", scale: factors.small },
+    ],
+    rng,
+  );
 }
 
-/** Generates a round with shuffled toy positions and two boxes. */
-export function generateRound(factors: ScaleFactors = CLASSIC_SCALE_FACTORS): {
+/** Generates a round with shuffled toy positions and two boxes.
+ *
+ *  `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ *  draw is reproducible.
+ */
+export function generateRound(
+  factors: ScaleFactors = CLASSIC_SCALE_FACTORS,
+  rng: Rng = Math.random,
+): {
   toys: ToyInstance[];
   boxes: BoxInstance[];
 } {
-  const selected = selectToys();
-  const toys = shuffle(createToyInstances(selected, factors));
-  const boxes = createBoxes(factors);
+  const selected = selectToys(rng);
+  const toys = shuffle(createToyInstances(selected, factors), rng);
+  const boxes = createBoxes(factors, rng);
   return { toys, boxes };
 }
 

@@ -1,6 +1,6 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { COUNT_ITEMS } from "./countLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** Difficulty band id: 1 (sums ≤4), 2 (≤6), 3 (≤10). */
 export type BandId = 1 | 2 | 3;
@@ -50,37 +50,44 @@ function pairKey(a: number, b: number): string {
 }
 
 /** Samples 3 distinct totals from [1..bandMax] excluding the target. */
-function distractorOptions(target: number, max: number): number[] {
+function distractorOptions(target: number, max: number, rng: Rng): number[] {
   const pool = Array.from({ length: max }, (_, i) => i + 1).filter((n) => n !== target);
-  return shuffle(pool).slice(0, 3);
+  return shuffle(pool, rng).slice(0, 3);
 }
 
 /**
  * Builds one round for a band. `usedPairs` holds order-insensitive "a-b" keys
  * already drawn in the playthrough — the round's pair never repeats one.
  * Every band keeps enough unused pairs for its two rounds per playthrough.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildRound(band: BandId, usedPairs: ReadonlySet<string> = new Set()): AddItUpRound {
+export function buildRound(
+  band: BandId,
+  usedPairs: ReadonlySet<string> = new Set(),
+  rng: Rng = Math.random,
+): AddItUpRound {
   const config = ADD_IT_UP_BANDS[band - 1];
   if (!config) {
     // Only reachable if a caller passes a band id outside ADD_IT_UP_BANDS.
     throw new Error(`Unknown band ${band}`);
   }
   const available = pairPool(band).filter((pair) => !usedPairs.has(pairKey(pair.a, pair.b)));
-  const [pair] = shuffle(available);
+  const [pair] = shuffle(available, rng);
   if (!pair) {
     // Only reachable if a playthrough consumes every pair of the band.
     throw new Error(`No unused addend pair for band ${band}`);
   }
-  const [leftTexture, rightTexture] = shuffle([...COUNT_ITEMS]);
+  const [leftTexture, rightTexture] = shuffle([...COUNT_ITEMS], rng);
   const target = pair.a + pair.b;
   return {
     addends: [
       { count: pair.a, texture: leftTexture },
       { count: pair.b, texture: rightTexture },
     ],
-    answerOptions: shuffle([target, ...distractorOptions(target, config.max)]),
-    answerItemTexture: shuffle([...COUNT_ITEMS])[0],
+    answerOptions: shuffle([target, ...distractorOptions(target, config.max, rng)], rng),
+    answerItemTexture: shuffle([...COUNT_ITEMS], rng)[0],
     target,
   };
 }
@@ -92,12 +99,15 @@ export function buildRound(band: BandId, usedPairs: ReadonlySet<string> = new Se
  * No addend pair repeats within a playthrough; every shifted ladder keeps
  * enough unused pairs per band (band 1 serves 4 rounds at shift -1 from a
  * pool of 6).
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildPlaythrough(shift: BandShift = 0): AddItUpRound[] {
+export function buildPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): AddItUpRound[] {
   const bands = shiftLadder(BASE_LADDER, shift);
   const usedPairs = new Set<string>();
   return bands.map((band) => {
-    const round = buildRound(band, usedPairs);
+    const round = buildRound(band, usedPairs, rng);
     const [left, right] = round.addends;
     usedPairs.add(pairKey(left.count, right.count));
     return round;

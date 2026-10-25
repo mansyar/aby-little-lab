@@ -1,6 +1,6 @@
 import type { BandShift } from "./adaptiveLogic";
 
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** The six animal types used in the Animal Trace game. */
 export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
@@ -24,9 +24,14 @@ export const ALL_PAIRS: readonly AnimalFoodPair[] = [
   { animal: "pig", food: "apple" },
 ];
 
-/** Randomly selects 3 of the 6 animal-food pairs for a round. */
-export function selectThreePairs(): AnimalFoodPair[] {
-  return shuffle(ALL_PAIRS).slice(0, 3);
+/**
+ * Randomly selects 3 of the 6 animal-food pairs for a round.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function selectThreePairs(rng: Rng = Math.random): AnimalFoodPair[] {
+  return shuffle(ALL_PAIRS, rng).slice(0, 3);
 }
 
 /** Tracks progress along a path with discrete waypoints. */
@@ -77,6 +82,9 @@ export function waypointsFor(shift: BandShift = 0): number {
  *  preserved. The primary arch and optional S-curve components are
  *  randomized per call, giving each playthrough a visually distinct path
  *  while staying smooth and traceable for a toddler.
+ *
+ *  `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ *  draw is reproducible.
  */
 export function generatePathPoints(
   startX: number,
@@ -84,12 +92,13 @@ export function generatePathPoints(
   endX: number,
   endY: number,
   numPoints: number,
+  rng: Rng = Math.random,
 ): Array<{ x: number; y: number }> {
   const points: Array<{ x: number; y: number }> = [];
-  const archAmplitude = 40 + Math.random() * 50; // 40–90px hump
-  const archDirection = Math.random() < 0.5 ? 1 : -1; // arch up or down
-  const sAmplitude = Math.random() * 30; // 0–30px secondary wave
-  const sDirection = Math.random() < 0.5 ? 1 : -1;
+  const archAmplitude = 40 + rng() * 50; // 40–90px hump
+  const archDirection = rng() < 0.5 ? 1 : -1; // arch up or down
+  const sAmplitude = rng() * 30; // 0–30px secondary wave
+  const sDirection = rng() < 0.5 ? 1 : -1;
 
   for (let i = 0; i < numPoints; i++) {
     const t = i / (numPoints - 1);

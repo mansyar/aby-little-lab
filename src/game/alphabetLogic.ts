@@ -1,6 +1,6 @@
 import type { BandId, BandShift } from "./adaptiveLogic";
 import { shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** The 26 uppercase letters used in the Find the Letter game. */
 export type Letter =
@@ -96,15 +96,23 @@ const EASY_LETTERS: readonly Letter[] = ALPHABET.slice(0, 10);
  * Builds one round for a target: 3 unique distractors, all positions shuffled.
  * Distractors never share the target's confusable family — unless the hard
  * band explicitly invites that discrimination skill.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateRound(target: Letter, band: BandId = 2): AlphabetRound {
+export function generateRound(
+  target: Letter,
+  band: BandId = 2,
+  rng: Rng = Math.random,
+): AlphabetRound {
   const allowSameFamily = band === 3;
   const distractors = shuffle(
     ALPHABET.filter(
       (letter) => letter !== target && (allowSameFamily || !isConfusableWith(target, letter)),
     ),
+    rng,
   ).slice(0, 3);
-  return { target, choices: shuffle([target, ...distractors]) };
+  return { target, choices: shuffle([target, ...distractors], rng) };
 }
 
 /**
@@ -113,11 +121,18 @@ export function generateRound(target: Letter, band: BandId = 2): AlphabetRound {
  * easy (shift -1) draws only from A-J, hard (shift +1) keeps the full alphabet
  * and allows same-family distractors. The default shift 0 reproduces the
  * classic playthrough exactly.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generatePlaythrough(roundCount = 6, shift: BandShift = 0): AlphabetRound[] {
+export function generatePlaythrough(
+  roundCount = 6,
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): AlphabetRound[] {
   const band = shiftLadder(LETTER_BASE_LADDER, shift)[0] ?? 2;
   const pool = band === 1 ? EASY_LETTERS : ALPHABET;
-  return shuffle(pool)
+  return shuffle(pool, rng)
     .slice(0, roundCount)
-    .map((target) => generateRound(target, band));
+    .map((target) => generateRound(target, band, rng));
 }

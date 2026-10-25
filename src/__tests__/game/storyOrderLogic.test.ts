@@ -12,6 +12,7 @@ import {
   type Story,
   SUBTLE_POOL,
 } from "../../game/storyOrderLogic";
+import { mulberry32 } from "../helpers/randomHelper";
 
 const storyById = new Map<string, Story>(STORY_POOL.map((story) => [story.id, story]));
 
@@ -163,6 +164,52 @@ describe("buildPlaythrough", () => {
 
   it("is deterministic under a seeded rng", () => {
     expect(buildPlaythrough(seededRng(1234))).toEqual(buildPlaythrough(seededRng(1234)));
+  });
+
+  it("draws the identical sequence after adopting the shared shuffle (AC-3)", () => {
+    // Goldens captured while the module still used its private Fisher-Yates
+    // shuffleWith, right before P3.T3.1 delegated it to the shared shuffle.
+    // The shared shuffle consumes rng in the same order, so the same seeded
+    // rng must yield the exact pre-migration strips, story order included.
+    expect(buildPlaythrough(mulberry32(1)).map((round) => round.storyId)).toEqual([
+      "cake",
+      "duck",
+      "balloon",
+      "clothes",
+      "banana",
+      "rain",
+    ]);
+    expect(buildPlaythrough(mulberry32(1))[0].shuffled).toEqual([
+      "story_cake_candles",
+      "story_cake_whole",
+      "story_cake_sliced",
+    ]);
+    expect(buildPlaythrough(mulberry32(1))[5].shuffled).toEqual([
+      "story_cloud_raining",
+      "story_cloud",
+      "story_rain_puddle",
+    ]);
+    expect(buildPlaythrough(mulberry32(11)).map((round) => round.shuffled)).toEqual([
+      ["story_seed_flower", "story_seed_planted", "story_seed_sprout"],
+      ["story_ice_dripping", "story_ice_scoop", "story_ice_puddle"],
+      ["story_balloon_round", "story_balloon_aloft", "story_balloon_flat"],
+      ["story_cloud_raining", "story_rain_puddle", "story_cloud"],
+      ["story_clothes_wet", "story_clothes_dry", "story_clothes_drying"],
+      ["story_cup_empty", "story_cup_pouring", "story_cup_full"],
+    ]);
+    expect(buildPlaythrough(mulberry32(2026)).map((round) => round.storyId)).toEqual([
+      "seed",
+      "cake",
+      "ice-cream",
+      "clothes",
+      "sun",
+      "rain",
+    ]);
+    expect(buildPlaythrough(mulberry32(2026))[1].shuffled).toEqual([
+      "story_cake_sliced",
+      "story_cake_whole",
+      "story_cake_candles",
+    ]);
   });
 
   it("differs between two seeds known to draw different orders", () => {

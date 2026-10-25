@@ -1,5 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** The twelve object types used in the Shadow Match game. */
 export type ObjectType =
@@ -64,22 +64,28 @@ export const ROUND_SIZE = 6;
  *   before, now over the full pool.
  * - hard (`shift > 0`): three full clusters, so every round pairs confusable
  *   silhouettes.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateRound(shift: BandShift = 0): {
+export function generateRound(
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): {
   objects: ObjectType[];
   shadows: ObjectType[];
 } {
   let selected: ObjectType[];
   if (shift < 0) {
-    selected = CONFUSABLE_CLUSTERS.flatMap((cluster) => shuffle(cluster).slice(0, 1));
+    selected = CONFUSABLE_CLUSTERS.flatMap((cluster) => shuffle(cluster, rng).slice(0, 1));
   } else if (shift > 0) {
-    selected = shuffle(CONFUSABLE_CLUSTERS).slice(0, 3).flat();
+    selected = shuffle(CONFUSABLE_CLUSTERS, rng).slice(0, 3).flat();
   } else {
-    selected = shuffle(ALL_OBJECTS).slice(0, ROUND_SIZE);
+    selected = shuffle(ALL_OBJECTS, rng).slice(0, ROUND_SIZE);
   }
   return {
-    objects: shuffle(selected),
-    shadows: shuffle(selected),
+    objects: shuffle(selected, rng),
+    shadows: shuffle(selected, rng),
   };
 }
 

@@ -1,5 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** Named colors used in Color Match rounds. */
 export type ColorId = "red" | "blue" | "yellow" | "green" | "orange" | "purple";
@@ -48,9 +48,14 @@ export interface ColorMatchRound {
   targetColorId: ColorId;
 }
 
-/** Builds one round by sampling 4 distinct colors from the pool. */
-export function buildRound(pool: readonly ColorId[]): ColorMatchRound {
-  const colors = shuffle(pool).slice(0, 4);
+/**
+ * Builds one round by sampling 4 distinct colors from the pool.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function buildRound(pool: readonly ColorId[], rng: Rng = Math.random): ColorMatchRound {
+  const colors = shuffle(pool, rng).slice(0, 4);
   const cards = colors.map((colorId) => {
     const card = COLOR_CARDS.find((candidate) => candidate.colorId === colorId);
     if (!card) {
@@ -59,7 +64,7 @@ export function buildRound(pool: readonly ColorId[]): ColorMatchRound {
     }
     return card;
   });
-  const targetColorId = cards[Math.floor(Math.random() * cards.length)].colorId;
+  const targetColorId = cards[Math.floor(rng() * cards.length)].colorId;
   return { cards, targetColorId };
 }
 
@@ -71,14 +76,17 @@ export function buildRound(pool: readonly ColorId[]): ColorMatchRound {
  * in Musical Memory. The shift is chosen by the caller once per playthrough
  * and never changes mid-game. Difficulty is fixed across replays for a given
  * shift.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildPlaythrough(shift: BandShift = 0): ColorMatchRound[] {
+export function buildPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): ColorMatchRound[] {
   const rounds: ColorMatchRound[] = [];
   for (let i = 0; i < 3 - shift; i++) {
-    rounds.push(buildRound(COLOR_POOLS.easy));
+    rounds.push(buildRound(COLOR_POOLS.easy, rng));
   }
   for (let i = 0; i < 3 + shift; i++) {
-    rounds.push(buildRound(COLOR_POOLS.hard));
+    rounds.push(buildRound(COLOR_POOLS.hard, rng));
   }
   return rounds;
 }

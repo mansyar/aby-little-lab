@@ -8,6 +8,7 @@
  */
 
 import type { BandShift } from "./adaptiveLogic";
+import { type Rng, shuffle } from "./random";
 
 /** The four emotions Aby can show. */
 export type Emotion = "happy" | "sad" | "angry" | "scared";
@@ -63,14 +64,14 @@ export const SCENARIO_POOL: readonly Scenario[] = [
 /** How many rounds one playthrough presents. */
 export const ROUND_COUNT = 6;
 
-/** Returns a shuffled copy of `items` using the injected RNG (Fisher-Yates). */
-function shuffleWith<T>(items: readonly T[], rng: () => number): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
+/**
+ * Delegate for the private shuffles: the shared Fisher-Yates `shuffle`
+ * releases the exact same sequence of `rng` draws (copy in, `i` from the end
+ * down to 1, `j = floor(rng() * (i + 1))`), so a given seed yields the
+ * identical draw as before this module adopted it.
+ */
+function shuffleWith<T>(items: readonly T[], rng: Rng): T[] {
+  return shuffle(items, rng);
 }
 
 /**
@@ -81,7 +82,7 @@ function shuffleWith<T>(items: readonly T[], rng: () => number): T[] {
  * `rng` must return a number in [0, 1); tests pass a seeded generator so a
  * draw is reproducible.
  */
-export function drawScenarios(rng: () => number = Math.random): Scenario[] {
+export function drawScenarios(rng: Rng = Math.random): Scenario[] {
   const guaranteed = EMOTIONS.map((emotion) => {
     const scenarios = SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion);
     return shuffleWith(scenarios, rng)[0];

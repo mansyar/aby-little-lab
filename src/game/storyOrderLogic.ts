@@ -8,6 +8,7 @@
  */
 
 import type { BandShift } from "./adaptiveLogic";
+import { type Rng, shuffle } from "./random";
 
 /** Which easy-first band a story belongs to. Rounds 1-3 are `obvious`. */
 export type StoryLadder = "obvious" | "subtle";
@@ -124,14 +125,14 @@ export interface StoryOrderRound {
   solution: string[];
 }
 
-/** Returns a shuffled copy of `items` using the injected RNG (Fisher-Yates). */
-function shuffleWith<T>(items: readonly T[], rng: () => number): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
+/**
+ * Delegate for the private shuffles: the shared Fisher-Yates `shuffle`
+ * releases the exact same sequence of `rng` draws (copy in, `i` from the end
+ * down to 1, `j = floor(rng() * (i + 1))`), so a given seed yields the
+ * identical draw as before this module adopted it.
+ */
+function shuffleWith<T>(items: readonly T[], rng: Rng): T[] {
+  return shuffle(items, rng);
 }
 
 /** True iff both strips hold the same keys in the same positions. */
@@ -145,7 +146,7 @@ function isSameOrder(a: readonly string[], b: readonly string[]): boolean {
  * degenerate RNG still yields the solution the row is rotated by one. A round
  * therefore always requires work.
  */
-export function buildRound(story: Story, rng: () => number = Math.random): StoryOrderRound {
+export function buildRound(story: Story, rng: Rng = Math.random): StoryOrderRound {
   const solution = [...story.panels];
   let shuffled = shuffleWith(solution, rng);
   if (isSameOrder(shuffled, solution)) {
@@ -164,10 +165,7 @@ export function buildRound(story: Story, rng: () => number = Math.random): Story
  * shuffled, so consecutive playthroughs differ. `rng` must return a number in
  * [0, 1); tests pass a seeded generator so a playthrough is reproducible.
  */
-export function buildPlaythrough(
-  rng: () => number = Math.random,
-  shift: BandShift = 0,
-): StoryOrderRound[] {
+export function buildPlaythrough(rng: Rng = Math.random, shift: BandShift = 0): StoryOrderRound[] {
   const mix = mixFor(shift);
   const obvious = shuffleWith(OBVIOUS_POOL, rng).slice(0, mix.obvious);
   const subtle = shuffleWith(SUBTLE_POOL, rng).slice(0, mix.subtle);

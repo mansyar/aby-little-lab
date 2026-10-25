@@ -85,7 +85,10 @@ export function poolFor(shift: BandShift = 0): readonly ShapeType[] {
 /**
  * Generates a playthrough of `roundCount` rounds, each containing 3 shapes,
  * drawn without repeats across the entire playthrough (unique shapes per
- * session) from the band shift's selected shape pool.
+ * session) from the band shift's selected shape pool. The draw inherits the
+ * shared `shuffle` default wiring; callers needing a deterministic draw should
+ * not call this directly but drive it via a round of explicit seeded shuffles,
+ * per the track spec's seam assumption (A5).
  */
 export function generatePlaythrough(roundCount: number, shift: BandShift = 0): ShapeType[][] {
   const shuffled = shuffle(poolFor(shift));

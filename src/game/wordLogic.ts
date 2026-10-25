@@ -1,6 +1,6 @@
 import type { BandShift } from "./adaptiveLogic";
 import { ALPHABET } from "./alphabetLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** A single first word: the printed word, its length, and its picture texture. */
 export interface FirstWord {
@@ -57,8 +57,11 @@ export interface WordRound {
  * Builds one Find the Word round: 3 distractors from the pool, one per
  * distinct first letter, never sharing the target's first letter (pre-reader
  * confusion guard). All positions are shuffled.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateWordRound(target: FirstWord): WordRound {
+export function generateWordRound(target: FirstWord, rng: Rng = Math.random): WordRound {
   const firstLetter = target.word[0];
   const candidates = WORD_POOL.filter(
     (entry) => entry.word !== target.word && entry.word[0] !== firstLetter,
@@ -71,10 +74,10 @@ export function generateWordRound(target: FirstWord): WordRound {
     group.push(entry);
     groups.set(entry.word[0], group);
   }
-  const distractors = shuffle([...groups.values()])
+  const distractors = shuffle([...groups.values()], rng)
     .slice(0, 3)
-    .map((group) => shuffle(group)[0].word);
-  return { target: target.word, choices: shuffle([target.word, ...distractors]) };
+    .map((group) => shuffle(group, rng)[0].word);
+  return { target: target.word, choices: shuffle([target.word, ...distractors], rng) };
 }
 
 /**
@@ -86,14 +89,27 @@ export function generateWordRound(target: FirstWord): WordRound {
  * The adaptive `shift` (-1 | 0 | 1) moves the tier split point: -1 serves an
  * all-3-letter ladder, +1 brings a second 4-letter round forward. The default
  * 0 reproduces the classic split exactly.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateWordPlaythrough(roundCount = 6, shift: BandShift = 0): WordRound[] {
-  const tier3 = shuffle(WORD_POOL.filter((entry) => entry.tier === 3));
-  const tier4 = shuffle(WORD_POOL.filter((entry) => entry.tier === 4));
+export function generateWordPlaythrough(
+  roundCount = 6,
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): WordRound[] {
+  const tier3 = shuffle(
+    WORD_POOL.filter((entry) => entry.tier === 3),
+    rng,
+  );
+  const tier4 = shuffle(
+    WORD_POOL.filter((entry) => entry.tier === 4),
+    rng,
+  );
   const earlyCount = Math.min(tier3.length, Math.max(0, roundCount - 1 - shift));
   return [...tier3.slice(0, earlyCount), ...tier4.slice(0, roundCount - earlyCount)]
     .slice(0, roundCount)
-    .map((target) => generateWordRound(target));
+    .map((target) => generateWordRound(target, rng));
 }
 
 /**
@@ -104,10 +120,23 @@ export function generateWordPlaythrough(roundCount = 6, shift: BandShift = 0): W
  * The adaptive `shift` (-1 | 0 | 1) moves the tier split point: -1 serves an
  * all-3-letter ladder, +1 brings a second 4-letter build forward. The default
  * 0 reproduces the classic split exactly.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateWordBuildPlaythrough(wordCount = 3, shift: BandShift = 0): FirstWord[] {
-  const tier3 = shuffle(WORD_POOL.filter((entry) => entry.tier === 3));
-  const tier4 = shuffle(WORD_POOL.filter((entry) => entry.tier === 4));
+export function generateWordBuildPlaythrough(
+  wordCount = 3,
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): FirstWord[] {
+  const tier3 = shuffle(
+    WORD_POOL.filter((entry) => entry.tier === 3),
+    rng,
+  );
+  const tier4 = shuffle(
+    WORD_POOL.filter((entry) => entry.tier === 4),
+    rng,
+  );
   const earlyCount = Math.min(tier3.length, Math.max(0, wordCount - 1 - shift));
   return [...tier3.slice(0, earlyCount), ...tier4.slice(0, wordCount - earlyCount)].slice(
     0,
@@ -118,14 +147,17 @@ export function generateWordBuildPlaythrough(wordCount = 3, shift: BandShift = 0
 /**
  * Builds the 6 letter tiles for a word: the word's unique letters plus
  * 2–3 distractor letters not in the word, all shuffled.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateLetterTiles(word: string): string[] {
+export function generateLetterTiles(word: string, rng: Rng = Math.random): string[] {
   const uniqueLetters = [...new Set(word.split(""))];
   const distractorCount = 6 - uniqueLetters.length;
   const wordLetters = new Set(uniqueLetters);
-  const distractors = shuffle(ALPHABET.filter((letter) => !wordLetters.has(letter))).slice(
-    0,
-    distractorCount,
-  );
-  return shuffle([...uniqueLetters, ...distractors]);
+  const distractors = shuffle(
+    ALPHABET.filter((letter) => !wordLetters.has(letter)),
+    rng,
+  ).slice(0, distractorCount);
+  return shuffle([...uniqueLetters, ...distractors], rng);
 }

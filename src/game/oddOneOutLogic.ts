@@ -1,5 +1,5 @@
 import { BASE_LADDER, type BandId, type BandShift } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** Visual category used to pick group/odd textures and define difficulty bands. */
 export type OddCategory = "animal" | "frog" | "toy" | "shape";
@@ -129,9 +129,10 @@ export interface OddOneRound {
 function pickItem(
   pool: readonly OddItem[],
   usedOddTextures: ReadonlySet<string>,
+  rng: Rng,
   excludeTexture?: string,
 ): OddItem {
-  const candidates = shuffle(pool).find(
+  const candidates = shuffle(pool, rng).find(
     (item) => item.texture !== excludeTexture && !usedOddTextures.has(item.texture),
   );
   if (!candidates) {
@@ -151,23 +152,27 @@ function pickItem(
  *   back to reusing a frog already used as an odd when the 3-texture pool
  *   cannot serve a fresh one — group cards repeating across rounds is
  *   harmless, while odds are required to stay unique.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
 export function createRound(
   band: BandId,
   usedOddTextures: ReadonlySet<string> = new Set(),
+  rng: Rng = Math.random,
 ): OddOneRound {
-  const oddSlot = Math.floor(Math.random() * 4);
+  const oddSlot = Math.floor(rng() * 4);
 
   if (band === 3) {
-    const odd = pickItem(FROG_ITEMS, usedOddTextures);
+    const odd = pickItem(FROG_ITEMS, usedOddTextures, rng);
     // Odds stay unique, so the tiny 3-frog pool can exhaust the strict group
     // pick (a third band-3 round in one playthrough). Group cards repeat
     // across rounds harmlessly — only odds must stay unique — so fall back to
     // any frog other than this round's odd.
     const group =
-      shuffle(FROG_ITEMS).find(
+      shuffle(FROG_ITEMS, rng).find(
         (item) => item.texture !== odd.texture && !usedOddTextures.has(item.texture),
-      ) ?? shuffle(FROG_ITEMS).find((item) => item.texture !== odd.texture);
+      ) ?? shuffle(FROG_ITEMS, rng).find((item) => item.texture !== odd.texture);
     if (!group) {
       // Unreachable with FROG_ITEMS (3 textures); guards a future pool of 1.
       throw new Error("Odd One Out frog pool exhausted for the requested round");
@@ -176,18 +181,18 @@ export function createRound(
   }
 
   if (band === 2) {
-    const categoryPool = shuffle([ANIMAL_ITEMS, TOY_ITEMS, SHAPE_ITEMS])[0];
-    const odd = pickItem(categoryPool, usedOddTextures);
-    const group = pickItem(categoryPool, usedOddTextures, odd.texture);
+    const categoryPool = shuffle([ANIMAL_ITEMS, TOY_ITEMS, SHAPE_ITEMS], rng)[0];
+    const odd = pickItem(categoryPool, usedOddTextures, rng);
+    const group = pickItem(categoryPool, usedOddTextures, rng, odd.texture);
     return { groupTexture: group.texture, oddTexture: odd.texture, oddSlot };
   }
 
   // Band 1: pick the odd from a NON-frog category first (frogs are reserved
   // for band 3's color variants), then a different category for the group.
   const nonFrogItems = ODD_ITEMS.filter((item) => item.category !== "frog");
-  const odd = pickItem(nonFrogItems, usedOddTextures);
+  const odd = pickItem(nonFrogItems, usedOddTextures, rng);
   const otherCategories = nonFrogItems.filter((item) => item.category !== odd.category);
-  const group = pickItem(otherCategories, usedOddTextures);
+  const group = pickItem(otherCategories, usedOddTextures, rng);
   return { groupTexture: group.texture, oddTexture: odd.texture, oddSlot };
 }
 
@@ -222,11 +227,14 @@ function ladderFor(shift: BandShift): readonly BandId[] {
  * byte-identical to the classic playthrough. The shift is chosen by the
  * caller once per playthrough and never changes mid-game. The odd texture is
  * unique across the playthrough.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function createPlaythrough(shift: BandShift = 0): OddOneRound[] {
+export function createPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): OddOneRound[] {
   const usedOddTextures = new Set<string>();
   return ladderFor(shift).map((band) => {
-    const round = createRound(band, usedOddTextures);
+    const round = createRound(band, usedOddTextures, rng);
     usedOddTextures.add(round.oddTexture);
     return round;
   });

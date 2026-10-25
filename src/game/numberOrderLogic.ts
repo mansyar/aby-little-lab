@@ -1,5 +1,5 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /** Band 1 easy 1–5, band 2 medium 1–8, band 3 hard 1–10. Range is inclusive. */
 export const BAND_RANGES: Record<1 | 2 | 3, readonly [number, number]> = {
@@ -36,21 +36,25 @@ function isAscending(arr: readonly number[]): boolean {
  * band's inclusive range, sorts to form the solution, then shuffles to form
  * the source row. If the shuffle happens to equal the ascending solution, it
  * is reshuffled once to guarantee the puzzle requires work (not already solved).
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildRound(band: 1 | 2 | 3): NumberOrderRound {
+export function buildRound(band: 1 | 2 | 3, rng: Rng = Math.random): NumberOrderRound {
   const [min, max] = BAND_RANGES[band];
   const count = BAND_COUNTS[band];
   const pool = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-  const sampled = shuffle(pool).slice(0, count);
+  const sampled = shuffle(pool, rng).slice(0, count);
   const solution = [...sampled].sort((a, b) => a - b);
-  let shuffled = shuffle(solution);
-  // Guard: if shuffled is already ascending, reshuffle once (deterministic via Math.random mock)
+  let shuffled = shuffle(solution, rng);
+  // Guard: if shuffled is already ascending, reshuffle once so the round
+  // always requires work.
   if (
     isAscending(shuffled) &&
     shuffled.length === solution.length &&
     shuffled.every((v, i) => v === solution[i])
   ) {
-    shuffled = shuffle(solution);
+    shuffled = shuffle(solution, rng);
   }
   return { band, shuffled, solution };
 }
@@ -59,10 +63,13 @@ export function buildRound(band: 1 | 2 | 3): NumberOrderRound {
  * Generates a 6-round easy-first playthrough. `shift` (-1|0|1) nudges the
  * classic [1,1,2,2,3,3] ladder via `shiftLadder`, clamped to 1..3.
  * The shifted ladder maps each step to a `buildRound` call.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildPlaythrough(shift: BandShift = 0): NumberOrderRound[] {
+export function buildPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): NumberOrderRound[] {
   const ladder = shiftLadder(BASE_LADDER, shift);
-  return ladder.map((band) => buildRound(band));
+  return ladder.map((band) => buildRound(band, rng));
 }
 
 /** True iff `placed` equals `solution` (same length, same order, same values). */

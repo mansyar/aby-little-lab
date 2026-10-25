@@ -1,5 +1,5 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./random";
+import { type Rng, shuffle } from "./random";
 
 /**
  * Small, clearly countable item textures used to build counting groups.
@@ -43,15 +43,23 @@ export interface CountRound {
   groups: CountGroup[];
 }
 
-/** Builds one round for a band: distinct counts, one correct group, shuffled. */
-export function createRound(band: 1 | 2 | 3, target?: number): CountRound {
+/**
+ * Builds one round for a band: distinct counts, one correct group, shuffled.
+ * An explicit `target` bypasses the random pick (used by the playthrough
+ * builder to avoid repeat targets).
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function createRound(band: 1 | 2 | 3, target?: number, rng: Rng = Math.random): CountRound {
   const config = ROUND_BANDS[band - 1];
-  const chosen = target ?? 1 + Math.floor(Math.random() * config.max);
+  const chosen = target ?? 1 + Math.floor(rng() * config.max);
   const others = shuffle(
     Array.from({ length: config.max }, (_, i) => i + 1).filter((count) => count !== chosen),
+    rng,
   ).slice(0, config.groupCount - 1);
-  const counts = shuffle([chosen, ...others]);
-  const textures = shuffle([...COUNT_ITEMS]).slice(0, config.groupCount);
+  const counts = shuffle([chosen, ...others], rng);
+  const textures = shuffle([...COUNT_ITEMS], rng).slice(0, config.groupCount);
   return {
     target: chosen,
     groups: counts.map((count, index) => ({ count, texture: textures[index] })),
@@ -66,8 +74,11 @@ export function createRound(band: 1 | 2 | 3, target?: number): CountRound {
  * pool allows; a shifted ladder can ask a band for more rounds than it has
  * targets (e.g. band 1 serves 4 rounds at shift -1 with a pool of 3), in
  * which case the per-band used set resets and reuse begins.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function createPlaythrough(shift: BandShift = 0): CountRound[] {
+export function createPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): CountRound[] {
   const ladder = shiftLadder(BASE_LADDER, shift);
   const usedTargets = new Map<1 | 2 | 3, number[]>();
   return ladder.map((band) => {
@@ -77,9 +88,9 @@ export function createPlaythrough(shift: BandShift = 0): CountRound[] {
     const available = fullPool.filter((target) => !used.includes(target));
     // Reset the per-band used set when every target has been drawn.
     const pool = available.length > 0 ? available : fullPool;
-    const target = shuffle(pool)[0];
+    const target = shuffle(pool, rng)[0];
     usedTargets.set(band, [...used, target]);
-    return createRound(band, target);
+    return createRound(band, target, rng);
   });
 }
 

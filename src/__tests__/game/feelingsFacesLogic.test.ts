@@ -13,6 +13,7 @@ import {
   SCENARIO_POOL,
   type Scenario,
 } from "../../game/feelingsFacesLogic";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Deterministic generator so draw tests never depend on Math.random. */
 function seededRng(seed: number): () => number {
@@ -127,6 +128,37 @@ describe("drawScenarios", () => {
     for (let seed = 1; seed <= 20; seed++) {
       expect(drawScenarios(seededRng(seed))).toEqual(drawScenarios(seededRng(seed)));
     }
+  });
+
+  it("draws the identical sequence after adopting the shared shuffle (AC-3)", () => {
+    // Goldens captured while the module still used its private Fisher-Yates
+    // shuffleWith, right before P3.T3.1 delegated it to the shared shuffle.
+    // The shared shuffle consumes rng in the same order, so the same seeded
+    // rng must yield the exact pre-migration draw.
+    expect(drawScenarios(mulberry32(1)).map((scenario) => scenario.id)).toEqual([
+      "sad-rain",
+      "angry-toy",
+      "scared-dog",
+      "happy-bubbles",
+      "angry-tower",
+      "sad-blocks",
+    ]);
+    expect(drawScenarios(mulberry32(77)).map((scenario) => scenario.id)).toEqual([
+      "angry-line",
+      "angry-turn",
+      "sad-rain",
+      "happy-truck",
+      "sad-ice-cream",
+      "scared-dog",
+    ]);
+    expect(drawScenarios(mulberry32(2026)).map((scenario) => scenario.id)).toEqual([
+      "scared-mask",
+      "happy-truck",
+      "sad-balloon",
+      "angry-toy",
+      "scared-hallway",
+      "angry-tower",
+    ]);
   });
 
   it("varies the draw across seeds", () => {
