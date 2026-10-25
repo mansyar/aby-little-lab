@@ -98,3 +98,18 @@ All 13 references are: the definition + its migration-input doc comment (`types/
 - One non-`Touches` edit was biome-mandated after the deviation edits: the `ProfilesOverlay.test.ts` storage import needed re-sorting/multi-lining to satisfy `pnpm check` (commit `style(tests)`).
 - The phase-1-landed migration test in storage.test.ts (`migrates a v1 AppStorage save …`) initially asserted the stored v2 payload before any granular read had triggered the migration; fixed by reading via the granular API before the stored-payload assertions (caught by the targeted run, fixed once).
 - The docs-validator step was initially denied by the sandbox; the primary ran it after handoff (exit 0, "All document validation checks passed!"), completing the 8-layer green chain and confirming this phase as verified.
+
+## Primary verification
+
+Independent verification by the primary (2026-10-25): working tree clean;
+git diff --name-only bfb1cce6..HEAD matches the report exactly (Touches +
+evidence + the six reported out-of-Touches test-file deviations, all the same
+mechanism — removed load import redirected to the granular API with
+behaviour assertions unchanged; accepted as the smallest necessary ripple of
+FR-5). Grep confirms load/save exports are gone from
+src/utils/storage.ts while hasSticker/getSettings remain. Full gate
+re-run by the primary at the phase head: pnpm check 0, pnpm typecheck 0,
+pnpm test -- --run 0, pnpm test:coverage 0 (All files 97.83/91.62/96.78/98.75;
+storage.ts 99.12/90.62/100/98.88 — gates met), pnpm build 0,
+validate-bundle 0, validate-pwa 0, validate-docs 0. Result: accepted; squashed
+to checkpoint 6fb3ca59.

@@ -11,7 +11,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, AC-1, AC-2, AC-3, AC-5, NFR-1, NFR-2, NFR-3
 - **Touches:** `src/utils/storage.ts`, `src/__tests__/utils/storage.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
 - [x] **P1.T1: Versioning tests, red first** — covers: FR-1, FR-2, FR-4
   - [x] **P1.T1.1: Stamp test** — a fresh `saveV2` write round-trips through `JSON.parse` with top-level `schemaVersion === 1`; a legacy unstamped payload is classified as v1 and carries `schemaVersion: 1` after the next write, with its body otherwise unchanged. Red against the current unstamped writer.
@@ -33,15 +33,19 @@
 - **Covers:** FR-5, AC-4, NFR-1, NFR-2, NFR-3
 - **Touches:** `src/utils/storage.ts`, `src/game/profileLogic.ts`, `src/types/index.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/game/profileLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
 - **Note:** no data-path change — the v1 key, `readV1()` and `migrateV1` stay untouched (A3); only the compatibility pair and the type's dual role go.
-- [ ] **P2.T1: Retire the pair** — covers: FR-5
-  - [ ] **P2.T1.1: Redirect internal callers** — `hasSticker` and `getSettings` read through the granular path instead of `load()`.
-  - [ ] **P2.T1.2: Remove exports, narrow the type** — delete the `load()`/`save()` exports; `AppStorage` in `src/types/index.ts` becomes the migration-input type (`migrateV1`'s parameter), with its doc comment updated.
-  - [ ] **P2.T1.3: Test updates** — the default-shape tests and the `AppStorage` literal in `storage.test.ts`, and the v1 helpers in `profileLogic.test.ts`, use the narrowed type; behaviour assertions unchanged.
-- [ ] **P2.T2: Grep proof of retirement** — covers: FR-5, AC-4
-  - [ ] **P2.T2.1: Zero call sites** — grep shows no `load(`/`save(` storage call sites outside the migration context, and every remaining `AppStorage` reference is the migration input; record the output in the phase evidence. All suites pass.
+- [x] **P2.T1: Retire the pair** — covers: FR-5
+  - [x] **P2.T1.1: Redirect internal callers** — `hasSticker` and `getSettings` read through the granular path instead of `load()`.
+  - [x] **P2.T1.2: Remove exports, narrow the type** — delete the `load()`/`save()` exports; `AppStorage` in `src/types/index.ts` becomes the migration-input type (`migrateV1`'s parameter), with its doc comment updated.
+  - [x] **P2.T1.3: Test updates** — the default-shape tests and the `AppStorage` literal in `storage.test.ts`, and the v1 helpers in `profileLogic.test.ts`, use the narrowed type; behaviour assertions unchanged.
+- [x] **P2.T2: Grep proof of retirement** — covers: FR-5, AC-4
+  - [x] **P2.T2.1: Zero call sites** — grep shows no `load(`/`save(` storage call sites outside the migration context, and every remaining `AppStorage` reference is the migration input; record the output in the phase evidence. All suites pass.
+
+**Result:** verified
+**Checkpoint:** `6fb3ca59`
+**Evidence:** conductor/tracks/20261025-storage-schema-version/verification/phase-2.md
 
 ## Phase 3: Docs truth — TDD and roadmap
 
