@@ -43,7 +43,8 @@
    - [6.2 Schema v2](#62-schema-v2)
    - [6.3 Facade functions](#63-facade-functions)
    - [6.4 Migration and normalisation](#64-migration-and-normalisation)
-   - [6.5 The write path and its limitation](#65-the-write-path-and-its-limitation)
+   - [6.5 Schema versioning](#65-schema-versioning)
+   - [6.6 The write path and its limitation](#66-the-write-path-and-its-limitation)
 7. [Game logic modules](#7-game-logic-modules)
    - [7.1 The module list](#71-the-module-list)
    - [7.2 The round contract](#72-the-round-contract)
@@ -698,7 +699,7 @@ interface GameProgress {
 interface DayActivity { day: string; plays: number }
 ```
 
-`GameId` is a 22-member string union in `src/types/index.ts`, and `GAME_IDS` repeats it in hub order. `MAX_PROFILES = 4`, `DEFAULT_AVATAR_ID = "cat"`, `AVATAR_IDS = ["cat","dog","pig","frog","duck","bear"]`. `AppStorage` (`{ stickers, settings }`) survives as the shape `load()`/`save()` speak, not as a stored format.
+`GameId` is a 22-member string union in `src/types/index.ts`, and `GAME_IDS` repeats it in hub order. `MAX_PROFILES = 4`, `DEFAULT_AVATAR_ID = "cat"`, `AVATAR_IDS = ["cat","dog","pig","frog","duck","bear"]`. `AppStorage` (`{ stickers, settings }`) survives only as the one-time v1→v2 migration input type — the `Partial<AppStorage>` shape `migrateV1()` consumes — not as a stored format.
 
 Sticker keys are `sticker_<game_id_with_underscores>`; `Profile.avatarId` maps to an existing boot texture through `PROFILE_AVATAR_TEXTURES` in `src/game/profileLogic.ts` (`cat` → `animal_cat`, `dog` → `animal_dog`, `pig` → `animal_pig`, `frog` → `frog_red`, `duck` → `sm_duck`, `bear` → `toy_teddy_bear`). Avatars are textless by design ([`docs/PRD.md#45-profiles`](./PRD.md#45-profiles)).
 
@@ -706,7 +707,7 @@ Sticker keys are `sticker_<game_id_with_underscores>`; `Profile.avatarId` maps t
 
 | Group | Exports |
 | --- | --- |
-| Read/write state | `load`, `save`, `ensureV2` (internal), `mutate` (internal) |
+| Read/write state | `ensureV2` (internal), `mutate` (internal) |
 | Stickers | `earnSticker`, `hasSticker`, `resetProgress` |
 | Settings | `getSettings`, `updateSettings` |
 | Profiles | `getProfiles`, `getActiveProfile`, `addProfile`, `deleteProfile`, `switchProfile`, `getAvailableAvatars` |
@@ -723,18 +724,37 @@ Every mutator goes through `mutate(fn)`: apply a pure transform to the current s
 `ensureV2()`:
 
 1. reads the raw v2 string; on a cache hit, returns the memo;
-2. parses and normalises; if that succeeds, caches and returns;
-3. otherwise calls `migrateV1(readV1())`, saves the result and returns it.
+2. classifies the payload by its `schemaVersion` ([§6.5](#65-schema-versioning)); an **unknown** version is write-protected, so fresh defaults are served from memory and nothing is written;
+3. parses and normalises; if that succeeds, caches and returns;
+4. otherwise calls `migrateV1(readV1())`, saves the result and returns it.
 
 `migrateV1()` in `src/game/profileLogic.ts` turns a v1 save into one profile `p1` with avatar `cat`, carrying the old stickers over, and fills every other field from defaults. The v1 key is left in place, so a downgrade still finds its data. `normalizeV2()` backfills missing fields on every read: unknown stickers/progress entries default, counters must be non-negative integers, `recent` keeps only booleans and the last `WINDOW_SIZE` entries, `activity` is pruned to seven days.
 
-### 6.5 The write path and its limitation
+### 6.5 Schema versioning
 
-`saveV2()` at `src/utils/storage.ts:81-85` is:
+Every v2 payload carries a top-level `schemaVersion` field, stamped by the single write path (`saveV2`) from the `SCHEMA_VERSION` constant (currently `1`). The read path classifies the stored payload by that field before anything is normalised or rewritten:
+
+| Stored `schemaVersion` | Classification | What the reader does |
+| --- | --- | --- |
+| field missing | implicit version 1 | served; stamped on the next write |
+| `1` | known | served |
+| any other number | unknown | write-protected — in-memory defaults are served, the stored bytes are never touched |
+| `"1"`, `null`, any non-number | corrupt | the existing normalise-to-defaults path |
+
+Unparseable JSON takes the same corrupt path it took before version stamping existed.
+
+A payload classified **unknown** — a future version this build cannot read — is write-protected: the raw `localStorage` bytes are never modified or removed, so they survive until a matching app version reads them. The session serves fresh defaults from memory; mutations during such a session apply to the in-memory state only and are discarded on reload. The protection is silent — there is no user-visible signal. The trade-off is deliberate: a rare older-app-reads-newer-data scenario must not destroy data, and losing one session's in-memory mutations is the cheaper failure. The `v2Cache` memo is keyed by the raw string, so it can never overwrite the protected bytes.
+
+Migrations are minimal: a per-version migrate step from the stored version to the current one, with no speculative registry. Version 1's step, `migrateFromVersion1()`, is the identity and stands as the template — each future version adds one step that accepts its stored shape and returns the current one.
+
+### 6.6 The write path and its limitation
+
+`saveV2()` at `src/utils/storage.ts:151-156` is:
 
 ```ts
 function saveV2(v2: ProfileV2): void {
-  const raw = JSON.stringify(v2);
+  // FR-1: the single write path stamps every payload with the schema version.
+  const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
   localStorage.setItem(V2_KEY, raw);
   v2Cache = { raw, state: v2 };
 }

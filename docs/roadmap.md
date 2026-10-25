@@ -10,14 +10,6 @@ is what a reader would actually see.
 
 ## Known Issues
 
-### The stored payload carries no schema version
-
-`src/utils/storage.ts` writes the v2 payload without a `schemaVersion` field,
-and `src/types/index.ts` still exports the legacy `AppStorage` type alongside
-the v2 types. A reader notices it by searching the storage module for
-`schemaVersion` and finding nothing, then wondering how a future format change
-would be recognised.
-
 ### Five copies of the same shuffle, and an RNG seam in only two modules
 
 The `shuffle` helper is byte-identical in `src/game/bigSmallLogic.ts`,
@@ -33,10 +25,7 @@ through `Math.random`. A reader notices it by searching `src/game/` for
 The same material, ordered by how much each item would improve the product.
 The track named against each item is the track that would deliver it.
 
-1. **Version the stored payload.** A `schemaVersion` field would let a future
-   format change be recognised instead of inferred, and would give the legacy
-   `AppStorage` type somewhere to be retired to. Track: *storage-schema-version*.
-2. **One shuffle, one RNG seam.** A single shared shuffle helper and an
+1. **One shuffle, one RNG seam.** A single shared shuffle helper and an
    injectable RNG across the logic modules would let the remaining 19
    per-game modules be tested without stubbing `Math.random`. Track:
    *shared-random-helpers*.
