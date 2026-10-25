@@ -70,7 +70,7 @@ The primary appends after acceptance:
   `src/scenes/ShapeSorterScene.ts`, and the test files that import `shuffle`
   from those modules (import-line swaps only)
 - **Verification:** full `verify_phase` chain (as Phase 1)
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Delete the four private copies** — covers: FR-2
   - [ ] **P2.T1.1: Remove `shuffle` from** `animalTraceLogic`, `bigSmallLogic`,
