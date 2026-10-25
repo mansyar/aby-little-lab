@@ -54,7 +54,7 @@
 - **Covers:** FR-6, AC-6
 - **Touches:** `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
 - [x] **P3.T1: TDD storage section** — covers: FR-6
   - [x] **P3.T1.1: Classification table** — the storage docs gain the version contract: `SCHEMA_VERSION` constant, the four-way read classification, write-protect semantics (silent, raw preserved, in-memory defaults discarded on reload per A2), and the identity migrate step as the pattern for future versions. Engine-accurate against `src/utils/storage.ts`.
@@ -77,9 +77,13 @@
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
 - **Status:** in_progress
 
-- [ ] **R1.T1: Fix the findings** — covers: FR-6
-  - [ ] **R1.T1.1: F1** — Phase 3 `Status:` in plan.md set to `verified` (conductor state, applied with the R1 completion commit).
-  - [ ] **R1.T1.2: F2** — the migration sentence in `docs/TDD.md` (§6.5, ~line 748) gains the clause that a future version bump must also teach `classifyStoredV2` to recognize the older stamped version as a known older version — otherwise existing payloads classify as unknown and stay write-protected.
+- [x] **R1.T1: Fix the findings** — covers: FR-6
+  - [x] **R1.T1.1: F1** — Phase 3 `Status:` in plan.md set to `verified` (conductor state, applied with the R1 completion commit).
+  - [x] **R1.T1.2: F2** — the migration sentence in `docs/TDD.md` (§6.5, ~line 748) gains the clause that a future version bump must also teach `classifyStoredV2` to recognize the older stamped version as a known older version — otherwise existing payloads classify as unknown and stay write-protected.
+
+**Result:** verified
+**Checkpoint:** pending squash
+**Evidence:** conductor/tracks/20261025-storage-schema-version/verification/phase-3.md (Phase R1 section)
 
 <!--
 The primary appends after acceptance:
