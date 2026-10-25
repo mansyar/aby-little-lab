@@ -33,7 +33,7 @@
 - **Covers:** FR-5, AC-4, NFR-1, NFR-2, NFR-3
 - **Touches:** `src/utils/storage.ts`, `src/game/profileLogic.ts`, `src/types/index.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/game/profileLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - **Note:** no data-path change — the v1 key, `readV1()` and `migrateV1` stay untouched (A3); only the compatibility pair and the type's dual role go.
 - [ ] **P2.T1: Retire the pair** — covers: FR-5
