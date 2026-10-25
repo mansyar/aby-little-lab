@@ -615,8 +615,8 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 | File | Responsibility |
 | --- | --- |
 | `primitives.ts` | palette, panel/toggle/row dimensions, `addRowCard`, `createRow`, toggle drawing |
-| `ProfilesOverlay.ts` | profile list, add/delete/switch, per-profile limit chips (Off/15/30/45/60) |
-| `ProgressOverlay.ts` | per-game learning stats: 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip |
+| `ProfilesOverlay.ts` | profile list, add/delete/switch, per-profile limit chips (Off/15/30/45/60); its custom hit areas (the Delete button and the play-time chip) go through `centredHitArea()` from `primitives`, which cancels the `displayOrigin` the engine's `InputManager` adds before testing a custom area, so the described rectangle is the live zone, not the drawn label's extent |
+| `ProgressOverlay.ts` | per-game learning stats: 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip; its custom hit areas (the close glyph, the page chevrons and the avatar chips) go through `centredHitArea()` from `primitives`, which cancels the `displayOrigin` the engine's `InputManager` adds before testing a custom area, so the described rectangle is the live zone, not the drawn glyph's or avatar's extent |
 | `ResetModal.ts` | two-step destructive confirm (`Reset all stickers?` with Cancel/Reset); on success calls `resetProgress()`, leaves settings untouched, sets the row to `Progress cleared`, and calls the panel's `onProgressReset` so the Hub shelf re-renders immediately |
 | `VoiceRow.ts` | voice chip cycling and preview |
 | `InstallRow.ts` | install state row read from the app-lifetime tracker — `installable`, `ios-howto` or hidden |
@@ -633,7 +633,7 @@ The page holds one tracker for its life. `initInstallPrompt()` runs in `src/main
 
 ### 5.7 PwaToast and PwaToasts
 
-`PwaToast.ts` draws one 520×150 cream toast with 200×72 buttons (primary `#2b6cb0`, secondary `#a0aec0`). `PwaToasts.ts` owns the lifecycle: it subscribes through `pwaBridge` and surfaces an update-available toast (action: reload into the waiting service worker) and an offline toast. `registerType: "prompt"` in the PWA config is what makes the update toast possible instead of a silent takeover.
+`PwaToast.ts` draws one 520×150 cream toast with 200×72 buttons (primary `#2b6cb0`, secondary `#a0aec0`). Every custom hit area on the toast's controls goes through `centredHitArea()` from `settings/primitives`, which cancels the `displayOrigin` the engine's `InputManager` adds before testing a custom area, so each button's live zone is the described 200×72 rectangle centred on it, not the rendered word's extent. `PwaToasts.ts` owns the lifecycle: it subscribes through `pwaBridge` and surfaces an update-available toast (action: reload into the waiting service worker) and an offline toast. `registerType: "prompt"` in the PWA config is what makes the update toast possible instead of a silent takeover. The Progress overlay's avatar chips apply the same helper to an `Image` and carry its one accepted overlap: because the engine divides an `Image` tap by the drawn scale (`TransformXY`) before the helper's callback runs, the chip's rectangle is written in the image's local frame as `96 / chipScale`, so the live band still measures 96×96 in scene space; the chips ride a 56 px pitch, so adjacent bands overlap, and the later-drawn chip wins each seam.
 
 ### 5.8 Typography and fonts
 

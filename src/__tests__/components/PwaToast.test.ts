@@ -286,3 +286,206 @@ describe("PwaToast reduced motion", () => {
     expect(title.setScale).not.toHaveBeenCalled();
   });
 });
+
+describe("PwaToast engine hit test", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockMatchMedia.mockReturnValue({ matches: false });
+  });
+
+  interface HitConfig {
+    hitArea: { height: number; width: number; x: number; y: number };
+    hitAreaCallback: (area: unknown, localX: number, localY: number, object: unknown) => boolean;
+  }
+
+  /** Reads the hit-area config a toast button was handed, failing loudly otherwise. */
+  function configOf(object: MockGameObject): HitConfig {
+    const config = object.setInteractive.mock.calls[0]?.[0] as HitConfig | undefined;
+    if (!config?.hitAreaCallback) throw new Error("No custom hit area callback");
+    return config;
+  }
+
+  /**
+   * Answers the engine's own question for a scene-space point: it adds the
+   * display origin to the local pointer before calling the callback, exactly
+   * as `InputManager.pointWithinHitArea` does, so a band that only looks right
+   * relative to the object's centre fails here.
+   */
+  function engineHits(
+    config: HitConfig,
+    objectX: number,
+    objectY: number,
+    displayOriginX: number,
+    displayOriginY: number,
+    pointX: number,
+    pointY: number,
+  ): boolean {
+    return config.hitAreaCallback(
+      config.hitArea,
+      pointX - objectX + displayOriginX,
+      pointY - objectY + displayOriginY,
+      { displayOriginX, displayOriginY },
+    );
+  }
+
+  /** Scene-space position arguments of the text call that created the object. */
+  function textCallArgs(scene: MockScene, object: MockGameObject): [number, number] {
+    const index = scene.add.text.mock.results.findIndex((result) => result.value === object);
+    if (index < 0) throw new Error("Object was not created by scene.add.text");
+    return scene.add.text.mock.calls[index] as unknown as [number, number];
+  }
+
+  /** Finds the button text object with the exact label. */
+  function findButtonByLabel(scene: MockScene, label: string): MockGameObject | undefined {
+    const index = scene.add.text.mock.calls.findIndex((call) => call[2] === label);
+    if (index < 0) return undefined;
+    return scene.add.text.mock.results[index]?.value as MockGameObject | undefined;
+  }
+
+  // Drawn extents of 24px labels in the suite's measurement convention —
+  // mirrors SettingsPanel.test.ts GLYPH_WIDTH/LINE_HEIGHT scaled to 24px.
+  const UPDATE_WORD_HALF = 60; // "Update now": 10 chars x 12px
+  const LATER_WORD_HALF = 30; // "Later": 5 chars x 12px
+  const OK_WORD_HALF = 12; // "OK": 2 chars x 12px
+  const LINE_HALF = 16; // 24px line box, about 32px tall
+  const BAND_HALF_WIDTH = 100;
+  const BAND_HALF_HEIGHT = 36;
+
+  /**
+   * Asserts one button's engine-frame behaviour at every displayOrigin the
+   * engine may hand over (origin 0 and two realistic centre-anchored values):
+   * drawn centre and word edges live, the full 200x72 band live, one pixel
+   * outside dead.
+   */
+  function expectButtonBand(scene: MockScene, label: string, wordHalf: number): void {
+    const button = findButtonByLabel(scene, label);
+    expect(button).toBeDefined();
+    const [objectX, objectY] = textCallArgs(scene, button as MockGameObject);
+    const config = configOf(button as MockGameObject);
+    // The band keeps today's intended 200 x 72 size.
+    expect(config.hitArea.width).toBe(BAND_HALF_WIDTH * 2);
+    expect(config.hitArea.height).toBe(BAND_HALF_HEIGHT * 2);
+
+    for (const [displayOriginX, displayOriginY] of [
+      [0, 0],
+      [wordHalf, LINE_HALF],
+      [137, 13],
+    ] as const) {
+      // Drawn centre and drawn word edges live.
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + wordHalf,
+          objectY + LINE_HALF,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - wordHalf,
+          objectY - LINE_HALF,
+        ),
+      ).toBe(true);
+      // The full band is live (inclusive edges).
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + BAND_HALF_WIDTH,
+          objectY + BAND_HALF_HEIGHT,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - BAND_HALF_WIDTH,
+          objectY - BAND_HALF_HEIGHT,
+        ),
+      ).toBe(true);
+      // One pixel outside the band is dead.
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + BAND_HALF_WIDTH + 1,
+          objectY,
+        ),
+      ).toBe(false);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - BAND_HALF_WIDTH - 1,
+          objectY,
+        ),
+      ).toBe(false);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX,
+          objectY + BAND_HALF_HEIGHT + 1,
+        ),
+      ).toBe(false);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX,
+          objectY - BAND_HALF_HEIGHT - 1,
+        ),
+      ).toBe(false);
+    }
+  }
+
+  it("lands Update now taps across its drawn word and its 200x72 band", () => {
+    const scene = createScene();
+    new PwaToast(scene as never, { kind: "update", onUpdate: vi.fn(), onDismiss: vi.fn() });
+
+    expectButtonBand(scene, "Update now", UPDATE_WORD_HALF);
+  });
+
+  it("lands Later taps across its drawn word and its 200x72 band", () => {
+    const scene = createScene();
+    new PwaToast(scene as never, { kind: "update", onUpdate: vi.fn(), onDismiss: vi.fn() });
+
+    expectButtonBand(scene, "Later", LATER_WORD_HALF);
+  });
+
+  it("lands OK taps across its drawn word and its 200x72 band", () => {
+    const scene = createScene();
+    new PwaToast(scene as never, { kind: "offline", onDismiss: vi.fn() });
+
+    expectButtonBand(scene, "OK", OK_WORD_HALF);
+  });
+});

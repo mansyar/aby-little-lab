@@ -1,5 +1,11 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
-import { PANEL_WIDTH, ROW_HIT_WIDTH, ROW_PITCH } from "../../components/settings/primitives";
+import {
+  AVATAR_TEXTURE_SIZE,
+  PANEL_HEIGHT,
+  PANEL_WIDTH,
+  ROW_HIT_WIDTH,
+  ROW_PITCH,
+} from "../../components/settings/primitives";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import {
   createInstallTracker,
@@ -252,6 +258,43 @@ function engineHits(
     pointY - objectY + displayOriginY,
     { displayOriginX, displayOriginY },
   );
+}
+
+/**
+ * Answers the engine's question for a scaled image: the pointer is translated
+ * into the object's local frame through `TransformXY`, which divides by scale,
+ * before `pointWithinHitArea` adds the (unscaled) displayOrigin.
+ */
+function engineHitsScaled(
+  config: ReturnType<typeof configOf>,
+  objectX: number,
+  objectY: number,
+  scale: number,
+  displayOriginX: number,
+  displayOriginY: number,
+  pointX: number,
+  pointY: number,
+): boolean {
+  return config.hitAreaCallback(
+    config.hitArea,
+    (pointX - objectX) / scale + displayOriginX,
+    (pointY - objectY) / scale + displayOriginY,
+    { displayOriginX, displayOriginY },
+  );
+}
+
+/** Scene-space position arguments of the text call that created the object. */
+function textCallArgs(scene: MockScene, object: MockGameObject): [number, number] {
+  const index = scene.add.text.mock.results.findIndex((result) => result.value === object);
+  if (index < 0) throw new Error("Object was not created by scene.add.text");
+  return scene.add.text.mock.calls[index] as unknown as [number, number];
+}
+
+/** Scene-space position arguments of the image call that created the object. */
+function imageCallArgs(scene: MockScene, object: MockGameObject): [number, number] {
+  const index = scene.add.image.mock.results.findIndex((result) => result.value === object);
+  if (index < 0) throw new Error("Object was not created by scene.add.image");
+  return scene.add.image.mock.calls[index] as unknown as [number, number];
 }
 
 /**
@@ -1279,6 +1322,108 @@ describe("SettingsPanel profile management", () => {
     );
     expect(addConfig).toBeUndefined();
   });
+
+  it("installs the Delete band around the drawn word in the engine frame", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    triggerPointerdown(findTextByLabel(scene, "Profiles") as MockGameObject);
+
+    const remove = findTextByLabel(scene, "Delete") as MockGameObject;
+    const config = configOf(remove);
+    const [objectX, objectY] = textCallArgs(scene, remove);
+    // The band keeps today's intended 240 x 64 size.
+    expect(config.hitArea.width).toBe(240);
+    expect(config.hitArea.height).toBe(64);
+
+    // "Delete" at 30px: about 13px per glyph, 40px line box, in the suite's
+    // convention (GLYPH_WIDTH/LINE_HEIGHT are the 26px anchors above).
+    const wordHalf = ("Delete".length * GLYPH_WIDTH) / 2;
+    const lineHalf = 20;
+    for (const [displayOriginX, displayOriginY] of [
+      [0, 0],
+      [wordHalf, lineHalf],
+      [137, 13],
+    ] as const) {
+      // Drawn word centre and drawn word edges live.
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + wordHalf,
+          objectY + lineHalf,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - wordHalf,
+          objectY - lineHalf,
+        ),
+      ).toBe(true);
+      // The full band is live (inclusive edges).
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + 120,
+          objectY + 32,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - 120,
+          objectY - 32,
+        ),
+      ).toBe(true);
+      // One pixel outside the band is dead.
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + 121,
+          objectY,
+        ),
+      ).toBe(false);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - 121,
+          objectY,
+        ),
+      ).toBe(false);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY + 33),
+      ).toBe(false);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY - 33),
+      ).toBe(false);
+    }
+  });
 });
 
 describe("SettingsPanel play time", () => {
@@ -1400,6 +1545,91 @@ describe("SettingsPanel play time", () => {
     };
     expect(config.hitArea.width).toBeGreaterThanOrEqual(64);
     expect(config.hitArea.height).toBeGreaterThanOrEqual(64);
+  });
+
+  it("cycles the limit from the drawn chip label in the engine frame without closing the overlay", () => {
+    setPlayTimeLimit("p1", 15);
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProfilesOverlay(scene);
+
+    const chip = findTextByLabel(scene, "Play Time: 15m") as MockGameObject;
+    const config = configOf(chip);
+    const [objectX, objectY] = textCallArgs(scene, chip);
+    // The band keeps today's intended 120 x 64 size.
+    expect(config.hitArea.width).toBe(120);
+    expect(config.hitArea.height).toBe(64);
+
+    // Rendered extent in the suite's measure convention (GLYPH_WIDTH per
+    // character of a 26px label, LINE_HEIGHT line box). The 120px band
+    // intentionally ends inside the drawn word — the spec keeps today's
+    // floor — so the word's outermost x-edges stay outside the band; the
+    // repro's right-third aim point is what must be live.
+    const lineHalf = LINE_HEIGHT / 2;
+    for (const [displayOriginX, displayOriginY] of [
+      [0, 0],
+      [45, 17],
+      [137, 13],
+    ] as const) {
+      // Drawn centre, drawn line-box edges and the right-third aim live.
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX,
+          objectY + lineHalf,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX,
+          objectY - lineHalf,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX + 45, objectY),
+      ).toBe(true);
+      // The full band is live (inclusive edges).
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX + 60, objectY),
+      ).toBe(true);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX - 60, objectY),
+      ).toBe(true);
+      // One pixel outside the band is dead.
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX + 61, objectY),
+      ).toBe(false);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX - 61, objectY),
+      ).toBe(false);
+    }
+
+    // The engine-resolved tap on the chip cycles its own limit and never
+    // falls through to the backdrop that closes the overlay.
+    const backdrop = getRectangles(scene)
+      .filter((rect) => rect.args?.[2] === 1024 && rect.args?.[3] === 768)
+      .at(-1) as RectWithArgs;
+    const overlayPanel = getRectangles(scene)
+      .filter((rect) => rect.args?.[2] === PANEL_WIDTH && rect.args?.[3] === PANEL_HEIGHT)
+      .at(-1) as RectWithArgs;
+    expect(backdrop.object).toBeDefined();
+    expect(overlayPanel.object).toBeDefined();
+    triggerPointerdown(chip);
+    expect(chip.setText).toHaveBeenCalledWith("Play Time: 30m");
+    expect(backdrop.object.destroy).not.toHaveBeenCalled();
+    expect(overlayPanel.object.destroy).not.toHaveBeenCalled();
   });
 });
 
@@ -1901,6 +2131,308 @@ describe("SettingsPanel progress report", () => {
     const header2 = findTextByLabel(scene, "Learning Progress") as MockGameObject;
     triggerPointerdown(findTextByLabel(scene, "X") as MockGameObject);
     expect(header2.destroy).toHaveBeenCalled();
+  });
+});
+
+describe("SettingsPanel progress overlay bands", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  function openProgress(scene: MockScene): void {
+    triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+  }
+
+  /**
+   * The most recently created avatar chip in the progress chip row (y = 189)
+   * for the given texture, with the image call's index so drawn order can be
+   * checked. Re-renders re-create the chips, so the last match is the live one.
+   */
+  function progressChip(
+    scene: MockScene,
+    texture: string,
+  ): { callIndex: number; object: MockGameObject } {
+    let index = -1;
+    scene.add.image.mock.calls.forEach((call, i) => {
+      if (call[2] === texture && call[1] === 189) index = i;
+    });
+    if (index < 0) throw new Error(`No progress chip rendered for ${texture}`);
+    return {
+      callIndex: index,
+      object: scene.add.image.mock.results[index]?.value as MockGameObject,
+    };
+  }
+
+  /** Viewed-profile highlight rings created after the given call count. */
+  function newRingsAt(scene: MockScene, since: number, x: number): RectWithArgs[] {
+    return getRectangles(scene)
+      .slice(since)
+      .filter((rect) => {
+        const [rx, ry, w] = rect.args ?? [];
+        return (
+          Math.abs((rx as number) - x) <= 2 &&
+          ry === 189 &&
+          (w as number) >= 70 &&
+          (w as number) <= 90
+        );
+      });
+  }
+
+  it("selects a chip from a tap inside its own band (wrong-profile reproduction fixed)", () => {
+    addProfile("dog"); // p2 becomes the active profile, so the overlay opens on p2
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProgress(scene);
+
+    const chipCat = progressChip(scene, PROFILE_AVATAR_TEXTURES.cat); // p1, drawn first
+    const chipDog = progressChip(scene, PROFILE_AVATAR_TEXTURES.dog); // p2, drawn later
+    const [catX, chipY] = imageCallArgs(scene, chipCat.object);
+    const [dogX] = imageCallArgs(scene, chipDog.object);
+    expect(chipY).toBe(189);
+    expect(dogX - catX).toBe(56); // the accepted chip pitch
+
+    const catConfig = configOf(chipCat.object);
+    const dogConfig = configOf(chipDog.object);
+    const scale = chipCat.object.setScale.mock.calls[0]?.[0] as number; // 64/256
+    // The helper's rectangle lives in the image's local space; because the
+    // engine's TransformXY divides the tap by the drawn scale first, the live
+    // band measures local width x scale across the scene.
+    expect(catConfig.hitArea.width * scale).toBeCloseTo(96);
+    expect(catConfig.hitArea.height * scale).toBeCloseTo(96);
+    const origin = AVATAR_TEXTURE_SIZE / 2;
+
+    // A point on the drawn avatar that only cat's band contains (left part,
+    // outside the accepted seam overlap) selects cat and nothing else.
+    const ownX = catX - 24;
+    expect(engineHitsScaled(catConfig, catX, chipY, scale, origin, origin, ownX, chipY)).toBe(true);
+    expect(engineHitsScaled(dogConfig, dogX, chipY, scale, origin, origin, ownX, chipY)).toBe(
+      false,
+    );
+
+    const beforeOwn = scene.add.rectangle.mock.calls.length;
+    triggerPointerdown(chipCat.object);
+    expect(newRingsAt(scene, beforeOwn, catX).length).toBeGreaterThan(0);
+
+    // Re-resolve the live chips; the first tap's re-render destroyed these.
+    const catNow = progressChip(scene, PROFILE_AVATAR_TEXTURES.cat);
+    const dogNow = progressChip(scene, PROFILE_AVATAR_TEXTURES.dog);
+    const catConfigNow = configOf(catNow.object);
+    const dogConfigNow = configOf(dogNow.object);
+
+    // A tap exactly at the seam lands in BOTH bands; Phaser resolves
+    // topmost-first, so the later-drawn chip (dog) wins the overlap.
+    const seamX = (catX + dogX) / 2;
+    expect(engineHitsScaled(catConfigNow, catX, chipY, scale, origin, origin, seamX, chipY)).toBe(
+      true,
+    );
+    expect(engineHitsScaled(dogConfigNow, dogX, chipY, scale, origin, origin, seamX, chipY)).toBe(
+      true,
+    );
+    expect(dogNow.callIndex).toBeGreaterThan(catNow.callIndex); // drawn later = on top
+
+    const beforeSeam = scene.add.rectangle.mock.calls.length;
+    triggerPointerdown(dogNow.object);
+    expect(newRingsAt(scene, beforeSeam, dogX).length).toBeGreaterThan(0);
+    expect(newRingsAt(scene, beforeSeam, catX).length).toBe(0);
+  });
+
+  it("covers the drawn X glyph across its 96px band with one pixel outside dead", () => {
+    addProfile("dog");
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProgress(scene);
+
+    const close = findLastTextByLabel(scene, "X") as MockGameObject;
+    const config = configOf(close);
+    const [objectX, objectY] = textCallArgs(scene, close);
+    // The band keeps today's intended 96 x 96 size.
+    expect(config.hitArea.width).toBe(96);
+    expect(config.hitArea.height).toBe(96);
+
+    // "X" at 32px: about 26px wide glyph and 42px line box in the suite's
+    // convention (GLYPH_WIDTH/LINE_HEIGHT are the 26px anchors above).
+    const glyphHalf = 13;
+    const lineHalf = 21;
+    for (const [displayOriginX, displayOriginY] of [
+      [0, 0],
+      [glyphHalf, lineHalf],
+      [137, 13],
+    ] as const) {
+      // Drawn glyph centre and edges live.
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX + glyphHalf,
+          objectY + lineHalf,
+        ),
+      ).toBe(true);
+      expect(
+        engineHits(
+          config,
+          objectX,
+          objectY,
+          displayOriginX,
+          displayOriginY,
+          objectX - glyphHalf,
+          objectY - lineHalf,
+        ),
+      ).toBe(true);
+      // The full band is live (inclusive edges).
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX + 48, objectY),
+      ).toBe(true);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY + 48),
+      ).toBe(true);
+      // One pixel outside the band is dead.
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX + 49, objectY),
+      ).toBe(false);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX - 49, objectY),
+      ).toBe(false);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY + 49),
+      ).toBe(false);
+      expect(
+        engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY - 49),
+      ).toBe(false);
+    }
+
+    // The X still closes the overlay it is drawn on.
+    const backdrop = getRectangles(scene)
+      .filter((rect) => rect.args?.[2] === 1024 && rect.args?.[3] === 768)
+      .at(-1) as RectWithArgs;
+    triggerPointerdown(close);
+    expect(backdrop.object.destroy).toHaveBeenCalled();
+  });
+
+  it("covers the drawn chevron glyphs across their 96px bands with one pixel outside dead", () => {
+    const scene = createScene();
+    new SettingsPanel(scene as never);
+    openProgress(scene);
+
+    for (const glyph of ["‹", "›"]) {
+      const chevron = findLastTextByLabel(scene, glyph) as MockGameObject;
+      const config = configOf(chevron);
+      const [objectX, objectY] = textCallArgs(scene, chevron);
+      // The band keeps today's intended 96 x 96 size.
+      expect(config.hitArea.width).toBe(96);
+      expect(config.hitArea.height).toBe(96);
+
+      // "‹"/"›" at 40px: about 20px glyphs and 52px line boxes in the suite's
+      // convention (GLYPH_WIDTH/LINE_HEIGHT are the 26px anchors above).
+      const glyphHalf = 10;
+      const lineHalf = 26;
+      for (const [displayOriginX, displayOriginY] of [
+        [0, 0],
+        [glyphHalf, lineHalf],
+        [137, 13],
+      ] as const) {
+        // Drawn glyph centre and edges live.
+        expect(
+          engineHits(config, objectX, objectY, displayOriginX, displayOriginY, objectX, objectY),
+        ).toBe(true);
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX + glyphHalf,
+            objectY + lineHalf,
+          ),
+        ).toBe(true);
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX - glyphHalf,
+            objectY - lineHalf,
+          ),
+        ).toBe(true);
+        // The full band is live (inclusive edges).
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX + 48,
+            objectY,
+          ),
+        ).toBe(true);
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX,
+            objectY + 48,
+          ),
+        ).toBe(true);
+        // One pixel outside the band is dead.
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX + 49,
+            objectY,
+          ),
+        ).toBe(false);
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX - 49,
+            objectY,
+          ),
+        ).toBe(false);
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX,
+            objectY + 49,
+          ),
+        ).toBe(false);
+        expect(
+          engineHits(
+            config,
+            objectX,
+            objectY,
+            displayOriginX,
+            displayOriginY,
+            objectX,
+            objectY - 49,
+          ),
+        ).toBe(false);
+      }
+    }
   });
 });
 

@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import {
@@ -15,6 +15,7 @@ import { textStyle } from "../../utils/typography";
 import {
   AVATAR_TEXTURE_SIZE,
   BACKDROP_COLOR,
+  centredHitArea,
   DISABLED_COLOR,
   type ObjectBucket,
   OUTLINE_COLOR,
@@ -141,15 +142,10 @@ export class ProgressOverlay {
         }),
       )
       .setOrigin(0.5);
-    close.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -TOGGLE_HEIGHT / 2,
-        -TOGGLE_HEIGHT / 2,
-        TOGGLE_HEIGHT,
-        TOGGLE_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    // Custom hit areas are tested in the engine frame: InputManager adds the
+    // displayOrigin before the callback, so centredHitArea cancels it and the
+    // band lands on the drawn glyph.
+    close.setInteractive(centredHitArea(TOGGLE_HEIGHT, TOGGLE_HEIGHT));
     close.on("pointerdown", () => this.close());
     this.deps.overlayObjects.push(close);
 
@@ -163,11 +159,13 @@ export class ProgressOverlay {
         this.deps.overlayObjects.push(ring);
       }
       const chip = scene.add.image(x, centerY - 195, PROFILE_AVATAR_TEXTURES[profile.avatarId]);
-      chip.setScale(64 / AVATAR_TEXTURE_SIZE);
-      chip.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
+      const chipScale = 64 / AVATAR_TEXTURE_SIZE;
+      chip.setScale(chipScale);
+      // Custom hit areas are tested in the image's LOCAL frame: the engine
+      // transforms the tap with TransformXY, which divides it by the drawn
+      // scale, so a 96px band on screen needs 96/chipScale local units here.
+      // (displayOrigin — texture pixels — is cancelled by centredHitArea.)
+      chip.setInteractive(centredHitArea(96 / chipScale, 96 / chipScale));
       chip.on("pointerdown", () => {
         if (profile.id !== viewedId) {
           this.viewedId = profile.id;
@@ -265,10 +263,8 @@ export class ProgressOverlay {
           }),
         )
         .setOrigin(0.5);
-      chevron.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-48, -48, 96, 96),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      });
+      // Same engine frame as the other text controls (comment above).
+      chevron.setInteractive(centredHitArea(96, 96));
       chevron.on("pointerdown", () => {
         const nextPage = this.page + delta;
         if (nextPage < 0 || nextPage >= pageCount) return;

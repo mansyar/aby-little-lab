@@ -1,6 +1,7 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import { isReducedMotion, motionDuration } from "../utils/motion";
 import { textStyle } from "../utils/typography";
+import { centredHitArea } from "./settings/primitives";
 
 const PANEL_COLOR = 0xfff8e7;
 const OUTLINE_COLOR = 0x2d3748;
@@ -99,15 +100,10 @@ export class PwaToast {
         }),
       )
       .setOrigin(0.5);
-    button.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(
-        -BUTTON_WIDTH / 2,
-        -BUTTON_HEIGHT / 2,
-        BUTTON_WIDTH,
-        BUTTON_HEIGHT,
-      ),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    // Custom hit areas are tested in the engine frame: InputManager adds the
+    // displayOrigin before the callback, so the band describes a rectangle
+    // relative to this text's centre only because centredHitArea cancels it.
+    button.setInteractive(centredHitArea(BUTTON_WIDTH, BUTTON_HEIGHT));
     button.on("pointerdown", () => onTap?.());
     this.objects.push(button);
     this.animateEntrance([button]);
