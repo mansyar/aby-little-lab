@@ -85,7 +85,7 @@ The primary appends after acceptance:
 - **Covers:** AC-6
 - **Touches:** `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: TDD.md board section** — covers: AC-6
   - [ ] **P3.T1.1: Generalized contract truthfully documented** — the board section names the widened piece contract (Image/Container via the DragTarget set), the `single|multi` slot capacity, and all five consuming scenes; stay engine-accurate (line/behaviour references match shipped code).
