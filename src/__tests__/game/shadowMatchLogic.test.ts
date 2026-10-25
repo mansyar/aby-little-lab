@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { shuffle } from "../../game/random";
 import {
@@ -11,29 +11,11 @@ import {
   ROUND_SIZE,
   WIN_TARGET,
 } from "../../game/shadowMatchLogic";
+import { mulberry32 } from "../helpers/randomHelper";
 
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-
-/** Deterministic Park-Miller generator, spied onto Math.random for a draw. */
-function seededRng(seed: number): () => number {
-  let state = seed % 2147483647;
-  if (state <= 0) state += 2147483646;
-  return () => {
-    state = (state * 16807) % 2147483647;
-    return (state - 1) / 2147483646;
-  };
-}
-
-/** Draws one round with a seeded rng spied onto Math.random. */
+/** Draws one round with a seeded rng passed through the injected seam. */
 function drawWithSeed(seed: number, shift: -1 | 0 | 1) {
-  const spy = vi.spyOn(Math, "random").mockImplementation(seededRng(seed));
-  try {
-    return generateRound(shift);
-  } finally {
-    spy.mockRestore();
-  }
+  return generateRound(shift, mulberry32(seed));
 }
 
 describe("generateRound", () => {
@@ -98,7 +80,7 @@ describe("generateRound", () => {
     expect(new Set(round.shadows)).toEqual(new Set(round.objects));
   });
 
-  it("is deterministic per seed in every band (seeded rng spy)", () => {
+  it("is deterministic per seed in every band (seeded rng injection)", () => {
     for (const shift of [-1, 0, 1] as const) {
       const first = drawWithSeed(42, shift);
       const second = drawWithSeed(42, shift);
@@ -145,12 +127,12 @@ describe("generateRound", () => {
   });
 
   it("shuffles objects and shadows independently (replay variety)", () => {
-    const spy = vi.spyOn(Math, "random");
-    // selection shuffle (12 elements, 11 calls) + objects shuffle (6 elements, 5 calls) use 0.5
-    for (let i = 0; i < 16; i++) spy.mockReturnValueOnce(0.5);
-    // shadows shuffle (6 elements, 5 calls) uses 0.1 → different ordering
-    for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.1);
-    const round = generateRound();
+    // Draw script passed through the injected seam: the selection shuffle and
+    // the objects shuffle (16 draws) take 0.5, the shadows shuffle (5 draws)
+    // takes 0.1, so the two orderings differ by construction.
+    let draw = 0;
+    const rng = () => (draw++ < 16 ? 0.5 : 0.1);
+    const round = generateRound(0, rng);
     expect(round.objects).not.toEqual(round.shadows);
   });
 });
@@ -178,12 +160,13 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: ObjectType[] = ["house", "tree", "car"];
 
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
-    const result1 = shuffle(input);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
-    const result2 = shuffle(input);
+    // Draw script passed through the injected seam: the first shuffle draws
+    // 0.5 then 0.2, the second 0.8 then 0.1.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.1];
+    const rng = () => draws[draw++];
+    const result1 = shuffle(input, rng);
+    const result2 = shuffle(input, rng);
 
     expect(result1).not.toEqual(result2);
   });

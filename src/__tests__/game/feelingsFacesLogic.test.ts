@@ -15,15 +15,6 @@ import {
 } from "../../game/feelingsFacesLogic";
 import { mulberry32 } from "../helpers/randomHelper";
 
-/** Deterministic generator so draw tests never depend on Math.random. */
-function seededRng(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 0x100000000;
-  };
-}
-
 /** The contrast kind of each rung, in order — the compact shape band tests compare. */
 function kindsOf(ladder: readonly RoundContrast[]): string[] {
   return ladder.map((rung) => rung.kind);
@@ -106,16 +97,18 @@ describe("SCENARIO_POOL", () => {
 
 describe("drawScenarios", () => {
   it("draws one playthrough of six scenarios", () => {
-    expect(drawScenarios(seededRng(1))).toHaveLength(ROUND_COUNT);
+    expect(drawScenarios(mulberry32(1))).toHaveLength(ROUND_COUNT);
   });
 
   it("defaults to Math.random when no generator is passed", () => {
+    // Scoped default-wiring assertion only (the FR-6 exception): the call runs
+    // the real fallback wiring unmocked, it does not script gameplay randomness.
     expect(drawScenarios()).toHaveLength(ROUND_COUNT);
   });
 
   it("never repeats a scenario within a run and covers every emotion over 20 runs", () => {
     for (let seed = 1; seed <= 20; seed++) {
-      const drawn = drawScenarios(seededRng(seed));
+      const drawn = drawScenarios(mulberry32(seed));
       expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
       expect(new Set(drawn.map((scenario) => scenario.emotion)).size).toBe(EMOTIONS.length);
       for (const scenario of drawn) {
@@ -126,7 +119,7 @@ describe("drawScenarios", () => {
 
   it("draws the same playthrough for the same seed", () => {
     for (let seed = 1; seed <= 20; seed++) {
-      expect(drawScenarios(seededRng(seed))).toEqual(drawScenarios(seededRng(seed)));
+      expect(drawScenarios(mulberry32(seed))).toEqual(drawScenarios(mulberry32(seed)));
     }
   });
 
@@ -164,7 +157,7 @@ describe("drawScenarios", () => {
   it("varies the draw across seeds", () => {
     const runs = new Set(
       Array.from({ length: 20 }, (_, index) =>
-        drawScenarios(seededRng(index + 1))
+        drawScenarios(mulberry32(index + 1))
           .map((scenario) => scenario.id)
           .join(","),
       ),
@@ -475,7 +468,7 @@ describe("buildRoundChoices band ladders", () => {
 
   it("plays observably different rounds per band from one seeded draw (AC-1)", () => {
     for (let seed = 1; seed <= 6; seed++) {
-      const rng = seededRng(seed);
+      const rng = mulberry32(seed);
       const scenarios = drawScenarios(rng);
       const easy = scenarios.map((scenario, index) =>
         buildRoundChoices(index, scenario.emotion, contrastSplitFor(-1)),
@@ -494,7 +487,7 @@ describe("buildRoundChoices band ladders", () => {
 
   it("spreads targets over all four emotions at every band", () => {
     for (let seed = 1; seed <= 8; seed++) {
-      const drawn = drawScenarios(seededRng(seed));
+      const drawn = drawScenarios(mulberry32(seed));
       expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
       expect(drawn.map((scenario) => scenario.emotion)).toEqual(
         expect.arrayContaining([...EMOTIONS]),

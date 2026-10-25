@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   ALL_TOYS,
@@ -16,10 +16,6 @@ import {
   WIN_TARGET,
 } from "../../game/bigSmallLogic";
 import { shuffle } from "../../game/random";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe("selectToys", () => {
   it("selects exactly 3 toy types from the pool of 6", () => {
@@ -110,15 +106,12 @@ describe("generateRound", () => {
   });
 
   it("toys are shuffled independently per playthrough (replay variety)", () => {
-    const spy = vi.spyOn(Math, "random");
-    // selectToys shuffle (6 elements, 5 random calls) + toy instances shuffle (6 elements, 5 random calls) = 10 total
-    // First round: all 0.5
-    for (let i = 0; i < 10; i++) spy.mockReturnValueOnce(0.5);
-    const round1 = generateRound();
-
-    // Second round: all 0.1
-    for (let i = 0; i < 10; i++) spy.mockReturnValueOnce(0.1);
-    const round2 = generateRound();
+    // selectToys shuffle (6 elements, 5 draws) + toy instances shuffle
+    // (6 elements, 5 draws) = 10 draws per round, scripted through the seam:
+    // first round all 0.5, second round all 0.1.
+    const allOf = (value: number) => () => value;
+    const round1 = generateRound(undefined, allOf(0.5));
+    const round2 = generateRound(undefined, allOf(0.1));
 
     expect(round1.toys).not.toEqual(round2.toys);
   });
@@ -147,8 +140,7 @@ describe("createBoxes", () => {
   });
 
   it("places the small box first under a low random value", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.0);
-    const boxes = createBoxes();
+    const boxes = createBoxes(undefined, () => 0.0);
     expect(boxes[0].scaleCategory).toBe("small");
   });
 });
@@ -170,12 +162,13 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: ToyType[] = ["teddy_bear", "car", "ball"];
 
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
-    const result1 = shuffle(input);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
-    const result2 = shuffle(input);
+    // Draw script passed through the injected seam: the first shuffle draws
+    // 0.5 then 0.2, the second 0.8 then 0.1.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.1];
+    const rng = () => draws[draw++];
+    const result1 = shuffle(input, rng);
+    const result2 = shuffle(input, rng);
 
     expect(result1).not.toEqual(result2);
   });
@@ -323,10 +316,11 @@ describe("generateRound with band factors", () => {
   });
 
   it("shifted factors draw observably different scales under one seed", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const classic = generateRound();
-    const easy = generateRound(scaleFactorsFor(-1));
-    const hard = generateRound(scaleFactorsFor(1));
+    // A constant 0.5 draw passed through the injected seam at every band.
+    const steady = () => 0.5;
+    const classic = generateRound(undefined, steady);
+    const easy = generateRound(scaleFactorsFor(-1), steady);
+    const hard = generateRound(scaleFactorsFor(1), steady);
     expect(easy.toys.map((t) => t.scale)).not.toEqual(classic.toys.map((t) => t.scale));
     expect(easy.boxes.map((b) => b.scale)).not.toEqual(classic.boxes.map((b) => b.scale));
     expect(hard.toys.map((t) => t.scale)).not.toEqual(classic.toys.map((t) => t.scale));
@@ -334,8 +328,8 @@ describe("generateRound with band factors", () => {
   });
 
   it("classic draws are identical with and without the factors argument", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    expect(generateRound(scaleFactorsFor(0))).toEqual(generateRound());
+    const steady = () => 0.5;
+    expect(generateRound(scaleFactorsFor(0), steady)).toEqual(generateRound(undefined, steady));
   });
 });
 
@@ -365,7 +359,7 @@ describe("createBoxes with band factors", () => {
   });
 
   it("keeps the shipped scales when no factors argument is passed", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    expect(createBoxes(scaleFactorsFor(0))).toEqual(createBoxes());
+    const steady = () => 0.5;
+    expect(createBoxes(scaleFactorsFor(0), steady)).toEqual(createBoxes(undefined, steady));
   });
 });

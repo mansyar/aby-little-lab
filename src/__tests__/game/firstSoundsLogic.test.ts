@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { isConfusableWith, type Letter } from "../../game/alphabetLogic";
 import {
   firstLetterOf,
@@ -9,10 +9,6 @@ import {
   type PhonicsRound,
 } from "../../game/firstSoundsLogic";
 import { getWord, WORD_POOL } from "../../game/wordLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -140,11 +136,9 @@ describe("generatePhonicsRound", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generatePhonicsRound("B");
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generatePhonicsRound("B");
+    const steady = () => 0.5;
+    const first = generatePhonicsRound("B", 2, steady);
+    const second = generatePhonicsRound("B", 2, steady);
     expect(second).toEqual(first);
     expectValidRound(first);
   });
@@ -303,20 +297,15 @@ describe("generatePhonicsPlaythrough", () => {
   });
 
   it("produces different playthroughs under different random sequences", () => {
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.05).mockReturnValueOnce(0.35);
-    const first = generatePhonicsPlaythrough(6);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.95).mockReturnValueOnce(0.65);
-    const second = generatePhonicsPlaythrough(6);
+    const first = generatePhonicsPlaythrough(6, 0, () => 0.05);
+    const second = generatePhonicsPlaythrough(6, 0, () => 0.95);
     expect(first).not.toEqual(second);
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generatePhonicsPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generatePhonicsPlaythrough();
+    const steady = () => 0.5;
+    const first = generatePhonicsPlaythrough(6, 0, steady);
+    const second = generatePhonicsPlaythrough(6, 0, steady);
     expect(second).toEqual(first);
   });
 });

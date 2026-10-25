@@ -89,6 +89,8 @@ afterEach(() => {
 
 describe("MusicalMemoryScene sequence playback and input", () => {
   beforeEach(() => {
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 
@@ -570,6 +572,8 @@ describe("MusicalMemoryScene sequence playback and input", () => {
 
 describe("MusicalMemoryScene round progression and completion", () => {
   beforeEach(() => {
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 

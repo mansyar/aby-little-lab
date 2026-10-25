@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   BAND_GRID,
   BAND_PAIRS,
@@ -11,10 +11,7 @@ import {
   type MemoryBand,
   type MemoryRound,
 } from "../../game/memoryMatchLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -118,12 +115,9 @@ describe("buildRound", () => {
     expect(textureSets.size).toBeGreaterThan(1);
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildRound("medium");
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildRound("medium");
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildRound("medium", mulberry32(1234));
+    const second = buildRound("medium", mulberry32(1234));
     expect(second).toEqual(first);
     expectValidRound(first);
   });
@@ -168,12 +162,9 @@ describe("buildPlaythrough", () => {
     expect(textureSets.size).toBeGreaterThan(1);
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildPlaythrough();
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildPlaythrough(0, mulberry32(1234));
+    const second = buildPlaythrough(0, mulberry32(1234));
     expect(second).toEqual(first);
   });
 });
@@ -228,13 +219,10 @@ describe("buildPlaythrough (adaptive shift)", () => {
     }
   });
 
-  it("is deterministic under a fixed random sequence for every shift", () => {
+  it("is deterministic under a seeded rng injection for every shift", () => {
     for (const shift of [-1, 0, 1] as const) {
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const first = buildPlaythrough(shift);
-      vi.restoreAllMocks();
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const second = buildPlaythrough(shift);
+      const first = buildPlaythrough(shift, mulberry32(1234));
+      const second = buildPlaythrough(shift, mulberry32(1234));
       expect(second).toEqual(first);
     }
   });

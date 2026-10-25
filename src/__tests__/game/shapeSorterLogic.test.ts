@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { shuffle } from "../../game/random";
 import {
@@ -8,10 +8,6 @@ import {
   poolFor,
   type ShapeType,
 } from "../../game/shapeSorterLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 it("expanded pool includes all 12 new shape types (18 total)", () => {
   expect(ALL_SHAPES).toHaveLength(18);
@@ -52,12 +48,13 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: ShapeType[] = ["circle", "square", "triangle"];
 
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
-    const result1 = shuffle(input);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
-    const result2 = shuffle(input);
+    // Draw script passed through the injected seam: the first shuffle draws
+    // 0.5 then 0.2, the second 0.8 then 0.1.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.1];
+    const rng = () => draws[draw++];
+    const result1 = shuffle(input, rng);
+    const result2 = shuffle(input, rng);
 
     expect(result1).not.toEqual(result2);
   });
@@ -173,7 +170,14 @@ describe("generatePlaythrough with a band shift", () => {
   });
 
   it("classic draws are identical with and without the shift argument", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    expect(generatePlaythrough(3, 0)).toEqual(generatePlaythrough(3));
+    // Scoped default-wiring assertion (the FR-6 exception): shapeSorterLogic
+    // deliberately exposes no rng seam (it only forwards to `shuffle`), so the
+    // implicit Math.random default is pinned for this one comparison.
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    try {
+      expect(generatePlaythrough(3, 0)).toEqual(generatePlaythrough(3));
+    } finally {
+      randomSpy.mockRestore();
+    }
   });
 });

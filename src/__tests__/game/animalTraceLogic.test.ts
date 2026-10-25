@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   ALL_PAIRS,
@@ -12,10 +12,6 @@ import {
   waypointsFor,
 } from "../../game/animalTraceLogic";
 import { shuffle } from "../../game/random";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe("selectThreePairs", () => {
   it("returns exactly 3 pairs", () => {
@@ -67,12 +63,13 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: AnimalFoodPair[] = [...ALL_PAIRS];
 
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
-    const result1 = shuffle(input);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
-    const result2 = shuffle(input);
+    // Draw script passed through the injected seam: the first shuffle draws
+    // 0.5 then 0.2, the second 0.8 then 0.1.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.1];
+    const rng = () => draws[draw++];
+    const result1 = shuffle(input, rng);
+    const result2 = shuffle(input, rng);
 
     expect(result1).not.toEqual(result2);
   });
@@ -169,12 +166,13 @@ describe("generatePathPoints", () => {
   });
 
   it("produces different curves on successive calls (randomized)", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2); // first call params
-    const result1 = generatePathPoints(200, 384, 824, 384, 6);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.9); // second call params
-    const result2 = generatePathPoints(200, 384, 824, 384, 6);
+    // First call draws 0.5 then 0.2, the second 0.8 then 0.9 — scripted
+    // through the injected seam instead of a Math.random spy.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.9];
+    const rng = () => draws[draw++];
+    const result1 = generatePathPoints(200, 384, 824, 384, 6, rng);
+    const result2 = generatePathPoints(200, 384, 824, 384, 6, rng);
 
     // At least one intermediate point should differ between the two curves
     const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
@@ -182,12 +180,11 @@ describe("generatePathPoints", () => {
   });
 
   it("produces different curves at other waypoint counts too", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2); // first call params
-    const result1 = generatePathPoints(200, 384, 824, 384, 8);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.9); // second call params
-    const result2 = generatePathPoints(200, 384, 824, 384, 8);
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.9];
+    const rng = () => draws[draw++];
+    const result1 = generatePathPoints(200, 384, 824, 384, 8, rng);
+    const result2 = generatePathPoints(200, 384, 824, 384, 8, rng);
 
     const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
     expect(midDiffer).toBe(true);

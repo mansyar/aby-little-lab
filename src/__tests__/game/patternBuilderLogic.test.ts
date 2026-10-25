@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   buildPatternRow,
   generatePlaythrough,
@@ -8,10 +8,6 @@ import {
   type PatternType,
 } from "../../game/patternBuilderLogic";
 import { ALL_SHAPES, type ShapeType } from "../../game/shapeSorterLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -139,11 +135,9 @@ describe("generateRound", () => {
   });
 
   it("chooses a deterministic round under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generateRound();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generateRound();
+    const steady = () => 0.5;
+    const first = generateRound(3, steady);
+    const second = generateRound(3, steady);
     expect(second).toEqual(first);
     expectValidRound(first);
   });
@@ -170,11 +164,8 @@ describe("generatePlaythrough", () => {
   });
 
   it("produces different rounds under different random sequences", () => {
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.1).mockReturnValueOnce(0.2);
-    const first = generateRound();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.8).mockReturnValueOnce(0.9);
-    const second = generateRound();
+    const first = generateRound(3, () => 0.1);
+    const second = generateRound(3, () => 0.8);
     expect(first).not.toEqual(second);
   });
 
@@ -199,11 +190,8 @@ describe("generatePlaythrough", () => {
   });
 
   it("produces different playthroughs under different random sequences", () => {
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.05).mockReturnValueOnce(0.35);
-    const first = generatePlaythrough(5);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.95).mockReturnValueOnce(0.65);
-    const second = generatePlaythrough(5);
+    const first = generatePlaythrough(5, 0, () => 0.05);
+    const second = generatePlaythrough(5, 0, () => 0.95);
     expect(first).not.toEqual(second);
   });
 });
@@ -271,12 +259,9 @@ describe("generatePlaythrough (adaptive shift)", () => {
   });
 
   it("produces different playthroughs per shift under the same random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.42);
-    const struggling = generatePlaythrough(6, -1);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.42);
-    const thriving = generatePlaythrough(6, 1);
-    vi.restoreAllMocks();
+    const steady = () => 0.42;
+    const struggling = generatePlaythrough(6, -1, steady);
+    const thriving = generatePlaythrough(6, 1, steady);
     expect(struggling).not.toEqual(thriving);
   });
 });

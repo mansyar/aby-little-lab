@@ -517,6 +517,8 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   const PATH_POINTS = 6;
 
   beforeEach(() => {
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 

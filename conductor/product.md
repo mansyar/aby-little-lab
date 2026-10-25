@@ -124,6 +124,19 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## Changelog - Shared Random Helpers (2026-10-25)
+
+> **2026-10-25 - Shared Random Helpers:** the lab now draws its randomness from
+> one place. Five byte-identical copies of the same shuffle had grown across the
+> game logic, and only two of the twenty-one per-game modules could be handed a
+> seeded generator, so the other nineteen could only be tested by stubbing the
+> platform's random number source globally. A single `src/game/random.ts` now
+> owns the one shuffle and the one RNG type, every logic module takes an
+> optional generator that defaults to the platform source, and the test suite
+> seeds a shared generator instead of stubbing. Nothing a child sees, hears or
+> taps changes: every game deals the same cards, in the same order, from the
+> same pool as before.
+
 ## Changelog - Adaptive Difficulty Completion (2026-10-23)
 
 > **2026-10-23 - Adaptive Difficulty Completion:** every game in the lab now
