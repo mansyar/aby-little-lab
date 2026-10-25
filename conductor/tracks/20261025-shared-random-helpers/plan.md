@@ -20,23 +20,23 @@
 - **Verification:** the full `verify_phase` chain
   (`pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`)
   plus targeted `pnpm test -- --run src/__tests__/game/random.test.ts src/__tests__/helpers/randomHelper.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Create `src/game/random.ts` and its suite** — covers: FR-1, NFR-4
-  - [ ] **P1.T1.1: Module + TSDoc** — export the `Rng` type alias and
+- [x] **P1.T1: Create `src/game/random.ts` and its suite** — covers: FR-1, NFR-4
+  - [x] **P1.T1.1: Module + TSDoc** — export the `Rng` type alias and
     `shuffle<T>(items: readonly T[], rng?: Rng): T[]` copying the exact
     Fisher-Yates body from `shapeSorterLogic.ts` with `Math.random` replaced
     by the `rng` parameter; TSDoc per NFR-2/a house wording (returns a copy,
     input untouched, rng contract `[0, 1)`).
-  - [ ] **P1.T1.2: Edge + determinism tests (red → green not applicable; new
+  - [x] **P1.T1.2: Edge + determinism tests (red → green not applicable; new
     file)** — per AC-1: input untouched, empty → `[]`, single → copy not
     reference, two-element swap, fixed-seed determinism, boundary rng
     `0.0` and `1 - Number.EPSILON` keep indices in range over a realistic
     pool (≥ 24 items).
-- [ ] **P1.T2: Create the shared seeded test helper** — covers: FR-5
-  - [ ] **P1.T2.1: `randomHelper.ts`** — export `mulberry32(seed: number):
+- [x] **P1.T2: Create the shared seeded test helper** — covers: FR-5
+  - [x] **P1.T2.1: `randomHelper.ts`** — export `mulberry32(seed: number):
     () => number` with a TSDoc seed contract; no dependencies.
-  - [ ] **P1.T2.2: Helper test** — fixed seed reproduces the documented
+  - [x] **P1.T2.2: Helper test** — fixed seed reproduces the documented
     sequence property (same seed → same sequence; different seed →
     different sequence; output always in `[0, 1)`).
 
@@ -46,6 +46,10 @@ The primary appends after acceptance:
 **Checkpoint:** <short-sha>
 **Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-1.md
 -->
+
+**Result:** verified
+**Checkpoint:** 8f8e2236
+**Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-1.md
 
 ## Phase 2: Cut over shuffle consumers, delete the five copies
 
