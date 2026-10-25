@@ -1,7 +1,7 @@
 # Drag-Board Consolidation — Implementation Plan
 
 > **Branch:** `refactor/20261025-drag-board-consolidation`
-> **Base:** `master` @ `<base-sha>`
+> **Base:** `master` @ `7f40c076d08d4f6a95a498d1aa0c1435abddc098`
 >
 > Phase states are `pending`, `in_progress`, `verified`, `failed`, or `blocked`.
 > Only the primary agent writes this file. Phase subagents report results and the
@@ -13,10 +13,10 @@
   draggables via the `DragTarget` capability set and supports single- and
   multi-capacity slots, generically, with board-level tests proving it.
 - **Depends on:** none
-- **Covers:** FR-4, AC-2, NFR-2
+- **Covers:** FR-4, AC-2, NFR-2, NFR-3, NFR-4
 - **Touches:** `src/game/dragBoard.ts`, `src/__tests__/game/dragBoard.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Board tests for the generalizations (red first)** — covers: FR-4
   - [ ] **P1.T1.1: Image-piece test** — a piece whose draggable is a plain `Phaser.GameObjects.Image` (satisfying the `DragTarget` set) registers on the board, delivers a drop through `onDrop` and updates occupancy, proving the widened contract.
@@ -43,7 +43,7 @@ The primary appends after acceptance:
   behaviour parity by regression suites; the two existing board games stay
   unchanged.
 - **Depends on:** Phase 1
-- **Covers:** FR-1, FR-2, FR-3, FR-5, AC-1, AC-3, AC-4, NFR-1, NFR-2
+- **Covers:** FR-1, FR-2, FR-3, FR-5, AC-1, AC-3, AC-4, NFR-1, NFR-2, NFR-3, NFR-4
 - **Touches:** `src/scenes/ShapeSorterScene.ts`, `src/scenes/ShadowMatchScene.ts`, `src/scenes/BigSmallScene.ts`, `src/__tests__/scenes/shapeSorterScene.test.ts`, `src/__tests__/scenes/shapeSorterFlow.test.ts`, `src/__tests__/scenes/shadowMatchFlow.test.ts`, `src/__tests__/scenes/bigSmallScene.test.ts`, `src/__tests__/scenes/bigSmallFlow.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
 - **Status:** pending
