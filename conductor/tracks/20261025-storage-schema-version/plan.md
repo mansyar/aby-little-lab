@@ -54,7 +54,7 @@
 - **Covers:** FR-6, AC-6
 - **Touches:** `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: TDD storage section** — covers: FR-6
   - [ ] **P3.T1.1: Classification table** — the storage docs gain the version contract: `SCHEMA_VERSION` constant, the four-way read classification, write-protect semantics (silent, raw preserved, in-memory defaults discarded on reload per A2), and the identity migrate step as the pattern for future versions. Engine-accurate against `src/utils/storage.ts`.
