@@ -106,12 +106,18 @@ The primary appends after acceptance:
 - **Covers:** NFR-1, AC-3, AC-6 (findings F1, F3, F4)
 - **Touches:** `src/game/dragBoard.ts`, `src/__tests__/game/dragBoard.test.ts`, `src/__tests__/scenes/shapeSorterFlow.test.ts`, `src/__tests__/scenes/shadowMatchFlow.test.ts`, `src/__tests__/scenes/bigSmallFlow.test.ts`, `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Wrong drop animates one positional tween** — covers: F1
-  - [ ] **R1.T1.1: Regression-first** — in each adopting scene's wrong-drop test, assert exactly one positional (x/y) tween exists for the piece after the drop; capture the red output against the current shell before the fix.
-  - [ ] **R1.T1.2: Shell fix** — `DragBoard` tracks the snap tween per piece and stops it in `tweenHome` before adding the home tween; never `killTweensOf` (it would kill the drag-lift's scale/angle restore on the same container).
-- [ ] **R1.T2: Wrong-drop test fidelity** — covers: F4
-  - [ ] **R1.T2.1: Drop-point positioning** — the three wrong-drop tests set the mock container's x/y to the drop position (inside the zone) before firing dragend, mirroring the real gesture order.
-- [ ] **R1.T3: Docs contract precision** — covers: F3
-  - [ ] **R1.T3.1: Full contract clause** — the TDD.md piece-contract line gains a clause for the pointer/drag/drop event overloads the `BoardDraggable` contract adds beyond the `DragTarget` capability set.
+- [x] **R1.T1: Wrong drop animates one positional tween** — covers: F1
+  - [x] **R1.T1.1: Regression-first** — in each adopting scene's wrong-drop test, assert exactly one positional (x/y) tween exists for the piece after the drop; capture the red output against the current shell before the fix.
+  - [x] **R1.T1.2: Shell fix** — `DragBoard` tracks the snap tween per piece and stops it in `tweenHome` before adding the home tween; never `killTweensOf` (it would kill the drag-lift's scale/angle restore on the same container).
+- [x] **R1.T2: Wrong-drop test fidelity** — covers: F4
+  - [x] **R1.T2.1: Drop-point positioning** — the three wrong-drop tests set the mock container's x/y to the drop position (inside the zone) before firing dragend, mirroring the real gesture order.
+- [x] **R1.T3: Docs contract precision** — covers: F3
+  - [x] **R1.T3.1: Full contract clause** — the TDD.md piece-contract line gains a clause for the pointer/drag/drop event overloads the `BoardDraggable` contract adds beyond the `DragTarget` capability set.
+
+**Result:** verified
+**Checkpoint:** `ea4eea2c`
+**Evidence:** conductor/tracks/20261025-drag-board-consolidation/verification/phase-r1.md
+
+**Primary verification note:** the executor's one deviation (`src/utils/dragJuice.ts` — `snapToSlot` now returns its tween so the shell can track it) was reviewed and accepted by the primary: behaviour-neutral for existing callers, and the only alternative inside `Touches` was re-duplicating snap constants the track just deleted. The docs gate denied to the executor was run by the primary (exit 0, 5/5). Full gate re-run independently at the pre-squash head: exit 0, 2664 tests, coverage 97.85/91.47/96.79/98.76, bundle + PWA + docs validators green.
