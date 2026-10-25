@@ -1,0 +1,32 @@
+{
+  "id": "20261025-shared-random-helpers",
+  "title": "Shared Random Helpers — one shuffle, one RNG seam",
+  "type": "refactor",
+  "status": "new",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-25T20:00:30+11:00",
+  "updated_at": "2026-10-25T20:00:30+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "refactor/20261025-shared-random-helpers",
+  "base_branch": "master",
+  "base_sha": "97869ab72403c7f97cefadc744331a671782a026",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 0,
+    "tasks_total": 12,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}

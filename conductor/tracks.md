@@ -254,3 +254,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Overlay Hit Areas** - [20261024-overlay-hit-areas](./archive/20261024-overlay-hit-areas/index.md) - bug - high
 - [x] **Track: Drag-Board Consolidation** - [20261025-drag-board-consolidation](./archive/20261025-drag-board-consolidation/index.md) - refactor - high
 - [x] **Track: Storage Schema Version** — [20261025-storage-schema-version](./archive/20261025-storage-schema-version/index.md) — chore — high
+
+- [ ] **Track: Shared Random Helpers — one shuffle, one RNG seam** — [20261025-shared-random-helpers](./tracks/20261025-shared-random-helpers/index.md) — refactor — high
