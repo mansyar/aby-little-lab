@@ -22,16 +22,6 @@ function storyFor(id: string): Story {
   return story;
 }
 
-/** Deterministic Park-Miller generator so a draw can be replayed. */
-function seededRng(seed: number): () => number {
-  let state = seed % 2147483647;
-  if (state <= 0) state += 2147483646;
-  return () => {
-    state = (state * 16807) % 2147483647;
-    return (state - 1) / 2147483646;
-  };
-}
-
 /** RNG that replays a fixed sequence and records how many values it handed out. */
 function sequenceRng(values: readonly number[]): { rng: () => number; calls: () => number } {
   let calls = 0;
@@ -82,7 +72,7 @@ describe("STORY_POOL", () => {
 describe("buildRound", () => {
   it("scrambles the panels into an unsolved permutation of the solution", () => {
     for (const story of STORY_POOL) {
-      const round = buildRound(story, seededRng(7));
+      const round = buildRound(story, mulberry32(7));
       expect(round.storyId).toBe(story.id);
       expect(round.solution).toEqual([...story.panels]);
       expect([...round.shuffled].sort()).toEqual([...round.solution].sort());
@@ -110,7 +100,7 @@ describe("buildRound", () => {
 
 describe("buildPlaythrough", () => {
   it("returns six rounds: three obvious then three subtle", () => {
-    const rounds = buildPlaythrough(seededRng(11));
+    const rounds = buildPlaythrough(mulberry32(11));
     expect(rounds).toHaveLength(ROUND_COUNT);
     expect(ROUNDS_PER_BAND).toBe(3);
     for (const round of rounds.slice(0, 3)) {
@@ -122,21 +112,24 @@ describe("buildPlaythrough", () => {
   });
 
   it("pins the classic mix: default call and shift 0 draw the same 3 + 3 shape", () => {
-    const byDefault = buildPlaythrough(seededRng(77)).map((round) => round.storyId);
-    const shifted = buildPlaythrough(seededRng(77), 0).map((round) => round.storyId);
+    const byDefault = buildPlaythrough(mulberry32(77)).map((round) => round.storyId);
+    const shifted = buildPlaythrough(mulberry32(77), 0).map((round) => round.storyId);
     expect(byDefault).toEqual(shifted);
     expect(byDefault).toHaveLength(6);
+    // Classic-mix pin re-derived from `mulberry32(77)` when the suite moved off
+    // its local Park-Miller generator: three obvious stories, then three subtle.
+    expect(byDefault).toEqual(["balloon", "ice-cream", "cake", "cup", "sun", "foot"]);
   });
 
   it("draws a 5 + 1 mix in the easy band, obvious rounds first", () => {
-    const rounds = buildPlaythrough(seededRng(13), -1);
+    const rounds = buildPlaythrough(mulberry32(13), -1);
     expect(rounds).toHaveLength(ROUND_COUNT);
     const ladders = rounds.map((round) => storyFor(round.storyId).ladder);
     expect(ladders).toEqual(["obvious", "obvious", "obvious", "obvious", "obvious", "subtle"]);
   });
 
   it("draws a 1 + 5 mix in the hard band, obvious round first", () => {
-    const rounds = buildPlaythrough(seededRng(13), 1);
+    const rounds = buildPlaythrough(mulberry32(13), 1);
     expect(rounds).toHaveLength(ROUND_COUNT);
     const ladders = rounds.map((round) => storyFor(round.storyId).ladder);
     expect(ladders).toEqual(["obvious", "subtle", "subtle", "subtle", "subtle", "subtle"]);
@@ -145,7 +138,7 @@ describe("buildPlaythrough", () => {
   it("never repeats a story in any band, across many seeds", () => {
     for (const shift of [-1, 0, 1] as const) {
       for (let seed = 1; seed <= 50; seed++) {
-        const rounds = buildPlaythrough(seededRng(seed), shift);
+        const rounds = buildPlaythrough(mulberry32(seed), shift);
         const ids = rounds.map((round) => round.storyId);
         expect(new Set(ids).size).toBe(ROUND_COUNT);
       }
@@ -153,7 +146,7 @@ describe("buildPlaythrough", () => {
   });
 
   it("gives every round a scrambled strip that is a permutation of its story", () => {
-    const rounds = buildPlaythrough(seededRng(23));
+    const rounds = buildPlaythrough(mulberry32(23));
     for (const round of rounds) {
       const story = storyFor(round.storyId);
       expect(round.solution).toEqual([...story.panels]);
@@ -163,7 +156,7 @@ describe("buildPlaythrough", () => {
   });
 
   it("is deterministic under a seeded rng", () => {
-    expect(buildPlaythrough(seededRng(1234))).toEqual(buildPlaythrough(seededRng(1234)));
+    expect(buildPlaythrough(mulberry32(1234))).toEqual(buildPlaythrough(mulberry32(1234)));
   });
 
   it("draws the identical sequence after adopting the shared shuffle (AC-3)", () => {
@@ -213,8 +206,8 @@ describe("buildPlaythrough", () => {
   });
 
   it("differs between two seeds known to draw different orders", () => {
-    const first = buildPlaythrough(seededRng(1)).map((round) => round.storyId);
-    const second = buildPlaythrough(seededRng(2)).map((round) => round.storyId);
+    const first = buildPlaythrough(mulberry32(1)).map((round) => round.storyId);
+    const second = buildPlaythrough(mulberry32(2)).map((round) => round.storyId);
     expect(first).not.toEqual(second);
   });
 });

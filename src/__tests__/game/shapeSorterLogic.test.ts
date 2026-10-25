@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { shuffle } from "../../game/random";
 import {
@@ -8,6 +8,7 @@ import {
   poolFor,
   type ShapeType,
 } from "../../game/shapeSorterLogic";
+import { mulberry32 } from "../helpers/randomHelper";
 
 it("expanded pool includes all 12 new shape types (18 total)", () => {
   expect(ALL_SHAPES).toHaveLength(18);
@@ -170,14 +171,17 @@ describe("generatePlaythrough with a band shift", () => {
   });
 
   it("classic draws are identical with and without the shift argument", () => {
-    // Scoped default-wiring assertion (the FR-6 exception): shapeSorterLogic
-    // deliberately exposes no rng seam (it only forwards to `shuffle`), so the
-    // implicit Math.random default is pinned for this one comparison.
-    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.5);
-    try {
-      expect(generatePlaythrough(3, 0)).toEqual(generatePlaythrough(3));
-    } finally {
-      randomSpy.mockRestore();
-    }
+    // The rng is a trailing optional parameter, so omitting the shift still
+    // takes the classic default; the seeded generator makes the draw
+    // repeatable instead of relying on a scoped Math.random stub.
+    expect(generatePlaythrough(3, undefined, mulberry32(1234))).toEqual(
+      generatePlaythrough(3, 0, mulberry32(1234)),
+    );
+    expect(generatePlaythrough(3, 0, mulberry32(1234))).toEqual(
+      generatePlaythrough(3, 0, mulberry32(1234)),
+    );
+    const classic = generatePlaythrough(3, 0, mulberry32(1234));
+    expect(classic).toHaveLength(3);
+    expect(new Set(classic.flat()).size).toBe(9);
   });
 });

@@ -397,6 +397,8 @@ describe("MusicalMemoryScene sequence playback and input", () => {
     // Sequence [0, 1] (green, blue): distinct adjacent notes expose the
     // stale-inputIndex bug — without the reset, a replay followed by the
     // first-note tap would be judged against the SECOND note and fail.
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValueOnce(0.0).mockReturnValueOnce(0.5).mockReturnValue(0.5);
 
     const scene = new MusicalMemoryScene();

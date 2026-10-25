@@ -164,6 +164,11 @@ export function buildRound(story: Story, rng: Rng = Math.random): StoryOrderRoun
  * rounds come first, then the subtle ones. Within a band the draw order is
  * shuffled, so consecutive playthroughs differ. `rng` must return a number in
  * [0, 1); tests pass a seeded generator so a playthrough is reproducible.
+ *
+ * `rng` stays the **first** parameter, unlike the trailing-rng convention every
+ * other module follows, for scene-call compatibility: `StoryOrderScene` calls
+ * `buildPlaythrough(Math.random, shift)`. See the FR-3 deviation in the phase
+ * evidence.
  */
 export function buildPlaythrough(rng: Rng = Math.random, shift: BandShift = 0): StoryOrderRound[] {
   const mix = mixFor(shift);

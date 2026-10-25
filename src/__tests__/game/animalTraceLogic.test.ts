@@ -12,6 +12,7 @@ import {
   waypointsFor,
 } from "../../game/animalTraceLogic";
 import { shuffle } from "../../game/random";
+import { mulberry32 } from "../helpers/randomHelper";
 
 describe("selectThreePairs", () => {
   it("returns exactly 3 pairs", () => {
@@ -63,14 +64,33 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: AnimalFoodPair[] = [...ALL_PAIRS];
 
-    // Draw script passed through the injected seam: the first shuffle draws
-    // 0.5 then 0.2, the second 0.8 then 0.1.
+    // A 6-element pool takes 5 Fisher-Yates draws per call, so two calls need
+    // 10 draws. The script cycles instead of running dry: an under-scripted rng
+    // would return `undefined`, write it into the result, and let a mere
+    // inequality assertion pass on corrupted output.
     let draw = 0;
     const draws = [0.5, 0.2, 0.8, 0.1];
-    const rng = () => draws[draw++];
+    const rng = () => draws[draw++ % draws.length];
     const result1 = shuffle(input, rng);
     const result2 = shuffle(input, rng);
 
+    // Concrete permutations re-derived from the cycled draws above.
+    expect(result1.map((pair) => pair.animal)).toEqual([
+      "cat",
+      "elephant",
+      "monkey",
+      "pig",
+      "rabbit",
+      "dog",
+    ]);
+    expect(result2.map((pair) => pair.animal)).toEqual([
+      "cat",
+      "dog",
+      "pig",
+      "monkey",
+      "elephant",
+      "rabbit",
+    ]);
     expect(result1).not.toEqual(result2);
   });
 });
@@ -166,13 +186,19 @@ describe("generatePathPoints", () => {
   });
 
   it("produces different curves on successive calls (randomized)", () => {
-    // First call draws 0.5 then 0.2, the second 0.8 then 0.9 — scripted
-    // through the injected seam instead of a Math.random spy.
+    // Each call consumes exactly 4 draws (arch amplitude, arch direction,
+    // S-curve amplitude, S-curve direction), so two calls need 8. The explicit
+    // budget means an under-scripted rng surfaces as a non-finite coordinate
+    // instead of silently passing on `undefined`-derived `NaN`s.
     let draw = 0;
-    const draws = [0.5, 0.2, 0.8, 0.9];
+    const draws = [0.5, 0.2, 0.8, 0.9, 0.3, 0.6, 0.1, 0.7];
     const rng = () => draws[draw++];
     const result1 = generatePathPoints(200, 384, 824, 384, 6, rng);
     const result2 = generatePathPoints(200, 384, 824, 384, 6, rng);
+    expect(draw).toBe(8);
+
+    expect(Number.isFinite(result1[1].y)).toBe(true);
+    expect(Number.isFinite(result2[1].y)).toBe(true);
 
     // At least one intermediate point should differ between the two curves
     const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
@@ -181,13 +207,23 @@ describe("generatePathPoints", () => {
 
   it("produces different curves at other waypoint counts too", () => {
     let draw = 0;
-    const draws = [0.5, 0.2, 0.8, 0.9];
+    const draws = [0.4, 0.7, 0.2, 0.3, 0.9, 0.1, 0.6, 0.4];
     const rng = () => draws[draw++];
     const result1 = generatePathPoints(200, 384, 824, 384, 8, rng);
     const result2 = generatePathPoints(200, 384, 824, 384, 8, rng);
+    expect(draw).toBe(8);
+
+    expect(Number.isFinite(result1[1].y)).toBe(true);
+    expect(Number.isFinite(result2[1].y)).toBe(true);
 
     const midDiffer = result1.slice(1, -1).some((p, i) => p.y !== result2[i + 1].y);
     expect(midDiffer).toBe(true);
+  });
+
+  it("is deterministic under a seeded rng (AC-3)", () => {
+    expect(generatePathPoints(200, 384, 824, 384, 6, mulberry32(1234))).toEqual(
+      generatePathPoints(200, 384, 824, 384, 6, mulberry32(1234)),
+    );
   });
 });
 

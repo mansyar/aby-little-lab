@@ -18,6 +18,7 @@ import {
   WIN_TARGET,
 } from "../../game/popFreezeLogic";
 import { shuffle } from "../../game/random";
+import { mulberry32 } from "../helpers/randomHelper";
 
 describe("createRoundState", () => {
   it("initializes pop count to 0", () => {
@@ -168,6 +169,14 @@ describe("generateInitialBubbles", () => {
       }
     }
   });
+
+  it("is deterministic under a seeded rng (AC-3)", () => {
+    // `undefined` keeps the classic sleeping bounds; the seeded generator makes
+    // the whole spawn (positions, velocities and animal draws) reproducible.
+    expect(generateInitialBubbles(800, 600, 96, undefined, mulberry32(1234))).toEqual(
+      generateInitialBubbles(800, 600, 96, undefined, mulberry32(1234)),
+    );
+  });
 });
 
 describe("registerPop", () => {
@@ -243,14 +252,19 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: BubbleType[] = ["poppable", "sleeping", "poppable", "sleeping"];
 
-    // Draw script passed through the injected seam: the first shuffle draws
-    // 0.5 then 0.2, the second 0.8 then 0.1.
+    // A 4-element pool takes 3 Fisher-Yates draws per call, so two calls need 6
+    // draws. The script cycles instead of running dry: an under-scripted rng
+    // returns `undefined`, writes it into the result, and lets a mere
+    // inequality assertion pass on corrupted output.
     let draw = 0;
     const draws = [0.5, 0.2, 0.8, 0.1];
-    const rng = () => draws[draw++];
+    const rng = () => draws[draw++ % draws.length];
     const result1 = shuffle(input, rng);
     const result2 = shuffle(input, rng);
 
+    // Concrete permutations re-derived from the cycled draws above.
+    expect(result1).toEqual(["sleeping", "sleeping", "poppable", "poppable"]);
+    expect(result2).toEqual(["poppable", "sleeping", "sleeping", "poppable"]);
     expect(result1).not.toEqual(result2);
   });
 });
