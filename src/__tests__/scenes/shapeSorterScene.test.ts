@@ -94,7 +94,7 @@ vi.mock("../../game/shapeSorterLogic", async (importOriginal) => {
 interface SceneInternals {
   playthrough: ShapeType[][];
   roundIndex: number;
-  shapes: Array<{ obj: MockGameObject; type: ShapeType }>;
+  shapes: Array<{ container: MockGameObject; type: ShapeType }>;
   slots: Array<{ zone: MockGameObject; type: ShapeType }>;
   progressDots: MockGameObject[];
 }
@@ -121,7 +121,7 @@ function placeAllShapes(scene: ShapeSorterScene): void {
   for (const shape of internals.shapes) {
     const slot = internals.slots.find((s) => s.type === shape.type);
     if (!slot) throw new Error("No matching slot found");
-    dropShapeOn(shape.obj, slot.zone);
+    dropShapeOn(shape.container, slot.zone);
   }
 }
 
@@ -259,7 +259,7 @@ describe("ShapeSorterScene multi-round sessions", () => {
   it("destroys the previous round's objects when advancing", () => {
     const scene = createScene();
     const internals = getInternals(scene);
-    const roundZeroShapes = internals.shapes.map((s) => s.obj);
+    const roundZeroShapes = internals.shapes.map((s) => s.container);
     const roundZeroZones = internals.slots.map((s) => s.zone);
 
     placeAllShapes(scene);

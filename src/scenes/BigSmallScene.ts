@@ -10,8 +10,9 @@ import {
   scaleFactorsFor,
   type ToyInstance,
 } from "../game/bigSmallLogic";
+import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
+import { attachDragLift, attachDropZoneHighlight } from "../utils/dragJuice";
 import { motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
@@ -31,12 +32,6 @@ const BOX_BASE_SIZE = 128;
 
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 160;
-
-/** Tween duration for bounce-back animation (ms). */
-const BOUNCE_DURATION = 300;
-
-/** Duration of the bounce-back under reduced motion (ms). */
-const BOUNCE_REDUCED_DURATION = 180;
 
 /** Duration of the shrink-into-box tween on a correct drop (ms). */
 const SHRINK_DURATION = 150;
@@ -68,14 +63,11 @@ const BOX_BUMP_DURATION = 250;
 /** Duration of the box scale bump under reduced motion (ms). */
 const BOX_BUMP_REDUCED_DURATION = 150;
 
-/** Tracks a draggable toy's state during the round. */
-interface ToyData {
-  obj: Phaser.GameObjects.Image;
+/** Tracks a draggable toy registered with the shared drag board. */
+interface ToyData extends BoardPiece {
+  container: Phaser.GameObjects.Image;
   scaleCategory: ScaleCategory;
-  originX: number;
-  originY: number;
   sorted: boolean;
-  droppedOnZone: boolean;
 }
 
 /** Tracks a box's drop zone and position. */
@@ -91,11 +83,14 @@ interface BoxSlotData {
  * Big vs. Small Cleaner scene — drag toys into matching big/small boxes.
  *
  * Round initialization generates 6 toy instances (3 big + 3 small) and 2 boxes.
- * Toys are dragged via Phaser Pointer Drag to matching scale-category boxes.
- * Correct drops snap to box center with SFX + bounded splash/ray feedback; incorrect drops
- * bounce back gently with a soft tone.
+ * The shared {@link DragBoard} shell owns the gesture wiring, the snap, and
+ * the bounce home, with each box registered as a multi slot so sorted toys
+ * accumulate; this scene keeps the sorted-vs-fit validation, so a correct
+ * drop snaps to box center and shrinks into it with the lid wiggle and scale
+ * bump, and an incorrect drop bounces back gently with a soft tone.
  */
 export class BigSmallScene extends GameSceneBase {
+  private board: DragBoard<ToyData> | null = null;
   private round: { toys: ToyInstance[]; boxes: BoxInstance[] } = {
     toys: [],
     boxes: [],
@@ -119,6 +114,28 @@ export class BigSmallScene extends GameSceneBase {
     this.createCornerMascot();
     this.createBackButton();
     this.createSpokenInstruction("Put the big toys in the big box.");
+
+    // completeGame locks input for the auto-return; a relaunched session
+    // (Phaser reuses the scene instance) must start unlocked, and the shell
+    // consults this lock on every gesture.
+    this.inputLocked = false;
+
+    this.board?.destroy();
+    this.board = new DragBoard<ToyData>({
+      scene: this,
+      zoneSize: DROP_ZONE_SIZE,
+      // Per-drop validation lives in the onDrop callback below, so the
+      // shell's validation-reporting hook stays unused; a wrong drop bounces
+      // just that toy home through the shell's withdraw (300/180 ms).
+      wrongAnswerBehavior: "bounce-home",
+      validationTiming: "per-drop",
+      // A tap never lifts a sorted toy out of its box in this game.
+      tapWithdraw: false,
+      isLocked: () => this.inputLocked,
+      callbacks: {
+        onDrop: (data, slotIndex) => this.handleBoardDrop(data, slotIndex),
+      },
+    });
 
     this.factors = scaleFactorsFor(getAdaptiveBandShift("big-small"));
     this.initRound();
@@ -146,8 +163,11 @@ export class BigSmallScene extends GameSceneBase {
     this.createToys();
   }
 
-  /** Creates box images and drop zones at the top of the screen. */
+  /** Creates box images and board-registered multi-slot drop zones at the top of the screen. */
   private createBoxSlots(): void {
+    const board = this.board;
+    if (!board) return;
+
     const spacing = this.scale.width / (this.round.boxes.length + 1);
     for (let i = 0; i < this.round.boxes.length; i++) {
       const x = spacing * (i + 1);
@@ -156,15 +176,22 @@ export class BigSmallScene extends GameSceneBase {
       const boxObj = this.add.image(x, BOX_Y, "toy_box");
       boxObj.setDisplaySize(displaySize, displaySize);
 
-      const zone = this.add.zone(x, BOX_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
-      zone.setInteractive({ dropZone: true });
-
-      this.boxSlots.push({ zone, scaleCategory: box.scaleCategory, x, y: BOX_Y, obj: boxObj });
+      const registered = board.addSlot(x, BOX_Y, "multi");
+      this.boxSlots.push({
+        zone: registered.zone,
+        scaleCategory: box.scaleCategory,
+        x,
+        y: BOX_Y,
+        obj: boxObj,
+      });
     }
   }
 
   /** Creates interactive draggable toy images at the bottom of the screen. */
   private createToys(): void {
+    const board = this.board;
+    if (!board) return;
+
     const spacing = this.scale.width / (this.round.toys.length + 1);
     for (let i = 0; i < this.round.toys.length; i++) {
       const x = spacing * (i + 1);
@@ -175,63 +202,58 @@ export class BigSmallScene extends GameSceneBase {
         .setDisplaySize(displaySize, displaySize)
         .setInteractive();
 
-      this.input.setDraggable(obj);
-
       const data: ToyData = {
-        obj,
+        id: `${toy.scaleCategory}_${toy.type}`,
+        container: obj,
         scaleCategory: toy.scaleCategory,
         originX: x,
         originY: TOY_Y,
+        slotIndex: null,
+        justDropped: false,
         sorted: false,
-        droppedOnZone: false,
       };
 
-      obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
-        obj.setPosition(dragX, dragY);
-      });
-
-      obj.on("drop", (_pointer: unknown, target: unknown) => {
-        this.handleDrop(data, target);
-      });
-
-      obj.on("dragend", () => {
-        this.handleDragEnd(data);
-      });
-
+      // The lift juice stays scene-called; the shell owns the gesture wiring.
       attachDragLift(obj, { skipRestore: () => data.sorted });
+      board.addPiece(data);
 
       this.toyData.push(data);
     }
   }
 
-  /** Handles a toy being dropped on a zone. Snaps on correct match, otherwise no-ops. */
-  private handleDrop(data: ToyData, target: unknown): void {
-    const slot = this.boxSlots.find((s) => s.zone === target);
-    if (!slot) return;
+  /** Validates one board drop: a matching toy shrinks into the box, a miss bounces home. */
+  private handleBoardDrop(data: ToyData, slotIndex: number): void {
+    const board = this.board;
+    const slot = this.boxSlots[slotIndex];
+    if (!board || !slot) return;
 
-    data.droppedOnZone = true;
+    if (!isMatch(data.scaleCategory, slot.scaleCategory)) {
+      // The soft tone first, then the shell bounces just this toy home.
+      this.reactWrong();
+      board.withdraw(data);
+      return;
+    }
 
-    if (isMatch(data.scaleCategory, slot.scaleCategory)) {
-      snapToSlot(this, data.obj, slot.x, slot.y);
-      this.tweens.add({
-        targets: data.obj,
-        scaleX: 0,
-        scaleY: 0,
-        duration: motionDuration(SHRINK_DURATION, SHRINK_REDUCED_DURATION),
-        ease: "Sine.in",
-      });
-      this.reactBox(slot);
-      data.obj.disableInteractive();
-      data.sorted = true;
-      this.sortedCount++;
-      this.audioManager.playCorrect();
-      this.recordCorrect();
-      this.mascot?.cheer();
-      createCompletionSplash(this, slot.x, slot.y);
+    // Sorted toys stay board occupants in the multi slot — multi slots
+    // accumulate, so a later drop can never displace them.
+    this.tweens.add({
+      targets: data.container,
+      scaleX: 0,
+      scaleY: 0,
+      duration: motionDuration(SHRINK_DURATION, SHRINK_REDUCED_DURATION),
+      ease: "Sine.in",
+    });
+    this.reactBox(slot);
+    data.container.disableInteractive();
+    data.sorted = true;
+    this.sortedCount++;
+    this.audioManager.playCorrect();
+    this.recordCorrect();
+    this.mascot?.cheer();
+    createCompletionSplash(this, slot.x, slot.y);
 
-      if (isWin(this.sortedCount)) {
-        this.completeGame("big-small");
-      }
+    if (isWin(this.sortedCount)) {
+      this.completeGame("big-small");
     }
   }
 
@@ -258,22 +280,5 @@ export class BigSmallScene extends GameSceneBase {
       yoyo: true,
       ease: "Sine.inOut",
     });
-  }
-
-  /** Handles drag end. Bounces toy back to origin; plays incorrect SFX only if dropped on a zone. */
-  private handleDragEnd(data: ToyData): void {
-    if (!data.sorted) {
-      if (data.droppedOnZone) {
-        this.reactWrong();
-      }
-      this.tweens.add({
-        targets: data.obj,
-        x: data.originX,
-        y: data.originY,
-        duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-        ease: "Back.out",
-      });
-      data.droppedOnZone = false;
-    }
   }
 }

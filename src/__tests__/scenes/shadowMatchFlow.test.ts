@@ -243,22 +243,30 @@ describe("ShadowMatchScene drag and drop", () => {
 
     const onCalls = getMockFn(object.obj.on).mock.calls;
 
-    // Simulate drop on wrong zone (no snap, no SFX)
-    const dropCall = onCalls.find((c) => c[0] === "drop");
-    const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+    // Simulate drop on wrong zone (no snap, no SFX), then release. The real
+    // gesture fires every dragend listener — the lift's restore and the
+    // board's bounce bookkeeping.
+    const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+      pointer: unknown,
+      target: unknown,
+    ) => void;
     dropCallback(null, wrongSlot.zone);
-
-    // Simulate dragend (triggers bounce-back)
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-    const objTween = tweenCalls.find((c) => c[0]?.targets === object.obj);
+    const objTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === object.obj && c[0]?.x === object.originX && c[0]?.y === object.originY,
+    );
     expect(objTween).toBeDefined();
     if (!objTween) throw new Error("object bounce-back tween not found");
-    expect(objTween[0].x).toBe(object.originX);
-    expect(objTween[0].y).toBe(object.originY);
+    expect(objTween[0].duration).toBe(300);
+    expect(objTween[0].ease).toBe("Back.out");
 
     expect(mockAudio.playIncorrect).toHaveBeenCalled();
     expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
@@ -283,17 +291,94 @@ describe("ShadowMatchScene drag and drop", () => {
 
     expect(getMockFn(object.obj.disableInteractive)).toHaveBeenCalled();
 
-    // Dragend after match — should NOT bounce
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    // Dragend after match — should NOT bounce. The real gesture fires every
+    // dragend listener; simulate the matched object resting at slot center.
+    const positioned = object.obj as unknown as { x: number; y: number };
+    positioned.x = slot.x;
+    positioned.y = slot.y;
+    const tweenCountBefore = getMockFn(scene.tweens.add).mock.calls.length;
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
+
+    // Placed-correct lock: no movement tween afterwards (the lift's scale
+    // restore is juice, not movement). A bounce home or a slot return would
+    // both carry x/y targets.
+    const newObjectTweens = getMockFn(scene.tweens.add)
+      .mock.calls.slice(tweenCountBefore)
+      .filter(
+        (c) => c[0]?.targets === object.obj && (c[0]?.x !== undefined || c[0]?.y !== undefined),
+      );
+    expect(newObjectTweens).toHaveLength(0);
+  });
+
+  it("uses a reduced-motion bounce-back when requested", () => {
+    vi.stubGlobal("window", {
+      matchMedia: vi.fn(() => ({ matches: true })),
+    });
+
+    const scene = new ShadowMatchScene();
+    scene.create();
+
+    const objects = getObjects(scene);
+    const object = objects[0];
+
+    const onCalls = getMockFn(object.obj.on).mock.calls;
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
     const bounceTween = tweenCalls.find(
       (c) =>
         c[0]?.targets === object.obj && c[0]?.x === object.originX && c[0]?.y === object.originY,
     );
-    expect(bounceTween).toBeUndefined();
+    expect(bounceTween).toBeDefined();
+    if (!bounceTween) return;
+    expect((bounceTween[0] as { duration: number }).duration).toBe(180);
+  });
+
+  it("never displaces a locked object when another object drops onto its slot", () => {
+    const scene = new ShadowMatchScene();
+    scene.create();
+
+    const objects = getObjects(scene);
+    const slots = getShadowSlots(scene);
+    const objectA = objects[0];
+    const slotA = slots.find((s) => s.type === objectA.type);
+    if (!slotA) throw new Error("No matching slot found");
+    const objectB = objects[1];
+
+    const dropFor = (target: { obj: Record<string, MockFn> }) => {
+      const onCalls = getMockFn(target.obj.on).mock.calls;
+      const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+        pointer: unknown,
+        target: unknown,
+      ) => void;
+      return dropCallback;
+    };
+
+    dropFor(objectA)(null, slotA.zone);
+    dropFor(objectB)(null, slotA.zone);
+
+    // The locked object must stay in its slot; only the wrong object bounces.
+    const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+    const evictedTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === objectA.obj && c[0]?.x === objectA.originX && c[0]?.y === objectA.originY,
+    );
+    expect(evictedTween).toBeUndefined();
+    const wrongBounceTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === objectB.obj && c[0]?.x === objectB.originX && c[0]?.y === objectB.originY,
+    );
+    expect(wrongBounceTween).toBeDefined();
   });
 
   it("creates touch targets meeting 64x64px minimum", () => {
@@ -336,11 +421,15 @@ describe("ShadowMatchScene drag and drop", () => {
     const objects = getObjects(scene);
     const object = objects[0];
 
-    // Simulate dragend without a preceding drop (object released on empty space)
+    // Simulate dragend without a preceding drop (object released on empty
+    // space). The real gesture fires every dragend listener.
     const onCalls = getMockFn(object.obj.on).mock.calls;
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     // Bounce tween should be created
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;

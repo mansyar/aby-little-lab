@@ -1,10 +1,10 @@
 import type Phaser from "phaser";
 import { cutouts } from "../game/art/cutouts";
 import { shapes } from "../game/art/shapes";
+import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import { generatePlaythrough, isMatch, type ShapeType, shuffle } from "../game/shapeSorterLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
-import { motionDuration } from "../utils/motion";
+import { attachDragLift, attachDropZoneHighlight } from "../utils/dragJuice";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
 import { GameSceneBase } from "./GameSceneBase";
@@ -21,23 +21,14 @@ const SHAPE_DISPLAY_SIZE = 128;
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 160;
 
-/** Tween duration for bounce-back animation (ms). */
-const BOUNCE_DURATION = 300;
-
-/** Duration of the bounce-back under reduced motion (ms). */
-const BOUNCE_REDUCED_DURATION = 180;
-
 /** Number of rounds per play session. */
 const ROUND_COUNT = 3;
 
-/** Tracks a draggable shape's state during the round. */
-interface ShapeData {
-  obj: Phaser.GameObjects.Image;
+/** Tracks a draggable shape registered with the shared drag board. */
+interface ShapeData extends BoardPiece {
+  container: Phaser.GameObjects.Image;
   type: ShapeType;
-  originX: number;
-  originY: number;
   placed: boolean;
-  droppedOnZone: boolean;
 }
 
 /** Tracks a slot's drop zone, image, and position. */
@@ -54,10 +45,12 @@ interface SlotData {
  *
  * A session is 3 rounds of 3 shapes drawn without repeats from the 18-shape
  * pool. Slot positions and shape positions are shuffled independently each
- * round; progress dots fill above the slots. Correct drops snap to center
- * with SFX + bounded splash/ray feedback; incorrect drops bounce back gently
- * with a soft tone. Win celebration + sticker award happen after the final
- * round.
+ * round; progress dots fill above the slots. The shared {@link DragBoard}
+ * shell owns the gesture wiring, the snap, and the bounce home; this scene
+ * keeps only its visuals and the per-drop validation, so a correct drop snaps
+ * to center with SFX + bounded splash/ray feedback and an incorrect drop
+ * bounces back gently with a soft tone. Win celebration + sticker award
+ * happen after the final round.
  */
 export class ShapeSorterScene extends GameSceneBase {
   // Shape Sorter's larger dots sit above the slots, with a shorter pop and a
@@ -70,6 +63,7 @@ export class ShapeSorterScene extends GameSceneBase {
   protected readonly DOT_POP_REDUCED_DURATION = 140;
   protected readonly NEXT_ROUND_DELAY = 1200;
 
+  private board: DragBoard<ShapeData> | null = null;
   private playthrough: ShapeType[][] = [];
   private roundIndex = 0;
   private selectedShapes: ShapeType[] = [];
@@ -93,6 +87,28 @@ export class ShapeSorterScene extends GameSceneBase {
     // Progress dots sit at y=100 here, so the instruction line drops below them
     // and above the shape slots (y=200).
     this.createSpokenInstruction("Drag each shape into its hole.", { y: 126 });
+
+    // completeGame locks input for the auto-return; a relaunched session
+    // (Phaser reuses the scene instance) must start unlocked, and the shell
+    // consults this lock on every gesture.
+    this.inputLocked = false;
+
+    this.board?.destroy();
+    this.board = new DragBoard<ShapeData>({
+      scene: this,
+      zoneSize: DROP_ZONE_SIZE,
+      // Per-drop validation lives in the onDrop callback below, so the
+      // shell's validation-reporting hook stays unused; a wrong drop bounces
+      // just that shape home through the shell's withdraw (300/180 ms).
+      wrongAnswerBehavior: "bounce-home",
+      validationTiming: "per-drop",
+      // A tap never lifts a placed shape in this game.
+      tapWithdraw: false,
+      isLocked: () => this.inputLocked,
+      callbacks: {
+        onDrop: (shape, slotIndex) => this.handleBoardDrop(shape, slotIndex),
+      },
+    });
 
     this.playthrough = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("shape-sorter"));
     this.roundIndex = 0;
@@ -125,8 +141,11 @@ export class ShapeSorterScene extends GameSceneBase {
     this.createShapes();
   }
 
-  /** Creates cutout slot images and drop zones at the top of the screen. */
+  /** Creates cutout slot images and board-registered drop zones at the top of the screen. */
   private createSlots(): void {
+    const board = this.board;
+    if (!board) return;
+
     const spacing = this.scale.width / (this.selectedShapes.length + 1);
     for (let i = 0; i < this.slotOrder.length; i++) {
       const x = spacing * (i + 1);
@@ -135,15 +154,16 @@ export class ShapeSorterScene extends GameSceneBase {
         .image(x, SLOT_Y, `cutout_${slotType}`)
         .setDisplaySize(SHAPE_DISPLAY_SIZE, SHAPE_DISPLAY_SIZE);
 
-      const zone = this.add.zone(x, SLOT_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
-      zone.setInteractive({ dropZone: true });
-
-      this.slots.push({ zone, img, type: slotType, x, y: SLOT_Y });
+      const registered = board.addSlot(x, SLOT_Y);
+      this.slots.push({ zone: registered.zone, img, type: slotType, x, y: SLOT_Y });
     }
   }
 
   /** Creates interactive draggable shape images at the bottom of the screen. */
   private createShapes(): void {
+    const board = this.board;
+    if (!board) return;
+
     const spacing = this.scale.width / (this.selectedShapes.length + 1);
     for (let i = 0; i < this.shapeOrder.length; i++) {
       const x = spacing * (i + 1);
@@ -153,54 +173,51 @@ export class ShapeSorterScene extends GameSceneBase {
         .setDisplaySize(SHAPE_DISPLAY_SIZE, SHAPE_DISPLAY_SIZE)
         .setInteractive();
 
-      this.input.setDraggable(obj);
-
       const shapeData: ShapeData = {
-        obj,
+        id: shapeType,
+        container: obj,
         type: shapeType,
         originX: x,
         originY: SHAPE_Y,
+        slotIndex: null,
+        justDropped: false,
         placed: false,
-        droppedOnZone: false,
       };
 
-      obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
-        obj.setPosition(dragX, dragY);
-      });
-
-      obj.on("drop", (_pointer: unknown, target: unknown) => {
-        this.handleDrop(shapeData, target);
-      });
-
-      obj.on("dragend", () => {
-        this.handleDragEnd(shapeData);
-      });
-
+      // The lift juice stays scene-called; the shell owns the gesture wiring.
       attachDragLift(obj);
+      board.addPiece(shapeData);
 
       this.shapes.push(shapeData);
     }
   }
 
-  /** Handles a shape being dropped on a zone. Snaps on correct match, otherwise no-ops. */
-  private handleDrop(shape: ShapeData, target: unknown): void {
-    const slot = this.slots.find((s) => s.zone === target);
-    if (!slot) return;
+  /** Validates one board drop: a match locks the shape in its slot, a miss bounces it home. */
+  private handleBoardDrop(shape: ShapeData, slotIndex: number): void {
+    const board = this.board;
+    const slot = this.slots[slotIndex];
+    if (!board || !slot) return;
 
-    shape.droppedOnZone = true;
+    if (!isMatch(shape.type, slot.type)) {
+      // The soft tone first, then the shell bounces just this shape home.
+      this.reactWrong();
+      board.withdraw(shape);
+      return;
+    }
 
-    if (isMatch(shape.type, slot.type)) {
-      snapToSlot(this, shape.obj, slot.x, slot.y);
-      shape.obj.disableInteractive();
-      shape.placed = true;
-      this.audioManager.playCorrect();
-      this.recordCorrect();
-      this.mascot?.cheer();
-      createCompletionSplash(this, slot.x, slot.y);
+    // A placed shape is locked, so a later drop must never displace it:
+    // release its board occupancy while it visually stays in the slot.
+    board.getSlots()[slotIndex].occupiedBy = null;
+    shape.slotIndex = null;
+    shape.container.disableInteractive();
+    shape.placed = true;
+    this.audioManager.playCorrect();
+    this.recordCorrect();
+    this.mascot?.cheer();
+    createCompletionSplash(this, slot.x, slot.y);
 
-      if (this.shapes.every((s) => s.placed)) {
-        this.handleRoundComplete();
-      }
+    if (this.shapes.every((s) => s.placed)) {
+      this.handleRoundComplete();
     }
   }
 
@@ -223,33 +240,16 @@ export class ShapeSorterScene extends GameSceneBase {
     }
   }
 
-  /** Removes the current round's shapes, slot images, and drop zones. */
+  /** Removes the current round's shapes and slot images; the shell drops its zones. */
   private teardownRound(): void {
     for (const shape of this.shapes) {
-      shape.obj.destroy();
+      shape.container.destroy();
     }
     for (const slot of this.slots) {
       slot.img.destroy();
-      slot.zone.destroy();
     }
+    this.board?.clear();
     this.shapes = [];
     this.slots = [];
-  }
-
-  /** Handles drag end. Bounces shape back to origin with wobble if not placed. */
-  private handleDragEnd(shape: ShapeData): void {
-    if (!shape.placed) {
-      if (shape.droppedOnZone) {
-        this.reactWrong();
-      }
-      this.tweens.add({
-        targets: shape.obj,
-        x: shape.originX,
-        y: shape.originY,
-        duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-        ease: "Back.out",
-      });
-      shape.droppedOnZone = false;
-    }
   }
 }

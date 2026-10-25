@@ -292,20 +292,29 @@ describe("BigSmallScene drag and drop", () => {
 
     const onCalls = getMockFn(toy.obj.on).mock.calls;
 
-    const dropCall = onCalls.find((c) => c[0] === "drop");
-    const dropCallback = dropCall?.[1] as (pointer: unknown, target: unknown) => void;
+    const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+      pointer: unknown,
+      target: unknown,
+    ) => void;
     dropCallback(null, wrongSlot.zone);
 
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    // The real gesture fires every dragend listener — the lift's restore and
+    // the board's bounce bookkeeping.
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-    const toyTween = tweenCalls.find((c) => c[0]?.targets === toy.obj);
+    const toyTween = tweenCalls.find(
+      (c) => c[0]?.targets === toy.obj && c[0]?.x === toy.originX && c[0]?.y === toy.originY,
+    );
     expect(toyTween).toBeDefined();
     if (!toyTween) throw new Error("toy bounce-back tween not found");
-    expect(toyTween[0].x).toBe(toy.originX);
-    expect(toyTween[0].y).toBe(toy.originY);
+    expect(toyTween[0].duration).toBe(300);
+    expect(toyTween[0].ease).toBe("Back.out");
 
     expect(mockAudio.playIncorrect).toHaveBeenCalled();
     expect(getMockFn(toy.obj.disableInteractive)).not.toHaveBeenCalled();
@@ -330,15 +339,90 @@ describe("BigSmallScene drag and drop", () => {
 
     expect(getMockFn(toy.obj.disableInteractive)).toHaveBeenCalled();
 
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    // Dragend after sorting — should NOT bounce. The real gesture fires every
+    // dragend listener; simulate the toy resting at box center.
+    const positioned = toy.obj as unknown as { x: number; y: number };
+    positioned.x = slot.x;
+    positioned.y = slot.y;
+    const tweenCountBefore = getMockFn(scene.tweens.add).mock.calls.length;
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
+
+    const newToyTweens = getMockFn(scene.tweens.add)
+      .mock.calls.slice(tweenCountBefore)
+      .filter((c) => c[0]?.targets === toy.obj);
+    expect(newToyTweens).toHaveLength(0);
+  });
+
+  it("uses a reduced-motion bounce-back when requested", () => {
+    vi.stubGlobal("window", {
+      matchMedia: vi.fn(() => ({ matches: true })),
+    });
+
+    const scene = new BigSmallScene();
+    scene.create();
+
+    const toys = getToys(scene);
+    const toy = toys[0];
+
+    const onCalls = getMockFn(toy.obj.on).mock.calls;
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
     const bounceTween = tweenCalls.find(
       (c) => c[0]?.targets === toy.obj && c[0]?.x === toy.originX && c[0]?.y === toy.originY,
     );
-    expect(bounceTween).toBeUndefined();
+    expect(bounceTween).toBeDefined();
+    if (!bounceTween) return;
+    expect((bounceTween[0] as { duration: number }).duration).toBe(180);
+  });
+
+  it("keeps sorted toys in their box when a wrong toy drops into the same box", () => {
+    const scene = new BigSmallScene();
+    scene.create();
+
+    const toys = getToys(scene);
+    const slots = getBoxSlots(scene);
+    const bigToy = toys.find((t) => t.scaleCategory === "big");
+    const smallToy = toys.find((t) => t.scaleCategory === "small");
+    const bigBox = slots.find((s) => s.scaleCategory === "big");
+    if (!bigToy || !smallToy || !bigBox) throw new Error("Expected big/small toys and a big box");
+
+    const dropFor = (target: { obj: Record<string, MockFn> }) => {
+      const onCalls = getMockFn(target.obj.on).mock.calls;
+      const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+        pointer: unknown,
+        target: unknown,
+      ) => void;
+      return dropCallback;
+    };
+
+    dropFor(bigToy)(null, bigBox.zone);
+    dropFor(smallToy)(null, bigBox.zone);
+
+    // The sorted toy must stay; only the wrong toy bounces back to its tray.
+    const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+    const evictedTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === bigToy.obj && c[0]?.x === bigToy.originX && c[0]?.y === bigToy.originY,
+    );
+    expect(evictedTween).toBeUndefined();
+    const wrongBounceTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === smallToy.obj &&
+        c[0]?.x === smallToy.originX &&
+        c[0]?.y === smallToy.originY,
+    );
+    expect(wrongBounceTween).toBeDefined();
   });
 
   it("creates touch targets meeting 64x64px minimum", () => {
@@ -382,9 +466,13 @@ describe("BigSmallScene drag and drop", () => {
     const toy = toys[0];
 
     const onCalls = getMockFn(toy.obj.on).mock.calls;
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    // The real gesture fires every dragend listener.
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
     const bounceTween = tweenCalls.find(
