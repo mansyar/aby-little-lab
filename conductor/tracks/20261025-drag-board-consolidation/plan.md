@@ -85,15 +85,19 @@ The primary appends after acceptance:
 - **Covers:** AC-6
 - **Touches:** `docs/TDD.md`, `docs/roadmap.md`
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: TDD.md board section** — covers: AC-6
-  - [ ] **P3.T1.1: Generalized contract truthfully documented** — the board section names the widened piece contract (Image/Container via the DragTarget set), the `single|multi` slot capacity, and all five consuming scenes; stay engine-accurate (line/behaviour references match shipped code).
-- [ ] **P3.T2: roadmap.md refresh** — covers: AC-6
-  - [ ] **P3.T2.1: Remove delivered/solved entries** — delete Known Issue "Three games hand-roll their drag scaffolding", Future-Work item 1 (drag-board consolidation), and the delivered "Bank play time as it is earned" bullet (user-approved fold-in); renumber the Future-Work list.
-  - [ ] **P3.T2.2: Refresh the review date** — the "checked against the code" line reflects this track's verification date.
-- [ ] **P3.T3: Docs gate** — covers: AC-5
-  - [ ] **P3.T3.1: Validator green** — `node scripts/validate-docs.js` passes with the updated docs.
+- [x] **P3.T1: TDD.md board section** — covers: AC-6
+  - [x] **P3.T1.1: Generalized contract truthfully documented** — the board section names the widened piece contract (Image/Container via the DragTarget set), the `single|multi` slot capacity, and all five consuming scenes; stay engine-accurate (line/behaviour references match shipped code).
+- [x] **P3.T2: roadmap.md refresh** — covers: AC-6
+  - [x] **P3.T2.1: Remove delivered/solved entries** — delete Known Issue "Three games hand-roll their drag scaffolding", Future-Work item 1 (drag-board consolidation), and the delivered "Bank play time as it is earned" bullet (user-approved fold-in); renumber the Future-Work list.
+  - [x] **P3.T2.2: Refresh the review date** — the "checked against the code" line reflects this track's verification date.
+- [x] **P3.T3: Docs gate** — covers: AC-5
+  - [x] **P3.T3.1: Validator green** — `node scripts/validate-docs.js` passes with the updated docs.
+
+**Result:** verified
+**Checkpoint:** `73e3c967`
+**Evidence:** conductor/tracks/20261025-drag-board-consolidation/verification/phase-3.md
 
 <!--
 The primary appends after acceptance:
