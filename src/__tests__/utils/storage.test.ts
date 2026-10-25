@@ -1,5 +1,7 @@
+import { vi } from "vitest";
 import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
+import { createDefaultProgressMap } from "../../game/progressLogic";
 import type { AppStorage, GameId } from "../../types";
 import {
   addProfile,
@@ -1166,5 +1168,183 @@ describe("v2 state cache (memoization)", () => {
     // The cached state must remain the real state, not the declined proposal.
     expect(getActiveProfile().id).toBe("p1");
     expect(getSettings().sfxEnabled).toBe(true);
+  });
+});
+
+describe("schema versioning", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  /**
+   * A fully normalized legacy v2 body (the shape every build before schema
+   * versioning wrote): complete sticker keys, complete progress map, play
+   * time keyed to today, and the full settings block — so normalizing it is
+   * the identity and the stamp is the only change the next write makes.
+   */
+  function legacyV2Body() {
+    return {
+      activeProfileId: "p1",
+      profiles: [
+        {
+          id: "p1",
+          avatarId: "cat",
+          createdAt: "2026-08-04T00:00:00.000Z",
+          stickers: {
+            ...createDefaultStickers(),
+            "animal-trace": { earned: true, earnedAt: "2026-09-01T00:00:00.000Z" },
+          },
+          playTime: { limitMinutes: 30, usedMinutes: 5, lastUsedDate: todayKey() },
+          progress: createDefaultProgressMap(),
+          activity: [],
+        },
+      ],
+      settings: {
+        bgmEnabled: false,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      },
+    };
+  }
+
+  /** Serializes a v2 body with an explicit schemaVersion (omit = unstamped). */
+  function storedV2(body: object, schemaVersion?: unknown): string {
+    return JSON.stringify(schemaVersion === undefined ? body : { ...body, schemaVersion });
+  }
+
+  it("stamps a fresh write with schemaVersion 1", () => {
+    updateSettings({ bgmEnabled: false });
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    expect(JSON.parse(stored).schemaVersion).toBe(1);
+  });
+
+  it("classifies a legacy unstamped payload as version 1 and stamps it on the next write", () => {
+    const body = legacyV2Body();
+    localStorage.setItem(V2_KEY, JSON.stringify(body));
+
+    // The implicit-v1 payload reads normally: its stored progress survives.
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+
+    switchProfile("p1"); // a persisting no-op write
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    const parsed = JSON.parse(stored);
+    expect(parsed.schemaVersion).toBe(1);
+    // The stamp is the only change: the body is otherwise unchanged.
+    expect(parsed).toEqual({ ...body, schemaVersion: 1 });
+  });
+
+  it("stamps the migrated v2 payload when a v1-only install first migrates", () => {
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+
+    load();
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    expect(JSON.parse(stored).schemaVersion).toBe(1);
+    // The migration itself is untouched: v1 progress survives, v1 key stays.
+    expect(hasSticker("shape-sorter")).toBe(true);
+    expect(localStorage.getItem(V1_KEY)).not.toBeNull();
+  });
+
+  it("reads a payload stamped with the known version normally", () => {
+    localStorage.setItem(V2_KEY, storedV2(legacyV2Body(), 1));
+
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+  });
+
+  it("pins the version-1 identity migrate step", () => {
+    const body = legacyV2Body();
+    localStorage.setItem(V2_KEY, storedV2(body, 1));
+
+    // The known-version payload passes through the version-1 (identity) step:
+    // every stored field reads back exactly as stored — the template a future
+    // version's migrate step must preserve.
+    expect(getActiveProfile().stickers["animal-trace"]).toEqual({
+      earned: true,
+      earnedAt: "2026-09-01T00:00:00.000Z",
+    });
+    expect(getActiveProfile().playTime).toEqual({
+      limitMinutes: 30,
+      usedMinutes: 5,
+      lastUsedDate: todayKey(),
+    });
+    expect(getSettings()).toEqual(body.settings);
+  });
+
+  it("serves in-memory defaults for an unknown version and never touches the stored bytes", async () => {
+    const raw = storedV2(legacyV2Body(), 99);
+    localStorage.setItem(V2_KEY, raw);
+
+    // The unknown payload's data is NOT served; fresh defaults are.
+    expect(hasSticker("animal-trace")).toBe(false);
+    expect(getSettings()).toEqual({
+      bgmEnabled: true,
+      sfxEnabled: true,
+      preferredVoiceURI: null,
+      adaptiveDifficulty: true,
+    });
+
+    // Mutations apply to the in-memory default state only (A2) and the raw
+    // stored bytes stay byte-identical.
+    earnSticker("shape-sorter");
+    updateSettings({ bgmEnabled: false });
+    recordGamePlay("pop-freeze");
+
+    expect(hasSticker("shape-sorter")).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+
+    // A fresh session (reload) discards the in-memory mutations: the stored
+    // payload is re-classified as unknown and defaults are served again.
+    vi.resetModules();
+    const fresh = await import("../../utils/storage");
+    expect(fresh.hasSticker("shape-sorter")).toBe(false);
+    expect(fresh.getSettings().bgmEnabled).toBe(true);
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+  });
+
+  it("never lets the memo cache overwrite a write-protected payload", () => {
+    getSettings(); // prime the cache with a good payload
+
+    const raw = storedV2(legacyV2Body(), 99);
+    localStorage.setItem(V2_KEY, raw); // external write while the cache is hot
+
+    earnSticker("shape-sorter");
+    updateSettings({ sfxEnabled: false });
+
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+  });
+
+  it("treats a non-number schemaVersion as corrupt and serves fresh defaults", () => {
+    for (const version of ["1", null]) {
+      localStorage.clear();
+      localStorage.setItem(V2_KEY, storedV2(legacyV2Body(), version));
+
+      // The corrupt path (A4): fresh defaults, matching today's handling.
+      expect(hasSticker("animal-trace")).toBe(false);
+      expect(getSettings().bgmEnabled).toBe(true);
+    }
+  });
+
+  it("prefers v2 when both keys exist and leaves the v1 key in place", () => {
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+    localStorage.setItem(V2_KEY, storedV2(legacyV2Body(), 1));
+
+    load();
+
+    // v2 wins: its earned sticker is served, the v1 payload's is not consulted.
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(hasSticker("shape-sorter")).toBe(false);
+    expect(localStorage.getItem(V1_KEY)).not.toBeNull();
   });
 });
