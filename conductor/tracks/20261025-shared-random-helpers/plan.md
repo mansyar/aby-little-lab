@@ -40,13 +40,6 @@
     sequence property (same seed → same sequence; different seed →
     different sequence; output always in `[0, 1)`).
 
-<!--
-The primary appends after acceptance:
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-1.md
--->
-
 **Result:** verified
 **Checkpoint:** 8f8e2236
 **Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-1.md
@@ -163,31 +156,35 @@ The primary appends after acceptance:
   `src/__tests__/helpers/randomHelper.ts` (consumed), `docs/roadmap.md`,
   `conductor/product.md`
 - **Verification:** full `verify_phase` chain (as Phase 1)
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Migrate logic suites** — covers: FR-6
-  - [ ] **P4.T1.1:** The 11 formerly direct-Math.random logic suites pass
+- [x] **P4.T1: Migrate logic suites** — covers: FR-6
+  - [x] **P4.T1.1:** The 11 formerly direct-Math.random logic suites pass
     seeded `mulberry32` output as the new rng argument; global mocks/spies
     deleted; expectations untouched except old-PRNG constant sequences
     re-derived per NFR-1/A3 (document in evidence).
-  - [ ] **P4.T1.2:** feelingsFaces + shadowMatch suites switch their local
+  - [x] **P4.T1.2:** feelingsFaces + shadowMatch suites switch their local
     seeded generators (LCG, Park-Miller) to the shared helper; the
     shadowMatch spy-on-Math.random pattern is deleted.
-- [ ] **P4.T2: Migrate flow suites** — covers: FR-6
-  - [ ] **P4.T2.1:** Flow tests (`animalTraceFlow`, `bigSmallFlow`,
+- [x] **P4.T2: Migrate flow suites** — covers: FR-6
+  - [x] **P4.T2.1:** Flow tests (`animalTraceFlow`, `bigSmallFlow`,
     `musicalMemory`, `feelingsFacesFlow`, and any other suite stubbing
     `Math.random`) seed via the helper and pass rng through the scene/logic
     call they exercise; the default-wiring stubs keep a scoped comment.
-- [ ] **P4.T3: Docs truth pass** — covers: FR-7
-  - [ ] **P4.T3.1: Roadmap** — retire the duplicate-shuffle Known Issue and
+- [x] **P4.T3: Docs truth pass** — covers: FR-7
+  - [x] **P4.T3.1: Roadmap** — retire the duplicate-shuffle Known Issue and
     the "One shuffle, one RNG seam" Future-Work entry; renumber remaining
     Future-Work items; refresh the "checked against the code on" date.
-  - [ ] **P4.T3.2: Product changelog** — add the
+  - [x] **P4.T3.2: Product changelog** — add the
     "Changelog — Shared Random Helpers (<date>)" entry to
     `conductor/product.md` summarizing the consolidation.
-- [ ] **P4.T4: Validator green** — covers: AC-5, AC-6
-  - [ ] **P4.T4.1:** `node scripts/validate-docs.js` exits 0 with the
+- [x] **P4.T4: Validator green** — covers: AC-5, AC-6
+  - [x] **P4.T4.1:** `node scripts/validate-docs.js` exits 0 with the
     updated docs.
+
+**Result:** verified
+**Checkpoint:** 5db21858
+**Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-4.md
 
 <!--
 Review fixes are appended by `conductor-review` as:
