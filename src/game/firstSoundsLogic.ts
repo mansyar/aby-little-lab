@@ -1,7 +1,7 @@
 import type { BandId, BandShift } from "./adaptiveLogic";
 import { shiftLadder } from "./adaptiveLogic";
 import { isConfusableWith, type Letter } from "./alphabetLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 import { getWord } from "./wordLogic";
 
 /** A single First Sounds word: the printed word and its picture texture. */

@@ -12,10 +12,10 @@ import {
   SMALL_SCALE,
   scaleFactorsFor,
   selectToys,
-  shuffle,
   type ToyType,
   WIN_TARGET,
 } from "../../game/bigSmallLogic";
+import { shuffle } from "../../game/random";
 
 afterEach(() => {
   vi.restoreAllMocks();

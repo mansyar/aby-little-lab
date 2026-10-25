@@ -1,6 +1,6 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { COUNT_ITEMS } from "./countLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** The comparison a round asks for: "which group has MORE?" or "...LESS?". */
 export type ComparisonMode = "more" | "less";

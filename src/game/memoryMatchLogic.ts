@@ -1,6 +1,6 @@
 import type { BandId, BandShift } from "./adaptiveLogic";
 import { BASE_LADDER, shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** Difficulty bands for Memory Match rounds (fixed across replays). */
 export type MemoryBand = "easy" | "medium" | "hard";

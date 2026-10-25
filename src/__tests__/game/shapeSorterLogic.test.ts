@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { shuffle } from "../../game/random";
 import {
   ALL_SHAPES,
   generatePlaythrough,
   isMatch,
   poolFor,
   type ShapeType,
-  shuffle,
 } from "../../game/shapeSorterLogic";
 
 afterEach(() => {

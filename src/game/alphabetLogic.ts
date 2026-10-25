@@ -1,6 +1,6 @@
 import type { BandId, BandShift } from "./adaptiveLogic";
 import { shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** The 26 uppercase letters used in the Find the Letter game. */
 export type Letter =

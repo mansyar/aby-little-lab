@@ -14,10 +14,10 @@ import {
   registerWake,
   selectBubbleType,
   selectSleepingAnimal,
-  shuffle,
   sleepingBoundsFor,
   WIN_TARGET,
 } from "../../game/popFreezeLogic";
+import { shuffle } from "../../game/random";
 
 afterEach(() => {
   vi.restoreAllMocks();

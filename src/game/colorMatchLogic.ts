@@ -1,5 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** Named colors used in Color Match rounds. */
 export type ColorId = "red" | "blue" | "yellow" | "green" | "orange" | "purple";

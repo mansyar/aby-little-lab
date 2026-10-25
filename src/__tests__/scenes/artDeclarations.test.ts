@@ -203,7 +203,7 @@ const GAME_MODULES: ReadonlyMap<string, string> = new Map([
  * (e.g. the shared ordered-drag-board shell). They draw nothing, so they stay
  * out of {@link GAME_MODULES} but must not fail the import scan either.
  */
-const NON_ART_GAME_MODULES: readonly string[] = ["dragBoard"];
+const NON_ART_GAME_MODULES: readonly string[] = ["dragBoard", "random"];
 
 interface SourceLiteral {
   readonly value: string;

@@ -1,4 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
+import { shuffle } from "./random";
 
 /** The six animal types used as sleeping-animal content in Pop & Freeze. */
 export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
@@ -68,16 +69,6 @@ export interface RoundState {
 /** Creates a new round state with pop count 0 and win target 6. */
 export function createRoundState(): RoundState {
   return { popCount: 0, winTarget: WIN_TARGET };
-}
-
-/** Returns a shuffled copy of the input array using the Fisher-Yates algorithm. */
-export function shuffle<T>(array: readonly T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
 }
 
 /** Selects the bubble type for the next spawn, maintaining the band's sleeping bounds. */

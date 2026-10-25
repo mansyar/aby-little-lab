@@ -1,5 +1,5 @@
 import { BASE_LADDER, type BandId, type BandShift } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** Visual category used to pick group/odd textures and define difficulty bands. */
 export type OddCategory = "animal" | "frog" | "toy" | "shape";

@@ -1,5 +1,5 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /**
  * Small, clearly countable item textures used to build counting groups.

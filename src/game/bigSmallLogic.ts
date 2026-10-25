@@ -1,4 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
+import { shuffle } from "./random";
 
 /** The six toy types used in the Big vs. Small game. */
 export type ToyType = "teddy_bear" | "car" | "ball" | "block" | "rocket" | "drum";
@@ -71,16 +72,6 @@ export interface ToyInstance {
 export interface BoxInstance {
   scaleCategory: ScaleCategory;
   scale: number;
-}
-
-/** Returns a shuffled copy of the input array using the Fisher-Yates algorithm. */
-export function shuffle<T>(array: readonly T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
 }
 
 /** Randomly selects 3 of 6 toy types from the pool. */

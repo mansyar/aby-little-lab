@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { shuffle } from "../../game/random";
 import {
   ALL_OBJECTS,
   CONFUSABLE_CLUSTERS,
@@ -8,7 +9,6 @@ import {
   isWin,
   type ObjectType,
   ROUND_SIZE,
-  shuffle,
   WIN_TARGET,
 } from "../../game/shadowMatchLogic";
 

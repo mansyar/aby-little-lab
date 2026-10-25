@@ -1,6 +1,6 @@
 import type { BandShift } from "./adaptiveLogic";
 import { isConfusableWith, type Letter } from "./alphabetLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 import { type FirstWord, WORD_POOL } from "./wordLogic";
 
 /** The 22 decode words: shared 18 plus 4 new CVC words. */

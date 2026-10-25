@@ -9,9 +9,9 @@ import {
   isPathComplete,
   isRoundComplete,
   selectThreePairs,
-  shuffle,
   waypointsFor,
 } from "../../game/animalTraceLogic";
+import { shuffle } from "../../game/random";
 
 afterEach(() => {
   vi.restoreAllMocks();

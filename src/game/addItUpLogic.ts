@@ -1,6 +1,6 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { COUNT_ITEMS } from "./countLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** Difficulty band id: 1 (sums ≤4), 2 (≤6), 3 (≤10). */
 export type BandId = 1 | 2 | 3;

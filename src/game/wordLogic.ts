@@ -1,6 +1,6 @@
 import type { BandShift } from "./adaptiveLogic";
 import { ALPHABET } from "./alphabetLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** A single first word: the printed word, its length, and its picture texture. */
 export interface FirstWord {

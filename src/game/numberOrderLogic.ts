@@ -1,5 +1,5 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { shuffle } from "./random";
 
 /** Band 1 easy 1–5, band 2 medium 1–8, band 3 hard 1–10. Range is inclusive. */
 export const BAND_RANGES: Record<1 | 2 | 3, readonly [number, number]> = {

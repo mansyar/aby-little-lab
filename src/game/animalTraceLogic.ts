@@ -1,5 +1,7 @@
 import type { BandShift } from "./adaptiveLogic";
 
+import { shuffle } from "./random";
+
 /** The six animal types used in the Animal Trace game. */
 export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
 
@@ -25,16 +27,6 @@ export const ALL_PAIRS: readonly AnimalFoodPair[] = [
 /** Randomly selects 3 of the 6 animal-food pairs for a round. */
 export function selectThreePairs(): AnimalFoodPair[] {
   return shuffle(ALL_PAIRS).slice(0, 3);
-}
-
-/** Returns a shuffled copy of the input array using the Fisher-Yates algorithm. */
-export function shuffle<T>(array: readonly T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
 }
 
 /** Tracks progress along a path with discrete waypoints. */
