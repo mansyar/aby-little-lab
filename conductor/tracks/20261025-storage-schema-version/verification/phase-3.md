@@ -77,3 +77,21 @@ None. Only `docs/TDD.md` and `docs/roadmap.md` were edited, via the `edit` tool 
 - Content was written engine-accurate against `src/utils/storage.ts` at the phase base (`3d2692cc`): `SCHEMA_VERSION = 1`, `classifyStoredV2` four-way classification, unknown write-protect + in-memory `mutate` path (A2, silent), cache keyed by the protected raw string, identity `migrateFromVersion1`, unguarded `setItem` in `saveV2`.
 - A read-only `git diff` preview command was also denied at shell; per the no-retry rule it was skipped (it was informational — edit verification used the native read/grep tools instead). Not a verification check; not blocking.
 - P3.T3 is partial pending the primary's validator run; the exact command and expected output are recorded in the Commands section.
+
+## Primary verification
+
+Independent verification by the primary (2026-10-25): working tree clean;
+git diff --name-only 3d2692cc..HEAD = docs/TDD.md + docs/roadmap.md +
+evidence only (within Touches); commit chain matches the report with no
+merges (squash guard pass). Roadmap confirmed: the schema-version Known Issue
+and Future-Work item are gone, "One shuffle, one RNG seam" is the only Known
+Issue and Future-Work item 1, and line 7 still reads "checked against the code
+on 2026-10-25". TDD confirmed: new section 6.5 "Schema versioning" with the
+four-way classification table exactly per FR-2, write-protect paragraph per
+FR-4 with the A2 trade-off verbatim, identity migrate step per FR-3,
+stamped saveV2 block at storage.ts:151-156 per FR-1, AppStorage sentence
+rewritten as the migration input per FR-5, facade table row without
+load/save, ToC updated. Docs validator run by the primary after sandbox
+denial: node scripts/validate-docs.js exit 0, "All document validation
+checks passed!". Unit suite 2673/2673 (executor run). Result: accepted;
+squashed to checkpoint b3e5d9b1.

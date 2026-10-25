@@ -56,13 +56,17 @@
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
 - **Status:** in_progress
 
-- [ ] **P3.T1: TDD storage section** — covers: FR-6
-  - [ ] **P3.T1.1: Classification table** — the storage docs gain the version contract: `SCHEMA_VERSION` constant, the four-way read classification, write-protect semantics (silent, raw preserved, in-memory defaults discarded on reload per A2), and the identity migrate step as the pattern for future versions. Engine-accurate against `src/utils/storage.ts`.
-- [ ] **P3.T2: Roadmap cleanup** — covers: FR-6
-  - [ ] **P3.T2.1: Removals** — delete the "no schema version" Known Issue and the "Version the stored payload" Future-Work item; renumber the remaining Future-Work entries (shared-random-helpers → 1).
-  - [ ] **P3.T2.2: Date refresh** — the "checked against the code on" line moves to 2026-10-25.
-- [ ] **P3.T3: Validator green** — covers: AC-6
-  - [ ] **P3.T3.1: Docs validation** — `node scripts/validate-docs.js` passes at the phase's final head.
+- [x] **P3.T1: TDD storage section** — covers: FR-6
+  - [x] **P3.T1.1: Classification table** — the storage docs gain the version contract: `SCHEMA_VERSION` constant, the four-way read classification, write-protect semantics (silent, raw preserved, in-memory defaults discarded on reload per A2), and the identity migrate step as the pattern for future versions. Engine-accurate against `src/utils/storage.ts`.
+- [x] **P3.T2: Roadmap cleanup** — covers: FR-6
+  - [x] **P3.T2.1: Removals** — delete the "no schema version" Known Issue and the "Version the stored payload" Future-Work item; renumber the remaining Future-Work entries (shared-random-helpers → 1).
+  - [x] **P3.T2.2: Date refresh** — the "checked against the code on" line moves to 2026-10-25.
+- [x] **P3.T3: Validator green** — covers: AC-6
+  - [x] **P3.T3.1: Docs validation** — `node scripts/validate-docs.js` passes at the phase's final head.
+
+**Result:** verified
+**Checkpoint:** `b3e5d9b1`
+**Evidence:** conductor/tracks/20261025-storage-schema-version/verification/phase-3.md
 
 <!--
 The primary appends after acceptance:
