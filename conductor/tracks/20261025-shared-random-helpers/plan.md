@@ -163,7 +163,7 @@ The primary appends after acceptance:
   `src/__tests__/helpers/randomHelper.ts` (consumed), `docs/roadmap.md`,
   `conductor/product.md`
 - **Verification:** full `verify_phase` chain (as Phase 1)
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Migrate logic suites** — covers: FR-6
   - [ ] **P4.T1.1:** The 11 formerly direct-Math.random logic suites pass
