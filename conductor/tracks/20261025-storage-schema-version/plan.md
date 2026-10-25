@@ -11,7 +11,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, AC-1, AC-2, AC-3, AC-5, NFR-1, NFR-2, NFR-3
 - **Touches:** `src/utils/storage.ts`, `src/__tests__/utils/storage.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Versioning tests, red first** — covers: FR-1, FR-2, FR-4
   - [ ] **P1.T1.1: Stamp test** — a fresh `saveV2` write round-trips through `JSON.parse` with top-level `schemaVersion === 1`; a legacy unstamped payload is classified as v1 and carries `schemaVersion: 1` after the next write, with its body otherwise unchanged. Red against the current unstamped writer.
