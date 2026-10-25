@@ -205,7 +205,7 @@
 - **Verification:** full `verify_phase` chain (as Phase 1), plus the greppable
   proofs `grep "16807" src/__tests__` → empty and
   `grep "function shuffle" src/game` → one hit
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Replace the surviving Park–Miller generator** — covers: F1
   - [ ] **R1.T1.1:** Migrate `storyOrderLogic.test.ts`'s `seededRng` to
