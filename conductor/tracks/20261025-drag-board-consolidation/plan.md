@@ -99,9 +99,19 @@ The primary appends after acceptance:
 **Checkpoint:** `73e3c967`
 **Evidence:** conductor/tracks/20261025-drag-board-consolidation/verification/phase-3.md
 
-<!--
-The primary appends after acceptance:
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/<track-id>/verification/phase-3.md
--->
+## Phase R1: Review fixes — tween interplay and contract precision
+
+- **Goal:** Resolve review round 1 findings F1 (Medium), F3 and F4 (Low) without regressing kid-visible parity. F2 is a documented deferral (see `review.md`).
+- **Depends on:** Phase 3
+- **Covers:** NFR-1, AC-3, AC-6 (findings F1, F3, F4)
+- **Touches:** `src/game/dragBoard.ts`, `src/__tests__/game/dragBoard.test.ts`, `src/__tests__/scenes/shapeSorterFlow.test.ts`, `src/__tests__/scenes/shadowMatchFlow.test.ts`, `src/__tests__/scenes/bigSmallFlow.test.ts`, `docs/TDD.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** in_progress
+
+- [ ] **R1.T1: Wrong drop animates one positional tween** — covers: F1
+  - [ ] **R1.T1.1: Regression-first** — in each adopting scene's wrong-drop test, assert exactly one positional (x/y) tween exists for the piece after the drop; capture the red output against the current shell before the fix.
+  - [ ] **R1.T1.2: Shell fix** — `DragBoard` tracks the snap tween per piece and stops it in `tweenHome` before adding the home tween; never `killTweensOf` (it would kill the drag-lift's scale/angle restore on the same container).
+- [ ] **R1.T2: Wrong-drop test fidelity** — covers: F4
+  - [ ] **R1.T2.1: Drop-point positioning** — the three wrong-drop tests set the mock container's x/y to the drop position (inside the zone) before firing dragend, mirroring the real gesture order.
+- [ ] **R1.T3: Docs contract precision** — covers: F3
+  - [ ] **R1.T3.1: Full contract clause** — the TDD.md piece-contract line gains a clause for the pointer/drag/drop event overloads the `BoardDraggable` contract adds beyond the `DragTarget` capability set.
