@@ -127,6 +127,18 @@ the mutation cycle closed — row above).
 | NFR-1 | Kid-visible parity: timings/feedback/lock-on-correct + reduced-motion forms | Lift/snap/stamp/dim/shrink/wiggle/bump assertions unchanged and green; bounce home now at identical 300/180 board timings | Pass |
 | NFR-2 | Two board games' parity | Suites pass with zero edits | Pass |
 | NFR-3 | Full verification gate | Commands table (single chain, exit 0) | Pass |
+| NFR-4 | Bundle discipline — shell stays game-free and small | Shell entry 138.4 kB ≤ 200 kB; `dragBoard` lazy chunk 5.87 kB; no game names added in phase 2 code | Pass |
+
+## Primary verification
+
+- Verified by the primary (conductor) on 2026-10-25 at checkpoint `6187149d`
+  (phase base `78e1b7c8`).
+- Full gate run independently: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js` — exit 0.
+- Tests: 121 files / 2661 passed (+6 parity tests vs Phase 1). Coverage: statements 97.83 (≥90), branches 91.41 (≥85), functions 96.79 (≥88), lines 98.76 (≥95). Bundle + PWA validators pass.
+- Consolidation truth spot-checked: `grep DragBoard src/scenes/` = exactly five scenes (NumberOrder, StoryOrder, ShapeSorter, ShadowMatch, BigSmall); zero scene-local `BOUNCE_DURATION`/`BOUNCE_REDUCED_DURATION` copies in the three adopting scenes (only MusicalMemory's unrelated non-drag frog bounce remains); zero hand-wired placement `drop` wiring in the adopting scenes.
+- `inputLocked = false` reset confirmed in all three scenes at board construction, paired with `isLocked: () => this.inputLocked` — behaviour-preserving relative to the shipped games (the hand-rolled wiring never consulted `inputLocked`, so a relaunched session was playable; the reset keeps that true under the board's lock contract).
+- Mutation spot-check verified by the primary directly: see `.conductor/evidence/phase-2-mutation.md` (mutated `BOUNCE_DURATION` 300→3000; all three scenes' bounce assertions failed `expected 3000 to be 300`; restored byte-identical, hash `addccc49…`).
+- Result: **accepted**.
 
 ## Evidence paths
 
