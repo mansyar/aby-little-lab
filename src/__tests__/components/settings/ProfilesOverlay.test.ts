@@ -25,7 +25,11 @@ vi.mock("../../../utils/storage", async (importOriginal) => {
 });
 
 import { ProfilesOverlay } from "../../../components/settings/ProfilesOverlay";
-import { getProfiles, load, addProfile as realAddProfile } from "../../../utils/storage";
+import {
+  getActiveProfile,
+  getProfiles,
+  addProfile as realAddProfile,
+} from "../../../utils/storage";
 
 interface OverlayFixture {
   overlay: ProfilesOverlay;
@@ -77,7 +81,7 @@ function tap(obj: MockObject): void {
 beforeEach(() => {
   mockRegistry.length = 0;
   localStorage.clear();
-  load();
+  getActiveProfile();
 });
 
 afterEach(() => {

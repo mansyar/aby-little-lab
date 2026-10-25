@@ -13,7 +13,7 @@ vi.mock("../../../utils/speech", () => ({
 
 import { VoiceRow } from "../../../components/settings/VoiceRow";
 import { setPreferredVoiceURI, speakWord } from "../../../utils/speech";
-import { getSettings, load, updateSettings } from "../../../utils/storage";
+import { getActiveProfile, getSettings, updateSettings } from "../../../utils/storage";
 
 /** Minimal SpeechSynthesisVoice stand-in for availableVoiceOptions(). */
 function makeVoice(voiceURI: string, name: string, lang: string): SpeechSynthesisVoice {
@@ -87,7 +87,7 @@ describe("VoiceRow", () => {
     mockRegistry.length = 0;
     bucket = [];
     localStorage.clear();
-    load();
+    getActiveProfile();
     vi.mocked(setPreferredVoiceURI).mockClear();
     vi.mocked(speakWord).mockClear();
   });

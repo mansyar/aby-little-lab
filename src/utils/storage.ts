@@ -173,29 +173,6 @@ function mutate(mutator: (v2: ProfileV2) => ProfileV2 | null): ProfileV2 | null 
   return next;
 }
 
-/**
- * Reads storage as the legacy AppStorage shape: stickers from the ACTIVE
- * profile, settings from the device-global block. Never throws; corrupt or
- * missing data resolves to a fresh default profile.
- */
-export function load(): AppStorage {
-  const v2 = ensureV2();
-  const active = v2.profiles.find((p) => p.id === v2.activeProfileId) ?? v2.profiles[0];
-  return { stickers: active.stickers, settings: v2.settings };
-}
-
-/** Persists an AppStorage: stickers replace the ACTIVE profile's, settings are global. */
-export function save(data: AppStorage): void {
-  mutate((v2) => {
-    const profiles = v2.profiles.map((p) =>
-      p.id === v2.activeProfileId
-        ? { ...p, stickers: { ...createDefaultStickers(), ...data.stickers } }
-        : p,
-    );
-    return { ...v2, profiles, settings: { ...v2.settings, ...data.settings } };
-  });
-}
-
 /** Marks a sticker as earned on the ACTIVE profile and persists. */
 export function earnSticker(gameId: GameId): void {
   mutate((v2) => ({
@@ -214,12 +191,14 @@ export function earnSticker(gameId: GameId): void {
   }));
 }
 
+/** Whether the ACTIVE profile has earned the sticker. */
 export function hasSticker(gameId: GameId): boolean {
-  return load().stickers[gameId].earned;
+  return getActiveProfile().stickers[gameId].earned;
 }
 
+/** The device-global settings block of the current v2 state. */
 export function getSettings(): Settings {
-  return load().settings;
+  return ensureV2().settings;
 }
 
 export function updateSettings(partial: Partial<Settings>): void {
