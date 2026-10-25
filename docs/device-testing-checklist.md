@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.21.5 (2026-10-25)
+
+- **Target:** tag `v1.21.5` pushed on 2026-10-25; Coolify deploy triggered by the tag. The smoke below ran against the live release at `https://aby-little-lab.ansyar-world.top/`.
+- **Scope:** one track, `conductor/archive/20261024-overlay-hit-areas/` (PR #64) - the six overlay controls that carried custom centre-negative hit rectangles Phaser never tests (`PointWithinHitArea` adds the object's `displayOrigin` to the tap before calling the callback, so every centred rectangle landed displaced by half its size) now route through the shared `centredHitArea()` helper from `src/components/settings/primitives.ts`: the toast's two buttons, Profiles' Delete button and play-time chip, and Progress' close X, avatar chip and pager chevrons. The avatar-chip rect is authored in the image's local units (`96 / chipScale`) because Phaser divides a tap by the drawn scale before the origin add. Every scene-level `(0,0)`-based rect elsewhere is correct by construction and untouched. No new game, asset, storage schema or dependency; the save shape is unchanged from v1.21.4.
+- **Checks:** the manual rows from the PR description - every toast button responds anywhere across its drawn label, never only on its left half; Profiles' Delete responds anywhere across its own rect and the play-time chip's band selects its chip instead of closing the panel; a tap in the seam between two adjacent chips selects the later-drawn chip; Progress' close X, chevrons and avatar chip all respond across their visible faces; every site's regression test proves a red under the engine's centre-negative behaviour; footer `v1.21.5`.
+- **Result:** **PASSED (desktop smoke) 2026-10-25** - `Quality Gates` and `Deploy to Coolify` both succeeded on the tag, and the live `assets/index-CbZAR4_R.js` (141712 bytes) is SHA-256 identical to a local build of the release commit. (The fingerprint differs from the pre-release local dist only because the bundle bakes the app version, 1.21.4 → 1.21.5; the first fetch minutes after the deploy still returned the v1.21.4 shell from the edge cache.) Device-class execution of the six manual rows is **PENDING**; the toast button and the chip seams are the parts most worth a finger on real glass.
+- **Issues found:** none reported
+
 ## Execution Record - v1.21.4 (2026-10-24)
 
 - **Target:** tag `v1.21.4` pushed on 2026-10-24; Coolify deploy triggered by the tag. The smoke below ran against the live release.
