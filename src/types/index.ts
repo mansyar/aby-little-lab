@@ -78,6 +78,12 @@ export interface PlayTime {
   lastUsedDate: string;
 }
 
+/**
+ * The legacy v1 save shape (key `abby-little-lab:v1`), kept solely as the
+ * one-time v1→v2 migration input: `migrateV1` accepts a `Partial<AppStorage>`
+ * read from the v1 key. It is not a live read/write shape — the live state is
+ * `ProfileV2`.
+ */
 export interface AppStorage {
   stickers: Record<GameId, StickerData>;
   settings: Settings;

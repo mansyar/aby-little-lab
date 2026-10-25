@@ -18,7 +18,7 @@ vi.mock("../../../utils/storage", async (importOriginal) => {
 });
 
 import { ResetModal } from "../../../components/settings/ResetModal";
-import { getProfiles, load } from "../../../utils/storage";
+import { getActiveProfile, getProfiles } from "../../../utils/storage";
 
 /** Fires every registered pointerdown handler (module + press feedback). */
 function tap(obj: MockObject): void {
@@ -50,7 +50,7 @@ describe("ResetModal", () => {
     overlayObjects = [];
     onProgressReset = vi.fn();
     localStorage.clear();
-    load();
+    getActiveProfile();
     storageSpies.resetProgress.mockClear();
   });
 

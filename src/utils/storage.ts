@@ -37,6 +37,53 @@ import type {
 const V1_KEY = "abby-little-lab:v1";
 const V2_KEY = "abby-little-lab:v2";
 
+/**
+ * The schema version stamped on every v2 payload write (FR-1). Payloads
+ * without the field predate stamping and classify as the implicit version 1;
+ * payloads carrying any other number are future versions this build cannot
+ * read, and any non-number version field is corrupt.
+ */
+const SCHEMA_VERSION = 1;
+
+/** Classification of a stored v2 payload by its top-level `schemaVersion`. */
+type StoredV2Kind = "known" | "missing" | "unknown" | "unusable";
+
+/**
+ * Classifies a stored v2 payload before anything is normalized or rewritten:
+ * - `missing` — no `schemaVersion` field: implicit version 1.
+ * - `known` — `schemaVersion` equals `SCHEMA_VERSION`.
+ * - `unknown` — any other number: a future version; write-protected (FR-4).
+ * - `unusable` — unparseable JSON or a non-number version field (A4):
+ *   handled exactly as corrupt payloads were before stamping existed.
+ */
+function classifyStoredV2(raw: string | null): StoredV2Kind {
+  if (raw === null) return "missing";
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return "unusable";
+  }
+  const version =
+    typeof parsed === "object" && parsed !== null
+      ? (parsed as { schemaVersion?: unknown }).schemaVersion
+      : undefined;
+  if (version === undefined) return "missing";
+  if (version === SCHEMA_VERSION) return "known";
+  if (typeof version === "number") return "unknown";
+  return "unusable";
+}
+
+/**
+ * The version-1 migrate step — the identity, since version 1 is the current
+ * schema. Kept as the template for future versions: each new version adds a
+ * step that accepts its stored shape and returns the current one, without
+ * touching the stored bytes (FR-3; no speculative registry).
+ */
+function migrateFromVersion1(v2: ProfileV2): ProfileV2 {
+  return v2;
+}
+
 function readV1(): Partial<AppStorage> | null {
   const raw = localStorage.getItem(V1_KEY);
   if (raw === null) return null;
@@ -63,6 +110,11 @@ let v2Cache: { raw: string | null; state: ProfileV2 } | null = null;
 function readV2(): ProfileV2 | null {
   const raw = readV2Raw();
   if (raw === null) return null;
+  // Only `known` and `missing` (implicit v1) payloads may be normalized; an
+  // `unknown` version must never reach here (it is write-protected, FR-4),
+  // and `unusable` falls back to the corrupt path like before stamping.
+  const kind = classifyStoredV2(raw);
+  if (kind === "unknown" || kind === "unusable") return null;
   try {
     return normalizeV2(JSON.parse(raw) as Partial<ProfileV2>);
   } catch {
@@ -74,10 +126,22 @@ function readV2(): ProfileV2 | null {
 function ensureV2(): ProfileV2 {
   const raw = readV2Raw();
   if (v2Cache !== null && v2Cache.raw === raw) return v2Cache.state;
+
+  if (classifyStoredV2(raw) === "unknown") {
+    // FR-4: a future version's payload is write-protected — its raw bytes are
+    // never rewritten. The session serves fresh defaults from memory only
+    // (A2: mutations are discarded on the next load). The cache is keyed by
+    // the protected raw string, so it can never overwrite those bytes.
+    const defaults = migrateV1(null);
+    v2Cache = { raw, state: defaults };
+    return defaults;
+  }
+
   const existing = readV2();
   if (existing !== null) {
-    v2Cache = { raw, state: existing };
-    return existing;
+    const v2 = migrateFromVersion1(existing);
+    v2Cache = { raw, state: v2 };
+    return v2;
   }
   const v2 = migrateV1(readV1());
   saveV2(v2);
@@ -85,7 +149,8 @@ function ensureV2(): ProfileV2 {
 }
 
 function saveV2(v2: ProfileV2): void {
-  const raw = JSON.stringify(v2);
+  // FR-1: the single write path stamps every payload with the schema version.
+  const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
   localStorage.setItem(V2_KEY, raw);
   v2Cache = { raw, state: v2 };
 }
@@ -96,31 +161,16 @@ function saveV2(v2: ProfileV2): void {
  */
 function mutate(mutator: (v2: ProfileV2) => ProfileV2 | null): ProfileV2 | null {
   const next = mutator(ensureV2());
-  if (next !== null) saveV2(next);
+  if (next === null) return null;
+  if (classifyStoredV2(readV2Raw()) === "unknown") {
+    // FR-4: the stored payload is a future version and write-protected, so
+    // the mutation applies to the in-memory state only (A2) — the raw bytes
+    // stay untouched and the cache is re-keyed to the unchanged raw string.
+    v2Cache = { raw: readV2Raw(), state: next };
+    return next;
+  }
+  saveV2(next);
   return next;
-}
-
-/**
- * Reads storage as the legacy AppStorage shape: stickers from the ACTIVE
- * profile, settings from the device-global block. Never throws; corrupt or
- * missing data resolves to a fresh default profile.
- */
-export function load(): AppStorage {
-  const v2 = ensureV2();
-  const active = v2.profiles.find((p) => p.id === v2.activeProfileId) ?? v2.profiles[0];
-  return { stickers: active.stickers, settings: v2.settings };
-}
-
-/** Persists an AppStorage: stickers replace the ACTIVE profile's, settings are global. */
-export function save(data: AppStorage): void {
-  mutate((v2) => {
-    const profiles = v2.profiles.map((p) =>
-      p.id === v2.activeProfileId
-        ? { ...p, stickers: { ...createDefaultStickers(), ...data.stickers } }
-        : p,
-    );
-    return { ...v2, profiles, settings: { ...v2.settings, ...data.settings } };
-  });
 }
 
 /** Marks a sticker as earned on the ACTIVE profile and persists. */
@@ -141,12 +191,14 @@ export function earnSticker(gameId: GameId): void {
   }));
 }
 
+/** Whether the ACTIVE profile has earned the sticker. */
 export function hasSticker(gameId: GameId): boolean {
-  return load().stickers[gameId].earned;
+  return getActiveProfile().stickers[gameId].earned;
 }
 
+/** The device-global settings block of the current v2 state. */
 export function getSettings(): Settings {
-  return load().settings;
+  return ensureV2().settings;
 }
 
 export function updateSettings(partial: Partial<Settings>): void {

@@ -9,7 +9,7 @@ vi.mock("phaser", async () => {
 
 import { ProgressOverlay } from "../../../components/settings/ProgressOverlay";
 import { GAME_REGISTRY } from "../../../game/gameRegistry";
-import { addProfile, getProfiles, load } from "../../../utils/storage";
+import { addProfile, getActiveProfile, getProfiles } from "../../../utils/storage";
 
 /** Registry objects whose destroy has not been called (current render). */
 function live(): MockObject[] {
@@ -49,7 +49,7 @@ function tap(obj: MockObject): void {
 beforeEach(() => {
   mockRegistry.length = 0;
   localStorage.clear();
-  load();
+  getActiveProfile();
 });
 
 describe("ProgressOverlay", () => {

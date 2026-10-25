@@ -7,7 +7,7 @@ import {
   winTempoForBudget,
 } from "../../game/audioIdentity";
 import type { GameId } from "../../types";
-import { load } from "../../utils/storage";
+import { getActiveProfile, getSettings } from "../../utils/storage";
 
 /**
  * Speech lifecycle double: AudioManager subscribes once at init(), so the test
@@ -198,7 +198,7 @@ describe("AudioManager", () => {
     });
 
     it("respects bgmEnabled=false from storage on init", () => {
-      const data = load();
+      const data = { stickers: getActiveProfile().stickers, settings: getSettings() };
       data.settings.bgmEnabled = false;
       // Simulate a legacy v1 save: force re-migration so settings flow through.
       localStorage.removeItem("abby-little-lab:v2");
@@ -287,8 +287,7 @@ describe("AudioManager", () => {
     it("updates bgmEnabled in localStorage", () => {
       manager.init();
       manager.setBGMEnabled(false);
-      const data = load();
-      expect(data.settings.bgmEnabled).toBe(false);
+      expect(getSettings().bgmEnabled).toBe(false);
     });
 
     it("pauses BGM when set to false", () => {
@@ -303,8 +302,7 @@ describe("AudioManager", () => {
       manager.init();
       manager.setBGMEnabled(false);
       manager.setBGMEnabled(true);
-      const data = load();
-      expect(data.settings.bgmEnabled).toBe(true);
+      expect(getSettings().bgmEnabled).toBe(true);
     });
   });
 
@@ -312,16 +310,14 @@ describe("AudioManager", () => {
     it("updates sfxEnabled in localStorage", () => {
       manager.init();
       manager.setSFXEnabled(false);
-      const data = load();
-      expect(data.settings.sfxEnabled).toBe(false);
+      expect(getSettings().sfxEnabled).toBe(false);
     });
 
     it("can re-enable SFX after disabling", () => {
       manager.init();
       manager.setSFXEnabled(false);
       manager.setSFXEnabled(true);
-      const data = load();
-      expect(data.settings.sfxEnabled).toBe(true);
+      expect(getSettings().sfxEnabled).toBe(true);
     });
   });
 

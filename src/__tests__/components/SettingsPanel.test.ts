@@ -20,7 +20,7 @@ import {
   getPlayTime,
   getProfiles,
   getSettings,
-  load,
+  hasSticker,
   recordGamePlay,
   recordGameResult,
   setPlayTimeLimit,
@@ -1102,7 +1102,7 @@ describe("SettingsPanel reset progress", () => {
     triggerPointerdown(row);
     triggerPointerdown(findTextByLabel(scene, "Cancel") as MockGameObject);
 
-    expect(load().stickers["shape-sorter"].earned).toBe(true);
+    expect(hasSticker("shape-sorter")).toBe(true);
     const modalTitle = findTextByLabel(scene, "Reset all stickers?") as MockGameObject;
     expect(modalTitle.destroy).toHaveBeenCalled();
     expect(row.setText).not.toHaveBeenCalledWith("Progress cleared");
@@ -1118,9 +1118,8 @@ describe("SettingsPanel reset progress", () => {
     triggerPointerdown(row);
     triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
 
-    const result = load();
-    expect(result.stickers["shape-sorter"].earned).toBe(false);
-    expect(result.stickers["pattern-builder"].earned).toBe(false);
+    expect(hasSticker("shape-sorter")).toBe(false);
+    expect(hasSticker("pattern-builder")).toBe(false);
     expect(
       (findTextByLabel(scene, "Reset all stickers?") as MockGameObject).destroy,
     ).toHaveBeenCalled();
@@ -1136,8 +1135,8 @@ describe("SettingsPanel reset progress", () => {
     triggerPointerdown(findTextByLabel(scene, "Reset Progress") as MockGameObject);
     triggerPointerdown(findTextByLabel(scene, "Reset") as MockGameObject);
 
-    expect(load().settings.bgmEnabled).toBe(false);
-    expect(load().settings.sfxEnabled).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+    expect(getSettings().sfxEnabled).toBe(true);
   });
 
   it("gives the reset row the row pitch band and modal buttons at least 64px", () => {

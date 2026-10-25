@@ -1,0 +1,31 @@
+{
+  "id": "20261025-storage-schema-version",
+  "title": "Storage Schema Version",
+  "type": "chore",
+  "status": "complete",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25",
+  "spec": "conductor/tracks/20261025-storage-schema-version/spec.md",
+  "plan": "conductor/tracks/20261025-storage-schema-version/plan.md",
+  "branch": "chore/20261025-storage-schema-version",
+  "base_branch": "master",
+  "base_sha": "572394d0193fcf49e8b5f4d75e6f2ba8cc389151",
+  "progress": {
+    "phases_total": 3,
+    "phases_verified": 3,
+    "tasks_total": 7,
+    "tasks_done": 7
+  },
+  "last_checkpoint": "e61a7d8d",
+  "review_verdict": "PASS",
+  "review_rounds": 2,
+  "doc_sync": "pending",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/66",
+  "pr_state": "open",
+  "reverted": null,
+  "archived": null,
+  "archived_at": "2026-10-25",
+  "archive_path": "conductor/archive/20261025-storage-schema-version"
+}

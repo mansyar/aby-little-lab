@@ -1,5 +1,7 @@
+import { vi } from "vitest";
 import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
+import { createDefaultProgressMap } from "../../game/progressLogic";
 import type { AppStorage, GameId } from "../../types";
 import {
   addProfile,
@@ -13,13 +15,11 @@ import {
   getProgress,
   getSettings,
   hasSticker,
-  load,
   recordGamePlay,
   recordGameResult,
   recordGameTaps,
   recordPlayTime,
   resetProgress,
-  save,
   setPlayTimeLimit,
   switchProfile,
   updateSettings,
@@ -27,6 +27,15 @@ import {
 
 const V1_KEY = "abby-little-lab:v1";
 const V2_KEY = "abby-little-lab:v2";
+
+/**
+ * The migration-input view of the current state — the active profile's
+ * stickers plus the device-global settings. The legacy `load()` export is
+ * retired (FR-5); reads go through the granular API instead.
+ */
+function readActiveState() {
+  return { stickers: getActiveProfile().stickers, settings: getSettings() };
+}
 
 const GAME_IDS: GameId[] = [
   "shape-sorter",
@@ -46,9 +55,9 @@ describe("Storage utilities", () => {
     localStorage.clear();
   });
 
-  describe("load", () => {
-    it("returns default AppStorage when storage is empty", () => {
-      const result = load();
+  describe("storage reads", () => {
+    it("serves default stickers and settings when storage is empty", () => {
+      const result = readActiveState();
 
       for (const gameId of GAME_IDS) {
         expect(result.stickers[gameId]).toEqual({
@@ -61,9 +70,9 @@ describe("Storage utilities", () => {
       expect(result.settings.sfxEnabled).toBe(true);
     });
 
-    it("returns default AppStorage when storage contains invalid JSON", () => {
+    it("serves default stickers and settings when storage contains invalid JSON", () => {
       localStorage.setItem(V1_KEY, "invalid-json");
-      const result = load();
+      const result = readActiveState();
 
       expect(result.stickers["shape-sorter"].earned).toBe(false);
       expect(result.settings.bgmEnabled).toBe(true);
@@ -84,7 +93,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       // The new game gets a fresh unearned entry instead of crashing.
       expect(result.stickers["pattern-builder"]).toEqual({
@@ -114,7 +123,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       expect(result.stickers["alphabet-match"]).toEqual({
         earned: false,
@@ -144,7 +153,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       expect(result.stickers["word-match"]).toEqual({ earned: false, earnedAt: null });
       expect(result.stickers["word-builder"]).toEqual({ earned: false, earnedAt: null });
@@ -176,7 +185,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       // The new game gets a fresh unearned entry instead of crashing.
       expect(result.stickers["more-less"]).toEqual({ earned: false, earnedAt: null });
@@ -208,7 +217,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       // The new game gets a fresh unearned entry instead of crashing.
       expect(result.stickers["odd-one-out"]).toEqual({ earned: false, earnedAt: null });
@@ -242,7 +251,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       // The new game gets a fresh unearned entry instead of crashing.
       expect(result.stickers["color-match"]).toEqual({ earned: false, earnedAt: null });
@@ -281,7 +290,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       // The new game gets a fresh unearned entry instead of crashing.
       expect(result.stickers["number-order"]).toEqual({ earned: false, earnedAt: null });
@@ -325,7 +334,7 @@ describe("Storage utilities", () => {
       };
       localStorage.setItem(V1_KEY, JSON.stringify(oldSave));
 
-      const result = load();
+      const result = readActiveState();
 
       // The new game gets a fresh unearned entry instead of crashing.
       expect(result.stickers["feelings-faces"]).toEqual({ earned: false, earnedAt: null });
@@ -366,7 +375,7 @@ describe("Storage utilities", () => {
         }),
       );
 
-      const result = load();
+      const result = readActiveState();
 
       expect(result.stickers["story-order"]).toEqual({ earned: false, earnedAt: null });
       expect(hasSticker("story-order")).toBe(false);
@@ -385,8 +394,8 @@ describe("Storage utilities", () => {
     });
   });
 
-  describe("save", () => {
-    it("writes storage data that can be read back by load", () => {
+  describe("v1 migration input", () => {
+    it("migrates a v1 AppStorage save: its stickers become the active profile's and its settings are global", () => {
       const data: AppStorage = {
         stickers: {
           ...createDefaultStickers(),
@@ -407,9 +416,13 @@ describe("Storage utilities", () => {
         },
       };
 
-      save(data);
+      // The v1 save is the migration input: stage it on the v1 key and let
+      // the one-time v1→v2 migration place it.
+      localStorage.setItem(V1_KEY, JSON.stringify(data));
 
-      // save() persists the v2 schema: the provided stickers become the ACTIVE profile's.
+      const result = readActiveState();
+
+      // The migrated v2 payload: the provided stickers become the ACTIVE profile's.
       const stored = localStorage.getItem(V2_KEY);
       expect(stored).not.toBeNull();
       if (stored !== null) {
@@ -420,7 +433,6 @@ describe("Storage utilities", () => {
         expect(parsed.settings.bgmEnabled).toBe(false);
       }
 
-      const result = load();
       expect(result.stickers["shape-sorter"].earned).toBe(true);
       expect(result.stickers["shape-sorter"].earnedAt).toBe("2026-07-28T00:00:00.000Z");
       expect(result.stickers["animal-trace"].earned).toBe(false);
@@ -433,7 +445,7 @@ describe("Storage utilities", () => {
     it("sets earned to true and earnedAt to a valid ISO timestamp", () => {
       earnSticker("shape-sorter");
 
-      const result = load();
+      const result = readActiveState();
       const sticker = result.stickers["shape-sorter"];
       expect(sticker.earned).toBe(true);
       expect(sticker.earnedAt).not.toBeNull();
@@ -446,7 +458,7 @@ describe("Storage utilities", () => {
     it("does not affect other stickers", () => {
       earnSticker("animal-trace");
 
-      const result = load();
+      const result = readActiveState();
       expect(result.stickers["animal-trace"].earned).toBe(true);
       expect(result.stickers["shape-sorter"].earned).toBe(false);
       expect(result.stickers["big-small"].earned).toBe(false);
@@ -456,7 +468,7 @@ describe("Storage utilities", () => {
       earnSticker("word-match");
       earnSticker("word-builder");
 
-      const result = load();
+      const result = readActiveState();
       expect(result.stickers["word-match"].earned).toBe(true);
       expect(result.stickers["word-builder"].earned).toBe(true);
       expect(result.stickers["alphabet-match"].earned).toBe(false);
@@ -510,7 +522,7 @@ describe("Storage utilities", () => {
 
     it("persists settings to localStorage", () => {
       updateSettings({ bgmEnabled: false });
-      const result = load();
+      const result = readActiveState();
       expect(result.settings.bgmEnabled).toBe(false);
     });
 
@@ -535,7 +547,7 @@ describe("Storage utilities", () => {
 
       resetProgress();
 
-      const result = load();
+      const result = readActiveState();
       for (const gameId of GAME_IDS) {
         expect(result.stickers[gameId]).toEqual({ earned: false, earnedAt: null });
       }
@@ -565,7 +577,7 @@ describe("Storage utilities", () => {
 
       expect(() => resetProgress()).not.toThrow();
 
-      const result = load();
+      const result = readActiveState();
       for (const gameId of GAME_IDS) {
         expect(result.stickers[gameId]).toEqual({ earned: false, earnedAt: null });
       }
@@ -606,7 +618,7 @@ describe("Storage utilities", () => {
     it("keeps the v1 key untouched after migration", () => {
       localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
 
-      load();
+      readActiveState();
 
       expect(localStorage.getItem(V1_KEY)).not.toBeNull();
       expect(localStorage.getItem(V2_KEY)).not.toBeNull();
@@ -697,7 +709,7 @@ describe("Storage utilities", () => {
 
     it("migrates a v1 save with an unlimited default play time", () => {
       localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
-      load();
+      readActiveState();
 
       const playTime = getPlayTime("p1");
       expect(playTime.limitMinutes).toBeNull();
@@ -867,22 +879,12 @@ describe("progress recording", () => {
     expect(progress.plays).toBe(0);
   });
 
-  it("preserves progress across save, earnSticker, and resetProgress", () => {
+  it("preserves progress across sticker and settings writes and resetProgress", () => {
     recordGamePlay("shape-sorter");
     recordGameResult("shape-sorter", 5, 1);
 
-    save({
-      stickers: {
-        ...createDefaultStickers(),
-        "shape-sorter": { earned: true, earnedAt: "2026-08-05T00:00:00.000Z" },
-      },
-      settings: {
-        bgmEnabled: false,
-        sfxEnabled: true,
-        preferredVoiceURI: null,
-        adaptiveDifficulty: true,
-      },
-    });
+    earnSticker("shape-sorter");
+    updateSettings({ bgmEnabled: false, sfxEnabled: true });
     earnSticker("color-match");
     expect(getProgress()["shape-sorter"].plays).toBe(1);
 
@@ -892,7 +894,7 @@ describe("progress recording", () => {
     expect(progress.correct).toBe(5);
     expect(progress.wrong).toBe(1);
     // Stickers were cleared, progress was not.
-    expect(load().stickers["shape-sorter"].earned).toBe(false);
+    expect(hasSticker("shape-sorter")).toBe(false);
   });
 
   it("backfills zeroed progress for an older v2 save without progress", () => {
@@ -914,7 +916,7 @@ describe("progress recording", () => {
     localStorage.setItem(V2_KEY, JSON.stringify(oldV2));
 
     // Sticker data survived, progress is zeroed and complete.
-    expect(load().stickers["shape-sorter"].earned).toBe(true);
+    expect(hasSticker("shape-sorter")).toBe(true);
     expect(getProgress()["shape-sorter"]).toEqual({
       plays: 0,
       wins: 0,
@@ -940,7 +942,7 @@ describe("progress recording", () => {
     expect(getProgress()["shape-sorter"].plays).toBe(0);
     expect(getActiveProfile().activity).toEqual([]);
     // v1 sticker survived migration.
-    expect(load().stickers["shape-sorter"].earned).toBe(true);
+    expect(hasSticker("shape-sorter")).toBe(true);
   });
 
   it("records an abandoned session's taps on the active profile only", () => {
@@ -1106,16 +1108,11 @@ describe("v2 state cache (memoization)", () => {
     expect(after).not.toBe(before);
   });
 
-  it("save() updates the cached state (write-through)", () => {
+  it("writes update the cached state (write-through)", () => {
     getSettings(); // prime the cache
 
-    save({
-      stickers: {
-        ...createDefaultStickers(),
-        "shape-sorter": { earned: true, earnedAt: "2026-07-28T00:00:00.000Z" },
-      },
-      settings: { ...getSettings(), bgmEnabled: false, sfxEnabled: true },
-    });
+    earnSticker("shape-sorter");
+    updateSettings({ bgmEnabled: false });
 
     expect(getSettings().bgmEnabled).toBe(false);
     expect(hasSticker("shape-sorter")).toBe(true);
@@ -1166,5 +1163,183 @@ describe("v2 state cache (memoization)", () => {
     // The cached state must remain the real state, not the declined proposal.
     expect(getActiveProfile().id).toBe("p1");
     expect(getSettings().sfxEnabled).toBe(true);
+  });
+});
+
+describe("schema versioning", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  /**
+   * A fully normalized legacy v2 body (the shape every build before schema
+   * versioning wrote): complete sticker keys, complete progress map, play
+   * time keyed to today, and the full settings block — so normalizing it is
+   * the identity and the stamp is the only change the next write makes.
+   */
+  function legacyV2Body() {
+    return {
+      activeProfileId: "p1",
+      profiles: [
+        {
+          id: "p1",
+          avatarId: "cat",
+          createdAt: "2026-08-04T00:00:00.000Z",
+          stickers: {
+            ...createDefaultStickers(),
+            "animal-trace": { earned: true, earnedAt: "2026-09-01T00:00:00.000Z" },
+          },
+          playTime: { limitMinutes: 30, usedMinutes: 5, lastUsedDate: todayKey() },
+          progress: createDefaultProgressMap(),
+          activity: [],
+        },
+      ],
+      settings: {
+        bgmEnabled: false,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      },
+    };
+  }
+
+  /** Serializes a v2 body with an explicit schemaVersion (omit = unstamped). */
+  function storedV2(body: object, schemaVersion?: unknown): string {
+    return JSON.stringify(schemaVersion === undefined ? body : { ...body, schemaVersion });
+  }
+
+  it("stamps a fresh write with schemaVersion 1", () => {
+    updateSettings({ bgmEnabled: false });
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    expect(JSON.parse(stored).schemaVersion).toBe(1);
+  });
+
+  it("classifies a legacy unstamped payload as version 1 and stamps it on the next write", () => {
+    const body = legacyV2Body();
+    localStorage.setItem(V2_KEY, JSON.stringify(body));
+
+    // The implicit-v1 payload reads normally: its stored progress survives.
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+
+    switchProfile("p1"); // a persisting no-op write
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    const parsed = JSON.parse(stored);
+    expect(parsed.schemaVersion).toBe(1);
+    // The stamp is the only change: the body is otherwise unchanged.
+    expect(parsed).toEqual({ ...body, schemaVersion: 1 });
+  });
+
+  it("stamps the migrated v2 payload when a v1-only install first migrates", () => {
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+
+    readActiveState();
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    expect(JSON.parse(stored).schemaVersion).toBe(1);
+    // The migration itself is untouched: v1 progress survives, v1 key stays.
+    expect(hasSticker("shape-sorter")).toBe(true);
+    expect(localStorage.getItem(V1_KEY)).not.toBeNull();
+  });
+
+  it("reads a payload stamped with the known version normally", () => {
+    localStorage.setItem(V2_KEY, storedV2(legacyV2Body(), 1));
+
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+  });
+
+  it("pins the version-1 identity migrate step", () => {
+    const body = legacyV2Body();
+    localStorage.setItem(V2_KEY, storedV2(body, 1));
+
+    // The known-version payload passes through the version-1 (identity) step:
+    // every stored field reads back exactly as stored — the template a future
+    // version's migrate step must preserve.
+    expect(getActiveProfile().stickers["animal-trace"]).toEqual({
+      earned: true,
+      earnedAt: "2026-09-01T00:00:00.000Z",
+    });
+    expect(getActiveProfile().playTime).toEqual({
+      limitMinutes: 30,
+      usedMinutes: 5,
+      lastUsedDate: todayKey(),
+    });
+    expect(getSettings()).toEqual(body.settings);
+  });
+
+  it("serves in-memory defaults for an unknown version and never touches the stored bytes", async () => {
+    const raw = storedV2(legacyV2Body(), 99);
+    localStorage.setItem(V2_KEY, raw);
+
+    // The unknown payload's data is NOT served; fresh defaults are.
+    expect(hasSticker("animal-trace")).toBe(false);
+    expect(getSettings()).toEqual({
+      bgmEnabled: true,
+      sfxEnabled: true,
+      preferredVoiceURI: null,
+      adaptiveDifficulty: true,
+    });
+
+    // Mutations apply to the in-memory default state only (A2) and the raw
+    // stored bytes stay byte-identical.
+    earnSticker("shape-sorter");
+    updateSettings({ bgmEnabled: false });
+    recordGamePlay("pop-freeze");
+
+    expect(hasSticker("shape-sorter")).toBe(true);
+    expect(getSettings().bgmEnabled).toBe(false);
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+
+    // A fresh session (reload) discards the in-memory mutations: the stored
+    // payload is re-classified as unknown and defaults are served again.
+    vi.resetModules();
+    const fresh = await import("../../utils/storage");
+    expect(fresh.hasSticker("shape-sorter")).toBe(false);
+    expect(fresh.getSettings().bgmEnabled).toBe(true);
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+  });
+
+  it("never lets the memo cache overwrite a write-protected payload", () => {
+    getSettings(); // prime the cache with a good payload
+
+    const raw = storedV2(legacyV2Body(), 99);
+    localStorage.setItem(V2_KEY, raw); // external write while the cache is hot
+
+    earnSticker("shape-sorter");
+    updateSettings({ sfxEnabled: false });
+
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+  });
+
+  it("treats a non-number schemaVersion as corrupt and serves fresh defaults", () => {
+    for (const version of ["1", null]) {
+      localStorage.clear();
+      localStorage.setItem(V2_KEY, storedV2(legacyV2Body(), version));
+
+      // The corrupt path (A4): fresh defaults, matching today's handling.
+      expect(hasSticker("animal-trace")).toBe(false);
+      expect(getSettings().bgmEnabled).toBe(true);
+    }
+  });
+
+  it("prefers v2 when both keys exist and leaves the v1 key in place", () => {
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+    localStorage.setItem(V2_KEY, storedV2(legacyV2Body(), 1));
+
+    readActiveState();
+
+    // v2 wins: its earned sticker is served, the v1 payload's is not consulted.
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(hasSticker("shape-sorter")).toBe(false);
+    expect(localStorage.getItem(V1_KEY)).not.toBeNull();
   });
 });
