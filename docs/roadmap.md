@@ -4,20 +4,11 @@ This document is the single home for two things: what is known to be broken in
 Aby's Little Lab, and what is planned next. Nothing else in `docs/` keeps a
 second copy of either list — other documents link here instead.
 
-Every entry below was checked against the code on 2026-10-22. Where an entry
+Every entry below was checked against the code on 2026-10-25. Where an entry
 names a file, that file is where the debt lives; where it names a symptom, that
 is what a reader would actually see.
 
 ## Known Issues
-
-### Three games hand-roll their drag scaffolding
-
-`src/scenes/ShapeSorterScene.ts`, `src/scenes/ShadowMatchScene.ts` and
-`src/scenes/BigSmallScene.ts` build their own drag behaviour from the
-`dragJuice` helpers instead of using the shared board in
-`src/game/dragBoard.ts`. Only `NumberOrderScene` and `StoryOrderScene` use
-`DragBoard`. A reader notices it by searching `src/scenes/` for `DragBoard` and
-finding two of the five drag games.
 
 ### The stored payload carries no schema version
 
@@ -42,18 +33,10 @@ through `Math.random`. A reader notices it by searching `src/game/` for
 The same material, ordered by how much each item would improve the product.
 The track named against each item is the track that would deliver it.
 
-1. **Move the three hand-rolled drag games onto the shared board.** Shape
-   Sorter, Shadow Match and Big & Small each reimplement lift, drop-zone
-   highlight and snap, which means the shared board's swap and tap-withdraw
-   behaviour reaches only two of the five drag games. Track:
-   *drag-board-consolidation*.
-2. **Version the stored payload.** A `schemaVersion` field would let a future
+1. **Version the stored payload.** A `schemaVersion` field would let a future
    format change be recognised instead of inferred, and would give the legacy
    `AppStorage` type somewhere to be retired to. Track: *storage-schema-version*.
-3. **Bank play time as it is earned.** Writing the visible minutes as they
-   accrue would survive an app that is killed, and would stop a short session
-   from banking nothing. Track: *play-time-banking*.
-4. **One shuffle, one RNG seam.** A single shared shuffle helper and an
+2. **One shuffle, one RNG seam.** A single shared shuffle helper and an
    injectable RNG across the logic modules would let the remaining 19
    per-game modules be tested without stubbing `Math.random`. Track:
    *shared-random-helpers*.
