@@ -235,6 +235,48 @@ describe("DragBoard", () => {
     });
   });
 
+  describe("image pieces (widened draggable contract)", () => {
+    /** A piece whose draggable is a plain Image, as Shape Sorter's pieces are. */
+    interface ImagePiece extends BoardPiece {
+      container: Phaser.GameObjects.Image;
+    }
+
+    function makeImagePiece(harness: Harness, id: string, x: number, y: number): ImagePiece {
+      // A plain Image mock: the producer does not reparent it into a Container.
+      const draggable = createContainer(harness.scene, x, y) as unknown as Phaser.GameObjects.Image;
+      const piece: ImagePiece = {
+        id,
+        container: draggable,
+        originX: x,
+        originY: y,
+        slotIndex: null,
+        justDropped: false,
+      };
+      harness.board.addPiece(piece);
+      return piece;
+    }
+
+    it("registers an Image piece, delivers its drop, and updates occupancy", () => {
+      const harness = createHarness();
+      const slot = harness.board.addSlot(100, 200);
+      const piece = makeImagePiece(harness, "shape", 100, 40);
+
+      expect(harness.scene.input.setDraggable).toHaveBeenCalledWith(piece.container);
+      fire(piece, "dragstart");
+      expect(harness.scene.children.bringToTop).toHaveBeenCalledWith(piece.container);
+
+      dropOnto(harness, piece, 0);
+
+      expect(piece.slotIndex).toBe(0);
+      expect(slot.occupiedBy).toBe(piece);
+      const [snap] = tweensFor(harness, piece.container);
+      expect(snap.x).toBe(100);
+      expect(snap.y).toBe(200);
+      expect(snap.ease).toBe("Cubic.out");
+      expect(harness.callbacks.onDrop).toHaveBeenCalledWith(piece, 0);
+    });
+  });
+
   describe("drop resolution", () => {
     it("places a source piece into an empty slot and snaps it", () => {
       const harness = createHarness();
@@ -332,6 +374,128 @@ describe("DragBoard", () => {
       expect(piece.slotIndex).toBeNull();
       expect(piece.justDropped).toBe(false);
       expect(harness.callbacks.onDrop).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("slot capacity", () => {
+    it("registers a slot with single capacity by default", () => {
+      const harness = createHarness();
+      harness.board.addSlot(100, 200);
+
+      const [slot] = harness.board.getSlots();
+
+      expect(slot.capacity).toBe("single");
+      expect(slot.occupiedBy).toBeNull();
+      expect(slot.pieces).toEqual([]);
+    });
+
+    it("an explicitly single slot keeps the exact single-occupancy semantics", () => {
+      const harness = createHarness();
+      const slot = harness.board.addSlot(100, 200, "single");
+      const pieceA = harness.makePiece("a", 100, 40);
+      const pieceB = harness.makePiece("b", 250, 40);
+
+      dropOnto(harness, pieceA, 0);
+      expect(slot.capacity).toBe("single");
+      expect(slot.occupiedBy).toBe(pieceA);
+      expect(slot.pieces).toEqual([]);
+      expect(pieceA.slotIndex).toBe(0);
+
+      dropOnto(harness, pieceB, 0);
+
+      expect(slot.occupiedBy).toBe(pieceB);
+      expect(slot.pieces).toEqual([]);
+      expect(pieceA.slotIndex).toBeNull();
+      const homeTween = tweensFor(harness, pieceA.container).at(-1);
+      expect(homeTween?.x).toBe(pieceA.originX);
+      expect(homeTween?.duration).toBe(300);
+      expect(harness.callbacks.onDrop).toHaveBeenLastCalledWith(pieceB, 0);
+    });
+
+    it("a multi slot accepts several distinct pieces across drop gestures and feeds each drop", () => {
+      const harness = createHarness();
+      const slot = harness.board.addSlot(100, 200, "multi");
+      const pieceA = harness.makePiece("a", 100, 40);
+      const pieceB = harness.makePiece("b", 220, 40);
+      const pieceC = harness.makePiece("c", 340, 40);
+
+      dropOnto(harness, pieceA, 0);
+      expect(slot.capacity).toBe("multi");
+      expect(slot.pieces).toEqual([pieceA]);
+      expect(slot.occupiedBy).toBeNull();
+      expect(pieceA.slotIndex).toBe(0);
+      expect(harness.callbacks.onDrop).toHaveBeenLastCalledWith(pieceA, 0);
+
+      dropOnto(harness, pieceB, 0);
+      expect(slot.pieces).toEqual([pieceA, pieceB]);
+      expect(pieceA.slotIndex).toBe(0);
+      expect(pieceB.slotIndex).toBe(0);
+      expect(harness.callbacks.onDrop).toHaveBeenLastCalledWith(pieceB, 0);
+
+      dropOnto(harness, pieceC, 0);
+      expect(slot.pieces).toEqual([pieceA, pieceB, pieceC]);
+      expect(harness.callbacks.onDrop).toHaveBeenCalledTimes(3);
+      expect(harness.board.placedPieces()).toEqual([pieceA, pieceB, pieceC]);
+      expect(harness.board.placedIds()).toEqual(["a,b,c"]);
+      expect(harness.board.isFull()).toBe(true);
+    });
+
+    it("withdrawing one piece of a multi slot keeps the rest in place", () => {
+      const harness = createHarness();
+      const slot = harness.board.addSlot(100, 200, "multi");
+      const pieceA = harness.makePiece("a", 100, 40);
+      const pieceB = harness.makePiece("b", 220, 40);
+      dropOnto(harness, pieceA, 0);
+      dropOnto(harness, pieceB, 0);
+
+      fire(pieceA, "pointerdown");
+      fire(pieceA, "pointerup");
+
+      expect(slot.pieces).toEqual([pieceB]);
+      expect(pieceA.slotIndex).toBeNull();
+      expect(pieceB.slotIndex).toBe(0);
+      expect(slot.occupiedBy).toBeNull();
+      expect(harness.callbacks.onWithdraw).toHaveBeenCalledWith(pieceA);
+    });
+
+    it("bounce-home frees a multi slot's whole list", () => {
+      const harness = createHarness();
+      const slot = harness.board.addSlot(100, 200, "multi");
+      const pieceA = harness.makePiece("a", 100, 40);
+      const pieceB = harness.makePiece("b", 220, 40);
+      dropOnto(harness, pieceA, 0);
+      dropOnto(harness, pieceB, 0);
+
+      harness.board.applyWrongAnswer();
+
+      expect(slot.pieces).toEqual([]);
+      expect(pieceA.slotIndex).toBeNull();
+      expect(pieceB.slotIndex).toBeNull();
+      expect(harness.board.placedPieces()).toHaveLength(0);
+      expect(harness.board.placedIds()).toEqual([null]);
+      const homeA = tweensFor(harness, pieceA.container).at(-1);
+      const homeB = tweensFor(harness, pieceB.container).at(-1);
+      expect(homeA?.x).toBe(pieceA.originX);
+      expect(homeB?.y).toBe(pieceB.originY);
+    });
+
+    it("a piece moves between multi slots, leaving its source list and joining the target", () => {
+      const harness = createHarness();
+      const slotA = harness.board.addSlot(100, 200, "multi");
+      const slotB = harness.board.addSlot(400, 200, "multi");
+      const pieceA = harness.makePiece("a", 100, 40);
+      const pieceB = harness.makePiece("b", 130, 40);
+      dropOnto(harness, pieceA, 0);
+      dropOnto(harness, pieceB, 0);
+
+      dropOnto(harness, pieceB, 1);
+
+      expect(slotA.pieces).toEqual([pieceA]);
+      expect(slotB.pieces).toEqual([pieceB]);
+      expect(pieceA.slotIndex).toBe(0);
+      expect(pieceB.slotIndex).toBe(1);
+      expect(harness.board.placedIds()).toEqual(["a", "b"]);
+      expect(harness.callbacks.onDrop).toHaveBeenLastCalledWith(pieceB, 1);
     });
   });
 

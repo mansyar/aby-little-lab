@@ -13,6 +13,9 @@ export type WrongAnswerBehavior = "bounce-home" | "retry-in-place";
  */
 export type ValidationTiming = "per-drop" | "round-full";
 
+/** How many pieces a slot holds: exactly one, or several accumulating. */
+export type SlotCapacity = "single" | "multi";
+
 /**
  * Pointer travel (px) before a gesture counts as a drag. Phaser starts a drag
  * on the first pointermove (threshold 0), and a drag that ends over the
@@ -34,6 +37,22 @@ const SWAP_DURATION = 200;
 const SWAP_REDUCED_DURATION = 120;
 
 /**
+ * The draggable capability set a board piece's `container` field accepts —
+ * the {@link DragTarget} capability set (transform + drag lifecycle + owning
+ * scene, which both a plain `Phaser.GameObjects.Image` and a
+ * `Phaser.GameObjects.Container` satisfy), extended with the pointer, drag,
+ * and drop events the shell wires itself.
+ */
+export type BoardDraggable = DragTarget & {
+  /** Register a pointer gesture handler (tap bookkeeping). */
+  on(event: "pointerdown" | "pointerup", listener: () => void): void;
+  /** Register the drag-move handler the shell positions the piece with. */
+  on(event: "drag", listener: (pointer: unknown, dragX: number, dragY: number) => void): void;
+  /** Register the drop handler the shell resolves occupancy with. */
+  on(event: "drop", listener: (pointer: unknown, target: unknown) => void): void;
+};
+
+/**
  * Minimal piece record the shell manages. Scenes keep richer records (art,
  * fills, payloads) that structurally satisfy this shape, so a scene's own
  * card/panel interface can be handed to the shell directly.
@@ -44,8 +63,12 @@ export interface BoardPiece {
    * (Story Order's `key|key|key` guard).
    */
   readonly id: string;
-  /** Draggable container the shell wires gesture listeners onto. */
-  container: Phaser.GameObjects.Container;
+  /**
+   * Draggable object the shell wires gesture listeners onto — any
+   * {@link BoardDraggable}, so a piece may be a plain `Image` as well as a
+   * `Container`.
+   */
+  container: BoardDraggable;
   /** Source (tray/row) position the piece returns to when unplaced. */
   originX: number;
   originY: number;
@@ -55,12 +78,20 @@ export interface BoardPiece {
   justDropped: boolean;
 }
 
-/** One drop slot: its hit zone, position, and current occupant. */
+/** One drop slot: its hit zone, position, and current occupancy. */
 export interface BoardSlot<TPiece extends BoardPiece = BoardPiece> {
   readonly zone: Phaser.GameObjects.Zone;
   readonly x: number;
   readonly y: number;
+  /** Whether the slot holds exactly one piece or several. */
+  readonly capacity: SlotCapacity;
+  /**
+   * Single-capacity occupant: the placed piece, or null when free. Multi
+   * slots keep this null and track occupancy in {@link BoardSlot.pieces}.
+   */
   occupiedBy: TPiece | null;
+  /** Multi-capacity occupants in drop order. Single slots keep it empty. */
+  pieces: TPiece[];
 }
 
 /** Scene-owned reactions the shell reports into; it never validates itself. */
@@ -73,7 +104,9 @@ export interface DragBoardCallbacks<TPiece extends BoardPiece> {
   onWithdraw?: (piece: TPiece) => void;
   /**
    * Validation hook, fired per the configured timing. Entries are slot-indexed
-   * piece ids, null for an empty slot.
+   * occupant summaries: the piece's id for a single slot, its occupants' ids
+   * in drop order joined with "," for a multi slot, and null for an empty
+   * slot. (Piece ids are scene-owned and must not contain the separators.)
    */
   onValidate?: (placedIds: readonly (string | null)[]) => void;
 }
@@ -105,12 +138,13 @@ export interface DragBoardOptions<TPiece extends BoardPiece> {
 /**
  * Parameterized drag-board shell extracted from Number Order and Story Order.
  *
- * Owns the scaffolding both scenes hand-rolled inline: slot/drop-zone
+ * Owns the scaffolding every board scene hand-rolled inline: slot/drop-zone
  * registration and hover detection, snap wiring over {@link snapToSlot},
  * slot↔slot swap, tray↔slot displacement, tap-vs-drag discrimination with
- * tap-withdraw, and the two wrong-answer movement policies. Validation itself
- * belongs to the scene — the shell only reports drop/withdraw events and fires
- * the validation hook at the configured timing.
+ * tap-withdraw, and the two wrong-answer movement policies. Slots are single
+ * or multi capacity; pieces may be Images or Containers — the shell is generic
+ * over both. Validation itself belongs to the scene — the shell only reports
+ * drop/withdraw events and fires the validation hook at the configured timing.
  *
  * The shell never touches visuals (outlines, fills, art): scenes draw their
  * own slot decoration and keep their piece records, which satisfy
@@ -151,11 +185,15 @@ export class DragBoard<TPiece extends BoardPiece> {
     this.scene.events.on("shutdown", this.handleShutdown);
   }
 
-  /** Creates the interactive drop zone for a slot and registers it. */
-  addSlot(x: number, y: number): BoardSlot<TPiece> {
+  /**
+   * Creates the interactive drop zone for a slot and registers it. Capacity
+   * defaults to `"single"` — the exact one-piece-per-slot occupancy semantics
+   * the adopting boards already run on.
+   */
+  addSlot(x: number, y: number, capacity: SlotCapacity = "single"): BoardSlot<TPiece> {
     const zone = this.scene.add.zone(x, y, this.zoneSize, this.zoneSize);
     zone.setInteractive({ dropZone: true });
-    const slot: BoardSlot<TPiece> = { zone, x, y, occupiedBy: null };
+    const slot: BoardSlot<TPiece> = { zone, x, y, capacity, occupiedBy: null, pieces: [] };
     this.slots.push(slot);
     return slot;
   }
@@ -222,17 +260,25 @@ export class DragBoard<TPiece extends BoardPiece> {
 
   /** Returns true when every registered slot is occupied. */
   isFull(): boolean {
-    return this.slots.every((slot) => slot.occupiedBy !== null);
+    return this.slots.every((slot) => this.isOccupied(slot));
   }
 
   /** The placed pieces in slot order. */
   placedPieces(): TPiece[] {
-    return this.slots.flatMap((slot) => (slot.occupiedBy ? [slot.occupiedBy] : []));
+    return this.slots.flatMap((slot) => this.occupantsOf(slot));
   }
 
-  /** The placed piece ids in slot order, null for an empty slot. */
+  /**
+   * The placed piece ids in slot order, null for an empty slot. A multi slot
+   * contributes its occupants' ids in drop order joined with "," — the same
+   * summary the validation hook receives.
+   */
   placedIds(): (string | null)[] {
-    return this.slots.map((slot) => slot.occupiedBy?.id ?? null);
+    return this.slots.map((slot) => {
+      const occupants = this.occupantsOf(slot);
+      if (occupants.length === 0) return null;
+      return occupants.map((piece) => piece.id).join(",");
+    });
   }
 
   /** All registered slots in registration order. */
@@ -243,8 +289,7 @@ export class DragBoard<TPiece extends BoardPiece> {
   /** Returns a placed piece to its source position, freeing its slot. */
   withdraw(piece: TPiece): void {
     if (piece.slotIndex === null) return;
-    const slot = this.slots[piece.slotIndex];
-    if (slot) slot.occupiedBy = null;
+    this.detachPiece(piece);
     piece.slotIndex = null;
     this.refreshValidationGuard();
     this.tweenHome(piece);
@@ -259,11 +304,11 @@ export class DragBoard<TPiece extends BoardPiece> {
   applyWrongAnswer(): void {
     if (this.wrongAnswerBehavior === "retry-in-place") return;
     for (const slot of this.slots) {
-      const piece = slot.occupiedBy;
-      if (!piece) continue;
-      slot.occupiedBy = null;
-      piece.slotIndex = null;
-      this.tweenHome(piece);
+      for (const piece of this.occupantsOf(slot)) {
+        piece.slotIndex = null;
+        this.tweenHome(piece);
+      }
+      this.freeSlot(slot);
     }
     this.lastValidatedSignature = null;
   }
@@ -276,7 +321,7 @@ export class DragBoard<TPiece extends BoardPiece> {
       } catch {
         // Already destroyed — keep going.
       }
-      if (slot.occupiedBy) slot.occupiedBy.slotIndex = null;
+      for (const piece of this.occupantsOf(slot)) piece.slotIndex = null;
     }
     this.slots = [];
     this.pieces = [];
@@ -294,7 +339,7 @@ export class DragBoard<TPiece extends BoardPiece> {
   }
 
   private tweenTo(
-    target: Phaser.GameObjects.Container,
+    target: BoardDraggable,
     x: number,
     y: number,
     normal: number,
@@ -326,6 +371,40 @@ export class DragBoard<TPiece extends BoardPiece> {
     snapToSlot(this.scene, piece.container as unknown as DragTarget, slot.x, slot.y);
   }
 
+  /** Whether a slot currently holds at least one piece. */
+  private isOccupied(slot: BoardSlot<TPiece>): boolean {
+    return slot.capacity === "single" ? slot.occupiedBy !== null : slot.pieces.length > 0;
+  }
+
+  /** A slot's placed pieces in occupancy order, empty when free. */
+  private occupantsOf(slot: BoardSlot<TPiece>): TPiece[] {
+    if (slot.capacity === "single") return slot.occupiedBy ? [slot.occupiedBy] : [];
+    return [...slot.pieces];
+  }
+
+  /** Whether the piece already occupies the slot. */
+  private holdsPiece(slot: BoardSlot<TPiece>, piece: TPiece): boolean {
+    return slot.capacity === "single" ? slot.occupiedBy === piece : slot.pieces.includes(piece);
+  }
+
+  /** Frees whichever slot currently holds the piece; the caller owns slotIndex. */
+  private detachPiece(piece: TPiece): void {
+    if (piece.slotIndex === null) return;
+    const slot = this.slots[piece.slotIndex];
+    if (!slot) return;
+    if (slot.capacity === "single") {
+      slot.occupiedBy = null;
+    } else {
+      slot.pieces = slot.pieces.filter((occupied) => occupied !== piece);
+    }
+  }
+
+  /** Clears a slot's occupancy in both capacity modes. */
+  private freeSlot(slot: BoardSlot<TPiece>): void {
+    slot.occupiedBy = null;
+    slot.pieces = [];
+  }
+
   private handleDrop(piece: TPiece, zone: unknown): void {
     if (this.isLocked()) return;
     // A drop is never a tap, whatever the trailing pointerup looks like.
@@ -333,19 +412,19 @@ export class DragBoard<TPiece extends BoardPiece> {
     const destIndex = this.slots.findIndex((slot) => slot.zone === zone);
     if (destIndex === -1) return;
     const destSlot = this.slots[destIndex];
-    const sourceIndex = piece.slotIndex;
 
-    if (destSlot.occupiedBy === piece) {
+    if (this.holdsPiece(destSlot, piece)) {
       // Dropped back onto its own slot — just snap.
       this.snap(piece, destSlot);
       return;
     }
 
-    if (destSlot.occupiedBy === null) {
-      if (sourceIndex !== null) {
-        this.slots[sourceIndex].occupiedBy = null;
-      }
-      destSlot.occupiedBy = piece;
+    const sourceIndex = piece.slotIndex;
+
+    if (destSlot.capacity === "multi") {
+      // A multi slot accumulates: the piece joins its occupant list.
+      this.detachPiece(piece);
+      destSlot.pieces.push(piece);
       piece.slotIndex = destIndex;
       this.snap(piece, destSlot);
       this.callbacks.onDrop?.(piece, destIndex);
@@ -354,13 +433,28 @@ export class DragBoard<TPiece extends BoardPiece> {
     }
 
     const occupant = destSlot.occupiedBy;
-    if (sourceIndex !== null) {
-      // Slot↔slot swap: the occupant slides to the dragging piece's slot.
-      const sourceSlot = this.slots[sourceIndex];
-      sourceSlot.occupiedBy = occupant;
-      occupant.slotIndex = sourceIndex;
+    if (occupant === null) {
+      this.detachPiece(piece);
       destSlot.occupiedBy = piece;
       piece.slotIndex = destIndex;
+      this.snap(piece, destSlot);
+      this.callbacks.onDrop?.(piece, destIndex);
+      this.refreshValidationGuard();
+      return;
+    }
+
+    this.detachPiece(piece);
+    const sourceSlot = sourceIndex !== null ? this.slots[sourceIndex] : null;
+    destSlot.occupiedBy = piece;
+    piece.slotIndex = destIndex;
+    if (sourceSlot) {
+      // Slot↔slot: the occupant slides to the dragging piece's source slot.
+      if (sourceSlot.capacity === "single") {
+        sourceSlot.occupiedBy = occupant;
+      } else {
+        sourceSlot.pieces.push(occupant);
+      }
+      occupant.slotIndex = sourceIndex;
       this.tweenTo(
         occupant.container,
         sourceSlot.x,
@@ -368,11 +462,8 @@ export class DragBoard<TPiece extends BoardPiece> {
         SWAP_DURATION,
         SWAP_REDUCED_DURATION,
       );
-      this.snap(piece, destSlot);
     } else {
       // Tray↔slot displacement: the occupant returns to its own source spot.
-      destSlot.occupiedBy = piece;
-      piece.slotIndex = destIndex;
       occupant.slotIndex = null;
       this.tweenTo(
         occupant.container,
@@ -381,8 +472,8 @@ export class DragBoard<TPiece extends BoardPiece> {
         this.bounceDuration,
         this.bounceReducedDuration,
       );
-      this.snap(piece, destSlot);
     }
+    this.snap(piece, destSlot);
     this.callbacks.onDrop?.(piece, destIndex);
     this.refreshValidationGuard();
   }
@@ -410,7 +501,7 @@ export class DragBoard<TPiece extends BoardPiece> {
    * re-validate the same arrangement once it fills again.
    */
   private refreshValidationGuard(): void {
-    if (this.slots.some((slot) => slot.occupiedBy === null)) {
+    if (this.slots.some((slot) => !this.isOccupied(slot))) {
       this.lastValidatedSignature = null;
     }
   }
@@ -419,7 +510,7 @@ export class DragBoard<TPiece extends BoardPiece> {
     if (this.isLocked()) return;
     const placedIds = this.placedIds();
     if (this.validationTiming === "round-full") {
-      if (this.slots.some((slot) => slot.occupiedBy === null)) return;
+      if (this.slots.some((slot) => !this.isOccupied(slot))) return;
       const signature = placedIds.join("|");
       if (signature === this.lastValidatedSignature) return;
       this.lastValidatedSignature = signature;
