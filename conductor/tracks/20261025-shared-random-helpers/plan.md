@@ -70,29 +70,33 @@ The primary appends after acceptance:
   `src/scenes/ShapeSorterScene.ts`, and the test files that import `shuffle`
   from those modules (import-line swaps only)
 - **Verification:** full `verify_phase` chain (as Phase 1)
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Delete the four private copies** — covers: FR-2
-  - [ ] **P2.T1.1: Remove `shuffle` from** `animalTraceLogic`, `bigSmallLogic`,
+- [x] **P2.T1: Delete the four private copies** — covers: FR-2
+  - [x] **P2.T1.1: Remove `shuffle` from** `animalTraceLogic`, `bigSmallLogic`,
     `popFreezeLogic`, `shadowMatchLogic`; their internal callers import from
     `./random`.
-  - [ ] **P2.T1.2: Remove the copy in `shapeSorterLogic`** and its own
+  - [x] **P2.T1.2: Remove the copy in `shapeSorterLogic`** and its own
     internal usage — `generatePlaythrough`/`poolFor` call paths import from
     `./random` (A5: `generatePlaythrough` inherits the seam via this path).
-- [ ] **P2.T2: Re-point the import-hub consumers** — covers: FR-2
-  - [ ] **P2.T2.1: The 12 logic importers** (`addItUp`, `alphabet`,
+- [x] **P2.T2: Re-point the import-hub consumers** — covers: FR-2
+  - [x] **P2.T2.1: The 12 logic importers** (`addItUp`, `alphabet`,
     `colorMatch`, `count`, `decode`, `firstSounds`, `memoryMatch`,
     `moreLess`, `numberOrder`, `oddOneOut`, `takeAway`, `word`) import
     `shuffle` from `./random`; no other line changes.
-  - [ ] **P2.T2.2: `ShapeSorterScene` and `patternBuilderLogic`** —
+  - [x] **P2.T2.2: `ShapeSorterScene` and `patternBuilderLogic`** —
     ShapeSorterScene swaps the shuffle part of its shapeSorterLogic import
     (keeps `generatePlaythrough`, `isMatch`, `ShapeType`);
     patternBuilderLogic keeps `ALL_SHAPES`/`ShapeType` from shapeSorterLogic
     and takes `shuffle` from `./random`.
-- [ ] **P2.T3: Grep proof of one definition** — covers: FR-2, AC-2
-  - [ ] **P2.T3.1: Static sweep** — one `function shuffle` definition in
+- [x] **P2.T3: Grep proof of one definition** — covers: FR-2, AC-2
+  - [x] **P2.T3.1: Static sweep** — one `function shuffle` definition in
     `src/game` (inside `random.ts`), zero `shuffle` imports from
     `shapeSorterLogic`; record the grep output in the phase evidence.
+
+**Result:** verified
+**Checkpoint:** 0b4c7b5a
+**Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-2.md
 
 ## Phase 3: Thread the RNG seam through the logic modules
 
