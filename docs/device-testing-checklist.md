@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.21.7 (2026-10-25)
+
+- **Target:** tag `v1.21.7` pushed on 2026-10-25; Coolify deploy triggered by the tag. The smoke below ran against the live release at `https://aby-little-lab.ansyar-world.top/`.
+- **Scope:** one track, `conductor/archive/20261025-storage-schema-version/` (PR #66) - the persisted v2 payload now carries a top-level `schemaVersion` field stamped by the single write path (`SCHEMA_VERSION = 1`), and the read path classifies every stored payload before normalising: missing version is served as implicit v1 and stamped on the next write, a non-number version takes the corrupt path, and an unknown version is write-protected (raw `localStorage` bytes never modified or removed, fresh defaults served from memory, session mutations kept in memory and discarded on reload). The legacy `load()`/`save()` pair is retired - `hasSticker`/`getSettings` read through the granular API - and `AppStorage` survives only as the one-time v1→v2 migration input type. The v1 key, `readV1()` and `migrateV1()` are untouched: existing installs keep every byte of data. Zero kid-visible behaviour change; the save shape gains one field only.
+- **Checks:** the manual rows from the PR description - play a game, earn a sticker, close and relaunch: progress intact; DevTools: write a payload with `schemaVersion: 99` into `abby-little-lab:v2`, reload - the app opens with defaults, the tampered bytes stay byte-identical after any in-app action, and reload restores them; same with `schemaVersion: "1"` and `null` - fresh defaults (corrupt path); a normal session stamps `schemaVersion: 1` on its next write; footer `v1.21.7`.
+- **Result:** **PASSED (desktop smoke) 2026-10-25** - `Quality Gates` succeeded on the tag, and the live `assets/index-B6qix_c7.js` (142004 bytes) is SHA-256 identical (`8d09f1fd876be4a3e0fdb58f61a5b973fd98073cffb1af550268ced93e4685bc`) to a local build of the release commit `ee6bb40f`; the served bundle carries the `1.21.7` version string. The edge served the stale v1.21.6 shell for about two minutes after the deploy before returning the new fingerprint (same cache lag seen at v1.21.5, absent at v1.21.6). Device-class execution of the manual rows is **PENDING**; the unknown-version write-protect (tampered bytes survive a play session untouched) is the part most worth a deliberate check on real hardware.
+- **Issues found:** none reported
+
 ## Execution Record - v1.21.6 (2026-10-25)
 
 - **Target:** tag `v1.21.6` pushed on 2026-10-25; Coolify deploy triggered by the tag. The smoke below ran against the live release at `https://aby-little-lab.ansyar-world.top/`.
