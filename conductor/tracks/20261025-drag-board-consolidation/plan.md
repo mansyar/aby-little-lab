@@ -16,17 +16,21 @@
 - **Covers:** FR-4, AC-2, NFR-2, NFR-3, NFR-4
 - **Touches:** `src/game/dragBoard.ts`, `src/__tests__/game/dragBoard.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Board tests for the generalizations (red first)** — covers: FR-4
-  - [ ] **P1.T1.1: Image-piece test** — a piece whose draggable is a plain `Phaser.GameObjects.Image` (satisfying the `DragTarget` set) registers on the board, delivers a drop through `onDrop` and updates occupancy, proving the widened contract.
-  - [ ] **P1.T1.2: Slot-capacity test** — a `multi` slot accepts several distinct pieces across drop gestures, feeding each drop to the scene, while a `single` slot keeps the exact single-occupancy semantics Number Order and Story Order rely on (existing board tests prove those unchanged).
+- [x] **P1.T1: Board tests for the generalizations (red first)** — covers: FR-4
+  - [x] **P1.T1.1: Image-piece test** — a piece whose draggable is a plain `Phaser.GameObjects.Image` (satisfying the `DragTarget` set) registers on the board, delivers a drop through `onDrop` and updates occupancy, proving the widened contract.
+  - [x] **P1.T1.2: Slot-capacity test** — a `multi` slot accepts several distinct pieces across drop gestures, feeding each drop to the scene, while a `single` slot keeps the exact single-occupancy semantics Number Order and Story Order rely on (existing board tests prove those unchanged).
 > **Red-first note:** the P1.T1 tests must fail against the un-generalized
 > shell (a TS type error under vitest is an acceptable red) before
 > implementation begins.
-- [ ] **P1.T2: Generalize the shell** — covers: FR-4
-  - [ ] **P1.T2.1: Widen the piece contract** — the draggable field becomes the `DragTarget` capability set (transform + drag lifecycle + scene) so `Image` and `Container` both qualify; `BoardPiece` keeps its data fields as-is.
-  - [ ] **P1.T2.2: Add slot capacity** — `addSlot` gains a capacity option (`single` default | `multi`); occupancy bookkeeping (per-slot pieces, round-full signature entries, tray↔slot displacement) generalizes over lists; no game names and no game-specific branches in `dragBoard.ts`.
+- [x] **P1.T2: Generalize the shell** — covers: FR-4
+  - [x] **P1.T2.1: Widen the piece contract** — the draggable field becomes the `DragTarget` capability set (transform + drag lifecycle + scene) so `Image` and `Container` both qualify; `BoardPiece` keeps its data fields as-is.
+  - [x] **P1.T2.2: Add slot capacity** — `addSlot` gains a capacity option (`single` default | `multi`); occupancy bookkeeping (per-slot pieces, round-full signature entries, tray↔slot displacement) generalizes over lists; no game names and no game-specific branches in `dragBoard.ts`.
+
+**Result:** verified
+**Checkpoint:** `3d94b937`
+**Evidence:** conductor/tracks/20261025-drag-board-consolidation/verification/phase-1.md
 
 <!--
 The primary appends after acceptance:

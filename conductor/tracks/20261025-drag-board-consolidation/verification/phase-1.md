@@ -97,3 +97,13 @@
   shape, same swap/displacement tweens, same `placedIds` entries, so the
   round-full signature machinery (Story Order's `key|key|key` guard) is
   unchanged for single-capacity boards.
+
+## Primary verification
+
+- Verified by the primary (conductor) on 2026-10-25 at checkpoint `3d94b937`
+  (phase base `48fa355a`).
+- Full gate run independently: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js` — exit 0.
+- Tests: 121 files / 2655 passed. Coverage: statements 97.97 (≥90), branches 91.9 (≥85), functions 96.73 (≥88), lines 98.74 (≥95). Bundle + PWA validators pass.
+- AC-2 spot-check: `dragBoard.test.ts` — `image pieces (widened draggable contract)` (`:259` registers an Image piece, delivers its drop, updates occupancy), `slot capacity` (`:381` default single, `:392` explicit single semantics, `:415` multi accepts several pieces feeding each drop, `:443` multi withdraw, `:461` bounce-home frees list, `:482` multi→multi move).
+- Red evidence confirmed present at `.conductor/evidence/phase-1-red.md`.
+- Result: **accepted**.
