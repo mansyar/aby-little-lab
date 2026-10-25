@@ -205,54 +205,43 @@
 - **Verification:** full `verify_phase` chain (as Phase 1), plus the greppable
   proofs `grep "16807" src/__tests__` → empty and
   `grep "function shuffle" src/game` → one hit
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Replace the surviving Park–Miller generator** — covers: F1
-  - [ ] **R1.T1.1:** Migrate `storyOrderLogic.test.ts`'s `seededRng` to
+- [x] **R1.T1: Replace the surviving Park–Miller generator** — covers: F1
+  - [x] **R1.T1.1:** Migrate `storyOrderLogic.test.ts`'s `seededRng` to
     `mulberry32` from the shared helper; re-derive the classic-mix pin and the
     no-repeat seeds; record `grep "16807" src/__tests__` as empty in evidence.
-- [ ] **R1.T2: Fix the under-scripted rngs** — covers: F2
-  - [ ] **R1.T2.1:** `animalTraceLogic.test.ts` — budget 10 draws for the
+- [x] **R1.T2: Fix the under-scripted rngs** — covers: F2
+  - [x] **R1.T2.1:** `animalTraceLogic.test.ts` — budget 10 draws for the
     6-pair shuffle and 8 for the two `generatePathPoints` calls (or cycle the
     script), assert a concrete permutation plus a `Number.isFinite` guard.
-  - [ ] **R1.T2.2:** `popFreezeLogic.test.ts` — budget 6 draws for the
+  - [x] **R1.T2.2:** `popFreezeLogic.test.ts` — budget 6 draws for the
     4-element shuffle; same finite-value guard.
-- [ ] **R1.T3: Give `shapeSorterLogic` the seam** — covers: F3
-  - [ ] **R1.T3.1:** Add trailing `rng: Rng = Math.random` to
+- [x] **R1.T3: Give `shapeSorterLogic` the seam** — covers: F3
+  - [x] **R1.T3.1:** Add trailing `rng: Rng = Math.random` to
     `generatePlaythrough` and forward it to `shuffle(poolFor(shift), rng)`;
     confirm the scene's two-argument call and `toHaveBeenCalledWith(3, 1)`
     assertions still hold.
-  - [ ] **R1.T3.2:** Replace the scoped `Math.random` spy in
+  - [x] **R1.T3.2:** Replace the scoped `Math.random` spy in
     `shapeSorterLogic.test.ts` with a seeded same-rng determinism case; amend
     assumption A5 in `spec.md` to describe the real mechanism.
-- [ ] **R1.T4: Annotate the retained flow stubs** — covers: F4
-  - [ ] **R1.T4.1:** Add the FR-6/A4 comment to
+- [x] **R1.T4: Annotate the retained flow stubs** — covers: F4
+  - [x] **R1.T4.1:** Add the FR-6/A4 comment to
     `feelingsFacesFlow.test.ts:183` and `musicalMemoryFlow.test.ts:400`;
     restate the exception in FR-6/AC-4 and the Phase-4 evidence as "scoped
     scene-level stubs in flow suites, each carrying a comment".
-- [ ] **R1.T5: Add the missing seeded determinism cases** — covers: F5
-  - [ ] **R1.T5.1:** `animalTraceLogic` — `generatePathPoints(..., mulberry32(1234))`
+- [x] **R1.T5: Add the missing seeded determinism cases** — covers: F5
+  - [x] **R1.T5.1:** `animalTraceLogic` — `generatePathPoints(..., mulberry32(1234))`
     twice ⇒ equal. `popFreezeLogic` — `generateInitialBubbles(..., mulberry32(1234))`
     twice ⇒ equal. Restate the Phase-4 evidence about constant closures.
-- [ ] **R1.T6: Record the signature deviations** — covers: F6, F7
-  - [ ] **R1.T6.1:** Document the rng-first `buildPlaythrough` signature as a
+- [x] **R1.T6: Record the signature deviations** — covers: F6, F7
+  - [x] **R1.T6.1:** Document the rng-first `buildPlaythrough` signature as a
     deliberate FR-3 deviation (scene-call compatibility) in the TSDoc and the
     evidence; correct the Phase-4 suite count, add the omitted
     `storyOrderLogic.test.ts`, and replace the repo-wide AC-4 claim with an
     exact grep result.
 
 
-<!--
-Review fixes are appended by `conductor-review` as:
-
-## Phase R1: Review Fixes
-
-- **Goal:** Resolve review findings ...
-- **Depends on:** Phase 4
-- **Covers:** review findings
-- **Touches:** ...
-- **Verification:** ...
-- **Status:** pending
-
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
--->
+**Result:** verified
+**Checkpoint:** a9c41674
+**Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-R1.md
