@@ -13,14 +13,14 @@
   `shuffle` (TSDoc'd, fully edge-case-tested) and one seeded `mulberry32`
   helper lives in `src/__tests__/helpers/` — nothing else imports it yet.
 - **Depends on:** none
-- **Covers:** FR-1, FR-5, NFR-2, AC-1 (helper half of AC-4)
+- **Covers:** FR-1, FR-5, NFR-2, NFR-4, AC-1 (helper half of AC-4)
 - **Touches:** `src/game/random.ts`, `src/__tests__/game/random.test.ts`,
   `src/__tests__/helpers/randomHelper.ts`,
   `src/__tests__/helpers/randomHelper.test.ts`
 - **Verification:** the full `verify_phase` chain
   (`pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`)
   plus targeted `pnpm test -- --run src/__tests__/game/random.test.ts src/__tests__/helpers/randomHelper.test.ts`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Create `src/game/random.ts` and its suite** — covers: FR-1, NFR-4
   - [ ] **P1.T1.1: Module + TSDoc** — export the `Rng` type alias and
