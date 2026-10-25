@@ -50,7 +50,7 @@ The primary appends after acceptance:
 - **Covers:** FR-1, FR-2, FR-3, FR-5, AC-1, AC-3, AC-4, NFR-1, NFR-2, NFR-3, NFR-4
 - **Touches:** `src/scenes/ShapeSorterScene.ts`, `src/scenes/ShadowMatchScene.ts`, `src/scenes/BigSmallScene.ts`, `src/__tests__/scenes/shapeSorterScene.test.ts`, `src/__tests__/scenes/shapeSorterFlow.test.ts`, `src/__tests__/scenes/shadowMatchFlow.test.ts`, `src/__tests__/scenes/bigSmallScene.test.ts`, `src/__tests__/scenes/bigSmallFlow.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Shape Sorter onto the board** — covers: FR-1
   - [ ] **P2.T1.1: Rebuild orchestration** — piece/slot records satisfy `BoardPiece`; slots register as `single`; wrong drops bounce home via the board (300/180 ms), correct drops fire the scene's splash/ray reaction through callbacks; juice stays scene-called (`attachDragLift`, `attachDropZoneHighlight`) the same way the two board games use juice; delete the hand-wired `dragstart`/`drop` state machine and local `BOUNCE_*` constants.
