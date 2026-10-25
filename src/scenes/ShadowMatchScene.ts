@@ -2,9 +2,10 @@ import type Phaser from "phaser";
 import type { BandShift } from "../game/adaptiveLogic";
 import { items } from "../game/art/items";
 import { shadows } from "../game/art/shadows";
+import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
-import { attachDragLift, attachDropZoneHighlight, snapToSlot } from "../utils/dragJuice";
+import { attachDragLift, attachDropZoneHighlight } from "../utils/dragJuice";
 import { motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { getAdaptiveBandShift } from "../utils/storage";
@@ -21,12 +22,6 @@ const DISPLAY_SIZE = 112;
 
 /** Drop zone size (inflated for generous snap radius per touch-ergonomics). */
 const DROP_ZONE_SIZE = 160;
-
-/** Tween duration for bounce-back animation (ms). */
-const BOUNCE_DURATION = 300;
-
-/** Duration of the bounce-back under reduced motion (ms). */
-const BOUNCE_REDUCED_DURATION = 180;
 
 /** Shadow stamp scale pulse on a correct drop. */
 const STAMP_SCALE = 1.1;
@@ -61,14 +56,11 @@ const DIM_DURATION = 200;
 /** Duration of the matched-object dim under reduced motion (ms). */
 const DIM_REDUCED_DURATION = 120;
 
-/** Tracks a draggable object's state during the round. */
-interface ObjectData {
-  obj: Phaser.GameObjects.Image;
+/** Tracks a draggable object registered with the shared drag board. */
+interface ObjectData extends BoardPiece {
+  container: Phaser.GameObjects.Image;
   type: ObjectType;
-  originX: number;
-  originY: number;
   matched: boolean;
-  droppedOnZone: boolean;
 }
 
 /** Tracks a shadow slot's drop zone and position. */
@@ -86,11 +78,14 @@ interface ShadowSlotData {
  * Round initialization generates 6 of 12 object-silhouette pairs, drawn by the
  * profile's adaptive band shift: the easy band takes one object per confusable
  * cluster, the hard band three full clusters, and the classic band any 6 of
- * the pool. Objects are dragged via Phaser Pointer Drag to matching
- * shadow silhouettes. Correct drops snap to center with SFX + bounded splash/ray feedback;
- * incorrect drops bounce back gently with a soft tone.
+ * the pool. The shared {@link DragBoard} shell owns the gesture wiring, the
+ * snap, and the bounce home; this scene keeps its visuals and the per-drop
+ * validation, so a correct drop snaps to center with the shadow-stamp pulse
+ * and bounded splash/ray feedback, and an incorrect drop bounces back gently
+ * with a soft tone.
  */
 export class ShadowMatchScene extends GameSceneBase {
+  private board: DragBoard<ObjectData> | null = null;
   private round: { objects: ObjectType[]; shadows: ObjectType[] } = {
     objects: [],
     shadows: [],
@@ -112,6 +107,28 @@ export class ShadowMatchScene extends GameSceneBase {
     this.createCornerMascot();
     this.createBackButton();
     this.createSpokenInstruction("Drag each picture onto its shadow.");
+
+    // completeGame locks input for the auto-return; a relaunched session
+    // (Phaser reuses the scene instance) must start unlocked, and the shell
+    // consults this lock on every gesture.
+    this.inputLocked = false;
+
+    this.board?.destroy();
+    this.board = new DragBoard<ObjectData>({
+      scene: this,
+      zoneSize: DROP_ZONE_SIZE,
+      // Per-drop validation lives in the onDrop callback below, so the
+      // shell's validation-reporting hook stays unused; a wrong drop bounces
+      // just that object home through the shell's withdraw (300/180 ms).
+      wrongAnswerBehavior: "bounce-home",
+      validationTiming: "per-drop",
+      // A tap never lifts a placed object in this game.
+      tapWithdraw: false,
+      isLocked: () => this.inputLocked,
+      callbacks: {
+        onDrop: (data, slotIndex) => this.handleBoardDrop(data, slotIndex),
+      },
+    });
 
     this.initRound(getAdaptiveBandShift("shadow-match"));
 
@@ -138,8 +155,11 @@ export class ShadowMatchScene extends GameSceneBase {
     this.createObjects();
   }
 
-  /** Creates shadow silhouette images and drop zones at the top of the screen. */
+  /** Creates shadow silhouette images and board-registered drop zones at the top of the screen. */
   private createShadowSlots(): void {
+    const board = this.board;
+    if (!board) return;
+
     const spacing = this.scale.width / (this.round.shadows.length + 1);
     for (let i = 0; i < this.round.shadows.length; i++) {
       const x = spacing * (i + 1);
@@ -147,15 +167,22 @@ export class ShadowMatchScene extends GameSceneBase {
       const shadowObj = this.add.image(x, SHADOW_Y, `sm_shadow_${shadowType}`);
       shadowObj.setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE);
 
-      const zone = this.add.zone(x, SHADOW_Y, DROP_ZONE_SIZE, DROP_ZONE_SIZE);
-      zone.setInteractive({ dropZone: true });
-
-      this.shadowSlots.push({ zone, type: shadowType, x, y: SHADOW_Y, obj: shadowObj });
+      const registered = board.addSlot(x, SHADOW_Y);
+      this.shadowSlots.push({
+        zone: registered.zone,
+        type: shadowType,
+        x,
+        y: SHADOW_Y,
+        obj: shadowObj,
+      });
     }
   }
 
   /** Creates interactive draggable object images at the bottom of the screen. */
   private createObjects(): void {
+    const board = this.board;
+    if (!board) return;
+
     const spacing = this.scale.width / (this.round.objects.length + 1);
     for (let i = 0; i < this.round.objects.length; i++) {
       const x = spacing * (i + 1);
@@ -165,62 +192,59 @@ export class ShadowMatchScene extends GameSceneBase {
         .setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE)
         .setInteractive();
 
-      this.input.setDraggable(obj);
-
       const data: ObjectData = {
-        obj,
+        id: objectType,
+        container: obj,
         type: objectType,
         originX: x,
         originY: OBJECT_Y,
+        slotIndex: null,
+        justDropped: false,
         matched: false,
-        droppedOnZone: false,
       };
 
-      obj.on("drag", (_pointer: unknown, dragX: number, dragY: number) => {
-        obj.setPosition(dragX, dragY);
-      });
-
-      obj.on("drop", (_pointer: unknown, target: unknown) => {
-        this.handleDrop(data, target);
-      });
-
-      obj.on("dragend", () => {
-        this.handleDragEnd(data);
-      });
-
+      // The lift juice stays scene-called; the shell owns the gesture wiring.
       attachDragLift(obj);
+      board.addPiece(data);
 
       this.objectData.push(data);
     }
   }
 
-  /** Handles an object being dropped on a zone. Snaps on correct match, otherwise no-ops. */
-  private handleDrop(data: ObjectData, target: unknown): void {
-    const slot = this.shadowSlots.find((s) => s.zone === target);
-    if (!slot) return;
+  /** Validates one board drop: a match stamps the shadow, a miss bounces the object home. */
+  private handleBoardDrop(data: ObjectData, slotIndex: number): void {
+    const board = this.board;
+    const slot = this.shadowSlots[slotIndex];
+    if (!board || !slot) return;
 
-    data.droppedOnZone = true;
+    if (!isMatch(data.type, slot.type)) {
+      // The soft tone first, then the shell bounces just this object home.
+      this.reactWrong();
+      board.withdraw(data);
+      return;
+    }
 
-    if (isMatch(data.type, slot.type)) {
-      snapToSlot(this, data.obj, slot.x, slot.y);
-      this.stampShadow(slot);
-      this.tweens.add({
-        targets: data.obj,
-        alpha: DIM_ALPHA,
-        duration: motionDuration(DIM_DURATION, DIM_REDUCED_DURATION),
-        ease: "Sine.out",
-      });
-      data.obj.disableInteractive();
-      data.matched = true;
-      this.matchedCount++;
-      this.audioManager.playCorrect();
-      this.recordCorrect();
-      this.mascot?.cheer();
-      createCompletionSplash(this, slot.x, slot.y);
+    // A matched object is locked, so a later drop must never displace it:
+    // release its board occupancy while it visually stays in the slot.
+    board.getSlots()[slotIndex].occupiedBy = null;
+    data.slotIndex = null;
+    this.stampShadow(slot);
+    this.tweens.add({
+      targets: data.container,
+      alpha: DIM_ALPHA,
+      duration: motionDuration(DIM_DURATION, DIM_REDUCED_DURATION),
+      ease: "Sine.out",
+    });
+    data.container.disableInteractive();
+    data.matched = true;
+    this.matchedCount++;
+    this.audioManager.playCorrect();
+    this.recordCorrect();
+    this.mascot?.cheer();
+    createCompletionSplash(this, slot.x, slot.y);
 
-      if (isWin(this.matchedCount)) {
-        this.completeGame("shadow-match");
-      }
+    if (isWin(this.matchedCount)) {
+      this.completeGame("shadow-match");
     }
   }
 
@@ -252,22 +276,5 @@ export class ShadowMatchScene extends GameSceneBase {
         flash.destroy();
       },
     });
-  }
-
-  /** Handles drag end. Bounces object back to origin; plays incorrect SFX only if dropped on a zone. */
-  private handleDragEnd(data: ObjectData): void {
-    if (!data.matched) {
-      if (data.droppedOnZone) {
-        this.reactWrong();
-      }
-      this.tweens.add({
-        targets: data.obj,
-        x: data.originX,
-        y: data.originY,
-        duration: motionDuration(BOUNCE_DURATION, BOUNCE_REDUCED_DURATION),
-        ease: "Back.out",
-      });
-      data.droppedOnZone = false;
-    }
   }
 }

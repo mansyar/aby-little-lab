@@ -271,24 +271,59 @@ describe("ShapeSorterScene drag and drop", () => {
     const slots = getSlots(scene);
     const shape = shapes[0];
     const wrongSlot = slots.find((s) => s.type !== shape.type);
+    if (!wrongSlot) throw new Error("No mismatching slot found");
 
-    // Drop on a wrong slot, then release
+    // The real gesture drops the shape at a zone position: put the mock at the
+    // wrong slot's center before the drop and dragend, mirroring the gesture
+    // order (drop over the zone, then dragend over it — the board's over-zone
+    // skip branch in correctMissedDrop).
+    const positioned = shape.obj as unknown as { x: number; y: number };
+    positioned.x = wrongSlot.x;
+    positioned.y = wrongSlot.y;
+
+    // Drop on a wrong slot, then release. The real gesture fires every
+    // dragend listener — the lift's restore and the board's bounce bookkeeping.
     const onCalls = getMockFn(shape.obj.on).mock.calls;
     const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
       pointer: unknown,
       target: unknown,
     ) => void;
-    dropCallback(null, wrongSlot?.zone);
-    const dragendCallback = onCalls.find((c) => c[0] === "dragend")?.[1] as () => void;
-    dragendCallback();
+    dropCallback(null, wrongSlot.zone);
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
-    // Verify bounce-back tween targets origin position
+    // Verify the board's bounce-home tween targets the origin position at the
+    // shared board timing (300 ms, Back.out).
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-    const shapeTween = tweenCalls.find((c) => c[0]?.targets === shape.obj);
+    const shapeTween = tweenCalls.find(
+      (c) => c[0]?.targets === shape.obj && c[0]?.x === shape.originX && c[0]?.y === shape.originY,
+    );
     expect(shapeTween).toBeDefined();
     if (!shapeTween) throw new Error("shape bounce-back tween not found");
-    expect(shapeTween[0].x).toBe(shape.originX);
-    expect(shapeTween[0].y).toBe(shape.originY);
+    expect(shapeTween[0].duration).toBe(300);
+    expect(shapeTween[0].ease).toBe("Back.out");
+
+    // Exactly one positional tween stays live for the shape — the bounce home.
+    // The shell must have stopped the snap tween it started before firing
+    // onDrop: two competing x/y tweens make the piece lunge toward the slot
+    // before bouncing home instead of one clean bounce from the drop point.
+    const addMock = getMockFn(scene.tweens.add);
+    const livePositionalTweens = addMock.mock.results
+      .map((result, index) => ({
+        config: addMock.mock.calls[index][0] as Record<string, unknown>,
+        tween: result.value as { stop: MockFn },
+      }))
+      .filter(
+        (entry) =>
+          entry.config?.targets === shape.obj &&
+          (entry.config?.x !== undefined || entry.config?.y !== undefined),
+      )
+      .filter((entry) => getMockFn(entry.tween.stop).mock.calls.length === 0);
+    expect(livePositionalTweens).toHaveLength(1);
 
     expect(mockAudio.playIncorrect).toHaveBeenCalled();
     // No penalty — scene not restarted
@@ -307,15 +342,99 @@ describe("ShapeSorterScene drag and drop", () => {
     const shape = shapes[0];
 
     const onCalls = getMockFn(shape.obj.on).mock.calls;
-    const dragendCall = onCalls.find((c) => c[0] === "dragend");
-    const dragendCallback = dragendCall?.[1] as () => void;
-    dragendCallback();
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-    const bounceTween = tweenCalls.find((c) => c[0]?.targets === shape.obj);
+    const bounceTween = tweenCalls.find(
+      (c) => c[0]?.targets === shape.obj && c[0]?.x === shape.originX && c[0]?.y === shape.originY,
+    );
     expect(bounceTween).toBeDefined();
     if (!bounceTween) return;
     expect((bounceTween[0] as { duration: number }).duration).toBe(180);
+  });
+
+  it("locks a placed shape: a dragend after a correct drop never moves it", () => {
+    const scene = new ShapeSorterScene();
+    scene.create();
+
+    const shapes = getShapes(scene);
+    const slots = getSlots(scene);
+    const shape = shapes[0];
+    const slot = slots.find((s) => s.type === shape.type);
+    if (!slot) throw new Error("No matching slot found");
+
+    const onCalls = getMockFn(shape.obj.on).mock.calls;
+    const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+      pointer: unknown,
+      target: unknown,
+    ) => void;
+    dropCallback(null, slot.zone);
+
+    // The snapped shape now rests at the slot center, as the snap tween ends.
+    const positioned = shape.obj as unknown as { x: number; y: number };
+    positioned.x = slot.x;
+    positioned.y = slot.y;
+
+    const tweenCountBefore = getMockFn(scene.tweens.add).mock.calls.length;
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
+
+    // Placed-correct lock: no movement tween afterwards (the lift's scale
+    // restore is juice, not movement). A bounce home or a slot return would
+    // both carry x/y targets.
+    const newShapeTweens = getMockFn(scene.tweens.add)
+      .mock.calls.slice(tweenCountBefore)
+      .filter(
+        (c) => c[0]?.targets === shape.obj && (c[0]?.x !== undefined || c[0]?.y !== undefined),
+      );
+    expect(newShapeTweens).toHaveLength(0);
+    expect(getMockFn(shape.obj.disableInteractive)).toHaveBeenCalled();
+  });
+
+  it("never displaces a locked shape when another shape drops onto its slot", () => {
+    const scene = new ShapeSorterScene();
+    scene.create();
+
+    const shapes = getShapes(scene);
+    const slots = getSlots(scene);
+    const shapeA = shapes[0];
+    const slotA = slots.find((s) => s.type === shapeA.type);
+    if (!slotA) throw new Error("No matching slot found");
+    const shapeB = shapes[1];
+
+    const dropFor = (shape: { obj: Record<string, MockFn> }) => {
+      const onCalls = getMockFn(shape.obj.on).mock.calls;
+      const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
+        pointer: unknown,
+        target: unknown,
+      ) => void;
+      return dropCallback;
+    };
+
+    dropFor(shapeA)(null, slotA.zone);
+    dropFor(shapeB)(null, slotA.zone);
+
+    // The locked shape must stay in its slot; only the wrong shape bounces.
+    const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+    const evictedTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === shapeA.obj && c[0]?.x === shapeA.originX && c[0]?.y === shapeA.originY,
+    );
+    expect(evictedTween).toBeUndefined();
+    const wrongBounceTween = tweenCalls.find(
+      (c) =>
+        c[0]?.targets === shapeB.obj && c[0]?.x === shapeB.originX && c[0]?.y === shapeB.originY,
+    );
+    expect(wrongBounceTween).toBeDefined();
   });
 
   it("lifts and tilts the shape on drag start and restores it on drag end", () => {
@@ -442,8 +561,12 @@ describe("ShapeSorterScene drag and drop", () => {
 
     // Drag end with no prior drop on a zone: bounce back without incorrect SFX
     const onCalls = getMockFn(shape.obj.on).mock.calls;
-    const dragendCallback = onCalls.find((c) => c[0] === "dragend")?.[1] as () => void;
-    dragendCallback();
+    const dragendCallbacks = onCalls
+      .filter((c) => c[0] === "dragend")
+      .map((c) => c[1] as () => void);
+    dragendCallbacks.forEach((callback) => {
+      callback();
+    });
 
     const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
     const bounceTween = tweenCalls.find(

@@ -182,10 +182,17 @@ export function attachDropZoneHighlight(
 /**
  * Tweens an object to the given slot position with a decelerating Cubic.out
  * ease, replacing an instant snap. A spring overshoot used to push the card
- * past the slot before settling. Reduced motion shortens the tween.
+ * past the slot before settling. Reduced motion shortens the tween. Returns
+ * the started tween so a caller that supersedes it (e.g. a bounce home) can
+ * stop it instead of leaving two competing positional tweens behind.
  */
-export function snapToSlot(scene: Phaser.Scene, obj: DragTarget, x: number, y: number): void {
-  scene.tweens.add({
+export function snapToSlot(
+  scene: Phaser.Scene,
+  obj: DragTarget,
+  x: number,
+  y: number,
+): Phaser.Tweens.Tween {
+  return scene.tweens.add({
     targets: obj,
     x,
     y,

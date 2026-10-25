@@ -252,3 +252,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 - [x] **Track: Overlay Hit Areas** - [20261024-overlay-hit-areas](./archive/20261024-overlay-hit-areas/index.md) - bug - high
+- [~] **Track: Drag-Board Consolidation** - [20261025-drag-board-consolidation](./tracks/20261025-drag-board-consolidation/index.md) - refactor - high
