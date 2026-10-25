@@ -4,6 +4,14 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Execution Record - v1.21.6 (2026-10-25)
+
+- **Target:** tag `v1.21.6` pushed on 2026-10-25; Coolify deploy triggered by the tag. The smoke below ran against the live release at `https://aby-little-lab.ansyar-world.top/`.
+- **Scope:** one track, `conductor/archive/20261025-drag-board-consolidation/` (PR #65) - the shared `DragBoard` shell (Number Order, Story Order) is generalized to accept plain `Image` pieces via the `BoardDraggable` capability contract and a `single|multi` slot capacity, and Shape Sorter, Shadow Match and Big & Small are routed through it; each scene's hand-rolled drag/drop wiring and duplicated bounce constants are deleted. Kid-visible behaviour is unchanged by design (internals-only refactor, spec scope guard): wrong answers still bounce home once from the drop point at the same 300/180 ms timings (the review caught and fixed a snap-then-bounce tween interplay), correct answers keep each scene's own reaction (splash/ray, shadow-stamp pulse, shrink/lid-wiggle/box bump), placed-correct pieces lock, and Number Order/Story Order are untouched. One latent fix: each adopting scene resets `inputLocked` at board construction so a relaunched session stays playable under the board's lock contract. No new game, asset, storage schema or dependency; the save shape is unchanged from v1.21.5.
+- **Checks:** the manual rows from the PR description - Shape Sorter: a wrong drop bounces the shape home once, cleanly (no lunge toward the slot), a correct drop splashes with ray and locks; Shadow Match: same bounce behaviour, correct drop stamps with pulse and dim, locks; Big & Small: wrong drop bounces the toy home, correct drop shrinks into the box with lid wiggle and box bump, sorted toys never bounce and never get evicted by later drops; Number Order/Story Order unchanged for one spot-check round each; reduced-motion shorter forms in all three games; footer `v1.21.6`.
+- **Result:** **PASSED (desktop smoke) 2026-10-25** - `Quality Gates` succeeded on the tag, and the live `assets/index-DeR7fFCv.js` (141675 bytes) is SHA-256 identical (`ba0d014ae522bd0d6775fc25fa75d0a61bbd69d224405e284ec27f740126dcd0`) to a local build of the release commit `fb651690`; the served bundle carries the `1.21.6` version string. Device-class execution of the manual rows is **PENDING**; the wrong-drop bounce (single clean bounce, no lunge) in all three games is the part most worth a finger on real glass.
+- **Issues found:** none reported
+
 ## Execution Record - v1.21.5 (2026-10-25)
 
 - **Target:** tag `v1.21.5` pushed on 2026-10-25; Coolify deploy triggered by the tag. The smoke below ran against the live release at `https://aby-little-lab.ansyar-world.top/`.
