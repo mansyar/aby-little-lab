@@ -120,7 +120,7 @@ The primary appends after acceptance:
   `wordLogic.ts`) — matching test files for signature adoption only
   (determinism migration is Phase 4)
 - **Verification:** full `verify_phase` chain (as Phase 1)
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Seam the five shuffle-carrying draw functions** — covers: FR-3
   - [ ] **P3.T1.1:** Add trailing `rng: Rng = Math.random` to the exported
