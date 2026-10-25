@@ -173,8 +173,12 @@ are now "None."), and the "checked against the code on" date was already
 
 ## Doc sync
 
-`pending` - the post-review sync will confirm whether the fix round changed any
-documented contract.
+`updated` - the review-fix round gave `shapeSorterLogic.generatePlaythrough` a
+trailing `rng` parameter, which contradicted the design note in
+`conductor/tech-stack.md`; that note now records the parameter, the amended
+assumption A5, and the rng-first `buildPlaythrough` deviation, and its test
+count was refreshed to 2,691. `conductor/product.md` needed no change: no
+kid-visible behavior moved.
 
 ## History
 
