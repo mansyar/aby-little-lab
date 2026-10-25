@@ -22,7 +22,7 @@
   plus targeted `pnpm test -- --run src/__tests__/game/random.test.ts src/__tests__/helpers/randomHelper.test.ts`
 - **Status:** pending
 
-- [ ] **P1.T1: Create `src/game/random.ts` and its suite** — covers: FR-1
+- [ ] **P1.T1: Create `src/game/random.ts` and its suite** — covers: FR-1, NFR-4
   - [ ] **P1.T1.1: Module + TSDoc** — export the `Rng` type alias and
     `shuffle<T>(items: readonly T[], rng?: Rng): T[]` copying the exact
     Fisher-Yates body from `shapeSorterLogic.ts` with `Math.random` replaced
@@ -145,7 +145,7 @@ The primary appends after acceptance:
   documented default-wiring cases), and the roadmap + product changelog
   reflect completion.
 - **Depends on:** Phase 3
-- **Covers:** FR-5, FR-6, FR-7, NFR-3, AC-3, AC-4, AC-6
+- **Covers:** FR-5, FR-6, FR-7, NFR-3, NFR-4, AC-3, AC-4, AC-5, AC-6
 - **Touches:** `src/__tests__/game/*.test.ts` (logic suites),
   `src/__tests__/scenes/*.test.ts` (flow suites touching randomness),
   `src/__tests__/helpers/randomHelper.ts` (consumed), `docs/roadmap.md`,
@@ -173,7 +173,7 @@ The primary appends after acceptance:
   - [ ] **P4.T3.2: Product changelog** — add the
     "Changelog — Shared Random Helpers (<date>)" entry to
     `conductor/product.md` summarizing the consolidation.
-- [ ] **P4.T4: Validator green** — covers: AC-6
+- [ ] **P4.T4: Validator green** — covers: AC-5, AC-6
   - [ ] **P4.T4.1:** `node scripts/validate-docs.js` exits 0 with the
     updated docs.
 
