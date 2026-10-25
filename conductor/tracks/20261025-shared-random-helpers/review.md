@@ -5,7 +5,7 @@
 - **Branch:** `refactor/20261025-shared-random-helpers`
 - **Range:** `97869ab7..2fec3ac2`
 - **Date:** `2026-10-26`
-- **Verdict:** `BLOCK`
+- **Verdict:** `PASS WITH FINDINGS`
 
 ## Summary
 
@@ -169,11 +169,11 @@ are now "None."), and the "checked against the code on" date was already
 
 ## Debt
 
-- none yet; all seven findings go into the Review Fixes phase.
+- none
 
 ## Doc sync
 
-`pending` — the post-review sync will confirm whether the fix round changed any
+`pending` - the post-review sync will confirm whether the fix round changed any
 documented contract.
 
 ## History
@@ -181,3 +181,35 @@ documented contract.
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | BLOCK | 0 | 2 | 3 | 2 | 0 |
+| 2 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 7 |
+
+### Round 2
+
+All seven round-1 findings verified **resolved**. The reviewer independently
+re-derived the re-pinned values rather than accepting them: `mulberry32(77)`
+was replayed against the shared `shuffle` and `buildPlaythrough` to confirm the
+classic-mix pin `["balloon","ice-cream","cake","cup","sun","foot"]` is a real
+consequence of the seed, the AC-3 goldens were reproduced for seeds 1, 11 and
+2026, and both pop-freeze permutations were hand-derived from the cycled draw
+script. It also audited every remaining scripted rng in `src/__tests__/game` and
+found no queue-draining generator left.
+
+Two new **Low** findings, both evidence-accuracy defects of the same class F7
+raised, fixed immediately under strict mode:
+
+- **F8** - `verification/phase-R1.md` still reported F3/F4 as `partial` and AC-4
+  as blocked on the `spec.md` wording, contradicting its own Result line and
+  the applied amendments. Status cells now read `resolved` with pointers to
+  `spec.md:94,113,152-158`; `phase-4.md`'s `animalTraceFlow` stub citations
+  corrected to `104,524`.
+- **F9** - `verification/phase-4.md`'s AC-3 row claimed all six constant-closure
+  suites carry a case titled "is deterministic under a fixed random sequence";
+  `bigSmallLogic.test.ts` has no such case. Corrected to name the five that do
+  and cite `bigSmallLogic.test.ts:332`/`:363` as its actual determinism proof.
+
+The primary ran the two checks the reviewer could not (its shell was denied):
+the fix delta touches nine code files (the stated tenth is the `spec.md`
+amendment), and the only removed assertions in the delta are the
+`shapeSorterLogic` scoped-spy comparison and the `storyOrderLogic`
+`seededRng` self-comparison, both replaced by `mulberry32` equivalents - no
+assertion was silently deleted.
