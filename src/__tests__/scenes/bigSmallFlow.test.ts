@@ -292,6 +292,14 @@ describe("BigSmallScene drag and drop", () => {
 
     const onCalls = getMockFn(toy.obj.on).mock.calls;
 
+    // The real gesture drops the toy at a zone position: put the mock at the
+    // wrong box's center before the drop and dragend, mirroring the gesture
+    // order (drop over the zone, then dragend over it — the board's over-zone
+    // skip branch in correctMissedDrop).
+    const positioned = toy.obj as unknown as { x: number; y: number };
+    positioned.x = wrongSlot.x;
+    positioned.y = wrongSlot.y;
+
     const dropCallback = onCalls.find((c) => c[0] === "drop")?.[1] as (
       pointer: unknown,
       target: unknown,
@@ -315,6 +323,24 @@ describe("BigSmallScene drag and drop", () => {
     if (!toyTween) throw new Error("toy bounce-back tween not found");
     expect(toyTween[0].duration).toBe(300);
     expect(toyTween[0].ease).toBe("Back.out");
+
+    // Exactly one positional tween stays live for the toy — the bounce home.
+    // The shell must have stopped the snap tween it started before firing
+    // onDrop: two competing x/y tweens make the piece lunge toward the box
+    // before bouncing home instead of one clean bounce from the drop point.
+    const addMock = getMockFn(scene.tweens.add);
+    const livePositionalTweens = addMock.mock.results
+      .map((result, index) => ({
+        config: addMock.mock.calls[index][0] as Record<string, unknown>,
+        tween: result.value as { stop: MockFn },
+      }))
+      .filter(
+        (entry) =>
+          entry.config?.targets === toy.obj &&
+          (entry.config?.x !== undefined || entry.config?.y !== undefined),
+      )
+      .filter((entry) => getMockFn(entry.tween.stop).mock.calls.length === 0);
+    expect(livePositionalTweens).toHaveLength(1);
 
     expect(mockAudio.playIncorrect).toHaveBeenCalled();
     expect(getMockFn(toy.obj.disableInteractive)).not.toHaveBeenCalled();

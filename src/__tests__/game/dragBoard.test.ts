@@ -160,6 +160,18 @@ function tweensFor(harness: Harness, target: unknown): Array<Record<string, unkn
   return tweenCalls(harness).filter((tween) => tween.targets === target);
 }
 
+/** The tween objects the scene returned for tweens targeting a specific object. */
+function tweenObjectsFor(harness: Harness, target: unknown): Array<{ stop: MockFn }> {
+  const add = harness.scene.tweens.add;
+  return add.mock.results
+    .map((result, index) => ({
+      config: add.mock.calls[index][0] as Record<string, unknown>,
+      tween: result.value as { stop: MockFn },
+    }))
+    .filter((entry) => entry.config.targets === target)
+    .map((entry) => entry.tween);
+}
+
 /** Places a piece through the full browser gesture order. */
 function placePiece(harness: Harness, piece: BoardPiece, slotIndex: number): void {
   const slot = harness.board.getSlots()[slotIndex];
@@ -374,6 +386,75 @@ describe("DragBoard", () => {
       expect(piece.slotIndex).toBeNull();
       expect(piece.justDropped).toBe(false);
       expect(harness.callbacks.onDrop).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("snap tween interplay", () => {
+    /** How many of the piece's x/y-animating tweens are still live (never stopped). */
+    function livePositionalTweenCount(harness: Harness, piece: BoardPiece): number {
+      const add = harness.scene.tweens.add;
+      return add.mock.results
+        .map((result, index) => ({
+          config: add.mock.calls[index][0] as Record<string, unknown>,
+          tween: result.value as { stop: MockFn },
+        }))
+        .filter(
+          (entry) =>
+            entry.config.targets === piece.container &&
+            (entry.config.x !== undefined || entry.config.y !== undefined),
+        )
+        .filter((entry) => entry.tween.stop.mock.calls.length === 0).length;
+    }
+
+    it("stops the tracked snap tween before a withdraw bounce home", () => {
+      const harness = createHarness();
+      harness.board.addSlot(100, 200);
+      const piece = harness.makePiece("a", 100, 40);
+
+      dropOnto(harness, piece, 0);
+      const snap = tweenObjectsFor(harness, piece.container)[0];
+      expect(snap.stop).not.toHaveBeenCalled();
+
+      harness.board.withdraw(piece);
+
+      // The bounce home must be the single positional tween left on the
+      // piece: the snap tween started before onDrop is stopped, not left
+      // competing with the home tween (the wrong-drop lunge bug).
+      expect(snap.stop).toHaveBeenCalledTimes(1);
+      const home = tweensFor(harness, piece.container).at(-1);
+      expect(home?.x).toBe(piece.originX);
+      expect(home?.y).toBe(piece.originY);
+      expect(home?.duration).toBe(300);
+      expect(home?.ease).toBe("Back.out");
+      expect(livePositionalTweenCount(harness, piece)).toBe(1);
+    });
+
+    it("stops the tracked snap tween before a wrong-answer bounce home", () => {
+      const harness = createHarness({ wrongAnswerBehavior: "bounce-home" });
+      harness.board.addSlot(100, 200);
+      const piece = harness.makePiece("a", 100, 40);
+
+      dropOnto(harness, piece, 0);
+      const snap = tweenObjectsFor(harness, piece.container)[0];
+
+      harness.board.applyWrongAnswer();
+
+      expect(snap.stop).toHaveBeenCalledTimes(1);
+      expect(livePositionalTweenCount(harness, piece)).toBe(1);
+    });
+
+    it("leaves the snap tween running on a correct drop", () => {
+      const harness = createHarness();
+      harness.board.addSlot(100, 200);
+      const piece = harness.makePiece("a", 100, 40);
+
+      dropOnto(harness, piece, 0);
+      const snap = tweenObjectsFor(harness, piece.container)[0];
+
+      // The snap is the intended final rest tween on a correct drop — only
+      // the home paths stop it.
+      expect(snap.stop).not.toHaveBeenCalled();
+      expect(livePositionalTweenCount(harness, piece)).toBe(1);
     });
   });
 

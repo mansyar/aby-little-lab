@@ -163,6 +163,14 @@ export class DragBoard<TPiece extends BoardPiece> {
   private slots: BoardSlot<TPiece>[] = [];
   private pieces: TPiece[] = [];
   private lastValidatedSignature: string | null = null;
+  /**
+   * The live snap tween per piece. A wrong answer bounces the piece home, and
+   * that home tween must be the only positional tween left on the piece — so
+   * {@link DragBoard.tweenHome} stops the tracked snap first. `killTweensOf`
+   * is deliberately not used: it would also kill the drag-lift's scale/angle
+   * restore tween running on the same container.
+   */
+  private snapTweens = new Map<TPiece, Phaser.Tweens.Tween>();
   private destroyed = false;
   private readonly handleShutdown = (): void => {
     this.destroy();
@@ -325,6 +333,7 @@ export class DragBoard<TPiece extends BoardPiece> {
     }
     this.slots = [];
     this.pieces = [];
+    this.snapTweens.clear();
     this.lastValidatedSignature = null;
   }
 
@@ -355,6 +364,12 @@ export class DragBoard<TPiece extends BoardPiece> {
   }
 
   private tweenHome(piece: TPiece): void {
+    // A wrong drop snaps the piece toward the slot before the scene's onDrop
+    // withdraws it, so a snap tween can still be live here; stop it so the
+    // bounce home is the single positional tween, starting from the drop
+    // point like the hand-rolled code this shell replaced.
+    this.snapTweens.get(piece)?.stop();
+    this.snapTweens.delete(piece);
     this.tweenTo(
       piece.container,
       piece.originX,
@@ -368,7 +383,8 @@ export class DragBoard<TPiece extends BoardPiece> {
     // DragTarget is a structural shape (transform + scene + drag-event `on`)
     // any draggable container satisfies; the double cast only bridges Phaser's
     // EventEmitter `on` overloads, not a real type mismatch.
-    snapToSlot(this.scene, piece.container as unknown as DragTarget, slot.x, slot.y);
+    const tween = snapToSlot(this.scene, piece.container as unknown as DragTarget, slot.x, slot.y);
+    this.snapTweens.set(piece, tween);
   }
 
   /** Whether a slot currently holds at least one piece. */

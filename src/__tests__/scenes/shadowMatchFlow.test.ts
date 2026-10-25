@@ -243,6 +243,14 @@ describe("ShadowMatchScene drag and drop", () => {
 
     const onCalls = getMockFn(object.obj.on).mock.calls;
 
+    // The real gesture drops the object at a zone position: put the mock at
+    // the wrong slot's center before the drop and dragend, mirroring the
+    // gesture order (drop over the zone, then dragend over it — the board's
+    // over-zone skip branch in correctMissedDrop).
+    const positioned = object.obj as unknown as { x: number; y: number };
+    positioned.x = wrongSlot.x;
+    positioned.y = wrongSlot.y;
+
     // Simulate drop on wrong zone (no snap, no SFX), then release. The real
     // gesture fires every dragend listener — the lift's restore and the
     // board's bounce bookkeeping.
@@ -267,6 +275,25 @@ describe("ShadowMatchScene drag and drop", () => {
     if (!objTween) throw new Error("object bounce-back tween not found");
     expect(objTween[0].duration).toBe(300);
     expect(objTween[0].ease).toBe("Back.out");
+
+    // Exactly one positional tween stays live for the object — the bounce
+    // home. The shell must have stopped the snap tween it started before
+    // firing onDrop: two competing x/y tweens make the piece lunge toward the
+    // slot before bouncing home instead of one clean bounce from the drop
+    // point.
+    const addMock = getMockFn(scene.tweens.add);
+    const livePositionalTweens = addMock.mock.results
+      .map((result, index) => ({
+        config: addMock.mock.calls[index][0] as Record<string, unknown>,
+        tween: result.value as { stop: MockFn },
+      }))
+      .filter(
+        (entry) =>
+          entry.config?.targets === object.obj &&
+          (entry.config?.x !== undefined || entry.config?.y !== undefined),
+      )
+      .filter((entry) => getMockFn(entry.tween.stop).mock.calls.length === 0);
+    expect(livePositionalTweens).toHaveLength(1);
 
     expect(mockAudio.playIncorrect).toHaveBeenCalled();
     expect(getMockFn(scene.scene.start)).not.toHaveBeenCalled();
