@@ -4,11 +4,11 @@
 - **Branch:** `refactor/20261025-drag-board-consolidation`
 - **Range:** `7f40c076d08d4f6a95a498d1aa0c1435abddc098..73e3c967` (code head at review; later commits are conductor state and docs sync only)
 - **Date:** 2026-10-25
-- **Round:** 1
-- **Verdict:** **PASS WITH FINDINGS** - zero Critical or High. One Medium
-  (wrong-drop tween interplay) and three Low findings. F1/F3/F4 are fixed in a
-  Phase R1 review-fixes round; F2 is a documented deferral by the reviewer's
-  own recommendation.
+- **Round:** 2 (final)
+- **Verdict:** **PASS** - round 1 returned PASS WITH FINDINGS (zero Critical or
+  High: one Medium, three Low); F1/F3/F4 were fixed in Phase R1 (checkpoint
+  `ea4eea2c`) with red-proofed regression coverage; F2 is an accepted
+  documented deferral. Round 2 confirmed resolution with no new findings.
 
 ## Summary
 
@@ -65,10 +65,10 @@ kept while its type widened (spec requires widening, not renaming; FR-4 met).
 
 | ID | Severity | Finding | Disposition |
 | --- | --- | --- | --- |
-| F1 | Medium | `dragBoard.ts:429-441` + scene withdraw paths - on a wrong drop the shell snaps the piece toward the slot centre (200 ms `Cubic.out`) *before* firing `onDrop`, and the scene's `withdraw` then adds the 300 ms `Back.out` home tween: two competing `x/y` tweens on the same target; the home tween's start value is captured after the snap's first fast-start step, so the piece lunges up to ~18 px toward the box before bouncing home instead of the old single clean bounce from the drop point | fixed in Phase R1 (track the snap tween per piece and stop it in `tweenHome`; no blanket `killTweensOf` - it would kill the drag-lift's scale/angle restore on the same container); regression: exactly one positional tween after a wrong drop |
+| F1 | Medium | `dragBoard.ts:429-441` + scene withdraw paths - on a wrong drop the shell snaps the piece toward the slot centre (200 ms `Cubic.out`) *before* firing `onDrop`, and the scene's `withdraw` then adds the 300 ms `Back.out` home tween: two competing `x/y` tweens on the same target; the home tween's start value is captured after the snap's first fast-start step, so the piece lunges up to ~18 px toward the box before bouncing home instead of the old single clean bounce from the drop point | **fixed in R1** - `snapToSlot` returns its tween (accepted behaviour-neutral deviation); `DragBoard` tracks it in a private `snapTweens` map and stops it in `tweenHome` before the home tween, covering withdraw / wrong-answer / missed-drop; correct-drop path untouched; no `killTweensOf`; 3 board interplay tests + one single-live-tween assertion per scene suite; red proof in `.conductor/evidence/phase-r1-red.md` |
 | F2 | Low | `BoardPiece.container` (line 71) holds any `BoardDraggable` (often a plain `Image`); the field name is mildly misleading | documented deferral (reviewer-endorsed): renaming would touch Number Order / Story Order scenes + tests, outside this track's `Touches`; follow-up track may rename to `draggable` |
-| F3 | Low | `docs/TDD.md` ~962 - the changed line describes the piece contract as the `DragTarget` capability set, omitting the pointer/drag/drop event overloads the real `BoardDraggable` contract adds | fixed in Phase R1 (one clause) |
-| F4 | Low | wrong-drop tests in the three flow suites fire all dragend handlers while the mock container sits at its tray position, not the drop point, so `correctMissedDrop`'s over-zone skip branch is not exercised faithfully and a duplicate identical home tween can be added | fixed in Phase R1 (position the mock at the drop point before firing dragend) |
+| F3 | Low | `docs/TDD.md` ~962 - the changed line describes the piece contract as the `DragTarget` capability set, omitting the pointer/drag/drop event overloads the real `BoardDraggable` contract adds | **fixed in R1** - the clause landed (verified in the round-2 diff) |
+| F4 | Low | wrong-drop tests in the three flow suites fire all dragend handlers while the mock container sits at its tray position, not the drop point, so `correctMissedDrop`'s over-zone skip branch is not exercised faithfully and a duplicate identical home tween can be added | **fixed in R1** - all three tests position the mock at the wrong slot's centre before drop/dragend |
 
 ## Out of scope (pre-existing, unchanged by this diff)
 
@@ -88,11 +88,13 @@ Low.
 
 | Round | Verdict | C | H | M | L | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 3 | 3 in Phase R1; 1 deferred (F2) |
+| 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 3 | 3 in Phase R1 (`ea4eea2c`); 1 deferred (F2) |
+| 2 | PASS | 0 | 0 | 0 | 1 | F2 accepted deferral; zero fixable findings remain |
 
 ## Doc sync
 
 `updated`. Tech-stack changelog carries the 2026-10-25 drag-board
 consolidation entry (`d47ef137`); TDD.md 9.3 and roadmap.md truth landed in
-Phase 3 (`73e3c967`); PRD needed no change (no hand-roll claims or per-chunk
-byte figures in `docs/PRD.md`). F3's precision clause lands in Phase R1.
+Phase 3 (`73e3c967`) with F3's precision clause in R1 (`ea4eea2c`); PRD
+needed no change (no hand-roll claims or per-chunk byte figures in
+`docs/PRD.md`).
