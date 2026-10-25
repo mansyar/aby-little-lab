@@ -120,31 +120,35 @@ The primary appends after acceptance:
   `wordLogic.ts`) — matching test files for signature adoption only
   (determinism migration is Phase 4)
 - **Verification:** full `verify_phase` chain (as Phase 1)
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Seam the five shuffle-carrying draw functions** — covers: FR-3
-  - [ ] **P3.T1.1:** Add trailing `rng: Rng = Math.random` to the exported
+- [x] **P3.T1: Seam the five shuffle-carrying draw functions** — covers: FR-3
+  - [x] **P3.T1.1:** Add trailing `rng: Rng = Math.random` to the exported
     draw/build functions of animalTrace, bigSmall, popFreeze, shadowMatch,
     shapeSorter (via `poolFor`/`shuffle` internal threading per A5), each
     propagated to every internal random call and nested helper.
-  - [ ] **P3.T1.2:** Same treatment for the seven shuffle-importing modules
+  - [x] **P3.T1.2:** Same treatment for the seven shuffle-importing modules
     of Phase 2 that make their own random choices beyond shuffle
     (`addItUp`, `decode`, `moreLess`, `takeAway`, `word`, `memoryMatch`,
     `firstSounds`, `alphabet`) — signature + threading only.
-- [ ] **P3.T2: Seam the remaining direct-Math.random modules** — covers: FR-3
-  - [ ] **P3.T2.1:** `patternBuilder`, `musicalMemory`, `colorMatch`,
+- [x] **P3.T2: Seam the remaining direct-Math.random modules** — covers: FR-3
+  - [x] **P3.T2.1:** `patternBuilder`, `musicalMemory`, `colorMatch`,
     `count`, `numberOrder`, `oddOneOut` gain the trailing optional rng;
     internal `Math.random` call sites take the parameter.
-- [ ] **P3.T3: feelingsFaces + storyOrder adopt the shared shuffle** —
+- [x] **P3.T3: feelingsFaces + storyOrder adopt the shared shuffle** —
   covers: FR-4
-  - [ ] **P3.T3.1:** Both modules' private `shuffleWith` bodies delegate to
+  - [x] **P3.T3.1:** Both modules' private `shuffleWith` bodies delegate to
     `shuffle` from `./random`; rng contract and call order preserved so a
     given seed yields the identical draw (suite adds a same-rng
     sequence-equivalence case per AC-3).
-- [ ] **P3.T4: Static sweep** — covers: FR-3, AC-2
-  - [ ] **P3.T4.1:** Every `Math.random` occurrence in non-test `src/game/**`
+- [x] **P3.T4: Static sweep** — covers: FR-3, AC-2
+  - [x] **P3.T4.1:** Every `Math.random` occurrence in non-test `src/game/**`
     is a default-parameter initializer or inside `random.ts`; record the
     grep in phase evidence.
+
+**Result:** verified
+**Checkpoint:** 3d86bf77
+**Evidence:** conductor/tracks/20261025-shared-random-helpers/verification/phase-3.md
 
 ## Phase 4: Test migration + docs truth pass
 
