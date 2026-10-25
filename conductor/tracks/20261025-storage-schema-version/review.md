@@ -4,8 +4,8 @@
 - **Branch:** `chore/20261025-storage-schema-version`
 - **Range:** `572394d0193fcf49e8b5f4d75e6f2ba8cc389151..b3e5d9b1` (code), review at head `272e745f`
 - **Date:** 2026-10-25
-- **Round:** 1
-- **Verdict:** **PASS WITH FINDINGS** — 0 Critical / 0 High / 0 Medium / 2 Low
+- **Round:** 2 (final)
+- **Verdict:** **PASS** — round 1: 0/0/0/2 (F1, F2) fixed in Phase R1; round 2: 0/0/0/2 (F3, F4 — evidence-prose typos) fixed at close
 
 ## Summary
 
@@ -63,12 +63,14 @@ verified mechanical; the docs-validator sandbox denials and primary handoffs
 are recorded in every evidence file; Phase 1 red-first proof committed at
 `.conductor/evidence/phase-1-red.md`. One stale state field (F1).
 
-## Findings (to fix in Phase R1)
+## Findings
 
 | ID | Severity | Finding | Fix |
 | --- | --- | --- | --- |
-| F1 | Low | `plan.md` Phase 3 `Status:` still reads `in_progress` while its tasks are checked and `Result: verified` — stale Conductor state | Set the field to `verified` in the R1 state commit |
-| F2 | Low | `docs/TDD.md:748` says each future version "adds one step", but bumping `SCHEMA_VERSION` without also teaching `classifyStoredV2` to recognize the older stamped version would classify existing payloads as unknown (write-protected) and leave the new step unreachable — the doc over-promises the template | Add a clause noting the classifier must also recognize older stamped versions as known older versions |
+| F1 | Low | `plan.md` Phase 3 `Status:` still read `in_progress` while its tasks were checked and `Result: verified` — stale Conductor state | **fixed in R1** — field now `verified` (state commit `93ff80ca`) |
+| F2 | Low | `docs/TDD.md:748` said each future version "adds one step", but a `SCHEMA_VERSION` bump without extending `classifyStoredV2` would classify existing payloads as unknown (write-protected) and leave the new step unreachable — the doc over-promised the template | **fixed in R1** (`e61a7d8d`) — sentence now requires the classifier extension explicitly |
+| F3 | Low | R1 evidence block carried a mangled checkpoint SHA (`61a7d8d` — leading `e` dropped by a PowerShell here-string escape) | **fixed at close** — SHA corrected to `e61a7d8d`; block rewritten control-char-free |
+| F4 | Low | Same block read "set to `erified`" — leading `v` dropped (same here-string escape cause) | **fixed at close** — rewritten via node script; file verified free of control characters |
 
 ## Out of scope (pre-existing)
 
@@ -79,14 +81,18 @@ are recorded in every evidence file; Phase 1 red-first proof committed at
 
 ## Debt
 
-None (F1/F2 are fixed in Phase R1; nothing deferred; no GitHub issues — no
-finding at Medium or above).
+None — no finding remains unfixed and nothing is deferred; no GitHub issues
+(nothing at Medium or above).
 
 ## History
 
 | Round | Verdict | C | H | M | L | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | pending (Phase R1) |
+| 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 2 in Phase R1 (`e61a7d8d`: F1 state field, F2 docs clause) |
+| 2 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 2 at close (F3/F4 evidence-prose typos; both round-1 fixes confirmed) |
+
+Final verdict: **PASS** — zero unresolved findings; the suite was re-run green
+by the reviewer in both rounds (2673/2673).
 
 ## Doc sync
 

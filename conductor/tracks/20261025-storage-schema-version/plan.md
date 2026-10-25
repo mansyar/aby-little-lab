@@ -75,7 +75,7 @@
 - **Covers:** FR-6, AC-6
 - **Touches:** `docs/TDD.md`
 - **Verification:** `pnpm test -- --run && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
 - [x] **R1.T1: Fix the findings** — covers: FR-6
   - [x] **R1.T1.1: F1** — Phase 3 `Status:` in plan.md set to `verified` (conductor state, applied with the R1 completion commit).

@@ -99,11 +99,12 @@ squashed to checkpoint b3e5d9b1.
 ## Phase R1 (review fixes)
 
 - Goal: resolve F1 (stale Phase 3 Status field) and F2 (TDD migration sentence).
-- F2: docs/TDD.md §6.5 migration sentence now states that a future version bump
-  must also extend classifyStoredV2 to recognize the older stamped version as
-  a known older version, otherwise existing payloads classify as unknown and
-  stay write-protected with the new step unreachable. Docs validator: exit 0.
-- F1: Phase 3 Status: set to erified in the R1 state commit (conductor state,
+- F2: docs/TDD.md section 6.5 migration sentence now states that a future
+  version bump must also extend classifyStoredV2 to recognize the older
+  stamped version as a known older version, otherwise existing payloads
+  classify as unknown and stay write-protected with the new step unreachable.
+  Docs validator: exit 0 (run by the primary).
+- F1: Phase 3 Status set to verified in the R1 state commit (conductor state,
   primary-owned).
-- Checkpoint: 61a7d8d (docs(storage-schema): resolve review findings F1 and F2).
-- Result: verified — both findings resolved; suite unaffected (docs-only).
+- Checkpoint: e61a7d8d (docs(storage-schema): resolve review findings F1 and F2).
+- Result: verified - both findings resolved; suite unaffected (docs-only).
