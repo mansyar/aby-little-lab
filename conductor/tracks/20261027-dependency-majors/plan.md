@@ -70,13 +70,20 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-4, FR-8
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `src/__tests__/**/*.test.ts` (only affected suites)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P3.T1: Upgrade** — covers: FR-1
-  - [ ] **P3.T1.1:** `pnpm up happy-dom@^21.0.4` (dev); commit package.json + lockfile; record `pnpm outdated` after.
-- [ ] **P3.T2: Audit CSS/IFrame default-off** — covers: FR-4, FR-8
-  - [ ] **P3.T2.1:** Run the full suite; for any failure caused by the default-off CSS/IFrame loading, re-enable per suite with a recorded justification (test-hygiene findings get fixed, not papered over).
-- [ ] **P3.T3: Verify** — covers: FR-1
-  - [ ] **P3.T3.1:** Run the full verification chain.
+- **Status:** verified
+- [x] **P3.T1: Upgrade** — covers: FR-1
+  - [x] **P3.T1.1:** `pnpm up happy-dom@^21.0.4` (dev); commit package.json + lockfile; record `pnpm outdated` after.
+- [x] **P3.T2: Audit CSS/IFrame default-off** — covers: FR-4, FR-8
+  - [x] **P3.T2.1:** Run the full suite; for any failure caused by the default-off CSS/IFrame loading, re-enable per suite with a recorded justification (test-hygiene findings get fixed, not papered over).
+- [x] **P3.T3: Verify** — covers: FR-1
+  - [x] **P3.T3.1:** Run the full verification chain.
+
+
+**Result:** verified
+
+**Checkpoint:** ede22b71
+
+**Evidence:** conductor/tracks/20261027-dependency-majors/verification/phase-3.md
 
 ## Phase 4: vite-plugin-pwa 2.0.0
 
