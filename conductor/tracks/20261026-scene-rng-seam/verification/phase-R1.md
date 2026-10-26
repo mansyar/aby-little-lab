@@ -70,15 +70,15 @@ None. All changes are inside the phase's `Touches` paths. Side effect of the F2 
 
 Primary verification performed 2026-10-26 by the primary.
 
-- Tree clean; range 183b63b..HEAD = 4 commits, no merge commits; exactly
+- Tree clean; range f183b63b..HEAD = 4 commits, no merge commits; exactly
   the 9 Touches files changed.
 - F1 spot-audit: exactly one pathRngForPair definition remains (hoisted to
-  module scope), and the warm-up loop passes ng - the latent divergence is
+  module scope), and the warm-up loop passes rng - the latent divergence is
   structurally impossible now that there is one helper.
-- F2 spot-audit: xpect.any(Function) appended with leading arguments
+- F2 spot-audit: expect.any(Function) appended with leading arguments
   preserved verbatim (howMany :720/:727, musicalMemory :281 verified;
   the reviewer's counts reconciled - 15 assertions across the 8 suites).
-- Side effect audited: the removed import type { Rng } lines in seven
+- Side effect audited: the removed "import type { Rng }" lines in seven
   suites were made unused BY this change (the rest-args wrappers no longer
   name Rng), so their removal is the correct orphan cleanup.
 - Command table re-run by the primary: all exit 0.
@@ -90,11 +90,8 @@ Primary verification performed 2026-10-26 by the primary.
 | tests | pnpm test -- --run | 0 | 125 files / 2729 tests passed |
 | coverage | pnpm test:coverage | 0 | 97.82 st / 91.96 br / 96.77 fn / 98.74 ln |
 | build | pnpm build | 0 | 54 precache entries (1727.85 KiB) |
-| bundle | 
-ode scripts/validate-bundle.js | 0 | shell 138.7 kB <= 200 kB; Phaser vendor present |
-| pwa | 
-ode scripts/validate-pwa.js | 0 | all checks passed |
-| docs | 
-ode scripts/validate-docs.js | 0 | all checks passed |
+| bundle | node scripts/validate-bundle.js | 0 | shell 138.7 kB <= 200 kB; Phaser vendor present |
+| pwa | node scripts/validate-pwa.js | 0 | all checks passed |
+| docs | node scripts/validate-docs.js | 0 | all checks passed |
 
 Primary verdict: **verified**.

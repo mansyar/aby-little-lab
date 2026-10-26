@@ -5,7 +5,7 @@
 - **Branch:** `refactor/20261026-scene-rng-seam`
 - **Range:** `0a6758c0..92409d0a` (excluding `conductor/`: 55 files, +1,661/−761)
 - **Date:** 2026-10-26
-- **Verdict:** PASS WITH FINDINGS
+- **Verdict:** PASS
 
 ## Summary
 
@@ -135,14 +135,30 @@ recorded honestly.
 
 ## Debt
 
-None yet — both findings go into the Review Fixes phase (strict mode).
+None — F1 and F2 were fixed in the Review Fixes phase (strict mode); no
+deferred items remain.
 
 ## Doc sync
 
-`pending`
+`none` — the fix round changed only test assertions (a hoisted helper and 15
+strengthened `toHaveBeenCalledWith` pins); no behavior, contract, or command
+changed, so no living document required an update.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 |---|---|---|---|---|---|---|
 | 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 1 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 0 | 2 |
+
+### Round 2
+
+Delta re-review of `f183b63b..2adcf1db` (the Review Fixes phase) confirmed
+both findings resolved: F1 via the preferred pure hoist — one module-scope
+`pathRngForPair` whose warm-up loop passes `rng`, both duplicates deleted,
+no call-site semantics change; F2 via rest-args recorder wrappers and
+`expect.any(Function)` on all 15 band-shift assertions, no weakened or
+deleted checks, and the 7 removed `Rng` imports verified as genuine orphan
+cleanup. No new findings. Note: the fix-phase evidence cites the executor's
+pre-squash task commits (`2c5effee`, `530cfa13`); the primary squashed them
+into the phase checkpoint `2adcf1db`, which contains both fixes.
