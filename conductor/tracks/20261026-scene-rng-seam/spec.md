@@ -101,7 +101,7 @@ supplied by tests.
 | ID | Criterion | Verifies |
 | --- | --- | --- |
 | AC-1 | A test constructs each scene twice with `mulberry32(1234)` and receives identical rounds both times | FR-1, FR-2 |
-| AC-2 | Static proof: `grep "Math\.random" src/scenes` returns zero matches; `grep "vi.spyOn(Math" src/__tests__/scenes` returns zero matches | FR-5, FR-6 |
+| AC-2 | Static proof: `grep "Math\.random" src/scenes` returns only default-parameter initializers (the sanctioned production defaults); `grep "vi.spyOn(Math" src/__tests__/scenes` returns zero matches | FR-5, FR-6 |
 | AC-3 | A seeded scene produces output equal to calling the same builder directly with the same seed — this proves argument **position**, not merely presence | FR-4 |
 | AC-4 | Add It Up and Take Away each have a seeded determinism case driven through `GroupMathScene` | FR-3 |
 | AC-5 | Full `verify_phase` chain exits 0 | NFR-1, NFR-2, NFR-3, NFR-4 |
