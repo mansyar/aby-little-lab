@@ -14,14 +14,18 @@
 - **Covers:** FR-1, FR-2, FR-3, NFR-1, NFR-2, AC-1, AC-2 (pre-FINAL), AC-5
 - **Touches:** `package.json`, `docs/release-notes-v1.22.0.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js` plus `pnpm check && pnpm typecheck` (no `src/` change expected; full gate runs in Phase 2)
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Bump the version** — covers: FR-1, AC-1
-  - [ ] **P1.T1.1:** `package.json` `1.21.7` → `1.22.0` (version field only, no lockfile hand-edits).
-  - [ ] **P1.T1.2:** Confirm no save-schema change across PRs #67–#73 (spec assumption check; record the answer in the phase evidence).
-- [ ] **P1.T2: Write the release notes** — covers: FR-2, AC-2, AC-5
-  - [ ] **P1.T2.1:** `docs/release-notes-v1.22.0.md` with Status DRAFT header, `v1.21.7` Base, parent-facing lede, one section per PR #67–#73 in merge order, verification section, and the skipped device pass recorded as an accepted gap.
-  - [ ] **P1.T2.2:** Link the notes from the README Documentation index; `validate-docs` 6/6.
+**Result:** verified
+**Checkpoint:** 17c4acec
+**Evidence:** conductor/tracks/20261027-release-v1-22-0/verification/phase-1.md
+
+- [x] **P1.T1: Bump the version** — covers: FR-1, AC-1
+  - [x] **P1.T1.1:** `package.json` `1.21.7` → `1.22.0` (version field only, no lockfile hand-edits).
+  - [x] **P1.T1.2:** Confirm no save-schema change across PRs #67–#73 (spec assumption check; record the answer in the phase evidence).
+- [x] **P1.T2: Write the release notes** — covers: FR-2, AC-2, AC-5
+  - [x] **P1.T2.1:** `docs/release-notes-v1.22.0.md` with Status DRAFT header, `v1.21.7` Base, parent-facing lede, one section per PR #67–#73 in merge order, verification section, and the skipped device pass recorded as an accepted gap.
+  - [x] **P1.T2.2:** Link the notes from the README Documentation index; `validate-docs` 6/6.
 
 <!--
 The primary appends after acceptance:
