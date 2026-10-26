@@ -18,7 +18,7 @@
 - **Covers:** FR-2, FR-3, FR-4, FR-5, FR-6, AC-3 (partial), AC-4 (partial)
 - **Touches:** `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `docs/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Refresh README's current-state claims** — covers: FR-2, FR-5
   - [ ] **P1.T1.1:** `README.md:49` — replace "**2,556 tests across 119 files**, all green (verified 2026-10-23)" with "**2,729 tests across 125 files**, all green (verified 2026-10-26)".
