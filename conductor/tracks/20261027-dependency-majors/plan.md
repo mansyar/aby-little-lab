@@ -23,7 +23,7 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-2, FR-6, FR-8, NFR-4
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `biome.json`, `.github/workflows/ci.yml` (only if Node < 22.12), `vite.config.ts` (only if the vite minor requires it)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P1.T1: Upgrade the minors** — covers: FR-1, FR-2
   - [ ] **P1.T1.1:** `pnpm up @biomejs/biome@^2.6.3 vite@^8.3.5` (dev); commit package.json + lockfile together; record `pnpm outdated` after.
   - [ ] **P1.T1.2:** Refresh `biome.json` `$schema` to the installed version; confirm the pre-existing `$schema` info diagnostic is gone.
