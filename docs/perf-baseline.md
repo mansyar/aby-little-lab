@@ -597,3 +597,93 @@ Build figures for the prewarm build measured here (2026-10-27): shell entry
 the shell grew 9.6 kB over the 2026-10-22 figure, from the tracks that landed
 after it, and stays well inside the 200 kB budget.
 
+## Idle art-queue prewarm — cold-tap verdict (2026-10-27)
+
+Track: `20261027-cold-tap-art-preload`, Phase 3. This is the increment
+measurement the chunk-prewarm verdict above implies: a cold tap pays fetch
+plus module eval **plus art rasterization** — each game rasterizes its SVG
+groups inside its own `preload`, and the scene's `create` waits for the
+loader — and this track moves that rasterization into Hub idle. Victory is
+AC-6: worst-case cold tap ≤ 400 ms, median-of-three, on the same rig. What
+Phase 3 established on the executor host and what still needs a headed run
+are recorded separately below — no number here is claimed without a run
+behind it.
+
+### Method
+
+Two production builds from the same tree, served side by side on the same
+host, the same warm-aware rig pointed at each with `PREVIEW_URL`:
+
+| Build | What it is | Shell entry file size |
+|---|---|---|
+| Baseline (art queue off) | the track branch with the art pass disabled only: both `this.startArtPass()` calls removed (`syncPrewarm`'s delayed call and `restartPrewarm` in `src/scenes/HubScene.ts`), chunk pass intact; built with `pnpm build` | `index-*.js` = 152.39 kB |
+| Art prewarm | the track branch as committed (`pnpm build`) | `index-*.js` = 152.43 kB |
+
+The 0.04 kB shell delta is the point: the two builds are code-identical for
+practical purposes (the key tables ride in lazy art chunks), so any cold-tap
+difference is rasterization saved, not bytes moved.
+
+```sh
+# art prewarm build
+pnpm build
+node node_modules/vite/bin/vite.js preview --port 4173 --strictPort
+
+# baseline (art queue off): remove the two startArtPass() calls, build, serve
+node node_modules/vite/bin/vite.js preview --port 4174 --strictPort
+
+# one run (three runs per build per settle, alternating builds)
+PREVIEW_URL=http://localhost:4173/ TAP_HEADED=1 HUB_SETTLE_MS=2000 \
+  node scripts/measure-first-tap.mjs --json --warm-aware
+# repeat at HUB_SETTLE_MS=6000; inert control on the prewarm build:
+PREVIEW_URL=http://localhost:4173/ TAP_HEADED=1 TAP_INERT_IDLE=1 \
+  node scripts/measure-first-tap.mjs --json --warm-aware
+```
+
+Headed is required (see the chunk-prewarm Method above — headless starves
+`requestIdleCallback`, which would starve the art queue exactly as it starves
+the chunk pass, and report every tap cold in both builds). Settle stays the
+variable: **2000 ms** and **6000 ms**. The `--warm-aware` classification and
+the 400 ms cold-only gate are unchanged; an art-warmed tap still needs its
+chunk imported first, so chunk-cold taps pay the fetch identically in both
+builds and the comparison isolates the raster half.
+
+### Results (pending headed rerun)
+
+PENDING — the headed comparison could not run on the executor host (see
+Established below), so the per-game before/after medians table and the AC-6
+verdict are open. The table to fill, three runs per build per settle,
+alternating, medians reported:
+
+| Game | Baseline cold median (ms) | Art-prewarm cold median (ms) | Tap kind, runs 1 / 2 / 3 |
+|---|---|---|---|
+| Shape Sorter | pending | pending | pending |
+| Find the Letter | pending | pending | pending |
+| Find the Word | pending | pending | pending |
+| Add It Up | pending | pending | pending |
+| Memory Match | pending | pending | pending |
+
+Expectation to test, not a claim: at 6 s settle the chunk pass already warms
+all five tiles, so the art queue (hundreds of keys, one raster per idle slot,
+recency-first) decides how many of the five skip rasterization in `preload`;
+the worst case moves only if Find the Word — the slowest tile in every prior
+run — is art-warm when tapped. If the worst cold median stays above 400 ms,
+the verdict re-scopes honestly to which games remain over budget and why
+(key counts per game, tier sizes, queue position at tap time).
+
+### Established in Phase 3 (executor host, 2026-10-27)
+
+- The art-off baseline compiles and builds: shell 152.39 kB against 152.43 kB
+  for the art-prewarm build.
+- The full verification gate is green on the art-prewarm tree with the TDD
+  §4.8 walkthrough included: Biome clean, typecheck clean, 126 files /
+  2,781 tests pass, coverage 97.75 / 91.76 / 96.88 / 98.70,
+  `validate-bundle` (shell ≤ 200 kB gate), `validate-pwa` 16/16,
+  `validate-docs` 6/6.
+- The headed runs themselves are not done: the executor sandbox permits the
+  brief-named gate command but denies ad-hoc `node` execution, so the rig
+  could not be launched here — and a headless run would have measured nothing
+  (both queues starved, every tap cold in both builds). P3.T1 is therefore
+  partial: method, baseline recipe, and gate are established; the medians
+  table and the AC-6 verdict await the primary's headed run, with raw JSON
+  to be filed beside the phase-3 verification note.
+
