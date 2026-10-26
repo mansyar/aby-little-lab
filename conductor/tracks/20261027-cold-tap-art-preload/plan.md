@@ -14,17 +14,21 @@
 - **Covers:** FR-1, FR-3, AC-1, AC-2, AC-4
 - **Touches:** `src/game/hub/prewarm.ts`, `src/game/hub/*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Per-game art-key source** — covers: FR-1
-  - [ ] **P1.T1.1:** Derive each game's key list (key + tier size) from its declared art groups; single source in `src/game/art/`.
-  - [ ] **P1.T1.2:** First-visit fallback to grid order when no `lastPlayedAt` exists.
-- [ ] **P1.T2: Idle art queue in the prewarm engine** — covers: FR-1, FR-3
-  - [ ] **P1.T2.1:** One key per idle tick via the injected scheduler (rIC with timer fallback); order recomputed each tick from the active profile.
-  - [ ] **P1.T2.2:** Skip keys already in the TextureManager; tap cancels pending keys; per-key failures swallowed with no retry storm and no unhandled rejection.
-- [ ] **P1.T3: Seeded engine tests** — covers: AC-1, AC-2, AC-4
-  - [ ] **P1.T3.1:** Recency order at idle pace, one per tick (fake scheduler/clock).
-  - [ ] **P1.T3.2:** Tap-cancel; failure-swallow with tap path unaffected.
+- [x] **P1.T1: Per-game art-key source** — covers: FR-1
+  - [x] **P1.T1.1:** Derive each game's key list (key + tier size) from its declared art groups; single source in `src/game/art/`.
+  - [x] **P1.T1.2:** First-visit fallback to grid order when no `lastPlayedAt` exists.
+- [x] **P1.T2: Idle art queue in the prewarm engine** — covers: FR-1, FR-3
+  - [x] **P1.T2.1:** One key per idle tick via the injected scheduler (rIC with timer fallback); order recomputed each tick from the active profile.
+  - [x] **P1.T2.2:** Skip keys already in the TextureManager; tap cancels pending keys; per-key failures swallowed with no retry storm and no unhandled rejection.
+- [x] **P1.T3: Seeded engine tests** — covers: AC-1, AC-2, AC-4
+  - [x] **P1.T3.1:** Recency order at idle pace, one per tick (fake scheduler/clock).
+  - [x] **P1.T3.2:** Tap-cancel; failure-swallow with tap path unaffected.
+
+**Result:** verified
+**Checkpoint:** a1a2a6d5
+**Evidence:** conductor/tracks/20261027-cold-tap-art-preload/verification/phase-1.md
 
 <!--
 The primary appends after acceptance:
