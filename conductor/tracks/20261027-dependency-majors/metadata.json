@@ -1,0 +1,32 @@
+{
+  "id": "20261027-dependency-majors",
+  "title": "Dependency Majors — five dev-dep upgrades with the gate green",
+  "type": "chore",
+  "status": "new",
+  "priority": "medium",
+  "depends_on": [],
+  "created_at": "2026-10-27T09:00:00+11:00",
+  "updated_at": "2026-10-27T09:00:00+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261027-dependency-majors",
+  "base_branch": "master",
+  "base_sha": "72bf861c8b563819cef9fac68d1310382804add0",
+  "progress": {
+    "phases_total": 5,
+    "phases_verified": 0,
+    "tasks_total": 18,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}
