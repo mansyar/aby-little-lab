@@ -46,7 +46,7 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-3, FR-8, NFR-2
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `vite.config.ts` (test config only), `src/__tests__/**/*.test.ts` (only suites the majors force to change), `src/__tests__/helpers/**` (only if forced)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P2.T1: Upgrade the exact pair** — covers: FR-1
   - [ ] **P2.T1.1:** `pnpm up vitest@^5.0.5 @vitest/coverage-v8@^5.0.5` (versions must match exactly); commit package.json + lockfile; record `pnpm outdated` after.
 - [ ] **P2.T2: Embrace clearMocks** — covers: FR-3, FR-8
