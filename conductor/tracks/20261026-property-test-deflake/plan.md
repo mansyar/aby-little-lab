@@ -56,14 +56,17 @@ phase subagent and independently verified by the primary before acceptance.
 **Checkpoint:** 6e8a9b9b
 **Evidence:** conductor/tracks/20261026-property-test-deflake/verification/phase-2.md
 
-<!--
-Review fixes are appended by conductor-review as:
 ## Phase R1: Review Fixes
-- **Goal:** Resolve review finding(s) <ID>.
-- **Depends on:** <last verified phase>
-- **Covers:** <finding IDs>
-- **Touches:** <union of finding files>
-- **Verification:** <same chain or narrower, exact>
+
+- **Goal:** Resolve review findings F1-F3: budget the two unprotected sweeps the historical record implicates, correct the TDD policy note's timeout inventory, and fix the evidence provenance.
+- **Depends on:** Phase 2
+- **Covers:** F1, F2, F3
+- **Touches:** `src/__tests__/game/decodeLogic.test.ts`, `src/__tests__/game/wordLogic.test.ts`, `docs/TDD.md`, `conductor/tracks/20261026-property-test-deflake/verification/phase-1.md`, `conductor/tracks/20261026-property-test-deflake/verification/integrated.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending
-- [ ] **R1.T1: Resolve <finding ID>** - covers: <finding ID>
--->
+- [ ] **R1.T1: Resolve F1** — covers: F1
+  - [ ] **R1.T1.1:** Add `{ timeout: 120_000 }` to "keeps every round valid and uniquely targeted at every shift" in `decodeLogic.test.ts:322` and `wordLogic.test.ts:254`; update the AC-2 grep-proof counts (5 → 7 matches) in `phase-1.md` and `integrated.md`, and the TDD note's test list.
+- [ ] **R1.T2: Resolve F2** — covers: F2
+  - [ ] **R1.T2.1:** Reword the `docs/TDD.md:1015` sentence so the pre-existing timeout inventory is accurate (the addItUp/count/takeAway 20 s guards AND the two 20 s sweep guards in `moreLessLogic.test.ts:141-143`/`:159`), plus the new 120 s budgets.
+- [ ] **R1.T3: Resolve F3** — covers: F3
+  - [ ] **R1.T3.1:** In `phase-1.md` provenance (~:72), cite `20261026-docs-truth-pass/verification/phase-1.md:93,119` as the sole flake record, reconcile the five-victim framing with its seven-file list, and correct the multiplier range (worst observed ~33× over the 1.98 s victim).
