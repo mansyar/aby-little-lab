@@ -93,10 +93,17 @@ The primary appends after acceptance:
 - **Covers:** F1 (AC-6 scope), F2 (perf-baseline header)
 - **Touches:** `docs/perf-baseline.md`, `conductor/tracks/20261027-cold-tap-art-preload/spec.md`, `conductor/product.md`
 - **Verification:** `node scripts/validate-docs.js` (docs-only delta; full gate already green on identical code/tests)
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Re-scope AC-6 to the 5-game sample (F1)** — covers: F1
-  - [ ] **R1.T1.1:** `spec.md` AC-6 row: "across all 22 games" → the rig's 5 sampled games incl. the widest 83-key union (user-approved re-scope).
-  - [ ] **R1.T1.2:** Verdict line (`perf-baseline.md` ~696-697): state the 332.6 ms worst case as worst of the sampled five; note the 17-game gap explicitly.
-- [ ] **R1.T2: Refresh the perf-baseline live header (F2)** — covers: F2
-  - [ ] **R1.T2.1:** Header line 3: point at the art-verdict section as live with art-build figures (148.86 kB on-disk / 148.9 kB validator).
+- [x] **R1.T1: Re-scope AC-6 to the 5-game sample (F1)** — covers: F1
+  - [x] **R1.T1.1:** `spec.md` AC-6 row: "across all 22 games" → the rig's 5 sampled games incl. the widest 83-key union (user-approved re-scope).
+  - [x] **R1.T1.2:** Verdict line (`perf-baseline.md` ~696-697): state the 332.6 ms worst case as worst of the sampled five; note the 17-game gap explicitly.
+- [x] **R1.T2: Refresh the perf-baseline live header (F2)** — covers: F2
+  - [x] **R1.T2.1:** Header line 3: point at the art-verdict section as live with art-build figures (148.86 kB on-disk / 148.9 kB validator).
+
+<!--
+The primary appends after acceptance:
+**Result:** verified
+**Checkpoint:** 9ae33c53
+**Evidence:** `node scripts/validate-docs.js` 6/6 on the R1 delta (docs-only; full gate already green on identical code/tests)
+-->
