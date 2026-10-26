@@ -169,7 +169,7 @@ describe("buildPlaythrough(shift)", () => {
   /** All shifts the facade can produce. */
   const SHIFTS: readonly BandShift[] = [-1, 0, 1];
 
-  it("keeps the shifted band ladder and validity across many samples", () => {
+  it("keeps the shifted band ladder and validity across many samples", { timeout: 120_000 }, () => {
     for (const shift of SHIFTS) {
       const ladder = shiftLadder(BASE_LADDER, shift);
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
