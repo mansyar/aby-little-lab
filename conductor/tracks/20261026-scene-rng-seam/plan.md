@@ -186,30 +186,34 @@ Only the primary agent writes this file.
 - **Covers:** FR-6, NFR-3, AC-1, AC-2, AC-5
 - **Touches:** `src/__tests__/scenes/*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Per-game scene suites** - covers: FR-6, AC-1
-  - [ ] **P4.T1.1:** In each of the 22 scene suites, construct the scene with
+- [x] **P4.T1: Per-game scene suites** - covers: FR-6, AC-1
+  - [x] **P4.T1.1:** In each of the 22 scene suites, construct the scene with
         `mulberry32(seed)` instead of stubbing `Math.random`, delete the stub and
         its `afterEach` restore where nothing else needs it, and re-derive any
         expectation that was pinned to a mocked constant. Do not loosen an
         assertion to make it pass.
-  - [ ] **P4.T1.2:** Confirm each suite still fails if the rng is ignored —
+  - [x] **P4.T1.2:** Confirm each suite still fails if the rng is ignored —
         either by construction or by one explicit check per suite.
 
-- [ ] **P4.T2: Flow and integration suites** — covers: FR-6
-  - [ ] **P4.T2.1:** Migrate the five flow suites (`animalTraceFlow`,
+- [x] **P4.T2: Flow and integration suites** — covers: FR-6
+  - [x] **P4.T2.1:** Migrate the five flow suites (`animalTraceFlow`,
         `feelingsFacesFlow`, `musicalMemoryFlow`, `patternBuilderFlow`,
         `popFreezeFlow`) plus `sceneLifecycle.test.ts` and
         `firstWordsIntegration.test.ts`, then delete the FR-6/A4 annotation
         comments that no longer apply.
 
-- [ ] **P4.T3: Static proof** — covers: AC-2
-  - [ ] **P4.T3.1:** Run `grep "vi.spyOn(Math" src/__tests__/scenes` and
+- [x] **P4.T3: Static proof** — covers: AC-2
+  - [x] **P4.T3.1:** Run `grep "vi.spyOn(Math" src/__tests__/scenes` and
         `grep "Math\.random" src/scenes`, confirm both are empty, and record the
         verbatim commands and output in the evidence file.
 
 ---
+
+**Result:** verified
+**Checkpoint:** ae0ccaa2
+**Evidence:** conductor/tracks/20261026-scene-rng-seam/verification/phase-4.md
 
 ## Phase 5: Docs truth pass
 
