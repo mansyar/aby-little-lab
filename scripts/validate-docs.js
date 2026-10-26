@@ -535,7 +535,12 @@ const FILES_CLAIM_RE = /\b\d[\d,]*\s+files\b/g;
  * reason the derivation failed. One spawn, no retries.
  */
 function deriveSuiteTruth() {
-  const result = spawnSync("pnpm", ["exec", "vitest", "list"], {
+  // `--no-staticParse` matters: since vitest 5 the `list` command AST-parses
+  // test files instead of importing them, and dynamically registered tests
+  // (loops over imported data, conditionally created suites) never appear in
+  // its output. Static parsing under-counted the suite by 305 tests, so the
+  // derivation collects the way the runner itself does.
+  const result = spawnSync("pnpm", ["exec", "vitest", "list", "--no-staticParse"], {
     cwd: ROOT,
     encoding: "utf8",
     maxBuffer: 32 * 1024 * 1024,
@@ -547,10 +552,14 @@ function deriveSuiteTruth() {
     shell: process.platform === "win32",
   });
   if (result.error) {
-    return { error: `spawning "pnpm exec vitest list" failed: ${result.error.message}` };
+    return {
+      error: `spawning "pnpm exec vitest list --no-staticParse" failed: ${result.error.message}`,
+    };
   }
   if (result.status !== 0) {
-    return { error: `"pnpm exec vitest list" exited with status ${result.status}` };
+    return {
+      error: `"pnpm exec vitest list --no-staticParse" exited with status ${result.status}`,
+    };
   }
   const files = new Set();
   let tests = 0;
