@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-10-22.** The numbers in the section **Shell Diet Re-measurement — 2026-10-22** at the end of this file describe the current build: shell entry `index-BrQ7goBH.js` at 134.6 kB, **42** JavaScript chunks, **54** precache entries. Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17) and the Shell Diet (2026-10-20). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-10-27.** The numbers in the section **Idle chunk prewarm — first-tap verdict (2026-10-27)** at the end of this file describe the current build: shell entry `index-DJ5iAYOR.js` at 144.23 kB, **42** JavaScript chunks, **54** precache entries, and the first-tap result split into a warm case (40.9–55.7 ms per game) and a cold case (unchanged, up to ~600 ms). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20) and the Shell Diet re-measurement (2026-10-22). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts and the planned work behind these numbers live in one place: [`docs/roadmap.md`](roadmap.md).
 
@@ -392,7 +392,17 @@ What the number is and is not:
   worker is blocked, so the chunk fetch is a cold round trip that a warm
   precache would beat.
 
-**Open question, not a verdict:** whether the cold first tap is inside its
+**Resolved 2026-10-27** — see [Idle chunk prewarm — first-tap verdict (2026-10-27)](#idle-chunk-prewarm--first-tap-verdict-2026-10-27).
+The open question below was answered by the increment measurement it asked for: a
+built pre-track baseline (`cb5f713a`) and the prewarm build measured back to back
+on this host. The short version: a tap that finds its chunk already imported
+costs 27–65 ms, comfortably inside the 400 ms budget; a tap that still pays the
+fetch does not, and how long the Hub has been idle decides which one happens.
+A device pass is still the manual exception the workflow config describes, but
+it is no longer needed to know whether the budget is met in the warm condition.
+The paragraph is kept as written for the record:
+
+**Open question, not a verdict (closed 2026-10-27):** whether the cold first tap is inside its
 budget on the target hardware is not settled by this run. It needs the
 increment measurement the shell-diet track used (a built pre-track baseline on
 the same host, back to back) and a device pass. It is recorded here as a
@@ -418,4 +428,172 @@ The Shell Diet section above keeps its own numbers (129.1 KiB, 41 chunks, 53
 precache entries) — that is what the build of 2026-10-20 measured. The 42
 chunks and 54 precache entries above are one chunk and one entry more, from
 the tracks that landed after it.
+
+## Idle chunk prewarm — first-tap verdict (2026-10-27)
+
+Track: `20261027-hub-idle-prewarm`, Phase 3. This is the increment measurement
+the 2026-10-22 record asked for: a built pre-track baseline and the prewarm
+build, same host, back to back, three runs each, medians reported. It answers
+the open question in **Cold first tap → first frame** above.
+
+### Method
+
+Two production builds served side by side on this host, and the same script
+pointed at each with `PREVIEW_URL`:
+
+| Build | What it is | Served on |
+|---|---|---|
+| Baseline | commit `cb5f713a` (pre-track), materialised from `git show` into `.conductor/evidence/base-tree` — `src/scenes/HubScene.ts` reverted to the commit's version and `src/game/hub/prewarm.ts` absent — built with `vite build` | `vite preview --port 4174 --strictPort` |
+| Prewarm | the track branch (`pnpm build`), prewarm module + Hub wiring in place | `vite preview --port 4173 --strictPort` |
+
+```sh
+# baseline
+node node_modules/vite/bin/vite.js build .conductor/evidence/base-tree
+node node_modules/vite/bin/vite.js preview .conductor/evidence/base-tree --port 4174 --strictPort
+
+# prewarm
+pnpm build
+node node_modules/vite/bin/vite.js preview --port 4173 --strictPort
+
+# one run, prewarm build (three runs per build, alternating)
+PREVIEW_URL=http://localhost:4173/ TAP_HEADED=1 \
+  node scripts/measure-first-tap.mjs --json --warm-aware
+```
+
+Two properties of the method are worth recording, because both decide whether
+the numbers mean anything:
+
+- **The measurement must run headed.** Headless Chromium on this host never
+  delivers an idle period once Phaser's game loop is running, so
+  `requestIdleCallback` starves: a probe saw the prewarm's single request and no
+  callback at all in 20 s, and zero scene chunks fetched. The same probe headed
+  saw the callback fire 14 ms after the request and all 22 chunks imported in
+  about 0.5 s. Both builds were therefore measured headed (`TAP_HEADED=1`), so
+  the baseline is not being flattered by a headless run.
+- **Settle time is a variable, not a constant.** `HUB_SETTLE_MS` sets how long
+  the measurement waits between the Hub's canvas and the tap, i.e. how long the
+  child idles first. The prewarm starts 1200 ms after the entrance settles and
+  imports one chunk per idle slot, so this one number decides how many tiles are
+  warm. Two settings were measured: **2000 ms** (the script's default — a child
+  who taps almost immediately) and **6000 ms** (a child who looks at the Hub for
+  a moment first).
+
+`--warm-aware` classifies each tap before it lands, from the requests already
+issued for that game's chunk: `imported` (body arrived → reported **warm**,
+stages A/B are 0 and stage C runs tap → first frame after the Hub's play
+record), `in-flight` (the tap joins the prewarm's own fetch → measured **cold**,
+conservatively), or `none` (an ordinary cold tap, unchanged three-stage
+measurement). Cold taps are still the only ones the 400 ms gate is applied to.
+
+### Per-game medians of three runs
+
+Settle 2000 ms — a child who taps as soon as the Hub appears:
+
+| Game | Baseline cold median (ms) | Prewarm build median (ms) | Tap kind, runs 1 / 2 / 3 |
+|---|---|---|---|
+| Shape Sorter | 258.7 | 49.9 | cold / warm / warm |
+| Find the Letter | 219.1 | 255.4 | cold / cold / warm |
+| Find the Word | 439.0 | 47.9 | cold / warm / warm |
+| Add It Up | 269.5 | 52.6 | cold / warm / warm |
+| Memory Match | 222.4 | 220.8 | cold / warm / cold |
+| **Median across the five** | **258.7** | **52.6** | 8 of 15 taps warm |
+
+Settle 6000 ms — a child who looks at the Hub before tapping:
+
+| Game | Baseline cold median (ms) | Prewarm build median (ms) | Tap kind, runs 1 / 2 / 3 |
+|---|---|---|---|
+| Shape Sorter | 277.2 | 45.5 | warm / warm / warm |
+| Find the Letter | 241.0 | 55.7 | warm / warm / warm |
+| Find the Word | 501.4 | 50.7 | warm / warm / warm |
+| Add It Up | 324.6 | 40.9 | warm / warm / warm |
+| Memory Match | 227.7 | 43.5 | warm / warm / warm |
+| **Median across the five** | **277.2** | **45.5** | 15 of 15 taps warm |
+
+### Cold against cold — the tap path did not regress
+
+The prewarm build's own cold path, measured with the idle scheduler neutralised
+in the page (`TAP_INERT_IDLE=1`, so the prewarm can never import and every tap
+must fetch) against the same baseline runs:
+
+| Game | Baseline cold median (ms) | Prewarm build, cold path (ms) | Spread of individual cold samples |
+|---|---|---|---|
+| Shape Sorter | 258.7 | 219.1 | 180.8 – 318.3 |
+| Find the Letter | 219.1 | 240.8 | 216.0 – 242.6 |
+| Find the Word | 439.0 | 595.4 | 170.8 – 627.4 |
+| Add It Up | 269.5 | 211.7 | 199.7 – 339.0 |
+| Memory Match | 222.4 | 230.9 | 83.0 – 258.5 |
+
+No systematic change: the per-game medians move in both directions, and Find
+the Word — the slowest and noisiest tile in every run of this session — spans
+170.8–627.4 ms on its own. The tap path is untouched by the track (the diff
+touches `HubScene.ts`'s prewarm calls and adds `prewarm.ts`; `openGame`,
+`loadSceneWithRetry` and `ensureSceneLoaded` are unchanged), and the prewarm
+only ever runs in idle slots, so this is the expected result rather than a
+finding.
+
+### Warm taps — a different quantity
+
+A warm tap is not a faster cold tap; it is a tap that pays no chunk fetch and no
+module eval at all. Across the two warm-aware batches, 23 warm taps measured
+**27.2–64.9 ms**, with per-game medians of 40.9–55.7 ms. Stage A and stage B are
+zero by construction, and stage C here is tap → first frame after the Hub's play
+record (the warm analogue of "first frame after the chunk settled"), so it is
+comparable to the cold total only in the sense that both end at the same
+milestone.
+
+### Verdict
+
+**The 400 ms first-tap budget is demonstrated for a tap whose chunk the idle
+prewarm has already imported, and not demonstrated for a tap that still pays the
+fetch.** Which of the two a child gets depends on how long the Hub has been
+sitting idle, and at the current pacing that is a couple of seconds:
+
+- **Idle first (6 s settle): all five measured tiles warm, 40.9–55.7 ms.** Every
+  tap in all three runs was already imported, and every one is an order of
+  magnitude inside the budget. This is the condition the track was built for.
+- **Tap at once (2 s settle): mixed.** 8 of 15 taps were warm and cost
+  35.0–52.6 ms; the other 7 were still cold and cost 89.3–392.3 ms. Shape
+  Sorter (tile 0), Find the Word and Add It Up were warm in 2 of 3 runs; Find
+  the Letter (tile 7) was warm in 1 of 3 and Memory Match (tile 17) in 1 of 3 —
+  the prewarm works through the grid in recency order at one chunk per idle
+  slot, so the early tiles land first and the last tile of a 22-chunk sweep is
+  the one a fast tap can still catch cold.
+- **Cold taps are unchanged and still over budget in the worst case.** The
+  worst cold median in the whole session was Find the Word at 595.4 ms (prewarm
+  build, idle scheduler neutralised) and 501.4 ms (baseline, 6 s settle); the
+  script still exits non-zero for those runs, correctly.
+
+So the open question is closed with a scoped answer rather than a pass: the
+budget is met in the warm condition, the warm condition arrives after roughly
+2–3 s of Hub idle, and a child who taps within the first second or two can
+still pay 90–400 ms. Raising the number of chunks imported per idle slot, or
+starting the pass earlier than 1200 ms, is what would move the fast-tap case;
+neither is in this track. A real-device pass remains the manual exception the
+workflow config describes, and it is now a confirmation of a measured result
+rather than the thing that would settle an unknown.
+
+Caveats, unchanged from the sections above:
+
+- Stage C still stops at the first frame the game paints behind its loading cue,
+  not at "fully rendered".
+- Service workers are blocked in the measurement context, so the chunk fetch is
+  a real cold round trip. On a real second visit the PWA precache satisfies it
+  from cache, which makes the warm case the more representative one for a
+  returning child and the cold case a first-visit floor.
+- This host is slow (boot medians 1115–1392 ms against 419.5 ms on the
+  shell-diet host), and the run-to-run spread is wide — individual cold samples
+  ranged 83.0–627.4 ms. The medians of three are reported for that reason, and
+  the tap-kind counts matter more than any single millisecond.
+- Idle pacing is invisible to headless automation on this host (see Method), so
+  any future re-measurement of the prewarm must run headed or it will measure
+  nothing and report every tap cold.
+
+Raw per-run output for both builds: `.conductor/evidence/phase-3/*.json`,
+aggregated in `.conductor/evidence/phase-3/aggregate.json`.
+
+Build figures for the prewarm build measured here (2026-10-27): shell entry
+`index-DJ5iAYOR.js` = **144.23 kB** (34.12 kB gzip), `phaser-B_vcVLyb.js` =
+1367.08 kB, **42** JavaScript chunks, **54** precache entries (1722.35 KiB) —
+the shell grew 9.6 kB over the 2026-10-22 figure, from the tracks that landed
+after it, and stays well inside the 200 kB budget.
 

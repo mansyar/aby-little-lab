@@ -554,6 +554,36 @@ A resolved `false` releases `grid.navLocked` — the flag `hub/gridBuilder` sets
 
 The cue's lifetime is the launch attempt: it is destroyed before the fade into a game that finally loads, before the Settings panel or the profile picker opens, on the scene's `shutdown`, when a page flip or a viewport change rebuilds the tiles it was anchored to, and before a retry replaces it (`hideLoadCue()` is safe to call at any time, including when no cue exists — `HubGridDeps.onBoardChange` is how the grid tells the scene its tiles were rebuilt). `openGame` also re-checks the daily cap after the load resolves and before any charge, so a cue that outlived the moment the limit was reached cannot open a game behind the time-up lock — it destroys the cue, releases the lock and returns uncharged. Across visits, `create()` bumps a per-visit token and the `shutdown` handler bumps it again; `openGame` captures the value before it awaits and returns when the two no longer match, so a chunk that resolves after the Hub is gone — or after the same instance was re-created for a new visit — neither transitions, nor raises a cue, nor throws. While a launch is in flight, `launching` stays set and `openGame` refuses at the top, so a tile tap and a cue retry cannot run two loads at once.
 
+### 4.7 Idle chunk prewarm
+
+`src/game/hub/prewarm.ts` imports the lazy game chunks while the Hub is sitting idle, so a child's first tap does not pay the fetch and the module evaluation. It imports; it never registers. Registration stays where it was — `ensureSceneLoaded` at tap time — so a prewarmed chunk is exactly as inert as a chunk the service worker happened to cache, and ES module caching makes the duplicate import from `openGame` a no-op rather than a second evaluation.
+
+The pacing model is one import per idle slot:
+
+- `startPrewarm` takes `{ entries, scheduler?, imported? }`. `entries` is an ordered `{ key, load }` list; `load` is the same `sceneLoaders[key]` function the tap path calls. The scheduler is `requestIdleCallback` when the host has it and a 16 ms `setTimeout` otherwise (`IDLE_FALLBACK_DELAY_MS`), and it is injected, which is how the tests drive time.
+- Exactly one import is ever in flight. The next idle slot is requested only after the previous import settles, so the main thread never holds two module evaluations at once and the pacing degrades to "as fast as the browser offers idle time", not "as fast as the network returns".
+- A key already in `imported` is skipped **without** consuming a slot: the pump walks past it and asks for the next one immediately. A rejected import is swallowed and **not** marked imported, so the failure costs one slot and the next Hub visit re-attempts it. There is no retry inside a pass and nothing reaches the child — the service worker's precache is the offline net.
+- `cancel()` clears the pending idle handle and discards the in-flight result; nothing resolves, nothing throws, no callback survives. The controller is the whole surface: `startPrewarm` returns `{ cancel }`.
+
+Ordering is `recencyFirstOrder(progress, gridOrder, allKeys)` — a pure function over the active profile's progress map. Games the profile has played sort by `lastPlayedAt` descending, so a returning child's favourites arrive first; everything never played follows in Hub grid order; an unparseable timestamp counts as never played. The order is recomputed for every pass, from whatever profile is active when the pass starts.
+
+Hub wiring (`src/scenes/HubScene.ts`):
+
+| Piece | Behaviour |
+| --- | --- |
+| `PREWARM_START_DELAY = 1200` | The pass starts 1200 ms after the entrance flow has settled. The timer is armed in `create()` alongside `scheduleIdleAttract()`, never inside `sceneEntrance`, so the entrance tween is never competing with a module evaluation. |
+| `prewarmEntries()` | Joins `GAME_TILES` grid order with `getProgress()` and `sceneLoaders`, skipping any tile whose scene has no loader. |
+| `canPrewarm()` | Three gates, all of which must hold: not `timeUp` (the daily play-time lock), not `launching` (a tap is in flight), and not `isDocumentHidden()`. The visibility gate is built on `canObserveVisibility()`, so a host with no visibility surface counts as visible and keeps the prewarm running. |
+| `syncPrewarm()` | The single entry point: cancels when a gate closes, and otherwise arms the start timer once (no-op while a timer or a pass already exists). Called from `create()`, from `refreshPlayTimeState()` in both directions (the lock can arrive or clear with a refresh), from `handleVisibilityChange` when the tab becomes visible, and from `openGame`'s failed-launch branch. |
+| `startPrewarmPass()` | Re-checks `canPrewarm()`, builds the entries and hands them to `startPrewarm` with the shared `prewarmImported` set. |
+| `cancelPrewarm()` | Removes the start timer and cancels the controller. Called from `openGame` **immediately after the `launching` guard and before the load** — the tap always wins — from `create()` (both before the visit token bump and after it, so a stale pass cannot outlive a re-created scene), from `refreshPlayTimeState()` when a gate closes, and from the `shutdown` handler next to `idleCallTimer`. |
+| `restartPrewarm()` | Cancel-then-start, used on a profile switch so the new profile's recency order applies immediately. |
+| `prewarmImported` | One `Set<string>` per scene instance, shared across passes and visits. It is the only cross-visit state: it stops a re-entered Hub from re-importing what a previous pass already imported, and it is what makes a second visit's pass cheap. |
+
+Reuse safety: a cancelled pass leaves its `imported` entries behind deliberately — a chunk that finished loading is loaded for everyone, so the next pass skips it. An import in flight when the Hub shuts down is discarded rather than marked, and `visitToken` is not consulted by the module at all: the prewarm has no post-await work that could touch a dead scene, because it never registers anything.
+
+The behaviour is tested at two levels: `src/__tests__/game/hub/prewarm.test.ts` drives the module with a fake scheduler (order, one-at-a-time pacing, cancellation, a rejected import, idempotence, unparseable timestamps), and `src/__tests__/scenes/hubScene.test.ts` asserts the Hub wiring (the 1200 ms delay, the three gates, cancellation ahead of the load in `openGame`, the shutdown cancel, and the profile-switch restart). The measured first-tap effect — cold versus warm, and what the pacing means for a child who taps immediately — is recorded in [`docs/perf-baseline.md`](./perf-baseline.md#idle-chunk-prewarm--first-tap-verdict-2026-10-27).
+
 ---
 
 ## 5. Components

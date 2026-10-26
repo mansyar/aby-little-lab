@@ -28,14 +28,62 @@
  *
  * Usage:
  *   pnpm preview --port 4173
- *   node scripts/measure-first-tap.mjs [--json]
+ *   node scripts/measure-first-tap.mjs [--json] [--warm-aware]
  *
  *   # or let this script own the preview server (evidence suite: validate-boot,
  *   # 4x-throttled boot, then first tap — always stops the server it started)
- *   node scripts/measure-first-tap.mjs --with-preview
+ *   node scripts/measure-first-tap.mjs --with-preview [--warm-aware]
  *
- * Exits non-zero only when the worst game's TOTAL exceeds TOTAL_BUDGET_MS (or
- * when a measurement cannot run at all).
+ * `--warm-aware` adds the tap kind the Hub's idle prewarm creates. Before the
+ * tap it inspects the requests already issued for the tapped scene's chunk
+ * (`<Scene>Scene-<hash>.js`), which gives three cases:
+ *
+ *   - `imported` — the chunk body had arrived. The tap pays no network and no
+ *     module eval, so the cold stages A and B do not exist for it (reported 0)
+ *     and waiting for a chunk request would only time out. Such a tap is
+ *     verified by the launch commit instead (below) and reported as `warm`,
+ *     with stage C = tap -> first frame after that commit.
+ *   - `in-flight` — the prewarm's request was out but had not finished. The
+ *     tap's `import()` joins that same fetch, so the remaining download is real
+ *     waiting the child does: the tap is measured as `cold` (conservative) and
+ *     its A/B stages are read from that in-flight request.
+ *   - `none` — nothing was requested: an ordinary cold tap, measured exactly as
+ *     without the flag.
+ *
+ * The launch commit is observed without touching app code: an init script
+ * wraps `Storage.prototype.setItem`, and a commit is the v2 payload
+ * (`abby-little-lab:v2`) carrying a non-empty `lastPlayedAt` for the tapped
+ * game — the record `recordGamePlay` writes inside `openGame` after the load
+ * resolves and before the fade. Its first animation frame after the write is
+ * the warm stage C, measured from the same tap anchor the cold stages use.
+ *
+ * Headless note: headless Chromium on this host never delivers an idle period
+ * once Phaser's game loop is running, so `requestIdleCallback` never fires and
+ * the prewarm imports nothing (measured: one request, no callback in 20 s).
+ * A headed browser fires it ~14 ms later and imports all 22 chunks in ~0.5 s.
+ * Set `TAP_HEADED=1` to run headed; a warm-aware comparison must run headed on
+ * BOTH builds or the prewarm side measures nothing.
+ *
+ * `HUB_SETTLE_MS` (default 2000) overrides the wait between the canvas and the
+ * tap, so a run can model a child who taps at once or one who idles first.
+ *
+ * `TAP_INERT_IDLE=1` neutralises the page's idle scheduler before the app boots
+ * (`requestIdleCallback` returns a handle and never calls back, `cancelIdleCallback`
+ * is a no-op), so the prewarm can never import and every tap is cold. It is the
+ * cold-vs-cold control: it measures the prewarm build's own tap path against the
+ * baseline's without the prewarm being able to help, which is the only way to
+ * show the tap path itself did not regress. It changes nothing in the build, so
+ * it works on either one.
+ *
+ * Without the flag nothing changes: cold taps keep their three-stage
+ * measurement, and the exit code still gates the worst cold total. With the
+ * flag the budget is still applied to cold taps only — a warm tap is a
+ * different quantity and must never mask a cold failure. A run in which every
+ * tap was already warm therefore exits 0 and says the cold budget was not
+ * exercised.
+ *
+ * Exits non-zero only when the worst cold tap's TOTAL exceeds TOTAL_BUDGET_MS
+ * (or when a measurement cannot run at all).
  */
 
 import { spawn, spawnSync } from "node:child_process";
@@ -62,12 +110,14 @@ const TILE_WIDTH = 144;
 const TILE_HEIGHT = 116;
 const TILE_SPACING = 22;
 /** Let the Hub's entrance tweens settle before tapping. */
-const HUB_SETTLE_MS = 2000;
+const HUB_SETTLE_MS = Number(process.env.HUB_SETTLE_MS ?? 2000);
 /** Boot settles 5x1000 ms before sampling, as in docs/perf-baseline.md. */
 const BOOT_SETTLE_MS = 5000;
 const BOOT_SAMPLES = 3;
 /** A missing chunk within this window means the tap did not navigate. */
 const CHUNK_TIMEOUT_MS = 8000;
+/** The v2 payload key the app writes its profiles (and the play record) to. */
+const STORAGE_KEY = "abby-little-lab:v2";
 
 /**
  * Tile indexes are positions in `GAME_TILES` (src/game/hubTiles.ts). The set
@@ -77,11 +127,11 @@ const CHUNK_TIMEOUT_MS = 8000;
  * median across games, so one slow union cannot hide behind three fast ones.
  */
 const TARGETS = [
-  { name: "Shape Sorter", scene: "ShapeSorter", tileIndex: 0 },
-  { name: "Find the Letter", scene: "Alphabet", tileIndex: 7 },
-  { name: "Find the Word", scene: "WordMatch", tileIndex: 8 },
-  { name: "Add It Up", scene: "AddItUp", tileIndex: 15 },
-  { name: "Memory Match", scene: "MemoryMatch", tileIndex: 17 },
+  { name: "Shape Sorter", scene: "ShapeSorter", gameId: "shape-sorter", tileIndex: 0 },
+  { name: "Find the Letter", scene: "Alphabet", gameId: "alphabet-match", tileIndex: 7 },
+  { name: "Find the Word", scene: "WordMatch", gameId: "word-match", tileIndex: 8 },
+  { name: "Add It Up", scene: "AddItUp", gameId: "add-it-up", tileIndex: 15 },
+  { name: "Memory Match", scene: "MemoryMatch", gameId: "memory-match", tileIndex: 17 },
 ];
 
 /** Resolves once `predicate()` returns a truthy value, polling every 5 ms. */
@@ -97,9 +147,15 @@ async function until(predicate, timeoutMs, label) {
 
 /** Launch order matches scripts/validate-boot.js: bundled, Chrome, then Edge. */
 async function launchBrowser() {
-  const attempts = [{}, { channel: "chrome" }, { channel: "msedge" }];
+  // Headless Chromium on this host never delivers an idle period once Phaser's
+  // game loop is running, so `requestIdleCallback` starves and the Hub's idle
+  // prewarm imports nothing (measured: one request, no callback, 20 s). The
+  // prewarm is only observable in a headed browser, so the comparison runs
+  // headed for BOTH builds — same environment, back-to-back.
+  const headless = process.env.TAP_HEADED !== "1";
+  const attempts = [{ headless }, { channel: "chrome", headless }, { channel: "msedge", headless }];
   if (process.env.TAP_BROWSER_PATH) {
-    attempts.push({ executablePath: process.env.TAP_BROWSER_PATH });
+    attempts.push({ executablePath: process.env.TAP_BROWSER_PATH, headless });
   }
   const failures = [];
   for (const options of attempts) {
@@ -144,13 +200,56 @@ async function tilePoint(page, tileIndex) {
   };
 }
 
-async function measureGame(browser, target) {
+/**
+ * Page-side tap detector: records the moment the app writes a play record for
+ * `gameId` into the v2 payload, plus the first frame after that write. Installed
+ * as an init script so it is in place before the bundle runs, and used only with
+ * `--warm-aware`.
+ */
+function tapDetector({ key, gameId }) {
+  const original = Storage.prototype.setItem;
+  window.__tapLaunch = null;
+  Storage.prototype.setItem = function setItem(storageKey, value) {
+    const result = original.call(this, storageKey, value);
+    if (storageKey !== key || window.__tapLaunch !== null) return result;
+    try {
+      const parsed = JSON.parse(value);
+      const profile = (parsed.profiles ?? []).find((entry) => entry.id === parsed.activeProfileId);
+      const stamp = profile?.progress?.[gameId]?.lastPlayedAt;
+      if (typeof stamp === "string" && stamp !== "") {
+        const record = { at: performance.now(), firstFrame: null };
+        window.__tapLaunch = record;
+        requestAnimationFrame(() => {
+          record.firstFrame = performance.now();
+        });
+      }
+    } catch {
+      // A payload this shape does not describe is not a launch record.
+    }
+    return result;
+  };
+}
+
+async function measureGame(browser, target, warmAware = false) {
   const context = await browser.newContext({
     viewport: VIEWPORT,
     deviceScaleFactor: 1,
     serviceWorkers: "block",
   });
   const page = await context.newPage();
+  if (process.env.TAP_INERT_IDLE === "1") {
+    // Cold-vs-cold control: neutralise the Hub's idle scheduler so the prewarm
+    // can never import, while leaving the rest of the build untouched. Without
+    // this a tap on a prewarm build may or may not find its chunk warm, so the
+    // build's own cold path could not be compared with the baseline's.
+    await page.addInitScript(() => {
+      window.requestIdleCallback = () => 1;
+      window.cancelIdleCallback = () => {};
+    });
+  }
+  if (warmAware) {
+    await page.addInitScript(tapDetector, { key: STORAGE_KEY, gameId: target.gameId });
+  }
   const client = await context.newCDPSession(page);
 
   /** requestId -> url, for every request started on this page. */
@@ -185,6 +284,22 @@ async function measureGame(browser, target) {
 
     const point = await tilePoint(page, target.tileIndex);
     const alreadyStarted = new Set(requestUrls.keys());
+    // Warm-aware only: did the Hub already ask for this scene's chunk? Checked
+    // on request URLs, so a chunk still in flight also counts. Three states:
+    //   "imported"  the chunk body had arrived before the tap (no network paid)
+    //   "in-flight" the prewarm's request was out; the tap joins that same fetch
+    //   "none"      nothing was requested: an ordinary cold tap
+    const sceneChunk = new RegExp(`/${target.scene}Scene-[^/]+\\.js$`);
+    const preTapRequestId =
+      [...requestUrls.entries()].find(([, url]) => sceneChunk.test(url))?.[0] ?? null;
+    const chunkBeforeTap = !warmAware
+      ? null
+      : preTapRequestId === null
+        ? "none"
+        : finishedAt.has(preTapRequestId)
+          ? "imported"
+          : "in-flight";
+    const prefetched = chunkBeforeTap === "imported";
 
     // Tap: the anchor request is issued between down and up, so it can never
     // follow the pointerup that starts navigation.
@@ -208,23 +323,6 @@ async function measureGame(browser, target) {
     );
     await page.mouse.up();
 
-    const chunkResponse = await until(
-      () =>
-        responses.find(
-          (entry) =>
-            entry.type === "Script" &&
-            !alreadyStarted.has(entry.requestId) &&
-            entry.url.endsWith(".js"),
-        ),
-      CHUNK_TIMEOUT_MS,
-      `${target.scene} chunk response`,
-    );
-    const chunkFinished = await until(
-      () => finishedAt.get(chunkResponse.requestId),
-      CHUNK_TIMEOUT_MS,
-      `${target.scene} chunk loadingFinished`,
-    );
-
     const anchorEntry = await page.evaluate(
       (probe) =>
         new Promise((resolve, reject) => {
@@ -246,50 +344,169 @@ async function measureGame(browser, target) {
       anchorUrl,
     );
 
-    const firstFrame = await page.evaluate(
-      () =>
-        new Promise((resolve) => {
-          requestAnimationFrame(() => resolve(performance.now()));
-        }),
-    );
+    /** The tapped scene's own chunk response, started by the tap itself. */
+    const sceneChunkResponse = () =>
+      responses.find(
+        (entry) =>
+          entry.type === "Script" &&
+          !alreadyStarted.has(entry.requestId) &&
+          sceneChunk.test(entry.url),
+      );
+    /** The original cold matcher: any script response the tap started. */
+    const anyChunkResponse = () =>
+      responses.find(
+        (entry) =>
+          entry.type === "Script" &&
+          !alreadyStarted.has(entry.requestId) &&
+          entry.url.endsWith(".js"),
+      );
+    /**
+     * The prewarm's own request for the tapped chunk, when it was still in
+     * flight at tap time. The tap's `import()` joins that same fetch, so its
+     * remaining download is part of what the child waits for and belongs in the
+     * cold reading rather than being written off as warm.
+     */
+    const inFlightResponse = () =>
+      preTapRequestId === null
+        ? undefined
+        : responses.find(
+            (entry) =>
+              entry.requestId === preTapRequestId &&
+              entry.type === "Script" &&
+              sceneChunk.test(entry.url),
+          );
 
-    const responseMs = (chunkResponse.timestamp - tap.timestamp) * 1000;
-    const finishedMs = (chunkFinished - tap.timestamp) * 1000;
+    let tapKind = "cold";
+    let chunkResponse = null;
+    let chunkFinished = null;
+    let firstFrame = null;
+    let settledMs = 0;
+
+    if (warmAware && prefetched) {
+      // A warm tap issues no chunk request at all, so the cold stages cannot be
+      // recorded and waiting for one would only time out. The tap is verified
+      // instead by the play record the Hub writes inside `openGame` after the
+      // load resolves and before the fade: that write is proof the scene was
+      // registered and the launch committed. Stage C is then tap -> first frame
+      // after that write, the warm analogue of "first frame after the chunk
+      // settled"; A and B are 0 because neither is paid.
+      const launch = await page.evaluate(
+        (budget) =>
+          new Promise((resolve) => {
+            const deadline = Date.now() + budget;
+            const read = () => {
+              const record = window.__tapLaunch;
+              if (record !== null && record.firstFrame !== null) {
+                resolve(record);
+                return;
+              }
+              if (Date.now() > deadline) {
+                resolve(null);
+                return;
+              }
+              requestAnimationFrame(read);
+            };
+            read();
+          }),
+        CHUNK_TIMEOUT_MS,
+      );
+      if (launch === null) {
+        throw new Error(
+          `${target.scene} was already imported but the tap never reached the Hub's play record`,
+        );
+      }
+      tapKind = "warm";
+      settledMs = launch.at - anchorEntry.startTime;
+      firstFrame = launch.firstFrame;
+      chunkResponse = responses.find((entry) => sceneChunk.test(entry.url)) ?? null;
+    } else if (chunkBeforeTap === "in-flight") {
+      chunkResponse = await until(
+        inFlightResponse,
+        CHUNK_TIMEOUT_MS,
+        `${target.scene} in-flight chunk response`,
+      );
+    } else {
+      chunkResponse = await until(
+        anyChunkResponse,
+        CHUNK_TIMEOUT_MS,
+        `${target.scene} chunk response`,
+      );
+    }
+
+    if (tapKind === "cold") {
+      chunkFinished = await until(
+        () => finishedAt.get(chunkResponse.requestId),
+        CHUNK_TIMEOUT_MS,
+        `${target.scene} chunk loadingFinished`,
+      );
+      firstFrame = await page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            requestAnimationFrame(() => resolve(performance.now()));
+          }),
+      );
+      settledMs = (chunkFinished - tap.timestamp) * 1000;
+    }
+
     const totalMs = firstFrame - anchorEntry.startTime;
+    // An in-flight prewarm request may already have its headers when the tap
+    // lands, so A can be <= 0 there; clamping keeps the stage a duration.
+    const responseMs =
+      tapKind === "warm" ? 0 : Math.max(0, (chunkResponse.timestamp - tap.timestamp) * 1000);
 
     return {
       game: target.name,
       scene: target.scene,
-      chunk: chunkResponse.url.split("/").pop(),
+      gameId: target.gameId,
+      chunk: chunkResponse === null ? "(no request)" : chunkResponse.url.split("/").pop(),
+      ...(warmAware ? { tapKind, chunkBeforeTap } : {}),
       responseMs,
-      finishedMs,
+      finishedMs: tapKind === "warm" ? 0 : settledMs,
       totalMs,
-      clockSkewMs: totalMs - finishedMs,
+      clockSkewMs: totalMs - settledMs,
     };
   } finally {
     await context.close();
   }
 }
 
-async function measureFirstTap() {
+async function measureFirstTap(warmAware = false) {
   const browser = await launchBrowser();
   const runs = [];
   try {
     for (const target of TARGETS) {
-      runs.push(await measureGame(browser, target));
+      runs.push(await measureGame(browser, target, warmAware));
     }
   } finally {
     await browser.close();
   }
 
-  const worst = runs.reduce((current, run) => (run.totalMs > current.totalMs ? run : current));
+  // The budget gates a cold tap only. A warm tap is a different quantity (it
+  // pays no fetch and no module eval), so letting one win the "worst" slot
+  // would hide a cold failure behind the very optimisation being measured.
+  const coldRuns = warmAware ? runs.filter((run) => run.tapKind === "cold") : runs;
+  const warmRuns = warmAware ? runs.filter((run) => run.tapKind === "warm") : [];
+  // A warm tap is a different quantity (no fetch, no module eval), so the
+  // budget's "worst" slot only ever holds a cold tap; a run with no cold tap
+  // reports null and the exit code stays 0, saying the budget was not exercised.
+  const worstCold =
+    coldRuns.length === 0
+      ? null
+      : coldRuns.reduce((current, run) => (run.totalMs > current.totalMs ? run : current));
   return {
     stages: {
       responseMs: "tap -> game chunk responseReceived (headers only)",
       finishedMs: "tap -> game chunk loadingFinished (body downloaded)",
       totalMs: "tap -> first frame after the chunk settled (budgeted)",
+      ...(warmAware
+        ? {
+            warmTotalMs:
+              "tap -> first frame after the Hub's play record (warm tap: A and B are 0)",
+          }
+        : {}),
     },
     budgetMs: TOTAL_BUDGET_MS,
+    ...(warmAware ? { warmAware: true } : {}),
     runs: runs.map((run) => ({
       ...run,
       responseMs: round(run.responseMs),
@@ -298,11 +515,21 @@ async function measureFirstTap() {
       clockSkewMs: round(run.clockSkewMs),
     })),
     medians: {
-      responseMs: round(median(runs.map((run) => run.responseMs))),
-      finishedMs: round(median(runs.map((run) => run.finishedMs))),
-      totalMs: round(median(runs.map((run) => run.totalMs))),
+      responseMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.responseMs))),
+      finishedMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.finishedMs))),
+      totalMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.totalMs))),
     },
-    worst: { game: worst.game, totalMs: round(worst.totalMs) },
+    ...(warmAware
+      ? {
+          warmMedians:
+            warmRuns.length === 0
+              ? null
+              : { totalMs: round(median(warmRuns.map((run) => run.totalMs))) },
+          coldCount: coldRuns.length,
+          warmCount: warmRuns.length,
+        }
+      : {}),
+    worst: worstCold === null ? null : { game: worstCold.game, totalMs: round(worstCold.totalMs) },
   };
 }
 
@@ -393,7 +620,7 @@ async function measureBudget(stage, promise) {
 }
 
 /** `--with-preview`: own the server, measure boot + tap, always stop it. */
-async function runEvidenceSuite(log) {
+async function runEvidenceSuite(log, warmAware = false) {
   const server = await startPreview();
   const suite = { phases: {}, taps: null, boot: null, throttledBoot: null };
   try {
@@ -409,10 +636,13 @@ async function runEvidenceSuite(log) {
       `${THROTTLE_RATE}x-throttled boot median ${suite.throttledBoot.medianMs} ms: ` +
         suite.throttledBoot.samplesMs.join(" / "),
     );
-    suite.taps = await measureBudget("first tap", measureFirstTap());
+    suite.taps = await measureBudget("first tap", measureFirstTap(warmAware));
     log(
-      `first tap worst game ${suite.taps.worst.game} at ${suite.taps.worst.totalMs} ms ` +
-        `(median across games ${suite.taps.medians.totalMs} ms)`,
+      `first tap worst cold game ${suite.taps.worst === null ? "(none)" : suite.taps.worst.game} at ` +
+        `${suite.taps.worst === null ? "—" : suite.taps.worst.totalMs} ms` +
+        (suite.taps.medians.totalMs === null
+          ? ""
+          : ` (cold median across games ${suite.taps.medians.totalMs} ms)`),
     );
   } finally {
     stopPreview(server);
@@ -421,71 +651,98 @@ async function runEvidenceSuite(log) {
 }
 
 function printTapTable(taps) {
-  console.log("Cold first tap per game (fresh context each run, service worker blocked)\n");
+  const cold = taps.warmAware === true;
+  console.log(
+    `${cold ? "First tap per game (fresh context each run, service worker blocked)" : "Cold first tap per game (fresh context each run, service worker blocked)"}\n`,
+  );
   console.log("  A = tap -> chunk responseReceived (headers)");
   console.log("  B = tap -> chunk loadingFinished (body downloaded)");
-  console.log("  C = tap -> first frame after the chunk settled (budgeted; NOT fully rendered)\n");
-  console.log("  game              scene chunk                     A ms    B ms    C ms");
+  console.log("  C = tap -> first frame after the chunk settled (budgeted; NOT fully rendered)");
+  if (cold) {
+    console.log(
+      "  A warm tap pays neither A nor B: the Hub's idle prewarm imported the chunk, so C is\n" +
+        "  tap -> first frame after the Hub's play record (a different quantity from a cold C).",
+    );
+  }
+  console.log("");
+  console.log(
+    `  game              scene chunk                     A ms    B ms    C ms${cold ? "  kind" : ""}`,
+  );
   for (const run of taps.runs) {
     console.log(
       `  ${run.game.padEnd(16)}  ${String(run.chunk).padEnd(28)}  ` +
         `${run.responseMs.toFixed(1).padStart(5)}  ` +
         `${run.finishedMs.toFixed(1).padStart(6)}  ` +
-        `${run.totalMs.toFixed(1).padStart(6)}`,
+        `${run.totalMs.toFixed(1).padStart(6)}` +
+        (cold ? `  ${run.tapKind}` : ""),
     );
   }
-  console.log(
-    `\n  median            ${"".padEnd(28)}  ${taps.medians.responseMs.toFixed(1).padStart(5)}` +
-      `  ${taps.medians.finishedMs.toFixed(1).padStart(6)}` +
-      `  ${taps.medians.totalMs.toFixed(1).padStart(6)}`,
-  );
-  console.log(`\n  worst game: ${taps.worst.game} at ${taps.worst.totalMs.toFixed(1)} ms (C)`);
-  console.log(`  budget: worst game C <= ${taps.budgetMs} ms`);
+  if (taps.medians.totalMs !== null) {
+    console.log(
+      `\n  cold median       ${"".padEnd(28)}  ${taps.medians.responseMs.toFixed(1).padStart(5)}` +
+        `  ${taps.medians.finishedMs.toFixed(1).padStart(6)}` +
+        `  ${taps.medians.totalMs.toFixed(1).padStart(6)}`,
+    );
+  }
+  if (taps.warmMedians !== null && taps.warmMedians !== undefined) {
+    console.log(
+      `  warm median       ${"".padEnd(28)}  ${"—".padStart(5)}  ${"—".padStart(6)}` +
+        `  ${taps.warmMedians.totalMs.toFixed(1).padStart(6)}`,
+    );
+  }
+  if (taps.worst !== null) {
+    console.log(`\n  worst cold game: ${taps.worst.game} at ${taps.worst.totalMs.toFixed(1)} ms (C)`);
+  } else {
+    console.log("\n  no cold tap in this run: every tapped chunk was already imported");
+  }
+  if (cold) {
+    console.log(
+      `  tap kinds: ${taps.coldCount} cold / ${taps.warmCount} warm`,
+    );
+  }
+  console.log(`  budget: worst cold game C <= ${taps.budgetMs} ms`);
+}
+
+/** Shared budget gate: returns the exit code for a finished tap pass. */
+function tapExitCode(taps) {
+  if (taps.worst === null) {
+    console.log("\nPASS: no cold tap in this run — the cold budget was not exercised");
+    return 0;
+  }
+  if (taps.worst.totalMs > taps.budgetMs) {
+    console.error(
+      `\nFAIL: worst game ${taps.worst.game} total ${taps.worst.totalMs} ms ` +
+        `exceeds ${taps.budgetMs} ms`,
+    );
+    return 1;
+  }
+  const medianText =
+    taps.medians.totalMs === null ? "" : ` (cold median across games ${taps.medians.totalMs} ms)`;
+  console.log(`\nPASS: worst cold game ${taps.worst.game} total ${taps.worst.totalMs} ms${medianText}`);
+  return 0;
 }
 
 async function main() {
   const args = new Set(process.argv.slice(2));
   const asJson = args.has("--json");
+  const warmAware = args.has("--warm-aware");
 
   if (args.has("--with-preview")) {
-    const suite = await runEvidenceSuite(asJson ? () => {} : (line) => console.log(line));
+    const suite = await runEvidenceSuite(asJson ? () => {} : (line) => console.log(line), warmAware);
     if (asJson) {
       console.log(JSON.stringify({ bootBudgetMs: BOOT_BUDGET_MS, ...suite }, null, 2));
     } else {
       console.log("");
       printTapTable(suite.taps);
     }
-    if (suite.taps.worst.totalMs > TOTAL_BUDGET_MS) {
-      console.error(
-        `\nFAIL: worst game ${suite.taps.worst.game} total ${suite.taps.worst.totalMs} ms ` +
-          `exceeds ${TOTAL_BUDGET_MS} ms`,
-      );
-      process.exitCode = 1;
-      return;
-    }
-    console.log(
-      `\nPASS: worst game ${suite.taps.worst.game} total ${suite.taps.worst.totalMs} ms ` +
-        `(median across games ${suite.taps.medians.totalMs} ms)`,
-    );
+    process.exitCode = tapExitCode(suite.taps);
     return;
   }
 
-  const taps = await measureFirstTap();
+  const taps = await measureFirstTap(warmAware);
   if (asJson) console.log(JSON.stringify(taps, null, 2));
   else printTapTable(taps);
-
-  if (taps.worst.totalMs > TOTAL_BUDGET_MS) {
-    console.error(
-      `\nFAIL: worst game ${taps.worst.game} total ${taps.worst.totalMs} ms ` +
-        `exceeds ${TOTAL_BUDGET_MS} ms`,
-    );
-    process.exitCode = 1;
-    return;
-  }
-  console.log(
-    `\nPASS: worst game ${taps.worst.game} total ${taps.worst.totalMs} ms ` +
-      `(median across games ${taps.medians.totalMs} ms)`,
-  );
+  process.exitCode = tapExitCode(taps);
 }
 
 main().catch((error) => {
