@@ -18,18 +18,24 @@
 - **Covers:** FR-2, FR-3, FR-4, FR-5, FR-6, AC-3 (partial), AC-4 (partial)
 - **Touches:** `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `docs/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Refresh README's current-state claims** — covers: FR-2, FR-5
-  - [ ] **P1.T1.1:** `README.md:49` — replace "**2,556 tests across 119 files**, all green (verified 2026-10-23)" with "**2,729 tests across 125 files**, all green (verified 2026-10-26)".
-  - [ ] **P1.T1.2:** `README.md` `game/` line — "55 files = 33 modules + art/ 16 + hub/ 6" → "56 files = 34 modules + art/ 16 + hub/ 6"; add `random.ts` (the shared Fisher–Yates shuffle + `Rng` type every logic module and scene draws from) to the module enumeration alongside the 21 per-game logic modules.
-- [ ] **P1.T2: Refresh docs/TDD.md's claims** — covers: FR-3
-  - [ ] **P1.T2.1:** `:1013` and `:1027` — 119 files / 2,556 tests → 125 files / 2,729 tests, with the "measured/verified" dates refreshed to 2026-10-26 where the sentence carries one.
-  - [ ] **P1.T2.2:** `:1033` — coverage snapshot → statements 97.82 (5493/5615), branches 91.96 (1488/1618), functions 96.77 (1141/1179), lines 98.74 (5116/5181) across 125 files and 2,729 tests, verified 2026-10-26.
-- [ ] **P1.T3: Refresh docs/perf-baseline.md's count rows** — covers: FR-4
-  - [ ] **P1.T3.1:** header figure block and the `:411` Test-suite row — 118 files / 2,488 tests → 125 files / 2,729 tests, with the header's measured date refreshed; every boot/first-tap measurement, bundle figure, and precache figure stays byte-identical.
-- [ ] **P1.T4: Refresh the roadmap check date** — covers: FR-6
-  - [ ] **P1.T4.1:** `docs/roadmap.md:7` — "checked against the code on 2026-10-25" → "2026-10-26"; no entry content changes.
+- [x] **P1.T1: Refresh README's current-state claims** — covers: FR-2, FR-5
+  - [x] **P1.T1.1:** `README.md:49` — replace "**2,556 tests across 119 files**, all green (verified 2026-10-23)" with "**2,729 tests across 125 files**, all green (verified 2026-10-26)".
+  - [x] **P1.T1.2:** `README.md` `game/` line — "55 files = 33 modules + art/ 16 + hub/ 6" → "56 files = 34 modules + art/ 16 + hub/ 6"; add `random.ts` (the shared Fisher–Yates shuffle + `Rng` type every logic module and scene draws from) to the module enumeration alongside the 21 per-game logic modules.
+- [x] **P1.T2: Refresh docs/TDD.md's claims** — covers: FR-3
+  - [x] **P1.T2.1:** `:1013` and `:1027` — 119 files / 2,556 tests → 125 files / 2,729 tests, with the "measured/verified" dates refreshed to 2026-10-26 where the sentence carries one.
+  - [x] **P1.T2.2:** `:1033` — coverage snapshot → statements 97.82 (5493/5615), branches 91.96 (1488/1618), functions 96.77 (1141/1179), lines 98.74 (5116/5181) across 125 files and 2,729 tests, verified 2026-10-26.
+- [x] **P1.T3: Refresh docs/perf-baseline.md's count rows** — covers: FR-4
+  - [x] **P1.T3.1:** header figure block and the `:411` Test-suite row — 118 files / 2,488 tests → 125 files / 2,729 tests, with the header's measured date refreshed; every boot/first-tap measurement, bundle figure, and precache figure stays byte-identical.
+- [x] **P1.T4: Refresh the roadmap check date** — covers: FR-6
+  - [x] **P1.T4.1:** `docs/roadmap.md:7` — "checked against the code on 2026-10-25" → "2026-10-26"; no entry content changes.
+
+**Result:** verified
+
+**Checkpoint:** c0d92eed
+
+**Evidence:** conductor/tracks/20261026-docs-truth-pass/verification/phase-1.md
 
 ## Phase 2: Add the count-drift guard
 
