@@ -61,7 +61,7 @@ the phase result and evidence file — no manual verification meta-task exists.
 - **Covers:** FR-4, FR-5, NFR-2, AC-5, AC-6
 - **Touches:** `docs/perf-baseline.md`, `docs/TDD.md`, `conductor/tech-stack.md`, `scripts/measure-first-tap.mjs` (only if the measurement needs a prewarm-aware flag), `README.md` (count claim only, if moved again)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P3.T1: Measure the increment** — covers: FR-4
   - [ ] **P3.T1.1:** build the pre-track baseline (`git worktree` or stash-based build from the base commit) and run the first-tap measurement back-to-back with the prewarm build on the same host — median-of-three per game, shell-diet methodology.
   - [ ] **P3.T1.2:** write the dated verdict section into `perf-baseline.md` (before/after medians, host caveats) and resolve or re-scope the `:395-399` open-question text with the reason.
