@@ -263,4 +263,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Dependency Majors - five dev-dep upgrades with the gate green** - [20261027-dependency-majors](./archive/20261027-dependency-majors/index.md) - chore - medium
 - [x] **Track: Hub Idle Chunk Prewarm - warm the lazy game chunks while children idle** - [20261027-hub-idle-prewarm](./archive/20261027-hub-idle-prewarm/index.md) - feature - high
 - [x] **Track: Hub Cold-Tap Art Preload — Warm the Game Art While Children Idle** - [20261027-cold-tap-art-preload](./archive/20261027-cold-tap-art-preload/index.md) - feature - high
-- [x] **Track: Release v1.22.0 — Ship the Seven Tracks Merged Since v1.21.7** - [20261027-release-v1-22-0](./archive/20261027-release-v1-22-0/index.md) - chore - high
+- [x] **Track: Release v1.22.0 - Ship the Seven Tracks Merged Since v1.21.7** - [20261027-release-v1-22-0](./archive/20261027-release-v1-22-0/index.md) - chore - high
+- [ ] **Track: Content Expansion — Words, Stories, Scenarios** — [20261027-content-expansion](./tracks/20261027-content-expansion/index.md) — feature — medium
