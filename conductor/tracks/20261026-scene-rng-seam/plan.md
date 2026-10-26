@@ -224,7 +224,7 @@ Only the primary agent writes this file.
 - **Touches:** `conductor/tracks/20261026-scene-rng-seam/spec.md`,
   `conductor/tech-stack.md`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Retire the FR-6 exception** — covers: FR-7
   - [ ] **P5.T1.1:** Amend this track's `spec.md` FR-6 and AC-4 so the scene
