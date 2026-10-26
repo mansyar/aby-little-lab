@@ -264,17 +264,21 @@ Only the primary agent writes this file.
   `src/__tests__/scenes/wordBuilderScene.test.ts`,
   `src/__tests__/scenes/musicalMemoryScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Resolve F1** - covers: F1
-  - [ ] **R1.T1.1:** In `animalTraceFlow.test.ts` line 111, pass `rng`
+- [x] **R1.T1: Resolve F1** - covers: F1
+  - [x] **R1.T1.1:** In `animalTraceFlow.test.ts` line 111, pass `rng`
         (not `pathRngForPair(0)`) inside the warm-up loop, mirroring the
         correct copy at `:608-611`; or hoist one shared
         `pathRngForPair`/`completePath` helper so the two describe blocks
         cannot diverge again.
-- [ ] **R1.T2: Resolve F2** - covers: F2
-  - [ ] **R1.T2.1:** In the eight suites named in review.md F2, have the
+- [x] **R1.T2: Resolve F2** - covers: F2
+  - [x] **R1.T2.1:** In the eight suites named in review.md F2, have the
         recorder mocks record all arguments and append
         `expect.any(Function)` to the band-shift wiring assertions so the
         forwarded generator is pinned, matching the seven already-repaired
         suites.
+
+**Result:** verified
+**Checkpoint:** 2adcf1db
+**Evidence:** conductor/tracks/20261026-scene-rng-seam/verification/phase-R1.md
