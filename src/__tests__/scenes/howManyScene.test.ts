@@ -84,13 +84,16 @@ vi.mock("../../game/countLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/countLogic")>();
   return {
     ...actual,
-    createPlaythrough: (shift: -1 | 0 | 1 = 0) => {
+    // Forward every argument: the scene calls createPlaythrough(shift, rng),
+    // and dropping rng here would silently strip the seeded path.
+    createPlaythrough: (shift: -1 | 0 | 1 = 0, rng?: Rng) => {
       createPlaythroughMock(shift);
-      return actual.createPlaythrough(shift);
+      return actual.createPlaythrough(shift, rng);
     },
   };
 });
 
+import type { Rng } from "../../game/random";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -99,6 +102,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -109,7 +113,6 @@ describe("HowManyScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -260,7 +263,7 @@ describe("HowManyScene round flow", () => {
   }
 
   it("renders a big target numeral, 6 progress dots, and 3 band-1 group cards with item copies", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -315,7 +318,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("centers the last partial row of items inside a card", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     // Force a band-3-style group of 10 items: rows of 4 + 4 + 2. The final
@@ -353,7 +356,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("shows 4 group cards from band 2 onward", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     // Complete rounds 1-2 (band 1) to reach band 2 (rounds 3-4).
@@ -365,7 +368,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("speaks the target number at round start when SFX is enabled", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -375,7 +378,7 @@ describe("HowManyScene round flow", () => {
   it("silences TTS when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
 
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -383,7 +386,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("tapping the correct group card plays the correct chime, flashes success, and advances", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const dots = getProgressDots(scene);
@@ -428,7 +431,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("tapping a wrong group card wiggles gently and does not advance the round", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.groups.findIndex((group) => group.count === round.target);
@@ -463,7 +466,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -504,7 +507,7 @@ describe("HowManyScene round flow", () => {
   }
 
   it("guards the speaker during the win celebration (no crash after the final round)", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -524,7 +527,7 @@ describe("HowManyScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("how-many");
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -539,7 +542,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -560,7 +563,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -585,7 +588,7 @@ describe("HowManyScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.groups.findIndex((group) => group.count === round.target);
@@ -606,7 +609,7 @@ describe("HowManyScene round flow", () => {
   });
 
   it("generates a valid playthrough for the scene (6 rounds, easy-first bands)", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
     const rounds = (
       scene as unknown as {
@@ -651,7 +654,7 @@ describe("HowManyScene press feedback cohesion", () => {
 
   it("gives every answer card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -663,7 +666,7 @@ describe("HowManyScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -673,14 +676,14 @@ describe("HowManyScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new HowManyScene();
+    const reducedScene = new HowManyScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -697,7 +700,6 @@ describe("HowManyScene press feedback cohesion", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     getAdaptiveBandShiftMock.mockClear();
@@ -713,14 +715,14 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to createPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     expect(createPlaythroughMock).toHaveBeenCalledWith(1);
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     expect(createPlaythroughMock).toHaveBeenCalledWith(0);
@@ -728,7 +730,7 @@ describe("adaptive band shift wiring", () => {
 
   it("keeps the child UI textless under a shifted ladder", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new HowManyScene();
+    const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
     // The only alphabetic label is the shared parent-facing "← Back" chrome —
@@ -738,5 +740,21 @@ describe("adaptive band shift wiring", () => {
     const labels = textMock.mock.calls.map((call) => String(call[2] ?? ""));
     const alphabetic = labels.filter((label) => /[a-zA-Z]/.test(label));
     expect(alphabetic).toEqual(["← Back"]);
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new HowManyScene(mulberry32(1234));
+    first.create();
+    const second = new HowManyScene(mulberry32(1234));
+    second.create();
+
+    const a = (
+      first as unknown as {
+        rounds: Array<{ target: number; groups: Array<{ count: number; texture: string }> }>;
+      }
+    ).rounds;
+    const b = (second as unknown as { rounds: typeof a }).rounds;
+
+    expect(b).toEqual(a);
   });
 });

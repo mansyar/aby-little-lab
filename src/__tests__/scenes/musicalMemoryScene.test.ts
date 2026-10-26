@@ -79,9 +79,11 @@ vi.mock("../../game/musicalMemoryLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/musicalMemoryLogic")>();
   return {
     ...actual,
-    generateSequence: (length: number) => {
+    // Forward every argument: the scene calls generateSequence(length, rng),
+    // and dropping rng here would silently strip the seeded path.
+    generateSequence: (length: number, rng?: Rng) => {
       generateSequenceMock(length);
-      return actual.generateSequence(length);
+      return actual.generateSequence(length, rng);
     },
     isWin: (sequenceLength: number, target: number) => {
       isWinMock(sequenceLength, target);
@@ -90,6 +92,7 @@ vi.mock("../../game/musicalMemoryLogic", async (importOriginal) => {
   };
 });
 
+import type { Rng } from "../../game/random";
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
 import {
   countListeners,
@@ -98,6 +101,7 @@ import {
   getInteractiveImages,
   type MockGameObject,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 describe("MusicalMemoryScene press feedback cohesion", () => {
   let matchMediaMock: MatchMediaStub;
@@ -124,7 +128,7 @@ describe("MusicalMemoryScene press feedback cohesion", () => {
 
   it("gives every frog press feedback restoring on release, out, and cancel", () => {
     setReducedMotion(false);
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveImages(scene);
@@ -138,7 +142,7 @@ describe("MusicalMemoryScene press feedback cohesion", () => {
 
   it("keeps the tap handler registered before the press squish", () => {
     setReducedMotion(false);
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveImages(scene);
@@ -148,14 +152,14 @@ describe("MusicalMemoryScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per frog when motion is allowed", () => {
     setReducedMotion(true);
-    const reducedScene = new MusicalMemoryScene();
+    const reducedScene = new MusicalMemoryScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveImages(reducedScene).map((frog) =>
       countListeners(frog, "pointerdown"),
     );
 
     setReducedMotion(false);
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getInteractiveImages(scene);
 
@@ -171,7 +175,7 @@ describe("MusicalMemoryScene press feedback cohesion", () => {
 
   it("ignores taps while the sequence plays, regardless of press feedback", () => {
     setReducedMotion(false);
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     // create() starts playback immediately, so input is locked here.
@@ -220,7 +224,7 @@ describe("MusicalMemoryScene replay drives the speaker grammar", () => {
   }
 
   it("pulses the replay button while a replay plays and restores neutral after", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     // create() auto-plays; complete that initial playback first.
@@ -238,7 +242,6 @@ describe("MusicalMemoryScene replay drives the speaker grammar", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -273,7 +276,7 @@ describe("adaptive band shift wiring", () => {
     [1, 3],
   ] as const)("starts the sequence at the shifted length for shift %i", (shift, start) => {
     getAdaptiveBandShiftMock.mockReturnValue(shift);
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("musical-memory");
     expect(generateSequenceMock).toHaveBeenCalledWith(start);
@@ -281,7 +284,7 @@ describe("adaptive band shift wiring", () => {
 
   it("checks the win against the shifted win length after a completed round", () => {
     getAdaptiveBandShiftMock.mockReturnValue(-1);
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     // Finish the auto-play so input unlocks.
@@ -294,5 +297,17 @@ describe("adaptive band shift wiring", () => {
     fireFirstHandler(frogControls[sequence[0]]!, "pointerdown");
 
     expect(isWinMock).toHaveBeenCalledWith(1, 5);
+  });
+
+  it("builds identical sequences from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new MusicalMemoryScene(mulberry32(1234));
+    first.create();
+    const second = new MusicalMemoryScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { sequence: number[] }).sequence;
+    const b = (second as unknown as { sequence: number[] }).sequence;
+
+    expect(b).toEqual(a);
   });
 });

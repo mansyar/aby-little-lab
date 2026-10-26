@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ShapeType } from "../../game/shapeSorterLogic";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 type MockFn = ReturnType<typeof vi.fn>;
 type MockGameObject = Record<string, MockFn>;
@@ -145,7 +146,7 @@ function completeSession(scene: ShapeSorterScene): void {
 }
 
 function createScene(): ShapeSorterScene {
-  const scene = new ShapeSorterScene();
+  const scene = new ShapeSorterScene(mulberry32(1234));
   scene.create();
   return scene;
 }
@@ -181,6 +182,13 @@ describe("ShapeSorterScene multi-round sessions", () => {
     for (const shape of internals.shapes) {
       expect(internals.playthrough[0]).toContain(shape.type);
     }
+  });
+
+  it("builds an identical playthrough from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = createScene();
+    const second = createScene();
+
+    expect(getInternals(second).playthrough).toEqual(getInternals(first).playthrough);
   });
 
   it("advances to round two with fresh shapes after all three shapes are placed", () => {

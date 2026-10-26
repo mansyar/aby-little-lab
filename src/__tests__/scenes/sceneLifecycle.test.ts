@@ -75,7 +75,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   return { ensureSceneLoaded: mockEnsureSceneLoaded };
 });
 
-import { generatePathPoints } from "../../game/animalTraceLogic";
+import { generatePathPoints, selectThreePairs } from "../../game/animalTraceLogic";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
 import { HubScene } from "../../scenes/HubScene";
@@ -101,6 +101,7 @@ afterEach(() => {
 });
 
 import { GAME_SCENES } from "../helpers/gameScenes";
+import { mulberry32 } from "../helpers/randomHelper";
 
 describe("game mascot companion", () => {
   /** Asserts the mascot sits in the bottom-right corner, small, behind gameplay. */
@@ -268,9 +269,20 @@ describe("game mascot companion", () => {
     return call[1] as (...args: unknown[]) => void;
   }
 
-  /** Simulates tracing a single AnimalTrace path. */
-  function completePath(scene: unknown): void {
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+  /** Simulates tracing a single AnimalTrace path.
+   *
+   *  The replay generator is positioned exactly where the scene's draw
+   *  sequence stands at pair `pairIndex`'s path generation: the scene first
+   *  consumes selectThreePairs' shuffle draws, then one generatePathPoints
+   *  call per already-rendered pair.
+   */
+  function completePath(scene: unknown, pairIndex = 0): void {
+    const rng = mulberry32(1234);
+    selectThreePairs(rng);
+    for (let i = 0; i < pairIndex; i++) {
+      generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS, rng);
+    }
+    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS, rng);
     const pointerdown = getInputCallback(scene, "pointerdown");
     const pointermove = getInputCallback(scene, "pointermove");
     pointerdown({ x: pathPoints[0].x, y: pathPoints[0].y });
@@ -282,7 +294,7 @@ describe("game mascot companion", () => {
   /** Simulates tracing all 3 AnimalTrace paths with between-pair advances. */
   function completeAllPaths(scene: unknown): void {
     for (let pair = 0; pair < 3; pair++) {
-      completePath(scene);
+      completePath(scene, pair);
       if (pair < 2) {
         const delayedCallMock = getMockFn(
           (scene as { time: Record<string, unknown> }).time.delayedCall,
@@ -310,16 +322,20 @@ describe("game mascot companion", () => {
     }
   }
 
-  /** Simulates popping 6 poppable bubbles to complete the PopFreeze round. */
+  /** Simulates popping 6 poppable bubbles to complete the PopFreeze round.
+   *
+   *  Seed 1234 sleeps bubbles 0-1 and leaves 2-4 poppable; respawns keep the
+   *  sleeper count at the classic maximum, so every respawn is poppable too.
+   */
   function completePopRound(scene: unknown): void {
     let bubbles = getBubbles(scene);
-    tapBubble(bubbles[1]);
     tapBubble(bubbles[2]);
     tapBubble(bubbles[3]);
     tapBubble(bubbles[4]);
     bubbles = getBubbles(scene);
     tapBubble(bubbles[5]);
     tapBubble(bubbles[6]);
+    tapBubble(bubbles[7]);
   }
 
   /** Returns MusicalMemory frog images in index order. */
@@ -391,17 +407,15 @@ describe("game mascot companion", () => {
     name: string;
     build: () => { create: () => void };
     sim: {
-      seedRandom?: boolean;
       correct: (scene: unknown) => void;
       incorrect?: (scene: unknown) => void;
       win: (scene: unknown) => void;
     };
   }
-
   const GAME_MASCOT_CASES: MascotGameCase[] = [
     {
       name: "ShapeSorterScene",
-      build: () => new ShapeSorterScene(),
+      build: () => new ShapeSorterScene(mulberry32(1234)),
       sim: {
         correct: (scene) => {
           const shapes = getDraggables(scene, "shape_");
@@ -445,9 +459,8 @@ describe("game mascot companion", () => {
     },
     {
       name: "AnimalTraceScene",
-      build: () => new AnimalTraceScene(),
+      build: () => new AnimalTraceScene(mulberry32(1234)),
       sim: {
-        seedRandom: true,
         correct: (scene) => completePath(scene),
         // No-fail game: there is no incorrect reaction path.
         win: (scene) => completeAllPaths(scene),
@@ -455,12 +468,11 @@ describe("game mascot companion", () => {
     },
     {
       name: "PopFreezeScene",
-      build: () => new PopFreezeScene(),
+      build: () => new PopFreezeScene(mulberry32(1234)),
       sim: {
-        seedRandom: true,
         correct: (scene) => {
           const bubbles = getBubbles(scene);
-          tapBubble(bubbles[1]);
+          tapBubble(bubbles[2]);
         },
         incorrect: (scene) => {
           const bubbles = getBubbles(scene);
@@ -471,7 +483,7 @@ describe("game mascot companion", () => {
     },
     {
       name: "ShadowMatchScene",
-      build: () => new ShadowMatchScene(),
+      build: () => new ShadowMatchScene(mulberry32(1234)),
       sim: {
         correct: (scene) => {
           const objects = getDraggables(scene, "sm_");
@@ -503,19 +515,21 @@ describe("game mascot companion", () => {
     },
     {
       name: "MusicalMemoryScene",
-      build: () => new MusicalMemoryScene(),
+      build: () => new MusicalMemoryScene(mulberry32(1234)),
       sim: {
-        seedRandom: true,
         correct: (scene) => {
           fireDelayedCallsFrom(scene, 0);
           const frogs = getFrogs(scene);
-          tapFrog(frogs, 1);
-          tapFrog(frogs, 1);
+          const sequence = (scene as { sequence: number[] }).sequence;
+          tapFrog(frogs, sequence[0]);
+          tapFrog(frogs, sequence[1]);
         },
         incorrect: (scene) => {
           fireDelayedCallsFrom(scene, 0);
           const frogs = getFrogs(scene);
-          tapFrog(frogs, 0);
+          // The seeded round-1 sequence opens on the green frog (0), so the
+          // blue frog (1) is the wrong tap.
+          tapFrog(frogs, 1);
         },
         win: (scene) => {
           const frogs = getFrogs(scene);
@@ -525,7 +539,7 @@ describe("game mascot companion", () => {
     },
     {
       name: "BigSmallScene",
-      build: () => new BigSmallScene(),
+      build: () => new BigSmallScene(mulberry32(1234)),
       sim: {
         correct: (scene) => {
           const toys = getToys(scene);
@@ -559,12 +573,6 @@ describe("game mascot companion", () => {
 
   for (const game of GAME_MASCOT_CASES) {
     describe(`mascot reactions in ${game.name}`, () => {
-      beforeEach(() => {
-        if (game.sim.seedRandom) {
-          vi.spyOn(Math, "random").mockReturnValue(0.5);
-        }
-      });
-
       afterEach(() => {
         vi.restoreAllMocks();
       });
@@ -628,8 +636,7 @@ describe("game mascot companion", () => {
   }
 
   it("does not nod when a ShapeSorter shape is released in mid-air (no zone interaction)", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const scene = new ShapeSorterScene();
+    const scene = new ShapeSorterScene(mulberry32(1234));
     scene.create();
 
     const mascot = getMascot(scene);
@@ -639,13 +646,12 @@ describe("game mascot companion", () => {
 
     // The entry curious() tilt predates the release; mid-air adds no nod.
     expect(findMascotAngleTweens(scene, mascot)).toHaveLength(tweensBefore);
-    vi.restoreAllMocks();
   });
 });
 
 describe("scene shutdown cleanup", () => {
   it.each(GAME_SCENES)("destroys ParentLock on shutdown in $name", ({ SceneClass }) => {
-    const scene = new SceneClass();
+    const scene = new SceneClass(mulberry32(1234));
     scene.create();
 
     expect(anyObjectOffCalled(scene)).toBe(false);

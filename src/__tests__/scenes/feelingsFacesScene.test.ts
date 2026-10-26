@@ -96,6 +96,7 @@ import { isMastered } from "../../game/progressLogic";
 import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import type { GameProgress } from "../../types";
 import { earnSticker, getProgress, updateSettings } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** The rule line the scene must show and speak. */
 const RULE_LINE = "Tap the face that shows how Aby feels.";
@@ -312,7 +313,6 @@ describe("FeelingsFacesScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     // happy-dom ships no speech engine; install one voice so the scene takes the
     // spoken path by default. Individual tests stub it away again.
@@ -339,7 +339,7 @@ describe("FeelingsFacesScene round flow", () => {
   }
 
   it("renders the rule line, its replay glyph, three face cards and six progress dots", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     expect(findText(scene, RULE_LINE)).toBeDefined();
@@ -357,7 +357,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("shows the ladder's three distinct faces, including the scenario's emotion", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -370,7 +370,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("every card is a >=64px touch target", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     const rectangleCalls = getMockFn(internals(scene).add.rectangle).mock.calls;
@@ -383,7 +383,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("speaks the rule once at round setup and the opening scenario after it", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     expect(mockSpeech.speakSentence).toHaveBeenCalledTimes(1);
@@ -396,7 +396,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("re-speaks the rule when the speaker glyph is tapped", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     mockSpeech.speakSentence.mockClear();
 
@@ -411,7 +411,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("a correct tap plays the chime, splashes, fills the dot and advances", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     const dots = getProgressDots(scene);
 
@@ -435,7 +435,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("a wrong tap wiggles, plays the gentle tone, re-speaks the scenario and stays on the round", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const wrongIndex = internals(scene).choices.findIndex((emotion) => emotion !== round.emotion);
@@ -464,7 +464,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("never locks out on repeated wrong taps", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const wrongIndex = internals(scene).choices.findIndex((emotion) => emotion !== round.emotion);
@@ -484,7 +484,7 @@ describe("FeelingsFacesScene round flow", () => {
 
   it("uses the gentler reduced-motion wiggle", () => {
     setReducedMotion(true);
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const wrongIndex = internals(scene).choices.findIndex((emotion) => emotion !== round.emotion);
@@ -496,7 +496,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("plays six rounds to a win: celebration, sticker once, justEarned and 3s auto-return", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     playThrough(scene);
 
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
@@ -523,7 +523,7 @@ describe("FeelingsFacesScene round flow", () => {
 
   it("does not award the sticker again on a repeat completion", () => {
     earnSticker("feelings-faces");
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     playThrough(scene);
 
     expect(mockAudio.playSticker).not.toHaveBeenCalled();
@@ -533,7 +533,7 @@ describe("FeelingsFacesScene round flow", () => {
 
   it("renders a written caption and dims the glyph when the browser cannot speak", () => {
     mockSpeech.isSpeechSupported.mockReturnValue(false);
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -558,7 +558,7 @@ describe("FeelingsFacesScene round flow", () => {
 
   it("falls back to the caption when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     expect(getCaption(scene)).toBeDefined();
@@ -573,7 +573,7 @@ describe("FeelingsFacesScene round flow", () => {
 
   it("falls back to the caption when the engine has no installed voice", () => {
     vi.stubGlobal("speechSynthesis", { getVoices: () => [] });
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     expect(getCaption(scene)).toBeDefined();
@@ -584,7 +584,7 @@ describe("FeelingsFacesScene round flow", () => {
     vi.stubGlobal("speechSynthesis", {
       getVoices: () => [{ voiceURI: "test-voice", lang: "en-US", name: "Test" }],
     });
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     expect(getCaption(scene)).toBeUndefined();
@@ -599,7 +599,7 @@ describe("FeelingsFacesScene round flow", () => {
       addEventListener: (_type: string, listener: () => void) => listeners.push(listener),
       removeEventListener: () => {},
     });
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
 
     // Chrome populates voices asynchronously: an empty first read is
@@ -655,7 +655,7 @@ describe("FeelingsFacesScene round flow", () => {
       addEventListener: (_type: string, listener: () => void) => listeners.push(listener),
       removeEventListener: () => {},
     });
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     const scenarioCalls = (text: string) =>
       getMockFn(mockSpeech.speakSentence).mock.calls.filter((call) => call[0] === text).length;
@@ -677,7 +677,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("records wins and accuracy on the progress row, starring after three wins", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     playThrough(scene);
 
     const first: GameProgress = getProgress()["feelings-faces"];
@@ -697,7 +697,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("counts wrong taps in the accuracy behind the progress row", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const wrongIndex = internals(scene).choices.findIndex((emotion) => emotion !== round.emotion);
@@ -717,7 +717,7 @@ describe("FeelingsFacesScene round flow", () => {
   });
 
   it("re-launching after completion re-arms input and re-draws the ladder", () => {
-    const scene = new FeelingsFacesScene();
+    const scene = new FeelingsFacesScene(mulberry32(1234));
     playThrough(scene);
     expect(internals(scene).inputLocked).toBe(true);
 
@@ -730,10 +730,20 @@ describe("FeelingsFacesScene round flow", () => {
     expect(internals(scene).roundIndex).toBe(1);
   });
 
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new FeelingsFacesScene(mulberry32(1234));
+    first.create();
+    const second = new FeelingsFacesScene(mulberry32(1234));
+    second.create();
+
+    expect(internals(second).rounds).toEqual(internals(first).rounds);
+    expect(internals(second).choices).toEqual(internals(first).choices);
+  });
+
   describe("adaptive band wiring", () => {
     /** Creates a fresh scene with its round flow built. */
     function createScene(): FeelingsFacesScene {
-      const scene = new FeelingsFacesScene();
+      const scene = new FeelingsFacesScene(mulberry32(1234));
       scene.create();
       return scene;
     }

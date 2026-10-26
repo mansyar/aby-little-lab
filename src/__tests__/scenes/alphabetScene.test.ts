@@ -94,6 +94,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -104,7 +105,6 @@ describe("AlphabetScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -255,7 +255,7 @@ describe("AlphabetScene round flow", () => {
   }
 
   it("renders a big target letter, 6 progress dots, and 4 interactive cards", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -294,7 +294,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("speaks the target letter at round start when SFX is enabled", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -304,7 +304,7 @@ describe("AlphabetScene round flow", () => {
   it("silences TTS when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
 
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -312,7 +312,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("tapping the correct card plays the correct chime, pops the dot, and advances", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const dots = getProgressDots(scene);
@@ -357,7 +357,7 @@ describe("AlphabetScene round flow", () => {
 
   it("draws one placeholder for a failed letter load and still plays a round", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
 
     // The scene declares `letters` in preload; a cold TextureManager means
     // every key is queued.
@@ -383,7 +383,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("tapping a wrong card wiggles gently and does not advance the round", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);
@@ -416,7 +416,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -457,7 +457,7 @@ describe("AlphabetScene round flow", () => {
   }
 
   it("guards the speaker during the win celebration (no crash after the final round)", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -476,7 +476,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("shows a splash burst at the tapped card on a correct answer", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -496,7 +496,7 @@ describe("AlphabetScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("alphabet-match");
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -511,7 +511,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -532,7 +532,7 @@ describe("AlphabetScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -557,7 +557,7 @@ describe("AlphabetScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);
@@ -588,6 +588,19 @@ describe("AlphabetScene round flow", () => {
       expect(round.choices).toContain(round.target);
     }
   });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new AlphabetScene(mulberry32(1234));
+    first.create();
+    const second = new AlphabetScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: Array<{ target: string; choices: string[] }> }).rounds;
+    const b = (second as unknown as { rounds: Array<{ target: string; choices: string[] }> })
+      .rounds;
+
+    expect(b).toEqual(a);
+  });
 });
 
 /* --- Press feedback cohesion (Track: UI/UX Cohesion, Phase 2) --- */
@@ -604,7 +617,7 @@ describe("AlphabetScene press feedback cohesion", () => {
 
   it("gives every choice card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -616,7 +629,7 @@ describe("AlphabetScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -626,14 +639,14 @@ describe("AlphabetScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new AlphabetScene();
+    const reducedScene = new AlphabetScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -650,7 +663,6 @@ describe("AlphabetScene press feedback cohesion", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -667,14 +679,14 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to generatePlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("alphabet-match");
     expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new AlphabetScene();
+    const scene = new AlphabetScene(mulberry32(1234));
     scene.create();
     expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
   });

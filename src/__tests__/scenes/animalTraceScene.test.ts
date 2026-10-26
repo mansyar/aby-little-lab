@@ -64,6 +64,7 @@ vi.mock("../../utils/storage", async (importOriginal) => ({
 
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -74,7 +75,6 @@ describe("AnimalTraceScene session state", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -130,8 +130,24 @@ describe("AnimalTraceScene session state", () => {
     return delayedCallMock.mock.calls.filter((call) => call[0] === 3000).at(-1);
   }
 
+  it("builds identical sessions from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new AnimalTraceScene(mulberry32(1234));
+    first.create();
+    const second = new AnimalTraceScene(mulberry32(1234));
+    second.create();
+
+    const a = first as unknown as {
+      pairs: Array<{ animal: string; food: string }>;
+      currentPair?: { pathPoints: Array<{ x: number; y: number }> };
+    };
+    const b = second as unknown as typeof a;
+
+    expect(b.pairs).toEqual(a.pairs);
+    expect(b.currentPair?.pathPoints).toEqual(a.currentPair?.pathPoints);
+  });
+
   it("requires all 3 paths again after a full-session relaunch", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     // Complete a full session (3 paths → win → sticker).
@@ -163,7 +179,7 @@ describe("AnimalTraceScene session state", () => {
   });
 
   it("plays all 3 pairs after a mid-session exit relaunch without crashing", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     // Complete one path, then exit mid-session (relaunch without finishing).
@@ -184,7 +200,7 @@ describe("AnimalTraceScene session state", () => {
   });
 
   it("recreates progress dots on relaunch (no stale destroyed dots)", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     scene.create();
 
@@ -197,7 +213,7 @@ describe("AnimalTraceScene session state", () => {
 
   it("guards the round-complete flow under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     traceFullPath(scene);
     fireNextPairDelay(scene);
@@ -209,7 +225,7 @@ describe("AnimalTraceScene session state", () => {
   });
 
   it("marks the next waypoint with a ring and lights visited dots as the trace advances", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     // Path graphics is the single graphics object created for the path.
@@ -244,7 +260,7 @@ describe("AnimalTraceScene session state", () => {
 
   it("skips the pulsing ring animation under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const tweensMock = getMockFn(
@@ -255,7 +271,7 @@ describe("AnimalTraceScene session state", () => {
   });
 
   it("pulses the next-waypoint ring with a looping tween in normal motion", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const tweensMock = getMockFn(
@@ -268,7 +284,7 @@ describe("AnimalTraceScene session state", () => {
   });
 
   it("redraws the path guide from the pulse onUpdate without an active pair", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const tweensMock = getMockFn(
@@ -285,7 +301,7 @@ describe("AnimalTraceScene session state", () => {
   });
 
   it("redraws the path guide from the pulse onUpdate with an active pair", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const tweensMock = getMockFn(
@@ -325,7 +341,7 @@ describe("AnimalTraceScene session state", () => {
 
     it("samples the band shift once in create() and sizes the path for the band", () => {
       getAdaptiveBandShiftMock.mockReturnValue(1);
-      const scene = new AnimalTraceScene();
+      const scene = new AnimalTraceScene(mulberry32(1234));
       scene.create();
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("animal-trace");
@@ -344,7 +360,7 @@ describe("AnimalTraceScene session state", () => {
 
     it("traces an easy-band path across 4 waypoints and advances to the next pair", () => {
       getAdaptiveBandShiftMock.mockReturnValue(-1);
-      const scene = new AnimalTraceScene();
+      const scene = new AnimalTraceScene(mulberry32(1234));
       scene.create();
       const currentPair = (
         scene as unknown as {

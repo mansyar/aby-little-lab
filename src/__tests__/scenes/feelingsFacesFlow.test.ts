@@ -89,6 +89,7 @@ import { type Emotion, ROUND_COUNT, type Scenario } from "../../game/feelingsFac
 import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import { HubScene } from "../../scenes/HubScene";
 import { hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** The rule line the scene renders and speaks (`FeelingsFacesScene` constant). */
 const RULE_LINE = "Tap the face that shows how Aby feels.";
@@ -180,9 +181,6 @@ beforeEach(() => {
   stubMatchMedia(false);
   localStorage.clear();
   vi.clearAllMocks();
-  // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-  // scene-level stub is the only way to make this scene's draws repeatable.
-  vi.spyOn(Math, "random").mockReturnValue(0.5);
   mockSpeech.isSpeechSupported.mockReturnValue(true);
 });
 
@@ -229,7 +227,7 @@ describe("Feelings Faces hub entry", () => {
 
 describe("Feelings Faces playthrough", () => {
   it("speaks the rule, then plays six scenario rounds to the heart sticker", () => {
-    const game = new FeelingsFacesScene();
+    const game = new FeelingsFacesScene(mulberry32(1234));
     game.create();
 
     const state = internals(game);
@@ -273,7 +271,7 @@ describe("Feelings Faces playthrough", () => {
   });
 
   it("returns to the hub with the heart sticker on the shelf", () => {
-    const game = new FeelingsFacesScene();
+    const game = new FeelingsFacesScene(mulberry32(1234));
     playThrough(game);
 
     expect(getMockFn(game.scene.start)).not.toHaveBeenCalled();
@@ -292,16 +290,26 @@ describe("Feelings Faces playthrough", () => {
   });
 
   it("does not award a second sticker on a replay and returns without justEarned", () => {
-    const first = new FeelingsFacesScene();
+    const first = new FeelingsFacesScene(mulberry32(1234));
     playThrough(first);
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
 
-    const replay = new FeelingsFacesScene();
+    const replay = new FeelingsFacesScene(mulberry32(1234));
     playThrough(replay);
     autoReturn(replay);
 
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     expect(mockAudio.playWin).toHaveBeenCalledTimes(2);
     expect(getMockFn(replay.scene.start)).toHaveBeenCalledWith("Hub");
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new FeelingsFacesScene(mulberry32(1234));
+    first.create();
+    const second = new FeelingsFacesScene(mulberry32(1234));
+    second.create();
+
+    expect(internals(second).rounds).toEqual(internals(first).rounds);
+    expect(internals(second).choices).toEqual(internals(first).choices);
   });
 });

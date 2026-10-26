@@ -79,13 +79,16 @@ vi.mock("../../game/takeAwayLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/takeAwayLogic")>();
   return {
     ...actual,
-    buildPlaythrough: (shift: -1 | 0 | 1 = 0) => {
+    // Forward every argument: the scene calls buildPlaythrough(shift, rng),
+    // and dropping rng here would silently strip the seeded path.
+    buildPlaythrough: (shift: -1 | 0 | 1 = 0, rng?: Rng) => {
       buildPlaythroughMock(shift);
-      return actual.buildPlaythrough(shift);
+      return actual.buildPlaythrough(shift, rng);
     },
   };
 });
 
+import type { Rng } from "../../game/random";
 import type { TakeAwayRound } from "../../game/takeAwayLogic";
 import { TakeAwayScene } from "../../scenes/TakeAwayScene";
 import { earnSticker } from "../../utils/storage";
@@ -95,6 +98,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -105,7 +109,6 @@ describe("TakeAwayScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -274,7 +277,7 @@ describe("TakeAwayScene round flow", () => {
   }
 
   it("renders 2 prompt cards, minus/equals cues, 4 interactive answer cards, and 6 progress dots", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -338,7 +341,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("tapping the matching difference card plays the correct chime, flashes success, and advances", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -373,7 +376,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("tapping a non-matching card wiggles gently and does not advance the round", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -416,7 +419,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("skips the flash revert when the answer card is destroyed before the 250ms timer", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -438,7 +441,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -473,7 +476,7 @@ describe("TakeAwayScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("take-away");
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -488,7 +491,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -509,7 +512,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -534,7 +537,7 @@ describe("TakeAwayScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -555,7 +558,7 @@ describe("TakeAwayScene round flow", () => {
   });
 
   it("generates a valid playthrough for the scene (6 rounds, distinct totals, target present)", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
     const rounds = (scene as unknown as { rounds: TakeAwayRound[] }).rounds;
 
@@ -567,6 +570,18 @@ describe("TakeAwayScene round flow", () => {
       expect(round.promptCards[0].count - round.promptCards[1].count).toBe(round.target);
       expect(round.promptCards[0].count).toBeGreaterThan(round.promptCards[1].count);
     }
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new TakeAwayScene(mulberry32(1234));
+    first.create();
+    const second = new TakeAwayScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: TakeAwayRound[] }).rounds;
+    const b = (second as unknown as { rounds: TakeAwayRound[] }).rounds;
+
+    expect(b).toEqual(a);
   });
 });
 
@@ -584,7 +599,7 @@ describe("TakeAwayScene press feedback cohesion", () => {
 
   it("gives every answer card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -596,7 +611,7 @@ describe("TakeAwayScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -606,14 +621,14 @@ describe("TakeAwayScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per answer card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new TakeAwayScene();
+    const reducedScene = new TakeAwayScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -630,7 +645,6 @@ describe("TakeAwayScene press feedback cohesion", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     getAdaptiveBandShiftMock.mockClear();
@@ -646,14 +660,14 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to buildPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
@@ -669,7 +683,7 @@ describe("TakeAwayScene spoken instruction", () => {
   });
 
   it("shows and speaks the rule when the round starts", () => {
-    const scene = new TakeAwayScene();
+    const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
     const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add

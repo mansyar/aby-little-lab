@@ -81,6 +81,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
 
 import { NumberOrderScene } from "../../scenes/NumberOrderScene";
 import { tapHits } from "../helpers/hitTest";
+import { mulberry32 } from "../helpers/randomHelper";
 
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -106,7 +107,6 @@ function getCards(scene: unknown): Array<Record<string, MockFn>> {
 
 describe("NumberOrderScene shell", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -123,7 +123,7 @@ describe("NumberOrderScene shell", () => {
   });
 
   it("renders mascot, parent-locked Back button, and 6 progress dots", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
 
     const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);
@@ -139,8 +139,24 @@ describe("NumberOrderScene shell", () => {
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new NumberOrderScene(mulberry32(1234));
+    first.create();
+    const second = new NumberOrderScene(mulberry32(1234));
+    second.create();
+
+    const a = (
+      first as unknown as {
+        rounds: Array<{ shuffled: number[]; solution: number[] }>;
+      }
+    ).rounds;
+    const b = (second as unknown as { rounds: typeof a }).rounds;
+
+    expect(b).toEqual(a);
+  });
+
   it("renders 3 cards, zones, and dashed outlines for the first (easy band) round", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -158,7 +174,6 @@ describe("NumberOrderScene shell", () => {
 
 describe("NumberOrderScene interactions", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -249,7 +264,7 @@ describe("NumberOrderScene interactions", () => {
   }
 
   it("hit-tests the visible card: centre and lower-right hit, outside taps miss", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const card = internals(scene).cards[0];
     const subject = hitSubject(card);
@@ -294,7 +309,7 @@ describe("NumberOrderScene interactions", () => {
   }
 
   it("speaks the numeral on tap and ignores taps while locked", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards } = internals(scene);
     const tap = lastHandler(cards[0].container, "pointerdown");
@@ -308,7 +323,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("lifts on dragstart and moves with the pointer via drag", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards } = internals(scene);
     const dragstart = lastHandler(cards[0].container, "dragstart");
@@ -325,7 +340,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("claims an empty slot on drop and snaps to it", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
@@ -340,7 +355,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("snaps back onto its own slot without changing occupancy", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
@@ -350,7 +365,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("swaps occupants when dropping a placed card onto an occupied slot", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
@@ -363,7 +378,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("returns the occupant home when a source card drops onto an occupied slot", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
@@ -382,7 +397,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("ignores drops while locked or onto unknown zones", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     (scene as unknown as { inputLocked: boolean }).inputLocked = true;
@@ -398,7 +413,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("tap-to-return sends a placed card home on pointerup", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
@@ -412,7 +427,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("keeps a dropped card in its slot when the gesture's pointerup follows dragend", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     const card = cards[0];
@@ -432,7 +447,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("bounces a missed source drag home on dragend", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards } = internals(scene);
     const card = cards[0];
@@ -450,7 +465,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("bounces a missed placed drag back to its slot on dragend", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards, slots } = internals(scene);
     drop(scene, cards[0], 0);
@@ -468,7 +483,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("advances to the next round on a correct full board", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     fillBoard(scene, round.solution);
@@ -483,7 +498,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("wiggles and bounces home on an incorrect full board", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     fillBoard(scene, [...round.solution].reverse());
@@ -515,7 +530,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("does not validate a partially filled board", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards } = internals(scene);
     drop(scene, cards[0], 0);
@@ -526,7 +541,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("completes the game with a win on the final round", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const s = scene as unknown as {
       rounds: Array<{ solution: number[] }>;
@@ -545,7 +560,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("lays out two images for numeral 10 and one for single numerals", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
     const before = imageMock.mock.calls.length;
@@ -560,7 +575,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("tolerates destroy failures when clearing a round", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const s = scene as unknown as {
       roundObjects: Array<{ destroy: MockFn }>;
@@ -579,7 +594,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("detects whether a point is over any drop zone", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { slots } = internals(scene);
     const board = boardOf(scene);
@@ -588,7 +603,7 @@ describe("NumberOrderScene interactions", () => {
   });
 
   it("pointerup on a source card returns nothing home", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
     const { cards } = internals(scene);
     const tweens = getMockFn((scene as unknown as { tweens: Record<string, unknown> }).tweens.add);
@@ -607,7 +622,7 @@ describe("NumberOrderScene spoken instruction", () => {
   });
 
   it("shows and speaks the rule when the round starts", () => {
-    const scene = new NumberOrderScene();
+    const scene = new NumberOrderScene(mulberry32(1234));
     scene.create();
 
     const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add

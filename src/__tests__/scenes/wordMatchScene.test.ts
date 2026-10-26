@@ -84,13 +84,17 @@ vi.mock("../../game/wordLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/wordLogic")>();
   return {
     ...actual,
-    generateWordPlaythrough: (roundCount: number, shift: -1 | 0 | 1 = 0) => {
+    // Forward every argument: the scene calls
+    // generateWordPlaythrough(roundCount, shift, rng), and dropping rng here
+    // would silently strip the seeded path.
+    generateWordPlaythrough: (roundCount: number, shift: -1 | 0 | 1 = 0, rng?: Rng) => {
       generateWordPlaythroughMock(roundCount, shift);
-      return actual.generateWordPlaythrough(roundCount, shift);
+      return actual.generateWordPlaythrough(roundCount, shift, rng);
     },
   };
 });
 
+import type { Rng } from "../../game/random";
 import * as wordLogic from "../../game/wordLogic";
 import { getWord } from "../../game/wordLogic";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
@@ -101,6 +105,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -221,7 +226,6 @@ function fireAutoReturn(scene: unknown): void {
 
 describe("WordMatchScene shell", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -239,7 +243,7 @@ describe("WordMatchScene shell", () => {
   });
 
   it("renders mascot, parent-locked Back button, and 6 progress dots", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
@@ -264,7 +268,7 @@ describe("WordMatchScene shell", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -285,11 +289,22 @@ describe("WordMatchScene shell", () => {
       (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
     ).toHaveBeenCalledWith("Hub");
   });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new WordMatchScene(mulberry32(1234));
+    first.create();
+    const second = new WordMatchScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: Array<{ target: string; choices: string[] }> }).rounds;
+    const b = (second as unknown as { rounds: typeof a }).rounds;
+
+    expect(b).toEqual(a);
+  });
 });
 
 describe("WordMatchScene round rendering", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -307,7 +322,7 @@ describe("WordMatchScene round rendering", () => {
   });
 
   it("renders the prompt picture from the round's texture key at ~180px", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const prompt = getPromptImage(scene);
@@ -316,7 +331,7 @@ describe("WordMatchScene round rendering", () => {
   });
 
   it("renders 4 word cards in a 2×2 grid, composed of letter textures", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
 
@@ -361,7 +376,7 @@ describe("WordMatchScene round rendering", () => {
   });
 
   it("speaks the target word at round start when SFX is enabled", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -371,7 +386,7 @@ describe("WordMatchScene round rendering", () => {
   it("silences TTS when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
 
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -389,7 +404,7 @@ describe("WordMatchScene round rendering", () => {
       { target: "FROG", choices: ["FROG", "CAT", "PIG", "BALL"] },
     ]);
 
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     // add.rectangle(x, y, width, height, color) — position is the center.
@@ -421,7 +436,6 @@ describe("WordMatchScene interaction", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -444,7 +458,7 @@ describe("WordMatchScene interaction", () => {
   }
 
   it("tapping the correct card plays the correct chime, pops the dot, and advances", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const dots = getProgressDots(scene);
@@ -486,7 +500,7 @@ describe("WordMatchScene interaction", () => {
   }
 
   it("tapping a wrong card wiggles gently and does not advance the round", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);
@@ -519,7 +533,7 @@ describe("WordMatchScene interaction", () => {
   });
 
   it("locks input during the next-round transition", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
 
@@ -534,7 +548,7 @@ describe("WordMatchScene interaction", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);
@@ -558,7 +572,6 @@ describe("WordMatchScene interaction", () => {
 
 describe("WordMatchScene completion", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -576,7 +589,7 @@ describe("WordMatchScene completion", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -617,7 +630,7 @@ describe("WordMatchScene completion", () => {
   }
 
   it("guards the speaker during the win celebration (no crash after the final round)", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -636,7 +649,7 @@ describe("WordMatchScene completion", () => {
   });
 
   it("shows a splash burst at the tapped card on a correct answer", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -656,7 +669,7 @@ describe("WordMatchScene completion", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("word-match");
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -671,7 +684,7 @@ describe("WordMatchScene completion", () => {
   });
 
   it("re-launching after completion unlocks input so choices are clickable again", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -706,7 +719,7 @@ describe("WordMatchScene press feedback cohesion", () => {
 
   it("gives every choice card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -718,7 +731,7 @@ describe("WordMatchScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -728,14 +741,14 @@ describe("WordMatchScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new WordMatchScene();
+    const reducedScene = new WordMatchScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -767,14 +780,14 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to generateWordPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 1);
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new WordMatchScene();
+    const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
     expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 0);

@@ -69,6 +69,7 @@ vi.mock("../../utils/completionEffect", () => mockCompletionEffect);
 
 import { StoryOrderScene } from "../../scenes/StoryOrderScene";
 import { tapHits } from "../helpers/hitTest";
+import { mulberry32 } from "../helpers/randomHelper";
 
 const RULE = "Put the story in order, first to last.";
 
@@ -209,7 +210,6 @@ function hitSubject(panel: TestPanel) {
 
 describe("StoryOrderScene shell", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -225,7 +225,7 @@ describe("StoryOrderScene shell", () => {
   });
 
   it("renders mascot, parent-locked Back button, and 6 progress dots", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
 
     const textMock = getMockFn(addOf(scene).text);
@@ -238,8 +238,24 @@ describe("StoryOrderScene shell", () => {
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new StoryOrderScene(mulberry32(1234));
+    first.create();
+    const second = new StoryOrderScene(mulberry32(1234));
+    second.create();
+
+    const a = (
+      first as unknown as {
+        rounds: Array<{ shuffled: string[]; solution: string[] }>;
+      }
+    ).rounds;
+    const b = (second as unknown as { rounds: typeof a }).rounds;
+
+    expect(b).toEqual(a);
+  });
+
   it("preloads only the 33 story panels, not the boot art", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.preload();
 
     const keys = getMockFn(
@@ -254,7 +270,7 @@ describe("StoryOrderScene shell", () => {
   });
 
   it("renders three panels in the tray and three pip-marked ordinal slots", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
 
@@ -278,7 +294,7 @@ describe("StoryOrderScene shell", () => {
   });
 
   it("rebuilds three panels and three slots for every one of the six rounds", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const s = scene as unknown as {
       rounds: Array<{ shuffled: string[]; solution: string[] }>;
@@ -297,7 +313,7 @@ describe("StoryOrderScene shell", () => {
   });
 
   it("shows and speaks the rule and nothing per round", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
 
     const textMock = getMockFn(addOf(scene).text);
@@ -308,7 +324,6 @@ describe("StoryOrderScene shell", () => {
 
 describe("StoryOrderScene interactions", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -326,7 +341,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("gives the whole visible panel a 180 px hit area and misses outside it", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const panel = internals(scene).panels[0];
     const subject = hitSubject(panel);
@@ -338,7 +353,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("lifts on dragstart and follows the pointer, ignoring a locked board", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels } = internals(scene);
 
@@ -354,7 +369,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("claims an empty slot on drop and snaps to it", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -367,7 +382,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("re-snaps to its own slot without changing occupancy", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -377,7 +392,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("swaps the two occupants when a placed panel lands on an occupied slot", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -391,7 +406,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("sends the occupant back to the tray when a tray panel takes its slot", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -409,7 +424,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("ignores drops while locked or onto an unknown zone", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
 
@@ -427,7 +442,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("returns a missed tray drag home and never validates", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const panel = internals(scene).panels[0];
     panel.container.x = 0;
@@ -442,7 +457,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("does not validate when the third panel is dropped outside a slot", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -460,7 +475,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("keeps a dropped panel in its slot when the gesture's pointerup follows dragend", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     const panel = panels[0];
@@ -479,7 +494,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("routes a real pointer sequence through the container's drop wire", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     const panel = panels[0];
@@ -498,7 +513,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("returns a placed panel on a real tap, then revalidates a refilled strip", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { slots } = internals(scene);
     const solution = getCurrentRound(scene).solution;
@@ -523,7 +538,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("gives a wobbly tap 10 px of slack before it counts as a drag", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
 
     expect(
@@ -532,7 +547,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("puts the ordered strip above the shuffled tray", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     const trayY = panels[0].originY;
@@ -541,7 +556,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("moves a placed panel into another empty slot", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -554,7 +569,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("returns a missed placed drag to its slot", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -568,7 +583,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("ignores a tap on a placed panel while the board is locked", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     drop(scene, panels[0], 0);
@@ -580,7 +595,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("does not tween a tray panel on a plain tap", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const panel = internals(scene).panels[1];
     const before = tweenConfigs(scene).length;
@@ -589,7 +604,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("advances on a correct strip after the shared feedback", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     fillBoard(scene, getCurrentRound(scene).solution);
     validate(scene);
@@ -610,7 +625,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("leaves a wrong strip exactly in place, unlocks, and accepts one move", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
     const solution = getCurrentRound(scene).solution;
@@ -647,7 +662,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("does not validate a partially filled strip", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     drop(scene, internals(scene).panels[0], 0);
     validate(scene);
@@ -657,7 +672,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("completes the game on the last round", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const s = scene as unknown as {
       rounds: Array<{ solution: string[] }>;
@@ -676,7 +691,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("tolerates destroy failures when clearing a round", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const s = scene as unknown as {
       roundObjects: Array<{ destroy: MockFn }>;
@@ -695,7 +710,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("does nothing when the round is missing or the slice is stale", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { panels, slots } = internals(scene);
 
@@ -725,7 +740,7 @@ describe("StoryOrderScene interactions", () => {
   });
 
   it("detects whether a point is over any slot and reports no placed panel for an empty slot", () => {
-    const scene = new StoryOrderScene();
+    const scene = new StoryOrderScene(mulberry32(1234));
     scene.create();
     const { slots } = internals(scene);
     const board = boardOf(scene);

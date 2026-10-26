@@ -76,6 +76,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 const { getAdaptiveBandShiftMock, generatePlaythroughMock } = vi.hoisted(() => ({
   getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
@@ -121,7 +122,6 @@ describe("PatternBuilderScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -145,7 +145,7 @@ describe("PatternBuilderScene round flow", () => {
   }
 
   function createScene(): PatternBuilderScene {
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
     return scene;
   }
@@ -410,6 +410,15 @@ describe("PatternBuilderScene round flow", () => {
     fireSnap(scene);
     expect(getMockFn(internals.progressDots[0].setAlpha)).toHaveBeenCalledWith(1);
   });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new PatternBuilderScene(mulberry32(1234));
+    first.create();
+    const second = new PatternBuilderScene(mulberry32(1234));
+    second.create();
+
+    expect(getInternals(second).rounds).toEqual(getInternals(first).rounds);
+  });
 });
 
 /* --- Press feedback cohesion (Track: UI/UX Cohesion, Phase 2) --- */
@@ -426,7 +435,7 @@ describe("PatternBuilderScene press feedback cohesion", () => {
 
   it("gives every answer card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -438,7 +447,7 @@ describe("PatternBuilderScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -448,14 +457,14 @@ describe("PatternBuilderScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new PatternBuilderScene();
+    const reducedScene = new PatternBuilderScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -479,14 +488,14 @@ describe("PatternBuilderScene adaptive shift", () => {
 
   it("passes the facade's band shift to generatePlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("pattern-builder");
     expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
     expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
   });

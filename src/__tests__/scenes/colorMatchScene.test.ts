@@ -74,6 +74,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 const { getAdaptiveBandShiftMock, buildPlaythroughMock } = vi.hoisted(() => ({
   getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
@@ -105,7 +106,6 @@ describe("ColorMatchScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -249,7 +249,7 @@ describe("ColorMatchScene round flow", () => {
   }
 
   it("renders a prompt swatch in the target color, a 2x2 grid of 4 distinct-color cards, and 6 progress dots", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -298,7 +298,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("speaks the target color name at round start when SFX is enabled", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -308,7 +308,7 @@ describe("ColorMatchScene round flow", () => {
   it("silences TTS when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
 
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -316,7 +316,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("tapping the matching card plays the correct chime, flashes success, and advances", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.cards.findIndex((card) => card.colorId === round.targetColorId);
@@ -364,7 +364,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("tapping a non-matching card wiggles gently and does not advance the round", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.cards.findIndex((card) => card.colorId === round.targetColorId);
@@ -399,7 +399,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("does nothing when the speaker is tapped after the final round (celebration guard)", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     mockSpeech.speakWord.mockClear();
 
@@ -417,7 +417,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("re-speaks the current target color when the speaker is tapped mid-round", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     mockSpeech.speakWord.mockClear();
 
@@ -434,7 +434,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("skips the flash revert when the card is destroyed before the 250ms timer", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.cards.findIndex((card) => card.colorId === round.targetColorId);
@@ -458,7 +458,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -493,7 +493,7 @@ describe("ColorMatchScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("color-match");
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -508,7 +508,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -529,7 +529,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -554,7 +554,7 @@ describe("ColorMatchScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.cards.findIndex((card) => card.colorId === round.targetColorId);
@@ -575,7 +575,7 @@ describe("ColorMatchScene round flow", () => {
   });
 
   it("generates a valid playthrough for the scene (6 rounds, 4 distinct colors, target present)", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     const rounds = (scene as unknown as { rounds: ColorMatchRound[] }).rounds;
 
@@ -585,6 +585,18 @@ describe("ColorMatchScene round flow", () => {
       expect(new Set(round.cards.map((card) => card.colorId)).size).toBe(4);
       expect(round.cards.map((card) => card.colorId)).toContain(round.targetColorId);
     }
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new ColorMatchScene(mulberry32(1234));
+    first.create();
+    const second = new ColorMatchScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: ColorMatchRound[] }).rounds;
+    const b = (second as unknown as { rounds: ColorMatchRound[] }).rounds;
+
+    expect(b).toEqual(a);
   });
 });
 
@@ -602,7 +614,7 @@ describe("ColorMatchScene press feedback cohesion", () => {
 
   it("gives every color card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -614,7 +626,7 @@ describe("ColorMatchScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -624,14 +636,14 @@ describe("ColorMatchScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new ColorMatchScene();
+    const reducedScene = new ColorMatchScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -655,14 +667,14 @@ describe("ColorMatchScene adaptive shift", () => {
 
   it("passes the facade's band shift to buildPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("color-match");
     expect(buildPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new ColorMatchScene();
+    const scene = new ColorMatchScene(mulberry32(1234));
     scene.create();
     expect(buildPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });

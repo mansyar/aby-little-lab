@@ -84,14 +84,18 @@ vi.mock("../../game/wordLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/wordLogic")>();
   return {
     ...actual,
-    generateWordBuildPlaythrough: (wordCount: number, shift: -1 | 0 | 1 = 0) => {
+    // Forward every argument: the scene calls
+    // generateWordBuildPlaythrough(wordCount, shift, rng), and dropping rng
+    // here would silently strip the seeded path.
+    generateWordBuildPlaythrough: (wordCount: number, shift: -1 | 0 | 1 = 0, rng?: Rng) => {
       generateWordBuildPlaythroughMock(wordCount, shift);
-      return actual.generateWordBuildPlaythrough(wordCount, shift);
+      return actual.generateWordBuildPlaythrough(wordCount, shift, rng);
     },
   };
 });
 
-import { generateLetterTiles, getWord } from "../../game/wordLogic";
+import type { Rng } from "../../game/random";
+import { generateLetterTiles, generateWordBuildPlaythrough, getWord } from "../../game/wordLogic";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -100,6 +104,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -140,7 +145,6 @@ function fireAutoReturn(scene: unknown): void {
 
 describe("WordBuilderScene shell", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -158,7 +162,7 @@ describe("WordBuilderScene shell", () => {
   });
 
   it("renders mascot, parent-locked Back button, and 3 progress dots for 3 words", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
@@ -181,7 +185,7 @@ describe("WordBuilderScene shell", () => {
   });
 
   it("returns to the Hub when the parent lock succeeds", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -202,6 +206,18 @@ describe("WordBuilderScene shell", () => {
     expect(
       (scene as unknown as { scene: Record<string, unknown> }).scene.start,
     ).toHaveBeenCalledWith("Hub");
+  });
+
+  it("builds identical words from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new WordBuilderScene(mulberry32(1234));
+    first.create();
+    const second = new WordBuilderScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { words: Array<{ word: string }> }).words;
+    const b = (second as unknown as { words: typeof a }).words;
+
+    expect(b).toEqual(a);
   });
 });
 
@@ -283,7 +299,6 @@ function getPlacedSlots(scene: unknown): Array<Record<string, MockFn>> {
 
 describe("WordBuilderScene interaction", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -301,7 +316,7 @@ describe("WordBuilderScene interaction", () => {
   });
 
   it("flies a used tile's letter into the slot and ghosts the tile", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
@@ -344,7 +359,7 @@ describe("WordBuilderScene interaction", () => {
   });
 
   it("sizes letter tiles to stay above the 64px touch floor at phone scale", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     // At the smallest supported phone (FIT scale ~0.49) a 110px tile renders
@@ -367,7 +382,7 @@ describe("WordBuilderScene interaction", () => {
   });
 
   it("keeps a duplicate-letter tile tappable until its second use", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     // Force the duplicate-letter word: BALL needs its single L tile twice.
@@ -414,7 +429,7 @@ describe("WordBuilderScene interaction", () => {
   });
 
   it("wiggles wrong tiles with a soft tone and no penalty", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
@@ -438,7 +453,7 @@ describe("WordBuilderScene interaction", () => {
   });
 
   it("fills slots strictly left-to-right in word order", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
@@ -462,7 +477,7 @@ describe("WordBuilderScene interaction", () => {
   });
 
   it("locks input once the word is fully spelled", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
@@ -526,7 +541,6 @@ function fireWordLinger(scene: unknown): void {
 
 describe("WordBuilderScene completion", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -544,7 +558,7 @@ describe("WordBuilderScene completion", () => {
   });
 
   it("chimes, cheers, pops a dot, and advances after a finished word lingers", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     fillWord(scene);
@@ -566,7 +580,7 @@ describe("WordBuilderScene completion", () => {
   });
 
   it("wins after 3 words, awarding the sticker and auto-returning with justEarned", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 3; i++) {
@@ -601,7 +615,7 @@ describe("WordBuilderScene completion", () => {
   }
 
   it("guards the speaker during the win celebration (no crash after the final word)", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 3; i++) {
@@ -622,7 +636,7 @@ describe("WordBuilderScene completion", () => {
 
   it("does not re-award the sticker or pass justEarned on repeat completions", () => {
     earnSticker("word-builder");
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 3; i++) {
@@ -636,7 +650,7 @@ describe("WordBuilderScene completion", () => {
   });
 
   it("re-launching after completion unlocks input so tiles are tappable again", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 3; i++) {
@@ -659,7 +673,6 @@ describe("WordBuilderScene completion", () => {
 
 describe("WordBuilderScene round rendering", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -677,7 +690,7 @@ describe("WordBuilderScene round rendering", () => {
   });
 
   it("renders the prompt picture from the word's texture key", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const prompt = getPromptImage(scene);
@@ -686,7 +699,7 @@ describe("WordBuilderScene round rendering", () => {
   });
 
   it("renders one slot per letter of the word", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
@@ -698,13 +711,17 @@ describe("WordBuilderScene round rendering", () => {
   });
 
   it("renders 6 letter tiles with distractors from letter textures", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
     const entry = getWord(word);
     if (!entry) throw new Error("current word entry not found");
-    const expectedTiles = generateLetterTiles(entry.word);
+    // Replay the scene's draw order on a fresh mulberry32(1234): the
+    // playthrough's shuffles consume draws before the tiles are generated.
+    const replay = mulberry32(1234);
+    generateWordBuildPlaythrough(3, 0, replay);
+    const expectedTiles = generateLetterTiles(entry.word, replay);
     const tiles = getTileRects(scene);
     expect(tiles).toHaveLength(6);
     for (const tile of tiles) {
@@ -729,7 +746,7 @@ describe("WordBuilderScene round rendering", () => {
   });
 
   it("speaks the word when SFX is enabled and stays silent when disabled", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const word = getCurrentWord(scene);
@@ -737,7 +754,7 @@ describe("WordBuilderScene round rendering", () => {
 
     mockSpeech.speakWord.mockClear();
     updateSettings({ sfxEnabled: false });
-    const silentScene = new WordBuilderScene();
+    const silentScene = new WordBuilderScene(mulberry32(1234));
     silentScene.create();
     expect(mockSpeech.speakWord).toHaveBeenCalledWith(word, false);
   });
@@ -757,7 +774,7 @@ describe("WordBuilderScene press feedback cohesion", () => {
 
   it("gives every letter tile press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -769,7 +786,7 @@ describe("WordBuilderScene press feedback cohesion", () => {
 
   it("keeps the tile placement handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -779,14 +796,14 @@ describe("WordBuilderScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per tile when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new WordBuilderScene();
+    const reducedScene = new WordBuilderScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -818,14 +835,14 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to generateWordBuildPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(-1);
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     expect(generateWordBuildPlaythroughMock).toHaveBeenCalledWith(3, -1);
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new WordBuilderScene();
+    const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
     expect(generateWordBuildPlaythroughMock).toHaveBeenCalledWith(3, 0);
