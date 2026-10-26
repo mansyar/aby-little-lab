@@ -61,15 +61,19 @@ the phase result and evidence file — no manual verification meta-task exists.
 - **Covers:** FR-4, FR-5, NFR-2, AC-5, AC-6
 - **Touches:** `docs/perf-baseline.md`, `docs/TDD.md`, `conductor/tech-stack.md`, `scripts/measure-first-tap.mjs` (only if the measurement needs a prewarm-aware flag), `README.md` (count claim only, if moved again)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P3.T1: Measure the increment** — covers: FR-4
-  - [ ] **P3.T1.1:** build the pre-track baseline (`git worktree` or stash-based build from the base commit) and run the first-tap measurement back-to-back with the prewarm build on the same host — median-of-three per game, shell-diet methodology.
-  - [ ] **P3.T1.2:** write the dated verdict section into `perf-baseline.md` (before/after medians, host caveats) and resolve or re-scope the `:395-399` open-question text with the reason.
-- [ ] **P3.T2: Document the behavior** — covers: FR-5
-  - [ ] **P3.T2.1:** TDD — document the prewarm module, pacing model, and lock/visibility gates.
-  - [ ] **P3.T2.2:** tech-stack — dated Design Update blockquote (newest-first) describing the prewarm, recency ordering, and the tap-wins rule.
-- [ ] **P3.T3: Final validation** — covers: AC-6
-  - [ ] **P3.T3.1:** full chain including `validate-docs` green with the new sections; coverage snapshot refreshed if denominators moved.
+- **Status:** verified
+- [x] **P3.T1: Measure the increment** — covers: FR-4
+  - [x] **P3.T1.1:** build the pre-track baseline (`git worktree` or stash-based build from the base commit) and run the first-tap measurement back-to-back with the prewarm build on the same host — median-of-three per game, shell-diet methodology.
+  - [x] **P3.T1.2:** write the dated verdict section into `perf-baseline.md` (before/after medians, host caveats) and resolve or re-scope the `:395-399` open-question text with the reason.
+- [x] **P3.T2: Document the behavior** — covers: FR-5
+  - [x] **P3.T2.1:** TDD — document the prewarm module, pacing model, and lock/visibility gates.
+  - [x] **P3.T2.2:** tech-stack — dated Design Update blockquote (newest-first) describing the prewarm, recency ordering, and the tap-wins rule.
+- [x] **P3.T3: Final validation** — covers: AC-6
+  - [x] **P3.T3.1:** full chain including `validate-docs` green with the new sections; coverage snapshot refreshed if denominators moved.
+
+**Result:** verified
+**Checkpoint:** 34131419
+**Evidence:** conductor/tracks/20261027-hub-idle-prewarm/verification/phase-3.md
 
 <!-- Review fixes are appended by conductor-review as:
 ## Phase R1: Review Fixes
