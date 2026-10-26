@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, NFR-1, NFR-2, AC-1, AC-2 (pre-FINAL), AC-5
 - **Touches:** `package.json`, `docs/release-notes-v1.22.0.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js` plus `pnpm check && pnpm typecheck` (no `src/` change expected; full gate runs in Phase 2)
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Bump the version** — covers: FR-1, AC-1
   - [ ] **P1.T1.1:** `package.json` `1.21.7` → `1.22.0` (version field only, no lockfile hand-edits).
