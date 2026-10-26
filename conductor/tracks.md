@@ -257,4 +257,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Shared Random Helpers - one shuffle, one RNG seam** - [20261025-shared-random-helpers](./archive/20261025-shared-random-helpers/index.md) - refactor - high
 
-- [ ] **Track: Scene RNG Seam - injectable randomness in the 22 game scenes** - [20261026-scene-rng-seam](./tracks/20261026-scene-rng-seam/index.md) - refactor - high
+- [~] **Track: Scene RNG Seam - injectable randomness in the 22 game scenes** - [20261026-scene-rng-seam](./tracks/20261026-scene-rng-seam/index.md) - refactor - high

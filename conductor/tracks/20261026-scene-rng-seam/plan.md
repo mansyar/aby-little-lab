@@ -46,7 +46,7 @@ Only the primary agent writes this file.
 - **Goal:** every scene whose randomness is one builder call accepts `rng` and
   passes it in that builder's correct parameter position.
 - **Depends on:** Phase 1
-- **Covers:** FR-2, FR-4, FR-5, AC-2 (scene half)
+- **Covers:** FR-2, FR-4, FR-5, NFR-1, NFR-4, AC-2 (scene half)
 - **Touches:** `src/scenes/AddItUpScene.ts`, `src/scenes/TakeAwayScene.ts`,
   `src/scenes/AlphabetScene.ts`, `src/scenes/ColorMatchScene.ts`,
   `src/scenes/DecodeItScene.ts`, `src/scenes/FeelingsFacesScene.ts`,
@@ -97,7 +97,7 @@ Only the primary agent writes this file.
   `storyOrderLogic`'s rng-first signature, and prove each call site's argument
   position with an equivalence test.
 - **Depends on:** Phase 2
-- **Covers:** FR-4, FR-5, AC-3, AC-4
+- **Covers:** FR-4, FR-5, NFR-1, AC-3, AC-4
 - **Touches:** `src/scenes/AnimalTraceScene.ts`, `src/scenes/BigSmallScene.ts`,
   `src/scenes/MusicalMemoryScene.ts`, `src/scenes/PopFreezeScene.ts`,
   `src/scenes/WordBuilderScene.ts`, `src/scenes/StoryOrderScene.ts`,
@@ -145,7 +145,7 @@ Only the primary agent writes this file.
 - **Goal:** the 52 `vi.spyOn(Math, "random")` sites across 27 files become
   seeded injections, and no global stub remains.
 - **Depends on:** Phase 3
-- **Covers:** FR-6, AC-1, AC-2
+- **Covers:** FR-6, NFR-3, AC-1, AC-2, AC-5
 - **Touches:** `src/__tests__/scenes/*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending
