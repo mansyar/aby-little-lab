@@ -4,7 +4,7 @@
 - **Phase:** R1
 - **Date:** 2026-10-26
 - **Branch:** `chore/20261026-property-test-deflake`
-- **Phase base:** `902ac732` — **Phase head:** `68bb3aa5`
+- **Phase base:** `902ac732` - **Phase head:** `84c0699d` (the three task commits `e9995163`, `68bb3aa5`, `10eeaf42` were squashed into `84c0699d` at acceptance; content-equivalent — see Primary verification)
 - **Result:** ✅ verified (all eight gate commands exit 0 on the final run)
 
 ## Findings resolution
@@ -107,6 +107,7 @@ None.
 ## Primary verification
 
 - Worktree clean; range `902ac732..HEAD` = 3 commits (`e9995163`, `68bb3aa5`, `10eeaf42`), zero merges.
+- Squash note (round-2 review F4): the three fix commits were squashed at acceptance into checkpoint `84c0699d`, and this evidence file was re-added with the Primary verification section as `b043c3c8`. The hashes above describe the pre-squash history and are reachable only via reflog; the squashed content is equivalent (`git diff 10eeaf42 84c0699d` touches only conductor evidence/plan files).
 - `git diff --name-only 902ac732..HEAD` = exactly the five Touches files plus the new phase-R1.md evidence.
 - F1 audit: `git grep -n "timeout: 120_000" -- src/__tests__/game` returns exactly 7 matches at lines addItUpLogic 172, countLogic 174, decodeLogic 322, firstSoundsLogic 252, numberOrderLogic 136, takeAwayLogic 173, wordLogic 254. The F1 placements (decode 322, word 254) use the options-object form; decodeLogic's redundant trailing numeric 30000 was replaced by the object on the same test.
 - F2 audit: the reworded TDD sentence now names the five pair-pool guards (addItUp/count/takeAway) and the two 20 s sweep guards at `moreLessLogic.test.ts:141-143`/`:159`.

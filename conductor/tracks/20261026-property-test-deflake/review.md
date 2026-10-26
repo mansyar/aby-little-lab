@@ -5,7 +5,7 @@
 - **Branch:** `chore/20261026-property-test-deflake`
 - **Range:** `c5bb9eca..HEAD` (excluding `conductor/`: 5 test files + `docs/TDD.md`)
 - **Date:** 2026-10-26
-- **Verdict:** PASS WITH FINDINGS
+- **Verdict:** PASS
 
 ## Summary
 
@@ -83,14 +83,21 @@ None.
 
 ## Debt
 
-Both findings go into the Review Fixes phase (strict mode); no debt.
+None.
 
 ## Doc sync
 
-`pending`
+`none` — the fix rounds touched only test timeouts, the TDD §10.1 note, and evidence provenance; no documented contract moved.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 |---|---|---|---|---|---|---|
 | 1 | PASS WITH FINDINGS | 0 | 0 | 1 | 2 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 1 | 3 |
+
+### Round 2
+
+Delta re-review of `902ac732..84c0699d` (excluding conductor/): verdict PASS WITH FINDINGS with F1/F2/F3 all verified resolved — the reviewer independently reproduced the 7-match grep proof, spot-checked the seven `timeout: 20_000` guards behind the corrected F2 sentence (including `moreLessLogic.test.ts:142`/`:159`, confirming they are sweep guards, not pair-pool guards), read the archived docs-truth-pass flake record to confirm the F3 provenance (seven files including decodeLogic and moreLessLogic, not wordLogic; multiplier 66/1.98 ≈ 33×), and ran the two budgeted suites in isolation (73/73 passed; sweeps 693 ms / 1548 ms). Weakening audit clean: the delta's only removal is decodeLogic's redundant trailing `30000` on the test that gained the options object.
+
+One new Low: **F4** — `phase-R1.md` cited the pre-squash task-commit hashes (`e9995163`/`68bb3aa5`/`10eeaf42`) after acceptance squashed them into `84c0699d`, leaving orphaned references. Fixed immediately under strict mode: the header now names `84c0699d` as the checkpoint with a squash note, and the Primary verification section records the squash equivalence (`git diff 10eeaf42 84c0699d` touches only conductor evidence/plan files).
