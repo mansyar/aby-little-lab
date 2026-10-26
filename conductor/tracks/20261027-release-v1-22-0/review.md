@@ -3,13 +3,17 @@
 - **Track:** `20261027-release-v1-22-0`
 - **Type:** `chore`
 - **Branch:** `chore/20261027-release-v1-22-0`
-- **Range:** `f44a3a91..c70591bf`
+- **Range:** `f44a3a91..122068af`
 - **Date:** `2026-10-27`
-- **Verdict:** `BLOCK` (round 1: four Low findings pending fix in Phase R1; no Critical/High)
+- **Verdict:** `PASS WITH FINDINGS` (round 2: all four round-1 findings fixed and independently verified; strict-mode compliant — no deferrals)
 
 ## Summary
 
-Release diff is metadata/notes/index only with correct version linkage and structure, but the notes contain four invented or contradicted factual claims across the PR #67/#68/#70 bullets and header. All four are Low, mechanical, docs-only fixes — no runtime impact, no test gap. Fixing in Phase R1, then re-review.
+Release diff is metadata/notes/index only with correct version linkage and structure. Round 1 found four invented or contradicted factual claims in the notes (all Low, docs-only); Phase R1 fixed all four exactly per spec and the primary independently verified each fix against the tree and archived specs. Strict-mode compliant: no deferrals, no Critical/High at any round.
+
+## Re-review (round 2)
+
+Primary verified the R1 delta (`27fa696c..122068af`, notes only, 6+/6−) line by line: F1 rewritten per archived FR-1 (`Rng` + shared `shuffle`, 13 importers, 21 logic modules, helper path added within scope); F2 "27 files" per archived line 62 with `StoryOrderScene.ts:91` citation replacing the false exception; F3 names the actual timeout-carrying suites; F4 header now states the Phase 3 cut with go-ahead. `node scripts/validate-docs.js` 6/6 and `pnpm check` clean re-run by the primary. All findings fixed; no new findings.
 
 ## Verification
 
@@ -111,3 +115,4 @@ Phase 1 verified with Result/Checkpoint/Evidence; tasks marked `[x]` were implem
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | BLOCK | 0 | 0 | 0 | 4 | 0 |
+| 2 | PASS WITH FINDINGS | 0 | 0 | 0 | 0 | 4 |
