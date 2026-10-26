@@ -5,6 +5,19 @@
 
 Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`. Only the primary writes this file.
 
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve F1 and F2 so the evidence traceability matches the squashed branch history.
+- **Depends on:** Phase 5
+- **Covers:** F1, F2
+- **Touches:** conductor/tracks/20261027-dependency-majors/verification/phase-1.md, phase-2.md, phase-3.md, phase-4.md, phase-5.md
+- **Verification:** `node scripts/validate-docs.js` (the only check that reads Conductor prose); evidence-only phase, no code change.
+- **Status:** pending
+- [ ] **R1.T1: Append squash-mapping notes (F1)** — covers: F1
+  - [ ] **R1.T1.1:** Append a one-line squash-mapping note to each of the five phase evidence files mapping the cited executor-worktree hashes to the final phase commit (P1: da7bb6d8, 1fd28538, e7f5e215 → bd8a6c54; P2: 2cf18cae, f32f0c92, ef4651d3, 38229b3a → c0c86ee2; P3: 14d8986a, 8a670374 → ede22b71; P4: d2f5a28a → a66d9367; P5: 8610fc93, 4630a71e, 0b05af30 → e2893a19), noting the hashes remain reflog-reachable.
+- [ ] **R1.T2: Fix the typo (F2)** — covers: F2
+  - [ ] **R1.T2.1:** phase-5.md: "single dit call" → "single edit call".
+
 <!-- Review fixes are appended by conductor-review as:
 ## Phase R1: Review Fixes
 - **Goal:** Resolve review finding(s) <ID>.
