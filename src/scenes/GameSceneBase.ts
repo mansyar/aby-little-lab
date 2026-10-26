@@ -12,6 +12,7 @@ import type { SpeakerButton } from "../components/SpeakerButton";
 import { preloadArtGroups } from "../game/art/registry";
 import type { ArtGroup } from "../game/art/types";
 import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createWinCelebration } from "../utils/completionEffect";
 import { motionDuration, motionScale } from "../utils/motion";
@@ -56,6 +57,22 @@ export abstract class GameSceneBase extends Phaser.Scene {
   private artCue?: ArtLoadingCue;
 
   protected readonly audioManager: AudioManager;
+
+  /**
+   * Random generator every gameplay draw in this scene flows through.
+   *
+   * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+   * draw is reproducible, while production gets `Math.random`. It is a
+   * constructor parameter because Phaser instantiates a scene class with no
+   * arguments (`SceneManager` calls `new scene()`), so the default is what
+   * production always gets and only tests ever supply a seeded generator.
+   *
+   * Readonly because scene instances are reused across visits — see
+   * {@link init} — so the generator is fixed for the life of the instance and
+   * is never reassigned per visit.
+   */
+  protected readonly rng: Rng;
+
   protected progressDots: Phaser.GameObjects.Arc[] = [];
   protected inputLocked = false;
 
@@ -147,10 +164,11 @@ export abstract class GameSceneBase extends Phaser.Scene {
    */
   private resolvedGameId?: GameId;
 
-  constructor(key: string) {
+  constructor(key: string, rng: Rng = Math.random) {
     super({ key });
     this.constructedSceneKey = key;
     this.audioManager = AudioManager.getInstance();
+    this.rng = rng;
   }
 
   /**
