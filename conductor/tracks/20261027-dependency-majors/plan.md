@@ -70,7 +70,7 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-4, FR-8
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `src/__tests__/**/*.test.ts` (only affected suites)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P3.T1: Upgrade** — covers: FR-1
   - [ ] **P3.T1.1:** `pnpm up happy-dom@^21.0.4` (dev); commit package.json + lockfile; record `pnpm outdated` after.
 - [ ] **P3.T2: Audit CSS/IFrame default-off** — covers: FR-4, FR-8
