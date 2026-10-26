@@ -137,9 +137,9 @@ Only the primary agent writes this file.
   `src/scenes/WordBuilderScene.ts`, `src/scenes/StoryOrderScene.ts`,
   `src/__tests__/scenes/sceneRngEquivalence.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
-- [ ] **P3.T1: Animal Trace and Big & Small** — covers: FR-4
+- [ ] **P3.T1: Animal Trace and Big & Small** - covers: FR-4
   - [ ] **P3.T1.1:** `AnimalTraceScene` forwards `this.rng` to both
         `generatePathPoints(x, y, x, y, count, rng)` and `selectThreePairs(rng)`.
   - [ ] **P3.T1.2:** `BigSmallScene` forwards `this.rng` to
