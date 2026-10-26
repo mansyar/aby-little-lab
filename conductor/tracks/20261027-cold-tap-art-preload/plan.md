@@ -44,14 +44,18 @@ The primary appends after acceptance:
 - **Covers:** FR-2, FR-5, AC-3, AC-5
 - **Touches:** `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Gate the art queue like the JS chunks** — covers: FR-2
-  - [ ] **P2.T1.1:** Start after entrance settles; pause under arc/moon lock or hidden tab; resume on clear/visible.
-  - [ ] **P2.T1.2:** Queue svg loads through the Hub loader; never create or show the art cue during idle; shutdown cancels with no dangling timers/loads (covers FR-5).
-- [ ] **P2.T2: Warmed-game assertions** — covers: AC-3, AC-5
-  - [ ] **P2.T2.1:** Lock/hidden suppression + resume test.
-  - [ ] **P2.T2.2:** Fully warmed game queues zero art keys in `preload()` and shows no cue on entry.
+- [x] **P2.T1: Gate the art queue like the JS chunks** — covers: FR-2
+  - [x] **P2.T1.1:** Start after entrance settles; pause under arc/moon lock or hidden tab; resume on clear/visible.
+  - [x] **P2.T1.2:** Queue svg loads through the Hub loader; never create or show the art cue during idle; shutdown cancels with no dangling timers/loads (covers FR-5).
+- [x] **P2.T2: Warmed-game assertions** — covers: AC-3, AC-5
+  - [x] **P2.T2.1:** Lock/hidden suppression + resume test.
+  - [x] **P2.T2.2:** Fully warmed game queues zero art keys in `preload()` and shows no cue on entry.
+
+**Result:** verified
+**Checkpoint:** f6c9bb52
+**Evidence:** conductor/tracks/20261027-cold-tap-art-preload/verification/phase-2.md
 
 <!--
 The primary appends after acceptance:
