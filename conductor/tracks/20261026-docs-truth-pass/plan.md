@@ -73,7 +73,7 @@
 - **Covers:** F1, F2
 - **Touches:** `scripts/validate-docs.js`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1 — guard the "N test cases" phrasing** — covers: F1
   - [ ] **R1.T1.1:** Add a third claim pattern `TEST_CASES_CLAIM_RE = /\b\d[\d,]*\s+test\s+cases\b/g` in `scripts/validate-docs.js` and check it against `truth.tests` in `checkTestCounts` alongside `TESTS_CLAIM_RE`; extend the mutation proof in the evidence with a "2,999 test cases" mutation (working tree only, reverted) proving the new pattern fails.
