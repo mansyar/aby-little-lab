@@ -6,10 +6,10 @@
 |---|---|---|---|
 | **Language** | TypeScript | 7.0.2 | Type safety for complex game state; catches errors at compile time |
 | **Game Engine** | Phaser | 4.2.1 | Latest stable HTML5 framework; built-in physics, scene management, SVG rasterization, audio, input handling |
-| **Build Tool** | Vite | 8.1.5 | Fast HMR, modern ESM bundling, plugin ecosystem |
-| **PWA** | vite-plugin-pwa | 1.3.0 | Auto-generates service worker + manifest; precache for offline play |
-| **Testing** | Vitest | 4.1.10 | Vite-native, fast, Jest-compatible API, ESM support |
-| **Linting/Formatting** | Biome | 2.5.5 | Fast all-in-one linter and formatter; zero config needed for sensible defaults |
+| **Build Tool** | Vite | 8.3.5 | Fast HMR, modern ESM bundling, plugin ecosystem |
+| **PWA** | vite-plugin-pwa | 2.0.0 | Auto-generates service worker + manifest; precache for offline play |
+| **Testing** | Vitest | 5.0.5 | Vite-native, fast, Jest-compatible API, ESM support |
+| **Linting/Formatting** | Biome | 2.6.3 | Fast all-in-one linter and formatter; zero config needed for sensible defaults |
 | **Package Manager** | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
 
 ## 2. Dependencies
@@ -27,12 +27,12 @@
 ```json
 {
   "typescript": "^7.0.2",
-  "vite": "^8.1.5",
-  "vite-plugin-pwa": "^1.3.0",
-  "vitest": "^4.1.10",
-  "@vitest/coverage-v8": "^4.1.10",
-  "@biomejs/biome": "^2.5.5",
-  "happy-dom": "^18.0.1"
+  "vite": "^8.3.5",
+  "vite-plugin-pwa": "^2.0.0",
+  "vitest": "^5.0.5",
+  "@vitest/coverage-v8": "^5.0.5",
+  "@biomejs/biome": "^2.6.3",
+  "happy-dom": "^21.0.4"
 }
 ```
 
@@ -61,6 +61,8 @@
 
 > **2026-08-08 — Design Update (Game Scene Scaffold Extraction):** All 13 game scenes now extend the shared abstract base `src/scenes/GameSceneBase.ts` (`GameSceneBase extends Phaser.Scene`, constructor takes the scene key). The base owns the duplicated per-scene skeleton: `createBackButton()` (text "← Back" + 96×96 hit area + `ParentLock` hold-to-exit transitioning to Hub + press feedback), `createCornerMascot()` (Professor Hoot bottom-right), `createProgressDots(count)` / `fillProgressDot(index)` (top-of-screen dots, pop tween, reduced-motion aware; `count` parameterized — 6 default games, 5 Musical Memory, 3 Shape Sorter/Animal Trace, 0 for Shadow Match/Big Small/Pop Freeze), `completeGame(gameId)` (win SFX, mascot big cheer, `createWinCelebration`, first-completion sticker award + reveal animation with the key derived from `gameId` via `stickerKeyFor` (`-` → `_`), 3s `AUTO_RETURN_DELAY` auto-return to Hub carrying `{justEarned}` when earned), `registerShutdownCleanup()` (destroys parentLock/mascot/speaker on scene `shutdown`), and shared protected constants (`NEXT_ROUND_DELAY` 700, `AUTO_RETURN_DELAY` 3000, `WIGGLE_*`, `OUTLINE_WIDTH`, `PROGRESS_DOT_*`, `DOT_POP_*`, `STICKER_*`, `WIN_TWEEN_DURATION`, `SUCCESS_COLOR`, `CARD_BG_COLOR`, `OUTLINE_COLOR`, `SPEAKER_OFFSET`). Subclasses keep their per-game mechanics (rounds, cards, drag, scoring, Arcade physics) and may redeclare protected constants to override defaults (e.g. `ShapeSorterScene`: `PROGRESS_DOT_Y` 100 / `RADIUS` 18 / `SPACING` 64, `DOT_POP_REDUCED_SCALE` 1.15, `DOT_POP_DURATION` 220 / `REDUCED` 140, `NEXT_ROUND_DELAY` 1200). `progressDots` is intentionally reassignable so scenes can reset the array on `create()` relaunch (Shape Sorter, Pattern Builder). `sceneRegistry.ts` unchanged — all 13 loaders still map to the same scene classes. Test coverage: `src/__tests__/scenes/gameSceneBase.test.ts` (11 tests); full suite 46 files / 1112 tests green; Biome clean. Zero user-visible behavior change.
 - **Input:** Touch-first, single-finger interactions
+
+> **2026-10-27 - Design Update (Dependency Majors):** Five dev-dependency majors/minors landed — `@biomejs/biome` 2.5.5 → 2.6.3, `vite` 8.1.5 → 8.3.5, `vitest` + `@vitest/coverage-v8` 4.1.10 → 5.0.5 (exact pair), `happy-dom` 18.0.1 → 21.0.4, and `vite-plugin-pwa` 1.3.0 → 2.0.0 (`workbox-window` stays ^7.4.1) — with the full 8-command verification gate green throughout and zero production-code change. Vitest 5's `clearMocks: true` default (call history cleared before every test, implementations kept) is embraced with no escape hatch in `vite.config.ts`; the full suite passed its first vitest 5 run with zero test-file changes. The count-drift guard is kept honest via `--no-staticParse`: vitest 5's `list` AST-parses files by default and silently drops the 305 dynamically registered tests. happy-dom 21's CSS/IFrame-loading default-off (SSRF prevention) was audited: zero suites needed a re-enable, and the suite runs markedly faster (~13–16 s vs ~32–37 s). vite-plugin-pwa 2.0 needed zero config adaptation — precache byte-equivalent at 54 entries / 1,720.45 KiB (validate-pwa 16/0, 42/42 chunks precached). Node 24.16 local + CI Node 22 satisfy vitest 5's ≥ 22.12 engine requirement.
 
 > **2026-10-26 - Design Update (Docs Truth Pass + Count-Drift Guard):** The living documentation now states the current suite truth - README, the TDD and the perf baseline all read **125 files / 2,729 tests** (coverage snapshot 97.82/91.96/96.77/98.74, verified 2026-10-26), the README's structure tree reflects 17 components (`GameLoadCue` added) and 34 game modules (`random.ts`), and `docs/roadmap.md`'s check line reads 2026-10-26. The drift can no longer recur silently: `scripts/validate-docs.js` gained `checkTestCounts`, which derives the true numbers from one collect-only `vitest list` run and fails any suite-count claim in the three living docs that disagrees with it - proven by a recorded mutation. Coverage percentages stay dated snapshots by agreement (deriving them live would cost a full coverage run inside a docs validator). Historical records (`docs/release-checklist.md`) are deliberately untouched.
 

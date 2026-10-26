@@ -1,0 +1,32 @@
+{
+  "id": "20261027-dependency-majors",
+  "title": "Dependency Majors — five dev-dep upgrades with the gate green",
+  "type": "chore",
+  "status": "complete",
+  "priority": "medium",
+  "depends_on": [],
+  "created_at": "2026-10-27T09:00:00+11:00",
+  "updated_at": "2026-10-27T13:55:00+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261027-dependency-majors",
+  "base_branch": "master",
+  "base_sha": "72bf861c8b563819cef9fac68d1310382804add0",
+  "progress": {
+    "phases_total": 6,
+    "phases_verified": 6,
+    "tasks_total": 20,
+    "tasks_done": 20
+  },
+  "last_checkpoint": "31afc8fe",
+  "review_verdict": "PASS",
+  "review_rounds": 2,
+  "doc_sync": "none",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/71",
+  "pr_state": "open",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-10-27T13:55:00+11:00",
+  "archive_path": "conductor/archive/20261027-dependency-majors"
+}
