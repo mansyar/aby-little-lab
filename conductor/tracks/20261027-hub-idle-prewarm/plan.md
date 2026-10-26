@@ -33,16 +33,20 @@ the phase result and evidence file — no manual verification meta-task exists.
 - **Covers:** FR-1 (tap-wins in situ), FR-2, FR-5, NFR-1, AC-3
 - **Touches:** `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/game/hub/prewarm.test.ts` (integration-level additions if the engine contract needs them), `README.md` / `docs/TDD.md` / `docs/perf-baseline.md` (count claims only, if the suite grows)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P2.T1: Wire the Hub** — covers: FR-1, FR-2, FR-5
-  - [ ] **P2.T1.1:** start the prewarm shortly after the Hub entrance settles (aligned with the existing post-entrance flow, e.g. where `idleLoop()`/`scheduleIdleAttract()` arm), never during the entrance itself.
-  - [ ] **P2.T1.2:** gate on the play-time lock — no imports while the lock is active; re-check at each pacing tick and resume when the lock clears. Pause while `document.hidden`.
-  - [ ] **P2.T1.3:** tap-wins — the tile-tap path (via the hub grid) must cancel the prewarm before scene start so the tap's own fetch/registration is never queued behind prewarm work.
-  - [ ] **P2.T1.4:** shutdown cleanup — the existing shutdown handler pattern (`HubScene.ts:264-265`) must also cancel the prewarm; no dangling timers or unhandled rejections across visits (scene instances are reused).
-- [ ] **P2.T2: Prove the integration** — covers: FR-2, AC-3
-  - [ ] **P2.T2.1:** seeded scene-level tests in the Hub suite: no imports while locked, resume after unlock, cancel on tap, cleanup on shutdown + re-create (reuse-safe).
-- [ ] **P2.T3: Count claims** — covers: NFR-3
-  - [ ] **P2.T3.1:** refresh the living-doc count claims if the suite grew in this phase.
+- **Status:** verified
+- [x] **P2.T1: Wire the Hub** — covers: FR-1, FR-2, FR-5
+  - [x] **P2.T1.1:** start the prewarm shortly after the Hub entrance settles (aligned with the existing post-entrance flow, e.g. where `idleLoop()`/`scheduleIdleAttract()` arm), never during the entrance itself.
+  - [x] **P2.T1.2:** gate on the play-time lock — no imports while the lock is active; re-check at each pacing tick and resume when the lock clears. Pause while `document.hidden`.
+  - [x] **P2.T1.3:** tap-wins — the tile-tap path (via the hub grid) must cancel the prewarm before scene start so the tap's own fetch/registration is never queued behind prewarm work.
+  - [x] **P2.T1.4:** shutdown cleanup — the existing shutdown handler pattern (`HubScene.ts:264-265`) must also cancel the prewarm; no dangling timers or unhandled rejections across visits (scene instances are reused).
+- [x] **P2.T2: Prove the integration** — covers: FR-2, AC-3
+  - [x] **P2.T2.1:** seeded scene-level tests in the Hub suite: no imports while locked, resume after unlock, cancel on tap, cleanup on shutdown + re-create (reuse-safe).
+- [x] **P2.T3: Count claims** — covers: NFR-3
+  - [x] **P2.T3.1:** refresh the living-doc count claims if the suite grew in this phase.
+
+**Result:** verified
+**Checkpoint:** 0369f7b0
+**Evidence:** conductor/tracks/20261027-hub-idle-prewarm/verification/phase-2.md
 
 <!-- The primary appends after acceptance:
 **Result:** verified | failed | blocked
