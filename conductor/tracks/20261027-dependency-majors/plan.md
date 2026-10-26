@@ -116,7 +116,7 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-7, FR-8, AC-6, NFR-1
 - **Touches:** `docs/TDD.md`, `docs/perf-baseline.md` (coverage snapshot only if shifted), `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P5.T1: TDD runner section** — covers: FR-7
   - [ ] **P5.T1.1:** Update `docs/TDD.md` §10.1: new runner versions, the clearMocks policy decision (embraced default, no escape hatch), and any happy-dom note.
 - [ ] **P5.T2: Tech-stack version table** — covers: FR-7
