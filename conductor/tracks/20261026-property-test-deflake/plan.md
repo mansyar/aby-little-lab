@@ -63,7 +63,7 @@ phase subagent and independently verified by the primary before acceptance.
 - **Covers:** F1, F2, F3
 - **Touches:** `src/__tests__/game/decodeLogic.test.ts`, `src/__tests__/game/wordLogic.test.ts`, `docs/TDD.md`, `conductor/tracks/20261026-property-test-deflake/verification/phase-1.md`, `conductor/tracks/20261026-property-test-deflake/verification/integrated.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **R1.T1: Resolve F1** — covers: F1
   - [ ] **R1.T1.1:** Add `{ timeout: 120_000 }` to "keeps every round valid and uniquely targeted at every shift" in `decodeLogic.test.ts:322` and `wordLogic.test.ts:254`; update the AC-2 grep-proof counts (5 → 7 matches) in `phase-1.md` and `integrated.md`, and the TDD note's test list.
 - [ ] **R1.T2: Resolve F2** — covers: F2
