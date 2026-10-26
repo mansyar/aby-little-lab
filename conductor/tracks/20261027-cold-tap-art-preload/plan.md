@@ -71,7 +71,7 @@ The primary appends after acceptance:
 - **Covers:** FR-4, AC-6, AC-7
 - **Touches:** `docs/perf-baseline.md`, `docs/tech-stack.md`, `scripts/measure-first-tap.mjs`, `conductor/tracks/20261027-cold-tap-art-preload/verification/*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Cold-tap measurement** — covers: FR-4, AC-6
   - [ ] **P3.T1.1:** Built baseline (art queue off) vs art-prewarm build, same host back-to-back, median-of-three per game, same warm-aware rig.
