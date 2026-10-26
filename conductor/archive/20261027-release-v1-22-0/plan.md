@@ -79,13 +79,17 @@ The primary appends after acceptance:
 - **Covers:** FR-5, AC-2 (FINAL flip), AC-4
 - **Touches:** `docs/release-notes-v1.22.0.md` (Status flip only), git tag `v1.22.0`
 - **Verification:** `git ls-remote origin refs/tags/v1.22.0` resolves to the `master` HEAD; notes Status reads FINAL
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P3.T1: Create and push the tag** — covers: FR-5, AC-4
-  - [ ] **P3.T1.1:** Confirm tag `v1.22.0` does not already exist.
-  - [ ] **P3.T1.2:** With explicit user go-ahead, tag the merged `master` HEAD and push the tag (fires the Coolify deploy).
-- [ ] **P3.T2: Flip the notes to FINAL** — covers: AC-2
-  - [ ] **P3.T2.1:** Status DRAFT → FINAL with tag/deploy record, on `master` directly after the deploy fires.
+**Result:** verified
+**Checkpoint:** v1.22.0 (tag `a2bffc6b` on `f624884d`)
+**Evidence:** conductor/archive/20261027-release-v1-22-0/verification/phase-3.md
+
+- [x] **P3.T1: Create and push the tag** — covers: FR-5, AC-4
+  - [x] **P3.T1.1:** Confirm tag `v1.22.0` does not already exist.
+  - [x] **P3.T1.2:** With explicit user go-ahead, tag the merged `master` HEAD and push the tag (fires the Coolify deploy).
+- [x] **P3.T2: Flip the notes to FINAL** — covers: AC-2
+  - [x] **P3.T2.1:** Status DRAFT → FINAL with tag/deploy record, on `master` directly after the deploy fires.
 
 <!--
 The primary appends after acceptance:

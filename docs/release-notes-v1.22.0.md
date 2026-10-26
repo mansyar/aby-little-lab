@@ -1,7 +1,7 @@
 # Release Notes - v1.22.0
 
-> Status: DRAFT
-> Target tag: `v1.22.0` (pending - cut in Phase 3 after merge with explicit go-ahead)
+> Status: FINAL
+> Tag: `v1.22.0` (cut 2026-10-27 on `f624884d`, pushed to origin - tag-gated Coolify deploy fired)
 > Base: `v1.21.7` (`ee6bb40f`, 2026-10-25)
 
 Seven tracks merged since v1.21.7: **the Hub now uses the quiet moments after you land to get the next game ready (idle game-chunk prewarm), and it draws game art before first paint on a cold tap (art-queue prewarm)** - so taps feel instant whether the game is already in memory or not. Underneath, the codebase gains one shared shuffle and one seeded RNG seam across all 22 scenes and every game-logic helper (the duplicate dice are gone, tests are deterministic), the toolchain moves to its current majors, and the property suites get their flake guard. Nothing changes in what you see when you play - except that the wait is gone.
