@@ -8,9 +8,12 @@ import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
 import {
+  ART_KEYS_BY_GAME,
+  type ArtKeyEntry,
   type PrewarmController,
   type PrewarmEntry,
   recencyFirstOrder,
+  startArtPrewarm,
   startPrewarm,
 } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
@@ -27,6 +30,7 @@ import {
   recordGamePlay,
   recordPlayTime,
 } from "../utils/storage";
+import { toDataUri } from "../utils/svgDataUri";
 import { textStyle } from "../utils/typography";
 import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 
@@ -78,6 +82,84 @@ function canObserveVisibility(): boolean {
 function isDocumentHidden(): boolean {
   return canObserveVisibility() && document.visibilityState === "hidden";
 }
+
+/** One game-art texture: the key the game draws and the SVG markup behind it. */
+interface ArtTableAsset {
+  /** Texture key, identical to the key the game's art group declares. */
+  readonly key: string;
+  /** Raw SVG markup for the key. */
+  readonly svg: string;
+}
+
+/** One lazily loaded art table: the assets of a single art group. */
+interface ArtTableLike {
+  /** The group's textures in declaration order. */
+  readonly assets: readonly ArtTableAsset[];
+}
+
+/**
+ * Lazy loader for one art group's table.
+ *
+ * Every loader is a dynamic `import()`, so the group's SVG markup ships in a
+ * lazy chunk the idle pass fetches on demand — never in the shell entry. A
+ * static import here would inline every game's artwork into the shell bundle
+ * and break the 200 kB `validate-bundle` budget; the source guard in
+ * `hubScene.test.ts` pins this file to dynamic imports only.
+ */
+type ArtGroupLoader = () => Promise<readonly ArtTableLike[]>;
+
+/** One lazy loader per art group, plus Story Order's own panel table. */
+const ART_GROUP_LOADERS: Readonly<Record<string, ArtGroupLoader>> = {
+  animals: () => import("../game/art/animals").then((module) => [module.animals]),
+  cutouts: () => import("../game/art/cutouts").then((module) => [module.cutouts]),
+  faces: () => import("../game/art/faces").then((module) => [module.faces]),
+  food: () => import("../game/art/food").then((module) => [module.food]),
+  glyphs: () => import("../game/art/glyphs").then((module) => [module.glyphs]),
+  items: () => import("../game/art/items").then((module) => [module.items]),
+  letters: () => import("../game/art/letters").then((module) => [module.letters]),
+  music: () => import("../game/art/music").then((module) => [module.music]),
+  numerals: () => import("../game/art/numerals").then((module) => [module.numerals]),
+  shadows: () => import("../game/art/shadows").then((module) => [module.shadows]),
+  shapes: () => import("../game/art/shapes").then((module) => [module.shapes]),
+  toys: () => import("../game/art/toys").then((module) => [module.toys]),
+  "story-panels": () =>
+    import("../game/storyOrderArt").then((module) => [{ assets: module.STORY_PANEL_ASSETS }]),
+};
+
+/**
+ * Art groups each game draws, by game id.
+ *
+ * Mirrors each scene's `preloadArt([...])` declaration (Story Order declares
+ * through `preloadStoryOrderArt`) and the group composition of
+ * `ART_KEYS_BY_GAME` in `src/game/hub/prewarm.ts`: the key-only table decides
+ * the raster order, this table decides where each key's markup is fetched from.
+ * The resolver parity test in `hubScene.test.ts` resolves every key of every
+ * game through this table, so a drift in either direction fails loudly.
+ */
+const ART_GROUPS_BY_GAME: Readonly<Record<string, readonly string[]>> = {
+  "shape-sorter": ["cutouts", "shapes"],
+  "animal-trace": ["animals", "food"],
+  "pop-freeze": ["animals", "glyphs"],
+  "shadow-match": ["items", "shadows"],
+  "musical-memory": ["music"],
+  "big-small": ["toys"],
+  "pattern-builder": ["shapes"],
+  "alphabet-match": ["letters"],
+  "word-match": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
+  "word-builder": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
+  "how-many": ["food", "items", "numerals", "shapes"],
+  "first-sounds": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
+  "more-less": ["food", "glyphs", "items", "shapes"],
+  "odd-one-out": ["animals", "music", "shapes", "toys"],
+  "color-match": ["music", "shapes"],
+  "add-it-up": ["food", "glyphs", "items", "shapes"],
+  "take-away": ["food", "glyphs", "items", "shapes"],
+  "memory-match": ["animals", "glyphs", "items", "toys"],
+  "decode-it": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
+  "number-order": ["numerals"],
+  "feelings-faces": ["faces"],
+  "story-order": ["story-panels"],
+};
 
 /**
  * Hub scene — the central navigation hub.
@@ -131,6 +213,27 @@ export class HubScene extends Phaser.Scene {
   private prewarm?: PrewarmController;
   /** Pending prewarm start, armed once the Hub entrance has settled. */
   private prewarmStartTimer?: Phaser.Time.TimerEvent;
+  /**
+   * Idle-paced art raster pass; armed and cancelled alongside the chunk pass
+   * so both queues share the entrance, lock, and visibility gates (FR-2).
+   * Absent while the pass is stopped.
+   */
+  private artPrewarm?: PrewarmController;
+  /**
+   * Art keys the idle pass has already rasterized. Shared across passes —
+   * and across visits, like `warmedChunks` — so a return trip resumes where
+   * the last visit stopped.
+   */
+  private readonly artQueued = new Set<string>();
+  /** Loaded art group tables, by group key; fetched once per Hub lifetime. */
+  private readonly artGroupCache = new Map<string, readonly ArtTableLike[]>();
+  /** Resolved SVG markup, by texture key; filled as the idle pass walks keys. */
+  private readonly artSvgCache = new Map<string, string>();
+  /**
+   * Art pass generation: bumped on every cancel so a key resolution that
+   * settles after shutdown, a tap, or a lock queues nothing (FR-5).
+   */
+  private artPassId = 0;
   /**
    * Chunk keys a prewarm pass already imported. Shared across passes — and
    * across visits, since Phaser reuses this instance and the module registry
@@ -522,9 +625,11 @@ export class HubScene extends Phaser.Scene {
 
   /**
    * Brings the prewarm in line with the current gates: arms a pass when one may
-   * run and none is pending, stops whatever is pending otherwise. Safe to call
-   * at any point in the scene's life, including before `create()` has armed the
-   * entrance delay.
+   * run and none is pending, stops whatever is pending otherwise. The chunk and
+   * art passes share the one entrance timer and the same gates, so both queues
+   * pause under the arc/moon lock or a hidden tab and resume together. Safe to
+   * call at any point in the scene's life, including before `create()` has
+   * armed the entrance delay.
    */
   private syncPrewarm(): void {
     if (!this.canPrewarm()) {
@@ -533,10 +638,12 @@ export class HubScene extends Phaser.Scene {
     }
     if (this.prewarm || this.prewarmStartTimer) return;
     // The first idle request waits out the entrance so the fade and zoom keep
-    // their frames; the pass itself still imports only in idle slots (NFR-2).
+    // their frames; each pass still imports or rasterizes only in idle slots
+    // (NFR-2).
     this.prewarmStartTimer = this.time.delayedCall(PREWARM_START_DELAY, () => {
       this.prewarmStartTimer = undefined;
       this.startPrewarmPass();
+      this.startArtPass();
     });
   }
 
@@ -550,21 +657,103 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Stops the prewarm: drops the pending idle slot and the entrance delay, and
-   * discards an in-flight import's result. Safe when nothing is armed or
-   * running, which is why every gate and every tap can call it unconditionally.
+   * Starts one art-raster pass over the keys the TextureManager still lacks.
+   * The engine probes `isPresent` on every tick, so keys a previous visit
+   * rasterized — or a game scene itself loaded — are skipped without queueing.
+   * Never touches the art loading cue: prewarm only fills the TextureManager,
+   * and the game scene's own `preload` owns the cue when entered for real.
+   */
+  private startArtPass(): void {
+    if (!this.canPrewarm() || this.artPrewarm) return;
+    const passId = this.artPassId;
+    this.artPrewarm = startArtPrewarm({
+      keysByGame: ART_KEYS_BY_GAME,
+      gridOrder: GAME_TILES.map((tile) => tile.gameId),
+      getProgress,
+      queued: this.artQueued,
+      isPresent: (key) => this.textures.exists(key),
+      queueKey: (entry) => this.queueArtKey(entry, passId),
+    });
+  }
+
+  /**
+   * Resolves the SVG markup behind one art key, lazily loading the key's art
+   * group on first touch. The dynamic imports keep every game's artwork out of
+   * the shell entry; loaded tables stay cached for the Hub's lifetime, and an
+   * unknown key resolves to `undefined` so the pass skips it instead of
+   * queueing a load the TextureManager could never satisfy.
+   */
+  private async resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined> {
+    const cached = this.artSvgCache.get(entry.key);
+    if (cached !== undefined) return cached;
+    const groupKeys = ART_GROUPS_BY_GAME[entry.gameId] ?? [];
+    for (const groupKey of groupKeys) {
+      let tables = this.artGroupCache.get(groupKey);
+      if (!tables) {
+        const loader = ART_GROUP_LOADERS[groupKey];
+        if (!loader) continue;
+        tables = await loader();
+        this.artGroupCache.set(groupKey, tables);
+      }
+      const asset = tables.flatMap((table) => table.assets).find((item) => item.key === entry.key);
+      if (asset) {
+        this.artSvgCache.set(entry.key, asset.svg);
+        return asset.svg;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Rasterizes one art key through the Hub loader at the texture tier the key
+   * would load at in its game scene, then settles once the loader reports the
+   * file done — so the engine paces the next key a tick at a time. Resolves
+   * without queueing when the key landed meanwhile, when its markup cannot be
+   * resolved, or when the pass was cancelled while resolving (FR-5).
+   */
+  private queueArtKey(entry: ArtKeyEntry, passId: number): Promise<void> {
+    return new Promise<void>((resolve) => {
+      void this.resolveArtSvg(entry).then((svg) => {
+        if (passId !== this.artPassId || svg === undefined || this.textures.exists(entry.key)) {
+          resolve();
+          return;
+        }
+        const done = (): void => {
+          this.load.off("complete", done);
+          this.load.off("loaderror", done);
+          resolve();
+        };
+        this.load.on("complete", done);
+        this.load.on("loaderror", done);
+        this.load.svg(entry.key, toDataUri(svg), { width: entry.size, height: entry.size });
+        this.load.start();
+      });
+    });
+  }
+
+  /**
+   * Stops the prewarm: drops the pending idle slots and the entrance delay,
+   * and discards an in-flight chunk import or art raster's result. Safe when
+   * nothing is armed or running, which is why every gate and every tap can call
+   * it unconditionally.
    */
   private cancelPrewarm(): void {
     this.prewarmStartTimer?.remove();
     this.prewarmStartTimer = undefined;
     this.prewarm?.cancel();
     this.prewarm = undefined;
+    this.artPrewarm?.cancel();
+    this.artPrewarm = undefined;
+    this.artPassId += 1;
   }
 
-  /** Stops the pass and starts a fresh one, so pending work takes a new order. */
+  /**
+   * Stops both passes and starts fresh ones, so pending work takes a new order.
+   */
   private restartPrewarm(): void {
     this.cancelPrewarm();
     this.startPrewarmPass();
+    this.startArtPass();
   }
 
   /**

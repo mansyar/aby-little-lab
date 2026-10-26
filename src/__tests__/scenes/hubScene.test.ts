@@ -1,63 +1,78 @@
+import type Phaser from "phaser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
-import { type MockFn, type MockObject, mockRegistry } from "../helpers/phaserMock";
+import { type MockFn, type MockObject, MockScene, mockRegistry } from "../helpers/phaserMock";
 import { settleLoad } from "../helpers/sceneFlowHarness";
 
-const { mockAudio, mockRecordGamePlay, idleScheduler, chunkLoaders } = vi.hoisted(() => {
-  const mockAudio = {
-    init: vi.fn(),
-    resume: vi.fn(),
-    playBGM: vi.fn(),
-    playCorrect: vi.fn(),
-    playIncorrect: vi.fn(),
-    playWin: vi.fn(),
-    playSticker: vi.fn(),
-    playPop: vi.fn(),
-    playWake: vi.fn(),
-    playFrogNote: vi.fn(),
-    playIdleCall: vi.fn(),
-  };
-  const mockRecordGamePlay = vi.fn();
-  /**
-   * Manual idle scheduler: records every request so a test decides when an
-   * idle slot fires. The prewarm engine keeps its real pacing (one import in
-   * flight, cancelled slots dropped); only the platform clock is stood in for.
-   */
-  const pending = new Map<number, () => void>();
-  let nextHandle = 0;
-  const idleScheduler = {
-    request(callback: () => void): number {
-      nextHandle += 1;
-      pending.set(nextHandle, callback);
-      return nextHandle;
-    },
-    cancel(handle: number): void {
-      pending.delete(handle);
-    },
-    /** Runs the oldest queued idle callback; false when none is pending. */
-    fire(): boolean {
-      const oldest = pending.entries().next();
-      if (oldest.done) return false;
-      pending.delete(oldest.value[0]);
-      oldest.value[1]();
-      return true;
-    },
-    /** Number of idle callbacks still queued. */
-    size(): number {
-      return pending.size;
-    },
-    clear(): void {
-      pending.clear();
-    },
-  };
-  /** Three of the 22 lazy chunks, enough to observe order and pacing. */
-  const chunkLoaders = {
-    ShapeSorter: vi.fn(() => Promise.resolve("ShapeSorter")),
-    AnimalTrace: vi.fn(() => Promise.resolve("AnimalTrace")),
-    PopFreeze: vi.fn(() => Promise.resolve("PopFreeze")),
-  };
-  return { mockAudio, mockRecordGamePlay, idleScheduler, chunkLoaders };
-});
+const { mockAudio, mockRecordGamePlay, idleScheduler, artScheduler, chunkLoaders } = vi.hoisted(
+  () => {
+    const mockAudio = {
+      init: vi.fn(),
+      resume: vi.fn(),
+      playBGM: vi.fn(),
+      playCorrect: vi.fn(),
+      playIncorrect: vi.fn(),
+      playWin: vi.fn(),
+      playSticker: vi.fn(),
+      playPop: vi.fn(),
+      playWake: vi.fn(),
+      playFrogNote: vi.fn(),
+      playIdleCall: vi.fn(),
+    };
+    const mockRecordGamePlay = vi.fn();
+    /**
+     * Manual idle scheduler: records every request so a test decides when an
+     * idle slot fires. The prewarm engine keeps its real pacing (one import in
+     * flight, cancelled slots dropped); only the platform clock is stood in for.
+     */
+    function createManualScheduler(): {
+      request: (callback: () => void) => number;
+      cancel: (handle: number) => void;
+      /** Runs the oldest queued idle callback; false when none is pending. */
+      fire: () => boolean;
+      /** Number of idle callbacks still queued. */
+      size: () => number;
+      clear: () => void;
+    } {
+      const slots = new Map<number, () => void>();
+      let nextHandle = 0;
+      return {
+        request(callback: () => void): number {
+          nextHandle += 1;
+          slots.set(nextHandle, callback);
+          return nextHandle;
+        },
+        cancel(handle: number): void {
+          slots.delete(handle);
+        },
+        fire(): boolean {
+          const oldest = slots.entries().next();
+          if (oldest.done) return false;
+          slots.delete(oldest.value[0]);
+          oldest.value[1]();
+          return true;
+        },
+        size(): number {
+          return slots.size;
+        },
+        clear(): void {
+          slots.clear();
+        },
+      };
+    }
+    /** Drives the chunk pass; the art pass gets its own scheduler below. */
+    const idleScheduler = createManualScheduler();
+    /** Drives the art pass so chunk and art pacing stay independently observable. */
+    const artScheduler = createManualScheduler();
+    /** Three of the 22 lazy chunks, enough to observe order and pacing. */
+    const chunkLoaders = {
+      ShapeSorter: vi.fn(() => Promise.resolve("ShapeSorter")),
+      AnimalTrace: vi.fn(() => Promise.resolve("AnimalTrace")),
+      PopFreeze: vi.fn(() => Promise.resolve("PopFreeze")),
+    };
+    return { mockAudio, mockRecordGamePlay, idleScheduler, artScheduler, chunkLoaders };
+  },
+);
 
 /**
  * Mock Phaser module. HubScene extends Phaser.Scene, which at runtime resolves
@@ -107,6 +122,19 @@ vi.mock("../../components/SettingsPanel", () => ({
   },
 }));
 
+/**
+ * The game-entry art cue: idle prewarm must never create or show it (FR-2), so
+ * the mock records construction and the art tests assert it stays untouched
+ * while the Hub rasterizes keys.
+ */
+vi.mock("../../components/ArtLoadingCue", () => ({
+  createArtLoadingCue: vi.fn(() => ({
+    show: vi.fn(),
+    clear: vi.fn(),
+    destroy: vi.fn(),
+  })),
+}));
+
 /** Hub-only browser bridges: keep them inert in tests. */
 vi.mock("../../utils/pwaBridge", () => ({
   getPwaBridge: vi.fn(() => null),
@@ -128,9 +156,11 @@ vi.mock("../../scenes/sceneRegistry", () => ({
 }));
 
 /**
- * Partial prewarm mock: the real engine runs (pacing, cancellation and the
- * shared imported set are its contract), with the manual scheduler injected and
- * the returned controller wrapped so a test can assert cancellation.
+ * Partial prewarm mock: the real engines run (pacing, cancellation and the
+ * shared queued sets are their contract), with a manual scheduler injected per
+ * pass and the returned controller wrapped so a test can assert cancellation.
+ * Chunk and art slots live on separate schedulers so each pass's pacing stays
+ * independently observable.
  */
 vi.mock("../../game/hub/prewarm", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/hub/prewarm")>();
@@ -138,6 +168,10 @@ vi.mock("../../game/hub/prewarm", async (importOriginal) => {
     ...actual,
     startPrewarm: vi.fn((options: StartPrewarmOptions) => {
       const controller = actual.startPrewarm({ ...options, scheduler: idleScheduler });
+      return { cancel: vi.fn(() => controller.cancel()) };
+    }),
+    startArtPrewarm: vi.fn((options: StartArtPrewarmOptions) => {
+      const controller = actual.startArtPrewarm({ ...options, scheduler: artScheduler });
       return { cancel: vi.fn(() => controller.cancel()) };
     }),
   };
@@ -156,8 +190,20 @@ vi.mock("../../utils/storage", async (importOriginal) => {
   return { ...actual, recordGamePlay: mockRecordGamePlay };
 });
 
-import { type StartPrewarmOptions, startPrewarm } from "../../game/hub/prewarm";
+import { createArtLoadingCue } from "../../components/ArtLoadingCue";
+import { music } from "../../game/art/music";
+import { preloadArtGroups } from "../../game/art/registry";
+import { shapes } from "../../game/art/shapes";
+import {
+  ART_KEYS_BY_GAME,
+  type ArtKeyEntry,
+  type StartArtPrewarmOptions,
+  type StartPrewarmOptions,
+  startArtPrewarm,
+  startPrewarm,
+} from "../../game/hub/prewarm";
 import { HubScene } from "../../scenes/HubScene";
+import hubSceneSource from "../../scenes/HubScene.ts?raw";
 import { loadSceneWithRetry } from "../../scenes/sceneRegistry";
 import type { GameId } from "../../types";
 import {
@@ -870,10 +916,12 @@ describe("HubScene idle prewarm", () => {
     mockRegistry.length = 0;
     mockRecordGamePlay.mockClear();
     idleScheduler.clear();
+    artScheduler.clear();
     for (const loader of Object.values(chunkLoaders)) {
       loader.mockClear();
     }
     vi.mocked(startPrewarm).mockClear();
+    vi.mocked(startArtPrewarm).mockClear();
     visibility = "visible";
     Object.defineProperty(document, "visibilityState", {
       configurable: true,
@@ -884,6 +932,7 @@ describe("HubScene idle prewarm", () => {
   afterEach(() => {
     Reflect.deleteProperty(document, "visibilityState");
     idleScheduler.clear();
+    artScheduler.clear();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     localStorage.clear();
@@ -1054,5 +1103,331 @@ describe("HubScene idle prewarm", () => {
       "ShapeSorter",
       "AnimalTrace",
     ]);
+  });
+});
+
+describe("HubScene idle art prewarm", () => {
+  let visibility: DocumentVisibilityState;
+
+  beforeEach(() => {
+    stubMatchMedia(false);
+    localStorage.clear();
+    mockRegistry.length = 0;
+    mockRecordGamePlay.mockClear();
+    idleScheduler.clear();
+    artScheduler.clear();
+    vi.mocked(startPrewarm).mockClear();
+    vi.mocked(startArtPrewarm).mockClear();
+    vi.mocked(createArtLoadingCue).mockClear();
+    visibility = "visible";
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => visibility,
+    });
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(document, "visibilityState");
+    idleScheduler.clear();
+    artScheduler.clear();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  /** Reports the document as the given state and dispatches the browser event. */
+  function setVisibility(next: DocumentVisibilityState): void {
+    visibility = next;
+    document.dispatchEvent(new Event("visibilitychange"));
+  }
+
+  /** Fires the Hub's post-entrance start; arms the chunk and art passes together. */
+  function firePrewarmStart(scene: HubScene): void {
+    const calls = (scene.time.delayedCall as MockFn).mock.calls;
+    const index = calls.findIndex((call) => call[0] === 1200);
+    if (index < 0) throw new Error("the Hub armed no prewarm start");
+    (calls[index][1] as () => void)();
+  }
+
+  /** The controller the most recent art pass returned. */
+  function lastArtController(): { cancel: MockFn } {
+    const value = vi.mocked(startArtPrewarm).mock.results.at(-1)?.value as
+      | { cancel: MockFn }
+      | undefined;
+    if (!value) throw new Error("no art pass was started");
+    return value;
+  }
+
+  /** The 22 nav tiles in Hub order. */
+  function navTiles(): MockObject[] {
+    return mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
+  }
+
+  /** Lets a lazy art-group import and the engine's promise chain settle. */
+  async function flushArt(): Promise<void> {
+    for (let round = 0; round < 10; round += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+  }
+
+  /**
+   * Waits until the Hub queued `count` svg loads. The first key pays the lazy
+   * chunk transform (tens of milliseconds of wall clock), which empty
+   * microtask rounds cannot cover — so poll on time, not on rounds.
+   */
+  async function waitForSvg(scene: HubScene, count: number): Promise<void> {
+    const deadline = Date.now() + 10000;
+    while (svgQueue(scene).length < count) {
+      if (Date.now() > deadline) {
+        throw new Error(`timed out waiting for ${count} queued art keys`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+  }
+
+  /** Art keys queued on the Hub loader so far, in queue order. */
+  function svgQueue(scene: HubScene): Array<{ key: string; url: string; size: number }> {
+    return ((scene.load.svg as MockFn).mock.calls as unknown[][]).map((call) => ({
+      key: call[0] as string,
+      url: call[1] as string,
+      size: (call[2] as { width: number }).width,
+    }));
+  }
+
+  /** Fires the most recently registered loader handler for the given event. */
+  function fireLoadEvent(scene: HubScene, event: "complete" | "loaderror"): void {
+    const handlers = ((scene.load.on as MockFn).mock.calls as unknown[][]).filter(
+      (call) => call[0] === event,
+    );
+    const handler = handlers.at(-1)?.[1] as (() => void) | undefined;
+    if (!handler) throw new Error(`the Hub registered no load ${event} handler`);
+    handler();
+  }
+
+  it("keeps game SVG markup out of the shell: art tables load through dynamic imports only", () => {
+    // A static import would inline every game's artwork into the shell entry and
+    // break the 200 kB validate-bundle budget; the lazy loaders are the only
+    // sanctioned path from the Hub to the art tables. The game-entry cue is
+    // pinned too: idle prewarm must never reach the module that creates it.
+    expect(hubSceneSource).not.toMatch(/from\s+["']\.\.\/game\/(art|storyOrderArt)/);
+    expect(hubSceneSource).not.toMatch(/from\s+["']\.\.\/components\/ArtLoadingCue["']/);
+    const lazyGroupImports = hubSceneSource.match(/import\("\.\.\/game\/art\/[a-z]+"\)/g) ?? [];
+    expect(lazyGroupImports).toHaveLength(12);
+    expect(hubSceneSource).toContain('import("../game/storyOrderArt")');
+  });
+
+  it("starts the art pass alongside the chunk pass once the entrance settles", () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+
+    expect(startPrewarm).toHaveBeenCalledTimes(1);
+    expect(startArtPrewarm).toHaveBeenCalledTimes(1);
+    const options = vi.mocked(startArtPrewarm).mock.calls[0]?.[0];
+    if (!options) throw new Error("no art pass was started");
+    expect(options.keysByGame).toBe(ART_KEYS_BY_GAME);
+    expect(options.gridOrder).toHaveLength(22);
+    expect(options.queued).toBeInstanceOf(Set);
+    expect(artScheduler.size()).toBe(1);
+
+    // The presence probe reads the live TextureManager: nothing is warm on a
+    // fresh boot, and a key the manager holds is reported present.
+    expect(options.isPresent("cutout_circle")).toBe(false);
+    scene.textures.createCanvas("cutout_circle");
+    expect(options.isPresent("cutout_circle")).toBe(true);
+  });
+
+  it("rasterizes one key per idle tick through the Hub loader at the key's tier", async () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+
+    artScheduler.fire();
+    await waitForSvg(scene, 1);
+
+    const first = svgQueue(scene);
+    expect(first).toHaveLength(1);
+    expect(first[0]?.key).toBe("cutout_circle");
+    expect(first[0]?.url.startsWith("data:image/svg+xml;base64,")).toBe(true);
+    expect(first[0]?.size).toBe(256);
+    expect((scene.load.start as MockFn).mock.calls).toHaveLength(1);
+
+    // The engine holds the next tick until the loader reports the file done.
+    expect(artScheduler.fire()).toBe(false);
+    expect(svgQueue(scene)).toHaveLength(1);
+
+    fireLoadEvent(scene, "complete");
+    await flushArt();
+    expect(artScheduler.size()).toBe(1);
+
+    artScheduler.fire();
+    await waitForSvg(scene, 2);
+
+    const second = svgQueue(scene);
+    expect(second).toHaveLength(2);
+    expect(second[1]?.key).toBe("cutout_square");
+    expect((scene.load.start as MockFn).mock.calls).toHaveLength(2);
+  });
+
+  it("skips keys the TextureManager already holds", async () => {
+    const scene = new HubScene();
+    scene.create();
+    scene.textures.createCanvas("cutout_circle");
+    firePrewarmStart(scene);
+
+    artScheduler.fire();
+    await waitForSvg(scene, 1);
+
+    const queued = svgQueue(scene);
+    expect(queued).toHaveLength(1);
+    expect(queued[0]?.key).toBe("cutout_square");
+  });
+
+  it("never creates the art cue while the idle pass rasterizes", async () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+
+    artScheduler.fire();
+    await waitForSvg(scene, 1);
+    fireLoadEvent(scene, "complete");
+    await flushArt();
+    artScheduler.fire();
+    await waitForSvg(scene, 2);
+
+    expect(vi.mocked(createArtLoadingCue)).not.toHaveBeenCalled();
+  });
+
+  it("starts no art pass while the Hub opens locked, and starts one when the lock clears", () => {
+    const profileId = getActiveProfile().id;
+    setPlayTimeLimit(profileId, 15);
+    recordPlayTime(profileId, 15);
+
+    const scene = new HubScene();
+    scene.create();
+
+    expect(startArtPrewarm).not.toHaveBeenCalled();
+    expect(artScheduler.size()).toBe(0);
+
+    // The parent raises the cap; the next foreground return re-reads it.
+    setPlayTimeLimit(profileId, null);
+    setVisibility("visible");
+
+    firePrewarmStart(scene);
+    expect(startArtPrewarm).toHaveBeenCalledTimes(1);
+    expect(artScheduler.size()).toBe(1);
+  });
+
+  it("pauses the art pass while the document is hidden and resumes on the way back", () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const controller = lastArtController();
+    expect(artScheduler.size()).toBe(1);
+
+    setVisibility("hidden");
+
+    expect(controller.cancel).toHaveBeenCalled();
+    expect(artScheduler.size()).toBe(0);
+
+    setVisibility("visible");
+    firePrewarmStart(scene);
+
+    expect(startArtPrewarm).toHaveBeenCalledTimes(2);
+    expect(artScheduler.size()).toBe(1);
+  });
+
+  it("cancels the art pass before the tap's load is awaited", () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const controller = lastArtController();
+
+    const tile = navTiles()[0];
+    if (!tile) throw new Error("no nav tile found");
+    tile.handlers.pointerup?.();
+
+    expect(controller.cancel).toHaveBeenCalled();
+    // Ordering, not just both happening: the tap's fetch must never queue
+    // behind art raster work.
+    const cancelOrder = controller.cancel.mock.invocationCallOrder[0];
+    const loadOrder = vi.mocked(loadSceneWithRetry).mock.invocationCallOrder[0];
+    expect(cancelOrder).toBeLessThan(loadOrder);
+  });
+
+  it("cancels the art pass on shutdown and resumes the next visit where it stopped", async () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const first = lastArtController();
+
+    artScheduler.fire();
+    await waitForSvg(scene, 1);
+    expect(svgQueue(scene).map((entry) => entry.key)).toEqual(["cutout_circle"]);
+    fireLoadEvent(scene, "complete");
+    await flushArt();
+
+    const shutdown = (scene as unknown as { eventsHandlers: Record<string, MockFn[]> })
+      .eventsHandlers.shutdown?.[0];
+    if (!shutdown) throw new Error("the Hub registered no shutdown handler");
+    shutdown();
+
+    expect(first.cancel).toHaveBeenCalled();
+    expect(artScheduler.size()).toBe(0);
+
+    (scene.load.svg as MockFn).mockClear();
+    (scene.load.start as MockFn).mockClear();
+
+    // A new visit on the same (Phaser-reused) instance: a fresh pass that skips
+    // the key the previous visit already rasterized.
+    scene.create();
+    firePrewarmStart(scene);
+    expect(lastArtController()).not.toBe(first);
+
+    artScheduler.fire();
+    await waitForSvg(scene, 1);
+
+    expect(svgQueue(scene).map((entry) => entry.key)).toEqual(["cutout_square"]);
+  });
+
+  it("resolves every art key of every game to its group's markup", async () => {
+    const scene = new HubScene();
+    scene.create();
+    const hub = scene as unknown as {
+      resolveArtSvg: (entry: ArtKeyEntry) => Promise<string | undefined>;
+    };
+
+    // A key from a game's second group exercises the fallback across tables.
+    const circle = await hub.resolveArtSvg({
+      gameId: "shape-sorter",
+      key: "shape_circle",
+      size: 192,
+    });
+    expect(circle).toBe(shapes.assets.find((asset) => asset.key === "shape_circle")?.svg);
+
+    for (const keys of Object.values(ART_KEYS_BY_GAME)) {
+      for (const entry of keys) {
+        const svg = await hub.resolveArtSvg(entry);
+        if (!svg) throw new Error(`no markup resolved for ${entry.gameId}/${entry.key}`);
+        expect(svg).toContain("<svg");
+      }
+    }
+
+    await expect(
+      hub.resolveArtSvg({ gameId: "shape-sorter", key: "not-a-real-key", size: 256 }),
+    ).resolves.toBeUndefined();
+  });
+
+  it("queues zero art keys when the TextureManager already holds the game (AC-5)", () => {
+    const warmed = new MockScene([]);
+    for (const asset of music.assets) {
+      warmed.textures.createCanvas(asset.key);
+    }
+
+    preloadArtGroups(warmed as unknown as Phaser.Scene, [music]);
+
+    expect((warmed.load.svg as MockFn).mock.calls).toHaveLength(0);
+    // Nothing queued means nothing to listen for either.
+    expect((warmed.load.on as MockFn).mock.calls).toHaveLength(0);
   });
 });

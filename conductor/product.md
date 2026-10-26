@@ -124,6 +124,17 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## Changelog - Hub Cold-Tap Art Preload (2026-10-27)
+
+> **2026-10-27 - Hub Cold-Tap Art Preload:** the Hub now rasterizes each
+> game's art into the shared texture store while a child idles, beside the
+> idle chunk imports - so a tap can find both its game already imported and
+> its art already painted. The worst sampled fully-cold first tap measures
+> 332.6 ms against the 400 ms budget, and at a 6-second settle the art queue
+> drives post-tap painting blockage to near zero in every sampled game.
+> Nothing a child sees, hears or taps changes - games open the same way,
+> just sooner.
+
 ## Changelog - Hub Idle Chunk Prewarm (2026-10-26)
 
 > **2026-10-27 - Hub Idle Chunk Prewarm:** the Hub now warms the lazy game

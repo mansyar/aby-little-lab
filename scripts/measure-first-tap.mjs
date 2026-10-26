@@ -15,6 +15,16 @@
  * main thread plus one paint opportunity. The scene's own `preload` art work
  * and its first `create()` happen after that frame.
  *
+ * Stage D closes that gap without touching app code: from the tap instant an
+ * in-page `requestAnimationFrame` loop samples frame deltas for 2.5 s and
+ * reports `blockedMs`, the sum of `max(0, delta - 17)` over the window — the
+ * main-thread time the tap's aftermath (chunk eval, SVG rasterization and
+ * texture upload inside the game scene's `preload`, `create`, the transition
+ * fade) steals beyond one frame budget. Chunk eval is byte-identical across
+ * builds, so a before/after D difference on the same game isolates the art
+ * raster the idle queue removed. Stage C stays the budgeted gate; D is the
+ * art-half diagnostic.
+ *
  * Service workers are blocked in the measurement context so the tap's chunk
  * fetch is a real network request that CDP can see (the PWA precaches every
  * art chunk, which would otherwise satisfy the import from cache and make the
@@ -322,6 +332,27 @@ async function measureGame(browser, target, warmAware = false) {
       anchor,
     );
     await page.mouse.up();
+    // Stage D sampler: an in-page rAF loop over a fixed 2.5 s window from the
+    // tap, collecting frame deltas. Started before any wait below so nothing
+    // of the tap's aftermath (chunk eval, art raster, create, fade) is missed;
+    // awaited after the stage logic, which only lengthens warm taps by the
+    // remainder of the window.
+    const frameDeltas = page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const windowMs = 2500;
+          const deltas = [];
+          const startedAt = performance.now();
+          let last = startedAt;
+          const tick = (now) => {
+            deltas.push(now - last);
+            last = now;
+            if (now - startedAt < windowMs) requestAnimationFrame(tick);
+            else resolve(deltas);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
 
     const anchorEntry = await page.evaluate(
       (probe) =>
@@ -449,6 +480,11 @@ async function measureGame(browser, target, warmAware = false) {
     }
 
     const totalMs = firstFrame - anchorEntry.startTime;
+    // Stage D: main-thread blockage in the tap's aftermath. One frame budget
+    // (17 ms) per sampled frame is free; everything beyond it is time the
+    // child waits on chunk eval, raster, create, or fade jank.
+    const deltas = await frameDeltas;
+    const blockedMs = deltas.reduce((sum, delta) => sum + Math.max(0, delta - 17), 0);
     // An in-flight prewarm request may already have its headers when the tap
     // lands, so A can be <= 0 there; clamping keeps the stage a duration.
     const responseMs =
@@ -463,6 +499,7 @@ async function measureGame(browser, target, warmAware = false) {
       responseMs,
       finishedMs: tapKind === "warm" ? 0 : settledMs,
       totalMs,
+      blockedMs,
       clockSkewMs: totalMs - settledMs,
     };
   } finally {
@@ -498,6 +535,7 @@ async function measureFirstTap(warmAware = false) {
       responseMs: "tap -> game chunk responseReceived (headers only)",
       finishedMs: "tap -> game chunk loadingFinished (body downloaded)",
       totalMs: "tap -> first frame after the chunk settled (budgeted)",
+      blockedMs: "post-tap main-thread blockage: sum of frame time beyond 17 ms over a 2.5 s rAF window (art-half diagnostic)",
       ...(warmAware
         ? {
             warmTotalMs:
@@ -512,6 +550,7 @@ async function measureFirstTap(warmAware = false) {
       responseMs: round(run.responseMs),
       finishedMs: round(run.finishedMs),
       totalMs: round(run.totalMs),
+      blockedMs: round(run.blockedMs),
       clockSkewMs: round(run.clockSkewMs),
     })),
     medians: {
@@ -658,6 +697,7 @@ function printTapTable(taps) {
   console.log("  A = tap -> chunk responseReceived (headers)");
   console.log("  B = tap -> chunk loadingFinished (body downloaded)");
   console.log("  C = tap -> first frame after the chunk settled (budgeted; NOT fully rendered)");
+  console.log("  D = post-tap main-thread blockage over 2.5 s (art-half diagnostic; lower is better)");
   if (cold) {
     console.log(
       "  A warm tap pays neither A nor B: the Hub's idle prewarm imported the chunk, so C is\n" +
@@ -666,14 +706,15 @@ function printTapTable(taps) {
   }
   console.log("");
   console.log(
-    `  game              scene chunk                     A ms    B ms    C ms${cold ? "  kind" : ""}`,
+    `  game              scene chunk                     A ms    B ms    C ms    D ms${cold ? "  kind" : ""}`,
   );
   for (const run of taps.runs) {
     console.log(
       `  ${run.game.padEnd(16)}  ${String(run.chunk).padEnd(28)}  ` +
         `${run.responseMs.toFixed(1).padStart(5)}  ` +
         `${run.finishedMs.toFixed(1).padStart(6)}  ` +
-        `${run.totalMs.toFixed(1).padStart(6)}` +
+        `${run.totalMs.toFixed(1).padStart(6)}  ` +
+        `${run.blockedMs.toFixed(1).padStart(6)}` +
         (cold ? `  ${run.tapKind}` : ""),
     );
   }

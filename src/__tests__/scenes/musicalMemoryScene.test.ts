@@ -293,7 +293,11 @@ describe("adaptive band shift wiring", () => {
     const sequence = (scene as unknown as { sequence: number[] }).sequence;
     expect(sequence).toHaveLength(1);
     const frogControls = getInteractiveImages(scene).slice(0, 3); // frogs only
-    fireFirstHandler(frogControls[sequence[0]]!, "pointerdown");
+    const target = frogControls[sequence[0] ?? 0];
+    if (target === undefined) {
+      throw new Error("expected a frog control at the sequence index");
+    }
+    fireFirstHandler(target, "pointerdown");
 
     expect(isWinMock).toHaveBeenCalledWith(1, 5);
   });

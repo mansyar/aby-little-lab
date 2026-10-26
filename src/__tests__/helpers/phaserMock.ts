@@ -261,6 +261,7 @@ export class MockScene {
       on: vi.fn(),
       once: vi.fn(),
       off: vi.fn(),
+      start: vi.fn(),
     };
     // Empty by default, like a cold TextureManager: keys created here are the
     // ones a scene generated itself (the missing-art placeholder path).

@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-10-27.** The numbers in the section **Idle chunk prewarm — first-tap verdict (2026-10-27)** at the end of this file describe the current build: shell entry `index-DJ5iAYOR.js` at 144.23 kB, **42** JavaScript chunks, **54** precache entries, and the first-tap result split into a warm case (40.9–55.7 ms per game) and a cold case (unchanged, up to ~600 ms). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20) and the Shell Diet re-measurement (2026-10-22). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-10-27.** The numbers in the section **Idle art-queue prewarm — cold-tap verdict (2026-10-26)** at the end of this file describe the current build: shell entry `index-DCKgoc2n.js` at 148.86 kB on disk (148.9 kB via `validate-bundle`), **42** JavaScript chunks, **54** precache entries, and the first-tap result split into a warm case (20–65 ms per game), an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20) and the Shell Diet re-measurement (2026-10-22). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts and the planned work behind these numbers live in one place: [`docs/roadmap.md`](roadmap.md).
 
@@ -418,7 +418,7 @@ measured, dated figure and is a candidate for `docs/roadmap.md`.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 126 files / 2,753 tests | `pnpm test -- --run` |
+| Test suite | 126 files / 2,781 tests | `pnpm test -- --run` |
 | Coverage | statements 97.76 % / branches 91.84 % / functions 96.76 % / lines 98.73 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-10-27; the build
@@ -596,4 +596,146 @@ Build figures for the prewarm build measured here (2026-10-27): shell entry
 1367.08 kB, **42** JavaScript chunks, **54** precache entries (1722.35 KiB) —
 the shell grew 9.6 kB over the 2026-10-22 figure, from the tracks that landed
 after it, and stays well inside the 200 kB budget.
+
+## Idle art-queue prewarm — cold-tap verdict (2026-10-27)
+
+Track: `20261027-cold-tap-art-preload`, Phase 3. This is the increment
+measurement the chunk-prewarm verdict above implies: a cold tap pays fetch
+plus module eval **plus art rasterization** — each game rasterizes its SVG
+groups inside its own `preload`, and the scene's `create` waits for the
+loader — and this track moves that rasterization into Hub idle. Victory is
+AC-6: worst-case cold tap ≤ 400 ms, median-of-three, on the same rig. What
+Phase 3 established on the executor host and what still needs a headed run
+are recorded separately below — no number here is claimed without a run
+behind it.
+
+### Method
+
+Two production builds from the same tree, served side by side on the same
+host, the same warm-aware rig pointed at each with `PREVIEW_URL`:
+
+| Build | What it is | Shell entry file size |
+|---|---|---|
+| Baseline (art queue off) | the track branch with the art pass disabled only: both `this.startArtPass()` calls removed (`syncPrewarm`'s delayed call and `restartPrewarm` in `src/scenes/HubScene.ts`), chunk pass intact; built with `pnpm build` | `index-*.js` = 148.82 kB on disk |
+| Art prewarm | the track branch as committed (`pnpm build`) | `index-*.js` = 148.86 kB on disk |
+
+(The 152.39 / 152.43 kB figures recorded mid-phase from the build log were
+superseded: the on-disk entry files measure 148.82 / 148.86 kB, matching the
+`validate-bundle` shell reading of 148.9 kB. The 0.04 kB delta is unchanged —
+the two builds are code-identical for practical purposes, so any tap
+difference is rasterization saved, not bytes moved.)
+
+```sh
+# art prewarm build
+pnpm build
+node node_modules/vite/bin/vite.js preview --port 4173 --strictPort
+
+# baseline (art queue off): remove the two startArtPass() calls, build, serve
+node node_modules/vite/bin/vite.js preview --port 4174 --strictPort
+
+# one run (three runs per build per settle, alternating builds)
+PREVIEW_URL=http://localhost:4173/ TAP_HEADED=1 HUB_SETTLE_MS=2000 \
+  node scripts/measure-first-tap.mjs --json --warm-aware
+# repeat at HUB_SETTLE_MS=6000; inert control on the prewarm build:
+PREVIEW_URL=http://localhost:4173/ TAP_HEADED=1 TAP_INERT_IDLE=1 \
+  node scripts/measure-first-tap.mjs --json --warm-aware
+```
+
+Headed is required (see the chunk-prewarm Method above — headless starves
+`requestIdleCallback`, which would starve the art queue exactly as it starves
+the chunk pass, and report every tap cold in both builds). Settle stays the
+variable: **2000 ms** and **6000 ms**. The `--warm-aware` classification and
+the 400 ms cold-only gate are unchanged; an art-warmed tap still needs its
+chunk imported first, so chunk-cold taps pay the fetch identically in both
+builds and the comparison isolates the raster half.
+
+Stage C cannot see the art half: `recordGamePlay` fires after the chunk
+import resolves but before `transitionToScene` starts the game scene, so the
+game's `preload` raster and `create` happen after every C reading. The rig
+therefore grew a stage D for this track (`scripts/measure-first-tap.mjs`):
+from the tap instant an in-page `requestAnimationFrame` loop samples frame
+deltas for 2.5 s and reports `blockedMs`, the sum of `max(0, delta - 17)` —
+the main-thread time the tap's aftermath (chunk eval, SVG raster and texture
+upload, `create`, fade) steals beyond one frame budget. Chunk eval is
+byte-identical across builds, so a before/after D difference on the same game
+is the raster the idle queue removed. The budget gate stays on C; D is the
+art-half evidence. C and D overlap in chunk eval, so they are not additive —
+the comparison, not the sum, is the verdict.
+
+### Results (headed, 2026-10-27)
+
+Sixteen runs on the same host, alternating builds per settle, three runs per
+build per settle plus three fully-cold inert runs on the art build
+(`TAP_INERT_IDLE=1`, idle scheduler neutralised). Every prewarm/baseline run
+tapped all five games warm (chunk pass intact in both builds); the inert runs
+tapped all five cold. Raw JSON: `.conductor/evidence/tap-runs/`
+(`art|base-<settle>-r<1..3>.json`, `art-inert-r<1..3>.json`; verdict lines
+stripped for parsing — the rig prints its PASS/FAIL line to stdout even with
+`--json`).
+
+Stage C medians, ms (median of the three runs per cell):
+
+| Game | Baseline 2 s | Art 2 s | Baseline 6 s | Art 6 s | Fully cold (inert) |
+|---|---|---|---|---|---|
+| Shape Sorter | 30.2 | 62.9 | 48.4 | 54.5 | 219.8 |
+| Find the Letter | 32.8 | 44.5 | 38.5 | 44.1 | 190.5 |
+| Find the Word | 27.5 | 47.5 | 40.2 | 44.3 | 332.6 |
+| Add It Up | 32.7 | 45.3 | 50.5 | 55.5 | 204.7 |
+| Memory Match | 33.8 | 31.7 | 37.3 | 41.3 | 242.1 |
+
+Stage D (`blockedMs`) medians, ms:
+
+| Game | Baseline 2 s | Art 2 s | Baseline 6 s | Art 6 s | Fully cold (inert) |
+|---|---|---|---|---|---|
+| Shape Sorter | 53.5 | 16.4 | 90.6 | 20.5 | 98.7 |
+| Find the Letter | 56.9 | 32.6 | 40.6 | 0.0 | 115.3 |
+| Find the Word | 190.8 | 99.2 | 190.3 | 0.0 | 281.0 |
+| Add It Up | 69.9 | 15.6 | 81.9 | 0.0 | 115.0 |
+| Memory Match | 36.4 | 0.0 | 44.9 | 8.0 | 81.8 |
+
+Verdict — **AC-6 passes.** The worst fully-cold tap among the five sampled
+games is Find the Word at 332.6 ms (median of three inert runs), inside the
+400 ms budget, and all five cold medians clear it. The art half is where the track moves the needle: at
+6 s settle the queue drives post-tap blockage to ~zero in every game (Find
+the Word 190.3 → 0.0, Add It Up 81.9 → 0.0, Shape Sorter 90.6 → 20.5, Find
+the Letter 40.6 → 0.0, Memory Match 44.9 → 8.0) — the raster the baseline
+still pays on every chunk-warm tap is gone. At 2 s the queue is still working
+through its hundreds of keys one raster per idle slot (Find the Word
+190.8 → 99.2), exactly the pacing story the chunk pass told first. No chunk
+regression: warm C medians sit in the same 20–65 ms band on both builds, and
+all twelve prewarm/baseline runs tapped 5/5 warm. The one alarming reading of
+the campaign — a 989 ms in-flight Shape Sorter tap on the prior rig — never
+repeated across sixteen runs; medians absorb that class of outlier by
+construction.
+
+**Sample scope.** The rig taps five representative tiles — the sample
+inherited from the chunk-prewarm verdict — including Find the Word, the
+widest art union (83 keys) and the slowest tile in every prior run. The
+remaining 17 games ride the same queue mechanics (same engine, same gates,
+same per-key failure handling) but have no headed cold-tap numbers yet; a
+full 22-game sweep is follow-up work, not a claim made here.
+
+Expectation to test, not a claim: at 6 s settle the chunk pass already warms
+all five tiles, so the art queue (hundreds of keys, one raster per idle slot,
+recency-first) decides how many of the five skip rasterization in `preload`;
+the worst case moves only if Find the Word — the slowest tile in every prior
+run — is art-warm when tapped. If the worst cold median stays above 400 ms,
+the verdict re-scopes honestly to which games remain over budget and why
+(key counts per game, tier sizes, queue position at tap time).
+
+### Established in Phase 3 (executor host, 2026-10-27)
+
+- The art-off baseline compiles and builds with a 0.04 kB on-disk shell
+  delta (148.82 vs 148.86 kB, superseding the build-log figures),
+  isolating rasterization from bytes.
+- The full verification gate is green on the art-prewarm tree with the TDD
+  §4.8 walkthrough included: Biome clean, typecheck clean, 126 files /
+  2,781 tests pass, coverage 97.75 / 91.76 / 96.88 / 98.70,
+  `validate-bundle` (shell ≤ 200 kB gate), `validate-pwa` 16/16,
+  `validate-docs` 6/6.
+- The headed comparison ran on the primary host (sixteen runs, same-host
+  alternating builds, plus the stage-D rig extension): the C/D medians table
+  and the AC-6 verdict above are measured, not pending. Raw JSON is filed
+  under `.conductor/evidence/tap-runs/` beside the phase-3 verification
+  note.
 
