@@ -13,6 +13,7 @@ import {
   selectBubbleType,
   sleepingBoundsFor,
 } from "../game/popFreezeLogic";
+import type { Rng } from "../game/random";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -97,8 +98,8 @@ export class PopFreezeScene extends GameSceneBase {
   /** Sleeping-animal bounds for the session, sampled from the band once. */
   private sleepBounds: SleepingBounds = sleepingBoundsFor(0);
 
-  constructor() {
-    super("PopFreeze");
+  constructor(rng: Rng = Math.random) {
+    super("PopFreeze", rng);
   }
 
   preload(): void {
@@ -130,6 +131,7 @@ export class PopFreezeScene extends GameSceneBase {
       this.scale.height,
       BUBBLE_DISPLAY_SIZE,
       this.sleepBounds,
+      this.rng,
     );
 
     for (const config of configs) {
@@ -289,12 +291,13 @@ export class PopFreezeScene extends GameSceneBase {
   /** Spawns a replacement bubble to maintain concurrent count (1-2 sleeping maintained). */
   private respawnBubble(): void {
     const sleepingCount = this.bubbles.filter((b) => b.config.type === "sleeping").length;
-    const type = selectBubbleType(sleepingCount, this.sleepBounds);
+    const type = selectBubbleType(sleepingCount, this.sleepBounds, this.rng);
     const config = generateSpawnConfig(
       this.scale.width,
       this.scale.height,
       BUBBLE_DISPLAY_SIZE,
       type,
+      this.rng,
     );
     this.spawnBubble(config);
   }

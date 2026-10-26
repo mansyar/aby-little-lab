@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import type { BandShift } from "../game/adaptiveLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -70,8 +71,14 @@ export interface GroupMathConfig<Round extends GroupMathRound> {
   readonly gameId: GameId;
   /** Texture key of the operation cue between the two prompt cards. */
   readonly operationCue: "plus" | "minus";
-  /** Pure playthrough generator for this rule set. */
-  readonly buildPlaythrough: (shift: BandShift) => Round[];
+  /**
+   * Pure playthrough generator for this rule set.
+   *
+   * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+   * playthrough is reproducible, while production passes the scene's
+   * `Math.random` default. It is optional so a rule set may ignore it.
+   */
+  readonly buildPlaythrough: (shift: BandShift, rng?: Rng) => Round[];
   /** Pure evaluator for this rule set. */
   readonly isCorrect: (
     options: readonly number[],
@@ -107,7 +114,7 @@ export abstract class GroupMathScene<Round extends GroupMathRound> extends Choic
     this.createProgressDots(this.totalRounds());
     this.createSpokenInstruction(this.config.instruction);
 
-    this.rounds = this.config.buildPlaythrough(getAdaptiveBandShift(this.config.gameId));
+    this.rounds = this.config.buildPlaythrough(getAdaptiveBandShift(this.config.gameId), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

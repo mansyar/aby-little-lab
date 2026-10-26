@@ -2,7 +2,7 @@ import type Phaser from "phaser";
 import { cutouts } from "../game/art/cutouts";
 import { shapes } from "../game/art/shapes";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
-import { shuffle } from "../game/random";
+import { type Rng, shuffle } from "../game/random";
 import { generatePlaythrough, isMatch, type ShapeType } from "../game/shapeSorterLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight } from "../utils/dragJuice";
@@ -73,8 +73,8 @@ export class ShapeSorterScene extends GameSceneBase {
   private shapes: ShapeData[] = [];
   private slots: SlotData[] = [];
 
-  constructor() {
-    super("ShapeSorter");
+  constructor(rng: Rng = Math.random) {
+    super("ShapeSorter", rng);
   }
 
   preload(): void {
@@ -111,7 +111,11 @@ export class ShapeSorterScene extends GameSceneBase {
       },
     });
 
-    this.playthrough = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("shape-sorter"));
+    this.playthrough = generatePlaythrough(
+      ROUND_COUNT,
+      getAdaptiveBandShift("shape-sorter"),
+      this.rng,
+    );
     this.roundIndex = 0;
     this.createProgressDots(ROUND_COUNT);
     this.initRound();
@@ -123,8 +127,8 @@ export class ShapeSorterScene extends GameSceneBase {
   private initRound(): void {
     const roundShapes = this.playthrough[this.roundIndex];
     this.selectedShapes = roundShapes;
-    this.slotOrder = shuffle(roundShapes);
-    this.shapeOrder = shuffle(roundShapes);
+    this.slotOrder = shuffle(roundShapes, this.rng);
+    this.shapeOrder = shuffle(roundShapes, this.rng);
     this.shapes = [];
     this.slots = [];
 

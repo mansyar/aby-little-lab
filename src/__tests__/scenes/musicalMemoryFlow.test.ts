@@ -71,6 +71,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
 
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -88,12 +89,6 @@ afterEach(() => {
 });
 
 describe("MusicalMemoryScene sequence playback and input", () => {
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -186,7 +181,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   }
 
   it("creates 3 frog images and 3 lily pad images", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const imageCalls = getMockFn(scene.add.image).mock.calls;
@@ -199,23 +194,24 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("auto-plays sequence at round start with each frog playing its note in sequence order", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
-    // With Math.random=0.5, sequence = [1, 1] (blue frog, E4=329.63Hz)
+    // Seed 1234 opens with sequence [0, 2] (green C4=261.63Hz, red G4=392.00Hz).
     // Notes are scheduled via delayed calls — none played yet
     expect(mockAudio.playFrogNote).not.toHaveBeenCalled();
 
     // Fire all delayed calls to simulate playback
     fireAllDelayedCalls(scene);
 
-    // Should have played 2 notes (sequence length 2), both E4 (329.63Hz)
+    // Should have played 2 notes: the first green, then red
     expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(2);
-    expect(mockAudio.playFrogNote).toHaveBeenCalledWith(329.63);
+    expect(mockAudio.playFrogNote).toHaveBeenCalledWith(261.63);
+    expect(mockAudio.playFrogNote).toHaveBeenCalledWith(392.0);
   });
 
   it("plays short sequences at 600ms per note and long sequences at 480ms", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const s = scene as unknown as {
@@ -248,7 +244,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("locks input during sequence playback (taps ignored)", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     // Don't fire delayed calls — playback is "in progress", input locked
@@ -260,7 +256,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("unlocks input after sequence playback completes", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     // Fire all delayed calls — playback completes, input unlocked
@@ -275,7 +271,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("child tap on a frog plays its note and triggers scale animation", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
@@ -283,17 +279,17 @@ describe("MusicalMemoryScene sequence playback and input", () => {
     clearAudioMocks();
 
     const tweensBefore = getMockFn(scene.tweens.add).mock.calls.length;
-    tapFrog(frogs, 1); // Tap blue frog
+    tapFrog(frogs, 0); // Tap the seeded round's first note (green frog)
     const tweensAfter = getMockFn(scene.tweens.add).mock.calls.length;
 
     // Note plays from the tap
     expect(mockAudio.playFrogNote).toHaveBeenCalledTimes(1);
-    expect(mockAudio.playFrogNote).toHaveBeenCalledWith(329.63);
+    expect(mockAudio.playFrogNote).toHaveBeenCalledWith(261.63);
 
     // Scale animation (tween) added for the tapped frog
     expect(tweensAfter).toBeGreaterThan(tweensBefore);
     const latestTween = getMockFn(scene.tweens.add).mock.calls[tweensAfter - 1][0];
-    expect(latestTween.targets).toBe(frogs[1]);
+    expect(latestTween.targets).toBe(frogs[0]);
     expect(latestTween.yoyo).toBe(true);
   });
 
@@ -302,41 +298,42 @@ describe("MusicalMemoryScene sequence playback and input", () => {
       matchMedia: vi.fn(() => ({ matches: true })),
     });
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
     const frogs = getFrogs(scene);
     clearAudioMocks();
 
-    tapFrog(frogs, 1); // Tap blue frog
+    tapFrog(frogs, 0); // Tap the seeded round's first note (green frog)
     const tweensAfter = getMockFn(scene.tweens.add).mock.calls.length;
 
     const latestTween = getMockFn(scene.tweens.add).mock.calls[tweensAfter - 1][0];
-    expect(latestTween.targets).toBe(frogs[1]);
+    expect(latestTween.targets).toBe(frogs[0]);
     expect(latestTween.duration).toBe(120);
     expect(latestTween.scaleX).toBeCloseTo((128 / 256) * 1.05, 5);
     expect(latestTween.scaleY).toBeCloseTo((128 / 256) * 1.05, 5);
   });
 
   it("correct tap advances input index; completing the full sequence triggers round success", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
     const frogs = getFrogs(scene);
     clearAudioMocks();
 
-    // Sequence is [1, 1] — tap blue frog twice to complete
-    tapFrog(frogs, 1); // Correct (index 0 -> 1)
-    tapFrog(frogs, 1); // Correct (index 1 -> 2, round complete)
+    // Complete the seeded round-1 sequence [0, 2] (green, then red).
+    const sequence = (scene as unknown as { sequence: number[] }).sequence;
+    tapFrog(frogs, sequence[0]); // Correct (index 0 -> 1)
+    tapFrog(frogs, sequence[1]); // Correct (index 1 -> 2, round complete)
 
     // Round success triggers correct SFX
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
   });
 
   it("wrong tap plays incorrect SFX, replays the sequence, and retries the same round", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
@@ -345,8 +342,8 @@ describe("MusicalMemoryScene sequence playback and input", () => {
 
     const delayedCallsBefore = getMockFn(scene.time.delayedCall).mock.calls.length;
 
-    // Tap wrong frog (sequence[0]=1, tap frog 0=green)
-    tapFrog(frogs, 0);
+    // Tap wrong frog (seeded sequence[0]=0 green, so tap frog 1=blue)
+    tapFrog(frogs, 1);
 
     // Incorrect SFX plays
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
@@ -366,13 +363,14 @@ describe("MusicalMemoryScene sequence playback and input", () => {
 
     // After replay, the same round can still be completed (no progress lost)
     clearAudioMocks();
-    tapFrog(frogs, 1); // Correct
-    tapFrog(frogs, 1); // Correct, round complete
+    const sequence = (scene as unknown as { sequence: number[] }).sequence;
+    tapFrog(frogs, sequence[0]); // Correct
+    tapFrog(frogs, sequence[1]); // Correct, round complete
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
   });
 
   it("replay button re-plays the current sequence on demand", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
@@ -394,14 +392,10 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("replay resets input progress so the child can restart from the first note", () => {
-    // Sequence [0, 1] (green, blue): distinct adjacent notes expose the
-    // stale-inputIndex bug — without the reset, a replay followed by the
-    // first-note tap would be judged against the SECOND note and fail.
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.0).mockReturnValueOnce(0.5).mockReturnValue(0.5);
-
-    const scene = new MusicalMemoryScene();
+    // Sequence [0, 2] under seed 1234 (green, red): distinct adjacent notes
+    // expose the stale-inputIndex bug — without the reset, a replay followed
+    // by the first-note tap would be judged against the SECOND note and fail.
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene); // initial playback done, input unlocked
 
@@ -430,7 +424,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("input is locked during replay and unlocked after replay completes", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
@@ -458,7 +452,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("creates frog touch targets meeting 64x64px minimum", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const frogs = getFrogs(scene);
@@ -473,7 +467,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
     }
   });
   it("emits a self-cleaning ripple ring when a frog is tapped", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
@@ -506,7 +500,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   it("uses reduced-motion ripple timing when requested", () => {
     vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     fireAllDelayedCalls(scene);
 
@@ -532,7 +526,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   });
 
   it("drifts lily pads gently with a looping tween", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn(scene.add.image);
@@ -558,7 +552,7 @@ describe("MusicalMemoryScene sequence playback and input", () => {
   it("skips lily pad drift under reduced motion", () => {
     vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn(scene.add.image);
@@ -570,15 +564,21 @@ describe("MusicalMemoryScene sequence playback and input", () => {
       }
     }
   });
+
+  it("builds identical sequences from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new MusicalMemoryScene(mulberry32(1234));
+    first.create();
+    const second = new MusicalMemoryScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { sequence: number[] }).sequence;
+    const b = (second as unknown as { sequence: number[] }).sequence;
+
+    expect(b).toEqual(a);
+  });
 });
 
 describe("MusicalMemoryScene round progression and completion", () => {
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -687,7 +687,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   }
 
   it("creates 5 progress dots at scene initialization", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const dots = getProgressDots(scene);
@@ -695,7 +695,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   });
 
   it("round success fills the next progress dot", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
     const dots = getProgressDots(scene);
@@ -707,7 +707,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   });
 
   it("pops the progress dot with a scale bounce on round success", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
     const dots = getProgressDots(scene);
@@ -727,7 +727,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   it("uses a reduced-motion progress dot pop", () => {
     vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
     const dots = getProgressDots(scene);
@@ -742,7 +742,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   });
 
   it("sequence grows by 1 on round success and the next round auto-plays", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
 
@@ -757,7 +757,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   it("completion is triggered only at length-6 (5th round)", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
 
@@ -777,7 +777,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   it("plays the choreographed win celebration on completion", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
     const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
@@ -791,7 +791,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   it("awards sticker on first completion only", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
 
@@ -804,7 +804,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   it("does not re-award sticker when already earned", () => {
     vi.mocked(hasSticker).mockReturnValue(true);
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
 
@@ -817,7 +817,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   it("auto-returns to Hub after 3s delay on completion", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
 
@@ -838,7 +838,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   });
 
   it("re-launching after completion restarts playback and unlocks input", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     const frogs = getFrogs(scene);
 
@@ -859,7 +859,7 @@ describe("MusicalMemoryScene round progression and completion", () => {
   });
 
   it("parental lock exits to Hub at any time", () => {
-    const scene = new MusicalMemoryScene();
+    const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
 
     const backButton = getBackButton(scene);

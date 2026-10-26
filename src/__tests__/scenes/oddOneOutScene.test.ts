@@ -74,6 +74,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 const { getAdaptiveBandShiftMock, createPlaythroughMock } = vi.hoisted(() => ({
   getAdaptiveBandShiftMock: vi.fn((_gameId: string): -1 | 0 | 1 => 0),
@@ -105,7 +106,6 @@ describe("OddOneOutScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -237,7 +237,7 @@ describe("OddOneOutScene round flow", () => {
   }
 
   it("renders a 2x2 grid of 4 cards (3 identical + 1 odd) and 6 progress dots", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -268,7 +268,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("speaks the odd item's name at round start when SFX is enabled", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -278,7 +278,7 @@ describe("OddOneOutScene round flow", () => {
   it("silences TTS when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
 
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -286,7 +286,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("tapping the odd card plays the correct chime, flashes success, and advances", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const dots = getProgressDots(scene);
@@ -323,7 +323,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("tapping a group card wiggles gently and does not advance the round", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const wrongIndex = round.oddSlot === 0 ? 1 : 0;
@@ -357,7 +357,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("does nothing when the speaker is tapped after the final round (celebration guard)", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     mockSpeech.speakWord.mockClear();
 
@@ -374,7 +374,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("re-speaks the current odd item when the speaker is tapped mid-round", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     mockSpeech.speakWord.mockClear();
 
@@ -391,7 +391,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("skips the flash revert when the card is destroyed before the 250ms timer", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const cards = getCardRects(scene);
@@ -412,7 +412,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -447,7 +447,7 @@ describe("OddOneOutScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("odd-one-out");
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -462,7 +462,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -482,7 +482,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -507,7 +507,7 @@ describe("OddOneOutScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const wrongIndex = round.oddSlot === 0 ? 1 : 0;
@@ -527,7 +527,7 @@ describe("OddOneOutScene round flow", () => {
   });
 
   it("generates a valid playthrough for the scene (6 rounds, 3 identical + 1 odd each)", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     const rounds = (scene as unknown as { rounds: OddOneRound[] }).rounds;
 
@@ -537,6 +537,18 @@ describe("OddOneOutScene round flow", () => {
       expect(round.oddSlot).toBeGreaterThanOrEqual(0);
       expect(round.oddSlot).toBeLessThanOrEqual(3);
     }
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new OddOneOutScene(mulberry32(1234));
+    first.create();
+    const second = new OddOneOutScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: OddOneRound[] }).rounds;
+    const b = (second as unknown as { rounds: OddOneRound[] }).rounds;
+
+    expect(b).toEqual(a);
   });
 });
 
@@ -554,7 +566,7 @@ describe("OddOneOutScene press feedback cohesion", () => {
 
   it("gives every option card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -566,7 +578,7 @@ describe("OddOneOutScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -576,14 +588,14 @@ describe("OddOneOutScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new OddOneOutScene();
+    const reducedScene = new OddOneOutScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -607,15 +619,15 @@ describe("OddOneOutScene adaptive shift", () => {
 
   it("passes the facade's band shift to createPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("odd-one-out");
-    expect(createPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(createPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new OddOneOutScene();
+    const scene = new OddOneOutScene(mulberry32(1234));
     scene.create();
-    expect(createPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(createPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 });

@@ -78,6 +78,7 @@ vi.mock("../../utils/storage", async (importOriginal) => ({
 
 import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -88,7 +89,6 @@ describe("PopFreezeScene spawn and tap routing", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -119,6 +119,22 @@ describe("PopFreezeScene spawn and tap routing", () => {
     return imageMock.mock.results.map((r) => r.value as Record<string, MockFn>);
   }
 
+  it("spawns identical bubble layouts from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new PopFreezeScene(mulberry32(1234));
+    first.create();
+    const firstArgs = getMockFn(
+      (first as unknown as { physics: { add: { image: MockFn } } }).physics.add.image,
+    ).mock.calls.map((call) => [call[0], call[1]]);
+
+    const second = new PopFreezeScene(mulberry32(1234));
+    second.create();
+    const secondArgs = getMockFn(
+      (second as unknown as { physics: { add: { image: MockFn } } }).physics.add.image,
+    ).mock.calls.map((call) => [call[0], call[1]]);
+
+    expect(secondArgs).toEqual(firstArgs);
+  });
+
   /** Taps a bubble by invoking its registered pointerdown handler. */
   function tapBubble(bubble: Record<string, MockFn>): void {
     const handler = getMockFn(bubble.on).mock.calls.find((call) => call[0] === "pointerdown");
@@ -129,7 +145,7 @@ describe("PopFreezeScene spawn and tap routing", () => {
   }
 
   it("spawns 5 bubbles with 96px display, 48px circle bodies, and sleeping overlays", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -145,37 +161,40 @@ describe("PopFreezeScene spawn and tap routing", () => {
       expect(getMockFn(bubble.setInteractive)).toHaveBeenCalled();
     }
 
-    // Exactly one sleeping bubble carries an animal + zzz overlay (Math.random 0.5).
+    // Seeded mulberry32(1234) opens with two sleeping bubbles (bubbles 0 and 1;
+    // the first is band-forced, the second wins the 50/50 roll at 0.073).
     const imageMock = getMockFn((scene as unknown as { add: { image: MockFn } }).add.image);
     const animalCalls = imageMock.mock.calls.filter(
       (call) => typeof call[2] === "string" && call[2].startsWith("animal_"),
     );
-    expect(animalCalls).toHaveLength(1);
+    expect(animalCalls).toHaveLength(2);
     const zzzCalls = imageMock.mock.calls.filter((call) => call[2] === "sleep_zzz");
-    expect(zzzCalls).toHaveLength(1);
+    expect(zzzCalls).toHaveLength(2);
   });
 
   it("routes poppable taps to pop and sleeping taps to wake", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
+    // Seeded mulberry32(1234): bubbles 0 and 1 sleep, bubble 2 is the first poppable.
     tapBubble(bubbles[0]);
     expect(mockAudio.playWake).toHaveBeenCalledTimes(1);
     expect(mockAudio.playPop).not.toHaveBeenCalled();
     expect(mockMascot.nod).toHaveBeenCalledTimes(1);
 
-    tapBubble(bubbles[1]);
+    tapBubble(bubbles[2]);
     expect(mockAudio.playPop).toHaveBeenCalledTimes(1);
     expect(mockAudio.playWake).toHaveBeenCalledTimes(1);
     expect(mockMascot.cheer).toHaveBeenCalledTimes(1);
   });
 
   it("pops a bubble and respawns a replacement to keep 5 concurrent", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
-    tapBubble(getBubbles(scene)[1]);
+    // Bubble 2 is the first poppable under the seeded draw sequence.
+    tapBubble(getBubbles(scene)[2]);
     expect(mockAudio.playPop).toHaveBeenCalledTimes(1);
 
     // 5 initial + 1 respawn; the live set is still 5 bubbles.
@@ -185,13 +204,13 @@ describe("PopFreezeScene spawn and tap routing", () => {
   });
 
   it("emits self-cleaning droplet graphics on pop", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const graphicsMock = getMockFn(
       (scene as unknown as { add: { graphics: MockFn } }).add.graphics,
     );
-    tapBubble(getBubbles(scene)[1]);
+    tapBubble(getBubbles(scene)[2]);
 
     // graphics[0] = completion splash rays, graphics[1] = droplet burst.
     const splash = graphicsMock.mock.results[0].value as Record<string, MockFn>;
@@ -211,7 +230,7 @@ describe("PopFreezeScene spawn and tap routing", () => {
 
   it("skips the breathing loop under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const tweenMock = getMockFn((scene as unknown as { tweens: { add: MockFn } }).tweens.add);
@@ -220,7 +239,7 @@ describe("PopFreezeScene spawn and tap routing", () => {
   });
 
   it("syncs sleeping overlays with their bubble in update() and skips poppables", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn((scene as unknown as { add: { image: MockFn } }).add.image);
@@ -250,25 +269,25 @@ describe("PopFreezeScene spawn and tap routing", () => {
   });
 
   it("destroys the popped bubble when its shrink tween completes", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
-    tapBubble(bubbles[1]);
+    tapBubble(bubbles[2]);
 
     const tweenMock = getMockFn((scene as unknown as { tweens: { add: MockFn } }).tweens.add);
     const shrink = tweenMock.mock.calls.find(
-      (call) => call[0]?.targets === bubbles[1] && call[0]?.scaleX === 0,
+      (call) => call[0]?.targets === bubbles[2] && call[0]?.scaleX === 0,
     );
     expect(shrink).toBeDefined();
     if (shrink && typeof shrink[0].onComplete === "function") {
       shrink[0].onComplete();
     }
-    expect(getMockFn(bubbles[1].destroy)).toHaveBeenCalled();
+    expect(getMockFn(bubbles[2].destroy)).toHaveBeenCalled();
   });
 
   it("breathes the sleeping animal with a looping tween in normal motion", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn((scene as unknown as { add: { image: MockFn } }).add.image);
@@ -302,22 +321,23 @@ describe("PopFreezeScene spawn and tap routing", () => {
 
     it("samples the band shift once in create() and honours the band bounds", () => {
       getAdaptiveBandShiftMock.mockReturnValue(1);
-      const scene = new PopFreezeScene();
+      const scene = new PopFreezeScene(mulberry32(1234));
       scene.create();
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("pop-freeze");
-      // Hard band (Math.random 0.5): two sleeping bubbles are forced first.
-      expect(countAnimalOverlays(scene)).toBe(2);
+      // Hard band (seed 1234): two forced sleepers plus one rolled sleeper.
+      expect(countAnimalOverlays(scene)).toBe(3);
     });
 
-    it("easy band opens all-poppable and taps never wake (inert wake flow)", () => {
+    it("easy band keeps poppable taps popping (one seeded sleeper opens)", () => {
       getAdaptiveBandShiftMock.mockReturnValue(-1);
-      const scene = new PopFreezeScene();
+      const scene = new PopFreezeScene(mulberry32(1234));
       scene.create();
-      // Math.random 0.5 sleeps the 50/50 roll (>= 0.5) on poppable every time.
-      expect(countAnimalOverlays(scene)).toBe(0);
+      // Seed 1234's first draw (0.073) wins the easy band's 50/50 roll, so the
+      // opening has exactly one sleeping bubble; bubble 1 is poppable.
+      expect(countAnimalOverlays(scene)).toBe(1);
       const bubbles = getBubbles(scene);
-      tapBubble(bubbles[0]);
+      tapBubble(bubbles[1]);
       expect(getMockFn(mockAudio.playPop)).toHaveBeenCalledTimes(1);
       expect(getMockFn(mockAudio.playWake)).not.toHaveBeenCalled();
     });
@@ -326,7 +346,6 @@ describe("PopFreezeScene spawn and tap routing", () => {
 
 describe("PopFreezeScene completion and sticker flow", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -358,12 +377,16 @@ describe("PopFreezeScene completion and sticker flow", () => {
 
   function completeRound(scene: PopFreezeScene): void {
     const initial = getBubbles(scene);
-    for (let i = 1; i <= 4; i++) {
+    // Seeded mulberry32(1234): bubbles 0 and 1 sleep; poppables are 2-4.
+    for (let i = 2; i <= 4; i++) {
       tapBubble(initial[i]);
     }
+    // Respawns keep the sleeping count at the classic maximum (2), so every
+    // respawn stays poppable: three more pops complete the round.
     const refreshed = getBubbles(scene);
     tapBubble(refreshed[5]);
     tapBubble(refreshed[6]);
+    tapBubble(refreshed[7]);
   }
 
   function completeFadeOuts(scene: PopFreezeScene): void {
@@ -377,7 +400,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   }
 
   it("plays win SFX when 6 poppable bubbles are popped", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     completeRound(scene);
@@ -386,7 +409,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   });
 
   it("locks input after the round is complete", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     completeRound(scene);
@@ -402,7 +425,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   });
 
   it("awards the sticker on first completion and auto-returns with justEarned", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     completeRound(scene);
@@ -431,7 +454,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
 
   it("does not re-award the sticker or pass justEarned on repeat completions", () => {
     earnSticker("pop-freeze");
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     completeRound(scene);
@@ -457,7 +480,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   });
 
   it("starts a fresh round on relaunch (no stale completion state)", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     completeRound(scene);

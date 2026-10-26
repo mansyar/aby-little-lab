@@ -73,6 +73,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
 import { getCorrectShape, type PatternRound } from "../../game/patternBuilderLogic";
 import { PatternBuilderScene } from "../../scenes/PatternBuilderScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -90,12 +91,6 @@ afterEach(() => {
 });
 
 describe("PatternBuilderScene round flow", () => {
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -109,7 +104,7 @@ describe("PatternBuilderScene round flow", () => {
     return s.rounds[s.roundIndex];
   }
 
-  /** Returns the answer card rectangles (created at the cards row y). */
+  /** Returns the live answer card rectangles (created at the cards row y). */
   function getCardRects(scene: unknown): Array<Record<string, MockFn>> {
     const s = scene as { add: Record<string, unknown> };
     const rectangleMock = getMockFn(s.add.rectangle);
@@ -117,13 +112,16 @@ describe("PatternBuilderScene round flow", () => {
     const cards: Array<Record<string, MockFn>> = [];
     for (let i = 0; i < rectangleMock.mock.calls.length; i++) {
       if (rectangleMock.mock.calls[i][1] === cardsY) {
-        cards.push(rectangleMock.mock.results[i].value as Record<string, MockFn>);
+        const rect = rectangleMock.mock.results[i].value as Record<string, MockFn>;
+        if (getMockFn(rect.destroy).mock.calls.length === 0) {
+          cards.push(rect);
+        }
       }
     }
     return cards;
   }
 
-  /** Returns the answer card shape images (created at the cards row y). */
+  /** Returns the live answer card shape images (created at the cards row y). */
   function getCardShapes(scene: unknown): Array<Record<string, MockFn>> {
     const s = scene as { add: Record<string, unknown> };
     const imageMock = getMockFn(s.add.image);
@@ -131,7 +129,10 @@ describe("PatternBuilderScene round flow", () => {
     const cards: Array<Record<string, MockFn>> = [];
     for (let i = 0; i < imageMock.mock.calls.length; i++) {
       if (imageMock.mock.calls[i][1] === cardsY) {
-        cards.push(imageMock.mock.results[i].value as Record<string, MockFn>);
+        const shape = imageMock.mock.results[i].value as Record<string, MockFn>;
+        if (getMockFn(shape.destroy).mock.calls.length === 0) {
+          cards.push(shape);
+        }
       }
     }
     return cards;
@@ -190,7 +191,7 @@ describe("PatternBuilderScene round flow", () => {
   }
 
   it("creates 6 progress dots, 3 filled slots, 1 gap marker, and 3 answer cards", () => {
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     const dots = getProgressDots(scene);
@@ -217,7 +218,7 @@ describe("PatternBuilderScene round flow", () => {
   });
 
   it("tapping the correct card plays the correct chime, fills the dot, and advances", () => {
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(getCorrectShape(round));
@@ -269,7 +270,7 @@ describe("PatternBuilderScene round flow", () => {
   });
 
   it("tapping a wrong card wiggles it gently and does not advance the round", () => {
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(getCorrectShape(round));
@@ -304,7 +305,7 @@ describe("PatternBuilderScene round flow", () => {
   it("completing all 6 rounds triggers win, first-time sticker award, and auto-return", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -340,7 +341,7 @@ describe("PatternBuilderScene round flow", () => {
   it("does not re-award sticker when already earned", () => {
     vi.mocked(hasSticker).mockReturnValue(true);
 
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -363,7 +364,7 @@ describe("PatternBuilderScene round flow", () => {
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
     vi.mocked(hasSticker).mockReturnValue(true);
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -382,6 +383,18 @@ describe("PatternBuilderScene round flow", () => {
     tapCard(scene, correctIndex);
     expect(mockAudio.playCorrect.mock.calls.length).toBe(correctCallsBefore + 1);
   });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new PatternBuilderScene(mulberry32(1234));
+    first.create();
+    const second = new PatternBuilderScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: PatternRound[] }).rounds;
+    const b = (second as unknown as { rounds: typeof a }).rounds;
+
+    expect(b).toEqual(a);
+  });
 });
 
 describe("PatternBuilderScene spoken instruction", () => {
@@ -393,7 +406,7 @@ describe("PatternBuilderScene spoken instruction", () => {
   });
 
   it("shows and speaks the rule when the round starts", () => {
-    const scene = new PatternBuilderScene();
+    const scene = new PatternBuilderScene(mulberry32(1234));
     scene.create();
 
     const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add

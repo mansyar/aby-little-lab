@@ -124,6 +124,16 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## Changelog - Scene RNG Seam (2026-10-26)
+
+> **2026-10-26 - Scene RNG Seam:** the last hidden testing seam inside the
+> games is now open. Every game scene can be handed its own random number
+> generator, so the test suite seeds each scene directly instead of stubbing
+> the platform's random source across whole test files. This is an internal
+> test-determinism refactor only: the production randomness source is
+> unchanged, and nothing a child sees, hears or taps changes — every game
+> deals the same rounds, in the same order, from the same pools as before.
+
 ## Changelog - Shared Random Helpers (2026-10-25)
 
 > **2026-10-25 - Shared Random Helpers:** the lab now draws its randomness from

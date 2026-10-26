@@ -69,8 +69,10 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   return { ensureSceneLoaded: mockEnsureSceneLoaded };
 });
 
+import type { ObjectType } from "../../game/shadowMatchLogic";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -127,6 +129,20 @@ describe("ShadowMatchScene round initialization", () => {
       expect(getMockFn(obj.setInteractive)).toHaveBeenCalled();
     }
     expect(getMockFn(scene.input.setDraggable)).toHaveBeenCalledTimes(6);
+  });
+
+  it("builds an identical round from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new ShadowMatchScene(mulberry32(1234));
+    first.create();
+    const second = new ShadowMatchScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { round: { objects: ObjectType[]; shadows: ObjectType[] } })
+      .round;
+    const b = (second as unknown as { round: { objects: ObjectType[]; shadows: ObjectType[] } })
+      .round;
+
+    expect(b).toEqual(a);
   });
 });
 

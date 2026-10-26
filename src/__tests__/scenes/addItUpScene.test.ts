@@ -79,9 +79,11 @@ vi.mock("../../game/addItUpLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/addItUpLogic")>();
   return {
     ...actual,
-    buildPlaythrough: (shift: -1 | 0 | 1 = 0) => {
-      buildPlaythroughMock(shift);
-      return actual.buildPlaythrough(shift);
+    // Forward every argument: the scene calls buildPlaythrough(shift, rng),
+    // and dropping rng here would silently strip the seeded path.
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
     },
   };
 });
@@ -95,6 +97,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -105,7 +108,6 @@ describe("AddItUpScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -274,7 +276,7 @@ describe("AddItUpScene round flow", () => {
   }
 
   it("renders 2 addend cards, plus/equals cues, 4 interactive answer cards, and 6 progress dots", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -338,7 +340,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("tapping the matching total card plays the correct chime, flashes success, and advances", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -373,7 +375,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("tapping a non-matching card wiggles gently and does not advance the round", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -416,7 +418,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("skips the flash revert when the answer card is destroyed before the 250ms timer", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -438,7 +440,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -473,7 +475,7 @@ describe("AddItUpScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("add-it-up");
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -488,7 +490,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -509,7 +511,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -534,7 +536,7 @@ describe("AddItUpScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const targetSlot = round.answerOptions.indexOf(round.target);
@@ -555,7 +557,7 @@ describe("AddItUpScene round flow", () => {
   });
 
   it("generates a valid playthrough for the scene (6 rounds, distinct totals, target present)", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
     const rounds = (scene as unknown as { rounds: AddItUpRound[] }).rounds;
 
@@ -566,6 +568,18 @@ describe("AddItUpScene round flow", () => {
       expect(round.answerOptions).toContain(round.target);
       expect(round.addends[0].count + round.addends[1].count).toBe(round.target);
     }
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new AddItUpScene(mulberry32(1234));
+    first.create();
+    const second = new AddItUpScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: AddItUpRound[] }).rounds;
+    const b = (second as unknown as { rounds: AddItUpRound[] }).rounds;
+
+    expect(b).toEqual(a);
   });
 });
 
@@ -583,7 +597,7 @@ describe("AddItUpScene press feedback cohesion", () => {
 
   it("gives every answer card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -595,7 +609,7 @@ describe("AddItUpScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -605,14 +619,14 @@ describe("AddItUpScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per answer card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new AddItUpScene();
+    const reducedScene = new AddItUpScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -629,7 +643,6 @@ describe("AddItUpScene press feedback cohesion", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     getAdaptiveBandShiftMock.mockClear();
@@ -645,17 +658,17 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to buildPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 });
 
@@ -668,7 +681,7 @@ describe("AddItUpScene spoken instruction", () => {
   });
 
   it("shows and speaks the rule when the round starts", () => {
-    const scene = new AddItUpScene();
+    const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
     const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add

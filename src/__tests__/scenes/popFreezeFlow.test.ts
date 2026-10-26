@@ -73,6 +73,7 @@ vi.mock("../../scenes/sceneRegistry", async () => {
 
 import { PopFreezeScene } from "../../scenes/PopFreezeScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -90,12 +91,6 @@ afterEach(() => {
 });
 
 describe("PopFreezeScene round initialization", () => {
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -108,22 +103,40 @@ describe("PopFreezeScene round initialization", () => {
   }
 
   it("creates 5 concurrent bubble physics images", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const physicsImageMock = getMockFn(scene.physics.add.image);
     expect(physicsImageMock.mock.calls).toHaveLength(5);
   });
 
+  it("spawns identical bubble layouts from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new PopFreezeScene(mulberry32(1234));
+    first.create();
+    const firstArgs = getMockFn(first.physics.add.image).mock.calls.map((call) => [
+      call[0],
+      call[1],
+    ]);
+
+    const second = new PopFreezeScene(mulberry32(1234));
+    second.create();
+    const secondArgs = getMockFn(second.physics.add.image).mock.calls.map((call) => [
+      call[0],
+      call[1],
+    ]);
+
+    expect(secondArgs).toEqual(firstArgs);
+  });
+
   it("sets world bounds collision for bouncing", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     expect(getMockFn(scene.physics.world.setBoundsCollision)).toHaveBeenCalled();
   });
 
   it("sets velocity on each bubble for floating motion", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -133,7 +146,7 @@ describe("PopFreezeScene round initialization", () => {
   });
 
   it("enables world bounds collision on each bubble", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -143,7 +156,7 @@ describe("PopFreezeScene round initialization", () => {
   });
 
   it("makes each bubble interactive for tapping", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -153,7 +166,7 @@ describe("PopFreezeScene round initialization", () => {
   });
 
   it("creates touch targets meeting 64x64px minimum", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -167,7 +180,7 @@ describe("PopFreezeScene round initialization", () => {
   });
 
   it("creates animal image for sleeping bubbles", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const imageCalls = getMockFn(scene.add.image).mock.calls;
@@ -178,7 +191,7 @@ describe("PopFreezeScene round initialization", () => {
   });
 
   it("creates sleep glyph image (not text) for sleeping bubbles", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const imageCalls = getMockFn(scene.add.image).mock.calls;
@@ -194,12 +207,6 @@ describe("PopFreezeScene round initialization", () => {
 });
 
 describe("PopFreezeScene tap interaction", () => {
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -221,13 +228,13 @@ describe("PopFreezeScene tap interaction", () => {
   }
 
   it("tapping a poppable bubble triggers pop SFX + bounded success feedback", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
     const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
-    // With Math.random=0.5: bubble 0 is sleeping, bubbles 1-4 are poppable
-    const poppableBubble = bubbles[1];
+    // Seeded mulberry32(1234): bubbles 0-1 sleep, bubbles 2-4 are poppable.
+    const poppableBubble = bubbles[2];
 
     tapBubble(poppableBubble);
 
@@ -236,7 +243,7 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("tapping a sleeping bubble triggers wake SFX with no penalty", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -250,11 +257,11 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("tapping a poppable bubble starts pop animation tween", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
-    const poppableBubble = bubbles[1];
+    const poppableBubble = bubbles[2];
 
     tapBubble(poppableBubble);
 
@@ -264,7 +271,7 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("tapping a sleeping bubble starts wake wobble animation", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -284,7 +291,7 @@ describe("PopFreezeScene tap interaction", () => {
       matchMedia: vi.fn(() => ({ matches: true })),
     });
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const bubbles = getBubbles(scene);
@@ -304,14 +311,14 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("emits self-cleaning droplet circles when a bubble pops", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const graphicsMock = getMockFn(scene.add.graphics);
     const graphicsCountBefore = graphicsMock.mock.results.length;
 
     const bubbles = getBubbles(scene);
-    tapBubble(bubbles[1]);
+    tapBubble(bubbles[2]);
 
     // Splash + droplets graphics both created
     expect(graphicsMock.mock.results.length).toBeGreaterThan(graphicsCountBefore + 1);
@@ -346,14 +353,14 @@ describe("PopFreezeScene tap interaction", () => {
       matchMedia: vi.fn(() => ({ matches: true })),
     });
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const graphicsMock = getMockFn(scene.add.graphics);
     const graphicsCountBefore = graphicsMock.mock.results.length;
 
     const bubbles = getBubbles(scene);
-    tapBubble(bubbles[1]);
+    tapBubble(bubbles[2]);
 
     let droplets: Record<string, MockFn> | undefined;
     for (let i = graphicsCountBefore; i < graphicsMock.mock.results.length; i++) {
@@ -375,7 +382,7 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("starts a gentle breathing loop on sleeping animals", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn(scene.add.image);
@@ -405,7 +412,7 @@ describe("PopFreezeScene tap interaction", () => {
       matchMedia: vi.fn(() => ({ matches: true })),
     });
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn(scene.add.image);
@@ -427,21 +434,22 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("registers a shutdown cleanup for the breathing loop", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     expect(getMockFn(scene.events.once)).toHaveBeenCalledWith("shutdown", expect.any(Function));
   });
 
   it("respawns a poppable bubble after pop to maintain concurrent count", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const physicsImageMock = getMockFn(scene.physics.add.image);
     expect(physicsImageMock.mock.calls).toHaveLength(5);
 
     const bubbles = getBubbles(scene);
-    tapBubble(bubbles[1]);
+    // Bubble 1 is a seeded sleeper, so bubble 2 is the first poppable.
+    tapBubble(bubbles[2]);
 
     expect(physicsImageMock.mock.calls).toHaveLength(6);
 
@@ -450,40 +458,37 @@ describe("PopFreezeScene tap interaction", () => {
   });
 
   it("does not respawn after win target is reached", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const physicsImageMock = getMockFn(scene.physics.add.image);
     let bubbles = getBubbles(scene);
 
-    // Pop 4 initial poppable bubbles (indices 1-4)
-    tapBubble(bubbles[1]);
+    // Pop the 3 seeded poppable bubbles (indices 2-4); 0-1 sleep.
     tapBubble(bubbles[2]);
     tapBubble(bubbles[3]);
     tapBubble(bubbles[4]);
 
-    // 4 pops → 4 respawns → 9 total physics images
-    expect(physicsImageMock.mock.calls).toHaveLength(9);
+    // 3 pops → 3 respawns → 8 total physics images
+    expect(physicsImageMock.mock.calls).toHaveLength(8);
 
-    // Get updated list (includes respawns at indices 5-8)
+    // Get updated list (includes respawns at indices 5-7)
     bubbles = getBubbles(scene);
     tapBubble(bubbles[5]);
+    // 4 pops → 4 respawns → 9 total
+    expect(physicsImageMock.mock.calls).toHaveLength(9);
+
+    tapBubble(bubbles[6]);
     // 5 pops → 5 respawns → 10 total
     expect(physicsImageMock.mock.calls).toHaveLength(10);
 
-    tapBubble(bubbles[6]);
+    tapBubble(bubbles[7]);
     // 6 pops = win target → NO respawn → still 10
     expect(physicsImageMock.mock.calls).toHaveLength(10);
   });
 });
 
 describe("PopFreezeScene completion and sticker flow", () => {
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -507,19 +512,21 @@ describe("PopFreezeScene completion and sticker flow", () => {
   /** Simulates popping 6 poppable bubbles to complete the round. */
   function completeRound(scene: PopFreezeScene): void {
     let bubbles = getBubbles(scene);
-    // With Math.random=0.5: bubble 0 is sleeping, bubbles 1-4 are poppable
-    tapBubble(bubbles[1]);
+    // Seeded mulberry32(1234): bubbles 0-1 sleep, bubbles 2-4 are poppable.
     tapBubble(bubbles[2]);
     tapBubble(bubbles[3]);
     tapBubble(bubbles[4]);
-    // 4 pops → 4 respawns → 9 total; get updated list with respawns
+    // 3 pops → 3 respawns → 8 total; get updated list with respawns.
+    // Respawns keep the sleeper count at the classic maximum (2), so all
+    // respawns stay poppable and complete the 6-pop round.
     bubbles = getBubbles(scene);
     tapBubble(bubbles[5]);
     tapBubble(bubbles[6]);
+    tapBubble(bubbles[7]);
   }
 
   it("sizes every bubble physics body to the 96px display size", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     // Without setCircle, the Arcade body stays at the 512px SVG frame:
@@ -536,7 +543,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("plays win SFX when 6 poppable bubbles are popped", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
     completeRound(scene);
 
@@ -546,7 +553,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("ignores a late Back hold when the auto-return is already navigating", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     // Child starts a 3s Back hold mid-game, then pops the last bubble.
@@ -581,7 +588,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("awards sticker on first completion only", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
     completeRound(scene);
 
@@ -592,7 +599,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("does not re-award sticker on replay", () => {
     vi.mocked(hasSticker).mockReturnValue(true);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
     completeRound(scene);
 
@@ -603,7 +610,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("auto-returns to Hub after 3s delay", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
     completeRound(scene);
 
@@ -623,7 +630,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("triggers the choreographed win celebration on round completion", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
     completeRound(scene);
 
@@ -633,7 +640,7 @@ describe("PopFreezeScene completion and sticker flow", () => {
   it("creates sticker animation image on first completion", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
     completeRound(scene);
 
@@ -652,7 +659,7 @@ describe("PopFreezeScene spoken instruction", () => {
   });
 
   it("shows and speaks the rule when the round starts", () => {
-    const scene = new PopFreezeScene();
+    const scene = new PopFreezeScene(mulberry32(1234));
     scene.create();
 
     const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);

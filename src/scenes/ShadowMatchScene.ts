@@ -3,6 +3,7 @@ import type { BandShift } from "../game/adaptiveLogic";
 import { items } from "../game/art/items";
 import { shadows } from "../game/art/shadows";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
+import type { Rng } from "../game/random";
 import { generateRound, isMatch, isWin, type ObjectType } from "../game/shadowMatchLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight } from "../utils/dragJuice";
@@ -94,8 +95,8 @@ export class ShadowMatchScene extends GameSceneBase {
   private shadowSlots: ShadowSlotData[] = [];
   private matchedCount = 0;
 
-  constructor() {
-    super("ShadowMatch");
+  constructor(rng: Rng = Math.random) {
+    super("ShadowMatch", rng);
   }
 
   preload(): void {
@@ -137,7 +138,7 @@ export class ShadowMatchScene extends GameSceneBase {
 
   /** Initializes a new round: generates pairs, shuffles positions, renders shadows and objects. */
   private initRound(shift: BandShift = 0): void {
-    this.round = generateRound(shift);
+    this.round = generateRound(shift, this.rng);
     this.shadowSlots = [];
     this.objectData = [];
     this.matchedCount = 0;

@@ -3,6 +3,7 @@ import { food } from "../game/art/food";
 import { glyphs } from "../game/art/glyphs";
 import { items } from "../game/art/items";
 import { shapes } from "../game/art/shapes";
+import type { Rng } from "../game/random";
 import { type GroupMathConfig, GroupMathScene } from "./GroupMathScene";
 
 /**
@@ -23,8 +24,8 @@ export class AddItUpScene extends GroupMathScene<AddItUpRound> {
     promptCards: (round) => round.addends,
   };
 
-  constructor() {
-    super("AddItUp");
+  constructor(rng: Rng = Math.random) {
+    super("AddItUp", rng);
   }
 
   preload(): void {

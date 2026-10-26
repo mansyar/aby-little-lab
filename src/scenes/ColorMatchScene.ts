@@ -6,6 +6,7 @@ import {
   isCorrect,
   promptFor,
 } from "../game/colorMatchLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
@@ -51,8 +52,8 @@ const SWATCH_RADIUS = 24;
 export class ColorMatchScene extends ChoiceRoundScene {
   private rounds: ColorMatchRound[] = [];
 
-  constructor() {
-    super("ColorMatch");
+  constructor(rng: Rng = Math.random) {
+    super("ColorMatch", rng);
   }
 
   preload(): void {
@@ -78,7 +79,7 @@ export class ColorMatchScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = buildPlaythrough(getAdaptiveBandShift("color-match"));
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("color-match"), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

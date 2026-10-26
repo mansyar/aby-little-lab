@@ -106,6 +106,7 @@ import { PreloadScene } from "../../scenes/PreloadScene";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 const STORAGE_KEY = "abby-little-lab:v2";
 
@@ -156,7 +157,6 @@ describe("First Words integration flows", () => {
     vi.stubGlobal("screen", {
       orientation: { lock: vi.fn(() => Promise.resolve()) },
     });
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     Object.values(mockAudio).forEach((fn) => {
       (fn as MockFn).mockClear();
     });
@@ -199,7 +199,7 @@ describe("First Words integration flows", () => {
     expect(hubStarts).toContain("WordMatch");
 
     // Find the Word: play all 6 rounds.
-    const wordMatch = new WordMatchScene();
+    const wordMatch = new WordMatchScene(mulberry32(1234));
     wordMatch.create();
     for (let round = 0; round < 6; round++) {
       const scene = wordMatch as unknown as {
@@ -232,7 +232,7 @@ describe("First Words integration flows", () => {
     completeFadeOuts(hub);
     expect(getMockFn(hub.scene.start).mock.calls.map((c) => c[0])).toContain("WordBuilder");
 
-    const builder = new WordBuilderScene();
+    const builder = new WordBuilderScene(mulberry32(1234));
     builder.create();
     const state = builder as unknown as {
       words: Array<{ word: string }>;
@@ -297,7 +297,7 @@ describe("First Words integration flows", () => {
     // Find the Word — drive rounds including OWL (reuses Professor Hoot art)
     // and SUN (new SVG). The scene is data-driven, so injecting rounds into
     // the real scene exercises renderRound → getWord → texture key end-to-end.
-    const wordMatch = new WordMatchScene();
+    const wordMatch = new WordMatchScene(mulberry32(1234));
     wordMatch.create();
     const matchState = wordMatch as unknown as {
       rounds: Array<{ target: string; choices: string[] }>;
@@ -348,7 +348,7 @@ describe("First Words integration flows", () => {
     expect(matchPromptKeys).toContain("toy_teddy_bear"); // BEAR reuses the teddy
 
     // Build the Word — same data-driven path with DUCK (new SVG) and BEAR.
-    const builder = new WordBuilderScene();
+    const builder = new WordBuilderScene(mulberry32(1234));
     builder.create();
     const builderState = builder as unknown as {
       words: Array<{ word: string }>;

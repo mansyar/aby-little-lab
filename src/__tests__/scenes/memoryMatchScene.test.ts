@@ -67,9 +67,11 @@ vi.mock("../../game/memoryMatchLogic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../game/memoryMatchLogic")>();
   return {
     ...actual,
-    buildPlaythrough: (shift?: -1 | 0 | 1) => {
-      buildPlaythroughMock(shift);
-      return actual.buildPlaythrough(shift);
+    // Forward every argument: the scene calls buildPlaythrough(shift, rng),
+    // and dropping rng here would silently strip the seeded path.
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
     },
   };
 });
@@ -77,6 +79,7 @@ vi.mock("../../game/memoryMatchLogic", async (importOriginal) => {
 import type { MemoryRound } from "../../game/memoryMatchLogic";
 import { MemoryMatchScene } from "../../scenes/MemoryMatchScene";
 import { earnSticker, getProfiles } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -87,7 +90,6 @@ describe("MemoryMatchScene round flow", () => {
   let matchMediaMock: MatchMediaStub;
 
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     matchMediaMock = stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -301,7 +303,7 @@ describe("MemoryMatchScene round flow", () => {
   }
 
   it("deals the first round face-down: 2x3 grid of 6 interactive cards >=96px with card backs, hidden faces, and 6 progress dots", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -344,7 +346,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("deals card art at the card size instead of its native 256px raster", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     const backs = cardParts(scene, "cardBacks");
@@ -368,7 +370,7 @@ describe("MemoryMatchScene round flow", () => {
       ["medium", 132],
       ["hard", 120],
     ] as const) {
-      const scene = new MemoryMatchScene();
+      const scene = new MemoryMatchScene(mulberry32(1234));
       scene.create();
       const s = scene as unknown as {
         rounds: MemoryRound[];
@@ -390,7 +392,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("flips a card back to its sized art scale instead of full raster size", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     tapCard(scene, 0);
     fireFlipHalf(scene, 0);
@@ -402,7 +404,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("tapping a face-down card pops and reveals it via a scaleX flip", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     tapCard(scene, 0);
@@ -436,7 +438,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("a second tap on the revealed card does nothing (no double-flip)", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     tapCard(scene, 0);
@@ -446,7 +448,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("matching a pair plays the correct chime, flashes both cards success, cheers, and keeps them face-up", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     const cards = getCardRects(scene);
 
@@ -482,7 +484,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("mismatched pair wiggles, plays the soft tone, nods, flips back after the pause, and does not advance", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const cards = getCardRects(scene);
@@ -524,7 +526,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("locks input during the mismatch pause so extra taps are ignored", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const mismatchIndex = round.layout.findIndex((t, i) => i !== 0 && t !== round.layout[0]);
@@ -542,7 +544,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("completing all pairs fills the progress dot and advances rounds after 700ms (easy 2x3, then medium 3x4)", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     const dots = getProgressDots(scene);
 
@@ -569,7 +571,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("wins after 6 rounds: celebration, first-time sticker, justEarned, auto-return, progress recorded", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -615,7 +617,7 @@ describe("MemoryMatchScene round flow", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("memory-match");
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -630,7 +632,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("re-launching after completion unlocks input so cards are tappable again", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -649,7 +651,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -674,7 +676,7 @@ describe("MemoryMatchScene round flow", () => {
 
   it("uses smaller wiggle amplitude and shorter flip durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const mismatchIndex = round.layout.findIndex((t, i) => i !== 0 && t !== round.layout[0]);
@@ -702,7 +704,7 @@ describe("MemoryMatchScene round flow", () => {
   });
 
   it("generates a valid playthrough for the scene (6 rounds, progressive bands)", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     const rounds = (scene as unknown as { rounds: MemoryRound[] }).rounds;
 
@@ -725,7 +727,6 @@ describe("MemoryMatchScene round flow", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -742,16 +743,28 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to buildPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("memory-match");
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new MemoryMatchScene(mulberry32(1234));
+    first.create();
+    const second = new MemoryMatchScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { rounds: MemoryRound[] }).rounds;
+    const b = (second as unknown as { rounds: MemoryRound[] }).rounds;
+
+    expect(b).toEqual(a);
   });
 });
 
@@ -761,7 +774,7 @@ describe("MemoryMatchScene spoken instruction", () => {
   });
 
   it("shows the rule when the round starts", () => {
-    const scene = new MemoryMatchScene();
+    const scene = new MemoryMatchScene(mulberry32(1234));
     scene.create();
 
     const addText = (scene as unknown as { add: { text: { mock: { calls: unknown[][] } } } }).add

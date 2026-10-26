@@ -6,6 +6,7 @@ import { letters } from "../game/art/letters";
 import { music } from "../game/art/music";
 import { shapes } from "../game/art/shapes";
 import { toys } from "../game/art/toys";
+import type { Rng } from "../game/random";
 import {
   type FirstWord,
   generateLetterTiles,
@@ -95,8 +96,8 @@ export class WordBuilderScene extends GameSceneBase {
   private wordIndex = 0;
   private filledSlots = 0;
 
-  constructor() {
-    super("WordBuilder");
+  constructor(rng: Rng = Math.random) {
+    super("WordBuilder", rng);
   }
 
   preload(): void {
@@ -122,7 +123,11 @@ export class WordBuilderScene extends GameSceneBase {
       },
     });
 
-    this.words = generateWordBuildPlaythrough(WORD_COUNT, getAdaptiveBandShift("word-builder"));
+    this.words = generateWordBuildPlaythrough(
+      WORD_COUNT,
+      getAdaptiveBandShift("word-builder"),
+      this.rng,
+    );
     this.wordIndex = 0;
     this.inputLocked = false;
     this.renderRound();
@@ -168,7 +173,7 @@ export class WordBuilderScene extends GameSceneBase {
     }
 
     // Six letter tiles: the word's unique letters plus distractors.
-    const tileValues = generateLetterTiles(word.word);
+    const tileValues = generateLetterTiles(word.word, this.rng);
     const tileRowWidth = tileValues.length * TILE_SIZE + (tileValues.length - 1) * TILE_GAP;
     const tileStartX = centerX - tileRowWidth / 2 + TILE_SIZE / 2;
     for (let i = 0; i < tileValues.length; i++) {

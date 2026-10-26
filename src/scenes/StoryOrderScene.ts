@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
+import type { Rng } from "../game/random";
 import { preloadStoryOrderArt } from "../game/storyOrderArt";
 import { buildPlaythrough, isCorrect } from "../game/storyOrderLogic";
 import type { GameId } from "../types";
@@ -54,8 +55,8 @@ export class StoryOrderScene extends ChoiceRoundScene {
   /** Round-scoped graphics and containers kept for tolerant teardown. */
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
 
-  constructor() {
-    super("StoryOrder");
+  constructor(rng: Rng = Math.random) {
+    super("StoryOrder", rng);
   }
 
   preload(): void {
@@ -87,7 +88,7 @@ export class StoryOrderScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the story in order, first to last.");
 
-    this.rounds = buildPlaythrough(Math.random, getAdaptiveBandShift("story-order"));
+    this.rounds = buildPlaythrough(this.rng, getAdaptiveBandShift("story-order"));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

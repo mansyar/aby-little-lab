@@ -6,6 +6,7 @@ import { letters } from "../game/art/letters";
 import { music } from "../game/art/music";
 import { shapes } from "../game/art/shapes";
 import { toys } from "../game/art/toys";
+import type { Rng } from "../game/random";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
@@ -51,8 +52,8 @@ const CARD_COL_X_OFFSET = 210;
 export class WordMatchScene extends ChoiceRoundScene {
   private rounds: WordRound[] = [];
 
-  constructor() {
-    super("WordMatch");
+  constructor(rng: Rng = Math.random) {
+    super("WordMatch", rng);
   }
 
   preload(): void {
@@ -78,7 +79,11 @@ export class WordMatchScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
+    this.rounds = generateWordPlaythrough(
+      ROUND_COUNT,
+      getAdaptiveBandShift(this.gameId()),
+      this.rng,
+    );
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

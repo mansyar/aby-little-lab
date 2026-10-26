@@ -11,6 +11,7 @@ import {
   WIN_TARGET,
   winLengthFor,
 } from "../game/musicalMemoryLogic";
+import type { Rng } from "../game/random";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -101,8 +102,8 @@ export class MusicalMemoryScene extends GameSceneBase {
   /** Guards overlapping sequence playbacks so a stale completion cannot clear the speaker. */
   private sequencePlayId = 0;
 
-  constructor() {
-    super("MusicalMemory");
+  constructor(rng: Rng = Math.random) {
+    super("MusicalMemory", rng);
   }
 
   preload(): void {
@@ -120,7 +121,7 @@ export class MusicalMemoryScene extends GameSceneBase {
 
     const startLength = startLengthFor(getAdaptiveBandShift("musical-memory"));
     this.winTarget = winLengthFor(startLength);
-    this.sequence = generateSequence(startLength);
+    this.sequence = generateSequence(startLength, this.rng);
     this.inputIndex = 0;
     this.playSequence();
 
@@ -276,7 +277,7 @@ export class MusicalMemoryScene extends GameSceneBase {
     if (isWin(this.sequence.length, this.winTarget)) {
       this.completeGame("musical-memory");
     } else {
-      this.sequence = appendNote(this.sequence);
+      this.sequence = appendNote(this.sequence, this.rng);
       this.inputIndex = 0;
       this.playSequence();
     }

@@ -94,6 +94,7 @@ import {
   fireFirstHandler,
   getInteractiveRects,
 } from "../helpers/pressFeedback";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Casts a Phaser-typed method to a MockFn for mock assertions. */
 function getMockFn(fn: unknown): MockFn {
@@ -220,7 +221,6 @@ function fireAutoReturn(scene: unknown): void {
 
 /** Shared beforeEach setup for every describe block. */
 function setup(): void {
-  vi.spyOn(Math, "random").mockReturnValue(0.5);
   stubMatchMedia(false);
   localStorage.clear();
   mockParentLockInstances.length = 0;
@@ -243,7 +243,7 @@ describe("FirstSoundsScene shell", () => {
   afterEach(teardown);
 
   it("renders mascot, parent-locked Back button, and 6 progress dots", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const imageMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.image);
@@ -268,7 +268,7 @@ describe("FirstSoundsScene shell", () => {
   });
 
   it("parental lock hold success exits to the Hub", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     expect(mockParentLockInstances).toHaveLength(1);
@@ -289,6 +289,22 @@ describe("FirstSoundsScene shell", () => {
       (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
     ).toHaveBeenCalledWith("Hub");
   });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new FirstSoundsScene(mulberry32(1234));
+    first.create();
+    const second = new FirstSoundsScene(mulberry32(1234));
+    second.create();
+
+    const a = (
+      first as unknown as {
+        rounds: Array<{ word: string; promptTexture: string; target: string; choices: string[] }>;
+      }
+    ).rounds;
+    const b = (second as unknown as { rounds: typeof a }).rounds;
+
+    expect(b).toEqual(a);
+  });
 });
 
 describe("FirstSoundsScene round rendering", () => {
@@ -296,7 +312,7 @@ describe("FirstSoundsScene round rendering", () => {
   afterEach(teardown);
 
   it("renders the prompt picture from the round's texture key at ~180px", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const prompt = getPromptImage(scene);
@@ -305,7 +321,7 @@ describe("FirstSoundsScene round rendering", () => {
   });
 
   it("renders 4 letter cards in a row, each with its choice's letter texture", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
 
@@ -341,7 +357,7 @@ describe("FirstSoundsScene round rendering", () => {
   });
 
   it("speaks the target word at round start when SFX is enabled", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -351,7 +367,7 @@ describe("FirstSoundsScene round rendering", () => {
   it("silences TTS when the SFX toggle is off", () => {
     updateSettings({ sfxEnabled: false });
 
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -369,7 +385,7 @@ describe("FirstSoundsScene interaction", () => {
   }
 
   it("tapping the correct card plays the correct chime, speaks the letter, and advances", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const dots = getProgressDots(scene);
@@ -399,7 +415,7 @@ describe("FirstSoundsScene interaction", () => {
   });
 
   it("tapping a wrong card wiggles gently and does not advance the round", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);
@@ -433,7 +449,7 @@ describe("FirstSoundsScene interaction", () => {
   });
 
   it("locks input during the next-round transition", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
 
@@ -448,7 +464,7 @@ describe("FirstSoundsScene interaction", () => {
 
   it("uses smaller wiggle amplitude and shorter durations under reduced motion", () => {
     setReducedMotion(true);
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     const round = getCurrentRound(scene);
     const correctIndex = round.choices.indexOf(round.target);
@@ -475,7 +491,7 @@ describe("FirstSoundsScene completion", () => {
   afterEach(teardown);
 
   it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -516,7 +532,7 @@ describe("FirstSoundsScene completion", () => {
   }
 
   it("guards the speaker during the win celebration (no crash after the final round)", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -535,7 +551,7 @@ describe("FirstSoundsScene completion", () => {
   });
 
   it("shows a splash burst at the tapped card on a correct answer", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const round = getCurrentRound(scene);
@@ -553,7 +569,7 @@ describe("FirstSoundsScene completion", () => {
 
   it("does not award the sticker again or pass justEarned on repeat completions", () => {
     earnSticker("first-sounds");
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -568,7 +584,7 @@ describe("FirstSoundsScene completion", () => {
   });
 
   it("re-launching after completion unlocks input so choices are clickable again", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     for (let i = 0; i < 6; i++) {
@@ -603,7 +619,7 @@ describe("FirstSoundsScene press feedback cohesion", () => {
 
   it("gives every choice card press feedback restoring on release, out, and cancel", () => {
     stubMotion(false);
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const controls = getInteractiveRects(scene);
@@ -615,7 +631,7 @@ describe("FirstSoundsScene press feedback cohesion", () => {
 
   it("keeps the gameplay choice handler registered before the press squish", () => {
     stubMotion(false);
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
 
     const [first] = getInteractiveRects(scene);
@@ -625,14 +641,14 @@ describe("FirstSoundsScene press feedback cohesion", () => {
 
   it("attaches exactly one extra pointerdown listener per card when motion is allowed", () => {
     stubMotion(true);
-    const reducedScene = new FirstSoundsScene();
+    const reducedScene = new FirstSoundsScene(mulberry32(1234));
     reducedScene.create();
     const reducedCounts = getInteractiveRects(reducedScene).map((control) =>
       countListeners(control, "pointerdown"),
     );
 
     stubMotion(false);
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     const controls = getInteractiveRects(scene);
 
@@ -649,7 +665,6 @@ describe("FirstSoundsScene press feedback cohesion", () => {
 
 describe("adaptive band shift wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     stubMatchMedia(false);
     localStorage.clear();
     mockParentLockInstances.length = 0;
@@ -666,15 +681,15 @@ describe("adaptive band shift wiring", () => {
 
   it("passes the facade's band shift to generatePhonicsPlaythrough", () => {
     getAdaptiveBandShiftMock.mockReturnValue(1);
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("first-sounds");
-    expect(generatePhonicsPlaythroughMock).toHaveBeenCalledWith(6, 1);
+    expect(generatePhonicsPlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
-    const scene = new FirstSoundsScene();
+    const scene = new FirstSoundsScene(mulberry32(1234));
     scene.create();
-    expect(generatePhonicsPlaythroughMock).toHaveBeenCalledWith(6, 0);
+    expect(generatePhonicsPlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
   });
 });

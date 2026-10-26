@@ -3,6 +3,7 @@ import { music } from "../game/art/music";
 import { shapes } from "../game/art/shapes";
 import { toys } from "../game/art/toys";
 import { createPlaythrough, isCorrect, type OddOneRound, promptFor } from "../game/oddOneOutLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakWord } from "../utils/speech";
@@ -35,8 +36,8 @@ const ITEM_SIZE = 150;
 export class OddOneOutScene extends ChoiceRoundScene {
   private rounds: OddOneRound[] = [];
 
-  constructor() {
-    super("OddOneOut");
+  constructor(rng: Rng = Math.random) {
+    super("OddOneOut", rng);
   }
 
   preload(): void {
@@ -62,7 +63,7 @@ export class OddOneOutScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = createPlaythrough(getAdaptiveBandShift("odd-one-out"));
+    this.rounds = createPlaythrough(getAdaptiveBandShift("odd-one-out"), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

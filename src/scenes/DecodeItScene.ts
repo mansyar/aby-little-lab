@@ -7,6 +7,7 @@ import { music } from "../game/art/music";
 import { shapes } from "../game/art/shapes";
 import { toys } from "../game/art/toys";
 import { buildPlaythrough, type DecodeRound, getDecodeWord, isCorrect } from "../game/decodeLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -34,8 +35,8 @@ const CARD_COL_X_OFFSET = 210;
 export class DecodeItScene extends ChoiceRoundScene {
   private rounds: DecodeRound[] = [];
 
-  constructor() {
-    super("DecodeIt");
+  constructor(rng: Rng = Math.random) {
+    super("DecodeIt", rng);
   }
 
   preload(): void {
@@ -60,7 +61,7 @@ export class DecodeItScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = buildPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
+    this.rounds = buildPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

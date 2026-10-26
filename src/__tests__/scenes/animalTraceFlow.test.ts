@@ -70,9 +70,11 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   return { ensureSceneLoaded: mockEnsureSceneLoaded };
 });
 
-import { generatePathPoints } from "../../game/animalTraceLogic";
+import { generatePathPoints, selectThreePairs } from "../../game/animalTraceLogic";
+import type { Rng } from "../../game/random";
 import { AnimalTraceScene } from "../../scenes/AnimalTraceScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -89,21 +91,28 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+/** Layout constants matching the scene implementation (shared by both suites). */
+const ANIMAL_X = 200;
+const FOOD_X = 824;
+const SPRITE_Y = 384;
+const PATH_POINTS = 6;
+
+/**
+ * A fresh generator positioned exactly where the scene's draw sequence
+ * stands at the given pair's path generation: the scene first consumes
+ * selectThreePairs' shuffle draws, then one generatePathPoints call per
+ * already-rendered pair.
+ */
+function pathRngForPair(pairIndex: number): Rng {
+  const rng = mulberry32(1234);
+  selectThreePairs(rng);
+  for (let i = 0; i < pairIndex; i++) {
+    generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS, rng);
+  }
+  return rng;
+}
+
 describe("AnimalTraceScene path tracing", () => {
-  /** Layout constants matching the scene implementation. */
-  const ANIMAL_X = 200;
-  const FOOD_X = 824;
-  const SPRITE_Y = 384;
-  const PATH_POINTS = 6;
-
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    // Deterministic Math.random so test helper's generatePathPoints
-    // matches the scene's internal generatePathPoints call
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -143,8 +152,15 @@ describe("AnimalTraceScene path tracing", () => {
   }
 
   /** Simulates tracing the entire path by advancing through all points. */
-  function completePath(scene: unknown): void {
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+  function completePath(scene: unknown, pairIndex = 0): void {
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(pairIndex),
+    );
     const pointerdown = getInputCallback(scene, "pointerdown");
     const pointermove = getInputCallback(scene, "pointermove");
 
@@ -155,7 +171,7 @@ describe("AnimalTraceScene path tracing", () => {
   }
 
   it("creates animal and food images for the first pair", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const imageCalls = getMockFn(scene.add.image).mock.calls;
@@ -166,14 +182,14 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("creates a graphics object for the dotted path", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     expect(getMockFn(scene.add.graphics)).toHaveBeenCalled();
   });
 
   it("registers pointerdown, pointermove, and pointerup handlers", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const inputOnMock = getMockFn(scene.input.on);
@@ -185,10 +201,17 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("pointermove near next path point advances animal sprite", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const animalSprite = getAnimalSprite(scene);
 
     const pointerdown = getInputCallback(scene, "pointerdown");
@@ -209,7 +232,7 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("pointer far from path does not advance animal", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const animalSprite = getAnimalSprite(scene);
@@ -227,10 +250,17 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("pointerup pauses animal — no position reset", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const animalSprite = getAnimalSprite(scene);
 
     const pointerdown = getInputCallback(scene, "pointerdown");
@@ -259,10 +289,17 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("resume continues from current position after pointer lift", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const animalSprite = getAnimalSprite(scene);
 
     const pointerdown = getInputCallback(scene, "pointerdown");
@@ -290,7 +327,7 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("reaching food triggers correct SFX + bounded success feedback", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
@@ -301,10 +338,17 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("no SFX during tracing (only on path completion)", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const pointerdown = getInputCallback(scene, "pointerdown");
     const pointermove = getInputCallback(scene, "pointermove");
 
@@ -317,10 +361,17 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("trace tolerance is generous (pointer within 60px of target advances)", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const animalSprite = getAnimalSprite(scene);
 
     const pointerdown = getInputCallback(scene, "pointerdown");
@@ -340,7 +391,7 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("advances to next pair after path completion", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     completePath(scene);
@@ -362,7 +413,7 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("cleans success feedback after its bounded animation", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const initialGraphicsCount = getMockFn(scene.add.graphics).mock.results.length;
@@ -372,10 +423,17 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("lands the animal on the waypoint after the hop arc completes", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const animalSprite = getAnimalSprite(scene);
 
     const pointerdown = getInputCallback(scene, "pointerdown");
@@ -410,10 +468,17 @@ describe("AnimalTraceScene path tracing", () => {
   it("uses a reduced-motion hop (no arc, shorter duration) when requested", () => {
     vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(0),
+    );
     const animalSprite = getAnimalSprite(scene);
 
     const pointerdown = getInputCallback(scene, "pointerdown");
@@ -436,7 +501,7 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("wiggles the food sprite when the path is completed", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const foodSprite = getFoodSprite(scene);
@@ -458,7 +523,7 @@ describe("AnimalTraceScene path tracing", () => {
   it("uses a gentler reduced-motion food wiggle", () => {
     vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const foodSprite = getFoodSprite(scene);
@@ -474,7 +539,7 @@ describe("AnimalTraceScene path tracing", () => {
   });
 
   it("pops the progress dot with a scale bounce when a path is completed", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const circleMock = getMockFn(scene.add.circle);
@@ -495,7 +560,7 @@ describe("AnimalTraceScene path tracing", () => {
   it("uses a reduced-motion progress dot pop", () => {
     vi.stubGlobal("window", { matchMedia: vi.fn(() => ({ matches: true })) });
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const circleMock = getMockFn(scene.add.circle);
@@ -509,21 +574,21 @@ describe("AnimalTraceScene path tracing", () => {
     expect(popTween[0].scaleX).toBe(1.2);
     expect(popTween[0].duration).toBe(150);
   });
+
+  it("builds identical pairs from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new AnimalTraceScene(mulberry32(1234));
+    first.create();
+    const second = new AnimalTraceScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as { pairs: unknown[] }).pairs;
+    const b = (second as unknown as { pairs: typeof a }).pairs;
+
+    expect(b).toEqual(a);
+  });
 });
 
 describe("AnimalTraceScene completion and sticker flow", () => {
-  /** Layout constants matching the scene implementation. */
-  const ANIMAL_X = 200;
-  const FOOD_X = 824;
-  const SPRITE_Y = 384;
-  const PATH_POINTS = 6;
-
-  beforeEach(() => {
-    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
-    // scene-level stub is the only way to make this scene's draws repeatable.
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -539,8 +604,15 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   }
 
   /** Simulates tracing a single path by advancing through all points. */
-  function completePath(scene: unknown): void {
-    const pathPoints = generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS);
+  function completePath(scene: unknown, pairIndex = 0): void {
+    const pathPoints = generatePathPoints(
+      ANIMAL_X,
+      SPRITE_Y,
+      FOOD_X,
+      SPRITE_Y,
+      PATH_POINTS,
+      pathRngForPair(pairIndex),
+    );
     const pointerdown = getInputCallback(scene, "pointerdown");
     const pointermove = getInputCallback(scene, "pointermove");
 
@@ -553,7 +625,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   /** Simulates tracing all 3 paths, triggering delayedCall advances between pairs. */
   function completeAllPaths(scene: unknown): void {
     for (let pair = 0; pair < 3; pair++) {
-      completePath(scene);
+      completePath(scene, pair);
 
       if (pair < 2) {
         const delayedCallMock = getMockFn(
@@ -570,7 +642,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   it("plays win SFX when all 3 paths are traced", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     completeAllPaths(scene);
 
@@ -580,7 +652,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   it("awards sticker on first completion only", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     completeAllPaths(scene);
 
@@ -591,7 +663,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   it("does not re-award sticker on replay", () => {
     vi.mocked(hasSticker).mockReturnValue(true);
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     completeAllPaths(scene);
 
@@ -602,7 +674,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   it("auto-returns to Hub after 3s delay", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     completeAllPaths(scene);
 
@@ -623,7 +695,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   it("triggers the choreographed win celebration on round completion", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     completeAllPaths(scene);
 
@@ -633,7 +705,7 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   it("creates sticker animation image on first completion", () => {
     vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
     completeAllPaths(scene);
 
@@ -643,14 +715,14 @@ describe("AnimalTraceScene completion and sticker flow", () => {
   });
 
   it("creates 3 progress indicator dots on scene create", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     expect(getMockFn(scene.add.circle)).toHaveBeenCalledTimes(3);
   });
 
   it("highlights a progress dot when a path is completed", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const circleMock = getMockFn(scene.add.circle);
@@ -671,7 +743,7 @@ describe("AnimalTraceScene spoken instruction", () => {
   });
 
   it("shows and speaks the rule when the round starts", () => {
-    const scene = new AnimalTraceScene();
+    const scene = new AnimalTraceScene(mulberry32(1234));
     scene.create();
 
     const textMock = getMockFn((scene as unknown as { add: Record<string, unknown> }).add.text);

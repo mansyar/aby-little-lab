@@ -12,6 +12,7 @@ import {
 } from "../game/animalTraceLogic";
 import { animals } from "../game/art/animals";
 import { food } from "../game/art/food";
+import type { Rng } from "../game/random";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -108,8 +109,8 @@ export class AnimalTraceScene extends GameSceneBase {
   private ringRadius = NEXT_RING_RADIUS;
   private pathPulseTween?: { stop(): void };
 
-  constructor() {
-    super("AnimalTrace");
+  constructor(rng: Rng = Math.random) {
+    super("AnimalTrace", rng);
   }
 
   preload(): void {
@@ -130,7 +131,7 @@ export class AnimalTraceScene extends GameSceneBase {
     this.pathPulseTween = undefined;
 
     this.pathPointsCount = waypointsFor(getAdaptiveBandShift("animal-trace"));
-    this.pairs = selectThreePairs();
+    this.pairs = selectThreePairs(this.rng);
     this.createProgressDots(3);
     this.renderPair(0);
 
@@ -167,6 +168,7 @@ export class AnimalTraceScene extends GameSceneBase {
       FOOD_X,
       SPRITE_Y,
       this.pathPointsCount,
+      this.rng,
     );
 
     const animalSprite = this.add

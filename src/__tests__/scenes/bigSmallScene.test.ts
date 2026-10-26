@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BoxInstance, ToyInstance } from "../../game/bigSmallLogic";
 import { BigSmallScene } from "../../scenes/BigSmallScene";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /**
  * Mock Phaser module (same pattern as shapeSorterScene.test.ts). Scene files
@@ -83,14 +84,13 @@ function getInternals(scene: BigSmallScene): SceneInternals {
 }
 
 function createScene(): BigSmallScene {
-  const scene = new BigSmallScene();
+  const scene = new BigSmallScene(mulberry32(1234));
   scene.create();
   return scene;
 }
 
 describe("BigSmallScene adaptive band wiring", () => {
   beforeEach(() => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
     localStorage.clear();
     vi.clearAllMocks();
     getAdaptiveBandShiftMock.mockReturnValue(0);
@@ -107,7 +107,7 @@ describe("BigSmallScene adaptive band wiring", () => {
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("big-small");
     expect(generateRoundMock).toHaveBeenCalledTimes(1);
-    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.35, small: 0.8 });
+    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.35, small: 0.8 }, expect.any(Function));
     expect(getInternals(scene).round.toys).toHaveLength(6);
   });
 
@@ -115,16 +115,28 @@ describe("BigSmallScene adaptive band wiring", () => {
     const scene = createScene();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("big-small");
     expect(generateRoundMock).toHaveBeenCalledTimes(1);
-    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.5, small: 0.7 });
+    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.5, small: 0.7 }, expect.any(Function));
     expect(getInternals(scene).round.boxes).toHaveLength(2);
   });
 
   it("passes the easy band's wider factors into the round", () => {
     getAdaptiveBandShiftMock.mockReturnValue(-1);
     const scene = createScene();
-    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.6, small: 0.68 });
+    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.6, small: 0.68 }, expect.any(Function));
     for (const toy of getInternals(scene).round.toys) {
       expect(toy.scale).toBe(toy.scaleCategory === "big" ? 1.6 : 0.68);
     }
+  });
+
+  it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {
+    const first = new BigSmallScene(mulberry32(1234));
+    first.create();
+    const second = new BigSmallScene(mulberry32(1234));
+    second.create();
+
+    const a = (first as unknown as SceneInternals).round;
+    const b = (second as unknown as SceneInternals).round;
+
+    expect(b).toEqual(a);
   });
 });
