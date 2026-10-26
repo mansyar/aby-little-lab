@@ -3,7 +3,7 @@ import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 import { type MockFn, type MockObject, mockRegistry } from "../helpers/phaserMock";
 import { settleLoad } from "../helpers/sceneFlowHarness";
 
-const { mockAudio, mockRecordGamePlay } = vi.hoisted(() => {
+const { mockAudio, mockRecordGamePlay, idleScheduler, chunkLoaders } = vi.hoisted(() => {
   const mockAudio = {
     init: vi.fn(),
     resume: vi.fn(),
@@ -18,7 +18,45 @@ const { mockAudio, mockRecordGamePlay } = vi.hoisted(() => {
     playIdleCall: vi.fn(),
   };
   const mockRecordGamePlay = vi.fn();
-  return { mockAudio, mockRecordGamePlay };
+  /**
+   * Manual idle scheduler: records every request so a test decides when an
+   * idle slot fires. The prewarm engine keeps its real pacing (one import in
+   * flight, cancelled slots dropped); only the platform clock is stood in for.
+   */
+  const pending = new Map<number, () => void>();
+  let nextHandle = 0;
+  const idleScheduler = {
+    request(callback: () => void): number {
+      nextHandle += 1;
+      pending.set(nextHandle, callback);
+      return nextHandle;
+    },
+    cancel(handle: number): void {
+      pending.delete(handle);
+    },
+    /** Runs the oldest queued idle callback; false when none is pending. */
+    fire(): boolean {
+      const oldest = pending.entries().next();
+      if (oldest.done) return false;
+      pending.delete(oldest.value[0]);
+      oldest.value[1]();
+      return true;
+    },
+    /** Number of idle callbacks still queued. */
+    size(): number {
+      return pending.size;
+    },
+    clear(): void {
+      pending.clear();
+    },
+  };
+  /** Three of the 22 lazy chunks, enough to observe order and pacing. */
+  const chunkLoaders = {
+    ShapeSorter: vi.fn(() => Promise.resolve("ShapeSorter")),
+    AnimalTrace: vi.fn(() => Promise.resolve("AnimalTrace")),
+    PopFreeze: vi.fn(() => Promise.resolve("PopFreeze")),
+  };
+  return { mockAudio, mockRecordGamePlay, idleScheduler, chunkLoaders };
 });
 
 /**
@@ -78,11 +116,32 @@ vi.mock("../../utils/speech", () => ({
   unlockSpeechForUserGesture: vi.fn(),
 }));
 
-/** Lazy chunk loading is not exercised here; the retrying wrapper reports success. */
+/**
+ * Lazy chunk loading is not exercised here; the retrying wrapper reports
+ * success. The prewarm sees real loaders so its pacing and ordering can be
+ * driven through the manual idle scheduler.
+ */
 vi.mock("../../scenes/sceneRegistry", () => ({
   ensureSceneLoaded: vi.fn(() => Promise.resolve()),
   loadSceneWithRetry: vi.fn(() => Promise.resolve(true)),
+  sceneLoaders: chunkLoaders,
 }));
+
+/**
+ * Partial prewarm mock: the real engine runs (pacing, cancellation and the
+ * shared imported set are its contract), with the manual scheduler injected and
+ * the returned controller wrapped so a test can assert cancellation.
+ */
+vi.mock("../../game/hub/prewarm", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/hub/prewarm")>();
+  return {
+    ...actual,
+    startPrewarm: vi.fn((options: StartPrewarmOptions) => {
+      const controller = actual.startPrewarm({ ...options, scheduler: idleScheduler });
+      return { cancel: vi.fn(() => controller.cancel()) };
+    }),
+  };
+});
 
 /**
  * Partial storage mock: keep the real implementation (persistence assertions
@@ -97,6 +156,7 @@ vi.mock("../../utils/storage", async (importOriginal) => {
   return { ...actual, recordGamePlay: mockRecordGamePlay };
 });
 
+import { type StartPrewarmOptions, startPrewarm } from "../../game/hub/prewarm";
 import { HubScene } from "../../scenes/HubScene";
 import { loadSceneWithRetry } from "../../scenes/sceneRegistry";
 import type { GameId } from "../../types";
@@ -798,5 +858,201 @@ describe("HubScene profile and hierarchy cohesion", () => {
       return navTiles.includes(config.targets as MockObject);
     });
     expect(motionTargets).toHaveLength(0);
+  });
+});
+
+describe("HubScene idle prewarm", () => {
+  let visibility: DocumentVisibilityState;
+
+  beforeEach(() => {
+    stubMatchMedia(false);
+    localStorage.clear();
+    mockRegistry.length = 0;
+    mockRecordGamePlay.mockClear();
+    idleScheduler.clear();
+    for (const loader of Object.values(chunkLoaders)) {
+      loader.mockClear();
+    }
+    vi.mocked(startPrewarm).mockClear();
+    visibility = "visible";
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => visibility,
+    });
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(document, "visibilityState");
+    idleScheduler.clear();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  /** Reports the document as the given state and dispatches the browser event. */
+  function setVisibility(next: DocumentVisibilityState): void {
+    visibility = next;
+    document.dispatchEvent(new Event("visibilitychange"));
+  }
+
+  /** True when the Hub armed its post-entrance prewarm start (1200 ms). */
+  function hasPrewarmStart(scene: HubScene): boolean {
+    return (scene.time.delayedCall as MockFn).mock.calls.some((call) => call[0] === 1200);
+  }
+
+  /** Fires the Hub's post-entrance prewarm start. */
+  function firePrewarmStart(scene: HubScene): void {
+    const calls = (scene.time.delayedCall as MockFn).mock.calls;
+    const index = calls.findIndex((call) => call[0] === 1200);
+    if (index < 0) throw new Error("the Hub armed no prewarm start");
+    (calls[index][1] as () => void)();
+  }
+
+  /** The controller the most recent prewarm pass returned. */
+  function lastController(): { cancel: MockFn } {
+    const value = vi.mocked(startPrewarm).mock.results.at(-1)?.value as
+      | { cancel: MockFn }
+      | undefined;
+    if (!value) throw new Error("no prewarm pass was started");
+    return value;
+  }
+
+  /** The 22 nav tiles in Hub order. */
+  function navTiles(): MockObject[] {
+    return mockRegistry.filter((obj) => obj.kind === "rectangle" && obj.handlers.pointerup);
+  }
+
+  /** Lets a resolved chunk import settle its promise chain. */
+  async function flushImports(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  it("starts no prewarm while the Hub opens locked, and starts one when the lock clears", () => {
+    const profileId = getActiveProfile().id;
+    setPlayTimeLimit(profileId, 15);
+    recordPlayTime(profileId, 15);
+
+    const scene = new HubScene();
+    scene.create();
+
+    expect(hasPrewarmStart(scene)).toBe(false);
+    expect(startPrewarm).not.toHaveBeenCalled();
+    expect(idleScheduler.size()).toBe(0);
+
+    // The parent raises the cap; the next foreground return re-reads it.
+    setPlayTimeLimit(profileId, null);
+    setVisibility("visible");
+
+    expect(hasPrewarmStart(scene)).toBe(true);
+    firePrewarmStart(scene);
+    expect(startPrewarm).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops the pass when the lock arrives mid-cycle and starts a fresh one when it clears", () => {
+    const profileId = getActiveProfile().id;
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const first = lastController();
+    expect(idleScheduler.size()).toBe(1);
+
+    // The cap is reached while the pass is still waiting for an idle slot.
+    setPlayTimeLimit(profileId, 15);
+    recordPlayTime(profileId, 15);
+    setVisibility("visible");
+
+    expect(first.cancel).toHaveBeenCalled();
+    expect(idleScheduler.size()).toBe(0);
+
+    setPlayTimeLimit(profileId, null);
+    setVisibility("visible");
+    firePrewarmStart(scene);
+
+    expect(startPrewarm).toHaveBeenCalledTimes(2);
+    expect(lastController()).not.toBe(first);
+  });
+
+  it("pauses while the document is hidden and resumes on the way back", () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const controller = lastController();
+    expect(idleScheduler.size()).toBe(1);
+
+    setVisibility("hidden");
+
+    expect(controller.cancel).toHaveBeenCalled();
+    expect(idleScheduler.size()).toBe(0);
+
+    setVisibility("visible");
+    firePrewarmStart(scene);
+
+    expect(startPrewarm).toHaveBeenCalledTimes(2);
+    expect(idleScheduler.size()).toBe(1);
+  });
+
+  it("cancels the pass before the tap's load is awaited", () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const controller = lastController();
+
+    const tile = navTiles()[0];
+    if (!tile) throw new Error("no nav tile found");
+    tile.handlers.pointerup?.();
+
+    expect(controller.cancel).toHaveBeenCalled();
+    // Ordering, not just both happening: the tap's fetch must never queue
+    // behind prewarm work.
+    const cancelOrder = controller.cancel.mock.invocationCallOrder[0];
+    const loadOrder = vi.mocked(loadSceneWithRetry).mock.invocationCallOrder[0];
+    expect(cancelOrder).toBeLessThan(loadOrder);
+  });
+
+  it("cancels on shutdown and warms the next visit from where the last one stopped", async () => {
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+    const first = lastController();
+
+    idleScheduler.fire();
+    await flushImports();
+    expect(chunkLoaders.ShapeSorter).toHaveBeenCalledTimes(1);
+
+    const shutdown = (scene as unknown as { eventsHandlers: Record<string, MockFn[]> })
+      .eventsHandlers.shutdown?.[0];
+    if (!shutdown) throw new Error("the Hub registered no shutdown handler");
+    shutdown();
+
+    expect(first.cancel).toHaveBeenCalled();
+    expect(idleScheduler.size()).toBe(0);
+
+    // A new visit on the same (Phaser-reused) instance: a fresh pass that skips
+    // the chunk the previous visit already imported.
+    scene.create();
+    firePrewarmStart(scene);
+    expect(lastController()).not.toBe(first);
+    idleScheduler.fire();
+    await flushImports();
+
+    expect(chunkLoaders.ShapeSorter).toHaveBeenCalledTimes(1);
+    expect(chunkLoaders.AnimalTrace).toHaveBeenCalledTimes(1);
+  });
+
+  it("orders the pass recency-first for the active profile", () => {
+    // The storage spy calls through, so this really records the play.
+    mockRecordGamePlay("pop-freeze");
+
+    const scene = new HubScene();
+    scene.create();
+    firePrewarmStart(scene);
+
+    const options = vi.mocked(startPrewarm).mock.calls[0]?.[0];
+    if (!options) throw new Error("no prewarm pass was started");
+    expect(options.entries.map((entry) => entry.key)).toEqual([
+      "PopFreeze",
+      "ShapeSorter",
+      "AnimalTrace",
+    ]);
   });
 });
