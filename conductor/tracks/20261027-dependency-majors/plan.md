@@ -116,12 +116,18 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-7, FR-8, AC-6, NFR-1
 - **Touches:** `docs/TDD.md`, `docs/perf-baseline.md` (coverage snapshot only if shifted), `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P5.T1: TDD runner section** — covers: FR-7
-  - [ ] **P5.T1.1:** Update `docs/TDD.md` §10.1: new runner versions, the clearMocks policy decision (embraced default, no escape hatch), and any happy-dom note.
-- [ ] **P5.T2: Tech-stack version table** — covers: FR-7
-  - [ ] **P5.T2.1:** Update the `conductor/tech-stack.md` version table to the five new versions.
-- [ ] **P5.T3: Coverage snapshot** — covers: FR-7, NFR-2
-  - [ ] **P5.T3.1:** If the measured coverage shifted under vitest 5, refresh the dated snapshot in TDD (and perf-baseline if listed); if unchanged, record that.
-- [ ] **P5.T4: Validate** — covers: AC-6
-  - [ ] **P5.T4.1:** Run the full verification chain; validate-docs must report 6/6.
+- **Status:** verified
+- [x] **P5.T1: TDD runner section** — covers: FR-7
+  - [x] **P5.T1.1:** Update `docs/TDD.md` §10.1: new runner versions, the clearMocks policy decision (embraced default, no escape hatch), and any happy-dom note.
+- [x] **P5.T2: Tech-stack version table** — covers: FR-7
+  - [x] **P5.T2.1:** Update the `conductor/tech-stack.md` version table to the five new versions.
+- [x] **P5.T3: Coverage snapshot** — covers: FR-7, NFR-2
+  - [x] **P5.T3.1:** If the measured coverage shifted under vitest 5, refresh the dated snapshot in TDD (and perf-baseline if listed); if unchanged, record that.
+- [x] **P5.T4: Validate** — covers: AC-6
+  - [x] **P5.T4.1:** Run the full verification chain; validate-docs must report 6/6.
+
+**Result:** verified
+
+**Checkpoint:** e2893a19
+
+**Evidence:** conductor/tracks/20261027-dependency-majors/verification/phase-5.md
