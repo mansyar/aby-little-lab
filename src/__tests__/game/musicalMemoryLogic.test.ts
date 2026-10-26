@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   appendNote,
@@ -12,10 +12,7 @@ import {
   WIN_TARGET,
   winLengthFor,
 } from "../../game/musicalMemoryLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+import { mulberry32 } from "../helpers/randomHelper";
 
 describe("generateSequence", () => {
   it("produces a sequence of the given length (start length 2)", () => {
@@ -36,29 +33,26 @@ describe("generateSequence", () => {
     }
   });
 
-  it("is deterministic when Math.random is mocked", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.0).mockReturnValueOnce(0.5);
-    const seq = generateSequence(2);
-    // Math.floor(0.0 * 3) = 0, Math.floor(0.5 * 3) = 1
-    expect(seq).toEqual([0, 1]);
+  it("is deterministic with an injected seeded rng", () => {
+    const seq = generateSequence(2, mulberry32(1234));
+    expect(seq).toEqual(generateSequence(2, mulberry32(1234)));
+    for (const note of seq) {
+      expect(note).toBeGreaterThanOrEqual(0);
+      expect(note).toBeLessThan(FROG_COUNT);
+    }
   });
 
   it("never emits a run longer than 2 consecutive same-frog notes", () => {
     // A constant 0.0 would otherwise produce all-green sequences; the cap
     // must force a different frog after two repeats.
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValue(0.0);
-    const seq = generateSequence(12);
+    const seq = generateSequence(12, () => 0.0);
     for (let i = 2; i < seq.length; i++) {
       expect(seq[i] === seq[i - 1] && seq[i - 1] === seq[i - 2]).toBe(false);
     }
   });
 
   it("keeps every note in range even when the run cap forces a different frog", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValue(0.0);
-    const seq = generateSequence(12);
+    const seq = generateSequence(12, () => 0.0);
     for (const note of seq) {
       expect(note).toBeGreaterThanOrEqual(0);
       expect(note).toBeLessThan(FROG_COUNT);
@@ -93,28 +87,22 @@ describe("appendNote", () => {
     expect(grown.slice(0, original.length)).toEqual(original);
   });
 
-  it("is deterministic when Math.random is mocked", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.99);
-    const grown = appendNote([0]);
-    // Math.floor(0.99 * 3) = 2
-    expect(grown).toEqual([0, 2]);
+  it("is deterministic with an injected seeded rng", () => {
+    const grown = appendNote([0], mulberry32(1234));
+    expect(grown).toEqual(appendNote([0], mulberry32(1234)));
+    expect(grown).toHaveLength(2);
   });
 
   it("avoids a third consecutive same-frog note", () => {
     // [0, 0] is already a run of 2; the appended note must not be 0.
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValue(0.0);
-    const grown = appendNote([0, 0]);
+    const grown = appendNote([0, 0], () => 0.0);
     expect(grown).toHaveLength(3);
     expect(grown.slice(0, 2)).toEqual([0, 0]);
     expect(grown[2]).not.toBe(0);
   });
 
   it("appends normally when the sequence has no run to cap", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValue(0.99);
-    const grown = appendNote([0, 2]);
+    const grown = appendNote([0, 2], () => 0.99);
     // Math.floor(0.99 * 3) = 2 — no run, free pick.
     expect(grown).toEqual([0, 2, 2]);
   });
@@ -237,9 +225,7 @@ describe("start-length shift (adaptive)", () => {
   });
 
   it("grows the easy starting sequence under the same run cap", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValue(0.0);
-    const seq = generateSequence(startLengthFor(-1));
+    const seq = generateSequence(startLengthFor(-1), () => 0.0);
     expect(seq).toHaveLength(1);
     for (let i = 2; i < seq.length; i++) {
       expect(seq[i] === seq[i - 1] && seq[i - 1] === seq[i - 2]).toBe(false);

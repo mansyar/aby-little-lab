@@ -91,6 +91,8 @@ afterEach(() => {
 
 describe("PopFreezeScene round initialization", () => {
   beforeEach(() => {
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 
@@ -193,6 +195,8 @@ describe("PopFreezeScene round initialization", () => {
 
 describe("PopFreezeScene tap interaction", () => {
   beforeEach(() => {
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 
@@ -475,6 +479,8 @@ describe("PopFreezeScene tap interaction", () => {
 
 describe("PopFreezeScene completion and sticker flow", () => {
   beforeEach(() => {
+    // FR-6 exception: the rng seam stops at the logic boundary (A4), so a
+    // scene-level stub is the only way to make this scene's draws repeatable.
     vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 

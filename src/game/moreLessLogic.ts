@@ -1,6 +1,6 @@
 import { BASE_LADDER, type BandShift, shiftLadder } from "./adaptiveLogic";
 import { COUNT_ITEMS } from "./countLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { type Rng, shuffle } from "./random";
 
 /** The comparison a round asks for: "which group has MORE?" or "...LESS?". */
 export type ComparisonMode = "more" | "less";
@@ -33,11 +33,23 @@ export interface MoreLessRound {
  */
 export const ROUND_BANDS: readonly { max: number }[] = [{ max: 3 }, { max: 5 }, { max: 10 }];
 
-/** Builds one round for a band and mode with two distinct counts and item types. */
-export function createRound(band: 1 | 2 | 3, mode: ComparisonMode): MoreLessRound {
+/**
+ * Builds one round for a band and mode with two distinct counts and item types.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function createRound(
+  band: 1 | 2 | 3,
+  mode: ComparisonMode,
+  rng: Rng = Math.random,
+): MoreLessRound {
   const config = ROUND_BANDS[band - 1];
-  const counts = shuffle(Array.from({ length: config.max }, (_, i) => i + 1)).slice(0, 2);
-  const textures = shuffle([...COUNT_ITEMS]).slice(0, 2);
+  const counts = shuffle(
+    Array.from({ length: config.max }, (_, i) => i + 1),
+    rng,
+  ).slice(0, 2);
+  const textures = shuffle([...COUNT_ITEMS], rng).slice(0, 2);
   return {
     mode,
     left: { count: counts[0], texture: textures[0] },
@@ -51,11 +63,14 @@ export function createRound(band: 1 | 2 | 3, mode: ComparisonMode): MoreLessRoun
  * [1,1,2,2,3,3] band ladder before rounds are built, clamped to bands 1..3.
  * The comparison modes are shuffled so every playthrough asks exactly 3
  * "more" and 3 "less" questions.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function createPlaythrough(shift: BandShift = 0): MoreLessRound[] {
+export function createPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): MoreLessRound[] {
   const bands = shiftLadder(BASE_LADDER, shift);
-  const modes = shuffle(["more", "more", "more", "less", "less", "less"]) as ComparisonMode[];
-  return bands.map((band, index) => createRound(band, modes[index]));
+  const modes = shuffle(["more", "more", "more", "less", "less", "less"], rng) as ComparisonMode[];
+  return bands.map((band, index) => createRound(band, modes[index], rng));
 }
 
 /** Returns whether the tapped side satisfies the round's comparison. */

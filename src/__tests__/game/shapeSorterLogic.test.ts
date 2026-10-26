@@ -1,17 +1,14 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { shuffle } from "../../game/random";
 import {
   ALL_SHAPES,
   generatePlaythrough,
   isMatch,
   poolFor,
   type ShapeType,
-  shuffle,
 } from "../../game/shapeSorterLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+import { mulberry32 } from "../helpers/randomHelper";
 
 it("expanded pool includes all 12 new shape types (18 total)", () => {
   expect(ALL_SHAPES).toHaveLength(18);
@@ -52,12 +49,13 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: ShapeType[] = ["circle", "square", "triangle"];
 
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
-    const result1 = shuffle(input);
-
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
-    const result2 = shuffle(input);
+    // Draw script passed through the injected seam: the first shuffle draws
+    // 0.5 then 0.2, the second 0.8 then 0.1.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.1];
+    const rng = () => draws[draw++];
+    const result1 = shuffle(input, rng);
+    const result2 = shuffle(input, rng);
 
     expect(result1).not.toEqual(result2);
   });
@@ -173,7 +171,17 @@ describe("generatePlaythrough with a band shift", () => {
   });
 
   it("classic draws are identical with and without the shift argument", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    expect(generatePlaythrough(3, 0)).toEqual(generatePlaythrough(3));
+    // The rng is a trailing optional parameter, so omitting the shift still
+    // takes the classic default; the seeded generator makes the draw
+    // repeatable instead of relying on a scoped Math.random stub.
+    expect(generatePlaythrough(3, undefined, mulberry32(1234))).toEqual(
+      generatePlaythrough(3, 0, mulberry32(1234)),
+    );
+    expect(generatePlaythrough(3, 0, mulberry32(1234))).toEqual(
+      generatePlaythrough(3, 0, mulberry32(1234)),
+    );
+    const classic = generatePlaythrough(3, 0, mulberry32(1234));
+    expect(classic).toHaveLength(3);
+    expect(new Set(classic.flat()).size).toBe(9);
   });
 });

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BASE_LADDER, type BandShift, shiftLadder } from "../../game/adaptiveLogic";
 import {
   ADD_IT_UP_BANDS,
@@ -9,10 +9,7 @@ import {
   isCorrect,
 } from "../../game/addItUpLogic";
 import { COUNT_ITEMS } from "../../game/countLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -109,12 +106,9 @@ describe("buildRound", () => {
     expect(answerSets.size).toBeGreaterThan(1);
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildRound(3);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildRound(3);
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildRound(3, new Set(), mulberry32(1234));
+    const second = buildRound(3, new Set(), mulberry32(1234));
     expect(second).toEqual(first);
     expectValidRound(first, 3);
   });
@@ -164,12 +158,9 @@ describe("buildPlaythrough", () => {
     }
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildPlaythrough();
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildPlaythrough(0, mulberry32(1234));
+    const second = buildPlaythrough(0, mulberry32(1234));
     expect(second).toEqual(first);
   });
 });
@@ -216,12 +207,9 @@ describe("buildPlaythrough(shift)", () => {
     }).not.toThrow();
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildPlaythrough(1);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildPlaythrough(1);
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildPlaythrough(1, mulberry32(1234));
+    const second = buildPlaythrough(1, mulberry32(1234));
     expect(second).toEqual(first);
   });
 });

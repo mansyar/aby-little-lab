@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BASE_LADDER, type BandShift, shiftLadder } from "../../game/adaptiveLogic";
 import {
   BAND_COUNTS,
@@ -8,10 +8,6 @@ import {
   isCorrect,
   type NumberOrderRound,
 } from "../../game/numberOrderLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 const VARIETY_SAMPLES = 200;
 
@@ -105,11 +101,9 @@ describe("buildRound", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildRound(2);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildRound(2);
+    const steady = () => 0.5;
+    const first = buildRound(2, steady);
+    const second = buildRound(2, steady);
     expect(second).toEqual(first);
   });
 });
@@ -129,11 +123,9 @@ describe("buildPlaythrough", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildPlaythrough();
+    const steady = () => 0.5;
+    const first = buildPlaythrough(0, steady);
+    const second = buildPlaythrough(0, steady);
     expect(second).toEqual(first);
   });
 });
@@ -155,11 +147,9 @@ describe("buildPlaythrough(shift)", () => {
   });
 
   it("shift 0 is byte-identical classic fixture (easy-first 1,1,2,2,3,3)", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.42);
-    const classic = buildPlaythrough(0);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.42);
-    const again = buildPlaythrough(0);
+    const steady = () => 0.42;
+    const classic = buildPlaythrough(0, steady);
+    const again = buildPlaythrough(0, steady);
     expect(again).toEqual(classic);
     // ladder sanity
     expect(shiftLadder(BASE_LADDER, 0)).toEqual([1, 1, 2, 2, 3, 3]);
@@ -185,11 +175,9 @@ describe("buildPlaythrough(shift)", () => {
 
   it("is deterministic under a fixed random sequence per shift", () => {
     for (const shift of SHIFTS) {
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const first = buildPlaythrough(shift);
-      vi.restoreAllMocks();
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const second = buildPlaythrough(shift);
+      const steady = () => 0.5;
+      const first = buildPlaythrough(shift, steady);
+      const second = buildPlaythrough(shift, steady);
       expect(second).toEqual(first);
     }
   });

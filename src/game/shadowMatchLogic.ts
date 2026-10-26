@@ -1,4 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
+import { type Rng, shuffle } from "./random";
 
 /** The twelve object types used in the Shadow Match game. */
 export type ObjectType =
@@ -51,16 +52,6 @@ export const WIN_TARGET = 6;
 /** Number of objects shown per round (6 of the 12 available). */
 export const ROUND_SIZE = 6;
 
-/** Returns a shuffled copy of the input array using the Fisher-Yates algorithm. */
-export function shuffle<T>(array: readonly T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
 /**
  * Generates a round: 6 of the 12 objects selected, with objects and shadows
  * sharing the same set (every object must have a matching shadow) but in
@@ -73,22 +64,28 @@ export function shuffle<T>(array: readonly T[]): T[] {
  *   before, now over the full pool.
  * - hard (`shift > 0`): three full clusters, so every round pairs confusable
  *   silhouettes.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateRound(shift: BandShift = 0): {
+export function generateRound(
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): {
   objects: ObjectType[];
   shadows: ObjectType[];
 } {
   let selected: ObjectType[];
   if (shift < 0) {
-    selected = CONFUSABLE_CLUSTERS.flatMap((cluster) => shuffle(cluster).slice(0, 1));
+    selected = CONFUSABLE_CLUSTERS.flatMap((cluster) => shuffle(cluster, rng).slice(0, 1));
   } else if (shift > 0) {
-    selected = shuffle(CONFUSABLE_CLUSTERS).slice(0, 3).flat();
+    selected = shuffle(CONFUSABLE_CLUSTERS, rng).slice(0, 3).flat();
   } else {
-    selected = shuffle(ALL_OBJECTS).slice(0, ROUND_SIZE);
+    selected = shuffle(ALL_OBJECTS, rng).slice(0, ROUND_SIZE);
   }
   return {
-    objects: shuffle(selected),
-    shadows: shuffle(selected),
+    objects: shuffle(selected, rng),
+    shadows: shuffle(selected, rng),
   };
 }
 

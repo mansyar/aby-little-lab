@@ -1,6 +1,6 @@
 import type { BandShift } from "./adaptiveLogic";
 import { isConfusableWith, type Letter } from "./alphabetLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { type Rng, shuffle } from "./random";
 import { type FirstWord, WORD_POOL } from "./wordLogic";
 
 /** The 22 decode words: shared 18 plus 4 new CVC words. */
@@ -32,8 +32,11 @@ export interface DecodeRound {
  * distinct first letter, never sharing the target's first letter and never
  * confusable via isConfusableWith (families C/G/O/Q, I/L/T, M/W). Positions
  * are shuffled. Confusable exclusion also applies pairwise among distractors.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildRound(target: FirstWord): DecodeRound {
+export function buildRound(target: FirstWord, rng: Rng = Math.random): DecodeRound {
   const targetFirst = target.word.charAt(0) as Letter;
   const candidates = DECODE_POOL.filter((entry) => {
     if (entry.word === target.word) return false;
@@ -44,7 +47,7 @@ export function buildRound(target: FirstWord): DecodeRound {
   });
 
   // Shuffle and pick 3 distractors pairwise non-confusable and distinct first letters
-  const shuffled = shuffle([...candidates]);
+  const shuffled = shuffle([...candidates], rng);
   const distractors: string[] = [];
   const usedFirsts: Letter[] = [];
   for (const cand of shuffled) {
@@ -63,7 +66,7 @@ export function buildRound(target: FirstWord): DecodeRound {
     const fallbackPool = DECODE_POOL.filter(
       (entry) => entry.word !== target.word && !distractors.includes(entry.word),
     );
-    for (const cand of shuffle(fallbackPool)) {
+    for (const cand of shuffle(fallbackPool, rng)) {
       if (distractors.length >= 3) break;
       const candFirst = cand.word.charAt(0) as Letter;
       if (candFirst === targetFirst) continue;
@@ -81,7 +84,7 @@ export function buildRound(target: FirstWord): DecodeRound {
   return {
     target: target.word,
     promptTexture: target.promptTexture,
-    choices: shuffle([target.word, ...distractors]),
+    choices: shuffle([target.word, ...distractors], rng),
   };
 }
 
@@ -94,17 +97,30 @@ export function buildRound(target: FirstWord): DecodeRound {
  * The adaptive `shift` (-1 | 0 | 1) moves the tier split point: -1 serves
  * four 3-letter rounds then two 4-letter, +1 brings two 3-letter then four
  * 4-letter. Default 0 reproduces the classic 3+3 exactly.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildPlaythrough(roundCount = 6, shift: BandShift = 0): DecodeRound[] {
-  const tier3 = shuffle(DECODE_POOL.filter((entry) => entry.tier === 3));
-  const tier4 = shuffle(DECODE_POOL.filter((entry) => entry.tier === 4));
+export function buildPlaythrough(
+  roundCount = 6,
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): DecodeRound[] {
+  const tier3 = shuffle(
+    DECODE_POOL.filter((entry) => entry.tier === 3),
+    rng,
+  );
+  const tier4 = shuffle(
+    DECODE_POOL.filter((entry) => entry.tier === 4),
+    rng,
+  );
   const classicEasy = Math.floor(roundCount / 2);
   const earlyCount = Math.min(tier3.length, Math.max(0, classicEasy - shift));
   const targets = [...tier3.slice(0, earlyCount), ...tier4.slice(0, roundCount - earlyCount)].slice(
     0,
     roundCount,
   );
-  return targets.map((target) => buildRound(target));
+  return targets.map((target) => buildRound(target, rng));
 }
 
 /** True when the tapped card index matches the round's target. */

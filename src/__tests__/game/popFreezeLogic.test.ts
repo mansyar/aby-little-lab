@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   ALL_ANIMALS,
@@ -14,14 +14,11 @@ import {
   registerWake,
   selectBubbleType,
   selectSleepingAnimal,
-  shuffle,
   sleepingBoundsFor,
   WIN_TARGET,
 } from "../../game/popFreezeLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+import { shuffle } from "../../game/random";
+import { mulberry32 } from "../helpers/randomHelper";
 
 describe("createRoundState", () => {
   it("initializes pop count to 0", () => {
@@ -49,12 +46,8 @@ describe("selectBubbleType", () => {
   });
 
   it("can return either type when sleeping count is between min and max", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.3);
-    expect(selectBubbleType(1)).toBe("sleeping");
-
-    spy.mockReturnValueOnce(0.7);
-    expect(selectBubbleType(1)).toBe("poppable");
+    expect(selectBubbleType(1, undefined, () => 0.3)).toBe("sleeping");
+    expect(selectBubbleType(1, undefined, () => 0.7)).toBe("poppable");
   });
 });
 
@@ -71,13 +64,11 @@ describe("selectSleepingAnimal", () => {
   });
 
   it("returns different animals on successive calls (randomized)", () => {
-    // shuffle(ALL_ANIMALS) with 6 elements does 5 Fisher-Yates iterations
-    const spy = vi.spyOn(Math, "random");
-    for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.0);
-    const first = selectSleepingAnimal();
-
-    for (let i = 0; i < 5; i++) spy.mockReturnValueOnce(0.9);
-    const second = selectSleepingAnimal();
+    // shuffle(ALL_ANIMALS) with 6 elements does 5 Fisher-Yates draws.
+    const low = () => 0.0;
+    const high = () => 0.9;
+    const first = selectSleepingAnimal(low);
+    const second = selectSleepingAnimal(high);
 
     expect(first).not.toBe(second);
   });
@@ -112,20 +103,26 @@ describe("generateSpawnConfig", () => {
   });
 
   it("produces different positions on successive calls (randomized)", () => {
-    const spy = vi.spyOn(Math, "random");
-    spy
-      .mockReturnValueOnce(0.1)
-      .mockReturnValueOnce(0.2)
-      .mockReturnValueOnce(0.3)
-      .mockReturnValueOnce(0.4);
-    const config1 = generateSpawnConfig(worldWidth, worldHeight, bubbleSize, "poppable");
+    // Draw scripts passed through the injected seam: four draws per call.
+    let first = 0;
+    const firstDraws = [0.1, 0.2, 0.3, 0.4];
+    const config1 = generateSpawnConfig(
+      worldWidth,
+      worldHeight,
+      bubbleSize,
+      "poppable",
+      () => firstDraws[first++],
+    );
 
-    spy
-      .mockReturnValueOnce(0.8)
-      .mockReturnValueOnce(0.9)
-      .mockReturnValueOnce(0.1)
-      .mockReturnValueOnce(0.2);
-    const config2 = generateSpawnConfig(worldWidth, worldHeight, bubbleSize, "poppable");
+    let second = 0;
+    const secondDraws = [0.8, 0.9, 0.1, 0.2];
+    const config2 = generateSpawnConfig(
+      worldWidth,
+      worldHeight,
+      bubbleSize,
+      "poppable",
+      () => secondDraws[second++],
+    );
 
     expect(config1.x).not.toBe(config2.x);
     expect(config1.y).not.toBe(config2.y);
@@ -171,6 +168,14 @@ describe("generateInitialBubbles", () => {
         expect(b.animal).toBeUndefined();
       }
     }
+  });
+
+  it("is deterministic under a seeded rng (AC-3)", () => {
+    // `undefined` keeps the classic sleeping bounds; the seeded generator makes
+    // the whole spawn (positions, velocities and animal draws) reproducible.
+    expect(generateInitialBubbles(800, 600, 96, undefined, mulberry32(1234))).toEqual(
+      generateInitialBubbles(800, 600, 96, undefined, mulberry32(1234)),
+    );
   });
 });
 
@@ -247,13 +252,19 @@ describe("shuffle", () => {
   it("produces independent results when called twice with different random values", () => {
     const input: BubbleType[] = ["poppable", "sleeping", "poppable", "sleeping"];
 
-    const spy = vi.spyOn(Math, "random");
-    spy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.2);
-    const result1 = shuffle(input);
+    // A 4-element pool takes 3 Fisher-Yates draws per call, so two calls need 6
+    // draws. The script cycles instead of running dry: an under-scripted rng
+    // returns `undefined`, writes it into the result, and lets a mere
+    // inequality assertion pass on corrupted output.
+    let draw = 0;
+    const draws = [0.5, 0.2, 0.8, 0.1];
+    const rng = () => draws[draw++ % draws.length];
+    const result1 = shuffle(input, rng);
+    const result2 = shuffle(input, rng);
 
-    spy.mockReturnValueOnce(0.8).mockReturnValueOnce(0.1);
-    const result2 = shuffle(input);
-
+    // Concrete permutations re-derived from the cycled draws above.
+    expect(result1).toEqual(["sleeping", "sleeping", "poppable", "poppable"]);
+    expect(result2).toEqual(["poppable", "sleeping", "sleeping", "poppable"]);
     expect(result1).not.toEqual(result2);
   });
 });
@@ -279,10 +290,9 @@ describe("selectBubbleType with band bounds", () => {
   });
 
   it("easy band: the 0 floor allows an all-poppable opening", () => {
-    // Seeded roll keeps the 50/50 branch deterministic: >= 0.5 means poppable.
-    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    // Steady roll keeps the 50/50 branch deterministic: >= 0.5 means poppable.
     const bounds = sleepingBoundsFor(-1);
-    expect(selectBubbleType(0, bounds)).toBe("poppable");
+    expect(selectBubbleType(0, bounds, () => 0.7)).toBe("poppable");
   });
 
   it("hard band: spawns stay sleeping until the band's minimum is met", () => {
@@ -299,12 +309,13 @@ describe("generateInitialBubbles with band bounds", () => {
   const bubbleSize = 96;
 
   it("easy band can open all-poppable; the wake flow stays inert", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const steady = () => 0.7;
     const bubbles = generateInitialBubbles(
       worldWidth,
       worldHeight,
       bubbleSize,
       sleepingBoundsFor(-1),
+      steady,
     );
     expect(bubbles).toHaveLength(CONCURRENT_BUBBLES);
     expect(bubbles.filter((b) => b.type === "sleeping")).toHaveLength(0);
@@ -315,12 +326,13 @@ describe("generateInitialBubbles with band bounds", () => {
   });
 
   it("hard band forces 2-3 sleeping bubbles into the opening set", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const steady = () => 0.7;
     const bubbles = generateInitialBubbles(
       worldWidth,
       worldHeight,
       bubbleSize,
       sleepingBoundsFor(1),
+      steady,
     );
     const sleeping = bubbles.filter((b) => b.type === "sleeping");
     expect(sleeping.length).toBeGreaterThanOrEqual(2);
@@ -329,11 +341,13 @@ describe("generateInitialBubbles with band bounds", () => {
   });
 
   it("bands open observably different mixes under one seed", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.7);
+    const steady = () => 0.7;
     const countSleeping = (bs: BubbleConfig[]) => bs.filter((b) => b.type === "sleeping").length;
-    const easy = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(-1)));
-    const classic = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(0)));
-    const hard = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(1)));
+    const easy = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(-1), steady));
+    const classic = countSleeping(
+      generateInitialBubbles(800, 600, 96, sleepingBoundsFor(0), steady),
+    );
+    const hard = countSleeping(generateInitialBubbles(800, 600, 96, sleepingBoundsFor(1), steady));
     expect(easy).toBe(0);
     expect(classic).toBe(1);
     expect(hard).toBe(2);

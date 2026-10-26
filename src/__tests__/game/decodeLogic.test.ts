@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   buildPlaythrough,
   buildRound,
@@ -8,10 +8,7 @@ import {
   isCorrect,
 } from "../../game/decodeLogic";
 import { WORD_POOL } from "../../game/wordLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+import { mulberry32 } from "../helpers/randomHelper";
 
 const VARIETY_SAMPLES = 200;
 
@@ -228,12 +225,9 @@ describe("buildRound", () => {
     }
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildRound(DECODE_POOL[0]);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildRound(DECODE_POOL[0]);
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildRound(DECODE_POOL[0], mulberry32(1234));
+    const second = buildRound(DECODE_POOL[0], mulberry32(1234));
     expect(second).toEqual(first);
     expectValidDecodeRound(first);
   });
@@ -272,12 +266,9 @@ describe("buildPlaythrough", () => {
     }
   });
 
-  it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = buildPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = buildPlaythrough();
+  it("is deterministic under a seeded rng injection", () => {
+    const first = buildPlaythrough(6, 0, mulberry32(1234));
+    const second = buildPlaythrough(6, 0, mulberry32(1234));
     expect(second).toEqual(first);
   });
 
@@ -339,15 +330,11 @@ describe("buildPlaythrough (adaptive shift)", () => {
     }
   }, 30000);
 
-  it("is deterministic under a fixed random sequence for each shift", () => {
+  it("is deterministic under a seeded rng injection for each shift", () => {
     for (const shift of [-1, 0, 1] as const) {
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const first = buildPlaythrough(6, shift);
-      vi.restoreAllMocks();
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const second = buildPlaythrough(6, shift);
+      const first = buildPlaythrough(6, shift, mulberry32(1234));
+      const second = buildPlaythrough(6, shift, mulberry32(1234));
       expect(second).toEqual(first);
-      vi.restoreAllMocks();
     }
   });
 });

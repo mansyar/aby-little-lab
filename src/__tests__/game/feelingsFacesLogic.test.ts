@@ -13,15 +13,7 @@ import {
   SCENARIO_POOL,
   type Scenario,
 } from "../../game/feelingsFacesLogic";
-
-/** Deterministic generator so draw tests never depend on Math.random. */
-function seededRng(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 0x100000000;
-  };
-}
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** The contrast kind of each rung, in order — the compact shape band tests compare. */
 function kindsOf(ladder: readonly RoundContrast[]): string[] {
@@ -105,16 +97,18 @@ describe("SCENARIO_POOL", () => {
 
 describe("drawScenarios", () => {
   it("draws one playthrough of six scenarios", () => {
-    expect(drawScenarios(seededRng(1))).toHaveLength(ROUND_COUNT);
+    expect(drawScenarios(mulberry32(1))).toHaveLength(ROUND_COUNT);
   });
 
   it("defaults to Math.random when no generator is passed", () => {
+    // Scoped default-wiring assertion only (the FR-6 exception): the call runs
+    // the real fallback wiring unmocked, it does not script gameplay randomness.
     expect(drawScenarios()).toHaveLength(ROUND_COUNT);
   });
 
   it("never repeats a scenario within a run and covers every emotion over 20 runs", () => {
     for (let seed = 1; seed <= 20; seed++) {
-      const drawn = drawScenarios(seededRng(seed));
+      const drawn = drawScenarios(mulberry32(seed));
       expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
       expect(new Set(drawn.map((scenario) => scenario.emotion)).size).toBe(EMOTIONS.length);
       for (const scenario of drawn) {
@@ -125,14 +119,45 @@ describe("drawScenarios", () => {
 
   it("draws the same playthrough for the same seed", () => {
     for (let seed = 1; seed <= 20; seed++) {
-      expect(drawScenarios(seededRng(seed))).toEqual(drawScenarios(seededRng(seed)));
+      expect(drawScenarios(mulberry32(seed))).toEqual(drawScenarios(mulberry32(seed)));
     }
+  });
+
+  it("draws the identical sequence after adopting the shared shuffle (AC-3)", () => {
+    // Goldens captured while the module still used its private Fisher-Yates
+    // shuffleWith, right before P3.T3.1 delegated it to the shared shuffle.
+    // The shared shuffle consumes rng in the same order, so the same seeded
+    // rng must yield the exact pre-migration draw.
+    expect(drawScenarios(mulberry32(1)).map((scenario) => scenario.id)).toEqual([
+      "sad-rain",
+      "angry-toy",
+      "scared-dog",
+      "happy-bubbles",
+      "angry-tower",
+      "sad-blocks",
+    ]);
+    expect(drawScenarios(mulberry32(77)).map((scenario) => scenario.id)).toEqual([
+      "angry-line",
+      "angry-turn",
+      "sad-rain",
+      "happy-truck",
+      "sad-ice-cream",
+      "scared-dog",
+    ]);
+    expect(drawScenarios(mulberry32(2026)).map((scenario) => scenario.id)).toEqual([
+      "scared-mask",
+      "happy-truck",
+      "sad-balloon",
+      "angry-toy",
+      "scared-hallway",
+      "angry-tower",
+    ]);
   });
 
   it("varies the draw across seeds", () => {
     const runs = new Set(
       Array.from({ length: 20 }, (_, index) =>
-        drawScenarios(seededRng(index + 1))
+        drawScenarios(mulberry32(index + 1))
           .map((scenario) => scenario.id)
           .join(","),
       ),
@@ -443,7 +468,7 @@ describe("buildRoundChoices band ladders", () => {
 
   it("plays observably different rounds per band from one seeded draw (AC-1)", () => {
     for (let seed = 1; seed <= 6; seed++) {
-      const rng = seededRng(seed);
+      const rng = mulberry32(seed);
       const scenarios = drawScenarios(rng);
       const easy = scenarios.map((scenario, index) =>
         buildRoundChoices(index, scenario.emotion, contrastSplitFor(-1)),
@@ -462,7 +487,7 @@ describe("buildRoundChoices band ladders", () => {
 
   it("spreads targets over all four emotions at every band", () => {
     for (let seed = 1; seed <= 8; seed++) {
-      const drawn = drawScenarios(seededRng(seed));
+      const drawn = drawScenarios(mulberry32(seed));
       expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
       expect(drawn.map((scenario) => scenario.emotion)).toEqual(
         expect.arrayContaining([...EMOTIONS]),

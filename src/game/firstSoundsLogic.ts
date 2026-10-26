@@ -1,7 +1,7 @@
 import type { BandId, BandShift } from "./adaptiveLogic";
 import { shiftLadder } from "./adaptiveLogic";
 import { isConfusableWith, type Letter } from "./alphabetLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { type Rng, shuffle } from "./random";
 import { getWord } from "./wordLogic";
 
 /** A single First Sounds word: the printed word and its picture texture. */
@@ -91,11 +91,18 @@ export interface PhonicsRound {
  * are never visually confusable (alphabet families) with the target, and —
  * unless the hard band explicitly invites that skill — also never
  * sound-confusable (B/P, D/T). All positions are shuffled.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generatePhonicsRound(target: Letter, band: BandId = 2): PhonicsRound {
+export function generatePhonicsRound(
+  target: Letter,
+  band: BandId = 2,
+  rng: Rng = Math.random,
+): PhonicsRound {
   const allowSoundConfusable = band === 3;
   const words = PHONICS_POOL.filter((entry) => firstLetterOf(entry.word) === target);
-  const word = shuffle(words)[0];
+  const word = shuffle(words, rng)[0];
   const distractors = shuffle(
     PHONICS_LETTERS.filter(
       (letter) =>
@@ -103,12 +110,13 @@ export function generatePhonicsRound(target: Letter, band: BandId = 2): PhonicsR
         !isConfusableWith(target, letter) &&
         (allowSoundConfusable || !isSoundConfusableWith(target, letter)),
     ),
+    rng,
   ).slice(0, 3);
   return {
     target,
     word: word.word,
     promptTexture: word.promptTexture,
-    choices: shuffle([target, ...distractors]),
+    choices: shuffle([target, ...distractors], rng),
   };
 }
 
@@ -118,11 +126,18 @@ export function generatePhonicsRound(target: Letter, band: BandId = 2): PhonicsR
  * classic draws all 9 phonics letters, easy (shift -1) drops the B/P pair to
  * 7 gentler letters, hard (shift +1) keeps all 9 and allows sound-confusable
  * distractors. The default shift 0 reproduces the classic playthrough exactly.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generatePhonicsPlaythrough(roundCount = 6, shift: BandShift = 0): PhonicsRound[] {
+export function generatePhonicsPlaythrough(
+  roundCount = 6,
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): PhonicsRound[] {
   const band = shiftLadder(SOUND_BASE_LADDER, shift)[0] ?? 2;
   const pool = band === 1 ? EASY_SOUND_LETTERS : PHONICS_LETTERS;
-  return shuffle(pool)
+  return shuffle(pool, rng)
     .slice(0, roundCount)
-    .map((target) => generatePhonicsRound(target, band));
+    .map((target) => generatePhonicsRound(target, band, rng));
 }

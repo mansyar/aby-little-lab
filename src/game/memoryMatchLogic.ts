@@ -1,6 +1,6 @@
 import type { BandId, BandShift } from "./adaptiveLogic";
 import { BASE_LADDER, shiftLadder } from "./adaptiveLogic";
-import { shuffle } from "./shapeSorterLogic";
+import { type Rng, shuffle } from "./random";
 
 /** Difficulty bands for Memory Match rounds (fixed across replays). */
 export type MemoryBand = "easy" | "medium" | "hard";
@@ -78,15 +78,18 @@ function bandIdToMemoryBand(band: BandId): MemoryBand {
 /**
  * Builds one round by sampling `pairs` distinct textures from the pool,
  * duplicating them, and shuffling the layout so each texture appears twice.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildRound(band: MemoryBand): MemoryRound {
+export function buildRound(band: MemoryBand, rng: Rng = Math.random): MemoryRound {
   const pairs = BAND_PAIRS[band];
   if (pairs === undefined) {
     // Only reachable if a caller passes a band outside the MemoryBand union.
     throw new Error(`Unknown band ${band}`);
   }
-  const textures = shuffle(MEMORY_POOL).slice(0, pairs);
-  const layout = shuffle([...textures, ...textures]);
+  const textures = shuffle(MEMORY_POOL, rng).slice(0, pairs);
+  const layout = shuffle([...textures, ...textures], rng);
   const { rows, cols } = BAND_GRID[band];
   return { band, rows, cols, textures, layout };
 }
@@ -95,10 +98,13 @@ export function buildRound(band: MemoryBand): MemoryRound {
  * Generates a playthrough of 6 rounds, easy-first through the bands. The
  * adaptive shift moves every round one band down (-1) or up (+1), clamped
  * to easy/hard; the default shift 0 reproduces the classic ladder exactly.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function buildPlaythrough(shift: BandShift = 0): MemoryRound[] {
+export function buildPlaythrough(shift: BandShift = 0, rng: Rng = Math.random): MemoryRound[] {
   const ladder = shiftLadder(BASE_LADDER, shift);
-  return ladder.map((band) => buildRound(bandIdToMemoryBand(band)));
+  return ladder.map((band) => buildRound(bandIdToMemoryBand(band), rng));
 }
 
 /**

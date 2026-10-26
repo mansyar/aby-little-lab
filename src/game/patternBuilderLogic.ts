@@ -1,5 +1,6 @@
 import { BASE_LADDER, type BandId, type BandShift, shiftLadder } from "./adaptiveLogic";
-import { ALL_SHAPES, type ShapeType, shuffle } from "./shapeSorterLogic";
+import { type Rng, shuffle } from "./random";
+import { ALL_SHAPES, type ShapeType } from "./shapeSorterLogic";
 
 /** The three repeating pattern types used in the Pattern Builder game. */
 export type PatternType = "ABAB" | "AABB" | "ABB";
@@ -32,8 +33,8 @@ export function buildPatternRow(type: PatternType, a: ShapeType, b: ShapeType): 
   }
 }
 
-function pickFrom<T>(array: readonly T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
+function pickFrom<T>(array: readonly T[], rng: Rng): T {
+  return array[Math.floor(rng() * array.length)];
 }
 
 /**
@@ -55,14 +56,14 @@ function isConfusableWith(shape: ShapeType, other: ShapeType): boolean {
 }
 
 /** Picks a gap index per band: bands 1–2 always hide the end (3); band 3 ends 50% / middle 50%. */
-function pickGapIndex(band: BandId): number {
+function pickGapIndex(band: BandId, rng: Rng): number {
   if (band < 3) {
     return 3;
   }
-  if (Math.random() < 0.5) {
+  if (rng() < 0.5) {
     return 3;
   }
-  return 1 + Math.floor(Math.random() * 2);
+  return 1 + Math.floor(rng() * 2);
 }
 
 /**
@@ -72,17 +73,21 @@ function pickGapIndex(band: BandId): number {
  * matches today's draw — any type, end or middle gap. The confusable-family
  * distractor guard holds in every band: it is an ambiguity guard, not a
  * difficulty knob.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateRound(band: BandId = 3): PatternRound {
-  const patternType = band === 1 ? "ABAB" : pickFrom(PATTERN_TYPES);
-  const [a, b] = shuffle(ALL_SHAPES).slice(0, 2);
+export function generateRound(band: BandId = 3, rng: Rng = Math.random): PatternRound {
+  const patternType = band === 1 ? "ABAB" : pickFrom(PATTERN_TYPES, rng);
+  const [a, b] = shuffle(ALL_SHAPES, rng).slice(0, 2);
   const row = buildPatternRow(patternType, a, b);
-  const gapIndex = pickGapIndex(band);
+  const gapIndex = pickGapIndex(band, rng);
   const correct = row[gapIndex];
   const distractors = shuffle(
     ALL_SHAPES.filter((shape) => shape !== correct && !isConfusableWith(correct, shape)),
+    rng,
   ).slice(0, 2);
-  const choices = shuffle([correct, ...distractors]);
+  const choices = shuffle([correct, ...distractors], rng);
   return { patternType, row, gapIndex, choices };
 }
 
@@ -95,10 +100,17 @@ export function generateRound(band: BandId = 3): PatternRound {
  * rounds (any type, end gap), then two band-3 rounds (any type, any gap) —
  * matching the shape of every other band-based mini-game. The shift is chosen
  * by the caller once per playthrough and never changes mid-game.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generatePlaythrough(roundCount = 6, shift: BandShift = 0): PatternRound[] {
+export function generatePlaythrough(
+  roundCount = 6,
+  shift: BandShift = 0,
+  rng: Rng = Math.random,
+): PatternRound[] {
   const ladder = shiftLadder(BASE_LADDER, shift);
-  return Array.from({ length: roundCount }, (_, round) => generateRound(ladder[round] ?? 3));
+  return Array.from({ length: roundCount }, (_, round) => generateRound(ladder[round] ?? 3, rng));
 }
 
 /** Returns the shape that fills the round's gap. */

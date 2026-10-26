@@ -1,4 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
+import type { Rng } from "./random";
 
 /** The number of frogs the child can tap (green / blue / red). */
 export const FROG_COUNT = 3;
@@ -32,26 +33,29 @@ export function winLengthFor(start: number): number {
  * Picks a random frog index (0..FROG_COUNT-1), avoiding a third consecutive
  * same-frog note when the last two notes are identical.
  */
-function pickNote(previous: number[]): number {
+function pickNote(previous: number[], rng: Rng): number {
   const last = previous.at(-1);
   const secondLast = previous.at(-2);
   if (last !== undefined && last === secondLast) {
     // Run of MAX_RUN already: draw from the other frogs only.
     const allowed = [0, 1, 2].filter((frog) => frog !== last);
-    return allowed[Math.floor(Math.random() * allowed.length)];
+    return allowed[Math.floor(rng() * allowed.length)];
   }
-  return Math.floor(Math.random() * FROG_COUNT);
+  return Math.floor(rng() * FROG_COUNT);
 }
 
 /**
  * Generates a random sequence of frog indices (0..FROG_COUNT-1) of the given
  * length with no run of more than `MAX_RUN` consecutive same-frog notes.
  * Used to initialise the first round.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function generateSequence(length: number): number[] {
+export function generateSequence(length: number, rng: Rng = Math.random): number[] {
   const sequence: number[] = [];
   for (let i = 0; i < length; i++) {
-    sequence.push(pickNote(sequence));
+    sequence.push(pickNote(sequence, rng));
   }
   return sequence;
 }
@@ -60,9 +64,12 @@ export function generateSequence(length: number): number[] {
  * Returns a *new* sequence with one random frog index (0..FROG_COUNT-1)
  * appended, respecting the same-frog run cap. The original sequence is not
  * mutated.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
  */
-export function appendNote(sequence: readonly number[]): number[] {
-  const note = pickNote([...sequence]);
+export function appendNote(sequence: readonly number[], rng: Rng = Math.random): number[] {
+  const note = pickNote([...sequence], rng);
   return [...sequence, note];
 }
 

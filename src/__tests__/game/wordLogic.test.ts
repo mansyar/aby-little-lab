@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   generateLetterTiles,
   generateWordBuildPlaythrough,
@@ -8,10 +8,6 @@ import {
   WORD_POOL,
   type WordRound,
 } from "../../game/wordLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -165,11 +161,9 @@ describe("generateWordRound", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generateWordRound(WORD_POOL[0]);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generateWordRound(WORD_POOL[0]);
+    const steady = () => 0.5;
+    const first = generateWordRound(WORD_POOL[0], steady);
+    const second = generateWordRound(WORD_POOL[0], steady);
     expect(second).toEqual(first);
     expectValidWordRound(first);
   });
@@ -212,11 +206,9 @@ describe("generateWordPlaythrough", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generateWordPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generateWordPlaythrough();
+    const steady = () => 0.5;
+    const first = generateWordPlaythrough(6, 0, steady);
+    const second = generateWordPlaythrough(6, 0, steady);
     expect(second).toEqual(first);
   });
 
@@ -274,13 +266,10 @@ describe("generateWordPlaythrough (adaptive shift)", () => {
 
   it("is deterministic under a fixed random sequence for each shift", () => {
     for (const shift of [-1, 0, 1] as const) {
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const first = generateWordPlaythrough(6, shift);
-      vi.restoreAllMocks();
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const second = generateWordPlaythrough(6, shift);
+      const steady = () => 0.5;
+      const first = generateWordPlaythrough(6, shift, steady);
+      const second = generateWordPlaythrough(6, shift, steady);
       expect(second).toEqual(first);
-      vi.restoreAllMocks();
     }
   });
 });
@@ -336,11 +325,9 @@ describe("generateWordBuildPlaythrough", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generateWordBuildPlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generateWordBuildPlaythrough();
+    const steady = () => 0.5;
+    const first = generateWordBuildPlaythrough(3, 0, steady);
+    const second = generateWordBuildPlaythrough(3, 0, steady);
     expect(second).toEqual(first);
   });
 });
@@ -429,11 +416,9 @@ describe("generateLetterTiles", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generateLetterTiles("CAT");
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generateLetterTiles("CAT");
+    const steady = () => 0.5;
+    const first = generateLetterTiles("CAT", steady);
+    const second = generateLetterTiles("CAT", steady);
     expect(second).toEqual(first);
   });
 });

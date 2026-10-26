@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   ALPHABET,
   type AlphabetRound,
@@ -6,10 +6,6 @@ import {
   generateRound,
   type Letter,
 } from "../../game/alphabetLogic";
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -80,11 +76,9 @@ describe("generateRound", () => {
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generateRound("B");
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generateRound("B");
+    const steady = () => 0.5;
+    const first = generateRound("B", 2, steady);
+    const second = generateRound("B", 2, steady);
     expect(second).toEqual(first);
     expectValidRound(first);
   });
@@ -127,20 +121,15 @@ describe("generatePlaythrough", () => {
   });
 
   it("produces different playthroughs under different random sequences", () => {
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.05).mockReturnValueOnce(0.35);
-    const first = generatePlaythrough(6);
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValueOnce(0.95).mockReturnValueOnce(0.65);
-    const second = generatePlaythrough(6);
+    const first = generatePlaythrough(6, 0, () => 0.05);
+    const second = generatePlaythrough(6, 0, () => 0.95);
     expect(first).not.toEqual(second);
   });
 
   it("is deterministic under a fixed random sequence", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const first = generatePlaythrough();
-    vi.restoreAllMocks();
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const second = generatePlaythrough();
+    const steady = () => 0.5;
+    const first = generatePlaythrough(6, 0, steady);
+    const second = generatePlaythrough(6, 0, steady);
     expect(second).toEqual(first);
   });
 });
@@ -199,11 +188,9 @@ describe("generateRound (adaptive band)", () => {
 
   it("is deterministic under a fixed random sequence for every band", () => {
     for (const band of [1, 2, 3] as const) {
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const first = generateRound("C", band);
-      vi.restoreAllMocks();
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const second = generateRound("C", band);
+      const steady = () => 0.5;
+      const first = generateRound("C", band, steady);
+      const second = generateRound("C", band, steady);
       expect(second).toEqual(first);
       expectValidRound(first);
     }
@@ -263,11 +250,9 @@ describe("generatePlaythrough (adaptive shift)", () => {
 
   it("is deterministic under a fixed random sequence for every shift", () => {
     for (const shift of [-1, 0, 1] as const) {
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const first = generatePlaythrough(6, shift);
-      vi.restoreAllMocks();
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-      const second = generatePlaythrough(6, shift);
+      const steady = () => 0.5;
+      const first = generatePlaythrough(6, shift, steady);
+      const second = generatePlaythrough(6, shift, steady);
       expect(second).toEqual(first);
     }
   });

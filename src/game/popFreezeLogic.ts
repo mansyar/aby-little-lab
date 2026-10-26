@@ -1,4 +1,5 @@
 import type { BandShift } from "./adaptiveLogic";
+import { type Rng, shuffle } from "./random";
 
 /** The six animal types used as sleeping-animal content in Pop & Freeze. */
 export type AnimalType = "monkey" | "rabbit" | "cat" | "dog" | "elephant" | "pig";
@@ -70,51 +71,56 @@ export function createRoundState(): RoundState {
   return { popCount: 0, winTarget: WIN_TARGET };
 }
 
-/** Returns a shuffled copy of the input array using the Fisher-Yates algorithm. */
-export function shuffle<T>(array: readonly T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
-/** Selects the bubble type for the next spawn, maintaining the band's sleeping bounds. */
+/**
+ * Selects the bubble type for the next spawn, maintaining the band's sleeping bounds.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
 export function selectBubbleType(
   sleepingCount: number,
   bounds: SleepingBounds = CLASSIC_SLEEPING_BOUNDS,
+  rng: Rng = Math.random,
 ): BubbleType {
   if (sleepingCount < bounds.min) return "sleeping";
   if (sleepingCount >= bounds.max) return "poppable";
-  return Math.random() < 0.5 ? "sleeping" : "poppable";
+  return rng() < 0.5 ? "sleeping" : "poppable";
 }
 
-/** Randomly selects one of the six sleeping animals. */
-export function selectSleepingAnimal(): AnimalType {
-  return shuffle(ALL_ANIMALS)[0];
+/**
+ * Randomly selects one of the six sleeping animals.
+ *
+ * `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ * draw is reproducible.
+ */
+export function selectSleepingAnimal(rng: Rng = Math.random): AnimalType {
+  return shuffle(ALL_ANIMALS, rng)[0];
 }
 
 /** Generates a randomized spawn config within world bounds.
  *
  *  Position is clamped so the bubble stays fully on-screen. Velocity is
  *  a random direction at a gentle speed suitable for floating motion.
+ *
+ *  `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ *  draw is reproducible.
  */
 export function generateSpawnConfig(
   worldWidth: number,
   worldHeight: number,
   bubbleSize: number,
   type: BubbleType,
+  rng: Rng = Math.random,
 ): BubbleConfig {
-  const x = bubbleSize + Math.random() * (worldWidth - 2 * bubbleSize);
-  const y = bubbleSize + Math.random() * (worldHeight - 2 * bubbleSize);
-  const speed = 30 + Math.random() * 50; // 30–80 px/s gentle drift
-  const angle = Math.random() * Math.PI * 2;
+  const x = bubbleSize + rng() * (worldWidth - 2 * bubbleSize);
+  const y = bubbleSize + rng() * (worldHeight - 2 * bubbleSize);
+  const speed = 30 + rng() * 50; // 30–80 px/s gentle drift
+  const angle = rng() * Math.PI * 2;
   const vx = Math.cos(angle) * speed;
   const vy = Math.sin(angle) * speed;
   return {
     type,
-    animal: type === "sleeping" ? selectSleepingAnimal() : undefined,
+    animal: type === "sleeping" ? selectSleepingAnimal(rng) : undefined,
     x,
     y,
     vx,
@@ -122,19 +128,24 @@ export function generateSpawnConfig(
   };
 }
 
-/** Generates the initial set of concurrent bubbles (poppable + the band's sleeping mix). */
+/** Generates the initial set of concurrent bubbles (poppable + the band's sleeping mix).
+ *
+ *  `rng` must return a number in [0, 1); tests pass a seeded generator so a
+ *  draw is reproducible.
+ */
 export function generateInitialBubbles(
   worldWidth: number,
   worldHeight: number,
   bubbleSize: number,
   bounds: SleepingBounds = CLASSIC_SLEEPING_BOUNDS,
+  rng: Rng = Math.random,
 ): BubbleConfig[] {
   const bubbles: BubbleConfig[] = [];
   let sleepingCount = 0;
   for (let i = 0; i < CONCURRENT_BUBBLES; i++) {
-    const type = selectBubbleType(sleepingCount, bounds);
+    const type = selectBubbleType(sleepingCount, bounds, rng);
     if (type === "sleeping") sleepingCount++;
-    bubbles.push(generateSpawnConfig(worldWidth, worldHeight, bubbleSize, type));
+    bubbles.push(generateSpawnConfig(worldWidth, worldHeight, bubbleSize, type, rng));
   }
   return bubbles;
 }
