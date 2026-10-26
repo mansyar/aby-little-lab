@@ -12,7 +12,7 @@
 - Worktree clean except the untracked evidence file; range `578bf9ac..HEAD` = 2 commits (`260ba758`, `a6c62c3c`), zero merges.
 - `git diff --name-only 578bf9ac..HEAD -- . ':(exclude)conductor'` = exactly the 5 Touches test files + `docs/TDD.md`.
 - `git diff -- vite.config.ts` = empty (byte-identical global policy).
-- Grep `timeout: 120_000` over `src/__tests__/game` → exactly 5 matches: `addItUpLogic.test.ts:172`, `countLogic.test.ts:174`, `numberOrderLogic.test.ts:136`, `takeAwayLogic.test.ts:173`, `firstSoundsLogic.test.ts:252` — the five proven victims, none beyond.
+- Grep `timeout: 120_000` over `src/__tests__/game` → exactly 7 matches (reconciled in Phase R1 per F1): the five proven victims — `addItUpLogic.test.ts:172`, `countLogic.test.ts:174`, `numberOrderLogic.test.ts:136`, `takeAwayLogic.test.ts:173`, `firstSoundsLogic.test.ts:252` — plus the two sweeps budgeted in Phase R1 — `decodeLogic.test.ts:322`, `wordLogic.test.ts:254` (the count was exactly 5 at Phase 1).
 - Full 8-command chain re-run by the primary, all exit 0: `pnpm check` (1 pre-existing warning + 1 info), `pnpm typecheck` clean, `pnpm test -- --run` 125 files / 2,729 tests passed, coverage 97.82/91.96/96.77/98.74, build precache 54 entries (1727.85 KiB), bundle PASS, PWA 16/0, docs 6/0.
 - Primary verdict: **verified**.
 
@@ -34,14 +34,14 @@
 
 | Req | Evidence | Status |
 |---|---|---|
-| FR-1 (120,000 ms on the five proven victims) | grep `120_000` → exactly 5 matches, one per victim suite (see placements below) | ✅ |
+| FR-1 (120,000 ms on the five proven victims) | grep `120_000` → exactly 7 matches after Phase R1 (5 victims + the decode/word sweeps budgeted per F1; see placements below) | ✅ |
 | FR-2 (audit all 13 `VARIETY_SAMPLES = 200` suites; > 20 s gets a budget) | Audit table below: all 13 run individually and timed; no sweep test exceeds 20 s in isolation (worst 4.84 s), so no budget beyond the five mandated victims | ✅ |
 | FR-3 (confirm vitest 4.1.x per-test timeout syntax from installed typings) | See "Confirmed timeout syntax" below | ✅ |
 | FR-4 (policy recorded in TDD §10.1; vmThreads rationale intact) | `docs/TDD.md` §10.1 paragraph extended in place; `git diff -- vite.config.ts` = empty (byte-identical) | ✅ |
 | FR-5 (no test renamed/removed/weakened; `VARIETY_SAMPLES = 200` stays) | Full-suite counts identical (125 / 2,729); diff touches only the timeout options of 5 tests (+1 style normalization of firstSounds' trailing numeric timeout) | ✅ |
 | NFR-1 (no production `src/**` change) | `git diff --stat`: 5 test files + `docs/TDD.md` only | ✅ |
 | NFR-3 (audit numbers are real measurements) | Every number below comes from a timed `pnpm test -- --run <file> --reporter=verbose` run on this host, 2026-10-26 | ✅ |
-| AC-2 (grep proof of 120,000 ms only where justified) | grep `120_000` over `src/__tests__/game/*.test.ts` → 5 matches, exactly the 5 victims | ✅ |
+| AC-2 (grep proof of 120,000 ms only where justified) | grep `120_000` over `src/__tests__/game/*.test.ts` → exactly 7 matches after Phase R1 (F1): the 5 victims plus the `decodeLogic`/`wordLogic` sweeps | ✅ |
 | AC-3 (audit table from a real timed run) | Audit table below | ✅ |
 | AC-4 (vite.config.ts byte-identical + TDD note + docs validator green) | `git diff -- vite.config.ts` empty; TDD §10.1 extended; `validate-docs.js` 6/6 | ✅ |
 | AC-5 (suite counts unchanged) | 125 test files / 2,729 tests in both `pnpm test -- --run` and `pnpm test:coverage` | ✅ |
@@ -69,8 +69,8 @@ Method: each suite run individually (`pnpm test -- --run <file> --reporter=verbo
 **Audit conclusions:**
 
 - No sweep test exceeds the 20 s threshold **in isolation** (worst: numberOrderLogic shifted ladder, 4.84 s). No additional suite is budgeted beyond the five mandated victims.
-- The five victims are budgeted anyway per FR-1's mandate: the three tracks' gate-run flake records show these exact tests hitting `Test timed out in 30000ms` under host load at 30–66 s — an isolated-vs-loaded multiplier of ~2–17×, so the 20 s isolated threshold is not protective by itself for these tests.
-- The once-observed 46 s test "keeps every round valid and uniquely targeted at every shift" lives in **`decodeLogic.test.ts:322` and `wordLogic.test.ts:254`** — not in `moreLessLogic`/`oddOneOutLogic` as the brief guessed. Isolated wall times: 2.21 s (decode) and 1.98 s (word) — below threshold, so not budgeted; the identity question is resolved in the evidence.
+- The five victims are budgeted anyway per FR-1's mandate: the sole actual flake record is `conductor/archive/20261026-docs-truth-pass/verification/phase-1.md:93,119` — the `20261025-shared-random-helpers` and `20261026-scene-rng-seam` archives contain no timeout records — and it lists **seven** files losing property tests to `Test timed out in 30000ms` under host load at 34–66 s: `addItUpLogic`, `countLogic`, `decodeLogic`, `firstSoundsLogic`, `moreLessLogic`, `numberOrderLogic`, `takeAwayLogic` (note: `decodeLogic` and `moreLessLogic`, not `wordLogic`). The five mandated victims are a subset of that seven-file list. At the worst record, 66 s over the 1.98 s isolated victim, the isolated-vs-loaded multiplier reaches ~33×, so the 20 s isolated threshold is not protective by itself for these tests. Of the two record files outside the five: `decodeLogic`'s sweep is budgeted in Phase R1 (F1), and `moreLessLogic` carries pre-existing 20 s budgets below the 30 s default (pre-existing, out of scope per the review).
+- The once-observed 46 s test "keeps every round valid and uniquely targeted at every shift" lives in **`decodeLogic.test.ts:322` and `wordLogic.test.ts:254`** — not in `moreLessLogic`/`oddOneOutLogic` as the brief guessed. Isolated wall times: 2.21 s (decode) and 1.98 s (word) — below threshold, so not budgeted at Phase 1; the identity question is resolved in the evidence. (Phase R1: both were budgeted with `{ timeout: 120_000 }` per F1 — the historical record names `decodeLogic` and this test name's once-observed 46 s run put them at risk under load; grep count now 7.)
 
 ## Confirmed timeout syntax (P1.T1.2)
 
@@ -82,7 +82,7 @@ Installed vitest: **4.1.11**. The per-test options-object form `it(name, { timeo
 
 Applied form: `{ timeout: 120_000 }` (numeric separator matches the existing `20_000` style; AC-2 grep pattern `120_000` proves placement).
 
-## Timeout placements (grep proof, 5 matches)
+## Timeout placements (grep proof, 7 matches after Phase R1)
 
 | File | Line | Test |
 |---|---|---|
@@ -91,10 +91,12 @@ Applied form: `{ timeout: 120_000 }` (numeric separator matches the existing `20
 | `src/__tests__/game/firstSoundsLogic.test.ts` | 252 | "keeps every round valid at every shift" |
 | `src/__tests__/game/numberOrderLogic.test.ts` | 136 | "keeps the shifted band ladder across many samples" |
 | `src/__tests__/game/takeAwayLogic.test.ts` | 173 | "keeps the shifted band ladder and validity across many samples" |
+| `src/__tests__/game/decodeLogic.test.ts` | 322 | "keeps every round valid and uniquely targeted at every shift" (Phase R1, F1; replaced the redundant trailing `30000` on the same test) |
+| `src/__tests__/game/wordLogic.test.ts` | 254 | "keeps every round valid and uniquely targeted at every shift" (Phase R1, F1) |
 
 ## TDD note (P1.T3)
 
-`docs/TDD.md` §10.1 runner paragraph extended in place (single-sentence insert between the vmThreads-isolation sentence and "Five shared helpers:"): names the five sweep tests, states the `{ timeout: 120_000 }` exception with the measured reason (200-sample × 3-shift loops exceed 30 s under host load, worst observed 66 s on the gate runs; < 5 s in isolation, audited 2026-10-26, worst 4.84 s), and records that the global 30 s default is unchanged. The existing vmThreads rationale is intact — extended, not rewritten. `git diff -- vite.config.ts` is empty.
+`docs/TDD.md` §10.1 runner paragraph extended in place (single-sentence insert between the vmThreads-isolation sentence and "Five shared helpers:"): names the five sweep tests, states the `{ timeout: 120_000 }` exception with the measured reason (200-sample × 3-shift loops exceed 30 s under host load, worst observed 66 s on the gate runs; < 5 s in isolation, audited 2026-10-26, worst 4.84 s), and records that the global 30 s default is unchanged. The existing vmThreads rationale is intact — extended, not rewritten. `git diff -- vite.config.ts` is empty. (Phase R1: the test list now names seven sweeps — `decodeLogic` and `wordLogic` added per F1 — and the closing sentence's pre-existing-timeout inventory was corrected per F2.)
 
 ## Files touched
 
