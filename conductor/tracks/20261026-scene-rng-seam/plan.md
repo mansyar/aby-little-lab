@@ -247,17 +247,34 @@ Only the primary agent writes this file.
 
 ---
 
-<!-- Review fixes are appended by conductor-review as:
-
 ## Phase R1: Review Fixes
 
-- **Goal:** Resolve review findings ...
+- **Goal:** Resolve review findings F1 and F2 so every band-shift wiring
+  assertion pins the forwarded generator and the duplicated replay helper
+  cannot diverge again.
 - **Depends on:** Phase 5
-- **Covers:** F1, F2, ...
-- **Touches:** ...
-- **Verification:** ...
+- **Covers:** F1, F2
+- **Touches:** `src/__tests__/scenes/animalTraceFlow.test.ts`,
+  `src/__tests__/scenes/howManyScene.test.ts`,
+  `src/__tests__/scenes/memoryMatchScene.test.ts`,
+  `src/__tests__/scenes/wordMatchScene.test.ts`,
+  `src/__tests__/scenes/addItUpScene.test.ts`,
+  `src/__tests__/scenes/takeAwayScene.test.ts`,
+  `src/__tests__/scenes/decodeItScene.test.ts`,
+  `src/__tests__/scenes/wordBuilderScene.test.ts`,
+  `src/__tests__/scenes/musicalMemoryScene.test.ts`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending
 
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
-
--->
+- [ ] **R1.T1: Resolve F1** - covers: F1
+  - [ ] **R1.T1.1:** In `animalTraceFlow.test.ts` line 111, pass `rng`
+        (not `pathRngForPair(0)`) inside the warm-up loop, mirroring the
+        correct copy at `:608-611`; or hoist one shared
+        `pathRngForPair`/`completePath` helper so the two describe blocks
+        cannot diverge again.
+- [ ] **R1.T2: Resolve F2** - covers: F2
+  - [ ] **R1.T2.1:** In the eight suites named in review.md F2, have the
+        recorder mocks record all arguments and append
+        `expect.any(Function)` to the band-shift wiring assertions so the
+        forwarded generator is pinned, matching the seven already-repaired
+        suites.
