@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-10-27.** The numbers in the section **Idle chunk prewarm — first-tap verdict (2026-10-27)** at the end of this file describe the current build: shell entry `index-DJ5iAYOR.js` at 144.23 kB, **42** JavaScript chunks, **54** precache entries, and the first-tap result split into a warm case (40.9–55.7 ms per game) and a cold case (unchanged, up to ~600 ms). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20) and the Shell Diet re-measurement (2026-10-22). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-10-27.** The numbers in the section **Idle art-queue prewarm — cold-tap verdict (2026-10-26)** at the end of this file describe the current build: shell entry `index-DCKgoc2n.js` at 148.86 kB on disk (148.9 kB via `validate-bundle`), **42** JavaScript chunks, **54** precache entries, and the first-tap result split into a warm case (20–65 ms per game), an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20) and the Shell Diet re-measurement (2026-10-22). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts and the planned work behind these numbers live in one place: [`docs/roadmap.md`](roadmap.md).
 
@@ -693,9 +693,9 @@ Stage D (`blockedMs`) medians, ms:
 | Add It Up | 69.9 | 15.6 | 81.9 | 0.0 | 115.0 |
 | Memory Match | 36.4 | 0.0 | 44.9 | 8.0 | 81.8 |
 
-Verdict — **AC-6 passes.** The worst fully-cold tap is Find the Word at
-332.6 ms (median of three inert runs), inside the 400 ms budget, and all five
-cold medians clear it. The art half is where the track moves the needle: at
+Verdict — **AC-6 passes.** The worst fully-cold tap among the five sampled
+games is Find the Word at 332.6 ms (median of three inert runs), inside the
+400 ms budget, and all five cold medians clear it. The art half is where the track moves the needle: at
 6 s settle the queue drives post-tap blockage to ~zero in every game (Find
 the Word 190.3 → 0.0, Add It Up 81.9 → 0.0, Shape Sorter 90.6 → 20.5, Find
 the Letter 40.6 → 0.0, Memory Match 44.9 → 8.0) — the raster the baseline
@@ -707,6 +707,13 @@ all twelve prewarm/baseline runs tapped 5/5 warm. The one alarming reading of
 the campaign — a 989 ms in-flight Shape Sorter tap on the prior rig — never
 repeated across sixteen runs; medians absorb that class of outlier by
 construction.
+
+**Sample scope.** The rig taps five representative tiles — the sample
+inherited from the chunk-prewarm verdict — including Find the Word, the
+widest art union (83 keys) and the slowest tile in every prior run. The
+remaining 17 games ride the same queue mechanics (same engine, same gates,
+same per-key failure handling) but have no headed cold-tap numbers yet; a
+full 22-game sweep is follow-up work, not a claim made here.
 
 Expectation to test, not a claim: at 6 s settle the chunk pass already warms
 all five tiles, so the art queue (hundreds of keys, one raster per idle slot,

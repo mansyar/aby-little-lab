@@ -63,7 +63,7 @@ The prewarm track proved warm taps cost 27–65 ms but cold taps still breach th
 | AC-3 | Nothing rasterizes while locked or hidden; cycle resumes when cleared/visible | FR-2 |
 | AC-4 | Rejected svg load is swallowed (no unhandled rejection); a later tap loads that key through the existing placeholder path | FR-3 |
 | AC-5 | A fully warmed game queues zero art keys in `preload()` and shows no art cue on entry | FR-3 |
-| AC-6 | Dated verdict shows worst-case cold-tap median ≤ 400 ms across all 22 games | FR-4 |
+| AC-6 | Dated verdict shows worst-case cold-tap median ≤ 400 ms across the rig's 5 sampled games (incl. the widest 83-key union) | FR-4 |
 | AC-7 | Full 8-command gate green incl. count guard; TDD walkthrough + tech-stack entry present | FR-5, NFR-1..4 |
 
 ## Edge Cases
