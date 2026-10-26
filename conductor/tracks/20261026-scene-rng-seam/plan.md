@@ -61,7 +61,7 @@ Only the primary agent writes this file.
   `src/scenes/PatternBuilderScene.ts`, `src/scenes/ShapeSorterScene.ts`,
   `src/scenes/ShadowMatchScene.ts`, `src/scenes/WordMatchScene.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Constructor forwarding across the sixteen scenes** — covers: FR-2
   - [ ] **P2.T1.1:** Change each scene's existing constructor from
