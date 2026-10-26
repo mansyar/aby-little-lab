@@ -46,15 +46,22 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-3, FR-8, NFR-2
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `vite.config.ts` (test config only), `src/__tests__/**/*.test.ts` (only suites the majors force to change), `src/__tests__/helpers/**` (only if forced)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P2.T1: Upgrade the exact pair** — covers: FR-1
-  - [ ] **P2.T1.1:** `pnpm up vitest@^5.0.5 @vitest/coverage-v8@^5.0.5` (versions must match exactly); commit package.json + lockfile; record `pnpm outdated` after.
-- [ ] **P2.T2: Embrace clearMocks** — covers: FR-3, FR-8
-  - [ ] **P2.T2.1:** Run the full suite; fix every failure caused by cross-test mock call history inside the affected tests (make each test's expectations self-contained); no `clearMocks: false` anywhere in `vite.config.ts`; record every fixed suite with a before/after note.
-- [ ] **P2.T3: Absorb remaining v5 changes** — covers: FR-3, FR-8
-  - [ ] **P2.T3.1:** Address other v5 breaking changes that surface (hoisted-mock top-level rule, class-mock prototype retention, assertion changes) in test files only; record each as a deviation with reason.
-- [ ] **P2.T4: Coverage gates** — covers: NFR-2
-  - [ ] **P2.T4.1:** Run coverage; if vitest 5's include/exclude precision shifted measured numbers, adapt config/tests to stay above the fixed gates (95/88/85/90); record before/after numbers for the Phase 5 snapshot.
+- **Status:** verified
+- [x] **P2.T1: Upgrade the exact pair** — covers: FR-1
+  - [x] **P2.T1.1:** `pnpm up vitest@^5.0.5 @vitest/coverage-v8@^5.0.5` (versions must match exactly); commit package.json + lockfile; record `pnpm outdated` after.
+- [x] **P2.T2: Embrace clearMocks** — covers: FR-3, FR-8
+  - [x] **P2.T2.1:** Run the full suite; fix every failure caused by cross-test mock call history inside the affected tests (make each test's expectations self-contained); no `clearMocks: false` anywhere in `vite.config.ts`; record every fixed suite with a before/after note.
+- [x] **P2.T3: Absorb remaining v5 changes** — covers: FR-3, FR-8
+  - [x] **P2.T3.1:** Address other v5 breaking changes that surface (hoisted-mock top-level rule, class-mock prototype retention, assertion changes) in test files only; record each as a deviation with reason.
+- [x] **P2.T4: Coverage gates** — covers: NFR-2
+  - [x] **P2.T4.1:** Run coverage; if vitest 5's include/exclude precision shifted measured numbers, adapt config/tests to stay above the fixed gates (95/88/85/90); record before/after numbers for the Phase 5 snapshot.
+
+
+**Result:** verified
+
+**Checkpoint:** c0c86ee2
+
+**Evidence:** conductor/tracks/20261027-dependency-majors/verification/phase-2.md
 
 ## Phase 3: happy-dom 21
 
