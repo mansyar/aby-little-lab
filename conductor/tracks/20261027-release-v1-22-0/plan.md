@@ -61,7 +61,7 @@ The primary appends after acceptance:
 - **Covers:** F1, F2, F3, F4 (review.md round 1)
 - **Touches:** `docs/release-notes-v1.22.0.md`
 - **Verification:** `node scripts/validate-docs.js` (6/6) plus `pnpm check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1 (PR #67 bullet)** — covers: F1
 - [ ] **R1.T2: Resolve F2 (PR #68 bullet)** — covers: F2
