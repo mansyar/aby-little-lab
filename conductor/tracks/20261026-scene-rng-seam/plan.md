@@ -18,7 +18,7 @@ Only the primary agent writes this file.
 - **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/GroupMathScene.ts`,
   `src/__tests__/scenes/gameSceneBaseRng.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Add the rng seam to GameSceneBase** — covers: FR-1
   - [ ] **P1.T1.1:** Change the constructor to
