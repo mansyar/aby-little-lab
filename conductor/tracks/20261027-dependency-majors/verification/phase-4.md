@@ -7,6 +7,8 @@
 - **Phase base:** `af95b719` — **Phase head:** `d2f5a28a`
 - **Result:** `verified`
 
+> Note: the executor-worktree commit hashes cited in this evidence (`d2f5a28a` PWA pair) were squashed at phase acceptance into `a66d9367`; the hashes remain reflog-reachable but are not on the branch history.
+
 ## Commands
 
 | # | Command | Exit | Summary |

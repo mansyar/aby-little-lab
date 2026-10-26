@@ -7,6 +7,8 @@
 - **Phase base:** `c4050cf0` — **Phase head:** `14d8986a` (FR-1 upgrade pair; the evidence-file commit follows)
 - **Result:** `verified`
 
+> Note: the executor-worktree commit hashes cited in this evidence (`14d8986a` happy-dom pair, `8a670374` evidence) were squashed at phase acceptance into `ede22b71`; the hashes remain reflog-reachable but are not on the branch history.
+
 ## Commands
 
 | # | Command | Exit | Summary |

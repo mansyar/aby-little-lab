@@ -2,6 +2,8 @@
 
 **Track:** `20261027-dependency-majors` · **Phase:** 5 · **Branch:** `chore/20261027-dependency-majors` · **Phase base:** `1e211ec7` · **Date:** 2026-10-27
 
+> Note: the executor-worktree commit hashes cited in this evidence (`8610fc93` TDD, `4630a71e` tech-stack, `0b05af30` evidence) were squashed at phase acceptance into `e2893a19`; the hashes remain reflog-reachable but are not on the branch history.
+
 ## Commands
 
 | # | Command | Exit | Notes |
@@ -98,7 +100,7 @@ None off-`Touches`. `docs/TDD.md` §1.3 (:121) stale `$schema` sentence update i
 
 ## Blockers (resolved)
 
-The executor's single dit call against `conductor/tech-stack.md` was permission-denied (not retried, per the standing rule). The primary applied Edits 1-3 from the prepared text below as commit 4630a71e; the row's expected end-state is met (table 8.3.5 / 2.0.0 / 5.0.5 / 2.6.3, quote block with all six pins including happy-dom ^21.0.4, and the 2026-10-27 Design Update blockquote newest-first).
+The executor's single edit call against `conductor/tech-stack.md` was permission-denied (not retried, per the standing rule). The primary applied Edits 1-3 from the prepared text below as commit 4630a71e; the row's expected end-state is met (table 8.3.5 / 2.0.0 / 5.0.5 / 2.6.3, quote block with all six pins including happy-dom ^21.0.4, and the 2026-10-27 Design Update blockquote newest-first).
 
 ## Notes
 

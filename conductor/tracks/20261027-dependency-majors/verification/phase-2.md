@@ -7,6 +7,8 @@
 - **Phase base:** `1445de38` — **Phase head:** `f32f0c92`
 - **Result:** `verified`
 
+> Note: the executor-worktree commit hashes cited in this evidence (`2cf18cae` vitest pair, `f32f0c92` validator, `ef4651d3` line-width, `38229b3a` evidence) were squashed at phase acceptance into `c0c86ee2`; the hashes remain reflog-reachable but are not on the branch history.
+
 ## Commands
 
 | # | Command | Exit | Summary |

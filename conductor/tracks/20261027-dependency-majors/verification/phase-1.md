@@ -7,6 +7,8 @@
 - **Phase base:** `1e464b48` — **Phase head:** `1fd28538`
 - **Result:** `verified`
 
+> Note: the executor-worktree commit hashes cited in this evidence (`da7bb6d8` deps, `1fd28538` schema, `e7f5e215` evidence) were squashed at phase acceptance into `bd8a6c54`; the hashes remain reflog-reachable but are not on the branch history.
+
 ## Commands
 
 | # | Command | Exit | Summary |
