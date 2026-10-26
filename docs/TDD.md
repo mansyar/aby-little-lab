@@ -89,11 +89,11 @@
 | pnpm | 11.7.0 | `corepack prepare pnpm@11.7.0` in `Dockerfile`; `pnpm/action-setup@v6` in CI |
 | TypeScript | `^7.0.2` | `package.json` |
 | Phaser | `^4.2.1` | `package.json` (only runtime dependency) |
-| Vite | `^8.1.5` | `package.json` |
-| vite-plugin-pwa | `^1.3.0` | `package.json` |
-| Vitest + `@vitest/coverage-v8` | `^4.1.10` | `package.json` |
-| happy-dom | `^18.0.1` | `package.json` |
-| Biome | `^2.5.5` | `package.json` |
+| Vite | `^8.3.5` | `package.json` |
+| vite-plugin-pwa | `^2.0.0` | `package.json` |
+| Vitest + `@vitest/coverage-v8` | `^5.0.5` | `package.json` |
+| happy-dom | `^21.0.4` | `package.json` |
+| Biome | `^2.6.3` | `package.json` |
 | `playwright-core` | `^1.64.1` | `package.json` — used by `scripts/validate-boot.js` only |
 | `serve` | `^14.2.6` | `package.json` |
 | `workbox-window` | `^7.4.1` | `package.json` — `registerType: "prompt"` plumbing |
@@ -118,7 +118,7 @@
 
 `biome.json` scopes the tool to `src/**/*.ts`, `scripts/**/*.js` and `vite.config.ts`. Formatter: 2-space indent, line width 100, double quotes, semicolons always, trailing commas in all positions. Linter runs the `recommended` preset with `source.organizeImports` on.
 
-The `$schema` field is pinned to 2.5.5 while `package.json` allows any 2.5.x, so an install that resolves 2.5.10 reports a schema-version info message on every run and still exits 0. Existing warnings (one `noNonNullAssertion` in a scene test) are reported, not fatal.
+The `$schema` field is pinned to 2.6.3, matching `package.json`'s `^2.6.3`, so no schema-version info message fires — the drift where the schema pinned 2.5.5 while the install resolved 2.5.10 was retired by the 2026-10-27 dependency-majors pass. Existing warnings (one `noNonNullAssertion` in a scene test) are reported, not fatal.
 
 ### 1.4 TypeScript and Vitest configuration
 
@@ -1012,7 +1012,7 @@ Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big 
 
 ### 10.1 Runner and mocks
 
-Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (125 files / 2,729 tests, measured 2026-10-26). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` — sweep guards, not pair-pool guards. Five shared helpers:
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (125 files / 2,729 tests, measured 2026-10-26). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` — sweep guards, not pair-pool guards. As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
 
 | Helper | Purpose |
 | --- | --- |
