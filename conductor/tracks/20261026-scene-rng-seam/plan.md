@@ -18,26 +18,31 @@ Only the primary agent writes this file.
 - **Touches:** `src/scenes/GameSceneBase.ts`, `src/scenes/GroupMathScene.ts`,
   `src/__tests__/scenes/gameSceneBaseRng.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Add the rng seam to GameSceneBase** — covers: FR-1
-  - [ ] **P1.T1.1:** Change the constructor to
+- [x] **P1.T1: Add the rng seam to GameSceneBase** — covers: FR-1
+  - [x] **P1.T1.1:** Change the constructor to
         `constructor(key: string, rng: Rng = Math.random)`, store
         `protected readonly rng: Rng`, and document the `[0, 1)` contract plus the
         reason it is a constructor parameter (Phaser instantiates with no
         arguments, so the default always applies in production).
-  - [ ] **P1.T1.2:** Add `src/__tests__/scenes/gameSceneBaseRng.test.ts` covering:
+  - [x] **P1.T1.2:** Add `src/__tests__/scenes/gameSceneBaseRng.test.ts` covering:
         the default is `Math.random` when no argument is passed, an injected
         generator is retained unchanged, and the field is not reassigned across a
         shutdown/restart cycle.
 
-- [ ] **P1.T2: Forward the rng through GroupMathScene** — covers: FR-3
-  - [ ] **P1.T2.1:** Widen `GroupMathConfig.buildPlaythrough` from
+- [x] **P1.T2: Forward the rng through GroupMathScene** — covers: FR-3
+  - [x] **P1.T2.1:** Widen `GroupMathConfig.buildPlaythrough` from
         `(shift: BandShift) => Round[]` to `(shift: BandShift, rng?: Rng) => Round[]`.
         Both consumers (`addItUpLogic`, `takeAwayLogic`) already match this shape,
         so no scene file changes.
-  - [ ] **P1.T2.2:** Pass `this.rng` at `GroupMathScene.ts:110`, making the call
+  - [x] **P1.T2.2:** Pass `this.rng` at `GroupMathScene.ts:110`, making the call
         `this.config.buildPlaythrough(getAdaptiveBandShift(this.config.gameId), this.rng)`.
+
+
+**Result:** verified
+**Checkpoint:** 0dc331fd
+**Evidence:** conductor/tracks/20261026-scene-rng-seam/verification/phase-1.md
 
 ---
 
