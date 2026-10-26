@@ -137,42 +137,46 @@ Only the primary agent writes this file.
   `src/scenes/WordBuilderScene.ts`, `src/scenes/StoryOrderScene.ts`,
   `src/__tests__/scenes/sceneRngEquivalence.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Animal Trace and Big & Small** - covers: FR-4
-  - [ ] **P3.T1.1:** `AnimalTraceScene` forwards `this.rng` to both
+- [x] **P3.T1: Animal Trace and Big & Small** - covers: FR-4
+  - [x] **P3.T1.1:** `AnimalTraceScene` forwards `this.rng` to both
         `generatePathPoints(x, y, x, y, count, rng)` and `selectThreePairs(rng)`.
-  - [ ] **P3.T1.2:** `BigSmallScene` forwards `this.rng` to
+  - [x] **P3.T1.2:** `BigSmallScene` forwards `this.rng` to
         `generateRound(factors, rng)` and threads it through
         `createToys()` into `selectToys(rng)` and `createBoxes(factors, rng)`.
 
-- [ ] **P3.T2: Musical Memory and Pop & Freeze** — covers: FR-4
-  - [ ] **P3.T2.1:** `MusicalMemoryScene` forwards `this.rng` to
+- [x] **P3.T2: Musical Memory and Pop & Freeze** — covers: FR-4
+  - [x] **P3.T2.1:** `MusicalMemoryScene` forwards `this.rng` to
         `generateSequence(length, rng)` and to every `appendNote(sequence, rng)`
         per-tap call.
-  - [ ] **P3.T2.2:** `PopFreezeScene` forwards `this.rng` to
+  - [x] **P3.T2.2:** `PopFreezeScene` forwards `this.rng` to
         `generateInitialBubbles(..., rng)`, to each
         `generateSpawnConfig(..., rng)`, and to `selectSleepingAnimal(rng)`.
 
-- [ ] **P3.T3: Build the Word and Story Order** — covers: FR-4, FR-5
-  - [ ] **P3.T3.1:** `WordBuilderScene` forwards `this.rng` to
+- [x] **P3.T3: Build the Word and Story Order** — covers: FR-4, FR-5
+  - [x] **P3.T3.1:** `WordBuilderScene` forwards `this.rng` to
         `generateWordBuildPlaythrough(count, shift, rng)` and to
         `generateLetterTiles(word, rng)`.
-  - [ ] **P3.T3.2:** `StoryOrderScene` replaces the explicit `Math.random`
+  - [x] **P3.T3.2:** `StoryOrderScene` replaces the explicit `Math.random`
         argument at `:90` with `this.rng`, keeping it in **first** position:
         `buildPlaythrough(this.rng, getAdaptiveBandShift("story-order"))`.
         Document why the position differs from every other builder.
 
-- [ ] **P3.T4: Equivalence proof** — covers: AC-3, AC-4
-  - [ ] **P3.T4.1:** Add `src/__tests__/scenes/sceneRngEquivalence.test.ts`:
+- [x] **P3.T4: Equivalence proof** — covers: AC-3, AC-4
+  - [x] **P3.T4.1:** Add `src/__tests__/scenes/sceneRngEquivalence.test.ts`:
         for every scene, drive the scene with `mulberry32(seed)` and assert its
         rounds equal a direct call to the same builder with the same seed. A
         determinism assertion alone would pass with the generator in the wrong
         parameter slot; this one fails.
-  - [ ] **P3.T4.2:** Add seeded determinism cases for Add It Up and Take Away
+  - [x] **P3.T4.2:** Add seeded determinism cases for Add It Up and Take Away
         driven through `GroupMathScene`, satisfying AC-4.
 
 ---
+
+**Result:** verified
+**Checkpoint:** 31e4283c
+**Evidence:** conductor/tracks/20261026-scene-rng-seam/verification/phase-3.md
 
 ## Phase 4: Test migration
 
