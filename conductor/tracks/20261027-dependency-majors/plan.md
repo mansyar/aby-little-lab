@@ -92,15 +92,22 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-5, FR-8, NFR-3, NFR-4
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `vite.config.ts` (PWA options only)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P4.T1: Upgrade + peers** — covers: FR-1, NFR-4
-  - [ ] **P4.T1.1:** `pnpm up vite-plugin-pwa@^2.0.0`; verify `workbox-window` satisfies `^7.4.1` (bump if not); commit package.json + lockfile; record `pnpm outdated` after.
-- [ ] **P4.T2: Adapt config** — covers: FR-5, FR-8
-  - [ ] **P4.T2.1:** Adapt `vite.config.ts` PWA options if the 2.0 surface moved; record every semantic change as a deviation.
-- [ ] **P4.T3: PWA/bundle equivalence** — covers: FR-5, NFR-3
-  - [ ] **P4.T3.1:** Run build + validate-bundle + validate-pwa; confirm 16/0, 42/42 precached, ~54 manifest entries, shell ≤ 200 kB.
-- [ ] **P4.T4: Verify** — covers: FR-1
-  - [ ] **P4.T4.1:** Run the full verification chain.
+- **Status:** verified
+- [x] **P4.T1: Upgrade + peers** — covers: FR-1, NFR-4
+  - [x] **P4.T1.1:** `pnpm up vite-plugin-pwa@^2.0.0`; verify `workbox-window` satisfies `^7.4.1` (bump if not); commit package.json + lockfile; record `pnpm outdated` after.
+- [x] **P4.T2: Adapt config** — covers: FR-5, FR-8
+  - [x] **P4.T2.1:** Adapt `vite.config.ts` PWA options if the 2.0 surface moved; record every semantic change as a deviation.
+- [x] **P4.T3: PWA/bundle equivalence** — covers: FR-5, NFR-3
+  - [x] **P4.T3.1:** Run build + validate-bundle + validate-pwa; confirm 16/0, 42/42 precached, ~54 manifest entries, shell ≤ 200 kB.
+- [x] **P4.T4: Verify** — covers: FR-1
+  - [x] **P4.T4.1:** Run the full verification chain.
+
+
+**Result:** verified
+
+**Checkpoint:** a66d9367
+
+**Evidence:** conductor/tracks/20261027-dependency-majors/verification/phase-4.md
 
 ## Phase 5: Docs truth pass
 
