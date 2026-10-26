@@ -11,7 +11,7 @@
 
 - **Goal:** WORD_POOL grows with phonics-safe, band-fitted words plus art and tests.
 - **Depends on:** none
-- **Covers:** FR-1, FR-6, AC-1, AC-6
+- **Covers:** FR-1, FR-4, FR-6, NFR-1, NFR-2, AC-1, AC-6
 - **Touches:** `src/game/wordLogic.ts`, `src/game/art/*`, `src/__tests__/game/word*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/word && pnpm typecheck`
 - **Status:** pending
@@ -33,7 +33,7 @@ The primary appends after acceptance:
 
 - **Goal:** Story pool grows obvious→subtle, 3 panels per story, rendering verified.
 - **Depends on:** Phase 1
-- **Covers:** FR-2, AC-2
+- **Covers:** FR-2, FR-4, NFR-1, NFR-2, AC-2
 - **Touches:** `src/game/storyOrderLogic.ts`, `src/game/storyOrderArt.ts`, `src/__tests__/game/story*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/story && pnpm typecheck`
 - **Status:** pending
@@ -54,7 +54,7 @@ The primary appends after acceptance:
 
 - **Goal:** Feelings scenario pool grows on the contrastive→confusable ladder.
 - **Depends on:** Phase 2
-- **Covers:** FR-3, AC-3
+- **Covers:** FR-3, FR-4, NFR-1, NFR-4, AC-3
 - **Touches:** `src/game/feelingsFacesLogic.ts`, `src/game/art/faces.ts`, `src/__tests__/game/feelings*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/feelings && pnpm typecheck`
 - **Status:** pending
@@ -75,7 +75,7 @@ The primary appends after acceptance:
 
 - **Goal:** Adaptive ±1 band preserved, full verification + bundle/PWA/docs gates green, counts synced.
 - **Depends on:** Phase 3
-- **Covers:** FR-5, AC-4, AC-5, AC-6
+- **Covers:** FR-5, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-4, AC-5, AC-6
 - **Touches:** `src/__tests__/game/adaptive*`, `docs/*`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending
