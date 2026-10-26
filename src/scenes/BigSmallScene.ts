@@ -11,6 +11,7 @@ import {
   type ToyInstance,
 } from "../game/bigSmallLogic";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
+import type { Rng } from "../game/random";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift, attachDropZoneHighlight } from "../utils/dragJuice";
 import { motionDuration, motionScale } from "../utils/motion";
@@ -101,8 +102,8 @@ export class BigSmallScene extends GameSceneBase {
   private boxSlots: BoxSlotData[] = [];
   private sortedCount = 0;
 
-  constructor() {
-    super("BigSmall");
+  constructor(rng: Rng = Math.random) {
+    super("BigSmall", rng);
   }
 
   preload(): void {
@@ -145,7 +146,7 @@ export class BigSmallScene extends GameSceneBase {
 
   /** Initializes a new round: generates toys and boxes, renders them on screen. */
   private initRound(): void {
-    this.round = generateRound(this.factors);
+    this.round = generateRound(this.factors, this.rng);
     this.boxSlots = [];
     this.toyData = [];
     this.sortedCount = 0;

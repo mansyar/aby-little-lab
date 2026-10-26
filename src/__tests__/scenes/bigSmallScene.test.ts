@@ -107,7 +107,7 @@ describe("BigSmallScene adaptive band wiring", () => {
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("big-small");
     expect(generateRoundMock).toHaveBeenCalledTimes(1);
-    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.35, small: 0.8 });
+    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.35, small: 0.8 }, expect.any(Function));
     expect(getInternals(scene).round.toys).toHaveLength(6);
   });
 
@@ -115,14 +115,14 @@ describe("BigSmallScene adaptive band wiring", () => {
     const scene = createScene();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("big-small");
     expect(generateRoundMock).toHaveBeenCalledTimes(1);
-    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.5, small: 0.7 });
+    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.5, small: 0.7 }, expect.any(Function));
     expect(getInternals(scene).round.boxes).toHaveLength(2);
   });
 
   it("passes the easy band's wider factors into the round", () => {
     getAdaptiveBandShiftMock.mockReturnValue(-1);
     const scene = createScene();
-    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.6, small: 0.68 });
+    expect(generateRoundMock).toHaveBeenCalledWith({ big: 1.6, small: 0.68 }, expect.any(Function));
     for (const toy of getInternals(scene).round.toys) {
       expect(toy.scale).toBe(toy.scaleCategory === "big" ? 1.6 : 0.68);
     }
