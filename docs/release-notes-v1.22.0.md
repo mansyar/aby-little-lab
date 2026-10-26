@@ -1,7 +1,7 @@
 # Release Notes - v1.22.0
 
 > Status: DRAFT
-> Target tag: `v1.22.0` (pending - cut after the Phase 2 deployment dry run)
+> Target tag: `v1.22.0` (pending - cut in Phase 3 after merge with explicit go-ahead)
 > Base: `v1.21.7` (`ee6bb40f`, 2026-10-25)
 
 Seven tracks merged since v1.21.7: **the Hub now uses the quiet moments after you land to get the next game ready (idle game-chunk prewarm), and it draws game art before first paint on a cold tap (art-queue prewarm)** - so taps feel instant whether the game is already in memory or not. Underneath, the codebase gains one shared shuffle and one seeded RNG seam across all 22 scenes and every game-logic helper (the duplicate dice are gone, tests are deterministic), the toolchain moves to its current majors, and the property suites get their flake guard. Nothing changes in what you see when you play - except that the wait is gone.
@@ -12,14 +12,14 @@ Merged PRs #67-#73 on master after the v1.21.7 tag, in merge order.
 
 ### PR #67 - One shuffle, one RNG seam
 
-- New `src/game/random.ts` is the single home for randomness: one `mulberry32` engine behind `createRng`, `hashSeed`, `Rng` and one shared Fisher-Yates `shuffle` used by all games.
-- Five hand-rolled duplicate shuffles are deleted and their 13 importers re-pointed; every game-logic helper (Find the Word, Letter Landing, Memory Match, Number Snake, Shape Pop, Story Order, ferry/plugin/board/logic surfacing in 21 modules) takes a trailing `rng` parameter defaulting to `Math.random`, so production behaviour is unchanged and tests inject a seed.
-- A shared seeded-RNG test helper replaces ad-hoc `mulberry32` copies; the roadmap Known Issue about scattered dice and the Future Work entry calling for one RNG seam are both retired as done.
+- New `src/game/random.ts` is the single home for randomness: it exports `Rng` plus one shared Fisher-Yates `shuffle` used by all games.
+- Five hand-rolled duplicate shuffles are deleted and their 13 importers re-pointed; every game-logic helper across the 21 logic modules takes a trailing `rng` parameter defaulting to `Math.random`, so production behaviour is unchanged and tests inject a seed.
+- A shared seeded `mulberry32` test helper in `src/__tests__/helpers/` replaces ad-hoc copies; the roadmap Known Issue about scattered dice and the Future Work entry calling for one RNG seam are both retired as done.
 
 ### PR #68 - The scenes gain their own RNG seam
 
 - `GameSceneBase` and all 22 game scenes now take a trailing `rng` constructor parameter (defaulting to `Math.random`) stored as a protected field, so each scene owns its dice; scenes forward `this.rng` into their logic calls and `GroupMathConfig.buildPlaythrough` widens to `(shift, rng?)`.
-- 52 `Math.random` spy sites across 19 test files become seeded construction; the one honest exception is documented (Story Order keeps `Math.random()` for its rng-first draw so the advertiser-adversarial pool stays unpredictable).
+- 52 `Math.random` spy sites across 27 files become seeded construction; Story Order passes `this.rng` with the rng-first argument position preserved (`buildPlaythrough(this.rng, getAdaptiveBandShift("story-order"))`, `StoryOrderScene.ts:91`).
 - No player-visible change; the whole suite stays green, which is the point - the seam exists so future tests can freeze luck entirely.
 
 ### PR #69 - The docs truth pass, with a count-drift guard
@@ -30,7 +30,7 @@ Merged PRs #67-#73 on master after the v1.21.7 tag, in merge order.
 
 ### PR #70 - The property-test deflake
 
-- The five heaviest seeded-sweep suites (hub stress, play-time, profile lifecycle, scene per-game launch, and their companions) each get a 120-second per-test timeout so a loaded CI runner can no longer kill a long sweep mid-stride and report a flake.
+- The addItUp/count/numberOrder/takeAway/firstSounds seeded-sweep suites (plus decode/word per the audit) each get an explicit 120-second per-test timeout so a loaded CI runner can no longer kill a long sweep mid-stride and report a flake.
 - The TDD gains a §10.1 note explaining why the generous timeout is a guard rail rather than a slower test, and `vite.config.ts` is untouched.
 - Zero production change, counts unchanged: this track buys quiet CI, not new coverage.
 
