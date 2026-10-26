@@ -20,14 +20,20 @@
  * dead in a fresh checkout even though it resolves on the machine that wrote
  * it.
  *
- * It checks invariants, never snapshots. A number that moves - a new test, a
- * new chunk, a new release - never fails this script; only the documents and
- * the code genuinely parting company does.
+ * It checks invariants, never snapshots. A number that moves - a new chunk, a
+ * new release - never fails this script; only the documents and the code
+ * genuinely parting company does. One check is deliberately carved out:
+ * checkTestCounts derives the test-suite truth (the number of test files and
+ * of test cases) from one collect-only `vitest list` run at validation time,
+ * and fails when a living document disagrees with it. Count drift in the
+ * living docs is exactly the failure that check exists to catch, so its
+ * snapshot is derived fresh on every run rather than baked in.
  *
  * Run it on its own, or after `pnpm run build`:
  *   node scripts/validate-docs.js
  */
 
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -42,6 +48,7 @@ const README_FILE = path.join(ROOT, "README.md");
 const PRD_FILE = path.join(DOCS_DIR, "PRD.md");
 const TDD_FILE = path.join(DOCS_DIR, "TDD.md");
 const ROADMAP_FILE = path.join(DOCS_DIR, "roadmap.md");
+const PERF_BASELINE_FILE = path.join(DOCS_DIR, "perf-baseline.md");
 const REGISTRY_FILE = path.join(ROOT, "src", "game", "gameRegistry.ts");
 
 /** A Markdown link: `[text](target)`, with its line number in the source file. */
@@ -482,6 +489,126 @@ function checkConductorPaths() {
 }
 
 // ---------------------------------------------------------------------------
+// Check 6 - the living docs state the current test-suite truth
+//
+// The one snapshot-style check, and deliberately so. It derives the true
+// suite numbers from a single collect-only `vitest list` run - no tests are
+// executed, nothing is watched - and then fails every count claim a living
+// document (README, TDD, perf baseline) makes that disagrees with that truth.
+// When it fails, the DOCUMENT is stale: refresh the document to the current
+// suite truth; do not change the code to match the document.
+//
+// The derivation parses `vitest list` output defensively. A test-case line
+// has the shape `<file path> > <suite...> > <test name>`; the file count is
+// the number of distinct first segments ending in `.test.ts`, the test count
+// the number of such lines. Headers, blank lines and progress noise do not
+// match the shape and are ignored. If nothing matches, the derivation
+// failed - the check says so instead of passing vacuously or blaming the
+// docs.
+// ---------------------------------------------------------------------------
+
+/** The three living documents whose count claims this check guards. */
+const SUITE_DOCS = [README_FILE, TDD_FILE, PERF_BASELINE_FILE];
+
+/**
+ * ANSI escape sequences `vitest list` may emit before or inside a line.
+ * Built through the RegExp constructor because a regex literal cannot hold
+ * the escape character (ESC) without tripping the control-character rule.
+ */
+const ANSI_RE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[A-Za-z]`, "g");
+
+/** A count claim: `2,729 tests`, `2,729 test cases`, `125 test files`, `125 files`. */
+const TESTS_CLAIM_RE = /\b\d[\d,]*\s+tests\b/g;
+const TEST_CASES_CLAIM_RE = /\b\d[\d,]*\s+test\s+cases\b/g;
+const TEST_FILES_CLAIM_RE = /\b\d[\d,]*\s+test\s+files\b/g;
+const FILES_CLAIM_RE = /\b\d[\d,]*\s+files\b/g;
+
+/**
+ * A bare `<N> files` claim is suite-shaped only when the same line also
+ * claims a test count: "125 files / 2,729 tests" guards both numbers, while
+ * "components/ # 17 files" in a tree diagram describes a directory and is
+ * left alone.
+ */
+
+/**
+ * The suite truth derived from one collect-only `vitest list` run, or the
+ * reason the derivation failed. One spawn, no retries.
+ */
+function deriveSuiteTruth() {
+  const result = spawnSync("pnpm", ["exec", "vitest", "list"], {
+    cwd: ROOT,
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+    // `vitest list` is collect-only by definition: it collects the suite and
+    // exits, never watching. CI=1 keeps the run non-interactive and plain.
+    env: { ...process.env, CI: "1" },
+    // pnpm is a .cmd shim on Windows, which spawnSync cannot execute without
+    // a shell; the arguments carry no spaces or metacharacters.
+    shell: process.platform === "win32",
+  });
+  if (result.error) {
+    return { error: `spawning "pnpm exec vitest list" failed: ${result.error.message}` };
+  }
+  if (result.status !== 0) {
+    return { error: `"pnpm exec vitest list" exited with status ${result.status}` };
+  }
+  const files = new Set();
+  let tests = 0;
+  for (const rawLine of `${result.stdout ?? ""}\n${result.stderr ?? ""}`.split(/\r?\n/)) {
+    const line = rawLine.replace(ANSI_RE, "");
+    const separator = line.indexOf(" > ");
+    if (separator === -1) continue;
+    const file = /(\S+\.test\.ts)$/.exec(line.slice(0, separator))?.[1];
+    if (!file) continue;
+    files.add(file.replace(/\\/g, "/"));
+    tests += 1;
+  }
+  return { files: files.size, tests };
+}
+
+/** Whether a documented number agrees with the derived truth behind it. */
+function claimAgrees(claim, derived) {
+  return Number(claim.match(/\d[\d,]*/)[0].replace(/,/g, "")) === derived;
+}
+
+function checkTestCounts() {
+  const truth = deriveSuiteTruth();
+  if (truth.error || truth.files === 0) {
+    fail(
+      README_FILE,
+      1,
+      'the suite truth to be derivable from one collect-only "vitest list" run',
+      `the derivation failed (${truth.error ?? "the output named no test files"}), so no count claim was checked`,
+    );
+    return;
+  }
+  const expected = `the documented suite counts to match the derived truth (${truth.files} files / ${truth.tests} tests) - refresh the document to the current suite truth; do not change the code`;
+  for (const file of SUITE_DOCS) {
+    unfencedLines(file).forEach((line, index) => {
+      if (line === null) return;
+      const testClaims = [...line.matchAll(TESTS_CLAIM_RE), ...line.matchAll(TEST_CASES_CLAIM_RE)];
+      for (const claim of testClaims) {
+        if (!claimAgrees(claim[0], truth.tests)) {
+          fail(file, index + 1, expected, `"${claim[0]}"`);
+        }
+      }
+      for (const claim of line.matchAll(TEST_FILES_CLAIM_RE)) {
+        if (!claimAgrees(claim[0], truth.files)) {
+          fail(file, index + 1, expected, `"${claim[0]}"`);
+        }
+      }
+      if (testClaims.length > 0) {
+        for (const claim of line.matchAll(FILES_CLAIM_RE)) {
+          if (!claimAgrees(claim[0], truth.files)) {
+            fail(file, index + 1, expected, `"${claim[0]}"`);
+          }
+        }
+      }
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Run
 // ---------------------------------------------------------------------------
 
@@ -496,6 +623,10 @@ const checks = [
   {
     name: "No document points at a Conductor path that does not exist",
     run: checkConductorPaths,
+  },
+  {
+    name: "The living docs state the current test-suite truth",
+    run: checkTestCounts,
   },
 ];
 
