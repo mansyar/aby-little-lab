@@ -47,9 +47,9 @@
 - **Covers:** FR-1, FR-7, NFR-1, NFR-2, NFR-3, AC-1, AC-2, AC-3 (partial)
 - **Touches:** `scripts/validate-docs.js`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
-- [ ] **P2.T1: Implement `checkTestCounts`** — covers: FR-1, FR-7, NFR-1, NFR-2, NFR-3
+- [ ] **P2.T1: Implement `checkTestCounts`** - covers: FR-1, FR-7, NFR-1, NFR-2, NFR-3
   - [ ] **P2.T1.1:** Spawn one collect-only `vitest list` (non-interactive; no watch; no test execution) via `child_process`, capture stdout, and derive the distinct test-file count (distinct source paths) and the total test-case count (lines matching the `path > suite > test` shape). Parse defensively: if the output yields zero files, fail with a clear derivation message rather than a false pass.
   - [ ] **P2.T1.2:** Scan `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` for count claims with a pattern that matches `N tests` + `M files` pairs (and `M test files`) but cannot match unrelated prose (e.g. "22 games"). Every match must equal the derived truth or the check fails naming `file → claimed vs derived`. Only those three files are scanned.
   - [ ] **P2.T1.3:** Register the check in the `checks` list so it reports in the standard results format, and confirm the full validator still exits 0 against the refreshed docs from Phase 1.
