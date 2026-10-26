@@ -4,7 +4,7 @@ This document is the single home for two things: what is known to be broken in
 Aby's Little Lab, and what is planned next. Nothing else in `docs/` keeps a
 second copy of either list — other documents link here instead.
 
-Every entry below was checked against the code on 2026-10-25. Where an entry
+Every entry below was checked against the code on 2026-10-26. Where an entry
 names a file, that file is where the debt lives; where it names a symptom, that
 is what a reader would actually see.
 
