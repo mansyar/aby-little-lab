@@ -33,7 +33,7 @@ the phase result and evidence file — no manual verification meta-task exists.
 - **Covers:** FR-1 (tap-wins in situ), FR-2, FR-5, NFR-1, AC-3
 - **Touches:** `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/game/hub/prewarm.test.ts` (integration-level additions if the engine contract needs them), `README.md` / `docs/TDD.md` / `docs/perf-baseline.md` (count claims only, if the suite grows)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P2.T1: Wire the Hub** — covers: FR-1, FR-2, FR-5
   - [ ] **P2.T1.1:** start the prewarm shortly after the Hub entrance settles (aligned with the existing post-entrance flow, e.g. where `idleLoop()`/`scheduleIdleAttract()` arm), never during the entrance itself.
   - [ ] **P2.T1.2:** gate on the play-time lock — no imports while the lock is active; re-check at each pacing tick and resume when the lock clears. Pause while `document.hidden`.
