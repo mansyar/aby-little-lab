@@ -224,22 +224,26 @@ Only the primary agent writes this file.
 - **Touches:** `conductor/tracks/20261026-scene-rng-seam/spec.md`,
   `conductor/tech-stack.md`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P5.T1: Retire the FR-6 exception** — covers: FR-7
-  - [ ] **P5.T1.1:** Amend this track's `spec.md` FR-6 and AC-4 so the scene
+- [x] **P5.T1: Retire the FR-6 exception** — covers: FR-7
+  - [x] **P5.T1.1:** Amend this track's `spec.md` FR-6 and AC-4 so the scene
         carve-out is gone, leaving only the narrowly scoped default-wiring clause.
 
-- [ ] **P5.T2: Living documents** — covers: FR-7
-  - [ ] **P5.T2.1:** Add a dated design-update blockquote to
+- [x] **P5.T2: Living documents** — covers: FR-7
+  - [x] **P5.T2.1:** Add a dated design-update blockquote to
         `conductor/tech-stack.md` covering the scene seam, the `GroupMathConfig`
         signature change, and the rng-first `buildPlaythrough` exception.
-  - [ ] **P5.T2.2:** Add a `## Changelog - Scene RNG Seam (<date>)` section to
+  - [x] **P5.T2.2:** Add a `## Changelog - Scene RNG Seam (<date>)` section to
         `conductor/product.md` stating the no-visible-change guarantee.
 
-- [ ] **P5.T3: Validator** — covers: AC-6
-  - [ ] **P5.T3.1:** Confirm `node scripts/validate-docs.js` exits 0 and record
+- [x] **P5.T3: Validator** — covers: AC-6
+  - [x] **P5.T3.1:** Confirm `node scripts/validate-docs.js` exits 0 and record
         the result in the evidence file.
+
+**Result:** verified
+**Checkpoint:** 59b81b3b
+**Evidence:** conductor/tracks/20261026-scene-rng-seam/verification/phase-5.md
 
 ---
 
