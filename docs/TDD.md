@@ -584,6 +584,29 @@ Reuse safety: a cancelled pass leaves its `imported` entries behind deliberately
 
 The behaviour is tested at two levels: `src/__tests__/game/hub/prewarm.test.ts` drives the module with a fake scheduler (order, one-at-a-time pacing, cancellation, a rejected import, idempotence, unparseable timestamps), and `src/__tests__/scenes/hubScene.test.ts` asserts the Hub wiring (the 1200 ms delay, the three gates, cancellation ahead of the load in `openGame`, the shutdown cancel, and the profile-switch restart). The measured first-tap effect — cold versus warm, and what the pacing means for a child who taps immediately — is recorded in [`docs/perf-baseline.md`](./perf-baseline.md#idle-chunk-prewarm--first-tap-verdict-2026-10-27).
 
+### 4.8 Idle art-queue prewarm
+
+`ART_KEYS_BY_GAME` in `src/game/hub/prewarm.ts` extends the idle engine with the art half of a cold tap: every texture key each game rasterizes in its own `preload`, as key-plus-tier-size pairs transcribed from the scenes' declared art groups (`story-order` from `preloadStoryOrderArt`). Shell-owned `tile_*`/`sticker_*` keys are excluded — they are warm from boot. Key-only strings live here deliberately: importing the group objects would drag every game's SVG markup into the shell entry.
+
+`artKeysInRecencyOrder(keysByGame, progress, gridOrder)` is the pure recency-first flattening: each game's keys in declaration order, cross-game duplicates kept at their first (most-recent-game) occurrence, a first visit falling back to grid order — mirroring the chunk order.
+
+Pacing mirrors the chunk engine one slot at a time:
+
+- `startArtPrewarm` takes `{ keysByGame, gridOrder, getProgress, queued?, isPresent, queueKey, scheduler? }`. The order is recomputed from `getProgress()` on every tick, so a profile switch mid-cycle reorders the remaining keys; an in-flight raster is never aborted, its outcome only discarded when cancelled.
+- A key already `isPresent` in the TextureManager is marked queued without consuming a raster; a rejected raster is swallowed into a pass-local failure set — no in-pass retry, no unhandled rejection — and stays out of the shared `queued` set, so the next pass re-attempts it. The tap path covers a missed key through the existing placeholder exactly as without prewarm.
+- `cancel()` drops the pending slot and discards the in-flight result, mirroring the chunk tap-wins rule.
+
+Hub wiring (`src/scenes/HubScene.ts`), behind the same gates as the chunk pass:
+
+| Piece | Behaviour |
+| --- | --- |
+| `ART_GROUP_LOADERS` | One dynamic `import()` per art group (12 groups plus Story Order panels): the markup ships in lazy chunks, never the shell entry — pinned by a source-guard test. Loaded tables stay cached for the Hub's lifetime; unknown keys resolve to `undefined` and are skipped. |
+| `ART_GROUPS_BY_GAME` | Per-game group list mirroring each scene's `preloadArt([...])` declaration and the `ART_KEYS_BY_GAME` composition; the resolver parity test resolves every key of all 22 games through it. |
+| `queueArtKey` | Skips keys that landed meanwhile, unresolvable keys, and resolutions settling after cancel, shutdown or tap (a per-pass generation id discards them); otherwise queues `load.svg(key, toDataUri(svg), tierSize)` at the key's texture tier, calls `load.start()`, and settles on the loader's `complete`/`loaderror` — one raster per idle tick. |
+| Shared lifecycle | The single 1200 ms post-entrance timer arms both passes; `cancelPrewarm` cancels both and bumps the art generation id; `restartPrewarm` restarts both. The art cue module is never imported during idle. `artQueued` is shared across visits, so a re-entered Hub resumes where the last visit stopped. |
+
+A fully warmed game queues zero art keys in `preload()` — `preloadArtGroups` only queues keys the TextureManager lacks — and the unchanged `GameSceneBase` show-then-clear cue wiring takes the cue down on `create` before it can paint, so no cue appears on entry. The behaviour is tested at both levels: `prewarm.test.ts` pins the table key-for-key against the live group objects (sizes pinned to `textureSizeFor`, shell-key exclusion asserted) and drives the queue with a fake scheduler (order, one-per-tick pacing, present-skip, per-tick reorder, tap-cancel, failure-swallow with next-pass retry); `hubScene.test.ts` asserts the Hub wiring (arming, tier/data-URI/`start` pins, no cue during idle, lock/hidden suppression plus resume, tap-cancel ordering, shutdown cancel plus cross-visit resume, 22-game resolver parity, warmed-game zero-queue). The measured cold-tap effect is recorded in [`docs/perf-baseline.md`](./perf-baseline.md).
+
 ---
 
 ## 5. Components
