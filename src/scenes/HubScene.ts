@@ -7,6 +7,12 @@ import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIn
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
+import {
+  type PrewarmController,
+  type PrewarmEntry,
+  recencyFirstOrder,
+  startPrewarm,
+} from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
 import { GAME_TILES } from "../game/hubTiles";
 import { endPlaySession, isNearLimit, startPlaySession } from "../game/playTimeLogic";
@@ -14,9 +20,15 @@ import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
 import { unlockSpeechForUserGesture } from "../utils/speech";
-import { getActiveProfile, getPlayTime, recordGamePlay, recordPlayTime } from "../utils/storage";
+import {
+  getActiveProfile,
+  getPlayTime,
+  getProgress,
+  recordGamePlay,
+  recordPlayTime,
+} from "../utils/storage";
 import { textStyle } from "../utils/typography";
-import { loadSceneWithRetry } from "./sceneRegistry";
+import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 
 /** Number of background decorations. */
 const DECORATION_COUNT = 4;
@@ -34,6 +46,12 @@ const DECORATION_DRIFT_MAX = 6000;
 const IDLE_ATTRACT_DELAY = 25000;
 /** Interval between idle calls while attract is active (ms). */
 const IDLE_CALL_INTERVAL = 10000;
+/**
+ * Delay between the Hub entrance and the first prewarm idle request (ms). Long
+ * enough that the entrance fade and zoom finish before any chunk is fetched,
+ * short enough that a child who hesitates still finds warmed chunks.
+ */
+const PREWARM_START_DELAY = 1200;
 /** Wiggle amplitude for the attract cue (degrees). */
 const WIGGLE_ANGLE = 4;
 /** Duration of one wiggle swing (ms). */
@@ -50,6 +68,15 @@ const ATTRACT_WIGGLE_COUNT = 2;
  */
 function canObserveVisibility(): boolean {
   return typeof document !== "undefined" && typeof document.visibilityState === "string";
+}
+
+/**
+ * True only where the document reports itself hidden. Built on the same guard
+ * as `canObserveVisibility`, so a host with no visibility surface counts as
+ * visible and keeps the prewarm active instead of silently disabling it.
+ */
+function isDocumentHidden(): boolean {
+  return canObserveVisibility() && document.visibilityState === "hidden";
 }
 
 /**
@@ -97,17 +124,36 @@ export class HubScene extends Phaser.Scene {
    * opened (FR-4).
    */
   private launching = false;
+  /**
+   * Idle-paced prewarm of the lazy game chunks; absent while the pass is
+   * stopped (locked, hidden, launching, or shut down).
+   */
+  private prewarm?: PrewarmController;
+  /** Pending prewarm start, armed once the Hub entrance has settled. */
+  private prewarmStartTimer?: Phaser.Time.TimerEvent;
+  /**
+   * Chunk keys a prewarm pass already imported. Shared across passes — and
+   * across visits, since Phaser reuses this instance and the module registry
+   * outlives a visit — so a restart skips what already landed without spending
+   * an idle slot on it (FR-3).
+   */
+  private readonly prewarmImported = new Set<string>();
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
   /**
    * Document-visibility handler: re-reads the budget when the page returns to
-   * the foreground. A field so the shutdown hook can remove the exact
-   * reference create() attached.
+   * the foreground and parks the chunk prewarm while it is in the background.
+   * A field so the shutdown hook can remove the exact reference create()
+   * attached.
    */
   private handleVisibilityChange = (): void => {
     if (document.visibilityState === "visible") {
       this.refreshPlayTimeState();
+      return;
     }
+    // Background imports buy the child nothing and cost battery, so the pass
+    // stops here; the foreground return above re-arms it (FR-2).
+    this.syncPrewarm();
   };
   /** Tile-grid renderer: layouts, page dots, swipes and the sticker shelf. */
   private grid: HubGrid;
@@ -125,6 +171,9 @@ export class HubScene extends Phaser.Scene {
       onSwitch: () => {
         this.grid.rerenderStickerShelf();
         this.refreshPlayTimeState();
+        // The order is recency-first for the active profile, so a switch
+        // re-derives the work still pending (spec: profile switch mid-cycle).
+        this.restartPrewarm();
       },
     });
     this.pwaToasts = new PwaToasts(this);
@@ -150,6 +199,10 @@ export class HubScene extends Phaser.Scene {
     // A new visit: a launch still in flight belongs to the previous one, and
     // its resolution must not act on this one.
     this.visitToken += 1;
+    // Likewise a prewarm: the shutdown handler already drops it, but a visit
+    // must never inherit the previous one's pass even if that handler did not
+    // run (NFR-6).
+    this.cancelPrewarm();
     this.launching = false;
     // Phaser reuses this instance across visits: a cue left from the previous
     // visit is gone with its scene, but the field must not point at it.
@@ -208,6 +261,10 @@ export class HubScene extends Phaser.Scene {
       this.resetIdleAttract();
     });
     this.scheduleIdleAttract();
+    // Armed with the rest of the post-entrance flow, never inside
+    // `sceneEntrance`: the pass imports only in idle slots, so the entrance's
+    // fade and zoom keep their frames (NFR-2).
+    this.syncPrewarm();
 
     const settingsButton = this.add.text(
       this.cameras.main.width - 20,
@@ -263,6 +320,9 @@ export class HubScene extends Phaser.Scene {
       this.playTimeGraphics = undefined;
       this.idleCallTimer?.remove();
       this.idleCallTimer = undefined;
+      // A prewarm belongs to the visit that armed it: drop its pending idle
+      // slot so nothing imports for a Hub nobody is looking at (FR-5).
+      this.cancelPrewarm();
       this.mascot?.destroy();
       this.mascot = undefined;
       this.grid.destroy();
@@ -301,6 +361,10 @@ export class HubScene extends Phaser.Scene {
    */
   private async openGame(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): Promise<void> {
     if (this.launching) return;
+    // The tap always wins: pending prewarm work stops before the load is
+    // awaited, so the tap's own fetch and registration are never queued behind
+    // an idle import (FR-1).
+    this.cancelPrewarm();
     const visit = this.visitToken;
     this.launching = true;
     const loaded = await loadSceneWithRetry(this, GAME_TILES[tileIndex].sceneKey);
@@ -323,6 +387,8 @@ export class HubScene extends Phaser.Scene {
       this.launching = false;
       this.grid.navLocked = false;
       this.showLoadCue(tileIndex, tile);
+      // No game started, so the idle pass may resume behind the retry cue.
+      this.syncPrewarm();
       return;
     }
     // Navigating away from the Hub now, so the in-flight flag stays set until
@@ -409,6 +475,96 @@ export class HubScene extends Phaser.Scene {
       this.timeUp = false;
     }
     this.createPlayTimeIndicator(wasTimeUp);
+    // The lock can arrive or clear with this refresh, so the prewarm follows it
+    // in both directions: no imports while locked, a fresh pass once it clears
+    // (FR-2).
+    this.syncPrewarm();
+  }
+
+  /**
+   * Ordered chunk entries for one prewarm pass, recency-first for the active
+   * profile. Recency lives in the progress map keyed by game id, while the
+   * loaders are keyed by scene key, so the order is derived over the game ids
+   * and then mapped to the chunks that have a loader.
+   *
+   * The progress map is read here, at every pass start, rather than cached, so
+   * the order follows the child: returning from a game re-derives with that
+   * game first, and a profile switch re-derives for the new profile (FR-1).
+   */
+  private prewarmEntries(): PrewarmEntry[] {
+    const gridOrder = GAME_TILES.map((tile) => tile.gameId);
+    // Only the games the registry actually has a chunk loader for: a host or a
+    // test double may expose a registry without one, and there is nothing to
+    // warm then.
+    const warmable = GAME_TILES.filter((tile) => tile.sceneKey in sceneLoaders);
+    const entries: PrewarmEntry[] = [];
+    for (const gameId of recencyFirstOrder(
+      getProgress(),
+      gridOrder,
+      warmable.map((tile) => tile.gameId),
+    )) {
+      const tile = warmable.find((candidate) => candidate.gameId === gameId);
+      if (!tile) continue;
+      entries.push({ key: tile.sceneKey, load: sceneLoaders[tile.sceneKey] });
+    }
+    return entries;
+  }
+
+  /**
+   * True while the prewarm may run. The play-time lock outranks it — a locked
+   * Hub is not a place a child can start a game from, so warming chunks there
+   * buys nothing — and a backgrounded page or a launch in flight has the same
+   * answer (FR-2).
+   */
+  private canPrewarm(): boolean {
+    return !this.timeUp && !this.launching && !isDocumentHidden();
+  }
+
+  /**
+   * Brings the prewarm in line with the current gates: arms a pass when one may
+   * run and none is pending, stops whatever is pending otherwise. Safe to call
+   * at any point in the scene's life, including before `create()` has armed the
+   * entrance delay.
+   */
+  private syncPrewarm(): void {
+    if (!this.canPrewarm()) {
+      this.cancelPrewarm();
+      return;
+    }
+    if (this.prewarm || this.prewarmStartTimer) return;
+    // The first idle request waits out the entrance so the fade and zoom keep
+    // their frames; the pass itself still imports only in idle slots (NFR-2).
+    this.prewarmStartTimer = this.time.delayedCall(PREWARM_START_DELAY, () => {
+      this.prewarmStartTimer = undefined;
+      this.startPrewarmPass();
+    });
+  }
+
+  /** Starts one pass over the chunks that have not landed yet. */
+  private startPrewarmPass(): void {
+    if (!this.canPrewarm() || this.prewarm) return;
+    this.prewarm = startPrewarm({
+      entries: this.prewarmEntries(),
+      imported: this.prewarmImported,
+    });
+  }
+
+  /**
+   * Stops the prewarm: drops the pending idle slot and the entrance delay, and
+   * discards an in-flight import's result. Safe when nothing is armed or
+   * running, which is why every gate and every tap can call it unconditionally.
+   */
+  private cancelPrewarm(): void {
+    this.prewarmStartTimer?.remove();
+    this.prewarmStartTimer = undefined;
+    this.prewarm?.cancel();
+    this.prewarm = undefined;
+  }
+
+  /** Stops the pass and starts a fresh one, so pending work takes a new order. */
+  private restartPrewarm(): void {
+    this.cancelPrewarm();
+    this.startPrewarmPass();
   }
 
   /**

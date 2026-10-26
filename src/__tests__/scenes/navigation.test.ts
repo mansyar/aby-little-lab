@@ -89,6 +89,9 @@ vi.mock("../../scenes/sceneRegistry", async () => {
     // The Hub loads through the retrying wrapper; this double always succeeds so
     // these cases keep observing the post-load behaviour they have asserted.
     loadSceneWithRetry: createLoadSceneWithRetryDouble(),
+    // No chunk loaders: the idle prewarm finds nothing to warm, which is what
+    // these navigation cases want.
+    sceneLoaders: {},
   };
 });
 
