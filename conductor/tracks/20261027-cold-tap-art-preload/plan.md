@@ -71,17 +71,17 @@ The primary appends after acceptance:
 - **Covers:** FR-4, AC-6, AC-7
 - **Touches:** `docs/perf-baseline.md`, `docs/tech-stack.md`, `scripts/measure-first-tap.mjs`, `conductor/tracks/20261027-cold-tap-art-preload/verification/*`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Cold-tap measurement** — covers: FR-4, AC-6
-  - [ ] **P3.T1.1:** Built baseline (art queue off) vs art-prewarm build, same host back-to-back, median-of-three per game, same warm-aware rig.
-  - [ ] **P3.T1.2:** Dated verdict section in `docs/perf-baseline.md`; victory = worst case ≤ 400 ms, else re-scope with numbers.
-- [ ] **P3.T2: Records** — covers: AC-7
-  - [ ] **P3.T2.1:** TDD walkthrough and tech-stack Design Update.
+- [x] **P3.T1: Cold-tap measurement** — covers: FR-4, AC-6
+  - [x] **P3.T1.1:** Built baseline (art queue off) vs art-prewarm build, same host back-to-back, median-of-three per game, same warm-aware rig.
+  - [x] **P3.T1.2:** Dated verdict section in `docs/perf-baseline.md`; victory = worst case ≤ 400 ms, else re-scope with numbers.
+- [x] **P3.T2: Records** — covers: AC-7
+  - [x] **P3.T2.1:** TDD walkthrough and tech-stack Design Update.
 
 <!--
 The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 7764666b
 **Evidence:** conductor/tracks/20261027-cold-tap-art-preload/verification/phase-3.md
 -->
