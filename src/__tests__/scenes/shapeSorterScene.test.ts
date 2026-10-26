@@ -310,12 +310,12 @@ describe("ShapeSorterScene multi-round sessions", () => {
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("shape-sorter");
       expect(generatePlaythroughMock).toHaveBeenCalledTimes(1);
-      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 1);
+      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 1, expect.any(Function));
     });
 
     it("requests the classic pool when the facade returns 0", () => {
       createScene();
-      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 0);
+      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 0, expect.any(Function));
     });
 
     it("keeps three progress dots on every band", () => {

@@ -670,12 +670,12 @@ describe("adaptive band shift wiring", () => {
     const scene = new AlphabetScene();
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("alphabet-match");
-    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 1);
+    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new AlphabetScene();
     scene.create();
-    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 0);
+    expect(generatePlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
   });
 });

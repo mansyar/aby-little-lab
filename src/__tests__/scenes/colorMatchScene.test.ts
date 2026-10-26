@@ -658,12 +658,12 @@ describe("ColorMatchScene adaptive shift", () => {
     const scene = new ColorMatchScene();
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("color-match");
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new ColorMatchScene();
     scene.create();
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 });

@@ -1,5 +1,6 @@
 import { type AlphabetRound, generatePlaythrough } from "../game/alphabetLogic";
 import { letters } from "../game/art/letters";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -44,8 +45,8 @@ function letterKey(letter: string): string {
 export class AlphabetScene extends ChoiceRoundScene {
   private rounds: AlphabetRound[] = [];
 
-  constructor() {
-    super("Alphabet");
+  constructor(rng: Rng = Math.random) {
+    super("Alphabet", rng);
   }
 
   preload(): void {
@@ -71,7 +72,7 @@ export class AlphabetScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
+    this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

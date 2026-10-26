@@ -9,6 +9,7 @@ import {
   createPlaythrough,
   evaluateRound,
 } from "../game/countLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -60,8 +61,8 @@ const ITEM_GAP = 4;
 export class HowManyScene extends ChoiceRoundScene {
   private rounds: CountRound[] = [];
 
-  constructor() {
-    super("HowMany");
+  constructor(rng: Rng = Math.random) {
+    super("HowMany", rng);
   }
 
   preload(): void {
@@ -87,7 +88,7 @@ export class HowManyScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = createPlaythrough(getAdaptiveBandShift(this.gameId()));
+    this.rounds = createPlaythrough(getAdaptiveBandShift(this.gameId()), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

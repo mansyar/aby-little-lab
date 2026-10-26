@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { numerals } from "../game/art/numerals";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import { buildPlaythrough, isCorrect } from "../game/numberOrderLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { attachDragLift } from "../utils/dragJuice";
@@ -45,8 +46,8 @@ export class NumberOrderScene extends ChoiceRoundScene {
   private board: DragBoard<NumeralCard> | null = null;
   private readonly roundObjects: Phaser.GameObjects.GameObject[] = [];
 
-  constructor() {
-    super("NumberOrder");
+  constructor(rng: Rng = Math.random) {
+    super("NumberOrder", rng);
   }
 
   preload(): void {
@@ -85,7 +86,7 @@ export class NumberOrderScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the numbers in order, smallest first.");
 
-    this.rounds = buildPlaythrough(getAdaptiveBandShift("number-order"));
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("number-order"), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

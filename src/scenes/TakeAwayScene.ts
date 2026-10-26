@@ -2,6 +2,7 @@ import { food } from "../game/art/food";
 import { glyphs } from "../game/art/glyphs";
 import { items } from "../game/art/items";
 import { shapes } from "../game/art/shapes";
+import type { Rng } from "../game/random";
 import { buildPlaythrough, isCorrect, type TakeAwayRound } from "../game/takeAwayLogic";
 import { type GroupMathConfig, GroupMathScene } from "./GroupMathScene";
 
@@ -24,8 +25,8 @@ export class TakeAwayScene extends GroupMathScene<TakeAwayRound> {
     promptCards: (round) => round.promptCards,
   };
 
-  constructor() {
-    super("TakeAway");
+  constructor(rng: Rng = Math.random) {
+    super("TakeAway", rng);
   }
 
   preload(): void {

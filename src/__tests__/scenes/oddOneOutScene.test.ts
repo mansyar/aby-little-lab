@@ -610,12 +610,12 @@ describe("OddOneOutScene adaptive shift", () => {
     const scene = new OddOneOutScene();
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("odd-one-out");
-    expect(createPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(createPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new OddOneOutScene();
     scene.create();
-    expect(createPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(createPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 });

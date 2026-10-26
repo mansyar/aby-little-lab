@@ -5,6 +5,7 @@ import {
   getCorrectShape,
   type PatternRound,
 } from "../game/patternBuilderLogic";
+import type { Rng } from "../game/random";
 import type { ShapeType } from "../game/shapeSorterLogic";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
@@ -83,8 +84,8 @@ export class PatternBuilderScene extends ChoiceRoundScene {
   private readonly cardShapes: Phaser.GameObjects.Image[] = [];
   private rounds: PatternRound[] = [];
 
-  constructor() {
-    super("PatternBuilder");
+  constructor(rng: Rng = Math.random) {
+    super("PatternBuilder", rng);
   }
 
   preload(): void {
@@ -99,7 +100,11 @@ export class PatternBuilderScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Pick the shape that finishes the pattern.");
 
-    this.rounds = generatePlaythrough(ROUND_COUNT, getAdaptiveBandShift("pattern-builder"));
+    this.rounds = generatePlaythrough(
+      ROUND_COUNT,
+      getAdaptiveBandShift("pattern-builder"),
+      this.rng,
+    );
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

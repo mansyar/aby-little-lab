@@ -10,6 +10,7 @@ import {
   type RoundContrast,
   type Scenario,
 } from "../game/feelingsFacesLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -87,8 +88,8 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
   /** Pending opening-speech timer, tracked so a voice-settle flip can cancel it. */
   private openingSpeechTimer?: Phaser.Time.TimerEvent;
 
-  constructor() {
-    super("FeelingsFaces");
+  constructor(rng: Rng = Math.random) {
+    super("FeelingsFaces", rng);
   }
 
   preload(): void {
@@ -103,7 +104,7 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
     this.createRuleLine();
 
     this.ladder = contrastSplitFor(getAdaptiveBandShift("feelings-faces"));
-    this.rounds = drawScenarios();
+    this.rounds = drawScenarios(this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

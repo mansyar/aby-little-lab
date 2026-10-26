@@ -9,6 +9,7 @@ import {
   type MoreLessGroup,
   type MoreLessRound,
 } from "../game/moreLessLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { motionDuration } from "../utils/motion";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -58,8 +59,8 @@ const ITEM_GAP = 4;
 export class MoreLessScene extends ChoiceRoundScene {
   private rounds: MoreLessRound[] = [];
 
-  constructor() {
-    super("MoreLess");
+  constructor(rng: Rng = Math.random) {
+    super("MoreLess", rng);
   }
 
   preload(): void {
@@ -85,7 +86,7 @@ export class MoreLessScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = createPlaythrough(getAdaptiveBandShift("more-less"));
+    this.rounds = createPlaythrough(getAdaptiveBandShift("more-less"), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

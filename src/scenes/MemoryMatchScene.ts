@@ -10,6 +10,7 @@ import {
   type MemoryBand,
   type MemoryRound,
 } from "../game/memoryMatchLogic";
+import type { Rng } from "../game/random";
 import { motionDuration } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -80,8 +81,8 @@ export class MemoryMatchScene extends GameSceneBase {
   private rounds: MemoryRound[] = [];
   private roundIndex = 0;
 
-  constructor() {
-    super("MemoryMatch");
+  constructor(rng: Rng = Math.random) {
+    super("MemoryMatch", rng);
   }
 
   preload(): void {
@@ -95,7 +96,7 @@ export class MemoryMatchScene extends GameSceneBase {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Turn over two cards to find a pair.");
 
-    this.rounds = buildPlaythrough(getAdaptiveBandShift("memory-match"));
+    this.rounds = buildPlaythrough(getAdaptiveBandShift("memory-match"), this.rng);
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

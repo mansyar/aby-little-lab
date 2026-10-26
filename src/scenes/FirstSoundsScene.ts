@@ -6,6 +6,7 @@ import { music } from "../game/art/music";
 import { shapes } from "../game/art/shapes";
 import { toys } from "../game/art/toys";
 import { generatePhonicsPlaythrough, type PhonicsRound } from "../game/firstSoundsLogic";
+import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -51,8 +52,8 @@ function letterKey(letter: string): string {
 export class FirstSoundsScene extends ChoiceRoundScene {
   private rounds: PhonicsRound[] = [];
 
-  constructor() {
-    super("FirstSounds");
+  constructor(rng: Rng = Math.random) {
+    super("FirstSounds", rng);
   }
 
   preload(): void {
@@ -78,7 +79,11 @@ export class FirstSoundsScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = generatePhonicsPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()));
+    this.rounds = generatePhonicsPlaythrough(
+      ROUND_COUNT,
+      getAdaptiveBandShift(this.gameId()),
+      this.rng,
+    );
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
