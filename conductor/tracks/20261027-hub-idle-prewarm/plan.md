@@ -48,12 +48,6 @@ the phase result and evidence file — no manual verification meta-task exists.
 **Checkpoint:** 0369f7b0
 **Evidence:** conductor/tracks/20261027-hub-idle-prewarm/verification/phase-2.md
 
-<!-- The primary appends after acceptance:
-**Result:** verified | failed | blocked
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/<track-id>/verification/phase-2.md
--->
-
 ## Phase 3: First-tap verdict and docs truth
 
 - **Goal:** a measured, dated first-tap verdict in `docs/perf-baseline.md` that resolves the open question, plus the behavior documented in TDD and tech-stack — the track's user-facing proof.
