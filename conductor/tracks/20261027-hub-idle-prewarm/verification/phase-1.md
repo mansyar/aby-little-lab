@@ -72,3 +72,11 @@ Full chain run once as a single record:
 - Out-of-scope doc drift observed but deliberately untouched (Phase 3 owns docs truth): the tree-diagram file counts (`56 files` in `src/game`, `hub/ 6` in README:81/TDD:200) now under-count by the new `prewarm.ts`; the count-drift guard does not check those lines, so the gate stays green.
 - Pre-existing lint warning in `src/__tests__/scenes/musicalMemoryScene.test.ts:296` (non-null assertion) — not from this phase, left alone per surgical-changes rule.
 - Coverage of `prewarm.ts` itself: 94.91 % stmts / 84.84 % branches (uncovered lines 111, 115 — the defensive `!next` guard and the cancelled-after-fire return). Global gates still pass; not required to cover file-locally.
+## Primary verification
+
+- Worktree clean after the executor's commits; range `300f98dc..HEAD` = 3 commits (`0be6517a` engine, `a76da8e9` docs counts, `686495f5` evidence), zero merges.
+- `git diff --name-only 300f98dc..HEAD` = exactly the six Touches paths (engine, test file, three living docs, evidence) — no off-Touches change.
+- Deviation audited: `GameProgress.lastPlayedAt` is indeed `string | null` (ISO, `progressLogic.ts:70` `now.toISOString()`); the brief's `number | null` was a transcription error — the helper's `Date.parse` comparison is correct.
+- Spot-audit: the engine head carries the pacing/idempotency/tap-wins TSDoc; the 18 tests name every contract case (recency order :100, one-in-flight :169, no idle slot while in flight :199, skip-imported :224, cancel-pending :239, cancel-in-flight :256, tap-path-unpoisoned :277, swallow-rejection :292, failed-key-retry :309, scheduler fallbacks :352/:368/:379).
+- Primary gate re-run, all exit 0: `pnpm check` (260 files, 1 pre-existing warning), `pnpm typecheck` clean, `pnpm test -- --run` 126 files / 2,747 tests, `pnpm test:coverage` 97.79/91.82/96.73/98.72 (gates 95/88/85/90 held), `pnpm build` precache 54 entries (1,720.45 KiB), `validate-bundle` pass, `validate-pwa` pass, `validate-docs` pass.
+- Primary verdict: **verified**.
