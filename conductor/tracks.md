@@ -261,4 +261,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Docs Truth Pass - count refresh plus a count-drift guard** - [20261026-docs-truth-pass](./archive/20261026-docs-truth-pass/index.md) - chore - high
 - [x] **Track: Property-Test Deflake - explicit budgets for the heavy sweeps** - [20261026-property-test-deflake](./archive/20261026-property-test-deflake/index.md) - chore - high
 - [x] **Track: Dependency Majors - five dev-dep upgrades with the gate green** - [20261027-dependency-majors](./archive/20261027-dependency-majors/index.md) - chore - medium
-- [ ] **Track: Hub Idle Chunk Prewarm - warm the lazy game chunks while children idle** - [20261027-hub-idle-prewarm](./tracks/20261027-hub-idle-prewarm/index.md) - feature - high
+- [~] **Track: Hub Idle Chunk Prewarm - warm the lazy game chunks while children idle** - [20261027-hub-idle-prewarm](./tracks/20261027-hub-idle-prewarm/index.md) - feature - high
