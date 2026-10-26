@@ -23,16 +23,22 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-2, FR-6, FR-8, NFR-4
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `biome.json`, `.github/workflows/ci.yml` (only if Node < 22.12), `vite.config.ts` (only if the vite minor requires it)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P1.T1: Upgrade the minors** — covers: FR-1, FR-2
-  - [ ] **P1.T1.1:** `pnpm up @biomejs/biome@^2.6.3 vite@^8.3.5` (dev); commit package.json + lockfile together; record `pnpm outdated` after.
-  - [ ] **P1.T1.2:** Refresh `biome.json` `$schema` to the installed version; confirm the pre-existing `$schema` info diagnostic is gone.
-  - [ ] **P1.T1.3:** Read `.github/workflows/ci.yml` Node version; if below 22.12.0, bump it (record); if at/above, record the verification with no change.
-- [ ] **P1.T2: Absorb new lint findings** — covers: FR-2, FR-8
-  - [ ] **P1.T2.1:** Run `pnpm check`; fix every new finding the 2.6.3 rules surface; any config-disable carries a recorded justification (deviation).
-- [ ] **P1.T3: Verify** — covers: FR-1, NFR-4
-  - [ ] **P1.T3.1:** Run the full verification chain; record `pnpm install --frozen-lockfile` success (CI parity).
+- **Status:** verified
+- [x] **P1.T1: Upgrade the minors** — covers: FR-1, FR-2
+  - [x] **P1.T1.1:** `pnpm up @biomejs/biome@^2.6.3 vite@^8.3.5` (dev); commit package.json + lockfile together; record `pnpm outdated` after.
+  - [x] **P1.T1.2:** Refresh `biome.json` `$schema` to the installed version; confirm the pre-existing `$schema` info diagnostic is gone.
+  - [x] **P1.T1.3:** Read `.github/workflows/ci.yml` Node version; if below 22.12.0, bump it (record); if at/above, record the verification with no change.
+- [x] **P1.T2: Absorb new lint findings** — covers: FR-2, FR-8
+  - [x] **P1.T2.1:** Run `pnpm check`; fix every new finding the 2.6.3 rules surface; any config-disable carries a recorded justification (deviation).
+- [x] **P1.T3: Verify** — covers: FR-1, NFR-4
+  - [x] **P1.T3.1:** Run the full verification chain; record `pnpm install --frozen-lockfile` success (CI parity).
 
+
+**Result:** verified
+
+**Checkpoint:** bd8a6c54
+
+**Evidence:** conductor/tracks/20261027-dependency-majors/verification/phase-1.md
 ## Phase 2: Vitest 5.0.5
 
 - **Goal:** Vitest 5 + coverage-v8 5.0.5 land with the suite green under the embraced `clearMocks: true` default and coverage above the fixed gates.
