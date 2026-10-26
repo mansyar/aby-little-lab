@@ -73,9 +73,15 @@
 - **Covers:** F1, F2
 - **Touches:** `scripts/validate-docs.js`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Resolve F1 — guard the "N test cases" phrasing** — covers: F1
-  - [ ] **R1.T1.1:** Add a third claim pattern `TEST_CASES_CLAIM_RE = /\b\d[\d,]*\s+test\s+cases\b/g` in `scripts/validate-docs.js` and check it against `truth.tests` in `checkTestCounts` alongside `TESTS_CLAIM_RE`; extend the mutation proof in the evidence with a "2,999 test cases" mutation (working tree only, reverted) proving the new pattern fails.
-- [ ] **R1.T2: Resolve F2 — date the two refreshed perf-baseline rows** — covers: F2
-  - [ ] **R1.T2.1:** Add one sentence directly under the "### Build figures (2026-10-22)" table in `docs/perf-baseline.md` stating that the Test-suite and Coverage rows were verified 2026-10-26 while the build figures above are the 2026-10-22 measurement. No other change.
+- [x] **R1.T1: Resolve F1 — guard the "N test cases" phrasing** — covers: F1
+  - [x] **R1.T1.1:** Add a third claim pattern `TEST_CASES_CLAIM_RE = /\b\d[\d,]*\s+test\s+cases\b/g` in `scripts/validate-docs.js` and check it against `truth.tests` in `checkTestCounts` alongside `TESTS_CLAIM_RE`; extend the mutation proof in the evidence with a "2,999 test cases" mutation (working tree only, reverted) proving the new pattern fails.
+- [x] **R1.T2: Resolve F2 — date the two refreshed perf-baseline rows** — covers: F2
+  - [x] **R1.T2.1:** Add one sentence directly under the "### Build figures (2026-10-22)" table in `docs/perf-baseline.md` stating that the Test-suite and Coverage rows were verified 2026-10-26 while the build figures above are the 2026-10-22 measurement. No other change.
+
+**Result:** verified
+
+**Checkpoint:** 6cdcaff4
+
+**Evidence:** conductor/tracks/20261026-docs-truth-pass/verification/phase-R1.md
