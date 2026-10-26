@@ -23,15 +23,19 @@ phase subagent and independently verified by the primary before acceptance.
   plus any additional suite the audit flags (recorded in evidence),
   `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Audit every sweep test's isolated wall time** — covers: FR-2, FR-3, NFR-3
-  - [ ] **P1.T1.1:** Run the 13 `VARIETY_SAMPLES = 200` suites individually with a wall-clock timer (`pnpm exec vitest run <file>` per suite, timed), recording each suite's slowest tests. The audit table maps every sweep test (tests whose body loops over shifts or samples) to its worst observed wall time; tests that hit the global 30 s timeout record `>= 30 s (timed out)`.
-  - [ ] **P1.T1.2:** Confirm the installed vitest 4.1.x per-test timeout syntax from `node_modules/vitest` typings (options object as the second `it()` argument) before writing any option.
-- [ ] **P1.T2: Apply the explicit budgets** — covers: FR-1, FR-2, FR-5, AC-2
-  - [ ] **P1.T2.1:** Add `{ timeout: 120000 }` to every sweep test whose worst observed wall time exceeds 20 s — the five proven victims at minimum (`addItUpLogic.test.ts`, `countLogic.test.ts`, `numberOrderLogic.test.ts`, `takeAwayLogic.test.ts`, `firstSoundsLogic.test.ts` shift-sweep tests). No test is renamed, removed, or weakened; sample counts stay 200; no other test carries a timeout unless the audit justified it.
-- [ ] **P1.T3: Record the policy in the TDD** — covers: FR-4, AC-4
-  - [ ] **P1.T3.1:** In `docs/TDD.md` §10.1, extend the runner paragraph with the exception policy: the named suites' sweep tests carry an explicit 120 s budget because their 200-sample × 3-shift loops exceed 30 s under host load (worst observed 66 s), while the global 30 s default is unchanged. Keep the vmThreads rationale intact.
+- [x] **P1.T1: Audit every sweep test's isolated wall time** — covers: FR-2, FR-3, NFR-3
+  - [x] **P1.T1.1:** Run the 13 `VARIETY_SAMPLES = 200` suites individually with a wall-clock timer (`pnpm exec vitest run <file>` per suite, timed), recording each suite's slowest tests. The audit table maps every sweep test (tests whose body loops over shifts or samples) to its worst observed wall time; tests that hit the global 30 s timeout record `>= 30 s (timed out)`.
+  - [x] **P1.T1.2:** Confirm the installed vitest 4.1.x per-test timeout syntax from `node_modules/vitest` typings (options object as the second `it()` argument) before writing any option.
+- [x] **P1.T2: Apply the explicit budgets** — covers: FR-1, FR-2, FR-5, AC-2
+  - [x] **P1.T2.1:** Add `{ timeout: 120000 }` to every sweep test whose worst observed wall time exceeds 20 s — the five proven victims at minimum (`addItUpLogic.test.ts`, `countLogic.test.ts`, `numberOrderLogic.test.ts`, `takeAwayLogic.test.ts`, `firstSoundsLogic.test.ts` shift-sweep tests). No test is renamed, removed, or weakened; sample counts stay 200; no other test carries a timeout unless the audit justified it.
+- [x] **P1.T3: Record the policy in the TDD** — covers: FR-4, AC-4
+  - [x] **P1.T3.1:** In `docs/TDD.md` §10.1, extend the runner paragraph with the exception policy: the named suites' sweep tests carry an explicit 120 s budget because their 200-sample × 3-shift loops exceed 30 s under host load (worst observed 66 s), while the global 30 s default is unchanged. Keep the vmThreads rationale intact.
+
+**Result:** verified
+**Checkpoint:** bf96b31c
+**Evidence:** conductor/tracks/20261026-property-test-deflake/verification/phase-1.md
 
 ## Phase 2: Verify the deflake
 
