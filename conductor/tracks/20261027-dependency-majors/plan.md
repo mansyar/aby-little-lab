@@ -86,7 +86,7 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 
 - **Goal:** The living docs state the new dependency truth and the clearMocks policy decision; every validator green.
 - **Depends on:** Phase 4
-- **Covers:** FR-7, FR-8, AC-6
+- **Covers:** FR-7, FR-8, AC-6, NFR-1
 - **Touches:** `docs/TDD.md`, `docs/perf-baseline.md` (coverage snapshot only if shifted), `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending

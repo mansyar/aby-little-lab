@@ -260,4 +260,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Scene RNG Seam - injectable randomness in the 22 game scenes** - [20261026-scene-rng-seam](./archive/20261026-scene-rng-seam/index.md) - refactor - high
 - [x] **Track: Docs Truth Pass - count refresh plus a count-drift guard** - [20261026-docs-truth-pass](./archive/20261026-docs-truth-pass/index.md) - chore - high
 - [x] **Track: Property-Test Deflake - explicit budgets for the heavy sweeps** - [20261026-property-test-deflake](./archive/20261026-property-test-deflake/index.md) - chore - high
-- [ ] **Track: Dependency Majors - five dev-dep upgrades with the gate green** - [20261027-dependency-majors](./tracks/20261027-dependency-majors/index.md) - chore - medium
+- [~] **Track: Dependency Majors - five dev-dep upgrades with the gate green** - [20261027-dependency-majors](./tracks/20261027-dependency-majors/index.md) - chore - medium
