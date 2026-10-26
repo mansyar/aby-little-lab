@@ -43,7 +43,7 @@ The primary appends after acceptance:
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** in_progress
 
-- [ ] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
+- [x] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
 - [ ] **P2.T2: Conductor review + fixes** — covers: NFR-3 (rounds as appended R-phases)
 - [ ] **P2.T3: PR, CI watch, merge** — covers: AC-3 (merge commit on `master`)
 
