@@ -45,7 +45,7 @@ The primary appends after acceptance:
 
 - [x] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
 - [x] **P2.T2: Conductor review + fixes** — covers: NFR-3 (review `PASS WITH FINDINGS`, round 2, R1 fixed all 4 findings)
-- [ ] **P2.T3: PR, CI watch, merge** — covers: AC-3 (merge commit on `master`)
+- [x] **P2.T3: PR, CI watch, merge** — covers: AC-3 (merge commit `6adc7211` on `master`)
 
 <!--
 The primary appends after acceptance:
