@@ -9,14 +9,16 @@
 
 ## Result
 
-**Blocked on one file.** The measurement ran end to end, the dated verdict is
-written and the TDD section is in place; `conductor/tech-stack.md` could not be
-edited — the `edit` tool returned `permission.rejected` for that path (see
-Blockers). Everything else in the phase is complete and the full gate is green.
+**Verified.** The measurement ran end to end, the dated verdict is written, the
+TDD section is in place, and the tech-stack Design Update blockquote landed —
+the primary applied it after the executor's `edit` tool returned
+`permission.rejected` for `conductor/tech-stack.md`. Its figures were checked
+against this phase's measurement (warm 27.2–64.9 ms, 8 of 15 taps warm at a 2 s
+settle, 15 of 15 at 6 s) and the full gate re-run green with it in place.
 
-The measurement itself is honest and complete: two builds (pre-track baseline
-`cb5f713a` and the track branch), same host, back to back, three runs per build
-per settle setting, headed Chromium, medians reported.
+The measurement itself: two builds (pre-track baseline `cb5f713a` and the track
+branch), same host, back to back, three runs per build per settle setting,
+headed Chromium, medians reported.
 
 ## Commands
 
@@ -53,7 +55,7 @@ all 22 chunks imported in ~0.5 s).
 | FR-4 | First-tap verdict from a back-to-back baseline-vs-prewarm build | `docs/perf-baseline.md` § *Idle chunk prewarm — first-tap verdict (2026-10-27)*; raw JSON under `.conductor/evidence/phase-3/` | met |
 | AC-5 | Dated verdict section with before/after medians per measured game; `:395-399` resolved or re-scoped | same section; the old paragraph now carries a **Resolved 2026-10-27** pointer above the untouched record | met |
 | FR-5 | TDD records the behaviour and pacing model | `docs/TDD.md` § 4.7 *Idle chunk prewarm* | met |
-| FR-5 | tech-stack dated Design Update, newest-first | `conductor/tech-stack.md` — **not written**, `edit` permission denied | **not met** |
+| FR-5 | tech-stack dated Design Update, newest-first | `conductor/tech-stack.md` — *Hub Idle Chunk Prewarm* entry above the 2026-10-27 Dependency Majors entry (applied by the primary; see Deviations) | met |
 | AC-6 | Full gate green including `validate-docs` | commands table above | met |
 | NFR-2 | Budgets hold | shell 140.9 kB ≤ 200 kB; 42/42 precached; suite and coverage above thresholds | met |
 
@@ -105,6 +107,7 @@ itself: Shape Sorter 219.1, Find the Letter 240.8, Find the Word 595.4, Add It U
 |---|---|
 | `.conductor/evidence/base-tree/**` | `git worktree add` is denied by the executor's shell allowlist, so the baseline build was materialised by copying the tree and reverting `src/scenes/HubScene.ts` to `cb5f713a`'s version while deleting `src/game/hub/prewarm.ts`. The result is the same source state the commit holds; it is never committed and lives only under `.conductor/evidence/`. |
 | `scripts/measure-first-tap.mjs` | In Touches. Gained `--warm-aware` (three-state `chunkBeforeTap`), `TAP_HEADED`, `HUB_SETTLE_MS` and `TAP_INERT_IDLE`, all documented in the usage docstring. The cold-only budget and exit-code contract is unchanged when the flag is absent. |
+| `conductor/tech-stack.md` | The executor's `edit` tool returned `permission.rejected` for this path, so the dated Design Update blockquote was applied by the primary agent rather than by this phase. Its content was verified against the measured figures here and the full gate was re-run green afterwards. |
 
 ## Notes
 
