@@ -121,6 +121,18 @@ itself: Shape Sorter 219.1, Find the Letter 240.8, Find the Word 595.4, Add It U
 - Suite count is unchanged (126 files / 2,753 tests), so no README count claim
   moved.
 - The preview servers on 4173 (prewarm build) and 4174 (baseline) were background
-  shells for the measurement. Both have since exited with code 1, after every run
-  in the table above had finished; no figure in this file depends on a server
-  still being up. Both are re-creatable from the commands in the table.
+  shells for the measurement. Both were still listening when the primary verified
+  this phase and were stopped then; every run in the table above had finished
+  before that, so no figure in this file depends on a server still being up. Both
+  are re-creatable from the commands in the table.
+## Primary verification
+
+- Worktree audit: range `d2cc9619..HEAD` = 2 commits (`a8c3b8c2` perf verdict + TDD + script, `26e69e82` evidence head/gate refresh), zero merges. Changed paths = `docs/perf-baseline.md`, `docs/TDD.md`, `scripts/measure-first-tap.mjs`, this evidence file — the Touches list, plus `conductor/tech-stack.md` applied here.
+- Measurement audited from the raw artefacts, not the prose: `.conductor/evidence/phase-3/aggregate.json` carries six batches. Cold baselines: 2 s settle medians 258.7 / 219.1 / 439.0 / 269.5 / 222.4 (median of medians 258.7, worst 439.0); 6 s settle 277.2 / 241.0 / 501.4 / 324.6 / 227.7 (277.2, worst 501.4). Prewarm build at 6 s settle: 45.5 / 55.7 / 50.7 / 40.9 / 43.5 (45.5), 15 of 15 taps warm. Prewarm build at 2 s settle: 49.9 / 255.4 / 47.9 / 52.6 / 220.8 (52.6), 8 of 15 taps warm, with the per-run summaries showing run 1 all-cold and runs 2-3 progressively warmer. Cold-against-cold control with the idle scheduler neutralised: 219.1 / 240.8 / 595.4 / 211.7 / 230.9 — no systematic change on the tap path. The 23 warm taps ranged 27.2-64.9 ms.
+- Verdict audited against that data and found honest: `docs/perf-baseline.md:432` states the budget is demonstrated for a warm tap and **not** demonstrated for a cold one, reports the 2 s mixed result rather than only the favourable 6 s one, names which two tiles stayed cold, and re-scopes the device pass to confirmation. No manufactured pass. The `:395` pointer marks the original open question closed and the original paragraph is preserved at `:405`.
+- Method caveat verified in the artefacts and in the written section: headless Chromium never delivers an idle period once Phaser's loop runs, so the runs used `TAP_HEADED=1`. The script keeps its cold-only budget and exit-code contract when `--warm-aware` is absent.
+- `conductor/tech-stack.md` gained the newest-first `2026-10-27 - Design Update (Hub Idle Chunk Prewarm)` blockquote above the Dependency Majors entry, stating the engine contract, the recency ordering, the three `canPrewarm` gates, the tap-wins cancellation, the reuse-safety rule, and the measured warm/cold split.
+- Docs truth: `README.md:49` = 2,753 tests across 126 files (verified 2026-10-27); `docs/TDD.md:1065` coverage sentence = 97.76 / 91.84 / 96.76 / 98.73 across 126 files and 2,753 tests; `docs/perf-baseline.md:411` Test suite row = 126 files / 2,753 tests. Coverage denominators did not move, so no snapshot refresh was needed beyond the phase's own restate.
+- Leaked measurement servers: ports 4173 and 4174 were still listening at verification time and were stopped before the gate was run, so the gate measured the tree, not a stale preview.
+- Primary gate re-run on the final tree, all exit 0: `pnpm check` (260 files, 1 pre-existing warning), `pnpm typecheck` clean, `pnpm test -- --run` 126 files / 2,753 tests, `pnpm test:coverage` 97.77 / 91.90 / 96.76 / 98.73, `pnpm build` precache 54 entries (1,722.35 KiB), `validate-bundle` PASS (Phaser vendor 1,335.0 kB; shell 140.9 kB ≤ 200 kB), `validate-pwa` 16 passed / 0 failed, `validate-docs` 6 passed / 0 failed.
+- Primary verdict: **verified**.
