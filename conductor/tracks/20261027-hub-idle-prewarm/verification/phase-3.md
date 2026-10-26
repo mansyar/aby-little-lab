@@ -117,5 +117,7 @@ itself: Shape Sorter 219.1, Find the Letter 240.8, Find the Word 595.4, Add It U
   documents' 97.76 / 91.84 / 96.76 / 98.73; `validate-docs` does not guard them.
 - Suite count is unchanged (126 files / 2,753 tests), so no README count claim
   moved.
-- The preview servers on 4173 and 4174 were started as background shells and are
-  still running.
+- The preview servers on 4173 (prewarm build) and 4174 (baseline) were background
+  shells for the measurement. Both have since exited with code 1, after every run
+  in the table above had finished; no figure in this file depends on a server
+  still being up. Both are re-creatable from the commands in the table.
