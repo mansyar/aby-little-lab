@@ -411,6 +411,9 @@ measured, dated figure and is a candidate for `docs/roadmap.md`.
 | Test suite | 125 files / 2,729 tests | `pnpm test -- --run` |
 | Coverage | statements 97.82 % / branches 91.96 % / functions 96.77 % / lines 98.74 % | `pnpm test:coverage` |
 
+The Test-suite and Coverage rows were verified 2026-10-26; the build
+figures above are the 2026-10-22 measurement.
+
 The Shell Diet section above keeps its own numbers (129.1 KiB, 41 chunks, 53
 precache entries) — that is what the build of 2026-10-20 measured. The 42
 chunks and 54 precache entries above are one chunk and one entry more, from

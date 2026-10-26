@@ -517,8 +517,9 @@ const SUITE_DOCS = [README_FILE, TDD_FILE, PERF_BASELINE_FILE];
  */
 const ANSI_RE = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*[A-Za-z]`, "g");
 
-/** A count claim: `2,729 tests`, `125 test files`, `125 files`. */
+/** A count claim: `2,729 tests`, `2,729 test cases`, `125 test files`, `125 files`. */
 const TESTS_CLAIM_RE = /\b\d[\d,]*\s+tests\b/g;
+const TEST_CASES_CLAIM_RE = /\b\d[\d,]*\s+test\s+cases\b/g;
 const TEST_FILES_CLAIM_RE = /\b\d[\d,]*\s+test\s+files\b/g;
 const FILES_CLAIM_RE = /\b\d[\d,]*\s+files\b/g;
 
@@ -585,7 +586,7 @@ function checkTestCounts() {
   for (const file of SUITE_DOCS) {
     unfencedLines(file).forEach((line, index) => {
       if (line === null) return;
-      const testClaims = [...line.matchAll(TESTS_CLAIM_RE)];
+      const testClaims = [...line.matchAll(TESTS_CLAIM_RE), ...line.matchAll(TEST_CASES_CLAIM_RE)];
       for (const claim of testClaims) {
         if (!claimAgrees(claim[0], truth.tests)) {
           fail(file, index + 1, expected, `"${claim[0]}"`);
