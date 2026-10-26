@@ -23,7 +23,7 @@ phase subagent and independently verified by the primary before acceptance.
   plus any additional suite the audit flags (recorded in evidence),
   `docs/TDD.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Audit every sweep test's isolated wall time** — covers: FR-2, FR-3, NFR-3
   - [ ] **P1.T1.1:** Run the 13 `VARIETY_SAMPLES = 200` suites individually with a wall-clock timer (`pnpm exec vitest run <file>` per suite, timed), recording each suite's slowest tests. The audit table maps every sweep test (tests whose body loops over shifts or samples) to its worst observed wall time; tests that hit the global 30 s timeout record `>= 30 s (timed out)`.
