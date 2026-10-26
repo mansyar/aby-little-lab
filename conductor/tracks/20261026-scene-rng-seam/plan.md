@@ -186,9 +186,9 @@ Only the primary agent writes this file.
 - **Covers:** FR-6, NFR-3, AC-1, AC-2, AC-5
 - **Touches:** `src/__tests__/scenes/*.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
-- [ ] **P4.T1: Per-game scene suites** — covers: FR-6, AC-1
+- [ ] **P4.T1: Per-game scene suites** - covers: FR-6, AC-1
   - [ ] **P4.T1.1:** In each of the 22 scene suites, construct the scene with
         `mulberry32(seed)` instead of stubbing `Math.random`, delete the stub and
         its `afterEach` restore where nothing else needs it, and re-derive any
