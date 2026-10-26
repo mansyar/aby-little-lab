@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-10-27T09:00:00+11:00",
-  "updated_at": "2026-10-27T13:00:00+11:00",
+  "updated_at": "2026-10-27T13:20:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261027-dependency-majors",
@@ -16,9 +16,9 @@
     "phases_total": 6,
     "phases_verified": 5,
     "tasks_total": 20,
-    "tasks_done": 18
+    "tasks_done": 20
   },
-  "last_checkpoint": "e2893a19",
+  "last_checkpoint": "31afc8fe",
   "review_verdict": "PASS WITH FINDINGS",
   "review_rounds": 1,
   "doc_sync": "pending",
