@@ -54,6 +54,20 @@ The primary appends after acceptance:
 **Evidence:** conductor/tracks/20261027-release-v1-22-0/verification/phase-2.md
 -->
 
+## Phase R1: Review Fixes (round 1)
+
+- **Goal:** Resolve review findings F1–F4 (notes accuracy) with no other changes.
+- **Depends on:** Phase 2 (P2.T1 verified; review round 1 done)
+- **Covers:** F1, F2, F3, F4 (review.md round 1)
+- **Touches:** `docs/release-notes-v1.22.0.md`
+- **Verification:** `node scripts/validate-docs.js` (6/6) plus `pnpm check`
+- **Status:** pending
+
+- [ ] **R1.T1: Resolve F1 (PR #67 bullet)** — covers: F1
+- [ ] **R1.T2: Resolve F2 (PR #68 bullet)** — covers: F2
+- [ ] **R1.T3: Resolve F3 (PR #70 bullet)** — covers: F3
+- [ ] **R1.T4: Resolve F4 (header wording)** — covers: F4
+
 ## Phase 3: Tag and ship
 
 - **Goal:** Tag `v1.22.0` pushed to origin, deploy fired, notes flipped FINAL.
