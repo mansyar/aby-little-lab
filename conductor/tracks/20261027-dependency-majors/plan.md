@@ -92,7 +92,7 @@ Phase states: `pending` → `in_progress` → `verified` | `failed` | `blocked`.
 - **Covers:** FR-1, FR-5, FR-8, NFR-3, NFR-4
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `vite.config.ts` (PWA options only)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P4.T1: Upgrade + peers** — covers: FR-1, NFR-4
   - [ ] **P4.T1.1:** `pnpm up vite-plugin-pwa@^2.0.0`; verify `workbox-window` satisfies `^7.4.1` (bump if not); commit package.json + lockfile; record `pnpm outdated` after.
 - [ ] **P4.T2: Adapt config** — covers: FR-5, FR-8
