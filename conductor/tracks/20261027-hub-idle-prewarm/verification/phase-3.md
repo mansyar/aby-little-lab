@@ -5,7 +5,7 @@
 - **Date:** 2026-10-27
 - **Branch:** `feat/20261027-hub-idle-prewarm`
 - **Base:** `d2cc9619` (phase 3 base)
-- **Head:** `d2cc9619` + this phase's commits
+- **Head:** `a8c3b8c2` (plus the follow-up commit that refreshed this file)
 
 ## Result
 
