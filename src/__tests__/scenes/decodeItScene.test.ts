@@ -75,13 +75,9 @@ vi.mock("../../game/decodeLogic", async (importOriginal) => {
     ...actual,
     // Forward every argument: the scene calls buildPlaythrough(roundCount, shift, rng),
     // and dropping rng here would silently strip the seeded path.
-    buildPlaythrough: (
-      roundCount: number,
-      shift: -1 | 0 | 1 = 0,
-      rng?: Parameters<typeof actual.buildPlaythrough>[2],
-    ) => {
-      buildPlaythroughMock(roundCount, shift);
-      return actual.buildPlaythrough(roundCount, shift, rng);
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
     },
   };
 });
@@ -744,14 +740,14 @@ describe("adaptive band shift wiring", () => {
     const scene = new DecodeItScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(6, 1);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new DecodeItScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(6, 0);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
   });
 
   it("builds identical rounds from two mulberry32(1234) constructions (AC-1)", () => {

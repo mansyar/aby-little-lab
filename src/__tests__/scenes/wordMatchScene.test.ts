@@ -87,14 +87,13 @@ vi.mock("../../game/wordLogic", async (importOriginal) => {
     // Forward every argument: the scene calls
     // generateWordPlaythrough(roundCount, shift, rng), and dropping rng here
     // would silently strip the seeded path.
-    generateWordPlaythrough: (roundCount: number, shift: -1 | 0 | 1 = 0, rng?: Rng) => {
-      generateWordPlaythroughMock(roundCount, shift);
-      return actual.generateWordPlaythrough(roundCount, shift, rng);
+    generateWordPlaythrough: (...args: Parameters<typeof actual.generateWordPlaythrough>) => {
+      generateWordPlaythroughMock(...args);
+      return actual.generateWordPlaythrough(...args);
     },
   };
 });
 
-import type { Rng } from "../../game/random";
 import * as wordLogic from "../../game/wordLogic";
 import { getWord } from "../../game/wordLogic";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
@@ -783,13 +782,13 @@ describe("adaptive band shift wiring", () => {
     const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
-    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 1);
+    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
-    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 0);
+    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
   });
 });

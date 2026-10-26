@@ -91,28 +91,28 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("AnimalTraceScene path tracing", () => {
-  /** Layout constants matching the scene implementation. */
-  const ANIMAL_X = 200;
-  const FOOD_X = 824;
-  const SPRITE_Y = 384;
-  const PATH_POINTS = 6;
+/** Layout constants matching the scene implementation (shared by both suites). */
+const ANIMAL_X = 200;
+const FOOD_X = 824;
+const SPRITE_Y = 384;
+const PATH_POINTS = 6;
 
-  /**
-   * A fresh generator positioned exactly where the scene's draw sequence
-   * stands at the given pair's path generation: the scene first consumes
-   * selectThreePairs' shuffle draws, then one generatePathPoints call per
-   * already-rendered pair.
-   */
-  function pathRngForPair(pairIndex: number): Rng {
-    const rng = mulberry32(1234);
-    selectThreePairs(rng);
-    for (let i = 0; i < pairIndex; i++) {
-      generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS, pathRngForPair(0));
-    }
-    return rng;
+/**
+ * A fresh generator positioned exactly where the scene's draw sequence
+ * stands at the given pair's path generation: the scene first consumes
+ * selectThreePairs' shuffle draws, then one generatePathPoints call per
+ * already-rendered pair.
+ */
+function pathRngForPair(pairIndex: number): Rng {
+  const rng = mulberry32(1234);
+  selectThreePairs(rng);
+  for (let i = 0; i < pairIndex; i++) {
+    generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS, rng);
   }
+  return rng;
+}
 
+describe("AnimalTraceScene path tracing", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -589,27 +589,6 @@ describe("AnimalTraceScene path tracing", () => {
 });
 
 describe("AnimalTraceScene completion and sticker flow", () => {
-  /** Layout constants matching the scene implementation. */
-  const ANIMAL_X = 200;
-  const FOOD_X = 824;
-  const SPRITE_Y = 384;
-  const PATH_POINTS = 6;
-
-  /**
-   * A fresh generator positioned exactly where the scene's draw sequence
-   * stands at the given pair's path generation: the scene first consumes
-   * selectThreePairs' shuffle draws, then one generatePathPoints call per
-   * already-rendered pair.
-   */
-  function pathRngForPair(pairIndex: number): Rng {
-    const rng = mulberry32(1234);
-    selectThreePairs(rng);
-    for (let i = 0; i < pairIndex; i++) {
-      generatePathPoints(ANIMAL_X, SPRITE_Y, FOOD_X, SPRITE_Y, PATH_POINTS, rng);
-    }
-    return rng;
-  }
-
   afterEach(() => {
     vi.restoreAllMocks();
   });

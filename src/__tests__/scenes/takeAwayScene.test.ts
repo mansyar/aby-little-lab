@@ -81,14 +81,13 @@ vi.mock("../../game/takeAwayLogic", async (importOriginal) => {
     ...actual,
     // Forward every argument: the scene calls buildPlaythrough(shift, rng),
     // and dropping rng here would silently strip the seeded path.
-    buildPlaythrough: (shift: -1 | 0 | 1 = 0, rng?: Rng) => {
-      buildPlaythroughMock(shift);
-      return actual.buildPlaythrough(shift, rng);
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
     },
   };
 });
 
-import type { Rng } from "../../game/random";
 import type { TakeAwayRound } from "../../game/takeAwayLogic";
 import { TakeAwayScene } from "../../scenes/TakeAwayScene";
 import { earnSticker } from "../../utils/storage";
@@ -663,14 +662,14 @@ describe("adaptive band shift wiring", () => {
     const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new TakeAwayScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 });
 

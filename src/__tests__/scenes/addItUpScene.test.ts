@@ -81,15 +81,14 @@ vi.mock("../../game/addItUpLogic", async (importOriginal) => {
     ...actual,
     // Forward every argument: the scene calls buildPlaythrough(shift, rng),
     // and dropping rng here would silently strip the seeded path.
-    buildPlaythrough: (shift: -1 | 0 | 1 = 0, rng?: Rng) => {
-      buildPlaythroughMock(shift);
-      return actual.buildPlaythrough(shift, rng);
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
     },
   };
 });
 
 import type { AddItUpRound } from "../../game/addItUpLogic";
-import type { Rng } from "../../game/random";
 import { AddItUpScene } from "../../scenes/AddItUpScene";
 import { earnSticker } from "../../utils/storage";
 import {
@@ -662,14 +661,14 @@ describe("adaptive band shift wiring", () => {
     const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new AddItUpScene(mulberry32(1234));
     scene.create();
 
-    expect(buildPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(buildPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 });
 

@@ -81,9 +81,9 @@ vi.mock("../../game/musicalMemoryLogic", async (importOriginal) => {
     ...actual,
     // Forward every argument: the scene calls generateSequence(length, rng),
     // and dropping rng here would silently strip the seeded path.
-    generateSequence: (length: number, rng?: Rng) => {
-      generateSequenceMock(length);
-      return actual.generateSequence(length, rng);
+    generateSequence: (...args: Parameters<typeof actual.generateSequence>) => {
+      generateSequenceMock(...args);
+      return actual.generateSequence(...args);
     },
     isWin: (sequenceLength: number, target: number) => {
       isWinMock(sequenceLength, target);
@@ -92,7 +92,6 @@ vi.mock("../../game/musicalMemoryLogic", async (importOriginal) => {
   };
 });
 
-import type { Rng } from "../../game/random";
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
 import {
   countListeners,
@@ -279,7 +278,7 @@ describe("adaptive band shift wiring", () => {
     const scene = new MusicalMemoryScene(mulberry32(1234));
     scene.create();
     expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("musical-memory");
-    expect(generateSequenceMock).toHaveBeenCalledWith(start);
+    expect(generateSequenceMock).toHaveBeenCalledWith(start, expect.any(Function));
   });
 
   it("checks the win against the shifted win length after a completed round", () => {

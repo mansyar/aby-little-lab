@@ -86,14 +86,13 @@ vi.mock("../../game/countLogic", async (importOriginal) => {
     ...actual,
     // Forward every argument: the scene calls createPlaythrough(shift, rng),
     // and dropping rng here would silently strip the seeded path.
-    createPlaythrough: (shift: -1 | 0 | 1 = 0, rng?: Rng) => {
-      createPlaythroughMock(shift);
-      return actual.createPlaythrough(shift, rng);
+    createPlaythrough: (...args: Parameters<typeof actual.createPlaythrough>) => {
+      createPlaythroughMock(...args);
+      return actual.createPlaythrough(...args);
     },
   };
 });
 
-import type { Rng } from "../../game/random";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -718,14 +717,14 @@ describe("adaptive band shift wiring", () => {
     const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
-    expect(createPlaythroughMock).toHaveBeenCalledWith(1);
+    expect(createPlaythroughMock).toHaveBeenCalledWith(1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new HowManyScene(mulberry32(1234));
     scene.create();
 
-    expect(createPlaythroughMock).toHaveBeenCalledWith(0);
+    expect(createPlaythroughMock).toHaveBeenCalledWith(0, expect.any(Function));
   });
 
   it("keeps the child UI textless under a shifted ladder", () => {

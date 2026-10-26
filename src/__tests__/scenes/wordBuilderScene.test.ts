@@ -87,14 +87,15 @@ vi.mock("../../game/wordLogic", async (importOriginal) => {
     // Forward every argument: the scene calls
     // generateWordBuildPlaythrough(wordCount, shift, rng), and dropping rng
     // here would silently strip the seeded path.
-    generateWordBuildPlaythrough: (wordCount: number, shift: -1 | 0 | 1 = 0, rng?: Rng) => {
-      generateWordBuildPlaythroughMock(wordCount, shift);
-      return actual.generateWordBuildPlaythrough(wordCount, shift, rng);
+    generateWordBuildPlaythrough: (
+      ...args: Parameters<typeof actual.generateWordBuildPlaythrough>
+    ) => {
+      generateWordBuildPlaythroughMock(...args);
+      return actual.generateWordBuildPlaythrough(...args);
     },
   };
 });
 
-import type { Rng } from "../../game/random";
 import { generateLetterTiles, generateWordBuildPlaythrough, getWord } from "../../game/wordLogic";
 import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
@@ -838,13 +839,13 @@ describe("adaptive band shift wiring", () => {
     const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
-    expect(generateWordBuildPlaythroughMock).toHaveBeenCalledWith(3, -1);
+    expect(generateWordBuildPlaythroughMock).toHaveBeenCalledWith(3, -1, expect.any(Function));
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new WordBuilderScene(mulberry32(1234));
     scene.create();
 
-    expect(generateWordBuildPlaythroughMock).toHaveBeenCalledWith(3, 0);
+    expect(generateWordBuildPlaythroughMock).toHaveBeenCalledWith(3, 0, expect.any(Function));
   });
 });
