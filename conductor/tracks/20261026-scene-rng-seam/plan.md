@@ -60,18 +60,27 @@ Only the primary agent writes this file.
   `src/scenes/NumberOrderScene.ts`, `src/scenes/OddOneOutScene.ts`,
   `src/scenes/PatternBuilderScene.ts`, `src/scenes/ShapeSorterScene.ts`,
   `src/scenes/ShadowMatchScene.ts`, `src/scenes/WordMatchScene.ts`
+- **Also touches (arity repairs only):** `src/__tests__/scenes/alphabetScene.test.ts`,
+  `src/__tests__/scenes/colorMatchScene.test.ts`,
+  `src/__tests__/scenes/firstSoundsScene.test.ts`,
+  `src/__tests__/scenes/oddOneOutScene.test.ts`,
+  `src/__tests__/scenes/patternBuilderScene.test.ts`,
+  `src/__tests__/scenes/shapeSorterScene.test.ts` — the exact-arity
+  `toHaveBeenCalledWith(...)` assertions in their `adaptive band shift` blocks
+  break the moment the scene forwards a generator. This phase owns that repair;
+  Phase 4 still owns the seeding migration in those same files.
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Constructor forwarding across the sixteen scenes** — covers: FR-2
-  - [ ] **P2.T1.1:** Change each scene's existing constructor from
+- [x] **P2.T1: Constructor forwarding across the sixteen scenes** — covers: FR-2
+  - [x] **P2.T1.1:** Change each scene's existing constructor from
         `constructor() { super("Key"); }` to
         `constructor(rng: Rng = Math.random) { super("Key", rng); }`, importing
         `type Rng` from `../game/random`. Add It Up and Take Away need only this
         step — their builder arrives via the config.
 
-- [ ] **P2.T2: Builder call sites** — covers: FR-4
-  - [ ] **P2.T2.1:** Pass `this.rng` at each scene's single call site, matching
+- [x] **P2.T2: Builder call sites** — covers: FR-4
+  - [x] **P2.T2.1:** Pass `this.rng` at each scene's single call site, matching
         that module's real signature. Known positions:
         `alphabetLogic.generatePlaythrough(roundCount, shift, rng)`,
         `colorMatchLogic.buildPlaythrough(shift, rng)`,
@@ -90,11 +99,31 @@ Only the primary agent writes this file.
         Verify each against the module before editing; do not assume a uniform
         shape.
 
-- [ ] **P2.T3: Static sweep** — covers: FR-5, AC-2
-  - [ ] **P2.T3.1:** Run `grep "Math\.random" src/scenes` and confirm zero
-        matches, then record the verbatim command and output in the evidence file.
+- [x] **P2.T3: Static sweep** — covers: FR-5, AC-2
+  - [x] **P2.T3.1:** Run `grep "Math\.random" src/scenes` and record the verbatim
+        command and output in the evidence file. Every remaining match must be
+        either a default-parameter initializer or TSDoc prose. The one live draw
+        left is `StoryOrderScene.ts:90`, which is Phase 3 scope — name it
+        explicitly rather than editing it.
+
+- [x] **P2.T4: Repair the arity assertions this phase invalidates** — covers: FR-4
+  - [x] **P2.T4.1:** In the six scene suites listed under "Also touches", append
+        `expect.any(Function)` as the final expected argument in each
+        `toHaveBeenCalledWith(...)` assertion inside the `adaptive band shift`
+        blocks (12 assertions total: `alphabetScene.test.ts:673,679`;
+        `colorMatchScene.test.ts:661,667`; `firstSoundsScene.test.ts:672,678`;
+        `oddOneOutScene.test.ts:613,619`; `patternBuilderScene.test.ts:485,491`;
+        `shapeSorterScene.test.ts:313,318`). This preserves the shift-position
+        check and additionally pins that a generator is forwarded. Do not
+        change any other assertion in those files — Phase 4 owns the seeding
+        migration.
 
 ---
+
+
+**Result:** verified
+**Checkpoint:** 385395da
+**Evidence:** conductor/tracks/20261026-scene-rng-seam/verification/phase-2.md
 
 ## Phase 3: The six multi-draw scenes, and the equivalence proof
 
