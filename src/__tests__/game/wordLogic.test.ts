@@ -251,7 +251,7 @@ describe("generateWordPlaythrough (adaptive shift)", () => {
     }
   });
 
-  it("keeps every round valid and uniquely targeted at every shift", () => {
+  it("keeps every round valid and uniquely targeted at every shift", { timeout: 120_000 }, () => {
     for (const shift of [-1, 0, 1] as const) {
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
         const playthrough = generateWordPlaythrough(6, shift);

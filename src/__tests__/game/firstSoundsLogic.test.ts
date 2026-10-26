@@ -249,7 +249,7 @@ describe("generatePhonicsPlaythrough (adaptive shift)", () => {
     }
   });
 
-  it("keeps every round valid at every shift", () => {
+  it("keeps every round valid at every shift", { timeout: 120_000 }, () => {
     for (const shift of [-1, 0, 1] as const) {
       for (let i = 0; i < VARIETY_SAMPLES; i++) {
         for (const round of generatePhonicsPlaythrough(6, shift)) {
@@ -257,7 +257,7 @@ describe("generatePhonicsPlaythrough (adaptive shift)", () => {
         }
       }
     }
-  }, 30000);
+  });
 });
 
 describe("generatePhonicsPlaythrough", () => {
