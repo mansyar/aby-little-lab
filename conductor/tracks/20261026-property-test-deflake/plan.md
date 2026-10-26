@@ -45,12 +45,16 @@ phase subagent and independently verified by the primary before acceptance.
 - **Covers:** NFR-2, AC-1, AC-4, AC-5
 - **Touches:** `conductor/tracks/20261026-property-test-deflake/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Run the full verification chain** — covers: NFR-2, AC-1
-  - [ ] **P2.T1.1:** Run the phase Verification chain exactly as written (all eight commands, exit 0). Record per-suite wall times of the budgeted suites from the run output as post-change evidence (they must fit inside the new budgets with headroom).
-- [ ] **P2.T2: Record the evidence** — covers: AC-4, AC-5
-  - [ ] **P2.T2.1:** Evidence records the chain results, the AC-2 grep proof (explicit timeouts present, `vite.config.ts` untouched), the audit table reference, and the unchanged counts (125 files / 2,729 tests).
+- [x] **P2.T1: Run the full verification chain** — covers: NFR-2, AC-1
+  - [x] **P2.T1.1:** Run the phase Verification chain exactly as written (all eight commands, exit 0). Record per-suite wall times of the budgeted suites from the run output as post-change evidence (they must fit inside the new budgets with headroom).
+- [x] **P2.T2: Record the evidence** — covers: AC-4, AC-5
+  - [x] **P2.T2.1:** Evidence records the chain results, the AC-2 grep proof (explicit timeouts present, `vite.config.ts` untouched), the audit table reference, and the unchanged counts (125 files / 2,729 tests).
+
+**Result:** verified
+**Checkpoint:** 6e8a9b9b
+**Evidence:** conductor/tracks/20261026-property-test-deflake/verification/phase-2.md
 
 <!--
 Review fixes are appended by conductor-review as:
