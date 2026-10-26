@@ -264,7 +264,7 @@ Only the primary agent writes this file.
   `src/__tests__/scenes/wordBuilderScene.test.ts`,
   `src/__tests__/scenes/musicalMemoryScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1** - covers: F1
   - [ ] **R1.T1.1:** In `animalTraceFlow.test.ts` line 111, pass `rng`
