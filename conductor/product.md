@@ -124,6 +124,14 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## Changelog - Hub Idle Chunk Prewarm (2026-10-26)
+
+> **2026-10-27 - Hub Idle Chunk Prewarm:** the Hub now warms the lazy game
+> chunks while a child idles, so a tap can find its game already imported.
+> A warm first tap costs 27-65 ms against the 400 ms budget, where a cold
+> one still pays the fetch. Nothing a child sees, hears or taps changes -
+> games open the same way, just sooner.
+
 ## Changelog - Scene RNG Seam (2026-10-26)
 
 > **2026-10-26 - Scene RNG Seam:** the last hidden testing seam inside the
