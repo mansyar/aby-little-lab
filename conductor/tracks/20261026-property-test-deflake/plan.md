@@ -45,7 +45,7 @@ phase subagent and independently verified by the primary before acceptance.
 - **Covers:** NFR-2, AC-1, AC-4, AC-5
 - **Touches:** `conductor/tracks/20261026-property-test-deflake/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Run the full verification chain** — covers: NFR-2, AC-1
   - [ ] **P2.T1.1:** Run the phase Verification chain exactly as written (all eight commands, exit 0). Record per-suite wall times of the budgeted suites from the run output as post-change evidence (they must fit inside the new budgets with headroom).
