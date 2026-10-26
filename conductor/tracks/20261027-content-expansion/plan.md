@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-4, FR-6, NFR-1, NFR-2, AC-1, AC-6
 - **Touches:** `src/game/wordLogic.ts`, `src/game/art/*`, `src/__tests__/game/word*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/word && pnpm typecheck`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Expand WORD_POOL data** — covers: FR-1
   - [ ] **P1.T1.1: Add moderate batch of phonics-safe words with band placement**
