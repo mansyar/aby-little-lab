@@ -44,7 +44,7 @@ The primary appends after acceptance:
 - **Covers:** FR-2, FR-5, AC-3, AC-5
 - **Touches:** `src/scenes/HubScene.ts`, `src/__tests__/scenes/hubScene.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Gate the art queue like the JS chunks** — covers: FR-2
   - [ ] **P2.T1.1:** Start after entrance settles; pause under arc/moon lock or hidden tab; resume on clear/visible.
