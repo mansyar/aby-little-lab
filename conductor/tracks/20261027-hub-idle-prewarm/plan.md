@@ -14,7 +14,7 @@ the phase result and evidence file — no manual verification meta-task exists.
 - **Covers:** FR-1 (engine half), FR-3, NFR-3, NFR-4, AC-1, AC-2, AC-4
 - **Touches:** `src/game/hub/prewarm.ts`, `src/__tests__/game/hub/prewarm.test.ts`, `README.md` (count claim only), `docs/TDD.md` (runner count figures only), `docs/perf-baseline.md` (Test-suite row only)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P1.T1: Build the prewarm engine** — covers: FR-1, FR-3
   - [ ] **P1.T1.1:** create `src/game/hub/prewarm.ts` — public API takes the ordered loader list (or a re-ordering callback), an injected idle scheduler (requestIdleCallback with timer fallback, defaulted at module level), and returns a controller with `cancel()`. One import in flight at a time; the next is scheduled only after the previous settles. All 22 chunks come from `sceneRegistry.sceneLoaders` — no new loader definitions.
   - [ ] **P1.T1.2:** recency-first ordering helper — takes the active profile's progress map (read at each pacing tick, not cached) plus the Hub grid order; sorts by `lastPlayedAt` descending, never-played games last in grid order. Pure function, unit-tested directly.
