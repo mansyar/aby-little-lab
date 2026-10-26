@@ -1,0 +1,32 @@
+{
+  "id": "20261027-hub-idle-prewarm",
+  "title": "Hub Idle Chunk Prewarm — warm the lazy game chunks while children idle",
+  "type": "feature",
+  "status": "new",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-10-27T14:05:00+11:00",
+  "updated_at": "2026-10-27T14:05:00+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261027-hub-idle-prewarm",
+  "base_branch": "master",
+  "base_sha": "cb5f713a236e360d5a48ab3c092844ae52847888",
+  "progress": {
+    "phases_total": 3,
+    "phases_verified": 0,
+    "tasks_total": 8,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}
