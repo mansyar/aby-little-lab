@@ -54,3 +54,19 @@
 - No gate failure occurred, so no fix retries were used (0 of 2 allowed).
 - `pnpm test:coverage` and `pnpm build` ran to completion as required (not skipped).
 - The pre-existing dirty `phase-1.md` (+11-line primary-verification appendix) was observed via `git status`/`git diff` and deliberately left uncommitted and unmodified.
+
+## Primary verification
+
+- `pnpm check` — exit 0, Biome clean, 260 files.
+- `pnpm typecheck` — exit 0, `tsc --noEmit` clean.
+- `pnpm test -- --run` — exit 0, 126 files / 2783 tests pass.
+- `pnpm test:coverage` — exit 0; statements 97.73 / branches 91.71 / functions 96.88 / lines 98.70 — all above gates (95 / 88 / 85 / 90). (Note: the subagent evidence listed these four numbers in swapped column order; the authoritative values are as printed here.)
+- `pnpm build` — exit 0, 357 modules, precache 59 entries / 1745.07 KiB.
+- `node scripts/validate-bundle.js` — exit 0, shell 149.1 kB ≤ 200 kB gate.
+- `node scripts/validate-pwa.js` — exit 0, 16/16, 47/47 chunks precached.
+- `node scripts/validate-docs.js` — exit 0, 6/6.
+- Tree at verification time: only the primary-owned `phase-1.md` appendix
+  modified plus committed `phase-2.md`; diff `5c9a545b..HEAD` limited to
+  `verification/phase-2.md`. No merges, no foreign commits.
+- Result: independent verification agrees — P2.T1 accepted; P2.T2/P2.T3 proceed
+  as primary-executed steps.

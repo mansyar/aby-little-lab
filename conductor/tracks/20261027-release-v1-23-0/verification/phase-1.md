@@ -74,3 +74,14 @@ did not trigger.
   2,783 tests from the content-expansion review) and records that the
   release-state full 8-command gate re-runs in Phase 2 before merge.
 - No product or design decisions were required.
+
+## Primary verification
+
+- Command: `node scripts/validate-docs.js` — exit 0, 6/6 pass.
+- Command: `pnpm check` — exit 0, Biome clean, 260 files, no fixes applied.
+- Command: `pnpm typecheck` — exit 0, `tsc --noEmit` clean.
+- Tree: clean after subagent commits; diff `114740a3..HEAD` limited to
+  `package.json`, `docs/release-notes-v1.23.0.md`, `README.md`, plus the phase
+  evidence file — all within `Touches` + evidence. No merges, no foreign
+  commits; all 3 commits reported.
+- Result: independent verification agrees — Phase 1 accepted.
