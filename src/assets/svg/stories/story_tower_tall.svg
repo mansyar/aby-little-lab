@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A tower grows - 3 of 3. A tall three-block tower crowned with a star. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#FEEBC8" stroke="#2D3748" stroke-width="5"/>
+  <rect x="200" y="300" width="112" height="96" rx="14" fill="#2B6CB0" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="256" cy="348" r="20" fill="#BEE3F8"/>
+  <rect x="210" y="210" width="92" height="94" rx="14" fill="#FC8181" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="256" cy="257" r="17" fill="#FED7D7"/>
+  <rect x="220" y="128" width="72" height="86" rx="14" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 256 44 L 271 82 L 311 84 L 279 108 L 290 147 L 256 124 L 222 147 L 233 108 L 201 84 L 241 82 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

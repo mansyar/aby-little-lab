@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A butterfly emerges - 1 of 3. A green caterpillar crawls along a leaf. -->
+  <ellipse cx="256" cy="372" rx="180" ry="40" fill="#68D391" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 140 360 L 372 360" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="150" cy="300" r="30" fill="#68D391" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="200" cy="288" r="34" fill="#68D391" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="254" cy="288" r="34" fill="#68D391" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="308" cy="288" r="34" fill="#68D391" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="362" cy="276" r="40" fill="#68D391" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="352" cy="266" r="7" fill="#2D3748"/>
+  <path d="M 344 296 Q 360 304 378 294" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 348 240 L 336 214" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 368 240 L 382 216" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+</svg>

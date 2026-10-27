@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A butterfly emerges - 2 of 3. The caterpillar sleeps inside a hanging cocoon. -->
+  <rect x="96" y="120" width="320" height="34" rx="17" fill="#A0522D" stroke="#2D3748" stroke-width="6" transform="rotate(-8 256 137)"/>
+  <path d="M 256 150 L 256 196" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="256" cy="300" rx="84" ry="112" fill="#C6F6D5" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 186 262 Q 256 292 326 262" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 182 310 Q 256 340 330 310" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 190 356 Q 256 384 322 356" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="256" cy="372" rx="180" ry="26" fill="#68D391" stroke="#2D3748" stroke-width="5"/>
+</svg>

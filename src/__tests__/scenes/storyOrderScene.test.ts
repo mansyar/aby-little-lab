@@ -254,15 +254,15 @@ describe("StoryOrderScene shell", () => {
     expect(b).toEqual(a);
   });
 
-  it("preloads only the 33 story panels, not the boot art", () => {
+  it("preloads only the 45 story panels, not the boot art", () => {
     const scene = new StoryOrderScene(mulberry32(1234));
     scene.preload();
 
     const keys = getMockFn(
       (scene as unknown as { load: Record<string, unknown> }).load.svg,
     ).mock.calls.map((call) => call[0] as string);
-    expect(keys).toHaveLength(33);
-    expect(new Set(keys).size).toBe(33);
+    expect(keys).toHaveLength(45);
+    expect(new Set(keys).size).toBe(45);
     expect(keys).toContain("story_seed_planted");
     expect(keys).toContain("story_rain_puddle");
     expect(keys).toContain("story_cake_whole");

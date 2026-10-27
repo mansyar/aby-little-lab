@@ -15,14 +15,18 @@ import storyBalloonRoundSvg from "../assets/svg/stories/story_balloon_round.svg?
 import storyBananaPeelSvg from "../assets/svg/stories/story_banana_peel.svg?raw";
 import storyBananaPeeledSvg from "../assets/svg/stories/story_banana_peeled.svg?raw";
 import storyBananaWholeSvg from "../assets/svg/stories/story_banana_whole.svg?raw";
+import storyBlocksScatteredSvg from "../assets/svg/stories/story_blocks_scattered.svg?raw";
+import storyButterflySvg from "../assets/svg/stories/story_butterfly.svg?raw";
 import storyCakeCandlesSvg from "../assets/svg/stories/story_cake_candles.svg?raw";
 import storyCakeSlicedSvg from "../assets/svg/stories/story_cake_sliced.svg?raw";
 import storyCakeWholeSvg from "../assets/svg/stories/story_cake_whole.svg?raw";
+import storyCaterpillarSvg from "../assets/svg/stories/story_caterpillar.svg?raw";
 import storyClothesDrySvg from "../assets/svg/stories/story_clothes_dry.svg?raw";
 import storyClothesDryingSvg from "../assets/svg/stories/story_clothes_drying.svg?raw";
 import storyClothesWetSvg from "../assets/svg/stories/story_clothes_wet.svg?raw";
 import storyCloudSvg from "../assets/svg/stories/story_cloud.svg?raw";
 import storyCloudRainingSvg from "../assets/svg/stories/story_cloud_raining.svg?raw";
+import storyCocoonSvg from "../assets/svg/stories/story_cocoon.svg?raw";
 import storyCupEmptySvg from "../assets/svg/stories/story_cup_empty.svg?raw";
 import storyCupFullSvg from "../assets/svg/stories/story_cup_full.svg?raw";
 import storyCupPouringSvg from "../assets/svg/stories/story_cup_pouring.svg?raw";
@@ -32,6 +36,8 @@ import storyEggCrackingSvg from "../assets/svg/stories/story_egg_cracking.svg?ra
 import storyFootBareSvg from "../assets/svg/stories/story_foot_bare.svg?raw";
 import storyFootShoeSvg from "../assets/svg/stories/story_foot_shoe.svg?raw";
 import storyFootSockSvg from "../assets/svg/stories/story_foot_sock.svg?raw";
+import storyFrogSvg from "../assets/svg/stories/story_frog.svg?raw";
+import storyFrogspawnSvg from "../assets/svg/stories/story_frogspawn.svg?raw";
 import storyIceDrippingSvg from "../assets/svg/stories/story_ice_dripping.svg?raw";
 import storyIcePuddleSvg from "../assets/svg/stories/story_ice_puddle.svg?raw";
 import storyIceScoopSvg from "../assets/svg/stories/story_ice_scoop.svg?raw";
@@ -39,9 +45,15 @@ import storyRainPuddleSvg from "../assets/svg/stories/story_rain_puddle.svg?raw"
 import storySeedFlowerSvg from "../assets/svg/stories/story_seed_flower.svg?raw";
 import storySeedPlantedSvg from "../assets/svg/stories/story_seed_planted.svg?raw";
 import storySeedSproutSvg from "../assets/svg/stories/story_seed_sprout.svg?raw";
+import storySnowPileSvg from "../assets/svg/stories/story_snow_pile.svg?raw";
+import storySnowmanSvg from "../assets/svg/stories/story_snowman.svg?raw";
+import storySnowmanHatSvg from "../assets/svg/stories/story_snowman_hat.svg?raw";
 import storySunNoonSvg from "../assets/svg/stories/story_sun_noon.svg?raw";
 import storySunRiseSvg from "../assets/svg/stories/story_sun_rise.svg?raw";
 import storySunSetSvg from "../assets/svg/stories/story_sun_set.svg?raw";
+import storyTadpoleSvg from "../assets/svg/stories/story_tadpole.svg?raw";
+import storyTowerHalfSvg from "../assets/svg/stories/story_tower_half.svg?raw";
+import storyTowerTallSvg from "../assets/svg/stories/story_tower_tall.svg?raw";
 import { toDataUri } from "../utils/svgDataUri";
 import { textureSizeFor } from "../utils/textureTiers";
 
@@ -54,7 +66,7 @@ export interface StoryPanelAsset {
 }
 
 /**
- * The 33 story panels in `STORY_POOL` solution order: every story's three
+ * The 45 story panels in `STORY_POOL` solution order: every story's three
  * panels, first → last, with the stories in pool order.
  */
 export const STORY_PANEL_ASSETS: readonly StoryPanelAsset[] = [
@@ -73,6 +85,12 @@ export const STORY_PANEL_ASSETS: readonly StoryPanelAsset[] = [
   { key: "story_cake_whole", svg: storyCakeWholeSvg },
   { key: "story_cake_candles", svg: storyCakeCandlesSvg },
   { key: "story_cake_sliced", svg: storyCakeSlicedSvg },
+  { key: "story_snow_pile", svg: storySnowPileSvg },
+  { key: "story_snowman", svg: storySnowmanSvg },
+  { key: "story_snowman_hat", svg: storySnowmanHatSvg },
+  { key: "story_blocks_scattered", svg: storyBlocksScatteredSvg },
+  { key: "story_tower_half", svg: storyTowerHalfSvg },
+  { key: "story_tower_tall", svg: storyTowerTallSvg },
   { key: "story_banana_whole", svg: storyBananaWholeSvg },
   { key: "story_banana_peeled", svg: storyBananaPeeledSvg },
   { key: "story_banana_peel", svg: storyBananaPeelSvg },
@@ -91,6 +109,12 @@ export const STORY_PANEL_ASSETS: readonly StoryPanelAsset[] = [
   { key: "story_sun_rise", svg: storySunRiseSvg },
   { key: "story_sun_noon", svg: storySunNoonSvg },
   { key: "story_sun_set", svg: storySunSetSvg },
+  { key: "story_caterpillar", svg: storyCaterpillarSvg },
+  { key: "story_cocoon", svg: storyCocoonSvg },
+  { key: "story_butterfly", svg: storyButterflySvg },
+  { key: "story_frogspawn", svg: storyFrogspawnSvg },
+  { key: "story_tadpole", svg: storyTadpoleSvg },
+  { key: "story_frog", svg: storyFrogSvg },
 ];
 
 /**

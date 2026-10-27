@@ -1,7 +1,7 @@
 /**
  * Pure logic for Story Order (Game 22).
  *
- * Owns the eleven-story pool, the easy-first ladder split, the per-round panel
+ * Owns the fifteen-story pool, the easy-first ladder split, the per-round panel
  * shuffle and the whole-strip correctness check. No Phaser, DOM, storage or
  * timers live here; every random decision is injectable so the scene and the
  * tests stay deterministic.
@@ -24,7 +24,7 @@ export interface Story {
 }
 
 /**
- * The eleven-story pool: five obvious causes and six subtler ones. Panel keys
+ * The fifteen-story pool: seven obvious causes and eight subtler ones. Panel keys
  * are fixed by the spec because the art is authored against them.
  */
 export const STORY_POOL: readonly Story[] = [
@@ -52,6 +52,16 @@ export const STORY_POOL: readonly Story[] = [
     id: "cake",
     ladder: "obvious",
     panels: ["story_cake_whole", "story_cake_candles", "story_cake_sliced"],
+  },
+  {
+    id: "snowman",
+    ladder: "obvious",
+    panels: ["story_snow_pile", "story_snowman", "story_snowman_hat"],
+  },
+  {
+    id: "tower",
+    ladder: "obvious",
+    panels: ["story_blocks_scattered", "story_tower_half", "story_tower_tall"],
   },
   {
     id: "banana",
@@ -82,6 +92,16 @@ export const STORY_POOL: readonly Story[] = [
     id: "sun",
     ladder: "subtle",
     panels: ["story_sun_rise", "story_sun_noon", "story_sun_set"],
+  },
+  {
+    id: "caterpillar",
+    ladder: "subtle",
+    panels: ["story_caterpillar", "story_cocoon", "story_butterfly"],
+  },
+  {
+    id: "tadpole",
+    ladder: "subtle",
+    panels: ["story_frogspawn", "story_tadpole", "story_frog"],
   },
 ];
 
