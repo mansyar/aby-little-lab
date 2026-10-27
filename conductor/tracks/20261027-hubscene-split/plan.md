@@ -46,7 +46,7 @@
 - **Covers:** FR-3, AC-3
 - **Touches:** `src/game/hub/hubPrewarm.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/__tests__/game/hub/hubPrewarm.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
 - **Verification:** `pnpm vitest run src/__tests__/game/hub/hubPrewarm.test.ts src/__tests__/scenes/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Extract prewarm orchestration** — covers: FR-3
 - [ ] **P3.T2: Unit tests + HubScene rewire** — covers: FR-3, AC-3
