@@ -14,7 +14,7 @@
 - **Covers:** FR-1, NFR-2, AC-1
 - **Touches:** `src/game/hub/artGroups.ts` (new), `src/scenes/HubScene.ts` (import swap + member removal), `src/game/hub/__tests__/artGroups.test.ts` (new)
 - **Verification:** `pnpm vitest run src/game/hub/__tests__/artGroups.test.ts src/scenes/__tests__/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Extract art tables and resolver** — covers: FR-1
 - [ ] **P1.T2: Unit tests + HubScene rewire** — covers: FR-1, AC-1
