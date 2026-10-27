@@ -51,19 +51,16 @@
 - **Covers:** FR-3, FR-4, NFR-1, NFR-4, AC-3
 - **Touches:** `src/game/feelingsFacesLogic.ts`, `src/game/art/faces.ts`, `src/__tests__/game/feelings*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/feelings && pnpm typecheck`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Add new scenarios on contrast ladder** — covers: FR-3
-  - [ ] **P3.T1.1: Keep contrastive pairs first, confusable sad/scared later**
-- [ ] **P3.T2: Add face art as needed (Storybook Flat)** — covers: FR-4
-- [ ] **P3.T3: Update feelings tests** — covers: AC-3
+- [x] **P3.T1: Add new scenarios on contrast ladder** — covers: FR-3
+  - [x] **P3.T1.1: Keep contrastive pairs first, confusable sad/scared later**
+- [x] **P3.T2: Add face art as needed (Storybook Flat)** — covers: FR-4
+- [x] **P3.T3: Update feelings tests** — covers: AC-3
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** b37de9f1
 **Evidence:** conductor/tracks/20261027-content-expansion/verification/phase-3.md
--->
 
 ## Phase 4: Banding, full gate, docs sync
 
