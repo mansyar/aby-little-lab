@@ -92,7 +92,7 @@ function createHarness() {
       { sceneKey: "Gamma", gameId: "g-c" },
       { sceneKey: "Delta", gameId: "g-x" },
     ],
-    sceneLoaders: {
+    getSceneLoaders: () => ({
       Alpha: () => {
         chunkCalls.push("Alpha");
         return Promise.resolve("Alpha");
@@ -105,7 +105,7 @@ function createHarness() {
         chunkCalls.push("Gamma");
         return Promise.resolve("Gamma");
       },
-    },
+    }),
     getProgress: () => progress,
     isTimeUp: () => timeUp,
     isLaunching: () => launching,

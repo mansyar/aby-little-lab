@@ -1,15 +1,24 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import { createGameLoadCue } from "../components/GameLoadCue";
-import { createCornerMascot, type Mascot } from "../components/Mascot";
 import { ParentLock } from "../components/ParentLock";
-import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIndicator";
+import type { PlayTimeNudge } from "../components/PlayTimeIndicator";
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
 import { createArtResolver } from "../game/hub/artGroups";
-import { createGameLaunch, type GameLaunchController } from "../game/hub/gameLaunch";
+import {
+  createGameLaunch,
+  type GameLaunchController,
+  type GameLaunchCue,
+} from "../game/hub/gameLaunch";
+import { createHubAttract, type HubAttractController } from "../game/hub/hubAttract";
 import { createHubPrewarm, type HubPrewarmController } from "../game/hub/hubPrewarm";
+import {
+  createPlayTimeUi,
+  isDocumentHidden,
+  type PlayTimeUiController,
+} from "../game/hub/playTimeUi";
 import type { ArtKeyEntry } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
 import { GAME_TILES } from "../game/hubTiles";
@@ -28,49 +37,6 @@ import {
 import { textStyle } from "../utils/typography";
 import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 
-/** Number of background decorations. */
-const DECORATION_COUNT = 4;
-/** Radius of background decoration dots (px). */
-const DECORATION_RADIUS = 10;
-/** Low-contrast color for background decorations. */
-const DECORATION_COLOR = 0xe8e0d0;
-/** Vertical drift distance for decorations (px). */
-const DECORATION_DRIFT = 16;
-/** Slowest decoration drift loop (ms). */
-const DECORATION_DRIFT_MIN = 4000;
-/** Fastest decoration drift loop (ms). */
-const DECORATION_DRIFT_MAX = 6000;
-/** Idle time without input before the attract cue starts (ms). */
-const IDLE_ATTRACT_DELAY = 25000;
-/** Interval between idle calls while attract is active (ms). */
-const IDLE_CALL_INTERVAL = 10000;
-/** Wiggle amplitude for the attract cue (degrees). */
-const WIGGLE_ANGLE = 4;
-/** Duration of one wiggle swing (ms). */
-const WIGGLE_DURATION = 350;
-/** Phase offset between tile wiggles (ms). */
-const WIGGLE_PHASE_OFFSET = 120;
-/** How many tiles wiggle during an attract cue (rotating pick). */
-const ATTRACT_WIGGLE_COUNT = 2;
-
-/**
- * True where the document exposes a visibility state. Mirrors the play-time
- * module's guard so a headless host (no document, or no `visibilityState`)
- * stays inert instead of throwing on the visibility hook.
- */
-function canObserveVisibility(): boolean {
-  return typeof document !== "undefined" && typeof document.visibilityState === "string";
-}
-
-/**
- * True only where the document reports itself hidden. Built on the same guard
- * as `canObserveVisibility`, so a host with no visibility surface counts as
- * visible and keeps the prewarm active instead of silently disabling it.
- */
-function isDocumentHidden(): boolean {
-  return canObserveVisibility() && document.visibilityState === "hidden";
-}
-
 /**
  * Hub scene — the central navigation hub.
  *
@@ -82,24 +48,22 @@ export class HubScene extends Phaser.Scene {
   private settingsPanel?: SettingsPanel;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
-  /** Pending idle-attract timer. */
-  private idleCallTimer?: Phaser.Time.TimerEvent;
-  /** True once the attract cue has started for the current idle period. */
-  private idleAttractActive = false;
-  /** Rotates which tiles are picked for each idle-attract wiggle. */
-  private attractWiggleTick = 0;
-  /** Professor Hoot, the friendly teacher mascot. */
-  private mascot?: Mascot;
+  /**
+   * Idle attract and decor owned by `src/game/hub/hubAttract.ts`. The scene
+   * keeps only this delegation: the module owns the mascot, the idle timer,
+   * and the decorations.
+   */
+  private readonly attract: HubAttractController;
+  /**
+   * Play-time UI owned by `src/game/hub/playTimeUi.ts`. The scene keeps only
+   * this delegation: the module owns the lock flag, the indicator graphics,
+   * the nudge, and the visibility hook.
+   */
+  private readonly playTime: PlayTimeUiController;
   /** Profile chip + picker: active avatar, switch UI (top-left, kid-tappable). */
   private profileChip: ProfileChip;
   /** PWA lifecycle toast wiring (update/offline). */
   private pwaToasts: PwaToasts;
-  /** True while the active profile's daily play-time limit is reached. */
-  private timeUp = false;
-  /** Play-time indicator (hint arc or moon badge) for the active profile. */
-  private playTimeGraphics?: Phaser.GameObjects.Graphics;
-  /** True while the pre-game nudge overlay is showing. */
-  private nudge = new PlayTimeNudge();
   /**
    * Game-launch flow owned by `src/game/hub/gameLaunch.ts`. The scene keeps
    * only this delegation plus the `loadCue` compat accessor below: the module
@@ -122,21 +86,6 @@ export class HubScene extends Phaser.Scene {
   private readonly artResolver = createArtResolver();
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
-  /**
-   * Document-visibility handler: re-reads the budget when the page returns to
-   * the foreground and parks the chunk prewarm while it is in the background.
-   * A field so the shutdown hook can remove the exact reference create()
-   * attached.
-   */
-  private handleVisibilityChange = (): void => {
-    if (document.visibilityState === "visible") {
-      this.refreshPlayTimeState();
-      return;
-    }
-    // Background imports buy the child nothing and cost battery, so the pass
-    // stops here; the foreground return above re-arms it (FR-2).
-    this.syncPrewarm();
-  };
   /** Tile-grid renderer: layouts, page dots, swipes and the sticker shelf. */
   private grid: HubGrid;
 
@@ -152,18 +101,32 @@ export class HubScene extends Phaser.Scene {
       },
       onSwitch: () => {
         this.grid.rerenderStickerShelf();
-        this.refreshPlayTimeState();
+        this.playTime.refreshPlayTimeState();
         // The order is recency-first for the active profile, so a switch
         // re-derives the work still pending (spec: profile switch mid-cycle).
         this.restartPrewarm();
       },
     });
     this.pwaToasts = new PwaToasts(this);
+    this.attract = createHubAttract({
+      scene: this,
+      getAttractTargets: () => this.grid.attractTargets,
+      playIdleCall: () => AudioManager.getInstance().playIdleCall(),
+      isReducedMotion: () => isReducedMotion(),
+    });
+    this.playTime = createPlayTimeUi({
+      scene: this,
+      applyTimeUpLock: () => this.grid.applyTimeUpLock(),
+      restoreTiles: () => this.grid.restoreTiles(),
+      waveMascot: () => this.attract.waveMascot(),
+      syncPrewarm: () => this.syncPrewarm(),
+      launchTile: (tileIndex) => transitionToScene(this, GAME_TILES[tileIndex].sceneKey),
+    });
     this.grid = new HubGrid({
       scene: this,
-      isTimeUp: () => this.timeUp,
+      isTimeUp: () => this.playTime.isTimeUp(),
       activateTile: (tileIndex, tile) => this.activateTile(tileIndex, tile),
-      onUserGesture: () => this.resetIdleAttract(),
+      onUserGesture: () => this.attract.resetIdleAttract(),
       gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
       onBoardChange: () => this.hideLoadCue(),
     });
@@ -172,7 +135,7 @@ export class HubScene extends Phaser.Scene {
       loadScene: (sceneKey) => loadSceneWithRetry(this, sceneKey),
       cancelPrewarm: () => this.cancelPrewarm(),
       syncPrewarm: () => this.syncPrewarm(),
-      isTimeUp: () => this.timeUp,
+      isTimeUp: () => this.playTime.isTimeUp(),
       setNavLocked: (locked) => {
         this.grid.navLocked = locked;
       },
@@ -181,7 +144,7 @@ export class HubScene extends Phaser.Scene {
       getActiveProfileId: () => getActiveProfile().id,
       getPlayTime: () => getPlayTime(),
       transition: (sceneKey) => transitionToScene(this, sceneKey),
-      showNudge: (tileIndex) => this.showPlayTimeNudge(tileIndex),
+      showNudge: (tileIndex) => this.playTime.showPlayTimeNudge(tileIndex),
       createCue: () => createGameLoadCue(this),
       getFallbackCenter: () => ({
         x: this.cameras.main.width / 2,
@@ -191,9 +154,9 @@ export class HubScene extends Phaser.Scene {
     });
     this.prewarmer = createHubPrewarm({
       tiles: GAME_TILES,
-      sceneLoaders,
+      getSceneLoaders: () => sceneLoaders,
       getProgress,
-      isTimeUp: () => this.timeUp,
+      isTimeUp: () => this.playTime.isTimeUp(),
       isLaunching: () => this.launcher.isLaunching(),
       isHidden: () => isDocumentHidden(),
       resolveArtSvg: (entry) => this.resolveArtSvg(entry),
@@ -220,8 +183,8 @@ export class HubScene extends Phaser.Scene {
   create(): void {
     sceneEntrance(this);
     const reducedMotion = isReducedMotion();
-    this.idleAttractActive = false;
-    this.timeUp = false;
+    this.attract.resetForVisit();
+    this.playTime.beginVisit();
     // A new visit: a launch still in flight belongs to the previous one, and
     // its resolution must not act on this one. The launcher bumps its visit
     // token, drops the in-flight flag, and destroys the retry cue.
@@ -230,7 +193,6 @@ export class HubScene extends Phaser.Scene {
     // must never inherit the previous one's pass even if that handler did not
     // run (NFR-6).
     this.cancelPrewarm();
-    this.nudge = new PlayTimeNudge();
     // Phaser reuses this instance across visits (auto-return re-runs create()),
     // so clear the launch guard or every tile tap after the first game is dead.
     this.grid.resetForVisit();
@@ -242,10 +204,10 @@ export class HubScene extends Phaser.Scene {
       recordPlayTime(ended.profileId, ended.minutes);
     }
 
-    this.createMascot();
+    this.attract.createMascot(this.justEarned);
 
     if (!reducedMotion) {
-      this.createDecorations();
+      this.attract.createDecorations();
     }
 
     const startAudio = (): void => {
@@ -273,16 +235,16 @@ export class HubScene extends Phaser.Scene {
     }
     this.scale.on("resize", this.grid.handleViewportChange, this.grid);
 
-    this.createPlayTimeIndicator();
+    this.playTime.createPlayTimeIndicator();
 
     this.input.on("pointerdown", () => {
       // Any first interaction unlocks audio so the idle-attract cue is
       // audible on a fresh load (the tile tap already resumes + starts BGM).
       unlockSpeechForUserGesture();
       AudioManager.getInstance().resume();
-      this.resetIdleAttract();
+      this.attract.resetIdleAttract();
     });
-    this.scheduleIdleAttract();
+    this.attract.scheduleIdleAttract();
     // Armed with the rest of the post-entrance flow, never inside
     // `sceneEntrance`: the pass imports only in idle slots, so the entrance's
     // fade and zoom keep their frames (NFR-2).
@@ -314,7 +276,7 @@ export class HubScene extends Phaser.Scene {
         this.settingsPanel = new SettingsPanel(this, undefined, () => {
           this.grid.rerenderStickerShelf();
           this.profileChip.refresh();
-          this.refreshPlayTimeState();
+          this.playTime.refreshPlayTimeState();
         });
       },
       onFailure: () => {
@@ -337,15 +299,11 @@ export class HubScene extends Phaser.Scene {
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
       this.profileChip.destroy();
-      this.playTimeGraphics?.destroy();
-      this.playTimeGraphics = undefined;
-      this.idleCallTimer?.remove();
-      this.idleCallTimer = undefined;
+      this.playTime.destroy();
       // A prewarm belongs to the visit that armed it: drop its pending idle
       // slot so nothing imports for a Hub nobody is looking at (FR-5).
       this.cancelPrewarm();
-      this.mascot?.destroy();
-      this.mascot = undefined;
+      this.attract.destroy();
       this.grid.destroy();
       // Detach the viewport listener so a resize while the scene is inactive
       // cannot rebuild a dead scene's objects.
@@ -354,7 +312,7 @@ export class HubScene extends Phaser.Scene {
 
     // Registered after the cleanup above so the first shutdown handler stays
     // the scene teardown; this one only detaches the page-visibility hook.
-    this.watchPlayTimeVisibility();
+    this.playTime.watchPlayTimeVisibility();
   }
 
   /**
@@ -372,47 +330,16 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Creates the play-time indicator for the active profile: a hint arc under
-   * the grid while time remains (warm when 5 minutes or fewer are left), or a
-   * textless moon badge with dimmed, locked tiles once the daily limit is
-   * reached. No-op when the profile has no limit set.
-   *
-   * `wasTimeUp` is the lock state before the refresh that called this, so the
-   * mascot waves once when the cap is first reached rather than on every
-   * foreground return the cap is re-read on. The lock itself is applied
-   * unconditionally — the visuals must converge whatever the call site.
+   * Test-compat reads: the cue and nudge live in the extracted launch and
+   * play-time controllers, but scene suites inspect them via cast
+   * (`hubSceneLoad.test.ts`). These getters preserve the pre-split surface.
    */
-  private createPlayTimeIndicator(wasTimeUp = false): void {
-    this.playTimeGraphics =
-      createPlayTimeIndicator({
-        scene: this,
-        onLimitReached: () => {
-          this.timeUp = true;
-          this.grid.applyTimeUpLock();
-          if (!wasTimeUp) {
-            this.mascot?.wave();
-          }
-        },
-      }) ?? undefined;
+  get loadCue(): GameLaunchCue | undefined {
+    return this.launcher.cue;
   }
 
-  /**
-   * Rebuilds the play-time indicator and tile lock state after a profile
-   * switch or a parental settings change.
-   */
-  private refreshPlayTimeState(): void {
-    this.playTimeGraphics?.destroy();
-    this.playTimeGraphics = undefined;
-    const wasTimeUp = this.timeUp;
-    if (this.timeUp) {
-      this.grid.restoreTiles();
-      this.timeUp = false;
-    }
-    this.createPlayTimeIndicator(wasTimeUp);
-    // The lock can arrive or clear with this refresh, so the prewarm follows it
-    // in both directions: no imports while locked, a fresh pass once it clears
-    // (FR-2).
-    this.syncPrewarm();
+  get nudge(): PlayTimeNudge {
+    return this.playTime.nudge;
   }
 
   /**
@@ -451,117 +378,5 @@ export class HubScene extends Phaser.Scene {
    */
   private restartPrewarm(): void {
     this.prewarmer.restartPrewarm();
-  }
-
-  /**
-   * Refreshes the limit visuals when the page becomes visible again, so a Hub
-   * parked across midnight (or behind a limit change) tells the truth without
-   * a reload. The browser event is the only trigger — no timer, no polling —
-   * and the shutdown hook detaches the handler so repeated Hub creates cannot
-   * stack listeners.
-   */
-  private watchPlayTimeVisibility(): void {
-    if (!canObserveVisibility()) return;
-    document.addEventListener("visibilitychange", this.handleVisibilityChange);
-    this.events.once("shutdown", () => {
-      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
-    });
-  }
-
-  /**
-   * Shows a textless nudge (dim overlay + hourglass) for NUDGE_DELAY ms before
-   * launching the game — a soft "almost done" signal without harsh cutoffs.
-   * The chunk is already registered by `openGame`, so the nudge starts the fade
-   * directly: a second load — or a second play session — would charge twice.
-   */
-  private showPlayTimeNudge(tileIndex: number): void {
-    this.nudge.show(
-      { scene: this, onLaunch: (i) => transitionToScene(this, GAME_TILES[i].sceneKey) },
-      tileIndex,
-    );
-  }
-
-  /**
-   * Places Professor Hoot in the bottom-right corner: greets on load, cheers
-   * when the visit follows a newly earned sticker, then settles into the idle
-   * loop. Touch-inert and behind gameplay z-order by component design.
-   */
-  private createMascot(): void {
-    this.mascot = createCornerMascot(this);
-    this.mascot.flapGreeting();
-    if (this.justEarned) {
-      this.mascot.cheer();
-    }
-    this.mascot.idleLoop();
-  }
-
-  /** Schedules the next idle-attract check after the given delay. */
-  private scheduleIdleAttract(delay = IDLE_ATTRACT_DELAY): void {
-    this.idleCallTimer = this.time.delayedCall(delay, () => {
-      this.triggerIdleAttract();
-    });
-  }
-
-  /** Re-arms the idle timer after any pointer input. */
-  private resetIdleAttract(): void {
-    this.idleCallTimer?.remove();
-    this.scheduleIdleAttract();
-  }
-
-  /**
-   * Plays the idle call; starts the tile wiggle cue once (skipped under reduced
-   * motion); re-arms itself so the call repeats every IDLE_CALL_INTERVAL.
-   */
-  private triggerIdleAttract(): void {
-    if (!this.idleCallTimer) return;
-    AudioManager.getInstance().playIdleCall();
-    if (!this.idleAttractActive) {
-      this.idleAttractActive = true;
-      if (!isReducedMotion() && this.grid.attractTargets.length > 0) {
-        // Wiggle only a couple of tiles so the cue stays gentle; rotate the
-        // pick across the grid on each attract so no tile feels ignored.
-        const start = this.attractWiggleTick % this.grid.attractTargets.length;
-        for (let i = 0; i < ATTRACT_WIGGLE_COUNT; i++) {
-          const tile = this.grid.attractTargets[(start + i) % this.grid.attractTargets.length];
-          this.tweens.add({
-            targets: tile,
-            angle: WIGGLE_ANGLE,
-            duration: WIGGLE_DURATION,
-            yoyo: true,
-            repeat: -1,
-            ease: "Sine.inOut",
-            delay: i * WIGGLE_PHASE_OFFSET,
-          });
-        }
-        this.attractWiggleTick += 1;
-      }
-    }
-    this.scheduleIdleAttract(IDLE_CALL_INTERVAL);
-  }
-
-  /** Creates a few low-contrast dots that drift slowly behind the grid. */
-  private createDecorations(): void {
-    const driftRange = DECORATION_DRIFT_MAX - DECORATION_DRIFT_MIN;
-    const positions: ReadonlyArray<[number, number]> = [
-      [this.cameras.main.width * 0.12, this.cameras.main.height * 0.18],
-      [this.cameras.main.width * 0.88, this.cameras.main.height * 0.15],
-      [this.cameras.main.width * 0.1, this.cameras.main.height * 0.8],
-      [this.cameras.main.width * 0.9, this.cameras.main.height * 0.75],
-    ];
-
-    for (let i = 0; i < DECORATION_COUNT; i++) {
-      const [x, y] = positions[i];
-      const dot = this.add.circle(x, y, DECORATION_RADIUS, DECORATION_COLOR);
-      dot.setDepth(-1);
-      this.tweens.add({
-        targets: dot,
-        y: y - DECORATION_DRIFT,
-        duration: DECORATION_DRIFT_MIN + (i * driftRange) / (DECORATION_COUNT - 1),
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.inOut",
-        delay: i * 300,
-      });
-    }
   }
 }

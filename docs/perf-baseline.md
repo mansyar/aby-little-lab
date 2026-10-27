@@ -418,7 +418,7 @@ measured, dated figure and is a candidate for `docs/roadmap.md`.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 126 files / 2,783 tests | `pnpm test -- --run` |
+| Test suite | 131 files / 2,829 tests | `pnpm test -- --run` |
 | Coverage | statements 97.76 % / branches 91.84 % / functions 96.76 % / lines 98.73 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-10-27; the build
@@ -730,7 +730,7 @@ the verdict re-scopes honestly to which games remain over budget and why
   isolating rasterization from bytes.
 - The full verification gate is green on the art-prewarm tree with the TDD
   §4.8 walkthrough included: Biome clean, typecheck clean, 126 files /
-  2,783 tests pass, coverage 97.75 / 91.76 / 96.88 / 98.70,
+  2,829 tests pass, coverage 97.75 / 91.76 / 96.88 / 98.70,
   `validate-bundle` (shell ≤ 200 kB gate), `validate-pwa` 16/16,
   `validate-docs` 6/6.
 - The headed comparison ran on the primary host (sixteen runs, same-host

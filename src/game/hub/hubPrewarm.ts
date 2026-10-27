@@ -46,8 +46,10 @@ export interface HubPrewarmTimer {
 export interface HubPrewarmDeps {
   /** Hub tiles in grid order: the recency tie-breaker and entry source. */
   readonly tiles: readonly HubPrewarmTile[];
-  /** Chunk loaders keyed by scene key (`sceneRegistry.sceneLoaders`). */
-  readonly sceneLoaders: Record<string, () => Promise<unknown>>;
+  /** Chunk loaders keyed by scene key (`sceneRegistry.sceneLoaders`). Read lazily
+   * at pass time, never at construction: a host or test double may expose a
+   * registry without one, and construction must not touch it. */
+  getSceneLoaders(): Record<string, () => Promise<unknown>>;
   /** Active-profile progress provider, read at every pass start. */
   getProgress(): PrewarmProgress;
   /** True while the play-time lock holds (the pass must not run). */
@@ -148,7 +150,8 @@ export function createHubPrewarm(deps: HubPrewarmDeps): HubPrewarmController {
     // Only the games the registry actually has a chunk loader for: a host or a
     // test double may expose a registry without one, and there is nothing to
     // warm then.
-    const warmable = deps.tiles.filter((tile) => tile.sceneKey in deps.sceneLoaders);
+    const loaders = deps.getSceneLoaders();
+    const warmable = deps.tiles.filter((tile) => tile.sceneKey in loaders);
     const entries: PrewarmEntry[] = [];
     for (const gameId of recencyFirstOrder(
       deps.getProgress(),
@@ -157,7 +160,7 @@ export function createHubPrewarm(deps: HubPrewarmDeps): HubPrewarmController {
     )) {
       const tile = warmable.find((candidate) => candidate.gameId === gameId);
       if (!tile) continue;
-      entries.push({ key: tile.sceneKey, load: deps.sceneLoaders[tile.sceneKey] });
+      entries.push({ key: tile.sceneKey, load: loaders[tile.sceneKey] });
     }
     return entries;
   }
