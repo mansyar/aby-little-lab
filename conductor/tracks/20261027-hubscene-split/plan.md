@@ -28,9 +28,9 @@
 - **Goal:** Game-launch flow (activate/open/cue + guards) lives in `src/game/hub/`; HubScene delegates.
 - **Depends on:** Phase 1
 - **Covers:** FR-2, AC-2
-- **Touches:** `src/game/hub/gameLaunch.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/game/hub/__tests__/gameLaunch.test.ts` (new)
-- **Verification:** `pnpm vitest run src/game/hub/__tests__/gameLaunch.test.ts src/scenes/__tests__/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
-- **Status:** pending
+- **Touches:** `src/game/hub/gameLaunch.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/__tests__/game/hub/gameLaunch.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
+- **Verification:** `pnpm vitest run src/__tests__/game/hub/gameLaunch.test.ts src/__tests__/scenes/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
+- **Status:** in_progress
 
 - [ ] **P2.T1: Extract launch flow with guards** — covers: FR-2
 - [ ] **P2.T2: Unit tests + HubScene rewire** — covers: FR-2, AC-2
@@ -40,8 +40,8 @@
 - **Goal:** Prewarm orchestration (entries, gates, sync/start/cancel/restart, art pass) lives in a `src/game/hub/` controller; HubScene delegates.
 - **Depends on:** Phase 2
 - **Covers:** FR-3, AC-3
-- **Touches:** `src/game/hub/hubPrewarm.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/game/hub/__tests__/hubPrewarm.test.ts` (new)
-- **Verification:** `pnpm vitest run src/game/hub/__tests__/hubPrewarm.test.ts src/scenes/__tests__/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
+- **Touches:** `src/game/hub/hubPrewarm.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/__tests__/game/hub/hubPrewarm.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
+- **Verification:** `pnpm vitest run src/__tests__/game/hub/hubPrewarm.test.ts src/__tests__/scenes/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
 - **Status:** pending
 
 - [ ] **P3.T1: Extract prewarm orchestration** — covers: FR-3
@@ -52,7 +52,7 @@
 - **Goal:** Play-time UI and attract/decor extracted; HubScene ≤ ~320 lines; full gate green.
 - **Depends on:** Phase 3
 - **Covers:** FR-4, FR-5, NFR-1, NFR-3, NFR-4, AC-4, AC-5
-- **Touches:** `src/game/hub/playTimeUi.ts` (new), `src/game/hub/hubAttract.ts` (new), `src/scenes/HubScene.ts` (final rewire), `src/game/hub/__tests__/playTimeUi.test.ts` + `hubAttract.test.ts` (new)
+- **Touches:** `src/game/hub/playTimeUi.ts` (new), `src/game/hub/hubAttract.ts` (new), `src/scenes/HubScene.ts` (final rewire), `src/__tests__/game/hub/playTimeUi.test.ts` + `hubAttract.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
 - **Verification:** `pnpm check` && `pnpm typecheck` && `pnpm test -- --run` && `pnpm test:coverage` && `pnpm build` && `node scripts/validate-bundle.js` && `node scripts/validate-pwa.js` && `node scripts/validate-docs.js`
 - **Status:** pending
 
