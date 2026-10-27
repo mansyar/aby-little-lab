@@ -51,7 +51,7 @@
 - **Covers:** FR-3, FR-4, NFR-1, NFR-4, AC-3
 - **Touches:** `src/game/feelingsFacesLogic.ts`, `src/game/art/faces.ts`, `src/__tests__/game/feelings*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/feelings && pnpm typecheck`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Add new scenarios on contrast ladder** — covers: FR-3
   - [ ] **P3.T1.1: Keep contrastive pairs first, confusable sad/scared later**
