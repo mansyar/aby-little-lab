@@ -46,10 +46,14 @@
 - **Covers:** FR-3, AC-3
 - **Touches:** `src/game/hub/hubPrewarm.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/__tests__/game/hub/hubPrewarm.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
 - **Verification:** `pnpm vitest run src/__tests__/game/hub/hubPrewarm.test.ts src/__tests__/scenes/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Extract prewarm orchestration** — covers: FR-3
-- [ ] **P3.T2: Unit tests + HubScene rewire** — covers: FR-3, AC-3
+- [x] **P3.T1: Extract prewarm orchestration** — covers: FR-3
+- [x] **P3.T2: Unit tests + HubScene rewire** — covers: FR-3, AC-3
+
+- **Result:** verified — prewarm orchestration in `src/game/hub/hubPrewarm.ts`; HubScene 700 → 567 lines; new suite 10/10 + `hubScene.test.ts` 48/48 green; typecheck + Biome clean. Known deviation: `hubPrewarm.ts` is 275 lines (over the NFR-3 200-line target) — left for `conductor-review` to disposition.
+- **Checkpoint:** 24aae2da
+- **Evidence:** `conductor/tracks/20261027-hubscene-split/verification/phase-3.md`
 
 ## Phase 4: Play-Time UI, Attract/Decor, Thin Coordinator
 
