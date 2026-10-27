@@ -33,7 +33,7 @@
 - **Covers:** FR-2, FR-4, NFR-1, NFR-2, AC-2
 - **Touches:** `src/game/storyOrderLogic.ts`, `src/game/storyOrderArt.ts`, `src/__tests__/game/story*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/story && pnpm typecheck`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add new stories data in obvious→subtle order** — covers: FR-2
   - [ ] **P2.T1.1: Author story texts with 3-panel breakdowns**
