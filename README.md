@@ -180,6 +180,7 @@ One-time setup: a Coolify API token with the `deploy` permission, the app's Depl
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
+| **v1.23.0** | 2026-10-27 | One track merged since v1.22.0: the content expansion - ten new early words (MAP/FOX/CUP/BOX/BED/KITE/SOCK/BOOT/RING/PLUS), four new three-panel stories (snowman, block tower, caterpillar, tadpole) and eight new feelings moments, all riding unchanged mechanics. [Release notes](docs/release-notes-v1.23.0.md) | `v1.23.0` |
 | **v1.22.0** | 2026-10-27 | Seven tracks merged since v1.21.7: Hub idle game-chunk prewarm plus cold-tap art preload (taps stay instant warm or cold), one shared shuffle and seeded RNG seam across all 22 scenes and game-logic helpers, docs truth pass with a count-drift guard, property-test deflake timeouts, and the dependency majors. [Release notes](docs/release-notes-v1.22.0.md) | `v1.22.0` |
 | **v1.21.0** | 2026-10-23 | Eight tracks merged since v1.20.0: per-game lazy art (a shell diet that roughly halves the boot), one registry for all 22 games, a shared drag board, the decomposed Hub grid, a sound identity per game, the session-lifecycle fixes and two documentation passes. [Release notes](docs/release-notes-v1.21.0.md) | `v1.21.0` |
 | **v1.20.0** | 2026-10-20 | Game 22 - Story Order (3-panel story sequencing, 8-story pool, retry in place, ordinal pips) + game art moved into the game's own chunk so the boot shell stayed inside its 200 kB gate | `v1.20.0` |
@@ -217,6 +218,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
 - [SVG_STYLE.md](docs/SVG_STYLE.md) - The art style every SVG asset is drawn in
+- [release-notes-v1.23.0.md](docs/release-notes-v1.23.0.md) - v1.23.0 release notes (the content-expansion track merged after v1.22.0)
 - [release-notes-v1.22.0.md](docs/release-notes-v1.22.0.md) - v1.22.0 release notes (the seven tracks merged after v1.21.7)
 - [release-notes-v1.21.0.md](docs/release-notes-v1.21.0.md) - v1.21.0 release notes (the eight tracks merged after v1.20.0)
 - [release-notes-v1.20.0.md](docs/release-notes-v1.20.0.md) - v1.20.0 release notes (Story Order + in-chunk game art, released)
