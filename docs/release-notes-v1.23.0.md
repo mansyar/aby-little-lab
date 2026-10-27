@@ -1,7 +1,7 @@
 # Release Notes - v1.23.0
 
-> Status: DRAFT
-> Tag: `v1.23.0` (to be cut on `master` after merge - tag-gated Coolify deploy fires on push)
+> Status: FINAL
+> Tag: `v1.23.0` (cut on `master` at `45190721`, pushed 2026-10-27 - tag-gated Coolify deploy fired; tag CI 40435767433 green including boot-time validation)
 > Base: `v1.22.0` (`a2bffc6b`, 2026-10-27)
 
 One track merged since v1.22.0: **repeat play stays fresh - ten new early words to find and build (MAP, FOX, CUP, BOX, BED, KITE, SOCK, BOOT, RING, PLUS), four new three-panel stories to put in order (a snowman, a block tower, a caterpillar's change, a tadpole's change), and eight new everyday feelings moments to name** - so the games your child already knows keep surprising them. Nothing changes in how any game plays: the rounds, the ladders, the voices and the art style are exactly what they were - there is simply more to discover inside them.
