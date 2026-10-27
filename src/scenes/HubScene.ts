@@ -7,6 +7,7 @@ import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIn
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { createArtResolver } from "../game/hub/artGroups";
 import {
   ART_KEYS_BY_GAME,
   type ArtKeyEntry,
@@ -83,84 +84,6 @@ function isDocumentHidden(): boolean {
   return canObserveVisibility() && document.visibilityState === "hidden";
 }
 
-/** One game-art texture: the key the game draws and the SVG markup behind it. */
-interface ArtTableAsset {
-  /** Texture key, identical to the key the game's art group declares. */
-  readonly key: string;
-  /** Raw SVG markup for the key. */
-  readonly svg: string;
-}
-
-/** One lazily loaded art table: the assets of a single art group. */
-interface ArtTableLike {
-  /** The group's textures in declaration order. */
-  readonly assets: readonly ArtTableAsset[];
-}
-
-/**
- * Lazy loader for one art group's table.
- *
- * Every loader is a dynamic `import()`, so the group's SVG markup ships in a
- * lazy chunk the idle pass fetches on demand — never in the shell entry. A
- * static import here would inline every game's artwork into the shell bundle
- * and break the 200 kB `validate-bundle` budget; the source guard in
- * `hubScene.test.ts` pins this file to dynamic imports only.
- */
-type ArtGroupLoader = () => Promise<readonly ArtTableLike[]>;
-
-/** One lazy loader per art group, plus Story Order's own panel table. */
-const ART_GROUP_LOADERS: Readonly<Record<string, ArtGroupLoader>> = {
-  animals: () => import("../game/art/animals").then((module) => [module.animals]),
-  cutouts: () => import("../game/art/cutouts").then((module) => [module.cutouts]),
-  faces: () => import("../game/art/faces").then((module) => [module.faces]),
-  food: () => import("../game/art/food").then((module) => [module.food]),
-  glyphs: () => import("../game/art/glyphs").then((module) => [module.glyphs]),
-  items: () => import("../game/art/items").then((module) => [module.items]),
-  letters: () => import("../game/art/letters").then((module) => [module.letters]),
-  music: () => import("../game/art/music").then((module) => [module.music]),
-  numerals: () => import("../game/art/numerals").then((module) => [module.numerals]),
-  shadows: () => import("../game/art/shadows").then((module) => [module.shadows]),
-  shapes: () => import("../game/art/shapes").then((module) => [module.shapes]),
-  toys: () => import("../game/art/toys").then((module) => [module.toys]),
-  "story-panels": () =>
-    import("../game/storyOrderArt").then((module) => [{ assets: module.STORY_PANEL_ASSETS }]),
-};
-
-/**
- * Art groups each game draws, by game id.
- *
- * Mirrors each scene's `preloadArt([...])` declaration (Story Order declares
- * through `preloadStoryOrderArt`) and the group composition of
- * `ART_KEYS_BY_GAME` in `src/game/hub/prewarm.ts`: the key-only table decides
- * the raster order, this table decides where each key's markup is fetched from.
- * The resolver parity test in `hubScene.test.ts` resolves every key of every
- * game through this table, so a drift in either direction fails loudly.
- */
-const ART_GROUPS_BY_GAME: Readonly<Record<string, readonly string[]>> = {
-  "shape-sorter": ["cutouts", "shapes"],
-  "animal-trace": ["animals", "food"],
-  "pop-freeze": ["animals", "glyphs"],
-  "shadow-match": ["items", "shadows"],
-  "musical-memory": ["music"],
-  "big-small": ["toys"],
-  "pattern-builder": ["shapes"],
-  "alphabet-match": ["letters"],
-  "word-match": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "word-builder": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "how-many": ["food", "items", "numerals", "shapes"],
-  "first-sounds": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "more-less": ["food", "glyphs", "items", "shapes"],
-  "odd-one-out": ["animals", "music", "shapes", "toys"],
-  "color-match": ["music", "shapes"],
-  "add-it-up": ["food", "glyphs", "items", "shapes"],
-  "take-away": ["food", "glyphs", "items", "shapes"],
-  "memory-match": ["animals", "glyphs", "items", "toys"],
-  "decode-it": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "number-order": ["numerals"],
-  "feelings-faces": ["faces"],
-  "story-order": ["story-panels"],
-};
-
 /**
  * Hub scene — the central navigation hub.
  *
@@ -225,10 +148,13 @@ export class HubScene extends Phaser.Scene {
    * the last visit stopped.
    */
   private readonly artQueued = new Set<string>();
-  /** Loaded art group tables, by group key; fetched once per Hub lifetime. */
-  private readonly artGroupCache = new Map<string, readonly ArtTableLike[]>();
-  /** Resolved SVG markup, by texture key; filled as the idle pass walks keys. */
-  private readonly artSvgCache = new Map<string, string>();
+  /**
+   * Resolves game-art SVG markup through the lazily loaded art tables owned by
+   * `src/game/hub/artGroups.ts`. The scene keeps only this delegation: the
+   * module owns the tables, loaders, and caches, while the scene owns the
+   * `textures`/`load` engine handles and the pass generation (`artPassId`).
+   */
+  private readonly artResolver = createArtResolver();
   /**
    * Art pass generation: bumped on every cancel so a key resolution that
    * settles after shutdown, a tap, or a lock queues nothing (FR-5).
@@ -677,31 +603,13 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Resolves the SVG markup behind one art key, lazily loading the key's art
-   * group on first touch. The dynamic imports keep every game's artwork out of
-   * the shell entry; loaded tables stay cached for the Hub's lifetime, and an
-   * unknown key resolves to `undefined` so the pass skips it instead of
-   * queueing a load the TextureManager could never satisfy.
+   * Resolves the SVG markup behind one art key through the art-group tables in
+   * `src/game/hub/artGroups.ts`. An unknown key resolves to `undefined` so the
+   * pass skips it instead of queueing a load the TextureManager could never
+   * satisfy.
    */
-  private async resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined> {
-    const cached = this.artSvgCache.get(entry.key);
-    if (cached !== undefined) return cached;
-    const groupKeys = ART_GROUPS_BY_GAME[entry.gameId] ?? [];
-    for (const groupKey of groupKeys) {
-      let tables = this.artGroupCache.get(groupKey);
-      if (!tables) {
-        const loader = ART_GROUP_LOADERS[groupKey];
-        if (!loader) continue;
-        tables = await loader();
-        this.artGroupCache.set(groupKey, tables);
-      }
-      const asset = tables.flatMap((table) => table.assets).find((item) => item.key === entry.key);
-      if (asset) {
-        this.artSvgCache.set(entry.key, asset.svg);
-        return asset.svg;
-      }
-    }
-    return undefined;
+  private resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined> {
+    return this.artResolver.resolveArtSvg(entry);
   }
 
   /**

@@ -194,6 +194,7 @@ import { createArtLoadingCue } from "../../components/ArtLoadingCue";
 import { music } from "../../game/art/music";
 import { preloadArtGroups } from "../../game/art/registry";
 import { shapes } from "../../game/art/shapes";
+import artGroupsSource from "../../game/hub/artGroups.ts?raw";
 import {
   ART_KEYS_BY_GAME,
   type ArtKeyEntry,
@@ -1211,9 +1212,9 @@ describe("HubScene idle art prewarm", () => {
     // pinned too: idle prewarm must never reach the module that creates it.
     expect(hubSceneSource).not.toMatch(/from\s+["']\.\.\/game\/(art|storyOrderArt)/);
     expect(hubSceneSource).not.toMatch(/from\s+["']\.\.\/components\/ArtLoadingCue["']/);
-    const lazyGroupImports = hubSceneSource.match(/import\("\.\.\/game\/art\/[a-z]+"\)/g) ?? [];
+    const lazyGroupImports = artGroupsSource.match(/import\("\.\.\/art\/[a-z]+"\)/g) ?? [];
     expect(lazyGroupImports).toHaveLength(12);
-    expect(hubSceneSource).toContain('import("../game/storyOrderArt")');
+    expect(artGroupsSource).toContain('import("../storyOrderArt")');
   });
 
   it("starts the art pass alongside the chunk pass once the entrance settles", () => {
