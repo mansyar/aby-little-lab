@@ -30,10 +30,14 @@
 - **Covers:** FR-2, AC-2
 - **Touches:** `src/game/hub/gameLaunch.ts` (new), `src/scenes/HubScene.ts` (delegate), `src/__tests__/game/hub/gameLaunch.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
 - **Verification:** `pnpm vitest run src/__tests__/game/hub/gameLaunch.test.ts src/__tests__/scenes/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Extract launch flow with guards** — covers: FR-2
-- [ ] **P2.T2: Unit tests + HubScene rewire** — covers: FR-2, AC-2
+- [x] **P2.T1: Extract launch flow with guards** — covers: FR-2
+- [x] **P2.T2: Unit tests + HubScene rewire** — covers: FR-2, AC-2
+
+- **Result:** verified — launch flow in `src/game/hub/gameLaunch.ts` (182 lines); HubScene 778 → 700 lines; new suite 10/10 + `hubScene.test.ts` 48/48 green; typecheck + Biome clean.
+- **Checkpoint:** e7057485
+- **Evidence:** `conductor/tracks/20261027-hubscene-split/verification/phase-2.md`
 
 ## Phase 3: Prewarm Orchestration Extraction
 
