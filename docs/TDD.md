@@ -303,7 +303,7 @@ src/
 │   └── viewportZoom.ts
 └── assets/
     ├── audio/                             # empty at runtime; BGM ships from public/
-    └── svg/                               # 219 tracked illustrations, 11 folders
+    └── svg/                               # 231 tracked illustrations, 11 folders
         ├── animals/                       # 9 files
         ├── feelings/                      # 4 files
         ├── items/                         # 27 files
@@ -312,7 +312,7 @@ src/
         ├── shadows/                       # 12 files
         ├── shapes/                        # 36 files
         ├── stickers/                      # 22 files
-        ├── stories/                       # 33 files
+        ├── stories/                       # 45 files
         ├── toys/                          # 7 files
         └── ui/                            # 33 files, of which 21 in ui/tiles/
 ```
@@ -323,7 +323,7 @@ The `src/game/` logic modules are importable without Phaser, with one exception:
 
 ### 2.3 Asset corpus
 
-219 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). Only the 53 shell keys' files are rasterized at boot; every other texture a game draws is reached through `src/game/art/` or that game's own art module (see [§3.5](#35-in-chunk-art)).
+231 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). Only the 53 shell keys' files are rasterized at boot; every other texture a game draws is reached through `src/game/art/` or that game's own art module (see [§3.5](#35-in-chunk-art)).
 
 | Folder | Files | What it holds |
 | --- | --- | --- |
@@ -335,10 +335,10 @@ The `src/game/` logic modules are importable without Phaser, with one exception:
 | `shadows/` | 12 | `shadow_airplane`, `_ball`, `_bell`, `_boat`, `_boot`, `_car`, `_house`, `_kite`, `_mushroom`, `_sock`, `_tree`, `_umbrella` |
 | `shapes/` | 36 | 18 `shape_*` outlines and their 18 `cutout_*` filled twins |
 | `stickers/` | 22 | `sticker_<game>` in `snake_case`, one per game |
-| `stories/` | 33 | 11 story strips of 3 panels (`story_*`) — loaded with the Story Order chunk only |
+| `stories/` | 45 | 15 story strips of 3 panels (`story_*`) — loaded with the Story Order chunk only |
 | `toys/` | 7 | `teddy_bear`, `toy_ball`, `toy_block`, `toy_box`, `toy_car`, `toy_drum`, `toy_rocket` |
 | `ui/` | 33 | 12 shared UI glyphs (`arrow_up`, `arrow_down`, `bubble`, `card_back`, `equals`, `icon_speaker`, `mascot_idle`, `mascot_celebrate`, `minus`, `plus`, `sleep_zzz`, `tile_feelings_faces`) plus 21 `ui/tiles/tile_*` Hub tiles |
-| **Total** | **219** | |
+| **Total** | **231** | |
 
 `shadows/` art is derived from the matching `items/` silhouette rather than drawn separately. Art rules — palette, stroke weights, the 512×512 grid, ASCII-only markup — live in [`docs/SVG_STYLE.md`](./SVG_STYLE.md).
 
@@ -376,7 +376,7 @@ The font gate exists because the letter and numeral SVGs set `font-family="'Balo
 
 ### 3.3 PreloadScene and the boot asset table
 
-`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through three eager raw globs — `../assets/svg/ui/tile_*.svg`, `../assets/svg/ui/tiles/*.svg` and `../assets/svg/stickers/*.svg`, written `{ eager: true, query: "?raw" }`. The patterns are deliberately narrower than "everything under `ui/`": the `ui/` directory also holds the glyph SVGs that belong to the lazy `game/art/glyphs.ts` group, and globbing `ui/**` would inline them into the entry chunk for keys the table never reads. The `tile_`/`sticker_` stem filter stays as defence in depth. Two files sharing a key, two registry entries naming one key, or a registry key with no file, throws at module evaluation naming the key. Only the nine non-game rows stay literal, because they belong to the shell rather than to a game. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 219 texture keys in the app, 53 of them in the shell, over a corpus of 219 art files.
+`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through three eager raw globs — `../assets/svg/ui/tile_*.svg`, `../assets/svg/ui/tiles/*.svg` and `../assets/svg/stickers/*.svg`, written `{ eager: true, query: "?raw" }`. The patterns are deliberately narrower than "everything under `ui/`": the `ui/` directory also holds the glyph SVGs that belong to the lazy `game/art/glyphs.ts` group, and globbing `ui/**` would inline them into the entry chunk for keys the table never reads. The `tile_`/`sticker_` stem filter stays as defence in depth. Two files sharing a key, two registry entries naming one key, or a registry key with no file, throws at module evaluation naming the key. Only the nine non-game rows stay literal, because they belong to the shell rather than to a game. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 231 texture keys in the app, 53 of them in the shell, over a corpus of 231 art files.
 
 `preload()` draws a brand lockup (title at `centerY - 110`, tagline at `centerY - 70`, a 300×30 progress bar over a 320×50 box) and wires `load.on("progress")` and `load.on("complete")` to it. In development only, a `/* v8 ignore next */`-guarded block profiles per-file load time and logs `[preload] N files in Xms`; the block is statically removed from production builds.
 
@@ -392,7 +392,7 @@ where `size = textureSizeFor(asset.key)` ([§3.4](#34-texture-tiers)). `toDataUr
 
 ### 3.4 Texture tiers
 
-Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (the 178-key boot set of the time x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. The corpus has grown since to 219 art files and 219 texture keys. `src/utils/textureTiers.ts` sizes each texture for its largest display context, and the rule applies per key wherever that key lives - shell, lazy art group or Story Order panel:
+Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (the 178-key boot set of the time x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. The corpus has grown since to 231 art files and 231 texture keys. `src/utils/textureTiers.ts` sizes each texture for its largest display context, and the rule applies per key wherever that key lives - shell, lazy art group or Story Order panel:
 
 | Tier | Size | Applied to |
 | --- | --- | --- |
@@ -412,9 +412,9 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 
 **Loading feedback and the missing-key path.** A scene shows the shared textless cue from `src/components/ArtLoadingCue.ts` (`createArtLoadingCue(scene)`) while its groups load and clears it when they land; the cue is opacity-only under reduced motion and never waits on the network. A key that is missing despite its declaration degrades to the neutral placeholder from `src/game/art/placeholder.ts`, logs one `console.warn` per key, and leaves the round completable (FR-6) — never an exception, never a blocked loader.
 
-**Story Order** keeps its own table for the same reason: `src/game/storyOrderArt.ts` imports the 33 panels as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 33 SVG strings land in the Story Order chunk.
+**Story Order** keeps its own table for the same reason: `src/game/storyOrderArt.ts` imports the 45 panels as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 45 SVG strings land in the Story Order chunk.
 
-**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or spells a game key out in the shell table. It pins the registered set against its own literal 53-key list — read from `SHELL_ASSETS` at runtime, not from the scene's source — so the derivation cannot quietly change the shell. It also asserts the counts — 139 group keys, 133 game-only, 33 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, `storyOrderArt.test.ts` keeps the single-module assertion, and `preloadScene.test.ts` checks each derived key against the SVG file named after it. Adding a game means adding an art group and a `preloadArtGroups()` call in its scene; `PreloadScene` never gains an import for it.
+**The boundary is a test, not a convention.** `src/__tests__/game/art/shellOwnership.test.ts` reads `PreloadScene.ts` as text and fails if the scene imports an art-registry module (beyond a type-only `index`/`types` import), imports an SVG that backs a game-only key, or spells a game key out in the shell table. It pins the registered set against its own literal 53-key list — read from `SHELL_ASSETS` at runtime, not from the scene's source — so the derivation cannot quietly change the shell. It also asserts the counts — 139 group keys, 133 game-only, 45 story panels, six shared avatar files — so a scan that lost the registry cannot pass vacuously. `groupIntegrity.test.ts` fails on a key in two groups, `storyOrderArt.test.ts` keeps the single-module assertion, and `preloadScene.test.ts` checks each derived key against the SVG file named after it. Adding a game means adding an art group and a `preloadArtGroups()` call in its scene; `PreloadScene` never gains an import for it.
 
 **Measured budgets.** The shell entry is 137.8 kB as `validate-bundle.js` reports it (141.15 kB as Vite prints it — the same size in binary and decimal units) against the 200 kB gate. Cold boot is gated at 3000 ms by `validate-boot.js`; the measured medians and the 4× CPU throttle figures live in `docs/perf-baseline.md`, which records the shell-diet track's run of 2026-10-20 (419.5 ms median, 1697.2 ms at 4× throttle). A cold first tap of a game adds **82 ms at worst** (Memory Match) and **48 ms for the widest art union** (Find the Word, 83 keys) against the 400 ms budget, with absolute totals of 224–334 ms, measured on that same 2026-10-20 run. That is an increment, not a standalone latency: the criterion is "adds <= 400 ms versus the same tap". `scripts/measure-first-tap.mjs` opens a fresh browser context per game so the game chunk is not cached, taps one tile and records the tap-to-first-frame total; it fails when the worst game's total exceeds the 400 ms budget rather than when the cross-game median does. It is not wired into CI, so it is evidence rather than a gate. `docs/perf-baseline.md` carries the before/after tables.
 
@@ -426,7 +426,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | Game art | 12 groups, 139 keys; nine emit chunks of 3.1–19.4 kB and `cutouts`, `shadows`, `faces` inline into their only consumer | build output |
 | Shell entry | 137.8 kB as `validate-bundle.js` reports it (141.15 kB as Vite prints it), gated at 200 kB | `node scripts/validate-bundle.js` |
 | Phaser vendor chunk | 1342.6 kB as the validator reports it (1,374.8 kB as the Vite build prints it — same 1,374,822 bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
-| Story Order chunk | ~40.3 kB, includes all 33 panel SVGs | build output |
+| Story Order chunk | ~40.3 kB, includes all 45 panel SVGs | build output |
 | Precache entries | 54 (about 1,726 KiB) | `precache  54 entries` from the PWA build step |
 
 The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
@@ -855,7 +855,7 @@ The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode reje
 | `progressLogic.ts` | per-game stats, mastery, accuracy, 7-day activity |
 | `shadowMatchLogic.ts` | shadow/object pairing and win test |
 | `shapeSorterLogic.ts` | shape sets, `ShapeType`, matching |
-| `storyOrderArt.ts` | 33 story panel SVGs + `preloadStoryOrderArt` (imports Phaser types only) |
+| `storyOrderArt.ts` | 45 story panel SVGs + `preloadStoryOrderArt` (imports Phaser types only) |
 | `storyOrderLogic.ts` | `STORY_POOL`, shuffling, whole-strip validation |
 | `takeAwayLogic.ts` | Take Away rounds and answer checking |
 | `voiceLogic.ts` | `availableVoiceOptions`, `resolveVoice` |
@@ -1065,7 +1065,7 @@ Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big 
 
 ### 10.1 Runner and mocks
 
-Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (126 files / 2,781 tests, measured 2026-10-27). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` — sweep guards, not pair-pool guards. As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (126 files / 2,783 tests, measured 2026-10-27). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` — sweep guards, not pair-pool guards. As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
 
 | Helper | Purpose |
 | --- | --- |
@@ -1079,21 +1079,21 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-126 test files, 2,781 tests (verified 2026-10-27). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+126 test files, 2,783 tests (verified 2026-10-27). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-27) is statements 97.75 (5737/5869), branches 91.76 (1572/1713), functions 96.88 (1211/1250) and lines 98.70 (5340/5410) across 126 files and 2,781 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-10-27) is statements 97.75 (5737/5869), branches 91.76 (1572/1713), functions 96.88 (1211/1250) and lines 98.70 (5340/5410) across 126 files and 2,783 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
-`src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 22 words never forces.
+`src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
 ### 10.4 What unit tests cannot cover
 
 happy-dom supplies no canvas, no audio graph and no screen. The following are device checks, not unit tests:
 
-- real rasterisation of the 219 SVGs (glyph fallback, tier sharpness);
+- real rasterisation of the 231 SVGs (glyph fallback, tier sharpness);
 - actual audio mixing, ducking audibility and voice availability;
 - orientation lock and PWA install/update on iOS Safari, Android Chrome and desktop;
 - the cold-load budget, which is `scripts/validate-boot.js`'s job in CI.

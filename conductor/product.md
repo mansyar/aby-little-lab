@@ -44,8 +44,8 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 | 18 | Memory Match | Visual working memory | Flip pairs of face-down cards to find identical textures; grids grow 2×3 → 3×4 → 4×4 across 6 rounds |
 | 19 | Decode It | Early decoding / word recognition | Picture + spoken word → tap the written word among 4 cards (6 rounds, easy-first 3→4-letter bands) |
 | 20 | Number Order | Numeral sequencing / ordinality | Drag shuffled numeral cards (3–5 of them) into empty slots in ascending order (6 rounds, easy-first 1–5 → 1–8 → 1–10 bands; tap a numeral to hear it spoken) |
-| 21 | Feelings Faces | Social-emotional learning (emotion recognition) | Hear a short everyday scenario, then tap the face showing how Aby feels (6 rounds, 3 faces per round, 16-scenario pool; contrastive pairs first, then the confusable sad/scared pair) |
-| 22 | Story Order | Narrative sequencing / temporal order | Drag three shuffled story panels into three ordinal slots (marked only by 1/2/3 pips) to tell the story first to last (6 rounds, 8-story pool, easy-first obvious then subtle) |
+| 21 | Feelings Faces | Social-emotional learning (emotion recognition) | Hear a short everyday scenario, then tap the face showing how Aby feels (6 rounds, 3 faces per round, 32-scenario pool; contrastive pairs first, then the confusable sad/scared pair) |
+| 22 | Story Order | Narrative sequencing / temporal order | Drag three shuffled story panels into three ordinal slots (marked only by 1/2/3 pips) to tell the story first to last (6 rounds, 15-story pool, easy-first obvious then subtle) |
 
 ### 3.2 Cross-Game Systems
 

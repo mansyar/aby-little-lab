@@ -378,6 +378,12 @@ const STORY_PANEL_KEYS: readonly ArtKeyDef[] = [
   ["story_cake_whole", CARD],
   ["story_cake_candles", CARD],
   ["story_cake_sliced", CARD],
+  ["story_snow_pile", CARD],
+  ["story_snowman", CARD],
+  ["story_snowman_hat", CARD],
+  ["story_blocks_scattered", CARD],
+  ["story_tower_half", CARD],
+  ["story_tower_tall", CARD],
   ["story_banana_whole", CARD],
   ["story_banana_peeled", CARD],
   ["story_banana_peel", CARD],
@@ -396,6 +402,12 @@ const STORY_PANEL_KEYS: readonly ArtKeyDef[] = [
   ["story_sun_rise", CARD],
   ["story_sun_noon", CARD],
   ["story_sun_set", CARD],
+  ["story_caterpillar", CARD],
+  ["story_cocoon", CARD],
+  ["story_butterfly", CARD],
+  ["story_frogspawn", CARD],
+  ["story_tadpole", CARD],
+  ["story_frog", CARD],
 ];
 
 /**

@@ -55,7 +55,7 @@ export function buildRound(target: FirstWord, rng: Rng = Math.random): DecodeRou
     usedFirsts.push(candFirst);
   }
 
-  // Fallback if strict filter left us short (should not happen with 22 pool, but guard)
+  // Fallback if strict filter left us short (should not happen with 28 pool, but guard)
   if (distractors.length < 3) {
     const fallbackPool = DECODE_POOL.filter(
       (entry) => entry.word !== target.word && !distractors.includes(entry.word),

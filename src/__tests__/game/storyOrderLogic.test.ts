@@ -48,7 +48,7 @@ describe("STORY_POOL", () => {
     }
   });
 
-  it("uses 33 distinct panel keys across the pool", () => {
+  it("uses 45 distinct panel keys across the pool", () => {
     const panels = STORY_POOL.flatMap((story) => [...story.panels]);
     expect(panels).toHaveLength(45);
     expect(new Set(panels).size).toBe(45);
