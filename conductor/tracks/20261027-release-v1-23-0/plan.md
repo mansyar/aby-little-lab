@@ -41,7 +41,7 @@ The primary appends after acceptance:
 - **Covers:** FR-4, NFR-1, NFR-3, AC-3
 - **Touches:** `conductor/tracks/20261027-release-v1-23-0/*` (evidence, review, pr notes)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
 - [ ] **P2.T2: Conductor review + fixes** — covers: NFR-3
