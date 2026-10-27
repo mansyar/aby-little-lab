@@ -27,8 +27,8 @@ function expectValidWordRound(round: WordRound): void {
 }
 
 describe("WORD_POOL", () => {
-  it("contains exactly the 18 first words", () => {
-    expect(WORD_POOL).toHaveLength(18);
+  it("contains exactly the 28 first words", () => {
+    expect(WORD_POOL).toHaveLength(28);
   });
 
   it("contains the expected words", () => {
@@ -36,19 +36,29 @@ describe("WORD_POOL", () => {
     expect(words).toEqual([
       "BALL",
       "BEAR",
+      "BED",
       "BOAT",
       "BONE",
+      "BOOT",
+      "BOX",
       "BUG",
       "CAR",
       "CAT",
+      "CUP",
       "DOG",
       "DRUM",
       "DUCK",
       "FISH",
+      "FOX",
       "FROG",
       "HAT",
+      "KITE",
+      "MAP",
       "OWL",
       "PIG",
+      "PLUS",
+      "RING",
+      "SOCK",
       "STAR",
       "SUN",
       "TREE",
@@ -72,8 +82,8 @@ describe("WORD_POOL", () => {
   });
 
   it("classifies 3-letter words as tier 3 and 4-letter words as tier 4", () => {
-    expect(WORD_POOL.filter((entry) => entry.tier === 3)).toHaveLength(8);
-    expect(WORD_POOL.filter((entry) => entry.tier === 4)).toHaveLength(10);
+    expect(WORD_POOL.filter((entry) => entry.tier === 3)).toHaveLength(13);
+    expect(WORD_POOL.filter((entry) => entry.tier === 4)).toHaveLength(15);
     for (const entry of WORD_POOL) {
       expect(entry.tier).toBe(entry.word.length === 3 ? 3 : 4);
     }
@@ -109,6 +119,16 @@ describe("WORD_POOL", () => {
       "toy_drum",
       "toy_teddy_bear",
       "sm_duck",
+      "sm_fox",
+      "sm_cup",
+      "sm_map",
+      "sm_bed",
+      "toy_box",
+      "sm_kite",
+      "sm_sock",
+      "sm_boot",
+      "shape_ring",
+      "shape_plus",
     ]);
     for (const entry of WORD_POOL) {
       expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);
@@ -132,6 +152,35 @@ describe("WORD_POOL", () => {
     expect(byWord.get("HAT")).toBe("sm_hat");
     expect(byWord.get("BUG")).toBe("sm_bug");
     expect(byWord.get("DUCK")).toBe("sm_duck");
+    // Content-expansion batch: every prompt reuses an existing texture.
+    expect(byWord.get("FOX")).toBe("sm_fox");
+    expect(byWord.get("CUP")).toBe("sm_cup");
+    expect(byWord.get("MAP")).toBe("sm_map");
+    expect(byWord.get("BED")).toBe("sm_bed");
+    expect(byWord.get("BOX")).toBe("toy_box");
+    expect(byWord.get("KITE")).toBe("sm_kite");
+    expect(byWord.get("SOCK")).toBe("sm_sock");
+    expect(byWord.get("BOOT")).toBe("sm_boot");
+    expect(byWord.get("RING")).toBe("shape_ring");
+    expect(byWord.get("PLUS")).toBe("shape_plus");
+  });
+
+  it("keeps words TTS-safe: short uppercase words only", () => {
+    for (const entry of WORD_POOL) {
+      expect(entry.word).toMatch(/^[A-Z]{3,4}$/);
+    }
+  });
+
+  it("spreads first letters so every target keeps distractor groups", () => {
+    const groups = new Map<string, number>();
+    for (const entry of WORD_POOL) {
+      groups.set(entry.word[0], (groups.get(entry.word[0]) ?? 0) + 1);
+    }
+    expect(groups.size).toBeGreaterThanOrEqual(10);
+    for (const entry of WORD_POOL) {
+      const otherGroups = [...groups.keys()].filter((initial) => initial !== entry.word[0]);
+      expect(otherGroups.length).toBeGreaterThanOrEqual(3);
+    }
   });
 });
 

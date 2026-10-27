@@ -264,14 +264,14 @@ describe("shell ownership", () => {
     expect(offending).toEqual([]);
   });
 
-  it("sees all 139 group keys, 133 of them game-only, and the 33 Story Order panels", () => {
+  it("sees all 139 group keys, 133 of them game-only, and the 45 Story Order panels", () => {
     // Non-vacuity: a scan that lost the registry, the SVG imports or the key
     // rows would find nothing to complain about, so the counts are asserted.
     // 131 prior group keys + 4 Shadow Match items + 4 shadows = 139; game-only
-    // 125 + 8 = 133; story panels 24 + 9 = 33.
+    // 125 + 8 = 133; story panels 33 + 12 = 45.
     expect(groupKeyToFile.size).toBe(139);
     expect(gameOnlyKeys).toHaveLength(133);
-    expect(storyKeyToFile.size).toBe(33);
+    expect(storyKeyToFile.size).toBe(45);
   });
 
   it("shares exactly the six avatar files with the groups", () => {

@@ -37,9 +37,9 @@ function sequenceRng(values: readonly number[]): { rng: () => number; calls: () 
 }
 
 describe("STORY_POOL", () => {
-  it("holds eleven stories with unique ids and three unique panels each", () => {
-    expect(STORY_POOL).toHaveLength(11);
-    expect(new Set(STORY_IDS).size).toBe(11);
+  it("holds fifteen stories with unique ids and three unique panels each", () => {
+    expect(STORY_POOL).toHaveLength(15);
+    expect(new Set(STORY_IDS).size).toBe(15);
     expect(STORY_IDS).toEqual(STORY_POOL.map((story) => story.id));
     for (const story of STORY_POOL) {
       expect(story.panels).toHaveLength(3);
@@ -48,15 +48,15 @@ describe("STORY_POOL", () => {
     }
   });
 
-  it("uses 33 distinct panel keys across the pool", () => {
+  it("uses 45 distinct panel keys across the pool", () => {
     const panels = STORY_POOL.flatMap((story) => [...story.panels]);
-    expect(panels).toHaveLength(33);
-    expect(new Set(panels).size).toBe(33);
+    expect(panels).toHaveLength(45);
+    expect(new Set(panels).size).toBe(45);
   });
 
-  it("splits into five obvious and six subtle stories", () => {
-    expect(OBVIOUS_POOL).toHaveLength(5);
-    expect(SUBTLE_POOL).toHaveLength(6);
+  it("splits into seven obvious and eight subtle stories", () => {
+    expect(OBVIOUS_POOL).toHaveLength(7);
+    expect(SUBTLE_POOL).toHaveLength(8);
     expect(OBVIOUS_POOL.length + SUBTLE_POOL.length).toBe(STORY_POOL.length);
     for (const story of OBVIOUS_POOL) expect(story.ladder).toBe("obvious");
     for (const story of SUBTLE_POOL) expect(story.ladder).toBe("subtle");
@@ -118,7 +118,7 @@ describe("buildPlaythrough", () => {
     expect(byDefault).toHaveLength(6);
     // Classic-mix pin re-derived from `mulberry32(77)` when the suite moved off
     // its local Park-Miller generator: three obvious stories, then three subtle.
-    expect(byDefault).toEqual(["balloon", "ice-cream", "cake", "cup", "sun", "foot"]);
+    expect(byDefault).toEqual(["tower", "cake", "snowman", "foot", "clothes", "cup"]);
   });
 
   it("draws a 5 + 1 mix in the easy band, obvious rounds first", () => {
@@ -165,43 +165,43 @@ describe("buildPlaythrough", () => {
     // The shared shuffle consumes rng in the same order, so the same seeded
     // rng must yield the exact pre-migration strips, story order included.
     expect(buildPlaythrough(mulberry32(1)).map((round) => round.storyId)).toEqual([
-      "cake",
-      "duck",
       "balloon",
-      "clothes",
+      "snowman",
+      "tower",
+      "caterpillar",
       "banana",
       "rain",
     ]);
     expect(buildPlaythrough(mulberry32(1))[0].shuffled).toEqual([
-      "story_cake_candles",
-      "story_cake_whole",
-      "story_cake_sliced",
+      "story_balloon_aloft",
+      "story_balloon_flat",
+      "story_balloon_round",
     ]);
     expect(buildPlaythrough(mulberry32(1))[5].shuffled).toEqual([
-      "story_cloud_raining",
       "story_cloud",
       "story_rain_puddle",
+      "story_cloud_raining",
     ]);
     expect(buildPlaythrough(mulberry32(11)).map((round) => round.shuffled)).toEqual([
-      ["story_seed_flower", "story_seed_planted", "story_seed_sprout"],
-      ["story_ice_dripping", "story_ice_scoop", "story_ice_puddle"],
+      ["story_seed_sprout", "story_seed_flower", "story_seed_planted"],
       ["story_balloon_round", "story_balloon_aloft", "story_balloon_flat"],
-      ["story_cloud_raining", "story_rain_puddle", "story_cloud"],
-      ["story_clothes_wet", "story_clothes_dry", "story_clothes_drying"],
-      ["story_cup_empty", "story_cup_pouring", "story_cup_full"],
+      ["story_cake_whole", "story_cake_sliced", "story_cake_candles"],
+      ["story_sun_set", "story_sun_noon", "story_sun_rise"],
+      ["story_frog", "story_frogspawn", "story_tadpole"],
+      ["story_clothes_drying", "story_clothes_wet", "story_clothes_dry"],
     ]);
     expect(buildPlaythrough(mulberry32(2026)).map((round) => round.storyId)).toEqual([
-      "seed",
+      "snowman",
       "cake",
-      "ice-cream",
-      "clothes",
-      "sun",
+      "seed",
+      "foot",
       "rain",
+      "caterpillar",
     ]);
     expect(buildPlaythrough(mulberry32(2026))[1].shuffled).toEqual([
+      "story_cake_candles",
       "story_cake_sliced",
       "story_cake_whole",
-      "story_cake_candles",
     ]);
   });
 

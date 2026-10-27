@@ -227,11 +227,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.9 Find the Word
 
 - **Mechanic.** Tap the printed word that matches the picture and the spoken word.
-- **Rounds and pool.** Six rounds. An 18 word pool, eight three-letter words and ten four-letter words. Four word cards per round, never two starting with the same letter.
+- **Rounds and pool.** Six rounds. A 28 word pool, thirteen three-letter words and fifteen four-letter words. Four word cards per round, never two starting with the same letter.
 - **Difficulty.** Adaptive. The band ladder shifts the mix of three and four letter words. A child who is finding it hard sees only three-letter words.
 - **Feedback.** The prompt picture pops in and every card squishes on press. A correct tap flashes the card green with the chime and a progress dot; a wrong tap wiggles the card 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the word is spoken at a slow rate while the picture shows its meaning.
-- **Art and assets.** 18 prompt pictures. Most reuse the art other games already draw; four SVGs (sun, hat, bug, duck) were added for this game. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
+- **Art and assets.** 28 prompt pictures. Most reuse the art other games already draw; four SVGs (sun, hat, bug, duck) were added for this game and the content-expansion batch reuses existing item, toy and shape keys, so no new picture SVGs were needed. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.10 Build the Word
 
@@ -317,11 +317,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.19 Decode It
 
 - **Mechanic.** See the picture and hear the word, then tap the printed word that names it among four cards.
-- **Rounds and pool.** Six rounds, easy first. Rounds one to three use three-letter words and rounds four to six use four-letter words, drawn from a 22 word pool. Four word cards per round, guarded against distractors that share the target's first letter or a confusable letter shape.
+- **Rounds and pool.** Six rounds, easy first. Rounds one to three use three-letter words and rounds four to six use four-letter words, drawn from a 28 word pool. Four word cards per round, guarded against distractors that share the target's first letter or a confusable letter shape.
 - **Difficulty.** Adaptive. The band ladder shifts the split between three and four letter words, so a stronger reader meets four-letter words a round or two earlier.
 - **Feedback.** The target word is re-heard from the speaker glyph. A correct tap flashes the card green with the chime and a dot pop before the next word 700 ms later; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the target word is spoken while the picture shows its meaning, and the speaker glyph repeats it.
-- **Art and assets.** The pool shares 18 words with Find the Word and adds four (fox, cup, map, bed). Four new item SVGs. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
+- **Art and assets.** The pool is the 28-word pool shared with Find the Word — fox, cup, map and bed are in-pool words now. Every picture reuses an existing art-group key, so no new item SVGs. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.20 Number Order
 
@@ -335,7 +335,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.21 Feelings Faces
 
 - **Mechanic.** Hear a short scenario about Aby, then tap the face that shows how Aby feels. Three face cards per round, drawn from four faces: happy, sad, angry and scared.
-- **Rounds and pool.** Six rounds from a pool of 24 scenarios, six per emotion. Each playthrough uses one scenario per emotion plus two more, with no repeats. Every round includes the target emotion among three distinct faces.
+- **Rounds and pool.** Six rounds from a pool of 32 scenarios, eight per emotion. Each playthrough uses one scenario per emotion plus two more, with no repeats. Every round includes the target emotion among three distinct faces.
 - **Difficulty.** Adaptive. The band sets the contrast ramp: the easiest band plays all six rounds with clearly distinct emotions (happy against angry), the classic band plays three distinct rounds then three confusable ones (sad against scared), and the hardest band plays all six with the confusable pair.
 - **Feedback.** Three face cards rise in under the spoken scenario and squish on press. A correct tap splashes colour at the card, fills its progress dot on a Back.out pop and cheers Hoot before the 700 ms advance; a wrong tap wiggles the card and its face 4 degrees three times (2 degrees over 200 ms reduced), nods the mascot and re-speaks the scenario, with no penalty.
 - **Narration.** Rule line: "Tap the face that shows how Aby feels." Each round then speaks its scenario. A wrong tap re-speaks the scenario once and leaves the round open. When there is no voice or sound is off, the scenario appears as a caption and the glyph dims.
@@ -344,11 +344,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.22 Story Order
 
 - **Mechanic.** Drag three shuffled panels into three slots, marked by one, two and three pips, to tell the story first, next, last. Panels can be swapped between slots, withdrawn by tapping, and dropped back into the tray.
-- **Rounds and pool.** Six rounds from a pool of eleven three-panel stories, five obvious (seed to flower, flat balloon to aloft, egg to duckling, ice cream to puddle, whole cake to candles to slices) and six subtle (whole banana to peel, full cup to empty, bare foot to shoe, cloud to puddle, wet clothes hung out to dry, sunrise to sunset). No repeats within a playthrough.
+- **Rounds and pool.** Six rounds from a pool of fifteen three-panel stories, seven obvious (seed to flower, flat balloon to aloft, egg to duckling, ice cream to puddle, whole cake to candles to slices, snow pile to hatted snowman, scattered blocks to tall tower) and eight subtle (whole banana to peel, full cup to empty, bare foot to shoe, cloud to puddle, wet clothes hung out to dry, sunrise to sunset, caterpillar to butterfly, frogspawn to frog). No repeats within a playthrough.
 - **Difficulty.** Adaptive. The band sets the mix of obvious and subtle stories: five obvious and one subtle at the easiest band, three of each in the classic band, one obvious and five subtle at the hardest.
 - **Feedback.** Panels squash on press and tilt as they lift, and a panel dropped on an occupied slot swaps with the one already there, so nothing is ever rejected. A correct order splashes colour at the strip's centre, chimes and fills the dot; a wrong order wiggles every placed panel, leaves them where the child put them and re-judges only when the completed order changes.
 - **Narration.** Rule line: "Put the story in order, first to last." No per-round narration; the panels are the prompt.
-- **Art and assets.** 33 panel SVGs. They travel with the Story Order chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
+- **Art and assets.** 45 panel SVGs. They travel with the Story Order chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
 
 ## 4. Cross-game systems
 
@@ -552,7 +552,7 @@ Rasterising every key at 512 by 512 would waste GPU memory, because most art dis
 
 The tier rule is applied per key wherever that key lives, not to one fixed set, so art loaded with a game is tiered by the same rule as a shell key. Display code scales from the tier size rather than assuming 512. The rule list and the tier sizes live in one place in the code, and the TDD states them ([TDD §3.4](./TDD.md#34-texture-tiers)).
 
-Story Order's 33 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces are lazy group art, loaded with the game; only its tile icon and its sticker are in the boot set, as they are for every game.
+Story Order's 45 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces are lazy group art, loaded with the game; only its tile icon and its sticker are in the boot set, as they are for every game.
 
 ### 7.2 Shell and game chunks
 
@@ -562,15 +562,15 @@ The build produces three kinds of JavaScript:
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
 - **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-Measured from the current build, the shell entry is 137.8 kB as `validate-bundle.js` reports it (141.15 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1342.6 kB, and the build emits 42 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 33 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
+Measured from the current build, the shell entry is 137.8 kB as `validate-bundle.js` reports it (141.15 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1342.6 kB, and the build emits 42 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 45 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 
-Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 166 of the app's 219 art files.
+Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 178 of the app's 231 art files.
 
 **Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 139 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 139 keys are also shell keys, the profile avatars, so 133 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
 
-**Story Order's own art.** Its 33 panel drawings are imported as raw markup by the story scene and rasterised by that scene's own preload, so the strings live in the lazy chunk instead of the shell.
+**Story Order's own art.** Its 45 panel drawings are imported as raw markup by the story scene and rasterised by that scene's own preload, so the strings live in the lazy chunk instead of the shell.
 
 A scene that asks for art which fails to load falls back to a neutral placeholder rather than Phaser's missing-texture checkerboard, and a shared textless cue is shown while the art loads, so the child sees a deliberate loading mark rather than a broken picture.
 

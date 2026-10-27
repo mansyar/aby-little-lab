@@ -3,14 +3,8 @@ import { isConfusableWith, type Letter } from "./alphabetLogic";
 import { type Rng, shuffle } from "./random";
 import { type FirstWord, WORD_POOL } from "./wordLogic";
 
-/** The 22 decode words: shared 18 plus 4 new CVC words. */
-export const DECODE_POOL: readonly FirstWord[] = [
-  ...WORD_POOL,
-  { word: "FOX", letters: 3, promptTexture: "sm_fox", tier: 3 },
-  { word: "CUP", letters: 3, promptTexture: "sm_cup", tier: 3 },
-  { word: "MAP", letters: 3, promptTexture: "sm_map", tier: 3 },
-  { word: "BED", letters: 3, promptTexture: "sm_bed", tier: 3 },
-];
+/** The decode words: the full shared WORD_POOL, so Decode It grows with it. */
+export const DECODE_POOL: readonly FirstWord[] = [...WORD_POOL];
 
 /** Looks up a decode word by its uppercase spelling. */
 export function getDecodeWord(word: string): FirstWord | undefined {
@@ -61,7 +55,7 @@ export function buildRound(target: FirstWord, rng: Rng = Math.random): DecodeRou
     usedFirsts.push(candFirst);
   }
 
-  // Fallback if strict filter left us short (should not happen with 22 pool, but guard)
+  // Fallback if strict filter left us short (should not happen with 28 pool, but guard)
   if (distractors.length < 3) {
     const fallbackPool = DECODE_POOL.filter(
       (entry) => entry.word !== target.word && !distractors.includes(entry.word),

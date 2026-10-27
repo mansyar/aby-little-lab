@@ -50,8 +50,8 @@ function expectValidDecodeRound(round: DecodeRound): void {
 }
 
 describe("DECODE_POOL", () => {
-  it("contains exactly the 22 decode words (18 shared + 4 new)", () => {
-    expect(DECODE_POOL).toHaveLength(22);
+  it("contains exactly the 28 decode words (the full shared WORD_POOL)", () => {
+    expect(DECODE_POOL).toHaveLength(28);
   });
 
   it("contains the expected words", () => {
@@ -62,6 +62,8 @@ describe("DECODE_POOL", () => {
       "BED",
       "BOAT",
       "BONE",
+      "BOOT",
+      "BOX",
       "BUG",
       "CAR",
       "CAT",
@@ -73,9 +75,13 @@ describe("DECODE_POOL", () => {
       "FOX",
       "FROG",
       "HAT",
+      "KITE",
       "MAP",
       "OWL",
       "PIG",
+      "PLUS",
+      "RING",
+      "SOCK",
       "STAR",
       "SUN",
       "TREE",
@@ -99,8 +105,8 @@ describe("DECODE_POOL", () => {
   });
 
   it("classifies 3-letter words as tier 3 and 4-letter words as tier 4", () => {
-    expect(DECODE_POOL.filter((entry) => entry.tier === 3)).toHaveLength(12);
-    expect(DECODE_POOL.filter((entry) => entry.tier === 4)).toHaveLength(10);
+    expect(DECODE_POOL.filter((entry) => entry.tier === 3)).toHaveLength(13);
+    expect(DECODE_POOL.filter((entry) => entry.tier === 4)).toHaveLength(15);
     for (const entry of DECODE_POOL) {
       expect(entry.tier).toBe(entry.word.length === 3 ? 3 : 4);
     }
@@ -140,6 +146,12 @@ describe("DECODE_POOL", () => {
       "sm_cup",
       "sm_map",
       "sm_bed",
+      "toy_box",
+      "sm_kite",
+      "sm_sock",
+      "sm_boot",
+      "shape_ring",
+      "shape_plus",
     ]);
     for (const entry of DECODE_POOL) {
       expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);
@@ -155,9 +167,15 @@ describe("DECODE_POOL", () => {
     expect(byWord.get("CUP")).toBe("sm_cup");
     expect(byWord.get("MAP")).toBe("sm_map");
     expect(byWord.get("BED")).toBe("sm_bed");
+    expect(byWord.get("BOX")).toBe("toy_box");
+    expect(byWord.get("KITE")).toBe("sm_kite");
+    expect(byWord.get("SOCK")).toBe("sm_sock");
+    expect(byWord.get("BOOT")).toBe("sm_boot");
+    expect(byWord.get("RING")).toBe("shape_ring");
+    expect(byWord.get("PLUS")).toBe("shape_plus");
   });
 
-  it("reuses the original 18 WORD_POOL entries exactly", () => {
+  it("reuses every WORD_POOL entry exactly", () => {
     const decodeWords = new Set(DECODE_POOL.map((e) => e.word));
     for (const entry of WORD_POOL) {
       expect(decodeWords.has(entry.word)).toBe(true);

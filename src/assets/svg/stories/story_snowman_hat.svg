@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A snowman is built - 3 of 3. The snowman dressed with a hat, scarf and carrot nose. -->
+  <rect x="32" y="392" width="448" height="28" rx="14" fill="#BEE3F8" stroke="#2D3748" stroke-width="5"/>
+  <path d="M 192 222 L 108 182" fill="none" stroke="#A0522D" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 320 222 L 404 182" fill="none" stroke="#A0522D" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="256" cy="330" r="92" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="256" cy="212" r="66" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="256" cy="118" r="46" fill="#FFFFFF" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="240" cy="110" r="7" fill="#2D3748"/>
+  <circle cx="272" cy="110" r="7" fill="#2D3748"/>
+  <path d="M 256 122 L 292 130 L 256 140 Z" fill="#ED8936" stroke="#2D3748" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="196" y="152" width="120" height="30" rx="14" fill="#FC8181" stroke="#2D3748" stroke-width="5"/>
+  <rect x="282" y="168" width="30" height="56" rx="12" fill="#FC8181" stroke="#2D3748" stroke-width="5"/>
+  <rect x="222" y="36" width="68" height="52" rx="8" fill="#2D3748" stroke="#2D3748" stroke-width="5"/>
+  <rect x="202" y="80" width="108" height="18" rx="9" fill="#2D3748" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="256" cy="300" r="9" fill="#2D3748"/>
+  <circle cx="256" cy="332" r="9" fill="#2D3748"/>
+</svg>
