@@ -33,19 +33,16 @@
 - **Covers:** FR-2, FR-4, NFR-1, NFR-2, AC-2
 - **Touches:** `src/game/storyOrderLogic.ts`, `src/game/storyOrderArt.ts`, `src/__tests__/game/story*`
 - **Verification:** `pnpm test -- --run src/__tests__/game/story && pnpm typecheck`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Add new stories data in obvious→subtle order** — covers: FR-2
-  - [ ] **P2.T1.1: Author story texts with 3-panel breakdowns**
-- [ ] **P2.T2: Add 3-panel Storybook Flat art per story** — covers: FR-4
-- [ ] **P2.T3: Update story order tests** — covers: AC-2
+- [x] **P2.T1: Add new stories data in obvious→subtle order** — covers: FR-2
+  - [x] **P2.T1.1: Author story texts with 3-panel breakdowns**
+- [x] **P2.T2: Add 3-panel Storybook Flat art per story** — covers: FR-4
+- [x] **P2.T3: Update story order tests** — covers: AC-2
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 7f3d6c43
 **Evidence:** conductor/tracks/20261027-content-expansion/verification/phase-2.md
--->
 
 ## Phase 3: Feelings scenarios expansion
 
