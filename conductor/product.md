@@ -124,6 +124,20 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## Changelog — Content Expansion: Words, Stories, Scenarios (2026-10-27)
+
+> **2026-10-27 — Content Expansion:** three pools grow so repeat play stays
+> fresh. Find the Word, Build the Word and Decode It draw from a 28-word pool
+> (map, fox, cup, box, bed, kite, sock, boot, ring and plus join; every picture
+> reuses an existing art key, so no new word art). Feelings Faces speaks 32
+> scenarios (eight per emotion, still gentle everyday Aby moments on the same
+> contrastive-then-confusable ladder). Story Order tells 15 stories (snowman,
+> tower, caterpillar and frogspawn-to-frog join; 12 new Storybook Flat panels
+> in the game's lazy chunk, prewarmed by the cold-tap art queue like the old
+> ones). Adaptive bands, round counts, narration and art style are unchanged —
+> at the classic band every game plays exactly as before, with more to
+> discover.
+
 ## Changelog - Hub Cold-Tap Art Preload (2026-10-27)
 
 > **2026-10-27 - Hub Cold-Tap Art Preload:** the Hub now rasterizes each
