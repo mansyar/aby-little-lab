@@ -69,7 +69,7 @@
 - **Covers:** FR-5, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-4, AC-5, AC-6
 - **Touches:** `src/__tests__/game/adaptive*`, `docs/*`, `conductor/product.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Re-verify adaptive banding per affected game** — covers: FR-5
 - [ ] **P4.T2: Sync pool counts in docs + run full gate** — covers: AC-4, AC-5, AC-6
