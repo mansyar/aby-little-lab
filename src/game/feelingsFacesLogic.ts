@@ -27,12 +27,12 @@ export interface Scenario {
 }
 
 /**
- * The 24-entry scenario pool: six situations per emotion. Every entry is a
+ * The 32-entry scenario pool: eight situations per emotion. Every entry is a
  * gentle, everyday, resolvable moment — thunder, a loud vacuum, a dropped ice
  * cream, a friend taking a toy — with no injury, loss, or violence. The
- * extender band's per-emotion draw needs at least six usable scenarios per
+ * extender band's per-emotion draw needs at least eight usable scenarios per
  * emotion, so the shipped 16 entries stay verbatim and two more per emotion
- * keep every draw fresh.
+ * from each of the two extensions keep every draw fresh.
  */
 export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "happy-ladybug", emotion: "happy", text: "Aby finds a ladybug on a leaf." },
@@ -41,24 +41,32 @@ export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "happy-truck", emotion: "happy", text: "Aby hears the ice cream truck coming." },
   { id: "happy-bubbles", emotion: "happy", text: "Aby catches soap bubbles in the sun." },
   { id: "happy-plant", emotion: "happy", text: "Aby's little seed grows its first leaf." },
+  { id: "happy-cookies", emotion: "happy", text: "Aby shares cookies with friends at snack time." },
+  { id: "happy-ducks", emotion: "happy", text: "Aby sings a sweet song for the baby ducks." },
   { id: "sad-blocks", emotion: "sad", text: "Aby's block tower falls down." },
   { id: "sad-ice-cream", emotion: "sad", text: "Aby drops the ice cream cone." },
   { id: "sad-boat", emotion: "sad", text: "Aby's paper boat sinks in the puddle." },
   { id: "sad-home", emotion: "sad", text: "Aby has to stop playing to go home." },
   { id: "sad-rain", emotion: "sad", text: "Rain stops the trip to the playground." },
   { id: "sad-balloon", emotion: "sad", text: "Aby's red balloon drifts away slowly." },
+  { id: "sad-kite", emotion: "sad", text: "Aby's kite gets stuck in the tall tree." },
+  { id: "sad-story", emotion: "sad", text: "Aby misses the morning story circle." },
   { id: "angry-toy", emotion: "angry", text: "Aby's friend takes the toy Aby had." },
   { id: "angry-crayon", emotion: "angry", text: "Aby's little brother grabs the crayon." },
   { id: "angry-turn", emotion: "angry", text: "Aby has to wait a long turn." },
   { id: "angry-line", emotion: "angry", text: "Someone cuts in front of Aby in line." },
   { id: "angry-tower", emotion: "angry", text: "Aby's sibling knocks over the tower." },
   { id: "angry-puzzle", emotion: "angry", text: "The puzzle piece will not fit yet." },
+  { id: "angry-cup", emotion: "angry", text: "Aby wants the blue cup but gets the green one." },
+  { id: "angry-slide", emotion: "angry", text: "Aby waits while others finish the slide." },
   { id: "scared-thunder", emotion: "scared", text: "Thunder booms during the bedtime story." },
   { id: "scared-vacuum", emotion: "scared", text: "The vacuum roars in the next room." },
   { id: "scared-hallway", emotion: "scared", text: "The hallway is dark at bedtime." },
   { id: "scared-dog", emotion: "scared", text: "A big dog barks behind the fence." },
   { id: "scared-mask", emotion: "scared", text: "The new face mask looks surprising." },
   { id: "scared-swing", emotion: "scared", text: "The big swing goes higher than usual." },
+  { id: "scared-owl", emotion: "scared", text: "Owls hoot softly outside the tent at night." },
+  { id: "scared-wind", emotion: "scared", text: "Aby hears the wind tap the window." },
 ];
 
 /** How many rounds one playthrough presents. */
