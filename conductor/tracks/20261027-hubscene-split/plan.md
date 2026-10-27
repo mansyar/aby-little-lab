@@ -62,10 +62,14 @@
 - **Covers:** FR-4, FR-5, NFR-1, NFR-3, NFR-4, AC-4, AC-5
 - **Touches:** `src/game/hub/playTimeUi.ts` (new), `src/game/hub/hubAttract.ts` (new), `src/scenes/HubScene.ts` (final rewire), `src/__tests__/game/hub/playTimeUi.test.ts` + `hubAttract.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
 - **Verification:** `pnpm check` && `pnpm typecheck` && `pnpm test -- --run` && `pnpm test:coverage` && `pnpm build` && `node scripts/validate-bundle.js` && `node scripts/validate-pwa.js` && `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Extract play-time UI + attract/decor** — covers: FR-4, FR-5
-- [ ] **P4.T2: Unit tests, size check, full gate** — covers: FR-4, FR-5, AC-4, AC-5
+- [x] **P4.T1: Extract play-time UI + attract/decor** — covers: FR-4, FR-5
+- [x] **P4.T2: Unit tests, size check, full gate** — covers: FR-4, FR-5, AC-4, AC-5
+
+- **Result:** verified — `playTimeUi.ts` (162) + `hubAttract.ts` (190) extracted; HubScene 567 → 382 lines; full 8-command gate green (131 files / 2,829 tests; coverage above gates; shell 150.0 kB; PWA 16/16; docs 6/6). Deviations: HubScene 382 vs ~320 target; six validator-mandated doc-count lines outside Touches; primary-fixed eager-`sceneLoaders` regression and `loadCue`/`nudge` cast-read surface. All recorded in evidence for review to disposition.
+- **Checkpoint:** a804c07a
+- **Evidence:** `conductor/tracks/20261027-hubscene-split/verification/phase-4.md`
 
 <!--
 Review fixes are appended by `conductor-review` as:
