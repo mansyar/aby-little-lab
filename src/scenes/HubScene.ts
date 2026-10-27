@@ -1,24 +1,28 @@
 import Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
-import { createGameLoadCue, type GameLoadCue } from "../components/GameLoadCue";
-import { createCornerMascot, type Mascot } from "../components/Mascot";
+import { createGameLoadCue } from "../components/GameLoadCue";
 import { ParentLock } from "../components/ParentLock";
-import { createPlayTimeIndicator, PlayTimeNudge } from "../components/PlayTimeIndicator";
+import type { PlayTimeNudge } from "../components/PlayTimeIndicator";
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { createArtResolver } from "../game/hub/artGroups";
 import {
-  ART_KEYS_BY_GAME,
-  type ArtKeyEntry,
-  type PrewarmController,
-  type PrewarmEntry,
-  recencyFirstOrder,
-  startArtPrewarm,
-  startPrewarm,
-} from "../game/hub/prewarm";
+  createGameLaunch,
+  type GameLaunchController,
+  type GameLaunchCue,
+} from "../game/hub/gameLaunch";
+import { createHubAttract, type HubAttractController } from "../game/hub/hubAttract";
+import { createHubPrewarm, type HubPrewarmController } from "../game/hub/hubPrewarm";
+import {
+  createPlayTimeUi,
+  isDocumentHidden,
+  type PlayTimeUiController,
+} from "../game/hub/playTimeUi";
+import type { ArtKeyEntry } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
 import { GAME_TILES } from "../game/hubTiles";
-import { endPlaySession, isNearLimit, startPlaySession } from "../game/playTimeLogic";
+import { endPlaySession, startPlaySession } from "../game/playTimeLogic";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
@@ -30,136 +34,8 @@ import {
   recordGamePlay,
   recordPlayTime,
 } from "../utils/storage";
-import { toDataUri } from "../utils/svgDataUri";
 import { textStyle } from "../utils/typography";
 import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
-
-/** Number of background decorations. */
-const DECORATION_COUNT = 4;
-/** Radius of background decoration dots (px). */
-const DECORATION_RADIUS = 10;
-/** Low-contrast color for background decorations. */
-const DECORATION_COLOR = 0xe8e0d0;
-/** Vertical drift distance for decorations (px). */
-const DECORATION_DRIFT = 16;
-/** Slowest decoration drift loop (ms). */
-const DECORATION_DRIFT_MIN = 4000;
-/** Fastest decoration drift loop (ms). */
-const DECORATION_DRIFT_MAX = 6000;
-/** Idle time without input before the attract cue starts (ms). */
-const IDLE_ATTRACT_DELAY = 25000;
-/** Interval between idle calls while attract is active (ms). */
-const IDLE_CALL_INTERVAL = 10000;
-/**
- * Delay between the Hub entrance and the first prewarm idle request (ms). Long
- * enough that the entrance fade and zoom finish before any chunk is fetched,
- * short enough that a child who hesitates still finds warmed chunks.
- */
-const PREWARM_START_DELAY = 1200;
-/** Wiggle amplitude for the attract cue (degrees). */
-const WIGGLE_ANGLE = 4;
-/** Duration of one wiggle swing (ms). */
-const WIGGLE_DURATION = 350;
-/** Phase offset between tile wiggles (ms). */
-const WIGGLE_PHASE_OFFSET = 120;
-/** How many tiles wiggle during an attract cue (rotating pick). */
-const ATTRACT_WIGGLE_COUNT = 2;
-
-/**
- * True where the document exposes a visibility state. Mirrors the play-time
- * module's guard so a headless host (no document, or no `visibilityState`)
- * stays inert instead of throwing on the visibility hook.
- */
-function canObserveVisibility(): boolean {
-  return typeof document !== "undefined" && typeof document.visibilityState === "string";
-}
-
-/**
- * True only where the document reports itself hidden. Built on the same guard
- * as `canObserveVisibility`, so a host with no visibility surface counts as
- * visible and keeps the prewarm active instead of silently disabling it.
- */
-function isDocumentHidden(): boolean {
-  return canObserveVisibility() && document.visibilityState === "hidden";
-}
-
-/** One game-art texture: the key the game draws and the SVG markup behind it. */
-interface ArtTableAsset {
-  /** Texture key, identical to the key the game's art group declares. */
-  readonly key: string;
-  /** Raw SVG markup for the key. */
-  readonly svg: string;
-}
-
-/** One lazily loaded art table: the assets of a single art group. */
-interface ArtTableLike {
-  /** The group's textures in declaration order. */
-  readonly assets: readonly ArtTableAsset[];
-}
-
-/**
- * Lazy loader for one art group's table.
- *
- * Every loader is a dynamic `import()`, so the group's SVG markup ships in a
- * lazy chunk the idle pass fetches on demand — never in the shell entry. A
- * static import here would inline every game's artwork into the shell bundle
- * and break the 200 kB `validate-bundle` budget; the source guard in
- * `hubScene.test.ts` pins this file to dynamic imports only.
- */
-type ArtGroupLoader = () => Promise<readonly ArtTableLike[]>;
-
-/** One lazy loader per art group, plus Story Order's own panel table. */
-const ART_GROUP_LOADERS: Readonly<Record<string, ArtGroupLoader>> = {
-  animals: () => import("../game/art/animals").then((module) => [module.animals]),
-  cutouts: () => import("../game/art/cutouts").then((module) => [module.cutouts]),
-  faces: () => import("../game/art/faces").then((module) => [module.faces]),
-  food: () => import("../game/art/food").then((module) => [module.food]),
-  glyphs: () => import("../game/art/glyphs").then((module) => [module.glyphs]),
-  items: () => import("../game/art/items").then((module) => [module.items]),
-  letters: () => import("../game/art/letters").then((module) => [module.letters]),
-  music: () => import("../game/art/music").then((module) => [module.music]),
-  numerals: () => import("../game/art/numerals").then((module) => [module.numerals]),
-  shadows: () => import("../game/art/shadows").then((module) => [module.shadows]),
-  shapes: () => import("../game/art/shapes").then((module) => [module.shapes]),
-  toys: () => import("../game/art/toys").then((module) => [module.toys]),
-  "story-panels": () =>
-    import("../game/storyOrderArt").then((module) => [{ assets: module.STORY_PANEL_ASSETS }]),
-};
-
-/**
- * Art groups each game draws, by game id.
- *
- * Mirrors each scene's `preloadArt([...])` declaration (Story Order declares
- * through `preloadStoryOrderArt`) and the group composition of
- * `ART_KEYS_BY_GAME` in `src/game/hub/prewarm.ts`: the key-only table decides
- * the raster order, this table decides where each key's markup is fetched from.
- * The resolver parity test in `hubScene.test.ts` resolves every key of every
- * game through this table, so a drift in either direction fails loudly.
- */
-const ART_GROUPS_BY_GAME: Readonly<Record<string, readonly string[]>> = {
-  "shape-sorter": ["cutouts", "shapes"],
-  "animal-trace": ["animals", "food"],
-  "pop-freeze": ["animals", "glyphs"],
-  "shadow-match": ["items", "shadows"],
-  "musical-memory": ["music"],
-  "big-small": ["toys"],
-  "pattern-builder": ["shapes"],
-  "alphabet-match": ["letters"],
-  "word-match": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "word-builder": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "how-many": ["food", "items", "numerals", "shapes"],
-  "first-sounds": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "more-less": ["food", "glyphs", "items", "shapes"],
-  "odd-one-out": ["animals", "music", "shapes", "toys"],
-  "color-match": ["music", "shapes"],
-  "add-it-up": ["food", "glyphs", "items", "shapes"],
-  "take-away": ["food", "glyphs", "items", "shapes"],
-  "memory-match": ["animals", "glyphs", "items", "toys"],
-  "decode-it": ["animals", "food", "items", "letters", "music", "shapes", "toys"],
-  "number-order": ["numerals"],
-  "feelings-faces": ["faces"],
-  "story-order": ["story-panels"],
-};
 
 /**
  * Hub scene — the central navigation hub.
@@ -172,92 +48,44 @@ export class HubScene extends Phaser.Scene {
   private settingsPanel?: SettingsPanel;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
-  /** Pending idle-attract timer. */
-  private idleCallTimer?: Phaser.Time.TimerEvent;
-  /** True once the attract cue has started for the current idle period. */
-  private idleAttractActive = false;
-  /** Rotates which tiles are picked for each idle-attract wiggle. */
-  private attractWiggleTick = 0;
-  /** Professor Hoot, the friendly teacher mascot. */
-  private mascot?: Mascot;
+  /**
+   * Idle attract and decor owned by `src/game/hub/hubAttract.ts`. The scene
+   * keeps only this delegation: the module owns the mascot, the idle timer,
+   * and the decorations.
+   */
+  private readonly attract: HubAttractController;
+  /**
+   * Play-time UI owned by `src/game/hub/playTimeUi.ts`. The scene keeps only
+   * this delegation: the module owns the lock flag, the indicator graphics,
+   * the nudge, and the visibility hook.
+   */
+  private readonly playTime: PlayTimeUiController;
   /** Profile chip + picker: active avatar, switch UI (top-left, kid-tappable). */
   private profileChip: ProfileChip;
   /** PWA lifecycle toast wiring (update/offline). */
   private pwaToasts: PwaToasts;
-  /** True while the active profile's daily play-time limit is reached. */
-  private timeUp = false;
-  /** Play-time indicator (hint arc or moon badge) for the active profile. */
-  private playTimeGraphics?: Phaser.GameObjects.Graphics;
-  /** True while the pre-game nudge overlay is showing. */
-  private nudge = new PlayTimeNudge();
-  /** Textless retry cue for a game chunk that failed to load; absent when none is due. */
-  private loadCue?: GameLoadCue;
   /**
-   * Identifies the current visit to the Hub. `create()` and the `shutdown`
-   * handler each bump it, and a launch compares the value it captured before
-   * its await with the value it finds after it. Phaser reuses the scene
-   * instance, so a boolean reset in `create()` would let a load that settles
-   * after the next `create()` act on the new visit; a counter cannot (NFR-6).
+   * Game-launch flow owned by `src/game/hub/gameLaunch.ts`. The scene keeps
+   * only this delegation plus the `loadCue` compat accessor below: the module
+   * owns the single-flight flag, the visit token, and the retry cue, while the
+   * scene owns the engine handles the launcher's deps close over.
    */
-  private visitToken = 0;
+  private readonly launcher: GameLaunchController;
   /**
-   * True while a game launch is in flight. A cue retry and a tile tap can
-   * otherwise race two loads, and both would charge a game the child never
-   * opened (FR-4).
+   * Prewarm orchestration owned by `src/game/hub/hubPrewarm.ts`. The scene
+   * keeps only this delegation plus the engine handles the controller's deps
+   * close over (timers, textures, loader, gates): the module owns entry
+   * selection, gates, and pass lifecycle.
    */
-  private launching = false;
+  private readonly prewarmer: HubPrewarmController;
   /**
-   * Idle-paced prewarm of the lazy game chunks; absent while the pass is
-   * stopped (locked, hidden, launching, or shut down).
+   * Resolves game-art SVG markup through the lazily loaded art tables owned by
+   * `src/game/hub/artGroups.ts`. The scene keeps only this delegation: the
+   * module owns the tables, loaders, and caches.
    */
-  private prewarm?: PrewarmController;
-  /** Pending prewarm start, armed once the Hub entrance has settled. */
-  private prewarmStartTimer?: Phaser.Time.TimerEvent;
-  /**
-   * Idle-paced art raster pass; armed and cancelled alongside the chunk pass
-   * so both queues share the entrance, lock, and visibility gates (FR-2).
-   * Absent while the pass is stopped.
-   */
-  private artPrewarm?: PrewarmController;
-  /**
-   * Art keys the idle pass has already rasterized. Shared across passes —
-   * and across visits, like `warmedChunks` — so a return trip resumes where
-   * the last visit stopped.
-   */
-  private readonly artQueued = new Set<string>();
-  /** Loaded art group tables, by group key; fetched once per Hub lifetime. */
-  private readonly artGroupCache = new Map<string, readonly ArtTableLike[]>();
-  /** Resolved SVG markup, by texture key; filled as the idle pass walks keys. */
-  private readonly artSvgCache = new Map<string, string>();
-  /**
-   * Art pass generation: bumped on every cancel so a key resolution that
-   * settles after shutdown, a tap, or a lock queues nothing (FR-5).
-   */
-  private artPassId = 0;
-  /**
-   * Chunk keys a prewarm pass already imported. Shared across passes — and
-   * across visits, since Phaser reuses this instance and the module registry
-   * outlives a visit — so a restart skips what already landed without spending
-   * an idle slot on it (FR-3).
-   */
-  private readonly prewarmImported = new Set<string>();
+  private readonly artResolver = createArtResolver();
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
-  /**
-   * Document-visibility handler: re-reads the budget when the page returns to
-   * the foreground and parks the chunk prewarm while it is in the background.
-   * A field so the shutdown hook can remove the exact reference create()
-   * attached.
-   */
-  private handleVisibilityChange = (): void => {
-    if (document.visibilityState === "visible") {
-      this.refreshPlayTimeState();
-      return;
-    }
-    // Background imports buy the child nothing and cost battery, so the pass
-    // stops here; the foreground return above re-arms it (FR-2).
-    this.syncPrewarm();
-  };
   /** Tile-grid renderer: layouts, page dots, swipes and the sticker shelf. */
   private grid: HubGrid;
 
@@ -273,20 +101,78 @@ export class HubScene extends Phaser.Scene {
       },
       onSwitch: () => {
         this.grid.rerenderStickerShelf();
-        this.refreshPlayTimeState();
+        this.playTime.refreshPlayTimeState();
         // The order is recency-first for the active profile, so a switch
         // re-derives the work still pending (spec: profile switch mid-cycle).
         this.restartPrewarm();
       },
     });
     this.pwaToasts = new PwaToasts(this);
+    this.attract = createHubAttract({
+      scene: this,
+      getAttractTargets: () => this.grid.attractTargets,
+      playIdleCall: () => AudioManager.getInstance().playIdleCall(),
+      isReducedMotion: () => isReducedMotion(),
+    });
+    this.playTime = createPlayTimeUi({
+      scene: this,
+      applyTimeUpLock: () => this.grid.applyTimeUpLock(),
+      restoreTiles: () => this.grid.restoreTiles(),
+      waveMascot: () => this.attract.waveMascot(),
+      syncPrewarm: () => this.syncPrewarm(),
+      launchTile: (tileIndex) => transitionToScene(this, GAME_TILES[tileIndex].sceneKey),
+    });
     this.grid = new HubGrid({
       scene: this,
-      isTimeUp: () => this.timeUp,
+      isTimeUp: () => this.playTime.isTimeUp(),
       activateTile: (tileIndex, tile) => this.activateTile(tileIndex, tile),
-      onUserGesture: () => this.resetIdleAttract(),
+      onUserGesture: () => this.attract.resetIdleAttract(),
       gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
       onBoardChange: () => this.hideLoadCue(),
+    });
+    this.launcher = createGameLaunch({
+      tiles: GAME_TILES,
+      loadScene: (sceneKey) => loadSceneWithRetry(this, sceneKey),
+      cancelPrewarm: () => this.cancelPrewarm(),
+      syncPrewarm: () => this.syncPrewarm(),
+      isTimeUp: () => this.playTime.isTimeUp(),
+      setNavLocked: (locked) => {
+        this.grid.navLocked = locked;
+      },
+      startSession: (profileId) => startPlaySession(profileId),
+      recordPlay: (gameId) => recordGamePlay(gameId),
+      getActiveProfileId: () => getActiveProfile().id,
+      getPlayTime: () => getPlayTime(),
+      transition: (sceneKey) => transitionToScene(this, sceneKey),
+      showNudge: (tileIndex) => this.playTime.showPlayTimeNudge(tileIndex),
+      createCue: () => createGameLoadCue(this),
+      getFallbackCenter: () => ({
+        x: this.cameras.main.width / 2,
+        y: this.cameras.main.height / 2,
+      }),
+      startAudio: () => this.startAudioFn(),
+    });
+    this.prewarmer = createHubPrewarm({
+      tiles: GAME_TILES,
+      getSceneLoaders: () => sceneLoaders,
+      getProgress,
+      isTimeUp: () => this.playTime.isTimeUp(),
+      isLaunching: () => this.launcher.isLaunching(),
+      isHidden: () => isDocumentHidden(),
+      resolveArtSvg: (entry) => this.resolveArtSvg(entry),
+      isPresent: (key) => this.textures.exists(key),
+      queueSvg: (entry, dataUri) =>
+        this.load.svg(entry.key, dataUri, { width: entry.size, height: entry.size }),
+      onLoadSettled: (done) => {
+        this.load.on("complete", done);
+        this.load.on("loaderror", done);
+      },
+      offLoadSettled: (done) => {
+        this.load.off("complete", done);
+        this.load.off("loaderror", done);
+      },
+      startLoad: () => this.load.start(),
+      delayStart: (ms, callback) => this.time.delayedCall(ms, callback),
     });
   }
 
@@ -297,21 +183,16 @@ export class HubScene extends Phaser.Scene {
   create(): void {
     sceneEntrance(this);
     const reducedMotion = isReducedMotion();
-    this.idleAttractActive = false;
-    this.timeUp = false;
+    this.attract.resetForVisit();
+    this.playTime.beginVisit();
     // A new visit: a launch still in flight belongs to the previous one, and
-    // its resolution must not act on this one.
-    this.visitToken += 1;
+    // its resolution must not act on this one. The launcher bumps its visit
+    // token, drops the in-flight flag, and destroys the retry cue.
+    this.launcher.beginVisit();
     // Likewise a prewarm: the shutdown handler already drops it, but a visit
     // must never inherit the previous one's pass even if that handler did not
     // run (NFR-6).
     this.cancelPrewarm();
-    this.launching = false;
-    // Phaser reuses this instance across visits: a cue left from the previous
-    // visit is gone with its scene, but the field must not point at it.
-    this.loadCue?.destroy();
-    this.loadCue = undefined;
-    this.nudge = new PlayTimeNudge();
     // Phaser reuses this instance across visits (auto-return re-runs create()),
     // so clear the launch guard or every tile tap after the first game is dead.
     this.grid.resetForVisit();
@@ -323,10 +204,10 @@ export class HubScene extends Phaser.Scene {
       recordPlayTime(ended.profileId, ended.minutes);
     }
 
-    this.createMascot();
+    this.attract.createMascot(this.justEarned);
 
     if (!reducedMotion) {
-      this.createDecorations();
+      this.attract.createDecorations();
     }
 
     const startAudio = (): void => {
@@ -354,16 +235,16 @@ export class HubScene extends Phaser.Scene {
     }
     this.scale.on("resize", this.grid.handleViewportChange, this.grid);
 
-    this.createPlayTimeIndicator();
+    this.playTime.createPlayTimeIndicator();
 
     this.input.on("pointerdown", () => {
       // Any first interaction unlocks audio so the idle-attract cue is
       // audible on a fresh load (the tile tap already resumes + starts BGM).
       unlockSpeechForUserGesture();
       AudioManager.getInstance().resume();
-      this.resetIdleAttract();
+      this.attract.resetIdleAttract();
     });
-    this.scheduleIdleAttract();
+    this.attract.scheduleIdleAttract();
     // Armed with the rest of the post-entrance flow, never inside
     // `sceneEntrance`: the pass imports only in idle slots, so the entrance's
     // fade and zoom keep their frames (NFR-2).
@@ -395,7 +276,7 @@ export class HubScene extends Phaser.Scene {
         this.settingsPanel = new SettingsPanel(this, undefined, () => {
           this.grid.rerenderStickerShelf();
           this.profileChip.refresh();
-          this.refreshPlayTimeState();
+          this.playTime.refreshPlayTimeState();
         });
       },
       onFailure: () => {
@@ -412,22 +293,17 @@ export class HubScene extends Phaser.Scene {
     this.events.on("shutdown", () => {
       // From here on a load in flight resolves against a dead visit; end it
       // before anything else so a late `openGame` continuation stops early.
-      this.visitToken += 1;
-      this.hideLoadCue();
+      this.launcher.endVisit();
       this.pwaToasts.destroy();
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
       this.profileChip.destroy();
-      this.playTimeGraphics?.destroy();
-      this.playTimeGraphics = undefined;
-      this.idleCallTimer?.remove();
-      this.idleCallTimer = undefined;
+      this.playTime.destroy();
       // A prewarm belongs to the visit that armed it: drop its pending idle
       // slot so nothing imports for a Hub nobody is looking at (FR-5).
       this.cancelPrewarm();
-      this.mascot?.destroy();
-      this.mascot = undefined;
+      this.attract.destroy();
       this.grid.destroy();
       // Detach the viewport listener so a resize while the scene is inactive
       // cannot rebuild a dead scene's objects.
@@ -436,435 +312,71 @@ export class HubScene extends Phaser.Scene {
 
     // Registered after the cleanup above so the first shutdown handler stays
     // the scene teardown; this one only detaches the page-visibility hook.
-    this.watchPlayTimeVisibility();
+    this.playTime.watchPlayTimeVisibility();
   }
 
   /**
-   * Activates a tile after the grid's tap guards pass. The audio unlock stays
-   * on the gesture that triggered it; everything that belongs to a started
-   * game waits for the load (see `openGame`).
+   * Activates a tile after the grid's tap guards pass. Delegates to the launch
+   * flow owned by `src/game/hub/gameLaunch.ts`; the audio unlock stays on the
+   * gesture that triggered it (see `GameLaunchDeps.startAudio`).
    */
   private activateTile(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): void {
-    this.startAudioFn();
-    void this.openGame(tileIndex, tile);
-  }
-
-  /**
-   * Loads the game's chunk and opens it when the load succeeded. Every side
-   * effect belongs to a game that actually opened, so the play session, the
-   * game-play record and the play-time nudge all sit behind the resolved load —
-   * a tap whose chunk never arrives charges neither time nor a play.
-   *
-   * One launch runs at a time: a launch already in flight refuses a second one,
-   * and this method is the only place that decides a launch is over, so the tap
-   * lock a failed launch hands back and the cue's retry cannot race a second
-   * chain into the same play record.
-   *
-   * The tapped tile rides along so a failure can anchor the retry cue on it.
-   */
-  private async openGame(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): Promise<void> {
-    if (this.launching) return;
-    // The tap always wins: pending prewarm work stops before the load is
-    // awaited, so the tap's own fetch and registration are never queued behind
-    // an idle import (FR-1).
-    this.cancelPrewarm();
-    const visit = this.visitToken;
-    this.launching = true;
-    const loaded = await loadSceneWithRetry(this, GAME_TILES[tileIndex].sceneKey);
-    // The Hub can go away mid-load, and Phaser reuses the instance, so the
-    // resolution only acts on the visit that started it: acting on any other
-    // would start a transition on a dead scene, or hang a cue over a screen
-    // nobody sees (NFR-6).
-    if (visit !== this.visitToken) return;
-    // The cap outranks a retry: the grid checks time-up when a tile is tapped,
-    // but a cue outlives that moment, so it is checked again before any charge.
-    if (this.timeUp) {
-      this.hideLoadCue();
-      this.launching = false;
-      this.grid.navLocked = false;
-      return;
-    }
-    if (!loaded) {
-      // Nothing opened, so hand the grid its tap lock back: one dead chunk must
-      // not take every other tile with it. The launch itself is over.
-      this.launching = false;
-      this.grid.navLocked = false;
-      this.showLoadCue(tileIndex, tile);
-      // No game started, so the idle pass may resume behind the retry cue.
-      this.syncPrewarm();
-      return;
-    }
-    // Navigating away from the Hub now, so the in-flight flag stays set until
-    // the scene shuts down.
-    this.hideLoadCue();
-    startPlaySession(getActiveProfile().id);
-    recordGamePlay(GAME_TILES[tileIndex].gameId);
-    if (this.shouldNudge()) {
-      this.showPlayTimeNudge(tileIndex);
-    } else {
-      transitionToScene(this, GAME_TILES[tileIndex].sceneKey);
-    }
-  }
-
-  /**
-   * Puts the textless retry cue over the tapped tile, or the scene centre when
-   * the tap did not come with a tile. A destroyed cue is terminal (its shutdown
-   * hook is detached), so each failure that needs a surface builds a fresh one;
-   * `show()` still keeps it to one cue at a time (FR-6).
-   */
-  private showLoadCue(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): void {
-    this.loadCue ??= createGameLoadCue(this);
-    this.loadCue.show({
-      x: tile?.x ?? this.cameras.main.width / 2,
-      y: tile?.y ?? this.cameras.main.height / 2,
-      onRetry: () => {
-        // The retry is a tap on a live grid, so it takes the same tap lock a
-        // tile tap does. Without it a second tile can start a parallel load and
-        // charge a game that never opens (FR-4).
-        this.grid.navLocked = true;
-        // Drop the cue before retrying so a success cannot leave it on screen.
-        this.hideLoadCue();
-        void this.openGame(tileIndex, tile);
-      },
-    });
+    this.launcher.activateTile(tileIndex, tile);
   }
 
   /** Removes the retry cue, if one is up. Safe to call at any time. */
   private hideLoadCue(): void {
-    this.loadCue?.destroy();
-    this.loadCue = undefined;
-  }
-
-  /** True when the active profile has 5 minutes or fewer remaining. */
-  private shouldNudge(): boolean {
-    return isNearLimit(getPlayTime());
+    this.launcher.hideLoadCue();
   }
 
   /**
-   * Creates the play-time indicator for the active profile: a hint arc under
-   * the grid while time remains (warm when 5 minutes or fewer are left), or a
-   * textless moon badge with dimmed, locked tiles once the daily limit is
-   * reached. No-op when the profile has no limit set.
-   *
-   * `wasTimeUp` is the lock state before the refresh that called this, so the
-   * mascot waves once when the cap is first reached rather than on every
-   * foreground return the cap is re-read on. The lock itself is applied
-   * unconditionally — the visuals must converge whatever the call site.
+   * Test-compat reads: the cue and nudge live in the extracted launch and
+   * play-time controllers, but scene suites inspect them via cast
+   * (`hubSceneLoad.test.ts`). These getters preserve the pre-split surface.
    */
-  private createPlayTimeIndicator(wasTimeUp = false): void {
-    this.playTimeGraphics =
-      createPlayTimeIndicator({
-        scene: this,
-        onLimitReached: () => {
-          this.timeUp = true;
-          this.grid.applyTimeUpLock();
-          if (!wasTimeUp) {
-            this.mascot?.wave();
-          }
-        },
-      }) ?? undefined;
+  get loadCue(): GameLaunchCue | undefined {
+    return this.launcher.cue;
   }
 
-  /**
-   * Rebuilds the play-time indicator and tile lock state after a profile
-   * switch or a parental settings change.
-   */
-  private refreshPlayTimeState(): void {
-    this.playTimeGraphics?.destroy();
-    this.playTimeGraphics = undefined;
-    const wasTimeUp = this.timeUp;
-    if (this.timeUp) {
-      this.grid.restoreTiles();
-      this.timeUp = false;
-    }
-    this.createPlayTimeIndicator(wasTimeUp);
-    // The lock can arrive or clear with this refresh, so the prewarm follows it
-    // in both directions: no imports while locked, a fresh pass once it clears
-    // (FR-2).
-    this.syncPrewarm();
-  }
-
-  /**
-   * Ordered chunk entries for one prewarm pass, recency-first for the active
-   * profile. Recency lives in the progress map keyed by game id, while the
-   * loaders are keyed by scene key, so the order is derived over the game ids
-   * and then mapped to the chunks that have a loader.
-   *
-   * The progress map is read here, at every pass start, rather than cached, so
-   * the order follows the child: returning from a game re-derives with that
-   * game first, and a profile switch re-derives for the new profile (FR-1).
-   */
-  private prewarmEntries(): PrewarmEntry[] {
-    const gridOrder = GAME_TILES.map((tile) => tile.gameId);
-    // Only the games the registry actually has a chunk loader for: a host or a
-    // test double may expose a registry without one, and there is nothing to
-    // warm then.
-    const warmable = GAME_TILES.filter((tile) => tile.sceneKey in sceneLoaders);
-    const entries: PrewarmEntry[] = [];
-    for (const gameId of recencyFirstOrder(
-      getProgress(),
-      gridOrder,
-      warmable.map((tile) => tile.gameId),
-    )) {
-      const tile = warmable.find((candidate) => candidate.gameId === gameId);
-      if (!tile) continue;
-      entries.push({ key: tile.sceneKey, load: sceneLoaders[tile.sceneKey] });
-    }
-    return entries;
-  }
-
-  /**
-   * True while the prewarm may run. The play-time lock outranks it — a locked
-   * Hub is not a place a child can start a game from, so warming chunks there
-   * buys nothing — and a backgrounded page or a launch in flight has the same
-   * answer (FR-2).
-   */
-  private canPrewarm(): boolean {
-    return !this.timeUp && !this.launching && !isDocumentHidden();
+  get nudge(): PlayTimeNudge {
+    return this.playTime.nudge;
   }
 
   /**
    * Brings the prewarm in line with the current gates: arms a pass when one may
-   * run and none is pending, stops whatever is pending otherwise. The chunk and
-   * art passes share the one entrance timer and the same gates, so both queues
-   * pause under the arc/moon lock or a hidden tab and resume together. Safe to
-   * call at any point in the scene's life, including before `create()` has
-   * armed the entrance delay.
+   * run and none is pending, stops whatever is pending otherwise. Delegates to
+   * the orchestration owned by `src/game/hub/hubPrewarm.ts`.
    */
   private syncPrewarm(): void {
-    if (!this.canPrewarm()) {
-      this.cancelPrewarm();
-      return;
-    }
-    if (this.prewarm || this.prewarmStartTimer) return;
-    // The first idle request waits out the entrance so the fade and zoom keep
-    // their frames; each pass still imports or rasterizes only in idle slots
-    // (NFR-2).
-    this.prewarmStartTimer = this.time.delayedCall(PREWARM_START_DELAY, () => {
-      this.prewarmStartTimer = undefined;
-      this.startPrewarmPass();
-      this.startArtPass();
-    });
-  }
-
-  /** Starts one pass over the chunks that have not landed yet. */
-  private startPrewarmPass(): void {
-    if (!this.canPrewarm() || this.prewarm) return;
-    this.prewarm = startPrewarm({
-      entries: this.prewarmEntries(),
-      imported: this.prewarmImported,
-    });
+    this.prewarmer.syncPrewarm();
   }
 
   /**
-   * Starts one art-raster pass over the keys the TextureManager still lacks.
-   * The engine probes `isPresent` on every tick, so keys a previous visit
-   * rasterized — or a game scene itself loaded — are skipped without queueing.
-   * Never touches the art loading cue: prewarm only fills the TextureManager,
-   * and the game scene's own `preload` owns the cue when entered for real.
+   * Resolves the SVG markup behind one art key through the art-group tables in
+   * `src/game/hub/artGroups.ts`. An unknown key resolves to `undefined` so the
+   * pass skips it instead of queueing a load the TextureManager could never
+   * satisfy.
    */
-  private startArtPass(): void {
-    if (!this.canPrewarm() || this.artPrewarm) return;
-    const passId = this.artPassId;
-    this.artPrewarm = startArtPrewarm({
-      keysByGame: ART_KEYS_BY_GAME,
-      gridOrder: GAME_TILES.map((tile) => tile.gameId),
-      getProgress,
-      queued: this.artQueued,
-      isPresent: (key) => this.textures.exists(key),
-      queueKey: (entry) => this.queueArtKey(entry, passId),
-    });
-  }
-
-  /**
-   * Resolves the SVG markup behind one art key, lazily loading the key's art
-   * group on first touch. The dynamic imports keep every game's artwork out of
-   * the shell entry; loaded tables stay cached for the Hub's lifetime, and an
-   * unknown key resolves to `undefined` so the pass skips it instead of
-   * queueing a load the TextureManager could never satisfy.
-   */
-  private async resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined> {
-    const cached = this.artSvgCache.get(entry.key);
-    if (cached !== undefined) return cached;
-    const groupKeys = ART_GROUPS_BY_GAME[entry.gameId] ?? [];
-    for (const groupKey of groupKeys) {
-      let tables = this.artGroupCache.get(groupKey);
-      if (!tables) {
-        const loader = ART_GROUP_LOADERS[groupKey];
-        if (!loader) continue;
-        tables = await loader();
-        this.artGroupCache.set(groupKey, tables);
-      }
-      const asset = tables.flatMap((table) => table.assets).find((item) => item.key === entry.key);
-      if (asset) {
-        this.artSvgCache.set(entry.key, asset.svg);
-        return asset.svg;
-      }
-    }
-    return undefined;
-  }
-
-  /**
-   * Rasterizes one art key through the Hub loader at the texture tier the key
-   * would load at in its game scene, then settles once the loader reports the
-   * file done — so the engine paces the next key a tick at a time. Resolves
-   * without queueing when the key landed meanwhile, when its markup cannot be
-   * resolved, or when the pass was cancelled while resolving (FR-5).
-   */
-  private queueArtKey(entry: ArtKeyEntry, passId: number): Promise<void> {
-    return new Promise<void>((resolve) => {
-      void this.resolveArtSvg(entry).then((svg) => {
-        if (passId !== this.artPassId || svg === undefined || this.textures.exists(entry.key)) {
-          resolve();
-          return;
-        }
-        const done = (): void => {
-          this.load.off("complete", done);
-          this.load.off("loaderror", done);
-          resolve();
-        };
-        this.load.on("complete", done);
-        this.load.on("loaderror", done);
-        this.load.svg(entry.key, toDataUri(svg), { width: entry.size, height: entry.size });
-        this.load.start();
-      });
-    });
+  private resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined> {
+    return this.artResolver.resolveArtSvg(entry);
   }
 
   /**
    * Stops the prewarm: drops the pending idle slots and the entrance delay,
    * and discards an in-flight chunk import or art raster's result. Safe when
    * nothing is armed or running, which is why every gate and every tap can call
-   * it unconditionally.
+   * it unconditionally. Delegates to the orchestration owned by
+   * `src/game/hub/hubPrewarm.ts`.
    */
   private cancelPrewarm(): void {
-    this.prewarmStartTimer?.remove();
-    this.prewarmStartTimer = undefined;
-    this.prewarm?.cancel();
-    this.prewarm = undefined;
-    this.artPrewarm?.cancel();
-    this.artPrewarm = undefined;
-    this.artPassId += 1;
+    this.prewarmer.cancelPrewarm();
   }
 
   /**
    * Stops both passes and starts fresh ones, so pending work takes a new order.
+   * Delegates to the orchestration owned by `src/game/hub/hubPrewarm.ts`.
    */
   private restartPrewarm(): void {
-    this.cancelPrewarm();
-    this.startPrewarmPass();
-    this.startArtPass();
-  }
-
-  /**
-   * Refreshes the limit visuals when the page becomes visible again, so a Hub
-   * parked across midnight (or behind a limit change) tells the truth without
-   * a reload. The browser event is the only trigger — no timer, no polling —
-   * and the shutdown hook detaches the handler so repeated Hub creates cannot
-   * stack listeners.
-   */
-  private watchPlayTimeVisibility(): void {
-    if (!canObserveVisibility()) return;
-    document.addEventListener("visibilitychange", this.handleVisibilityChange);
-    this.events.once("shutdown", () => {
-      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
-    });
-  }
-
-  /**
-   * Shows a textless nudge (dim overlay + hourglass) for NUDGE_DELAY ms before
-   * launching the game — a soft "almost done" signal without harsh cutoffs.
-   * The chunk is already registered by `openGame`, so the nudge starts the fade
-   * directly: a second load — or a second play session — would charge twice.
-   */
-  private showPlayTimeNudge(tileIndex: number): void {
-    this.nudge.show(
-      { scene: this, onLaunch: (i) => transitionToScene(this, GAME_TILES[i].sceneKey) },
-      tileIndex,
-    );
-  }
-
-  /**
-   * Places Professor Hoot in the bottom-right corner: greets on load, cheers
-   * when the visit follows a newly earned sticker, then settles into the idle
-   * loop. Touch-inert and behind gameplay z-order by component design.
-   */
-  private createMascot(): void {
-    this.mascot = createCornerMascot(this);
-    this.mascot.flapGreeting();
-    if (this.justEarned) {
-      this.mascot.cheer();
-    }
-    this.mascot.idleLoop();
-  }
-
-  /** Schedules the next idle-attract check after the given delay. */
-  private scheduleIdleAttract(delay = IDLE_ATTRACT_DELAY): void {
-    this.idleCallTimer = this.time.delayedCall(delay, () => {
-      this.triggerIdleAttract();
-    });
-  }
-
-  /** Re-arms the idle timer after any pointer input. */
-  private resetIdleAttract(): void {
-    this.idleCallTimer?.remove();
-    this.scheduleIdleAttract();
-  }
-
-  /**
-   * Plays the idle call; starts the tile wiggle cue once (skipped under reduced
-   * motion); re-arms itself so the call repeats every IDLE_CALL_INTERVAL.
-   */
-  private triggerIdleAttract(): void {
-    if (!this.idleCallTimer) return;
-    AudioManager.getInstance().playIdleCall();
-    if (!this.idleAttractActive) {
-      this.idleAttractActive = true;
-      if (!isReducedMotion() && this.grid.attractTargets.length > 0) {
-        // Wiggle only a couple of tiles so the cue stays gentle; rotate the
-        // pick across the grid on each attract so no tile feels ignored.
-        const start = this.attractWiggleTick % this.grid.attractTargets.length;
-        for (let i = 0; i < ATTRACT_WIGGLE_COUNT; i++) {
-          const tile = this.grid.attractTargets[(start + i) % this.grid.attractTargets.length];
-          this.tweens.add({
-            targets: tile,
-            angle: WIGGLE_ANGLE,
-            duration: WIGGLE_DURATION,
-            yoyo: true,
-            repeat: -1,
-            ease: "Sine.inOut",
-            delay: i * WIGGLE_PHASE_OFFSET,
-          });
-        }
-        this.attractWiggleTick += 1;
-      }
-    }
-    this.scheduleIdleAttract(IDLE_CALL_INTERVAL);
-  }
-
-  /** Creates a few low-contrast dots that drift slowly behind the grid. */
-  private createDecorations(): void {
-    const driftRange = DECORATION_DRIFT_MAX - DECORATION_DRIFT_MIN;
-    const positions: ReadonlyArray<[number, number]> = [
-      [this.cameras.main.width * 0.12, this.cameras.main.height * 0.18],
-      [this.cameras.main.width * 0.88, this.cameras.main.height * 0.15],
-      [this.cameras.main.width * 0.1, this.cameras.main.height * 0.8],
-      [this.cameras.main.width * 0.9, this.cameras.main.height * 0.75],
-    ];
-
-    for (let i = 0; i < DECORATION_COUNT; i++) {
-      const [x, y] = positions[i];
-      const dot = this.add.circle(x, y, DECORATION_RADIUS, DECORATION_COLOR);
-      dot.setDepth(-1);
-      this.tweens.add({
-        targets: dot,
-        y: y - DECORATION_DRIFT,
-        duration: DECORATION_DRIFT_MIN + (i * driftRange) / (DECORATION_COUNT - 1),
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.inOut",
-        delay: i * 300,
-      });
-    }
+    this.prewarmer.restartPrewarm();
   }
 }
