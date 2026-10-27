@@ -265,4 +265,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Hub Cold-Tap Art Preload — Warm the Game Art While Children Idle** - [20261027-cold-tap-art-preload](./archive/20261027-cold-tap-art-preload/index.md) - feature - high
 - [x] **Track: Release v1.22.0 - Ship the Seven Tracks Merged Since v1.21.7** - [20261027-release-v1-22-0](./archive/20261027-release-v1-22-0/index.md) - chore - high
 - [x] **Track: Content Expansion - Words, Stories, Scenarios** - [20261027-content-expansion](./archive/20261027-content-expansion/index.md) - feature - medium
-- [ ] **Track: Release v1.23.0 — Ship Content Expansion** — [20261027-release-v1-23-0](./tracks/20261027-release-v1-23-0/index.md) — chore — high
+- [~] **Track: Release v1.23.0 — Ship Content Expansion** — [20261027-release-v1-23-0](./tracks/20261027-release-v1-23-0/index.md) — chore — high
