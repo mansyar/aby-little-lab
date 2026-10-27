@@ -9,15 +9,8 @@ import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
 import { createArtResolver } from "../game/hub/artGroups";
 import { createGameLaunch, type GameLaunchController } from "../game/hub/gameLaunch";
-import {
-  ART_KEYS_BY_GAME,
-  type ArtKeyEntry,
-  type PrewarmController,
-  type PrewarmEntry,
-  recencyFirstOrder,
-  startArtPrewarm,
-  startPrewarm,
-} from "../game/hub/prewarm";
+import { createHubPrewarm, type HubPrewarmController } from "../game/hub/hubPrewarm";
+import type { ArtKeyEntry } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
 import { GAME_TILES } from "../game/hubTiles";
 import { endPlaySession, startPlaySession } from "../game/playTimeLogic";
@@ -32,7 +25,6 @@ import {
   recordGamePlay,
   recordPlayTime,
 } from "../utils/storage";
-import { toDataUri } from "../utils/svgDataUri";
 import { textStyle } from "../utils/typography";
 import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 
@@ -52,12 +44,6 @@ const DECORATION_DRIFT_MAX = 6000;
 const IDLE_ATTRACT_DELAY = 25000;
 /** Interval between idle calls while attract is active (ms). */
 const IDLE_CALL_INTERVAL = 10000;
-/**
- * Delay between the Hub entrance and the first prewarm idle request (ms). Long
- * enough that the entrance fade and zoom finish before any chunk is fetched,
- * short enough that a child who hesitates still finds warmed chunks.
- */
-const PREWARM_START_DELAY = 1200;
 /** Wiggle amplitude for the attract cue (degrees). */
 const WIGGLE_ANGLE = 4;
 /** Duration of one wiggle swing (ms). */
@@ -122,43 +108,18 @@ export class HubScene extends Phaser.Scene {
    */
   private readonly launcher: GameLaunchController;
   /**
-   * Idle-paced prewarm of the lazy game chunks; absent while the pass is
-   * stopped (locked, hidden, launching, or shut down).
+   * Prewarm orchestration owned by `src/game/hub/hubPrewarm.ts`. The scene
+   * keeps only this delegation plus the engine handles the controller's deps
+   * close over (timers, textures, loader, gates): the module owns entry
+   * selection, gates, and pass lifecycle.
    */
-  private prewarm?: PrewarmController;
-  /** Pending prewarm start, armed once the Hub entrance has settled. */
-  private prewarmStartTimer?: Phaser.Time.TimerEvent;
-  /**
-   * Idle-paced art raster pass; armed and cancelled alongside the chunk pass
-   * so both queues share the entrance, lock, and visibility gates (FR-2).
-   * Absent while the pass is stopped.
-   */
-  private artPrewarm?: PrewarmController;
-  /**
-   * Art keys the idle pass has already rasterized. Shared across passes —
-   * and across visits, like `warmedChunks` — so a return trip resumes where
-   * the last visit stopped.
-   */
-  private readonly artQueued = new Set<string>();
+  private readonly prewarmer: HubPrewarmController;
   /**
    * Resolves game-art SVG markup through the lazily loaded art tables owned by
    * `src/game/hub/artGroups.ts`. The scene keeps only this delegation: the
-   * module owns the tables, loaders, and caches, while the scene owns the
-   * `textures`/`load` engine handles and the pass generation (`artPassId`).
+   * module owns the tables, loaders, and caches.
    */
   private readonly artResolver = createArtResolver();
-  /**
-   * Art pass generation: bumped on every cancel so a key resolution that
-   * settles after shutdown, a tap, or a lock queues nothing (FR-5).
-   */
-  private artPassId = 0;
-  /**
-   * Chunk keys a prewarm pass already imported. Shared across passes — and
-   * across visits, since Phaser reuses this instance and the module registry
-   * outlives a visit — so a restart skips what already landed without spending
-   * an idle slot on it (FR-3).
-   */
-  private readonly prewarmImported = new Set<string>();
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
   /**
@@ -227,6 +188,28 @@ export class HubScene extends Phaser.Scene {
         y: this.cameras.main.height / 2,
       }),
       startAudio: () => this.startAudioFn(),
+    });
+    this.prewarmer = createHubPrewarm({
+      tiles: GAME_TILES,
+      sceneLoaders,
+      getProgress,
+      isTimeUp: () => this.timeUp,
+      isLaunching: () => this.launcher.isLaunching(),
+      isHidden: () => isDocumentHidden(),
+      resolveArtSvg: (entry) => this.resolveArtSvg(entry),
+      isPresent: (key) => this.textures.exists(key),
+      queueSvg: (entry, dataUri) =>
+        this.load.svg(entry.key, dataUri, { width: entry.size, height: entry.size }),
+      onLoadSettled: (done) => {
+        this.load.on("complete", done);
+        this.load.on("loaderror", done);
+      },
+      offLoadSettled: (done) => {
+        this.load.off("complete", done);
+        this.load.off("loaderror", done);
+      },
+      startLoad: () => this.load.start(),
+      delayStart: (ms, callback) => this.time.delayedCall(ms, callback),
     });
   }
 
@@ -433,95 +416,12 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Ordered chunk entries for one prewarm pass, recency-first for the active
-   * profile. Recency lives in the progress map keyed by game id, while the
-   * loaders are keyed by scene key, so the order is derived over the game ids
-   * and then mapped to the chunks that have a loader.
-   *
-   * The progress map is read here, at every pass start, rather than cached, so
-   * the order follows the child: returning from a game re-derives with that
-   * game first, and a profile switch re-derives for the new profile (FR-1).
-   */
-  private prewarmEntries(): PrewarmEntry[] {
-    const gridOrder = GAME_TILES.map((tile) => tile.gameId);
-    // Only the games the registry actually has a chunk loader for: a host or a
-    // test double may expose a registry without one, and there is nothing to
-    // warm then.
-    const warmable = GAME_TILES.filter((tile) => tile.sceneKey in sceneLoaders);
-    const entries: PrewarmEntry[] = [];
-    for (const gameId of recencyFirstOrder(
-      getProgress(),
-      gridOrder,
-      warmable.map((tile) => tile.gameId),
-    )) {
-      const tile = warmable.find((candidate) => candidate.gameId === gameId);
-      if (!tile) continue;
-      entries.push({ key: tile.sceneKey, load: sceneLoaders[tile.sceneKey] });
-    }
-    return entries;
-  }
-
-  /**
-   * True while the prewarm may run. The play-time lock outranks it — a locked
-   * Hub is not a place a child can start a game from, so warming chunks there
-   * buys nothing — and a backgrounded page or a launch in flight has the same
-   * answer (FR-2).
-   */
-  private canPrewarm(): boolean {
-    return !this.timeUp && !this.launcher.isLaunching() && !isDocumentHidden();
-  }
-
-  /**
    * Brings the prewarm in line with the current gates: arms a pass when one may
-   * run and none is pending, stops whatever is pending otherwise. The chunk and
-   * art passes share the one entrance timer and the same gates, so both queues
-   * pause under the arc/moon lock or a hidden tab and resume together. Safe to
-   * call at any point in the scene's life, including before `create()` has
-   * armed the entrance delay.
+   * run and none is pending, stops whatever is pending otherwise. Delegates to
+   * the orchestration owned by `src/game/hub/hubPrewarm.ts`.
    */
   private syncPrewarm(): void {
-    if (!this.canPrewarm()) {
-      this.cancelPrewarm();
-      return;
-    }
-    if (this.prewarm || this.prewarmStartTimer) return;
-    // The first idle request waits out the entrance so the fade and zoom keep
-    // their frames; each pass still imports or rasterizes only in idle slots
-    // (NFR-2).
-    this.prewarmStartTimer = this.time.delayedCall(PREWARM_START_DELAY, () => {
-      this.prewarmStartTimer = undefined;
-      this.startPrewarmPass();
-      this.startArtPass();
-    });
-  }
-
-  /** Starts one pass over the chunks that have not landed yet. */
-  private startPrewarmPass(): void {
-    if (!this.canPrewarm() || this.prewarm) return;
-    this.prewarm = startPrewarm({
-      entries: this.prewarmEntries(),
-      imported: this.prewarmImported,
-    });
-  }
-
-  /**
-   * Starts one art-raster pass over the keys the TextureManager still lacks.
-   * The engine probes `isPresent` on every tick, so keys a previous visit
-   * rasterized — or a game scene itself loaded — are skipped without queueing.
-   * Never touches the art loading cue: prewarm only fills the TextureManager,
-   * and the game scene's own `preload` owns the cue when entered for real.
-   */
-  private startArtPass(): void {
-    if (!this.canPrewarm() || this.artPrewarm) return;
-    const passId = this.artPassId;
-    this.artPrewarm = startArtPrewarm({
-      keysByGame: ART_KEYS_BY_GAME,
-      gridOrder: GAME_TILES.map((tile) => tile.gameId),
-      getProgress,
-      queued: this.artQueued,
-      isPresent: (key) => this.textures.exists(key),
-      queueKey: (entry) => this.queueArtKey(entry, passId),
-    });
+    this.prewarmer.syncPrewarm();
   }
 
   /**
@@ -535,55 +435,22 @@ export class HubScene extends Phaser.Scene {
   }
 
   /**
-   * Rasterizes one art key through the Hub loader at the texture tier the key
-   * would load at in its game scene, then settles once the loader reports the
-   * file done — so the engine paces the next key a tick at a time. Resolves
-   * without queueing when the key landed meanwhile, when its markup cannot be
-   * resolved, or when the pass was cancelled while resolving (FR-5).
-   */
-  private queueArtKey(entry: ArtKeyEntry, passId: number): Promise<void> {
-    return new Promise<void>((resolve) => {
-      void this.resolveArtSvg(entry).then((svg) => {
-        if (passId !== this.artPassId || svg === undefined || this.textures.exists(entry.key)) {
-          resolve();
-          return;
-        }
-        const done = (): void => {
-          this.load.off("complete", done);
-          this.load.off("loaderror", done);
-          resolve();
-        };
-        this.load.on("complete", done);
-        this.load.on("loaderror", done);
-        this.load.svg(entry.key, toDataUri(svg), { width: entry.size, height: entry.size });
-        this.load.start();
-      });
-    });
-  }
-
-  /**
    * Stops the prewarm: drops the pending idle slots and the entrance delay,
    * and discards an in-flight chunk import or art raster's result. Safe when
    * nothing is armed or running, which is why every gate and every tap can call
-   * it unconditionally.
+   * it unconditionally. Delegates to the orchestration owned by
+   * `src/game/hub/hubPrewarm.ts`.
    */
   private cancelPrewarm(): void {
-    this.prewarmStartTimer?.remove();
-    this.prewarmStartTimer = undefined;
-    this.prewarm?.cancel();
-    this.prewarm = undefined;
-    this.artPrewarm?.cancel();
-    this.artPrewarm = undefined;
-    this.artPassId += 1;
+    this.prewarmer.cancelPrewarm();
   }
 
   /**
    * Stops both passes and starts fresh ones, so pending work takes a new order.
+   * Delegates to the orchestration owned by `src/game/hub/hubPrewarm.ts`.
    */
   private restartPrewarm(): void {
-    this.cancelPrewarm();
-    this.startPrewarmPass();
-    this.startArtPass();
+    this.prewarmer.restartPrewarm();
   }
 
   /**

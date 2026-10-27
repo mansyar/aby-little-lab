@@ -6,7 +6,7 @@ import type { ArtKeyEntry } from "./prewarm";
  * The tables say where each game's texture markup lives; the resolver lazily
  * loads one art group on first touch and answers the SVG markup behind one
  * art key. The scene (`HubScene`) keeps only delegation: it owns the
- * `textures`/`load` engine handles and the pass generation (`artPassId`),
+ * `textures`/`load` engine handles the prewarm controller queues through,
  * while this module owns the tables, the loaders, the caches, and markup
  * resolution.
  */
