@@ -15,9 +15,10 @@ export interface FirstWord {
 }
 
 /**
- * The 18 first words. Prompt textures are PreloadScene texture keys:
+ * The 28 first words. Prompt textures are PreloadScene texture keys:
  * most reuse existing art; `sm_sun`/`sm_hat`/`sm_bug`/`sm_duck` are new
- * SVGs registered alongside this pool.
+ * SVGs registered alongside the earlier pool, and the content-expansion
+ * batch reuses existing item/toy/shape keys so no new SVG was needed.
  */
 export const WORD_POOL: readonly FirstWord[] = [
   { word: "CAT", letters: 3, promptTexture: "animal_cat", tier: 3 },
@@ -28,6 +29,11 @@ export const WORD_POOL: readonly FirstWord[] = [
   { word: "SUN", letters: 3, promptTexture: "sm_sun", tier: 3 },
   { word: "HAT", letters: 3, promptTexture: "sm_hat", tier: 3 },
   { word: "BUG", letters: 3, promptTexture: "sm_bug", tier: 3 },
+  { word: "MAP", letters: 3, promptTexture: "sm_map", tier: 3 },
+  { word: "FOX", letters: 3, promptTexture: "sm_fox", tier: 3 },
+  { word: "CUP", letters: 3, promptTexture: "sm_cup", tier: 3 },
+  { word: "BOX", letters: 3, promptTexture: "toy_box", tier: 3 },
+  { word: "BED", letters: 3, promptTexture: "sm_bed", tier: 3 },
   { word: "FROG", letters: 4, promptTexture: "frog_red", tier: 4 },
   { word: "BALL", letters: 4, promptTexture: "sm_ball", tier: 4 },
   { word: "FISH", letters: 4, promptTexture: "food_fish", tier: 4 },
@@ -38,6 +44,11 @@ export const WORD_POOL: readonly FirstWord[] = [
   { word: "DRUM", letters: 4, promptTexture: "toy_drum", tier: 4 },
   { word: "BEAR", letters: 4, promptTexture: "toy_teddy_bear", tier: 4 },
   { word: "DUCK", letters: 4, promptTexture: "sm_duck", tier: 4 },
+  { word: "KITE", letters: 4, promptTexture: "sm_kite", tier: 4 },
+  { word: "SOCK", letters: 4, promptTexture: "sm_sock", tier: 4 },
+  { word: "BOOT", letters: 4, promptTexture: "sm_boot", tier: 4 },
+  { word: "RING", letters: 4, promptTexture: "shape_ring", tier: 4 },
+  { word: "PLUS", letters: 4, promptTexture: "shape_plus", tier: 4 },
 ];
 
 /** Looks up a word's entry by its uppercase spelling. */
