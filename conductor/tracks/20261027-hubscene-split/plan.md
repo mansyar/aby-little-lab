@@ -12,12 +12,16 @@
 - **Goal:** Art-group tables + SVG resolver live in `src/game/hub/`; HubScene imports them.
 - **Depends on:** none
 - **Covers:** FR-1, NFR-2, AC-1
-- **Touches:** `src/game/hub/artGroups.ts` (new), `src/scenes/HubScene.ts` (import swap + member removal), `src/game/hub/__tests__/artGroups.test.ts` (new)
-- **Verification:** `pnpm vitest run src/game/hub/__tests__/artGroups.test.ts src/scenes/__tests__/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
-- **Status:** in_progress
+- **Touches:** `src/game/hub/artGroups.ts` (new), `src/scenes/HubScene.ts` (import swap + member removal), `src/__tests__/game/hub/artGroups.test.ts` (new), `src/__tests__/scenes/hubScene.test.ts` (source-guard retarget only: positive dynamic-import assertions move to the new module's source, negatives stay)
+- **Verification:** `pnpm vitest run src/__tests__/game/hub/artGroups.test.ts src/__tests__/scenes/hubScene.test.ts` + `pnpm typecheck` + `pnpm check`
+- **Status:** verified
 
-- [ ] **P1.T1: Extract art tables and resolver** — covers: FR-1
-- [ ] **P1.T2: Unit tests + HubScene rewire** — covers: FR-1, AC-1
+- [x] **P1.T1: Extract art tables and resolver** — covers: FR-1
+- [x] **P1.T2: Unit tests + HubScene rewire + guard retarget** — covers: FR-1, AC-1
+
+- **Result:** verified — art tables + resolver in `src/game/hub/artGroups.ts` (140 lines); HubScene 821 → 778 lines; `hubScene.test.ts` 48/48 + new suite 3/3 green; typecheck + Biome clean.
+- **Checkpoint:** b9b02444
+- **Evidence:** `conductor/tracks/20261027-hubscene-split/verification/phase-1.md`
 
 ## Phase 2: Launch Flow Extraction
 

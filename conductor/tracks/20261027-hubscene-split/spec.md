@@ -61,13 +61,13 @@ first. If it is not split, the next Hub change adds to the same knot.
 | NFR-1 | Zero behavior change: the diff is structural only. |
 | NFR-2 | Dynamic `import()`s stay dynamic; `validate-bundle` shell budget (≤ 200 kB) holds. |
 | NFR-3 | `HubScene.ts` ≤ ~320 lines; each new helper ≤ 200 lines. |
-| NFR-4 | Coverage gates hold (95 / 88 / 85 / 90); `hubScene.test.ts` passes unmodified. |
+| NFR-4 | Coverage gates hold (95 / 88 / 85 / 90); `hubScene.test.ts` behavior pins pass; its dynamic-import source guard moves with the loaders (positive assertions target the extraction module, negative assertions stay on `HubScene.ts`). |
 
 ## Acceptance Criteria
 
 | ID | Criterion | Verifies |
 | --- | --- | --- |
-| AC-1 | Art tables extracted; resolver parity test passes; `hubScene.test.ts` green unmodified. | FR-1 |
+| AC-1 | Art tables extracted; resolver parity test passes; `hubScene.test.ts` green with only the source-guard assertions retargeted to the new module. | FR-1 |
 | AC-2 | Launch flow extracted; single-flight/visit-token/retry-cue tests pass. | FR-2 |
 | AC-3 | Prewarm orchestration extracted; gate/lifecycle tests pass. | FR-3 |
 | AC-4 | Play-time UI and attract/decor extracted; HubScene ≤ ~320 lines; full gate green. | FR-4, FR-5 |
