@@ -6,8 +6,8 @@
 
 ## Overview
 
-Grow the three finite content pools — WORD_POOL (22 items), Story Order
-stories (~8), and Feelings Faces scenarios (16) — with a moderate batch of
+Grow the three finite content pools — WORD_POOL (18 items), Story Order
+stories (11: 5 obvious + 6 subtle), and Feelings Faces scenarios (16) — with a moderate batch of
 phonics-safe, difficulty-band-fitted items plus new Storybook Flat SVG art, so
 repeat playthroughs feel fresh without touching any game engine code.
 
@@ -15,7 +15,7 @@ repeat playthroughs feel fresh without touching any game engine code.
 
 Kids replay the same 22 games daily. The word, story, and feelings pools are
 the smallest content bottlenecks: WORD_POOL repeats within a few 6-round
-sessions, Story Order's ~8 stories become predictable, and the 16 feelings
+sessions, Story Order's 11 stories become predictable, and the 16 feelings
 scenarios exhaust the contrast ladder quickly. If unsolved, replay variety
 stagnates and the adaptive-difficulty system has less headroom to band new
 items. Parents see repetition; kids disengage.
@@ -23,7 +23,7 @@ items. Parents see repetition; kids disengage.
 ## Goals & Success Metrics
 
 - **Goal:** Ship a moderate batch of new words, stories, and scenarios that fit existing difficulty bands and art pipeline.
-- **Metric:** WORD_POOL 22→~32, stories 8→~12, scenarios 16→~24 (exact counts recorded at implementation); full suite green (2781+ tests); adaptive ±1 band behavior unchanged; bundle/perf budgets unregressed.
+- **Metric:** WORD_POOL 18→~28, stories 11→~15, scenarios 16→~24 (exact counts recorded at implementation); full suite green (2781+ tests); adaptive ±1 band behavior unchanged; bundle/perf budgets unregressed.
 
 ## Scope
 
@@ -94,8 +94,8 @@ items. Parents see repetition; kids disengage.
 
 ## References
 
-- src/game/wordLogic.ts (WORD_POOL, 22 items)
-- src/game/storyOrderLogic.ts + src/game/storyOrderArt.ts (~8 stories)
+- src/game/wordLogic.ts (WORD_POOL, 18 items)
+- src/game/storyOrderLogic.ts + src/game/storyOrderArt.ts (11 stories: 5 obvious + 6 subtle; 33 panels)
 - src/game/feelingsFacesLogic.ts (16 scenarios)
 - src/game/art/ + docs/SVG_STYLE.md
 - docs/PRD.md §3 (games), conductor/product.md game table
