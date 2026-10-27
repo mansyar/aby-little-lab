@@ -62,7 +62,7 @@
 - **Covers:** FR-4, FR-5, NFR-1, NFR-3, NFR-4, AC-4, AC-5
 - **Touches:** `src/game/hub/playTimeUi.ts` (new), `src/game/hub/hubAttract.ts` (new), `src/scenes/HubScene.ts` (final rewire), `src/__tests__/game/hub/playTimeUi.test.ts` + `hubAttract.test.ts` (new — project vitest `include` is `src/__tests__/**`; colocated `src/game/**` tests are never collected)
 - **Verification:** `pnpm check` && `pnpm typecheck` && `pnpm test -- --run` && `pnpm test:coverage` && `pnpm build` && `node scripts/validate-bundle.js` && `node scripts/validate-pwa.js` && `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Extract play-time UI + attract/decor** — covers: FR-4, FR-5
 - [ ] **P4.T2: Unit tests, size check, full gate** — covers: FR-4, FR-5, AC-4, AC-5
