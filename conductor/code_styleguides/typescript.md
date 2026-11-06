@@ -41,6 +41,11 @@ This document summarizes key rules and best practices from the Google TypeScript
 - **Redundancy:** **Do not declare types in `@param` or `@return` blocks** (e.g., `/** @param {string} user */`). This is redundant in TypeScript.
 - **Add Information:** Comments must add information, not just restate the code.
 
+## 6. Tests and Time
+- **No Wall-Clock Values:** A test must not derive a value from the wall clock. Inject the clock (`normalizePlayTime(save, now)`) or derive from an explicit fixed instant (`todayKey(FIXED_NOW)`, or `vi.setSystemTime`), so the verdict is the same on every calendar day, timezone and locale.
+- **No Day-Key Literals for "Today":** A literal `YYYY-MM-DD` assigned to a field that production compares against *today* is a clock stand-in, not fixture data. In `gameLaunch.test.ts` the fixture wrote `lastUsedDate: "2026-10-27"`; the test passed on 2026-10-27 and failed from 2026-10-28 onward, because `normalizePlayTime` zeroes `usedMinutes` whenever the stored day is not `todayKey()`. Dates that are payload rather than a stand-in for today (sort keys, `createdAt`, `earnedAt`) may stay literal.
+- **Enforcement:** `src/__tests__/guard/fixture-clock.test.ts` scans every `.ts` file under `src/__tests__` - helpers included - and fails, naming `path:line`, on a bare quoted day key assigned to `lastUsedDate`.
+
 *Source: [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html)*
 
 </protect>

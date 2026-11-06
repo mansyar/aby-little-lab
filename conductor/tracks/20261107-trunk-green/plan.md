@@ -49,3 +49,23 @@
 - [ ] **P2.T3: Write the style rule** - covers: FR-4
   - [ ] **P2.T3.1: Add `## 6. Tests and Time`** with the rule and the `gameLaunch` counter-example
 - [ ] **P2.T4: Run the full gate** - covers: AC-6
+
+## Phase 3: Timeout headroom for the 22-scene sweeps
+
+- **Goal:** the coverage gate passes twice in a row on an unmodified tree, so a green gate means green code and not a lucky scheduler.
+- **Depends on:** Phase 2
+- **Covers:** AC-6
+- **Touches:** `src/__tests__/scenes/navigation.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `conductor/tracks/20261107-trunk-green/verification/`
+- **Verification:** `CI=true pnpm test:coverage` twice, then the full `verify_phase` chain
+- **Status:** pending
+
+- [ ] **P3.T1: Give the two sweeps their own budget** - covers: AC-6
+  - [ ] **P3.T1.1: Raise the 22-scene sweep test** in `navigation.test.ts` and the
+    tile-navigation sweep in `hubEngagement.test.ts` to a 60 s per-test budget,
+    leaving the global `testTimeout: 30000` and every other test untouched
+- [ ] **P3.T2: Prove the gate is stable** - covers: AC-6
+  - [ ] **P3.T2.1: Run `CI=true pnpm test:coverage` twice back to back**; both must
+    pass with no modification in between
+  - [ ] **P3.T2.2: Run the full `verify_phase` chain** and record both coverage
+    runs plus the chain in `verification/phase-3.md`
+
