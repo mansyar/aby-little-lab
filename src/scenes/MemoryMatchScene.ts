@@ -3,6 +3,7 @@ import { animals } from "../game/art/animals";
 import { glyphs } from "../game/art/glyphs";
 import { items } from "../game/art/items";
 import { toys } from "../game/art/toys";
+import type { E2ERoundGeometry } from "../game/e2eBridge";
 import {
   buildPlaythrough,
   isPair,
@@ -184,6 +185,25 @@ export class MemoryMatchScene extends GameSceneBase {
         });
       }
     }
+  }
+
+  /**
+   * Publishes the round for the e2e bridge: one target per card, with the face
+   * texture as its id. Cards sharing an id are a pair, so a journey reveals the
+   * two positions with the same id.
+   */
+  protected override e2eRoundGeometry(): E2ERoundGeometry | null {
+    const round = this.rounds[this.roundIndex];
+    if (!round || this.cardRects.length !== round.layout.length) return null;
+
+    return {
+      round: this.roundIndex,
+      targets: round.layout.map((face, index) => ({
+        id: face,
+        x: this.cardRects[index].x,
+        y: this.cardRects[index].y,
+      })),
+    };
   }
 
   /** Destroys all display objects created for the current round. */

@@ -12,6 +12,7 @@ import {
 } from "../game/animalTraceLogic";
 import { animals } from "../game/art/animals";
 import { food } from "../game/art/food";
+import type { E2ERoundGeometry } from "../game/e2eBridge";
 import type { Rng } from "../game/random";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { isReducedMotion, motionDuration, motionScale } from "../utils/motion";
@@ -192,6 +193,26 @@ export class AnimalTraceScene extends GameSceneBase {
     };
 
     this.startRingPulse();
+  }
+
+  /**
+   * Publishes the round for the e2e bridge: the waypoints still to be visited,
+   * in trace order. Only the unfinished tail is reported, so a journey that
+   * touches them in order never re-visits one the animal has already passed.
+   */
+  protected override e2eRoundGeometry(): E2ERoundGeometry | null {
+    const current = this.currentPair;
+    if (!current) return null;
+
+    const next = current.progress.currentPoint + 1;
+    return {
+      round: this.completedPaths,
+      targets: current.pathPoints.slice(next).map((point, offset) => ({
+        id: `waypoint-${next + offset}`,
+        x: point.x,
+        y: point.y,
+      })),
+    };
   }
 
   /** Restarts the looping pulse on the next-waypoint ring (normal motion only). */

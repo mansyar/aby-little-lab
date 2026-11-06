@@ -1,6 +1,7 @@
 import "./styles/style.css";
 import { registerSW } from "virtual:pwa-register";
 import Phaser from "phaser";
+import { initE2EBridge } from "./game/e2eBridge";
 import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
 import { PreloadScene } from "./scenes/PreloadScene";
@@ -43,4 +44,7 @@ initInstallPrompt();
 // update/offline events the moment it becomes active.
 initPwaBridge(registerSW);
 
-new Phaser.Game(config);
+// The instance is kept so the read-only e2e bridge can reach the scene
+// manager; without `?e2e=1` the bridge returns immediately and changes nothing.
+const game = new Phaser.Game(config);
+initE2EBridge(game);

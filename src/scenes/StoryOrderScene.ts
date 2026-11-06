@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
+import type { E2ERoundGeometry, E2ERoundTarget } from "../game/e2eBridge";
 import type { Rng } from "../game/random";
 import { preloadStoryOrderArt } from "../game/storyOrderArt";
 import { buildPlaythrough, isCorrect } from "../game/storyOrderLogic";
@@ -133,6 +134,35 @@ export class StoryOrderScene extends ChoiceRoundScene {
     for (let i = 0; i < count; i++) {
       this.createPanel(round.shuffled[i], trayPositions[i], TRAY_Y);
     }
+  }
+
+  /**
+   * Publishes the round for the e2e bridge: each solution panel with the
+   * position it currently occupies, and the ordinal slots in solution order.
+   * Ids are the panel texture keys, so a journey drags each target onto the
+   * slot with the same id — the slot's id is the panel that belongs there.
+   */
+  protected override e2eRoundGeometry(): E2ERoundGeometry | null {
+    const round = this.rounds[this.roundIndex];
+    if (!round) return null;
+
+    const targets: E2ERoundTarget[] = [];
+    for (const key of round.solution) {
+      const panel = this.panels.find((candidate) => candidate.key === key);
+      if (!panel) return null;
+      targets.push({ id: key, x: panel.container.x, y: panel.container.y });
+    }
+
+    const slotPositions = this.rowPositions(round.solution.length, SLOT_SIZE, SLOT_GAP);
+    return {
+      round: this.roundIndex,
+      targets,
+      slots: round.solution.map((key, index) => ({
+        id: key,
+        x: slotPositions[index],
+        y: SLOT_Y,
+      })),
+    };
   }
 
   /**

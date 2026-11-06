@@ -11,6 +11,7 @@ import { RoundNarrator } from "../components/RoundNarrator";
 import type { SpeakerButton } from "../components/SpeakerButton";
 import { preloadArtGroups } from "../game/art/registry";
 import type { ArtGroup } from "../game/art/types";
+import type { E2ERoundGeometry } from "../game/e2eBridge";
 import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
 import type { Rng } from "../game/random";
 import type { GameId } from "../types";
@@ -395,6 +396,18 @@ export abstract class GameSceneBase extends Phaser.Scene {
       ease: "Back.out",
       yoyo: true,
     });
+  }
+
+  /**
+   * Canvas-space description of the current round for the read-only e2e
+   * bridge, or null when this scene publishes none.
+   *
+   * Null by default: only the six sampled game scenes override it, and the
+   * bridge treats null as "no geometry to drive". Read at call time, never
+   * cached, so a mid-round change is reported as it is.
+   */
+  protected e2eRoundGeometry(): E2ERoundGeometry | null {
+    return null;
   }
 
   /** Records a correct answer for the active profile's learning progress. */
