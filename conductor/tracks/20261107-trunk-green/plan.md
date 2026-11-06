@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-3, AC-1, AC-3
 - **Touches:** `src/__tests__/components/PlayTimeIndicator.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/game/hub/hubPrewarm.test.ts`, `conductor/tracks/20261107-trunk-green/verification/`
 - **Verification:** `pnpm test -- --run`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Classify the 29 date literals** - covers: FR-1
   - [ ] **P1.T1.1: Enumerate every hit** with file, line, field name and the API that consumes the value
