@@ -5,6 +5,7 @@ import {
   type GameLaunchCue,
   type GameLaunchDeps,
 } from "../../../game/hub/gameLaunch";
+import { todayKey } from "../../../game/playTimeLogic";
 import type { PlayTime } from "../../../types";
 
 /** Retry cue fake: records every show and counts destroys. */
@@ -38,7 +39,9 @@ function createDeferred<T>(): {
 const playTimeWith = (usedMinutes: number): PlayTime => ({
   limitMinutes: 60,
   usedMinutes,
-  lastUsedDate: "2026-10-27",
+  // Anchored to the real day so normalizePlayTime's rollover reset does not
+  // zero the fixture once the calendar moves past a hardcoded date.
+  lastUsedDate: todayKey(),
 });
 
 interface Harness {
