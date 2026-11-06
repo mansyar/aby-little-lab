@@ -11,6 +11,11 @@ test-out.txt
 
 gate*.txt
 
+# Playwright journey artifacts: traces, screenshots and the HTML report are
+# per-run scratch, uploaded from CI on failure instead of committed.
+test-results/
+playwright-report/
+
 .art-preview/
 
 # Generated contact-sheet PNGs and HTML are scratch; the tracked record is the baseline set.
