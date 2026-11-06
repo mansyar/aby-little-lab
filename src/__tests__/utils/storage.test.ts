@@ -908,7 +908,7 @@ describe("progress recording", () => {
           stickers: {
             "shape-sorter": { earned: true, earnedAt: "2026-08-02T00:00:00.000Z" },
           },
-          playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: "2026-08-05" },
+          playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey() },
         },
       ],
       settings: { bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null },

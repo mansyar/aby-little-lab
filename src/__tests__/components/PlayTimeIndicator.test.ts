@@ -3,8 +3,13 @@ import { todayKey } from "../../game/playTimeLogic";
 import type { PlayTime } from "../../types";
 import { MockScene, mockRegistry } from "../helpers/phaserMock";
 
-/** normalizePlayTime resets usage on stale dates, so fixtures must be "today" (local, not UTC). */
-const TODAY = todayKey();
+/**
+ * normalizePlayTime resets usage on stale dates, so fixtures must be "today"
+ * (local, not UTC). The clock is captured once per module run, so a suite that
+ * straddles midnight cannot flip the fixtures underneath itself.
+ */
+const FIXED_NOW = new Date();
+const TODAY = todayKey(FIXED_NOW);
 
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();
@@ -48,7 +53,7 @@ beforeEach(() => {
   vi.mocked(getPlayTime).mockReturnValue({
     limitMinutes: null,
     usedMinutes: 0,
-    lastUsedDate: "2026-01-01",
+    lastUsedDate: TODAY,
   });
 });
 
