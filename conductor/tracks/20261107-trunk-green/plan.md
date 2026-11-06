@@ -57,7 +57,7 @@
 - **Covers:** AC-6
 - **Touches:** `src/__tests__/scenes/navigation.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `conductor/tracks/20261107-trunk-green/verification/`
 - **Verification:** `CI=true pnpm test:coverage` twice, then the full `verify_phase` chain
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Give the two sweeps their own budget** - covers: AC-6
   - [ ] **P3.T1.1: Raise the 22-scene sweep test** in `navigation.test.ts` and the
