@@ -1,0 +1,47 @@
+# Trunk Green — Wall-Clock-Safe Test Fixtures - Implementation Plan
+
+> **Branch:** `chore/20261107-trunk-green`
+> **Base:** `master` @ `6cd2d85a867d704039decb8427a4ebece7cc68bc`
+>
+> Phase states are `pending`, `in_progress`, `verified`, `failed`, or `blocked`.
+> Only the primary agent writes this file. Phase subagents report results and the
+> primary records them.
+
+## Phase 1: Audit and convert the clock stand-ins
+
+- **Goal:** every date literal in the test tree carries a recorded verdict, and no fixture stands in for "today" with a literal.
+- **Depends on:** none
+- **Covers:** FR-1, FR-3, AC-1, AC-3
+- **Touches:** `src/__tests__/components/PlayTimeIndicator.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/game/hub/hubPrewarm.test.ts`, `conductor/tracks/20261107-trunk-green/verification/`
+- **Verification:** `pnpm test -- --run`
+- **Status:** pending
+
+- [ ] **P1.T1: Classify the 29 date literals** - covers: FR-1
+  - [ ] **P1.T1.1: Enumerate every hit** with file, line, field name and the API that consumes the value
+  - [ ] **P1.T1.2: Write `verification/date-literal-audit.md`** with one verdict per entry (`data` or `clock stand-in`) and the reason
+- [ ] **P1.T2: Convert the play-time indicator fixture** - covers: FR-3
+  - [ ] **P1.T2.1: Replace `lastUsedDate: "2026-01-01"`** with a value derived from a `FIXED_NOW` clock via `todayKey`
+- [ ] **P1.T3: Resolve the storage and prewarm fixtures** - covers: FR-3
+  - [ ] **P1.T3.1: `storage.test.ts` backfill payload** - keep as data if nothing compares it to today; record the reason
+  - [ ] **P1.T3.2: `hubPrewarm.test.ts` recency payload** - recency order is relative, so absolute dates are inert
+- [ ] **P1.T4: Prove no literal remains** - covers: AC-3
+  - [ ] **P1.T4.1: Grep** for a quoted date assigned to `lastUsedDate`; expect zero hits
+
+## Phase 2: Guard and style rule
+
+- **Goal:** the suite itself rejects the pattern, and the rule is written where the next author will read it.
+- **Depends on:** Phase 1
+- **Covers:** FR-2, FR-4, FR-5, NFR-1, NFR-3, AC-2, AC-4, AC-5, AC-6
+- **Touches:** `src/__tests__/guard/fixture-clock.test.ts`, `conductor/code_styleguides/typescript.md`, `conductor/tracks/20261107-trunk-green/verification/`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** pending
+
+- [ ] **P2.T1: Write the guard test** - covers: FR-2
+  - [ ] **P2.T1.1: Scan every `.ts` under `src/__tests__`**, excluding the guard itself, matching a bare quoted `YYYY-MM-DD` assigned to `lastUsedDate`
+  - [ ] **P2.T1.2: Assert with `relative path:line`**, listing every offending site rather than the first
+- [ ] **P2.T2: Mutation proof** - covers: AC-2
+  - [ ] **P2.T2.1: Add a violating line, capture the failure, revert, capture the pass**
+  - [ ] **P2.T2.2: Record both outputs in `verification/phase-2.md`**
+- [ ] **P2.T3: Write the style rule** - covers: FR-4
+  - [ ] **P2.T3.1: Add `## 6. Tests and Time`** with the rule and the `gameLaunch` counter-example
+- [ ] **P2.T4: Run the full gate** - covers: AC-6
