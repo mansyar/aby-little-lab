@@ -231,3 +231,25 @@ Apply to `conductor/code_styleguides/typescript.md`, between the end of
   template interpolation is not a literal and is not matched.
 - Re-running the full gate on an unloaded host is the remaining verification
   step; nothing in the phase's static layers or the guard itself is red.
+
+## Resolution
+
+Both blockers were cleared by the primary, and neither required a change to the
+guard.
+
+1. **The style rule (AC-4)** - the subagent's `edit` is denied on
+   `conductor/code_styleguides/typescript.md` (the file is `<protect>`-wrapped and
+   the denial is intended for phase subagents). The primary applied the pending
+   patch verbatim as `## 6. Tests and Time`, after `## 5. Comments and
+   Documentation` and before the `*Source:*` footer.
+
+2. **The gate (AC-6)** - the two 22-scene sweeps were marginal against the global
+   30 s `testTimeout`, and the control run proved the guard was not the cost
+   (81.5 s with it, 84.5 s without). Phase 3 gave those two tests a 60 s budget.
+   With that in place the gate ran green three times consecutively, including
+   three coverage runs, with no edit between the first two.
+
+The phase therefore stands verified on re-run rather than on its first attempt,
+and the evidence above is left as it was produced so the record shows the order
+things actually happened in.
+
