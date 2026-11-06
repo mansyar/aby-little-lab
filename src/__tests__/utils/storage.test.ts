@@ -1,8 +1,25 @@
-import { vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
 import { createDefaultProgressMap } from "../../game/progressLogic";
 import type { AppStorage, GameId } from "../../types";
+
+/**
+ * Production writes `lastUsedDate` from the ambient clock, so every fixture and
+ * expectation here has to read the same instant. Freezing `Date` (timers stay
+ * real) keeps the two sides in agreement no matter what day the suite runs on.
+ */
+const FIXED_NOW = new Date("2026-08-05T12:00:00");
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(FIXED_NOW);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 import {
   addProfile,
   deleteProfile,
@@ -354,7 +371,7 @@ describe("Storage utilities", () => {
           "shape-sorter": { earned: true, earnedAt: "2026-09-02T00:00:00.000Z" },
           "feelings-faces": { earned: true, earnedAt: "2026-09-03T00:00:00.000Z" },
         },
-        playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey(new Date()) },
+        playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey(FIXED_NOW) },
         progress: {
           "shape-sorter": {
             plays: 4,
@@ -704,7 +721,7 @@ describe("Storage utilities", () => {
       const playTime = getPlayTime();
       expect(playTime.limitMinutes).toBeNull();
       expect(playTime.usedMinutes).toBe(0);
-      expect(playTime.lastUsedDate).toBe(todayKey());
+      expect(playTime.lastUsedDate).toBe(todayKey(FIXED_NOW));
     });
 
     it("migrates a v1 save with an unlimited default play time", () => {
@@ -785,7 +802,7 @@ describe("Storage utilities", () => {
 
       const playTime = getPlayTime("p1");
       expect(playTime.usedMinutes).toBe(0);
-      expect(playTime.lastUsedDate).toBe(todayKey());
+      expect(playTime.lastUsedDate).toBe(todayKey(FIXED_NOW));
       expect(playTime.limitMinutes).toBe(30);
     });
 
@@ -852,7 +869,7 @@ describe("progress recording", () => {
     recordGamePlay("shape-sorter");
 
     const active = getActiveProfile();
-    expect(active.activity).toContainEqual({ day: todayKey(new Date()), plays: 2 });
+    expect(active.activity).toContainEqual({ day: todayKey(FIXED_NOW), plays: 2 });
   });
 
   it("records plays per active profile", () => {
@@ -908,7 +925,11 @@ describe("progress recording", () => {
           stickers: {
             "shape-sorter": { earned: true, earnedAt: "2026-08-02T00:00:00.000Z" },
           },
-          playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey() },
+          playTime: {
+            limitMinutes: null,
+            usedMinutes: 0,
+            lastUsedDate: todayKey(FIXED_NOW),
+          },
         },
       ],
       settings: { bgmEnabled: true, sfxEnabled: true, preferredVoiceURI: null },
@@ -1189,7 +1210,7 @@ describe("schema versioning", () => {
             ...createDefaultStickers(),
             "animal-trace": { earned: true, earnedAt: "2026-09-01T00:00:00.000Z" },
           },
-          playTime: { limitMinutes: 30, usedMinutes: 5, lastUsedDate: todayKey() },
+          playTime: { limitMinutes: 30, usedMinutes: 5, lastUsedDate: todayKey(FIXED_NOW) },
           progress: createDefaultProgressMap(),
           activity: [],
         },
@@ -1271,7 +1292,7 @@ describe("schema versioning", () => {
     expect(getActiveProfile().playTime).toEqual({
       limitMinutes: 30,
       usedMinutes: 5,
-      lastUsedDate: todayKey(),
+      lastUsedDate: todayKey(FIXED_NOW),
     });
     expect(getSettings()).toEqual(body.settings);
   });

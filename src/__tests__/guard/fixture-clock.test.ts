@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import guardSource from "./fixture-clock.test.ts?raw";
 
 /**
  * Guard over the test tree: no fixture may stand in for "today" with a bare
@@ -38,9 +37,13 @@ const GUARD_SUFFIX = "guard/fixture-clock.test.ts";
 
 /**
  * The rejected shape: a day key assigned to the field production compares
- * against the current date. Matched per line so a failure can name its line.
+ * against the current date. Scanned over the whole file so a key written across
+ * two lines still matches, and the quote may be `'`, `"` or a backtick.
+ *
+ * An indirect value (`lastUsedDate: SOME_CONST`) is not a literal and is not
+ * matched. That limit is accepted and recorded in the spec.
  */
-const LITERAL_DAY_KEY = /\blastUsedDate\b\s*:\s*["']\d{4}-\d{2}-\d{2}["']/;
+const LITERAL_DAY_KEY = /\blastUsedDate\b\s*:\s*["'`]\d{4}-\d{2}-\d{2}["'`]/g;
 
 interface RawSource {
   readonly path: string;
@@ -69,18 +72,44 @@ function testSources(): RawSource[] {
   });
 }
 
-/** All offending sites as `path:line`, so one failure reports every hit. */
-function literalDayKeySites(): string[] {
-  const sites: string[] = [];
-  for (const file of testSources()) {
-    const lines = file.source.split(/\r?\n/);
-    for (let index = 0; index < lines.length; index += 1) {
-      if (LITERAL_DAY_KEY.test(lines[index])) {
-        sites.push(`${file.path}:${index + 1}`);
-      }
+/** One-based line number of `index` inside `source`. */
+function lineAt(source: string, index: number): number {
+  let line = 1;
+  for (let cursor = 0; cursor < index; cursor += 1) {
+    if (source[cursor] === "\n") {
+      line += 1;
     }
   }
+  return line;
+}
+
+/**
+ * True when the match sits on comment prose rather than code, so a comment that
+ * documents the historical bug does not fail a green tree.
+ */
+function isCommentLine(source: string, index: number): boolean {
+  const start = source.lastIndexOf("\n", index) + 1;
+  const end = source.indexOf("\n", index);
+  const text = source.slice(start, end === -1 ? source.length : end).trimStart();
+  return text.startsWith("//") || text.startsWith("/*") || text.startsWith("*");
+}
+
+/** All offending sites in one source, as `path:line`. */
+function sitesIn(source: string, path: string): string[] {
+  const sites: string[] = [];
+  for (const match of source.matchAll(LITERAL_DAY_KEY)) {
+    const index = match.index ?? 0;
+    if (isCommentLine(source, index)) {
+      continue;
+    }
+    sites.push(`${path}:${lineAt(source, index)}`);
+  }
   return sites;
+}
+
+/** All offending sites as `path:line`, so one failure reports every hit. */
+function literalDayKeySites(): string[] {
+  return testSources().flatMap((file) => sitesIn(file.source, file.path));
 }
 
 describe("fixture clock guard", () => {
@@ -92,11 +121,38 @@ describe("fixture clock guard", () => {
     ).toEqual([]);
   });
 
-  it("cannot match its own source", () => {
-    // The guard's comments and pattern are prose, not fixtures. If this ever
-    // fails, the doc comment grew an example the scan would have flagged.
-    expect(guardSource.length).toBeGreaterThan(0);
-    expect(LITERAL_DAY_KEY.test(guardSource)).toBe(false);
+  it("rejects the shape it documents, and only that shape", () => {
+    // Same line, double quotes.
+    expect(sitesIn('const fixture = { lastUsedDate: "2026-10-27" };', "probe.ts")).toEqual([
+      "probe.ts:1",
+    ]);
+    // Key and value split across lines.
+    expect(
+      sitesIn('const fixture = {\n  lastUsedDate:\n    "2026-10-27",\n};', "probe.ts"),
+    ).toEqual(["probe.ts:2"]);
+    // Single quotes and template quotes.
+    expect(sitesIn("const a = { lastUsedDate: '2026-10-27' };", "probe.ts")).toEqual([
+      "probe.ts:1",
+    ]);
+    expect(sitesIn("const a = { lastUsedDate: `2026-10-27` };", "probe.ts")).toEqual([
+      "probe.ts:1",
+    ]);
+    // Comment prose that documents the bug is not a fixture.
+    expect(sitesIn('// was lastUsedDate: "2026-10-27"', "probe.ts")).toEqual([]);
+    expect(sitesIn(' * was lastUsedDate: "2026-10-27"', "probe.ts")).toEqual([]);
+    // Accepted limit: an indirect value is not a literal.
+    expect(
+      sitesIn('const key = "2026-10-27";\nconst a = { lastUsedDate: key };', "probe.ts"),
+    ).toEqual([]);
+  });
+
+  it("excludes only its own file from the scan", () => {
+    // The guard's probes are literal by necessity: they are the violation being
+    // demonstrated. Self-exclusion is what keeps them from failing the tree, so
+    // it is asserted directly rather than inferred.
+    expect(isGuardKey("./guard/fixture-clock.test.ts")).toBe(true);
+    expect(isGuardKey("./game/hub/gameLaunch.test.ts")).toBe(false);
+    expect(testSources().map((file) => file.path)).not.toContain("guard/fixture-clock.test.ts");
   });
 
   it("scans the whole test tree", () => {

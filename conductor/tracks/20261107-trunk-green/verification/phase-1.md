@@ -5,7 +5,7 @@
 - **Date:** 2026-11-07
 - **Branch:** `chore/20261107-trunk-green`
 - **Phase base:** `697ed5f6889f0983cf38ec00d52121c8db0102f9`
-- **Head (code + audit):** `a7977db0` — this report is committed directly after it and changes no code
+- **Head (code + audit):** `a7977db0` - this report is committed directly after it and changes no code. The phase was later squashed, so the delivered equivalent is `f08e956c`
 - **Result:** **verified**
 - **Covers:** FR-1, FR-3, AC-1, AC-3
 
@@ -104,7 +104,7 @@ two literals are `lastPlayedAt` stamps used only for relative ordering.
 
 - **Date:** 2026-11-07
 - **Verified by:** primary agent, independently of the phase subagent
-- **Head at verification:** `63f6716d`
+- **Head at verification:** `63f6716d` (delivered equivalent after the phase squash: `f08e956c`)
 
 | Check | Command | Exit | Result |
 |-------|---------|------|--------|

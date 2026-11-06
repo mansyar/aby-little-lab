@@ -11,7 +11,14 @@ import type { PlayTime } from "../../../types";
 import { type MockFn, MockScene, mockRegistry } from "../../helpers/phaserMock";
 
 /** normalizePlayTime resets usage on stale dates, so limit fixtures must be "today". */
-const TODAY = todayKey();
+/**
+ * normalizePlayTime resets usage when the stored day key is not today, so the
+ * fixtures and production must read the same clock. This file freezes `Date`
+ * (timers stay real) and derives `TODAY` from that same instant, so the suite
+ * cannot invert when the host calendar moves or a run straddles midnight.
+ */
+const FIXED_NOW = new Date("2026-08-05T12:00:00");
+const TODAY = todayKey(FIXED_NOW);
 
 vi.mock("../../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../utils/storage")>();
@@ -63,9 +70,15 @@ function noLimit(): PlayTime {
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(FIXED_NOW);
   mockRegistry.length = 0;
   vi.mocked(getPlayTime).mockReset();
   vi.mocked(getPlayTime).mockReturnValue(noLimit());
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("createPlayTimeIndicator", () => {

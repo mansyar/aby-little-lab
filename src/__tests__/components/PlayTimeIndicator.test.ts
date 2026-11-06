@@ -1,15 +1,25 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { todayKey } from "../../game/playTimeLogic";
 import type { PlayTime } from "../../types";
 import { MockScene, mockRegistry } from "../helpers/phaserMock";
 
 /**
  * normalizePlayTime resets usage on stale dates, so fixtures must be "today"
- * (local, not UTC). The clock is captured once per module run, so a suite that
- * straddles midnight cannot flip the fixtures underneath itself.
+ * (local, not UTC). Every test in this file runs against one frozen instant, so
+ * the fixture's day key and production's `new Date()` cannot disagree even if
+ * the run straddles local midnight. Only `Date` is faked; timers stay real.
  */
-const FIXED_NOW = new Date();
+const FIXED_NOW = new Date("2026-08-05T12:00:00");
 const TODAY = todayKey(FIXED_NOW);
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(FIXED_NOW);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 vi.mock("../../utils/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../utils/storage")>();

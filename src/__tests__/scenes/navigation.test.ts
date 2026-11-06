@@ -379,7 +379,8 @@ describe("HubScene", () => {
     expect(hasSticker).toHaveBeenCalledTimes(22);
   });
 
-  // Boots all 22 scenes in one test body: needs headroom under coverage on a loaded host.
+  // Boots all 22 scenes in one test body: 20-23 s isolated, 30-31 s under
+  // coverage on a loaded host. The 30 s default was marginal, not wrong.
   it("navigates to each game scene when respective tile is clicked", {
     timeout: 60_000,
   }, async () => {

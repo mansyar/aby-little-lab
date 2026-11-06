@@ -313,7 +313,8 @@ describe("Hub engagement tile press feedback", () => {
     }
   });
 
-  // Boots all 22 scenes in one test body: needs headroom under coverage on a loaded host.
+  // Boots all 22 scenes in one test body: 20-23 s isolated, 30-31 s under
+  // coverage on a loaded host. The 30 s default was marginal, not wrong.
   it("keeps tile taps navigating to games after press feedback is attached", {
     timeout: 60_000,
   }, async () => {

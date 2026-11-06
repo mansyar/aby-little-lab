@@ -68,9 +68,22 @@ genuine failure lands next to it.
 | ID | Requirement |
 | --- | --- |
 | NFR-1 | The guard completes in under 1 s, with no network, timers, or Phaser |
-| NFR-2 | No file outside `src/__tests__/**` and `conductor/code_styleguides/typescript.md` changes |
+| NFR-2 | No file outside `src/__tests__/**` and `conductor/code_styleguides/typescript.md` changes, plus the three documents `validate-docs` derives suite counts from (see amendment) |
 | NFR-3 | The guard's verdict is independent of host date, timezone and locale |
 | NFR-4 | Coverage gates and the existing test count are unaffected |
+
+**NFR-2 amendment (2026-11-07, review finding R4).** The original wording was
+"no file outside `src/__tests__/**` and `conductor/code_styleguides/typescript.md`
+changes". Adding a test file changes the derived suite truth, and
+`scripts/validate-docs.js` fails any living document whose counts disagree, so
+`README.md`, `docs/TDD.md` and `docs/perf-baseline.md` had to be updated for AC-6
+to be reachable at all. The amendment is recorded rather than waived, and it is
+narrow to those three files: no production source changed.
+
+**NFR-4 amendment (2026-11-07).** "The existing test count is unaffected" was
+written before the track's own tests existed; the intended reading is that no
+existing test is removed or skipped. The suite grew by four tests (guard probes)
+and by one converted sweep budget, and every pre-existing test still runs.
 
 ## Acceptance Criteria
 

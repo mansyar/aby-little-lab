@@ -5,8 +5,8 @@
 - **Date:** 2026-11-07
 - **Branch:** `chore/20261107-trunk-green`
 - **Phase base:** `4cdf8e1af8a94574015d443274d2c19e794e520c`
-- **Phase head:** `ace2e97b`
-- **Result:** `blocked`
+- **Phase head:** `1eda5fc2` (the pre-squash commit `ace2e97b` no longer exists on the branch)
+- **Result:** **verified** - the command denial was cleared by the primary, see Primary verification below
 
 The code change (P3.T1) is complete, committed and statically clean. The proof
 (P3.T2) could not start: the phase's verification command was refused by the
@@ -105,7 +105,7 @@ remaining verification. The tree was not modified between these runs.
 | coverage run 2 | `CI=true pnpm test:coverage` | 0 | identical summary - back to back, no edit in between |
 | static | `pnpm check` | 0 | 271 files, no findings |
 | static | `pnpm typecheck` | 0 | clean |
-| unit | `CI=true pnpm test -- --run` | 0 | 132 files / 2,832 tests, 16.92 s |
+| unit | `CI=true pnpm test -- --run` | 0 | 132 files / 2,832 tests, 16.92 s (2,833 after the review fixes below) |
 | coverage (in chain) | `pnpm test:coverage` | 0 | 97.86 / 92.10 / 97.01 / 98.76 |
 | build | `pnpm build` | 0 | succeeded, `dist/sw.js` emitted |
 | bundle artifact | `node scripts/validate-bundle.js` | 0 | phaser 1335.0 kB, shell 150.0 kB <= 200 kB |
