@@ -38,7 +38,7 @@
 - **Covers:** FR-2, FR-4, FR-5, NFR-1, NFR-3, AC-2, AC-4, AC-5, AC-6
 - **Touches:** `src/__tests__/guard/fixture-clock.test.ts`, `conductor/code_styleguides/typescript.md`, `conductor/tracks/20261107-trunk-green/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Write the guard test** - covers: FR-2
   - [ ] **P2.T1.1: Scan every `.ts` under `src/__tests__`**, excluding the guard itself, matching a bare quoted `YYYY-MM-DD` assigned to `lastUsedDate`
