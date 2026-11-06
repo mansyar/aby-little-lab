@@ -62,7 +62,7 @@
 - **Covers:** FR-2, FR-3, FR-4, AC-2, AC-3, AC-4
 - **Touches:** `e2e/journeys/`, `e2e/fixtures/`
 - **Verification:** `pnpm test:e2e` then the full chain
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Launch and return, all 22 games** - covers: FR-2, AC-2
   - [ ] **P3.T1.1:** Shared helper that taps a hub tile by its registry order, waits for the scene key, and returns via back navigation
