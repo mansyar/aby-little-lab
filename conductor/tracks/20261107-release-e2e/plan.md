@@ -37,7 +37,7 @@
 - **Covers:** FR-9, NFR-2, NFR-4, NFR-5, AC-9
 - **Touches:** `package.json`, `pnpm-workspace.yaml`, `playwright.config.ts`, `e2e/`, `tsconfig.json`, `biome.json`, `.github/workflows/ci.yml`
 - **Verification:** `pnpm test:e2e` then the full chain
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the runner and its configuration** - covers: FR-9
   - [ ] **P2.T1.1:** Add `@playwright/test` at a pinned version; keep `playwright-core` if `validate-boot.js` still needs it
