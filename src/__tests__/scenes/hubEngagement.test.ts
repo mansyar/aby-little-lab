@@ -313,7 +313,10 @@ describe("Hub engagement tile press feedback", () => {
     }
   });
 
-  it("keeps tile taps navigating to games after press feedback is attached", async () => {
+  // Boots all 22 scenes in one test body: needs headroom under coverage on a loaded host.
+  it("keeps tile taps navigating to games after press feedback is attached", {
+    timeout: 60_000,
+  }, async () => {
     // Fresh Hub per navigation (see "navigates to each game scene").
     for (let i = 0; i < GAME_SCENE_KEYS.length; i++) {
       const scene = new HubScene();
