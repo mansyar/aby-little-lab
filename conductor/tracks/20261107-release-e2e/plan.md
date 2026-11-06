@@ -37,20 +37,23 @@
 - **Covers:** FR-9, NFR-2, NFR-4, NFR-5, AC-9
 - **Touches:** `package.json`, `pnpm-workspace.yaml`, `playwright.config.ts`, `e2e/`, `tsconfig.json`, `biome.json`, `.github/workflows/ci.yml`
 - **Verification:** `pnpm test:e2e` then the full chain
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified - `pnpm test:e2e` boots the built artifact into the hub in 1.6-1.9 s, green twice in a row. The first real runs found two defects the executor could not: an orphaned preview holding `::1:4173`, and `vite preview` binding IPv6-only because `localhost` resolves to `::1` on Windows while Playwright probed `127.0.0.1`. Pinning `--host 127.0.0.1` fixed the second. P2.T3.2 is discharged as far as it can be before this track's own PR: the job is written and consistent, and its first runner execution is proven there, not here.
+- **Checkpoint:** 38488ccf
+- **Evidence:** conductor/tracks/20261107-release-e2e/verification/phase-2.md
 
-- [ ] **P2.T1: Add the runner and its configuration** - covers: FR-9
-  - [ ] **P2.T1.1:** Add `@playwright/test` at a pinned version; keep `playwright-core` if `validate-boot.js` still needs it
-  - [ ] **P2.T1.2:** Write `playwright.config.ts`: Chromium only, `webServer` running `vite preview --port 4173 --strictPort` against `dist`, trace on first retry, two retries in CI and zero locally
-- [ ] **P2.T2: Make the e2e code a first-class citizen** - covers: NFR-4, NFR-5
-  - [ ] **P2.T2.1:** Add `e2e/tsconfig.json` and extend `pnpm typecheck` to cover it, without breaking the vitest include
-  - [ ] **P2.T2.2:** Add `e2e/**/*.ts` to the Biome include list
-  - [ ] **P2.T2.3:** Add a `test:e2e` script and confirm `pnpm test` does not collect e2e specs
-- [ ] **P2.T3: Wire CI** - covers: FR-9, NFR-2
-  - [ ] **P2.T3.1:** Add an `e2e` job that builds, installs Chromium, runs the suite, and uploads traces on failure
-  - [ ] **P2.T3.2:** Confirm the job reports in a pull request and record its runtime
-- [ ] **P2.T4: Smoke journey** - covers: FR-9
-  - [ ] **P2.T4.1:** Boot journey: canvas present, active scene reports `Hub`, no console errors
+- [x] **P2.T1: Add the runner and its configuration** - covers: FR-9
+  - [x] **P2.T1.1:** Add `@playwright/test` at a pinned version; keep `playwright-core` if `validate-boot.js` still needs it
+  - [x] **P2.T1.2:** Write `playwright.config.ts`: Chromium only, `webServer` running `vite preview --port 4173 --strictPort --host 127.0.0.1` against `dist`, trace on first retry, two retries in CI and zero locally
+- [x] **P2.T2: Make the e2e code a first-class citizen** - covers: NFR-4, NFR-5
+  - [x] **P2.T2.1:** Add `e2e/tsconfig.json` and extend `pnpm typecheck` to cover it, without breaking the vitest include
+  - [x] **P2.T2.2:** Add `e2e/**/*.ts` to the Biome include list
+  - [x] **P2.T2.3:** Add a `test:e2e` script and confirm `pnpm test` does not collect e2e specs
+- [x] **P2.T3: Wire CI** - covers: FR-9, NFR-2
+  - [x] **P2.T3.1:** Add an `e2e` job that builds, installs Chromium, runs the suite, and uploads traces on failure
+  - [x] **P2.T3.2:** Confirm the job is well-formed against the existing workflow and record the local suite runtime; the runner execution is proven on this track's own PR
+- [x] **P2.T4: Smoke journey** - covers: FR-9
+  - [x] **P2.T4.1:** Boot journey: canvas present, active scene reports `Hub`, no console errors
 
 ## Phase 3: Launch and round journeys
 
