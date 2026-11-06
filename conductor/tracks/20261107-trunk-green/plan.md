@@ -14,18 +14,22 @@
 - **Covers:** FR-1, FR-3, AC-1, AC-3
 - **Touches:** `src/__tests__/components/PlayTimeIndicator.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/game/hub/hubPrewarm.test.ts`, `conductor/tracks/20261107-trunk-green/verification/`
 - **Verification:** `pnpm test -- --run`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Classify the 29 date literals** - covers: FR-1
-  - [ ] **P1.T1.1: Enumerate every hit** with file, line, field name and the API that consumes the value
-  - [ ] **P1.T1.2: Write `verification/date-literal-audit.md`** with one verdict per entry (`data` or `clock stand-in`) and the reason
-- [ ] **P1.T2: Convert the play-time indicator fixture** - covers: FR-3
-  - [ ] **P1.T2.1: Replace `lastUsedDate: "2026-01-01"`** with a value derived from a `FIXED_NOW` clock via `todayKey`
-- [ ] **P1.T3: Resolve the storage and prewarm fixtures** - covers: FR-3
-  - [ ] **P1.T3.1: `storage.test.ts` backfill payload** - keep as data if nothing compares it to today; record the reason
-  - [ ] **P1.T3.2: `hubPrewarm.test.ts` recency payload** - recency order is relative, so absolute dates are inert
-- [ ] **P1.T4: Prove no literal remains** - covers: AC-3
-  - [ ] **P1.T4.1: Grep** for a quoted date assigned to `lastUsedDate`; expect zero hits
+- [x] **P1.T1: Classify the 29 date literals** - covers: FR-1
+  - [x] **P1.T1.1: Enumerate every hit** with file, line, field name and the API that consumes the value
+  - [x] **P1.T1.2: Write `verification/date-literal-audit.md`** with one verdict per entry (`data` or `clock stand-in`) and the reason
+- [x] **P1.T2: Convert the play-time indicator fixture** - covers: FR-3
+  - [x] **P1.T2.1: Replace `lastUsedDate: "2026-01-01"`** with a value derived from a `FIXED_NOW` clock via `todayKey`
+- [x] **P1.T3: Resolve the storage and prewarm fixtures** - covers: FR-3
+  - [x] **P1.T3.1: `storage.test.ts` backfill payload** - read through `normalizePlayTime`, so it compares with today; converted to `todayKey()`
+  - [x] **P1.T3.2: `hubPrewarm.test.ts` recency payload** - relative order only; left as data
+- [x] **P1.T4: Prove no literal remains** - covers: AC-3
+  - [x] **P1.T4.1: Grep** for a quoted date assigned to `lastUsedDate`; zero hits
+
+**Result:** verified
+**Checkpoint:** `f08e956c`
+**Evidence:** `conductor/tracks/20261107-trunk-green/verification/phase-1.md`
 
 ## Phase 2: Guard and style rule
 
