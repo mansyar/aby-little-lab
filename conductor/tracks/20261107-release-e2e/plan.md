@@ -14,7 +14,7 @@
 - **Covers:** FR-1, NFR-1, AC-1
 - **Touches:** `src/game/e2eBridge.ts`, `src/main.ts`, `src/scenes/GameSceneBase.ts`, `src/scenes/ShapeSorterScene.ts`, `src/scenes/AddItUpScene.ts`, `src/scenes/MemoryMatchScene.ts`, `src/scenes/StoryOrderScene.ts`, `src/scenes/AnimalTraceScene.ts`, `src/scenes/FirstSoundsScene.ts`, `src/__tests__/game/e2eBridge.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Build the bridge module** - covers: FR-1
   - [ ] **P1.T1.1:** Create `src/game/e2eBridge.ts` with an `initE2EBridge(game)` entry point that returns early unless `location.search` contains `e2e=1`
