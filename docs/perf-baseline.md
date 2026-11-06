@@ -418,10 +418,10 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 131 files / 2,829 tests | `pnpm test -- --run` |
-| Coverage | statements 97.76 % / branches 91.84 % / functions 96.76 % / lines 98.73 % | `pnpm test:coverage` |
+| Test suite | 132 files / 2,833 tests | `pnpm test -- --run` |
+| Coverage | statements 97.87 % / branches 92.16 % / functions 97.01 % / lines 98.76 % | `pnpm test:coverage` |
 
-The Test-suite and Coverage rows were verified 2026-10-27; the build
+The Test-suite and Coverage rows were verified 2026-11-07; the build
 figures above are the 2026-10-22 measurement.
 
 The Shell Diet section above keeps its own numbers (129.1 KiB, 41 chunks, 53
@@ -729,8 +729,8 @@ the verdict re-scopes honestly to which games remain over budget and why
   delta (148.82 vs 148.86 kB, superseding the build-log figures),
   isolating rasterization from bytes.
 - The full verification gate is green on the art-prewarm tree with the TDD
-  §4.8 walkthrough included: Biome clean, typecheck clean, 126 files /
-  2,829 tests pass, coverage 97.75 / 91.76 / 96.88 / 98.70,
+  §4.8 walkthrough included: Biome clean, typecheck clean, the suite passing at
+  the counts then current (today's counts are in the table above),
   `validate-bundle` (shell ≤ 200 kB gate), `validate-pwa` 16/16,
   `validate-docs` 6/6.
 - The headed comparison ran on the primary host (sixteen runs, same-host

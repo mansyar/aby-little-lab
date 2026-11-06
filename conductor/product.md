@@ -151,7 +151,7 @@ that rots on a calendar boundary teaches the team to ignore red.
 
 | Track | Work | Exit gate |
 |---|---|---|
-| `20261106-trunk-green` | Anchor the play-time fixture to the current day (done); audit the 30 hardcoded test dates and convert the time-sensitive suites to `vi.setSystemTime`; add the "no wall-clock dates in fixtures" rule to `code_styleguides/typescript.md` | `master` green on a fresh clone on a different day |
+| `20261106-trunk-green` | **Done 2026-11-07** (track `20261107-trunk-green`): all 29 date literals classified - 5 were clock stand-ins, converted to values derived from an explicit clock; 24 were payload data and stayed literal. A source-guard test now fails on a bare quoted day key assigned to `lastUsedDate`, the "no wall-clock values" rule is in `code_styleguides/typescript.md` §6, and the two 22-scene sweeps got a 60 s budget so the coverage gate stops tripping on a 30 s deadline. | `master` green on a fresh clone on a different day |
 | `20261106-docs-truth-2` | Clear the README "Known Issues" list (both items shipped) and make it the Known Issues home; delete `docs/roadmap.md` and repoint every reference so this section is the only roadmap | No second roadmap copy survives in `docs/`; `validate-docs` green |
 | `20261106-roadmap-adopt` | Make this section the roadmap of record; the old `docs/roadmap.md` is deleted rather than kept as a pointer | Roadmap carries dated, owned items; nothing else claims the title |
 

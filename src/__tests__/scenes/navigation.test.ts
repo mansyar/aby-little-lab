@@ -379,7 +379,11 @@ describe("HubScene", () => {
     expect(hasSticker).toHaveBeenCalledTimes(22);
   });
 
-  it("navigates to each game scene when respective tile is clicked", async () => {
+  // Boots all 22 scenes in one test body: 20-23 s isolated, 30-31 s under
+  // coverage on a loaded host. The 30 s default was marginal, not wrong.
+  it("navigates to each game scene when respective tile is clicked", {
+    timeout: 60_000,
+  }, async () => {
     // A fresh Hub per navigation mirrors reality: once a transition starts,
     // the guard blocks further transitions on that instance until shutdown
     // (which Phaser fires when the Hub is replaced by the game scene).

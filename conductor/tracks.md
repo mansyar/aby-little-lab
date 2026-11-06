@@ -267,3 +267,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Content Expansion - Words, Stories, Scenarios** - [20261027-content-expansion](./archive/20261027-content-expansion/index.md) - feature - medium
 - [x] **Track: Release v1.23.0 — Ship Content Expansion** - [20261027-release-v1-23-0](./archive/20261027-release-v1-23-0/index.md) - chore - high
 - [x] **Track: HubScene Decomposition** — [20261027-hubscene-split](./archive/20261027-hubscene-split/index.md) — refactor — medium
+- [x] **Track: Trunk Green — Wall-Clock-Safe Test Fixtures** - [20261107-trunk-green](./archive/20261107-trunk-green/index.md) - chore - high

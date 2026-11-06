@@ -20,7 +20,7 @@ const DAY = new Date(2026, 7, 5, 10, 0, 0); // 2026-08-05 local
 const NEXT_DAY = new Date(2026, 7, 6, 9, 0, 0); // 2026-08-06 local
 
 function pt(overrides: Partial<PlayTime> = {}): PlayTime {
-  return { limitMinutes: null, usedMinutes: 0, lastUsedDate: "2026-08-05", ...overrides };
+  return { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey(DAY), ...overrides };
 }
 
 describe("playTimeLogic", () => {
@@ -37,7 +37,7 @@ describe("playTimeLogic", () => {
       expect(playTime).toEqual({
         limitMinutes: null,
         usedMinutes: 0,
-        lastUsedDate: "2026-08-05",
+        lastUsedDate: todayKey(DAY),
       });
     });
   });
@@ -61,7 +61,7 @@ describe("playTimeLogic", () => {
       expect(normalized).toEqual({
         limitMinutes: null,
         usedMinutes: 0,
-        lastUsedDate: "2026-08-05",
+        lastUsedDate: todayKey(DAY),
       });
     });
 
