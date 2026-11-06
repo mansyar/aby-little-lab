@@ -14,18 +14,21 @@
 - **Covers:** FR-1, NFR-1, AC-1
 - **Touches:** `src/game/e2eBridge.ts`, `src/main.ts`, `src/scenes/GameSceneBase.ts`, `src/scenes/ShapeSorterScene.ts`, `src/scenes/AddItUpScene.ts`, `src/scenes/MemoryMatchScene.ts`, `src/scenes/StoryOrderScene.ts`, `src/scenes/AnimalTraceScene.ts`, `src/scenes/FirstSoundsScene.ts`, `src/__tests__/game/e2eBridge.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified - the bridge installs only for `e2e=1`, publishes live reads, and the shell moved 150.0 -> 150.6 kB inside the 200 kB gate. The boot smoke the executor could not run was run by the primary and passed at a 0.84 s median.
+- **Checkpoint:** aa5f05f5
+- **Evidence:** conductor/tracks/20261107-release-e2e/verification/phase-1.md
 
-- [ ] **P1.T1: Build the bridge module** - covers: FR-1
-  - [ ] **P1.T1.1:** Create `src/game/e2eBridge.ts` with an `initE2EBridge(game)` entry point that returns early unless `location.search` contains `e2e=1`
-  - [ ] **P1.T1.2:** Expose `activeSceneKey()`, `profileCount()`, `stickerCount()`, `roundIndex()` and `roundGeometry()` as read-only functions over the live game
-  - [ ] **P1.T1.3:** Register the bridge from `src/main.ts` by capturing the `Phaser.Game` instance instead of discarding it
-- [ ] **P1.T2: Publish round geometry for the six sampled scenes** - covers: FR-1
-  - [ ] **P1.T2.1:** Add a protected overridable geometry hook to `GameSceneBase` returning `null` by default
-  - [ ] **P1.T2.2:** Override it in the six sampled scenes, reporting correct target ids and canvas coordinates per round
-- [ ] **P1.T3: Prove the gate and the budget** - covers: NFR-1, AC-1
-  - [ ] **P1.T3.1:** Unit-test the bridge gating: no bridge without the parameter, bridge with it, and no behaviour change in either case
-  - [ ] **P1.T3.2:** Record the shell size from `validate-bundle` against the 200 kB gate
+- [x] **P1.T1: Build the bridge module** - covers: FR-1
+  - [x] **P1.T1.1:** Create `src/game/e2eBridge.ts` with an `initE2EBridge(game)` entry point that returns early unless `location.search` contains `e2e=1`
+  - [x] **P1.T1.2:** Expose `activeSceneKey()`, `profileCount()`, `stickerCount()`, `roundIndex()` and `roundGeometry()` as read-only functions over the live game
+  - [x] **P1.T1.3:** Register the bridge from `src/main.ts` by capturing the `Phaser.Game` instance instead of discarding it
+- [x] **P1.T2: Publish round geometry for the six sampled scenes** - covers: FR-1
+  - [x] **P1.T2.1:** Add a protected overridable geometry hook to `GameSceneBase` returning `null` by default
+  - [x] **P1.T2.2:** Override it in the six sampled scenes, reporting correct target ids and canvas coordinates per round
+- [x] **P1.T3: Prove the gate and the budget** - covers: NFR-1, AC-1
+  - [x] **P1.T3.1:** Unit-test the bridge gating: no bridge without the parameter, bridge with it, and no behaviour change in either case
+  - [x] **P1.T3.2:** Record the shell size from `validate-bundle` against the 200 kB gate
 
 ## Phase 2: Harness and CI wiring
 
