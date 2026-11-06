@@ -2,7 +2,7 @@
 
 > **Live figures — measured 2026-10-27.** The numbers in the section **Idle art-queue prewarm — cold-tap verdict (2026-10-26)** at the end of this file describe the current build: shell entry `index-DCKgoc2n.js` at 148.86 kB on disk (148.9 kB via `validate-bundle`), **42** JavaScript chunks, **54** precache entries, and the first-tap result split into a warm case (20–65 ms per game), an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20) and the Shell Diet re-measurement (2026-10-22). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
-> The standing debts and the planned work behind these numbers live in one place: [`docs/roadmap.md`](roadmap.md).
+> The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
 
 Track: `perf-bundle-hardening_20260809`, Phase 3 (measure-first). Date: 2026-08-09.
 
@@ -406,7 +406,7 @@ The paragraph is kept as written for the record:
 budget on the target hardware is not settled by this run. It needs the
 increment measurement the shell-diet track used (a built pre-track baseline on
 the same host, back to back) and a device pass. It is recorded here as a
-measured, dated figure and is a candidate for `docs/roadmap.md`.
+measured, dated figure and is a candidate for the roadmap in `conductor/product.md` §10.
 
 ### Build figures (2026-10-22)
 

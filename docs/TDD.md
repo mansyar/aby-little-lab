@@ -1132,7 +1132,7 @@ VitePWA({
 | `validate-bundle.js` | exactly one `phaser-*.js` vendor chunk; every `index-*.js` shell entry ≤ `200 * 1024` bytes |
 | `validate-pwa.js` | 16 named checks over `dist/sw.js` and `dist/manifest.webmanifest`: files exist, manifest name/orientation/display/`display_override`, `precacheAndRoute` present, **every emitted `dist/assets/*.js` chunk present in the precache manifest** (so a lazily loaded game or art group is offline-capable, or the build fails), BGM precached, no `.ligne` or `ligne_wasm_bg` asset, `NavigationRoute` registered |
 | `validate-boot.js` | drives the production build through `playwright-core`: three cold loads, samples Navigation Timing after canvas mount + 5 s settle, fails when the median exceeds 3000 ms |
-| `validate-docs.js` | asserts the durable invariants between the documents and the code: every `docs/release-notes-v*.md` is linked from the README's Documentation index, every relative link resolves and every anchor matches a heading, the README, the PRD and the TDD describe exactly the games in `GAME_REGISTRY`, `docs/roadmap.md` carries both `Known Issues` and `Future Work / Roadmap`, and no document points at a Conductor path that does not exist |
+| `validate-docs.js` | asserts the durable invariants between the documents and the code: every `docs/release-notes-v*.md` is linked from the README's Documentation index, every relative link resolves and every anchor matches a heading, the README, the PRD and the TDD describe exactly the games in `GAME_REGISTRY`, and no document points at a Conductor path that does not exist |
 | `render-svg-contact-sheets.mjs` | developer tool, not a gate: renders per-category contact sheets from the SVG corpus (categories include `stories`) for art review |
 
 `validate-boot.js` deliberately does not start its own server — spawning one destabilised CDP on Windows — so CI starts `vite preview` as a separate step. Measured medians at introduction were 0.63–1.75 s against a 2036 ms baseline; [`docs/perf-baseline.md`](./perf-baseline.md) keeps the per-run numbers.
@@ -1165,7 +1165,7 @@ Locally the image builds with `docker build -t aby-little-lab .` and smoke-tests
 ## 12. See also
 
 - [`docs/PRD.md`](./PRD.md) — product definition, curriculum map, per-game rules, cross-game systems, performance targets.
-- [`docs/roadmap.md`](./roadmap.md) — what is known to be broken and what is planned next.
+- [`conductor/product.md` §10](../conductor/product.md#10-roadmap) - the roadmap: phases, gates and deliberate non-goals.
 - [`conductor/tech-stack.md`](../conductor/tech-stack.md) — dated stack decisions and the history behind them.
 - [`conductor/archive/uiux-hardening_20260805/`](../conductor/archive/uiux-hardening_20260805/) — the archived UI/UX hardening track behind the Baloo 2 typography, Hub tile icons and press-feedback pass.
 - [`docs/release-checklist.md`](./release-checklist.md) — the manual device pass that complements the CI gates.

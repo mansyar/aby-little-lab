@@ -5,9 +5,8 @@
  *
  * This script asserts the durable invariants between the documentation and the
  * code: the release-note index is complete, every relative link and every
- * anchor resolves, the three game lists agree with `GAME_REGISTRY`, the
- * roadmap carries both of its sections, and no document points at a Conductor
- * path that does not exist.
+ * anchor resolves, the three game lists agree with `GAME_REGISTRY`, and no
+ * document points at a Conductor path that does not exist.
  *
  * The two scans over prose differ in what they blank. The link check blanks
  * inline code spans as well as fenced blocks, because a backticked word is not
@@ -47,7 +46,6 @@ const CONDUCTOR_DIR = path.join(ROOT, "conductor");
 const README_FILE = path.join(ROOT, "README.md");
 const PRD_FILE = path.join(DOCS_DIR, "PRD.md");
 const TDD_FILE = path.join(DOCS_DIR, "TDD.md");
-const ROADMAP_FILE = path.join(DOCS_DIR, "roadmap.md");
 const PERF_BASELINE_FILE = path.join(DOCS_DIR, "perf-baseline.md");
 const REGISTRY_FILE = path.join(ROOT, "src", "game", "gameRegistry.ts");
 
@@ -452,20 +450,7 @@ function checkGameLists() {
 }
 
 // ---------------------------------------------------------------------------
-// Check 4 - the roadmap has both sections
-// ---------------------------------------------------------------------------
-
-function checkRoadmap() {
-  const headings = new Set(headingsOf(ROADMAP_FILE).map((heading) => heading.text));
-  for (const section of ["Known Issues", "Future Work / Roadmap"]) {
-    if (!headings.has(section)) {
-      fail(ROADMAP_FILE, 1, `a "## ${section}" section`, "the section is missing");
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Check 5 - no document points at a Conductor path that does not exist
+// Check 4 - no document points at a Conductor path that does not exist
 // ---------------------------------------------------------------------------
 
 function checkConductorPaths() {
@@ -628,7 +613,6 @@ const checks = [
     run: checkLinks,
   },
   { name: "The README, the PRD and the TDD agree with GAME_REGISTRY", run: checkGameLists },
-  { name: "The roadmap carries both of its sections", run: checkRoadmap },
   {
     name: "No document points at a Conductor path that does not exist",
     run: checkConductorPaths,

@@ -213,7 +213,6 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 - [PRD.md](docs/PRD.md) - Product Requirements Document
 - [TDD.md](docs/TDD.md) - Technical Design Document
-- [roadmap.md](docs/roadmap.md) - Known Issues and Future Work / Roadmap - the single home for both
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
@@ -247,12 +246,18 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 ## Known Issues
 
-The headline items. The full list - three of them, each with the file the debt
-lives in and how a reader would notice it - is in
-[docs/roadmap.md](docs/roadmap.md), which is the single home for them.
+No shipped behaviour is known to be broken. The two items carried here until
+2026-11-06 have both shipped: every drag game uses the shared `DragTarget`
+capability set in `src/game/dragBoard.ts`, and the stored payload is
+schema-versioned with an unknown-version write guard in `src/utils/storage.ts`.
 
-- [Three of the five drag games still hand-roll their own drag](docs/roadmap.md) - only Number Order and Story Order use the shared `DragBoard`.
-- [The stored save payload has no schema version](docs/roadmap.md) - a future format change would have to be inferred rather than recognised.
+Two limitations are tracked rather than fixed, because each is a scoped product
+decision rather than a defect:
+
+- **Canvas-only UI** - no keyboard input, no accessibility tree, and a viewport that disables browser zoom. Correct for a touch-only 3-5 app, disqualifying for schools or procurement; Phase 3 of the roadmap decides whether to keep it as a stated stance or close it.
+- **Unguarded storage write** - `src/utils/storage.ts:154` calls `localStorage.setItem` without a guard, so a quota-exceeded or private-mode device throws inside sticker award. Track: `20261110-storage-resilience`.
+
+Planned work lives in [conductor/product.md §10](conductor/product.md#10-roadmap).
 
 ## License
 

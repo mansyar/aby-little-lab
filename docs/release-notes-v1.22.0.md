@@ -67,7 +67,7 @@ Nothing to install by hand: the release is the PWA shell plus its content-addres
 
 ## Known Issues
 
-The full list of known issues and planned work lives in [roadmap.md](roadmap.md) - it is the single home for what is outstanding, and nothing below duplicates it.
+The full list of known issues lives in the README's Known Issues section, and the planned work lives in [conductor/product.md §10](../conductor/product.md#10-roadmap) - nothing below duplicates either.
 
 - The duplicate-shuffle Known Issue and its Future Work entry are resolved by PRs #67-#68 and already retired in the roadmap.
 - No new known issues were filed by these seven tracks: the prewarm paths degrade to previous behaviour (placeholder art, on-demand chunk load) rather than new failure modes.

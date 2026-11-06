@@ -124,6 +124,160 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 | Audio latency | < 50ms |
 | Offline | Full gameplay after first install |
 
+## 10. Roadmap
+
+Priority as of 2026-11-06. The engineering foundation is not the constraint: the
+app is layered, registry-driven, measured and gated. What is missing is the
+operating layer around it — a browser-level regression net, evidence that the
+games still work for a child over weeks rather than minutes, content depth
+behind the 22 mechanics, and a stated position on distribution, language and
+accessibility. The sequence is therefore **trust → observability → depth →
+reach**, and each phase is one or more Conductor tracks.
+
+**Planning assumptions**
+
+- One developer, part-time, with the existing Conductor workflow and gates.
+- Distribution stays private/small until Phase 3 decides otherwise.
+- No accounts, no cloud sync, no third-party analytics; local-only data is a
+  product property, not an implementation detail.
+- Every phase ships through the existing gate (`check`, `typecheck`, `test`,
+  `test:coverage`, `build`, `validate-bundle`, `validate-pwa`, `validate-docs`)
+  plus whatever the phase adds.
+
+### 10.1 Phase 0 — Trunk hygiene (1 day)
+
+The trunk must be trustworthy before anything is planned on top of it. A suite
+that rots on a calendar boundary teaches the team to ignore red.
+
+| Track | Work | Exit gate |
+|---|---|---|
+| `20261106-trunk-green` | Anchor the play-time fixture to the current day (done); audit the 30 hardcoded test dates and convert the time-sensitive suites to `vi.setSystemTime`; add the "no wall-clock dates in fixtures" rule to `code_styleguides/typescript.md` | `master` green on a fresh clone on a different day |
+| `20261106-docs-truth-2` | Clear the README "Known Issues" list (both items shipped) and make it the Known Issues home; delete `docs/roadmap.md` and repoint every reference so this section is the only roadmap | No second roadmap copy survives in `docs/`; `validate-docs` green |
+| `20261106-roadmap-adopt` | Make this section the roadmap of record; the old `docs/roadmap.md` is deleted rather than kept as a pointer | Roadmap carries dated, owned items; nothing else claims the title |
+
+### 10.2 Phase 1 — Trust the build (2 weeks)
+
+| Track | Work | Exit gate |
+|---|---|---|
+| `20261110-release-e2e` | Playwright journey suite on the built artifact: boot → hub → launch each of 22 games → complete 3 rounds on a 6-game sample → back nav → 3s parental hold → settings toggles → time-limit nudge → offline reload. 8–12 journeys, 5-minute budget | `e2e` green on every PR; catches a deliberately broken hit area |
+| `20261110-storage-resilience` | Guard the write path (`storage.ts:154`); define quota-exceeded and private-mode behaviour (degrade to in-memory, non-scary cue) with tests for both | No unguarded `setItem`; a simulated quota failure never throws into a scene |
+| `20261110-toolchain-pinning` | `packageManager` and `engines` fields; one pnpm/Node truth across CI, Docker, README and `tech-stack.md`; drop the stale `@ligne-engine/*` excludes; add `.node-version` | CI and a fresh clone resolve identically; the docs validator checks the pin |
+| `20261110-edge-hardening` | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` in `nginx.conf`; verify the service worker under CSP | Headers present; install and update still work |
+
+Every later phase touches scenes, assets or storage; without a browser layer
+each of those changes is blind.
+
+### 10.3 Phase 2 — Product operations (3 weeks)
+
+The phase that turns a well-built toy into a product that can be reasoned about.
+All instrumentation is local, capped, prunable, and leaves the device only when a
+parent explicitly exports it.
+
+| Track | Work | Exit gate |
+|---|---|---|
+| `20261124-local-insights` | Local event ring buffer plus an upgraded parent Insights view: per-game plays, accuracy, completion, streak, time-limit adherence, adaptive-band spread | A parent can answer "what is being played, and is it working" in under 30 seconds |
+| `20261124-backup-restore` | Versioned JSON export/import with checksum and a merge-or-replace choice, parent-gated | A round trip to a second device loses nothing |
+| `20261124-error-capture` | Global handlers → local error log plus "Copy diagnostics" in parent settings; no transmission | A crash yields a shareable, human-readable trace |
+
+**Metrics this unlocks** — baseline is unknown today; the target is what the
+product is trying to demonstrate:
+
+| Metric | Today | Target |
+|---|---|---|
+| Game completion rate (start → 3 rounds) | unknown | ≥ 80% |
+| Distinct games per session | unknown | ≥ 4 |
+| Adaptive band movement | unknown | 60% of profiles move ≥ 1 band within 2 weeks |
+| Uncaught errors per 100 sessions | unknown | < 1 |
+| Day-7 return (local proxy) | unknown | ≥ 40% |
+
+### 10.4 Phase 3 — Product-intent gate (1 week)
+
+One decision unlocks or cancels Phases 4–5. Record it; scope must stop being
+implicit. Deliverable: `docs/product-intent.md`.
+
+1. **Audience** — family-only, small private distribution, or public release?
+2. **Accessibility scope** — is "touch-only, sighted, textless" a documented
+   stance (defensible and honest) or a gap to close (keyboard/switch access,
+   OS zoom)?
+3. **Language** — English permanently, or is a second locale a goal?
+4. **Legal posture** — LICENSE, `bgm.mp3` provenance, COPPA/GDPR-K statement,
+   store privacy labels.
+
+Building i18n and store packaging for a family-only app is months of waste;
+shipping publicly without these answers is a legal and reputational risk.
+
+### 10.5 Phase 4 — Depth & retention (4–6 weeks, content-led)
+
+Breadth is already 22 games; the retention risk is pool thinness, not game
+count. Content work must stay inside the current texture tiers (39 MiB typical /
+178 MiB full) and per-game chunk budget — retention may not be bought with
+memory.
+
+| Track | Work | Exit gate |
+|---|---|---|
+| `20261208-content-depth` | Words 28 → 60+, stories 15 → 30, scenarios 32 → 48, shapes 18 → 24; two signature variants per core mechanic | No pool repeats within a session; art-chunk budget held |
+| `20261208-replay-novelty` | Session-level variety policy (no immediate repeats), rotating sticker sets, "Professor Hoot suggests" rotation | Median distinct games per session ≥ 4 |
+| `20261208-adaptive-tuning` | Retune the bands against Phase 2 data; optional parent view of the current band | Band distribution matches the designed curve |
+
+### 10.6 Phase 5 — Reach (4–6 weeks, gated by Phase 3)
+
+Only if Phase 3 says "public" or "second language".
+
+| Track | Work | Exit gate |
+|---|---|---|
+| `20270105-i18n-seam` | Extract strings and narration manifests; per-locale asset bundles; RTL-safe layout audit; one pilot locale | A second locale ships without touching game logic |
+| `20270105-accessibility-execution` | Either publish the touch-only stance in this document and the README, or add keyboard/switch input and restore OS zoom | The decision is visible to a user, not just in code |
+| `20270105-store-packaging` | TWA/Capacitor wrapper, store assets, privacy statement, review checklist | Installable from a store listing |
+| `20270105-licensing` | LICENSE, audio attribution, third-party notices | Every shipped asset has a traceable right |
+
+### 10.7 Phase 6 — Sustainability (continuous)
+
+| Item | Cadence | Why |
+|---|---|---|
+| Module size budget in `workflow.md` (400 warn / 600 fail, baseline allowlist for `prewarm.ts` and `AudioManager.ts`) | once, then enforced | `prewarm.ts` at 665 lines is the next god-file |
+| Split changelogs out of `product.md` and `tech-stack.md` into `docs/changelog.md` | once | stops the recurring "docs truth pass" tracks |
+| Dependency-majors track | monthly | one already shipped on 2026-10-27; make it routine |
+| Perf baseline per release, first-tap p95 measured headed | per release | closes the 400ms KPI that the README admits is unproven |
+| Browser matrix (iOS Safari, Android Chrome, Fire tablet) | per release | automates what is currently a manual device checklist |
+
+### 10.8 Sequence and milestones
+
+```
+P0 trunk (1d) → P1 trust (2w) → P2 ops (3w) → P3 intent gate (1w)
+                                                   │
+                                  ┌────────────────┴────────────────┐
+                                  ▼ family-only                     ▼ public
+                            P4 depth (4–6w)                  P4 depth (4–6w)
+                            P6 sustain (ongoing)             P5 reach (4–6w)
+                                                             P6 sustain (ongoing)
+```
+
+| Milestone | Approx. version | When |
+|---|---|---|
+| Trunk trustworthy | patch | day 1 |
+| CI has a browser layer | v1.24.0 | ~2 weeks |
+| A parent can see and move their data | v1.25.0 | ~6 weeks |
+| Content depth landed | v1.26.0 | ~12 weeks |
+| Public-release candidate | v2.0.0 | ~4.5 months |
+
+### 10.9 Roadmap risks
+
+| Risk | Likelihood | Mitigation |
+|---|---|---|
+| The E2E suite turns flaky and gets disabled | High | Journeys, not unit assertions; retry ≤ 1; quarantine policy; state-based waits only |
+| Content expansion blows the texture budget | Medium | Per-game art budget validated in CI before merge |
+| Phase 3 never happens and scope stays implicit | Medium | Timeboxed to one week; it blocks Phase 5 by design |
+| Retention is optimised against a noisy proxy | Medium | Treat Phase 2 numbers as directional; confirm with a handful of real families |
+| Toolchain pinning breaks a contributor's setup | Low | Pin in CI first, then Docker, then docs |
+| The accessibility stance is deferred indefinitely | Medium | Force the decision in Phase 3 and publish it either way |
+
+### 10.10 Deliberately not doing
+
+Cloud sync and accounts (breaks the privacy posture and the offline guarantee) ·
+real-time multiplayer · more games before deeper pools · third-party analytics or
+crash SDKs · runtime AI content · a native rewrite · keyboard support unless
+Phase 3 asks for it · migrating the `abby-` storage key (permanent but harmless).
+
 ## Changelog — Content Expansion: Words, Stories, Scenarios (2026-10-27)
 
 > **2026-10-27 — Content Expansion:** three pools grow so repeat play stays

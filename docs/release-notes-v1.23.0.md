@@ -34,6 +34,6 @@ Nothing to install by hand: the release is the PWA shell plus its content-addres
 
 ## Known Issues
 
-The full list of known issues and planned work lives in [roadmap.md](roadmap.md) - it is the single home for what is outstanding, and nothing below duplicates it.
+The full list of known issues lives in the README's Known Issues section, and the planned work lives in [conductor/product.md §10](../conductor/product.md#10-roadmap) - nothing below duplicates either.
 
 - No new known issues were filed by this one track: the new words, stories and scenarios ride the existing mechanics (a missing panel degrades to the same placeholder it always did), and the adaptive bands at the classic setting play byte-for-byte as before.

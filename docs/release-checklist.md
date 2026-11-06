@@ -467,7 +467,7 @@ git push origin HEAD:master  # via PR if branch protection is enabled
 - Fix 2
 
 ## Known Issues
-- Issue 1 (workaround available) — the standing-debt list lives once, in `docs/roadmap.md`; a release note says which of those this release resolves
+- Issue 1 (workaround available) - the standing-debt list lives once, in the README's Known Issues; a release note says which of those this release resolves
 - Issue 2 (fix in progress)
 
 ## Installation
@@ -800,7 +800,7 @@ and the three runs behind every figure are in `docs/perf-baseline.md`
 **Approval:**
 - [x] Code quality meets standards (Biome clean - the two pre-existing findings unchanged)
 - [x] All tests pass (2,488/2,488)
-- [x] Documentation complete (release notes, README, PRD, TDD, both checklists, perf baseline, roadmap)
+- [x] Documentation complete (release notes, README, PRD, TDD, both checklists, perf baseline)
 - [x] Security review passed (no new dependencies, no new network calls)
 - [x] Performance targets met (shell 134.6 kB of 200 kB; boot median 1.16 s in the release-commit smoke check; boot gate green in CI)
 - [x] Ready for release

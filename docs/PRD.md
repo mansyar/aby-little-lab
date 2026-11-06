@@ -618,7 +618,7 @@ A game or feature is done when: it has a spec entry here and an implementation s
 ## 9. See also
 
 - [TDD.md](./TDD.md) for the implementation record: scenes, components, storage schema, audio manager, build and PWA configuration.
-- [roadmap.md](./roadmap.md) for what is known to be broken and what is planned next.
+- [Known Issues](../README.md#known-issues) for what is known to be broken, and [conductor/product.md §10](../conductor/product.md#10-roadmap) for what is planned next.
 - `conductor/product.md` for the product overview and the per-milestone changelog.
 - `conductor/product-guidelines.md` for voice, tone and visual conventions.
 - `conductor/tech-stack.md` for the toolchain.

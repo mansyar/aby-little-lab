@@ -168,9 +168,9 @@ here.
 
 ### What is still open
 
-The full list of known issues and of the planned work lives in
-[`docs/roadmap.md`](roadmap.md). It is the single home for both; nothing is
-copied here.
+The full list of known issues lives in the README's Known Issues, and the
+planned work lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap);
+nothing is copied here.
 
 ## Installation
 
