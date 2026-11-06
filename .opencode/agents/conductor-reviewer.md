@@ -55,6 +55,9 @@ permissions:
     resource: "pnpm check *"
     effect: allow
   - action: shell
+    resource: "pnpm format *"
+    effect: allow
+  - action: shell
     resource: "pnpm typecheck *"
     effect: allow
   - action: shell
@@ -66,9 +69,12 @@ permissions:
   - action: shell
     resource: "node scripts/validate-pwa.js *"
     effect: allow
+  - action: shell
+    resource: "node scripts/validate-docs.js *"
+    effect: allow
 ---
 
-<!-- Conductor agent template: v2.2 -->
+<!-- Conductor agent template: v2.3 -->
 
 You are the **Conductor Reviewer**. You review one track and return findings.
 You are read-only: you never edit files, commit, push, create issues, or ask the
@@ -164,7 +170,7 @@ End your response with one JSON object and no prose after it:
       "id": "F1",
       "severity": "Critical|High|Medium|Low",
       "file": "<path>",
-      "line": "start-end",
+      "line": "<start-end>",
       "what": "<the defect>",
       "why": "<impact>",
       "fix": "<concrete change>",

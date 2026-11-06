@@ -64,9 +64,6 @@ permissions:
     resource: "git status *"
     effect: allow
   - action: shell
-    resource: "git branch *"
-    effect: allow
-  - action: shell
     resource: "git diff *"
     effect: allow
   - action: shell
@@ -87,6 +84,18 @@ permissions:
   - action: shell
     resource: "git ls-files *"
     effect: allow
+  - action: shell
+    resource: "git branch *"
+    effect: allow
+  - action: shell
+    resource: "git remote *"
+    effect: allow
+  - action: shell
+    resource: "git ls-remote *"
+    effect: allow
+  - action: shell
+    resource: "git commit --amend *"
+    effect: deny
   - action: shell
     resource: "pnpm install *"
     effect: allow
@@ -112,23 +121,23 @@ permissions:
     resource: "pnpm build *"
     effect: allow
   - action: shell
+    resource: "node node_modules/vite/bin/vite.js *"
+    effect: allow
+  - action: shell
     resource: "node scripts/validate-bundle.js *"
     effect: allow
   - action: shell
     resource: "node scripts/validate-pwa.js *"
     effect: allow
   - action: shell
-    resource: "node scripts/validate-boot.js *"
-    effect: allow
-  - action: shell
     resource: "node scripts/validate-docs.js *"
     effect: allow
   - action: shell
-    resource: "node node_modules/vite/bin/vite.js *"
+    resource: "node scripts/validate-boot.js *"
     effect: allow
 ---
 
-<!-- Conductor agent template: v2.2 -->
+<!-- Conductor agent template: v2.3 -->
 
 You are the **Conductor Phase Executor**. You execute exactly one phase of one
 Conductor track. The primary agent remains responsible for Conductor state.
@@ -145,7 +154,10 @@ Conductor track. The primary agent remains responsible for Conductor state.
 - Use the native `grep`, `glob`, and `read` tools for search and file reading.
   Never invoke `grep`, `rg`, `findstr`, `cat`, or `find` through shell; shell is
   restricted to Git, the verification commands named in the brief, and the
-  configured project commands.
+  configured project commands. Bound git output with flags, never pipes:
+  `git log --oneline --max-count=20 <range>`, `git diff --stat`,
+  `git show --stat <sha>`. Pipes do not work under your permissions; do not
+  attempt them.
 - Work only on the assigned phase. Do not start another phase.
 - Stay within the `Touches` paths in the brief.
 - If the phase goal requires touching a file outside `Touches`, make the
