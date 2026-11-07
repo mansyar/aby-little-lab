@@ -270,3 +270,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Trunk Green — Wall-Clock-Safe Test Fixtures** - [20261107-trunk-green](./archive/20261107-trunk-green/index.md) - chore - high
 - [x] **Track: Browser Journey Suite** - [20261107-release-e2e](./archive/20261107-release-e2e/index.md) - chore - high
 - [x] **Track: Storage Resilience** - [20261107-storage-resilience](./archive/20261107-storage-resilience/index.md) - bug - high
+- [ ] **Track: Toolchain Pinning** - [20261107-toolchain-pinning](./tracks/20261107-toolchain-pinning/index.md) - chore - high
