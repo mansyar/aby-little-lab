@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-07T18:12:51+11:00",
-  "updated_at": "2026-11-07T18:13:54+11:00",
+  "updated_at": "2026-11-07T18:36:33+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "fix/20261107-storage-resilience",
@@ -14,11 +14,11 @@
   "base_sha": "26764e9f5563b21cc91e8ec2627c1b06d3a616fb",
   "progress": {
     "phases_total": 2,
-    "phases_verified": 0,
+    "phases_verified": 1,
     "tasks_total": 7,
-    "tasks_done": 0
+    "tasks_done": 4
   },
-  "last_checkpoint": null,
+  "last_checkpoint": "09ea4440",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

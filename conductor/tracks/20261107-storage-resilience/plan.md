@@ -14,24 +14,28 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-6, AC-1, AC-2, AC-3, AC-4, AC-6, AC-8
 - **Touches:** `src/utils/storage.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Write the failing tests first** — covers: AC-8, FR-1, FR-2, FR-3, FR-4
-  - [ ] **P1.T1.1: Add a throwing-storage harness** to `storage.test.ts` — helpers that make `setItem` and/or `getItem` throw a chosen `DOMException` and restore the original in `afterEach`, with no other test affected
-  - [ ] **P1.T1.2: Cover the write paths** — with `setItem` throwing, assert no throw and an applied in-memory change for `earnSticker`, `updateSettings`, `resetProgress`, `addProfile`, `deleteProfile`, `switchProfile`, `setPlayTimeLimit`, `recordPlayTime`, `recordGamePlay`, `recordGameResult`, `recordGameTaps`
-  - [ ] **P1.T1.3: Cover the read paths** — with `getItem` throwing, assert defaults and no throw from `getProfiles`, `getActiveProfile`, `getSettings`, `getPlayTime`, `getProgress`, `hasSticker`, `getAdaptiveBandShift`
-  - [ ] **P1.T1.4: Pin `completeGame`** in `gameSceneBase.test.ts` — with `setItem` throwing, the win celebration and the auto-return `delayedCall` are still scheduled (the defect in one assertion)
-  - [ ] **P1.T1.5: Record the red run** — the new tests against the unmodified `storage.ts`, verbatim output in the phase evidence, so the teeth are proven rather than asserted
-- [ ] **P1.T2: Guard the write path** — covers: FR-1, FR-2, FR-4
-  - [ ] **P1.T2.1: Make `saveV2` total** — attempt the write inside a `try`; on failure keep the memo and the in-memory state so the mutation still applies, and mark degraded
-  - [ ] **P1.T2.2: Clear the flag on success** — the memo is only trusted for the value actually written, so a later successful write re-persists the whole in-memory state and clears the flag
-- [ ] **P1.T3: Guard the read paths** — covers: FR-3, FR-4
-  - [ ] **P1.T3.1: Make `readV1` and `readV2Raw` total** — `getItem` inside the guard, `null` on failure, degraded marked
-  - [ ] **P1.T3.2: Guard a missing `localStorage`** — a `Storage` accessor that returns `null` when the global is absent, so no path can raise a `ReferenceError`
-  - [ ] **P1.T3.3: Expose `isPersistenceDegraded()`** — a read-only accessor, no setter, no subscription
-- [ ] **P1.T4: Keep the deliberate paths deliberate** — covers: FR-4, FR-6
-  - [ ] **P1.T4.1: Exclude the unknown-version guard** — the memory-only write in `mutate` must not mark degraded, and a declined mutator must not either
-  - [ ] **P1.T4.2: Prove the happy path is untouched** — the schema stamp, the cache key, the v1 migration, the corrupt-JSON fallback and the wider raw string a success writes
+- [x] **P1.T1: Write the failing tests first** — covers: AC-8, FR-1, FR-2, FR-3, FR-4
+  - [x] **P1.T1.1: Add a throwing-storage harness** to `storage.test.ts` — helpers that make `setItem` and/or `getItem` throw a chosen `DOMException` and restore the original in `afterEach`, with no other test affected
+  - [x] **P1.T1.2: Cover the write paths** — with `setItem` throwing, assert no throw and an applied in-memory change for `earnSticker`, `updateSettings`, `resetProgress`, `addProfile`, `deleteProfile`, `switchProfile`, `setPlayTimeLimit`, `recordPlayTime`, `recordGamePlay`, `recordGameResult`, `recordGameTaps`
+  - [x] **P1.T1.3: Cover the read paths** — with `getItem` throwing, assert defaults and no throw from `getProfiles`, `getActiveProfile`, `getSettings`, `getPlayTime`, `getProgress`, `hasSticker`, `getAdaptiveBandShift`
+  - [x] **P1.T1.4: Pin `completeGame`** in `gameSceneBase.test.ts` — with `setItem` throwing, the win celebration and the auto-return `delayedCall` are still scheduled (the defect in one assertion)
+  - [x] **P1.T1.5: Record the red run** — the new tests against the unmodified `storage.ts`, verbatim output in the phase evidence, so the teeth are proven rather than asserted
+- [x] **P1.T2: Guard the write path** — covers: FR-1, FR-2, FR-4
+  - [x] **P1.T2.1: Make `saveV2` total** — attempt the write inside a `try`; on failure keep the memo and the in-memory state so the mutation still applies, and mark degraded
+  - [x] **P1.T2.2: Clear the flag on success** — the memo is only trusted for the value actually written, so a later successful write re-persists the whole in-memory state and clears the flag
+- [x] **P1.T3: Guard the read paths** — covers: FR-3, FR-4
+  - [x] **P1.T3.1: Make `readV1` and `readV2Raw` total** — `getItem` inside the guard, `null` on failure, degraded marked
+  - [x] **P1.T3.2: Guard a missing `localStorage`** — a `Storage` accessor that returns `null` when the global is absent, so no path can raise a `ReferenceError`
+  - [x] **P1.T3.3: Expose `isPersistenceDegraded()`** — a read-only accessor, no setter, no subscription
+- [x] **P1.T4: Keep the deliberate paths deliberate** — covers: FR-4, FR-6
+  - [x] **P1.T4.1: Exclude the unknown-version guard** — the memory-only write in `mutate` must not mark degraded, and a declined mutator must not either
+  - [x] **P1.T4.2: Prove the happy path is untouched** — the schema stamp, the cache key, the v1 migration, the corrupt-JSON fallback and the wider raw string a success writes
+
+**Result:** verified
+**Checkpoint:** 09ea4440
+**Evidence:** conductor/tracks/20261107-storage-resilience/verification/phase-1.md
 
 <!--
 The primary appends after acceptance:
