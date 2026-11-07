@@ -272,4 +272,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Storage Resilience** - [20261107-storage-resilience](./archive/20261107-storage-resilience/index.md) - bug - high
 - [x] **Track: Toolchain Pinning** - [20261107-toolchain-pinning](./archive/20261107-toolchain-pinning/index.md) - chore - high
 
-- [ ] **Track: Edge Hardening** - [20261108-edge-hardening](./tracks/20261108-edge-hardening/index.md) - chore - high
+- [~] **Track: Edge Hardening** - [20261108-edge-hardening](./tracks/20261108-edge-hardening/index.md) - chore - high
