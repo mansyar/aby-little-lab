@@ -44,7 +44,7 @@ the primary agent writes this file.
 - **Covers:** FR-4, FR-6, NFR-3, AC-5
 - **Touches:** `src/game/insightsSummary.ts`, `src/__tests__/game/insightsSummary.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Derive what is already there** - covers: FR-4
   - **P2.T1.1:** `MIN_SUMMARY_TAPS` plus the derived helpers: games played in the last seven days from `lastPlayedAt`, lifetime completions from `wins`, overall completion rate from `wins / plays`, overall accuracy from `correct` vs `wrong`
