@@ -63,7 +63,7 @@
 - **Covers:** FR-6, FR-7, FR-9, NFR-2, AC-5, AC-6, AC-8
 - **Touches:** `src/__tests__/guard/toolchain.test.ts`, `pnpm-workspace.yaml`, `conductor/tech-stack.md`, `docs/TDD.md`, `README.md`, `conductor/tracks/20261107-toolchain-pinning/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Guard the declaration** — covers: FR-6, NFR-2, AC-5
   - [ ] **P3.T1.1: Assert agreement** across `package.json`, `.node-version`, the Dockerfile, both CI jobs and the README prerequisite line, naming every disagreeing file and both values on failure
