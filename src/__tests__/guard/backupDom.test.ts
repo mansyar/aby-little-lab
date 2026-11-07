@@ -5,11 +5,11 @@ import { describe, expect, it } from "vitest";
  * and nothing in `src/` may reach the network.
  *
  * The app runs on a canvas with pointer input, so `document`, `Blob`, `URL`,
- * `FileReader` and `navigator.clipboard` were never part of it. This track adds
- * the first of them on purpose, for one feature — writing a backup file and
- * reading one back — and NFR-1 requires that they stay in one module. A second
- * module reaching for a DOM global would be an unnoticed browser dependency in
- * code that has to keep working headless.
+ * `crypto`, `FileReader` and `navigator.clipboard` were never part of it. This
+ * track adds the first of them on purpose, for one feature — writing a backup
+ * file and reading one back — and NFR-1 requires that they stay in one module.
+ * A second module reaching for a DOM global would be an unnoticed browser
+ * dependency in code that has to keep working headless.
  *
  * The tree already named `document` in five modules (audio visibility, the font
  * probe, viewport zoom, play-time accrual and the play-time banner), so the
@@ -75,6 +75,9 @@ const DOM_GLOBALS: ReadonlyArray<{ readonly name: string; readonly pattern: RegE
   { name: "document", pattern: /\bdocument\b/g },
   { name: "Blob", pattern: /\bBlob\b/g },
   { name: "URL.", pattern: /\bURL\./g },
+  // NFR-1 names crypto too: the seam may reach for `crypto.subtle`, and nothing
+  // else may. No production file matches it today, so no module is allowed it.
+  { name: "crypto", pattern: /\bcrypto\./g },
   { name: "FileReader", pattern: /\bFileReader\b/g },
   { name: "navigator.clipboard", pattern: /\bnavigator\.clipboard\b/g },
 ];
@@ -202,13 +205,19 @@ describe("backup DOM guard", () => {
     ]);
   });
 
-  it("keeps every allowance pointing at a file that exists", () => {
-    // A renamed or deleted module would leave a silent hole in the allowance.
-    const scanned = new Set(productionSources().map((file) => file.path));
-    const missing = [...ALLOWED].filter((path) => !scanned.has(path));
-    expect(missing, `An allowed module is no longer in the scan: ${missing.join(", ")}`).toEqual(
-      [],
-    );
+  it("keeps every allowance pointing at a file that still names its global", () => {
+    // A renamed or deleted module would leave a silent hole in the allowance;
+    // so would one that stopped using the global, since the allowance would
+    // then exempt it for every other global too.
+    const scanned = new Map(productionSources().map((file) => [file.path, file.source]));
+    for (const path of ALLOWED) {
+      const source = scanned.get(path);
+      expect(source, `An allowed module is no longer in the scan: ${path}`).toBeDefined();
+      expect(
+        domSitesIn(source ?? "", path).length,
+        `${path} is allowed to name a browser global but no longer does: remove its allowance.`,
+      ).toBeGreaterThan(0);
+    }
   });
 
   it("sends nothing over the network", () => {
@@ -233,6 +242,9 @@ describe("backup DOM guard", () => {
     ]);
     expect(domSitesIn("URL.revokeObjectURL(url);", "probe.ts")).toEqual([
       { name: "URL.", site: "probe.ts:1" },
+    ]);
+    expect(domSitesIn('await crypto.subtle.digest("SHA-256", bytes);', "probe.ts")).toEqual([
+      { name: "crypto", site: "probe.ts:1" },
     ]);
     expect(domSitesIn("await navigator.clipboard.readText();", "probe.ts")).toEqual([
       { name: "navigator.clipboard", site: "probe.ts:1" },

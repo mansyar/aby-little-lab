@@ -265,7 +265,11 @@ function ensureV2(): ProfileV2 {
   return v2;
 }
 
-function saveV2(v2: ProfileV2): void {
+/**
+ * The single write path. Returns whether the store accepted the bytes: `true`
+ * only on the accepted-write path, `false` when the payload stayed in memory.
+ */
+function saveV2(v2: ProfileV2): boolean {
   // FR-1: the single write path stamps every payload with the schema version.
   const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
   const storage = getStorage();
@@ -277,7 +281,7 @@ function saveV2(v2: ProfileV2): void {
       persistenceDegraded = false;
       lastKnownRaw = raw;
       v2Cache = { provisional: false, raw, state: v2 };
-      return;
+      return true;
     } catch {
       // A full quota refuses the write; the change still applies to this
       // session below, so play is never interrupted by a failed save.
@@ -294,6 +298,7 @@ function saveV2(v2: ProfileV2): void {
   // would miss the cache, re-read stale bytes and take the sticker back off
   // screen.
   v2Cache = { provisional: false, raw: storedRaw(), state: v2 };
+  return false;
 }
 
 /** The raw the store holds: a fresh read where it answers, the last known raw otherwise. */
@@ -320,6 +325,32 @@ function mutate(mutator: (v2: ProfileV2) => ProfileV2 | null): ProfileV2 | null 
   }
   saveV2(next);
   return next;
+}
+
+/**
+ * Applies a pure transform to the v2 state and reports whether the result
+ * reached the store.
+ *
+ * The same walk `mutate` takes — the transform, then the write-protection
+ * check — but with the one answer `mutate` throws away: a caller that must not
+ * claim success needs to know whether the bytes landed. The unknown-version
+ * branch answers `false` because it is memory-only by design (FR-4): those
+ * bytes are never rewritten, so nothing was persisted.
+ *
+ * No caller's transform declines, which is why the signature has no `null`:
+ * an unexercised branch would be a branch no test could fail.
+ */
+function mutatePersisted(mutator: (v2: ProfileV2) => ProfileV2): boolean {
+  const next = mutator(ensureV2());
+  const stored = readV2Raw();
+  if (!stored.failed && classifyStoredV2(stored.raw) === "unknown") {
+    // FR-4: the stored payload is a future version and write-protected, so
+    // the mutation applies to the in-memory state only (A2) — the raw bytes
+    // stay untouched and the cache is re-keyed to the unchanged raw string.
+    v2Cache = { provisional: false, raw: stored.raw, state: next };
+    return false;
+  }
+  return saveV2(next);
 }
 
 /** Marks a sticker as earned on the ACTIVE profile and persists. */
@@ -561,13 +592,20 @@ export function exportSave(): ProfileV2 {
  *
  * The plan is computed from the normalised current save, so a merge keeps this
  * device's settings and profile ids and a replace overwrites the whole payload.
- * Either way the result lands through `mutate` — one write, the same path every
- * other change takes, so an import is guarded exactly as `earnSticker` is and
- * `v2Cache` is re-keyed for free.
+ * Either way the result lands through the mutating path — one write, the same
+ * path every other change takes, so an import is guarded exactly as
+ * `earnSticker` is and `v2Cache` is re-keyed for free.
  *
  * A degraded store refuses before anything is planned (FR-7): a restored save
  * would not survive the reload that makes it visible, so pretending is worse
  * than saying no. Export still works while degraded, because it only reads.
+ *
+ * A write the store refuses — a full quota, or a payload from a future version
+ * that is never rewritten — also refuses rather than reporting success. An
+ * import that cannot reach storage keeps its state in memory for the session,
+ * the same choice the save layer already makes, but it reports
+ * `store-unavailable` so the panel prints the sentence and does not reload: a
+ * reload is the one thing that would destroy the restore without a word.
  */
 export function applyImport(
   mode: ImportMode,
@@ -579,7 +617,9 @@ export function applyImport(
   }
   const planned = planImport(ensureV2(), incoming, mode, now ?? new Date());
   if (!planned.ok) return planned;
-  mutate(() => planned.next);
+  if (!mutatePersisted(() => planned.next)) {
+    return { ok: false, refusal: refusalFor("store-unavailable") };
+  }
   return { ok: true };
 }
 

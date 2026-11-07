@@ -1,7 +1,7 @@
 import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import type { E2EBackupState, E2EProgressState, E2ESettingsToggle } from "../game/e2eBridge";
-import type { ProfileV2 } from "../types";
+import type { Profile, ProfileV2 } from "../types";
 import { backupFilename, downloadBackup, pickBackupFile, reloadApp } from "../utils/backupFile";
 import { createBackup, type ImportMode, readBackup } from "../utils/backupFormat";
 import { attachPressFeedback } from "../utils/pressFeedback";
@@ -9,6 +9,7 @@ import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstal
 import {
   applyImport,
   exportSave,
+  getProfiles,
   getSettings,
   isPersistenceDegraded,
   SCHEMA_VERSION,
@@ -99,6 +100,39 @@ const CHOICE_NOTE =
 /** Width the result line and the choice note wrap to, inside the 480px panel. */
 const RESULT_WRAP_WIDTH = 420;
 
+/**
+ * How long the result line holds before a completed import starts the app
+ * again. Long enough for a parent to read one sentence, short enough that
+ * nothing feels stuck; the reload is the only way every scene sees the new
+ * bytes, so it cannot be dropped, only paused.
+ */
+const IMPORT_RELOAD_DELAY_MS = 900;
+
+/** Every earned sticker across every profile: what a backup carries. */
+function earnedStickerTotal(profiles: readonly Profile[]): number {
+  return profiles.reduce(
+    (total, profile) =>
+      total + Object.values(profile.stickers).filter((sticker) => sticker.earned).length,
+    0,
+  );
+}
+
+/**
+ * One sentence saying what an import did, in numbers (FR-10).
+ *
+ * A merge reports what it added — the point of merging two devices — and a
+ * replace reports what the device now holds, because nothing was added to what
+ * was there. Both counts are pluralised, and neither sentence says more than
+ * the save can show.
+ */
+function importSummary(mode: ImportMode, profiles: number, stickers: number): string {
+  const profileCount = `${profiles} ${profiles === 1 ? "profile" : "profiles"}`;
+  const stickerCount = `${stickers} ${stickers === 1 ? "sticker" : "stickers"}`;
+  return mode === "merge"
+    ? `Merged ${profileCount} and ${stickerCount} into this one.`
+    : `Restored ${profileCount} and ${stickerCount}.`;
+}
+
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
   private readonly scene: Phaser.Scene;
@@ -121,6 +155,11 @@ export class SettingsPanel {
   private readonly onProgressReset?: () => void;
   /** The title, relabelled rather than rebuilt, so the header never jumps. */
   private readonly title: Phaser.GameObjects.Text;
+  /**
+   * The explicit ✕, kept so every page rebuild can raise it above the rows it
+   * shares a corner with.
+   */
+  private readonly closeButton: Phaser.GameObjects.Text;
   /** The page switch's label, relabelled on each switch. */
   private readonly switchLabel: Phaser.GameObjects.Text;
   /** The switch card's centre, captured from the layout arguments. */
@@ -283,6 +322,7 @@ export class SettingsPanel {
     closeButton.on("pointerdown", () => this.destroy());
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
+    this.closeButton = closeButton;
     // The page switch lives in the empty band above the notice and the title,
     // and never moves: it is the same card on both pages, relabelled to say
     // where the next tap goes.
@@ -308,13 +348,6 @@ export class SettingsPanel {
     // arguments are the point a finger lands on.
     this.switchPoint = { x: centerX, y: switchY };
     this.buildPage(settings);
-    // The ✕ box overlaps the BGM band's top-right corner, and the rows are
-    // created after the ✕, so at equal depth the row would win that corner and
-    // toggle music. Raising the ✕ above the rows settles it - and only above
-    // the rows: the overlays open later and must still cover it, which a depth
-    // above theirs would break. Every page rebuilds its rows, so this runs
-    // after the rows of the page that opened first.
-    this.scene.children.bringToTop(closeButton);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
     if (synth && typeof synth.addEventListener === "function") {
@@ -441,13 +474,23 @@ export class SettingsPanel {
     const rowY = (index: number): number => centerY + FIRST_ROW_OFFSET + index * ROW_PITCH;
     if (this.page === 0) {
       this.buildSettingsPage(settings, centerX, rowY);
-      return;
+    } else {
+      this.buildBackupPage(centerX, rowY);
     }
-    this.buildBackupPage(centerX, rowY);
+    // The ✕ box shares its top-right corner with a row - page one's BGM band,
+    // page two's export row - and the rows are created after the ✕, so at equal
+    // depth a row would win that corner and fire the wrong control. Raising the
+    // ✕ above the rows settles it, and only above the rows: the overlays open
+    // later and must still cover it, which a depth above theirs would break.
+    // Every page rebuilds its rows, so this runs after each page's own.
+    this.scene.children.bringToTop(this.closeButton);
   }
 
   /** Destroys the page on screen, so nothing from it can answer a tap. */
   private clearPage(): void {
+    // Before the objects go: the voice row keeps handles to its chip, preview
+    // and band, and its `voiceschanged` listener outlives every page switch.
+    this.voiceRow.release();
     for (const object of this.pageObjects) object.destroy();
     this.pageObjects.length = 0;
     this.toggles.length = 0;
@@ -652,17 +695,31 @@ export class SettingsPanel {
 
   /**
    * Applies the file in the chosen mode: a refusal lands on the result line and
-   * leaves the app running, a completed import starts the app again from a
-   * clean boot so no scene shows a mixture of two saves.
+   * leaves the app running; a completed import says in numbers what changed,
+   * then starts the app again from a clean boot so no scene shows a mixture of
+   * two saves.
+   *
+   * The counts are read from the save itself before and after the write, so a
+   * merge that added nothing says zero rather than repeating the file's totals.
+   * The reload is delayed, not immediate: it replaces the page, and the line has
+   * to be readable first.
    */
   private chooseImport(mode: ImportMode, payload: ProfileV2): void {
+    const before = getProfiles();
+    const beforeStickers = earnedStickerTotal(before);
     const applied = applyImport(mode, payload);
     this.closeChoice();
     if (!applied.ok) {
       this.showBackupResult(applied.refusal.message);
       return;
     }
-    reloadApp();
+    const after = getProfiles();
+    const stickersAfter = earnedStickerTotal(after);
+    // A merge is scored by what it added; a replace by what the device holds.
+    const addedProfiles = mode === "merge" ? after.length - before.length : after.length;
+    const addedStickers = mode === "merge" ? stickersAfter - beforeStickers : stickersAfter;
+    this.showBackupResult(importSummary(mode, addedProfiles, addedStickers), PRIMARY_COLOR);
+    this.scene.time.delayedCall(IMPORT_RELOAD_DELAY_MS, reloadApp);
   }
 
   /** Puts one sentence on the result line, and remembers it for the next build. */

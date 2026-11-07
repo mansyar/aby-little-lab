@@ -177,7 +177,8 @@ function asVersion(value: unknown): number | null {
  * it. The order is deliberate: a file that is not JSON at all, then one that is
  * not ours (a missing or non-numeric version field is folded in here rather
  * than given a code of its own), then one from a newer layout, then one holding
- * a newer save, and only then the checksum.
+ * a newer save, then the checksum, and last the payload's own shape — a
+ * checksum can vouch for bytes that are not a save.
  *
  * A lower `formatVersion` or `schemaVersion` is accepted — an older file is
  * still readable. Only the payload is hashed, so the envelope's own metadata
@@ -220,6 +221,15 @@ export function readBackup(
     return { ok: false, refusal: refusalFor("checksum-mismatch") };
   }
 
+  // A verified checksum proves the payload is the bytes the file describes, not
+  // that those bytes are a save. A payload that is not a save object — `{}`
+  // included, which would otherwise normalise into an empty one — is refused
+  // here rather than reaching `planImport`.
+  const payload = asRecord(candidate.payload);
+  if (payload === null || !Array.isArray(payload.profiles)) {
+    return { ok: false, refusal: refusalFor("wrong-format") };
+  }
+
   return {
     ok: true,
     envelope: {
@@ -229,9 +239,9 @@ export function readBackup(
       appVersion: typeof candidate.appVersion === "string" ? candidate.appVersion : "",
       exportedAt: typeof candidate.exportedAt === "string" ? candidate.exportedAt : "",
       checksum,
-      // The checksum just proved this is the payload the file describes; its
-      // internal shape is `planImport`'s business, which normalises it.
-      payload: candidate.payload as ProfileV2,
+      // The checksum proved this is the payload the file describes and the shape
+      // check proved it is a save; `planImport` normalises it for both modes.
+      payload: payload as unknown as ProfileV2,
     },
   };
 }
@@ -375,15 +385,21 @@ function mergeProfiles(local: Profile, incoming: Profile): Profile {
 /**
  * Decides what an import would write, without writing anything.
  *
- * `replace` hands back the file's save, normalised by `normalizeV2`. `merge`
- * matches profiles by **id** and keeps the better of each field (FR-5), adds
- * the profiles whose ids are new while the device has room, and keeps this
- * device's settings and active profile.
+ * The incoming save is normalised by `normalizeV2` once, before the mode is
+ * looked at, so both paths work with the shape the app produces: a partial or
+ * malformed payload cannot reach `merge`'s `filter` or `replace`'s assignment
+ * unnormalised.
  *
- * When an incoming profile cannot fit under `MAX_PROFILES`, the whole import is
- * refused and no `next` is returned: a partial restore would be worse than
- * none. Note the accepted limit the spec records — two devices that both named
- * a profile `p1` are treated as the same child.
+ * `replace` hands back that normalised save. `merge` matches profiles by **id**
+ * and keeps the better of each field (FR-5), adds the profiles whose ids are
+ * new while the device has room, and keeps this device's settings and active
+ * profile.
+ *
+ * When the save carries more than `MAX_PROFILES` profiles — in either mode — or
+ * an incoming profile cannot fit under the cap, the whole import is refused and
+ * no `next` is returned: a partial restore would be worse than none. Note the
+ * accepted limit the spec records — two devices that both named a profile `p1`
+ * are treated as the same child.
  *
  * `now` is injectable so the normalisation is deterministic; production passes
  * the moment of the import.
@@ -395,17 +411,24 @@ export function planImport(
   now: Date = new Date(),
 ): { ok: true; next: ProfileV2 } | { ok: false; refusal: Refusal } {
   const moment = now.toISOString();
+  const incomingSave = normalizeV2(incoming, moment);
+  // The cap is a property of the save being installed, not of the mode: a
+  // five-profile file would install five profiles under replace just as surely
+  // as under merge, and this device has room for four.
+  if (incomingSave.profiles.length > MAX_PROFILES) {
+    return { ok: false, refusal: refusalFor("profile-cap") };
+  }
   if (mode === "replace") {
-    return { ok: true, next: normalizeV2(incoming, moment) };
+    return { ok: true, next: incomingSave };
   }
 
   const localIds = new Set(local.profiles.map((profile) => profile.id));
-  const added = incoming.profiles.filter((profile) => !localIds.has(profile.id));
+  const added = incomingSave.profiles.filter((profile) => !localIds.has(profile.id));
   if (local.profiles.length + added.length > MAX_PROFILES) {
     return { ok: false, refusal: refusalFor("profile-cap") };
   }
 
-  const incomingById = new Map(incoming.profiles.map((profile) => [profile.id, profile]));
+  const incomingById = new Map(incomingSave.profiles.map((profile) => [profile.id, profile]));
   const merged = local.profiles.map((profile) => {
     const counterpart = incomingById.get(profile.id);
     return counterpart === undefined ? profile : mergeProfiles(profile, counterpart);

@@ -2140,4 +2140,47 @@ describe("backup export and import", () => {
     expect(readStoredRaw(V2_KEY)).toBe(before);
     expect(isPersistenceDegraded()).toBe(true);
   });
+
+  it("refuses an import whose write the store did not accept", () => {
+    // A write the store accepts first, so the pre-check is looking at a healthy
+    // session: this case is about the import's own write failing, not the one
+    // before it.
+    updateSettings({});
+    const incoming = incomingSave([
+      incomingProfile("p1", { "shape-sorter": "2026-08-02T00:00:00.000Z" }),
+    ]);
+    const before = localStorage.getItem(V2_KEY);
+    // Broken immediately before the import, after the pre-check has been given
+    // everything it needs: `applyImport` asks `isPersistenceDegraded()`, which
+    // reads a flag and writes nothing, so the refused `setItem` here is the
+    // import's write and not an earlier one.
+    breakStorage(["setItem"], "QuotaExceededError");
+
+    const result = applyImport("merge", incoming);
+
+    // F1: a restore that cannot reach the store says so rather than reporting
+    // success and reloading over the one copy it has.
+    expect(result).toMatchObject({ ok: false, refusal: { code: "store-unavailable" } });
+    expect(localStorage.getItem(V2_KEY)).toBe(before);
+    expect(isPersistenceDegraded()).toBe(true);
+  });
+
+  it("refuses an import into a write-protected future-version save", () => {
+    updateSettings({});
+    // The write-protection fixture this file already uses for the unknown-version
+    // path: a payload stamped above this build's schema is never rewritten.
+    const raw = JSON.stringify({ ...incomingSave([incomingProfile("p1")]), schemaVersion: 99 });
+    localStorage.setItem(V2_KEY, raw);
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    const result = applyImport("replace", incomingSave([incomingProfile("p1")]));
+
+    // A future payload is memory-only by design (FR-4), so the import did not
+    // land: it reports the same store-unavailable sentence as a full quota, and
+    // the protected bytes stay byte-identical.
+    expect(result).toMatchObject({ ok: false, refusal: { code: "store-unavailable" } });
+    expect(setItem).not.toHaveBeenCalled();
+    setItem.mockRestore();
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+  });
 });

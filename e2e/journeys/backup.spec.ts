@@ -36,10 +36,13 @@ import { readStoredV2, STORAGE_KEY } from "../fixtures/shell";
 test.setTimeout(120_000);
 
 /**
- * Seeds one profile with two earned stickers, real progress on two games and a
- * streak — the four kinds of record AC-3 says a round trip must not lose.
+ * Seeds two profiles between them carrying two earned stickers each, real
+ * progress on different games and a streak — the four kinds of record AC-3 says
+ * a round trip must not lose. Two, not one: the empty device already has a
+ * profile whose id is `p1`, so a second child is what makes the merge's
+ * add-a-profile branch observable end to end.
  */
-async function seedSaveWithTwoStickers(page: Page): Promise<void> {
+async function seedSaveWithTwoProfiles(page: Page): Promise<void> {
   await page.addInitScript((key: string) => {
     /** The local day key `offset` days from today, in the app's YYYY-MM-DD shape. */
     const dayKey = (offset: number): string => {
@@ -102,6 +105,34 @@ async function seedSaveWithTwoStickers(page: Page): Promise<void> {
             lastLimitHitDay: dayKey(-1),
           },
         },
+        {
+          id: "p2",
+          avatarId: "dog",
+          createdAt: at(-20, 9),
+          stickers: {
+            "animal-trace": { earned: true, earnedAt: at(-8, 10) },
+            "pop-freeze": { earned: true, earnedAt: at(-4, 12) },
+          },
+          playTime: { limitMinutes: 20, usedMinutes: 4, lastUsedDate: dayKey(0) },
+          progress: {
+            "animal-trace": {
+              plays: 2,
+              wins: 1,
+              correct: 9,
+              wrong: 3,
+              lastPlayedAt: at(-3, 14),
+              recent: [],
+            },
+          },
+          activity: [{ day: dayKey(-3), plays: 2 }],
+          insights: {
+            currentStreakDays: 1,
+            bestStreakDays: 2,
+            lastStreakDay: dayKey(0),
+            limitHitDays: 0,
+            lastLimitHitDay: null,
+          },
+        },
       ],
       settings: {},
     };
@@ -143,7 +174,7 @@ test("a save exported to a file restores into an empty browser and survives a re
   browser,
 }) => {
   const errors = collectErrors(page);
-  await seedSaveWithTwoStickers(page);
+  await seedSaveWithTwoProfiles(page);
   await openHub(page);
   await openBackupPage(page);
 
@@ -203,20 +234,41 @@ test("a save exported to a file restores into an empty browser and survives a re
     ]);
     await settleHub(secondPage);
 
-    // AC-3: both stickers came across, with the rest of the record, and only
-    // the one child the device already had.
-    expect(await profileCount(secondPage), "merge adds no duplicate profile").toBe(1);
-    expect(await stickerCount(secondPage), "both earned stickers should arrive").toBe(2);
+    // AC-3: both children came across, each with its own record. The empty
+    // device's `p1` is merged into and `p2` is appended — that append is the
+    // branch a cross-device restore exists for.
+    expect(await profileCount(secondPage), "the merge brings the second child too").toBe(2);
+    // The bridge counts the ACTIVE profile's stickers, and a merge keeps this
+    // device's active child (`p1`), so the chip is p1's two; the four across
+    // both children are counted from storage below.
+    expect(await stickerCount(secondPage), "the active child keeps both stickers").toBe(2);
     const restored = (await readStoredV2(secondPage)) as {
       profiles?: Array<{
+        id?: string;
+        stickers?: Record<string, { earned?: boolean }>;
         progress?: Record<string, { plays?: number }>;
-        insights?: { currentStreakDays?: number };
+        insights?: { currentStreakDays?: number; bestStreakDays?: number };
       }>;
     } | null;
-    const profile = restored?.profiles?.[0];
-    if (!profile) throw new Error("the restored device should hold a profile after the merge");
-    expect(profile.progress?.["shape-sorter"]?.plays, "progress should survive the trip").toBe(3);
-    expect(profile.insights?.currentStreakDays, "the streak should survive the trip").toBe(3);
+    const profiles = restored?.profiles ?? [];
+    const merged = profiles.find((profile) => profile.id === "p1");
+    const appended = profiles.find((profile) => profile.id === "p2");
+    if (!merged || !appended) throw new Error("the restored device should hold both children");
+    expect(merged.progress?.["shape-sorter"]?.plays, "progress should survive the trip").toBe(3);
+    expect(merged.insights?.currentStreakDays, "the streak should survive the trip").toBe(3);
+    expect(
+      appended.progress?.["animal-trace"]?.plays,
+      "the appended child keeps its own progress",
+    ).toBe(2);
+    expect(appended.insights?.bestStreakDays, "the appended child keeps its own best streak").toBe(
+      2,
+    );
+    const earned = profiles.reduce(
+      (total, profile) =>
+        total + Object.values(profile.stickers ?? {}).filter((sticker) => sticker.earned).length,
+      0,
+    );
+    expect(earned, "all four earned stickers arrive, two per child").toBe(4);
 
     // And it is still a playable app, not just a repaired save: the hub takes a
     // tap and one game opens and closes.
@@ -233,7 +285,7 @@ test("a save exported to a file restores into an empty browser and survives a re
 
 test("a file that is not a backup is refused, and nothing is written", async ({ page }) => {
   const errors = collectErrors(page);
-  await seedSaveWithTwoStickers(page);
+  await seedSaveWithTwoProfiles(page);
   await openHub(page);
   await openBackupPage(page);
 
@@ -265,7 +317,7 @@ test("a file that is not a backup is refused, and nothing is written", async ({ 
   const after = await settingsState(page);
   expect(after.choices, "a refused file must not offer merge or replace").toEqual([]);
   expect(await stickerCount(page), "the refused file must not change the save").toBe(before);
-  expect(await profileCount(page), "the refused file must not change the profiles").toBe(1);
+  expect(await profileCount(page), "the refused file must not change the profiles").toBe(2);
 
   expect(errors).toEqual([]);
 });

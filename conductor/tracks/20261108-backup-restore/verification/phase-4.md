@@ -60,17 +60,23 @@ Design notes worth keeping:
 - The second context has its own service worker, storage and cookies, so this
   is the "new tablet" case rather than a reload of the first one.
 - The merge lands on profile `p1`, which is what the fresh device already
-  creates, so "merge adds no duplicate" is a real assertion, not a tautology.
+  creates, and appends the file's `p2` - so the assertion covers both branches,
+  merged-into and appended (widened to two profiles in Phase R1).
 
 ## Acceptance
 
 | Criterion | Where it is proved |
 |---|---|
-| AC-3: importing the exported file into empty storage choosing merge yields both profiles with every sticker, progress count and insight value, still there after a reload | `a save exported to a file restores into an empty browser and survives a reload` - asserts 2 stickers, `progress["shape-sorter"].plays` 3 and `insights.currentStreakDays` 3 read from storage *after* `settleHub` (the reload a completed import forces), plus a playable hub |
+| AC-3: importing the exported file into empty storage choosing merge yields both profiles with every sticker, progress count and insight value, still there after a reload | `a save exported to a file restores into an empty browser and survives a reload` - seeds **two** profiles (`p1`: shape-sorter + color-match, `plays` 3, streak 3; `p2`: animal-trace + pop-freeze, `plays` 2, best streak 2), then after `settleHub` asserts `profileCount` 2, `stickerCount` 2 for the active child, 4 stickers across the two read from storage, and each child's own `progress`/`insights` after the reload, plus a playable hub |
 
-AC-3 at the unit layer (`planImport`/`applyImport`) was already proven in Phase
-3 and is unchanged here. **PENDING**: the browser row above is the first run's
-claim; it has not been observed green (see `## Blocked`).
+AC-3 at the format layer was proved in Phase 1 (`planImport` round-trips a
+two-profile save) and at the storage layer in Phase 3, and both are unchanged
+here. **Correction (Phase R1)**: the Phase 4 run seeded a single profile and
+asserted `profileCount === 1`, so the append branch - a profile the device does
+not have - was never exercised end to end; the journey now seeds two and asserts
+both arrive. That corrected journey has **not** been run yet (`pnpm test:e2e` is
+the primary's to run), so the green claim on AC-3 stands only for the
+one-profile version the Phase 4 run measured.
 
 ## Documents
 
@@ -201,11 +207,11 @@ Second run of the file: **2 passed (42.0s)**. Full suite after that: **19 passed
 
 `a save exported to a file restores into an empty browser and survives a reload` (31.5 s alone, 38.6 s under contention):
 
-- seeds two earned stickers, progress on two games, an activity week and a streak, all with day keys **computed in the page** - no `YYYY-MM-DD` literal anywhere in the test tree, which is the rule that costs a red trunk every time it is broken;
+- seeds **two profiles** carrying four earned stickers between them, progress on three games, an activity week and a streak each, all with day keys **computed in the page** - no `YYYY-MM-DD` literal anywhere in the test tree, which is the rule that costs a red trunk every time it is broken;
 - arms the download wait **before** the tap, then asserts `suggestedFilename()` against `/^aby-little-lab-backup-\d{4}-\d{2}-\d{2}\.json$/` - the dated name is a product promise, so it is asserted rather than assumed;
 - opens a **second `BrowserContext`**, not a reload, so the restore starts from genuinely empty storage with its own service worker, and asserts that device begins with one profile and zero stickers before the import;
 - hands `download.path()` to the chooser - the file that landed on disk, never read with `fs` and never rebuilt, so the export's own bytes are what the import has to accept;
-- waits for `choices` to publish both ids, taps **Merge at the published point**, waits for the navigation `reloadApp()` causes, and only then asserts: one profile (merge added no duplicate), **both stickers**, `progress["shape-sorter"].plays === 3`, `insights.currentStreakDays === 3`;
+- waits for `choices` to publish both ids, taps **Merge at the published point**, waits for the navigation `reloadApp()` causes, and only then asserts: **two profiles** (the fresh device's `p1` merged into, the file's `p2` appended), **four earned stickers across the two** (`stickerCount` 2 for the active child, the other two counted from storage), `p1`'s `progress["shape-sorter"].plays === 3` and `insights.currentStreakDays === 3`, and `p2`'s `progress["animal-trace"].plays === 2` and `insights.bestStreakDays === 2` - each child keeps its own numbers;
 - proves the app is still a playable app rather than a repaired save, by launching a game and returning to the hub;
 - asserts `collectErrors` is empty in **both** contexts.
 
@@ -220,11 +226,11 @@ Second run of the file: **2 passed (42.0s)**. Full suite after that: **19 passed
 
 | AC | Status | Evidence |
 | --- | --- | --- |
-| AC-3 | pass | `a save exported to a file restores into an empty browser and survives a reload` - 19/19 green in 3.7 min |
+| AC-3 | pass | `a save exported to a file restores into an empty browser and survives a reload` - 19/19 green in 3.7 min, at a **two-profile** save (corrected in Phase R1: the Phase 4 run seeded one profile, so the journey asserted `profileCount === 1`; it now seeds `p1` and `p2` and asserts both arrive, four stickers between them, with each child's own `plays` and `insights` read from storage after the reload) |
 | FR-11 | pass | the journey acts on the real download in a real second context, with merge tapped at the card's own published point |
 | FR-12 | pass | TDD §6.7 documents the envelope, the six refusals plus `store-unavailable`, the merge rules and the seam; §10.5 names the backup journey as the only one that acts on a file; README states the parent-facing promise; the roadmap row records the outcome and the limits |
 | NFR-5 | pass | 19 journeys in 3.7 min of a 5 min budget, two workers |
-| NFR-6 | pass | the two backup tests cost 47.8 s together; no journey grew |
+| NFR-6 | pass, re-measured in Phase R1 | the payload is **23,435 bytes** for four profiles at the shape the app produces: all 22 games played, full counters, a `WINDOW_SIZE`-long `recent` window each, a 7-day activity strip and both play-time fields - `the envelope a real save produces (NFR-6)` asserts it under 64 kB and reports the measured size. The write is one `setItem` of that payload, the save path the app already runs on every earned sticker; the frame-time half is reasoned from that path rather than separately timed. The Phase 4 claim ("47.8 s, no journey grew") measured the tests, not the requirement, and is withdrawn |
 
 ### Deviations accepted
 

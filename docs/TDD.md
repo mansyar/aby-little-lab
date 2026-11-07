@@ -838,10 +838,10 @@ Migrations are minimal: a per-version migrate step from the stored version to th
 
 ### 6.6 The guarded write path and the degraded session
 
-`saveV2()` is still the single write route. It stamps the payload, offers it to the store, and applies it to the in-memory cache whether or not the store accepts it:
+`saveV2()` is still the single write route. It stamps the payload, offers it to the store, and applies it to the in-memory cache whether or not the store accepts it — and reports which of the two happened, so a caller that must know (an import) can say so:
 
 ```ts
-function saveV2(v2: ProfileV2): void {
+function saveV2(v2: ProfileV2): boolean {
   // FR-1: the single write path stamps every payload with the schema version.
   const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
   const storage = getStorage();
@@ -851,13 +851,14 @@ function saveV2(v2: ProfileV2): void {
       persistenceDegraded = false;
       lastKnownRaw = raw;
       v2Cache = { provisional: false, raw, state: v2 };
-      return;
+      return true;
     } catch {
       // A full quota refuses the write; the change still applies below.
     }
   }
   persistenceDegraded = true;
   v2Cache = { provisional: false, raw: storedRaw(), state: v2 };
+  return false;
 }
 ```
 
@@ -887,9 +888,9 @@ Seven fields. `format` and `formatVersion` name the file and let a future versio
 
 `checksumOf(JSON.stringify(payload))` is FNV-1a 64-bit over the payload's own text, rendered `fnv1a64:<16 hex>`. It catches **corruption**: a truncated download, a share that arrived mangled, a file a text editor re-saved. It proves nothing about intent — there is no key and no secret, so anyone who edits the payload can recompute it. It is an integrity check against accidents, not a signature, and what it guards is a child's sticker collection, not a credential. That is also why the format carries no encryption: the file holds no more than the device already stores in plain `localStorage`.
 
-Reading refuses in a fixed order, so the sentence a parent reads is the truest one available: unreadable JSON, then `wrong-format` (a different file, or a field missing), then `newer-format`, then `newer-schema` (update the app, then try again), then `checksum-mismatch`, then `profile-cap`. One more code, `store-unavailable`, never comes from the file: `applyImport()` asks `isPersistenceDegraded()` first and refuses, because a save that cannot survive the reload that reveals it is worse than a clear refusal. Export is allowed while degraded — it only reads. Each refusal is a full sentence from `REFUSAL_MESSAGES`, painted on the panel's result line; none of them changes the save, and none of them reloads the app.
+Reading refuses in a fixed order, so the sentence a parent reads is the truest one available: unreadable JSON, then `wrong-format` (a different file, or a field missing), then `newer-format`, then `newer-schema` (update the app, then try again), then `checksum-mismatch`. A checksum therefore never vouches for a payload that is not a save: a verified `{}` is refused as `wrong-format` rather than normalising into a default device. Reading ends there. `profile-cap` comes from `planImport` after the parent chooses a mode — the file can be read perfectly and still bring more profiles than this device holds — and `store-unavailable` from `applyImport` before it plans: the store is asked first, because a save that cannot survive the reload that reveals it is worse than a clear refusal. Export is allowed while degraded — it only reads. Each refusal is a full sentence from `REFUSAL_MESSAGES`, painted on the panel's result line; none of them changes the save, and none of them reloads the app.
 
-`planImport(local, incoming, mode)` is the decision, `applyImport(mode, incoming)` the write. **Merge** keeps this device's `settings` and `activeProfileId` and combines each profile whose id is already here **best-of-field**: an earned sticker (the earlier `earnedAt` winning), the higher of each progress counter, the longer `recent` list, the larger play-time figure for the same day with the later day winning outright, the later insight day with the higher counts, and the union of activity days at the higher play count. Profiles whose id the device does not have are appended while the total stays at or under `MAX_PROFILES`; a backup that would push past the cap is refused **whole**, never partly applied. Every rule is a maximum or a union, so merging the same file twice is a no-op the second time. **Replace** overwrites the payload entirely, after the parent confirms. Both land through `mutate`, the single write path, so an import is guarded exactly as an earned sticker is; a completed import reloads so every scene is built from the new bytes, and a refusal does not.
+`planImport(local, incoming, mode)` is the decision, `applyImport(mode, incoming)` the write. **Merge** keeps this device's `settings` and `activeProfileId` and combines each profile whose id is already here **best-of-field**: an earned sticker (the earlier `earnedAt` winning), the higher of each progress counter, the longer `recent` list, the larger play-time figure for the same day with the later day winning outright, the later insight day with the higher counts, and the union of activity days at the higher play count. Profiles whose id the device does not have are appended while the total stays at or under `MAX_PROFILES`; a backup that would push past the cap is refused **whole**, never partly applied. Every rule is a maximum or a union, so merging the same file twice is a no-op the second time. **Replace** overwrites the payload entirely, after the parent confirms. Both land through `mutatePersisted`, the single write path, which also reports whether the store accepted the bytes; a completed import states in numbers what changed — profiles and stickers — and then reloads after a short beat so every scene is built from the new bytes, and a refusal, including a write the store would not keep, does not reload.
 
 **The seam.** `src/utils/backupFile.ts` is the only module under `src/` that touches the browser's file machinery: `downloadBackup()` builds the `Blob`, clicks an anchor and revokes the URL, `pickBackupFile()` returns `{ name, text } | null` from a hidden `<input type="file">`, `backupFilename()` dates the file with the local day, and `reloadApp()` is the one `location.reload()`. `SettingsPanel` is its only caller, and above it `createBackup`, `readBackup` and `planImport` are exercised directly by unit tests; the browser layer only has to prove that the file a download actually produces is the file the picker accepts ([§10.5](#105-the-browser-journey-layer)).
 
@@ -1155,13 +1156,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-140 test files, 3,059 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+140 test files, 3,069 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.28 (6345/6522), branches 91.51 (1854/2026), functions 96.12 (1391/1447) and lines 98.26 (5902/6006) across 140 files and 3,059 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.33 (6381/6556), branches 91.67 (1882/2053), functions 96.28 (1399/1453) and lines 98.29 (5935/6038) across 140 files and 3,069 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 

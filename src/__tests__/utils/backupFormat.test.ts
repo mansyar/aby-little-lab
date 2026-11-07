@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { WINDOW_SIZE } from "../../game/adaptiveLogic";
 import { createDefaultInsights } from "../../game/insightsLogic";
 import { todayKey } from "../../game/playTimeLogic";
 import { createDefaultProfile, migrateV1, normalizeV2 } from "../../game/profileLogic";
@@ -256,23 +257,18 @@ describe("readBackup — the five refusals (AC-6)", () => {
   ];
 
   for (const testCase of REFUSALS) {
-    it(`refuses ${testCase.name} with its own sentence and touches nothing`, () => {
-      const save = saveOf([
-        profileOf("p1", { playTime: { limitMinutes: 15, usedMinutes: 4, lastUsedDate: TODAY } }),
-      ]);
-      const saveBefore = JSON.stringify(save);
-      const payloadBefore = JSON.stringify(SAMPLE_PAYLOAD);
-
+    it(`refuses ${testCase.name} with its own sentence`, () => {
       const result = readBackup(testCase.text, { schemaVersion: SCHEMA_VERSION });
 
       expect(result).toEqual({
         ok: false,
         refusal: { code: testCase.code, message: testCase.message },
       });
-      // AC-6: a refused read has no write path at all, so the device's save and
-      // the file's own payload are byte-identical afterwards.
-      expect(JSON.stringify(save)).toBe(saveBefore);
-      expect(JSON.stringify(SAMPLE_PAYLOAD)).toBe(payloadBefore);
+      // AC-6's "the save is untouched" half cannot be shown from here and is not
+      // claimed: `readBackup` is pure — it takes a string and returns a verdict,
+      // with no write path at all. The byte-identity proof belongs to the storage
+      // layer, where a write is possible, and `storage.test.ts` makes it for
+      // `profile-cap` and `store-unavailable`.
     });
   }
 
@@ -318,6 +314,17 @@ describe("readBackup — the five refusals (AC-6)", () => {
         message: "This file is not a backup from Aby's Little Lab.",
       });
     }
+  });
+
+  it("refuses a verifying checksum on a payload that is not a save", () => {
+    // A checksum proves the payload is the bytes the file describes, not that
+    // those bytes are a save: `{}` would otherwise normalise into a default
+    // device under replace, and merge as an empty save.
+    expect(refusalOf(fileOf({}))).toEqual({
+      code: "wrong-format",
+      message: "This file is not a backup from Aby's Little Lab.",
+    });
+    expect(refusalOf(fileOf({ profiles: "nope" })).code).toBe("wrong-format");
   });
 
   it("checks the layout version before the save version", () => {
@@ -402,6 +409,36 @@ describe("planImport — replace", () => {
     const result = planImport(saveOf([profileOf("p1")]), partial, "replace", NOW);
     if (!result.ok) throw new Error("expected a replacement");
     expect(result.next.profiles[0].playTime.lastUsedDate).toBe(TODAY);
+  });
+
+  it("refuses a file with more profiles than this device can hold (AC-8)", () => {
+    // Replace is not exempt from the cap: a five-profile file would install five
+    // profiles just as surely as a merge would exceed it.
+    const incoming = saveOf(["p1", "p2", "p3", "p4", "p5"].map((id) => profileOf(id)));
+    expect(planImport(saveOf([profileOf("p1")]), incoming, "replace", NOW)).toEqual({
+      ok: false,
+      refusal: refusalFor("profile-cap"),
+    });
+  });
+});
+
+describe("planImport — a partial payload", () => {
+  it("is normalised before merging, so it cannot throw from the panel's tap", () => {
+    // A file can verify its checksum and still be short of fields: merging it
+    // straight from the payload would read `incoming.stickers[gameId].earned`
+    // off undefined. The normalise step at the top of `planImport` is what makes
+    // that impossible, for both modes.
+    const partial = {
+      activeProfileId: "p9",
+      profiles: [{ id: "p9" }],
+      settings: {},
+    } as unknown as ProfileV2;
+
+    const result = planImport(saveOf([profileOf("p1")]), partial, "merge", NOW);
+
+    if (!result.ok) throw new Error(`expected a merge, refused ${result.refusal.code}`);
+    expect(result.next.profiles.map((profile) => profile.id)).toEqual(["p1", "p9"]);
+    expect(Object.keys(result.next.profiles[1].stickers)).toEqual(GAME_IDS);
   });
 });
 
@@ -805,5 +842,71 @@ describe("planImport and readBackup — the whole round trip", () => {
     expect(restored.profiles[0].progress["pop-freeze"].plays).toBe(7);
 
     expect(mergedOnce(restored, incoming)).toEqual(restored);
+  });
+});
+
+describe("the envelope a real save produces (NFR-6)", () => {
+  /**
+   * What a device that has played everything actually holds: four children, all
+   * 22 games with counters and a full adaptive window, a 7-day activity strip, a
+   * streak and both play-time fields. Measured through the same `createBackup`
+   * an export calls, so the number is the file a parent would get.
+   */
+  function fourFullProfiles(): Profile[] {
+    const avatars: ReadonlyArray<Profile["avatarId"]> = ["cat", "dog", "pig", "frog"];
+    const allEarned = Object.fromEntries(
+      GAME_IDS.map((gameId, index) => [
+        gameId,
+        { earned: true, earnedAt: index % 2 === 0 ? EARLY : LATER },
+      ]),
+    ) as Record<GameId, StickerData>;
+    const fullProgress = progressOf(
+      Object.fromEntries(
+        GAME_IDS.map((gameId) => [
+          gameId,
+          {
+            plays: 30,
+            wins: 22,
+            correct: 140,
+            wrong: 41,
+            lastPlayedAt: LATER,
+            recent: Array.from({ length: WINDOW_SIZE }, (_, index) => index % 2 === 0),
+          },
+        ]),
+      ),
+    );
+    const activity = [0, 1, 2, 3, 4, 5, 6].map((offset) => ({
+      day: todayKey(new Date(2026, 10, 8 - offset, 12, 0, 0)),
+      plays: 3,
+    }));
+
+    return avatars.map((avatarId, index) =>
+      profileOf(`p${index + 1}`, {
+        avatarId,
+        stickers: allEarned,
+        progress: fullProgress,
+        activity,
+        insights: {
+          currentStreakDays: 9,
+          bestStreakDays: 21,
+          lastStreakDay: TODAY,
+          limitHitDays: 2,
+          lastLimitHitDay: YESTERDAY,
+        },
+      }),
+    );
+  }
+
+  it("stays in kilobytes with four full profiles", () => {
+    const profiles = fourFullProfiles();
+    const { json } = backupOf(saveOf(profiles, { activeProfileId: "p1" }));
+
+    expect(profiles).toHaveLength(4);
+    // The bound NFR-6 promises: kilobytes, not megabytes. The message carries the
+    // measured size so a regression reports the number it reached.
+    expect(
+      json.length,
+      `a four-profile backup measured ${json.length} bytes, over the ${64 * 1024} byte bound`,
+    ).toBeLessThan(64 * 1024);
   });
 });
