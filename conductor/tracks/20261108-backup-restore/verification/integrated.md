@@ -4,7 +4,7 @@
 - **Date:** 2026-11-08
 - **Branch:** `feat/20261108-backup-restore`
 - **Base:** `8029cfada0bc5a7abe63d8f9feeaab347c653d17`
-- **Head:** `f0340343` (all four phases)
+- **Head:** `8770c6b8` (review fixes included)
 - **Result:** verified
 
 ## Layers, run against the integrated tree
@@ -13,10 +13,10 @@
 | --- | --- | --- |
 | Static | `pnpm check` | 307 files, no findings |
 | Types | `pnpm typecheck` | both programs (app and `e2e`), exit 0 |
-| Unit | `CI=true pnpm test -- --run` | 140 files / 3059 tests passed |
-| Coverage | `pnpm test:coverage` | statements 97.28 / branches 91.51 / functions 96.12 / lines 98.26 - gate 90 / 85 / 88 / 95 |
-| Build | `pnpm build` | 59 precache entries, 1764.81 KiB |
-| Bundle artifact | `node scripts/validate-bundle.js` | phaser 1335.0 kB; shell `index-DQkOGc5Y.js` **167.3 kB** ≤ 200 kB |
+| Unit | `CI=true pnpm test -- --run` | 140 files / 3,069 tests passed |
+| Coverage | `pnpm test:coverage` | statements 97.33 / branches 91.67 / functions 96.28 / lines 98.29 - gate 90 / 85 / 88 / 95 |
+| Build | `pnpm build` | 59 precache entries, 1765.75 KiB |
+| Bundle artifact | `node scripts/validate-bundle.js` | phaser 1335.0 kB; shell `index-DI9SmdDG.js` **168.3 kB** ≤ 200 kB |
 | PWA artifact | `node scripts/validate-pwa.js` | 16 passed, 0 failed |
 | Documents | `node scripts/validate-docs.js` | 5 passed, 0 failed |
 | Browser | `pnpm test:e2e` | **19 journeys passed in 3.7 min** on two workers |
@@ -31,6 +31,8 @@
 - **Page one did not move.** The eight settings rows keep their exact coordinates across a page round trip (a label-to-y map, asserted), the gate and the ✕ are untouched, and the new surface is inside a panel a child cannot open.
 - **The suite proves the file, not a copy of it.** The journey hands `download.path()` to the chooser in a second `BrowserContext` and never reads the bytes with `fs`. If the export were malformed, the import refuses and the sticker assertion fails with the parent's own sentence rather than a parse error.
 - **Idempotence is a shape, not a case.** Merge is best-of-field: stickers union with the earlier `earnedAt`, counters take `Math.max`, stamps take the later, activity unions days at the higher count. Importing the same file twice is therefore equal to importing it once - proved at the unit layer (`merging the same file twice equals merging it once`), and deliberately not re-proved in the browser, where a second file pick would have cost the suite ~10 s for a rule the unit layer owns.
+
+- **A restore that did not land says so.** Round 1 found the one hole this design left: `mutate` swallowed the write outcome, so a restore onto a full disk reloaded over itself in silence. `saveV2` now answers whether the bytes landed and `applyImport` turns a `false` into the same `store-unavailable` sentence a degraded store gets - one vocabulary, two causes.
 
 ## Scope note
 
@@ -49,9 +51,9 @@ The browser suite went from 17 journeys in 3.2 min to **19 in 3.7 min** - two te
 
 ## The number to watch
 
-The shell entry grew **158.5 → 167.3 kB** across this track: +2.6 kB for the format module and its storage calls, +5.2 kB for the settings page, +0.1 kB for the bridge. 167.3 of 200 leaves 32.7 kB. Nothing in this feature belongs in the boot path, so if the next track adds a module the hub imports, measure first.
+The shell entry grew **158.5 → 168.3 kB** across this track: +2.6 kB for the format module and its storage calls, +5.2 kB for the settings page, +0.1 kB for the bridge, +1.0 kB for the review-fix write reporting and the import summary. 168.3 of 200 leaves 31.7 kB. Nothing in this feature belongs in the boot path, so if the next track adds a module the hub imports, measure first.
 
 ## Accepted limits, recorded rather than hidden
 
 - **A profile id collision merges two children as one.** Ids are `p1`…`p4` on every device, so a tablet with "Aby" and a tablet with "Sam" both holding `p1` will merge into a single profile on restore, keeping the best of both. Merge is a restore onto a device whose profiles *are* the same children; a family with two tablets of different children is the case this gets wrong, and it is documented in the roadmap row rather than guessed at with a heuristic.
-- **The file is not encrypted.** It holds star counts and a first name, not secrets, and a password would be a lock a four-year-old cannot open and a parent will lose. The checksum detects corruption and truncation; it does not detect tampering, and the docs say so.
+- **The file is not encrypted.** It holds star counts and a chosen avatar, not secrets, and a password would be a lock a four-year-old cannot open and a parent will lose. The checksum detects corruption and truncation; it does not detect tampering, and the docs say so.
