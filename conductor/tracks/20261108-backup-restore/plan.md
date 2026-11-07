@@ -63,12 +63,16 @@
 - **Covers:** FR-9, FR-10, NFR-7, AC-9
 - **Touches:** `src/components/SettingsPanel.ts`, `src/components/settings/primitives.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/game/e2eBridge.ts`, `src/scenes/HubScene.ts`, `src/__tests__/game/e2eBridge.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P3.T1: The page and its two actions** - covers: FR-9, FR-10, NFR-7
+- **Status:** verified
+- [x] **P3.T1: The page and its two actions** - covers: FR-9, FR-10, NFR-7
   - **P3.T1.1:** Add the switch card in the header band and the second page, leaving page one's eight rows at their current coordinates and hit bands
   - **P3.T1.2:** Export and Restore rows with the merge-or-replace confirmation, and a result line that states numbers or the reason for a refusal
-- [ ] **P3.T2: Let a journey see it** - covers: FR-9
+- [x] **P3.T2: Let a journey see it** - covers: FR-9
   - **P3.T2.1:** Publish the current page, the switch card's point, the action rows' points and the result line through the `?e2e=1` bridge, read-only and inert without the parameter
+
+**Result:** verified - Settings reaches a second page from a card in the header band; export writes a dated file, restore verifies a picked file and asks merge or replace before writing, and one line states the outcome. Page one keeps its eight rows at their exact coordinates, proved by a label-to-y map across a round trip. Shell entry 167.2 kB of 200.
+**Checkpoint:** f14ab1c8
+**Evidence:** conductor/tracks/20261108-backup-restore/verification/phase-3.md
 
 ## Phase 4: The round trip, and the record
 
