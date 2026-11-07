@@ -88,7 +88,7 @@
 - **Covers:** FR-5, FR-6, FR-7, FR-8, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `e2e/journeys/`, `e2e/fixtures/`
 - **Verification:** `pnpm test:e2e` then the full chain
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Parental gate and settings** - covers: FR-5, FR-6, AC-5, AC-6
   - [ ] **P4.T1.1:** Three-second hold opens settings; one-second press does not
