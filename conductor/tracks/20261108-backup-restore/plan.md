@@ -63,7 +63,7 @@
 - **Covers:** FR-9, FR-10, NFR-7, AC-9
 - **Touches:** `src/components/SettingsPanel.ts`, `src/components/settings/primitives.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/game/e2eBridge.ts`, `src/scenes/HubScene.ts`, `src/__tests__/game/e2eBridge.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P3.T1: The page and its two actions** - covers: FR-9, FR-10, NFR-7
   - **P3.T1.1:** Add the switch card in the header band and the second page, leaving page one's eight rows at their current coordinates and hit bands
   - **P3.T1.2:** Export and Restore rows with the merge-or-replace confirmation, and a result line that states numbers or the reason for a refusal
