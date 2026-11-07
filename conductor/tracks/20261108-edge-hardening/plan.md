@@ -63,7 +63,7 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
 - **Covers:** FR-9, FR-12, FR-13, NFR-5, AC-7
 - **Touches:** `.github/workflows/ci.yml`, `docs/TDD.md`, `README.md`, `conductor/product.md`, `conductor/tracks/20261108-edge-hardening/verification/`
 - **Verification:** the full chain plus `node scripts/validate-headers.js`, and the CI run observed on this track's pull request
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
