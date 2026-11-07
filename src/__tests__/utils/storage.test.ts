@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, vi } from "vitest";
+import { createDefaultInsights } from "../../game/insightsLogic";
 import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
 import { createDefaultProgressMap } from "../../game/progressLogic";
@@ -38,6 +39,7 @@ import {
   recordGamePlay,
   recordGameResult,
   recordGameTaps,
+  recordLimitHit,
   recordPlayTime,
   resetProgress,
   setPlayTimeLimit,
@@ -1256,8 +1258,13 @@ describe("schema versioning", () => {
     if (stored === null) return;
     const parsed = JSON.parse(stored);
     expect(parsed.schemaVersion).toBe(1);
-    // The stamp is the only change: the body is otherwise unchanged.
-    expect(parsed).toEqual({ ...body, schemaVersion: 1 });
+    // The stamp and the backfilled insights record are the only changes: every
+    // other field is untouched.
+    expect(parsed).toEqual({
+      ...body,
+      profiles: [{ ...body.profiles[0], insights: createDefaultInsights() }],
+      schemaVersion: 1,
+    });
   });
 
   it("stamps the migrated v2 payload when a v1-only install first migrates", () => {
@@ -1801,5 +1808,189 @@ describe("when the storage global itself cannot be reached", () => {
     } finally {
       restoreLocalStorageGlobal();
     }
+  });
+});
+
+describe("insights", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  /** A saved payload from before the insights record existed. */
+  function preTrackV2Body() {
+    return {
+      activeProfileId: "p1",
+      profiles: [
+        {
+          id: "p1",
+          avatarId: "cat",
+          createdAt: "2026-08-04T00:00:00.000Z",
+          stickers: createDefaultStickers(),
+          playTime: { limitMinutes: 30, usedMinutes: 5, lastUsedDate: todayKey(FIXED_NOW) },
+          progress: createDefaultProgressMap(),
+          activity: [],
+        },
+      ],
+      settings: {
+        bgmEnabled: true,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      },
+    };
+  }
+
+  it("loads a pre-track payload with a zeroed record, still schemaVersion 1", () => {
+    localStorage.setItem(V2_KEY, JSON.stringify(preTrackV2Body()));
+
+    expect(getActiveProfile().insights).toEqual(createDefaultInsights());
+    // The rest of the payload is served as before, from the same key.
+    expect(getActiveProfile().playTime.limitMinutes).toBe(30);
+    expect(getSettings().bgmEnabled).toBe(true);
+
+    switchProfile("p1"); // a persisting no-op write
+
+    const stored = localStorage.getItem(V2_KEY);
+    expect(stored).not.toBeNull();
+    if (stored === null) return;
+    const parsed = JSON.parse(stored);
+    expect(parsed.schemaVersion).toBe(1);
+    expect(parsed.profiles[0].insights).toEqual(createDefaultInsights());
+  });
+
+  it("advances the streak by exactly one for a completion", () => {
+    recordGameResult("shape-sorter", 5, 1);
+
+    expect(getActiveProfile().insights).toEqual({
+      currentStreakDays: 1,
+      bestStreakDays: 1,
+      lastStreakDay: todayKey(FIXED_NOW),
+      limitHitDays: 0,
+      lastLimitHitDay: null,
+    });
+  });
+
+  it("does not advance twice for two completions on the same day", () => {
+    recordGameResult("shape-sorter", 5, 1);
+    recordGameResult("how-many", 4, 2);
+
+    const insights = getActiveProfile().insights;
+    expect(insights.currentStreakDays).toBe(1);
+    expect(insights.bestStreakDays).toBe(1);
+    // The second session still counted as a win; only the streak stood still.
+    expect(getProgress()["how-many"].wins).toBe(1);
+  });
+
+  it("advances the streak on the following day", () => {
+    recordGameResult("shape-sorter", 5, 1);
+
+    vi.setSystemTime(new Date(2026, 7, 6, 12, 0, 0));
+
+    recordGameResult("shape-sorter", 5, 1);
+    expect(getActiveProfile().insights.currentStreakDays).toBe(2);
+    expect(getActiveProfile().insights.bestStreakDays).toBe(2);
+    expect(getActiveProfile().insights.lastStreakDay).toBe(todayKey(new Date()));
+  });
+
+  it("keeps each profile's record separate", () => {
+    recordGameResult("shape-sorter", 5, 1);
+    vi.setSystemTime(new Date(2026, 7, 6, 12, 0, 0));
+    recordGameResult("shape-sorter", 5, 1);
+
+    addProfile("dog"); // becomes active
+    recordGameResult("shape-sorter", 5, 1);
+
+    const [first, second] = getProfiles();
+    expect(first.insights.currentStreakDays).toBe(2);
+    expect(second.insights.currentStreakDays).toBe(1);
+    expect(second.insights.bestStreakDays).toBe(1);
+  });
+
+  it("writes once per completion, however the streak moves", () => {
+    getProfiles(); // warm the memo so the count is the completion's own write
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    recordGameResult("shape-sorter", 5, 1);
+    expect(setItem).toHaveBeenCalledTimes(1);
+
+    // Same day: the progress write happens, the streak write is folded into it.
+    recordGameResult("shape-sorter", 5, 1);
+    expect(setItem).toHaveBeenCalledTimes(2);
+
+    setItem.mockRestore();
+  });
+
+  it("writes once per abandoned session, not once per tap", () => {
+    getProfiles();
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    recordGameTaps("shape-sorter", 1, 0);
+    expect(setItem).toHaveBeenCalledTimes(1);
+
+    // Forty more taps in one abandoned session are still one write.
+    recordGameTaps("shape-sorter", 40, 25);
+    expect(setItem).toHaveBeenCalledTimes(2);
+
+    setItem.mockRestore();
+  });
+
+  it("counts one cap-day per local day", () => {
+    setPlayTimeLimit("p1", 30);
+    recordPlayTime("p1", 30);
+
+    recordLimitHit("p1");
+    expect(getActiveProfile().insights.limitHitDays).toBe(1);
+    expect(getActiveProfile().insights.lastLimitHitDay).toBe(todayKey(FIXED_NOW));
+
+    // Re-reaching the cap on the same day is the same day.
+    recordLimitHit("p1");
+    expect(getActiveProfile().insights.limitHitDays).toBe(1);
+  });
+
+  it("counts the cap again on the next day", () => {
+    setPlayTimeLimit("p1", 30);
+    recordLimitHit("p1");
+
+    const nextDay = new Date(2026, 7, 6, 12, 0, 0);
+    vi.setSystemTime(nextDay);
+    recordLimitHit("p1");
+
+    expect(getActiveProfile().insights.limitHitDays).toBe(2);
+    expect(getActiveProfile().insights.lastLimitHitDay).toBe(todayKey(nextDay));
+  });
+
+  it("never counts a cap-day for a profile with no limit", () => {
+    // The tile lock is guarded at its call site too, but FR-3 is asserted here
+    // against the writer, so a future call site cannot break it silently.
+    recordLimitHit("p1");
+
+    expect(getActiveProfile().insights.limitHitDays).toBe(0);
+    expect(getActiveProfile().insights.lastLimitHitDay).toBeNull();
+  });
+
+  it("writes nothing when the same cap-day is already recorded", () => {
+    setPlayTimeLimit("p1", 30);
+    recordLimitHit("p1");
+    const stored = localStorage.getItem(V2_KEY);
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    recordLimitHit("p1");
+
+    expect(setItem).not.toHaveBeenCalled();
+    setItem.mockRestore();
+    expect(localStorage.getItem(V2_KEY)).toBe(stored);
+  });
+
+  it("records nothing new when the stored payload is write-protected", () => {
+    const raw = JSON.stringify({ ...preTrackV2Body(), schemaVersion: 99 });
+    localStorage.setItem(V2_KEY, raw);
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    recordGameResult("shape-sorter", 5, 1);
+    recordLimitHit("p1");
+
+    expect(setItem).not.toHaveBeenCalled();
+    setItem.mockRestore();
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
   });
 });

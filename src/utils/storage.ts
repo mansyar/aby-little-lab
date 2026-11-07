@@ -1,10 +1,12 @@
 import type { BandShift } from "../game/adaptiveLogic";
 import { bandShiftFor } from "../game/adaptiveLogic";
+import { advanceStreak, normalizeInsights } from "../game/insightsLogic";
 import {
   addPlayTime,
   normalizePlayTime,
   setLimit,
   setPlaySessionSink,
+  todayKey,
 } from "../game/playTimeLogic";
 import {
   addProfile as addProfileToV2,
@@ -436,22 +438,64 @@ export function recordGamePlay(gameId: GameId): void {
   });
 }
 
-/** Records a completed session on the ACTIVE profile: win + correct/wrong taps. */
+/**
+ * Records a completed session on the ACTIVE profile: win + correct/wrong taps,
+ * and the day's streak advance. Folded into the one `mutate` so a completion is
+ * still one write (NFR-2), and the streak advances at most once per local day
+ * because `advanceStreak` leaves a same-day record unchanged.
+ */
 export function recordGameResult(gameId: GameId, correct: number, wrong: number): void {
-  mutate((v2) => ({
-    ...v2,
-    profiles: v2.profiles.map((p) =>
-      p.id === v2.activeProfileId
-        ? {
-            ...p,
-            progress: {
-              ...p.progress,
-              [gameId]: recordResult(p.progress[gameId], { correct, wrong, win: true }),
-            },
-          }
-        : p,
-    ),
-  }));
+  mutate((v2) => {
+    const now = new Date();
+    return {
+      ...v2,
+      profiles: v2.profiles.map((p) =>
+        p.id === v2.activeProfileId
+          ? {
+              ...p,
+              progress: {
+                ...p.progress,
+                [gameId]: recordResult(p.progress[gameId], { correct, wrong, win: true }),
+              },
+              insights: advanceStreak(p.insights, now),
+            }
+          : p,
+      ),
+    };
+  });
+}
+
+/**
+ * Records that a profile reached its daily play-time cap on the day containing
+ * `now`. One increment per local day: a second hit on the same day declines the
+ * mutation, so `mutate` short-circuits and nothing is written (NFR-2). A profile
+ * with no limit never increments here either, so FR-3 holds even if a future
+ * caller forgets the call-site guard.
+ */
+export function recordLimitHit(profileId: string, now: Date = new Date()): void {
+  mutate((v2) => {
+    const profile = v2.profiles.find((p) => p.id === profileId);
+    if (profile === undefined) return null;
+    if (normalizePlayTime(profile.playTime, now).limitMinutes === null) return null;
+    const insights = normalizeInsights(profile.insights);
+    const today = todayKey(now);
+    if (insights.lastLimitHitDay === today) return null;
+    return {
+      ...v2,
+      profiles: v2.profiles.map((p) =>
+        p.id === profileId
+          ? {
+              ...p,
+              insights: {
+                ...insights,
+                limitHitDays: insights.limitHitDays + 1,
+                lastLimitHitDay: today,
+              },
+            }
+          : p,
+      ),
+    };
+  });
 }
 
 /**

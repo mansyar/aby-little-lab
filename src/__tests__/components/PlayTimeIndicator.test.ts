@@ -32,10 +32,11 @@ vi.mock("../../utils/storage", async (importOriginal) => {
         lastUsedDate: TODAY,
       }),
     ),
+    recordLimitHit: vi.fn(),
   };
 });
 
-const { getPlayTime } = await import("../../utils/storage");
+const { getActiveProfile, getPlayTime, recordLimitHit } = await import("../../utils/storage");
 const { createPlayTimeIndicator, PlayTimeNudge } = await import(
   "../../components/PlayTimeIndicator"
 );
@@ -65,6 +66,7 @@ beforeEach(() => {
     usedMinutes: 0,
     lastUsedDate: TODAY,
   });
+  vi.mocked(recordLimitHit).mockClear();
 });
 
 describe("createPlayTimeIndicator", () => {
@@ -78,6 +80,7 @@ describe("createPlayTimeIndicator", () => {
     expect(graphics).toBeNull();
     expect(mockRegistry).toHaveLength(0);
     expect(onLimitReached).not.toHaveBeenCalled();
+    expect(recordLimitHit).not.toHaveBeenCalled();
   });
 
   it("draws a cool hint arc sized by the remaining budget", () => {
@@ -135,6 +138,20 @@ describe("createPlayTimeIndicator", () => {
     expect(fillCircle).toHaveBeenCalledWith(512, 752, 18);
     expect(fillCircle).toHaveBeenCalledWith(507, 748, 13);
     expect(onLimitReached).toHaveBeenCalledTimes(1);
+  });
+
+  it("records one cap-day for the active profile when the tiles lock", () => {
+    vi.mocked(getPlayTime).mockReturnValue({
+      limitMinutes: 30,
+      usedMinutes: 30,
+      lastUsedDate: TODAY,
+    });
+    const scene = new MockScene();
+
+    createPlayTimeIndicator({ scene: asScene(scene), onLimitReached: vi.fn() });
+
+    expect(recordLimitHit).toHaveBeenCalledTimes(1);
+    expect(recordLimitHit).toHaveBeenCalledWith(getActiveProfile().id);
   });
 });
 
