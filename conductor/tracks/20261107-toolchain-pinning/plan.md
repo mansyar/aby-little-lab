@@ -37,7 +37,7 @@
 - **Covers:** FR-4, FR-5, FR-11, FR-12, FR-13, FR-14, AC-3, AC-4, AC-10, AC-11, AC-13
 - **Touches:** `Dockerfile`, `.github/workflows/ci.yml`
 - **Verification:** `docker build . && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm build && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: The Dockerfile consumes the pin** — covers: FR-5, AC-4, AC-10
   - [ ] **P2.T1.1: Move the build stage to the pinned Node major** and install the pinned pnpm; if `node:24-alpine` ships no usable Corepack, fall back to `npm i -g` and record the evidence
