@@ -6,7 +6,12 @@ import type { PlayTimeNudge } from "../components/PlayTimeIndicator";
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
-import type { E2EHubToast, E2ERoundTarget } from "../game/e2eBridge";
+import type {
+  E2EHubPlayTime,
+  E2EHubToast,
+  E2ERoundTarget,
+  E2ESettingsState,
+} from "../game/e2eBridge";
 import { createArtResolver } from "../game/hub/artGroups";
 import {
   createGameLaunch,
@@ -48,6 +53,12 @@ import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private settingsPanel?: SettingsPanel;
+  /**
+   * The "Settings" label the parental hold is armed on. Held so the bridge can
+   * publish the point a parent presses, read from the live object rather than
+   * recomputed from font metrics.
+   */
+  private settingsButton?: Phaser.GameObjects.Text;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
   /**
@@ -262,6 +273,7 @@ export class HubScene extends Phaser.Scene {
       }),
     );
     settingsButton.setOrigin(1, 0);
+    this.settingsButton = settingsButton;
     settingsButton.setInteractive({
       hitArea: new Phaser.Geom.Rectangle(0, 0, 96, 96),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
@@ -300,6 +312,7 @@ export class HubScene extends Phaser.Scene {
       this.parentLock?.destroy();
       this.settingsPanel?.destroy();
       this.settingsPanel = undefined;
+      this.settingsButton = undefined;
       this.profileChip.destroy();
       this.playTime.destroy();
       // A prewarm belongs to the visit that armed it: drop its pending idle
@@ -375,6 +388,36 @@ export class HubScene extends Phaser.Scene {
    */
   e2eHubReady(): boolean {
     return this.grid.entranceSettled;
+  }
+
+  /**
+   * Publishes the parental gate and the settings panel for the browser suite.
+   *
+   * `gate` is the live centre of the "Settings" label — what a parent aims at —
+   * and never a copy of the layout numbers. `open` comes from the panel's own
+   * liveness flag rather than the scene's reference: closing the panel by
+   * tapping its backdrop destroys it without the scene clearing the field, so
+   * the reference alone would keep reporting an open panel that is gone.
+   */
+  e2eSettings(): E2ESettingsState {
+    const centre = this.settingsButton?.getCenter();
+    const panel = this.settingsPanel;
+    const open = panel?.e2eOpen() ?? false;
+    return {
+      gate: centre ? { x: centre.x, y: centre.y } : null,
+      open,
+      toggles: open && panel ? panel.e2eToggles() : [],
+    };
+  }
+
+  /**
+   * Publishes the play-time state the hub acts on, so a journey can tell "the
+   * cap is what refused the tap" apart from "the tap missed": the same flag
+   * that dims and disables the tiles, and the nudge the launch flow shows in
+   * the last few minutes of the budget.
+   */
+  e2eHubPlayTime(): E2EHubPlayTime {
+    return { timeUp: this.playTime.isTimeUp(), nudging: this.playTime.nudge.isActive() };
   }
 
   /**

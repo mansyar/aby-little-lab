@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
+import type { E2ESettingsToggle } from "../game/e2eBridge";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
 import { getSettings, updateSettings } from "../utils/storage";
@@ -54,6 +55,19 @@ export class SettingsPanel {
   private readonly resetModal: ResetModal;
   private readonly installTracker: InstallTracker;
   private readonly onProgressReset?: () => void;
+  /**
+   * The toggle rows, with the tap band they answer to and a live read of their
+   * state. The switch flips a closure variable, not an object property, so the
+   * value has to be asked for through this accessor rather than inspected.
+   */
+  private readonly toggles: Array<{
+    id: string;
+    x: number;
+    y: number;
+    value: () => boolean;
+  }> = [];
+  /** Set by {@link destroy}: the panel's own liveness, independent of the scene. */
+  private destroyed = false;
 
   /** Refreshes the voice chip when the platform loads voices late. */
   private readonly voiceChangedHandler = (): void => {
@@ -148,11 +162,19 @@ export class SettingsPanel {
     // stack starts at -47 so the top row clears the title and version footer,
     // and the bottom card ends at +379, inside the 760px panel.
     const rowY = (index: number): number => centerY + FIRST_ROW_OFFSET + index * ROW_PITCH;
-    this.createToggle(centerX, rowY(0), "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, rowY(1), "SFX", settings.sfxEnabled);
-    this.createToggle(centerX, rowY(2), "Adaptive", settings.adaptiveDifficulty, (next) => {
+    const toggleAdaptive = (next: boolean): void => {
       updateSettings({ adaptiveDifficulty: next });
-    });
+    };
+    this.createToggle(centerX, rowY(0), "bgm", "BGM", settings.bgmEnabled);
+    this.createToggle(centerX, rowY(1), "sfx", "SFX", settings.sfxEnabled);
+    this.createToggle(
+      centerX,
+      rowY(2),
+      "adaptive",
+      "Adaptive",
+      settings.adaptiveDifficulty,
+      toggleAdaptive,
+    );
     this.createProfilesRow(centerX, rowY(3));
     this.createProgressRow(centerX, rowY(4));
     this.resetModal.createRow(centerX, rowY(5));
@@ -186,6 +208,7 @@ export class SettingsPanel {
 
   /** Destroys the modal, the install overlay, and all display objects. */
   destroy(): void {
+    this.destroyed = true;
     const synth = window.speechSynthesis;
     if (synth && typeof synth.removeEventListener === "function") {
       synth.removeEventListener("voiceschanged", this.voiceChangedHandler);
@@ -202,15 +225,40 @@ export class SettingsPanel {
   }
 
   /**
+   * Whether the panel is still on screen. Read-only, and asked of the panel
+   * rather than of whoever holds it: a backdrop tap closes the panel by
+   * destroying it, so a holder's reference can outlive the panel it names.
+   */
+  e2eOpen(): boolean {
+    return !this.destroyed;
+  }
+
+  /**
+   * The toggle rows with the canvas point their whole card answers to and the
+   * state the child's tap would flip. Empty before creation finishes, which is
+   * never observable from outside the constructor.
+   */
+  e2eToggles(): E2ESettingsToggle[] {
+    return this.toggles.map((row) => ({
+      id: row.id,
+      x: row.x,
+      y: row.y,
+      on: row.value(),
+    }));
+  }
+
+  /**
    * Creates one inflated, touch-friendly settings toggle: a labeled row card
    * plus a track-and-knob switch whose knob side encodes the state (never
    * color alone).
+   * @param id - Stable setting key the panel publishes for the browser suite.
    * @param onChange - Optional persistence hook; when provided it replaces the
    *   built-in audio handling (used by non-audio toggles such as Adaptive).
    */
   private createToggle(
     x: number,
     y: number,
+    id: string,
     label: string,
     enabled: boolean,
     onChange?: (nextEnabled: boolean) => void,
@@ -275,6 +323,11 @@ export class SettingsPanel {
     });
     attachPressFeedback(toggle);
     this.objects.push(toggle);
+    // The band is centred on (x, y) by construction: the label sits 40px left
+    // of the row centre and the hit area offsets back by 40, so `x` is where a
+    // finger lands. Publishing the layout arguments keeps the suite from
+    // re-deriving the row maths.
+    this.toggles.push({ id, x, y, value: () => enabled });
     return toggle;
   }
 

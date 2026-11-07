@@ -1554,4 +1554,33 @@ describe("HubScene e2e hub tiles", () => {
     // guess whether a panel is covering the tiles.
     expect(scene.e2eHubToast()).toBeNull();
   });
+
+  it("publishes the parental gate while no panel is open", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    const settings = scene.e2eSettings();
+    expect(settings.gate, "the hub should publish the control the hold is armed on").not.toBeNull();
+    expect(settings.open).toBe(false);
+    expect(settings.toggles, "a closed panel publishes no rows to tap").toEqual([]);
+  });
+
+  it("publishes no gate once the hub has shut down", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    // A backdrop tap destroys the panel without the scene clearing its field,
+    // which is why the published state comes from the panel itself; shutdown
+    // takes the same path and must also drop the gate.
+    scene.events.emit("shutdown");
+
+    expect(scene.e2eSettings()).toEqual({ gate: null, open: false, toggles: [] });
+  });
+
+  it("reports no spent budget on an unlimited profile", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    expect(scene.e2eHubPlayTime()).toEqual({ timeUp: false, nudging: false });
+  });
 });

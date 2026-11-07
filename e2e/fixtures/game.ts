@@ -1,5 +1,11 @@
 import { expect, type Page } from "@playwright/test";
-import type { E2EHubToast, E2ERoundGeometry, E2ERoundTarget } from "../../src/game/e2eBridge";
+import type {
+  E2EHubPlayTime,
+  E2EHubToast,
+  E2ERoundGeometry,
+  E2ERoundTarget,
+  E2ESettingsState,
+} from "../../src/game/e2eBridge";
 import { type GamePoint, holdCanvas, tapCanvas } from "./canvas";
 
 /**
@@ -19,17 +25,35 @@ export const BACK_BUTTON: GamePoint = { x: 68, y: 68 };
 /** Comfortably past {@link import("../../src/components/ParentLock").DEFAULT_HOLD_DURATION}. */
 export const BACK_HOLD_MS = 3_400;
 
+/** The same hold, aimed at the hub's "Settings" control. */
+export const SETTINGS_HOLD_MS = 3_400;
+
+/**
+ * A press well under the gate's three seconds. It must leave the hub exactly as
+ * it found it — and mostly it must not leave a timer behind that opens the
+ * panel late, which is why the journey watches past the three-second mark.
+ */
+export const SETTINGS_SHORT_PRESS_MS = 1_000;
+
 const BRIDGE_TIMEOUT = 15_000;
 const SCENE_TIMEOUT = 30_000;
 const ROUND_TIMEOUT = 20_000;
 
-/** Collects page errors and console errors for a journey's final assertion. */
-export function collectErrors(page: Page): string[] {
+/**
+ * Collects page errors and console errors for a journey's final assertion.
+ *
+ * `console: false` keeps only uncaught page errors, which is what an offline
+ * journey can honestly claim: a relaunch with no network may log a failed fetch
+ * for something optional without anything being wrong with the app.
+ */
+export function collectErrors(page: Page, options: { console?: boolean } = {}): string[] {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
-  });
+  if (options.console !== false) {
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+  }
   return errors;
 }
 
@@ -41,6 +65,18 @@ export function hubToast(page: Page): Promise<E2EHubToast | null> {
 /** Whether the hub is accepting taps, per the grid's own entrance state. */
 export function hubReady(page: Page): Promise<boolean> {
   return page.evaluate(() => window.__abyE2E?.hubReady() ?? false);
+}
+
+/** The parental gate and settings panel as the hub publishes them. */
+export function settingsState(page: Page): Promise<E2ESettingsState> {
+  return page.evaluate(
+    () => window.__abyE2E?.settings() ?? { gate: null, open: false, toggles: [] },
+  );
+}
+
+/** The hub's daily-budget state: whether the cap locked the tiles, and whether a nudge is up. */
+export function hubPlayTime(page: Page): Promise<E2EHubPlayTime> {
+  return page.evaluate(() => window.__abyE2E?.hubPlayTime() ?? { timeUp: false, nudging: false });
 }
 
 /**
@@ -128,9 +164,16 @@ export interface OpenHubOptions {
   dismissToast?: boolean;
 }
 
-/** Opens the built game and waits for the bridge and the hub. */
-export async function openHub(page: Page, options: OpenHubOptions = {}): Promise<void> {
-  await page.goto("/?e2e=1");
+/**
+ * Waits for the built game's shell to be up: canvas, bridge, hub, a settled
+ * grid, and no toast covering the tiles.
+ *
+ * Split out of {@link openHub} because a journey that reloads — the only way to
+ * prove persistence, and the only way to relaunch while offline — arrives at
+ * the same shell through a different navigation and must wait for the same
+ * things.
+ */
+export async function settleHub(page: Page, options: OpenHubOptions = {}): Promise<void> {
   await expect(page.locator("canvas")).toBeVisible({ timeout: SCENE_TIMEOUT });
   await expect
     .poll(() => page.evaluate(() => typeof window.__abyE2E), {
@@ -141,6 +184,23 @@ export async function openHub(page: Page, options: OpenHubOptions = {}): Promise
   await waitForScene(page, "Hub");
   await waitForHubReady(page);
   if (options.dismissToast !== false) await dismissHubToast(page);
+}
+
+/** Opens the built game and waits for the bridge and the hub. */
+export async function openHub(page: Page, options: OpenHubOptions = {}): Promise<void> {
+  await page.goto("/?e2e=1");
+  await settleHub(page, options);
+}
+
+/**
+ * Relaunches the app from the URL already open, then waits for the same shell.
+ *
+ * This is the navigation a player gets from a home-screen icon: no fresh URL,
+ * no cache bypass — whatever the browser can serve from what it already holds.
+ */
+export async function reloadHub(page: Page, options: OpenHubOptions = {}): Promise<void> {
+  await page.reload();
+  await settleHub(page, options);
 }
 
 /** The scene key the bridge reports right now, or null mid-transition. */

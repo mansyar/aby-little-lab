@@ -1,6 +1,12 @@
 import type Phaser from "phaser";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { E2EHubToast, E2ERoundGeometry, E2ERoundTarget } from "../../game/e2eBridge";
+import type {
+  E2EHubPlayTime,
+  E2EHubToast,
+  E2ERoundGeometry,
+  E2ERoundTarget,
+  E2ESettingsState,
+} from "../../game/e2eBridge";
 import { initE2EBridge } from "../../game/e2eBridge";
 import { addProfile, earnSticker } from "../../utils/storage";
 
@@ -12,6 +18,8 @@ interface FakeScene {
   e2eHubTiles?: () => E2ERoundTarget[];
   e2eHubToast?: () => E2EHubToast | null;
   e2eHubReady?: () => boolean;
+  e2eSettings?: () => E2ESettingsState;
+  e2eHubPlayTime?: () => E2EHubPlayTime;
 }
 
 interface FakeGame {
@@ -91,12 +99,14 @@ describe("initE2EBridge", () => {
       expect(Object.isFrozen(bridge)).toBe(true);
       expect(Object.keys(bridge ?? {}).sort()).toEqual([
         "activeSceneKey",
+        "hubPlayTime",
         "hubReady",
         "hubTiles",
         "hubToast",
         "profileCount",
         "roundGeometry",
         "roundIndex",
+        "settings",
         "stickerCount",
       ]);
     });
@@ -277,6 +287,71 @@ describe("initE2EBridge", () => {
 
       ready = true;
       expect(window.__abyE2E?.hubReady()).toBe(true);
+    });
+  });
+
+  describe("settings", () => {
+    it("reports no gate and no panel when the active scene publishes no hook", () => {
+      install([sceneWith("ShapeSorter")]);
+
+      expect(window.__abyE2E?.settings()).toEqual({ gate: null, open: false, toggles: [] });
+    });
+
+    it("reports no gate and no panel when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.settings()).toEqual({ gate: null, open: false, toggles: [] });
+    });
+
+    it("follows the gate point, the panel and a toggle's own state", () => {
+      const scene = sceneWith("Hub");
+      let on = true;
+      let state: E2ESettingsState = {
+        gate: { x: 1016, y: 32 },
+        open: true,
+        toggles: [{ id: "adaptive", x: 512, y: 449, on }],
+      };
+      scene.e2eSettings = () => state;
+      install([scene]);
+
+      expect(window.__abyE2E?.settings().toggles[0]?.on).toBe(true);
+
+      on = false;
+      state = { ...state, toggles: [{ id: "adaptive", x: 512, y: 449, on }] };
+      expect(window.__abyE2E?.settings().toggles[0]?.on).toBe(false);
+
+      state = { gate: state.gate, open: false, toggles: [] };
+      expect(window.__abyE2E?.settings()).toEqual({
+        gate: { x: 1016, y: 32 },
+        open: false,
+        toggles: [],
+      });
+    });
+  });
+
+  describe("hubPlayTime", () => {
+    it("reports spent budget and no nudge when the scene publishes no hook", () => {
+      install([sceneWith("ShapeSorter")]);
+
+      expect(window.__abyE2E?.hubPlayTime()).toEqual({ timeUp: false, nudging: false });
+    });
+
+    it("reports nothing when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.hubPlayTime()).toEqual({ timeUp: false, nudging: false });
+    });
+
+    it("follows the hub from locked to nudging", () => {
+      const scene = sceneWith("Hub");
+      let state: E2EHubPlayTime = { timeUp: true, nudging: false };
+      scene.e2eHubPlayTime = () => state;
+      install([scene]);
+
+      expect(window.__abyE2E?.hubPlayTime()).toEqual({ timeUp: true, nudging: false });
+
+      state = { timeUp: false, nudging: true };
+      expect(window.__abyE2E?.hubPlayTime()).toEqual({ timeUp: false, nudging: true });
     });
   });
 });

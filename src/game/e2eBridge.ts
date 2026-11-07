@@ -30,6 +30,36 @@ export interface E2EHubToast {
   button: { x: number; y: number };
 }
 
+/** One settings row the parental panel publishes for the browser suite. */
+export interface E2ESettingsToggle {
+  /** Stable setting key: `bgm`, `sfx` or `adaptive`. */
+  id: string;
+  /** Canvas-space X of the row's tap band - the whole card is live. */
+  x: number;
+  /** Canvas-space Y of the row's tap band centre. */
+  y: number;
+  /** The toggle's state right now, read from the row's own flag. */
+  on: boolean;
+}
+
+/** The parental gate and the settings panel as the hub currently holds them. */
+export interface E2ESettingsState {
+  /** Canvas centre of the settings control, or null in a scene that is not the hub. */
+  gate: { x: number; y: number } | null;
+  /** Whether the panel is up; false in any other scene and after it closes. */
+  open: boolean;
+  /** The panel's toggle rows while it is open, empty otherwise. */
+  toggles: E2ESettingsToggle[];
+}
+
+/** The hub's play-time state, as the hub itself sees it. */
+export interface E2EHubPlayTime {
+  /** Whether the active profile's daily budget is spent, so every tile is locked. */
+  timeUp: boolean;
+  /** Whether the pre-game nudge overlay is on screen right now. */
+  nudging: boolean;
+}
+
 /** The window the browser suite polls; every member is a live read. */
 export interface E2EBridge {
   activeSceneKey(): string | null;
@@ -62,6 +92,18 @@ export interface E2EBridge {
    * scene that is not the hub, because nothing there publishes it.
    */
   hubReady(): boolean;
+  /**
+   * The parental settings gate and panel. `gate` is the live canvas point a
+   * parent presses to start the three-second hold; `open` is the panel's own
+   * liveness, and `toggles` are the rows it is showing. A scene without a gate
+   * reports `{ gate: null, open: false, toggles: [] }` rather than throwing.
+   */
+  settings(): E2ESettingsState;
+  /**
+   * The hub's daily-budget state: whether the cap locked the tiles, and whether
+   * the pre-game nudge is on screen. False in any other scene.
+   */
+  hubPlayTime(): E2EHubPlayTime;
 }
 
 declare global {
@@ -85,6 +127,8 @@ interface E2ESceneProbe {
   e2eHubTiles?: () => E2ERoundTarget[];
   e2eHubToast?: () => E2EHubToast | null;
   e2eHubReady?: () => boolean;
+  e2eSettings?: () => E2ESettingsState;
+  e2eHubPlayTime?: () => E2EHubPlayTime;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -164,6 +208,18 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eHubReady;
       if (typeof hook !== "function") return false;
+      return hook.call(probe);
+    },
+    settings: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eSettings;
+      if (typeof hook !== "function") return { gate: null, open: false, toggles: [] };
+      return hook.call(probe);
+    },
+    hubPlayTime: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eHubPlayTime;
+      if (typeof hook !== "function") return { timeUp: false, nudging: false };
       return hook.call(probe);
     },
   };
