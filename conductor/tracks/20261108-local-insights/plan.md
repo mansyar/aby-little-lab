@@ -116,22 +116,22 @@ the primary agent writes this file.
 - **Covers:** review findings F1-F6
 - **Touches:** src/game/insightsSummary.ts, src/game/insightsLogic.ts, src/__tests__/game/insightsSummary.test.ts, src/__tests__/game/insightsLogic.test.ts, e2e/journeys/insights.spec.ts, docs/TDD.md, conductor/tracks/20261108-local-insights/
 - **Verification:** pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js, then pnpm test:e2e
-- **Status:** in_progress
-- [ ] **R1.T1: Count the days the way the strip counts them** - covers: F1
+- **Status:** verified
+- [x] **R1.T1: Count the days the way the strip counts them** - covers: F1
   - **R1.T1.1:** Derive the day count from the pruned activity entries the strip draws, not from each game's last-played stamp
   - **R1.T1.2:** Give the AC-5 profiles the activity their stamps imply, and add the case a single game played on three days exposes
-- [ ] **R1.T2: Print the completion rate** - covers: F2
+- [x] **R1.T2: Print the completion rate** - covers: F2
   - **R1.T2.1:** Add the share of started games finished to the reach sentence, with the zero case unchanged
   - **R1.T2.2:** Update the AC-5 text, the journey assertions and the TDD statement table
-- [ ] **R1.T3: Refuse a day key that is not a date** - covers: F3
+- [x] **R1.T3: Refuse a day key that is not a date** - covers: F3
   - **R1.T3.1:** Validate the shape in the normaliser and prove a non-date string is dropped
-- [ ] **R1.T4: The small truths** - covers: F4, F5, F6
+- [x] **R1.T4: The small truths** - covers: F4, F5, F6
   - **R1.T4.1:** Correct the TDD sentence that describes the page and strip as sharing one object
   - **R1.T4.2:** Prove the year rollover for the streak and the week start
   - **R1.T4.3:** Rename the seven-day boundary test
-- [ ] **R1.T5: Re-run both suites** - covers: F1, F2, F3
+- [x] **R1.T5: Re-run both suites** - covers: F1, F2, F3
   - **R1.T5.1:** Run the full chain and the browser suite, and record both in the evidence
 
-**Result:** pending
-**Checkpoint:** pending
+**Result:** verified - the day count now comes from the same pruned activity the strip draws, so the sentence and the bars cannot disagree; the reach sentence prints the share of started games finished; a stored day key must name a real calendar date; the TDD claim is corrected; the year rollover is proven; the boundary test is renamed. 2,981 tests and 17 journeys green.
+**Checkpoint:** 64e234e0
 **Evidence:** conductor/tracks/20261108-local-insights/verification/review-fixes.md
