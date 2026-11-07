@@ -278,6 +278,11 @@ describe("GameSceneBase scaffold", () => {
     vi.restoreAllMocks();
     repairStorage();
     localStorage.clear();
+    // A refused write raises the module-level flag for the rest of the
+    // module's life, and nothing else in this file performs an accepted write
+    // afterwards. Persist a clean state here so the flag is cleared and no
+    // later test in this file inherits a degraded session.
+    updateSettings({});
   });
 
   /** Toggles the `prefers-reduced-motion` media query result. */

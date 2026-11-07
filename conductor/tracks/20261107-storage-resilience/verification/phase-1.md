@@ -65,7 +65,7 @@ Failing tests, verbatim names, with their assertion messages:
 | 14 | `… > keeps the session usable when reads and writes are both blocked` | same message (`:1536`) |
 
 Full transcript (verbatim, including the failure diffs and code frames):
-`.conductor/evidence/phase-1-red-run.md`.
+`verification/red-run.md`.
 
 All 14 failures are the defect itself: the `DOMException` from
 `localStorage.setItem` (quota) or `localStorage.getItem` (blocked access) escapes
@@ -87,7 +87,7 @@ Not covered here by design: AC-5 (Settings notice) and AC-7 (browser journey) be
 
 ## Evidence paths
 
-- `.conductor/evidence/phase-1-red-run.md` — full verbatim pre-fix transcript.
+- `verification/red-run.md` — full verbatim pre-fix transcript.
 - This file.
 
 ## Deviations

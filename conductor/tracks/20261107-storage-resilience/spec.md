@@ -144,7 +144,19 @@ anyone. A parent sees a game that "just stops" and stickers that never stay.
 | AC-5 | The Settings panel renders the notice while degraded and renders no notice when storage works; the eight existing rows keep their positions. | FR-5 |
 | AC-6 | With a working storage stub, the written raw string, the read results, the v1 migration, the corrupt-JSON fallback and the unknown-version protection are identical to the pre-change behaviour. | FR-6 |
 | AC-7 | The browser journey passes: with `setItem` throwing, a game is completed, the hub returns, a reload boots the hub, and no page error was collected. | FR-7 |
-| AC-8 | The new unit tests fail against the pre-fix `src/utils/storage.ts` and pass after it, recorded in the phase evidence. | FR-7 |
+| AC-8 | Every new unit test that can run against the pre-fix `src/utils/storage.ts` fails against it and passes after, recorded verbatim in the phase evidence. (14 of the 21 could run; the seven flag-lifecycle tests cite `isPersistenceDegraded()`, which the pre-fix file does not export - see the amendment.) | FR-7 |
+
+**AC-8 amendment (2026-11-07, review findings F1 and F4).** The original wording
+claimed every new test fails against the pre-fix file. Fourteen of the twenty-one
+did; the seven flag-lifecycle tests could not, because they call
+`isPersistenceDegraded()`, which the pre-fix file does not export — a test that
+cannot compile is not evidence. The transcript is checked in at
+`verification/red-run.md` rather than kept under `.conductor/`, which is ignored by
+git and so could not be read by anyone reviewing the track. Two tests added in the
+review round were proved the same way after the fact: the destructive-mode test
+below fails against the Phase 1 file (it rewrites the seeded payload with
+defaults) and passes against the review-fix file, recorded in
+`verification/review-fixes.md`.
 
 ## Edge Cases
 

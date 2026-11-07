@@ -2793,6 +2793,21 @@ describe("SettingsPanel degraded persistence notice", () => {
     expect(degraded.e2eDegraded()).toBe(true);
   });
 
+  it("reaches the notice in a session whose reads are blocked", () => {
+    // A real save exists, and then the device refuses to read it back.
+    earnSticker("shape-sorter");
+    breakStorage(["getItem"], "SecurityError");
+
+    // The panel calls getSettings() before it reads the flag. That read used
+    // to write defaults over the save it could not see, which cleared the flag
+    // before the notice could be decided.
+    const scene = createScene();
+    const degraded = buildPanel(scene);
+
+    expect(degraded.e2eDegraded()).toBe(true);
+    expect(findTextByLabel(scene, NOTICE)).toBeDefined();
+  });
+
   it("leaves the title, the version footer and the eight rows exactly where they were", () => {
     const healthyScene = createScene();
     buildPanel(healthyScene);

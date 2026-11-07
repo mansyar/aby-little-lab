@@ -106,32 +106,58 @@ function getStorage(): Storage | null {
  */
 let persistenceDegraded = false;
 
+/**
+ * Whether this session cannot read the store. An unreadable store is not an
+ * empty one — it may hold a real save this build cannot see — so while this is
+ * true nothing is written and memory is the only authority.
+ */
+let readsBlocked = false;
+
+/**
+ * The raw v2 string this session last knew the store to hold: the last one it
+ * read, or the one a write was accepted with. A later read returning it is the
+ * evidence that heals a blocked session — the store did not change while it
+ * could not be seen, so memory is strictly newer than it.
+ */
+let lastKnownRaw: string | null = null;
+
 /** True while this session has lost at least one storage access (FR-4). */
 export function isPersistenceDegraded(): boolean {
   return persistenceDegraded;
 }
 
+/** The outcome of a read: the value, and whether the store refused to answer. */
+interface StorageRead {
+  /** True when the store could not be read — distinct from holding nothing. */
+  failed: boolean;
+  /** The stored string, or null when there is nothing there (or the read failed). */
+  raw: string | null;
+}
+
 /**
- * Reads a key, treating a store that refuses access as an empty one: callers
- * serve defaults, the session stays playable, and the failure is recorded.
+ * Reads a key, reporting a store that refuses access separately from an empty
+ * one. Folding the two together is what let a blocked device overwrite a save
+ * it could not see, because every caller read `null` as "nothing stored".
  */
-function readStorage(key: string): string | null {
+function readStorage(key: string): StorageRead {
   const storage = getStorage();
   if (storage === null) {
     persistenceDegraded = true;
-    return null;
+    readsBlocked = true;
+    return { failed: true, raw: null };
   }
   try {
-    return storage.getItem(key);
+    return { failed: false, raw: storage.getItem(key) };
   } catch {
     persistenceDegraded = true;
-    return null;
+    readsBlocked = true;
+    return { failed: true, raw: null };
   }
 }
 
 function readV1(): Partial<AppStorage> | null {
-  const raw = readStorage(V1_KEY);
-  if (raw === null) return null;
+  const { failed, raw } = readStorage(V1_KEY);
+  if (failed || raw === null) return null;
   try {
     return JSON.parse(raw) as Partial<AppStorage>;
   } catch {
@@ -139,8 +165,20 @@ function readV1(): Partial<AppStorage> | null {
   }
 }
 
-function readV2Raw(): string | null {
-  return readStorage(V2_KEY);
+/**
+ * Reads the v2 payload and decides whether a successful read heals a blocked
+ * session. Healing needs evidence, not optimism: only a read returning the raw
+ * this session last knew — or an empty store, which has nothing to destroy —
+ * proves that writing cannot overwrite bytes this build never saw.
+ */
+function readV2Raw(): StorageRead {
+  const read = readStorage(V2_KEY);
+  if (read.failed) return read;
+  if (readsBlocked && (read.raw === lastKnownRaw || read.raw === null)) {
+    readsBlocked = false;
+  }
+  if (!readsBlocked) lastKnownRaw = read.raw;
+  return read;
 }
 
 /**
@@ -152,8 +190,7 @@ function readV2Raw(): string | null {
  */
 let v2Cache: { raw: string | null; state: ProfileV2 } | null = null;
 
-function readV2(): ProfileV2 | null {
-  const raw = readV2Raw();
+function parseV2(raw: string | null): ProfileV2 | null {
   if (raw === null) return null;
   // Only `known` and `missing` (implicit v1) payloads may be normalized; an
   // `unknown` version must never reach here (it is write-protected, FR-4),
@@ -169,7 +206,16 @@ function readV2(): ProfileV2 | null {
 
 /** Returns the current v2 state, migrating a v1 save (or fresh install) on first access. */
 function ensureV2(): ProfileV2 {
-  const raw = readV2Raw();
+  const { failed, raw } = readV2Raw();
+  if (failed || readsBlocked) {
+    // F1: an unreadable store is not an empty one. Serve what this session
+    // already holds — the cache if there is one, otherwise the same defaults a
+    // fresh install builds — and write nothing: the store may hold a real save
+    // this build cannot see. The cache is keyed so the next accessor hits it.
+    if (v2Cache === null) v2Cache = { raw: lastKnownRaw, state: migrateV1(null) };
+    return v2Cache.state;
+  }
+
   if (v2Cache !== null && v2Cache.raw === raw) return v2Cache.state;
 
   if (classifyStoredV2(raw) === "unknown") {
@@ -182,7 +228,7 @@ function ensureV2(): ProfileV2 {
     return defaults;
   }
 
-  const existing = readV2();
+  const existing = parseV2(raw);
   if (existing !== null) {
     const v2 = migrateFromVersion1(existing);
     v2Cache = { raw, state: v2 };
@@ -197,12 +243,13 @@ function saveV2(v2: ProfileV2): void {
   // FR-1: the single write path stamps every payload with the schema version.
   const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
   const storage = getStorage();
-  if (storage !== null) {
+  if (storage !== null && !readsBlocked) {
     try {
       storage.setItem(V2_KEY, raw);
       // FR-2/FR-4: an accepted write stores the whole state — no delta — and
       // proves the store works again, so it clears the degraded flag.
       persistenceDegraded = false;
+      lastKnownRaw = raw;
       v2Cache = { raw, state: v2 };
       return;
     } catch {
@@ -211,11 +258,23 @@ function saveV2(v2: ProfileV2): void {
     }
   }
   persistenceDegraded = true;
-  // The persisted bytes did not move. Key the memo with the raw the store
-  // still holds next to the new state, so the next read hits the cache and
-  // serves what the child just earned; keying it with the rejected JSON would
-  // miss the cache, re-read stale bytes and take the sticker back off screen.
-  v2Cache = { raw: readV2Raw(), state: v2 };
+  // F1: while the store cannot be read it may hold a real save, so a blocked
+  // session never writes over bytes it cannot see. The mutation stays in
+  // memory and the memo keeps pointing at it for the rest of the session.
+  //
+  // Otherwise the persisted bytes did not move. Key the memo with the raw the
+  // store still holds next to the new state, so the next read hits the cache
+  // and serves what the child just earned; keying it with the rejected JSON
+  // would miss the cache, re-read stale bytes and take the sticker back off
+  // screen.
+  v2Cache = { raw: storedRaw(), state: v2 };
+}
+
+/** The raw the store holds: a fresh read where it answers, the last known raw otherwise. */
+function storedRaw(): string | null {
+  if (readsBlocked) return lastKnownRaw;
+  const read = readV2Raw();
+  return read.failed ? lastKnownRaw : read.raw;
 }
 
 /**
@@ -225,11 +284,12 @@ function saveV2(v2: ProfileV2): void {
 function mutate(mutator: (v2: ProfileV2) => ProfileV2 | null): ProfileV2 | null {
   const next = mutator(ensureV2());
   if (next === null) return null;
-  if (classifyStoredV2(readV2Raw()) === "unknown") {
+  const stored = readV2Raw();
+  if (!stored.failed && classifyStoredV2(stored.raw) === "unknown") {
     // FR-4: the stored payload is a future version and write-protected, so
     // the mutation applies to the in-memory state only (A2) — the raw bytes
     // stay untouched and the cache is re-keyed to the unchanged raw string.
-    v2Cache = { raw: readV2Raw(), state: next };
+    v2Cache = { raw: stored.raw, state: next };
     return next;
   }
   saveV2(next);

@@ -1543,6 +1543,71 @@ describe("when a read cannot be performed", () => {
     expect(hasSticker("shape-sorter")).toBe(true);
     expect(getSettings().bgmEnabled).toBe(true);
   });
+
+  it("leaves the save it cannot read byte-identical, and keeps the session in memory", () => {
+    // A real save this device will refuse to read back: one profile, one
+    // sticker earned, written by a store that accepts writes.
+    earnSticker("shape-sorter");
+    const seeded = localStorage.getItem(V2_KEY);
+    expect(seeded).not.toBeNull();
+    // The thrower replaces the instance method, so hold a reference to the
+    // real one to inspect the bytes afterwards without healing the test.
+    const readStoredRaw = localStorage.getItem.bind(localStorage);
+
+    breakStorage(["getItem"], "SecurityError");
+
+    // The two getters that used to fold "cannot read" into "nothing stored"
+    // and write defaults straight over the save above.
+    expect(() => getProfiles()).not.toThrow();
+    expect(getSettings().bgmEnabled).toBe(true);
+
+    expect(readStoredRaw(V2_KEY)).toBe(seeded);
+    expect(isPersistenceDegraded()).toBe(true);
+
+    // A sticker earned after the failure is served from memory, and still does
+    // not reach the store this build cannot see.
+    earnSticker("animal-trace");
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(readStoredRaw(V2_KEY)).toBe(seeded);
+  });
+
+  it("resumes writing when a later read returns the raw this session last saw", () => {
+    earnSticker("shape-sorter");
+
+    breakStorage(["getItem"], "SecurityError");
+    getProfiles();
+    expect(isPersistenceDegraded()).toBe(true);
+
+    // The store answers again with exactly the bytes it held before the
+    // failure: it did not change while it could not be seen, so memory is
+    // strictly newer and the next write persists the whole state.
+    repairStorage();
+    earnSticker("animal-trace");
+
+    expect(isPersistenceDegraded()).toBe(false);
+    const persisted = JSON.parse(localStorage.getItem(V2_KEY) ?? "null");
+    expect(persisted.profiles[0].stickers["shape-sorter"]).toMatchObject({ earned: true });
+    expect(persisted.profiles[0].stickers["animal-trace"]).toMatchObject({ earned: true });
+  });
+
+  it("stays memory-only when the store changed while it could not be read", () => {
+    earnSticker("shape-sorter");
+    breakStorage(["getItem"], "SecurityError");
+    getProfiles();
+
+    // Something else wrote the store while this session could not look.
+    const other = JSON.stringify({ schemaVersion: 1, profiles: [], activeProfileId: "p1" });
+    localStorage.setItem(V2_KEY, other);
+    repairStorage();
+
+    earnSticker("animal-trace");
+
+    // Ambiguity resolves toward not destroying data: the other writer's bytes
+    // are left alone, the flag stays raised, and the session keeps its memory.
+    expect(localStorage.getItem(V2_KEY)).toBe(other);
+    expect(hasSticker("animal-trace")).toBe(true);
+    expect(isPersistenceDegraded()).toBe(true);
+  });
 });
 
 describe("degraded persistence flag", () => {
@@ -1641,5 +1706,67 @@ describe("degraded persistence flag", () => {
     expect(() => earnSticker("shape-sorter")).not.toThrow();
     expect(hasSticker("shape-sorter")).toBe(true);
     expect(isPersistenceDegraded()).toBe(true);
+  });
+});
+
+describe("when the storage global itself cannot be reached", () => {
+  let originalDescriptor: PropertyDescriptor | undefined;
+  let broken = false;
+
+  /** Makes every look at `globalThis.localStorage` raise, the way a sandboxed frame does. */
+  function breakLocalStorageGlobal(): void {
+    originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      get() {
+        throw new DOMException("simulated SecurityError", "SecurityError");
+      },
+    });
+    broken = true;
+  }
+
+  /** Puts the real global back, so no later test inherits a throwing accessor. */
+  function restoreLocalStorageGlobal(): void {
+    if (!broken) return;
+    if (originalDescriptor) {
+      Object.defineProperty(globalThis, "localStorage", originalDescriptor);
+    } else {
+      delete (globalThis as { localStorage?: Storage }).localStorage;
+    }
+    broken = false;
+  }
+
+  afterEach(() => {
+    restoreLocalStorageGlobal();
+  });
+
+  it("serves defaults from every getter, never throws, and raises the flag", async () => {
+    // A fresh module, so the memo holds nothing and whatever the getters serve
+    // can only come from the store they cannot reach.
+    vi.resetModules();
+    const fresh = await import("../../utils/storage");
+    breakLocalStorageGlobal();
+
+    try {
+      expect(() => fresh.getProfiles()).not.toThrow();
+      expect(fresh.getProfiles()).toHaveLength(1);
+      expect(fresh.getActiveProfile()).toMatchObject({ id: "p1", avatarId: "cat" });
+      expect(fresh.getSettings()).toEqual({
+        bgmEnabled: true,
+        sfxEnabled: true,
+        preferredVoiceURI: null,
+        adaptiveDifficulty: true,
+      });
+      expect(fresh.getPlayTime()).toMatchObject({ limitMinutes: null, usedMinutes: 0 });
+      expect(fresh.getProgress()["shape-sorter"]).toMatchObject({ plays: 0, wins: 0 });
+      expect(fresh.hasSticker("shape-sorter")).toBe(false);
+      expect(fresh.getAdaptiveBandShift("how-many")).toBe(0);
+      // A mutation still applies to the session.
+      expect(() => fresh.earnSticker("shape-sorter")).not.toThrow();
+      expect(fresh.hasSticker("shape-sorter")).toBe(true);
+      expect(fresh.isPersistenceDegraded()).toBe(true);
+    } finally {
+      restoreLocalStorageGlobal();
+    }
   });
 });
