@@ -42,7 +42,7 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
 - **Covers:** FR-7, FR-11, NFR-6, AC-4, AC-8
 - **Touches:** `playwright.config.ts`, `nginx.security-headers.conf`, `conductor/tracks/20261108-edge-hardening/verification/`
 - **Verification:** `docker build -t aby-little-lab:headers . && docker run -d -p 8080:80 … && E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e` then `pnpm test:e2e` with the variable unset, then the full chain
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
