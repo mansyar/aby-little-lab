@@ -92,19 +92,23 @@ the primary agent writes this file.
 - **Covers:** FR-8, FR-9, NFR-5, NFR-6, AC-7, AC-8, AC-9
 - **Touches:** `e2e/journeys/insights.spec.ts`, `e2e/fixtures/`, `README.md`, `docs/TDD.md`, `conductor/product.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm test:e2e` then `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: The journey** - covers: FR-8, AC-7, NFR-6
+- [x] **P4.T1: The journey** - covers: FR-8, AC-7, NFR-6
   - **P4.T1.1:** Seed a profile with completed sessions across a few days, then open the hub and read the published state rather than sleeping
   - **P4.T1.2:** Hold the settings gate until it opens (`holdCanvasUntil`), open Progress, and assert the three statements are readable on page 1 with no paging step
   - **P4.T1.3:** Assert the journey adds no console or page error, and keep its runtime inside the suite's budget
-- [ ] **P4.T2: The documents** - covers: FR-9, AC-9
+- [x] **P4.T2: The documents** - covers: FR-9, AC-9
   - **P4.T2.1:** `docs/TDD.md` records the `insights` shape, each derived metric with its window and floor, and why the schema version did not move
   - **P4.T2.2:** `README.md` names the Overview page among the parent features
   - **P4.T2.3:** The roadmap row becomes Done with dated evidence, and the metric table's "unknown" baselines are replaced by what the page now reports
-- [ ] **P4.T3: The gate** - covers: AC-8, NFR-5
+- [x] **P4.T3: The gate** - covers: AC-8, NFR-5
   - **P4.T3.1:** Assert no new dependency, no new `fetch` under `src/`, and that the shell entry is still inside 200 kB
   - **P4.T3.2:** Refresh the suite counts and confirm all four validators are green
+
+**Result:** verified - a journey seeds a week of history, holds the parental gate, opens Progress and reads all three statements on page one (17 journeys green in 3.2 minutes); the bridge publishes the strings the overlay drew rather than recomputing them; the human json carries the stored shape, the metric windows and the reason the schema version stayed at 1.
+**Checkpoint:** 38db07a2
+**Evidence:** conductor/tracks/20261108-local-insights/verification/phase-4.md
 
 <!-- Review fixes are appended by conductor-review as:
 ## Phase R<n>: Review Fixes
