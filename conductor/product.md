@@ -152,8 +152,8 @@ that rots on a calendar boundary teaches the team to ignore red.
 | Track | Work | Exit gate |
 |---|---|---|
 | `20261106-trunk-green` | **Done 2026-11-07** (track `20261107-trunk-green`): all 29 date literals classified - 5 were clock stand-ins, converted to values derived from an explicit clock; 24 were payload data and stayed literal. A source-guard test now fails on a bare quoted day key assigned to `lastUsedDate`, the "no wall-clock values" rule is in `code_styleguides/typescript.md` §6, and the two 22-scene sweeps got a 60 s budget so the coverage gate stops tripping on a 30 s deadline. | `master` green on a fresh clone on a different day |
-| `20261106-docs-truth-2` | Clear the README "Known Issues" list (both items shipped) and make it the Known Issues home; delete `docs/roadmap.md` and repoint every reference so this section is the only roadmap | No second roadmap copy survives in `docs/`; `validate-docs` green |
-| `20261106-roadmap-adopt` | Make this section the roadmap of record; the old `docs/roadmap.md` is deleted rather than kept as a pointer | Roadmap carries dated, owned items; nothing else claims the title |
+| `20261106-docs-truth-2` | **Done 2026-11-07** (absorbed into track `20261107-trunk-green`, commit `6cd2d85a`): the README's "Known Issues" is now the home for what is broken and carries only live items; `docs/roadmap.md` was deleted and every reference repointed at §10, so this section is the only roadmap. | No second roadmap copy survives in `docs/`; `validate-docs` green |
+| `20261106-roadmap-adopt` | **Done 2026-11-07** (same commit): this section is the roadmap of record; the old file was deleted rather than kept as a pointer, and the two dated changelog mentions of it were left intact as history. | Roadmap carries dated, owned items; nothing else claims the title |
 
 ### 10.2 Phase 1 — Trust the build (2 weeks)
 
