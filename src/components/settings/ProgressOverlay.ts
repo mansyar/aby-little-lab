@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
+import { summariseInsights } from "../../game/insightsSummary";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
 import {
   formatAccuracyPercent,
@@ -33,10 +34,18 @@ const MASTERY_STAR = "★";
 const VIEWED_RING_SIZE = 80;
 /** Game rows shown per page in the Learning Progress overlay. */
 const PROGRESS_PAGE_SIZE = 6;
+/** Pages the Overview occupies ahead of the per-game pages. */
+const OVERVIEW_PAGES = 1;
 /** Vertical pitch between progress rows (two text lines each). */
 const PROGRESS_ROW_PITCH = 56;
 /** Center-relative Y of the first progress row. */
 const PROGRESS_ROW_START_Y = -150;
+/** Center-relative Y of the first Overview statement: the top of the row band. */
+const OVERVIEW_LINE_START_Y = PROGRESS_ROW_START_Y;
+/** Vertical pitch between Overview statements; each band holds three wrapped lines. */
+const OVERVIEW_LINE_PITCH = 100;
+/** Width an Overview statement wraps inside: the 480px panel less a 20px margin each side. */
+const OVERVIEW_TEXT_WIDTH = 430;
 /** Center-relative Y of the 7-day activity strip label. */
 const PROGRESS_STRIP_LABEL_Y = 230;
 /** Center-relative Y of the 7-day activity bars. */
@@ -69,10 +78,10 @@ export interface ProgressOverlayDeps {
 }
 
 /**
- * The Learning Progress overlay: per-profile chips, paginated per-game rows
- * (plays, accuracy bar + %, mastery star, last played), and the 7-day activity
- * strip. Read-only: switching the viewed profile never changes the active
- * profile.
+ * The Learning Progress overlay: per-profile chips, an Overview page (the three
+ * insight statements plus the 7-day activity strip), then paginated per-game
+ * rows (plays, accuracy bar + %, mastery star, last played). Read-only:
+ * switching the viewed profile never changes the active profile.
  */
 export class ProgressOverlay {
   private readonly deps: ProgressOverlayDeps;
@@ -83,7 +92,7 @@ export class ProgressOverlay {
     this.deps = deps;
   }
 
-  /** Opens (or resets) the overlay at page 1 for the active profile. */
+  /** Opens (or resets) the overlay on the Overview page for the active profile. */
   open(): void {
     this.close();
     this.page = 0;
@@ -106,6 +115,11 @@ export class ProgressOverlay {
     const centerY = height / 2;
     const viewedId = this.viewedId ?? getActiveProfile().id;
     const progress = getProgress(viewedId);
+    const profiles = getProfiles();
+    // The Overview follows the viewed profile, not the active one; the summary
+    // is derived once per render so the page never recomputes on its own.
+    const viewedProfile = profiles.find((profile) => profile.id === viewedId) ?? getActiveProfile();
+    const summary = summariseInsights(viewedProfile, new Date());
 
     const backdrop = scene.add
       .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
@@ -149,7 +163,6 @@ export class ProgressOverlay {
     close.on("pointerdown", () => this.close());
     this.deps.overlayObjects.push(close);
 
-    const profiles = getProfiles();
     profiles.forEach((profile, index) => {
       const x = centerX + (index - (profiles.length - 1) / 2) * 56;
       // Persistent outline marks the profile being viewed (never color alone).
@@ -176,8 +189,35 @@ export class ProgressOverlay {
       this.deps.overlayObjects.push(chip);
     });
 
-    const pageStart = this.page * PROGRESS_PAGE_SIZE;
-    const pageEnd = Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_ROWS.length);
+    // Page 0 is the Overview: the three statements, one text block each. They
+    // wrap to the panel width rather than shrink, so a long strongest/hardest
+    // line still reads at the same size as the others.
+    if (this.page === 0) {
+      summary.lines.forEach((line, index) => {
+        this.deps.overlayObjects.push(
+          scene.add
+            .text(
+              centerX,
+              centerY + OVERVIEW_LINE_START_Y + index * OVERVIEW_LINE_PITCH,
+              line,
+              textStyle({
+                color: "#2d3748",
+                fontSize: "24px",
+                align: "center",
+                wordWrap: { width: OVERVIEW_TEXT_WIDTH },
+              }),
+            )
+            .setOrigin(0.5, 0),
+        );
+      });
+    }
+
+    // Page 0 is the Overview; the per-game pages follow it, so the row window
+    // is empty on the Overview and starts at row 0 on the first game page.
+    const gamePage = this.page - OVERVIEW_PAGES;
+    const pageStart = Math.max(0, gamePage * PROGRESS_PAGE_SIZE);
+    const pageEnd =
+      gamePage < 0 ? 0 : Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_ROWS.length);
     for (let i = pageStart; i < pageEnd; i += 1) {
       const row = PROGRESS_ROWS[i];
       const y = centerY + PROGRESS_ROW_START_Y + (i - pageStart) * PROGRESS_ROW_PITCH;
@@ -230,7 +270,7 @@ export class ProgressOverlay {
       }
     }
 
-    const pageCount = Math.ceil(PROGRESS_ROWS.length / PROGRESS_PAGE_SIZE);
+    const pageCount = OVERVIEW_PAGES + Math.ceil(PROGRESS_ROWS.length / PROGRESS_PAGE_SIZE);
     this.deps.overlayObjects.push(
       scene.add
         .text(
@@ -277,7 +317,7 @@ export class ProgressOverlay {
     addPageChevron("‹", centerX - 110, -1);
     addPageChevron("›", centerX + 110, 1);
 
-    const activity = getProfiles().find((profile) => profile.id === viewedId)?.activity ?? [];
+    const activity = viewedProfile.activity;
     const totalPlays = activity.reduce((sum, entry) => sum + entry.plays, 0);
     this.deps.overlayObjects.push(
       scene.add

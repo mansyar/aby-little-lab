@@ -1986,19 +1986,23 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "X")).toBeDefined();
     // Profile switcher chip for the single default profile.
     expect(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.cat).length).toBe(1);
-    // First page shows the first 6 game rows.
-    expect(findTextByLabel(scene, "Shape Sorter")).toBeDefined();
-    expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
-    expect(findTextByLabel(scene, "Big & Small")).toBeDefined();
-    expect(findTextByLabel(scene, "Pattern Builder")).toBeUndefined();
-    // Explicit prev/next chevron controls and the 7-day strip.
-    expect(findTextByLabel(scene, "‹")).toBeDefined();
-    expect(findTextByLabel(scene, "›")).toBeDefined();
-    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
+    // The overlay opens on the Overview page: its three statements, the page
+    // counter over the extra page, and the 7-day strip.
+    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
     expect(findTextByLabel(scene, "Last 7 days · 0 plays")).toBeDefined();
     // Activity strip bars are 24px wide; the toggle knobs are 24×24 squares.
     const bars = scene.add.rectangle.mock.calls.filter((call) => call[2] === 24 && call[3] !== 24);
     expect(bars).toHaveLength(7);
+
+    // The per-game rows start on the page after the Overview.
+    triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
+    expect(findTextByLabel(scene, "Shape Sorter")).toBeDefined();
+    expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
+    expect(findTextByLabel(scene, "Big & Small")).toBeDefined();
+    expect(findTextByLabel(scene, "Pattern Builder")).toBeUndefined();
+    // Explicit prev/next chevron controls.
+    expect(findTextByLabel(scene, "‹")).toBeDefined();
+    expect(findTextByLabel(scene, "›")).toBeDefined();
   });
 
   it("explains adaptive difficulty to parents inside the report", () => {
@@ -2029,6 +2033,7 @@ describe("SettingsPanel progress report", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
 
     expect(findTextByLabel(scene, "1 plays · 75% · Today")).toBeDefined();
     expect(findTextByLabel(scene, "1 plays · — · Today")).toBeDefined();
@@ -2044,6 +2049,7 @@ describe("SettingsPanel progress report", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
 
     expect(findTextByLabel(scene, "★ Shape Sorter")).toBeDefined();
     expect(findTextByLabel(scene, "Animal Trace")).toBeDefined();
@@ -2054,25 +2060,33 @@ describe("SettingsPanel progress report", () => {
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
 
-    const pageOneRow = findTextByLabel(scene, "Shape Sorter") as MockGameObject;
     const nextChevron = () => findTextByLabel(scene, "›") as MockGameObject | undefined;
     const prevChevron = () => findTextByLabel(scene, "‹") as MockGameObject | undefined;
     expect(nextChevron()).toBeDefined();
     expect(prevChevron()).toBeDefined();
+    // Page 1 is the Overview: no game rows and no last-page game yet.
+    expect(findTextByLabel(scene, "Shape Sorter")).toBeUndefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Story Order")).toBeUndefined();
-    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
+
+    triggerPointerdown(nextChevron() as MockGameObject);
+    const pageOneRow = findTextByLabel(scene, "Shape Sorter") as MockGameObject;
+    expect(findTextByLabel(scene, "2 / 5")).toBeDefined();
+    expect(pageOneRow).toBeDefined();
+    expect(findTextByLabel(scene, "Pattern Builder")).toBeUndefined();
+    expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
     expect(pageOneRow.destroy).toHaveBeenCalled();
-    expect(findTextByLabel(scene, "2 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "3 / 5")).toBeDefined();
     expect(findTextByLabel(scene, "Pattern Builder")).toBeDefined();
     expect(findTextByLabel(scene, "First Sounds")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeUndefined();
     expect(findTextByLabel(scene, "Take Away")).toBeUndefined();
 
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "3 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "4 / 5")).toBeDefined();
     expect(findTextByLabel(scene, "Color Match")).toBeDefined();
     expect(findTextByLabel(scene, "Add It Up")).toBeDefined();
     expect(findTextByLabel(scene, "Take Away")).toBeDefined();
@@ -2081,7 +2095,7 @@ describe("SettingsPanel progress report", () => {
 
     const lastPageMark = scene.add.text.mock.calls.length;
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "5 / 5")).toBeDefined();
     expect(findTextByLabel(scene, "Decode It")).toBeDefined();
     expect(findTextByLabel(scene, "Number Order")).toBeDefined();
     expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
@@ -2094,17 +2108,19 @@ describe("SettingsPanel progress report", () => {
 
     // The last page clamps instead of wrapping around.
     triggerPointerdown(nextChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "5 / 5")).toBeDefined();
 
-    // Previous pages walk back to the first page, which also clamps.
+    // Previous pages walk back to the Overview, which also clamps.
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "3 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "4 / 5")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "2 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "3 / 5")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "2 / 5")).toBeDefined();
     triggerPointerdown(prevChevron() as MockGameObject);
-    expect(findTextByLabel(scene, "1 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
+    triggerPointerdown(prevChevron() as MockGameObject);
+    expect(findTextByLabel(scene, "1 / 5")).toBeDefined();
   });
 
   it("shows Story Order as the 22nd row, reading its own progress record", () => {
@@ -2113,11 +2129,11 @@ describe("SettingsPanel progress report", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
-    for (let page = 0; page < 3; page += 1) {
+    for (let page = 0; page < 4; page += 1) {
       triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
     }
 
-    expect(findTextByLabel(scene, "4 / 4")).toBeDefined();
+    expect(findTextByLabel(scene, "5 / 5")).toBeDefined();
     expect(findTextByLabel(scene, "Story Order")).toBeDefined();
     expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
     // Exactly one row reports a play: story-order's own record.
@@ -2131,6 +2147,7 @@ describe("SettingsPanel progress report", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
 
     // Row names are the 30px texts at x = centerX - 158 (354 for a 1024-wide
     // scene). Stats lines are 26px, the title is 36px, and footer texts sit at
@@ -2155,9 +2172,11 @@ describe("SettingsPanel progress report", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
+    triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
 
     expect(findTextByLabel(scene, "0 plays · — · —")).toBeDefined();
     triggerPointerdown(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.dog)[0]);
+    // A re-render keeps the current page, so the swapped rows appear in place.
     expect(findTextByLabel(scene, "1 plays · — · Today")).toBeDefined();
     expect(getActiveProfile().id).toBe(getProfiles()[0].id);
   });
@@ -2572,7 +2591,7 @@ describe("SettingsPanel affordance cohesion", () => {
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
 
-    const pageLabel = () => findLastTextByLabel(scene, "1 / 4");
+    const pageLabel = () => findLastTextByLabel(scene, "1 / 5");
     expect(pageLabel()).toBeDefined();
 
     // The ambiguous single More/Back button is gone.
@@ -2588,16 +2607,18 @@ describe("SettingsPanel affordance cohesion", () => {
     triggerPointerdown(next);
     triggerPointerdown(next);
     triggerPointerdown(next);
-    expect(findLastTextByLabel(scene, "4 / 4")).toBeDefined();
     triggerPointerdown(next);
-    expect(findLastTextByLabel(scene, "4 / 4")).toBeDefined(); // clamped
+    expect(findLastTextByLabel(scene, "5 / 5")).toBeDefined();
+    triggerPointerdown(next);
+    expect(findLastTextByLabel(scene, "5 / 5")).toBeDefined(); // clamped
 
     triggerPointerdown(prev);
     triggerPointerdown(prev);
     triggerPointerdown(prev);
-    expect(findLastTextByLabel(scene, "1 / 4")).toBeDefined();
     triggerPointerdown(prev);
-    expect(findLastTextByLabel(scene, "1 / 4")).toBeDefined(); // clamped
+    expect(findLastTextByLabel(scene, "1 / 5")).toBeDefined();
+    triggerPointerdown(prev);
+    expect(findLastTextByLabel(scene, "1 / 5")).toBeDefined(); // clamped
   });
 
   it("highlights the viewed profile in the progress report", () => {

@@ -9,7 +9,13 @@ vi.mock("phaser", async () => {
 
 import { ProgressOverlay } from "../../../components/settings/ProgressOverlay";
 import { GAME_REGISTRY } from "../../../game/gameRegistry";
-import { addProfile, getActiveProfile, getProfiles } from "../../../utils/storage";
+import { summariseInsights } from "../../../game/insightsSummary";
+import {
+  addProfile,
+  getActiveProfile,
+  getProfiles,
+  setPlayTimeLimit,
+} from "../../../utils/storage";
 
 /** Registry objects whose destroy has not been called (current render). */
 function live(): MockObject[] {
@@ -46,6 +52,25 @@ function tap(obj: MockObject): void {
   for (const entry of handlers) entry.cb();
 }
 
+/** Taps the forward chevron; throws if the current render has none. */
+function nextPage(): void {
+  const chevron = liveTexts("›")[0];
+  if (!chevron) throw new Error("no next chevron");
+  tap(chevron);
+}
+
+/** Taps the back chevron; throws if the current render has none. */
+function previousPage(): void {
+  const chevron = liveTexts("‹")[0];
+  if (!chevron) throw new Error("no prev chevron");
+  tap(chevron);
+}
+
+/** The three statement strings page 0 prints, for whichever profile is viewed. */
+function statementLines(): readonly [string, string, string] {
+  return summariseInsights(getActiveProfile(), new Date()).lines;
+}
+
 beforeEach(() => {
   mockRegistry.length = 0;
   localStorage.clear();
@@ -53,7 +78,7 @@ beforeEach(() => {
 });
 
 describe("ProgressOverlay", () => {
-  it("renders panel, title, close button and first page of rows", () => {
+  it("renders panel, title, close button and the Overview as the first page", () => {
     const scene = new MockScene();
     const bucket: MockObject[] = [];
     const overlay = new ProgressOverlay({
@@ -66,15 +91,16 @@ describe("ProgressOverlay", () => {
     expect(panels()).toHaveLength(1);
     expect(liveTexts("Learning Progress")).toHaveLength(1);
     expect(liveTexts("X")).toHaveLength(1);
-    // 22 games over 6 rows per page -> 4 pages, first shown.
-    expect(liveTexts("1 / 4")).toHaveLength(1);
-    expect(rowIcons()).toHaveLength(6);
+    // 22 games over 6 rows per page -> 4 game pages behind the Overview.
+    expect(liveTexts("1 / 5")).toHaveLength(1);
+    expect(liveTexts("1 / 4")).toHaveLength(0);
+    expect(rowIcons()).toHaveLength(0);
     expect(liveTexts("‹")).toHaveLength(1);
     expect(liveTexts("›")).toHaveLength(1);
     expect(bucket.length).toBeGreaterThan(0);
   });
 
-  it("derives its rows from the registry, in hub order", () => {
+  it("lists the three insight statements on page 0", () => {
     const scene = new MockScene();
     const overlay = new ProgressOverlay({
       scene: scene as never,
@@ -82,6 +108,39 @@ describe("ProgressOverlay", () => {
     });
 
     overlay.open();
+
+    const lines = statementLines();
+    expect(lines[0].length).toBeGreaterThan(0);
+    expect(liveTexts(lines[0])).toHaveLength(1);
+    expect(liveTexts(lines[1])).toHaveLength(1);
+    expect(liveTexts(lines[2])).toHaveLength(1);
+  });
+
+  it("renders the empty sentences for a profile with nothing played", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+
+    expect(() => overlay.open()).not.toThrow();
+
+    // Every game unplayed, no answers and no streak: all three statements are
+    // the written sparse states rather than blanks.
+    expect(liveTexts("No games yet this week · nothing completed yet")).toHaveLength(1);
+    expect(liveTexts("Start playing to see how it is going")).toHaveLength(1);
+    expect(liveTexts("No streak yet · no daily limit set")).toHaveLength(1);
+  });
+
+  it("derives its rows from the registry, in hub order, from page 1 onward", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+
+    overlay.open();
+    nextPage();
 
     const firstPage = GAME_REGISTRY.slice(0, 6);
     expect(rowIcons().map((icon) => icon.args?.[2])).toEqual(firstPage.map((game) => game.tileKey));
@@ -98,6 +157,7 @@ describe("ProgressOverlay", () => {
     });
 
     overlay.open();
+    nextPage();
 
     const icon = rowIcons()[0];
     if (!icon) throw new Error("no row icon");
@@ -134,26 +194,40 @@ describe("ProgressOverlay", () => {
     });
     overlay.open();
 
-    const next = (): void => {
-      const chevron = liveTexts("›")[0];
-      if (!chevron) throw new Error("no next chevron");
-      tap(chevron);
-    };
-    next();
-    expect(liveTexts("2 / 4")).toHaveLength(1);
+    nextPage();
+    expect(liveTexts("2 / 5")).toHaveLength(1);
     expect(rowIcons()).toHaveLength(6);
 
-    next();
-    next();
-    expect(liveTexts("4 / 4")).toHaveLength(1);
+    nextPage();
+    nextPage();
+    nextPage();
+    expect(liveTexts("5 / 5")).toHaveLength(1);
     // 22 games -> last page shows the remaining 4 rows.
     expect(rowIcons()).toHaveLength(4);
 
-    next();
-    expect(liveTexts("4 / 4")).toHaveLength(1);
+    nextPage();
+    expect(liveTexts("5 / 5")).toHaveLength(1);
   });
 
-  it("no-ops the previous chevron on the first page", () => {
+  it("pages back from page 1 to the Overview", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+    nextPage();
+
+    const lines = statementLines();
+    expect(liveTexts(lines[0])).toHaveLength(0);
+    previousPage();
+
+    expect(liveTexts("1 / 5")).toHaveLength(1);
+    expect(rowIcons()).toHaveLength(0);
+    for (const line of lines) expect(liveTexts(line)).toHaveLength(1);
+  });
+
+  it("no-ops the previous chevron on the Overview page", () => {
     const scene = new MockScene();
     const overlay = new ProgressOverlay({
       scene: scene as never,
@@ -162,11 +236,9 @@ describe("ProgressOverlay", () => {
     overlay.open();
     const before = live().length;
 
-    const chevron = liveTexts("‹")[0];
-    if (!chevron) throw new Error("no prev chevron");
-    tap(chevron);
+    previousPage();
 
-    expect(liveTexts("1 / 4")).toHaveLength(1);
+    expect(liveTexts("1 / 5")).toHaveLength(1);
     // No re-render happened: the live object count is unchanged.
     expect(live()).toHaveLength(before);
   });
@@ -195,6 +267,33 @@ describe("ProgressOverlay", () => {
     expect(getProfiles().find((p) => p.id === "p2")?.id).toBe("p2");
   });
 
+  it("re-renders the Overview with the viewed profile's summary", () => {
+    // The second (now active) profile has a daily cap, so its routine line
+    // differs from the first profile's "no daily limit set".
+    addProfile("dog");
+    setPlayTimeLimit("p2", 20);
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const capped = "No streak yet · cap not reached yet";
+    expect(liveTexts(capped)).toHaveLength(1);
+    expect(liveTexts("No streak yet · no daily limit set")).toHaveLength(0);
+
+    // First chip sits at centerX − 28 (56px pitch, 2 profiles).
+    const firstChip = live().find(
+      (obj) => obj.kind === "image" && obj.args?.[0] === 484 && obj.args?.[1] === 189,
+    );
+    if (!firstChip) throw new Error("no first chip");
+    tap(firstChip);
+
+    expect(liveTexts("No streak yet · no daily limit set")).toHaveLength(1);
+    expect(liveTexts(capped)).toHaveLength(0);
+  });
+
   it("renders per-game stats rows for a fresh profile", () => {
     const scene = new MockScene();
     const overlay = new ProgressOverlay({
@@ -203,6 +302,7 @@ describe("ProgressOverlay", () => {
     });
 
     overlay.open();
+    nextPage();
 
     // Every row shows its play count in the stats line.
     const stats = live().filter(
@@ -214,7 +314,7 @@ describe("ProgressOverlay", () => {
     expect(stats.length).toBeGreaterThanOrEqual(6);
   });
 
-  it("renders the 7-day activity strip label and bars", () => {
+  it("renders the 7-day activity strip label and bars on the Overview page", () => {
     const scene = new MockScene();
     const overlay = new ProgressOverlay({
       scene: scene as never,
