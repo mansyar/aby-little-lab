@@ -273,4 +273,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Toolchain Pinning** - [20261107-toolchain-pinning](./archive/20261107-toolchain-pinning/index.md) - chore - high
 
 - [x] **Track: Edge Hardening** - [20261108-edge-hardening](./archive/20261108-edge-hardening/index.md) - chore - high
-- [~] **Track: Local Insights** - [20261108-local-insights](./tracks/20261108-local-insights/index.md) - feature - high
+- [x] **Track: Local Insights** - [20261108-local-insights](./archive/20261108-local-insights/index.md) - feature - high

@@ -2,11 +2,11 @@
   "id": "20261108-local-insights",
   "title": "Local Insights",
   "type": "feature",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-08T06:24:18+11:00",
-  "updated_at": "2026-11-08T09:40:00+11:00",
+  "updated_at": "2026-11-08T10:00:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261108-local-insights",
@@ -22,9 +22,9 @@
   "review_verdict": "pass_with_findings",
   "review_rounds": 1,
   "doc_sync": "synced",
-  "pr_url": null,
-  "pr_state": null,
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/83",
+  "pr_state": "open",
   "revert_commit": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-11-08T10:00:00+11:00",
+  "archive_path": "conductor/archive/20261108-local-insights"
 }
