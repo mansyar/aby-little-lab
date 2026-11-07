@@ -21,12 +21,14 @@ import {
   getProfiles,
   getSettings,
   hasSticker,
+  isPersistenceDegraded,
   recordGamePlay,
   recordGameResult,
   setPlayTimeLimit,
   switchProfile,
   updateSettings,
 } from "../../utils/storage";
+import { breakStorage, repairStorage } from "../helpers/throwingStorage";
 
 const { mockAudio } = vi.hoisted(() => ({
   mockAudio: {
@@ -2741,5 +2743,115 @@ describe("SettingsPanel affordance cohesion", () => {
       return w === 240 && h === 64 && (ry as number) > 384;
     });
     expect(deleteButtons.some((r) => r.object.setStrokeStyle.mock.calls.length > 0)).toBe(true);
+  });
+});
+
+describe("SettingsPanel degraded persistence notice", () => {
+  /** The line the panel shows a parent while the device cannot save. */
+  const NOTICE = "Progress can't be saved on this device";
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    repairStorage();
+    // A refused write raises the flag for the rest of the session, and the panel
+    // reads it at open time, so each case heals the store before the next one
+    // builds a panel that has to be undegraded.
+    updateSettings({});
+  });
+
+  /** Scene-space y of the first text call rendered with the given label. */
+  function textY(scene: MockScene, label: string): number {
+    const call = scene.add.text.mock.calls.find((args) => args[2] === label);
+    if (!call) throw new Error(`no text rendered for "${label}"`);
+    return call[1] as number;
+  }
+
+  /** Builds a panel whose install row is visible, so every row is comparable. */
+  function buildPanel(scene: MockScene): SettingsPanel {
+    const tracker = createFakeInstallTracker("installable");
+    return new SettingsPanel(scene as never, tracker as unknown as InstallTracker);
+  }
+
+  it("states the fact while the device cannot save, and says nothing otherwise", () => {
+    const healthyScene = createScene();
+    const healthy = buildPanel(healthyScene);
+    expect(findTextByLabel(healthyScene, NOTICE)).toBeUndefined();
+    expect(healthy.e2eDegraded()).toBe(false);
+
+    // The flag is raised by a refused write, not by a stubbed boolean: the panel
+    // reads the same session flag every mutator sets.
+    breakStorage(["setItem"], "QuotaExceededError");
+    earnSticker("shape-sorter");
+
+    const degradedScene = createScene();
+    const degraded = buildPanel(degradedScene);
+    expect(findTextByLabel(degradedScene, NOTICE)).toBeDefined();
+    expect(degraded.e2eDegraded()).toBe(true);
+  });
+
+  it("leaves the title, the version footer and the eight rows exactly where they were", () => {
+    const healthyScene = createScene();
+    buildPanel(healthyScene);
+
+    breakStorage(["setItem"], "QuotaExceededError");
+    earnSticker("shape-sorter");
+    const degradedScene = createScene();
+    buildPanel(degradedScene);
+
+    const unchanged = [
+      "Settings",
+      `v${__APP_VERSION__}`,
+      "BGM: ON",
+      "SFX: ON",
+      "Adaptive: ON",
+      "Profiles",
+      "Progress",
+      "Reset Progress",
+      "Install App",
+      "Voice: Default (device)",
+    ];
+    for (const label of unchanged) {
+      expect(textY(degradedScene, label), `${label} should not move`).toBe(
+        textY(healthyScene, label),
+      );
+    }
+
+    // The notice occupies the empty band above the title: inside the panel's own
+    // top edge and clear of the title's line.
+    const noticeY = textY(degradedScene, NOTICE);
+    expect(noticeY).toBeGreaterThan(384 - PANEL_HEIGHT / 2);
+    expect(noticeY).toBeLessThan(textY(degradedScene, "Settings"));
+  });
+
+  it("keeps the notice informational: no hit area and no tap handler", () => {
+    breakStorage(["setItem"], "QuotaExceededError");
+    earnSticker("shape-sorter");
+    const scene = createScene();
+    buildPanel(scene);
+
+    const notice = findTextByLabel(scene, NOTICE) as MockGameObject;
+    expect(notice.setInteractive).not.toHaveBeenCalled();
+    expect(listenerCount(notice, "pointerdown")).toBe(0);
+  });
+
+  it("reads the flag once, at open time, and never polls it", () => {
+    breakStorage(["setItem"], "QuotaExceededError");
+    earnSticker("shape-sorter");
+    const scene = createScene();
+    const panel = buildPanel(scene);
+
+    // The store starts accepting writes again while the panel is up.
+    repairStorage();
+    updateSettings({});
+
+    expect(isPersistenceDegraded(), "a later accepted write heals the session").toBe(false);
+    // The open panel still reports what was true when it was built and still
+    // shows the notice: there is no subscription and no re-render.
+    expect(panel.e2eDegraded()).toBe(true);
+    expect(findTextByLabel(scene, NOTICE)).toBeDefined();
   });
 });

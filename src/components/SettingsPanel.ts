@@ -3,7 +3,7 @@ import { AudioManager } from "../audio/AudioManager";
 import type { E2ESettingsToggle } from "../game/e2eBridge";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
-import { getSettings, updateSettings } from "../utils/storage";
+import { getSettings, isPersistenceDegraded, updateSettings } from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
 import { InstallRow } from "./settings/InstallRow";
@@ -42,6 +42,17 @@ import { VoiceRow } from "./settings/VoiceRow";
  */
 const FIRST_ROW_OFFSET = -47;
 
+/**
+ * Y offset of the degraded notice from the panel center. The band from the
+ * panel's top edge (-380) down to the title (-105) is empty, so the notice
+ * sits in it at -150: clear of the panel edge above and with a comfortable
+ * gap before the title below, and nothing already on the panel moves.
+ */
+const NOTICE_OFFSET = -150;
+
+/** What the notice says: the fact itself, in the panel's own quiet voice. */
+const NOTICE_LABEL = "Progress can't be saved on this device";
+
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
   private readonly scene: Phaser.Scene;
@@ -68,6 +79,12 @@ export class SettingsPanel {
   }> = [];
   /** Set by {@link destroy}: the panel's own liveness, independent of the scene. */
   private destroyed = false;
+  /**
+   * Whether the device could not persist when this panel was built. A snapshot:
+   * the notice states what was true at open time, and nothing in the panel
+   * polls or subscribes to the storage layer.
+   */
+  private readonly persistenceDegraded: boolean;
 
   /** Refreshes the voice chip when the platform loads voices late. */
   private readonly voiceChangedHandler = (): void => {
@@ -118,6 +135,10 @@ export class SettingsPanel {
     const centerX = width / 2;
     const centerY = height / 2;
     const settings = getSettings();
+    // FR-5: read once, at open time. No polling and no subscription: a parent
+    // sees the state of the session they are in, and a write the store accepts
+    // later clears the flag for the next open rather than editing this panel.
+    this.persistenceDegraded = isPersistenceDegraded();
 
     const backdrop = scene.add
       .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, BACKDROP_ALPHA)
@@ -142,6 +163,24 @@ export class SettingsPanel {
         )
         .setOrigin(0.5),
     );
+    // FR-5: one quiet line while the session cannot persist. It is deliberately
+    // not interactive - the condition has not gone away, so there is nothing
+    // here for a parent to dismiss and no hit area that could be tapped.
+    if (this.persistenceDegraded) {
+      this.objects.push(
+        scene.add
+          .text(
+            centerX,
+            centerY + NOTICE_OFFSET,
+            NOTICE_LABEL,
+            textStyle({
+              color: DISABLED_COLOR,
+              fontSize: "24px",
+            }),
+          )
+          .setOrigin(0.5),
+      );
+    }
     // Explicit, glanceable close affordance (backdrop tap still works).
     const closeButton = this.scene.add
       .text(
@@ -231,6 +270,15 @@ export class SettingsPanel {
    */
   e2eOpen(): boolean {
     return !this.destroyed;
+  }
+
+  /**
+   * Whether this panel was built while the device could not persist, which is
+   * exactly when the notice is on screen. Published for the browser suite so a
+   * journey proves the parent-facing half from state rather than pixels.
+   */
+  e2eDegraded(): boolean {
+    return this.persistenceDegraded;
   }
 
   /**

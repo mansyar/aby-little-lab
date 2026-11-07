@@ -297,13 +297,23 @@ describe("initE2EBridge", () => {
     it("reports no gate and no panel when the active scene publishes no hook", () => {
       install([sceneWith("ShapeSorter")]);
 
-      expect(window.__abyE2E?.settings()).toEqual({ gate: null, open: false, toggles: [] });
+      expect(window.__abyE2E?.settings()).toEqual({
+        gate: null,
+        open: false,
+        toggles: [],
+        degraded: false,
+      });
     });
 
     it("reports no gate and no panel when no scene is active", () => {
       install();
 
-      expect(window.__abyE2E?.settings()).toEqual({ gate: null, open: false, toggles: [] });
+      expect(window.__abyE2E?.settings()).toEqual({
+        gate: null,
+        open: false,
+        toggles: [],
+        degraded: false,
+      });
     });
 
     it("follows the gate point, the panel and a toggle's own state", () => {
@@ -313,21 +323,24 @@ describe("initE2EBridge", () => {
         gate: { x: 1016, y: 32 },
         open: true,
         toggles: [{ id: "adaptive", x: 512, y: 449, on }],
+        degraded: true,
       };
       scene.e2eSettings = () => state;
       install([scene]);
 
       expect(window.__abyE2E?.settings().toggles[0]?.on).toBe(true);
+      expect(window.__abyE2E?.settings().degraded).toBe(true);
 
       on = false;
       state = { ...state, toggles: [{ id: "adaptive", x: 512, y: 449, on }] };
       expect(window.__abyE2E?.settings().toggles[0]?.on).toBe(false);
 
-      state = { gate: state.gate, open: false, toggles: [] };
+      state = { gate: state.gate, open: false, toggles: [], degraded: false };
       expect(window.__abyE2E?.settings()).toEqual({
         gate: { x: 1016, y: 32 },
         open: false,
         toggles: [],
+        degraded: false,
       });
     });
   });

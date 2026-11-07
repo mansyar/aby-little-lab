@@ -44,7 +44,7 @@
    - [6.3 Facade functions](#63-facade-functions)
    - [6.4 Migration and normalisation](#64-migration-and-normalisation)
    - [6.5 Schema versioning](#65-schema-versioning)
-   - [6.6 The write path and its limitation](#66-the-write-path-and-its-limitation)
+   - [6.6 The guarded write path and the degraded session](#66-the-guarded-write-path-and-the-degraded-session)
 7. [Game logic modules](#7-game-logic-modules)
    - [7.1 The module list](#71-the-module-list)
    - [7.2 The round contract](#72-the-round-contract)
@@ -803,20 +803,35 @@ A payload classified **unknown** — a future version this build cannot read —
 
 Migrations are minimal: a per-version migrate step from the stored version to the current one, with no speculative registry. Version 1's step, `migrateFromVersion1()`, is the identity and stands as the template — each future version adds one step that accepts its stored shape and returns the current one, **and extends the classifier to recognize the older stamped version as a known older version**; a bump that only adds a step would classify every existing stamped payload as unknown and write-protect it, leaving the new step unreachable.
 
-### 6.6 The write path and its limitation
+### 6.6 The guarded write path and the degraded session
 
-`saveV2()` at `src/utils/storage.ts:151-156` is:
+`saveV2()` is still the single write route. It stamps the payload, offers it to the store, and applies it to the in-memory cache whether or not the store accepts it:
 
 ```ts
 function saveV2(v2: ProfileV2): void {
   // FR-1: the single write path stamps every payload with the schema version.
   const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
-  localStorage.setItem(V2_KEY, raw);
-  v2Cache = { raw, state: v2 };
+  const storage = getStorage();
+  if (storage !== null) {
+    try {
+      storage.setItem(V2_KEY, raw);
+      persistenceDegraded = false;
+      v2Cache = { raw, state: v2 };
+      return;
+    } catch {
+      // A full quota refuses the write; the change still applies below.
+    }
+  }
+  persistenceDegraded = true;
+  v2Cache = { raw: readV2Raw(), state: v2 };
 }
 ```
 
-The `setItem` call is **unguarded**. A `QuotaExceededError`, a private-mode rejection or a blocked-storage exception propagates to the caller of any facade mutator, and the in-memory cache is not updated, so the write is simply lost. Reads are defensive — `readV1` and `readV2` both swallow `JSON.parse` failures and resolve to defaults — so a corrupt store degrades to a fresh profile rather than a crash. There is no `try/catch`, no write-failure flag and no user-visible signal on the write side.
+`getStorage()` is the only route to `localStorage`: it returns `null` when the global is missing or the access itself throws, so a blocked or partitioned store cannot raise a `ReferenceError` or a `SecurityError` just by being looked for. `readStorage()` is the only route to `getItem`, and it treats a refusal as an empty store. Both directions therefore end the same way — the change applies to memory, the session is marked degraded, and nothing reaches a scene.
+
+The flag is a module-scope session flag rather than a stored field. `isPersistenceDegraded()` reports it; any failed read or write raises it; the next write the store accepts persists the whole of memory and clears it, so the first successful moment heals. The two deliberate memory-only paths — a payload from a future schema version, and a mutator whose transform declines — are not failures and leave it alone. The parental Settings panel reads it once, when the panel is built, and states the fact in one quiet line while it is raised; nothing child-facing changes and no row moves.
+
+Two consequences are worth knowing. A refused write keys the cache with the raw string the store still holds (`readV2Raw()`) beside the new state, so the memo keeps serving what the child just earned instead of re-reading stale bytes and taking the sticker back off screen — and it still detects a genuine external write. And the happy path is unchanged: one `getItem` per read, one `setItem` per accepted write, the same bytes, the same schema stamp.
 
 ---
 
@@ -1066,7 +1081,7 @@ Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big 
 
 ### 10.1 Runner and mocks
 
-Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (133 files / 2,902 tests, measured 2026-11-07). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` - sweep guards, not pair-pool guards. From 2026-11-07 the two 22-scene sweeps in `scenes/navigation.test.ts` and `scenes/hubEngagement.test.ts` carry `{ timeout: 60_000 }` as well: each boots all 22 game scenes inside one test body, which measures 20-23 s in isolation and 30-31 s under coverage on a loaded host, so the 30 s budget was marginal rather than wrong (track `20261107-trunk-green`, review finding R2). As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (133 files / 2,906 tests, measured 2026-11-07). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` - sweep guards, not pair-pool guards. From 2026-11-07 the two 22-scene sweeps in `scenes/navigation.test.ts` and `scenes/hubEngagement.test.ts` carry `{ timeout: 60_000 }` as well: each boots all 22 game scenes inside one test body, which measures 20-23 s in isolation and 30-31 s under coverage on a loaded host, so the 30 s budget was marginal rather than wrong (track `20261107-trunk-green`, review finding R2). As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
 
 | Helper | Purpose |
 | --- | --- |
@@ -1080,13 +1095,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-133 test files, 2,902 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+133 test files, 2,906 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.18 (5940/6112), branches 91.15 (1629/1787), functions 96.17 (1308/1360) and lines 98.18 (5526/5628) across 133 files and 2,902 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.18 (5946/6118), branches 91.07 (1633/1793), functions 96.17 (1309/1361) and lines 98.18 (5533/5635) across 133 files and 2,906 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1101,7 +1116,7 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 13 journeys across 12 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, settings persistence, the daily cap and an offline relaunch. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 16 journeys across 13 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, settings persistence, the daily cap, an offline relaunch and a device whose storage refuses every write. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
 What this layer observes that the unit layer cannot:
 

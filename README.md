@@ -46,9 +46,9 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,902 tests across 133 files**, all green (verified 2026-11-07).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,906 tests across 133 files**, all green (verified 2026-11-07).
 
-Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the daily cap and an offline relaunch. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
+Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the daily cap, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
 ## Code Quality
 
@@ -248,16 +248,17 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 ## Known Issues
 
-No shipped behaviour is known to be broken. The two items carried here until
-2026-11-06 have both shipped: every drag game uses the shared `DragTarget`
-capability set in `src/game/dragBoard.ts`, and the stored payload is
-schema-versioned with an unknown-version write guard in `src/utils/storage.ts`.
+No shipped behaviour is known to be broken. The three items carried here until
+2026-11-07 have all shipped: every drag game uses the shared `DragTarget`
+capability set in `src/game/dragBoard.ts`, the stored payload is
+schema-versioned with an unknown-version write guard in `src/utils/storage.ts`,
+and a device that cannot persist no longer throws into a scene — the save layer
+degrades to memory and the parental panel states the fact.
 
-Two limitations are tracked rather than fixed, because each is a scoped product
+One limitation is tracked rather than fixed, because it is a scoped product
 decision rather than a defect:
 
 - **Canvas-only UI** - no keyboard input, no accessibility tree, and a viewport that disables browser zoom. Correct for a touch-only 3-5 app, disqualifying for schools or procurement; Phase 3 of the roadmap decides whether to keep it as a stated stance or close it.
-- **Unguarded storage write** - `src/utils/storage.ts:154` calls `localStorage.setItem` without a guard, so a quota-exceeded or private-mode device throws inside sticker award. Track: `20261110-storage-resilience`.
 
 Planned work lives in [conductor/product.md §10](conductor/product.md#10-roadmap).
 

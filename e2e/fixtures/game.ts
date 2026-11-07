@@ -72,7 +72,7 @@ export function hubReady(page: Page): Promise<boolean> {
 /** The parental gate and settings panel as the hub publishes them. */
 export function settingsState(page: Page): Promise<E2ESettingsState> {
   return page.evaluate(
-    () => window.__abyE2E?.settings() ?? { gate: null, open: false, toggles: [] },
+    () => window.__abyE2E?.settings() ?? { gate: null, open: false, toggles: [], degraded: false },
   );
 }
 
