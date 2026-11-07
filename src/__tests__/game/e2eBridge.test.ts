@@ -68,6 +68,7 @@ function noPanelSettings(): E2ESettingsState {
     switchPage: { x: 0, y: 0 },
     backupRows: [],
     backupResult: "",
+    choices: [],
   };
 }
 
@@ -415,6 +416,7 @@ describe("initE2EBridge", () => {
       expect(window.__abyE2E?.settings().switchPage).toEqual({ x: 512, y: 134 });
       expect(window.__abyE2E?.settings().backupRows).toEqual([]);
       expect(window.__abyE2E?.settings().backupResult).toBe("");
+      expect(window.__abyE2E?.settings().choices, "no card is open yet").toEqual([]);
 
       // A parent taps the switch: the same point now means "back to settings",
       // and the two rows it led to are live.
@@ -439,6 +441,21 @@ describe("initE2EBridge", () => {
       expect(window.__abyE2E?.settings().backupResult).toBe(
         "Saved aby-little-lab-backup-2026-11-08.json",
       );
+
+      // And, once a picked file is accepted, the two buttons its card offers:
+      // a journey taps these rather than copying the card's own geometry.
+      state = {
+        ...state,
+        choices: [
+          { id: "merge", point: { x: 512, y: 424 } },
+          { id: "replace", point: { x: 512, y: 504 } },
+        ],
+      };
+      expect(window.__abyE2E?.settings().choices.map((choice) => choice.id)).toEqual([
+        "merge",
+        "replace",
+      ]);
+      expect(window.__abyE2E?.settings().choices[1]?.point).toEqual({ x: 512, y: 504 });
     });
 
     it("reports the empty page again once the panel closes", () => {

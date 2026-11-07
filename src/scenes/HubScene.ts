@@ -418,7 +418,7 @@ export class HubScene extends Phaser.Scene {
       // panel publishes the empty page rather than the last one it drew.
       ...(open && panel
         ? panel.backupState()
-        : { page: 0, switchPage: { x: 0, y: 0 }, backupRows: [], backupResult: "" }),
+        : { page: 0, switchPage: { x: 0, y: 0 }, backupRows: [], backupResult: "", choices: [] }),
     };
   }
 

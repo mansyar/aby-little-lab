@@ -136,6 +136,12 @@ export class SettingsPanel {
   /** Page two's tappable rows, with the point their band answers to. */
   private backupRows: Array<{ id: "export" | "restore"; x: number; y: number }> = [];
   /**
+   * The choice card's two buttons, with the point each answers to, captured as
+   * the card is built. Published so the browser suite taps the buttons' own
+   * layout instead of copying two coordinates; emptied when the card closes.
+   */
+  private choices: Array<{ id: "merge" | "replace"; x: number; y: number }> = [];
+  /**
    * Set while a file picker is open. A second tap on "Restore from a file"
    * while the native dialog is up would open a second picker, so the tap that
    * arrives during one is ignored and the flag is cleared in a `finally`.
@@ -402,6 +408,10 @@ export class SettingsPanel {
         point: { x: row.x, y: row.y },
       })),
       backupResult: this.backupResult,
+      choices: this.choices.map((choice) => ({
+        id: choice.id,
+        point: { x: choice.x, y: choice.y },
+      })),
     };
   }
 
@@ -625,12 +635,19 @@ export class SettingsPanel {
         () => this.chooseImport("replace", payload),
       ),
     );
+    // Like the rows: the buttons are centred on the layout arguments, so those
+    // are the points a finger lands on - published rather than re-derived.
+    this.choices = [
+      { id: "merge", x: centerX, y: centerY + 40 },
+      { id: "replace", x: centerX, y: centerY + 120 },
+    ];
   }
 
   /** Closes the choice card without writing anything. */
   private closeChoice(): void {
     for (const object of this.choiceObjects) object.destroy();
     this.choiceObjects.length = 0;
+    this.choices = [];
   }
 
   /**

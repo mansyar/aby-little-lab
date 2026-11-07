@@ -88,6 +88,13 @@ export interface E2EBackupState {
   backupRows: { id: "export" | "restore"; point: GamePoint }[];
   /** The result line's current text, `""` when nothing has happened yet. */
   backupResult: string;
+  /**
+   * The merge-or-replace card's two buttons, in the order they are drawn, each
+   * with the centre its own band answers to. Empty while no card is open, which
+   * is how a journey tells "the file was accepted" apart from "it was refused":
+   * a refusal ends on the result line and never opens the card.
+   */
+  choices: { id: "merge" | "replace"; point: GamePoint }[];
 }
 
 /** The parental gate and the settings panel as the hub currently holds them. */
@@ -292,6 +299,7 @@ export function initE2EBridge(game: Phaser.Game): void {
           switchPage: { x: 0, y: 0 },
           backupRows: [],
           backupResult: "",
+          choices: [],
         };
       }
       return hook.call(probe);

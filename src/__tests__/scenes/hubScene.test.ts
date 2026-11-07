@@ -1585,6 +1585,7 @@ describe("HubScene e2e hub tiles", () => {
       switchPage: { x: 0, y: 0 },
       backupRows: [],
       backupResult: "",
+      choices: [],
     });
   });
 

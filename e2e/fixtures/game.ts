@@ -107,6 +107,7 @@ export function settingsState(page: Page): Promise<E2ESettingsState> {
         switchPage: { x: 0, y: 0 },
         backupRows: [],
         backupResult: "",
+        choices: [],
       },
   );
 }
