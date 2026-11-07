@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-6, AC-1, AC-2, AC-3, AC-4, AC-6, AC-8
 - **Touches:** `src/utils/storage.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Write the failing tests first** — covers: AC-8, FR-1, FR-2, FR-3, FR-4
   - [ ] **P1.T1.1: Add a throwing-storage harness** to `storage.test.ts` — helpers that make `setItem` and/or `getItem` throw a chosen `DOMException` and restore the original in `afterEach`, with no other test affected
