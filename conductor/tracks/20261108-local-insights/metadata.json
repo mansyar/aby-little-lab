@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-08T06:24:18+11:00",
-  "updated_at": "2026-11-08T07:30:00+11:00",
+  "updated_at": "2026-11-08T08:00:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261108-local-insights",
@@ -14,11 +14,11 @@
   "base_sha": "64e35642ad33dbeeeb2ed85507a0c40795d8844d",
   "progress": {
     "phases_total": 4,
-    "phases_verified": 2,
+    "phases_verified": 3,
     "tasks_total": 13,
-    "tasks_done": 7
+    "tasks_done": 9
   },
-  "last_checkpoint": "78dca82c",
+  "last_checkpoint": "dec26399",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

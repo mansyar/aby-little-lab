@@ -69,17 +69,21 @@ the primary agent writes this file.
 - **Covers:** FR-5, NFR-3, AC-6
 - **Touches:** `src/components/settings/ProgressOverlay.ts`, `src/__tests__/components/settings/ProgressOverlay.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Make the Overview page 1** - covers: FR-5
+- [x] **P3.T1: Make the Overview page 1** - covers: FR-5
   - **P3.T1.1:** Insert an Overview page ahead of the per-game rows, built from the summary the page is given, not derived inside the renderer
   - **P3.T1.2:** Keep the 7-day strip on it and keep `PROGRESS_PAGE_SIZE` for the game pages, so the existing paging arithmetic still totals the same page count plus one
   - **P3.T1.3:** Text uses the overlay's existing typography and colours; no new asset, texture or scene
-- [ ] **P3.T2: Leave everything else where it was** - covers: AC-6
+- [x] **P3.T2: Leave everything else where it was** - covers: AC-6
   - **P3.T2.1:** Per-game page numbering, the dot indicators, the profile switcher and the parental gate behave exactly as before
   - **P3.T2.2:** Page tests: first page is Overview and shows three statement texts; the second page is the first six games; the last page holds the remainder; switching profile re-renders the Overview
   - **P3.T2.3:** A reduced-motion or missing-insights profile still renders (no row, no throw)
   - **P3.T2.4:** Refresh the suite counts if they moved
+
+**Result:** verified - the overlay opens on an Overview page holding the three statements and the unchanged 7-day strip; the summary is derived once per render for the viewed profile, the per-game rows keep six to a page one page later, paging clamps at both ends, and the counter totals five pages. Shell entry 157.4 kB of the 200 kB gate.
+**Checkpoint:** dec26399
+**Evidence:** conductor/tracks/20261108-local-insights/verification/phase-3.md
 
 ## Phase 4: The proof a parent can reach it
 
