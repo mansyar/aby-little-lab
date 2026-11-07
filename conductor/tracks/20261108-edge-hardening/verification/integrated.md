@@ -4,7 +4,7 @@
 - **Date:** 2026-11-08
 - **Branch:** `chore/20261108-edge-hardening`
 - **Base:** `5610bc6f6f01996f53265b1213c249686aba2c9a`
-- **Head:** `800be4fc`
+- **Head:** `d982985c` (review round included)
 - **Result:** verified (AC-7 partial: the PR's own CI log is the remaining evidence)
 
 ## Layers, run against the integrated tree
