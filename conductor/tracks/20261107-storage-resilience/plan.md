@@ -77,20 +77,23 @@ The primary appends after acceptance:
 - **Covers:** review round 2 findings F1-F7
 - **Touches:** `src/utils/storage.ts`, `src/__tests__/utils/storage.test.ts`, `docs/TDD.md`, `conductor/tech-stack.md`, `conductor/tracks/20261107-storage-resilience/`, `e2e/journeys/storage.spec.ts`, `src/__tests__/helpers/throwingStorage.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R2.T1: The provisional memo** — covers: F1
-  - [ ] **R2.T1.1: Mark the blocked placeholder** — a boot-time block memoizes defaults that must not satisfy a later heal's cache comparison, so the healed read can reach the migration path
-  - [ ] **R2.T1.2: Prove the legacy save survives** — seed only `V1_KEY`, break `getItem`, read a getter, repair, earn a sticker, and assert the migrated stickers are in the persisted v2 payload
-  - [ ] **R2.T1.3: Record the precedence** — when a blocked session heals onto a store it must adopt, the persisted payload wins over earnings made while blind; state it in the code comment and the spec rather than leaving it to accident
-- [ ] **R2.T2: The documents stop teaching the removed design** — covers: F2, F3, F4
-  - [ ] **R2.T2.1: `docs/TDD.md` §6.6** — the `saveV2` snippet regenerated from the current file, the "treats a refusal as an empty store" sentence replaced, and "the first successful moment heals" restated as the read-evidence rule
-  - [ ] **R2.T2.2: `conductor/tech-stack.md`** — remove the self-contradiction about `readStorage`'s return, and paste the `storage.ts` coverage tuple from the run
-  - [ ] **R2.T2.3: The spec's recovery edge case** — amended to the implemented rule, with FR-3 and AC-3 qualified to "on first access"
-- [ ] **R2.T3: Evidence honest to the last digit** — covers: F5, F6, F7
-  - [ ] **R2.T3.1: Re-record the round-1 red run** with the command actually used and the failing titles listed
-  - [ ] **R2.T3.2: Reconcile the rows** — `phase-2.md`'s AC-7 row points at the integrated run; the severity ratings in `review-fixes.md` match round 1
-  - [ ] **R2.T3.3: Two comments** — the journey's "degraded before a single tap" claim either asserted or removed, and the throwing-storage helper's "today" corrected
+- [x] **R2.T1: The provisional memo** — covers: F1
+  - [x] **R2.T1.1: Mark the blocked placeholder** — a boot-time block memoizes defaults that must not satisfy a later heal's cache comparison, so the healed read can reach the migration path
+  - [x] **R2.T1.2: Prove the legacy save survives** — seed only `V1_KEY`, break `getItem`, read a getter, repair, earn a sticker, and assert the migrated stickers are in the persisted v2 payload
+  - [x] **R2.T1.3: Record the precedence** — when a blocked session heals onto a store it must adopt, the persisted payload wins over earnings made while blind; state it in the code comment and the spec rather than leaving it to accident
+- [x] **R2.T2: The documents stop teaching the removed design** — covers: F2, F3, F4
+  - [x] **R2.T2.1: `docs/TDD.md` §6.6** — the `saveV2` snippet regenerated from the current file, the "treats a refusal as an empty store" sentence replaced, and "the first successful moment heals" restated as the read-evidence rule
+  - [x] **R2.T2.2: `conductor/tech-stack.md`** — remove the self-contradiction about `readStorage`'s return, and paste the `storage.ts` coverage tuple from the run
+  - [x] **R2.T2.3: The spec's recovery edge case** — amended to the implemented rule, with FR-3 and AC-3 qualified to "on first access"
+- [x] **R2.T3: Evidence honest to the last digit** — covers: F5, F6, F7
+  - [x] **R2.T3.1: Re-record the round-1 red run** with the command actually used and the failing titles listed
+  - [x] **R2.T3.2: Reconcile the rows** — `phase-2.md`'s AC-7 row points at the integrated run; the severity ratings in `review-fixes.md` match round 1
+  - [x] **R2.T3.3: Two comments** — the journey's "degraded before a single tap" claim either asserted or removed, and the throwing-storage helper's "today" corrected
+**Result:** verified - F1 closed: the blocked-boot placeholder is provisional and cannot answer a healed read, so a legacy save migrates instead of being shadowed; the guard-removal run fails the new test alone. F2-F7 closed in the design documents, the evidence and two comments.
+**Checkpoint:** 519fe74a
+**Evidence:** conductor/tracks/20261107-storage-resilience/verification/review-fixes-2.md
 
 ## Phase R1: Review Fixes
 - **Goal:** a failed read stops being treated as an empty store, so a device that blocks reads but accepts writes can no longer overwrite its own save, discard the session or hide the notice; plus the small test-hygiene findings.
