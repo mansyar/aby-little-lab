@@ -1574,7 +1574,14 @@ describe("HubScene e2e hub tiles", () => {
     // takes the same path and must also drop the gate.
     scene.events.emit("shutdown");
 
-    expect(scene.e2eSettings()).toEqual({ gate: null, open: false, toggles: [], degraded: false });
+    expect(scene.e2eSettings()).toEqual({
+      gate: null,
+      open: false,
+      toggles: [],
+      progressRow: null,
+      progress: null,
+      degraded: false,
+    });
   });
 
   it("reports no spent budget on an unlimited profile", () => {

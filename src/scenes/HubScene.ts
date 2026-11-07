@@ -407,6 +407,10 @@ export class HubScene extends Phaser.Scene {
       gate: centre ? { x: centre.x, y: centre.y } : null,
       open,
       toggles: open && panel ? panel.e2eToggles() : [],
+      // The row's published point and the overlay's own state both survive the
+      // panel losing focus, so neither is gated on the panel staying open.
+      progressRow: panel ? panel.e2eProgressRow() : null,
+      progress: panel ? panel.e2eProgress() : null,
       // The notice is the panel's own open-time snapshot, so the journey reads
       // the same value that decided what the parent sees.
       degraded: open && panel ? panel.e2eDegraded() : false,

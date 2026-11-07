@@ -46,9 +46,9 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,972 tests across 137 files**, all green (verified 2026-11-08).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,975 tests across 137 files**, all green (verified 2026-11-08).
 
-Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the daily cap, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
+Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the Learning Progress overview, the daily cap, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
 ## Code Quality
 
@@ -119,6 +119,8 @@ Twenty-two mini-games in hub order; each links to its spec in [PRD §3](docs/PRD
 
 Settings access and every game's Back button are gated by a **hold-for-3-seconds** parental lock: a continuous press on a 96×96px target, a green ring filling from twelve o'clock, one hold at a time, and release, pointer-out or pointer-cancel leaving no partial state. The same 96px targets cover the replay glyph in all twenty-two games. Behind that hold sit the version footer, Reset Progress, Install, the profile manager and the play-time limits.
 
+The parental **Learning Progress** panel opens on an Overview page rather than a game list: three plain sentences — how many games and days this week with the lifetime completion count, the overall accuracy with the strongest and hardest game, and the current streak with how often the daily cap was reached — above the seven-day activity strip. The per-game pages (plays, accuracy, last played, mastery stars) sit one page behind, and everything is derived from the save file on the device, so no reading leaves it.
+
 Product rules: [PRD §5.2](docs/PRD.md#52-touch-targets), [PRD §5.3](docs/PRD.md#53-the-parental-lock). Implementation: [TDD §5.3](docs/TDD.md#53-parentlock), [TDD §5.5](docs/TDD.md#55-settingspanel-and-the-settings-group).
 
 ## Motion & Feedback
@@ -172,7 +174,7 @@ docker run --rm -p 8080:80 aby-little-lab
 
 Then open `http://localhost:8080`; production terminates TLS in front of the container. See [TDD §11.5](docs/TDD.md#115-container-and-host).
 
-Every response it serves also carries four security headers: a strict `Content-Security-Policy` with no `unsafe-inline` and no `unsafe-eval`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a `Permissions-Policy` denying camera, microphone, location and eight other features the app never asks for. They are declared once in `nginx.security-headers.conf` and included by every location that sets its own `Cache-Control`, because nginx otherwise drops inherited `add_header` there. Two proofs: `node scripts/validate-headers.js` asserts all four on every route class against the built image, and `E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e` plays the 16 journeys against that image — `vite preview` sends no headers, so only the container can prove the app runs under the policy. Details: [TDD §11.6](docs/TDD.md#116-security-headers-and-the-serving-layer).
+Every response it serves also carries four security headers: a strict `Content-Security-Policy` with no `unsafe-inline` and no `unsafe-eval`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a `Permissions-Policy` denying camera, microphone, location and eight other features the app never asks for. They are declared once in `nginx.security-headers.conf` and included by every location that sets its own `Cache-Control`, because nginx otherwise drops inherited `add_header` there. Two proofs: `node scripts/validate-headers.js` asserts all four on every route class against the built image, and `E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e` plays the journeys against that image — `vite preview` sends no headers, so only the container can prove the app runs under the policy. Details: [TDD §11.6](docs/TDD.md#116-security-headers-and-the-serving-layer).
 
 ## CI/CD
 

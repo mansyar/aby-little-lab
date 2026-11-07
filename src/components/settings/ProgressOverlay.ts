@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import type { E2EProgressState } from "../../game/e2eBridge";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
 import { summariseInsights } from "../../game/insightsSummary";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
@@ -87,6 +88,17 @@ export class ProgressOverlay {
   private readonly deps: ProgressOverlayDeps;
   private page = 0;
   private viewedId: string | null = null;
+  /** Whether the overlay is on screen; false before the first open and after a close. */
+  private visible = false;
+  /** The page total the current render printed. */
+  private pageCount = 0;
+  /** The Overview statements this render created, in creation order. */
+  private pageLines: string[] = [];
+  /** Live screen points of the two page chevrons, from the current render. */
+  private chevrons: {
+    prev: { x: number; y: number } | null;
+    next: { x: number; y: number } | null;
+  } = { prev: null, next: null };
 
   constructor(deps: ProgressOverlayDeps) {
     this.deps = deps;
@@ -104,6 +116,29 @@ export class ProgressOverlay {
   close(): void {
     for (const object of this.deps.overlayObjects) object.destroy();
     this.deps.overlayObjects.length = 0;
+    this.visible = false;
+    this.pageLines = [];
+    this.chevrons = { prev: null, next: null };
+  }
+
+  /**
+   * The overlay as it is drawn right now, for the browser suite, or null when
+   * it is closed.
+   *
+   * `lines` is the array filled while the text objects were created, and the
+   * chevron points are the drawn objects' own centres, so nothing here is a
+   * second derivation of what the page shows.
+   */
+  e2eState(): E2EProgressState | null {
+    if (!this.visible) return null;
+    const { prev, next } = this.chevrons;
+    return {
+      page: this.page,
+      pageCount: this.pageCount,
+      lines: this.pageLines,
+      prev: prev ?? { x: 0, y: 0 },
+      next: next ?? { x: 0, y: 0 },
+    };
   }
 
   /** Renders (or re-renders) the Learning Progress overlay content. */
@@ -209,6 +244,8 @@ export class ProgressOverlay {
             )
             .setOrigin(0.5, 0),
         );
+        // Recorded as drawn, not re-derived: the suite asserts the page it saw.
+        this.pageLines.push(line);
       });
     }
 
@@ -313,9 +350,11 @@ export class ProgressOverlay {
       });
       attachPressFeedback(chevron);
       this.deps.overlayObjects.push(chevron);
+      this.chevrons[delta < 0 ? "prev" : "next"] = { x, y: centerY + 175 };
     };
     addPageChevron("‹", centerX - 110, -1);
     addPageChevron("›", centerX + 110, 1);
+    this.pageCount = pageCount;
 
     const activity = viewedProfile.activity;
     const totalPlays = activity.reduce((sum, entry) => sum + entry.plays, 0);
@@ -366,5 +405,7 @@ export class ProgressOverlay {
         )
         .setOrigin(0.5),
     );
+    // Last, so the state a caller reads describes a render that finished.
+    this.visible = true;
   }
 }

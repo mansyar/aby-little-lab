@@ -331,4 +331,50 @@ describe("ProgressOverlay", () => {
     expect(bars).toHaveLength(7);
     for (const bar of bars) expect(bar.args?.[3]).toBe(4);
   });
+
+  it("publishes the drawn page, its statements and the chevrons for the suite", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+
+    expect(overlay.e2eState(), "a closed overlay publishes nothing").toBeNull();
+
+    overlay.open();
+
+    const opened = overlay.e2eState();
+    expect(opened?.page).toBe(0);
+    expect(opened?.pageCount).toBe(5);
+    // The strings the page printed, captured as each text was created.
+    expect(opened?.lines).toEqual([...statementLines()]);
+    expect(opened?.prev).toEqual({ x: 402, y: 559 });
+    expect(opened?.next).toEqual({ x: 622, y: 559 });
+
+    nextPage();
+
+    const paged = overlay.e2eState();
+    expect(paged?.page).toBe(1);
+    expect(paged?.lines).toEqual([]);
+
+    previousPage();
+
+    expect(overlay.e2eState()?.page).toBe(0);
+    expect(overlay.e2eState()?.lines).toEqual([...statementLines()]);
+  });
+
+  it("publishes nothing once the overlay is closed", () => {
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+    const close = liveTexts("X")[0];
+    if (!close) throw new Error("no close button");
+
+    tap(close);
+
+    expect(overlay.e2eState()).toBeNull();
+  });
 });

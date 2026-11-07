@@ -38,6 +38,7 @@
    - [5.6 ProfileChip and PlayTimeIndicator](#56-profilechip-and-playtimeindicator)
    - [5.7 PwaToast and PwaToasts](#57-pwatoast-and-pwatoasts)
    - [5.8 Typography and fonts](#58-typography-and-fonts)
+   - [5.9 Local insights and the Overview page](#59-local-insights-and-the-overview-page)
 6. [State and storage](#6-state-and-storage)
    - [6.1 Keys and cache](#61-keys-and-cache)
    - [6.2 Schema v2](#62-schema-v2)
@@ -673,7 +674,7 @@ While the panel is open `allowPinchZoom()` relaxes the `user-scalable=no` viewpo
 | --- | --- |
 | `primitives.ts` | palette, panel/toggle/row dimensions, `addRowCard`, `createRow`, toggle drawing |
 | `ProfilesOverlay.ts` | profile list, add/delete/switch, per-profile limit chips (Off/15/30/45/60); its custom hit areas (the Delete button and the play-time chip) go through `centredHitArea()` from `primitives`, which cancels the `displayOrigin` the engine's `InputManager` adds before testing a custom area, so the described rectangle is the live zone, not the drawn label's extent |
-| `ProgressOverlay.ts` | per-game learning stats: 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip; its custom hit areas (the close glyph, the page chevrons and the avatar chips) go through `centredHitArea()` from `primitives`, which cancels the `displayOrigin` the engine's `InputManager` adds before testing a custom area, so the described rectangle is the live zone, not the drawn glyph's or avatar's extent |
+| `ProgressOverlay.ts` | the Learning Progress report: an Overview page of three statements ([§5.9](#59-local-insights-and-the-overview-page)), then per-game stats, 6 rows per page (`PROGRESS_PAGE_SIZE = 6`), accuracy bar, `★` mastery at 3 wins, relative last-played, 7-day strip; its custom hit areas (the close glyph, the page chevrons and the avatar chips) go through `centredHitArea()` from `primitives`, which cancels the `displayOrigin` the engine's `InputManager` adds before testing a custom area, so the described rectangle is the live zone, not the drawn glyph's or avatar's extent |
 | `ResetModal.ts` | two-step destructive confirm (`Reset all stickers?` with Cancel/Reset); on success calls `resetProgress()`, leaves settings untouched, sets the row to `Progress cleared`, and calls the panel's `onProgressReset` so the Hub shelf re-renders immediately |
 | `VoiceRow.ts` | voice chip cycling and preview |
 | `InstallRow.ts` | install state row read from the app-lifetime tracker — `installable`, `ios-howto` or hidden |
@@ -701,6 +702,36 @@ The page holds one tracker for its life. `initInstallPrompt()` runs in `src/main
 The face also backs the letter and numeral SVGs, which set `font-family` on a `<text>` element; that dependency is why `BootScene` gates on `ensureGlyphFontLoaded()` ([§3.2](#32-bootscene)).
 
 The parental Settings panel is the one surface that runs larger than the game presets: a 36 px panel title, 32-34 px row and toggle labels, and 30 px buttons, which is what the readability pass bought when the face replaced the bundled monospace.
+
+### 5.9 Local insights and the Overview page
+
+Every profile carries an `insights` record beside its `progress` and `activity`, so the parent's report is derived from the same save the games write:
+
+| Field | Meaning |
+| --- | --- |
+| `currentStreakDays` | consecutive local days with a completed session |
+| `bestStreakDays` | the running maximum of the above, never decreasing |
+| `lastStreakDay` | the local day key (`YYYY-MM-DD`) of the last counted completion, or `null` |
+| `limitHitDays` | local days on which the daily play-time cap was reached |
+| `lastLimitHitDay` | the local day key that increment last happened on, or `null` |
+
+`SCHEMA_VERSION` stayed at `1`. The field is additive and backfilled: an existing payload still classifies as a known version, `normalizeInsights` supplies zeros and nulls for anything missing or malformed, and `bestStreakDays` is raised to `currentStreakDays` when a stored pair is inconsistent. There is therefore no migration step to write, and a payload saved before the field existed normalises to exactly what a fresh profile holds — the two are indistinguishable once read, which is the property a version bump would have had to buy back.
+
+`src/game/insightsLogic.ts` owns the two write paths. `advanceStreak` counts one completion per local day: the same day is a no-op, the day after the stored one extends the streak, and any other gap — a missed day, a long absence, or a stored day in the future because the device clock moved backwards — restarts it at `1`. `recordLimitHit` increments `limitHitDays` once per local day keyed by `lastLimitHitDay`, and never when `limitMinutes` is `null`. Both take `now` from the caller and compare local day keys from `todayKey()`, so a midnight straddle splits two sessions and a daylight-saving change cannot skip or repeat a day.
+
+`src/game/insightsSummary.ts` derives the page. `summariseInsights(profile, now)` returns the three statements and the numbers behind them:
+
+| Statement | Derived from | Window / floor |
+| --- | --- | --- |
+| Reach | distinct games whose `lastPlayedAt` falls in the window, out of the registry size, with days played and lifetime `wins` as completions | the same seven local days the activity strip draws (`ACTIVITY_DAYS = 7`), from one `weekStartKey`, so page and strip cannot disagree |
+| Accuracy | overall `correct` / (`correct` + `wrong`), then the strongest and hardest game | strongest and hardest only among games with at least `MIN_SUMMARY_TAPS = 10` recorded taps; ordered by accuracy, then taps, then registry order |
+| Habit | `currentStreakDays`, `bestStreakDays` and `limitHitDays`, or an explicit "no daily limit set" | no window — the streak is the stored run and the count is lifetime on this device |
+
+A game under the ten-tap floor is never named as strongest or hardest, and a percentage with a zero denominator is `null` rather than `NaN`, so the sentences degrade to written sparse and empty states instead of arithmetic. The Overview is page 0 of the Learning Progress overlay (`OVERVIEW_PAGES = 1`): the three statements above the seven-day strip, with the per-game pages one chevron away and the page counter still totalling five. The statements and the strip are built from the same summary object, which is why a paged-forward and paged-back Overview prints the same three sentences it printed the first time.
+
+The browser layer observes all of this through the read-only bridge: `E2ESettingsState` gained `progressRow` (the "Progress" row's canvas centre, captured from the row's own layout, not re-derived) and `progress` (`page`, `pageCount`, `lines`, and both chevron centres while the overlay is open, `null` when it is closed). `lines` is the array filled as each Overview `Text` object is created during that render, so the suite asserts the strings the page printed rather than a second call to `summariseInsights` that could agree with the test while disagreeing with the page. The bridge remains inert without `?e2e=1` and stays frozen.
+
+`e2e/journeys/insights.spec.ts` is the reachability proof: it seeds an `abby-little-lab:v2` payload through `addInitScript` — two completed days, three games with accuracy above and below the floor, and a 30-minute cap with one cap-day — holds the gate until the panel opens, taps the published Progress row, and reads all three statements on page 0 with no paging step. Day keys are computed inside the page from the local clock, because a literal `YYYY-MM-DD` stops matching "this week" the day after it is written.
 
 ---
 
@@ -1096,13 +1127,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-137 test files, 2,972 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+137 test files, 2,975 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.24 (6075/6247), branches 91.27 (1737/1903), functions 96.24 (1333/1385) and lines 98.24 (5652/5753) across 137 files and 2,972 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.22 (6092/6266), branches 91.12 (1745/1915), functions 96.1 (1334/1388) and lines 98.21 (5668/5771) across 137 files and 2,975 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1117,7 +1148,7 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 16 journeys across 13 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, settings persistence, the daily cap, an offline relaunch and a device whose storage refuses every write. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 17 journeys across 14 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, an offline relaunch and a device whose storage refuses every write. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
 What this layer observes that the unit layer cannot:
 
@@ -1137,7 +1168,7 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 
 `pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
 
-**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 16 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 17 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 
@@ -1259,7 +1290,7 @@ E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e
 docker rm -f aby-edge-e2e
 ```
 
-`E2E_BASE_URL` makes the suite target that origin and start no server of its own ([§10.5](#105-the-browser-journey-layer)); unset, every value is the preview default it was before. The 16 journeys take about 3.6 min against the container, inside the 5-minute budget.
+`E2E_BASE_URL` makes the suite target that origin and start no server of its own ([§10.5](#105-the-browser-journey-layer)); unset, every value is the preview default it was before. The journeys take about 3.6 min against the container, inside the 5-minute budget.
 
 CI runs the validator in the gates job under the same `tier == 'code'` expression as the other steps, so a documentation-only change skips it: `docker build -t aby-little-lab:headers .` then `node scripts/validate-headers.js`. A runner without Docker fails the step with a `::error::` annotation rather than skipping it, because a skipped check would make the tier's guarantee vacuous.
 
