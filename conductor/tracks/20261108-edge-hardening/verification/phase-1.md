@@ -182,3 +182,69 @@ No probe was left in the tree.
   edit and proved byte-for-byte with `git diff --stat` (empty output), which is
   the same guarantee. Recorded here so the primary does not read the missing
   `git restore` in the transcript as a shortcut.
+
+
+## Primary verification
+
+Verified 2026-11-08 by the primary agent, independently of the executor.
+Phase base `071e1330`, checkpoint `b22ca578`.
+
+The executor completed everything that does not need a container and reported `blocked` on Docker, which its shell permission layer denies. The runtime half of this phase is therefore the primary's, and it is where two of the brief's assumptions were corrected.
+
+### The commands the executor could not run
+
+| Proof | Command | Result |
+| --- | --- | --- |
+| Image builds with the snippet inside it | `docker build -t aby-little-lab:headers .` | exit 0 |
+| Every route carries the headers | `node scripts/validate-headers.js` | **21 passed, 0 failed**, exit 0 |
+| Inheritance trap, reproduced | remove the `include` from `/sw.js` only, rebuild, re-run | `/sw.js` **0/4 headers**, every other route still 4/4, its `Cache-Control` unchanged; **20 passed, 1 failed**, exit 1 |
+| A missing header, caught twice | delete `X-Content-Type-Options` from the snippet, rebuild, re-run | validator **14 passed, 7 failed** (one per route class), exit 1; guard test **1 failed**, naming `declares all four headers in the snippet, each with always` |
+| Both restored | restore, rebuild, re-run | 21 passed / 0 failed; guard 7 passed; `git status` clean |
+
+The first mutation is the point of the track. It is not a hypothetical: with the include removed from one location, that location serves no security header at all while the rest of the site looks perfect, and nothing in the config text reads as wrong.
+
+### Observed route matrix
+
+| Class | Path | Status | Headers | `Cache-Control` |
+| --- | --- | --- | --- | --- |
+| SPA root | `/` | 200 | 4/4 | `no-cache` |
+| shell | `/index.html` | 200 | 4/4 | `no-cache` |
+| service worker | `/sw.js` | 200 | 4/4 | `no-cache, no-store, must-revalidate` |
+| web manifest | `/manifest.webmanifest` | 200 | 4/4 | `no-cache` |
+| hashed asset | `/assets/index-CpDFSutQ.js` | 200 | 4/4 | `public, max-age=31536000, immutable` |
+| unknown route | `/no-such-route` | 200 | 4/4 | `no-cache` |
+| missing hashed asset | `/assets/does-not-exist.js` | **404** | **4/4** | `public, max-age=31536000, immutable` |
+
+Two corrections came out of the real run:
+
+1. **`/` and the SPA fallback serve `no-cache`, not an absent header.** Both are resolved by `try_files`' internal redirect into `location = /index.html`, so they inherit that location's cache rule. The executor had guessed this and asserted only that the two classes agreed; the first real run made the exact values knowable, so the validator now asserts `no-cache` for both and the guess is gone.
+2. **A 404 carries all four headers**, which is `always` doing its job — and it also carries `immutable`, because the hashed-asset location matches on extension rather than on file existence. That is a pre-existing quirk, not something this phase introduced: a missing asset would be cached for a year. It is asserted now (so it cannot change unnoticed) and recorded as a follow-up rather than fixed here, because changing it would change cache semantics that FR-5 requires to stay put.
+
+The brief also miscounted the includes: it said five in total, the correct number is six (the server block plus the five locations that declare `add_header`, since the `.mp3` rule makes five). The executor implemented the rule rather than the number and the guard pins the location count at five so the scan cannot pass vacuously.
+
+### What the executor got right that is worth keeping
+
+- The snippet is fail-closed by construction: nginx exits on a missing include, so a forgotten `COPY` breaks the container instead of silently serving unprotected. The guard test asserts the `COPY` exists.
+- The validator fails fast on a busy port and on a missing image rather than choosing a random port, which is the trap `20261107-release-e2e` spent a day on.
+- It removes the container in a `finally` and keeps the image, because later phases reuse it.
+
+### Gate
+
+| Layer | Command | Result |
+| --- | --- | --- |
+| Static | `pnpm check` | 296 files, no findings |
+| Types | `pnpm typecheck` | both programs clean |
+| Unit | `CI=true pnpm test -- --run` | 135 files / 2,927 tests, 19.88 s |
+| Coverage | `pnpm test:coverage` | 97.21 / 91.14 / 96.18 / 98.21 — gate 90 / 85 / 88 / 95 |
+| Build | `pnpm build` | 59 precache entries (1751.05 KiB) |
+| Bundle | `node scripts/validate-bundle.js` | phaser 1,335.0 kB; shell `index-CpDFSutQ.js` 153.6 kB ≤ 200 kB |
+| PWA | `node scripts/validate-pwa.js` | 16 passed, 0 failed |
+| Documents | `node scripts/validate-docs.js` | 5 passed, 0 failed |
+| Headers | `node scripts/validate-headers.js` | 21 passed, 0 failed |
+
+Shell entry unchanged at 153.6 kB with the same hash: headers are a serving concern and added nothing to the bundle.
+
+### Acceptance
+
+AC-1, AC-2, AC-3, AC-5, AC-6 and the runtime half of AC-9 are met by the runs above. AC-10 holds: `src/` gains one test file and no production file. AC-4 and AC-7 belong to Phases 2 and 3.
+
