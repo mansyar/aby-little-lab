@@ -23,7 +23,7 @@
   "review_rounds": 1,
   "doc_sync": "synced",
   "pr_url": "https://github.com/mansyar/aby-little-lab/pull/81",
-  "pr_state": "open",
+  "pr_state": "merged",
   "revert": null,
   "archived_at": "2026-11-07T22:40:00+11:00",
   "archive_path": "conductor/archive/20261107-toolchain-pinning"
