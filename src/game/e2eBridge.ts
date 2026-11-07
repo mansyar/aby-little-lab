@@ -50,6 +50,12 @@ export interface E2ESettingsState {
   open: boolean;
   /** The panel's toggle rows while it is open, empty otherwise. */
   toggles: E2ESettingsToggle[];
+  /**
+   * Whether the panel was built while the device could not persist — the same
+   * snapshot that decides whether its notice is on screen. False when the panel
+   * is closed and in any scene that publishes no panel.
+   */
+  degraded: boolean;
 }
 
 /** The hub's play-time state, as the hub itself sees it. */
@@ -218,7 +224,9 @@ export function initE2EBridge(game: Phaser.Game): void {
     settings: () => {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eSettings;
-      if (typeof hook !== "function") return { gate: null, open: false, toggles: [] };
+      if (typeof hook !== "function") {
+        return { gate: null, open: false, toggles: [], degraded: false };
+      }
       return hook.call(probe);
     },
     hubPlayTime: () => {

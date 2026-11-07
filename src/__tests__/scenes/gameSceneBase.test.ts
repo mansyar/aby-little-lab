@@ -4,6 +4,7 @@ import type { SpeakerButton } from "../../components/SpeakerButton";
 import type { GameId } from "../../types";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 import type { MockObject } from "../helpers/phaserMock";
+import { breakStorage, repairStorage } from "../helpers/throwingStorage";
 
 type MockFn = ReturnType<typeof vi.fn>;
 
@@ -275,7 +276,13 @@ describe("GameSceneBase scaffold", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    repairStorage();
     localStorage.clear();
+    // A refused write raises the module-level flag for the rest of the
+    // module's life, and nothing else in this file performs an accepted write
+    // afterwards. Persist a clean state here so the flag is cleared and no
+    // later test in this file inherits a degraded session.
+    updateSettings({});
   });
 
   /** Toggles the `prefers-reduced-motion` media query result. */
@@ -539,6 +546,37 @@ describe("GameSceneBase scaffold", () => {
       expect(revealTween).toBeDefined();
       expect(revealTween?.[0].scaleX).toBeCloseTo(0.5);
       expect(revealTween?.[0].scaleY).toBeCloseTo(0.5);
+    });
+
+    it("still celebrates and schedules the way home when the store refuses the write", () => {
+      // The defect in one assertion: a full quota threw inside completeGame
+      // after `inputLocked = true`, so the win sound, the celebration and the
+      // auto-return never ran and the child was stranded on a dead screen.
+      breakStorage(["setItem"], "QuotaExceededError");
+
+      const scene = new TestScene();
+      scene.testCreateCornerMascot();
+
+      expect(() => scene.testCompleteGame("more-less")).not.toThrow();
+
+      expect(scene.getInputLocked()).toBe(true);
+      expect(getMockFn(mockAudio.playWin)).toHaveBeenCalled();
+      const mascotImage = getMascotImage(scene);
+      expect(getMockFn(mascotImage.setTexture)).toHaveBeenCalledWith("mascot_celebrate");
+      expect(getMockFn(scene.add.graphics).mock.calls.length).toBeGreaterThan(0);
+
+      // The sticker the child just earned is shown from memory.
+      expect(hasSticker("more-less")).toBe(true);
+      const imageMock = getMockFn(scene.add.image);
+      expect(imageMock.mock.calls.some((call) => call[2] === "sticker_more_less")).toBe(true);
+
+      // The way home: the 3s auto-return is scheduled and reaches the Hub.
+      const delayedCallMock = getMockFn(scene.time.delayedCall);
+      expect(delayedCallMock.mock.calls.some((call) => call[0] === 3000)).toBe(true);
+      fireAutoReturn(scene);
+      expect(getMockFn(scene.scene.start)).toHaveBeenCalledWith("Hub", {
+        justEarned: "more-less",
+      });
     });
   });
 

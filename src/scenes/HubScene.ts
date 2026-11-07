@@ -407,6 +407,9 @@ export class HubScene extends Phaser.Scene {
       gate: centre ? { x: centre.x, y: centre.y } : null,
       open,
       toggles: open && panel ? panel.e2eToggles() : [],
+      // The notice is the panel's own open-time snapshot, so the journey reads
+      // the same value that decided what the parent sees.
+      degraded: open && panel ? panel.e2eDegraded() : false,
     };
   }
 

@@ -418,8 +418,8 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 133 files / 2,881 tests | `pnpm test -- --run` |
-| Coverage | statements 97.19 % / branches 91.12 % / functions 96.16 % / lines 98.19 % | `pnpm test:coverage` |
+| Test suite | 133 files / 2,912 tests | `pnpm test -- --run` |
+| Coverage | statements 97.21 % / branches 91.14 % / functions 96.18 % / lines 98.21 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-11-07; the build
 figures above are the 2026-10-22 measurement.
