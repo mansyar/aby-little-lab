@@ -40,7 +40,7 @@
 - **Covers:** FR-3, FR-5, FR-6, FR-7, FR-8, NFR-1, NFR-2, AC-5, AC-7, AC-10
 - **Touches:** `src/utils/backupFile.ts`, `src/utils/storage.ts`, `src/__tests__/utils/backupFile.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/guard/backupDom.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P2.T1: One module owns the browser** - covers: FR-3, NFR-1, NFR-2
   - **P2.T1.1:** Export through a Blob and a temporary anchor, with the object URL revoked and the filename dated
   - **P2.T1.2:** Import through a hidden file input, resolving to the file's text, removing the input afterwards, and never asking the parent to type
