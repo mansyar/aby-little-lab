@@ -45,6 +45,22 @@ export function downloadBackup(json: string, filename: string): void {
 }
 
 /**
+ * Starts the app again from a clean boot after a completed import.
+ *
+ * An import writes the whole save in one mutation, but every scene already
+ * drawing has read the old state into its own objects — the hub's sticker shelf,
+ * the profile chip, the play-time banner. Half-applying the new save to live
+ * scene state would show a parent a mixture of two devices, so the honest move
+ * is to start again: the write is on disk, and a fresh boot draws from it.
+ *
+ * It lives in the seam rather than in the panel because `window` is a DOM
+ * global, and the panel is canvas code that a headless test can build.
+ */
+export function reloadApp(): void {
+  window.location.reload();
+}
+
+/**
  * Opens the file picker; resolves the chosen file's text, or null when cancelled.
  *
  * The input is removed from the document and both listeners are detached on

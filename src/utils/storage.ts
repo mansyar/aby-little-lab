@@ -46,8 +46,11 @@ const V2_KEY = "abby-little-lab:v2";
  * without the field predate stamping and classify as the implicit version 1;
  * payloads carrying any other number are future versions this build cannot
  * read, and any non-number version field is corrupt.
+ *
+ * Exported because a backup envelope has to record the schema version it was
+ * written at, and the caller that builds one is the settings panel.
  */
-const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 1;
 
 /** Classification of a stored v2 payload by its top-level `schemaVersion`. */
 type StoredV2Kind = "known" | "missing" | "unknown" | "unusable";

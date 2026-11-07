@@ -414,6 +414,11 @@ export class HubScene extends Phaser.Scene {
       // The notice is the panel's own open-time snapshot, so the journey reads
       // the same value that decided what the parent sees.
       degraded: open && panel ? panel.e2eDegraded() : false,
+      // The second page is only tappable while the panel is up, so a closed
+      // panel publishes the empty page rather than the last one it drew.
+      ...(open && panel
+        ? panel.backupState()
+        : { page: 0, switchPage: { x: 0, y: 0 }, backupRows: [], backupResult: "" }),
     };
   }
 

@@ -1127,13 +1127,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-140 test files, 3,044 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+140 test files, 3,059 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.28 (6229/6403), branches 91.52 (1835/2005), functions 96.21 (1372/1426) and lines 98.25 (5791/5894) across 140 files and 3,044 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.29 (6342/6518), branches 91.51 (1854/2026), functions 96.19 (1391/1446) and lines 98.28 (5899/6002) across 140 files and 3,059 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 

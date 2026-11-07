@@ -103,6 +103,10 @@ export function settingsState(page: Page): Promise<E2ESettingsState> {
         progressRow: null,
         progress: null,
         degraded: false,
+        page: 0,
+        switchPage: { x: 0, y: 0 },
+        backupRows: [],
+        backupResult: "",
       },
   );
 }

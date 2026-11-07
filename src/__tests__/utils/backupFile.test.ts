@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { backupFilename, downloadBackup, pickBackupFile } from "../../utils/backupFile";
+import { backupFilename, downloadBackup, pickBackupFile, reloadApp } from "../../utils/backupFile";
 
 /**
  * The browser seam, driven against happy-dom's real `document`.
@@ -140,5 +140,21 @@ describe("pickBackupFile", () => {
 
     await expect(picked).resolves.toBeNull();
     expect(document.querySelector("input[type=file]")).toBeNull();
+  });
+});
+
+describe("reloadApp", () => {
+  it("starts the app again through the browser's own reload", () => {
+    const reload = vi.fn();
+    const original = window.location.reload;
+    // `location.reload` is not configurable on a real browser, so it is swapped
+    // by hand and put back, rather than spied on.
+    Object.defineProperty(window.location, "reload", { configurable: true, value: reload });
+    try {
+      reloadApp();
+    } finally {
+      Object.defineProperty(window.location, "reload", { configurable: true, value: original });
+    }
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });

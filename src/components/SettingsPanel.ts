@@ -1,9 +1,19 @@
 import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
-import type { E2EProgressState, E2ESettingsToggle } from "../game/e2eBridge";
+import type { E2EBackupState, E2EProgressState, E2ESettingsToggle } from "../game/e2eBridge";
+import type { ProfileV2 } from "../types";
+import { backupFilename, downloadBackup, pickBackupFile, reloadApp } from "../utils/backupFile";
+import { createBackup, type ImportMode, readBackup } from "../utils/backupFormat";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
-import { getSettings, isPersistenceDegraded, updateSettings } from "../utils/storage";
+import {
+  applyImport,
+  exportSave,
+  getSettings,
+  isPersistenceDegraded,
+  SCHEMA_VERSION,
+  updateSettings,
+} from "../utils/storage";
 import { textStyle } from "../utils/typography";
 import { allowPinchZoom, restorePinchZoom } from "../utils/viewportZoom";
 import { InstallRow } from "./settings/InstallRow";
@@ -14,14 +24,18 @@ import {
   BACKDROP_ALPHA,
   BACKDROP_COLOR,
   centredHitArea,
+  createModalButton,
   createRow,
+  DANGER_COLOR,
   DISABLED_COLOR,
   ENABLED_COLOR,
   OUTLINE_COLOR,
+  OVERLAY_ALPHA,
   PANEL_COLOR,
   PANEL_HEIGHT,
   PANEL_WIDTH,
   PRIMARY_COLOR,
+  ROW_CARD_HEIGHT,
   ROW_HIT_WIDTH,
   ROW_PITCH,
   TOGGLE_KNOB_COLOR,
@@ -53,12 +67,51 @@ const NOTICE_OFFSET = -150;
 /** What the notice says: the fact itself, in the panel's own quiet voice. */
 const NOTICE_LABEL = "Progress can't be saved on this device";
 
+/**
+ * Y offset of the page-switch card. The band from the panel's top edge (-380)
+ * to the notice (-150) and the title (-105) is empty, so the switch sits in it
+ * at -250: inside the panel, clear of the notice below, and nothing else moves.
+ */
+const SWITCH_OFFSET = -250;
+
+/** The switch card on each page: where it leads, with a chevron saying so. */
+const SWITCH_TO_BACKUP = "Backup & restore ›";
+const SWITCH_TO_SETTINGS = "‹ Back to settings";
+
+/** Page titles, both drawn by the one title element the panel already had. */
+const SETTINGS_TITLE = "Settings";
+const BACKUP_TITLE = "Backup";
+
+/** Page two's two actions, in drawing order. */
+const EXPORT_LABEL = "Save a backup";
+const RESTORE_LABEL = "Restore from a file";
+
+/** What the result line says when the picker came back empty. */
+const NOTHING_RESTORED = "Nothing was restored.";
+
+/**
+ * The one line on the merge-or-replace card that says what each button does.
+ * A parent choosing between two words deserves the difference in a sentence.
+ */
+const CHOICE_NOTE =
+  "Merge keeps what is on this device and adds anything newer from the file. Replace overwrites this device's save.";
+
+/** Width the result line and the choice note wrap to, inside the 480px panel. */
+const RESULT_WRAP_WIDTH = 420;
+
 /** Renders the parental settings controls above the HubScene. */
 export class SettingsPanel {
   private readonly scene: Phaser.Scene;
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
+  /**
+   * Everything the page on screen owns. Destroyed and rebuilt on every switch,
+   * so no row from the other page keeps a live hit band over the canvas.
+   */
+  private readonly pageObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly overlayObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly modalObjects: Phaser.GameObjects.GameObject[] = [];
+  /** The merge-or-replace card, and only it: destroyed by closing or choosing. */
+  private readonly choiceObjects: Phaser.GameObjects.GameObject[] = [];
   private readonly progressOverlay: ProgressOverlay;
   private readonly profilesOverlay: ProfilesOverlay;
   private readonly installRow: InstallRow;
@@ -66,6 +119,28 @@ export class SettingsPanel {
   private readonly resetModal: ResetModal;
   private readonly installTracker: InstallTracker;
   private readonly onProgressReset?: () => void;
+  /** The title, relabelled rather than rebuilt, so the header never jumps. */
+  private readonly title: Phaser.GameObjects.Text;
+  /** The page switch's label, relabelled on each switch. */
+  private readonly switchLabel: Phaser.GameObjects.Text;
+  /** The switch card's centre, captured from the layout arguments. */
+  private readonly switchPoint: { x: number; y: number };
+  /** Which settings page is on screen. */
+  private page: 0 | 1 = 0;
+  /** The result line's text, kept so the bridge can read it before it is drawn. */
+  private backupResult = "";
+  /** The colour that text is drawn in, so a rebuild does not lose it. */
+  private backupResultColor = DISABLED_COLOR;
+  /** The result line while page two is up, or null while page one is. */
+  private backupResultText: Phaser.GameObjects.Text | null = null;
+  /** Page two's tappable rows, with the point their band answers to. */
+  private backupRows: Array<{ id: "export" | "restore"; x: number; y: number }> = [];
+  /**
+   * Set while a file picker is open. A second tap on "Restore from a file"
+   * while the native dialog is up would open a second picker, so the tap that
+   * arrives during one is ignored and the flag is cleared in a `finally`.
+   */
+  private busy = false;
   /**
    * The toggle rows, with the tap band they answer to and a live read of their
    * state. The switch flips a closure variable, not an object property, so the
@@ -122,14 +197,14 @@ export class SettingsPanel {
     this.progressOverlay = new ProgressOverlay({ scene, overlayObjects: this.overlayObjects });
     this.installRow = new InstallRow({
       scene,
-      objects: this.objects,
+      objects: this.pageObjects,
       overlayObjects: this.overlayObjects,
       installTracker: this.installTracker,
     });
-    this.voiceRow = new VoiceRow({ scene, bucket: this.objects });
+    this.voiceRow = new VoiceRow({ scene, bucket: this.pageObjects });
     this.resetModal = new ResetModal({
       scene,
-      objects: this.objects,
+      objects: this.pageObjects,
       overlayObjects: this.overlayObjects,
       onProgressReset: () => this.onProgressReset?.(),
     });
@@ -155,19 +230,19 @@ export class SettingsPanel {
         .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
         .setStrokeStyle(4, OUTLINE_COLOR),
     );
-    this.objects.push(
-      scene.add
-        .text(
-          centerX,
-          centerY - 105,
-          "Settings",
-          textStyle({
-            color: "#2d3748",
-            fontSize: "36px",
-          }),
-        )
-        .setOrigin(0.5),
-    );
+    const title = scene.add
+      .text(
+        centerX,
+        centerY - 105,
+        SETTINGS_TITLE,
+        textStyle({
+          color: "#2d3748",
+          fontSize: "36px",
+        }),
+      )
+      .setOrigin(0.5);
+    this.title = title;
+    this.objects.push(title);
     // FR-5: one quiet line while the session cannot persist. It is deliberately
     // not interactive - the condition has not gone away, so there is nothing
     // here for a parent to dismiss and no hit area that could be tapped.
@@ -202,33 +277,37 @@ export class SettingsPanel {
     closeButton.on("pointerdown", () => this.destroy());
     attachPressFeedback(closeButton);
     this.objects.push(closeButton);
-    // Eight rows, one ROW_PITCH apart, which is also each row's hit band: the
-    // stack starts at -47 so the top row clears the title and version footer,
-    // and the bottom card ends at +379, inside the 760px panel.
-    const rowY = (index: number): number => centerY + FIRST_ROW_OFFSET + index * ROW_PITCH;
-    const toggleAdaptive = (next: boolean): void => {
-      updateSettings({ adaptiveDifficulty: next });
-    };
-    this.createToggle(centerX, rowY(0), "bgm", "BGM", settings.bgmEnabled);
-    this.createToggle(centerX, rowY(1), "sfx", "SFX", settings.sfxEnabled);
-    this.createToggle(
-      centerX,
-      rowY(2),
-      "adaptive",
-      "Adaptive",
-      settings.adaptiveDifficulty,
-      toggleAdaptive,
-    );
-    this.createProfilesRow(centerX, rowY(3));
-    this.createProgressRow(centerX, rowY(4));
-    this.resetModal.createRow(centerX, rowY(5));
-    this.installRow.create(centerX, rowY(6));
-    this.voiceRow.create(centerX, rowY(7));
+    // The page switch lives in the empty band above the notice and the title,
+    // and never moves: it is the same card on both pages, relabelled to say
+    // where the next tap goes.
+    const switchY = centerY + SWITCH_OFFSET;
+    addRowCard(scene, centerX, switchY, this.objects);
+    const switchLabel = scene.add
+      .text(
+        centerX,
+        switchY,
+        SWITCH_TO_BACKUP,
+        textStyle({
+          color: PRIMARY_COLOR,
+          fontSize: "32px",
+        }),
+      )
+      .setOrigin(0.5);
+    switchLabel.setInteractive(centredHitArea(ROW_HIT_WIDTH, ROW_CARD_HEIGHT));
+    switchLabel.on("pointerdown", () => this.flipPage());
+    attachPressFeedback(switchLabel);
+    this.objects.push(switchLabel);
+    this.switchLabel = switchLabel;
+    // Like the toggle rows: the card is centred on (x, y), so the layout
+    // arguments are the point a finger lands on.
+    this.switchPoint = { x: centerX, y: switchY };
+    this.buildPage(settings);
     // The ✕ box overlaps the BGM band's top-right corner, and the rows are
     // created after the ✕, so at equal depth the row would win that corner and
     // toggle music. Raising the ✕ above the rows settles it - and only above
     // the rows: the overlays open later and must still cover it, which a depth
-    // above theirs would break.
+    // above theirs would break. Every page rebuilds its rows, so this runs
+    // after the rows of the page that opened first.
     this.scene.children.bringToTop(closeButton);
     // Voices load asynchronously on some platforms; refresh the chip list.
     const synth = window.speechSynthesis;
@@ -257,6 +336,10 @@ export class SettingsPanel {
     if (synth && typeof synth.removeEventListener === "function") {
       synth.removeEventListener("voiceschanged", this.voiceChangedHandler);
     }
+    for (const object of this.choiceObjects) object.destroy();
+    this.choiceObjects.length = 0;
+    for (const object of this.pageObjects) object.destroy();
+    this.pageObjects.length = 0;
     for (const object of this.modalObjects) object.destroy();
     this.modalObjects.length = 0;
     for (const object of this.overlayObjects) object.destroy();
@@ -301,6 +384,279 @@ export class SettingsPanel {
   }
 
   /**
+   * The second page — its page number, its switch point, its two rows and the
+   * line that says what happened — as the panel is holding them right now.
+   *
+   * A journey moves between pages with this and taps a row by its published
+   * centre, so it never copies a layout number. Every value is a live read:
+   * `page` is the page on screen, `backupRows` is empty while the other page is
+   * up because those rows no longer exist, and `backupResult` is the panel's
+   * own memory of the last thing it told a parent.
+   */
+  backupState(): E2EBackupState {
+    return {
+      page: this.page,
+      switchPage: { x: this.switchPoint.x, y: this.switchPoint.y },
+      backupRows: this.backupRows.map((row) => ({
+        id: row.id,
+        point: { x: row.x, y: row.y },
+      })),
+      backupResult: this.backupResult,
+    };
+  }
+
+  /** Switches pages, relabelling the header and the switch, and rebuilding. */
+  private flipPage(): void {
+    this.page = this.page === 0 ? 1 : 0;
+    this.title.setText(this.page === 0 ? SETTINGS_TITLE : BACKUP_TITLE);
+    this.switchLabel.setText(this.page === 0 ? SWITCH_TO_BACKUP : SWITCH_TO_SETTINGS);
+    this.buildPage(getSettings());
+  }
+
+  /**
+   * Destroys everything the page on screen owns and builds the current page.
+   *
+   * The rows are destroyed rather than hidden: an invisible row keeps its
+   * interactive object, and Phaser would still route a tap over the canvas to
+   * it. Nothing interactive survives a switch.
+   */
+  private buildPage(settings: ReturnType<typeof getSettings>): void {
+    this.clearPage();
+    const { width, height } = this.scene.cameras.main;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    // One ROW_PITCH apart, which is also each row's hit band: the stack starts
+    // at -47 so the top row clears the title and version footer, and the bottom
+    // card ends at +379, inside the 760px panel.
+    const rowY = (index: number): number => centerY + FIRST_ROW_OFFSET + index * ROW_PITCH;
+    if (this.page === 0) {
+      this.buildSettingsPage(settings, centerX, rowY);
+      return;
+    }
+    this.buildBackupPage(centerX, rowY);
+  }
+
+  /** Destroys the page on screen, so nothing from it can answer a tap. */
+  private clearPage(): void {
+    for (const object of this.pageObjects) object.destroy();
+    this.pageObjects.length = 0;
+    this.toggles.length = 0;
+    this.progressRowPoint = null;
+    this.backupRows = [];
+    this.backupResultText = null;
+  }
+
+  /** Page one: the eight settings rows, at the numbers AC-9 pins. */
+  private buildSettingsPage(
+    settings: ReturnType<typeof getSettings>,
+    centerX: number,
+    rowY: (index: number) => number,
+  ): void {
+    const toggleAdaptive = (next: boolean): void => {
+      updateSettings({ adaptiveDifficulty: next });
+    };
+    this.createToggle(centerX, rowY(0), "bgm", "BGM", settings.bgmEnabled);
+    this.createToggle(centerX, rowY(1), "sfx", "SFX", settings.sfxEnabled);
+    this.createToggle(
+      centerX,
+      rowY(2),
+      "adaptive",
+      "Adaptive",
+      settings.adaptiveDifficulty,
+      toggleAdaptive,
+    );
+    this.createProfilesRow(centerX, rowY(3));
+    this.createProgressRow(centerX, rowY(4));
+    this.resetModal.createRow(centerX, rowY(5));
+    this.installRow.create(centerX, rowY(6));
+    this.voiceRow.create(centerX, rowY(7));
+  }
+
+  /** Page two: save a backup, restore one, and the line saying what happened. */
+  private buildBackupPage(centerX: number, rowY: (index: number) => number): void {
+    createRow(this.scene, centerX, rowY(0), this.pageObjects, EXPORT_LABEL, PRIMARY_COLOR, () =>
+      this.saveBackup(),
+    );
+    createRow(
+      this.scene,
+      centerX,
+      rowY(1),
+      this.pageObjects,
+      RESTORE_LABEL,
+      PRIMARY_COLOR,
+      // The handler is async, and the tap is not: the promise's own rejection
+      // would escape into Phaser's update loop, so it is awaited here instead.
+      () => void this.restoreBackup(),
+    );
+    // The rows are centred on the layout arguments, so those are the points a
+    // finger lands on - published rather than re-derived by the suite.
+    this.backupRows = [
+      { id: "export", x: centerX, y: rowY(0) },
+      { id: "restore", x: centerX, y: rowY(1) },
+    ];
+    const result = this.scene.add
+      .text(
+        centerX,
+        rowY(2),
+        this.backupResult,
+        textStyle({
+          align: "center",
+          color: this.backupResultColor,
+          fontSize: "24px",
+          wordWrap: { width: RESULT_WRAP_WIDTH },
+        }),
+      )
+      .setOrigin(0.5);
+    this.backupResultText = result;
+    this.pageObjects.push(result);
+  }
+
+  /**
+   * Writes the whole save to a file a parent can keep.
+   *
+   * `exportSave` reads the store, never writes it, so this works even while the
+   * device cannot save — which is exactly when a backup matters most.
+   */
+  private saveBackup(): void {
+    const now = new Date();
+    const { json } = createBackup(exportSave(), {
+      appVersion: __APP_VERSION__,
+      now,
+      schemaVersion: SCHEMA_VERSION,
+    });
+    const filename = backupFilename(now);
+    downloadBackup(json, filename);
+    this.showBackupResult(`Saved ${filename}`, PRIMARY_COLOR);
+  }
+
+  /**
+   * Opens the picker, verifies what came back, then asks how to apply it.
+   *
+   * Nothing is written before a parent chooses: a cancelled picker, an
+   * unreadable file and a damaged checksum all end on the result line with the
+   * save untouched. `busy` keeps a second tap from opening a second picker.
+   */
+  private async restoreBackup(): Promise<void> {
+    if (this.busy) return;
+    this.busy = true;
+    try {
+      const picked = await pickBackupFile();
+      if (picked === null) {
+        this.showBackupResult(NOTHING_RESTORED);
+        return;
+      }
+      const read = readBackup(picked.text, { schemaVersion: SCHEMA_VERSION });
+      if (!read.ok) {
+        // The sentence, never the code: a parent reads why, not a diagnostic.
+        this.showBackupResult(read.refusal.message);
+        return;
+      }
+      this.showChoice(picked.name, read.envelope.payload);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  /** Shows the file's name and the two ways to apply it. */
+  private showChoice(name: string, payload: ProfileV2): void {
+    this.closeChoice();
+    const { width, height } = this.scene.cameras.main;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const backdrop = this.scene.add
+      .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
+      .setInteractive();
+    backdrop.on("pointerdown", () => this.closeChoice());
+    this.choiceObjects.push(backdrop);
+    this.choiceObjects.push(
+      this.scene.add
+        .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR)
+        .setStrokeStyle(4, OUTLINE_COLOR),
+    );
+    this.choiceObjects.push(
+      this.scene.add
+        .text(
+          centerX,
+          centerY - 170,
+          name,
+          textStyle({
+            align: "center",
+            color: "#2d3748",
+            fontSize: "24px",
+            wordWrap: { width: RESULT_WRAP_WIDTH },
+          }),
+        )
+        .setOrigin(0.5),
+    );
+    this.choiceObjects.push(
+      this.scene.add
+        .text(
+          centerX,
+          centerY - 80,
+          CHOICE_NOTE,
+          textStyle({
+            align: "center",
+            color: "#2d3748",
+            fontSize: "24px",
+            wordWrap: { width: RESULT_WRAP_WIDTH },
+          }),
+        )
+        .setOrigin(0.5),
+    );
+    this.choiceObjects.push(
+      createModalButton(
+        this.scene,
+        centerX,
+        centerY + 40,
+        this.choiceObjects,
+        "Merge",
+        PRIMARY_COLOR,
+        () => this.chooseImport("merge", payload),
+      ),
+    );
+    this.choiceObjects.push(
+      createModalButton(
+        this.scene,
+        centerX,
+        centerY + 120,
+        this.choiceObjects,
+        "Replace",
+        DANGER_COLOR,
+        () => this.chooseImport("replace", payload),
+      ),
+    );
+  }
+
+  /** Closes the choice card without writing anything. */
+  private closeChoice(): void {
+    for (const object of this.choiceObjects) object.destroy();
+    this.choiceObjects.length = 0;
+  }
+
+  /**
+   * Applies the file in the chosen mode: a refusal lands on the result line and
+   * leaves the app running, a completed import starts the app again from a
+   * clean boot so no scene shows a mixture of two saves.
+   */
+  private chooseImport(mode: ImportMode, payload: ProfileV2): void {
+    const applied = applyImport(mode, payload);
+    this.closeChoice();
+    if (!applied.ok) {
+      this.showBackupResult(applied.refusal.message);
+      return;
+    }
+    reloadApp();
+  }
+
+  /** Puts one sentence on the result line, and remembers it for the next build. */
+  private showBackupResult(message: string, color: string = DISABLED_COLOR): void {
+    this.backupResult = message;
+    this.backupResultColor = color;
+    this.backupResultText?.setText(message);
+    this.backupResultText?.setColor(color);
+  }
+
+  /**
    * Creates one inflated, touch-friendly settings toggle: a labeled row card
    * plus a track-and-knob switch whose knob side encodes the state (never
    * color alone).
@@ -316,7 +672,7 @@ export class SettingsPanel {
     enabled: boolean,
     onChange?: (nextEnabled: boolean) => void,
   ): Phaser.GameObjects.Text {
-    addRowCard(this.scene, x, y, this.objects);
+    addRowCard(this.scene, x, y, this.pageObjects);
 
     const switchX = x + 170;
     const track = this.scene.add.rectangle(
@@ -326,7 +682,7 @@ export class SettingsPanel {
       TOGGLE_TRACK_HEIGHT,
       enabled ? TOGGLE_TRACK_ON_COLOR : TOGGLE_TRACK_OFF_COLOR,
     );
-    this.objects.push(track);
+    this.pageObjects.push(track);
 
     const knob = this.scene.add.rectangle(
       switchX + (enabled ? TOGGLE_KNOB_OFFSET : -TOGGLE_KNOB_OFFSET),
@@ -336,7 +692,7 @@ export class SettingsPanel {
       TOGGLE_KNOB_COLOR,
     );
     knob.setStrokeStyle(2, OUTLINE_COLOR, 1);
-    this.objects.push(knob);
+    this.pageObjects.push(knob);
 
     const toggle = this.scene.add
       .text(
@@ -375,7 +731,7 @@ export class SettingsPanel {
       track.setFillStyle(nextEnabled ? TOGGLE_TRACK_ON_COLOR : TOGGLE_TRACK_OFF_COLOR, 1);
     });
     attachPressFeedback(toggle);
-    this.objects.push(toggle);
+    this.pageObjects.push(toggle);
     // The band is centred on (x, y) by construction: the label sits 40px left
     // of the row centre and the hit area offsets back by 40, so `x` is where a
     // finger lands. Publishing the layout arguments keeps the suite from
@@ -386,14 +742,14 @@ export class SettingsPanel {
 
   /** Adds the parental "Profiles" row that opens the profile manager overlay. */
   private createProfilesRow(x: number, y: number): void {
-    createRow(this.scene, x, y, this.objects, "Profiles", PRIMARY_COLOR, () =>
+    createRow(this.scene, x, y, this.pageObjects, "Profiles", PRIMARY_COLOR, () =>
       this.openProfilesOverlay(),
     );
   }
 
   /** Adds the parental "Progress" row that opens the Learning Progress overlay. */
   private createProgressRow(x: number, y: number): void {
-    createRow(this.scene, x, y, this.objects, "Progress", PRIMARY_COLOR, () =>
+    createRow(this.scene, x, y, this.pageObjects, "Progress", PRIMARY_COLOR, () =>
       this.openProgressOverlay(),
     );
     // Like the toggle rows: the row card is centred on (x, y), so the layout
