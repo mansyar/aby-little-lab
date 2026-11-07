@@ -82,7 +82,7 @@
 - **Covers:** FR-11, FR-12, NFR-5, NFR-6, AC-3
 - **Touches:** `e2e/journeys/backup.spec.ts`, `e2e/fixtures/`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/product.md`
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P4.T1: Export, carry, restore, reload** - covers: FR-11, AC-3
   - **P4.T1.1:** Seed a save, take the real download, and read the file that lands on disk
   - **P4.T1.2:** Import that file into a fresh context with empty storage through the file chooser
