@@ -17,8 +17,8 @@ An ad-free, distraction-free developmental game suite for preschoolers aged 3-5.
 
 ## Prerequisites
 
-- Node.js 22+
-- pnpm 11+
+- Node.js 24+
+- pnpm 12.16.1
 
 ## Getting Started
 
@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,912 tests across 133 files**, all green (verified 2026-11-07).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,920 tests across 134 files**, all green (verified 2026-11-07).
 
 Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the daily cap, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
@@ -163,7 +163,7 @@ Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), 
 
 ## Docker Deployment
 
-The image builds the Vite app in a `node:22-alpine` stage and serves `dist/` from `nginx:1.27-alpine`:
+The image builds the Vite app in a `node:24-alpine` stage with the pnpm version `package.json` declares, and serves `dist/` from `nginx:1.27-alpine`:
 
 ```bash
 docker build -t aby-little-lab .
@@ -174,7 +174,7 @@ Then open `http://localhost:8080`; production terminates TLS in front of the con
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs` and `validate-boot` against a preview server. A second job, `Browser Journeys`, runs after it on the same triggers and takes the Playwright suite through the built `dist`, so a browser failure is reported without hiding the static and unit results. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
+`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs` and `validate-boot` against a preview server. A second job, `Browser Journeys`, runs after it on the same triggers and takes the Playwright suite through the built `dist`, so a browser failure is reported without hiding the static and unit results. Both jobs begin by classifying the pull request against its base commit: a diff that touches anything outside `conductor/`, `docs/`, `README.md` and `**/*.md` publishes `code`, and anything else publishes `doc`, where the gates job installs and runs `validate-docs` only and the browser job runs nothing but still reports. The classifier falls back to `code` whenever it cannot tell — an unknown base, an empty diff, an unfetchable fork — because a suite run wasted is minutes and a merge waved through is not recoverable. Runner versions are read from the declaration rather than written in the workflow: `pnpm/action-setup` takes its version from `packageManager` and `actions/setup-node` takes Node from `.node-version`, and `src/__tests__/guard/toolchain.test.ts` fails, naming the file and both values, if either gains a literal or drifts from the Dockerfile. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
 
 One-time setup: a Coolify API token with the `deploy` permission, the app's Deploy Webhook URL, the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` secrets, and branch protection requiring `Quality Gates`. Intent: [PRD §8.2](docs/PRD.md#82-deploy-path); implementation and setup steps: [TDD §11.4](docs/TDD.md#114-github-actions), [TDD §11.5](docs/TDD.md#115-container-and-host).
 
