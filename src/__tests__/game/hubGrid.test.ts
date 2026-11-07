@@ -473,3 +473,94 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     }
   });
 });
+
+/**
+ * Fires the entrance completions the mock tween manager captured for the
+ * builds that started between `from` and `to` (call indexes), in creation order.
+ */
+function fireEntrances(scene: MockScene, from = 0, to = Number.POSITIVE_INFINITY): void {
+  const calls = (scene.tweens.add as MockFn).mock.calls.slice(from, to);
+  for (const [config] of calls) {
+    (config as { onComplete?: () => void }).onComplete?.();
+  }
+}
+
+/** Maps the entrance callbacks a build registered, so a test can fire them one by one. */
+function entranceCallbacks(scene: MockScene, from = 0): Array<() => void> {
+  const calls = (scene.tweens.add as MockFn).mock.calls.slice(from);
+  const callbacks: Array<() => void> = [];
+  for (const [config] of calls) {
+    const complete = (config as { onComplete?: () => void }).onComplete;
+    if (complete) callbacks.push(complete);
+  }
+  return callbacks;
+}
+
+describe("HubGrid — entrance readiness", () => {
+  beforeEach(() => {
+    stubMatchMedia(false);
+    localStorage.clear();
+    mockRegistry.length = 0;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("is not ready before the grid is built, and ready only when the last tile lands", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+
+    expect(grid.entranceSettled, "nothing is tappable before a grid exists").toBe(false);
+
+    grid.buildWideGrid();
+    expect(grid.entranceSettled, "tiles at scale 0 cannot be hit").toBe(false);
+
+    const landings = entranceCallbacks(scene);
+    expect(landings.length, "one entrance per tile gates input").toBe(22);
+
+    for (const land of landings.slice(0, -1)) land();
+    expect(grid.entranceSettled, "one tile still entering is still a dead board").toBe(false);
+
+    landings.at(-1)?.();
+    expect(grid.entranceSettled).toBe(true);
+  });
+
+  it("is not marked ready by the grid a rebuild replaced", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+
+    grid.buildWideGrid();
+    const wideBuild = (scene.tweens.add as MockFn).mock.calls.length;
+
+    // A viewport flip rebuilds the grid before the outgoing tiles finished.
+    grid.buildPageGrid(0);
+
+    fireEntrances(scene, 0, wideBuild);
+    expect(grid.entranceSettled, "a stale entrance must not mark the new page ready").toBe(false);
+
+    fireEntrances(scene, wideBuild);
+    expect(grid.entranceSettled).toBe(true);
+  });
+
+  it("goes back to not ready for a new visit and on shutdown", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+
+    grid.buildPageGrid(2);
+    fireEntrances(scene);
+    expect(grid.entranceSettled).toBe(true);
+
+    grid.resetForVisit();
+    expect(grid.entranceSettled, "a revisit rebuilds its grid from scratch").toBe(false);
+
+    grid.buildWideGrid();
+    fireEntrances(scene);
+    expect(grid.entranceSettled).toBe(true);
+
+    grid.destroy();
+    expect(grid.entranceSettled, "a destroyed grid accepts nothing").toBe(false);
+  });
+});

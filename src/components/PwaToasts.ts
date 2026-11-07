@@ -34,6 +34,15 @@ export class PwaToasts {
     this.toast = undefined;
   }
 
+  /**
+   * Canvas-space centre of the visible toast's dismiss button, or null when no
+   * toast is showing. Read-only: it reports where the toast put its button so a
+   * caller can close it the way a parent would.
+   */
+  dismissPoint(): { x: number; y: number } | null {
+    return this.toast?.dismissPoint() ?? null;
+  }
+
   private show(kind: ToastKind): void {
     this.toast?.destroy();
     const bridge = getPwaBridge();

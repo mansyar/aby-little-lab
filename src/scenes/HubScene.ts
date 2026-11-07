@@ -6,6 +6,7 @@ import type { PlayTimeNudge } from "../components/PlayTimeIndicator";
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
+import type { E2EHubToast, E2ERoundTarget } from "../game/e2eBridge";
 import { createArtResolver } from "../game/hub/artGroups";
 import {
   createGameLaunch,
@@ -21,6 +22,7 @@ import {
 } from "../game/hub/playTimeUi";
 import type { ArtKeyEntry } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
+import { pageTileIndexes } from "../game/hubPaging";
 import { GAME_TILES } from "../game/hubTiles";
 import { endPlaySession, startPlaySession } from "../game/playTimeLogic";
 import { isReducedMotion } from "../utils/motion";
@@ -327,6 +329,52 @@ export class HubScene extends Phaser.Scene {
   /** Removes the retry cue, if one is up. Safe to call at any time. */
   private hideLoadCue(): void {
     this.launcher.hideLoadCue();
+  }
+
+  /**
+   * Publishes the tiles that are on screen for the browser suite.
+   *
+   * The id is the tile's **registry index**, which is the one identity shared by
+   * the grid (which builds tiles in registry order) and a journey (which loops
+   * the registry). A paged viewport shows one page, so the ids are that page's
+   * global indexes rather than 0..9 — the suite can therefore tell which game a
+   * tile belongs to without knowing the layout. Read-only: it reports the live
+   * rectangles and never touches them.
+   */
+  e2eHubTiles(): E2ERoundTarget[] {
+    const indexes = this.grid.paged
+      ? pageTileIndexes(this.grid.hubPage)
+      : GAME_TILES.map((_, index) => index);
+    return this.grid.attractTargets.map((tile, slot) => ({
+      id: String(indexes[slot]),
+      x: tile.x,
+      y: tile.y,
+    }));
+  }
+
+  /**
+   * Publishes the PWA toast covering the hub, so the suite can close it the way
+   * a parent would instead of tapping a point that may or may not be a panel.
+   *
+   * Null when no toast is showing. The toast is a real part of the app — a
+   * first visit announces offline readiness — so a journey dismisses it and
+   * carries on; nothing about it is special-cased for tests.
+   */
+  e2eHubToast(): E2EHubToast | null {
+    const point = this.pwaToasts.dismissPoint();
+    return point ? { button: point } : null;
+  }
+
+  /**
+   * Publishes whether the grid is accepting taps.
+   *
+   * Tiles enter at scale 0 and only become hittable once their entrance tween
+   * finishes, so for the first second or so after the hub appears a tap lands
+   * on nothing. Reporting that state lets a journey wait for the board rather
+   * than guess a duration. Read-only: it only asks the grid.
+   */
+  e2eHubReady(): boolean {
+    return this.grid.entranceSettled;
   }
 
   /**

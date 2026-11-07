@@ -75,6 +75,17 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected readonly rng: Rng;
 
   protected progressDots: Phaser.GameObjects.Arc[] = [];
+
+  /**
+   * Rounds finished this visit.
+   *
+   * Kept as its own counter rather than inferred from the dots: a dot is
+   * dimmed by its *fill* alpha, so `dot.alpha` stays 1 on an untouched dot
+   * and reading it would count every dot as filled. Only
+   * {@link fillProgressDot} advances this, so the count and the visible fill
+   * cannot drift apart.
+   */
+  protected completedRounds = 0;
   protected inputLocked = false;
 
   /** Correct taps recorded this session (flushed to progress on completion). */
@@ -371,6 +382,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
    */
   protected createProgressDots(count: number): void {
     this.progressDots = [];
+    this.completedRounds = 0;
     const startX = this.cameras.main.centerX - ((count - 1) * this.PROGRESS_DOT_SPACING) / 2;
     for (let i = 0; i < count; i++) {
       const dot = this.add.circle(
@@ -388,6 +400,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected fillProgressDot(index: number): void {
     const dot = this.progressDots[index];
     dot.setAlpha(1);
+    this.completedRounds += 1;
     this.tweens.add({
       targets: dot,
       scaleX: motionScale(this.DOT_POP_SCALE, this.DOT_POP_REDUCED_SCALE),
@@ -528,6 +541,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
       // The dots are destroyed with the display list: release them so the
       // scene holds no references to destroyed objects.
       this.progressDots = [];
+      this.completedRounds = 0;
     });
   }
 

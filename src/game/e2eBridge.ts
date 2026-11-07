@@ -24,13 +24,44 @@ export interface E2ERoundGeometry {
   slots?: E2ERoundTarget[];
 }
 
+/** A hub overlay that sits over the tiles until it is dismissed. */
+export interface E2EHubToast {
+  /** Canvas-space centre of the button that closes the toast. */
+  button: { x: number; y: number };
+}
+
 /** The window the browser suite polls; every member is a live read. */
 export interface E2EBridge {
   activeSceneKey(): string | null;
   profileCount(): number;
   stickerCount(): number;
+  /**
+   * Rounds finished in the active visit: 0 before the first round, one more
+   * per completed round, reset when the scene is left. Read from the scene's
+   * own counter, never inferred from how the progress dots look.
+   */
   roundIndex(): number;
   roundGeometry(): E2ERoundGeometry | null;
+  /**
+   * The hub's game tiles that are on screen right now, in creation order, with
+   * each tile's registry index as its id. Empty in any scene that is not the
+   * hub. A paged viewport publishes only the current page's tiles.
+   */
+  hubTiles(): E2ERoundTarget[];
+  /**
+   * The PWA toast covering the hub right now, if any, with the canvas position
+   * of the button that dismisses it. Null in any scene that is not the hub, and
+   * null when no toast is showing — so a journey can tell "nothing to dismiss"
+   * apart from "dismissed" and cannot accidentally tap a tile through a panel.
+   */
+  hubToast(): E2EHubToast | null;
+  /**
+   * Whether the hub's tiles are tappable yet. False before the grid is built
+   * and while its entrance tweens run — a tile scaled to nothing cannot be hit —
+   * and true once every visible tile has finished entering. Always false in a
+   * scene that is not the hub, because nothing there publishes it.
+   */
+  hubReady(): boolean;
 }
 
 declare global {
@@ -49,8 +80,11 @@ declare global {
  * without widening the scene's public surface for production code.
  */
 interface E2ESceneProbe {
-  progressDots?: Array<{ alpha: number }>;
+  completedRounds?: number;
   e2eRoundGeometry?: () => E2ERoundGeometry | null;
+  e2eHubTiles?: () => E2ERoundTarget[];
+  e2eHubToast?: () => E2EHubToast | null;
+  e2eHubReady?: () => boolean;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -68,17 +102,18 @@ function probeOf(scene: Phaser.Scene | undefined): E2ESceneProbe | undefined {
 }
 
 /**
- * Completed rounds in the active visit, counted from the filled progress dots.
+ * Rounds finished in the active visit, read from the scene's own counter.
  *
- * Every game scene fills one dot per completed round in {@link
- * GameSceneBase.fillProgressDot}, so a filled dot is exactly a round the child
- * has finished — no second counter to keep in step. The dot's `alpha` is the
- * filled flag (0.3 dimmed, 1 filled); its scale is a pop tween and says nothing.
+ * `GameSceneBase` keeps `completedRounds`, advances it once in {@link
+ * GameSceneBase.fillProgressDot}, and resets it when the dots are rebuilt or
+ * the scene shuts down — so this reports 0 before the first round and one more
+ * per finished round. Not inferred from the dots: a dot is dimmed with its
+ * *fill* alpha, which leaves the game object's `alpha` at 1, so counting dots
+ * by alpha would report every dot as filled.
  */
 function completedRounds(probe: E2ESceneProbe | undefined): number {
-  const dots = probe?.progressDots;
-  if (!Array.isArray(dots)) return 0;
-  return dots.filter((dot) => dot.alpha === 1).length;
+  const count = probe?.completedRounds;
+  return typeof count === "number" ? count : 0;
 }
 
 /** The active profile's earned stickers. */
@@ -111,6 +146,24 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eRoundGeometry;
       if (typeof hook !== "function") return null;
+      return hook.call(probe);
+    },
+    hubTiles: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eHubTiles;
+      if (typeof hook !== "function") return [];
+      return hook.call(probe);
+    },
+    hubToast: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eHubToast;
+      if (typeof hook !== "function") return null;
+      return hook.call(probe);
+    },
+    hubReady: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eHubReady;
+      if (typeof hook !== "function") return false;
       return hook.call(probe);
     },
   };

@@ -157,6 +157,16 @@ export function createMockGameObject(
   return obj;
 }
 
+/**
+ * Copies a factory call's leading x/y onto the mock, as Phaser's own factories
+ * do. Without this a scene reading `tile.x` gets `undefined` and any geometry it
+ * publishes is silently blank.
+ */
+function positionFromArgs(obj: MockObject, args: unknown[]): void {
+  obj.x = args[0];
+  obj.y = args[1];
+}
+
 /** A canvas texture the placeholder path can draw into and refresh. */
 export interface MockCanvasTexture {
   readonly context: {
@@ -220,22 +230,26 @@ export class MockScene {
       rectangle: vi.fn((...args: unknown[]) => {
         const obj = createMockGameObject(this, "rectangle", reg);
         obj.args = args;
+        positionFromArgs(obj, args);
         return obj;
       }),
       text: vi.fn((...args: unknown[]) => {
         const obj = createMockGameObject(this, "text", reg);
         obj.args = args;
+        positionFromArgs(obj, args);
         return obj;
       }),
       image: vi.fn((...args: unknown[]) => {
         const obj = createMockGameObject(this, "image", reg);
         obj.args = args;
+        positionFromArgs(obj, args);
         return obj;
       }),
       container: vi.fn(() => createMockGameObject(this, "container", reg)),
       circle: vi.fn((...args: unknown[]) => {
         const obj = createMockGameObject(this, "circle", reg);
         obj.args = args;
+        positionFromArgs(obj, args);
         return obj;
       }),
       graphics: vi.fn(() => createMockGameObject(this, "graphics", reg)),

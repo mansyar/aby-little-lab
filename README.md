@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,845 tests across 133 files**, all green (verified 2026-11-07).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,869 tests across 133 files**, all green (verified 2026-11-07).
 
 ## Code Quality
 

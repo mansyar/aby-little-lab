@@ -192,6 +192,10 @@ class TestScene extends GameSceneBase {
     return this.progressDots;
   }
 
+  getCompletedRounds(): number {
+    return this.completedRounds;
+  }
+
   getMascot(): Mascot | undefined {
     return this.mascot;
   }
@@ -423,6 +427,40 @@ describe("GameSceneBase scaffold", () => {
       expect(popTween?.[0].scaleX).toBe(1.2);
       expect(popTween?.[0].scaleY).toBe(1.2);
       expect(popTween?.[0].duration).toBe(150);
+    });
+
+    it("advances the completed-round counter once per filled dot, never drifting from the fill", () => {
+      const scene = new TestScene();
+      scene.testCreateProgressDots(3);
+      expect(scene.getCompletedRounds()).toBe(0);
+
+      scene.testFillProgressDot(0);
+      scene.testFillProgressDot(1);
+
+      // Every dot reports alpha 1 from creation (its dimming is fill alpha), so
+      // the counter is the only honest signal — and it moves exactly once per
+      // fill.
+      const filledDots = scene
+        .getDots()
+        .filter((dot) => getMockFn(dot.setAlpha).mock.calls.length > 0);
+      expect(filledDots).toHaveLength(2);
+      expect(scene.getCompletedRounds()).toBe(2);
+    });
+
+    it("resets the counter with the dots, so a second visit starts at zero", () => {
+      const scene = new TestScene();
+      scene.testRegisterShutdownCleanup();
+      scene.testCreateProgressDots(3);
+      scene.testFillProgressDot(0);
+      scene.testFillProgressDot(1);
+      expect(scene.getCompletedRounds()).toBe(2);
+
+      scene.events.emit("shutdown");
+      expect(scene.getCompletedRounds()).toBe(0);
+
+      scene.testCreateProgressDots(3);
+
+      expect(scene.getCompletedRounds()).toBe(0);
     });
   });
 

@@ -36,6 +36,14 @@ export class PwaToast {
   private readonly scene: Phaser.Scene;
   private readonly objects: Phaser.GameObjects.GameObject[] = [];
 
+  /**
+   * Canvas-space centre of the button that closes this toast — "OK" for an
+   * offline toast, "Later" for an update toast. Recorded from the geometry the
+   * constructor lays out, which never moves afterwards, so a caller can act on
+   * the toast without reaching into the display list.
+   */
+  private readonly dismiss: { x: number; y: number };
+
   constructor(scene: Phaser.Scene, options: PwaToastOptions) {
     this.scene = scene;
     const { width } = scene.cameras.main;
@@ -69,11 +77,18 @@ export class PwaToast {
         options.onUpdate,
       );
       this.createButton(centerX + 110, y + 40, "Later", SECONDARY_BUTTON_COLOR, options.onDismiss);
+      this.dismiss = { x: centerX + 110, y: y + 40 };
     } else {
       this.createButton(centerX, y + 40, "OK", PRIMARY_BUTTON_COLOR, options.onDismiss);
+      this.dismiss = { x: centerX, y: y + 40 };
     }
 
     this.animateEntrance([panel, title]);
+  }
+
+  /** Where the button that closes this toast sits, in canvas space. */
+  dismissPoint(): { x: number; y: number } {
+    return this.dismiss;
   }
 
   /** Destroys the toast and all of its display objects. */

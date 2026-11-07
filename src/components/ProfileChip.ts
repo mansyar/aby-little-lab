@@ -37,6 +37,12 @@ export class ProfileChip {
   private chip?: Phaser.GameObjects.Image;
   private pickerObjects: Phaser.GameObjects.GameObject[] = [];
   private open = false;
+  /**
+   * True between a `pointerdown` on the chip and the release that follows it.
+   * Phaser fires an object's `pointerup` for any release over it, even when the
+   * press began elsewhere — including a press that began in the previous scene.
+   */
+  private pressed = false;
 
   constructor(private readonly deps: ProfileChipDeps) {}
 
@@ -64,9 +70,25 @@ export class ProfileChip {
     // Frame-based default hit area covers the visible chip exactly (custom
     // rects are tested in texture-local space and miss on 512px textures).
     chip.setInteractive();
+    chip.on("pointerdown", () => {
+      this.pressed = true;
+    });
     chip.on("pointerup", () => {
+      // A release only counts as a tap when this chip took the press. Phaser
+      // reports a `pointerup` to whatever sits under the pointer, so a hold that
+      // began in the previous scene (the back button shares this corner) used to
+      // open the picker on arrival, and its full-canvas overlay then swallowed
+      // the child's first real tap.
+      if (!this.pressed) return;
+      this.pressed = false;
       this.deps.onOpen();
       this.openProfilePicker();
+    });
+    chip.on("pointerout", () => {
+      this.pressed = false;
+    });
+    chip.on("pointercancel", () => {
+      this.pressed = false;
     });
     attachPressFeedback(chip);
     this.chip = chip;
@@ -87,6 +109,7 @@ export class ProfileChip {
     for (const obj of this.pickerObjects) obj.destroy();
     this.pickerObjects = [];
     this.open = false;
+    this.pressed = false;
   }
 
   /** Tears down chip and picker (scene shutdown). */

@@ -1,0 +1,272 @@
+import { expect, type Page } from "@playwright/test";
+import type { E2EHubToast, E2ERoundGeometry, E2ERoundTarget } from "../../src/game/e2eBridge";
+import { type GamePoint, holdCanvas, tapCanvas } from "./canvas";
+
+/**
+ * Journey primitives: open the hub, launch a game by registry index, read what
+ * the bridge publishes, and leave the way a child would.
+ *
+ * Every wait here polls bridge state. Nothing waits a fixed duration for a
+ * transition to land — the only fixed wait in the suite is the parental hold,
+ * where the duration *is* the thing under test. The readiness poll asks the page
+ * for two animation frames, which is a stability check on a state reading, not a
+ * timeout standing in for an event.
+ */
+
+/** The canvas point at the centre of the in-game "← Back" button's hold square. */
+export const BACK_BUTTON: GamePoint = { x: 68, y: 68 };
+
+/** Comfortably past {@link import("../../src/components/ParentLock").DEFAULT_HOLD_DURATION}. */
+export const BACK_HOLD_MS = 3_400;
+
+const BRIDGE_TIMEOUT = 15_000;
+const SCENE_TIMEOUT = 30_000;
+const ROUND_TIMEOUT = 20_000;
+
+/** Collects page errors and console errors for a journey's final assertion. */
+export function collectErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  return errors;
+}
+
+/** The hub's PWA toast, while one is covering the tiles. */
+export function hubToast(page: Page): Promise<E2EHubToast | null> {
+  return page.evaluate(() => window.__abyE2E?.hubToast() ?? null);
+}
+
+/** Whether the hub is accepting taps, per the grid's own entrance state. */
+export function hubReady(page: Page): Promise<boolean> {
+  return page.evaluate(() => window.__abyE2E?.hubReady() ?? false);
+}
+
+/**
+ * Whether the hub is ready now, and still ready a couple of animation frames
+ * later.
+ *
+ * One `true` is not proof: the flag can be withdrawn right after it is read
+ * (the frame a rebuild starts, a resize, a page flip), and a tap taken in that
+ * gap lands on a board that is entering. Two frames are enough to reject a
+ * reading that is about to be invalidated, and short enough that a genuine
+ * wait — the board reports false for about a second — is not extended.
+ */
+async function hubReadySettled(page: Page): Promise<boolean> {
+  return page.evaluate(
+    () =>
+      new Promise<boolean>((resolve) => {
+        const bridge = window.__abyE2E;
+        if (!bridge?.hubReady()) {
+          resolve(false);
+          return;
+        }
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve(bridge.hubReady()));
+        });
+      }),
+  );
+}
+
+/**
+ * Polls until the hub's tiles have finished entering and the board stays ready.
+ *
+ * A tile enters at scale 0 and cannot be hit until its tween ends, so for the
+ * first second or so a tap lands on nothing. Waiting on the grid's own signal
+ * is the alternative to sleeping past it — which would pass here and flake on
+ * a slower host. The reading has to survive two frames because the value alone
+ * can be a leftover from a grid that is already being replaced.
+ */
+export async function waitForHubReady(page: Page): Promise<void> {
+  await expect
+    .poll(() => hubReadySettled(page), {
+      message: "the hub should finish building its grid and start accepting taps",
+      timeout: SCENE_TIMEOUT,
+    })
+    .toBe(true);
+}
+
+/**
+ * Closes the hub's PWA toast the way a parent does, by tapping its button.
+ *
+ * A first visit announces offline readiness, and the toast is drawn over the
+ * tiles inside the canvas, so it swallows the next tap. The journey dismisses
+ * it from the geometry the app publishes rather than tapping a guess: a blind
+ * tap would hit a tile on any visit without a toast and pass for the wrong
+ * reason. Bounded to two attempts, because the button scales in with the
+ * toast's entrance and a tap in its first frame cannot hit it.
+ */
+export async function dismissHubToast(page: Page): Promise<void> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const toast = await hubToast(page);
+    if (!toast) return;
+    await tapCanvas(page, toast.button);
+    try {
+      await expect
+        .poll(() => hubToast(page), {
+          message: "the toast should close when its button is tapped",
+          timeout: 2_000,
+        })
+        .toBeNull();
+      return;
+    } catch (error) {
+      // Still showing: only retry if we are still on the hub, so a tap that
+      // somehow reached a tile fails loudly instead of being replayed.
+      if ((await activeSceneKey(page)) !== "Hub") throw error;
+    }
+  }
+  throw new Error("the hub toast's published button did not dismiss it");
+}
+
+/** Options for {@link openHub}. */
+export interface OpenHubOptions {
+  /**
+   * Close a toast covering the tiles before returning. Default `true`; the boot
+   * journey turns it off so it can assert the toast is reported at all.
+   */
+  dismissToast?: boolean;
+}
+
+/** Opens the built game and waits for the bridge and the hub. */
+export async function openHub(page: Page, options: OpenHubOptions = {}): Promise<void> {
+  await page.goto("/?e2e=1");
+  await expect(page.locator("canvas")).toBeVisible({ timeout: SCENE_TIMEOUT });
+  await expect
+    .poll(() => page.evaluate(() => typeof window.__abyE2E), {
+      message: "?e2e=1 should install the read-only bridge",
+      timeout: BRIDGE_TIMEOUT,
+    })
+    .toBe("object");
+  await waitForScene(page, "Hub");
+  await waitForHubReady(page);
+  if (options.dismissToast !== false) await dismissHubToast(page);
+}
+
+/** The scene key the bridge reports right now, or null mid-transition. */
+export function activeSceneKey(page: Page): Promise<string | null> {
+  return page.evaluate(() => window.__abyE2E?.activeSceneKey() ?? null);
+}
+
+/** Polls until the given scene is the active one. */
+export async function waitForScene(
+  page: Page,
+  key: string,
+  timeout = SCENE_TIMEOUT,
+): Promise<void> {
+  await expect
+    .poll(() => activeSceneKey(page), {
+      message: `the active scene should settle on ${key}`,
+      timeout,
+    })
+    .toBe(key);
+}
+
+/** The hub tiles currently on screen, in registry order. */
+export function hubTiles(page: Page): Promise<E2ERoundTarget[]> {
+  return page.evaluate(() => window.__abyE2E?.hubTiles() ?? []);
+}
+
+/** How many profiles the app has stored. */
+export function profileCount(page: Page): Promise<number> {
+  return page.evaluate(() => window.__abyE2E?.profileCount() ?? -1);
+}
+
+/** How many stickers the active profile has earned. */
+export function stickerCount(page: Page): Promise<number> {
+  return page.evaluate(() => window.__abyE2E?.stickerCount() ?? -1);
+}
+
+/** How many progress dots are filled in the active game, 0 at round start. */
+export function roundIndex(page: Page): Promise<number> {
+  return page.evaluate(() => window.__abyE2E?.roundIndex() ?? -1);
+}
+
+/** The active scene's published round geometry, or null when it has none. */
+export function roundGeometry(page: Page): Promise<E2ERoundGeometry | null> {
+  return page.evaluate(() => window.__abyE2E?.roundGeometry() ?? null);
+}
+
+/** Polls until the round's progress dots show `filled` completions. */
+export async function waitForRoundIndex(
+  page: Page,
+  filled: number,
+  timeout = ROUND_TIMEOUT,
+): Promise<void> {
+  await expect
+    .poll(() => roundIndex(page), {
+      message: `the board should show ${filled} completed round(s)`,
+      timeout,
+    })
+    .toBe(filled);
+}
+
+/**
+ * Polls until the given round is on the board with targets to act on.
+ *
+ * `targets` never lies about what is clickable, so this is also the wait that
+ * covers the game's own between-round delay — no sleeping on 700 ms or 1.2 s.
+ */
+export async function waitForPlayableRound(
+  page: Page,
+  round: number,
+  timeout = ROUND_TIMEOUT,
+): Promise<E2ERoundGeometry> {
+  await expect
+    .poll(
+      async () => {
+        const geometry = await roundGeometry(page);
+        return geometry !== null && geometry.round === round && geometry.targets.length > 0;
+      },
+      {
+        message: `round ${round} should be on the board with playable targets`,
+        timeout,
+      },
+    )
+    .toBe(true);
+
+  const geometry = await roundGeometry(page);
+  if (!geometry) throw new Error(`round ${round} vanished between polling and reading`);
+  return geometry;
+}
+
+/**
+ * Taps the hub tile for a registry index and waits for its scene.
+ *
+ * The tile is found by the index the bridge publishes, not by position, so the
+ * journey does not care how the grid is laid out.
+ */
+export async function launchGame(page: Page, index: number, sceneKey: string): Promise<void> {
+  await waitForScene(page, "Hub");
+  await waitForHubReady(page);
+
+  await expect
+    .poll(async () => (await hubTiles(page)).some((tile) => tile.id === String(index)), {
+      message: `hub tile ${index} (${sceneKey}) should be on screen`,
+      timeout: SCENE_TIMEOUT,
+    })
+    .toBe(true);
+
+  const tiles = await hubTiles(page);
+  const tile = tiles.find((candidate) => candidate.id === String(index));
+  if (!tile) throw new Error(`hub tile ${index} (${sceneKey}) is not on screen`);
+
+  await tapCanvas(page, tile);
+  await waitForScene(page, sceneKey);
+}
+
+/**
+ * Leaves a game the way a player does: hold the back control, then wait for the
+ * hub. The hold is the parental gate, so it cannot be short-circuited.
+ */
+export async function returnToHub(page: Page): Promise<void> {
+  await holdCanvas(page, BACK_BUTTON, BACK_HOLD_MS);
+  await waitForScene(page, "Hub");
+  await waitForHubReady(page);
+  await dismissHubToast(page);
+}
+
+/** Taps a published target's centre. */
+export async function tapTarget(page: Page, target: E2ERoundTarget): Promise<void> {
+  await tapCanvas(page, target);
+}

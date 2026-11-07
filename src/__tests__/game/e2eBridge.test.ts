@@ -1,14 +1,17 @@
 import type Phaser from "phaser";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { E2ERoundGeometry } from "../../game/e2eBridge";
+import type { E2EHubToast, E2ERoundGeometry, E2ERoundTarget } from "../../game/e2eBridge";
 import { initE2EBridge } from "../../game/e2eBridge";
 import { addProfile, earnSticker } from "../../utils/storage";
 
 /** The slice of a scene the bridge reads, with nothing of Phaser booted. */
 interface FakeScene {
   scene: { key: string };
-  progressDots?: Array<{ alpha: number }>;
+  completedRounds?: number;
   e2eRoundGeometry?: () => E2ERoundGeometry | null;
+  e2eHubTiles?: () => E2ERoundTarget[];
+  e2eHubToast?: () => E2EHubToast | null;
+  e2eHubReady?: () => boolean;
 }
 
 interface FakeGame {
@@ -88,6 +91,9 @@ describe("initE2EBridge", () => {
       expect(Object.isFrozen(bridge)).toBe(true);
       expect(Object.keys(bridge ?? {}).sort()).toEqual([
         "activeSceneKey",
+        "hubReady",
+        "hubTiles",
+        "hubToast",
         "profileCount",
         "roundGeometry",
         "roundIndex",
@@ -137,21 +143,20 @@ describe("initE2EBridge", () => {
   });
 
   describe("roundIndex", () => {
-    it("counts filled progress dots as completed rounds", () => {
+    it("reports the scene's completed-round counter", () => {
       const scene = sceneWith("ShapeSorter");
-      scene.progressDots = [{ alpha: 0.3 }, { alpha: 0.3 }, { alpha: 0.3 }];
       install([scene]);
 
       expect(window.__abyE2E?.roundIndex()).toBe(0);
 
-      scene.progressDots[0].alpha = 1;
+      scene.completedRounds = 1;
       expect(window.__abyE2E?.roundIndex()).toBe(1);
 
-      scene.progressDots[1].alpha = 1;
+      scene.completedRounds = 2;
       expect(window.__abyE2E?.roundIndex()).toBe(2);
     });
 
-    it("reports zero for a scene that has no progress dots", () => {
+    it("reports zero for a scene with no counter", () => {
       install([sceneWith("Hub")]);
 
       expect(window.__abyE2E?.roundIndex()).toBe(0);
@@ -189,6 +194,89 @@ describe("initE2EBridge", () => {
       };
       scene.e2eRoundGeometry = () => second;
       expect(window.__abyE2E?.roundGeometry()).toBe(second);
+    });
+  });
+
+  describe("hubTiles", () => {
+    it("reports no tiles when the active scene publishes no hub hook", () => {
+      install([sceneWith("ShapeSorter")]);
+
+      expect(window.__abyE2E?.hubTiles()).toEqual([]);
+    });
+
+    it("reports no tiles when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.hubTiles()).toEqual([]);
+    });
+
+    it("returns the hook's live value", () => {
+      const scene = sceneWith("Hub");
+      const first: E2ERoundTarget[] = [
+        { id: "0", x: 100, y: 200 },
+        { id: "1", x: 260, y: 200 },
+      ];
+      scene.e2eHubTiles = () => first;
+      install([scene]);
+
+      expect(window.__abyE2E?.hubTiles()).toBe(first);
+
+      const second: E2ERoundTarget[] = [{ id: "21", x: 512, y: 640 }];
+      scene.e2eHubTiles = () => second;
+      expect(window.__abyE2E?.hubTiles()).toBe(second);
+    });
+  });
+
+  describe("hubToast", () => {
+    it("reports null when the active scene publishes no toast hook", () => {
+      install([sceneWith("ShapeSorter")]);
+
+      expect(window.__abyE2E?.hubToast()).toBeNull();
+    });
+
+    it("reports null when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.hubToast()).toBeNull();
+    });
+
+    it("follows the hook from showing to dismissed", () => {
+      const scene = sceneWith("Hub");
+      const showing: E2EHubToast = { button: { x: 512, y: 140 } };
+      let toast: E2EHubToast | null = showing;
+      scene.e2eHubToast = () => toast;
+      install([scene]);
+
+      expect(window.__abyE2E?.hubToast()).toEqual(showing);
+
+      toast = null;
+      expect(window.__abyE2E?.hubToast()).toBeNull();
+    });
+  });
+
+  describe("hubReady", () => {
+    it("is false when the active scene publishes no readiness hook", () => {
+      install([sceneWith("ShapeSorter")]);
+
+      expect(window.__abyE2E?.hubReady()).toBe(false);
+    });
+
+    it("is false when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.hubReady()).toBe(false);
+    });
+
+    it("follows the hub from entering to settled", () => {
+      const scene = sceneWith("Hub");
+      let ready = false;
+      scene.e2eHubReady = () => ready;
+      install([scene]);
+
+      expect(window.__abyE2E?.hubReady()).toBe(false);
+
+      ready = true;
+      expect(window.__abyE2E?.hubReady()).toBe(true);
     });
   });
 });

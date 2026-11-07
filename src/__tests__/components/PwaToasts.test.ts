@@ -25,12 +25,13 @@ vi.mock("../../utils/pwaBridge", () => ({
 }));
 
 /** Options the panel passes to `new PwaToast(scene, options)`. */
-type ToastOptions = { kind: string };
+type ToastOptions = { kind: string; onDismiss?: () => void };
 
 const toastCtor = vi.hoisted(() =>
   vi.fn(function (this: Record<string, unknown>, _scene: unknown, _options: ToastOptions) {
     this.destroy = vi.fn();
     this.update = vi.fn();
+    this.dismissPoint = vi.fn(() => ({ x: 512, y: 140 }));
   }),
 );
 vi.mock("../../components/PwaToast", () => ({
@@ -111,5 +112,25 @@ describe("PwaToasts", () => {
     // No further events after unsubscribe.
     bridgeMock.listeners[0]?.("offline");
     expect(toastCtor).not.toHaveBeenCalled();
+  });
+
+  it("reports no dismiss point while no toast is showing", () => {
+    const { toasts } = makeToasts();
+    toasts.wire();
+
+    expect(toasts.dismissPoint()).toBeNull();
+  });
+
+  it("reports the visible toast's dismiss point until it is dismissed", () => {
+    const { toasts } = makeToasts();
+    toasts.wire();
+    bridgeMock.listeners[0]?.("offline");
+
+    // The point is the toast's own, not a second copy of its geometry.
+    expect(toasts.dismissPoint()).toEqual({ x: 512, y: 140 });
+
+    toastOptions().onDismiss?.();
+
+    expect(toasts.dismissPoint()).toBeNull();
   });
 });
