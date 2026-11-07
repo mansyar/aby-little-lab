@@ -108,12 +108,15 @@
 - **Covers:** FR-10, NFR-3, AC-10
 - **Touches:** `e2e/`, `conductor/tracks/20261107-release-e2e/verification/`
 - **Verification:** full chain plus ten consecutive `pnpm test:e2e` runs
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified - the mutation turned the suite red (3 failed: `launch-all`, `shape-sorter`, and `time-limit`, whose nudge can only be reached by tapping a tile) while every other gate stayed green; reverted, then ten consecutive runs green at 3.07-3.10 m with retries 0. NFR-2 is resolved by measuring rather than amending: 4.9 m serial became 3.0 m on two workers, leaving 1.9 m of headroom.
+- **Checkpoint:** 00b9216d
+- **Evidence:** conductor/tracks/20261107-release-e2e/verification/phase-5.md
 
-- [ ] **P5.T1: Mutation proof** - covers: FR-10, AC-10
-  - [ ] **P5.T1.1:** Break one tile's hit area, run the suite, capture the failing journey and its output
-  - [ ] **P5.T1.2:** Revert, confirm green, and confirm no probe survives in any commit
-- [ ] **P5.T2: Determinism** - covers: NFR-3
-  - [ ] **P5.T2.1:** Ten consecutive local runs with retries disabled, all green; record the runtimes
-- [ ] **P5.T3: Document the layer** - covers: NFR-2
-  - [ ] **P5.T3.1:** Record the runtime budget, the retry policy, and how to run one journey locally
+- [x] **P5.T1: Mutation proof** - covers: FR-10, AC-10
+  - [x] **P5.T1.1:** Break one tile's hit area, run the suite, capture the failing journey and its output
+  - [x] **P5.T1.2:** Revert, confirm green, and confirm no probe survives in any commit
+- [x] **P5.T2: Determinism** - covers: NFR-3
+  - [x] **P5.T2.1:** Ten consecutive local runs with retries disabled, all green; record the runtimes
+- [x] **P5.T3: Document the layer** - covers: NFR-2
+  - [x] **P5.T3.1:** Record the runtime budget, the retry policy, and how to run one journey locally
