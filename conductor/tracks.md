@@ -269,3 +269,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: HubScene Decomposition** — [20261027-hubscene-split](./archive/20261027-hubscene-split/index.md) — refactor — medium
 - [x] **Track: Trunk Green — Wall-Clock-Safe Test Fixtures** - [20261107-trunk-green](./archive/20261107-trunk-green/index.md) - chore - high
 - [x] **Track: Browser Journey Suite** - [20261107-release-e2e](./archive/20261107-release-e2e/index.md) - chore - high
+- [ ] **Track: Storage Resilience** - [20261107-storage-resilience](./tracks/20261107-storage-resilience/index.md) - bug - high
