@@ -64,7 +64,9 @@ So a policy with no `'unsafe-inline'` and no `'unsafe-eval'` is achievable, not 
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-1 | Every response from the container carries `Content-Security-Policy` with `default-src 'self'`, `script-src 'self'`, `style-src 'self'`, `img-src 'self' data:`, `font-src 'self'`, `media-src 'self'`, `connect-src 'self'`, `worker-src 'self'`, `manifest-src 'self'`, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`, `frame-ancestors 'none'`. No directive contains `unsafe-inline`, `unsafe-eval`, a bare `*` or a scheme wildcard. | must |
+| FR-1 | Every response from the container carries `Content-Security-Policy` with `default-src 'self'`, `script-src 'self'`, `style-src 'self'`, `img-src 'self' data: blob:`, `font-src 'self'`, `media-src 'self'`, `connect-src 'self'`, `worker-src 'self'`, `manifest-src 'self'`, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`, `frame-ancestors 'none'`. No directive contains `unsafe-inline`, `unsafe-eval`, a bare `*` or a scheme wildcard. | must |
+
+**FR-1 amendment (2026-11-08, measured in Phase 2).** The original value was `img-src 'self' data:`. Under the enforced policy a bare boot logged ten refusals — `Loading the image 'blob:http://…/<uuid>' violates … "img-src 'self' data:"` — because Phaser uploads canvas textures through `blob:` object URLs, and 12 of 16 journeys failed. Adding `blob:` was the smallest value that made the suite pass; `data:` stayed, because it is equally load-bearing (dropping it alone fails `boot`, whose first sample is a `data:image/png` texture). No `unsafe-*` was added and no directive was removed, which is what NFR-3 requires.
 | FR-2 | Every response carries `X-Content-Type-Options: nosniff`. | must |
 | FR-3 | Every response carries `Referrer-Policy: no-referrer`. | must |
 | FR-4 | Every response carries a `Permissions-Policy` denying `camera`, `microphone`, `geolocation`, `payment`, `usb`, `serial`, `midi`, `display-capture`, `accelerometer`, `gyroscope` and `magnetometer` (each `=()`). `fullscreen` is not mentioned, so the installed-PWA path keeps its default. | must |

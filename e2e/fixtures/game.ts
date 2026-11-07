@@ -42,18 +42,40 @@ const SCENE_TIMEOUT = 30_000;
 const ROUND_TIMEOUT = 20_000;
 
 /**
+ * What the browser calls a policy refusal. Chromium writes "Refused to load …
+ * because it violates the following Content Security Policy directive", and the
+ * other engines name the policy too, so matching the policy's name is enough to
+ * tell a blocked resource from an ordinary console error.
+ */
+const CSP_REFUSAL = /content security policy/i;
+
+/**
  * Collects page errors and console errors for a journey's final assertion.
  *
  * `console: false` keeps only uncaught page errors, which is what an offline
  * journey can honestly claim: a relaunch with no network may log a failed fetch
  * for something optional without anything being wrong with the app.
+ *
+ * The first Content-Security-Policy refusal is also echoed to the runner's own
+ * output. It arrives as a console error, so the final assertion would name it —
+ * but only if the journey reaches that line, and a blocked resource usually
+ * fails earlier as a plain timeout on a blank canvas. Echoing it once means the
+ * violation text is in the failure output either way, without changing what the
+ * assertion sees or how many times a journey reports.
  */
 export function collectErrors(page: Page, options: { console?: boolean } = {}): string[] {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   if (options.console !== false) {
+    let echoed = false;
     page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
+      if (message.type() !== "error") return;
+      const text = message.text();
+      errors.push(text);
+      if (!echoed && CSP_REFUSAL.test(text)) {
+        echoed = true;
+        console.log(`[collectErrors] ${text}`);
+      }
     });
   }
   return errors;
