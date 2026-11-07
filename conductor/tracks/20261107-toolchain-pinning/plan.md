@@ -13,7 +13,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-8, FR-10, AC-1, AC-2, AC-7
 - **Touches:** `package.json`, `.node-version`, `pnpm-lock.yaml`
 - **Verification:** `pnpm install --frozen-lockfile && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Declare the versions** — covers: FR-1, FR-2, FR-3
   - [ ] **P1.T1.1: Add `packageManager`** as `pnpm@12.16.1`, exact, no range
