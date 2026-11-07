@@ -41,6 +41,30 @@
   scenes gained a `protected e2eRoundGeometry()` override that returns null on
   the base class.
 
+## CI, on this track's own PR (#79)
+
+| Job | Result | Duration | Run |
+| --- | --- | --- | --- |
+| Quality Gates | pass | 1m38s | 42347052476 / 128326965403 |
+| Browser Journeys | pass | 3m36s | 42347052476 / 128327333063 |
+| Deploy to Coolify | skipped (not a tag) | - | 42347052476 / 128327333980 |
+
+AC-9 is satisfied by the passing job above. The job's **first** execution - on
+the commit before `b9f3a649` - failed `parental-gate.spec.ts` on three attempts
+with "the parental panel should be open before its rows are touched", after
+passing ten consecutive local runs. The cause was the journeys, not the app: the
+gate counts **scene** time, so a 3.4 s wall-clock hold is only 3.0 s of gate on a
+runner rendering at a handful of frames per second. Fixed by holding **until the
+state arrives** (`holdCanvasUntil`) rather than for a duration - both gates, the
+hub's Settings control and the back button - which is also faster on a fast
+machine. The suite is unchanged in what it asserts; `3m36s` on CI against `3.0m`
+locally, inside the 5 min budget.
+
+That failure is worth keeping in the record: it is the same class of defect as
+the wall-clock test fixtures this project fixed in `20261107-trunk-green`, one
+level up - a test that encodes a duration instead of a state is a test that
+depends on the machine underneath it.
+
 ## Scope note
 
 The phase Touches started as `e2e/` and `e2e/fixtures/`. They widened, with the

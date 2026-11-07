@@ -58,7 +58,8 @@ The five defects, all found by running rather than reading:
 - NFR-4 — met: Vitest does not collect the specs; unit count only grew by the
   tests for the bridge and the chip guard.
 - NFR-5 — met: `pnpm typecheck` covers both programs, Biome covers `e2e/`.
-- AC-1..AC-10 — met except AC-9, which is this PR's own CI run.
+- AC-1..AC-10 — met. AC-9 is this PR's own run: `Browser Journeys` passed in
+  3m36s on this branch (run 42347052476), after the hold-until-open fix below.
 
 ## Verification
 
@@ -72,7 +73,8 @@ The five defects, all found by running rather than reading:
 | Bundle | `validate-bundle` | shell 152.6 kB <= 200 kB, phaser 1,335.0 kB |
 | PWA | `validate-pwa` | 16 passed |
 | Documents | `validate-docs` | 5 passed |
-| Browser | `pnpm test:e2e` | 13 passed in 3.2 min, retries 0 |
+| Browser | `pnpm test:e2e` | 13 passed in 3.0 min, retries 0 |
+| Browser on CI | GitHub Actions, this PR | `Browser Journeys` pass, 3m36s (run 42347052476) |
 | Determinism | ten consecutive `pnpm test:e2e` | 10/10 green, 3.07-3.10 min |
 | Mutation | 1x1 tile hit area | 3 journeys red, every static gate green |
 
