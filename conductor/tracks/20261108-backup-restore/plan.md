@@ -15,18 +15,22 @@
 - **Covers:** FR-1, FR-2, FR-4, FR-5, NFR-4, AC-1, AC-2, AC-6, AC-8
 - **Touches:** `src/utils/backupFormat.ts`, `src/__tests__/utils/backupFormat.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P1.T1: Build and read the envelope** - covers: FR-1, FR-2
+- **Status:** verified
+- [x] **P1.T1: Build and read the envelope** - covers: FR-1, FR-2
   - **P1.T1.1:** Write the envelope with `format`, `formatVersion`, `schemaVersion`, `appVersion`, `exportedAt`, `checksum` and the normalised save as `payload`
   - **P1.T1.2:** Hash the canonical `JSON.stringify(payload)` with a 64-bit non-cryptographic hash, documented as corruption detection rather than protection
   - **P1.T1.3:** Parse a candidate file into a value or a named refusal, covering not-JSON, wrong `format`, newer `formatVersion`, newer `schemaVersion` and checksum mismatch
-- [ ] **P1.T2: Decide what an import would write** - covers: FR-5
+- [x] **P1.T2: Decide what an import would write** - covers: FR-5
   - **P1.T2.1:** Compute the merge as the better of each field per matching profile, and the added profiles whose ids are new, without touching storage
   - **P1.T2.2:** Apply the four-profile cap as a refusal of the whole import when an incoming profile cannot fit
   - **P1.T2.3:** Prove idempotence: merging the same payload twice equals merging it once
-- [ ] **P1.T3: Prove the format cannot lie about itself** - covers: AC-1, AC-2, AC-6, AC-8
+- [x] **P1.T3: Prove the format cannot lie about itself** - covers: AC-1, AC-2, AC-6, AC-8
   - **P1.T3.1:** Table-driven test for the five refusals, each asserting its own sentence and an untouched input
   - **P1.T3.2:** A v1-only save exports as a v2 payload carrying the migrated content
+
+**Result:** verified - a save wraps in a versioned envelope whose checksum covers exactly the payload, an import plans a merge best-of-field or a replace, and six named refusals cover every damaged, foreign, newer or oversized file. 40 new tests, 303 files lint-clean, 3,025 tests green, coverage 97.26/91.48/96.18/98.24, shell entry unchanged.
+**Checkpoint:** 839fe57b
+**Evidence:** conductor/tracks/20261108-backup-restore/verification/phase-1.md
 
 ## Phase 2: The browser seam, and the write it performs
 
