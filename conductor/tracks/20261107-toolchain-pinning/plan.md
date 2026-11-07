@@ -37,23 +37,22 @@
 - **Covers:** FR-4, FR-5, FR-11, FR-12, FR-13, FR-14, AC-3, AC-4, AC-10, AC-11, AC-13
 - **Touches:** `Dockerfile`, `.github/workflows/ci.yml`
 - **Verification:** `docker build . && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm build && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: The Dockerfile consumes the pin** — covers: FR-5, AC-4, AC-10
-  - [ ] **P2.T1.1: Move the build stage to the pinned Node major** and install the pinned pnpm; if `node:24-alpine` ships no usable Corepack, fall back to `npm i -g` and record the evidence
-  - [ ] **P2.T1.2: `docker build` exits 0** and the image serves the same `dist/` shape; record the command, duration and any warning
-- [ ] **P2.T2: CI consumes the pin** — covers: FR-4, AC-3
-  - [ ] **P2.T2.1: Resolve Node from `.node-version`** in both jobs via `node-version-file`, removing both `node-version:` literals
-  - [ ] **P2.T2.2: Drop the pnpm `version:` input** in both jobs so the action reads `packageManager`, per its own README
-- [ ] **P2.T3: Classify the change** — covers: FR-11, FR-12, FR-13, FR-14, AC-11, AC-13
-  - [ ] **P2.T3.1: Add a classification step to each job** that resolves the PR base sha, lists changed paths with `git diff`, and yields `code` unless every path is documentation; unknown base, empty diff or error resolves to `code`
-  - [ ] **P2.T3.2: Gate the expensive steps** on the output: documentation-only keeps install and `validate-docs` in the gates job and runs nothing in the browser job
-  - [ ] **P2.T3.3: Remove nothing else** — keep the existing `push` `paths-ignore`, the deploy job and its tag gate
-  - [ ] **P2.T3.4: Show the step never fails the job** when it skips, so both required checks report green
+- [x] **P2.T1: The Dockerfile consumes the pin** — covers: FR-5, AC-4, AC-10
+  - [x] **P2.T1.1: Move the build stage to the pinned Node major** and install the pinned pnpm; if `node:24-alpine` ships no usable Corepack, fall back to `npm i -g` and record the evidence
+  - [x] **P2.T1.2: `docker build` exits 0** and the image serves the same `dist/` shape; record the command, duration and any warning
+- [x] **P2.T2: CI consumes the pin** — covers: FR-4, AC-3
+  - [x] **P2.T2.1: Resolve Node from `.node-version`** in both jobs via `node-version-file`, removing both `node-version:` literals
+  - [x] **P2.T2.2: Drop the pnpm `version:` input** in both jobs so the action reads `packageManager`, per its own README
+- [x] **P2.T3: Classify the change** — covers: FR-11, FR-12, FR-13, FR-14, AC-11, AC-13
+  - [x] **P2.T3.1: Add a classification step to each job** that resolves the PR base sha, lists changed paths with `git diff`, and yields `code` unless every path is documentation; unknown base, empty diff or error resolves to `code`
+  - [x] **P2.T3.2: Gate the expensive steps** on the output: documentation-only keeps install and `validate-docs` in the gates job and runs nothing in the browser job
+  - [x] **P2.T3.3: Remove nothing else** — keep the existing `push` `paths-ignore`, the deploy job and its tag gate
+  - [x] **P2.T3.4: Show the step never fails the job** when it skips, so both required checks report green
 
-<!--
-**Result:** verified
-**Checkpoint:** 1fb6f6f3
+**Result:** verified - the Dockerfile builds on `node:24-alpine` with pnpm 12.16.1 (exit 0, 36 s, same dist shape), and both CI jobs take their versions from the declaration. A classification step in each job keeps a documentation-only change to the install plus `validate-docs` while both required checks still report; its three arms were proved in the image shell (doc, code, and the unknown-base fail-safe). The first real build found two defects: `.dockerignore` never excluded `.conductor/`, so a stray `node_modules` there broke the build context, and the classifier fetched commits it already had.
+**Checkpoint:** c3770f9c
 **Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/phase-2.md
 -->
 
