@@ -76,6 +76,7 @@
     - [11.3 Validator scripts](#113-validator-scripts)
     - [11.4 GitHub Actions](#114-github-actions)
     - [11.5 Container and host](#115-container-and-host)
+    - [11.6 Security headers and the serving layer](#116-security-headers-and-the-serving-layer)
 12. [See also](#12-see-also)
 
 ---
@@ -1095,13 +1096,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-134 test files, 2,920 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+135 test files, 2,927 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.21 (5967/6138), branches 91.14 (1658/1819), functions 96.18 (1310/1362) and lines 98.21 (5551/5652) across 134 files and 2,920 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.21 (5967/6138), branches 91.14 (1658/1819), functions 96.18 (1310/1362) and lines 98.21 (5551/5652) across 135 files and 2,927 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1135,6 +1136,8 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 ```
 
 `pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
+
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 16 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 
@@ -1176,6 +1179,7 @@ VitePWA({
 | `validate-bundle.js` | exactly one `phaser-*.js` vendor chunk; every `index-*.js` shell entry ≤ `200 * 1024` bytes |
 | `validate-pwa.js` | 16 named checks over `dist/sw.js` and `dist/manifest.webmanifest`: files exist, manifest name/orientation/display/`display_override`, `precacheAndRoute` present, **every emitted `dist/assets/*.js` chunk present in the precache manifest** (so a lazily loaded game or art group is offline-capable, or the build fails), BGM precached, no `.ligne` or `ligne_wasm_bg` asset, `NavigationRoute` registered |
 | `validate-boot.js` | drives the production build through `playwright-core`: three cold loads, samples Navigation Timing after canvas mount + 5 s settle, fails when the median exceeds 3000 ms |
+| `validate-headers.js` | boots the built image (not the config text) on a fixed port — `HEADERS_IMAGE` names the image, `HEADERS_PORT` the port, and a busy port is a failure rather than a reason to pick another — and probes seven route classes: four security headers present on every one, the exact `Cache-Control` per class, and a 404 through the hashed-asset location that still carries the policy (`always`) |
 | `validate-docs.js` | asserts the durable invariants between the documents and the code: every `docs/release-notes-v*.md` is linked from the README's Documentation index, every relative link resolves and every anchor matches a heading, the README, the PRD and the TDD describe exactly the games in `GAME_REGISTRY`, and no document points at a Conductor path that does not exist |
 | `render-svg-contact-sheets.mjs` | developer tool, not a gate: renders per-category contact sheets from the SVG corpus (categories include `stories`) for art review |
 
@@ -1189,7 +1193,7 @@ VitePWA({
 
 | Job | Runs on | Steps |
 | --- | --- | --- |
-| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `Classify the change` (publishes `tier` as the `changes` step output), `pnpm/action-setup@v6` (reads `packageManager`: 12.16.1), `setup-node@v7` (reads `.node-version`: Node 24, pnpm store cached), `pnpm install --frozen-lockfile`, `node scripts/validate-docs.js`, then — `tier == 'code'` only — `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `vite preview` on port 4173 and `node scripts/validate-boot.js` |
+| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `Classify the change` (publishes `tier` as the `changes` step output), `pnpm/action-setup@v6` (reads `packageManager`: 12.16.1), `setup-node@v7` (reads `.node-version`: Node 24, pnpm store cached), `pnpm install --frozen-lockfile`, `node scripts/validate-docs.js`, then — `tier == 'code'` only — `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `vite preview` on port 4173 and `node scripts/validate-boot.js`, then `docker build -t aby-little-lab:headers .` and `node scripts/validate-headers.js` (the step fails with `::error::Docker is required…` when the runner has no Docker rather than skipping, so the tier's claim stays true) |
 | Browser Journeys | same triggers, `needs: quality-gates`, `timeout-minutes: 15` | checkout, `Classify the change` (the same script, its own `tier` output), pnpm and Node from the declaration, then — `tier == 'code'` only — `pnpm install --frozen-lockfile`, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e` (builds `dist`, then the journey suite on two workers), with `test-results/` uploaded when the job fails |
 | Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
@@ -1204,6 +1208,62 @@ One-time setup spans Coolify and the repo settings: an API token with the `deplo
 The `Dockerfile` is two stages: `node:24-alpine` with `corepack prepare pnpm@12.16.1` — the Node major the base image matches `.node-version`, the pnpm version `package.json` declares — then `pnpm install --frozen-lockfile` and `pnpm run build`; then `nginx:1.27-alpine` with `nginx.conf` and `dist/` copied in, port 80 exposed and a `wget --spider` healthcheck. The host is a private VPS running Coolify behind Nginx.
 
 Locally the image builds with `docker build -t aby-little-lab .` and smoke-tests with `docker run --rm -p 8080:80 aby-little-lab`, which serves the app at `http://localhost:8080`. The container speaks plain HTTP on port 80, so production terminates TLS at the hosting provider or reverse proxy in front of it; installability and offline both depend on that.
+
+### 11.6 Security headers and the serving layer
+
+Every response the container emits carries four headers: `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` and a `Permissions-Policy` denying eleven browser features. They are declared once, in `nginx.security-headers.conf`, which the `Dockerfile` copies to `/etc/nginx/snippets/security-headers.conf` — the path every `include` names, so a forgotten copy breaks the container at startup instead of serving without a policy.
+
+**The inheritance rule is what forced the snippet.** nginx inherits `add_header` from an enclosing block only into a location that declares none of its own. `nginx.conf` declares a `Cache-Control` in five locations — `/sw.js`, `/manifest.webmanifest`, `/index.html`, the hashed-asset regex and the `.mp3` regex — so a policy written once in the `server` block would be missing from exactly those five, which is nearly every request the app makes, while the config still read as correct. Each of the five includes the snippet, and so does the server block, which is what covers `location /` and the SPA fallback: both are resolved by `try_files`' internal redirect into `location = /index.html`, so they serve its `no-cache` and its headers. Every declaration carries `always`, because without it nginx drops `add_header` from 4xx and 5xx responses — including the 404 that a missing asset receives.
+
+`src/__tests__/guard/securityHeaders.test.ts` reads the config text and fails, naming the location, when a location declares an `add_header` without the include, when a header leaves the snippet, when the CSP gains `unsafe-inline`, `unsafe-eval` or `*`, or when the deny set loses a feature. That is the unit half; the runtime half boots a container.
+
+| Directive | Value | Why it is that value |
+| --- | --- | --- |
+| `default-src` | `'self'` | The floor: nothing loads from anywhere else. |
+| `script-src` | `'self'` | The shell chunk, the Phaser vendor chunk and the lazy game chunks are same-origin files, and the service worker's `importScripts('/workbox-*.js')` is same-origin too. No `'unsafe-inline'` or `'unsafe-eval'` because neither is needed: `dist/index.html` holds one module script and nothing inline, and neither bundle contains `eval(`, `new Function(`, `createElement("style")` or `insertRule`. |
+| `style-src` | `'self'` | One emitted stylesheet. Phaser assigns through the CSSOM (`element.style.*`), which CSP does not govern, and no bundle creates a `<style>` element. |
+| `img-src` | `'self' data: blob:` | Both extra tokens are load-bearing and were measured, not assumed. Every generated artwork is a `data:image/svg+xml;base64,…` URI (`src/game/art/svgDataUri.ts`), so `data:` keeps the hub tiles drawn; Phaser uploads canvas textures through `blob:` object URLs, and under `'self' data:` alone a bare boot logged ten `blob:` refusals and 12 of 16 journeys failed. Neither token is a wildcard. |
+| `font-src` | `'self'` | The bundled Baloo 2 WOFF2, nothing else. |
+| `media-src` | `'self'` | The background music served from `/audio/`. |
+| `connect-src` | `'self'` | Workbox precaches from same-origin URLs under the worker's own policy; the app makes no other network request. |
+| `worker-src` | `'self'` | The service worker is classic and registered from `/sw.js`; no `blob:` worker is created. |
+| `manifest-src` | `'self'` | `/manifest.webmanifest`. |
+| `object-src` | `'none'` | No plugin content exists, so none may load. |
+| `base-uri` | `'none'` | Nothing may retarget relative URLs at runtime. |
+| `form-action` | `'none'` | The app submits no form to any origin. |
+| `frame-ancestors` | `'none'` | The app may not be framed. A `<meta>` tag cannot express this at all, which is part of why the policy lives in nginx. |
+
+No `unsafe-*` token appears anywhere in the policy, and both the guard test and the validator assert their absence rather than trusting the table.
+
+| Header | Value | Why it is that value |
+| --- | --- | --- |
+| `X-Content-Type-Options` | `nosniff` | A `.js` or `.mp3` response may not be sniffed into a different type and executed or rendered as something it is not. |
+| `Referrer-Policy` | `no-referrer` | The default leaks the origin on cross-origin navigation. The app has no outbound link today, which is exactly why the value is fixed before one appears. |
+| `Permissions-Policy` | `camera`, `microphone`, `geolocation`, `payment`, `usb`, `serial`, `midi`, `display-capture`, `accelerometer`, `gyroscope` and `magnetometer`, each `=()` | Nothing in the app asks for any of them, so a script that did would be refused. `fullscreen` is deliberately unmentioned: a feature named with `=()` is denied outright, and the installed PWA's `display_override` begins with `fullscreen`. |
+
+**The validator.** `scripts/validate-headers.js` boots the image on `HEADERS_PORT` (default 8080), fails fast when that port is busy instead of picking another, polls readiness with a bounded wait and no fixed sleep, and removes the container on every path including failure — from the `finally` and from an `exit` hook, because `fatal` throws rather than calling `process.exit`, which would leave the container holding the port. It probes seven route classes — `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest`, a hashed asset chosen from `dist/assets`, an unknown path through the SPA fallback and a missing hashed asset — asserting the four headers on each, the exact `Cache-Control` that class served before the policy existed, and the `Content-Type` it must keep. The missing asset is the row that proves `always`: its 404 still carries the policy. The image is kept, because the journey run below reuses it.
+
+The content-type assertions exist because `nosniff` makes a wrong type fatal rather than cosmetic: a service worker served as `text/plain` is refused by the browser and the app cannot start offline, while a header-only check stays green. Adding them found one real defect — nginx's `mime.types` has no `webmanifest` entry, so the manifest shipped as `application/octet-stream` — fixed with `default_type application/manifest+json;` in that location rather than a `types { }` block, which would have replaced the inherited type table for everything else it serves.
+
+```bash
+docker build -t aby-little-lab:headers .
+node scripts/validate-headers.js
+```
+
+**The journeys under the policy.** `vite preview` sends no security header, so only the container can prove the app runs under the policy rather than argue it:
+
+```bash
+docker build -t aby-little-lab:headers .
+docker run --rm -d --name aby-edge-e2e -p 8080:80 aby-little-lab:headers
+E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e
+docker rm -f aby-edge-e2e
+```
+
+`E2E_BASE_URL` makes the suite target that origin and start no server of its own ([§10.5](#105-the-browser-journey-layer)); unset, every value is the preview default it was before. The 16 journeys take about 3.6 min against the container, inside the 5-minute budget.
+
+CI runs the validator in the gates job under the same `tier == 'code'` expression as the other steps, so a documentation-only change skips it: `docker build -t aby-little-lab:headers .` then `node scripts/validate-headers.js`. A runner without Docker fails the step with a `::error::` annotation rather than skipping it, because a skipped check would make the tier's guarantee vacuous.
+
+**Deliberately absent.** HSTS is only meaningful behind Coolify's TLS terminator and pins a mistake; COOP protects cross-origin popups and OAuth flows the app does not have; CORP and COEP exist for cross-origin resources there are none of. Each was considered and omitted, not forgotten.
 
 ---
 

@@ -13,6 +13,10 @@ RUN pnpm run build
 FROM nginx:1.27-alpine AS runtime
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# nginx exits at startup on a missing include, so shipping the snippet in the
+# same layer as the config it belongs to makes an omission fail the container
+# rather than quietly serve every route without a policy.
+COPY nginx.security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

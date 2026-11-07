@@ -96,6 +96,20 @@ jobs:
           sleep 3
           node scripts/validate-boot.js
 
+      # The policy is only proven by a container. The guard test reads
+      # `nginx.conf` and the snippet as text; this step asserts what nginx
+      # actually sends, on every route class, from the image Coolify builds.
+      # Docker missing is an error rather than a skip: a silently skipped check
+      # would make "every code change is validated" mean nothing, which is the
+      # whole of AC-7. The image is built here, not reused, because a cache hit
+      # from another job could hide a snippet the Dockerfile no longer copies.
+      - name: Security headers
+        if: steps.changes.outputs.tier == 'code'
+        run: |
+          command -v docker >/dev/null 2>&1 || { echo "::error::Docker is required to validate the security headers"; exit 1; }
+          docker build -t aby-little-lab:headers .
+          node scripts/validate-headers.js
+
   e2e:
     name: Browser Journeys
     # A separate job after the quality gates, not a step inside them, so a
