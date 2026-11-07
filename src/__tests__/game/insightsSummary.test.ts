@@ -7,7 +7,14 @@ import {
 } from "../../game/insightsSummary";
 import { createDefaultPlayTime, todayKey } from "../../game/playTimeLogic";
 import { createDefaultProgressMap } from "../../game/progressLogic";
-import type { GameId, GameProgress, Profile, ProfileInsights, StickerData } from "../../types";
+import type {
+  DayActivity,
+  GameId,
+  GameProgress,
+  Profile,
+  ProfileInsights,
+  StickerData,
+} from "../../types";
 import { GAME_IDS } from "../../types";
 
 /**
@@ -27,10 +34,29 @@ function insightsOf(partial: Partial<ProfileInsights>): ProfileInsights {
   return { ...createDefaultInsights(), ...partial };
 }
 
-/** A profile with the given per-game stats and the given limit and history. */
+/** The activity the stamps of a profile imply: one entry per played day. */
+function activityOf(entries: ReadonlyArray<readonly [number, number]>): DayActivity[] {
+  return entries.map(([daysAgoPlayed, plays]) => ({
+    day: todayKey(daysAgo(daysAgoPlayed)),
+    plays,
+  }));
+}
+
+/**
+ * A profile with the given per-game stats, the given limit and history, and the
+ * activity entries the 7-day strip draws.
+ *
+ * `activity` is given explicitly rather than derived from `lastPlayedAt`: the
+ * day count the summary prints is read from these entries, so a case that left
+ * them out would be testing a profile that never recorded a play.
+ */
 function profileOf(
   entries: ReadonlyArray<readonly [GameId, Partial<GameProgress>]>,
-  options: { limitMinutes?: number | null; insights?: Partial<ProfileInsights> } = {},
+  options: {
+    limitMinutes?: number | null;
+    insights?: Partial<ProfileInsights>;
+    activity?: ReadonlyArray<DayActivity>;
+  } = {},
 ): Profile {
   const progress = createDefaultProgressMap();
   for (const [gameId, stats] of entries) {
@@ -48,7 +74,7 @@ function profileOf(
     stickers,
     playTime: { ...createDefaultPlayTime(NOW), limitMinutes: options.limitMinutes ?? null },
     progress,
-    activity: [],
+    activity: [...(options.activity ?? [])],
     insights: insightsOf(options.insights ?? {}),
   };
 }
@@ -146,7 +172,14 @@ const CASES: ReadonlyArray<Case> = [
           { plays: 1, wins: 0, correct: 4, wrong: 1, lastPlayedAt: daysAgo(2).toISOString() },
         ],
       ],
-      { limitMinutes: 20 },
+      // The two days those games were played, in the strip's own buckets.
+      {
+        limitMinutes: 20,
+        activity: activityOf([
+          [1, 2],
+          [2, 1],
+        ]),
+      },
     ),
     lines: [
       "2 of 22 games · 2 days this week · nothing completed yet",
@@ -159,14 +192,17 @@ const CASES: ReadonlyArray<Case> = [
   },
   {
     name: "a profile with fewer than MIN_SUMMARY_TAPS taps overall",
-    profile: profileOf([
+    profile: profileOf(
       [
-        "color-match",
-        { plays: 1, wins: 1, correct: 5, wrong: 2, lastPlayedAt: daysAgo(0).toISOString() },
+        [
+          "color-match",
+          { plays: 1, wins: 1, correct: 5, wrong: 2, lastPlayedAt: daysAgo(0).toISOString() },
+        ],
       ],
-    ]),
+      { activity: activityOf([[0, 1]]) },
+    ),
     lines: [
-      "1 of 22 games · 1 day this week · 1 completion in all",
+      "1 of 22 games · 1 day this week · 1 completion in all (100% of started games finished)",
       "71% of answers correct · not enough play yet to name a strongest game",
       "No streak yet · no daily limit set",
     ],
@@ -195,14 +231,27 @@ const CASES: ReadonlyArray<Case> = [
           { plays: 2, wins: 0, correct: 6, wrong: 4, lastPlayedAt: daysAgo(8).toISOString() },
         ],
       ],
-      { limitMinutes: 30, insights: RICH_INSIGHTS },
+      {
+        limitMinutes: 30,
+        insights: RICH_INSIGHTS,
+        // Three days the stamps account for, plus a fourth the strip drew from
+        // a session whose game was played again later. The day count follows
+        // the strip, so it is four while three games were last played inside
+        // the window.
+        activity: activityOf([
+          [1, 5],
+          [2, 4],
+          [3, 2],
+          [4, 3],
+        ]),
+      },
     ),
     lines: [
-      "3 of 22 games · 3 days this week · 6 completions in all",
+      "3 of 22 games · 4 days this week · 6 completions in all (43% of started games finished)",
       "73% of answers correct · strongest Shape Sorter (90%) · hardest Pop & Freeze (60%)",
       "4 days in a row · best 9 days · cap reached on 3 days",
     ],
-    activity: { daysPlayed: 3, distinctGames: 3, completions: 6, completionPercent: 43 },
+    activity: { daysPlayed: 4, distinctGames: 3, completions: 6, completionPercent: 43 },
     accuracy: {
       overallPercent: 73,
       strongest: { gameId: "shape-sorter", label: "Shape Sorter", accuracyPercent: 90, taps: 30 },
@@ -226,10 +275,11 @@ const CASES: ReadonlyArray<Case> = [
           bestStreakDays: 5,
           limitHitDays: 4,
         }),
+        activity: activityOf([[0, 3]]),
       },
     ),
     lines: [
-      "1 of 22 games · 1 day this week · 2 completions in all",
+      "1 of 22 games · 1 day this week · 2 completions in all (67% of started games finished)",
       "90% of answers correct · Story Order has the most answers so far (90%)",
       "2 days in a row · best 5 days · no daily limit set",
     ],
@@ -296,22 +346,105 @@ describe("summariseInsights — the accuracy floor", () => {
   });
 });
 
+describe("summariseInsights — the day count", () => {
+  it("counts three days when one game was played on three of them", () => {
+    // One game, one last-played stamp: the defect this test guards against
+    // counted a single day here while the strip drew three bars.
+    const profile = profileOf(
+      [
+        [
+          "color-match",
+          { plays: 3, wins: 1, correct: 8, wrong: 2, lastPlayedAt: daysAgo(0).toISOString() },
+        ],
+      ],
+      {
+        activity: activityOf([
+          [0, 1],
+          [1, 1],
+          [2, 1],
+        ]),
+      },
+    );
+
+    const summary = summariseInsights(profile, NOW);
+
+    expect(summary.activity.daysPlayed).toBe(3);
+    expect(summary.activity.distinctGames).toBe(1);
+    expect(summary.lines[0]).toBe(
+      "1 of 22 games · 3 days this week · 1 completion in all (33% of started games finished)",
+    );
+  });
+
+  it("prints completions without a share when a malformed record has wins but no plays", () => {
+    const profile = profileOf([["story-order", { plays: 0, wins: 5 }]]);
+
+    const summary = summariseInsights(profile, NOW);
+
+    expect(summary.activity.completionPercent).toBeNull();
+    expect(summary.lines[0]).toBe("No games yet this week · 5 completions in all");
+  });
+
+  it("counts the week from December when the moment is in early January", () => {
+    const twoDaysIntoTheYear = new Date(2027, 0, 2, 12, 0, 0);
+    const profile = profileOf(
+      [
+        [
+          "color-match",
+          {
+            plays: 2,
+            wins: 1,
+            correct: 5,
+            wrong: 2,
+            lastPlayedAt: new Date(2026, 11, 31, 12, 0, 0).toISOString(),
+          },
+        ],
+      ],
+      {
+        // The week that starts in January must reach back into December: the
+        // window is stepped by calendar date, not by subtracting six times 24
+        // hours across a year boundary.
+        activity: [
+          { day: todayKey(new Date(2026, 11, 31, 12, 0, 0)), plays: 1 },
+          { day: todayKey(new Date(2027, 0, 1, 12, 0, 0)), plays: 1 },
+        ],
+      },
+    );
+
+    const summary = summariseInsights(profile, twoDaysIntoTheYear);
+
+    expect(summary.activity.daysPlayed).toBe(2);
+    expect(summary.activity.distinctGames).toBe(1);
+    expect(summary.lines[0]).toContain("2 days this week");
+  });
+});
+
 describe("summariseInsights — the week window", () => {
-  it("drops a game played eight days ago from the week but keeps its completions", () => {
-    const profile = profileOf([
+  it("drops a game played seven days ago from the week but keeps its completions", () => {
+    const profile = profileOf(
       [
-        "shape-sorter",
-        { plays: 1, wins: 1, correct: 5, wrong: 5, lastPlayedAt: daysAgo(6).toISOString() },
+        [
+          "shape-sorter",
+          { plays: 2, wins: 1, correct: 5, wrong: 5, lastPlayedAt: daysAgo(6).toISOString() },
+        ],
+        [
+          "pop-freeze",
+          { plays: 3, wins: 2, correct: 5, wrong: 5, lastPlayedAt: daysAgo(7).toISOString() },
+        ],
+        [
+          "big-small",
+          { plays: 4, wins: 3, correct: 5, wrong: 5, lastPlayedAt: daysAgo(8).toISOString() },
+        ],
       ],
-      [
-        "pop-freeze",
-        { plays: 1, wins: 2, correct: 5, wrong: 5, lastPlayedAt: daysAgo(7).toISOString() },
-      ],
-      [
-        "big-small",
-        { plays: 1, wins: 3, correct: 5, wrong: 5, lastPlayedAt: daysAgo(8).toISOString() },
-      ],
-    ]);
+      // The strip's own buckets, including the two days outside the window:
+      // pruning, not the stamps, is what bounds the day count.
+      {
+        activity: activityOf([
+          [6, 2],
+          [7, 3],
+          [8, 4],
+        ]),
+      },
+    );
 
     const summary = summariseInsights(profile, NOW);
 
@@ -320,7 +453,9 @@ describe("summariseInsights — the week window", () => {
     expect(summary.activity.daysPlayed).toBe(1);
     // Completions are lifetime, so both older games still count.
     expect(summary.activity.completions).toBe(6);
-    expect(summary.lines[0]).toBe("1 of 22 games · 1 day this week · 6 completions in all");
+    expect(summary.lines[0]).toBe(
+      "1 of 22 games · 1 day this week · 6 completions in all (67% of started games finished)",
+    );
   });
 });
 

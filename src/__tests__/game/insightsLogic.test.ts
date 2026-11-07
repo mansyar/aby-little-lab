@@ -16,6 +16,7 @@ const MONTH_LATER = new Date(2026, 8, 5, 12, 0, 0);
 const FUTURE = new Date(2027, 0, 1, 12, 0, 0);
 const LATE_NIGHT = new Date(2026, 7, 3, 23, 59, 59);
 const JUST_AFTER_MIDNIGHT = new Date(2026, 7, 4, 0, 0, 1);
+const NEW_YEARS_EVE = new Date(2026, 11, 31, 12, 0, 0);
 
 /** A record with the given fields over the defaults. */
 function insightsOf(partial: Partial<ProfileInsights>): ProfileInsights {
@@ -116,6 +117,23 @@ describe("advanceStreak", () => {
     expect(afterMidnight.bestStreakDays).toBe(2);
   });
 
+  it("extends a streak across a year boundary", () => {
+    // 31 December -> 1 January is one day apart: the previous day is stepped
+    // through the calendar, so the turn of the year neither breaks the streak
+    // nor skips a day.
+    const record = insightsOf({
+      currentStreakDays: 2,
+      bestStreakDays: 2,
+      lastStreakDay: todayKey(NEW_YEARS_EVE),
+    });
+
+    const next = advanceStreak(record, FUTURE); // 1 January 2027
+
+    expect(next.currentStreakDays).toBe(3);
+    expect(next.bestStreakDays).toBe(3);
+    expect(next.lastStreakDay).toBe(todayKey(FUTURE));
+  });
+
   it("raises the best to the current streak when a malformed pair disagrees", () => {
     // A best below the current is impossible; normalisation repairs it, and the
     // running maximum then keeps growing from the repaired value.
@@ -187,6 +205,30 @@ describe("normalizeInsights", () => {
         limitHitDays: Number.NEGATIVE_INFINITY,
       }),
     ).toEqual(createDefaultInsights());
+  });
+
+  it("drops a day key that is not a shaped date", () => {
+    // `"banana"` has no date shape at all; `"2026-13-45"` has the shape but
+    // names no day on the calendar. Neither may survive a save and be compared
+    // against `todayKey()` for the life of the profile.
+    expect(normalizeInsights({ lastStreakDay: "banana", lastLimitHitDay: "banana" })).toEqual(
+      createDefaultInsights(),
+    );
+    expect(
+      normalizeInsights({ lastStreakDay: "2026-13-45", lastLimitHitDay: "2026-02-30" }),
+    ).toEqual(createDefaultInsights());
+    // A partial key, a key with the wrong separators and a longer one are all
+    // refused by the same shape check.
+    for (const key of ["2026-1-1", "2026/01/01", "2026-01-01T00:00:00Z", " 2026-01-01"]) {
+      expect(normalizeInsights({ lastStreakDay: key })).toEqual(createDefaultInsights());
+    }
+  });
+
+  it("keeps a day key that names a real calendar day at the year turn", () => {
+    // 29 February in a leap year and 31 December are the two edges a naive
+    // month-length check gets wrong.
+    expect(normalizeInsights({ lastStreakDay: "2028-02-29" }).lastStreakDay).toBe("2028-02-29");
+    expect(normalizeInsights({ lastLimitHitDay: "2026-12-31" }).lastLimitHitDay).toBe("2026-12-31");
   });
 
   it("keeps a well-formed record exactly as stored", () => {

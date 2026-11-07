@@ -43,6 +43,10 @@ async function openProgress(page: Page): Promise<void> {
  * Accuracy is built to make the ranking unambiguous: Color Match answers 18 of
  * 20 correctly (90%), Shape Sorter 5 of 14 (36%), and Memory Match 4 of 8 sits
  * under `MIN_SUMMARY_TAPS` so it can be neither strongest nor hardest.
+ *
+ * The two days are also written into `activity`, the buckets the 7-day strip
+ * draws: the Overview's day count is read from there, so a seed that left it
+ * empty would be asserting against a profile with no recorded play at all.
  */
 async function seedInsightProfile(page: Page): Promise<void> {
   await page.addInitScript((key: string) => {
@@ -100,7 +104,13 @@ async function seedInsightProfile(page: Page): Promise<void> {
               recent: [],
             },
           },
-          activity: [],
+          // The days the stamps above imply, in the strip's own buckets: the
+          // summary counts its days from these entries, so a seed without them
+          // tests a profile that never recorded a play.
+          activity: [
+            { day: dayKey(0), plays: 4 },
+            { day: dayKey(-1), plays: 3 },
+          ],
           insights: {
             currentStreakDays: 2,
             bestStreakDays: 2,
@@ -138,9 +148,12 @@ test("a parent reads the three insight statements on the first Progress page", a
     expect(line.trim(), "no statement may be blank").not.toBe("");
   }
 
-  // Reach: both games played inside the seven-day window, five lifetime wins.
+  // Reach: two games played inside the seven-day window, on the two days the
+  // seeded activity draws, with five lifetime wins of eight started sessions.
+  expect(lines[0]).toContain("2 of 22 games");
   expect(lines[0]).toContain("2 days this week");
   expect(lines[0]).toContain("5 completions in all");
+  expect(lines[0]).toContain("63% of started games finished");
   // Accuracy: overall share, then the two games above the ten-tap floor.
   expect(lines[1]).toContain("64% of answers correct");
   expect(lines[1]).toContain("strongest Color Match");

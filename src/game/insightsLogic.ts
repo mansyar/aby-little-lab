@@ -35,9 +35,30 @@ function count(value: unknown): number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : 0;
 }
 
-/** A stored day key: a non-empty string, or null for anything else. */
+/**
+ * The day-key shape `todayKey()` emits: four digits, a two-digit month and a
+ * two-digit day.
+ */
+const DAY_KEY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * A stored day key: a string shaped like a local date that also names a real
+ * calendar day, or null for anything else.
+ *
+ * The shape alone is not enough — `"2026-13-45"` matches the pattern and is
+ * not a date — so the month and day are checked against the calendar too.
+ * The month length is read at noon so a daylight-saving change at midnight
+ * cannot shift the count onto a neighbouring day.
+ */
 function dayKey(value: unknown): string | null {
-  return typeof value === "string" && value !== "" ? value : null;
+  if (typeof value !== "string") return null;
+  const match = DAY_KEY.exec(value);
+  if (match === null) return null;
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1) return null;
+  const daysInMonth = new Date(Number(match[1]), month, 0, 12).getDate();
+  return day <= daysInMonth ? value : null;
 }
 
 /**

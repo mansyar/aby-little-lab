@@ -2,7 +2,7 @@ import type { GameId, Profile, ProfileInsights } from "../types";
 import { GAME_REGISTRY } from "./gameRegistry";
 import { normalizeInsights } from "./insightsLogic";
 import { normalizePlayTime, todayKey } from "./playTimeLogic";
-import { ACTIVITY_DAYS, normalizeProgressMap } from "./progressLogic";
+import { ACTIVITY_DAYS, normalizeProgressMap, pruneActivity } from "./progressLogic";
 
 /**
  * Turns a profile and a moment into the three statements the Progress
@@ -128,10 +128,15 @@ function activityLine(activity: InsightsSummary["activity"]): string {
     activity.distinctGames === 0
       ? "No games yet this week"
       : `${activity.distinctGames} of ${GAME_REGISTRY.length} games · ${plural(activity.daysPlayed, "day", "days")} this week`;
+  // A completion count with no share is only possible for a malformed record
+  // (`wins` without `plays`), where there is no denominator to divide by; the
+  // sentence still has to read, so the share is simply left off.
   const completions =
     activity.completions === 0
       ? "nothing completed yet"
-      : `${plural(activity.completions, "completion", "completions")} in all`;
+      : activity.completionPercent === null
+        ? `${plural(activity.completions, "completion", "completions")} in all`
+        : `${plural(activity.completions, "completion", "completions")} in all (${activity.completionPercent}% of started games finished)`;
   return `${reach} · ${completions}`;
 }
 
@@ -158,16 +163,24 @@ function routineLine(routine: InsightsSummary["routine"]): string {
  *
  * "This week" is the same window the 7-day strip draws — today and the six
  * days before it — compared by local day key, so the two surfaces can never
- * disagree about which plays count. Lifetime completions are every game's
- * `wins` summed, whether or not the game was played this week.
+ * disagree about which plays count. The day count is read from the same
+ * activity entries the strip draws, because a game's `lastPlayedAt` holds only
+ * its latest play: one game played on three days would otherwise count as one
+ * day while the strip beneath the sentence drew three bars. Lifetime
+ * completions are every game's `wins` summed, whether or not the game was
+ * played this week.
  */
 export function summariseInsights(profile: Profile, now: Date = new Date()): InsightsSummary {
   const progress = normalizeProgressMap(profile.progress);
   const insights: ProfileInsights = normalizeInsights(profile.insights);
   const limitMinutes = normalizePlayTime(profile.playTime, now).limitMinutes;
   const weekStart = weekStartKey(now);
+  const today = todayKey(now);
 
-  const playedDays = new Set<string>();
+  const daysPlayed = pruneActivity(profile.activity, now).filter(
+    (entry) => entry.plays > 0 && entry.day >= weekStart && entry.day <= today,
+  ).length;
+
   let distinctGames = 0;
   let completions = 0;
   let plays = 0;
@@ -182,10 +195,12 @@ export function summariseInsights(profile: Profile, now: Date = new Date()): Ins
     correct += game.correct;
     wrong += game.wrong;
 
+    // `distinctGames` stays on the last-played stamp, which is what "distinct
+    // games played this week" means: the day count above answers a different
+    // question and may be larger than this one.
     const playedDay = playedDayKey(game.lastPlayedAt);
     if (playedDay !== null && playedDay >= weekStart) {
       distinctGames += 1;
-      playedDays.add(playedDay);
     }
 
     const taps = game.correct + game.wrong;
@@ -232,7 +247,7 @@ export function summariseInsights(profile: Profile, now: Date = new Date()): Ins
   };
 
   const activity: InsightsSummary["activity"] = {
-    daysPlayed: playedDays.size,
+    daysPlayed,
     distinctGames,
     completions,
     // `wins` and `plays` are independent counters, so a malformed record can
