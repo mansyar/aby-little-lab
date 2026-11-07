@@ -15,7 +15,7 @@
 - **Covers:** FR-1, FR-2, FR-4, FR-5, NFR-4, AC-1, AC-2, AC-6, AC-8
 - **Touches:** `src/utils/backupFormat.ts`, `src/__tests__/utils/backupFormat.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 - [ ] **P1.T1: Build and read the envelope** - covers: FR-1, FR-2
   - **P1.T1.1:** Write the envelope with `format`, `formatVersion`, `schemaVersion`, `appVersion`, `exportedAt`, `checksum` and the normalised save as `payload`
   - **P1.T1.2:** Hash the canonical `JSON.stringify(payload)` with a 64-bit non-cryptographic hash, documented as corruption detection rather than protection
