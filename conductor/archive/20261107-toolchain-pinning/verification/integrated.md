@@ -22,6 +22,7 @@
 | Image | `docker build -t aby-little-lab:toolchain .` | exit 0 in 36 s on `node:24-alpine`; image carries the same `dist/` shape |
 | Clean install | `pnpm install --frozen-lockfile` after moving `node_modules` away | exit 0 in 21.4 s, `using pnpm v12.16.1` |
 | Browser suite | `pnpm test:e2e` on Node v24.22.2 / pnpm 12.16.1 | 16 journeys passed in 3.9 min — inside the 5-minute budget |
+| CI, this PR (run 42365843038) | GitHub Actions | `Quality Gates` pass 1m36s, `Browser Journeys` pass 4m36s; setup-node logged `Resolved .node-version as 24` and both jobs installed with `using pnpm v12.16.1` |
 
 Coverage prints 97.19 / 91.09 on this run and 97.21 / 91.14 on the run recorded in Phase 3 — v8 instrumentation moves by a hundredth between runs of an unchanged tree. The documented figures are the Phase 3 pair; the gate is what matters and both clear it by a wide margin.
 
@@ -53,3 +54,17 @@ No release or tag (this changes how the app is built, not what it does); no depe
 The gates job for a documentation-only change now installs dependencies and runs `validate-docs`, which is roughly a minute against the previous full run; the browser job still starts a runner but executes no test. Both required checks report either way.
 
 A PR-level documentation-only run could not be produced by this track: on `pull_request` the classifier diffs the whole PR, and this PR's diff is code. The arms were proven against real ranges in the image's own shell, and the first genuinely documentation-only PR will confirm the tier end to end (AC-11 is `partial` for that reason).
+
+
+## CI, on this track's own PR (#81)
+
+| Job | Result |
+| --- | --- |
+| Quality Gates | pass, 1m36s |
+| Browser Journeys | pass, 4m36s |
+| Deploy to Coolify | skipped (not a tag) |
+
+This PR's diff is code, so it ran the **full** pipeline — which proves the code tier end to end (AC-12) and, for the first time, that the declaration is consumed by a real runner: `actions/setup-node` logged `Resolved .node-version as 24`, and both jobs installed with `using pnpm v12.16.1` while neither workflow states a version.
+
+The documentation-only tier remains unproven on GitHub, and cannot be proven here: on a `pull_request` event the classifier diffs the whole PR, so a PR containing code is always `code` no matter what its last commit touches. That is AC-11's remaining evidence and the reason it is recorded `partial`.
+
