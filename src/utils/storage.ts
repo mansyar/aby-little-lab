@@ -84,8 +84,53 @@ function migrateFromVersion1(v2: ProfileV2): ProfileV2 {
   return v2;
 }
 
+/**
+ * The store, or null when this context has none. Some engines present the
+ * global and still throw on access (blocked or partitioned site data), so the
+ * absence and the access are both guarded — no path may raise a
+ * `ReferenceError` or a `SecurityError` just by looking for the store.
+ */
+function getStorage(): Storage | null {
+  try {
+    return typeof localStorage === "undefined" ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether this session is running without a store it can use. Set by any
+ * failed read or write, cleared by a write the store accepted; the two
+ * deliberate memory-only paths (a future-version payload and a declined
+ * mutator) are not failures and leave it alone.
+ */
+let persistenceDegraded = false;
+
+/** True while this session has lost at least one storage access (FR-4). */
+export function isPersistenceDegraded(): boolean {
+  return persistenceDegraded;
+}
+
+/**
+ * Reads a key, treating a store that refuses access as an empty one: callers
+ * serve defaults, the session stays playable, and the failure is recorded.
+ */
+function readStorage(key: string): string | null {
+  const storage = getStorage();
+  if (storage === null) {
+    persistenceDegraded = true;
+    return null;
+  }
+  try {
+    return storage.getItem(key);
+  } catch {
+    persistenceDegraded = true;
+    return null;
+  }
+}
+
 function readV1(): Partial<AppStorage> | null {
-  const raw = localStorage.getItem(V1_KEY);
+  const raw = readStorage(V1_KEY);
   if (raw === null) return null;
   try {
     return JSON.parse(raw) as Partial<AppStorage>;
@@ -95,7 +140,7 @@ function readV1(): Partial<AppStorage> | null {
 }
 
 function readV2Raw(): string | null {
-  return localStorage.getItem(V2_KEY);
+  return readStorage(V2_KEY);
 }
 
 /**
@@ -151,8 +196,26 @@ function ensureV2(): ProfileV2 {
 function saveV2(v2: ProfileV2): void {
   // FR-1: the single write path stamps every payload with the schema version.
   const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
-  localStorage.setItem(V2_KEY, raw);
-  v2Cache = { raw, state: v2 };
+  const storage = getStorage();
+  if (storage !== null) {
+    try {
+      storage.setItem(V2_KEY, raw);
+      // FR-2/FR-4: an accepted write stores the whole state — no delta — and
+      // proves the store works again, so it clears the degraded flag.
+      persistenceDegraded = false;
+      v2Cache = { raw, state: v2 };
+      return;
+    } catch {
+      // A full quota refuses the write; the change still applies to this
+      // session below, so play is never interrupted by a failed save.
+    }
+  }
+  persistenceDegraded = true;
+  // The persisted bytes did not move. Key the memo with the raw the store
+  // still holds next to the new state, so the next read hits the cache and
+  // serves what the child just earned; keying it with the rejected JSON would
+  // miss the cache, re-read stale bytes and take the sticker back off screen.
+  v2Cache = { raw: readV2Raw(), state: v2 };
 }
 
 /**
