@@ -4,7 +4,7 @@
 - **Date:** 2026-11-08
 - **Branch:** `feat/20261108-local-insights`
 - **Base:** `64e35642ad33dbeeeb2ed85507a0c40795d8844d`
-- **Head:** `c2c87661`
+- **Head:** `2bac6f17` (review fixes included)
 - **Result:** verified
 
 ## Layers, run against the integrated tree
@@ -13,10 +13,10 @@
 | --- | --- | --- |
 | Static | `pnpm check` | `Checked 301 files in 364ms. No fixes applied.` |
 | Types | `pnpm typecheck` | `tsc --noEmit` then `tsc --noEmit -p e2e/tsconfig.json`, clean |
-| Unit | `CI=true pnpm test -- --run` | 137 files / 2,975 tests passed, 19.20 s |
-| Coverage | `pnpm test:coverage` | statements 97.22 / branches 91.12 / functions 96.1 / lines 98.21 - gate 90 / 85 / 88 / 95 |
+| Unit | `CI=true pnpm test -- --run` | 137 files / 2,981 tests passed, 20.02 s |
+| Coverage | `pnpm test:coverage` | statements 97.21 / branches 91.12 / functions 96.11 / lines 98.21 - gate 90 / 85 / 88 / 95 |
 | Build | `pnpm build` | 365 modules, 47 JS chunks, 59 precache entries (1755.58 KiB) |
-| Bundle artifact | `node scripts/validate-bundle.js` | phaser 1335.0 kB; shell `index-C7_3WcjB.js` 158.1 kB <= 200 kB |
+| Bundle artifact | `node scripts/validate-bundle.js` | phaser 1335.0 kB; shell `index-DfVk-7sS.js` 158.5 kB <= 200 kB |
 | PWA artifact | `node scripts/validate-pwa.js` | 16 passed, 0 failed (47 chunks, 47 precached) |
 | Documents | `node scripts/validate-docs.js` | 5 passed, 0 failed |
 | Browser | `pnpm test:e2e` | 17 journeys passed, 3.2 min on two workers |
@@ -40,6 +40,11 @@
 - **The suite proves the parent's path.** The journey holds the 3-second gate,
   taps the published Progress row, and reads the strings the overlay drew - not a
   recomputation of them. A page that rendered the wrong sentence would fail it.
+- **The sentence and the strip read one window.** The day count comes from the
+  same pruned activity entries the strip draws, inside the same
+  `weekStart <= day <= today` bounds, so the two surfaces cannot contradict each
+  other on one screen - the defect the review found and the reason the fixtures
+  now carry the activity their stamps imply.
 - **No new surface left the device.** No dependency added, no `fetch(` in `src/`,
   no timestamp finer than a local day key, nothing transmitted.
 
@@ -67,7 +72,7 @@ another decision.
 
 ## Residual risk
 
-The shell entry grew 3.3 kB across this track, to 158.1 kB of the 200 kB gate. That
+The shell entry grew 3.7 kB across this track, to 158.5 kB of the 200 kB gate. That
 is still comfortable, but it is the number to watch: the Overview page added a
 module to the boot path's import graph, and the next feature that does the same
 should check the budget rather than discover it.
