@@ -13,25 +13,29 @@ the primary agent writes this file.
 - **Covers:** FR-1, FR-2, FR-3, NFR-1, NFR-2, AC-1, AC-2, AC-3, AC-4
 - **Touches:** `src/types/index.ts`, `src/game/insightsLogic.ts`, `src/utils/storage.ts`, `src/components/PlayTimeIndicator.ts`, `src/__tests__/game/insightsLogic.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/components/PlayTimeIndicator.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Store the record** - covers: FR-1, AC-2
+- [x] **P1.T1: Store the record** - covers: FR-1, AC-2
   - **P1.T1.1:** Add `ProfileInsights` to `src/types/index.ts` with the five fields of FR-1 and a doc comment saying what each one is for
   - **P1.T1.2:** Add `src/game/insightsLogic.ts` with `createDefaultInsights()` and `normalizeInsights(raw)` — zeros and nulls for missing, non-numeric, negative or impossible values, and `bestStreakDays` raised to `currentStreakDays` when the pair disagrees
   - **P1.T1.3:** Normalise insights in `src/utils/storage.ts` wherever a `ProfileV2` is read or migrated, leaving `SCHEMA_VERSION` at `1` and the key unchanged
-- [ ] **P1.T2: Advance the streak** - covers: FR-2, AC-1, AC-3
+- [x] **P1.T2: Advance the streak** - covers: FR-2, AC-1, AC-3
   - **P1.T2.1:** `advanceStreak(insights, now)` in `insightsLogic.ts`: same day means no change, yesterday means `+ 1`, anything else restarts at `1`; `bestStreakDays` is the running maximum; the clock is a parameter, never read inside
   - **P1.T2.2:** Call it from the completion path (`recordGameResult`) so one completion is one write
   - **P1.T2.3:** Unit tests for three consecutive days, a same-day repeat, a two-day gap, a month gap, and a `lastStreakDay` in the future
-- [ ] **P1.T3: Count cap-days** - covers: FR-3, AC-4
+- [x] **P1.T3: Count cap-days** - covers: FR-3, AC-4
   - **P1.T3.1:** `recordLimitHit(profileId, now)` in `storage.ts`, idempotent per day key
   - **P1.T3.2:** Call it from where the tiles actually lock, so a backgrounded hub cannot lose the event; a profile with no limit never reaches it
   - **P1.T3.3:** Tests: two days increment twice, one day reached twice increments once, unlimited never increments
-- [ ] **P1.T4: Prove the shape survived** - covers: NFR-1, NFR-2, AC-2
+- [x] **P1.T4: Prove the shape survived** - covers: NFR-1, NFR-2, AC-2
   - **P1.T4.1:** A pre-track payload loads with zeroed insights, a still-`1` schema version, and an unchanged public getter surface
   - **P1.T4.2:** The unknown-version write protection still writes nothing (no regression of the storage-resilience guard)
   - **P1.T4.3:** Assert the write count: one extra `mutate` per completion, none per tap
   - **P1.T4.4:** Refresh the suite counts in the three living documents if the added tests move them
+
+**Result:** verified - the record is stored, backfilled and preserved: a completion advances the streak once per local day inside the existing `recordGameResult` mutate (still one write), the daily cap counts once per day from the block that locks the tiles, and a pre-track save loads with zeros at `schemaVersion: 1`. 29 tests cover the arithmetic, the gaps, the midnight straddle, the unlimited guard and the write-protected payload.
+**Checkpoint:** ed3d0bed
+**Evidence:** conductor/tracks/20261108-local-insights/verification/phase-1.md
 
 ## Phase 2: The sentence
 
