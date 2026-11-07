@@ -51,20 +51,24 @@ The primary appends after acceptance:
 - **Covers:** FR-5, FR-7, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-5, AC-7
 - **Touches:** `src/components/SettingsPanel.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `e2e/journeys/storage.spec.ts`, `e2e/fixtures/`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/product.md`
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: The notice** — covers: FR-5, NFR-4
-  - [ ] **P2.T1.1: Render one line while degraded** — small text in the existing panel header area, read at open time from `isPersistenceDegraded()`, styled from the panel's existing text conventions
-  - [ ] **P2.T1.2: Move nothing** — the title, the version footer and the eight rows keep their current positions; no new interactive element; nothing appears when storage works
-  - [ ] **P2.T1.3: Unit-test both directions** — the label is present while degraded and absent otherwise, found the way the existing panel tests find text
-- [ ] **P2.T2: The journey** — covers: FR-7, AC-7, NFR-3, NFR-5
-  - [ ] **P2.T2.1: Make storage throw at page load** — an `addInitScript` that patches only `Storage.prototype.setItem` (and `getItem` in a second case), leaving Playwright's own machinery and the service worker alone
-  - [ ] **P2.T2.2: Win a game and come home** — launch a short game, complete three rounds, assert the hub returns and the sticker count rose in memory
-  - [ ] **P2.T2.3: Survive a reload** — reload with storage still throwing, assert the hub boots and the app collected no page error
-  - [ ] **P2.T2.4: Prove the notice is reachable** — open Settings in the degrading context and read the published state, so the parent-facing half is not unit-only
-- [ ] **P2.T3: Record the shape** — covers: NFR-1, NFR-2
-  - [ ] **P2.T3.1: Document the layer** — `docs/TDD.md` describes the guarded save layer and the degraded state; `README.md` Known Issues drops the storage item; `product.md` §10.2 marks the roadmap row done
-  - [ ] **P2.T3.2: Record the cost** — shell size against the 200 kB gate and the suite runtime against the 5 minute budget
+- [x] **P2.T1: The notice** — covers: FR-5, NFR-4
+  - [x] **P2.T1.1: Render one line while degraded** — small text in the existing panel header area, read at open time from `isPersistenceDegraded()`, styled from the panel's existing text conventions
+  - [x] **P2.T1.2: Move nothing** — the title, the version footer and the eight rows keep their current positions; no new interactive element; nothing appears when storage works
+  - [x] **P2.T1.3: Unit-test both directions** — the label is present while degraded and absent otherwise, found the way the existing panel tests find text
+- [x] **P2.T2: The journey** — covers: FR-7, AC-7, NFR-3, NFR-5
+  - [x] **P2.T2.1: Make storage throw at page load** — an `addInitScript` that patches only `Storage.prototype.setItem` (and `getItem` in a second case), leaving Playwright's own machinery and the service worker alone
+  - [x] **P2.T2.2: Win a game and come home** — launch a short game, complete three rounds, assert the hub returns and the sticker count rose in memory
+  - [x] **P2.T2.3: Survive a reload** — reload with storage still throwing, assert the hub boots and the app collected no page error
+  - [x] **P2.T2.4: Prove the notice is reachable** — open Settings in the degrading context and read the published state, so the parent-facing half is not unit-only
+- [x] **P2.T3: Record the shape** — covers: NFR-1, NFR-2
+  - [x] **P2.T3.1: Document the layer** — `docs/TDD.md` describes the guarded save layer and the degraded state; `README.md` Known Issues drops the storage item; `product.md` §10.2 marks the roadmap row done
+  - [x] **P2.T3.2: Record the cost** — shell size against the 200 kB gate and the suite runtime against the 5 minute budget
+
+**Result:** verified
+**Checkpoint:** 09484691
+**Evidence:** conductor/tracks/20261107-storage-resilience/verification/phase-2.md
 
 <!--
 Review fixes are appended by `conductor-review` as:
