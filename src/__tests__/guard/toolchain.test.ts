@@ -109,32 +109,94 @@ function blockUnder(header: string): string[] {
 }
 
 /**
- * The whole step that contains `needle`, from its `- name:` line to the next
- * step at the same indentation, so an action's inputs are found where they
- * live rather than anywhere in the file.
+ * Every step that contains `needle`, not just the first one. Two jobs install
+ * pnpm, and a check that looked only at the first would leave the second free to
+ * pin a literal pnpm the declaration never names — the exact drift this guard
+ * exists to stop.
  */
-function stepContaining(needle: string): string[] {
-  const anchor = WORKFLOW_LINES.findIndex((line) => line.includes(needle));
-  if (anchor === -1) {
-    return [];
+function stepsContaining(needle: string): string[][] {
+  return WORKFLOW_LINES.map((line, index) => (line.includes(needle) ? index : -1))
+    .filter((index) => index !== -1)
+    .map((anchor) => {
+      let start = anchor;
+      while (start > 0 && !WORKFLOW_LINES[start].trimStart().startsWith("- ")) {
+        start -= 1;
+      }
+      const base = indentOf(WORKFLOW_LINES[start]);
+      const body: string[] = [WORKFLOW_LINES[start]];
+      for (let index = start + 1; index < WORKFLOW_LINES.length; index += 1) {
+        const line = WORKFLOW_LINES[index];
+        if (line.trimStart().startsWith("- ") && indentOf(line) <= base) {
+          break;
+        }
+        if (line.trim() !== "" && indentOf(line) < base) {
+          break;
+        }
+        body.push(line);
+      }
+      return body;
+    });
+}
+
+function parseVersion(text: string): readonly number[] | null {
+  const match = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/.exec(text.trim());
+  if (match === null) {
+    return null;
   }
-  let start = anchor;
-  while (start > 0 && !WORKFLOW_LINES[start].trimStart().startsWith("- ")) {
-    start -= 1;
-  }
-  const base = indentOf(WORKFLOW_LINES[start]);
-  const body: string[] = [WORKFLOW_LINES[start]];
-  for (let index = start + 1; index < WORKFLOW_LINES.length; index += 1) {
-    const line = WORKFLOW_LINES[index];
-    if (line.trimStart().startsWith("- ") && indentOf(line) <= base) {
-      break;
+  return [Number(match[1]), Number(match[2] ?? 0), Number(match[3] ?? 0)];
+}
+
+function compareVersions(left: readonly number[], right: readonly number[]): number {
+  for (let index = 0; index < 3; index += 1) {
+    const difference = (left[index] ?? 0) - (right[index] ?? 0);
+    if (difference !== 0) {
+      return difference;
     }
-    if (line.trim() !== "" && indentOf(line) < base) {
-      break;
-    }
-    body.push(line);
   }
-  return body;
+  return 0;
+}
+
+/**
+ * Whether `version` satisfies a range written as space-separated comparators
+ * (`>=`, `>`, `<=`, `<`) — the shape `engines.node` is declared in here.
+ *
+ * Anything else (`||`, `^`, `~`, `x`) answers `false` on purpose: a range the
+ * guard cannot read is a range nothing checks, and a substring test would say
+ * the opposite. `">=22.0.0 <24"` contains the characters "24" while excluding
+ * Node 24 entirely, which is precisely the drift this pin removes.
+ */
+function satisfiesComparators(version: string, range: string): boolean {
+  const typed = parseVersion(version);
+  const parts = range
+    .trim()
+    .split(/\s+/)
+    .filter((part) => part !== "");
+  if (typed === null || parts.length === 0) {
+    return false;
+  }
+  return parts.every((part) => {
+    const match = /^(>=|>|<=|<)(\S+)$/.exec(part);
+    if (match === null) {
+      return false;
+    }
+    const bound = parseVersion(match[2] ?? "");
+    if (bound === null) {
+      return false;
+    }
+    const difference = compareVersions(typed, bound);
+    switch (match[1]) {
+      case ">=":
+        return difference >= 0;
+      case ">":
+        return difference > 0;
+      case "<=":
+        return difference <= 0;
+      case "<":
+        return difference < 0;
+      default:
+        return false;
+    }
+  });
 }
 
 describe("toolchain guard", () => {
@@ -159,10 +221,11 @@ describe("toolchain guard", () => {
       "",
     );
     expect(
-      range,
-      `package.json allows node "${range}" but .node-version says ${major}: a range that ` +
-        "admits a runtime nothing verifies is the drift this pin removes",
-    ).toContain(major);
+      satisfiesComparators(`${major}.0.0`, range),
+      `package.json allows node "${range}" but .node-version says ${major}: a range that does ` +
+        "not admit the pinned major is the drift this pin removes. Write plain space-separated " +
+        "comparators (>=24.0.0 <25); anything else fails here rather than passing unread.",
+    ).toBe(true);
   });
 
   it("keeps .node-version a bare version the runner accepts", () => {
@@ -205,9 +268,13 @@ describe("toolchain guard", () => {
   });
 
   it("takes both versions from the declaration and keeps both required checks", () => {
-    const pnpmStep = stepContaining("uses: pnpm/action-setup");
-    expect(pnpmStep.length, "ci.yml has no pnpm/action-setup step to inspect").toBeGreaterThan(0);
-    const pnpmLiteral = pnpmStep.filter((line) => /^\s*version:/.test(line));
+    const pnpmSteps = stepsContaining("uses: pnpm/action-setup");
+    expect(
+      pnpmSteps.length,
+      `ci.yml installs pnpm in ${pnpmSteps.length} step(s); both jobs need it, and a step that ` +
+        "disappears must fail here rather than quietly shrink this check",
+    ).toBe(2);
+    const pnpmLiteral = pnpmSteps.flat().filter((line) => /^\s*version:/.test(line));
     expect(
       pnpmLiteral,
       "pnpm/action-setup must read packageManager, not a literal that can drift from it:\n" +
@@ -244,6 +311,28 @@ describe("toolchain guard", () => {
         `ci.yml job "${job}" must classify the change before it spends minutes on the suite`,
       ).toBe(true);
     }
+
+    // The classifier is written out once per job. Two copies of a rule is how
+    // one of them drifts: compare the bodies so an edit to one job cannot pass.
+    const classifyBodies = stepsContaining("- name: Classify the change").map((step) =>
+      step
+        .filter((line) => !line.includes("- name: Classify the change"))
+        .join("\n")
+        .trim(),
+    );
+    expect(
+      classifyBodies.length,
+      `ci.yml has ${classifyBodies.length} classification step(s); each job needs one`,
+    ).toBe(2);
+    expect(
+      new Set(classifyBodies).size,
+      "the two Classify the change steps differ: the tier rules must be identical in both jobs, " +
+        "or a documentation-only change is cheap in one and full price in the other",
+    ).toBe(1);
+    expect(
+      classifyBodies.every((body) => body.length > 0),
+      "a Classify the change step has no body, so the comparison above proved nothing",
+    ).toBe(true);
 
     const pullRequest = blockUnder("pull_request:");
     expect(

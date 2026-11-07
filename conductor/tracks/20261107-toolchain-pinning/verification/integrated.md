@@ -21,6 +21,7 @@
 | Documents | `node scripts/validate-docs.js` | 5 passed, 0 failed |
 | Image | `docker build -t aby-little-lab:toolchain .` | exit 0 in 36 s on `node:24-alpine`; image carries the same `dist/` shape |
 | Clean install | `pnpm install --frozen-lockfile` after moving `node_modules` away | exit 0 in 21.4 s, `using pnpm v12.16.1` |
+| Browser suite | `pnpm test:e2e` on Node v24.22.2 / pnpm 12.16.1 | 16 journeys passed in 3.9 min — inside the 5-minute budget |
 
 Coverage prints 97.19 / 91.09 on this run and 97.21 / 91.14 on the run recorded in Phase 3 — v8 instrumentation moves by a hundredth between runs of an unchanged tree. The documented figures are the Phase 3 pair; the gate is what matters and both clear it by a wide margin.
 
@@ -31,7 +32,7 @@ Coverage prints 97.19 / 91.09 on this run and 97.21 / 91.14 on the run recorded 
 - **The build works on the new base.** `node:24-alpine` ships Node v24.22.2 and Corepack 0.36.0, so the explicit `corepack prepare pnpm@12.16.1` is the mechanism rather than a fallback.
 - **The lockfile owns its tool.** Declaring `packageManager` made pnpm 12 write `packageManagerDependencies: pnpm 12.16.1` and the `@pnpm/exe.*` platform set into `pnpm-lock.yaml`, `linux-x64-musl` included — the defect this track opened with ("the lockfile has no owner") is answered by the tool itself.
 - **The dead artefacts are gone.** `pnpm-workspace.yaml` and `serve` (with 70 unique transitive packages) are removed; no tracked file outside Conductor state mentions either.
-- **CI classification is fail-safe.** Documentation-only, code and an unknown base were all exercised in the image's own shell; the unknown base resolved to `code`, which is the expensive-but-safe direction.
+- **CI classification is fail-safe.** Documentation-only, code and an unknown base were all exercised in the image's own shell; the unknown base resolved to `code`, which is the expensive-but-safe direction. The guard compares the two copies of the rule, and AC-11 stays `partial` because this PR's own diff is code — a genuinely documentation-only PR is its remaining evidence.
 - **No application behaviour changed.** No `src/` production file was touched. The only `src/` change is a new test file.
 
 ## Scope note
@@ -49,4 +50,6 @@ No release or tag (this changes how the app is built, not what it does); no depe
 
 ## Runtime note
 
-The gates job for a documentation-only change now installs dependencies and runs `validate-docs`, which is roughly a minute against the previous full run; the browser job still starts a runner but executes no test. The first real GitHub run of both tiers arrives with this track's PR, where the final commit is conductor-only by construction.
+The gates job for a documentation-only change now installs dependencies and runs `validate-docs`, which is roughly a minute against the previous full run; the browser job still starts a runner but executes no test. Both required checks report either way.
+
+A PR-level documentation-only run could not be produced by this track: on `pull_request` the classifier diffs the whole PR, and this PR's diff is code. The arms were proven against real ranges in the image's own shell, and the first genuinely documentation-only PR will confirm the tier end to end (AC-11 is `partial` for that reason).

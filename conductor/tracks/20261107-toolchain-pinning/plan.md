@@ -54,7 +54,6 @@
 **Result:** verified - the Dockerfile builds on `node:24-alpine` with pnpm 12.16.1 (exit 0, 36 s, same dist shape), and both CI jobs take their versions from the declaration. A classification step in each job keeps a documentation-only change to the install plus `validate-docs` while both required checks still report; its three arms were proved in the image shell (doc, code, and the unknown-base fail-safe). The first real build found two defects: `.dockerignore` never excluded `.conductor/`, so a stray `node_modules` there broke the build context, and the classifier fetched commits it already had.
 **Checkpoint:** c3770f9c
 **Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/phase-2.md
--->
 
 ## Phase 3: Guard it, and record it
 
@@ -81,16 +80,27 @@
 **Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/phase-3.md
 
 ## Phase R1: Review Fixes
+## Phase R1: Review Fixes
 
-<!--
-Review fixes are appended by `conductor-review` as:
-
-- **Goal:** Resolve review findings ...
+- **Goal:** the guard cannot pass on the drift it exists to catch, the record stops claiming a proof this PR cannot produce, and the browser suite is measured on the new toolchain.
 - **Depends on:** Phase 3
-- **Covers:** review findings
-- **Touches:** ...
-- **Verification:** ...
-- **Status:** pending
+- **Covers:** review findings F1-F9
+- **Touches:** `src/__tests__/guard/toolchain.test.ts`, `conductor/workflow.md`, `docs/TDD.md`, `conductor/tracks/20261107-toolchain-pinning/`, `conductor/product.md`
+- **Verification:** the full chain plus `pnpm test:e2e`
+- **Status:** verified
 
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
--->
+- [x] **R1.T1: Close the guard holes** - covers: F2, F3, F9
+    - [x] **R1.T1.1:** Inspect every `pnpm/action-setup` step and require two, not the first one
+    - [x] **R1.T1.2:** Replace the substring engines test with a comparator that must be satisfied
+    - [x] **R1.T1.3:** Require both `Classify the change` bodies to be identical
+- [x] **R1.T2: Make the record honest** - covers: F1, F4, F6, F7, F8
+    - [x] **R1.T2.1:** Reword AC-11 to what the classifier mechanism can prove, and mark it partial
+    - [x] **R1.T2.2:** `conductor/workflow.md` names the declaring files, not a literal version
+    - [x] **R1.T2.3:** Restore the historical measurement scope in `docs/TDD.md`
+    - [x] **R1.T2.4:** Remove the stray `-->` and correct the spec's accepted-limit claim
+- [x] **R1.T3: Measure the browser suite on Node 24** - covers: F5
+    - [x] **R1.T3.1:** Run `pnpm test:e2e` and record the wall clock
+
+**Result:** verified - all nine findings closed. The guard now inspects both pnpm steps, requires the pinned major to satisfy the engines range, and compares the two classifier copies; each of the three was proved failing against a deliberate probe. `workflow.md` no longer states a literal version, the TDD measurement is restored to its real scope, and the browser suite runs green in 3.9 min on Node 24.22.2 / pnpm 12.16.1. AC-11 is recorded partial: the classifier diffs the whole PR, so a documentation-only tier needs a documentation-only PR.
+**Checkpoint:** 0000000
+**Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/review-fixes.md

@@ -76,8 +76,11 @@ pr:
 pnpm install --frozen-lockfile
 ```
 
-Node 22 and pnpm 11.7.0 are the CI-pinned versions; keep local versions at or
-above them. Do not edit `pnpm-lock.yaml` by hand.
+The toolchain pins are declared in exactly three places: `packageManager` and
+`engines` in `package.json`, and `.node-version`. CI and the `Dockerfile` both
+read them rather than restating them, and `src/__tests__/guard/toolchain.test.ts`
+fails when any consumer disagrees. Keep your local versions at or above the
+declared Node. Do not edit `pnpm-lock.yaml` by hand.
 
 ### Daily Development
 

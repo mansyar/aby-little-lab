@@ -322,7 +322,7 @@ Both are recorded as deviations from the plan's Touches: `.dockerignore` is a ne
 - **AC-4 — met.** `node:24-alpine` ships Node v24.22.2 and Corepack 0.36.0, so the explicit `corepack prepare pnpm@12.16.1` is the mechanism, and the image builds.
 - **AC-10 — met.** `docker build` exits 0 and the image carries the same `dist/` shape.
 - **AC-13 — met.** `paths-ignore` remains only under `push`; the classification step is shell and `git`, with no third-party action.
-- **AC-11 — deferred to the pull request.** It needs two real GitHub runs, one code commit and one conductor-only commit. The final commit of this track is conductor-only, so the proof arrives there; the tier logic itself is proven above.
+- **AC-11 — partial, and corrected here.** The arms are proven against real ranges (doc, code, unknown base). A PR-level documentation-only run cannot be produced by this track: on a `pull_request` event the classifier diffs the PR's whole change set, and this PR's own diff is code, so the track's final conductor-only commit does not make the tier `doc`. The claim that it would was wrong and is corrected in `spec.md`; a genuine documentation-only PR is the remaining evidence.
 
 ### Runtime note for AC-11
 

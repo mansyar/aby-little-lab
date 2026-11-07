@@ -136,7 +136,7 @@ number is equally true and none is checked.
 | AC-8 | The three documents state 12.16.1 and 24, the dated entry exists, and `validate-docs` passes. | FR-9 |
 | AC-9 | The full verification chain and the browser suite are green on the new toolchain. | NFR-1, NFR-4, NFR-5 |
 | AC-10 | `docker build` for the image exits 0 on the new Node base, or the failure and its cause are recorded as a blocker rather than shipped. | FR-5, NFR-3 |
-| AC-11 | On a documentation-only commit, both required checks report green: the gates job runs install and `validate-docs` only, and the browser job runs no tests. Proven on this track's own PR by its final, conductor-only commit. | FR-11, FR-12, FR-13, NFR-6 |
+| AC-11 | On a documentation-only change, both required checks report green: the gates job runs install and `validate-docs` only, and the browser job runs no tests. The classifier arms are proven against real ranges (`verification/phase-2.md`); a PR-level documentation-only run is not available on this track, whose own diff is code. | FR-11, FR-12, FR-13, NFR-6 |
 | AC-12 | On a code commit, the full pipeline runs — proven by the earlier commits on the same PR, whose logs show lint, types, unit, coverage, build and the browser suite. | FR-12 |
 | AC-13 | No `paths-ignore` remains under `pull_request`, and the workflow contains no third-party action for change detection. | FR-11, FR-14 |
 
@@ -183,8 +183,9 @@ number is equally true and none is checked.
   dependency added for the test. The guard scans the two job blocks for the
   specific keys it cares about and asserts their absence or presence.
 - **A second workflow file** added later would escape the guard. Recorded as an
-  accepted limit; the guard asserts the set of workflow files it scans is the set
-  it found, so a new file fails the test until it is added to the list.
+  accepted limit: the guard imports `ci.yml` by path and cannot enumerate
+  `.github/workflows/`, so a new workflow file is unguarded until it is added to
+  the import list.
 - **The `pnpm/action-setup` `version:` conflict.** The action reads
   `packageManager` when `version` is omitted, and its README states the input is
   optional only when `packageManager` declares pnpm 11 or newer. FR-3's pin is
