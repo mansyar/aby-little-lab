@@ -1,0 +1,30 @@
+{
+  "id": "20261107-toolchain-pinning",
+  "title": "Toolchain Pinning",
+  "type": "chore",
+  "status": "complete",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-11-07T20:40:06+11:00",
+  "updated_at": "2026-11-07T22:40:00+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261107-toolchain-pinning",
+  "base_branch": "master",
+  "base_sha": "b8d43ffee1e25716cc656450002ece7d9f4e230d",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 4,
+    "tasks_total": 38,
+    "tasks_done": 38
+  },
+  "last_checkpoint": "f014e7eb",
+  "review_verdict": "pass_with_findings",
+  "review_rounds": 1,
+  "doc_sync": "synced",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/81",
+  "pr_state": "open",
+  "revert": null,
+  "archived_at": "2026-11-07T22:40:00+11:00",
+  "archive_path": "conductor/archive/20261107-toolchain-pinning"
+}

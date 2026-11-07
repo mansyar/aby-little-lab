@@ -86,8 +86,8 @@
 
 | Tool | Version | Where pinned |
 | --- | --- | --- |
-| Node.js | 22 | `Dockerfile`, `.github/workflows/ci.yml` |
-| pnpm | 11.7.0 | `corepack prepare pnpm@11.7.0` in `Dockerfile`; `pnpm/action-setup@v6` in CI |
+| Node.js | 24 | `.node-version`; the `Dockerfile` and both CI jobs read it |
+| pnpm | 12.16.1 | `packageManager` in `package.json`; `corepack prepare pnpm@12.16.1` in `Dockerfile`; `pnpm/action-setup@v6` reads it in CI |
 | TypeScript | `^7.0.2` | `package.json` |
 | Phaser | `^4.2.1` | `package.json` (only runtime dependency) |
 | Vite | `^8.3.5` | `package.json` |
@@ -96,7 +96,6 @@
 | happy-dom | `^21.0.4` | `package.json` |
 | Biome | `^2.6.3` | `package.json` |
 | `playwright-core` | `^1.64.1` | `package.json` — used by `scripts/validate-boot.js` only |
-| `serve` | `^14.2.6` | `package.json` |
 | `workbox-window` | `^7.4.1` | `package.json` — `registerType: "prompt"` plumbing |
 
 `phaser` is the only entry under `dependencies`; everything else is a dev dependency.
@@ -138,11 +137,11 @@ Vitest is configured inside `vite.config.ts`: `environment: "happy-dom"`, `globa
 ├── index.html                    # #game-container, viewport meta, iOS meta, theme colour
 ├── package.json
 ├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
+├── .node-version                 # the Node major; the Dockerfile and CI read it
 ├── tsconfig.json
 ├── vite.config.ts                # build, PWA, Vitest and coverage config in one file
 ├── biome.json
-├── Dockerfile                    # node:22-alpine build → nginx:1.27-alpine runtime
+├── Dockerfile                    # node:24-alpine build → nginx:1.27-alpine runtime
 ├── .dockerignore
 ├── nginx.conf
 ├── public/
@@ -1082,7 +1081,7 @@ Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big 
 
 ### 10.1 Runner and mocks
 
-Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (133 files / 2,912 tests, measured 2026-11-07). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` - sweep guards, not pair-pool guards. From 2026-11-07 the two 22-scene sweeps in `scenes/navigation.test.ts` and `scenes/hubEngagement.test.ts` carry `{ timeout: 60_000 }` as well: each boots all 22 game scenes inside one test body, which measures 20-23 s in isolation and 30-31 s under coverage on a loaded host, so the 30 s budget was marginal rather than wrong (track `20261107-trunk-green`, review finding R2). As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s on the suite as it stood that day (2026-11-07, before the toolchain guard test existed; today's counts are in the coverage line below). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` - sweep guards, not pair-pool guards. From 2026-11-07 the two 22-scene sweeps in `scenes/navigation.test.ts` and `scenes/hubEngagement.test.ts` carry `{ timeout: 60_000 }` as well: each boots all 22 game scenes inside one test body, which measures 20-23 s in isolation and 30-31 s under coverage on a loaded host, so the 30 s budget was marginal rather than wrong (track `20261107-trunk-green`, review finding R2). As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
 
 | Helper | Purpose |
 | --- | --- |
@@ -1096,13 +1095,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-133 test files, 2,912 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+134 test files, 2,920 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.21 (5967/6138), branches 91.14 (1658/1819), functions 96.18 (1310/1362) and lines 98.21 (5551/5652) across 133 files and 2,912 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.21 (5967/6138), branches 91.14 (1658/1819), functions 96.18 (1310/1362) and lines 98.21 (5551/5652) across 134 files and 2,920 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1190,11 +1189,11 @@ VitePWA({
 
 | Job | Runs on | Steps |
 | --- | --- | --- |
-| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `pnpm/action-setup@v6` (11.7.0), `setup-node@v7` (Node 22, pnpm store cached), `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then `vite preview` on port 4173 and `node scripts/validate-boot.js` |
-| Browser Journeys | same triggers, `needs: quality-gates`, `timeout-minutes: 15` | checkout, pnpm and Node 22 setup, `pnpm install --frozen-lockfile`, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e` (builds `dist`, then the journey suite on two workers), and `test-results/` uploaded when the job fails |
+| Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `Classify the change` (publishes `tier` as the `changes` step output), `pnpm/action-setup@v6` (reads `packageManager`: 12.16.1), `setup-node@v7` (reads `.node-version`: Node 24, pnpm store cached), `pnpm install --frozen-lockfile`, `node scripts/validate-docs.js`, then — `tier == 'code'` only — `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `vite preview` on port 4173 and `node scripts/validate-boot.js` |
+| Browser Journeys | same triggers, `needs: quality-gates`, `timeout-minutes: 15` | checkout, `Classify the change` (the same script, its own `tier` output), pnpm and Node from the declaration, then — `tier == 'code'` only — `pnpm install --frozen-lockfile`, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e` (builds `dist`, then the journey suite on two workers), with `test-results/` uploaded when the job fails |
 | Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
-`paths-ignore` skips CI for `conductor/**`, `docs/**`, `README.md` and `**/*.md`. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.
+`paths-ignore` (`conductor/**`, `docs/**`, `README.md`, `**/*.md`) sits on the `push` trigger only: a master push that touches nothing but prose skips the pipeline, while every pull request runs both jobs regardless of what it touches. Each job's first step classifies the diff against the pull request's base commit and publishes `code` or `doc`; the gates job keeps `validate-docs` ungated because that script is what reads `conductor/*.md`, so skipping it would let a dead track link merge green. The two tiers are `code` (the whole pipeline) and `doc` (install plus `validate-docs` in the gates job, and in the browser job only checkout, the classifier and the two setup steps — nothing that needs the suite); the classifier falls back to `code` on an unknown base, an empty diff, a failed fetch or a `git diff` error, and it never exits non-zero. Both job display names are load-bearing — branch protection matches `Quality Gates` and `Browser Journeys` as strings — so `src/__tests__/guard/toolchain.test.ts` asserts both, along with `node-version-file: .node-version` appearing in each job and no `version:`/`node-version:` literal appearing anywhere. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.
 
 Deploy is tag-gated; master pushes never deploy. The PRD's release path section describes the intent ([`docs/PRD.md#82-deploy-path`](./PRD.md#82-deploy-path)).
 
@@ -1202,7 +1201,7 @@ One-time setup spans Coolify and the repo settings: an API token with the `deplo
 
 ### 11.5 Container and host
 
-The `Dockerfile` is two stages: `node:22-alpine` with `corepack prepare pnpm@11.7.0`, `pnpm install --frozen-lockfile`, `pnpm run build`; then `nginx:1.27-alpine` with `nginx.conf` and `dist/` copied in, port 80 exposed and a `wget --spider` healthcheck. The host is a private VPS running Coolify behind Nginx.
+The `Dockerfile` is two stages: `node:24-alpine` with `corepack prepare pnpm@12.16.1` — the Node major the base image matches `.node-version`, the pnpm version `package.json` declares — then `pnpm install --frozen-lockfile` and `pnpm run build`; then `nginx:1.27-alpine` with `nginx.conf` and `dist/` copied in, port 80 exposed and a `wget --spider` healthcheck. The host is a private VPS running Coolify behind Nginx.
 
 Locally the image builds with `docker build -t aby-little-lab .` and smoke-tests with `docker run --rm -p 8080:80 aby-little-lab`, which serves the app at `http://localhost:8080`. The container speaks plain HTTP on port 80, so production terminates TLS at the hosting provider or reverse proxy in front of it; installability and offline both depend on that.
 

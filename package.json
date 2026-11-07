@@ -3,6 +3,8 @@
   "version": "1.23.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "engines": { "node": ">=24.0.0 <25" },
   "description": "An ad-free, distraction-free developmental game suite for preschoolers aged 3-5",
   "scripts": {
     "dev": "vite",
@@ -25,7 +27,6 @@
     "@vitest/coverage-v8": "^5.0.5",
     "happy-dom": "^21.0.4",
     "playwright-core": "^1.64.1",
-    "serve": "^14.2.6",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0",

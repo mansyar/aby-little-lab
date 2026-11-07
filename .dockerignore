@@ -4,6 +4,11 @@
 node_modules
 dist
 coverage
+# Machine-owned Conductor scratch (runs, briefs, evidence, backups). It is
+# gitignored, so a CI checkout never has it, but a developer does - and a copy of
+# node_modules living in there is enough to fail the build context.
+.conductor
+
 *.local
 .DS_Store
 npm-debug.log*
