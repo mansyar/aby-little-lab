@@ -63,7 +63,7 @@ Phaser uploads textures via `blob:` object URLs. `data:` stayed, because `blob:`
 | Inheritance trap | delete the `/sw.js` include, rebuild | `/sw.js` 0/4 headers; 20 passed / 1 failed |
 | Missing header | delete `nosniff`, rebuild | 14 passed / 7 failed, and the guard fails too |
 | Politeness, not convenience | remove `data:` only | `boot` fails on Phaser's 1×1 PNG |
-| Cleanup on failure | `HEADERS_IMAGE=node:24-alpine` | exit 1, no container left, port 8080 free |
+| Cleanup on failure | `HEADERS_IMAGE=node:24-alpine` | exit 1, no container left, port 8080 free |`n| CI, this PR | run 42400257295 | `Quality Gates` pass 1m40s (`Security headers` **14 s**), `Browser Journeys` pass 4m37s |
 
 ## Media
 

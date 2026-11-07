@@ -44,3 +44,16 @@ The journeys under nginx took 3.6 minutes and the default path 3.4, inside the 5
 ## Known follow-up, not fixed here
 
 A request for a missing hashed asset returns `404` with `Cache-Control: public, max-age=31536000, immutable`, because the hashed-asset location matches on extension rather than on file existence. That means a browser could cache a 404 for a year. It is pre-existing, it is now asserted so it cannot change unnoticed, and it was left alone because FR-5 requires cache semantics to be unchanged by this track. It belongs in the Product Operations phase as a serving-correctness item.
+
+## CI, on this track's own PR (#82)
+
+| Job | Result |
+| --- | --- |
+| `Quality Gates` | pass, 1m40s |
+| `Security headers` (inside the gates job) | **14 s** - the whole NFR-5 question, answered by the run rather than estimated |
+| `Browser Journeys` | pass, 4m37s |
+| `Deploy to Coolify` | skipped (not a tag) |
+
+The code tier ran every step, so the step's wiring is proven where it will actually run: the classifier published `code`, the gates job built the image and ran the validator, and no paths-ignore kept the job from reporting. AC-7's other half - the documentation-only tier skipping the step - remains unproven, because a pull request's classifier sees the whole change set and this one is code. It closes on the first genuinely documentation-only PR, alongside AC-11 of `20261107-toolchain-pinning`.
+
+14 seconds is faster than the 36 s local build because the runner's pnpm store and Docker layer cache do what a laptop's cold cache cannot; the ceiling had room either way, which is what NFR-5 was asking.
