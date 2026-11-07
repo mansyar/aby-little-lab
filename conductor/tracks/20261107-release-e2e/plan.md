@@ -88,15 +88,18 @@
 - **Covers:** FR-5, FR-6, FR-7, FR-8, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `e2e/journeys/`, `e2e/fixtures/`
 - **Verification:** `pnpm test:e2e` then the full chain
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified - 13 journeys green in 4.9 m, no retries. Running them confirmed both directions of the parental gate, settings persistence through a rebuilt panel, the cap refusing every tap, and an offline relaunch served from cache. Two things were recorded rather than fixed: the daily cap locks without ever showing the nudge (`isNearLimit` needs remaining > 0), and NFR-2 is now at 4.9 min against a 5 min budget, so Phase 5 must decide between a cheaper loop and an amended number.
+- **Checkpoint:** e322595a
+- **Evidence:** conductor/tracks/20261107-release-e2e/verification/phase-4.md
 
-- [ ] **P4.T1: Parental gate and settings** - covers: FR-5, FR-6, AC-5, AC-6
-  - [ ] **P4.T1.1:** Three-second hold opens settings; one-second press does not
-  - [ ] **P4.T1.2:** Toggle a setting, reload, assert it persisted
-- [ ] **P4.T2: Time-limit lock** - covers: FR-7, AC-7
-  - [ ] **P4.T2.1:** Seed a profile at its daily cap and assert the nudge appears and no transition occurs
-- [ ] **P4.T3: Offline relaunch** - covers: FR-8, AC-8
-  - [ ] **P4.T3.1:** Wait for the service worker to control the page, go offline, reload, and launch one game
+- [x] **P4.T1: Parental gate and settings** - covers: FR-5, FR-6, AC-5, AC-6
+  - [x] **P4.T1.1:** Three-second hold opens settings; one-second press does not
+  - [x] **P4.T1.2:** Toggle a setting, reload, assert it persisted
+- [x] **P4.T2: Time-limit lock** - covers: FR-7, AC-7
+  - [x] **P4.T2.1:** Seed a profile at its daily cap and assert the nudge appears and no transition occurs
+- [x] **P4.T3: Offline relaunch** - covers: FR-8, AC-8
+  - [x] **P4.T3.1:** Wait for the service worker to control the page, go offline, reload, and launch one game
 
 ## Phase 5: Proof and determinism
 
