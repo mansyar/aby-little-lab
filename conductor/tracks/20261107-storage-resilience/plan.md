@@ -51,7 +51,7 @@ The primary appends after acceptance:
 - **Covers:** FR-5, FR-7, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-5, AC-7
 - **Touches:** `src/components/SettingsPanel.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `e2e/journeys/storage.spec.ts`, `e2e/fixtures/`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/product.md`
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: The notice** — covers: FR-5, NFR-4
   - [ ] **P2.T1.1: Render one line while degraded** — small text in the existing panel header area, read at open time from `isPersistenceDegraded()`, styled from the panel's existing text conventions
@@ -76,7 +76,7 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** review findings
 - **Touches:** ...
 - **Verification:** ...
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
 -->
