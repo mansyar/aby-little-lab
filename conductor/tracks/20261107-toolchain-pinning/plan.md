@@ -67,7 +67,7 @@
 
 - [x] **P3.T1: Guard the declaration** — covers: FR-6, NFR-2, AC-5
   - [x] **P3.T1.1: Assert agreement** across `package.json`, `.node-version`, the Dockerfile, both CI jobs and the README prerequisite line, naming every disagreeing file and both values on failure
-  - [x] **P3.T1.2: Assert the workflow's shape** — both job names still exist, no `paths-ignore` under `pull_request`, no `version:` or `node-version:` literal, and the scanned workflow set matches the workflow files on disk
+  - [x] **P3.T1.2: Assert the workflow's shape** — both job names still exist, no `paths-ignore` under `pull_request`, no `version:` or `node-version:` literal, and every `uses:` action is in the reviewed allowlist
   - [x] **P3.T1.3: Prove the teeth** — change one file's version, capture the failing test, revert, and record both outputs
 - [x] **P3.T2: Delete the dead config** — covers: FR-7, AC-6
   - [x] **P3.T2.1: Delete `pnpm-workspace.yaml`** and confirm no tracked file references it
@@ -75,6 +75,10 @@
   - [x] **P3.T3.1: `conductor/tech-stack.md`** — correct the §1 table, the dependency block and the CI/Docker entries, and add a dated design-update entry
   - [x] **P3.T3.2: `docs/TDD.md`** — correct the tool table and the job descriptions, including the new classification step
   - [x] **P3.T3.3: `README.md`** — correct the prerequisites and the CI/CD paragraph
+
+**Result:** verified — a guard test derives the truth from `package.json` and `.node-version` and holds the Dockerfile, both CI jobs, the README prerequisites and the reviewed-action allowlist to it, with two mutations captured and reverted; `pnpm-workspace.yaml` is deleted; tech-stack, TDD and README state the declared versions. The two actions the executor was denied — `git rm` and the tech-stack edits — were done by the primary, and the dated 2026-08-02 entries were superseded rather than rewritten so the log stays true.
+**Checkpoint:** 974fbfe5
+**Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/phase-3.md
 
 ## Phase R1: Review Fixes
 
