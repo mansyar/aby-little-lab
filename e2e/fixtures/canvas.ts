@@ -83,6 +83,43 @@ export async function holdCanvas(page: Page, point: GamePoint, ms: number): Prom
   await page.mouse.up();
 }
 
+/**
+ * Presses a game-space point and holds until `reached` says the press has
+ * landed, then releases.
+ *
+ * `holdCanvas(page, point, ms)` is a fixed wall-clock hold, and a hold is
+ * *scene* time: Phaser's timer advances on the game loop, so on a loaded runner
+ * running at a handful of frames per second a 3.4 s wall-clock hold can be well
+ * short of the 3 s the gate counts. That is not a product defect - a real tablet
+ * does not run at 8 fps - but it made this suite pass on ten local runs and fail
+ * every attempt on CI (2026-11-07, PR #79). Waiting for the state instead of a
+ * duration makes the journey independent of how fast the machine renders, and
+ * costs nothing when it is fast. The timeout is generous because the point is to
+ * fail on the state never arriving, not on the clock.
+ */
+export async function holdCanvasUntil(
+  page: Page,
+  point: GamePoint,
+  reached: () => Promise<boolean>,
+  timeout = 20_000,
+): Promise<void> {
+  const at = toPagePoint(await canvasBox(page), point);
+  await page.mouse.move(at.x, at.y);
+  await page.mouse.down();
+  try {
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      if (await reached()) return;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(
+      `the press at (${point.x}, ${point.y}) never reached its state in ${timeout} ms`,
+    );
+  } finally {
+    await page.mouse.up();
+  }
+}
+
 /** Presses at a game-space point without releasing. */
 export async function pressCanvas(page: Page, point: GamePoint): Promise<void> {
   const at = toPagePoint(await canvasBox(page), point);

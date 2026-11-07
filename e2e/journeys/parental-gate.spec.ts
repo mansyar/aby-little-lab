@@ -1,12 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { holdCanvas, tapCanvas } from "../fixtures/canvas";
+import { holdCanvas, holdCanvasUntil, tapCanvas } from "../fixtures/canvas";
 import {
   activeSceneKey,
   collectErrors,
   hubTiles,
   openHub,
   reloadHub,
-  SETTINGS_HOLD_MS,
   SETTINGS_SHORT_PRESS_MS,
   settingsState,
 } from "../fixtures/game";
@@ -48,13 +47,11 @@ test("a three-second hold opens settings and a one-second press does not", async
   );
 
   // Stage: the full hold, on the same point, in the same visit.
-  await holdCanvas(page, initial.gate, SETTINGS_HOLD_MS);
-  await expect
-    .poll(async () => (await settingsState(page)).open, {
-      message: "a three-second hold on the Settings control should open the parental panel",
-      timeout: 5_000,
-    })
-    .toBe(true);
+  await holdCanvasUntil(page, initial.gate, async () => (await settingsState(page)).open);
+  expect(
+    (await settingsState(page)).open,
+    "a three-second hold on the Settings control should open the parental panel",
+  ).toBe(true);
 
   const opened = await settingsState(page);
   expect(
@@ -75,13 +72,11 @@ test("a settings toggle survives a reload and the game still boots", async ({ pa
   const initial = await settingsState(page);
   if (!initial.gate) throw new Error("the hub should publish its Settings control");
 
-  await holdCanvas(page, initial.gate, SETTINGS_HOLD_MS);
-  await expect
-    .poll(async () => (await settingsState(page)).open, {
-      message: "the parental panel should be open before its rows are touched",
-      timeout: 5_000,
-    })
-    .toBe(true);
+  await holdCanvasUntil(page, initial.gate, async () => (await settingsState(page)).open);
+  expect(
+    (await settingsState(page)).open,
+    "the parental panel should be open before its rows are touched",
+  ).toBe(true);
 
   const row = (await settingsState(page)).toggles.find((toggle) => toggle.id === "adaptive");
   if (!row) throw new Error("the open panel should publish its Adaptive row");
@@ -118,13 +113,8 @@ test("a settings toggle survives a reload and the game still boots", async ({ pa
     throw new Error("the reloaded hub should publish its Settings control again");
 
   // Stage: read the value back through the app, not from storage.
-  await holdCanvas(page, afterReload.gate, SETTINGS_HOLD_MS);
-  await expect
-    .poll(async () => (await settingsState(page)).open, {
-      message: "the panel should reopen after the reload",
-      timeout: 5_000,
-    })
-    .toBe(true);
+  await holdCanvasUntil(page, afterReload.gate, async () => (await settingsState(page)).open);
+  expect((await settingsState(page)).open, "the panel should reopen after the reload").toBe(true);
 
   const restored = (await settingsState(page)).toggles.find((toggle) => toggle.id === "adaptive");
   expect(

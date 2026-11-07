@@ -6,7 +6,7 @@ import type {
   E2ERoundTarget,
   E2ESettingsState,
 } from "../../src/game/e2eBridge";
-import { type GamePoint, holdCanvas, tapCanvas } from "./canvas";
+import { type GamePoint, holdCanvasUntil, tapCanvas } from "./canvas";
 
 /**
  * Journey primitives: open the hub, launch a game by registry index, read what
@@ -22,11 +22,13 @@ import { type GamePoint, holdCanvas, tapCanvas } from "./canvas";
 /** The canvas point at the centre of the in-game "← Back" button's hold square. */
 export const BACK_BUTTON: GamePoint = { x: 68, y: 68 };
 
-/** Comfortably past {@link import("../../src/components/ParentLock").DEFAULT_HOLD_DURATION}. */
-export const BACK_HOLD_MS = 3_400;
-
-/** The same hold, aimed at the hub's "Settings" control. */
-export const SETTINGS_HOLD_MS = 3_400;
+/**
+ * The gate cannot be short-circuited, and its three seconds are *scene* time, so
+ * both holds below are state-driven (`holdCanvasUntil`) rather than fixed: see
+ * `holdCanvasUntil` for why a wall-clock hold is not equivalent on a loaded
+ * machine. `SETTINGS_SHORT_PRESS_MS` is the one duration that stays literal,
+ * because the thing being tested is that too short a press does nothing.
+ */
 
 /**
  * A press well under the gate's three seconds. It must leave the hub exactly as
@@ -317,10 +319,12 @@ export async function launchGame(page: Page, index: number, sceneKey: string): P
 
 /**
  * Leaves a game the way a player does: hold the back control, then wait for the
- * hub. The hold is the parental gate, so it cannot be short-circuited.
+ * hub. The hold is the parental gate, so it cannot be short-circuited - but it
+ * is held until the hub appears rather than for a fixed duration, because the
+ * gate counts scene time and a loaded runner renders fewer frames per second.
  */
 export async function returnToHub(page: Page): Promise<void> {
-  await holdCanvas(page, BACK_BUTTON, BACK_HOLD_MS);
+  await holdCanvasUntil(page, BACK_BUTTON, async () => (await activeSceneKey(page)) === "Hub");
   await waitForScene(page, "Hub");
   await waitForHubReady(page);
   await dismissHubToast(page);
