@@ -19,42 +19,78 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup pnpm (pinned to Dockerfile version)
-        uses: pnpm/action-setup@v6
-        with:
-          version: 11.7.0
+      # Tells the job whether the PR touches anything but documentation. It
+      # never fails: an unknown base, an empty diff or a fetch failure all fall
+      # through to `code`, because running the suite needlessly costs minutes
+      # while skipping it wrongly costs a merge.
+      - name: Classify the change
+        id: changes
+        shell: bash
+        run: |
+          set -uo pipefail
+          emit() { echo "tier=$1" >> "$GITHUB_OUTPUT"; echo "Change tier: $1"; }
+          if [ ! -f .node-version ]; then emit code; exit 0; fi
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "${base:-}" ]; then emit code; exit 0; fi
+          if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            if ! git fetch --no-tags --depth=1 origin "$base"; then emit code; exit 0; fi
+          fi
+          files="$(git diff --name-only "$base" HEAD || true)"
+          if [ -z "$files" ]; then emit code; exit 0; fi
+          tier=doc
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              conductor/*|docs/*|README.md|*.md) ;;
+              *) tier=code; break ;;
+            esac
+          done <<< "$files"
+          emit "$tier"
 
-      - name: Setup Node 22
+      - name: Setup pnpm (from packageManager)
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node (from .node-version)
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint & format check
-        run: pnpm run check
-
-      - name: Typecheck
-        run: pnpm run typecheck
-
-      - name: Tests
-        run: CI=true pnpm test
-
-      - name: Production build
-        run: pnpm run build
-
-      - name: Bundle validation
-        run: node scripts/validate-bundle.js
-
-      - name: PWA validation
-        run: node scripts/validate-pwa.js
-
+      # The one check that must also run for a documentation-only change: it is
+      # what reads conductor/*.md, so skipping it would let a dead track link
+      # merge with every check green.
       - name: Document validation
         run: node scripts/validate-docs.js
 
+      - name: Lint & format check
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm run check
+
+      - name: Typecheck
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm run typecheck
+
+      - name: Tests
+        if: steps.changes.outputs.tier == 'code'
+        run: CI=true pnpm test
+
+      - name: Production build
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm run build
+
+      - name: Bundle validation
+        if: steps.changes.outputs.tier == 'code'
+        run: node scripts/validate-bundle.js
+
+      - name: PWA validation
+        if: steps.changes.outputs.tier == 'code'
+        run: node scripts/validate-pwa.js
+
       - name: Boot-time validation
+        if: steps.changes.outputs.tier == 'code'
         run: |
           node node_modules/vite/bin/vite.js preview --port 4173 --strictPort &
           sleep 3
@@ -68,6 +104,8 @@ jobs:
     # builds itself (`pnpm build && playwright test`), keeping the artifact
     # local to the job that tests it. NFR-2's budget is 5 min for the suite;
     # the timeout below is only the backstop for a browser that never exits.
+    # A documentation-only change runs no test here, but the job still runs and
+    # still reports: both required checks must report or the PR stays blocked.
     needs: quality-gates
     runs-on: ubuntu-latest
     # A hung browser should fail loudly instead of occupying a runner.
@@ -76,24 +114,49 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup pnpm (pinned to Dockerfile version)
-        uses: pnpm/action-setup@v6
-        with:
-          version: 11.7.0
+      - name: Classify the change
+        id: changes
+        shell: bash
+        run: |
+          set -uo pipefail
+          emit() { echo "tier=$1" >> "$GITHUB_OUTPUT"; echo "Change tier: $1"; }
+          if [ ! -f .node-version ]; then emit code; exit 0; fi
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "${base:-}" ]; then emit code; exit 0; fi
+          if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            if ! git fetch --no-tags --depth=1 origin "$base"; then emit code; exit 0; fi
+          fi
+          files="$(git diff --name-only "$base" HEAD || true)"
+          if [ -z "$files" ]; then emit code; exit 0; fi
+          tier=doc
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              conductor/*|docs/*|README.md|*.md) ;;
+              *) tier=code; break ;;
+            esac
+          done <<< "$files"
+          emit "$tier"
 
-      - name: Setup Node 22
+      - name: Setup pnpm (from packageManager)
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node (from .node-version)
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install dependencies
+        if: steps.changes.outputs.tier == 'code'
         run: pnpm install --frozen-lockfile
 
       - name: Install Chromium
+        if: steps.changes.outputs.tier == 'code'
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Browser journeys
+        if: steps.changes.outputs.tier == 'code'
         run: pnpm test:e2e
 
       - name: Upload traces and screenshots
