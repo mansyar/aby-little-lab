@@ -8,6 +8,7 @@ import {
   mockSettingsPanel,
   triggerAllPointerdowns,
   triggerAllPointerups,
+  triggerPointerdownOn,
   triggerPointerupOn,
 } from "../helpers/sceneFlowHarness";
 
@@ -354,6 +355,7 @@ describe("Hub play-time enforcement", () => {
 
     const chip = findLastAddedImage(scene, "animal_cat");
     if (!chip) throw new Error("chip not created");
+    triggerPointerdownOn(chip);
     triggerPointerupOn(chip);
     const dogAvatar = findLastAddedImage(scene, "animal_dog");
     if (!dogAvatar) throw new Error("picker avatar not created");

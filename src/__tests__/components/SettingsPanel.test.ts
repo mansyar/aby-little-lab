@@ -869,6 +869,54 @@ describe("SettingsPanel interaction", () => {
   });
 });
 
+describe("SettingsPanel browser-suite probes", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it("reports itself open until destroy runs", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+
+    expect(panel.e2eOpen()).toBe(true);
+
+    // Closing the panel destroys it without telling whoever holds it, which is
+    // why the flag lives on the panel rather than on the Hub.
+    panel.destroy();
+
+    expect(panel.e2eOpen()).toBe(false);
+  });
+
+  it("publishes each toggle with a point its own row band answers to", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+
+    const toggles = panel.e2eToggles();
+    expect(toggles.map((toggle) => toggle.id)).toEqual(["bgm", "sfx", "adaptive"]);
+    expect(toggles.map((toggle) => toggle.on)).toEqual([true, true, true]);
+
+    const labels = ["BGM: ON", "SFX: ON", "Adaptive: ON"];
+    toggles.forEach((toggle, index) => {
+      const band = hitRectFor(scene, labels[index]);
+      expect(toggle.x).toBeGreaterThanOrEqual(band.left);
+      expect(toggle.x).toBeLessThanOrEqual(band.right);
+      expect(toggle.y).toBeGreaterThanOrEqual(band.top);
+      expect(toggle.y).toBeLessThanOrEqual(band.bottom);
+    });
+  });
+
+  it("reports a toggle's state after its row is tapped", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+
+    triggerPointerdown(findTextByLabel(scene, "Adaptive: ON") as MockGameObject);
+
+    const adaptive = panel.e2eToggles().find((toggle) => toggle.id === "adaptive");
+    expect(adaptive?.on).toBe(false);
+  });
+});
+
 describe("SettingsPanel install control", () => {
   beforeEach(() => {
     localStorage.clear();

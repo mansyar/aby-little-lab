@@ -11,6 +11,7 @@ import { RoundNarrator } from "../components/RoundNarrator";
 import type { SpeakerButton } from "../components/SpeakerButton";
 import { preloadArtGroups } from "../game/art/registry";
 import type { ArtGroup } from "../game/art/types";
+import type { E2ERoundGeometry } from "../game/e2eBridge";
 import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
 import type { Rng } from "../game/random";
 import type { GameId } from "../types";
@@ -74,6 +75,17 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected readonly rng: Rng;
 
   protected progressDots: Phaser.GameObjects.Arc[] = [];
+
+  /**
+   * Rounds finished this visit.
+   *
+   * Kept as its own counter rather than inferred from the dots: a dot is
+   * dimmed by its *fill* alpha, so `dot.alpha` stays 1 on an untouched dot
+   * and reading it would count every dot as filled. Only
+   * {@link fillProgressDot} advances this, so the count and the visible fill
+   * cannot drift apart.
+   */
+  protected completedRounds = 0;
   protected inputLocked = false;
 
   /** Correct taps recorded this session (flushed to progress on completion). */
@@ -370,6 +382,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
    */
   protected createProgressDots(count: number): void {
     this.progressDots = [];
+    this.completedRounds = 0;
     const startX = this.cameras.main.centerX - ((count - 1) * this.PROGRESS_DOT_SPACING) / 2;
     for (let i = 0; i < count; i++) {
       const dot = this.add.circle(
@@ -387,6 +400,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
   protected fillProgressDot(index: number): void {
     const dot = this.progressDots[index];
     dot.setAlpha(1);
+    this.completedRounds += 1;
     this.tweens.add({
       targets: dot,
       scaleX: motionScale(this.DOT_POP_SCALE, this.DOT_POP_REDUCED_SCALE),
@@ -395,6 +409,18 @@ export abstract class GameSceneBase extends Phaser.Scene {
       ease: "Back.out",
       yoyo: true,
     });
+  }
+
+  /**
+   * Canvas-space description of the current round for the read-only e2e
+   * bridge, or null when this scene publishes none.
+   *
+   * Null by default: only the six sampled game scenes override it, and the
+   * bridge treats null as "no geometry to drive". Read at call time, never
+   * cached, so a mid-round change is reported as it is.
+   */
+  protected e2eRoundGeometry(): E2ERoundGeometry | null {
+    return null;
   }
 
   /** Records a correct answer for the active profile's learning progress. */
@@ -515,6 +541,7 @@ export abstract class GameSceneBase extends Phaser.Scene {
       // The dots are destroyed with the display list: release them so the
       // scene holds no references to destroyed objects.
       this.progressDots = [];
+      this.completedRounds = 0;
     });
   }
 

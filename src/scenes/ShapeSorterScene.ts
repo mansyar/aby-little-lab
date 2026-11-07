@@ -2,6 +2,7 @@ import type Phaser from "phaser";
 import { cutouts } from "../game/art/cutouts";
 import { shapes } from "../game/art/shapes";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
+import type { E2ERoundGeometry } from "../game/e2eBridge";
 import { type Rng, shuffle } from "../game/random";
 import { generatePlaythrough, isMatch, type ShapeType } from "../game/shapeSorterLogic";
 import { createCompletionSplash } from "../utils/completionEffect";
@@ -195,6 +196,26 @@ export class ShapeSorterScene extends GameSceneBase {
 
       this.shapes.push(shapeData);
     }
+  }
+
+  /**
+   * Publishes the round for the e2e bridge: every shape with the position it
+   * currently occupies, and every slot with the shape type it accepts. Ids are
+   * the shape types, so a journey drags each target onto the slot with the
+   * same id.
+   */
+  protected override e2eRoundGeometry(): E2ERoundGeometry | null {
+    if (this.shapes.length === 0) return null;
+
+    return {
+      round: this.roundIndex,
+      targets: this.shapes.map((shape) => ({
+        id: shape.type,
+        x: shape.container.x,
+        y: shape.container.y,
+      })),
+      slots: this.slots.map((slot) => ({ id: slot.type, x: slot.x, y: slot.y })),
+    };
   }
 
   /** Validates one board drop: a match locks the shape in its slot, a miss bounces it home. */

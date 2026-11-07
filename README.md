@@ -46,7 +46,9 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,833 tests across 132 files**, all green (verified 2026-11-07).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **2,881 tests across 133 files**, all green (verified 2026-11-07).
+
+Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the daily cap and an offline relaunch. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
 ## Code Quality
 
@@ -172,7 +174,7 @@ Then open `http://localhost:8080`; production terminates TLS in front of the con
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs` and `validate-boot` against a preview server. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
+`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs` and `validate-boot` against a preview server. A second job, `Browser Journeys`, runs after it on the same triggers and takes the Playwright suite through the built `dist`, so a browser failure is reported without hiding the static and unit results. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
 
 One-time setup: a Coolify API token with the `deploy` permission, the app's Deploy Webhook URL, the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` secrets, and branch protection requiring `Quality Gates`. Intent: [PRD §8.2](docs/PRD.md#82-deploy-path); implementation and setup steps: [TDD §11.4](docs/TDD.md#114-github-actions), [TDD §11.5](docs/TDD.md#115-container-and-host).
 

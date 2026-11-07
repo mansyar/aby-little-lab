@@ -69,6 +69,7 @@
     - [10.2 Suite shape](#102-suite-shape)
     - [10.3 Coverage gates](#103-coverage-gates)
     - [10.4 What unit tests cannot cover](#104-what-unit-tests-cannot-cover)
+    - [10.5 The browser journey layer](#105-the-browser-journey-layer)
 11. [Build, PWA and CI](#11-build-pwa-and-ci)
     - [11.1 Vite build](#111-vite-build)
     - [11.2 PWA configuration](#112-pwa-configuration)
@@ -1065,7 +1066,7 @@ Per-game reactions kept from the juice pass: Shape Sorter, Shadow Match and Big 
 
 ### 10.1 Runner and mocks
 
-Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (132 files / 2,833 tests, measured 2026-11-07). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` - sweep guards, not pair-pool guards. From 2026-11-07 the two 22-scene sweeps in `scenes/navigation.test.ts` and `scenes/hubEngagement.test.ts` carry `{ timeout: 60_000 }` as well: each boots all 22 game scenes inside one test body, which measures 20-23 s in isolation and 30-31 s under coverage on a loaded host, so the 30 s budget was marginal rather than wrong (track `20261107-trunk-green`, review finding R2). As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
+Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.test.ts`). The runner is the `vmThreads` pool with a 30,000 ms per-test budget, both committed in `vite.config.ts` with the measured reason. The default `forks` pool spawns an OS process per test file, and on a loaded development host those processes blew the 5,000 ms default in untouched files, forcing serialized runs (`--maxWorkers=1`, 460–520 s) and ad-hoc `--testTimeout=30000` retries. Under `vmThreads` the same full suite ran green twice at 59.4 s and 59.9 s (133 files / 2,881 tests, measured 2026-11-07). The command-line workarounds are retired: the timeout policy lives in the repository, and no run needs a flag. vmThreads keeps per-file VM isolation, so the module singletons the suite relies on (`AudioManager.getInstance()`, memo caches) stay safe. Per-test exception: the seven heavy sweep tests — "keeps the shifted band ladder and validity across many samples" in `addItUpLogic` and `takeAwayLogic`, "keeps the shifted band ladder across many samples" in `countLogic` and `numberOrderLogic`, "keeps every round valid at every shift" in `firstSoundsLogic`, and "keeps every round valid and uniquely targeted at every shift" in `decodeLogic` and `wordLogic` — carry an explicit `{ timeout: 120_000 }` because their 200-sample × 3-shift property loops exceed the 30 s budget under host load (worst observed 66 s on the gate runs) although they stay under 5 s in isolation (audited 2026-10-26, worst 4.84 s). The global 30 s default is unchanged, and no other test carries a per-test timeout beyond the pre-existing 20 s guards: the five pair-pool guards in `addItUpLogic`, `countLogic` and `takeAwayLogic`, plus the two 20 s sweep guards in `moreLessLogic.test.ts:141-143` and `:159` - sweep guards, not pair-pool guards. From 2026-11-07 the two 22-scene sweeps in `scenes/navigation.test.ts` and `scenes/hubEngagement.test.ts` carry `{ timeout: 60_000 }` as well: each boots all 22 game scenes inside one test body, which measures 20-23 s in isolation and 30-31 s under coverage on a loaded host, so the 30 s budget was marginal rather than wrong (track `20261107-trunk-green`, review finding R2). As of the 2026-10-27 dependency-majors pass the suite runs on vitest 5.0.5 over happy-dom 21.0.4. Vitest 5 changed the `clearMocks` default to `clearMocks: true` — mock call history is cleared before every test while implementations are kept — and the project embraces that default with no escape hatch: `vite.config.ts` carries no `clearMocks` key, and the full suite passed its first vitest 5 run with zero test-file changes. happy-dom 21 disables CSS and IFrame loading by default (SSRF prevention); the audit found zero suites needing a re-enable, and the suite runs markedly faster under it (~13–16 s versus ~32–37 s under 18.0.1). Five shared helpers:
 
 | Helper | Purpose |
 | --- | --- |
@@ -1079,13 +1080,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-132 test files, 2,833 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+133 test files, 2,881 tests (verified 2026-11-07). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.87 (5817/5943), branches 92.16 (1588/1723), functions 97.01 (1269/1308) and lines 98.76 (5416/5484) across 132 files and 2,833 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.19 (5921/6092), branches 91.12 (1623/1781), functions 96.16 (1305/1357) and lines 98.19 (5507/5608) across 133 files and 2,881 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1097,6 +1098,34 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 - actual audio mixing, ducking audibility and voice availability;
 - orientation lock and PWA install/update on iOS Safari, Android Chrome and desktop;
 - the cold-load budget, which is `scripts/validate-boot.js`'s job in CI.
+
+### 10.5 The browser journey layer
+
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 13 journeys across 12 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, settings persistence, the daily cap and an offline relaunch. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+
+What this layer observes that the unit layer cannot:
+
+- the wiring between the registry, the lazy scene loaders and the built chunks — a game registered but whose chunk is missing from the precache, or whose scene never registers, fails here and passes every unit test;
+- real hit areas on a real canvas: every gesture goes through the canvas bounding box, so the 1024x768 `Scale.FIT` letterboxing is exercised rather than assumed, and a control whose interactive area no longer covers its published centre is invisible to happy-dom;
+- persistence across a real reload, the service worker, and a relaunch with the network cut at the browser context;
+- only-in-a-frame timing: the entrance tweens that swallow a tap, the parental gate's three-second hold, `NEXT_ROUND_DELAY`.
+
+**Why it is not in `verify_phase`.** The phase gate is a ~90 s budget every phase subagent runs; this layer builds `dist` and takes minutes. It runs as its own CI job on every pull request (`Browser Journeys`, `needs: quality-gates`), so a browser failure is reported next to the static and unit results instead of replacing them.
+
+**Run one journey locally:**
+
+```bash
+pnpm build                                  # the suite serves dist, not the dev server
+pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
+```
+
+`pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
+
+**Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
+
+**Workers and budget.** Two workers, locally and in CI, against one shared preview server. `fullyParallel: false` makes the file the unit of parallelism: the tests inside a spec run in order in one worker, and every test still gets a fresh browser context, so no journey can see another's storage or service worker. Serially the suite measured 4.9 min against NFR-2's 5 min ceiling, with `launch-all` alone at 2.6 min; two workers put the measured wall clock at 3.0-3.1 min over ten consecutive runs, because the wall clock shrinks and the work does not. The budget is a CI ceiling, not a target: a new journey that pushes past it is a decision about the suite's shape, not a number to edit.
+
+**The suite must be seen to fail.** A layer that has never gone red is not evidence. The proof is a surgical mutation — one tile's hit area shrunk to a 1x1 point — which must turn the launch journey red, after which the mutation is reverted and the suite must be green again.
 
 ---
 
@@ -1146,6 +1175,7 @@ VitePWA({
 | Job | Runs on | Steps |
 | --- | --- | --- |
 | Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `pnpm/action-setup@v6` (11.7.0), `setup-node@v7` (Node 22, pnpm store cached), `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then `vite preview` on port 4173 and `node scripts/validate-boot.js` |
+| Browser Journeys | same triggers, `needs: quality-gates`, `timeout-minutes: 15` | checkout, pnpm and Node 22 setup, `pnpm install --frozen-lockfile`, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e` (builds `dist`, then the journey suite on two workers), and `test-results/` uploaded when the job fails |
 | Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
 `paths-ignore` skips CI for `conductor/**`, `docs/**`, `README.md` and `**/*.md`. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.

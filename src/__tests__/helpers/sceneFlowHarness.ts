@@ -306,6 +306,15 @@ export function triggerPointerupOn(obj: Record<string, MockFn>): void {
   }
 }
 
+/** Fires the first pointerdown handler registered on a game object. */
+export function triggerPointerdownOn(obj: Record<string, MockFn>): void {
+  const onMock = getMockFn(obj.on);
+  const call = onMock.mock.calls.find((c) => c[0] === "pointerdown");
+  if (call && typeof call[1] === "function") {
+    call[1]();
+  }
+}
+
 /** Returns the first text game object whose label contains the given text. */
 export function getTextObject(
   scene: unknown,

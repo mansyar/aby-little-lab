@@ -1,0 +1,32 @@
+{
+  "id": "20261107-release-e2e",
+  "title": "Browser Journey Suite",
+  "type": "chore",
+  "status": "in_progress",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-11-07T09:17:21+11:00",
+  "updated_at": "2026-11-07T09:44:00+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261107-release-e2e",
+  "base_branch": "master",
+  "base_sha": "4bcb38a1aac84340a99fa1c34bf3550ee716baf7",
+  "progress": {
+    "phases_total": 5,
+    "phases_verified": 5,
+    "tasks_total": 17,
+    "tasks_done": 17
+  },
+  "last_checkpoint": "00b9216d",
+  "review_verdict": "pass_with_findings",
+  "review_rounds": 1,
+  "doc_sync": "synced",
+  "pr_url": null,
+  "pr_state": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}

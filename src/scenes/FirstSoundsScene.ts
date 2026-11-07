@@ -5,6 +5,7 @@ import { letters } from "../game/art/letters";
 import { music } from "../game/art/music";
 import { shapes } from "../game/art/shapes";
 import { toys } from "../game/art/toys";
+import type { E2ERoundGeometry } from "../game/e2eBridge";
 import { generatePhonicsPlaythrough, type PhonicsRound } from "../game/firstSoundsLogic";
 import type { Rng } from "../game/random";
 import type { GameId } from "../types";
@@ -134,6 +135,24 @@ export class FirstSoundsScene extends ChoiceRoundScene {
   }
 
   protected clearRoundContent(): void {}
+
+  /**
+   * Publishes the round for the e2e bridge: the correct letter card's id is the
+   * letter, and its coordinates come from the card the base drew for it.
+   */
+  protected override e2eRoundGeometry(): E2ERoundGeometry | null {
+    const round = this.rounds[this.roundIndex];
+    if (!round) return null;
+
+    const correctIndex = round.choices.findIndex((_, index) => this.isChoiceCorrect(index));
+    const card = this.choiceTargets[correctIndex];
+    if (!card) return null;
+
+    return {
+      round: this.roundIndex,
+      targets: [{ id: round.target, x: card.x, y: card.y }],
+    };
+  }
 
   /**
    * A splash bursts at the tapped card and the letter name is spoken once as

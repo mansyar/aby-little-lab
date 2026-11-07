@@ -43,8 +43,18 @@ function pickerAvatars() {
   return mockRegistry.filter((obj) => obj.kind === "image" && (obj.args?.[1] as number) === 384);
 }
 
-/** Fires every pointerup handler in dispatch order. */
+/** Fires a full press on an object: `pointerdown`, then `pointerup`. */
 function tap(obj: { allHandlers: Array<{ name: string; cb: MockFn }> }): void {
+  for (const { name, cb } of obj.allHandlers) {
+    if (name === "pointerdown") cb();
+  }
+  for (const { name, cb } of obj.allHandlers) {
+    if (name === "pointerup") cb();
+  }
+}
+
+/** Fires only the release, as Phaser does for a press that began elsewhere. */
+function loneRelease(obj: { allHandlers: Array<{ name: string; cb: MockFn }> }): void {
   for (const { name, cb } of obj.allHandlers) {
     if (name === "pointerup") cb();
   }
@@ -100,6 +110,15 @@ describe("ProfileChip", () => {
       (obj) => (obj.setScale as MockFn).mock.calls.at(-1)?.[0] === base * 1.15,
     );
     expect(active).toBeDefined();
+  });
+
+  it("ignores a release that began somewhere else, so a stray up cannot open the picker", () => {
+    const { chip, onOpen } = makeChip();
+    chip.create();
+    loneRelease(chipImage());
+
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(chip.isOpen()).toBe(false);
   });
 
   it("switches profiles on another avatar's tap, notifies the scene and closes", () => {

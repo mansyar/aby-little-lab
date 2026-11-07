@@ -195,6 +195,7 @@ import { music } from "../../game/art/music";
 import { preloadArtGroups } from "../../game/art/registry";
 import { shapes } from "../../game/art/shapes";
 import artGroupsSource from "../../game/hub/artGroups.ts?raw";
+import { wideGridOrigin, wideTileCenter } from "../../game/hub/gridLayout";
 import {
   ART_KEYS_BY_GAME,
   type ArtKeyEntry,
@@ -203,6 +204,8 @@ import {
   startArtPrewarm,
   startPrewarm,
 } from "../../game/hub/prewarm";
+import { pagedTilePosition } from "../../game/hubPaging";
+import { GAME_TILES } from "../../game/hubTiles";
 import { HubScene } from "../../scenes/HubScene";
 import hubSceneSource from "../../scenes/HubScene.ts?raw";
 import { loadSceneWithRetry } from "../../scenes/sceneRegistry";
@@ -533,7 +536,11 @@ describe("HubScene paged grid (narrow viewports)", () => {
       (obj) => obj.kind === "image" && obj.args?.[0] === 68 && obj.args?.[1] === 68,
     );
     if (!chip) throw new Error("profile chip image not found");
-    // Fire every pointerup handler (press feedback + open) in dispatch order.
+    // Fire a full press (pointerdown + pointerup) in dispatch order, exactly as
+    // the engine reports a tap: the chip only opens on a release it took.
+    for (const { name, cb } of chip.allHandlers) {
+      if (name === "pointerdown") cb();
+    }
     for (const { name, cb } of chip.allHandlers) {
       if (name === "pointerup") cb();
     }
@@ -720,6 +727,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
 
     const baseScale = 96 / 256; // PICKER_AVATAR_DISPLAY / AVATAR_TEXTURE_SIZE
     const activeScale = baseScale * 1.15;
+    fireAll(getChipImage(), "pointerdown");
     fireAll(getChipImage(), "pointerup");
 
     const avatars = mockRegistry.filter(
@@ -873,6 +881,7 @@ describe("HubScene profile and hierarchy cohesion", () => {
     }
 
     const before = getActiveProfile().id;
+    fireAll(getChipImage(), "pointerdown");
     fireAll(getChipImage(), "pointerup");
 
     const baseScale = 96 / 256;
@@ -1430,5 +1439,148 @@ describe("HubScene idle art prewarm", () => {
     expect((warmed.load.svg as MockFn).mock.calls).toHaveLength(0);
     // Nothing queued means nothing to listen for either.
     expect((warmed.load.on as MockFn).mock.calls).toHaveLength(0);
+  });
+});
+
+describe("HubScene e2e hub tiles", () => {
+  beforeEach(() => {
+    stubMatchMedia(false);
+    localStorage.clear();
+    mockRegistry.length = 0;
+    mockRecordGamePlay.mockClear();
+    for (const fn of Object.values(mockAudio)) {
+      fn.mockClear();
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  /** The page-dot circles in creation order. */
+  function pageDots(): MockObject[] {
+    return mockRegistry.filter((obj) => {
+      const [, y, r] = (obj.args ?? []) as unknown[];
+      return obj.kind === "circle" && y === 640 && r === 8;
+    });
+  }
+
+  /** Builds a Hub on a small-phone landscape viewport, which pages the grid. */
+  function createNarrowHub(): HubScene {
+    const scene = new HubScene();
+    (scene.scale as unknown as { displaySize: { width: number; height: number } }).displaySize = {
+      width: 844,
+      height: 390,
+    };
+    scene.create();
+    return scene;
+  }
+
+  it("publishes the 22 wide-grid tiles in registry order at their drawn centres", () => {
+    // Pins the registry contract the launch journey loops: a 23rd game changes
+    // this count and fails here before the journey mis-maps a tile.
+    const scene = new HubScene();
+    scene.create();
+
+    const tiles = scene.e2eHubTiles();
+    expect(tiles.map((tile) => tile.id)).toEqual(
+      Array.from({ length: 22 }, (_, index) => String(index)),
+    );
+
+    // Coordinates come from the same layout module the grid draws with, so a
+    // drifted tile position fails here rather than as a dead tap in the suite.
+    const origin = wideGridOrigin(1024, 768);
+    expect(tiles).toEqual(
+      GAME_TILES.map((_, index) => ({ id: String(index), ...wideTileCenter(index, origin) })),
+    );
+  });
+
+  it("publishes only the visible page, keeping registry indexes as ids", () => {
+    const scene = createNarrowHub();
+
+    const pageTiles = (page: number, count: number) =>
+      GAME_TILES.slice(page * 10, page * 10 + count).map((_, slot) => {
+        const { x, y } = pagedTilePosition(slot, count);
+        return { id: String(page * 10 + slot), x, y };
+      });
+
+    expect(scene.e2eHubTiles().map((tile) => tile.id)).toEqual(
+      Array.from({ length: 10 }, (_, index) => String(index)),
+    );
+    expect(scene.e2eHubTiles()).toEqual(pageTiles(0, 10));
+
+    pageDots()[1]?.handlers.pointerup?.();
+
+    // The new page starts one canvas width to the right and slides in; the mock
+    // records the live start position, so x carries that offset here.
+    expect(scene.e2eHubTiles().map((tile) => tile.id)).toEqual(
+      Array.from({ length: 10 }, (_, index) => String(index + 10)),
+    );
+    expect(scene.e2eHubTiles().map((tile) => tile.y)).toEqual(
+      pageTiles(1, 10).map((tile) => tile.y),
+    );
+    expect(scene.e2eHubTiles().map((tile) => tile.x)).toEqual(
+      pageTiles(1, 10).map((tile) => tile.x + 1024),
+    );
+
+    pageDots()[2]?.handlers.pointerup?.();
+
+    expect(scene.e2eHubTiles().map((tile) => tile.id)).toEqual(["20", "21"]);
+  });
+
+  it("reports the grid's readiness through the probe", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    // The mock tween manager records entrances but never completes them, so the
+    // board is honestly still entering.
+    expect(scene.e2eHubReady()).toBe(false);
+
+    for (const [config] of (scene.tweens.add as MockFn).mock.calls) {
+      (config as { onComplete?: () => void }).onComplete?.();
+    }
+
+    expect(scene.e2eHubReady()).toBe(true);
+  });
+
+  it("reports no toast while none is showing", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    // No PWA bridge in the harness, so the hub never raises a toast; the
+    // published state still has to say so rather than leaving the journey to
+    // guess whether a panel is covering the tiles.
+    expect(scene.e2eHubToast()).toBeNull();
+  });
+
+  it("publishes the parental gate while no panel is open", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    const settings = scene.e2eSettings();
+    expect(settings.gate, "the hub should publish the control the hold is armed on").not.toBeNull();
+    expect(settings.open).toBe(false);
+    expect(settings.toggles, "a closed panel publishes no rows to tap").toEqual([]);
+  });
+
+  it("publishes no gate once the hub has shut down", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    // A backdrop tap destroys the panel without the scene clearing its field,
+    // which is why the published state comes from the panel itself; shutdown
+    // takes the same path and must also drop the gate.
+    scene.events.emit("shutdown");
+
+    expect(scene.e2eSettings()).toEqual({ gate: null, open: false, toggles: [] });
+  });
+
+  it("reports no spent budget on an unlimited profile", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    expect(scene.e2eHubPlayTime()).toEqual({ timeUp: false, nudging: false });
   });
 });

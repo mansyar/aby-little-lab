@@ -9,6 +9,7 @@
 | **Build Tool** | Vite | 8.3.5 | Fast HMR, modern ESM bundling, plugin ecosystem |
 | **PWA** | vite-plugin-pwa | 2.0.0 | Auto-generates service worker + manifest; precache for offline play |
 | **Testing** | Vitest | 5.0.5 | Vite-native, fast, Jest-compatible API, ESM support |
+| **Browser Testing** | @playwright/test | 1.64.1 | Drives the built artifact in Chromium; the only layer that sees real hit areas, storage and service-worker behaviour (CI only, not in `verify_phase`) |
 | **Linting/Formatting** | Biome | 2.6.3 | Fast all-in-one linter and formatter; zero config needed for sensible defaults |
 | **Package Manager** | pnpm | 11.17.0 | Fast, disk-efficient, strict dependency resolution |
 
@@ -32,7 +33,9 @@
   "vitest": "^5.0.5",
   "@vitest/coverage-v8": "^5.0.5",
   "@biomejs/biome": "^2.6.3",
-  "happy-dom": "^21.0.4"
+  "happy-dom": "^21.0.4",
+  "@playwright/test": "1.64.1",
+  "playwright-core": "^1.64.1"
 }
 ```
 
@@ -99,6 +102,18 @@
 - **Formatter:** 2-space indent, double quotes, semicolons
 - **Linter:** Recommended ruleset
 - **Assists:** organizeImports enabled
+
+### Playwright (`playwright.config.ts`)
+
+- **Scope:** `e2e/` only — the browser journey layer, run as its own CI job (`Browser Journeys`, `needs: quality-gates`), deliberately outside `verify_phase` so the ~90 s phase gate stays fast
+- **Runner:** `@playwright/test` 1.64.1, Chromium only (WebKit/Firefox belong to the roadmap's browser-matrix work); `playwright-core` drives the pre-existing `scripts/validate-boot.js` smoke check
+- **Server:** one shared `vite preview` on `http://127.0.0.1:4173`, built by `pnpm test:e2e` and pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows
+- **Workers:** 2 locally and in CI, `fullyParallel: false` so the file is the parallelism unit; every test gets a fresh browser context, so the preview is the only shared state
+- **Retries:** 0 locally (that is what makes the determinism claim mean anything), 2 in CI with a trace on the first retry; a retry-only pass is a finding, not a pass
+- **Budget:** 13 journeys in 3.0 min on two workers (4.9 min serially); `launch-all` alone is 2.7 min and is the critical path
+- **Observation seam:** a read-only bridge installed only under `?e2e=1` (`src/game/e2eBridge.ts`) — no `node:fs`, no test-only build, so the artifact CI tests is the artifact that ships
+
+> **2026-11-07 — Design Update (Browser Journey Layer):** The project's first browser-level tests. Playwright drives the built `dist` through `vite preview` and plays the game with real pointer input: boot, all 22 launches, three rounds on each of six mechanic families, the sticker award, the parental gate (3 s hold vs 1 s press), settings persistence across reload, the daily cap, and an offline relaunch from the service worker. A query-gated read-only bridge (`window.__abyE2E`) publishes scene key, profile/sticker counts, round index, round geometry, hub tiles, hub toast, hub readiness, settings rows and play-time state; without `e2e=1` it does not exist. Running it found five defects invisible to every other gate — `roundIndex()` counting dot alpha, the offline toast swallowing the first tap, the hub ignoring input during its entrance, readiness sampled mid-rebuild, and a held back button delivering the child's first tap to the profile chip (a shipping bug, fixed). Proof of teeth: shrinking one tile's hit area to 1x1 turned three journeys red while check, typecheck, 2,881 unit tests and the build stayed green. Ten consecutive runs at 3.07-3.10 min, retries 0.
 
 ## 4. Screen Orientation
 

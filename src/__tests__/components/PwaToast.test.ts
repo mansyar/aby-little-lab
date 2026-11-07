@@ -187,6 +187,44 @@ describe("PwaToast rendering", () => {
   });
 });
 
+describe("PwaToast dismiss point", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockMatchMedia.mockReturnValue({ matches: false });
+  });
+
+  it("reports the single OK button's centre for an offline toast", () => {
+    const scene = createScene();
+
+    const toast = new PwaToast(scene as never, { kind: "offline", onDismiss: vi.fn() });
+
+    // Panel centre is (512, 100); the OK button sits 40px below it.
+    expect(toast.dismissPoint()).toEqual({ x: 512, y: 140 });
+  });
+
+  it("reports the Later button's centre for an update toast, never Update now", () => {
+    const scene = createScene();
+
+    const toast = new PwaToast(scene as never, {
+      kind: "update",
+      onUpdate: vi.fn(),
+      onDismiss: vi.fn(),
+    });
+
+    // Closing must be the side-effect-free action: 110px right of centre.
+    expect(toast.dismissPoint()).toEqual({ x: 622, y: 140 });
+  });
+
+  it("reports the real button geometry, not a copy of a constant", () => {
+    const scene = createScene();
+    const toast = new PwaToast(scene as never, { kind: "offline", onDismiss: vi.fn() });
+
+    const okButton = scene.add.text.mock.calls[getTextLabels(scene).indexOf("OK")];
+
+    expect(toast.dismissPoint()).toEqual({ x: okButton?.[0], y: okButton?.[1] });
+  });
+});
+
 describe("PwaToast interaction", () => {
   beforeEach(() => {
     vi.clearAllMocks();

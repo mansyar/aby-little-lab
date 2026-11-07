@@ -74,6 +74,7 @@ export function buildWideGrid(grid: HubGrid): void {
   grid.emptySlotGraphics = [];
   grid.attractTargets = [];
   grid.entranceIndex = 0;
+  const settleEntrance = grid.beginEntrances(GAME_TILES.length);
   const origin = wideGridOrigin(scene.cameras.main.width, scene.cameras.main.height);
 
   for (let i = 0; i < GAME_TILES.length; i++) {
@@ -118,6 +119,7 @@ export function buildWideGrid(grid: HubGrid): void {
     animateEntrance(scene, [tile, label], grid.entranceIndex++, {
       onComplete: () => {
         attachPressFeedback(tile, { spring: true });
+        settleEntrance();
       },
     });
     animateEntrance(scene, [icon], grid.entranceIndex++, {
@@ -158,6 +160,7 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
   const reducedMotion = isReducedMotion();
 
   const indexes = pageTileIndexes(page);
+  const settleEntrance = grid.beginEntrances(indexes.length);
   indexes.forEach((globalIndex, slot) => {
     const pos = pagedTilePosition(slot, indexes.length);
     const x = pos.x + (slideFrom ?? 0);
@@ -198,6 +201,7 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     animateEntrance(scene, [tile, label], grid.entranceIndex++, {
       onComplete: () => {
         attachPressFeedback(tile, { spring: true });
+        settleEntrance();
       },
     });
     animateEntrance(scene, [icon], grid.entranceIndex++, {

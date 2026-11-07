@@ -20,6 +20,7 @@ import {
   mockSpeech,
   triggerAllPointerdowns,
   triggerAllPointerups,
+  triggerPointerdownOn,
   triggerPointerupOn,
   triggerShutdown,
 } from "../helpers/sceneFlowHarness";
@@ -481,6 +482,7 @@ describe("Hub profile switcher", () => {
 
     const chip = findLastAddedImage(scene, "animal_cat");
     if (!chip) throw new Error("chip not created");
+    triggerPointerdownOn(chip);
     triggerPointerupOn(chip);
 
     expect((scene as unknown as { profileChip: { isOpen(): boolean } }).profileChip.isOpen()).toBe(
@@ -505,6 +507,7 @@ describe("Hub profile switcher", () => {
 
     const chip = findLastAddedImage(scene, "animal_dog");
     if (!chip) throw new Error("chip not created");
+    triggerPointerdownOn(chip);
     triggerPointerupOn(chip);
 
     expect(getActiveProfile().id).toBe("p2");
@@ -529,6 +532,7 @@ describe("Hub profile switcher", () => {
 
     const chip = findLastAddedImage(scene, "animal_dog");
     if (!chip) throw new Error("chip not created");
+    triggerPointerdownOn(chip);
     triggerPointerupOn(chip);
 
     // The overlay is the full-screen (1024×768) rectangle added when the

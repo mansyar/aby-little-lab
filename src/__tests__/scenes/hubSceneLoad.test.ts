@@ -481,7 +481,8 @@ describe("Hub scene load", () => {
     const cueRect = cueRectOf(scene);
     expect(cue?.isActive()).toBe(true);
 
-    // The chip opens the picker on pointerup, exactly as a child opens it.
+    // The chip opens the picker on a tap: a press it took, then the release.
+    fireAllObjectEvents(chipOf(scene), "pointerdown");
     fireAllObjectEvents(chipOf(scene), "pointerup");
 
     expect(cue?.isActive()).toBe(false);

@@ -64,6 +64,15 @@ export class HubGrid {
   justEarned?: string;
   /** Delay between consecutive entrance elements (ms) — shared counter, advanced by the concern modules. */
   entranceIndex = 0;
+  /**
+   * True once every visible tile's entrance tween has finished, which is also
+   * when each tile can first be hit: the tween starts it at scale 0, and a
+   * scaled-to-nothing object fails Phaser's hit test. `null` means no grid has
+   * been built yet this visit, so nothing is tappable.
+   */
+  private pendingEntrances: number | null = null;
+  /** Bumped by every rebuild so a stale entrance cannot mark the new grid ready. */
+  private entranceGeneration = 0;
   /** Swipe state machine for the paged grid's horizontal page gestures; the paged tile guard reads `swiping`. */
   swipes = new SwipeGesture();
   /** Guards against double-wiring the scene-level swipe handlers. */
@@ -78,8 +87,37 @@ export class HubGrid {
     this.entranceIndex = 0;
     this.attractTargets = [];
     this.navLocked = false;
+    // Nothing is tappable until this visit builds its grid.
+    this.invalidateEntrances();
     // Scene shutdown drops input listeners while this instance survives the revisit; re-arm each visit.
     this.swipeWired = false;
+  }
+
+  /** True when every visible tile has finished entering, so taps can land. */
+  get entranceSettled(): boolean {
+    return this.pendingEntrances === 0;
+  }
+
+  /**
+   * Registers that `count` tiles are about to enter, and returns the callback
+   * each tile calls when its entrance finishes. A callback from an earlier
+   * build is ignored, so a rebuild (page flip, viewport change) cannot be
+   * marked ready by the grid it replaced.
+   */
+  beginEntrances(count: number): () => void {
+    this.entranceGeneration += 1;
+    const generation = this.entranceGeneration;
+    this.pendingEntrances = count;
+    return () => {
+      if (generation !== this.entranceGeneration || this.pendingEntrances === null) return;
+      this.pendingEntrances = Math.max(0, this.pendingEntrances - 1);
+    };
+  }
+
+  /** Forgets the current build's entrances, so nothing reports ready until the next one settles. */
+  private invalidateEntrances(): void {
+    this.entranceGeneration += 1;
+    this.pendingEntrances = null;
   }
 
   /** Classifies the current viewport into the paged (narrow) or wide mode. */
@@ -125,6 +163,7 @@ export class HubGrid {
 
   /** Destroys everything the grid owns (page dots, page objects, wide grid). */
   destroy(): void {
+    this.invalidateEntrances();
     for (const dot of this.pageDots) dot.destroy();
     this.pageDots = [];
     this.destroyPageGrid();
