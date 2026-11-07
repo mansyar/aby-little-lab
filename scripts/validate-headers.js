@@ -81,13 +81,22 @@ const DENIED_FEATURES = [
   "magnetometer",
 ];
 
+/**
+ * Thrown by `fatal`. It is a throw rather than a `process.exit` because
+ * `process.exit` does not unwind the stack: the `finally` that removes the
+ * container would never run, and a readiness timeout would leave a container
+ * holding the host port after the process dies. Every later run would then fail
+ * at `assertPortFree` with a message about a port, not about the real problem.
+ */
+class FatalError extends Error {}
+
 function fatal(problem, hint) {
   console.error(`\n✗ ${problem}`);
   if (hint) {
     console.error(`  ${hint}`);
   }
   console.error("");
-  process.exit(1);
+  throw new FatalError(problem);
 }
 
 function docker(args, extra = {}) {
@@ -169,6 +178,17 @@ function stopContainer() {
   docker(["rm", "--force", CONTAINER]);
 }
 
+let containerRemoved = false;
+
+/** Idempotent: the `finally`, the exit hook and a late `fatal` may all reach it. */
+function ensureContainerRemoved() {
+  if (containerRemoved) {
+    return;
+  }
+  containerRemoved = true;
+  stopContainer();
+}
+
 function containerRunning() {
   const result = docker(["inspect", "--format", "{{.State.Running}}", CONTAINER]);
   return result.status === 0 && result.stdout.trim() === "true";
@@ -227,6 +247,11 @@ async function waitForReadiness() {
 
 function cacheControl(headers) {
   const value = headers.get("cache-control");
+  return value === null ? null : value.trim();
+}
+
+function contentType(headers) {
+  const value = headers.get("content-type");
   return value === null ? null : value.trim();
 }
 
@@ -299,39 +324,51 @@ async function probe(probePath) {
  */
 function probePlan(hashedAsset) {
   return [
-    { label: "SPA root", path: "/", cache: "no-cache", expectStatus: 200 },
+    {
+      label: "SPA root",
+      path: "/",
+      cache: "no-cache",
+      expectStatus: 200,
+      expectType: /^text\/html/,
+    },
     {
       label: "shell",
       path: "/index.html",
       cache: "no-cache",
       expectStatus: 200,
+      expectType: /^text\/html/,
     },
     {
       label: "service worker",
       path: "/sw.js",
       cache: "no-cache, no-store, must-revalidate",
       expectStatus: 200,
+      expectType: /javascript/,
     },
     {
       label: "web manifest",
       path: "/manifest.webmanifest",
       cache: "no-cache",
       expectStatus: 200,
+      expectType: /manifest\+json/,
     },
     {
       label: "hashed asset",
+      expectType: /javascript/,
       path: `/assets/${hashedAsset}`,
       cache: "public, max-age=31536000, immutable",
       expectStatus: 200,
     },
     {
       label: "unknown route (SPA fallback)",
+      expectType: /^text\/html/,
       path: "/no-such-route",
       cache: "no-cache",
       expectStatus: 200,
     },
     {
       label: "missing hashed asset",
+      expectType: /^text\/html/,
       path: "/assets/does-not-exist.js",
       cache: "public, max-age=31536000, immutable",
       expectStatus: 404,
@@ -404,6 +441,24 @@ function buildChecks(observations) {
         },
       });
     }
+
+    // `nosniff` makes a wrong Content-Type fatal rather than cosmetic: a service
+    // worker served as text/plain is refused by the browser and every header
+    // above is green while the app cannot start offline. The header set alone
+    // does not catch that, so each class names the type it must keep.
+    if (planned.expectType) {
+      checks.push({
+        name: `${observed.path} keeps Content-Type ${planned.expectType}`,
+        problems: () => {
+          const actual = contentType(observed.headers);
+          return actual !== null && planned.expectType.test(actual)
+            ? []
+            : [
+                `Content-Type is ${actual === null ? "absent" : `"${actual}"`}, expected ${planned.expectType}`,
+              ];
+        },
+      });
+    }
   }
 
   // `/` and the SPA fallback each assert their own exact value above, which is
@@ -456,6 +511,9 @@ async function main() {
   let checks = [];
 
   startContainer();
+  // `finally` covers the throwing paths, and this covers anything that ends the
+  // process without unwinding the stack. Together they make the docstring true.
+  process.once("exit", ensureContainerRemoved);
   try {
     await waitForReadiness();
 
@@ -469,7 +527,7 @@ async function main() {
     console.log(`\n${"=".repeat(70)}\n`);
     checks = buildChecks(observations);
   } finally {
-    stopContainer();
+    ensureContainerRemoved();
   }
 
   const { passed, failed } = runChecks(checks);
@@ -490,6 +548,8 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`\n✗ Header validation aborted: ${error.message}\n`);
+  if (!(error instanceof FatalError)) {
+    console.error(`\n✗ Header validation aborted: ${error.message}\n`);
+  }
   process.exitCode = 1;
 });

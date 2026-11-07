@@ -73,12 +73,14 @@ So a policy with no `'unsafe-inline'` and no `'unsafe-eval'` is achievable, not 
 | FR-5 | The four headers are declared once, in a snippet file that the server block and every location declaring `add_header` all include, so that no route loses them and no route loses its `Cache-Control`. | must |
 | FR-6 | All four headers are sent with `always`, so 4xx and 5xx responses carry them too. | must |
 | FR-7 | The app boots, plays and returns to the hub under the enforced policy: all 16 existing journeys pass with `E2E_BASE_URL` pointing at the nginx origin. | must |
-| FR-8 | `scripts/validate-headers.js` boots the built image on a free local port, waits for readiness, and asserts for `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest`, one hashed asset from `dist/` and one unknown path (SPA fallback): the four headers present, the expected `Cache-Control` per class, and `Content-Type` not sniffable. It exits non-zero on any miss and removes the container and image on every path, including failure. | must |
+| FR-8 | `scripts/validate-headers.js` boots the built image on a free local port, waits for readiness, and asserts for `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest`, one hashed asset from `dist/` and one unknown path (SPA fallback): the four headers present, the expected `Cache-Control` per class, and `Content-Type` not sniffable. It exits non-zero on any miss and removes the container on every path, including failure (see the FR-8 amendment). | must |
 | FR-9 | The validator is a CI step in the gates job, run only on the code tier (a documentation-only change skips it), and it fails with an actionable message when Docker is unavailable rather than hanging. | must |
 | FR-10 | A unit test reads `nginx.conf` and the snippet and fails if: any `location` declaring `add_header` does not include the snippet; a header is missing from the snippet; the CSP contains `unsafe-inline`, `unsafe-eval` or `*`; the `Permissions-Policy` deny set is incomplete. | must |
 | FR-11 | `playwright.config.ts` targets `E2E_BASE_URL` when set and skips its own `webServer`; with the variable unset, behaviour is exactly as today (`vite preview` on 127.0.0.1:4173). | must |
 | FR-12 | `docs/TDD.md` documents the serving layer: the policy, why each directive exists, the inheritance rule that forced the snippet, how to run the validator, and how to run the journey suite against the image. | must |
 | FR-13 | `README.md` lists the headers among the deployment properties, and the roadmap row for `20261110-edge-hardening` records the outcome with dated evidence. | should |
+
+**FR-8 amendment (2026-11-08).** The original wording said the validator "removes the container and image on every path". It removes the **container** on every path — now including a throwing failure, after review finding F1 replaced a `process.exit` with a thrown `FatalError` so the `finally` still runs — and it deliberately keeps the image, because later phases and CI reuse it and a rebuild is the cheap part. The deliverable is the removed container: a run that leaves one holding the host port is what FR-8 exists to prevent.
 
 ## Non-Functional Requirements
 
@@ -106,9 +108,7 @@ So a policy with no `'unsafe-inline'` and no `'unsafe-eval'` is achievable, not 
 | AC-9 | The four headers survive the Dockerfile → nginx path used by Coolify, i.e. the snippet is present in the image at the path nginx reads. | FR-5 |
 | AC-10 | No `src/` production file appears in the diff. | NFR-1 |
 
-## Edge Cases
-
-- **`/` versus `/index.html`.** `/` is served through `location /` with `try_files`; `/index.html` matches the exact location that declares `add_header`. Both must carry the four headers, which is why the server block also includes the snippet.
+## Edge Cases- **`/` versus `/index.html`.** `/` is served through `location /` with `try_files`; `/index.html` matches the exact location that declares `add_header`. Both must carry the four headers, which is why the server block also includes the snippet.
 - **404 responses.** Without `always`, nginx drops `add_header` on error responses; the snippet must use it so a missing asset still gets `nosniff` and a CSP.
 - **The service worker's own CSP.** `sw.js` is served with the same policy; `importScripts('/workbox-*.js')` is same-origin, so `script-src 'self'` must permit it — proven by the offline journey, not assumed.
 - **`data:` images.** All generated art is a `data:image/svg+xml;base64` URI; without `img-src data:` the hub would render blank tiles, which the launch journeys would catch.

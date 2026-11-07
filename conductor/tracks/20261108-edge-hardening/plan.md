@@ -69,7 +69,7 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
 
 - [x] **P3.T1: Wire the validator into the gates job** - covers: FR-9, NFR-5, AC-7
   - [x] **P3.T1.1: Add the step after `pnpm run build`**, gated on `tier == 'code'`, building the image and running the validator, with a Docker-unavailable message that fails rather than skips
-  - [x] **P3.T1.2: Confirm the docs-only tier still skips it** and record the two observed runs from this track's PR
+  - [ ] **P3.T1.2: Confirm the docs-only tier still skips it** and record the two observed runs from this track's PR. Not closed by the executor: this PR's own diff is code, so the docs-only run is observable only on the PR, and the claim is left unchecked until it is
 - [x] **P3.T2: Document the serving layer** - covers: FR-12, FR-13
   - [x] **P3.T2.1: `docs/TDD.md`** gains the policy table (directive → why), the inheritance rule that forced the snippet, the validator command, and the `E2E_BASE_URL` journey recipe
   - [x] **P3.T2.2: `README.md`** lists the headers among the deployment properties and names the validator

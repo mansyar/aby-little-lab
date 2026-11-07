@@ -35,7 +35,7 @@ const CSP_DIRECTIVES: { name: string; sources: string[] }[] = [
   { name: "default-src", sources: ["'self'"] },
   { name: "script-src", sources: ["'self'"] },
   { name: "style-src", sources: ["'self'"] },
-  { name: "img-src", sources: ["'self'", "data:"] },
+  { name: "img-src", sources: ["'self'", "data:", "blob:"] },
   { name: "font-src", sources: ["'self'"] },
   { name: "media-src", sources: ["'self'"] },
   { name: "connect-src", sources: ["'self'"] },
@@ -196,9 +196,13 @@ describe("security headers guard", () => {
 
     for (const expected of CSP_DIRECTIVES) {
       const actual = parsed.find((directive) => directive.name === expected.name);
-      for (const source of expected.sources) {
-        expect(actual?.sources, `${expected.name} must include ${source}`).toContain(source);
-      }
+      // Exact equality, not "contains": a `toContain` per source would accept
+      // `script-src 'self' https://cdn.example.com`, which is a wider policy
+      // than the one reviewed. The listed sources are the whole allowance.
+      expect(
+        actual?.sources,
+        `${expected.name} must be exactly "${expected.sources.join(" ")}" - a source added to it is a policy change`,
+      ).toEqual(expected.sources);
     }
 
     expect(
