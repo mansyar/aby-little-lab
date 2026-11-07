@@ -20,6 +20,7 @@
 | PWA artifact | `node scripts/validate-pwa.js` | 16 passed, 0 failed |
 | Documents | `node scripts/validate-docs.js` | 5 passed, 0 failed |
 | Browser | `pnpm test:e2e` | **19 journeys passed in 3.7 min** on two workers |
+| CI, this PR (run 42425888246) | GitHub Actions | `Quality Gates` pass 2m11s, `Browser Journeys` pass **5m28s** - inside the 15-minute job timeout, outside NFR-5's 5-minute ceiling |
 
 ## Cross-phase checks
 
@@ -48,6 +49,15 @@ Touches started as `src/utils/backupFormat.ts`, `src/utils/backupFile.ts`, `src/
 ## Runtime note
 
 The browser suite went from 17 journeys in 3.2 min to **19 in 3.7 min** - two tests costing 47.8 s together, inside the 5-minute budget with ~1.3 min of headroom. `launch-all` still owns the critical path at 2.7 min, so future journeys remain nearly free.
+
+**The five-minute budget is breached on CI, and that is a finding.** The same 19
+journeys take 3.7 minutes locally and took 5m28s on the first runner to execute
+them. Nothing fails - the job's timeout is 15 minutes - but the ceiling this suite
+is supposed to sit under is now one it exceeds on slower hardware, and the extra
+time is the two backup tests (~48 s) on top of a suite that was already at 3.7 of
+5. The honest options are a third worker, a cheaper `launch-all`, or a larger
+number written down on purpose; silently editing the number is the one this
+project has refused before.
 
 ## The number to watch
 

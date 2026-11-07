@@ -65,7 +65,12 @@ the parent's sentence, an empty choice card and an untouched save.
 - **NFR-2** - met: zero `fetch(`, no network request anywhere in the feature.
 - **NFR-3** - met: no new dependency; shell entry 168.3 kB of 200 kB.
 - **NFR-4** - met: coverage 97.33 / 91.67 / 96.28 / 98.29 against 90 / 85 / 88 / 95.
-- **NFR-5** - met: 19 journeys in 3.7 min on two workers, ~1.3 min of headroom.
+- **NFR-5** - **breached on CI hardware, and recorded rather than widened.** The
+  suite is 3.7 min locally on two workers, but its first run on a GitHub runner took
+  **5m28s** for the same 19 journeys - inside the 15-minute job timeout, outside the
+  5-minute ceiling. The lever is a third worker (`launch-all` alone is 2.7 min
+  locally and owns the critical path), and the ceiling is worth re-reading before the
+  next journey is added rather than edited to fit.
 - **NFR-6** - met and now measured: a four-profile save at the app's real shape is
   **23,435 bytes**, written in a single `setItem`.
 - **NFR-7** - met: the new surface is behind the three-second hold, and nothing
@@ -129,6 +134,11 @@ two.
 - **Shell entry +9.8 kB** across the track (158.5 → 168.3). Nothing in this
   feature belongs in the boot path, but the headroom is now 31.7 kB and worth
   measuring before the next module the hub imports.
+- **The browser suite is over its CI budget.** 19 journeys took 3.7 min locally on
+  two workers and **5m28s** on the first GitHub runner that ran them - the same
+  work, a slower machine. Nothing fails (the job's timeout is 15 minutes), but the
+  five-minute ceiling is now a thing this suite exceeds rather than approaches, and
+  a third worker is the next lever if another journey is added.
 
 ## Follow-ups
 
