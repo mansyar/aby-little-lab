@@ -12,24 +12,28 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-8, FR-10, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-5, AC-6, AC-9, AC-10
 - **Touches:** `nginx.security-headers.conf`, `nginx.conf`, `Dockerfile`, `scripts/validate-headers.js`, `src/__tests__/guard/securityHeaders.test.ts`, `conductor/tracks/20261108-edge-hardening/verification/`
 - **Verification:** `pnpm build && docker build -t aby-little-lab:headers . && node scripts/validate-headers.js` then the full chain `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
 ### Tasks
 
-- [ ] **P1.T1: Write the policy once** - covers: FR-1, FR-2, FR-3, FR-4, FR-6
-  - [ ] **P1.T1.1: Create `nginx.security-headers.conf`** with `add_header … always;` for all four headers, CSP as the thirteen directives FR-1 names, `Referrer-Policy: no-referrer`, `Permissions-Policy` denying the eleven features and not mentioning `fullscreen`
-  - [ ] **P1.T1.2: Justify each CSP directive in a comment** — why `img-src data:` (generated SVG art), why `connect-src 'self'` (Workbox precache), why `worker-src 'self'` (classic service worker), why no `unsafe-*`
-- [ ] **P1.T2: Place it where inheritance cannot drop it** - covers: FR-5
-  - [ ] **P1.T2.1: `include` the snippet in the server block and in every location that declares `add_header`** — the four cache locations — leaving every existing `Cache-Control` value untouched
-  - [ ] **P1.T2.2: `COPY` the snippet into the image** at `/etc/nginx/snippets/security-headers.conf` and confirm the path nginx reads matches
-- [ ] **P1.T3: Build the validator** - covers: FR-8, NFR-4
-  - [ ] **P1.T3.1: `scripts/validate-headers.js`** boots the image on a fixed port, fails fast if the port is busy, polls readiness with a bounded wait, and removes the container and image in a `finally`
-  - [ ] **P1.T3.2: Assert per route class** — `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest`, one hashed asset read from `dist/`, one unknown path through the SPA fallback: four headers present and the expected `Cache-Control` for each class
-  - [ ] **P1.T3.3: Prove the validator fails when it should** — delete one header from the snippet, capture the red run, restore, capture the green run
-- [ ] **P1.T4: Guard the inheritance trap** - covers: FR-10
-  - [ ] **P1.T4.1: `src/__tests__/guard/securityHeaders.test.ts`** fails if any `location` declaring `add_header` does not `include` the snippet
-  - [ ] **P1.T4.2: Assert the snippet's content** — all four headers present, no `unsafe-inline`/`unsafe-eval`/`*` in the CSP, the full eleven-feature deny set
-  - [ ] **P1.T4.3: Show both teeth** — remove one `include` (red), add `unsafe-inline` (red), restore both, record the runs
+- [x] **P1.T1: Write the policy once** - covers: FR-1, FR-2, FR-3, FR-4, FR-6
+  - [x] **P1.T1.1: Create `nginx.security-headers.conf`** with `add_header … always;` for all four headers, CSP as the thirteen directives FR-1 names, `Referrer-Policy: no-referrer`, `Permissions-Policy` denying the eleven features and not mentioning `fullscreen`
+  - [x] **P1.T1.2: Justify each CSP directive in a comment** — why `img-src data:` (generated SVG art), why `connect-src 'self'` (Workbox precache), why `worker-src 'self'` (classic service worker), why no `unsafe-*`
+- [x] **P1.T2: Place it where inheritance cannot drop it** - covers: FR-5
+  - [x] **P1.T2.1: `include` the snippet in the server block and in every location that declares `add_header`** — the four cache locations — leaving every existing `Cache-Control` value untouched
+  - [x] **P1.T2.2: `COPY` the snippet into the image** at `/etc/nginx/snippets/security-headers.conf` and confirm the path nginx reads matches
+- [x] **P1.T3: Build the validator** - covers: FR-8, NFR-4
+  - [x] **P1.T3.1: `scripts/validate-headers.js`** boots the image on a fixed port, fails fast if the port is busy, polls readiness with a bounded wait, and removes the container and image in a `finally`
+  - [x] **P1.T3.2: Assert per route class** — `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest`, one hashed asset read from `dist/`, one unknown path through the SPA fallback: four headers present and the expected `Cache-Control` for each class
+  - [x] **P1.T3.3: Prove the validator fails when it should** — delete one header from the snippet, capture the red run, restore, capture the green run
+- [x] **P1.T4: Guard the inheritance trap** - covers: FR-10
+  - [x] **P1.T4.1: `src/__tests__/guard/securityHeaders.test.ts`** fails if any `location` declaring `add_header` does not `include` the snippet
+  - [x] **P1.T4.2: Assert the snippet's content** — all four headers present, no `unsafe-inline`/`unsafe-eval`/`*` in the CSP, the full eleven-feature deny set
+  - [x] **P1.T4.3: Show both teeth** — remove one `include` (red), add `unsafe-inline` (red), restore both, record the runs
+
+**Result:** verified — the four headers ship from one snippet included by the server block and all five cache locations; the runtime validator proves them on every route class with unchanged `Cache-Control` (21 checks), and two mutations proved both it and the guard test can fail, one of them reproducing the inheritance trap end to end (`/sw.js` served 0/4 while every other route kept 4/4).
+**Checkpoint:** b22ca578
+**Evidence:** conductor/tracks/20261108-edge-hardening/verification/phase-1.md
 
 ## Phase 2: Run the suite under the policy
 
