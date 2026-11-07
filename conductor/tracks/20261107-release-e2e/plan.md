@@ -97,7 +97,7 @@
   - [x] **P4.T1.1:** Three-second hold opens settings; one-second press does not
   - [x] **P4.T1.2:** Toggle a setting, reload, assert it persisted
 - [x] **P4.T2: Time-limit lock** - covers: FR-7, AC-7
-  - [x] **P4.T2.1:** Seed a profile at its daily cap and assert the nudge appears and no transition occurs
+  - [x] **P4.T2.1:** Seed a profile at the daily cap and assert the hub locks, no launch occurs, and the near-limit nudge is raised at the near-limit threshold
 - [x] **P4.T3: Offline relaunch** - covers: FR-8, AC-8
   - [x] **P4.T3.1:** Wait for the service worker to control the page, go offline, reload, and launch one game
 

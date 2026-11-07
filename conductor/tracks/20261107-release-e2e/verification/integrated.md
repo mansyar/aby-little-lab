@@ -19,7 +19,7 @@
 | Bundle | `node scripts/validate-bundle.js` | 0 | phaser 1,335.0 kB; shell `index-CwRDX7PP.js` 152.7 kB <= 200 kB |
 | PWA | `node scripts/validate-pwa.js` | 0 | 16 passed, 0 failed |
 | Documents | `node scripts/validate-docs.js` | 0 | 5 passed, 0 failed |
-| Browser | `pnpm test:e2e` | 0 | 13 journeys, 3.0 m, two workers, no retries |
+| Browser | `pnpm test:e2e` | 0 | 13 journeys, 3.0 m, two workers, no retries (local runner; the job's first run on CI hardware is recorded on the track PR - AC-9) |
 
 ## Cross-phase checks
 

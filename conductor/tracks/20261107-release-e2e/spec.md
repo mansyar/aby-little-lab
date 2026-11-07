@@ -82,7 +82,7 @@ changes ships blind, and the only detector is a parent noticing.
 | FR-4 | Winning a game awards a sticker, increments the stored sticker count, and returns to the hub | must |
 | FR-5 | The parental gate opens settings on a three-second hold and does nothing on a one-second press | must |
 | FR-6 | A settings toggle survives a page reload | must |
-| FR-7 | With seeded play time at the daily cap, hub tiles are locked and the play-time nudge appears instead of a launch | should |
+| FR-7 | With seeded play time at the daily cap, hub tiles are locked and no launch occurs; within the last five minutes the soft nudge appears instead of a launch (see the AC-7 amendment) | should |
 | FR-8 | With the service worker installed and the network offline, the hub reloads and a game still launches from cache | should |
 | FR-9 | The suite runs on every pull request in Chromium, within five minutes, with two retries in CI and none locally, retaining a trace on first retry | must |
 | FR-10 | A deliberately broken tile hit area fails at least one journey; the break and its failure output are recorded, then reverted | must |
@@ -91,11 +91,21 @@ changes ships blind, and the only detector is a parent noticing.
 
 | ID | Requirement |
 | --- | --- |
-| NFR-1 | No product behaviour change. The bridge is read-only, inert without the query parameter, and the shipped shell stays within the existing 200 kB `validate-bundle` gate |
+| NFR-1 | No product behaviour change beyond the ProfileChip press guard (see the NFR-1 amendment). The bridge is read-only, inert without the query parameter, and the shipped shell stays within the existing 200 kB `validate-bundle` gate |
 | NFR-2 | The suite completes in five minutes or less on CI and six minutes locally |
 | NFR-3 | The suite is deterministic: ten consecutive local runs pass with retries disabled |
 | NFR-4 | Existing gates are unaffected: vitest does not collect e2e specs, and the 2,833 unit tests, coverage thresholds, and all four validators still pass |
 | NFR-5 | The e2e code is type-checked by `pnpm typecheck` and linted by Biome like the rest of the repository |
+
+**NFR-1 amendment (2026-11-07, review findings F5/F6).** One product behaviour
+change was made, and it is named rather than hidden: `ProfileChip` now ignores a
+release it did not take a press for. It was in scope because a Phase 3 journey
+found the shipped bug it fixes — `ParentLock` navigates on a timer, so a parent's
+release after the back hold lands at the chip's centre in the hub, opened the
+profile picker, and the picker's full-canvas overlay then ate the child's first
+tap. The guard is judged by release position so the chip's own press-feedback
+shrink cannot cancel an edge tap. The bridge itself keeps the requirement's
+substance: read-only, inert without `?e2e=1`, +2.7 kB of a 200 kB gate.
 
 ## Acceptance Criteria
 
@@ -107,7 +117,17 @@ changes ships blind, and the only detector is a parent noticing.
 | AC-4 | One journey wins a game and observes the sticker count increase and the return to hub | FR-4 |
 | AC-5 | A three-second hold opens settings; a one-second press leaves the hub unchanged | FR-5 |
 | AC-6 | A toggle set before reload is still set after reload | FR-6 |
-| AC-7 | With seeded usage at the cap, tapping a tile shows the nudge and does not transition | FR-7 |
+| AC-7 | With seeded usage at the cap, tapping a tile locks the hub and does not transition; with three minutes left, tapping a tile raises the nudge and does not transition | FR-7 |
+
+**AC-7 amendment (2026-11-07, review finding F1).** The criterion first read
+"at the cap, tapping a tile shows the nudge and does not transition", which the
+product never did and does not want: `isNearLimit` requires remaining minutes
+`> 0` (`src/game/playTimeLogic.ts:74`), so the nudge is the last-five-minutes
+courtesy and the cap is a lock, exactly as `product.md` §3.2 describes ("tiles
+dim and lock with a moon badge"). The journey verifies both real behaviours —
+the near-limit nudge and the cap's refusal across twelve samples — and this
+criterion now says what the app does rather than what the earlier wording
+assumed. Plan task `P4.T2.1` is reworded to match.
 | AC-8 | Offline after install, the hub reloads and one game launches | FR-8 |
 | AC-9 | CI reports the `e2e` job green on the track's pull request, with the runtime recorded | FR-9 |
 | AC-10 | The mutation run fails a named journey, the failure is recorded, and the tree is clean afterwards | FR-10 |

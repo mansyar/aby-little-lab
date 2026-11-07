@@ -155,6 +155,7 @@ describe("initE2EBridge", () => {
   describe("roundIndex", () => {
     it("reports the scene's completed-round counter", () => {
       const scene = sceneWith("ShapeSorter");
+      scene.completedRounds = 0;
       install([scene]);
 
       expect(window.__abyE2E?.roundIndex()).toBe(0);
@@ -166,10 +167,12 @@ describe("initE2EBridge", () => {
       expect(window.__abyE2E?.roundIndex()).toBe(2);
     });
 
-    it("reports zero for a scene with no counter", () => {
+    it("reports -1 for a scene with no counter", () => {
       install([sceneWith("Hub")]);
 
-      expect(window.__abyE2E?.roundIndex()).toBe(0);
+      // -1 rather than 0: a journey asserting "on round 0" must fail if a game
+      // scene stops publishing a counter, not pass on a coincidental zero.
+      expect(window.__abyE2E?.roundIndex()).toBe(-1);
     });
   });
 

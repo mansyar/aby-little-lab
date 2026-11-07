@@ -34,7 +34,7 @@
   "@vitest/coverage-v8": "^5.0.5",
   "@biomejs/biome": "^2.6.3",
   "happy-dom": "^21.0.4",
-  "@playwright/test": "^1.64.1",
+  "@playwright/test": "1.64.1",
   "playwright-core": "^1.64.1"
 }
 ```

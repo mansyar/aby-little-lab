@@ -1086,7 +1086,7 @@ Per-scene flow suites drive a scene through a whole playthrough with the mocked 
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.14 (5922/6096), branches 91.07 (1622/1781), functions 96.02 (1305/1359) and lines 98.16 (5509/5612) across 133 files and 2,881 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-07) is statements 97.19 (5921/6092), branches 91.12 (1623/1781), functions 96.16 (1305/1357) and lines 98.19 (5507/5608) across 133 files and 2,881 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1123,7 +1123,7 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 
-**Workers and budget.** Two workers, locally and in CI, against one shared preview server. `fullyParallel: false` makes the file the unit of parallelism: the tests inside a spec run in order in one worker, and every test still gets a fresh browser context, so no journey can see another's storage or service worker. Serially the suite measured 4.9 min against NFR-2's 5 min ceiling, with `launch-all` alone at 2.6 min; two workers put the critical path near 2.8 min, because the wall clock shrinks and the work does not. The budget is a CI ceiling, not a target: a new journey that pushes past it is a decision about the suite's shape, not a number to edit.
+**Workers and budget.** Two workers, locally and in CI, against one shared preview server. `fullyParallel: false` makes the file the unit of parallelism: the tests inside a spec run in order in one worker, and every test still gets a fresh browser context, so no journey can see another's storage or service worker. Serially the suite measured 4.9 min against NFR-2's 5 min ceiling, with `launch-all` alone at 2.6 min; two workers put the measured wall clock at 3.0-3.1 min over ten consecutive runs, because the wall clock shrinks and the work does not. The budget is a CI ceiling, not a target: a new journey that pushes past it is a decision about the suite's shape, not a number to edit.
 
 **The suite must be seen to fail.** A layer that has never gone red is not evidence. The proof is a surgical mutation — one tile's hit area shrunk to a 1x1 point — which must turn the launch journey red, after which the mutation is reverted and the suite must be green again.
 

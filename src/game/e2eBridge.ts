@@ -146,18 +146,23 @@ function probeOf(scene: Phaser.Scene | undefined): E2ESceneProbe | undefined {
 }
 
 /**
- * Rounds finished in the active visit, read from the scene's own counter.
+ * Rounds finished in the active visit, read from the scene's own counter, or
+ * `-1` when the active scene publishes no counter at all.
  *
  * `GameSceneBase` keeps `completedRounds`, advances it once in {@link
  * GameSceneBase.fillProgressDot}, and resets it when the dots are rebuilt or
- * the scene shuts down — so this reports 0 before the first round and one more
+ * the scene shuts down - so this reports 0 before the first round and one more
  * per finished round. Not inferred from the dots: a dot is dimmed with its
  * *fill* alpha, which leaves the game object's `alpha` at 1, so counting dots
  * by alpha would report every dot as filled.
+ *
+ * The `-1` default matches the other counters (`profileCount`, `stickerCount`):
+ * a caller asserting "the game is on round 0" then fails loudly if a scene
+ * stops publishing a counter, instead of passing on a coincidental zero.
  */
 function completedRounds(probe: E2ESceneProbe | undefined): number {
   const count = probe?.completedRounds;
-  return typeof count === "number" ? count : 0;
+  return typeof count === "number" ? count : -1;
 }
 
 /** The active profile's earned stickers. */

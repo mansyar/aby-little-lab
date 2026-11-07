@@ -79,16 +79,17 @@ export class ProfileChip {
       // began in the previous scene (the back button shares this corner) used to
       // open the picker on arrival, and its full-canvas overlay then swallowed
       // the child's first real tap.
+      //
+      // The press is not cancelled by `pointerout` on purpose: `attachPressFeedback`
+      // shrinks the chip to 0.95 on the same `pointerdown`, which contracts its hit
+      // area by about 2 game px per side, so a press near the edge would cancel
+      // itself while the finger is still down. A press that started here and
+      // wandered off still counts - this is a 72 px target for small hands, and
+      // forgiving is the right failure.
       if (!this.pressed) return;
       this.pressed = false;
       this.deps.onOpen();
       this.openProfilePicker();
-    });
-    chip.on("pointerout", () => {
-      this.pressed = false;
-    });
-    chip.on("pointercancel", () => {
-      this.pressed = false;
     });
     attachPressFeedback(chip);
     this.chip = chip;
