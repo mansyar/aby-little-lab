@@ -80,19 +80,19 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** review findings F1, F2, F3
 - **Touches:** `src/utils/storage.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/scenes/gameSceneBase.test.ts`, `conductor/tracks/20261107-storage-resilience/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Separate "could not read" from "nothing stored"** — covers: F1
-  - [ ] **R1.T1.1: Record the failure beside the value** — `readStorage` reports failure to its caller instead of folding it into `null`, so no caller has to guess
-  - [ ] **R1.T1.2: `ensureV2` serves memory, never writes, while reads are blocked** — the cache when one exists, otherwise the same defaults `migrateV1(null)` builds, keyed so the next accessor hits it
-  - [ ] **R1.T1.3: `saveV2` refuses to write while reads are blocked** — an unreadable store may hold a real save this build cannot see, so the session stays memory-only and the flag stays raised
-  - [ ] **R1.T1.4: Heal only on evidence** — if a later read succeeds and returns the raw last known from this session, the store did not change under us and memory is newer, so writes resume and the next one persists the whole state
-- [ ] **R1.T2: Prove the destroyed-save case** — covers: F1, F2
-  - [ ] **R1.T2.1: The test that would have caught it** — seed a real save with a sticker, break only `getItem`, call two getters, then assert the stored raw is byte-identical, the flag is still true, and a mutation made afterwards survives the next getter
-  - [ ] **R1.T2.2: Keep the notice reachable in that mode** — a panel opened while reads are blocked reads the flag as true
-  - [ ] **R1.T2.3: Stop the flag leaking in `gameSceneBase.test.ts`** — perform an accepted write in `afterEach` after restoring the methods, as the other two suites do
-- [ ] **R1.T3: Cover the throwing accessor** — covers: F3
-  - [ ] **R1.T3.1: A `localStorage` global that throws on access** — every getter serves defaults without throwing and the flag is raised, exercising the `getStorage` catch that no test reached
+- [x] **R1.T1: Separate "could not read" from "nothing stored"** — covers: F1
+  - [x] **R1.T1.1: Record the failure beside the value** — `readStorage` reports failure to its caller instead of folding it into `null`, so no caller has to guess
+  - [x] **R1.T1.2: `ensureV2` serves memory, never writes, while reads are blocked** — the cache when one exists, otherwise the same defaults `migrateV1(null)` builds, keyed so the next accessor hits it
+  - [x] **R1.T1.3: `saveV2` refuses to write while reads are blocked** — an unreadable store may hold a real save this build cannot see, so the session stays memory-only and the flag stays raised
+  - [x] **R1.T1.4: Heal only on evidence** — if a later read succeeds and returns the raw last known from this session, the store did not change under us and memory is newer, so writes resume and the next one persists the whole state
+- [x] **R1.T2: Prove the destroyed-save case** — covers: F1, F2
+  - [x] **R1.T2.1: The test that would have caught it** — seed a real save with a sticker, break only `getItem`, call two getters, then assert the stored raw is byte-identical, the flag is still true, and a mutation made afterwards survives the next getter
+  - [x] **R1.T2.2: Keep the notice reachable in that mode** — a panel opened while reads are blocked reads the flag as true
+  - [x] **R1.T2.3: Stop the flag leaking in `gameSceneBase.test.ts`** — perform an accepted write in `afterEach` after restoring the methods, as the other two suites do
+- [x] **R1.T3: Cover the throwing accessor** — covers: F3
+  - [x] **R1.T3.1: A `localStorage` global that throws on access** — every getter serves defaults without throwing and the flag is raised, exercising the `getStorage` catch that no test reached
 
 <!--
 The primary appends after acceptance:
@@ -101,3 +101,6 @@ The primary appends after acceptance:
 **Evidence:** conductor/tracks/20261107-storage-resilience/verification/review-fixes.md
 -->
 
+**Result:** verified - F1 closed: a refused read is now a distinct signal from an empty store, so a blocked session keeps its save, keeps its memory-only mutations and keeps the parent notice; the destructive-mode test was proved red against the Phase 1 file. F2, F3 closed with tests; F4 and F5 recorded alongside.
+**Checkpoint:** c99861b1
+**Evidence:** conductor/tracks/20261107-storage-resilience/verification/review-fixes.md
