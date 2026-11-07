@@ -69,7 +69,7 @@ the primary agent writes this file.
 - **Covers:** FR-5, NFR-3, AC-6
 - **Touches:** `src/components/settings/ProgressOverlay.ts`, `src/__tests__/components/settings/ProgressOverlay.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Make the Overview page 1** - covers: FR-5
   - **P3.T1.1:** Insert an Overview page ahead of the per-game rows, built from the summary the page is given, not derived inside the renderer
