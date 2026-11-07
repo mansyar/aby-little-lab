@@ -62,21 +62,24 @@
 - **Covers:** FR-2, FR-3, FR-4, AC-2, AC-3, AC-4
 - **Touches:** `e2e/journeys/`, `e2e/fixtures/`
 - **Verification:** `pnpm test:e2e` then the full chain
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** verified - 9 journeys green in 4.0 m. Running them found five defects that no unit test, linter, typecheck or build could see: `roundIndex()` counted dot `alpha` and so reported the round count, the offline toast swallowed the first tap, the hub swallows input during its entrance, readiness was sampled once mid-rebuild, and a held back button left the profile chip to eat the child's first tap - that last one was a shipping bug, not a harness artefact. Phase Touches widened by the approved bridge extensions (hub tiles, hub toast, hub readiness) and by the chip fix.
+- **Checkpoint:** dff466c1
+- **Evidence:** conductor/tracks/20261107-release-e2e/verification/phase-3.md
 
-- [ ] **P3.T1: Launch and return, all 22 games** - covers: FR-2, AC-2
-  - [ ] **P3.T1.1:** Shared helper that taps a hub tile by its registry order, waits for the scene key, and returns via back navigation
-  - [ ] **P3.T1.2:** Loop the registry so a 23rd game added later fails the journey until the helper is updated
-- [ ] **P3.T2: Drag and gesture journeys** - covers: FR-3, AC-3
-  - [ ] **P3.T2.1:** Shape Sorter: three rounds, dragging each target onto its slot by bridge coordinates
-  - [ ] **P3.T2.2:** Animal Trace: three rounds following the trace path
-- [ ] **P3.T3: Discrete-choice journeys** - covers: FR-3, AC-3
-  - [ ] **P3.T3.1:** Add It Up: three rounds of tap choice
-  - [ ] **P3.T3.2:** First Sounds: three rounds of literacy taps
-  - [ ] **P3.T3.3:** Memory Match: three rounds of reveal and match
-  - [ ] **P3.T3.4:** Story Order: three rounds of sequencing
-- [ ] **P3.T4: Completion and sticker** - covers: FR-4, AC-4
-  - [ ] **P3.T4.1:** Play one game to completion and assert the sticker count increments and the hub returns
+- [x] **P3.T1: Launch and return, all 22 games** - covers: FR-2, AC-2
+  - [x] **P3.T1.1:** Shared helper that taps a hub tile by its registry order, waits for the scene key, and returns via back navigation
+  - [x] **P3.T1.2:** Loop the registry so a 23rd game added later fails the journey until the helper is updated
+- [x] **P3.T2: Drag and gesture journeys** - covers: FR-3, AC-3
+  - [x] **P3.T2.1:** Shape Sorter: three rounds, dragging each target onto its slot by bridge coordinates
+  - [x] **P3.T2.2:** Animal Trace: three rounds following the trace path
+- [x] **P3.T3: Discrete-choice journeys** - covers: FR-3, AC-3
+  - [x] **P3.T3.1:** Add It Up: three rounds of tap choice
+  - [x] **P3.T3.2:** First Sounds: three rounds of literacy taps
+  - [x] **P3.T3.3:** Memory Match: three rounds of reveal and match
+  - [x] **P3.T3.4:** Story Order: three rounds of sequencing
+- [x] **P3.T4: Completion and sticker** - covers: FR-4, AC-4
+  - [x] **P3.T4.1:** Play one game to completion and assert the sticker count increments and the hub returns
 
 ## Phase 4: Shell journeys
 
