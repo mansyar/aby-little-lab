@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type {
   E2EHubPlayTime,
   E2EHubToast,
+  E2EProgressState,
   E2ERoundGeometry,
   E2ERoundTarget,
   E2ESettingsState,
@@ -301,6 +302,8 @@ describe("initE2EBridge", () => {
         gate: null,
         open: false,
         toggles: [],
+        progressRow: null,
+        progress: null,
         degraded: false,
       });
     });
@@ -312,6 +315,8 @@ describe("initE2EBridge", () => {
         gate: null,
         open: false,
         toggles: [],
+        progressRow: null,
+        progress: null,
         degraded: false,
       });
     });
@@ -323,6 +328,8 @@ describe("initE2EBridge", () => {
         gate: { x: 1016, y: 32 },
         open: true,
         toggles: [{ id: "adaptive", x: 512, y: 449, on }],
+        progressRow: { x: 512, y: 505 },
+        progress: null,
         degraded: true,
       };
       scene.e2eSettings = () => state;
@@ -335,13 +342,61 @@ describe("initE2EBridge", () => {
       state = { ...state, toggles: [{ id: "adaptive", x: 512, y: 449, on }] };
       expect(window.__abyE2E?.settings().toggles[0]?.on).toBe(false);
 
-      state = { gate: state.gate, open: false, toggles: [], degraded: false };
+      state = {
+        gate: state.gate,
+        open: false,
+        toggles: [],
+        progressRow: null,
+        progress: null,
+        degraded: false,
+      };
       expect(window.__abyE2E?.settings()).toEqual({
         gate: { x: 1016, y: 32 },
         open: false,
         toggles: [],
+        progressRow: null,
+        progress: null,
         degraded: false,
       });
+    });
+
+    it("reports the Progress row's point and the overlay's live page", () => {
+      const scene = sceneWith("Hub");
+      const page0: E2EProgressState = {
+        page: 0,
+        pageCount: 5,
+        lines: ["a", "b", "c"],
+        prev: { x: 402, y: 559 },
+        next: { x: 622, y: 559 },
+      };
+      const page1: E2EProgressState = {
+        page: 1,
+        pageCount: 5,
+        lines: [],
+        prev: { x: 402, y: 559 },
+        next: { x: 622, y: 559 },
+      };
+      let progress: E2EProgressState | null = null;
+      scene.e2eSettings = () => ({
+        gate: { x: 1016, y: 32 },
+        open: true,
+        toggles: [],
+        progressRow: { x: 512, y: 505 },
+        progress,
+        degraded: false,
+      });
+      install([scene]);
+
+      expect(window.__abyE2E?.settings().progressRow).toEqual({ x: 512, y: 505 });
+      expect(window.__abyE2E?.settings().progress).toBeNull();
+
+      progress = page0;
+      expect(window.__abyE2E?.settings().progress).toBe(page0);
+
+      progress = page1;
+      const moved = window.__abyE2E?.settings().progress;
+      expect(moved?.page).toBe(1);
+      expect(moved?.lines).toEqual([]);
     });
   });
 

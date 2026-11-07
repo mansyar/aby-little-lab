@@ -125,6 +125,25 @@ export const GAME_IDS: GameId[] = [
   "story-order",
 ];
 
+/**
+ * The history a parent-facing summary cannot derive from the other fields:
+ * whether play happens on consecutive days, and how often the daily cap was
+ * reached. Every count is per profile and every day is a local day key, the
+ * same shape `todayKey()` emits.
+ */
+export interface ProfileInsights {
+  /** Consecutive days with a completed session, ending on `lastStreakDay`. */
+  currentStreakDays: number;
+  /** The longest `currentStreakDays` this profile has ever reached. */
+  bestStreakDays: number;
+  /** Local day key ("YYYY-MM-DD") of the last completed session, or null. */
+  lastStreakDay: string | null;
+  /** Local days on which the daily play-time cap was reached. */
+  limitHitDays: number;
+  /** Local day key ("YYYY-MM-DD") the cap was last reached, or null. */
+  lastLimitHitDay: string | null;
+}
+
 export interface Profile {
   id: string;
   avatarId: AvatarId;
@@ -136,6 +155,8 @@ export interface Profile {
   progress: Record<GameId, GameProgress>;
   /** Last-7-days play activity (today + 6 prior, pruned on write). */
   activity: DayActivity[];
+  /** Streak and cap-day history (zeroed by default). */
+  insights: ProfileInsights;
 }
 
 /** Profile-aware storage schema (key `abby-little-lab:v2`). */

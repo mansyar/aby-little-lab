@@ -42,6 +42,24 @@ export interface E2ESettingsToggle {
   on: boolean;
 }
 
+/** The Learning Progress overlay, as the overlay itself is drawing it. */
+export interface E2EProgressState {
+  /** Zero-based page index; page 0 is the Overview. */
+  page: number;
+  /** The Overview plus the per-game pages, as the overlay computes it. */
+  pageCount: number;
+  /**
+   * The Overview statements in the order they were drawn on page 0, or `[]` on
+   * any later page. Captured when the text objects are created, so a journey
+   * asserts the strings the page printed rather than a second derivation.
+   */
+  lines: string[];
+  /** Canvas centre of the back chevron. */
+  prev: { x: number; y: number };
+  /** Canvas centre of the forward chevron. */
+  next: { x: number; y: number };
+}
+
 /** The parental gate and the settings panel as the hub currently holds them. */
 export interface E2ESettingsState {
   /** Canvas centre of the settings control, or null in a scene that is not the hub. */
@@ -50,6 +68,14 @@ export interface E2ESettingsState {
   open: boolean;
   /** The panel's toggle rows while it is open, empty otherwise. */
   toggles: E2ESettingsToggle[];
+  /**
+   * Canvas centre of the "Progress" row while the panel is up, so a journey
+   * opens the overlay from the row's own layout rather than a copied number.
+   * Null when the panel is closed.
+   */
+  progressRow: { x: number; y: number } | null;
+  /** The Progress overlay while it is open; null when it is closed. */
+  progress: E2EProgressState | null;
   /**
    * Whether the panel was built while the device could not persist — the same
    * snapshot that decides whether its notice is on screen. False when the panel
@@ -225,7 +251,14 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eSettings;
       if (typeof hook !== "function") {
-        return { gate: null, open: false, toggles: [], degraded: false };
+        return {
+          gate: null,
+          open: false,
+          toggles: [],
+          progressRow: null,
+          progress: null,
+          degraded: false,
+        };
       }
       return hook.call(probe);
     },

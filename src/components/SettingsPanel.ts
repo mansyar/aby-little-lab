@@ -1,6 +1,6 @@
 import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
-import type { E2ESettingsToggle } from "../game/e2eBridge";
+import type { E2EProgressState, E2ESettingsToggle } from "../game/e2eBridge";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
 import { getSettings, isPersistenceDegraded, updateSettings } from "../utils/storage";
@@ -79,6 +79,11 @@ export class SettingsPanel {
   }> = [];
   /** Set by {@link destroy}: the panel's own liveness, independent of the scene. */
   private destroyed = false;
+  /**
+   * The "Progress" row's centre, captured when the row is created. Published so
+   * the browser suite taps the row's layout rather than a copied coordinate.
+   */
+  private progressRowPoint: { x: number; y: number } | null = null;
   /**
    * Whether the device could not persist when this panel was built. A snapshot:
    * the notice states what was true at open time, and nothing in the panel
@@ -391,6 +396,23 @@ export class SettingsPanel {
     createRow(this.scene, x, y, this.objects, "Progress", PRIMARY_COLOR, () =>
       this.openProgressOverlay(),
     );
+    // Like the toggle rows: the row card is centred on (x, y), so the layout
+    // arguments are the point a finger lands on - no re-derivation by the suite.
+    this.progressRowPoint = { x, y };
+  }
+
+  /**
+   * The "Progress" row's canvas centre, or null before the row is built. The
+   * row's own rectangle is what a parent's finger lands on, so a journey that
+   * taps this point taps the control.
+   */
+  e2eProgressRow(): { x: number; y: number } | null {
+    return this.progressRowPoint;
+  }
+
+  /** The Learning Progress overlay as it is drawing it, or null when closed. */
+  e2eProgress(): E2EProgressState | null {
+    return this.progressOverlay.e2eState();
   }
 
   /** Delegates to the extracted ProgressOverlay component. */

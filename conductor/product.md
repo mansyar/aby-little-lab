@@ -175,20 +175,21 @@ parent explicitly exports it.
 
 | Track | Work | Exit gate |
 |---|---|---|
-| `20261124-local-insights` | Local event ring buffer plus an upgraded parent Insights view: per-game plays, accuracy, completion, streak, time-limit adherence, adaptive-band spread | A parent can answer "what is being played, and is it working" in under 30 seconds |
+| `20261124-local-insights` | **Done 2026-11-08** (track `20261108-local-insights`): one pure summary built from the aggregates that already existed, plus a five-field per-profile record holding what they cannot — the streak, its best, and the days the daily cap was reached (backfilled at zero, `SCHEMA_VERSION` still 1). The Progress overlay now opens on an Overview page: this week's reach and lifetime completions, overall accuracy with the strongest and hardest game above a ten-tap floor, and the streak and cap history. No event ring buffer was needed — the existing counters plus two new ones answer the question, so none was built. Adaptive-band spread is not on this page yet; it belongs with Phase 4's adaptive work. | A parent can answer "what is being played, and is it working" in under 30 seconds - **demonstrated**: a journey seeds a week of history, holds the parental gate, opens Progress and reads all three statements on page one, in about ten seconds |
 | `20261124-backup-restore` | Versioned JSON export/import with checksum and a merge-or-replace choice, parent-gated | A round trip to a second device loses nothing |
 | `20261124-error-capture` | Global handlers → local error log plus "Copy diagnostics" in parent settings; no transmission | A crash yields a shareable, human-readable trace |
 
-**Metrics this unlocks** — baseline is unknown today; the target is what the
-product is trying to demonstrate:
+**Metrics this unlocks** - every figure below is read per profile, on the device,
+by opening Progress. Nothing is transmitted and nothing is aggregated; where the
+Overview does not yet report a metric, the row says so rather than guessing:
 
 | Metric | Today | Target |
 |---|---|---|
-| Game completion rate (start → 3 rounds) | unknown | ≥ 80% |
-| Distinct games per session | unknown | ≥ 4 |
-| Adaptive band movement | unknown | 60% of profiles move ≥ 1 band within 2 weeks |
-| Uncaught errors per 100 sessions | unknown | < 1 |
-| Day-7 return (local proxy) | unknown | ≥ 40% |
+| Game completion rate (start → 3 rounds) | reported on the Overview page as a share of started sessions; no device-wide figure exists | ≥ 80% |
+| Distinct games per session | the page reports distinct games this week, not per session | ≥ 4 |
+| Adaptive band movement | not surfaced yet - Phase 4's adaptive work adds it | 60% of profiles move ≥ 1 band within 2 weeks |
+| Uncaught errors per 100 sessions | unknown - error capture is the next track | < 1 |
+| Day-7 return (local proxy) | the 7-day strip shows reach, not retention; a return rate needs a longer history than a profile holds | ≥ 40% |
 
 ### 10.4 Phase 3 — Product-intent gate (1 week)
 

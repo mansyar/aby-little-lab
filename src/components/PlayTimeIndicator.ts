@@ -1,6 +1,6 @@
 import type Phaser from "phaser";
 import { getRemainingMinutes, isLimitReached, isNearLimit } from "../game/playTimeLogic";
-import { getPlayTime } from "../utils/storage";
+import { getActiveProfile, getPlayTime, recordLimitHit } from "../utils/storage";
 
 const HINT_ARC_RADIUS = 12;
 
@@ -35,6 +35,11 @@ export function createPlayTimeIndicator(
   const cx = scene.cameras.main.width / 2;
   const cy = scene.cameras.main.height - 16;
   if (isLimitReached(playTime)) {
+    // The one place the tiles actually lock, so the cap-day is recorded from
+    // the same decision that locks them: a hub that returns from the background
+    // re-runs this and cannot lose the event. `recordLimitHit` is idempotent per
+    // local day, so re-applying the lock writes nothing after the first time.
+    recordLimitHit(getActiveProfile().id);
     onLimitReached();
     graphics.fillStyle(0x2d3748, 1);
     graphics.fillCircle(cx, cy, HINT_ARC_RADIUS + 6);

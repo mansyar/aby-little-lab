@@ -2,6 +2,7 @@ import { expect, type Page } from "@playwright/test";
 import type {
   E2EHubPlayTime,
   E2EHubToast,
+  E2EProgressState,
   E2ERoundGeometry,
   E2ERoundTarget,
   E2ESettingsState,
@@ -94,8 +95,21 @@ export function hubReady(page: Page): Promise<boolean> {
 /** The parental gate and settings panel as the hub publishes them. */
 export function settingsState(page: Page): Promise<E2ESettingsState> {
   return page.evaluate(
-    () => window.__abyE2E?.settings() ?? { gate: null, open: false, toggles: [], degraded: false },
+    () =>
+      window.__abyE2E?.settings() ?? {
+        gate: null,
+        open: false,
+        toggles: [],
+        progressRow: null,
+        progress: null,
+        degraded: false,
+      },
   );
+}
+
+/** The Learning Progress overlay as it is drawing it, or null while it is closed. */
+export function progressState(page: Page): Promise<E2EProgressState | null> {
+  return page.evaluate(() => window.__abyE2E?.settings().progress ?? null);
 }
 
 /** The hub's daily-budget state: whether the cap locked the tiles, and whether a nudge is up. */
