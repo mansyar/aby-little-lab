@@ -62,10 +62,12 @@ jobs:
 
   e2e:
     name: Browser Journeys
-    # Runs beside the quality gates rather than inside them, so a browser
-    # failure does not hide static/unit results. It still needs `dist`, which
-    # `pnpm test:e2e` builds itself (`pnpm build && playwright test`), keeping
-    # the artifact local to the job that tests it.
+    # A separate job after the quality gates, not a step inside them, so a
+    # browser failure does not hide static/unit results and a hung browser
+    # cannot stall the gate. It still needs `dist`, which `pnpm test:e2e`
+    # builds itself (`pnpm build && playwright test`), keeping the artifact
+    # local to the job that tests it. NFR-2's budget is 5 min for the suite;
+    # the timeout below is only the backstop for a browser that never exits.
     needs: quality-gates
     runs-on: ubuntu-latest
     # A hung browser should fail loudly instead of occupying a runner.

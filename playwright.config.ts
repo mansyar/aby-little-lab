@@ -20,9 +20,16 @@ export default defineConfig({
   // of false reds on a loaded host, so both budgets are deliberately generous.
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  // The suite shares one preview server and one service worker. Parallelism
-  // buys nothing here and costs determinism.
-  workers: 1,
+  // Two workers, not one: the suite reached 4.9 min serially against NFR-2's
+  // 5 min budget, and the excess is wall clock rather than work. Files are the
+  // parallelism unit — `fullyParallel: false` keeps the tests inside one file
+  // serial — and every test already gets a fresh browser context, so the
+  // preview server is the only thing the workers share. Only `webServer` owns
+  // that server: there is no per-worker port and no second server, so both
+  // workers read the same built `dist` over the same origin. `launch-all` alone
+  // is 2.6 min, so the critical path is that file plus the slower worker's
+  // share of the rest: near 2.8 min, not the 2.5 min a clean halving predicts.
+  workers: 2,
   fullyParallel: false,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,

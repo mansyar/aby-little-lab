@@ -69,6 +69,7 @@
     - [10.2 Suite shape](#102-suite-shape)
     - [10.3 Coverage gates](#103-coverage-gates)
     - [10.4 What unit tests cannot cover](#104-what-unit-tests-cannot-cover)
+    - [10.5 The browser journey layer](#105-the-browser-journey-layer)
 11. [Build, PWA and CI](#11-build-pwa-and-ci)
     - [11.1 Vite build](#111-vite-build)
     - [11.2 PWA configuration](#112-pwa-configuration)
@@ -1098,6 +1099,34 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 - orientation lock and PWA install/update on iOS Safari, Android Chrome and desktop;
 - the cold-load budget, which is `scripts/validate-boot.js`'s job in CI.
 
+### 10.5 The browser journey layer
+
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 13 journeys across 12 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, settings persistence, the daily cap and an offline relaunch. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+
+What this layer observes that the unit layer cannot:
+
+- the wiring between the registry, the lazy scene loaders and the built chunks — a game registered but whose chunk is missing from the precache, or whose scene never registers, fails here and passes every unit test;
+- real hit areas on a real canvas: every gesture goes through the canvas bounding box, so the 1024x768 `Scale.FIT` letterboxing is exercised rather than assumed, and a control whose interactive area no longer covers its published centre is invisible to happy-dom;
+- persistence across a real reload, the service worker, and a relaunch with the network cut at the browser context;
+- only-in-a-frame timing: the entrance tweens that swallow a tap, the parental gate's three-second hold, `NEXT_ROUND_DELAY`.
+
+**Why it is not in `verify_phase`.** The phase gate is a ~90 s budget every phase subagent runs; this layer builds `dist` and takes minutes. It runs as its own CI job on every pull request (`Browser Journeys`, `needs: quality-gates`), so a browser failure is reported next to the static and unit results instead of replacing them.
+
+**Run one journey locally:**
+
+```bash
+pnpm build                                  # the suite serves dist, not the dev server
+pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
+```
+
+`pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
+
+**Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
+
+**Workers and budget.** Two workers, locally and in CI, against one shared preview server. `fullyParallel: false` makes the file the unit of parallelism: the tests inside a spec run in order in one worker, and every test still gets a fresh browser context, so no journey can see another's storage or service worker. Serially the suite measured 4.9 min against NFR-2's 5 min ceiling, with `launch-all` alone at 2.6 min; two workers put the critical path near 2.8 min, because the wall clock shrinks and the work does not. The budget is a CI ceiling, not a target: a new journey that pushes past it is a decision about the suite's shape, not a number to edit.
+
+**The suite must be seen to fail.** A layer that has never gone red is not evidence. The proof is a surgical mutation — one tile's hit area shrunk to a 1x1 point — which must turn the launch journey red, after which the mutation is reverted and the suite must be green again.
+
 ---
 
 ## 11. Build, PWA and CI
@@ -1146,6 +1175,7 @@ VitePWA({
 | Job | Runs on | Steps |
 | --- | --- | --- |
 | Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `pnpm/action-setup@v6` (11.7.0), `setup-node@v7` (Node 22, pnpm store cached), `pnpm install --frozen-lockfile`, `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then `vite preview` on port 4173 and `node scripts/validate-boot.js` |
+| Browser Journeys | same triggers, `needs: quality-gates`, `timeout-minutes: 15` | checkout, pnpm and Node 22 setup, `pnpm install --frozen-lockfile`, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e` (builds `dist`, then the journey suite on two workers), and `test-results/` uploaded when the job fails |
 | Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
 `paths-ignore` skips CI for `conductor/**`, `docs/**`, `README.md` and `**/*.md`. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.
