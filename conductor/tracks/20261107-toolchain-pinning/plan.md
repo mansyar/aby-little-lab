@@ -13,24 +13,22 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-8, FR-10, AC-1, AC-2, AC-7
 - **Touches:** `package.json`, `.node-version`, `pnpm-lock.yaml`
 - **Verification:** `pnpm install --frozen-lockfile && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Declare the versions** — covers: FR-1, FR-2, FR-3
-  - [ ] **P1.T1.1: Add `packageManager`** as `pnpm@12.16.1`, exact, no range
-  - [ ] **P1.T1.2: Add `engines.node`** as a range containing 24 and nothing unverified
-  - [ ] **P1.T1.3: Add `.node-version`** with the pinned Node in a form `actions/setup-node` accepts — no `v` prefix
-- [ ] **P1.T2: Drop the dependency nothing uses** — covers: FR-8
-  - [ ] **P1.T2.1: Remove `serve`** from `devDependencies` and refresh the lockfile
-  - [ ] **P1.T2.2: Prove it was unused** — the only reference was a hint in `scripts/validate-boot.js` that recommends `vite preview`
-- [ ] **P1.T3: Prove the install** — covers: FR-10, AC-7
-  - [ ] **P1.T3.1: `pnpm install --frozen-lockfile` on a clean `node_modules`** under 12.16.1, exit 0; if pnpm rewrites the lockfile, record the diff and why it is safe
-  - [ ] **P1.T3.2: Confirm no resolved version moved** in the lockfile beyond removing `serve` and its unique children
+- [x] **P1.T1: Declare the versions** — covers: FR-1, FR-2, FR-3
+  - [x] **P1.T1.1: Add `packageManager`** as `pnpm@12.16.1`, exact, no range
+  - [x] **P1.T1.2: Add `engines.node`** as a range containing 24 and nothing unverified
+  - [x] **P1.T1.3: Add `.node-version`** with the pinned Node in a form `actions/setup-node` accepts — no `v` prefix
+- [x] **P1.T2: Drop the dependency nothing uses** — covers: FR-8
+  - [x] **P1.T2.1: Remove `serve`** from `devDependencies` and refresh the lockfile
+  - [x] **P1.T2.2: Prove it was unused** — the only reference was a hint in `scripts/validate-boot.js` that recommends `vite preview`
+- [x] **P1.T3: Prove the install** — covers: FR-10, AC-7
+  - [x] **P1.T3.1: `pnpm install --frozen-lockfile` on a clean `node_modules`** under 12.16.1, exit 0; if pnpm rewrites the lockfile, record the diff and why it is safe
+  - [x] **P1.T3.2: Confirm no resolved version moved** in the lockfile beyond removing `serve` and its unique children
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified - pnpm 12.16.1 and Node 24 are declared in package.json and .node-version; serve and its 70 unique transitive packages are gone; a clean pnpm install --frozen-lockfile succeeds under the declared pnpm, and the gate is green with 2,912 tests and an unchanged shell entry.
+**Checkpoint:** 1fb6f6f3
 **Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/phase-1.md
--->
 
 ## Phase 2: Consume it, and stop paying for markdown
 
@@ -55,7 +53,7 @@
 
 <!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 1fb6f6f3
 **Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/phase-2.md
 -->
 
