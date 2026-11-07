@@ -102,5 +102,5 @@
     - [x] **R1.T3.1:** Run `pnpm test:e2e` and record the wall clock
 
 **Result:** verified - all nine findings closed. The guard now inspects both pnpm steps, requires the pinned major to satisfy the engines range, and compares the two classifier copies; each of the three was proved failing against a deliberate probe. `workflow.md` no longer states a literal version, the TDD measurement is restored to its real scope, and the browser suite runs green in 3.9 min on Node 24.22.2 / pnpm 12.16.1. AC-11 is recorded partial: the classifier diffs the whole PR, so a documentation-only tier needs a documentation-only PR.
-**Checkpoint:** 0000000
+**Checkpoint:** f014e7eb
 **Evidence:** conductor/tracks/20261107-toolchain-pinning/verification/review-fixes.md
