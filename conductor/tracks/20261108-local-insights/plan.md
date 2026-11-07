@@ -44,19 +44,23 @@ the primary agent writes this file.
 - **Covers:** FR-4, FR-6, NFR-3, AC-5
 - **Touches:** `src/game/insightsSummary.ts`, `src/__tests__/game/insightsSummary.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Derive what is already there** - covers: FR-4
+- [x] **P2.T1: Derive what is already there** - covers: FR-4
   - **P2.T1.1:** `MIN_SUMMARY_TAPS` plus the derived helpers: games played in the last seven days from `lastPlayedAt`, lifetime completions from `wins`, overall completion rate from `wins / plays`, overall accuracy from `correct` vs `wrong`
   - **P2.T1.2:** Strongest and hardest game by accuracy among games with at least `MIN_SUMMARY_TAPS` answer taps, with a stable tie-break
   - **P2.T1.3:** Every ratio guarded against a zero denominator — the function must be total
-- [ ] **P2.T2: Say it in three lines** - covers: FR-4, FR-6
+- [x] **P2.T2: Say it in three lines** - covers: FR-4, FR-6
   - **P2.T2.1:** `summariseInsights(profile, now)` returns the three statements as text plus the raw numbers behind each, so the page never recomputes and the tests can assert the arithmetic
   - **P2.T2.2:** Empty, sparse (fewer taps than the floor), and unlimited variants each get their own sentence rather than a zero or a dash
-- [ ] **P2.T3: Prove the arithmetic** - covers: AC-5
+- [x] **P2.T3: Prove the arithmetic** - covers: AC-5
   - **P2.T3.1:** Table-driven tests for the five profiles named in AC-5, asserting the statement text and the numbers, and asserting no `NaN`/`Infinity` appears in any output
   - **P2.T3.2:** A boundary test for a game sitting exactly at `MIN_SUMMARY_TAPS`, and one for a single wrong tap never being named hardest
   - **P2.T3.3:** Refresh the suite counts if they moved
+
+**Result:** verified - one pure module turns a profile and an injected moment into the three statements plus their numbers. The week window is the one the 7-day strip draws, the strongest/hardest comparison sits on a ten-tap floor with a deterministic tie-break, and every ratio guards its denominator, so a brand-new, sparse or malformed profile still gets three readable sentences. 12 tests, including a finiteness walk and a purity proof.
+**Checkpoint:** 78dca82c
+**Evidence:** conductor/tracks/20261108-local-insights/verification/phase-2.md
 
 ## Phase 3: The page
 
