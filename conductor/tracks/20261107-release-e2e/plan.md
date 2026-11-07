@@ -108,7 +108,7 @@
 - **Covers:** FR-10, NFR-3, AC-10
 - **Touches:** `e2e/`, `conductor/tracks/20261107-release-e2e/verification/`
 - **Verification:** full chain plus ten consecutive `pnpm test:e2e` runs
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P5.T1: Mutation proof** - covers: FR-10, AC-10
   - [ ] **P5.T1.1:** Break one tile's hit area, run the suite, capture the failing journey and its output
