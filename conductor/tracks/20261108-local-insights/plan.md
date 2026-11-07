@@ -92,7 +92,7 @@ the primary agent writes this file.
 - **Covers:** FR-8, FR-9, NFR-5, NFR-6, AC-7, AC-8, AC-9
 - **Touches:** `e2e/journeys/insights.spec.ts`, `e2e/fixtures/`, `README.md`, `docs/TDD.md`, `conductor/product.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm test:e2e` then `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: The journey** - covers: FR-8, AC-7, NFR-6
   - **P4.T1.1:** Seed a profile with completed sessions across a few days, then open the hub and read the published state rather than sleeping
