@@ -75,10 +75,31 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
   - [x] **P3.T2.2: `README.md`** lists the headers among the deployment properties and names the validator
   - [x] **P3.T2.3: `conductor/product.md` §10.2** row becomes Done with dated evidence, and the out-of-scope set (HSTS/COOP/CORP) is recorded with its reason
 
-<!-- Review fixes are appended by conductor-review as:
-## Phase R<n>: Review Fixes
-- **Goal:** Resolve review findings <IDs>
-- **Touches:** ...
-- **Verification:** ...
-- **Status:** pending
--->
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1-F8: the validator must clean up after its own failure, must prove the content types `nosniff` makes load-bearing, and the record must stop claiming checks it has not run.
+- **Depends on:** Phase 3
+- **Covers:** review findings F1, F2, F3, F4, F5, F6, F7, F8
+- **Touches:** `scripts/validate-headers.js`, `nginx.conf`, `nginx.security-headers.conf`, `src/__tests__/guard/securityHeaders.test.ts`, `README.md`, `docs/TDD.md`, `conductor/tracks/20261108-edge-hardening/`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js && node scripts/validate-headers.js`, then `E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e`
+- **Status:** verified
+
+- [x] **R1.T1: A throwing failure still cleans up** - covers: F1
+  - **R1.T1.1:** `fatal` throws a `FatalError` instead of calling `process.exit`, so `finally` runs on the readiness-timeout path
+  - **R1.T1.2:** `ensureContainerRemoved` is idempotent and called from the `finally` and from a `process.once("exit")` hook
+  - **R1.T1.3:** Prove it with a container that exits immediately (`HEADERS_IMAGE=node:24-alpine`): exit 1, no container left, port free
+- [x] **R1.T2: Content types, which `nosniff` makes load-bearing** - covers: F5
+  - **R1.T2.1:** Each probe row declares the type it must keep; `buildChecks` asserts it
+  - **R1.T2.2:** Fix the defect the new check found: the manifest was served `application/octet-stream` because nginx has no `webmanifest` mime entry
+- [x] **R1.T3: The guard pins the policy, not a subset of it** - covers: F4, F6
+  - **R1.T3.1:** `toEqual(expected.sources)` instead of `toContain` per source, so an added host fails
+  - **R1.T3.2:** The snippet's directive table heading matches the shipped value (`data: blob:`)
+- [x] **R1.T4: Record only what was observed** - covers: F2, F3, F7, F8
+  - **R1.T4.1:** `P3.T1.2` unchecked again, with the reason it cannot close here
+  - **R1.T4.2:** `integrated.md` qualified as AC-7 partial, and committed rather than left untracked
+  - **R1.T4.3:** Count dates corrected to 2026-11-08 where the counts were refreshed
+
+**Result:** verified - F1 proven by a container that dies before answering (exit 1, nothing left behind, port free); F5's new assertions found and fixed a real defect, the web manifest served as `application/octet-stream`; F4 and F6 tighten the guard and its documentation; F2/F7/F8 correct the record, and F3's duration is measured on the PR rather than guessed. 28 header checks green, 16 journeys green under nginx after the fix.
+**Checkpoint:** d982985c
+**Evidence:** conductor/tracks/20261108-edge-hardening/verification/review-fixes.md
