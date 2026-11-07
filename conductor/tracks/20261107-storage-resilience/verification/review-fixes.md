@@ -12,8 +12,8 @@
 | ID | Severity | What was wrong | What changed | Test that now proves it |
 | --- | --- | --- | --- | --- |
 | F1 | High | A refused read and an absent payload were the same `null`, so `ensureV2` treated an unreadable store as a fresh install and wrote defaults over a real save. The accepted write cleared the flag, so the parent never saw the notice either. | `readStorage` now returns `{ raw, failed }`; `ensureV2` serves the memo (or the defaults `migrateV1(null)` builds, keyed so the next accessor hits it) and writes nothing while reads are blocked; `saveV2` skips `setItem` while blocked and keeps the memo pointing at the session state; `mutate` only takes the write-protected branch on a read that succeeded. | `src/__tests__/utils/storage.test.ts` — `leaves the save it cannot read byte-identical, and keeps the session in memory` (quoted below), plus `resumes writing when a later read returns the raw this session last saw` and `stays memory-only when the store changed while it could not be read`. |
-| F2 | Medium | `gameSceneBase.test.ts` repaired the storage methods in `afterEach` but performed no accepted write, leaving the module flag raised for every later case in the file. | That `afterEach` now calls `updateSettings({})` after `repairStorage()` and `localStorage.clear()`, which persists a clean state and clears the flag. | Whole-file `src/__tests__/scenes/gameSceneBase.test.ts` run, and the project-wide suite (no case inherits a degraded session). |
-| F3 | Medium | `getStorage`'s catch — a `localStorage` global that throws on access — was uncovered, so the engine-level failure was never exercised. | No production change needed; a test now defines a throwing getter for `globalThis.localStorage`, loads a fresh module, and asserts every getter serves defaults without throwing while the flag is raised. The getter is restored in a `finally` and in `afterEach`. | `src/__tests__/utils/storage.test.ts` — `serves defaults from every getter, never throws, and raises the flag`. |
+| F2 | Low | `gameSceneBase.test.ts` repaired the storage methods in `afterEach` but performed no accepted write, leaving the module flag raised for every later case in the file. | That `afterEach` now calls `updateSettings({})` after `repairStorage()` and `localStorage.clear()`, which persists a clean state and clears the flag. | Whole-file `src/__tests__/scenes/gameSceneBase.test.ts` run, and the project-wide suite (no case inherits a degraded session). |
+| F3 | Low | `getStorage`'s catch — a `localStorage` global that throws on access — was uncovered, so the engine-level failure was never exercised. | No production change needed; a test now defines a throwing getter for `globalThis.localStorage`, loads a fresh module, and asserts every getter serves defaults without throwing while the flag is raised. The getter is restored in a `finally` and in `afterEach`. | `src/__tests__/utils/storage.test.ts` — `serves defaults from every getter, never throws, and raises the flag`. |
 
 R1.T2.2 is proved by `src/__tests__/components/SettingsPanel.test.ts` →
 `reaches the notice in a session whose reads are blocked`: a panel built while
@@ -131,12 +131,34 @@ mistaken for a protected future payload.
 
 ### The test teeth, proved against the pre-fix file
 
-`git checkout 56f6fbd5 -- src/utils/storage.ts`, then
+**Corrected in phase R2.** Round 1 recorded this as
 `pnpm test src/__tests__/utils/storage.test.ts -- --run -t "leaves the save it cannot read"`:
-**3 failed**. The destructive-mode assertion failed with the seeded payload
-replaced by a fresh default save — exactly the reviewer's finding, reproduced.
-`git checkout HEAD -- src/utils/storage.ts` restored the file, and the tree showed
-no modification to it afterwards.
+**3 failed**. That filter matches one test, so it cannot produce three failures — the
+count was right and the command was wrong. Re-run with a filter that genuinely
+matches the three review tests, against the Phase 1 file (`56f6fbd5`, written over
+`src/utils/storage.ts` because phase R2 may not run `git checkout`; HEAD was restored
+afterwards and `git status --short -- src/utils/storage.ts` was empty):
+
+`pnpm test src/__tests__/utils/storage.test.ts -- --run -t "leaves the save it cannot read|resumes writing|stays memory-only|migrates a legacy save"`
+
+**4 failed | 134 passed**, every failure in `when a read cannot be performed`:
+
+| Test | What failed |
+| --- | --- |
+| `leaves the save it cannot read byte-identical, and keeps the session in memory` | the seeded payload was replaced by a fresh default save — `shape-sorter` back to `earned: false` |
+| `resumes writing when a later read returns the raw this session last saw` | the degraded flag read `false` after the blocked read, because `ensureV2` had already written defaults over the save |
+| `stays memory-only when the store changed while it could not be read` | the other writer's bytes were replaced by a fresh default save |
+| `migrates a legacy save the blocked boot could not read, once the store answers again` | failed on the R1 defect (the flag never stayed raised), not on R2's shadowing — see below |
+
+The three review tests are the first three rows; that is the honest version of round
+1's "3 failed".
+
+**Round 2's own defect, proved separately.** With the round-2 fix committed and only
+the `!v2Cache.provisional` term removed from `ensureV2`'s cache check, the new test
+fails alone (`1 failed | 137 passed`) on the assertion round 2 is about:
+`active?.stickers["shape-sorter"]` is `{ earned: false, earnedAt: null }` while
+`animal-trace` is earned — the v1 save was shadowed, exactly as the reset described.
+Restoring the term left `src/utils/storage.ts` unmodified against HEAD.
 
 ### Gate
 

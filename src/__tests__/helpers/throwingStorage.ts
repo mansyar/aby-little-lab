@@ -3,7 +3,7 @@
  *
  * A full quota rejects writes with `QuotaExceededError`; blocked or
  * partitioned site data rejects every access with `SecurityError`. Both reach
- * the save layer and neither is survivable today.
+ * the save layer, and neither was survivable before it was guarded.
  *
  * happy-dom binds each `Storage` method to the instance as an own property on
  * first access, so a `Storage.prototype` spy never reaches

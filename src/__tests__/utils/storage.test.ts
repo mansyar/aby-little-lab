@@ -1608,6 +1608,39 @@ describe("when a read cannot be performed", () => {
     expect(hasSticker("animal-trace")).toBe(true);
     expect(isPersistenceDegraded()).toBe(true);
   });
+
+  it("migrates a legacy save the blocked boot could not read, once the store answers again", async () => {
+    // The save lives only on the v1 key: this install has never written a v2
+    // payload, so the boot that fails has read nothing and knows nothing.
+    localStorage.clear();
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+    vi.resetModules();
+    const fresh = await import("../../utils/storage");
+
+    breakStorage(["getItem"], "SecurityError");
+    try {
+      expect(() => fresh.getProfiles()).not.toThrow();
+      expect(fresh.hasSticker("shape-sorter")).toBe(false);
+      expect(fresh.isPersistenceDegraded()).toBe(true);
+
+      // The store answers again and its v2 key is empty — nothing to destroy,
+      // so the read heals and the ordinary path has to run. If the placeholder
+      // a blocked boot memoized satisfied the cache comparison, its raw (`null`)
+      // would equal this empty store's `null` and the v1 save below would be
+      // shadowed for the rest of the install's life.
+      repairStorage();
+      fresh.earnSticker("animal-trace");
+
+      const persisted = JSON.parse(localStorage.getItem(V2_KEY) ?? "null");
+      const active = persisted.profiles.find(
+        (profile: { id: string }) => profile.id === persisted.activeProfileId,
+      );
+      expect(active?.stickers["shape-sorter"]).toMatchObject({ earned: true });
+      expect(active?.stickers["animal-trace"]).toMatchObject({ earned: true });
+    } finally {
+      repairStorage();
+    }
+  });
 });
 
 describe("degraded persistence flag", () => {

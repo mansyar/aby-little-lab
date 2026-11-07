@@ -41,8 +41,9 @@ test.describe("storage refusal", () => {
     await refuseStorage(page, ["setItem"]);
     await openHub(page);
 
-    // The device refuses from the first write, so the session is degraded
-    // before a single tap — and the hub still boots to a playable board.
+    // Only writes are refused here, so nothing has failed yet: the hub boots a
+    // playable board from a fresh profile, and the first refused write is what
+    // will raise the notice later in this journey.
     expect(await activeSceneKey(page)).toBe("Hub");
     expect(await stickerCount(page), "a fresh profile starts with no stickers").toBe(0);
 

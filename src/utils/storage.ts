@@ -187,8 +187,23 @@ function readV2Raw(): StorageRead {
  * `JSON.parse` + `normalizeV2`, which per-tap call sites were paying on every
  * read. The guard keeps external `localStorage` writes (and `clear()`) correct:
  * any raw change — external edit, removal, or corruption — forces a re-parse.
+ *
+ * `provisional` marks the placeholder a blocked boot builds before any read has
+ * ever succeeded: it is memory the session invented, not a state the store was
+ * seen to hold, so it must never satisfy the cache comparison. A boot that
+ * failed every read keys it with `lastKnownRaw`, which is `null`; an empty store
+ * then heals the read and answers `null` too, so a plain comparison would serve
+ * the placeholder forever and never reach `migrateV1(readV1())` — shadowing a
+ * legacy save permanently. A provisional entry lets the healed read fall
+ * through to the ordinary path.
+ *
+ * Precedence once it does, deliberately: the persisted payload wins over
+ * anything the session earned while blind. The session was already telling the
+ * parent it could not save, so those earnings were never promised to survive;
+ * merging the two states would need a rule for two versions of the same sticker,
+ * and the spec has none.
  */
-let v2Cache: { raw: string | null; state: ProfileV2 } | null = null;
+let v2Cache: { provisional: boolean; raw: string | null; state: ProfileV2 } | null = null;
 
 function parseV2(raw: string | null): ProfileV2 | null {
   if (raw === null) return null;
@@ -211,12 +226,16 @@ function ensureV2(): ProfileV2 {
     // F1: an unreadable store is not an empty one. Serve what this session
     // already holds — the cache if there is one, otherwise the same defaults a
     // fresh install builds — and write nothing: the store may hold a real save
-    // this build cannot see. The cache is keyed so the next accessor hits it.
-    if (v2Cache === null) v2Cache = { raw: lastKnownRaw, state: migrateV1(null) };
+    // this build cannot see. The cache is keyed so the next accessor hits it,
+    // and marked provisional so a later healed read cannot mistake this
+    // invented placeholder for a state the store was seen to hold.
+    if (v2Cache === null) {
+      v2Cache = { provisional: true, raw: lastKnownRaw, state: migrateV1(null) };
+    }
     return v2Cache.state;
   }
 
-  if (v2Cache !== null && v2Cache.raw === raw) return v2Cache.state;
+  if (v2Cache !== null && !v2Cache.provisional && v2Cache.raw === raw) return v2Cache.state;
 
   if (classifyStoredV2(raw) === "unknown") {
     // FR-4: a future version's payload is write-protected — its raw bytes are
@@ -224,14 +243,14 @@ function ensureV2(): ProfileV2 {
     // (A2: mutations are discarded on the next load). The cache is keyed by
     // the protected raw string, so it can never overwrite those bytes.
     const defaults = migrateV1(null);
-    v2Cache = { raw, state: defaults };
+    v2Cache = { provisional: false, raw, state: defaults };
     return defaults;
   }
 
   const existing = parseV2(raw);
   if (existing !== null) {
     const v2 = migrateFromVersion1(existing);
-    v2Cache = { raw, state: v2 };
+    v2Cache = { provisional: false, raw, state: v2 };
     return v2;
   }
   const v2 = migrateV1(readV1());
@@ -250,7 +269,7 @@ function saveV2(v2: ProfileV2): void {
       // proves the store works again, so it clears the degraded flag.
       persistenceDegraded = false;
       lastKnownRaw = raw;
-      v2Cache = { raw, state: v2 };
+      v2Cache = { provisional: false, raw, state: v2 };
       return;
     } catch {
       // A full quota refuses the write; the change still applies to this
@@ -267,7 +286,7 @@ function saveV2(v2: ProfileV2): void {
   // and serves what the child just earned; keying it with the rejected JSON
   // would miss the cache, re-read stale bytes and take the sticker back off
   // screen.
-  v2Cache = { raw: storedRaw(), state: v2 };
+  v2Cache = { provisional: false, raw: storedRaw(), state: v2 };
 }
 
 /** The raw the store holds: a fresh read where it answers, the last known raw otherwise. */
@@ -289,7 +308,7 @@ function mutate(mutator: (v2: ProfileV2) => ProfileV2 | null): ProfileV2 | null 
     // FR-4: the stored payload is a future version and write-protected, so
     // the mutation applies to the in-memory state only (A2) — the raw bytes
     // stay untouched and the cache is re-keyed to the unchanged raw string.
-    v2Cache = { raw: stored.raw, state: next };
+    v2Cache = { provisional: false, raw: stored.raw, state: next };
     return next;
   }
   saveV2(next);

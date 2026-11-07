@@ -117,7 +117,7 @@ anyone. A parent sees a game that "just stops" and stickers that never stay.
 | --- | --- | --- |
 | FR-1 | No storage write throws to its caller. Every write path (`earnSticker`, `updateSettings`, `resetProgress`, `addProfile`, `deleteProfile`, `switchProfile`, `setPlayTimeLimit`, `recordPlayTime`, `recordGamePlay`, `recordGameResult`, `recordGameTaps`) returns normally when `setItem` throws. | must |
 | FR-2 | When a write cannot be persisted, the change still applies to the in-memory state for the rest of the session, so the child sees the sticker, the toggle and the progress they earned. | must |
-| FR-3 | No storage read throws. When `getItem` throws, the app boots and every getter (`getProfiles`, `getActiveProfile`, `getSettings`, `getPlayTime`, `getProgress`, `hasSticker`, `getAdaptiveBandShift`) returns fresh defaults. | must |
+| FR-3 | No storage read throws. When `getItem` throws **on first access**, the app boots and every getter (`getProfiles`, `getActiveProfile`, `getSettings`, `getPlayTime`, `getProgress`, `hasSticker`, `getAdaptiveBandShift`) returns fresh defaults. Mid-session a refused read deliberately serves the session's own state instead — see the "Reads fail, writes work" edge case. | must |
 | FR-4 | A session-scoped degraded flag is set by any failed read or write, cleared by a later successful write, and is never set by the deliberate unknown-`schemaVersion` write-protection path or by a declined mutator. | must |
 | FR-5 | While degraded, the parental Settings panel shows one informational line stating that progress cannot be saved on this device. It is not shown otherwise, adds no interactive element, and moves none of the existing rows. | must |
 | FR-6 | With storage working, behaviour is unchanged: the same bytes are written (including the schema stamp), the v1 migration and corrupt-JSON fallbacks behave as today, the unknown-version payload stays write-protected, and reads keep the raw-string memo. | must |
@@ -139,7 +139,7 @@ anyone. A parent sees a game that "just stops" and stickers that never stay.
 | --- | --- | --- |
 | AC-1 | With `setItem` throwing, each write path returns normally and the corresponding in-memory getter reflects the change (earned sticker, updated setting, added profile, cleared stickers, recorded play). | FR-1, FR-2 |
 | AC-2 | With `setItem` throwing, `completeGame` reaches its auto-return schedule — the child is returned to the hub rather than stranded. | FR-1 |
-| AC-3 | With `getItem` throwing, `getProfiles`, `getActiveProfile`, `getSettings`, `getPlayTime` and `getProgress` return defaults and nothing throws during hub construction. | FR-3 |
+| AC-3 | With `getItem` throwing **on first access**, `getProfiles`, `getActiveProfile`, `getSettings`, `getPlayTime` and `getProgress` return defaults and nothing throws during hub construction. | FR-3 |
 | AC-4 | The degraded flag is false on a working store, true after a failed write, true after a failed read, false again after a successful write, and false on the unknown-version write-protection path. | FR-4 |
 | AC-5 | The Settings panel renders the notice while degraded and renders no notice when storage works; the eight existing rows keep their positions. | FR-5 |
 | AC-6 | With a working storage stub, the written raw string, the read results, the v1 migration, the corrupt-JSON fallback and the unknown-version protection are identical to the pre-change behaviour. | FR-6 |
@@ -152,19 +152,38 @@ did; the seven flag-lifecycle tests could not, because they call
 `isPersistenceDegraded()`, which the pre-fix file does not export — a test that
 cannot compile is not evidence. The transcript is checked in at
 `verification/red-run.md` rather than kept under `.conductor/`, which is ignored by
-git and so could not be read by anyone reviewing the track. Two tests added in the
-review round were proved the same way after the fact: the destructive-mode test
-below fails against the Phase 1 file (it rewrites the seeded payload with
-defaults) and passes against the review-fix file, recorded in
-`verification/review-fixes.md`.
+git and so could not be read by anyone reviewing the track. **Three** tests added
+in the review rounds were proved the same way after the fact — the destructive-mode
+test, the healing test and the legacy-migration test — by running them against the
+file as it stood before their fix; each fails there and passes after, recorded with
+its command and failing titles in `verification/review-fixes.md` and
+`verification/review-fixes-2.md`.
+
+**Edge case amendment (2026-11-07, review findings round 1 and round 2).** The
+original "Reads fail, writes work" text said a later successful write heals the
+session. It does not, and deliberately so: `saveV2` attempts no write at all while
+a read is failing, because the store may hold a save this build cannot see. A
+blocked session heals on read evidence — a read returning the raw this session
+last knew, or an empty store — and when a blocked boot heals onto a store holding
+a v1 save the migration runs on that payload, with the persisted state outranking
+anything earned while blind.
 
 ## Edge Cases
 
 - **Writes fail, reads work** (the common quota case): reads keep returning the
   last persisted state plus in-session mutations; only persistence is lost.
 - **Reads fail, writes work** (blocked access is usually both): boot to
-  defaults, degrade, and let a later successful write persist the whole
-  in-memory state — so the first successful moment heals the session.
+  defaults, degrade, and keep the session memory-only — **no write is attempted
+  while a read is failing**, because the store may hold a save this build cannot
+  see. Writing resumes only on evidence: a later read that returns the raw this
+  session last knew, or an empty store. When a blocked boot heals onto a store
+  holding a v1 save, the migration runs on that payload and the persisted state
+  wins over anything earned while blind — the session had already told the parent
+  it could not save, so those earnings were never promised to survive.
+- **Failure then recovery**: storage frees up mid-session (the parent leaves
+  private mode, or another site's data is cleared). The next accepted write
+  persists the full in-memory state, not just the newest delta, and clears the
+  flag.
 - **Failure then recovery**: storage frees up mid-session (the parent leaves
   private mode, or another site's data is cleared). The next write must persist
   the full in-memory state, not just the newest delta, and clear the flag.

@@ -35,7 +35,7 @@ pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test
 | AC | What it requires | Proving test(s) | Status |
 |---|---|---|---|
 | AC-5 | Settings renders the notice while the store refuses, renders nothing while it works, and the eight rows keep their positions | `SettingsPanel.test.ts` → *SettingsPanel degraded persistence notice*: "states the fact while the device cannot save, and says nothing otherwise", "leaves the title, the version footer and the eight rows exactly where they were", "keeps the notice informational: no hit area and no tap handler", "reads the flag once, at open time, and never polls it" | pass |
-| AC-7 | A browser journey with `setItem` throwing completes a game, returns to the hub, reloads into a booted hub and collects no page error | `e2e/journeys/storage.spec.ts` → "a child finishes a game on a device that cannot save, and the parent is told"; plus "a device that blocks storage entirely still boots a playable hub" and "a working device sees no notice" | **prepared, unrun** (blocker) |
+| AC-7 | A browser journey with `setItem` throwing completes a game, returns to the hub, reloads into a booted hub and collects no page error | `e2e/journeys/storage.spec.ts` → "a child finishes a game on a device that cannot save, and the parent is told"; plus "a device that blocks storage entirely still boots a playable hub" and "a working device sees no notice" | **pass** — run green in `verification/integrated.md` (16 journeys in 3.6 min, the three new ones included) |
 
 ## The notice's geometry
 

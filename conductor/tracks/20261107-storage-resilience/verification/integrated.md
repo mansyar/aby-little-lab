@@ -3,7 +3,7 @@
 - Date: 2026-11-07
 - Branch: `fix/20261107-storage-resilience`
 - Base: `26764e9f5563b21cc91e8ec2627c1b06d3a616fb`
-- Head: `8dae4694` (review fixes included)
+- Head: `2e1c9557` (both review rounds included)
 - Result: verified
 
 ## Layers, run against the integrated tree
@@ -12,14 +12,14 @@
 | --- | --- | --- |
 | static | `pnpm check` | exit 0, 293 files, no fixes |
 | types | `pnpm typecheck` | exit 0, `src` and `e2e` programs |
-| unit | `pnpm test -- --run` | exit 0, 133 files / 2,911 tests, 34.35 s |
-| coverage | `pnpm test:coverage` | statements 97.19 (5966/6138) / branches 91.08 (1656/1818) / functions 96.18 (1310/1362) / lines 98.21 (5550/5651) - gate 90 / 85 / 88 / 95 |
+| unit | `pnpm test -- --run` | exit 0, 133 files / 2,912 tests, 30.17 s |
+| coverage | `pnpm test:coverage` | statements 97.21 (5967/6138) / branches 91.14 (1658/1819) / functions 96.18 (1310/1362) / lines 98.21 (5551/5652) - gate 90 / 85 / 88 / 95 |
 | build | `pnpm build` | exit 0, 363 modules, 59 precache entries |
-| artifact | `node scripts/validate-bundle.js` | phaser 1335.0 kB; shell `index-C8lW21Oo.js` 153.5 kB <= 200 kB |
+| artifact | `node scripts/validate-bundle.js` | phaser 1335.0 kB; shell `index-CpDFSutQ.js` 153.6 kB <= 200 kB |
 | artifact | `node scripts/validate-pwa.js` | 16 passed, 0 failed; 47 chunks, 47 precached |
 | documents | `node scripts/validate-docs.js` | 5 passed, 0 failed, including derived suite truth |
-| browser | `pnpm test:e2e` | 16 journeys passed in 3.6 min on two workers |
-| boot smoke | `node scripts/validate-boot.js` | PASS, median 0.98 s over 3 cold loads (<= 3.0 s) |
+| browser | `pnpm test:e2e` | 16 journeys passed in 3.4 min on two workers |
+| boot smoke | `node scripts/validate-boot.js` | PASS, median 0.63 s over 3 cold loads (<= 3.0 s) |
 
 ## Cross-phase checks
 
@@ -37,6 +37,14 @@
   failure signal, keeps a blocked session memory-only, and heals only when a later
   read returns the raw this session last knew. The test that proves it was run
   against the Phase 1 file first and failed there.
+- **A blocked boot cannot shadow a legacy save.** Round 2 found the second half:
+  the placeholder a blind boot memoized was keyed with `null`, so a later heal
+  onto an empty store matched the cache and never reached `migrateV1(readV1())` —
+  a v1-only save would have been overwritten on the first write. The memo now
+  carries `provisional` and cannot satisfy the cache comparison, and a test seeds
+  only `V1_KEY`, blocks reads, heals, earns a sticker, and asserts the persisted
+  v2 payload holds the v1 sticker *and* the new one. Removing the single
+  `!v2Cache.provisional` term fails that test alone (1 failed / 137 passed).
 - **The happy path did not move.** The bytes written on a working store are
   pinned by an existing test set plus one new assertion that a recovered device
   receives exactly the raw string a healthy one would have.
