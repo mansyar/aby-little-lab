@@ -40,16 +40,20 @@
 - **Covers:** FR-3, FR-5, FR-6, FR-7, FR-8, NFR-1, NFR-2, AC-5, AC-7, AC-10
 - **Touches:** `src/utils/backupFile.ts`, `src/utils/storage.ts`, `src/__tests__/utils/backupFile.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/guard/backupDom.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P2.T1: One module owns the browser** - covers: FR-3, NFR-1, NFR-2
+- **Status:** verified
+- [x] **P2.T1: One module owns the browser** - covers: FR-3, NFR-1, NFR-2
   - **P2.T1.1:** Export through a Blob and a temporary anchor, with the object URL revoked and the filename dated
   - **P2.T1.2:** Import through a hidden file input, resolving to the file's text, removing the input afterwards, and never asking the parent to type
-- [ ] **P2.T2: Write through the save layer** - covers: FR-5, FR-6, FR-8
+- [x] **P2.T2: Write through the save layer** - covers: FR-5, FR-6, FR-8
   - **P2.T2.1:** Apply a merge as one write, keeping the device's settings
   - **P2.T2.2:** Apply a replace as one write of the payload, with the same schema-version refusal rules
-- [ ] **P2.T3: Refuse rather than half-apply** - covers: FR-7, AC-5, AC-7, AC-10
+- [x] **P2.T3: Refuse rather than half-apply** - covers: FR-7, AC-5, AC-7, AC-10
   - **P2.T3.1:** Refuse both imports while persistence is degraded, and leave export working
   - **P2.T3.2:** Guard test: no production module outside `src/utils/backupFile.ts` names `document`, `Blob`, `URL` or `crypto`
+
+**Result:** verified - one module owns every browser call, the save exports as text and imports through a single mutate, and a device that cannot save refuses instead of pretending. 3,044 tests, coverage 97.28/91.52/96.21/98.25, shell entry unchanged at 158.5 kB. The guard enumerates the six modules that may name a DOM global, including the five that already did, and its teeth are proved.
+**Checkpoint:** 6f58106b
+**Evidence:** conductor/tracks/20261108-backup-restore/verification/phase-2.md
 
 ## Phase 3: The second Settings page
 
