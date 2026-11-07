@@ -53,7 +53,8 @@ export type RefusalCode =
   | "newer-format"
   | "newer-schema"
   | "checksum-mismatch"
-  | "profile-cap";
+  | "profile-cap"
+  | "store-unavailable";
 
 /** A refused file or import: the code for the caller, the sentence for the parent. */
 export interface Refusal {
@@ -77,9 +78,17 @@ const REFUSAL_MESSAGES: Record<RefusalCode, string> = {
   "checksum-mismatch":
     "This backup is damaged: part of the file is missing or changed, so nothing was restored.",
   "profile-cap": `This device has room for ${MAX_PROFILES} profiles, and this backup brings more. Delete a profile first, then try again.`,
+  "store-unavailable":
+    "This device cannot save at the moment, so nothing was restored. Free up some space, then try again.",
 };
 
-function refusalFor(code: RefusalCode): Refusal {
+/**
+ * The `{ code, message }` pair for a refusal. Exported so the save layer can
+ * refuse a degraded import (FR-7) with the sentence from this table instead of
+ * a second copy of it: `readBackup` never returns `store-unavailable`, because
+ * whether this device can save is not a property of the file.
+ */
+export function refusalFor(code: RefusalCode): Refusal {
   return { code, message: REFUSAL_MESSAGES[code] };
 }
 

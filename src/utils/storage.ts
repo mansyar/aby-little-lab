@@ -35,6 +35,8 @@ import type {
   ProfileV2,
   Settings,
 } from "../types";
+import type { ImportMode, Refusal } from "./backupFormat";
+import { planImport, refusalFor } from "./backupFormat";
 
 const V1_KEY = "abby-little-lab:v1";
 const V2_KEY = "abby-little-lab:v2";
@@ -537,6 +539,45 @@ export function getProgress(profileId?: string): Record<GameId, GameProgress> {
 export function getAdaptiveBandShift(gameId: GameId): BandShift {
   if (!getSettings().adaptiveDifficulty) return 0;
   return bandShiftFor(getProgress()[gameId].recent);
+}
+
+/**
+ * The whole save as the backup format wants it: normalised, so a v1-only device
+ * exports v2 (FR-3).
+ *
+ * `ensureV2` is what makes that true — it migrates a v1-only store and
+ * normalises a partial one before handing anything out, so the exported payload
+ * is always the current shape, whatever the store happens to hold.
+ */
+export function exportSave(): ProfileV2 {
+  return ensureV2();
+}
+
+/**
+ * Plans an import against the live save and writes it in one mutation.
+ *
+ * The plan is computed from the normalised current save, so a merge keeps this
+ * device's settings and profile ids and a replace overwrites the whole payload.
+ * Either way the result lands through `mutate` — one write, the same path every
+ * other change takes, so an import is guarded exactly as `earnSticker` is and
+ * `v2Cache` is re-keyed for free.
+ *
+ * A degraded store refuses before anything is planned (FR-7): a restored save
+ * would not survive the reload that makes it visible, so pretending is worse
+ * than saying no. Export still works while degraded, because it only reads.
+ */
+export function applyImport(
+  mode: ImportMode,
+  incoming: ProfileV2,
+  now?: Date,
+): { ok: true } | { ok: false; refusal: Refusal } {
+  if (isPersistenceDegraded()) {
+    return { ok: false, refusal: refusalFor("store-unavailable") };
+  }
+  const planned = planImport(ensureV2(), incoming, mode, now ?? new Date());
+  if (!planned.ok) return planned;
+  mutate(() => planned.next);
+  return { ok: true };
 }
 
 // The play-session module banks through a sink so it can stay free of a storage

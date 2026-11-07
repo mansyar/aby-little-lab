@@ -13,6 +13,7 @@ import {
   createBackup,
   planImport,
   readBackup,
+  refusalFor,
 } from "../../utils/backupFormat";
 
 /**
@@ -278,6 +279,20 @@ describe("readBackup — the five refusals (AC-6)", () => {
   it("gives every refusal a distinct sentence", () => {
     const sentences = new Set(REFUSALS.map((testCase) => testCase.message));
     expect(sentences.size).toBe(REFUSALS.length);
+  });
+
+  it("gives the degraded store its own sentence, outside the read path", () => {
+    // `store-unavailable` is FR-7's refusal, and it is not a property of the
+    // file: `readBackup` never returns it, so it cannot sit in the table above.
+    // The sentence still lives in the same table, so no call site writes its own.
+    const refusal = refusalFor("store-unavailable");
+    expect(refusal.code).toBe("store-unavailable");
+    expect(refusal.message).toBe(
+      "This device cannot save at the moment, so nothing was restored. Free up some space, then try again.",
+    );
+    // Every sentence is still distinct across all seven codes.
+    const sentences = new Set([...REFUSALS.map((testCase) => testCase.message), refusal.message]);
+    expect(sentences.size).toBe(REFUSALS.length + 1);
   });
 
   it("folds a missing or non-numeric version field into wrong-format", () => {
