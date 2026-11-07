@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-08T03:59:36+11:00",
-  "updated_at": "2026-11-08T04:25:00+11:00",
+  "updated_at": "2026-11-08T05:05:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261108-edge-hardening",
@@ -14,11 +14,11 @@
   "base_sha": "5610bc6f6f01996f53265b1213c249686aba2c9a",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 30,
-    "tasks_done": 14
+    "tasks_done": 23
   },
-  "last_checkpoint": "b22ca578",
+  "last_checkpoint": "78c2db6a",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

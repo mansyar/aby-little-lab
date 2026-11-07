@@ -42,19 +42,19 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
 - **Covers:** FR-7, FR-11, NFR-6, AC-4, AC-8
 - **Touches:** `playwright.config.ts`, `nginx.security-headers.conf`, `conductor/tracks/20261108-edge-hardening/verification/`
 - **Verification:** `docker build -t aby-little-lab:headers . && docker run -d -p 8080:80 … && E2E_BASE_URL=http://127.0.0.1:8080 pnpm test:e2e` then `pnpm test:e2e` with the variable unset, then the full chain
-- **Status:** in_progress
+- **Status:** verified
 
 ### Tasks
 
-- [ ] **P2.T1: Let the suite target an external origin** - covers: FR-11, AC-8
-  - [ ] **P2.T1.1: `E2E_BASE_URL` skips the `webServer` block** and becomes `use.baseURL`, leaving the default path byte-identical when unset
-  - [ ] **P2.T1.2: Prove the default is unchanged** — `pnpm test:e2e` with the variable unset still passes all 16
-- [ ] **P2.T2: Run all 16 journeys against nginx** - covers: FR-7, NFR-6, AC-4
-  - [ ] **P2.T2.1: Capture any CSP violation** from the page console, not just a test failure, so a blocked resource is named rather than inferred
-  - [ ] **P2.T2.2: Record per-journey durations and the total** against the 5-minute budget
-  - [ ] **P2.T2.3: If a directive is wrong, narrow it to the smallest working value in the snippet and record the violation that forced it** — NFR-3 forbids widening to `unsafe-*`
-- [ ] **P2.T3: Prove the policy is what fails, not luck** - covers: FR-7
-  - [ ] **P2.T3.1: Temporarily drop `data:` from `img-src`**, confirm at least one journey fails on blank art, restore it, and record both runs
+- [x] **P2.T1: Let the suite target an external origin** - covers: FR-11, AC-8
+  - [x] **P2.T1.1: `E2E_BASE_URL` skips the `webServer` block** and becomes `use.baseURL`, leaving the default path byte-identical when unset
+  - [x] **P2.T1.2: Prove the default is unchanged** — `pnpm test:e2e` with the variable unset still passes all 16
+- [x] **P2.T2: Run all 16 journeys against nginx** - covers: FR-7, NFR-6, AC-4
+  - [x] **P2.T2.1: Capture any CSP violation** from the page console, not just a test failure, so a blocked resource is named rather than inferred
+  - [x] **P2.T2.2: Record per-journey durations and the total** against the 5-minute budget
+  - [x] **P2.T2.3: If a directive is wrong, narrow it to the smallest working value in the snippet and record the violation that forced it** — NFR-3 forbids widening to `unsafe-*`
+- [x] **P2.T3: Prove the policy is what fails, not luck** - covers: FR-7
+  - [x] **P2.T3.1: Temporarily drop `data:` from `img-src`**, confirm at least one journey fails on blank art, restore it, and record both runs
 
 ## Phase 3: Keep it honest in CI and in the docs
 
