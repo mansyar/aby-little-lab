@@ -1,0 +1,30 @@
+{
+  "id": "20261108-local-insights",
+  "title": "Local Insights",
+  "type": "feature",
+  "status": "new",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-11-08T06:24:18+11:00",
+  "updated_at": "2026-11-08T06:24:18+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261108-local-insights",
+  "base_branch": "master",
+  "base_sha": "64e35642ad33dbeeeb2ed85507a0c40795d8844d",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 0,
+    "tasks_total": 13,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "pr_state": null,
+  "revert_commit": null,
+  "archived_at": null,
+  "archive_path": null
+}
