@@ -12,7 +12,7 @@ Phase states are `pending`, `in_progress`, `verified`, `failed` or `blocked`. On
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-8, FR-10, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-5, AC-6, AC-9, AC-10
 - **Touches:** `nginx.security-headers.conf`, `nginx.conf`, `Dockerfile`, `scripts/validate-headers.js`, `src/__tests__/guard/securityHeaders.test.ts`, `conductor/tracks/20261108-edge-hardening/verification/`
 - **Verification:** `pnpm build && docker build -t aby-little-lab:headers . && node scripts/validate-headers.js` then the full chain `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
