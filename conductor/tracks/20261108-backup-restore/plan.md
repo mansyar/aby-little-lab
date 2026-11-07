@@ -91,13 +91,44 @@
   - **P4.T2.1:** Document the envelope, the five refusals and the DOM seam in `docs/TDD.md`, and name the backup in `README.md`
   - **P4.T2.2:** Record the roadmap row as done with what shipped and what was deliberately left out, and refresh the living counts
 
-<!-- Review fixes are appended by conductor-review as:
-
 **Result:** verified - 19 journeys green in 3.7 minutes. The round-trip journey exports through the real download, hands the file that landed on disk to a file chooser in a second browser context, merges it, and reads both stickers, the progress and the streak back after the reload with the app still playable. The first run of it failed on setFiles with a Uint8Array, which is why e2e/node-env.d.ts now declares Buffer.
 **Checkpoint:** d49498fe
 **Evidence:** conductor/tracks/20261108-backup-restore/verification/phase-4.md
 
 ## Phase R1: Review Fixes
+- **Goal:** A restore either lands in storage or says it did not, both profiles survive a cross-device merge, and the second Settings page cannot fire the wrong control
+- **Depends on:** Phase 4
+- **Covers:** review findings F1-F14
+- **Touches:** `src/utils/storage.ts`, `src/utils/backupFormat.ts`, `src/components/SettingsPanel.ts`, `src/components/settings/VoiceRow.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/utils/backupFormat.test.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/guard/backupDom.test.ts`, `e2e/journeys/backup.spec.ts`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-backup-restore/`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`, then `pnpm test:e2e`
+- **Status:** in_progress
+- [ ] **R1.T1: A restore that did not reach storage says so** - covers: F1
+  - **R1.T1.1:** Make the write path report whether the bytes landed, including the write-protected unknown-version branch
+  - **R1.T1.2:** Return the store-unavailable refusal from `applyImport` when the write did not land, so the panel shows the sentence and does not reload
+  - **R1.T1.3:** Test a write that fails during the import itself, after the pre-check passed
+- [ ] **R1.T2: Both profiles survive a merge** - covers: F2
+  - **R1.T2.1:** Seed two profiles in the journey and assert both arrive in the empty context with their own progress and insights
+  - **R1.T2.2:** Correct the phase 4 evidence row to describe what the journey actually asserts
+- [ ] **R1.T3: The format refuses what it cannot normalise** - covers: F6, F7
+  - **R1.T3.1:** Normalise the incoming payload once at the top of `planImport` and use it for both modes
+  - **R1.T3.2:** Apply the four-profile cap to replace as well as merge, refusing the whole import
+  - **R1.T3.3:** Test a checksum-valid payload with no profiles and an over-cap replace, both leaving the save untouched
+- [ ] **R1.T4: The second page cannot fire the wrong control** - covers: F4, F5
+  - **R1.T4.1:** Raise the close button above the rows on every page rebuild, not just the first
+  - **R1.T4.2:** Release the voice row's objects when a page is cleared, and guard its refresh callback
+  - **R1.T4.3:** Test both: close-button depth after a flip, and a voice refresh while page two is open
+- [ ] **R1.T5: The result line states what happened** - covers: F8, F9
+  - **R1.T5.1:** Report the profile and sticker numbers of a completed import before the reload
+  - **R1.T5.2:** Test the numbers, and test that dismissing the choice card writes nothing
+- [ ] **R1.T6: The record and the guard stop overclaiming** - covers: F3, F10, F11, F12, F13, F14
+  - **R1.T6.1:** Guard `crypto` and fail a stale allowance that no longer touches its global
+  - **R1.T6.2:** Correct the perf baseline coverage row, the TDD reading order and the tautological refusal assertions
+  - **R1.T6.3:** Measure the payload size NFR-6 promises, and record it
+- [ ] **R1.T7: Re-run both suites** - covers: AC-3, AC-5, AC-9, AC-10
+
+<!-- Review fixes are appended by conductor-review as:
+
+## Phase R<number>: Review Fixes
 - **Goal:** Resolve review findings
 - **Depends on:** <last phase>
 - **Covers:** <findings>
