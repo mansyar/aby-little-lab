@@ -25,10 +25,14 @@ restoring an old file cannot silently delete newer stickers.
 - The save is schema-versioned (`SCHEMA_VERSION = 1`) and write-protected against
   unknown versions, so a backup taken by a future build must be refused by an
   older one rather than misread.
-- The app has **no DOM usage at all**: it draws on a canvas and takes pointer
-  input. A file download and a file picker are therefore the first `document`
-  touches in `src/`, and they must stay in one module rather than leaking into
-  scenes.
+- The app's UI has **no DOM composition at all**: it draws on a canvas and takes
+  pointer input, and no scene builds elements. Five modules do reach for a
+  browser global - `AudioManager` and `playTimeUi`/`playTimeLogic` for
+  `document.visibilityState`, `fonts.ts` for `document.fonts.load`, and
+  `viewportZoom.ts` for the viewport meta tag - so the accurate claim is that
+  nothing *renders* through the DOM, not that `document` is never named. A file
+  download and a file picker are the first touches of their kind, and they must
+  stay in one module rather than leaking into scenes.
 - The settings panel is full: eight rows at `ROW_PITCH` 56 ending one pixel inside
   the 760 px panel. A ninth row cannot be appended without shrinking hit bands
   below the 64 px minimum the guidelines set, so the backup surface needs its own
@@ -97,7 +101,7 @@ restoring an old file cannot silently delete newer stickers.
 
 | ID | Requirement |
 | --- | --- |
-| NFR-1 | `src/utils/backupFile.ts` is the only module in `src/` that touches `document`, `Blob`, `URL` or `crypto`, and a unit test asserts that no other production file references them, so the canvas-only property stays a property rather than a memory. |
+| NFR-1 | `src/utils/backupFile.ts` is the only module **this track adds** that touches `document`, `Blob`, `URL` or `crypto`; a unit test scans every production file, allows that one module plus the five that already named `document` for visibility, fonts and viewport zoom, and fails when a seventh module appears or an allowed one disappears - so the canvas-only property stays a property rather than a memory. |
 | NFR-2 | No network request anywhere in the feature: `fetch(` stays at zero matches in `src/`, and no external script, font or endpoint is added. |
 | NFR-3 | No new runtime dependency, and the shell entry stays inside `validate-bundle`'s 200 kB gate. |
 | NFR-4 | Coverage stays above the project gate (lines 95 / functions 88 / branches 85 / statements 90) and every new branch has a test that fails if it is inverted. |
@@ -118,7 +122,19 @@ restoring an old file cannot silently delete newer stickers.
 | AC-7 | Import is refused while the save layer reports degraded persistence, and export still works. | FR-7 |
 | AC-8 | With four profiles already stored, an incoming file carrying an unknown profile is refused with the delete-a-profile instruction and writes nothing. | FR-5 |
 | AC-9 | Page one of Settings shows the same eight rows at the same coordinates as before this track, every hit band is still `ROW_PITCH` tall, and page two is reachable in one tap and returns in one tap. | FR-9 |
-| AC-10 | The bridge stays inert without `?e2e=1`, and no production module outside `src/utils/backupFile.ts` names a DOM global. | NFR-1, NFR-7 |
+| AC-10 | The bridge stays inert without `?e2e=1`, and the guard test's enumerated list of DOM-touching modules is unchanged: the seam is on it, and no new production module joins it. | NFR-1, NFR-7 |
+
+**Correction (2026-11-08, found while building the guard).** The Problem section
+originally claimed the app had "no DOM usage at all". It does not: five modules
+already named `document` before this track - `AudioManager`, `playTimeUi` and
+`playTimeLogic` for `document.visibilityState`, `fonts.ts` for
+`document.fonts.load`, and `viewportZoom.ts` for the viewport meta tag. The
+premise was wrong, not the goal. The claim, NFR-1 and AC-10 are reworded above to
+the property that actually matters and is actually testable: **no module renders
+through the DOM**, the seam is the only module this track adds that touches the
+file machinery, and the guard pins an enumerated list so a sixth module cannot
+arrive quietly. A guard written to the original absolute wording would have had
+to be deleted on its first run, which is how a check becomes a comment.
 
 ## Edge Cases
 

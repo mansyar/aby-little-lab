@@ -432,3 +432,48 @@ aby-little-lab/
 
 > **2026-11-08 - Design Update (Local Insights):** Each profile gains an additive five-field record, `ProfileInsights` - `currentStreakDays`, `bestStreakDays`, `lastStreakDay`, `limitHitDays`, `lastLimitHitDay` (local day keys, never timestamps) - and the Learning Progress overlay gains an **Overview** page in front of the per-game rows. Nothing else was added: the aggregate counters and the 7-day `activity` buckets already existed, so the roadmap's "event ring buffer" was deliberately **not** built. `SCHEMA_VERSION` stays at **1** because the field is additive: `createDefaultProfile` seeds zeros and `normalizeInsights` backfills and sanitises any stored value (a `best` below `current` is raised), so an older save reads clean and an unknown-version payload is still write-protected. Pure logic in `src/game/insightsLogic.ts` (`createDefaultInsights`, `normalizeInsights`, `advanceStreak` - same day leaves the streak alone, yesterday adds one, any other day restarts at one, `best` is the running maximum, the injected clock is the only time source and `previousDayKey` steps the calendar rather than subtracting 86 400 s so a DST boundary cannot skip a day) and `src/game/insightsSummary.ts` (`MIN_SUMMARY_TAPS` 10, `summariseInsights(profile, now)` - a pure function of the profile and a moment, no Phaser, no storage, no clock read). Write path unchanged in shape: the streak advances inside the single `mutate` that `recordGameResult` already performs, and `recordLimitHit(profileId, now)` is idempotent per day and called from the one site that decides a lock (`PlayTimeIndicator`), so a capped profile costs one write per day and an unlimited one never writes. Summaries: this week's distinct games and lifetime completions, overall accuracy with the strongest and hardest game above the tap floor (higher taps first, then registry order - deterministic), and the streak and cap history, or an explicit "no daily limit set". Every ratio guards its denominator, so no input produces `NaN` or `Infinity`; a new, sparse, never-completed or malformed profile gets a sentence rather than a zero. The Overview keeps the 7-day strip at its existing coordinates, derived from the same window as the sentence above it; per-game rows stay six to a page, one page later, and the counter totals five. Bridge: `?e2e=1` publishes the Progress row's point and the overlay's own `{page, pageCount, lines}`, where `lines` are the strings the overlay drew rather than a recomputation; `null` when closed. Suite 137 files / 2,975 tests, coverage 97.22/91.12/96.1/98.21, 17 browser journeys in 3.2 min, shell entry 158.1 kB of the 200 kB gate. No new dependency, no network call, nothing leaves the device.
 
+
+> **2026-11-08 - Design Update (Backup and Restore):** A save leaves the device
+> as a file and comes back, in two modules split along the browser boundary.
+> `src/utils/backupFormat.ts` is pure - it names no browser global and reads no
+> clock, taking `now` and `schemaVersion` as arguments - and `src/utils/backupFile.ts`
+> is the only module this track adds that touches the file machinery: a `Blob`
+> written through a temporary anchor (attached, clicked, removed, then the object
+> URL revoked, in that order), and a hidden `<input type="file">` whose `change`
+> and `cancel` events settle a promise. `reloadApp()` there is the app's one
+> `location.reload()`. The envelope carries `format`
+> (`"aby-little-lab-backup"`), `formatVersion` 1, the save's `schemaVersion`, the
+> app version, `exportedAt`, a checksum, and the payload; `createBackup` returns
+> the object *and* the exact text it hashed, so no caller can serialise the
+> envelope differently from the bytes the checksum describes. The checksum is
+> 64-bit FNV-1a over `JSON.stringify(payload)`, documented as detecting
+> corruption and truncation, not tampering - the file holds star counts, not
+> secrets, and `crypto.subtle` is absent on a plain-http origin. Six refusals
+> from the format plus a seventh from the storage layer (`store-unavailable`,
+> raised when `isPersistenceDegraded()` is true) each carry their own sentence,
+> ordered so a file from a future build says "update the app" rather than "this
+> file is damaged". Import is one write or none: `planImport` computes the whole
+> next save (best-of-field merge - sticker earned if either, earlier `earnedAt`,
+> `Math.max` per counter, later stamp, activity unioned at the higher count) and
+> a save that would exceed four profiles refuses entirely rather than dropping
+> the profiles that would not fit; importing the same file twice is therefore
+> equal to importing it once. Settings grows a second page rather than a ninth
+> row: a switch card at `centerY - 250` (y 134) in the header band that was
+> empty, page one's eight rows at their exact coordinates (337 to 729, asserted
+> as a label-to-y map across a round trip), and page two carrying
+> "Save a backup", "Restore from a file" and one result line at y 449. Each page
+> destroys its own objects on switch, so no hidden row keeps a hit band. The
+> `?e2e=1` bridge publishes the page, the switch point, both row points, the two
+> choice-button points and the result text - drawn values, not recomputed ones.
+> `src/__tests__/guard/backupDom.test.ts` holds the boundary: it scans every
+> production file for `document`, `Blob`, `URL`, `FileReader` and
+> `navigator.clipboard`, allows the seam plus the five modules that already named
+> `document`, and fails on a sixth joining or an allowed one leaving. Suite 140
+> files / 3,059 tests, coverage 97.28/91.51/96.12/98.26, 19 browser journeys in
+> 3.7 min, shell entry 158.5 -> 167.3 kB of the 200 kB gate, no new dependency
+> and no network request. `e2e/node-env.d.ts` gains a `Buffer` declaration for one
+> reason worth recording: `fileChooser.setFiles` base64-encodes in-memory bytes
+> for the page, a `Uint8Array` does not survive that step, and with no
+> `@types/node` and `skipLibCheck` on, `tsc` had no vocabulary to catch it - the
+> first real run of the journey did.
+
