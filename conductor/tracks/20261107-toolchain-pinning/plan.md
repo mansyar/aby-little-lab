@@ -63,18 +63,18 @@
 - **Covers:** FR-6, FR-7, FR-9, NFR-2, AC-5, AC-6, AC-8
 - **Touches:** `src/__tests__/guard/toolchain.test.ts`, `pnpm-workspace.yaml`, `conductor/tech-stack.md`, `docs/TDD.md`, `README.md`, `conductor/tracks/20261107-toolchain-pinning/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Guard the declaration** — covers: FR-6, NFR-2, AC-5
-  - [ ] **P3.T1.1: Assert agreement** across `package.json`, `.node-version`, the Dockerfile, both CI jobs and the README prerequisite line, naming every disagreeing file and both values on failure
-  - [ ] **P3.T1.2: Assert the workflow's shape** — both job names still exist, no `paths-ignore` under `pull_request`, no `version:` or `node-version:` literal, and the scanned workflow set matches the workflow files on disk
-  - [ ] **P3.T1.3: Prove the teeth** — change one file's version, capture the failing test, revert, and record both outputs
-- [ ] **P3.T2: Delete the dead config** — covers: FR-7, AC-6
-  - [ ] **P3.T2.1: Delete `pnpm-workspace.yaml`** and confirm no tracked file references it
-- [ ] **P3.T3: State the truth** — covers: FR-9, AC-8
-  - [ ] **P3.T3.1: `conductor/tech-stack.md`** — correct the §1 table, the dependency block and the CI/Docker entries, and add a dated design-update entry
-  - [ ] **P3.T3.2: `docs/TDD.md`** — correct the tool table and the job descriptions, including the new classification step
-  - [ ] **P3.T3.3: `README.md`** — correct the prerequisites and the CI/CD paragraph
+- [x] **P3.T1: Guard the declaration** — covers: FR-6, NFR-2, AC-5
+  - [x] **P3.T1.1: Assert agreement** across `package.json`, `.node-version`, the Dockerfile, both CI jobs and the README prerequisite line, naming every disagreeing file and both values on failure
+  - [x] **P3.T1.2: Assert the workflow's shape** — both job names still exist, no `paths-ignore` under `pull_request`, no `version:` or `node-version:` literal, and the scanned workflow set matches the workflow files on disk
+  - [x] **P3.T1.3: Prove the teeth** — change one file's version, capture the failing test, revert, and record both outputs
+- [x] **P3.T2: Delete the dead config** — covers: FR-7, AC-6
+  - [x] **P3.T2.1: Delete `pnpm-workspace.yaml`** and confirm no tracked file references it
+- [x] **P3.T3: State the truth** — covers: FR-9, AC-8
+  - [x] **P3.T3.1: `conductor/tech-stack.md`** — correct the §1 table, the dependency block and the CI/Docker entries, and add a dated design-update entry
+  - [x] **P3.T3.2: `docs/TDD.md`** — correct the tool table and the job descriptions, including the new classification step
+  - [x] **P3.T3.3: `README.md`** — correct the prerequisites and the CI/CD paragraph
 
 ## Phase R1: Review Fixes
 
