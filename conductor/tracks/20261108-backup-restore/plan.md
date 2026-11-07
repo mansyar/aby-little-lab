@@ -82,16 +82,20 @@
 - **Covers:** FR-11, FR-12, NFR-5, NFR-6, AC-3
 - **Touches:** `e2e/journeys/backup.spec.ts`, `e2e/fixtures/`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/product.md`
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
-- [ ] **P4.T1: Export, carry, restore, reload** - covers: FR-11, AC-3
+- **Status:** verified
+- [x] **P4.T1: Export, carry, restore, reload** - covers: FR-11, AC-3
   - **P4.T1.1:** Seed a save, take the real download, and read the file that lands on disk
   - **P4.T1.2:** Import that file into a fresh context with empty storage through the file chooser
   - **P4.T1.3:** Assert profiles, stickers, progress and insights after the reload, and that a second import changes nothing
-- [ ] **P4.T2: Say how it works** - covers: FR-12, NFR-5, NFR-6
+- [x] **P4.T2: Say how it works** - covers: FR-12, NFR-5, NFR-6
   - **P4.T2.1:** Document the envelope, the five refusals and the DOM seam in `docs/TDD.md`, and name the backup in `README.md`
   - **P4.T2.2:** Record the roadmap row as done with what shipped and what was deliberately left out, and refresh the living counts
 
 <!-- Review fixes are appended by conductor-review as:
+
+**Result:** verified - 19 journeys green in 3.7 minutes. The round-trip journey exports through the real download, hands the file that landed on disk to a file chooser in a second browser context, merges it, and reads both stickers, the progress and the streak back after the reload with the app still playable. The first run of it failed on setFiles with a Uint8Array, which is why e2e/node-env.d.ts now declares Buffer.
+**Checkpoint:** d49498fe
+**Evidence:** conductor/tracks/20261108-backup-restore/verification/phase-4.md
 
 ## Phase R1: Review Fixes
 - **Goal:** Resolve review findings
