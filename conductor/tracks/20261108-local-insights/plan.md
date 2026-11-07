@@ -13,7 +13,7 @@ the primary agent writes this file.
 - **Covers:** FR-1, FR-2, FR-3, NFR-1, NFR-2, AC-1, AC-2, AC-3, AC-4
 - **Touches:** `src/types/index.ts`, `src/game/insightsLogic.ts`, `src/utils/storage.ts`, `src/components/PlayTimeIndicator.ts`, `src/__tests__/game/insightsLogic.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/components/PlayTimeIndicator.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (suite counts only), `conductor/tracks/20261108-local-insights/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Store the record** - covers: FR-1, AC-2
   - **P1.T1.1:** Add `ProfileInsights` to `src/types/index.ts` with the five fields of FR-1 and a doc comment saying what each one is for
