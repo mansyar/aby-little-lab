@@ -3002,8 +3002,8 @@ describe("SettingsPanel backup page", () => {
   const PAGE_ONE_Y = [337, 393, 449, 505, 561, 617, 673, 729];
   /** The switch card's centre, in the empty band above the title. */
   const SWITCH_Y = 134;
-  /** The result line's row on page two. */
-  const RESULT_Y = 449;
+  /** The result line's row on page two: one pitch below the row it reports on. */
+  const RESULT_Y = 561;
 
   beforeEach(() => {
     localStorage.clear();
@@ -3155,7 +3155,7 @@ describe("SettingsPanel backup page", () => {
     expect(state.backupRows).toEqual([
       { id: "export", point: { x: 512, y: 337 } },
       { id: "restore", point: { x: 512, y: 393 } },
-      { id: "diagnostics", point: { x: 512, y: 505 } },
+      { id: "diagnostics", point: { x: 512, y: 449 } },
     ]);
     // Each published point is inside the band its own row answers to.
     const LABEL_OF = {
@@ -3190,7 +3190,7 @@ describe("SettingsPanel backup page", () => {
     expect(panel.backupState().backupResult).toBe(expected);
   });
 
-  it("puts the diagnostics row at the next free pitch, with page one having none of it", () => {
+  it("puts the diagnostics row above the result line, with page one having none of it", () => {
     const scene = createScene();
     const panel = new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
 
@@ -3201,13 +3201,18 @@ describe("SettingsPanel backup page", () => {
 
     openBackupPage(scene, panel);
 
-    // FR-8: below the restore row, at one ROW_PITCH past it, and above the line
-    // that reports what happened.
-    expect(lastTextCallY(scene, "Save diagnostics")).toBe(RESULT_Y + ROW_PITCH);
-    expect(lastTextCallY(scene, "Save a backup")).toBe(PAGE_ONE_Y[0]);
-    expect(lastTextCallY(scene, "Restore from a file")).toBe(PAGE_ONE_Y[1]);
-    // The result line has not moved: it stays where the export row reports to.
-    expect(findResultLine(scene), "the result line holds the third row").toBeDefined();
+    // FR-8: a "Save diagnostics" row, and the line reporting what it did
+    // *below* it. The row is the third at 449 and the line one pitch past it at
+    // 561; the first version had them the other way round, which put "Saved
+    // <backup>" between Restore and this row.
+    expect(lastTextCallY(scene, "Save a backup")).toBe(337);
+    expect(lastTextCallY(scene, "Restore from a file")).toBe(393);
+    expect(lastTextCallY(scene, "Save diagnostics")).toBe(449);
+    expect(findResultLine(scene), "the result line sits under the row it reports").toBeDefined();
+    expect(RESULT_Y).toBe(561);
+    // One pitch clear of the row's card (471-539), so a wrapped filename cannot
+    // reach it even though the line is drawn from its centre.
+    expect(RESULT_Y).toBeGreaterThan(hitRectFor(scene, "Save diagnostics").bottom + 30);
   });
 
   it("saves the diagnostics file in one tap and names it on the line (AC-8)", () => {

@@ -429,7 +429,7 @@ describe("initE2EBridge", () => {
         backupRows: [
           { id: "export", point: { x: 512, y: 337 } },
           { id: "restore", point: { x: 512, y: 393 } },
-          { id: "diagnostics", point: { x: 512, y: 505 } },
+          { id: "diagnostics", point: { x: 512, y: 449 } },
         ],
       };
       expect(window.__abyE2E?.settings().page).toBe(1);

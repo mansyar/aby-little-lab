@@ -550,13 +550,15 @@ export class SettingsPanel {
       // would escape into Phaser's update loop, so it is awaited here instead.
       () => void this.restoreBackup(),
     );
-    // FR-8: the next free pitch, below the restore row and above the line that
-    // reports what happened. Never disabled: a parent who has had no crash
-    // should be able to ask and be told so, not find a dead control.
+    // FR-8: the diagnostics row sits directly under the restore row, and the
+    // line that reports what happened sits under it - one pitch clear of the
+    // row's card (471-539), so a wrapped "Saved diagnostics-....txt" cannot
+    // clip it. Never disabled: a parent who has had no crash should be able to
+    // ask and be told so, not find a dead control.
     createRow(
       this.scene,
       centerX,
-      rowY(3),
+      rowY(2),
       this.pageObjects,
       DIAGNOSTICS_LABEL,
       PRIMARY_COLOR,
@@ -567,12 +569,12 @@ export class SettingsPanel {
     this.backupRows = [
       { id: "export", x: centerX, y: rowY(0) },
       { id: "restore", x: centerX, y: rowY(1) },
-      { id: "diagnostics", x: centerX, y: rowY(3) },
+      { id: "diagnostics", x: centerX, y: rowY(2) },
     ];
     const result = this.scene.add
       .text(
         centerX,
-        rowY(2),
+        rowY(4),
         this.backupResult,
         textStyle({
           align: "center",
