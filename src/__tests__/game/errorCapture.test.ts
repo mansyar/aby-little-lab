@@ -229,6 +229,50 @@ describe("installErrorCapture", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
+  it("does not throw out of the listener when reading the scene fails (F2)", async () => {
+    const { installErrorCapture } = await loadCapture();
+    const { game } = makeGame();
+    const fake = makeTarget();
+    const reload = vi.fn();
+
+    installErrorCapture(game, {
+      target: fake.target,
+      now: () => FIXED_NOW,
+      // What a destroyed game does: `getScenes` throws rather than returning [].
+      runningScene: () => {
+        throw new Error("gone");
+      },
+      reload,
+    });
+
+    // An error handler that throws turns one crash into two, and the second
+    // would fire from inside the first's recovery.
+    expect(() => fake.fire("error", errorEvent(new Error("boom")))).not.toThrow();
+    // Both listeners are still attached, and the next crash is still recorded.
+    fake.fire("unhandledrejection", { reason: "still here" });
+    expect(reportCrash).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not throw out of the listener when the reload itself is blocked (F2)", async () => {
+    const { installErrorCapture } = await loadCapture();
+    const { game } = makeGame();
+    const fake = makeTarget();
+
+    installErrorCapture(game, {
+      target: fake.target,
+      now: () => FIXED_NOW,
+      runningScene: () => null,
+      // What a blocked `location` does: the call throws instead of navigating.
+      reload: () => {
+        throw new Error("blocked");
+      },
+    });
+
+    expect(() => fake.fire("error", errorEvent(new Error("boom")))).not.toThrow();
+    fake.fire("unhandledrejection", { reason: "still here" });
+    expect(reportCrash).toHaveBeenCalledTimes(2);
+  });
+
   it("reloads once when no scene ever came up, then only logs the second crash", async () => {
     const { installErrorCapture } = await loadCapture();
     const { game, start } = makeGame();

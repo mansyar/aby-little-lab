@@ -89,12 +89,23 @@ export function installErrorCapture(game: Phaser.Game, deps: ErrorCaptureDeps = 
    */
   const capture = (kind: CrashKind, reason: unknown): void => {
     try {
-      recordCrash(toCrashEntry(kind, reason, now()));
+      try {
+        recordCrash(toCrashEntry(kind, reason, now()));
+      } catch {
+        // A recorder that throws must still produce the card (FR-4): the save is
+        // the first thing this handler touches, never the condition for recovery
+        // happening at all.
+      }
+      recover();
     } catch {
-      // A recorder that throws must still produce the card (FR-4). Recovery is
-      // the reason this handler exists, so the catch falls through to it.
+      // What is guarded here is the listener itself, not only the save. A game
+      // that has been destroyed makes `runningScene` throw, and a `location`
+      // that refuses makes `reload` throw; either one escaping would turn one
+      // crash into two, and the second would try to recover from inside the
+      // recovery. Swallowed, the listener stays registered for the next crash
+      // and the page keeps whatever state it has, which is the honest floor: a
+      // crash log is worth more than a cascade.
     }
-    recover();
   };
 
   const handleError = (event: ErrorEvent | Event): void => {
