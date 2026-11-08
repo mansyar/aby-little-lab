@@ -12,7 +12,7 @@
 - **Covers:** FR-2, FR-3, FR-5, NFR-1, AC-1, AC-2, AC-3
 - **Touches:** `src/utils/diagnostics.ts`, `src/__tests__/utils/diagnostics.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Define the entry, and coerce whatever arrives into one** - covers: FR-2
   - [ ] P1.T1.1 An `Error`, a rejected string, a rejected `undefined`, a rejected plain object and a thrown non-`Error` each produce a complete `CrashEntry` with a readable message and, where one exists, a stack trimmed to 400 characters
