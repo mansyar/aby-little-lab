@@ -53,6 +53,28 @@ export interface DayActivity {
   plays: number;
 }
 
+/**
+ * Which of the two global handlers saw a crash: `error` for a throw that
+ * escaped, `rejection` for a promise that rejected with no handler attached.
+ */
+export type CrashKind = "error" | "rejection";
+
+/**
+ * One crash, as the device remembers it. `at` is an ISO timestamp and
+ * `message` is never empty — a rejected string, `undefined` or a plain object
+ * all read as a sentence rather than `[object Object]`. An entry is only ever
+ * written by `toCrashEntry`, which cannot throw.
+ */
+export interface CrashEntry {
+  /** ISO timestamp of the moment it was recorded. */
+  at: string;
+  kind: CrashKind;
+  /** The error's message, or a readable sentence for a reason that had none. */
+  message: string;
+  /** The stack where one existed, trimmed to its first 400 characters; "" otherwise. */
+  stack: string;
+}
+
 export interface Settings {
   bgmEnabled: boolean;
   sfxEnabled: boolean;

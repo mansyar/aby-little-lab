@@ -71,7 +71,7 @@ Four facts, all verified in the code on 2026-11-08:
 
 | ID | Requirement |
 | --- | --- |
-| NFR-1 | The stored log is bounded: 20 entries at 400 characters of stack each is under 4 kB of JSON, and the buffer never grows past that. A crash loop must not be able to consume the quota the guarded save layer exists to survive. |
+| NFR-1 | The stored log is bounded by a ceiling that follows from its constants: 20 entries at 400 characters of stack is at most 12,000 bytes of JSON (`20 × (400 + 200)` for the timestamp, kind and keys), and twenty maximum-length entries measure 9,612. A crash loop must not be able to consume the quota the guarded save layer exists to survive. |
 | NFR-2 | The handler path adds no measurable cost to a normal frame: it is listener registration at boot and nothing else. Recording happens only when a crash fires. |
 | NFR-3 | The recovery card is drawn in Phaser, not the DOM, so the app's single rendering model holds for every surface a child can see. |
 | NFR-4 | No new dependency and the shipped shell entry stays inside the 200 kB `validate-bundle` gate. The recover scene is registered eagerly (Phaser 4 cannot lazily add to the scene array), so its bytes are part of that number and must be reported. |
@@ -79,12 +79,14 @@ Four facts, all verified in the code on 2026-11-08:
 | NFR-6 | The browser suite gains exactly one journey and no more than about 15 seconds. CI already measured 5m28s against NFR-5's 5-minute ceiling from the backup track; this track must not make that worse than its own journey, and the breach is recorded as an existing finding rather than widened. |
 | NFR-7 | No child-facing text and no new child-facing surface. The only screen a child can newly reach is the crash card, and it is icon-only. |
 
+**NFR-1 amendment (2026-11-08, found during Phase 1).** The original wording bounded the log "under 4 kB of JSON", a figure written before the arithmetic: twenty entries at 400 characters of stack are 8,000 characters of stack before a single timestamp, and the measured buffer at maximum stack lengths is 9,612 bytes, so the number was unachievable by construction. The requirement is now the ceiling the constants imply — 12,000 bytes — with the measurement recorded beside it, and AC-2 asserts that bound. The intent is unchanged and still met: a completely full crash log is around ten kilobytes against a store whose own saves run to tens of kilobytes that this app already tolerates, so a crash loop still cannot threaten the quota. The alternative — shrinking `MAX_STACK_CHARS` until 4 kB became true — would have cut away the frames that make a trace worth downloading, which is the opposite of why the log exists.
+
 ## Acceptance Criteria
 
 | ID | Criterion | Verifies |
 | --- | --- | --- |
 | AC-1 | With a handler installed, a thrown error and a rejected promise each produce one entry with the right `kind`, a message, and a stack where one exists; a rejected string, `undefined` and a plain object each produce a readable entry and no throw. | FR-1, FR-2 |
-| AC-2 | A 25-entry sequence keeps the newest 20 in order and drops the oldest five; the persisted payload parses and stays under 4 kB at the maximum stack length. | FR-3, NFR-1 |
+| AC-2 | A 25-entry sequence keeps the newest 20 in order and drops the oldest five; the persisted payload parses and stays under the 12,000-byte ceiling that follows from the constants (measured 9,612 for twenty maximum-length entries). | FR-3, NFR-1 |
 | AC-3 | A payload written before this track (no `diagnostics` field) loads with an empty log, saves normally, and `SCHEMA_VERSION` is still 1; an unknown-version payload is still refused a write. | FR-5 |
 | AC-4 | With `setItem` throwing, recording an entry does not throw and the session continues; `getDiagnostics()` returns the entry from memory for the rest of the session; and once the store accepts writes again, the next accepted save persists that entry rather than dropping it. | FR-4 |
 | AC-5 | An uncaught error while the hub is active shows the card over the scene, the card contains no text object, and tapping its single button reloads the page to a working hub. | FR-6, NFR-7 |
