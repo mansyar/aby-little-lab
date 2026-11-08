@@ -42,3 +42,19 @@ export function reloadOnce(): void {
   }
   window.location.reload();
 }
+
+/**
+ * Reloads the page because someone asked for it: the recovery card's control
+ * (FR-6).
+ *
+ * Deliberately *not* the loop guard above, and it must not become one. That
+ * guard exists to bound a reload the *app* decides to perform by itself — a
+ * crash before the canvas came up, once per session. A tap is not automatic.
+ * The flag lives in `sessionStorage`, which survives a reload, so a card that
+ * spent it would leave a child on an icon-only screen whose only button does
+ * nothing after the first crash of the tab: the exact failure the card exists
+ * to remove.
+ */
+export function reloadPage(): void {
+  window.location.reload();
+}

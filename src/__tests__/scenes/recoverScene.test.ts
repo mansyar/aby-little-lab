@@ -1,15 +1,45 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("phaser", async () => {
   const { createPhaserModuleMock } = await import("../helpers/phaserMock");
   return createPhaserModuleMock().module;
 });
 
-const reloadOnce = vi.hoisted(() => vi.fn());
-vi.mock("../../utils/reload", () => ({ reloadOnce }));
-
+import Phaser from "phaser";
 import { RecoverScene } from "../../scenes/RecoverScene";
 import { mockRegistry } from "../helpers/phaserMock";
+
+/** The flag the pre-canvas path spends; the card must not consult it. */
+const SPENT_KEY = "aby-little-lab:reload-once";
+
+/** A `sessionStorage` that behaves like the real one, in a `Map`. */
+function memoryStorage(): Storage {
+  const store = new Map<string, string>();
+  return {
+    get length() {
+      return store.size;
+    },
+    clear: () => store.clear(),
+    getItem: (key: string) => store.get(key) ?? null,
+    key: (index: number) => [...store.keys()][index] ?? null,
+    removeItem: (key: string) => store.delete(key),
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
+    },
+  } as Storage;
+}
+
+let reload: ReturnType<typeof vi.fn>;
+
+/**
+ * The card calls the real reload seam, so the page load is what gets stubbed.
+ * Mocking the module instead would let a card that consults the loop guard pass
+ * — which is exactly the defect this file now pins.
+ */
+function stubWindow(): void {
+  reload = vi.fn();
+  vi.stubGlobal("window", { sessionStorage: memoryStorage(), location: { reload } });
+}
 
 /** The objects that were given a hit area — the card should have exactly one. */
 function interactiveObjects() {
@@ -19,7 +49,11 @@ function interactiveObjects() {
 describe("RecoverScene", () => {
   beforeEach(() => {
     mockRegistry.length = 0;
-    reloadOnce.mockReset();
+    stubWindow();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("draws no text at all", () => {
@@ -66,11 +100,23 @@ describe("RecoverScene", () => {
     // press. The kind is asserted by name so that regression is a red test.
     expect(interactive[0].kind).toBe("zone");
     expect(interactive[0].setInteractive).toHaveBeenCalledTimes(1);
-    // Hit-tested as a circle, so a tap in the corner of the painting box misses.
-    expect(interactive[0].setInteractive).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.any(Function),
-    );
+  });
+
+  it("hit-tests the button as a circle centred in its own box, so a corner tap misses", () => {
+    const scene = new RecoverScene();
+    scene.create();
+    const [button] = interactiveObjects();
+    const [hitArea, contains] = button.setInteractive.mock.calls[0] as unknown as [
+      { x: number; y: number; radius: number },
+      unknown,
+    ];
+
+    // Local space, measured from the Zone's top-left corner: a 144 x 144 box
+    // with a circle of radius 72 at (72, 72) covers the disc and nothing else.
+    // Asserting the shape rather than "some hit area exists" is what makes the
+    // old off-centre circle, which also passed, a red test.
+    expect(hitArea).toMatchObject({ x: 72, y: 72, radius: 72 });
+    expect(contains).toBe(Phaser.Geom.Circle.Contains);
   });
 
   it("reloads when the button is tapped", () => {
@@ -80,7 +126,23 @@ describe("RecoverScene", () => {
 
     button.handlers.pointerdown?.();
 
-    expect(reloadOnce).toHaveBeenCalledTimes(1);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("still reloads when this tab already spent its one automatic reload (F1)", () => {
+    // The tab crashed once before the canvas came up, or a child pressed the
+    // card already: `sessionStorage` survives the reload, so the flag is spent.
+    // A card that called `reloadOnce()` here left a dead button on the second
+    // crash, which is the failure this track exists to remove.
+    window.sessionStorage.setItem(SPENT_KEY, "1");
+    const scene = new RecoverScene();
+    scene.create();
+    const [button] = interactiveObjects();
+
+    button.handlers.pointerdown?.();
+
+    expect(window.sessionStorage.getItem(SPENT_KEY)).toBe("1");
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 
   it("publishes the centre it drew the button at, for the browser suite", () => {

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { E2ERecoverState } from "../game/e2eBridge";
-import { reloadOnce } from "../utils/reload";
+import { reloadPage } from "../utils/reload";
 
 /**
  * The recovery card (FR-6, NFR-3, NFR-7): the one screen a crash produces.
@@ -117,9 +117,11 @@ export class RecoverScene extends Phaser.Scene {
       new Phaser.Geom.Circle(HIT_RADIUS, HIT_RADIUS, HIT_RADIUS),
       Phaser.Geom.Circle.Contains,
     );
-    // The same one-shot guard the pre-canvas path uses, so a child mashing the
-    // button reloads the page at most once.
-    hit.on("pointerdown", () => reloadOnce());
+    // Asked for, not automatic: this is the child's one control, so it reloads
+    // every time it is pressed. The one-shot guard belongs to the pre-canvas
+    // path (`reloadOnce`), where the app reloads by itself and a loop is the
+    // danger; sharing it here made the button dead on the tab's second crash.
+    hit.on("pointerdown", () => reloadPage());
 
     // Published at the numbers the disc and the hit area were just drawn with,
     // never a second copy of them.
