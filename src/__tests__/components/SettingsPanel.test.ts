@@ -4,12 +4,21 @@ import {
   OVERLAY_ALPHA,
   PANEL_HEIGHT,
   PANEL_WIDTH,
+  PRIMARY_COLOR,
   ROW_HIT_WIDTH,
   ROW_PITCH,
 } from "../../components/settings/primitives";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
-import { backupFilename, downloadBackup, pickBackupFile, reloadApp } from "../../utils/backupFile";
+import {
+  backupFilename,
+  downloadBackup,
+  downloadText,
+  pickBackupFile,
+  reloadApp,
+  saveDiagnostics,
+} from "../../utils/backupFile";
 import { type BackupEnvelope, createBackup, refusalFor } from "../../utils/backupFormat";
+import { NO_CRASHES } from "../../utils/diagnostics";
 import {
   createInstallTracker,
   type InstallTracker,
@@ -63,8 +72,10 @@ vi.mock("../../utils/backupFile", async (importOriginal) => {
   return {
     ...actual,
     downloadBackup: vi.fn(),
+    downloadText: vi.fn(),
     pickBackupFile: vi.fn(),
     reloadApp: vi.fn(),
+    saveDiagnostics: vi.fn(),
   };
 });
 
@@ -2991,8 +3002,8 @@ describe("SettingsPanel backup page", () => {
   const PAGE_ONE_Y = [337, 393, 449, 505, 561, 617, 673, 729];
   /** The switch card's centre, in the empty band above the title. */
   const SWITCH_Y = 134;
-  /** The result line's row on page two. */
-  const RESULT_Y = 449;
+  /** The result line's row on page two: one pitch below the row it reports on. */
+  const RESULT_Y = 561;
 
   beforeEach(() => {
     localStorage.clear();
@@ -3001,8 +3012,10 @@ describe("SettingsPanel backup page", () => {
     // would answer for a case that meant to decide for itself.
     vi.mocked(applyImport).mockReset();
     vi.mocked(downloadBackup).mockReset();
+    vi.mocked(downloadText).mockReset();
     vi.mocked(pickBackupFile).mockReset();
     vi.mocked(reloadApp).mockReset();
+    vi.mocked(saveDiagnostics).mockReset();
     // Only the clock is faked: the async paths below still need the real
     // microtask queue, and nothing here waits on a timer.
     vi.useFakeTimers({ now: FIXED_NOW, toFake: ["Date"] });
@@ -3066,7 +3079,7 @@ describe("SettingsPanel backup page", () => {
     });
   }
 
-  it("reaches a second page in one tap, with its own title and two rows", () => {
+  it("reaches a second page in one tap, with its own title and three rows", () => {
     const scene = createScene();
     const panel = new SettingsPanel(scene as never);
 
@@ -3079,6 +3092,7 @@ describe("SettingsPanel backup page", () => {
     );
     expect(findTextByLabel(scene, "Save a backup")).toBeDefined();
     expect(findTextByLabel(scene, "Restore from a file")).toBeDefined();
+    expect(findTextByLabel(scene, "Save diagnostics")).toBeDefined();
     expect(findResultLine(scene), "the result line starts empty").toBeDefined();
     expect(panel.backupState().backupResult).toBe("");
 
@@ -3131,7 +3145,7 @@ describe("SettingsPanel backup page", () => {
     expect(restoreRow.destroy).toHaveBeenCalled();
   });
 
-  it("publishes the switch point and both row points from the panel's own layout", () => {
+  it("publishes the switch point and every row point from the panel's own layout", () => {
     const scene = createScene();
     const panel = new SettingsPanel(scene as never);
     openBackupPage(scene, panel);
@@ -3141,11 +3155,16 @@ describe("SettingsPanel backup page", () => {
     expect(state.backupRows).toEqual([
       { id: "export", point: { x: 512, y: 337 } },
       { id: "restore", point: { x: 512, y: 393 } },
+      { id: "diagnostics", point: { x: 512, y: 449 } },
     ]);
     // Each published point is inside the band its own row answers to.
+    const LABEL_OF = {
+      export: "Save a backup",
+      restore: "Restore from a file",
+      diagnostics: "Save diagnostics",
+    } as const;
     for (const row of state.backupRows) {
-      const label = row.id === "export" ? "Save a backup" : "Restore from a file";
-      const band = hitRectFor(scene, label);
+      const band = hitRectFor(scene, LABEL_OF[row.id]);
       expect(row.point.x).toBeGreaterThanOrEqual(band.left);
       expect(row.point.x).toBeLessThanOrEqual(band.right);
       expect(row.point.y).toBeGreaterThanOrEqual(band.top);
@@ -3169,6 +3188,66 @@ describe("SettingsPanel backup page", () => {
     expect(JSON.parse(json)).toMatchObject({ format: "aby-little-lab-backup", formatVersion: 1 });
     expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(expected);
     expect(panel.backupState().backupResult).toBe(expected);
+  });
+
+  it("puts the diagnostics row above the result line, with page one having none of it", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+
+    // Nothing from page two exists while page one is up - not the rows, not the
+    // result line - so a tap cannot reach a control that is not drawn.
+    expect(findTextByLabel(scene, "Save diagnostics")).toBeUndefined();
+    expect(findTextByLabel(scene, "Save a backup")).toBeUndefined();
+
+    openBackupPage(scene, panel);
+
+    // FR-8: a "Save diagnostics" row, and the line reporting what it did
+    // *below* it. The row is the third at 449 and the line one pitch past it at
+    // 561; the first version had them the other way round, which put "Saved
+    // <backup>" between Restore and this row.
+    expect(lastTextCallY(scene, "Save a backup")).toBe(337);
+    expect(lastTextCallY(scene, "Restore from a file")).toBe(393);
+    expect(lastTextCallY(scene, "Save diagnostics")).toBe(449);
+    expect(findResultLine(scene), "the result line sits under the row it reports").toBeDefined();
+    expect(RESULT_Y).toBe(561);
+    // One pitch clear of the row's card (471-539), so a wrapped filename cannot
+    // reach it even though the line is drawn from its centre.
+    expect(RESULT_Y).toBeGreaterThan(hitRectFor(scene, "Save diagnostics").bottom + 30);
+  });
+
+  it("saves the diagnostics file in one tap and names it on the line (AC-8)", () => {
+    const filename = "diagnostics-2026-11-08.txt";
+    vi.mocked(saveDiagnostics).mockReturnValue({ saved: true, filename });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Save diagnostics") as MockGameObject);
+
+    expect(saveDiagnostics).toHaveBeenCalledTimes(1);
+    // The sentence names the file the parent is about to find in Downloads,
+    // in the colour the export row already answers with.
+    expect(panel.backupState().backupResult).toBe(`Saved ${filename}`);
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(`Saved ${filename}`);
+    expect(findResultLine(scene)?.setColor).toHaveBeenCalledWith(PRIMARY_COLOR);
+  });
+
+  it("says nothing has been recorded and writes no file when the log is empty (AC-8)", () => {
+    vi.mocked(saveDiagnostics).mockReturnValue({ saved: false });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Save diagnostics") as MockGameObject);
+
+    // The row answered, so it is not a dead control; the sentence is the one
+    // the report module owns, not a second copy in the panel.
+    expect(saveDiagnostics).toHaveBeenCalledTimes(1);
+    expect(panel.backupState().backupResult).toBe(NO_CRASHES);
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(NO_CRASHES);
+    // Not even a Blob: the seam writes nothing when there is nothing to write.
+    expect(downloadText, "an empty log must not produce a file").not.toHaveBeenCalled();
+    expect(downloadBackup).not.toHaveBeenCalled();
   });
 
   it("restores a verified file as a merge, and says in numbers what it added", async () => {

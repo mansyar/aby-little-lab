@@ -1,4 +1,6 @@
-import { todayKey } from "../game/playTimeLogic";
+import { isLimitReached, todayKey } from "../game/playTimeLogic";
+import { buildDiagnosticsReport, type DiagnosticsEnvironment } from "./diagnostics";
+import { getDiagnostics, getPlayTime, getProfiles, isPersistenceDegraded } from "./storage";
 
 /**
  * The browser seam for backup: the only module in `src/` this track added that
@@ -22,7 +24,11 @@ export function backupFilename(now: Date): string {
 }
 
 /**
- * Writes `json` to the user's downloads as `filename`.
+ * Writes `text` to the user's downloads as `filename`.
+ *
+ * The one place in the app that turns a string into a file. The backup hand it
+ * a JSON envelope and the diagnostics row hands it a text report; both go
+ * through the same anchor, because two download paths would drift.
  *
  * The anchor has to be in the document: a detached anchor's synthetic `click()`
  * is ignored by some engines, so the download would silently never start. The
@@ -33,8 +39,8 @@ export function backupFilename(now: Date): string {
  * `revokeObjectURL` runs AFTER `click()`: revoking a URL first leaves the
  * anchor pointing at nothing, and the download is empty or never starts.
  */
-export function downloadBackup(json: string, filename: string): void {
-  const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+export function downloadText(text: string, filename: string, type = "text/plain"): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
@@ -42,6 +48,59 @@ export function downloadBackup(json: string, filename: string): void {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Writes `json` to the user's downloads as `filename`.
+ *
+ * Kept as its own name because the backup's callers speak in envelopes; the
+ * body is {@link downloadText}, so there is one anchor path in the app.
+ */
+export function downloadBackup(json: string, filename: string): void {
+  downloadText(json, filename, "application/json");
+}
+
+/** What a save attempt came to: a file, or the fact that there was nothing to write. */
+export type DiagnosticsSave = { saved: false } | { saved: true; filename: string };
+
+/**
+ * The play-time state in one word (FR-10): `unlimited` when this device sets no
+ * daily budget, `spent` once today's is used up, `available` while there is
+ * time left. One word because the header answers "was the child out of time?"
+ * rather than reporting a number no parent asked for.
+ */
+function playTimeState(): string {
+  const playTime = getPlayTime();
+  if (playTime.limitMinutes === null) return "unlimited";
+  return isLimitReached(playTime) ? "spent" : "available";
+}
+
+/**
+ * Writes the crash log to the user's downloads as `diagnostics-<local day>.txt`.
+ *
+ * The environment is read here, at the moment of export, and the report text is
+ * built by the pure module: this function is the browser seam, not the format.
+ * An empty log writes nothing at all — no Blob, no anchor, no file — and says
+ * so, because an empty file a parent emails is worse than a sentence.
+ *
+ * The date is the LOCAL day through `todayKey`, for the same reason
+ * {@link backupFilename} uses it: a Sydney morning before 11am is still
+ * yesterday in UTC.
+ */
+export function saveDiagnostics(now: Date = new Date()): DiagnosticsSave {
+  const log = getDiagnostics();
+  if (log.length === 0) return { saved: false };
+  const environment: DiagnosticsEnvironment = {
+    appVersion: __APP_VERSION__,
+    userAgent: navigator.userAgent,
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    profileCount: getProfiles().length,
+    playTime: playTimeState(),
+    degraded: isPersistenceDegraded(),
+  };
+  const filename = `diagnostics-${todayKey(now)}.txt`;
+  downloadText(buildDiagnosticsReport(log, environment, now), filename);
+  return { saved: true, filename };
 }
 
 /**

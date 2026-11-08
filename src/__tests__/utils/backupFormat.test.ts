@@ -38,6 +38,7 @@ const SETTINGS: Settings = {
   sfxEnabled: true,
   preferredVoiceURI: null,
   adaptiveDifficulty: true,
+  diagnostics: [],
 };
 
 /** A profile with a fixed creation stamp, so no fixture reads the wall clock. */

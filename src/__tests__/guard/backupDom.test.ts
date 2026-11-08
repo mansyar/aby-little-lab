@@ -22,6 +22,10 @@ import { describe, expect, it } from "vitest";
  * existing raw-source precedent (`guard/fixture-clock.test.ts`). It reads files
  * only — no network, no timers, no shell. Comment prose is skipped, so the seam
  * and the format module may document what they deliberately do not touch.
+ *
+ * The error-capture track widened the watched set by one: `sessionStorage`, the
+ * only store that survives a reload without writing into the child's save, so
+ * the one-shot reload guard is the only module allowed to name it.
  */
 
 /** Every `.ts` file under `src`, keyed relative to `src/__tests__/guard`. */
@@ -66,9 +70,34 @@ const PRE_EXISTING: readonly AllowedUser[] = [
     path: "utils/viewportZoom.ts",
     reason: "reads the viewport meta tag to size the canvas",
   },
+  {
+    path: "utils/pwaInstall.ts",
+    reason: "hears the install-prompt events the browser fires on the window",
+  },
 ];
 
-const ALLOWED = new Set<string>([SEAM, ...PRE_EXISTING.map((user) => user.path)]);
+/**
+ * The modules the error-capture track added that need a browser global.
+ *
+ * `errorCapture.ts` is deliberately not here. It attaches its listeners through
+ * `deps.target ?? window`, so it never writes `window.member` and matches no
+ * pattern in this list; an allowance for it would therefore fail the coupling
+ * test below, which is the test doing its job. What must not silently disappear
+ * is the pair of registrations themselves, and the dedicated test after this one
+ * asserts both by name.
+ */
+const RECOVERY: readonly AllowedUser[] = [
+  {
+    path: "utils/reload.ts",
+    reason: "reloads the page once when the canvas never came up",
+  },
+];
+
+const ALLOWED = new Set<string>([
+  SEAM,
+  ...PRE_EXISTING.map((user) => user.path),
+  ...RECOVERY.map((user) => user.path),
+]);
 
 /** The browser globals this guard forbids outside the seam, by source name. */
 const DOM_GLOBALS: ReadonlyArray<{ readonly name: string; readonly pattern: RegExp }> = [
@@ -80,6 +109,16 @@ const DOM_GLOBALS: ReadonlyArray<{ readonly name: string; readonly pattern: RegE
   { name: "crypto", pattern: /\bcrypto\./g },
   { name: "FileReader", pattern: /\bFileReader\b/g },
   { name: "navigator.clipboard", pattern: /\bnavigator\.clipboard\b/g },
+  // The reload loop guard needs one bit that survives a reload, and session
+  // storage is the only store that does so without writing into the save.
+  { name: "sessionStorage", pattern: /\bsessionStorage\./g },
+  // The two ways a module can leave the canvas rather than draw on it. A guard
+  // that watched every `window.` member would fail nine modules that legitimately
+  // use browser feature APIs (`speechSynthesis`, `matchMedia`, `setTimeout`) and
+  // would say nothing useful about them; navigation and global listeners are the
+  // capabilities that actually escape the app loop, so those are what is watched.
+  { name: "window.location", pattern: /\bwindow\.location\b/g },
+  { name: "window.addEventListener", pattern: /\bwindow\.(?:add|remove)EventListener\b/g },
 ];
 
 /** The only network shape this app could plausibly grow: a bare `fetch(` call. */
@@ -198,11 +237,10 @@ describe("backup DOM guard", () => {
     const seam = productionSources().find((file) => file.path === SEAM);
     expect(seam, `The seam ${SEAM} was not found in the scan.`).toBeDefined();
     const names = new Set(domSitesIn(seam?.source ?? "", SEAM).map((site) => site.name));
-    expect([...names].sort(), "The seam must name document, Blob and URL to be the seam.").toEqual([
-      "Blob",
-      "URL.",
-      "document",
-    ]);
+    expect(
+      [...names].sort(),
+      "The seam must name document, Blob, URL and the reload it performs after an import.",
+    ).toEqual(["Blob", "URL.", "document", "window.location"]);
   });
 
   it("keeps every allowance pointing at a file that still names its global", () => {
@@ -217,6 +255,25 @@ describe("backup DOM guard", () => {
         domSitesIn(source ?? "", path).length,
         `${path} is allowed to name a browser global but no longer does: remove its allowance.`,
       ).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps the crash listeners registered where the guard expects them", () => {
+    // The capture module reaches the window through an injected target, so it
+    // names no watched member and cannot be coupled to this guard the way an
+    // allowance is. The coupling it does have is the pair of event names: if one
+    // is dropped, a crash shape is silently unrecorded and nothing else in the
+    // suite would notice.
+    const source = productionSources().find((file) => file.path === "game/errorCapture.ts")?.source;
+    expect(
+      source,
+      "game/errorCapture.ts is missing: the crash listeners have no home",
+    ).toBeDefined();
+    for (const event of ['addEventListener("error"', 'addEventListener("unhandledrejection"']) {
+      expect(
+        source,
+        `errorCapture.ts no longer registers ${event}: a crash shape is unrecorded`,
+      ).toContain(event);
     }
   });
 
@@ -248,6 +305,10 @@ describe("backup DOM guard", () => {
     ]);
     expect(domSitesIn("await navigator.clipboard.readText();", "probe.ts")).toEqual([
       { name: "navigator.clipboard", site: "probe.ts:1" },
+    ]);
+    // The error-capture track's global: one read is still a site.
+    expect(domSitesIn('sessionStorage.getItem("x");', "probe.ts")).toEqual([
+      { name: "sessionStorage", site: "probe.ts:1" },
     ]);
     // Comment prose is not code.
     expect(domSitesIn("// no document here", "probe.ts")).toEqual([]);

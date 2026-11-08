@@ -199,7 +199,7 @@ src/
 │       ├── ResetModal.ts
 │       ├── VoiceRow.ts
 │       └── primitives.ts
-├── game/                                  # 56 files: 34 modules, art/ (16), hub/ (6)
+├── game/                                  # 57 files: 35 modules, art/ (16), hub/ (6)
 │   ├── adaptiveLogic.ts
 │   ├── addItUpLogic.ts
 │   ├── alphabetLogic.ts
@@ -210,6 +210,7 @@ src/
 │   ├── countLogic.ts
 │   ├── decodeLogic.ts
 │   ├── dragBoard.ts
+│   ├── errorCapture.ts
 │   ├── feelingsFacesLogic.ts
 │   ├── firstSoundsLogic.ts
 │   ├── gameRegistry.ts
@@ -258,7 +259,7 @@ src/
 │       ├── pageBoard.ts
 │       ├── stickerShelf.ts
 │       └── timeUpDim.ts
-├── scenes/                                # 29 files
+├── scenes/                                # 30 files
 │   ├── AddItUpScene.ts
 │   ├── AlphabetScene.ts
 │   ├── AnimalTraceScene.ts
@@ -281,6 +282,7 @@ src/
 │   ├── PatternBuilderScene.ts
 │   ├── PopFreezeScene.ts
 │   ├── PreloadScene.ts
+│   ├── RecoverScene.ts
 │   ├── ShadowMatchScene.ts
 │   ├── ShapeSorterScene.ts
 │   ├── StoryOrderScene.ts
@@ -288,16 +290,18 @@ src/
 │   ├── WordBuilderScene.ts
 │   ├── WordMatchScene.ts
 │   └── sceneRegistry.ts
-├── utils/                                 # 16 files
+├── utils/                                 # 18 files
 │   ├── backupFile.ts
 │   ├── backupFormat.ts
 │   ├── completionEffect.ts
+│   ├── diagnostics.ts
 │   ├── dragJuice.ts
 │   ├── fonts.ts
 │   ├── motion.ts
 │   ├── pressFeedback.ts
 │   ├── pwaBridge.ts
 │   ├── pwaInstall.ts
+│   ├── reload.ts
 │   ├── sceneTransitions.ts
 │   ├── speech.ts
 │   ├── storage.ts
@@ -362,10 +366,10 @@ dom: { createContainer: true },
 transparent: true,
 scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
 physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
-scene: [BootScene, PreloadScene, HubScene],
+scene: [BootScene, PreloadScene, HubScene, RecoverScene],
 ```
 
-`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame. `initInstallPrompt()` runs first, so the browser's once-per-load offer is captured before any scene can open Settings.
+`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes plus `RecoverScene`, the crash card, which is eager because the one scene you cannot load lazily is the one that runs when loading is what broke. `installErrorCapture(game)` runs immediately after construction and before the bridge, so both crash listeners exist before the rest of boot can throw. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame. `initInstallPrompt()` runs first, so the browser's once-per-load offer is captured before any scene can open Settings.
 
 ### 3.2 BootScene
 
@@ -433,9 +437,9 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | Story Order chunk | ~40.3 kB, includes all 45 panel SVGs | build output |
 | Precache entries | 54 (about 1,726 KiB) | `precache  54 entries` from the PWA build step |
 
-The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the four eagerly registered scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
-The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload or Hub.
+The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload, Hub or Recover.
 
 ---
 
@@ -443,7 +447,7 @@ The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chu
 
 ### 4.1 Shell scenes and the lazy registry
 
-Only `BootScene`, `PreloadScene` and `HubScene` are registered at construction time. The other 22 scenes are registered on demand.
+Only `BootScene`, `PreloadScene`, `HubScene` and the eager `RecoverScene` are registered at construction time. The other 22 scenes are registered on demand.
 
 `src/scenes/sceneRegistry.ts` exports `sceneLoaders`, a `Record<sceneKey, () => Promise<SceneType>>` with one dynamic import per game, keyed identically to the `sceneKey` values in `GAME_TILES`. `ensureSceneLoaded(scene, key, loaders = sceneLoaders)`:
 
@@ -894,6 +898,22 @@ Reading refuses in a fixed order, so the sentence a parent reads is the truest o
 
 **The seam.** `src/utils/backupFile.ts` is the only module under `src/` that touches the browser's file machinery: `downloadBackup()` builds the `Blob`, clicks an anchor and revokes the URL, `pickBackupFile()` returns `{ name, text } | null` from a hidden `<input type="file">`, `backupFilename()` dates the file with the local day, and `reloadApp()` is the one `location.reload()`. `SettingsPanel` is its only caller, and above it `createBackup`, `readBackup` and `planImport` are exercised directly by unit tests; the browser layer only has to prove that the file a download actually produces is the file the picker accepts ([§10.5](#105-the-browser-journey-layer)).
 
+### 6.8 The crash log and the recovery card
+
+A crash is state, and the save now carries it. `Settings.diagnostics` is a `CrashEntry[]` at the same `schemaVersion` 1 as every other field, so nothing migrated and nothing was rewritten: `normalizeDiagnostics` backfills an absent or malformed value to `[]`, a payload written before this existed loads with an empty log, and a payload from a newer build is still write-protected exactly as [§6.5](#65-schema-versioning) describes. The record is **device-level**, not per profile — a crash is the browser's fact rather than a child's achievement — so it survives deleting a profile and resetting progress, and no scene ever shows it to a child. The log is written by `recordCrash` through the total save layer of [§6.6](#66-the-guarded-write-path-and-the-degraded-session): a refused write keeps the entry in memory for the session and raises the same quiet notice every other refused write does, and a recorder that throws cannot turn one crash into two.
+
+Three modules hold the split. `src/utils/diagnostics.ts` is pure — no browser global, no clock read, the moment passed in as `now` — and owns the entry, the coercion, the buffer and the report text; a test reads that file's own source and fails on a browser global or a clock read appearing in it. The track adds **two** modules that name a browser global, and that pair is what FR-11 names. `src/game/errorCapture.ts` attaches `error` and `unhandledrejection` to `window`, once per page load, as soon as the game object exists and before anything else in boot can throw — a failure while the rest of boot is being wired is precisely the failure nothing else can hear ([§3.1](#31-phaser-configuration)). `src/utils/reload.ts` owns the reload capabilities: `reloadOnce()` for the pre-canvas loop guard and `reloadPage()` for the card's button.
+
+An entry is `{ at, kind, message, stack }`. `kind` is `error` or `rejection`, so a parent can tell a thrown failure from a promise nobody awaited; `stack` is the **front** of the stack trimmed to `MAX_STACK_CHARS` (400), and `message` is the **front** of the message trimmed to `MAX_MESSAGE_CHARS` (200) — which keeps the message and the throwing frame and drops the tail of Phaser's call chain. Both trims apply on the way in as well as on write, in `readEntry`, because a stored log can be hand-edited. Rejections are the awkward half: a promise may reject with a bare string, with `undefined`, with a plain object, or with nothing at all, and `toCrashEntry` coerces all four into something a person can read — never `[object Object]` on its own, never a throw of its own, and `Unhandled rejection with no reason` when there is genuinely nothing to read. A rejected object is the one case where the message is generated here, so it is trimmed like every other branch; without that a 100 kB reason would carry the buffer past any ceiling the constants claim. The buffer keeps the newest `MAX_ENTRIES` (20) with the newest last, dropping from the head on append, so a scene that throws every frame cannot consume the quota the guarded save layer exists to survive. With both text fields bounded the ceiling follows from the constants: `MAX_ENTRIES × (MAX_MESSAGE_CHARS + MAX_STACK_CHARS + 200)` is 16,000 bytes, the extra 200 being the room a timestamp, a kind and the JSON keys need, and twenty entries at both maxima measure 13,461.
+
+**Recovery is ordered, and it is why the card exists.** With a scene running, the handler calls `scene.scene.start("Recover")` through the running scene's own plugin: starting a scene *replaces* the running one, which is what stops a scene that throws on every frame from throwing on every frame. Overlaying a card on top would leave the broken scene updating underneath it. The plugin, not `game.scene.start` — Phaser 4's `SceneManager` has no `start` at all, and a call to one is a silent no-op that typechecks against a loose fake, which is exactly how the first version of this shipped and what the browser journey caught. With **no** scene at all — a crash before the canvas ever came up — there is nothing to draw on, so the handler spends one `reloadOnce()`: a session-scoped flag in `sessionStorage`, written *before* the reload is asked for, so a reload that never happens still costs the session its one attempt rather than leaving a call site to try again. A store that throws on access reads as "cannot remember", which must behave as *still allowed one reload*: a genuinely broken first load would otherwise get no retry at all. A second pre-canvas crash logs and does not reload — a page that sits still is better for a child than a page that spins. The whole handler body is inside one `try`: reading the running scene throws if the game was destroyed and `reload()` throws if the location is blocked, and an error handler that throws turns one crash into two.
+
+`RecoverScene` is the only screen a crash produces, and it is eager — Phaser 4 cannot add a scene to the array lazily, so its bytes are part of the shell entry and NFR-4 records them. It is a full-bleed rectangle in the page background, an opaque cover rather than an overlay, with the mascot when `mascot_idle` exists (a crash during preload is exactly the case where it does not, and the card must still draw), one circular arrow drawn from an arc and a chevron, and **no text anywhere**: a four-year-old cannot read, so the card carries the rule in shape instead of words (NFR-7). The only interactive object is a `Zone` over the art — a `Phaser.GameObjects.Zone`, which is invisible by design and is what `dragBoard` already uses for its empty slots — hit-tested as `Phaser.Geom.Circle` centred in its own box at `(72, 72)` with radius 72 over a 64 px disc, so a tap in the corner of its box misses. A zero-alpha Arc would have looked identical and accepted nothing: Phaser does not hit-test a transparent object, which is how the first version drew a button no finger could press. Its `pointerdown` calls `reloadPage()`, deliberately **not** the loop guard: a guard bounds a reload the app decides to perform by itself, and a tap is not automatic. Sharing the guard made the button dead on the tab's second crash, because `sessionStorage` survives a reload — the child stranded on an icon-only screen, which is the failure this card exists to remove. The card is raised once per page load; a crash while it is up is still recorded and still draws no second card.
+
+**The file is the trace a parent can share.** Settings page two's third row writes `diagnostics-<local day>.txt` through the same anchor the backup uses, now that `downloadText` takes the MIME type (`text/plain` here, `application/json` for the envelope). The report is plain text: a header built from the exported environment — app version, export moment, user agent, viewport, profile count, the play-time state in one word (`unlimited`, `available` or `spent`), and whether this session lost its store — then a blank line and the entries **newest first**, because the crash a parent is chasing is almost always the last one. An empty log writes no file at all and the row says `No crashes have been recorded on this device.`, the same constant the report body uses, so the sentence on the panel and the sentence in the file cannot drift. The date is the local day through `todayKey`, for the reason the backup filename is: a Sydney morning before 11am is still yesterday in UTC. One consequence of the import rules is worth stating plainly: a **replace** takes the incoming `settings` wholesale, so restoring a backup written before this track normalises `diagnostics` to `[]` and the device's crash log is gone. That is what "replace" means — a merge keeps this device's settings and its log — and it is named here so nobody discovers it from a support thread.
+
+**What keeps the browser surface enumerated.** `src/__tests__/guard/backupDom.test.ts` scans every production file for `document`, `Blob`, `URL.`, `crypto.`, `FileReader` and `navigator.clipboard`, and this track widened the watched set by three specific names rather than one prefix: `sessionStorage.`, `window.location` and `window.addEventListener`. A guard on bare `window.` would fail nine modules that legitimately use browser feature APIs — `speechSynthesis`, `matchMedia`, `setTimeout` — and would say nothing useful about them; navigation and global listeners are the capabilities that actually escape the app loop, so those are what is watched and the rest of `window.` stays out. Each module allowed to name a watched global is listed with its reason: the backup seam, the five modules that already named `document`, and `utils/reload.ts`, the one module permitted the loop guard. `src/game/errorCapture.ts` needed no allowance at all, because it reaches its target through `deps.target ?? window` and so never writes `window.member` — an allowance for it would fail the "still names its global" check, which is the coupling the guard deliberately does not have. A sixth module naming `document`, any new module naming a watched global, an allowance that stops matching, and a `fetch(` call anywhere in `src/` each fail the suite. Nothing here transmits anything: the log leaves the device only when a parent downloads it, and no package was added to make any of it work.
+
 ---
 
 ## 7. Game logic modules
@@ -1156,13 +1176,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-140 test files, 3,069 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+144 test files, 3,158 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.33 (6381/6556), branches 91.67 (1882/2053), functions 96.28 (1399/1453) and lines 98.29 (5935/6038) across 140 files and 3,069 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.38 (6551/6727), branches 91.97 (1972/2144), functions 96.37 (1435/1489) and lines 98.33 (6088/6191) across 144 files and 3,158 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1177,7 +1197,7 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 19 journeys across 15 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, an offline relaunch and a device whose storage refuses every write. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 21 journeys across 16 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
 What this layer observes that the unit layer cannot:
 
@@ -1199,7 +1219,7 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 
 `pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
 
-**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 19 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 21 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 

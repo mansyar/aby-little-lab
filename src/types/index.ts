@@ -53,6 +53,28 @@ export interface DayActivity {
   plays: number;
 }
 
+/**
+ * Which of the two global handlers saw a crash: `error` for a throw that
+ * escaped, `rejection` for a promise that rejected with no handler attached.
+ */
+export type CrashKind = "error" | "rejection";
+
+/**
+ * One crash, as the device remembers it. `at` is an ISO timestamp and
+ * `message` is never empty — a rejected string, `undefined` or a plain object
+ * all read as a sentence rather than `[object Object]`. An entry is only ever
+ * written by `toCrashEntry`, which cannot throw.
+ */
+export interface CrashEntry {
+  /** ISO timestamp of the moment it was recorded. */
+  at: string;
+  kind: CrashKind;
+  /** The error's message, or a readable sentence for a reason that had none. */
+  message: string;
+  /** The stack where one existed, trimmed to its first 400 characters; "" otherwise. */
+  stack: string;
+}
+
 export interface Settings {
   bgmEnabled: boolean;
   sfxEnabled: boolean;
@@ -63,6 +85,14 @@ export interface Settings {
    * Off restores the fixed classic ladder for every game.
    */
   adaptiveDifficulty: boolean;
+  /**
+   * The device's crash log, oldest first: the newest twenty uncaught errors,
+   * written only through `recordCrash` and never shown to a child. Additive at
+   * schema version 1 — a payload written before the log existed backfills an
+   * empty array, and the settings normaliser re-caps whatever a hand-edited
+   * payload holds.
+   */
+  diagnostics: CrashEntry[];
 }
 
 /**

@@ -276,3 +276,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Local Insights** - [20261108-local-insights](./archive/20261108-local-insights/index.md) - feature - high
 
 - [x] **Track: Backup and Restore** - [20261108-backup-restore](./archive/20261108-backup-restore/index.md) - feature - high
+- [x] **Track: Error Capture** - [20261108-error-capture](./archive/20261108-error-capture/index.md) - feature - high

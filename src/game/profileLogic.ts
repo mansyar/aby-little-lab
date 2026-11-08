@@ -8,6 +8,7 @@ import type {
   StickerData,
 } from "../types";
 import { AVATAR_IDS, DEFAULT_AVATAR_ID, GAME_IDS, MAX_PROFILES } from "../types";
+import { normalizeDiagnostics } from "../utils/diagnostics";
 import { createDefaultInsights, normalizeInsights } from "./insightsLogic";
 import { createDefaultPlayTime, normalizePlayTime } from "./playTimeLogic";
 import { createDefaultProgressMap, normalizeProgressMap, pruneActivity } from "./progressLogic";
@@ -25,6 +26,7 @@ function defaultSettings(): Settings {
     sfxEnabled: true,
     preferredVoiceURI: null,
     adaptiveDifficulty: true,
+    diagnostics: [],
   };
 }
 
@@ -75,12 +77,22 @@ export function migrateV1(
  * Normalizes raw v2 data into a valid schema: backfills each profile's
  * sticker keys, guarantees at least one profile, repairs an invalid active
  * profile id, and merges settings with defaults.
+ *
+ * The crash log is the one settings field that is re-read rather than merely
+ * backfilled: a device that crashed before this track has no `diagnostics` at
+ * all, and a hand-edited or over-long array is capped and coerced here, so the
+ * read path can never serve a log larger than the buffer or an entry the report
+ * cannot print.
  */
 export function normalizeV2(
   raw: Partial<ProfileV2> | null,
   now = new Date().toISOString(),
 ): ProfileV2 {
-  const settings = { ...defaultSettings(), ...raw?.settings };
+  const merged = { ...defaultSettings(), ...raw?.settings };
+  const settings: Settings = {
+    ...merged,
+    diagnostics: normalizeDiagnostics(merged.diagnostics),
+  };
   const savedProfiles = raw?.profiles;
   let profiles: Profile[];
   if (Array.isArray(savedProfiles) && savedProfiles.length > 0) {

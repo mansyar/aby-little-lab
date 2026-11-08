@@ -34,6 +34,9 @@ function v1Save(overrides: Partial<AppStorage> = {}): Partial<AppStorage> {
       sfxEnabled: true,
       preferredVoiceURI: null,
       adaptiveDifficulty: true,
+      // The fixture is a current-shape save; a payload written before the crash
+      // log existed is modelled in `storage.test.ts`, where it is raw JSON.
+      diagnostics: [],
     },
     ...overrides,
   };
@@ -88,6 +91,7 @@ describe("profileLogic", () => {
         sfxEnabled: true,
         preferredVoiceURI: null,
         adaptiveDifficulty: true,
+        diagnostics: [],
       });
     });
 
@@ -105,6 +109,7 @@ describe("profileLogic", () => {
         sfxEnabled: true,
         preferredVoiceURI: null,
         adaptiveDifficulty: true,
+        diagnostics: [],
       });
       expect(v2.activeProfileId).toBe("p1");
     });
@@ -131,6 +136,7 @@ describe("profileLogic", () => {
         sfxEnabled: true,
         preferredVoiceURI: null,
         adaptiveDifficulty: true,
+        diagnostics: [],
       });
     });
 

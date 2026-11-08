@@ -38,6 +38,19 @@ export interface E2EHubToast {
   button: { x: number; y: number };
 }
 
+/**
+ * The recovery card's one control, as the card is drawing it.
+ *
+ * A journey that has just crashed cannot read a comment to find the button: the
+ * card is the only thing on screen and its position is a drawn number. Publishing
+ * the centre means the tap is the card's own layout rather than a copied
+ * coordinate, exactly as `E2EHubToast` does for the toast.
+ */
+export interface E2ERecoverState {
+  /** The card's button centre in canvas coordinates. */
+  readonly button: GamePoint;
+}
+
 /** One settings row the parental panel publishes for the browser suite. */
 export interface E2ESettingsToggle {
   /** Stable setting key: `bgm`, `sfx` or `adaptive`. */
@@ -69,11 +82,12 @@ export interface E2EProgressState {
 }
 
 /**
- * The second Settings page — backup and restore — as the panel is showing it.
+ * The second Settings page — backup, restore and the crash log — as the panel
+ * is showing it.
  *
- * A journey moves between the pages with `switchPage` and taps the two action
- * rows with `backupRows`, then reads `backupResult` rather than a pixel: the
- * result line is the app's own sentence about what happened.
+ * A journey moves between the pages with `switchPage` and taps the action rows
+ * with `backupRows`, then reads `backupResult` rather than a pixel: the result
+ * line is the app's own sentence about what happened.
  */
 export interface E2EBackupState {
   /** The page on screen: 0 is the settings rows, 1 is backup and restore. */
@@ -84,8 +98,8 @@ export interface E2EBackupState {
    * panel object.
    */
   switchPage: GamePoint;
-  /** Page two's two tappable rows, in the order they are drawn; empty off page 1. */
-  backupRows: { id: "export" | "restore"; point: GamePoint }[];
+  /** Page two's tappable rows, in the order they are drawn; empty off page 1. */
+  backupRows: { id: "export" | "restore" | "diagnostics"; point: GamePoint }[];
   /** The result line's current text, `""` when nothing has happened yet. */
   backupResult: string;
   /**
@@ -173,6 +187,12 @@ export interface E2EBridge {
    * the pre-game nudge is on screen. False in any other scene.
    */
   hubPlayTime(): E2EHubPlayTime;
+  /**
+   * The recovery card's button, while that card is the active scene. Null in
+   * every other scene, so a journey can only tap the card while the card is
+   * actually what it is looking at.
+   */
+  recover(): E2ERecoverState | null;
 }
 
 declare global {
@@ -198,6 +218,7 @@ interface E2ESceneProbe {
   e2eHubReady?: () => boolean;
   e2eSettings?: () => E2ESettingsState;
   e2eHubPlayTime?: () => E2EHubPlayTime;
+  e2eRecoverButton?: () => E2ERecoverState | null;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -308,6 +329,17 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eHubPlayTime;
       if (typeof hook !== "function") return { timeUp: false, nudging: false };
+      return hook.call(probe);
+    },
+    recover: () => {
+      // The card is only readable while it is what Phaser is showing: after the
+      // tap the page is reloading and after a normal launch this scene is not
+      // running at all, so there is no button a journey could honestly tap.
+      const scene = activeScene(game);
+      if (scene?.scene.key !== "Recover") return null;
+      const probe = probeOf(scene);
+      const hook = probe?.e2eRecoverButton;
+      if (typeof hook !== "function") return null;
       return hook.call(probe);
     },
   };
