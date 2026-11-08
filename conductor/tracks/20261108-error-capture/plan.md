@@ -70,7 +70,7 @@
 - **Covers:** FR-8, FR-9, FR-10, AC-7, AC-8
 - **Touches:** `src/components/SettingsPanel.ts`, `src/utils/backupFile.ts`, `src/game/e2eBridge.ts`, `src/scenes/HubScene.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/utils/backupFile.test.ts`, `src/__tests__/game/e2eBridge.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Gather the environment and write the file** - covers: FR-10, FR-9
   - [ ] P3.T1.1 `downloadText(filename, body)` generalised out of `downloadBackup` so both write through one anchor path, with `downloadBackup` unchanged in behaviour
