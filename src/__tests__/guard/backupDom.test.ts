@@ -22,6 +22,10 @@ import { describe, expect, it } from "vitest";
  * existing raw-source precedent (`guard/fixture-clock.test.ts`). It reads files
  * only — no network, no timers, no shell. Comment prose is skipped, so the seam
  * and the format module may document what they deliberately do not touch.
+ *
+ * The error-capture track widened the watched set by one: `sessionStorage`, the
+ * only store that survives a reload without writing into the child's save, so
+ * the one-shot reload guard is the only module allowed to name it.
  */
 
 /** Every `.ts` file under `src`, keyed relative to `src/__tests__/guard`. */
@@ -68,7 +72,28 @@ const PRE_EXISTING: readonly AllowedUser[] = [
   },
 ];
 
-const ALLOWED = new Set<string>([SEAM, ...PRE_EXISTING.map((user) => user.path)]);
+/**
+ * The modules the error-capture track added that need a browser global.
+ *
+ * `errorCapture.ts` is deliberately not here: it names `window` for its two
+ * listeners, and `window.` is not a watched global yet — see the guard's
+ * evidence for why watching it wholesale would fail nine modules that
+ * legitimately use it (`speechSynthesis`, `matchMedia`, the visibility
+ * listeners). Until that decision is taken, the capture module has no global to
+ * be allowed for.
+ */
+const RECOVERY: readonly AllowedUser[] = [
+  {
+    path: "utils/reload.ts",
+    reason: "reloads the page once when the canvas never came up",
+  },
+];
+
+const ALLOWED = new Set<string>([
+  SEAM,
+  ...PRE_EXISTING.map((user) => user.path),
+  ...RECOVERY.map((user) => user.path),
+]);
 
 /** The browser globals this guard forbids outside the seam, by source name. */
 const DOM_GLOBALS: ReadonlyArray<{ readonly name: string; readonly pattern: RegExp }> = [
@@ -80,6 +105,9 @@ const DOM_GLOBALS: ReadonlyArray<{ readonly name: string; readonly pattern: RegE
   { name: "crypto", pattern: /\bcrypto\./g },
   { name: "FileReader", pattern: /\bFileReader\b/g },
   { name: "navigator.clipboard", pattern: /\bnavigator\.clipboard\b/g },
+  // The reload loop guard needs one bit that survives a reload, and session
+  // storage is the only store that does so without writing into the save.
+  { name: "sessionStorage", pattern: /\bsessionStorage\./g },
 ];
 
 /** The only network shape this app could plausibly grow: a bare `fetch(` call. */
@@ -248,6 +276,10 @@ describe("backup DOM guard", () => {
     ]);
     expect(domSitesIn("await navigator.clipboard.readText();", "probe.ts")).toEqual([
       { name: "navigator.clipboard", site: "probe.ts:1" },
+    ]);
+    // The error-capture track's global: one read is still a site.
+    expect(domSitesIn('sessionStorage.getItem("x");', "probe.ts")).toEqual([
+      { name: "sessionStorage", site: "probe.ts:1" },
     ]);
     // Comment prose is not code.
     expect(domSitesIn("// no document here", "probe.ts")).toEqual([]);

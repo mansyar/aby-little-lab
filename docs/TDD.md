@@ -199,7 +199,7 @@ src/
 │       ├── ResetModal.ts
 │       ├── VoiceRow.ts
 │       └── primitives.ts
-├── game/                                  # 56 files: 34 modules, art/ (16), hub/ (6)
+├── game/                                  # 57 files: 35 modules, art/ (16), hub/ (6)
 │   ├── adaptiveLogic.ts
 │   ├── addItUpLogic.ts
 │   ├── alphabetLogic.ts
@@ -210,6 +210,7 @@ src/
 │   ├── countLogic.ts
 │   ├── decodeLogic.ts
 │   ├── dragBoard.ts
+│   ├── errorCapture.ts
 │   ├── feelingsFacesLogic.ts
 │   ├── firstSoundsLogic.ts
 │   ├── gameRegistry.ts
@@ -258,7 +259,7 @@ src/
 │       ├── pageBoard.ts
 │       ├── stickerShelf.ts
 │       └── timeUpDim.ts
-├── scenes/                                # 29 files
+├── scenes/                                # 30 files
 │   ├── AddItUpScene.ts
 │   ├── AlphabetScene.ts
 │   ├── AnimalTraceScene.ts
@@ -281,6 +282,7 @@ src/
 │   ├── PatternBuilderScene.ts
 │   ├── PopFreezeScene.ts
 │   ├── PreloadScene.ts
+│   ├── RecoverScene.ts
 │   ├── ShadowMatchScene.ts
 │   ├── ShapeSorterScene.ts
 │   ├── StoryOrderScene.ts
@@ -288,7 +290,7 @@ src/
 │   ├── WordBuilderScene.ts
 │   ├── WordMatchScene.ts
 │   └── sceneRegistry.ts
-├── utils/                                 # 17 files
+├── utils/                                 # 18 files
 │   ├── backupFile.ts
 │   ├── backupFormat.ts
 │   ├── completionEffect.ts
@@ -299,6 +301,7 @@ src/
 │   ├── pressFeedback.ts
 │   ├── pwaBridge.ts
 │   ├── pwaInstall.ts
+│   ├── reload.ts
 │   ├── sceneTransitions.ts
 │   ├── speech.ts
 │   ├── storage.ts
@@ -363,10 +366,10 @@ dom: { createContainer: true },
 transparent: true,
 scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
 physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
-scene: [BootScene, PreloadScene, HubScene],
+scene: [BootScene, PreloadScene, HubScene, RecoverScene],
 ```
 
-`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes only. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame. `initInstallPrompt()` runs first, so the browser's once-per-load offer is captured before any scene can open Settings.
+`transparent: true` lets the page background (`--bg-base` `#FAF9F6`) show through; an opaque canvas would paint black behind every scene. The scene array carries the three shell scenes plus `RecoverScene`, the crash card, which is eager because the one scene you cannot load lazily is the one that runs when loading is what broke. `installErrorCapture(game)` runs immediately after construction and before the bridge, so both crash listeners exist before the rest of boot can throw. `initPwaBridge(registerSW)` runs before `new Phaser.Game(config)` so the Hub can receive update/offline events from its first frame. `initInstallPrompt()` runs first, so the browser's once-per-load offer is captured before any scene can open Settings.
 
 ### 3.2 BootScene
 
@@ -434,9 +437,9 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | Story Order chunk | ~40.3 kB, includes all 45 panel SVGs | build output |
 | Precache entries | 54 (about 1,726 KiB) | `precache  54 entries` from the PWA build step |
 
-The shell carries the three shell scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the four eagerly registered scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
-The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload or Hub.
+The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload, Hub or Recover.
 
 ---
 
@@ -444,7 +447,7 @@ The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chu
 
 ### 4.1 Shell scenes and the lazy registry
 
-Only `BootScene`, `PreloadScene` and `HubScene` are registered at construction time. The other 22 scenes are registered on demand.
+Only `BootScene`, `PreloadScene`, `HubScene` and the eager `RecoverScene` are registered at construction time. The other 22 scenes are registered on demand.
 
 `src/scenes/sceneRegistry.ts` exports `sceneLoaders`, a `Record<sceneKey, () => Promise<SceneType>>` with one dynamic import per game, keyed identically to the `sceneKey` values in `GAME_TILES`. `ensureSceneLoaded(scene, key, loaders = sceneLoaders)`:
 
@@ -1157,13 +1160,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-141 test files, 3,103 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+144 test files, 3,133 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.33 (6381/6556), branches 91.82 (1933/2105), functions 96.30 (1409/1463) and lines 98.30 (5981/6084) across 141 files and 3,103 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.38 (6516/6691), branches 91.97 (1959/2130), functions 96.34 (1425/1479) and lines 98.32 (6057/6160) across 144 files and 3,133 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
