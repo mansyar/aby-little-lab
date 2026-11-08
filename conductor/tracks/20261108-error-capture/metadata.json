@@ -1,0 +1,34 @@
+{
+  "id": "20261108-error-capture",
+  "title": "Error Capture",
+  "type": "feature",
+  "status": "new",
+  "priority": "high",
+  "depends_on": [
+    "20261107-storage-resilience",
+    "20261108-backup-restore",
+    "20261107-release-e2e"
+  ],
+  "created_at": "2026-11-08T14:14:55+11:00",
+  "updated_at": "2026-11-08T14:14:55+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261108-error-capture",
+  "base_branch": "master",
+  "base_sha": "7d3c0db886685b5b307eefc53231990f721417dc",
+  "progress": {
+    "phases_total": 4,
+    "phases_verified": 0,
+    "tasks_total": 13,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "pr_state": null,
+  "revert": null,
+  "archived_at": null,
+  "archive_path": null
+}
