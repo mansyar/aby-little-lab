@@ -1581,6 +1581,11 @@ describe("HubScene e2e hub tiles", () => {
       progressRow: null,
       progress: null,
       degraded: false,
+      page: 0,
+      switchPage: { x: 0, y: 0 },
+      backupRows: [],
+      backupResult: "",
+      choices: [],
     });
   });
 

@@ -288,7 +288,9 @@ src/
 │   ├── WordBuilderScene.ts
 │   ├── WordMatchScene.ts
 │   └── sceneRegistry.ts
-├── utils/                                 # 14 files
+├── utils/                                 # 16 files
+│   ├── backupFile.ts
+│   ├── backupFormat.ts
 │   ├── completionEffect.ts
 │   ├── dragJuice.ts
 │   ├── fonts.ts
@@ -836,10 +838,10 @@ Migrations are minimal: a per-version migrate step from the stored version to th
 
 ### 6.6 The guarded write path and the degraded session
 
-`saveV2()` is still the single write route. It stamps the payload, offers it to the store, and applies it to the in-memory cache whether or not the store accepts it:
+`saveV2()` is still the single write route. It stamps the payload, offers it to the store, and applies it to the in-memory cache whether or not the store accepts it — and reports which of the two happened, so a caller that must know (an import) can say so:
 
 ```ts
-function saveV2(v2: ProfileV2): void {
+function saveV2(v2: ProfileV2): boolean {
   // FR-1: the single write path stamps every payload with the schema version.
   const raw = JSON.stringify({ ...v2, schemaVersion: SCHEMA_VERSION });
   const storage = getStorage();
@@ -849,13 +851,14 @@ function saveV2(v2: ProfileV2): void {
       persistenceDegraded = false;
       lastKnownRaw = raw;
       v2Cache = { provisional: false, raw, state: v2 };
-      return;
+      return true;
     } catch {
       // A full quota refuses the write; the change still applies below.
     }
   }
   persistenceDegraded = true;
   v2Cache = { provisional: false, raw: storedRaw(), state: v2 };
+  return false;
 }
 ```
 
@@ -864,6 +867,32 @@ function saveV2(v2: ProfileV2): void {
 The flag is a module-scope session flag rather than a stored field. `isPersistenceDegraded()` reports it; any failed read or write raises it; a write the store accepts persists the whole of memory and clears it. That heal is not reachable while reads are blocked, though, because `saveV2` attempts no write then: the session stays memory-only until a read proves the store did not change while it could not be seen — a read returning the raw this session last knew, or an empty store, which has nothing to destroy. A read returning a different raw keeps the session memory-only with the flag raised, so a writer that got there first is never overwritten. The two deliberate memory-only paths — a payload from a future schema version, and a mutator whose transform declines — are not failures and leave the flag alone. The parental Settings panel reads it once, when the panel is built, and states the fact in one quiet line while it is raised; nothing child-facing changes and no row moves.
 
 Three consequences are worth knowing. A refused write keys the cache with the raw string the store still holds (`storedRaw()`: `lastKnownRaw` while reads are blocked, a fresh read otherwise) beside the new state, so the memo keeps serving what the child just earned instead of re-reading stale bytes and taking the sticker back off screen — and it still detects a genuine external write. A boot that could read nothing memoizes a **provisional** placeholder, the defaults `migrateV1(null)` builds, and a provisional entry never satisfies the cache comparison: a read that heals onto an empty store therefore still reaches the migration path and adopts a legacy v1 save instead of shadowing it for the life of the install. When it does, the persisted payload wins over anything the session earned while blind — the session had already told the parent it could not save, and merging two states would need a rule for two versions of the same sticker. And the happy path is unchanged: one `getItem` per read, one `setItem` per accepted write, the same bytes, the same schema stamp.
+
+### 6.7 Backup and restore
+
+The save is also a file a parent can carry to another device. `src/utils/backupFormat.ts` is the whole of it and is pure: no DOM, no storage, no clock it is not handed. It owns four things — the envelope, the checksum, the refusals and the merge plan.
+
+```json
+{
+  "format": "aby-little-lab-backup",
+  "formatVersion": 1,
+  "schemaVersion": 1,
+  "appVersion": "1.23.0",
+  "exportedAt": "2026-11-08T09:14:00.000Z",
+  "checksum": "fnv1a64:0b3f5c1d8a92e647",
+  "payload": { "activeProfileId": "p1", "profiles": [], "settings": {} }
+}
+```
+
+Seven fields. `format` and `formatVersion` name the file and let a future version recognise its own; `schemaVersion` is the save schema the payload is written in; `appVersion` and `exportedAt` are provenance for a parent reading the file in a text editor; `payload` is a normalised `ProfileV2` — `exportSave()` hands `ensureV2()`, so a device that still holds a legacy v1 store exports v2.
+
+`checksumOf(JSON.stringify(payload))` is FNV-1a 64-bit over the payload's own text, rendered `fnv1a64:<16 hex>`. It catches **corruption**: a truncated download, a share that arrived mangled, a file a text editor re-saved. It proves nothing about intent — there is no key and no secret, so anyone who edits the payload can recompute it. It is an integrity check against accidents, not a signature, and what it guards is a child's sticker collection, not a credential. That is also why the format carries no encryption: the file holds no more than the device already stores in plain `localStorage`.
+
+Reading refuses in a fixed order, so the sentence a parent reads is the truest one available: unreadable JSON, then `wrong-format` (a different file, or a field missing), then `newer-format`, then `newer-schema` (update the app, then try again), then `checksum-mismatch`. A checksum therefore never vouches for a payload that is not a save: a verified `{}` is refused as `wrong-format` rather than normalising into a default device. Reading ends there. `profile-cap` comes from `planImport` after the parent chooses a mode — the file can be read perfectly and still bring more profiles than this device holds — and `store-unavailable` from `applyImport` before it plans: the store is asked first, because a save that cannot survive the reload that reveals it is worse than a clear refusal. Export is allowed while degraded — it only reads. Each refusal is a full sentence from `REFUSAL_MESSAGES`, painted on the panel's result line; none of them changes the save, and none of them reloads the app.
+
+`planImport(local, incoming, mode)` is the decision, `applyImport(mode, incoming)` the write. **Merge** keeps this device's `settings` and `activeProfileId` and combines each profile whose id is already here **best-of-field**: an earned sticker (the earlier `earnedAt` winning), the higher of each progress counter, the longer `recent` list, the larger play-time figure for the same day with the later day winning outright, the later insight day with the higher counts, and the union of activity days at the higher play count. Profiles whose id the device does not have are appended while the total stays at or under `MAX_PROFILES`; a backup that would push past the cap is refused **whole**, never partly applied. Every rule is a maximum or a union, so merging the same file twice is a no-op the second time. **Replace** overwrites the payload entirely, after the parent confirms. Both land through `mutatePersisted`, the single write path, which also reports whether the store accepted the bytes; a completed import states in numbers what changed — profiles and stickers — and then reloads after a short beat so every scene is built from the new bytes, and a refusal, including a write the store would not keep, does not reload.
+
+**The seam.** `src/utils/backupFile.ts` is the only module under `src/` that touches the browser's file machinery: `downloadBackup()` builds the `Blob`, clicks an anchor and revokes the URL, `pickBackupFile()` returns `{ name, text } | null` from a hidden `<input type="file">`, `backupFilename()` dates the file with the local day, and `reloadApp()` is the one `location.reload()`. `SettingsPanel` is its only caller, and above it `createBackup`, `readBackup` and `planImport` are exercised directly by unit tests; the browser layer only has to prove that the file a download actually produces is the file the picker accepts ([§10.5](#105-the-browser-journey-layer)).
 
 ---
 
@@ -1127,13 +1156,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-137 test files, 2,981 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+140 test files, 3,069 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.22 (6104/6278), branches 91.17 (1757/1927), functions 96.11 (1335/1389) and lines 98.21 (5677/5780) across 137 files and 2,981 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.33 (6381/6556), branches 91.67 (1882/2053), functions 96.28 (1399/1453) and lines 98.29 (5935/6038) across 140 files and 3,069 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1148,7 +1177,7 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 17 journeys across 14 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, an offline relaunch and a device whose storage refuses every write. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 19 journeys across 15 spec files cover boot, all 22 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, an offline relaunch and a device whose storage refuses every write. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
 What this layer observes that the unit layer cannot:
 
@@ -1156,6 +1185,8 @@ What this layer observes that the unit layer cannot:
 - real hit areas on a real canvas: every gesture goes through the canvas bounding box, so the 1024x768 `Scale.FIT` letterboxing is exercised rather than assumed, and a control whose interactive area no longer covers its published centre is invisible to happy-dom;
 - persistence across a real reload, the service worker, and a relaunch with the network cut at the browser context;
 - only-in-a-frame timing: the entrance tweens that swallow a tap, the parental gate's three-second hold, `NEXT_ROUND_DELAY`.
+
+One journey does something no other does and acts on a file the browser produced. `backup.spec.ts` exports a save through the real download event, then hands `download.path()` — the file that actually landed on disk, never read with `fs` and never rebuilt — to the file chooser in a *second browser context*, so the restore starts from genuinely empty storage. The merge-or-replace card's two buttons are published through the bridge at the points the card draws them, so the tap is the button's own layout rather than a copied coordinate, and an empty `choices` array is how the journey tells an accepted file from a refused one.
 
 **Why it is not in `verify_phase`.** The phase gate is a ~90 s budget every phase subagent runs; this layer builds `dist` and takes minutes. It runs as its own CI job on every pull request (`Browser Journeys`, `needs: quality-gates`), so a browser failure is reported next to the static and unit results instead of replacing them.
 
@@ -1168,7 +1199,7 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 
 `pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
 
-**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 17 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 19 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 

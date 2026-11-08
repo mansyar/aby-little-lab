@@ -51,6 +51,27 @@ function install(scenes: FakeScene[] = []): FakeGame {
   return fake;
 }
 
+/**
+ * The settings state of a scene that publishes no panel: no gate, no panel, and
+ * the second page at rest. A fresh object each call, so an assertion against it
+ * compares values rather than a shared reference.
+ */
+function noPanelSettings(): E2ESettingsState {
+  return {
+    gate: null,
+    open: false,
+    toggles: [],
+    progressRow: null,
+    progress: null,
+    degraded: false,
+    page: 0,
+    switchPage: { x: 0, y: 0 },
+    backupRows: [],
+    backupResult: "",
+    choices: [],
+  };
+}
+
 describe("initE2EBridge", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -298,38 +319,24 @@ describe("initE2EBridge", () => {
     it("reports no gate and no panel when the active scene publishes no hook", () => {
       install([sceneWith("ShapeSorter")]);
 
-      expect(window.__abyE2E?.settings()).toEqual({
-        gate: null,
-        open: false,
-        toggles: [],
-        progressRow: null,
-        progress: null,
-        degraded: false,
-      });
+      expect(window.__abyE2E?.settings()).toEqual(noPanelSettings());
     });
 
     it("reports no gate and no panel when no scene is active", () => {
       install();
 
-      expect(window.__abyE2E?.settings()).toEqual({
-        gate: null,
-        open: false,
-        toggles: [],
-        progressRow: null,
-        progress: null,
-        degraded: false,
-      });
+      expect(window.__abyE2E?.settings()).toEqual(noPanelSettings());
     });
 
     it("follows the gate point, the panel and a toggle's own state", () => {
       const scene = sceneWith("Hub");
       let on = true;
       let state: E2ESettingsState = {
+        ...noPanelSettings(),
         gate: { x: 1016, y: 32 },
         open: true,
         toggles: [{ id: "adaptive", x: 512, y: 449, on }],
         progressRow: { x: 512, y: 505 },
-        progress: null,
         degraded: true,
       };
       scene.e2eSettings = () => state;
@@ -343,20 +350,12 @@ describe("initE2EBridge", () => {
       expect(window.__abyE2E?.settings().toggles[0]?.on).toBe(false);
 
       state = {
-        gate: state.gate,
-        open: false,
-        toggles: [],
-        progressRow: null,
-        progress: null,
-        degraded: false,
+        ...noPanelSettings(),
+        gate: { x: 1016, y: 32 },
       };
       expect(window.__abyE2E?.settings()).toEqual({
+        ...noPanelSettings(),
         gate: { x: 1016, y: 32 },
-        open: false,
-        toggles: [],
-        progressRow: null,
-        progress: null,
-        degraded: false,
       });
     });
 
@@ -378,12 +377,11 @@ describe("initE2EBridge", () => {
       };
       let progress: E2EProgressState | null = null;
       scene.e2eSettings = () => ({
+        ...noPanelSettings(),
         gate: { x: 1016, y: 32 },
         open: true,
-        toggles: [],
         progressRow: { x: 512, y: 505 },
         progress,
-        degraded: false,
       });
       install([scene]);
 
@@ -397,6 +395,88 @@ describe("initE2EBridge", () => {
       const moved = window.__abyE2E?.settings().progress;
       expect(moved?.page).toBe(1);
       expect(moved?.lines).toEqual([]);
+    });
+
+    it("publishes the second page, its switch point and its two action rows", () => {
+      const scene = sceneWith("Hub");
+      let state: E2ESettingsState = {
+        ...noPanelSettings(),
+        gate: { x: 1016, y: 32 },
+        open: true,
+        page: 0,
+        switchPage: { x: 512, y: 134 },
+        backupRows: [],
+        backupResult: "",
+      };
+      scene.e2eSettings = () => state;
+      install([scene]);
+
+      // Page one first: the switch is there, the backup rows are not.
+      expect(window.__abyE2E?.settings().page).toBe(0);
+      expect(window.__abyE2E?.settings().switchPage).toEqual({ x: 512, y: 134 });
+      expect(window.__abyE2E?.settings().backupRows).toEqual([]);
+      expect(window.__abyE2E?.settings().backupResult).toBe("");
+      expect(window.__abyE2E?.settings().choices, "no card is open yet").toEqual([]);
+
+      // A parent taps the switch: the same point now means "back to settings",
+      // and the two rows it led to are live.
+      state = {
+        ...state,
+        page: 1,
+        backupRows: [
+          { id: "export", point: { x: 512, y: 337 } },
+          { id: "restore", point: { x: 512, y: 393 } },
+        ],
+      };
+      expect(window.__abyE2E?.settings().page).toBe(1);
+      expect(window.__abyE2E?.settings().switchPage).toEqual({ x: 512, y: 134 });
+      expect(window.__abyE2E?.settings().backupRows.map((row) => row.id)).toEqual([
+        "export",
+        "restore",
+      ]);
+      expect(window.__abyE2E?.settings().backupRows[1]?.point).toEqual({ x: 512, y: 393 });
+
+      // And the line the parent reads afterwards.
+      state = { ...state, backupResult: "Saved aby-little-lab-backup-2026-11-08.json" };
+      expect(window.__abyE2E?.settings().backupResult).toBe(
+        "Saved aby-little-lab-backup-2026-11-08.json",
+      );
+
+      // And, once a picked file is accepted, the two buttons its card offers:
+      // a journey taps these rather than copying the card's own geometry.
+      state = {
+        ...state,
+        choices: [
+          { id: "merge", point: { x: 512, y: 424 } },
+          { id: "replace", point: { x: 512, y: 504 } },
+        ],
+      };
+      expect(window.__abyE2E?.settings().choices.map((choice) => choice.id)).toEqual([
+        "merge",
+        "replace",
+      ]);
+      expect(window.__abyE2E?.settings().choices[1]?.point).toEqual({ x: 512, y: 504 });
+    });
+
+    it("reports the empty page again once the panel closes", () => {
+      const scene = sceneWith("Hub");
+      let state: E2ESettingsState = {
+        ...noPanelSettings(),
+        gate: { x: 1016, y: 32 },
+        open: true,
+        page: 1,
+        switchPage: { x: 512, y: 134 },
+        backupRows: [{ id: "restore", point: { x: 512, y: 393 } }],
+        backupResult: "Nothing was restored.",
+      };
+      scene.e2eSettings = () => state;
+      install([scene]);
+
+      state = { ...noPanelSettings(), gate: { x: 1016, y: 32 } };
+      expect(window.__abyE2E?.settings()).toEqual({
+        ...noPanelSettings(),
+        gate: { x: 1016, y: 32 },
+      });
     });
   });
 

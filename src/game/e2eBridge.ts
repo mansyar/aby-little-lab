@@ -14,6 +14,14 @@ export interface E2ERoundTarget {
   y: number;
 }
 
+/** A canvas-space point with no identity: a card, a button, a row's centre. */
+export interface GamePoint {
+  /** X in the 1024x768 canvas space. */
+  x: number;
+  /** Y in the 1024x768 canvas space. */
+  y: number;
+}
+
 /** A read-only description of the round the active scene is showing. */
 export interface E2ERoundGeometry {
   /** Zero-based round index, matching the scene's progress dots. */
@@ -60,8 +68,37 @@ export interface E2EProgressState {
   next: { x: number; y: number };
 }
 
+/**
+ * The second Settings page — backup and restore — as the panel is showing it.
+ *
+ * A journey moves between the pages with `switchPage` and taps the two action
+ * rows with `backupRows`, then reads `backupResult` rather than a pixel: the
+ * result line is the app's own sentence about what happened.
+ */
+export interface E2EBackupState {
+  /** The page on screen: 0 is the settings rows, 1 is backup and restore. */
+  page: 0 | 1;
+  /**
+   * Canvas centre of the card that switches pages. `{ x: 0, y: 0 }` when no
+   * panel is open — there is no card to tap, and the origin is outside every
+   * panel object.
+   */
+  switchPage: GamePoint;
+  /** Page two's two tappable rows, in the order they are drawn; empty off page 1. */
+  backupRows: { id: "export" | "restore"; point: GamePoint }[];
+  /** The result line's current text, `""` when nothing has happened yet. */
+  backupResult: string;
+  /**
+   * The merge-or-replace card's two buttons, in the order they are drawn, each
+   * with the centre its own band answers to. Empty while no card is open, which
+   * is how a journey tells "the file was accepted" apart from "it was refused":
+   * a refusal ends on the result line and never opens the card.
+   */
+  choices: { id: "merge" | "replace"; point: GamePoint }[];
+}
+
 /** The parental gate and the settings panel as the hub currently holds them. */
-export interface E2ESettingsState {
+export interface E2ESettingsState extends E2EBackupState {
   /** Canvas centre of the settings control, or null in a scene that is not the hub. */
   gate: { x: number; y: number } | null;
   /** Whether the panel is up; false in any other scene and after it closes. */
@@ -258,6 +295,11 @@ export function initE2EBridge(game: Phaser.Game): void {
           progressRow: null,
           progress: null,
           degraded: false,
+          page: 0,
+          switchPage: { x: 0, y: 0 },
+          backupRows: [],
+          backupResult: "",
+          choices: [],
         };
       }
       return hook.call(probe);

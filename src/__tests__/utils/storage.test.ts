@@ -3,7 +3,7 @@ import { createDefaultInsights } from "../../game/insightsLogic";
 import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
 import { createDefaultProgressMap } from "../../game/progressLogic";
-import type { AppStorage, GameId } from "../../types";
+import type { AppStorage, GameId, Profile, ProfileV2 } from "../../types";
 import { MAX_PROFILES } from "../../types";
 import { breakStorage, repairStorage } from "../helpers/throwingStorage";
 
@@ -25,8 +25,10 @@ afterEach(() => {
 
 import {
   addProfile,
+  applyImport,
   deleteProfile,
   earnSticker,
+  exportSave,
   getActiveProfile,
   getAdaptiveBandShift,
   getAvailableAvatars,
@@ -1989,6 +1991,194 @@ describe("insights", () => {
     recordGameResult("shape-sorter", 5, 1);
     recordLimitHit("p1");
 
+    expect(setItem).not.toHaveBeenCalled();
+    setItem.mockRestore();
+    expect(localStorage.getItem(V2_KEY)).toBe(raw);
+  });
+});
+
+/**
+ * The backup write path: the payload an export writes, and the one mutation an
+ * import performs. Every instant comes from the frozen clock above, so the
+ * today stamps in these fixtures agree with what production writes.
+ */
+describe("backup export and import", () => {
+  const INCOMING_SETTINGS = {
+    bgmEnabled: false,
+    sfxEnabled: false,
+    preferredVoiceURI: null,
+    adaptiveDifficulty: true,
+  };
+
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+    repairStorage();
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    repairStorage();
+  });
+
+  /** One profile from another device: default everywhere except what is given. */
+  function incomingProfile(id: string, earned: Partial<Record<GameId, string>> = {}): Profile {
+    const stickers = createDefaultStickers();
+    for (const [gameId, earnedAt] of Object.entries(earned) as Array<[GameId, string]>) {
+      stickers[gameId] = { earned: true, earnedAt };
+    }
+    return {
+      id,
+      avatarId: "cat",
+      createdAt: "2026-08-01T00:00:00.000Z",
+      stickers,
+      playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey(FIXED_NOW) },
+      progress: createDefaultProgressMap(),
+      activity: [],
+      insights: createDefaultInsights(),
+    };
+  }
+
+  /** The payload a backup file carries, as `readBackup` would hand it over. */
+  function incomingSave(profiles: Profile[], settings = INCOMING_SETTINGS): ProfileV2 {
+    return { activeProfileId: profiles[0].id, profiles, settings };
+  }
+
+  it("exportSave migrates a v1-only store, so the payload is v2", () => {
+    localStorage.setItem(V1_KEY, JSON.stringify(v1OnlySave()));
+
+    // FR-3: a device that has never written v2 still exports a v2 payload,
+    // because the export reads through `ensureV2`'s migration.
+    const exported = exportSave();
+
+    expect(exported.profiles).toHaveLength(1);
+    expect(exported.profiles[0]).toMatchObject({ id: "p1", avatarId: "cat" });
+    expect(exported.profiles[0].stickers["shape-sorter"].earned).toBe(true);
+    // The v1 body's settings came across, and the v2-only fields are present.
+    expect(exported.settings).toMatchObject({ bgmEnabled: false, sfxEnabled: true });
+    expect(exported.profiles[0].playTime.lastUsedDate).toBe(todayKey(FIXED_NOW));
+  });
+
+  it("applyImport replace writes the file's save over this device's", () => {
+    const incoming = incomingSave([
+      incomingProfile("p1", { "shape-sorter": "2026-08-02T00:00:00.000Z" }),
+    ]);
+
+    const result = applyImport("replace", incoming);
+
+    expect(result).toEqual({ ok: true });
+    expect(getActiveProfile().id).toBe("p1");
+    expect(getActiveProfile().stickers["shape-sorter"].earned).toBe(true);
+    // Replace overwrites the whole save, device settings included (FR-6).
+    expect(getSettings()).toEqual(INCOMING_SETTINGS);
+    expect(localStorage.getItem(V2_KEY)).not.toBeNull();
+  });
+
+  it("applyImport merge adds a sticker and keeps the local settings", () => {
+    updateSettings({ sfxEnabled: false });
+    const incoming = incomingSave(
+      [incomingProfile("p1", { "shape-sorter": "2026-08-02T00:00:00.000Z" })],
+      { ...INCOMING_SETTINGS, sfxEnabled: true },
+    );
+
+    const result = applyImport("merge", incoming);
+
+    expect(result).toEqual({ ok: true });
+    expect(hasSticker("shape-sorter")).toBe(true);
+    // Merge never carries settings across (FR-5): this device keeps its own.
+    expect(getSettings().sfxEnabled).toBe(false);
+  });
+
+  it("applyImport merge twice leaves the stored bytes identical", () => {
+    const incoming = incomingSave(
+      [incomingProfile("p1", { "shape-sorter": "2026-08-02T00:00:00.000Z" })],
+      { ...INCOMING_SETTINGS, bgmEnabled: true },
+    );
+
+    applyImport("merge", incoming);
+    const once = localStorage.getItem(V2_KEY);
+
+    // AC-5 at the storage layer: the same file twice changes nothing, so no
+    // duplicated sticker and no inflated counter.
+    const second = applyImport("merge", incoming);
+
+    expect(second).toEqual({ ok: true });
+    expect(localStorage.getItem(V2_KEY)).toBe(once);
+  });
+
+  it("applyImport refuses over the profile cap and writes nothing", () => {
+    addProfile("dog");
+    addProfile("frog");
+    addProfile("pig");
+    expect(getProfiles()).toHaveLength(MAX_PROFILES);
+    const before = localStorage.getItem(V2_KEY);
+    const degradedBefore = isPersistenceDegraded();
+
+    const incoming = incomingSave([incomingProfile("q9")]);
+    const result = applyImport("merge", incoming);
+
+    expect(result).toMatchObject({ ok: false, refusal: { code: "profile-cap" } });
+    // AC-8: a refused import writes nothing at all.
+    expect(localStorage.getItem(V2_KEY)).toBe(before);
+    expect(isPersistenceDegraded()).toBe(degradedBefore);
+  });
+
+  it("applyImport refuses on a degraded store, even for a valid file", () => {
+    updateSettings({});
+    const readStoredRaw = localStorage.getItem.bind(localStorage);
+    const before = readStoredRaw(V2_KEY);
+    breakStorage(["getItem"], "SecurityError");
+    // A failed read is what marks the store degraded in the first place.
+    expect(() => getSettings()).not.toThrow();
+    expect(isPersistenceDegraded()).toBe(true);
+
+    const result = applyImport("replace", incomingSave([incomingProfile("p1")]));
+
+    // FR-7: a restored save would not survive the reload that shows it, so the
+    // import is refused rather than half-applied.
+    expect(result).toMatchObject({ ok: false, refusal: { code: "store-unavailable" } });
+    expect(readStoredRaw(V2_KEY)).toBe(before);
+    expect(isPersistenceDegraded()).toBe(true);
+  });
+
+  it("refuses an import whose write the store did not accept", () => {
+    // A write the store accepts first, so the pre-check is looking at a healthy
+    // session: this case is about the import's own write failing, not the one
+    // before it.
+    updateSettings({});
+    const incoming = incomingSave([
+      incomingProfile("p1", { "shape-sorter": "2026-08-02T00:00:00.000Z" }),
+    ]);
+    const before = localStorage.getItem(V2_KEY);
+    // Broken immediately before the import, after the pre-check has been given
+    // everything it needs: `applyImport` asks `isPersistenceDegraded()`, which
+    // reads a flag and writes nothing, so the refused `setItem` here is the
+    // import's write and not an earlier one.
+    breakStorage(["setItem"], "QuotaExceededError");
+
+    const result = applyImport("merge", incoming);
+
+    // F1: a restore that cannot reach the store says so rather than reporting
+    // success and reloading over the one copy it has.
+    expect(result).toMatchObject({ ok: false, refusal: { code: "store-unavailable" } });
+    expect(localStorage.getItem(V2_KEY)).toBe(before);
+    expect(isPersistenceDegraded()).toBe(true);
+  });
+
+  it("refuses an import into a write-protected future-version save", () => {
+    updateSettings({});
+    // The write-protection fixture this file already uses for the unknown-version
+    // path: a payload stamped above this build's schema is never rewritten.
+    const raw = JSON.stringify({ ...incomingSave([incomingProfile("p1")]), schemaVersion: 99 });
+    localStorage.setItem(V2_KEY, raw);
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    const result = applyImport("replace", incomingSave([incomingProfile("p1")]));
+
+    // A future payload is memory-only by design (FR-4), so the import did not
+    // land: it reports the same store-unavailable sentence as a full quota, and
+    // the protected bytes stay byte-identical.
+    expect(result).toMatchObject({ ok: false, refusal: { code: "store-unavailable" } });
     expect(setItem).not.toHaveBeenCalled();
     setItem.mockRestore();
     expect(localStorage.getItem(V2_KEY)).toBe(raw);

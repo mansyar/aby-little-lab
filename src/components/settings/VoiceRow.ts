@@ -145,10 +145,31 @@ export class VoiceRow {
    * Refreshes the voice options from the platform and resolves the chip index
    * against the stored preference (falling back to "Default (device)" when the
    * URI is unset or no longer installed).
+   *
+   * The platform fires `voiceschanged` for the panel's whole lifetime, while
+   * the row itself exists only on page one: after a switch to page two its
+   * objects are destroyed and `release` has cleared them, so this returns
+   * without touching anything. The state it resolves is still refreshed by the
+   * next `create`.
    */
   voiceChanged(): void {
+    if (!this.chip || !this.preview || !this.band) return;
     this.syncVoiceSelection();
     this.fitBand();
+  }
+
+  /**
+   * Forgets the row's display objects, which the panel destroys.
+   *
+   * Called before a page clear so the handles and the cached label geometry do
+   * not outlive the objects they name: `fitBand` and `setChipLabel` both write
+   * through these, and a platform voice event between a switch and the next
+   * `create` would otherwise drive destroyed objects.
+   */
+  release(): void {
+    this.chip = null;
+    this.preview = null;
+    this.band = null;
   }
 
   /**

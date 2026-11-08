@@ -1,0 +1,32 @@
+{
+  "id": "20261108-backup-restore",
+  "title": "Backup and Restore",
+  "type": "feature",
+  "status": "complete",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-11-08T08:31:57+11:00",
+  "updated_at": "2026-11-08T13:10:00+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261108-backup-restore",
+  "base_branch": "master",
+  "base_sha": "8029cfada0bc5a7abe63d8f9feeaab347c653d17",
+  "progress": {
+    "phases_total": 5,
+    "phases_verified": 5,
+    "tasks_total": 17,
+    "tasks_done": 17
+  },
+  "last_checkpoint": "a5864afa",
+  "review_verdict": "pass_with_findings",
+  "review_rounds": 1,
+  "doc_sync": "synced",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/84",
+  "pr_state": "open",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-11-08T13:10:00+11:00",
+  "archive_path": "conductor/archive/20261108-backup-restore"
+}

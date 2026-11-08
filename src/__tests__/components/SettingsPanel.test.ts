@@ -1,12 +1,15 @@
 import { SettingsPanel } from "../../components/SettingsPanel";
 import {
   AVATAR_TEXTURE_SIZE,
+  OVERLAY_ALPHA,
   PANEL_HEIGHT,
   PANEL_WIDTH,
   ROW_HIT_WIDTH,
   ROW_PITCH,
 } from "../../components/settings/primitives";
 import { PROFILE_AVATAR_TEXTURES } from "../../game/profileLogic";
+import { backupFilename, downloadBackup, pickBackupFile, reloadApp } from "../../utils/backupFile";
+import { type BackupEnvelope, createBackup, refusalFor } from "../../utils/backupFormat";
 import {
   createInstallTracker,
   type InstallTracker,
@@ -15,7 +18,9 @@ import {
 } from "../../utils/pwaInstall";
 import {
   addProfile,
+  applyImport,
   earnSticker,
+  exportSave,
   getActiveProfile,
   getPlayTime,
   getProfiles,
@@ -24,6 +29,7 @@ import {
   isPersistenceDegraded,
   recordGamePlay,
   recordGameResult,
+  SCHEMA_VERSION,
   setPlayTimeLimit,
   switchProfile,
   updateSettings,
@@ -45,6 +51,31 @@ vi.mock("../../audio/AudioManager", () => ({
     getInstance: () => mockAudio,
   },
 }));
+
+/**
+ * The seam's browser effects are replaced with spies: this file may not open a
+ * real picker, write a real download or reload a real page. `backupFilename`
+ * stays real — it is pure, and the result line has to name the file the same
+ * way the app does. The pure format module is untouched.
+ */
+vi.mock("../../utils/backupFile", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/backupFile")>();
+  return {
+    ...actual,
+    downloadBackup: vi.fn(),
+    pickBackupFile: vi.fn(),
+    reloadApp: vi.fn(),
+  };
+});
+
+/**
+ * `applyImport` writes the whole save, so each case decides its own verdict:
+ * a real merge, or a refusal it wants to see on the result line.
+ */
+vi.mock("../../utils/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../utils/storage")>();
+  return { ...actual, applyImport: vi.fn() };
+});
 
 /** Creates a fake install tracker in the given state for SettingsPanel tests. */
 function createFakeInstallTracker(state: InstallUiState): InstallTracker {
@@ -139,6 +170,9 @@ interface MockScene {
   };
   children: {
     bringToTop: MockFn;
+  };
+  time: {
+    delayedCall: MockFn;
   };
 }
 
@@ -363,6 +397,9 @@ function createScene(): MockScene {
       },
     },
     children: { bringToTop: vi.fn() },
+    // A real `delayedCall` would wait; the panel only needs its request recorded
+    // so a test can fire the callback itself.
+    time: { delayedCall: vi.fn() },
   };
 }
 
@@ -643,6 +680,27 @@ describe("SettingsPanel row geometry", () => {
     expect(voiceIndex).toBeGreaterThanOrEqual(0);
     expect(scene.children.bringToTop.mock.invocationCallOrder[0]).toBeGreaterThan(
       scene.add.text.mock.invocationCallOrder[voiceIndex],
+    );
+  });
+
+  it("keeps the close button above page two's rows after a flip", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+    const close = findTextByLabel(scene, "✕") as MockGameObject;
+
+    // Page two's export row shares the same corner as page one's BGM band, and
+    // it is built after the ✕, so the invariant has to be restored by every
+    // rebuild rather than only by the constructor's one call.
+    const card = findTextStartingWith(scene, "Backup & restore") as MockGameObject;
+    triggerPointerdown(card);
+    expect(panel.backupState().page).toBe(1);
+
+    expect(scene.children.bringToTop).toHaveBeenCalledTimes(2);
+    expect(scene.children.bringToTop).toHaveBeenLastCalledWith(close);
+    const exportIndex = scene.add.text.mock.calls.findIndex((call) => call[2] === "Save a backup");
+    expect(exportIndex).toBeGreaterThanOrEqual(0);
+    expect(scene.children.bringToTop.mock.invocationCallOrder[1]).toBeGreaterThan(
+      scene.add.text.mock.invocationCallOrder[exportIndex],
     );
   });
 });
@@ -1953,6 +2011,28 @@ describe("SettingsPanel TTS voice selection", () => {
     expect(chip.setText).toHaveBeenCalledWith("Voice: en-US — Zoe");
   });
 
+  it("survives a voiceschanged event while the other page is open", () => {
+    const { synth, listeners } = stubSynth([]);
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    const chip = findTextByLabel(scene, "Voice: Default (device)") as MockGameObject;
+    const callsBefore = chip.setText.mock.calls.length;
+
+    const card = findTextStartingWith(scene, "Backup & restore") as MockGameObject;
+    triggerPointerdown(card);
+    expect(panel.backupState().page).toBe(1);
+    expect(chip.destroy, "the chip goes with page one").toHaveBeenCalled();
+
+    // The platform listener lives for the panel's lifetime, so it can arrive
+    // with page two on screen: the row released its handles before the objects
+    // were destroyed, so this writes through nothing.
+    (synth.getVoices as ReturnType<typeof vi.fn>).mockReturnValue([
+      makeVoice("urn:zoe", "Zoe", "en-US"),
+    ]);
+    expect(() => listeners.voiceschanged?.()).not.toThrow();
+    expect(chip.setText.mock.calls.length).toBe(callsBefore);
+  });
+
   it("removes the voiceschanged listener on destroy", () => {
     const { synth } = stubSynth([]);
     const scene = createScene();
@@ -2704,12 +2784,13 @@ describe("SettingsPanel affordance cohesion", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
 
-    // Seven rows: BGM, SFX, Adaptive, Profiles, Progress, Reset, Voice.
+    // Eight cards: the page switch above the title, then BGM, SFX, Adaptive,
+    // Profiles, Progress, Reset, Voice.
     const cards = getRectangles(scene).filter((r) => {
       const [, , w, h] = r.args ?? [];
       return w === 400 && h === 68;
     });
-    expect(cards).toHaveLength(7);
+    expect(cards).toHaveLength(8);
   });
 
   it("keeps every settings row card inside the panel and the canvas", () => {
@@ -2889,5 +2970,405 @@ describe("SettingsPanel degraded persistence notice", () => {
     // shows the notice: there is no subscription and no re-render.
     expect(panel.e2eDegraded()).toBe(true);
     expect(findTextByLabel(scene, NOTICE)).toBeDefined();
+  });
+});
+
+describe("SettingsPanel backup page", () => {
+  /** One fixed instant, so the download's filename and the payload agree. */
+  const FIXED_NOW = new Date("2026-11-08T10:00:00");
+  /** Page one's eight rows, in the order they are drawn. */
+  const PAGE_ONE_LABELS = [
+    "BGM: ON",
+    "SFX: ON",
+    "Adaptive: ON",
+    "Profiles",
+    "Progress",
+    "Reset Progress",
+    "Install App",
+    "Voice: Default (device)",
+  ];
+  /** Their centres, which AC-9 pins: centerY -47, stepping by ROW_PITCH. */
+  const PAGE_ONE_Y = [337, 393, 449, 505, 561, 617, 673, 729];
+  /** The switch card's centre, in the empty band above the title. */
+  const SWITCH_Y = 134;
+  /** The result line's row on page two. */
+  const RESULT_Y = 449;
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+    // A reset, not a clear: an implementation left over from the previous case
+    // would answer for a case that meant to decide for itself.
+    vi.mocked(applyImport).mockReset();
+    vi.mocked(downloadBackup).mockReset();
+    vi.mocked(pickBackupFile).mockReset();
+    vi.mocked(reloadApp).mockReset();
+    // Only the clock is faked: the async paths below still need the real
+    // microtask queue, and nothing here waits on a timer.
+    vi.useFakeTimers({ now: FIXED_NOW, toFake: ["Date"] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** Scene-space y of the last text created with the given label. */
+  function lastTextCallY(scene: MockScene, label: string): number {
+    let y = Number.NaN;
+    scene.add.text.mock.calls.forEach((call, index) => {
+      if (call[2] === label)
+        y = (scene.add.text.mock.calls[index] as unknown as [number, number])[1];
+    });
+    if (Number.isNaN(y)) throw new Error(`no text rendered for "${label}"`);
+    return y;
+  }
+
+  /** The result line: the wrapped text drawn at page two's third row. */
+  function findResultLine(scene: MockScene): MockGameObject | undefined {
+    let found: MockGameObject | undefined;
+    scene.add.text.mock.calls.forEach((call, index) => {
+      const style = call[3] as { wordWrap?: unknown } | undefined;
+      if (call[1] === RESULT_Y && style?.wordWrap) {
+        found = scene.add.text.mock.results[index]?.value as MockGameObject;
+      }
+    });
+    return found;
+  }
+
+  /** Builds a panel and taps its way to the backup page, returning the switch card. */
+  function openBackupPage(scene: MockScene, panel: SettingsPanel): MockGameObject {
+    const card = findTextStartingWith(scene, "Backup & restore") as MockGameObject;
+    expect(card, "the switch card should be on page one").toBeDefined();
+    triggerPointerdown(card);
+    expect(panel.backupState().page).toBe(1);
+    return card;
+  }
+
+  /** The most recently created text object carrying exactly this label. */
+  function lastTextObject(scene: MockScene, label: string): MockGameObject {
+    const object = findLastTextByLabel(scene, label) as MockGameObject | undefined;
+    if (!object) throw new Error(`no text rendered for "${label}"`);
+    return object;
+  }
+
+  /** Lets the tap handler's promise chain run to completion. */
+  async function settle(): Promise<void> {
+    await Promise.resolve();
+    await Promise.resolve();
+  }
+
+  /** A valid backup of the save on this device, as a parent would pick it. */
+  function backupOfThisDevice(): { envelope: BackupEnvelope; json: string } {
+    return createBackup(exportSave(), {
+      appVersion: __APP_VERSION__,
+      now: FIXED_NOW,
+      schemaVersion: SCHEMA_VERSION,
+    });
+  }
+
+  it("reaches a second page in one tap, with its own title and two rows", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+
+    const card = findTextStartingWith(scene, "Backup & restore") as MockGameObject;
+    expect(lastTextCallY(scene, "Backup & restore ›")).toBe(SWITCH_Y);
+    triggerPointerdown(card);
+
+    expect((findTextByLabel(scene, "Settings") as MockGameObject).setText).toHaveBeenCalledWith(
+      "Backup",
+    );
+    expect(findTextByLabel(scene, "Save a backup")).toBeDefined();
+    expect(findTextByLabel(scene, "Restore from a file")).toBeDefined();
+    expect(findResultLine(scene), "the result line starts empty").toBeDefined();
+    expect(panel.backupState().backupResult).toBe("");
+
+    // The same card now says where it goes back to.
+    expect(card.setText).toHaveBeenCalledWith("‹ Back to settings");
+  });
+
+  it("returns in one tap with every page-one row at its exact original y", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+
+    const pageOneMap = (): Record<string, number> =>
+      Object.fromEntries(PAGE_ONE_LABELS.map((label) => [label, lastTextCallY(scene, label)]));
+
+    const before = pageOneMap();
+    expect(Object.values(before)).toEqual(PAGE_ONE_Y);
+
+    const switchCard = openBackupPage(scene, panel);
+    const exportRow = lastTextObject(scene, "Save a backup");
+    const restoreRow = lastTextObject(scene, "Restore from a file");
+    triggerPointerdown(switchCard);
+
+    expect(panel.backupState().page).toBe(0);
+    // AC-9: the same eight labels, at the same y, byte for byte.
+    expect(pageOneMap()).toEqual(before);
+    expect(Object.values(pageOneMap())).toEqual(PAGE_ONE_Y);
+    // The page-two rows are destroyed, so nothing from the other page answers.
+    expect(exportRow.destroy).toHaveBeenCalled();
+    expect(restoreRow.destroy).toHaveBeenCalled();
+  });
+
+  it("destroys the rows of the page it leaves, both ways", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never, createFakeInstallTracker("installable"));
+    const pageOneRows = PAGE_ONE_LABELS.map(
+      (label) => findTextByLabel(scene, label) as MockGameObject,
+    );
+
+    const switchCard = openBackupPage(scene, panel);
+    for (const row of pageOneRows) {
+      // Destroyed, not hidden: a hidden row keeps a live hit band over the canvas.
+      expect(row.destroy, "a page-one row outlived the switch").toHaveBeenCalled();
+    }
+
+    const exportRow = lastTextObject(scene, "Save a backup");
+    const restoreRow = lastTextObject(scene, "Restore from a file");
+    triggerPointerdown(switchCard);
+
+    expect(exportRow.destroy).toHaveBeenCalled();
+    expect(restoreRow.destroy).toHaveBeenCalled();
+  });
+
+  it("publishes the switch point and both row points from the panel's own layout", () => {
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    const state = panel.backupState();
+    expect(state.switchPage).toEqual({ x: 512, y: SWITCH_Y });
+    expect(state.backupRows).toEqual([
+      { id: "export", point: { x: 512, y: 337 } },
+      { id: "restore", point: { x: 512, y: 393 } },
+    ]);
+    // Each published point is inside the band its own row answers to.
+    for (const row of state.backupRows) {
+      const label = row.id === "export" ? "Save a backup" : "Restore from a file";
+      const band = hitRectFor(scene, label);
+      expect(row.point.x).toBeGreaterThanOrEqual(band.left);
+      expect(row.point.x).toBeLessThanOrEqual(band.right);
+      expect(row.point.y).toBeGreaterThanOrEqual(band.top);
+      expect(row.point.y).toBeLessThanOrEqual(band.bottom);
+    }
+  });
+
+  it("saves the whole save to a dated file and says so", () => {
+    vi.mocked(applyImport).mockReturnValue({ ok: true });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Save a backup") as MockGameObject);
+
+    const expected = `Saved ${backupFilename(FIXED_NOW)}`;
+    expect(backupFilename(FIXED_NOW)).toBe("aby-little-lab-backup-2026-11-08.json");
+    expect(downloadBackup).toHaveBeenCalledWith(expect.any(String), backupFilename(FIXED_NOW));
+    // The bytes are a real envelope, not a stringification of something else.
+    const json = vi.mocked(downloadBackup).mock.calls[0]?.[0] as string;
+    expect(JSON.parse(json)).toMatchObject({ format: "aby-little-lab-backup", formatVersion: 1 });
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(expected);
+    expect(panel.backupState().backupResult).toBe(expected);
+  });
+
+  it("restores a verified file as a merge, and says in numbers what it added", async () => {
+    const backup = backupOfThisDevice();
+    vi.mocked(pickBackupFile).mockResolvedValue({ name: "mine.json", text: backup.json });
+    // A real import through the public save layer: one more child, two more
+    // stickers. The panel counts the save before and after, so these numbers
+    // come from what was written rather than from the file.
+    vi.mocked(applyImport).mockImplementation(() => {
+      addProfile("dog");
+      earnSticker("shape-sorter");
+      earnSticker("color-match");
+      return { ok: true };
+    });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+
+    // The choice card names the file and offers both ways to apply it.
+    expect(findTextByLabel(scene, "mine.json")).toBeDefined();
+    expect(findTextByLabel(scene, "Merge")).toBeDefined();
+    expect(findTextByLabel(scene, "Replace")).toBeDefined();
+    expect(applyImport, "nothing is written before the parent chooses").not.toHaveBeenCalled();
+
+    triggerPointerdown(findTextByLabel(scene, "Merge") as MockGameObject);
+
+    expect(applyImport).toHaveBeenCalledWith("merge", backup.envelope.payload);
+    // FR-10: the numbers, on the line the parent reads before the restart.
+    expect(panel.backupState().backupResult).toBe("Merged 1 profile and 2 stickers into this one.");
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(
+      "Merged 1 profile and 2 stickers into this one.",
+    );
+    // The restart waits for the line to be read rather than racing it.
+    expect(reloadApp).not.toHaveBeenCalled();
+    expect(scene.time.delayedCall).toHaveBeenCalledWith(900, reloadApp);
+    const restart = scene.time.delayedCall.mock.calls[0]?.[1] as () => void;
+    restart();
+    expect(reloadApp).toHaveBeenCalledTimes(1);
+  });
+
+  it("restores a verified file as a replace when that is what was chosen", async () => {
+    const backup = backupOfThisDevice();
+    vi.mocked(pickBackupFile).mockResolvedValue({ name: "mine.json", text: backup.json });
+    vi.mocked(applyImport).mockImplementation(() => {
+      addProfile("dog");
+      earnSticker("shape-sorter");
+      return { ok: true };
+    });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+    triggerPointerdown(findTextByLabel(scene, "Replace") as MockGameObject);
+
+    expect(applyImport).toHaveBeenCalledWith("replace", backup.envelope.payload);
+    // A replace reports what the device now holds, not what it added.
+    expect(panel.backupState().backupResult).toBe("Restored 2 profiles and 1 sticker.");
+    expect(scene.time.delayedCall).toHaveBeenCalledWith(900, reloadApp);
+  });
+
+  it("says a merge added nothing when the file held nothing new", async () => {
+    const backup = backupOfThisDevice();
+    vi.mocked(pickBackupFile).mockResolvedValue({ name: "mine.json", text: backup.json });
+    // An import that writes the same save changes no count: the line has to say
+    // so rather than repeating the file's totals.
+    vi.mocked(applyImport).mockReturnValue({ ok: true });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+    triggerPointerdown(findTextByLabel(scene, "Merge") as MockGameObject);
+
+    expect(panel.backupState().backupResult).toBe(
+      "Merged 0 profiles and 0 stickers into this one.",
+    );
+  });
+
+  it("writes nothing when the choice card is dismissed (AC-5)", async () => {
+    const backup = backupOfThisDevice();
+    vi.mocked(pickBackupFile).mockResolvedValue({ name: "mine.json", text: backup.json });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+    expect(panel.backupState().choices).toHaveLength(2);
+
+    // The card's backdrop is the published way out: a parent who taps away from
+    // Merge and Replace has decided not to restore.
+    const card = getRectangles(scene).find((rect) => rect.args?.[5] === OVERLAY_ALPHA);
+    if (!card) throw new Error("the choice card should draw its own backdrop");
+    triggerPointerdown(card.object);
+
+    expect(applyImport, "declining writes nothing").not.toHaveBeenCalled();
+    expect(panel.backupState().choices).toEqual([]);
+    // The page itself is untouched, so the choice can be made again.
+    expect(findTextByLabel(scene, "Save a backup")).toBeDefined();
+    expect(findTextByLabel(scene, "Restore from a file")).toBeDefined();
+    expect(reloadApp).not.toHaveBeenCalled();
+  });
+
+  it("refuses a damaged file on the result line, with no write and no reload", async () => {
+    const backup = backupOfThisDevice();
+    const damaged = JSON.stringify({ ...backup.envelope, checksum: "fnv1a64:0" });
+    vi.mocked(pickBackupFile).mockResolvedValue({ name: "damaged.json", text: damaged });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+
+    const sentence = refusalFor("checksum-mismatch").message;
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(sentence);
+    expect(panel.backupState().backupResult).toBe(sentence);
+    expect(findTextByLabel(scene, "Merge"), "no choice to make").toBeUndefined();
+    expect(applyImport).not.toHaveBeenCalled();
+    expect(reloadApp).not.toHaveBeenCalled();
+  });
+
+  it("says nothing was restored when the picker came back empty", async () => {
+    vi.mocked(pickBackupFile).mockResolvedValue(null);
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith("Nothing was restored.");
+    expect(panel.backupState().backupResult).toBe("Nothing was restored.");
+    expect(applyImport).not.toHaveBeenCalled();
+    expect(reloadApp).not.toHaveBeenCalled();
+  });
+
+  it("puts a refused import's sentence on the line and does not reload", async () => {
+    const backup = backupOfThisDevice();
+    vi.mocked(pickBackupFile).mockResolvedValue({ name: "mine.json", text: backup.json });
+    vi.mocked(applyImport).mockReturnValue({ ok: false, refusal: refusalFor("profile-cap") });
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+    const mergeButton = lastTextObject(scene, "Merge");
+    triggerPointerdown(mergeButton);
+
+    const sentence = refusalFor("profile-cap").message;
+    expect(mergeButton.destroy, "the card closes on a choice").toHaveBeenCalled();
+    expect(findResultLine(scene)?.setText).toHaveBeenCalledWith(sentence);
+    expect(panel.backupState().backupResult).toBe(sentence);
+    expect(reloadApp).not.toHaveBeenCalled();
+  });
+
+  it("opens one picker, not two, when the row is tapped twice", async () => {
+    // A picker that never settles: the first tap is still in flight.
+    vi.mocked(pickBackupFile).mockReturnValue(new Promise(() => undefined));
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    const row = findTextByLabel(scene, "Restore from a file") as MockGameObject;
+    triggerPointerdown(row);
+    triggerPointerdown(row);
+    await settle();
+
+    expect(pickBackupFile).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the buffer line up while a picker is pending", async () => {
+    let resolvePick: ((picked: { name: string; text: string } | null) => void) | undefined;
+    vi.mocked(pickBackupFile).mockReturnValue(
+      new Promise((resolve) => {
+        resolvePick = resolve;
+      }),
+    );
+    const scene = createScene();
+    const panel = new SettingsPanel(scene as never);
+    openBackupPage(scene, panel);
+
+    triggerPointerdown(findTextByLabel(scene, "Restore from a file") as MockGameObject);
+    await settle();
+
+    // The panel stays exactly as it is: the native dialog is the feedback.
+    expect(panel.backupState().page).toBe(1);
+    expect(findTextByLabel(scene, "Save a backup")).toBeDefined();
+    expect(panel.backupState().backupResult).toBe("");
+
+    resolvePick?.(null);
+    await settle();
+
+    expect(panel.backupState().backupResult).toBe("Nothing was restored.");
   });
 });

@@ -10,3 +10,14 @@
 declare const process: {
   env: Record<string, string | undefined>;
 };
+
+/**
+ * `Buffer`, for one purpose: `fileChooser.setFiles` takes in-memory file bytes
+ * and Playwright base64-encodes them for the page. A `Uint8Array` does not
+ * survive that step - it stringifies to "104,101,..." and `atob` refuses it -
+ * so an in-memory fixture has to be a real Buffer. Same rule as above: declare
+ * what is used, and delete it if `@types/node` ever arrives.
+ */
+declare class Buffer extends Uint8Array {
+  static from(input: string, encoding?: "utf8" | "base64" | "hex"): Buffer;
+}
