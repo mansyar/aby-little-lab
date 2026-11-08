@@ -487,8 +487,8 @@ aby-little-lab/
 > survives deleting a profile and resetting progress, and no scene shows it to a
 > child. The buffer is bounded by constants - `MAX_ENTRIES` 20, and
 > `MAX_STACK_CHARS` 400 taken from the *front* of a stack, where the message and
-> the throwing frame are - which puts a 12,000-byte ceiling on the stored JSON
-> and a measured 9,612 bytes on twenty maximal entries; the oldest entry is
+> the throwing frame are - which puts a 12,000-byte ceiling on the stored JSON (Corrected 2026-11-08: `MAX_MESSAGE_CHARS` 200 is bounded too, on write and on read, so the ceiling is 16,000 bytes and the measured worst case is 13,461; the figures here bounded only the stack. The card starts `Recover` through `scene.scene.start()` - Phaser 4's `SceneManager` has no `start` - and its hit target is a `Zone`, because a zero-alpha Arc is never hit-tested.)
+> and a measured 9,612 bytes on twenty maximal entries; the oldest entry is (Corrected 2026-11-08: `MAX_MESSAGE_CHARS` 200 is bounded too, on write and on read, so the ceiling is 16,000 bytes and the measured worst case is 13,461; the figures here bounded only the stack. The card starts `Recover` through `scene.scene.start()` - Phaser 4's `SceneManager` has no `start` - and its hit target is a `Zone`, because a zero-alpha Arc is never hit-tested.)
 > dropped from the head, so a scene that throws every frame cannot spend the
 > quota the guarded save layer exists to survive. Recovery is ordered. With a
 > scene running the handler starts `Recover` as a *replacement*, which is what
@@ -500,7 +500,7 @@ aby-little-lab/
 > still. The card is a Phaser scene and eager, since Phaser 4 cannot add a scene
 > to the array lazily: a full-bleed rectangle in the page colour, the mascot only
 > when its texture exists, one drawn circular arrow, no text anywhere, and the
-> only interactive object a transparent disc hit-tested as a `Geom.Circle` at
+> only interactive object a `Zone` hit-tested as a `Geom.Circle` at
 > radius 72 over a 64 px disc. The guard widened by three names and not by a
 > prefix: `sessionStorage.` for the loop guard, and `window.location` plus
 > `window.addEventListener` for the two ways a module leaves the canvas rather

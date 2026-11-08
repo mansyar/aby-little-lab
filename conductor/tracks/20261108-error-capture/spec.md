@@ -97,6 +97,21 @@ Four facts, all verified in the code on 2026-11-08:
 | AC-10 | A journey throws a real error in the page, sees the card, taps it, then reads the downloaded diagnostics text and finds that error's message; the suite passes with the new journey and no retries. | FR-9, NFR-6 |
 | AC-11 | `grep` finds zero `fetch(` in `src/`, `package.json` is unchanged, and the shell entry size is recorded before and after. | FR-13, NFR-4 |
 
+**Correction (2026-11-08, review findings F3, F5, F7).** Three requirement
+statements were written before the code could contradict them.
+
+- The ceiling is **16,000 bytes**, not 12,000: bounding only the stack left the
+  message unbounded, so `MAX_MESSAGE_CHARS` (200) now applies on write and on
+  read and twenty entries at both maxima measure 13,461.
+- The DOM guard watches `sessionStorage.`, `window.location` and
+  `window.(add|remove)EventListener` - the members, not a `window.` prefix. A
+  prefix rule would fail nine existing modules for `speechSynthesis`,
+  `matchMedia` and `setTimeout`, which are not escape hatches, and a check that
+  cannot pass is not a check. `src/utils/reload.ts` is the second module this
+  track adds that names globals, beside `errorCapture.ts`.
+- NFR-6's "exactly one journey" is one spec file with two tests: the second
+  proves the empty-log path AC-8 needs.
+
 ## Edge Cases
 
 - **A crash inside the crash handler.** The record call is wrapped; if it throws, the failure is swallowed and the card still shows. An error handler that can throw turns one crash into two.

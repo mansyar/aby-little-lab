@@ -409,3 +409,171 @@ inherited, which is carried into `integrated.md` rather than papered over.
 - The shell entry went 168.3 -> 172.6 kB across this phase (+4.3 kB: the card, the
   capture module, the diagnostics file), 27.4 kB inside the gate.
 
+## Rework round 2
+
+Phase base `cfd17a75`. Ten findings from `review.md`, executed in severity order:
+the two that can strand a child first, then the mediums, then the lows.
+
+### F1 - the card's button works on the second crash
+
+`reloadOnce()` is the pre-canvas loop guard, and the flag it spends lives in
+`sessionStorage` - which survives a reload. So after the tab's first crash-tap
+(or any pre-canvas reload) the card's only control did nothing: an icon-only
+screen with a dead button, which is precisely the failure this track exists to
+remove.
+
+`src/utils/reload.ts` gained `reloadPage()`, which calls
+`window.location.reload()` unconditionally, with a comment saying why it must
+not share the guard: a guard exists to bound a reload the **app** decides to
+perform by itself, and a tap is not automatic. `RecoverScene` imports
+`reloadPage` and its `pointerdown` calls it. `reloadOnce()` is untouched and
+still guards the no-scene path in `errorCapture.ts`, with its existing tests
+unchanged.
+
+The test that would have failed before: `recoverScene.test.ts` no longer mocks
+the reload module. It stubs `window` with a `Map`-backed `sessionStorage` whose
+key is already `"1"` and a `location.reload` spy, then taps the button and
+asserts the page reloaded anyway - and that the spent key is still `"1"`, so the
+guard was consulted by nobody. Mocking the module instead would have let a card
+that consults the guard pass, which is exactly the defect. (`2a113a81`)
+
+### F2 - the handler cannot throw
+
+`recover()` sat outside the `try` that guarded the recording. `runningScene()`
+throws if the game was destroyed; `reload()` throws if the location is blocked;
+either escapes the listener, and an error handler that throws turns one crash
+into two - the second from inside the recovery.
+
+`capture()` now has the whole body inside one `try`: the recording keeps its own
+inner `catch` (a throwing recorder must still leave the card to run, FR-4), and
+the outer `catch` says in its comment what is actually being protected - the
+listener itself. Two cases were added, one per dependency
+(`runningScene: () => { throw new Error("gone") }`, and
+`reload: () => { throw new Error("blocked") }`): each fires a real error event,
+asserts it did not throw, and then fires a rejection and asserts it was still
+recorded - the other listener is still attached and the next crash still
+counts. (`c9a014e2`)
+
+### F3 - the size ceiling belongs to the code
+
+`MAX_STACK_CHARS` bounded half an entry. A thrown string, or a stringified
+rejection reason, could be any size at all, and `readEntry` passed a stored
+`stack` through untrimmed - so `normalizeDiagnostics` capped the count and
+nothing capped the bytes. The 12,000-byte ceiling was a property of fixtures
+that happened to throw seven-character messages.
+
+`MAX_MESSAGE_CHARS = 200` now sits beside `MAX_STACK_CHARS`, applied in
+`describedReason` in **every** branch - including the stringified-object branch,
+the one place the module generates a message of its own and therefore the only
+branch where "the thrown size" is not already a given - and in `readEntry` for
+both fields, because a stored log can be hand-edited.
+
+The tests: a 200-character trim from the front, a 100 kB rejected object trimmed
+on write, a 100 kB object carried through twenty appends without moving the
+buffer past the bound, a hand-edited 5,000-character message and stack trimmed
+on read, and the buffer test rebuilt with messages genuinely at their maximum
+instead of seven characters. The constants pin is now
+`[20, 400, 200]`.
+
+**The ceiling moved, and the arithmetic says it had to.** With both fields
+bounded, `MAX_ENTRIES x (MAX_MESSAGE_CHARS + MAX_STACK_CHARS + 200)` is
+**16,000 bytes**, and twenty entries at both maxima measure **13,461** - the
+number the failing run printed (`expected 0, received 13461`) and which is now
+pinned as `MEASURED_WORST_CASE` so the prose cannot drift from the code. The old
+12,000 was `20 x (400 + 200)` with the 200 spent entirely on timestamp, kind and
+keys: it silently assumed a message of no length, which was the finding.
+(`b3d5d3bf`)
+
+### F4 - the documents described the code that was replaced
+
+`docs/TDD.md` §6.8 now says `scene.scene.start("Recover")` through the running
+scene's own plugin, with the clause that Phaser 4's `SceneManager` has no
+`start` and that this was the silent no-op the journey caught; it names the
+`Zone` the card is hit-tested through, with the clause that Phaser does not
+hit-test a zero-alpha object and that this was the button no finger could press;
+the message/stack bound and the 16,000 / 13,461 figures replace the "maximal
+message / 9,612" wording; the handler is described as one guarded body; the
+card's `reloadPage()` is distinguished from the loop guard; and the
+replace-erases-the-log sentence is there (F10). README's parent-facing sentence
+promised the arrow "starts the app again - once, never in a loop", which was true
+only of the broken card; it now says the tap is always allowed and that the
+once-per-session limit belongs to the automatic pre-canvas reload.
+
+`conductor/tech-stack.md` and `conductor/product.md` were **denied** to this
+executor (see Blockers for the exact replacement text).
+
+### F5 - the requirements now say what the guard does
+
+`src/__tests__/guard/backupDom.test.ts` watches two window *members*
+(`window.location`, `window.(add|remove)EventListener`) and `sessionStorage.`,
+not a `window.` prefix, and `src/utils/reload.ts` is a second module this track
+adds that names globals - so FR-11 and FR-12 as written were false and AC-9
+named a rule the guard does not implement. The guard itself was not weakened:
+the amendments are to the prose. `spec.md` was denied (Blockers), with the
+amended FR-11 / FR-12 / AC-9 text drafted there, including a dated correction
+paragraph explaining that a prefix-wide `window.` rule fails nine modules for
+`speechSynthesis`, `matchMedia` and `setTimeout`, which are feature APIs rather
+than escape hatches.
+
+### F6 - the row is above the line that reports on it
+
+The diagnostics row sat at `rowY(3)` (505) and the result line at `rowY(2)`
+(449), so "Saved <file>" appeared *between* Restore and Save diagnostics -
+contrary to FR-8 and to both comments (F9's clipping risk was the same mistake
+seen from the other side).
+
+The row is now at `rowY(2)` (449) and the result text at `rowY(4)` (561), one
+pitch clear of the row's card, whose band is 471-539, so a wrapped
+`Saved diagnostics-....txt` cannot touch it. Comments corrected in both places.
+`RESULT_Y` in `SettingsPanel.test.ts` became 561; the pinning test now asserts
+337 / 393 / 449 **by label** and that `RESULT_Y` is more than 30 px below
+`hitRectFor(scene, "Save diagnostics").bottom`, which is F9's confirmation.
+`backupRows`' diagnostics point moved 505 -> 449 in both `SettingsPanel.test.ts`
+and `e2eBridge.test.ts`. Page one's eight rows and their `y` values are
+untouched, and their test was not edited. (`9b642d82`)
+
+### F8 - the hit area is asserted, not assumed
+
+`recoverScene.test.ts` reads the recorded `setInteractive` argument and asserts
+`toMatchObject({ x: 72, y: 72, radius: 72 })` plus
+`contains === Phaser.Geom.Circle.Contains`. The removed off-centre circle would
+have satisfied `expect.anything()`; this does not. The comment records why the
+local-space centre matters: it is what makes a tap in the corner of the zone miss.
+(`2a113a81`)
+
+### F7, F9, F10
+
+F9 is solved by F6 and asserted there. F7 (NFR-6 to "one spec file with two
+tests") is a `spec.md` edit and is denied - drafted in Blockers. F10's behaviour
+is kept unchanged and named in TDD §6.8; the `product.md` half is drafted in
+Blockers.
+
+### Gate
+
+| Layer | Command | Result |
+| --- | --- | --- |
+| Static | `pnpm check` | exit 0, 316 files, no fixes |
+| Types | `pnpm typecheck` | exit 0, both programs |
+| Unit | `pnpm test -- --run` | exit 0, 144 files / **3,158** tests, 29.65 s |
+| Coverage | `pnpm test:coverage` | exit 0, 97.38 / 91.97 / 96.37 / 98.33 - gate 90 / 85 / 88 / 95 |
+| Build | `pnpm build` | exit 0, shell `index-CrzFtQuT.js`, 47 chunks, 59 precache entries |
+| Bundle | `node scripts/validate-bundle.js` | exit 0, shell **172.7 kB** <= 200 kB |
+| PWA | `node scripts/validate-pwa.js` | exit 0, 16 passed, 47/47 chunks precached |
+| Documents | `node scripts/validate-docs.js` | exit 0, 5 passed (after the count refresh below) |
+| Browser | `pnpm test:e2e` | **NOT RUN (denied)** - the primary runs it |
+
+### What moved, and why
+
+- Tests 3,150 -> **3,158**: one card case (F1), two throwing-dependency cases
+  (F2), four message/read bound cases (F3), and one extra at the constants pin.
+- Coverage 97.39/92.02/96.36/98.33 -> **97.38/91.97/96.37/98.33** (statements
+  6551/6727, branches 1972/2144, functions 1435/1489, lines 6088/6191). Both
+  directions are inside the "varies by a fraction between identical runs" note
+  the TDD already carries.
+- Shell entry 172.6 -> **172.7 kB** (176.80 kB as Vite prints it, 45.23 kB
+  gzipped) - the added branch in `diagnostics.ts` and the `reloadPage` wrapper.
+- Documents refreshed only where those numbers appear: README line 49 and the
+  shell delta, TDD §10.2 and §10.3, `perf-baseline.md`'s suite and coverage
+  rows. The evidence file, `plan.md` and the track's own records keep their
+  historical figures.
+
