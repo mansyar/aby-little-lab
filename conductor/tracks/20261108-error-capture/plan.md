@@ -117,36 +117,45 @@
 - **Covers:** review findings F1-F10
 - **Touches:** `src/utils/reload.ts`, `src/scenes/RecoverScene.ts`, `src/game/errorCapture.ts`, `src/utils/diagnostics.ts`, `src/components/SettingsPanel.ts`, `src/utils/backupFormat.ts`, their test files, `docs/TDD.md`, `conductor/tech-stack.md`, `conductor/product.md`, `README.md`, the track directory
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`, then `pnpm test:e2e`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: A reload that is not a loop guard** - covers: FR-6, FR-7, AC-5
-  - [ ] R1.T1.1 Add `reloadPage()` to `src/utils/reload.ts` that reloads unconditionally, keeping `reloadOnce()` for the no-scene path only
-  - [ ] R1.T1.2 The card calls `reloadPage()`, so a second crash in the same tab still leaves the screen
-  - [ ] R1.T1.3 A test with the session flag already spent that asserts the card's tap still reaches `location.reload`
-- [ ] **R1.T2: A handler that cannot throw** - covers: FR-1, FR-4
-  - [ ] R1.T2.1 `recover()` inside the same `try` as the recording, so a destroyed game or a blocked location cannot throw out of the listener
-  - [ ] R1.T2.2 Cases where `runningScene()` and `reload()` both throw, asserting the listener stays silent
-- [ ] **R1.T3: A ceiling the code enforces** - covers: NFR-1, AC-2
-  - [ ] R1.T3.1 `MAX_MESSAGE_CHARS` applied on write and on read, with the stored stack trimmed too
-  - [ ] R1.T3.2 The ceiling test uses realistic message lengths and a large rejected object
-- [ ] **R1.T4: The page says what it drew** - covers: FR-8, AC-7
-  - [ ] R1.T4.1 The diagnostics row above the result line, as FR-8 says, with no wrap overlapping the card
-  - [ ] R1.T4.2 Both `y` values asserted, and the two comments corrected
-- [ ] **R1.T5: The documents describe the shipped code** - covers: FR-14
-  - [ ] R1.T5.1 TDD §6.8: `scene.scene.start`, the `Zone`, and the ceiling wording
-  - [ ] R1.T5.2 `tech-stack.md` and `product.md` wording, and the replace-erases-the-log behaviour named
-- [ ] **R1.T6: Requirements that match the guard and the suite** - covers: FR-11, FR-12, AC-9, NFR-6
-  - [ ] R1.T6.1 FR-11/FR-12/AC-9 amended to the two watched window members and to name `reload.ts`
-  - [ ] R1.T6.2 NFR-6 amended to one spec file with two tests
-  - [ ] R1.T6.3 The hit-area test asserts the recorded shape (72/72/72) rather than `expect.anything()`
-- [ ] **R1.T7: Both suites** - covers: AC-10
-  - [ ] R1.T7.1 Re-run the full chain and the browser suite
+- [x] **R1.T1: A reload that is not a loop guard** - covers: FR-6, FR-7, AC-5
+  - [x] R1.T1.1 Add `reloadPage()` to `src/utils/reload.ts` that reloads unconditionally, keeping `reloadOnce()` for the no-scene path only
+  - [x] R1.T1.2 The card calls `reloadPage()`, so a second crash in the same tab still leaves the screen
+  - [x] R1.T1.3 A test with the session flag already spent that asserts the card's tap still reaches `location.reload`
+- [x] **R1.T2: A handler that cannot throw** - covers: FR-1, FR-4
+  - [x] R1.T2.1 `recover()` inside the same `try` as the recording, so a destroyed game or a blocked location cannot throw out of the listener
+  - [x] R1.T2.2 Cases where `runningScene()` and `reload()` both throw, asserting the listener stays silent
+- [x] **R1.T3: A ceiling the code enforces** - covers: NFR-1, AC-2
+  - [x] R1.T3.1 `MAX_MESSAGE_CHARS` applied on write and on read, with the stored stack trimmed too
+  - [x] R1.T3.2 The ceiling test uses realistic message lengths and a large rejected object
+- [x] **R1.T4: The page says what it drew** - covers: FR-8, AC-7
+  - [x] R1.T4.1 The diagnostics row above the result line, as FR-8 says, with no wrap overlapping the card
+  - [x] R1.T4.2 Both `y` values asserted, and the two comments corrected
+- [x] **R1.T5: The documents describe the shipped code** - covers: FR-14
+  - [x] R1.T5.1 TDD §6.8: `scene.scene.start`, the `Zone`, and the ceiling wording
+  - [x] R1.T5.2 `tech-stack.md` and `product.md` wording, and the replace-erases-the-log behaviour named
+- [x] **R1.T6: Requirements that match the guard and the suite** - covers: FR-11, FR-12, AC-9, NFR-6
+  - [x] R1.T6.1 FR-11/FR-12/AC-9 amended to the two watched window members and to name `reload.ts`
+  - [x] R1.T6.2 NFR-6 amended to one spec file with two tests
+  - [x] R1.T6.3 The hit-area test asserts the recorded shape (72/72/72) rather than `expect.anything()`
+- [x] **R1.T7: Both suites** - covers: AC-10
+  - [x] R1.T7.1 Re-run the full chain and the browser suite
 
+**Result:** verified - ten findings closed. The card reloads on every tap and
+survives a second crash in the same tab, a throw inside the recovery path can
+no longer escape the listener, the message is bounded alongside the stack
+(16,000-byte ceiling, 13,461 measured), the diagnostics row sits above its
+result line, the guard and the documents name what actually shipped, and the
+hit shape is asserted rather than assumed. 3,158 unit tests and 21 journeys
+green; shell entry 172.7 kB of the 200 kB gate.
+**Checkpoint:** bbc28dfc
+**Evidence:** conductor/tracks/20261108-error-capture/verification/review-fixes.md
 <!-- Review fixes are appended by conductor-review as:
 ## Phase R1: Review Fixes
 - **Goal:** Resolve review findings ...
 - **Touches:** ...
 - **Verification:** ...
 - **Status:** pending
-- [ ] **R1.T1: Resolve <finding ID>** - covers: <AC>
+- [x] **R1.T1: Resolve <finding ID>** - covers: <AC>
 -->
