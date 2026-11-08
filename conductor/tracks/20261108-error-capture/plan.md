@@ -94,7 +94,7 @@
 - **Covers:** FR-13, FR-14, NFR-2, NFR-4, NFR-6, AC-10, AC-11
 - **Touches:** `e2e/journeys/crash.spec.ts`, `e2e/fixtures/game.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/product.md`, `conductor/tech-stack.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: A real crash, all the way to the file** - covers: AC-10, NFR-6
   - [ ] P4.T1.1 The journey boots the built artifact, throws from inside the page (`setTimeout(() => { throw ... })`, not a test hook), waits for the card, taps its published button or reloads after it, then opens Settings and saves diagnostics while watching the download
