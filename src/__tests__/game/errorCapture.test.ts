@@ -1,6 +1,6 @@
 import type Phaser from "phaser";
-import type { CrashEntry } from "../../types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { CrashEntry } from "../../types";
 
 /**
  * `recordCrash` is the module under a `try` in the handler, so the test has to
