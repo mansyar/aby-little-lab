@@ -2,7 +2,7 @@
   "id": "20261108-error-capture",
   "title": "Error Capture",
   "type": "feature",
-  "status": "new",
+  "status": "in_progress",
   "priority": "high",
   "depends_on": [
     "20261107-storage-resilience",
@@ -10,7 +10,7 @@
     "20261107-release-e2e"
   ],
   "created_at": "2026-11-08T14:14:55+11:00",
-  "updated_at": "2026-11-08T14:14:55+11:00",
+  "updated_at": "2026-11-08T14:16:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261108-error-capture",
