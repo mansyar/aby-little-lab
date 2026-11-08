@@ -70,18 +70,22 @@
 - **Covers:** FR-8, FR-9, FR-10, AC-7, AC-8
 - **Touches:** `src/components/SettingsPanel.ts`, `src/utils/backupFile.ts`, `src/game/e2eBridge.ts`, `src/scenes/HubScene.ts`, `src/__tests__/components/SettingsPanel.test.ts`, `src/__tests__/utils/backupFile.test.ts`, `src/__tests__/game/e2eBridge.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Gather the environment and write the file** - covers: FR-10, FR-9
-  - [ ] P3.T1.1 `downloadText(filename, body)` generalised out of `downloadBackup` so both write through one anchor path, with `downloadBackup` unchanged in behaviour
-  - [ ] P3.T1.2 `saveDiagnostics()` in the seam reads the environment (app version, user agent, viewport, profile count, play-time state, degraded flag), builds the report via the pure module, and downloads `diagnostics-<local day>.txt`
-  - [ ] P3.T1.3 An empty log downloads nothing and returns a value the panel turns into a sentence
-- [ ] **P3.T2: Put the row on page two** - covers: FR-8
-  - [ ] P3.T2.1 A third row at the next free pitch on page two, leaving page one's eight rows and the result line's place intact
-  - [ ] P3.T2.2 The result line reports `Saved <filename>` or that no crashes have been recorded, and the row is not disabled when the log is empty
-- [ ] **P3.T3: Publish it for the journey** - covers: FR-8, AC-7
-  - [ ] P3.T3.1 The bridge publishes the diagnostics row's point and the result line's text, additively and inert without `?e2e=1`
-  - [ ] P3.T3.2 Tests: page one's eight labels and `y` values are asserted equal to the pre-change list; the row writes once and reports; an empty log reports without writing
+- [x] **P3.T1: Gather the environment and write the file** - covers: FR-10, FR-9
+  - [x] P3.T1.1 `downloadText(filename, body)` generalised out of `downloadBackup` so both write through one anchor path, with `downloadBackup` unchanged in behaviour
+  - [x] P3.T1.2 `saveDiagnostics()` in the seam reads the environment (app version, user agent, viewport, profile count, play-time state, degraded flag), builds the report via the pure module, and downloads `diagnostics-<local day>.txt`
+  - [x] P3.T1.3 An empty log downloads nothing and returns a value the panel turns into a sentence
+- [x] **P3.T2: Put the row on page two** - covers: FR-8
+  - [x] P3.T2.1 A third row at the next free pitch on page two, leaving page one's eight rows and the result line's place intact
+  - [x] P3.T2.2 The result line reports `Saved <filename>` or that no crashes have been recorded, and the row is not disabled when the log is empty
+- [x] **P3.T3: Publish it for the journey** - covers: FR-8, AC-7
+  - [x] P3.T3.1 The bridge publishes the diagnostics row's point and the result line's text, additively and inert without `?e2e=1`
+  - [x] P3.T3.2 Tests: page one's eight labels and `y` values are asserted equal to the pre-change list; the row writes once and reports; an empty log reports without writing
+
+- **Result:** verified - a third row on Backup page two writes the crash log to `diagnostics-<local day>.txt` with an environment header, an empty log writes no file and says so, and the download seam keeps the backup `application/json` while the report leaves as `text/plain`. 3,143 tests green, coverage 97.39/92/96.36/98.33, shell entry 172.3 kB of the 200 kB gate.
+- **Checkpoint:** 07b09ab9
+- **Evidence:** conductor/tracks/20261108-error-capture/verification/phase-3.md
 
 ## Phase 4: Proof, and the record
 
