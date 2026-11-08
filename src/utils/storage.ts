@@ -28,6 +28,7 @@ import {
 import type {
   AppStorage,
   AvatarId,
+  CrashEntry,
   GameId,
   GameProgress,
   PlayTime,
@@ -37,6 +38,7 @@ import type {
 } from "../types";
 import type { ImportMode, Refusal } from "./backupFormat";
 import { planImport, refusalFor } from "./backupFormat";
+import { appendCrash } from "./diagnostics";
 
 const V1_KEY = "abby-little-lab:v1";
 const V2_KEY = "abby-little-lab:v2";
@@ -383,6 +385,37 @@ export function getSettings(): Settings {
 
 export function updateSettings(partial: Partial<Settings>): void {
   mutate((v2) => ({ ...v2, settings: { ...v2.settings, ...partial } }));
+}
+
+/**
+ * The device's crash log, oldest first (FR-3).
+ *
+ * A copy, never the live array: `getSettings` hands out the settings block
+ * itself for historical reasons, but a caller that could append to the log
+ * behind `recordCrash`'s back would bypass the ring buffer and the write path
+ * both.
+ */
+export function getDiagnostics(): CrashEntry[] {
+  return [...ensureV2().settings.diagnostics];
+}
+
+/**
+ * Records one crash against the device (FR-3, FR-4).
+ *
+ * It goes through `mutate`, the single write path, which is total: a store that
+ * refuses the write leaves the entry in memory for the rest of the session and
+ * the next accepted save persists it. There is deliberately no `try` here — the
+ * save layer is written not to throw, and a catch no test can reach would be an
+ * unexercised branch in the one function that must never fail.
+ */
+export function recordCrash(entry: CrashEntry): void {
+  mutate((current) => ({
+    ...current,
+    settings: {
+      ...current.settings,
+      diagnostics: appendCrash(current.settings.diagnostics, entry),
+    },
+  }));
 }
 
 /** Clears the ACTIVE profile's stickers, keeping settings and other profiles. */

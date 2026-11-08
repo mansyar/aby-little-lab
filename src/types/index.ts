@@ -85,6 +85,14 @@ export interface Settings {
    * Off restores the fixed classic ladder for every game.
    */
   adaptiveDifficulty: boolean;
+  /**
+   * The device's crash log, oldest first: the newest twenty uncaught errors,
+   * written only through `recordCrash` and never shown to a child. Additive at
+   * schema version 1 — a payload written before the log existed backfills an
+   * empty array, and the settings normaliser re-caps whatever a hand-edited
+   * payload holds.
+   */
+  diagnostics: CrashEntry[];
 }
 
 /**

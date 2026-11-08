@@ -3,7 +3,7 @@ import { createDefaultInsights } from "../../game/insightsLogic";
 import { endPlaySession, startPlaySession, todayKey } from "../../game/playTimeLogic";
 import { createDefaultStickers } from "../../game/profileLogic";
 import { createDefaultProgressMap } from "../../game/progressLogic";
-import type { AppStorage, GameId, Profile, ProfileV2 } from "../../types";
+import type { AppStorage, CrashEntry, GameId, Profile, ProfileV2 } from "../../types";
 import { MAX_PROFILES } from "../../types";
 import { breakStorage, repairStorage } from "../helpers/throwingStorage";
 
@@ -32,12 +32,14 @@ import {
   getActiveProfile,
   getAdaptiveBandShift,
   getAvailableAvatars,
+  getDiagnostics,
   getPlayTime,
   getProfiles,
   getProgress,
   getSettings,
   hasSticker,
   isPersistenceDegraded,
+  recordCrash,
   recordGamePlay,
   recordGameResult,
   recordGameTaps,
@@ -437,6 +439,7 @@ describe("Storage utilities", () => {
           sfxEnabled: true,
           preferredVoiceURI: null,
           adaptiveDifficulty: true,
+          diagnostics: [],
         },
       };
 
@@ -563,6 +566,155 @@ describe("Storage utilities", () => {
     });
   });
 
+  describe("crash log", () => {
+    /** One entry, as `toCrashEntry` would build it for a thrown Error. */
+    function crashEntry(overrides: Partial<CrashEntry> = {}): CrashEntry {
+      return {
+        at: "2026-08-05T11:59:00.000Z",
+        kind: "error",
+        message: "boom",
+        stack: "Error: boom\n    at create (GameScene.ts:12:9)",
+        ...overrides,
+      };
+    }
+
+    /**
+     * A payload written before this track: a complete, normalized v2 body whose
+     * settings block simply has no `diagnostics` key at all.
+     */
+    function preTrackPayload(): string {
+      return JSON.stringify({
+        activeProfileId: "p1",
+        profiles: [
+          {
+            id: "p1",
+            avatarId: "cat",
+            createdAt: "2026-08-04T00:00:00.000Z",
+            stickers: createDefaultStickers(),
+            playTime: { limitMinutes: null, usedMinutes: 0, lastUsedDate: todayKey(FIXED_NOW) },
+            progress: createDefaultProgressMap(),
+            activity: [],
+          },
+        ],
+        settings: {
+          bgmEnabled: true,
+          sfxEnabled: true,
+          preferredVoiceURI: null,
+          adaptiveDifficulty: true,
+        },
+      });
+    }
+
+    it("starts empty on a save that has never crashed", () => {
+      expect(getDiagnostics()).toEqual([]);
+    });
+
+    it("records an entry and hands back a copy, never the live array", () => {
+      const entry = crashEntry();
+      recordCrash(entry);
+
+      const first = getDiagnostics();
+      expect(first).toEqual([entry]);
+
+      // A caller that edits what it was given cannot reach the cache.
+      first.push(crashEntry({ message: "not really recorded" }));
+      first.length = 0;
+      expect(getDiagnostics()).toEqual([entry]);
+    });
+
+    it("keeps the newest twenty, oldest first, through repeated crashes", () => {
+      for (let index = 0; index < 25; index += 1) {
+        recordCrash(crashEntry({ message: `crash ${index}` }));
+      }
+
+      const log = getDiagnostics();
+      expect(log).toHaveLength(20);
+      expect(log[0].message).toBe("crash 5");
+      expect(log[19].message).toBe("crash 24");
+    });
+
+    it("survives a profile deletion and a progress reset", () => {
+      addProfile("dog");
+      const entry = crashEntry();
+      recordCrash(entry);
+
+      resetProgress();
+      deleteProfile("p2");
+
+      expect(getDiagnostics()).toEqual([entry]);
+    });
+
+    it("loads a payload written before the log existed with an empty log", () => {
+      localStorage.setItem(V2_KEY, preTrackPayload());
+
+      expect(getDiagnostics()).toEqual([]);
+      expect(isPersistenceDegraded()).toBe(false);
+
+      // The next write stamps the field in and persists normally.
+      updateSettings({ bgmEnabled: false });
+      const stored = localStorage.getItem(V2_KEY);
+      expect(stored).not.toBeNull();
+      if (stored === null) return;
+      const parsed = JSON.parse(stored);
+      expect(parsed.settings.diagnostics).toEqual([]);
+      expect(parsed.schemaVersion).toBe(1);
+      expect(parsed.settings.bgmEnabled).toBe(false);
+    });
+
+    it("re-caps a hand-edited log on read", () => {
+      const body = JSON.parse(preTrackPayload());
+      const entries = Array.from({ length: 25 }, (_, index) =>
+        crashEntry({ message: `edited ${index}` }),
+      );
+      localStorage.setItem(
+        V2_KEY,
+        JSON.stringify({
+          ...body,
+          settings: { ...body.settings, diagnostics: [...entries, { nonsense: true }] },
+        }),
+      );
+
+      const log = getDiagnostics();
+      expect(log).toHaveLength(20);
+      expect(log[0].message).toBe("edited 5");
+      expect(log[19].message).toBe("edited 24");
+    });
+
+    it("keeps a refused write in memory and persists it once the store accepts writes (AC-4)", () => {
+      const entry = crashEntry({ message: "the crash that lost storage" });
+      breakStorage(["setItem"], "QuotaExceededError");
+
+      expect(() => recordCrash(entry)).not.toThrow();
+
+      // Still readable for the rest of the session…
+      expect(getDiagnostics()).toEqual([entry]);
+      expect(isPersistenceDegraded()).toBe(true);
+
+      // …and the next accepted save writes the whole state, log included.
+      repairStorage();
+      updateSettings({ sfxEnabled: false });
+
+      expect(isPersistenceDegraded()).toBe(false);
+      const stored = localStorage.getItem(V2_KEY);
+      expect(stored).not.toBeNull();
+      if (stored === null) return;
+      expect(JSON.parse(stored).settings.diagnostics).toEqual([entry]);
+    });
+
+    it("records into memory only, and leaves the bytes untouched, for a future-version payload (AC-3)", () => {
+      const body = JSON.parse(preTrackPayload());
+      const raw = JSON.stringify({ ...body, schemaVersion: 99 });
+      localStorage.setItem(V2_KEY, raw);
+
+      const entry = crashEntry({ message: "recorded while write-protected" });
+      expect(() => recordCrash(entry)).not.toThrow();
+
+      expect(getDiagnostics()).toEqual([entry]);
+      // FR-4: the protected bytes are never rewritten, not even by a crash.
+      expect(localStorage.getItem(V2_KEY)).toBe(raw);
+    });
+  });
+
   describe("resetProgress", () => {
     it("clears every sticker while preserving audio settings", () => {
       earnSticker("shape-sorter");
@@ -636,6 +788,7 @@ describe("Storage utilities", () => {
         sfxEnabled: true,
         preferredVoiceURI: null,
         adaptiveDifficulty: true,
+        diagnostics: [],
       });
     });
 
@@ -1260,11 +1413,13 @@ describe("schema versioning", () => {
     if (stored === null) return;
     const parsed = JSON.parse(stored);
     expect(parsed.schemaVersion).toBe(1);
-    // The stamp and the backfilled insights record are the only changes: every
-    // other field is untouched.
+    // The stamp and the backfilled insights record are the only changes to the
+    // profiles; in settings the crash log is the one additive field this track
+    // backfills. Every other field is untouched.
     expect(parsed).toEqual({
       ...body,
       profiles: [{ ...body.profiles[0], insights: createDefaultInsights() }],
+      settings: { ...body.settings, diagnostics: [] },
       schemaVersion: 1,
     });
   });
@@ -1296,7 +1451,8 @@ describe("schema versioning", () => {
 
     // The known-version payload passes through the version-1 (identity) step:
     // every stored field reads back exactly as stored — the template a future
-    // version's migrate step must preserve.
+    // version's migrate step must preserve. The crash log is the one field this
+    // track adds, and it backfills empty rather than changing a stored value.
     expect(getActiveProfile().stickers["animal-trace"]).toEqual({
       earned: true,
       earnedAt: "2026-09-01T00:00:00.000Z",
@@ -1306,7 +1462,7 @@ describe("schema versioning", () => {
       usedMinutes: 5,
       lastUsedDate: todayKey(FIXED_NOW),
     });
-    expect(getSettings()).toEqual(body.settings);
+    expect(getSettings()).toEqual({ ...body.settings, diagnostics: [] });
   });
 
   it("serves in-memory defaults for an unknown version and never touches the stored bytes", async () => {
@@ -1320,6 +1476,7 @@ describe("schema versioning", () => {
       sfxEnabled: true,
       preferredVoiceURI: null,
       adaptiveDifficulty: true,
+      diagnostics: [],
     });
 
     // Mutations apply to the in-memory default state only (A2) and the raw
@@ -1527,6 +1684,7 @@ describe("when a read cannot be performed", () => {
       sfxEnabled: true,
       preferredVoiceURI: null,
       adaptiveDifficulty: true,
+      diagnostics: [],
     });
     expect(getPlayTime()).toMatchObject({ limitMinutes: null, usedMinutes: 0 });
     expect(getProgress()["shape-sorter"]).toEqual({
@@ -1798,6 +1956,7 @@ describe("when the storage global itself cannot be reached", () => {
         sfxEnabled: true,
         preferredVoiceURI: null,
         adaptiveDifficulty: true,
+        diagnostics: [],
       });
       expect(fresh.getPlayTime()).toMatchObject({ limitMinutes: null, usedMinutes: 0 });
       expect(fresh.getProgress()["shape-sorter"]).toMatchObject({ plays: 0, wins: 0 });
@@ -2003,11 +2162,14 @@ describe("insights", () => {
  * today stamps in these fixtures agree with what production writes.
  */
 describe("backup export and import", () => {
+  /** The settings a backup file carries. A file has no log, so importing one
+   * replaces this device's crash log with an empty one like every other field. */
   const INCOMING_SETTINGS = {
     bgmEnabled: false,
     sfxEnabled: false,
     preferredVoiceURI: null,
     adaptiveDifficulty: true,
+    diagnostics: [],
   };
 
   beforeEach(() => {
