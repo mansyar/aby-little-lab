@@ -148,6 +148,12 @@ const NON_GAME_SCENES: readonly string[] = [
   "GroupMathScene",
   "HubScene",
   "PreloadScene",
+  // A shell scene like HubScene: it draws `mascot_idle` and declares no art
+  // group, so the game-scene declaration checks do not apply to it. It was
+  // missing here until the crash-card track, where the scan counted a 23rd
+  // "game" scene and the suite's own size moved by two cases with the machine
+  // it was read on.
+  "RecoverScene",
 ];
 
 /** `../../scenes/WordMatchScene.ts` → `WordMatchScene`. */
