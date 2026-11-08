@@ -429,6 +429,17 @@ export class MockRectangle {
   ) {}
 }
 
+/** Mock for Phaser.Geom.Circle — must be a class to support `new`. */
+export class MockCircle {
+  static Contains = vi.fn(() => true);
+
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly radius: number,
+  ) {}
+}
+
 export interface PhaserModuleMock {
   default: PhaserModuleMock;
   Scene: typeof MockScene;
@@ -436,7 +447,7 @@ export interface PhaserModuleMock {
   Scale: { FIT: number; CENTER_BOTH: number };
   AUTO: string;
   Curves: { Path: typeof MockPath };
-  Geom: { Rectangle: typeof MockRectangle };
+  Geom: { Circle: typeof MockCircle; Rectangle: typeof MockRectangle };
 }
 
 /**
@@ -457,7 +468,7 @@ export function createPhaserModuleMock(): {
       Scale: { FIT: 0, CENTER_BOTH: 0 },
       AUTO: "AUTO",
       Curves: { Path: MockPath },
-      Geom: { Rectangle: MockRectangle },
+      Geom: { Circle: MockCircle, Rectangle: MockRectangle },
     },
     mockRegistry,
   };
@@ -470,6 +481,6 @@ const phaserModule: PhaserModuleMock = {
   Scale: { FIT: 0, CENTER_BOTH: 0 },
   AUTO: "AUTO",
   Curves: { Path: MockPath },
-  Geom: { Rectangle: MockRectangle },
+  Geom: { Circle: MockCircle, Rectangle: MockRectangle },
 };
 phaserModule.default = phaserModule;
