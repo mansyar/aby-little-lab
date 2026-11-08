@@ -5,6 +5,7 @@ import {
   appendCrash,
   buildDiagnosticsReport,
   MAX_ENTRIES,
+  MAX_MESSAGE_CHARS,
   MAX_STACK_CHARS,
   normalizeDiagnostics,
   toCrashEntry,
@@ -18,6 +19,13 @@ import diagnosticsSource from "../../utils/diagnostics.ts?raw";
  */
 const NOW = new Date(2026, 10, 8, 14, 20, 0);
 const EARLIER = new Date(2026, 10, 8, 14, 19, 30);
+
+/**
+ * The measured size of a buffer of twenty maximal entries, in bytes of JSON.
+ * Recorded here rather than only in prose so the ceiling in the documents can
+ * only be restated by someone who ran this.
+ */
+const MEASURED_WORST_CASE = 13461;
 
 const ENVIRONMENT: DiagnosticsEnvironment = {
   appVersion: "1.23.0",
@@ -149,11 +157,29 @@ describe("toCrashEntry — whatever arrives becomes a readable entry (AC-1)", ()
     expect(entry.stack).toHaveLength(MAX_STACK_CHARS);
     expect(entry.stack.startsWith("Boom")).toBe(true);
   });
+
+  it("trims a long message to its first two hundred characters, from the front (F3)", () => {
+    const entry = toCrashEntry("rejection", `Boom${"x".repeat(MAX_MESSAGE_CHARS * 5)}`, NOW);
+
+    expect(entry.message).toHaveLength(MAX_MESSAGE_CHARS);
+    expect(entry.message.startsWith("Boom")).toBe(true);
+  });
+
+  it("trims the message it makes from a rejected object, so JSON size is not the thrown size (F3)", () => {
+    const huge = { payload: "x".repeat(100_000) };
+
+    const entry = toCrashEntry("rejection", huge, NOW);
+
+    // The stringified object is generated here, so this is the one branch where
+    // an unbounded message could arrive without anybody writing one.
+    expect(entry.message).toHaveLength(MAX_MESSAGE_CHARS);
+    expect(entry.message.startsWith('{"payload":"xxxx')).toBe(true);
+  });
 });
 
 describe("appendCrash — the newest twenty, oldest first out (AC-2)", () => {
-  it("holds the spec's twenty entries and four hundred characters", () => {
-    expect([MAX_ENTRIES, MAX_STACK_CHARS]).toEqual([20, 400]);
+  it("holds the spec's twenty entries, four hundred stack characters and two hundred of message", () => {
+    expect([MAX_ENTRIES, MAX_STACK_CHARS, MAX_MESSAGE_CHARS]).toEqual([20, 400, 200]);
   });
 
   it("returns a new array and leaves the caller's alone", () => {
@@ -184,23 +210,39 @@ describe("appendCrash — the newest twenty, oldest first out (AC-2)", () => {
     );
   });
 
-  it("keeps the serialised buffer bounded at the maximum stack length (NFR-1)", () => {
+  it("keeps the serialised buffer bounded at the maximum message and stack (NFR-1)", () => {
     let buffer: CrashEntry[] = [];
     for (let index = 1; index <= MAX_ENTRIES; index += 1) {
-      buffer = appendCrash(buffer, entryOf(NOW, `crash ${index}`, "s".repeat(MAX_STACK_CHARS)));
+      buffer = appendCrash(
+        buffer,
+        entryOf(NOW, "m".repeat(MAX_MESSAGE_CHARS), "s".repeat(MAX_STACK_CHARS)),
+      );
     }
 
     const json = JSON.stringify(buffer);
-    // NFR-1 asks for a bounded log. The spec's "under 4 kB" figure cannot hold
-    // at twenty entries of four hundred characters — the stacks alone are 8,000
-    // characters, and twenty real entries measure about 9.6 kB — so the bound is
-    // written where it can be true: the constants times the per-entry room a
-    // timestamp, a kind and the JSON keys need.
-    const bound = MAX_ENTRIES * (MAX_STACK_CHARS + 200);
+    // NFR-1 asks for a ceiling that follows from the constants. With messages
+    // genuinely at their maximum — the first version of this test used seven
+    // characters, which made the bound a property of the fixture — the bound is
+    // the constants times the per-entry room a timestamp, a kind and the JSON
+    // keys need.
+    const bound = MAX_ENTRIES * (MAX_MESSAGE_CHARS + MAX_STACK_CHARS + 200);
     expect(
       json.length,
       `the twenty-entry buffer measured ${json.length} bytes, over the ${bound} byte bound`,
     ).toBeLessThan(bound);
+    expect(json.length).toBe(MEASURED_WORST_CASE);
+  });
+
+  it("does not let a hundred-kilobyte rejected object carry the buffer past the ceiling (F3)", () => {
+    const reason = { payload: "x".repeat(100_000) };
+    let buffer: CrashEntry[] = [];
+    for (let index = 1; index <= MAX_ENTRIES; index += 1) {
+      buffer = appendCrash(buffer, toCrashEntry("rejection", reason, NOW));
+    }
+
+    const json = JSON.stringify(buffer);
+    const bound = MAX_ENTRIES * (MAX_MESSAGE_CHARS + MAX_STACK_CHARS + 200);
+    expect(json.length).toBeLessThan(bound);
   });
 });
 
@@ -242,6 +284,24 @@ describe("normalizeDiagnostics — an absent, pre-track or hand-edited log (AC-3
     const raw = [{ at: NOW.toISOString(), kind: "error", message: "Boom", stack: 42 }];
 
     expect(normalizeDiagnostics(raw)).toEqual([entryOf(NOW, "Boom")]);
+  });
+
+  it("trims what it reads, so a hand-edited log cannot store more than the ceiling (F3)", () => {
+    const raw = [
+      {
+        at: NOW.toISOString(),
+        kind: "error",
+        message: "m".repeat(5_000),
+        stack: "s".repeat(5_000),
+      },
+    ];
+
+    const [entry] = normalizeDiagnostics(raw);
+
+    // `normalizeDiagnostics` caps the count; without this it left the size to
+    // whatever already sat on disk, which is the same defect one layer down.
+    expect(entry.message).toHaveLength(MAX_MESSAGE_CHARS);
+    expect(entry.stack).toHaveLength(MAX_STACK_CHARS);
   });
 
   it("keeps only the newest twenty of a longer stored log", () => {

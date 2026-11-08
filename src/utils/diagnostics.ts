@@ -21,6 +21,18 @@ export const MAX_ENTRIES = 20;
 /** How much of a stack is kept: the front, where the message and frame are. */
 export const MAX_STACK_CHARS = 400;
 
+/**
+ * How much of a message is kept, from the front.
+ *
+ * `MAX_STACK_CHARS` alone bounded only half of an entry: a thrown string or a
+ * stringified rejection reason could be any size at all, so the "ceiling" was a
+ * property of whatever the fixtures happened to throw rather than of this code.
+ * With both constants, twenty entries cost at most
+ * `MAX_ENTRIES * (MAX_MESSAGE_CHARS + MAX_STACK_CHARS + 200)` bytes of JSON —
+ * the last term being the timestamp, the kind and the object keys.
+ */
+export const MAX_MESSAGE_CHARS = 200;
+
 /** What a report says when this session has lost its store. */
 const DEGRADED_NOTE = "Progress cannot be saved on this device";
 
@@ -54,6 +66,11 @@ function trimmedStack(stack: string | undefined): string {
   return (stack ?? "").slice(0, MAX_STACK_CHARS);
 }
 
+/** At most `MAX_MESSAGE_CHARS` of a message, from the front. */
+function trimmedMessage(message: string): string {
+  return message.slice(0, MAX_MESSAGE_CHARS);
+}
+
 /** A non-empty `message` string carried by a thrown object, or null when it has none. */
 function messageOfObject(reason: object): string | null {
   const message = (reason as { message?: unknown }).message;
@@ -79,14 +96,19 @@ function serialisedReason(reason: object): string {
 function describedReason(kind: CrashKind, reason: unknown): { message: string; stack: string } {
   if (reason instanceof Error) {
     // A `new Error("")` still names itself, so the entry is never blank.
-    return { message: reason.message || reason.name, stack: trimmedStack(reason.stack) };
+    return {
+      message: trimmedMessage(reason.message || reason.name),
+      stack: trimmedStack(reason.stack),
+    };
   }
   if (typeof reason === "string") {
-    return { message: reason || noTextMessage(kind), stack: "" };
+    return { message: trimmedMessage(reason) || noTextMessage(kind), stack: "" };
   }
   if (typeof reason === "object" && reason !== null) {
     const message = messageOfObject(reason);
-    return { message: message ?? serialisedReason(reason), stack: "" };
+    // Trimmed after stringifying as well: a rejected object is the one case
+    // where the message is generated here and could be any size at all.
+    return { message: trimmedMessage(message ?? serialisedReason(reason)), stack: "" };
   }
   return { message: noTextMessage(kind), stack: "" };
 }
@@ -113,7 +135,13 @@ export function appendCrash(existing: readonly CrashEntry[], entry: CrashEntry):
   return [...existing, entry].slice(-MAX_ENTRIES);
 }
 
-/** One stored value read as an entry, or null when it cannot be read as one. */
+/**
+ * One stored value read as an entry, or null when it cannot be read as one.
+ *
+ * Both text fields are trimmed on the way in as well as on the way out: a stored
+ * log can be hand-edited, and `normalizeDiagnostics` caps the count, so without
+ * this the size ceiling would be only as true as what already sat on disk.
+ */
 function readEntry(value: unknown): CrashEntry | null {
   if (typeof value !== "object" || value === null) return null;
   const { at, kind, message, stack } = value as {
@@ -125,7 +153,12 @@ function readEntry(value: unknown): CrashEntry | null {
   if (typeof at !== "string" || at === "") return null;
   if (typeof message !== "string" || message === "") return null;
   if (kind !== "error" && kind !== "rejection") return null;
-  return { at, kind, message, stack: typeof stack === "string" ? stack : "" };
+  return {
+    at,
+    kind,
+    message: trimmedMessage(message),
+    stack: trimmedStack(typeof stack === "string" ? stack : ""),
+  };
 }
 
 /**
