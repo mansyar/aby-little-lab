@@ -1,5 +1,5 @@
 /**
- * The one-shot reload guard (FR-7).
+ * The two reloads (FR-6, FR-7): the one-shot guard and the card's own button.
  *
  * A crash before the canvas exists has no scene to replace and no card to draw,
  * so the only way out is a reload. Doing that unguarded turns a load that always
