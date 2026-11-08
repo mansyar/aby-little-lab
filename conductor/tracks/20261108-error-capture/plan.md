@@ -38,26 +38,30 @@
 - **Covers:** FR-1, FR-4, FR-6, FR-7, FR-11, FR-12, NFR-3, NFR-7, AC-4, AC-5, AC-6, AC-9
 - **Touches:** `src/game/errorCapture.ts`, `src/scenes/RecoverScene.ts`, `src/main.ts`, `src/types/index.ts`, `src/game/profileLogic.ts`, `src/utils/storage.ts`, `src/utils/reload.ts`, `src/__tests__/game/errorCapture.test.ts`, `src/__tests__/scenes/recoverScene.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/guard/backupDom.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Store the log beside the settings** - covers: FR-3, FR-4, FR-5
-  - [ ] P2.T1.1 `Settings.diagnostics: CrashEntry[]`, created empty for a new save and backfilled by the settings normaliser, with `SCHEMA_VERSION` untouched
-  - [ ] P2.T1.2 `getDiagnostics()` and `recordCrash(entry)` on the storage facade, the write going through the existing total mutation path
-  - [ ] P2.T1.3 Tests: a pre-track payload loads an empty log and saves normally; a refused write leaves the entry readable in memory and persists it on the next accepted save; an unknown-version payload stays write-protected
-- [ ] **P2.T2: Install the handlers before the game exists** - covers: FR-1, FR-4, FR-7
-  - [ ] P2.T2.1 `installErrorCapture(game)` is called in `main.ts` after the game is constructed and before anything else can throw, attaching `error` and `unhandledrejection` once
-  - [ ] P2.T2.2 The handler body is total: coercion cannot throw, recording is wrapped, and a failure inside recording is swallowed while the card still shows
-  - [ ] P2.T2.3 With no active scene the handler reloads once, guarded by a session-scoped flag in a small `src/utils/reload.ts`; a second crash in the same session logs and does not reload
-  - [ ] P2.T2.4 Tests with fake `window`/`sessionStorage`: both event shapes record, a throwing recorder does not propagate, the first and second engagement behave differently
-- [ ] **P2.T3: Draw the card** - covers: FR-6, NFR-3, NFR-7
-  - [ ] P2.T3.1 `RecoverScene` draws a full-bleed dim backdrop, the `mascot_idle` image when that texture exists, and one circular-arrow button; it creates no text object
-  - [ ] P2.T3.2 Only the button is interactive; tapping it reloads; the scene is raised once per page load through a module flag so a crash loop cannot stack cards
-  - [ ] P2.T3.3 Registered eagerly in `main.ts`'s scene array, with a comment recording that Phaser 4 cannot lazily add to it
-  - [ ] P2.T3.4 Tests: no text object is created, the button is the only interactive object, a missing mascot texture does not throw
-- [ ] **P2.T4: Make the guard say what it now means** - covers: FR-11, FR-12, AC-9
-  - [ ] P2.T4.1 `window.` and `sessionStorage` join the guard's watched globals, with `errorCapture.ts` and `reload.ts` added to the enumerated allowlist and a stated reason each
-  - [ ] P2.T4.2 The guard still fails when a module outside the list names a watched global, and fails when an allowed module stops naming one
-  - [ ] P2.T4.3 Teeth proved: a temporary `sessionStorage.setItem` in another module fails the guard, then is reverted to an empty diff
+- [x] **P2.T1: Store the log beside the settings** - covers: FR-3, FR-4, FR-5
+  - [x] P2.T1.1 `Settings.diagnostics: CrashEntry[]`, created empty for a new save and backfilled by the settings normaliser, with `SCHEMA_VERSION` untouched
+  - [x] P2.T1.2 `getDiagnostics()` and `recordCrash(entry)` on the storage facade, the write going through the existing total mutation path
+  - [x] P2.T1.3 Tests: a pre-track payload loads an empty log and saves normally; a refused write leaves the entry readable in memory and persists it on the next accepted save; an unknown-version payload stays write-protected
+- [x] **P2.T2: Install the handlers before the game exists** - covers: FR-1, FR-4, FR-7
+  - [x] P2.T2.1 `installErrorCapture(game)` is called in `main.ts` after the game is constructed and before anything else can throw, attaching `error` and `unhandledrejection` once
+  - [x] P2.T2.2 The handler body is total: coercion cannot throw, recording is wrapped, and a failure inside recording is swallowed while the card still shows
+  - [x] P2.T2.3 With no active scene the handler reloads once, guarded by a session-scoped flag in a small `src/utils/reload.ts`; a second crash in the same session logs and does not reload
+  - [x] P2.T2.4 Tests with fake `window`/`sessionStorage`: both event shapes record, a throwing recorder does not propagate, the first and second engagement behave differently
+- [x] **P2.T3: Draw the card** - covers: FR-6, NFR-3, NFR-7
+  - [x] P2.T3.1 `RecoverScene` draws a full-bleed dim backdrop, the `mascot_idle` image when that texture exists, and one circular-arrow button; it creates no text object
+  - [x] P2.T3.2 Only the button is interactive; tapping it reloads; the scene is raised once per page load through a module flag so a crash loop cannot stack cards
+  - [x] P2.T3.3 Registered eagerly in `main.ts`'s scene array, with a comment recording that Phaser 4 cannot lazily add to it
+  - [x] P2.T3.4 Tests: no text object is created, the button is the only interactive object, a missing mascot texture does not throw
+- [x] **P2.T4: Make the guard say what it now means** - covers: FR-11, FR-12, AC-9
+  - [x] P2.T4.1 `window.` and `sessionStorage` join the guard's watched globals, with `errorCapture.ts` and `reload.ts` added to the enumerated allowlist and a stated reason each
+  - [x] P2.T4.2 The guard still fails when a module outside the list names a watched global, and fails when an allowed module stops naming one
+  - [x] P2.T4.3 Teeth proved: a temporary `sessionStorage.setItem` in another module fails the guard, then is reverted to an empty diff
+
+**Result:** verified - an uncaught error is coerced, recorded through the total save path and answered with a card that has no words on it; a crash before the canvas exists spends one session-guarded reload and a second logs without reloading. 3,134 tests green, coverage 97.38/91.97/96.34/98.32, shell entry 168.3 -> 171.0 kB as NFR-4 predicted.
+**Checkpoint:** d3a051b3
+**Evidence:** conductor/tracks/20261108-error-capture/verification/phase-2.md
 
 ## Phase 3: The parent's row
 
