@@ -12,22 +12,22 @@
 - **Covers:** FR-2, FR-3, FR-5, NFR-1, AC-1, AC-2, AC-3
 - **Touches:** `src/utils/diagnostics.ts`, `src/__tests__/utils/diagnostics.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Define the entry, and coerce whatever arrives into one** - covers: FR-2
+- [x] **P1.T1: Define the entry, and coerce whatever arrives into one** - covers: FR-2
   - [ ] P1.T1.1 An `Error`, a rejected string, a rejected `undefined`, a rejected plain object and a thrown non-`Error` each produce a complete `CrashEntry` with a readable message and, where one exists, a stack trimmed to 400 characters
   - [ ] P1.T1.2 A rejection with no reason reads `Unhandled rejection with no reason` rather than an empty message
-- [ ] **P1.T2: Keep the last twenty, oldest first-out** - covers: FR-3, NFR-1
+- [x] **P1.T2: Keep the last twenty, oldest first-out** - covers: FR-3, NFR-1
   - [ ] P1.T2.1 `appendCrash(existing, entry)` returns a new array capped at `MAX_ENTRIES = 20`, newest last, dropping from the head
   - [ ] P1.T2.2 A 25-entry sequence keeps exactly the newest 20 in order, and the serialised maximum-size buffer is asserted under 4 kB
-- [ ] **P1.T3: Render the report text** - covers: FR-10, FR-5
+- [x] **P1.T3: Render the report text** - covers: FR-10, FR-5
   - [ ] P1.T3.1 `buildDiagnosticsReport(entries, environment, now)` returns plain text: a header built from the passed environment, a blank line, then the entries newest-first
   - [ ] P1.T3.2 An empty log renders a one-line "no crashes recorded" body rather than an empty file, with no header fields invented
   - [ ] P1.T3.3 `normalizeDiagnostics` backfills an absent or malformed field to `[]` and drops entries that cannot be read, so a pre-track payload loads
-- [ ] **P1.T4: Prove the module is pure** - covers: FR-11
+- [x] **P1.T4: Prove the module is pure** - covers: FR-11
   - [ ] P1.T4.1 A guard-style assertion that `src/utils/diagnostics.ts` names no browser global and reads no clock (no `new Date()` without an argument, no `Date.now()`)
 
-## Phase 2: Capture, record, recover
+ Capture, record, recover
 
 - **Goal:** an uncaught error is recorded in the save and turns into a card a child can dismiss
 - **Depends on:** Phase 1
