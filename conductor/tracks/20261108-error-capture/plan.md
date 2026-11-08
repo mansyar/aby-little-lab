@@ -27,14 +27,18 @@
 - [x] **P1.T4: Prove the module is pure** - covers: FR-11
   - [ ] P1.T4.1 A guard-style assertion that `src/utils/diagnostics.ts` names no browser global and reads no clock (no `new Date()` without an argument, no `Date.now()`)
 
- Capture, record, recover
+**Result:** verified — a thrown value becomes a `CrashEntry` without throwing, the newest twenty are kept, an old or hand-edited payload reads as a safe log at schema version 1, and the report text is written in one place from an explicit clock. 3,103 tests green; the shell entry is unchanged at 168.3 kB because nothing imports the module yet.
+**Checkpoint:** 249e627d
+**Evidence:** conductor/tracks/20261108-error-capture/verification/phase-1.md
+
+## Phase 2: Capture, record, recover
 
 - **Goal:** an uncaught error is recorded in the save and turns into a card a child can dismiss
 - **Depends on:** Phase 1
 - **Covers:** FR-1, FR-4, FR-6, FR-7, FR-11, FR-12, NFR-3, NFR-7, AC-4, AC-5, AC-6, AC-9
 - **Touches:** `src/game/errorCapture.ts`, `src/scenes/RecoverScene.ts`, `src/main.ts`, `src/types/index.ts`, `src/game/profileLogic.ts`, `src/utils/storage.ts`, `src/utils/reload.ts`, `src/__tests__/game/errorCapture.test.ts`, `src/__tests__/scenes/recoverScene.test.ts`, `src/__tests__/utils/storage.test.ts`, `src/__tests__/guard/backupDom.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Store the log beside the settings** - covers: FR-3, FR-4, FR-5
   - [ ] P2.T1.1 `Settings.diagnostics: CrashEntry[]`, created empty for a new save and backfilled by the settings normaliser, with `SCHEMA_VERSION` untouched
