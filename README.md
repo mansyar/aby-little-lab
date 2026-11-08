@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,150 tests across 144 files**, all green (verified 2026-11-08).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,158 tests across 144 files**, all green (verified 2026-11-08).
 
 Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the Learning Progress overview, the daily cap, a backup exported and restored into an empty browser, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
@@ -123,7 +123,7 @@ The parental **Learning Progress** panel opens on an Overview page rather than a
 
 The same panel's second page carries the save itself: a parent taps **Save a backup** to download one dated JSON file, and **Restore from a file** on another device to put it back. A picked file is checked before anything is written and then offered as **Merge** (this device's settings kept, the best of each record combined) or **Replace**; a damaged or foreign file is refused in one sentence and the save on the device is left exactly as it was. Nothing leaves the device unless a parent downloads it, and nothing is uploaded anywhere. Implementation: [TDD §6.7](docs/TDD.md#67-backup-and-restore).
 
-That page's third row, **Save diagnostics**, is the other half of the same promise: it downloads a plain text file, `diagnostics-<date>.txt`, holding the app version, the device and browser, and the last twenty uncaught errors with each message and the top of its stack, newest first. If nothing has crashed it writes no file at all and says so. The app also catches its own crashes now: instead of a dead screen, a child sees a card with the mascot and one arrow, and tapping the arrow starts the app again — once, never in a loop. The log stays on the device; it leaves only as the file a parent chose to download. Implementation: [TDD §6.8](docs/TDD.md#68-the-crash-log-and-the-recovery-card).
+That page's third row, **Save diagnostics**, is the other half of the same promise: it downloads a plain text file, `diagnostics-<date>.txt`, holding the app version, the device and browser, and the last twenty uncaught errors with each message and the top of its stack, newest first. If nothing has crashed it writes no file at all and says so. The app also catches its own crashes now: instead of a dead screen, a child sees a card with the mascot and one arrow, and tapping the arrow starts the app again — the tap is always allowed, because a button that works once per tab is a button that strands a child on the tab's second crash. (The once-per-session limit belongs to the automatic reload a crash *before* the first frame asks for, where no card can be shown and a loop is the only danger.) The log stays on the device; it leaves only as the file a parent chose to download. Implementation: [TDD §6.8](docs/TDD.md#68-the-crash-log-and-the-recovery-card).
 
 Product rules: [PRD §5.2](docs/PRD.md#52-touch-targets), [PRD §5.3](docs/PRD.md#53-the-parental-lock). Implementation: [TDD §5.3](docs/TDD.md#53-parentlock), [TDD §5.5](docs/TDD.md#55-settingspanel-and-the-settings-group).
 
@@ -167,7 +167,7 @@ Only Boot, Preload and Hub load at startup; the other twenty-two scenes arrive t
 
 Product rules: [PRD §4.1](docs/PRD.md#41-shared-scene-bases-and-lazy-loading), [PRD §7](docs/PRD.md#7-performance-and-asset-budget). Implementation, measurements and art ownership: [TDD §3.5](docs/TDD.md#35-in-chunk-art), [TDD §3.6](docs/TDD.md#36-what-the-budget-costs).
 
-The error-capture track cost the shell **168.3 kB → 172.6 kB** as `node scripts/validate-bundle.js` reports it (176.69 kB as Vite prints the same chunk), still well inside the 200 kB gate and 45.21 kB gzipped. Most of the 4.3 kB is the recovery card: `RecoverScene` is registered eagerly because Phaser 4 cannot add a scene to the array lazily, and the one scene you cannot afford to load on demand is the one that runs when loading is what broke.
+The error-capture track cost the shell **168.3 kB → 172.7 kB** as `node scripts/validate-bundle.js` reports it (176.80 kB as Vite prints the same chunk), still well inside the 200 kB gate and 45.23 kB gzipped. Most of the 4.4 kB is the recovery card: `RecoverScene` is registered eagerly because Phaser 4 cannot add a scene to the array lazily, and the one scene you cannot afford to load on demand is the one that runs when loading is what broke.
 
 ## Docker Deployment
 
