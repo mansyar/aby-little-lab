@@ -477,3 +477,45 @@ aby-little-lab/
 > `@types/node` and `skipLibCheck` on, `tsc` had no vocabulary to catch it - the
 > first real run of the journey did.
 
+> **2026-11-08 - Design Update (Error Capture):** A crash is state, and it is
+> stored where the save already lives. `Settings.diagnostics` is a
+> `CrashEntry[]` of `{ at, kind, message, stack }` at the same schema version 1,
+> backfilled to `[]` by `normalizeDiagnostics`, so a payload written before this
+> track loads with an empty log and a payload from a newer build stays
+> write-protected exactly as before. It is device-level rather than per profile
+> because a crash is the browser's fact and not a child's achievement: it
+> survives deleting a profile and resetting progress, and no scene shows it to a
+> child. The buffer is bounded by constants - `MAX_ENTRIES` 20, and
+> `MAX_STACK_CHARS` 400 taken from the *front* of a stack, where the message and
+> the throwing frame are - which puts a 12,000-byte ceiling on the stored JSON
+> and a measured 9,612 bytes on twenty maximal entries; the oldest entry is
+> dropped from the head, so a scene that throws every frame cannot spend the
+> quota the guarded save layer exists to survive. Recovery is ordered. With a
+> scene running the handler starts `Recover` as a *replacement*, which is what
+> stops a scene that throws every frame from throwing every frame; with no scene
+> at all - the canvas never came up - it spends one session-guarded
+> `reloadOnce()`, the flag written before the reload is asked for, and a
+> `sessionStorage` that throws reads as "cannot remember, so still allowed one",
+> because a broken first load with no retry at all is worse than a page that sits
+> still. The card is a Phaser scene and eager, since Phaser 4 cannot add a scene
+> to the array lazily: a full-bleed rectangle in the page colour, the mascot only
+> when its texture exists, one drawn circular arrow, no text anywhere, and the
+> only interactive object a transparent disc hit-tested as a `Geom.Circle` at
+> radius 72 over a 64 px disc. The guard widened by three names and not by a
+> prefix: `sessionStorage.` for the loop guard, and `window.location` plus
+> `window.addEventListener` for the two ways a module leaves the canvas rather
+> than draws on it. Every other `window.` member stayed unwatched on purpose -
+> `speechSynthesis`, `matchMedia` and `setTimeout` are feature APIs that nine
+> modules use legitimately, so a bare `window.` pattern would fail all of them
+> and still say nothing about what escapes the app loop. `src/game/errorCapture.ts`
+> needed no allowance at all: it attaches through `deps.target ?? window`, so it
+> never writes `window.member`, and an allowance for it would fail the guard's
+> own "the module still names its global" check. The download seam now takes the
+> MIME type - `downloadText(text, filename, type = "text/plain")`, with
+> `downloadBackup` passing `application/json` and the diagnostics row taking the
+> default - so one anchor serves both files instead of two code paths drifting.
+> Suite 144 files / 3,150 tests, coverage 97.39/92.02/96.36/98.33, 21 browser
+> journeys across 16 spec files (the crash journey is written this phase and is
+> the one row CI has not yet run), shell entry 168.3 -> 172.6 kB of the 200 kB
+> gate, no new dependency and no network request: `grep fetch(` over `src/` is
+> still empty.

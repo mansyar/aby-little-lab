@@ -3,6 +3,7 @@ import type {
   E2EHubPlayTime,
   E2EHubToast,
   E2EProgressState,
+  E2ERecoverState,
   E2ERoundGeometry,
   E2ERoundTarget,
   E2ESettingsState,
@@ -85,6 +86,16 @@ export function collectErrors(page: Page, options: { console?: boolean } = {}): 
 /** The hub's PWA toast, while one is covering the tiles. */
 export function hubToast(page: Page): Promise<E2EHubToast | null> {
   return page.evaluate(() => window.__abyE2E?.hubToast() ?? null);
+}
+
+/**
+ * The recovery card's button while that card is what the page is showing.
+ *
+ * Null everywhere else, including a page that has already left the card, so a
+ * journey cannot tap a coordinate the card is not currently drawing.
+ */
+export function recoverState(page: Page): Promise<E2ERecoverState | null> {
+  return page.evaluate(() => window.__abyE2E?.recover() ?? null);
 }
 
 /** Whether the hub is accepting taps, per the grid's own entrance state. */

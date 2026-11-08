@@ -13,9 +13,10 @@ vi.mock("../../utils/storage", () => ({ recordCrash: reportCrash }));
 const FIXED_NOW = new Date("2026-08-05T12:00:00.000Z");
 
 type Listener = (event: never) => void;
+type MockFn = ReturnType<typeof vi.fn>;
 
 interface FakeTarget {
-  addEventListener: ReturnType<typeof vi.fn>;
+  addEventListener: MockFn;
   target: Pick<Window, "addEventListener">;
   fire(type: string, event: unknown): void;
 }
@@ -36,9 +37,27 @@ function makeTarget(): FakeTarget {
   };
 }
 
-function makeGame(): { game: Phaser.Game; start: ReturnType<typeof vi.fn> } {
+/**
+ * A fake game whose **scene manager has no `start`**.
+ *
+ * Phaser 4's `SceneManager` exposes `getScenes`, `add`, `remove` and `update`,
+ * and a scene change goes through the running scene's own plugin — which is
+ * what `utils/sceneTransitions.ts` does, and therefore what recovery has to do.
+ * The first version of this fake put `start` on the manager, so a recovery call
+ * that could never work in a browser passed every case here; the browser
+ * journey found it. Keep the manager `start`-less: a future regression should
+ * fail in these tests rather than sail through them.
+ */
+function makeGame(key?: string): { game: Phaser.Game; start: MockFn; scene: Phaser.Scene } {
   const start = vi.fn();
-  return { game: { scene: { start } } as unknown as Phaser.Game, start };
+  // The shape a scene really has for this module's purposes: a key and the
+  // plugin a transition goes through. Cast once here so every case can inject
+  // it as the module's own `Phaser.Scene` parameter without repeating the cast.
+  const scene = { scene: { key: key ?? "", start } } as unknown as Phaser.Scene;
+  const game = {
+    scene: { getScenes: () => (key === undefined ? [] : [scene]) },
+  } as unknown as Phaser.Game;
+  return { game, start, scene };
 }
 
 /** A fresh module instance, so each case starts with no installation. */
@@ -62,13 +81,13 @@ describe("installErrorCapture", () => {
 
   it("attaches both listeners and records an uncaught error", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game } = makeGame();
+    const { game, scene } = makeGame("Hub");
     const fake = makeTarget();
 
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "Hub",
+      runningScene: () => scene,
       reload: vi.fn(),
     });
     fake.fire("error", errorEvent(new Error("boom")));
@@ -85,13 +104,13 @@ describe("installErrorCapture", () => {
 
   it("records a rejection with its reason and the rejection kind", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game } = makeGame();
+    const { game, scene } = makeGame("Hub");
     const fake = makeTarget();
 
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "Hub",
+      runningScene: () => scene,
       reload: vi.fn(),
     });
     fake.fire("unhandledrejection", { reason: "something rejected" });
@@ -106,13 +125,13 @@ describe("installErrorCapture", () => {
 
   it("records a plain error event, which carries no ErrorEvent fields", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game } = makeGame();
+    const { game, scene } = makeGame("Hub");
     const fake = makeTarget();
 
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "Hub",
+      runningScene: () => scene,
       reload: vi.fn(),
     });
     fake.fire("error", new Event("error"));
@@ -123,12 +142,12 @@ describe("installErrorCapture", () => {
 
   it("installs nothing on a second call", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game } = makeGame();
+    const { game, scene } = makeGame("Hub");
     const first = makeTarget();
     const second = makeTarget();
 
-    installErrorCapture(game, { target: first.target, activeSceneKey: () => "Hub" });
-    installErrorCapture(game, { target: second.target, activeSceneKey: () => "Hub" });
+    installErrorCapture(game, { target: first.target, runningScene: () => scene });
+    installErrorCapture(game, { target: second.target, runningScene: () => scene });
 
     expect(first.addEventListener).toHaveBeenCalledTimes(2);
     expect(second.addEventListener).not.toHaveBeenCalled();
@@ -136,7 +155,7 @@ describe("installErrorCapture", () => {
 
   it("still starts the card, without throwing, when the recorder itself fails", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game, start } = makeGame();
+    const { game, start, scene } = makeGame("Hub");
     const fake = makeTarget();
     reportCrash.mockImplementation(() => {
       throw new Error("the recorder is broken");
@@ -145,7 +164,7 @@ describe("installErrorCapture", () => {
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "Hub",
+      runningScene: () => scene,
       reload: vi.fn(),
     });
 
@@ -155,14 +174,14 @@ describe("installErrorCapture", () => {
 
   it("replaces the running scene with the card, so a scene that throws every frame stops", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game, start } = makeGame();
+    const { game, start, scene } = makeGame("ShapeSorter");
     const fake = makeTarget();
     const reload = vi.fn();
 
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "ShapeSorter",
+      runningScene: () => scene,
       reload,
     });
     fake.fire("error", errorEvent(new Error("boom")));
@@ -171,16 +190,37 @@ describe("installErrorCapture", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
+  it("starts the card through the scene's plugin, not the scene manager", async () => {
+    const { installErrorCapture } = await loadCapture();
+    const { game, start, scene } = makeGame("Hub");
+    const fake = makeTarget();
+
+    installErrorCapture(game, {
+      target: fake.target,
+      now: () => FIXED_NOW,
+      runningScene: () => scene,
+      reload: vi.fn(),
+    });
+    fake.fire("error", errorEvent(new Error("boom")));
+
+    // Phaser 4's `SceneManager` has `getScenes`, `add`, `remove` and `update`
+    // and no `start` at all, so `game.scene.start(...)` compiles against a loose
+    // fake and does nothing in a browser. Recovery must go through the scene's
+    // own plugin, the same call `utils/sceneTransitions.ts` makes.
+    expect("start" in game.scene).toBe(false);
+    expect(start).toHaveBeenCalledWith("Recover");
+  });
+
   it("does not restart the card when the crash came from inside it", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game, start } = makeGame();
+    const { game, start, scene } = makeGame("Recover");
     const fake = makeTarget();
     const reload = vi.fn();
 
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "Recover",
+      runningScene: () => scene,
       reload,
     });
     fake.fire("error", errorEvent(new Error("boom")));
@@ -209,7 +249,7 @@ describe("installErrorCapture", () => {
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => null,
+      runningScene: () => null,
     });
     fake.fire("error", errorEvent(new Error("first")));
     fake.fire("error", errorEvent(new Error("second")));
@@ -222,13 +262,13 @@ describe("installErrorCapture", () => {
 
   it("reads the message when the event carries no error object", async () => {
     const { installErrorCapture } = await loadCapture();
-    const { game } = makeGame();
+    const { game, scene } = makeGame("Hub");
     const fake = makeTarget();
 
     installErrorCapture(game, {
       target: fake.target,
       now: () => FIXED_NOW,
-      activeSceneKey: () => "Hub",
+      runningScene: () => scene,
       reload: vi.fn(),
     });
     fake.fire("error", new ErrorEvent("error", { message: "a message only" }));
@@ -270,20 +310,22 @@ describe("installErrorCapture", () => {
   });
 });
 
-describe("runningSceneKey", () => {
+describe("runningScene", () => {
   it("is null before the first boot, when Phaser shows nothing", async () => {
-    const { runningSceneKey } = await loadCapture();
+    const { runningScene } = await loadCapture();
     const game = { scene: { getScenes: () => [] } } as unknown as Phaser.Game;
 
-    expect(runningSceneKey(game)).toBeNull();
+    expect(runningScene(game)).toBeNull();
   });
 
-  it("reports the key of the scene that is on screen", async () => {
-    const { runningSceneKey } = await loadCapture();
+  it("returns the scene on screen, so its key and its plugin come from one place", async () => {
+    const { runningScene } = await loadCapture();
+    const onScreen = { scene: { key: "Hub", start: vi.fn() } };
     const game = {
-      scene: { getScenes: () => [{ scene: { key: "Hub" } }] },
+      scene: { getScenes: () => [onScreen] },
     } as unknown as Phaser.Game;
 
-    expect(runningSceneKey(game)).toBe("Hub");
+    expect(runningScene(game)).toBe(onScreen);
+    expect(runningScene(game)?.scene.key).toBe("Hub");
   });
 });

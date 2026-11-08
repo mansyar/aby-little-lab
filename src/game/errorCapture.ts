@@ -20,8 +20,8 @@ export interface ErrorCaptureDeps {
   target?: Pick<Window, "addEventListener">;
   /** The clock. Defaults to `() => new Date()`. */
   now?: () => Date;
-  /** Returns the key of the scene currently running, or null before the first boot. */
-  activeSceneKey?: () => string | null;
+  /** Returns the scene currently running, or null before the first boot. */
+  runningScene?: () => Phaser.Scene | null;
   /** The reload the first pre-canvas crash performs. Defaults to `reloadOnce`. */
   reload?: () => void;
 }
@@ -30,12 +30,13 @@ export interface ErrorCaptureDeps {
 let installed = false;
 
 /**
- * The key of the scene Phaser is currently showing, or null before the first
- * boot. `main.ts` injects this as `activeSceneKey`, so recovery decides from
- * what is actually on screen rather than from what was started last.
+ * The scene Phaser is currently showing, or null before the first boot.
+ * `main.ts` injects this as `runningScene`, so recovery decides from what is
+ * actually on screen rather than from what was started last — and the key it
+ * reads comes from that scene, so "what is on screen" has one source of truth.
  */
-export function runningSceneKey(game: Phaser.Game): string | null {
-  return game.scene.getScenes(true)[0]?.scene.key ?? null;
+export function runningScene(game: Phaser.Game): Phaser.Scene | null {
+  return game.scene.getScenes(true)[0] ?? null;
 }
 
 /**
@@ -51,18 +52,30 @@ export function installErrorCapture(game: Phaser.Game, deps: ErrorCaptureDeps = 
   const target = deps.target ?? window;
   const now = deps.now ?? (() => new Date());
   const reload = deps.reload ?? reloadOnce;
+  // `main.ts` injects this explicitly, so boot reads as one line; the default
+  // asks the same question of the game object it was handed, so a caller that
+  // forgets the dep still recovers from what is on screen instead of reloading.
+  const currentScene = deps.runningScene ?? (() => runningScene(game));
 
   const recover = (): void => {
-    const key = deps.activeSceneKey?.() ?? null;
+    const scene = currentScene();
     // A crash inside the card must not restart it: the child is already looking
     // at the one thing that can get them out.
-    if (key === RECOVER_SCENE_KEY) return;
-    if (key !== null) {
+    if (scene?.scene.key === RECOVER_SCENE_KEY) return;
+    if (scene !== null) {
       // Starting a scene replaces the running one, which is what stops a scene
       // that throws every frame from throwing every frame: it is removed before
       // its next update, and the card takes the display list. Overlaying a card
       // on top would leave the broken scene updating underneath it.
-      game.scene.start(RECOVER_SCENE_KEY);
+      //
+      // Through the scene's own plugin, never `game.scene.start`: Phaser 4's
+      // `SceneManager` exposes `getScenes`, `add`, `remove` and `update` and has
+      // no `start` at all, while every transition this app makes goes through
+      // `scene.scene.start` (`utils/sceneTransitions.ts`). Recovery takes the
+      // same route so it behaves like every other scene change in the app —
+      // and so it is not a call that typechecks against a loose fake and does
+      // nothing in a browser.
+      scene.scene.start(RECOVER_SCENE_KEY);
       return;
     }
     // No scene at all means the canvas never came up. There is nothing to draw

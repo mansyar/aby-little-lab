@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import type { E2ERecoverState } from "../game/e2eBridge";
 import { reloadOnce } from "../utils/reload";
 
 /**
@@ -41,6 +42,16 @@ const ARROW_LENGTH = 22;
 const ARROW_SPREAD = 0.55;
 
 export class RecoverScene extends Phaser.Scene {
+  /**
+   * The button centre the card drew, for the browser suite.
+   *
+   * A journey that has just crashed cannot look a coordinate up: the card is
+   * the only thing on screen. This is set from the same constants the disc and
+   * the hit area are drawn with, so a tap lands on the control rather than near
+   * it. Null until the card is built.
+   */
+  private recoverButton: E2ERecoverState | null = null;
+
   constructor() {
     super({ key: "Recover" });
   }
@@ -93,12 +104,35 @@ export class RecoverScene extends Phaser.Scene {
       );
     }
 
-    // The only interactive object on the screen: a transparent disc over the
-    // art, hit-tested as a circle so a tap in the corner of its box misses.
-    const hit = this.add.circle(BUTTON_X, BUTTON_Y, HIT_RADIUS, BUTTON_COLOR, 0);
-    hit.setInteractive(new Phaser.Geom.Circle(0, 0, HIT_RADIUS), Phaser.Geom.Circle.Contains);
+    // The only interactive object on the screen: a Zone over the art, hit-tested
+    // as a circle so a tap in the corner of its box misses.
+    //
+    // A Zone, not a transparent Arc: Phaser skips hit-testing a game object whose
+    // alpha is 0 (`willRender` is false for it), so the circle that was here
+    // first drew a button no finger could press - the card was on screen, at the
+    // right place, and simply unreachable. A Zone is invisible by design and is
+    // what `dragBoard` already uses for its empty slots.
+    const hit = this.add.zone(BUTTON_X, BUTTON_Y, HIT_RADIUS * 2, HIT_RADIUS * 2);
+    hit.setInteractive(
+      new Phaser.Geom.Circle(HIT_RADIUS, HIT_RADIUS, HIT_RADIUS),
+      Phaser.Geom.Circle.Contains,
+    );
     // The same one-shot guard the pre-canvas path uses, so a child mashing the
     // button reloads the page at most once.
     hit.on("pointerdown", () => reloadOnce());
+
+    // Published at the numbers the disc and the hit area were just drawn with,
+    // never a second copy of them.
+    this.recoverButton = { button: { x: BUTTON_X, y: BUTTON_Y } };
+  }
+
+  /**
+   * The card's one control, at the centre it drew.
+   *
+   * Read by the `?e2e=1` bridge only; nothing in the game calls it, and a page
+   * without the query parameter never holds a bridge to call it through.
+   */
+  e2eRecoverButton(): E2ERecoverState | null {
+    return this.recoverButton;
   }
 }

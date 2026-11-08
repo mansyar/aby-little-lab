@@ -253,7 +253,12 @@ export class MockScene {
         return obj;
       }),
       graphics: vi.fn(() => createMockGameObject(this, "graphics", reg)),
-      zone: vi.fn(() => createMockGameObject(this, "zone", reg)),
+      zone: vi.fn((...args: unknown[]) => {
+        const obj = createMockGameObject(this, "zone", reg);
+        obj.args = args;
+        positionFromArgs(obj, args);
+        return obj;
+      }),
       particles: vi.fn(() => createMockGameObject(this, "particles", reg)),
     };
     this.scene = {

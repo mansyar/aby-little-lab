@@ -61,7 +61,10 @@ describe("RecoverScene", () => {
 
     const interactive = interactiveObjects();
     expect(interactive).toHaveLength(1);
-    expect(interactive[0].kind).toBe("circle");
+    // A Zone, not a transparent Arc: Phaser does not hit-test a game object whose
+    // alpha is 0, so the first version of this card drew a button nothing could
+    // press. The kind is asserted by name so that regression is a red test.
+    expect(interactive[0].kind).toBe("zone");
     expect(interactive[0].setInteractive).toHaveBeenCalledTimes(1);
     // Hit-tested as a circle, so a tap in the corner of the painting box misses.
     expect(interactive[0].setInteractive).toHaveBeenCalledWith(
@@ -78,5 +81,22 @@ describe("RecoverScene", () => {
     button.handlers.pointerdown?.();
 
     expect(reloadOnce).toHaveBeenCalledTimes(1);
+  });
+
+  it("publishes the centre it drew the button at, for the browser suite", () => {
+    const scene = new RecoverScene();
+    scene.create();
+    const [button] = interactiveObjects();
+
+    // The published point is the drawn one, not a second copy that could drift
+    // from the art: the disc and the hit area are both built on it.
+    expect(scene.e2eRecoverButton()).toEqual({ button: { x: button.x, y: button.y } });
+    expect(scene.e2eRecoverButton()).toEqual({ button: { x: 512, y: 560 } });
+  });
+
+  it("publishes nothing before the card is built", () => {
+    const scene = new RecoverScene();
+
+    expect(scene.e2eRecoverButton()).toBeNull();
   });
 });

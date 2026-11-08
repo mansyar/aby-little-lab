@@ -4,6 +4,7 @@ import type {
   E2EHubPlayTime,
   E2EHubToast,
   E2EProgressState,
+  E2ERecoverState,
   E2ERoundGeometry,
   E2ERoundTarget,
   E2ESettingsState,
@@ -21,6 +22,7 @@ interface FakeScene {
   e2eHubReady?: () => boolean;
   e2eSettings?: () => E2ESettingsState;
   e2eHubPlayTime?: () => E2EHubPlayTime;
+  e2eRecoverButton?: () => E2ERecoverState | null;
 }
 
 interface FakeGame {
@@ -126,6 +128,7 @@ describe("initE2EBridge", () => {
         "hubTiles",
         "hubToast",
         "profileCount",
+        "recover",
         "roundGeometry",
         "roundIndex",
         "settings",
@@ -505,6 +508,43 @@ describe("initE2EBridge", () => {
 
       state = { timeUp: false, nudging: true };
       expect(window.__abyE2E?.hubPlayTime()).toEqual({ timeUp: false, nudging: true });
+    });
+  });
+
+  describe("recover", () => {
+    it("reports null when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.recover()).toBeNull();
+    });
+
+    it("reports null while the recovery card is not the active scene", () => {
+      const scene = sceneWith("Hub");
+      // A hook on the wrong scene must not be enough: the card is only readable
+      // while it is what Phaser is showing, so a journey cannot tap it early.
+      scene.e2eRecoverButton = () => ({ button: { x: 1, y: 2 } });
+      install([scene]);
+
+      expect(window.__abyE2E?.recover()).toBeNull();
+    });
+
+    it("reports null when the card publishes no hook", () => {
+      install([sceneWith("Recover")]);
+
+      expect(window.__abyE2E?.recover()).toBeNull();
+    });
+
+    it("returns the hook's live value while the card is up", () => {
+      const scene = sceneWith("Recover");
+      const first: E2ERecoverState = { button: { x: 512, y: 560 } };
+      let state: E2ERecoverState | null = first;
+      scene.e2eRecoverButton = () => state;
+      install([scene]);
+
+      expect(window.__abyE2E?.recover()).toBe(first);
+
+      state = null;
+      expect(window.__abyE2E?.recover()).toBeNull();
     });
   });
 });

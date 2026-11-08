@@ -2,7 +2,7 @@ import "./styles/style.css";
 import { registerSW } from "virtual:pwa-register";
 import Phaser from "phaser";
 import { initE2EBridge } from "./game/e2eBridge";
-import { installErrorCapture, runningSceneKey } from "./game/errorCapture";
+import { installErrorCapture, runningScene } from "./game/errorCapture";
 import { BootScene } from "./scenes/BootScene";
 import { HubScene } from "./scenes/HubScene";
 import { PreloadScene } from "./scenes/PreloadScene";
@@ -55,6 +55,6 @@ const game = new Phaser.Game(config);
 // Before anything else is wired, and in particular before the bridge below: a
 // failure while wiring the rest of boot is exactly the failure nothing else can
 // hear, and the listeners have to exist before it happens.
-installErrorCapture(game, { activeSceneKey: () => runningSceneKey(game) });
+installErrorCapture(game, { runningScene: () => runningScene(game) });
 
 initE2EBridge(game);

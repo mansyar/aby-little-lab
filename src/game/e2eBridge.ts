@@ -38,6 +38,19 @@ export interface E2EHubToast {
   button: { x: number; y: number };
 }
 
+/**
+ * The recovery card's one control, as the card is drawing it.
+ *
+ * A journey that has just crashed cannot read a comment to find the button: the
+ * card is the only thing on screen and its position is a drawn number. Publishing
+ * the centre means the tap is the card's own layout rather than a copied
+ * coordinate, exactly as `E2EHubToast` does for the toast.
+ */
+export interface E2ERecoverState {
+  /** The card's button centre in canvas coordinates. */
+  readonly button: GamePoint;
+}
+
 /** One settings row the parental panel publishes for the browser suite. */
 export interface E2ESettingsToggle {
   /** Stable setting key: `bgm`, `sfx` or `adaptive`. */
@@ -174,6 +187,12 @@ export interface E2EBridge {
    * the pre-game nudge is on screen. False in any other scene.
    */
   hubPlayTime(): E2EHubPlayTime;
+  /**
+   * The recovery card's button, while that card is the active scene. Null in
+   * every other scene, so a journey can only tap the card while the card is
+   * actually what it is looking at.
+   */
+  recover(): E2ERecoverState | null;
 }
 
 declare global {
@@ -199,6 +218,7 @@ interface E2ESceneProbe {
   e2eHubReady?: () => boolean;
   e2eSettings?: () => E2ESettingsState;
   e2eHubPlayTime?: () => E2EHubPlayTime;
+  e2eRecoverButton?: () => E2ERecoverState | null;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -309,6 +329,17 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eHubPlayTime;
       if (typeof hook !== "function") return { timeUp: false, nudging: false };
+      return hook.call(probe);
+    },
+    recover: () => {
+      // The card is only readable while it is what Phaser is showing: after the
+      // tap the page is reloading and after a normal launch this scene is not
+      // running at all, so there is no button a journey could honestly tap.
+      const scene = activeScene(game);
+      if (scene?.scene.key !== "Recover") return null;
+      const probe = probeOf(scene);
+      const hook = probe?.e2eRecoverButton;
+      if (typeof hook !== "function") return null;
       return hook.call(probe);
     },
   };

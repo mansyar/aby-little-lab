@@ -21,3 +21,16 @@ declare const process: {
 declare class Buffer extends Uint8Array {
   static from(input: string, encoding?: "utf8" | "base64" | "hex"): Buffer;
 }
+
+/**
+ * `readFileSync`, for one purpose: the crash journey downloads a diagnostics
+ * text file and reads its words back, which is the only proof that what a parent
+ * would open is the crash history rather than an empty file with the right name.
+ * Only the utf8 form is declared, because that is the only form the suite calls —
+ * the encoding argument is required rather than optional, so the text form
+ * cannot be asked for by accident and silently read as bytes. Same rule as
+ * above: declare what is used, and delete it if `@types/node` ever arrives.
+ */
+declare module "node:fs" {
+  export function readFileSync(path: string, encoding: "utf8"): string;
+}
