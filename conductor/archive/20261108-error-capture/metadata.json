@@ -2,7 +2,7 @@
   "id": "20261108-error-capture",
   "title": "Error Capture",
   "type": "feature",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "high",
   "depends_on": [
     "20261107-storage-resilience",
@@ -10,7 +10,7 @@
     "20261107-release-e2e"
   ],
   "created_at": "2026-11-08T14:14:55+11:00",
-  "updated_at": "2026-11-08T16:10:00+11:00",
+  "updated_at": "2026-11-08T16:40:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261108-error-capture",
@@ -26,9 +26,9 @@
   "review_verdict": "pass_with_findings",
   "review_rounds": 1,
   "doc_sync": "synced",
-  "pr_url": null,
-  "pr_state": null,
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/85",
+  "pr_state": "open",
   "revert": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-11-08T16:40:00+11:00",
+  "archive_path": "conductor/archive/20261108-error-capture"
 }
