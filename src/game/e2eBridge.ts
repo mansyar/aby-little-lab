@@ -69,11 +69,12 @@ export interface E2EProgressState {
 }
 
 /**
- * The second Settings page — backup and restore — as the panel is showing it.
+ * The second Settings page — backup, restore and the crash log — as the panel
+ * is showing it.
  *
- * A journey moves between the pages with `switchPage` and taps the two action
- * rows with `backupRows`, then reads `backupResult` rather than a pixel: the
- * result line is the app's own sentence about what happened.
+ * A journey moves between the pages with `switchPage` and taps the action rows
+ * with `backupRows`, then reads `backupResult` rather than a pixel: the result
+ * line is the app's own sentence about what happened.
  */
 export interface E2EBackupState {
   /** The page on screen: 0 is the settings rows, 1 is backup and restore. */
@@ -84,8 +85,8 @@ export interface E2EBackupState {
    * panel object.
    */
   switchPage: GamePoint;
-  /** Page two's two tappable rows, in the order they are drawn; empty off page 1. */
-  backupRows: { id: "export" | "restore"; point: GamePoint }[];
+  /** Page two's tappable rows, in the order they are drawn; empty off page 1. */
+  backupRows: { id: "export" | "restore" | "diagnostics"; point: GamePoint }[];
   /** The result line's current text, `""` when nothing has happened yet. */
   backupResult: string;
   /**

@@ -2,8 +2,15 @@ import type Phaser from "phaser";
 import { AudioManager } from "../audio/AudioManager";
 import type { E2EBackupState, E2EProgressState, E2ESettingsToggle } from "../game/e2eBridge";
 import type { Profile, ProfileV2 } from "../types";
-import { backupFilename, downloadBackup, pickBackupFile, reloadApp } from "../utils/backupFile";
+import {
+  backupFilename,
+  downloadBackup,
+  pickBackupFile,
+  reloadApp,
+  saveDiagnostics,
+} from "../utils/backupFile";
 import { createBackup, type ImportMode, readBackup } from "../utils/backupFormat";
+import { NO_CRASHES } from "../utils/diagnostics";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { getInstallPromptTracker, type InstallTracker } from "../utils/pwaInstall";
 import {
@@ -83,9 +90,10 @@ const SWITCH_TO_SETTINGS = "‹ Back to settings";
 const SETTINGS_TITLE = "Settings";
 const BACKUP_TITLE = "Backup";
 
-/** Page two's two actions, in drawing order. */
+/** Page two's three actions, in drawing order. */
 const EXPORT_LABEL = "Save a backup";
 const RESTORE_LABEL = "Restore from a file";
+const DIAGNOSTICS_LABEL = "Save diagnostics";
 
 /** What the result line says when the picker came back empty. */
 const NOTHING_RESTORED = "Nothing was restored.";
@@ -173,7 +181,8 @@ export class SettingsPanel {
   /** The result line while page two is up, or null while page one is. */
   private backupResultText: Phaser.GameObjects.Text | null = null;
   /** Page two's tappable rows, with the point their band answers to. */
-  private backupRows: Array<{ id: "export" | "restore"; x: number; y: number }> = [];
+  private backupRows: Array<{ id: "export" | "restore" | "diagnostics"; x: number; y: number }> =
+    [];
   /**
    * The choice card's two buttons, with the point each answers to, captured as
    * the card is built. Published so the browser suite taps the buttons' own
@@ -423,7 +432,7 @@ export class SettingsPanel {
   }
 
   /**
-   * The second page — its page number, its switch point, its two rows and the
+   * The second page — its page number, its switch point, its three rows and the
    * line that says what happened — as the panel is holding them right now.
    *
    * A journey moves between pages with this and taps a row by its published
@@ -525,7 +534,7 @@ export class SettingsPanel {
     this.voiceRow.create(centerX, rowY(7));
   }
 
-  /** Page two: save a backup, restore one, and the line saying what happened. */
+  /** Page two: save a backup, restore one, save the crash log, and the line saying what happened. */
   private buildBackupPage(centerX: number, rowY: (index: number) => number): void {
     createRow(this.scene, centerX, rowY(0), this.pageObjects, EXPORT_LABEL, PRIMARY_COLOR, () =>
       this.saveBackup(),
@@ -541,11 +550,24 @@ export class SettingsPanel {
       // would escape into Phaser's update loop, so it is awaited here instead.
       () => void this.restoreBackup(),
     );
+    // FR-8: the next free pitch, below the restore row and above the line that
+    // reports what happened. Never disabled: a parent who has had no crash
+    // should be able to ask and be told so, not find a dead control.
+    createRow(
+      this.scene,
+      centerX,
+      rowY(3),
+      this.pageObjects,
+      DIAGNOSTICS_LABEL,
+      PRIMARY_COLOR,
+      () => this.saveDiagnosticsFile(),
+    );
     // The rows are centred on the layout arguments, so those are the points a
     // finger lands on - published rather than re-derived by the suite.
     this.backupRows = [
       { id: "export", x: centerX, y: rowY(0) },
       { id: "restore", x: centerX, y: rowY(1) },
+      { id: "diagnostics", x: centerX, y: rowY(3) },
     ];
     const result = this.scene.add
       .text(
@@ -580,6 +602,23 @@ export class SettingsPanel {
     const filename = backupFilename(now);
     downloadBackup(json, filename);
     this.showBackupResult(`Saved ${filename}`, PRIMARY_COLOR);
+  }
+
+  /**
+   * Writes the crash log to a file, or says there is nothing to write.
+   *
+   * The sentence is the panel's own: `Saved <filename>` in the colour the
+   * export uses, or the report module's `NO_CRASHES` sentence — the same words
+   * the downloaded file would carry, so the panel and the file cannot disagree
+   * about what "nothing recorded" says.
+   */
+  private saveDiagnosticsFile(): void {
+    const result = saveDiagnostics();
+    if (result.saved) {
+      this.showBackupResult(`Saved ${result.filename}`, PRIMARY_COLOR);
+    } else {
+      this.showBackupResult(NO_CRASHES);
+    }
   }
 
   /**

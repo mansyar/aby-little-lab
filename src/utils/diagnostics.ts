@@ -24,8 +24,12 @@ export const MAX_STACK_CHARS = 400;
 /** What a report says when this session has lost its store. */
 const DEGRADED_NOTE = "Progress cannot be saved on this device";
 
-/** The body of a report written on a device that has never crashed. */
-const NO_CRASHES = "No crashes have been recorded on this device.";
+/**
+ * The body of a report written on a device that has never crashed, exported so
+ * the Settings row says the same sentence the file would rather than growing a
+ * second copy that could drift from it.
+ */
+export const NO_CRASHES = "No crashes have been recorded on this device.";
 
 /** What a thrown value with no message and no name of its own reads as. */
 const UNKNOWN_ERROR = "An unknown error was thrown";

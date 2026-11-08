@@ -397,7 +397,7 @@ describe("initE2EBridge", () => {
       expect(moved?.lines).toEqual([]);
     });
 
-    it("publishes the second page, its switch point and its two action rows", () => {
+    it("publishes the second page, its switch point and its three action rows", () => {
       const scene = sceneWith("Hub");
       let state: E2ESettingsState = {
         ...noPanelSettings(),
@@ -426,6 +426,7 @@ describe("initE2EBridge", () => {
         backupRows: [
           { id: "export", point: { x: 512, y: 337 } },
           { id: "restore", point: { x: 512, y: 393 } },
+          { id: "diagnostics", point: { x: 512, y: 505 } },
         ],
       };
       expect(window.__abyE2E?.settings().page).toBe(1);
@@ -433,6 +434,7 @@ describe("initE2EBridge", () => {
       expect(window.__abyE2E?.settings().backupRows.map((row) => row.id)).toEqual([
         "export",
         "restore",
+        "diagnostics",
       ]);
       expect(window.__abyE2E?.settings().backupRows[1]?.point).toEqual({ x: 512, y: 393 });
 
