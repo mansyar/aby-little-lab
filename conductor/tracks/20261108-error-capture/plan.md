@@ -94,19 +94,22 @@
 - **Covers:** FR-13, FR-14, NFR-2, NFR-4, NFR-6, AC-10, AC-11
 - **Touches:** `e2e/journeys/crash.spec.ts`, `e2e/fixtures/game.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/product.md`, `conductor/tech-stack.md`, `conductor/tracks/20261108-error-capture/verification/`
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: A real crash, all the way to the file** - covers: AC-10, NFR-6
+- [x] **P4.T1: A real crash, all the way to the file** - covers: AC-10, NFR-6
   - [ ] P4.T1.1 The journey boots the built artifact, throws from inside the page (`setTimeout(() => { throw ... })`, not a test hook), waits for the card, taps its published button or reloads after it, then opens Settings and saves diagnostics while watching the download
   - [ ] P4.T1.2 It reads the downloaded text back and asserts the thrown message and the environment header are present; it asserts the hub works after recovery
   - [ ] P4.T1.3 Runtime recorded and the suite total reported against the CI 5m28s breach
-- [ ] **P4.T2: Tell the truth in the documents** - covers: FR-14, FR-13, NFR-4, AC-11
+- [x] **P4.T2: Tell the truth in the documents** - covers: FR-14, FR-13, NFR-4, AC-11
   - [ ] P4.T2.1 `docs/TDD.md`: the crash path, the stored field, the recovery card and the diagnostics file, plus the journey and spec counts
   - [ ] P4.T2.2 `conductor/tech-stack.md`: a dated design-update entry for `Settings.diagnostics`, the bounded buffer and the enumerated guard widening
   - [ ] P4.T2.3 `conductor/product.md` §10.3: the `20261124-error-capture` row becomes Done with the clipboard-to-download deviation stated, and the metrics table's "uncaught errors" row says what the log now makes measurable rather than `unknown`
   - [ ] P4.T2.4 `README.md`: the parent-facing paragraph, and the shell entry size before and after this track
   - [ ] P4.T2.5 `grep` for `fetch(` in `src/`, and `package.json` diffed to prove no dependency was added
 
+**Result:** verified - the crash path is proven in a browser and the two defects it found are fixed. A journey throws a real error, sees the card replace the broken scene, taps the point the card itself published, lets the card's own click reload the app, launches a game and reads the downloaded diagnostics file back from disk. Writing it exposed that recovery called `game.scene.start`, which Phaser 4's SceneManager does not have (a silent no-op, and a unit fake had invented the method), and that the card's hit target was an alpha-0 Arc, which Phaser never hit-tests. Both are fixed, the fake now has no `start` at all, and the card asserts its interactive kind by name. 21 journeys green in 4.0 minutes locally, 3,150 tests, coverage 97.38/91.97/96.36/98.33, shell entry 172.6 kB.
+**Checkpoint:** 598518c4
+**Evidence:** conductor/tracks/20261108-error-capture/verification/phase-4.md
 <!-- Review fixes are appended by conductor-review as:
 ## Phase R1: Review Fixes
 - **Goal:** Resolve review findings ...
