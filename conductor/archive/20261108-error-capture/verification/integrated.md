@@ -85,3 +85,24 @@ The phase Touches widened, each for a reason the finding required: `e2eBridge.ts
   its own right and is not fixed here.
 - Crash log: 20 entries, 400 characters of stack each, 9,612 bytes measured at the
   maximum, stored in `settings.diagnostics` at schema version 1.
+
+## CI, on this track's own PR (#85)
+
+| Job | Result |
+|---|---|
+| \`Quality Gates\` | pass, 2m1s |
+| \`Browser Journeys\` | pass, 5m39s |
+| \`Deploy to Coolify\` | skipped (no tag) |
+
+The first run failed one check only, and it was worth failing: Document validation
+derived **3,160 tests** on the Linux runner against the 3,158 the documents claimed.
+The two extra cases were \`RecoverScene\` being scanned as a 23rd game scene - it
+draws \`mascot_idle\` and declares no art group, so the scan does not apply to it -
+and on that checkout it also failed four assertions the Windows run never collected.
+Excluding it in \`src/__tests__/scenes/artDeclarations.test.ts\` made the scan 22 game
+scenes on both platforms and the suite 3,158 tests everywhere, so the count now
+means one thing. The lesson is the track's own subject at one remove: a number that
+only one machine can reproduce is a number nobody can check.
+
+Browser Journeys took 5m39s, again over NFR-5's five minutes and inside the
+15-minute job timeout. Recorded, not widened.

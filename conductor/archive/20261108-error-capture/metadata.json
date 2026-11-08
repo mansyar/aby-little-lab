@@ -10,7 +10,7 @@
     "20261107-release-e2e"
   ],
   "created_at": "2026-11-08T14:14:55+11:00",
-  "updated_at": "2026-11-08T16:40:00+11:00",
+  "updated_at": "2026-11-08T17:20:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261108-error-capture",
@@ -27,7 +27,7 @@
   "review_rounds": 1,
   "doc_sync": "synced",
   "pr_url": "https://github.com/mansyar/aby-little-lab/pull/85",
-  "pr_state": "open",
+  "pr_state": "merged",
   "revert": null,
   "archived_at": "2026-11-08T16:40:00+11:00",
   "archive_path": "conductor/archive/20261108-error-capture"
