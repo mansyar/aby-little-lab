@@ -117,19 +117,25 @@ moved to Phase 4 with the registry row it must mirror (see evidence).
 - **Dependencies:** none
 - **Decisions:** D12, D7, D8
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P4.T1: Register the game and ship its two shell assets** — covers: FR-1, FR-15, AC-7
-  - [ ] `GameId` gains `"robot-path"`; `GAME_REGISTRY` gains the entry of FR-1 appended after `story-order` (`thinking`, `RobotPath`, `tile_robot_path`, `sticker_robot_path`), leaving the other 22 entries byte-identical.
-  - [ ] `tile_robot_path.svg` (a robot head over a trail of two arrow marks, icon tier) and `sticker_robot_path.svg` (the robot beside a star, card tier) join the shell, taking it to 60 keys and the app total to 193.
-- [ ] **P4.T2: Restate every count-bearing suite to 23** — covers: AC-6, AC-10
-  - [ ] Hub and roster suites: `hubGrid.test.ts` (23 rects/icons/labels, entrance count, page 3 holds 21–23), `hubPaging.test.ts` (3 pages of 10/10/3), `hubTiles.test.ts` (23 unique ids/keys), `gameRegistry.test.ts` (23 invariants), `hubGroups.test.ts` (5/5/7/4/2 with Robot Path named in `thinking`), `audioIdentity.test.ts`, `prewarm.test.ts`.
-  - [ ] Adjacent surfaces: `SettingsPanel.test.ts` and `ProgressOverlay.test.ts` page `6+6+6+5`; `groupIntegrity.test.ts` and `shellOwnership.test.ts` assert 60 shell keys and 193 app keys. Every change is a number or a name; no expectation is dropped.
-- [ ] **P4.T3: Add the three roster rows the validator compares** — covers: FR-17 (rows), AC-9
-  - [ ] README's Mini-Games list gains item 23 `[Robot Path](docs/PRD.md#323-robot-path)`, the PRD gains `### 3.23 Robot Path`, and the TDD §4.5 table gains row 23 naming `RobotPathScene`, in that order and with those names, so `checkGameLists` agrees at 23.
+- [x] **P4.T1: Register the game and ship its two shell assets** — covers: FR-1, FR-15, AC-7
+  - [x] `GameId` gains `"robot-path"`; `GAME_REGISTRY` gains the entry of FR-1 appended after `story-order` (`thinking`, `RobotPath`, `tile_robot_path`, `sticker_robot_path`), leaving the other 22 entries byte-identical.
+  - [x] `tile_robot_path.svg` (a robot head over a trail of two arrow marks, icon tier) and `sticker_robot_path.svg` (the robot beside a star, card tier) join the shell, taking it to 60 keys and the app total to 193.
+- [x] **P4.T2: Restate every count-bearing suite to 23** — covers: AC-6, AC-10
+  - [x] Hub and roster suites: `hubGrid.test.ts` (23 rects/icons/labels, entrance count, page 3 holds 21–23), `hubPaging.test.ts` (3 pages of 10/10/3), `hubTiles.test.ts` (23 unique ids/keys), `gameRegistry.test.ts` (23 invariants), `hubGroups.test.ts` (5/5/7/4/2 with Robot Path named in `thinking`), `audioIdentity.test.ts`, `prewarm.test.ts`.
+  - [x] Adjacent surfaces: `SettingsPanel.test.ts` and `ProgressOverlay.test.ts` page `6+6+6+5`; `groupIntegrity.test.ts` and `shellOwnership.test.ts` assert 60 shell keys and 193 app keys. Every change is a number or a name; no expectation is dropped.
+- [x] **P4.T3: Add the three roster rows the validator compares** — covers: FR-17 (rows), AC-9
+  - [x] README's Mini-Games list gains item 23 `[Robot Path](docs/PRD.md#323-robot-path)`, the PRD gains `### 3.23 Robot Path`, and the TDD §4.5 table gains row 23 naming `RobotPathScene`, in that order and with those names, so `checkGameLists` agrees at 23.
 
-**Result:** PENDING
-**Checkpoint:** PENDING
+**Result:** verified — the roster is 23 everywhere: `GameId` and `GAME_REGISTRY`
+carry the row appended after `story-order`, the lazy loader and an audio identity
+follow, and the two shell SVGs take the shell to 60 keys and the app to 193. Every
+count-bearing suite was restated (Hub 23 tiles, phones 10/10/3, `thinking` 7,
+progress 6+6+6+5) and README, PRD and TDD gained the row the validator compares.
+3,248 tests in 150 files; coverage 97.21 / 91.69 / 96.28 / 98.3; shell entry
+182.4 kB of the 200 kB gate; precache 61 entries / 1793.79 KiB; gate exit 0.
+**Checkpoint:** e7928fd3
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-4.md
 
 ## Phase 5: The bridge and the browser journey
