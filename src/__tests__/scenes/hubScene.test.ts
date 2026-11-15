@@ -1531,6 +1531,21 @@ describe("HubScene e2e hub tiles", () => {
     expect(mockSpeech.speakSentence).toHaveBeenCalledWith("All games", false);
   });
 
+  it("re-speaks the group when its own chip is tapped again", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    chipZones()[2]?.handlers.pointerup?.();
+    mockSpeech.speakSentence.mockClear();
+
+    // The board is already this group's; the child wanting the name again is
+    // the reason the announcement is per tap, not per change.
+    chipZones()[2]?.handlers.pointerup?.();
+
+    expect(mockSpeech.speakSentence).toHaveBeenCalledTimes(1);
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith("Numbers and counting", true);
+  });
+
   it("publishes the chip row's live centres and the selection", () => {
     const scene = new HubScene();
     scene.create();

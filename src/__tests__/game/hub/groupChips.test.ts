@@ -150,7 +150,7 @@ describe("groupChips — the row", () => {
     expect(lastFill(chipRects()[0] as MockObject)).toBe(0xfff8e7);
   });
 
-  it("re-selecting the current chip changes nothing", () => {
+  it("re-selecting the current chip speaks again but rebuilds nothing", () => {
     const onSelectGroup = vi.fn();
     const onBoardChange = vi.fn();
     const { deps } = makeDeps({ onSelectGroup, onBoardChange });
@@ -161,8 +161,11 @@ describe("groupChips — the row", () => {
     const all = chipZones()[0] as MockObject;
     all.handlers.pointerup?.();
 
-    expect(onSelectGroup).not.toHaveBeenCalled();
+    // FR-8 is per tap: the name is spoken even though All was already selected,
+    // while the board it is already showing is not redrawn.
+    expect(onSelectGroup).toHaveBeenCalledWith("all");
     expect(onBoardChange).not.toHaveBeenCalled();
+    expect(grid.selection).toBe("all");
   });
 
   it("releases every chip object on shutdown, and forgets them", () => {

@@ -189,21 +189,21 @@ export class HubGrid {
   }
 
   /**
-   * Selects a group: repaints the row, reports the choice, and rebuilds the
-   * board for it (spec FR-3, D8). Re-selecting the current chip is a no-op, so
-   * a double tap cannot redraw the board twice.
+   * Selects a group: reports the choice, repaints the row and rebuilds the
+   * board for it (spec FR-3, D8).
+   *
+   * The announcement happens before the no-op guard, because FR-8 is per tap
+   * rather than per change: tapping the chip that is already selected still
+   * speaks the group's name — which is exactly when a pre-reader may want to
+   * hear it again — while the board is rebuilt only on a real change, so a
+   * double tap cannot redraw it twice.
    */
   setGroup(selection: HubSelection): void {
+    this.deps.onSelectGroup?.(selection);
     if (selection === this.selection) return;
     this.selection = selection;
     paintGroupChips(this);
-    this.deps.onSelectGroup?.(selection);
     this.rebuildBoard();
-  }
-
-  /** Repaints the chip row to the current selection. */
-  refreshChips(): void {
-    paintGroupChips(this);
   }
 
   /** Creates the chip row on first use, then keeps it showing the selection. */
