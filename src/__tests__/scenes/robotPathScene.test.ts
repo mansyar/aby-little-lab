@@ -340,8 +340,8 @@ describe("RobotPathScene interactions", () => {
     // The robot is back on its start tile, ready for one arrow to change.
     const robot = internals(scene).robot as Record<string, MockFn>;
     expect(robot.setPosition).toHaveBeenLastCalledWith(
-      512 + (round.start.col - 1) * 120,
-      190 + round.start.row * 120,
+      512 + (round.start.col - 1) * 124,
+      190 + round.start.row * 124,
     );
   });
 

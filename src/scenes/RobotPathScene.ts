@@ -27,9 +27,9 @@ import { ChoiceRoundScene } from "./ChoiceRoundScene";
 /** Spoken once when the game opens, and again on an empty Go (spec FR-13). */
 const RULE = "Put the arrows in the robot's path, then tap go.";
 
-/** Board geometry: three 112px tiles, 8px apart, rows starting below the rule. */
+/** Board geometry: three 112px tiles, 12px apart (spec FR-2). */
 const TILE_SIZE = 112;
-const TILE_GAP = 8;
+const TILE_GAP = 12;
 const TILE_STEP = TILE_SIZE + TILE_GAP;
 const BOARD_TOP_ROW = 190;
 const BOARD_CENTER_X = 512;
