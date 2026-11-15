@@ -149,19 +149,19 @@ progress 6+6+6+5) and README, PRD and TDD gained the row the validator compares.
 - **Dependencies:** none
 - **Decisions:** D9, D5
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P5.T1: Publish the game's state** — covers: FR-16, D9
-  - [ ] `e2eBridge.ts` gains `E2ERobotPathState` and the `e2eRobotPath?()` probe hook (added to the scene-probe shape and the installed bridge), returning the FR-16 fields read live from the scene.
-  - [ ] `RobotPathScene` implements it from its own objects: palette and slot centres, Go, robot and star positions, the command list, the round's solution, the run count and whether the round is solved; unit tests prove the hook is absent without `?e2e=1` and reflects a placement immediately.
-- [ ] **P5.T2: Write the journey** — covers: AC-8, FR-7, FR-9
-  - [ ] `robot-path.spec.ts`: open the Hub, launch `RobotPath` by registry index, read the round, tap the palette in `solution` order, press Go, and assert the round advances and no console errors appear.
-  - [ ] Then a stopped run: press Go one command short, assert the round did **not** advance and every command is still published, add the last command, press Go and solve it in the same round; repeat to three completed rounds and leave through the back control.
-- [ ] **P5.T3: Move the roster literals in the suite** — covers: AC-8, AC-10
-  - [ ] `launch-all.spec.ts` `EXPECTED_GAME_COUNT` 22 → 23 (the loop itself already follows the registry), its two messages updated, `hub-groups.spec.ts`'s "draws all 22 games" step text, and `insights.spec.ts`'s "2 of 22 games" expectation to 23.
+- [x] **P5.T1: Publish the game's state** — covers: FR-16, D9
+  - [x] `e2eBridge.ts` gains `E2ERobotPathState` and the `e2eRobotPath?()` probe hook (added to the scene-probe shape and the installed bridge), returning the FR-16 fields read live from the scene.
+  - [x] `RobotPathScene` implements it from its own objects: palette and slot centres, Go, robot and star positions, the command list, the round's solution, the run count and whether the round is solved; unit tests prove the hook is absent without `?e2e=1` and reflects a placement immediately.
+- [x] **P5.T2: Write the journey** — covers: AC-8, FR-7, FR-9
+  - [x] `robot-path.spec.ts`: open the Hub, launch `RobotPath` by registry index, read the round, tap the palette in `solution` order, press Go, and assert the round advances and no console errors appear.
+  - [x] Then a stopped run: press Go one command short, assert the round did **not** advance and every command is still published, add the last command, press Go and solve it in the same round; repeat to three completed rounds and leave through the back control.
+- [x] **P5.T3: Move the roster literals in the suite** — covers: AC-8, AC-10
+  - [x] `launch-all.spec.ts` `EXPECTED_GAME_COUNT` 22 → 23 (the loop itself already follows the registry), its two messages updated, `hub-groups.spec.ts`'s "draws all 22 games" step text, and `insights.spec.ts`'s "2 of 22 games" expectation to 23.
 
-**Result:** PENDING
-**Checkpoint:** PENDING
+**Result:** verified 2026-11-16 — the phase's verbatim chain exits 0 on `f96c923e` (23 browser journeys, 150 files / 3,254 tests, coverage 97.24/91.56/96.3/98.31, shell entry 182.5 kB, PWA 16/16, docs 5/5). The Go button's custom hit area was in unscaled frame pixels and left the visible button untappable; it now uses the frame hit area at 112x112. Deviation 3 refreshed four suite-count lines.
+**Checkpoint:** f96c923e
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-5.md
 
 ## Phase 6: Documents say 23, and say what the game teaches
