@@ -107,6 +107,8 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round. If it cannot be fetched, the Hub tries again by itself. When that retry fails too, the rest of the Hub stays usable and a wordless retry ring appears on the tile the child tapped; tapping the ring tries the same game again. A game that never opens charges no play time and records no play.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
+Above the grid sit six group chips — All, Letters, Numbers, Thinking, Play and Stories — in the top band between the avatar chip and Settings. A chip tap redraws the board as that group's own games at 176×196 in three columns, each row centred, so reaching a game takes at most two taps: the chip, then the game. Tapping a chip also speaks the group's spoken name ("Numbers and counting"), and All says "All games". All is the landing state of every visit: the selection is never stored, and the familiar 22-tile board is always what a child arrives on.
+
 The Hub fits all 22 tiles in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and two) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
 
 ## 2. Curriculum map
@@ -542,11 +544,11 @@ Music and sound effects are two independent toggles in the Settings panel, each 
 
 ### 7.1 The boot asset set
 
-The boot set is 53 keys, rasterised during Preload so that the shell never stalls on a first draw. It is deliberately small and deliberately shared: the 22 tile icons and 22 sticker icons the Hub needs, the two mascot poses, the shared speaker glyph, and the six profile avatars. Everything else a game draws is loaded with that game instead (see 7.3), so the shell does not pay for art a child may never open.
+The boot set is 58 keys, rasterised during Preload so that the shell never stalls on a first draw. It is deliberately small and deliberately shared: the 22 tile icons and 22 sticker icons the Hub needs, the two mascot poses, the five group-chip glyphs, the shared speaker glyph, and the six profile avatars. Everything else a game draws is loaded with that game instead (see 7.3), so the shell does not pay for art a child may never open.
 
 Rasterising every key at 512 by 512 would waste GPU memory, because most art displays far smaller than that. Each key is therefore rasterised at one of three tiers, chosen by an ordered rule list where the first match wins:
 
-- **160 px (icon)** — any `tile_*` key, any `sm_shadow_*` key, and the five exact keys `minus`, `plus`, `equals`, `sleep_zzz` and `icon_speaker`.
+- **160 px (icon)** — any `tile_*` key, any `group_*` key, any `sm_shadow_*` key, and the five exact keys `minus`, `plus`, `equals`, `sleep_zzz` and `icon_speaker`.
 - **256 px (card)** — everything else: gameplay art, stickers and prompt targets, and also letters and numerals, because no rule matches `letter_*` or `numeral_*` and an unmatched key takes this default.
 - **512 px (hero)** — any `mascot_*` key, whose scale maths assumes a full-size texture.
 
@@ -558,11 +560,11 @@ Story Order's 45 panels are not in the boot set; they travel with that game's ch
 
 The build produces three kinds of JavaScript:
 
-- **The shell entry**, which contains the three shell scenes (Boot, Preload and Hub), the components the Hub and its settings overlays use, the storage, audio and speech utilities they import, and the 53 boot textures as strings. It is gated at 200 kB minified.
+- **The shell entry**, which contains the three shell scenes (Boot, Preload and Hub), the components the Hub and its settings overlays use, the storage, audio and speech utilities they import, and the 58 boot textures as strings. It is gated at 200 kB minified.
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
 - **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-Measured from the current build, the shell entry is 137.8 kB as `validate-bundle.js` reports it (141.15 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1342.6 kB, and the build emits 42 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 45 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
+Measured from the current build, the shell entry is 179.5 kB as `validate-bundle.js` reports it (183.77 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 47 JavaScript chunks in all: the 22 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 45 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 
@@ -574,7 +576,7 @@ Game art belongs in the game's chunk when only that game uses it. Two mechanisms
 
 A scene that asks for art which fails to load falls back to a neutral placeholder rather than Phaser's missing-texture checkerboard, and a shared textless cue is shown while the art loads, so the child sees a deliberate loading mark rather than a broken picture.
 
-The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 53 shell keys, and fails if the shell ever imports a game-only key.
+The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 58 shell keys, and fails if the shell ever imports a game-only key.
 
 ### 7.4 Runtime targets
 

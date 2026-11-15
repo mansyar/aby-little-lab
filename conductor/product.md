@@ -82,7 +82,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 
 - **BootScene:** Locks screen orientation to landscape via Screen Orientation API. Auto-transitions to Preload.
 - **PreloadScene:** Preloads SVG assets (rasterized at three tiers — icon 160px, card 256px, hero 512px), displays progress bar. Auto-transitions to Hub.
-- **HubScene:** 22 game tiles grid (6×4 at 144px — rows 6/6/6/4) on wide viewports, collapsing to three pages of 5×2 (10 + 10 + 2) with swipe and page dots below the touch floor on phones, sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner.
+- **HubScene:** 22 game tiles grid (6×4 at 144px — rows 6/6/6/4) on wide viewports, collapsing to three pages of 5×2 (10 + 10 + 2) with swipe and page dots below the touch floor on phones, sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner. Six group chips sit in the top band — All, Letters, Numbers, Thinking, Play and Stories — and a chip redraws the board as that group's own games at 176×196, so any game is at most two taps away; the chip also speaks the group's name, and All is the landing state of every visit.
 - **GameScene:** Initialized with randomized items. On completion: win animation + sticker award (if first time) + auto-return to Hub (3s delay). Exit via parental lock (hold 3s).
 
 ## 7. Visual Design
@@ -278,6 +278,19 @@ Cloud sync and accounts (breaks the privacy posture and the offline guarantee) �
 real-time multiplayer · more games before deeper pools · third-party analytics or
 crash SDKs · runtime AI content · a native rewrite · keyboard support unless
 Phase 3 asks for it · migrating the `abby-` storage key (permanent but harmless).
+
+## Changelog — Hub Game Groups (2026-11-15)
+
+> **2026-11-15 — Hub Game Groups:** the Hub's top band now carries six chips —
+> All, Letters, Numbers, Thinking, Play and Stories — that group the 22 games by
+> learning domain. A chip tap redraws the board as that group's own games at
+> 176×196 (three columns, rows centred, page dots hidden on phones), speaks the
+> group's spoken name through the existing narrator, and resets to All on the
+> next visit, so a child still lands on the familiar grid and reaches any game
+> in at most two taps. The All board is unchanged byte-for-byte. Five flat
+> `group_*` glyphs join the boot shell at the icon tier (58 shell keys, 191 app
+> keys), and the `?e2e=1` bridge publishes the chip row so the browser journey
+> drives a group and plays from it.
 
 ## Changelog — Content Expansion: Words, Stories, Scenarios (2026-10-27)
 

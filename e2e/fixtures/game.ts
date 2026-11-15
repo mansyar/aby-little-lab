@@ -1,5 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import type {
+  E2EHubGroups,
   E2EHubPlayTime,
   E2EHubToast,
   E2EProgressState,
@@ -126,6 +127,11 @@ export function settingsState(page: Page): Promise<E2ESettingsState> {
 /** The Learning Progress overlay as it is drawing it, or null while it is closed. */
 export function progressState(page: Page): Promise<E2EProgressState | null> {
   return page.evaluate(() => window.__abyE2E?.settings().progress ?? null);
+}
+
+/** The hub's chip row and the selection it is filtering by. */
+export function hubGroups(page: Page): Promise<E2EHubGroups> {
+  return page.evaluate(() => window.__abyE2E?.hubGroups() ?? { selected: "all", chips: [] });
 }
 
 /** The hub's daily-budget state: whether the cap locked the tiles, and whether a nudge is up. */
