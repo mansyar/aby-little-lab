@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Robot Path: the rock a route has to go around. -->
+  <path d="M 112 392 Q 88 316 152 292 Q 186 236 258 254 Q 314 226 352 272 Q 424 292 402 392 Z" fill="#A0AEC0" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 190 292 Q 216 320 210 356" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 300 286 Q 322 318 320 350" fill="none" stroke="#2D3748" stroke-width="4" stroke-linecap="round"/>
+</svg>
