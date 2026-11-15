@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-15T00:00:00+11:00",
-  "updated_at": "2026-11-15T22:20:00+11:00",
+  "updated_at": "2026-11-15T23:10:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "mission": "mission.md",
@@ -18,14 +18,14 @@
   "progress": {
     "phases_total": 5,
     "tasks_total": 14,
-    "phases_verified": 4,
-    "tasks_done": 12
+    "phases_verified": 5,
+    "tasks_done": 14
   },
-  "last_checkpoint": "648cf374",
+  "last_checkpoint": "b378e05b",
   "review_verdict": null,
   "review_rounds": 0,
   "reviewed_head_sha": null,
-  "doc_sync": "pending",
+  "doc_sync": "done",
   "pr_url": null,
   "pr_state": null,
   "decisions_open": 0,

@@ -126,15 +126,15 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
 - **Dependencies:** none
 - **Decisions:** D1
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P5.T1: Drive every chip and play from one** — covers: FR-6, AC-3
-  - [ ] `hub-groups.spec.ts`: wait for the board, read `e2eHubGroups()`, tap each chip and assert the drawn tile ids equal that group's registry indexes, tap All and assert 22 tiles, then select Numbers, launch a game tile, play it, and assert the Hub returns on All.
+- [x] **P5.T1: Drive every chip and play from one** — covers: FR-6, AC-3
+  - [x] `hub-groups.spec.ts`: wait for the board, read `e2eHubGroups()`, tap each chip and assert the drawn tile ids equal that group's registry indexes, tap All and assert 22 tiles, then select Numbers, launch a game tile, play it, and assert the Hub returns on All.
 - [ ] **P5.T2: Write it down** — covers: FR-12, AC-10
-  - [ ] `README.md` and `docs/PRD.md`: the six chips, the five groups, the two-tap rule and All as the landing state, with the 58-key shell count replacing 53 wherever it is stated.
-  - [ ] `docs/TDD.md`: the group field, `hubGroups.ts`, `groupLayout.ts`, the chip band geometry, the filtered board geometry and the glyph ownership rule.
-  - [ ] `conductor/product.md`: a dated changelog entry and the Hub line in §6; `conductor/product-guidelines.md`: one line under the Hub/paging guidance that grouping is a layout concern and the 64px floor still governs game tiles, not the top-band chrome.
+  - [x] `README.md` and `docs/PRD.md`: the six chips, the five groups, the two-tap rule and All as the landing state, with the 58-key shell count replacing 53 wherever it is stated.
+  - [x] `docs/TDD.md`: the group field, `hubGroups.ts`, `groupLayout.ts`, the chip band geometry, the filtered board geometry and the glyph ownership rule.
+  - [x] `conductor/product.md`: a dated changelog entry and the Hub line in §6; `conductor/product-guidelines.md`: one line under the Hub/paging guidance that grouping is a layout concern and the 64px floor still governs game tiles, not the top-band chrome.
 
-**Result:**
-**Checkpoint:**
+**Result:** verified — a Playwright journey taps all six chips, asserts each drawn board equals that group's registry indexes, launches and plays Add It Up from the Numbers board, and proves the returned Hub lands on All with 22 tiles; README, PRD, TDD, `product.md` and `product-guidelines.md` describe the groups, the two-tap rule and the 58-key shell. 22 browser journeys and 3,203 unit tests in 147 files; gate exit 0.
+**Checkpoint:** b378e05b
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-5.md
