@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-16.** The section **Robot Path — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-Cq96urFU.js` at 182.5 kB via `validate-bundle` (186.85 kB as Vite prints it, 47.59 kB gzip), **49** JavaScript chunks, **61** precache entries (1794.41 KiB), 150 test files / 3,254 tests across 97.22 % statements, 91.51 % branches, 96.3 % functions and 98.31 % lines, and 22 browser journeys over 23 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-16.** The section **Robot Path — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-9iYt2XVh.js` at 182.5 kB via `validate-bundle` (186.85 kB as Vite prints it, 47.59 kB gzip), **49** JavaScript chunks, **61** precache entries (1794.50 KiB), 150 test files / 3,255 tests across 97.24 % statements, 91.61 % branches, 96.3 % functions and 98.31 % lines, and 23 browser journeys across 18 spec files over 23 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
 
@@ -418,7 +418,7 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 150 files / 3,254 tests | `pnpm test -- --run` |
+| Test suite | 150 files / 3,255 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-11-15; the build
@@ -749,15 +749,15 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 
 | Measurement | Value | Source |
 | --- | --- | --- |
-| Shell entry (minified) | `index-Cq96urFU.js` = **182.5 kB** (186.85 kB as Vite prints it, 47.59 kB gzip) | `node scripts/validate-bundle.js` |
+| Shell entry (minified) | `index-9iYt2XVh.js` = **182.5 kB** (186.85 kB as Vite prints it, 47.59 kB gzip) | `node scripts/validate-bundle.js` |
 | Shell entry budget | ≤ 200 kB | `scripts/validate-bundle.js` |
 | Phaser vendor chunk | `phaser-B_vcVLyb.js` = 1335.0 kB | `node scripts/validate-bundle.js` |
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
-| Service-worker precache | **61 entries** (1794.41 KiB) | the build's PWA step |
+| Service-worker precache | **61 entries** (1794.50 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 150 files / 3,254 tests | `pnpm test -- --run` |
-| Coverage | statements 97.22 % / branches 91.51 % / functions 96.3 % / lines 98.31 % | `pnpm test:coverage` |
-| Browser journeys | 22 journeys in 17 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
+| Test suite | 150 files / 3,255 tests | `pnpm test -- --run` |
+| Coverage | statements 97.24 % / branches 91.61 % / functions 96.3 % / lines 98.31 % | `pnpm test:coverage` |
+| Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
 The two Robot Path shell SVGs moved the entry from 179.4 kB to 182.4 kB in Phase 4, and Phase 5's
 bridge and scene kept it at 182.5 kB — still 17.5 kB inside the gate and inside NFR-3's 4 kB
@@ -765,7 +765,8 @@ allowance for the two new drawings. The six robot and prop drawings do not reach
 `ROBOT_PATH_ASSETS` is imported by `src/game/robotPathArt.ts` and rasterized by the scene's own
 `preload()`, so they land in the game's chunk like Story Order's panels.
 
-The suite grew by six tests (3,248 → 3,254) and no test file was added or removed: the three new
-bridge cases in `src/__tests__/game/e2eBridge.test.ts` and the three new scene cases in
-`src/__tests__/scenes/robotPathScene.test.ts`. The browser layer gained one journey file
+The suite grew by seven tests (3,248 → 3,255) and no test file was added or removed: the three new
+bridge cases in `src/__tests__/game/e2eBridge.test.ts`, the three new scene cases in
+`src/__tests__/scenes/robotPathScene.test.ts` and review round 1's third-stop hint case in the
+same scene suite. The browser layer gained one journey file
 (`e2e/journeys/robot-path.spec.ts`) and moved its roster literals from 22 to 23 games.

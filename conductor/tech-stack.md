@@ -58,7 +58,7 @@
 - **Resolution:** 1024×768 landscape base
 - **Scale Mode:** `Phaser.Scale.FIT` + `Phaser.Scale.CENTER_BOTH` — dynamic centered letterboxing
 - **Physics:** Arcade Physics, gravity y:0 (top-down/2D, no platformer physics)
-- **Scenes:** 25 scenes (Boot, Preload, Hub, 22 game scenes)
+- **Scenes:** 26 scenes (Boot, Preload, Hub, 23 game scenes)
 
 > **2026-08-02 — Design Update (Bundle Code Splitting):** Game scenes are lazy-loaded via runtime registration. `src/scenes/sceneRegistry.ts` maps each game scene key to a dynamic-import loader and exposes `ensureSceneLoaded(scene, key)` (no-op if already registered, else `import()` + `scene.add(key, SceneClass)`); HubScene awaits it before transitioning into a game. Phaser 4.2.1 does **not** support dynamic-import lazy loaders in the `scene` array — functions there are invoked with `new` (constructor form only, no promise handling in `SceneManager`). Shell scenes (Boot/Preload/Hub) remain statically registered in `main.ts`. Rollup hoists shared modules into shared chunks automatically; no `manualChunks` config.
 
@@ -110,7 +110,7 @@
 - **Server:** one shared `vite preview` on `http://127.0.0.1:4173`, built by `pnpm test:e2e` and pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows
 - **Workers:** 2 locally and in CI, `fullyParallel: false` so the file is the parallelism unit; every test gets a fresh browser context, so the preview is the only shared state
 - **Retries:** 0 locally (that is what makes the determinism claim mean anything), 2 in CI with a trace on the first retry; a retry-only pass is a finding, not a pass
-- **Budget:** 13 journeys in 3.0 min on two workers (4.9 min serially); `launch-all` alone is 2.7 min and is the critical path
+- **Budget:** 23 journeys in 4.6 min on two workers; `launch-all` alone is 2.9 min and is the critical path (measured 2026-11-16, track `20261115-robot-path`)
 - **Observation seam:** a read-only bridge installed only under `?e2e=1` (`src/game/e2eBridge.ts`) — no `node:fs`, no test-only build, so the artifact CI tests is the artifact that ships
 
 > **2026-11-07 — Design Update (Browser Journey Layer):** The project's first browser-level tests. Playwright drives the built `dist` through `vite preview` and plays the game with real pointer input: boot, all 22 launches, three rounds on each of six mechanic families, the sticker award, the parental gate (3 s hold vs 1 s press), settings persistence across reload, the daily cap, and an offline relaunch from the service worker. A query-gated read-only bridge (`window.__abyE2E`) publishes scene key, profile/sticker counts, round index, round geometry, hub tiles, hub toast, hub readiness, settings rows and play-time state; without `e2e=1` it does not exist. Running it found five defects invisible to every other gate — `roundIndex()` counting dot alpha, the offline toast swallowing the first tap, the hub ignoring input during its entrance, readiness sampled mid-rebuild, and a held back button delivering the child's first tap to the profile chip (a shipping bug, fixed). Proof of teeth: shrinking one tile's hit area to 1x1 turned three journeys red while check, typecheck, 2,881 unit tests and the build stayed green. Ten consecutive runs at 3.07-3.10 min, retries 0.

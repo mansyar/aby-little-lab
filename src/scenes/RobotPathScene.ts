@@ -86,6 +86,11 @@ export class RobotPathScene extends ChoiceRoundScene {
   private deviation: number | null = null;
   /** Runs finished this round, both outcomes — what the bridge publishes. */
   private runs = 0;
+  /**
+   * Whether this round's hint has been offered. FR-10 caps it at one per round,
+   * so a third stopped run must not pulse the arrow again.
+   */
+  private hintOffered = false;
   /** Whether one of those runs reached the star. */
   private solvedThisRound = false;
 
@@ -138,6 +143,7 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.deviation = null;
     this.runs = 0;
     this.solvedThisRound = false;
+    this.hintOffered = false;
 
     const board = this.add.graphics();
     this.trackRoundObject(board);
@@ -187,6 +193,7 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.deviation = null;
     this.runs = 0;
     this.solvedThisRound = false;
+    this.hintOffered = false;
     for (let index = 0; index < this.slotArrows.length; index++) {
       this.slotArrows[index]?.destroy();
       this.slotArrows[index] = null;
@@ -407,8 +414,13 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.redrawStrip();
     this.inputLocked = false;
 
-    const hint = round ? hintFor(round, this.stoppedRuns) : null;
-    if (hint) this.pulseHint(hint);
+    // The hint is offered once per round (spec FR-10): after the second stopped
+    // run it pulses, and a third stop no longer repeats it.
+    const hint = round && !this.hintOffered ? hintFor(round, this.stoppedRuns) : null;
+    if (hint) {
+      this.hintOffered = true;
+      this.pulseHint(hint);
+    }
   }
 
   /** The shared splash, then the base's chime, dot and advance. */

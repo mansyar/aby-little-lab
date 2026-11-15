@@ -404,6 +404,37 @@ describe("RobotPathScene interactions", () => {
       true,
     );
   });
+
+  it("offers the round's hint once, so a third stopped run pulses nothing", () => {
+    const scene = new RobotPathScene(mulberry32(1234));
+    scene.create();
+    const round = useRoundWithSteps(scene, 3);
+    const startIndex = internals(scene).roundIndex;
+    // Identify a hint pulse by its target rather than by tween shape: the
+    // stopped-run wiggle also repeats twice over two objects, so counting
+    // `repeat: 2` alone would count the wiggle as a hint.
+    const hinted = internals(scene).paletteRects.get(round.solution[0]);
+    const hintPulses = () =>
+      internals(scene)
+        .tweens.add.mock.calls.map((call) => call[0] as { targets?: unknown[] })
+        .filter((config) => config.targets?.[0] === hinted).length;
+
+    programSolution(scene, round.solution.length - 1);
+    pressGo(scene);
+    flushTimers(scene);
+    expect(hintPulses(), "one stopped run offers no hint").toBe(0);
+
+    pressGo(scene);
+    flushTimers(scene);
+    expect(internals(scene).stoppedRuns).toBe(2);
+    expect(hintPulses(), "the second stopped run offers the hint").toBe(1);
+
+    pressGo(scene);
+    flushTimers(scene);
+    expect(internals(scene).stoppedRuns).toBe(3);
+    expect(hintPulses(), "the hint is offered at most once per round").toBe(1);
+    expect(internals(scene).roundIndex, "no stopped run advances the round").toBe(startIndex);
+  });
 });
 
 describe("RobotPathScene bridge hook", () => {

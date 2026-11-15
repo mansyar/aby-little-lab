@@ -445,7 +445,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | Shell entry | 182.5 kB as `validate-bundle.js` reports it (186.85 kB as Vite prints it), gated at 200 kB | `node scripts/validate-bundle.js` |
 | Phaser vendor chunk | 1335.0 kB as the validator reports it (the same bytes, binary versus decimal units) | `node scripts/validate-bundle.js` |
 | Story Order chunk | ~40.3 kB, includes all 45 panel SVGs | build output |
-| Precache entries | 61 (1794.41 KiB) | `precache  61 entries` from the PWA build step |
+| Precache entries | 61 (1794.50 KiB) | `precache  61 entries` from the PWA build step |
 
 The shell carries the four eagerly registered scenes, the components the Hub and its settings overlays use, the utilities they import and the 60 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
@@ -1247,13 +1247,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-150 test files, 3,254 tests (verified 2026-11-16). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+150 test files, 3,255 tests (verified 2026-11-16). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-16) is statements 97.22 %, branches 91.51 %, functions 96.3 % and lines 98.31 % across 150 files and 3,254 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-16) is statements 97.24 %, branches 91.61 %, functions 96.3 % and lines 98.31 % across 150 files and 3,255 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
@@ -1268,7 +1268,7 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 22 journeys across 17 spec files cover boot, all 23 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 23 journeys across 18 spec files cover boot, all 23 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
 What this layer observes that the unit layer cannot:
 
@@ -1290,7 +1290,7 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 
 `pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
 
-**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 21 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 23 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 
