@@ -1,6 +1,6 @@
 # Initial Concept
 
-Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 22 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
+Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 23 mini-games, built with Phaser 4 + TypeScript + Vite as a PWA. Detailed product and technical specifications are available in `docs/PRD.md` and `docs/TDD.md`.
 
 ---
 
@@ -8,7 +8,7 @@ Aby's Little Lab — An ad-free toddler game suite (ages 3-5) with 22 mini-games
 
 ## 1. Product Overview
 
-**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **22 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
+**Aby's Little Lab** is an ad-free, distraction-free developmental game suite for preschoolers aged 3–5 (36–60 months). The app packages **23 distinct mini-games** into a single lightweight PWA targeting fundamental cognitive, motor, and reasoning milestones.
 
 All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes scalable vectors dynamically at load time into crisp bitmaps, matching exact display resolutions without large file sizes.
 
@@ -20,7 +20,7 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 
 ## 3. Key Features
 
-### 3.1 Twenty-Two Mini-Games
+### 3.1 Twenty-Three Mini-Games
 
 | # | Game | Milestone | Core Mechanic |
 |---|---|---|---|
@@ -46,18 +46,19 @@ All graphical assets use an **AI-Generated SVG Pipeline**: Phaser 4 rasterizes s
 | 20 | Number Order | Numeral sequencing / ordinality | Drag shuffled numeral cards (3–5 of them) into empty slots in ascending order (6 rounds, easy-first 1–5 → 1–8 → 1–10 bands; tap a numeral to hear it spoken) |
 | 21 | Feelings Faces | Social-emotional learning (emotion recognition) | Hear a short everyday scenario, then tap the face showing how Aby feels (6 rounds, 3 faces per round, 32-scenario pool; contrastive pairs first, then the confusable sad/scared pair) |
 | 22 | Story Order | Narrative sequencing / temporal order | Drag three shuffled story panels into three ordinal slots (marked only by 1/2/3 pips) to tell the story first to last (6 rounds, 15-story pool, easy-first obvious then subtle) |
+| 23 | Robot Path | Early programming / sequencing absolute steps | Tap absolute direction arrows into a six-slot strip, then Go, to walk a robot across a 3×3 board to its star (6 rounds, 2-6 commands each, a rock or two in the last two; a refused illegal step, retry in place, one hint after two stopped runs) |
 
 ### 3.2 Cross-Game Systems
 
-- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all twenty-two game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
+- **Mascot Companion:** "Professor Hoot", a round owl in a tiny lab coat, lives on the Hub (bottom corner; waves on load, gentle bob + squash-blink idle loop, cheers on newly-earned stickers) and in all twenty-three game scenes (cheers on correct actions, nods on incorrect ones, big cheer on round wins alongside the win celebration). Tween-only reactions over two static SVG poses (no sprite sheets); respects `prefers-reduced-motion`; adds no new audio.
 - **Sticker Collection:** Each game awards a unique themed sticker on first completion. Stickers persist across sessions via localStorage and display as a sticker shelf (SVG thumbnails) under each Hub tile — earned stickers shimmer, unearned ones are dimmed, and a just-earned sticker gets a highlight on return. Since v2 (2026-08-04), stickers are **per kid profile**: up to 4 profiles, each with its own collection; a kid-tappable avatar chip on the Hub switches profiles instantly (no parental lock), while profile creation/deletion stays behind the parental hold in Settings → Profiles.
 - **Play-Time Limits** *(2026-08-05)*: Parents can set a per-profile daily play-time cap (Off / 15 / 30 / 45 / 60 min) in Settings → Profiles. Usage accrues per profile while games run — only visible time counts, so a hidden or backgrounded tab accrues nothing — the Hub shows a textless remaining-budget arc that turns warm at ≤5 min, a soft hourglass nudge delays game launch once 5 min remain, and when the cap is reached tiles dim and lock with a moon badge — no mid-game cutoffs, no harshness, fully off by default.
-- **TTS Voice Selection** *(2026-08-08)*: Parents can pick the device TTS voice used by all speech-driven games (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match) in Settings → Voice. Device-level (shared across profiles), "Default (device)" option, in-place Preview honoring the SFX toggle. Since 2026-10-18 this voice also drives the twelve rule-narrators, so it sets the voice for all twenty-two games. Addresses the accepted known issue "TTS voice availability varies by device/OS".
-- **Spoken Rules for Every Game** *(2026-10-18)*: All twenty-two games are now voiced. The ten that already narrated their target keep doing so; the ten that taught by interaction alone (Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Memory Match, Number Order, Pattern Builder, Big vs. Small, Add It Up, Take Away) speak a single one-line rule when the round is set up - "Drag each shape into its hole.", "Put the numbers in order, smallest first." and so on. Since 2026-10-20, Feelings Faces is the eleventh rule-narrator ("Tap the face that shows how Aby feels.") and also speaks each round's everyday scenario aloud. Since 2026-10-20, Story Order is the twelfth rule-narrator ("Put the story in order, first to last."). Each rule is one short written line beside the shared speaker glyph: spoken once automatically, replayable on tap, silent and dimmed when SFX is off or the device has no voice. The rule is spoken, not just printed, so a pre-reader needs no help to start a game they have never seen.
-- **Parent Progress Insights** *(2026-08-09)*: Parents can open a per-profile **Learning Progress** report from Settings → Progress: for each of the 22 games — plays, accuracy (green fill bar + percent), a ★ mastery star after 3 wins, and relative last-played. Avatar chips switch the report between profiles without changing the active profile; rows page 6 + 6 + 6 + 4; a 7-day activity strip shows plays per day. Fully on-device (additive `progress`/`activity` fields per profile, normalize-on-read), parent-gated behind the 3-second hold — kids never see it. Pop & Freeze and Animal Trace count plays/wins but have no right/wrong taps by design.
+- **TTS Voice Selection** *(2026-08-08)*: Parents can pick the device TTS voice used by all speech-driven games (Find the Letter, Find the Word, Build the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match) in Settings → Voice. Device-level (shared across profiles), "Default (device)" option, in-place Preview honoring the SFX toggle. Since 2026-10-18 this voice also drives the twelve rule-narrators, so it sets the voice for all twenty-three games. Addresses the accepted known issue "TTS voice availability varies by device/OS".
+- **Spoken Rules for Every Game** *(2026-10-18)*: All twenty-three games are now voiced. The ten that already narrated their target keep doing so; the ten that taught by interaction alone (Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Memory Match, Number Order, Pattern Builder, Big vs. Small, Add It Up, Take Away) speak a single one-line rule when the round is set up - "Drag each shape into its hole.", "Put the numbers in order, smallest first." and so on. Since 2026-10-20, Feelings Faces is the eleventh rule-narrator ("Tap the face that shows how Aby feels.") and also speaks each round's everyday scenario aloud. Since 2026-10-20, Story Order is the twelfth rule-narrator ("Put the story in order, first to last."). Since 2026-11-16, Robot Path is the thirteenth ("Put the arrows in the robot's path, then tap go."). Each rule is one short written line beside the shared speaker glyph: spoken once automatically, replayable on tap, silent and dimmed when SFX is off or the device has no voice. The rule is spoken, not just printed, so a pre-reader needs no help to start a game they have never seen.
+- **Parent Progress Insights** *(2026-08-09)*: Parents can open a per-profile **Learning Progress** report from Settings → Progress: for each of the 23 games — plays, accuracy (green fill bar + percent), a ★ mastery star after 3 wins, and relative last-played. Avatar chips switch the report between profiles without changing the active profile; rows page 6 + 6 + 6 + 5; a 7-day activity strip shows plays per day. Fully on-device (additive `progress`/`activity` fields per profile, normalize-on-read), parent-gated behind the 3-second hold — kids never see it. Pop & Freeze and Animal Trace count plays/wins but have no right/wrong taps by design.
 - **Adaptive Difficulty** *(2026-08-27)*: In the five early-numeracy games (How Many?, More or Less, Add It Up, Take Away, and Number Order — 2026-08-28, twelfth adaptive game), the easy-first difficulty ladder may shift one band up or down at the start of a playthrough, based on the kid's last 10 taps in that game (per profile, re-evaluated fresh each session, never mid-game). Strong recent performance (≥90% across that 10-tap window, once at least 6 taps are in it) nudges the ladder up; struggling (<60%) nudges it down; anything between leaves the ladder steady, every step is clamped to the game's own band range, and with fewer than 6 taps or the toggle off the classic ladder is used. Invisible to kids (no labels, no tiers, no fail states); parents can turn it off in Settings → Adaptive Difficulty, and the Learning Progress report notes that difficulty adapts to recent answers.
 - **Adaptive Literacy & Memory** *(2026-08-27)*: The same adaptive ±1 band system extends to six literacy & memory games — Find the Word, Build the Word, First Sounds, Find the Letter, Memory Match, and Musical Memory — plus Decode It (2026-08-28, seventh adaptive game) — re-evaluated fresh at each playthrough start from the kid's last 10 taps in that game (per profile, never mid-game, invisible to kids). Struggling kids get easier runs (all-3-letter words, B/P-free phonics targets, A–J letter targets, smaller memory grids, 1-note starting sequences, 4 easy + 2 hard decoding rounds); thriving kids get stretched runs (more 4-letter words, confusable-distractor discrimination practice, bigger grids, longer frog sequences, 2 easy + 4 hard decoding rounds); with too few taps or the toggle off, the classic ladder is used. Same Settings → Adaptive Difficulty toggle; no new controls.
-- **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed. *(Amended 2026-08-28: in the five early-numeracy games (How Many?, More or Less, Add It Up, Take Away, Number Order), the seven literacy & memory games - Find the Word, Build the Word, First Sounds, Find the Letter, Memory Match, Musical Memory, Decode It - and Color Match, Odd One Out and Pattern Builder, difficulty may now shift ±1 band per playthrough via Adaptive Difficulty above; the other seven games (Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Feelings Faces, Story Order) remain fixed-difficulty.)*
+- **Replay Variety:** Items/shapes/animals shuffle per playthrough; difficulty stays fixed. *(Amended 2026-08-28: in the five early-numeracy games (How Many?, More or Less, Add It Up, Take Away, Number Order), the seven literacy & memory games - Find the Word, Build the Word, First Sounds, Find the Letter, Memory Match, Musical Memory, Decode It - and Color Match, Odd One Out and Pattern Builder, difficulty may now shift ±1 band per playthrough via Adaptive Difficulty above; the other seven games (Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Feelings Faces, Story Order) remain fixed-difficulty, and Robot Path (2026-11-16) is fixed in the strongest sense: no adaptive dimension reaches it at all, because the child's own program is the difficulty.)*
 - **Gentle Feedback:** Correct → pleasant chime + Graphics-based splash (no particle emitters). Incorrect → gentle "try again" animation, no penalty.
 - **Per-Game Juice:** Each game layers playful animation reactions — drag pieces lift/tilt and snap home with a `Back.out` settle, boxes wiggle and bump, shadows stamp, animals hop, bubbles burst into droplets, frogs ripple — all reduced-motion-aware (gentler/shorter or disabled) and zero-penalty.
 
@@ -82,7 +83,7 @@ BootScene → PreloadScene → HubScene → GameScene → HubScene
 
 - **BootScene:** Locks screen orientation to landscape via Screen Orientation API. Auto-transitions to Preload.
 - **PreloadScene:** Preloads SVG assets (rasterized at three tiers — icon 160px, card 256px, hero 512px), displays progress bar. Auto-transitions to Hub.
-- **HubScene:** 22 game tiles grid (6×4 at 144px — rows 6/6/6/4) on wide viewports, collapsing to three pages of 5×2 (10 + 10 + 2) with swipe and page dots below the touch floor on phones, sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner. Six group chips sit in the top band — All, Letters, Numbers, Thinking, Play and Stories — and a chip redraws the board as that group's own games at 176×196, so any game is at most two taps away; the chip also speaks the group's name, and All is the landing state of every visit.
+- **HubScene:** 23 game tiles grid (6×4 at 144px — rows 6/6/6/5) on wide viewports, collapsing to three pages of 5×2 (10 + 10 + 3) with swipe and page dots below the touch floor on phones, sticker shelf display, settings (behind parental lock), and the Professor Hoot mascot in the bottom corner. Six group chips sit in the top band — All, Letters, Numbers, Thinking, Play and Stories — and a chip redraws the board as that group's own games at 176×196, so any game is at most two taps away; the chip also speaks the group's name, and All is the landing state of every visit.
 - **GameScene:** Initialized with randomized items. On completion: win animation + sticker award (if first time) + auto-return to Hub (3s delay). Exit via parental lock (hold 3s).
 
 ## 7. Visual Design
@@ -130,7 +131,7 @@ Priority as of 2026-11-06. The engineering foundation is not the constraint: the
 app is layered, registry-driven, measured and gated. What is missing is the
 operating layer around it — a browser-level regression net, evidence that the
 games still work for a child over weeks rather than minutes, content depth
-behind the 22 mechanics, and a stated position on distribution, language and
+behind the 23 mechanics, and a stated position on distribution, language and
 accessibility. The sequence is therefore **trust → observability → depth →
 reach**, and each phase is one or more Conductor tracks.
 
@@ -278,6 +279,28 @@ Cloud sync and accounts (breaks the privacy posture and the offline guarantee) �
 real-time multiplayer · more games before deeper pools · third-party analytics or
 crash SDKs · runtime AI content · a native rewrite · keyboard support unless
 Phase 3 asks for it · migrating the `abby-` storage key (permanent but harmless).
+
+## Changelog — Game 23: Robot Path (2026-11-16)
+
+> **2026-11-16 — Game 23 — Robot Path:** the suite's first programming game, and
+> the one game whose answer is a program rather than a tap. The child taps
+> absolute direction arrows (up, right, down, left) into a six-slot strip to walk
+> a robot across a 3×3 board to its star; a dotted ghost trail shows where the
+> current program would go before anything moves, and Go replays it at 450 ms per
+> step. Commands are absolute rather than forward-and-turn because that is the
+> under-five failure mode in Bee-Bot studies — a turn needs a frame the child has
+> not built yet. Illegal steps (off the board, into a rock, past the star) are
+> refused at placement, so a program can never be invalid; a run that stops short
+> keeps every command and pulses the arrow that first left the route, so one arrow
+> can be dropped and the same round run again, and after two stopped runs the first
+> correct arrow pulses as a hint that is never placed for the child. Six fixed
+> rounds, two to six commands each. Hub grid 23 tiles (rows 6/6/6/5, phones
+> 10 + 10 + 3); Settings Learning Progress rows 22 → 23 (pages 6+6+6+5); the
+> `thinking` group holds seven games; the boot shell gains two keys (tile and
+> sticker) and the six robot drawings ride the game's own chunk. Not part of
+> Adaptive Difficulty: the ladder is fixed, because the child's own program is the
+> difficulty. Hub tiles and stickers are unchanged for every earlier game, and no
+> stored id, sticker or profile changes meaning.
 
 ## Changelog — Hub Game Groups (2026-11-15)
 

@@ -15,7 +15,7 @@ import type { GameId } from "../../types";
 
 describe("audio identity table", () => {
   it("covers the documented registry size", () => {
-    expect(GAME_REGISTRY).toHaveLength(22);
+    expect(GAME_REGISTRY).toHaveLength(23);
   });
 
   /**

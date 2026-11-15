@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Robot Path: the goal. Warm yellow so it reads at 96 px on a cream tile. -->
+  <polygon points="256,96 296,212 418,216 322,290 352,406 256,338 160,406 190,290 94,216 216,212" fill="#F6E05E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+</svg>

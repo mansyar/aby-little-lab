@@ -3,14 +3,14 @@ import { PAGE_SIZE, pageCount } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 
 describe("GAME_TILES", () => {
-  it("holds exactly 22 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
-    expect(GAME_TILES).toHaveLength(22);
+  it("holds exactly 23 tiles with unique gameIds, sceneKeys, and tileKeys", () => {
+    expect(GAME_TILES).toHaveLength(23);
     const gameIds = new Set(GAME_TILES.map((t) => t.gameId));
     const sceneKeys = new Set(GAME_TILES.map((t) => t.sceneKey));
     const tileKeys = new Set(GAME_TILES.map((t) => t.tileKey));
-    expect(gameIds.size).toBe(22);
-    expect(sceneKeys.size).toBe(22);
-    expect(tileKeys.size).toBe(22);
+    expect(gameIds.size).toBe(23);
+    expect(sceneKeys.size).toBe(23);
+    expect(tileKeys.size).toBe(23);
   });
 
   it("derives the hub page count from the tile list, not a constant", () => {
@@ -43,6 +43,7 @@ describe("GAME_TILES", () => {
       "number-order": "tile_number_order",
       "feelings-faces": "tile_feelings_faces",
       "story-order": "tile_story_order",
+      "robot-path": "tile_robot_path",
     };
     for (const tile of GAME_TILES) {
       expect(tile.tileKey).toBe(expected[tile.gameId]);
@@ -72,16 +73,21 @@ describe("GAME_TILES", () => {
     }
   });
 
-  it("keeps Feelings Faces as tile 21 and appends Story Order as tile 22", () => {
+  it("keeps Feelings Faces as tile 21 and appends Story Order 22, Robot Path 23", () => {
     const feelings = GAME_TILES[20];
     expect(feelings?.gameId).toBe("feelings-faces");
     expect(feelings?.sceneKey).toBe("FeelingsFaces");
     expect(feelings?.label).toBe("Feelings Faces");
     expect(GAME_TILES[19]?.gameId).toBe("number-order");
 
+    const story = GAME_TILES[21];
+    expect(story?.gameId).toBe("story-order");
+    expect(story?.sceneKey).toBe("StoryOrder");
+    expect(story?.label).toBe("Story Order");
+
     const last = GAME_TILES.at(-1);
-    expect(last?.gameId).toBe("story-order");
-    expect(last?.sceneKey).toBe("StoryOrder");
-    expect(last?.label).toBe("Story Order");
+    expect(last?.gameId).toBe("robot-path");
+    expect(last?.sceneKey).toBe("RobotPath");
+    expect(last?.label).toBe("Robot Path");
   });
 });

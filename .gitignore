@@ -24,3 +24,6 @@ docs/svg-contact-sheets/**/*.png
 docs/svg-contact-sheets/**/*.html
 !docs/svg-contact-sheets/baseline/**/*.png
 !docs/svg-contact-sheets/baseline/**/*.html
+
+# Local dev-server output; never part of the tree.
+.dev-server.log

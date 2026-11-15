@@ -6,6 +6,7 @@ import type {
   E2EHubToast,
   E2EProgressState,
   E2ERecoverState,
+  E2ERobotPathState,
   E2ERoundGeometry,
   E2ERoundTarget,
   E2ESettingsState,
@@ -25,6 +26,7 @@ interface FakeScene {
   e2eHubPlayTime?: () => E2EHubPlayTime;
   e2eHubGroups?: () => E2EHubGroups;
   e2eRecoverButton?: () => E2ERecoverState | null;
+  e2eRobotPath?: () => E2ERobotPathState | null;
 }
 
 interface FakeGame {
@@ -132,11 +134,71 @@ describe("initE2EBridge", () => {
         "hubToast",
         "profileCount",
         "recover",
+        "robotPath",
         "roundGeometry",
         "roundIndex",
         "settings",
         "stickerCount",
       ]);
+    });
+  });
+
+  describe("robotPath", () => {
+    /** A whole-board state; every field is one the scene would really publish. */
+    function robotPathState(commands: E2ERobotPathState["commands"]): E2ERobotPathState {
+      return {
+        round: 0,
+        solution: ["up", "right"],
+        commands,
+        palette: [
+          { dir: "up", x: 332, y: 560 },
+          { dir: "right", x: 452, y: 560 },
+          { dir: "down", x: 572, y: 560 },
+          { dir: "left", x: 692, y: 560 },
+        ],
+        slots: [0, 1, 2, 3, 4, 5].map((index) => ({
+          index,
+          x: 252 + index * 104,
+          y: 676,
+          filled: index < commands.length,
+        })),
+        go: { x: 920, y: 676 },
+        robot: { x: 512, y: 438 },
+        star: { x: 636, y: 190 },
+        runs: 0,
+        solved: false,
+      };
+    }
+
+    it("returns null when the active scene publishes no robot-path hook", () => {
+      install([sceneWith("Hub")]);
+
+      expect(window.__abyE2E?.robotPath()).toBeNull();
+    });
+
+    it("returns null when no scene is active", () => {
+      install([]);
+
+      expect(window.__abyE2E?.robotPath()).toBeNull();
+    });
+
+    it("reflects a placement immediately, without caching the board", () => {
+      let commands: E2ERobotPathState["commands"] = [];
+      const scene = sceneWith("RobotPath");
+      scene.e2eRobotPath = () => robotPathState(commands);
+      install([scene]);
+
+      const empty = window.__abyE2E?.robotPath();
+      expect(empty?.commands).toEqual([]);
+      expect(empty?.slots.every((slot) => !slot.filled)).toBe(true);
+
+      commands = ["up"];
+      const placed = window.__abyE2E?.robotPath();
+      expect(placed?.commands).toEqual(["up"]);
+      expect(placed?.slots[0]?.filled).toBe(true);
+      expect(placed?.slots[1]?.filled).toBe(false);
+      expect(placed?.solution).toEqual(["up", "right"]);
+      expect(placed?.palette.map((arrow) => arrow.dir)).toEqual(["up", "right", "down", "left"]);
     });
   });
 

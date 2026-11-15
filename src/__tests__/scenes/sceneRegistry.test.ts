@@ -15,6 +15,7 @@ import { NumberOrderScene } from "../../scenes/NumberOrderScene";
 import { OddOneOutScene } from "../../scenes/OddOneOutScene";
 import { PatternBuilderScene } from "../../scenes/PatternBuilderScene";
 import { PopFreezeScene } from "../../scenes/PopFreezeScene";
+import { RobotPathScene } from "../../scenes/RobotPathScene";
 import { ShadowMatchScene } from "../../scenes/ShadowMatchScene";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { StoryOrderScene } from "../../scenes/StoryOrderScene";
@@ -24,7 +25,7 @@ import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 
 /**
- * Stub the 22 scene modules so invoking the real dynamic-import loaders
+ * Stub the 23 scene modules so invoking the real dynamic-import loaders
  * never pulls Phaser scenes into happy-dom — each loader should resolve
  * to its module's named scene export.
  */
@@ -94,12 +95,15 @@ vi.mock("../../scenes/FeelingsFacesScene", () => ({
 vi.mock("../../scenes/StoryOrderScene", () => ({
   StoryOrderScene: class StoryOrderSceneStub {},
 }));
+vi.mock("../../scenes/RobotPathScene", () => ({
+  RobotPathScene: class RobotPathSceneStub {},
+}));
 
 /** Fake scene class returned by test loaders. */
 class FakeScene {}
 
 describe("sceneRegistry", () => {
-  it("maps exactly the 22 game scene keys", () => {
+  it("maps exactly the 23 game scene keys", () => {
     expect(Object.keys(sceneLoaders).sort()).toEqual([
       "AddItUp",
       "Alphabet",
@@ -117,6 +121,7 @@ describe("sceneRegistry", () => {
       "OddOneOut",
       "PatternBuilder",
       "PopFreeze",
+      "RobotPath",
       "ShadowMatch",
       "ShapeSorter",
       "StoryOrder",
@@ -186,6 +191,7 @@ describe("sceneRegistry", () => {
       NumberOrder: NumberOrderScene,
       FeelingsFaces: FeelingsFacesScene,
       StoryOrder: StoryOrderScene,
+      RobotPath: RobotPathScene,
     };
 
     expect(Object.keys(sceneLoaders).sort()).toEqual(Object.keys(expectedByKey).sort());

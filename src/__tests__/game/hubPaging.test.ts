@@ -74,7 +74,7 @@ describe("pageTileIndexes", () => {
   });
 
   it("clamps the last page to the tiles that remain", () => {
-    expect(pageTileIndexes(2)).toEqual([20, 21]);
+    expect(pageTileIndexes(2)).toEqual([20, 21, 22]);
   });
 
   it("maps every tile index back to its page", () => {
@@ -91,7 +91,7 @@ describe("pageTileIndexes", () => {
       .flat()
       .sort((a, b) => a - b);
     expect(all).toEqual([...Array(GAME_REGISTRY.length).keys()]);
-    expect(all).toEqual([...Array(22).keys()]);
+    expect(all).toEqual([...Array(23).keys()]);
   });
 
   it("rejects out-of-range pages", () => {
@@ -101,11 +101,11 @@ describe("pageTileIndexes", () => {
 });
 
 describe("page constants", () => {
-  it("splits the registry's 22 tiles into 3 pages (10 + 10 + 2)", () => {
+  it("splits the registry's 23 tiles into 3 pages (10 + 10 + 3)", () => {
     expect(PAGE_SIZE).toBe(10);
-    expect(GAME_REGISTRY).toHaveLength(22);
+    expect(GAME_REGISTRY).toHaveLength(23);
     expect(pageCount()).toBe(3);
-    expect(pageTileIndexes(pageCount() - 1)).toEqual([20, 21]);
+    expect(pageTileIndexes(pageCount() - 1)).toEqual([20, 21, 22]);
   });
 });
 
@@ -182,21 +182,22 @@ describe("pagedTilePosition", () => {
     });
   });
 
-  it("centres the two-tile last page at the canvas centre-x on the first row", () => {
+  it("centres the three-tile last page as one row of three inside the canvas", () => {
     const page = pageTileIndexes(pageCount() - 1);
-    expect(page).toHaveLength(2);
-    expect(page).toEqual([20, 21]);
+    expect(page).toHaveLength(3);
+    expect(page).toEqual([20, 21, 22]);
     const first = pagedTilePosition(0, page.length);
     const second = pagedTilePosition(1, page.length);
-    // Two 176px columns with 20px spacing: 32 + 176 + 20 + 176 + 32 = 436 wide box.
-    expect(first.x).toBeCloseTo(CANVAS.width / 2 - (176 + 20) / 2, 6);
-    expect(second.x).toBeCloseTo(CANVAS.width / 2 + (176 + 20) / 2, 6);
-    // The pair is symmetric about the canvas centre.
-    expect((first.x + second.x) / 2).toBeCloseTo(CANVAS.width / 2, 6);
-    // Vertically still the first row, so the page box keeps its vertical anchor.
+    const third = pagedTilePosition(2, page.length);
+    // Three 176px columns with 20px spacing: 3 x 176 + 2 x 20 = 568 wide box, so
+    // the row is centred and the middle tile sits exactly on the canvas centre.
+    expect(first.x).toBeCloseTo(CANVAS.width / 2 - (176 + 20), 6);
+    expect(second.x).toBeCloseTo(CANVAS.width / 2, 6);
+    expect(third.x).toBeCloseTo(CANVAS.width / 2 + (176 + 20), 6);
+    // All three share the first row's vertical anchor.
     expect(first.y).toBeCloseTo(pagedTilePosition(0).y, 6);
-    expect(second.y).toBeCloseTo(pagedTilePosition(0).y, 6);
+    expect(third.y).toBeCloseTo(first.y, 6);
     expect(first.x - first.width / 2).toBeGreaterThan(0);
-    expect(second.x + second.width / 2).toBeLessThan(CANVAS.width);
+    expect(third.x + third.width / 2).toBeLessThan(CANVAS.width);
   });
 });

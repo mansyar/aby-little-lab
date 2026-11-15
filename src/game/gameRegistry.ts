@@ -34,7 +34,7 @@ export interface GameRegistryEntry {
 }
 
 /**
- * The 22 games in Hub order (PRD §2.2). The order is behaviour, not
+ * The 23 games in Hub order (PRD §2.2). The order is behaviour, not
  * presentation: it is the Hub grid order, the storage order and the order the
  * sticker shelf is filled in.
  *
@@ -246,6 +246,14 @@ export const GAME_REGISTRY = [
     label: "Story Order",
     tileKey: "tile_story_order",
     stickerKey: "sticker_story_order",
+  },
+  {
+    gameId: "robot-path",
+    group: "thinking",
+    sceneKey: "RobotPath",
+    label: "Robot Path",
+    tileKey: "tile_robot_path",
+    stickerKey: "sticker_robot_path",
   },
 ] as const satisfies readonly GameRegistryEntry[];
 

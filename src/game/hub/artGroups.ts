@@ -52,6 +52,7 @@ export const ART_GROUP_LOADERS: Readonly<Record<string, ArtGroupLoader>> = {
   toys: () => import("../art/toys").then((module) => [module.toys]),
   "story-panels": () =>
     import("../storyOrderArt").then((module) => [{ assets: module.STORY_PANEL_ASSETS }]),
+  robot: () => import("../robotPathArt").then((module) => [{ assets: module.ROBOT_PATH_ASSETS }]),
 };
 
 /**
@@ -88,6 +89,9 @@ export const ART_GROUPS_BY_GAME: Readonly<Record<string, readonly string[]>> = {
   "number-order": ["numerals"],
   "feelings-faces": ["faces"],
   "story-order": ["story-panels"],
+  // Scene-local art (D7), fetched by the idle prewarm through its own lazy
+  // loader exactly like Story Order's panels.
+  "robot-path": ["robot"],
 };
 
 /** Resolves the SVG markup behind one art key, caching tables and markup. */

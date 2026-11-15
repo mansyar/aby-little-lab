@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Robot Path: a stopped run. The robot tilts and wonders, never frowns. -->
+  <g transform="rotate(8 256 300)">
+    <rect x="148" y="248" width="24" height="64" rx="12" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
+    <rect x="340" y="248" width="24" height="64" rx="12" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
+    <rect x="196" y="356" width="44" height="24" rx="12" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+    <rect x="272" y="356" width="44" height="24" rx="12" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+    <rect x="176" y="200" width="160" height="160" rx="44" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
+    <rect x="200" y="224" width="112" height="96" rx="28" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+    <circle cx="234" cy="264" r="13" fill="#2D3748"/>
+    <circle cx="276" cy="264" r="13" fill="#2D3748"/>
+    <circle cx="256" cy="300" r="11" fill="#2D3748"/>
+    <path d="M 256 200 L 256 158" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="256" cy="142" r="16" fill="#FC8181" stroke="#2D3748" stroke-width="6"/>
+  </g>
+  <path d="M 356 150 Q 356 118 384 118 Q 412 118 412 146 Q 412 168 384 174 L 384 190" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="384" cy="212" r="9" fill="#2D3748"/>
+</svg>

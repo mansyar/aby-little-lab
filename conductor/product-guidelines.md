@@ -72,6 +72,13 @@
 - Visual progress indicator (filling circle) shows the hold progress; only one hold runs at a time, and the indicator is cleared on release, cancel, or scene shutdown.
 - Prevents accidental navigation, settings access, or app exit.
 
+### Plan Then Run
+- A plan-then-run interaction is the suite's second answer shape, and Robot Path owns it: the child builds a sequence of steps, reviews it against a visible ghost preview, and only then presses Go. Nothing moves while the plan is being built, so a mistake costs a tap rather than a lost round.
+- Steps are absolute (`up`, `right`, `down`, `left`), never forward-and-turn: a preschooler has not yet built the frame that makes a turn meaningful, and absolute arrows mean the same thing wherever the figure stands.
+- Illegal steps cannot be added. Off-board, blocked and past-the-goal commands are refused at placement with a nudge and no penalty, so the strip is always a legal prefix, and dropping a step drops everything after it.
+- A failed run is a rehearsal, not a loss: the program stays on the strip, the step that first left the route pulses, and the figure returns to its start so one arrow can be replaced and the round retried. A hint may pulse after two stopped runs; it is never placed.
+- Go is the only button that moves anything, and it is the same size as every other play target (112×112), so the plan is deliberate and the run is never triggered by a stray tap.
+
 ### Auto-Progression
 - After game completion, a 3-second delay with win animation before auto-returning to Hub.
 - No manual "done" button required from the child.

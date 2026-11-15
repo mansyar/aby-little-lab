@@ -53,7 +53,7 @@ const GROUPS: readonly ArtGroup[] = [
 ];
 
 /**
- * The shell set the boot preloader keeps (FR-4): 22 tiles, 22 stickers, two
+ * The shell set the boot preloader keeps (FR-4): 23 tiles, 23 stickers, two
  * mascot poses, the speaker glyph, the six avatar keys and the five group
  * glyphs. Spelled out explicitly — the avatar keys are the deliberate
  * shell/game overlap, so the union cannot be derived by prefix.
@@ -81,6 +81,7 @@ const SHELL_KEYS: readonly string[] = [
   "tile_number_order",
   "tile_story_order",
   "tile_feelings_faces",
+  "tile_robot_path",
   "sticker_shape_sorter",
   "sticker_animal_trace",
   "sticker_pop_freeze",
@@ -102,6 +103,7 @@ const SHELL_KEYS: readonly string[] = [
   "sticker_decode_it",
   "sticker_number_order",
   "sticker_story_order",
+  "sticker_robot_path",
   "sticker_feelings_faces",
   "mascot_idle",
   "mascot_celebrate",
@@ -120,11 +122,11 @@ const SHELL_KEYS: readonly string[] = [
 ];
 
 /**
- * Every texture key the app can ask for today: 58 shell keys plus the 133
+ * Every texture key the app can ask for today: 60 shell keys plus the 133
  * game-only group keys (131 prior + 4 Shadow Match items + 4 shadows).
  */
 
-const TOTAL_APP_ASSETS = 191;
+const TOTAL_APP_ASSETS = 193;
 
 const AVATAR_KEYS: readonly string[] = [
   "animal_cat",
@@ -191,11 +193,11 @@ describe("art group inventory", () => {
     expect(new Set(allGroupKeys).size).toBe(allGroupKeys.length);
   });
 
-  it("leaves exactly the 58 shell keys outside the groups, for 191 in total", () => {
+  it("leaves exactly the 60 shell keys outside the groups, for 193 in total", () => {
     const groupKeySet = new Set(allGroupKeys);
     const shellOverlaps = SHELL_KEYS.filter((key) => groupKeySet.has(key));
 
-    expect(SHELL_KEYS).toHaveLength(58);
+    expect(SHELL_KEYS).toHaveLength(60);
     expect(new Set(SHELL_KEYS).size).toBe(SHELL_KEYS.length);
     // The six avatars are the only keys the shell and a game group share.
     expect(shellOverlaps.sort()).toEqual([...AVATAR_KEYS].sort());

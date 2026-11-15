@@ -99,7 +99,7 @@ test("a child picks a group, plays from it, and lands back on All", async ({ pag
   expect((await hubGroups(page)).selected, "the returned hub lands on All").toBe("all");
   expect(
     (await hubTiles(page)).map((tile) => tile.id),
-    "and draws all 22 games",
+    "and draws all 23 games",
   ).toEqual(ALL_TILE_IDS);
 
   expect(

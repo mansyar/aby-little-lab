@@ -150,7 +150,7 @@ test("a parent reads the three insight statements on the first Progress page", a
 
   // Reach: two games played inside the seven-day window, on the two days the
   // seeded activity draws, with five lifetime wins of eight started sessions.
-  expect(lines[0]).toContain("2 of 22 games");
+  expect(lines[0]).toContain("2 of 23 games");
   expect(lines[0]).toContain("2 days this week");
   expect(lines[0]).toContain("5 completions in all");
   expect(lines[0]).toContain("63% of started games finished");

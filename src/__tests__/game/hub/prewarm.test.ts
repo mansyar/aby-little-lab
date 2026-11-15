@@ -24,6 +24,7 @@ import {
   startArtPrewarm,
   startPrewarm,
 } from "../../../game/hub/prewarm";
+import { ROBOT_PATH_ASSETS } from "../../../game/robotPathArt";
 import { STORY_PANEL_ASSETS } from "../../../game/storyOrderArt";
 import { textureSizeFor } from "../../../utils/textureTiers";
 
@@ -442,9 +443,10 @@ describe("ART_KEYS_BY_GAME — per-game art-key source (P1.T1)", () => {
     "number-order": [numerals],
     "feelings-faces": [faces],
     "story-order": [{ assets: STORY_PANEL_ASSETS }],
+    "robot-path": [{ assets: ROBOT_PATH_ASSETS }],
   };
 
-  it("covers all 22 registry games and nothing else", () => {
+  it("covers all 23 registry games and nothing else", () => {
     const registryIds = GAME_REGISTRY.map((entry) => entry.gameId).sort();
     expect(Object.keys(ART_KEYS_BY_GAME).sort()).toEqual(registryIds);
     expect(Object.keys(EXPECTED_GROUPS).sort()).toEqual(registryIds);

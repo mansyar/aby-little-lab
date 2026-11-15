@@ -58,11 +58,11 @@ describe("progressLogic", () => {
       }
     });
 
-    it("covers all 22 games, with Story Order last in hub order", () => {
+    it("covers all 23 games, with Robot Path last in hub order", () => {
       const map = createDefaultProgressMap();
-      expect(Object.keys(map)).toHaveLength(22);
-      expect(GAME_IDS.at(-1)).toBe("story-order");
-      expect(map["story-order"]).toEqual(gp());
+      expect(Object.keys(map)).toHaveLength(23);
+      expect(GAME_IDS.at(-1)).toBe("robot-path");
+      expect(map["robot-path"]).toEqual(gp());
       expect(map["feelings-faces"]).toEqual(gp());
     });
   });

@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { getActiveProfile, getProfiles } from "../utils/storage";
+import type { Direction } from "./robotPathLogic";
 
 /** One canvas-space point the browser suite may act on. */
 export interface E2ERoundTarget {
@@ -158,6 +159,61 @@ export interface E2EHubGroups {
   chips: E2EHubChip[];
 }
 
+/** One palette arrow and the canvas point its button answers to. */
+export interface E2ERobotPathPalette {
+  /** The absolute direction this arrow appends. */
+  dir: Direction;
+  /** X in the 1024x768 canvas space. */
+  x: number;
+  /** Y in the 1024x768 canvas space. */
+  y: number;
+}
+
+/** One command slot: where it is, and whether it holds an arrow right now. */
+export interface E2ERobotPathSlot {
+  /** Zero-based slot index. */
+  index: number;
+  /** X in the 1024x768 canvas space. */
+  x: number;
+  /** Y in the 1024x768 canvas space. */
+  y: number;
+  /** True when this slot holds a command in the current program. */
+  filled: boolean;
+}
+
+/**
+ * Robot Path's live board (FR-16): the round, the program being built, the
+ * intended route, and the geometry a journey taps.
+ *
+ * `solution` mirrors how the other games publish their correct answers; `runs`
+ * counts finished runs this round (a stopped run and a solved run each count
+ * once) and `solved` says whether one of them reached the star, so a journey can
+ * tell "the wrong program is still on the strip" from "the round has moved on"
+ * without inferring it from a timer.
+ */
+export interface E2ERobotPathState {
+  /** Zero-based round index, matching the scene's progress dots. */
+  round: number;
+  /** The round's intended route, step by step. */
+  solution: Direction[];
+  /** The program in the strip right now. */
+  commands: Direction[];
+  /** The four palette arrows, in draw order. */
+  palette: E2ERobotPathPalette[];
+  /** The six command slots, in draw order. */
+  slots: E2ERobotPathSlot[];
+  /** The Go button's centre. */
+  go: GamePoint;
+  /** The robot's current tile centre. */
+  robot: GamePoint;
+  /** The star's tile centre. */
+  star: GamePoint;
+  /** Runs finished this round, both outcomes. */
+  runs: number;
+  /** Whether one of those runs reached the star. */
+  solved: boolean;
+}
+
 /** The hub's play-time state, as the hub itself sees it. */
 export interface E2EHubPlayTime {
   /** Whether the active profile's daily budget is spent, so every tile is locked. */
@@ -223,6 +279,11 @@ export interface E2EBridge {
    * actually what it is looking at.
    */
   recover(): E2ERecoverState | null;
+  /**
+   * Robot Path's board while that scene is active. Null in every other scene,
+   * so a journey can only program the robot while the robot is what it sees.
+   */
+  robotPath(): E2ERobotPathState | null;
 }
 
 declare global {
@@ -250,6 +311,7 @@ interface E2ESceneProbe {
   e2eHubPlayTime?: () => E2EHubPlayTime;
   e2eHubGroups?: () => E2EHubGroups;
   e2eRecoverButton?: () => E2ERecoverState | null;
+  e2eRobotPath?: () => E2ERobotPathState | null;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -366,6 +428,12 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eHubGroups;
       if (typeof hook !== "function") return { selected: "all", chips: [] };
+      return hook.call(probe);
+    },
+    robotPath: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eRobotPath;
+      if (typeof hook !== "function") return null;
       return hook.call(probe);
     },
     recover: () => {

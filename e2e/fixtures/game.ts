@@ -5,6 +5,7 @@ import type {
   E2EHubToast,
   E2EProgressState,
   E2ERecoverState,
+  E2ERobotPathState,
   E2ERoundGeometry,
   E2ERoundTarget,
   E2ESettingsState,
@@ -305,6 +306,46 @@ export function roundIndex(page: Page): Promise<number> {
 /** The active scene's published round geometry, or null when it has none. */
 export function roundGeometry(page: Page): Promise<E2ERoundGeometry | null> {
   return page.evaluate(() => window.__abyE2E?.roundGeometry() ?? null);
+}
+
+/**
+ * Robot Path's live board, or null while another scene is active.
+ *
+ * The scene publishes its own palette, slots and Go button, so the journey taps
+ * what the game is drawing rather than remembering the layout.
+ */
+export function robotPathState(page: Page): Promise<E2ERobotPathState | null> {
+  return page.evaluate(() => window.__abyE2E?.robotPath() ?? null);
+}
+
+/**
+ * Polls until Robot Path is on the given round with a solution and a pair of
+ * palette arrows to tap.
+ *
+ * `solution` never lies about the intended route, so this wait also covers the
+ * shared between-round delay without sleeping through it.
+ */
+export async function waitForRobotPathRound(
+  page: Page,
+  round: number,
+  timeout = ROUND_TIMEOUT,
+): Promise<E2ERobotPathState> {
+  await expect
+    .poll(
+      async () => {
+        const state = await robotPathState(page);
+        return state !== null && state.round === round && state.solution.length > 0;
+      },
+      {
+        message: `Robot Path round ${round} should be on the board with a solution`,
+        timeout,
+      },
+    )
+    .toBe(true);
+
+  const state = await robotPathState(page);
+  if (!state) throw new Error(`Robot Path round ${round} vanished between polling and reading`);
+  return state;
 }
 
 /** Polls until the round's progress dots show `filled` completions. */
