@@ -3,8 +3,8 @@ import {
   buildPlaythrough,
   buildRound,
   canPlace,
-  type Direction,
   DIRECTIONS,
+  type Direction,
   firstDeviation,
   ghostPath,
   hintFor,
@@ -13,10 +13,10 @@ import {
   isSolved,
   MAX_COMMANDS,
   placeCommand,
-  removeFrom,
-  type RobotPathRound,
   ROUND_COUNT,
   ROUND_SPECS,
+  type RobotPathRound,
+  removeFrom,
   runProgram,
   samePoint,
   step,
@@ -24,7 +24,11 @@ import {
 import { mulberry32 } from "../helpers/randomHelper";
 
 /** A hand-built round with no rocks, used where the route is the assertion. */
-function board(start: [number, number], star: [number, number], rocks: [number, number][] = []): RobotPathRound {
+function board(
+  start: [number, number],
+  star: [number, number],
+  rocks: [number, number][] = [],
+): RobotPathRound {
   return {
     band: 1,
     start: { col: start[0], row: start[1] },

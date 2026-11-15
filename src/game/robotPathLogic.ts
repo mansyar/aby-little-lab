@@ -87,9 +87,7 @@ export function samePoint(a: GridPoint, b: GridPoint): boolean {
 
 /** True when the point is inside the GRID_SIZE × GRID_SIZE board. */
 export function isOnBoard(point: GridPoint): boolean {
-  return (
-    point.col >= 0 && point.col < GRID_SIZE && point.row >= 0 && point.row < GRID_SIZE
-  );
+  return point.col >= 0 && point.col < GRID_SIZE && point.row >= 0 && point.row < GRID_SIZE;
 }
 
 /** True when `point` is one of `rocks`. */
@@ -105,10 +103,7 @@ export function isRock(point: GridPoint, rocks: readonly GridPoint[]): boolean {
  * any remaining commands are never executed (spec FR-8). `visited` always holds
  * the start tile first, so the scene can draw the ghost trail from it.
  */
-export function runProgram(
-  round: RobotPathRound,
-  commands: readonly Direction[],
-): ProgramResult {
+export function runProgram(round: RobotPathRound, commands: readonly Direction[]): ProgramResult {
   const visited: GridPoint[] = [round.start];
   let current = round.start;
 
@@ -206,10 +201,7 @@ export function firstDeviation(
 }
 
 /** True when `commands` reaches the star. */
-export function isSolved(
-  round: RobotPathRound,
-  commands: readonly Direction[],
-): boolean {
+export function isSolved(round: RobotPathRound, commands: readonly Direction[]): boolean {
   return runProgram(round, commands).reachedStar;
 }
 
@@ -221,10 +213,7 @@ export function isSolved(
  * child keeps authorship of the program; a single stopped run is treated as
  * exploration, not as being stuck.
  */
-export function hintFor(
-  round: RobotPathRound,
-  stoppedRuns: number,
-): Direction | null {
+export function hintFor(round: RobotPathRound, stoppedRuns: number): Direction | null {
   if (stoppedRuns < 2) return null;
   return round.solution[0] ?? null;
 }
@@ -325,9 +314,7 @@ export function buildRound(spec: RoundSpec, rng: Rng = Math.random): RobotPathRo
     if (route === null) continue;
 
     const star = route.visited[route.visited.length - 1];
-    const free = ALL_TILES.filter(
-      (tile) => !route.visited.some((tile2) => samePoint(tile, tile2)),
-    );
+    const free = ALL_TILES.filter((tile) => !route.visited.some((tile2) => samePoint(tile, tile2)));
     if (free.length < spec.rocks) continue;
 
     const rocks: GridPoint[] = [];
