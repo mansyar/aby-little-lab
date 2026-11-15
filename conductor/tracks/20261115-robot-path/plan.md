@@ -175,17 +175,17 @@ progress 6+6+6+5) and README, PRD and TDD gained the row the validator compares.
 - **Dependencies:** none
 - **Decisions:** D1, D6, D8, D10
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P6.T1: Describe the game where the others are described** — covers: FR-17
-  - [ ] PRD §3.23 gets the two-paragraph description (the mechanic, the ladder, the no-fail repair loop, why absolute arrows), and its "All 22 games adapt" sentence becomes the explicit fifteen, with Robot Path named among the fixed-difficulty seven.
-  - [ ] README's product summary, Hub paragraph and lazy-scene sentence move from twenty-two to twenty-three; TDD gains §4.9 "Robot Path" beside the hub-groups section (the command model, the placement rule, the run loop, the bridge shape) and updates its scene/art inventories and shell figures.
-- [ ] **P6.T2: Update the product and baseline records** — covers: FR-17, NFR-3
-  - [ ] `conductor/product.md`: a §3.1 row 23, the counts in §1 and §3.2, the adaptivity note naming the fixed-difficulty games, and a dated changelog entry for the track; `conductor/product-guidelines.md` gains the plan-then-run interaction pattern in §5.
-  - [ ] `docs/perf-baseline.md` gets this track's suite counts, shell entry and chunk figure, all measured from the build rather than estimated.
-- [ ] **P6.T3: Prove the documents** — covers: AC-9
-  - [ ] `node scripts/validate-docs.js` exits 0 with all five checks, the three game lists and the test-count guard agreeing with the tree; the track's evidence records the exact figures.
+- [x] **P6.T1: Describe the game where the others are described** — covers: FR-17
+  - [x] PRD §3.23 gets the two-paragraph description (the mechanic, the ladder, the no-fail repair loop, why absolute arrows), and its "All 22 games adapt" sentence becomes the explicit fifteen, with Robot Path named among the fixed-difficulty seven.
+  - [x] README's product summary, Hub paragraph and lazy-scene sentence move from twenty-two to twenty-three; TDD gains §4.9 "Robot Path" beside the hub-groups section (the command model, the placement rule, the run loop, the bridge shape) and updates its scene/art inventories and shell figures.
+- [x] **P6.T2: Update the product and baseline records** — covers: FR-17, NFR-3
+  - [x] `conductor/product.md`: a §3.1 row 23, the counts in §1 and §3.2, the adaptivity note naming the fixed-difficulty games, and a dated changelog entry for the track; `conductor/product-guidelines.md` gains the plan-then-run interaction pattern in §5.
+  - [x] `docs/perf-baseline.md` gets this track's suite counts, shell entry and chunk figure, all measured from the build rather than estimated.
+- [x] **P6.T3: Prove the documents** — covers: AC-9
+  - [x] `node scripts/validate-docs.js` exits 0 with all five checks, the three game lists and the test-count guard agreeing with the tree; the track's evidence records the exact figures.
 
-**Result:** PENDING
-**Checkpoint:** PENDING
+**Result:** verified 2026-11-16 — the phase's verbatim chain exits 0 on `877bb496` (Biome 330 files, 150 files / 3,254 tests, coverage 97.22/91.51/96.3/98.31, shell entry 182.5 kB, PWA 16/16, docs 5/5). Two chains ran: the first passed on a tree whose perf-baseline header still carried its superseded figures beside the new ones, which the second run corrected. Deviations 1–6 in the evidence.
+**Checkpoint:** 877bb496
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-6.md
