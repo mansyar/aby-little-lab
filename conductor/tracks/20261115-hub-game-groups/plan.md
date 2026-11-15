@@ -20,20 +20,20 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
 - **Dependencies:** none
 - **Decisions:** D1, D5
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P1.T1: Type the group and declare it per game** — covers: FR-1
-  - [ ] Add `HubGroupId` (`letters | numbers | thinking | play | stories`) to `src/types/index.ts` as a value-free union, so the registry gains a field without an import cycle.
-  - [ ] Add `group` to all 22 `GAME_REGISTRY` entries per FR-1, leaving order, keys and icon overrides byte-identical.
-- [ ] **P1.T2: Give the groups their words and their tiles** — covers: FR-1, FR-5, FR-6
-  - [ ] Create `src/game/hubGroups.ts` with the `HUB_GROUPS` table (id, chip label, spoken name, glyph key), `ALL_GROUP_ID`, `groupForGame`, `tilesInGroup(selection)` and `visibleTileIndexes(selection)` — all derived from `GAME_REGISTRY`.
-  - [ ] Keep registry order inside a group and the declared order across chips, and pin the spoken names: "All games", "Letters and sounds", "Numbers and counting", "Thinking and matching", "Play and memory", "Feelings and stories".
-- [ ] **P1.T3: Prove the decomposition** — covers: AC-1
-  - [ ] New `hubGroups.test.ts`: 5/5/6/4/2 membership, every `GameId` in exactly one group, no empty group, each group's indexes ascending and contiguous to its own list, `visibleTileIndexes("all")` equal to `[0..21]`, and one entry per `HUB_GROUPS` row with a unique `group_*` glyph key.
-  - [ ] Extend `gameRegistry.test.ts`: the two-way coverage proof (every entry's `group` is a `HUB_GROUPS` id; every group is claimed by at least one entry) while the pre-registry tile golden test stays untouched.
+- [x] **P1.T1: Type the group and declare it per game** — covers: FR-1
+  - [x] Add `HubGroupId` (`letters | numbers | thinking | play | stories`) to `src/types/index.ts` as a value-free union, so the registry gains a field without an import cycle.
+  - [x] Add `group` to all 22 `GAME_REGISTRY` entries per FR-1, leaving order, keys and icon overrides byte-identical.
+- [x] **P1.T2: Give the groups their words and their tiles** — covers: FR-1, FR-5, FR-6
+  - [x] Create `src/game/hubGroups.ts` with the `HUB_GROUPS` table (id, chip label, spoken name, glyph key), `ALL_GROUP_ID`, `groupForGame`, `tilesInGroup(selection)` and `visibleTileIndexes(selection)` — all derived from `GAME_REGISTRY`.
+  - [x] Keep registry order inside a group and the declared order across chips, and pin the spoken names: "All games", "Letters and sounds", "Numbers and counting", "Thinking and matching", "Play and memory", "Feelings and stories".
+- [x] **P1.T3: Prove the decomposition** — covers: AC-1
+  - [x] New `hubGroups.test.ts`: 5/5/6/4/2 membership, every `GameId` in exactly one group, no empty group, each group's indexes ascending and contiguous to its own list, `visibleTileIndexes("all")` equal to `[0..21]`, and one entry per `HUB_GROUPS` row with a unique `group_*` glyph key.
+  - [x] Extend `gameRegistry.test.ts`: the two-way coverage proof (every entry's `group` is a `HUB_GROUPS` id; every group is claimed by at least one entry) while the pre-registry tile golden test stays untouched.
 
-**Result:**
-**Checkpoint:**
+**Result:** verified — the 22 games are declared once and grouped 5/5/6/4/2 by a type-checked `group` field, and `src/game/hubGroups.ts` turns a chip id into that group's registry indexes, its chip word, its spoken sentence and its glyph key. 3,169 tests in 145 files; gate exit 0.
+**Checkpoint:** 5a78c970
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-1.md
 
 ## Phase 2: The chips, and the board they draw
