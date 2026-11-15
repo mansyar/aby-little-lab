@@ -84,19 +84,26 @@ files, gate exit 0 on the first run.
 - **Dependencies:** none
 - **Decisions:** D3, D4, D9, D10, D11, D12
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P3.T1: Draw the board, the palette and the strip** — covers: FR-2, FR-4, FR-5, FR-6, NFR-1
-  - [ ] `RobotPathScene extends ChoiceRoundScene`: `preload` calls `preloadRobotPathArt`; `create` runs the shared entrance, mascot, back button, six progress dots and the spoken rule; the board draws nine tiles with the star, rocks and robot, the palette draws four 112px arrow buttons in `Graphics`, the strip draws six 96px slots, and Go draws `robot_go`.
-  - [ ] Taps append through `canPlace`, a refused command nudges the palette button, a filled slot truncates through `removeFrom`, and every change redraws the ghost trail from `ghostPath`.
-- [ ] **P3.T2: Run, resolve and repair the program** — covers: FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, AC-4, AC-5
-  - [ ] Go steps at 450 ms per command, highlighting the slot and hopping the robot; reaching the star resolves the round through `resolveWholeRound(true)` after the shared delay, and stopping short resolves `false`, keeping the strip and pulsing the first command that left the route.
-  - [ ] An empty-strip Go re-speaks the rule and nudges, recording nothing; the second stopped run in a round pulses the first solution command once; each finished run records one correct or one wrong answer, and reduced motion shortens the hop while keeping the slot highlight.
-- [ ] **P3.T3: Prove the scene** — covers: AC-4, AC-5, NFR-5
-  - [ ] `robotPathScene.test.ts` with the shared Phaser mock: palette taps append and draw the trail, a refused tap adds nothing, a slot tap truncates, a solved run fills a dot and advances, a stopped run keeps every command and records one wrong answer, an empty Go records nothing, two stopped runs give exactly one hint pulse, input is locked during a run, and a scene revisit starts clean at round 1.
+- [x] **P3.T1: Draw the board, the palette and the strip** — covers: FR-2, FR-4, FR-5, FR-6, NFR-1
+  - [x] `RobotPathScene extends ChoiceRoundScene`: `preload` calls `preloadRobotPathArt`; `create` runs the shared entrance, mascot, back button, six progress dots and the spoken rule; the board draws nine tiles with the star, rocks and robot, the palette draws four 112px arrow buttons in `Graphics`, the strip draws six 96px slots, and Go draws `robot_go`.
+  - [x] Taps append through `canPlace`, a refused command nudges the palette button, a filled slot truncates through `removeFrom`, and every change redraws the ghost trail from `ghostPath`.
+- [x] **P3.T2: Run, resolve and repair the program** — covers: FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, AC-4, AC-5
+  - [x] Go steps at 450 ms per command, highlighting the slot and hopping the robot; reaching the star resolves the round through `resolveWholeRound(true)` after the shared delay, and stopping short resolves `false`, keeping the strip and pulsing the first command that left the route.
+  - [x] An empty-strip Go re-speaks the rule and nudges, recording nothing; the second stopped run in a round pulses the first solution command once; each finished run records one correct or one wrong answer, and reduced motion shortens the hop while keeping the slot highlight.
+- [x] **P3.T3: Prove the scene** — covers: AC-4, AC-5, NFR-5
+  - [x] `robotPathScene.test.ts` with the shared Phaser mock: palette taps append and draw the trail, a refused tap adds nothing, a slot tap truncates, a solved run fills a dot and advances, a stopped run keeps every command and records one wrong answer, an empty Go records nothing, two stopped runs give exactly one hint pulse, input is locked during a run, and a scene revisit starts clean at round 1.
 
-**Result:** PENDING
-**Checkpoint:** PENDING
+**Result:** verified — `RobotPathScene` plays the whole loop: arrows append through
+`canPlace` with a ghost trail, a filled slot truncates through `removeFrom`, Go
+walks at 450 ms per command and resolves through `resolveWholeRound`, and a
+stopped run keeps every command, pulses the arrow that left the route and hints
+the first solution command on the second stop. 12 scene tests; 3,245 tests in 150
+files; coverage 97.22 / 91.73 / 96.27 / 98.3; shell entry byte-identical at
+179.4 kB with the precache at 59 entries; gate exit 0. The `sceneLoaders` entry
+moved to Phase 4 with the registry row it must mirror (see evidence).
+**Checkpoint:** c4197970
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-3.md
 
 ## Phase 4: The 23rd game enters the roster
