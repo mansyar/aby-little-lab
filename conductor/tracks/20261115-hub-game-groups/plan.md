@@ -113,7 +113,7 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
   - [x] Keep `e2eHubTiles()` truthful on a filtered board by mapping drawn slots through the selection's visible indexes.
 
 **Result:** verified — a chip tap speaks the group's sentence through the existing `speakSentence` path under the live SFX flag (All says "All games"), and `?e2e=1` now publishes `{ selected, chips: [{ id, x, y }] }` from the live row while `hubTiles()` keeps registry indexes on a filtered board (Numbers → 10, 12, 15, 16, 19; Stories on a paged viewport → 20, 21). 3,203 tests in 147 files; gate exit 0.
-**Checkpoint:** HEAD4A
+**Checkpoint:** 648cf374
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-4.md
 
 ## Phase 5: The journey, and the record

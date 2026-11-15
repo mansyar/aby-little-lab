@@ -2,7 +2,7 @@
 
 - Track: 20261115-hub-game-groups
 - Branch: feat/20261115-hub-game-groups
-- Base / Head: `703b12ad` / (implementation commit below)
+- Base / Head: `703b12ad` / `648cf374`
 - Date: 2026-11-15
 - Result: verified
 
