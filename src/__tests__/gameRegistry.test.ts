@@ -8,6 +8,7 @@ vi.mock("phaser", () => {
 
 import { GAME_REGISTRY, stickerKeyForGame } from "../game/gameRegistry";
 import registrySource from "../game/gameRegistry.ts?raw";
+import { HUB_GROUPS } from "../game/hubGroups";
 import { PAGE_SIZE, pageCount, pageOf, pageTileIndexes } from "../game/hubPaging";
 import { GAME_TILES, type GameTile } from "../game/hubTiles";
 import { SHELL_ASSETS } from "../scenes/PreloadScene";
@@ -268,6 +269,38 @@ describe("GAME_TILES", () => {
 
   it("holds one tile per registry entry", () => {
     expect(GAME_TILES).toHaveLength(GAME_REGISTRY.length);
+  });
+});
+
+describe("the group field", () => {
+  it("assigns every game to a declared group, and gives every group at least one game", () => {
+    const declared = new Set<string>(HUB_GROUPS.map((group) => group.id));
+
+    for (const entry of GAME_REGISTRY) {
+      expect(declared.has(entry.group), entry.gameId).toBe(true);
+    }
+
+    for (const group of HUB_GROUPS) {
+      expect(
+        GAME_REGISTRY.some((entry) => entry.group === group.id),
+        `${group.id} has no games`,
+      ).toBe(true);
+    }
+  });
+
+  it("keeps the 5/5/6/4/2 totals the spec states", () => {
+    const counts = HUB_GROUPS.map((group) => ({
+      id: group.id,
+      count: GAME_REGISTRY.filter((entry) => entry.group === group.id).length,
+    }));
+
+    expect(counts).toEqual([
+      { id: "letters", count: 5 },
+      { id: "numbers", count: 5 },
+      { id: "thinking", count: 6 },
+      { id: "play", count: 4 },
+      { id: "stories", count: 2 },
+    ]);
   });
 });
 
