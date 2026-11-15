@@ -101,7 +101,7 @@ export function buildShellAssets(
  * `src/utils/textureTiers.ts` — sized for the asset's largest display context,
  * not a uniform 512px).
  *
- * The 44 game entries are derived: every registry entry names its `tileKey` and
+ * The 46 game entries are derived: every registry entry names its `tileKey` and
  * `stickerKey`, and the sources come from the eager glob above, so a new game
  * needs one registry row and its two SVG files — no edit here. A missing or
  * duplicated file throws at module evaluation, naming the key.

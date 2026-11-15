@@ -362,6 +362,15 @@ const SHADOWS_KEYS: readonly ArtKeyDef[] = [
   ["sm_shadow_bell", ICON],
 ];
 
+const ROBOT_PATH_KEYS: readonly ArtKeyDef[] = [
+  ["robot_idle", CARD],
+  ["robot_walk", CARD],
+  ["robot_puzzled", CARD],
+  ["robot_go", CARD],
+  ["robot_rock", CARD],
+  ["robot_star", CARD],
+];
+
 const STORY_PANEL_KEYS: readonly ArtKeyDef[] = [
   ["story_seed_planted", CARD],
   ["story_seed_sprout", CARD],
@@ -494,6 +503,7 @@ export const ART_KEYS_BY_GAME: Readonly<Record<string, readonly ArtKeyEntry[]>> 
   "number-order": artKeys("number-order", [NUMERALS_KEYS]),
   "feelings-faces": artKeys("feelings-faces", [FACES_KEYS]),
   "story-order": artKeys("story-order", [STORY_PANEL_KEYS]),
+  "robot-path": artKeys("robot-path", [ROBOT_PATH_KEYS]),
 });
 
 /**

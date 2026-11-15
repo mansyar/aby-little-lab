@@ -1,7 +1,7 @@
 import type Phaser from "phaser";
 
 /**
- * Dynamic-import loaders for the 22 game scenes, keyed by scene key
+ * Dynamic-import loaders for the 23 game scenes, keyed by scene key
  * (matching the `sceneKey` values of GAME_TILES in HubScene).
  *
  * Phaser 4 does not support lazy loaders in the config `scene` array
@@ -12,6 +12,7 @@ export const sceneLoaders: Record<string, () => Promise<Phaser.Types.Scenes.Scen
   ShapeSorter: () => import("./ShapeSorterScene").then((m) => m.ShapeSorterScene),
   AnimalTrace: () => import("./AnimalTraceScene").then((m) => m.AnimalTraceScene),
   PopFreeze: () => import("./PopFreezeScene").then((m) => m.PopFreezeScene),
+  RobotPath: () => import("./RobotPathScene").then((m) => m.RobotPathScene),
   ShadowMatch: () => import("./ShadowMatchScene").then((m) => m.ShadowMatchScene),
   MusicalMemory: () => import("./MusicalMemoryScene").then((m) => m.MusicalMemoryScene),
   BigSmall: () => import("./BigSmallScene").then((m) => m.BigSmallScene),

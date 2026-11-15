@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Sticker: Robot Path - a small robot beside the star it walks to. -->
+  <circle cx="256" cy="256" r="236" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="176" cy="122" r="20" fill="#FC8181" stroke="#2D3748" stroke-width="5"/>
+  <rect x="130" y="134" width="96" height="22" rx="11" fill="#718096" stroke="#2D3748" stroke-width="5"/>
+  <rect x="92" y="150" width="176" height="186" rx="36" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
+  <rect x="122" y="186" width="116" height="96" rx="22" fill="#FFFFFF" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="158" cy="226" r="13" fill="#2D3748"/>
+  <circle cx="202" cy="226" r="13" fill="#2D3748"/>
+  <path d="M 246 366 L 300 366 L 300 344 L 344 382 L 300 420 L 300 398 L 246 398 Z" fill="#2B6CB0" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M 366 196 L 388 258 L 452 264 L 402 304 L 418 366 L 366 332 L 314 366 L 330 304 L 280 264 L 344 258 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+</svg>
