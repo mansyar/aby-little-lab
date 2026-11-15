@@ -135,7 +135,7 @@ count-bearing suite was restated (Hub 23 tiles, phones 10/10/3, `thinking` 7,
 progress 6+6+6+5) and README, PRD and TDD gained the row the validator compares.
 3,248 tests in 150 files; coverage 97.21 / 91.69 / 96.28 / 98.3; shell entry
 182.4 kB of the 200 kB gate; precache 61 entries / 1793.79 KiB; gate exit 0.
-**Checkpoint:** e7928fd3
+**Checkpoint:** 18e477ad
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-4.md
 
 ## Phase 5: The bridge and the browser journey

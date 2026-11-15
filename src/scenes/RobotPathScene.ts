@@ -114,10 +114,7 @@ export class RobotPathScene extends ChoiceRoundScene {
   }
 
   protected gameId(): GameId {
-    // The `GameId` member and the registry row that makes it real land together
-    // in Phase 4 ("the 23rd game enters the roster"), so this scene is typed by
-    // the id it will report rather than waiting for the roster.
-    return "robot-path" as GameId;
+    return "robot-path";
   }
 
   /** The strip is the answer; no single tapped card decides the round. */
