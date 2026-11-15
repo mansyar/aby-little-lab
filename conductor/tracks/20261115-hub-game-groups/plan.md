@@ -138,3 +138,25 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
 **Result:** verified — a Playwright journey taps all six chips, asserts each drawn board equals that group's registry indexes, launches and plays Add It Up from the Numbers board, and proves the returned Hub lands on All with 22 tiles; README, PRD, TDD, `product.md` and `product-guidelines.md` describe the groups, the two-tap rule and the 58-key shell. 22 browser journeys and 3,203 unit tests in 147 files; gate exit 0.
 **Checkpoint:** b378e05b
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-5.md
+
+## Phase 6: Review fixes (round 1)
+
+- **Goal:** every finding from review round 1 is fixed, with the announcement
+  behaviour matching FR-8 and no unreachable surface left on the grid.
+- **Depends on:** Phase 5
+- **Covers:** FR-8, AC-5
+- **Touches:** `src/game/hubGrid.ts`, `src/__tests__/game/hub/groupChips.test.ts`, `src/__tests__/scenes/hubScene.test.ts`
+- **Dependencies:** none
+- **Decisions:** D6, D8
+- **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** verified
+
+- [x] **P6.T1: Announce on every chip tap** — covers: FR-8, AC-5
+  - [x] Report the selection to `onSelectGroup` before the no-op guard, so the current chip still speaks while the board is rebuilt only on a change (R1-F1).
+  - [x] Restate the Phase 2 re-selection test as "speaks again but rebuilds nothing", and add a HubScene test for the second tap.
+- [x] **P6.T2: Remove dead `refreshChips()`** — covers: static hygiene
+  - [x] Delete the method; `ensureGroupChips()` already repaints and is called by every build (R1-F2).
+
+**Result:** verified — a chip tap announces its group even when that group is already selected, and the grid no longer carries an unreachable `refreshChips`; 22 browser journeys and 3,203 unit tests in 147 files, gate exit 0.
+**Checkpoint:** PENDING_SHA
+**Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-6.md
