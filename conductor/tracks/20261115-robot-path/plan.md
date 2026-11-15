@@ -178,7 +178,7 @@ progress 6+6+6+5) and README, PRD and TDD gained the row the validator compares.
 - **Status:** verified
 
 - [x] **P6.T1: Describe the game where the others are described** — covers: FR-17
-  - [x] PRD §3.23 gets the two-paragraph description (the mechanic, the ladder, the no-fail repair loop, why absolute arrows), and its "All 22 games adapt" sentence becomes the explicit fifteen, with Robot Path named among the fixed-difficulty seven.
+  - [x] PRD §3.23 gets the two-paragraph description (the mechanic, the ladder, the no-fail repair loop, why absolute arrows), and its "All 22 games adapt" sentence becomes the explicit fifteen, with Robot Path named as the one game no adaptive dimension reaches (fifteen + seven dimension-adaptive + Robot Path = 23; see review R1-6).
   - [x] README's product summary, Hub paragraph and lazy-scene sentence move from twenty-two to twenty-three; TDD gains §4.9 "Robot Path" beside the hub-groups section (the command model, the placement rule, the run loop, the bridge shape) and updates its scene/art inventories and shell figures.
 - [x] **P6.T2: Update the product and baseline records** — covers: FR-17, NFR-3
   - [x] `conductor/product.md`: a §3.1 row 23, the counts in §1 and §3.2, the adaptivity note naming the fixed-difficulty games, and a dated changelog entry for the track; `conductor/product-guidelines.md` gains the plan-then-run interaction pattern in §5.
@@ -189,3 +189,25 @@ progress 6+6+6+5) and README, PRD and TDD gained the row the validator compares.
 **Result:** verified 2026-11-16 — the phase's verbatim chain exits 0 on `877bb496` (Biome 330 files, 150 files / 3,254 tests, coverage 97.22/91.51/96.3/98.31, shell entry 182.5 kB, PWA 16/16, docs 5/5). Two chains ran: the first passed on a tree whose perf-baseline header still carried its superseded figures beside the new ones, which the second run corrected. Deviations 1–6 in the evidence.
 **Checkpoint:** 877bb496
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-6.md
+
+## Phase 7: Review Fixes (R1)
+
+- **Goal:** close round 1's two Medium findings and the two wordings it named, without changing Phases 1–6 or any shipped behaviour they verified.
+- **Depends on:** Phase 6 (verified) and `review.md` R1
+- **Covers:** R1-2, R1-3, R1-6, R1-7
+- **Touches:** `docs/TDD.md`, `docs/perf-baseline.md`, `src/scenes/RobotPathScene.ts`, `src/__tests__/scenes/robotPathScene.test.ts`, `conductor/tech-stack.md`
+- **Dependencies:** none
+- **Decisions:** D11, D6
+- **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** verified
+
+- [x] **P7.T1: Restate the journey counts the documents got wrong** — covers: R1-2
+  - [x] `docs/TDD.md` §10.5 and `docs/perf-baseline.md` (live-figures header and the 2026-11-16 section) carry 23 journeys across 18 spec files, the counts measured from `e2e/journeys/` and the run.
+- [x] **P7.T2: Make the hint cap true once per round** — covers: R1-3
+  - [x] `RobotPathScene` remembers that the round's hint was offered, so a third stopped run pulses nothing; a new scene test covers the third stop and identifies the hint by its palette target, and the existing two-stop assertion still passes.
+- [x] **P7.T3: Correct the two stale wordings** — covers: R1-6, R1-7
+  - [x] `plan.md` P6.T1 stops calling Robot Path one of "the fixed seven"; `conductor/tech-stack.md`'s current-state bullets carry 26 scenes / 23 game scenes and the measured journey budget, while its dated 2026-10-27 design notes stay as they were written.
+
+**Result:** PASS — gate exit 0 (23 journeys, 150 files / 3,255 tests, coverage 97.24/91.61/96.3/98.31, entry 182.5 kB, PWA 49 chunks, docs 5/5).
+**Checkpoint:** 26fa4805
+**Evidence:** conductor/tracks/20261115-robot-path/verification/phase-7.md
