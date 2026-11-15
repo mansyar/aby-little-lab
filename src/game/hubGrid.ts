@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import {
+  buildFilteredGrid,
   buildPageGrid,
   buildWideGrid,
   createPageDots,
@@ -8,9 +9,16 @@ import {
   flipTo,
   rerenderStickerShelf,
 } from "./hub/gridBuilder";
+import {
+  type ChipView,
+  createGroupChips,
+  destroyGroupChips,
+  paintGroupChips,
+} from "./hub/groupChips";
 import { isPagedViewport, paintPageDots, SwipeGesture, swipeRegion } from "./hub/pageBoard";
 import { createShelfSticker, drawEmptySlot } from "./hub/stickerShelf";
 import { applyTimeUpLock, restoreTiles } from "./hub/timeUpDim";
+import { ALL_GROUP_ID, type HubSelection } from "./hubGroups";
 
 /** Everything the grid needs from the Hub scene, so rendering lives here and orchestration stays there. */
 export interface HubGridDeps {
@@ -33,6 +41,12 @@ export interface HubGridDeps {
    * — has to go with the tile, or it lands over a different game's slot.
    */
   onBoardChange?: () => void;
+  /**
+   * Reports a chip selection after the row and the board have been updated, so
+   * the owner can speak the group's name (spec FR-8). Optional: a caller with
+   * nothing to say can omit it.
+   */
+  onSelectGroup?: (selection: HubSelection) => void;
 }
 
 /**
@@ -44,6 +58,16 @@ export class HubGrid {
   deps: HubGridDeps;
   /** True when this visit uses the paged (narrow-viewport) grid. */
   paged = false;
+  /**
+   * The chip currently filtering the board; resets to All on every visit
+   * (spec D4), so no selection is persisted and the familiar 22-tile board is
+   * always what a child lands on.
+   */
+  selection: HubSelection = ALL_GROUP_ID;
+  /** Every object owned by the chip row (created once per grid lifetime). */
+  chips: Phaser.GameObjects.GameObject[] = [];
+  /** One repaintable view per chip, so a selection never rebuilds the row. */
+  chipViews: ChipView[] = [];
   /** Current page in paged mode (0..pageCount() - 1); reset on every visit to the Hub. */
   hubPage = 0;
   /** Every grid object owned by the wide 6x4 layout (rebuilt on resize). */
@@ -82,11 +106,23 @@ export class HubGrid {
     this.deps = deps;
   }
 
+  /**
+   * The chip row's live centres, in draw order, for the e2e bridge (spec D9).
+   *
+   * Read from the views the row was built with rather than from a layout call,
+   * so a journey taps the chip the child is looking at.
+   */
+  groupChipPoints(): { id: HubSelection; x: number; y: number }[] {
+    return this.chipViews.map((chip) => ({ id: chip.selection, x: chip.x, y: chip.y }));
+  }
+
   /** Clears per-visit state (Phaser reuses scene instances across visits). */
   resetForVisit(): void {
     this.entranceIndex = 0;
     this.attractTargets = [];
     this.navLocked = false;
+    // A new visit always starts on All (spec FR-7, D4).
+    this.selection = ALL_GROUP_ID;
     // Nothing is tappable until this visit builds its grid.
     this.invalidateEntrances();
     // Scene shutdown drops input listeners while this instance survives the revisit; re-arm each visit.
@@ -120,7 +156,12 @@ export class HubGrid {
     this.pendingEntrances = null;
   }
 
-  /** Classifies the current viewport into the paged (narrow) or wide mode. */
+  /**
+   * Classifies the current viewport into the paged (narrow) or wide mode. The
+   * chip row is created at the end of the first board build instead, so the
+   * tiles stay the first objects a scene creates — the order the Hub's launch
+   * tests and the e2e bridge both assume.
+   */
   classifyViewport(): void {
     this.paged = isPagedViewport(this.deps.scene);
   }
@@ -138,17 +179,79 @@ export class HubGrid {
     // to die underneath it.
     this.deps.onBoardChange?.();
     this.hubPage = 0;
-    if (this.paged) {
-      this.destroyWideGrid();
-      if (this.pageDots.length === 0) this.createPageDots();
-      this.wireSwipeGestures();
-      this.buildPageGrid(0);
-    } else {
-      this.destroyPageGrid();
-      for (const dot of this.pageDots) dot.destroy();
-      this.pageDots = [];
-      this.buildWideGrid();
+    this.destroyWideGrid();
+    this.destroyPageGrid();
+    this.clearPageDots();
+    if (this.paged) this.wireSwipeGestures();
+    // The selection survives a viewport flip (spec FR-3): a child who picked a
+    // group on a tablet still has it when the tablet is turned.
+    this.showBoard();
+  }
+
+  /**
+   * Selects a group: reports the choice, repaints the row and rebuilds the
+   * board for it (spec FR-3, D8).
+   *
+   * The announcement happens before the no-op guard, because FR-8 is per tap
+   * rather than per change: tapping the chip that is already selected still
+   * speaks the group's name — which is exactly when a pre-reader may want to
+   * hear it again — while the board is rebuilt only on a real change, so a
+   * double tap cannot redraw it twice.
+   */
+  setGroup(selection: HubSelection): void {
+    this.deps.onSelectGroup?.(selection);
+    if (selection === this.selection) return;
+    this.selection = selection;
+    paintGroupChips(this);
+    this.rebuildBoard();
+  }
+
+  /** Creates the chip row on first use, then keeps it showing the selection. */
+  ensureGroupChips(): void {
+    if (this.chips.length === 0) createGroupChips(this);
+    else paintGroupChips(this);
+  }
+
+  /** True when a group rather than the All board is on screen. */
+  get filtered(): boolean {
+    return this.selection !== ALL_GROUP_ID;
+  }
+
+  /** Rebuilds the visible board for the current selection and layout. */
+  rebuildBoard(): void {
+    // The tiles anchoring the retry cue are about to die underneath it.
+    this.deps.onBoardChange?.();
+    this.destroyWideGrid();
+    this.destroyPageGrid();
+    this.showBoard();
+  }
+
+  /** Draws the board the current selection and layout call for. */
+  private showBoard(): void {
+    if (this.filtered) {
+      // A group is at most six tiles, so it has no pages and no dots (D3).
+      this.clearPageDots();
+      this.buildFilteredGrid();
+      return;
     }
+    if (this.paged) {
+      this.showPageDots();
+      this.buildPageGrid(this.hubPage);
+      return;
+    }
+    this.buildWideGrid();
+  }
+
+  /** Destroys the page dots, which a filtered board does not use. */
+  private clearPageDots(): void {
+    for (const dot of this.pageDots) dot.destroy();
+    this.pageDots = [];
+  }
+
+  /** Creates the dots for the All paged board, or repaints existing ones. */
+  private showPageDots(): void {
+    if (this.pageDots.length === 0) this.createPageDots();
+    else this.updatePageDots();
   }
 
   /** Destroys every object owned by the wide grid (tiles + shelf). */
@@ -161,13 +264,14 @@ export class HubGrid {
     destroyPageGrid(this);
   }
 
-  /** Destroys everything the grid owns (page dots, page objects, wide grid). */
+  /** Destroys everything the grid owns (page dots, both board lists, chips). */
   destroy(): void {
     this.invalidateEntrances();
     for (const dot of this.pageDots) dot.destroy();
     this.pageDots = [];
     this.destroyPageGrid();
     this.destroyWideGrid();
+    destroyGroupChips(this);
   }
 
   /** Builds the wide 6x4 grid (see gridBuilder.buildWideGrid). */
@@ -178,6 +282,11 @@ export class HubGrid {
   /** Builds one page of the paged grid (see gridBuilder.buildPageGrid). */
   buildPageGrid(page: number, slideFrom: number | null = null): void {
     buildPageGrid(this, page, slideFrom);
+  }
+
+  /** Builds the selected group's board (see gridBuilder.buildFilteredGrid). */
+  buildFilteredGrid(): void {
+    buildFilteredGrid(this);
   }
 
   /** Flips to the requested page with a horizontal slide (instant under reduced motion). */

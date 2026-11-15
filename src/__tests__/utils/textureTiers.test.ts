@@ -49,8 +49,8 @@ const GROUPS: readonly ArtGroup[] = [
 /** Every key the app can ask for: the shell's set plus every group's. */
 const APP_ASSETS = [...SHELL_ASSETS, ...GROUPS.flatMap((group) => group.assets)];
 
-/** The 186 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
-const APP_ASSET_COUNT = 186;
+/** The 191 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
+const APP_ASSET_COUNT = 191;
 
 describe("textureSizeFor tier mapping", () => {
   it("maps Hub tile icons to the icon tier (displayed at ~64px, headroom for paged tiles)", () => {
@@ -103,6 +103,19 @@ describe("textureSizeFor tier mapping", () => {
     expect(textureSizeFor("mascot_celebrate")).toBe(TEXTURE_SIZES.hero);
   });
 
+  it("maps the Hub's group-chip glyphs to the icon tier, at a 40px display", () => {
+    for (const key of [
+      "group_letters",
+      "group_numbers",
+      "group_thinking",
+      "group_play",
+      "group_stories",
+    ]) {
+      expect(textureSizeFor(key), key).toBe(TEXTURE_SIZES.icon);
+      expect(displayScale(key, 40), key).toBeCloseTo(40 / 160);
+    }
+  });
+
   it("falls back to the card tier for unknown keys (safe default for new art)", () => {
     expect(textureSizeFor("some_future_texture")).toBe(TEXTURE_SIZES.card);
   });
@@ -118,7 +131,7 @@ describe("displayScale helper", () => {
 
 describe("tier coverage over every app asset", () => {
   it("resolves every shell and group key to a known tier size", () => {
-    expect(SHELL_ASSETS).toHaveLength(53);
+    expect(SHELL_ASSETS).toHaveLength(58);
     expect(new Set(APP_ASSETS.map((asset) => asset.key)).size).toBe(APP_ASSET_COUNT);
     for (const asset of APP_ASSETS) {
       const size = textureSizeFor(asset.key);

@@ -1,4 +1,4 @@
-import type { GameId } from "../types";
+import type { GameId, HubGroupId } from "../types";
 
 /**
  * One game's identity and presentation, declared exactly once.
@@ -10,6 +10,12 @@ import type { GameId } from "../types";
 export interface GameRegistryEntry {
   /** Stable storage id, shared by stickers and per-game progress records. */
   readonly gameId: GameId;
+  /**
+   * The Hub's learning-domain group (spec FR-1). Membership is declared here and
+   * read by `src/game/hubGroups.ts`, which owns the group's words and its job of
+   * turning a chip into the tiles it shows.
+   */
+  readonly group: HubGroupId;
   /** Phaser scene key, matching the loader table in `scene/sceneRegistry.ts`. */
   readonly sceneKey: string;
   /** Hub tile text. */
@@ -41,6 +47,7 @@ export interface GameRegistryEntry {
 export const GAME_REGISTRY = [
   {
     gameId: "shape-sorter",
+    group: "thinking",
     sceneKey: "ShapeSorter",
     label: "Shape Sorter",
     tileKey: "tile_shape_sorter",
@@ -48,6 +55,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "animal-trace",
+    group: "play",
     sceneKey: "AnimalTrace",
     label: "Animal Trace",
     tileKey: "tile_animal_trace",
@@ -55,6 +63,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "pop-freeze",
+    group: "play",
     sceneKey: "PopFreeze",
     label: "Pop & Freeze",
     tileKey: "tile_pop_freeze",
@@ -62,6 +71,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "shadow-match",
+    group: "thinking",
     sceneKey: "ShadowMatch",
     label: "Shadow Match",
     tileKey: "tile_shadow_match",
@@ -69,6 +79,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "musical-memory",
+    group: "play",
     sceneKey: "MusicalMemory",
     label: "Musical Memory",
     tileKey: "tile_musical_memory",
@@ -76,6 +87,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "big-small",
+    group: "thinking",
     sceneKey: "BigSmall",
     label: "Big & Small",
     tileKey: "tile_big_small",
@@ -83,6 +95,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "pattern-builder",
+    group: "thinking",
     sceneKey: "PatternBuilder",
     label: "Pattern Builder",
     tileKey: "tile_pattern_builder",
@@ -90,6 +103,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "alphabet-match",
+    group: "letters",
     sceneKey: "Alphabet",
     label: "Find the Letter",
     tileKey: "tile_alphabet",
@@ -99,6 +113,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "word-match",
+    group: "letters",
     sceneKey: "WordMatch",
     label: "Find the Word",
     tileKey: "tile_word_match",
@@ -108,6 +123,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "word-builder",
+    group: "letters",
     sceneKey: "WordBuilder",
     label: "Build the Word",
     tileKey: "tile_word_builder",
@@ -117,6 +133,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "how-many",
+    group: "numbers",
     sceneKey: "HowMany",
     label: "How Many?",
     tileKey: "tile_how_many",
@@ -126,6 +143,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "first-sounds",
+    group: "letters",
     sceneKey: "FirstSounds",
     label: "First Sounds",
     tileKey: "tile_first_sounds",
@@ -135,6 +153,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "more-less",
+    group: "numbers",
     sceneKey: "MoreLess",
     label: "More or Less",
     tileKey: "tile_more_less",
@@ -144,6 +163,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "odd-one-out",
+    group: "thinking",
     sceneKey: "OddOneOut",
     label: "Odd One Out",
     tileKey: "tile_odd_one_out",
@@ -153,6 +173,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "color-match",
+    group: "thinking",
     sceneKey: "ColorMatch",
     label: "Color Match",
     tileKey: "tile_color_match",
@@ -162,6 +183,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "add-it-up",
+    group: "numbers",
     sceneKey: "AddItUp",
     label: "Add It Up",
     tileKey: "tile_add_it_up",
@@ -171,6 +193,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "take-away",
+    group: "numbers",
     sceneKey: "TakeAway",
     label: "Take Away",
     tileKey: "tile_take_away",
@@ -180,6 +203,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "memory-match",
+    group: "play",
     sceneKey: "MemoryMatch",
     label: "Memory Match",
     tileKey: "tile_memory_match",
@@ -189,6 +213,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "decode-it",
+    group: "letters",
     sceneKey: "DecodeIt",
     label: "Decode It",
     tileKey: "tile_decode_it",
@@ -198,6 +223,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "number-order",
+    group: "numbers",
     sceneKey: "NumberOrder",
     label: "Number Order",
     tileKey: "tile_number_order",
@@ -207,6 +233,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "feelings-faces",
+    group: "stories",
     sceneKey: "FeelingsFaces",
     label: "Feelings Faces",
     tileKey: "tile_feelings_faces",
@@ -214,6 +241,7 @@ export const GAME_REGISTRY = [
   },
   {
     gameId: "story-order",
+    group: "stories",
     sceneKey: "StoryOrder",
     label: "Story Order",
     tileKey: "tile_story_order",

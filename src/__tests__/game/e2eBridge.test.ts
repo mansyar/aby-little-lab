@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type {
+  E2EHubGroups,
   E2EHubPlayTime,
   E2EHubToast,
   E2EProgressState,
@@ -22,6 +23,7 @@ interface FakeScene {
   e2eHubReady?: () => boolean;
   e2eSettings?: () => E2ESettingsState;
   e2eHubPlayTime?: () => E2EHubPlayTime;
+  e2eHubGroups?: () => E2EHubGroups;
   e2eRecoverButton?: () => E2ERecoverState | null;
 }
 
@@ -123,6 +125,7 @@ describe("initE2EBridge", () => {
       expect(Object.isFrozen(bridge)).toBe(true);
       expect(Object.keys(bridge ?? {}).sort()).toEqual([
         "activeSceneKey",
+        "hubGroups",
         "hubPlayTime",
         "hubReady",
         "hubTiles",
@@ -508,6 +511,35 @@ describe("initE2EBridge", () => {
 
       state = { timeUp: false, nudging: true };
       expect(window.__abyE2E?.hubPlayTime()).toEqual({ timeUp: false, nudging: true });
+    });
+  });
+
+  describe("hubGroups", () => {
+    it("reports All and no chips when the scene publishes no row", () => {
+      install([sceneWith("ShapeSorter")]);
+
+      expect(window.__abyE2E?.hubGroups()).toEqual({ selected: "all", chips: [] });
+    });
+
+    it("reports All and no chips when no scene is active", () => {
+      install();
+
+      expect(window.__abyE2E?.hubGroups()).toEqual({ selected: "all", chips: [] });
+    });
+
+    it("returns the hub's live selection and chip centres", () => {
+      const scene = sceneWith("Hub");
+      let state: E2EHubGroups = {
+        selected: "all",
+        chips: [{ id: "all", x: 247, y: 66 }],
+      };
+      scene.e2eHubGroups = () => state;
+      install([scene]);
+
+      expect(window.__abyE2E?.hubGroups()).toEqual(state);
+
+      state = { selected: "numbers", chips: [{ id: "numbers", x: 459, y: 66 }] };
+      expect(window.__abyE2E?.hubGroups()).toEqual(state);
     });
   });
 

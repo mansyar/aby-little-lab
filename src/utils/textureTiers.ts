@@ -8,7 +8,8 @@
  * 256 px). Tiers size each texture for its **largest display context**:
  *
  * - `icon` (160): Hub tile icons, shadow silhouettes, letters, numerals,
- *   small UI symbols — largest known display ≈ 128 px.
+ *   small UI symbols and the Hub's group-chip glyphs (displayed at 40 px) —
+ *   largest known display ≈ 128 px.
  * - `card` (256): gameplay art (animals, shapes, cutouts, items, toys),
  *   stickers, prompt targets — largest known display ≈ 256 px.
  * - `hero` (512): mascot art — `Mascot.ts` scale math assumes the 512 px
@@ -28,6 +29,7 @@ export type TextureTier = keyof typeof TEXTURE_SIZES;
 /** Ordered rules: first prefix/exact match wins; unmatched keys default to `card`. */
 const TIER_RULES: ReadonlyArray<readonly [RegExp, TextureTier]> = [
   [/^tile_/, "icon"],
+  [/^group_/, "icon"],
   [/^sm_shadow_/, "icon"],
   [/^(minus|plus|equals|sleep_zzz|icon_speaker)$/, "icon"],
   [/^mascot_/, "hero"],

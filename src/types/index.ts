@@ -22,6 +22,15 @@ export type GameId =
   | "feelings-faces"
   | "story-order";
 
+/**
+ * The Hub's five learning-domain groups, in chip order after All.
+ *
+ * Declared as a type only, so `gameRegistry` can name a group without a runtime
+ * import; the table that gives each one its chip word, its spoken name and its
+ * glyph lives in `src/game/hubGroups.ts`.
+ */
+export type HubGroupId = "letters" | "numbers" | "thinking" | "play" | "stories";
+
 export interface StickerData {
   earned: boolean;
   earnedAt: string | null;

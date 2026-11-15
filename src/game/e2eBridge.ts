@@ -135,6 +135,29 @@ export interface E2ESettingsState extends E2EBackupState {
   degraded: boolean;
 }
 
+/** One group chip the hub is drawing, with the centre its hit zone answers to. */
+export interface E2EHubChip {
+  /** `all` or one of the five group ids. */
+  id: string;
+  /** Canvas-space X of the chip's centre. */
+  x: number;
+  /** Canvas-space Y of the chip's centre. */
+  y: number;
+}
+
+/**
+ * The hub's chip row and the selection it is filtering by.
+ *
+ * Read from the live row, so a journey drives the chip the child sees instead of
+ * a copied layout number, and can tell which group's board it is looking at.
+ */
+export interface E2EHubGroups {
+  /** The selection the board is filtered by — `all` when nothing is filtered. */
+  selected: string;
+  /** The six chips, in draw order (All first), from the live objects. */
+  chips: E2EHubChip[];
+}
+
 /** The hub's play-time state, as the hub itself sees it. */
 export interface E2EHubPlayTime {
   /** Whether the active profile's daily budget is spent, so every tile is locked. */
@@ -188,6 +211,13 @@ export interface E2EBridge {
    */
   hubPlayTime(): E2EHubPlayTime;
   /**
+   * The chip row and the current selection. A scene that is not the hub, or a
+   * hub whose row is not built yet, publishes `{ selected: "all", chips: [] }`
+   * rather than throwing, so a journey can wait for the row the same way it
+   * waits for the board.
+   */
+  hubGroups(): E2EHubGroups;
+  /**
    * The recovery card's button, while that card is the active scene. Null in
    * every other scene, so a journey can only tap the card while the card is
    * actually what it is looking at.
@@ -218,6 +248,7 @@ interface E2ESceneProbe {
   e2eHubReady?: () => boolean;
   e2eSettings?: () => E2ESettingsState;
   e2eHubPlayTime?: () => E2EHubPlayTime;
+  e2eHubGroups?: () => E2EHubGroups;
   e2eRecoverButton?: () => E2ERecoverState | null;
 }
 
@@ -329,6 +360,12 @@ export function initE2EBridge(game: Phaser.Game): void {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eHubPlayTime;
       if (typeof hook !== "function") return { timeUp: false, nudging: false };
+      return hook.call(probe);
+    },
+    hubGroups: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eHubGroups;
+      if (typeof hook !== "function") return { selected: "all", chips: [] };
       return hook.call(probe);
     },
     recover: () => {

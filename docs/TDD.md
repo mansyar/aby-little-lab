@@ -214,6 +214,7 @@ src/
 │   ├── feelingsFacesLogic.ts
 │   ├── firstSoundsLogic.ts
 │   ├── gameRegistry.ts
+│   ├── hubGroups.ts
 │   ├── hubGrid.ts
 │   ├── hubPaging.ts
 │   ├── hubTiles.ts
@@ -252,9 +253,11 @@ src/
 │   │   ├── shapes.ts
 │   │   ├── toys.ts
 │   │   └── types.ts
-│   └── hub/                               # 6 files — the decomposed Hub grid
+│   └── hub/                               # 14 files — the decomposed Hub grid
 │       ├── gridBuilder.ts
 │       ├── gridLayout.ts
+│       ├── groupChips.ts
+│       ├── groupLayout.ts
 │       ├── hubGridConstants.ts
 │       ├── pageBoard.ts
 │       ├── stickerShelf.ts
@@ -331,7 +334,7 @@ The `src/game/` logic modules are importable without Phaser, with one exception:
 
 ### 2.3 Asset corpus
 
-231 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). Only the 53 shell keys' files are rasterized at boot; every other texture a game draws is reached through `src/game/art/` or that game's own art module (see [§3.5](#35-in-chunk-art)).
+236 `.svg` files, 512×512 `viewBox`, ASCII markup only (see [§3.3](#33-preloadscene-and-the-boot-asset-table)). Only the 58 shell keys' files are rasterized at boot; every other texture a game draws is reached through `src/game/art/` or that game's own art module (see [§3.5](#35-in-chunk-art)).
 
 | Folder | Files | What it holds |
 | --- | --- | --- |
@@ -384,7 +387,7 @@ The font gate exists because the letter and numeral SVGs set `font-family="'Balo
 
 ### 3.3 PreloadScene and the boot asset table
 
-`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **53** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker` and the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through three eager raw globs — `../assets/svg/ui/tile_*.svg`, `../assets/svg/ui/tiles/*.svg` and `../assets/svg/stickers/*.svg`, written `{ eager: true, query: "?raw" }`. The patterns are deliberately narrower than "everything under `ui/`": the `ui/` directory also holds the glyph SVGs that belong to the lazy `game/art/glyphs.ts` group, and globbing `ui/**` would inline them into the entry chunk for keys the table never reads. The `tile_`/`sticker_` stem filter stays as defence in depth. Two files sharing a key, two registry entries naming one key, or a registry key with no file, throws at module evaluation naming the key. Only the nine non-game rows stay literal, because they belong to the shell rather than to a game. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 231 texture keys in the app, 53 of them in the shell, over a corpus of 231 art files.
+`src/scenes/PreloadScene.ts` exports `SHELL_ASSETS`, an array of **58** `{ key, svg }` entries — the shell set: 22 tile icons, 22 stickers, the two mascot poses, `icon_speaker`, the six avatar keys (`animal_cat`, `animal_dog`, `animal_pig`, `frog_red`, `sm_duck`, `toy_teddy_bear`) and the five `group_*` glyphs (`group_letters`, `group_numbers`, `group_thinking`, `group_play`, `group_stories`). The game half is not hand-listed: the scene builds it from `GAME_REGISTRY`, taking each game's `tileKey` and then each `stickerKey` in registry order, and resolves each key to SVG markup through three eager raw globs — `../assets/svg/ui/tile_*.svg`, `../assets/svg/ui/tiles/*.svg` and `../assets/svg/stickers/*.svg`, written `{ eager: true, query: "?raw" }`. The patterns are deliberately narrower than "everything under `ui/`": the `ui/` directory also holds the glyph SVGs that belong to the lazy `game/art/glyphs.ts` group, and globbing `ui/**` would inline them into the entry chunk for keys the table never reads. The `tile_`/`sticker_` stem filter stays as defence in depth. Two files sharing a key, two registry entries naming one key, or a registry key with no file, throws at module evaluation naming the key. Only the fourteen non-game rows stay literal, because they belong to the shell rather than to a game: the nine UI keys, then the five `group_*` glyphs, which are explicit rows because the shell glob keeps only `tile_`/`sticker_` stems — widening it to `ui/**` would inline the lazy glyphs group. The keys are the texture keys used everywhere else, e.g. `sticker_story_order`, `tile_story_order`, `mascot_idle`. Every other texture a game draws is loaded by that game ([§3.5](#35-in-chunk-art)), so this table is the whole boot payload: 236 texture keys in the app, 58 of them in the shell, over a corpus of 236 art files.
 
 `preload()` draws a brand lockup (title at `centerY - 110`, tagline at `centerY - 70`, a 300×30 progress bar over a 320×50 box) and wires `load.on("progress")` and `load.on("complete")` to it. In development only, a `/* v8 ignore next */`-guarded block profiles per-file load time and logs `[preload] N files in Xms`; the block is statically removed from production builds.
 
@@ -400,11 +403,11 @@ where `size = textureSizeFor(asset.key)` ([§3.4](#34-texture-tiers)). `toDataUr
 
 ### 3.4 Texture tiers
 
-Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (the 178-key boot set of the time x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. The corpus has grown since to 231 art files and 231 texture keys. `src/utils/textureTiers.ts` sizes each texture for its largest display context, and the rule applies per key wherever that key lives - shell, lazy art group or Story Order panel:
+Historically every SVG was rasterised at 512×512, which reserved ~186.6 MB of GPU texture memory (the 178-key boot set of the time x 512 x 512 x 4 B, i.e. 178 MiB) while most consumers display far smaller. The corpus has grown since to 236 art files and 236 texture keys. `src/utils/textureTiers.ts` sizes each texture for its largest display context, and the rule applies per key wherever that key lives - shell, lazy art group or Story Order panel:
 
 | Tier | Size | Applied to |
 | --- | --- | --- |
-| `icon` | 160 | `tile_*`, `sm_shadow_*`, and the exact keys `minus`, `plus`, `equals`, `sleep_zzz`, `icon_speaker` |
+| `icon` | 160 | `tile_*`, `group_*`, `sm_shadow_*`, and the exact keys `minus`, `plus`, `equals`, `sleep_zzz`, `icon_speaker` |
 | `card` | 256 | default — gameplay art, stickers, letters, numerals, story panels |
 | `hero` | 512 | `mascot_*` (the `MASCOT_SCALE = 0.2` maths assumes a 512 px texture) |
 
@@ -437,7 +440,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 | Story Order chunk | ~40.3 kB, includes all 45 panel SVGs | build output |
 | Precache entries | 54 (about 1,726 KiB) | `precache  54 entries` from the PWA build step |
 
-The shell carries the four eagerly registered scenes, the components the Hub and its settings overlays use, the utilities they import and the 53 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
+The shell carries the four eagerly registered scenes, the components the Hub and its settings overlays use, the utilities they import and the 58 shell textures as strings. The build hoists whatever the lazy scenes share into its own chunk instead, so the shared bases do not ride the shell (the per-chunk figures below are also listed in [PRD §7.2](./PRD.md#72-shell-and-game-chunks), which owns them): `GameSceneBase` 11.85 kB, `ChoiceRoundScene` 2.08 kB, `GroupMathScene` 2.03 kB, `dragJuice` 1.03 kB, `dragBoard` 5.87 kB, and shared game logic such as `wordLogic` 1.95 kB, `countLogic` 0.81 kB and `shapeSorterLogic` 0.68 kB. Game scenes and art groups are separate chunks; Phaser is isolated so an app update downloads only the shell delta.
 
 The current build emits 42 JavaScript chunks: 22 game scenes, nine art-group chunks (the other three groups inline into their only consumer), the three shared bases, the two drag shells, the shared game-logic chunks, the Phaser vendor chunk, the workbox helper and the shell entry. The structural acceptance is an inspection of `dist/assets`: the entry chunk carries zero game-scene constructor registrations, so every `super({ key: ... })` it holds belongs to Boot, Preload, Hub or Recover.
 
@@ -614,6 +617,16 @@ Hub wiring (`src/scenes/HubScene.ts`), behind the same gates as the chunk pass:
 | Shared lifecycle | The single 1200 ms post-entrance timer arms both passes; `cancelPrewarm` cancels both and bumps the art generation id; `restartPrewarm` restarts both. The art cue module is never imported during idle. `artQueued` is shared across visits, so a re-entered Hub resumes where the last visit stopped. |
 
 A fully warmed game queues zero art keys in `preload()` — `preloadArtGroups` only queues keys the TextureManager lacks — and the unchanged `GameSceneBase` show-then-clear cue wiring takes the cue down on `create` before it can paint, so no cue appears on entry. The behaviour is tested at both levels: `prewarm.test.ts` pins the table key-for-key against the live group objects (sizes pinned to `textureSizeFor`, shell-key exclusion asserted) and drives the queue with a fake scheduler (order, one-per-tick pacing, present-skip, per-tick reorder, tap-cancel, failure-swallow with next-pass retry); `hubScene.test.ts` asserts the Hub wiring (arming, tier/data-URI/`start` pins, no cue during idle, lock/hidden suppression plus resume, tap-cancel ordering, shutdown cancel plus cross-visit resume, 22-game resolver parity, warmed-game zero-queue). The measured cold-tap effect is recorded in [`docs/perf-baseline.md`](./perf-baseline.md).
+
+### 4.9 Hub group chips and the filtered board
+
+Every registry entry carries a `group` (`letters`, `numbers`, `thinking`, `play`, `stories`); the id type lives in `src/types/index.ts` and the words live in `src/game/hubGroups.ts`. That module owns the chip table (id, 14px word, spoken sentence, glyph key), `HUB_SELECTIONS` (All first, then the five declared groups), `visibleTileIndexes(selection)` — the registry indexes a chip shows, in registry order — and `selectionSpokenName`. `HUB_GROUPS` is `as const satisfies readonly HubGroup[]`, so a group id without a table row fails typecheck rather than drawing an empty board.
+
+`src/game/hub/groupLayout.ts` is the pure geometry both boards draw from. Chips are 96×84 with 10px between them, centred at `y = 66` in the top band: at 1024 wide their centres are `247, 353, 459, 565, 671, 777`, scaled from the live canvas width so the row clears the avatar chip at `x = 116` and Settings at `x = 908`. Filtered tiles are 176×196 with 20px spacing, `n` columns for `n ≤ 3` and three otherwise, each row centred on the canvas; six tiles land as 3×2, five as 3+2 and two as a centred pair. The All geometry (`hub/gridLayout.ts`) is untouched.
+
+`src/game/hub/groupChips.ts` builds the row once per grid lifetime: a cream plate, a glyph, a 14px word and a 96×84 hit `Zone` per chip. The tap goes through the zone rather than the plate so the row cannot be mistaken for a game tile by the launch tests or the browser bridge, and the selected state is fills and strokes only — no tween, because NFR-4 gives the chip row none. A chip tap calls `HubGrid.setGroup`, which repaints the row, rebuilds the board through `buildFilteredGrid`, hides the page dots on a narrow viewport and notifies the owner through `onBoardChange`; `HubScene` speaks the group's name through `speakSentence`, and the selection resets to All in `resetForVisit()`, so nothing is persisted.
+
+Glyph ownership: the five `group_*` files live in `src/assets/svg/ui/` and are explicit `SHELL_ASSETS` rows — the boot glob keeps only `tile_`/`sticker_` stems, and `ui/**` would inline the lazy glyphs group — with a `/^group_/ → icon` tier rule, so they rasterise at 160px for a 40px display. The All chip ships no art: its 2×2 grid is drawn as four 12px squares, which also serves as the fallback for a group whose texture is absent, so a chip can never paint Phaser's missing-texture box.
 
 ---
 
@@ -936,8 +949,9 @@ An entry is `{ at, kind, message, stack }`. `kind` is `error` or `rejection`, so
 | `dragBoard.ts` | the shared drag shell: slots (single or multi capacity), pieces, drop validation, wrong-answer behaviour and tap-to-withdraw ([§9.3](#93-press-drag-and-completion-feedback)) |
 | `feelingsFacesLogic.ts` | contrast ladder of faces and prompts |
 | `firstSoundsLogic.ts` | phonics rounds from a 12-word subset |
-| `gameRegistry.ts` | the one declaration of the 22 games — `gameId`, `sceneKey`, `label`, `tileKey`, `stickerKey` and the icon overrides — plus `stickerKeyForGame`; `GameId` coverage is enforced by the type checker |
-| `hubGrid.ts` | the Hub grid orchestrator: it delegates to `hub/gridBuilder` (tiles and page dots), `hub/pageBoard` (paging, page dots and the swipe gesture), `hub/stickerShelf` (earned stickers) and `hub/timeUpDim` (the play-time dim) |
+| `gameRegistry.ts` | the one declaration of the 22 games — `gameId`, `group`, `sceneKey`, `label`, `tileKey`, `stickerKey` and the icon overrides — plus `stickerKeyForGame`; `GameId` coverage is enforced by the type checker |
+| `hubGrid.ts` | the Hub grid orchestrator: it holds the group selection and delegates to `hub/gridBuilder` (tiles, the filtered board and page dots), `hub/groupChips` (the chip row), `hub/pageBoard` (paging, page dots and the swipe gesture), `hub/stickerShelf` (earned stickers) and `hub/timeUpDim` (the play-time dim) |
+| `hubGroups.ts` | the five learning-domain groups: chip id, word, spoken name, glyph key, and `visibleTileIndexes(selection)` over the registry; `HubGroupId` is declared type-only in `src/types/index.ts` |
 | `hubPaging.ts` | page maths for the tile grid, with the tile count defaulting to the registry length |
 | `hubTiles.ts` | `GAME_TILES`, derived from `gameRegistry` for the Hub grid |
 | `memoryMatchLogic.ts` | pair generation, flip rules, adaptive tier split |
@@ -1176,13 +1190,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-144 test files, 3,158 tests (verified 2026-11-08). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+147 test files, 3,204 tests (verified 2026-11-15). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-08) is statements 97.38 (6551/6727), branches 91.97 (1972/2144), functions 96.37 (1435/1489) and lines 98.33 (6088/6191) across 144 files and 3,158 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-15) is statements 97.39 %, branches 92.03 %, functions 96.4 % and lines 98.34 % across 147 files and 3,204 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 28 words never forces.
 
