@@ -140,9 +140,15 @@ vi.mock("../../utils/pwaBridge", () => ({
   getPwaBridge: vi.fn(() => null),
 }));
 
-vi.mock("../../utils/speech", () => ({
-  unlockSpeechForUserGesture: vi.fn(),
+/** Speech is not available in the harness; the chip row's announcement is spied on. */
+const { mockSpeech } = vi.hoisted(() => ({
+  mockSpeech: {
+    unlockSpeechForUserGesture: vi.fn(),
+    speakSentence: vi.fn(() => true),
+  },
 }));
+
+vi.mock("../../utils/speech", () => mockSpeech);
 
 /**
  * Lazy chunk loading is not exercised here; the retrying wrapper reports
@@ -219,6 +225,7 @@ import {
   getProgress,
   recordPlayTime,
   setPlayTimeLimit,
+  updateSettings,
 } from "../../utils/storage";
 
 /** Returns the first object of the given kind registered for an event. */
@@ -1495,6 +1502,73 @@ describe("HubScene e2e hub tiles", () => {
     expect(tiles).toEqual(
       GAME_TILES.map((_, index) => ({ id: String(index), ...wideTileCenter(index, origin) })),
     );
+  });
+
+  /** The six chip hit zones, in draw order (All first). */
+  function chipZones(): MockObject[] {
+    return mockRegistry.filter((obj) => {
+      const [, , width, height] = (obj.args ?? []) as unknown[];
+      return obj.kind === "zone" && width === 96 && height === 84;
+    });
+  }
+
+  it("speaks the selected group's name with the live SFX flag", () => {
+    const scene = new HubScene();
+    scene.create();
+    mockSpeech.speakSentence.mockClear();
+
+    chipZones()[2]?.handlers.pointerup?.();
+
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith("Numbers and counting", true);
+
+    // The parent can flip the toggle between chips; the flag is read per tap.
+    updateSettings({ sfxEnabled: false });
+    mockSpeech.speakSentence.mockClear();
+    chipZones()[0]?.handlers.pointerup?.();
+
+    // FR-8 passes the flag rather than skipping the call: the wrapper is what
+    // stays silent, so the same path serves a voiceless device.
+    expect(mockSpeech.speakSentence).toHaveBeenCalledWith("All games", false);
+  });
+
+  it("publishes the chip row's live centres and the selection", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    const groups = scene.e2eHubGroups();
+    expect(groups.selected).toBe("all");
+    expect(groups.chips).toEqual([
+      { id: "all", x: 247, y: 66 },
+      { id: "letters", x: 353, y: 66 },
+      { id: "numbers", x: 459, y: 66 },
+      { id: "thinking", x: 565, y: 66 },
+      { id: "play", x: 671, y: 66 },
+      { id: "stories", x: 777, y: 66 },
+    ]);
+
+    chipZones()[3]?.handlers.pointerup?.();
+
+    expect(scene.e2eHubGroups().selected).toBe("thinking");
+  });
+
+  it("keeps registry indexes as tile ids on a filtered board", () => {
+    const scene = new HubScene();
+    scene.create();
+
+    chipZones()[2]?.handlers.pointerup?.();
+
+    // The five Numbers games, in registry order — the identity a journey loops.
+    expect(scene.e2eHubTiles().map((tile) => tile.id)).toEqual(["10", "12", "15", "16", "19"]);
+  });
+
+  it("keeps registry indexes as tile ids on a filtered paged board", () => {
+    const scene = createNarrowHub();
+
+    chipZones()[5]?.handlers.pointerup?.();
+
+    // A filtered paged board draws its group on one page, so the page count no
+    // longer decides which ids are published.
+    expect(scene.e2eHubTiles().map((tile) => tile.id)).toEqual(["20", "21"]);
   });
 
   it("publishes only the visible page, keeping registry indexes as ids", () => {

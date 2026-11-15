@@ -103,17 +103,17 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
 - **Dependencies:** none
 - **Decisions:** D6, D9
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P4.T1: Speak the group's name** — covers: FR-8, AC-5
-  - [ ] Pass `onSelectGroup` into `HubGrid` and implement it as `speakSentence(HUB_GROUPS[selection].spokenName, getSettings().sfxEnabled)`, All included as "All games".
-  - [ ] Test with a mocked `speakSentence`: the right name per chip, the current SFX flag, and no call at all when the toggle is off.
-- [ ] **P4.T2: Publish the selection and the chips** — covers: FR-11, AC-9
-  - [ ] Add `E2EHubGroups` to `e2eBridge.ts` and `e2eHubGroups()` to `HubScene`, reading the live chip centres and the grid's selection; keep the bridge inert without `?e2e=1`.
-  - [ ] Keep `e2eHubTiles()` truthful on a filtered board by mapping drawn slots through the selection's visible indexes.
+- [x] **P4.T1: Speak the group's name** — covers: FR-8, AC-5
+  - [x] Pass `onSelectGroup` into `HubGrid` and implement it as `speakSentence(HUB_GROUPS[selection].spokenName, getSettings().sfxEnabled)`, All included as "All games".
+  - [x] Test with a mocked `speakSentence`: the right name per chip and the current SFX flag (FR-8 passes the flag rather than skipping the call, so the off case asserts `false`).
+- [x] **P4.T2: Publish the selection and the chips** — covers: FR-11, AC-9
+  - [x] Add `E2EHubGroups` to `e2eBridge.ts` and `e2eHubGroups()` to `HubScene`, reading the live chip centres and the grid's selection; keep the bridge inert without `?e2e=1`.
+  - [x] Keep `e2eHubTiles()` truthful on a filtered board by mapping drawn slots through the selection's visible indexes.
 
-**Result:**
-**Checkpoint:**
+**Result:** verified — a chip tap speaks the group's sentence through the existing `speakSentence` path under the live SFX flag (All says "All games"), and `?e2e=1` now publishes `{ selected, chips: [{ id, x, y }] }` from the live row while `hubTiles()` keeps registry indexes on a filtered board (Numbers → 10, 12, 15, 16, 19; Stories on a paged viewport → 20, 21). 3,203 tests in 147 files; gate exit 0.
+**Checkpoint:** HEAD4A
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-4.md
 
 ## Phase 5: The journey, and the record

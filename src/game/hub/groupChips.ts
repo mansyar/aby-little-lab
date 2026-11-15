@@ -46,9 +46,12 @@ const GLYPH_SQUARE = 12;
 /** Centre offset of each square in the drawn 2x2 glyph (px). */
 const GLYPH_SQUARE_OFFSET = 10;
 
-/** One chip's objects and the repaint rule that keeps them in step. */
+/** One chip's objects, its live centre and the repaint rule that keeps them in step. */
 export interface ChipView {
   readonly selection: HubSelection;
+  /** Canvas centre of the chip's plate and hit zone. */
+  readonly x: number;
+  readonly y: number;
   readonly objects: Phaser.GameObjects.GameObject[];
   paint(selected: boolean): void;
 }
@@ -136,7 +139,7 @@ export function createGroupChips(grid: HubGrid): void {
     objects.push(zone);
 
     grid.chips.push(...objects);
-    grid.chipViews.push({ selection, objects, paint });
+    grid.chipViews.push({ selection, x, y, objects, paint });
   });
 }
 

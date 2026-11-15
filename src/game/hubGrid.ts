@@ -106,6 +106,16 @@ export class HubGrid {
     this.deps = deps;
   }
 
+  /**
+   * The chip row's live centres, in draw order, for the e2e bridge (spec D9).
+   *
+   * Read from the views the row was built with rather than from a layout call,
+   * so a journey taps the chip the child is looking at.
+   */
+  groupChipPoints(): { id: HubSelection; x: number; y: number }[] {
+    return this.chipViews.map((chip) => ({ id: chip.selection, x: chip.x, y: chip.y }));
+  }
+
   /** Clears per-visit state (Phaser reuses scene instances across visits). */
   resetForVisit(): void {
     this.entranceIndex = 0;

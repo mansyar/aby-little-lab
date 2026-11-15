@@ -7,6 +7,7 @@ import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
 import type {
+  E2EHubGroups,
   E2EHubPlayTime,
   E2EHubToast,
   E2ERoundTarget,
@@ -27,17 +28,19 @@ import {
 } from "../game/hub/playTimeUi";
 import type { ArtKeyEntry } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
+import { ALL_GROUP_ID, selectionSpokenName, visibleTileIndexes } from "../game/hubGroups";
 import { pageTileIndexes } from "../game/hubPaging";
 import { GAME_TILES } from "../game/hubTiles";
 import { endPlaySession, startPlaySession } from "../game/playTimeLogic";
 import { isReducedMotion } from "../utils/motion";
 import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance, transitionToScene } from "../utils/sceneTransitions";
-import { unlockSpeechForUserGesture } from "../utils/speech";
+import { speakSentence, unlockSpeechForUserGesture } from "../utils/speech";
 import {
   getActiveProfile,
   getPlayTime,
   getProgress,
+  getSettings,
   recordGamePlay,
   recordPlayTime,
 } from "../utils/storage";
@@ -142,6 +145,12 @@ export class HubScene extends Phaser.Scene {
       onUserGesture: () => this.attract.resetIdleAttract(),
       gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
       onBoardChange: () => this.hideLoadCue(),
+      // The chip row's selection is spoken, not written: `speakSentence` re-reads
+      // the SFX toggle on every call, so a parent's change mid-session is
+      // honoured and a voiceless device stays silent (spec FR-8, D6).
+      onSelectGroup: (selection) => {
+        speakSentence(selectionSpokenName(selection), getSettings().sfxEnabled);
+      },
     });
     this.launcher = createGameLaunch({
       tiles: GAME_TILES,
@@ -355,14 +364,31 @@ export class HubScene extends Phaser.Scene {
    * rectangles and never touches them.
    */
   e2eHubTiles(): E2ERoundTarget[] {
-    const indexes = this.grid.paged
-      ? pageTileIndexes(this.grid.hubPage)
-      : GAME_TILES.map((_, index) => index);
+    const selection = this.grid.selection;
+    const indexes =
+      selection === ALL_GROUP_ID
+        ? this.grid.paged
+          ? pageTileIndexes(this.grid.hubPage)
+          : GAME_TILES.map((_, index) => index)
+        : // A filtered board draws one group on one page, so its drawn slots are
+          // that group's registry indexes — the identity a journey already knows.
+          visibleTileIndexes(selection);
     return this.grid.attractTargets.map((tile, slot) => ({
       id: String(indexes[slot]),
       x: tile.x,
       y: tile.y,
     }));
+  }
+
+  /**
+   * Publishes the chip row and the selection for the browser suite.
+   *
+   * Both come from the live row: the ids are the chip ids the grid filters by,
+   * and the centres are where the row actually drew, so a journey taps a chip
+   * rather than a copied coordinate and asserts the board it asked for.
+   */
+  e2eHubGroups(): E2EHubGroups {
+    return { selected: this.grid.selection, chips: this.grid.groupChipPoints() };
   }
 
   /**
