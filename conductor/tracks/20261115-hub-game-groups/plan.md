@@ -46,25 +46,25 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
 - **Dependencies:** none
 - **Decisions:** D2, D3, D4, D8
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P2.T1: Lay out chips and group tiles as pure geometry** — covers: FR-2, FR-4, NFR-1
-  - [ ] `groupLayout.ts`: `chipCenter(index)` for six 96×84 chips 10px apart centred in the top band, and `groupTilePosition(index, count)` for 176×196 tiles with 20px spacing, n columns up to 3, each row centred.
-  - [ ] Tests: chip centres land on 247/353/459/565/671/777 with a y of 66, every chip rect clears x=116 and x=908, and 1–6 tiles produce the documented boxes with every tile inside the canvas between y=108 and y=620.
-- [ ] **P2.T2: Draw the chips and own the selection** — covers: FR-2, FR-7, NFR-4
-  - [ ] `groupChips.ts`: create one chip per `HUB_GROUPS` row plus All, each a 96×84 rounded rect with a glyph image (or the drawn 2×2 grid for All) and a 14px label, a 96×84 hit area, `attachPressFeedback`, and an alpha/stroke-only selected state.
-  - [ ] `HubGrid`: hold `selection`, expose `setGroup(selection)`, build/destroy the chips with the board, reset the selection in `resetForVisit()`, and call the new optional `onSelectGroup` dep with the chosen id.
-  - [ ] Tests with plain mock objects: six chips created, the selected chip painted active, a tap calls `onSelectGroup` with its id and rebuilds, a visit reset returns to All, and no storage call is made.
-- [ ] **P2.T3: Build a filtered board in both layouts** — covers: FR-3, FR-4, FR-9, AC-2, AC-3, AC-4, AC-7
-  - [ ] `gridBuilder`: a filtered build that draws that group's tiles at the group geometry with the same icon/label/shelf treatment, re-arms `beginEntrances`, repopulates `attractTargets`, and applies the time-up lock; the paged layout uses the same filtered build and hides the page dots, restoring them on All.
-  - [ ] Keep the All path untouched: no change to `buildWideGrid`'s or `buildPageGrid`'s All geometry, stagger or breathe values.
-  - [ ] Tests: a golden position table for the All board both layouts; a filtered board's slot-to-registry-index mapping; the lock applied to a filtered board; the cue teardown fired on a chip tap.
-- [ ] **P2.T4: Keep the selection across a viewport flip** — covers: FR-3
-  - [ ] `handleViewportChange` rebuilds the current selection in the new layout instead of resetting it, and re-creates page dots only for All.
-  - [ ] Test: flip wide→paged with Numbers selected, then back, asserting the drawn game ids both times.
+- [x] **P2.T1: Lay out chips and group tiles as pure geometry** — covers: FR-2, FR-4, NFR-1
+  - [x] `groupLayout.ts`: `chipCenter(index)` for six 96×84 chips 10px apart centred in the top band, and `groupTilePosition(index, count)` for 176×196 tiles with 20px spacing, n columns up to 3, each row centred.
+  - [x] Tests: chip centres land on 247/353/459/565/671/777 with a y of 66, every chip rect clears x=116 and x=908, and 1–6 tiles produce the documented boxes with every tile inside the canvas between y=108 and y=620.
+- [x] **P2.T2: Draw the chips and own the selection** — covers: FR-2, FR-7, NFR-4
+  - [x] `groupChips.ts`: create one chip per `HUB_GROUPS` row plus All, each a 96×84 rounded rect with a glyph image (or the drawn 2×2 grid for All) and a 14px label, a 96×84 hit area, `attachPressFeedback`, and an alpha/stroke-only selected state.
+  - [x] `HubGrid`: hold `selection`, expose `setGroup(selection)`, build/destroy the chips with the board, reset the selection in `resetForVisit()`, and call the new optional `onSelectGroup` dep with the chosen id.
+  - [x] Tests with plain mock objects: six chips created, the selected chip painted active, a tap calls `onSelectGroup` with its id and rebuilds, a visit reset returns to All, and no storage call is made.
+- [x] **P2.T3: Build a filtered board in both layouts** — covers: FR-3, FR-4, FR-9, AC-2, AC-3, AC-4, AC-7
+  - [x] `gridBuilder`: a filtered build that draws that group's tiles at the group geometry with the same icon/label/shelf treatment, re-arms `beginEntrances`, repopulates `attractTargets`, and applies the time-up lock; the paged layout uses the same filtered build and hides the page dots, restoring them on All.
+  - [x] Keep the All path untouched: no change to `buildWideGrid`'s or `buildPageGrid`'s All geometry, stagger or breathe values.
+  - [x] Tests: a golden position table for the All board both layouts; a filtered board's slot-to-registry-index mapping; the lock applied to a filtered board; the cue teardown fired on a chip tap.
+- [x] **P2.T4: Keep the selection across a viewport flip** — covers: FR-3
+  - [x] `handleViewportChange` rebuilds the current selection in the new layout instead of resetting it, and re-creates page dots only for All.
+  - [x] Test: flip wide→paged with Numbers selected, then back, asserting the drawn game ids both times.
 
-**Result:**
-**Checkpoint:**
+**Result:** verified — six chips in the top band carry the selection, and a chip tap redraws the board as that group's 176×196 tiles on both layouts (n≤3 columns, each row centred, page dots hidden) while All restores the 22-tile board unchanged; the selection resets per visit, survives a viewport flip and never touches storage. 3,195 tests in 147 files; gate exit 0.
+**Checkpoint:** 2da5a60d
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-2.md
 
 ## Phase 3: Five glyphs, and the inventory that counts them
