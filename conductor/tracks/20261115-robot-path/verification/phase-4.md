@@ -4,7 +4,7 @@
 - Phase: 4
 - Date: 2026-11-16
 - Branch: `feat/20261115-robot-path`
-- Base / Head: `f2f602a0` / `18e477ad`
+- Base / Head: `f2f602a0` / `de311e98`
 - Result: verified
 - Mode: E3 (the primary implemented; no code subagent in this host)
 
@@ -69,7 +69,7 @@ being accepted.
   Order's panels are prewarmed, so the idle prewarm still covers every game.
 - Commits: `b3baca6b` (registration, shell assets, identity, prewarm),
   `e7928fd3` (every count-bearing suite, the three roster rows, suite counts),
-  `18e477ad` (the cast removal the acceptance commit carries).
+  `de311e98` (the cast removal the acceptance commit carries).
 
 ## Deviations
 
