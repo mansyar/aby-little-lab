@@ -2,11 +2,11 @@
   "id": "20261115-robot-path",
   "title": "Robot Path",
   "type": "feature",
-  "status": "new",
+  "status": "in_progress",
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-15T21:10:00+11:00",
-  "updated_at": "2026-11-15T21:10:00+11:00",
+  "updated_at": "2026-11-15T22:05:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "mission": "mission.md",
@@ -18,10 +18,10 @@
   "progress": {
     "phases_total": 6,
     "tasks_total": 17,
-    "phases_verified": 0,
-    "tasks_done": 0
+    "phases_verified": 1,
+    "tasks_done": 3
   },
-  "last_checkpoint": null,
+  "last_checkpoint": "26a05551",
   "review_verdict": null,
   "review_rounds": 0,
   "reviewed_head_sha": null,

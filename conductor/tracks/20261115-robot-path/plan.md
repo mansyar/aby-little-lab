@@ -28,19 +28,22 @@ around them is Phase 6's job.
 - **Dependencies:** none
 - **Decisions:** D1, D2, D3, D4, D5, D11
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P1.T1: Model the board and the four commands** — covers: FR-2, FR-3, AC-1
-  - [ ] `GRID_SIZE = 3`, `Direction = "up" | "right" | "down" | "left"`, `GridPoint`, `step`, `isOnBoard`, `isBlocked` (rocks), and `runProgram(start, commands, rocks)` returning the visited tiles, the final tile and whether the star was reached, with the first refused step reported rather than thrown.
-  - [ ] `canPlace(start, commands, rocks, direction, capacity)` — the placement rule: on-board, off-rock, and under the six-command cap; `ghostPath` returns the reachable prefix for the dotted trail; `removeFrom(commands, index)` keeps the program a prefix.
-- [ ] **P1.T2: Build the six-round ladder with seeded variety** — covers: FR-2, D5, AC-1
-  - [ ] `buildPlaythrough(rng)` returns six rounds with the ladder in D5 — straight (2–3 steps) twice, one corner (3–4) twice, rock detour (4–5), two corners (5–6) — drawing start corner, star and rocks inside each band's set from `rng`.
-  - [ ] `solutionFor(round)` returns the intended route as `Direction[]`, and `hintFor(round, stoppedRuns)` exposes the first solution command only from the second stopped run; both are asserted to be placeable on an empty strip.
-- [ ] **P1.T3: Prove the logic** — covers: AC-1, AC-2, AC-3, NFR-6
-  - [ ] Tests: a known four-command program lands on the documented tile and the ghost path equals its visited prefix; every round's solution is ≤ 6 commands and reaches the star; off-board, rock and seventh commands are all refused; `removeFrom` truncates and shortens the ghost path; the same seed builds the same six rounds and two seeds differ; the hint appears exactly at the second stopped run and never before.
+- [x] **P1.T1: Model the board and the four commands** — covers: FR-2, FR-3, AC-1
+  - [x] `GRID_SIZE = 3`, `Direction = "up" | "right" | "down" | "left"`, `GridPoint`, `step`, `isOnBoard`, `isBlocked` (rocks), and `runProgram(start, commands, rocks)` returning the visited tiles, the final tile and whether the star was reached, with the first refused step reported rather than thrown.
+  - [x] `canPlace(start, commands, rocks, direction, capacity)` — the placement rule: on-board, off-rock, and under the six-command cap; `ghostPath` returns the reachable prefix for the dotted trail; `removeFrom(commands, index)` keeps the program a prefix.
+- [x] **P1.T2: Build the six-round ladder with seeded variety** — covers: FR-2, D5, AC-1
+  - [x] `buildPlaythrough(rng)` returns six rounds with the ladder in D5 — straight (2–3 steps) twice, one corner (3–4) twice, rock detour (4–5), two corners (5–6) — drawing start corner, star and rocks inside each band's set from `rng`.
+  - [x] `solutionFor(round)` returns the intended route as `Direction[]`, and `hintFor(round, stoppedRuns)` exposes the first solution command only from the second stopped run; both are asserted to be placeable on an empty strip.
+- [x] **P1.T3: Prove the logic** — covers: AC-1, AC-2, AC-3, NFR-6
+  - [x] Tests: a known four-command program lands on the documented tile and the ghost path equals its visited prefix; every round's solution is ≤ 6 commands and reaches the star; off-board, rock and seventh commands are all refused; `removeFrom` truncates and shortens the ghost path; the same seed builds the same six rounds and two seeds differ; the hint appears exactly at the second stopped run and never before.
 
-**Result:** PENDING
-**Checkpoint:** PENDING
+**Result:** verified — the board, the four absolute commands, the placement
+refusals, the prefix strip, the ghost trail and the six-rung ladder all live in
+one Phaser-free module, and 22 tests over 40 seeds prove every generated round is
+playable; 3,226 tests in 148 files, gate exit 0.
+**Checkpoint:** 26a05551
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-1.md
 
 ## Phase 2: Robot and prop art, in the game's own chunk
