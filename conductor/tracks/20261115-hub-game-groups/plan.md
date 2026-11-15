@@ -158,5 +158,5 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
   - [x] Delete the method; `ensureGroupChips()` already repaints and is called by every build (R1-F2).
 
 **Result:** verified — a chip tap announces its group even when that group is already selected, and the grid no longer carries an unreachable `refreshChips`; 22 browser journeys and 3,203 unit tests in 147 files, gate exit 0.
-**Checkpoint:** PENDING_SHA
+**Checkpoint:** 9bce0dec
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-6.md
