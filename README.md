@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,245 tests across 150 files**, all green (verified 2026-11-15).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,248 tests across 150 files**, all green (verified 2026-11-15).
 
 Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 22 launches, three rounds on each mechanic family, the sticker award, the parental gate, the Learning Progress overview, the daily cap, a backup exported and restored into an empty browser, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as the `Browser Journeys` job (two workers, one shared preview server, a 5 min budget); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
@@ -114,6 +114,7 @@ Twenty-two mini-games in hub order; each links to its spec in [PRD §3](docs/PRD
 - [Number Order](docs/PRD.md#320-number-order) — numeral sequencing and ordinality
 - [Feelings Faces](docs/PRD.md#321-feelings-faces) — social-emotional learning, emotion recognition
 - [Story Order](docs/PRD.md#322-story-order) — narrative sequencing and temporal order
+- [Robot Path](docs/PRD.md#323-robot-path) — early programming, sequencing absolute steps
 
 ## Parental Lock & Touch UX
 

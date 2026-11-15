@@ -29,6 +29,8 @@ import numberOrderLogicSource from "../../game/numberOrderLogic.ts?raw";
 import oddOneOutLogicSource from "../../game/oddOneOutLogic.ts?raw";
 import patternBuilderLogicSource from "../../game/patternBuilderLogic.ts?raw";
 import popFreezeLogicSource from "../../game/popFreezeLogic.ts?raw";
+import robotPathArtSource from "../../game/robotPathArt.ts?raw";
+import robotPathLogicSource from "../../game/robotPathLogic.ts?raw";
 import shadowMatchLogicSource from "../../game/shadowMatchLogic.ts?raw";
 import shapeSorterLogicSource from "../../game/shapeSorterLogic.ts?raw";
 import storyOrderArtSource from "../../game/storyOrderArt.ts?raw";
@@ -36,10 +38,20 @@ import storyOrderLogicSource from "../../game/storyOrderLogic.ts?raw";
 import takeAwayLogicSource from "../../game/takeAwayLogic.ts?raw";
 import wordLogicSource from "../../game/wordLogic.ts?raw";
 import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
+import robotPathSceneSource from "../../scenes/RobotPathScene.ts?raw";
 import storyOrderSceneSource from "../../scenes/StoryOrderScene.ts?raw";
 
-/** The one scene that owns its art through the story-order preloader instead. */
-const STORY_ORDER_SCENE = "StoryOrderScene";
+/**
+ * Scenes that rasterize their own art in their own `preload` instead of
+ * declaring a shared group. Each one is checked for its own preloader below.
+ */
+const SCENE_LOCAL_PRELOADER_SCENES: readonly string[] = ["RobotPathScene", "StoryOrderScene"];
+
+/** The scene-local preload call each of those scenes must make. */
+const SCENE_LOCAL_PRELOADER_CALLS: Readonly<Record<string, string>> = {
+  RobotPathScene: "preloadRobotPathArt(this)",
+  StoryOrderScene: "preloadStoryOrderArt(this)",
+};
 
 /** Every art group, by id — the single source of truth for key ownership. */
 const GROUPS: readonly ArtGroup[] = [
@@ -162,7 +174,7 @@ function sceneNameOf(path: string): string {
   return file.slice(0, -".ts".length);
 }
 
-/** The 22 game scenes, read as text. */
+/** The 23 game scenes, read as text. */
 const SCENES: readonly SceneSource[] = Object.entries(SCENE_SOURCES)
   .map(([path, source]) => ({ name: sceneNameOf(path), source }))
   .filter((scene) => !NON_GAME_SCENES.includes(scene.name))
@@ -198,6 +210,8 @@ const GAME_MODULES: ReadonlyMap<string, string> = new Map([
   ["popFreezeLogic", popFreezeLogicSource],
   ["shadowMatchLogic", shadowMatchLogicSource],
   ["shapeSorterLogic", shapeSorterLogicSource],
+  ["robotPathArt", robotPathArtSource],
+  ["robotPathLogic", robotPathLogicSource],
   ["storyOrderArt", storyOrderArtSource],
   ["storyOrderLogic", storyOrderLogicSource],
   ["takeAwayLogic", takeAwayLogicSource],
@@ -337,13 +351,13 @@ function sorted(ids: Iterable<string>): string[] {
 }
 
 describe("game scene art declarations", () => {
-  it("discovers all 22 game scenes, so a new one cannot escape the scan", () => {
+  it("discovers all 23 game scenes, so a new one cannot escape the scan", () => {
     const discovered = Object.keys(SCENE_SOURCES).map(sceneNameOf);
 
     // The inventory itself is the tripwire: a 23rd game changes this number,
     // and its own declaration checks run in the same pass.
-    expect(SCENES).toHaveLength(22);
-    expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(22);
+    expect(SCENES).toHaveLength(23);
+    expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(23);
 
     // Every exclusion is a scene the glob really found; a stale name here
     // would let a non-game module slip into the game-scene checks.
@@ -362,16 +376,22 @@ describe("game scene art declarations", () => {
     expect(sorted(unknown)).toEqual([]);
   });
 
-  it("declares art groups in every game scene but Story Order", () => {
+  it("declares art groups in every game scene but the two with a local preloader", () => {
     const without = SCENES.filter((scene) => declaredGroups(scene.source) === null).map(
       (scene) => scene.name,
     );
-    expect(without).toEqual([STORY_ORDER_SCENE]);
+    expect(without).toEqual([...SCENE_LOCAL_PRELOADER_SCENES]);
   });
 
-  it("keeps Story Order on its own preloader", () => {
-    expect(storyOrderSceneSource).toContain("preloadStoryOrderArt(this)");
-    expect(storyOrderSceneSource).not.toContain("this.preloadArt(");
+  it("keeps each scene-local preloader scene on its own preload call", () => {
+    const sources: Readonly<Record<string, string>> = {
+      RobotPathScene: robotPathSceneSource,
+      StoryOrderScene: storyOrderSceneSource,
+    };
+    for (const [scene, call] of Object.entries(SCENE_LOCAL_PRELOADER_CALLS)) {
+      expect(sources[scene]).toContain(call);
+      expect(sources[scene]).not.toContain("this.preloadArt(");
+    }
   });
 
   describe.each(SCENES)("$name", (scene) => {
@@ -379,7 +399,7 @@ describe("game scene art declarations", () => {
       const drawn: ReadonlySet<string> = drawnGroups(scene);
       const declared = declaredGroups(scene.source);
       if (declared === null) {
-        expect(scene.name).toBe(STORY_ORDER_SCENE);
+        expect(SCENE_LOCAL_PRELOADER_SCENES).toContain(scene.name);
         return;
       }
 
@@ -390,7 +410,7 @@ describe("game scene art declarations", () => {
       const drawn: ReadonlySet<string> = drawnGroups(scene);
       const declared = declaredGroups(scene.source);
       if (declared === null) {
-        expect(scene.name).toBe(STORY_ORDER_SCENE);
+        expect(SCENE_LOCAL_PRELOADER_SCENES).toContain(scene.name);
         return;
       }
 

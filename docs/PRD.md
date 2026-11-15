@@ -352,6 +352,15 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Narration.** Rule line: "Put the story in order, first to last." No per-round narration; the panels are the prompt.
 - **Art and assets.** 45 panel SVGs. They travel with the Story Order chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
 
+### 3.23 Robot Path
+
+- **Mechanic.** Tap absolute direction arrows (up, right, down, left) into a six-slot strip to program a robot across a 3×3 board to its star. A dotted ghost trail shows where the current program would go before anything moves; pressing Go runs it at 450 ms per step.
+- **Rounds and rules.** Six fixed rounds, two to six commands each, with a rock or two in the last two. A command that would leave the board, enter a rock or overflow the strip is refused at placement, so an illegal program cannot exist.
+- **Feedback.** A run that reaches the star chimes, cheers and fills the dot. A run that stops short keeps every command, pulses the arrow that first left the route, never advances and never resets, so one arrow can be changed and the program run again. After two stopped runs the first correct arrow pulses in the palette as a hint; it is never placed for the child.
+- **Difficulty.** Fixed. Robot Path is one of the seven games whose ladder does not shift with the adaptive band, because the child's own program is the difficulty.
+- **Narration.** Rule line: "Put the arrows in the robot's path, then tap go." No per-round narration.
+- **Art and assets.** Six robot and prop SVGs travel with the game's own chunk; arrows, tiles and the trail are drawn at runtime. Tile and sticker icons.
+
 ## 4. Cross-game systems
 
 ### 4.1 Shared scene bases and lazy loading
