@@ -418,10 +418,10 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 144 files / 3,158 tests | `pnpm test -- --run` |
-| Coverage | statements 97.38 % / branches 91.97 % / functions 96.37 % / lines 98.33 % | `pnpm test:coverage` |
+| Test suite | 145 files / 3,169 tests | `pnpm test -- --run` |
+| Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
-The Test-suite and Coverage rows were verified 2026-11-08; the build
+The Test-suite and Coverage rows were verified 2026-11-15; the build
 figures above are the 2026-10-22 measurement.
 
 The Shell Diet section above keeps its own numbers (129.1 KiB, 41 chunks, 53
