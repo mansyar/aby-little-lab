@@ -200,12 +200,12 @@ describe("PreloadScene", () => {
     expect(getMockFn(tagline.destroy)).toHaveBeenCalled();
   });
 
-  it("loads exactly the 53 shell SVGs during preload", () => {
+  it("loads exactly the 58 shell SVGs during preload", () => {
     const scene = new PreloadScene();
     scene.preload();
 
     const svgCalls = getMockFn(scene.load.svg).mock.calls;
-    expect(svgCalls).toHaveLength(53);
+    expect(svgCalls).toHaveLength(58);
     expect(svgCalls.map((call) => call[0] as string)).toEqual(
       SHELL_ASSETS.map((asset) => asset.key),
     );

@@ -5,6 +5,11 @@ import animalFrogRedSvg from "../assets/svg/animals/frog_red.svg?raw";
 import animalPigSvg from "../assets/svg/animals/pig.svg?raw";
 import smDuckSvg from "../assets/svg/items/duck.svg?raw";
 import toyTeddyBearSvg from "../assets/svg/toys/teddy_bear.svg?raw";
+import groupLettersSvg from "../assets/svg/ui/group_letters.svg?raw";
+import groupNumbersSvg from "../assets/svg/ui/group_numbers.svg?raw";
+import groupPlaySvg from "../assets/svg/ui/group_play.svg?raw";
+import groupStoriesSvg from "../assets/svg/ui/group_stories.svg?raw";
+import groupThinkingSvg from "../assets/svg/ui/group_thinking.svg?raw";
 import iconSpeakerSvg from "../assets/svg/ui/icon_speaker.svg?raw";
 import mascotCelebrateSvg from "../assets/svg/ui/mascot_celebrate.svg?raw";
 import mascotIdleSvg from "../assets/svg/ui/mascot_idle.svg?raw";
@@ -106,6 +111,11 @@ export function buildShellAssets(
  * avatar picker render before any game scene loads. They are the only keys the
  * shell and a game group share. `mascot_idle` stays because it is also a word
  * prompt in `wordLogic`.
+ *
+ * The five `group_*` glyphs are explicit rows because they cannot be derived:
+ * they belong to the Hub's chip row, not to a game registry entry, and the shell
+ * glob keeps only `tile_`/`sticker_` keys — widening it to `ui/**` would inline
+ * the lazy `game/art/glyphs.ts` group too. They rasterize at the icon tier.
  */
 export const SHELL_ASSETS: readonly ShellAsset[] = [
   ...buildShellAssets([
@@ -121,6 +131,11 @@ export const SHELL_ASSETS: readonly ShellAsset[] = [
   { key: "frog_red", svg: animalFrogRedSvg },
   { key: "sm_duck", svg: smDuckSvg },
   { key: "toy_teddy_bear", svg: toyTeddyBearSvg },
+  { key: "group_letters", svg: groupLettersSvg },
+  { key: "group_numbers", svg: groupNumbersSvg },
+  { key: "group_thinking", svg: groupThinkingSvg },
+  { key: "group_play", svg: groupPlaySvg },
+  { key: "group_stories", svg: groupStoriesSvg },
 ];
 
 /**

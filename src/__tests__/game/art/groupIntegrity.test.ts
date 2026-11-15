@@ -54,9 +54,9 @@ const GROUPS: readonly ArtGroup[] = [
 
 /**
  * The shell set the boot preloader keeps (FR-4): 22 tiles, 22 stickers, two
- * mascot poses, the speaker glyph and the six avatar keys. Spelled out
- * explicitly — the avatar keys are the deliberate shell/game overlap, so the
- * union cannot be derived by prefix.
+ * mascot poses, the speaker glyph, the six avatar keys and the five group
+ * glyphs. Spelled out explicitly — the avatar keys are the deliberate
+ * shell/game overlap, so the union cannot be derived by prefix.
  */
 const SHELL_KEYS: readonly string[] = [
   "tile_shape_sorter",
@@ -112,13 +112,19 @@ const SHELL_KEYS: readonly string[] = [
   "frog_red",
   "sm_duck",
   "toy_teddy_bear",
+  "group_letters",
+  "group_numbers",
+  "group_thinking",
+  "group_play",
+  "group_stories",
 ];
 
 /**
- * Every texture key the app can ask for today: 53 shell keys plus the 133
+ * Every texture key the app can ask for today: 58 shell keys plus the 133
  * game-only group keys (131 prior + 4 Shadow Match items + 4 shadows).
  */
-const TOTAL_APP_ASSETS = 186;
+
+const TOTAL_APP_ASSETS = 191;
 
 const AVATAR_KEYS: readonly string[] = [
   "animal_cat",
@@ -185,11 +191,11 @@ describe("art group inventory", () => {
     expect(new Set(allGroupKeys).size).toBe(allGroupKeys.length);
   });
 
-  it("leaves exactly the 53 shell keys outside the groups, for 186 in total", () => {
+  it("leaves exactly the 58 shell keys outside the groups, for 191 in total", () => {
     const groupKeySet = new Set(allGroupKeys);
     const shellOverlaps = SHELL_KEYS.filter((key) => groupKeySet.has(key));
 
-    expect(SHELL_KEYS).toHaveLength(53);
+    expect(SHELL_KEYS).toHaveLength(58);
     expect(new Set(SHELL_KEYS).size).toBe(SHELL_KEYS.length);
     // The six avatars are the only keys the shell and a game group share.
     expect(shellOverlaps.sort()).toEqual([...AVATAR_KEYS].sort());
