@@ -3,9 +3,9 @@
 - **Track:** `20261115-hub-game-groups`
 - **Type:** `feature`
 - **Branch:** `feat/20261115-hub-game-groups`
-- **Range:** `703b12ad..64268065`
-- **Date:** `2026-11-15T23:40:00+11:00`
-- **Verdict:** `PASS WITH FINDINGS` (round 1 — two findings, both fixable; see History)
+- **Range:** `703b12ad..2776dcd1` (code head `9bce0dec`)
+- **Date:** `2026-11-16T00:30:00+11:00`
+- **Verdict:** `PASS` (round 2 — both round-1 findings fixed and re-verified)
 
 ## Summary
 
@@ -14,7 +14,9 @@ test or a browser journey. The heading, chip band, filtered board, glyphs, speec
 and bridge all match the plan's pre-authorized decisions, and the All board is
 untouched apart from the chip row. Two defects surfaced in review: a re-tap on
 the already-selected chip was silent, which contradicts FR-8 read plainly, and
-`HubGrid.refreshChips()` is dead code. Both are fixed in Phase 6 and re-verified.
+`HubGrid.refreshChips()` is dead code. Round 2 confirms both are fixed in
+Phase 6 (`9bce0dec`) and re-verified by that phase's gate; no finding remains
+open and the verdict is PASS.
 
 ## Verification
 
@@ -56,7 +58,13 @@ Each figure is the phase-5 gate run recorded in `verification/phase-5.md`.
 | NFR-6 | P2–P5 | coverage gates hold | covered |
 | AC-1..AC-10 | P1–P5 | per-phase evidence; AC-2 golden table in `hubGrid.test.ts`, AC-3/6 in the journey, AC-8 in the guards, AC-9 in the bridge tests | covered |
 
-## Findings
+## Findings (all resolved in Phase 6)
+
+Both findings below were confirmed fixed in review round 2: `setGroup` now
+announces before the no-op guard, and `refreshChips()` is gone. Their tests are
+`groupChips.test.ts` — "re-selecting the current chip speaks again but rebuilds
+nothing" — and `hubScene.test.ts` — "re-speaks the group when its own chip is
+tapped again".
 
 ### Critical
 
@@ -136,3 +144,12 @@ and need no doc change.
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 (full track) | PASS WITH FINDINGS | 0 | 0 | 1 | 1 | 0 |
+| 2 (fix confirmation) | PASS | 0 | 0 | 0 | 0 | 2 |
+
+## Round 2
+
+Re-read `setGroup` and the two tests, then confirmed the phase-6 gate run for
+`9bce0dec`: `pnpm test:e2e` 22/22, `pnpm check` 323 files, `pnpm typecheck`
+clean, `pnpm test -- --run` 147 files / 3,204 tests, coverage 97.42 / 92.11 /
+96.46 / 98.36, shell entry 179.4 kB ≤ 200 kB, PWA 16/16, docs 5/5 — chain exit 0.
+No new findings. The accepted deviations stand as recorded above.
