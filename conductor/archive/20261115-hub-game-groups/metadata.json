@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-15T00:00:00+11:00",
-  "updated_at": "2026-11-15T20:45:00+11:00",
+  "updated_at": "2026-11-15T20:51:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "mission": "mission.md",
@@ -33,6 +33,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-11-15T20:51:00+11:00",
+  "archive_path": "conductor/archive/20261115-hub-game-groups"
 }
