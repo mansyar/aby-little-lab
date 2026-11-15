@@ -77,20 +77,20 @@ device, and the narrow checks cannot see a shell that failed to rasterize.
 - **Dependencies:** none
 - **Decisions:** D7
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P3.T1: Draw the five glyphs** — covers: FR-10
-  - [ ] `group_letters` (one letter card), `group_numbers` (one numeral card), `group_thinking` (a star beside a rounded square), `group_play` (a green music note over a face-down card), `group_stories` (a smiling round face), each on a transparent 512 viewBox with the 4–6px `#2D3748` outline and palette colours only.
-  - [ ] Verify each file parses through `toDataUri` and shows its intended shape at 40px, recorded as an evidence note.
-- [ ] **P3.T2: Put them in the shell at the icon tier** — covers: FR-10, NFR-3
-  - [ ] Import the five SVGs and append five explicit `SHELL_ASSETS` rows after the registry-derived block, with a comment saying why they are explicit (the shell glob keeps only `tile_`/`sticker_` keys).
-  - [ ] Add `[/^group_/, "icon"]` to `TIER_RULES`, and extend `textureTiers.test.ts` to assert the tier and the 40px display scale.
-- [ ] **P3.T3: Restate the inventory, do not loosen it** — covers: AC-8, NFR-3
-  - [ ] Update `shellOwnership.test.ts` (53 → 58 keys, the five `group_*` rows added to its literal list), `groupIntegrity.test.ts` (53/186 → 58/191 and the union assertion), `preloadScene.test.ts` (53 → 58, 186 → 191) and `navigation.test.ts`'s 53-svg count, each with the new number and the reason.
-  - [ ] Record the measured shell entry size and precache count before/after in the phase evidence, against the 200 kB gate and the 5 kB art budget.
+- [x] **P3.T1: Draw the five glyphs** — covers: FR-10
+  - [x] `group_letters` (one letter card), `group_numbers` (one numeral card), `group_thinking` (a star beside a rounded square), `group_play` (a green music note over a face-down card), `group_stories` (a smiling round face), each on a transparent 512 viewBox with the 4–6px `#2D3748` outline and palette colours only.
+  - [x] Verify each file parses through `toDataUri` and shows its intended shape at 40px, recorded as an evidence note.
+- [x] **P3.T2: Put them in the shell at the icon tier** — covers: FR-10, NFR-3
+  - [x] Import the five SVGs and append five explicit `SHELL_ASSETS` rows after the registry-derived block, with a comment saying why they are explicit (the shell glob keeps only `tile_`/`sticker_` keys).
+  - [x] Add `[/^group_/, "icon"]` to `TIER_RULES`, and extend `textureTiers.test.ts` to assert the tier and the 40px display scale.
+- [x] **P3.T3: Restate the inventory, do not loosen it** — covers: AC-8, NFR-3
+  - [x] Update `shellOwnership.test.ts` (53 → 58 keys, the five `group_*` rows added to its literal list), `groupIntegrity.test.ts` (53/186 → 58/191 and the union assertion), `preloadScene.test.ts` (53 → 58, 186 → 191) and `navigation.test.ts`'s 53-svg count, each with the new number and the reason.
+  - [x] Record the measured shell entry size and precache count before/after in the phase evidence, against the 200 kB gate and the 5 kB art budget.
 
-**Result:**
-**Checkpoint:**
+**Result:** verified — five flat group glyphs ship as explicit shell rows at the icon tier, the shell grew 176.9 → 179.0 kB and the precache 54 → 59 entries against a 200 kB gate and a 5 kB art budget (the files total 2.0 kB), and the four inventory guards state 58 shell keys / 191 app keys rather than being loosened. 3,196 tests in 147 files; gate exit 0.
+**Checkpoint:** cf47ccb1
 **Evidence:** conductor/tracks/20261115-hub-game-groups/verification/phase-3.md
 
 ## Phase 4: The scene speaks the group
