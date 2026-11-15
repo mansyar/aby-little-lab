@@ -438,9 +438,11 @@ describe("Hub scene load", () => {
     expect(cueOf(scene)).toBe(cue);
     expect(cue?.isActive()).toBe(true);
     expect(mockEnsureSceneLoaded).toHaveBeenCalledTimes(4);
+    // The cue's hit floor is 96x96; the Hub's group chips are 96 wide but 84
+    // tall, so both edges are matched rather than the width alone.
     const cueFloors = getRectangles(scene)
       .map((rect) => rect as unknown as MockObject)
-      .filter((rect) => rect.args?.[2] === 96);
+      .filter((rect) => rect.args?.[2] === 96 && rect.args?.[3] === 96);
     expect(cueFloors).toHaveLength(1);
   });
 

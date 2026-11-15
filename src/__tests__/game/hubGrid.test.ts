@@ -83,7 +83,12 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     const texts = mockRegistry.filter((obj) => obj.kind === "text");
     // 22 icons + 22 sticker slots would be more; the wide grid adds 22 icons.
     expect(images.length).toBe(22);
-    expect(texts.length).toBe(22);
+    // 22 game labels (17px) plus the six chip words (14px).
+    const tileLabels = texts.filter(
+      (obj) => (obj.args?.[3] as { fontSize?: string })?.fontSize === "17px",
+    );
+    expect(tileLabels.length).toBe(22);
+    expect(texts.length).toBe(28);
   });
 
   it("activates a tile on tap exactly once (navLocked blocks double-taps)", () => {
@@ -562,5 +567,182 @@ describe("HubGrid — entrance readiness", () => {
 
     grid.destroy();
     expect(grid.entranceSettled, "a destroyed grid accepts nothing").toBe(false);
+  });
+});
+
+describe("HubGrid — group chips and the filtered board", () => {
+  beforeEach(() => {
+    stubMatchMedia(false);
+    localStorage.clear();
+    mockRegistry.length = 0;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  /** The tiles' (x, y) pairs in draw order. */
+  function tileCentres(width: number, height: number): Array<[number, number]> {
+    return rects(width, height).map((obj) => [obj.args?.[0] as number, obj.args?.[1] as number]);
+  }
+
+  it("draws the selected group's own games at 176x196, in registry order", () => {
+    const { deps, activate } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+
+    grid.setGroup("numbers");
+
+    // Numbers & Counting: How Many? (10), More or Less (12), Add It Up (15),
+    // Take Away (16), Number Order (19) — 3 + 2 on the measured centres.
+    expect(tileCentres(176, 196)).toEqual([
+      [316, 276],
+      [512, 276],
+      [708, 276],
+      [414, 492],
+      [610, 492],
+    ]);
+
+    const tiles = grid.attractTargets as unknown as MockObject[];
+    tiles[4]?.handlers.pointerup?.();
+    expect(activate).toHaveBeenCalledWith(19, grid.attractTargets[4]);
+  });
+
+  it("draws a two-game group as one centred pair", () => {
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+
+    grid.setGroup("stories");
+
+    // Feelings Faces (20) and Story Order (21).
+    expect(tileCentres(176, 196)).toEqual([
+      [414, 384],
+      [610, 384],
+    ]);
+  });
+
+  it("restores the 22-tile All board, byte-identical to the pre-track grid", () => {
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+
+    grid.setGroup("letters");
+    grid.setGroup("all");
+
+    const tiles = rects(144, 116);
+    expect(tiles).toHaveLength(22);
+    // The same origin the pre-track grid computed (see gridLayout.test.ts).
+    expect(tiles[0]?.args?.slice(0, 2)).toEqual([97, 177]);
+    expect(tiles[21]?.args?.slice(0, 2)).toEqual([595, 591]);
+  });
+
+  it("keeps the selected group across a viewport flip, in both directions", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+    grid.buildWideGrid();
+    grid.setGroup("letters");
+
+    scene.scale.displaySize = { width: 844, height: 390 };
+    grid.handleViewportChange();
+    expect(grid.paged).toBe(true);
+    expect(grid.selection).toBe("letters");
+    expect(grid.attractTargets).toHaveLength(5);
+    expect(grid.pageDots).toHaveLength(0);
+
+    scene.scale.displaySize = { width: 1024, height: 768 };
+    grid.handleViewportChange();
+    expect(grid.paged).toBe(false);
+    expect(grid.selection).toBe("letters");
+    expect(grid.attractTargets).toHaveLength(5);
+  });
+
+  it("starts the next visit on All", () => {
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+    grid.setGroup("numbers");
+
+    grid.resetForVisit();
+    grid.classifyViewport();
+
+    expect(grid.selection).toBe("all");
+  });
+
+  it("hides the page dots while a group is filtered, and restores them on All", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    scene.scale.displaySize = { width: 844, height: 390 };
+    grid.classifyViewport();
+    grid.createPageDots();
+    grid.buildPageGrid(0);
+    expect(grid.pageDots).toHaveLength(3);
+
+    grid.setGroup("stories");
+    expect(grid.pageDots).toHaveLength(0);
+
+    grid.setGroup("all");
+    expect(grid.pageDots).toHaveLength(3);
+    expect(grid.attractTargets).toHaveLength(10);
+  });
+
+  it("locks a filtered board when the daily cap is already reached", () => {
+    const { deps } = makeDeps({ isTimeUp: () => true });
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+
+    grid.setGroup("numbers");
+
+    const tiles = grid.attractTargets as unknown as MockObject[];
+    expect(tiles).toHaveLength(5);
+    for (const tile of tiles) {
+      expect(tile.setAlpha).toHaveBeenCalledWith(0.45);
+      expect(tile.disableInteractive).toHaveBeenCalled();
+    }
+  });
+
+  it("tells the owner the board changed, so a stale cue cannot outlive it", () => {
+    const onBoardChange = vi.fn();
+    const { deps } = makeDeps({ onBoardChange });
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+
+    grid.setGroup("numbers");
+    expect(onBoardChange).toHaveBeenCalledTimes(1);
+
+    grid.setGroup("all");
+    expect(onBoardChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("re-arms the entrance gate on a filtered board", () => {
+    const { deps, scene } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.buildWideGrid();
+    fireEntrances(scene);
+    expect(grid.entranceSettled).toBe(true);
+
+    const before = (scene.tweens.add as MockFn).mock.calls.length;
+    grid.setGroup("play");
+    expect(grid.entranceSettled, "a fresh board is not tappable until it lands").toBe(false);
+
+    fireEntrances(scene, before);
+    expect(grid.entranceSettled).toBe(true);
+  });
+
+  it("re-renders the shelf for the filtered games only after a reset", () => {
+    earnSticker("how-many"); // in Numbers & Counting
+    earnSticker("shape-sorter"); // not in it
+    const { deps } = makeDeps();
+    const grid = new HubGrid(deps);
+    grid.classifyViewport();
+    grid.setGroup("numbers");
+
+    grid.rerenderStickerShelf();
+
+    expect(grid.stickerImages).toHaveLength(1);
+    expect(grid.emptySlotGraphics).toHaveLength(4);
   });
 });

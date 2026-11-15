@@ -3,9 +3,11 @@ import { isReducedMotion } from "../../utils/motion";
 import { attachPressFeedback } from "../../utils/pressFeedback";
 import { textStyle } from "../../utils/typography";
 import type { HubGrid } from "../hubGrid";
+import { ALL_GROUP_ID, visibleTileIndexes } from "../hubGroups";
 import { pageCount, pagedTilePosition, pageTileIndexes } from "../hubPaging";
 import { GAME_TILES } from "../hubTiles";
 import { addBreatheTweens, animateEntrance, wideGridOrigin, wideTileCenter } from "./gridLayout";
+import { groupTilePosition } from "./groupLayout";
 import {
   PAGED_ICON_DISPLAY,
   PAGED_ICON_Y_OFFSET,
@@ -138,6 +140,10 @@ export function buildWideGrid(grid: HubGrid): void {
     // tiles too — the limit is profile-wide, not per layout.
     grid.applyTimeUpLock();
   }
+
+  // The chip row is built once per grid lifetime, after the tiles: the board's
+  // object order stays the order the launch tests and the bridge read.
+  grid.ensureGroupChips();
 }
 
 /**
@@ -234,6 +240,92 @@ export function buildPageGrid(grid: HubGrid, page: number, slideFrom: number | n
     // too — the limit is profile-wide, not per page.
     grid.applyTimeUpLock();
   }
+
+  grid.ensureGroupChips();
+}
+
+/**
+ * Builds the filtered board: the selected group's tiles at the larger group
+ * geometry, in both layouts (spec FR-4, D3).
+ *
+ * The board is deliberately layout-independent — one group is at most six tiles,
+ * so it needs no paging and no slide — and it is built into the paged object
+ * list, so one teardown covers the wide and paged cases alike. Tiles keep their
+ * registry index for the tap callback, which is the identity the launch flow and
+ * the bridge both use.
+ */
+export function buildFilteredGrid(grid: HubGrid): void {
+  const scene = grid.deps.scene;
+  grid.pageObjects = [];
+  grid.stickerImages = [];
+  grid.emptySlotGraphics = [];
+  grid.attractTargets = [];
+  grid.entranceIndex = 0;
+
+  const indexes = visibleTileIndexes(grid.selection);
+  const settleEntrance = grid.beginEntrances(indexes.length);
+
+  indexes.forEach((globalIndex, slot) => {
+    const pos = groupTilePosition(slot, indexes.length);
+
+    const tile = scene.add.rectangle(pos.x, pos.y, pos.width, pos.height, 0x2b6cb0);
+    tile.setStrokeStyle(4, 0x2d3748);
+    tile.setInteractive();
+    grid.attractTargets.push(tile as Phaser.GameObjects.Rectangle);
+    // Same release-to-navigate contract as the All grids; locked tiles swallow
+    // the tap and a swipe belongs to the page gesture instead.
+    tile.on("pointerup", () => {
+      if (grid.deps.isTimeUp() || grid.navLocked || grid.swipes.swiping) return;
+      grid.navLocked = true;
+      grid.deps.activateTile(globalIndex, tile);
+    });
+    grid.pageObjects.push(tile);
+
+    const iconDisplay = GAME_TILES[globalIndex].iconDisplay ?? PAGED_ICON_DISPLAY;
+    const icon = scene.add.image(
+      pos.x,
+      pos.y + PAGED_ICON_Y_OFFSET,
+      GAME_TILES[globalIndex].tileKey,
+    );
+    icon.setDisplaySize(iconDisplay, iconDisplay);
+    grid.pageObjects.push(icon);
+
+    const label = scene.add.text(
+      pos.x,
+      pos.y + PAGED_LABEL_Y_OFFSET,
+      GAME_TILES[globalIndex].label,
+      textStyle({
+        fontSize: `${PAGED_LABEL_FONT_SIZE}px`,
+        color: "#ffffff",
+      }),
+    );
+    label.setOrigin(0.5);
+    grid.pageObjects.push(label);
+
+    animateEntrance(scene, [tile, label], grid.entranceIndex++, {
+      onComplete: () => {
+        attachPressFeedback(tile, { spring: true });
+        settleEntrance();
+      },
+    });
+    animateEntrance(scene, [icon], grid.entranceIndex++, {
+      targetScale: iconDisplay / TILE_ICON_TEXTURE_SIZE,
+    });
+
+    // Breathe pulse: scale-only wave owned by gridLayout; no-op under reduced
+    // motion.
+    addBreatheTweens(scene, slot, tile, label, icon, iconDisplay);
+
+    createShelfSticker(grid, globalIndex, pos.x, pos.y, pos.height, PAGED_STICKER_DISPLAY_SIZE);
+  });
+
+  if (grid.deps.isTimeUp()) {
+    // The cap is profile-wide: a filter chosen after it was reached must draw
+    // already-locked tiles, not a fresh tappable board.
+    grid.applyTimeUpLock();
+  }
+
+  grid.ensureGroupChips();
 }
 
 /** Creates the textless page dots below the paged grid. */
@@ -275,6 +367,16 @@ export function rerenderStickerShelf(grid: HubGrid): void {
   grid.stickerImages = [];
   for (const graphics of grid.emptySlotGraphics) graphics.destroy();
   grid.emptySlotGraphics = [];
+  if (grid.selection !== ALL_GROUP_ID) {
+    // A filtered board draws only its group's shelf, so a parental reset must
+    // not resurrect slots for the games it is not showing.
+    const indexes = visibleTileIndexes(grid.selection);
+    indexes.forEach((globalIndex, slot) => {
+      const pos = groupTilePosition(slot, indexes.length);
+      createShelfSticker(grid, globalIndex, pos.x, pos.y, pos.height, PAGED_STICKER_DISPLAY_SIZE);
+    });
+    return;
+  }
   if (grid.paged) {
     // Only the active page exists on screen; the other page is rebuilt
     // (with fresh sticker state) whenever it is flipped to.
@@ -300,6 +402,8 @@ export function rerenderStickerShelf(grid: HubGrid): void {
  * re-entrant call during the slide is a no-op.
  */
 export function flipTo(grid: HubGrid, page: number): void {
+  // A filtered board has one page and no dots, so a swipe settles on nothing.
+  if (grid.selection !== ALL_GROUP_ID) return;
   if (!grid.paged || page < 0 || page >= pageCount() || page === grid.hubPage) return;
   const direction = page > grid.hubPage ? 1 : -1;
   grid.hubPage = page;
