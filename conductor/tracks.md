@@ -282,4 +282,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Hub Game Groups** - [20261115-hub-game-groups](./archive/20261115-hub-game-groups/index.md) - feature - high
 
-- [ ] **Track: Robot Path** — [20261115-robot-path](./tracks/20261115-robot-path/index.md) — feature — high
+- [x] **Track: Robot Path** - [20261115-robot-path](./archive/20261115-robot-path/index.md) - feature - high
