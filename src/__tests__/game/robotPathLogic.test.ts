@@ -139,7 +139,7 @@ describe("placing and removing commands", () => {
   });
 
   it("returns a new array and keeps the old one intact", () => {
-    const commands = ["up"];
+    const commands: Direction[] = ["up"];
     const placed = placeCommand(cross, commands, "right");
     expect(placed).toEqual(["up", "right"]);
     expect(commands).toEqual(["up"]);
@@ -150,7 +150,7 @@ describe("placing and removing commands", () => {
   });
 
   it("removes a command and every command after it", () => {
-    const commands = ["up", "right", "up", "right"];
+    const commands: Direction[] = ["up", "right", "up", "right"];
     expect(removeFrom(commands, 2)).toEqual(["up", "right"]);
     expect(removeFrom(commands, 0)).toEqual([]);
     // Out-of-range taps leave the program alone rather than emptying it.
