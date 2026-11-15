@@ -94,6 +94,18 @@ interface SceneInternals {
   slotRects: Array<Record<string, MockFn>>;
   slotArrows: Array<Record<string, MockFn> | null>;
   robot?: Record<string, MockFn>;
+  e2eRobotPath: () => {
+    round: number;
+    solution: Direction[];
+    commands: Direction[];
+    palette: { dir: Direction; x: number; y: number }[];
+    slots: { index: number; x: number; y: number; filled: boolean }[];
+    go: { x: number; y: number };
+    robot: { x: number; y: number };
+    star: { x: number; y: number };
+    runs: number;
+    solved: boolean;
+  };
   time: { delayedCall: MockFn };
   tweens: { add: MockFn };
 }
@@ -391,5 +403,89 @@ describe("RobotPathScene interactions", () => {
     expect(hintTweens.some((config) => config.repeat === 2 && config.targets?.length === 2)).toBe(
       true,
     );
+  });
+});
+
+describe("RobotPathScene bridge hook", () => {
+  beforeEach(() => {
+    stubMatchMedia(false);
+    localStorage.clear();
+    mockParentLockInstances.length = 0;
+    for (const fn of Object.values(mockAudio)) fn.mockClear();
+    mockSpeech.speakSentence.mockClear();
+    mockCompletionEffect.createCompletionSplash.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("publishes the round, its solution and the geometry a journey taps (FR-16)", () => {
+    const scene = new RobotPathScene(mulberry32(1234));
+    scene.create();
+    const round = currentRound(scene);
+    const state = internals(scene).e2eRobotPath();
+
+    expect(state.round).toBe(0);
+    expect(state.solution).toEqual(round.solution);
+    expect(state.commands).toEqual([]);
+    expect(state.palette.map((arrow) => arrow.dir)).toEqual(["up", "right", "down", "left"]);
+    expect(state.palette.map((arrow) => arrow.x)).toEqual([332, 452, 572, 692]);
+    expect(state.palette.every((arrow) => arrow.y === 560)).toBe(true);
+    expect(state.slots.map((slot) => slot.x)).toEqual([252, 356, 460, 564, 668, 772]);
+    expect(state.slots.every((slot) => !slot.filled)).toBe(true);
+    expect(state.go).toEqual({ x: 920, y: 676 });
+    expect(state.star).toEqual({
+      x: 512 + (round.star.col - 1) * 124,
+      y: 190 + round.star.row * 124,
+    });
+    expect(state.robot).toEqual({
+      x: 512 + (round.start.col - 1) * 124,
+      y: 190 + round.start.row * 124,
+    });
+    expect(state.runs).toBe(0);
+    expect(state.solved).toBe(false);
+  });
+
+  it("reflects a placement and a solved run without caching", () => {
+    const scene = new RobotPathScene(mulberry32(1234));
+    scene.create();
+    const round = currentRound(scene);
+
+    tapPalette(scene, round.solution[0]);
+    const placed = internals(scene).e2eRobotPath();
+    expect(placed.commands).toEqual([round.solution[0]]);
+    expect(placed.slots[0]?.filled).toBe(true);
+    expect(placed.slots[1]?.filled).toBe(false);
+
+    for (const direction of round.solution.slice(1)) tapPalette(scene, direction);
+    pressGo(scene);
+    flushTimers(scene);
+
+    const afterSolve = internals(scene).e2eRobotPath();
+    expect(afterSolve.round).toBe(1);
+    expect(afterSolve.commands).toEqual([]);
+    expect(afterSolve.runs).toBe(0);
+    expect(afterSolve.solved).toBe(false);
+    expect(internals(scene).completedRounds).toBe(1);
+  });
+
+  it("reports a stopped run as one run, unsolved, with the program intact", () => {
+    const scene = new RobotPathScene(mulberry32(1234));
+    scene.create();
+    const round = useRoundWithSteps(scene, 3);
+    programSolution(scene, round.solution.length - 1);
+    const commands = [...internals(scene).commands];
+
+    pressGo(scene);
+    flushTimers(scene);
+
+    const state = internals(scene).e2eRobotPath();
+    expect(state.runs).toBe(1);
+    expect(state.solved).toBe(false);
+    expect(state.commands).toEqual(commands);
+    expect(state.round).toBe(internals(scene).roundIndex);
   });
 });

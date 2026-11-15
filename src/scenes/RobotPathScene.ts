@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import type { E2ERobotPathState } from "../game/e2eBridge";
 import type { Rng } from "../game/random";
 import { preloadRobotPathArt } from "../game/robotPathArt";
 import {
@@ -71,6 +72,7 @@ export class RobotPathScene extends ChoiceRoundScene {
   private commands: Direction[] = [];
   private stoppedRuns = 0;
   private robot?: Phaser.GameObjects.Image;
+  private star?: Phaser.GameObjects.Image;
   private trail?: Phaser.GameObjects.Graphics;
   private readonly paletteRects = new Map<Direction, Phaser.GameObjects.Rectangle>();
   private readonly paletteArrows = new Map<Direction, Phaser.GameObjects.Graphics>();
@@ -82,6 +84,10 @@ export class RobotPathScene extends ChoiceRoundScene {
   private running = false;
   /** Index of the command that first left the route, while a run is judged. */
   private deviation: number | null = null;
+  /** Runs finished this round, both outcomes — what the bridge publishes. */
+  private runs = 0;
+  /** Whether one of those runs reached the star. */
+  private solvedThisRound = false;
 
   constructor(rng: Rng = Math.random) {
     super("RobotPath", rng);
@@ -130,6 +136,8 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.commands = [];
     this.stoppedRuns = 0;
     this.deviation = null;
+    this.runs = 0;
+    this.solvedThisRound = false;
 
     const board = this.add.graphics();
     this.trackRoundObject(board);
@@ -150,7 +158,9 @@ export class RobotPathScene extends ChoiceRoundScene {
     }
 
     const goal = this.tileCenter(round.star);
-    this.trackRoundObject(this.add.image(goal.x, goal.y, "robot_star").setDisplaySize(84, 84));
+    const star = this.add.image(goal.x, goal.y, "robot_star").setDisplaySize(84, 84);
+    this.star = star;
+    this.trackRoundObject(star);
 
     const start = this.tileCenter(round.start);
     const robot = this.add.image(start.x, start.y, "robot_idle").setDisplaySize(96, 96);
@@ -170,10 +180,13 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.runToken += 1;
     this.running = false;
     this.robot = undefined;
+    this.star = undefined;
     this.trail = undefined;
     this.commands = [];
     this.stoppedRuns = 0;
     this.deviation = null;
+    this.runs = 0;
+    this.solvedThisRound = false;
     for (let index = 0; index < this.slotArrows.length; index++) {
       this.slotArrows[index]?.destroy();
       this.slotArrows[index] = null;
@@ -190,6 +203,41 @@ export class RobotPathScene extends ChoiceRoundScene {
       arrow.setAlpha(1);
       arrow.setScale(1);
     }
+  }
+
+  /**
+   * Publishes the round, the program and the live board for the browser suite
+   * (FR-16). Read-only: every field is copied from the scene's own state at call
+   * time, so a journey acts on the geometry this scene is drawing.
+   */
+  e2eRobotPath(): E2ERobotPathState {
+    const round = this.rounds[this.roundIndex];
+    const commands = this.commands;
+    const robot = this.robot;
+    const star = this.star;
+    return {
+      round: this.roundIndex,
+      solution: round ? [...round.solution] : [],
+      commands: [...commands],
+      palette: DIRECTIONS.map((direction) => ({ dir: direction, ...this.palettePoint(direction) })),
+      slots: this.slotRects.map((rect, index) => ({
+        index,
+        x: rect.x,
+        y: rect.y,
+        filled: index < commands.length,
+      })),
+      go: { x: GO_X, y: GO_Y },
+      robot: { x: robot?.x ?? 0, y: robot?.y ?? 0 },
+      star: { x: star?.x ?? 0, y: star?.y ?? 0 },
+      runs: this.runs,
+      solved: this.solvedThisRound,
+    };
+  }
+
+  /** Centre of one palette arrow, from the same constants that drew it. */
+  private palettePoint(direction: Direction): { x: number; y: number } {
+    const startX = BOARD_CENTER_X - ((DIRECTIONS.length - 1) * PALETTE_STEP) / 2;
+    return { x: startX + DIRECTIONS.indexOf(direction) * PALETTE_STEP, y: PALETTE_Y };
   }
 
   /** Centre of a board tile in canvas space. */
@@ -241,13 +289,19 @@ export class RobotPathScene extends ChoiceRoundScene {
     }
   }
 
-  /** The run button: a play triangle beside the strip. */
+  /**
+   * The run button: a play triangle beside the strip, drawn at the phase's
+   * 112x112 touch size (FR-7 / NFR-1).
+   *
+   * Its tap target is the frame's own hit area rather than a centred custom
+   * rectangle: a custom area is measured in *unscaled* frame pixels, so on this
+   * 512px texture a 112px rectangle would sit in the top-left corner of the art
+   * and leave the visible button untappable. The default area follows the
+   * displayed size, which is exactly the size NFR-1 asks for.
+   */
   private buildGo(): void {
-    const go = this.add.image(GO_X, GO_Y, "robot_go").setDisplaySize(96, 96);
-    go.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-GO_HIT / 2, -GO_HIT / 2, GO_HIT, GO_HIT),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-    });
+    const go = this.add.image(GO_X, GO_Y, "robot_go").setDisplaySize(GO_HIT, GO_HIT);
+    go.setInteractive();
     go.on("pointerdown", () => this.run());
     attachPressFeedback(go);
   }
@@ -314,7 +368,9 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.time.delayedCall(STEP_MS * result.visited.length, () => {
       if (token !== this.runToken) return;
       this.running = false;
+      this.runs += 1;
       if (result.reachedStar) {
+        this.solvedThisRound = true;
         this.resolveWholeRound(true);
         return;
       }
