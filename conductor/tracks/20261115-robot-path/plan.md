@@ -57,17 +57,20 @@ playable; 3,226 tests in 148 files, gate exit 0.
 - **Dependencies:** none
 - **Decisions:** D7, D8
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P2.T1: Draw the robot, the star and the rock** — covers: FR-14, D7
-  - [ ] Six flat SVGs at a 512 viewBox with the 4–6px `#2D3748` outline and the existing palette: `robot_idle` (rounded body, two eyes, antenna), `robot_walk` (the same silhouette mid-hop, one arm up), `robot_puzzled` (head tilt, a drawn question mark made of shapes), `robot_go` (a chunky play triangle), `robot_rock` (three-lobed grey rock), `robot_star` (five-point star in the success green's warm neighbour).
-  - [ ] No gradients, no shadows, no text, and every shape readable at 96px for a three-year-old.
-- [ ] **P2.T2: Load them lazily and pin the shape** — covers: FR-14, NFR-3
-  - [ ] `src/game/robotPathArt.ts`: `?raw` imports, a `ROBOT_PATH_ASSETS` table in key order, and `preloadRobotPathArt(scene)` registering each at `textureSizeFor(key)` through `toDataUri`, mirroring `storyOrderArt.ts`.
-  - [ ] `robotPathArt.test.ts`: the six keys are exactly the documented set, every key resolves to the card tier, `preloadRobotPathArt` queues six `svg` loads at 256, and `PreloadScene` does not import the module (the shell stays free of the markup), copying the guard Story Order already has.
+- [x] **P2.T1: Draw the robot, the star and the rock** — covers: FR-14, D7
+  - [x] Six flat SVGs at a 512 viewBox with the 4–6px `#2D3748` outline and the existing palette: `robot_idle` (rounded body, two eyes, antenna), `robot_walk` (the same silhouette mid-hop, one arm up), `robot_puzzled` (head tilt, a drawn question mark made of shapes), `robot_go` (a chunky play triangle), `robot_rock` (three-lobed grey rock), `robot_star` (five-point star in the success green's warm neighbour).
+  - [x] No gradients, no shadows, no text, and every shape readable at 96px for a three-year-old.
+- [x] **P2.T2: Load them lazily and pin the shape** — covers: FR-14, NFR-3
+  - [x] `src/game/robotPathArt.ts`: `?raw` imports, a `ROBOT_PATH_ASSETS` table in key order, and `preloadRobotPathArt(scene)` registering each at `textureSizeFor(key)` through `toDataUri`, mirroring `storyOrderArt.ts`.
+  - [x] `robotPathArt.test.ts`: the six keys are exactly the documented set, every key resolves to the card tier, `preloadRobotPathArt` queues six `svg` loads at 256, and `PreloadScene` does not import the module (the shell stays free of the markup), copying the guard Story Order already has.
 
-**Result:** PENDING
-**Checkpoint:** PENDING
+**Result:** verified — six flat `robot_*` SVGs load through the game's own
+`preloadRobotPathArt`, so the art rides the lazy chunk while the boot shell stays
+byte-identical at 179.4 kB and the precache at 59 entries; 3,233 tests in 149
+files, gate exit 0 on the first run.
+**Checkpoint:** 1898f5cc
 **Evidence:** conductor/tracks/20261115-robot-path/verification/phase-2.md
 
 ## Phase 3: The scene — build a program, then run it
