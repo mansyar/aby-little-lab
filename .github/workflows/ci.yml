@@ -110,20 +110,32 @@ jobs:
           docker build -t aby-little-lab:headers .
           node scripts/validate-headers.js
 
-  e2e:
-    name: Browser Journeys
+  e2e-shard:
+    # NFR-2's budget is 5 min for the suite, and one runner at two workers
+    # measured 5.5-6.5 min on 2026-11-16 (runs 43950134928, 43951894620) while
+    # three workers starved the game loop badly enough to kill the browser. The
+    # roster is therefore split across this matrix: each half gets its own
+    # four-vCPU runner, its own preview server and two workers, and
+    # `--shard=i/2` is Playwright's own partition of the suite, so no spec file
+    # can be dropped by a hand-kept list. Adding a third entry to `shard` is the
+    # whole change if a half ever creeps past the budget again.
+    name: Browser Journeys (${{ matrix.shard }}/${{ strategy.job-total }})
     # A separate job after the quality gates, not a step inside them, so a
     # browser failure does not hide static/unit results and a hung browser
-    # cannot stall the gate. It still needs `dist`, which `pnpm test:e2e`
-    # builds itself (`pnpm build && playwright test`), keeping the artifact
-    # local to the job that tests it. NFR-2's budget is 5 min for the suite;
-    # the timeout below is only the backstop for a browser that never exits.
-    # A documentation-only change runs no test here, but the job still runs and
-    # still reports: both required checks must report or the PR stays blocked.
+    # cannot stall the gate. It still needs `dist`, which this job builds
+    # itself (`pnpm build` below), keeping the artifact local to the job that
+    # tests it. A documentation-only change runs no test here, but the job still
+    # runs and still reports: both required checks must report or the PR stays
+    # blocked.
     needs: quality-gates
     runs-on: ubuntu-latest
     # A hung browser should fail loudly instead of occupying a runner.
     timeout-minutes: 15
+    strategy:
+      # One half failing must not cancel the other: both are evidence.
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -169,18 +181,51 @@ jobs:
         if: steps.changes.outputs.tier == 'code'
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Browser journeys
+      # `pnpm test:e2e` runs the whole suite in one process; a shard runs the
+      # same build and passes the partition Playwright computed for it.
+      - name: Build the artifact
         if: steps.changes.outputs.tier == 'code'
-        run: pnpm test:e2e
+        run: pnpm build
+
+      - name: Browser journeys (shard ${{ matrix.shard }} of ${{ strategy.job-total }})
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm exec playwright test --project=chromium --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
       - name: Upload traces and screenshots
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: e2e-test-results
+          name: e2e-test-results-shard-${{ matrix.shard }}
           path: test-results/
           retention-days: 7
           if-no-files-found: ignore
+
+  e2e:
+    # The check name branch protection requires, kept as one job so sharding
+    # cannot quietly un-require the suite: it is green only when the gate passed
+    # and every half of the roster did.
+    name: Browser Journeys
+    needs: [quality-gates, e2e-shard]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every half must pass
+        shell: bash
+        run: |
+          set -uo pipefail
+          gate="${{ needs.quality-gates.result }}"
+          halves="${{ needs.e2e-shard.result }}"
+          echo "Quality Gates: $gate"
+          echo "Browser journey halves: $halves"
+          if [ "$gate" != "success" ]; then
+            echo "::error::Quality Gates did not pass, so the browser journeys could not run"
+            exit 1
+          fi
+          if [ "$halves" != "success" ]; then
+            echo "::error::a browser journey half failed, failed to start, or was cancelled"
+            exit 1
+          fi
 
   deploy:
     name: Deploy to Coolify
