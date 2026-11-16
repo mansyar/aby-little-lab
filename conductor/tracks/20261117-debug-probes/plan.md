@@ -86,10 +86,13 @@
 - **Dependencies:** none
 - **Decisions:** D1, D2, D5
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P4.T1: State the probe rule in the TDD's learning-progress section** — covers: FR-2, FR-6
-  - [ ] **P4.T1.1: The section names a probe, what it never changes, and which taps are probes**
-- [ ] **P4.T2: Note the debugging metric in the product definition** — covers: FR-8
-- [ ] **P4.T3: Mention the look count where the README describes progress** — covers: FR-8
-  - [ ] **P4.T3.1: No count-bearing claim changes, so the documents validator still passes**
+- [x] **P4.T1: State the probe rule in the TDD's learning-progress section** — covers: FR-2, FR-6
+  - [x] **P4.T1.1: The section names a probe, what it never changes, and which taps are probes**
+- [x] **P4.T2: Note the debugging metric in the product definition** — covers: FR-8
+- [x] **P4.T3: Mention the look count where the README describes progress** — covers: FR-8
+  - [x] **P4.T3.1: No count-bearing claim changes, so the documents validator still passes**
+**Result:** verified
+**Checkpoint:** PHASE4SHA
+**Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-4.md
