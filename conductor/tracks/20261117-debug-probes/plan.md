@@ -74,7 +74,7 @@
   - [x] **P3.T3.1: The journey's own taps explain its wrong count; accuracy reads 100%**
 - [x] **P3.T4: Cover the overlay row and the ranking rule with unit tests** — covers: FR-8, FR-9, AC-5, AC-6
 **Result:** verified
-**Checkpoint:** PHASE3SHA
+**Checkpoint:** 8b41e065
 **Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-3.md
 
 ## Phase 4: The rule is written down
