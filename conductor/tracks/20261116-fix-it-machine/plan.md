@@ -157,3 +157,21 @@
   - [x] The published field names and the spec agree, with the richer fields recorded as authorized.
 - [x] **P7.T6: The numbers that drifted** — covers: R1-6, R1-7
   - [x] FR-16 restated to the derived counts and the three roster comments at 24.
+
+## Phase 8: The launch journey stops setting the clock
+
+- **Goal:** The browser suite's wall clock sits inside NFR-2's 5 min budget again, with the 24 launches no longer a single serial chain and no launch, assertion or hold removed.
+- **Depends on:** Phase 7
+- **Covers:** NFR-2, AC-10
+- **Touches:** `e2e/journeys/launch-all.spec.ts`, `playwright.config.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
+- **Dependencies:** none
+- **Decisions:** D12
+- **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** verified
+
+- [x] **P8.T1: The roster runs as two parallel halves** — covers: NFR-2
+  - [x] `launch-all` drives the registry as two slices that run in parallel workers, with a guard that the slices partition the registry and every launch, its round-0 check and the three-second held return unchanged.
+- [x] **P8.T2: The worker count the split needs** — covers: NFR-2
+  - [x] Three workers, measured against two: the suite lands inside the 5 min ceiling with the numbers recorded in the config, the TDD and the perf baseline.
+- [x] **P8.T3: The suite inside its budget** — covers: NFR-2, AC-10
+  - [x] `pnpm test:e2e` passes with 26 browser tests and a wall clock under 5.0 min, and the documents state the measured figure.

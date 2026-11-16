@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-DK87S-QP.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 153 test files / 3,306 tests across 97.12 % statements, 90.93 % branches, 96.20 % functions and 98.31 % lines, and 24 browser journeys across 19 spec files over 24 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-DK87S-QP.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 153 test files / 3,306 tests across 97.12 % statements, 90.93 % branches, 96.20 % functions and 98.31 % lines, and 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
 
@@ -789,7 +789,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Test suite | 153 files / 3,306 tests | `pnpm test -- --run` |
 | Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
-| Browser journeys | **24 journeys in 19 spec files, 24 launches**; 5.0 min wall clock on two workers, `launch-all` alone at 3.3 min | `pnpm test:e2e` |
+| Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs, `launch-all` at 1.8 min | `pnpm test:e2e` |
 
 The two Fix-It Machine shell SVGs moved the entry from 182.5 kB to 186.4 kB (+3.9 kB, inside
 NFR-3's 4 kB allowance for two new drawings and 13.6 kB inside the 200 kB gate). The sixteen machine
@@ -803,7 +803,10 @@ The unit suite grew by six cases inside the same 153 files: review round 1 added
 24th scene, on top of the 15 logic, 11 art, 16 scene and 3 bridge cases the implementation phases
 brought with them. The browser layer gained one journey file
 (`e2e/journeys/fix-it-machine.spec.ts`, 30.9 s alone) and moved its roster literals from 23 to 24
-games. The wall clock is the honest number to watch: 4.6 min on the Robot Path tree, 5.0 min here on
-the same host with `launch-all` at 3.3 min, which sits on NFR-2's ceiling rather than inside it — the
-critical path is `launch-all`'s 24 sequential launches, so the next game makes that file the first
-thing to reshape.
+games. The wall clock is the honest number to watch, and it moved in three steps on this host: 4.6 min
+on the Robot Path tree at two workers, 5.0 min once the roster reached 24 games (24 sequential launches
+as one 3.3 min file), and 5.1 min with those launches split across two workers — because a two-worker
+floor is total work divided by two and the launches are only about a third of the work. Phase 8 of this
+track split the roster into two parallel halves and moved the suite to three workers, which measures
+**3.8-4.3 min** with `launch-all` at 1.8 min: inside NFR-2's ceiling, from reshaping the launch
+journey rather than from deleting any of it.
