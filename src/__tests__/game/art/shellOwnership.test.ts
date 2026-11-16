@@ -13,7 +13,7 @@ import preloadSceneSource from "../../../scenes/PreloadScene.ts?raw";
 /**
  * Art ownership guard (FR-8, AC-4).
  *
- * The boot shell ships the 60-key shell set and nothing else: no module of the
+ * The boot shell ships the 62-key shell set and nothing else: no module of the
  * art registry, no SVG whose key belongs to a game group, no game-owned art
  * module. `storyOrderArt.test.ts` asserts the single-module case; this suite
  * states the rule for all 133 moved keys and for the Story Order panels.
@@ -46,6 +46,7 @@ const SHELL_KEYS: readonly string[] = [
   "tile_story_order",
   "tile_feelings_faces",
   "tile_robot_path",
+  "tile_fix_it_machine",
   "sticker_shape_sorter",
   "sticker_animal_trace",
   "sticker_pop_freeze",
@@ -68,6 +69,7 @@ const SHELL_KEYS: readonly string[] = [
   "sticker_number_order",
   "sticker_story_order",
   "sticker_robot_path",
+  "sticker_fix_it_machine",
   "sticker_feelings_faces",
   "mascot_idle",
   "mascot_celebrate",
@@ -244,9 +246,9 @@ const SVG_FILES = new Set(
 );
 
 describe("shell ownership", () => {
-  it("ships exactly the 60 documented shell keys, with no extras or omissions", () => {
-    expect(SHELL_KEYS).toHaveLength(60);
-    expect(new Set(SHELL_KEYS).size).toBe(60);
+  it("ships exactly the 62 documented shell keys, with no extras or omissions", () => {
+    expect(SHELL_KEYS).toHaveLength(62);
+    expect(new Set(SHELL_KEYS).size).toBe(62);
     expect([...shellKeysRegistered].sort()).toEqual([...SHELL_KEYS].sort());
   });
 

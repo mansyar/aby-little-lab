@@ -145,11 +145,7 @@ export class FixItMachineScene extends ChoiceRoundScene {
   }
 
   protected gameId(): GameId {
-    // `GameId` gains "fix-it-machine" in Phase 4 with the registry row it must
-    // mirror (FR-1): adding the member here would make every `Record<GameId, …>`
-    // table incomplete and fail typecheck by design. This cast is the one place
-    // Phase 4 deletes.
-    return "fix-it-machine" as GameId;
+    return "fix-it-machine";
   }
 
   /** The tape is the answer; no single tapped card decides the round. */

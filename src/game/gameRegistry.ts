@@ -255,6 +255,14 @@ export const GAME_REGISTRY = [
     tileKey: "tile_robot_path",
     stickerKey: "sticker_robot_path",
   },
+  {
+    gameId: "fix-it-machine",
+    group: "thinking",
+    sceneKey: "FixItMachine",
+    label: "Fix-It Machine",
+    tileKey: "tile_fix_it_machine",
+    stickerKey: "sticker_fix_it_machine",
+  },
 ] as const satisfies readonly GameRegistryEntry[];
 
 /** A `GameId` the registry forgot; `never` while every game has an entry. */

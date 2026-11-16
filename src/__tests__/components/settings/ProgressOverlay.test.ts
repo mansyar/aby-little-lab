@@ -91,7 +91,7 @@ describe("ProgressOverlay", () => {
     expect(panels()).toHaveLength(1);
     expect(liveTexts("Learning Progress")).toHaveLength(1);
     expect(liveTexts("X")).toHaveLength(1);
-    // 23 games over 6 rows per page -> 4 game pages behind the Overview.
+    // 24 games over 6 rows per page -> 4 game pages behind the Overview.
     expect(liveTexts("1 / 5")).toHaveLength(1);
     expect(liveTexts("1 / 4")).toHaveLength(0);
     expect(rowIcons()).toHaveLength(0);
@@ -202,8 +202,8 @@ describe("ProgressOverlay", () => {
     nextPage();
     nextPage();
     expect(liveTexts("5 / 5")).toHaveLength(1);
-    // 23 games -> last page shows the remaining 5 rows.
-    expect(rowIcons()).toHaveLength(5);
+    // 24 games -> the last page shows a full 6 rows.
+    expect(rowIcons()).toHaveLength(6);
 
     nextPage();
     expect(liveTexts("5 / 5")).toHaveLength(1);

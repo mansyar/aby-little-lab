@@ -53,6 +53,8 @@ export const ART_GROUP_LOADERS: Readonly<Record<string, ArtGroupLoader>> = {
   "story-panels": () =>
     import("../storyOrderArt").then((module) => [{ assets: module.STORY_PANEL_ASSETS }]),
   robot: () => import("../robotPathArt").then((module) => [{ assets: module.ROBOT_PATH_ASSETS }]),
+  machine: () =>
+    import("../fixItMachineArt").then((module) => [{ assets: module.FIX_IT_MACHINE_ASSETS }]),
 };
 
 /**
@@ -92,6 +94,7 @@ export const ART_GROUPS_BY_GAME: Readonly<Record<string, readonly string[]>> = {
   // Scene-local art (D7), fetched by the idle prewarm through its own lazy
   // loader exactly like Story Order's panels.
   "robot-path": ["robot"],
+  "fix-it-machine": ["machine"],
 };
 
 /** Resolves the SVG markup behind one art key, caching tables and markup. */

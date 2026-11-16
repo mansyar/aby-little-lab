@@ -18,7 +18,7 @@ import { GAME_IDS, type GameId } from "../types";
 /**
  * Registry and derived-tile guards (FR-1, FR-2, FR-8).
  *
- * The registry is the single declaration of the 23 games, so this suite holds
+ * The registry is the single declaration of the 24 games, so this suite holds
  * the contract in three directions: the declaration itself (order, uniqueness,
  * purity), the derived `GAME_TILES` against the exact pre-registry array, and
  * the type-level coverage proof that lives in the module (a missing `GameId`
@@ -50,12 +50,14 @@ const PRD_ORDER: readonly GameId[] = [
   "feelings-faces",
   "story-order",
   "robot-path",
+  "fix-it-machine",
 ];
 
 /**
- * `GAME_TILES` exactly as it was hand-written before the registry existed,
- * frozen here as the behaviour-preservation golden copy. Property presence
- * matters: a tile without an icon override must not gain an `iconDisplay: 0`.
+ * Every `GAME_TILES` row, frozen here as the behaviour-preservation golden copy.
+ * Property presence matters: a tile without an icon override must not gain an
+ * `iconDisplay: 0`. The 23 pre-registry rows are unchanged; Fix-It Machine is
+ * appended after them.
  */
 const PRE_TRACK_GAME_TILES: readonly GameTile[] = [
   {
@@ -217,6 +219,12 @@ const PRE_TRACK_GAME_TILES: readonly GameTile[] = [
     label: "Robot Path",
     tileKey: "tile_robot_path",
   },
+  {
+    sceneKey: "FixItMachine",
+    gameId: "fix-it-machine",
+    label: "Fix-It Machine",
+    tileKey: "tile_fix_it_machine",
+  },
 ];
 
 /** Every `from "…"` specifier in a module's source text. */
@@ -295,7 +303,7 @@ describe("the group field", () => {
     }
   });
 
-  it("keeps the 5/5/7/4/2 totals the spec states", () => {
+  it("keeps the 5/5/8/4/2 totals the spec states", () => {
     const counts = HUB_GROUPS.map((group) => ({
       id: group.id,
       count: GAME_REGISTRY.filter((entry) => entry.group === group.id).length,
@@ -304,7 +312,7 @@ describe("the group field", () => {
     expect(counts).toEqual([
       { id: "letters", count: 5 },
       { id: "numbers", count: 5 },
-      { id: "thinking", count: 7 },
+      { id: "thinking", count: 8 },
       { id: "play", count: 4 },
       { id: "stories", count: 2 },
     ]);
@@ -331,7 +339,7 @@ describe("stickerKeyForGame", () => {
   });
 });
 
-describe("the 23 game invariants", () => {
+describe("the 24 game invariants", () => {
   it("keeps GAME_IDS in registry order", () => {
     expect(GAME_IDS).toEqual(GAME_REGISTRY.map((game) => game.gameId));
   });
@@ -373,7 +381,7 @@ describe("the 23 game invariants", () => {
     }
   });
 
-  it("stays coherent when a 23rd game is added", () => {
+  it("stays coherent when a further game is added", () => {
     const tileCount = GAME_REGISTRY.length + 1;
     const pages = pageCount(tileCount);
 

@@ -85,16 +85,16 @@
 - **Dependencies:** none
 - **Decisions:** D1, D7, D10, D12
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P4.T1: The registry row, the id and the three lists** — covers: FR-1, FR-17
-  - [ ] The 24th entry appended after `robot-path` exactly as FR-1 says, `GameId` extended so the coverage proof still compiles, and the README list, PRD §3.24 heading and TDD §4.5 row added in the same commit (D10), so the four lists stay the same length.
-- [ ] **P4.T2: The Hub tile, the sticker and the shell counts** — covers: FR-14, FR-16
-  - [ ] Two shell SVGs, `SHELL_ASSETS` extended to 62 keys, the app count to 201, and the shell-ownership and preload suites restated with the new keys named.
-- [ ] **P4.T3: Grid, paging, groups and progress at 24** — covers: FR-16
-  - [ ] Rows become 6/6/6/6, phones page as 10 + 10 + 4, `thinking` holds 8, the report pages 6 + 6 + 6 + 6, and every count-bearing test asserts the new numbers rather than dropping its assertion (D12).
-- [ ] **P4.T4: Audio identity, art groups and prewarm** — covers: FR-14, FR-16
-  - [ ] An `audioIdentity` entry for `fix-it-machine` and its table test, the game's art keys added to `ART_GROUPS_BY_GAME` and `ART_KEYS_BY_GAME`, with the resolver-parity and prewarm tests green.
+- [x] **P4.T1: The registry row, the id and the three lists** — covers: FR-1, FR-17
+  - [x] The 24th entry appended after `robot-path` exactly as FR-1 says, `GameId` extended so the coverage proof still compiles, and the README list, PRD §3.24 heading and TDD §4.5 row added in the same commit (D10), so the four lists stay the same length.
+- [x] **P4.T2: The Hub tile, the sticker and the shell counts** — covers: FR-14, FR-16
+  - [x] Two shell SVGs, `SHELL_ASSETS` extended to 62 keys, the app count to 195, and the shell-ownership and preload suites restated with the new keys named.
+- [x] **P4.T3: Grid, paging, groups and progress at 24** — covers: FR-16
+  - [x] Rows become 6/6/6/6, phones page as 10 + 10 + 4, `thinking` holds 8, the report pages 6 + 6 + 6 + 6, and every count-bearing test asserts the new numbers rather than dropping its assertion (D12).
+- [x] **P4.T4: Audio identity, art groups and prewarm** — covers: FR-14, FR-16
+  - [x] An `audioIdentity` entry for `fix-it-machine` and its table test, the game's art keys added to `ART_GROUPS_BY_GAME` and `ART_KEYS_BY_GAME`, with the resolver-parity and prewarm tests green.
 
 ## Phase 5: The bridge proves it in a browser
 

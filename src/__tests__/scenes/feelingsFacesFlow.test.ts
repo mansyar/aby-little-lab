@@ -191,7 +191,7 @@ afterEach(() => {
 });
 
 describe("Feelings Faces hub entry", () => {
-  it("renders 23 tiles with Feelings Faces 21st, Story Order 22nd and Robot Path last", () => {
+  it("renders 24 tiles with Feelings Faces 21st, Story Order 22nd and Fix-It Machine last", () => {
     const hub = new HubScene();
     hub.create();
     completeHubEntrances(hub);
@@ -199,12 +199,13 @@ describe("Feelings Faces hub entry", () => {
     const tiles = getRectangles(hub).filter((obj) =>
       getMockFn(obj.on).mock.calls.some((call) => call[0] === "pointerup"),
     );
-    expect(tiles).toHaveLength(23);
+    expect(tiles).toHaveLength(24);
     const icons = getTileIcons(hub).map((icon) => icon.key);
-    expect(icons).toHaveLength(23);
-    expect(icons.at(-3)).toBe("tile_feelings_faces");
-    expect(icons.at(-2)).toBe("tile_story_order");
-    expect(icons.at(-1)).toBe("tile_robot_path");
+    expect(icons).toHaveLength(24);
+    expect(icons.at(-4)).toBe("tile_feelings_faces");
+    expect(icons.at(-3)).toBe("tile_story_order");
+    expect(icons.at(-2)).toBe("tile_robot_path");
+    expect(icons.at(-1)).toBe("tile_fix_it_machine");
     expect(getTextObject(hub, "Feelings Faces")).toBeDefined();
   });
 
@@ -287,7 +288,7 @@ describe("Feelings Faces playthrough", () => {
     completeHubEntrances(hub);
 
     expect(getStickerImageSafe(hub, "sticker_feelings_faces")).toBeDefined();
-    expect(getEmptySlots(hub), "23 tiles minus the one earned sticker").toHaveLength(22);
+    expect(getEmptySlots(hub), "24 tiles minus the one earned sticker").toHaveLength(23);
   });
 
   it("does not award a second sticker on a replay and returns without justEarned", () => {
