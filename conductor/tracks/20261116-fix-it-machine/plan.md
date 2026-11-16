@@ -143,17 +143,17 @@
 - **Dependencies:** none
 - **Decisions:** D5, D11, D9
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P7.T1: The art-declaration scan covers the 24th scene** — covers: R1-1
-  - [ ] `fixItMachineArt` in `GAME_MODULES`, `FixItMachineScene` in `SCENE_LOCAL_PRELOADER_SCENES` and `SCENE_LOCAL_PRELOADER_CALLS`, the count literals and comments at 24, proven with a forced re-transform run of that file.
-- [ ] **P7.T2: The hint ladder the spec designed** — covers: R1-2
-  - [ ] Level 1 draws the band from card 0 through the bug card and the machine's pointing arm, level 2 lifts and pulses the bug card, level 3 pulses the correct tray candidate; scene tests cover all three representations.
-- [ ] **P7.T3: Every tap records one result** — covers: R1-3
-  - [ ] `recordCorrect()` on the bug card and on the right tool, with scene tests proving one result per tap and one win per solve.
-- [ ] **P7.T4: The rule line the spec speaks** — covers: R1-4
-  - [ ] The spec's sentence in the scene and in the four documents that quote it.
-- [ ] **P7.T5: The bridge contract settled** — covers: R1-5
-  - [ ] The published field names and the spec agree, with the richer fields recorded as authorized.
-- [ ] **P7.T6: The numbers that drifted** — covers: R1-6, R1-7
-  - [ ] FR-16 restated to the derived counts and the three roster comments at 24.
+- [x] **P7.T1: The art-declaration scan covers the 24th scene** — covers: R1-1
+  - [x] `fixItMachineArt` in `GAME_MODULES`, `FixItMachineScene` in `SCENE_LOCAL_PRELOADER_SCENES` and `SCENE_LOCAL_PRELOADER_CALLS`, the count literals and comments at 24, proven with a forced re-transform run of that file.
+- [x] **P7.T2: The hint ladder the spec designed** — covers: R1-2
+  - [x] Level 1 draws the band from card 0 through the bug card and the machine's pointing arm, level 2 lifts and pulses the bug card, level 3 pulses the correct tray candidate; scene tests cover all three representations.
+- [x] **P7.T3: Every tap records one result** — covers: R1-3
+  - [x] `recordCorrect()` on the bug card and on the right tool, with scene tests proving one result per tap and one win per solve.
+- [x] **P7.T4: The rule line the spec speaks** — covers: R1-4
+  - [x] The spec's sentence in the scene and in the four documents that quote it.
+- [x] **P7.T5: The bridge contract settled** — covers: R1-5
+  - [x] The published field names and the spec agree, with the richer fields recorded as authorized.
+- [x] **P7.T6: The numbers that drifted** — covers: R1-6, R1-7
+  - [x] FR-16 restated to the derived counts and the three roster comments at 24.

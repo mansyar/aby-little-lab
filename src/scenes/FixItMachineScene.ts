@@ -24,7 +24,7 @@ import { getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
 
 /** Spoken once when the game opens, and again on an empty Go. */
-const RULE = "Watch the machine make the toy. Then tap the card that went wrong.";
+const RULE = "Find the wrong card and fix it.";
 
 /** Cards: 96px with 12px gaps, so the hardest tape spans 528px (spec FR-2). */
 const CARD_SIZE = 96;
@@ -52,6 +52,15 @@ const MACHINE_SIZE = 232;
 
 /** Art size drawn inside one card or tray slot. */
 const ICON_SIZE = 68;
+
+/**
+ * The hint ladder's own geometry (spec FR-11): the padding of the
+ * divergence band, the lift the bug card takes at level 2, and the band's
+ * amber, which is a shape cue as well as a colour one.
+ */
+const HINT_PAD = 14;
+const HINT_LIFT = 18;
+const HINT_COLOR = 0xf4b942;
 
 /**
  * The display objects that exist right now, in order. A round's cards and tray
@@ -113,6 +122,8 @@ export class FixItMachineScene extends ChoiceRoundScene {
   private solvedThisRound = false;
   /** The ring drawn around the card that stopped the last run. */
   private mismatch?: Phaser.GameObjects.Graphics;
+  /** The soft divergence band level 1 draws, with the machine's arm. */
+  private hintBand?: Phaser.GameObjects.Graphics;
 
   constructor(rng: Rng = Math.random) {
     super("FixItMachine", rng);
@@ -214,11 +225,13 @@ export class FixItMachineScene extends ChoiceRoundScene {
     this.machine = undefined;
     this.goal = undefined;
     this.mismatch = undefined;
+    this.hintBand = undefined;
     this.dropCardImages();
     this.dropTrayImages();
-    for (const rect of this.cardRects) {
+    for (const [index, rect] of this.cardRects.entries()) {
       rect.setAlpha(0.18);
       rect.setAngle(0);
+      rect.y = this.tapePoint(index).y;
     }
     for (const rect of this.trayRects) {
       rect.setVisible(false);
@@ -335,9 +348,11 @@ export class FixItMachineScene extends ChoiceRoundScene {
   private redrawTape(): void {
     this.dropCardImages();
     this.matchRing();
+    this.clearHintBand();
     for (let index = 0; index < this.cardRects.length; index++) {
       const rect = this.cardRects[index];
       rect.setAngle(0);
+      rect.y = this.tapePoint(index).y;
       const action = this.tape[index];
       if (!action) {
         rect.setAlpha(0.18);
@@ -409,6 +424,8 @@ export class FixItMachineScene extends ChoiceRoundScene {
     if (index >= this.tape.length) return;
 
     if (isWrongCard(round, index)) {
+      // Naming the bug card is the round's correct diagnosis (spec FR-10).
+      this.recordCorrect();
       this.openTray();
       return;
     }
@@ -427,6 +444,8 @@ export class FixItMachineScene extends ChoiceRoundScene {
     if (!round || !action) return;
 
     if (action === correctAction(round)) {
+      // Choosing the tool the job needs is the second correct result (FR-10).
+      this.recordCorrect();
       this.tape = [...applyRepair(round, action)];
       this.closeTray();
       this.redrawTape();
@@ -449,20 +468,83 @@ export class FixItMachineScene extends ChoiceRoundScene {
   }
 
   /**
-   * Visual help only: the wrong card pulses from the first level, and from the
-   * second the tray's right tool pulses too. A hint never places a card.
+   * Visual help only, least to most (spec FR-11): the band shows where the
+   * tape went wrong, the card then lifts out of it, and at the last level
+   * the tool that belongs pulses in the open tray. A hint never places a
+   * card and never taps for the child.
    */
   private applyHint(level: 0 | 1 | 2 | 3): void {
-    if (level >= 1) {
-      const rect = this.cardRects[this.rounds[this.roundIndex]?.bugIndex ?? -1];
-      if (rect) this.pulse(rect);
-    }
-    if (level >= 2 && this.trayOpen) {
-      const round = this.rounds[this.roundIndex];
-      const index = round ? this.trayActions.indexOf(correctAction(round)) : -1;
-      const rect = index >= 0 ? this.trayRects[index] : undefined;
-      if (rect) this.pulse(rect);
-    }
+    if (level === 1) this.drawHintBand();
+    if (level === 2) this.liftBugCard();
+    if (level === 3) this.pulseCorrectCandidate();
+  }
+
+  /**
+   * Level 1 (two missed taps): a soft band from the first card through the
+   * wrong one, and the machine's arm pointing at the band's end.
+   */
+  private drawHintBand(): void {
+    this.clearHintBand();
+    const round = this.rounds[this.roundIndex];
+    if (!round || round.bugIndex < 0) return;
+
+    const first = this.tapePoint(0);
+    const bug = this.tapePoint(round.bugIndex);
+    const x = first.x - CARD_SIZE / 2 - HINT_PAD;
+    const y = first.y - CARD_SIZE / 2 - HINT_PAD;
+    const width = bug.x - first.x + CARD_SIZE + HINT_PAD * 2;
+    const height = CARD_SIZE + HINT_PAD * 2;
+
+    const band = this.add.graphics();
+    this.trackRoundObject(band);
+    band.fillStyle(HINT_COLOR, 0.16);
+    band.fillRoundedRect(x, y, width, height, 20);
+    band.lineStyle(4, HINT_COLOR, 0.7);
+    band.strokeRoundedRect(x, y, width, height, 20);
+
+    // The arm: one line from the machine's edge to the band's end, with a
+    // head, so the direction reads as shape rather than as motion.
+    const tipX = bug.x;
+    const tipY = bug.y - CARD_SIZE / 2 - HINT_PAD - 8;
+    band.lineStyle(6, this.OUTLINE_COLOR, 0.55);
+    band.beginPath();
+    band.moveTo(MACHINE_X - MACHINE_SIZE / 2, MACHINE_Y + MACHINE_SIZE / 2 - 30);
+    band.lineTo(tipX, tipY);
+    band.strokePath();
+    band.fillStyle(this.OUTLINE_COLOR, 0.75);
+    band.fillCircle(tipX, tipY, 8);
+
+    this.hintBand = band;
+  }
+
+  /** Level 2 (four missed taps): the wrong card lifts and pulses once. */
+  private liftBugCard(): void {
+    const index = this.rounds[this.roundIndex]?.bugIndex ?? -1;
+    const rect = this.cardRects[index];
+    if (!rect) return;
+
+    const lifted = this.tapePoint(index).y - HINT_LIFT;
+    const duration = motionDuration(180, 120);
+    this.tweens.add({ targets: rect, y: lifted, duration });
+    const image = this.cardImages[index];
+    if (image) this.tweens.add({ targets: image, y: lifted, duration });
+    this.pulse(rect);
+  }
+
+  /** Level 3 (six missed taps): the tool the job needs pulses once. */
+  private pulseCorrectCandidate(): void {
+    if (!this.trayOpen) return;
+    const round = this.rounds[this.roundIndex];
+    if (!round) return;
+    const index = this.trayActions.indexOf(correctAction(round));
+    const rect = index >= 0 ? this.trayRects[index] : undefined;
+    if (rect) this.pulse(rect);
+  }
+
+  /** Drops the level-1 band; a redraw, a repair or a new round clears it. */
+  private clearHintBand(): void {
+    if (this.hintBand && !this.hintBand.isDestroyed) this.hintBand.destroy();
+    this.hintBand = undefined;
   }
 
   /** Plays the tape: one card at a time, then either solve or funny failure. */

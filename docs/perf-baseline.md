@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-BiqtO09P.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 153 test files / 3,300 tests across 97.07 % statements, 90.73 % branches, 96.19 % functions and 98.24 % lines, and 24 browser journeys across 19 spec files over 24 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-DK87S-QP.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 153 test files / 3,306 tests across 97.12 % statements, 90.93 % branches, 96.20 % functions and 98.31 % lines, and 24 browser journeys across 19 spec files over 24 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
 
@@ -418,7 +418,7 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 153 files / 3,300 tests | `pnpm test -- --run` |
+| Test suite | 153 files / 3,306 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-11-15; the build
@@ -755,7 +755,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 153 files / 3,300 tests | `pnpm test -- --run` |
+| Test suite | 153 files / 3,306 tests | `pnpm test -- --run` |
 | Coverage | statements 97.07 % / branches 90.73 % / functions 96.18 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
@@ -781,14 +781,14 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 
 | Measurement | Value | Source |
 | --- | --- | --- |
-| Shell entry (minified) | `index-BiqtO09P.js` = **186.4 kB** (190.89 kB as Vite prints it, 48.35 kB gzip) | `node scripts/validate-bundle.js` |
+| Shell entry (minified) | `index-DK87S-QP.js` = **186.4 kB** (190.89 kB as Vite prints it, 48.35 kB gzip) | `node scripts/validate-bundle.js` |
 | Shell entry budget | ≤ 200 kB | `scripts/validate-bundle.js` |
 | Phaser vendor chunk | `phaser-B_vcVLyb.js` = 1335.0 kB | `node scripts/validate-bundle.js` |
 | JavaScript chunks emitted | **51** (51 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **63 entries** (1826.19 KiB) | the build's PWA step |
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 153 files / 3,300 tests | `pnpm test -- --run` |
-| Coverage | statements 97.07 % / branches 90.73 % / functions 96.19 % / lines 98.24 % | `pnpm test:coverage` |
+| Test suite | 153 files / 3,306 tests | `pnpm test -- --run` |
+| Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
 | Browser journeys | **24 journeys in 19 spec files, 24 launches**; 5.0 min wall clock on two workers, `launch-all` alone at 3.3 min | `pnpm test:e2e` |
 
 The two Fix-It Machine shell SVGs moved the entry from 182.5 kB to 186.4 kB (+3.9 kB, inside
@@ -798,9 +798,10 @@ drawings do not reach the shell at all: `FIX_IT_MACHINE_ASSETS` is imported by
 game's chunk like Robot Path's six and Story Order's panels. The roster growth also adds a 24th scene
 chunk and a 13th art group, taking the emitted count from 49 to 51.
 
-The unit suite did not grow: this track's four phases before the roster added their tests as they
-went (15 logic cases, 11 art cases, 16 scene cases and 3 bridge cases between them), so the suite
-stands at 3,300 tests in the same 153 files. The browser layer gained one journey file
+The unit suite grew by six cases inside the same 153 files: review round 1 added four scene cases
+(the three hint representations and the per-tap recording) and two art-declaration cases for the
+24th scene, on top of the 15 logic, 11 art, 16 scene and 3 bridge cases the implementation phases
+brought with them. The browser layer gained one journey file
 (`e2e/journeys/fix-it-machine.spec.ts`, 30.9 s alone) and moved its roster literals from 23 to 24
 games. The wall clock is the honest number to watch: 4.6 min on the Robot Path tree, 5.0 min here on
 the same host with `launch-all` at 3.3 min, which sits on NFR-2's ceiling rather than inside it — the

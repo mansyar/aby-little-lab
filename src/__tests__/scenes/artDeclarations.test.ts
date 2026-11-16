@@ -22,6 +22,8 @@ import countLogicSource from "../../game/countLogic.ts?raw";
 import decodeLogicSource from "../../game/decodeLogic.ts?raw";
 import feelingsFacesLogicSource from "../../game/feelingsFacesLogic.ts?raw";
 import firstSoundsLogicSource from "../../game/firstSoundsLogic.ts?raw";
+import fixItMachineArtSource from "../../game/fixItMachineArt.ts?raw";
+import fixItMachineLogicSource from "../../game/fixItMachineLogic.ts?raw";
 import memoryMatchLogicSource from "../../game/memoryMatchLogic.ts?raw";
 import moreLessLogicSource from "../../game/moreLessLogic.ts?raw";
 import musicalMemoryLogicSource from "../../game/musicalMemoryLogic.ts?raw";
@@ -37,6 +39,7 @@ import storyOrderArtSource from "../../game/storyOrderArt.ts?raw";
 import storyOrderLogicSource from "../../game/storyOrderLogic.ts?raw";
 import takeAwayLogicSource from "../../game/takeAwayLogic.ts?raw";
 import wordLogicSource from "../../game/wordLogic.ts?raw";
+import fixItMachineSceneSource from "../../scenes/FixItMachineScene.ts?raw";
 import preloadSceneSource from "../../scenes/PreloadScene.ts?raw";
 import robotPathSceneSource from "../../scenes/RobotPathScene.ts?raw";
 import storyOrderSceneSource from "../../scenes/StoryOrderScene.ts?raw";
@@ -45,10 +48,15 @@ import storyOrderSceneSource from "../../scenes/StoryOrderScene.ts?raw";
  * Scenes that rasterize their own art in their own `preload` instead of
  * declaring a shared group. Each one is checked for its own preloader below.
  */
-const SCENE_LOCAL_PRELOADER_SCENES: readonly string[] = ["RobotPathScene", "StoryOrderScene"];
+const SCENE_LOCAL_PRELOADER_SCENES: readonly string[] = [
+  "FixItMachineScene",
+  "RobotPathScene",
+  "StoryOrderScene",
+];
 
 /** The scene-local preload call each of those scenes must make. */
 const SCENE_LOCAL_PRELOADER_CALLS: Readonly<Record<string, string>> = {
+  FixItMachineScene: "preloadFixItMachineArt(this)",
   RobotPathScene: "preloadRobotPathArt(this)",
   StoryOrderScene: "preloadStoryOrderArt(this)",
 };
@@ -174,7 +182,7 @@ function sceneNameOf(path: string): string {
   return file.slice(0, -".ts".length);
 }
 
-/** The 23 game scenes, read as text. */
+/** The 24 game scenes, read as text. */
 const SCENES: readonly SceneSource[] = Object.entries(SCENE_SOURCES)
   .map(([path, source]) => ({ name: sceneNameOf(path), source }))
   .filter((scene) => !NON_GAME_SCENES.includes(scene.name))
@@ -201,6 +209,8 @@ const GAME_MODULES: ReadonlyMap<string, string> = new Map([
   ["decodeLogic", decodeLogicSource],
   ["feelingsFacesLogic", feelingsFacesLogicSource],
   ["firstSoundsLogic", firstSoundsLogicSource],
+  ["fixItMachineArt", fixItMachineArtSource],
+  ["fixItMachineLogic", fixItMachineLogicSource],
   ["memoryMatchLogic", memoryMatchLogicSource],
   ["moreLessLogic", moreLessLogicSource],
   ["musicalMemoryLogic", musicalMemoryLogicSource],
@@ -351,13 +361,13 @@ function sorted(ids: Iterable<string>): string[] {
 }
 
 describe("game scene art declarations", () => {
-  it("discovers all 23 game scenes, so a new one cannot escape the scan", () => {
+  it("discovers all 24 game scenes, so a new one cannot escape the scan", () => {
     const discovered = Object.keys(SCENE_SOURCES).map(sceneNameOf);
 
-    // The inventory itself is the tripwire: a 23rd game changes this number,
+    // The inventory itself is the tripwire: a further game changes this number,
     // and its own declaration checks run in the same pass.
-    expect(SCENES).toHaveLength(23);
-    expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(23);
+    expect(SCENES).toHaveLength(24);
+    expect(new Set(SCENES.map((scene) => scene.name)).size).toBe(24);
 
     // Every exclusion is a scene the glob really found; a stale name here
     // would let a non-game module slip into the game-scene checks.
@@ -385,6 +395,7 @@ describe("game scene art declarations", () => {
 
   it("keeps each scene-local preloader scene on its own preload call", () => {
     const sources: Readonly<Record<string, string>> = {
+      FixItMachineScene: fixItMachineSceneSource,
       RobotPathScene: robotPathSceneSource,
       StoryOrderScene: storyOrderSceneSource,
     };

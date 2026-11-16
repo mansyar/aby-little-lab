@@ -72,7 +72,7 @@ import { correctAction } from "../../game/fixItMachineLogic";
 import { FixItMachineScene } from "../../scenes/FixItMachineScene";
 import { mulberry32 } from "../helpers/randomHelper";
 
-const RULE = "Watch the machine make the toy. Then tap the card that went wrong.";
+const RULE = "Find the wrong card and fix it.";
 
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -100,6 +100,7 @@ interface SceneInternals {
   sessionWrong: number;
   completedRounds: number;
   machine?: Record<string, MockFn>;
+  hintBand?: Record<string, MockFn>;
   e2eFixItMachine: () => {
     round: number;
     solution: ActionIcon[];
@@ -387,7 +388,9 @@ describe("FixItMachineScene the run", () => {
     runTape(scene);
 
     expect(mockAudio.playCorrect).toHaveBeenCalledTimes(1);
-    expect(internals(scene).sessionCorrect).toBe(1);
+    // Three correct results: naming the bug card, choosing the right tool and
+    // finishing the round (spec FR-10).
+    expect(internals(scene).sessionCorrect).toBe(3);
     expect(internals(scene).roundIndex).toBe(1);
     expect(internals(scene).trayOpen).toBe(false);
   });
@@ -472,6 +475,107 @@ describe("FixItMachineScene diagnosis", () => {
     // Visual help only: the tape is untouched, so the child still does the fix.
     expect(internals(scene).tape).toEqual(before);
     expect(internals(scene).trayOpen).toBe(false);
+  });
+
+  it("records one result for every tap, and one win for the solve", () => {
+    const scene = new FixItMachineScene(mulberry32(1234));
+    scene.create();
+
+    tapInnocentCard(scene);
+    expect(internals(scene).sessionWrong, "a card that is not the bug is a miss").toBe(1);
+    expect(internals(scene).sessionCorrect).toBe(0);
+
+    tapWrongCard(scene);
+    expect(internals(scene).sessionCorrect, "naming the bug card records one").toBe(1);
+
+    tapRightTool(scene);
+    expect(internals(scene).sessionCorrect, "the right tool records one").toBe(2);
+
+    runTape(scene);
+    expect(internals(scene).sessionCorrect, "the solve records one more").toBe(3);
+    expect(internals(scene).sessionWrong, "a repair adds no miss").toBe(1);
+  });
+
+  it("draws the divergence band and the machine's arm at two missed taps", () => {
+    const scene = new FixItMachineScene(mulberry32(1234));
+    scene.create();
+    const bug = currentRound(scene).bugIndex;
+
+    tapInnocentCard(scene);
+    const before = getMockFn(addOf(scene).graphics).mock.results.length;
+
+    tapInnocentCard(scene);
+    const created = getMockFn(addOf(scene).graphics).mock.results.slice(before) as Array<{
+      value: Record<string, MockFn>;
+    }>;
+    const band = created.find((entry) => getMockFn(entry.value.strokePath).mock.calls.length > 0);
+    expect(band, "level 1 draws a band graphics").toBeDefined();
+    if (!band) throw new Error("no band");
+
+    // The band starts at card 0 and reaches the bug card, with 14px padding.
+    const first = 512 + (0 - 2) * 108;
+    const last = 512 + (bug - 2) * 108;
+    expect(getMockFn(band.value.fillRoundedRect).mock.calls[0][0]).toBe(first - 48 - 14);
+    expect(getMockFn(band.value.fillRoundedRect).mock.calls[0][2]).toBe(last - first + 96 + 28);
+    expect(
+      getMockFn(band.value.fillCircle).mock.calls.length,
+      "the arm ends in a head at the band's end",
+    ).toBe(1);
+
+    // A correct diagnosis is not helped any more: the band goes with it.
+    tapWrongCard(scene);
+    tapRightTool(scene);
+    expect(internals(scene).hintBand, "a repair clears the band").toBeUndefined();
+  });
+
+  it("lifts the wrong card at four missed taps", () => {
+    const scene = new FixItMachineScene(mulberry32(1234));
+    scene.create();
+    const bug = currentRound(scene).bugIndex;
+
+    for (let tap = 0; tap < 3; tap++) tapInnocentCard(scene);
+    const liftedBefore = getMockFn(internals(scene).tweens.add).mock.calls.filter(
+      (call) => (call[0] as { targets?: unknown }).targets === internals(scene).cardRects[bug],
+    ).length;
+
+    tapInnocentCard(scene);
+    const lifts = getMockFn(internals(scene).tweens.add)
+      .mock.calls.filter(
+        (call) => (call[0] as { targets?: unknown }).targets === internals(scene).cardRects[bug],
+      )
+      .map((call) => call[0] as { y?: number });
+    expect(lifts.length, "level 2 lifts the card and pulses it").toBe(liftedBefore + 2);
+    expect(
+      lifts.map((lift) => lift.y).filter((y) => typeof y === "number"),
+      "the bug card rises out of the tape",
+    ).toEqual([552 - 18]);
+  });
+
+  it("pulses the right tool in the open tray at six missed taps", () => {
+    const scene = new FixItMachineScene(mulberry32(1234));
+    scene.create();
+    tapWrongCard(scene);
+    const correctIndex = internals(scene).trayActions.indexOf(correctAction(currentRound(scene)));
+    const wrongIndex = internals(scene).trayActions.findIndex(
+      (action) => action !== correctAction(currentRound(scene)),
+    );
+    if (wrongIndex < 0 || correctIndex < 0) throw new Error("round has no wrong tool");
+
+    const pulsesOf = (target: unknown) =>
+      getMockFn(internals(scene).tweens.add).mock.calls.filter(
+        (call) => (call[0] as { targets?: unknown }).targets === target,
+      ).length;
+
+    for (let tap = 0; tap < 5; tap++) tapTray(scene, wrongIndex);
+    const before = pulsesOf(internals(scene).trayRects[correctIndex]);
+
+    tapTray(scene, wrongIndex);
+    expect(internals(scene).hintLevel).toBe(3);
+    expect(
+      pulsesOf(internals(scene).trayRects[correctIndex]),
+      "the tool that belongs pulses once",
+    ).toBe(before + 1);
+    expect(internals(scene).tape).toEqual(currentRound(scene).tape);
   });
 
   it("publishes the round, the tape and every tap point for a journey", () => {
