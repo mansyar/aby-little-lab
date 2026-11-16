@@ -28,6 +28,7 @@ a browser journey that diagnoses, repairs and completes three rounds.
 | 5: The browser proof | A journey that diagnoses, repairs and solves three rounds; roster literals | verified | `b7f27c09` | Played only through the published bridge; 24 launches inside `launch-all` |
 | 6: Documents | PRD §3.24, TDD §4.11 and the restated counts, product record, guidelines, measured baseline | verified | `6a74feae` | `validate-docs` 5/5 |
 | 7: Review fixes | The art-declaration scan, the hint ladder, per-tap recording, the spoken rule, the bridge contract | verified | `918403c7` | Round 1 found three High gaps; all fixed with tests that would have caught them |
+| 8: The browser budget | 24 launches as two parallel halves, plus the worker count and documents to match | verified | `c78c47d6` | Suite back inside NFR-2: 5.0 min → **3.8-4.3 min**, `launch-all` 3.3 min → 1.8 min, nothing dropped |
 
 ## Requirements
 
@@ -50,15 +51,15 @@ a browser journey that diagnoses, repairs and completes three rounds.
 | lint + types | `pnpm check`, `pnpm typecheck` | pass (both projects) | `phase-7-gate.log` |
 | build | `pnpm build` + `validate-bundle.js` + `validate-pwa.js` | pass — shell entry 186.4 kB ≤ 200 kB, 51 chunks, 63 precache entries | `phase-7-gate.log` |
 | docs | `node scripts/validate-docs.js` | pass — 5/5 | `phase-7-gate.log` |
-| browser | `pnpm test:e2e` | pass — 24 journeys in 19 spec files, 5.0 min on two workers, `launch-all` 3.3 min | `phase-5-gate.log` |
+| browser | `pnpm test:e2e` | pass — 26 browser tests in 19 spec files (24 launches as two parallel halves), **4.3 min** on three workers, `launch-all` 1.8 min | `phase-8-gate.log` |
 | journey (after the fixes) | `npx playwright test e2e/journeys/fix-it-machine.spec.ts` | pass — 31.3 s | `phase-7-e2e.log` |
 
 ## Review
 
-- **Verdict:** `PASS`
-- **Rounds:** 2
+- **Verdict:** `PASS` (round 3, pinned `c78c47d6`)
+- **Rounds:** 3 — round 1 `FIXABLE` (7 findings), round 2 `PASS`, round 3 `PASS` after the browser-budget follow-up
 - **Fixed:** 7 findings (3 High, 2 Medium, 2 Low) in Phase 7
-- **Accepted/deferred:** 0 blocking; the 5.0 min browser ceiling and the Vite glob-cache trap are recorded as debt in `review.md`
+- **Accepted/deferred:** 0 blocking; the Vite glob-cache trap stays noted in `review.md` as a hazard to remember, and the 5 min browser ceiling is now closed by measurement
 
 ## Deviations and risks
 
@@ -71,8 +72,11 @@ a browser journey that diagnoses, repairs and completes three rounds.
 - **A solved round now records three correct results** (bug card, right tool, solve) instead of one,
   because FR-10 and D11 require per-tap recording; the scene's own `sessionCorrect` case was
   restated with the reason inline.
-- **The browser suite sits on NFR-2's 5 min ceiling** (5.0 min, `launch-all` 3.3 min). Recorded in
-  the baseline; the next game makes reshaping `launch-all` the first decision.
+- **The browser suite was on NFR-2's 5 min ceiling** and Phase 8 fixed it: the 24 launches are now two
+  asserted halves in parallel workers and the suite runs on three workers, measuring 3.8-4.3 min with
+  `launch-all` at 1.8 min. The split alone was not enough (5.1 min at two workers, because the floor is
+  total work ÷ workers), which is why the worker count changed too — both numbers are in the
+  baseline and in `playwright.config.ts`.
 - **A stale Vite `import.meta.glob` transform can hide a suite change.** It hid the 24th scene from
   the art-declaration scan until the file's content changed; review round 1 caught it and Phase 7
   proved the fix by forcing the transform. Worth remembering for any future glob-bearing suite.
