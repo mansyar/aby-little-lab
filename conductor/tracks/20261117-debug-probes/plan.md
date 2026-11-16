@@ -53,7 +53,7 @@
 - [x] **P2.T4: Audit every other scene's tap scoring and record the result** — covers: FR-6, D8
   - [x] **P2.T4.1: The audit lands in the phase evidence with the call sites quoted**
 **Result:** verified
-**Checkpoint:** PHASE2SHA
+**Checkpoint:** a33a6f16
 **Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-2.md
 
 ## Phase 3: The parent sees looking, not failing
