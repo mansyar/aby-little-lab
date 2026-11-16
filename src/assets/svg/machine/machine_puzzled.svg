@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: something came out wrong, and it does not know why. -->
+  <rect x="150" y="432" width="76" height="32" rx="16" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <rect x="286" y="432" width="76" height="32" rx="16" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 176 200 L 336 200 L 310 148 L 202 148 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 240 148 L 240 112 Q 256 96 272 112 L 272 148" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <rect x="136" y="196" width="240" height="248" rx="72" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <rect x="176" y="240" width="160" height="128" rx="44" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="220" cy="296" r="13" fill="#2D3748"/>
+  <circle cx="292" cy="286" r="13" fill="#2D3748"/>
+  <path d="M 204 262 L 236 254" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 274 254 L 308 256" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 234 336 L 278 336" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="256" cy="404" r="20" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 132 296 Q 112 322 128 348" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 392 152 Q 420 132 420 108 Q 392 90 384 118" fill="none" stroke="#E53E3E" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="384" cy="144" r="9" fill="#E53E3E"/>
+</svg>

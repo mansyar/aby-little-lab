@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: the stack, three crates piled flat on the bench. -->
+  <rect x="140" y="344" width="232" height="88" rx="12" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+  <rect x="140" y="248" width="232" height="88" rx="12" fill="#F6E05E" stroke="#2D3748" stroke-width="6"/>
+  <rect x="140" y="152" width="232" height="88" rx="12" fill="#FC8181" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 256 152 L 256 432" fill="none" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 140 296 L 372 296" fill="none" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 140 392 L 372 392" fill="none" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 184 200 L 232 200" fill="none" stroke="#FFF8E7" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 288 248 L 336 248" fill="none" stroke="#D69E2E" stroke-width="8" stroke-linecap="round"/>
+</svg>

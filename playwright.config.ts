@@ -31,16 +31,22 @@ export default defineConfig({
   // of false reds on a loaded host, so both budgets are deliberately generous.
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  // Two workers, not one: the suite reached 4.9 min serially against NFR-2's
-  // 5 min budget, and the excess is wall clock rather than work. Files are the
-  // parallelism unit — `fullyParallel: false` keeps the tests inside one file
-  // serial — and every test already gets a fresh browser context, so the
+  // Three workers, not one and not two: the suite reached 4.9 min serially
+  // against NFR-2's 5 min budget, and the excess is wall clock rather than work.
+  // Files are the parallelism unit — `fullyParallel: false` keeps the tests
+  // inside one file serial, except the `launch-all` halves, which opt into
+  // `mode: "parallel"` — and every test gets a fresh browser context, so the
   // preview server is the only thing the workers share. Only `webServer` owns
-  // that server: there is no per-worker port and no second server, so both
-  // workers read the same built `dist` over the same origin. `launch-all` alone
-  // is 2.6 min, so the critical path is that file plus the slower worker's
-  // share of the rest: near 2.8 min, not the 2.5 min a clean halving predicts.
-  workers: 2,
+  // that server: there is no per-worker port and no second server, so every
+  // worker reads the same built `dist` over the same origin.
+  //
+  // Measured on the 2026-11-16 host (wall clock):
+  // serial 4.9 min, two workers 5.0-5.1 min, three workers 3.8-4.3 min. Two
+  // workers no longer helped once `launch-all` stopped being a 3.3 min monolith
+  // — the suite's floor is its total work divided by workers, and 24 launches
+  // are ~200 s of that work. Three workers run the twenty-three other files and
+  // the two launch halves side by side and land inside the budget.
+  workers: 3,
   fullyParallel: false,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,

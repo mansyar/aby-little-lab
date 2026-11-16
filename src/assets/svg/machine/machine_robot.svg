@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine goal: the toy robot the child is asked for. -->
+  <rect x="188" y="168" width="136" height="112" rx="34" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
+  <rect x="208" y="188" width="96" height="72" rx="22" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="234" cy="216" r="11" fill="#2D3748"/>
+  <circle cx="278" cy="216" r="11" fill="#2D3748"/>
+  <path d="M 238 240 Q 256 252 274 240" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 256 168 L 256 132" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="116" r="16" fill="#FC8181" stroke="#2D3748" stroke-width="6"/>
+  <rect x="196" y="292" width="120" height="112" rx="24" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <rect x="222" y="316" width="68" height="42" rx="10" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 196 316 L 160 356 M 316 316 L 352 356" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+  <rect x="212" y="404" width="34" height="34" rx="10" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <rect x="266" y="404" width="34" height="34" rx="10" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+</svg>

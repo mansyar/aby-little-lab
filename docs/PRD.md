@@ -23,7 +23,7 @@ Aby's Little Lab is a set of 23 preschool mini-games delivered as one installabl
   - [1.5 Session flow](#15-session-flow)
 - [2. Curriculum map](#2-curriculum-map)
   - [2.1 How the games are grouped](#21-how-the-games-are-grouped)
-  - [2.2 The 23 games by domain](#22-the-23-games-by-domain)
+  - [2.2 The 24 games by domain](#22-the-24-games-by-domain)
 - [3. Game specifications](#3-game-specifications)
 - [4. Cross-game systems](#4-cross-game-systems)
   - [4.1 Shared scene bases and lazy loading](#41-shared-scene-bases-and-lazy-loading)
@@ -103,23 +103,23 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 
 1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
 2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
-3. **Hub.** Shows the 23 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
+3. **Hub.** Shows the 24 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
 4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round. If it cannot be fetched, the Hub tries again by itself. When that retry fails too, the rest of the Hub stays usable and a wordless retry ring appears on the tile the child tapped; tapping the ring tries the same game again. A game that never opens charges no play time and records no play.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
 Above the grid sit six group chips — All, Letters, Numbers, Thinking, Play and Stories — in the top band between the avatar chip and Settings. A chip tap redraws the board as that group's own games at 176×196 in three columns, each row centred, so reaching a game takes at most two taps: the chip, then the game. Tapping a chip also speaks the group's spoken name ("Numbers and counting"), and All says "All games". All is the landing state of every visit: the selection is never stored, and the familiar 23-tile board is always what a child arrives on.
 
-The Hub fits all 23 tiles in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and three) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
+The Hub fits all 24 tiles in a 6 by 4 grid on wide screens. When the fitted scale would push a tile below the 64 px touch floor, which is the normal case on a phone, the Hub switches to pages of 5 by 2 larger tiles (ten, ten and four) with swipe between pages and textless page dots. Both layouts are fixed furniture: they do not reflow during a session.
 
 ## 2. Curriculum map
 
 ### 2.1 How the games are grouped
 
-The 23 games are grouped by the developmental skill they are built around. The grouping is a product view, not a claim about assessment: a game practises its domain first and leans on others in passing. Numeracy games use visual discrimination, literacy games use working memory, and every drag game is fine motor practice.
+The 24 games are grouped by the developmental skill they are built around. The grouping is a product view, not a claim about assessment: a game practises its domain first and leans on others in passing. Numeracy games use visual discrimination, literacy games use working memory, and every drag game is fine motor practice.
 
 The nine domains are cognitive reasoning, fine motor, inhibitory control, visual discrimination, working memory, early literacy, early numeracy, social-emotional learning and narrative sequencing.
 
-### 2.2 The 23 games by domain
+### 2.2 The 24 games by domain
 
 Games are numbered in Hub order, which is the order used throughout this document.
 
@@ -147,8 +147,10 @@ Games are numbered in Hub order, which is the order used throughout this documen
 | 20 | Number Order | Early numeracy | Putting numerals in ascending order | [3.20](#320-number-order) |
 | 21 | Feelings Faces | Social-emotional | Naming an emotion from a short everyday scenario | [3.21](#321-feelings-faces) |
 | 22 | Story Order | Narrative sequencing | Putting three pictures in first, next, last order | [3.22](#322-story-order) |
+| 23 | Robot Path | Early programming | Programming absolute steps to walk a robot to its star | [3.23](#323-robot-path) |
+| 24 | Fix-It Machine | Early programming | Finding the step that went wrong and repairing it | [3.24](#324-fix-it-machine) |
 
-Domain counts: cognitive reasoning 4, fine motor 1, inhibitory control 1, visual discrimination 2, working memory 2, early literacy 5, early numeracy 5, social-emotional 1, narrative sequencing 1.
+Domain counts: cognitive reasoning 4, fine motor 1, inhibitory control 1, visual discrimination 2, working memory 2, early literacy 5, early numeracy 5, social-emotional 1, narrative sequencing 1, early programming 2.
 
 ## 3. Game specifications
 
@@ -361,13 +363,22 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 - **Narration.** Rule line: "Put the arrows in the robot's path, then tap go." No per-round narration.
 - **Art and assets.** Six robot and prop SVGs travel with the game's own chunk; arrows, tiles and the trail are drawn at runtime. Tile and sticker icons.
 
+### 3.24 Fix-It Machine
+
+- **Mechanic.** The machine runs a tape of instruction cards, half a second each, to repair a toy. One card does not belong and produces a funny result; the child taps that card, picks the tool it should have been from three, and runs the tape again to make the toy.
+- **Rounds and rules.** Six fixed rounds over six toys — 3, 3, 4, 4, 5, 5 cards. Exactly one card is a substitution, never the first, and its tool never appears elsewhere on the tape, so the wrong step always comes after a correct one and never looks twice. A substitution rather than a missing card, because the tape has to stay runnable: an empty slot would ask for a different verb, while a wrong tool is something the child can see, name and swap.
+- **Difficulty.** Fixed. The ladder is how close the wrong tool sits: rounds 1–2 substitute a tool from a family the routine never touches (a brush where a mister belongs), rounds 3–4 a tool from a family it does use, rounds 5–6 the other tool of the same family as the right one.
+- **Feedback.** A run that stops at the wrong card plays a gentle tone, rings that card and leaves the tape and the round index exactly as they were, so the child diagnoses the moment the machine shrugs. Tapping another card bounces it; tapping the right tool repairs the tape in place and the next run makes the toy. Hints pulse the wrong card at two missed taps, then the right tool as well at four and six, and never place a card.
+- **Narration.** Rule line: "Find the wrong card and fix it." No per-round narration.
+- **Art and assets.** Sixteen SVGs travel with the game's own chunk: four machine poses drawn on one shared anchor, six tool pictograms and six toy goals. The tape, tray and Go button are drawn at runtime. Tile and sticker icons.
+
 ## 4. Cross-game systems
 
 ### 4.1 Shared scene bases and lazy loading
 
 Every game scene extends one shared base. `GameSceneBase` owns the parts no game should reimplement: the parental lock on the Back button, the corner mascot, the speaker glyph and its narrator, progress dots, audio access, the instruction line, the win celebration, sticker award and return to the Hub, and shutdown cleanup.
 
-`ChoiceRoundScene` sits on top of it and owns the prompt-plus-cards loop: rendering a round, tearing it down, allowing exactly one advance per tap, the 250 ms success flash, filling a progress dot, the reduced-motion wiggle, and the wrong-answer path. Fifteen of the 23 games are built on it: thirteen extend `ChoiceRoundScene` directly (Find the Letter, Find the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Decode It, Number Order, Pattern Builder, Feelings Faces, Story Order, Robot Path) and two extend it through `GroupMathScene` (Add It Up, Take Away).
+`ChoiceRoundScene` sits on top of it and owns the prompt-plus-cards loop: rendering a round, tearing it down, allowing exactly one advance per tap, the 250 ms success flash, filling a progress dot, the reduced-motion wiggle, and the wrong-answer path. Sixteen of the 24 games are built on it: fourteen extend `ChoiceRoundScene` directly (Find the Letter, Find the Word, How Many?, First Sounds, More or Less, Odd One Out, Color Match, Decode It, Number Order, Pattern Builder, Feelings Faces, Story Order, Robot Path, Fix-It Machine) and two extend it through `GroupMathScene` (Add It Up, Take Away).
 
 `GroupMathScene` adds the two-card equation row and the operation cue. Add It Up and Take Away are roughly 25 line subclasses that pin only the instruction, the game id, the cue and the round builders.
 
@@ -413,7 +424,7 @@ Progress is recorded on device as an additive part of the profile: a play when a
 
 ### 4.8 Adaptive difficulty
 
-Fifteen of the 23 games adapt through the band ladder. When a game's difficulty moves, it moves for the whole playthrough, never mid-round. The shift applied to the band ladder is TDD's ([TDD §7.3](./TDD.md#73-adaptive-banding)); it is invisible to the child, who only feels a game getting easier or harder over days. A parent can turn the whole system off in Settings (on by default), which returns every game to its classic band.
+Twenty-two of the 24 games adapt through the band ladder. When a game's difficulty moves, it moves for the whole playthrough, never mid-round. The shift applied to the band ladder is TDD's ([TDD §7.3](./TDD.md#73-adaptive-banding)); it is invisible to the child, who only feels a game getting easier or harder over days. A parent can turn the whole system off in Settings (on by default), which returns every game to its classic band.
 
 An adaptive game keeps a rolling window of the profile's last ten taps for that game. Every tap feeds the window, whether the session is completed or abandoned - a child who backs out mid-game still made those taps, so they still inform the next shift. Only the window moves: the accuracy and the win count a parent sees describe completed sessions, while the play count still counts every game the child starts, abandoned or not. A shift is computed only once the window holds at least six taps: accuracy at or above 90 percent moves the band ladder up one step, accuracy below 60 percent moves it down one, and anything between leaves it alone. Most games clamp the shifted band to the 1 to 3 range the ladder defines, but some games deliberately step outside the classic ladder's shape, as described below.
 
@@ -527,7 +538,7 @@ All sound effects are synthesized with the Web Audio API at runtime. No audio fi
 | Sticker awarded | Two bright notes, C6 and E6 |
 | Idle Hub call | Two quiet notes, E5 and G5, at low gain |
 
-Every game carries its own audio identity, so the same event is a different set of notes from one game to the next. An identity sets a pitch offset of up to five semitones, a waveform, a tempo between 0.75 and 1.5, and its own three contours: correct, incorrect and win. The twenty-three identities are built from four three-note correct contours, four two-note incorrect contours and four four-note win contours, so a child hears a consistent voice within a game and a different one between games.
+Every game carries its own audio identity, so the same event is a different set of notes from one game to the next. An identity sets a pitch offset of up to five semitones, a waveform, a tempo between 0.75 and 1.5, and its own three contours: correct, incorrect and win. The twenty-four identities are built from four three-note correct contours, four two-note incorrect contours and four four-note win contours, so a child hears a consistent voice within a game and a different one between games.
 
 Two rules keep the trio gentle. The incorrect contour is forced gently descending for every identity, so no game can sound harsh. The win contour is always held inside a 300 to 800 millisecond celebration, and a game whose own tempo would run long has its tempo clamped to fit that budget. The pop, the wake tone, the sticker sparkle and the idle call are shared across the app and do not take a game identity. The TDD states the effect table ([§8.2](./TDD.md#82-sound-effects)) and the identity model ([§8.7](./TDD.md#87-the-per-game-audio-identity)).
 
@@ -575,11 +586,11 @@ The build produces three kinds of JavaScript:
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
 - **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-Measured from the current build, the shell entry is 182.5 kB as `validate-bundle.js` reports it (186.85 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 49 JavaScript chunks in all: the 23 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 45 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
+Measured from the current build, the shell entry is 186.4 kB as `validate-bundle.js` reports it (190.89 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 51 JavaScript chunks in all: the 24 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 45 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 
-Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 184 of the app's 244 art files.
+Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 202 of the app's 262 art files.
 
 **Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 139 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 139 keys are also shell keys, the profile avatars, so 133 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
 
@@ -587,7 +598,7 @@ Game art belongs in the game's chunk when only that game uses it. Two mechanisms
 
 A scene that asks for art which fails to load falls back to a neutral placeholder rather than Phaser's missing-texture checkerboard, and a shared textless cue is shown while the art loads, so the child sees a deliberate loading mark rather than a broken picture.
 
-The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 60 shell keys, and fails if the shell ever imports a game-only key.
+The boundary is a test, not a convention: the test suite reads the boot preload's source, pins the 62 shell keys, and fails if the shell ever imports a game-only key.
 
 ### 7.4 Runtime targets
 

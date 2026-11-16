@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: mid-job, arms up and steam puffing from the funnel. -->
+  <rect x="150" y="432" width="76" height="32" rx="16" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <rect x="286" y="432" width="76" height="32" rx="16" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 144 122 Q 160 84 200 96" fill="none" stroke="#A0AEC0" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 232 108 Q 248 60 300 78" fill="none" stroke="#A0AEC0" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 176 200 L 336 200 L 310 148 L 202 148 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 240 148 L 240 118 Q 256 102 272 118 L 272 148" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <rect x="136" y="196" width="240" height="248" rx="72" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <rect x="176" y="240" width="160" height="128" rx="44" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="222" cy="288" r="15" fill="#2D3748"/>
+  <circle cx="290" cy="288" r="15" fill="#2D3748"/>
+  <circle cx="256" cy="328" r="20" fill="#2D3748"/>
+  <circle cx="256" cy="404" r="26" fill="#F6E05E" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 256 386 L 262 400 L 276 402 L 264 412 L 268 426 L 256 418 L 244 426 L 248 412 L 236 402 L 250 400 Z" fill="#D69E2E"/>
+  <path d="M 136 268 L 84 236" fill="none" stroke="#2D3748" stroke-width="12" stroke-linecap="round"/>
+  <path d="M 376 268 L 428 236" fill="none" stroke="#2D3748" stroke-width="12" stroke-linecap="round"/>
+</svg>

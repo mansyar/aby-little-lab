@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: the polish, a folded cloth buffing a fresh shine. -->
+  <path d="M 132 300 Q 132 216 216 208 L 316 208 Q 380 208 380 264 Q 380 316 316 316 L 216 316 Q 132 324 132 300 Z" fill="#FBB6CE" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 196 216 L 226 308" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 288 210 L 292 314" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 152 268 Q 200 288 250 268" fill="none" stroke="#FFF8E7" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 176 380 L 216 344" fill="none" stroke="#2D3748" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 300 380 L 340 344" fill="none" stroke="#2D3748" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 232 400 L 240 374 L 264 374 L 272 400 Z" fill="#C53030" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 392 148 L 400 168 L 420 176 L 400 184 L 392 204 L 384 184 L 364 176 L 384 168 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

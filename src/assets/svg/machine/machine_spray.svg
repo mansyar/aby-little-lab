@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: the spray, a tall mister with a trigger and a fine cone. -->
+  <rect x="196" y="236" width="120" height="212" rx="24" fill="#FC8181" stroke="#2D3748" stroke-width="6"/>
+  <rect x="212" y="292" width="88" height="60" rx="12" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <rect x="216" y="196" width="80" height="44" rx="14" fill="#C53030" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 296 214 L 344 214 L 344 188 L 296 188" fill="none" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 344 200 L 376 200" fill="none" stroke="#2D3748" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 268 196 L 268 160" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="268" cy="142" r="14" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 360 176 L 404 152" fill="none" stroke="#4FD1C5" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 366 196 L 416 196" fill="none" stroke="#4FD1C5" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 360 216 L 404 240" fill="none" stroke="#4FD1C5" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="424" cy="146" r="8" fill="#4FD1C5"/>
+  <circle cx="436" cy="196" r="8" fill="#4FD1C5"/>
+  <circle cx="424" cy="246" r="8" fill="#4FD1C5"/>
+  <path d="M 224 400 L 288 400" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
+</svg>

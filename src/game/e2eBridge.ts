@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { getActiveProfile, getProfiles } from "../utils/storage";
+import type { ActionIcon } from "./fixItMachineLogic";
 import type { Direction } from "./robotPathLogic";
 
 /** One canvas-space point the browser suite may act on. */
@@ -214,6 +215,69 @@ export interface E2ERobotPathState {
   solved: boolean;
 }
 
+/** One tape card and the canvas point its slot answers to. */
+export interface E2EFixItMachineCard {
+  /** Zero-based card index on the tape. */
+  index: number;
+  /** X in the 1024x768 canvas space. */
+  x: number;
+  /** Y in the 1024x768 canvas space. */
+  y: number;
+}
+
+/** One open repair-tray slot: the tool it offers and where it is. */
+export interface E2EFixItMachineTraySlot {
+  /** Zero-based tray index. */
+  index: number;
+  /** The tool this slot offers. */
+  action: ActionIcon;
+  /** X in the 1024x768 canvas space. */
+  x: number;
+  /** Y in the 1024x768 canvas space. */
+  y: number;
+}
+
+/**
+ * Fix-It Machine's live workshop (FR-15): the round, the tape as drawn, the one
+ * wrong card, and the geometry a journey taps.
+ *
+ * `solution` mirrors how the other games publish their correct answers; `tape`
+ * is what is on screen right now, so a journey can tell a repaired tape from an
+ * untouched one. `wrongTaps` and `hintLevel` come from the scene's own counters
+ * rather than being inferred from how the hints look, and `failedRuns` counts
+ * runs this round that stopped at the wrong card.
+ */
+export interface E2EFixItMachineState {
+  /** Zero-based round index, matching the scene's progress dots. */
+  round: number;
+  /** The round's correct program, card by card. */
+  solution: ActionIcon[];
+  /** The tape on screen right now. */
+  tape: ActionIcon[];
+  /** Index of the card that does not belong, or -1 when there is no round. */
+  bugIndex: number;
+  /** Whether the toy came out right this round. */
+  solved: boolean;
+  /** Taps that missed the wrong card or the right tool. */
+  wrongTaps: number;
+  /** The hint level those taps have earned: 0, 1, 2 or 3. */
+  hintLevel: number;
+  /** Runs this round that stopped at the wrong card. */
+  failedRuns: number;
+  /** Whether the repair tray is open. */
+  trayOpen: boolean;
+  /** The cards the tape is showing, in draw order. */
+  cards: E2EFixItMachineCard[];
+  /** The open tray's candidates, in draw order; empty while it is shut. */
+  tray: E2EFixItMachineTraySlot[];
+  /** The Go button's centre. */
+  go: GamePoint;
+  /** The machine's centre. */
+  machine: GamePoint;
+  /** The goal bubble's centre. */
+  goal: GamePoint;
+}
+
 /** The hub's play-time state, as the hub itself sees it. */
 export interface E2EHubPlayTime {
   /** Whether the active profile's daily budget is spent, so every tile is locked. */
@@ -284,6 +348,11 @@ export interface E2EBridge {
    * so a journey can only program the robot while the robot is what it sees.
    */
   robotPath(): E2ERobotPathState | null;
+  /**
+   * Fix-It Machine's workshop while that scene is active. Null in every other
+   * scene, so a journey can only repair the tape while the tape is what it sees.
+   */
+  fixItMachine(): E2EFixItMachineState | null;
 }
 
 declare global {
@@ -312,6 +381,7 @@ interface E2ESceneProbe {
   e2eHubGroups?: () => E2EHubGroups;
   e2eRecoverButton?: () => E2ERecoverState | null;
   e2eRobotPath?: () => E2ERobotPathState | null;
+  e2eFixItMachine?: () => E2EFixItMachineState | null;
 }
 
 /** True when the page was opened by the browser suite. */
@@ -433,6 +503,12 @@ export function initE2EBridge(game: Phaser.Game): void {
     robotPath: () => {
       const probe = probeOf(activeScene(game));
       const hook = probe?.e2eRobotPath;
+      if (typeof hook !== "function") return null;
+      return hook.call(probe);
+    },
+    fixItMachine: () => {
+      const probe = probeOf(activeScene(game));
+      const hook = probe?.e2eFixItMachine;
       if (typeof hook !== "function") return null;
       return hook.call(probe);
     },

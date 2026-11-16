@@ -37,6 +37,7 @@ const EXPECTED_MEMBERS: ReadonlyArray<readonly [HubGroupId, readonly GameId[]]> 
       "odd-one-out",
       "color-match",
       "robot-path",
+      "fix-it-machine",
     ],
   ],
   ["play", ["animal-trace", "pop-freeze", "musical-memory", "memory-match"]],
@@ -60,11 +61,11 @@ describe("HUB_GROUPS", () => {
     }
   });
 
-  it("splits the 23 games 5/5/7/4/2 with none left out and none counted twice", () => {
+  it("splits the 24 games 5/5/8/4/2 with none left out and none counted twice", () => {
     const counts = EXPECTED_MEMBERS.map(
       ([id]) => GAME_REGISTRY.filter((g) => g.group === id).length,
     );
-    expect(counts).toEqual([5, 5, 7, 4, 2]);
+    expect(counts).toEqual([5, 5, 8, 4, 2]);
     expect(counts.reduce((sum, count) => sum + count, 0)).toBe(GAME_REGISTRY.length);
 
     const covered = EXPECTED_MEMBERS.flatMap(([id]) => tilesInGroup(id)).sort((a, b) => a - b);

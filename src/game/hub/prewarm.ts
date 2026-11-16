@@ -371,6 +371,25 @@ const ROBOT_PATH_KEYS: readonly ArtKeyDef[] = [
   ["robot_star", CARD],
 ];
 
+const MACHINE_KEYS: readonly ArtKeyDef[] = [
+  ["machine_idle", CARD],
+  ["machine_working", CARD],
+  ["machine_puzzled", CARD],
+  ["machine_happy", CARD],
+  ["machine_spray", CARD],
+  ["machine_pour", CARD],
+  ["machine_paint", CARD],
+  ["machine_polish", CARD],
+  ["machine_lift", CARD],
+  ["machine_stack", CARD],
+  ["machine_teddy", CARD],
+  ["machine_car", CARD],
+  ["machine_duck", CARD],
+  ["machine_drum", CARD],
+  ["machine_robot", CARD],
+  ["machine_blocks", CARD],
+];
+
 const STORY_PANEL_KEYS: readonly ArtKeyDef[] = [
   ["story_seed_planted", CARD],
   ["story_seed_sprout", CARD],
@@ -504,6 +523,7 @@ export const ART_KEYS_BY_GAME: Readonly<Record<string, readonly ArtKeyEntry[]>> 
   "feelings-faces": artKeys("feelings-faces", [FACES_KEYS]),
   "story-order": artKeys("story-order", [STORY_PANEL_KEYS]),
   "robot-path": artKeys("robot-path", [ROBOT_PATH_KEYS]),
+  "fix-it-machine": artKeys("fix-it-machine", [MACHINE_KEYS]),
 });
 
 /**

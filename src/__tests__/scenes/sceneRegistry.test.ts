@@ -7,6 +7,7 @@ import { ColorMatchScene } from "../../scenes/ColorMatchScene";
 import { DecodeItScene } from "../../scenes/DecodeItScene";
 import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import { FirstSoundsScene } from "../../scenes/FirstSoundsScene";
+import { FixItMachineScene } from "../../scenes/FixItMachineScene";
 import { HowManyScene } from "../../scenes/HowManyScene";
 import { MemoryMatchScene } from "../../scenes/MemoryMatchScene";
 import { MoreLessScene } from "../../scenes/MoreLessScene";
@@ -25,7 +26,7 @@ import { WordBuilderScene } from "../../scenes/WordBuilderScene";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 
 /**
- * Stub the 23 scene modules so invoking the real dynamic-import loaders
+ * Stub the 24 scene modules so invoking the real dynamic-import loaders
  * never pulls Phaser scenes into happy-dom — each loader should resolve
  * to its module's named scene export.
  */
@@ -95,6 +96,9 @@ vi.mock("../../scenes/FeelingsFacesScene", () => ({
 vi.mock("../../scenes/StoryOrderScene", () => ({
   StoryOrderScene: class StoryOrderSceneStub {},
 }));
+vi.mock("../../scenes/FixItMachineScene", () => ({
+  FixItMachineScene: class FixItMachineSceneStub {},
+}));
 vi.mock("../../scenes/RobotPathScene", () => ({
   RobotPathScene: class RobotPathSceneStub {},
 }));
@@ -103,7 +107,7 @@ vi.mock("../../scenes/RobotPathScene", () => ({
 class FakeScene {}
 
 describe("sceneRegistry", () => {
-  it("maps exactly the 23 game scene keys", () => {
+  it("maps exactly the 24 game scene keys", () => {
     expect(Object.keys(sceneLoaders).sort()).toEqual([
       "AddItUp",
       "Alphabet",
@@ -113,6 +117,7 @@ describe("sceneRegistry", () => {
       "DecodeIt",
       "FeelingsFaces",
       "FirstSounds",
+      "FixItMachine",
       "HowMany",
       "MemoryMatch",
       "MoreLess",
@@ -192,6 +197,7 @@ describe("sceneRegistry", () => {
       FeelingsFaces: FeelingsFacesScene,
       StoryOrder: StoryOrderScene,
       RobotPath: RobotPathScene,
+      FixItMachine: FixItMachineScene,
     };
 
     expect(Object.keys(sceneLoaders).sort()).toEqual(Object.keys(expectedByKey).sort());

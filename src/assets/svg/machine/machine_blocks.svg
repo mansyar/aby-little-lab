@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine goal: the block tower the child is asked for. -->
+  <rect x="140" y="356" width="112" height="88" rx="12" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <rect x="264" y="356" width="112" height="88" rx="12" fill="#F6E05E" stroke="#2D3748" stroke-width="6"/>
+  <rect x="204" y="264" width="112" height="88" rx="12" fill="#FC8181" stroke="#2D3748" stroke-width="6"/>
+  <rect x="234" y="172" width="60" height="88" rx="12" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 168 400 L 224 400" fill="none" stroke="#FFF8E7" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 292 400 L 348 400" fill="none" stroke="#D69E2E" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 232 308 L 288 308" fill="none" stroke="#FFF8E7" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="264" cy="216" r="12" fill="#FFF8E7" stroke="#2D3748" stroke-width="5"/>
+</svg>

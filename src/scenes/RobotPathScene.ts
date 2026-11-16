@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
 import type { E2ERobotPathState } from "../game/e2eBridge";
 import type { Rng } from "../game/random";
 import { preloadRobotPathArt } from "../game/robotPathArt";

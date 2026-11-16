@@ -699,7 +699,7 @@ describe("scene shutdown cleanup", () => {
     const firstVisit = getStickerImages(scene);
     expect(firstVisit).toHaveLength(1);
     const firstVisitSlots = getEmptySlots(scene);
-    expect(firstVisitSlots).toHaveLength(22);
+    expect(firstVisitSlots).toHaveLength(23);
 
     // Leave the Hub (shutdown clears the tracked shelf) and return: create()
     // re-runs on every visit via scene.start.
@@ -734,7 +734,7 @@ describe("scene shutdown cleanup", () => {
     const fresh = getEmptySlots(scene).filter(
       (obj) => getMockFn(obj.destroy).mock.calls.length === 0,
     );
-    expect(fresh).toHaveLength(23);
+    expect(fresh).toHaveLength(24);
   });
 });
 

@@ -79,6 +79,13 @@
 - A failed run is a rehearsal, not a loss: the program stays on the strip, the step that first left the route pulses, and the figure returns to its start so one arrow can be replaced and the round retried. A hint may pulse after two stopped runs; it is never placed.
 - Go is the only button that moves anything, and it is the same size as every other play target (112×112), so the plan is deliberate and the run is never triggered by a stray tap.
 
+### Debug Then Repair
+- Debug-and-repair is the suite's third answer shape, and Fix-It Machine owns it: the child watches a program run, sees one step produce a funny result, taps that step and swaps in the right tool. The wrong step is always authored and always one substitution, never card 0, and its tool never appears twice, so the diagnosis has exactly one answer.
+- A stopped run is evidence, not a failure. The tape, the round and the child's input all survive it: the machine shrugs, the wrong card is ringed, and nothing is re-locked or reset. The child can act on what they just saw.
+- Repair is in place. The tray offers three tools, one of which is the answer; the right tool rewrites that single card, so the child fixes the program they diagnosed rather than starting it over.
+- The ladder is how close the wrong tool sits, never how many cards there are: a family the routine never uses, then a family it does, then the sibling of the right action. Hints pulse the wrong card at two missed taps and the right tool as well at four and six; a hint never places a card.
+- Go stays the same 112×112 target as every other run button, and a stopped run never costs a tap to restart: the diagnosis is the only work the child does.
+
 ### Auto-Progression
 - After game completion, a 3-second delay with win animation before auto-returning to Hub.
 - No manual "done" button required from the child.

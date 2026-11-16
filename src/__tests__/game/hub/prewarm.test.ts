@@ -11,6 +11,7 @@ import { numerals } from "../../../game/art/numerals";
 import { shadows } from "../../../game/art/shadows";
 import { shapes } from "../../../game/art/shapes";
 import { toys } from "../../../game/art/toys";
+import { FIX_IT_MACHINE_ASSETS } from "../../../game/fixItMachineArt";
 import { GAME_REGISTRY } from "../../../game/gameRegistry";
 import {
   ART_KEYS_BY_GAME,
@@ -444,9 +445,10 @@ describe("ART_KEYS_BY_GAME — per-game art-key source (P1.T1)", () => {
     "feelings-faces": [faces],
     "story-order": [{ assets: STORY_PANEL_ASSETS }],
     "robot-path": [{ assets: ROBOT_PATH_ASSETS }],
+    "fix-it-machine": [{ assets: FIX_IT_MACHINE_ASSETS }],
   };
 
-  it("covers all 23 registry games and nothing else", () => {
+  it("covers all 24 registry games and nothing else", () => {
     const registryIds = GAME_REGISTRY.map((entry) => entry.gameId).sort();
     expect(Object.keys(ART_KEYS_BY_GAME).sort()).toEqual(registryIds);
     expect(Object.keys(EXPECTED_GROUPS).sort()).toEqual(registryIds);

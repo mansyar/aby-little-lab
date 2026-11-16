@@ -1,5 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import type {
+  E2EFixItMachineState,
   E2EHubGroups,
   E2EHubPlayTime,
   E2EHubToast,
@@ -345,6 +346,46 @@ export async function waitForRobotPathRound(
 
   const state = await robotPathState(page);
   if (!state) throw new Error(`Robot Path round ${round} vanished between polling and reading`);
+  return state;
+}
+
+/**
+ * Fix-It Machine's live workshop, or null while another scene is active.
+ *
+ * The scene publishes the tape it is drawing, the one card that does not belong
+ * and the geometry of its cards, tray and Go button, so the journey taps what
+ * the game is showing rather than a remembered layout.
+ */
+export function fixItMachineState(page: Page): Promise<E2EFixItMachineState | null> {
+  return page.evaluate(() => window.__abyE2E?.fixItMachine() ?? null);
+}
+
+/**
+ * Polls until Fix-It Machine is on the given round with a tape to run.
+ *
+ * `solution` and `bugIndex` come from the round itself, so this wait also covers
+ * the shared between-round delay without sleeping through it.
+ */
+export async function waitForFixItMachineRound(
+  page: Page,
+  round: number,
+  timeout = ROUND_TIMEOUT,
+): Promise<E2EFixItMachineState> {
+  await expect
+    .poll(
+      async () => {
+        const state = await fixItMachineState(page);
+        return state !== null && state.round === round && state.cards.length > 0;
+      },
+      {
+        message: `Fix-It Machine round ${round} should be on the bench with a tape`,
+        timeout,
+      },
+    )
+    .toBe(true);
+
+  const state = await fixItMachineState(page);
+  if (!state) throw new Error(`Fix-It Machine round ${round} vanished between polling and reading`);
   return state;
 }
 

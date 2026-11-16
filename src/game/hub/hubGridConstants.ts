@@ -13,7 +13,7 @@ import { textureSizeFor } from "../../utils/textureTiers";
 /** Wide (6x4) grid tile size and spacing (px). */
 export const TILE_WIDTH = 144;
 /**
- * 22 tiles render as 6x4 (rows 6/6/6/4). Height and spacing are sized so the
+ * 24 tiles render as 6x4 (rows 6/6/6/6). Height and spacing are sized so the
  * 4 rows fit inside 768 with the same 119px top/bottom margins as the 15-tile
  * grid - clearing the top-band controls (avatar chip / Settings, bottom edge
  * 116) while keeping every tile and its sticker shelf on-canvas. The width is
