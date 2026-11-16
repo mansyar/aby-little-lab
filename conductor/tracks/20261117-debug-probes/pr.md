@@ -84,3 +84,8 @@ window.
   look and that the rolling answer window holds exactly the six misses the session
   really made. A seventh would be this defect coming back.
 - Nothing in this branch touches a game's rounds, art, audio, pacing or difficulty.
+- The browser harness holds only once the canvas is provably ticking: `holdCanvasUntil`
+  waits for two consecutive animation frames before pressing and on every pass of its wait
+  loop, and reports `the canvas stopped ticking` instead of a bare 20 s state timeout. That
+  was the real cause of the backup journey failing on CI, whose parental gate counts frames.
+  No timeout was raised and no journey was skipped.

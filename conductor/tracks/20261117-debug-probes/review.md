@@ -81,3 +81,21 @@ Re-gate: `phase-5-singular-gate.log` — exit **0**, 3,323 tests over 153 files,
 coverage 97.12 / 90.94 / 96.21 / 98.31, entry 186.7 kB ≤ 200 kB, PWA 16/16,
 documents 5/5. The verdict stays **PASS**; the pin moves to `c20cea29`, and the
 reviewed behaviour is byte-identical because no source line moved.
+
+## Addendum — the CI harness, not the product
+
+`fcc60098` changes no product code: `holdCanvasUntil` in `e2e/fixtures/canvas.ts` now
+proves the canvas is ticking (two consecutive animation frames, `FRAME_STALL_MS = 2_000`)
+before pressing and on every pass of its wait loop, and a stall fails as
+`the canvas stopped ticking`. The 20 s state timeout is unchanged. The reproduced
+defect was `Browser Journeys` failing on `backup.spec.ts:172` in three runs
+(43901686670, 43901722594, 43932079796) with `the press at (972, 29) never reached its
+state in 20000 ms`, on a journey whose parental gate counts frames, not seconds.
+
+Proof: with the threshold forced to `0` the journey fails as `the canvas stopped ticking
+before the press at (971.5, 29.5) was sent`; restored, the hold journeys pass locally
+(backup 53.4 s, parental gate 14.8 s, insights 12.1 s) and CI run 43940819679 is green —
+Quality Gates 2m48s, Browser Journeys **26 passed (4.9m)**, first attempt, no retries.
+
+The verdict stays **PASS**; the pin moves to `fcc60098`. Details in
+`verification/phase-6.md`.

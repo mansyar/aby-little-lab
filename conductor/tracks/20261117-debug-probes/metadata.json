@@ -24,7 +24,7 @@
   "last_checkpoint": "b308ae20",
   "review_verdict": "PASS",
   "review_rounds": 2,
-  "reviewed_head_sha": "c20cea29",
+  "reviewed_head_sha": "fcc60098",
   "doc_sync": "done",
   "pr_url": "https://github.com/mansyar/aby-little-lab/pull/89",
   "pr_state": "open",
