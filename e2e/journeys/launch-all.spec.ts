@@ -20,10 +20,10 @@ import {
  * unlaunched.
  */
 
-const EXPECTED_GAME_COUNT = 23;
+const EXPECTED_GAME_COUNT = 24;
 
 test("every game launches from the hub and returns to it", async ({ page }) => {
-  // 23 launches, each with a three-second parental hold to get back out.
+  // 24 launches, each with a three-second parental hold to get back out.
   test.setTimeout(300_000);
 
   const errors = collectErrors(page);
@@ -57,5 +57,5 @@ test("every game launches from the hub and returns to it", async ({ page }) => {
     );
   }
 
-  expect(errors, "launching all 23 games should log no page or console errors").toEqual([]);
+  expect(errors, "launching all 24 games should log no page or console errors").toEqual([]);
 });

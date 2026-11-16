@@ -105,14 +105,14 @@
 - **Dependencies:** none
 - **Decisions:** D4, D11
 - **Verification:** `pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P5.T1: The Fix-It Machine journey** — covers: FR-15
-  - [ ] Through the published bridge only: launch the game, read the tape and the bug index, tap Go and see the round unchanged, tap the wrong card, choose the correct candidate, tap Go, assert the round advances and the dots fill; repeat for three rounds and leave through the back control.
-- [ ] **P5.T2: The roster literals** — covers: FR-16
-  - [ ] `EXPECTED_GAME_COUNT`, the hub-groups step text and the insights line move from 23 to 24, with no step removed.
-- [ ] **P5.T3: The suite green with the new journey** — covers: FR-16
-  - [ ] The full browser suite passes with 24 journeys across 19 spec files, `launch-all` covering the 24 launches inside its budget.
+- [x] **P5.T1: The Fix-It Machine journey** — covers: FR-15
+  - [x] Through the published bridge only: launch the game, read the tape and the bug index, tap Go and see the round unchanged, tap the wrong card, choose the correct candidate, tap Go, assert the round advances and the dots fill; repeat for three rounds and leave through the back control.
+- [x] **P5.T2: The roster literals** — covers: FR-16
+  - [x] `EXPECTED_GAME_COUNT`, the hub-groups step text and the insights line move from 23 to 24, with no step removed.
+- [x] **P5.T3: The suite green with the new journey** — covers: FR-16
+  - [x] The full browser suite passes with 24 journeys across 19 spec files, `launch-all` covering the 24 launches inside its budget.
 
 ## Phase 6: Documents say 24, and say what debugging is
 
