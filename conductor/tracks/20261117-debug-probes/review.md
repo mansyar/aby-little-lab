@@ -84,18 +84,29 @@ reviewed behaviour is byte-identical because no source line moved.
 
 ## Addendum — the CI harness, not the product
 
-`fcc60098` changes no product code: `holdCanvasUntil` in `e2e/fixtures/canvas.ts` now
-proves the canvas is ticking (two consecutive animation frames, `FRAME_STALL_MS = 2_000`)
-before pressing and on every pass of its wait loop, and a stall fails as
-`the canvas stopped ticking`. The 20 s state timeout is unchanged. The reproduced
-defect was `Browser Journeys` failing on `backup.spec.ts:172` in three runs
-(43901686670, 43901722594, 43932079796) with `the press at (972, 29) never reached its
-state in 20000 ms`, on a journey whose parental gate counts frames, not seconds.
+Two commits change no product code: `fcc60098` and `f34e35dd`, both in `e2e/fixtures/canvas.ts`,
+plus `7d559368` for the worker count.
 
-Proof: with the threshold forced to `0` the journey fails as `the canvas stopped ticking
-before the press at (971.5, 29.5) was sent`; restored, the hold journeys pass locally
-(backup 53.4 s, parental gate 14.8 s, insights 12.1 s) and CI run 43940819679 is green —
-Quality Gates 2m48s, Browser Journeys **26 passed (4.9m)**, first attempt, no retries.
+What the failures were: `Browser Journeys` failed four times on `backup.spec.ts:172` (runs
+43901686670, 43901722594, 43932079796, 43943297292, 43947422301) with `the press at (972, 29) never
+reached its state in 20000 ms`. The point is the parental gate, and a hold there is counted in
+Phaser timer frames, not seconds. Measured on the built artifact: the gate opens in 3.2 s at 73 fps,
+8.2 s at 17.5 fps (CDP 6x) and 10.9 s at 18.6 fps (CDP 20x) — 200 to 230 frames every time. A 20 s
+wall-clock deadline is therefore a budget that shrinks exactly when the runner is busy.
 
-The verdict stays **PASS**; the pin moves to `fcc60098`. Details in
-`verification/phase-6.md`.
+What the harness does now: `holdCanvasUntil` waits until the state arrives or the press has had
+`HOLD_FRAME_BUDGET = 300` frames; `canvasTicks` probes two consecutive `requestAnimationFrame`
+callbacks (`FRAME_STALL_MS = 2_000`) before the press and on every pass, so a stopped canvas fails as
+`the canvas stopped ticking`; a press that has had every frame a hold can need fails with its frame
+count and measured fps, which is a lost press rather than a slow runner; `HOLD_CEILING_MS = 90_000`
+keeps a pathological runner from timing the journey out underneath. CI also runs two workers
+(`workers: isCI ? 2 : 3`), because three canvases and the preview server on a four-vCPU runner starved
+the loop badly enough that the browser itself died (`Failed to find context`).
+
+Proof: each branch was forced to fail. With `HOLD_FRAME_BUDGET = 4`, the gate reports `the press at
+(971.5, 29.5) did not reach its state after 4 frames in 162 ms (25 fps)`; with `FRAME_STALL_MS = 0`,
+`the canvas stopped ticking before the press at (971.5, 29.5) was sent`. Defaults restored, the hold
+journeys pass locally at three workers (5 passed, 56.5 s) and CI run 43950134928 is green — Quality
+Gates 2m43s, Browser Journeys **26 passed (5.5m)**, first attempt, no retries.
+
+The verdict stays **PASS**; the pin moves to `7d559368`. Details in `verification/phase-6.md`.

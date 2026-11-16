@@ -816,5 +816,9 @@ the same setting: three Phaser canvases and the preview server on four cores sta
 badly enough that the backup journey's parental hold, which the gate counts in frames, overran the
 journey's own budget and the browser eventually died (`Failed to find context`, run 43947422301).
 CI now runs two workers (`workers: isCI ? 2 : 3`); the hold itself is budgeted in frames rather than
-wall clock, which is the change that made the difference visible instead of mysterious. Details in
-TDD §10.5.
+wall clock, which is the change that made the difference visible instead of mysterious. That setting
+is green but slower: run 43950134928 passed 26 browser tests in **5.5 min** (6m33s for the job) at
+two workers, against 4.9-6.3 min at three that failed intermittently. It sits about half a minute
+past NFR-2's 5 min ceiling, which is the price of a runner that can actually render the game; the
+next step if that matters is sharding the roster across two CI jobs rather than adding workers back.
+Details in TDD §10.5.
