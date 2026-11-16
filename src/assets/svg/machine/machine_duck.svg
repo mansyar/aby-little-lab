@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine goal: the yellow duck the child is asked for. -->
+  <path d="M 168 300 Q 152 372 196 400 L 380 400 Q 420 372 404 300 Q 400 268 372 268 L 200 268 Q 172 268 168 300 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="300" cy="200" r="88" fill="#F6E05E" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 296 208 L 372 224 L 296 244 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="316" cy="182" r="13" fill="#2D3748"/>
+  <path d="M 220 300 Q 180 320 200 352 Q 240 344 240 300" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 240 400 L 232 432 M 320 400 L 328 432" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+</svg>

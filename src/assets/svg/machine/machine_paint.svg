@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: the paint, a long brush with a loaded bristle tip. -->
+  <rect x="238" y="96" width="36" height="188" rx="10" fill="#D69E2E" stroke="#2D3748" stroke-width="6"/>
+  <rect x="222" y="272" width="68" height="52" rx="12" fill="#A0AEC0" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 216 320 L 296 320 L 306 400 Q 256 440 206 400 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 232 356 Q 256 372 280 356" fill="none" stroke="#FFF8E7" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 190 428 Q 220 404 256 428 Q 292 452 322 428" fill="none" stroke="#FC8181" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="352" cy="128" r="14" fill="#FC8181" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="386" cy="180" r="10" fill="#F6AD55" stroke="#2D3748" stroke-width="5"/>
+  <circle cx="160" cy="168" r="10" fill="#4FD1C5" stroke="#2D3748" stroke-width="5"/>
+</svg>

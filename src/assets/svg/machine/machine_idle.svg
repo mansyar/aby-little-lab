@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine: waiting for the child, steam gently rising. -->
+  <rect x="150" y="432" width="76" height="32" rx="16" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <rect x="286" y="432" width="76" height="32" rx="16" fill="#718096" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 176 200 L 336 200 L 310 148 L 202 148 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M 240 148 L 240 112 Q 256 96 272 112 L 272 148" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="256" cy="92" r="18" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <rect x="136" y="196" width="240" height="248" rx="72" fill="#4FD1C5" stroke="#2D3748" stroke-width="6"/>
+  <rect x="176" y="240" width="160" height="128" rx="44" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="222" cy="290" r="13" fill="#2D3748"/>
+  <circle cx="290" cy="290" r="13" fill="#2D3748"/>
+  <path d="M 226 322 Q 256 342 286 322" fill="none" stroke="#2D3748" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="256" cy="404" r="20" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 132 288 L 96 318" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 380 288 L 416 318" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+</svg>

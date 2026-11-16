@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fix-It Machine goal: the drum the child is asked for. -->
+  <ellipse cx="256" cy="188" rx="128" ry="44" fill="#FFF8E7" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 128 188 L 128 340 Q 128 384 256 384 Q 384 384 384 340 L 384 188" fill="#FBB6CE" stroke="#2D3748" stroke-width="6"/>
+  <ellipse cx="256" cy="340" rx="128" ry="44" fill="#FBB6CE" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 136 260 L 376 260" fill="none" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 140 316 L 372 316" fill="none" stroke="#2D3748" stroke-width="6"/>
+  <path d="M 172 156 L 150 96 M 340 156 L 362 96" fill="none" stroke="#2D3748" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="146" cy="84" r="16" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+  <circle cx="366" cy="84" r="16" fill="#F6AD55" stroke="#2D3748" stroke-width="6"/>
+</svg>
