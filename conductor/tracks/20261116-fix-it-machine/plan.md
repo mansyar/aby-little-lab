@@ -133,3 +133,27 @@
   - [x] `conductor/product.md` gains the game's row, the cross-game notes it now touches (roster, groups, progress rows, shell keys, spoken rules) and a changelog entry; `product-guidelines.md` gains the debug-and-repair interaction pattern; the perf baseline gains the measured build-and-suite section.
 - [x] **P6.T4: Validator and integrated gate** — covers: FR-17
   - [x] `node scripts/validate-docs.js` passes 5/5 on the final text and the full chain exits 0 on the committed tree.
+
+## Phase 7: Review Fixes (R1)
+
+- **Goal:** Resolve review findings R1-1 to R1-7
+- **Depends on:** Phase 6
+- **Covers:** review findings
+- **Touches:** `src/__tests__/scenes/artDeclarations.test.ts`, `src/scenes/FixItMachineScene.ts`, `src/__tests__/scenes/fixItMachineScene.test.ts`, `src/game/e2eBridge.ts`, `spec.md`, `docs/PRD.md`, `docs/TDD.md`, `conductor/product.md`, `src/__tests__/game/art/groupIntegrity.test.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`
+- **Dependencies:** none
+- **Decisions:** D5, D11, D9
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** pending
+
+- [ ] **P7.T1: The art-declaration scan covers the 24th scene** — covers: R1-1
+  - [ ] `fixItMachineArt` in `GAME_MODULES`, `FixItMachineScene` in `SCENE_LOCAL_PRELOADER_SCENES` and `SCENE_LOCAL_PRELOADER_CALLS`, the count literals and comments at 24, proven with a forced re-transform run of that file.
+- [ ] **P7.T2: The hint ladder the spec designed** — covers: R1-2
+  - [ ] Level 1 draws the band from card 0 through the bug card and the machine's pointing arm, level 2 lifts and pulses the bug card, level 3 pulses the correct tray candidate; scene tests cover all three representations.
+- [ ] **P7.T3: Every tap records one result** — covers: R1-3
+  - [ ] `recordCorrect()` on the bug card and on the right tool, with scene tests proving one result per tap and one win per solve.
+- [ ] **P7.T4: The rule line the spec speaks** — covers: R1-4
+  - [ ] The spec's sentence in the scene and in the four documents that quote it.
+- [ ] **P7.T5: The bridge contract settled** — covers: R1-5
+  - [ ] The published field names and the spec agree, with the richer fields recorded as authorized.
+- [ ] **P7.T6: The numbers that drifted** — covers: R1-6, R1-7
+  - [ ] FR-16 restated to the derived counts and the three roster comments at 24.
