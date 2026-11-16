@@ -280,11 +280,19 @@ export class ProgressOverlay {
         .setOrigin(0, 0.5);
       this.deps.overlayObjects.push(name);
 
+      // A game that records looks (Fix-It Machine's search taps) shows them as
+      // their own number: a parent should see the looking, not read it as
+      // failing. Games without probes render exactly what they did before.
+      const probesText = (progress: Parameters<typeof getAccuracy>[0]): string => {
+        const looks = progress?.probes ?? 0;
+        return looks > 0 ? `${looks} ${looks === 1 ? "look" : "looks"} · ` : "";
+      };
+
       const stats = scene.add
         .text(
           centerX - 158,
           y + 26,
-          `${game.plays} plays · ${formatAccuracyPercent(game)} · ${relativeLastPlayed(game.lastPlayedAt)}`,
+          `${game.plays} plays · ${formatAccuracyPercent(game)} · ${probesText(game)}${relativeLastPlayed(game.lastPlayedAt)}`,
           textStyle({
             color: PRIMARY_COLOR,
             fontSize: "26px",

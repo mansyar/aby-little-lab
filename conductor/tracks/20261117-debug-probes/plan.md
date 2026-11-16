@@ -65,14 +65,17 @@
 - **Dependencies:** none
 - **Decisions:** D5, D7
 - **Verification:** `pnpm build && pnpm test:e2e && pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P3.T1: Show a game's look count in the progress overlay** — covers: FR-8
-  - [ ] **P3.T1.1: A game with zero probes renders no probe text**
-- [ ] **P3.T2: Keep the insights accuracy ranking answer-only** — covers: FR-9
-- [ ] **P3.T3: Extend the Fix-It journey to prove the recording** — covers: FR-10, NFR-4
-  - [ ] **P3.T3.1: The journey's own taps explain its wrong count; accuracy reads 100%**
-- [ ] **P3.T4: Cover the overlay row and the ranking rule with unit tests** — covers: FR-8, FR-9, AC-5, AC-6
+- [x] **P3.T1: Show a game's look count in the progress overlay** — covers: FR-8
+  - [x] **P3.T1.1: A game with zero probes renders no probe text**
+- [x] **P3.T2: Keep the insights accuracy ranking answer-only** — covers: FR-9
+- [x] **P3.T3: Extend the Fix-It journey to prove the recording** — covers: FR-10, NFR-4
+  - [x] **P3.T3.1: The journey's own taps explain its wrong count; accuracy reads 100%**
+- [x] **P3.T4: Cover the overlay row and the ranking rule with unit tests** — covers: FR-8, FR-9, AC-5, AC-6
+**Result:** verified
+**Checkpoint:** PHASE3SHA
+**Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-3.md
 
 ## Phase 4: The rule is written down
 

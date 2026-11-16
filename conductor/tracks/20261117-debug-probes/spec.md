@@ -115,9 +115,11 @@ pair). The audit in Phase 2 records that finding rather than changing those game
 - **FR-9** — `insightsSummary`'s per-game accuracy ranking uses answers only; a
   game's probes can never raise or lower it.
 - **FR-10** — `e2e/journeys/fix-it-machine.spec.ts` taps a card that is not the bug
-  card before repairing, then asserts from the stored progress that the game has
-  probes at or above one, that its wrong count is what the wrong tray choices
-  explain, and that its accuracy is 100% for the session.
+  card before repairing, then asserts from the saved progress after leaving that
+  the game has exactly one probe, that its rolling answer window holds exactly the
+  six misses the session really made (three stopped runs, three distractor tools),
+  and that the abandoned session's win/counter totals are untouched. A seventh
+  mark in the window is the defect coming back.
 
 ## Non-Functional Requirements
 
@@ -138,8 +140,8 @@ pair). The audit in Phase 2 records that finding rather than changing those game
   counter intact (covers FR-1).
 - **AC-2** — A result recorded with probes reports the same accuracy and the same
   adaptive window as the identical result recorded without them (covers FR-2, FR-3).
-- **AC-3** — A completed Fix-It session with exploration taps stores the probes, not
-  the wrong answers (covers FR-4, FR-6, FR-10).
+- **AC-3** — A Fix-It session with exploration taps stores the probes, not the wrong
+  answers, whether it was completed or abandoned (covers FR-4, FR-6, FR-10).
 - **AC-4** — A missed card tap still raises the hint ladder (covers FR-7).
 - **AC-5** — The Learning Progress overlay shows looks for a game that has them and
   shows nothing for a game that does not (covers FR-8).
