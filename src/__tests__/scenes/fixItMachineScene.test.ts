@@ -98,6 +98,7 @@ interface SceneInternals {
   solvedThisRound: boolean;
   sessionCorrect: number;
   sessionWrong: number;
+  sessionProbes: number;
   completedRounds: number;
   machine?: Record<string, MockFn>;
   hintBand?: Record<string, MockFn>;
@@ -423,7 +424,7 @@ describe("FixItMachineScene diagnosis", () => {
     expect(internals(scene).trayActions).toContain(correctAction(round));
   });
 
-  it("bounces a card that is not the wrong one and records the miss", () => {
+  it("bounces a card that is not the wrong one and records a look, not a miss", () => {
     const scene = new FixItMachineScene(mulberry32(1234));
     scene.create();
 
@@ -431,7 +432,9 @@ describe("FixItMachineScene diagnosis", () => {
 
     expect(internals(scene).trayOpen).toBe(false);
     expect(mockAudio.playIncorrect).toHaveBeenCalledTimes(1);
-    expect(internals(scene).sessionWrong).toBe(1);
+    // Searching is not answering: the tap is a probe, and no wrong answer lands.
+    expect(internals(scene).sessionProbes).toBe(1);
+    expect(internals(scene).sessionWrong).toBe(0);
     expect(internals(scene).wrongTaps).toBe(1);
   });
 
@@ -482,7 +485,8 @@ describe("FixItMachineScene diagnosis", () => {
     scene.create();
 
     tapInnocentCard(scene);
-    expect(internals(scene).sessionWrong, "a card that is not the bug is a miss").toBe(1);
+    expect(internals(scene).sessionProbes, "a card that is not the bug is a look").toBe(1);
+    expect(internals(scene).sessionWrong, "looking is not a wrong answer").toBe(0);
     expect(internals(scene).sessionCorrect).toBe(0);
 
     tapWrongCard(scene);
@@ -493,7 +497,24 @@ describe("FixItMachineScene diagnosis", () => {
 
     runTape(scene);
     expect(internals(scene).sessionCorrect, "the solve records one more").toBe(3);
-    expect(internals(scene).sessionWrong, "a repair adds no miss").toBe(1);
+    expect(internals(scene).sessionWrong, "a repair adds no miss").toBe(0);
+    expect(internals(scene).sessionProbes, "the repair adds no look either").toBe(1);
+  });
+
+  it("still scores a distractor tool as a wrong answer", () => {
+    const scene = new FixItMachineScene(mulberry32(1234));
+    scene.create();
+    tapWrongCard(scene);
+    const wrongIndex = internals(scene).trayActions.findIndex(
+      (action) => action !== correctAction(currentRound(scene)),
+    );
+    if (wrongIndex < 0) throw new Error("round has no distractor");
+
+    tapTray(scene, wrongIndex);
+
+    // The tray is where the child answers, so a distractor there is a miss.
+    expect(internals(scene).sessionWrong).toBe(1);
+    expect(internals(scene).sessionProbes).toBe(0);
   });
 
   it("draws the divergence band and the machine's arm at two missed taps", () => {

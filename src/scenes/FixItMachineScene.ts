@@ -416,7 +416,13 @@ export class FixItMachineScene extends ChoiceRoundScene {
     }
   }
 
-  /** A tape card tap: name the wrong card to diagnose, anything else bounces. */
+  /**
+   * A tape card tap: name the wrong card to diagnose, anything else bounces.
+   *
+   * A tap on a card that is not the wrong one is how a child *finds* the fault,
+   * so it is recorded as a probe — counted for the parent, never scored. The
+   * tray is where answering happens, and the hint ladder still counts the miss.
+   */
   private tapCard(index: number): void {
     if (this.inputLocked || this.running) return;
     const round = this.rounds[this.roundIndex];
@@ -430,8 +436,8 @@ export class FixItMachineScene extends ChoiceRoundScene {
       return;
     }
 
-    this.noteWrongTap();
-    this.reactWrong(present(this.cardRects[index], this.cardImages[index]), () =>
+    this.noteMissedTap();
+    this.reactProbe(present(this.cardRects[index], this.cardImages[index]), () =>
       this.cardRects[index].setAngle(0),
     );
   }
@@ -452,14 +458,18 @@ export class FixItMachineScene extends ChoiceRoundScene {
       return;
     }
 
-    this.noteWrongTap();
+    this.noteMissedTap();
     this.reactWrong(present(this.trayRects[index], this.trayImages[index]), () =>
       this.trayRects[index].setAngle(0),
     );
   }
 
-  /** Counts a tap that missed, and offers the hint its count earns (FR-11). */
-  private noteWrongTap(): void {
+  /**
+   * Counts a tap that missed — a probe or a wrong answer alike — and offers the
+   * hint its count earns (FR-11). Being stuck is the same whether the miss was
+   * scored or not, so the ladder reads one counter.
+   */
+  private noteMissedTap(): void {
     this.wrongTaps += 1;
     const level = hintLevelFor(this.wrongTaps);
     if (level <= this.hintLevel) return;

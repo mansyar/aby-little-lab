@@ -94,6 +94,9 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /** Incorrect taps recorded this session (flushed to progress on completion). */
   private sessionWrong = 0;
 
+  /** Exploratory taps recorded this session (flushed with the other taps). */
+  private sessionProbes = 0;
+
   /** Delay before the next round after a correct answer (ms). */
   protected readonly NEXT_ROUND_DELAY: number = 700;
 
@@ -210,9 +213,10 @@ export abstract class GameSceneBase extends Phaser.Scene {
   /**
    * Folds an abandoned session's taps into the rolling adaptive window.
    *
-   * Only the window moves: the cumulative counters and the win count describe
-   * completed sessions, while the play count still counts every game the child
-   * starts, abandoned or not. The session counters are zeroed after the write
+   * Only the window and the probe count move: the cumulative answer counters
+   * and the win count describe completed sessions, while the play count still
+   * counts every game the child starts, abandoned or not, and a probe is not an
+   * answer. The session counters are zeroed after the write
    * because scene instances are reused across visits — left standing, the next
    * visit would carry this visit's taps and report them a second time. A
    * completed session has already zeroed them, so it is never flushed twice.
@@ -220,10 +224,11 @@ export abstract class GameSceneBase extends Phaser.Scene {
   private flushPendingTaps(): void {
     const gameId = this.resolvedGameId;
     if (gameId === undefined) return;
-    if (this.sessionCorrect === 0 && this.sessionWrong === 0) return;
-    recordGameTaps(gameId, this.sessionCorrect, this.sessionWrong);
+    if (this.sessionCorrect === 0 && this.sessionWrong === 0 && this.sessionProbes === 0) return;
+    recordGameTaps(gameId, this.sessionCorrect, this.sessionWrong, this.sessionProbes);
     this.sessionCorrect = 0;
     this.sessionWrong = 0;
+    this.sessionProbes = 0;
   }
 
   /**
@@ -434,6 +439,15 @@ export abstract class GameSceneBase extends Phaser.Scene {
   }
 
   /**
+   * Records an exploratory touch — a look at something that was not an answer.
+   * It is counted for the parent and never scored: no accuracy, no win and no
+   * adaptive window, because a child searching is not a child answering.
+   */
+  protected recordProbe(): void {
+    this.sessionProbes += 1;
+  }
+
+  /**
    * Shared wrong-answer reaction: the gentle descending incorrect tone, a
    * learning-progress record, and Professor Hoot's nod — never a penalty, so
    * the child simply tries again. When `targets` is given they also receive
@@ -455,8 +469,35 @@ export abstract class GameSceneBase extends Phaser.Scene {
     onComplete?: () => void,
     onPreWiggle?: () => void,
   ): void {
+    this.reactMiss(() => this.recordWrong(), targets, onComplete, onPreWiggle);
+  }
+
+  /**
+   * Shared exploration reaction: the same gentle tone, nod and
+   * reduced-motion-aware wiggle as {@link reactWrong}, recorded as a probe
+   * instead of a wrong answer.
+   *
+   * A debugging game asks the child to *find* which thing is wrong, so a touch
+   * that misses is a look rather than a failed answer. Scenes whose wrong tap is
+   * a genuine answer keep calling {@link reactWrong}.
+   */
+  protected reactProbe(
+    targets?: Phaser.GameObjects.GameObject[],
+    onComplete?: () => void,
+    onPreWiggle?: () => void,
+  ): void {
+    this.reactMiss(() => this.recordProbe(), targets, onComplete, onPreWiggle);
+  }
+
+  /** The feedback both a wrong answer and a probe share; only the record differs. */
+  private reactMiss(
+    record: () => void,
+    targets?: Phaser.GameObjects.GameObject[],
+    onComplete?: () => void,
+    onPreWiggle?: () => void,
+  ): void {
     this.audioManager.playIncorrect();
-    this.recordWrong();
+    record();
     this.mascot?.nod();
     onPreWiggle?.();
 
@@ -483,9 +524,10 @@ export abstract class GameSceneBase extends Phaser.Scene {
    */
   protected completeGame(gameId: GameId): void {
     this.inputLocked = true;
-    recordGameResult(gameId, this.sessionCorrect, this.sessionWrong);
+    recordGameResult(gameId, this.sessionCorrect, this.sessionWrong, this.sessionProbes);
     this.sessionCorrect = 0;
     this.sessionWrong = 0;
+    this.sessionProbes = 0;
     this.audioManager.playWin();
     this.mascot?.cheer(true);
     createWinCelebration(this, this.cameras.main.centerX, this.cameras.main.centerY);

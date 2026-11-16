@@ -41,17 +41,20 @@
 - **Dependencies:** none
 - **Decisions:** D2, D4
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P2.T1: Add `recordProbe()` to the base scene and flush it with the session** — covers: FR-5
-  - [ ] **P2.T1.1: Completion and the abandoned-session path both carry the probe count**
-  - [ ] **P2.T1.2: A scene that never probes records none and its flushed result is unchanged**
-- [ ] **P2.T2: Record a missed card tap as a probe in `FixItMachineScene`** — covers: FR-6
-  - [ ] **P2.T2.1: The bug-card tap and both tray outcomes keep their current scoring**
-- [ ] **P2.T3: Keep the hint ladder driven by every missed tap** — covers: FR-7
-  - [ ] **P2.T3.1: Two probes still raise the band hint; six still reach the tray pulse**
-- [ ] **P2.T4: Audit every other scene's tap scoring and record the result** — covers: FR-6, D8
-  - [ ] **P2.T4.1: The audit lands in the phase evidence with the call sites quoted**
+- [x] **P2.T1: Add `recordProbe()` to the base scene and flush it with the session** — covers: FR-5
+  - [x] **P2.T1.1: Completion and the abandoned-session path both carry the probe count**
+  - [x] **P2.T1.2: A scene that never probes records none and its flushed result is unchanged**
+- [x] **P2.T2: Record a missed card tap as a probe in `FixItMachineScene`** — covers: FR-6
+  - [x] **P2.T2.1: The bug-card tap and both tray outcomes keep their current scoring**
+- [x] **P2.T3: Keep the hint ladder driven by every missed tap** — covers: FR-7
+  - [x] **P2.T3.1: Two probes still raise the band hint; six still reach the tray pulse**
+- [x] **P2.T4: Audit every other scene's tap scoring and record the result** — covers: FR-6, D8
+  - [x] **P2.T4.1: The audit lands in the phase evidence with the call sites quoted**
+**Result:** verified
+**Checkpoint:** PHASE2SHA
+**Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-2.md
 
 ## Phase 3: The parent sees looking, not failing
 

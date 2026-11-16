@@ -341,7 +341,7 @@ describe("ChoiceRoundScene round lifecycle", () => {
     expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
     expect(scene.isLocked).toBe(true);
     expect(mockRecordGameResult).toHaveBeenCalledTimes(1);
-    expect(mockRecordGameResult).toHaveBeenCalledWith("take-away", 2, 0);
+    expect(mockRecordGameResult).toHaveBeenCalledWith("take-away", 2, 0, 0);
   });
 
   it("reverts the success flash to the card colour", () => {
@@ -450,7 +450,7 @@ describe("ChoiceRoundScene round lifecycle", () => {
     // Exactly one wrong tap is recorded toward learning progress.
     scene.completeNow();
     expect(mockRecordGameResult).toHaveBeenCalledTimes(1);
-    expect(mockRecordGameResult).toHaveBeenCalledWith("take-away", 0, 1);
+    expect(mockRecordGameResult).toHaveBeenCalledWith("take-away", 0, 1, 0);
   });
 
   it("runs the wrong-answer hook before the wiggle completion", () => {
