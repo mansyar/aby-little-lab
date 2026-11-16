@@ -15,16 +15,20 @@
 - **Dependencies:** none
 - **Decisions:** D2, D3, D4, D6, D9, D11
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P1.T1: Six actions, three families, six toys** — covers: FR-2, FR-4
-  - [ ] `ACTION_ICONS` with `spray`/`pour` (liquid), `paint`/`polish` (coat), `lift`/`stack` (move), each pair differing by silhouette; `TOYS` for the six rounds; `ACTIONS_BY_FAMILY`; a test asserting every family has exactly two members and every icon belongs to one.
-- [ ] **P1.T2: The six-round ladder and the one-bug generator** — covers: FR-3, FR-12
-  - [ ] `ROUND_SPECS` for card counts 3, 3, 4, 4, 5, 5 and bands `different`, `different`, `related`, `related`, `same-family`, `same-family`; `buildRound` seeded through the shared `Rng` seam; tests asserting exactly one differing card, a substitution (same position, different action), never index 0, no repeated icon in the correct program, and the same seed dealing the same round.
-- [ ] **P1.T3: Diagnosis, tray, hint level and solve** — covers: FR-8, FR-9, FR-11
-  - [ ] `isWrongCard`, `trayCandidates` (correct action plus two band distractors, seeded order), `hintLevelFor(wrongTaps)` returning 1 at 2, 2 at 4, 3 at 6 and 0 below 2, `isSolved`; tests for the wrong-card no-op, a distractor never equalling the correct action, and each level's boundary.
-- [ ] **P1.T4: Restate the suite and journey counts** — covers: FR-17
-  - [ ] The new test file changes the governed counts, so `README.md`, `docs/TDD.md` §10.2/§10.3 and `docs/perf-baseline.md` (live header, both tables) state the counts this phase's run measures (D9).
+- [x] **P1.T1: Six actions, three families, six toys** — covers: FR-2, FR-4
+  - [x] `ACTION_ICONS` with `spray`/`pour` (liquid), `paint`/`polish` (coat), `lift`/`stack` (move), each pair differing by silhouette; `TOYS` for the six rounds; `ACTIONS_BY_FAMILY`; a test asserting every family has exactly two members and every icon belongs to one.
+- [x] **P1.T2: The six-round ladder and the one-bug generator** — covers: FR-3, FR-12
+  - [x] `ROUND_SPECS` for card counts 3, 3, 4, 4, 5, 5 and bands `different`, `different`, `related`, `related`, `same-family`, `same-family`; `buildRound` seeded through the shared `Rng` seam; tests asserting exactly one differing card, a substitution (same position, different action), never index 0, no repeated icon in the correct program, and the same seed dealing the same round.
+- [x] **P1.T3: Diagnosis, tray, hint level and solve** — covers: FR-8, FR-9, FR-11
+  - [x] `isWrongCard`, `trayCandidates` (correct action plus two band distractors, seeded order), `hintLevelFor(wrongTaps)` returning 1 at 2, 2 at 4, 3 at 6 and 0 below 2, `isSolved`; tests for the wrong-card no-op, a distractor never equalling the correct action, and each level's boundary.
+- [x] **P1.T4: Restate the suite and journey counts** — covers: FR-17
+  - [x] The new test file changes the governed counts, so `README.md`, `docs/TDD.md` §10.2/§10.3 and `docs/perf-baseline.md` (live header, both tables) state the counts this phase's run measures (D9).
+
+**Result:** PASS — gate exit 0 (151 files / 3,270 tests, coverage 97.24/91.64/96.33/98.32, entry 182.5 kB, docs 5/5).
+**Checkpoint:** b80ea550
+**Evidence:** conductor/tracks/20261116-fix-it-machine/verification/phase-1.md
 
 ## Phase 2: Six tools, four faces and six toys, in the game's own chunk
 
