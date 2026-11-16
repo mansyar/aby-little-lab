@@ -111,5 +111,5 @@
 - [x] **P5.T1: Hoist the look label out of the row loop** — covers: R1-1
   - [x] **P5.T1.1: The rendered line is unchanged, singular and plural included**
 **Result:** verified
-**Checkpoint:** PHASE5SHA
+**Checkpoint:** b308ae20
 **Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-5.md
