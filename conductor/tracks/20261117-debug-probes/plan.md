@@ -15,19 +15,22 @@
 - **Dependencies:** none
 - **Decisions:** D1, D3, D6
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P1.T1: Add `probes` to `GameProgress` and the default entry** — covers: FR-1
-  - [ ] **P1.T1.1: Default is 0 and the type comment says what a probe is**
-- [ ] **P1.T2: Backfill `probes` in `normalizeProgress`** — covers: FR-1
-  - [ ] **P1.T2.1: A save with no probe field normalises to 0 with every other counter intact**
-  - [ ] **P1.T2.2: A negative, fractional or non-numeric value normalises to 0**
-- [ ] **P1.T3: Let `recordResult` and `recordTaps` carry probes** — covers: FR-2, FR-3
-  - [ ] **P1.T3.1: Probes add to `probes` only; accuracy and `recent` are identical with and without them**
-  - [ ] **P1.T3.2: An omitted probe count behaves as 0**
-- [ ] **P1.T4: Forward probes through `recordGameResult` and `recordGameTaps`** — covers: FR-4, NFR-5
-  - [ ] **P1.T4.1: The probe count rides the existing single `mutate`**
-  - [ ] **P1.T4.2: A backup exported and re-imported keeps its probes**
+- [x] **P1.T1: Add `probes` to `GameProgress` and the default entry** — covers: FR-1
+  - [x] **P1.T1.1: Default is 0 and the type comment says what a probe is**
+- [x] **P1.T2: Backfill `probes` in `normalizeProgress`** — covers: FR-1
+  - [x] **P1.T2.1: A save with no probe field normalises to 0 with every other counter intact**
+  - [x] **P1.T2.2: A negative, fractional or non-numeric value normalises to 0**
+- [x] **P1.T3: Let `recordResult` and `recordTaps` carry probes** — covers: FR-2, FR-3
+  - [x] **P1.T3.1: Probes add to `probes` only; accuracy and `recent` are identical with and without them**
+  - [x] **P1.T3.2: An omitted probe count behaves as 0**
+- [x] **P1.T4: Forward probes through `recordGameResult` and `recordGameTaps`** — covers: FR-4, NFR-5
+  - [x] **P1.T4.1: The probe count rides the existing single `mutate`**
+  - [x] **P1.T4.2: A backup exported and re-imported keeps its probes**
+**Result:** verified
+**Checkpoint:** PHASE1SHA
+**Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-1.md
 
 ## Phase 2: Fix-It stops scoring exploration
 

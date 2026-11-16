@@ -414,6 +414,7 @@ describe("Storage utilities", () => {
         wins: 0,
         correct: 0,
         wrong: 0,
+        probes: 0,
         lastPlayedAt: null,
         recent: [],
       });
@@ -1019,6 +1020,7 @@ describe("progress recording", () => {
       wins: 0,
       correct: 0,
       wrong: 0,
+      probes: 0,
       lastPlayedAt: null,
       recent: [],
     });
@@ -1103,6 +1105,7 @@ describe("progress recording", () => {
       wins: 0,
       correct: 0,
       wrong: 0,
+      probes: 0,
       lastPlayedAt: null,
       recent: [],
     });
@@ -1111,6 +1114,7 @@ describe("progress recording", () => {
       wins: 0,
       correct: 0,
       wrong: 0,
+      probes: 0,
       lastPlayedAt: null,
       recent: [],
     });
@@ -1154,6 +1158,58 @@ describe("progress recording", () => {
     expect(progress.plays).toBe(1);
   });
 
+  it("stores probes without scoring them as answers", () => {
+    recordGameResult("fix-it-machine", 2, 1, 4);
+
+    const progress = getProgress()["fix-it-machine"];
+    expect(progress.probes).toBe(4);
+    expect(progress.correct).toBe(2);
+    expect(progress.wrong).toBe(1);
+    // Accuracy is answers only: 2 of 3, never 2 of 7.
+    expect(progress.correct / (progress.correct + progress.wrong)).toBeCloseTo(2 / 3);
+    expect(progress.recent).toEqual([true, true, false]);
+  });
+
+  it("flushes an abandoned session's probes in the same write as its taps", () => {
+    recordGamePlay("fix-it-machine");
+    recordGameResult("fix-it-machine", 3, 0, 2);
+    recordGameTaps("fix-it-machine", 1, 1, 5);
+
+    const progress = getProgress()["fix-it-machine"];
+    expect(progress.probes).toBe(7);
+    expect(progress.correct).toBe(3);
+    expect(progress.wrong).toBe(0);
+    expect(progress.wins).toBe(1);
+  });
+
+  it("keeps a probe count through export and import", () => {
+    recordGameResult("fix-it-machine", 2, 0, 3);
+
+    const payload = exportSave();
+    localStorage.clear();
+    applyImport("replace", payload);
+
+    const progress = getProgress()["fix-it-machine"];
+    expect(progress.probes).toBe(3);
+    expect(progress.correct).toBe(2);
+  });
+
+  it("reads a save written before probes existed as zero probes", () => {
+    recordGameResult("shape-sorter", 4, 1);
+    const raw = JSON.parse(localStorage.getItem("abby-little-lab:v2") ?? "{}");
+    for (const profile of raw.profiles ?? []) {
+      for (const entry of Object.values(profile.progress ?? {})) {
+        delete (entry as { probes?: number }).probes;
+      }
+    }
+    localStorage.setItem("abby-little-lab:v2", JSON.stringify(raw));
+
+    const progress = getProgress()["shape-sorter"];
+    expect(progress.probes).toBe(0);
+    expect(progress.correct).toBe(4);
+    expect(progress.wrong).toBe(1);
+  });
+
   it("leaves other games untouched when an abandoned session is recorded", () => {
     recordGameTaps("shape-sorter", 2, 0);
 
@@ -1162,6 +1218,7 @@ describe("progress recording", () => {
       wins: 0,
       correct: 0,
       wrong: 0,
+      probes: 0,
       lastPlayedAt: null,
       recent: [],
     });
@@ -1692,6 +1749,7 @@ describe("when a read cannot be performed", () => {
       wins: 0,
       correct: 0,
       wrong: 0,
+      probes: 0,
       lastPlayedAt: null,
       recent: [],
     });

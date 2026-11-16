@@ -48,6 +48,13 @@ export interface GameProgress {
   correct: number;
   /** Incorrect answer taps across completed sessions. */
   wrong: number;
+  /**
+   * Exploratory taps across completed sessions: a touch that looked at
+   * something without answering a question (Fix-It Machine's card taps).
+   * Counted, never scored — it reaches no accuracy figure, no win and no
+   * adaptive window.
+   */
+  probes: number;
   /** ISO timestamp of the most recent play, or null when never played. */
   lastPlayedAt: string | null;
   /**
