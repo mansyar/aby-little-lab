@@ -199,7 +199,7 @@ src/
 │       ├── ResetModal.ts
 │       ├── VoiceRow.ts
 │       └── primitives.ts
-├── game/                                  # 71 files: 41 modules, art/ (16), hub/ (14)
+├── game/                                  # 73 files: 43 modules, art/ (16), hub/ (14)
 │   ├── adaptiveLogic.ts
 │   ├── addItUpLogic.ts
 │   ├── alphabetLogic.ts
@@ -213,6 +213,8 @@ src/
 │   ├── errorCapture.ts
 │   ├── feelingsFacesLogic.ts
 │   ├── firstSoundsLogic.ts
+│   ├── fixItMachineArt.ts
+│   ├── fixItMachineLogic.ts
 │   ├── gameRegistry.ts
 │   ├── hubGroups.ts
 │   ├── hubGrid.ts
@@ -347,13 +349,14 @@ The `src/game/` logic modules are importable without Phaser, with one exception:
 | `items/` | 27 | `airplane`, `apple`, `ball`, `banana`, `bed`, `bell`, `boat`, `bone`, `boot`, `bug`, `car`, `carrot`, `cup`, `duck`, `fish`, `fox`, `hat`, `house`, `kite`, `lilypad`, `map`, `mushroom`, `peanut`, `sock`, `sun`, `tree`, `umbrella` |
 | `letters/` | 26 | `letter_a` … `letter_z` |
 | `numbers/` | 10 | `numeral_0` … `numeral_9` |
+| `machine/` | 16 | Fix-It Machine's four machine poses (`machine_idle`, `machine_working`, `machine_puzzled`, `machine_happy`), six tool pictograms (`machine_<action>`) and six toy goals (`machine_<toy>`) — loaded with that game's chunk only |
 | `robot/` | 6 | Robot Path's `robot_idle`, `robot_walk`, `robot_puzzled`, `robot_rock`, `robot_star` and the `robot_go` run button — loaded with that game's chunk only |
 | `shadows/` | 12 | `shadow_airplane`, `_ball`, `_bell`, `_boat`, `_boot`, `_car`, `_house`, `_kite`, `_mushroom`, `_sock`, `_tree`, `_umbrella` |
 | `shapes/` | 36 | 18 `shape_*` outlines and their 18 `cutout_*` filled twins |
-| `stickers/` | 23 | `sticker_<game>` in `snake_case`, one per game |
+| `stickers/` | 24 | `sticker_<game>` in `snake_case`, one per game |
 | `stories/` | 45 | 15 story strips of 3 panels (`story_*`) — loaded with the Story Order chunk only |
 | `toys/` | 7 | `teddy_bear`, `toy_ball`, `toy_block`, `toy_box`, `toy_car`, `toy_drum`, `toy_rocket` |
-| `ui/` | 39 | 16 shared UI glyphs (`arrow_up`, `arrow_down`, `bubble`, `card_back`, `equals`, `group_letters`, `group_numbers`, `group_play`, `group_stories`, `group_thinking`, `icon_speaker`, `mascot_idle`, `mascot_celebrate`, `minus`, `plus`, `sleep_zzz`) plus the 23 Hub tiles: 22 in `ui/tiles/` and `tile_feelings_faces` beside them |
+| `ui/` | 40 | 16 shared UI glyphs (`arrow_up`, `arrow_down`, `bubble`, `card_back`, `equals`, `group_letters`, `group_numbers`, `group_play`, `group_stories`, `group_thinking`, `icon_speaker`, `mascot_idle`, `mascot_celebrate`, `minus`, `plus`, `sleep_zzz`) plus the 24 Hub tiles: 23 in `ui/tiles/` and `tile_feelings_faces` beside them |
 | **Total** | **244** | |
 
 `shadows/` art is derived from the matching `items/` silhouette rather than drawn separately. Art rules — palette, stroke weights, the 512×512 grid, ASCII-only markup — live in [`docs/SVG_STYLE.md`](./SVG_STYLE.md).
@@ -428,7 +431,7 @@ Game art leaves the shell by two mechanisms, and both are ordinary static module
 
 **Loading feedback and the missing-key path.** A scene shows the shared textless cue from `src/components/ArtLoadingCue.ts` (`createArtLoadingCue(scene)`) while its groups load and clears it when they land; the cue is opacity-only under reduced motion and never waits on the network. A key that is missing despite its declaration degrades to the neutral placeholder from `src/game/art/placeholder.ts`, logs one `console.warn` per key, and leaves the round completable (FR-6) — never an exception, never a blocked loader.
 
-**Robot Path** does the same: `src/game/robotPathArt.ts` imports its six drawings as `?raw`, exports `ROBOT_PATH_ASSETS` in the order the scene draws them, and exposes `preloadRobotPathArt(scene)`, so the strings land in the Robot Path chunk. The scene's `preload()` calls it before the first round, and the Hub's idle prewarm reaches the same table through the `robot` loader in `src/game/hub/artGroups.ts`.
+**Robot Path** does the same: `src/game/robotPathArt.ts` imports its six drawings as `?raw`, exports `ROBOT_PATH_ASSETS` in the order the scene draws them, and exposes `preloadRobotPathArt(scene)`, so the strings land in the Robot Path chunk. The scene's `preload()` calls it before the first round, and the Hub's idle prewarm reaches the same table through the `robot` loader in `src/game/hub/artGroups.ts`. **Fix-It Machine** follows the same path with sixteen drawings in `src/game/fixItMachineArt.ts` (`FIX_IT_MACHINE_ASSETS`, `preloadFixItMachineArt`) and the `machine` loader.
 
 **Story Order** keeps its own table for the same reason: `src/game/storyOrderArt.ts` imports the 45 panels as `?raw`, exports `STORY_PANEL_ASSETS` in `STORY_POOL` solution order, and exposes `preloadStoryOrderArt(scene)`, which registers each panel at `textureSizeFor(key)` through `toDataUri`. `StoryOrderScene.preload()` calls it, so the 45 SVG strings land in the Story Order chunk.
 
@@ -683,6 +686,57 @@ Every registry entry carries a `group` (`letters`, `numbers`, `thinking`, `play`
 `src/game/hub/groupChips.ts` builds the row once per grid lifetime: a cream plate, a glyph, a 14px word and a 96×84 hit `Zone` per chip. The tap goes through the zone rather than the plate so the row cannot be mistaken for a game tile by the launch tests or the browser bridge, and the selected state is fills and strokes only — no tween, because NFR-4 gives the chip row none. A chip tap calls `HubGrid.setGroup`, which repaints the row, rebuilds the board through `buildFilteredGrid`, hides the page dots on a narrow viewport and notifies the owner through `onBoardChange`; `HubScene` speaks the group's name through `speakSentence`, and the selection resets to All in `resetForVisit()`, so nothing is persisted.
 
 Glyph ownership: the five `group_*` files live in `src/assets/svg/ui/` and are explicit `SHELL_ASSETS` rows — the boot glob keeps only `tile_`/`sticker_` stems, and `ui/**` would inline the lazy glyphs group — with a `/^group_/ → icon` tier rule, so they rasterise at 160px for a 40px display. The All chip ships no art: its 2×2 grid is drawn as four 12px squares, which also serves as the fallback for a group whose texture is absent, so a chip can never paint Phaser's missing-texture box.
+
+### 4.11 Fix-It Machine
+
+Fix-It Machine is the suite's debugging game: the one place where the child is
+shown a program that is already written, and the wrong step is the puzzle.
+`src/game/fixItMachineLogic.ts` owns the model. Six icons in three families —
+`spray`/`pour` (liquid), `paint`/`polish` (coat), `lift`/`stack` (move) — carry the
+action, and `familyPartner` names the sibling an icon shares a family with.
+
+Rounds are authored rather than derived. `ROUND_SPECS` fixes each of the six
+rounds as a real repair job: its toy, its program (3, 3, 4, 4, 5 and 5 cards), the
+one card that is a substitution, the tool that belongs there and the three tools
+the tray offers. `buildRound` reads a spec and fills in the display data, so a
+round cannot be "generated" into something a machine would not actually do. The
+wrong card is never card 0, and its tool never appears elsewhere on the tape,
+which is what makes the diagnosis decidable for a four-year-old: the wrong step
+always follows a correct one and never looks like a second occurrence of itself.
+`isWrongCard`, `correctAction`, `applyRepair` and `isSolved` are the whole
+interface the scene needs, and `hintLevelFor` turns missed taps into the three
+hint levels (2, 4 and 6 taps).
+
+The ladder is how close the wrong tool sits, not how many cards there are:
+`SimilarityBand` is `different` (a family the routine never uses), `related` (a
+family it does use) or `same-family` (the sibling of the right action), and
+`fixItMachineLogic.test.ts` asserts each round's authored substitution holds the
+band its spec claims.
+
+`src/scenes/FixItMachineScene.ts` extends `ChoiceRoundScene` for whole-tape
+resolution but drives the round itself. Five 96×96 tape slots sit at `y = 552`
+(centres 512 ± 108, so 296 through 728), three 96×96 tray slots at `y = 664`
+(centres 404, 512 and 620) and the 112×112 Go button at (896, 664) — every
+target at or above the 64 px floor and no two overlapping. `preload()`
+rasterizes the sixteen drawings of `FIX_IT_MACHINE_ASSETS` into the game's own
+chunk; the tape outlines, tray plates and Go glyph are `Graphics`, drawn from the
+same constants that place their hit rects.
+
+The run loop is the game's feedback model. Go plays the tape at `STEP_MS = 550`
+per card through one guarded token, so a run superseded by a round change stops
+touching the board. A repaired tape resolves the round and fills the dot; an
+unrepaired one sets the machine to its puzzled pose, rings the wrong card and
+leaves the tape, the round index and the child's input exactly as they were — the
+funny result is the diagnosis, not a penalty (D4). Tapping a card that is not the
+bug knocks it and counts a missed tap; tapping the bug opens the tray, and the
+right tool rewrites that one card in place.
+
+The `?e2e=1` bridge publishes the bench through `e2eFixItMachine()`
+([§10.5](#105-the-browser-journey-layer)): `round`, `solution`, `tape`, `bugIndex`,
+`solved`, `wrongTaps`, `hintLevel`, `failedRuns`, `trayOpen`, `cards` (index and
+centre), `tray` (index, action and centre), `go`, `machine` and `goal`. The
+counters are the scene's own, so a journey can tell a stopped run from an
+advanced round without sleeping on a timer.
 
 ---
 
@@ -1020,6 +1074,8 @@ An entry is `{ at, kind, message, stack }`. `kind` is `error` or `rejection`, so
 | `popFreezeLogic.ts` | bubble spawn timing and pop targets |
 | `profileLogic.ts` | profile CRUD, avatar map, `migrateV1`, `normalizeV2` |
 | `progressLogic.ts` | per-game stats, mastery, accuracy, 7-day activity |
+| `fixItMachineArt.ts` | `FIX_IT_MACHINE_ASSETS` (the sixteen Fix-It Machine drawings) + `preloadFixItMachineArt` (imports Phaser types only) |
+| `fixItMachineLogic.ts` | the Fix-It Machine model: `ACTION_FAMILIES`, `ROUND_SPECS`, `buildRound`, `isWrongCard`, `correctAction`, `applyRepair`, `hintLevelFor` and `isSolved` over six authored rounds |
 | `robotPathArt.ts` | `ROBOT_PATH_ASSETS` (the six Robot Path drawings) + `preloadRobotPathArt` (imports Phaser types only) |
 | `robotPathLogic.ts` | the Robot Path model: `DIRECTIONS`, `canPlace`, `removeFrom` (prefix only), `runProgram`, `firstDeviation`, `hintFor` and `buildPlaythrough` over a 3×3 board |
 | `shadowMatchLogic.ts` | shadow/object pairing and win test |
@@ -1059,7 +1115,7 @@ Games that do not fit the shape expose their own equivalents: `shapeSorterLogic.
 
 `updateRecentWindow(recent, { correct, wrong })` appends correct taps then wrong taps, keeps the last ten and never mutates its input. A session's taps are folded into the window when the session ends: `GameSceneBase` records them on completion, and on shutdown it also records the taps of a session the child abandoned. That flush writes the window only - `recordTaps` in `src/game/progressLogic.ts` leaves the cumulative `correct`, `wrong` and `wins` counters to completed sessions, and the `plays` counter alone is counted elsewhere, when the child starts a game from the Hub - and it zeroes the session counters afterwards, so a reused scene instance cannot report the same taps a second time. `bandShiftFor(recent)` returns `0` below the sample floor, `1` at ≥ 0.9 accuracy, `-1` below 0.6, else `0`. `shiftLadder(ladder, shift)` clamps every band into 1..3.
 
-Twenty-two games read the shift; every one of them samples `getAdaptiveBandShift(gameId)` exactly once in `create()`, so a playthrough never changes difficulty mid-round. Their taps all reach the window, because the flush is unconditional. Robot Path is the one game with no adaptive dimension: it never samples the shift, and its ladder is fixed.
+Twenty-two games read the shift; every one of them samples `getAdaptiveBandShift(gameId)` exactly once in `create()`, so a playthrough never changes difficulty mid-round. Their taps all reach the window, because the flush is unconditional. Robot Path and Fix-It Machine are the two games with no adaptive dimension: neither samples the shift, and both ladders are fixed.
 
 The fifteen band-ladder games receive the shift in six different ways:
 
@@ -1269,7 +1325,7 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 23 journeys across 18 spec files cover boot, all 23 launches, three rounds on each of the six mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 24 journeys across 19 spec files cover boot, all 24 launches, three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
 
 What this layer observes that the unit layer cannot:
 
@@ -1291,7 +1347,7 @@ pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 
 `pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
 
-**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 23 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 24 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
 **Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
 

@@ -123,13 +123,13 @@
 - **Dependencies:** none
 - **Decisions:** D10, D12
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P6.T1: The PRD section for game 24** — covers: FR-17
-  - [ ] PRD §3.24 states the mechanic, the six-round ladder, the repair loop and why the bug is a substitution; §2.2, §4.1 and §7 lists carry 24 and the `thinking` group carries 8.
-- [ ] **P6.T2: The TDD record** — covers: FR-17
-  - [ ] §2.2/§2.3, §3.3/§3.6, §4.1/§4.5, §7.3/§7.5 and §10.5 describe the scene, the logic module, the bridge hook, the counts and the journey suite as they now are.
-- [ ] **P6.T3: Product record and baseline** — covers: FR-17
-  - [ ] `conductor/product.md` gains the game's row, the cross-game notes it now touches (roster, groups, progress rows, shell keys, spoken rules) and a changelog entry; `product-guidelines.md` gains the debug-and-repair interaction pattern; the perf baseline gains the measured build-and-suite section.
-- [ ] **P6.T4: Validator and integrated gate** — covers: FR-17
-  - [ ] `node scripts/validate-docs.js` passes 5/5 on the final text and the full chain exits 0 on the committed tree.
+- [x] **P6.T1: The PRD section for game 24** — covers: FR-17
+  - [x] PRD §3.24 states the mechanic, the six-round ladder, the repair loop and why the bug is a substitution; §2.2, §4.1 and §7 lists carry 24 and the `thinking` group carries 8.
+- [x] **P6.T2: The TDD record** — covers: FR-17
+  - [x] §2.2/§2.3, §3.3/§3.6, §4.1/§4.5, §7.3/§7.5 and §10.5 describe the scene, the logic module, the bridge hook, the counts and the journey suite as they now are.
+- [x] **P6.T3: Product record and baseline** — covers: FR-17
+  - [x] `conductor/product.md` gains the game's row, the cross-game notes it now touches (roster, groups, progress rows, shell keys, spoken rules) and a changelog entry; `product-guidelines.md` gains the debug-and-repair interaction pattern; the perf baseline gains the measured build-and-suite section.
+- [x] **P6.T4: Validator and integrated gate** — covers: FR-17
+  - [x] `node scripts/validate-docs.js` passes 5/5 on the final text and the full chain exits 0 on the committed tree.
