@@ -29,7 +29,7 @@
   - [x] **P1.T4.1: The probe count rides the existing single `mutate`**
   - [x] **P1.T4.2: A backup exported and re-imported keeps its probes**
 **Result:** verified
-**Checkpoint:** PHASE1SHA
+**Checkpoint:** ce0b4292
 **Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-1.md
 
 ## Phase 2: Fix-It stops scoring exploration
