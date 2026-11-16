@@ -84,6 +84,68 @@ export async function holdCanvas(page: Page, point: GamePoint, ms: number): Prom
 }
 
 /**
+ * How long two animation frames may take before the canvas counts as stalled.
+ *
+ * A frame or two at 1 fps is a loaded runner; several seconds with no frame at
+ * all is a game loop that has stopped, and every gesture below depends on that
+ * loop to recognise the press it is given.
+ */
+export const FRAME_STALL_MS = 2_000;
+
+/** The number of consecutive frames that prove the canvas is still rendering. */
+const TICK_FRAMES = 2;
+
+/**
+ * Waits for `TICK_FRAMES` consecutive animation frames and returns how long they
+ * took, or null when they did not arrive inside `timeoutMs`.
+ *
+ * This is the liveness probe every gesture needs. Playwright's mouse events are
+ * delivered to the page, but a press only becomes a hold when the game's own
+ * loop advances: the parental gate counts three seconds of frames, and a scene
+ * that is not rendering never counts anything. Testing the loop directly keeps
+ * the failure honest — a stalled canvas says so, instead of looking like a press
+ * that was never recognised.
+ */
+export async function canvasTicks(
+  page: Page,
+  timeoutMs = FRAME_STALL_MS * 3,
+): Promise<number | null> {
+  return page.evaluate(
+    ({ frames, timeoutMs: limit }) =>
+      new Promise<number | null>((resolve) => {
+        const started = performance.now();
+        let seen = 0;
+        let settled = false;
+        const guard = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          resolve(null);
+        }, limit);
+        const step = () => {
+          seen += 1;
+          if (seen >= frames) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(guard);
+            resolve(performance.now() - started);
+            return;
+          }
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }),
+    { frames: TICK_FRAMES, timeoutMs },
+  );
+}
+
+/** The message every stalled-canvas failure carries. */
+function stalled(where: string): Error {
+  return new Error(
+    `the canvas stopped ticking ${where}: ${TICK_FRAMES} animation frames did not arrive within ${FRAME_STALL_MS} ms`,
+  );
+}
+
+/**
  * Presses a game-space point and holds until `reached` says the press has
  * landed, then releases.
  *
@@ -96,6 +158,13 @@ export async function holdCanvas(page: Page, point: GamePoint, ms: number): Prom
  * duration makes the journey independent of how fast the machine renders, and
  * costs nothing when it is fast. The timeout is generous because the point is to
  * fail on the state never arriving, not on the clock.
+ *
+ * The hold starts only once the canvas is provably ticking, and every wait
+ * inside it re-checks that. Under three Playwright workers on a 4-vCPU runner the
+ * game loop can stop for long enough that no press becomes a hold; waiting on the
+ * clock alone turns that into a bare "never reached its state" twenty seconds
+ * later, which reads like a product bug. The tick probe makes the real cause the
+ * message.
  */
 export async function holdCanvasUntil(
   page: Page,
@@ -104,13 +173,22 @@ export async function holdCanvasUntil(
   timeout = 20_000,
 ): Promise<void> {
   const at = toPagePoint(await canvasBox(page), point);
+
+  if ((await canvasTicks(page)) === null) {
+    throw stalled(`before the press at (${point.x}, ${point.y}) was sent`);
+  }
+
   await page.mouse.move(at.x, at.y);
   await page.mouse.down();
   try {
     const deadline = Date.now() + timeout;
     while (Date.now() < deadline) {
       if (await reached()) return;
-      await page.waitForTimeout(100);
+      // Each pass proves the loop is alive; a stall fails here, with its own
+      // message, rather than waiting out the timeout above.
+      if ((await canvasTicks(page, FRAME_STALL_MS)) === null) {
+        throw stalled(`while the press at (${point.x}, ${point.y}) was held`);
+      }
     }
     throw new Error(
       `the press at (${point.x}, ${point.y}) never reached its state in ${timeout} ms`,
