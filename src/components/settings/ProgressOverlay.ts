@@ -84,6 +84,18 @@ export interface ProgressOverlayDeps {
  * rows (plays, accuracy bar + %, mastery star, last played). Read-only:
  * switching the viewed profile never changes the active profile.
  */
+/**
+ * The looks a game's stats line carries, or an empty string when it has none.
+ *
+ * A game that records search taps (Fix-It Machine) shows them as their own
+ * number, so a parent sees the looking rather than reading it as failing. Games
+ * without probes render exactly the line they did before.
+ */
+function probesText(progress: Parameters<typeof getAccuracy>[0]): string {
+  const looks = progress?.probes ?? 0;
+  return looks > 0 ? `${looks} ${looks === 1 ? "look" : "looks"} · ` : "";
+}
+
 export class ProgressOverlay {
   private readonly deps: ProgressOverlayDeps;
   private page = 0;
@@ -279,14 +291,6 @@ export class ProgressOverlay {
         )
         .setOrigin(0, 0.5);
       this.deps.overlayObjects.push(name);
-
-      // A game that records looks (Fix-It Machine's search taps) shows them as
-      // their own number: a parent should see the looking, not read it as
-      // failing. Games without probes render exactly what they did before.
-      const probesText = (progress: Parameters<typeof getAccuracy>[0]): string => {
-        const looks = progress?.probes ?? 0;
-        return looks > 0 ? `${looks} ${looks === 1 ? "look" : "looks"} · ` : "";
-      };
 
       const stats = scene.add
         .text(

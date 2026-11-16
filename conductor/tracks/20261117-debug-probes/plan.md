@@ -96,3 +96,20 @@
 **Result:** verified
 **Checkpoint:** 49bec555
 **Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-4.md
+
+## Phase 5: Review Fixes (R1)
+
+- **Goal:** R1-1 is closed — the look label is a module helper, not a closure rebuilt inside the drawing loop.
+- **Depends on:** Phase 4
+- **Covers:** review finding R1-1
+- **Touches:** `src/components/settings/ProgressOverlay.ts`
+- **Dependencies:** none
+- **Decisions:** none
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Status:** verified
+
+- [x] **P5.T1: Hoist the look label out of the row loop** — covers: R1-1
+  - [x] **P5.T1.1: The rendered line is unchanged, singular and plural included**
+**Result:** verified
+**Checkpoint:** PHASE5SHA
+**Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-5.md
