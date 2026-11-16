@@ -34,7 +34,7 @@ window.
 - Review: [`review.md`](./review.md) — verdict **PASS**, round 2, cold-read,
   pinned to `b308ae20`.
 - Gates: `.conductor/evidence/20261117-debug-probes/phase-{1..5}-gate.log`, all
-  `GATE EXIT: 0`. Unit suite 3,322 tests over 153 files; coverage 97.12 / 90.90 /
+  `GATE EXIT: 0`. Unit suite 3,323 tests over 153 files; coverage 97.12 / 90.94 /
   96.21 / 98.31 against 95 / 88 / 85 / 90; shell entry 186.7 kB ≤ 200 kB; PWA
   16/16; documents 5/5.
 - Browser: `pnpm test:e2e` 26 cases in 3.7 min — the same 26 as before, because
@@ -47,14 +47,15 @@ window.
 | FR-1, FR-2, FR-3 | `src/__tests__/game/progressLogic.test.ts` (probes block) | phase-1.md |
 | FR-4 | `src/__tests__/utils/storage.test.ts` (probes stored, flushed, exported, backfilled) | phase-1.md |
 | FR-5, FR-6, FR-7 | `src/__tests__/scenes/gameSceneBase.test.ts`, `fixItMachineScene.test.ts` | phase-2.md |
-| FR-8, FR-9 | `src/__tests__/components/settings/ProgressOverlay.test.ts`, `insightsSummary.test.ts` | phase-3.md |
+| FR-8, FR-9 | `src/__tests__/components/settings/ProgressOverlay.test.ts` (plural and singular look labels), `insightsSummary.test.ts` | phase-3.md |
 | FR-10 | `e2e/journeys/fix-it-machine.spec.ts` (one probe saved; six real misses in the window) | phase-3.md |
 | AC-1 … AC-7 | mapped in `review.md` | phases 1–5 |
 
 ## Debt and follow-ups
 
 - **R1-1 (Low) — fixed** in Phase 5: the look label is a module helper, not a
-  closure rebuilt inside the row loop.
+  closure rebuilt inside the row loop. Its singular branch now has its own case,
+  proved by removing the branch and watching that case fail.
 - **R1-2 (Low) — accepted**: the archived Fix-It spec still describes the old rule,
   because archives are frozen by convention. The live rule is the TDD paragraph
   added in Phase 4, and this track's spec supersedes the archived one.

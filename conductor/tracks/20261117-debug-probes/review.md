@@ -68,3 +68,16 @@ counter that reaches no accuracy figure, no window and no win, and the Fix-It
 journey proves the whole path into the saved profile. Round 2 closes the one
 code finding; the only note left is the frozen archive, which changes nothing at
 runtime. Verdict for the track: **PASS**, pinned to `b308ae20`.
+
+## Addendum — a test-only change after the pin
+
+`c20cea29` adds one overlay case (a one-probe game renders `1 look · `, never
+`1 looks`) and restates the suite count in three documents. No source file changed
+in that commit, and the file that matters was proved by removing the singular
+branch: the new case fails against an always-plural label and passes against the
+shipped one.
+
+Re-gate: `phase-5-singular-gate.log` — exit **0**, 3,323 tests over 153 files,
+coverage 97.12 / 90.94 / 96.21 / 98.31, entry 186.7 kB ≤ 200 kB, PWA 16/16,
+documents 5/5. The verdict stays **PASS**; the pin moves to `c20cea29`, and the
+reviewed behaviour is byte-identical because no source line moved.

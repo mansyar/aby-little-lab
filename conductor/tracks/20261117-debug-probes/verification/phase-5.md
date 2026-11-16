@@ -35,13 +35,31 @@ because archives are frozen; the live rule is the TDD paragraph written in Phase
 | ID | Criterion | Evidence | Status |
 |---|---|---|---|
 | R1-1 | The label logic is not rebuilt per row | the module function's position and call site | pass |
+| P5.T1.1 | The rendered line is unchanged, singular and plural included | `ProgressOverlay.test.ts` — "shows a game's looks beside its accuracy" (plural) and "renders a single look in the singular" (singular, added after review) | pass |
 | FR-8 | The rendered line is unchanged | `ProgressOverlay.test.ts` (shows a game's looks beside its accuracy) | pass |
 | AC-7 | The full gate exits 0 | the table above | pass |
 
+## Follow-up found after the gate: the singular branch was unproved
+
+P5.T1.1 claimed "the rendered line is unchanged, singular and plural included",
+but the only overlay case asserted `3 looks`. A one-probe game is now seeded
+(`robot-path`, 3 correct, 1 probe) and the row is asserted to read `1 look · ` and
+never `1 looks`.
+
+**The branch was proved by removing it**: the label was temporarily changed to
+always print `looks`, the suite failed exactly at "renders a single look in the
+singular", and the file was restored. That run is a mutation check, not a test
+change; the source is unchanged from the reviewed commit.
+
+Re-gate after the added case: `.conductor/evidence/20261117-debug-probes/phase-5-singular-gate.log` —
+`GATE EXIT: 0`, 3,323 unit tests over 153 files, coverage 97.12 / 90.94 / 96.21 /
+98.31, entry `index-BIq9mY8m.js` 186.7 kB, PWA 16/16, documents 5/5.
+
 ## Deviations
 
-None. `src/components/settings/ProgressOverlay.ts` is exactly the file the phase
-declared.
+None in source. `README.md`, `docs/TDD.md` and `docs/perf-baseline.md` restate the
+suite count to 3,323, which the documents validator requires in the same turn the
+test is added.
 
 ## Notes
 
