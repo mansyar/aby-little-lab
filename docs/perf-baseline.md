@@ -823,14 +823,13 @@ tests in **5.5 min** (6m33s for the job) and run 43951894620 in **6.5 min**, aga
 The roster is therefore split across two runners with Playwright's own `--shard` partition, each half
 with two workers of its own. Run 43959534246 measures the result:
 
-| Job | Tests | Suite | Job |
+| Run | Shard 1 (13 cases) | Shard 2 (13 cases) | Aggregation check |
 | --- | --- | --- | --- |
-| Browser Journeys (shard 1 of 2) | 13 cases | **2.5 min** | 3m6s |
-| Browser Journeys (shard 2 of 2) | 13 cases | **3.7 min** | 4m17s |
-| Browser Journeys (the required check) | - | 6 s | 6 s |
+| 43959534246 | **2.5 min** (job 3m6s) | **3.7 min** (job 4m17s) | 6 s |
+| 43966698279 | **1.9 min** (job 2m24s) | **3.8 min** (job 4m21s) | 3 s |
 
-The slowest half is **3.7 min**, inside NFR-2's 5 min with 1.3 min of headroom, and the suite's wall
-clock is that half rather than the sum. The halves are not perfectly even — Playwright partitions by
+The slowest half across both runs is **3.8 min**, inside NFR-2's 5 min with over a minute of headroom,
+and the suite's wall clock is that half rather than the sum. The halves are not perfectly even — Playwright partitions by
 file, and shard 2 carries both parallel launch halves — but both sit inside the budget, and adding a
 third entry to `matrix.shard` is the whole change if that ever stops being true. The aggregation job
 exists so branch protection keeps waiting on one check named `Browser Journeys`: it fails if either
