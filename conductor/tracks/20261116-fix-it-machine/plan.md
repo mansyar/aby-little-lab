@@ -39,14 +39,18 @@
 - **Dependencies:** none
 - **Decisions:** D7, D9
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P2.T1: Six tool icons** — covers: FR-14, NFR-3
-  - [ ] One flat Storybook-Flat SVG per action at 512 viewBox under 4 kB, each a tool in use rather than a symbol, with the same-family pair visibly different in outline (mister vs can, brush vs cloth).
-- [ ] **P2.T2: Four machine poses and six toy goals** — covers: FR-14
-  - [ ] `machine_idle`, `machine_working`, `machine_puzzled`, `machine_happy` as one chunky round character, and one goal drawing per toy; every pose shares the same anchor so swapping poses never shifts the character.
-- [ ] **P2.T3: The art module, its tests and the count restatement** — covers: FR-14, FR-17
-  - [ ] `fixItMachineArt.ts` exports the key list and the scene-local preload group; tests assert sixteen keys, every referenced file parses and each is under budget; the three governed documents restate this phase's suite counts (D9).
+- [x] **P2.T1: Six tool icons** — covers: FR-14, NFR-3
+  - [x] One flat Storybook-Flat SVG per action at 512 viewBox under 4 kB, each a tool in use rather than a symbol, with the same-family pair visibly different in outline (mister vs can, brush vs cloth).
+- [x] **P2.T2: Four machine poses and six toy goals** — covers: FR-14
+  - [x] `machine_idle`, `machine_working`, `machine_puzzled`, `machine_happy` as one chunky round character, and one goal drawing per toy; every pose shares the same anchor so swapping poses never shifts the character.
+- [x] **P2.T3: The art module, its tests and the count restatement** — covers: FR-14, FR-17
+  - [x] `fixItMachineArt.ts` exports the key list and the scene-local preload group; tests assert sixteen keys, every referenced file parses and each is under budget; the three governed documents restate this phase's suite counts (D9).
+
+**Result:** PASS — gate exit 0 (152 files / 3,281 tests, coverage 97.24/91.64/96.33/98.32, entry 182.5 kB, docs 5/5).
+**Checkpoint:** d0b96881
+**Evidence:** conductor/tracks/20261116-fix-it-machine/verification/phase-2.md
 
 ## Phase 3: The scene — watch it go wrong, then repair it
 
