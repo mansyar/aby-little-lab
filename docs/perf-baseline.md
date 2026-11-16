@@ -789,7 +789,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Test suite | 153 files / 3,323 tests | `pnpm test -- --run` |
 | Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
-| Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI splits them across two shards of 13 browser cases each, 2.5 and 3.7 min | `pnpm test:e2e` |
+| Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI runs two workers on its four-vCPU runner | `pnpm test:e2e` |
 
 The two Fix-It Machine shell SVGs moved the entry from 182.5 kB to 186.4 kB (+3.9 kB, inside
 NFR-3's 4 kB allowance for two new drawings and 13.6 kB inside the 200 kB gate). The sixteen machine
@@ -815,23 +815,10 @@ Three workers is a development-host number. On 2026-11-16 CI's four-vCPU runner 
 the same setting: three Phaser canvases and the preview server on four cores starved the game loop
 badly enough that the backup journey's parental hold, which the gate counts in frames, overran the
 journey's own budget and the browser eventually died (`Failed to find context`, run 43947422301).
-CI now runs two workers (`workers: isCI ? 2 : 3`), and the hold is budgeted in frames rather than
-wall clock, which is the change that made the difference visible instead of mysterious.
-
-Two workers alone were green but slower than NFR-2 allows: run 43950134928 passed all 26 browser
-tests in **5.5 min** (6m33s for the job) and run 43951894620 in **6.5 min**, against a 5 min ceiling.
-The roster is therefore split across two runners with Playwright's own `--shard` partition, each half
-with two workers of its own. Run 43959534246 measures the result:
-
-| Job | Tests | Suite | Job |
-| --- | --- | --- | --- |
-| Browser Journeys (shard 1 of 2) | 13 cases | **2.5 min** | 3m6s |
-| Browser Journeys (shard 2 of 2) | 13 cases | **3.7 min** | 4m17s |
-| Browser Journeys (the required check) | - | 6 s | 6 s |
-
-The slowest half is **3.7 min**, inside NFR-2's 5 min with 1.3 min of headroom, and the suite's wall
-clock is that half rather than the sum. The halves are not perfectly even — Playwright partitions by
-file, and shard 2 carries both parallel launch halves — but both sit inside the budget, and adding a
-third entry to `matrix.shard` is the whole change if that ever stops being true. The aggregation job
-exists so branch protection keeps waiting on one check named `Browser Journeys`: it fails if either
-half did. Details in TDD §10.5.
+CI now runs two workers (`workers: isCI ? 2 : 3`); the hold itself is budgeted in frames rather than
+wall clock, which is the change that made the difference visible instead of mysterious. That setting
+is green but slower: run 43950134928 passed 26 browser tests in **5.5 min** (6m33s for the job) at
+two workers, against 4.9-6.3 min at three that failed intermittently. It sits about half a minute
+past NFR-2's 5 min ceiling, which is the price of a runner that can actually render the game; the
+next step if that matters is sharding the roster across two CI jobs rather than adding workers back.
+Details in TDD §10.5.
