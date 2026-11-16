@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type {
+  E2EFixItMachineState,
   E2EHubGroups,
   E2EHubPlayTime,
   E2EHubToast,
@@ -27,6 +28,7 @@ interface FakeScene {
   e2eHubGroups?: () => E2EHubGroups;
   e2eRecoverButton?: () => E2ERecoverState | null;
   e2eRobotPath?: () => E2ERobotPathState | null;
+  e2eFixItMachine?: () => E2EFixItMachineState | null;
 }
 
 interface FakeGame {
@@ -127,6 +129,7 @@ describe("initE2EBridge", () => {
       expect(Object.isFrozen(bridge)).toBe(true);
       expect(Object.keys(bridge ?? {}).sort()).toEqual([
         "activeSceneKey",
+        "fixItMachine",
         "hubGroups",
         "hubPlayTime",
         "hubReady",
@@ -199,6 +202,58 @@ describe("initE2EBridge", () => {
       expect(placed?.slots[1]?.filled).toBe(false);
       expect(placed?.solution).toEqual(["up", "right"]);
       expect(placed?.palette.map((arrow) => arrow.dir)).toEqual(["up", "right", "down", "left"]);
+    });
+  });
+
+  describe("fixItMachine", () => {
+    /** A whole-workshop state; every field is one the scene would really publish. */
+    function fixItMachineState(tape: E2EFixItMachineState["tape"]): E2EFixItMachineState {
+      return {
+        round: 0,
+        solution: ["lift", "spray", "stack"],
+        tape,
+        bugIndex: 1,
+        solved: false,
+        wrongTaps: 0,
+        hintLevel: 0,
+        failedRuns: 0,
+        trayOpen: false,
+        cards: tape.map((_, index) => ({ index, x: 296 + index * 108, y: 552 })),
+        tray: [],
+        go: { x: 896, y: 664 },
+        machine: { x: 664, y: 320 },
+        goal: { x: 236, y: 232 },
+      };
+    }
+
+    it("returns null when the active scene publishes no machine hook", () => {
+      install([sceneWith("Hub")]);
+
+      expect(window.__abyE2E?.fixItMachine()).toBeNull();
+    });
+
+    it("returns null when no scene is active", () => {
+      install([]);
+
+      expect(window.__abyE2E?.fixItMachine()).toBeNull();
+    });
+
+    it("reflects a repair immediately, without caching the tape", () => {
+      let tape: E2EFixItMachineState["tape"] = ["lift", "paint", "stack"];
+      const scene = sceneWith("FixItMachine");
+      scene.e2eFixItMachine = () => fixItMachineState(tape);
+      install([scene]);
+
+      const wrong = window.__abyE2E?.fixItMachine();
+      expect(wrong?.tape).toEqual(["lift", "paint", "stack"]);
+      expect(wrong?.bugIndex).toBe(1);
+      expect(wrong?.solved).toBe(false);
+
+      tape = ["lift", "spray", "stack"];
+      const repaired = window.__abyE2E?.fixItMachine();
+      expect(repaired?.tape).toEqual(["lift", "spray", "stack"]);
+      expect(repaired?.solution).toEqual(["lift", "spray", "stack"]);
+      expect(repaired?.cards.map((card) => card.index)).toEqual([0, 1, 2]);
     });
   });
 

@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-16.** The section **Robot Path — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-9iYt2XVh.js` at 182.5 kB via `validate-bundle` (186.85 kB as Vite prints it, 47.59 kB gzip), **49** JavaScript chunks, **61** precache entries (1794.50 KiB), 152 test files / 3,281 tests across 97.24 % statements, 91.64 % branches, 96.33 % functions and 98.32 % lines, and 23 browser journeys across 18 spec files over 23 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-16.** The section **Robot Path — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-D_-FZk06.js` at 182.6 kB via `validate-bundle` (186.95 kB as Vite prints it, 47.59 kB gzip), **49** JavaScript chunks, **61** precache entries (1794.60 KiB), 153 test files / 3,300 tests across 97.07 % statements, 90.73 % branches, 96.18 % functions and 98.24 % lines, and 23 browser journeys across 18 spec files over 23 launches. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
 
@@ -418,7 +418,7 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 152 files / 3,281 tests | `pnpm test -- --run` |
+| Test suite | 153 files / 3,300 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-11-15; the build
@@ -749,14 +749,14 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 
 | Measurement | Value | Source |
 | --- | --- | --- |
-| Shell entry (minified) | `index-9iYt2XVh.js` = **182.5 kB** (186.85 kB as Vite prints it, 47.59 kB gzip) | `node scripts/validate-bundle.js` |
+| Shell entry (minified) | `index-D_-FZk06.js` = **182.6 kB** (186.95 kB as Vite prints it, 47.59 kB gzip) | `node scripts/validate-bundle.js` |
 | Shell entry budget | ≤ 200 kB | `scripts/validate-bundle.js` |
 | Phaser vendor chunk | `phaser-B_vcVLyb.js` = 1335.0 kB | `node scripts/validate-bundle.js` |
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
-| Service-worker precache | **61 entries** (1794.50 KiB) | the build's PWA step |
+| Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 152 files / 3,281 tests | `pnpm test -- --run` |
-| Coverage | statements 97.24 % / branches 91.64 % / functions 96.33 % / lines 98.32 % | `pnpm test:coverage` |
+| Test suite | 153 files / 3,300 tests | `pnpm test -- --run` |
+| Coverage | statements 97.07 % / branches 90.73 % / functions 96.18 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
 The two Robot Path shell SVGs moved the entry from 179.4 kB to 182.4 kB in Phase 4, and Phase 5's
