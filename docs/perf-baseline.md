@@ -789,7 +789,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
 | Test suite | 153 files / 3,323 tests | `pnpm test -- --run` |
 | Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
-| Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs, `launch-all` at 1.8 min | `pnpm test:e2e` |
+| Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI runs two workers on its four-vCPU runner | `pnpm test:e2e` |
 
 The two Fix-It Machine shell SVGs moved the entry from 182.5 kB to 186.4 kB (+3.9 kB, inside
 NFR-3's 4 kB allowance for two new drawings and 13.6 kB inside the 200 kB gate). The sixteen machine
@@ -810,3 +810,11 @@ floor is total work divided by two and the launches are only about a third of th
 track split the roster into two parallel halves and moved the suite to three workers, which measures
 **3.8-4.3 min** with `launch-all` at 1.8 min: inside NFR-2's ceiling, from reshaping the launch
 journey rather than from deleting any of it.
+
+Three workers is a development-host number. On 2026-11-16 CI's four-vCPU runner showed the cost of
+the same setting: three Phaser canvases and the preview server on four cores starved the game loop
+badly enough that the backup journey's parental hold, which the gate counts in frames, overran the
+journey's own budget and the browser eventually died (`Failed to find context`, run 43947422301).
+CI now runs two workers (`workers: isCI ? 2 : 3`); the hold itself is budgeted in frames rather than
+wall clock, which is the change that made the difference visible instead of mysterious. Details in
+TDD §10.5.
