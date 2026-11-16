@@ -119,7 +119,9 @@ jobs:
     # `--shard=i/2` is Playwright's own partition of the suite, so no spec file
     # can be dropped by a hand-kept list. Adding a third entry to `shard` is the
     # whole change if a half ever creeps past the budget again.
-    name: Browser Journeys (${{ matrix.shard }}/${{ strategy.job-total }})
+    # `strategy` is not available in a job's name, so the total is written
+    # here: it must match the number of entries in `matrix.shard` below.
+    name: Browser Journeys (shard ${{ matrix.shard }} of 2)
     # A separate job after the quality gates, not a step inside them, so a
     # browser failure does not hide static/unit results and a hung browser
     # cannot stall the gate. It still needs `dist`, which this job builds
