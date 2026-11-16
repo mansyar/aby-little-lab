@@ -94,5 +94,5 @@
 - [x] **P4.T3: Mention the look count where the README describes progress** — covers: FR-8
   - [x] **P4.T3.1: No count-bearing claim changes, so the documents validator still passes**
 **Result:** verified
-**Checkpoint:** PHASE4SHA
+**Checkpoint:** 49bec555
 **Evidence:** conductor/tracks/20261117-debug-probes/verification/phase-4.md
