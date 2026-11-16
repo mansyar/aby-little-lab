@@ -61,16 +61,20 @@
 - **Dependencies:** none
 - **Decisions:** D1, D4, D5, D8, D11, D9
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P3.T1: Layout — goal, tape, machine, Go, tray** — covers: FR-2, FR-5, FR-7, NFR-1
-  - [ ] A 112×112 Go, cards at 96×96 with 12 px gaps (five slots span 528 px), a three-candidate tray at 96×96, and a goal picture that stays on screen and never overlaps the tape, tray or Go; a layout test publishes and asserts the geometry.
-- [ ] **P3.T2: The run, the lock and the funny failure** — covers: FR-5, FR-6, FR-8
-  - [ ] Go executes at 550 ms per card (120 ms reduced motion) with per-card highlight and the machine's action, locks input for the run, and on the wrong card shows the mismatch, plays the gentle "uh-oh" and restores the tape with the round index unchanged; tests cover the lock, a tap during the run being ignored, and the tape surviving intact.
-- [ ] **P3.T3: Diagnose, repair, hints and the round flow** — covers: FR-8, FR-9, FR-10, FR-11, FR-12, FR-13
-  - [ ] Tapping the wrong card opens the tray; tapping another card bounces it; the correct candidate snaps in and the next run solves; each tap records one result and a solve records one win; hints fire at 2, 4 and 6 wrong taps and never place a card; six rounds, progress dots, sticker, celebration and the spoken rule line.
-- [ ] **P3.T4: The bridge hook, and the count restatement** — covers: FR-15, FR-17
-  - [ ] `e2eBridge.fixItMachine()` publishes the round, steps, bug index, solved flag, wrong-tap count, hint level, tray state and the drawn tape/tray/Go points; bridge and scene tests cover it; the three governed documents restate the counts (D9).
+- [x] **P3.T1: Layout — goal, tape, machine, Go, tray** — covers: FR-2, FR-5, FR-7, NFR-1
+  - [x] A 112×112 Go, cards at 96×96 with 12 px gaps (five slots span 528 px), a three-candidate tray at 96×96, and a goal picture that stays on screen and never overlaps the tape, tray or Go; a layout test publishes and asserts the geometry.
+- [x] **P3.T2: The run, the lock and the funny failure** — covers: FR-5, FR-6, FR-8
+  - [x] Go executes at 550 ms per card (120 ms reduced motion) with per-card highlight and the machine's action, locks input for the run, and on the wrong card shows the mismatch, plays the gentle "uh-oh" and restores the tape with the round index unchanged; tests cover the lock, a tap during the run being ignored, and the tape surviving intact.
+- [x] **P3.T3: Diagnose, repair, hints and the round flow** — covers: FR-8, FR-9, FR-10, FR-11, FR-12, FR-13
+  - [x] Tapping the wrong card opens the tray; tapping another card bounces it; the correct candidate snaps in and the next run solves; each tap records one result and a solve records one win; hints fire at 2, 4 and 6 wrong taps and never place a card; six rounds, progress dots, sticker, celebration and the spoken rule line.
+- [x] **P3.T4: The bridge hook, and the count restatement** — covers: FR-15, FR-17
+  - [x] `e2eBridge.fixItMachine()` publishes the round, steps, bug index, solved flag, wrong-tap count, hint level, tray state and the drawn tape/tray/Go points; bridge and scene tests cover it; the three governed documents restate the counts (D9).
+
+**Result:** PASS — gate exit 0 (153 files / 3,300 tests, coverage 97.07/90.73/96.18/98.24, entry 182.6 kB, docs 5/5).
+**Checkpoint:** 6f227043
+**Evidence:** conductor/tracks/20261116-fix-it-machine/verification/phase-3.md
 
 ## Phase 4: The 24th game enters the roster
 
