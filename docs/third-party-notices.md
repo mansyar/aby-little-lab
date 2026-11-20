@@ -38,7 +38,7 @@ The license names below are taken from the installed packages' own metadata.
 | --- | --- | --- |
 | SVG artwork under `src/assets/svg/` | Original to this project | Authored in-repo; covered by this project's MIT `LICENSE` |
 | `public/fonts/baloo2-latin.woff2` (Baloo 2) | SIL Open Font License 1.1 (upstream Baloo 2) | The upstream OFL text now ships at `../public/fonts/OFL.txt` |
-| `public/audio/bgm.mp3` | Untraceable — no license claimed | See [audio attribution](audio-attribution.md); rights resolution is outstanding |
+| `public/audio/bgm.mp3` | CC0 1.0 Universal | "Calm Loop" by wipics; the untraceable loop was replaced at this same path with a CC0-licensed one on 2026-11-20. See [audio attribution](audio-attribution.md) |
 
 ## Components that are not present
 

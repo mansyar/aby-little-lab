@@ -139,7 +139,8 @@ reach**, and each phase is one or more Conductor tracks.
 **Planning assumptions**
 
 - One developer, part-time, with the existing Conductor workflow and gates.
-- Distribution stays private/small until Phase 3 decides otherwise.
+- Distribution stays private/small — Phase 3 confirmed family-only on
+  2026-11-20 (see §10.4).
 - No accounts, no cloud sync, no third-party analytics; local-only data is a
   product property, not an implementation detail.
 - Every phase ships through the existing gate (`check`, `typecheck`, `test`,

@@ -80,15 +80,15 @@ investigation and that outcome are recorded in
   low-cost way to keep that risk closed without committing to a store listing.
 - **Consequence:** The five artifacts below are prepared (in the legal-gaps
   phase of this track) but are **prepared artifacts, not a submission** — no
-  store listing exists or is committed. `bgm.mp3` has untraceable provenance (no
-  creator, tool or license recorded in git, docs or past sessions); its rights
-  must be resolved in a later phase of this track, and no untraceable right is
-  claimed in the meantime.
+  store listing exists or is committed. The `bgm.mp3` rights were resolved on
+  2026-11-20 by replacing the untraceable loop at the same path with a
+  CC0-licensed "Calm Loop" by wipics, attributed in
+  [audio-attribution.md](audio-attribution.md); no untraceable right is claimed for the old file.
 
   | Artifact | Status |
   | --- | --- |
   | `LICENSE` (MIT) | Prepared artifact — not submitted |
-  | `docs/audio-attribution.md` (audio attribution; records the BGM investigation) | Prepared artifact — not submitted; BGM rights resolution outstanding |
+  | `docs/audio-attribution.md` (audio attribution; records the BGM investigation and CC0 resolution) | Prepared artifact — not submitted; BGM rights resolved 2026-11-20 by same-path CC0 "Calm Loop" (wipics) replacement, attributed here |
   | `docs/third-party-notices.md` (third-party notices) | Prepared artifact — not submitted |
   | `docs/child-privacy.md` (COPPA/GDPR-K statement) | Prepared artifact — not submitted |
   | `docs/store-privacy-labels.md` (store privacy labels) | Prepared artifact — not submitted; no store listing committed |
@@ -108,7 +108,7 @@ The decisions above settle the roadmap branch at the Phase 3 gate:
   the publish phase; no keyboard/switch input or OS zoom work is scheduled.
 - **The legal posture is prepared, not submitted.** All five artifacts are
   prepared; no store submission or listing is committed while the audience is
-  family-only. BGM rights resolution remains a tracked follow-up.
+  family-only. BGM rights were resolved on 2026-11-20 by replacing the loop at the same path with a CC0-licensed "Calm Loop" by wipics, attributed in [audio-attribution.md](audio-attribution.md).
 
 ## References
 

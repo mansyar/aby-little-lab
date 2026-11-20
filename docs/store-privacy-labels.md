@@ -63,6 +63,6 @@ tracking or advertising, and not sold or shared.
 
 These labels mirror the [child privacy statement](child-privacy.md). The
 [third-party notices](third-party-notices.md) list the bundled components; none
-of them collects data at runtime. The one audio asset with untraceable
-provenance is recorded in [audio attribution](audio-attribution.md); it has no
+of them collects data at runtime. The BGM provenance investigation and its resolution by a CC0-licensed
+replacement are recorded in [audio attribution](audio-attribution.md); it has no
 bearing on data collection.
