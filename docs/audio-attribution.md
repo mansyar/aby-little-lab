@@ -12,7 +12,7 @@ family-only.
 
 | Asset | Role | Origin / right | Status |
 | --- | --- | --- | --- |
-| `public/audio/bgm.mp3` | Background music loop — low volume, starts after the first interaction, ducks under speech | Untraceable: no creator, tool, source URL or license recorded | Rights unresolved; see below |
+| `public/audio/bgm.mp3` | Background music loop — low volume, starts after the first interaction, ducks under speech | "Calm Loop" by wipics, OpenGameArt — CC0 1.0 Universal / public domain | CC0 1.0 Universal — sourced and attributed |
 | Feedback tones and effects (correct, incorrect, win, pop, wake, sticker, idle chime) | Synthesized at runtime by the Web Audio API in the app's audio manager | Original to this project — generated in code from formula-derived per-game identities | Covered by this project's MIT `LICENSE` |
 | Narration and spoken prompts | Produced on the device by the browser Web Speech API (`window.speechSynthesis`) | Device-provided voices; no app-side audio file is shipped, recorded or uploaded | No bundled audio asset to attribute |
 
@@ -43,12 +43,24 @@ license to cite, and this document claims no right on its behalf.
 
 ## Rights resolution status
 
-Not resolved in this phase. The loop has no traceable license, so it is not
-represented as licensed here. The choice between replacing it with a
-known-licensed loop and removing the loop together with its precache entry is
-deliberately left to a later phase, after the product owner decides; this
-document records only the investigation and does not pre-empt that decision. No
-untraceable right is claimed in the meantime.
+**Resolved by replacement (2026-11-20).** The untraceable loop whose provenance
+is recorded above is no longer shipped. It was replaced at the same path,
+`public/audio/bgm.mp3`, with a known-licensed loop:
+
+- **Work:** "Calm Loop" by wipics.
+- **Item page:** https://opengameart.org/content/calm-loop — states `License(s):
+  CC0` and `Copyright/Attribution Notice: Public Domain` (fetched and confirmed
+  2026-11-20).
+- **Direct file:** https://opengameart.org/sites/default/files/Relaxing.mp3
+- **License:** CC0 1.0 Universal — a public-domain dedication. Attribution is
+  not required; the author and source are credited here voluntarily as a matter
+  of good practice, with the access date above.
+- **Shipped file facts:** MP3, 44,100 Hz, stereo, 19.382875 s, 314,222 bytes
+  (verified with `ffprobe`, 2026-11-20).
+
+No untraceable right is claimed for the old file: its origin remains untraceable
+as recorded above, and the old binary is no longer shipped. This document makes
+no new claim about any other asset or about third-party code.
 
 ## Related documents
 
