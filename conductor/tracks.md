@@ -287,4 +287,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Debug Probes** — [20261117-debug-probes](./archive/20261117-debug-probes/index.md) — bug — high
 - [x] **Track: Product Intent Gate** — [20261120-product-intent-gate](./archive/20261120-product-intent-gate/index.md) — chore — high
 
-- [~] **Track: Release v1.24.0** — [20261121-release-v1-24-0](./tracks/20261121-release-v1-24-0/index.md) — chore — high
+- [x] **Track: Release v1.24.0** — [20261121-release-v1-24-0](./archive/20261121-release-v1-24-0/index.md) — chore — high
