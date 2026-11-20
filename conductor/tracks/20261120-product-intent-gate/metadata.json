@@ -13,13 +13,13 @@
   "base_branch": "master",
   "base_sha": "85c5f16f",
   "progress": {
-    "phases_total": 4,
+    "phases_total": 5,
     "phases_verified": 4,
-    "tasks_total": 9,
+    "tasks_total": 13,
     "tasks_done": 9
   },
   "last_checkpoint": "0cc94d18",
-  "review_verdict": "PASS WITH FINDINGS",
+  "review_verdict": "BLOCK",
   "review_rounds": 1,
   "doc_sync": "done",
   "pr_url": null,

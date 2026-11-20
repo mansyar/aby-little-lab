@@ -87,3 +87,23 @@
 **Checkpoint:** 0cc94d18
 **Evidence:** conductor/tracks/20261120-product-intent-gate/verification/phase-4.md
 -->
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1, F2, F3 and F4.
+- **Depends on:** Phase 4
+- **Covers:** F1, F2, F3, F4
+- **Touches:** `docs/third-party-notices.md`, `docs/product-intent.md`, `docs/store-privacy-labels.md`, `conductor/product.md`
+- **Verification:** `node scripts/validate-docs.js` plus the full configured `verify_phase` chain
+- **Status:** pending
+
+- [ ] **R1.T1: Correct the BGM license row in third-party notices** — covers: F1
+- [ ] **R1.T2: Correct the three stale BGM-rights statements in the decision record** — covers: F2
+- [ ] **R1.T3: Correct the stale audio phrasing in store privacy labels** — covers: F3
+- [ ] **R1.T4: Update the distribution planning assumption in product.md** — covers: F4
+
+<!--
+**Result:** pending
+**Checkpoint:** <short-sha>
+**Evidence:** conductor/tracks/20261120-product-intent-gate/verification/phase-R1.md
+-->
