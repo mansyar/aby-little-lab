@@ -209,6 +209,16 @@ implicit. Deliverable: `docs/product-intent.md`.
 Building i18n and store packaging for a family-only app is months of waste;
 shipping publicly without these answers is a legal and reputational risk.
 
+**Done 2026-11-20** (track `20261120-product-intent-gate`). The four decisions
+are recorded in [docs/product-intent.md](../docs/product-intent.md): family-only
+audience; touch-only, sighted, textless, landscape as a documented stance
+(no keyboard/switch access or OS zoom work); English permanently, with i18n and
+a second locale not goals; and a full public-release legal posture with the
+artifacts prepared but not submitted. The untraceable BGM loop was replaced with
+a CC0-licensed one, attributed in
+[docs/audio-attribution.md](../docs/audio-attribution.md). Consequence: Phase 5
+reach is cancelled, Phase 4 depth is next.
+
 ### 10.5 Phase 4 — Depth & retention (4–6 weeks, content-led)
 
 Breadth is already 22 games; the retention risk is pool thinness, not game
@@ -222,9 +232,12 @@ memory.
 | `20261208-replay-novelty` | Session-level variety policy (no immediate repeats), rotating sticker sets, "Professor Hoot suggests" rotation | Median distinct games per session ≥ 4 |
 | `20261208-adaptive-tuning` | Retune the bands against Phase 2 data; optional parent view of the current band | Band distribution matches the designed curve |
 
-### 10.6 Phase 5 — Reach (4–6 weeks, gated by Phase 3)
+### 10.6 Phase 5 — Reach (4–6 weeks, gated by Phase 3) — Cancelled 2026-11-20
 
-Only if Phase 3 says "public" or "second language".
+Only if Phase 3 says "public" or "second language". Phase 3 chose family-only
+and English permanently, so the precondition is not met. The table below is kept
+as history, not as planned work; Phase 4 depth and Phase 6 sustainability are
+the path forward.
 
 | Track | Work | Exit gate |
 |---|---|---|
@@ -255,6 +268,9 @@ P0 trunk (1d) → P1 trust (2w) → P2 ops (3w) → P3 intent gate (1w)
                                                              P6 sustain (ongoing)
 ```
 
+**Outcome 2026-11-20:** the family-only branch was taken — Phase 5 reach is
+cancelled, and the path is Phase 4 depth followed by Phase 6 sustainability.
+
 | Milestone | Approx. version | When |
 |---|---|---|
 | Trunk trustworthy | patch | day 1 |
@@ -269,17 +285,18 @@ P0 trunk (1d) → P1 trust (2w) → P2 ops (3w) → P3 intent gate (1w)
 |---|---|---|
 | The E2E suite turns flaky and gets disabled | High | Journeys, not unit assertions; retry ≤ 1; quarantine policy; state-based waits only |
 | Content expansion blows the texture budget | Medium | Per-game art budget validated in CI before merge |
-| Phase 3 never happens and scope stays implicit | Medium | Timeboxed to one week; it blocks Phase 5 by design |
+| Phase 3 never happens and scope stays implicit | Medium | Closed 2026-11-20: the gate ran and its decisions are recorded in `docs/product-intent.md` |
 | Retention is optimised against a noisy proxy | Medium | Treat Phase 2 numbers as directional; confirm with a handful of real families |
 | Toolchain pinning breaks a contributor's setup | Low | Pin in CI first, then Docker, then docs |
-| The accessibility stance is deferred indefinitely | Medium | Force the decision in Phase 3 and publish it either way |
+| The accessibility stance is deferred indefinitely | Medium | Closed 2026-11-20: touch-only, sighted, textless, landscape published as a documented stance in README and `docs/product-intent.md` |
 
 ### 10.10 Deliberately not doing
 
 Cloud sync and accounts (breaks the privacy posture and the offline guarantee) ·
 real-time multiplayer · more games before deeper pools · third-party analytics or
-crash SDKs · runtime AI content · a native rewrite · keyboard support unless
-Phase 3 asks for it · migrating the `abby-` storage key (permanent but harmless).
+crash SDKs · runtime AI content · a native rewrite · keyboard support (Phase 3
+decided against it on 2026-11-20) · migrating the `abby-` storage key (permanent
+but harmless).
 
 ## Changelog — Game 24: Fix-It Machine (2026-11-16)
 

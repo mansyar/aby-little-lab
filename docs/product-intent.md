@@ -12,11 +12,12 @@ All four decisions were made on **2026-11-20** as part of the
 `20261120-product-intent-gate` track. Together they close the intent gate:
 Phase 4 (depth) is the next product phase, and Phase 5 (reach) is cancelled.
 
-One consequence is deliberately *not* resolved here: the origin of `bgm.mp3` is
-untraceable, so its rights must be resolved before public distribution. The
-resolution (replace with a known-licensed loop, or remove the loop and its
-precache entry) belongs to a later phase of this track and is out of scope for
-this record. This document only notes that rights resolution is required.
+One consequence is noted here rather than decided: the origin of `bgm.mp3` was
+untraceable from the repository history, documentation and past sessions, so its
+rights had to be resolved before public distribution. On 2026-11-20 the
+untraceable loop was replaced at the same path with a CC0-licensed one; the
+investigation and that outcome are recorded in
+[audio-attribution.md](audio-attribution.md).
 
 ## Decision 1 — Audience
 

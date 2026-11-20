@@ -37,7 +37,7 @@ The license names below are taken from the installed packages' own metadata.
 | Asset | License | Notes |
 | --- | --- | --- |
 | SVG artwork under `src/assets/svg/` | Original to this project | Authored in-repo; covered by this project's MIT `LICENSE` |
-| `public/fonts/baloo2-latin.woff2` (Baloo 2) | SIL Open Font License 1.1 (upstream Baloo 2) | No separate license file is present in this repository; add the upstream OFL text alongside the font before any public distribution |
+| `public/fonts/baloo2-latin.woff2` (Baloo 2) | SIL Open Font License 1.1 (upstream Baloo 2) | The upstream OFL text now ships at `../public/fonts/OFL.txt` |
 | `public/audio/bgm.mp3` | Untraceable — no license claimed | See [audio attribution](audio-attribution.md); rights resolution is outstanding |
 
 ## Components that are not present

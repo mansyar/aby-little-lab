@@ -129,6 +129,16 @@ That page's third row, **Save diagnostics**, is the other half of the same promi
 
 Product rules: [PRD §5.2](docs/PRD.md#52-touch-targets), [PRD §5.3](docs/PRD.md#53-the-parental-lock). Implementation: [TDD §5.3](docs/TDD.md#53-parentlock), [TDD §5.5](docs/TDD.md#55-settingspanel-and-the-settings-group).
 
+## Accessibility
+
+Aby's Little Lab is a touch-only, sighted, textless, landscape, canvas-based app
+for children aged 3–5. It has no keyboard or switch input, no accessibility tree,
+and no OS zoom — the viewport disables browser zoom. These are a documented
+product stance, not an unfinished feature: the games are built for a pre-reading
+child on a tablet held in landscape, and the app is not intended for anyone who
+needs non-touch access or text alternatives. The decision record is
+[docs/product-intent.md](docs/product-intent.md).
+
 ## Motion & Feedback
 
 One motion system drives the app: a 300ms crossfade into a 180ms fade-in on every navigation, the same ten-ray celebration in all twenty-four games with the sticker reveal ~400ms later, a 95% press squish with a `Back.out` settle, and reduced motion that shortens durations, drops particles and disables press feedback while gameplay stays whole. Narration owns the foreground: music ducks to 8% over a 120ms ramp, a 15s watchdog restores it, and a hidden document pauses music, speech and the play clock.
@@ -229,6 +239,11 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 
 - [PRD.md](docs/PRD.md) - Product Requirements Document
 - [TDD.md](docs/TDD.md) - Technical Design Document
+- [product-intent.md](docs/product-intent.md) - The recorded decisions on audience, accessibility, language and legal posture
+- [audio-attribution.md](docs/audio-attribution.md) - Shipped audio inventory and the BGM rights resolution
+- [third-party-notices.md](docs/third-party-notices.md) - Licenses of the bundled libraries, font and assets
+- [child-privacy.md](docs/child-privacy.md) - What data the app handles and how it stays on the device
+- [store-privacy-labels.md](docs/store-privacy-labels.md) - Prepared store privacy labels, not a submission
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
@@ -272,10 +287,15 @@ degrades to memory and the parental panel states the fact.
 One limitation is tracked rather than fixed, because it is a scoped product
 decision rather than a defect:
 
-- **Canvas-only UI** - no keyboard input, no accessibility tree, and a viewport that disables browser zoom. Correct for a touch-only 3-5 app, disqualifying for schools or procurement; Phase 3 of the roadmap decides whether to keep it as a stated stance or close it.
+- **Canvas-only UI** - no keyboard input, no accessibility tree, and a viewport that disables browser zoom. Correct for a touch-only 3-5 app, disqualifying for schools or procurement; recorded on 2026-11-20 as a stated product stance rather than a gap to close ([docs/product-intent.md](docs/product-intent.md)).
 
 Planned work lives in [conductor/product.md §10](conductor/product.md#10-roadmap).
 
 ## License
 
-Private project.
+Aby's Little Lab is released under the MIT License — see [LICENSE](LICENSE).
+Third-party components keep their own licenses, listed in [third-party notices](docs/third-party-notices.md).
+The app is distributed by local sideload / private PWA; the artifacts for a full
+public release are prepared, but no store listing exists. See
+[docs/product-intent.md](docs/product-intent.md) for the recorded audience and
+legal-posture decisions.
