@@ -84,7 +84,7 @@ Runtime work, i18n/second locale, keyboard or switch input, store submission/TWA
 
 ## Doc sync
 
-`pending` — no documentation changed by this review; the post-review sync records the final state.
+`none` — no documentation changed by this review; no post-review sync was required.
 
 ## History
 
