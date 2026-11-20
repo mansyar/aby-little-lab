@@ -29,6 +29,7 @@ function gp(overrides: Partial<GameProgress> = {}): GameProgress {
     wins: 0,
     correct: 0,
     wrong: 0,
+    probes: 0,
     lastPlayedAt: null,
     recent: [],
     ...overrides,
@@ -43,6 +44,7 @@ describe("progressLogic", () => {
         wins: 0,
         correct: 0,
         wrong: 0,
+        probes: 0,
         lastPlayedAt: null,
         recent: [],
       });
@@ -207,6 +209,54 @@ describe("progressLogic", () => {
     it("ignores negative counts when folding the window too", () => {
       const next = recordResult(gp({ recent: [true] }), { correct: -2, wrong: 1, win: true });
       expect(next.recent).toEqual([true, false]);
+    });
+  });
+
+  describe("probes", () => {
+    it("backfills an old save that has no probe count", () => {
+      const legacy = {
+        plays: 2,
+        wins: 1,
+        correct: 7,
+        wrong: 3,
+        lastPlayedAt: null,
+        recent: [true],
+      };
+      const normalized = normalizeProgress(legacy);
+      expect(normalized.probes).toBe(0);
+      expect(normalized.correct).toBe(7);
+      expect(normalized.wrong).toBe(3);
+    });
+
+    it("normalises a negative, fractional or non-numeric probe count to zero", () => {
+      expect(normalizeProgress({ probes: -4 }).probes).toBe(0);
+      expect(normalizeProgress({ probes: 2.5 }).probes).toBe(0);
+      expect(normalizeProgress({ probes: "3" as unknown as number }).probes).toBe(0);
+    });
+
+    it("accumulates probes without moving accuracy or the adaptive window", () => {
+      const base = gp({ correct: 4, wrong: 1, recent: [true, false] });
+      const withoutProbes = recordResult(base, { correct: 2, wrong: 1, win: true });
+      const withProbes = recordResult(base, { correct: 2, wrong: 1, win: true, probes: 5 });
+      expect(withProbes.probes).toBe(5);
+      expect(withProbes.correct).toBe(withoutProbes.correct);
+      expect(withProbes.wrong).toBe(withoutProbes.wrong);
+      expect(withProbes.wins).toBe(withoutProbes.wins);
+      expect(withProbes.recent).toEqual(withoutProbes.recent);
+      expect(getAccuracy(withProbes)).toBe(getAccuracy(withoutProbes));
+    });
+
+    it("treats an omitted probe count as zero", () => {
+      expect(recordResult(gp({ probes: 2 }), { correct: 1, wrong: 0, win: false }).probes).toBe(2);
+      expect(recordTaps(gp({ probes: 2 }), { correct: 1, wrong: 1 }).probes).toBe(2);
+    });
+
+    it("counts probes on the abandoned-session path without touching counters", () => {
+      const next = recordTaps(gp({ correct: 6, wrong: 2 }), { correct: 2, wrong: 1, probes: 3 });
+      expect(next.probes).toBe(3);
+      expect(next.correct).toBe(6);
+      expect(next.wrong).toBe(2);
+      expect(next.recent).toEqual([true, true, false]);
     });
   });
 

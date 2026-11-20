@@ -489,6 +489,23 @@ describe("planImport — merge, one field at a time", () => {
     expect(merged).toMatchObject({ plays: 5, wins: 1, correct: 10, wrong: 9 });
   });
 
+  it("takes the higher probe count, so a re-import adds nothing", () => {
+    const local = saveOf([
+      profileOf("p1", {
+        progress: progressOf({ "fix-it-machine": { correct: 2, wrong: 1, probes: 6 } }),
+      }),
+    ]);
+    const incoming = saveOf([
+      profileOf("p1", {
+        progress: progressOf({ "fix-it-machine": { correct: 1, wrong: 0, probes: 4 } }),
+      }),
+    ]);
+
+    const merged = mergedOnce(local, incoming).profiles[0].progress["fix-it-machine"];
+
+    expect(merged).toMatchObject({ correct: 2, wrong: 1, probes: 6 });
+  });
+
   it("takes the later lastPlayedAt, surviving a null on either side", () => {
     const cases: ReadonlyArray<{
       local: string | null;

@@ -344,6 +344,24 @@ describe("summariseInsights — the accuracy floor", () => {
     });
     expect(summary.lines[1]).not.toContain("Odd One Out");
   });
+
+  it("ranks on answers, so a game's probes never move the strongest or hardest", () => {
+    const answers = [
+      ["fix-it-machine", { plays: 2, wins: 1, correct: 6, wrong: 4 }],
+      ["shape-sorter", { plays: 2, wins: 1, correct: 9, wrong: 1 }],
+    ] as const;
+    const withoutProbes = profileOf(answers);
+    const withProbes = profileOf([
+      ["fix-it-machine", { plays: 2, wins: 1, correct: 6, wrong: 4, probes: 40 }],
+      ["shape-sorter", { plays: 2, wins: 1, correct: 9, wrong: 1, probes: 3 }],
+    ]);
+
+    const baseline = summariseInsights(withoutProbes, NOW);
+    const probed = summariseInsights(withProbes, NOW);
+
+    expect(probed.accuracy).toEqual(baseline.accuracy);
+    expect(probed.lines).toEqual(baseline.lines);
+  });
 });
 
 describe("summariseInsights — the day count", () => {

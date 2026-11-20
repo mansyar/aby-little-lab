@@ -185,6 +185,14 @@ class TestScene extends GameSceneBase {
     this.recordWrong();
   }
 
+  testRecordProbe(): void {
+    this.recordProbe();
+  }
+
+  testReactProbe(): void {
+    this.reactProbe();
+  }
+
   testReactWrong(targets?: Phaser.GameObjects.GameObject[], onComplete?: () => void): void {
     this.reactWrong(targets, onComplete);
   }
@@ -755,14 +763,14 @@ describe("GameSceneBase scaffold", () => {
       scene.testCompleteGame("shape-sorter");
 
       expect(mockRecordGameResult).toHaveBeenCalledTimes(1);
-      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 2, 1);
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 2, 1, 0);
     });
 
     it("flushes zeroed counters when the game is completed without taps", () => {
       const scene = new TestScene();
       scene.testCompleteGame("color-match");
 
-      expect(mockRecordGameResult).toHaveBeenCalledWith("color-match", 0, 0);
+      expect(mockRecordGameResult).toHaveBeenCalledWith("color-match", 0, 0, 0);
     });
 
     it("resets the session counters after flushing", () => {
@@ -771,8 +779,27 @@ describe("GameSceneBase scaffold", () => {
       scene.testCompleteGame("shape-sorter");
       scene.testCompleteGame("shape-sorter");
 
-      expect(mockRecordGameResult).toHaveBeenNthCalledWith(1, "shape-sorter", 1, 0);
-      expect(mockRecordGameResult).toHaveBeenNthCalledWith(2, "shape-sorter", 0, 0);
+      expect(mockRecordGameResult).toHaveBeenNthCalledWith(1, "shape-sorter", 1, 0, 0);
+      expect(mockRecordGameResult).toHaveBeenNthCalledWith(2, "shape-sorter", 0, 0, 0);
+    });
+
+    it("flushes probes as their own count, never as wrong answers", () => {
+      const scene = new TestScene();
+      scene.testRecordCorrect();
+      scene.testRecordProbe();
+      scene.testRecordProbe();
+      scene.testCompleteGame("fix-it-machine");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("fix-it-machine", 1, 0, 2);
+    });
+
+    it("records a probe reaction as a probe and a wrong reaction as a wrong answer", () => {
+      const scene = new TestScene();
+      scene.testReactProbe();
+      scene.testReactWrong();
+      scene.testCompleteGame("fix-it-machine");
+
+      expect(mockRecordGameResult).toHaveBeenCalledWith("fix-it-machine", 0, 1, 1);
     });
 
     it("does not record a completed result when the scene shuts down without completing", () => {
@@ -809,7 +836,19 @@ describe("GameSceneBase scaffold", () => {
       scene.events.emit("shutdown");
 
       expect(mockRecordGameTaps).toHaveBeenCalledTimes(1);
-      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1);
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1, 0);
+    });
+
+    it("flushes an abandoned session's probes with its taps", () => {
+      const scene = new TestScene("FixItMachine");
+      scene.init();
+      scene.testRecordCorrect();
+      scene.testRecordProbe();
+      scene.testRecordProbe();
+
+      scene.events.emit("shutdown");
+
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("fix-it-machine", 1, 0, 2);
     });
 
     it("folds the abandoned taps into the rolling window and nothing else", () => {
@@ -843,14 +882,14 @@ describe("GameSceneBase scaffold", () => {
       scene.testRecordWrong();
 
       scene.events.emit("shutdown");
-      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1);
+      expect(mockRecordGameTaps).toHaveBeenCalledWith("shape-sorter", 2, 1, 0);
 
       // Second visit on the same scene instance: Phaser reuses it.
       scene.init();
       scene.testRecordCorrect();
       scene.testCompleteGame("shape-sorter");
 
-      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0);
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0, 0);
     });
 
     it("writes nothing at shutdown when the session was completed", () => {
@@ -861,7 +900,7 @@ describe("GameSceneBase scaffold", () => {
 
       scene.events.emit("shutdown");
 
-      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0);
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 1, 0, 0);
       // The completed session already flushed its own taps: no second write.
       expect(mockRecordGameTaps).not.toHaveBeenCalled();
     });
@@ -966,7 +1005,7 @@ describe("GameSceneBase scaffold", () => {
       expect(wiggleTween(scene)).toBeUndefined();
       // The custom path still counts the wrong answer toward learning progress.
       scene.testCompleteGame("shape-sorter");
-      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 0, 1);
+      expect(mockRecordGameResult).toHaveBeenCalledWith("shape-sorter", 0, 1, 0);
     });
 
     it("hands the completion callback to the wiggle tween", () => {

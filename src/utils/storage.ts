@@ -513,7 +513,7 @@ export function recordGamePlay(gameId: GameId): void {
  * still one write (NFR-2), and the streak advances at most once per local day
  * because `advanceStreak` leaves a same-day record unchanged.
  */
-export function recordGameResult(gameId: GameId, correct: number, wrong: number): void {
+export function recordGameResult(gameId: GameId, correct: number, wrong: number, probes = 0): void {
   mutate((v2) => {
     const now = new Date();
     return {
@@ -524,7 +524,7 @@ export function recordGameResult(gameId: GameId, correct: number, wrong: number)
               ...p,
               progress: {
                 ...p.progress,
-                [gameId]: recordResult(p.progress[gameId], { correct, wrong, win: true }),
+                [gameId]: recordResult(p.progress[gameId], { correct, wrong, probes, win: true }),
               },
               insights: advanceStreak(p.insights, now),
             }
@@ -573,7 +573,7 @@ export function recordLimitHit(profileId: string, now: Date = new Date()): void 
  * sessions and stay untouched; the play count is not touched either, because
  * it counts every game the child starts, abandoned or not.
  */
-export function recordGameTaps(gameId: GameId, correct: number, wrong: number): void {
+export function recordGameTaps(gameId: GameId, correct: number, wrong: number, probes = 0): void {
   mutate((v2) => ({
     ...v2,
     profiles: v2.profiles.map((p) =>
@@ -582,7 +582,7 @@ export function recordGameTaps(gameId: GameId, correct: number, wrong: number): 
             ...p,
             progress: {
               ...p.progress,
-              [gameId]: recordTaps(p.progress[gameId], { correct, wrong }),
+              [gameId]: recordTaps(p.progress[gameId], { correct, wrong, probes }),
             },
           }
         : p,

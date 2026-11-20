@@ -294,23 +294,57 @@ describe("toolchain guard", () => {
       `ci.yml should read .node-version in both jobs; found ${versionFile.length} reference(s)`,
     ).toBe(2);
 
-    const jobs: readonly (readonly [string, string])[] = [
-      ["quality-gates", "Quality Gates"],
-      ["e2e", "Browser Journeys"],
+    // Three jobs, two of them expensive: the shard job spends minutes on the
+    // browser suite and must classify before it does. The third is the required
+    // check itself — a few seconds of shell, so it classifies nothing.
+    const jobs: readonly (readonly [string, RegExp, boolean])[] = [
+      ["quality-gates", /^ {4}name: Quality Gates$/, true],
+      ["e2e-shard", /^ {4}name: Browser Journeys \(shard \$\{\{ matrix\.shard \}\} of 2\)$/, true],
+      ["e2e", /^ {4}name: Browser Journeys$/, false],
     ];
-    for (const [job, display] of jobs) {
+    for (const [job, display, classifies] of jobs) {
       const body = blockUnder(`${job}:`);
       expect(body.length, `ci.yml has no "${job}" job`).toBeGreaterThan(0);
       expect(
-        body,
-        `ci.yml job "${job}" must keep the display name "${display}": branch protection ` +
+        body.some((line) => display.test(line)),
+        `ci.yml job "${job}" must keep the display name ${display}: branch protection ` +
           "matches these names by string, so a rename silently weakens the required checks",
-      ).toContain(`    name: ${display}`);
+      ).toBe(true);
       expect(
         body.some((line) => line.trim() === "- name: Classify the change"),
-        `ci.yml job "${job}" must classify the change before it spends minutes on the suite`,
-      ).toBe(true);
+        classifies
+          ? `ci.yml job "${job}" must classify the change before it spends minutes on the suite`
+          : `ci.yml job "${job}" is the aggregation check and must not grow a classifier of its own`,
+      ).toBe(classifies);
     }
+
+    // Sharding must not cost the required check its name. Branch protection
+    // waits on one check called "Browser Journeys"; if only the matrix halves
+    // report, that wait never ends, and if the aggregator does not run on
+    // failure the PR is left pending instead of red.
+    const required = blockUnder("e2e:").join("|");
+    expect(
+      required,
+      "the required-check job must need both the gate and every browser half",
+    ).toContain("needs: [quality-gates, e2e-shard]");
+    expect(
+      blockUnder("e2e:").some((line) => line.trim() === "if: always()"),
+      'the required-check job must run even when a half fails ("if: always()"), or a red ' +
+        "half leaves the required check pending forever",
+    ).toBe(true);
+    expect(
+      required.includes("needs.e2e-shard.result"),
+      "the required-check job must read the halves' result and fail on it, not merely exist",
+    ).toBe(true);
+
+    // The halves must partition the suite themselves: a hand-kept list of spec
+    // files is how a journey goes missing from CI without anything going red.
+    const shards = blockUnder("e2e-shard:").join("|");
+    expect(
+      shards.includes("--shard=") && shards.includes("matrix.shard"),
+      "the browser job must run Playwright's own --shard partition; a hand-kept file list " +
+        "can drop a journey silently",
+    ).toBe(true);
 
     // The classifier is written out once per job. Two copies of a rule is how
     // one of them drifts: compare the bodies so an edit to one job cannot pass.

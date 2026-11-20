@@ -299,6 +299,7 @@ function mergeProgress(local: GameProgress, incoming: GameProgress): GameProgres
     wins: Math.max(local.wins, incoming.wins),
     correct: Math.max(local.correct, incoming.correct),
     wrong: Math.max(local.wrong, incoming.wrong),
+    probes: Math.max(local.probes, incoming.probes),
     lastPlayedAt: laterStamp(local.lastPlayedAt, incoming.lastPlayedAt),
     // The longer window describes more play; on a tie the device's own is kept.
     recent: incoming.recent.length > local.recent.length ? incoming.recent : local.recent,

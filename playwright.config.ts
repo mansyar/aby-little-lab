@@ -40,13 +40,22 @@ export default defineConfig({
   // that server: there is no per-worker port and no second server, so every
   // worker reads the same built `dist` over the same origin.
   //
-  // Measured on the 2026-11-16 host (wall clock):
+  // Measured on the 2026-11-16 development host (wall clock):
   // serial 4.9 min, two workers 5.0-5.1 min, three workers 3.8-4.3 min. Two
-  // workers no longer helped once `launch-all` stopped being a 3.3 min monolith
-  // — the suite's floor is its total work divided by workers, and 24 launches
-  // are ~200 s of that work. Three workers run the twenty-three other files and
-  // the two launch halves side by side and land inside the budget.
-  workers: 3,
+  // workers no longer helped there once `launch-all` stopped being a 3.3 min
+  // monolith — the suite's floor is its total work divided by workers, and 24
+  // launches are ~200 s of that work.
+  //
+  // CI is a different machine and a different answer. Its runner has four
+  // vCPUs, and three workers there put three Phaser canvases plus the preview
+  // server on them: the journeys still passed, but the game loop fell far enough
+  // behind that a parental hold, which the gate counts in frames, took minutes of
+  // wall clock. On 2026-11-16 that showed up as the backup journey timing out on
+  // CI while passing locally (runs 43932079796, 43943297292, 43947422301, the
+  // last one ending in `Failed to find context` as the browser itself died).
+  // CI therefore runs two workers, which leaves a core for the browser's own
+  // compositor and the preview server; the development host keeps three.
+  workers: isCI ? 2 : 3,
   fullyParallel: false,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,

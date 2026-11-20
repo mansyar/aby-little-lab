@@ -21,7 +21,7 @@ export const ACTIVITY_DAYS = 7;
 
 /** Fresh per-game progress: zeroed stats and no last-played timestamp. */
 export function createDefaultProgress(): GameProgress {
-  return { plays: 0, wins: 0, correct: 0, wrong: 0, lastPlayedAt: null, recent: [] };
+  return { plays: 0, wins: 0, correct: 0, wrong: 0, probes: 0, lastPlayedAt: null, recent: [] };
 }
 
 /** Fresh progress map: zeroed stats for every game id. */
@@ -45,6 +45,8 @@ export function normalizeProgress(raw: Partial<GameProgress> | null | undefined)
     wins: count(raw?.wins),
     correct: count(raw?.correct),
     wrong: count(raw?.wrong),
+    // Absent in saves written before probes existed: an old save reads as zero.
+    probes: count(raw?.probes),
     lastPlayedAt: stamp(raw?.lastPlayedAt),
     recent: window(raw?.recent),
   };
@@ -75,10 +77,14 @@ export function recordPlay(
  * increments wins when the session was a win. Negative counts are ignored.
  * The per-session aggregate is also folded into the rolling recent-tap
  * window (correct taps first) that drives adaptive band shifts.
+ *
+ * Probes are the third kind of tap: an exploratory look that answered no
+ * question. They are accumulated and nothing else — not the accuracy ratio,
+ * not the win count, and not the adaptive window, which describes answers.
  */
 export function recordResult(
   progress: Partial<GameProgress> | null | undefined,
-  result: { correct: number; wrong: number; win: boolean },
+  result: { correct: number; wrong: number; win: boolean; probes?: number },
 ): GameProgress {
   const p = normalizeProgress(progress);
   const correct = Math.max(0, result.correct);
@@ -88,6 +94,7 @@ export function recordResult(
     wins: p.wins + (result.win ? 1 : 0),
     correct: p.correct + correct,
     wrong: p.wrong + wrong,
+    probes: p.probes + Math.max(0, result.probes ?? 0),
     recent: updateRecentWindow(p.recent, { correct, wrong }),
   };
 }
@@ -102,13 +109,14 @@ export function recordResult(
  */
 export function recordTaps(
   progress: Partial<GameProgress> | null | undefined,
-  taps: { correct: number; wrong: number },
+  taps: { correct: number; wrong: number; probes?: number },
 ): GameProgress {
   const p = normalizeProgress(progress);
   const correct = Math.max(0, taps.correct);
   const wrong = Math.max(0, taps.wrong);
   return {
     ...p,
+    probes: p.probes + Math.max(0, taps.probes ?? 0),
     recent: updateRecentWindow(p.recent, { correct, wrong }),
   };
 }

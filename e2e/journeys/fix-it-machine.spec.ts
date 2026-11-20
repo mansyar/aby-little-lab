@@ -9,6 +9,7 @@ import {
   roundIndex,
   waitForFixItMachineRound,
 } from "../fixtures/game";
+import { readStoredV2 } from "../fixtures/shell";
 
 /**
  * FR-15 / AC-9, debugging family: Fix-It Machine runs a tape, lets the stopped
@@ -36,6 +37,19 @@ test("Fix-It Machine diagnoses a stopped run, repairs it and solves three rounds
 
   for (let round = 0; round <= 2; round += 1) {
     const opening = await waitForFixItMachineRound(page, round);
+
+    if (round === 0) {
+      // Exploring is not answering: tapping a card that is not the wrong one is
+      // how a child searches the tape, so it must cost nothing but a look.
+      const innocent = opening.cards.findIndex((_, index) => index !== opening.bugIndex);
+      expect(innocent, "round 0 has a card that is not the bug").toBeGreaterThanOrEqual(0);
+      await tapCanvas(page, opening.cards[innocent]);
+      const afterLook = await fixItMachineState(page);
+      expect(afterLook?.trayOpen, "a look opens no repair tray").toBe(false);
+      expect(afterLook?.wrongTaps, "a look still counts as a missed tap for the hints").toBe(
+        opening.wrongTaps + 1,
+      );
+    }
 
     // The tape as drawn is the round's program with exactly one substitution,
     // and that substitution is never the first card.
@@ -136,6 +150,35 @@ test("Fix-It Machine diagnoses a stopped run, repairs it and solves three rounds
   // Leaving is the same parental hold every game's back control uses.
   await returnToHub(page);
   expect(await roundIndex(page), "the hub publishes no round counter").toBe(-1);
+
+  // The whole path into the parent's numbers: the look is stored as a look, and
+  // the answer window holds the three distractor taps and nothing for the look.
+  type StoredGame = { correct?: number; wrong?: number; probes?: number; recent?: boolean[] };
+  const storedProgress = async (): Promise<StoredGame> => {
+    const stored = (await readStoredV2(page)) as {
+      activeProfileId?: string;
+      profiles?: Array<{ id: string; progress?: Record<string, StoredGame> }>;
+    } | null;
+    const profiles = stored?.profiles ?? [];
+    const active = profiles.find((entry) => entry.id === stored?.activeProfileId) ?? profiles[0];
+    return active?.progress?.["fix-it-machine"] ?? {};
+  };
+
+  await expect
+    .poll(async () => (await storedProgress()).probes ?? 0, {
+      message: "the exploration tap is stored as a look",
+      timeout: RUN_TIMEOUT,
+    })
+    .toBe(1);
+
+  const stored = await storedProgress();
+  // Six misses reached the answer window — three stopped runs and three
+  // distractor tools. A seventh would mean the look had been scored.
+  expect(
+    (stored.recent ?? []).filter((answer) => answer === false),
+    "the look left no mark in the answer window",
+  ).toHaveLength(6);
+  expect(stored.wrong ?? 0, "an abandoned session writes no wrong-answer total").toBe(0);
 
   expect(errors, "debugging three rounds should log no page or console errors").toEqual([]);
 });

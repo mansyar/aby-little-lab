@@ -14,6 +14,7 @@ import {
   addProfile,
   getActiveProfile,
   getProfiles,
+  recordGameResult,
   setPlayTimeLimit,
 } from "../../../utils/storage";
 
@@ -312,6 +313,63 @@ describe("ProgressOverlay", () => {
         String(obj.args[2]).includes("plays"),
     );
     expect(stats.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("shows a game's looks beside its accuracy, and nothing for a game without them", () => {
+    // Two right answers, one wrong, three exploratory looks.
+    recordGameResult("fix-it-machine", 2, 1, 3);
+
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const statsLines = (): string[] =>
+      live()
+        .filter((obj) => obj.kind === "text" && String(obj.args?.[2] ?? "").includes("plays"))
+        .map((obj) => String(obj.args?.[2]));
+
+    let line = statsLines().find((text) => text.includes("looks"));
+    for (let page = 0; page < 8 && line === undefined; page += 1) {
+      nextPage();
+      line = statsLines().find((text) => text.includes("looks"));
+    }
+
+    expect(line, "the game with probes shows them").toContain("3 looks");
+    // Accuracy is answers only: 2 of 3, never 2 of 6.
+    expect(line).toContain("67%");
+    expect(
+      statsLines().filter((text) => text.includes("looks")),
+      "only the game that has looks shows them",
+    ).toHaveLength(1);
+  });
+
+  it("renders a single look in the singular", () => {
+    // Exactly one exploratory tap: the label must read "1 look", never "1 looks".
+    recordGameResult("robot-path", 3, 0, 1);
+
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const statsLines = (): string[] =>
+      live()
+        .filter((obj) => obj.kind === "text" && String(obj.args?.[2] ?? "").includes("plays"))
+        .map((obj) => String(obj.args?.[2]));
+
+    let line = statsLines().find((text) => text.includes("look"));
+    for (let page = 0; page < 8 && line === undefined; page += 1) {
+      nextPage();
+      line = statsLines().find((text) => text.includes("look"));
+    }
+
+    expect(line, "the game with one probe shows it").toContain("1 look · ");
+    expect(line, "one look is never pluralised").not.toContain("1 looks");
   });
 
   it("renders the 7-day activity strip label and bars on the Overview page", () => {
