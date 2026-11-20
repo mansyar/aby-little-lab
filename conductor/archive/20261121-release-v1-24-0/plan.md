@@ -59,18 +59,18 @@ PR: https://github.com/mansyar/aby-little-lab/pull/91 — MERGED
 - **Covers:** FR-6, FR-7, AC-5
 - **Touches:** `docs/release-notes-v1.24.0.md` (Status flip only), git tag `v1.24.0`
 - **Verification:** `git ls-remote origin refs/tags/v1.24.0` resolves to the merged `master` HEAD; notes Status reads FINAL; `node scripts/validate-docs.js` stays green
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P3.T1: Confirm the tag is clear** — covers: FR-6, AC-5
-  - [ ] **P3.T1.1:** Confirm `v1.24.0` does not exist locally or on origin and that the release commit is on `master` lineage.
-- [ ] **P3.T2: Create and push the tag** — covers: FR-6, AC-5
-  - [ ] **P3.T2.1:** With explicit user go-ahead, tag the merged `master` HEAD and push the tag (fires the tag-gated Coolify deploy).
-- [ ] **P3.T3: Flip the notes to FINAL** — covers: FR-7, AC-5
-  - [ ] **P3.T3.1:** Status DRAFT → FINAL with the tag and deploy record, on `master` directly after the deploy fires.
+- [x] **P3.T1: Confirm the tag is clear** — covers: FR-6, AC-5
+  - [x] **P3.T1.1:** Confirm `v1.24.0` does not exist locally or on origin and that the release commit is on `master` lineage.
+- [x] **P3.T2: Create and push the tag** — covers: FR-6, AC-5
+  - [x] **P3.T2.1:** With explicit user go-ahead, tag the merged `master` HEAD and push the tag (fires the tag-gated Coolify deploy).
+- [x] **P3.T3: Flip the notes to FINAL** — covers: FR-7, AC-5
+  - [x] **P3.T3.1:** Status DRAFT → FINAL with the tag and deploy record, on `master` directly after the deploy fires.
 
 <!--
-The primary appends after acceptance:
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261121-release-v1-24-0/verification/phase-3.md
+Result: verified
+Checkpoint: this phase's state commit (release-notes FINAL flip)
+Evidence: conductor/archive/20261121-release-v1-24-0/verification/phase-3.md
+Tag: v1.24.0 -> cac20094 (PR #91 merge commit); CI run 44824136678 green, Coolify webhook fired
 -->

@@ -1,7 +1,7 @@
 # Release Notes - v1.24.0
 
-> Status: DRAFT
-> Tag: (pending)
+> Status: FINAL
+> Tag: `v1.24.0` (`cac20094`, 2026-11-21)
 > Base: `v1.23.0` (`45190721`, 2026-10-27)
 
 Fourteen tracks have merged since v1.23.0 — the largest gap in the release record — and they land together here. For families the headline is two brand-new games: **Robot Path, the 23rd game**, and **Fix-It Machine, the 24th game** and the suite's first debugging game (where a child's taps count as "looks", never scores). Parents get a new Overview of what is being played and whether it is working, a way to carry a save to another device and back, a gentle tap-to-dismiss card if something goes wrong, and a way to filter the board by learning domain. Underneath, the save layer and the test suite were hardened, the toolchain pinned, and a strict Content-Security-Policy added. This release also closes the product-intent gate: the decisions on audience, accessibility, language and legal posture are recorded, the project carries an MIT license, and the old untraceable background music is replaced with a CC0-licensed track, with its source recorded in [audio-attribution.md](audio-attribution.md). Nothing here asks for a store listing or a store submission — it is the app you already use, with more to play and more to trust.
@@ -77,6 +77,7 @@ Nothing to install by hand: the release is the PWA shell plus its content-addres
 - Security: `node scripts/validate-headers.js` asserts the strict Content-Security-Policy and its three companion headers against the built image.
 - Save schema: additive and guarded changes only; existing saves carry over (see PRs #80 and #84).
 - Device matrix: **SKIPPED — accepted gap** (see Known Issues). CI and the tag-deploy smoke re-confirm every automated figure above on the release commit.
+- Tag and deploy: `v1.24.0` points at merge commit `cac20094` on `master`. The tag CI run (`44824136678`, 2026-11-21) passed Quality Gates, both Browser Journey shards (13 + 13 cases) and the rollup, and fired the Coolify deploy webhook via the tag-gated job. The tag must not be moved.
 
 ## Known Issues
 
