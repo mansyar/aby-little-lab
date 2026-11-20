@@ -47,7 +47,7 @@ Three timing-sensitive test failures occurred on this host while establishing th
 | AC-5 | Tag `v1.24.0` on merged master HEAD + notes FINAL | Phase 3, human-gated | Pending |
 | AC-6 | Skipped device pass recorded as accepted gap | Notes Known Issues → `device-testing-checklist.md` / `release-checklist.md` | Pass |
 | AC-7 | Notes include 23rd/24th games, looks-not-scores, and #90 product-intent/legal/CC0 outcome | Notes sections #87–#90 | Pass |
-| AC-8 | No runtime changes | Release diff scope above | Pass |
+| NFR-1 | No runtime changes | Release diff scope above | Pass |
 
 ## Deviations / blockers
 
