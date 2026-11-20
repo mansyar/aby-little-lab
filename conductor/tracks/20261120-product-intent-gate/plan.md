@@ -95,7 +95,7 @@
 - **Covers:** F1, F2, F3, F4
 - **Touches:** `docs/third-party-notices.md`, `docs/product-intent.md`, `docs/store-privacy-labels.md`, `conductor/product.md`
 - **Verification:** `node scripts/validate-docs.js` plus the full configured `verify_phase` chain
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Correct the BGM license row in third-party notices** — covers: F1
 - [ ] **R1.T2: Correct the three stale BGM-rights statements in the decision record** — covers: F2
