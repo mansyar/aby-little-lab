@@ -55,7 +55,7 @@
 - **Goal:** `bgm.mp3` has a traceable right — replaced with a known-licensed loop
   and attributed, or removed together with its precache wiring.
 - **Depends on:** Phase 2
-- **Covers:** FR-7, AC-7
+- **Covers:** FR-7, NFR-1, AC-7
 - **Touches:** `docs/audio-attribution.md`, `public/audio/bgm.mp3`, `vite.config.ts`, `scripts/validate-pwa.js`, `src/audio/AudioManager.ts`
 - **Verification:** `pnpm build && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending
