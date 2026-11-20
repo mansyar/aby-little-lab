@@ -38,7 +38,7 @@
 - **Covers:** FR-4, FR-5, NFR-3, AC-3, AC-4
 - **Touches:** `conductor/tracks/20261121-release-v1-24-0/*` (evidence, review, PR notes)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
 - [ ] **P2.T2: Conductor review and required fix rounds** — covers: NFR-3
