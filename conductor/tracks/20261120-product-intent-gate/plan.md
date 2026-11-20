@@ -36,7 +36,7 @@
 - **Covers:** FR-5, FR-6, AC-5, AC-6
 - **Touches:** `LICENSE`, `docs/audio-attribution.md`, `docs/third-party-notices.md`, `docs/child-privacy.md`, `docs/store-privacy-labels.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the MIT LICENSE** — covers: FR-6
 - [ ] **P2.T2: Add the audio attribution and third-party notices** — covers: FR-6
