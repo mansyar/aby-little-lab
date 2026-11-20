@@ -58,7 +58,7 @@
 - **Covers:** FR-7, NFR-1, AC-7
 - **Touches:** `docs/audio-attribution.md`, `public/audio/bgm.mp3`, `vite.config.ts`, `scripts/validate-pwa.js`, `src/audio/AudioManager.ts`
 - **Verification:** `pnpm build && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Record the investigation outcome in the attribution file** — covers: FR-7
 - [ ] **P3.T2: Replace or remove the loop and update its wiring** — covers: FR-7
