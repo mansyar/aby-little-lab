@@ -38,18 +38,18 @@
 - **Covers:** FR-4, FR-5, NFR-3, AC-3, AC-4
 - **Touches:** `conductor/tracks/20261121-release-v1-24-0/*` (evidence, review, PR notes)
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
-- [ ] **P2.T2: Conductor review and required fix rounds** — covers: NFR-3
-- [ ] **P2.T3: PR, CI watch and merge** — covers: FR-5, AC-4
-  - [ ] **P2.T3.1:** Open the PR against `master` with the configured tool, watch CI, and merge with the configured `merge` method only after explicit user go-ahead (no `--admin` or `--auto`).
+- [x] **P2.T1: Full gate on the release state** — covers: FR-4, AC-3
+- [x] **P2.T2: Conductor review and required fix rounds** — covers: NFR-3
+- [x] **P2.T3: PR, CI watch and merge** — covers: FR-5, AC-4
+  - [x] **P2.T3.1:** Open the PR against `master` with the configured tool, watch CI, and merge with the configured `merge` method only after explicit user go-ahead (no `--admin` or `--auto`).
 
 <!--
-The primary appends after acceptance:
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261121-release-v1-24-0/verification/phase-2.md
+Result: verified
+Checkpoint: cac20094 (merge commit; review gate at eecae159)
+Evidence: conductor/archive/20261121-release-v1-24-0/verification/phase-2.md
+PR: https://github.com/mansyar/aby-little-lab/pull/91 — MERGED
 -->
 
 ## Phase 3: Tag and ship
