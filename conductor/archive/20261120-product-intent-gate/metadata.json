@@ -27,6 +27,6 @@
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-11-20T20:14:00+11:00",
+  "archive_path": "conductor/archive/20261120-product-intent-gate"
 }
