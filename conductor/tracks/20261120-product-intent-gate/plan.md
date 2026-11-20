@@ -77,13 +77,13 @@
 - **Covers:** FR-2, FR-3, FR-8, AC-2, AC-3, AC-8
 - **Touches:** `README.md`, `conductor/product.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Publish the accessibility stance and link the decision record in README** — covers: FR-3, FR-8
-- [ ] **P4.T2: Mark Phase 3 complete and Phase 5 cancelled in product.md** — covers: FR-2, FR-8
+- [x] **P4.T1: Publish the accessibility stance and link the decision record in README** — covers: FR-3, FR-8
+- [x] **P4.T2: Mark Phase 3 complete and Phase 5 cancelled in product.md** — covers: FR-2, FR-8
 
 <!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 0cc94d18
 **Evidence:** conductor/tracks/20261120-product-intent-gate/verification/phase-4.md
 -->
