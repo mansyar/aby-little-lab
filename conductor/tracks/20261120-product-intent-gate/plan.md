@@ -15,17 +15,17 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, AC-1, AC-2, AC-3, AC-4, AC-5
 - **Touches:** `docs/product-intent.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Create the decision record** — covers: FR-1
-  - [ ] **P1.T1.1: Add overview and one section per decision with explicit values**
-  - [ ] **P1.T1.2: Add date, rationale and consequence to each decision**
-- [ ] **P1.T2: Record the sequencing consequences** — covers: FR-2, FR-4
-  - [ ] **P1.T2.1: State Phase 5 cancelled and Phase 4 next; i18n not a goal**
+- [x] **P1.T1: Create the decision record** — covers: FR-1
+  - [x] **P1.T1.1: Add overview and one section per decision with explicit values**
+  - [x] **P1.T1.2: Add date, rationale and consequence to each decision**
+- [x] **P1.T2: Record the sequencing consequences** — covers: FR-2, FR-4
+  - [x] **P1.T2.1: State Phase 5 cancelled and Phase 4 next; i18n not a goal**
 
 <!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 2a171939
 **Evidence:** conductor/tracks/20261120-product-intent-gate/verification/phase-1.md
 -->
 
