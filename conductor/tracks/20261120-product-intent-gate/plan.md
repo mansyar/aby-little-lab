@@ -36,17 +36,17 @@
 - **Covers:** FR-5, FR-6, AC-5, AC-6
 - **Touches:** `LICENSE`, `docs/audio-attribution.md`, `docs/third-party-notices.md`, `docs/child-privacy.md`, `docs/store-privacy-labels.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Add the MIT LICENSE** — covers: FR-6
-- [ ] **P2.T2: Add the audio attribution and third-party notices** — covers: FR-6
-  - [ ] **P2.T2.1: Inventory shipped assets and record the BGM investigation status**
-- [ ] **P2.T3: Add the child-privacy statement and store privacy labels** — covers: FR-5, FR-6
-  - [ ] **P2.T3.1: Mark the labels as prepared, not submitted**
+- [x] **P2.T1: Add the MIT LICENSE** — covers: FR-6
+- [x] **P2.T2: Add the audio attribution and third-party notices** — covers: FR-6
+  - [x] **P2.T2.1: Inventory shipped assets and record the BGM investigation status**
+- [x] **P2.T3: Add the child-privacy statement and store privacy labels** — covers: FR-5, FR-6
+  - [x] **P2.T3.1: Mark the labels as prepared, not submitted**
 
 <!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 2fcb8f5e
 **Evidence:** conductor/tracks/20261120-product-intent-gate/verification/phase-2.md
 -->
 
