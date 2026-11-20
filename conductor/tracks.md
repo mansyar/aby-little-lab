@@ -285,3 +285,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Robot Path** - [20261115-robot-path](./archive/20261115-robot-path/index.md) - feature - high
 - [x] **Track: Fix-It Machine** — [20261116-fix-it-machine](./archive/20261116-fix-it-machine/index.md) — feature — high
 - [x] **Track: Debug Probes** — [20261117-debug-probes](./archive/20261117-debug-probes/index.md) — bug — high
+- [~] **Track: Product Intent Gate** — [20261120-product-intent-gate](./tracks/20261120-product-intent-gate/index.md) — chore — high
