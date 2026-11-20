@@ -58,15 +58,15 @@
 - **Covers:** FR-7, NFR-1, AC-7
 - **Touches:** `docs/audio-attribution.md`, `public/audio/bgm.mp3`, `vite.config.ts`, `scripts/validate-pwa.js`, `src/audio/AudioManager.ts`
 - **Verification:** `pnpm build && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Record the investigation outcome in the attribution file** — covers: FR-7
-- [ ] **P3.T2: Replace or remove the loop and update its wiring** — covers: FR-7
-  - [ ] **P3.T2.1: If removed, drop the precache entry and confirm the PWA validator passes**
+- [x] **P3.T1: Record the investigation outcome in the attribution file** — covers: FR-7
+- [x] **P3.T2: Replace or remove the loop and update its wiring** — covers: FR-7
+  - [x] **P3.T2.1: If removed, drop the precache entry and confirm the PWA validator passes**
 
 <!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 9fc3e1a5
 **Evidence:** conductor/tracks/20261120-product-intent-gate/verification/phase-3.md
 -->
 
