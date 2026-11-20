@@ -15,7 +15,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, AC-1, AC-2, AC-3, AC-4, AC-5
 - **Touches:** `docs/product-intent.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Create the decision record** — covers: FR-1
   - [ ] **P1.T1.1: Add overview and one section per decision with explicit values**
