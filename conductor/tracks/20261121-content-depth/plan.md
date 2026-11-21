@@ -113,17 +113,29 @@
 **Checkpoint:** `edc25cae`
 **Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-4.md`
 
-<!--
-Review fixes are appended by `conductor-review` as:
-
 ## Phase R1: Review Fixes
 
-- **Goal:** Resolve review findings ...
+- **Goal:** Resolve review findings F1, F2, F3 and F4 from round 1.
 - **Depends on:** Phase 4
-- **Covers:** review findings
-- **Touches:** ...
-- **Verification:** ...
+- **Covers:** F1 (High), F2 (Medium), F3 (Low), F4 (Low)
+- **Touches:** `src/assets/svg/shapes/cutout_*.svg` (six new), `src/game/art/cutouts.ts`,
+  `src/game/hub/prewarm.ts`, `src/__tests__/game/art/groupIntegrity.test.ts`,
+  `src/__tests__/game/art/shellOwnership.test.ts`, `src/__tests__/game/art/preloadArtGroups.test.ts`,
+  `src/__tests__/utils/textureTiers.test.ts`, `src/__tests__/scenes/preloadScene.test.ts`,
+  `src/__tests__/game/hub/prewarm.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`,
+  `docs/PRD.md`, `docs/TDD.md`, `docs/SVG_STYLE.md`, `docs/perf-baseline.md`, `README.md`
+- **Verification:** full `verify_phase` + `node scripts/validate-textures.js`
 - **Status:** pending
 
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
--->
+- [ ] **R1.T1: Add six cut-out SVGs and register them** — covers: F1
+  - [ ] **R1.T1.1:** Author `cutout_{cube,cross,chevron,capsule,sector,parallelogram}.svg` matching the shape silhouettes (style/viewBox/stroke per existing cut-outs)
+  - [ ] **R1.T1.2:** Register in `src/game/art/cutouts.ts` and add CARD-tier rows to `src/game/hub/prewarm.ts` `CUTOUTS_KEYS`
+  - [ ] **R1.T1.3:** Add a test asserting every `ShapeType` maps to a registered `cutout_${type}` key
+- [ ] **R1.T2: Reconcile counts, budget and docs** — covers: F2, F4
+  - [ ] **R1.T2.1:** Update ripple count tests (groups, shell ownership, preload, texture tiers, preloadScene, prewarm) and living test counts
+  - [ ] **R1.T2.2:** Fix count docs (PRD 24+24/48; TDD tree/counts; SVG_STYLE) and re-baselined texture figures (319 SVGs)
+  - [ ] **R1.T2.3:** Update TDD §10.3 coverage percentages to final measured values
+
+**Result:** pending
+**Checkpoint:** <short-sha>
+**Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-R1.md`

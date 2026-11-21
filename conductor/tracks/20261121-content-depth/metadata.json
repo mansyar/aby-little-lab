@@ -13,9 +13,9 @@
   "base_branch": "master",
   "base_sha": "e208d45137ec9c2cf9d2cc28cab001a9838e64e5",
   "progress": {
-    "phases_total": 4,
+    "phases_total": 5,
     "phases_verified": 4,
-    "tasks_total": 11,
+    "tasks_total": 14,
     "tasks_done": 11
   },
   "last_checkpoint": "edc25cae",
