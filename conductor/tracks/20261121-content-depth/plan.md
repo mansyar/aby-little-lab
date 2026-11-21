@@ -100,14 +100,18 @@
 - **Touches:** `README.md`, `docs/PRD.md`, `docs/TDD.md`, `docs/perf-baseline.md`,
   `conductor/product.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Sync pool counts in README, PRD, TDD and perf-baseline** — covers: FR-8
-  - [ ] **P4.T1.1:** Update counts and texture figures
-  - [ ] **P4.T1.2:** Confirm living test counts
-- [ ] **P4.T2: Update product roadmap exit gate and §10.5 table** — covers: FR-8, FR-9
-  - [ ] **P4.T2.1:** Record the depth work and guard in `conductor/product.md`
-  - [ ] **P4.T2.2:** Confirm no new games/rules/i18n/input changes in the diff
+- [x] **P4.T1: Sync pool counts in README, PRD, TDD and perf-baseline** — covers: FR-8
+  - [x] **P4.T1.1:** Update counts and texture figures
+  - [x] **P4.T1.2:** Confirm living test counts
+- [x] **P4.T2: Update product roadmap exit gate and §10.5 table** — covers: FR-8, FR-9
+  - [x] **P4.T2.1:** Record the depth work and guard in `conductor/product.md`
+  - [x] **P4.T2.2:** Confirm no new games/rules/i18n/input changes in the diff
+
+**Result:** verified
+**Checkpoint:** `edc25cae`
+**Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-4.md`
 
 <!--
 Review fixes are appended by `conductor-review` as:
