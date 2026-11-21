@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Loose puzzle pieces make a picture - 1 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 120 170 L 226 170 L 226 276 L 120 276 Z" fill="#FC8181" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 286 170 L 392 170 L 392 276 L 286 276 Z" fill="#68D391" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 203 310 L 309 310 L 309 416 L 203 416 Z" fill="#90CDF4" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="173" cy="140" r="10" fill="#E2E8F0" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

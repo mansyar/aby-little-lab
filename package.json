@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p e2e/tsconfig.json",
     "lint": "biome lint",
     "format": "biome format --write",
-    "check": "biome check"
+    "check": "biome check",
+    "validate:textures": "node scripts/validate-textures.js"
   },
   "dependencies": {
     "phaser": "^4.2.1"

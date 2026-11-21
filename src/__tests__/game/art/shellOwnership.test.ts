@@ -16,7 +16,7 @@ import preloadSceneSource from "../../../scenes/PreloadScene.ts?raw";
  * The boot shell ships the 62-key shell set and nothing else: no module of the
  * art registry, no SVG whose key belongs to a game group, no game-owned art
  * module. `storyOrderArt.test.ts` asserts the single-module case; this suite
- * states the rule for all 133 moved keys and for the Story Order panels.
+ * states the rule for all 145 moved keys and for the Story Order panels.
  *
  * The shell list is spelled out here rather than read from `PreloadScene`: a
  * scene that defines its own truth is exactly the failure this guard exists to
@@ -227,7 +227,7 @@ const groupKeyToFile = mergeKeys(ART_MODULES);
 /** The keys Story Order owns, and the file behind each one. */
 const storyKeyToFile = keyToSvgFile(STORY_ORDER_ART);
 
-/** Group keys only a game draws — the 125 moved keys, minus the six avatars. */
+/** Group keys only a game draws — the 151 group keys, minus the six avatars. */
 const gameOnlyKeys: readonly string[] = [...groupKeyToFile.keys()].filter(
   (key) => !SHELL_KEYS.includes(key),
 );
@@ -273,14 +273,14 @@ describe("shell ownership", () => {
     expect(offending).toEqual([]);
   });
 
-  it("sees all 139 group keys, 133 of them game-only, and the 45 Story Order panels", () => {
+  it("sees all 151 group keys, 145 of them game-only, and the 90 Story Order panels", () => {
     // Non-vacuity: a scan that lost the registry, the SVG imports or the key
     // rows would find nothing to complain about, so the counts are asserted.
-    // 131 prior group keys + 4 Shadow Match items + 4 shadows = 139; game-only
-    // 125 + 8 = 133; story panels 33 + 12 = 45.
-    expect(groupKeyToFile.size).toBe(139);
-    expect(gameOnlyKeys).toHaveLength(133);
-    expect(storyKeyToFile.size).toBe(45);
+    // 131 prior group keys + 6 new shapes + 6 new cut-outs + 4 Shadow Match
+    // items + 4 shadows = 151; game-only 145; story panels 45 + 45 = 90.
+    expect(groupKeyToFile.size).toBe(151);
+    expect(gameOnlyKeys).toHaveLength(145);
+    expect(storyKeyToFile.size).toBe(90);
   });
 
   it("shares exactly the six avatar files with the groups", () => {

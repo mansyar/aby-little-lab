@@ -15,10 +15,11 @@ export interface FirstWord {
 }
 
 /**
- * The 28 first words. Prompt textures are PreloadScene texture keys:
- * most reuse existing art; `sm_sun`/`sm_hat`/`sm_bug`/`sm_duck` are new
- * SVGs registered alongside the earlier pool, and the content-expansion
- * batch reuses existing item/toy/shape keys so no new SVG was needed.
+ * The 60 first words, split across the 3- and 4-letter tiers. Prompt textures
+ * are PreloadScene texture keys drawn only from art groups the Word scenes
+ * preload (animals, food, items, shapes, toys) plus the two shell keys
+ * `mascot_idle` (OWL) and `frog_red` (FROG). Every key is unique and already
+ * registered, so the pool grew without inventing texture keys.
  */
 export const WORD_POOL: readonly FirstWord[] = [
   { word: "CAT", letters: 3, promptTexture: "animal_cat", tier: 3 },
@@ -49,6 +50,41 @@ export const WORD_POOL: readonly FirstWord[] = [
   { word: "BOOT", letters: 4, promptTexture: "sm_boot", tier: 4 },
   { word: "RING", letters: 4, promptTexture: "shape_ring", tier: 4 },
   { word: "PLUS", letters: 4, promptTexture: "shape_plus", tier: 4 },
+  // Tier-3 additions: every prompt reuses a registered item/animal/food/shape key.
+  { word: "APE", letters: 3, promptTexture: "animal_monkey", tier: 3 },
+  { word: "BUN", letters: 3, promptTexture: "animal_rabbit", tier: 3 },
+  { word: "EAR", letters: 3, promptTexture: "animal_elephant", tier: 3 },
+  { word: "NUT", letters: 3, promptTexture: "food_peanut", tier: 3 },
+  { word: "PIE", letters: 3, promptTexture: "food_apple", tier: 3 },
+  { word: "CAB", letters: 3, promptTexture: "toy_car", tier: 3 },
+  { word: "FLY", letters: 3, promptTexture: "toy_rocket", tier: 3 },
+  { word: "TOY", letters: 3, promptTexture: "toy_ball", tier: 3 },
+  { word: "HUT", letters: 3, promptTexture: "sm_house", tier: 3 },
+  { word: "JET", letters: 3, promptTexture: "sm_airplane", tier: 3 },
+  { word: "CAP", letters: 3, promptTexture: "sm_mushroom", tier: 3 },
+  { word: "DOT", letters: 3, promptTexture: "shape_circle", tier: 3 },
+  { word: "GEM", letters: 3, promptTexture: "shape_diamond", tier: 3 },
+  { word: "HEX", letters: 3, promptTexture: "shape_hexagon", tier: 3 },
+  // Tier-4 additions: the one new art key (`shape_cube`) is registered in
+  // `src/game/art/shapes.ts`; all other prompts reuse existing art.
+  { word: "PEEL", letters: 4, promptTexture: "food_banana", tier: 4 },
+  { word: "ROOT", letters: 4, promptTexture: "food_carrot", tier: 4 },
+  { word: "CUBE", letters: 4, promptTexture: "toy_block", tier: 4 },
+  { word: "RAIN", letters: 4, promptTexture: "sm_umbrella", tier: 4 },
+  { word: "BELL", letters: 4, promptTexture: "sm_bell", tier: 4 },
+  { word: "TILE", letters: 4, promptTexture: "shape_square", tier: 4 },
+  { word: "TENT", letters: 4, promptTexture: "shape_triangle", tier: 4 },
+  { word: "LOVE", letters: 4, promptTexture: "shape_heart", tier: 4 },
+  { word: "MOON", letters: 4, promptTexture: "shape_crescent", tier: 4 },
+  { word: "DART", letters: 4, promptTexture: "shape_arrow", tier: 4 },
+  { word: "STOP", letters: 4, promptTexture: "shape_octagon", tier: 4 },
+  { word: "OVAL", letters: 4, promptTexture: "shape_oval", tier: 4 },
+  { word: "FIVE", letters: 4, promptTexture: "shape_pentagon", tier: 4 },
+  { word: "DOOR", letters: 4, promptTexture: "shape_rectangle", tier: 4 },
+  { word: "ARCH", letters: 4, promptTexture: "shape_semicircle", tier: 4 },
+  { word: "DROP", letters: 4, promptTexture: "shape_teardrop", tier: 4 },
+  { word: "LAMP", letters: 4, promptTexture: "shape_trapezoid", tier: 4 },
+  { word: "DICE", letters: 4, promptTexture: "shape_cube", tier: 4 },
 ];
 
 /** Looks up a word's entry by its uppercase spelling. */

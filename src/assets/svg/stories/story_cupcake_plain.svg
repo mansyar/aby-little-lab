@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A cupcake gets frosting and a cherry - 1 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 176 300 L 336 300 L 312 400 L 200 400 Z" fill="#F687B3" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 176 300 Q 256 268 336 300 L 320 322 Q 256 300 192 322 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 212 332 L 220 388 M 256 332 L 256 388 M 300 332 L 292 388" fill="none" stroke="#ED64A6" stroke-width="4"/>
+</svg>

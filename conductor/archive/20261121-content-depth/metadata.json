@@ -1,0 +1,31 @@
+{
+  "id": "20261121-content-depth",
+  "title": "Content Depth",
+  "type": "feature",
+  "status": "complete",
+  "priority": "high",
+  "depends_on": [],
+  "created_at": "2026-11-21T16:44:22+11:00",
+  "updated_at": "2026-11-21T18:59:52+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "feat/20261121-content-depth",
+  "base_branch": "master",
+  "base_sha": "e208d45137ec9c2cf9d2cc28cab001a9838e64e5",
+  "progress": {
+    "phases_total": 5,
+    "phases_verified": 5,
+    "tasks_total": 14,
+    "tasks_done": 14
+  },
+  "last_checkpoint": "f942afca",
+  "review_verdict": "PASS",
+  "review_rounds": 2,
+  "doc_sync": "none",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/92",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-11-21T19:03:00+11:00",
+  "archive_path": "conductor/archive/20261121-content-depth"
+}

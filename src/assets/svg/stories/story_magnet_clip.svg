@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A magnet picks up paper clips - 2 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 176 168 L 176 320 Q 176 360 216 360 L 296 360 Q 336 360 336 320 L 336 168 L 288 168 L 288 312 L 224 312 L 224 168 Z" fill="#FC8181" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="256" cy="396" r="18" fill="#CBD5E0" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 256 360 L 256 378" fill="none" stroke="#2D3748" stroke-width="6"/>
+</svg>

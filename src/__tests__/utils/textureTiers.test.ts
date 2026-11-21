@@ -49,8 +49,8 @@ const GROUPS: readonly ArtGroup[] = [
 /** Every key the app can ask for: the shell's set plus every group's. */
 const APP_ASSETS = [...SHELL_ASSETS, ...GROUPS.flatMap((group) => group.assets)];
 
-/** The 195 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
-const APP_ASSET_COUNT = 195;
+/** The 207 distinct keys behind `APP_ASSETS` (the six avatars appear in both). */
+const APP_ASSET_COUNT = 207;
 
 describe("textureSizeFor tier mapping", () => {
   it("maps Hub tile icons to the icon tier (displayed at ~64px, headroom for paged tiles)", () => {

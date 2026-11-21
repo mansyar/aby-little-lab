@@ -36,7 +36,7 @@ commands:
   format: "pnpm format"
   typecheck: "pnpm typecheck"
   build: "pnpm build"
-  verify_phase: "pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js"
+  verify_phase: "pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js"
 coverage:
   gate: "lines 95 / functions 88 / branches 85 / statements 90"
   scope: "project"
@@ -116,7 +116,7 @@ pnpm check && pnpm typecheck && pnpm test -- --run
 The full pre-phase-acceptance gate is:
 
 ```bash
-pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js && node scripts/validate-docs.js
+pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js
 ```
 
 ### Boot Smoke Check
@@ -192,8 +192,8 @@ checks described there.
 - **Static:** Biome lint/format check and `tsc --noEmit`.
 - **Unit:** Vitest over `src/__tests__/**/*.test.ts` in `happy-dom`.
 - **Build artifact:** production `vite build` plus `validate-bundle.js`
-  (Phaser vendor chunk isolation) and `validate-pwa.js` (manifest, service
-  worker, icons).
+  (Phaser vendor chunk isolation), `validate-textures.js` (raster budget guard)
+  and `validate-pwa.js` (manifest, service worker, icons).
 - **Smoke:** `validate-boot.js` against `vite preview` on port 4173.
 
 No integration, contract, E2E, or visual-diff layer exists today. Do not add one
@@ -221,7 +221,7 @@ both runs in the evidence.
 | static | `pnpm check` and `pnpm typecheck` | yes |
 | unit | `pnpm test -- --run` | yes |
 | coverage | `pnpm test:coverage` | yes |
-| build-artifact | `pnpm build && node scripts/validate-bundle.js && node scripts/validate-pwa.js` | yes |
+| build-artifact | `pnpm build && node scripts/validate-bundle.js && node scripts/validate-textures.js && node scripts/validate-pwa.js` | yes |
 | documents | `node scripts/validate-docs.js` | yes |
 | smoke | `node scripts/validate-boot.js` (preview on :4173) | yes when boot/preload/PWA/assets change |
 

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A shadow changes through the day - 2 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <circle cx="256" cy="112" r="36" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 240 210 L 272 210 L 272 350 L 240 350 Z" fill="#68D391" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="256" cy="362" rx="34" ry="12" fill="#A0AEC0" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 80 386 L 432 386" fill="none" stroke="#E2E8F0" stroke-width="8"/>
+</svg>

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { cutouts } from "../../game/art/cutouts";
+import { shapes } from "../../game/art/shapes";
+import { ART_KEYS_BY_GAME } from "../../game/hub/prewarm";
 import { shuffle } from "../../game/random";
 import {
   ALL_SHAPES,
@@ -8,22 +11,56 @@ import {
   poolFor,
   type ShapeType,
 } from "../../game/shapeSorterLogic";
+import { SHAPE_VARIANTS, shapeVariantPool } from "../../game/shapeVariants";
 import { mulberry32 } from "../helpers/randomHelper";
 
-it("expanded pool includes all 12 new shape types (18 total)", () => {
-  expect(ALL_SHAPES).toHaveLength(18);
-  expect(ALL_SHAPES).toContain("oval");
-  expect(ALL_SHAPES).toContain("rectangle");
-  expect(ALL_SHAPES).toContain("diamond");
-  expect(ALL_SHAPES).toContain("pentagon");
-  expect(ALL_SHAPES).toContain("hexagon");
-  expect(ALL_SHAPES).toContain("octagon");
-  expect(ALL_SHAPES).toContain("trapezoid");
-  expect(ALL_SHAPES).toContain("semicircle");
-  expect(ALL_SHAPES).toContain("arrow");
-  expect(ALL_SHAPES).toContain("plus");
-  expect(ALL_SHAPES).toContain("ring");
-  expect(ALL_SHAPES).toContain("teardrop");
+it("expanded pool includes all 18 new shape types (24 total)", () => {
+  expect(ALL_SHAPES.length).toBeGreaterThanOrEqual(24);
+  expect(new Set(ALL_SHAPES).size).toBe(ALL_SHAPES.length);
+  for (const shape of [
+    "oval",
+    "rectangle",
+    "diamond",
+    "pentagon",
+    "hexagon",
+    "octagon",
+    "trapezoid",
+    "semicircle",
+    "arrow",
+    "plus",
+    "ring",
+    "teardrop",
+    "cube",
+    "cross",
+    "chevron",
+    "capsule",
+    "sector",
+    "parallelogram",
+  ] as const) {
+    expect(ALL_SHAPES).toContain(shape);
+  }
+});
+
+it("registers a shape_<name> art key for every ShapeType", () => {
+  // Fail loud: a ShapeType with no registered SVG falls back to the `card`
+  // placeholder at runtime, so keep the union and art group in lockstep.
+  const artKeys = new Set(shapes.assets.map((asset) => asset.key));
+  for (const shape of ALL_SHAPES) {
+    expect(artKeys.has(`shape_${shape}`), `missing art key for shape: ${shape}`).toBe(true);
+  }
+});
+
+it("registers a cutout_<name> art key and prewarm entry for every ShapeType", () => {
+  // Shape Sorter renders each slot hole as `cutout_${slotType}`. A widened pool
+  // with no matching cut-out would render Phaser's __MISSING placeholder, so
+  // keep the ShapeType union, the art group and the prewarm keys in lockstep.
+  const cutoutKeys = new Set(cutouts.assets.map((asset) => asset.key));
+  const prewarmKeys = new Set((ART_KEYS_BY_GAME["shape-sorter"] ?? []).map((entry) => entry.key));
+  for (const shape of ALL_SHAPES) {
+    const key = `cutout_${shape}`;
+    expect(cutoutKeys.has(key), `missing cut-out art key: ${key}`).toBe(true);
+    expect(prewarmKeys.has(key), `missing prewarm cut-out key: ${key}`).toBe(true);
+  }
 });
 
 describe("shuffle", () => {
@@ -83,7 +120,7 @@ describe("generatePlaythrough", () => {
     }
   });
 
-  it("draws all shapes from the valid 18-shape pool", () => {
+  it("draws all shapes from the valid 24-shape pool", () => {
     const playthrough = generatePlaythrough(3);
     for (const shape of playthrough.flat()) {
       expect(ALL_SHAPES).toContain(shape);
@@ -112,7 +149,7 @@ describe("isMatch", () => {
 });
 
 describe("poolFor", () => {
-  it("classic band draws from the full 18-shape pool", () => {
+  it("classic band draws from the full 24-shape pool", () => {
     expect(poolFor(0)).toEqual(ALL_SHAPES);
   });
 
@@ -183,5 +220,43 @@ describe("generatePlaythrough with a band shift", () => {
     const classic = generatePlaythrough(3, 0, mulberry32(1234));
     expect(classic).toHaveLength(3);
     expect(new Set(classic.flat()).size).toBe(9);
+  });
+});
+
+describe("shape content variants", () => {
+  it("exposes exactly two signature variants", () => {
+    expect(SHAPE_VARIANTS).toHaveLength(2);
+    expect(new Set(SHAPE_VARIANTS.map((variant) => variant.id)).size).toBe(2);
+  });
+
+  it("each variant is a non-empty strict subset with unique shape keys", () => {
+    for (const variant of SHAPE_VARIANTS) {
+      expect(variant.shapes.length).toBeGreaterThan(0);
+      expect(variant.shapes.length).toBeLessThan(ALL_SHAPES.length);
+      expect(new Set(variant.shapes).size).toBe(variant.shapes.length);
+      for (const shape of variant.shapes) {
+        expect(ALL_SHAPES).toContain(shape);
+      }
+    }
+  });
+
+  it("selects a variant purely and rejects unknown ids", () => {
+    for (const variant of SHAPE_VARIANTS) {
+      expect(shapeVariantPool(variant.id)).toEqual(variant.shapes);
+      expect(shapeVariantPool(variant.id)).toEqual(shapeVariantPool(variant.id));
+    }
+    expect(() => shapeVariantPool("nope" as (typeof SHAPE_VARIANTS)[number]["id"])).toThrow(
+      /unknown shape variant/,
+    );
+  });
+
+  it("variant selection does not alter generatePlaythrough (opt-in only)", () => {
+    const before = generatePlaythrough(3, 0, mulberry32(1234));
+    shapeVariantPool("curvy");
+    expect(generatePlaythrough(3, 0, mulberry32(1234))).toEqual(before);
+    // Rules keep drawing from the full pool, not the selected subset.
+    for (const shape of generatePlaythrough(3, 0, mulberry32(1234)).flat()) {
+      expect(ALL_SHAPES).toContain(shape);
+    }
   });
 });

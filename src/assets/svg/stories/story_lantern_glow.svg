@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A lantern lights up and glows - 3 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 196 200 Q 256 152 316 200" fill="none" stroke="#2D3748" stroke-width="8"/>
+    <path d="M 184 216 L 328 216 L 312 344 L 200 344 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 256 106 L 256 138 M 256 370 L 256 402 M 132 280 L 164 280 M 348 280 L 380 280" fill="none" stroke="#D69E2E" stroke-width="8"/>
+    <path d="M 158 178 L 180 200 M 354 178 L 332 200 M 158 382 L 180 360 M 354 382 L 332 360" fill="none" stroke="#D69E2E" stroke-width="8"/>
+</svg>

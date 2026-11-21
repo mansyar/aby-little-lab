@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A soap bar makes bubbles - 1 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <ellipse cx="256" cy="344" rx="120" ry="26" fill="#BEE3F8" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <rect x="176" y="260" width="160" height="72" rx="20" fill="#90CDF4" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 200 282 Q 256 268 312 282" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+    <circle cx="150" cy="220" r="10" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

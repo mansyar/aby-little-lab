@@ -126,7 +126,7 @@ Each `cutout_X` mirrors `shape_X` geometry in the same hue family:
 | `letters/` | 26 | bundled Baloo 2 glyphs (§4) |
 | `numbers/` | 10 | 0–9 |
 | `shadows/` | 12 | solid silhouettes paired with `items/` |
-| `shapes/` | 36 | 18 `shape_*` + 18 `cutout_*` (§6) |
+| `shapes/` | 48 | 24 `shape_*` + 24 `cutout_*` (§6) |
 | `stickers/` | 22 | cream circle scenes |
 | `stories/` | 33 | Story Order panels (`story_*`) |
 | `toys/` | 7 | |

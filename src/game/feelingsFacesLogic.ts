@@ -27,12 +27,12 @@ export interface Scenario {
 }
 
 /**
- * The 32-entry scenario pool: eight situations per emotion. Every entry is a
+ * The 48-entry scenario pool: twelve situations per emotion. Every entry is a
  * gentle, everyday, resolvable moment — thunder, a loud vacuum, a dropped ice
  * cream, a friend taking a toy — with no injury, loss, or violence. The
  * extender band's per-emotion draw needs at least eight usable scenarios per
- * emotion, so the shipped 16 entries stay verbatim and two more per emotion
- * from each of the two extensions keep every draw fresh.
+ * emotion, so the shipped 16 entries stay verbatim and the later additions
+ * keep every draw fresh.
  */
 export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "happy-ladybug", emotion: "happy", text: "Aby finds a ladybug on a leaf." },
@@ -43,6 +43,10 @@ export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "happy-plant", emotion: "happy", text: "Aby's little seed grows its first leaf." },
   { id: "happy-cookies", emotion: "happy", text: "Aby shares cookies with friends at snack time." },
   { id: "happy-ducks", emotion: "happy", text: "Aby sings a sweet song for the baby ducks." },
+  { id: "happy-parade", emotion: "happy", text: "Aby watches a tiny toy parade go by." },
+  { id: "happy-picnic", emotion: "happy", text: "Aby's family spreads a sunny picnic blanket." },
+  { id: "happy-puppy", emotion: "happy", text: "A little puppy licks Aby's hand." },
+  { id: "happy-rainbow", emotion: "happy", text: "A bright rainbow arches over the park." },
   { id: "sad-blocks", emotion: "sad", text: "Aby's block tower falls down." },
   { id: "sad-ice-cream", emotion: "sad", text: "Aby drops the ice cream cone." },
   { id: "sad-boat", emotion: "sad", text: "Aby's paper boat sinks in the puddle." },
@@ -51,6 +55,10 @@ export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "sad-balloon", emotion: "sad", text: "Aby's red balloon drifts away slowly." },
   { id: "sad-kite", emotion: "sad", text: "Aby's kite gets stuck in the tall tree." },
   { id: "sad-story", emotion: "sad", text: "Aby misses the morning story circle." },
+  { id: "sad-toybox", emotion: "sad", text: "Aby's favorite toy hides in the toybox." },
+  { id: "sad-cracker", emotion: "sad", text: "The last cracker breaks in two." },
+  { id: "sad-cloud", emotion: "sad", text: "A cloudy day keeps the sun away." },
+  { id: "sad-bye", emotion: "sad", text: "Aby waves goodbye to a visiting friend." },
   { id: "angry-toy", emotion: "angry", text: "Aby's friend takes the toy Aby had." },
   { id: "angry-crayon", emotion: "angry", text: "Aby's little brother grabs the crayon." },
   { id: "angry-turn", emotion: "angry", text: "Aby has to wait a long turn." },
@@ -59,6 +67,10 @@ export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "angry-puzzle", emotion: "angry", text: "The puzzle piece will not fit yet." },
   { id: "angry-cup", emotion: "angry", text: "Aby wants the blue cup but gets the green one." },
   { id: "angry-slide", emotion: "angry", text: "Aby waits while others finish the slide." },
+  { id: "angry-sock", emotion: "angry", text: "Aby's sock keeps sliding down." },
+  { id: "angry-buzzer", emotion: "angry", text: "The game buzzer beeps before Aby is ready." },
+  { id: "angry-scoop", emotion: "angry", text: "The scoop drops Aby's ice cream." },
+  { id: "angry-door", emotion: "angry", text: "The door sticks when Aby tries to open it." },
   { id: "scared-thunder", emotion: "scared", text: "Thunder booms during the bedtime story." },
   { id: "scared-vacuum", emotion: "scared", text: "The vacuum roars in the next room." },
   { id: "scared-hallway", emotion: "scared", text: "The hallway is dark at bedtime." },
@@ -67,6 +79,10 @@ export const SCENARIO_POOL: readonly Scenario[] = [
   { id: "scared-swing", emotion: "scared", text: "The big swing goes higher than usual." },
   { id: "scared-owl", emotion: "scared", text: "Owls hoot softly outside the tent at night." },
   { id: "scared-wind", emotion: "scared", text: "Aby hears the wind tap the window." },
+  { id: "scared-stairs", emotion: "scared", text: "The stairs to the basement creak softly." },
+  { id: "scared-moth", emotion: "scared", text: "A big moth flutters near the lamp." },
+  { id: "scared-flash", emotion: "scared", text: "A bright flash lights the bedroom window." },
+  { id: "scared-pumpkin", emotion: "scared", text: "The carved pumpkin looks a little strange." },
 ];
 
 /** How many rounds one playthrough presents. */

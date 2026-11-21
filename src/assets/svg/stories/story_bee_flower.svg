@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A bee visits a flower and flies off - 1 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 256 400 L 256 260" fill="none" stroke="#38A169" stroke-width="10"/>
+    <circle cx="256" cy="232" r="26" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="206" cy="232" r="24" fill="#F687B3" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="306" cy="232" r="24" fill="#F687B3" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="256" cy="182" r="24" fill="#F687B3" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>
