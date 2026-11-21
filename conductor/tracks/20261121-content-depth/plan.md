@@ -48,7 +48,7 @@
   `src/__tests__/game/storyOrderLogic.test.ts`, `src/__tests__/game/feelingsFacesLogic.test.ts`,
   variant data modules
 - **Verification:** `pnpm exec vitest run src/__tests__/game/storyOrderLogic.test.ts src/__tests__/game/feelingsFacesLogic.test.ts`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Expand `STORY_POOL` to ≥30** — covers: FR-2
   - [ ] **P2.T1.1:** Extend `OBVIOUS_POOL`/`SUBTLE_POOL` ladder with tiered art
