@@ -125,17 +125,17 @@
   `src/__tests__/game/hub/prewarm.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`,
   `docs/PRD.md`, `docs/TDD.md`, `docs/SVG_STYLE.md`, `docs/perf-baseline.md`, `README.md`
 - **Verification:** full `verify_phase` + `node scripts/validate-textures.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Add six cut-out SVGs and register them** — covers: F1
-  - [ ] **R1.T1.1:** Author `cutout_{cube,cross,chevron,capsule,sector,parallelogram}.svg` matching the shape silhouettes (style/viewBox/stroke per existing cut-outs)
-  - [ ] **R1.T1.2:** Register in `src/game/art/cutouts.ts` and add CARD-tier rows to `src/game/hub/prewarm.ts` `CUTOUTS_KEYS`
-  - [ ] **R1.T1.3:** Add a test asserting every `ShapeType` maps to a registered `cutout_${type}` key
-- [ ] **R1.T2: Reconcile counts, budget and docs** — covers: F2, F4
-  - [ ] **R1.T2.1:** Update ripple count tests (groups, shell ownership, preload, texture tiers, preloadScene, prewarm) and living test counts
-  - [ ] **R1.T2.2:** Fix count docs (PRD 24+24/48; TDD tree/counts; SVG_STYLE) and re-baselined texture figures (319 SVGs)
-  - [ ] **R1.T2.3:** Update TDD §10.3 coverage percentages to final measured values
+- [x] **R1.T1: Add six cut-out SVGs and register them** — covers: F1
+  - [x] **R1.T1.1:** Author `cutout_{cube,cross,chevron,capsule,sector,parallelogram}.svg` matching the shape silhouettes (style/viewBox/stroke per existing cut-outs)
+  - [x] **R1.T1.2:** Register in `src/game/art/cutouts.ts` and add CARD-tier rows to `src/game/hub/prewarm.ts` `CUTOUTS_KEYS`
+  - [x] **R1.T1.3:** Add a test asserting every `ShapeType` maps to a registered `cutout_${type}` key
+- [x] **R1.T2: Reconcile counts, budget and docs** — covers: F2, F4
+  - [x] **R1.T2.1:** Update ripple count tests (groups, shell ownership, preload, texture tiers, preloadScene, prewarm) and living test counts
+  - [x] **R1.T2.2:** Fix count docs (PRD 24+24/48; TDD tree/counts; SVG_STYLE) and re-baselined texture figures (319 SVGs)
+  - [x] **R1.T2.3:** Update TDD §10.3 coverage percentages to final measured values
 
-**Result:** pending
-**Checkpoint:** <short-sha>
+**Result:** verified
+**Checkpoint:** `f942afca`
 **Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-R1.md`
