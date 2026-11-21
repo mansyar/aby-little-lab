@@ -44,9 +44,13 @@
 - **Goal:** Story and scenario pools meet their floors with ladders/guards and two variants each.
 - **Depends on:** Phase 1
 - **Covers:** FR-2, FR-3, FR-5 (partial), NFR-2, NFR-5, AC-2, AC-3, AC-5 (partial)
-- **Touches:** `src/game/storyOrderLogic.ts`, `src/game/feelingsFacesLogic.ts`,
-  `src/__tests__/game/storyOrderLogic.test.ts`, `src/__tests__/game/feelingsFacesLogic.test.ts`,
-  variant data modules
+- **Touches:** `src/game/storyOrderLogic.ts`, `src/game/storyOrderArt.ts`,
+  `src/game/feelingsFacesLogic.ts`, 45 new `src/assets/svg/stories/*.svg` panels,
+  `src/__tests__/game/{storyOrderLogic,storyOrderArt,feelingsFacesLogic}.test.ts`,
+  variant data modules; stale-count test files (`art/groupIntegrity.test.ts`,
+  `utils/textureTiers.test.ts`, `scenes/preloadScene.test.ts`,
+  `game/hub/prewarm.test.ts` + `src/game/hub/prewarm.ts` as needed); and living
+  test-count lines in `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/game/storyOrderLogic.test.ts src/__tests__/game/feelingsFacesLogic.test.ts`
 - **Status:** in_progress
 
