@@ -16,7 +16,7 @@
   `src/__tests__/game/decodeLogic.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`,
   variant data modules
 - **Verification:** `pnpm exec vitest run src/__tests__/game/decodeLogic.test.ts src/__tests__/game/shapeSorterLogic.test.ts`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Expand `WORD_POOL` to ≥60** — covers: FR-1
   - [ ] **P1.T1.1:** Add words across 3-/4-letter tiers with confusable-family guards
