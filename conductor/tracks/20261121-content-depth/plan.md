@@ -52,23 +52,21 @@
   `game/hub/prewarm.test.ts` + `src/game/hub/prewarm.ts` as needed); and living
   test-count lines in `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/game/storyOrderLogic.test.ts src/__tests__/game/feelingsFacesLogic.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Expand `STORY_POOL` to ≥30** — covers: FR-2
-  - [ ] **P2.T1.1:** Extend `OBVIOUS_POOL`/`SUBTLE_POOL` ladder with tiered art
-  - [ ] **P2.T1.2:** Assert count and ladder invariants in tests
-- [ ] **P2.T2: Expand `SCENARIO_POOL` to ≥48 (12 per emotion)** — covers: FR-3
-  - [ ] **P2.T2.1:** Add scenarios per emotion preserving the safe-content guard
-  - [ ] **P2.T2.2:** Assert count, per-emotion balance and guard in tests
-- [ ] **P2.T3: Add two story and two scenario variants** — covers: FR-5 (partial)
-  - [ ] **P2.T3.1:** Define themed/subset variants reusing existing rules
-  - [ ] **P2.T3.2:** Assert variant selection does not alter rule logic
+- [x] **P2.T1: Expand `STORY_POOL` to ≥30** — covers: FR-2
+  - [x] **P2.T1.1:** Extend `OBVIOUS_POOL`/`SUBTLE_POOL` ladder with tiered art
+  - [x] **P2.T1.2:** Assert count and ladder invariants in tests
+- [x] **P2.T2: Expand `SCENARIO_POOL` to ≥48 (12 per emotion)** — covers: FR-3
+  - [x] **P2.T2.1:** Add scenarios per emotion preserving the safe-content guard
+  - [x] **P2.T2.2:** Assert count, per-emotion balance and guard in tests
+- [x] **P2.T3: Add two story and two scenario variants** — covers: FR-5 (partial)
+  - [x] **P2.T3.1:** Define themed/subset variants reusing existing rules
+  - [x] **P2.T3.2:** Assert variant selection does not alter rule logic
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261121-content-depth/verification/phase-2.md
--->
+**Checkpoint:** `1ac2204a`
+**Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-2.md`
 
 ## Phase 3: No-repeat scheduling & budget guard
 
