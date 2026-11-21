@@ -1,7 +1,7 @@
 import type { BandShift } from "./adaptiveLogic";
 import { type Rng, shuffle } from "./random";
 
-/** The eighteen geometric shape types used in the Shape Sorter game. */
+/** The twenty-four geometric shape types used in the Shape Sorter game. */
 export type ShapeType =
   | "circle"
   | "square"
@@ -20,9 +20,15 @@ export type ShapeType =
   | "arrow"
   | "plus"
   | "ring"
-  | "teardrop";
+  | "teardrop"
+  | "cube"
+  | "cross"
+  | "chevron"
+  | "capsule"
+  | "sector"
+  | "parallelogram";
 
-/** All eighteen shape types, in canonical order. */
+/** All twenty-four shape types, in canonical order. */
 export const ALL_SHAPES: readonly ShapeType[] = [
   "circle",
   "square",
@@ -42,6 +48,12 @@ export const ALL_SHAPES: readonly ShapeType[] = [
   "plus",
   "ring",
   "teardrop",
+  "cube",
+  "cross",
+  "chevron",
+  "capsule",
+  "sector",
+  "parallelogram",
 ];
 
 /** Pool for the easy band: bold ornamental silhouettes plus three maximally
@@ -57,6 +69,9 @@ const EASY_SHAPE_POOL: readonly ShapeType[] = [
   "ring",
   "arrow",
   "plus",
+  "cube",
+  "cross",
+  "capsule",
 ];
 
 /** Pool for the hard band: confusable rounded and rectilinear geometric
@@ -72,10 +87,13 @@ const HARD_SHAPE_POOL: readonly ShapeType[] = [
   "pentagon",
   "hexagon",
   "octagon",
+  "chevron",
+  "sector",
+  "parallelogram",
 ];
 
 /** Selects the shape pool for the band shift. The classic band keeps the full
- *  18-shape pool, so unshifted draws are byte-identical to shipped behaviour. */
+ *  24-shape pool, so unshifted draws keep the classic easy-first ordering. */
 export function poolFor(shift: BandShift = 0): readonly ShapeType[] {
   if (shift < 0) return EASY_SHAPE_POOL;
   if (shift > 0) return HARD_SHAPE_POOL;

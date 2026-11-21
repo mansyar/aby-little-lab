@@ -1,4 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { animals } from "../../game/art/animals";
+import { food } from "../../game/art/food";
+import { items } from "../../game/art/items";
+import { shapes } from "../../game/art/shapes";
+import { toys } from "../../game/art/toys";
 import {
   buildPlaythrough,
   buildRound,
@@ -7,7 +12,8 @@ import {
   getDecodeWord,
   isCorrect,
 } from "../../game/decodeLogic";
-import { WORD_POOL } from "../../game/wordLogic";
+import { generateWordRound, WORD_POOL } from "../../game/wordLogic";
+import { WORD_VARIANTS, wordVariantPool } from "../../game/wordVariants";
 import { mulberry32 } from "../helpers/randomHelper";
 
 const VARIETY_SAMPLES = 200;
@@ -50,40 +56,72 @@ function expectValidDecodeRound(round: DecodeRound): void {
 }
 
 describe("DECODE_POOL", () => {
-  it("contains exactly the 28 decode words (the full shared WORD_POOL)", () => {
-    expect(DECODE_POOL).toHaveLength(28);
+  it("contains at least the 60 decode words (the full shared WORD_POOL)", () => {
+    expect(DECODE_POOL.length).toBeGreaterThanOrEqual(60);
   });
 
   it("contains the expected words", () => {
     const words = DECODE_POOL.map((entry) => entry.word).sort();
     expect(words).toEqual([
+      "APE",
+      "ARCH",
       "BALL",
       "BEAR",
       "BED",
+      "BELL",
       "BOAT",
       "BONE",
       "BOOT",
       "BOX",
       "BUG",
+      "BUN",
+      "CAB",
+      "CAP",
       "CAR",
       "CAT",
+      "CUBE",
       "CUP",
+      "DART",
+      "DICE",
       "DOG",
+      "DOOR",
+      "DOT",
+      "DROP",
       "DRUM",
       "DUCK",
+      "EAR",
       "FISH",
+      "FIVE",
+      "FLY",
       "FOX",
       "FROG",
+      "GEM",
       "HAT",
+      "HEX",
+      "HUT",
+      "JET",
       "KITE",
+      "LAMP",
+      "LOVE",
       "MAP",
+      "MOON",
+      "NUT",
+      "OVAL",
       "OWL",
+      "PEEL",
+      "PIE",
       "PIG",
       "PLUS",
+      "RAIN",
       "RING",
+      "ROOT",
       "SOCK",
       "STAR",
+      "STOP",
       "SUN",
+      "TENT",
+      "TILE",
+      "TOY",
       "TREE",
     ]);
   });
@@ -105,8 +143,11 @@ describe("DECODE_POOL", () => {
   });
 
   it("classifies 3-letter words as tier 3 and 4-letter words as tier 4", () => {
-    expect(DECODE_POOL.filter((entry) => entry.tier === 3)).toHaveLength(13);
-    expect(DECODE_POOL.filter((entry) => entry.tier === 4)).toHaveLength(15);
+    expect(DECODE_POOL.filter((entry) => entry.tier === 3).length).toBeGreaterThanOrEqual(10);
+    expect(DECODE_POOL.filter((entry) => entry.tier === 4).length).toBeGreaterThanOrEqual(10);
+    expect(DECODE_POOL.filter((entry) => entry.tier === 3).length).toBe(
+      DECODE_POOL.filter((entry) => entry.word.length === 3).length,
+    );
     for (const entry of DECODE_POOL) {
       expect(entry.tier).toBe(entry.word.length === 3 ? 3 : 4);
     }
@@ -123,42 +164,21 @@ describe("DECODE_POOL", () => {
   });
 
   it("uses only PreloadScene-registered prompt texture keys", () => {
-    const KNOWN_TEXTURE_KEYS = new Set([
-      "animal_cat",
-      "animal_dog",
-      "animal_pig",
-      "sm_car",
+    // Fail loud (mirroring buildShellAssets): a prompt key absent from the art
+    // groups the Word scene preloads, or from the two shell keys, is a bug.
+    const preloadedKeys = new Set<string>([
+      ...[...animals.assets, ...food.assets, ...items.assets, ...shapes.assets, ...toys.assets].map(
+        (asset) => asset.key,
+      ),
       "mascot_idle",
-      "sm_sun",
-      "sm_hat",
-      "sm_bug",
       "frog_red",
-      "sm_ball",
-      "food_fish",
-      "sm_boat",
-      "sm_tree",
-      "food_bone",
-      "shape_star",
-      "toy_drum",
-      "toy_teddy_bear",
-      "sm_duck",
-      "sm_fox",
-      "sm_cup",
-      "sm_map",
-      "sm_bed",
-      "toy_box",
-      "sm_kite",
-      "sm_sock",
-      "sm_boot",
-      "shape_ring",
-      "shape_plus",
     ]);
     for (const entry of DECODE_POOL) {
-      expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);
+      expect(
+        preloadedKeys.has(entry.promptTexture),
+        `unknown prompt texture key: ${entry.promptTexture}`,
+      ).toBe(true);
     }
-    expect(new Set(DECODE_POOL.map((entry) => entry.promptTexture)).size).toBe(
-      KNOWN_TEXTURE_KEYS.size,
-    );
   });
 
   it("maps new words to the approved item textures", () => {
@@ -372,5 +392,49 @@ describe("isCorrect", () => {
     const round = buildRound(DECODE_POOL[0]);
     expect(isCorrect(round, -1)).toBe(false);
     expect(isCorrect(round, 4)).toBe(false);
+  });
+});
+
+describe("word content variants", () => {
+  it("exposes exactly two signature variants", () => {
+    expect(WORD_VARIANTS).toHaveLength(2);
+    expect(new Set(WORD_VARIANTS.map((variant) => variant.id)).size).toBe(2);
+  });
+
+  it("each variant is a non-empty strict subset with unique word keys", () => {
+    const allWords = new Set(WORD_POOL.map((entry) => entry.word));
+    for (const variant of WORD_VARIANTS) {
+      expect(variant.words.length).toBeGreaterThan(0);
+      expect(variant.words.length).toBeLessThan(WORD_POOL.length);
+      expect(new Set(variant.words.map((entry) => entry.word)).size).toBe(variant.words.length);
+      for (const entry of variant.words) {
+        expect(allWords.has(entry.word)).toBe(true);
+      }
+    }
+  });
+
+  it("selects a variant purely and rejects unknown ids", () => {
+    for (const variant of WORD_VARIANTS) {
+      expect(wordVariantPool(variant.id)).toEqual(variant.words);
+      expect(wordVariantPool(variant.id)).toEqual(wordVariantPool(variant.id));
+    }
+    expect(() => wordVariantPool("nope" as (typeof WORD_VARIANTS)[number]["id"])).toThrow(
+      /unknown word variant/,
+    );
+  });
+
+  it("variant selection does not alter word rule functions (opt-in only)", () => {
+    const target = WORD_POOL[0];
+    const roundBefore = generateWordRound(target, mulberry32(1234));
+    const playBefore = buildPlaythrough(6, 0, mulberry32(1234));
+
+    wordVariantPool("animals-and-food");
+
+    expect(generateWordRound(target, mulberry32(1234))).toEqual(roundBefore);
+    expect(buildPlaythrough(6, 0, mulberry32(1234))).toEqual(playBefore);
+    // Rules keep drawing from the full pool, not the selected subset.
+    for (const entry of WORD_POOL) {
+      expect(generateWordRound(entry).choices).toContain(entry.word);
+    }
   });
 });

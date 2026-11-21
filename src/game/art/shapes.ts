@@ -1,15 +1,21 @@
 import shapeArrowSvg from "../../assets/svg/shapes/shape_arrow.svg?raw";
+import shapeCapsuleSvg from "../../assets/svg/shapes/shape_capsule.svg?raw";
+import shapeChevronSvg from "../../assets/svg/shapes/shape_chevron.svg?raw";
 import shapeCircleSvg from "../../assets/svg/shapes/shape_circle.svg?raw";
 import shapeCrescentSvg from "../../assets/svg/shapes/shape_crescent.svg?raw";
+import shapeCrossSvg from "../../assets/svg/shapes/shape_cross.svg?raw";
+import shapeCubeSvg from "../../assets/svg/shapes/shape_cube.svg?raw";
 import shapeDiamondSvg from "../../assets/svg/shapes/shape_diamond.svg?raw";
 import shapeHeartSvg from "../../assets/svg/shapes/shape_heart.svg?raw";
 import shapeHexagonSvg from "../../assets/svg/shapes/shape_hexagon.svg?raw";
 import shapeOctagonSvg from "../../assets/svg/shapes/shape_octagon.svg?raw";
 import shapeOvalSvg from "../../assets/svg/shapes/shape_oval.svg?raw";
+import shapeParallelogramSvg from "../../assets/svg/shapes/shape_parallelogram.svg?raw";
 import shapePentagonSvg from "../../assets/svg/shapes/shape_pentagon.svg?raw";
 import shapePlusSvg from "../../assets/svg/shapes/shape_plus.svg?raw";
 import shapeRectangleSvg from "../../assets/svg/shapes/shape_rectangle.svg?raw";
 import shapeRingSvg from "../../assets/svg/shapes/shape_ring.svg?raw";
+import shapeSectorSvg from "../../assets/svg/shapes/shape_sector.svg?raw";
 import shapeSemicircleSvg from "../../assets/svg/shapes/shape_semicircle.svg?raw";
 import shapeSquareSvg from "../../assets/svg/shapes/shape_square.svg?raw";
 import shapeStarSvg from "../../assets/svg/shapes/shape_star.svg?raw";
@@ -19,8 +25,9 @@ import shapeTriangleSvg from "../../assets/svg/shapes/shape_triangle.svg?raw";
 import type { ArtGroup } from "./types";
 
 /**
- * The 18 solid shapes drawn by Shape Sorter, Pattern Builder, Color Match,
- * Odd One Out and How Many?.
+ * The 24 solid shapes drawn by Shape Sorter, Pattern Builder, Color Match,
+ * Odd One Out and How Many?. The six added shapes are original geometric art
+ * authored in-repo and sized through `textureTiers.ts` (card tier by default).
  */
 export const shapes: ArtGroup = Object.freeze({
   id: "shapes",
@@ -43,5 +50,11 @@ export const shapes: ArtGroup = Object.freeze({
     { key: "shape_semicircle", svg: shapeSemicircleSvg },
     { key: "shape_teardrop", svg: shapeTeardropSvg },
     { key: "shape_trapezoid", svg: shapeTrapezoidSvg },
+    { key: "shape_cube", svg: shapeCubeSvg },
+    { key: "shape_cross", svg: shapeCrossSvg },
+    { key: "shape_chevron", svg: shapeChevronSvg },
+    { key: "shape_capsule", svg: shapeCapsuleSvg },
+    { key: "shape_sector", svg: shapeSectorSvg },
+    { key: "shape_parallelogram", svg: shapeParallelogramSvg },
   ]),
 });

@@ -27,40 +27,72 @@ function expectValidWordRound(round: WordRound): void {
 }
 
 describe("WORD_POOL", () => {
-  it("contains exactly the 28 first words", () => {
-    expect(WORD_POOL).toHaveLength(28);
+  it("contains exactly the 60 first words", () => {
+    expect(WORD_POOL).toHaveLength(60);
   });
 
   it("contains the expected words", () => {
     const words = WORD_POOL.map((entry) => entry.word).sort();
     expect(words).toEqual([
+      "APE",
+      "ARCH",
       "BALL",
       "BEAR",
       "BED",
+      "BELL",
       "BOAT",
       "BONE",
       "BOOT",
       "BOX",
       "BUG",
+      "BUN",
+      "CAB",
+      "CAP",
       "CAR",
       "CAT",
+      "CUBE",
       "CUP",
+      "DART",
+      "DICE",
       "DOG",
+      "DOOR",
+      "DOT",
+      "DROP",
       "DRUM",
       "DUCK",
+      "EAR",
       "FISH",
+      "FIVE",
+      "FLY",
       "FOX",
       "FROG",
+      "GEM",
       "HAT",
+      "HEX",
+      "HUT",
+      "JET",
       "KITE",
+      "LAMP",
+      "LOVE",
       "MAP",
+      "MOON",
+      "NUT",
+      "OVAL",
       "OWL",
+      "PEEL",
+      "PIE",
       "PIG",
       "PLUS",
+      "RAIN",
       "RING",
+      "ROOT",
       "SOCK",
       "STAR",
+      "STOP",
       "SUN",
+      "TENT",
+      "TILE",
+      "TOY",
       "TREE",
     ]);
   });
@@ -82,8 +114,8 @@ describe("WORD_POOL", () => {
   });
 
   it("classifies 3-letter words as tier 3 and 4-letter words as tier 4", () => {
-    expect(WORD_POOL.filter((entry) => entry.tier === 3)).toHaveLength(13);
-    expect(WORD_POOL.filter((entry) => entry.tier === 4)).toHaveLength(15);
+    expect(WORD_POOL.filter((entry) => entry.tier === 3)).toHaveLength(27);
+    expect(WORD_POOL.filter((entry) => entry.tier === 4)).toHaveLength(33);
     for (const entry of WORD_POOL) {
       expect(entry.tier).toBe(entry.word.length === 3 ? 3 : 4);
     }
@@ -103,32 +135,64 @@ describe("WORD_POOL", () => {
     const KNOWN_TEXTURE_KEYS = new Set([
       "animal_cat",
       "animal_dog",
+      "animal_elephant",
+      "animal_monkey",
       "animal_pig",
-      "sm_car",
-      "mascot_idle",
-      "sm_sun",
-      "sm_hat",
-      "sm_bug",
-      "frog_red",
-      "sm_ball",
-      "food_fish",
-      "sm_boat",
-      "sm_tree",
+      "animal_rabbit",
+      "food_apple",
+      "food_banana",
       "food_bone",
+      "food_carrot",
+      "food_fish",
+      "food_peanut",
+      "frog_red",
+      "mascot_idle",
+      "shape_arrow",
+      "shape_circle",
+      "shape_crescent",
+      "shape_cube",
+      "shape_diamond",
+      "shape_hexagon",
+      "shape_heart",
+      "shape_octagon",
+      "shape_oval",
+      "shape_pentagon",
+      "shape_plus",
+      "shape_rectangle",
+      "shape_ring",
+      "shape_semicircle",
+      "shape_square",
       "shape_star",
-      "toy_drum",
-      "toy_teddy_bear",
+      "shape_teardrop",
+      "shape_trapezoid",
+      "shape_triangle",
+      "sm_airplane",
+      "sm_ball",
+      "sm_bed",
+      "sm_bell",
+      "sm_boot",
+      "sm_boat",
+      "sm_bug",
+      "sm_car",
+      "sm_cup",
       "sm_duck",
       "sm_fox",
-      "sm_cup",
-      "sm_map",
-      "sm_bed",
-      "toy_box",
+      "sm_hat",
+      "sm_house",
       "sm_kite",
+      "sm_map",
+      "sm_mushroom",
       "sm_sock",
-      "sm_boot",
-      "shape_ring",
-      "shape_plus",
+      "sm_sun",
+      "sm_tree",
+      "sm_umbrella",
+      "toy_ball",
+      "toy_block",
+      "toy_box",
+      "toy_car",
+      "toy_drum",
+      "toy_rocket",
+      "toy_teddy_bear",
     ]);
     for (const entry of WORD_POOL) {
       expect(KNOWN_TEXTURE_KEYS.has(entry.promptTexture)).toBe(true);
@@ -243,7 +307,11 @@ describe("generateWordPlaythrough", () => {
     // so uniformity holds within each tier, not across the full pool.
     const seen3 = new Set<string>();
     const seen4 = new Set<string>();
-    for (let i = 0; i < 200; i++) {
+    // One tier-4 draw per 6-round playthrough: 1500 draws over 33 tier-4 words
+    // miss any one word with probability (32/33)^1500 ≈ 9e-21, so coverage is
+    // effectively certain even with a fresh Math.random sequence each run.
+    const COVERAGE_SAMPLES = 1500;
+    for (let i = 0; i < COVERAGE_SAMPLES; i++) {
       for (const round of generateWordPlaythrough()) {
         const tier = getWord(round.target)?.tier ?? 0;
         if (tier === 3) seen3.add(round.target);

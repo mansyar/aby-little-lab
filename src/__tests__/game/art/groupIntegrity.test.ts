@@ -23,7 +23,7 @@ import { toDataUri } from "../../../utils/svgDataUri";
  * fails instead of quietly redefining the inventory.
  */
 const GROUP_INVENTORY: ReadonlyArray<readonly [ArtGroupId, number]> = [
-  ["shapes", 18],
+  ["shapes", 24],
   ["cutouts", 18],
   ["letters", 26],
   ["numerals", 10],
@@ -122,11 +122,12 @@ const SHELL_KEYS: readonly string[] = [
 ];
 
 /**
- * Every texture key the app can ask for today: 60 shell keys plus the 133
- * game-only group keys (131 prior + 4 Shadow Match items + 4 shadows).
+ * Every texture key the app can ask for today: 60 shell keys plus the 145
+ * group keys (139 game-only after the six avatar overlaps; the group total is
+ * 131 prior + 6 new shapes + 4 Shadow Match items + 4 shadows).
  */
 
-const TOTAL_APP_ASSETS = 193;
+const TOTAL_APP_ASSETS = 199;
 
 const AVATAR_KEYS: readonly string[] = [
   "animal_cat",
@@ -193,7 +194,7 @@ describe("art group inventory", () => {
     expect(new Set(allGroupKeys).size).toBe(allGroupKeys.length);
   });
 
-  it("leaves exactly the 60 shell keys outside the groups, for 193 in total", () => {
+  it("leaves exactly the 60 shell keys outside the groups, for 199 in total", () => {
     const groupKeySet = new Set(allGroupKeys);
     const shellOverlaps = SHELL_KEYS.filter((key) => groupKeySet.has(key));
 

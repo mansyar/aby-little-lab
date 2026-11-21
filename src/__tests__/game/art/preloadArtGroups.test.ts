@@ -130,7 +130,7 @@ describe("preloadArtGroups", () => {
     preloadArtGroups(asScene(scene), [shapes]);
 
     const keys = registeredKeys(scene);
-    expect(keys).toHaveLength(17);
+    expect(keys).toHaveLength(23);
     expect(keys).not.toContain("shape_circle");
   });
 
@@ -138,7 +138,7 @@ describe("preloadArtGroups", () => {
     const scene = createScene();
 
     preloadArtGroups(asScene(scene), [shapes]);
-    expect(scene.load.svg).toHaveBeenCalledTimes(18);
+    expect(scene.load.svg).toHaveBeenCalledTimes(24);
 
     // Simulate the loader delivering every file to the TextureManager.
     for (const key of registeredKeys(scene)) {
@@ -147,7 +147,7 @@ describe("preloadArtGroups", () => {
     }
 
     preloadArtGroups(asScene(scene), [shapes]);
-    expect(scene.load.svg).toHaveBeenCalledTimes(18);
+    expect(scene.load.svg).toHaveBeenCalledTimes(24);
   });
 
   it("registers a key once when two scenes queue it before the load completes", () => {
@@ -157,7 +157,7 @@ describe("preloadArtGroups", () => {
     preloadArtGroups(asScene(first), [shapes]);
     preloadArtGroups(asScene(second), [shapes]);
 
-    expect(first.load.svg).toHaveBeenCalledTimes(18);
+    expect(first.load.svg).toHaveBeenCalledTimes(24);
     expect(second.load.svg).toHaveBeenCalledTimes(0);
   });
 
@@ -175,14 +175,14 @@ describe("preloadArtGroups", () => {
     const second = createScene();
 
     preloadArtGroups(asScene(first), [shapes]);
-    expect(first.load.svg).toHaveBeenCalledTimes(18);
+    expect(first.load.svg).toHaveBeenCalledTimes(24);
 
     // A child taps Back before a single file lands: Phaser emits no
     // `loaderror` for those files, only the scene shutdown.
     first.events.emit("shutdown");
 
     preloadArtGroups(asScene(second), [shapes]);
-    expect(second.load.svg).toHaveBeenCalledTimes(18);
+    expect(second.load.svg).toHaveBeenCalledTimes(24);
   });
 
   it("keeps delivered art satisfied when the owning scene shuts down", () => {
@@ -198,9 +198,9 @@ describe("preloadArtGroups", () => {
 
     preloadArtGroups(asScene(second), [shapes]);
     const keys = registeredKeys(second);
-    // The 17 stranded keys come back; the delivered one stays in the shared
+    // The 23 stranded keys come back; the delivered one stays in the shared
     // TextureManager and must not be rasterized a second time.
-    expect(keys).toHaveLength(17);
+    expect(keys).toHaveLength(23);
     expect(keys).not.toContain("shape_circle");
   });
 

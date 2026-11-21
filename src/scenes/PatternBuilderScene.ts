@@ -34,6 +34,12 @@ const SHAPE_TEXTURES: Record<ShapeType, string> = {
   plus: "shape_plus",
   ring: "shape_ring",
   teardrop: "shape_teardrop",
+  cube: "shape_cube",
+  cross: "shape_cross",
+  chevron: "shape_chevron",
+  capsule: "shape_capsule",
+  sector: "shape_sector",
+  parallelogram: "shape_parallelogram",
 };
 
 /** Number of rounds per playthrough. */

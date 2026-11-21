@@ -206,6 +206,12 @@ const SHAPES_KEYS: readonly ArtKeyDef[] = [
   ["shape_semicircle", CARD],
   ["shape_teardrop", CARD],
   ["shape_trapezoid", CARD],
+  ["shape_cube", CARD],
+  ["shape_cross", CARD],
+  ["shape_chevron", CARD],
+  ["shape_capsule", CARD],
+  ["shape_sector", CARD],
+  ["shape_parallelogram", CARD],
 ];
 
 const CUTOUTS_KEYS: readonly ArtKeyDef[] = [
