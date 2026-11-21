@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A kite is folded, lifted, and flown - 1 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 256 286 L 322 344 L 256 402 L 190 344 Z" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 190 344 L 322 344" fill="none" stroke="#2D3748" stroke-width="4"/>
+    <path d="M 256 286 L 256 402" fill="none" stroke="#2D3748" stroke-width="4"/>
+    <circle cx="256" cy="344" r="10" fill="#FFF5D6" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

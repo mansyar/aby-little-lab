@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: Batter becomes a pancake with berries - 3 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <ellipse cx="256" cy="308" rx="150" ry="32" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="256" cy="282" rx="118" ry="38" fill="#D69E2E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="208" cy="264" r="14" fill="#E53E3E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="258" cy="248" r="14" fill="#E53E3E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="308" cy="268" r="14" fill="#E53E3E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

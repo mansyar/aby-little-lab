@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A kettle makes a cup of tea - 3 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 186 268 L 326 268 L 306 372 L 206 372 Z" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 326 288 Q 372 288 372 322 Q 372 352 330 352" fill="none" stroke="#2D3748" stroke-width="8"/>
+    <path d="M 196 268 Q 256 248 316 268" fill="none" stroke="#C05621" stroke-width="10"/>
+    <path d="M 226 222 Q 242 200 226 178 M 286 222 Q 302 200 286 178" fill="none" stroke="#A0AEC0" stroke-width="6"/>
+</svg>

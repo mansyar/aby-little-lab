@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A mirror shows a smiling face - 2 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <ellipse cx="256" cy="256" rx="112" ry="150" fill="#BEE3F8" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="256" cy="216" r="44" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="240" cy="208" r="5" fill="#2D3748"/>
+    <circle cx="272" cy="208" r="5" fill="#2D3748"/>
+    <rect x="236" y="404" width="40" height="34" fill="#D69E2E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

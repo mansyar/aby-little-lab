@@ -12,6 +12,7 @@ import {
   type Story,
   SUBTLE_POOL,
 } from "../../game/storyOrderLogic";
+import { STORY_VARIANTS, storyVariantPool } from "../../game/storyVariants";
 import { mulberry32 } from "../helpers/randomHelper";
 
 const storyById = new Map<string, Story>(STORY_POOL.map((story) => [story.id, story]));
@@ -37,9 +38,9 @@ function sequenceRng(values: readonly number[]): { rng: () => number; calls: () 
 }
 
 describe("STORY_POOL", () => {
-  it("holds fifteen stories with unique ids and three unique panels each", () => {
-    expect(STORY_POOL).toHaveLength(15);
-    expect(new Set(STORY_IDS).size).toBe(15);
+  it("holds thirty stories with unique ids and three unique panels each", () => {
+    expect(STORY_POOL).toHaveLength(30);
+    expect(new Set(STORY_IDS).size).toBe(30);
     expect(STORY_IDS).toEqual(STORY_POOL.map((story) => story.id));
     for (const story of STORY_POOL) {
       expect(story.panels).toHaveLength(3);
@@ -48,15 +49,15 @@ describe("STORY_POOL", () => {
     }
   });
 
-  it("uses 45 distinct panel keys across the pool", () => {
+  it("uses 90 distinct panel keys across the pool", () => {
     const panels = STORY_POOL.flatMap((story) => [...story.panels]);
-    expect(panels).toHaveLength(45);
-    expect(new Set(panels).size).toBe(45);
+    expect(panels).toHaveLength(90);
+    expect(new Set(panels).size).toBe(90);
   });
 
-  it("splits into seven obvious and eight subtle stories", () => {
-    expect(OBVIOUS_POOL).toHaveLength(7);
-    expect(SUBTLE_POOL).toHaveLength(8);
+  it("splits into fifteen obvious and fifteen subtle stories", () => {
+    expect(OBVIOUS_POOL).toHaveLength(15);
+    expect(SUBTLE_POOL).toHaveLength(15);
     expect(OBVIOUS_POOL.length + SUBTLE_POOL.length).toBe(STORY_POOL.length);
     for (const story of OBVIOUS_POOL) expect(story.ladder).toBe("obvious");
     for (const story of SUBTLE_POOL) expect(story.ladder).toBe("subtle");
@@ -118,7 +119,7 @@ describe("buildPlaythrough", () => {
     expect(byDefault).toHaveLength(6);
     // Classic-mix pin re-derived from `mulberry32(77)` when the suite moved off
     // its local Park-Miller generator: three obvious stories, then three subtle.
-    expect(byDefault).toEqual(["tower", "cake", "snowman", "foot", "clothes", "cup"]);
+    expect(byDefault).toEqual(["lantern", "ice-cream", "sandcastle", "magnet", "puzzle", "rain"]);
   });
 
   it("draws a 5 + 1 mix in the easy band, obvious rounds first", () => {
@@ -164,44 +165,46 @@ describe("buildPlaythrough", () => {
     // shuffleWith, right before P3.T3.1 delegated it to the shared shuffle.
     // The shared shuffle consumes rng in the same order, so the same seeded
     // rng must yield the exact pre-migration strips, story order included.
+    // Goldens re-derived after P2.T1 grew the pool 15 -> 30 (the new stories
+    // reshuffle the shared-shuffle draws), captured from the live functions.
     expect(buildPlaythrough(mulberry32(1)).map((round) => round.storyId)).toEqual([
-      "balloon",
-      "snowman",
-      "tower",
-      "caterpillar",
-      "banana",
-      "rain",
+      "ice-cream",
+      "cake",
+      "cupcake",
+      "magnet",
+      "mirror",
+      "paint",
     ]);
     expect(buildPlaythrough(mulberry32(1))[0].shuffled).toEqual([
-      "story_balloon_aloft",
-      "story_balloon_flat",
-      "story_balloon_round",
+      "story_ice_scoop",
+      "story_ice_puddle",
+      "story_ice_dripping",
     ]);
     expect(buildPlaythrough(mulberry32(1))[5].shuffled).toEqual([
-      "story_cloud",
-      "story_rain_puddle",
-      "story_cloud_raining",
+      "story_paint_picture",
+      "story_paint_blank",
+      "story_paint_stroke",
     ]);
     expect(buildPlaythrough(mulberry32(11)).map((round) => round.shuffled)).toEqual([
-      ["story_seed_sprout", "story_seed_flower", "story_seed_planted"],
+      ["story_pancake_berries", "story_pancake_cooked", "story_pancake_batter"],
+      ["story_tower_half", "story_tower_tall", "story_blocks_scattered"],
       ["story_balloon_round", "story_balloon_aloft", "story_balloon_flat"],
-      ["story_cake_whole", "story_cake_sliced", "story_cake_candles"],
-      ["story_sun_set", "story_sun_noon", "story_sun_rise"],
-      ["story_frog", "story_frogspawn", "story_tadpole"],
-      ["story_clothes_drying", "story_clothes_wet", "story_clothes_dry"],
+      ["story_banana_peeled", "story_banana_whole", "story_banana_peel"],
+      ["story_frogspawn", "story_frog", "story_tadpole"],
+      ["story_cocoon", "story_caterpillar", "story_butterfly"],
     ]);
     expect(buildPlaythrough(mulberry32(2026)).map((round) => round.storyId)).toEqual([
-      "snowman",
-      "cake",
-      "seed",
-      "foot",
-      "rain",
-      "caterpillar",
+      "ice-cream",
+      "cupcake",
+      "pencil",
+      "shadow",
+      "tadpole",
+      "magnet",
     ]);
     expect(buildPlaythrough(mulberry32(2026))[1].shuffled).toEqual([
-      "story_cake_candles",
-      "story_cake_sliced",
-      "story_cake_whole",
+      "story_cupcake_plain",
+      "story_cupcake_cherry",
+      "story_cupcake_frosted",
     ]);
   });
 
@@ -237,5 +240,47 @@ describe("isCorrect", () => {
     const wrong = [...solution];
     wrong[1] = "story_egg";
     expect(isCorrect(wrong, solution)).toBe(false);
+  });
+});
+
+describe("story content variants", () => {
+  it("exposes exactly two signature variants with unique ids", () => {
+    expect(STORY_VARIANTS).toHaveLength(2);
+    expect(new Set(STORY_VARIANTS.map((variant) => variant.id)).size).toBe(2);
+    expect(STORY_VARIANTS.map((variant) => variant.id)).toEqual([
+      "growing-things",
+      "everyday-changes",
+    ]);
+  });
+
+  it("selects non-empty strict subsets with unique story ids", () => {
+    const allIds = new Set(STORY_IDS);
+    for (const variant of STORY_VARIANTS) {
+      expect(variant.stories.length).toBeGreaterThan(0);
+      expect(variant.stories.length).toBeLessThan(STORY_POOL.length);
+      expect(new Set(variant.stories.map((story) => story.id)).size).toBe(variant.stories.length);
+      for (const story of variant.stories) {
+        expect(allIds.has(story.id)).toBe(true);
+        expect(STORY_POOL).toContain(story);
+      }
+    }
+  });
+
+  it("picks the same subset by id and throws on an unknown id", () => {
+    for (const variant of STORY_VARIANTS) {
+      expect(storyVariantPool(variant.id)).toEqual(variant.stories);
+    }
+    expect(() => storyVariantPool("nope" as "growing-things")).toThrow(/unknown story variant/);
+  });
+
+  it("does not alter rule functions when a variant is selected", () => {
+    const before = Array.from({ length: 10 }, (_, seed) =>
+      buildPlaythrough(mulberry32(seed + 1)).map((round) => round.storyId),
+    );
+    for (const variant of STORY_VARIANTS) storyVariantPool(variant.id);
+    const after = Array.from({ length: 10 }, (_, seed) =>
+      buildPlaythrough(mulberry32(seed + 1)).map((round) => round.storyId),
+    );
+    expect(after).toEqual(before);
   });
 });

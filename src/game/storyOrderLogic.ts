@@ -1,7 +1,7 @@
 /**
  * Pure logic for Story Order (Game 22).
  *
- * Owns the fifteen-story pool, the easy-first ladder split, the per-round panel
+ * Owns the thirty-story pool, the easy-first ladder split, the per-round panel
  * shuffle and the whole-strip correctness check. No Phaser, DOM, storage or
  * timers live here; every random decision is injectable so the scene and the
  * tests stay deterministic.
@@ -24,8 +24,8 @@ export interface Story {
 }
 
 /**
- * The fifteen-story pool: seven obvious causes and eight subtler ones. Panel keys
- * are fixed by the spec because the art is authored against them.
+ * The thirty-story pool: fifteen obvious causes and fifteen subtler ones. Panel
+ * keys are fixed by the spec because the art is authored against them.
  */
 export const STORY_POOL: readonly Story[] = [
   {
@@ -62,6 +62,46 @@ export const STORY_POOL: readonly Story[] = [
     id: "tower",
     ladder: "obvious",
     panels: ["story_blocks_scattered", "story_tower_half", "story_tower_tall"],
+  },
+  {
+    id: "kite",
+    ladder: "obvious",
+    panels: ["story_kite_folded", "story_kite_raised", "story_kite_flying"],
+  },
+  {
+    id: "pancake",
+    ladder: "obvious",
+    panels: ["story_pancake_batter", "story_pancake_cooked", "story_pancake_berries"],
+  },
+  {
+    id: "soap",
+    ladder: "obvious",
+    panels: ["story_soap_bar", "story_soap_bubbles", "story_soap_bubble_big"],
+  },
+  {
+    id: "pencil",
+    ladder: "obvious",
+    panels: ["story_pencil_new", "story_pencil_sharp", "story_pencil_drawing"],
+  },
+  {
+    id: "sandcastle",
+    ladder: "obvious",
+    panels: ["story_sand_pile", "story_sand_castle", "story_sand_flag"],
+  },
+  {
+    id: "lantern",
+    ladder: "obvious",
+    panels: ["story_lantern_off", "story_lantern_on", "story_lantern_glow"],
+  },
+  {
+    id: "cupcake",
+    ladder: "obvious",
+    panels: ["story_cupcake_plain", "story_cupcake_frosted", "story_cupcake_cherry"],
+  },
+  {
+    id: "train",
+    ladder: "obvious",
+    panels: ["story_train_track", "story_train_near", "story_train_waving"],
   },
   {
     id: "banana",
@@ -102,6 +142,41 @@ export const STORY_POOL: readonly Story[] = [
     id: "tadpole",
     ladder: "subtle",
     panels: ["story_frogspawn", "story_tadpole", "story_frog"],
+  },
+  {
+    id: "shadow",
+    ladder: "subtle",
+    panels: ["story_shadow_morning", "story_shadow_noon", "story_shadow_evening"],
+  },
+  {
+    id: "magnet",
+    ladder: "subtle",
+    panels: ["story_magnet_bar", "story_magnet_clip", "story_magnet_chain"],
+  },
+  {
+    id: "mirror",
+    ladder: "subtle",
+    panels: ["story_mirror_frame", "story_mirror_reflection", "story_mirror_smile"],
+  },
+  {
+    id: "kettle",
+    ladder: "subtle",
+    panels: ["story_kettle_cold", "story_kettle_steam", "story_kettle_tea"],
+  },
+  {
+    id: "paint",
+    ladder: "subtle",
+    panels: ["story_paint_blank", "story_paint_stroke", "story_paint_picture"],
+  },
+  {
+    id: "bee",
+    ladder: "subtle",
+    panels: ["story_bee_flower", "story_bee_landing", "story_bee_flying"],
+  },
+  {
+    id: "puzzle",
+    ladder: "subtle",
+    panels: ["story_puzzle_pieces", "story_puzzle_half", "story_puzzle_done"],
   },
 ];
 

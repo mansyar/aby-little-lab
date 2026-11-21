@@ -13,6 +13,7 @@ import {
   SCENARIO_POOL,
   type Scenario,
 } from "../../game/feelingsFacesLogic";
+import { SCENARIO_VARIANTS, scenarioVariantPool } from "../../game/scenarioVariants";
 import { mulberry32 } from "../helpers/randomHelper";
 
 /** The contrast kind of each rung, in order — the compact shape band tests compare. */
@@ -20,7 +21,7 @@ function kindsOf(ladder: readonly RoundContrast[]): string[] {
   return ladder.map((rung) => rung.kind);
 }
 
-/** Returns a pooled scenario for the given emotion (the pool holds eight each). */
+/** Returns a pooled scenario for the given emotion (the pool holds twelve each). */
 function scenarioFor(emotion: Emotion): Scenario {
   const found = SCENARIO_POOL.find((scenario) => scenario.emotion === emotion);
   if (!found) {
@@ -40,19 +41,19 @@ describe("EMOTIONS", () => {
 });
 
 describe("SCENARIO_POOL", () => {
-  it("holds eight scenarios for every emotion", () => {
-    expect(SCENARIO_POOL).toHaveLength(32);
+  it("holds twelve scenarios for every emotion", () => {
+    expect(SCENARIO_POOL).toHaveLength(48);
     for (const emotion of EMOTIONS) {
-      expect(SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion)).toHaveLength(8);
+      expect(SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion)).toHaveLength(12);
     }
   });
 
   it("gives every scenario a unique id and a unique line", () => {
-    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(32);
-    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.text)).size).toBe(32);
+    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(48);
+    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.text)).size).toBe(48);
   });
 
-  it("grows the shipped 16-entry pool by exactly 4 scenarios per emotion across two extensions", () => {
+  it("grows the shipped 16-entry pool by exactly 8 scenarios per emotion across three extensions", () => {
     const shippedIds = [
       "happy-ladybug",
       "happy-hug",
@@ -80,6 +81,14 @@ describe("SCENARIO_POOL", () => {
       "angry-puzzle",
       "scared-mask",
       "scared-swing",
+      "happy-cookies",
+      "happy-ducks",
+      "sad-kite",
+      "sad-story",
+      "angry-cup",
+      "angry-slide",
+      "scared-owl",
+      "scared-wind",
     ];
     for (const id of shippedIds) {
       const scenario = SCENARIO_POOL.find((entry) => entry.id === id);
@@ -89,8 +98,9 @@ describe("SCENARIO_POOL", () => {
       const scenario = SCENARIO_POOL.find((entry) => entry.id === id);
       expect(scenario).toBeDefined();
     }
-    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(16 + 8 + 8);
-    expect(SCENARIO_POOL.length - shippedIds.length).toBe(16);
+    // 16 shipped + 8 prior + 8 second extension + 16 depth additions = 48.
+    expect(new Set(SCENARIO_POOL.map((scenario) => scenario.id)).size).toBe(48);
+    expect(SCENARIO_POOL.length - shippedIds.length).toBe(32);
   });
 
   it("keeps every line short enough for one spoken sentence", () => {
@@ -142,32 +152,31 @@ describe("drawScenarios", () => {
     // shuffleWith, right before P3.T3.1 delegated it to the shared shuffle.
     // The shared shuffle consumes rng in the same order, so the same seeded
     // rng must yield the exact pre-migration draw.
-    // Seed-1 golden re-derived in P3 after the pool grew 24->32 (the two new
-    // scenarios per emotion reshuffle the shared-shuffle draws); seeds 77 and
-    // 2026 below still draw the pre-expansion ids.
+    // Goldens re-derived after P2.T2 grew the pool 32->48 (the 16 new scenarios
+    // reshuffle the shared-shuffle draws), captured from the live function.
     expect(drawScenarios(mulberry32(1)).map((scenario) => scenario.id)).toEqual([
-      "happy-sticker",
-      "sad-home",
-      "angry-line",
-      "scared-wind",
-      "sad-ice-cream",
-      "scared-owl",
+      "angry-puzzle",
+      "angry-scoop",
+      "scared-swing",
+      "scared-mask",
+      "sad-cracker",
+      "happy-bubbles",
     ]);
     expect(drawScenarios(mulberry32(77)).map((scenario) => scenario.id)).toEqual([
-      "scared-swing",
-      "angry-line",
-      "happy-ducks",
+      "sad-bye",
       "happy-sticker",
-      "sad-story",
-      "angry-tower",
+      "sad-ice-cream",
+      "angry-puzzle",
+      "scared-moth",
+      "angry-door",
     ]);
     expect(drawScenarios(mulberry32(2026)).map((scenario) => scenario.id)).toEqual([
-      "happy-cookies",
-      "happy-plant",
-      "scared-vacuum",
-      "sad-home",
-      "angry-slide",
-      "sad-kite",
+      "angry-buzzer",
+      "sad-toybox",
+      "angry-tower",
+      "happy-puppy",
+      "scared-stairs",
+      "scared-dog",
     ]);
   });
 
@@ -510,5 +519,45 @@ describe("buildRoundChoices band ladders", () => {
         expect.arrayContaining([...EMOTIONS]),
       );
     }
+  });
+});
+
+describe("scenario content variants", () => {
+  it("exposes exactly two signature variants with unique ids", () => {
+    expect(SCENARIO_VARIANTS).toHaveLength(2);
+    expect(new Set(SCENARIO_VARIANTS.map((variant) => variant.id)).size).toBe(2);
+    expect(SCENARIO_VARIANTS.map((variant) => variant.id)).toEqual([
+      "outdoors-and-play",
+      "home-and-friends",
+    ]);
+  });
+
+  it("selects non-empty strict subsets with unique scenario ids", () => {
+    for (const variant of SCENARIO_VARIANTS) {
+      expect(variant.scenarios.length).toBeGreaterThan(0);
+      expect(variant.scenarios.length).toBeLessThan(SCENARIO_POOL.length);
+      expect(new Set(variant.scenarios.map((scenario) => scenario.id)).size).toBe(
+        variant.scenarios.length,
+      );
+      for (const scenario of variant.scenarios) {
+        expect(SCENARIO_POOL).toContain(scenario);
+      }
+    }
+  });
+
+  it("picks the same subset by id and throws on an unknown id", () => {
+    for (const variant of SCENARIO_VARIANTS) {
+      expect(scenarioVariantPool(variant.id)).toEqual(variant.scenarios);
+    }
+    expect(() => scenarioVariantPool("nope" as "outdoors-and-play")).toThrow(
+      /unknown scenario variant/,
+    );
+  });
+
+  it("does not alter rule functions when a variant is selected", () => {
+    const before = Array.from({ length: 10 }, (_, seed) => drawScenarios(mulberry32(seed + 1)));
+    for (const variant of SCENARIO_VARIANTS) scenarioVariantPool(variant.id);
+    const after = Array.from({ length: 10 }, (_, seed) => drawScenarios(mulberry32(seed + 1)));
+    expect(after).toEqual(before);
   });
 });

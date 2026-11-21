@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A pencil is sharpened and draws a star - 3 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 256 150 L 276 214 L 344 214 L 290 254 L 310 320 L 256 280 L 202 320 L 222 254 L 168 214 L 236 214 Z" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 122 400 L 324 340 L 340 366 L 138 426 Z" fill="#F6AD55" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 324 340 L 340 366 L 352 358 L 336 332 Z" fill="#2D3748" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

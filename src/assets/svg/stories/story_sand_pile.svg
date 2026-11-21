@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A sand pile becomes a castle with a flag - 1 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <path d="M 120 370 Q 256 232 392 370 Z" fill="#F6E05E" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 96 376 L 416 376" fill="none" stroke="#D69E2E" stroke-width="6"/>
+    <circle cx="256" cy="418" r="10" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>

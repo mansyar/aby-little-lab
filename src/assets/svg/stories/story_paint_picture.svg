@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Story Order: A blank page becomes a painting - 3 of 3. -->
+  <rect x="32" y="32" width="448" height="448" rx="28" fill="#FFFCF4" stroke="#2D3748" stroke-width="5"/>
+    <rect x="120" y="120" width="272" height="272" fill="#FFFFFF" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="326" cy="190" r="30" fill="#FBD38D" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 140 340 Q 226 236 304 340 Z" fill="#68D391" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 264 340 Q 330 272 372 340 Z" fill="#38A169" stroke="#2D3748" stroke-width="5" stroke-linejoin="round"/>
+</svg>
