@@ -14,25 +14,30 @@
 - **Covers:** FR-1, FR-4, FR-5 (partial), NFR-2, NFR-5, AC-1, AC-4, AC-5 (partial)
 - **Touches:** `src/game/wordLogic.ts`, `src/game/shapeSorterLogic.ts`,
   `src/__tests__/game/decodeLogic.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`,
-  variant data modules
+  variant data modules; new shape SVGs + `src/game/art/shapes.ts`;
+  `src/scenes/PatternBuilderScene.ts` (compile-forced exhaustive type map only);
+  stale-count test files `src/__tests__/game/wordLogic.test.ts`,
+  `src/__tests__/game/art/{groupIntegrity,shellOwnership,preloadArtGroups}.test.ts`,
+  `src/__tests__/utils/textureTiers.test.ts`, `src/__tests__/scenes/preloadScene.test.ts`,
+  `src/__tests__/game/hub/prewarm.test.ts` + `src/game/hub/prewarm.ts`
+  (hardcoded shape-key list); and living test-count lines in `README.md`,
+  `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/game/decodeLogic.test.ts src/__tests__/game/shapeSorterLogic.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Expand `WORD_POOL` to ≥60** — covers: FR-1
-  - [ ] **P1.T1.1:** Add words across 3-/4-letter tiers with confusable-family guards
-  - [ ] **P1.T1.2:** Reuse/tier art keys; assert count and tier invariants in tests
-- [ ] **P1.T2: Expand `ALL_SHAPES` to ≥24** — covers: FR-4
-  - [ ] **P1.T2.1:** Add shapes to easy/hard pools with tiered art keys
-  - [ ] **P1.T2.2:** Assert count and partition invariants in tests
-- [ ] **P1.T3: Add two word and two shape variants** — covers: FR-5 (partial)
-  - [ ] **P1.T3.1:** Define themed/subset variants reusing existing rules
-  - [ ] **P1.T3.2:** Assert variant selection does not alter rule logic
+- [x] **P1.T1: Expand `WORD_POOL` to ≥60** — covers: FR-1
+  - [x] **P1.T1.1:** Add words across 3-/4-letter tiers with confusable-family guards
+  - [x] **P1.T1.2:** Reuse/tier art keys; assert count and tier invariants in tests
+- [x] **P1.T2: Expand `ALL_SHAPES` to ≥24** — covers: FR-4
+  - [x] **P1.T2.1:** Add shapes to easy/hard pools with tiered art keys
+  - [x] **P1.T2.2:** Assert count and partition invariants in tests
+- [x] **P1.T3: Add two word and two shape variants** — covers: FR-5 (partial)
+  - [x] **P1.T3.1:** Define themed/subset variants reusing existing rules
+  - [x] **P1.T3.2:** Assert variant selection does not alter rule logic
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261121-content-depth/verification/phase-1.md
--->
+**Checkpoint:** `34c1d217`
+**Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-1.md`
 
 ## Phase 2: Story & scenario depth
 
