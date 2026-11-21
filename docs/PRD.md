@@ -159,11 +159,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.1 Shape Sorter
 
 - **Mechanic.** Drag each shape tile into the matching cut-out hole on the board. The shape and the hole match by silhouette, so the child compares form rather than colour.
-- **Rounds and pool.** Three rounds of three shapes, nine unique shapes per playthrough, drawn from a pool of 18: circle, square, triangle, star, heart, crescent, oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring and teardrop.
-- **Difficulty.** Adaptive. The band selects the shape pool each playthrough draws from: the easiest band draws from nine ornamental, highly distinct shapes, the classic band from all 18, and the hardest band from ten easily confused geometric families. Three rounds of three at every shift.
+- **Rounds and pool.** Three rounds of three shapes, nine unique shapes per playthrough, drawn from a pool of 24: circle, square, triangle, star, heart, crescent, oval, rectangle, diamond, pentagon, hexagon, octagon, trapezoid, semicircle, arrow, plus, ring, teardrop, cube, cross, chevron, capsule, sector and parallelogram.
+- **Difficulty.** Adaptive. The band selects the shape pool each playthrough draws from: the easiest band draws from twelve ornamental, highly distinct shapes, the classic band from all 24, and the hardest band from thirteen easily confused geometric families. Three rounds of three at every shift.
 - **Feedback.** A dragged shape lifts to 1.1 times its display size with a 4 degree tilt, 1.05 times and level under reduced motion, while its matching hole pulses an outline. A correct drop snaps to the slot centre over 200 ms (120 ms reduced) with the chime and a progress dot, and a wrong drop bounces back; the incorrect tone plays only on a drop onto a hole, so a shape lifted and released in place stays silent.
 - **Narration.** One rule line: "Drag each shape into its hole." Spoken once at scene entry, replayable from the speaker glyph. No per-round prompt.
-- **Art and assets.** 18 filled shape SVGs plus 18 matching cut-out SVGs, each shape with its own flat colour, loaded with the game from the `shapes` and `cutouts` art groups rather than the boot set. Tile and sticker icons for the Hub.
+- **Art and assets.** 24 filled shape SVGs plus 24 matching cut-out SVGs, each shape with its own flat colour, loaded with the game from the `shapes` and `cutouts` art groups rather than the boot set. Tile and sticker icons for the Hub.
 
 ### 3.2 Animal Trace
 
@@ -213,7 +213,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.7 Pattern Builder
 
 - **Mechanic.** Tap the shape that finishes the pattern. The pattern strip has four slots, three filled and one gap.
-- **Rounds and pool.** Six rounds. Each round has four slots with three filled and one gap, and three answer choices drawn from the 18 shapes. The first slot is never the gap.
+- **Rounds and pool.** Six rounds. Each round has four slots with three filled and one gap, and three answer choices drawn from the 24 shapes. The first slot is never the gap.
 - **Difficulty.** Adaptive. The band ladder shifts the pattern type and the gap: the easiest band always hides the last slot on an ABAB row, the middle band widens to ABAB, AABB or ABB with the last slot still hidden, and the top band may hide a middle slot instead.
 - **Feedback.** A correct tap flashes the card in the success green, chimes, cheers the mascot and pops the progress dot before the next round opens 700 ms later; a wrong tap plays the soft tone and wiggles the card 4 degrees three times (2 degrees over 200 ms under reduced motion) with a mascot nod and no penalty.
 - **Narration.** Rule line: "Pick the shape that finishes the pattern." No per-round prompt.
@@ -231,11 +231,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.9 Find the Word
 
 - **Mechanic.** Tap the printed word that matches the picture and the spoken word.
-- **Rounds and pool.** Six rounds. A 28 word pool, thirteen three-letter words and fifteen four-letter words. Four word cards per round, never two starting with the same letter.
+- **Rounds and pool.** Six rounds. A 60 word pool, twenty-seven three-letter words and thirty-three four-letter words. Four word cards per round, never two starting with the same letter.
 - **Difficulty.** Adaptive. The band ladder shifts the mix of three and four letter words. A child who is finding it hard sees only three-letter words.
 - **Feedback.** The prompt picture pops in and every card squishes on press. A correct tap flashes the card green with the chime and a progress dot; a wrong tap wiggles the card 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the word is spoken at a slow rate while the picture shows its meaning.
-- **Art and assets.** 28 prompt pictures. Most reuse the art other games already draw; four SVGs (sun, hat, bug, duck) were added for this game and the content-expansion batch reuses existing item, toy and shape keys, so no new picture SVGs were needed. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
+- **Art and assets.** 60 prompt pictures. Most reuse the art other games already draw; four SVGs (sun, hat, bug, duck) were added for this game and the content-expansion batch reuses existing item, toy and shape keys, so no new picture SVGs were needed. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.10 Build the Word
 
@@ -276,7 +276,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.14 Odd One Out
 
 - **Mechanic.** Tap the card that does not belong in a 2 by 2 grid of four cards.
-- **Rounds and pool.** Six rounds across three kinds of difference: different category, same category but a different item, and near-identical items such as three frog colours. The pool is 33 textures: six animals, three frogs, six toys and 18 shapes.
+- **Rounds and pool.** Six rounds across three kinds of difference: different category, same category but a different item, and near-identical items such as three frog colours. The pool is 39 textures: six animals, three frogs, six toys and 24 shapes.
 - **Difficulty.** Adaptive. The band ladder shifts the mix of difference kinds across the six rounds.
 - **Feedback.** A correct tap flashes the card green with the chime and a dot pop, and a wrong tap wiggles it with a gentle mascot nod and no penalty. The odd item's name is re-heard from the speaker glyph at any point in the round.
 - **Narration.** Per-round target: the odd item is named when the round opens.
@@ -321,11 +321,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.19 Decode It
 
 - **Mechanic.** See the picture and hear the word, then tap the printed word that names it among four cards.
-- **Rounds and pool.** Six rounds, easy first. Rounds one to three use three-letter words and rounds four to six use four-letter words, drawn from a 28 word pool. Four word cards per round, guarded against distractors that share the target's first letter or a confusable letter shape.
+- **Rounds and pool.** Six rounds, easy first. Rounds one to three use three-letter words and rounds four to six use four-letter words, drawn from a 60 word pool. Four word cards per round, guarded against distractors that share the target's first letter or a confusable letter shape.
 - **Difficulty.** Adaptive. The band ladder shifts the split between three and four letter words, so a stronger reader meets four-letter words a round or two earlier.
 - **Feedback.** The target word is re-heard from the speaker glyph. A correct tap flashes the card green with the chime and a dot pop before the next word 700 ms later; a wrong tap wiggles it 4 degrees three times (2 degrees over 200 ms reduced) with a mascot nod and no penalty.
 - **Narration.** Per-round target: the target word is spoken while the picture shows its meaning, and the speaker glyph repeats it.
-- **Art and assets.** The pool is the 28-word pool shared with Find the Word — fox, cup, map and bed are in-pool words now. Every picture reuses an existing art-group key, so no new item SVGs. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
+- **Art and assets.** The pool is the 60-word pool shared with Find the Word — fox, cup, map and bed are in-pool words now. Every picture reuses an existing art-group key, so no new item SVGs. All of it is loaded with the game from the `animals`, `food`, `items`, `letters`, `music`, `shapes` and `toys` art groups rather than the boot set. Tile and sticker icons.
 
 ### 3.20 Number Order
 
@@ -339,7 +339,7 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.21 Feelings Faces
 
 - **Mechanic.** Hear a short scenario about Aby, then tap the face that shows how Aby feels. Three face cards per round, drawn from four faces: happy, sad, angry and scared.
-- **Rounds and pool.** Six rounds from a pool of 32 scenarios, eight per emotion. Each playthrough uses one scenario per emotion plus two more, with no repeats. Every round includes the target emotion among three distinct faces.
+- **Rounds and pool.** Six rounds from a pool of 48 scenarios, twelve per emotion. Each playthrough uses one scenario per emotion plus two more, with no repeats. Every round includes the target emotion among three distinct faces.
 - **Difficulty.** Adaptive. The band sets the contrast ramp: the easiest band plays all six rounds with clearly distinct emotions (happy against angry), the classic band plays three distinct rounds then three confusable ones (sad against scared), and the hardest band plays all six with the confusable pair.
 - **Feedback.** Three face cards rise in under the spoken scenario and squish on press. A correct tap splashes colour at the card, fills its progress dot on a Back.out pop and cheers Hoot before the 700 ms advance; a wrong tap wiggles the card and its face 4 degrees three times (2 degrees over 200 ms reduced), nods the mascot and re-speaks the scenario, with no penalty.
 - **Narration.** Rule line: "Tap the face that shows how Aby feels." Each round then speaks its scenario. A wrong tap re-speaks the scenario once and leaves the round open. When there is no voice or sound is off, the scenario appears as a caption and the glyph dims.
@@ -348,11 +348,11 @@ Every game below uses the same six fields: the mechanic the child performs, the 
 ### 3.22 Story Order
 
 - **Mechanic.** Drag three shuffled panels into three slots, marked by one, two and three pips, to tell the story first, next, last. Panels can be swapped between slots, withdrawn by tapping, and dropped back into the tray.
-- **Rounds and pool.** Six rounds from a pool of fifteen three-panel stories, seven obvious (seed to flower, flat balloon to aloft, egg to duckling, ice cream to puddle, whole cake to candles to slices, snow pile to hatted snowman, scattered blocks to tall tower) and eight subtle (whole banana to peel, full cup to empty, bare foot to shoe, cloud to puddle, wet clothes hung out to dry, sunrise to sunset, caterpillar to butterfly, frogspawn to frog). No repeats within a playthrough.
+- **Rounds and pool.** Six rounds from a pool of thirty three-panel stories, fifteen obvious (examples include seed to flower, flat balloon to aloft, egg to duckling, ice cream to puddle, whole cake to candles to slices, snow pile to hatted snowman, scattered blocks to tall tower, kite folding to flight, pancake, soap bubbles, pencil, sandcastle, lantern, cupcake and train) and fifteen subtle (examples include whole banana to peel, full cup to empty, bare foot to shoe, cloud to puddle, wet clothes hung out to dry, sunrise to sunset, caterpillar to butterfly, frogspawn to frog, shadow, magnet, mirror, kettle, paint, bee and puzzle). No repeats within a playthrough.
 - **Difficulty.** Adaptive. The band sets the mix of obvious and subtle stories: five obvious and one subtle at the easiest band, three of each in the classic band, one obvious and five subtle at the hardest.
 - **Feedback.** Panels squash on press and tilt as they lift, and a panel dropped on an occupied slot swaps with the one already there, so nothing is ever rejected. A correct order splashes colour at the strip's centre, chimes and fills the dot; a wrong order wiggles every placed panel, leaves them where the child put them and re-judges only when the completed order changes.
 - **Narration.** Rule line: "Put the story in order, first to last." No per-round narration; the panels are the prompt.
-- **Art and assets.** 45 panel SVGs. They travel with the Story Order chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
+- **Art and assets.** 90 panel SVGs. They travel with the Story Order chunk rather than the boot set, so the shell does not pay for them. Tile and sticker icons.
 
 ### 3.23 Robot Path
 
@@ -439,7 +439,7 @@ The first fifteen adaptive games are Find the Letter, Find the Word, Build the W
 - **A colour-pool split** - Color Match divides its six rounds between an easy four-colour pool and a hard six-colour pool: three and three by default, four and two when the band drops, two and four when it rises.
 - **Its own ladder** - Odd One Out replaces the classic ladder outright: when the band drops every round is played at the easiest band, and when it rises band 3 is capped at three rounds with the freed round re-served at the easiest band. Musical Memory maps the shift onto its starting sequence length instead, so the game begins with one, two or three notes.
 
-The seven games that joined them - Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order - do not use the band ladder; each owns a single difficulty dimension the shift selects. Shape Sorter's band chooses the playthrough's shape pool: nine ornamental, highly distinct shapes below classic, all 18 at classic, ten confusable geometric families above. Animal Trace's band chooses how many waypoints each traced path carries: four, six or eight. Pop & Freeze's band chooses how many of the five bubbles sleep: none to one, one to two, or two to three. Shadow Match's band chooses which of its twelve objects a playthrough draws: one per confusable pair below classic, any six at classic, three full confusable pairs above. Big & Small's band widens or narrows the size contrast between the boxes around the classic 1.5 and 0.7 scales. Feelings Faces' band turns its built-in contrast ramp fully distinct, keeps the classic three-and-three, or makes every round confusable. Story Order's band sets the mix of obvious and subtle stories: five and one, three and three, or one and five.
+The seven games that joined them - Shape Sorter, Animal Trace, Pop & Freeze, Shadow Match, Big & Small, Feelings Faces and Story Order - do not use the band ladder; each owns a single difficulty dimension the shift selects. Shape Sorter's band chooses the playthrough's shape pool: twelve ornamental, highly distinct shapes below classic, all 24 at classic, thirteen confusable geometric families above. Animal Trace's band chooses how many waypoints each traced path carries: four, six or eight. Pop & Freeze's band chooses how many of the five bubbles sleep: none to one, one to two, or two to three. Shadow Match's band chooses which of its twelve objects a playthrough draws: one per confusable pair below classic, any six at classic, three full confusable pairs above. Big & Small's band widens or narrows the size contrast between the boxes around the classic 1.5 and 0.7 scales. Feelings Faces' band turns its built-in contrast ramp fully distinct, keeps the classic three-and-three, or makes every round confusable. Story Order's band sets the mix of obvious and subtle stories: five and one, three and three, or one and five.
 
 Robot Path is the one game with no adaptive dimension at all. Its six-round ladder is fixed and no band is applied to it, because the child's own program is the difficulty: a longer route is harder for exactly the reason a child can see on the board.
 
@@ -576,7 +576,7 @@ Rasterising every key at 512 by 512 would waste GPU memory, because most art dis
 
 The tier rule is applied per key wherever that key lives, not to one fixed set, so art loaded with a game is tiered by the same rule as a shell key. Display code scales from the tier size rather than assuming 512. The rule list and the tier sizes live in one place in the code, and the TDD states them ([TDD §3.4](./TDD.md#34-texture-tiers)).
 
-Story Order's 45 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces are lazy group art, loaded with the game; only its tile icon and its sticker are in the boot set, as they are for every game.
+Story Order's 90 panels are not in the boot set; they travel with that game's chunk (see 7.3). Feelings Faces' four faces are lazy group art, loaded with the game; only its tile icon and its sticker are in the boot set, as they are for every game.
 
 ### 7.2 Shell and game chunks
 
@@ -586,15 +586,15 @@ The build produces three kinds of JavaScript:
 - **A separate Phaser vendor chunk**, so engine bytes are cached across releases and an app update downloads only the shell delta. The build must contain exactly one such chunk.
 - **One chunk per game**, plus the chunks the build hoists out of them because several games share the code: `GameSceneBase`, `ChoiceRoundScene`, `GroupMathScene`, `dragJuice`, `dragBoard` and shared game logic such as `wordLogic`, `countLogic` and `shapeSorterLogic`. The shared bases do not ride in the shell.
 
-Measured from the current build, the shell entry is 186.4 kB as `validate-bundle.js` reports it (190.89 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 51 JavaScript chunks in all: the 24 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 45 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
+Measured from the current build, the shell entry is 186.4 kB as `validate-bundle.js` reports it (190.89 kB as Vite prints it) against the 200 kB gate, the Phaser chunk is 1335.0 kB, and the build emits 51 JavaScript chunks in all: the 24 game scenes, nine art-group chunks, the shared bases and logic, the Phaser vendor chunk, the workbox helper and the shell entry. Game chunks range from about 1.4 kB to about 40 kB, the largest being Story Order because it carries its own 90 panel drawings. `validate-bundle.js` prints these numbers on every build, so they can be re-measured rather than trusted from this document.
 
 ### 7.3 Art that travels with a game
 
-Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 202 of the app's 262 art files.
+Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 251 of the app's 313 art files.
 
-**Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 139 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 139 keys are also shell keys, the profile avatars, so 133 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
+**Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 145 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 145 keys are also shell keys, the profile avatars, so 139 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
 
-**The two scene-local art modules.** Story Order's 45 panel drawings and Robot Path's six robot and prop drawings are imported as raw markup by their own scenes and rasterised by those scenes' own preloads, so the strings live in the lazy chunks instead of the shell.
+**The two scene-local art modules.** Story Order's 90 panel drawings and Robot Path's six robot and prop drawings are imported as raw markup by their own scenes and rasterised by those scenes' own preloads, so the strings live in the lazy chunks instead of the shell.
 
 A scene that asks for art which fails to load falls back to a neutral placeholder rather than Phaser's missing-texture checkerboard, and a shared textless cue is shown while the art loads, so the child sees a deliberate loading mark rather than a broken picture.
 

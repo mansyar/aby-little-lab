@@ -223,13 +223,16 @@ reach is cancelled, Phase 4 depth is next.
 ### 10.5 Phase 4 — Depth & retention (4–6 weeks, content-led)
 
 Breadth is already 22 games; the retention risk is pool thinness, not game
-count. Content work must stay inside the current texture tiers (39 MiB typical /
-178 MiB full) and per-game chunk budget — retention may not be bought with
-memory.
+count. Content work must stay inside the current texture tiers and per-game
+chunk budget — retention may not be bought with memory. The `validate-textures.js`
+guard enforces this in CI: on 2026-11-21 the caps were re-baselined to 80 MiB
+typical / 320 MiB full (real assets 74.57 / 313.00 MiB) with a hard
+`typical ≤ full/2` ratio, superseding the earlier 39 / 178 MiB figures from the
+2026-10-17 measurement (see `docs/perf-baseline.md`).
 
 | Track | Work | Exit gate |
 |---|---|---|
-| `20261208-content-depth` | Words 28 → 60+, stories 15 → 30, scenarios 32 → 48, shapes 18 → 24; two signature variants per core mechanic | No pool repeats within a session; art-chunk budget held |
+| `20261208-content-depth` — Done 2026-11-21 (track `20261121-content-depth`; see `docs/perf-baseline.md`) | Words 28 → 60 (27 three-letter / 33 four-letter), stories 15 → 30 (15 obvious / 15 subtle; 90 panels), scenarios 32 → 48 (12 per emotion), shapes 18 → 24; two signature variants per pool | Machine-checked: seeded no-repeat playthrough tests across all four games + `validate-textures.js` guard (80/320 MiB caps, ratio ≤ 0.5) in `verify_phase` |
 | `20261208-replay-novelty` | Session-level variety policy (no immediate repeats), rotating sticker sets, "Professor Hoot suggests" rotation | Median distinct games per session ≥ 4 |
 | `20261208-adaptive-tuning` | Retune the bands against Phase 2 data; optional parent view of the current band | Band distribution matches the designed curve |
 
@@ -277,7 +280,7 @@ cancelled, and the path is Phase 4 depth followed by Phase 6 sustainability.
 | Trunk trustworthy | patch | day 1 |
 | CI has a browser layer | v1.24.0 | ~2 weeks |
 | A parent can see and move their data | v1.25.0 | ~6 weeks |
-| Content depth landed | v1.26.0 | ~12 weeks |
+| Content depth landed — **Done 2026-11-21** (track `20261121-content-depth`) | v1.26.0 | ~12 weeks |
 | Public-release candidate | v2.0.0 | ~4.5 months |
 
 ### 10.9 Roadmap risks
