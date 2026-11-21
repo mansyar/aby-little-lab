@@ -76,7 +76,7 @@
 - **Touches:** `scripts/validate-textures.js`, `package.json`, `conductor/workflow.md`,
   `src/game/*Logic.ts` (scheduling only), focused logic tests
 - **Verification:** `node scripts/validate-textures.js && pnpm exec vitest run src/__tests__/game`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Add `scripts/validate-textures.js` guard** — covers: FR-7
   - [ ] **P3.T1.1:** Compute typical/full texture bytes; fail above 39 MiB / 178 MiB
