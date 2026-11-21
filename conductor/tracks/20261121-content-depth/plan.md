@@ -100,7 +100,7 @@
 - **Touches:** `README.md`, `docs/PRD.md`, `docs/TDD.md`, `docs/perf-baseline.md`,
   `conductor/product.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Sync pool counts in README, PRD, TDD and perf-baseline** — covers: FR-8
   - [ ] **P4.T1.1:** Update counts and texture figures
