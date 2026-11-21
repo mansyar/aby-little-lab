@@ -590,9 +590,9 @@ Measured from the current build, the shell entry is 186.4 kB as `validate-bundle
 
 ### 7.3 Art that travels with a game
 
-Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 251 of the app's 313 art files.
+Game art belongs in the game's chunk when only that game uses it. Two mechanisms move the art out of the shell, and together they move 257 of the app's 319 art files.
 
-**Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 145 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 145 keys are also shell keys, the profile avatars, so 139 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
+**Twelve lazy art groups.** The art that is not shell art is grouped into `shapes`, `cutouts`, `letters`, `numerals`, `animals`, `food`, `items`, `shadows`, `toys`, `faces`, `music` and `glyphs` - 151 keys in all. A scene declares the groups it draws in its own `preload` and hands them to the loader, so the SVG markup lands in that game's lazy chunk instead of the shell. Six of the 151 keys are also shell keys, the profile avatars, so 145 of them are game-only. The loader is idempotent, tracks which scene owns which key so a child who leaves mid-load frees the key for the next attempt, and rasterises every key at its own tier.
 
 **The two scene-local art modules.** Story Order's 90 panel drawings and Robot Path's six robot and prop drawings are imported as raw markup by their own scenes and rasterised by those scenes' own preloads, so the strings live in the lazy chunks instead of the shell.
 

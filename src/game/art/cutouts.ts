@@ -1,15 +1,21 @@
 import cutoutArrowSvg from "../../assets/svg/shapes/cutout_arrow.svg?raw";
+import cutoutCapsuleSvg from "../../assets/svg/shapes/cutout_capsule.svg?raw";
+import cutoutChevronSvg from "../../assets/svg/shapes/cutout_chevron.svg?raw";
 import cutoutCircleSvg from "../../assets/svg/shapes/cutout_circle.svg?raw";
 import cutoutCrescentSvg from "../../assets/svg/shapes/cutout_crescent.svg?raw";
+import cutoutCrossSvg from "../../assets/svg/shapes/cutout_cross.svg?raw";
+import cutoutCubeSvg from "../../assets/svg/shapes/cutout_cube.svg?raw";
 import cutoutDiamondSvg from "../../assets/svg/shapes/cutout_diamond.svg?raw";
 import cutoutHeartSvg from "../../assets/svg/shapes/cutout_heart.svg?raw";
 import cutoutHexagonSvg from "../../assets/svg/shapes/cutout_hexagon.svg?raw";
 import cutoutOctagonSvg from "../../assets/svg/shapes/cutout_octagon.svg?raw";
 import cutoutOvalSvg from "../../assets/svg/shapes/cutout_oval.svg?raw";
+import cutoutParallelogramSvg from "../../assets/svg/shapes/cutout_parallelogram.svg?raw";
 import cutoutPentagonSvg from "../../assets/svg/shapes/cutout_pentagon.svg?raw";
 import cutoutPlusSvg from "../../assets/svg/shapes/cutout_plus.svg?raw";
 import cutoutRectangleSvg from "../../assets/svg/shapes/cutout_rectangle.svg?raw";
 import cutoutRingSvg from "../../assets/svg/shapes/cutout_ring.svg?raw";
+import cutoutSectorSvg from "../../assets/svg/shapes/cutout_sector.svg?raw";
 import cutoutSemicircleSvg from "../../assets/svg/shapes/cutout_semicircle.svg?raw";
 import cutoutSquareSvg from "../../assets/svg/shapes/cutout_square.svg?raw";
 import cutoutStarSvg from "../../assets/svg/shapes/cutout_star.svg?raw";
@@ -18,7 +24,7 @@ import cutoutTrapezoidSvg from "../../assets/svg/shapes/cutout_trapezoid.svg?raw
 import cutoutTriangleSvg from "../../assets/svg/shapes/cutout_triangle.svg?raw";
 import type { ArtGroup } from "./types";
 
-/** The 18 press-out outlines Shape Sorter uses as drop slots. */
+/** The 24 press-out outlines Shape Sorter uses as drop slots. */
 export const cutouts: ArtGroup = Object.freeze({
   id: "cutouts",
   assets: Object.freeze([
@@ -40,5 +46,11 @@ export const cutouts: ArtGroup = Object.freeze({
     { key: "cutout_semicircle", svg: cutoutSemicircleSvg },
     { key: "cutout_teardrop", svg: cutoutTeardropSvg },
     { key: "cutout_trapezoid", svg: cutoutTrapezoidSvg },
+    { key: "cutout_cube", svg: cutoutCubeSvg },
+    { key: "cutout_cross", svg: cutoutCrossSvg },
+    { key: "cutout_chevron", svg: cutoutChevronSvg },
+    { key: "cutout_capsule", svg: cutoutCapsuleSvg },
+    { key: "cutout_sector", svg: cutoutSectorSvg },
+    { key: "cutout_parallelogram", svg: cutoutParallelogramSvg },
   ]),
 });

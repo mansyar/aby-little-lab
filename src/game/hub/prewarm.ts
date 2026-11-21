@@ -233,6 +233,12 @@ const CUTOUTS_KEYS: readonly ArtKeyDef[] = [
   ["cutout_semicircle", CARD],
   ["cutout_teardrop", CARD],
   ["cutout_trapezoid", CARD],
+  ["cutout_cube", CARD],
+  ["cutout_cross", CARD],
+  ["cutout_chevron", CARD],
+  ["cutout_capsule", CARD],
+  ["cutout_sector", CARD],
+  ["cutout_parallelogram", CARD],
 ];
 
 const ANIMALS_KEYS: readonly ArtKeyDef[] = [

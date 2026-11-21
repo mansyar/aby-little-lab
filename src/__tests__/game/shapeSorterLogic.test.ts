@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { cutouts } from "../../game/art/cutouts";
 import { shapes } from "../../game/art/shapes";
+import { ART_KEYS_BY_GAME } from "../../game/hub/prewarm";
 import { shuffle } from "../../game/random";
 import {
   ALL_SHAPES,
@@ -45,6 +47,19 @@ it("registers a shape_<name> art key for every ShapeType", () => {
   const artKeys = new Set(shapes.assets.map((asset) => asset.key));
   for (const shape of ALL_SHAPES) {
     expect(artKeys.has(`shape_${shape}`), `missing art key for shape: ${shape}`).toBe(true);
+  }
+});
+
+it("registers a cutout_<name> art key and prewarm entry for every ShapeType", () => {
+  // Shape Sorter renders each slot hole as `cutout_${slotType}`. A widened pool
+  // with no matching cut-out would render Phaser's __MISSING placeholder, so
+  // keep the ShapeType union, the art group and the prewarm keys in lockstep.
+  const cutoutKeys = new Set(cutouts.assets.map((asset) => asset.key));
+  const prewarmKeys = new Set((ART_KEYS_BY_GAME["shape-sorter"] ?? []).map((entry) => entry.key));
+  for (const shape of ALL_SHAPES) {
+    const key = `cutout_${shape}`;
+    expect(cutoutKeys.has(key), `missing cut-out art key: ${key}`).toBe(true);
+    expect(prewarmKeys.has(key), `missing prewarm cut-out key: ${key}`).toBe(true);
   }
 });
 

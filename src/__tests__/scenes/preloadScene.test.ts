@@ -85,7 +85,7 @@ const AVATAR_KEYS: readonly string[] = [
 ];
 
 /** How many SVGs the shell and the twelve groups carry together. */
-const CANONICAL_ASSET_COUNT = 201;
+const CANONICAL_ASSET_COUNT = 207;
 
 const shellKeys = SHELL_ASSETS.map((asset) => asset.key);
 
@@ -106,7 +106,7 @@ describe("PreloadScene SHELL_ASSETS", () => {
     expect(overlaps.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 
-  it("leaves the shell and the groups owning 201 keys in total", () => {
+  it("leaves the shell and the groups owning 207 keys in total", () => {
     const union = new Set([...shellKeys, ...allGroupKeys]);
     expect(union.size).toBe(CANONICAL_ASSET_COUNT);
   });
