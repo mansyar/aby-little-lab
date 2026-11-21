@@ -125,7 +125,7 @@
   `src/__tests__/game/hub/prewarm.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`,
   `docs/PRD.md`, `docs/TDD.md`, `docs/SVG_STYLE.md`, `docs/perf-baseline.md`, `README.md`
 - **Verification:** full `verify_phase` + `node scripts/validate-textures.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Add six cut-out SVGs and register them** — covers: F1
   - [ ] **R1.T1.1:** Author `cutout_{cube,cross,chevron,capsule,sector,parallelogram}.svg` matching the shape silhouettes (style/viewBox/stroke per existing cut-outs)
