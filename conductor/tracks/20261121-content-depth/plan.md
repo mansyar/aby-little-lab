@@ -76,23 +76,21 @@
 - **Touches:** `scripts/validate-textures.js`, `package.json`, `conductor/workflow.md`,
   `src/game/*Logic.ts` (scheduling only), focused logic tests
 - **Verification:** `node scripts/validate-textures.js && pnpm exec vitest run src/__tests__/game`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Add `scripts/validate-textures.js` guard** — covers: FR-7
-  - [ ] **P3.T1.1:** Compute typical/full texture bytes; fail above 39 MiB / 178 MiB
-  - [ ] **P3.T1.2:** Prove failure on a synthetic over-budget fixture
-- [ ] **P3.T2: Wire the guard into `verify_phase`** — covers: FR-7
-  - [ ] **P3.T2.1:** Add the guard to `conductor/workflow.md` and `package.json`
-  - [ ] **P3.T2.2:** Confirm the full chain still passes
-- [ ] **P3.T3: Prove no-repeat scheduling in all four games** — covers: FR-6
-  - [ ] **P3.T3.1:** Seeded-RNG tests for degenerate/random paths
-  - [ ] **P3.T3.2:** Assert no item repeats within a playthrough
+- [x] **P3.T1: Add `scripts/validate-textures.js` guard** — covers: FR-7
+  - [x] **P3.T1.1:** Compute typical/full texture bytes; fail above re-baselined caps (user decision: 80/320 MiB + ratio ≤ 0.5, overriding stale 39/178 MiB)
+  - [x] **P3.T1.2:** Prove failure on a synthetic over-budget fixture
+- [x] **P3.T2: Wire the guard into `verify_phase`** — covers: FR-7
+  - [x] **P3.T2.1:** Add the guard to `conductor/workflow.md` and `package.json`
+  - [x] **P3.T2.2:** Confirm the full chain still passes
+- [x] **P3.T3: Prove no-repeat scheduling in all four games** — covers: FR-6
+  - [x] **P3.T3.1:** Seeded-RNG tests for degenerate/random paths
+  - [x] **P3.T3.2:** Assert no item repeats within a playthrough
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261121-content-depth/verification/phase-3.md
--->
+**Checkpoint:** `ff643225`
+**Evidence:** `conductor/tracks/20261121-content-depth/verification/phase-3.md`
 
 ## Phase 4: Doc sync
 
