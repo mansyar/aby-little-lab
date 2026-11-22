@@ -109,7 +109,7 @@ Phases 1–4 are verified with checkpoints `0c6e79d5`, `6815d8c3`, `c4014bd6`, `
 
 ## Doc sync
 
-`none` — F1/F2 documentation fixes were applied in Phase R1 and are committed; no further doc changes are outstanding.
+`none` — review introduced no documentation changes of its own; F1/F2 were fixed and committed in Phase R1, and no post-review doc work is outstanding.
 
 ## History
 
