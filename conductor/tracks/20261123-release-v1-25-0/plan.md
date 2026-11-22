@@ -14,7 +14,7 @@
 - **Covers:** FR-4, NFR-1, NFR-2, NFR-4, AC-3, AC-10
 - **Touches:** `src/**/*.ts` (production modules and their extractions), import sites, tests if imports change, living count lines in README.md/docs/TDD.md/docs/perf-baseline.md if test counts change
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Split the five modules over 600 lines** — covers: FR-4
   - [ ] **P1.T1.1:** Extract cohesive helpers without changing public APIs
