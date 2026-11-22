@@ -289,4 +289,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Release v1.24.0** — [20261121-release-v1-24-0](./archive/20261121-release-v1-24-0/index.md) — chore — high
 - [x] **Track: Content Depth** — [20261121-content-depth](./archive/20261121-content-depth/index.md) — feature — high
-- [~] **Track: Release v1.25.0** — [20261123-release-v1-25-0](./tracks/20261123-release-v1-25-0/index.md) — chore — high
+- [x] **Track: Release v1.25.0** — [20261123-release-v1-25-0](./archive/20261123-release-v1-25-0/index.md) — chore — high
