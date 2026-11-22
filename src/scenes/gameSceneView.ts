@@ -231,12 +231,12 @@ export function fillProgressDot(v: GameSceneViewState, index: number): void {
 export function reactMiss(
   v: GameSceneViewState,
   record: () => void,
-  playIncorrect: () => void,
+  playTone: () => void,
   targets?: Phaser.GameObjects.GameObject[],
   onComplete?: () => void,
   onPreWiggle?: () => void,
 ): void {
-  playIncorrect();
+  playTone();
   record();
   v.mascot?.nod();
   onPreWiggle?.();

@@ -17,6 +17,7 @@
     "lint": "biome lint",
     "format": "biome format --write",
     "check": "biome check",
+    "validate:module-size": "node scripts/validate-module-size.js",
     "validate:textures": "node scripts/validate-textures.js"
   },
   "dependencies": {
