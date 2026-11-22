@@ -129,3 +129,21 @@ Review fixes are appended by `conductor-review` as:
 
 - [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
 -->
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review findings F1 (release-note CI claim) and F2 (stale integrated diff count).
+- **Depends on:** Phase 4
+- **Covers:** F1, F2
+- **Touches:** `docs/release-notes-v1.25.0.md`, `conductor/tracks/20261123-release-v1-25-0/verification/integrated.md`, `verification/phase-R1.md`
+- **Verification:** `node scripts/validate-docs.js` + `pnpm check` + `pnpm typecheck`
+- **Status:** pending
+
+- [ ] **R1.T1: Correct the release-note CI coverage claim (F1)** — covers: F1
+- [ ] **R1.T2: Correct the integrated verification diff counts (F2)** — covers: F2
+
+<!--
+**Result:** verified
+**Checkpoint:** <short-sha>
+**Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-R1.md
+-->
