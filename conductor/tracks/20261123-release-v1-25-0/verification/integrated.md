@@ -19,7 +19,7 @@
 
 ## Release diff scope
 
-- Total branch diff vs base: 50 files, 5,981 insertions, 4,619 deletions — the bulk is the behavior-neutral module split (new sibling files + re-export façades).
+- Total branch diff vs base: 51 files, 6,049 insertions, 4,619 deletions — the bulk is the behavior-neutral module split (new sibling files + re-export façades).
 - Non-Conductor diff: 38 files, 5,268 insertions, 4,260 deletions.
 - Runtime behavior: no game, rule, scene behavior, GameId, save format, input mode or language changed. Only structural module extractions, two new build-time guards, documentation and version metadata.
 - Merge set since `v1.24.0`: exactly one feature PR, #92 (merge `9ffbc01d`, head `8b8b142c`). P6 items are part of this release branch, not separate PRs.

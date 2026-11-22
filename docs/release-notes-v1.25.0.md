@@ -45,7 +45,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 - Docs: `node scripts/validate-docs.js` reports 5 passed / 0 failed — complete release-note index, resolving links and anchors, game lists that agree with the registry, existing Conductor paths and current test-suite counts.
 - Boot and headers: `node scripts/validate-boot.js` boots the built app against `vite preview` on port 4173, and `node scripts/validate-headers.js` asserts the strict Content-Security-Policy and its three companion headers on the built image.
 - Browser journeys: the Playwright suite drives the built `dist` in Chromium through boot, all 24 launches, the mechanic-family rounds, the sticker award, the parental gate, settings persistence, backup/restore, the daily cap and an offline relaunch. CI runs it as two `Browser Journeys` shards (13 cases each), outside the fast `verify_phase` gate.
-- Device matrix: **SKIPPED — accepted gap** (see Known Issues). CI and the tag-deploy smoke re-confirm every automated figure above on the release commit.
+- Device matrix: **SKIPPED — accepted gap** (see Known Issues). CI re-confirms lint, typecheck, unit tests, the production build, the bundle, PWA, boot, headers and docs validators, plus the browser journeys on the release commit. Coverage, module-size and texture figures are verified by the local `verify_phase` gate recorded above; they are not currently CI steps.
 - Tag and deploy: **pending** — this DRAFT is written before tagging. `v1.25.0` is not yet pushed; the tag CI run, deploy webhook result and live-entry check are recorded when the tag is cut.
 
 ## Known Issues
