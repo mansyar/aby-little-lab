@@ -248,6 +248,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
+- [changelog.md](docs/changelog.md) - Dated changelog entries moved verbatim from the Conductor docs
 - [SVG_STYLE.md](docs/SVG_STYLE.md) - The art style every SVG asset is drawn in
 - [release-notes-v1.24.0.md](docs/release-notes-v1.24.0.md) - v1.24.0 release notes (the fourteen tracks merged after v1.23.0)
 - [release-notes-v1.23.0.md](docs/release-notes-v1.23.0.md) - v1.23.0 release notes (the content-expansion track merged after v1.22.0)
