@@ -14,19 +14,17 @@
 - **Covers:** FR-4, NFR-1, NFR-2, NFR-4, AC-3, AC-10
 - **Touches:** `src/**/*.ts` (production modules and their extractions), import sites, tests if imports change, living count lines in README.md/docs/TDD.md/docs/perf-baseline.md if test counts change
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Split the five modules over 600 lines** — covers: FR-4
-  - [ ] **P1.T1.1:** Extract cohesive helpers without changing public APIs
-  - [ ] **P1.T1.2:** Update imports and barrel exports
-- [ ] **P1.T2: Split the eight modules in the 400–599 band** — covers: FR-4
-- [ ] **P1.T3: Update ripple imports and living count claims** — covers: NFR-2
+- [x] **P1.T1: Split the five modules over 600 lines** — covers: FR-4
+  - [x] **P1.T1.1:** Extract cohesive helpers without changing public APIs
+  - [x] **P1.T1.2:** Update imports and barrel exports
+- [x] **P1.T2: Split the eight modules in the 400–599 band** — covers: FR-4
+- [x] **P1.T3: Update ripple imports and living count claims** — covers: NFR-2
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-1.md
--->
+**Result:** verified — 167 production files, 0 over 400 lines (max 399); suite 154/3,346; full `verify_phase` green.
+**Checkpoint:** `0c6e79d5`
+**Evidence:** `conductor/tracks/20261123-release-v1-25-0/verification/phase-1.md`
 
 ## Phase 2: Module-size guard
 
