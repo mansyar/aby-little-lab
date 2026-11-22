@@ -67,7 +67,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-10, NFR-2, AC-1, AC-2, AC-9
 - **Touches:** `package.json`, `docs/release-notes-v1.25.0.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js` + `pnpm check` + `pnpm typecheck`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Bump version to 1.25.0** — covers: FR-1
 - [ ] **P4.T2: Write DRAFT notes covering PR #92 and the P6 work, with the device-pass gap** — covers: FR-2, FR-10
