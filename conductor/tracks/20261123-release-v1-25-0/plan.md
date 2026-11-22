@@ -115,21 +115,6 @@
 **Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-6.md
 -->
 
-<!--
-Review fixes are appended by `conductor-review` as:
-
-## Phase R1: Review Fixes
-
-- **Goal:** Resolve review findings ...
-- **Depends on:** Phase 6
-- **Covers:** review findings
-- **Touches:** ...
-- **Verification:** ...
-- **Status:** pending
-
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
--->
-
 ## Phase R1: Review Fixes
 
 - **Goal:** Resolve review findings F1 (release-note CI claim) and F2 (stale integrated diff count).
@@ -137,13 +122,11 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** F1, F2
 - **Touches:** `docs/release-notes-v1.25.0.md`, `conductor/tracks/20261123-release-v1-25-0/verification/integrated.md`, `verification/phase-R1.md`
 - **Verification:** `node scripts/validate-docs.js` + `pnpm check` + `pnpm typecheck`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Correct the release-note CI coverage claim (F1)** — covers: F1
-- [ ] **R1.T2: Correct the integrated verification diff counts (F2)** — covers: F2
+- [x] **R1.T1: Correct the release-note CI coverage claim (F1)** — covers: F1
+- [x] **R1.T2: Correct the integrated verification diff counts (F2)** — covers: F2
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — F1 and F2 fixed exactly as briefed; full `verify_phase` green (154/3,346; coverage 97.15/90.97/96.28/98.30; 167 modules zero warnings; 319 SVGs; PWA 16/16; docs 5/5).
+**Checkpoint:** `19aebacb`
 **Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-R1.md
--->
