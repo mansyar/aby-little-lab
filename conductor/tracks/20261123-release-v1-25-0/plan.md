@@ -50,17 +50,15 @@
 - **Covers:** FR-6, NFR-2, AC-5
 - **Touches:** `docs/changelog.md`, `conductor/product.md`, `conductor/tech-stack.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Move all dated changelog entries verbatim into `docs/changelog.md`** — covers: FR-6
-- [ ] **P3.T2: Insert pointer links in both Conductor docs and link the file from README's Documentation index** — covers: FR-6
-- [ ] **P3.T3: Mark both P6 roadmap items Done in `conductor/product.md`** — covers: FR-6
+- [x] **P3.T1: Move all dated changelog entries verbatim into `docs/changelog.md`** — covers: FR-6
+- [x] **P3.T2: Insert pointer links in both Conductor docs and link the file from README's Documentation index** — covers: FR-6
+- [x] **P3.T3: Mark both P6 roadmap items Done in `conductor/product.md`** — covers: FR-6
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — 33 changelog sections moved verbatim (32 product + 1 tech-stack), byte-comparison proof in evidence; pointers and README link added; both P6 roadmap rows Done 2026-11-23; full verify_phase green.
+**Checkpoint:** c4014bd6
 **Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-3.md
--->
 
 ## Phase 4: Version and release notes
 
