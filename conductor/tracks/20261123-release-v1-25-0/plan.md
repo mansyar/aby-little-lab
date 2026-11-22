@@ -50,7 +50,7 @@
 - **Covers:** FR-6, NFR-2, AC-5
 - **Touches:** `docs/changelog.md`, `conductor/product.md`, `conductor/tech-stack.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Move all dated changelog entries verbatim into `docs/changelog.md`** — covers: FR-6
 - [ ] **P3.T2: Insert pointer links in both Conductor docs and link the file from README's Documentation index** — covers: FR-6
