@@ -67,17 +67,15 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-10, NFR-2, AC-1, AC-2, AC-9
 - **Touches:** `package.json`, `docs/release-notes-v1.25.0.md`, `README.md`
 - **Verification:** `node scripts/validate-docs.js` + `pnpm check` + `pnpm typecheck`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Bump version to 1.25.0** — covers: FR-1
-- [ ] **P4.T2: Write DRAFT notes covering PR #92 and the P6 work, with the device-pass gap** — covers: FR-2, FR-10
-- [ ] **P4.T3: Add README Documentation link and Releases table row dated 2026-11-23** — covers: FR-3
+- [x] **P4.T1: Bump version to 1.25.0** — covers: FR-1
+- [x] **P4.T2: Write DRAFT notes covering PR #92 and the P6 work, with the device-pass gap** — covers: FR-2, FR-10
+- [x] **P4.T3: Add README Documentation link and Releases table row dated 2026-11-23** — covers: FR-3
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — package.json 1.25.0; DRAFT notes covering PR #92 + both P6 items with the accepted device-pass gap; README link and dated Releases row; full verify_phase green.
+**Checkpoint:** 08f1c09b
 **Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-4.md
--->
 
 ## Phase 5: Gate, review and merge
 
