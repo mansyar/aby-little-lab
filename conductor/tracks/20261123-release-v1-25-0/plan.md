@@ -31,19 +31,17 @@
 - **Goal:** `validate-module-size.js` passes real source and fails a synthetic oversized fixture, and is wired into every `verify_phase` site.
 - **Depends on:** Phase 1
 - **Covers:** FR-5, NFR-3, AC-4
-- **Touches:** `scripts/validate-module-size.js`, `package.json`, `conductor/workflow.md`, `conductor/tracks/20261123-release-v1-25-0/verification/phase-2.md`
+- **Touches:** `scripts/validate-module-size.js`, `package.json`, `conductor/workflow.md`, `conductor/tracks/20261123-release-v1-25-0/verification/phase-2.md`, and `src/scenes/gameSceneView.ts` (one behavior-neutral parameter rename to keep the single-playIncorrect-call-site invariant after Phase 1's extraction)
 - **Verification:** `node scripts/validate-module-size.js` real PASS + synthetic fixture exit 1 + full `verify_phase`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Implement the guard** — covers: FR-5
-  - [ ] **P2.T1.1:** Prove the synthetic oversized fixture fails with exit 1
-- [ ] **P2.T2: Wire the guard into all workflow.md `verify_phase` occurrences and add the package.json script** — covers: FR-5
+- [x] **P2.T1: Implement the guard** — covers: FR-5
+  - [x] **P2.T1.1:** Prove the synthetic oversized fixture fails with exit 1
+- [x] **P2.T2: Wire the guard into all workflow.md `verify_phase` occurrences and add the package.json script** — covers: FR-5
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — 167 production files, zero warnings; 601-line fixture exits 1; guard wired at workflow.md:39/119/195/225 and package.json.
+**Checkpoint:** `6815d8c3`
 **Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-2.md
--->
 
 ## Phase 3: Changelog split
 
