@@ -33,7 +33,7 @@
 - **Covers:** FR-5, NFR-3, AC-4
 - **Touches:** `scripts/validate-module-size.js`, `package.json`, `conductor/workflow.md`, `conductor/tracks/20261123-release-v1-25-0/verification/phase-2.md`
 - **Verification:** `node scripts/validate-module-size.js` real PASS + synthetic fixture exit 1 + full `verify_phase`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Implement the guard** — covers: FR-5
   - [ ] **P2.T1.1:** Prove the synthetic oversized fixture fails with exit 1
