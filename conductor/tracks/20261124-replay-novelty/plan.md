@@ -104,7 +104,7 @@
 - **Covers:** F1, F2, F3
 - **Touches:** `src/game/hub/replayCue.ts`, `src/scenes/HubScene.ts`, `src/game/hubGrid.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `README.md`, `docs/PRD.md`, `conductor/tracks/20261124-replay-novelty/verification/integrated.md`
 - **Verification:** targeted vitest on the two Hub test files, `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, full `verify_phase`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Correct the AC mapping in integrated evidence** — covers: F1
   - [ ] **R1.T1.1:** Set AC-3 to three-level ordering and AC-8 to the seeded simulation; move the no-new-art claim to NFR-2.
