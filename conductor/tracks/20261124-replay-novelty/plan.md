@@ -13,25 +13,23 @@
   visit and selects a non-repeating suggestion with the agreed ordering.
 - **Depends on:** none
 - **Covers:** FR-1, FR-2, FR-3, FR-8, NFR-1, AC-1, AC-2, AC-3, AC-8
-- **Touches:** `src/game/replayVariety.ts` (new), `src/__tests__/game/replayVariety.test.ts` (new)
+- **Touches:** `src/game/replayVariety.ts` (new), `src/__tests__/game/replayVariety.test.ts` (new), plus the living suite-count lines in `README.md`, `docs/TDD.md` and `docs/perf-baseline.md` that the docs validator derives from the new test file
 - **Verification:** `pnpm exec vitest run src/__tests__/game/replayVariety.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Model one profile's visit state** — covers: FR-1
-  - [ ] **P1.T1.1:** Create a fresh empty set on Hub entry with no storage writes.
-  - [ ] **P1.T1.2:** Record a played `GameId` once per successful launch and expose a read-only view.
-- [ ] **P1.T2: Implement the no-repeat selector** — covers: FR-2, FR-3
-  - [ ] **P1.T2.1:** Rank unplayed-this-visit first, then existing `lastPlayed` stamps (never played first), then registry order.
-  - [ ] **P1.T2.2:** Exclude the last played and last suggested game; expose forced repeats when only one candidate remains.
-- [ ] **P1.T3: Prove the session metric** — covers: FR-8
-  - [ ] **P1.T3.1:** Simulate ≥1,000 seeded eight-play visits and assert median distinct games ≥ 4.
-  - [ ] **P1.T3.2:** Assert zero unexpected immediate repeats across every simulated visit.
+- [x] **P1.T1: Model one profile's visit state** — covers: FR-1
+  - [x] **P1.T1.1:** Create a fresh empty set on Hub entry with no storage writes.
+  - [x] **P1.T1.2:** Record a played `GameId` once per successful launch and expose a read-only view.
+- [x] **P1.T2: Implement the no-repeat selector** — covers: FR-2, FR-3
+  - [x] **P1.T2.1:** Rank unplayed-this-visit first, then existing `lastPlayed` stamps (never played first), then registry order.
+  - [x] **P1.T2.2:** Exclude the last played and last suggested game; expose forced repeats when only one candidate remains.
+- [x] **P1.T3: Prove the session metric** — covers: FR-8
+  - [x] **P1.T3.1:** Simulate ≥1,000 seeded eight-play visits and assert median distinct games ≥ 4.
+  - [x] **P1.T3.2:** Assert zero unexpected immediate repeats across every simulated visit.
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — 155 files / 3,362 tests, full verify_phase green; 16 selector/simulation tests pass.
+**Checkpoint:** 83818e64
 **Evidence:** conductor/tracks/20261124-replay-novelty/verification/phase-1.md
--->
 
 ## Phase 2: Hub suggestion and idle cue
 
