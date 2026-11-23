@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import type { GameId } from "../types";
 import {
   buildFilteredGrid,
   buildPageGrid,
@@ -18,7 +19,9 @@ import {
 import { isPagedViewport, paintPageDots, SwipeGesture, swipeRegion } from "./hub/pageBoard";
 import { createShelfSticker, drawEmptySlot } from "./hub/stickerShelf";
 import { applyTimeUpLock, restoreTiles } from "./hub/timeUpDim";
-import { ALL_GROUP_ID, type HubSelection } from "./hubGroups";
+import { ALL_GROUP_ID, type HubSelection, visibleTileIndexes } from "./hubGroups";
+import { pageTileIndexes } from "./hubPaging";
+import { GAME_TILES } from "./hubTiles";
 
 /** Everything the grid needs from the Hub scene, so rendering lives here and orchestration stays there. */
 export interface HubGridDeps {
@@ -114,6 +117,24 @@ export class HubGrid {
    */
   groupChipPoints(): { id: HubSelection; x: number; y: number }[] {
     return this.chipViews.map((chip) => ({ id: chip.selection, x: chip.x, y: chip.y }));
+  }
+
+  /**
+   * The games on screen paired with their drawn tiles, in draw order. Uses the
+   * same slot-to-registry mapping as the e2e bridge, so the replay cue and the
+   * idle wiggle stay on-screen in wide, paged and filtered boards alike.
+   */
+  visibleGameEntries(): { gameId: GameId; target: Phaser.GameObjects.Rectangle }[] {
+    const indexes =
+      this.selection === ALL_GROUP_ID
+        ? this.paged
+          ? pageTileIndexes(this.hubPage)
+          : GAME_TILES.map((_, index) => index)
+        : visibleTileIndexes(this.selection);
+    return this.attractTargets.flatMap((target, slot) => {
+      const gameId = GAME_TILES[indexes[slot]]?.gameId;
+      return gameId === undefined ? [] : [{ gameId, target }];
+    });
   }
 
   /** Clears per-visit state (Phaser reuses scene instances across visits). */

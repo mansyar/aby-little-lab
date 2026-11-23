@@ -210,6 +210,7 @@ import {
   startArtPrewarm,
   startPrewarm,
 } from "../../game/hub/prewarm";
+import { SUGGESTION_RING_RADIUS } from "../../game/hub/replayCue";
 import { pagedTilePosition } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 import { HubScene } from "../../scenes/HubScene";
@@ -227,6 +228,23 @@ import {
   setPlayTimeLimit,
   updateSettings,
 } from "../../utils/storage";
+
+/** Read-only probe for the Hub's in-memory visit state (Phase 2). */
+interface ReplayProbe {
+  replayCue: {
+    visit: { played: ReadonlySet<GameId>; lastPlayed: GameId | null };
+    suggestion: GameId | null;
+    ring: MockObject | undefined;
+    recordPlay: (gameId: GameId) => void;
+  };
+  grid: {
+    visibleGameEntries(): Array<{ gameId: GameId; target: { x: number; y: number } }>;
+  };
+}
+
+function replayProbe(scene: HubScene): ReplayProbe {
+  return scene as unknown as ReplayProbe;
+}
 
 /** Returns the first object of the given kind registered for an event. */
 function getHandler(kind: string, event: string): ((...args: unknown[]) => unknown) | undefined {
@@ -312,7 +330,10 @@ describe("HubScene paged grid (narrow viewports)", () => {
     await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledWith("how-many");
-    expect(scene).toBeDefined();
+    // AC-4: the same launch hook records the play in the in-memory visit state.
+    const visit = replayProbe(scene).replayCue.visit;
+    expect(visit.lastPlayed).toBe("how-many");
+    expect(visit.played.has("how-many")).toBe(true);
   });
 
   it("builds the last page as four centred tiles", () => {
@@ -892,35 +913,79 @@ describe("HubScene profile and hierarchy cohesion", () => {
 
   it("switches profiles from the picker and re-textures the chip", () => {
     setReducedMotion(false);
+    mockSpeech.speakSentence.mockClear();
     const scene = new HubScene();
     scene.create();
+    let current = scene;
     if (getProfiles().length < 2) {
       addProfile(getAvailableAvatars()[0]);
       mockRegistry.length = 0;
-      const fresh = new HubScene();
-      fresh.create();
+      current = new HubScene();
+      current.create();
+    }
+
+    // AC-4: the entry cue is a static, textless ring on the suggested tile.
+    const initial = replayProbe(current).replayCue;
+    expect(initial.suggestion).not.toBeNull();
+    const ring = initial.ring as unknown as MockObject;
+    const suggested = replayProbe(current)
+      .grid.visibleGameEntries()
+      .find((entry) => entry.gameId === initial.suggestion);
+    expect(suggested).toBeDefined();
+    expect(ring.strokeCircle).toHaveBeenCalledWith(
+      suggested?.target.x,
+      suggested?.target.y,
+      SUGGESTION_RING_RADIUS,
+    );
+    expect(mockSpeech.speakSentence).not.toHaveBeenCalled();
+
+    // Make the outgoing visit non-empty so the reset is observable.
+    const sample = GAME_TILES.find((tile) => tile.gameId !== initial.suggestion);
+    if (!sample) throw new Error("no alternate game tile");
+    initial.recordPlay(sample.gameId);
+
+    function switchProfiles(): void {
+      fireAll(getChipImage(), "pointerdown");
+      fireAll(getChipImage(), "pointerup");
+      const baseScale = 96 / 256;
+      const other = mockRegistry.find(
+        (obj) =>
+          obj.kind === "image" &&
+          obj.args?.[1] === 384 &&
+          obj.destroy.mock.calls.length === 0 &&
+          obj.setScale.mock.calls.some((call) => call[0] === baseScale),
+      );
+      if (!other) throw new Error("inactive picker avatar not found");
+      fireAll(other, "pointerup");
     }
 
     const before = getActiveProfile().id;
-    fireAll(getChipImage(), "pointerdown");
-    fireAll(getChipImage(), "pointerup");
-
-    const baseScale = 96 / 256;
-    const other = mockRegistry.find(
-      (obj) =>
-        obj.kind === "image" &&
-        obj.args?.[1] === 384 &&
-        obj.setScale.mock.calls.some((call) => call[0] === baseScale),
-    );
-    if (!other) throw new Error("inactive picker avatar not found");
-
-    fireAll(other, "pointerup");
+    switchProfiles();
 
     expect(getActiveProfile().id).not.toBe(before);
     // Picker closed: every picker avatar was destroyed.
     for (const obj of mockRegistry.filter((o) => o.kind === "image" && o.args?.[1] === 384)) {
       expect(obj.destroy.mock.calls.length).toBeGreaterThan(0);
     }
+
+    // AC-7: the new profile starts empty and both cues are re-derived.
+    const after = replayProbe(current).replayCue;
+    expect(after.visit.played.size).toBe(0);
+    expect(after.visit.lastPlayed).toBeNull();
+    expect(after.suggestion).not.toBeNull();
+    const newRing = after.ring as unknown as MockObject;
+    expect(newRing).not.toBe(ring);
+    expect(newRing.strokeCircle).toHaveBeenCalled();
+    expect(mockSpeech.speakSentence).not.toHaveBeenCalled();
+
+    // Switching back starts a fresh visit for the original profile too.
+    after.recordPlay(sample.gameId);
+    switchProfiles();
+    expect(getActiveProfile().id).toBe(before);
+    const back = replayProbe(current).replayCue;
+    expect(back.visit.played.size).toBe(0);
+    expect(back.visit.lastPlayed).toBeNull();
+    expect(back.suggestion).not.toBeNull();
   });
 
   it("adds no idle motion tweens under reduced motion while tiles stay tappable", () => {

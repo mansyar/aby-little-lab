@@ -92,7 +92,18 @@ vi.mock("../../scenes/sceneRegistry", async () => {
 import { GAME_TILES } from "../../game/hubTiles";
 import { HubScene } from "../../scenes/HubScene";
 import { MusicalMemoryScene } from "../../scenes/MusicalMemoryScene";
+import type { GameId } from "../../types";
 import { earnSticker, resetProgress } from "../../utils/storage";
+
+/** Read-only probe for the scene's in-memory visit state (Phase 2). */
+interface ReplayProbe {
+  replayCue: {
+    visit: { played: ReadonlySet<GameId> };
+    suggestion: GameId | null;
+    recordPlay: (gameId: GameId) => void;
+  };
+  grid: { visibleGameEntries(): Array<{ gameId: GameId; target: unknown }> };
+}
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -590,6 +601,19 @@ describe("Hub engagement idle attract", () => {
     const scene = new HubScene();
     scene.create();
 
+    // AC-5: remember the suggested and just-played tiles before the idle fires.
+    const probe = scene as unknown as ReplayProbe;
+    const entries = probe.grid.visibleGameEntries();
+    const suggestedTarget = entries.find(
+      (entry) => entry.gameId === probe.replayCue.suggestion,
+    )?.target;
+    expect(suggestedTarget).toBeDefined();
+    const played = GAME_TILES.find((tile) => tile.gameId !== probe.replayCue.suggestion);
+    if (!played) throw new Error("no alternate game tile");
+    probe.replayCue.recordPlay(played.gameId);
+    const playedTarget = entries.find((entry) => entry.gameId === played.gameId)?.target;
+    expect(probe.replayCue.visit.played.has(played.gameId)).toBe(true);
+
     const idleCall = getMockFn(scene.time.delayedCall).mock.calls.find((call) => call[0] === 25000);
     expect(idleCall).toBeDefined();
     const callback = idleCall?.[1] as () => void;
@@ -601,6 +625,10 @@ describe("Hub engagement idle attract", () => {
       (call) => call[0]?.angle !== undefined && call[0]?.repeat === -1,
     );
     expect(wiggleTweens.length).toBe(2);
+    for (const tween of wiggleTweens) {
+      expect(tween[0].targets).not.toBe(suggestedTarget);
+      expect(tween[0].targets).not.toBe(playedTarget);
+    }
   });
 
   it("repeats the idle call every ~10s while idle", () => {
