@@ -61,9 +61,9 @@
   active profile's collection with an empty-slot fallback and no new art.
 - **Depends on:** Phase 2
 - **Covers:** FR-6, NFR-2, AC-6
-- **Touches:** `src/game/hub/stickerShelf.ts`, `src/game/hubGrid.ts`, `src/__tests__/game/hub/stickerShelf.test.ts`, `src/__tests__/game/hubGrid.test.ts`
-- **Verification:** `pnpm exec vitest run src/__tests__/game/hub/stickerShelf.test.ts src/__tests__/game/hubGrid.test.ts`
-- **Status:** pending
+- **Touches:** `src/game/replayVariety.ts`, `src/game/hub/replayCue.ts`, `src/game/hub/stickerShelf.ts`, `src/game/hubGrid.ts`, `src/scenes/HubScene.ts`, `src/__tests__/game/hub/stickerShelf.test.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/__tests__/scenes/hubScene.test.ts`
+- **Verification:** `pnpm exec vitest run src/__tests__/game/hub/stickerShelf.test.ts src/__tests__/game/hubGrid.test.ts src/__tests__/scenes/hubScene.test.ts`
+- **Status:** in_progress
 
 - [ ] **P3.T1: Derive the spotlight target** — covers: FR-6
   - [ ] **P3.T1.1:** Collect earned stickers from the active profile in registry order and advance one cursor per visit with wrap-around.
