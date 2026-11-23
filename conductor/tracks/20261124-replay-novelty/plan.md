@@ -39,23 +39,21 @@
 - **Covers:** FR-4, FR-5, FR-7, NFR-3, AC-4, AC-5, AC-7
 - **Touches:** `src/game/hub/hubAttract.ts`, `src/game/hub/gameLaunch.ts`, `src/game/hubGrid.ts` (read-only visible-game helper), `src/scenes/HubScene.ts`, `src/__tests__/game/hub/hubAttract.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `src/__tests__/scenes/hubScene.test.ts`
 - **Verification:** `pnpm exec vitest run src/__tests__/game/hub/hubAttract.test.ts src/__tests__/scenes/hubEngagement.test.ts src/__tests__/scenes/hubScene.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Wire the suggestion cue** — covers: FR-4
-  - [ ] **P2.T1.1:** Ask the selector for a game on Hub entry and show a textless mascot/point cue at that tile.
-  - [ ] **P2.T1.2:** Keep the existing tile tap as the only launch path; add no speech call.
-- [ ] **P2.T2: Replace the idle wiggle rotation** — covers: FR-5
-  - [ ] **P2.T2.1:** Choose wiggle targets through the no-repeat selector.
-  - [ ] **P2.T2.2:** Keep the reduced-motion guard so no wiggle tween is created.
-- [ ] **P2.T3: Reset on profile switch** — covers: FR-7
-  - [ ] **P2.T3.1:** Clear visit state in the `onSwitch` hook and re-derive the suggestion.
-  - [ ] **P2.T3.2:** Rebuild state fresh when returning to a previously used profile.
+- [x] **P2.T1: Wire the suggestion cue** — covers: FR-4
+  - [x] **P2.T1.1:** Ask the selector for a game on Hub entry and show a textless mascot/point cue at that tile.
+  - [x] **P2.T1.2:** Keep the existing tile tap as the only launch path; add no speech call.
+- [x] **P2.T2: Replace the idle wiggle rotation** — covers: FR-5
+  - [x] **P2.T2.1:** Choose wiggle targets through the no-repeat selector.
+  - [x] **P2.T2.2:** Keep the reduced-motion guard so no wiggle tween is created.
+- [x] **P2.T3: Reset on profile switch** — covers: FR-7
+  - [x] **P2.T3.1:** Clear visit state in the `onSwitch` hook and re-derive the suggestion.
+  - [x] **P2.T3.2:** Rebuild state fresh when returning to a previously used profile.
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — textless static ring at the suggested visible tile, launch hook records the visit, selector-driven idle wiggle with no immediate repeat, profile switch resets; full verify_phase green (155/3,362; coverage 97.09/90.86/96.30/98.25; 169 modules zero warnings; PWA 16/16; docs 5/5).
+**Checkpoint:** ae37c190
 **Evidence:** conductor/tracks/20261124-replay-novelty/verification/phase-2.md
--->
 
 ## Phase 3: Sticker shelf spotlight
 
