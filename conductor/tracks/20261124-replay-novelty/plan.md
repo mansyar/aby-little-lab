@@ -84,7 +84,7 @@
 - **Covers:** FR-9, FR-10, NFR-4, AC-9, AC-10
 - **Touches:** `README.md`, `docs/PRD.md`, `docs/TDD.md`, `conductor/product.md`, and any count-bearing doc the validator names
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Sync behaviour docs** — covers: FR-9
   - [ ] **P4.T1.1:** Describe the suggestion cue, no-repeat policy and sticker spotlight in README and PRD.
