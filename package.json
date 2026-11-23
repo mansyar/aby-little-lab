@@ -1,6 +1,6 @@
 {
   "name": "aby-little-lab",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@12.16.1",
@@ -17,6 +17,7 @@
     "lint": "biome lint",
     "format": "biome format --write",
     "check": "biome check",
+    "validate:module-size": "node scripts/validate-module-size.js",
     "validate:textures": "node scripts/validate-textures.js"
   },
   "dependencies": {

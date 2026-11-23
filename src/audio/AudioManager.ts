@@ -1,88 +1,29 @@
-import {
-  type AudioIdentity,
-  descendingContour,
-  identityForGameId,
-  type TimbreWaveform,
-  winTempoForBudget,
-} from "../game/audioIdentity";
+import { type AudioIdentity, identityForGameId } from "../game/audioIdentity";
 import type { GameId } from "../types";
 import { onSpeechLifecycle, type SpeechLifecycleEvent } from "../utils/speech";
 import { getSettings, updateSettings } from "../utils/storage";
+import { BGM_DUCKED_VOLUME, BGM_VOLUME, BgmVolumeRamp } from "./bgmRamp";
+import {
+  playCorrect,
+  playFrogNote,
+  playIdleCall,
+  playIncorrect,
+  playPop,
+  playSticker,
+  playWake,
+  playWin,
+  type SfxName,
+} from "./sfxSynthesis";
 
-const SFX_NAMES = ["pop", "correct", "incorrect", "wake", "win", "sticker"] as const;
-
-export type SfxName = (typeof SFX_NAMES)[number];
+export type { SfxName } from "./sfxSynthesis";
 
 const BGM_FILE = "/audio/bgm.mp3";
-const BGM_VOLUME = 0.3;
-/** BGM level while narration holds the foreground (8% of the normal level). */
-const BGM_DUCKED_VOLUME = BGM_VOLUME * 0.08;
-/** Duck/restore fade length (ms). */
-const BGM_RAMP_DURATION = 120;
-/** Ramp tick (ms): 120 ms in six steps reads as a fade rather than a jump. */
-const BGM_RAMP_STEP = 20;
-/**
- * Restore deadline after a `speech:start` that never reports its terminal
- * event (ms). Some engines swallow `onend` after a cancel — a scene shutdown,
- * a superseded utterance, a hidden tab — and a BGM parked at 8% is far worse
- * than one that comes back a little early.
- */
-const BGM_DUCK_WATCHDOG = 15000;
-
-const FROG_NOTE_DURATION = 0.5;
-const FROG_NOTE_GAIN = 0.3;
 
 /**
- * Per-cue synth voice for the feedback trio: the anchor note every contour
- * offset hangs from, today's note spacing and durations, and the gain each
- * cue has always used. The identity bends these — transposition, waveform,
- * tempo — so the default identity reproduces today's voices exactly.
- */
-interface TrioVoice {
-  readonly anchorHz: number;
-  /** Seconds between consecutive note starts at tempo 1. */
-  readonly stepSeconds: number;
-  /** Duration of every note except the last, at tempo 1. */
-  readonly noteDurationSeconds: number;
-  /** Duration of the final note, at tempo 1. */
-  readonly finalDurationSeconds: number;
-  readonly gain: number;
-}
-
-/** Correct voice: C5 anchor under today's ascending chime. */
-const CORRECT_VOICE: TrioVoice = {
-  anchorHz: 523.25,
-  stepSeconds: 0.12,
-  noteDurationSeconds: 0.15,
-  finalDurationSeconds: 0.2,
-  gain: 0.3,
-};
-
-/** Incorrect voice: G4 anchor under today's gentle descending fifth. */
-const INCORRECT_VOICE: TrioVoice = {
-  anchorHz: 392.0,
-  stepSeconds: 0.12,
-  noteDurationSeconds: 0.15,
-  finalDurationSeconds: 0.2,
-  gain: 0.2,
-};
-
-/** Win voice: C5 anchor under today's celebratory arpeggio + octave. */
-const WIN_VOICE: TrioVoice = {
-  anchorHz: 523.25,
-  stepSeconds: 0.1,
-  noteDurationSeconds: 0.12,
-  finalDurationSeconds: 0.25,
-  gain: 0.3,
-};
-
-/**
- * Manages all audio for the application: BGM loop, synthesized SFX, and frog notes.
- * Uses HTML5 Audio for BGM playback and Web Audio API for oscillator synthesis.
- *
- * Owns the app-wide audio-focus policy: narration ducks the BGM, and a hidden
- * document silences it. Both are wired once in `init()` because this is a
- * singleton whose audio state outlives every scene.
+ * Manages BGM, synthesized SFX and the app-wide audio-focus policy (narration
+ * ducks BGM; a hidden document silences it). Voices and ramp timers live in
+ * `sfxSynthesis.ts` / `bgmRamp.ts`; visibility handling stays here so this
+ * remains the single production module that names `document`.
  */
 export class AudioManager {
   private static instance: AudioManager | null = null;
@@ -92,10 +33,8 @@ export class AudioManager {
   private sfxEnabled = true;
   /** True while the BGM is held down for narration. */
   private ducked = false;
-  /** Active volume-ramp interval, cleared when the ramp lands or is replaced. */
-  private rampTimer: ReturnType<typeof setInterval> | null = null;
-  /** Restore deadline for a narration that never reports its end. */
-  private speechWatchdog: ReturnType<typeof setTimeout> | null = null;
+  /** The duck/restore ramp and the stalled-narration deadline. */
+  private readonly bgmRamp = new BgmVolumeRamp();
   /** Speech subscription, held so a re-init cannot subscribe twice. */
   private unsubscribeSpeech: (() => void) | null = null;
   /** True while the document visibility listener is attached. */
@@ -113,10 +52,7 @@ export class AudioManager {
     return AudioManager.instance;
   }
 
-  /**
-   * Initializes the audio system: creates AudioContext, loads settings from storage,
-   * and creates the looping BGM audio element.
-   */
+  /** Creates the AudioContext, loads settings and the looping BGM element. */
   init(): void {
     this.audioContext = new AudioContext();
 
@@ -137,30 +73,20 @@ export class AudioManager {
     this.watchVisibility();
   }
 
-  /**
-   * Resumes the AudioContext if it is suspended.
-   * Browsers require a user interaction (tap, click) before audio can play,
-   * so this must be called from a user gesture handler (e.g., tile tap in Hub).
-   */
+  /** Resumes a suspended AudioContext; must be called from a user gesture. */
   resume(): void {
     if (this.audioContext?.state === "suspended") {
       this.audioContext.resume();
     }
   }
 
-  /**
-   * Starts BGM playback if BGM is enabled.
-   * Does nothing if BGM is disabled or not initialized.
-   */
+  /** Starts BGM playback if enabled and initialized. */
   playBGM(): void {
     if (!this.bgmEnabled || !this.bgmAudio) return;
     this.bgmAudio.play().catch(() => {});
   }
 
-  /**
-   * Pauses BGM playback.
-   * Does nothing if not initialized.
-   */
+  /** Pauses BGM playback if initialized. */
   pauseBGM(): void {
     if (!this.bgmAudio) return;
     this.bgmAudio.pause();
@@ -280,21 +206,7 @@ export class AudioManager {
    */
   playFrogNote(frequency: number): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-
-    const oscillator = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = frequency;
-
-    gainNode.gain.value = FROG_NOTE_GAIN;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
-
-    const now = this.audioContext.currentTime;
-    oscillator.start(now);
-    oscillator.stop(now + FROG_NOTE_DURATION);
+    playFrogNote(this.audioContext, frequency);
   }
 
   /**
@@ -304,34 +216,18 @@ export class AudioManager {
    */
   playCorrect(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const identity = this.resolveTrioIdentity();
-    this.playContourCue(
-      this.audioContext,
-      CORRECT_VOICE,
-      identity.contours.correct,
-      identity.pitchOffsetSemitones,
-      identity.tempo,
-      identity.waveform,
-    );
+    playCorrect(this.audioContext, this.resolveTrioIdentity());
   }
 
   /**
    * Plays a soft descending tone using the Web Audio API, voiced by the
-   * registered game's audio identity (pitch, timbre, tempo, contour). The
+   * registered game's audio identity (pitch, timbre, contour). The
    * no-fail guard keeps the cue gently descending for every identity
    * (NFR-1). Does nothing if SFX is disabled or not initialized.
    */
   playIncorrect(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const identity = this.resolveTrioIdentity();
-    this.playContourCue(
-      this.audioContext,
-      INCORRECT_VOICE,
-      descendingContour(identity.contours.incorrect),
-      identity.pitchOffsetSemitones,
-      identity.tempo,
-      identity.waveform,
-    );
+    playIncorrect(this.audioContext, this.resolveTrioIdentity());
   }
 
   /**
@@ -342,19 +238,7 @@ export class AudioManager {
    */
   playWin(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const identity = this.resolveTrioIdentity();
-    const contour = identity.contours.win;
-    const baseEndSeconds =
-      (contour.length - 1) * WIN_VOICE.stepSeconds + WIN_VOICE.finalDurationSeconds;
-    const tempo = winTempoForBudget(identity.tempo, baseEndSeconds);
-    this.playContourCue(
-      this.audioContext,
-      WIN_VOICE,
-      contour,
-      identity.pitchOffsetSemitones,
-      tempo,
-      identity.waveform,
-    );
+    playWin(this.audioContext, this.resolveTrioIdentity());
   }
 
   /**
@@ -363,9 +247,7 @@ export class AudioManager {
    */
   playSticker(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 1046.5, 0, 0.1, 0.2);
-    this.playTone(ctx, 1318.51, 0.08, 0.15, 0.2);
+    playSticker(this.audioContext);
   }
 
   /**
@@ -374,8 +256,7 @@ export class AudioManager {
    */
   playPop(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 800, 0, 0.08, 0.3);
+    playPop(this.audioContext);
   }
 
   /**
@@ -384,9 +265,7 @@ export class AudioManager {
    */
   playWake(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 329.63, 0, 0.15, 0.2);
-    this.playTone(ctx, 440.0, 0.12, 0.2, 0.2);
+    playWake(this.audioContext);
   }
 
   /**
@@ -396,76 +275,7 @@ export class AudioManager {
    */
   playIdleCall(): void {
     if (!this.sfxEnabled || !this.audioContext) return;
-    const ctx = this.audioContext;
-    this.playTone(ctx, 659.25, 0, 0.15, 0.12);
-    this.playTone(ctx, 783.99, 0.15, 0.2, 0.12);
-  }
-
-  /**
-   * Plays a single synthesized tone at a given frequency with staggered start.
-   * `waveform` defaults to sine, today's oscillator shape for every cue; the
-   * identity-driven trio passes its timbre through.
-   * @param ctx - The AudioContext to use for synthesis.
-   * @param frequency - The frequency of the tone in Hz.
-   * @param startOffset - Delay before the tone starts, in seconds.
-   * @param duration - Duration of the tone in seconds.
-   * @param gainValue - Volume level (0.0 to 1.0).
-   * @param waveform - Oscillator shape of the tone.
-   */
-  private playTone(
-    ctx: AudioContext,
-    frequency: number,
-    startOffset: number,
-    duration: number,
-    gainValue: number,
-    waveform: OscillatorType = "sine",
-  ): void {
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-
-    oscillator.type = waveform;
-    oscillator.frequency.value = frequency;
-
-    gainNode.gain.value = gainValue;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    const now = ctx.currentTime;
-    oscillator.start(now + startOffset);
-    oscillator.stop(now + startOffset + duration);
-  }
-
-  /**
-   * Voices one trio cue: every contour note hangs a semitone-ratio frequency
-   * off the cue's anchor, transposed by the identity's pitch offset, shaped
-   * by its waveform, and timed by its tempo (note spacing and durations both
-   * scale). The default identity reproduces today's voices exactly: offsets
-   * of 0/4/7 semitones above the anchor are today's hardcoded chime tones,
-   * to within 0.01 Hz of equal-temperament rounding.
-   */
-  private playContourCue(
-    ctx: AudioContext,
-    voice: TrioVoice,
-    contour: readonly number[],
-    pitchOffsetSemitones: number,
-    tempo: number,
-    waveform: TimbreWaveform,
-  ): void {
-    const lastIndex = contour.length - 1;
-    contour.forEach((offset, index) => {
-      const frequency = voice.anchorHz * 2 ** ((offset + pitchOffsetSemitones) / 12);
-      const duration =
-        (index === lastIndex ? voice.finalDurationSeconds : voice.noteDurationSeconds) * tempo;
-      this.playTone(
-        ctx,
-        frequency,
-        index * voice.stepSeconds * tempo,
-        duration,
-        voice.gain,
-        waveform,
-      );
-    });
+    playIdleCall(this.audioContext);
   }
 
   /**
@@ -538,50 +348,24 @@ export class AudioManager {
 
   /** Ramps the element's volume to `target` over the short fade. */
   private rampBGMTo(target: number): void {
-    const element = this.bgmAudio;
-    if (!element) return;
-    this.clearRamp();
-    const from = element.volume;
-    const steps = Math.max(1, Math.round(BGM_RAMP_DURATION / BGM_RAMP_STEP));
-    let step = 0;
-    this.rampTimer = setInterval(() => {
-      step += 1;
-      if (step >= steps) {
-        element.volume = target;
-        this.clearRamp();
-        return;
-      }
-      element.volume = from + ((target - from) * step) / steps;
-    }, BGM_RAMP_STEP);
+    if (!this.bgmAudio) return;
+    this.bgmRamp.rampTo(this.bgmAudio, target);
   }
 
   private clearRamp(): void {
-    if (this.rampTimer === null) return;
-    clearInterval(this.rampTimer);
-    this.rampTimer = null;
+    this.bgmRamp.clearRamp();
   }
 
-  /**
-   * Arms the restore deadline. A long utterance legitimately outlives the
-   * window, so the check re-arms while the engine still reports speech and
-   * only releases the BGM once the engine has gone quiet.
-   */
+  /** Re-arms the stalled-narration deadline on every duck. */
   private restartDuckWatchdog(): void {
-    this.clearDuckWatchdog();
-    this.speechWatchdog = setTimeout(() => {
-      this.speechWatchdog = null;
-      if (this.isEngineSpeaking()) {
-        this.restartDuckWatchdog();
-        return;
-      }
-      this.restoreBGM();
-    }, BGM_DUCK_WATCHDOG);
+    this.bgmRamp.armWatchdog(
+      () => this.restoreBGM(),
+      () => this.isEngineSpeaking(),
+    );
   }
 
   private clearDuckWatchdog(): void {
-    if (this.speechWatchdog === null) return;
-    clearTimeout(this.speechWatchdog);
-    this.speechWatchdog = null;
+    this.bgmRamp.clearWatchdog();
   }
 
   private isEngineSpeaking(): boolean {

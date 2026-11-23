@@ -20,6 +20,15 @@ import {
   type GameLaunchCue,
 } from "../game/hub/gameLaunch";
 import { createHubAttract, type HubAttractController } from "../game/hub/hubAttract";
+import {
+  type HubE2EState,
+  hubGroups as publishHubGroups,
+  hubPlayTime as publishHubPlayTime,
+  hubReady as publishHubReady,
+  hubTiles as publishHubTiles,
+  hubToast as publishHubToast,
+  settings as publishSettings,
+} from "../game/hub/hubE2E";
 import { createHubPrewarm, type HubPrewarmController } from "../game/hub/hubPrewarm";
 import {
   createPlayTimeUi,
@@ -28,8 +37,7 @@ import {
 } from "../game/hub/playTimeUi";
 import type { ArtKeyEntry } from "../game/hub/prewarm";
 import { HubGrid } from "../game/hubGrid";
-import { ALL_GROUP_ID, selectionSpokenName, visibleTileIndexes } from "../game/hubGroups";
-import { pageTileIndexes } from "../game/hubPaging";
+import { selectionSpokenName } from "../game/hubGroups";
 import { GAME_TILES } from "../game/hubTiles";
 import { endPlaySession, startPlaySession } from "../game/playTimeLogic";
 import { isReducedMotion } from "../utils/motion";
@@ -56,49 +64,23 @@ import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private settingsPanel?: SettingsPanel;
-  /**
-   * The "Settings" label the parental hold is armed on. Held so the bridge can
-   * publish the point a parent presses, read from the live object rather than
-   * recomputed from font metrics.
-   */
-  private settingsButton?: Phaser.GameObjects.Text;
+  /** The "Settings" label the hold is armed on; bridge reads its live centre. */
+  protected settingsButton?: Phaser.GameObjects.Text;
   /** Game id whose sticker was just earned; highlighted on this visit. */
   private justEarned?: string;
-  /**
-   * Idle attract and decor owned by `src/game/hub/hubAttract.ts`. The scene
-   * keeps only this delegation: the module owns the mascot, the idle timer,
-   * and the decorations.
-   */
+  /** Idle attract, mascot and decor, owned by `hubAttract.ts`. */
   private readonly attract: HubAttractController;
-  /**
-   * Play-time UI owned by `src/game/hub/playTimeUi.ts`. The scene keeps only
-   * this delegation: the module owns the lock flag, the indicator graphics,
-   * the nudge, and the visibility hook.
-   */
+  /** Lock flag, indicator, nudge and visibility hook, owned by `playTimeUi.ts`. */
   private readonly playTime: PlayTimeUiController;
   /** Profile chip + picker: active avatar, switch UI (top-left, kid-tappable). */
   private profileChip: ProfileChip;
   /** PWA lifecycle toast wiring (update/offline). */
   private pwaToasts: PwaToasts;
-  /**
-   * Game-launch flow owned by `src/game/hub/gameLaunch.ts`. The scene keeps
-   * only this delegation plus the `loadCue` compat accessor below: the module
-   * owns the single-flight flag, the visit token, and the retry cue, while the
-   * scene owns the engine handles the launcher's deps close over.
-   */
+  /** Launch flow (single-flight flag, visit token, retry cue). */
   private readonly launcher: GameLaunchController;
-  /**
-   * Prewarm orchestration owned by `src/game/hub/hubPrewarm.ts`. The scene
-   * keeps only this delegation plus the engine handles the controller's deps
-   * close over (timers, textures, loader, gates): the module owns entry
-   * selection, gates, and pass lifecycle.
-   */
+  /** Prewarm orchestration: entry selection, gates and pass lifecycle. */
   private readonly prewarmer: HubPrewarmController;
-  /**
-   * Resolves game-art SVG markup through the lazily loaded art tables owned by
-   * `src/game/hub/artGroups.ts`. The scene keeps only this delegation: the
-   * module owns the tables, loaders, and caches.
-   */
+  /** Lazily resolved game-art SVG through `artGroups.ts`. */
   private readonly artResolver = createArtResolver();
   /** Audio unlock/start closure captured from create() for tap handlers. */
   private startAudioFn: () => void = () => {};
@@ -207,13 +189,9 @@ export class HubScene extends Phaser.Scene {
     const reducedMotion = isReducedMotion();
     this.attract.resetForVisit();
     this.playTime.beginVisit();
-    // A new visit: a launch still in flight belongs to the previous one, and
-    // its resolution must not act on this one. The launcher bumps its visit
-    // token, drops the in-flight flag, and destroys the retry cue.
+    // A launch in flight belongs to the previous visit; bump the visit token.
     this.launcher.beginVisit();
-    // Likewise a prewarm: the shutdown handler already drops it, but a visit
-    // must never inherit the previous one's pass even if that handler did not
-    // run (NFR-6).
+    // A visit must never inherit the previous one's prewarm pass (NFR-6).
     this.cancelPrewarm();
     // Phaser reuses this instance across visits (auto-return re-runs create()),
     // so clear the launch guard or every tile tap after the first game is dead.
@@ -242,10 +220,8 @@ export class HubScene extends Phaser.Scene {
     };
     this.startAudioFn = startAudio;
 
-    // Narrow viewports (phones) get the paged 5x2 grid of larger tiles so
-    // every tile stays above the 64px touch floor after FIT scaling; wide
-    // viewports keep the classic 5x4 grid exactly as before. A later resize
-    // that flips the classification rebuilds the grid (handleViewportChange).
+    // Phones get the paged 5x2 grid so tiles stay above the 64px touch floor;
+    // a resize that flips the classification rebuilds the grid.
     this.grid.hubPage = 0;
     this.grid.classifyViewport();
     if (this.grid.paged) {
@@ -353,109 +329,39 @@ export class HubScene extends Phaser.Scene {
     this.launcher.hideLoadCue();
   }
 
-  /**
-   * Publishes the tiles that are on screen for the browser suite.
-   *
-   * The id is the tile's **registry index**, which is the one identity shared by
-   * the grid (which builds tiles in registry order) and a journey (which loops
-   * the registry). A paged viewport shows one page, so the ids are that page's
-   * global indexes rather than 0..9 — the suite can therefore tell which game a
-   * tile belongs to without knowing the layout. Read-only: it reports the live
-   * rectangles and never touches them.
-   */
+  /** Structural view handed to the extracted e2e publishers. */
+  private get e2eView(): HubE2EState {
+    return this as unknown as HubE2EState;
+  }
+
+  /** Live tiles on screen, keyed by registry index. */
   e2eHubTiles(): E2ERoundTarget[] {
-    const selection = this.grid.selection;
-    const indexes =
-      selection === ALL_GROUP_ID
-        ? this.grid.paged
-          ? pageTileIndexes(this.grid.hubPage)
-          : GAME_TILES.map((_, index) => index)
-        : // A filtered board draws one group on one page, so its drawn slots are
-          // that group's registry indexes — the identity a journey already knows.
-          visibleTileIndexes(selection);
-    return this.grid.attractTargets.map((tile, slot) => ({
-      id: String(indexes[slot]),
-      x: tile.x,
-      y: tile.y,
-    }));
+    return publishHubTiles(this.e2eView);
   }
 
-  /**
-   * Publishes the chip row and the selection for the browser suite.
-   *
-   * Both come from the live row: the ids are the chip ids the grid filters by,
-   * and the centres are where the row actually drew, so a journey taps a chip
-   * rather than a copied coordinate and asserts the board it asked for.
-   */
+  /** The live chip row and its filter selection. */
   e2eHubGroups(): E2EHubGroups {
-    return { selected: this.grid.selection, chips: this.grid.groupChipPoints() };
+    return publishHubGroups(this.e2eView);
   }
 
-  /**
-   * Publishes the PWA toast covering the hub, so the suite can close it the way
-   * a parent would instead of tapping a point that may or may not be a panel.
-   *
-   * Null when no toast is showing. The toast is a real part of the app — a
-   * first visit announces offline readiness — so a journey dismisses it and
-   * carries on; nothing about it is special-cased for tests.
-   */
+  /** The PWA toast covering the hub, if any. */
   e2eHubToast(): E2EHubToast | null {
-    const point = this.pwaToasts.dismissPoint();
-    return point ? { button: point } : null;
+    return publishHubToast(this.e2eView);
   }
 
-  /**
-   * Publishes whether the grid is accepting taps.
-   *
-   * Tiles enter at scale 0 and only become hittable once their entrance tween
-   * finishes, so for the first second or so after the hub appears a tap lands
-   * on nothing. Reporting that state lets a journey wait for the board rather
-   * than guess a duration. Read-only: it only asks the grid.
-   */
+  /** Whether the grid is accepting taps. */
   e2eHubReady(): boolean {
-    return this.grid.entranceSettled;
+    return publishHubReady(this.e2eView);
   }
 
-  /**
-   * Publishes the parental gate and the settings panel for the browser suite.
-   *
-   * `gate` is the live centre of the "Settings" label — what a parent aims at —
-   * and never a copy of the layout numbers. `open` comes from the panel's own
-   * liveness flag rather than the scene's reference: closing the panel by
-   * tapping its backdrop destroys it without the scene clearing the field, so
-   * the reference alone would keep reporting an open panel that is gone.
-   */
+  /** The parental gate and settings panel as currently drawn. */
   e2eSettings(): E2ESettingsState {
-    const centre = this.settingsButton?.getCenter();
-    const panel = this.settingsPanel;
-    const open = panel?.e2eOpen() ?? false;
-    return {
-      gate: centre ? { x: centre.x, y: centre.y } : null,
-      open,
-      toggles: open && panel ? panel.e2eToggles() : [],
-      // The row's published point and the overlay's own state both survive the
-      // panel losing focus, so neither is gated on the panel staying open.
-      progressRow: panel ? panel.e2eProgressRow() : null,
-      progress: panel ? panel.e2eProgress() : null,
-      // The notice is the panel's own open-time snapshot, so the journey reads
-      // the same value that decided what the parent sees.
-      degraded: open && panel ? panel.e2eDegraded() : false,
-      // The second page is only tappable while the panel is up, so a closed
-      // panel publishes the empty page rather than the last one it drew.
-      ...(open && panel
-        ? panel.backupState()
-        : { page: 0, switchPage: { x: 0, y: 0 }, backupRows: [], backupResult: "", choices: [] }),
-    };
+    return publishSettings(this.e2eView);
   }
 
-  /**
-   * Publishes the play-time state the hub acts on, so a journey can tell "the
-   * cap is what refused the tap" apart from "the tap missed": the same flag
-   * that dims and disables the tiles, and the nudge the launch flow shows in
-   * the last few minutes of the budget.
-   */
+  /** The daily-budget cap and the launch nudge. */
   e2eHubPlayTime(): E2EHubPlayTime {
-    return { timeUp: this.playTime.isTimeUp(), nudging: this.playTime.nudge.isActive() };
+    return publishHubPlayTime(this.e2eView);
   }
 
   /**
@@ -471,40 +377,22 @@ export class HubScene extends Phaser.Scene {
     return this.playTime.nudge;
   }
 
-  /**
-   * Brings the prewarm in line with the current gates: arms a pass when one may
-   * run and none is pending, stops whatever is pending otherwise. Delegates to
-   * the orchestration owned by `src/game/hub/hubPrewarm.ts`.
-   */
+  /** Arms a prewarm pass when allowed, otherwise stops what is pending. */
   private syncPrewarm(): void {
     this.prewarmer.syncPrewarm();
   }
 
-  /**
-   * Resolves the SVG markup behind one art key through the art-group tables in
-   * `src/game/hub/artGroups.ts`. An unknown key resolves to `undefined` so the
-   * pass skips it instead of queueing a load the TextureManager could never
-   * satisfy.
-   */
+  /** Resolves one art key's SVG; unknown keys resolve to `undefined`. */
   private resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined> {
     return this.artResolver.resolveArtSvg(entry);
   }
 
-  /**
-   * Stops the prewarm: drops the pending idle slots and the entrance delay,
-   * and discards an in-flight chunk import or art raster's result. Safe when
-   * nothing is armed or running, which is why every gate and every tap can call
-   * it unconditionally. Delegates to the orchestration owned by
-   * `src/game/hub/hubPrewarm.ts`.
-   */
+  /** Drops pending prewarm slots and any in-flight import's result. */
   private cancelPrewarm(): void {
     this.prewarmer.cancelPrewarm();
   }
 
-  /**
-   * Stops both passes and starts fresh ones, so pending work takes a new order.
-   * Delegates to the orchestration owned by `src/game/hub/hubPrewarm.ts`.
-   */
+  /** Restarts both passes so pending work takes a new order. */
   private restartPrewarm(): void {
     this.prewarmer.restartPrewarm();
   }

@@ -8,9 +8,7 @@ import {
   DIRECTIONS,
   type Direction,
   firstDeviation,
-  ghostPath,
   hintFor,
-  MAX_COMMANDS,
   ROUND_COUNT,
   type RobotPathRound,
   removeFrom,
@@ -19,40 +17,30 @@ import {
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { motionDuration } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakSentence } from "../utils/speech";
 import { getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
+import {
+  buildGo,
+  buildPalette,
+  buildRoundBoard,
+  buildStrip,
+  goPoint,
+  highlightSlot as highlightSlotView,
+  moveRobotTo as moveRobotToView,
+  nudge as nudgeView,
+  palettePoint,
+  pulseHint as pulseHintView,
+  type RobotPathViewState,
+  redrawStrip as redrawStripView,
+  redrawTrail as redrawTrailView,
+  STEP_MS,
+  tileCenter,
+} from "./robotPathView";
 
 /** Spoken once when the game opens, and again on an empty Go (spec FR-13). */
 const RULE = "Put the arrows in the robot's path, then tap go.";
-
-/** Board geometry: three 112px tiles, 12px apart (spec FR-2). */
-const TILE_SIZE = 112;
-const TILE_GAP = 12;
-const TILE_STEP = TILE_SIZE + TILE_GAP;
-const BOARD_TOP_ROW = 190;
-const BOARD_CENTER_X = 512;
-
-/** Palette: four 112px arrow buttons in one row under the board. */
-const PALETTE_SIZE = 112;
-const PALETTE_STEP = 120;
-const PALETTE_Y = 560;
-
-/** Command strip: six 96px slots, and the Go button beside them. */
-const SLOT_SIZE = 96;
-const SLOT_STEP = 104;
-const SLOT_Y = 676;
-const GO_X = 920;
-const GO_Y = 676;
-const GO_HIT = 112;
-
-/** Time one command takes to run, so a full strip is 2.7s (spec NFR-5). */
-const STEP_MS = 450;
-
-/** The robot's hop between tiles; shortened under reduced motion. */
-const HOP_MS = 260;
 
 /**
  * Robot Path — Game 23.
@@ -65,7 +53,8 @@ const HOP_MS = 260;
  * The board rules are not here — `robotPathLogic` owns stepping, placement and
  * the ladder, so this scene only draws and times what those functions return.
  * Chrome (palette, strip, Go) is built once per visit; the board, robot and
- * trail are rebuilt per round by `ChoiceRoundScene`'s teardown.
+ * trail are rebuilt per round by `ChoiceRoundScene`'s teardown. The actual
+ * drawing lives in `robotPathView.ts`; this class owns all mutable game state.
  */
 export class RobotPathScene extends ChoiceRoundScene {
   private rounds: RobotPathRound[] = [];
@@ -73,7 +62,7 @@ export class RobotPathScene extends ChoiceRoundScene {
   private stoppedRuns = 0;
   private robot?: Phaser.GameObjects.Image;
   private star?: Phaser.GameObjects.Image;
-  private trail?: Phaser.GameObjects.Graphics;
+  protected trail?: Phaser.GameObjects.Graphics;
   private readonly paletteRects = new Map<Direction, Phaser.GameObjects.Rectangle>();
   private readonly paletteArrows = new Map<Direction, Phaser.GameObjects.Graphics>();
   private readonly slotRects: Phaser.GameObjects.Rectangle[] = [];
@@ -94,6 +83,11 @@ export class RobotPathScene extends ChoiceRoundScene {
   /** Whether one of those runs reached the star. */
   private solvedThisRound = false;
 
+  /** Structural view handed to the drawing helpers. */
+  private get view(): RobotPathViewState {
+    return this as unknown as RobotPathViewState;
+  }
+
   constructor(rng: Rng = Math.random) {
     super("RobotPath", rng);
   }
@@ -109,9 +103,9 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction(RULE);
 
-    this.buildPalette();
-    this.buildStrip();
-    this.buildGo();
+    buildPalette(this.view);
+    buildStrip(this.view);
+    buildGo(this.view);
 
     this.rounds = buildPlaythrough(this.rng);
     this.roundIndex = 0;
@@ -145,38 +139,7 @@ export class RobotPathScene extends ChoiceRoundScene {
     this.solvedThisRound = false;
     this.hintOffered = false;
 
-    const board = this.add.graphics();
-    this.trackRoundObject(board);
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        const { x, y } = this.tileCenter({ col, row });
-        const isGoal = col === round.star.col && row === round.star.row;
-        board.fillStyle(isGoal ? 0xfefcbf : 0xffffff, 1);
-        board.fillRoundedRect(x - TILE_SIZE / 2, y - TILE_SIZE / 2, TILE_SIZE, TILE_SIZE, 18);
-        board.lineStyle(4, this.OUTLINE_COLOR, 0.5);
-        board.strokeRoundedRect(x - TILE_SIZE / 2, y - TILE_SIZE / 2, TILE_SIZE, TILE_SIZE, 18);
-      }
-    }
-
-    for (const rock of round.rocks) {
-      const { x, y } = this.tileCenter(rock);
-      this.trackRoundObject(this.add.image(x, y, "robot_rock").setDisplaySize(92, 92));
-    }
-
-    const goal = this.tileCenter(round.star);
-    const star = this.add.image(goal.x, goal.y, "robot_star").setDisplaySize(84, 84);
-    this.star = star;
-    this.trackRoundObject(star);
-
-    const start = this.tileCenter(round.start);
-    const robot = this.add.image(start.x, start.y, "robot_idle").setDisplaySize(96, 96);
-    this.robot = robot;
-    this.trackRoundObject(robot);
-
-    const trail = this.add.graphics();
-    this.trail = trail;
-    this.trackRoundObject(trail);
-
+    buildRoundBoard(this.view, round);
     this.redrawStrip();
     this.redrawTrail();
   }
@@ -226,14 +189,14 @@ export class RobotPathScene extends ChoiceRoundScene {
       round: this.roundIndex,
       solution: round ? [...round.solution] : [],
       commands: [...commands],
-      palette: DIRECTIONS.map((direction) => ({ dir: direction, ...this.palettePoint(direction) })),
+      palette: DIRECTIONS.map((direction) => ({ dir: direction, ...palettePoint(direction) })),
       slots: this.slotRects.map((rect, index) => ({
         index,
         x: rect.x,
         y: rect.y,
         filled: index < commands.length,
       })),
-      go: { x: GO_X, y: GO_Y },
+      go: { x: goPoint.x, y: goPoint.y },
       robot: { x: robot?.x ?? 0, y: robot?.y ?? 0 },
       star: { x: star?.x ?? 0, y: star?.y ?? 0 },
       runs: this.runs,
@@ -241,80 +204,8 @@ export class RobotPathScene extends ChoiceRoundScene {
     };
   }
 
-  /** Centre of one palette arrow, from the same constants that drew it. */
-  private palettePoint(direction: Direction): { x: number; y: number } {
-    const startX = BOARD_CENTER_X - ((DIRECTIONS.length - 1) * PALETTE_STEP) / 2;
-    return { x: startX + DIRECTIONS.indexOf(direction) * PALETTE_STEP, y: PALETTE_Y };
-  }
-
-  /** Centre of a board tile in canvas space. */
-  private tileCenter(point: { col: number; row: number }): { x: number; y: number } {
-    return {
-      x: BOARD_CENTER_X + (point.col - 1) * TILE_STEP,
-      y: BOARD_TOP_ROW + point.row * TILE_STEP,
-    };
-  }
-
-  /** Four arrow buttons, built once per visit. */
-  private buildPalette(): void {
-    // Scene instances are reused across visits: drop the previous visit's chrome.
-    this.paletteRects.clear();
-    this.paletteArrows.clear();
-    const startX = BOARD_CENTER_X - ((DIRECTIONS.length - 1) * PALETTE_STEP) / 2;
-    DIRECTIONS.forEach((direction, index) => {
-      const x = startX + index * PALETTE_STEP;
-      const rect = this.add.rectangle(x, PALETTE_Y, PALETTE_SIZE, PALETTE_SIZE, this.CARD_BG_COLOR);
-      rect.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
-      rect.setInteractive();
-      rect.on("pointerdown", () => this.place(direction));
-      attachPressFeedback(rect);
-
-      const arrow = this.add.graphics();
-      arrow.setPosition(x, PALETTE_Y);
-      this.drawArrow(arrow, direction, 30);
-
-      this.paletteRects.set(direction, rect);
-      this.paletteArrows.set(direction, arrow);
-    });
-  }
-
-  /** Six empty slots, built once per visit; contents are redrawn per change. */
-  private buildStrip(): void {
-    this.slotRects.length = 0;
-    this.slotArrows.length = 0;
-    const startX = BOARD_CENTER_X - ((MAX_COMMANDS - 1) * SLOT_STEP) / 2;
-    for (let index = 0; index < MAX_COMMANDS; index++) {
-      const x = startX + index * SLOT_STEP;
-      const rect = this.add.rectangle(x, SLOT_Y, SLOT_SIZE, SLOT_SIZE, this.CARD_BG_COLOR);
-      rect.setStrokeStyle(4, this.OUTLINE_COLOR, 0.6);
-      rect.setInteractive();
-      rect.on("pointerdown", () => this.removeAt(index));
-      attachPressFeedback(rect);
-
-      this.slotRects.push(rect);
-      this.slotArrows.push(null);
-    }
-  }
-
-  /**
-   * The run button: a play triangle beside the strip, drawn at the phase's
-   * 112x112 touch size (FR-7 / NFR-1).
-   *
-   * Its tap target is the frame's own hit area rather than a centred custom
-   * rectangle: a custom area is measured in *unscaled* frame pixels, so on this
-   * 512px texture a 112px rectangle would sit in the top-left corner of the art
-   * and leave the visible button untappable. The default area follows the
-   * displayed size, which is exactly the size NFR-1 asks for.
-   */
-  private buildGo(): void {
-    const go = this.add.image(GO_X, GO_Y, "robot_go").setDisplaySize(GO_HIT, GO_HIT);
-    go.setInteractive();
-    go.on("pointerdown", () => this.run());
-    attachPressFeedback(go);
-  }
-
   /** Taps a palette arrow: append it, or nudge when the board refuses it. */
-  private place(direction: Direction): void {
+  protected place(direction: Direction): void {
     if (this.inputLocked || this.running) return;
     const round = this.rounds[this.roundIndex];
     if (!round) return;
@@ -330,7 +221,7 @@ export class RobotPathScene extends ChoiceRoundScene {
   }
 
   /** Taps a filled slot: drop it and everything after it (spec FR-5). */
-  private removeAt(index: number): void {
+  protected removeAt(index: number): void {
     if (this.inputLocked || this.running) return;
     if (index >= this.commands.length) return;
 
@@ -344,7 +235,7 @@ export class RobotPathScene extends ChoiceRoundScene {
    * of counting as a run; otherwise the robot walks the program one step at a
    * time, highlighting the command it is executing.
    */
-  private run(): void {
+  protected run(): void {
     if (this.inputLocked || this.running) return;
     const round = this.rounds[this.roundIndex];
     if (!round) return;
@@ -408,7 +299,7 @@ export class RobotPathScene extends ChoiceRoundScene {
   protected override onWiggleComplete(): void {
     const round = this.rounds[this.roundIndex];
     if (round) {
-      const start = this.tileCenter(round.start);
+      const start = tileCenter(round.start);
       this.robot?.setTexture("robot_idle").setPosition(start.x, start.y);
     }
     this.redrawStrip();
@@ -428,126 +319,29 @@ export class RobotPathScene extends ChoiceRoundScene {
     createCompletionSplash(this, this.cameras.main.centerX, this.cameras.main.centerY);
   }
 
-  /** Redraws every slot's arrow to match the current program. */
   private redrawStrip(): void {
-    for (let index = 0; index < this.slotRects.length; index++) {
-      this.slotArrows[index]?.destroy();
-      this.slotArrows[index] = null;
-
-      const direction = this.commands[index];
-      if (!direction) continue;
-      const glyph = this.add.graphics();
-      const rect = this.slotRects[index];
-      glyph.setPosition(rect.x, rect.y);
-      this.drawArrow(glyph, direction, 26);
-      this.slotArrows[index] = glyph;
-    }
+    redrawStripView(this.view);
   }
 
-  /** Redraws the dotted trail the current program would walk (spec FR-6). */
   private redrawTrail(): void {
     const round = this.rounds[this.roundIndex];
-    const trail = this.trail;
-    if (!round || !trail) return;
-
-    trail.clear();
-    trail.fillStyle(0x2b6cb0, 0.35);
-    for (const point of ghostPath(round, this.commands).slice(1)) {
-      const { x, y } = this.tileCenter(point);
-      trail.fillCircle(x, y, 7);
-    }
+    if (!round) return;
+    redrawTrailView(this.view, round);
   }
 
-  /** Draws a bold arrow of `size` pointing `direction`, centred on the origin. */
-  private drawArrow(glyph: Phaser.GameObjects.Graphics, direction: Direction, size: number): void {
-    const tip = {
-      up: [0, -size],
-      right: [size, 0],
-      down: [0, size],
-      left: [-size, 0],
-    }[direction] as [number, number];
-    const back = {
-      up: [
-        [-size * 0.8, size * 0.6],
-        [size * 0.8, size * 0.6],
-      ],
-      right: [
-        [-size * 0.6, -size * 0.8],
-        [-size * 0.6, size * 0.8],
-      ],
-      down: [
-        [-size * 0.8, -size * 0.6],
-        [size * 0.8, -size * 0.6],
-      ],
-      left: [
-        [size * 0.6, -size * 0.8],
-        [size * 0.6, size * 0.8],
-      ],
-    }[direction] as [number, number][];
-
-    // A path rather than fillTriangle: the arrow is three points and the fill
-    // closes them, which keeps the drawing to APIs the scene tests can see.
-    glyph.fillStyle(this.OUTLINE_COLOR, 1);
-    glyph.beginPath();
-    glyph.moveTo(tip[0], tip[1]);
-    glyph.lineTo(back[0][0], back[0][1]);
-    glyph.lineTo(back[1][0], back[1][1]);
-    glyph.fillPath();
-  }
-
-  /** Moves the robot one tile, hopping unless the child asked for less motion. */
   private moveRobotTo(point: { col: number; row: number }): void {
-    const robot = this.robot;
-    if (!robot) return;
-    const { x, y } = this.tileCenter(point);
-    robot.setTexture("robot_walk");
-    this.tweens.add({
-      targets: robot,
-      x,
-      y,
-      duration: motionDuration(HOP_MS, 120),
-      ease: "Sine.inOut",
-      onComplete: () => robot.setTexture("robot_idle"),
-    });
+    moveRobotToView(this.view, point);
   }
 
-  /** Pops the slot that is executing, so the strip and the walk stay in sync. */
   private highlightSlot(index: number): void {
-    const rect = this.slotRects[index];
-    if (!rect) return;
-    this.tweens.add({
-      targets: [rect, this.slotArrows[index]].filter(Boolean),
-      scaleX: motionDuration(1.18, 1.08),
-      scaleY: motionDuration(1.18, 1.08),
-      duration: motionDuration(160, 100),
-      yoyo: true,
-    });
+    highlightSlotView(this.view, index);
   }
 
-  /** Pulses the hinted arrow in the palette; it is never placed for the child. */
   private pulseHint(direction: Direction): void {
-    this.tweens.add({
-      targets: [this.paletteRects.get(direction), this.paletteArrows.get(direction)].filter(
-        Boolean,
-      ),
-      scaleX: motionDuration(1.14, 1.06),
-      scaleY: motionDuration(1.14, 1.06),
-      duration: motionDuration(260, 160),
-      yoyo: true,
-      repeat: 2,
-    });
+    pulseHintView(this.view, direction);
   }
 
-  /** A small refusal shake, shared by a refused arrow and an empty strip. */
   private nudge(rect?: Phaser.GameObjects.Rectangle, arrow?: Phaser.GameObjects.Graphics): void {
-    const targets = [rect, arrow].filter(Boolean);
-    if (targets.length === 0) return;
-    this.tweens.add({
-      targets,
-      x: (targets[0] as unknown as { x: number }).x + 6,
-      duration: motionDuration(90, 60),
-      yoyo: true,
-      repeat: 1,
-    });
+    nudgeView(this.view, rect, arrow);
   }
 }

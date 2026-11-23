@@ -28,6 +28,7 @@ import {
   PRIMARY_COLOR,
   TOGGLE_HEIGHT,
 } from "./primitives";
+import { ACCURACY_FILL_COLOR, drawActivityStrip } from "./progressActivity";
 
 /** Mastery badge shown next to games with at least 3 wins. */
 const MASTERY_STAR = "★";
@@ -47,22 +48,8 @@ const OVERVIEW_LINE_START_Y = PROGRESS_ROW_START_Y;
 const OVERVIEW_LINE_PITCH = 100;
 /** Width an Overview statement wraps inside: the 480px panel less a 20px margin each side. */
 const OVERVIEW_TEXT_WIDTH = 430;
-/** Center-relative Y of the 7-day activity strip label. */
-const PROGRESS_STRIP_LABEL_Y = 230;
-/** Center-relative Y of the 7-day activity bars. */
-const PROGRESS_STRIP_Y = 265;
-/** Width of one activity bar. */
-const PROGRESS_BAR_WIDTH = 24;
-/** Number of day bars in the 7-day activity strip. */
-const PROGRESS_BAR_COUNT = 7;
-/** Height of the tallest activity bar. */
-const PROGRESS_BAR_HEIGHT = 36;
-/** Horizontal gap between activity bars. */
-const PROGRESS_BAR_GAP = 6;
 /** Track color for the per-game accuracy bar. */
 const ACCURACY_TRACK_COLOR = 0xe8e0d0;
-/** Fill color for the per-game accuracy bar. */
-const ACCURACY_FILL_COLOR = 0x68d391;
 
 /**
  * One Learning Progress row per registry entry, in Hub order: the label and
@@ -368,39 +355,12 @@ export class ProgressOverlay {
     addPageChevron("›", centerX + 110, 1);
     this.pageCount = pageCount;
 
-    const activity = viewedProfile.activity;
-    const totalPlays = activity.reduce((sum, entry) => sum + entry.plays, 0);
-    this.deps.overlayObjects.push(
-      scene.add
-        .text(
-          centerX,
-          centerY + PROGRESS_STRIP_LABEL_Y,
-          `Last 7 days · ${totalPlays} plays`,
-          textStyle({
-            color: "#2d3748",
-            fontSize: "30px",
-          }),
-        )
-        .setOrigin(0.5),
+    drawActivityStrip(
+      { scene, overlayObjects: this.deps.overlayObjects },
+      centerX,
+      centerY,
+      viewedProfile.activity,
     );
-    const maxPlays = Math.max(1, ...activity.map((entry) => entry.plays));
-    const startX =
-      centerX - ((PROGRESS_BAR_COUNT - 1) * (PROGRESS_BAR_WIDTH + PROGRESS_BAR_GAP)) / 2;
-    for (let i = 0; i < PROGRESS_BAR_COUNT; i += 1) {
-      const entry = activity[i];
-      const plays = entry?.plays ?? 0;
-      const barHeight =
-        plays === 0 ? 4 : Math.max(10, Math.round((PROGRESS_BAR_HEIGHT * plays) / maxPlays));
-      this.deps.overlayObjects.push(
-        scene.add.rectangle(
-          startX + i * (PROGRESS_BAR_WIDTH + PROGRESS_BAR_GAP),
-          centerY + PROGRESS_STRIP_Y,
-          PROGRESS_BAR_WIDTH,
-          barHeight,
-          ACCURACY_FILL_COLOR,
-        ),
-      );
-    }
 
     // Static parent-facing note: difficulty bands adapt to recent accuracy.
     // Child-facing game UIs stay textless; this lives only where parents read.

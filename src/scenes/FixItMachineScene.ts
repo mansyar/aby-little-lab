@@ -10,76 +10,38 @@ import {
   hintLevelFor,
   isSolved,
   isWrongCard,
-  MAX_CARDS,
   ROUND_COUNT,
 } from "../game/fixItMachineLogic";
 import type { Rng } from "../game/random";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { motionDuration } from "../utils/motion";
-import { attachPressFeedback } from "../utils/pressFeedback";
 import { sceneEntrance } from "../utils/sceneTransitions";
 import { speakSentence } from "../utils/speech";
 import { getSettings } from "../utils/storage";
 import { ChoiceRoundScene } from "./ChoiceRoundScene";
-
-/** Spoken once when the game opens, and again on an empty Go. */
-const RULE = "Find the wrong card and fix it.";
-
-/** Cards: 96px with 12px gaps, so the hardest tape spans 528px (spec FR-2). */
-const CARD_SIZE = 96;
-const CARD_GAP = 12;
-const CARD_STEP = CARD_SIZE + CARD_GAP;
-const TAPE_Y = 552;
-const TAPE_CENTER_X = 512;
-
-/** The repair tray: three 96px candidates in one row under the tape. */
-const TRAY_Y = 664;
-const TRAY_STEP = 108;
-
-/** The Go button: 112px, the product's touch floor (spec FR-7 / NFR-1). */
-const GO_X = 896;
-const GO_Y = 664;
-const GO_HIT = 112;
-
-/** Where the goal bubble and the machine stand, clear of tape, tray and Go. */
-const GOAL_X = 236;
-const GOAL_Y = 232;
-const GOAL_SIZE = 132;
-const MACHINE_X = 664;
-const MACHINE_Y = 320;
-const MACHINE_SIZE = 232;
-
-/** Art size drawn inside one card or tray slot. */
-const ICON_SIZE = 68;
-
-/**
- * The hint ladder's own geometry (spec FR-11): the padding of the
- * divergence band, the lift the bug card takes at level 2, and the band's
- * amber, which is a shape cue as well as a colour one.
- */
-const HINT_PAD = 14;
-const HINT_LIFT = 18;
-const HINT_COLOR = 0xf4b942;
-
-/**
- * The display objects that exist right now, in order. A round's cards and tray
- * images come and go, so every wiggle target goes through here rather than
- * carrying `null` into `reactWrong`.
- */
-function present(
-  ...targets: Array<Phaser.GameObjects.GameObject | null | undefined>
-): Phaser.GameObjects.GameObject[] {
-  const found: Phaser.GameObjects.GameObject[] = [];
-  for (const target of targets) {
-    if (target) found.push(target);
-  }
-  return found;
-}
-
-/** One card of the run, and the shortest it may take under reduced motion. */
-const STEP_MS = 550;
-const STEP_REDUCED_MS = 120;
+import {
+  buildGo,
+  buildTapeSlots,
+  buildTray,
+  closeTray,
+  drawHintBand,
+  dropCardImages,
+  dropTrayImages,
+  type FixItMachineViewState,
+  liftBugCard,
+  markMismatch,
+  openTray,
+  present,
+  pulse,
+  pulseCorrectCandidate,
+  RULE,
+  redrawTape,
+  STEP_MS,
+  STEP_REDUCED_MS,
+  tapePoint,
+  trayPoint,
+} from "./fixItMachineView";
 
 /**
  * Fix-It Machine — Game 24.
@@ -93,7 +55,9 @@ const STEP_REDUCED_MS = 120;
  * the one wrong card, the tray candidates and the solve check, so this scene
  * only draws and times what those functions return. Chrome (tape slots, tray,
  * Go) is built once per visit; the cards, tray contents and machine are rebuilt
- * per round by `ChoiceRoundScene`'s teardown.
+ * per round by `ChoiceRoundScene`'s teardown. The drawing helpers and layout
+ * constants live in `fixItMachineView.ts`; this class orchestrates them and
+ * holds the round state the browser bridge publishes.
  */
 export class FixItMachineScene extends ChoiceRoundScene {
   private rounds: readonly FixItRound[] = [];
@@ -120,13 +84,13 @@ export class FixItMachineScene extends ChoiceRoundScene {
   private failedRuns = 0;
   /** Whether the toy came out right this round. */
   private solvedThisRound = false;
-  /** The ring drawn around the card that stopped the last run. */
-  private mismatch?: Phaser.GameObjects.Graphics;
-  /** The soft divergence band level 1 draws, with the machine's arm. */
-  private hintBand?: Phaser.GameObjects.Graphics;
-
   constructor(rng: Rng = Math.random) {
     super("FixItMachine", rng);
+  }
+
+  /** Structural view the drawing helpers use; no state leaves the scene. */
+  private get view(): FixItMachineViewState {
+    return this as unknown as FixItMachineViewState;
   }
 
   preload(): void {
@@ -140,9 +104,9 @@ export class FixItMachineScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction(RULE);
 
-    this.buildTapeSlots();
-    this.buildTray();
-    this.buildGo();
+    buildTapeSlots(this.view, (index) => this.tapCard(index));
+    buildTray(this.view, (index) => this.tapCandidate(index));
+    buildGo(this.view, () => this.run());
 
     this.rounds = buildPlaythrough(this.rng);
     this.roundIndex = 0;
@@ -177,38 +141,26 @@ export class FixItMachineScene extends ChoiceRoundScene {
     this.trayOpen = false;
     this.running = false;
 
-    const goal = this.add.image(GOAL_X, GOAL_Y, `machine_${round.toy}`);
-    goal.setDisplaySize(GOAL_SIZE, GOAL_SIZE);
+    const goal = this.add.image(236, 232, `machine_${round.toy}`);
+    goal.setDisplaySize(132, 132);
     this.goal = goal;
     this.trackRoundObject(goal);
 
     const bubble = this.add.graphics();
     this.trackRoundObject(bubble);
     bubble.fillStyle(0xfefcbf, 1);
-    bubble.fillRoundedRect(
-      GOAL_X - GOAL_SIZE / 2 - 10,
-      GOAL_Y - GOAL_SIZE / 2 - 10,
-      GOAL_SIZE + 20,
-      GOAL_SIZE + 20,
-      28,
-    );
+    bubble.fillRoundedRect(236 - 132 / 2 - 10, 232 - 132 / 2 - 10, 132 + 20, 132 + 20, 28);
     bubble.lineStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 0.6);
-    bubble.strokeRoundedRect(
-      GOAL_X - GOAL_SIZE / 2 - 10,
-      GOAL_Y - GOAL_SIZE / 2 - 10,
-      GOAL_SIZE + 20,
-      GOAL_SIZE + 20,
-      28,
-    );
+    bubble.strokeRoundedRect(236 - 132 / 2 - 10, 232 - 132 / 2 - 10, 132 + 20, 132 + 20, 28);
     bubble.setDepth(goal.depth - 1);
 
-    const machine = this.add.image(MACHINE_X, MACHINE_Y, "machine_idle");
-    machine.setDisplaySize(MACHINE_SIZE, MACHINE_SIZE);
+    const machine = this.add.image(664, 320, "machine_idle");
+    machine.setDisplaySize(232, 232);
     this.machine = machine;
     this.trackRoundObject(machine);
 
-    this.redrawTape();
-    this.closeTray();
+    redrawTape(this.view);
+    closeTray(this.view);
   }
 
   /** Releases the round's cards, tray and machine. */
@@ -224,14 +176,14 @@ export class FixItMachineScene extends ChoiceRoundScene {
     this.trayActions = [];
     this.machine = undefined;
     this.goal = undefined;
-    this.mismatch = undefined;
-    this.hintBand = undefined;
-    this.dropCardImages();
-    this.dropTrayImages();
+    this.view.mismatch = undefined;
+    this.view.hintBand = undefined;
+    dropCardImages(this.view);
+    dropTrayImages(this.view);
     for (const [index, rect] of this.cardRects.entries()) {
       rect.setAlpha(0.18);
       rect.setAngle(0);
-      rect.y = this.tapePoint(index).y;
+      rect.y = tapePoint(index).y;
     }
     for (const rect of this.trayRects) {
       rect.setVisible(false);
@@ -260,160 +212,17 @@ export class FixItMachineScene extends ChoiceRoundScene {
       trayOpen: this.trayOpen,
       cards: this.tape.map((_, index) => ({
         index,
-        ...this.tapePoint(index),
+        ...tapePoint(index),
       })),
       tray: this.trayActions.map((action, index) => ({
         index,
         action,
-        ...this.trayPoint(index),
+        ...trayPoint(index),
       })),
-      go: { x: GO_X, y: GO_Y },
-      machine: { x: machine?.x ?? MACHINE_X, y: machine?.y ?? MACHINE_Y },
-      goal: { x: goal?.x ?? GOAL_X, y: goal?.y ?? GOAL_Y },
+      go: { x: 896, y: 664 },
+      machine: { x: machine?.x ?? 664, y: machine?.y ?? 320 },
+      goal: { x: goal?.x ?? 236, y: goal?.y ?? 232 },
     };
-  }
-
-  /** Centre of one tape slot, from the same constants that drew it. */
-  private tapePoint(index: number): { x: number; y: number } {
-    return {
-      x: TAPE_CENTER_X + (index - (MAX_CARDS - 1) / 2) * CARD_STEP,
-      y: TAPE_Y,
-    };
-  }
-
-  /** Centre of one tray slot, from the same constants that drew it. */
-  private trayPoint(index: number): { x: number; y: number } {
-    return { x: TAPE_CENTER_X + (index - 1) * TRAY_STEP, y: TRAY_Y };
-  }
-
-  /** Five tape slots, built once per visit; contents are redrawn per round. */
-  private buildTapeSlots(): void {
-    // Scene instances are reused across visits: drop the previous visit's chrome.
-    this.cardRects.length = 0;
-    this.cardImages.length = 0;
-    for (let index = 0; index < MAX_CARDS; index++) {
-      const { x, y } = this.tapePoint(index);
-      const rect = this.add.rectangle(x, y, CARD_SIZE, CARD_SIZE, this.CARD_BG_COLOR);
-      rect.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 0.8);
-      rect.setInteractive();
-      rect.on("pointerdown", () => this.tapCard(index));
-      attachPressFeedback(rect);
-
-      this.cardRects.push(rect);
-      this.cardImages.push(null);
-    }
-  }
-
-  /** Three tray slots, built once per visit and shown only when diagnosing. */
-  private buildTray(): void {
-    this.trayRects.length = 0;
-    this.trayImages = [];
-    for (let index = 0; index < 3; index++) {
-      const { x, y } = this.trayPoint(index);
-      const rect = this.add.rectangle(x, y, CARD_SIZE, CARD_SIZE, 0xfefcbf);
-      rect.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 0.8);
-      rect.setInteractive();
-      rect.on("pointerdown", () => this.tapCandidate(index));
-      attachPressFeedback(rect);
-      rect.setVisible(false);
-
-      this.trayRects.push(rect);
-      this.trayImages.push(null);
-    }
-  }
-
-  /**
-   * The run button: a play triangle on a 112px card, the phase's touch size
-   * (FR-5 / NFR-1). The triangle is a path rather than `fillTriangle`, the same
-   * choice Robot Path's arrows make, so the scene tests can see the drawing.
-   */
-  private buildGo(): void {
-    const go = this.add.rectangle(GO_X, GO_Y, GO_HIT, GO_HIT, this.CARD_BG_COLOR);
-    go.setStrokeStyle(this.OUTLINE_WIDTH, this.OUTLINE_COLOR, 1);
-    go.setInteractive();
-    go.on("pointerdown", () => this.run());
-    attachPressFeedback(go);
-
-    const glyph = this.add.graphics();
-    glyph.fillStyle(this.OUTLINE_COLOR, 1);
-    glyph.beginPath();
-    glyph.moveTo(-18, -24);
-    glyph.lineTo(26, 0);
-    glyph.lineTo(-18, 24);
-    glyph.fillPath();
-    glyph.setPosition(GO_X, GO_Y);
-  }
-
-  /** Redraws the tape's cards to match the tape on screen. */
-  private redrawTape(): void {
-    this.dropCardImages();
-    this.matchRing();
-    this.clearHintBand();
-    for (let index = 0; index < this.cardRects.length; index++) {
-      const rect = this.cardRects[index];
-      rect.setAngle(0);
-      rect.y = this.tapePoint(index).y;
-      const action = this.tape[index];
-      if (!action) {
-        rect.setAlpha(0.18);
-        continue;
-      }
-      rect.setAlpha(1);
-      const image = this.add.image(rect.x, rect.y, `machine_${action}`);
-      image.setDisplaySize(ICON_SIZE, ICON_SIZE);
-      this.cardImages[index] = this.trackRoundObject(image);
-    }
-  }
-
-  /** Opens the tray on the round's three candidates. */
-  private openTray(): void {
-    const round = this.rounds[this.roundIndex];
-    if (!round || this.trayOpen) return;
-    this.trayOpen = true;
-    this.trayActions = [...round.candidates];
-    this.dropTrayImages();
-    this.trayActions.forEach((action, index) => {
-      const rect = this.trayRects[index];
-      rect.setVisible(true);
-      rect.setAngle(0);
-      const { x, y } = this.trayPoint(index);
-      const image = this.add.image(x, y, `machine_${action}`);
-      image.setDisplaySize(ICON_SIZE, ICON_SIZE);
-      this.trayImages[index] = this.trackRoundObject(image);
-    });
-  }
-
-  /** Closes the tray and clears what it was offering. */
-  private closeTray(): void {
-    this.trayOpen = false;
-    this.trayActions = [];
-    this.dropTrayImages();
-    for (const rect of this.trayRects) {
-      rect.setVisible(false);
-      rect.setAngle(0);
-    }
-  }
-
-  /** Clears the mismatch ring left by the last stopped run. */
-  private matchRing(): void {
-    if (this.mismatch && !this.mismatch.isDestroyed) this.mismatch.destroy();
-    this.mismatch = undefined;
-  }
-
-  private dropCardImages(): void {
-    for (let index = 0; index < this.cardImages.length; index++) {
-      const image = this.cardImages[index];
-      if (image && !image.isDestroyed) image.destroy();
-      this.cardImages[index] = null;
-    }
-  }
-
-  private dropTrayImages(): void {
-    for (let index = 0; index < this.trayImages.length; index++) {
-      const image = this.trayImages[index];
-      if (image && !image.isDestroyed) image.destroy();
-      this.trayImages[index] = null;
-    }
   }
 
   /**
@@ -432,7 +241,7 @@ export class FixItMachineScene extends ChoiceRoundScene {
     if (isWrongCard(round, index)) {
       // Naming the bug card is the round's correct diagnosis (spec FR-10).
       this.recordCorrect();
-      this.openTray();
+      openTray(this.view);
       return;
     }
 
@@ -453,8 +262,8 @@ export class FixItMachineScene extends ChoiceRoundScene {
       // Choosing the tool the job needs is the second correct result (FR-10).
       this.recordCorrect();
       this.tape = [...applyRepair(round, action)];
-      this.closeTray();
-      this.redrawTape();
+      closeTray(this.view);
+      redrawTape(this.view);
       return;
     }
 
@@ -484,77 +293,9 @@ export class FixItMachineScene extends ChoiceRoundScene {
    * card and never taps for the child.
    */
   private applyHint(level: 0 | 1 | 2 | 3): void {
-    if (level === 1) this.drawHintBand();
-    if (level === 2) this.liftBugCard();
-    if (level === 3) this.pulseCorrectCandidate();
-  }
-
-  /**
-   * Level 1 (two missed taps): a soft band from the first card through the
-   * wrong one, and the machine's arm pointing at the band's end.
-   */
-  private drawHintBand(): void {
-    this.clearHintBand();
-    const round = this.rounds[this.roundIndex];
-    if (!round || round.bugIndex < 0) return;
-
-    const first = this.tapePoint(0);
-    const bug = this.tapePoint(round.bugIndex);
-    const x = first.x - CARD_SIZE / 2 - HINT_PAD;
-    const y = first.y - CARD_SIZE / 2 - HINT_PAD;
-    const width = bug.x - first.x + CARD_SIZE + HINT_PAD * 2;
-    const height = CARD_SIZE + HINT_PAD * 2;
-
-    const band = this.add.graphics();
-    this.trackRoundObject(band);
-    band.fillStyle(HINT_COLOR, 0.16);
-    band.fillRoundedRect(x, y, width, height, 20);
-    band.lineStyle(4, HINT_COLOR, 0.7);
-    band.strokeRoundedRect(x, y, width, height, 20);
-
-    // The arm: one line from the machine's edge to the band's end, with a
-    // head, so the direction reads as shape rather than as motion.
-    const tipX = bug.x;
-    const tipY = bug.y - CARD_SIZE / 2 - HINT_PAD - 8;
-    band.lineStyle(6, this.OUTLINE_COLOR, 0.55);
-    band.beginPath();
-    band.moveTo(MACHINE_X - MACHINE_SIZE / 2, MACHINE_Y + MACHINE_SIZE / 2 - 30);
-    band.lineTo(tipX, tipY);
-    band.strokePath();
-    band.fillStyle(this.OUTLINE_COLOR, 0.75);
-    band.fillCircle(tipX, tipY, 8);
-
-    this.hintBand = band;
-  }
-
-  /** Level 2 (four missed taps): the wrong card lifts and pulses once. */
-  private liftBugCard(): void {
-    const index = this.rounds[this.roundIndex]?.bugIndex ?? -1;
-    const rect = this.cardRects[index];
-    if (!rect) return;
-
-    const lifted = this.tapePoint(index).y - HINT_LIFT;
-    const duration = motionDuration(180, 120);
-    this.tweens.add({ targets: rect, y: lifted, duration });
-    const image = this.cardImages[index];
-    if (image) this.tweens.add({ targets: image, y: lifted, duration });
-    this.pulse(rect);
-  }
-
-  /** Level 3 (six missed taps): the tool the job needs pulses once. */
-  private pulseCorrectCandidate(): void {
-    if (!this.trayOpen) return;
-    const round = this.rounds[this.roundIndex];
-    if (!round) return;
-    const index = this.trayActions.indexOf(correctAction(round));
-    const rect = index >= 0 ? this.trayRects[index] : undefined;
-    if (rect) this.pulse(rect);
-  }
-
-  /** Drops the level-1 band; a redraw, a repair or a new round clears it. */
-  private clearHintBand(): void {
-    if (this.hintBand && !this.hintBand.isDestroyed) this.hintBand.destroy();
-    this.hintBand = undefined;
+    if (level === 1) drawHintBand(this.view);
+    if (level === 2) liftBugCard(this.view);
+    if (level === 3) pulseCorrectCandidate(this.view);
   }
 
   /** Plays the tape: one card at a time, then either solve or funny failure. */
@@ -580,7 +321,7 @@ export class FixItMachineScene extends ChoiceRoundScene {
     for (let index = 0; index < total; index++) {
       this.time.delayedCall(motionDuration(STEP_MS, STEP_REDUCED_MS) * (index + 1), () => {
         if (token !== this.runToken) return;
-        this.pulse(this.cardRects[index]);
+        pulse(this.view, this.cardRects[index]);
         if (index === total - 1) this.finishRun();
       });
     }
@@ -601,41 +342,14 @@ export class FixItMachineScene extends ChoiceRoundScene {
 
     this.failedRuns += 1;
     this.machine?.setTexture("machine_puzzled");
-    this.markMismatch(round);
+    markMismatch(this.view, round);
     // No lock: the child can diagnose the moment the run stops, so the funny
     // result is never a penalty and never a wait.
     this.reactWrong(present(this.machine));
   }
 
-  /** Rings the card that did not belong, so the wrong step is visible. */
-  private markMismatch(round: FixItRound): void {
-    const { x, y } = this.tapePoint(round.bugIndex);
-    const ring = this.add.graphics();
-    ring.lineStyle(6, 0xe53e3e, 1);
-    ring.strokeRoundedRect(
-      x - CARD_SIZE / 2 - 6,
-      y - CARD_SIZE / 2 - 6,
-      CARD_SIZE + 12,
-      CARD_SIZE + 12,
-      20,
-    );
-    this.mismatch = this.trackRoundObject(ring);
-  }
-
   /** The shared splash, then the base's chime, dot and advance. */
   protected override onCorrect(): void {
     createCompletionSplash(this, this.cameras.main.centerX, this.cameras.main.centerY);
-  }
-
-  /** A brief scale pop on one object; every card and slot hint goes through it. */
-  private pulse(target: Phaser.GameObjects.GameObject): void {
-    this.tweens.add({
-      targets: target,
-      scaleX: motionDuration(1.16, 1.06),
-      scaleY: motionDuration(1.16, 1.06),
-      duration: motionDuration(240, 150),
-      yoyo: true,
-      repeat: 1,
-    });
   }
 }
