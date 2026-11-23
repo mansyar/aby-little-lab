@@ -67,8 +67,11 @@ export default defineConfig(() => ({
     environment: "happy-dom",
     globals: true,
     include: ["src/__tests__/**/*.test.ts"],
-    // vmThreads: full suite 59-60 s vs ~8 min under the forks pool on this loaded host.
-    pool: "vmThreads",
+    // The threads pool is the stable one on CI: vmThreads workers exited
+    // unexpectedly mid-file on two consecutive v1.25.0 runs (and on a local
+    // two-worker reproduction), with no failing assertion. Threads keeps
+    // per-file isolation and passes the whole suite in ~30 s locally.
+    pool: "threads",
     // 30,000 ms: the 5,000 ms default was marginal on a loaded machine.
     testTimeout: 30000,
     coverage: {
