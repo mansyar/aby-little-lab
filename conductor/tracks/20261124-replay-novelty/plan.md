@@ -63,20 +63,18 @@
 - **Covers:** FR-6, NFR-2, AC-6
 - **Touches:** `src/game/replayVariety.ts`, `src/game/hub/replayCue.ts`, `src/game/hub/stickerShelf.ts`, `src/game/hubGrid.ts`, `src/scenes/HubScene.ts`, `src/__tests__/game/hub/stickerShelf.test.ts`, `src/__tests__/game/hubGrid.test.ts`, `src/__tests__/scenes/hubScene.test.ts`
 - **Verification:** `pnpm exec vitest run src/__tests__/game/hub/stickerShelf.test.ts src/__tests__/game/hubGrid.test.ts src/__tests__/scenes/hubScene.test.ts`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Derive the spotlight target** — covers: FR-6
-  - [ ] **P3.T1.1:** Collect earned stickers from the active profile in registry order and advance one cursor per visit with wrap-around.
-  - [ ] **P3.T1.2:** Fall back to one dashed empty slot when the profile has no earned stickers.
-- [ ] **P3.T2: Render a gentle static-or-tween spotlight** — covers: FR-6, NFR-2
-  - [ ] **P3.T2.1:** Reuse the existing sticker keys and sparkle/tween helpers; add no SVG or texture key.
-  - [ ] **P3.T2.2:** Land on a static highlighted state under reduced motion.
+- [x] **P3.T1: Derive the spotlight target** — covers: FR-6
+  - [x] **P3.T1.1:** Collect earned stickers from the active profile in registry order and advance one cursor per visit with wrap-around.
+  - [x] **P3.T1.2:** Fall back to one dashed empty slot when the profile has no earned stickers.
+- [x] **P3.T2: Render a gentle static-or-tween spotlight** — covers: FR-6, NFR-2
+  - [x] **P3.T2.1:** Reuse the existing sticker keys and sparkle/tween helpers; add no SVG or texture key.
+  - [x] **P3.T2.2:** Land on a static highlighted state under reduced motion.
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — one earned-sticker spotlight per Hub visit with per-profile cursor and wrap-around, empty-slot fallback, static graphics ring with no new art; full verify_phase green (155/3,362; coverage 97.11/90.86/96.31/98.26; 169 modules zero warnings; PWA 16/16; docs 5/5).
+**Checkpoint:** 44be2e4a
 **Evidence:** conductor/tracks/20261124-replay-novelty/verification/phase-3.md
--->
 
 ## Phase 4: Doc sync and full gate
 
