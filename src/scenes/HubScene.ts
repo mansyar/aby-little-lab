@@ -142,7 +142,10 @@ export class HubScene extends Phaser.Scene {
       activateTile: (tileIndex, tile) => this.activateTile(tileIndex, tile),
       onUserGesture: () => this.attract.resetIdleAttract(),
       gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
-      onBoardChange: () => this.hideLoadCue(),
+      onBoardChange: () => {
+        this.hideLoadCue();
+        this.replayCue.refreshCue();
+      },
       // Spoken, not written: `speakSentence` re-reads the SFX toggle each call (FR-8, D6).
       onSelectGroup: (selection) => {
         speakSentence(selectionSpokenName(selection), getSettings().sfxEnabled);
@@ -365,11 +368,7 @@ export class HubScene extends Phaser.Scene {
     return publishHubPlayTime(this.e2eView);
   }
 
-  /**
-   * Test-compat reads: the cue and nudge live in the extracted launch and
-   * play-time controllers, but scene suites inspect them via cast
-   * (`hubSceneLoad.test.ts`). These getters preserve the pre-split surface.
-   */
+  /** Test-compat reads preserving the pre-split cue/nudge surface. */
   get loadCue(): GameLaunchCue | undefined {
     return this.launcher.cue;
   }

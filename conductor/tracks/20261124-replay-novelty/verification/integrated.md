@@ -48,14 +48,15 @@ All commands exited 0:
 | --- | --- | --- | --- |
 | AC-1 | Memory-only per-profile visit state, no save change | `replayVariety.test.ts`, phase-1.md | Pass |
 | AC-2 | No immediate repeat of last played/suggested game | `selectSuggestion` tests, 1,200 seeded visits | Pass |
-| AC-3 | ≥4 median distinct games over eight-play visits | seeded simulation in `replayVariety.test.ts` | Pass |
+| AC-3 | Three-level deterministic ordering (unplayed → least-recently played → registry order) | `replayVariety.test.ts` deterministic-ordering suite, phase-1.md | Pass |
 | AC-4 | Textless suggestion cue; tile tap remains only launch path | `hubScene.test.ts` (ring, no speech), phase-2.md | Pass |
 | AC-5 | Idle wiggle uses the same no-repeat selector | `hubAttract.test.ts` / `hubEngagement.test.ts`, phase-2.md | Pass |
 | AC-6 | One earned-sticker spotlight per visit, empty-slot fallback | `hubGrid.test.ts` / `hubScene.test.ts`, phase-3.md | Pass |
 | AC-7 | Profile switch resets visit + re-derives cue | `hubScene.test.ts` profile-switch case | Pass |
-| AC-8 | No new SVG/audio/TTS/save field/game rule | diff scope; all guards green | Pass |
+| AC-8 | Seeded 1,200 eight-play visits, median distinct ≥ 4, zero unexpected repeats | `replayVariety.test.ts` | Pass |
 | AC-9 | Docs describe shipped behaviour; validator 5/5 | README/PRD/TDD/product.md, phase-4.md | Pass |
 | AC-10 | Full `verify_phase` green on final tree | table above | Pass |
+| NFR-2 | Reuses existing art/assets: no new SVG/audio/TTS/save field/game rule | diff scope; all guards green | Pass |
 
 ## Deviations and notes
 

@@ -35,6 +35,8 @@ export interface ReplayCueController {
   prepareVisit(profileId?: string): void;
   /** Points the suggestion cue at a game once the board exists. */
   beginVisit(): void;
+  /** Removes the ring before the board beneath it is rebuilt by a flip or filter. */
+  refreshCue(): void;
   /** Discards the outgoing visit and re-derives both cues for the new profile. */
   resetForProfile(profileId: string): void;
   /** Records a play through storage and in the in-memory visit. */
@@ -133,6 +135,12 @@ export function createReplayCue(deps: ReplayCueDeps): ReplayCueController {
     },
     beginVisit() {
       deriveSuggestion();
+    },
+    refreshCue() {
+      // onBoardChange fires before the rebuild, so the old tiles are still
+      // visible here: drop the ring instead of leaving it on a game that is
+      // about to move. The next visit re-derives the cue for the new board.
+      clearRing();
     },
     resetForProfile(profileId) {
       visit = setReplayVisitProfile(visit, profileId);

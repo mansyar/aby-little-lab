@@ -342,8 +342,12 @@ describe("HubScene paged grid (narrow viewports)", () => {
   it("maps page-1 tiles to games 11-20 (How Many? first)", async () => {
     const scene = createNarrowHub();
 
+    // FR-4/AC-4: the entry cue is up before navigation repoints the tiles.
+    expect(replayProbe(scene).replayCue.ring).toBeDefined();
     // Flip to page 2 via the second dot.
     pageDots()[1].handlers.pointerup?.();
+    // The outgoing tiles die with the flip; a stale ring must not survive them.
+    expect(replayProbe(scene).replayCue.ring).toBeUndefined();
 
     const afterFlip = pagedRects().length;
     expect(afterFlip).toBe(20); // outgoing page lingers (slide timer mocked)
