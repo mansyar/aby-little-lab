@@ -689,6 +689,8 @@ Every registry entry carries a `group` (`letters`, `numbers`, `thinking`, `play`
 
 Glyph ownership: the five `group_*` files live in `src/assets/svg/ui/` and are explicit `SHELL_ASSETS` rows — the boot glob keeps only `tile_`/`sticker_` stems, and `ui/**` would inline the lazy glyphs group — with a `/^group_/ → icon` tier rule, so they rasterise at 160px for a 40px display. The All chip ships no art: its 2×2 grid is drawn as four 12px squares, which also serves as the fallback for a group whose texture is absent, so a chip can never paint Phaser's missing-texture box.
 
+Each Hub entry creates a fresh, profile-scoped, memory-only `ReplayVisit` (never saved). `src/game/replayVariety.ts` supplies a deterministic suggestion: unplayed-this-visit first, then least-recently played via existing `lastPlayedAt` stamps, then registry order, never the just-played or just-suggested game unless it is the only one left (a `forcedRepeat`). `src/game/hub/replayCue.ts` draws the suggestion as a textless static `Graphics` ring on a visible tile, feeds the same selector to the idle wiggle (`ATTRACT_WIGGLE_COUNT = 2`), and keeps a separate per-profile cursor that advances one earned sticker per visit with wrap-around, falling back to one dashed empty slot when none are earned. The spotlight is redrawn from the grid state after a shelf rebuild and destroyed on shutdown; all cues are static under reduced motion. Switching profile resets the visit and re-derives both cues. A seeded simulation of 1,200 eight-play visits proves a median of at least four distinct games with no unexpected immediate repeats.
+
 ### 4.11 Fix-It Machine
 
 Fix-It Machine is the suite's debugging game: the one place where the child is
@@ -1079,6 +1081,8 @@ An entry is `{ at, kind, message, stack }`. `kind` is `error` or `rejection`, so
 | `popFreezeLogic.ts` | bubble spawn timing and pop targets |
 | `profileLogic.ts` | profile CRUD, avatar map, `migrateV1`, `normalizeV2` |
 | `progressLogic.ts` | per-game stats, mastery, accuracy, 7-day activity |
+| `replayVariety.ts` | pure per-visit state and the no-repeat suggestion selector: records games opened this visit, ranks unplayed → least-recently played (`lastPlayedAt`) → registry order, excludes the last played/suggested, and surfaces a forced repeat only when the pool is exhausted |
+| `hub/replayCue.ts` | owns the in-memory visit, the textless suggestion ring, selector-driven idle-wiggle targets and the per-profile earned-sticker spotlight cursors |
 | `fixItMachineArt.ts` | `FIX_IT_MACHINE_ASSETS` (the sixteen Fix-It Machine drawings) + `preloadFixItMachineArt` (imports Phaser types only) |
 | `fixItMachineLogic.ts` | the Fix-It Machine model: `ACTION_FAMILIES`, `ROUND_SPECS`, `buildRound`, `isWrongCard`, `correctAction`, `applyRepair`, `hintLevelFor` and `isSolved` over six authored rounds |
 | `robotPathArt.ts` | `ROBOT_PATH_ASSETS` (the six Robot Path drawings) + `preloadRobotPathArt` (imports Phaser types only) |

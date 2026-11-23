@@ -103,7 +103,7 @@ The app is self-hosted on a private server behind HTTPS (Docker and Nginx on a p
 
 1. **Boot.** Locks the screen to landscape where the browser allows it, initialises audio and reads stored settings and profiles.
 2. **Preload.** Shows the brand lockup and a progress bar while the boot asset set rasterises.
-3. **Hub.** Shows the 24 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold.
+3. **Hub.** Shows the 24 game tiles, each a storybook icon above a short text label with its sticker shelf below, plus the avatar chip, the play-time indicator when a limit is set, the mascot and the hidden settings hold. On each visit Professor Hoot points at one game with a silent, textless ring, and one of the profile's earned stickers is highlighted on the shelf; neither repeats the game just played or just suggested, and the idle wiggle follows the same no-repeat rule.
 4. **Game.** The game's chunk is fetched and evaluated before the 300 ms crossfade, so a slow chunk never lands mid-round. If it cannot be fetched, the Hub tries again by itself. When that retry fails too, the rest of the Hub stays usable and a wordless retry ring appears on the tile the child tapped; tapping the ring tries the same game again. A game that never opens charges no play time and records no play.
 5. **Return.** Finishing a game plays the shared celebration, awards a sticker the first time, and fades back to the Hub after three seconds with the new sticker highlighted. The Back button in a game also returns to the Hub, but only through the parental hold.
 
@@ -400,11 +400,11 @@ Speech is off when sound is off or when the device has no voice. In that state t
 
 ### 4.3 The mascot
 
-Professor Hoot is a teacher owl drawn in two static poses, idle and celebrating. He appears in the Hub and in the corner of every game scene, where he reacts to correct answers and to the win. He is tweened only, never a second animation system, he has no voice of his own, and he is destroyed with the scene. With reduced motion on, his reactions shorten rather than disappear.
+Professor Hoot is a teacher owl drawn in two static poses, idle and celebrating. He appears in the Hub and in the corner of every game scene, where he reacts to correct answers and to the win. He is tweened only, never a second animation system, he has no voice of his own, and he is destroyed with the scene. With reduced motion on, his reactions shorten rather than disappear. On the Hub he also marks one game per visit with a silent ring; this is a visual nudge only — the child still chooses what to tap, and he speaks no new line for it.
 
 ### 4.4 Stickers
 
-Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: a small thumbnail on a cream plaque, full colour and shimmering on an 800 ms alpha loop when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
+Each game has exactly one sticker, awarded the first time that game is completed by the active profile. The sticker appears on a shelf under the game's Hub tile: a small thumbnail on a cream plaque, full colour and shimmering on an 800 ms alpha loop when earned, a dashed outline when not. A sticker earned in the session just played bounces and sparkles before settling. Each Hub visit also highlights one already-earned sticker with a gentle outline, moving to the next earned sticker in game order on the next visit and wrapping around; a profile with no stickers yet sees one dashed empty slot highlighted instead. The highlight is a static state under reduced motion and introduces no new art. Stickers are per profile, persist across sessions, and are cleared only by the parental reset, which clears the active profile's stickers and leaves settings and other profiles untouched.
 
 ### 4.5 Profiles
 
