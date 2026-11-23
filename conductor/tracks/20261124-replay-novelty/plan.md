@@ -104,18 +104,16 @@
 - **Covers:** F1, F2, F3
 - **Touches:** `src/game/hub/replayCue.ts`, `src/scenes/HubScene.ts`, `src/game/hubGrid.ts`, `src/__tests__/scenes/hubScene.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `README.md`, `docs/PRD.md`, `conductor/tracks/20261124-replay-novelty/verification/integrated.md`
 - **Verification:** targeted vitest on the two Hub test files, `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, full `verify_phase`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Correct the AC mapping in integrated evidence** — covers: F1
-  - [ ] **R1.T1.1:** Set AC-3 to three-level ordering and AC-8 to the seeded simulation; move the no-new-art claim to NFR-2.
-- [ ] **R1.T2: Refresh the suggestion cue on board changes** — covers: F2
-  - [ ] **R1.T2.1:** Add a refresh/clear path on `replayCue` and call it when the board changes (page flip, group filter, viewport flip).
-  - [ ] **R1.T2.2:** Add a test that flips a page or group after the cue is drawn and asserts the ring moves to or is removed from the correct tile.
-- [ ] **R1.T3: Reword the spotlight docs** — covers: F3
-  - [ ] **R1.T3.1:** README.md:156 and docs/PRD.md:106 — only cue and wiggle avoid played/suggested; spotlight advances one earned sticker per visit with wrap-around, re-derived per profile, empty-slot fallback.
+- [x] **R1.T1: Correct the AC mapping in integrated evidence** — covers: F1
+  - [x] **R1.T1.1:** Set AC-3 to three-level ordering and AC-8 to the seeded simulation; move the no-new-art claim to NFR-2.
+- [x] **R1.T2: Refresh the suggestion cue on board changes** — covers: F2
+  - [x] **R1.T2.1:** Add a refresh/clear path on `replayCue` and call it when the board changes (page flip, group filter, viewport flip).
+  - [x] **R1.T2.2:** Add a test that flips a page or group after the cue is drawn and asserts the ring moves to or is removed from the correct tile.
+- [x] **R1.T3: Reword the spotlight docs** — covers: F3
+  - [x] **R1.T3.1:** README.md:156 and docs/PRD.md:106 — only cue and wiggle avoid played/suggested; spotlight advances one earned sticker per visit with wrap-around, re-derived per profile, empty-slot fallback.
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — F1 AC mapping restored to frozen spec; F2 `refreshCue()` clears the stale ring on board change with a page-flip test; F3 README/PRD reworded so only cue/wiggle claim no-repeat; full verify_phase green (155/3,362; coverage 97.09/90.82/96.32/98.26; 169 modules zero warnings; PWA 16/16; docs 5/5).
+**Checkpoint:** e2a9bf26
 **Evidence:** conductor/tracks/20261124-replay-novelty/verification/phase-R1.md
--->
