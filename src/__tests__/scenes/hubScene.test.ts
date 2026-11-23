@@ -236,9 +236,12 @@ interface ReplayProbe {
     suggestion: GameId | null;
     ring: MockObject | undefined;
     recordPlay: (gameId: GameId) => void;
+    prepareVisit: (profileId?: string) => void;
   };
   grid: {
     visibleGameEntries(): Array<{ gameId: GameId; target: { x: number; y: number } }>;
+    spotlightGameId: GameId | null | undefined;
+    spotlightGraphics: MockObject[];
   };
 }
 
@@ -306,7 +309,27 @@ describe("HubScene paged grid (narrow viewports)", () => {
   });
 
   it("renders exactly one page of 10 larger tiles and no wide tiles", () => {
-    createNarrowHub();
+    earnSticker(GAME_TILES[0].gameId);
+    earnSticker(GAME_TILES[1].gameId);
+    const scene = createNarrowHub();
+
+    // AC-6: one earned sticker per visit, advancing with wrap-around.
+    const probe = replayProbe(scene);
+    expect([GAME_TILES[0].gameId, GAME_TILES[1].gameId]).toContain(probe.grid.spotlightGameId);
+    const profileId = getActiveProfile().id;
+    probe.replayCue.prepareVisit(profileId);
+    const next = probe.grid.spotlightGameId;
+    expect(next).not.toBeNull();
+    probe.replayCue.prepareVisit(profileId);
+    expect(probe.grid.spotlightGameId).not.toBe(next);
+    probe.replayCue.prepareVisit(profileId);
+    expect(probe.grid.spotlightGameId).toBe(next);
+    // A different profile keeps its own cursor; switching back resumes this one.
+    probe.replayCue.prepareVisit("spotlight-other-profile");
+    const other = probe.grid.spotlightGameId;
+    expect(other).not.toBe(next);
+    probe.replayCue.prepareVisit(profileId);
+    expect(probe.grid.spotlightGameId).toBe(other);
 
     expect(pagedRects().length).toBe(10);
     const wideTiles = mockRegistry.filter((obj) => {
@@ -337,7 +360,12 @@ describe("HubScene paged grid (narrow viewports)", () => {
   });
 
   it("builds the last page as four centred tiles", () => {
-    createNarrowHub();
+    const scene = createNarrowHub();
+    // AC-6: no earned sticker spots one dashed empty slot instead.
+    const grid = replayProbe(scene).grid;
+    expect(grid.spotlightGameId).toBeNull();
+    expect(grid.spotlightGraphics).toHaveLength(1);
+    expect(grid.spotlightGraphics[0].strokeCircle).toHaveBeenCalled();
 
     pageDots()[2].handlers.pointerup?.();
 
@@ -977,6 +1005,9 @@ describe("HubScene profile and hierarchy cohesion", () => {
     expect(newRing).not.toBe(ring);
     expect(newRing.strokeCircle).toHaveBeenCalled();
     expect(mockSpeech.speakSentence).not.toHaveBeenCalled();
+    // AC-6/NFR-2: the shelf spotlight is re-derived as a static empty-slot cue.
+    expect(replayProbe(current).grid.spotlightGameId).toBeNull();
+    expect(replayProbe(current).grid.spotlightGraphics).toHaveLength(1);
 
     // Switching back starts a fresh visit for the original profile too.
     after.recordPlay(sample.gameId);
@@ -1000,6 +1031,13 @@ describe("HubScene profile and hierarchy cohesion", () => {
       return navTiles.includes(config.targets as MockObject);
     });
     expect(motionTargets).toHaveLength(0);
+    // NFR-2: the spotlight is static under reduced motion, not a tween target.
+    const spotlight = replayProbe(scene).grid.spotlightGraphics[0];
+    expect(
+      (scene.tweens.add as MockFn).mock.calls.some(
+        (call) => (call[0] as { targets?: unknown }).targets === spotlight,
+      ),
+    ).toBe(false);
   });
 });
 

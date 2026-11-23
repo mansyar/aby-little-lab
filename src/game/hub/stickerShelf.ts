@@ -1,3 +1,4 @@
+import type Phaser from "phaser";
 import { isReducedMotion } from "../../utils/motion";
 import { hasSticker } from "../../utils/storage";
 import { displayScale } from "../../utils/textureTiers";
@@ -39,6 +40,11 @@ export const EMPTY_SLOT_ALPHA = 0.55;
 export const EMPTY_SLOT_LINE_WIDTH = 4;
 /** Number of dashes in the empty-slot circle. */
 export const EMPTY_SLOT_DASH_COUNT = 10;
+/** Static spotlight outline: no shimmer tween, no new art or texture key. */
+export const SPOTLIGHT_RING_WIDTH = 3;
+export const SPOTLIGHT_RING_COLOR = 0xf6ad55;
+/** Gap between the plaque edge and its spotlight outline (px). */
+export const SPOTLIGHT_RING_PADDING = 5;
 /** Entrance scale for the just-earned sticker. */
 export const JUST_EARNED_SCALE = 1.15;
 /** Duration of the gentle sparkle shimmer loop (ms). */
@@ -221,6 +227,26 @@ export function animateJustEarned(
 }
 
 /**
+ * Draws the one static spotlight outline for this visit around a shelf slot.
+ * Drawn around (0, 0) and positioned at the slot centre so it stays with the
+ * plaque; no tween and no new art — the same graphics pattern as the tile cue.
+ */
+export function drawSpotlightRing(
+  grid: HubGrid,
+  x: number,
+  y: number,
+  radius: number,
+): Phaser.GameObjects.Graphics {
+  const graphics = grid.deps.scene.add.graphics();
+  graphics.lineStyle(SPOTLIGHT_RING_WIDTH, SPOTLIGHT_RING_COLOR, 0.9);
+  graphics.strokeCircle(0, 0, radius);
+  graphics.setPosition(x, y);
+  graphics.setDepth(1);
+  grid.spotlightGraphics.push(graphics);
+  return graphics;
+}
+
+/**
  * Creates one shelf sticker thumbnail for the given tile, reflecting storage:
  * an earned sticker gets its tier-scaled thumbnail (with the just-earned
  * burst or the gentle entrance + sparkle), an unearned one gets the dashed
@@ -258,6 +284,14 @@ export function createShelfSticker(
     }
   } else {
     drawEmptySlot(grid, x, stickerY, shelfSize / 2);
+  }
+
+  const gameId = GAME_TILES[index].gameId;
+  const spotlit =
+    grid.spotlightGameId === gameId ||
+    (grid.spotlightGameId === null && !earned && index === grid.spotlightSlotIndex);
+  if (spotlit) {
+    drawSpotlightRing(grid, x, stickerY, shelfSize / 2 + SPOTLIGHT_RING_PADDING);
   }
 }
 

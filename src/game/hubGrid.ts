@@ -81,6 +81,12 @@ export class HubGrid {
   stickerImages: Phaser.GameObjects.Image[] = [];
   /** Dashed empty-slot outlines for unearned stickers (rebuilt after a reset). */
   emptySlotGraphics: Phaser.GameObjects.Graphics[] = [];
+  /** Shelf target this visit: id, null for the empty-slot fallback, unset before derivation. */
+  spotlightGameId: GameId | null | undefined;
+  /** Shelf slot used when the spotlight falls back to an empty slot. */
+  spotlightSlotIndex = 0;
+  /** Spotlight outlines owned by the current board, destroyed with it. */
+  spotlightGraphics: Phaser.GameObjects.Graphics[] = [];
   /** Tiles used as wiggle targets by the attract cue. */
   attractTargets: Phaser.GameObjects.Rectangle[] = [];
   /** The textless page dots (one per page; paged mode only). */
@@ -137,11 +143,19 @@ export class HubGrid {
     });
   }
 
+  /** Drops the current board's spotlight outlines before it is rebuilt. */
+  private clearSpotlightGraphics(): void {
+    for (const graphics of this.spotlightGraphics) graphics.destroy();
+    this.spotlightGraphics = [];
+  }
+
   /** Clears per-visit state (Phaser reuses scene instances across visits). */
   resetForVisit(): void {
     this.entranceIndex = 0;
     this.attractTargets = [];
     this.navLocked = false;
+    this.spotlightGameId = undefined;
+    this.clearSpotlightGraphics();
     // A new visit always starts on All (spec FR-7, D4).
     this.selection = ALL_GROUP_ID;
     // Nothing is tappable until this visit builds its grid.
@@ -278,11 +292,13 @@ export class HubGrid {
   /** Destroys every object owned by the wide grid (tiles + shelf). */
   destroyWideGrid(): void {
     destroyWideGrid(this);
+    this.clearSpotlightGraphics();
   }
 
   /** Destroys every object owned by the current page (tiles + shelf). */
   destroyPageGrid(): void {
     destroyPageGrid(this);
+    this.clearSpotlightGraphics();
   }
 
   /** Destroys everything the grid owns (page dots, both board lists, chips). */
@@ -297,16 +313,19 @@ export class HubGrid {
 
   /** Builds the wide 6x4 grid (see gridBuilder.buildWideGrid). */
   buildWideGrid(): void {
+    this.clearSpotlightGraphics();
     buildWideGrid(this);
   }
 
   /** Builds one page of the paged grid (see gridBuilder.buildPageGrid). */
   buildPageGrid(page: number, slideFrom: number | null = null): void {
+    this.clearSpotlightGraphics();
     buildPageGrid(this, page, slideFrom);
   }
 
   /** Builds the selected group's board (see gridBuilder.buildFilteredGrid). */
   buildFilteredGrid(): void {
+    this.clearSpotlightGraphics();
     buildFilteredGrid(this);
   }
 
@@ -364,6 +383,7 @@ export class HubGrid {
 
   /** Rebuilds the sticker shelf from storage after a parental progress reset. */
   rerenderStickerShelf(): void {
+    this.clearSpotlightGraphics();
     rerenderStickerShelf(this);
   }
 

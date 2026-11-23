@@ -22,13 +22,19 @@ export interface ReplayCueDeps {
   /** Visible tiles in draw order; read lazily so page flips and filters count. */
   getVisibleGames(): readonly VisibleGameEntry[];
   getProgress(): Readonly<Record<GameId, GameProgress>>;
+  /** Earned games for the active profile, in registry order. */
+  getEarnedGames(): readonly GameId[];
+  /** Publishes this visit's shelf spotlight target to the grid. */
+  setSpotlight(gameId: GameId | null | undefined, slotIndex: number): void;
   /** The existing storage path, called only after a game actually opens. */
   recordGamePlay(gameId: GameId): void;
 }
 
 export interface ReplayCueController {
-  /** Starts an empty visit for the given profile and points the cue at a game. */
-  beginVisit(profileId?: string): void;
+  /** Starts an empty visit and advances that profile's shelf spotlight cursor. */
+  prepareVisit(profileId?: string): void;
+  /** Points the suggestion cue at a game once the board exists. */
+  beginVisit(): void;
   /** Discards the outgoing visit and re-derives both cues for the new profile. */
   resetForProfile(profileId: string): void;
   /** Records a play through storage and in the in-memory visit. */
@@ -46,6 +52,13 @@ export interface ReplayCueController {
 export const SUGGESTION_RING_RADIUS = 70;
 export const SUGGESTION_RING_WIDTH = 4;
 export const SUGGESTION_RING_COLOR = 0x2b6cb0;
+
+/**
+ * Memory-only shelf cursors, one per profile. Deliberately separate from the
+ * per-visit state below: a visit reset starts a fresh suggestion session, but
+ * the earned-sticker spotlight keeps advancing across Hub visits.
+ */
+const spotlightCursors = new Map<string, number>();
 
 /** Builds the selector's `Stamps` view from stored per-game progress. */
 function stampsOf(progress: Readonly<Record<GameId, GameProgress>>): Stamps {
@@ -86,6 +99,19 @@ export function createReplayCue(deps: ReplayCueDeps): ReplayCueController {
     ring.setDepth(2);
   }
 
+  /** Advances this profile's earned-sticker cursor and publishes the target. */
+  function deriveSpotlight(): void {
+    const profileId = visit.profileId ?? "default";
+    const earned = deps.getEarnedGames();
+    if (earned.length === 0) {
+      deps.setSpotlight(null, 0);
+      return;
+    }
+    const next = ((spotlightCursors.get(profileId) ?? -1) + 1) % earned.length;
+    spotlightCursors.set(profileId, next);
+    deps.setSpotlight(earned[next], 0);
+  }
+
   function deriveSuggestion(): void {
     const visible = deps.getVisibleGames();
     if (visible.length === 0) {
@@ -101,12 +127,16 @@ export function createReplayCue(deps: ReplayCueDeps): ReplayCueController {
   }
 
   return {
-    beginVisit(profileId) {
+    prepareVisit(profileId) {
       visit = createReplayVisit(profileId);
+      deriveSpotlight();
+    },
+    beginVisit() {
       deriveSuggestion();
     },
     resetForProfile(profileId) {
       visit = setReplayVisitProfile(visit, profileId);
+      deriveSpotlight();
       deriveSuggestion();
     },
     recordPlay(gameId) {
