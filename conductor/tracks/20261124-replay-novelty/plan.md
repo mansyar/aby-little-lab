@@ -84,20 +84,18 @@
 - **Covers:** FR-9, FR-10, NFR-4, AC-9, AC-10
 - **Touches:** `README.md`, `docs/PRD.md`, `docs/TDD.md`, `conductor/product.md`, and any count-bearing doc the validator names
 - **Verification:** `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Sync behaviour docs** — covers: FR-9
-  - [ ] **P4.T1.1:** Describe the suggestion cue, no-repeat policy and sticker spotlight in README and PRD.
-  - [ ] **P4.T1.2:** Record the new modules and tests in TDD; mark the roadmap row Done without moving other milestones.
-- [ ] **P4.T2: Run the full gate** — covers: FR-10, NFR-4
-  - [ ] **P4.T2.1:** Pass the full `verify_phase` chain including bundle, module-size, texture, PWA and docs guards.
-  - [ ] **P4.T2.2:** Confirm no save-schema, art, audio or game-rule file changed outside the stated Touches.
+- [x] **P4.T1: Sync behaviour docs** — covers: FR-9
+  - [x] **P4.T1.1:** Describe the suggestion cue, no-repeat policy and sticker spotlight in README and PRD.
+  - [x] **P4.T1.2:** Record the new modules and tests in TDD; mark the roadmap row Done without moving other milestones.
+- [x] **P4.T2: Run the full gate** — covers: FR-10, NFR-4
+  - [x] **P4.T2.1:** Pass the full `verify_phase` chain including bundle, module-size, texture, PWA and docs guards.
+  - [x] **P4.T2.2:** Confirm no save-schema, art, audio or game-rule file changed outside the stated Touches.
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
+**Result:** verified — README/PRD/TDD describe the no-repeat suggestion cue, selector-driven idle wiggle and per-visit sticker spotlight; product roadmap row marked Done; full verify_phase green (155/3,362; coverage 97.09/90.82/96.31/98.26; 169 modules zero warnings; bundle/PWA/docs guards green).
+**Checkpoint:** f8f1680a
 **Evidence:** conductor/tracks/20261124-replay-novelty/verification/phase-4.md
--->
 
 <!--
 Review fixes are appended by `conductor-review` as:
