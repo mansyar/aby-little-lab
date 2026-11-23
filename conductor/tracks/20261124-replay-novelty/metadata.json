@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-24T00:49:45+11:00",
-  "updated_at": "2026-11-24T02:38:00+11:00",
+  "updated_at": "2026-11-24T02:45:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261124-replay-novelty",
@@ -15,12 +15,12 @@
   "progress": {
     "phases_total": 5,
     "phases_verified": 5,
-    "tasks_total": 12,
-    "tasks_done": 12
+    "tasks_total": 13,
+    "tasks_done": 13
   },
   "last_checkpoint": "e2a9bf26",
-  "review_verdict": "BLOCK",
-  "review_rounds": 1,
+  "review_verdict": "PASS",
+  "review_rounds": 2,
   "doc_sync": "none",
   "pr_url": null,
   "reverted_at": null,
