@@ -102,8 +102,9 @@ All four planned phases are verified with per-phase evidence and checkpoints; 10
 
 ## Doc sync
 
-`none` — all post-review documentation changes (README.md:156, PRD.md:106, integrated.md) were
-committed in Phase R1; no further doc changes are outstanding.
+`none` — all behaviour-bearing documentation changes (README.md:156, PRD.md:106, integrated.md)
+were committed in Phase R1. Round 2 changed only Conductor review state (this file, metadata.json);
+no product, design, or count-bearing doc changed after the review, so no further doc sync is required.
 
 ## History
 
