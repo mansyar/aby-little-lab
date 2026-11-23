@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-23T07:04:58+11:00",
-  "updated_at": "2026-11-23T08:54:00+11:00",
+  "updated_at": "2026-11-23T17:40:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261123-release-v1-25-0",
@@ -14,15 +14,16 @@
   "base_sha": "9ffbc01d3eb976bedfd6f5bc92b8e269abd9173a",
   "progress": {
     "phases_total": 7,
-    "phases_verified": 5,
+    "phases_verified": 7,
     "tasks_total": 19,
-    "tasks_done": 13
+    "tasks_done": 19
   },
-  "last_checkpoint": "19aebacb",
+  "last_checkpoint": "4359667b",
   "review_verdict": "PASS",
   "review_rounds": 2,
   "doc_sync": "none",
   "pr_url": "https://github.com/mansyar/aby-little-lab/pull/93",
+  "pr_state": "merged",
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,

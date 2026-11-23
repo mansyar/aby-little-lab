@@ -1,7 +1,7 @@
 # Release Notes - v1.25.0
 
-> Status: DRAFT
-> Tag: (pending)
+> Status: FINAL
+> Tag: `v1.25.0` (`4359667b`, 2026-11-23)
 > Base: `v1.24.0` (`cac20094`, 2026-11-21)
 
 One feature track has merged since v1.24.0, together with the last two housekeeping items from the roadmap. For families the headline is more to play and learn in the games they already know: twice as many words, stories, feelings moments and shapes, with fresh artwork drawn in the same gentle style. Nothing new is asked of a child — the rules, the controls and the familiar board are unchanged. Behind the scenes, the code now has a strict size budget and the long history of releases has been gathered into one readable file, so the app stays easy to keep healthy. There is nothing to install or move over: this is the same Aby's Little Lab, with more to discover.
@@ -46,7 +46,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 - Boot and headers: `node scripts/validate-boot.js` boots the built app against `vite preview` on port 4173, and `node scripts/validate-headers.js` asserts the strict Content-Security-Policy and its three companion headers on the built image.
 - Browser journeys: the Playwright suite drives the built `dist` in Chromium through boot, all 24 launches, the mechanic-family rounds, the sticker award, the parental gate, settings persistence, backup/restore, the daily cap and an offline relaunch. CI runs it as two `Browser Journeys` shards (13 cases each), outside the fast `verify_phase` gate.
 - Device matrix: **SKIPPED — accepted gap** (see Known Issues). CI re-confirms lint, typecheck, unit tests, the production build, the bundle, PWA, boot, headers and docs validators, plus the browser journeys on the release commit. Coverage, module-size and texture figures are verified by the local `verify_phase` gate recorded above; they are not currently CI steps.
-- Tag and deploy: **pending** — this DRAFT is written before tagging. `v1.25.0` is not yet pushed; the tag CI run, deploy webhook result and live-entry check are recorded when the tag is cut.
+- Tag and deploy: `v1.25.0` points at merge commit `4359667b` on `master`. The tag CI run (`45124846826`, 2026-11-23) passed Quality Gates (2m23s), both Browser Journey shards (13 + 13 cases) and the rollup, and fired the Coolify deploy webhook via the tag-gated job. The tag must not be moved.
 
 ## Known Issues
 

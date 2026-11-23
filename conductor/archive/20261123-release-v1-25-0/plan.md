@@ -84,17 +84,15 @@
 - **Covers:** FR-7, FR-8, NFR-3, AC-6, AC-7
 - **Touches:** `conductor/tracks/20261123-release-v1-25-0/*` only
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P5.T1: Run integrated verification and post-review doc sync** — covers: FR-7
-- [ ] **P5.T2: Pass `conductor-review` with up to two fix rounds** — covers: FR-7
-- [ ] **P5.T3: Open PR, watch CI, merge after explicit go-ahead** — covers: FR-8
+- [x] **P5.T1: Run integrated verification and post-review doc sync** — covers: FR-7
+- [x] **P5.T2: Pass `conductor-review` with up to two fix rounds** — covers: FR-7
+- [x] **P5.T3: Open PR, watch CI, merge after explicit go-ahead** — covers: FR-8
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-5.md
--->
+**Result:** verified — full gate green; review PASS in 2 rounds (F1/F2 fixed, none deferred); PR #93 green after the `threads` pool fix and merged at `4359667b`.
+**Checkpoint:** `4359667b`
+**Evidence:** conductor/archive/20261123-release-v1-25-0/verification/phase-5.md
 
 ## Phase 6: Tag and ship
 
@@ -103,17 +101,15 @@
 - **Covers:** FR-9, AC-8
 - **Touches:** `docs/release-notes-v1.25.0.md`, git tag
 - **Verification:** `git ls-remote origin refs/tags/v1.25.0` resolves to merged master HEAD + notes FINAL + `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P6.T1: Confirm no existing v1.25.0 tag locally or on origin** — covers: FR-9
-- [ ] **P6.T2: Create and push the tag after explicit go-ahead** — covers: FR-9
-- [ ] **P6.T3: Flip notes DRAFT→FINAL with tag/CI/deploy record** — covers: FR-9
+- [x] **P6.T1: Confirm no existing v1.25.0 tag locally or on origin** — covers: FR-9
+- [x] **P6.T2: Create and push the tag after explicit go-ahead** — covers: FR-9
+- [x] **P6.T3: Flip notes DRAFT→FINAL with tag/CI/deploy record** — covers: FR-9
 
-<!--
-**Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261123-release-v1-25-0/verification/phase-6.md
--->
+**Result:** verified — `v1.25.0` pushed at merged master HEAD `4359667b` after owner go-ahead; tag CI run `45124846826` green with the Coolify webhook fired; notes FINAL with tag/CI/deploy record.
+**Checkpoint:** `4359667b`
+**Evidence:** conductor/archive/20261123-release-v1-25-0/verification/phase-6.md
 
 ## Phase R1: Review Fixes
 
