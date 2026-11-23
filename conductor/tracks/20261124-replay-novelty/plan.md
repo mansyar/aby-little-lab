@@ -37,9 +37,9 @@
   the play, the idle wiggle uses the same selector, and profile switches reset.
 - **Depends on:** Phase 1
 - **Covers:** FR-4, FR-5, FR-7, NFR-3, AC-4, AC-5, AC-7
-- **Touches:** `src/game/hub/hubAttract.ts`, `src/game/hub/gameLaunch.ts`, `src/scenes/HubScene.ts`, `src/__tests__/game/hub/hubAttract.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`
-- **Verification:** `pnpm exec vitest run src/__tests__/game/hub/hubAttract.test.ts src/__tests__/scenes/hubEngagement.test.ts`
-- **Status:** pending
+- **Touches:** `src/game/hub/hubAttract.ts`, `src/game/hub/gameLaunch.ts`, `src/game/hubGrid.ts` (read-only visible-game helper), `src/scenes/HubScene.ts`, `src/__tests__/game/hub/hubAttract.test.ts`, `src/__tests__/scenes/hubEngagement.test.ts`, `src/__tests__/scenes/hubScene.test.ts`
+- **Verification:** `pnpm exec vitest run src/__tests__/game/hub/hubAttract.test.ts src/__tests__/scenes/hubEngagement.test.ts src/__tests__/scenes/hubScene.test.ts`
+- **Status:** in_progress
 
 - [ ] **P2.T1: Wire the suggestion cue** — covers: FR-4
   - [ ] **P2.T1.1:** Ask the selector for a game on Hub entry and show a textless mascot/point cue at that tile.
