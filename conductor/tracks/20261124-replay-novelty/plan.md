@@ -15,7 +15,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-8, NFR-1, AC-1, AC-2, AC-3, AC-8
 - **Touches:** `src/game/replayVariety.ts` (new), `src/__tests__/game/replayVariety.test.ts` (new)
 - **Verification:** `pnpm exec vitest run src/__tests__/game/replayVariety.test.ts`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Model one profile's visit state** — covers: FR-1
   - [ ] **P1.T1.1:** Create a fresh empty set on Hub entry with no storage writes.
