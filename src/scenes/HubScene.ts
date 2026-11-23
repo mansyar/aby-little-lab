@@ -13,6 +13,7 @@ import type {
   E2ERoundTarget,
   E2ESettingsState,
 } from "../game/e2eBridge";
+import { GAME_REGISTRY } from "../game/gameRegistry";
 import { createArtResolver } from "../game/hub/artGroups";
 import {
   createGameLaunch,
@@ -36,6 +37,7 @@ import {
   type PlayTimeUiController,
 } from "../game/hub/playTimeUi";
 import type { ArtKeyEntry } from "../game/hub/prewarm";
+import { createReplayCue } from "../game/hub/replayCue";
 import { HubGrid } from "../game/hubGrid";
 import { selectionSpokenName } from "../game/hubGroups";
 import { GAME_TILES } from "../game/hubTiles";
@@ -55,12 +57,7 @@ import {
 import { textStyle } from "../utils/typography";
 import { loadSceneWithRetry, sceneLoaders } from "./sceneRegistry";
 
-/**
- * Hub scene — the central navigation hub.
- *
- * Displays a grid of 22 game tiles, a sticker book showing earned stickers,
- * and a settings button gated behind a parental lock.
- */
+/** Hub scene: game-tile grid, sticker shelf and parental-gated settings. */
 export class HubScene extends Phaser.Scene {
   private parentLock?: ParentLock;
   private settingsPanel?: SettingsPanel;
@@ -86,29 +83,48 @@ export class HubScene extends Phaser.Scene {
   private startAudioFn: () => void = () => {};
   /** Tile-grid renderer: layouts, page dots, swipes and the sticker shelf. */
   private grid: HubGrid;
+  /** Memory-only visit state, textless cue ring and selector-driven wiggle targets. */
+  private readonly replayCue = createReplayCue({
+    scene: this,
+    getVisibleGames: () => this.grid.visibleGameEntries(),
+    getProgress: () => getProgress(),
+    // Read the active profile's sticker flags directly: the shelf already
+    // calls hasSticker once per tile, and other suites count those calls.
+    getEarnedGames: () =>
+      GAME_REGISTRY.filter((game) => getActiveProfile().stickers[game.gameId].earned).map(
+        (game) => game.gameId,
+      ),
+    setSpotlight: (gameId, slotIndex) => {
+      this.grid.spotlightGameId = gameId;
+      this.grid.spotlightSlotIndex = slotIndex;
+    },
+    recordGamePlay: (gameId) => recordGamePlay(gameId),
+  });
 
   constructor() {
     super({ key: "Hub" });
     this.profileChip = new ProfileChip({
       scene: this,
       onOpen: () => {
-        // The picker is the Hub's front-most surface: a retry cue must not
-        // survive behind it (FR-6).
+        // The picker is front-most: no retry cue may survive behind it (FR-6).
         this.hideLoadCue();
         this.startAudioFn();
       },
       onSwitch: () => {
+        // switchProfile has run: start this profile's visit empty and re-derive.
+        this.replayCue.resetForProfile(getActiveProfile().id);
         this.grid.rerenderStickerShelf();
         this.playTime.refreshPlayTimeState();
-        // The order is recency-first for the active profile, so a switch
-        // re-derives the work still pending (spec: profile switch mid-cycle).
-        this.restartPrewarm();
+        this.attract.resetForVisit();
+        this.attract.resetIdleAttract();
+        this.restartPrewarm(); // prewarm order is recency-first per profile
       },
     });
     this.pwaToasts = new PwaToasts(this);
     this.attract = createHubAttract({
       scene: this,
       getAttractTargets: () => this.grid.attractTargets,
+      pickAttractTargets: (count) => this.replayCue.pickAttractTargets(count),
       playIdleCall: () => AudioManager.getInstance().playIdleCall(),
       isReducedMotion: () => isReducedMotion(),
     });
@@ -126,10 +142,11 @@ export class HubScene extends Phaser.Scene {
       activateTile: (tileIndex, tile) => this.activateTile(tileIndex, tile),
       onUserGesture: () => this.attract.resetIdleAttract(),
       gestureBlocked: () => Boolean(this.profileChip.isOpen() || this.settingsPanel),
-      onBoardChange: () => this.hideLoadCue(),
-      // The chip row's selection is spoken, not written: `speakSentence` re-reads
-      // the SFX toggle on every call, so a parent's change mid-session is
-      // honoured and a voiceless device stays silent (spec FR-8, D6).
+      onBoardChange: () => {
+        this.hideLoadCue();
+        this.replayCue.refreshCue();
+      },
+      // Spoken, not written: `speakSentence` re-reads the SFX toggle each call (FR-8, D6).
       onSelectGroup: (selection) => {
         speakSentence(selectionSpokenName(selection), getSettings().sfxEnabled);
       },
@@ -144,7 +161,7 @@ export class HubScene extends Phaser.Scene {
         this.grid.navLocked = locked;
       },
       startSession: (profileId) => startPlaySession(profileId),
-      recordPlay: (gameId) => recordGamePlay(gameId),
+      recordPlay: (gameId) => this.replayCue.recordPlay(gameId),
       getActiveProfileId: () => getActiveProfile().id,
       getPlayTime: () => getPlayTime(),
       transition: (sceneKey) => transitionToScene(this, sceneKey),
@@ -189,13 +206,9 @@ export class HubScene extends Phaser.Scene {
     const reducedMotion = isReducedMotion();
     this.attract.resetForVisit();
     this.playTime.beginVisit();
-    // A launch in flight belongs to the previous visit; bump the visit token.
-    this.launcher.beginVisit();
-    // A visit must never inherit the previous one's prewarm pass (NFR-6).
-    this.cancelPrewarm();
-    // Phaser reuses this instance across visits (auto-return re-runs create()),
-    // so clear the launch guard or every tile tap after the first game is dead.
-    this.grid.resetForVisit();
+    this.launcher.beginVisit(); // a launch in flight belongs to the previous visit
+    this.cancelPrewarm(); // no prewarm pass carries across visits (NFR-6)
+    this.grid.resetForVisit(); // Phaser reuses this instance; clear the tap guard
     this.grid.justEarned = this.justEarned;
 
     // Account for the play session that ended when the game scene returned.
@@ -211,8 +224,7 @@ export class HubScene extends Phaser.Scene {
     }
 
     const startAudio = (): void => {
-      // First gesture in the session also unlocks iOS/WebKit speech (a silent
-      // warm-up utterance), otherwise programmatic TTS is silently dropped.
+      // First gesture unlocks iOS/WebKit speech; silent TTS is dropped otherwise.
       unlockSpeechForUserGesture();
       const audio = AudioManager.getInstance();
       audio.resume();
@@ -220,8 +232,9 @@ export class HubScene extends Phaser.Scene {
     };
     this.startAudioFn = startAudio;
 
-    // Phones get the paged 5x2 grid so tiles stay above the 64px touch floor;
-    // a resize that flips the classification rebuilds the grid.
+    // Derive the shelf spotlight before the board draws its stickers.
+    this.replayCue.prepareVisit(getActiveProfile().id);
+    // Phones get the paged 5x2 grid; a resize that flips mode rebuilds it.
     this.grid.hubPage = 0;
     this.grid.classifyViewport();
     if (this.grid.paged) {
@@ -231,21 +244,20 @@ export class HubScene extends Phaser.Scene {
     } else {
       this.grid.buildWideGrid();
     }
+    // The board is up, so visible tiles exist and the cue can be derived.
+    this.replayCue.beginVisit();
     this.scale.on("resize", this.grid.handleViewportChange, this.grid);
 
     this.playTime.createPlayTimeIndicator();
 
     this.input.on("pointerdown", () => {
-      // Any first interaction unlocks audio so the idle-attract cue is
-      // audible on a fresh load (the tile tap already resumes + starts BGM).
+      // First interaction unlocks audio so the idle call is audible on a fresh load.
       unlockSpeechForUserGesture();
       AudioManager.getInstance().resume();
       this.attract.resetIdleAttract();
     });
     this.attract.scheduleIdleAttract();
-    // Armed with the rest of the post-entrance flow, never inside
-    // `sceneEntrance`: the pass imports only in idle slots, so the entrance's
-    // fade and zoom keep their frames (NFR-2).
+    // Armed post-entrance, not inside `sceneEntrance`: imports use idle slots (NFR-2).
     this.syncPrewarm();
 
     const settingsButton = this.add.text(
@@ -268,8 +280,7 @@ export class HubScene extends Phaser.Scene {
       scene: this,
       target: settingsButton,
       onSuccess: () => {
-        // Settings owns the screen once the lock opens: drop the retry cue so
-        // it cannot outlive the Hub's front-most surface (FR-6).
+        // Settings owns the screen: drop the retry cue (FR-6).
         this.hideLoadCue();
         this.settingsPanel?.destroy();
         this.settingsPanel = new SettingsPanel(this, undefined, () => {
@@ -290,8 +301,7 @@ export class HubScene extends Phaser.Scene {
     this.pwaToasts.wire();
 
     this.events.on("shutdown", () => {
-      // From here on a load in flight resolves against a dead visit; end it
-      // before anything else so a late `openGame` continuation stops early.
+      // End the visit first so a late `openGame` continuation stops early.
       this.launcher.endVisit();
       this.pwaToasts.destroy();
       this.parentLock?.destroy();
@@ -300,26 +310,20 @@ export class HubScene extends Phaser.Scene {
       this.settingsButton = undefined;
       this.profileChip.destroy();
       this.playTime.destroy();
-      // A prewarm belongs to the visit that armed it: drop its pending idle
-      // slot so nothing imports for a Hub nobody is looking at (FR-5).
+      // A prewarm belongs to its visit: drop pending slots (FR-5).
       this.cancelPrewarm();
       this.attract.destroy();
+      this.replayCue.destroy();
       this.grid.destroy();
-      // Detach the viewport listener so a resize while the scene is inactive
-      // cannot rebuild a dead scene's objects.
+      // Detach resize so an inactive scene cannot rebuild dead objects.
       this.scale?.off("resize", this.grid.handleViewportChange, this.grid);
     });
 
-    // Registered after the cleanup above so the first shutdown handler stays
-    // the scene teardown; this one only detaches the page-visibility hook.
+    // Registered after cleanup: this one only detaches the visibility hook.
     this.playTime.watchPlayTimeVisibility();
   }
 
-  /**
-   * Activates a tile after the grid's tap guards pass. Delegates to the launch
-   * flow owned by `src/game/hub/gameLaunch.ts`; the audio unlock stays on the
-   * gesture that triggered it (see `GameLaunchDeps.startAudio`).
-   */
+  /** Delegates an approved tile tap to the extracted launch flow. */
   private activateTile(tileIndex: number, tile?: Phaser.GameObjects.Rectangle): void {
     this.launcher.activateTile(tileIndex, tile);
   }
@@ -364,11 +368,7 @@ export class HubScene extends Phaser.Scene {
     return publishHubPlayTime(this.e2eView);
   }
 
-  /**
-   * Test-compat reads: the cue and nudge live in the extracted launch and
-   * play-time controllers, but scene suites inspect them via cast
-   * (`hubSceneLoad.test.ts`). These getters preserve the pre-split surface.
-   */
+  /** Test-compat reads preserving the pre-split cue/nudge surface. */
   get loadCue(): GameLaunchCue | undefined {
     return this.launcher.cue;
   }

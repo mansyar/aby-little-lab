@@ -49,6 +49,12 @@ export interface HubAttractDeps {
   readonly scene: Phaser.Scene;
   /** Tiles eligible for the wiggle cue, in rotation order. */
   getAttractTargets(): readonly Phaser.GameObjects.Rectangle[];
+  /**
+   * Optional selector-driven targets. When supplied, it replaces the modulo
+   * rotation so wiggles can skip the just-played and just-suggested games;
+   * callers without a selector keep the legacy rotation.
+   */
+  pickAttractTargets?(count: number): readonly Phaser.GameObjects.Rectangle[];
   /** Plays the idle call (greeting prompt). */
   playIdleCall(): void;
   /** True while reduced motion suppresses the wiggle cue. */
@@ -79,6 +85,17 @@ export interface HubAttractController {
   waveMascot(): void;
   /** Drops the timer and destroys the mascot for the shutdown hook. */
   destroy(): void;
+}
+
+/** Legacy rotation: consecutive targets wrapping around the drawn board. */
+function rotatedTargets(
+  targets: readonly Phaser.GameObjects.Rectangle[],
+  tick: number,
+): readonly Phaser.GameObjects.Rectangle[] {
+  if (targets.length === 0) return [];
+  return Array.from({ length: Math.min(ATTRACT_WIGGLE_COUNT, targets.length) }, (_, index) => {
+    return targets[(tick + index) % targets.length];
+  });
 }
 
 /**
@@ -112,15 +129,15 @@ export function createHubAttract(deps: HubAttractDeps): HubAttractController {
     deps.playIdleCall();
     if (!idleAttractActive) {
       idleAttractActive = true;
-      const targets = deps.getAttractTargets();
+      // A selector (when supplied) provides distinct, freshly ranked tiles;
+      // otherwise keep the legacy rotating pick across the drawn board.
+      const selected = deps.pickAttractTargets?.(ATTRACT_WIGGLE_COUNT);
+      const targets = selected ?? rotatedTargets(deps.getAttractTargets(), attractWiggleTick);
       if (!deps.isReducedMotion() && targets.length > 0) {
-        // Wiggle only a couple of tiles so the cue stays gentle; rotate the
-        // pick across the grid on each attract so no tile feels ignored.
-        const start = attractWiggleTick % targets.length;
-        for (let i = 0; i < ATTRACT_WIGGLE_COUNT; i++) {
-          const tile = targets[(start + i) % targets.length];
+        // Wiggle only a couple of tiles so the cue stays gentle.
+        for (let i = 0; i < targets.length; i++) {
           scene.tweens.add({
-            targets: tile,
+            targets: targets[i],
             angle: WIGGLE_ANGLE,
             duration: WIGGLE_DURATION,
             yoyo: true,

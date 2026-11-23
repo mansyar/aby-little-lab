@@ -118,6 +118,22 @@ describe("idle attract", () => {
       IDLE_CALL_INTERVAL,
       expect.any(Function),
     );
+
+    // AC-5: a supplied selector replaces the modulo rotation.
+    const guided = new MockScene();
+    const chosen = {} as unknown as Phaser.GameObjects.Rectangle;
+    const picker = vi.fn((): readonly Phaser.GameObjects.Rectangle[] => [chosen]);
+    const guidedController = createHubAttract({
+      ...deps,
+      scene: asScene(guided),
+      pickAttractTargets: picker,
+    });
+    guidedController.scheduleIdleAttract();
+    fireLastTimer(guided);
+    expect(picker).toHaveBeenCalledWith(ATTRACT_WIGGLE_COUNT);
+    const guidedTweens = (guided.tweens.add as MockFn).mock.calls;
+    expect(guidedTweens).toHaveLength(1);
+    expect(guidedTweens[0][0].targets).toBe(chosen);
   });
 
   it("starts the wiggle cue only once per idle period", () => {

@@ -138,6 +138,8 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     earnSticker("shape-sorter");
     const { deps } = makeDeps();
     const grid = new HubGrid(deps);
+    // AC-6: the spotlight is a static outline on the one earned sticker.
+    grid.spotlightGameId = "shape-sorter";
     grid.buildWideGrid();
 
     // One earned sticker thumbnail for shape-sorter.
@@ -146,11 +148,17 @@ describe("HubGrid — classic wide 6x4 grid", () => {
     );
     expect(stickers.length).toBe(1);
     // 23 unearned slots: each dashed ring has 10 arc segments.
-    const slotGraphics = mockRegistry.filter((obj) => obj.kind === "graphics");
+    const slotGraphics = mockRegistry.filter(
+      (obj) => obj.kind === "graphics" && (obj.arc as MockFn).mock.calls.length === 10,
+    );
     for (const g of slotGraphics) {
       expect(g.arc).toHaveBeenCalledTimes(10);
     }
     expect(slotGraphics.length).toBe(23);
+    // No new art or texture key: one graphics outline, no tween.
+    expect(grid.spotlightGraphics).toHaveLength(1);
+    expect(grid.spotlightGraphics[0].strokeCircle).toHaveBeenCalledWith(0, 0, 16);
+    expect(grid.spotlightGraphics[0].strokeCircle).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the earned sticker below the tile label and above the tile's bottom edge", () => {
@@ -465,8 +473,10 @@ describe("HubGrid — paged grid (narrow viewports)", () => {
     const grid = new HubGrid(deps);
     narrowViewport(scene);
     grid.classifyViewport();
+    grid.spotlightGameId = "how-many";
     grid.buildPageGrid(1);
 
+    expect(grid.spotlightGraphics).toHaveLength(1);
     const built = mockRegistry.slice();
     expect(
       built.some((obj) => obj.kind === "image" && String(obj.args?.[2]).startsWith("sticker_")),
@@ -739,10 +749,15 @@ describe("HubGrid — group chips and the filtered board", () => {
     const grid = new HubGrid(deps);
     grid.classifyViewport();
     grid.setGroup("numbers");
+    grid.spotlightGameId = "how-many";
 
     grid.rerenderStickerShelf();
 
     expect(grid.stickerImages).toHaveLength(1);
     expect(grid.emptySlotGraphics).toHaveLength(4);
+    // The spotlight is re-derived from the grid field, not lost on a re-render.
+    expect(grid.spotlightGraphics).toHaveLength(1);
+    grid.rerenderStickerShelf();
+    expect(grid.spotlightGraphics).toHaveLength(1);
   });
 });

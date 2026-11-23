@@ -233,7 +233,7 @@ typical / 320 MiB full (real assets 74.57 / 313.00 MiB) with a hard
 | Track | Work | Exit gate |
 |---|---|---|
 | `20261208-content-depth` — Done 2026-11-21 (track `20261121-content-depth`; see `docs/perf-baseline.md`) | Words 28 → 60 (27 three-letter / 33 four-letter), stories 15 → 30 (15 obvious / 15 subtle; 90 panels), scenarios 32 → 48 (12 per emotion), shapes 18 → 24; two signature variants per pool | Machine-checked: seeded no-repeat playthrough tests across all four games + `validate-textures.js` guard (80/320 MiB caps, ratio ≤ 0.5) in `verify_phase` |
-| `20261208-replay-novelty` | Session-level variety policy (no immediate repeats), rotating sticker sets, "Professor Hoot suggests" rotation | Median distinct games per session ≥ 4 |
+| `20261208-replay-novelty` — Done 2026-11-24 (track `20261124-replay-novelty`) | Session-level variety policy (no immediate repeats) via a per-visit in-memory selector (unplayed → least-recently played → registry order), a textless Professor Hoot suggestion cue, the same no-repeat selector driving the idle wiggle, and one earned-sticker shelf spotlight per visit with an empty-slot fallback | Machine-checked: 1,200 seeded eight-play visits with median distinct games ≥ 4, zero unexpected immediate repeats, and per-profile reset tests; full `verify_phase` green |
 | `20261208-adaptive-tuning` | Retune the bands against Phase 2 data; optional parent view of the current band | Band distribution matches the designed curve |
 
 ### 10.6 Phase 5 — Reach (4–6 weeks, gated by Phase 3) — Cancelled 2026-11-20

@@ -210,6 +210,7 @@ import {
   startArtPrewarm,
   startPrewarm,
 } from "../../game/hub/prewarm";
+import { SUGGESTION_RING_RADIUS } from "../../game/hub/replayCue";
 import { pagedTilePosition } from "../../game/hubPaging";
 import { GAME_TILES } from "../../game/hubTiles";
 import { HubScene } from "../../scenes/HubScene";
@@ -227,6 +228,26 @@ import {
   setPlayTimeLimit,
   updateSettings,
 } from "../../utils/storage";
+
+/** Read-only probe for the Hub's in-memory visit state (Phase 2). */
+interface ReplayProbe {
+  replayCue: {
+    visit: { played: ReadonlySet<GameId>; lastPlayed: GameId | null };
+    suggestion: GameId | null;
+    ring: MockObject | undefined;
+    recordPlay: (gameId: GameId) => void;
+    prepareVisit: (profileId?: string) => void;
+  };
+  grid: {
+    visibleGameEntries(): Array<{ gameId: GameId; target: { x: number; y: number } }>;
+    spotlightGameId: GameId | null | undefined;
+    spotlightGraphics: MockObject[];
+  };
+}
+
+function replayProbe(scene: HubScene): ReplayProbe {
+  return scene as unknown as ReplayProbe;
+}
 
 /** Returns the first object of the given kind registered for an event. */
 function getHandler(kind: string, event: string): ((...args: unknown[]) => unknown) | undefined {
@@ -288,7 +309,27 @@ describe("HubScene paged grid (narrow viewports)", () => {
   });
 
   it("renders exactly one page of 10 larger tiles and no wide tiles", () => {
-    createNarrowHub();
+    earnSticker(GAME_TILES[0].gameId);
+    earnSticker(GAME_TILES[1].gameId);
+    const scene = createNarrowHub();
+
+    // AC-6: one earned sticker per visit, advancing with wrap-around.
+    const probe = replayProbe(scene);
+    expect([GAME_TILES[0].gameId, GAME_TILES[1].gameId]).toContain(probe.grid.spotlightGameId);
+    const profileId = getActiveProfile().id;
+    probe.replayCue.prepareVisit(profileId);
+    const next = probe.grid.spotlightGameId;
+    expect(next).not.toBeNull();
+    probe.replayCue.prepareVisit(profileId);
+    expect(probe.grid.spotlightGameId).not.toBe(next);
+    probe.replayCue.prepareVisit(profileId);
+    expect(probe.grid.spotlightGameId).toBe(next);
+    // A different profile keeps its own cursor; switching back resumes this one.
+    probe.replayCue.prepareVisit("spotlight-other-profile");
+    const other = probe.grid.spotlightGameId;
+    expect(other).not.toBe(next);
+    probe.replayCue.prepareVisit(profileId);
+    expect(probe.grid.spotlightGameId).toBe(other);
 
     expect(pagedRects().length).toBe(10);
     const wideTiles = mockRegistry.filter((obj) => {
@@ -301,8 +342,12 @@ describe("HubScene paged grid (narrow viewports)", () => {
   it("maps page-1 tiles to games 11-20 (How Many? first)", async () => {
     const scene = createNarrowHub();
 
+    // FR-4/AC-4: the entry cue is up before navigation repoints the tiles.
+    expect(replayProbe(scene).replayCue.ring).toBeDefined();
     // Flip to page 2 via the second dot.
     pageDots()[1].handlers.pointerup?.();
+    // The outgoing tiles die with the flip; a stale ring must not survive them.
+    expect(replayProbe(scene).replayCue.ring).toBeUndefined();
 
     const afterFlip = pagedRects().length;
     expect(afterFlip).toBe(20); // outgoing page lingers (slide timer mocked)
@@ -312,11 +357,19 @@ describe("HubScene paged grid (narrow viewports)", () => {
     await settleLoad(loadSceneWithRetry);
 
     expect(mockRecordGamePlay).toHaveBeenCalledWith("how-many");
-    expect(scene).toBeDefined();
+    // AC-4: the same launch hook records the play in the in-memory visit state.
+    const visit = replayProbe(scene).replayCue.visit;
+    expect(visit.lastPlayed).toBe("how-many");
+    expect(visit.played.has("how-many")).toBe(true);
   });
 
   it("builds the last page as four centred tiles", () => {
-    createNarrowHub();
+    const scene = createNarrowHub();
+    // AC-6: no earned sticker spots one dashed empty slot instead.
+    const grid = replayProbe(scene).grid;
+    expect(grid.spotlightGameId).toBeNull();
+    expect(grid.spotlightGraphics).toHaveLength(1);
+    expect(grid.spotlightGraphics[0].strokeCircle).toHaveBeenCalled();
 
     pageDots()[2].handlers.pointerup?.();
 
@@ -892,35 +945,82 @@ describe("HubScene profile and hierarchy cohesion", () => {
 
   it("switches profiles from the picker and re-textures the chip", () => {
     setReducedMotion(false);
+    mockSpeech.speakSentence.mockClear();
     const scene = new HubScene();
     scene.create();
+    let current = scene;
     if (getProfiles().length < 2) {
       addProfile(getAvailableAvatars()[0]);
       mockRegistry.length = 0;
-      const fresh = new HubScene();
-      fresh.create();
+      current = new HubScene();
+      current.create();
+    }
+
+    // AC-4: the entry cue is a static, textless ring on the suggested tile.
+    const initial = replayProbe(current).replayCue;
+    expect(initial.suggestion).not.toBeNull();
+    const ring = initial.ring as unknown as MockObject;
+    const suggested = replayProbe(current)
+      .grid.visibleGameEntries()
+      .find((entry) => entry.gameId === initial.suggestion);
+    expect(suggested).toBeDefined();
+    expect(ring.strokeCircle).toHaveBeenCalledWith(
+      suggested?.target.x,
+      suggested?.target.y,
+      SUGGESTION_RING_RADIUS,
+    );
+    expect(mockSpeech.speakSentence).not.toHaveBeenCalled();
+
+    // Make the outgoing visit non-empty so the reset is observable.
+    const sample = GAME_TILES.find((tile) => tile.gameId !== initial.suggestion);
+    if (!sample) throw new Error("no alternate game tile");
+    initial.recordPlay(sample.gameId);
+
+    function switchProfiles(): void {
+      fireAll(getChipImage(), "pointerdown");
+      fireAll(getChipImage(), "pointerup");
+      const baseScale = 96 / 256;
+      const other = mockRegistry.find(
+        (obj) =>
+          obj.kind === "image" &&
+          obj.args?.[1] === 384 &&
+          obj.destroy.mock.calls.length === 0 &&
+          obj.setScale.mock.calls.some((call) => call[0] === baseScale),
+      );
+      if (!other) throw new Error("inactive picker avatar not found");
+      fireAll(other, "pointerup");
     }
 
     const before = getActiveProfile().id;
-    fireAll(getChipImage(), "pointerdown");
-    fireAll(getChipImage(), "pointerup");
-
-    const baseScale = 96 / 256;
-    const other = mockRegistry.find(
-      (obj) =>
-        obj.kind === "image" &&
-        obj.args?.[1] === 384 &&
-        obj.setScale.mock.calls.some((call) => call[0] === baseScale),
-    );
-    if (!other) throw new Error("inactive picker avatar not found");
-
-    fireAll(other, "pointerup");
+    switchProfiles();
 
     expect(getActiveProfile().id).not.toBe(before);
     // Picker closed: every picker avatar was destroyed.
     for (const obj of mockRegistry.filter((o) => o.kind === "image" && o.args?.[1] === 384)) {
       expect(obj.destroy.mock.calls.length).toBeGreaterThan(0);
     }
+
+    // AC-7: the new profile starts empty and both cues are re-derived.
+    const after = replayProbe(current).replayCue;
+    expect(after.visit.played.size).toBe(0);
+    expect(after.visit.lastPlayed).toBeNull();
+    expect(after.suggestion).not.toBeNull();
+    const newRing = after.ring as unknown as MockObject;
+    expect(newRing).not.toBe(ring);
+    expect(newRing.strokeCircle).toHaveBeenCalled();
+    expect(mockSpeech.speakSentence).not.toHaveBeenCalled();
+    // AC-6/NFR-2: the shelf spotlight is re-derived as a static empty-slot cue.
+    expect(replayProbe(current).grid.spotlightGameId).toBeNull();
+    expect(replayProbe(current).grid.spotlightGraphics).toHaveLength(1);
+
+    // Switching back starts a fresh visit for the original profile too.
+    after.recordPlay(sample.gameId);
+    switchProfiles();
+    expect(getActiveProfile().id).toBe(before);
+    const back = replayProbe(current).replayCue;
+    expect(back.visit.played.size).toBe(0);
+    expect(back.visit.lastPlayed).toBeNull();
+    expect(back.suggestion).not.toBeNull();
   });
 
   it("adds no idle motion tweens under reduced motion while tiles stay tappable", () => {
@@ -935,6 +1035,13 @@ describe("HubScene profile and hierarchy cohesion", () => {
       return navTiles.includes(config.targets as MockObject);
     });
     expect(motionTargets).toHaveLength(0);
+    // NFR-2: the spotlight is static under reduced motion, not a tween target.
+    const spotlight = replayProbe(scene).grid.spotlightGraphics[0];
+    expect(
+      (scene.tweens.add as MockFn).mock.calls.some(
+        (call) => (call[0] as { targets?: unknown }).targets === spotlight,
+      ),
+    ).toBe(false);
   });
 });
 
