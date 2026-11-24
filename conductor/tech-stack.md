@@ -406,7 +406,7 @@ Run this pass monthly; track `20261124-dependency-majors` is the worked example.
 
 ## See Also
 
-- [TDD.md](../docs/TDD.md) - Full technical design document with detailed config snippets
+- [TDD.md](../docs/TDD.md) — Full technical design document with detailed config snippets
 - [PRD.md](../docs/PRD.md) — Product requirements including SVG prompt engineering matrix
 
 > Historical changelog entries moved to [docs/changelog.md](../docs/changelog.md) on 2026-11-23.
