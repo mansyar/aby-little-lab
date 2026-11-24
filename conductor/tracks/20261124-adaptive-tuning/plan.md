@@ -20,7 +20,7 @@
 - **Verification:** `pnpm exec vitest run src/__tests__/game/adaptiveCurve.test.ts`,
   `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, then the full
   `verify_phase` chain. Commands run separately (no `&&` chains in subagents).
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Model realistic answer streams** — covers: FR-2, NFR-1, AC-2
   - [ ] P1.T1.1: Build a seeded RNG (mulberry32-style) and a profile generator
