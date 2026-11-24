@@ -56,3 +56,24 @@ The chain below is the `conductor/workflow.md` `verify_phase` sequence, run as s
 Primary (independent) verification run by the Conductor. The two commands the subagent could not run were re-run verbatim, both exit 0: `node scripts/validate-module-size.js` (171 modules, zero warnings) and `node scripts/validate-textures.js` (319 SVGs; 76.07/80 MiB tiered, 319.00/320 MiB full, 0.238/0.500 ratio). The doc diff was inspected and confirms the shipped 0.9/0.5 thresholds, ~19/69/12 distribution and parent viewed-profile readout are recorded in PRD §4.8 and TDD §7.3, with the product roadmap row marked Done. No tests, source files or generated artefacts changed in this phase.
 
 **Overall verdict: verified.** All 11 verification commands in the full `verify_phase` chain passed on the final tree (nine by the subagent, two re-run by the primary), with coverage 97.11/90.93/96.33/98.25 clearing the 90/85/88/95 gates and `validate-docs.js` at 5/5.
+
+## Integrated verification (Section 5)
+
+Primary ran the complete 10-command `verify_phase` chain end to end on the final tree (HEAD `7c10c609`) in a single pass, with `INTEGRATED_GATE_EXIT=0`:
+
+| Command | Result |
+| --- | --- |
+| `pnpm check` | exit 0 — 370 files checked, no fixes |
+| `pnpm typecheck` | exit 0 — app + e2e tsconfig clean |
+| `pnpm test -- --run` | exit 0 — 156 files / 3,380 tests passed |
+| `pnpm test:coverage` | exit 0 — stmts 97.11/90, branch 90.93/85, funcs 96.33/88, lines 98.25/95 |
+| `pnpm build` | exit 0 — 490 modules transformed |
+| `node scripts/validate-bundle.js` | exit 0 — shell 192.9 kB <= 200 kB |
+| `node scripts/validate-module-size.js` | exit 0 — 171 modules, zero warnings |
+| `node scripts/validate-textures.js` | exit 0 — 319 SVGs, 76.07/80 MiB, 319.00/320 MiB, ratio 0.238/0.500 |
+| `node scripts/validate-pwa.js` | exit 0 — 16 passed / 0 failed, 51 chunks precached |
+| `node scripts/validate-docs.js` | exit 0 — 5 passed / 0 failed |
+
+No boot/preload/PWA/asset source was changed by this track, so the Section 5 boot-smoke condition is not triggered; the PWA validator above covers the generated service worker. The integrated gate is green with no retries.
+
+**Integrated verdict: verified.**
