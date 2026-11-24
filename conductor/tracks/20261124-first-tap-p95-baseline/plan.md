@@ -14,20 +14,24 @@
 - **Covers:** FR-1, FR-5, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-1, AC-6, AC-7, AC-9, AC-10
 - **Touches:** `scripts/firstTapStats.mjs` (new), `scripts/firstTapStats.d.mts` (new), `scripts/measure-first-tap.mjs`, `src/__tests__/guard/firstTapStats.test.ts` (new), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only only), `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-1.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/guard/firstTapStats.test.ts`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, `node scripts/measure-first-tap.mjs --with-preview --samples 1 --json`, then the full `verify_phase` chain on the final tree.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Add a pure nearest-rank p95 helper** - covers: FR-1, NFR-1, AC-1
-  - [ ] **P1.T1.1:** Implement `percentile(values, q)` in `scripts/firstTapStats.mjs` with nearest-rank index `ceil(q * n) - 1`, returning `null` for empty input and preserving input order.
-  - [ ] **P1.T1.2:** Add `scripts/firstTapStats.d.mts` so the helper is typed for the Vitest guard test without a new dependency.
-- [ ] **P1.T2: Guard the helper with a unit test** - covers: FR-1, AC-1, AC-9
-  - [ ] **P1.T2.1:** Add `src/__tests__/guard/firstTapStats.test.ts` covering empty, single-value, even/odd sample sets, nearest-rank interpolation and unsorted input.
-  - [ ] **P1.T2.2:** Refresh living suite-count claims only if the added test file changes `vitest list` truth, then require `validate-docs.js` 5/5.
-- [ ] **P1.T3: Wire p95 into the measurement script** - covers: FR-1, FR-5, AC-6, AC-10
-  - [ ] **P1.T3.1:** Add `--samples <n>` with default 10 and loop each target in fresh contexts; keep stages A–D, warm-aware classification and the service-worker block unchanged.
-  - [ ] **P1.T3.2:** Report `cold.p95Ms` and per-game p95 in JSON and the text table, leaving `median`, `worst`, `budgetMs` and the `worst.totalMs > 400` exit gate intact.
-  - [ ] **P1.T3.3:** Run a single-sample preview smoke to prove the loop and JSON shape without the full headed cost.
-- [ ] **P1.T4: Verify Phase 1** - covers: FR-4, NFR-2, NFR-3, NFR-4, AC-7, AC-8
-  - [ ] **P1.T4.1:** Run all Phase 1 verification commands separately, re-running any permission-denied command from the primary, and write `verification/phase-1.md` ending with an empty `## Primary verification` section.
+**Result:** verified
+**Checkpoint:** eaea065a
+**Evidence:** conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-1.md
+
+- [x] **P1.T1: Add a pure nearest-rank p95 helper** - covers: FR-1, NFR-1, AC-1
+  - [x] **P1.T1.1:** Implement `percentile(values, q)` in `scripts/firstTapStats.mjs` with nearest-rank index `ceil(q * n) - 1`, returning `null` for empty input and preserving input order.
+  - [x] **P1.T1.2:** Add `scripts/firstTapStats.d.mts` so the helper is typed for the Vitest guard test without a new dependency.
+- [x] **P1.T2: Guard the helper with a unit test** - covers: FR-1, AC-1, AC-9
+  - [x] **P1.T2.1:** Add `src/__tests__/guard/firstTapStats.test.ts` covering empty, single-value, even/odd sample sets, nearest-rank interpolation and unsorted input.
+  - [x] **P1.T2.2:** Refresh living suite-count claims only if the added test file changes `vitest list` truth, then require `validate-docs.js` 5/5.
+- [x] **P1.T3: Wire p95 into the measurement script** - covers: FR-1, FR-5, AC-6, AC-10
+  - [x] **P1.T3.1:** Add `--samples <n>` with default 10 and loop each target in fresh contexts; keep stages A–D, warm-aware classification and the service-worker block unchanged.
+  - [x] **P1.T3.2:** Report `cold.p95Ms` and per-game p95 in JSON and the text table, leaving `median`, `worst`, `budgetMs` and the `worst.totalMs > 400` exit gate intact.
+  - [x] **P1.T3.3:** Run a single-sample preview smoke to prove the loop and JSON shape without the full headed cost.
+- [x] **P1.T4: Verify Phase 1** - covers: FR-4, NFR-2, NFR-3, NFR-4, AC-7, AC-8
+  - [x] **P1.T4.1:** Run all Phase 1 verification commands separately, re-running any permission-denied command from the primary, and write `verification/phase-1.md` ending with an empty `## Primary verification` section.
 
 <!--
 The primary appends after acceptance:
