@@ -87,7 +87,7 @@
 - **Verification:** targeted vitest on the progress overlay tests, full
   `pnpm exec vitest run`, `pnpm check`, `pnpm typecheck`,
   `node scripts/validate-module-size.js`, full `verify_phase`.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Derive the band for the viewed profile** — covers: FR-5, NFR-2, AC-6
   - [ ] P3.T1.1: Read the viewed profile's `recent` window and derive the band
