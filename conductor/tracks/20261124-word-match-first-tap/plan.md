@@ -44,15 +44,15 @@ The primary appends after acceptance:
 - **Covers:** FR-5, NFR-3, NFR-6, AC-5, AC-8
 - **Touches:** `conductor/tracks/20261124-word-match-first-tap/verification/phase-2.md`, `conductor/tracks/20261124-word-match-first-tap/verification/first-tap-word-match.json` (new)
 - **Verification:** `node --version`, `pnpm exec playwright --version`, `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Confirm the headed environment** — covers: FR-5, NFR-6, AC-8
-  - [ ] **P2.T1.1:** Record Node and Playwright versions, confirm an interactive display session and free port 4173; block on unavailable headed Chromium or preview.
-- [ ] **P2.T2: Execute the headed 50-cold run** — covers: FR-5, AC-5, AC-8
-  - [ ] **P2.T2.1:** Run the exact cold-control headed command and capture raw stdout as `verification/first-tap-word-match.json`.
-  - [ ] **P2.T2.2:** Prove 50 cold samples, 10 per game, five per-game p95 rows, Find the Word p95 and worst ≤400 ms, all other worst values ≤400 ms, and exit code 0.
-- [ ] **P2.T3: Record performance evidence** — covers: FR-5, AC-5, AC-8
-  - [ ] **P2.T3.1:** Write `verification/phase-2.md` with exact command, environment, raw numbers, scope audit and a blocking verdict if the gate fails.
+- [x] **P2.T1: Confirm the headed environment** — covers: FR-5, NFR-6, AC-8
+  - [x] **P2.T1.1:** Record Node and Playwright versions, confirm an interactive display session and free port 4173; block on unavailable headed Chromium or preview.
+- [x] **P2.T2: Execute the headed 50-cold run** — covers: FR-5, AC-5, AC-8
+  - [x] **P2.T2.1:** Run the exact cold-control headed command and capture raw stdout as `verification/first-tap-word-match.json`.
+  - [x] **P2.T2.2:** Prove 50 cold samples, 10 per game, five per-game p95 rows, Find the Word p95 and worst ≤400 ms, all other worst values ≤400 ms, and exit code 0.
+- [x] **P2.T3: Record performance evidence** — covers: FR-5, AC-5, AC-8
+  - [x] **P2.T3.1:** Write `verification/phase-2.md` with exact command, environment, raw numbers, scope audit and a blocking verdict if the gate fails.
 
 <!--
 The primary appends after acceptance:
@@ -60,6 +60,10 @@ The primary appends after acceptance:
 **Checkpoint:** <short-sha>
 **Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-2.md
 -->
+
+**Result:** verified
+**Checkpoint:** f8a71706
+**Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-2.md
 
 ## Phase 3: Baseline publication and integrated gate
 
