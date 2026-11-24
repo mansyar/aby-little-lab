@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-24T10:30:29+11:00",
-  "updated_at": "2026-11-24T11:19:00+11:00",
+  "updated_at": "2026-11-24T11:32:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261124-adaptive-tuning",
@@ -14,11 +14,11 @@
   "base_sha": "0923e948b2c14aac32b4fedc2909da0a46ea9067",
   "progress": {
     "phases_total": 4,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 12,
-    "tasks_done": 3
+    "tasks_done": 6
   },
-  "last_checkpoint": "e1cc5dee",
+  "last_checkpoint": "4975075b",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

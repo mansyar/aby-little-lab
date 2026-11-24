@@ -56,25 +56,23 @@
   `src/__tests__/game/adaptiveCurve.test.ts` (final pinned-constant assertion).
 - **Verification:** targeted vitest on adaptive + curve tests, full
   `pnpm exec vitest run`, `pnpm check`, `pnpm typecheck`, full `verify_phase`.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Pin tuned constants** — covers: FR-3, AC-3
-  - [ ] P2.T1.1: Set `UP_THRESHOLD` / `DOWN_THRESHOLD` to the Phase 1 result;
+- [x] **P2.T1: Pin tuned constants** — covers: FR-3, AC-3
+  - [x] P2.T1.1: Set `UP_THRESHOLD` / `DOWN_THRESHOLD` to the Phase 1 result;
         leave `WINDOW_SIZE = 10`, `MIN_SAMPLE = 6`, and `BASE_LADDER` unchanged.
-- [ ] **P2.T2: Boundary and contract tests** — covers: FR-4, AC-3, AC-4
-  - [ ] P2.T2.1: Assert 0 below `MIN_SAMPLE`, +1 at/above the up cut point, −1
+- [x] **P2.T2: Boundary and contract tests** — covers: FR-4, AC-3, AC-4
+  - [x] P2.T2.1: Assert 0 below `MIN_SAMPLE`, +1 at/above the up cut point, −1
         below the down cut point, 0 between, with exact-boundary cases.
-  - [ ] P2.T2.2: Assert the simulated −1/0/+1 distribution with the pinned
+  - [x] P2.T2.2: Assert the simulated −1/0/+1 distribution with the pinned
         constants falls inside the FR-1 target ranges.
-- [ ] **P2.T3: Preserve classic playthroughs** — covers: NFR-4, AC-5
-  - [ ] P2.T3.1: Run all existing band/golden/byte-identity tests; confirm no
+- [x] **P2.T3: Preserve classic playthroughs** — covers: NFR-4, AC-5
+  - [x] P2.T3.1: Run all existing band/golden/byte-identity tests; confirm no
         shift-0 playthrough or game rule changed.
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 4975075b
 **Evidence:** conductor/tracks/20261124-adaptive-tuning/verification/phase-2.md
--->
 
 ## Phase 3: Parent band readout
 
