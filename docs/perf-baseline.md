@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-DK87S-QP.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 155 test files / 3,362 tests across 97.12 % statements, 90.93 % branches, 96.20 % functions and 98.31 % lines, and 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-DK87S-QP.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 156 test files / 3,374 tests across 97.12 % statements, 90.93 % branches, 96.20 % functions and 98.31 % lines, and 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
 
@@ -418,7 +418,7 @@ measured, dated figure and is a candidate for the roadmap in `conductor/product.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 155 files / 3,362 tests | `pnpm test -- --run` |
+| Test suite | 156 files / 3,374 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
 The Test-suite and Coverage rows were verified 2026-11-15; the build
@@ -755,7 +755,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 155 files / 3,362 tests | `pnpm test -- --run` |
+| Test suite | 156 files / 3,374 tests | `pnpm test -- --run` |
 | Coverage | statements 97.07 % / branches 90.73 % / functions 96.18 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
@@ -787,7 +787,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | JavaScript chunks emitted | **51** (51 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **63 entries** (1826.19 KiB) | the build's PWA step |
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 155 files / 3,362 tests | `pnpm test -- --run` |
+| Test suite | 156 files / 3,374 tests | `pnpm test -- --run` |
 | Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
 | Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI splits them across two shards of 13 browser cases each, 2.5 and 3.7 min | `pnpm test:e2e` |
 
@@ -848,7 +848,7 @@ headroom; the structural ratio check is the real anti-bloat guard and must never
 | Typical tiered GPU bytes | **76.07 MiB** (cap **80 MiB**) | `node scripts/validate-textures.js` |
 | Full uniform 512² bytes | **319.00 MiB** (cap **320 MiB**) | `node scripts/validate-textures.js` |
 | Tier ratio (typical / full) | **0.238** (hard cap **0.5**) | `node scripts/validate-textures.js` |
-| Unit suite after this track | 155 files / 3,362 tests | `pnpm exec vitest run` |
+| Unit suite after this track | 156 files / 3,374 tests | `pnpm exec vitest run` |
 
 `scripts/validate-textures.js` enumerates every `src/assets/svg/**/*.svg`, resolves each key's tier
 with the same ordered prefix rules as `src/utils/textureTiers.ts` (`tile_`, `group_`, `sm_shadow_`,
