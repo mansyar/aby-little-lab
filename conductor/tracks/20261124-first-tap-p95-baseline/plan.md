@@ -79,16 +79,20 @@ The primary appends after acceptance:
 - **Covers:** FR-3, FR-4, FR-6, NFR-3, NFR-4, AC-4, AC-5, AC-8
 - **Touches:** `docs/perf-baseline.md`, `README.md`, `docs/TDD.md` (count-only only), `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-3.md`, `conductor/tracks/20261124-first-tap-p95-baseline/verification/integrated.md`
 - **Verification:** `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, then the full `verify_phase` chain once on the final tree.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Publish the dated p95 result** - covers: FR-3, FR-6, AC-4, AC-5
-  - [ ] **P3.T1.1:** Ensure the live header in `docs/perf-baseline.md` carries the resumed 2026-11-24 headed figures, per-game p95 table, exact command, sample count, target set and a link to `verification/first-tap-headed.json`; preserve the reviewed Word Match fix section and dated history.
-  - [ ] **P3.T1.2:** If worst per-game p95 exceeds 400 ms while the gate passes, record the breach and a concrete follow-up in the baseline and roadmap instead of failing the run.
-- [ ] **P3.T2: Add the per-release refresh procedure** - covers: FR-3, AC-4
-  - [ ] **P3.T2.1:** Add a short `Per-release first-tap refresh` section to `docs/perf-baseline.md` with the headed requirement, `--samples 10`, the five targets, the report-only p95 semantics and the worst-cold gate.
-  - [ ] **P3.T2.2:** Keep README/TDD edits count-only and require `validate-docs.js` 5/5.
-- [ ] **P3.T3: Record the integrated gate** - covers: FR-4, NFR-3, NFR-4, AC-8
-  - [ ] **P3.T3.1:** Run the full `verify_phase` chain once on the final tree, write `verification/phase-3.md` and `verification/integrated.md`, and leave the empty `## Primary verification` / `## Integrated verification (Section 5)` sections for the primary.
+**Result:** verified
+**Checkpoint:** e57de46b
+**Evidence:** conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-3.md
+
+- [x] **P3.T1: Publish the dated p95 result** - covers: FR-3, FR-6, AC-4, AC-5
+  - [x] **P3.T1.1:** Ensure the live header in `docs/perf-baseline.md` carries the resumed 2026-11-24 headed figures, per-game p95 table, exact command, sample count, target set and a link to `verification/first-tap-headed.json`; preserve the reviewed Word Match fix section and dated history.
+  - [x] **P3.T1.2:** If worst per-game p95 exceeds 400 ms while the gate passes, record the breach and a concrete follow-up in the baseline and roadmap instead of failing the run.
+- [x] **P3.T2: Add the per-release refresh procedure** - covers: FR-3, AC-4
+  - [x] **P3.T2.1:** Add a short `Per-release first-tap refresh` section to `docs/perf-baseline.md` with the headed requirement, `--samples 10`, the five targets, the report-only p95 semantics and the worst-cold gate.
+  - [x] **P3.T2.2:** Keep README/TDD edits count-only and require `validate-docs.js` 5/5.
+- [x] **P3.T3: Record the integrated gate** - covers: FR-4, NFR-3, NFR-4, AC-8
+  - [x] **P3.T3.1:** Run the full `verify_phase` chain once on the final tree, write `verification/phase-3.md` and `verification/integrated.md`, and leave the empty `## Primary verification` / `## Integrated verification (Section 5)` sections for the primary.
 
 <!--
 The primary appends after acceptance:
