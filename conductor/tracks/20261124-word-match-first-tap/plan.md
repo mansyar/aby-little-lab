@@ -44,7 +44,7 @@ The primary appends after acceptance:
 - **Covers:** FR-5, NFR-3, NFR-6, AC-5, AC-8
 - **Touches:** `conductor/tracks/20261124-word-match-first-tap/verification/phase-2.md`, `conductor/tracks/20261124-word-match-first-tap/verification/first-tap-word-match.json` (new)
 - **Verification:** `node --version`, `pnpm exec playwright --version`, `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Confirm the headed environment** — covers: FR-5, NFR-6, AC-8
   - [ ] **P2.T1.1:** Record Node and Playwright versions, confirm an interactive display session and free port 4173; block on unavailable headed Chromium or preview.
