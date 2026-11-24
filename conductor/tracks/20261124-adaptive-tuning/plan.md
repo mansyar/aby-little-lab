@@ -116,7 +116,7 @@
   file was added), any other count-bearing doc.
 - **Verification:** `node scripts/validate-docs.js`, then the full
   `verify_phase` chain.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Sync docs** — covers: FR-6, AC-7
   - [ ] P4.T1.1: Record the final tuned thresholds, designed curve result, and
