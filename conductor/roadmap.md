@@ -10,6 +10,7 @@
 > The detailed phase history below was moved here from
 > [`conductor/product.md` §10](./product.md) on 2026-11-24; section numbers
 > (`§10.1` … `§10.10`) are preserved so existing references keep working.
+> This file lists forward-looking items only; completed tracks and dropped decisions are recorded in the archive and in the section 10 history below.
 
 ## Now
 
@@ -21,7 +22,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-1 | Run a monthly dependency-major upgrade track | chore | medium | — | 20261124-dependency-majors | user |
 | RM-2 | Measure first-tap p95 headed and refresh the perf baseline each release | chore | medium | — | — | user |
 | RM-3 | Automate the browser matrix (iOS Safari, Android Chrome, Fire tablet) | chore | medium | — | — | user |
 
@@ -35,10 +35,6 @@
 
 | id | title | reason |
 | --- | --- | --- |
-| RM-5 | Extract strings and narration manifests for a second locale (i18n seam) | Phase 5 precondition not met: Phase 3 chose English permanently on 2026-11-20 (§10.6). |
-| RM-6 | Add keyboard/switch input and restore OS zoom (accessibility execution) | Phase 3 published touch-only, sighted, textless, landscape as a documented stance on 2026-11-20 (§10.6). |
-| RM-7 | TWA/Capacitor wrapper, store assets and privacy statement (store packaging) | Phase 3 chose family-only distribution on 2026-11-20 (§10.6). |
-| RM-8 | LICENSE, audio attribution and third-party notices (licensing) | Phase 3 cancelled reach work; the public-release legal posture was prepared but not submitted, and the BGM was replaced with an attributed CC0 loop (§10.4, §10.6). |
 
 ## 10. Roadmap
 
