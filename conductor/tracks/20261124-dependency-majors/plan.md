@@ -63,7 +63,7 @@
 - **Covers:** FR-2, FR-3, FR-4, FR-5, FR-7, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-9, AC-10
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `playwright.config.ts` (only if forced), `e2e/**` (only if a runtime bump forces it), `src/__tests__/**` (only if forced), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only if forced), `conductor/tracks/20261124-dependency-majors/verification/phase-3.md`
 - **Verification:** `pnpm outdated --format=list`; `pnpm install --frozen-lockfile`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `node scripts/validate-docs.js`; `pnpm test:e2e` when FR-4 is triggered; then the full `verify_phase` chain once on the final tree. Commands are separate invocations.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Upgrade the exact Playwright pair** — covers: FR-2, FR-5, AC-2, AC-3
   - [ ] **P3.T1.1:** Move `@playwright/test` and `playwright-core` to one exact version and commit the manifest and lockfile together.
