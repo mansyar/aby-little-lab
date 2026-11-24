@@ -99,3 +99,22 @@ Review fixes are appended by `conductor-review` as:
 
 - [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
 -->
+
+## Phase R1: Review Fixes
+
+- **Goal:** Resolve review finding F1 by labeling validator-required living suite counts inside dated historical records.
+- **Depends on:** Phase 3
+- **Covers:** F1
+- **Touches:** `docs/perf-baseline.md`, `conductor/tracks/20261124-word-match-first-tap/verification/phase-R1.md`
+- **Verification:** `node scripts/validate-docs.js`, `pnpm check`, `git diff --check`, scoped documentation diff audit, then the full configured `verify_phase` chain.
+- **Status:** pending
+
+- [ ] **R1.T1: Label current suite rows inside dated history** — covers: F1
+- [ ] **R1.T2: Verify documentation truth and final gate** — covers: F1
+
+<!--
+The primary appends after acceptance:
+**Result:** verified
+**Checkpoint:** <short-sha>
+**Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-R1.md
+-->
