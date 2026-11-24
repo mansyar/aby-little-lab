@@ -116,23 +116,21 @@
   file was added), any other count-bearing doc.
 - **Verification:** `node scripts/validate-docs.js`, then the full
   `verify_phase` chain.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Sync docs** — covers: FR-6, AC-7
-  - [ ] P4.T1.1: Record the final tuned thresholds, designed curve result, and
+- [x] **P4.T1: Sync docs** — covers: FR-6, AC-7
+  - [x] P4.T1.1: Record the final tuned thresholds, designed curve result, and
         parent band readout in PRD §4.8 and TDD §7.3; mark the product roadmap
         row Done 2026-11-24 with track `20261124-adaptive-tuning`.
-  - [ ] P4.T1.2: Refresh living test counts if a test file was added; keep
+  - [x] P4.T1.2: Refresh living test counts if a test file was added; keep
         coverage/date/historical narrative unchanged; `validate-docs.js` 5/5.
-- [ ] **P4.T2: Full gate** — covers: FR-7, NFR-3, AC-8
-  - [ ] P4.T2.1: Run the full `verify_phase` chain and record results in
+- [x] **P4.T2: Full gate** — covers: FR-7, NFR-3, AC-8
+  - [x] P4.T2.1: Run the full `verify_phase` chain and record results in
         `verification/integrated.md`.
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** 57a906a4
 **Evidence:** conductor/tracks/20261124-adaptive-tuning/verification/phase-4.md
--->
 
 <!--
 ## Phase R1: Review Fixes
