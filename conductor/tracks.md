@@ -291,4 +291,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Content Depth** — [20261121-content-depth](./archive/20261121-content-depth/index.md) — feature — high
 - [x] **Track: Release v1.25.0** - [20261123-release-v1-25-0](./archive/20261123-release-v1-25-0/index.md) - chore - high
 - [x] **Track: Replay Novelty** — [20261124-replay-novelty](./archive/20261124-replay-novelty/index.md) — feature — high
-- [~] **Track: Adaptive Tuning** - [20261124-adaptive-tuning](./tracks/20261124-adaptive-tuning/index.md) - feature - high
+- [x] **Track: Adaptive Tuning** - [20261124-adaptive-tuning](./archive/20261124-adaptive-tuning/index.md) - feature - high
