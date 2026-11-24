@@ -8,7 +8,7 @@
     "20261124-first-tap-p95-baseline"
   ],
   "created_at": "2026-11-24T19:03:17+11:00",
-  "updated_at": "2026-11-24T19:11:18+11:00",
+  "updated_at": "2026-11-24T19:42:07+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "fix/20261124-word-match-first-tap",
@@ -16,11 +16,11 @@
   "base_sha": "537c2351798e06b0c449068692b886507d89272e",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 0,
+    "phases_verified": 1,
     "tasks_total": 22,
-    "tasks_done": 0
+    "tasks_done": 9
   },
-  "last_checkpoint": null,
+  "last_checkpoint": "4ead5e0d",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",
