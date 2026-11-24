@@ -1,8 +1,76 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,393 tests across 97.10 % statements, 90.96 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured with the Hub idle prewarm neutralised: 50 cold / 0 warm samples, aggregate cold p95 total 237.4 ms, median 185.1 ms, and worst cold total 251.2 ms (Find the Word), all inside the unchanged 400 ms gate; see [Find the Word cold first-tap fix (2026-11-24)](#find-the-word-cold-first-tap-fix-2026-11-24). Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-24 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
+> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,393 tests across 97.08 % statements, 90.92 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured on the resumed fixed tree after the reviewed Word Match fix: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 63.3 / 45.2 / 270.1 ms, cold median total 203.6 ms, and worst cold total 277.5 ms (Shape Sorter), all inside the unchanged 400 ms gate; see [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24). Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-24 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
+
+## First-tap p95 baseline after the Word Match fix (2026-11-24)
+
+Track `20261124-first-tap-p95-baseline`, Phase 3. This is the live resumed
+fixed-tree result, measured after the reviewed `20261124-word-match-first-tap`
+dependency (PR #97, merged at `025b037f`) landed. The exact headed cold-control
+command was:
+
+```sh
+TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10
+```
+
+The natural headed warm-aware run first observed only **1 cold / 49 warm
+samples**. It therefore did not exercise the required 50-sample cold KPI, and
+the approved cold-control fallback above was required; this is not presented as
+a natural all-cold result.
+
+Environment: Node **v24.22.2**, Playwright **1.65.1**, local interactive headed
+Chromium, production Vite preview (`--with-preview`), Hub idle chunk/art prewarm
+neutralised (`TAP_INERT_IDLE=1`), and warm-aware tap classification
+(`--warm-aware`). The command exited **0** and produced **50 cold / 0 warm
+samples**, exactly 10 per game across the unchanged five-game target set: Shape
+Sorter, Find the Letter, Find the Word, Add It Up and Memory Match.
+
+| Measurement | Result |
+| --- | ---: |
+| Aggregate cold p95 response | 63.3 ms |
+| Aggregate cold p95 finished | 45.2 ms |
+| Aggregate cold p95 total | 270.1 ms |
+| Cold median total | 203.6 ms |
+| `validate-boot` exit | 0 |
+| Unthrottled boot median | 644.3 ms |
+| 4×-throttled boot median | 4728.1 ms |
+
+| Game | Samples | p95 response | p95 finished | p95 total |
+| --- | ---: | ---: | ---: | ---: |
+| Shape Sorter | 10 | 53.6 ms | 43.5 ms | 277.5 ms |
+| Find the Letter | 10 | 51.1 ms | 45.2 ms | 241.4 ms |
+| Find the Word | 10 | 97.2 ms | 38.1 ms | 249.6 ms |
+| Add It Up | 10 | 68.4 ms | 48.3 ms | 270.1 ms |
+| Memory Match | 10 | 53.8 ms | 50.0 ms | 223.5 ms |
+
+The worst game is **Shape Sorter at 277.5 ms**, and every worst cold total is
+**≤400 ms**. Find the Word's p95 and worst cold total are both **249.6 ms**.
+P95 remains report-only; the unchanged worst-cold total ≤400 ms condition
+remains the only exit gate. Raw evidence:
+[`verification/first-tap-headed.json`](../conductor/tracks/20261124-first-tap-p95-baseline/verification/first-tap-headed.json).
+
+The earlier failed **507.4 ms Find the Word** result is preserved as pre-fix
+history in [`verification/phase-2.md`](../conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-2.md),
+not erased or replaced by this passing resumed result.
+
+### Per-release first-tap refresh
+
+After each release-candidate build:
+
+1. Run headed cold control with `--samples 10` against a production preview,
+   using the exact command above.
+2. Require **50 cold / 0 warm samples**, exactly 10 per game, across the same
+   five unchanged targets.
+3. Require exit **0** and every worst cold total **≤400 ms**.
+4. Publish p95 as report-only and commit the raw JSON evidence.
+5. If p95 exceeds 400 ms while the worst-cold gate passes, record a concrete
+   follow-up rather than fail; if the worst-cold gate fails, block.
+6. Never substitute headless or warm-only data, reduce the sample count or
+   target set, or weaken the gate.
+
+No p95 breach exists in this run, so no new follow-up is needed.
 
 ## Find the Word cold first-tap fix (2026-11-24)
 
