@@ -72,14 +72,18 @@ The primary appends after acceptance:
 - **Covers:** FR-6, FR-7, NFR-1, NFR-2, NFR-3, NFR-5, AC-4, AC-6, AC-7
 - **Touches:** `docs/perf-baseline.md`, `README.md`, `docs/TDD.md` (count-only only), `conductor/tracks/20261124-word-match-first-tap/verification/phase-3.md`, `conductor/tracks/20261124-word-match-first-tap/verification/integrated.md`
 - **Verification:** `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, then the full `verify_phase` chain once on the final tree.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Publish the passing dated baseline** — covers: FR-6, AC-7
-  - [ ] **P3.T1.1:** Update the live `docs/perf-baseline.md` section with the 2026-11-24 headed result, exact command, sample count, target set and per-game p95 table.
-  - [ ] **P3.T1.2:** Link the raw JSON evidence and retain the per-release first-tap refresh procedure.
-- [ ] **P3.T2: Audit scope and record the integrated gate** — covers: FR-7, NFR-1, NFR-2, NFR-3, NFR-5, AC-4, AC-6
-  - [ ] **P3.T2.1:** Prove package/lock are unchanged and production source changes are limited to the approved Find the Word scene/helper paths.
-  - [ ] **P3.T2.2:** Run the full `verify_phase` chain on the final tree and write `verification/integrated.md` with the exact results.
+- [x] **P3.T1: Publish the passing dated baseline** — covers: FR-6, AC-7
+  - [x] **P3.T1.1:** Update the live `docs/perf-baseline.md` section with the 2026-11-24 headed result, exact command, sample count, target set and per-game p95 table.
+  - [x] **P3.T1.2:** Link the raw JSON evidence and retain the per-release first-tap refresh procedure.
+- [x] **P3.T2: Audit scope and record the integrated gate** — covers: FR-7, NFR-1, NFR-2, NFR-3, NFR-5, AC-4, AC-6
+  - [x] **P3.T2.1:** Prove package/lock are unchanged and production source changes are limited to the approved Find the Word scene/helper paths.
+  - [x] **P3.T2.2:** Run the full `verify_phase` chain on the final tree and write `verification/integrated.md` with the exact results.
+
+**Result:** verified
+**Checkpoint:** d6cf5a17
+**Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-3.md
 
 <!--
 Review fixes are appended by `conductor-review` as:
