@@ -14,25 +14,23 @@
 - **Covers:** FR-1, FR-3, FR-5, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-4, AC-9, AC-10
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `biome.json` (only if forced), `vite.config.ts` (only if forced), `src/__tests__/**` (only if forced), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only if forced), `conductor/tracks/20261124-dependency-majors/verification/phase-1.md`
 - **Verification:** `pnpm outdated --format=list`; `pnpm install --frozen-lockfile`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `node scripts/validate-docs.js`; then the full `verify_phase` chain once on the final tree. Run commands separately; do not chain with `&&` inside a subagent shell.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Survey and freeze candidates** — covers: FR-1, AC-1
-  - [ ] **P1.T1.1:** Record verbatim `pnpm outdated --format=list` output and the six frozen candidate names in the phase evidence.
-  - [ ] **P1.T1.2:** Record the exact version installed for each candidate at its upgrade phase; treat releases published after that phase as out of scope (AC-2).
-- [ ] **P1.T2: Upgrade Biome and Vite** — covers: FR-1, FR-5, AC-1, AC-2
-  - [ ] **P1.T2.1:** Upgrade `@biomejs/biome` and `vite` to their latest available versions at execution time, committing `package.json` and `pnpm-lock.yaml` together.
-  - [ ] **P1.T2.2:** Refresh `biome.json` `$schema` only if the new Biome requires it; adapt `vite.config.ts` only if forced.
-- [ ] **P1.T3: Absorb forced changes** — covers: FR-8, AC-10
-  - [ ] **P1.T3.1:** Fix real new lint findings; record any out-of-scope justification instead of silently disabling rules.
-  - [ ] **P1.T3.2:** Refresh living suite counts only if they moved, and record every semantic change in the evidence.
-- [ ] **P1.T4: Verify Phase 1** — covers: FR-3, NFR-1, NFR-2, NFR-4, AC-4, AC-9
-  - [ ] **P1.T4.1:** Run every named check separately on the final tree; re-run the full `verify_phase` chain once and record its exit code.
+- [x] **P1.T1: Survey and freeze candidates** — covers: FR-1, AC-1
+  - [x] **P1.T1.1:** Record verbatim `pnpm outdated --format=list` output and the six frozen candidate names in the phase evidence.
+  - [x] **P1.T1.2:** Record the exact version installed for each candidate at its upgrade phase; treat releases published after that phase as out of scope (AC-2).
+- [x] **P1.T2: Upgrade Biome and Vite** — covers: FR-1, FR-5, AC-1, AC-2
+  - [x] **P1.T2.1:** Upgrade `@biomejs/biome` and `vite` to their latest available versions at execution time, committing `package.json` and `pnpm-lock.yaml` together.
+  - [x] **P1.T2.2:** Refresh `biome.json` `$schema` only if the new Biome requires it; adapt `vite.config.ts` only if forced.
+- [x] **P1.T3: Absorb forced changes** — covers: FR-8, AC-10
+  - [x] **P1.T3.1:** Fix real new lint findings; record any out-of-scope justification instead of silently disabling rules.
+  - [x] **P1.T3.2:** Refresh living suite counts only if they moved, and record every semantic change in the evidence.
+- [x] **P1.T4: Verify Phase 1** — covers: FR-3, NFR-1, NFR-2, NFR-4, AC-4, AC-9
+  - [x] **P1.T4.1:** Run every named check separately on the final tree; re-run the full `verify_phase` chain once and record its exit code.
 
-<!--
-**Result:** <verified|blocked>
-**Checkpoint:** <short-sha>
+**Result:** verified
+**Checkpoint:** 4a8fa46d
 **Evidence:** conductor/tracks/20261124-dependency-majors/verification/phase-1.md
--->
 
 ## Phase 2: Upgrade the Vitest and coverage pair
 
