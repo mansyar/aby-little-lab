@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-11-24T14:05:03+11:00",
-  "updated_at": "2026-11-24T14:30:11+11:00",
+  "updated_at": "2026-11-24T14:40:22+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261124-dependency-majors",
@@ -14,11 +14,11 @@
   "base_sha": "a914e2f26c0dc85f3c0c72b2b59c94ea75ced3b6",
   "progress": {
     "phases_total": 4,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 38,
-    "tasks_done": 11
+    "tasks_done": 21
   },
-  "last_checkpoint": "4a8fa46d",
+  "last_checkpoint": "4929a66f",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",
