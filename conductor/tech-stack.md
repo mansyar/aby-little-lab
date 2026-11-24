@@ -6,11 +6,11 @@
 |---|---|---|---|
 | **Language** | TypeScript | 7.0.2 | Type safety for complex game state; catches errors at compile time |
 | **Game Engine** | Phaser | 4.2.1 | Latest stable HTML5 framework; built-in physics, scene management, SVG rasterization, audio, input handling |
-| **Build Tool** | Vite | 8.3.5 | Fast HMR, modern ESM bundling, plugin ecosystem |
+| **Build Tool** | Vite | 8.3.8 | Fast HMR, modern ESM bundling, plugin ecosystem |
 | **PWA** | vite-plugin-pwa | 2.0.0 | Auto-generates service worker + manifest; precache for offline play |
-| **Testing** | Vitest | 5.0.5 | Vite-native, fast, Jest-compatible API, ESM support |
-| **Browser Testing** | @playwright/test | 1.64.1 | Drives the built artifact in Chromium; the only layer that sees real hit areas, storage and service-worker behaviour (CI only, not in `verify_phase`) |
-| **Linting/Formatting** | Biome | 2.6.3 | Fast all-in-one linter and formatter; zero config needed for sensible defaults |
+| **Testing** | Vitest | 5.1.1 | Vite-native, fast, Jest-compatible API, ESM support |
+| **Browser Testing** | @playwright/test | 1.65.1 | Drives the built artifact in Chromium; the only layer that sees real hit areas, storage and service-worker behaviour (CI only, not in `verify_phase`) |
+| **Linting/Formatting** | Biome | 2.6.8 | Fast all-in-one linter and formatter; zero config needed for sensible defaults |
 | **Package Manager** | pnpm | 12.16.1 | Fast, disk-efficient, strict dependency resolution; pinned exactly by `packageManager` in `package.json`, which `pnpm/action-setup` and the `Dockerfile` both follow |
 
 ## 2. Dependencies
@@ -25,17 +25,22 @@
 
 ### Dev Dependencies
 
+> **2026-11-24 (track `20261124-dependency-majors`):** Refreshed to the versions
+> actually installed after this month's dependency pass (Biome 2.6.8, Vite
+> 8.3.8, Vitest and coverage 5.1.1, Playwright pair 1.65.1). The reusable
+> procedure is recorded in [Monthly dependency maintenance](#monthly-dependency-maintenance).
+
 ```json
 {
   "typescript": "^7.0.2",
-  "vite": "^8.3.5",
+  "vite": "^8.3.8",
   "vite-plugin-pwa": "^2.0.0",
-  "vitest": "^5.0.5",
-  "@vitest/coverage-v8": "^5.0.5",
-  "@biomejs/biome": "^2.6.3",
+  "vitest": "^5.1.1",
+  "@vitest/coverage-v8": "^5.1.1",
+  "@biomejs/biome": "^2.6.8",
   "happy-dom": "^21.0.4",
-  "@playwright/test": "1.64.1",
-  "playwright-core": "^1.64.1"
+  "@playwright/test": "1.65.1",
+  "playwright-core": "1.65.1"
 }
 ```
 
@@ -106,7 +111,7 @@
 ### Playwright (`playwright.config.ts`)
 
 - **Scope:** `e2e/` only — the browser journey layer, run as its own CI job (`Browser Journeys`, `needs: quality-gates`), deliberately outside `verify_phase` so the ~90 s phase gate stays fast
-- **Runner:** `@playwright/test` 1.64.1, Chromium only (WebKit/Firefox belong to the roadmap's browser-matrix work); `playwright-core` drives the pre-existing `scripts/validate-boot.js` smoke check
+- **Runner:** `@playwright/test` 1.65.1, Chromium only (WebKit/Firefox belong to the roadmap's browser-matrix work); `playwright-core` drives the pre-existing `scripts/validate-boot.js` smoke check
 - **Server:** one shared `vite preview` on `http://127.0.0.1:4173`, built by `pnpm test:e2e` and pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows
 - **Workers:** 2 locally and in CI, `fullyParallel: false` so the file is the parallelism unit; every test gets a fresh browser context, so the preview is the only shared state
 - **Retries:** 0 locally (that is what makes the determinism claim mean anything), 2 in CI with a trace on the first retry; a retry-only pass is a finding, not a pass
@@ -388,6 +393,16 @@ aby-little-lab/
 > **2026-10-18 — Design Update (Voice-First Instructions):** The ten games that had no voice now speak their one-line rule. `GameSceneBase` gains `createSpokenInstruction(text, { x?, y? })` (`INSTRUCTION_Y` 112 / `INSTRUCTION_WRAP_WIDTH` 620 / `INSTRUCTION_SPEAKER_GAP` 36): one centred 26px line in the storybook text style plus the shared `SpeakerButton` glyph, spoken once when the round is set up and replayable on tap. The replay handler re-reads `getSettings().sfxEnabled`, so a mid-scene toggle is honoured, and a muted or unsupported engine dims the glyph exactly like the other speaker states. `src/utils/speech.ts` gains `speakSentence(text, enabled)` (rate 0.9) on the existing `speakText` path — SFX-gated, silent no-throw fallback, preferred-voice aware. Adopters: Shape Sorter ("Drag each shape into its hole.", y=126 to clear its y=100 progress dots), Animal Trace, Pop & Freeze, Shadow Match, Big vs. Small, Memory Match, Number Order, Pattern Builder, Add It Up and Take Away — the last two lose their "no speaker button" comment, and Memory Match / Add It Up / Take Away are no longer speech-free. The instruction is created in `create()`, never inside `renderRound()`, so round rebuilds never re-speak it, and `registerShutdownCleanup()` destroys the glyph. Copy stays terse and concrete because a pre-reader holds one clause at a time. Tests: 6 helper tests on `GameSceneBase` (render / one-shot speak / muted / replay re-reads the toggle / coordinate overrides / shutdown), 3 `speakSentence` tests, and one copy + auto-speak test in each of the ten game suites (Memory Match's face-image fixture now ignores the `icon_speaker` glyph). No speaking game was modified; no storage, asset or dependency change.
 
 > **2026-08-06 — Design Update (SVG Visual Polish):** All 142 SVGs in `src/assets/svg/` redrawn to the "Storybook Flat" quality bar (flat fills, `#2D3748` 4–6px outlines, soft-vibrant palette, silhouette-first) across 9 phases + 2 user-feedback rounds. `docs/SVG_STYLE.md` added as the asset style source of truth, with a contact-sheet renderer (`scripts/render-svg-contact-sheets.mjs`) and rendered sheets in `docs/svg-contact-sheets/`. Per user decision (Phase 9d), the 26 letter + 10 numeral SVGs were **reverted** to system-font Arial `<text>` versions (bold 400px, `#2B6CB0` fill, `#2D3748` 14px stroke, `paint-order="stroke fill"`) — custom-path letterforms are not to be reintroduced without product sign-off; stroked-text metrics are retained for sticker/tile accents only. No file renames/deletions (filenames = texture keys), no TS/source changes; 979/979 tests green.
+
+## Monthly dependency maintenance
+
+Run this pass monthly; track `20261124-dependency-majors` is the worked example.
+
+1. **Survey.** Run `pnpm outdated --format=list` and paste the output into the track evidence before choosing candidates. Freeze the candidate list from that survey; a release published after a package's upgrade phase is out of scope.
+2. **Pair-aware upgrade.** Move `vitest` and `@vitest/coverage-v8` together to one shared version, and `@playwright/test` and `playwright-core` together to one shared exact pin. Commit `package.json` and `pnpm-lock.yaml` together in each upgrade phase; add no new dependency and preserve each package's existing pin style.
+3. **Full gate.** On each phase's final tree run the configured `verify_phase` chain — check, typecheck, unit tests, coverage, build, then the bundle / module-size / textures / PWA / docs validators — with non-watch Vitest invocations. Add `pnpm test:e2e` only when the survey flags a runtime package; in that case the runtime bump and the browser journeys are both required.
+4. **Docs truth.** Run `node scripts/validate-docs.js` and require 5 passed / 0 failed. Update the living suite counts in `README.md`, `docs/TDD.md` and `docs/perf-baseline.md` only when a command proves they moved, and keep this file's Dev Dependencies block at the versions actually installed.
+5. **No runtime change by default.** Runtime packages not flagged by the survey stay byte-identical, and `src/**` outside `src/__tests__` stays untouched. A runtime bump is the documented exception, never the routine path.
 
 ## See Also
 

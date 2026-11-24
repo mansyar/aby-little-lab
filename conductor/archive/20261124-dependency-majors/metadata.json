@@ -1,0 +1,31 @@
+{
+  "id": "20261124-dependency-majors",
+  "title": "Dependency Majors - November 2026",
+  "type": "chore",
+  "status": "complete",
+  "priority": "medium",
+  "depends_on": [],
+  "created_at": "2026-11-24T14:05:03+11:00",
+  "updated_at": "2026-11-24T15:31:46+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261124-dependency-majors",
+  "base_branch": "master",
+  "base_sha": "a914e2f26c0dc85f3c0c72b2b59c94ea75ced3b6",
+  "progress": {
+    "phases_total": 5,
+    "phases_verified": 5,
+    "tasks_total": 41,
+    "tasks_done": 41
+  },
+  "last_checkpoint": "3bf09457",
+  "review_verdict": "PASS",
+  "review_rounds": 2,
+  "doc_sync": "updated",
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/96",
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": "2026-11-24T15:31:46+11:00",
+  "archive_path": "conductor/archive/20261124-dependency-majors"
+}
