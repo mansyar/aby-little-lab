@@ -25,6 +25,11 @@
 
 ### Dev Dependencies
 
+> **2026-11-24 (track `20261124-dependency-majors`):** Refreshed to the versions
+> actually installed after this month's dependency pass (Biome 2.6.8, Vite
+> 8.3.8, Vitest and coverage 5.1.1, Playwright pair 1.65.1). The reusable
+> procedure is recorded in [Monthly dependency maintenance](#monthly-dependency-maintenance).
+
 ```json
 {
   "typescript": "^7.0.2",
