@@ -54,4 +54,12 @@ No boot-smoke condition is triggered by Phase 3 because it changes documentation
 only. The reviewed Word Match production dependency remains exactly as merged in
 PR #97. `package.json` and `pnpm-lock.yaml` are unchanged across the full track.
 
+## Doc sync
+
+The live baseline, raw-evidence links and per-release procedure are published in
+`docs/perf-baseline.md`. The reviewed Word Match history and pre-fix failure are
+preserved. `README.md` and `docs/TDD.md` need no count changes. No product or
+technology-stack statement requires amendment; the only stale-looking 400 ms note
+is explicitly dated 2026-10-27 history. `validate-docs.js` passes 5/5.
+
 **Overall verdict: verified.**
