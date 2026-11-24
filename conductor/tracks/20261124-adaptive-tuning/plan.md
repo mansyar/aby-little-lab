@@ -20,31 +20,29 @@
 - **Verification:** `pnpm exec vitest run src/__tests__/game/adaptiveCurve.test.ts`,
   `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, then the full
   `verify_phase` chain. Commands run separately (no `&&` chains in subagents).
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Model realistic answer streams** — covers: FR-2, NFR-1, AC-2
-  - [ ] P1.T1.1: Build a seeded RNG (mulberry32-style) and a profile generator
+- [x] **P1.T1: Model realistic answer streams** — covers: FR-2, NFR-1, AC-2
+  - [x] P1.T1.1: Build a seeded RNG (mulberry32-style) and a profile generator
         with a latent accuracy spanning struggling / typical / thriving
         profiles; a fixed seed must reproduce the same streams exactly.
-  - [ ] P1.T1.2: Keep the module pure — no Phaser, no storage, no network; all
+  - [x] P1.T1.2: Keep the module pure — no Phaser, no storage, no network; all
         inputs injectable.
-- [ ] **P1.T2: Distribution calculator and designed curve** — covers: FR-1, FR-2, AC-1, AC-2
-  - [ ] P1.T2.1: Compute the −1/0/+1 band-shift distribution over ≥1,000
+- [x] **P1.T2: Distribution calculator and designed curve** — covers: FR-1, FR-2, AC-1, AC-2
+  - [x] P1.T2.1: Compute the −1/0/+1 band-shift distribution over ≥1,000
         simulated profiles using the real `bandShiftFor` (add optional up/down
         cut-point parameters defaulting to the shipped constants).
-  - [ ] P1.T2.2: Document the designed curve (70% stable, 15% down, 15% up,
+  - [x] P1.T2.2: Document the designed curve (70% stable, 15% down, 15% up,
         ±10pp) in TDD §7.3 and PRD §4.8; assert a degenerate RNG cannot divide
         by zero.
-- [ ] **P1.T3: Derive candidate tuned cut points** — covers: FR-2, AC-2
-  - [ ] P1.T3.1: Search cut points and report the pair whose simulated
+- [x] **P1.T3: Derive candidate tuned cut points** — covers: FR-2, AC-2
+  - [x] P1.T3.1: Search cut points and report the pair whose simulated
         distribution lands inside all three target ranges; record the search
         and result in evidence. Do not yet change the shipped constants.
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** e1cc5dee
 **Evidence:** conductor/tracks/20261124-adaptive-tuning/verification/phase-1.md
--->
 
 ## Phase 2: Apply tuned thresholds and protect existing behaviour
 
