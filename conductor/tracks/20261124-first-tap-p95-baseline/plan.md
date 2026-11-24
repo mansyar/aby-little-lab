@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-5, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-1, AC-6, AC-7, AC-9, AC-10
 - **Touches:** `scripts/firstTapStats.mjs` (new), `scripts/firstTapStats.d.mts` (new), `scripts/measure-first-tap.mjs`, `src/__tests__/guard/firstTapStats.test.ts` (new), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only only), `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-1.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/guard/firstTapStats.test.ts`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, `node scripts/measure-first-tap.mjs --with-preview --samples 1 --json`, then the full `verify_phase` chain on the final tree.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Add a pure nearest-rank p95 helper** - covers: FR-1, NFR-1, AC-1
   - [ ] **P1.T1.1:** Implement `percentile(values, q)` in `scripts/firstTapStats.mjs` with nearest-rank index `ceil(q * n) - 1`, returning `null` for empty input and preserving input order.
