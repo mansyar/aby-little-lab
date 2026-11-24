@@ -39,24 +39,22 @@
 - **Covers:** FR-2, FR-3, FR-5, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-9, AC-10
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `vite.config.ts` (only if forced), `src/__tests__/**` (only if forced), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only if forced), `conductor/tracks/20261124-dependency-majors/verification/phase-2.md`
 - **Verification:** `pnpm outdated --format=list`; `pnpm install --frozen-lockfile`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `node scripts/validate-docs.js`; then the full `verify_phase` chain once on the final tree. Commands are separate invocations, never `&&`-chained by the subagent.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Upgrade the exact pair** — covers: FR-2, FR-5, AC-2, AC-3
-  - [ ] **P2.T1.1:** Upgrade `vitest` and `@vitest/coverage-v8` together to the same version and commit the manifest and lockfile together.
-  - [ ] **P2.T1.2:** Record the `pnpm outdated` check showing both candidates current at their installed version.
-- [ ] **P2.T2: Absorb Vitest behaviour changes** — covers: FR-8, AC-10
-  - [ ] **P2.T2.1:** Fix any cross-test mock assumptions or hoisting errors without adding a `clearMocks: false` escape hatch.
-  - [ ] **P2.T2.2:** Keep every assertion intact — no rename, deletion or weakening — and record each forced test fix with its reason.
-- [ ] **P2.T3: Hold gates and docs truth** — covers: NFR-1, NFR-2, AC-9
-  - [ ] **P2.T3.1:** Confirm coverage thresholds remain 95/88/85/90 in `conductor/workflow.md`; refresh living counts in the same phase only if the suite count moved.
-- [ ] **P2.T4: Verify Phase 2** — covers: FR-3, NFR-4, AC-4
-  - [ ] **P2.T4.1:** Run every named check separately and record the full `verify_phase` exit code.
+- [x] **P2.T1: Upgrade the exact pair** — covers: FR-2, FR-5, AC-2, AC-3
+  - [x] **P2.T1.1:** Upgrade `vitest` and `@vitest/coverage-v8` together to the same version and commit the manifest and lockfile together.
+  - [x] **P2.T1.2:** Record the `pnpm outdated` check showing both candidates current at their installed version.
+- [x] **P2.T2: Absorb Vitest behaviour changes** — covers: FR-8, AC-10
+  - [x] **P2.T2.1:** Fix any cross-test mock assumptions or hoisting errors without adding a `clearMocks: false` escape hatch.
+  - [x] **P2.T2.2:** Keep every assertion intact — no rename, deletion or weakening — and record each forced test fix with its reason.
+- [x] **P2.T3: Hold gates and docs truth** — covers: NFR-1, NFR-2, AC-9
+  - [x] **P2.T3.1:** Confirm coverage thresholds remain 95/88/85/90 in `conductor/workflow.md`; refresh living counts in the same phase only if the suite count moved.
+- [x] **P2.T4: Verify Phase 2** — covers: FR-3, NFR-4, AC-4
+  - [x] **P2.T4.1:** Run every named check separately and record the full `verify_phase` exit code.
 
-<!--
-**Result:** <verified|blocked>
-**Checkpoint:** <short-sha>
+**Result:** verified
+**Checkpoint:** 4929a66f
 **Evidence:** conductor/tracks/20261124-dependency-majors/verification/phase-2.md
--->
 
 ## Phase 3: Upgrade the Playwright pair and handle conditional runtime drift
 
