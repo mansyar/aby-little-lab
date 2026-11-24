@@ -16,6 +16,7 @@ import {
   getProfiles,
   recordGameResult,
   setPlayTimeLimit,
+  updateSettings,
 } from "../../../utils/storage";
 
 /** Registry objects whose destroy has not been called (current render). */
@@ -70,6 +71,23 @@ function previousPage(): void {
 /** The three statement strings page 0 prints, for whichever profile is viewed. */
 function statementLines(): readonly [string, string, string] {
   return summariseInsights(getActiveProfile(), new Date()).lines;
+}
+
+/** Per-game stats lines on the page currently drawn. */
+function currentStatsLines(): string[] {
+  return live()
+    .filter((obj) => obj.kind === "text" && String(obj.args?.[2] ?? "").includes(" plays · "))
+    .map((obj) => String(obj.args?.[2]));
+}
+
+/** Every per-game stats line, walking from the Overview through all game pages. */
+function collectStatsLines(): string[] {
+  const found: string[] = [];
+  for (let page = 0; page < 5; page += 1) {
+    found.push(...currentStatsLines());
+    if (page < 4) nextPage();
+  }
+  return found;
 }
 
 beforeEach(() => {
@@ -434,5 +452,90 @@ describe("ProgressOverlay", () => {
     tap(close);
 
     expect(overlay.e2eState()).toBeNull();
+  });
+
+  it("shows a per-game band readout derived from each game's recent window", () => {
+    // Ten straight answers -> accuracy 1.0 -> band +1; two of ten -> band -1.
+    recordGameResult("shape-sorter", 10, 0);
+    recordGameResult("animal-trace", 2, 8);
+
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const lines = collectStatsLines();
+    expect(lines.filter((text) => text.includes("band +1"))).toHaveLength(1);
+    expect(lines.filter((text) => text.includes("band -1"))).toHaveLength(1);
+    // Unplayed games keep the classic band.
+    expect(lines.filter((text) => text.includes("band 0")).length).toBeGreaterThan(0);
+  });
+
+  it("shows band 0 for a thin window below the sample floor", () => {
+    // Three taps is fewer than MIN_SAMPLE (6): no band claim is made.
+    recordGameResult("shape-sorter", 2, 1);
+
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const lines = collectStatsLines();
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.every((text) => text.includes("band 0"))).toBe(true);
+  });
+
+  it("shows band 0 for every game when adaptive difficulty is off", () => {
+    // Both windows would shift if the toggle were on.
+    recordGameResult("shape-sorter", 10, 0);
+    recordGameResult("animal-trace", 2, 8);
+    updateSettings({ adaptiveDifficulty: false });
+
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const lines = collectStatsLines();
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.every((text) => text.includes("band 0"))).toBe(true);
+  });
+
+  it("derives the band from the viewed profile, not the active one", () => {
+    // p1 (active initially): shape-sorter would read +1.
+    recordGameResult("shape-sorter", 10, 0);
+    // p2 becomes active; give it the opposite band for the same game.
+    addProfile("dog");
+    recordGameResult("shape-sorter", 2, 8);
+
+    const scene = new MockScene();
+    const overlay = new ProgressOverlay({
+      scene: scene as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+    nextPage(); // first game page, where shape-sorter sits
+
+    // Viewed profile is the active p2 -> band -1.
+    expect(currentStatsLines().some((text) => text.includes("band -1"))).toBe(true);
+    expect(currentStatsLines().some((text) => text.includes("band +1"))).toBe(false);
+
+    // Tap p1's chip (centerX − 28 = 484, chip Y 189); re-render keeps page 1.
+    const firstChip = live().find(
+      (obj) => obj.kind === "image" && obj.args?.[0] === 484 && obj.args?.[1] === 189,
+    );
+    if (!firstChip) throw new Error("no first chip");
+    tap(firstChip);
+
+    expect(currentStatsLines().some((text) => text.includes("band +1"))).toBe(true);
+    expect(currentStatsLines().some((text) => text.includes("band -1"))).toBe(false);
+    // Selecting a profile to view never changes the active one.
+    expect(getActiveProfile().id).toBe("p2");
   });
 });

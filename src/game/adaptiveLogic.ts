@@ -20,7 +20,7 @@ export const MIN_SAMPLE = 6;
 export const UP_THRESHOLD = 0.9;
 
 /** Accuracy (exclusive) that earns a one-band step down. */
-export const DOWN_THRESHOLD = 0.6;
+export const DOWN_THRESHOLD = 0.5;
 
 /** The classic easy-first ladder every band-based game serves today. */
 export const BASE_LADDER: readonly BandId[] = [1, 1, 2, 2, 3, 3];
@@ -43,19 +43,27 @@ export function updateRecentWindow(
 
 /**
  * Computes the band shift for a game from its rolling tap window: +1 at or
- * above UP_THRESHOLD accuracy, -1 below DOWN_THRESHOLD, otherwise 0. Windows
+ * above the up cut point, -1 below the down cut point, otherwise 0. Windows
  * with fewer than MIN_SAMPLE taps yield 0 (not enough evidence yet).
+ *
+ * `upThreshold` and `downThreshold` are injectable so the offline simulation
+ * in `adaptiveCurve` can evaluate candidate cut points. Both default to the
+ * shipped constants, so a single-argument call is byte-identical to before.
  */
-export function bandShiftFor(recent: readonly boolean[]): BandShift {
+export function bandShiftFor(
+  recent: readonly boolean[],
+  upThreshold: number = UP_THRESHOLD,
+  downThreshold: number = DOWN_THRESHOLD,
+): BandShift {
   if (recent.length < MIN_SAMPLE) {
     return 0;
   }
   const correct = recent.filter((tap) => tap).length;
   const accuracy = correct / recent.length;
-  if (accuracy >= UP_THRESHOLD) {
+  if (accuracy >= upThreshold) {
     return 1;
   }
-  if (accuracy < DOWN_THRESHOLD) {
+  if (accuracy < downThreshold) {
     return -1;
   }
   return 0;
