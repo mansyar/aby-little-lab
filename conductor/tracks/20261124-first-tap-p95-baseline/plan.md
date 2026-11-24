@@ -47,7 +47,7 @@ The primary appends after acceptance:
 - **Covers:** FR-2, FR-7, AC-2, AC-3
 - **Touches:** `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-2.md`, `conductor/tracks/20261124-first-tap-p95-baseline/verification/first-tap-headed.json` (new)
 - **Verification:** `pnpm exec playwright --version`, `node --version`, `TAP_HEADED=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Confirm the headed environment** - covers: FR-2, FR-7
   - [ ] **P2.T1.1:** Record Node and Playwright versions, confirm a local display session and that port 4173 is free.
