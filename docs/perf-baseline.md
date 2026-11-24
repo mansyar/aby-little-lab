@@ -1,8 +1,57 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-24.** The dated section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file records that earlier build; the figures here describe the current tree: shell entry `index-Dw5_jcTg.js` at 193.0 kB via `validate-bundle` (197.64 kB as Vite prints it, 50.27 kB gzip), **51** JavaScript chunks, **63** precache entries (1875.33 KiB), 158 test files / 3,393 tests across 97.11 % statements, 90.93 % branches, 96.33 % functions and 98.25 % lines, and 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,393 tests across 97.10 % statements, 90.96 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured with the Hub idle prewarm neutralised: 50 cold / 0 warm samples, aggregate cold p95 total 237.4 ms, median 185.1 ms, and worst cold total 251.2 ms (Find the Word), all inside the unchanged 400 ms gate; see [Find the Word cold first-tap fix (2026-11-24)](#find-the-word-cold-first-tap-fix-2026-11-24). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time. Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
+
+## Find the Word cold first-tap fix (2026-11-24)
+
+Track `20261124-word-match-first-tap`, Phase 2. The final Vite 8.3.8 production
+build was measured with the exact headed cold-control command:
+
+```sh
+TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10
+```
+
+Environment: local headed Chromium (`TAP_HEADED=1`), production Vite preview
+(`--with-preview`), Hub idle chunk/art prewarm neutralised (`TAP_INERT_IDLE=1`),
+and `--warm-aware` tap classification. The command exited **0** and produced
+**50 cold / 0 warm samples**, exactly 10 per game across the unchanged five-game
+target set: Shape Sorter, Find the Letter, Find the Word, Add It Up and Memory
+Match.
+
+| Metric | Result |
+| --- | ---: |
+| Aggregate cold p95 total | 237.4 ms |
+| Aggregate cold median total | 185.1 ms |
+| Worst cold game | Find the Word |
+| Worst cold total | 251.2 ms |
+| `validate-boot` exit | 0 |
+| Boot median | 407.9 ms |
+| 4×-throttled boot median | 1295.0 ms |
+
+| Game | Cold samples | p95 response | p95 finished | p95 total |
+| --- | ---: | ---: | ---: | ---: |
+| Shape Sorter | 10 | 55.6 ms | 47.0 ms | 235.1 ms |
+| Find the Letter | 10 | 66.7 ms | 59.2 ms | 181.6 ms |
+| Find the Word | 10 | 71.6 ms | 54.5 ms | 251.2 ms |
+| Add It Up | 10 | 43.0 ms | 31.7 ms | 242.4 ms |
+| Memory Match | 10 | 59.6 ms | 50.2 ms | 200.8 ms |
+
+Find the Word's p95 and worst cold total are both 251.2 ms, within the unchanged
+400 ms gate; every other game also clears 400 ms. Raw evidence:
+[`verification/first-tap-word-match.json`](../conductor/tracks/20261124-word-match-first-tap/verification/first-tap-word-match.json).
+P95 remains report-only; the worst cold total is the product gate.
+
+### Per-release first-tap refresh
+
+After each release-candidate build, run the headed cold-control command above
+with `--samples 10`. Require exit 0, 50 cold / 0 warm samples, 10 samples for each
+of the same five games, and every worst cold total ≤400 ms. Commit the raw JSON,
+then update this live header and dated table. If a future run exceeds 400 ms,
+record the failure and block the release rather than weakening the gate,
+reducing the sample count or target set, or substituting headless or warm-only
+data.
 
 Track: `perf-bundle-hardening_20260809`, Phase 3 (measure-first). Date: 2026-08-09.
 
