@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { bandShiftFor } from "../../game/adaptiveLogic";
 import type { E2EProgressState } from "../../game/e2eBridge";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
 import { summariseInsights } from "../../game/insightsSummary";
@@ -11,7 +12,7 @@ import {
 } from "../../game/progressLogic";
 import type { GameId } from "../../types";
 import { attachPressFeedback } from "../../utils/pressFeedback";
-import { getActiveProfile, getProfiles, getProgress } from "../../utils/storage";
+import { getActiveProfile, getProfiles, getProgress, getSettings } from "../../utils/storage";
 import { displayScale } from "../../utils/textureTiers";
 import { textStyle } from "../../utils/typography";
 import {
@@ -29,6 +30,7 @@ import {
   TOGGLE_HEIGHT,
 } from "./primitives";
 import { ACCURACY_FILL_COLOR, drawActivityStrip } from "./progressActivity";
+import { bandLabel } from "./progressBand";
 
 /** Mastery badge shown next to games with at least 3 wins. */
 const MASTERY_STAR = "★";
@@ -254,11 +256,16 @@ export class ProgressOverlay {
     const pageStart = Math.max(0, gamePage * PROGRESS_PAGE_SIZE);
     const pageEnd =
       gamePage < 0 ? 0 : Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_ROWS.length);
+    const adaptiveEnabled = getSettings().adaptiveDifficulty;
     for (let i = pageStart; i < pageEnd; i += 1) {
       const row = PROGRESS_ROWS[i];
       const y = centerY + PROGRESS_ROW_START_Y + (i - pageStart) * PROGRESS_ROW_PITCH;
       const game = progress[row.gameId];
       const accuracy = getAccuracy(game);
+      // Read the viewed profile's window (game came from getProgress(viewedId));
+      // getAdaptiveBandShift would read the active profile instead. The toggle
+      // gates the readout exactly as it gates the child's playthrough shift.
+      const shift = adaptiveEnabled ? bandShiftFor(game.recent) : 0;
 
       const icon = scene.add.image(centerX - 182, y, row.tileKey);
       // Tile icons rasterize at the icon tier, avatars at card tier — derive
@@ -283,7 +290,7 @@ export class ProgressOverlay {
         .text(
           centerX - 158,
           y + 26,
-          `${game.plays} plays · ${formatAccuracyPercent(game)} · ${probesText(game)}${relativeLastPlayed(game.lastPlayedAt)}`,
+          `${game.plays} plays · ${formatAccuracyPercent(game)} · ${probesText(game)}${relativeLastPlayed(game.lastPlayedAt)}${bandLabel(shift)}`,
           textStyle({
             color: PRIMARY_COLOR,
             fontSize: "26px",

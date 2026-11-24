@@ -2126,8 +2126,8 @@ describe("SettingsPanel progress report", () => {
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
     triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
 
-    expect(findTextByLabel(scene, "1 plays · 75% · Today")).toBeDefined();
-    expect(findTextByLabel(scene, "1 plays · — · Today")).toBeDefined();
+    expect(findTextByLabel(scene, "1 plays · 75% · Today · band 0")).toBeDefined();
+    expect(findTextByLabel(scene, "1 plays · — · Today · band 0")).toBeDefined();
     expect(findTextByLabel(scene, "Last 7 days · 2 plays")).toBeDefined();
   });
 
@@ -2231,7 +2231,7 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "Feelings Faces")).toBeDefined();
     // Exactly one row reports a play: story-order's own record.
     const statsCalls = scene.add.text.mock.calls.filter(
-      (call) => call[0] === 354 && call[2] === "1 plays · — · Today",
+      (call) => call[0] === 354 && call[2] === "1 plays · — · Today · band 0",
     );
     expect(statsCalls).toHaveLength(1);
   });
@@ -2267,10 +2267,10 @@ describe("SettingsPanel progress report", () => {
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
     triggerPointerdown(findTextByLabel(scene, "›") as MockGameObject);
 
-    expect(findTextByLabel(scene, "0 plays · — · —")).toBeDefined();
+    expect(findTextByLabel(scene, "0 plays · — · — · band 0")).toBeDefined();
     triggerPointerdown(findImagesByTexture(scene, PROFILE_AVATAR_TEXTURES.dog)[0]);
     // A re-render keeps the current page, so the swapped rows appear in place.
-    expect(findTextByLabel(scene, "1 plays · — · Today")).toBeDefined();
+    expect(findTextByLabel(scene, "1 plays · — · Today · band 0")).toBeDefined();
     expect(getActiveProfile().id).toBe(getProfiles()[0].id);
   });
 
