@@ -62,4 +62,14 @@ preserved. `README.md` and `docs/TDD.md` need no count changes. No product or
 technology-stack statement requires amendment; the only stale-looking 400 ms note
 is explicitly dated 2026-10-27 history. `validate-docs.js` passes 5/5.
 
+## Review-time check retry
+
+During the review checks, the first full coverage invocation hit three
+`hubPlayTime.test.ts` elapsed-minute assertions while the immediately preceding
+full suite passed all 3,393 tests. Under the configured retry policy, the failing
+file passed in isolation (19/19), then the complete coverage gate passed
+(158 files / 3,393 tests; statements 97.10%, branches 90.96%, functions 96.35%,
+lines 98.23%). The live header uses this latest green coverage result. No test or
+production code was changed to resolve the transient failure.
+
 **Overall verdict: verified.**
