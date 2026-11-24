@@ -50,7 +50,7 @@ The primary appends after acceptance:
 - **Covers:** FR-2, FR-7, AC-2, AC-3
 - **Touches:** `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-2.md`, `conductor/tracks/20261124-first-tap-p95-baseline/verification/first-tap-headed.json` (new)
 - **Verification:** `pnpm exec playwright --version`, `node --version`, `TAP_HEADED=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`, `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` when 50 cold samples are not observed naturally, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
-- **Status:** blocked
+- **Status:** in_progress
 
 **Result:** blocked on the pre-fix tree — headed measurement executed, but the existing worst-cold 400 ms gate failed (Find the Word 507.4 ms on the committed 50-cold retry).
 **Resume basis:** the reviewed Word Match fix from PR #97 is now merged at `025b037f`; the failed measurement remains historical evidence and is not reused as the passing run.
