@@ -1,13 +1,7 @@
 import type Phaser from "phaser";
-import { animals } from "../game/art/animals";
-import { food } from "../game/art/food";
-import { items } from "../game/art/items";
-import { letters } from "../game/art/letters";
-import { music } from "../game/art/music";
-import { shapes } from "../game/art/shapes";
-import { toys } from "../game/art/toys";
 import type { Rng } from "../game/random";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
+import { selectWordMatchArt } from "../game/wordMatchArt";
 import type { GameId } from "../types";
 import { createCompletionSplash } from "../utils/completionEffect";
 import { sceneEntrance } from "../utils/sceneTransitions";
@@ -51,16 +45,27 @@ const CARD_COL_X_OFFSET = 210;
  */
 export class WordMatchScene extends ChoiceRoundScene {
   private rounds: WordRound[] = [];
+  private roundsReadyForCreate = false;
 
   constructor(rng: Rng = Math.random) {
     super("WordMatch", rng);
   }
 
+  init(): void {
+    super.init();
+    this.rounds = this.buildRounds();
+    this.roundsReadyForCreate = true;
+  }
+
   preload(): void {
+    this.ensureRounds();
+    const [animals, food, items, letters, music, shapes, toys] = selectWordMatchArt(this.rounds);
     this.preloadArt([animals, food, items, letters, music, shapes, toys]);
   }
 
   create(): void {
+    this.ensureRounds();
+    this.roundsReadyForCreate = false;
     sceneEntrance(this);
     this.createCornerMascot();
     this.createBackButton();
@@ -79,16 +84,21 @@ export class WordMatchScene extends ChoiceRoundScene {
       },
     });
 
-    this.rounds = generateWordPlaythrough(
-      ROUND_COUNT,
-      getAdaptiveBandShift(this.gameId()),
-      this.rng,
-    );
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();
 
     this.registerShutdownCleanup();
+  }
+
+  private buildRounds(): WordRound[] {
+    return generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()), this.rng);
+  }
+
+  private ensureRounds(): void {
+    if (this.roundsReadyForCreate) return;
+    this.rounds = this.buildRounds();
+    this.roundsReadyForCreate = true;
   }
 
   protected totalRounds(): number {
