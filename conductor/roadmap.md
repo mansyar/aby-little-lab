@@ -22,7 +22,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-2 | Measure first-tap p95 headed and refresh the perf baseline each release | chore | medium | — | — | user |
+| RM-2 | Measure first-tap p95 headed and refresh the perf baseline each release | chore | medium | - | 20261124-first-tap-p95-baseline | user |
 | RM-3 | Automate the browser matrix (iOS Safari, Android Chrome, Fire tablet) | chore | medium | — | — | user |
 
 ## Later
