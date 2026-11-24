@@ -3,7 +3,7 @@
 ## Overview
 
 This document is the durable record of the four product decisions that close the
-Phase 3 product-intent gate in `conductor/product.md` §10.4. It makes the
+Phase 3 product-intent gate in `conductor/roadmap.md` §10.4. It makes the
 product's audience, accessibility scope, language and legal posture explicit so
 they cannot drift back into being implicit. The record does not re-litigate the
 decisions — it states what was chosen, when, why, and what follows from it.
@@ -112,6 +112,6 @@ The decisions above settle the roadmap branch at the Phase 3 gate:
 
 ## References
 
-- `conductor/product.md` §10.4 (product-intent gate), §10.5 (Phase 4 — Depth),
+- `conductor/roadmap.md` §10.4 (product-intent gate), §10.5 (Phase 4 — Depth),
   §10.6 (Phase 5 — Reach), §10.9 (roadmap risks), §10.10 (deliberately not doing)
-- `../conductor/product.md` (roadmap)
+- `../conductor/roadmap.md` (roadmap)

@@ -1497,7 +1497,7 @@ CI runs the validator in the gates job under the same `tier == 'code'` expressio
 ## 12. See also
 
 - [`docs/PRD.md`](./PRD.md) — product definition, curriculum map, per-game rules, cross-game systems, performance targets.
-- [`conductor/product.md` §10](../conductor/product.md#10-roadmap) - the roadmap: phases, gates and deliberate non-goals.
+- [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap) - the roadmap: phases, gates and deliberate non-goals.
 - [`conductor/tech-stack.md`](../conductor/tech-stack.md) — dated stack decisions and the history behind them.
 - [`conductor/archive/uiux-hardening_20260805/`](../conductor/archive/uiux-hardening_20260805/) — the archived UI/UX hardening track behind the Baloo 2 typography, Hub tile icons and press-feedback pass.
 - [`docs/release-checklist.md`](./release-checklist.md) — the manual device pass that complements the CI gates.

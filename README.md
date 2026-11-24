@@ -296,7 +296,7 @@ decision rather than a defect:
 
 - **Canvas-only UI** - no keyboard input, no accessibility tree, and a viewport that disables browser zoom. Correct for a touch-only 3-5 app, disqualifying for schools or procurement; recorded on 2026-11-20 as a stated product stance rather than a gap to close ([docs/product-intent.md](docs/product-intent.md)).
 
-Planned work lives in [conductor/product.md §10](conductor/product.md#10-roadmap).
+Planned work lives in [conductor/roadmap.md §10](conductor/roadmap.md#10-roadmap).
 
 ## License
 

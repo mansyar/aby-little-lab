@@ -2,7 +2,7 @@
 
 > **Live figures — measured 2026-11-16.** The section **Fix-It Machine — build and suite figures (2026-11-16)** at the end of this file describes the current build: shell entry `index-DK87S-QP.js` at 186.4 kB via `validate-bundle` (190.89 kB as Vite prints it, 48.35 kB gzip), **51** JavaScript chunks, **63** precache entries (1826.19 KiB), 156 test files / 3,380 tests across 97.12 % statements, 90.93 % branches, 96.20 % functions and 98.31 % lines, and 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap result is unchanged from the 2026-10-27 session and still stands: a warm case of 20–65 ms per game, an art-blockage diagnostic (stage D, ~zero at 6 s settle in all five sampled games), and a fully-cold case (worst sampled median 332.6 ms, inside the 400 ms budget). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time: the Ligne pilot (2026-08-24), the Ligne removal (2026-10-16), the hub-phone-ux track (2026-10-17), the Shell Diet (2026-10-20), the Shell Diet re-measurement (2026-10-22) and the idle art-queue prewarm (2026-10-26) and the Robot Path track (2026-11-16). Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
 >
-> The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/product.md` §10](../conductor/product.md#10-roadmap).
+> The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
 
 Track: `perf-bundle-hardening_20260809`, Phase 3 (measure-first). Date: 2026-08-09.
 
@@ -406,7 +406,7 @@ The paragraph is kept as written for the record:
 budget on the target hardware is not settled by this run. It needs the
 increment measurement the shell-diet track used (a built pre-track baseline on
 the same host, back to back) and a device pass. It is recorded here as a
-measured, dated figure and is a candidate for the roadmap in `conductor/product.md` §10.
+measured, dated figure and is a candidate for the roadmap in `conductor/roadmap.md` §10.
 
 ### Build figures (2026-10-22)
 
