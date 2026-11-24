@@ -96,6 +96,7 @@ vi.mock("../../game/wordLogic", async (importOriginal) => {
 
 import * as wordLogic from "../../game/wordLogic";
 import { getWord } from "../../game/wordLogic";
+import { selectWordMatchArt } from "../../game/wordMatchArt";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -299,6 +300,40 @@ describe("WordMatchScene shell", () => {
     const b = (second as unknown as { rounds: typeof a }).rounds;
 
     expect(b).toEqual(a);
+  });
+
+  it("preloads only the generated playthrough art and does not regenerate in create", () => {
+    getAdaptiveBandShiftMock.mockClear();
+    getAdaptiveBandShiftMock.mockReturnValue(0);
+    generateWordPlaythroughMock.mockClear();
+    const scene = new WordMatchScene(mulberry32(1234));
+
+    scene.preload();
+    const state = scene as unknown as {
+      load: { svg: MockFn };
+      rounds: Array<{ target: string; choices: string[] }>;
+    };
+    const queuedKeys = state.load.svg.mock.calls.map((call) => call[0] as string);
+    const expectedKeys = selectWordMatchArt(state.rounds).flatMap((group) =>
+      group.assets.map((asset) => asset.key),
+    );
+
+    expect(queuedKeys).toEqual(expectedKeys);
+    expect(queuedKeys.some((key) => key.startsWith("letter_"))).toBe(true);
+    expect(generateWordPlaythroughMock).toHaveBeenCalledTimes(1);
+
+    scene.create();
+    expect(generateWordPlaythroughMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("regenerates the playthrough on a fresh create-only visit", () => {
+    generateWordPlaythroughMock.mockClear();
+    const scene = new WordMatchScene(mulberry32(1234));
+
+    scene.create();
+    scene.create();
+
+    expect(generateWordPlaythroughMock).toHaveBeenCalledTimes(2);
   });
 });
 

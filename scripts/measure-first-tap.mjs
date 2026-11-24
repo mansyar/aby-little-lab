@@ -38,11 +38,14 @@
  *
  * Usage:
  *   pnpm preview --port 4173
- *   node scripts/measure-first-tap.mjs [--json] [--warm-aware]
+ *   node scripts/measure-first-tap.mjs [--json] [--warm-aware] [--samples <n>]
  *
  *   # or let this script own the preview server (evidence suite: validate-boot,
  *   # 4x-throttled boot, then first tap — always stops the server it started)
- *   node scripts/measure-first-tap.mjs --with-preview [--warm-aware]
+ *   node scripts/measure-first-tap.mjs --with-preview [--warm-aware] [--samples <n>]
+ *
+ * `--samples` defaults to 10 fresh-context taps per target. Cold p95 is
+ * report-only; the worst cold total remains the sole tap budget gate.
  *
  * `--warm-aware` adds the tap kind the Hub's idle prewarm creates. Before the
  * tap it inspects the requests already issued for the tapped scene's chunk
@@ -100,6 +103,9 @@ import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 
+import { renderFirstTapReport } from "./firstTapReport.mjs";
+import { p95 } from "./firstTapStats.mjs";
+
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PREVIEW_PORT = 4173;
 const URL_UNDER_TEST = process.env.PREVIEW_URL ?? `http://localhost:${PREVIEW_PORT}/`;
@@ -124,6 +130,8 @@ const HUB_SETTLE_MS = Number(process.env.HUB_SETTLE_MS ?? 2000);
 /** Boot settles 5x1000 ms before sampling, as in docs/perf-baseline.md. */
 const BOOT_SETTLE_MS = 5000;
 const BOOT_SAMPLES = 3;
+/** Fresh contexts per target game; each context pays its own cold chunk fetch. */
+const DEFAULT_SAMPLES = 10;
 /** A missing chunk within this window means the tap did not navigate. */
 const CHUNK_TIMEOUT_MS = 8000;
 /** The v2 payload key the app writes its profiles (and the play record) to. */
@@ -176,6 +184,28 @@ async function launchBrowser() {
     }
   }
   throw new Error(`no usable browser:\n  ${failures.join("\n  ")}`);
+}
+
+/** Parse `--samples <n>` / `--samples=<n>` before any browser work starts. */
+function parseSamples(argv) {
+  let samples = DEFAULT_SAMPLES;
+  for (let index = 0; index < argv.length; index++) {
+    const argument = argv[index];
+    if (argument === "--samples") {
+      const value = argv[index + 1];
+      if (value === undefined || value.startsWith("--")) {
+        throw new Error("--samples requires a positive integer value");
+      }
+      samples = Number(value);
+      index++;
+    } else if (argument.startsWith("--samples=")) {
+      samples = Number(argument.slice("--samples=".length));
+    }
+  }
+  if (!Number.isInteger(samples) || samples <= 0) {
+    throw new Error("--samples must be a positive integer");
+  }
+  return samples;
 }
 
 function median(values) {
@@ -507,12 +537,14 @@ async function measureGame(browser, target, warmAware = false) {
   }
 }
 
-async function measureFirstTap(warmAware = false) {
+async function measureFirstTap(warmAware = false, samples = DEFAULT_SAMPLES) {
   const browser = await launchBrowser();
   const runs = [];
   try {
     for (const target of TARGETS) {
-      runs.push(await measureGame(browser, target, warmAware));
+      for (let sample = 0; sample < samples; sample++) {
+        runs.push(await measureGame(browser, target, warmAware));
+      }
     }
   } finally {
     await browser.close();
@@ -530,6 +562,21 @@ async function measureFirstTap(warmAware = false) {
     coldRuns.length === 0
       ? null
       : coldRuns.reduce((current, run) => (run.totalMs > current.totalMs ? run : current));
+  const coldP95Ms = {
+    responseMs: coldRuns.length === 0 ? null : round(p95(coldRuns.map((run) => run.responseMs))),
+    finishedMs: coldRuns.length === 0 ? null : round(p95(coldRuns.map((run) => run.finishedMs))),
+    totalMs: coldRuns.length === 0 ? null : round(p95(coldRuns.map((run) => run.totalMs))),
+  };
+  const perGameP95Ms = TARGETS.map((target) => {
+    const gameRuns = coldRuns.filter((run) => run.game === target.name);
+    return {
+      game: target.name,
+      samples: gameRuns.length,
+      responseMs: gameRuns.length === 0 ? null : round(p95(gameRuns.map((run) => run.responseMs))),
+      finishedMs: gameRuns.length === 0 ? null : round(p95(gameRuns.map((run) => run.finishedMs))),
+      totalMs: gameRuns.length === 0 ? null : round(p95(gameRuns.map((run) => run.totalMs))),
+    };
+  });
   return {
     stages: {
       responseMs: "tap -> game chunk responseReceived (headers only)",
@@ -557,6 +604,10 @@ async function measureFirstTap(warmAware = false) {
       responseMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.responseMs))),
       finishedMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.finishedMs))),
       totalMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.totalMs))),
+    },
+    cold: {
+      p95Ms: coldP95Ms,
+      perGameP95Ms,
     },
     ...(warmAware
       ? {
@@ -659,7 +710,7 @@ async function measureBudget(stage, promise) {
 }
 
 /** `--with-preview`: own the server, measure boot + tap, always stop it. */
-async function runEvidenceSuite(log, warmAware = false) {
+async function runEvidenceSuite(log, warmAware = false, samples = DEFAULT_SAMPLES) {
   const server = await startPreview();
   const suite = { phases: {}, taps: null, boot: null, throttledBoot: null };
   try {
@@ -675,73 +726,19 @@ async function runEvidenceSuite(log, warmAware = false) {
       `${THROTTLE_RATE}x-throttled boot median ${suite.throttledBoot.medianMs} ms: ` +
         suite.throttledBoot.samplesMs.join(" / "),
     );
-    suite.taps = await measureBudget("first tap", measureFirstTap(warmAware));
+    suite.taps = await measureBudget("first tap", measureFirstTap(warmAware, samples));
     log(
       `first tap worst cold game ${suite.taps.worst === null ? "(none)" : suite.taps.worst.game} at ` +
         `${suite.taps.worst === null ? "—" : suite.taps.worst.totalMs} ms` +
         (suite.taps.medians.totalMs === null
           ? ""
-          : ` (cold median across games ${suite.taps.medians.totalMs} ms)`),
+          : ` (cold median across games ${suite.taps.medians.totalMs} ms, ` +
+            `cold p95 ${suite.taps.cold.p95Ms.totalMs} ms)`),
     );
   } finally {
     stopPreview(server);
   }
   return suite;
-}
-
-function printTapTable(taps) {
-  const cold = taps.warmAware === true;
-  console.log(
-    `${cold ? "First tap per game (fresh context each run, service worker blocked)" : "Cold first tap per game (fresh context each run, service worker blocked)"}\n`,
-  );
-  console.log("  A = tap -> chunk responseReceived (headers)");
-  console.log("  B = tap -> chunk loadingFinished (body downloaded)");
-  console.log("  C = tap -> first frame after the chunk settled (budgeted; NOT fully rendered)");
-  console.log("  D = post-tap main-thread blockage over 2.5 s (art-half diagnostic; lower is better)");
-  if (cold) {
-    console.log(
-      "  A warm tap pays neither A nor B: the Hub's idle prewarm imported the chunk, so C is\n" +
-        "  tap -> first frame after the Hub's play record (a different quantity from a cold C).",
-    );
-  }
-  console.log("");
-  console.log(
-    `  game              scene chunk                     A ms    B ms    C ms    D ms${cold ? "  kind" : ""}`,
-  );
-  for (const run of taps.runs) {
-    console.log(
-      `  ${run.game.padEnd(16)}  ${String(run.chunk).padEnd(28)}  ` +
-        `${run.responseMs.toFixed(1).padStart(5)}  ` +
-        `${run.finishedMs.toFixed(1).padStart(6)}  ` +
-        `${run.totalMs.toFixed(1).padStart(6)}  ` +
-        `${run.blockedMs.toFixed(1).padStart(6)}` +
-        (cold ? `  ${run.tapKind}` : ""),
-    );
-  }
-  if (taps.medians.totalMs !== null) {
-    console.log(
-      `\n  cold median       ${"".padEnd(28)}  ${taps.medians.responseMs.toFixed(1).padStart(5)}` +
-        `  ${taps.medians.finishedMs.toFixed(1).padStart(6)}` +
-        `  ${taps.medians.totalMs.toFixed(1).padStart(6)}`,
-    );
-  }
-  if (taps.warmMedians !== null && taps.warmMedians !== undefined) {
-    console.log(
-      `  warm median       ${"".padEnd(28)}  ${"—".padStart(5)}  ${"—".padStart(6)}` +
-        `  ${taps.warmMedians.totalMs.toFixed(1).padStart(6)}`,
-    );
-  }
-  if (taps.worst !== null) {
-    console.log(`\n  worst cold game: ${taps.worst.game} at ${taps.worst.totalMs.toFixed(1)} ms (C)`);
-  } else {
-    console.log("\n  no cold tap in this run: every tapped chunk was already imported");
-  }
-  if (cold) {
-    console.log(
-      `  tap kinds: ${taps.coldCount} cold / ${taps.warmCount} warm`,
-    );
-  }
-  console.log(`  budget: worst cold game C <= ${taps.budgetMs} ms`);
 }
 
 /** Shared budget gate: returns the exit code for a finished tap pass. */
@@ -764,25 +761,31 @@ function tapExitCode(taps) {
 }
 
 async function main() {
-  const args = new Set(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const args = new Set(argv);
   const asJson = args.has("--json");
   const warmAware = args.has("--warm-aware");
+  const samples = parseSamples(argv);
 
   if (args.has("--with-preview")) {
-    const suite = await runEvidenceSuite(asJson ? () => {} : (line) => console.log(line), warmAware);
+    const suite = await runEvidenceSuite(
+      asJson ? () => {} : (line) => console.log(line),
+      warmAware,
+      samples,
+    );
     if (asJson) {
-      console.log(JSON.stringify({ bootBudgetMs: BOOT_BUDGET_MS, ...suite }, null, 2));
+      console.log(renderFirstTapReport({ bootBudgetMs: BOOT_BUDGET_MS, ...suite }, "json"));
     } else {
       console.log("");
-      printTapTable(suite.taps);
+      console.log(renderFirstTapReport(suite.taps));
     }
     process.exitCode = tapExitCode(suite.taps);
     return;
   }
 
-  const taps = await measureFirstTap(warmAware);
-  if (asJson) console.log(JSON.stringify(taps, null, 2));
-  else printTapTable(taps);
+  const taps = await measureFirstTap(warmAware, samples);
+  if (asJson) console.log(renderFirstTapReport(taps, "json"));
+  else console.log(renderFirstTapReport(taps));
   process.exitCode = tapExitCode(taps);
 }
 
