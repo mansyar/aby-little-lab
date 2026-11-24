@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-3, FR-5, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-4, AC-9, AC-10
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `biome.json` (only if forced), `vite.config.ts` (only if forced), `src/__tests__/**` (only if forced), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only if forced), `conductor/tracks/20261124-dependency-majors/verification/phase-1.md`
 - **Verification:** `pnpm outdated --format=list`; `pnpm install --frozen-lockfile`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `node scripts/validate-docs.js`; then the full `verify_phase` chain once on the final tree. Run commands separately; do not chain with `&&` inside a subagent shell.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Survey and freeze candidates** — covers: FR-1, AC-1
   - [ ] **P1.T1.1:** Record verbatim `pnpm outdated --format=list` output and the six frozen candidate names in the phase evidence.
