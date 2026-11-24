@@ -107,10 +107,14 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** F1
 - **Touches:** `docs/perf-baseline.md`, `conductor/tracks/20261124-word-match-first-tap/verification/phase-R1.md`
 - **Verification:** `node scripts/validate-docs.js`, `pnpm check`, `git diff --check`, scoped documentation diff audit, then the full configured `verify_phase` chain.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Label current suite rows inside dated history** — covers: F1
-- [ ] **R1.T2: Verify documentation truth and final gate** — covers: F1
+- [x] **R1.T1: Label current suite rows inside dated history** — covers: F1
+- [x] **R1.T2: Verify documentation truth and final gate** — covers: F1
+
+**Result:** verified
+**Checkpoint:** 65144c59
+**Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-R1.md
 
 <!--
 The primary appends after acceptance:
