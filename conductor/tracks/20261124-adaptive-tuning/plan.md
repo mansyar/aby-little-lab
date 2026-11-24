@@ -56,7 +56,7 @@
   `src/__tests__/game/adaptiveCurve.test.ts` (final pinned-constant assertion).
 - **Verification:** targeted vitest on adaptive + curve tests, full
   `pnpm exec vitest run`, `pnpm check`, `pnpm typecheck`, full `verify_phase`.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Pin tuned constants** — covers: FR-3, AC-3
   - [ ] P2.T1.1: Set `UP_THRESHOLD` / `DOWN_THRESHOLD` to the Phase 1 result;
