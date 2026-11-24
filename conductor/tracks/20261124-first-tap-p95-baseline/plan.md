@@ -123,7 +123,7 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** F1, F2, AC-1, FR-1, NFR-3, NFR-4
 - **Touches:** `scripts/firstTapReport.mjs` (new), `scripts/firstTapReport.d.mts` (new), `scripts/measure-first-tap.mjs`, `src/__tests__/guard/firstTapStats.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only only), `conductor/tracks/20261124-first-tap-p95-baseline/spec.md` (primary-applied F2), `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-R1.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/guard/firstTapStats.test.ts`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, `git diff --check`, scoped diff audit, then the full `verify_phase` chain once on the final tree.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Add a behavioral report-renderer guard** - covers: F1, AC-1
   - [ ] **R1.T1.1:** Extract the tap summary rendering into a pure exported function and use it for the script's text and JSON paths without changing measured values or the exit gate.
