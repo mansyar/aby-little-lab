@@ -49,10 +49,10 @@ The worst game is **Shape Sorter at 277.5 ms**, and every worst cold total is
 **≤400 ms**. Find the Word's p95 and worst cold total are both **249.6 ms**.
 P95 remains report-only; the unchanged worst-cold total ≤400 ms condition
 remains the only exit gate. Raw evidence:
-[`verification/first-tap-headed.json`](../conductor/tracks/20261124-first-tap-p95-baseline/verification/first-tap-headed.json).
+[`verification/first-tap-headed.json`](../conductor/archive/20261124-first-tap-p95-baseline/verification/first-tap-headed.json).
 
 The earlier failed **507.4 ms Find the Word** result is preserved as pre-fix
-history in [`verification/phase-2.md`](../conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-2.md),
+history in [`verification/phase-2.md`](../conductor/archive/20261124-first-tap-p95-baseline/verification/phase-2.md),
 not erased or replaced by this passing resumed result.
 
 ### Per-release first-tap refresh
