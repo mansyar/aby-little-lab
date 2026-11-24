@@ -294,4 +294,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Adaptive Tuning** - [20261124-adaptive-tuning](./archive/20261124-adaptive-tuning/index.md) - feature - high
 - [x] **Track: Dependency Majors - November 2026** - [20261124-dependency-majors](./archive/20261124-dependency-majors/index.md) - chore - medium
 - [~] **Track: Measure first-tap p95 headed and refresh the perf baseline each release** - [20261124-first-tap-p95-baseline](./tracks/20261124-first-tap-p95-baseline/index.md) - chore - medium
-- [ ] **Track: Reduce Find the Word cold first-tap latency** - [20261124-word-match-first-tap](./tracks/20261124-word-match-first-tap/index.md) - bug - high
+- [~] **Track: Reduce Find the Word cold first-tap latency** - [20261124-word-match-first-tap](./tracks/20261124-word-match-first-tap/index.md) - bug - high
