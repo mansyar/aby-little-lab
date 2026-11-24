@@ -123,7 +123,7 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** F1, F2
 - **Touches:** `conductor/tracks/20261124-dependency-majors/verification/phase-1.md`, `conductor/tech-stack.md` (primary-applied), `conductor/tracks/20261124-dependency-majors/verification/phase-R1.md`
 - **Verification:** `node scripts/validate-docs.js`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; scoped `git diff` audit; raw survey text present in evidence.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1** - covers: F1 — add the verbatim base-manifest `pnpm outdated` survey to phase-1 evidence with provenance and mark FR-1/AC-1/AC-2 covered.
 - [ ] **R1.T2: Resolve F2** - covers: F2 — restore the em-dash on the TDD.md See Also line in `conductor/tech-stack.md` (primary-applied protected edit).
