@@ -14,6 +14,7 @@ import {
   simulateWindow,
   TAP_WINDOW,
   TARGET_DISTRIBUTION,
+  TARGET_TOLERANCE,
 } from "../../game/adaptiveCurve";
 import { bandShiftFor, DOWN_THRESHOLD, MIN_SAMPLE, UP_THRESHOLD } from "../../game/adaptiveLogic";
 
@@ -176,5 +177,31 @@ describe("bandShiftFor optional cut points", () => {
     expect(bandShiftFor(makeWindow(5), 0.9, 0.5)).toBe(0);
     expect(bandShiftFor(makeWindow(5), 0.9, 0.6)).toBe(-1);
     expect(bandShiftFor(makeWindow(MIN_SAMPLE - 1), 0.9, 0.5)).toBe(0);
+  });
+});
+
+describe("pinned tuned constants", () => {
+  it("pins the shipped thresholds to the recorded candidate pair", () => {
+    expect(UP_THRESHOLD).toBe(CANDIDATE_UP);
+    expect(DOWN_THRESHOLD).toBe(CANDIDATE_DOWN);
+    expect(UP_THRESHOLD).toBe(0.9);
+    expect(DOWN_THRESHOLD).toBe(0.5);
+  });
+
+  it("meets the designed curve with the shipped pinned constants", () => {
+    const distribution = simulateDistribution(
+      SIMULATION_PROFILES,
+      UP_THRESHOLD,
+      DOWN_THRESHOLD,
+      mulberry32(SIMULATION_SEED),
+    );
+    expect(distribution.profiles).toBeGreaterThanOrEqual(1000);
+    expect(distributionMeetsTarget(distribution)).toBe(true);
+    for (const band of ["down", "steady", "up"] as const) {
+      expect(distribution[band]).toBeGreaterThanOrEqual(
+        TARGET_DISTRIBUTION[band] - TARGET_TOLERANCE,
+      );
+      expect(distribution[band]).toBeLessThanOrEqual(TARGET_DISTRIBUTION[band] + TARGET_TOLERANCE);
+    }
   });
 });

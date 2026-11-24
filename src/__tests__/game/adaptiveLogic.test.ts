@@ -23,7 +23,7 @@ describe("constants", () => {
     expect(WINDOW_SIZE).toBe(10);
     expect(MIN_SAMPLE).toBe(6);
     expect(UP_THRESHOLD).toBe(0.9);
-    expect(DOWN_THRESHOLD).toBe(0.6);
+    expect(DOWN_THRESHOLD).toBe(0.5);
   });
 
   it("exposes the classic easy-first base ladder", () => {
@@ -77,18 +77,19 @@ describe("bandShiftFor", () => {
 
   it("shifts up at or above the 90% accuracy threshold", () => {
     expect(bandShiftFor(makeWindow(6, 0))).toBe(1); // 100%
-    expect(bandShiftFor(makeWindow(9, 1))).toBe(1); // exactly 90%
+    expect(bandShiftFor(makeWindow(9, 1))).toBe(1); // exactly 90% (9/10)
   });
 
-  it("shifts down below the 60% accuracy threshold", () => {
+  it("shifts down below the 50% accuracy threshold", () => {
     expect(bandShiftFor(makeWindow(0, 6))).toBe(-1); // 0%
-    expect(bandShiftFor(makeWindow(5, 5))).toBe(-1); // 50%
+    expect(bandShiftFor(makeWindow(4, 6))).toBe(-1); // exactly 40% (4/10)
   });
 
   it("holds steady inside the neutral band", () => {
-    expect(bandShiftFor(makeWindow(8, 2))).toBe(0); // 80%
+    expect(bandShiftFor(makeWindow(8, 2))).toBe(0); // exactly 80% (8/10), below the up cut
     expect(bandShiftFor(makeWindow(4, 2))).toBe(0); // ~67%
-    expect(bandShiftFor(makeWindow(6, 4))).toBe(0); // exactly 60% is not below
+    expect(bandShiftFor(makeWindow(6, 4))).toBe(0); // 60%
+    expect(bandShiftFor(makeWindow(5, 5))).toBe(0); // exactly 50% (5/10) is not below the down cut
   });
 });
 

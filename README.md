@@ -46,7 +46,7 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,374 tests across 156 files**, all green (verified 2026-11-24).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,376 tests across 156 files**, all green (verified 2026-11-24).
 
 Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 24 launches (driven as two parallel halves), three rounds on each mechanic family, the sticker award, the parental gate, the Learning Progress overview, the daily cap, a backup exported and restored into an empty browser, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as two `Browser Journeys` shards (13 cases each, two workers per shard on its own four-vCPU runner and its own preview server, a 5 min budget: 2.5 and 3.7 min measured, reported by one aggregation check of the same name); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 

@@ -20,7 +20,7 @@ export const MIN_SAMPLE = 6;
 export const UP_THRESHOLD = 0.9;
 
 /** Accuracy (exclusive) that earns a one-band step down. */
-export const DOWN_THRESHOLD = 0.6;
+export const DOWN_THRESHOLD = 0.5;
 
 /** The classic easy-first ladder every band-based game serves today. */
 export const BASE_LADDER: readonly BandId[] = [1, 1, 2, 2, 3, 3];
