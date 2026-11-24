@@ -79,7 +79,7 @@ The primary appends after acceptance:
 - **Covers:** FR-3, FR-4, FR-6, NFR-3, NFR-4, AC-4, AC-5, AC-8
 - **Touches:** `docs/perf-baseline.md`, `README.md`, `docs/TDD.md` (count-only only), `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-3.md`, `conductor/tracks/20261124-first-tap-p95-baseline/verification/integrated.md`
 - **Verification:** `node scripts/validate-docs.js`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, then the full `verify_phase` chain once on the final tree.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Publish the dated p95 result** - covers: FR-3, FR-6, AC-4, AC-5
   - [ ] **P3.T1.1:** Ensure the live header in `docs/perf-baseline.md` carries the resumed 2026-11-24 headed figures, per-game p95 table, exact command, sample count, target set and a link to `verification/first-tap-headed.json`; preserve the reviewed Word Match fix section and dated history.
