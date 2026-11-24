@@ -4,17 +4,17 @@
 - **Type:** chore
 - **Branch:** `chore/20261124-dependency-majors`
 - **Range:** `a914e2f2..9de66811`
-- **Date:** `2026-11-24T15:17:49+11:00`
-- **Verdict:** `PASS WITH FINDINGS`
+- **Date:** `2026-11-24T15:29:47+11:00`
+- **Verdict:** `PASS`
 
 ## Summary
 
 The six frozen dev packages upgraded cleanly with correct pair alignment, all
 configured gates green, an empty production-source diff, and a stack doc that
 matches the installed versions. The read-only reviewer found no Critical, High
-or Medium findings; two Low findings concern evidence formality (the verbatim
-pre-upgrade survey) and one incidental doc formatting change. Strict mode
-requires both to be fixed before the PR, so Phase R1 is appended.
+or Medium findings. Two Low findings (verbatim pre-upgrade survey evidence and
+an incidental em-dash change) were fixed in Phase R1 and confirmed closed by the
+read-only reviewer on the final tree (`b22724b6`); no finding remains open.
 
 ## Verification
 
@@ -40,7 +40,7 @@ requires both to be fixed before the PR, so Phase R1 is appended.
 
 | ID | Implemented by | Verified by | Status |
 | --- | --- | --- | --- |
-| FR-1 | P1.T1 | phase-1 evidence, spec dated survey, primary `pnpm outdated` re-runs | partial (F1) |
+| FR-1 | P1.T1 | phase-1 §AC-1 survey reconciliation (R1), primary `pnpm outdated` re-runs | covered |
 | FR-2 | P1.T2, P2.T1, P3.T1 | package.json + lockfile diffs, phase evidence | covered |
 | FR-3 | P1.T4, P2.T4, P3.T3, P4.T3 | phase evidence, integrated gate | covered |
 | FR-4 | P3.T2 | final `pnpm outdated` shows no runtime rows; E2E not required | covered |
@@ -52,7 +52,7 @@ requires both to be fixed before the PR, so Phase R1 is appended.
 | NFR-2 | P1.T2–P3.T1 | frozen install exit 0 | covered |
 | NFR-3 | P3.T2 | runtime unchanged, no new deps, src diff empty | covered |
 | NFR-4 | all phases | non-watch Vitest, integrated full chain | covered |
-| AC-1 | P1.T1 | phase-1 evidence | partial (F1) |
+| AC-1 | P1.T1 | verbatim six-row survey in phase-1 §AC-1 survey reconciliation (R1) | covered |
 | AC-2 | P1.T2, P2.T1, P3.T1 | primary phase-head and final `pnpm outdated` re-runs | covered |
 | AC-3 | P1.T2, P2.T1, P3.T1 | six version strings; Vitest pair shared, Playwright pair exact | covered |
 | AC-4 | P1.T4, P2.T4, P3.T3, P4.T3 | phase evidence tables, integrated gate | covered |
@@ -94,6 +94,18 @@ requires both to be fixed before the PR, so Phase R1 is appended.
   - **Requirement:** FR-6
   - **Test gap:** none
 
+### Resolution (Phase R1)
+
+- **F1 closed:** `verification/phase-1.md:13` now carries the verbatim
+  `pnpm outdated --format=list --dir <scratch>` output (exit 1, six frozen dev
+  packages, no runtime row) with provenance from base manifest `a914e2f2`.
+  FR-1 and AC-1 rows are marked `covered`; `verification/phase-R1.md` records
+  the fix and the primary's re-runs of the two permission-denied validators.
+- **F2 closed:** `conductor/tech-stack.md:409` was reverted to U+2014 (em dash),
+  matching the base text and the adjacent PRD.md See Also line; verified at the
+  byte level by the primary and by the re-reviewer.
+- Re-review verdict: **PASS**, no findings, no needs. Fix checkpoint `3bf09457`.
+
 ## Overrides
 
 - <none; strict mode requires both findings fixed before the PR>
@@ -101,10 +113,11 @@ requires both to be fixed before the PR, so Phase R1 is appended.
 ## Plan compliance
 
 All four phases are verified with checkpoints `4a8fa46d`, `4929a66f`,
-`cd725aa8`, `b78553ff` and evidence files. Every task marked `[x]` is backed by
-a phase commit and evidence. No task was dropped. The diff stays within each
-phase's `Touches` except the declared, forced `biome.json` `$schema` migration.
-Phase R1 is appended for the two Low findings.
+`cd725aa8`, `b78553ff`, and review-fix Phase R1 with checkpoint `3bf09457`;
+every task marked `[x]` is backed by a phase commit and evidence. No task was
+dropped. The diff stays within each phase's `Touches` except the declared,
+forced `biome.json` `$schema` migration. Both Low findings were fixed in R1 and
+the re-review returned PASS.
 
 ## Out of scope
 
@@ -126,3 +139,4 @@ Phase R1 is appended for the two Low findings.
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 2 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 0 | 2 |
