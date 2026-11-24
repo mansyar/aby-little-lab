@@ -38,11 +38,14 @@
  *
  * Usage:
  *   pnpm preview --port 4173
- *   node scripts/measure-first-tap.mjs [--json] [--warm-aware]
+ *   node scripts/measure-first-tap.mjs [--json] [--warm-aware] [--samples <n>]
  *
  *   # or let this script own the preview server (evidence suite: validate-boot,
  *   # 4x-throttled boot, then first tap — always stops the server it started)
- *   node scripts/measure-first-tap.mjs --with-preview [--warm-aware]
+ *   node scripts/measure-first-tap.mjs --with-preview [--warm-aware] [--samples <n>]
+ *
+ * `--samples` defaults to 10 fresh-context taps per target. Cold p95 is
+ * report-only; the worst cold total remains the sole tap budget gate.
  *
  * `--warm-aware` adds the tap kind the Hub's idle prewarm creates. Before the
  * tap it inspects the requests already issued for the tapped scene's chunk
@@ -100,6 +103,8 @@ import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 
+import { p95 } from "./firstTapStats.mjs";
+
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PREVIEW_PORT = 4173;
 const URL_UNDER_TEST = process.env.PREVIEW_URL ?? `http://localhost:${PREVIEW_PORT}/`;
@@ -124,6 +129,8 @@ const HUB_SETTLE_MS = Number(process.env.HUB_SETTLE_MS ?? 2000);
 /** Boot settles 5x1000 ms before sampling, as in docs/perf-baseline.md. */
 const BOOT_SETTLE_MS = 5000;
 const BOOT_SAMPLES = 3;
+/** Fresh contexts per target game; each context pays its own cold chunk fetch. */
+const DEFAULT_SAMPLES = 10;
 /** A missing chunk within this window means the tap did not navigate. */
 const CHUNK_TIMEOUT_MS = 8000;
 /** The v2 payload key the app writes its profiles (and the play record) to. */
@@ -176,6 +183,28 @@ async function launchBrowser() {
     }
   }
   throw new Error(`no usable browser:\n  ${failures.join("\n  ")}`);
+}
+
+/** Parse `--samples <n>` / `--samples=<n>` before any browser work starts. */
+function parseSamples(argv) {
+  let samples = DEFAULT_SAMPLES;
+  for (let index = 0; index < argv.length; index++) {
+    const argument = argv[index];
+    if (argument === "--samples") {
+      const value = argv[index + 1];
+      if (value === undefined || value.startsWith("--")) {
+        throw new Error("--samples requires a positive integer value");
+      }
+      samples = Number(value);
+      index++;
+    } else if (argument.startsWith("--samples=")) {
+      samples = Number(argument.slice("--samples=".length));
+    }
+  }
+  if (!Number.isInteger(samples) || samples <= 0) {
+    throw new Error("--samples must be a positive integer");
+  }
+  return samples;
 }
 
 function median(values) {
@@ -507,12 +536,14 @@ async function measureGame(browser, target, warmAware = false) {
   }
 }
 
-async function measureFirstTap(warmAware = false) {
+async function measureFirstTap(warmAware = false, samples = DEFAULT_SAMPLES) {
   const browser = await launchBrowser();
   const runs = [];
   try {
     for (const target of TARGETS) {
-      runs.push(await measureGame(browser, target, warmAware));
+      for (let sample = 0; sample < samples; sample++) {
+        runs.push(await measureGame(browser, target, warmAware));
+      }
     }
   } finally {
     await browser.close();
@@ -530,6 +561,21 @@ async function measureFirstTap(warmAware = false) {
     coldRuns.length === 0
       ? null
       : coldRuns.reduce((current, run) => (run.totalMs > current.totalMs ? run : current));
+  const coldP95Ms = {
+    responseMs: coldRuns.length === 0 ? null : round(p95(coldRuns.map((run) => run.responseMs))),
+    finishedMs: coldRuns.length === 0 ? null : round(p95(coldRuns.map((run) => run.finishedMs))),
+    totalMs: coldRuns.length === 0 ? null : round(p95(coldRuns.map((run) => run.totalMs))),
+  };
+  const perGameP95Ms = TARGETS.map((target) => {
+    const gameRuns = coldRuns.filter((run) => run.game === target.name);
+    return {
+      game: target.name,
+      samples: gameRuns.length,
+      responseMs: gameRuns.length === 0 ? null : round(p95(gameRuns.map((run) => run.responseMs))),
+      finishedMs: gameRuns.length === 0 ? null : round(p95(gameRuns.map((run) => run.finishedMs))),
+      totalMs: gameRuns.length === 0 ? null : round(p95(gameRuns.map((run) => run.totalMs))),
+    };
+  });
   return {
     stages: {
       responseMs: "tap -> game chunk responseReceived (headers only)",
@@ -557,6 +603,10 @@ async function measureFirstTap(warmAware = false) {
       responseMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.responseMs))),
       finishedMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.finishedMs))),
       totalMs: coldRuns.length === 0 ? null : round(median(coldRuns.map((run) => run.totalMs))),
+    },
+    cold: {
+      p95Ms: coldP95Ms,
+      perGameP95Ms,
     },
     ...(warmAware
       ? {
@@ -659,7 +709,7 @@ async function measureBudget(stage, promise) {
 }
 
 /** `--with-preview`: own the server, measure boot + tap, always stop it. */
-async function runEvidenceSuite(log, warmAware = false) {
+async function runEvidenceSuite(log, warmAware = false, samples = DEFAULT_SAMPLES) {
   const server = await startPreview();
   const suite = { phases: {}, taps: null, boot: null, throttledBoot: null };
   try {
@@ -675,13 +725,14 @@ async function runEvidenceSuite(log, warmAware = false) {
       `${THROTTLE_RATE}x-throttled boot median ${suite.throttledBoot.medianMs} ms: ` +
         suite.throttledBoot.samplesMs.join(" / "),
     );
-    suite.taps = await measureBudget("first tap", measureFirstTap(warmAware));
+    suite.taps = await measureBudget("first tap", measureFirstTap(warmAware, samples));
     log(
       `first tap worst cold game ${suite.taps.worst === null ? "(none)" : suite.taps.worst.game} at ` +
         `${suite.taps.worst === null ? "—" : suite.taps.worst.totalMs} ms` +
         (suite.taps.medians.totalMs === null
           ? ""
-          : ` (cold median across games ${suite.taps.medians.totalMs} ms)`),
+          : ` (cold median across games ${suite.taps.medians.totalMs} ms, ` +
+            `cold p95 ${suite.taps.cold.p95Ms.totalMs} ms)`),
     );
   } finally {
     stopPreview(server);
@@ -725,6 +776,23 @@ function printTapTable(taps) {
         `  ${taps.medians.totalMs.toFixed(1).padStart(6)}`,
     );
   }
+  if (taps.cold.p95Ms.totalMs !== null) {
+    console.log(
+      `  cold p95          ${"".padEnd(28)}  ${taps.cold.p95Ms.responseMs.toFixed(1).padStart(5)}` +
+        `  ${taps.cold.p95Ms.finishedMs.toFixed(1).padStart(6)}` +
+        `  ${taps.cold.p95Ms.totalMs.toFixed(1).padStart(6)}`,
+    );
+    console.log("\n  cold p95 by game (samples)");
+    for (const row of taps.cold.perGameP95Ms) {
+      const response = row.responseMs === null ? "-" : row.responseMs.toFixed(1);
+      const finished = row.finishedMs === null ? "-" : row.finishedMs.toFixed(1);
+      const total = row.totalMs === null ? "-" : row.totalMs.toFixed(1);
+      console.log(
+        `  ${row.game.padEnd(20)} ${String(row.samples).padStart(3)}  ${response.padStart(6)}` +
+          `  ${finished.padStart(7)}  ${total.padStart(7)}`,
+      );
+    }
+  }
   if (taps.warmMedians !== null && taps.warmMedians !== undefined) {
     console.log(
       `  warm median       ${"".padEnd(28)}  ${"—".padStart(5)}  ${"—".padStart(6)}` +
@@ -764,12 +832,18 @@ function tapExitCode(taps) {
 }
 
 async function main() {
-  const args = new Set(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const args = new Set(argv);
   const asJson = args.has("--json");
   const warmAware = args.has("--warm-aware");
+  const samples = parseSamples(argv);
 
   if (args.has("--with-preview")) {
-    const suite = await runEvidenceSuite(asJson ? () => {} : (line) => console.log(line), warmAware);
+    const suite = await runEvidenceSuite(
+      asJson ? () => {} : (line) => console.log(line),
+      warmAware,
+      samples,
+    );
     if (asJson) {
       console.log(JSON.stringify({ bootBudgetMs: BOOT_BUDGET_MS, ...suite }, null, 2));
     } else {
@@ -780,7 +854,7 @@ async function main() {
     return;
   }
 
-  const taps = await measureFirstTap(warmAware);
+  const taps = await measureFirstTap(warmAware, samples);
   if (asJson) console.log(JSON.stringify(taps, null, 2));
   else printTapTable(taps);
   process.exitCode = tapExitCode(taps);
