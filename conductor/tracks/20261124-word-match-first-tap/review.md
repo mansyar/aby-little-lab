@@ -3,13 +3,13 @@
 - **Track:** `20261124-word-match-first-tap`
 - **Type:** `bug`
 - **Branch:** `fix/20261124-word-match-first-tap`
-- **Range:** `537c2351798e06b0c449068692b886507d89272e..db1ee021`
-- **Date:** `2026-11-24T20:30:19+11:00`
-- **Verdict:** `PASS WITH FINDINGS`
+- **Range:** `537c2351798e06b0c449068692b886507d89272e..4dc593bc`
+- **Date:** `2026-11-24T20:48:12+11:00`
+- **Verdict:** `PASS`
 
 ## Summary
 
-The selective preload implementation preserves Find the Word gameplay and meets the unchanged 400 ms cold first-tap gate: the headed 50-cold run reports Find the Word p95 and worst at 251.2 ms, with every other game also below 400 ms. All configured checks and the full `verify_phase` chain pass. One Low documentation-consistency finding remains and must be fixed in strict mode.
+The selective preload implementation preserves Find the Word gameplay and meets the unchanged 400 ms cold first-tap gate: the headed 50-cold run reports Find the Word p95 and worst at 251.2 ms, with every other game also below 400 ms. All configured checks and the full `verify_phase` chain pass. The sole Low documentation finding was fixed in R1, and re-review found no remaining findings.
 
 ## Verification
 
@@ -21,7 +21,7 @@ The selective preload implementation preserves Find the Word gameplay and meets 
 | format | `pnpm exec biome format .` | pass | 373 files, no fixes (non-mutating) |
 | typecheck | `pnpm typecheck` | pass | App + E2E clean |
 | build | `pnpm build` | pass | Vite 8.3.8; 491 modules; shell 197.99 kB |
-| integrated | full `verify_phase` chain | pass | `verification/integrated.md`, `INTEGRATED_GATE_EXIT=0` |
+| integrated | full `verify_phase` chain | pass | `verification/integrated.md`, `INTEGRATED_GATE_EXIT=0`; R1 final tree `R1_VERIFY_PHASE_EXIT=0` |
 | performance | headed cold-control 10×5 run | pass | 50 cold / 0 warm; Find the Word p95/worst 251.2 ms; all games <=400 ms |
 | scope | package/lock and production diff audit | pass | Package/lock unchanged; production limited to `wordMatchArt.ts` and `WordMatchScene.ts` |
 
@@ -67,13 +67,13 @@ The selective preload implementation preserves Find the Word gameplay and meets 
 
 ### Low
 
-- **F1 — Historical suite rows need an explicit living-value label**
-  - **File:** `docs/perf-baseline.md:3`, with affected rows at `:470`, `:807`, `:839`, `:900`
-  - **What:** The live header and dated section prose say historical records keep their accepted-tree numbers, but four dated `Test suite` / `Unit suite` rows now show the current 158 files / 3,393 tests. The neighboring build, coverage and browser figures remain historical.
-  - **Why:** Mixing current living counts into dated records without a label makes those historical measurements misleading.
-  - **Fix:** Keep the validator-required current counts, label those four rows as current living values verified 2026-11-24, and narrow the header/section prose so only dated build, coverage and browser figures are described as unchanged historical measurements.
+- **F1 — Historical suite rows need an explicit living-value label — resolved in R1**
+  - **File:** `docs/perf-baseline.md:3`, with affected rows now at `:471`, `:810`, `:843`, `:904`
+  - **What:** The live header and dated section prose said historical records kept their accepted-tree numbers while four suite rows showed current living counts.
+  - **Why:** Unlabeled current counts made dated records misleading.
+  - **Fix:** R1 labeled all four rows as current living values verified 2026-11-24 and narrowed the header and three historical introductions. No historical measurement value changed.
   - **Requirement:** none
-  - **Test gap:** none; `validate-docs.js` remains the guard.
+  - **Test gap:** none; `validate-docs.js` passed 5/5 after the fix.
 
 ## Overrides
 
@@ -81,7 +81,7 @@ The selective preload implementation preserves Find the Word gameplay and meets 
 
 ## Plan compliance
 
-All three phases are verified and all 22 planned tasks are complete. The documented test-only `artDeclarations.test.ts` allowlist deviation is narrow and does not weaken assertions. Package/lockfiles remain unchanged and production scope is limited to the approved scene/helper. The only finding is Low-severity documentation framing and is fixable in Phase R1.
+All three implementation phases and Phase R1 are verified; all 24 planned tasks are complete. The documented test-only `artDeclarations.test.ts` allowlist deviation is narrow and does not weaken assertions. Package/lockfiles remain unchanged and production scope is limited to the approved scene/helper. R1 checkpoint `65144c59` resolves F1 without source or measurement changes.
 
 ## Out of scope
 
@@ -93,10 +93,11 @@ All three phases are verified and all 22 planned tasks are complete. The documen
 
 ## Doc sync
 
-`pending` — F1 will update `docs/perf-baseline.md` in Phase R1.
+`updated` — R1 clarified living suite-count labels in `docs/perf-baseline.md`; `validate-docs.js` remains 5/5.
 
 ## History
 
 | Round | Verdict | Critical | High | Medium | Low | Fixed |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | 1 | PASS WITH FINDINGS | 0 | 0 | 0 | 1 | 0 |
+| 2 | PASS | 0 | 0 | 0 | 0 | 1 |
