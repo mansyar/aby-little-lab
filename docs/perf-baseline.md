@@ -40,7 +40,7 @@ Match.
 
 Find the Word's p95 and worst cold total are both 251.2 ms, within the unchanged
 400 ms gate; every other game also clears 400 ms. Raw evidence:
-[`verification/first-tap-word-match.json`](../conductor/tracks/20261124-word-match-first-tap/verification/first-tap-word-match.json).
+[`verification/first-tap-word-match.json`](../conductor/archive/20261124-word-match-first-tap/verification/first-tap-word-match.json).
 P95 remains report-only; the worst cold total is the product gate.
 
 ### Per-release first-tap refresh
