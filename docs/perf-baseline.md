@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,393 tests across 97.10 % statements, 90.96 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured with the Hub idle prewarm neutralised: 50 cold / 0 warm samples, aggregate cold p95 total 237.4 ms, median 185.1 ms, and worst cold total 251.2 ms (Find the Word), all inside the unchanged 400 ms gate; see [Find the Word cold first-tap fix (2026-11-24)](#find-the-word-cold-first-tap-fix-2026-11-24). Every other section below is a dated record of an earlier measurement session and keeps the numbers it recorded at the time. Those records are not rewritten — where one of them disagrees with this header, the header is the current truth and the record is the history.
+> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,393 tests across 97.10 % statements, 90.96 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured with the Hub idle prewarm neutralised: 50 cold / 0 warm samples, aggregate cold p95 total 237.4 ms, median 185.1 ms, and worst cold total 251.2 ms (Find the Word), all inside the unchanged 400 ms gate; see [Find the Word cold first-tap fix (2026-11-24)](#find-the-word-cold-first-tap-fix-2026-11-24). Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-24 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
 
@@ -368,9 +368,10 @@ after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
 ## Shell Diet Re-measurement — 2026-10-22
 
 Track `20261022-docs-roadmap-truth`, Phase 3 (the checklists and the perf
-baseline). This is the live section: the build measured here carries the eight
-tracks merged since v1.20.0 (PRs #48–#55), and the numbers below are the ones
-the header at the top of this file points at.
+baseline). The build measured here carries the eight tracks merged since
+v1.20.0 (PRs #48–#55), and its build, coverage and browser figures are dated.
+Only the `Test suite` row is a current living value refreshed on 2026-11-24
+for docs truth (see the live header).
 
 ### Method
 
@@ -467,11 +468,12 @@ measured, dated figure and is a candidate for the roadmap in `conductor/roadmap.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite | 158 files / 3,393 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-24) | 158 files / 3,393 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
-The Test-suite and Coverage rows were verified 2026-11-15; the build
-figures above are the 2026-10-22 measurement.
+The Test-suite row is a current living value verified 2026-11-24. The
+Coverage row was verified 2026-11-15; the build figures above are the
+2026-10-22 measurement.
 
 The Shell Diet section above keeps its own numbers (129.1 KiB, 41 chunks, 53
 precache entries) — that is what the build of 2026-10-20 measured. The 42
@@ -790,11 +792,12 @@ the verdict re-scopes honestly to which games remain over budget and why
 
 ## Robot Path — build and suite figures (2026-11-16)
 
-Track `20261115-robot-path`, Phase 6. Every number below is measured on that track's accepted
-tree, in the order the phase's verification chain runs the commands: `pnpm test:e2e`,
-`pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`,
-`node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`,
-`node scripts/validate-docs.js`. Nothing here is estimated from an earlier run.
+Track `20261115-robot-path`, Phase 6. The build, coverage and browser-journey figures retain
+that track's accepted-tree values, recorded in the order the phase's verification chain runs
+the commands: `pnpm test:e2e`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`,
+`pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`,
+`node scripts/validate-pwa.js`, `node scripts/validate-docs.js`. The `Test suite` row is a
+current living value refreshed on 2026-11-24 for docs truth.
 
 | Measurement | Value | Source |
 | --- | --- | --- |
@@ -804,7 +807,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 158 files / 3,393 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-24) | 158 files / 3,393 tests | `pnpm test -- --run` |
 | Coverage | statements 97.07 % / branches 90.73 % / functions 96.18 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
@@ -822,11 +825,12 @@ same scene suite. The browser layer gained one journey file
 
 ## Fix-It Machine — build and suite figures (2026-11-16)
 
-Track `20261116-fix-it-machine`, Phase 6. Every number below is measured on that track's accepted
-tree, in the order the phase's verification chain runs the commands: `pnpm test:e2e`, `pnpm check`,
-`pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`,
-`node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`,
-`node scripts/validate-docs.js`. Nothing here is estimated from an earlier run.
+Track `20261116-fix-it-machine`, Phase 6. The build, coverage and browser-journey figures retain
+that track's accepted-tree values, recorded in the order the phase's verification chain runs
+the commands: `pnpm test:e2e`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`,
+`pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`,
+`node scripts/validate-pwa.js`, `node scripts/validate-docs.js`. The `Test suite` row is a
+current living value refreshed on 2026-11-24 for docs truth.
 
 | Measurement | Value | Source |
 | --- | --- | --- |
@@ -836,7 +840,7 @@ tree, in the order the phase's verification chain runs the commands: `pnpm test:
 | JavaScript chunks emitted | **51** (51 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **63 entries** (1826.19 KiB) | the build's PWA step |
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite | 158 files / 3,393 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-24) | 158 files / 3,393 tests | `pnpm test -- --run` |
 | Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
 | Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI splits them across two shards of 13 browser cases each, 2.5 and 3.7 min | `pnpm test:e2e` |
 
@@ -897,7 +901,7 @@ headroom; the structural ratio check is the real anti-bloat guard and must never
 | Typical tiered GPU bytes | **76.07 MiB** (cap **80 MiB**) | `node scripts/validate-textures.js` |
 | Full uniform 512² bytes | **319.00 MiB** (cap **320 MiB**) | `node scripts/validate-textures.js` |
 | Tier ratio (typical / full) | **0.238** (hard cap **0.5**) | `node scripts/validate-textures.js` |
-| Unit suite after this track | 158 files / 3,393 tests | `pnpm exec vitest run` |
+| Unit suite after this track (current living value, verified 2026-11-24) | 158 files / 3,393 tests | `pnpm exec vitest run` |
 
 `scripts/validate-textures.js` enumerates every `src/assets/svg/**/*.svg`, resolves each key's tier
 with the same ordered prefix rules as `src/utils/textureTiers.ts` (`tile_`, `group_`, `sm_shadow_`,
