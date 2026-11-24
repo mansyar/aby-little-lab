@@ -2,6 +2,9 @@
 
 > **Branch:** `chore/20261124-first-tap-p95-baseline`
 > **Base:** `master` @ `04f14631`
+> **Stacked dependency:** `20261124-word-match-first-tap` / PR #97, merged at
+> `025b037f` on this branch; reviewed production scope is limited to
+> `src/game/wordMatchArt.ts` and `src/scenes/WordMatchScene.ts`.
 >
 > Phase states are `pending`, `in_progress`, `verified`, `failed`, or `blocked`.
 > Only the primary agent writes this file. Phase subagents report results and the
@@ -42,14 +45,15 @@ The primary appends after acceptance:
 
 ## Phase 2: Headed 10x5 measurement evidence
 
-- **Goal:** Produce committed raw JSON evidence from a headed Chromium run with 10 fresh-context taps per game across the five established targets, with warm-aware comparison run headed on both passes.
-- **Depends on:** Phase 1
+- **Goal:** Produce committed raw JSON evidence from a headed Chromium run with 10 fresh-context taps per game across the five established targets on the reviewed Word Match fix, with warm-aware comparison run headed on both passes.
+- **Depends on:** Phase 1 and reviewed stacked track `20261124-word-match-first-tap` / PR #97.
 - **Covers:** FR-2, FR-7, AC-2, AC-3
 - **Touches:** `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-2.md`, `conductor/tracks/20261124-first-tap-p95-baseline/verification/first-tap-headed.json` (new)
-- **Verification:** `pnpm exec playwright --version`, `node --version`, `TAP_HEADED=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
+- **Verification:** `pnpm exec playwright --version`, `node --version`, `TAP_HEADED=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`, `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` when 50 cold samples are not observed naturally, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
 - **Status:** blocked
 
-**Result:** blocked — headed measurement executed, but the existing worst-cold 400 ms gate failed (Find the Word 507.4 ms on the committed 50-cold retry).
+**Result:** blocked on the pre-fix tree — headed measurement executed, but the existing worst-cold 400 ms gate failed (Find the Word 507.4 ms on the committed 50-cold retry).
+**Resume basis:** the reviewed Word Match fix from PR #97 is now merged at `025b037f`; the failed measurement remains historical evidence and is not reused as the passing run.
 **Checkpoint:** none
 **Evidence:** conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-2.md
 
@@ -57,7 +61,7 @@ The primary appends after acceptance:
   - [x] **P2.T1.1:** Record Node and Playwright versions, confirm a local display session and that port 4173 is free.
   - [x] **P2.T1.2:** If headed Chromium or the preview cannot start, block with the exact command and error; do not substitute headless or historical data.
 - [ ] **P2.T2: Execute the evidence run** - covers: FR-2, AC-2, AC-3
-  - [ ] **P2.T2.1:** Run `TAP_HEADED=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` and capture stdout into `verification/first-tap-headed.json`.
+  - [ ] **P2.T2.1:** Run `TAP_HEADED=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` and capture stdout. If the natural run does not yield 50 cold samples, run `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` and commit that unchanged JSON object as `verification/first-tap-headed.json`; preserve the natural raw output as supporting evidence.
   - [ ] **P2.T2.2:** Confirm 50 samples, five games, per-game p95 values, warm-aware headed tap kinds, and an exit code governed only by the worst-cold 400 ms gate.
 - [ ] **P2.T3: Verify Phase 2** - covers: FR-4, NFR-3, NFR-4, AC-8
   - [ ] **P2.T3.1:** Run all Phase 2 verification commands separately, record the real numbers and command lines, and write `verification/phase-2.md` ending with an empty `## Primary verification` section.
@@ -79,7 +83,7 @@ The primary appends after acceptance:
 - **Status:** pending
 
 - [ ] **P3.T1: Publish the dated p95 result** - covers: FR-3, FR-6, AC-4, AC-5
-  - [ ] **P3.T1.1:** Replace the live header in `docs/perf-baseline.md` with the 2026-11-24 headed figures, per-game p95 table, exact command, sample count, target set and link to `verification/first-tap-headed.json`.
+  - [ ] **P3.T1.1:** Ensure the live header in `docs/perf-baseline.md` carries the resumed 2026-11-24 headed figures, per-game p95 table, exact command, sample count, target set and a link to `verification/first-tap-headed.json`; preserve the reviewed Word Match fix section and dated history.
   - [ ] **P3.T1.2:** If worst per-game p95 exceeds 400 ms while the gate passes, record the breach and a concrete follow-up in the baseline and roadmap instead of failing the run.
 - [ ] **P3.T2: Add the per-release refresh procedure** - covers: FR-3, AC-4
   - [ ] **P3.T2.1:** Add a short `Per-release first-tap refresh` section to `docs/perf-baseline.md` with the headed requirement, `--samples 10`, the five targets, the report-only p95 semantics and the worst-cold gate.
