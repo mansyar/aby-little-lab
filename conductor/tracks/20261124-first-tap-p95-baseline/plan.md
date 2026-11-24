@@ -123,12 +123,16 @@ Review fixes are appended by `conductor-review` as:
 - **Covers:** F1, F2, AC-1, FR-1, NFR-3, NFR-4
 - **Touches:** `scripts/firstTapReport.mjs` (new), `scripts/firstTapReport.d.mts` (new), `scripts/measure-first-tap.mjs`, `src/__tests__/guard/firstTapStats.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only only), `conductor/tracks/20261124-first-tap-p95-baseline/spec.md` (primary-applied F2), `conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-R1.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/guard/firstTapStats.test.ts`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, `git diff --check`, scoped diff audit, then the full `verify_phase` chain once on the final tree.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Add a behavioral report-renderer guard** - covers: F1, AC-1
-  - [ ] **R1.T1.1:** Extract the tap summary rendering into a pure exported function and use it for the script's text and JSON paths without changing measured values or the exit gate.
-  - [ ] **R1.T1.2:** Add guard tests asserting aggregate/per-game p95 and preserved median, worst and budget fields in both formats.
-- [ ] **R1.T2: Reconcile the one-sample p95 edge case** - covers: F2, FR-1
-  - [ ] **R1.T2.1:** Primary updates `spec.md` to state that empty input yields `null` while a one-sample set returns that value, matching plan P1.T1.1 and the tested helper.
-- [ ] **R1.T3: Verify and record the fixes** - covers: NFR-3, NFR-4
-  - [ ] **R1.T3.1:** Run the named checks separately, refresh living suite counts only if they move, write `verification/phase-R1.md` ending with an empty `## Primary verification` section, and leave the full `verify_phase` chain to the primary.
+**Result:** verified
+**Checkpoint:** 1313afb5
+**Evidence:** conductor/tracks/20261124-first-tap-p95-baseline/verification/phase-R1.md
+
+- [x] **R1.T1: Add a behavioral report-renderer guard** - covers: F1, AC-1
+  - [x] **R1.T1.1:** Extract the tap summary rendering into a pure exported function and use it for the script's text and JSON paths without changing measured values or the exit gate.
+  - [x] **R1.T1.2:** Add guard tests asserting aggregate/per-game p95 and preserved median, worst and budget fields in both formats.
+- [x] **R1.T2: Reconcile the one-sample p95 edge case** - covers: F2, FR-1
+  - [x] **R1.T2.1:** Primary updates `spec.md` to state that empty input yields `null` while a one-sample set returns that value, matching plan P1.T1.1 and the tested helper.
+- [x] **R1.T3: Verify and record the fixes** - covers: NFR-3, NFR-4
+  - [x] **R1.T3.1:** Run the named checks separately, refresh living suite counts only if they move, write `verification/phase-R1.md` ending with an empty `## Primary verification` section, and leave the full `verify_phase` chain to the primary.
