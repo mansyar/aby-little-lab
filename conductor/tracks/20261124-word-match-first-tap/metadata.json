@@ -1,0 +1,33 @@
+{
+  "id": "20261124-word-match-first-tap",
+  "title": "Reduce Find the Word cold first-tap latency",
+  "type": "bug",
+  "status": "new",
+  "priority": "high",
+  "depends_on": [
+    "20261124-first-tap-p95-baseline"
+  ],
+  "created_at": "2026-11-24T19:03:17+11:00",
+  "updated_at": "2026-11-24T19:03:17+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "fix/20261124-word-match-first-tap",
+  "base_branch": "chore/20261124-first-tap-p95-baseline",
+  "base_sha": "537c2351798e06b0c449068692b886507d89272e",
+  "progress": {
+    "phases_total": 3,
+    "phases_verified": 0,
+    "tasks_total": 22,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}
