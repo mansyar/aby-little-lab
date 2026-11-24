@@ -39,7 +39,7 @@
 - **Covers:** FR-2, FR-3, FR-5, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-9, AC-10
 - **Touches:** `package.json`, `pnpm-lock.yaml`, `vite.config.ts` (only if forced), `src/__tests__/**` (only if forced), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only if forced), `conductor/tracks/20261124-dependency-majors/verification/phase-2.md`
 - **Verification:** `pnpm outdated --format=list`; `pnpm install --frozen-lockfile`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `node scripts/validate-docs.js`; then the full `verify_phase` chain once on the final tree. Commands are separate invocations, never `&&`-chained by the subagent.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Upgrade the exact pair** — covers: FR-2, FR-5, AC-2, AC-3
   - [ ] **P2.T1.1:** Upgrade `vitest` and `@vitest/coverage-v8` together to the same version and commit the manifest and lockfile together.
