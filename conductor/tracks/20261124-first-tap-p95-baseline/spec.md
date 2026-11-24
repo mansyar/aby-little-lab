@@ -111,8 +111,10 @@ an unproven claim and has no stable number to compare against.
 
 ## Edge Cases
 
-- Fewer than two samples: p95 is `null`/absent and the helper test covers it;
-  no interpolation from an empty set.
+- Empty sample set: p95 is `null` and the helper test covers it; no
+  interpolation from an empty set.
+- Single sample: p95 returns that value, matching nearest rank and the helper's
+  single-value guard test.
 - Every tap already warm: cold p95 is `null`, the run reports that the cold
   budget was not exercised, and the exit code stays 0; a warm p95 is never
   reported as the cold KPI.

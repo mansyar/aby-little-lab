@@ -103,6 +103,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 
+import { renderFirstTapReport } from "./firstTapReport.mjs";
 import { p95 } from "./firstTapStats.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
@@ -740,78 +741,6 @@ async function runEvidenceSuite(log, warmAware = false, samples = DEFAULT_SAMPLE
   return suite;
 }
 
-function printTapTable(taps) {
-  const cold = taps.warmAware === true;
-  console.log(
-    `${cold ? "First tap per game (fresh context each run, service worker blocked)" : "Cold first tap per game (fresh context each run, service worker blocked)"}\n`,
-  );
-  console.log("  A = tap -> chunk responseReceived (headers)");
-  console.log("  B = tap -> chunk loadingFinished (body downloaded)");
-  console.log("  C = tap -> first frame after the chunk settled (budgeted; NOT fully rendered)");
-  console.log("  D = post-tap main-thread blockage over 2.5 s (art-half diagnostic; lower is better)");
-  if (cold) {
-    console.log(
-      "  A warm tap pays neither A nor B: the Hub's idle prewarm imported the chunk, so C is\n" +
-        "  tap -> first frame after the Hub's play record (a different quantity from a cold C).",
-    );
-  }
-  console.log("");
-  console.log(
-    `  game              scene chunk                     A ms    B ms    C ms    D ms${cold ? "  kind" : ""}`,
-  );
-  for (const run of taps.runs) {
-    console.log(
-      `  ${run.game.padEnd(16)}  ${String(run.chunk).padEnd(28)}  ` +
-        `${run.responseMs.toFixed(1).padStart(5)}  ` +
-        `${run.finishedMs.toFixed(1).padStart(6)}  ` +
-        `${run.totalMs.toFixed(1).padStart(6)}  ` +
-        `${run.blockedMs.toFixed(1).padStart(6)}` +
-        (cold ? `  ${run.tapKind}` : ""),
-    );
-  }
-  if (taps.medians.totalMs !== null) {
-    console.log(
-      `\n  cold median       ${"".padEnd(28)}  ${taps.medians.responseMs.toFixed(1).padStart(5)}` +
-        `  ${taps.medians.finishedMs.toFixed(1).padStart(6)}` +
-        `  ${taps.medians.totalMs.toFixed(1).padStart(6)}`,
-    );
-  }
-  if (taps.cold.p95Ms.totalMs !== null) {
-    console.log(
-      `  cold p95          ${"".padEnd(28)}  ${taps.cold.p95Ms.responseMs.toFixed(1).padStart(5)}` +
-        `  ${taps.cold.p95Ms.finishedMs.toFixed(1).padStart(6)}` +
-        `  ${taps.cold.p95Ms.totalMs.toFixed(1).padStart(6)}`,
-    );
-    console.log("\n  cold p95 by game (samples)");
-    for (const row of taps.cold.perGameP95Ms) {
-      const response = row.responseMs === null ? "-" : row.responseMs.toFixed(1);
-      const finished = row.finishedMs === null ? "-" : row.finishedMs.toFixed(1);
-      const total = row.totalMs === null ? "-" : row.totalMs.toFixed(1);
-      console.log(
-        `  ${row.game.padEnd(20)} ${String(row.samples).padStart(3)}  ${response.padStart(6)}` +
-          `  ${finished.padStart(7)}  ${total.padStart(7)}`,
-      );
-    }
-  }
-  if (taps.warmMedians !== null && taps.warmMedians !== undefined) {
-    console.log(
-      `  warm median       ${"".padEnd(28)}  ${"—".padStart(5)}  ${"—".padStart(6)}` +
-        `  ${taps.warmMedians.totalMs.toFixed(1).padStart(6)}`,
-    );
-  }
-  if (taps.worst !== null) {
-    console.log(`\n  worst cold game: ${taps.worst.game} at ${taps.worst.totalMs.toFixed(1)} ms (C)`);
-  } else {
-    console.log("\n  no cold tap in this run: every tapped chunk was already imported");
-  }
-  if (cold) {
-    console.log(
-      `  tap kinds: ${taps.coldCount} cold / ${taps.warmCount} warm`,
-    );
-  }
-  console.log(`  budget: worst cold game C <= ${taps.budgetMs} ms`);
-}
-
 /** Shared budget gate: returns the exit code for a finished tap pass. */
 function tapExitCode(taps) {
   if (taps.worst === null) {
@@ -845,18 +774,18 @@ async function main() {
       samples,
     );
     if (asJson) {
-      console.log(JSON.stringify({ bootBudgetMs: BOOT_BUDGET_MS, ...suite }, null, 2));
+      console.log(renderFirstTapReport({ bootBudgetMs: BOOT_BUDGET_MS, ...suite }, "json"));
     } else {
       console.log("");
-      printTapTable(suite.taps);
+      console.log(renderFirstTapReport(suite.taps));
     }
     process.exitCode = tapExitCode(suite.taps);
     return;
   }
 
   const taps = await measureFirstTap(warmAware, samples);
-  if (asJson) console.log(JSON.stringify(taps, null, 2));
-  else printTapTable(taps);
+  if (asJson) console.log(renderFirstTapReport(taps, "json"));
+  else console.log(renderFirstTapReport(taps));
   process.exitCode = tapExitCode(taps);
 }
 

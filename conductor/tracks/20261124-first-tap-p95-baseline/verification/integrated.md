@@ -72,4 +72,15 @@ file passed in isolation (19/19), then the complete coverage gate passed
 lines 98.23%). The live header uses this latest green coverage result. No test or
 production code was changed to resolve the transient failure.
 
+## Review fix R1 gate
+
+After the review added text/JSON report-contract guards, the final R1 tree ran
+the complete configured `verify_phase` chain with `R1_VERIFY_PHASE_EXIT=0`:
+check 373 files; typecheck clean; 158 files / 3,395 tests; coverage statements
+97.08%, branches 90.92%, functions 96.35%, lines 98.23%; build 491 modules with
+shell 197.99 kB / 50.39 kB gzip and 64 precache entries; bundle 193.4 kB;
+module-size 172 with zero warnings; textures 319 passing; PWA 16/16 with 52
+chunks; docs 5/5. Renderer smoke and scoped package/lock/Word Match audits also
+passed. See `verification/phase-R1.md`.
+
 **Overall verdict: verified.**
