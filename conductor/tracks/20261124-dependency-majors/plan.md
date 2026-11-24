@@ -85,7 +85,7 @@
 - **Covers:** FR-3, FR-5, FR-6, FR-7, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10
 - **Touches:** `conductor/tech-stack.md` (primary-applied edit from the subagent's recorded text), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261124-dependency-majors/verification/phase-4.md`, `conductor/tracks/20261124-dependency-majors/verification/integrated.md`
 - **Verification:** `node scripts/validate-docs.js`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `pnpm install --frozen-lockfile`; then the full `verify_phase` chain once on the final tree. Commands are separate invocations.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Record the monthly procedure in the stack doc** — covers: FR-6, AC-8
   - [ ] **P4.T1.1:** Update `conductor/tech-stack.md` version table to the installed versions.
