@@ -87,25 +87,23 @@
 - **Verification:** targeted vitest on the progress overlay tests, full
   `pnpm exec vitest run`, `pnpm check`, `pnpm typecheck`,
   `node scripts/validate-module-size.js`, full `verify_phase`.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Derive the band for the viewed profile** — covers: FR-5, NFR-2, AC-6
-  - [ ] P3.T1.1: Read the viewed profile's `recent` window and derive the band
+- [x] **P3.T1: Derive the band for the viewed profile** — covers: FR-5, NFR-2, AC-6
+  - [x] P3.T1.1: Read the viewed profile's `recent` window and derive the band
         with `bandShiftFor` (not `getAdaptiveBandShift`, which reads the active
         profile); return 0 when `getSettings().adaptiveDifficulty` is off.
-- [ ] **P3.T2: Render in the Learning Progress row** — covers: FR-5, AC-6
-  - [ ] P3.T2.1: Append a short band indicator to the existing per-game stats
+- [x] **P3.T2: Render in the Learning Progress row** — covers: FR-5, AC-6
+  - [x] P3.T2.1: Append a short band indicator to the existing per-game stats
         text; no new text in any child scene; static (no tween).
-- [ ] **P3.T3: Keep the module within budget** — covers: NFR-3
-  - [ ] P3.T3.1: If `ProgressOverlay.ts` exceeds 400 lines, extract a pure
+- [x] **P3.T3: Keep the module within budget** — covers: NFR-3
+  - [x] P3.T3.1: If `ProgressOverlay.ts` exceeds 400 lines, extract a pure
         formatting helper; confirm `validate-module-size.js` reports zero
         warnings.
 
-<!--
 **Result:** verified
-**Checkpoint:** <short-sha>
+**Checkpoint:** b1bfe433
 **Evidence:** conductor/tracks/20261124-adaptive-tuning/verification/phase-3.md
--->
 
 ## Phase 4: Doc sync and full gate
 
