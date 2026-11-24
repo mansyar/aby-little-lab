@@ -85,23 +85,21 @@
 - **Covers:** FR-3, FR-5, FR-6, FR-7, FR-8, NFR-1, NFR-2, NFR-3, NFR-4, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10
 - **Touches:** `conductor/tech-stack.md` (primary-applied edit from the subagent's recorded text), `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `conductor/tracks/20261124-dependency-majors/verification/phase-4.md`, `conductor/tracks/20261124-dependency-majors/verification/integrated.md`
 - **Verification:** `node scripts/validate-docs.js`; `pnpm check`; `pnpm typecheck`; `pnpm test -- --run`; `pnpm test:coverage`; `pnpm build`; `node scripts/validate-bundle.js`; `node scripts/validate-module-size.js`; `node scripts/validate-textures.js`; `node scripts/validate-pwa.js`; `pnpm install --frozen-lockfile`; then the full `verify_phase` chain once on the final tree. Commands are separate invocations.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P4.T1: Record the monthly procedure in the stack doc** — covers: FR-6, AC-8
-  - [ ] **P4.T1.1:** Update `conductor/tech-stack.md` version table to the installed versions.
-  - [ ] **P4.T1.2:** Add a short "Monthly dependency maintenance" section: survey → pair-aware upgrade → full gate → docs truth → no-runtime-change default. The phase subagent writes the exact text into its evidence; the primary applies the file edit before acceptance.
-- [ ] **P4.T2: Docs truth and final diff audit** — covers: FR-7, FR-8, NFR-1, NFR-3, AC-3, AC-6, AC-7, AC-9, AC-10
-  - [ ] **P4.T2.1:** Refresh living suite counts only if they moved; keep all links and anchors resolving at 5/5.
-  - [ ] **P4.T2.2:** Audit `git diff <base>..HEAD` for scope: six candidates plus peers, no gate weakening, no production source edit unless FR-4 fired.
-- [ ] **P4.T3: Full integrated gate** — covers: FR-3, FR-5, NFR-2, NFR-4, AC-4, AC-5, AC-9
-  - [ ] **P4.T3.1:** Run every named check separately on the final tree; write `verification/integrated.md` with the full `verify_phase` exit code, coverage numbers and verdict.
-  - [ ] **P4.T3.2:** Confirm `pnpm install --frozen-lockfile` succeeds and record the final `pnpm outdated` state with the post-phase exception for later releases.
+- [x] **P4.T1: Record the monthly procedure in the stack doc** — covers: FR-6, AC-8
+  - [x] **P4.T1.1:** Update `conductor/tech-stack.md` version table to the installed versions.
+  - [x] **P4.T1.2:** Add a short "Monthly dependency maintenance" section: survey → pair-aware upgrade → full gate → docs truth → no-runtime-change default. The phase subagent writes the exact text into its evidence; the primary applies the file edit before acceptance.
+- [x] **P4.T2: Docs truth and final diff audit** — covers: FR-7, FR-8, NFR-1, NFR-3, AC-3, AC-6, AC-7, AC-9, AC-10
+  - [x] **P4.T2.1:** Refresh living suite counts only if they moved; keep all links and anchors resolving at 5/5.
+  - [x] **P4.T2.2:** Audit `git diff <base>..HEAD` for scope: six candidates plus peers, no gate weakening, no production source edit unless FR-4 fired.
+- [x] **P4.T3: Full integrated gate** — covers: FR-3, FR-5, NFR-2, NFR-4, AC-4, AC-5, AC-9
+  - [x] **P4.T3.1:** Run every named check separately on the final tree; write `verification/integrated.md` with the full `verify_phase` exit code, coverage numbers and verdict.
+  - [x] **P4.T3.2:** Confirm `pnpm install --frozen-lockfile` succeeds and record the final `pnpm outdated` state with the post-phase exception for later releases.
 
-<!--
-**Result:** <verified|blocked>
-**Checkpoint:** <short-sha>
+**Result:** verified
+**Checkpoint:** b78553ff
 **Evidence:** conductor/tracks/20261124-dependency-majors/verification/phase-4.md
--->
 
 <!--
 Review fixes are appended by `conductor-review` as:
