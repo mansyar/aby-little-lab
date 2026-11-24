@@ -14,17 +14,17 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, AC-1, AC-2, AC-3, AC-4
 - **Touches:** `src/game/wordMatchArt.ts` (new), `src/scenes/WordMatchScene.ts`, `src/__tests__/game/wordMatchArt.test.ts` (new), `src/__tests__/scenes/wordMatchScene.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` (count-only only), `conductor/tracks/20261124-word-match-first-tap/verification/phase-1.md`
 - **Verification:** `pnpm exec vitest run src/__tests__/game/wordMatchArt.test.ts src/__tests__/scenes/wordMatchScene.test.ts`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`, `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`, `node scripts/validate-module-size.js`, `node scripts/validate-textures.js`, `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`, then the full `verify_phase` chain on the final tree.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Add a pure Find the Word art selector** — covers: FR-2, FR-4, AC-1
-  - [ ] **P1.T1.1:** Accept the selected word rounds and return only the letter group plus prompt assets referenced by those rounds.
-  - [ ] **P1.T1.2:** Deduplicate keys, preserve deterministic group/asset order, and keep the helper free of Phaser, storage, DOM and network dependencies.
-- [ ] **P1.T2: Integrate selective preload into WordMatchScene** — covers: FR-1, FR-2, FR-3, AC-2, AC-3
-  - [ ] **P1.T2.1:** Generate the playthrough before art selection using the existing RNG and adaptive-band inputs, preserving the exact seeded sequence.
-  - [ ] **P1.T2.2:** Queue only the selected art in `preload()` and reuse the generated rounds in `create()` without generating them twice.
-- [ ] **P1.T3: Add deterministic regression coverage** — covers: FR-1, FR-3, FR-4, AC-1, AC-2, AC-3, AC-4
-  - [ ] **P1.T3.1:** Test the pure selector for exact keys, deduplication, order, adaptive `+1` prompt coverage and no unused groups.
-  - [ ] **P1.T3.2:** Spy on scene preload to prove full unused groups are not queued, and pin identical seeded rounds, prompts, choices, completion and save behavior.
+- [x] **P1.T1: Add a pure Find the Word art selector** — covers: FR-2, FR-4, AC-1
+  - [x] **P1.T1.1:** Accept the selected word rounds and return only the letter group plus prompt assets referenced by those rounds.
+  - [x] **P1.T1.2:** Deduplicate keys, preserve deterministic group/asset order, and keep the helper free of Phaser, storage, DOM and network dependencies.
+- [x] **P1.T2: Integrate selective preload into WordMatchScene** — covers: FR-1, FR-2, FR-3, AC-2, AC-3
+  - [x] **P1.T2.1:** Generate the playthrough before art selection using the existing RNG and adaptive-band inputs, preserving the exact seeded sequence.
+  - [x] **P1.T2.2:** Queue only the selected art in `preload()` and reuse the generated rounds in `create()` without generating them twice.
+- [x] **P1.T3: Add deterministic regression coverage** — covers: FR-1, FR-3, FR-4, AC-1, AC-2, AC-3, AC-4
+  - [x] **P1.T3.1:** Test the pure selector for exact keys, deduplication, order, adaptive `+1` prompt coverage and no unused groups.
+  - [x] **P1.T3.2:** Spy on scene preload to prove full unused groups are not queued, and pin identical seeded rounds, prompts, choices, completion and save behavior.
 
 <!--
 The primary appends after acceptance:
@@ -32,6 +32,10 @@ The primary appends after acceptance:
 **Checkpoint:** <short-sha>
 **Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-1.md
 -->
+
+**Result:** verified
+**Checkpoint:** 4ead5e0d
+**Evidence:** conductor/tracks/20261124-word-match-first-tap/verification/phase-1.md
 
 ## Phase 2: Headed performance proof
 
