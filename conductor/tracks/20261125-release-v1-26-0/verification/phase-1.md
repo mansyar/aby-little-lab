@@ -42,7 +42,7 @@
 | --- | --- | --- | --- |
 | AC-1 | `package.json` is `1.26.0`, and frozen installation remains green with no dependency drift. | Version diff is exactly `1.25.0` → `1.26.0`; lockfile diff is empty; frozen install exited 0. | pass |
 | AC-2 | Release notes cover PRs #94–#98 in merge order and make no unsupported claims. | `docs/release-notes-v1.26.0.md` has the required DRAFT header, parent lede, ordered PR sections, Installation, Release Verification and Known Issues; release-state, CI/deploy and device claims remain pending. | pass |
-| AC-3 | README contains the Documentation index link. | `README.md` links the v1.26.0 notes directly before v1.25.0; the release-table row remains Phase 2 work. | pass |
+| AC-3 | README contains both the Documentation index link and the dated Releases row. | Phase 1 verified only the README Documentation index link. The dated Releases-table row was verified in Phase 2, which owns final AC-3 coverage. | partial |
 | AC-10 | The release diff contains no runtime source, dependency, asset or save-schema changes outside Conductor state. | Phase implementation diff contains only `package.json`, the new release note, and the README index link. | pass |
 
 ## Evidence Paths
@@ -68,4 +68,4 @@ P1.T1 and P1.T2 are complete and committed, including the README verification fi
 - **Diff review:** README adds exactly one index link; package adds exactly one version-line change; release notes cover #94–#98 in order and leave tag/deploy/device claims pending.
 - **Gate:** exact configured `verify_phase` chain exited 0 after the README fix.
 - **Install:** `pnpm install --frozen-lockfile` exited 0.
-- **Acceptance:** AC-1, AC-2, AC-3 and AC-10 pass with evidence above.
+- **Acceptance:** AC-1, AC-2 and AC-10 pass with evidence above. AC-3 is partial in Phase 1 and passes cumulatively in Phase 2, which verifies the dated Releases-table row.
