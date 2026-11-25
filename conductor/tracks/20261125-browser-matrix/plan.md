@@ -32,7 +32,7 @@ Evidence: `verification/phase-1.md` — exact gate, project roster, Chromium 26/
 - **Covers:** FR-4, FR-5, FR-6, FR-8, FR-9, NFR-1, NFR-2, NFR-5, AC-5, AC-6, AC-8
 - **Touches:** `.github/workflows/ci.yml`, `scripts/**`, `e2e/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list --project=webkit`; `pnpm exec playwright test --list --project=firefox`; `pnpm exec playwright test --list --project=mobile-chromium`; subsequent track-PR CI proves the workflow.
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
