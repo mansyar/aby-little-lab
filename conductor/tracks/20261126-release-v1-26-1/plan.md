@@ -104,7 +104,7 @@
 - **Covers:** FR-8, FR-10, NFR-2, NFR-5, NFR-6, AC-8, AC-10, AC-12
 - **Touches:** release notes or docs only if review requires a correction; Conductor review/PR/verification state
 - **Verification:** the exact configured gate; CI Quality Gates, both Chromium shards, all three engine jobs and the `Browser Journeys` rollup; final scope diff inspection
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Run `conductor-review`** — covers: FR-10, AC-10
   - Resolve blocking findings; allow at most two review-fix rounds.
