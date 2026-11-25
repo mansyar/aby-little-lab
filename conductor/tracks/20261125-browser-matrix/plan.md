@@ -5,7 +5,7 @@
 - **Goal:** Playwright exposes Chromium plus WebKit, Firefox, and mobile Chromium/touch, with only the core smoke selected outside Chromium.
 - **Depends on:** none
 - **Covers:** FR-1, FR-2, FR-3, FR-7, FR-9, FR-10, NFR-4, NFR-6, AC-1, AC-2, AC-3, AC-4, AC-9, AC-10, AC-11
-- **Touches:** `playwright.config.ts`, `package.json`, `e2e/**`, `src/audio/AudioManager.ts`, `src/__tests__/audio/AudioManager.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
+- **Touches:** `playwright.config.ts`, `package.json`, `e2e/**`, `src/audio/AudioManager.ts`, `src/__tests__/audio/AudioManager.test.ts`, `src/game/art/registry.ts`, `src/game/hub/hubPrewarm.ts`, `src/scenes/HubScene.ts`, `src/__tests__/game/art/preloadArtGroups.test.ts`, `src/__tests__/game/hub/hubPrewarm.test.ts`, `src/__tests__/scenes/hubScene.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
 - **Status:** in_progress
 
@@ -16,6 +16,7 @@
 - [ ] **P1.T3: Add reproducible local commands** — covers: FR-7, AC-9
 - [ ] **P1.T4: Keep fixtures portable across engines** — covers: NFR-4
 - [ ] **P1.T5: Repair smoke-proven engine portability defects** — covers: FR-9, NFR-6, AC-11
+  - Guard absent WebKit audio support; keep long-hold tests state-based with stall and ceiling guards rather than a premature 3 s wall-clock deadline; coordinate Hub art prewarm with game-scene texture loading so Firefox cannot queue a duplicate key.
 - [ ] **P1.T6: Refresh living test-count documentation** — covers: FR-10, AC-10
 
 ## Phase 2: CI matrix and blocking rollup
