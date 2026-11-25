@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, NFR-1, NFR-2, NFR-3, NFR-5, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6
 - **Touches:** `docs/retention-validation.md`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Write the pilot protocol** — covers: FR-1, AC-1
 - [ ] **P1.T2: Define the local proxy** — covers: FR-2, NFR-3, AC-2
