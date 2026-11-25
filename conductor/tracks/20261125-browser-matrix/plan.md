@@ -117,9 +117,11 @@ Evidence: `verification/phase-4.md` — documentation validation and the exact c
 - **Covers:** FR-10, AC-10
 - **Touches:** `docs/TDD.md`, `conductor/tracks/20261125-browser-matrix/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** F1 closed in `docs/TDD.md`; exact gate passed with 158 files / 3,404 tests, 491 modules and all artifact guards green; CRLF-aware whitespace check passed.
+- **Checkpoint:** `d18d21c4`
 
 ### Tasks
 
-- [ ] **R1.T1: Correct the re-dated TDD coverage claim to the integrated values** — covers: FR-10, AC-10
-- [ ] **R1.T2: Run the exact gate, record evidence and return to strict review** — covers: FR-10, AC-10
+- [x] **R1.T1: Correct the re-dated TDD coverage claim to the integrated values** — covers: FR-10, AC-10
+- [x] **R1.T2: Run the exact gate, record evidence and return to strict review** — covers: FR-10, AC-10
