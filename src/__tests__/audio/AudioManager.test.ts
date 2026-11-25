@@ -83,6 +83,19 @@ interface MockAudioContext {
   close: MockFn;
 }
 
+/**
+ * Fake promise whose `catch` records the handler it is given. A real rejected
+ * promise would surface a missing handler as a flaky unhandled-rejection
+ * report; this keeps the regression a deterministic assertion failure.
+ */
+function rejectionCapturingPromise(): {
+  promise: { catch(onRejected: (reason: unknown) => void): unknown };
+  catchHandler: MockFn;
+} {
+  const catchHandler = vi.fn();
+  return { promise: { catch: catchHandler }, catchHandler };
+}
+
 describe("AudioManager", () => {
   let manager: AudioManager;
   let mockAudios: MockAudioElement[];
@@ -115,8 +128,8 @@ describe("AudioManager", () => {
       destination: {},
       createOscillator: vi.fn(() => mockOscillator),
       createGain: vi.fn(() => mockGainNode),
-      resume: vi.fn(),
-      close: vi.fn(),
+      resume: vi.fn(() => Promise.resolve()),
+      close: vi.fn(() => Promise.resolve()),
     };
 
     // biome-ignore lint/complexity/useArrowFunction: Must use function expression — arrow functions cannot be used as constructors with new
@@ -280,6 +293,23 @@ describe("AudioManager", () => {
       manager.resume();
 
       expect(mockAudioContext.resume).toHaveBeenCalledTimes(1);
+    });
+
+    it("attaches a rejection handler that swallows navigation-time errors", () => {
+      mockAudioContext.state = "suspended";
+      const resumePromise = rejectionCapturingPromise();
+      mockAudioContext.resume = vi.fn(() => resumePromise.promise);
+      manager.init();
+
+      manager.resume();
+
+      expect(mockAudioContext.resume).toHaveBeenCalledTimes(1);
+      expect(resumePromise.catchHandler).toHaveBeenCalledTimes(1);
+      expect(resumePromise.catchHandler).toHaveBeenCalledWith(expect.any(Function));
+      const onRejected = resumePromise.catchHandler.mock.calls[0]?.[0];
+      expect(() =>
+        onRejected(new DOMException("Navigated away from page", "InvalidStateError")),
+      ).not.toThrow();
     });
   });
 
@@ -541,6 +571,22 @@ describe("AudioManager", () => {
       manager.init();
       manager.destroy();
       expect(mockAudioContext.close).toHaveBeenCalled();
+    });
+
+    it("attaches a rejection handler that swallows navigation-time errors", () => {
+      const closePromise = rejectionCapturingPromise();
+      mockAudioContext.close = vi.fn(() => closePromise.promise);
+      manager.init();
+
+      manager.destroy();
+
+      expect(mockAudioContext.close).toHaveBeenCalledTimes(1);
+      expect(closePromise.catchHandler).toHaveBeenCalledTimes(1);
+      expect(closePromise.catchHandler).toHaveBeenCalledWith(expect.any(Function));
+      const onRejected = closePromise.catchHandler.mock.calls[0]?.[0];
+      expect(() =>
+        onRejected(new DOMException("Navigated away from page", "InvalidStateError")),
+      ).not.toThrow();
     });
 
     it("pauses BGM on destroy", () => {
