@@ -3,14 +3,29 @@ import { defineConfig } from "@playwright/test";
 /**
  * Browser journey suite configuration.
  *
- * Chromium only. WebKit and Firefox are roadmap §10.7 work, deliberately
- * deferred until this suite is proven in one engine.
+ * Chromium keeps the full journey roster. WebKit, Firefox and mobile Chromium
+ * run only the focused core smoke, so engine coverage does not triple the work.
  *
  * The suite drives the production build through `vite preview` on the port
  * `scripts/validate-boot.js` already assumes, so what it exercises is the
  * artifact users download rather than the dev server.
  */
 const PREVIEW_URL = "http://127.0.0.1:4173";
+
+/** Landscape desktop proxy viewport shared by Chromium, WebKit and Firefox. */
+const LANDSCAPE_VIEWPORT = { width: 1280, height: 720 };
+
+/** A phone-shaped landscape viewport for the genuine Chromium touch profile. */
+const MOBILE_LANDSCAPE_VIEWPORT = { width: 844, height: 390 };
+
+/** Existing journeys that make up the cross-engine core smoke. */
+const CORE_SMOKE_TEST_MATCH = [
+  "**/journeys/boot.spec.ts",
+  "**/journeys/launch-all.spec.ts",
+  "**/journeys/first-sounds.spec.ts",
+  "**/journeys/shape-sorter.spec.ts",
+  "**/journeys/offline.spec.ts",
+];
 
 /**
  * An already-running origin to drive the journeys against, e.g. the built image
@@ -64,15 +79,39 @@ export default defineConfig({
     baseURL: EXTERNAL_BASE_URL ?? PREVIEW_URL,
     // A 16:9 viewport so the letterboxing path is the one exercised: the game
     // renders 1024x768 with Scale.FIT, so the canvas is pillarboxed here.
-    viewport: { width: 1280, height: 720 },
+    viewport: LANDSCAPE_VIEWPORT,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "off",
   },
   projects: [
-    // One project, not a browser matrix: `--project=chromium` in the
-    // `test:e2e` script names it.
-    { name: "chromium", use: { browserName: "chromium" } },
+    // The full journey suite remains Chromium-only. Smoke-only checks live in
+    // `e2e/smoke/` and are excluded here so this roster cannot grow by accident.
+    {
+      name: "chromium",
+      use: { browserName: "chromium", viewport: LANDSCAPE_VIEWPORT },
+      testIgnore: "**/smoke/**",
+    },
+    {
+      name: "webkit",
+      use: { browserName: "webkit", viewport: LANDSCAPE_VIEWPORT },
+      testMatch: CORE_SMOKE_TEST_MATCH,
+    },
+    {
+      name: "firefox",
+      use: { browserName: "firefox", viewport: LANDSCAPE_VIEWPORT },
+      testMatch: CORE_SMOKE_TEST_MATCH,
+    },
+    {
+      name: "mobile-chromium",
+      use: {
+        browserName: "chromium",
+        viewport: MOBILE_LANDSCAPE_VIEWPORT,
+        isMobile: true,
+        hasTouch: true,
+      },
+      testMatch: CORE_SMOKE_TEST_MATCH,
+    },
   ],
   // No server to start when `E2E_BASE_URL` names an origin: nginx must already
   // be listening. `vite preview` sends none of the headers under test, so the
