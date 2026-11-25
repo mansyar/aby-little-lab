@@ -176,7 +176,7 @@
 - **Covers:** NFR-2
 - **Touches:** `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R2.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R2.T1: Add NFR-2 to Phase R1 coverage** — covers: NFR-2
   - Make the plan's phase-level `Covers` list agree with R1.T5 and the reviewer's round-2 finding.
