@@ -89,7 +89,7 @@ fallback.
 
 ### F2 — Low — premature Phase 1 AC-3 pass — closed
 
-- **File:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md:45`
+- **File:** `conductor/archive/20261125-release-v1-26-0/verification/phase-1.md:45`
 - **What:** AC-3 was marked pass while the required Releases-table row belonged to Phase 2.
 - **Why:** the phase audit trail overstated acceptance.
 - **Fix:** mark AC-3 partial in Phase 1; retain final coverage in Phase 2.
@@ -98,7 +98,7 @@ fallback.
 
 ### F3 — Low — CI requirement mapped to local Phase 3 — closed
 
-- **File:** `conductor/tracks/20261125-release-v1-26-0/plan.md:61`
+- **File:** `conductor/archive/20261125-release-v1-26-0/plan.md:61`
 - **What:** Phase 3 claimed FR-6/AC-6 coverage although it runs no CI; Phase 4 omitted those IDs.
 - **Why:** pending CI work was attributed to a completed local phase.
 - **Fix:** move FR-6/AC-6 to Phase 4 `Covers` and P4.T3.
@@ -107,7 +107,7 @@ fallback.
 
 ### F4 — Low — finalization exception not defined — closed
 
-- **File:** `conductor/tracks/20261125-release-v1-26-0/spec.md:103` and `plan.md:132`
+- **File:** `conductor/archive/20261125-release-v1-26-0/spec.md:103` and `plan.md:132`
 - **What:** the plan invoked a documented direct-to-master release exception without defining it.
 - **Why:** the sensitive post-tag finalization had no authoritative procedure in the current plan.
 - **Fix:** define the exact docs/Conductor-only finalization procedure, explicit approval requirement, immutable-tag rule and v1.25.0 precedent; update the spec and P5.T5 references.
@@ -116,7 +116,7 @@ fallback.
 
 ### F5 — Low — Phase R1 omits NFR-2 from Covers
 
-- **File:** `conductor/tracks/20261125-release-v1-26-0/plan.md:152-165`
+- **File:** `conductor/archive/20261125-release-v1-26-0/plan.md:152-165`
 - **What:** Phase R1's `Covers` list omits NFR-2 even though R1.T5 explicitly covers it.
 - **Why:** the corrected plan retains the same requirement-to-phase traceability defect that F3 addressed for FR-6/AC-6.
 - **Fix:** add NFR-2 to the Phase R1 `Covers` list.

@@ -118,10 +118,10 @@ In merge order:
 
 ## References
 
-- [v1.25.0 release specification](../../archive/20261123-release-v1-25-0/spec.md)
-- [v1.25.0 implementation plan](../../archive/20261123-release-v1-25-0/plan.md)
+- [v1.25.0 release specification](../20261123-release-v1-25-0/spec.md)
+- [v1.25.0 implementation plan](../20261123-release-v1-25-0/plan.md)
 - [v1.25.0 release notes](../../../docs/release-notes-v1.25.0.md)
-- [v1.25.0 tag/ship verification](../../archive/20261123-release-v1-25-0/verification/phase-6.md)
+- [v1.25.0 tag/ship verification](../20261123-release-v1-25-0/verification/phase-6.md)
 - [Release checklist](../../../docs/release-checklist.md)
 - [Performance baseline](../../../docs/perf-baseline.md)
 - [Workflow](../../workflow.md)

@@ -55,6 +55,6 @@ switch, push, merge, reset, web access or extra subagent occurred.
 
 ## Evidence Paths
 
-- `conductor/tracks/20261125-release-v1-26-0/verification/phase-R2.md`
-- `conductor/tracks/20261125-release-v1-26-0/review.md`
-- `conductor/tracks/20261125-release-v1-26-0/plan.md`
+- `conductor/archive/20261125-release-v1-26-0/verification/phase-R2.md`
+- `conductor/archive/20261125-release-v1-26-0/review.md`
+- `conductor/archive/20261125-release-v1-26-0/plan.md`

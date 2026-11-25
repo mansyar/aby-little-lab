@@ -49,10 +49,10 @@ the subagent's blocker commits are preserved and this report supersedes them.
 
 ## Evidence Paths
 
-- `conductor/tracks/20261125-release-v1-26-0/verification/integrated.md`
-- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.json`
-- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.stdout.txt`
-- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.log`
+- `conductor/archive/20261125-release-v1-26-0/verification/integrated.md`
+- `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.json`
+- `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.stdout.txt`
+- `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.log`
 - `docs/release-notes-v1.26.0.md` § Release Verification
 
 ## Deviations and Scope Confirmation

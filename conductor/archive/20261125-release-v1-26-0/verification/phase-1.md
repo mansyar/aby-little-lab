@@ -47,7 +47,7 @@
 
 ## Evidence Paths
 
-- This report: `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`
+- This report: `conductor/archive/20261125-release-v1-26-0/verification/phase-1.md`
 - Release-note draft: `docs/release-notes-v1.26.0.md`
 - README Documentation index: `README.md` (Documentation section)
 - Phase brief: `.conductor/runs/20261125-release-v1-26-0/phase-1-brief.md`

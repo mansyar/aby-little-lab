@@ -46,7 +46,7 @@ total 265.9 ms. Cold median total: 192 ms.
 | Memory Match | 10 | 75.9 ms | 39.9 ms | 266.9 ms | 266.9 ms |
 
 The unchanged gate is worst cold total <= 400 ms; p95 remains report-only.
-Raw data: `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.json`.
+Raw data: `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.json`.
 The harness prints one trailing human-readable PASS line after its JSON. Exact
 stdout is preserved in `first-tap-headed.stdout.txt`; the parseable JSON and the
 trailing line are also separated into `.json` and `.log` without changing any
@@ -101,8 +101,8 @@ their explicit later gates.
 
 ## Evidence Paths
 
-- `conductor/tracks/20261125-release-v1-26-0/verification/phase-3.md`
-- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.json`
-- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.stdout.txt`
-- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.log`
+- `conductor/archive/20261125-release-v1-26-0/verification/phase-3.md`
+- `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.json`
+- `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.stdout.txt`
+- `conductor/archive/20261125-release-v1-26-0/verification/first-tap-headed.log`
 - `docs/release-notes-v1.26.0.md` § Release Verification

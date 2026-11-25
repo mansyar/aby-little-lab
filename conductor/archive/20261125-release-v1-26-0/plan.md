@@ -31,7 +31,7 @@
 
 **Result:** verified
 **Checkpoint:** `4f5969a0`
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-1.md`
 
 ## Phase 2: README and roadmap truth
 
@@ -52,7 +52,7 @@
 
 **Result:** verified
 **Checkpoint:** `3a28b75e`
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-2.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-2.md`
 
 ## Phase 3: Release-candidate verification
 
@@ -79,7 +79,7 @@
 
 **Result:** verified
 **Checkpoint:** `737fd899`
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/integrated.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-3.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/integrated.md`, `conductor/archive/20261125-release-v1-26-0/verification/phase-3.md`
 
 ## Phase 4: Review, PR and merge
 
@@ -90,10 +90,10 @@
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; CI Quality Gates, Browser Journeys shard 1, shard 2 and rollup; final scope diff inspection
 - **Status:** in_progress
 
-- [ ] **P4.T1: Run `conductor-review`** — covers: FR-8
+- [x] **P4.T1: Run `conductor-review`** — covers: FR-8
   - Resolve blocking findings; allow at most two review-fix rounds.
   - Record accepted/deferred findings according to workflow policy.
-- [ ] **P4.T2: Open the release PR** — covers: FR-8
+- [x] **P4.T2: Open the release PR** — covers: FR-8
   - Conventional title: `chore(release): ship v1.26.0`.
   - Media: none; this is metadata/documentation-only.
   - Include requirements coverage, verification summary and the separate human tag gate.
@@ -104,7 +104,7 @@
 
 **Result:** pending
 **Checkpoint:** pending
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-4.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-4.md`
 
 ## Phase 5: Device policy, tag, deploy and final notes
 
@@ -133,7 +133,7 @@
 
 ### Post-tag finalization procedure (release exception)
 
-1. This is a docs/Conductor-only procedure following the v1.25.0 precedent in [Phase 6 verification](../../archive/20261123-release-v1-25-0/verification/phase-6.md).
+1. This is a docs/Conductor-only procedure following the v1.25.0 precedent in [Phase 6 verification](../20261123-release-v1-25-0/verification/phase-6.md).
 2. Start only after the release PR is merged, `v1.26.0` is pushed on merged `master` HEAD, tag CI and Coolify verification pass, and the targeted-device result or accepted gap is recorded.
 3. The owner's explicit Phase 5 tag/deploy go-ahead must already be recorded; it also authorizes the final notes update. Never finalize autonomously.
 4. Fetch `origin/master`, fast-forward local `master` to it, and confirm a clean tree. Do not change the pushed tag or release merge commit.
@@ -143,14 +143,14 @@
 
 **Result:** pending
 **Checkpoint:** pending
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-5.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-5.md`
 
 ## Phase R1: Review fixes
 
 - **Goal:** close all four strict-review findings without expanding release scope.
 - **Depends on:** Review round 1
 - **Covers:** FR-2, FR-6, FR-9, NFR-2, NFR-5, AC-3, AC-6
-- **Touches:** `docs/release-notes-v1.26.0.md`, `conductor/tracks/20261125-release-v1-26-0/spec.md`, `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R1.md`
+- **Touches:** `docs/release-notes-v1.26.0.md`, `conductor/archive/20261125-release-v1-26-0/spec.md`, `conductor/archive/20261125-release-v1-26-0/plan.md`, `conductor/archive/20261125-release-v1-26-0/verification/phase-1.md`, `conductor/archive/20261125-release-v1-26-0/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
 - **Status:** verified
 
@@ -167,14 +167,14 @@
 
 **Result:** verified
 **Checkpoint:** `5fb25d81`
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-R1.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-R1.md`
 
 ## Phase R2: Final review mapping
 
 - **Goal:** close strict-review round 2 finding F5 and return to review.
 - **Depends on:** Review round 2
 - **Covers:** NFR-2
-- **Touches:** `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R2.md`
+- **Touches:** `conductor/archive/20261125-release-v1-26-0/plan.md`, `conductor/archive/20261125-release-v1-26-0/verification/phase-R2.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
 - **Status:** verified
 
@@ -185,7 +185,7 @@
 
 **Result:** verified
 **Checkpoint:** `1342b760`
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-R2.md`
+**Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-R2.md`
 
 ## Rollback Strategy
 

@@ -44,7 +44,7 @@ this report. No verification success is inferred from the subagent's attempts.
 
 ## Evidence Paths
 
-- This report: `conductor/tracks/20261125-release-v1-26-0/verification/phase-2.md`
+- This report: `conductor/archive/20261125-release-v1-26-0/verification/phase-2.md`
 - README release table: `README.md` § Releases
 - Baseline evidence: `docs/perf-baseline.md` § First-tap p95 baseline after the Word Match fix (2026-11-24)
 - Phase brief: `.conductor/runs/20261125-release-v1-26-0/phase-2-brief.md`
@@ -64,4 +64,4 @@ reset or branch switch occurred.
 
 - `README.md` — release-table row, commit `416e7913`.
 - `conductor/roadmap.md` — completed-baseline correction, commit `3a28b75e`.
-- `conductor/tracks/20261125-release-v1-26-0/verification/phase-2.md` — initial blocker report `4ff59085`, then this verified report.
+- `conductor/archive/20261125-release-v1-26-0/verification/phase-2.md` — initial blocker report `4ff59085`, then this verified report.
