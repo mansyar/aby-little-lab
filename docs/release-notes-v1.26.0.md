@@ -74,7 +74,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 
 ## Known Issues
 
-The full list of known issues lives in the README's [Known Issues](../README.md#known-issues) section, and planned work lives in [conductor/product.md §10](../conductor/product.md#10-roadmap); nothing below duplicates either.
+The full list of known issues lives in the README's [Known Issues](../README.md#known-issues) section, and planned work lives in [conductor/roadmap.md §10](../conductor/roadmap.md#10-roadmap); nothing below duplicates either.
 
 - Targeted device coverage is still pending. The automated Chromium Browser Journeys are valuable release evidence, but they do not replace the focused physical-device smoke in [device-testing-checklist.md](device-testing-checklist.md).
 - Non-Chromium browser support and production retention evidence are not claimed. The browser-matrix and real-family retention work remain separate roadmap items.
