@@ -7,7 +7,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-7, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-9
 - **Touches:** `playwright.config.ts`, `package.json`, `e2e/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
