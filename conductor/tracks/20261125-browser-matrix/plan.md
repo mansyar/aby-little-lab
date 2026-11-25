@@ -56,13 +56,19 @@ Evidence: `verification/phase-2.md` — exact gate, three project listings, acti
 - **Covers:** FR-2, FR-6, FR-9, NFR-3, NFR-4, NFR-5, NFR-6, AC-2, AC-3, AC-7, AC-8, AC-11
 - **Touches:** `e2e/**`, `src/**` only if a failing smoke proves a defect, `conductor/tracks/20261125-browser-matrix/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
-- **Status:** in_progress
+- **Status:** verified
 
 ### Tasks
 
-- [ ] **P3.T1: Establish first-attempt engine results** — covers: FR-6, NFR-3, AC-7
-- [ ] **P3.T2: Repair proven compatibility defects minimally** — covers: FR-9, NFR-4, NFR-6, AC-11
-- [ ] **P3.T3: Re-run to a clean matrix and retain earlier evidence** — covers: AC-2, AC-3, AC-7, AC-8
+- [x] **P3.T1: Establish first-attempt engine results** — covers: FR-6, NFR-3, AC-7
+- [x] **P3.T2: Repair proven compatibility defects minimally** — covers: FR-9, NFR-4, NFR-6, AC-11
+- [x] **P3.T3: Re-run to a clean matrix and retain earlier evidence** — covers: AC-2, AC-3, AC-7, AC-8
+
+**Result:** all four projects passed first-attempt with zero local retries after the CI changes; no new compatibility repair was needed.
+
+**Checkpoint:** `96801bf8`
+
+Evidence: `verification/phase-3.md` — exact gate and first-attempt Chromium 26/26, WebKit 8/8, Firefox 8/8 and mobile Chromium 8/8.
 
 ## Phase 4: Documentation and device-evidence policy
 
