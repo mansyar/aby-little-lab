@@ -54,7 +54,7 @@ export class AudioManager {
 
   /** Creates the AudioContext, loads settings and the looping BGM element. */
   init(): void {
-    this.audioContext = new AudioContext();
+    this.audioContext = typeof AudioContext === "undefined" ? null : new AudioContext();
 
     const settings = getSettings();
     this.bgmEnabled = settings.bgmEnabled;
