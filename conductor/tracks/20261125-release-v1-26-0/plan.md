@@ -66,7 +66,7 @@
   - `node scripts/validate-headers.js`.
   - `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`
   - Require exit 0, 50 cold / 0 warm samples, 10 per target game, and every worst cold total ≤400 ms.
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Run the integrated full gate** — covers: FR-5, AC-5
   - Capture current suite counts, coverage, shell size, module-size, texture, PWA and docs results.
