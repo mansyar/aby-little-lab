@@ -208,6 +208,7 @@ One-time setup: a Coolify API token with the `deploy` permission, the app's Depl
 
 | Version | Date | Highlights | Tag |
 |---|---|---|---|
+| **v1.26.0** | 2026-11-25 | Five PRs since v1.25.0: #94 replay novelty (textless Hub suggestions, idle wiggles and a per-visit earned-sticker spotlight), #95 adaptive-difficulty retuning with a parent band readout, #96 November dependency maintenance, #97 Find the Word cold first-tap fix, and #98 headed first-tap p95 evidence with a per-release refresh procedure. [Release notes](docs/release-notes-v1.26.0.md) | `v1.26.0` |
 | **v1.25.0** | 2026-11-23 | One feature track merged since v1.24.0: Content Depth doubles the core learning pools (60 words, 30 stories / 90 panels, 48 scenarios, 24 shapes + cut-outs, two variants each, no repeats per play) with a texture budget guard, plus the strict 400-line module-size guard and a single verbatim changelog. [Release notes](docs/release-notes-v1.25.0.md) | `v1.25.0` |
 | **v1.24.0** | 2026-11-21 | Fourteen tracks merged since v1.23.0: two new games - Robot Path (23rd) and Fix-It Machine (24th, looks-not-scores debugging) - plus a parent Overview, backup/restore, crash cards, Hub Game Groups, a strict CSP, a hardened save layer and test suite, pinned toolchain, and the product-intent/legal decisions with CC0 BGM and MIT license. [Release notes](docs/release-notes-v1.24.0.md) | `v1.24.0` |
 | **v1.23.0** | 2026-10-27 | One track merged since v1.22.0: the content expansion - ten new early words (MAP/FOX/CUP/BOX/BED/KITE/SOCK/BOOT/RING/PLUS), four new three-panel stories (snowman, block tower, caterpillar, tadpole) and eight new feelings moments, all riding unchanged mechanics. [Release notes](docs/release-notes-v1.23.0.md) | `v1.23.0` |
@@ -253,6 +254,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets
 - [changelog.md](docs/changelog.md) - Dated changelog entries moved verbatim from the Conductor docs
 - [SVG_STYLE.md](docs/SVG_STYLE.md) - The art style every SVG asset is drawn in
+- [release-notes-v1.26.0.md](docs/release-notes-v1.26.0.md) - v1.26.0 draft release notes (five shipped PRs, local verification complete; CI/device/tag pending)
 - [release-notes-v1.25.0.md](docs/release-notes-v1.25.0.md) - v1.25.0 release notes (Content Depth plus the two P6 housekeeping items)
 - [release-notes-v1.24.0.md](docs/release-notes-v1.24.0.md) - v1.24.0 release notes (the fourteen tracks merged after v1.23.0)
 - [release-notes-v1.23.0.md](docs/release-notes-v1.23.0.md) - v1.23.0 release notes (the content-expansion track merged after v1.22.0)

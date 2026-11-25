@@ -2,6 +2,8 @@
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
+- [x] **Track: Release v1.26.0** - [20261125-release-v1-26-0](./archive/20261125-release-v1-26-0/index.md) - chore - high (Archived)
+
 ---
 
 - [x] **Track: Foundation — Build Project Foundation and Core Game Framework** *Link: [./archive/foundation_20260728/index.md](./archive/foundation_20260728/index.md)* (Archived)

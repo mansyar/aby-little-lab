@@ -166,7 +166,7 @@ the path forward.
 | Module size budget in `workflow.md` (400 warn / 600 fail, strict, no allowlist) — **Done 2026-11-23** (track `20261123-release-v1-25-0`) | once, then enforced | 13 oversized production modules split; `prewarm.ts` is no longer a god-file |
 | Split changelogs out of `product.md` and `tech-stack.md` into `docs/changelog.md` — **Done 2026-11-23** (track `20261123-release-v1-25-0`) | once | entries moved verbatim; pointers left in both docs |
 | Dependency-majors track | monthly | one already shipped on 2026-10-27; make it routine |
-| Perf baseline per release, first-tap p95 measured headed | per release | closes the 400ms KPI that the README admits is unproven |
+| Perf baseline per release, first-tap p95 measured headed — **Done 2026-11-24** (track `20261124-first-tap-p95-baseline`; [evidence](../docs/perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24)) | per release | headed cold control passed the unchanged 400 ms worst-cold gate (50 cold / 0 warm samples, aggregate p95 total 270.1 ms, worst 277.5 ms); the pre-fix 507.4 ms Find the Word failure remains history. This does not prove every KPI: p95 is report-only and real-device coverage remains outstanding |
 | Browser matrix (iOS Safari, Android Chrome, Fire tablet) | per release | automates what is currently a manual device checklist |
 
 ### 10.8 Sequence and milestones
