@@ -14,12 +14,16 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, NFR-1, NFR-2, NFR-3, NFR-5, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6
 - **Touches:** `docs/retention-validation.md`, `README.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Write the pilot protocol** — covers: FR-1, AC-1
-- [ ] **P1.T2: Define the local proxy** — covers: FR-2, NFR-3, AC-2
-- [ ] **P1.T3: Write interview guide, privacy rules, and no-data finding** — covers: FR-3, FR-4, FR-5, NFR-2, NFR-3, AC-3, AC-4, AC-5
-- [ ] **P1.T4: Add the README Documentation index link** — covers: FR-6, AC-6
+- [x] **P1.T1: Write the pilot protocol** — covers: FR-1, AC-1
+- [x] **P1.T2: Define the local proxy** — covers: FR-2, NFR-3, AC-2
+- [x] **P1.T3: Write interview guide, privacy rules, and no-data finding** — covers: FR-3, FR-4, FR-5, NFR-2, NFR-3, AC-3, AC-4, AC-5
+- [x] **P1.T4: Add the README Documentation index link** — covers: FR-6, AC-6
+
+**Result:** verified
+**Checkpoint:** `c295715f`
+**Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-1.md`
 
 ## Phase 2: Roadmap linkage
 
