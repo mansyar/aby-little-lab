@@ -77,7 +77,7 @@ Evidence: `verification/phase-3.md` — exact gate and first-attempt Chromium 26
 - **Covers:** FR-7, FR-8, FR-10, NFR-5, AC-9, AC-10, AC-11
 - **Touches:** `README.md`, `docs/TDD.md`, `docs/device-testing-checklist.md`, `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
