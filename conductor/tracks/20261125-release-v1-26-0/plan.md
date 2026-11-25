@@ -66,20 +66,20 @@
   - `node scripts/validate-headers.js`.
   - `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`
   - Require exit 0, 50 cold / 0 warm samples, 10 per target game, and every worst cold total ≤400 ms.
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Run the integrated full gate** — covers: FR-5, AC-5
+- [x] **P3.T1: Run the integrated full gate** — covers: FR-5, AC-5
   - Capture current suite counts, coverage, shell size, module-size, texture, PWA and docs results.
-- [ ] **P3.T2: Run boot, headers and headed first-tap checks** — covers: NFR-3, AC-5
+- [x] **P3.T2: Run boot, headers and headed first-tap checks** — covers: NFR-3, AC-5
   - Save raw headed evidence under `verification/`.
   - Block on a failed worst-cold gate; do not substitute headless or warm-only data.
-- [ ] **P3.T3: Refresh the notes' Release Verification section** — covers: FR-2, AC-2
+- [x] **P3.T3: Refresh the notes' Release Verification section** — covers: FR-2, AC-2
   - Use measured figures, clearly label CI-only browser journeys, and leave the tag/deploy line pending.
-- [ ] **P3.T4: Record integrated evidence** — covers: NFR-3
+- [x] **P3.T4: Record integrated evidence** — covers: NFR-3
 
-**Result:** pending
-**Checkpoint:** pending
-**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/integrated.md`
+**Result:** verified
+**Checkpoint:** `737fd899`
+**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/integrated.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-3.md`
 
 ## Phase 4: Review, PR and merge
 
