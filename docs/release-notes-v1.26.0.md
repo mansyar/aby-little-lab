@@ -35,7 +35,7 @@ Five PRs merged after v1.25.0, in this order.
 
 - Find the Word now generates its deterministic six-round playthrough before preload, then rasterizes only the letters and prompt assets that run can draw. Unused art groups stay empty.
 - The seeded rounds, adaptive difficulty, prompts, cards, speech, input, completion and saves are unchanged.
-- Archived headed evidence passed the unchanged 400 ms first-tap gate. The release candidate will be measured again in Phase 3 rather than reusing the archived figure as a release-state claim.
+- Archived headed evidence passed the unchanged 400 ms first-tap gate. The release candidate was measured again in Phase 3; the current figures below are release-state evidence, not a reuse of the archived number.
 - Archived evidence: [PR #97](../conductor/archive/20261124-word-match-first-tap/pr.md) and the dated [performance baseline](perf-baseline.md#find-the-word-cold-first-tap-fix-2026-11-24).
 
 ### PR #98 - Repeatable first-tap performance evidence
@@ -67,7 +67,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 | Add It Up | 10 | 75.1 ms | 45.0 ms | 161.1 ms |
 | Memory Match | 10 | 75.9 ms | 39.9 ms | 266.9 ms |
 
-- Raw evidence: [headed first-tap JSON](../conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.json) and [integrated verification](../conductor/tracks/20261125-release-v1-26-0/verification/integrated.md). The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
+- Raw evidence: the exact headed stdout and parseable JSON, plus integrated verification, are preserved in `conductor/archive/20261125-release-v1-26-0/verification/` when this track completes. The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
 - Browser journeys: pending release-commit CI. The automated Playwright Browser Journeys run against the built `dist` in Chromium, in two shards plus a rollup. They exercise pointer input, storage and service-worker behavior, but they are **not real-device coverage** and make no Firefox or WebKit support claim.
 - Targeted device smoke: pending Phase 5. No physical-device install, landscape, offline-reload or first-tap-audio result is claimed by this draft.
 - Tag, CI and deploy: pending. No `v1.26.0` tag has been created, no release CI run is recorded, and no deployment has been verified.
