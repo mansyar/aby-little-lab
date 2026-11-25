@@ -109,7 +109,7 @@
 - [x] **P4.T1: Run `conductor-review`** — covers: FR-10, AC-10
   - Resolve blocking findings; allow at most two review-fix rounds.
   - Record the verdict and any accepted findings according to workflow policy.
-- [ ] **P4.T2: Open the release PR** — covers: FR-10
+- [x] **P4.T2: Open the release PR** — covers: FR-10
   - Conventional title: `chore(release): ship v1.26.1`.
   - Media: none; this is metadata/documentation-only.
   - Include requirements coverage, verification summary, the pre-authorized tag gate, and rollback.

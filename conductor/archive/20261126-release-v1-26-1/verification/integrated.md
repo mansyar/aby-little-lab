@@ -69,8 +69,12 @@ Headed first-tap figures: aggregate cold p95 response / finished / total 58.4 / 
 
 Strict review passed in round 1 at `138cf515` with no findings after two fix rounds were available but not needed. The primary reran the reviewer's two denied checks: the focused AudioManager suite passed 1 file / 93 tests, and the CRLF-aware whitespace check over the reviewed range exited 0. Post-review doc sync is complete with no additional living-document change.
 
+## PR gate
+
+PR `https://github.com/mansyar/aby-little-lab/pull/101` opened as `chore(release): ship v1.26.1`. CI run `45637409160` completed `success`: Quality Gates, both Chromium shards, WebKit, Firefox, mobile Chromium and the `Browser Journeys` rollup all passed; Deploy to Coolify skipped as expected on a non-tag PR. Evidence: `.conductor/evidence/pr-101-ci.md`.
+
 ## Pending gates
 
-1. PR `chore(release): ship v1.26.1`, required CI green: Quality Gates, both Chromium shards, WebKit, Firefox, mobile Chromium and `Browser Journeys` rollup.
-2. Explicit owner `"Merge now"` answer before merge.
+1. Explicit owner `"Merge now"` answer before merge.
+2. Merge evidence (commit, cleanup, rollback posture).
 3. Tag preflight, immutable annotated `v1.26.1`, tag CI/Coolify, live build verification, FINAL notes via the documented docs/Conductor-only release exception.

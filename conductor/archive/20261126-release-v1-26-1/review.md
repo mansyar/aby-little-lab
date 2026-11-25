@@ -82,5 +82,5 @@ Post-review doc sync complete with no additional living-document change. The rel
 |---|---|---|---|
 | 1 | PASS | 0 | This review; reviewer session `ses_decda0f53ffeZutPpcViz5cBzF`; head `138cf515` |
 
-CONDUCTOR_PROGRESS gate=review verdict=PASS round=1 findings=0 evidence=conductor/tracks/20261126-release-v1-26-1/review.md
+CONDUCTOR_PROGRESS gate=review verdict=PASS round=1 findings=0 evidence=conductor/archive/20261126-release-v1-26-1/review.md
 CONDUCTOR_PROGRESS gate=doc-sync status=complete living-doc-changes=none

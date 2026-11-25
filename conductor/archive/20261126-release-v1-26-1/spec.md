@@ -174,14 +174,14 @@ In merge order:
 
 ## References
 
-- [v1.26.0 specification](../archive/20261125-release-v1-26-0/spec.md)
-- [v1.26.0 implementation plan](../archive/20261125-release-v1-26-0/plan.md)
+- [v1.26.0 specification](../20261125-release-v1-26-0/spec.md)
+- [v1.26.0 implementation plan](../20261125-release-v1-26-0/plan.md)
 - [v1.26.0 release notes](../../docs/release-notes-v1.26.0.md)
 - [Release checklist](../../docs/release-checklist.md)
 - [Performance baseline](../../docs/perf-baseline.md)
 - [Roadmap](../roadmap.md)
 - [Workflow](../workflow.md)
 - [Browser-matrix PR](https://github.com/mansyar/aby-little-lab/pull/100)
-- [Browser-matrix archived PR record](../archive/20261125-browser-matrix/pr.md)
-- [Browser-matrix integrated verification](../archive/20261125-browser-matrix/verification/integrated.md)
+- [Browser-matrix archived PR record](../20261125-browser-matrix/pr.md)
+- [Browser-matrix integrated verification](../20261125-browser-matrix/verification/integrated.md)
 - [Product-intent decision](../../docs/product-intent.md)
