@@ -88,7 +88,7 @@
 
 | Tool | Version | Where pinned |
 | --- | --- | --- |
-| Node.js | 24 | `.node-version`; the `Dockerfile` and both CI jobs read it |
+| Node.js | 24 | `.node-version`; the `Dockerfile` and CI runner jobs read it |
 | pnpm | 12.16.1 | `packageManager` in `package.json`; `corepack prepare pnpm@12.16.1` in `Dockerfile`; `pnpm/action-setup@v6` reads it in CI |
 | TypeScript | `^7.0.2` | `package.json` |
 | Phaser | `^4.2.1` | `package.json` (only runtime dependency) |
@@ -97,7 +97,7 @@
 | Vitest + `@vitest/coverage-v8` | `^5.0.5` | `package.json` |
 | happy-dom | `^21.0.4` | `package.json` |
 | Biome | `^2.6.3` | `package.json` |
-| `playwright-core` | `^1.64.1` | `package.json` — used by `scripts/validate-boot.js` only |
+| `@playwright/test` / `playwright-core` | `1.65.1` | `package.json` — browser journeys and matrix; `playwright-core` also drives `scripts/validate-boot.js` |
 | `workbox-window` | `^7.4.1` | `package.json` — `registerType: "prompt"` plumbing |
 
 `phaser` is the only entry under `dependencies`; everything else is a dev dependency.
@@ -111,7 +111,12 @@
 | `preview` | `vite preview` | `validate-boot.js` target |
 | `test` | `vitest` | local watch |
 | `test:coverage` | `vitest run --coverage` | local gate |
-| `typecheck` | `tsc --noEmit` | CI |
+| `test:e2e` | `pnpm build && playwright test --project=chromium` | full local Chromium suite |
+| `test:e2e:webkit` | `pnpm build && playwright test --project=webkit` | local WebKit smoke |
+| `test:e2e:firefox` | `pnpm build && playwright test --project=firefox` | local Firefox smoke |
+| `test:e2e:mobile-chromium` | `pnpm build && playwright test --project=mobile-chromium` | local mobile/touch smoke |
+| `test:e2e:matrix` | `pnpm build && playwright test --project=webkit --project=firefox --project=mobile-chromium` | local three-engine matrix |
+| `typecheck` | `tsc --noEmit && tsc --noEmit -p e2e/tsconfig.json` | CI |
 | `check` | `biome check` | CI |
 | `lint` | `biome lint` | local |
 | `format` | `biome format --write` | local |
@@ -1340,7 +1345,18 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 26 browser tests across 19 spec files cover boot, all 24 launches (driven as two halves in parallel workers, with a guard that the halves partition the registry), three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` and plays the game with real pointer input. The projects have distinct roles:
+
+| Project | Role | Selection | Profile |
+| --- | --- | --- | --- |
+| `chromium` | Full journey regression | 26 cases / 19 specs; ignores `e2e/smoke/**` | Bundled Chromium, desktop 1280×720 |
+| `webkit` | Safari-engine proxy | 8 cases / 6 specs from the core smoke | Bundled WebKit, desktop 1280×720 |
+| `firefox` | Firefox engine coverage | 8 cases / 6 specs from the core smoke | Bundled Firefox, desktop 1280×720 |
+| `mobile-chromium` | Phone-shaped Chromium/touch proxy | 8 cases / 6 specs from the core smoke | Bundled Chromium, 844×390, `isMobile: true`, `hasTouch: true` |
+
+The Chromium roster covers boot, all 24 launches (driven as two halves in parallel workers, with a guard that the halves partition the registry), three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+
+**Core smoke selection.** The three matrix projects select exactly six files: `journeys/boot.spec.ts`, `journeys/launch-all.spec.ts`, `journeys/first-sounds.spec.ts`, `journeys/shape-sorter.spec.ts`, `journeys/offline.spec.ts` and `smoke/sticker-persistence.spec.ts`. Together they prove boot, the registry partition and all 24 game launch/return checks, three First Sounds speech rounds, three Shape Sorter drag rounds, one earned sticker surviving reload, and offline Hub/game relaunch. The full Chromium project excludes `e2e/smoke/**`; the matrix projects do not select its other journey files. Dated local verification on 2026-11-25 used Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2; the first-attempt results and durations are recorded in `conductor/tracks/20261125-browser-matrix/verification/phase-3.md`.
 
 What this layer observes that the unit layer cannot:
 
@@ -1353,14 +1369,24 @@ One journey does something no other does and acts on a file the browser produced
 
 **Why it is not in `verify_phase`.** The phase gate is a ~90 s budget every phase subagent runs; this layer builds `dist` and takes minutes. It runs as its own CI job on every pull request (`Browser Journeys`, `needs: quality-gates`), so a browser failure is reported next to the static and unit results instead of replacing them.
 
-**Run one journey locally:**
+**Run a project locally:**
 
 ```bash
-pnpm build                                  # the suite serves dist, not the dev server
+pnpm test:e2e                    # full Chromium suite
+pnpm test:e2e:webkit             # WebKit core smoke
+pnpm test:e2e:firefox            # Firefox core smoke
+pnpm test:e2e:mobile-chromium    # mobile Chromium touch smoke
+pnpm test:e2e:matrix             # all three matrix engines
+```
+
+Each command builds `dist` and starts or reuses the preview on `http://127.0.0.1:4173`; run them sequentially because they share that port. To run one Chromium journey, build first and select its file:
+
+```bash
+pnpm build
 pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 ```
 
-`pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
+`--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port locally; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows. Local retries are zero for every project, so a flaky first attempt fails instead of being hidden by a retry.
 
 **Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 24 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 

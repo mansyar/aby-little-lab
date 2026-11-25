@@ -48,7 +48,30 @@ pnpm test:coverage
 
 Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,404 tests across 158 files**, all green (verified 2026-11-25).
 
-Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 24 launches (driven as two parallel halves), three rounds on each mechanic family, the sticker award, the parental gate, the Learning Progress overview, the daily cap, a backup exported and restored into an empty browser, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as two `Browser Journeys` shards (13 cases each, two workers per shard on its own four-vCPU runner and its own preview server, a 5 min budget: 2.5 and 3.7 min measured, reported by one aggregation check of the same name); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
+Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and drives the full Chromium roster: 26 cases across 19 specs, including boot, all 24 launches, the mechanic families, sticker and persistence flows, the parental gate, backup/restore, offline relaunch and storage-failure recovery. It sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. Chromium deliberately ignores `e2e/smoke/**`, so smoke-only checks cannot silently enlarge the full suite.
+
+The compatibility matrix keeps that full roster Chromium-only and gives the other engines a focused smoke:
+
+| Project | Role | Selection | Profile |
+| --- | --- | --- | --- |
+| `chromium` | Full regression suite | 26 cases / 19 specs; ignores `e2e/smoke/**` | Desktop Chromium, 1280×720 |
+| `webkit` | Safari-engine proxy | 8 cases / 6 specs | Desktop WebKit, 1280×720 |
+| `firefox` | Firefox engine coverage | 8 cases / 6 specs | Desktop Firefox, 1280×720 |
+| `mobile-chromium` | Phone-shaped Chromium/touch proxy | 8 cases / 6 specs | 844×390, `isMobile: true`, `hasTouch: true` |
+
+The six smoke files are `boot`, `launch-all`, `first-sounds`, `shape-sorter`, `offline` and `sticker-persistence`. Together they prove boot, the registry partition and all 24 launches/returns, three speech rounds, three drag rounds, an earned sticker surviving reload, and offline Hub/game relaunch. Dated local verification on 2026-11-25 recorded Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2. First-attempt results were Chromium 26/26 (3.8 min), WebKit 8/8 (1.8 min), Firefox 8/8 (2.1 min) and mobile Chromium 8/8 (2.3 min), all with zero retries. The track-PR CI run remains the authoritative release evidence.
+
+Run a project locally with:
+
+```bash
+pnpm test:e2e                    # full Chromium suite
+pnpm test:e2e:webkit             # WebKit core smoke
+pnpm test:e2e:firefox            # Firefox core smoke
+pnpm test:e2e:mobile-chromium    # mobile Chromium touch smoke
+pnpm test:e2e:matrix             # all three matrix engines
+```
+
+Every command builds `dist` and uses the preview on `127.0.0.1:4173`; run them sequentially because they share that port. Local retries are zero. One Chromium journey can be selected with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. These runs validate bundled engines and emulated touch, not iOS Safari, Android Chrome, Silk/Fire tablet or physical hardware; the real HTTPS install, landscape, offline, audio and first-tap checks remain the manual release gate in the [device checklist](docs/device-testing-checklist.md). Details and historical measurements: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
 ## Code Quality
 
