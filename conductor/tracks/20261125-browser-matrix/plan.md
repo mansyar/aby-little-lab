@@ -56,7 +56,7 @@ Evidence: `verification/phase-2.md` — exact gate, three project listings, acti
 - **Covers:** FR-2, FR-6, FR-9, NFR-3, NFR-4, NFR-5, NFR-6, AC-2, AC-3, AC-7, AC-8, AC-11
 - **Touches:** `e2e/**`, `src/**` only if a failing smoke proves a defect, `conductor/tracks/20261125-browser-matrix/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
-- **Status:** pending
+- **Status:** in_progress
 
 ### Tasks
 
