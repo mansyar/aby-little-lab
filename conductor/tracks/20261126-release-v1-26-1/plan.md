@@ -59,7 +59,7 @@
 - **Goal:** prove the exact release candidate is healthy and refresh time-sensitive performance evidence.
 - **Depends on:** Phase 2
 - **Covers:** FR-2, FR-6, FR-7, FR-8, FR-12, NFR-2, NFR-3, NFR-4, NFR-7, AC-2, AC-6, AC-7, AC-8, AC-12
-- **Touches:** `docs/release-notes-v1.26.1.md`, `docs/perf-baseline.md` only if measured figures differ, Conductor verification files
+- **Touches:** `docs/release-notes-v1.26.1.md`, `docs/perf-baseline.md` only if measured figures differ, Conductor verification files, and for P3.T6 only the narrowly scoped fix-forward source/test files identified by the reproduced CI failure
 - **Verification:**
   - `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
   - `pnpm install --frozen-lockfile`
@@ -67,8 +67,9 @@
   - `docker build --build-arg GIT_SHA=<HEAD> -t aby-little-lab:headers .` followed by `node scripts/validate-headers.js`.
   - `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10`
   - Require exit 0, 50 cold / 0 warm samples, exactly 10 per target game, and every worst cold total ≤400 ms.
+  - `pnpm exec playwright test --list`, then `pnpm test:e2e`, WebKit, Firefox and mobile Chromium sequentially with zero local retries.
   - `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Run the integrated full gate** — covers: FR-6, AC-6, NFR-2
   - Capture actual suite, coverage, bundle, module-size, texture, PWA and docs figures.
