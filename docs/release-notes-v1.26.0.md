@@ -54,7 +54,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 > This is a DRAFT. The figures below were measured on the exact release candidate on 2026-11-25. Release-commit CI, the targeted device smoke, tag and deploy remain separate gates.
 
 - Full gate: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` exited 0.
-- Unit and coverage: 158 test files and 3,395 tests passed; coverage was 97.10% statements, 90.96% branches, 96.35% functions and 98.23% lines.
+- Unit and coverage: 158 test files and 3,395 tests passed on every release-candidate run; coverage was 97.08–97.10% statements, 90.92–90.96% branches, 96.35% functions and 98.23% lines across the repeated runs.
 - Build artifacts: 491 modules; shell entry `index-0f9hfHo0.js` was 197.99 kB raw / 50.40 kB gzip and 193.4 kB under the bundle guard; 172 TypeScript files had zero module-size warnings; 319 SVGs passed the texture budget; PWA validation passed 16/16 with 52 JavaScript chunks and 64 precache entries; documentation validation passed 5/5.
 - Boot and headers: the production-preview boot smoke passed with a 0.81 s median over three cold loads against the 3.0 s budget. A freshly built release-candidate container (`sha256:21d3b670ea56da854febaf90f999cbf62c55781e23727e312a20d3582f960b8b`) passed all 28 strict-header checks. The validator's pre-existing immutable-cache quirk on a missing hashed asset remains recorded, unchanged.
 - First tap: `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` exited 0 with exactly 50 cold / 0 warm runs and 10 samples per target game. Aggregate cold p95 was 75.1 ms response, 45.0 ms chunk-finished and 265.9 ms first-frame total; cold median total was 192 ms. The worst cold total was 300.2 ms (Shape Sorter), below the unchanged 400 ms gate.
@@ -67,7 +67,7 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 | Add It Up | 10 | 75.1 ms | 45.0 ms | 161.1 ms |
 | Memory Match | 10 | 75.9 ms | 39.9 ms | 266.9 ms |
 
-- Raw evidence: the exact headed stdout and parseable JSON, plus integrated verification, are preserved in `conductor/archive/20261125-release-v1-26-0/verification/` when this track completes. The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
+- Raw evidence: the exact headed stdout and parseable JSON, plus integrated verification, are preserved in this release track's verification directory and will move with it into the Conductor archive at completion. The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
 - Browser journeys: pending release-commit CI. The automated Playwright Browser Journeys run against the built `dist` in Chromium, in two shards plus a rollup. They exercise pointer input, storage and service-worker behavior, but they are **not real-device coverage** and make no Firefox or WebKit support claim.
 - Targeted device smoke: pending Phase 5. No physical-device install, landscape, offline-reload or first-tap-audio result is claimed by this draft.
 - Tag, CI and deploy: pending. No `v1.26.0` tag has been created, no release CI run is recorded, and no deployment has been verified.

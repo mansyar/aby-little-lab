@@ -79,6 +79,16 @@ header validation and headed measurement directly. Those primary-owned results
 are the evidence for Phase 3; the subagent's blocked reports are preserved in
 history and superseded by `verification/phase-3.md`.
 
+## Review Revalidation
+
+Before review, stale Phase 3 wording and a forward archive-path reference were
+corrected. One exact-gate run failed only at `validate-docs.js` because the
+validator checks inline code paths as well as Markdown links; the forward path
+was removed. The exact gate then passed twice on the corrected release tree.
+Across repeated coverage runs, statements ranged from 97.08% to 97.10% and
+branches from 90.92% to 90.96%; functions stayed 96.35% and lines 98.23%. The
+release notes record that measured range rather than implying false precision.
+
 ## Evidence Paths
 
 - `conductor/tracks/20261125-release-v1-26-0/verification/phase-3.md`
