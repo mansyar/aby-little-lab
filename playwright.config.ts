@@ -25,6 +25,7 @@ const CORE_SMOKE_TEST_MATCH = [
   "**/journeys/first-sounds.spec.ts",
   "**/journeys/shape-sorter.spec.ts",
   "**/journeys/offline.spec.ts",
+  "**/smoke/sticker-persistence.spec.ts",
 ];
 
 /**
