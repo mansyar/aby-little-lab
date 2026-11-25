@@ -135,6 +135,30 @@
 **Checkpoint:** pending
 **Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-5.md`
 
+## Phase R1: Review fixes
+
+- **Goal:** close all four strict-review findings without expanding release scope.
+- **Depends on:** Review round 1
+- **Covers:** FR-2, FR-6, FR-9, NFR-5, AC-3, AC-6
+- **Touches:** `docs/release-notes-v1.26.0.md`, `conductor/tracks/20261125-release-v1-26-0/spec.md`, `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R1.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
+- **Status:** pending
+
+- [ ] **R1.T1: Correct the Known Issues roadmap destination** — covers: FR-2
+  - Replace the `conductor/product.md §10` pointer with `conductor/roadmap.md §10`.
+- [ ] **R1.T2: Correct Phase 1 AC-3 attribution** — covers: AC-3
+  - Mark AC-3 partial in Phase 1 evidence; the Documentation index link passed there, while the Releases row passed in Phase 2.
+- [ ] **R1.T3: Correct CI requirement mapping** — covers: FR-6, AC-6
+  - Remove FR-6/AC-6 from Phase 3 `Covers`; add them to Phase 4 `Covers` and P4.T3.
+- [ ] **R1.T4: Define the post-tag finalization procedure** — covers: FR-9, NFR-5
+  - Document the exact docs/Conductor-only direct-to-master finalization procedure in Phase 5 and update the spec/P5.T5 reference to cite it and the v1.25.0 archived precedent.
+- [ ] **R1.T5: Verify and record the fix round** — covers: NFR-2
+  - Run the exact gate and whitespace check, write `verification/phase-R1.md`, and return to review.
+
+**Result:** pending
+**Checkpoint:** pending
+**Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-R1.md`
+
 ## Rollback Strategy
 
 - **Before tag:** revert the release PR merge; no production impact.
