@@ -40,7 +40,7 @@
 - **Covers:** FR-3, FR-4, NFR-4, AC-3, AC-4
 - **Touches:** `README.md`, `conductor/roadmap.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; targeted README link/table inspection
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the README release-table row** — covers: FR-3
   - Add a newest-first `v1.26.0` row dated 2026-11-25.
