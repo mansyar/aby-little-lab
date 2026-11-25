@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-26T00:03:56.6541019+11:00",
-  "updated_at": "2026-11-26T00:29:42.0321491+11:00",
+  "updated_at": "2026-11-26T00:32:44.5828330+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261126-release-v1-26-1",

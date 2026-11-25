@@ -38,7 +38,7 @@
 - **Covers:** FR-3, FR-4, FR-5, FR-12, NFR-4, AC-3, AC-4, AC-5, AC-12
 - **Touches:** `README.md`, `conductor/roadmap.md`, `conductor/archive/20261125-browser-matrix/metadata.json`, `conductor/archive/20261125-browser-matrix/pr.md`
 - **Verification:** the exact configured gate; `node scripts/validate-docs.js`; targeted README/roadmap/archive inspection
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Add the README release-table row** — covers: FR-3, AC-3
   - Add a newest-first `v1.26.1` row dated 2026-11-26.
