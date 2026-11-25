@@ -30,7 +30,7 @@ Evidence: `verification/phase-1.md` — exact gate, project roster, Chromium 26/
 - **Goal:** Every code PR runs the three-engine matrix, while `Browser Journeys` remains the single required rollup.
 - **Depends on:** Phase 1
 - **Covers:** FR-4, FR-5, FR-6, FR-8, FR-9, NFR-2, NFR-3, NFR-5, AC-5, AC-6, AC-8
-- **Touches:** `.github/workflows/ci.yml`, `scripts/**`, `e2e/**`
+- **Touches:** `.github/workflows/ci.yml`, `scripts/**`, `e2e/**`, `src/__tests__/guard/toolchain.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list --project=webkit`; `pnpm exec playwright test --list --project=firefox`; `pnpm exec playwright test --list --project=mobile-chromium`; subsequent track-PR CI proves the workflow.
 - **Status:** in_progress
 
@@ -41,6 +41,7 @@ Evidence: `verification/phase-1.md` — exact gate, project roster, Chromium 26/
 - [ ] **P2.T3: Extend the Browser Journeys rollup** — covers: FR-5, AC-6
 - [ ] **P2.T4: Preserve documentation-only required checks** — covers: FR-8, AC-5
 - [ ] **P2.T5: Enforce strict matrix failure policy** — covers: FR-9, NFR-3, AC-6, AC-8
+- [ ] **P2.T6: Update the CI topology guard for the engine matrix** — covers: FR-5, FR-8, AC-5, AC-6, AC-8
 
 ## Phase 3: Cross-engine execution and compatibility fixes
 
