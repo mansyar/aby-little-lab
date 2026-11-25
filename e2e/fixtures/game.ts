@@ -11,7 +11,7 @@ import type {
   E2ERoundTarget,
   E2ESettingsState,
 } from "../../src/game/e2eBridge";
-import { type GamePoint, dragCanvas, holdCanvasUntil, tapCanvas } from "./canvas";
+import { dragCanvas, type GamePoint, holdCanvasUntil, tapCanvas } from "./canvas";
 
 /**
  * Journey primitives: open the hub, launch a game by registry index, read what

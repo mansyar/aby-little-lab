@@ -316,10 +316,7 @@ export async function holdCanvasUntil(
       if (await reached()) return;
 
       const elapsed = Date.now() - started;
-      if (
-        (seen >= frames && elapsed >= HOLD_MIN_ELAPSED_MS) ||
-        elapsed >= HOLD_CEILING_MS
-      ) {
+      if ((seen >= frames && elapsed >= HOLD_MIN_ELAPSED_MS) || elapsed >= HOLD_CEILING_MS) {
         throw new Error(
           `${where} did not reach its state after ${seen} frames and ${elapsed} ms ` +
             `(${Math.round(seen / (elapsed / 1000))} fps): a hold counted for both ${frames} frames ` +
