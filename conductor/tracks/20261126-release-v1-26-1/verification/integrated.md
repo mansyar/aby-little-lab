@@ -65,9 +65,12 @@ Headed first-tap figures: aggregate cold p95 response / finished / total 58.4 / 
 - The first headed first-tap attempt hit a port-4173 race after the boot preview. A standalone rerun passed; the race is recorded in `.conductor/evidence/phase-3/first-tap-port-race.txt`.
 - Executor shell denials were reported without retry or workaround; all heavy verification was run and recorded by the primary.
 
+## Post-review update
+
+Strict review passed in round 1 at `138cf515` with no findings after two fix rounds were available but not needed. The primary reran the reviewer's two denied checks: the focused AudioManager suite passed 1 file / 93 tests, and the CRLF-aware whitespace check over the reviewed range exited 0. Post-review doc sync is complete with no additional living-document change.
+
 ## Pending gates
 
-1. Strict `conductor-review` with at most two fix rounds.
-2. PR `chore(release): ship v1.26.1`, required CI green: Quality Gates, both Chromium shards, WebKit, Firefox, mobile Chromium and `Browser Journeys` rollup.
-3. Explicit owner `"Merge now"` answer before merge.
-4. Tag preflight, immutable annotated `v1.26.1`, tag CI/Coolify, live build verification, FINAL notes via the documented docs/Conductor-only release exception.
+1. PR `chore(release): ship v1.26.1`, required CI green: Quality Gates, both Chromium shards, WebKit, Firefox, mobile Chromium and `Browser Journeys` rollup.
+2. Explicit owner `"Merge now"` answer before merge.
+3. Tag preflight, immutable annotated `v1.26.1`, tag CI/Coolify, live build verification, FINAL notes via the documented docs/Conductor-only release exception.

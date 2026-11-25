@@ -106,7 +106,7 @@
 - **Verification:** the exact configured gate; CI Quality Gates, both Chromium shards, all three engine jobs and the `Browser Journeys` rollup; final scope diff inspection
 - **Status:** in_progress
 
-- [ ] **P4.T1: Run `conductor-review`** — covers: FR-10, AC-10
+- [x] **P4.T1: Run `conductor-review`** — covers: FR-10, AC-10
   - Resolve blocking findings; allow at most two review-fix rounds.
   - Record the verdict and any accepted findings according to workflow policy.
 - [ ] **P4.T2: Open the release PR** — covers: FR-10
