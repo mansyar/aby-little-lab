@@ -60,7 +60,7 @@ function getEngine(value) {
 
 function getOption(args, name) {
   const index = args.indexOf(name);
-  if (index === -1 || !args[index + 1]) {
+  if (index === -1 || !args[index + 1] || args[index + 1].startsWith("--")) {
     throw new Error(`missing required option ${name}`);
   }
   return args[index + 1];
@@ -181,6 +181,8 @@ function inspectReport(report, engine) {
 }
 
 async function probe(args) {
+  const outputPath = process.env.GITHUB_OUTPUT;
+  if (!outputPath) throw new Error("GITHUB_OUTPUT is required to record browser evidence");
   const engineName = getOption(args, "--engine");
   const engine = getEngine(engineName);
   const browser = await engine.browserType.launch({ headless: true });
@@ -206,7 +208,7 @@ async function probe(args) {
         playwright_version: playwrightVersion,
       };
       appendLines(
-        process.env.GITHUB_OUTPUT,
+        outputPath,
         Object.entries(outputs).map(([key, value]) => `${key}=${value}`),
       );
       console.log(`${engine.label}: bundled version ${version}; ${engine.profile.label}`);
