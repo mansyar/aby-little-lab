@@ -69,29 +69,31 @@
   - Require exit 0, 50 cold / 0 warm samples, exactly 10 per target game, and every worst cold total ≤400 ms.
   - `pnpm exec playwright test --list`, then `pnpm test:e2e`, WebKit, Firefox and mobile Chromium sequentially with zero local retries.
   - `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** Local release candidate passed the exact configured gate, frozen install, boot/headers, headed first tap, and all four browser projects with zero retries. PR CI, merge, tag CI and deploy remain pending.
+- **Checkpoint:** `4428d33d71409859c65b8409b492703855a0d251`
 
-- [ ] **P3.T1: Run the integrated full gate** — covers: FR-6, AC-6, NFR-2
+- [x] **P3.T1: Run the integrated full gate** — covers: FR-6, AC-6, NFR-2
   - Capture actual suite, coverage, bundle, module-size, texture, PWA and docs figures.
   - Run frozen installation and confirm no lockfile drift.
-- [ ] **P3.T2: Run boot and header validation** — covers: FR-7, AC-7
+- [x] **P3.T2: Run boot and header validation** — covers: FR-7, AC-7
   - Require boot median under the 3.0 s budget and every strict-header check to pass.
   - Rebuild the current release-candidate image before header validation.
-- [ ] **P3.T3: Run the headed first-tap baseline** — covers: FR-7, AC-7
+- [x] **P3.T3: Run the headed first-tap baseline** — covers: FR-7, AC-7
   - Commit raw JSON/stdout evidence under `verification/`.
   - Block on a failed worst-cold gate; never substitute headless or warm-only data.
-- [ ] **P3.T4: Refresh notes and living performance truth** — covers: FR-2, FR-7, FR-12, NFR-3, NFR-4, AC-2
+- [x] **P3.T4: Refresh notes and living performance truth** — covers: FR-2, FR-7, FR-12, NFR-3, NFR-4, AC-2
   - Use measured release-state figures, label CI-only browser coverage, and leave tag/deploy pending.
   - Update the live header/table in `docs/perf-baseline.md` if figures differ, preserving historical sections.
-- [ ] **P3.T5: Record integrated evidence** — covers: NFR-3, NFR-7
+- [x] **P3.T5: Record integrated evidence** — covers: NFR-3, NFR-7
   - Save the exact commands, exit codes, measured figures and raw-evidence paths in `verification/integrated.md`.
   - Use the CRLF-aware whitespace check where needed.
-- [ ] **P3.T6: Fix forward the red master CI check** — covers: FR-8, NFR-2, AC-8
+- [x] **P3.T6: Fix forward the red master CI check** — covers: FR-8, NFR-2, AC-8
   - Master rerun `45595775568` on `859498a8` is red because Firefox `sticker-persistence` logged three `InvalidStateError: Navigated away from page` page errors across three attempts.
   - Diagnose and apply one narrowly scoped, reviewed patch that closes the reproduced red check without weakening an assertion, threshold, sample count, or gate; this is the sole exception to NFR-1/AC-12.
   - Add a regression test for the defect where practical, rerun the exact gate and all four browser projects with zero local retries, and record raw evidence.
   - Do not accept retry-only passes or filter generic console errors; PR CI must be green before merge and tagging.
-- [ ] **P3.T7: Refresh living suite counts after the fix-forward patch** — covers: FR-12, NFR-4, AC-12
+- [x] **P3.T7: Refresh living suite counts after the fix-forward patch** — covers: FR-12, NFR-4, AC-12
   - The two AudioManager regression tests raise living truth from 158 files / 3,404 tests to 158 files / 3,406 tests.
   - Update only living count and coverage claims in `README.md`, `docs/TDD.md` and `docs/perf-baseline.md`; preserve historical records.
 
