@@ -76,7 +76,7 @@ export class AudioManager {
   /** Resumes a suspended AudioContext; must be called from a user gesture. */
   resume(): void {
     if (this.audioContext?.state === "suspended") {
-      this.audioContext.resume();
+      this.audioContext.resume().catch(() => {});
     }
   }
 
@@ -391,7 +391,7 @@ export class AudioManager {
     this.gameContext = null;
     this.pauseBGM();
     if (this.audioContext) {
-      this.audioContext.close();
+      this.audioContext.close().catch(() => {});
       this.audioContext = null;
     }
     this.bgmAudio = null;

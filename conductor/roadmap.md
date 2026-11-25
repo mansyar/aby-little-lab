@@ -22,7 +22,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-3 | Automate the browser matrix (iOS Safari, Android Chrome, Fire tablet) | chore | medium | — | — | user |
+| RM-3 | Browser matrix delivered 2026-11-25 with WebKit, Firefox and mobile Chromium/touch emulation (track `20261125-browser-matrix`); physical iOS Safari, Android Chrome and Fire tablet validation remains a separate manual gate | chore | medium | — | `20261125-browser-matrix` | user |
 
 ## Later
 
@@ -167,7 +167,7 @@ the path forward.
 | Split changelogs out of `product.md` and `tech-stack.md` into `docs/changelog.md` — **Done 2026-11-23** (track `20261123-release-v1-25-0`) | once | entries moved verbatim; pointers left in both docs |
 | Dependency-majors track | monthly | one already shipped on 2026-10-27; make it routine |
 | Perf baseline per release, first-tap p95 measured headed — **Done 2026-11-24** (track `20261124-first-tap-p95-baseline`; [evidence](../docs/perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24)) | per release | headed cold control passed the unchanged 400 ms worst-cold gate (50 cold / 0 warm samples, aggregate p95 total 270.1 ms, worst 277.5 ms); the pre-fix 507.4 ms Find the Word failure remains history. This does not prove every KPI: p95 is report-only and real-device coverage remains outstanding |
-| Browser matrix (iOS Safari, Android Chrome, Fire tablet) | per release | automates what is currently a manual device checklist |
+| Browser matrix (WebKit, Firefox, mobile Chromium/touch emulation) — **Done 2026-11-25** (track `20261125-browser-matrix`; [PR #100](./archive/20261125-browser-matrix/pr.md)) | per release | emulated engine smoke runs on every code PR and blocks the `Browser Journeys` rollup; strict evidence rejects retried, flaky, skipped, unexpected or wrong-project reports. Physical-device checks remain manual; iOS Safari, Android Chrome and Fire tablet coverage is not claimed |
 
 ### 10.8 Sequence and milestones
 

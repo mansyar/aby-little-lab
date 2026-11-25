@@ -1,8 +1,10 @@
 # PR: chore(ci): add browser compatibility matrix
 
 - **URL:** https://github.com/mansyar/aby-little-lab/pull/100
-- **State:** open
-- **Head:** cd8c0bc2ca0bf67a174b6820f39c62a483a8394e`n- **Base:** master`n
+- **State:** merged
+- **Head:** 8524d33014acb4ca062a7896c760591655433489
+- **Base:** master
+- **Merge commit:** 859498a850f729294785453f5884c1915e4071c7
 ## Summary
 
 Adds a repeatable browser compatibility matrix to the existing Playwright suite. WebKit, Firefox and a genuine mobile Chromium/touch project now run a focused six-file smoke on every code PR, while the full 26-test journey suite stays Chromium-only. The existing required `Browser Journeys` rollup now fails if any engine or Chromium shard fails, and a strict evidence helper rejects retried, flaky, skipped, unexpected or wrong-project reports.
