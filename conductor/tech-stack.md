@@ -9,7 +9,7 @@
 | **Build Tool** | Vite | 8.3.8 | Fast HMR, modern ESM bundling, plugin ecosystem |
 | **PWA** | vite-plugin-pwa | 2.0.0 | Auto-generates service worker + manifest; precache for offline play |
 | **Testing** | Vitest | 5.1.1 | Vite-native, fast, Jest-compatible API, ESM support |
-| **Browser Testing** | @playwright/test | 1.65.1 | Drives the built artifact in Chromium; the only layer that sees real hit areas, storage and service-worker behaviour (CI only, not in `verify_phase`) |
+| **Browser Testing** | @playwright/test | 1.65.1 | Drives the built artifact in Chromium, WebKit, Firefox and mobile Chromium; the only layer that sees real hit areas, storage and service-worker behaviour (CI and local browser suites, outside `verify_phase`) |
 | **Linting/Formatting** | Biome | 2.6.8 | Fast all-in-one linter and formatter; zero config needed for sensible defaults |
 | **Package Manager** | pnpm | 12.16.1 | Fast, disk-efficient, strict dependency resolution; pinned exactly by `packageManager` in `package.json`, which `pnpm/action-setup` and the `Dockerfile` both follow |
 
@@ -110,13 +110,17 @@
 
 ### Playwright (`playwright.config.ts`)
 
-- **Scope:** `e2e/` only — the browser journey layer, run as its own CI job (`Browser Journeys`, `needs: quality-gates`), deliberately outside `verify_phase` so the ~90 s phase gate stays fast
-- **Runner:** `@playwright/test` 1.65.1, Chromium only (WebKit/Firefox belong to the roadmap's browser-matrix work); `playwright-core` drives the pre-existing `scripts/validate-boot.js` smoke check
-- **Server:** one shared `vite preview` on `http://127.0.0.1:4173`, built by `pnpm test:e2e` and pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows
-- **Workers:** 2 locally and in CI, `fullyParallel: false` so the file is the parallelism unit; every test gets a fresh browser context, so the preview is the only shared state
-- **Retries:** 0 locally (that is what makes the determinism claim mean anything), 2 in CI with a trace on the first retry; a retry-only pass is a finding, not a pass
-- **Budget:** 23 journeys in 4.6 min on two workers; `launch-all` alone is 2.9 min and is the critical path (measured 2026-11-16, track `20261115-robot-path`)
+- **Scope:** `e2e/` only — the browser layer, run as its own CI jobs and deliberately outside `verify_phase` so the phase gate stays fast; Chromium runs the full 26-test/19-file roster, while WebKit, Firefox and mobile Chromium run the same 8-test/6-file core smoke
+- **Runner:** `@playwright/test` 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2; `playwright-core` also drives the pre-existing `scripts/validate-boot.js` smoke check
+- **Projects:** `chromium` (desktop 1280×720, ignores `e2e/smoke/**`), `webkit` and `firefox` (desktop 1280×720 engine proxies), and `mobile-chromium` (844×390, `isMobile: true`, `hasTouch: true`); emulated touch and bundled engines are not physical iOS/Android/Fire-tablet validation
+- **Server:** one shared `vite preview` on `http://127.0.0.1:4173`, built by each local browser script and pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows; run the project scripts sequentially because they share the port
+- **Workers:** 3 locally and 2 in CI, `fullyParallel: false` so the file is the parallelism unit; every test gets a fresh browser context, so the preview is the only shared state
+- **Retries and evidence:** 0 locally; CI is configured for 2 with a trace on the first retry, but `scripts/playwright-matrix-evidence.js` rejects every retried, flaky, skipped, unexpected or wrong-project result and records exact engine version/profile, attempt count and duration
+- **CI gate:** the existing required `Browser Journeys` rollup depends on Quality Gates, two Chromium shards and the three-engine `e2e-matrix`; any failed engine fails the rollup. Track-PR CI is the authoritative first-attempt proof
+- **Budget:** full Chromium measured 26/26 in 3.8 min locally on 2026-11-25; each matrix smoke measured 8/8 in 1.8–2.3 min. CI keeps the 15-minute job bounds
 - **Observation seam:** a read-only bridge installed only under `?e2e=1` (`src/game/e2eBridge.ts`) — no `node:fs`, no test-only build, so the artifact CI tests is the artifact that ships
+
+> **2026-11-25 — Design Update (Browser Compatibility Matrix):** The full journey roster remains Chromium-only, while WebKit, Firefox and mobile Chromium run six shared smoke files covering boot, all 24 launches/returns, three speech rounds, three drag rounds, earned-sticker reload persistence and offline relaunch. The smoke exposed and fixed three real portability defects: WebKit boot crashed when `AudioContext` was absent, Firefox high-refresh holds exhausted a frame-only deadline before Phaser's smoothed three-second timer, and Hub prewarm could race a game preload into duplicate texture ownership. The fixes degrade audio silently, wait for actual hold state with canvas-liveness/90-second backstops, and share texture reservation/release between game preload and idle prewarm. No dependency, save-schema, asset or game-rule change. First-attempt local proof: Chromium 26/26, WebKit 8/8, Firefox 8/8, mobile Chromium 8/8, zero retries. Real-device HTTPS/PWA/audio/first-tap checks remain the manual release gate.
 
 > **2026-11-07 — Design Update (Browser Journey Layer):** The project's first browser-level tests. Playwright drives the built `dist` through `vite preview` and plays the game with real pointer input: boot, all 22 launches, three rounds on each of six mechanic families, the sticker award, the parental gate (3 s hold vs 1 s press), settings persistence across reload, the daily cap, and an offline relaunch from the service worker. A query-gated read-only bridge (`window.__abyE2E`) publishes scene key, profile/sticker counts, round index, round geometry, hub tiles, hub toast, hub readiness, settings rows and play-time state; without `e2e=1` it does not exist. Running it found five defects invisible to every other gate — `roundIndex()` counting dot alpha, the offline toast swallowing the first tap, the hub ignoring input during its entrance, readiness sampled mid-rebuild, and a held back button delivering the child's first tap to the profile chip (a shipping bug, fixed). Proof of teeth: shrinking one tile's hit area to 1x1 turned three journeys red while check, typecheck, 2,881 unit tests and the build stayed green. Ten consecutive runs at 3.07-3.10 min, retries 0.
 
