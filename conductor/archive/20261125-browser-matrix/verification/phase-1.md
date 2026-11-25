@@ -134,7 +134,7 @@ The primary's clean rerun after the type/format repairs established these result
 - `playwright.config.ts`
 - `package.json`
 - `README.md`, `docs/TDD.md`, `docs/perf-baseline.md` — refreshed living counts only.
-- `conductor/tracks/20261125-browser-matrix/verification/phase-1.md` — this file, intentionally uncommitted for the primary state commit.
+- `conductor/archive/20261125-browser-matrix/verification/phase-1.md` — this file, intentionally uncommitted for the primary state commit.
 
 ## Deviations
 

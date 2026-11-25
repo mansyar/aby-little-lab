@@ -54,7 +54,7 @@ Evidence: `verification/phase-2.md` — exact gate, three project listings, acti
 - **Goal:** All engines pass the core smoke first-attempt, or a proven compatibility defect is minimally repaired.
 - **Depends on:** Phase 2
 - **Covers:** FR-2, FR-6, FR-9, NFR-3, NFR-4, NFR-5, NFR-6, AC-2, AC-3, AC-7, AC-8, AC-11
-- **Touches:** `e2e/**`, `src/**` only if a failing smoke proves a defect, `conductor/tracks/20261125-browser-matrix/verification/**`
+- **Touches:** `e2e/**`, `src/**` only if a failing smoke proves a defect, `conductor/archive/20261125-browser-matrix/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
 - **Status:** verified
 
@@ -97,7 +97,7 @@ Evidence: `verification/phase-4.md` — documentation validation and the exact c
 - **Goal:** Leave one auditable package of local and CI-ready evidence for strict review and the release PR.
 - **Depends on:** Phases 1–4
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11
-- **Touches:** `conductor/tracks/20261125-browser-matrix/verification/**`
+- **Touches:** `conductor/archive/20261125-browser-matrix/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
 - **Status:** verified
 - **Result:** Exact gate passed (158 files / 3,404 tests; coverage 97.08 / 90.89 / 96.35 / 98.23). Roster was 50 tests / 20 files. Chromium 26/26, WebKit 8/8, Firefox 8/8 and mobile Chromium 8/8 all passed locally with zero retries. PR CI and physical-device checks remain pending.
@@ -115,7 +115,7 @@ Evidence: `verification/phase-4.md` — documentation validation and the exact c
 - **Goal:** Close strict-review finding F1 and revalidate the final tree.
 - **Depends on:** Phase 5
 - **Covers:** FR-10, AC-10
-- **Touches:** `docs/TDD.md`, `conductor/tracks/20261125-browser-matrix/verification/phase-R1.md`
+- **Touches:** `docs/TDD.md`, `conductor/archive/20261125-browser-matrix/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git -c core.whitespace=cr-at-eol diff --check`
 - **Status:** verified
 - **Result:** F1 closed in `docs/TDD.md`; exact gate passed with 158 files / 3,404 tests, 491 modules and all artifact guards green; CRLF-aware whitespace check passed.

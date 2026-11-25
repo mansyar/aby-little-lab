@@ -2,11 +2,11 @@
   "id": "20261125-browser-matrix",
   "title": "Browser Compatibility Matrix",
   "type": "chore",
-  "status": "in_progress",
+  "status": "complete",
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-11-25T15:20:30.1649356+11:00",
-  "updated_at": "2026-11-25T20:48:02.3654492+11:00",
+  "updated_at": "2026-11-25T20:51:27.3465878+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261125-browser-matrix",
@@ -22,10 +22,11 @@
   "review_verdict": "PASS",
   "review_rounds": 2,
   "doc_sync": "complete",
-  "pr_url": null,
+  "pr_url": "https://github.com/mansyar/aby-little-lab/pull/100",
+  "pr_state": "open",
   "reverted_at": null,
   "revert_commit": null,
   "revert_pr_url": null,
-  "archived_at": null,
-  "archive_path": null
+  "archived_at": "2026-11-25T20:51:27.3465878+11:00",
+  "archive_path": "conductor/archive/20261125-browser-matrix"
 }
