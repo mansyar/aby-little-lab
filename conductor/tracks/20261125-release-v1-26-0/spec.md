@@ -100,7 +100,7 @@ In merge order:
 - CI fails after merge: stop and fix forward with a reviewed patch before tagging.
 - Physical hardware is unavailable: record an accepted gap; do not imply a device pass.
 - Current suite/build figures differ from archived PR figures: use the release-state measurement, not the historical number.
-- Finalizing notes after the tag requires the documented direct-to-`master` release exception; never use it without explicit approval.
+- Finalizing notes after the tag uses the docs/Conductor-only direct-to-`master` procedure defined in Phase 5 and requires the recorded explicit Phase 5 tag/deploy go-ahead; the v1.25.0 archived precedent is cited there. Never use the procedure autonomously.
 
 ## Dependencies
 
@@ -121,6 +121,7 @@ In merge order:
 - [v1.25.0 release specification](../../archive/20261123-release-v1-25-0/spec.md)
 - [v1.25.0 implementation plan](../../archive/20261123-release-v1-25-0/plan.md)
 - [v1.25.0 release notes](../../../docs/release-notes-v1.25.0.md)
+- [v1.25.0 tag/ship verification](../../archive/20261123-release-v1-25-0/verification/phase-6.md)
 - [Release checklist](../../../docs/release-checklist.md)
 - [Performance baseline](../../../docs/perf-baseline.md)
 - [Workflow](../../workflow.md)

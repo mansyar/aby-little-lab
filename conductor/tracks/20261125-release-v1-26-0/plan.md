@@ -58,7 +58,7 @@
 
 - **Goal:** prove the exact release candidate is healthy before review and merge.
 - **Depends on:** Phase 2
-- **Covers:** FR-2, FR-5, FR-6, NFR-2, NFR-3, AC-2, AC-5, AC-6, AC-10
+- **Covers:** FR-2, FR-5, NFR-2, NFR-3, AC-2, AC-5, AC-10
 - **Touches:** `docs/release-notes-v1.26.0.md`, Conductor verification files
 - **Verification:**
   - `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
@@ -85,7 +85,7 @@
 
 - **Goal:** pass strict review and merge a green release PR.
 - **Depends on:** Phase 3
-- **Covers:** FR-8, NFR-2, NFR-5, NFR-6, AC-8, AC-10
+- **Covers:** FR-6, FR-8, NFR-2, NFR-5, NFR-6, AC-6, AC-8, AC-10
 - **Touches:** release notes or docs only if review requires a correction; Conductor review/PR/verification state
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; CI Quality Gates, Browser Journeys shard 1, shard 2 and rollup; final scope diff inspection
 - **Status:** in_progress
@@ -97,7 +97,7 @@
   - Conventional title: `chore(release): ship v1.26.0`.
   - Media: none; this is metadata/documentation-only.
   - Include requirements coverage, verification summary and the separate human tag gate.
-- [ ] **P4.T3: Watch CI and merge after go-ahead** — covers: FR-8, AC-8
+- [ ] **P4.T3: Watch CI and merge after go-ahead** — covers: FR-6, FR-8, AC-6, AC-8
   - Require green Quality Gates and all Browser Journeys jobs.
   - Merge with the configured `merge` method only after the required approval.
 - [ ] **P4.T4: Record merge evidence** — covers: NFR-3
@@ -129,7 +129,17 @@
   - Verify the live URL serves the release build and reports `1.26.0`.
 - [ ] **P5.T5: Finalize notes and close the ship gate** — covers: FR-9, AC-9
   - Flip `DRAFT` to `FINAL`; record tag commit, CI run, deploy result and device policy.
-  - Use the documented release exception for the finalization push to `master`, only after explicit go-ahead.
+  - Follow the post-tag finalization procedure below, which is the documented release exception and cites the v1.25.0 precedent.
+
+### Post-tag finalization procedure (release exception)
+
+1. This is a docs/Conductor-only procedure following the v1.25.0 precedent in [Phase 6 verification](../../archive/20261123-release-v1-25-0/verification/phase-6.md).
+2. Start only after the release PR is merged, `v1.26.0` is pushed on merged `master` HEAD, tag CI and Coolify verification pass, and the targeted-device result or accepted gap is recorded.
+3. The owner's explicit Phase 5 tag/deploy go-ahead must already be recorded; it also authorizes the final notes update. Never finalize autonomously.
+4. Fetch `origin/master`, fast-forward local `master` to it, and confirm a clean tree. Do not change the pushed tag or release merge commit.
+5. Update only `docs/release-notes-v1.26.0.md` from `DRAFT` to `FINAL` with the tag commit, tag CI run, deploy result and device policy, plus the archived track's ship evidence/state.
+6. Run `node scripts/validate-docs.js` and `git diff --check`; inspect that the diff is limited to release notes and Conductor archive/state files.
+7. Commit and push `master` with conventional release/Conductor messages. This is the single documented direct-to-`master` exception; never force-push, reset, move or recreate the tag. A failure stops the gate and requires a reviewed follow-up.
 
 **Result:** pending
 **Checkpoint:** pending
