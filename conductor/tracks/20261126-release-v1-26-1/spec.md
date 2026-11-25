@@ -94,7 +94,7 @@ In merge order:
 
 | ID | Requirement |
 | --- | --- |
-| NFR-1 | This release track introduces no new runtime source, gameplay, content, assets, dependencies, save schema, or storage migration; PR #100 is already merged. |
+| NFR-1 | This release track introduces no new runtime source, gameplay, content, assets, dependencies, save schema, or storage migration; PR #100 is already merged. The sole exception is one narrowly scoped, reviewed fix-forward patch if a post-merge CI check fails, as allowed by the CI edge case below; it must keep every assertion and threshold intact. |
 | NFR-2 | No quality gate, threshold, sample count, test assertion, or validation script is weakened. |
 | NFR-3 | Release notes use measured release-state figures and distinguish local checks, CI-only browser coverage, emulated engines, and real-device coverage. |
 | NFR-4 | Historical evidence remains intact; dated perf, browser, and release records are preserved rather than overwritten as history. |
@@ -117,7 +117,7 @@ In merge order:
 | AC-9 | The skipped physical-device smoke is explicitly recorded as an accepted gap. | FR-9 |
 | AC-10 | Review verdict is `PASS`, all blocking findings are closed, and the PR is merged with green checks. | FR-10 |
 | AC-11 | `v1.26.1` resolves on origin to merged `master` HEAD, tag CI and Coolify verification pass, the live bundle reports `1.26.1`, and notes are `FINAL`. | FR-11 |
-| AC-12 | The release diff contains no new runtime source, dependency, asset, or save-schema change outside `package.json`, release docs, living docs, and Conductor state. | FR-1, FR-12, NFR-1 |
+| AC-12 | The release diff contains no new runtime source, dependency, asset, or save-schema change outside `package.json`, release docs, living docs, and Conductor state, except one reviewed CI fix-forward patch as defined by NFR-1 and the CI edge case. | FR-1, FR-12, NFR-1 |
 
 ## Edge Cases
 
@@ -126,7 +126,10 @@ In merge order:
 - `master` advances before materialization or tagging: refetch and reconfirm the
   base; do not tag a non-release commit.
 - CI fails after merge: stop and fix forward with a reviewed patch before
-  tagging.
+  tagging. The patch must close a reproduced red check without weakening an
+  assertion, threshold, sample count, or gate. It is the only exception to
+  NFR-1/AC-12, must be included in the reviewed release PR before tagging, and
+  must be proven by a fresh green PR CI run.
 - The headed first-tap measurement differs from the archived figures: use the
   fresh release-state result and update the living header/table; preserve
   historical sections.
@@ -154,6 +157,11 @@ In merge order:
   contains compatibility fixes and test infrastructure, not new gameplay or
   content.
 - **Assumption:** no `v1.26.1` tag currently exists locally or on origin.
+- **Assumption:** master rerun `45595775568` on merge commit `859498a8` is red
+  because Firefox `sticker-persistence` logged three
+  `InvalidStateError: Navigated away from page` page errors across three
+  attempts; the CI edge case therefore requires one narrowly scoped, reviewed
+  fix-forward patch before this release can be tagged.
 - **Assumption:** the owner's "Authorize tag at track creation" answer is the
   explicit human authorization required by the workflow; Phase 5 still verifies
   every precondition and stops if any fails.
