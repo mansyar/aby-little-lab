@@ -29,7 +29,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-4 | Confirm the retention proxy with a handful of real families | chore | low | — | — | user |
+| RM-4 | Confirm the retention proxy with a handful of real families | chore | low | — | `20261126-retention-proxy` | user |
 
 ## Dropped
 
@@ -200,7 +200,7 @@ cancelled, and the path is Phase 4 depth followed by Phase 6 sustainability.
 | The E2E suite turns flaky and gets disabled | High | Journeys, not unit assertions; retry ≤ 1; quarantine policy; state-based waits only |
 | Content expansion blows the texture budget | Medium | Per-game art budget validated in CI before merge |
 | Phase 3 never happens and scope stays implicit | Medium | Closed 2026-11-20: the gate ran and its decisions are recorded in `docs/product-intent.md` |
-| Retention is optimised against a noisy proxy | Medium | Treat Phase 2 numbers as directional; confirm with a handful of real families |
+| Retention is optimised against a noisy proxy | Medium | Treat Phase 2 numbers as directional; confirm with a handful of real families (see [validation protocol](../docs/retention-validation.md)) |
 | Toolchain pinning breaks a contributor's setup | Low | Pin in CI first, then Docker, then docs |
 | The accessibility stance is deferred indefinitely | Medium | Closed 2026-11-20: touch-only, sighted, textless, landscape published as a documented stance in README and `docs/product-intent.md` |
 
