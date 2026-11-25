@@ -14,23 +14,23 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-10, NFR-1, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-10
 - **Touches:** `package.json`, `pnpm-lock.yaml` only if required for consistency, `README.md` (Documentation index link only), `docs/release-notes-v1.26.0.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm install --frozen-lockfile`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Bump the release version** — covers: FR-1
+- [x] **P1.T1: Bump the release version** — covers: FR-1
   - Run `pnpm version 1.26.0 --no-git-tag-version`.
   - Confirm no dependency or lockfile drift; preserve deterministic frozen installation.
-- [ ] **P1.T2: Draft the v1.26.0 release notes** — covers: FR-2, FR-3, FR-10
+- [x] **P1.T2: Draft the v1.26.0 release notes** — covers: FR-2, FR-3, FR-10
   - Use `Status: DRAFT`, `Tag: (pending)`, and `Base: v1.25.0 (4359667b, 2026-11-23)`.
   - Cover PRs #94–#98 in merge order using their archived `pr.md` and verification evidence.
   - State that profiles, stickers, settings and saves carry over without migration.
   - Leave tag/deploy and device-result claims pending until those gates complete.
   - Add the new notes to the README Documentation index so `validate-docs.js` can pass in this phase.
-- [ ] **P1.T3: Record phase evidence and task commits** — covers: NFR-3
+- [x] **P1.T3: Record phase evidence and task commits** — covers: NFR-3
   - Save actual gate output in `verification/phase-1.md`.
   - Use conventional commits; do not tag.
 
-**Result:** pending
-**Checkpoint:** pending
+**Result:** verified
+**Checkpoint:** `4f5969a0`
 **Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`
 
 ## Phase 2: README and roadmap truth
