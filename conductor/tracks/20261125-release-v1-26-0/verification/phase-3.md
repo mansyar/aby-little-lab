@@ -4,65 +4,66 @@
 - **Phase:** 3
 - **Date:** 2026-11-25
 - **Branch:** `chore/20261125-release-v1-26-0`
-- **Phase base:** `7ad53fcd`
-- **Execution head:** `9a9e7e653eeeadb966a586660178e07f8f15b6a6`
+- **Phase base:** `9a9e7e65`
+- **Execution head:** `3d27585bf5b1990a5cbc87ec05e08290b4ca0eba` before this evidence commit
 - **Result:** `blocked`
 
 ## Result Summary
 
-Phase 3 stopped before any verification command or authorized content edit. The
-required preflight to confirm ports 4173 and 8080 are free was denied by the
-restricted shell:
+The primary resolved the earlier port-preflight permission blocker and recorded
+that neither port 4173 nor 8080 has a listener. Phase 3 resumed from
+`3d27585b` without rerunning that preflight.
+
+The required integrated full gate was then denied by the restricted shell:
 
 ```text
-Get-NetTCPConnection -LocalPort 4173,8080 -State Listen
+pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js
 ```
 
 The tool returned `permission.rejected` / `Permission denied: shell`. Per the
-phase brief's stop conditions, this denial was not retried, rephrased, or worked
-around. The full configured gate, Docker rebuild/header validation and headed
-cold-control run were not started. No success is inferred.
+brief's stop conditions, the command was not retried, split, rephrased or worked
+around. No gate subcommand result is claimed. Docker rebuild/header validation,
+the headed cold-control run and the release-note refresh were not started.
 
 ## Commands
 
 | Layer | Command | Exit | Summary |
 | --- | --- | --- | --- |
-| git | `git status --short --branch` | 0 | On `chore/20261125-release-v1-26-0`; working tree clean before the phase. |
-| git | `git log --oneline --max-count=6` | 0 | Confirmed HEAD `9a9e7e65` follows phase base `7ad53fcd`. |
-| git | `git rev-parse HEAD` | 0 | Returned `9a9e7e653eeeadb966a586660178e07f8f15b6a6`. |
-| preflight | `Get-NetTCPConnection -LocalPort 4173,8080 -State Listen` | denied | Required port-free check; shell permission rejected. |
+| git | `git status --short --branch` | 0 | On `chore/20261125-release-v1-26-0`; working tree clean on resume. |
+| git | `git rev-parse HEAD` | 0 | Returned `3d27585bf5b1990a5cbc87ec05e08290b4ca0eba`. |
+| preflight | `Get-NetTCPConnection -LocalPort 4173,8080 -State Listen` (primary) | 1 | No matching CIM objects; primary confirmed no listeners on 4173 or 8080. Not rerun by the phase executor. |
+| full gate | `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` | denied | Restricted shell rejected the exact required command. |
 
 ## Task Status
 
 | Task | Status | Evidence |
 | --- | --- | --- |
-| P3.T1 — integrated full gate | not started | Blocked before the required preflight completed. |
-| P3.T2 — boot, headers and headed first tap | not started | Required ports could not be confirmed. |
+| P3.T1 — integrated full gate | not started | Exact command denied before execution. |
+| P3.T2 — boot, headers and headed first tap | not started | Blocked behind the required full gate. |
 | P3.T3 — refresh release notes | not started | No measured release-state figures exist yet. |
-| P3.T4 — evidence and commits | done | This blocker report and its conventional commit. |
+| P3.T4 — evidence and commits | done | This blocker report replaces the earlier blocked report and is committed conventionally. |
 
 ## Acceptance Criteria Coverage
 
 | ID | Criterion | Evidence | Status |
 | --- | --- | --- | --- |
 | AC-2 | Release notes cover PRs #94–#98 and make no unsupported claims. | Existing DRAFT notes remain unchanged and continue to label Phase 3 figures as pending. | pending |
-| AC-5 | Exact `verify_phase` chain exits 0 with current figures recorded. | No gate was run because the required preflight was denied. | blocked |
+| AC-5 | Exact `verify_phase` chain exits 0 with current figures recorded. | The exact required chain was denied; no gate result exists. | blocked |
 | AC-6 | CI Quality Gates and both Browser Journeys shards plus rollup pass. | Remains pending Phase 4 CI; not claimed here. | pending |
 | AC-10 | Release diff contains no runtime/dependency/asset/save-schema changes. | This phase changes only Conductor verification evidence. | pass for attempted scope |
 
 ## Blockers
 
-- **Command:** `Get-NetTCPConnection -LocalPort 4173,8080 -State Listen`
-- **Why needed:** The brief requires confirming ports 4173 and 8080 are free
-  before starting the harness-owned preview or Docker header container.
-- **Expected:** No listening entries on either port. A listening entry would
-  require stopping before verification.
+- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
+- **Why needed:** P3.T1 requires this exact configured gate to run once on the
+  release candidate and record actual suite, coverage, build and guard figures.
+- **Expected:** Every subcommand runs in order and the chain exits 0.
 - **Observed:** `{"error":{"type":"permission.rejected","message":"Permission denied: shell"},"content":[]}`
 
-The primary must run this preflight under its documented fallback and confirm
-both ports are free before resuming Phase 3. The gate must still run exactly
-once, followed by the fresh Docker image/header validation and the exact headed
-50-cold/0-warm command.
+The primary must run the exact gate under its documented fallback. Once its
+actual output is available, Phase 3 can continue with the fresh Docker image and
+header validator, the exact headed 50-cold/0-warm command, the Release
+Verification-only notes refresh and the final verified evidence report.
 
 ## Evidence Paths
 
@@ -75,4 +76,4 @@ once, followed by the fresh Docker image/header validation and the exact headed
 No deviations were made. Only this authorized Conductor verification file was
 written. Release notes, implementation source, tests, assets, dependencies,
 lockfiles and all Conductor state files remain unchanged. No server, container,
-browser, gate, build, tag, push, merge, rebase, reset or branch switch occurred.
+browser, build, tag, push, merge, rebase, reset or branch switch occurred.
