@@ -1,5 +1,7 @@
 # Conductor Roadmap
 
+<!-- next-rm-id: 5 -->
+
 > Planned and future work. The roadmap stores **intent** — ordering, priority,
 > and dependencies — not live state. `conductor-status` joins every entry whose
 > `track` column is filled to that track's real metadata and registry state, so
@@ -22,7 +24,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-3 | Browser matrix delivered 2026-11-25 with WebKit, Firefox and mobile Chromium/touch emulation (track `20261125-browser-matrix`); physical iOS Safari, Android Chrome and Fire tablet validation remains a separate manual gate | chore | medium | — | `20261125-browser-matrix` | user |
 
 ## Later
 
