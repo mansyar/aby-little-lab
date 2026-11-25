@@ -47,8 +47,11 @@
 - **Covers:** NFR-4, AC-8
 - **Touches:** `conductor/tracks/20261126-retention-proxy/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** Exact configured gate and CRLF-aware whitespace check passed on primary rerun at `ce3768da`; scope audit confirmed documentation/Conductor-only diff; integrated evidence committed.
+- **Checkpoint:** `ce3768dab7f27a0725e628d5a15a44a0889740c2`
+- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/integrated.md`
 
-- [ ] **P3.T1: Run the exact configured gate** — covers: AC-8
-- [ ] **P3.T2: Run docs validation and CRLF-aware whitespace check** — covers: NFR-4, AC-8
-- [ ] **P3.T3: Audit diff scope and write integrated evidence** — covers: NFR-1, NFR-4, AC-8
+- [x] **P3.T1: Run the exact configured gate** — covers: AC-8
+- [x] **P3.T2: Run docs validation and CRLF-aware whitespace check** — covers: NFR-4, AC-8
+- [x] **P3.T3: Audit diff scope and write integrated evidence** — covers: NFR-1, NFR-4, AC-8
