@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-10, FR-12, NFR-1, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-12
 - **Touches:** `package.json`, `pnpm-lock.yaml` only if required for consistency, `README.md` (Documentation index link only), `docs/release-notes-v1.26.1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm install --frozen-lockfile`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Bump the release version** — covers: FR-1, AC-1, NFR-1
   - Run `pnpm version 1.26.1 --no-git-tag-version`.
