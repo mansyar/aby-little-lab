@@ -126,20 +126,22 @@
 - **Covers:** FR-9, FR-11, FR-12, NFR-3, NFR-5, NFR-6, NFR-7, AC-9, AC-11
 - **Touches:** `docs/release-notes-v1.26.1.md`, `docs/device-testing-checklist.md` only if a device pass is executed, Conductor verification/state, git tag
 - **Verification:** recorded device policy; no tag collision; tag on merged `master` HEAD; tag CI green; live URL/build/version verified; `node scripts/validate-docs.js`; CRLF-aware whitespace check
-- **Status:** pending
+- **Status:** verified
+- **Result:** immutable `v1.26.1` tag pushed on merge commit `ce88cb7b`; tag run `45642802812` passed Quality Gates, both Chromium shards, all three engine jobs, the rollup and Coolify; live shell `index-CzNKiaF1.js` verified byte-identical and contains `1.26.1`; device smoke remains an accepted gap.
+- **Checkpoint:** `ce88cb7b`
 
-- [ ] **P5.T1: Record the targeted device-smoke policy** — covers: FR-9, FR-12, AC-9
+- [x] **P5.T1: Record the targeted device-smoke policy** — covers: FR-9, FR-12, AC-9
   - Record `SKIPPED — accepted gap`; no physical-device, iOS Safari, Android Chrome or Fire tablet pass is claimed.
-- [ ] **P5.T2: Preflight the tag** — covers: FR-11, NFR-5, AC-11
+- [x] **P5.T2: Preflight the tag** — covers: FR-11, NFR-5, AC-11
   - Fetch `master`; confirm the release merge is HEAD and the tree is clean.
   - Confirm `v1.26.1` exists neither locally nor on origin.
-- [ ] **P5.T3: Create and push the tag using the recorded pre-authorization** — covers: FR-11, NFR-5, AC-11
+- [x] **P5.T3: Create and push the tag using the recorded pre-authorization** — covers: FR-11, NFR-5, AC-11
   - Annotate `v1.26.1` on merged `master` HEAD.
   - Never move the tag after push; stop if any precondition from P5.T2 fails.
-- [ ] **P5.T4: Verify tag CI and deployment** — covers: FR-8, FR-11, AC-8, AC-11
+- [x] **P5.T4: Verify tag CI and deployment** — covers: FR-8, FR-11, AC-8, AC-11
   - Require Quality Gates, both Chromium shards, all three engine jobs, the rollup and Coolify to pass.
   - Verify the live URL serves the release build and reports `1.26.1`.
-- [ ] **P5.T5: Finalize notes and close the ship gate** — covers: FR-2, FR-11, FR-12, NFR-3, NFR-7, AC-11
+- [x] **P5.T5: Finalize notes and close the ship gate** — covers: FR-2, FR-11, FR-12, NFR-3, NFR-7, AC-11
   - Flip `DRAFT` to `FINAL`; record tag commit, CI run, deploy result and device policy.
   - Follow the post-tag finalization procedure below; cite the v1.25.0/v1.26.0 precedents.
 
