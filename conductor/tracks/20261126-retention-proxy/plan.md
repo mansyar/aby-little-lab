@@ -32,7 +32,7 @@
 - **Covers:** FR-7, NFR-5, AC-7
 - **Touches:** `conductor/roadmap.md`
 - **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Link RM-4 to this track** — covers: FR-7, AC-7
 - [ ] **P2.T2: Reference the protocol from the §10.9 risk** — covers: FR-7, NFR-5, AC-7
