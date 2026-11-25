@@ -176,15 +176,15 @@
 - **Covers:** NFR-2
 - **Touches:** `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R2.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R2.T1: Add NFR-2 to Phase R1 coverage** — covers: NFR-2
+- [x] **R2.T1: Add NFR-2 to Phase R1 coverage** — covers: NFR-2
   - Make the plan's phase-level `Covers` list agree with R1.T5 and the reviewer's round-2 finding.
-- [ ] **R2.T2: Verify and record the final mapping fix** — covers: NFR-2
+- [x] **R2.T2: Verify and record the final mapping fix** — covers: NFR-2
   - Run the exact gate and whitespace check, record `verification/phase-R2.md`, and return to review.
 
-**Result:** pending
-**Checkpoint:** pending
+**Result:** verified
+**Checkpoint:** `1342b760`
 **Evidence:** `conductor/tracks/20261125-release-v1-26-0/verification/phase-R2.md`
 
 ## Rollback Strategy
