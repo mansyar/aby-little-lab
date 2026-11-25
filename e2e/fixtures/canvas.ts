@@ -203,6 +203,12 @@ const TICK_FRAMES = 2;
 export const HOLD_FRAME_BUDGET = 300;
 
 /**
+ * High-refresh engines can consume the frame budget in less than the real
+ * 3000 ms parental hold, so both limits must elapse before a hold is lost.
+ */
+const HOLD_MIN_ELAPSED_MS = 3_000;
+
+/**
  * The wall-clock ceiling for a hold, so a runner slow enough to need minutes
  * fails as a frames message instead of timing the journey out from underneath.
  */
@@ -270,14 +276,15 @@ function stalled(where: string): Error {
  * #79). Waiting for the state instead of a duration makes the journey
  * independent of how fast the machine renders.
  *
- * The wait is bounded by frames ({@link HOLD_FRAME_BUDGET}) rather than seconds,
+ * The wait needs both the frame budget ({@link HOLD_FRAME_BUDGET}) and
+ * {@link HOLD_MIN_ELAPSED_MS} of wall-clock time before calling a press lost,
  * and it fails three different ways so the message names the cause:
  *
  * - the canvas stops rendering mid-hold - `the canvas stopped ticking`;
- * - the press has had every frame a hold can need and the state still has not
- *   arrived - that is a lost press or a state bug, not a slow runner;
- * - a runner so slow that the frames alone take {@link HOLD_CEILING_MS}, which
- *   fails in frames rather than letting the journey time out.
+ * - the press has had every frame and the full minimum time a hold can need and
+ *   the state still has not arrived - that is a lost press or a state bug;
+ * - a runner so slow that the hold alone reaches {@link HOLD_CEILING_MS}, which
+ *   fails with its elapsed time rather than letting the journey time out.
  *
  * The hold also starts only once the canvas is provably ticking, because a press
  * sent into a page that has not painted yet is a press nothing can count.
@@ -309,11 +316,14 @@ export async function holdCanvasUntil(
       if (await reached()) return;
 
       const elapsed = Date.now() - started;
-      if (seen >= frames || elapsed >= HOLD_CEILING_MS) {
+      if (
+        (seen >= frames && elapsed >= HOLD_MIN_ELAPSED_MS) ||
+        elapsed >= HOLD_CEILING_MS
+      ) {
         throw new Error(
-          `${where} did not reach its state after ${seen} frames in ${elapsed} ms ` +
-            `(${Math.round(seen / (elapsed / 1000))} fps): a hold that is still being counted would ` +
-            `have landed by ${frames} frames`,
+          `${where} did not reach its state after ${seen} frames and ${elapsed} ms ` +
+            `(${Math.round(seen / (elapsed / 1000))} fps): a hold counted for both ${frames} frames ` +
+            `and at least ${HOLD_MIN_ELAPSED_MS} ms would have landed`,
         );
       }
     }
