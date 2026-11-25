@@ -73,6 +73,8 @@ pnpm test:e2e:matrix             # all three matrix engines
 
 Every command builds `dist` and uses the preview on `127.0.0.1:4173`; run them sequentially because they share that port. Local retries are zero. One Chromium journey can be selected with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. These runs validate bundled engines and emulated touch, not iOS Safari, Android Chrome, Silk/Fire tablet or physical hardware; the real HTTPS install, landscape, offline, audio and first-tap checks remain the manual release gate in the [device checklist](docs/device-testing-checklist.md). Details and historical measurements: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
 
+Phase 4 adds no dependency, lockfile, asset, runtime, save-schema, game-rule, content or network-behavior change; it documents the existing validation boundary. The earlier smoke-proven compatibility repairs were silent degradation when `AudioContext` is absent and shared texture ownership, not physical-device evidence.
+
 ## Code Quality
 
 ```bash
