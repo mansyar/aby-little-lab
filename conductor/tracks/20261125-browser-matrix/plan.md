@@ -4,8 +4,8 @@
 
 - **Goal:** Playwright exposes Chromium plus WebKit, Firefox, and mobile Chromium/touch, with only the core smoke selected outside Chromium.
 - **Depends on:** none
-- **Covers:** FR-1, FR-2, FR-3, FR-7, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-9
-- **Touches:** `playwright.config.ts`, `package.json`, `e2e/**`
+- **Covers:** FR-1, FR-2, FR-3, FR-7, FR-9, NFR-4, NFR-6, AC-1, AC-2, AC-3, AC-4, AC-9, AC-11
+- **Touches:** `playwright.config.ts`, `package.json`, `e2e/**`, `src/audio/AudioManager.ts`, `src/__tests__/audio/AudioManager.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
 - **Status:** in_progress
 
@@ -15,6 +15,7 @@
 - [ ] **P1.T2: Isolate the core smoke and persistence check** — covers: FR-2, FR-3, AC-3, AC-4
 - [ ] **P1.T3: Add reproducible local commands** — covers: FR-7, AC-9
 - [ ] **P1.T4: Keep fixtures portable across engines** — covers: NFR-4
+- [ ] **P1.T5: Repair smoke-proven engine portability defects** — covers: FR-9, NFR-6, AC-11
 
 ## Phase 2: CI matrix and blocking rollup
 
