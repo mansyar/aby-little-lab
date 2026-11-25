@@ -66,7 +66,7 @@ measurement.
 | AC-5 | pass | Exact gate and all local release checks above. |
 | AC-6 | pending | Release PR/merge CI is Phase 4. |
 | AC-7 | pending | Targeted device policy is Phase 5. |
-| AC-8 | pending | Strict review and approved merge are Phase 4. |
+| AC-8 | review PASS; merge pending | Strict review passed in round 3 with F1–F5 closed; owner-approved merge is Phase 4. |
 | AC-9 | pending | Explicit tag/deploy approval is Phase 5. |
 | AC-10 | pass | Release diff contains only package version, release docs, roadmap truth and Conductor state/evidence; no runtime/dependency/asset/schema change. |
 
@@ -88,6 +88,16 @@ was removed. The exact gate then passed twice on the corrected release tree.
 Across repeated coverage runs, statements ranged from 97.08% to 97.10% and
 branches from 90.92% to 90.96%; functions stayed 96.35% and lines 98.23%. The
 release notes record that measured range rather than implying false precision.
+
+## Post-review Revalidation
+
+After strict-review fixes R1 and R2, the exact configured gate passed again at
+`9b323276` and `67fb29b5`. No non-Conductor file changed after the verified fix
+head. The reviewer independently reran documentation validation at final head
+`fe63ee15` (5/5), confirmed clean whitespace and returned PASS in round 3 with
+F1–F5 closed and no new findings. Post-review doc sync found no living-document
+change necessary; CI, device, tag, deploy and final notes remain assigned to
+their explicit later gates.
 
 ## Evidence Paths
 
