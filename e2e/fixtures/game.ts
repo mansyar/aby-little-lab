@@ -461,7 +461,7 @@ export async function launchGame(page: Page, index: number, sceneKey: string): P
     if (!first) throw new Error("the hub published no tiles to swipe from");
 
     const before = tiles.map((candidate) => candidate.id);
-    await dragCanvas(page, first, { x: first.x * 0.25, y: first.y }, { steps: 12 });
+    await dragCanvas(page, first, { x: first.x * 0.25, y: first.y });
     await expect
       .poll(
         async () => {
