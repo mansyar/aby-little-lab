@@ -142,7 +142,7 @@
 - **Covers:** FR-2, FR-6, FR-9, NFR-5, AC-3, AC-6
 - **Touches:** `docs/release-notes-v1.26.0.md`, `conductor/tracks/20261125-release-v1-26-0/spec.md`, `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Correct the Known Issues roadmap destination** — covers: FR-2
   - Replace the `conductor/product.md §10` pointer with `conductor/roadmap.md §10`.
