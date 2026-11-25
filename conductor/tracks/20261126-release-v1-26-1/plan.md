@@ -59,7 +59,7 @@
 - **Goal:** prove the exact release candidate is healthy and refresh time-sensitive performance evidence.
 - **Depends on:** Phase 2
 - **Covers:** FR-2, FR-6, FR-7, FR-8, FR-12, NFR-2, NFR-3, NFR-4, NFR-7, AC-2, AC-6, AC-7, AC-8, AC-12
-- **Touches:** `docs/release-notes-v1.26.1.md`, `docs/perf-baseline.md` only if measured figures differ, Conductor verification files, and for P3.T6 only the narrowly scoped fix-forward source/test files identified by the reproduced CI failure
+- **Touches:** `README.md` and `docs/TDD.md` only for living count truth, `docs/release-notes-v1.26.1.md`, `docs/perf-baseline.md` only if measured figures differ, Conductor verification files, and for P3.T6 only the narrowly scoped fix-forward source/test files identified by the reproduced CI failure
 - **Verification:**
   - `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
   - `pnpm install --frozen-lockfile`
@@ -91,6 +91,9 @@
   - Diagnose and apply one narrowly scoped, reviewed patch that closes the reproduced red check without weakening an assertion, threshold, sample count, or gate; this is the sole exception to NFR-1/AC-12.
   - Add a regression test for the defect where practical, rerun the exact gate and all four browser projects with zero local retries, and record raw evidence.
   - Do not accept retry-only passes or filter generic console errors; PR CI must be green before merge and tagging.
+- [ ] **P3.T7: Refresh living suite counts after the fix-forward patch** — covers: FR-12, NFR-4, AC-12
+  - The two AudioManager regression tests raise living truth from 158 files / 3,404 tests to 158 files / 3,406 tests.
+  - Update only living count and coverage claims in `README.md`, `docs/TDD.md` and `docs/perf-baseline.md`; preserve historical records.
 
 ## Phase 4: Review, PR and merge
 
