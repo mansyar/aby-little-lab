@@ -149,7 +149,7 @@
 
 - **Goal:** close all four strict-review findings without expanding release scope.
 - **Depends on:** Review round 1
-- **Covers:** FR-2, FR-6, FR-9, NFR-5, AC-3, AC-6
+- **Covers:** FR-2, FR-6, FR-9, NFR-2, NFR-5, AC-3, AC-6
 - **Touches:** `docs/release-notes-v1.26.0.md`, `conductor/tracks/20261125-release-v1-26-0/spec.md`, `conductor/tracks/20261125-release-v1-26-0/plan.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-1.md`, `conductor/tracks/20261125-release-v1-26-0/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; re-review
 - **Status:** verified
