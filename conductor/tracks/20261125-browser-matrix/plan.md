@@ -99,11 +99,13 @@ Evidence: `verification/phase-4.md` — documentation validation and the exact c
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11
 - **Touches:** `conductor/tracks/20261125-browser-matrix/verification/**`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** Exact gate passed (158 files / 3,404 tests; coverage 97.08 / 90.89 / 96.35 / 98.23). Roster was 50 tests / 20 files. Chromium 26/26, WebKit 8/8, Firefox 8/8 and mobile Chromium 8/8 all passed locally with zero retries. PR CI and physical-device checks remain pending.
+- **Checkpoint:** `76790f9f`
 
 ### Tasks
 
-- [ ] **P5.T1: Run the final Chromium suite and three-engine smoke** — covers: AC-1, AC-2, AC-3, AC-7
-- [ ] **P5.T2: Record engine profiles, versions, durations, and retries** — covers: FR-6, NFR-5, AC-7
-- [ ] **P5.T3: Inspect the final scope and project selection** — covers: FR-3, FR-9, NFR-1, NFR-7, AC-4, AC-11
-- [ ] **P5.T4: Write integrated evidence and identify the PR CI gate** — covers: AC-5, AC-6, AC-8, AC-9, AC-10
+- [x] **P5.T1: Run the final Chromium suite and three-engine smoke** — covers: AC-1, AC-2, AC-3, AC-7
+- [x] **P5.T2: Record engine profiles, versions, durations, and retries** — covers: FR-6, NFR-5, AC-7
+- [x] **P5.T3: Inspect the final scope and project selection** — covers: FR-3, FR-9, NFR-1, NFR-7, AC-4, AC-11
+- [x] **P5.T4: Write integrated evidence and identify the PR CI gate** — covers: AC-5, AC-6, AC-8, AC-9, AC-10
