@@ -75,8 +75,11 @@ function createHarness() {
   const artScheduler = new FakeScheduler();
   const chunkCalls: string[] = [];
   const queuedSvg: Array<{ key: string; dataUri: string }> = [];
+  const queueAttempts: Array<{ key: string; dataUri: string }> = [];
   const settledHandlers: Array<() => void> = [];
   const delays: Array<{ ms: number; callback: () => void; removed: boolean }> = [];
+  let queueResult = true;
+  let loadStarts = 0;
   let progress: PrewarmProgress = {};
   let timeUp = false;
   let launching = false;
@@ -113,7 +116,10 @@ function createHarness() {
     resolveArtSvg: (entry) => svgImpl(entry),
     isPresent: (key) => present.has(key),
     queueSvg: (entry, dataUri) => {
+      queueAttempts.push({ key: entry.key, dataUri });
+      if (!queueResult) return false;
       queuedSvg.push({ key: entry.key, dataUri });
+      return true;
     },
     onLoadSettled: (done) => {
       settledHandlers.push(done);
@@ -122,7 +128,9 @@ function createHarness() {
       const index = settledHandlers.indexOf(done);
       if (index >= 0) settledHandlers.splice(index, 1);
     },
-    startLoad: () => {},
+    startLoad: () => {
+      loadStarts += 1;
+    },
     delayStart: (ms, callback) => {
       const rec = { ms, callback, removed: false };
       delays.push(rec);
@@ -142,9 +150,16 @@ function createHarness() {
     artScheduler,
     chunkCalls,
     queuedSvg,
+    queueAttempts,
     settledHandlers,
     delays,
+    get loadStarts() {
+      return loadStarts;
+    },
     present,
+    setQueueResult: (next: boolean) => {
+      queueResult = next;
+    },
     setProgress: (next: PrewarmProgress) => {
       progress = next;
     },
@@ -166,6 +181,13 @@ function createHarness() {
       armed.callback();
     },
     fireSettled: () => {
+      const key = queuedSvg.at(-1)?.key;
+      if (key) present.add(key);
+      const handler = settledHandlers.at(-1);
+      if (!handler) throw new Error("the controller registered no load handler");
+      handler();
+    },
+    fireLoadFailed: () => {
       const handler = settledHandlers.at(-1);
       if (!handler) throw new Error("the controller registered no load handler");
       handler();
@@ -337,6 +359,48 @@ describe("createHubPrewarm", () => {
     await settle();
 
     expect(harness.queuedSvg.map((entry) => entry.key)).toEqual(["k1", "k2"]);
+  });
+
+  it("resolves an already-owned key without starting a loader or waiting for settlement", async () => {
+    const harness = createHarness();
+    harness.setQueueResult(false);
+    const controller = createHubPrewarm({
+      ...harness.deps,
+      keysByGame: { "g-a": [{ gameId: "g-a", key: "k1", size: 256 }] },
+    });
+
+    controller.syncPrewarm();
+    harness.fireDelay();
+    harness.artScheduler.fireNext();
+    await settle();
+
+    expect(harness.queueAttempts.map((entry) => entry.key)).toEqual(["k1"]);
+    expect(harness.queuedSvg).toHaveLength(0);
+    expect(harness.settledHandlers).toHaveLength(0);
+    expect(harness.loadStarts).toBe(0);
+  });
+
+  it("retries a failed prewarm raster on the next pass", async () => {
+    const harness = createHarness();
+    const controller = createHubPrewarm({
+      ...harness.deps,
+      keysByGame: { "g-a": [{ gameId: "g-a", key: "k1", size: 256 }] },
+    });
+
+    controller.syncPrewarm();
+    harness.fireDelay();
+    harness.artScheduler.fireNext();
+    await settle();
+    expect(harness.queuedSvg).toHaveLength(1);
+
+    harness.fireLoadFailed();
+    await settle();
+    controller.restartPrewarm();
+    harness.artScheduler.fireNext();
+    await settle();
+
+    expect(harness.queueAttempts.map((entry) => entry.key)).toEqual(["k1", "k1"]);
+    expect(harness.queuedSvg).toHaveLength(2);
   });
 
   it("restart resumes with already-warm keys skipped", async () => {

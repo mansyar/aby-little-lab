@@ -11,6 +11,7 @@ import {
   music,
   numerals,
   preloadArtGroups,
+  queueArtTexture,
   shadows,
   shapes,
   toys,
@@ -159,6 +160,90 @@ describe("preloadArtGroups", () => {
 
     expect(first.load.svg).toHaveBeenCalledTimes(24);
     expect(second.load.svg).toHaveBeenCalledTimes(0);
+  });
+
+  it("does not queue a prewarm-reserved key through a game preload", () => {
+    const prewarm = createScene();
+    const game = createScene();
+    const dataUri = "data:image/svg+xml;base64,c2hhcGU=";
+
+    expect(
+      queueArtTexture(asScene(prewarm), "shape_circle", dataUri, { placeholderOnError: false }),
+    ).toBe(true);
+    preloadArtGroups(asScene(game), [shapes]);
+
+    expect(registeredKeys(game)).toHaveLength(23);
+    expect(registeredKeys(game)).not.toContain("shape_circle");
+    expect(registeredKeys(prewarm)).toEqual(["shape_circle"]);
+  });
+
+  it("returns false without attaching listeners when the texture already exists", () => {
+    const scene = createScene();
+    scene.loadedKeys.add("shape_circle");
+
+    expect(
+      queueArtTexture(asScene(scene), "shape_circle", "data:image/svg+xml;base64,c2hhcGU="),
+    ).toBe(false);
+    expect(scene.load.svg).not.toHaveBeenCalled();
+    expect(scene.load.on).not.toHaveBeenCalled();
+  });
+
+  it.each(["filecomplete", "loaderror"] as const)(
+    "releases prewarm ownership after %s",
+    (event) => {
+      const first = createScene();
+      const second = createScene();
+      const dataUri = "data:image/svg+xml;base64,c2hhcGU=";
+
+      expect(
+        queueArtTexture(asScene(first), "shape_circle", dataUri, { placeholderOnError: false }),
+      ).toBe(true);
+      emitLoaderEvent(
+        first,
+        event,
+        event === "loaderror" ? { key: "shape_circle" } : "shape_circle",
+      );
+
+      expect(queueArtTexture(asScene(second), "shape_circle", dataUri)).toBe(true);
+      expect(second.load.svg).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("releases prewarm ownership when its scene shuts down", () => {
+    const first = createScene();
+    const second = createScene();
+    const dataUri = "data:image/svg+xml;base64,c2hhcGU=";
+
+    expect(
+      queueArtTexture(asScene(first), "shape_circle", dataUri, { placeholderOnError: false }),
+    ).toBe(true);
+    first.events.emit("shutdown");
+
+    expect(queueArtTexture(asScene(second), "shape_circle", dataUri)).toBe(true);
+    expect(second.load.svg).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves failed prewarm art absent and retryable without a placeholder", () => {
+    const scene = createScene();
+    const dataUri = "data:image/svg+xml;base64,c2hhcGU=";
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      expect(
+        queueArtTexture(asScene(scene), "shape_circle", dataUri, { placeholderOnError: false }),
+      ).toBe(true);
+      emitLoaderEvent(scene, "loaderror", { key: "shape_circle" });
+      emitLoaderEvent(scene, "complete");
+
+      expect(scene.textures.exists("shape_circle")).toBe(false);
+      expect(scene.textures.createCanvas).not.toHaveBeenCalled();
+      expect(warn).not.toHaveBeenCalled();
+      expect(
+        queueArtTexture(asScene(scene), "shape_circle", dataUri, { placeholderOnError: false }),
+      ).toBe(true);
+      expect(scene.load.svg).toHaveBeenCalledTimes(2);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it("registers a key once when the same scene queues it twice mid-flight", () => {

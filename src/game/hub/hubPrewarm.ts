@@ -62,8 +62,8 @@ export interface HubPrewarmDeps {
   resolveArtSvg(entry: ArtKeyEntry): Promise<string | undefined>;
   /** True when `key` already lives in the game-wide TextureManager. */
   isPresent(key: string): boolean;
-  /** Queues one rasterized key on the scene loader at the key's tier. */
-  queueSvg(entry: ArtKeyEntry, dataUri: string): void;
+  /** Queues one rasterized key; false means another owner already has it in flight. */
+  queueSvg(entry: ArtKeyEntry, dataUri: string): boolean;
   /** Subscribes `done` to the loader settling (completion and failure). */
   onLoadSettled(done: () => void): void;
   /** Unsubscribes a `done` previously added with `onLoadSettled`. */
@@ -211,21 +211,27 @@ export function createHubPrewarm(deps: HubPrewarmDeps): HubPrewarmController {
    * would load at in its game scene, then settles once the loader reports the
    * file done — so the engine paces the next key a tick at a time. Resolves
    * without queueing when the key landed meanwhile, when its markup cannot be
-   * resolved, or when the pass was cancelled while resolving (FR-5).
+   * resolved, when another scene owns the in-flight key, or when the pass was
+   * cancelled while resolving (FR-5). A failed idle load rejects so the engine
+   * can leave the absent raster retryable on the next pass.
    */
   function queueArtKey(entry: ArtKeyEntry, id: number): Promise<void> {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       void deps.resolveArtSvg(entry).then((svg) => {
         if (id !== passId || svg === undefined || deps.isPresent(entry.key)) {
           resolve();
           return;
         }
+        if (!deps.queueSvg(entry, toDataUri(svg))) {
+          resolve();
+          return;
+        }
         const done = (): void => {
           deps.offLoadSettled(done);
-          resolve();
+          if (deps.isPresent(entry.key)) resolve();
+          else reject(new Error(`art prewarm failed to load ${entry.key}`));
         };
         deps.onLoadSettled(done);
-        deps.queueSvg(entry, toDataUri(svg));
         deps.startLoad();
       });
     });

@@ -46,9 +46,34 @@ pnpm test
 pnpm test:coverage
 ```
 
-Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,395 tests across 158 files**, all green (verified 2026-11-24).
+Coverage thresholds are set to 95% lines, 88% functions, 85% branches, and 90% statements in `vite.config.ts`; CI and those thresholds are the source of truth, and the counts here are a snapshot. Current state: **3,404 tests across 158 files**, all green (verified 2026-11-25).
 
-Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and then drives it in Chromium with Playwright: boot, all 24 launches (driven as two parallel halves), three rounds on each mechanic family, the sticker award, the parental gate, the Learning Progress overview, the daily cap, a backup exported and restored into an empty browser, an offline relaunch and a device whose storage refuses every write. It is the layer that sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. CI runs it as two `Browser Journeys` shards (13 cases each, two workers per shard on its own four-vCPU runner and its own preview server, a 5 min budget: 2.5 and 3.7 min measured, reported by one aggregation check of the same name); one journey runs locally with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. Details, retry policy and the mutation proof: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
+Above the unit layer sits the browser journey suite. `pnpm test:e2e` builds `dist` and drives the full Chromium roster: 26 cases across 19 specs, including boot, all 24 launches, the mechanic families, sticker and persistence flows, the parental gate, backup/restore, offline relaunch and storage-failure recovery. It sees real hit areas on a letterboxed canvas, real storage and service-worker behaviour, and frame timing that happy-dom cannot model. Chromium deliberately ignores `e2e/smoke/**`, so smoke-only checks cannot silently enlarge the full suite.
+
+The compatibility matrix keeps that full roster Chromium-only and gives the other engines a focused smoke:
+
+| Project | Role | Selection | Profile |
+| --- | --- | --- | --- |
+| `chromium` | Full regression suite | 26 cases / 19 specs; ignores `e2e/smoke/**` | Desktop Chromium, 1280×720 |
+| `webkit` | Safari-engine proxy | 8 cases / 6 specs | Desktop WebKit, 1280×720 |
+| `firefox` | Firefox engine coverage | 8 cases / 6 specs | Desktop Firefox, 1280×720 |
+| `mobile-chromium` | Phone-shaped Chromium/touch proxy | 8 cases / 6 specs | 844×390, `isMobile: true`, `hasTouch: true` |
+
+The six smoke files are `boot`, `launch-all`, `first-sounds`, `shape-sorter`, `offline` and `sticker-persistence`. Together they prove boot, the registry partition and all 24 launches/returns, three speech rounds, three drag rounds, an earned sticker surviving reload, and offline Hub/game relaunch. Dated local verification on 2026-11-25 recorded Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2. First-attempt results were Chromium 26/26 (3.8 min), WebKit 8/8 (1.8 min), Firefox 8/8 (2.1 min) and mobile Chromium 8/8 (2.3 min), all with zero retries. The track-PR CI run remains the authoritative release evidence.
+
+Run a project locally with:
+
+```bash
+pnpm test:e2e                    # full Chromium suite
+pnpm test:e2e:webkit             # WebKit core smoke
+pnpm test:e2e:firefox            # Firefox core smoke
+pnpm test:e2e:mobile-chromium    # mobile Chromium touch smoke
+pnpm test:e2e:matrix             # all three matrix engines
+```
+
+Every command builds `dist` and uses the preview on `127.0.0.1:4173`; run them sequentially because they share that port. Local retries are zero. One Chromium journey can be selected with `pnpm exec playwright test --project=chromium e2e/journeys/<name>.spec.ts`. These runs validate bundled engines and emulated touch, not iOS Safari, Android Chrome, Silk/Fire tablet or physical hardware; the real HTTPS install, landscape, offline, audio and first-tap checks remain the manual release gate in the [device checklist](docs/device-testing-checklist.md). Details and historical measurements: [TDD §10.5](docs/TDD.md#105-the-browser-journey-layer).
+
+Phase 4 adds no dependency, lockfile, asset, runtime, save-schema, game-rule, content or network-behavior change; it documents the existing validation boundary. The earlier smoke-proven compatibility repairs were silent degradation when `AudioContext` is absent and shared texture ownership, not physical-device evidence.
 
 ## Code Quality
 
@@ -200,9 +225,11 @@ Every response it serves also carries four security headers: a strict `Content-S
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs the `Quality Gates` job on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs`, `validate-boot` against a preview server, and `validate-headers` against the image built from the `Dockerfile`. A second job, `Browser Journeys`, runs after it on the same triggers and takes the Playwright suite through the built `dist`, so a browser failure is reported without hiding the static and unit results. Both jobs begin by classifying the pull request against its base commit: a diff that touches anything outside `conductor/`, `docs/`, `README.md` and `**/*.md` publishes `code`, and anything else publishes `doc`, where the gates job installs and runs `validate-docs` only and the browser job runs nothing but still reports. The classifier falls back to `code` whenever it cannot tell — an unknown base, an empty diff, an unfetchable fork — because a suite run wasted is minutes and a merge waved through is not recoverable. Runner versions are read from the declaration rather than written in the workflow: `pnpm/action-setup` takes its version from `packageManager` and `actions/setup-node` takes Node from `.node-version`, and `src/__tests__/guard/toolchain.test.ts` fails, naming the file and both values, if either gains a literal or drifts from the Dockerfile. Deploy is tag-gated, not merge-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
+`.github/workflows/ci.yml` runs `Quality Gates` on every pull request and on `master`/tag pushes: check, typecheck, `CI=true pnpm test`, build, then `validate-bundle`, `validate-pwa`, `validate-docs`, `validate-boot` against a preview server, and `validate-headers` against the image built from the `Dockerfile`. For code changes, two `Browser Journeys` shard jobs then run the full Chromium roster as 13 cases per shard on separate four-vCPU runners with two workers each, while `e2e-matrix` runs WebKit, Firefox and mobile Chromium in parallel after Quality Gates. Each matrix job probes the exact bundled browser version and viewport/touch profile, runs only its eight-case smoke, and publishes first-attempt counts, retries and duration. `scripts/playwright-matrix-evidence.js` then rejects any retried, flaky, skipped, unexpected or wrong-project result, or missing/wrong version evidence; a green Playwright exit after a retry is still a red matrix job. JSON reports and failure artifacts are uploaded, and the track-PR CI run remains authoritative.
 
-One-time setup: a Coolify API token with the `deploy` permission, the app's Deploy Webhook URL, the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` secrets, and branch protection requiring `Quality Gates`. Intent: [PRD §8.2](docs/PRD.md#82-deploy-path); implementation and setup steps: [TDD §11.4](docs/TDD.md#114-github-actions), [TDD §11.5](docs/TDD.md#115-container-and-host).
+The required `Browser Journeys` rollup runs with `if: always()` and needs Quality Gates, both Chromium shards and the complete engine matrix. It fails if any dependency failed, was cancelled or did not start, so one red engine cannot hide behind green siblings. Every runner job classifies the PR against its base commit: a diff outside `conductor/`, `docs/`, `README.md` and `**/*.md` publishes `code`; anything else publishes `doc`. Documentation-only PRs still report all required checks, but install no browser, build no artifact and run no journey — Quality Gates still installs dependencies and runs `validate-docs`. The classifier falls back to `code` whenever it cannot tell, because a wasted run costs minutes while a merge waved through is not recoverable. Runner versions come from `packageManager` and `.node-version`, guarded by `src/__tests__/guard/toolchain.test.ts`. Deploy remains tag-gated: `Deploy to Coolify` runs only for a `v*.*.*` tag whose commit is on `master`.
+
+One-time setup: a Coolify API token with the `deploy` permission, the app's Deploy Webhook URL, the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` secrets, and branch protection requiring both `Quality Gates` and `Browser Journeys`. Intent: [PRD §8.2](docs/PRD.md#82-deploy-path); implementation and setup steps: [TDD §11.4](docs/TDD.md#114-github-actions), [TDD §11.5](docs/TDD.md#115-container-and-host).
 
 ## Releases
 

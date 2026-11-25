@@ -3,6 +3,7 @@
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
 - [x] **Track: Release v1.26.0** - [20261125-release-v1-26-0](./archive/20261125-release-v1-26-0/index.md) - chore - high (Archived)
+- [x] **Track: Browser Compatibility Matrix** — [20261125-browser-matrix](./archive/20261125-browser-matrix/index.md) — chore — medium (Archived)
 
 ---
 

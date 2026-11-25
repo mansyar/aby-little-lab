@@ -6,6 +6,7 @@ import type { PlayTimeNudge } from "../components/PlayTimeIndicator";
 import { ProfileChip } from "../components/ProfileChip";
 import { PwaToasts } from "../components/PwaToasts";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { queueArtTexture } from "../game/art/registry";
 import type {
   E2EHubGroups,
   E2EHubPlayTime,
@@ -183,7 +184,7 @@ export class HubScene extends Phaser.Scene {
       resolveArtSvg: (entry) => this.resolveArtSvg(entry),
       isPresent: (key) => this.textures.exists(key),
       queueSvg: (entry, dataUri) =>
-        this.load.svg(entry.key, dataUri, { width: entry.size, height: entry.size }),
+        queueArtTexture(this, entry.key, dataUri, { placeholderOnError: false }),
       onLoadSettled: (done) => {
         this.load.on("complete", done);
         this.load.on("loaderror", done);

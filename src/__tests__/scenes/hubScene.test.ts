@@ -1265,6 +1265,10 @@ describe("HubScene idle art prewarm", () => {
   });
 
   afterEach(() => {
+    const scenes = new Set(mockRegistry.map((object) => object.scene));
+    for (const scene of scenes) {
+      (scene as { events?: { emit: (event: string) => void } } | null)?.events?.emit("shutdown");
+    }
     Reflect.deleteProperty(document, "visibilityState");
     idleScheduler.clear();
     artScheduler.clear();
@@ -1332,22 +1336,35 @@ describe("HubScene idle art prewarm", () => {
     }));
   }
 
-  /** Fires the most recently registered loader handler for the given event. */
+  /** Fires the registered loader handlers for the given event, like Phaser does. */
   function fireLoadEvent(scene: HubScene, event: "complete" | "loaderror"): void {
+    const key = svgQueue(scene).at(-1)?.key;
+    if (!key) throw new Error("the Hub queued no art key");
     const handlers = ((scene.load.on as MockFn).mock.calls as unknown[][]).filter(
       (call) => call[0] === event,
     );
-    const handler = handlers.at(-1)?.[1] as (() => void) | undefined;
-    if (!handler) throw new Error(`the Hub registered no load ${event} handler`);
-    handler();
+    if (handlers.length === 0) throw new Error(`the Hub registered no load ${event} handler`);
+    if (event === "complete") {
+      scene.textures.createCanvas(key);
+      const completeHandlers = ((scene.load.on as MockFn).mock.calls as unknown[][]).filter(
+        (call) => call[0] === "filecomplete",
+      );
+      for (const [, handler] of completeHandlers) (handler as (fileKey: string) => void)(key);
+    }
+    for (const [, handler] of handlers) {
+      (handler as (file?: { key: string }) => void)(event === "loaderror" ? { key } : undefined);
+    }
   }
 
   it("keeps game SVG markup out of the shell: art tables load through dynamic imports only", () => {
     // A static import would inline every game's artwork into the shell entry and
     // break the 200 kB validate-bundle budget; the lazy loaders are the only
-    // sanctioned path from the Hub to the art tables. The game-entry cue is
-    // pinned too: idle prewarm must never reach the module that creates it.
-    expect(hubSceneSource).not.toMatch(/from\s+["']\.\.\/game\/(art|storyOrderArt)/);
+    // sanctioned path from the Hub to the art tables. The shared registry owns
+    // loader bookkeeping without inlining markup; the game-entry cue is pinned
+    // too: idle prewarm must never reach the module that creates it.
+    const staticArtImports =
+      hubSceneSource.match(/from\s+["']\.\.\/game\/(?:art|storyOrderArt)[^"']*["']/g) ?? [];
+    expect(staticArtImports).toEqual(['from "../game/art/registry"']);
     expect(hubSceneSource).not.toMatch(/from\s+["']\.\.\/components\/ArtLoadingCue["']/);
     const lazyGroupImports = artGroupsSource.match(/import\("\.\.\/art\/[a-z]+"\)/g) ?? [];
     expect(lazyGroupImports).toHaveLength(12);

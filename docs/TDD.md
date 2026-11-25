@@ -88,7 +88,7 @@
 
 | Tool | Version | Where pinned |
 | --- | --- | --- |
-| Node.js | 24 | `.node-version`; the `Dockerfile` and both CI jobs read it |
+| Node.js | 24 | `.node-version`; the `Dockerfile` and CI runner jobs read it |
 | pnpm | 12.16.1 | `packageManager` in `package.json`; `corepack prepare pnpm@12.16.1` in `Dockerfile`; `pnpm/action-setup@v6` reads it in CI |
 | TypeScript | `^7.0.2` | `package.json` |
 | Phaser | `^4.2.1` | `package.json` (only runtime dependency) |
@@ -97,7 +97,7 @@
 | Vitest + `@vitest/coverage-v8` | `^5.0.5` | `package.json` |
 | happy-dom | `^21.0.4` | `package.json` |
 | Biome | `^2.6.3` | `package.json` |
-| `playwright-core` | `^1.64.1` | `package.json` — used by `scripts/validate-boot.js` only |
+| `@playwright/test` / `playwright-core` | `1.65.1` | `package.json` — browser journeys and matrix; `playwright-core` also drives `scripts/validate-boot.js` |
 | `workbox-window` | `^7.4.1` | `package.json` — `registerType: "prompt"` plumbing |
 
 `phaser` is the only entry under `dependencies`; everything else is a dev dependency.
@@ -111,7 +111,12 @@
 | `preview` | `vite preview` | `validate-boot.js` target |
 | `test` | `vitest` | local watch |
 | `test:coverage` | `vitest run --coverage` | local gate |
-| `typecheck` | `tsc --noEmit` | CI |
+| `test:e2e` | `pnpm build && playwright test --project=chromium` | full local Chromium suite |
+| `test:e2e:webkit` | `pnpm build && playwright test --project=webkit` | local WebKit smoke |
+| `test:e2e:firefox` | `pnpm build && playwright test --project=firefox` | local Firefox smoke |
+| `test:e2e:mobile-chromium` | `pnpm build && playwright test --project=mobile-chromium` | local mobile/touch smoke |
+| `test:e2e:matrix` | `pnpm build && playwright test --project=webkit --project=firefox --project=mobile-chromium` | local three-engine matrix |
+| `typecheck` | `tsc --noEmit && tsc --noEmit -p e2e/tsconfig.json` | CI |
 | `check` | `biome check` | CI |
 | `lint` | `biome lint` | local |
 | `format` | `biome format --write` | local |
@@ -1319,13 +1324,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-158 test files, 3,395 tests (verified 2026-11-24). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+158 test files, 3,404 tests (verified 2026-11-25). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-24) is statements 97.11 %, branches 90.93 %, functions 96.33 % and lines 98.25 % across 158 files and 3,395 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-25) is statements 97.08 %, branches 90.89 %, functions 96.35 % and lines 98.23 % across 158 files and 3,404 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 60 words never forces.
 
@@ -1340,7 +1345,18 @@ happy-dom supplies no canvas, no audio graph and no screen. The following are de
 
 ### 10.5 The browser journey layer
 
-`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` in Chromium and plays the game with real pointer input: 26 browser tests across 19 spec files cover boot, all 24 launches (driven as two halves in parallel workers, with a guard that the halves partition the registry), three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+`e2e/` is a second layer, not more unit tests. Playwright drives the production build through `vite preview` on `http://127.0.0.1:4173` and plays the game with real pointer input. The projects have distinct roles:
+
+| Project | Role | Selection | Profile |
+| --- | --- | --- | --- |
+| `chromium` | Full journey regression | 26 cases / 19 specs; ignores `e2e/smoke/**` | Bundled Chromium, desktop 1280×720 |
+| `webkit` | Safari-engine proxy | 8 cases / 6 specs from the core smoke | Bundled WebKit, desktop 1280×720 |
+| `firefox` | Firefox engine coverage | 8 cases / 6 specs from the core smoke | Bundled Firefox, desktop 1280×720 |
+| `mobile-chromium` | Phone-shaped Chromium/touch proxy | 8 cases / 6 specs from the core smoke | Bundled Chromium, 844×390, `isMobile: true`, `hasTouch: true` |
+
+The Chromium roster covers boot, all 24 launches (driven as two halves in parallel workers, with a guard that the halves partition the registry), three rounds on each of the seven mechanic families, sticker award, the parental gate, the Learning Progress overview, settings persistence, the daily cap, a backup carried to a second browser, a device whose storage refuses every write, an offline relaunch and a crash recovered into a working app with its log downloaded as a file. A read-only bridge installed only under `?e2e=1` is how a canvas-only UI is observed; without the parameter nothing exists and nothing behaves differently.
+
+**Core smoke selection.** The three matrix projects select exactly six files: `journeys/boot.spec.ts`, `journeys/launch-all.spec.ts`, `journeys/first-sounds.spec.ts`, `journeys/shape-sorter.spec.ts`, `journeys/offline.spec.ts` and `smoke/sticker-persistence.spec.ts`. Together they prove boot, the registry partition and all 24 game launch/return checks, three First Sounds speech rounds, three Shape Sorter drag rounds, one earned sticker surviving reload, and offline Hub/game relaunch. The full Chromium project excludes `e2e/smoke/**`; the matrix projects do not select its other journey files. Dated local verification on 2026-11-25 used Playwright 1.65.1 with bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2; the first-attempt results and durations are recorded in `conductor/tracks/20261125-browser-matrix/verification/phase-3.md`.
 
 What this layer observes that the unit layer cannot:
 
@@ -1351,24 +1367,44 @@ What this layer observes that the unit layer cannot:
 
 One journey does something no other does and acts on a file the browser produced. `backup.spec.ts` exports a save through the real download event, then hands `download.path()` — the file that actually landed on disk, never read with `fs` and never rebuilt — to the file chooser in a *second browser context*, so the restore starts from genuinely empty storage. The merge-or-replace card's two buttons are published through the bridge at the points the card draws them, so the tap is the button's own layout rather than a copied coordinate, and an empty `choices` array is how the journey tells an accepted file from a refused one.
 
-**Why it is not in `verify_phase`.** The phase gate is a ~90 s budget every phase subagent runs; this layer builds `dist` and takes minutes. It runs as its own CI job on every pull request (`Browser Journeys`, `needs: quality-gates`), so a browser failure is reported next to the static and unit results instead of replacing them.
+**Why it is not in `verify_phase`.** The phase gate is a ~90 s budget every phase subagent runs; this layer builds `dist` and takes minutes. CI therefore runs two Chromium shard jobs and the three-engine `e2e-matrix` after `quality-gates`, then aggregates them in the required `Browser Journeys` rollup. A browser failure is reported next to the static and unit results instead of replacing them, and any failed shard or engine makes the rollup red.
 
-**Run one journey locally:**
+**Run a project locally:**
 
 ```bash
-pnpm build                                  # the suite serves dist, not the dev server
+pnpm test:e2e                    # full Chromium suite
+pnpm test:e2e:webkit             # WebKit core smoke
+pnpm test:e2e:firefox            # Firefox core smoke
+pnpm test:e2e:mobile-chromium    # mobile Chromium touch smoke
+pnpm test:e2e:matrix             # all three matrix engines
+```
+
+Each command builds `dist` and starts or reuses the preview on `http://127.0.0.1:4173`; run them sequentially because they share that port. To run one Chromium journey, build first and select its file:
+
+```bash
+pnpm build
 pnpm exec playwright test --project=chromium e2e/journeys/parental-gate.spec.ts
 ```
 
-`pnpm test:e2e` builds first and runs the whole suite. `--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows.
+`--headed` watches a journey, `--debug` steps it, and `--grep <title>` selects by name. `webServer` in `playwright.config.ts` starts the preview and reuses one already on the port locally; it is pinned to `--host 127.0.0.1` because `localhost` resolves to `::1` first on Windows. Local retries are zero for every project, so a flaky first attempt fails instead of being hidden by a retry.
 
-**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the same 24 journeys can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
+**Engine emulation is not physical-device validation.** WebKit is a Safari-engine proxy, not iOS Safari; mobile Chromium is an 844×390 touch emulation, not Android Chrome, Silk or a Fire tablet. The matrix does not establish a real HTTPS/home-screen install, OS landscape behavior, offline relaunch, audio output, first-tap latency, touch accuracy or hardware performance. Those checks remain manual release gates in the [device checklist](device-testing-checklist.md#current-automated-engine-evidence-policy-2026-11-25). No physical-device pass is claimed by the automated results.
 
-**Holds are counted in frames, not seconds.** A press only becomes a hold when the game's own loop advances: the parental gate's three seconds are Phaser timer milliseconds, accumulated from a smoothed per-frame delta, so the same hold costs ~180 frames at 60 fps and about the same frames on a starved runner where it takes far longer in wall clock. Measured on the built artifact, the gate opened in 3.2 s at 73 fps, 8.2 s at 17.5 fps and 10.9 s at 18.6 fps under CDP CPU throttling of 6x and 20x — 200 to 230 frames every time. `holdCanvasUntil` in `e2e/fixtures/canvas.ts` therefore budgets the hold in frames (`HOLD_FRAME_BUDGET = 300`) and drops the old 20 s wall-clock deadline, which shrank exactly when the runner got busy and is how the backup journey failed on CI under three Playwright workers (2026-11-16, runs 43932079796, 43943297292, 43947422301), which is also why CI now runs two workers on its four-vCPU runner (`workers: isCI ? 2 : 3` in `playwright.config.ts`) and splits the roster across two runners with Playwright's own `--shard` partition (2.5 and 3.7 min per half in run 43959534246, inside NFR-2's 5 min). The halves report through one aggregation job named `Browser Journeys`, so branch protection keeps waiting on the same check and a red half turns it red rather than leaving it pending. Liveness is probed with `canvasTicks` — two consecutive `requestAnimationFrame` callbacks inside `FRAME_STALL_MS = 2_000` — once before the press and on every pass of the wait, so a canvas that stops rendering fails as `the canvas stopped ticking …`; a press that has had every frame a hold can need and still shows no state fails with the frame count and measured fps, naming a lost press rather than a slow runner. A `HOLD_CEILING_MS` backstop keeps a pathological runner from timing the journey out underneath.
+**Phase 4 scope.** This documentation phase adds no dependency, lockfile, asset, runtime, save-schema, game-rule, content or network-behavior change. It records the existing matrix rather than altering the product. The earlier smoke-proven compatibility repairs were limited to silent degradation when `AudioContext` is absent and shared texture ownership; they are historical runtime changes, not new Phase 4 behavior.
 
-**Retries.** Zero locally, two in CI, with a trace kept on the first retry. The local number is what makes the determinism claim mean anything: a flake has to fail rather than pass on the second attempt. In CI a retry absorbs a loaded runner's timing, but a run that only went green after one is a finding to chase, not a pass — the trace exists because the first attempt is the interesting one.
+**Running it against the image.** `webServer` is optional: with `E2E_BASE_URL` set, the config points `use.baseURL` at that origin and starts nothing of its own, so the full Chromium roster can be driven against the nginx container — the only server that sends the security policy, because `vite preview` sends none. The recipe is in [§11.6](#116-security-headers-and-the-serving-layer); with the variable unset every value is the preview default it was before the branch existed.
 
-**Workers and budget.** Three workers, locally and in CI, against one shared preview server. `fullyParallel: false` makes the file the unit of parallelism: the tests inside a spec run in order in one worker, and every test still gets a fresh browser context, so no journey can see another's storage or service worker. The one exception is `launch-all`'s halves, which opt into `mode: "parallel"` so the roster is not a single serial chain. Serially the suite measured 4.9 min against NFR-2's 5 min ceiling, with `launch-all` alone at 2.6 min; two workers put the wall clock at 3.0-3.1 min over ten consecutive runs, because the wall clock shrinks and the work does not. On the 2026-11-16 host the same suite measured 4.6 min on two workers, then 5.0-5.1 min once the roster reached 24 games: at two workers the floor is total work divided by two, and the 24 launches are about 200 s of that work, so halving the launch file alone could not help. With the launches split and a third worker the same suite measures **3.8-4.3 min across two runs**, a minute inside the ceiling. The budget is a CI ceiling, not a target: a new journey that pushes past it is a decision about the suite's shape, not a number to edit.
+**Holds wait for real state; frames are diagnostic.** A press only becomes a hold when the game's own loop advances: the parental gate's three seconds are Phaser timer milliseconds, accumulated from a smoothed per-frame delta, so the same hold costs ~180 frames at 60 fps and about the same frames on a starved runner where it takes far longer in wall clock. The historical measurements are preserved: the gate opened in 3.2 s at 73 fps, 8.2 s at 17.5 fps and 10.9 s at 18.6 fps under CDP CPU throttling of 6x and 20x — 200 to 230 frames every time.
+
+The old 20 s wall-clock deadline shrank exactly when the runner got busy and is how the backup journey failed on CI under three Playwright workers (2026-11-16, runs 43932079796, 43943297292, 43947422301). That incident is why CI runs two workers on its four-vCPU runner (`workers: isCI ? 2 : 3` in `playwright.config.ts`) and splits the roster across two runners with Playwright's own `--shard` partition; the historical halves took 2.5 and 3.7 min in run 43959534246, inside the then-applicable 5 min budget. Those measurements describe the superseded implementations and remain part of the incident record.
+
+The current `holdCanvasUntil` in `e2e/fixtures/canvas.ts` waits until the supplied state predicate says the press has landed. Before the press and on every pass it probes `canvasTicks` — two consecutive `requestAnimationFrame` callbacks inside `FRAME_STALL_MS = 2_000` — so a canvas that stops rendering fails as `the canvas stopped ticking …` instead of pretending a slow runner lost the press. `HOLD_FRAME_BUDGET = 300` and the observed frame/fps count are diagnostics, not a deadline. The only time ceiling is `HOLD_CEILING_MS = 90_000`, a backstop for a pathological runner; reaching it fails with the frame and elapsed-time diagnostics rather than letting the journey time out underneath.
+
+**Retries and strict evidence.** Local retries are zero for every project, so a flaky first attempt fails rather than passing on a second attempt. CI remains configured for two retries with a trace on the first retry. For each `e2e-matrix` engine job, `scripts/playwright-matrix-evidence.js` inspects the JSON report and fails on any retried attempt, retry-only pass, flaky, skipped or unexpected result, runner error, wrong project, missing report, invalid retry configuration, or missing/wrong bundled-version evidence. A green Playwright exit after a retry is therefore still a red matrix job. The Chromium shards retain the normal CI retry configuration; the track-PR CI run must record the complete first-attempt suite and matrix before it is accepted as clean evidence.
+
+**Workers and budget.** The current configuration uses three workers locally and two in CI (`workers: isCI ? 2 : 3`). Locally they share one preview server; in CI each of the two Chromium shards has its own four-vCPU runner and preview, and runs 13 cases with two workers. `fullyParallel: false` makes the file the unit of parallelism: the cases inside a spec run in order in one worker, and every case still gets a fresh browser context, so no journey can see another's storage or service worker. The one exception is `launch-all`'s halves, which opt into `mode: "parallel"` so the roster is not a single serial chain.
+
+The historical budget measurements are preserved. Serially the suite measured 4.9 min against the then-applicable 5 min ceiling, with `launch-all` alone at 2.6 min; two workers put the wall clock at 3.0-3.1 min over ten consecutive runs, because the wall clock shrinks and the work does not. On the 2026-11-16 host the same suite measured 4.6 min on two workers, then 5.0-5.1 min once the roster reached 24 games: at two workers the floor is total work divided by two, and the 24 launches are about 200 s of that work, so halving the launch file alone could not help. With the launches split and a third worker the same suite measured **3.8-4.3 min across two runs**, a minute inside that ceiling. Dated local verification on 2026-11-25 recorded the full Chromium roster at 3.8 min and each matrix smoke at 1.8-2.3 min, all first-attempt with zero retries. CI keeps a 15-minute job timeout; the budget is a ceiling, not a target: a new journey that pushes past it is a decision about the suite's shape, not a number to edit.
 
 **The suite must be seen to fail.** A layer that has never gone red is not evidence. The proof is a surgical mutation — one tile's hit area shrunk to a 1x1 point — which must turn the launch journey red, after which the mutation is reverted and the suite must be green again.
 
@@ -1421,14 +1457,20 @@ VitePWA({
 | Job | Runs on | Steps |
 | --- | --- | --- |
 | Quality Gates | `pull_request` (opened, synchronize, reopened) and `push` to `master` or a `v*.*.*` tag | checkout, `Classify the change` (publishes `tier` as the `changes` step output), `pnpm/action-setup@v6` (reads `packageManager`: 12.16.1), `setup-node@v7` (reads `.node-version`: Node 24, pnpm store cached), `pnpm install --frozen-lockfile`, `node scripts/validate-docs.js`, then — `tier == 'code'` only — `pnpm run check`, `pnpm run typecheck`, `CI=true pnpm test`, `pnpm run build`, `node scripts/validate-bundle.js`, `node scripts/validate-pwa.js`, `vite preview` on port 4173 and `node scripts/validate-boot.js`, then `docker build -t aby-little-lab:headers .` and `node scripts/validate-headers.js` (the step fails with `::error::Docker is required…` when the runner has no Docker rather than skipping, so the tier's claim stays true) |
-| Browser Journeys | same triggers, `needs: quality-gates`, `timeout-minutes: 15` | checkout, `Classify the change` (the same script, its own `tier` output), pnpm and Node from the declaration, then — `tier == 'code'` only — `pnpm install --frozen-lockfile`, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e` (builds `dist`, then the journey suite on two workers), with `test-results/` uploaded when the job fails |
+| Browser Journeys (shard `${{ matrix.shard }}` of 2) | same triggers, job `e2e-shard`, `needs: quality-gates`, `timeout-minutes: 15` | checkout, classifier, pnpm and Node from the declaration, then — `tier == 'code'` only — install dependencies and Chromium, build `dist`, and run `pnpm exec playwright test --project=chromium --shard=<i>/2` (13 cases per shard, two workers); `test-results/` is uploaded on failure |
+| Browser Journeys (engine `${{ matrix.engine }}`) | same triggers, job `e2e-matrix`, `needs: quality-gates`, `timeout-minutes: 15`, `fail-fast: false` | checkout, classifier, pnpm and Node from the declaration, then — `tier == 'code'` only — install dependencies and the selected bundled browser, build `dist`, probe exact version/profile, run the selected eight-case smoke with `--reporter=json,line`, enforce `scripts/playwright-matrix-evidence.js`, and upload the JSON report plus `test-results/`; the three entries are `webkit`, `firefox` and `mobile-chromium` |
+| Browser Journeys | same triggers, job `e2e`, `needs: [quality-gates, e2e-shard, e2e-matrix]`, `if: always()`, `timeout-minutes: 5` | fails unless Quality Gates, both Chromium shards and all three engine jobs succeeded; a failed, cancelled or unstarted dependency makes the required rollup red |
 | Deploy to Coolify | tag pushes only, `needs: quality-gates` | verifies the tag commit is an ancestor of `origin/master`, fails fast when `COOLIFY_DEPLOY_WEBHOOK` or `COOLIFY_TOKEN` is missing, then `curl --fail-with-body --request POST` with a Bearer token |
 
-`paths-ignore` (`conductor/**`, `docs/**`, `README.md`, `**/*.md`) sits on the `push` trigger only: a master push that touches nothing but prose skips the pipeline, while every pull request runs both jobs regardless of what it touches. Each job's first step classifies the diff against the pull request's base commit and publishes `code` or `doc`; the gates job keeps `validate-docs` ungated because that script is what reads `conductor/*.md`, so skipping it would let a dead track link merge green. The two tiers are `code` (the whole pipeline) and `doc` (install plus `validate-docs` in the gates job, and in the browser job only checkout, the classifier and the two setup steps — nothing that needs the suite); the classifier falls back to `code` on an unknown base, an empty diff, a failed fetch or a `git diff` error, and it never exits non-zero. Both job display names are load-bearing — branch protection matches `Quality Gates` and `Browser Journeys` as strings — so `src/__tests__/guard/toolchain.test.ts` asserts both, along with `node-version-file: .node-version` appearing in each job and no `version:`/`node-version:` literal appearing anywhere. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.
+`paths-ignore` (`conductor/**`, `docs/**`, `README.md`, `**/*.md`) sits on the `push` trigger only: a master push that touches nothing but prose skips the pipeline, while every pull request runs Quality Gates, both Chromium shard entries, all three engine entries and the rollup regardless of what it touches. Each runner job's first step classifies the diff against the pull request's base commit and publishes `code` or `doc`; the gates job keeps `validate-docs` ungated because that script is what reads `conductor/*.md`, so skipping it would let a dead track link merge green. The two tiers are `code` (the whole pipeline) and `doc` (install plus `validate-docs` in Quality Gates; checkout, classifier and toolchain setup only in the shard and engine jobs — no browser install, build or journey). The classifier falls back to `code` on an unknown base, an empty diff, a failed fetch or a `git diff` error, and it never exits non-zero.
+
+The matrix evidence policy is deliberately stricter than Playwright's exit code. Each engine job records the exact bundled browser version, Playwright version, viewport/touch profile, duration, expected/unexpected/flaky/skipped counts, attempts and retries in its job summary. `scripts/playwright-matrix-evidence.js` rejects missing or malformed reports, runner errors, wrong projects, missing version evidence, invalid retry configuration, and any retried, flaky, skipped or unexpected result. The JSON report and `test-results/` are uploaded for every engine; the job log retains the evidence summary. The required `Browser Journeys` rollup runs with `if: always()` and fails unless Quality Gates, both shards and all three engines succeeded, so a failed, cancelled or unstarted dependency cannot be hidden by green siblings.
+
+The required check names are load-bearing: branch protection matches `Quality Gates` and `Browser Journeys` as strings. `src/__tests__/guard/toolchain.test.ts` asserts both names, all three pnpm/Node setup occurrences, `node-version-file: .node-version` in each runner job, no `version:`/`node-version:` literal anywhere, the three-entry engine matrix, selected-project execution, JSON reporting, retry policy, timeouts and the rollup dependencies. The webhook moved from GET to POST after Coolify 1.18.0 began answering GET with `405 {"message":"This endpoint has changed to a POST request."}`.
 
 Deploy is tag-gated; master pushes never deploy. The PRD's release path section describes the intent ([`docs/PRD.md#82-deploy-path`](./PRD.md#82-deploy-path)).
 
-One-time setup spans Coolify and the repo settings: an API token with the `deploy` permission (Keys & Tokens → API Tokens), the application's Deploy Webhook URL (Webhooks), the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` repository secrets, and branch protection on `master` with "Require status checks" set to `Quality Gates`. The workflow cannot enforce that last one itself, so without it an ungated pull request can still merge.
+One-time setup spans Coolify and the repo settings: an API token with the `deploy` permission (Keys & Tokens → API Tokens), the application's Deploy Webhook URL (Webhooks), the `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_TOKEN` repository secrets, and branch protection on `master` with "Require status checks" set to both `Quality Gates` and `Browser Journeys`. The workflow cannot enforce that last setting itself, so without it an ungated pull request can still merge.
 
 ### 11.5 Container and host
 

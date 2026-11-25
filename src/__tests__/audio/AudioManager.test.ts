@@ -162,6 +162,26 @@ describe("AudioManager", () => {
       expect(audioContextConstructor).toHaveBeenCalledTimes(1);
     });
 
+    it("initializes the rest of audio when AudioContext is unavailable", () => {
+      const data = { stickers: getActiveProfile().stickers, settings: getSettings() };
+      data.settings.bgmEnabled = false;
+      localStorage.setItem("abby-little-lab:v2", JSON.stringify(data));
+      vi.stubGlobal("AudioContext", undefined);
+      const addListener = vi.spyOn(document, "addEventListener");
+
+      expect(() => manager.init()).not.toThrow();
+
+      expect(Reflect.get(manager, "audioContext")).toBeNull();
+      const bgm = findAudioBySrc("bgm");
+      expect(bgm?.loop).toBe(true);
+      manager.playBGM();
+      expect(bgm?.play).not.toHaveBeenCalled();
+      expect(speechHarness.listeners.size).toBe(1);
+      expect(addListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+      expect(() => manager.playSFX("pop")).not.toThrow();
+      addListener.mockRestore();
+    });
+
     it("creates BGM audio element with loop enabled", () => {
       manager.init();
       const bgm = findAudioBySrc("bgm");

@@ -202,30 +202,155 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  e2e-matrix:
+    # The cross-engine core smoke runs in parallel, one bounded runner per
+    # project. The full Chromium journey roster above remains Chromium-only.
+    # Documentation-only PRs still set up the toolchain and report success, but
+    # install no browser, build no artifact and execute no tests.
+    name: Browser Journeys (engine ${{ matrix.engine }})
+    needs: quality-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: webkit
+            browser: webkit
+          - engine: firefox
+            browser: firefox
+          - engine: mobile-chromium
+            browser: chromium
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Keep this classification identical to the other required jobs. An
+      # unknown base, empty diff or failed lookup must run the code path, never
+      # turn a required check green by silently classifying it as docs.
+      - name: Classify the change
+        id: changes
+        shell: bash
+        run: |
+          set -uo pipefail
+          emit() { echo "tier=$1" >> "$GITHUB_OUTPUT"; echo "Change tier: $1"; }
+          if [ ! -f .node-version ]; then emit code; exit 0; fi
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "${base:-}" ]; then emit code; exit 0; fi
+          if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            if ! git fetch --no-tags --depth=1 origin "$base"; then emit code; exit 0; fi
+          fi
+          files="$(git diff --name-only "$base" HEAD || true)"
+          if [ -z "$files" ]; then emit code; exit 0; fi
+          tier=doc
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              conductor/*|docs/*|README.md|*.md) ;;
+              *) tier=code; break ;;
+            esac
+          done <<< "$files"
+          emit "$tier"
+
+      - name: Setup pnpm (from packageManager)
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node (from .node-version)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm install --frozen-lockfile
+
+      # mobile-chromium is a Playwright project name; its installed browser is
+      # the bundled Chromium revision. Never substitute a system browser.
+      - name: Install ${{ matrix.engine }} browser
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Build the artifact
+        if: steps.changes.outputs.tier == 'code'
+        run: pnpm build
+
+      - name: Record bundled browser version and profile
+        id: browser
+        if: steps.changes.outputs.tier == 'code'
+        run: node scripts/playwright-matrix-evidence.js probe --engine "${{ matrix.engine }}"
+
+      - name: Browser smoke (${{ matrix.engine }})
+        if: steps.changes.outputs.tier == 'code'
+        env:
+          CI: true
+          PLAYWRIGHT_JSON_OUTPUT_NAME: playwright-report-${{ matrix.engine }}.json
+        run: pnpm exec playwright test --project=${{ matrix.engine }} --reporter=json,line
+
+      # A green Playwright exit after a retry is still a red matrix job. This
+      # also runs after earlier failures so a missing report cannot be skipped.
+      - name: Enforce strict matrix evidence
+        if: always() && steps.changes.outputs.tier == 'code'
+        env:
+          BROWSER_VERSION: ${{ steps.browser.outputs.version }}
+        run: |
+          node scripts/playwright-matrix-evidence.js summarize \
+            --engine "${{ matrix.engine }}" \
+            --browser-version "${BROWSER_VERSION:-unavailable}" \
+            --configured-retries 2 \
+            --report "playwright-report-${{ matrix.engine }}.json"
+
+      - name: Upload matrix report and failure artifacts
+        if: always() && steps.changes.outputs.tier == 'code'
+        uses: actions/upload-artifact@v5
+        with:
+          name: e2e-matrix-${{ matrix.engine }}
+          path: |
+            playwright-report-${{ matrix.engine }}.json
+            test-results/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Report documentation-only result
+        if: steps.changes.outputs.tier == 'doc'
+        run: |
+          {
+            echo "### ${{ matrix.engine }} matrix smoke"
+            echo
+            echo "Documentation-only change: PASS. Browser install, production build and tests were not run."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   e2e:
     # The check name branch protection requires, kept as one job so sharding
-    # cannot quietly un-require the suite: it is green only when the gate passed
-    # and every half of the roster did.
+    # and engine matrices cannot quietly un-require coverage: it is green only
+    # when the gate, both Chromium journey halves and all three engines passed.
     name: Browser Journeys
-    needs: [quality-gates, e2e-shard]
+    needs: [quality-gates, e2e-shard, e2e-matrix]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Every half must pass
+      - name: Every journey and engine must pass
         shell: bash
         run: |
           set -uo pipefail
           gate="${{ needs.quality-gates.result }}"
           halves="${{ needs.e2e-shard.result }}"
+          engines="${{ needs.e2e-matrix.result }}"
           echo "Quality Gates: $gate"
           echo "Browser journey halves: $halves"
+          echo "Cross-engine matrix: $engines"
           if [ "$gate" != "success" ]; then
             echo "::error::Quality Gates did not pass, so the browser journeys could not run"
             exit 1
           fi
           if [ "$halves" != "success" ]; then
             echo "::error::a browser journey half failed, failed to start, or was cancelled"
+            exit 1
+          fi
+          if [ "$engines" != "success" ]; then
+            echo "::error::a cross-engine matrix job failed, failed to start, or was cancelled"
             exit 1
           fi
 

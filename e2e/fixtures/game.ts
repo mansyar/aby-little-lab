@@ -11,7 +11,7 @@ import type {
   E2ERoundTarget,
   E2ESettingsState,
 } from "../../src/game/e2eBridge";
-import { type GamePoint, holdCanvasUntil, tapCanvas } from "./canvas";
+import { dragCanvas, type GamePoint, holdCanvasUntil, tapCanvas } from "./canvas";
 
 /**
  * Journey primitives: open the hub, launch a game by registry index, read what
@@ -435,26 +435,44 @@ export async function waitForPlayableRound(
 /**
  * Taps the hub tile for a registry index and waits for its scene.
  *
- * The tile is found by the index the bridge publishes, not by position, so the
- * journey does not care how the grid is laid out.
+ * The tile is found by the index the bridge publishes, not by position. Narrow
+ * hubs page their tiles, so the helper swipes from a published tile's geometry
+ * until the requested page is visible.
  */
 export async function launchGame(page: Page, index: number, sceneKey: string): Promise<void> {
   await waitForScene(page, "Hub");
   await waitForHubReady(page);
 
-  await expect
-    .poll(async () => (await hubTiles(page)).some((tile) => tile.id === String(index)), {
-      message: `hub tile ${index} (${sceneKey}) should be on screen`,
-      timeout: SCENE_TIMEOUT,
-    })
-    .toBe(true);
+  const deadline = Date.now() + SCENE_TIMEOUT;
+  for (;;) {
+    const tiles = await hubTiles(page);
+    const tile = tiles.find((candidate) => candidate.id === String(index));
+    if (tile) {
+      await tapCanvas(page, tile);
+      await waitForScene(page, sceneKey);
+      return;
+    }
 
-  const tiles = await hubTiles(page);
-  const tile = tiles.find((candidate) => candidate.id === String(index));
-  if (!tile) throw new Error(`hub tile ${index} (${sceneKey}) is not on screen`);
+    if (Date.now() >= deadline) {
+      throw new Error(`hub tile ${index} (${sceneKey}) was not visible after paging the hub`);
+    }
 
-  await tapCanvas(page, tile);
-  await waitForScene(page, sceneKey);
+    const first = tiles[0];
+    if (!first) throw new Error("the hub published no tiles to swipe from");
+
+    const before = tiles.map((candidate) => candidate.id);
+    await dragCanvas(page, first, { x: first.x * 0.25, y: first.y });
+    await expect
+      .poll(
+        async () => {
+          const next = await hubTiles(page);
+          return next.length > 0 && next.some((candidate) => !before.includes(candidate.id));
+        },
+        { message: `the hub should page forward toward tile ${index}`, timeout: SCENE_TIMEOUT },
+      )
+      .toBe(true);
+    await waitForHubReady(page);
+  }
 }
 
 /**

@@ -4,6 +4,35 @@
 
 This checklist ensures comprehensive testing across target devices before release.
 
+## Current automated-engine evidence policy (2026-11-25)
+
+The required browser matrix uses Playwright 1.65.1 and its bundled Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2. It is automated engine evidence, not physical-device validation.
+
+| Project | Automated scope | Profile | Dated local first-attempt result |
+| --- | --- | --- | --- |
+| Chromium | Full regression: 26 cases / 19 specs; smoke-only files excluded | Desktop 1280×720 | 26/26 passed, 3.8 min, zero retries |
+| WebKit | Core smoke: 8 cases / 6 specs | Desktop 1280×720 | 8/8 passed, 1.8 min, zero retries |
+| Firefox | Core smoke: 8 cases / 6 specs | Desktop 1280×720 | 8/8 passed, 2.1 min, zero retries |
+| Mobile Chromium | Core smoke: 8 cases / 6 specs | 844×390, `isMobile: true`, `hasTouch: true` | 8/8 passed, 2.3 min, zero retries |
+
+The smoke covers boot, all 24 launches and returns, three speech rounds, three drag rounds, earned-sticker reload persistence and offline relaunch. Local retries are zero. CI configures two retries, but each engine job's `scripts/playwright-matrix-evidence.js` summary rejects any retried, flaky, skipped or unexpected test, wrong project, or missing/wrong bundled-version evidence. JSON reports and failure artifacts are uploaded, and the track-PR CI run remains authoritative.
+
+**What this does not prove.** WebKit is a Safari-engine proxy, not iOS Safari. Mobile Chromium is emulated Chromium with touch, not Android Chrome or a Fire tablet/Silk device. Desktop Firefox is additional engine coverage. None of these runs proves real PWA installation, OS orientation locking, audio output, first-tap latency, touch accuracy or hardware performance.
+
+### Manual release gate for the browser matrix
+
+These checks remain required on real devices before release and are **not satisfied by the automated matrix**:
+
+- [ ] Open the production build over real HTTPS on each target device and browser.
+- [ ] Install to the home screen and relaunch in standalone mode.
+- [ ] Confirm landscape orientation and the platform's orientation-lock behavior.
+- [ ] Confirm offline launch, cached gameplay and offline relaunch.
+- [ ] Confirm audio and speech after the first user tap, including volume, ducking and mute settings.
+- [ ] Confirm first-tap game launch, touch accuracy, drag behavior and return-to-Hub on real glass.
+- [ ] Record device model, OS/browser version, app version, date, tester and any limitations.
+
+**Physical-device result for this track: PENDING — not run.** No hardware pass is claimed. Historical execution records below remain unchanged and apply only to the releases, devices and dates they name.
+
 ## Execution Record - v1.21.7 (2026-10-25)
 
 - **Target:** tag `v1.21.7` pushed on 2026-10-25; Coolify deploy triggered by the tag. The smoke below ran against the live release at `https://aby-little-lab.ansyar-world.top/`.
@@ -253,6 +282,7 @@ This checklist ensures comprehensive testing across target devices before releas
 ### Primary Target Devices
 - **iPad** (any recent model, iPadOS 15+)
 - **Android Tablet** (Samsung Galaxy Tab, Android 10+)
+- **Fire tablet** (Amazon Fire OS with Silk; record the tested model and version)
 - **iPhone** (any recent model, iOS 15+)
 - **Android Phone** (any recent model, Android 10+)
 

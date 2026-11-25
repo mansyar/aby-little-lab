@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import type { CDPSession } from "playwright-core";
 
 /**
  * Canvas geometry, converted once for every journey.
@@ -48,9 +49,96 @@ export function toPagePoint(box: CanvasBox, point: GamePoint): GamePoint {
   };
 }
 
-/** Taps a game-space point with a real pointer down/up pair. */
+/** The held pointer's input kind and current page-space position. */
+interface PointerState {
+  kind: "mouse" | "touch";
+  at: GamePoint;
+}
+
+const pointers = new WeakMap<Page, PointerState>();
+const touchClients = new WeakMap<Page, CDPSession>();
+
+/** Touch support comes from the browser context, never from a user-agent string. */
+async function usesTouch(page: Page): Promise<boolean> {
+  return page.evaluate(() => navigator.maxTouchPoints > 0);
+}
+
+/** Chromium's touch protocol is needed only for continuous touch gestures. */
+async function touchClient(page: Page): Promise<CDPSession> {
+  let client = touchClients.get(page);
+  if (!client) {
+    client = await page.context().newCDPSession(page);
+    touchClients.set(page, client);
+  }
+  return client;
+}
+
+/** Sends one trusted Chromium touch point at a page-space coordinate. */
+async function sendTouch(
+  page: Page,
+  type: "touchStart" | "touchMove" | "touchEnd",
+  at?: GamePoint,
+): Promise<void> {
+  const client = await touchClient(page);
+  await client.send("Input.dispatchTouchEvent", {
+    type,
+    touchPoints: at ? [{ x: at.x, y: at.y, id: 1, radiusX: 1, radiusY: 1, force: 1 }] : [],
+  });
+}
+
+/** Starts a real mouse or touch press and remembers it for moves and release. */
+async function pointerDown(page: Page, at: GamePoint): Promise<void> {
+  const kind = (await usesTouch(page)) ? "touch" : "mouse";
+  pointers.set(page, { kind, at });
+  if (kind === "touch") {
+    await sendTouch(page, "touchStart", at);
+    return;
+  }
+  await page.mouse.move(at.x, at.y);
+  await page.mouse.down();
+}
+
+/** Moves the held pointer through intermediate points, as a real gesture does. */
+async function pointerMove(page: Page, to: GamePoint, steps = 8): Promise<void> {
+  const pointer = pointers.get(page);
+  if (!pointer) throw new Error("no canvas pointer is held");
+  if (pointer.kind === "touch") {
+    const client = await touchClient(page);
+    for (let step = 1; step <= steps; step += 1) {
+      const at = {
+        x: pointer.at.x + ((to.x - pointer.at.x) * step) / steps,
+        y: pointer.at.y + ((to.y - pointer.at.y) * step) / steps,
+      };
+      await client.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: at.x, y: at.y, id: 1, radiusX: 1, radiusY: 1, force: 1 }],
+      });
+    }
+  } else {
+    await page.mouse.move(to.x, to.y, { steps });
+  }
+  pointer.at = to;
+}
+
+/** Releases the held mouse or touch pointer. */
+async function pointerUp(page: Page): Promise<void> {
+  const pointer = pointers.get(page);
+  if (!pointer) return;
+  pointers.delete(page);
+  if (pointer.kind === "touch") {
+    await sendTouch(page, "touchEnd");
+    return;
+  }
+  await page.mouse.up();
+}
+
+/** Taps a game-space point with a real mouse or touch down/up pair. */
 export async function tapCanvas(page: Page, point: GamePoint): Promise<void> {
   const at = toPagePoint(await canvasBox(page), point);
+  if (await usesTouch(page)) {
+    await page.touchscreen.tap(at.x, at.y);
+    return;
+  }
   await page.mouse.move(at.x, at.y);
   await page.mouse.down();
   await page.mouse.up();
@@ -67,20 +155,24 @@ export async function dragCanvas(page: Page, from: GamePoint, to: GamePoint): Pr
   const box = await canvasBox(page);
   const start = toPagePoint(box, from);
   const end = toPagePoint(box, to);
-  await page.mouse.move(start.x, start.y);
-  await page.mouse.down();
-  await page.mouse.move(start.x, start.y + 1, { steps: 2 });
-  await page.mouse.move(end.x, end.y, { steps: 12 });
-  await page.mouse.up();
+  await pointerDown(page, start);
+  try {
+    await pointerMove(page, { x: start.x, y: start.y + 1 }, 2);
+    await pointerMove(page, end, 12);
+  } finally {
+    await pointerUp(page);
+  }
 }
 
 /** Presses a game-space point and holds it for `ms` before releasing. */
 export async function holdCanvas(page: Page, point: GamePoint, ms: number): Promise<void> {
   const at = toPagePoint(await canvasBox(page), point);
-  await page.mouse.move(at.x, at.y);
-  await page.mouse.down();
-  await page.waitForTimeout(ms);
-  await page.mouse.up();
+  await pointerDown(page, at);
+  try {
+    await page.waitForTimeout(ms);
+  } finally {
+    await pointerUp(page);
+  }
 }
 
 /**
@@ -112,7 +204,9 @@ export const HOLD_FRAME_BUDGET = 300;
 
 /**
  * The wall-clock ceiling for a hold, so a runner slow enough to need minutes
- * fails as a frames message instead of timing the journey out from underneath.
+ * fails with its elapsed time instead of timing the journey out from underneath.
+ * Frame count is diagnostic only: Phaser's smoothed scene clock can advance
+ * slower than wall time on a high-refresh engine.
  */
 const HOLD_CEILING_MS = 90_000;
 
@@ -120,8 +214,8 @@ const HOLD_CEILING_MS = 90_000;
  * Waits for `TICK_FRAMES` consecutive animation frames and returns how long they
  * took, or null when they did not arrive inside `timeoutMs`.
  *
- * This is the liveness probe every gesture needs. Playwright's mouse events are
- * delivered to the page, but a press only becomes a hold when the game's own
+ * This is the liveness probe every gesture needs. Playwright's pointer events
+ * are delivered to the page, but a press only becomes a hold when the game's own
  * loop advances: the parental gate counts frames, and a scene that is not
  * rendering never counts anything. Testing the loop directly keeps the failure
  * honest - a stalled canvas says so, instead of looking like a press that was
@@ -178,14 +272,14 @@ function stalled(where: string): Error {
  * #79). Waiting for the state instead of a duration makes the journey
  * independent of how fast the machine renders.
  *
- * The wait is bounded by frames ({@link HOLD_FRAME_BUDGET}) rather than seconds,
- * and it fails three different ways so the message names the cause:
+ * The frame budget ({@link HOLD_FRAME_BUDGET}) is diagnostic only: Phaser's
+ * smoothed scene clock can advance slower than wall time, so neither frames nor
+ * wall time predict when the real three-second gate opens. The wait fails in
+ * two ways so the message names the cause:
  *
  * - the canvas stops rendering mid-hold - `the canvas stopped ticking`;
- * - the press has had every frame a hold can need and the state still has not
- *   arrived - that is a lost press or a state bug, not a slow runner;
- * - a runner so slow that the frames alone take {@link HOLD_CEILING_MS}, which
- *   fails in frames rather than letting the journey time out.
+ * - the hold alone reaches {@link HOLD_CEILING_MS}, which fails with its frame
+ *   and elapsed-time diagnostics rather than letting the journey time out.
  *
  * The hold also starts only once the canvas is provably ticking, because a press
  * sent into a page that has not painted yet is a press nothing can count.
@@ -203,8 +297,7 @@ export async function holdCanvasUntil(
     throw stalled(`before ${where} was sent`);
   }
 
-  await page.mouse.move(at.x, at.y);
-  await page.mouse.down();
+  await pointerDown(page, at);
   const started = Date.now();
   let seen = 0;
   try {
@@ -218,33 +311,32 @@ export async function holdCanvasUntil(
       if (await reached()) return;
 
       const elapsed = Date.now() - started;
-      if (seen >= frames || elapsed >= HOLD_CEILING_MS) {
+      if (elapsed >= HOLD_CEILING_MS) {
         throw new Error(
-          `${where} did not reach its state after ${seen} frames in ${elapsed} ms ` +
-            `(${Math.round(seen / (elapsed / 1000))} fps): a hold that is still being counted would ` +
-            `have landed by ${frames} frames`,
+          `${where} did not reach its state after ${seen} frames and ${elapsed} ms ` +
+            `(${Math.round(seen / (elapsed / 1000))} fps; ${frames}-frame diagnostic budget), ` +
+            `reaching the ${HOLD_CEILING_MS} ms hold ceiling`,
         );
       }
     }
   } finally {
-    await page.mouse.up();
+    await pointerUp(page);
   }
 }
 
 /** Presses at a game-space point without releasing. */
 export async function pressCanvas(page: Page, point: GamePoint): Promise<void> {
   const at = toPagePoint(await canvasBox(page), point);
-  await page.mouse.move(at.x, at.y);
-  await page.mouse.down();
+  await pointerDown(page, at);
 }
 
 /** Moves the held pointer to a game-space point. */
 export async function moveCanvas(page: Page, point: GamePoint, steps = 8): Promise<void> {
   const at = toPagePoint(await canvasBox(page), point);
-  await page.mouse.move(at.x, at.y, { steps });
+  await pointerMove(page, at, steps);
 }
 
 /** Releases the held pointer. */
 export async function releasePointer(page: Page): Promise<void> {
-  await page.mouse.up();
+  await pointerUp(page);
 }
