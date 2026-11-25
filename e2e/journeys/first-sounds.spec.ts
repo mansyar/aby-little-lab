@@ -11,7 +11,8 @@ import {
 
 /**
  * FR-3 / AC-3, literacy family: three rounds of First Sounds, tapping the letter
- * the game pairs with the spoken word.
+ * the game pairs with the spoken word. Headless engines need not produce audible
+ * speech: the bridge's visual round progress is the assertion.
  */
 
 test("First Sounds advances three rounds of letter taps", async ({ page }) => {
