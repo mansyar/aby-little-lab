@@ -38,18 +38,20 @@
 - **Covers:** FR-3, FR-4, FR-5, FR-12, NFR-4, AC-3, AC-4, AC-5, AC-12
 - **Touches:** `README.md`, `conductor/roadmap.md`, `conductor/archive/20261125-browser-matrix/metadata.json`, `conductor/archive/20261125-browser-matrix/pr.md`
 - **Verification:** the exact configured gate; `node scripts/validate-docs.js`; targeted README/roadmap/archive inspection
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** local release truth committed at `f6a98249`; exact gate and CRLF-aware whitespace check passed; PR/merge/tag CI remains pending
+- **Checkpoint:** `f6a98249`
 
-- [ ] **P2.T1: Add the README release-table row** — covers: FR-3, AC-3
+- [x] **P2.T1: Add the README release-table row** — covers: FR-3, AC-3
   - Add a newest-first `v1.26.1` row dated 2026-11-26.
   - The Documentation index link is already present from Phase 1 for validator ordering.
-- [ ] **P2.T2: Correct browser-matrix roadmap truth** — covers: FR-4, FR-12, AC-4
+- [x] **P2.T2: Correct browser-matrix roadmap truth** — covers: FR-4, FR-12, AC-4
   - In the `Next` bucket, mark RM-3 as delivered for WebKit/Firefox/mobile-Chromium emulation while preserving the manual physical-device gate.
   - In §10.7, replace the future-work browser-matrix row with the delivered CI matrix description; do not claim physical iOS Safari, Android Chrome, or Fire tablet coverage.
-- [ ] **P2.T3: Repair archived browser-matrix state** — covers: FR-5, AC-5
+- [x] **P2.T3: Repair archived browser-matrix state** — covers: FR-5, AC-5
   - Change archived metadata `pr_state` from `open` to `merged`.
   - Repair the malformed `pr.md` URL/head/base header and verify all archived links resolve.
-- [ ] **P2.T4: Record phase evidence and task commits** — covers: NFR-4
+- [x] **P2.T4: Record phase evidence and task commits** — covers: NFR-4
   - Save gate, validator and scoped-diff evidence in `verification/phase-2.md`.
 
 ## Phase 3: Release-candidate verification
