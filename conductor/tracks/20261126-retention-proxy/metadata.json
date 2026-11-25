@@ -6,7 +6,7 @@
   "priority": "low",
   "depends_on": [],
   "created_at": "2026-11-26T10:12:56.7119334+11:00",
-  "updated_at": "2026-11-26T10:38:00+11:00",
+  "updated_at": "2026-11-26T10:45:00+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261126-retention-proxy",
@@ -14,11 +14,11 @@
   "base_sha": "5b9995f07aeeaccbd95221aebf327807f97d0ae0",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 9,
-    "tasks_done": 4
+    "tasks_done": 6
   },
-  "last_checkpoint": "c295715f",
+  "last_checkpoint": "675a810b",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

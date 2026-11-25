@@ -32,10 +32,13 @@
 - **Covers:** FR-7, NFR-5, AC-7
 - **Touches:** `conductor/roadmap.md`
 - **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** Roadmap linkage verified at `675a810b`; RM-4 links to the track and §10.9 links to the protocol; docs validation and CRLF-aware whitespace passed.
+- **Checkpoint:** `675a810b7873bed47fdd145674a9c6dc3eaca553`
+- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-2.md`
 
-- [ ] **P2.T1: Link RM-4 to this track** — covers: FR-7, AC-7
-- [ ] **P2.T2: Reference the protocol from the §10.9 risk** — covers: FR-7, NFR-5, AC-7
+- [x] **P2.T1: Link RM-4 to this track** — covers: FR-7, AC-7
+- [x] **P2.T2: Reference the protocol from the §10.9 risk** — covers: FR-7, NFR-5, AC-7
 
 ## Phase 3: Integrated verification and handoff
 
