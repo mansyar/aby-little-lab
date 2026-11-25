@@ -65,8 +65,15 @@ test.describe("every game launches from the hub and returns to it", () => {
       // Fresh context: one default profile, no stickers, and a clean roster.
       expect(await profileCount(page)).toBe(1);
 
+      // A narrow hub pages its tiles. The first page must still begin at
+      // registry index zero; the loops below prove every page and all 24
+      // launches without pretending the whole roster fits on screen.
       const tiles = await hubTiles(page);
-      expect(tiles.map((tile) => tile.id)).toEqual(GAME_REGISTRY.map((_, index) => String(index)));
+      const visibleIds = tiles.map((tile) => tile.id);
+      expect(visibleIds.length).toBeGreaterThan(0);
+      expect(visibleIds).toEqual(
+        GAME_REGISTRY.slice(0, visibleIds.length).map((_, index) => String(index)),
+      );
 
       const entries = GAME_REGISTRY.slice(slice.start, slice.end);
       for (const [offset, entry] of entries.entries()) {
