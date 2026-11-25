@@ -14,6 +14,8 @@ The final exact gate, project roster and all four browser suites passed locally 
 
 Phase 5's executor shell was denied before it could run the gate. The primary used the documented fallback. The first primary chain passed the exact gate, roster and Chromium suite, then ended with a tool-level `Shell.NotFoundError` after WebKit's tests had reported success. The primary reran WebKit to obtain a clean exit code, then ran Firefox and mobile Chromium successfully. No source, configuration, dependency or assertion was changed as a workaround.
 
+Post-review update: strict review passed in round 2 at `0baf9d08` after Phase R1 closed the single Low TDD coverage-claim finding. Post-review doc sync is complete with no additional living-document change. PR CI remains the authoritative automated gate.
+
 ## Commands and observed results
 
 | Layer | Exact command | Exit | Result |
