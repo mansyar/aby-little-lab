@@ -1,0 +1,31 @@
+{
+  "id": "20261125-browser-matrix",
+  "title": "Browser Compatibility Matrix",
+  "type": "chore",
+  "status": "new",
+  "priority": "medium",
+  "depends_on": [],
+  "created_at": "2026-11-25T15:20:30.1649356+11:00",
+  "updated_at": "2026-11-25T15:20:30.1649356+11:00",
+  "spec": "spec.md",
+  "plan": "plan.md",
+  "branch": "chore/20261125-browser-matrix",
+  "base_branch": "master",
+  "base_sha": "54621f70b5913f8c1b358e25baa212d4d34aa389",
+  "progress": {
+    "phases_total": 5,
+    "phases_verified": 0,
+    "tasks_total": 20,
+    "tasks_done": 0
+  },
+  "last_checkpoint": null,
+  "review_verdict": null,
+  "review_rounds": 0,
+  "doc_sync": "pending",
+  "pr_url": null,
+  "reverted_at": null,
+  "revert_commit": null,
+  "revert_pr_url": null,
+  "archived_at": null,
+  "archive_path": null
+}

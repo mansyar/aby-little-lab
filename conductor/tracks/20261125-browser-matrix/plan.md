@@ -1,0 +1,81 @@
+# Browser Compatibility Matrix — Implementation Plan
+
+## Phase 1: Project topology and reusable smoke
+
+- **Goal:** Playwright exposes Chromium plus WebKit, Firefox, and mobile Chromium/touch, with only the core smoke selected outside Chromium.
+- **Depends on:** none
+- **Covers:** FR-1, FR-2, FR-3, FR-7, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-9
+- **Touches:** `playwright.config.ts`, `package.json`, `e2e/**`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
+- **Status:** pending
+
+### Tasks
+
+- [ ] **P1.T1: Define cross-engine projects** — covers: FR-1, AC-2
+- [ ] **P1.T2: Isolate the core smoke and persistence check** — covers: FR-2, FR-3, AC-3, AC-4
+- [ ] **P1.T3: Add reproducible local commands** — covers: FR-7, AC-9
+- [ ] **P1.T4: Keep fixtures portable across engines** — covers: NFR-4
+
+## Phase 2: CI matrix and blocking rollup
+
+- **Goal:** Every code PR runs the three-engine matrix, while `Browser Journeys` remains the single required rollup.
+- **Depends on:** Phase 1
+- **Covers:** FR-4, FR-5, FR-6, FR-8, FR-9, NFR-1, NFR-2, NFR-5, AC-5, AC-6, AC-8
+- **Touches:** `.github/workflows/ci.yml`, `scripts/**`, `e2e/**`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm exec playwright test --list --project=webkit`; `pnpm exec playwright test --list --project=firefox`; `pnpm exec playwright test --list --project=mobile-chromium`; subsequent track-PR CI proves the workflow.
+- **Status:** pending
+
+### Tasks
+
+- [ ] **P2.T1: Add three parallel engine jobs** — covers: FR-4, NFR-2, AC-5
+- [ ] **P2.T2: Record versions, durations, and failure artifacts** — covers: FR-6, NFR-5, AC-8
+- [ ] **P2.T3: Extend the Browser Journeys rollup** — covers: FR-5, AC-6
+- [ ] **P2.T4: Preserve documentation-only required checks** — covers: FR-8, AC-5
+- [ ] **P2.T5: Enforce strict matrix failure policy** — covers: FR-9, NFR-1, AC-8
+
+## Phase 3: Cross-engine execution and compatibility fixes
+
+- **Goal:** All engines pass the core smoke first-attempt, or a proven compatibility defect is minimally repaired.
+- **Depends on:** Phase 2
+- **Covers:** FR-2, FR-6, FR-9, NFR-3, NFR-4, NFR-5, NFR-6, AC-2, AC-3, AC-7, AC-8, AC-11
+- **Touches:** `e2e/**`, `src/**` only if a failing smoke proves a defect, `conductor/tracks/20261125-browser-matrix/verification/**`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
+- **Status:** pending
+
+### Tasks
+
+- [ ] **P3.T1: Establish first-attempt engine results** — covers: FR-6, NFR-3, AC-7
+- [ ] **P3.T2: Repair proven compatibility defects minimally** — covers: FR-9, NFR-4, NFR-6, AC-11
+- [ ] **P3.T3: Re-run to a clean matrix and retain earlier evidence** — covers: AC-2, AC-3, AC-7, AC-8
+
+## Phase 4: Documentation and device-evidence policy
+
+- **Goal:** Contributors can reproduce the matrix and readers cannot mistake emulation for hardware validation.
+- **Depends on:** Phase 3
+- **Covers:** FR-7, FR-8, FR-10, NFR-5, AC-9, AC-10, AC-11
+- **Touches:** `README.md`, `docs/TDD.md`, `docs/device-testing-checklist.md`, `conductor/tech-stack.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `node scripts/validate-docs.js`
+- **Status:** pending
+
+### Tasks
+
+- [ ] **P4.T1: Document project roles and local commands** — covers: FR-7, AC-9
+- [ ] **P4.T2: Correct stale worker prose and document CI behavior** — covers: FR-8, FR-10
+- [ ] **P4.T3: Separate emulation from physical-device checks** — covers: FR-10, NFR-5, AC-10
+- [ ] **P4.T4: Record the unchanged dependency and runtime scope** — covers: AC-11
+
+## Phase 5: Integrated verification and handoff
+
+- **Goal:** Leave one auditable package of local and CI-ready evidence for strict review and the release PR.
+- **Depends on:** Phases 1–4
+- **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11
+- **Touches:** `conductor/tracks/20261125-browser-matrix/verification/**`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git diff --check`; `pnpm test:e2e`; `pnpm exec playwright test --project=webkit`; `pnpm exec playwright test --project=firefox`; `pnpm exec playwright test --project=mobile-chromium`
+- **Status:** pending
+
+### Tasks
+
+- [ ] **P5.T1: Run the final Chromium suite and three-engine smoke** — covers: AC-1, AC-2, AC-3, AC-7
+- [ ] **P5.T2: Record engine profiles, versions, durations, and retries** — covers: FR-6, NFR-5, AC-7
+- [ ] **P5.T3: Inspect the final scope and project selection** — covers: FR-3, FR-9, NFR-1, NFR-7, AC-4, AC-11
+- [ ] **P5.T4: Write integrated evidence and identify the PR CI gate** — covers: AC-5, AC-6, AC-8, AC-9, AC-10
