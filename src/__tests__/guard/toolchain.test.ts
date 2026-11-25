@@ -271,9 +271,9 @@ describe("toolchain guard", () => {
     const pnpmSteps = stepsContaining("uses: pnpm/action-setup");
     expect(
       pnpmSteps.length,
-      `ci.yml installs pnpm in ${pnpmSteps.length} step(s); both jobs need it, and a step that ` +
-        "disappears must fail here rather than quietly shrink this check",
-    ).toBe(2);
+      `ci.yml installs pnpm in ${pnpmSteps.length} step(s); every runner job needs it, and a step ` +
+        "that disappears must fail here rather than quietly shrink this check",
+    ).toBe(3);
     const pnpmLiteral = pnpmSteps.flat().filter((line) => /^\s*version:/.test(line));
     expect(
       pnpmLiteral,
@@ -291,15 +291,16 @@ describe("toolchain guard", () => {
     const versionFile = workflowRaw.match(/node-version-file: \.node-version/g) ?? [];
     expect(
       versionFile.length,
-      `ci.yml should read .node-version in both jobs; found ${versionFile.length} reference(s)`,
-    ).toBe(2);
+      `ci.yml should read .node-version in every runner job; found ${versionFile.length} reference(s)`,
+    ).toBe(3);
 
-    // Three jobs, two of them expensive: the shard job spends minutes on the
-    // browser suite and must classify before it does. The third is the required
+    // Four jobs, three of them expensive: the gate, Chromium shards and engine
+    // matrix all classify before they spend time. The fourth is the required
     // check itself — a few seconds of shell, so it classifies nothing.
     const jobs: readonly (readonly [string, RegExp, boolean])[] = [
       ["quality-gates", /^ {4}name: Quality Gates$/, true],
       ["e2e-shard", /^ {4}name: Browser Journeys \(shard \$\{\{ matrix\.shard \}\} of 2\)$/, true],
+      ["e2e-matrix", /^ {4}name: Browser Journeys \(engine \$\{\{ matrix\.engine \}\}\)$/, true],
       ["e2e", /^ {4}name: Browser Journeys$/, false],
     ];
     for (const [job, display, classifies] of jobs) {
@@ -325,8 +326,8 @@ describe("toolchain guard", () => {
     const required = blockUnder("e2e:").join("|");
     expect(
       required,
-      "the required-check job must need both the gate and every browser half",
-    ).toContain("needs: [quality-gates, e2e-shard]");
+      "the required-check job must need the gate, every browser half and the engine matrix",
+    ).toContain("needs: [quality-gates, e2e-shard, e2e-matrix]");
     expect(
       blockUnder("e2e:").some((line) => line.trim() === "if: always()"),
       'the required-check job must run even when a half fails ("if: always()"), or a red ' +
@@ -336,6 +337,32 @@ describe("toolchain guard", () => {
       required.includes("needs.e2e-shard.result"),
       "the required-check job must read the halves' result and fail on it, not merely exist",
     ).toBe(true);
+    expect(
+      required.includes("needs.e2e-matrix.result"),
+      "the required-check job must read the engine matrix result and fail on it, not merely exist",
+    ).toBe(true);
+
+    const matrix = blockUnder("e2e-matrix:").join("\n");
+    for (const engine of ["webkit", "firefox", "mobile-chromium"]) {
+      expect(
+        matrix,
+        `the engine matrix must include ${engine}; an absent engine silently loses coverage`,
+      ).toContain(`engine: ${engine}`);
+    }
+    expect(
+      matrix,
+      "the engine matrix must run the selected project, not the full Chromium roster",
+    ).toContain(`--project=\${{ matrix.engine }}`);
+    expect(
+      matrix,
+      "the engine matrix must publish a JSON report for the strict first-attempt evidence gate",
+    ).toContain("--reporter=json,line");
+    expect(matrix, "the engine matrix must stay bounded by a 15-minute job timeout").toContain(
+      "timeout-minutes: 15",
+    );
+    expect(matrix, "one engine failure must not cancel the other engine jobs").toContain(
+      "fail-fast: false",
+    );
 
     // The halves must partition the suite themselves: a hand-kept list of spec
     // files is how a journey goes missing from CI without anything going red.
@@ -346,8 +373,9 @@ describe("toolchain guard", () => {
         "can drop a journey silently",
     ).toBe(true);
 
-    // The classifier is written out once per job. Two copies of a rule is how
-    // one of them drifts: compare the bodies so an edit to one job cannot pass.
+    // The classifier is written out once per expensive job. Three copies of a
+    // rule is how one of them drifts: compare the bodies so an edit to one job
+    // cannot pass.
     const classifyBodies = stepsContaining("- name: Classify the change").map((step) =>
       step
         .filter((line) => !line.includes("- name: Classify the change"))
@@ -357,11 +385,11 @@ describe("toolchain guard", () => {
     expect(
       classifyBodies.length,
       `ci.yml has ${classifyBodies.length} classification step(s); each job needs one`,
-    ).toBe(2);
+    ).toBe(3);
     expect(
       new Set(classifyBodies).size,
-      "the two Classify the change steps differ: the tier rules must be identical in both jobs, " +
-        "or a documentation-only change is cheap in one and full price in the other",
+      "the Classify the change steps differ: the tier rules must be identical in every job, " +
+        "or a documentation-only change is cheap in one and full price in another",
     ).toBe(1);
     expect(
       classifyBodies.every((body) => body.length > 0),
