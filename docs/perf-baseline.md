@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,395 tests across 97.08 % statements, 90.92 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured on the resumed fixed tree after the reviewed Word Match fix: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 63.3 / 45.2 / 270.1 ms, cold median total 203.6 ms, and worst cold total 277.5 ms (Shape Sorter), all inside the unchanged 400 ms gate; see [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24). Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-24 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
+> **Live figures — measured 2026-11-24.** The figures here describe the current tree: Vite 8.3.8 built 491 modules; shell entry `index-DcqZRslV.js` is 193.4 kB via `validate-bundle` (197.99 kB as Vite prints it, 50.39 kB gzip), with **52** JavaScript chunks and **64** PWA precache entries (1876.89 KiB). The suite is 158 test files / 3,396 tests across 97.08 % statements, 90.92 % branches, 96.35 % functions and 98.23 % lines. The browser-journey record remains the 2026-11-16 result: 26 browser tests across 19 spec files (24 launches in two parallel halves) in 3.8-4.3 min. The first-tap verdict was remeasured on the resumed fixed tree after the reviewed Word Match fix: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 63.3 / 45.2 / 270.1 ms, cold median total 203.6 ms, and worst cold total 277.5 ms (Shape Sorter), all inside the unchanged 400 ms gate; see [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24). Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-25 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
 
@@ -438,7 +438,7 @@ after-numbers come from the Phase 4 checkpoint (`4f0a47c`).
 Track `20261022-docs-roadmap-truth`, Phase 3 (the checklists and the perf
 baseline). The build measured here carries the eight tracks merged since
 v1.20.0 (PRs #48–#55), and its build, coverage and browser figures are dated.
-Only the `Test suite` row is a current living value refreshed on 2026-11-24
+Only the `Test suite` row is a current living value refreshed on 2026-11-25
 for docs truth (see the live header).
 
 ### Method
@@ -536,10 +536,10 @@ measured, dated figure and is a candidate for the roadmap in `conductor/roadmap.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite (current living value, verified 2026-11-24) | 158 files / 3,395 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-25) | 158 files / 3,396 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
-The Test-suite row is a current living value verified 2026-11-24. The
+The Test-suite row is a current living value verified 2026-11-25. The
 Coverage row was verified 2026-11-15; the build figures above are the
 2026-10-22 measurement.
 
@@ -865,7 +865,7 @@ that track's accepted-tree values, recorded in the order the phase's verificatio
 the commands: `pnpm test:e2e`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`,
 `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`,
 `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`. The `Test suite` row is a
-current living value refreshed on 2026-11-24 for docs truth.
+current living value refreshed on 2026-11-25 for docs truth.
 
 | Measurement | Value | Source |
 | --- | --- | --- |
@@ -875,7 +875,7 @@ current living value refreshed on 2026-11-24 for docs truth.
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite (current living value, verified 2026-11-24) | 158 files / 3,395 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-25) | 158 files / 3,396 tests | `pnpm test -- --run` |
 | Coverage | statements 97.07 % / branches 90.73 % / functions 96.18 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
@@ -898,7 +898,7 @@ that track's accepted-tree values, recorded in the order the phase's verificatio
 the commands: `pnpm test:e2e`, `pnpm check`, `pnpm typecheck`, `pnpm test -- --run`,
 `pnpm test:coverage`, `pnpm build`, `node scripts/validate-bundle.js`,
 `node scripts/validate-pwa.js`, `node scripts/validate-docs.js`. The `Test suite` row is a
-current living value refreshed on 2026-11-24 for docs truth.
+current living value refreshed on 2026-11-25 for docs truth.
 
 | Measurement | Value | Source |
 | --- | --- | --- |
@@ -908,7 +908,7 @@ current living value refreshed on 2026-11-24 for docs truth.
 | JavaScript chunks emitted | **51** (51 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **63 entries** (1826.19 KiB) | the build's PWA step |
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite (current living value, verified 2026-11-24) | 158 files / 3,395 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-25) | 158 files / 3,396 tests | `pnpm test -- --run` |
 | Coverage | statements 97.12 % / branches 90.93 % / functions 96.20 % / lines 98.31 % | `pnpm test:coverage` |
 | Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI splits them across two shards of 13 browser cases each, 2.5 and 3.7 min | `pnpm test:e2e` |
 
@@ -969,7 +969,7 @@ headroom; the structural ratio check is the real anti-bloat guard and must never
 | Typical tiered GPU bytes | **76.07 MiB** (cap **80 MiB**) | `node scripts/validate-textures.js` |
 | Full uniform 512² bytes | **319.00 MiB** (cap **320 MiB**) | `node scripts/validate-textures.js` |
 | Tier ratio (typical / full) | **0.238** (hard cap **0.5**) | `node scripts/validate-textures.js` |
-| Unit suite after this track (current living value, verified 2026-11-24) | 158 files / 3,395 tests | `pnpm exec vitest run` |
+| Unit suite after this track (current living value, verified 2026-11-25) | 158 files / 3,396 tests | `pnpm exec vitest run` |
 
 `scripts/validate-textures.js` enumerates every `src/assets/svg/**/*.svg`, resolves each key's tier
 with the same ordered prefix rules as `src/utils/textureTiers.ts` (`tile_`, `group_`, `sm_shadow_`,
