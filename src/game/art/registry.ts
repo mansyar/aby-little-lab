@@ -10,6 +10,8 @@ interface SceneLoads {
   readonly events: Phaser.Events.EventEmitter;
   /** Keys this scene queued and that have not settled yet. */
   readonly keys: Set<string>;
+  /** Whether each in-flight key wants a placeholder if its file errors. */
+  readonly placeholderOnError: Map<string, boolean>;
   /** Keys whose file errored in this scene, still owed a placeholder. */
   readonly failed: Set<string>;
   readonly onFileComplete: (key: string) => void;
@@ -56,6 +58,7 @@ function detachScene(scene: Phaser.Scene): void {
     keyOwners.delete(key);
   }
   record.keys.clear();
+  record.placeholderOnError.clear();
   record.failed.clear();
   record.load.off("filecomplete", record.onFileComplete);
   record.load.off("loaderror", record.onLoadError);
@@ -73,17 +76,23 @@ function attachScene(scene: Phaser.Scene): SceneLoads {
     load: scene.load,
     events: scene.events,
     keys: new Set<string>(),
+    placeholderOnError: new Map<string, boolean>(),
     failed,
     onFileComplete: (key: string): void => {
       releaseKey(key);
+      record.placeholderOnError.delete(key);
       failed.delete(key);
     },
     onLoadError: (file: Phaser.Loader.File): void => {
-      // Release for a later retry, but remember the key: the loader's
-      // `complete` is the one moment a placeholder can be drawn before the
-      // scene's `create` asks for the texture.
+      // Only the scene that registered the file owns its fallback policy.
+      if (keyOwners.get(file.key) !== record) return;
+      // Release for a later retry, but remember keys that still owe a
+      // placeholder: the loader's `complete` is the one moment it can be drawn
+      // before the scene's `create` asks for the texture.
+      const wantsPlaceholder = record.placeholderOnError.get(file.key) ?? true;
       releaseKey(file.key);
-      failed.add(file.key);
+      record.placeholderOnError.delete(file.key);
+      if (wantsPlaceholder) failed.add(file.key);
     },
     onComplete: (): void => {
       for (const key of failed) ensureArtTexture(scene, key);
@@ -98,6 +107,38 @@ function attachScene(scene: Phaser.Scene): SceneLoads {
   record.load.on("complete", record.onComplete);
   record.events.on("shutdown", record.onShutdown);
   return record;
+}
+
+/** Whether a failed shared load still owes the scene a neutral placeholder. */
+export interface QueueArtTextureOptions {
+  readonly placeholderOnError?: boolean;
+}
+
+/**
+ * Registers one rasterized SVG key in the game-wide in-flight guard and queues
+ * it on `scene`'s loader. Returns false without touching the loader when the
+ * texture already exists or another scene already owns the key.
+ *
+ * Ownership is released when the file completes, errors, or the scene shuts
+ * down. Game preloads keep the placeholder-on-error fallback; Hub idle prewarm
+ * opts out so a failed idle raster stays absent and can be retried next pass.
+ */
+export function queueArtTexture(
+  scene: Phaser.Scene,
+  key: string,
+  dataUri: string,
+  { placeholderOnError = true }: QueueArtTextureOptions = {},
+): boolean {
+  if (scene.textures.exists(key) || keyOwners.has(key)) return false;
+
+  const owner = attachScene(scene);
+  owner.keys.add(key);
+  owner.placeholderOnError.set(key, placeholderOnError);
+  keyOwners.set(key, owner);
+
+  const size = textureSizeFor(key);
+  scene.load.svg(key, dataUri, { width: size, height: size });
+  return true;
 }
 
 /**
@@ -119,14 +160,7 @@ function attachScene(scene: Phaser.Scene): SceneLoads {
 export function preloadArtGroups(scene: Phaser.Scene, groups: readonly ArtGroup[]): void {
   for (const group of groups) {
     for (const asset of group.assets) {
-      if (scene.textures.exists(asset.key) || keyOwners.has(asset.key)) continue;
-
-      const owner = attachScene(scene);
-      owner.keys.add(asset.key);
-      keyOwners.set(asset.key, owner);
-
-      const size = textureSizeFor(asset.key);
-      scene.load.svg(asset.key, toDataUri(asset.svg), { width: size, height: size });
+      queueArtTexture(scene, asset.key, toDataUri(asset.svg));
     }
   }
 }
