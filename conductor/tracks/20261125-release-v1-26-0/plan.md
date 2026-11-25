@@ -88,7 +88,7 @@
 - **Covers:** FR-8, NFR-2, NFR-5, NFR-6, AC-8, AC-10
 - **Touches:** release notes or docs only if review requires a correction; Conductor review/PR/verification state
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; CI Quality Gates, Browser Journeys shard 1, shard 2 and rollup; final scope diff inspection
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P4.T1: Run `conductor-review`** — covers: FR-8
   - Resolve blocking findings; allow at most two review-fix rounds.
