@@ -6,22 +6,30 @@
 - **Branch:** `chore/20261126-retention-proxy`
 - **Phase base:** `f757b3c624e0c0b64c58e577c433d21d678d8f24`
 - **Head commit (F1 fix):** `53657e4f14abad14f3b22014a26dda4b67173fd5`
+- **Head commit (evidence):** `493c1ca352703e927ba20424a5d5370a1e833d2b`
 
 ## Result
 
-**Blocked.** The F1 documentation fix is committed and the docs validator passed,
-but the executor shell denied the exact configured gate and the CRLF-aware
-whitespace check. Per the phase rules neither denied command was retried or
-worked around. The primary must run both verbatim before this phase can be
-marked verified; no verification claim is made for those two layers here.
+**Verified.** The F1 documentation fix is committed and the primary reran the
+exact configured gate and CRLF-aware whitespace check verbatim against the final
+head; both exited 0. The executor's shell had denied those two commands and
+reported them without retry or workaround, as required.
 
 ## Commands
 
 | Layer | Command | Result | Notes |
 | --- | --- | --- | --- |
-| documents | `node scripts/validate-docs.js` | Pass | Executor run: exit 0, 5 passed / 0 failed. |
-| whitespace | `git -c core.whitespace=cr-at-eol diff --check` | Denied | Shell returned `permission.rejected`. Not retried. Expected: exit 0 with no diagnostics. |
-| full gate | `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` | Denied | Shell returned `permission.rejected`. Not retried. Expected: exit 0, as recorded for prior phases. |
+| documents | `node scripts/validate-docs.js` | Pass | Executor run: 5 passed / 0 failed. Primary rerun inside exact gate: 5 passed / 0 failed. |
+| whitespace | `git -c core.whitespace=cr-at-eol diff --check` | Pass | Executor shell denied it; primary rerun verbatim: exit 0, no diagnostics. |
+| full gate | `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` | Pass | Primary rerun at final head: exit 0; raw log `.conductor/evidence/phase-R1/gate.log`. |
+
+Primary gate figures: Biome 375 files; app/E2E typechecks passed; unit and
+coverage runs each 158 files / 3,406 tests; coverage 97.09 % statements, 90.93 %
+branches, 96.35 % functions, 98.23 % lines; 491 modules; shell `index-CzNKiaF1.js`
+199.96 kB raw / 51.15 kB gzip / 195.3 kB guarded; module guard 172 TypeScript
+files with zero warnings; 319 SVGs; PWA 16/16 with 52 chunks / 64 precache
+entries; docs 5/5. Only warning was the pre-existing Phaser vendor chunk above
+500 kB.
 
 ## F1 closure evidence
 
@@ -44,9 +52,9 @@ asset, schema, storage, telemetry, or network file changed.
 
 | AC | Requirement | Evidence | Status |
 | --- | --- | --- | --- |
-| AC-2 | Day-7 proxy, at least 40 % target, and source link documented as directional | `docs/retention-validation.md` §3; `verification/phase-1.md` self-check | Documentation fixed; full gate pending primary rerun |
-| F1 | Day-7 proxy computable from collectible exports | `docs/retention-validation.md` §§2–3, §5–6; fix table above | Documentation fixed; full gate pending primary rerun |
-| NFR-4 | CRLF-aware whitespace check and docs validation | docs Pass; whitespace Denied | Partial — primary rerun required |
+| F1 | Day-7 proxy computable from collectible exports | `docs/retention-validation.md` §§2–3, §5–6; fix table above | Closed |
+| AC-2 | Day-7 proxy, at least 40 % target, and source link documented as directional | `docs/retention-validation.md` §3; `verification/phase-1.md` self-check | Pass |
+| NFR-4 | CRLF-aware whitespace check and docs validation | docs 5/5 pass; whitespace exit 0 | Pass |
 
 ## Scope statement
 
@@ -57,16 +65,14 @@ file changed, and no validator or gate was weakened.
 
 ## Deviations
 
-- `docs/retention-validation.md` §1 was pluralized from one export to two exports
-  plus the interview. This was required to keep the evidence-source wording
-  consistent with the revised §2/§3; it is inside the file already listed in
-  the phase `Touches`.
+- **Primary verification fallback:** the executor's shell denied the exact gate
+  and CRLF-aware whitespace commands. It reported them without retry or
+  workaround; the primary reran both verbatim and records the results above.
 
 ## Notes
 
 - No family was recruited, contacted, or interviewed; no Day-7 or close-out
   export was read; no field result, observed Day-7 value, production-retention
   figure, physical-device coverage, or statistical significance is claimed.
-- The primary should run the two denied commands verbatim against head
-  `53657e4f14abad14f3b22014a26dda4b67173fd5` and record their exit codes before
-  accepting this phase. No workaround was attempted in this phase.
+- The revised proxy is a conservative observed-span stand-in, not a true first-play
+  return rate; the roadmap's retention question remains open.

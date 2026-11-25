@@ -63,8 +63,11 @@
 - **Covers:** F1, FR-2, AC-2
 - **Touches:** `docs/retention-validation.md`, `conductor/tracks/20261126-retention-proxy/verification/phase-1.md`, `conductor/tracks/20261126-retention-proxy/verification/phase-R1.md`
 - **Verification:** Exact configured gate; `node scripts/validate-docs.js`; `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** verified
+- **Result:** F1 closed by paired-export proxy definition and field self-check; primary exact gate and CRLF-aware whitespace passed at final head `493c1ca`.
+- **Checkpoint:** `493c1ca352703e927ba20424a5d5370a1e833d2b`
+- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R1.md`
 
-- [ ] **R1.T1: Redefine the Day-7 proxy using paired Day-7 and close-out exports** — covers: F1, FR-2, AC-2
-- [ ] **R1.T2: Add a field-by-field proxy input self-check and correct Phase 1 AC-2 evidence** — covers: F1, AC-2
-- [ ] **R1.T3: Run the exact gate and record R1 verification evidence** — covers: F1, NFR-4
+- [x] **R1.T1: Redefine the Day-7 proxy using paired Day-7 and close-out exports** — covers: F1, FR-2, AC-2
+- [x] **R1.T2: Add a field-by-field proxy input self-check and correct Phase 1 AC-2 evidence** — covers: F1, AC-2
+- [x] **R1.T3: Run the exact gate and record R1 verification evidence** — covers: F1, NFR-4
