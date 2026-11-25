@@ -109,3 +109,17 @@ Evidence: `verification/phase-4.md` — documentation validation and the exact c
 - [x] **P5.T2: Record engine profiles, versions, durations, and retries** — covers: FR-6, NFR-5, AC-7
 - [x] **P5.T3: Inspect the final scope and project selection** — covers: FR-3, FR-9, NFR-1, NFR-7, AC-4, AC-11
 - [x] **P5.T4: Write integrated evidence and identify the PR CI gate** — covers: AC-5, AC-6, AC-8, AC-9, AC-10
+
+## Phase R1: Final review mapping
+
+- **Goal:** Close strict-review finding F1 and revalidate the final tree.
+- **Depends on:** Phase 5
+- **Covers:** FR-10, AC-10
+- **Touches:** `docs/TDD.md`, `conductor/tracks/20261125-browser-matrix/verification/phase-R1.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `git -c core.whitespace=cr-at-eol diff --check`
+- **Status:** in_progress
+
+### Tasks
+
+- [ ] **R1.T1: Correct the re-dated TDD coverage claim to the integrated values** — covers: FR-10, AC-10
+- [ ] **R1.T2: Run the exact gate, record evidence and return to strict review** — covers: FR-10, AC-10
