@@ -1,7 +1,7 @@
 # Release Notes - v1.26.0
 
-> Status: DRAFT
-> Tag: (pending)
+> Status: FINAL
+> Tag: `v1.26.0` (`3c0cef4a63a779132370fb8ec056a7be55bc56ea`, 2026-11-25)
 > Base: `v1.25.0` (`4359667bbeea5a774efe5675fd6cc62069c96dc0`, 2026-11-23)
 
 Five reviewed changes have merged since v1.25.0. For families, the Hub now offers a fresh textless suggestion and an earned-sticker spotlight, the adaptive challenge is better balanced, and Find the Word gets to its first round faster. Behind the scenes, the development tools are current and first-tap performance now has repeatable evidence. The games keep the same rules and controls, and nothing new is asked of a child. Profiles, stickers, settings and saves carry over without migration.
@@ -47,11 +47,11 @@ Five PRs merged after v1.25.0, in this order.
 
 ## Installation
 
-Nothing to install by hand: this release is the PWA shell plus its content-addressed chunks, served from the live URL after the tag deploy. Offline play uses the precached entries from the first visit. There is no storage migration: existing profiles, stickers, settings and saves carry over exactly as they were. Tag and deploy remain pending until the separate approval gate.
+Nothing to install by hand: this release is the PWA shell plus its content-addressed chunks, served from the live URL after the tag deploy. Offline play uses the precached entries from the first visit. There is no storage migration: existing profiles, stickers, settings and saves carry over exactly as they were. The live release was verified at `https://aby-little-lab.ansyar-world.top/`.
 
 ## Release Verification
 
-> This is a DRAFT. The figures below were measured on the exact release candidate on 2026-11-25. Release-commit CI, the targeted device smoke, tag and deploy remain separate gates.
+> These figures were measured on the exact release candidate on 2026-11-25. The merged release commit and the `v1.26.0` tag both passed CI, and the live deployment was verified after the authorized Coolify deploy.
 
 - Full gate: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` exited 0.
 - Unit and coverage: 158 test files and 3,395 tests passed on every release-candidate run; coverage was 97.08–97.10% statements, 90.92–90.96% branches, 96.35% functions and 98.23% lines across the repeated runs.
@@ -67,15 +67,15 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 | Add It Up | 10 | 75.1 ms | 45.0 ms | 161.1 ms |
 | Memory Match | 10 | 75.9 ms | 39.9 ms | 266.9 ms |
 
-- Raw evidence: the exact headed stdout and parseable JSON, plus integrated verification, are preserved in this release track's verification directory and will move with it into the Conductor archive at completion. The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
-- Browser journeys: pending release-commit CI. The automated Playwright Browser Journeys run against the built `dist` in Chromium, in two shards plus a rollup. They exercise pointer input, storage and service-worker behavior, but they are **not real-device coverage** and make no Firefox or WebKit support claim.
-- Targeted device smoke: pending Phase 5. No physical-device install, landscape, offline-reload or first-tap-audio result is claimed by this draft.
-- Tag, CI and deploy: pending. No `v1.26.0` tag has been created, no release CI run is recorded, and no deployment has been verified.
+- Raw evidence: the exact headed stdout and parseable JSON, plus integrated verification, are preserved in [this release track's verification directory](../conductor/archive/20261125-release-v1-26-0/verification/integrated.md). The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
+- Browser journeys: PASS. Release PR [#99](https://github.com/mansyar/aby-little-lab/pull/99) run `45540144729` and tag run `45541584364` both passed the two Playwright Browser Journeys shards and rollup. They exercise the built `dist` in Chromium with pointer input, storage and service-worker behavior, but they are **not real-device coverage** and make no Firefox or WebKit support claim.
+- Targeted device smoke: **SKIPPED — accepted gap**. No suitable physical hardware was available for this release. No physical-device install, landscape, offline-reload or first-tap-audio result is claimed; the focused checklist remains in [device-testing-checklist.md](device-testing-checklist.md).
+- Tag, CI and deploy: PASS. Annotated tag `v1.26.0` was pushed on merged `master` commit `3c0cef4a`. Tag CI run [`45541584364`](https://github.com/mansyar/aby-little-lab/actions/runs/45541584364) passed Quality Gates and both Browser Journeys shards; the Deploy to Coolify job fired successfully. The live URL returned HTTP 200 and served `index-0f9hfHo0.js`, byte-identical to the local release build (SHA-256 `c4cbae0f83550bde1bf66fe186581d219aa62fe512be31fc80e356b5a46e652e`), with `1.26.0` present in the bundle.
 
 ## Known Issues
 
 The full list of known issues lives in the README's [Known Issues](../README.md#known-issues) section, and planned work lives in [conductor/roadmap.md §10](../conductor/roadmap.md#10-roadmap); nothing below duplicates either.
 
-- Targeted device coverage is still pending. The automated Chromium Browser Journeys are valuable release evidence, but they do not replace the focused physical-device smoke in [device-testing-checklist.md](device-testing-checklist.md).
+- Targeted device coverage remains an accepted gap for v1.26.0. The automated Chromium Browser Journeys are valuable release evidence, but they do not replace the focused physical-device smoke in [device-testing-checklist.md](device-testing-checklist.md).
 - Non-Chromium browser support and production retention evidence are not claimed. The browser-matrix and real-family retention work remain separate roadmap items.
-- No new known issue is filed by the five reviewed PRs. Final release-state verification and the device-policy decision remain open gates recorded in [release-checklist.md](release-checklist.md).
+- No new known issue is filed by the five reviewed PRs. The local gate, release CI, merge, tag, deploy, live asset check and notes finalization are complete; the device-policy decision is recorded in the release evidence.

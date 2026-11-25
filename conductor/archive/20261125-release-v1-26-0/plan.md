@@ -88,7 +88,7 @@
 - **Covers:** FR-6, FR-8, NFR-2, NFR-5, NFR-6, AC-6, AC-8, AC-10
 - **Touches:** release notes or docs only if review requires a correction; Conductor review/PR/verification state
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; CI Quality Gates, Browser Journeys shard 1, shard 2 and rollup; final scope diff inspection
-- **Status:** in_progress
+- **Status:** verified
 
 - [x] **P4.T1: Run `conductor-review`** — covers: FR-8
   - Resolve blocking findings; allow at most two review-fix rounds.
@@ -97,13 +97,13 @@
   - Conventional title: `chore(release): ship v1.26.0`.
   - Media: none; this is metadata/documentation-only.
   - Include requirements coverage, verification summary and the separate human tag gate.
-- [ ] **P4.T3: Watch CI and merge after go-ahead** — covers: FR-6, FR-8, AC-6, AC-8
+- [x] **P4.T3: Watch CI and merge after go-ahead** — covers: FR-6, FR-8, AC-6, AC-8
   - Require green Quality Gates and all Browser Journeys jobs.
   - Merge with the configured `merge` method only after the required approval.
-- [ ] **P4.T4: Record merge evidence** — covers: NFR-3
+- [x] **P4.T4: Record merge evidence** — covers: NFR-3
 
-**Result:** pending
-**Checkpoint:** pending
+**Result:** verified
+**Checkpoint:** `3c0cef4a`
 **Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-4.md`
 
 ## Phase 5: Device policy, tag, deploy and final notes
@@ -113,21 +113,21 @@
 - **Covers:** FR-7, FR-9, FR-10, NFR-5, AC-7, AC-9
 - **Touches:** `docs/release-notes-v1.26.0.md`, `docs/device-testing-checklist.md` if a device pass is executed, Conductor verification/state, git tag
 - **Verification:** device result or recorded accepted gap; no tag collision; tag on merged `master` HEAD; tag CI green; live URL/build/version verified; `node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** verified
 
-- [ ] **P5.T1: Resolve the targeted device-smoke policy** — covers: FR-7, AC-7
+- [x] **P5.T1: Resolve the targeted device-smoke policy** — covers: FR-7, AC-7
   - If hardware is available, ask the owner to run the focused install/landscape/offline/first-tap-audio smoke against the release candidate over HTTPS.
   - Otherwise record `SKIPPED — accepted gap` before tagging.
-- [ ] **P5.T2: Preflight the tag** — covers: FR-9
+- [x] **P5.T2: Preflight the tag** — covers: FR-9
   - Fetch `master`; confirm the release merge is HEAD and clean.
   - Confirm `v1.26.0` exists neither locally nor on origin.
-- [ ] **P5.T3: Create and push the tag after explicit approval** — covers: FR-9, AC-9
+- [x] **P5.T3: Create and push the tag after explicit approval** — covers: FR-9, AC-9
   - Annotate `v1.26.0` on merged `master` HEAD.
   - Never move the tag after push.
-- [ ] **P5.T4: Verify tag CI and deployment** — covers: FR-9, AC-9
+- [x] **P5.T4: Verify tag CI and deployment** — covers: FR-9, AC-9
   - Require Quality Gates and Browser Journeys to pass and the Coolify job to fire.
   - Verify the live URL serves the release build and reports `1.26.0`.
-- [ ] **P5.T5: Finalize notes and close the ship gate** — covers: FR-9, AC-9
+- [x] **P5.T5: Finalize notes and close the ship gate** — covers: FR-9, AC-9
   - Flip `DRAFT` to `FINAL`; record tag commit, CI run, deploy result and device policy.
   - Follow the post-tag finalization procedure below, which is the documented release exception and cites the v1.25.0 precedent.
 
@@ -141,8 +141,8 @@
 6. Run `node scripts/validate-docs.js` and `git diff --check`; inspect that the diff is limited to release notes and Conductor archive/state files.
 7. Commit and push `master` with conventional release/Conductor messages. This is the single documented direct-to-`master` exception; never force-push, reset, move or recreate the tag. A failure stops the gate and requires a reviewed follow-up.
 
-**Result:** pending
-**Checkpoint:** pending
+**Result:** verified
+**Checkpoint:** `3c0cef4a`
 **Evidence:** `conductor/archive/20261125-release-v1-26-0/verification/phase-5.md`
 
 ## Phase R1: Review fixes

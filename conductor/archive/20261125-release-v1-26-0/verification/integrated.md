@@ -5,7 +5,7 @@
 - **Date:** 2026-11-25
 - **Phase base:** `9a9e7e65`
 - **Measured implementation head:** `428db16c` (notes refreshed afterward on the same release tree)
-- **Result:** pass for local release-candidate checks; CI, device, tag and deploy remain gated
+- **Result:** pass for local release-candidate checks, release PR/tag CI, merge, deploy and live verification; targeted device smoke is an accepted gap
 
 ## Commands and Results
 
@@ -62,12 +62,12 @@ measurement.
 
 | ID | Status | Evidence |
 | --- | --- | --- |
-| AC-2 | covered for release-candidate content | Notes cover PRs #94–#98 in merge order and now cite measured local results; final CI/tag/device claims remain pending. |
+| AC-2 | covered | Notes cover PRs #94–#98 in merge order and cite measured local, CI, tag, deploy and live results; device coverage remains an accepted gap. |
 | AC-5 | pass | Exact gate and all local release checks above. |
-| AC-6 | pending | Release PR/merge CI is Phase 4. |
-| AC-7 | pending | Targeted device policy is Phase 5. |
-| AC-8 | review PASS; merge pending | Strict review passed in round 3 with F1–F5 closed; owner-approved merge is Phase 4. |
-| AC-9 | pending | Explicit tag/deploy approval is Phase 5. |
+| AC-6 | pass | PR run `45540144729` and tag run `45541584364`: Quality Gates, both Browser Journeys shards and rollup passed. |
+| AC-7 | accepted gap | Owner selected “Skip — accepted gap”; no physical-device result is claimed. |
+| AC-8 | pass | Strict review passed in round 3 with F1–F5 closed; owner-approved PR #99 merged as `3c0cef4a`. |
+| AC-9 | pass | Owner authorized tag/deploy; `v1.26.0` CI and Coolify passed; live shell hash/version matched the local build. |
 | AC-10 | pass | Release diff contains only package version, release docs, roadmap truth and Conductor state/evidence; no runtime/dependency/asset/schema change. |
 
 ## Subagent Permission Fallback
@@ -98,6 +98,16 @@ head. The reviewer independently reran documentation validation at final head
 F1–F5 closed and no new findings. Post-review doc sync found no living-document
 change necessary; CI, device, tag, deploy and final notes remain assigned to
 their explicit later gates.
+
+## Release Verification
+
+- PR #99 run `45540144729`: Quality Gates, Browser Journeys shard 1, shard 2 and rollup passed.
+- Owner approved merge; PR #99 merged as `3c0cef4a63a779132370fb8ec056a7be55bc56ea`, and the release branch was cleaned up.
+- Owner approved tag/deploy; annotated tag `v1.26.0` was pushed on the merged commit and never moved.
+- Tag run `45541584364`: Quality Gates, both Browser Journeys shards, rollup and Deploy to Coolify passed.
+- Live URL `https://aby-little-lab.ansyar-world.top/` returned HTTP 200 and served `index-0f9hfHo0.js` byte-identical to the local build (SHA-256 `c4cbae0f83550bde1bf66fe186581d219aa62fe512be31fc80e356b5a46e652e`) with `1.26.0` present.
+- Targeted physical-device smoke was skipped as an accepted gap; no device or non-Chromium coverage is claimed.
+- `docs/release-notes-v1.26.0.md` is FINAL; the post-tag docs/Conductor-only finalization procedure was followed.
 
 ## Evidence Paths
 
