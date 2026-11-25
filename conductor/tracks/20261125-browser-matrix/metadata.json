@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-11-25T15:20:30.1649356+11:00",
-  "updated_at": "2026-11-25T17:40:00+11:00",
+  "updated_at": "2026-11-25T18:00:57.8011765+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261125-browser-matrix",
@@ -14,11 +14,11 @@
   "base_sha": "54621f70b5913f8c1b358e25baa212d4d34aa389",
   "progress": {
     "phases_total": 5,
-    "phases_verified": 3,
+    "phases_verified": 4,
     "tasks_total": 23,
-    "tasks_done": 15
+    "tasks_done": 19
   },
-  "last_checkpoint": "96801bf8",
+  "last_checkpoint": "14fea5f6",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

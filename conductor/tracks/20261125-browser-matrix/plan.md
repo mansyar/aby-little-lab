@@ -77,14 +77,20 @@ Evidence: `verification/phase-3.md` — exact gate and first-attempt Chromium 26
 - **Covers:** FR-7, FR-8, FR-10, NFR-5, AC-9, AC-10, AC-11
 - **Touches:** `README.md`, `docs/TDD.md`, `docs/device-testing-checklist.md`, `conductor/tech-stack.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
 ### Tasks
 
-- [ ] **P4.T1: Document project roles and local commands** — covers: FR-7, AC-9
-- [ ] **P4.T2: Correct stale worker prose and document CI behavior** — covers: FR-8, FR-10
-- [ ] **P4.T3: Separate emulation from physical-device checks** — covers: FR-10, NFR-5, AC-10
-- [ ] **P4.T4: Record the unchanged dependency and runtime scope** — covers: AC-11
+- [x] **P4.T1: Document project roles and local commands** — covers: FR-7, AC-9
+- [x] **P4.T2: Correct stale worker prose and document CI behavior** — covers: FR-8, FR-10
+- [x] **P4.T3: Separate emulation from physical-device checks** — covers: FR-10, NFR-5, AC-10
+- [x] **P4.T4: Record the unchanged dependency and runtime scope** — covers: AC-11
+
+**Result:** verified
+
+**Checkpoint:** `14fea5f6`
+
+Evidence: `verification/phase-4.md` — documentation validation and the exact configured gate passed; engine emulation and the pending manual physical-device gate are explicitly separated.
 
 ## Phase 5: Integrated verification and handoff
 
