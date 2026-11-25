@@ -4,76 +4,63 @@
 - **Phase:** 3
 - **Date:** 2026-11-25
 - **Branch:** `chore/20261125-release-v1-26-0`
-- **Phase base:** `9a9e7e65`
-- **Execution head:** `3d27585bf5b1990a5cbc87ec05e08290b4ca0eba` before this evidence commit
-- **Result:** `blocked`
+- **Base:** `9a9e7e65`
+- **Measured implementation head:** `428db16c`
+- **Result:** `verified`
 
 ## Result Summary
 
-The primary resolved the earlier port-preflight permission blocker and recorded
-that neither port 4173 nor 8080 has a listener. Phase 3 resumed from
-`3d27585b` without rerunning that preflight.
+The exact configured full gate, rebuilt-container header validation, production
+boot smoke and headed cold-control first-tap measurement all passed on the
+release candidate. The exact gate was rerun after refreshing the notes and
+evidence and again exited 0. The release notes now contain measured release-state
+figures while leaving CI, device, tag and deploy claims pending their later gates.
 
-The required integrated full gate was then denied by the restricted shell:
-
-```text
-pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js
-```
-
-The tool returned `permission.rejected` / `Permission denied: shell`. Per the
-brief's stop conditions, the command was not retried, split, rephrased or worked
-around. No gate subcommand result is claimed. Docker rebuild/header validation,
-the headed cold-control run and the release-note refresh were not started.
+The subagent's restricted shell denied the port preflight and full gate. The
+primary ran the preflight and all required checks under the documented fallback;
+the subagent's blocker commits are preserved and this report supersedes them.
 
 ## Commands
 
-| Layer | Command | Exit | Summary |
-| --- | --- | --- | --- |
-| git | `git status --short --branch` | 0 | On `chore/20261125-release-v1-26-0`; working tree clean on resume. |
-| git | `git rev-parse HEAD` | 0 | Returned `3d27585bf5b1990a5cbc87ec05e08290b4ca0eba`. |
-| preflight | `Get-NetTCPConnection -LocalPort 4173,8080 -State Listen` (primary) | 1 | No matching CIM objects; primary confirmed no listeners on 4173 or 8080. Not rerun by the phase executor. |
-| full gate | `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` | denied | Restricted shell rejected the exact required command. |
+| Command | Exit | Summary |
+| --- | ---: | --- |
+| `Get-NetTCPConnection -LocalPort 4173,8080 -State Listen` | 1 | No matching listeners; both ports free. The cmdlet exits 1 when no objects match. |
+| `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` | 0 | Full configured gate passed. |
+| `docker build --build-arg GIT_SHA=<HEAD> -t aby-little-lab:headers .` | 0 | Fresh image `sha256:21d3b670ea56da854febaf90f999cbf62c55781e23727e312a20d3582f960b8b`. |
+| `node scripts/validate-headers.js` | 0 | 28/28 checks passed. |
+| `$env:TAP_HEADED='1'; $env:TAP_INERT_IDLE='1'; node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` | 0 | Boot passed; exactly 50 cold / 0 warm, 10 per game; worst cold 300.2 ms. |
+| `node scripts/validate-docs.js` | 0 | 5/5 after refreshing release notes. |
 
-## Task Status
-
-| Task | Status | Evidence |
-| --- | --- | --- |
-| P3.T1 — integrated full gate | not started | Exact command denied before execution. |
-| P3.T2 — boot, headers and headed first tap | not started | Blocked behind the required full gate. |
-| P3.T3 — refresh release notes | not started | No measured release-state figures exist yet. |
-| P3.T4 — evidence and commits | done | This blocker report replaces the earlier blocked report and is committed conventionally. |
-
-## Acceptance Criteria Coverage
+## Acceptance Criteria
 
 | ID | Criterion | Evidence | Status |
 | --- | --- | --- | --- |
-| AC-2 | Release notes cover PRs #94–#98 and make no unsupported claims. | Existing DRAFT notes remain unchanged and continue to label Phase 3 figures as pending. | pending |
-| AC-5 | Exact `verify_phase` chain exits 0 with current figures recorded. | The exact required chain was denied; no gate result exists. | blocked |
-| AC-6 | CI Quality Gates and both Browser Journeys shards plus rollup pass. | Remains pending Phase 4 CI; not claimed here. | pending |
-| AC-10 | Release diff contains no runtime/dependency/asset/save-schema changes. | This phase changes only Conductor verification evidence. | pass for attempted scope |
+| AC-2 | Notes cover PRs #94–#98 in merge order and make no unsupported claims. | Shipped sections unchanged; Release Verification now cites measured local results and explicitly leaves CI/device/tag/deploy pending. | pass |
+| AC-5 | Exact gate exits 0 and actual figures are recorded. | `verification/integrated.md` records suite, coverage, build, bundle, module, texture, PWA, docs, boot, headers and headed results. | pass |
+| AC-10 | No runtime/dependency/asset/save-schema change. | Phase 3 changed only release notes and Conductor evidence; cumulative release diff remains metadata/docs/roadmap/Conductor only. | pass |
 
-## Blockers
+## Concrete Evidence
 
-- **Command:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Why needed:** P3.T1 requires this exact configured gate to run once on the
-  release candidate and record actual suite, coverage, build and guard figures.
-- **Expected:** Every subcommand runs in order and the chain exits 0.
-- **Observed:** `{"error":{"type":"permission.rejected","message":"Permission denied: shell"},"content":[]}`
-
-The primary must run the exact gate under its documented fallback. Once its
-actual output is available, Phase 3 can continue with the fresh Docker image and
-header validator, the exact headed 50-cold/0-warm command, the Release
-Verification-only notes refresh and the final verified evidence report.
+- 158 test files / 3,395 tests; coverage 97.10% statements, 90.96% branches, 96.35% functions, 98.23% lines.
+- Build: 491 modules; shell 197.99 kB raw / 50.40 kB gzip; bundle guard 193.4 kB; 172 TypeScript files with zero warnings; 319 SVGs; PWA 16/16 with 52 JS chunks and 64 precache entries; docs 5/5.
+- Boot median: 0.81 s over three cold loads (budget 3.0 s).
+- Headed cold p95 total: 265.9 ms aggregate; per-game totals 300.2 / 254.5 / 193.9 / 161.1 / 266.9 ms. Worst cold total 300.2 ms, below the unchanged 400 ms gate.
+- Headers: 28/28. The pre-existing missing-hashed-asset cache-header quirk is recorded in the validator output and unchanged.
 
 ## Evidence Paths
 
-- This report: `conductor/tracks/20261125-release-v1-26-0/verification/phase-3.md`
-- Phase brief: `.conductor/runs/20261125-release-v1-26-0/phase-3-brief.md`
-- Raw headed JSON: not created; measurement did not run.
+- `conductor/tracks/20261125-release-v1-26-0/verification/integrated.md`
+- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.json`
+- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.stdout.txt`
+- `conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.log`
+- `docs/release-notes-v1.26.0.md` § Release Verification
 
 ## Deviations and Scope Confirmation
 
-No deviations were made. Only this authorized Conductor verification file was
-written. Release notes, implementation source, tests, assets, dependencies,
-lockfiles and all Conductor state files remain unchanged. No server, container,
-browser, build, tag, push, merge, rebase, reset or branch switch occurred.
+Primary-owned verification was required because the phase subagent's sandbox
+denied the preflight and gate. The harness's trailing PASS line was separated
+from its JSON for machine readability while preserving exact stdout. Neither
+action changed a threshold, sample count or measurement. Only release notes and
+Conductor evidence changed in this phase. No runtime source, tests, assets,
+dependencies, lockfiles, tags, deployment, push, merge, reset or branch switch
+occurred.

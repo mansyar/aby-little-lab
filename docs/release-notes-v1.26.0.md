@@ -51,14 +51,24 @@ Nothing to install by hand: this release is the PWA shell plus its content-addre
 
 ## Release Verification
 
-> This is a DRAFT. Final release-state figures are refreshed on the exact release candidate in Phase 3; archived PR figures are evidence for the shipped changes, not substitutes for that measurement.
+> This is a DRAFT. The figures below were measured on the exact release candidate on 2026-11-25. Release-commit CI, the targeted device smoke, tag and deploy remain separate gates.
 
-- Full gate: the configured `verify_phase` chain covers lint, typecheck, unit tests, coverage, production build, the bundle, module-size, texture, PWA and docs validators. Final release-state results are pending Phase 3.
-- Unit and coverage: suite counts and coverage percentages are pending the Phase 3 release-state run.
-- Build artifacts: shell size, module-size, texture and PWA validator figures are pending the Phase 3 release-state run.
-- Boot and headers: the built-app boot smoke and strict header checks are pending Phase 3.
-- First tap: the exact headed cold-control command, sample counts, p95 table and worst-cold gate result are pending the Phase 3 release-candidate run. The archived passing baseline and its refresh procedure live in [perf-baseline.md](perf-baseline.md#per-release-first-tap-refresh).
-- Browser journeys: CI runs the automated Playwright Browser Journeys against the built `dist` in Chromium, in two shards plus a rollup. Those jobs exercise pointer input, storage and service-worker behavior, but they are **not real-device coverage** and make no Firefox or WebKit support claim. Release-commit CI results are pending.
+- Full gate: `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` exited 0.
+- Unit and coverage: 158 test files and 3,395 tests passed; coverage was 97.10% statements, 90.96% branches, 96.35% functions and 98.23% lines.
+- Build artifacts: 491 modules; shell entry `index-0f9hfHo0.js` was 197.99 kB raw / 50.40 kB gzip and 193.4 kB under the bundle guard; 172 TypeScript files had zero module-size warnings; 319 SVGs passed the texture budget; PWA validation passed 16/16 with 52 JavaScript chunks and 64 precache entries; documentation validation passed 5/5.
+- Boot and headers: the production-preview boot smoke passed with a 0.81 s median over three cold loads against the 3.0 s budget. A freshly built release-candidate container (`sha256:21d3b670ea56da854febaf90f999cbf62c55781e23727e312a20d3582f960b8b`) passed all 28 strict-header checks. The validator's pre-existing immutable-cache quirk on a missing hashed asset remains recorded, unchanged.
+- First tap: `TAP_HEADED=1 TAP_INERT_IDLE=1 node scripts/measure-first-tap.mjs --with-preview --json --warm-aware --samples 10` exited 0 with exactly 50 cold / 0 warm runs and 10 samples per target game. Aggregate cold p95 was 75.1 ms response, 45.0 ms chunk-finished and 265.9 ms first-frame total; cold median total was 192 ms. The worst cold total was 300.2 ms (Shape Sorter), below the unchanged 400 ms gate.
+
+| Game | Cold samples | p95 response | p95 chunk finished | p95 first-frame total |
+| --- | ---: | ---: | ---: | ---: |
+| Shape Sorter | 10 | 65.0 ms | 34.9 ms | 300.2 ms |
+| Find the Letter | 10 | 45.4 ms | 33.4 ms | 254.5 ms |
+| Find the Word | 10 | 93.7 ms | 54.3 ms | 193.9 ms |
+| Add It Up | 10 | 75.1 ms | 45.0 ms | 161.1 ms |
+| Memory Match | 10 | 75.9 ms | 39.9 ms | 266.9 ms |
+
+- Raw evidence: [headed first-tap JSON](../conductor/tracks/20261125-release-v1-26-0/verification/first-tap-headed.json) and [integrated verification](../conductor/tracks/20261125-release-v1-26-0/verification/integrated.md). The archived 2026-11-24 baseline remains in [perf-baseline.md](perf-baseline.md#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24).
+- Browser journeys: pending release-commit CI. The automated Playwright Browser Journeys run against the built `dist` in Chromium, in two shards plus a rollup. They exercise pointer input, storage and service-worker behavior, but they are **not real-device coverage** and make no Firefox or WebKit support claim.
 - Targeted device smoke: pending Phase 5. No physical-device install, landscape, offline-reload or first-tap-audio result is claimed by this draft.
 - Tag, CI and deploy: pending. No `v1.26.0` tag has been created, no release CI run is recorded, and no deployment has been verified.
 
