@@ -14,18 +14,20 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-10, FR-12, NFR-1, NFR-3, NFR-4, AC-1, AC-2, AC-3, AC-12
 - **Touches:** `package.json`, `pnpm-lock.yaml` only if required for consistency, `README.md` (Documentation index link only), `docs/release-notes-v1.26.1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`; `pnpm install --frozen-lockfile`
-- **Status:** in_progress
+- **Status:** verified
+- **Result:** version, DRAFT notes and index link verified by the exact gate and frozen install; evidence in `verification/phase-1.md`
+- **Checkpoint:** `659ac77175ee8920a2da865fa05355fcff5a87f4`
 
-- [ ] **P1.T1: Bump the release version** — covers: FR-1, AC-1, NFR-1
+- [x] **P1.T1: Bump the release version** — covers: FR-1, AC-1, NFR-1
   - Run `pnpm version 1.26.1 --no-git-tag-version`.
   - Confirm no dependency or lockfile drift; preserve deterministic frozen installation.
-- [ ] **P1.T2: Draft the v1.26.1 release notes** — covers: FR-2, FR-3, FR-10, FR-12, AC-2, AC-3
+- [x] **P1.T2: Draft the v1.26.1 release notes** — covers: FR-2, FR-3, FR-10, FR-12, AC-2, AC-3
   - Use `Status: DRAFT`, `Tag: (pending)`, and `Base: v1.26.0 (3c0cef4a, 2026-11-25)`.
   - Cover PR #100 from its archived PR record: cross-engine smoke matrix, blocking rollup, strict evidence helper, and the three smoke-proven compatibility fixes.
   - State that profiles, stickers, settings and saves carry over without migration.
   - Leave tag/deploy and device-result claims pending until those gates complete.
   - Add the new notes to the README Documentation index so `validate-docs.js` can pass in this phase.
-- [ ] **P1.T3: Record phase evidence and task commits** — covers: NFR-3, NFR-4
+- [x] **P1.T3: Record phase evidence and task commits** — covers: NFR-3, NFR-4
   - Save actual gate output in `verification/phase-1.md`.
   - Use conventional commits; do not tag.
 
