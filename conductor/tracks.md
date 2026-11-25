@@ -2,7 +2,7 @@
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
-- [ ] **Track: Release v1.26.0** - [20261125-release-v1-26-0](./tracks/20261125-release-v1-26-0/index.md) - chore - high
+- [~] **Track: Release v1.26.0** - [20261125-release-v1-26-0](./tracks/20261125-release-v1-26-0/index.md) - chore - high
 
 ---
 
