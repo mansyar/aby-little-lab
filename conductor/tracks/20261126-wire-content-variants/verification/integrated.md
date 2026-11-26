@@ -29,7 +29,7 @@ The exact configured `verify_phase` chain was run once against the full branch d
 
 | ID | Criterion | Evidence | Status |
 | --- | --- | --- | --- |
-| AC-1 | Seeded selector tests yield both slide ids with no retained state | `src/__tests__/game/contentVariants.test.ts` (via phase-1 gate), `verification/phase-1.md` | pass |
+| AC-1 | Seeded selector tests yield both slide ids with no retained state | `src/__tests__/game/wordLogic.test.ts` (`pickVariantId` block), `verification/phase-1.md` | pass |
 | AC-2 | Word tests draw both variants; tier split, shift and no-repeat invariants hold | `src/__tests__/game/wordLogic.test.ts`, `verification/phase-1.md` | pass |
 | AC-3 | Story tests draw both variants and fall back safely for `growing-things` | `src/__tests__/game/storyOrderLogic.test.ts`, `verification/phase-1.md` | pass |
 | AC-4 | Shape tests draw both variants and fall back safely for `curvy` | `src/__tests__/game/shapeSorterLogic.test.ts`, `verification/phase-1.md` | pass |

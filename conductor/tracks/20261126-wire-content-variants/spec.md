@@ -41,11 +41,11 @@ is the depth work that realises the content already paid for.
 
 - A pure variant selector in `src/game/contentVariants.ts` that chooses one of
   two named slide ids from an injected RNG with no state.
-- An optional variant id on `generateWordPlaythrough`,
-  `generateWordBuildPlaythrough` where it shares the word pool,
-  `buildPlaythrough`, `generatePlaythrough`, and `drawScenarios`, using the
-  variant's pool when it preserves the game's guarantees and falling back to
-  the full classic pool otherwise.
+- An optional variant id on `generateWordPlaythrough`, `buildPlaythrough`,
+  `generatePlaythrough`, and `drawScenarios`, using the variant's pool when it
+  preserves the game's guarantees and falling back to the full classic pool
+  otherwise. `generateWordBuildPlaythrough` has no in-scope caller and is not
+  changed.
 - Per-playthrough 50/50 variant selection in `WordMatchScene`,
   `StoryOrderScene`, `ShapeSorterScene`, and `FeelingsFacesScene`, passed
   through to the generator with no UI or persistence.
@@ -73,7 +73,7 @@ is the depth work that realises the content already paid for.
 | FR-1 | A pure selector chooses one of the two named variant slide ids from an injected RNG with a 50/50 distribution and no retained state. | must |
 | FR-2 | `generateWordPlaythrough` accepts an optional variant id and uses that word pool while preserving the 3-letter/4-letter tier split, the adaptive shift, and no repeats within a run; it falls back to the full classic pool when the variant cannot satisfy the draw. | must |
 | FR-3 | The story-order generator accepts an optional variant id and uses that pool while preserving the obvious/subtle mix for the active shift and no repeats; `growing-things` falls back to the full classic pool because its obvious pool has only two stories. | must |
-| FR-4 | The shape-sorter generator accepts an optional variant id and uses that pool while preserving three unique shapes per round and no repeats across the run; `curvy` falls back to the full classic pool because eight shapes cannot fill a six-round run. | must |
+| FR-4 | The shape-sorter generator accepts an optional variant id and uses that pool while preserving three unique shapes per round and no repeats across the run; `curvy` falls back to the full classic pool because eight shapes cannot fill a three-round, nine-shape run. | must |
 | FR-5 | The feelings-faces generator accepts an optional variant id and uses that pool while preserving one scenario per emotion and no repeats. | must |
 | FR-6 | WordMatch, StoryOrder, ShapeSorter, and FeelingsFaces each select a slide per playthrough with the existing RNG and pass it to the generator, with no UI or persisted setting. | must |
 | FR-7 | Existing callers that supply no variant keep the exact prior behavior for a seeded RNG; defaults and public signatures remain backward compatible. | must |
