@@ -85,3 +85,14 @@
 - **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
 
 - [x] **R2.T1: Set metadata task counts to the 13 checked plan tasks and record R2 evidence** — covers: F2
+
+## Phase R3: Final evidence correction
+
+- **Goal:** Resolve owner-approved final findings F3 and F4 in `verification/phase-R2.md`.
+- **Depends on:** Phase R2
+- **Covers:** F3, F4
+- **Touches:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`, `conductor/tracks/20261126-retention-proxy/plan.md`, `conductor/tracks/20261126-retention-proxy/metadata.json`
+- **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
+- **Status:** pending
+
+- [ ] **R3.T1: Correct the R2 scope claim and add the R2 head commit, then record verified evidence** — covers: F3, F4
