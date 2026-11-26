@@ -70,25 +70,23 @@
 - **Depends on:** Phase 2
 - **Covers:** FR-9, NFR-4, NFR-5, AC-9
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/changelog.md`
+  - Approved deviation: PRD §4.11 “Replay variety” plus its Contents entry, because the document ends at §9; no existing heading, anchor or link was changed.
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P3.T1: Update the PRD** — covers: FR-9
+- [x] **P3.T1: Update the PRD** — covers: FR-9
   - [ ] **P3.T1.1:** Record that all four signature variant sets now reach play through a 50/50 per-playthrough draw
   - [ ] **P3.T1.2:** Note that thin variants fall back to the full classic pool and the deeper-pool stance is now satisfied
-- [ ] **P3.T2: Update the TDD** — covers: FR-9
+- [x] **P3.T2: Update the TDD** — covers: FR-9
   - [ ] **P3.T2.1:** Describe the selector, optional generator arguments, and fallback rules
   - [ ] **P3.T2.2:** Record the invariants preserved and the tests that prove both slides
-- [ ] **P3.T3: Update the changelog and prove docs** — covers: AC-9, NFR-5
+- [x] **P3.T3: Update the changelog and prove docs** — covers: AC-9, NFR-5
   - [ ] **P3.T3.1:** Add a concise changelog entry without editing `docs/release-notes-v1.25.0.md`
   - [ ] **P3.T3.2:** Run the full gate and confirm `node scripts/validate-docs.js` reports 5 passed / 0 failed
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261126-wire-content-variants/verification/phase-3.md
--->
+**Checkpoint:** `88c85b009cb8520a4bc3543fa68cb264a6222318`
+**Evidence:** `conductor/tracks/20261126-wire-content-variants/verification/phase-3.md`
 
 <!--
 Review fixes are appended by `conductor-review` as:

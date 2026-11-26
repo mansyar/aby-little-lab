@@ -102,4 +102,4 @@ the exact command with exit 0 and appended the output to the brief.
   commit recorded by the primary.
 - **Deviations:** the `docs/PRD.md` §4.11 addition listed above was approved as
   required to document the deeper-pool stance without inventing a nonexistent §10.
-- **Checkpoint:** to be recorded after squash.
+- **Checkpoint:** `88c85b009cb8520a4bc3543fa68cb264a6222318`.
