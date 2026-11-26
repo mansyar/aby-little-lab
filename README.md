@@ -278,6 +278,7 @@ Release mechanics: bump `package.json` → tag `vX.Y.Z` → push to `master` (CI
 - [child-privacy.md](docs/child-privacy.md) - What data the app handles and how it stays on the device
 - [store-privacy-labels.md](docs/store-privacy-labels.md) - Prepared store privacy labels, not a submission
 - [retention-validation.md](docs/retention-validation.md) - Consented protocol, local proxy definition and privacy rules for confirming the retention proxy; recruitment not executed
+- [retention-pilot-pack.md](docs/retention-pilot-pack.md) - Blank, not-yet-run recruitment note, consent form, evidence layout, checklist and proxy worksheet derived from the protocol
 - [device-testing-checklist.md](docs/device-testing-checklist.md) - HTTPS device and offline validation checklist
 - [release-checklist.md](docs/release-checklist.md) - Production build, PWA, deployment, and rollback checklist
 - [perf-baseline.md](docs/perf-baseline.md) - The measured boot, bundle and first-tap budgets

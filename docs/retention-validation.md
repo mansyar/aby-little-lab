@@ -177,3 +177,5 @@ the roadmap's retention question is explicitly left open.
   these rules preserve.
 - [Product intent](product-intent.md) — the recorded family-only audience and
   legal posture.
+- [Retention pilot pack](retention-pilot-pack.md) — the blank, not-yet-run pack of
+  run sheets that turns this protocol into forms an operator can fill in.
