@@ -5,6 +5,7 @@
 - **Date:** 2026-11-26
 - **Branch:** `chore/20261126-retention-proxy`
 - **Phase base:** `b0a0fd52950d14d923ba3e27de62ab3c5b711b31`
+- **Head commit:** `16d7536278d00894ffcb9f91d1aaeeec1737d894`
 - **Result:** verified
 
 ## Result
@@ -33,5 +34,6 @@ appending R2.T1 makes 13, so both `tasks_total` and `tasks_done` are 13.
 - No family was recruited, contacted, or interviewed; no export was read; no
   field result, observed proxy value, production-retention claim, device coverage,
   or statistical significance is claimed.
-- The non-Conductor documentation tree remains byte-identical to gated head
-  `ce3768dab7f27a0725e628d5a15a44a0889740c2`.
+- The R2 delta (`268968fd..16d75362`) is Conductor-only. The only
+  non-Conductor change since gated head `ce3768da` is the R1 paired-export
+  proxy fix in `docs/retention-validation.md`, committed in `53657e4f`.
