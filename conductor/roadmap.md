@@ -29,7 +29,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-4 | Confirm the retention proxy with a handful of real families | chore | low | — | `20261126-retention-proxy` | user |
 
 ## Dropped
 
