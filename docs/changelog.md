@@ -2,6 +2,10 @@
 
 Dated entries moved verbatim from `conductor/product.md` and `conductor/tech-stack.md` on 2026-11-23 (track `20261123-release-v1-25-0`).
 
+## Changelog — Signature content variants in play (2026-11-26)
+
+> **2026-11-26 — Content variants in play:** the four signature content pairs shipped with v1.25.0 as opt-in pools now reach real playthroughs. Find the Word draws between `animals-and-food` and `everyday-objects`, Story Order between `growing-things` and `everyday-changes`, Shape Sorter between `curvy` and `angular`, and Feelings Faces between `outdoors-and-play` and `home-and-friends`. Each scene makes one 50/50 draw from the existing pure selector with its own RNG before the first round, then passes the id to the generator; no setting, saved field, extra game or rule change is involved. The thin `growing-things` and `curvy` slides fall back to their game's normal pool when they cannot fill a band's story mix or three unique shapes, while the word and scenario slides serve every shift. Tier splits, no-repeat rules, round counts, scoring and adaptive bands are unchanged. The v1.25.0 note remains the historical record of when the pools shipped; PRD §4.11 and the TDD now carry the durable behaviour.
+
 ## Changelog — Game 24: Fix-It Machine (2026-11-16)
 
 > **2026-11-16 — Game 24 — Fix-It Machine:** the suite's first debugging game, and

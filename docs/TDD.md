@@ -1066,10 +1066,11 @@ An entry is `{ at, kind, message, stack }`. `kind` is `error` or `rejection`, so
 | `audioIdentity.ts` | the per-game audio identities - pitch offset, waveform, tempo and the correct/incorrect/win contours - and `identityForGameId` ([§8.7](#87-the-per-game-audio-identity)) |
 | `bigSmallLogic.ts` | Big & Small pair generation and classification |
 | `colorMatchLogic.ts` | colour round generation |
+| `contentVariants.ts` | the frozen signature-variant id arrays for words, stories, shapes and scenarios, and the pure `pickVariantId(ids, rng)` selector that draws one id per playthrough |
 | `countLogic.ts` | How Many? bands and group cards |
 | `decodeLogic.ts` | Decode It word/letter mapping |
 | `dragBoard.ts` | the shared drag shell: slots (single or multi capacity), pieces, drop validation, wrong-answer behaviour and tap-to-withdraw ([§9.3](#93-press-drag-and-completion-feedback)) |
-| `feelingsFacesLogic.ts` | contrast ladder of faces and prompts |
+| `feelingsFacesLogic.ts` | contrast ladder of faces and prompts; `drawScenarios(rng, variant?)` draws one scenario per emotion from the chosen slide |
 | `firstSoundsLogic.ts` | phonics rounds from a 12-word subset |
 | `gameRegistry.ts` | the one declaration of the 24 games — `gameId`, `group`, `sceneKey`, `label`, `tileKey`, `stickerKey` and the icon overrides — plus `stickerKeyForGame`; `GameId` coverage is enforced by the type checker |
 | `hubGrid.ts` | the Hub grid orchestrator: it holds the group selection and delegates to `hub/gridBuilder` (tiles, the filtered board and page dots), `hub/groupChips` (the chip row), `hub/pageBoard` (paging, page dots and the swipe gesture), `hub/stickerShelf` (earned stickers) and `hub/timeUpDim` (the play-time dim) |
@@ -1093,12 +1094,12 @@ An entry is `{ at, kind, message, stack }`. `kind` is `error` or `rejection`, so
 | `robotPathArt.ts` | `ROBOT_PATH_ASSETS` (the six Robot Path drawings) + `preloadRobotPathArt` (imports Phaser types only) |
 | `robotPathLogic.ts` | the Robot Path model: `DIRECTIONS`, `canPlace`, `removeFrom` (prefix only), `runProgram`, `firstDeviation`, `hintFor` and `buildPlaythrough` over a 3×3 board |
 | `shadowMatchLogic.ts` | shadow/object pairing and win test |
-| `shapeSorterLogic.ts` | shape sets, `ShapeType`, matching |
+| `shapeSorterLogic.ts` | shape sets, `ShapeType`, matching; `generatePlaythrough(roundCount, shift, rng, variant?)` intersects the slide with the band pool and falls back when it cannot supply three unique shapes per round |
 | `storyOrderArt.ts` | 90 story panel SVGs + `preloadStoryOrderArt` (imports Phaser types only) |
-| `storyOrderLogic.ts` | `STORY_POOL`, shuffling, whole-strip validation |
+| `storyOrderLogic.ts` | `STORY_POOL`, shuffling, whole-strip validation; `buildPlaythrough(rng, shift, variant?)` restricts the mix to the chosen slide and falls back to both full pools when it cannot fill the band's mix |
 | `takeAwayLogic.ts` | Take Away rounds and answer checking |
 | `voiceLogic.ts` | `availableVoiceOptions`, `resolveVoice` |
-| `wordLogic.ts` | word pools and word-round generation |
+| `wordLogic.ts` | word pools and word-round generation; `generateWordPlaythrough(roundCount, shift, rng, variant?)` draws from the chosen word slide while preserving the tier split and unique starting letters |
 | `art/` | the twelve lazy art groups and their loader - 145 keys that travel with the game that draws them - plus the placeholder a failed key degrades to ([§3.5](#35-in-chunk-art)) |
 | `hub/` | the decomposed Hub grid: tile layout, page board, sticker shelf and the time-up dim |
 
@@ -1114,6 +1115,8 @@ isCorrect(round, selectedIndex): boolean
 The scene builds the playthrough once in `create()` (never per round), then renders index by index. Because the builder is a pure function of `shift`, the same seed of inputs always produces the same ladder for the same profile state — the "adaptive" part is the shift, not randomness.
 
 Games that do not fit the shape expose their own equivalents: `shapeSorterLogic.generatePlaythrough`/`isMatch`, `shadowMatchLogic.generateRound`/`isMatch`/`isWin`, `musicalMemoryLogic`'s sequence length helpers, and `animalTraceLogic`'s path completion test.
+
+Four signature games add one optional final argument to their playthrough builder: `generateWordPlaythrough(roundCount, shift, rng, variant?)`, `buildPlaythrough(rng, shift, variant?)`, `generatePlaythrough(roundCount, shift, rng, variant?)` and `drawScenarios(rng, variant?)`. The caller passes the id returned by `pickVariantId` over the matching frozen array in `src/game/contentVariants.ts` — `WORD_VARIANT_IDS` (`animals-and-food`, `everyday-objects`), `STORY_VARIANT_IDS` (`growing-things`, `everyday-changes`), `SHAPE_VARIANT_IDS` (`curvy`, `angular`) and `SCENARIO_VARIANT_IDS` (`outdoors-and-play`, `home-and-friends`). The selector takes one draw from the injected `Rng`, clamps it into the array and keeps no state, so the same seed picks the same slide. Each of the four scenes draws once in `create()` from the RNG it already owns and forwards the id to the generator; no scene uses `Math.random` for the slide. Omitting the argument keeps the original full-pool path. Two slides are thin and declare their fallback: `growing-things` has only two obvious stories, so a band mix it cannot fill uses the full obvious and subtle pools, and `curvy` has only eight shapes, so a draw that cannot supply three unique shapes within the band pool uses that band's normal pool. The word and scenario slides carry enough items for every shift. Every original invariant holds: tier mix and no repeated starting letter for words, obvious/subtle mix and no repeated stories, three unique shapes per round with no global repeats, and one scenario per emotion with no repeats. Round counts, scoring, completion and adaptive-band behaviour are unchanged.
 
 ### 7.3 Adaptive banding
 
@@ -1160,7 +1163,7 @@ The pedagogy lives in [`docs/PRD.md#48-adaptive-difficulty`](./PRD.md#48-adaptiv
 
 ### 7.4 Randomness
 
-Shuffling uses `Math.random` by default. Where a module needs determinism it takes an optional RNG parameter — `storyOrderLogic.buildRound`/`buildPlaythrough` accept an injectable RNG so tests can pin a strip, and the builder guarantees a non-identity permutation even for a degenerate RNG (a reshuffle guard plus a one-step rotation). Other modules are tested by asserting invariants (counts, bands, membership) rather than exact order.
+Shuffling uses `Math.random` by default. Where a module needs determinism it takes an optional RNG parameter — `storyOrderLogic.buildRound`/`buildPlaythrough` accept an injectable RNG so tests can pin a strip, and the builder guarantees a non-identity permutation even for a degenerate RNG (a reshuffle guard plus a one-step rotation). Other modules are tested by asserting invariants (counts, bands, membership) rather than exact order. The signature content slide is drawn from that same injected RNG through the pure `pickVariantId`, never from `Math.random`, so a seeded test fixes both the slide and the round order it generates.
 
 ### 7.5 Play-time sessions
 
@@ -1326,7 +1329,7 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 158 test files, 3,435 tests (verified 2026-11-26). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
-Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules.
+Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules. Both slides of each signature pair are exercised with seeded RNGs in the game-logic suites and in the matching scene/flow suites, so a test pins the slide instead of leaving it to chance; the thin story and shape fallback paths are asserted there as well.
 
 ### 10.3 Coverage gates
 
