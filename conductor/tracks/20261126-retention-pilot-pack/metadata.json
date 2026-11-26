@@ -6,7 +6,7 @@
   "priority": "medium",
   "depends_on": [],
   "created_at": "2026-11-26T13:59:37+11:00",
-  "updated_at": "2026-11-26T14:27:44+11:00",
+  "updated_at": "2026-11-26T14:37:20+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "chore/20261126-retention-pilot-pack",
@@ -14,11 +14,11 @@
   "base_sha": "221defe4fbbb197dee1730d22ca2cead45dfcdbf",
   "progress": {
     "phases_total": 2,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 8,
-    "tasks_done": 6
+    "tasks_done": 8
   },
-  "last_checkpoint": "be92d541",
+  "last_checkpoint": "04c9eb60",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

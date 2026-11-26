@@ -49,4 +49,4 @@ None. All edits stayed within Touches (`docs/retention-validation.md`); the evid
 ## Primary verification
 
 - Verdict: **accepted**. The primary independently confirmed a clean tree, a phase-base diff limited to `docs/retention-validation.md` and this evidence file, the executor's three reported commits with no merges or unrelated commits, the new §7 link resolving, and the exact verification chain exiting 0 with the document validator at 5 passed / 0 failed.
-- Phase checkpoint: to be recorded after squash (`conductor(plan): Mark phase 'Link and prove' as complete`).
+- Phase checkpoint: `04c9eb60` (`chore(retention): link pilot pack from validation protocol`).
