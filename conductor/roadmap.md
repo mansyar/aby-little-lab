@@ -24,7 +24,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-6 | Surface adaptive-band movement on the Progress Overview | feature | high | — | 20261127-progress-band-movement | user |
 | RM-7 | Add a parent Help overlay explaining controls, data, backup, and play-time | feature | medium | — | — | user |
 
 ## Later

@@ -9,6 +9,7 @@ Closes RM-6.
 - **ID:** 20261127-progress-band-movement
 - **Type:** feature
 - **Priority:** high
+- **Pull request:** [#105](https://github.com/mansyar/aby-little-lab/pull/105)
 - **Spec:** [spec.md](conductor/archive/20261127-progress-band-movement/spec.md)
 - **Plan:** [plan.md](conductor/archive/20261127-progress-band-movement/plan.md)
 - **Review:** [review.md](conductor/archive/20261127-progress-band-movement/review.md)
