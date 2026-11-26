@@ -71,3 +71,14 @@
 - [x] **R1.T1: Redefine the Day-7 proxy using paired Day-7 and close-out exports** — covers: F1, FR-2, AC-2
 - [x] **R1.T2: Add a field-by-field proxy input self-check and correct Phase 1 AC-2 evidence** — covers: F1, AC-2
 - [x] **R1.T3: Run the exact gate and record R1 verification evidence** — covers: F1, NFR-4
+
+## Phase R2: Review state bookkeeping
+
+- **Goal:** Resolve review finding F2 so Conductor metadata accurately reports the completed task count.
+- **Depends on:** Phase R1
+- **Covers:** F2
+- **Touches:** `conductor/tracks/20261126-retention-proxy/metadata.json`, `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
+- **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
+- **Status:** pending
+
+- [ ] **R2.T1: Set metadata task counts to the 12 checked plan tasks and record R2 evidence** — covers: F2
