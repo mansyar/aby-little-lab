@@ -23,7 +23,7 @@
 
 **Result:** verified
 **Checkpoint:** `c295715f`
-**Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-1.md`
+**Evidence:** `conductor/archive/20261126-retention-proxy/verification/phase-1.md`
 
 ## Phase 2: Roadmap linkage
 
@@ -35,7 +35,7 @@
 - **Status:** verified
 - **Result:** Roadmap linkage verified at `675a810b`; RM-4 links to the track and §10.9 links to the protocol; docs validation and CRLF-aware whitespace passed.
 - **Checkpoint:** `675a810b7873bed47fdd145674a9c6dc3eaca553`
-- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-2.md`
+- **Evidence:** `conductor/archive/20261126-retention-proxy/verification/phase-2.md`
 
 - [x] **P2.T1: Link RM-4 to this track** — covers: FR-7, AC-7
 - [x] **P2.T2: Reference the protocol from the §10.9 risk** — covers: FR-7, NFR-5, AC-7
@@ -45,12 +45,12 @@
 - **Goal:** Full gate, documentation validation, scope audit, and committed integrated evidence pass.
 - **Depends on:** Phase 2
 - **Covers:** NFR-4, AC-8
-- **Touches:** `conductor/tracks/20261126-retention-proxy/verification/`
+- **Touches:** `conductor/archive/20261126-retention-proxy/verification/`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** verified
 - **Result:** Exact configured gate and CRLF-aware whitespace check passed on primary rerun at `ce3768da`; scope audit confirmed documentation/Conductor-only diff; integrated evidence committed.
 - **Checkpoint:** `ce3768dab7f27a0725e628d5a15a44a0889740c2`
-- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/integrated.md`
+- **Evidence:** `conductor/archive/20261126-retention-proxy/verification/integrated.md`
 
 - [x] **P3.T1: Run the exact configured gate** — covers: AC-8
 - [x] **P3.T2: Run docs validation and CRLF-aware whitespace check** — covers: NFR-4, AC-8
@@ -61,12 +61,12 @@
 - **Goal:** Resolve review finding F1 so the Day-7 proxy is computable from collectible exports.
 - **Depends on:** Phase 3
 - **Covers:** F1, FR-2, AC-2
-- **Touches:** `docs/retention-validation.md`, `conductor/tracks/20261126-retention-proxy/verification/phase-1.md`, `conductor/tracks/20261126-retention-proxy/verification/phase-R1.md`
+- **Touches:** `docs/retention-validation.md`, `conductor/archive/20261126-retention-proxy/verification/phase-1.md`, `conductor/archive/20261126-retention-proxy/verification/phase-R1.md`
 - **Verification:** Exact configured gate; `node scripts/validate-docs.js`; `git -c core.whitespace=cr-at-eol diff --check`
 - **Status:** verified
 - **Result:** F1 closed by paired-export proxy definition and field self-check; primary exact gate and CRLF-aware whitespace passed at final head `493c1ca`.
 - **Checkpoint:** `493c1ca352703e927ba20424a5d5370a1e833d2b`
-- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R1.md`
+- **Evidence:** `conductor/archive/20261126-retention-proxy/verification/phase-R1.md`
 
 - [x] **R1.T1: Redefine the Day-7 proxy using paired Day-7 and close-out exports** — covers: F1, FR-2, AC-2
 - [x] **R1.T2: Add a field-by-field proxy input self-check and correct Phase 1 AC-2 evidence** — covers: F1, AC-2
@@ -77,12 +77,12 @@
 - **Goal:** Resolve review finding F2 so Conductor metadata accurately reports the completed task count.
 - **Depends on:** Phase R1
 - **Covers:** F2
-- **Touches:** `conductor/tracks/20261126-retention-proxy/metadata.json`, `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
+- **Touches:** `conductor/archive/20261126-retention-proxy/metadata.json`, `conductor/archive/20261126-retention-proxy/verification/phase-R2.md`
 - **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
 - **Status:** verified
 - **Result:** F2 closed; metadata reports 5/5 phases and 13/13 tasks matching the plan; docs validation and CRLF-aware whitespace passed.
 - **Checkpoint:** `b0a0fd52950d14d923ba3e27de62ab3c5b711b31`
-- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
+- **Evidence:** `conductor/archive/20261126-retention-proxy/verification/phase-R2.md`
 
 - [x] **R2.T1: Set metadata task counts to the 13 checked plan tasks and record R2 evidence** — covers: F2
 
@@ -91,11 +91,11 @@
 - **Goal:** Resolve owner-approved final findings F3 and F4 in `verification/phase-R2.md`.
 - **Depends on:** Phase R2
 - **Covers:** F3, F4
-- **Touches:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`, `conductor/tracks/20261126-retention-proxy/plan.md`, `conductor/tracks/20261126-retention-proxy/metadata.json`
+- **Touches:** `conductor/archive/20261126-retention-proxy/verification/phase-R2.md`, `conductor/archive/20261126-retention-proxy/plan.md`, `conductor/archive/20261126-retention-proxy/metadata.json`
 - **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
 - **Status:** verified
 - **Result:** F3/F4 closed by correcting R2 evidence scope and adding the head commit; docs validation and CRLF-aware whitespace passed.
 - **Checkpoint:** `6b7da237859fee76656ea8c339a58083aff349b0`
-- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
+- **Evidence:** `conductor/archive/20261126-retention-proxy/verification/phase-R2.md`
 
 - [x] **R3.T1: Correct the R2 scope claim and add the R2 head commit, then record verified evidence** — covers: F3, F4

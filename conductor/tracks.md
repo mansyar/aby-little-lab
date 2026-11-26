@@ -5,7 +5,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Release v1.26.0** - [20261125-release-v1-26-0](./archive/20261125-release-v1-26-0/index.md) - chore - high (Archived)
 - [x] **Track: Browser Compatibility Matrix** — [20261125-browser-matrix](./archive/20261125-browser-matrix/index.md) — chore — medium (Archived)
 - [x] **Track: Release v1.26.1** - [20261126-release-v1-26-1](./archive/20261126-release-v1-26-1/index.md) - chore - high (Archived)
-- [~] **Track: Confirm the retention proxy with a handful of real families** — [20261126-retention-proxy](./tracks/20261126-retention-proxy/index.md) — chore — low
+- [x] **Track: Confirm the retention proxy with a handful of real families** — [20261126-retention-proxy](./archive/20261126-retention-proxy/index.md) — chore — low (Archived)
 
 ---
 

@@ -69,7 +69,7 @@ closed and no findings remain. The final state is 6/6 phases and 14/14 tasks.
 ### Medium
 
 - **F3 — false scope claim in R2 evidence — CLOSED in R3**
-  - **File:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md:36-37`
+  - **File:** `conductor/archive/20261126-retention-proxy/verification/phase-R2.md:36-37`
   - **What:** The note says the non-Conductor documentation tree remains byte-identical to `ce3768da`, but `git diff --quiet ce3768da..16d75362 -- . ':!conductor'` exits 1 because the R1 proxy fix changed `docs/retention-validation.md` after the gate.
   - **Why:** A verification file misstates scope and contradicts earlier evidence, weakening truthfulness.
   - **Fix:** State that the R2 delta is Conductor-only and that the only non-Conductor change since `ce3768da` is the R1 paired-export proxy fix in `docs/retention-validation.md`.
@@ -79,7 +79,7 @@ closed and no findings remain. The final state is 6/6 phases and 14/14 tasks.
 ### Low
 
 - **F4 — R2 evidence omits head commit — CLOSED in R3**
-  - **File:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md:3-8`
+  - **File:** `conductor/archive/20261126-retention-proxy/verification/phase-R2.md:3-8`
   - **What:** The header records phase base but no head commit, unlike other phase reports; configured evidence format requires both.
   - **Why:** Missing head commit weakens traceability of the exact revision checked.
   - **Fix:** Add a `Head commit` line naming `16d7536278d00894ffcb9f91d1aaeeec1737d894`.

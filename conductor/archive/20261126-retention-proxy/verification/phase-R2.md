@@ -26,7 +26,7 @@ appending R2.T1 makes 13, so both `tasks_total` and `tasks_done` are 13.
 
 | Required fix | Evidence |
 | --- | --- |
-| Metadata task counts must match the plan | `conductor/tracks/20261126-retention-proxy/metadata.json` reports `phases_total: 5`, `phases_verified: 5`, `tasks_total: 13`, `tasks_done: 13`; `plan.md` has five verified phases and 13 checked task boxes. |
+| Metadata task counts must match the plan | `conductor/archive/20261126-retention-proxy/metadata.json` reports `phases_total: 5`, `phases_verified: 5`, `tasks_total: 13`, `tasks_done: 13`; `plan.md` has five verified phases and 13 checked task boxes. |
 | No scope expansion | Only Conductor metadata and this evidence file changed in R2. No runtime source, test, dependency, lockfile, asset, schema, storage, telemetry, or network file changed. |
 
 ## Notes

@@ -77,12 +77,12 @@ Phaser vendor chunk above 500 kB.
 - `M README.md` — one added Documentation-index row.
 - `M conductor/roadmap.md` — RM-4 track cell `—` → `20261126-retention-proxy`; §10.9 mitigation cell gained the protocol link.
 - `M conductor/tracks.md` — one added in-progress track registry row.
-- `A conductor/tracks/20261126-retention-proxy/index.md`
-- `A conductor/tracks/20261126-retention-proxy/metadata.json`
-- `A conductor/tracks/20261126-retention-proxy/plan.md`
-- `A conductor/tracks/20261126-retention-proxy/spec.md`
-- `A conductor/tracks/20261126-retention-proxy/verification/phase-1.md`
-- `A conductor/tracks/20261126-retention-proxy/verification/phase-2.md`
+- `A conductor/archive/20261126-retention-proxy/index.md`
+- `A conductor/archive/20261126-retention-proxy/metadata.json`
+- `A conductor/archive/20261126-retention-proxy/plan.md`
+- `A conductor/archive/20261126-retention-proxy/spec.md`
+- `A conductor/archive/20261126-retention-proxy/verification/phase-1.md`
+- `A conductor/archive/20261126-retention-proxy/verification/phase-2.md`
 - `A docs/retention-validation.md`
 
 All entries are documentation or Conductor-state files. **No** runtime source, test,
