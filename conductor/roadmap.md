@@ -1,6 +1,6 @@
 # Conductor Roadmap
 
-<!-- next-rm-id: 10 -->
+<!-- next-rm-id: 11 -->
 
 > Planned and future work. The roadmap stores **intent** — ordering, priority,
 > and dependencies — not live state. `conductor-status` joins every entry whose
@@ -34,6 +34,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | RM-8 | Add a parent control for narration pace | feature | medium | — | — | user |
 | RM-9 | Add game 25: a Repeat Machine for loops | feature | medium | RM-5 | — | user |
+| RM-10 | Add a parent-facing sticker collection album in Progress | feature | low | — | — | user |
 
 ## Dropped
 
