@@ -12,6 +12,7 @@ describe the shipped behaviour.
 
 - **ID:** `20261126-wire-content-variants`
 - **Type:** `feature`
+- **Pull request:** [#104](https://github.com/mansyar/aby-little-lab/pull/104)
 - **Spec:** [`conductor/archive/20261126-wire-content-variants/spec.md`](conductor/archive/20261126-wire-content-variants/spec.md)
 - **Plan:** [`conductor/archive/20261126-wire-content-variants/plan.md`](conductor/archive/20261126-wire-content-variants/plan.md)
 - **Review:** [`conductor/archive/20261126-wire-content-variants/review.md`](conductor/archive/20261126-wire-content-variants/review.md)
