@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-8, NFR-1, NFR-2, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-5, AC-7, AC-8
 - **Touches:** `src/game/contentVariants.ts`, `src/game/wordLogic.ts`, `src/game/storyOrderLogic.ts`, `src/game/shapeSorterLogic.ts`, `src/game/feelingsFacesLogic.ts`, `src/__tests__/game/wordLogic.test.ts`, `src/__tests__/game/storyOrderLogic.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`, `src/__tests__/game/feelingsFacesLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Add the pure variant selector** — covers: FR-1
   - [ ] **P1.T1.1:** Define the two slide ids per game and a no-state selector driven by an injected RNG
