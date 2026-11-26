@@ -14,33 +14,31 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-9, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `src/game/adaptiveSummary.ts`, `src/__tests__/game/adaptiveSummary.test.ts`, `src/components/settings/ProgressOverlay.ts`, `src/__tests__/components/settings/ProgressOverlay.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Add adaptive-summary logic tests** — covers: FR-1, FR-2, FR-7, AC-1, AC-2, AC-3, AC-7
-  - [ ] **P1.T1.1:** Cover mixed, all-classic, sparse, and disabled states with deterministic fixtures.
-  - [ ] **P1.T1.2:** Cover exact threshold, short/malformed windows, no mutation, and boundary counts.
-- [ ] **P1.T2: Implement the pure adaptive-spread helper** — covers: FR-1, FR-2, FR-4, NFR-2, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-7
-  - [ ] **P1.T2.1:** Reuse `MIN_SAMPLE` and `bandShiftFor` to derive assessed/easier/classic/harder counts.
-  - [ ] **P1.T2.2:** Return explicit copy for every required state without clock, storage, or profile dependencies.
-- [ ] **P1.T3: Add Progress Overview component tests** — covers: FR-3, FR-5, FR-6, FR-7, AC-5, AC-6
-  - [ ] **P1.T3.1:** Prove viewed-profile switching changes the spread and never reads the active profile.
-  - [ ] **P1.T3.2:** Prove only the Overview note changes while per-game pages and the three statements remain intact.
-- [ ] **P1.T4: Wire the Overview readout** — covers: FR-3, FR-4, FR-5, FR-6, NFR-3, AC-4, AC-5, AC-6
-  - [ ] **P1.T4.1:** Replace the static note only on page 0 with the current-spread readout.
-  - [ ] **P1.T4.2:** Preserve the static per-game note, layout, paging, and adaptive-off behavior.
-- [ ] **P1.T5: Sync living engineering truth** — covers: FR-9, NFR-5, AC-8
-  - [ ] **P1.T5.1:** Update README/TDD/perf-baseline counts and build figures exposed by the gate.
-  - [ ] **P1.T5.2:** Keep historical release notes and archived figures unchanged.
-- [ ] **P1.T6: Run the full gate and record evidence** — covers: NFR-5, AC-8
-  - [ ] **P1.T6.1:** Run the exact configured verification chain and resolve any living-doc drift.
-  - [ ] **P1.T6.2:** Prove the phase-base diff stays inside the allowed scope and write `verification/phase-1.md`.
+- [x] **P1.T1: Add adaptive-summary logic tests** — covers: FR-1, FR-2, FR-7, AC-1, AC-2, AC-3, AC-7
+  - [x] **P1.T1.1:** Cover mixed, all-classic, sparse, and disabled states with deterministic fixtures.
+  - [x] **P1.T1.2:** Cover exact threshold, short/malformed windows, no mutation, and boundary counts.
+- [x] **P1.T2: Implement the pure adaptive-spread helper** — covers: FR-1, FR-2, FR-4, NFR-2, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-7
+  - [x] **P1.T2.1:** Reuse `MIN_SAMPLE` and `bandShiftFor` to derive assessed/easier/classic/harder counts.
+  - [x] **P1.T2.2:** Return explicit copy for every required state without clock, storage, or profile dependencies.
+- [x] **P1.T3: Add Progress Overview component tests** — covers: FR-3, FR-5, FR-6, FR-7, AC-5, AC-6
+  - [x] **P1.T3.1:** Prove viewed-profile switching changes the spread and never reads the active profile.
+  - [x] **P1.T3.2:** Prove only the Overview note changes while per-game pages and the three statements remain intact.
+- [x] **P1.T4: Wire the Overview readout** — covers: FR-3, FR-4, FR-5, FR-6, NFR-3, AC-4, AC-5, AC-6
+  - [x] **P1.T4.1:** Replace the static note only on page 0 with the current-spread readout.
+  - [x] **P1.T4.2:** Preserve the static per-game note, layout, paging, and adaptive-off behavior.
+- [x] **P1.T5: Sync living engineering truth** — covers: FR-9, NFR-5, AC-8
+  - [x] **P1.T5.1:** Update README/TDD/perf-baseline counts and build figures exposed by the gate.
+  - [x] **P1.T5.2:** Keep historical release notes and archived figures unchanged.
+- [x] **P1.T6: Run the full gate and record evidence** — covers: NFR-5, AC-8
+  - [x] **P1.T6.1:** Run the exact configured verification chain and resolve any living-doc drift.
+  - [x] **P1.T6.2:** Prove the phase-base diff stays inside the allowed scope and write `verification/phase-1.md`.
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261127-progress-band-movement/verification/phase-1.md
--->
+**Checkpoint:** `df98e3246122e3f98af41e883d0facd6d061407c`
+**Evidence:** `conductor/tracks/20261127-progress-band-movement/verification/phase-1.md`
+**Approved deviation:** `src/__tests__/components/SettingsPanel.test.ts` — updated one legacy static-note assertion to the new sparse Overview copy; no production code changed.
 
 ## Phase 2: Product documentation truth sync
 

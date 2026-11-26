@@ -74,4 +74,4 @@ IDs and wording follow `conductor/tracks/20261127-progress-band-movement/spec.md
 - **Acceptance criteria:** AC-1 through AC-8 are proved by the corrected table above. AC-9 remains Phase 2 scope.
 - **Deviation:** accepted as the smallest necessary update to a legacy assertion whose old static-note expectation no longer applies.
 - **Visual smoke:** `.conductor/media/20261127-progress-band-movement/progress-band-overview.png` was captured from the production build and inspected; the Overview shows the seeded 3-game / 1-easier / 1-classic / 1-harder spread. Media stays gitignored under `.conductor/media/` and is for the PR only.
-- **Checkpoint:** recorded at acceptance.
+- **Checkpoint:** `df98e3246122e3f98af41e883d0facd6d061407c`.
