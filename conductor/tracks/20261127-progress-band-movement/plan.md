@@ -76,7 +76,7 @@ Do not retire the RM-6 row until the track completion commit.
 - **Covers:** F1, F2, F3, NFR-3, NFR-5, FR-5, FR-8, AC-5, AC-9
 - **Touches:** `src/game/adaptiveSummary.ts`, `src/__tests__/game/adaptiveSummary.test.ts`, `src/components/settings/ProgressOverlay.ts`, `src/__tests__/components/settings/ProgressOverlay.test.ts`, `docs/PRD.md`, `docs/TDD.md`, `docs/changelog.md`, `README.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-progress-band-movement/verification/phase-2.md`, `conductor/tracks/20261127-progress-band-movement/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Exclude non-adaptive games from the spread** — covers: F1, NFR-3
   - [ ] Skip Robot Path and Fix-It Machine while retaining deterministic normalization and band rules.
