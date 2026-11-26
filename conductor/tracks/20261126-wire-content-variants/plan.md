@@ -95,7 +95,7 @@
 - **Covers:** F1
 - **Touches:** `conductor/tracks/20261126-wire-content-variants/spec.md`, `conductor/tracks/20261126-wire-content-variants/verification/integrated.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **R1.T1: Resolve F1** — covers: F1
   - [ ] **R1.T1.1:** Remove the unimplemented `generateWordBuildPlaythrough` mention from spec In Scope and correct FR-4's round wording to the shipped three-round shape session
