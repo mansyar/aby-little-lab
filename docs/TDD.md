@@ -1140,6 +1140,8 @@ A third kind of tap exists for games that ask a child to *find* something rather
 
 Twenty-two games read the shift; every one of them samples `getAdaptiveBandShift(gameId)` exactly once in `create()`, so a playthrough never changes difficulty mid-round. Their taps all reach the window, because the flush is unconditional. Robot Path and Fix-It Machine are the two games with no adaptive dimension: neither samples the shift, and both ladders are fixed.
 
+**Overview band spread.** `src/game/adaptiveSummary.ts` derives the parent-facing Overview note from the viewed profile's progress: `summariseAdaptiveSpread` normalises each record, skips windows shorter than `MIN_SAMPLE`, and classifies the rest with `bandShiftFor`. Only those same 22 adaptive games are assessed; Robot Path and Fix-It Machine are skipped even with a full window because no band reaches them. The four explicit states are adaptive off, no assessed game, all at classic, and a mixed easier/classic/harder spread. The Overview wraps the note to `OVERVIEW_TEXT_WIDTH` so the longest mixed line stays inside the 480px card, while per-game pages retain the static note. This is a present snapshot of existing windows, not band history, and makes no claim about the two-week longitudinal target.
+
 The fifteen band-ladder games receive the shift in six different ways:
 
 - **A shifted band ladder** - `shiftLadder(BASE_LADDER, shift)` - in `addItUpLogic`, `countLogic`, `moreLessLogic`, `takeAwayLogic`, `numberOrderLogic`, `memoryMatchLogic` and `patternBuilderLogic`.
@@ -1327,13 +1329,13 @@ Vitest on happy-dom, `globals: true`, one include pattern (`src/__tests__/**/*.t
 
 ### 10.2 Suite shape
 
-159 test files, 3,451 tests (verified 2026-11-27). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
+159 test files, 3,454 tests (verified 2026-11-27). The 7,013-line `navigation.test.ts` was split into focused files: Hub integration in `navigation`, `hubEngagement` and `hubPlayTime`; lifecycle in `sceneLifecycle` and `bootScene`; each game's flows co-located as `<game>Flow.test.ts`; assets, audio, components, game logic, scenes and utils each in their own folder.
 
 Per-scene flow suites drive a scene through a whole playthrough with the mocked Phaser surface, asserting round counts, correct/incorrect handling, progress dots, completion, sticker award and shutdown cleanup. Logic suites assert invariants over the pure modules. Both slides of each signature pair are exercised with seeded RNGs in the game-logic suites and in the matching scene/flow suites, so a test pins the slide instead of leaving it to chance; the thin story and shape fallback paths are asserted there as well.
 
 ### 10.3 Coverage gates
 
-Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-27) is statements 97.12 %, branches 91.04 %, functions 96.4 % and lines 98.25 % across 159 files and 3,451 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
+Thresholds (lines 95 / functions 88 / branches 85 / statements 90) live in `vite.config.ts` and fail `pnpm test:coverage`. Current coverage (verified 2026-11-27) is statements 97.12 %, branches 91.05 %, functions 96.4 % and lines 98.25 % across 159 files and 3,454 tests; per-run coverage instrumentation varies by a fraction of a point between identical runs.
 
 `src/main.ts` and `src/types/**` are excluded from the coverage denominator — the former is a config object plus two side effects, the latter is type-only. `src/scenes/sceneRegistry.ts` is fully covered (100 % on all four metrics) because its loaders are exercised through injected stubs. The lowest file is `src/game/decodeLogic.ts` at 75 % lines, 74.54 % statements, 83.33 % functions and 59.37 % branches; its uncovered lines 66–80 are the fallback distractor path, which a pool of 60 words never forces.
 

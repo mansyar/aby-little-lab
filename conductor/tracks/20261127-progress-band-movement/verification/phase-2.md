@@ -65,4 +65,3 @@ None.
 - **Acceptance criteria:** AC-9 is satisfied by the PRD and changelog wording, which explicitly distinguishes the current Overview snapshot from the unmeasured two-week longitudinal target.
 - **Gate:** the primary ran the exact configured chain after the executor's one shell denial; exit 0 with 159 test files / 3,451 tests, coverage above every configured threshold, build and all artifact guards green.
 - **Deviations:** none.
-

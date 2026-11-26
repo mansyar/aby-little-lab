@@ -578,6 +578,33 @@ describe("ProgressOverlay — current band spread on the Overview", () => {
     expect(liveTexts("1 / 5")).toHaveLength(1);
   });
 
+  it("wraps the longest mixed note inside the card and leaves the per-game note alone", () => {
+    recordGameResult("shape-sorter", 10, 0); // harder
+    recordGameResult("animal-trace", 2, 8); // easier
+    recordGameResult("pop-freeze", 8, 2); // classic
+    const overlay = new ProgressOverlay({
+      scene: new MockScene() as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    const longestMixedNote =
+      "Current bands · 3 games assessed · 1 easier · 1 classic · 1 harder · from recent answers";
+    const note = liveTexts(longestMixedNote)[0];
+    if (!note) throw new Error("no mixed note");
+    expect(note.args?.[3]).toMatchObject({
+      align: "center",
+      wordWrap: { width: 430 },
+    });
+    expect(note.setOrigin).toHaveBeenCalledWith(0.5);
+
+    nextPage();
+    const staticNote = liveTexts(STATIC_NOTE)[0];
+    if (!staticNote) throw new Error("no static note");
+    expect(staticNote.args?.[3]).not.toHaveProperty("wordWrap");
+    expect(staticNote.args?.[3]).not.toHaveProperty("align");
+  });
+
   it("switches the spread with the viewed profile and never reads the active one", () => {
     // p1 (active first) leans harder; p2 (active after addProfile) leans easier.
     recordGameResult("shape-sorter", 10, 0);

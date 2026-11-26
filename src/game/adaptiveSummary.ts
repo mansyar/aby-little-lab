@@ -14,7 +14,15 @@ import { normalizeProgressMap } from "./progressLogic";
  * nor the active profile: the caller decides whose progress to hand it. Every
  * stored record goes through the same normaliser the storage layer uses, and
  * a game only counts when its window holds at least MIN_SAMPLE answer taps.
+ * Only games that actually adapt are assessed: Robot Path and Fix-It Machine
+ * have fixed ladders, so a full window from either cannot place it in a band.
  */
+
+/** The two games with fixed ladders: no band shift ever reaches them. */
+const NON_ADAPTIVE_GAME_IDS: ReadonlySet<GameId> = new Set<GameId>([
+  "robot-path",
+  "fix-it-machine",
+]);
 
 /** The four mutually exclusive notes the Overview can print. */
 export type AdaptiveSpreadState = "disabled" | "sparse" | "all-classic" | "mixed";
@@ -44,10 +52,10 @@ function games(count: number): string {
 /**
  * Derives the current band spread from one profile's progress.
  *
- * Each game is classified with `bandShiftFor` (+1 harder, 0 classic, -1
- * easier) once its rolling window reaches MIN_SAMPLE taps. Games below that
- * floor are skipped. The returned copy is fixed for each state, so equal
- * arguments always produce an equal line.
+ * Each adaptive game is classified with `bandShiftFor` (+1 harder, 0 classic,
+ * -1 easier) once its rolling window reaches MIN_SAMPLE taps. Games below that
+ * floor and the two non-adaptive games are skipped. The returned copy is fixed
+ * for each state, so equal arguments always produce an equal line.
  */
 export function summariseAdaptiveSpread(
   progress: Partial<Record<GameId, GameProgress>> | null | undefined,
@@ -71,6 +79,7 @@ export function summariseAdaptiveSpread(
   let harder = 0;
 
   for (const { gameId } of GAME_REGISTRY) {
+    if (NON_ADAPTIVE_GAME_IDS.has(gameId)) continue;
     const recent = normalised[gameId].recent;
     if (recent.length < MIN_SAMPLE) continue;
     assessed += 1;

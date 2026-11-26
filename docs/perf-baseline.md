@@ -1,6 +1,6 @@
 # Performance Baseline — Boot-Time Asset Profiling
 
-> **Live figures — refreshed 2026-11-27.** The figures here describe the current tree: Vite 8.3.8 built 493 modules; shell entry `index-CK_dfCdR.js` is 196.2 kB via `validate-bundle` (200.86 kB as Vite prints it, 51.47 kB gzip), with **53** JavaScript chunks and **65** PWA precache entries (1880.33 KiB). The suite is 159 test files / 3,451 tests across 97.12 % statements, 91.04 % branches, 96.4 % functions and 98.25 % lines across repeated identical runs. The current release-candidate browser matrix is green locally with zero retries across the full Chromium journey suite and the WebKit, Firefox and mobile Chromium smoke projects; the earlier 2026-11-16 Chromium-only record remains history. The first-tap verdict was remeasured on 2026-11-26: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 58.4 / 37.6 / 332.3 ms, cold median total 235.4 ms, and worst cold total 383.8 ms (Memory Match), all inside the unchanged 400 ms gate; see [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24) for the earlier baseline. Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-27 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
+> **Live figures — refreshed 2026-11-27.** The figures here describe the current tree: Vite 8.3.8 built 493 modules; shell entry `index-ljU3tdMP.js` is 196.3 kB via `validate-bundle` (200.98 kB as Vite prints it, 51.50 kB gzip), with **53** JavaScript chunks and **65** PWA precache entries (1880.45 KiB). The suite is 159 test files / 3,454 tests across 97.12 % statements, 91.05 % branches, 96.4 % functions and 98.25 % lines across repeated identical runs. The current release-candidate browser matrix is green locally with zero retries across the full Chromium journey suite and the WebKit, Firefox and mobile Chromium smoke projects; the earlier 2026-11-16 Chromium-only record remains history. The first-tap verdict was remeasured on 2026-11-26: 50 cold / 0 warm headed cold-control samples, aggregate cold p95 response / finished / total 58.4 / 37.6 / 332.3 ms, cold median total 235.4 ms, and worst cold total 383.8 ms (Memory Match), all inside the unchanged 400 ms gate; see [First-tap p95 baseline after the Word Match fix (2026-11-24)](#first-tap-p95-baseline-after-the-word-match-fix-2026-11-24) for the earlier baseline. Historical sections retain their dated build, coverage, browser and first-tap figures. The four suite-count rows explicitly labeled as current living values were refreshed on 2026-11-27 for docs truth, not taken from those dated sessions. Where a historical figure disagrees with this header, the header is current truth and the record is history.
 >
 > The standing debts live in the README's Known Issues, and the planned work behind these numbers lives in [`conductor/roadmap.md` §10](../conductor/roadmap.md#10-roadmap).
 
@@ -536,7 +536,7 @@ measured, dated figure and is a candidate for the roadmap in `conductor/roadmap.
 | JavaScript chunks emitted | **42** (42 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **54 entries** (1707.70 KiB) | the build's PWA step |
 | Boot textures rasterized | 53 keys (the game art is lazy) | `src/scenes/PreloadScene.ts` |
-| Test suite (current living value, verified 2026-11-27) | 159 files / 3,451 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-27) | 159 files / 3,454 tests | `pnpm test -- --run` |
 | Coverage | statements 97.39 % / branches 92.03 % / functions 96.4 % / lines 98.34 % | `pnpm test:coverage` |
 
 The Test-suite row is a current living value verified 2026-11-27. The
@@ -875,7 +875,7 @@ current living value refreshed on 2026-11-25 for docs truth.
 | JavaScript chunks emitted | **49** (49 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **61 entries** (1794.60 KiB) | the build's PWA step |
 | Boot textures rasterized | 55 (23 tiles, 23 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite (current living value, verified 2026-11-27) | 159 files / 3,451 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-27) | 159 files / 3,454 tests | `pnpm test -- --run` |
 | Coverage | statements 97.11 % / branches 90.97 % / functions 96.39 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | 23 journeys in 18 spec files, 23 launches; 4.6 min wall clock on two workers, `launch-all` alone at 2.9 min | `pnpm test:e2e` |
 
@@ -908,7 +908,7 @@ current living value refreshed on 2026-11-25 for docs truth.
 | JavaScript chunks emitted | **51** (51 precached) | `node scripts/validate-pwa.js` |
 | Service-worker precache | **63 entries** (1826.19 KiB) | the build's PWA step |
 | Boot textures rasterized | 57 (24 tiles, 24 stickers, 2 mascot poses, `icon_speaker`, 6 avatars) | `SHELL_ASSETS` in `src/scenes/PreloadScene.ts` |
-| Test suite (current living value, verified 2026-11-27) | 159 files / 3,451 tests | `pnpm test -- --run` |
+| Test suite (current living value, verified 2026-11-27) | 159 files / 3,454 tests | `pnpm test -- --run` |
 | Coverage | statements 97.11 % / branches 90.97 % / functions 96.39 % / lines 98.24 % | `pnpm test:coverage` |
 | Browser journeys | **26 browser tests in 19 spec files, 24 launches in two parallel halves**; **3.8-4.3 min** on three workers across two runs on the development host, `launch-all` at 1.8 min; CI splits them across two shards of 13 browser cases each, 2.5 and 3.7 min | `pnpm test:e2e` |
 
@@ -969,7 +969,7 @@ headroom; the structural ratio check is the real anti-bloat guard and must never
 | Typical tiered GPU bytes | **76.07 MiB** (cap **80 MiB**) | `node scripts/validate-textures.js` |
 | Full uniform 512² bytes | **319.00 MiB** (cap **320 MiB**) | `node scripts/validate-textures.js` |
 | Tier ratio (typical / full) | **0.238** (hard cap **0.5**) | `node scripts/validate-textures.js` |
-| Unit suite after this track (current living value, verified 2026-11-27) | 159 files / 3,451 tests | `pnpm exec vitest run` |
+| Unit suite after this track (current living value, verified 2026-11-27) | 159 files / 3,454 tests | `pnpm exec vitest run` |
 
 `scripts/validate-textures.js` enumerates every `src/assets/svg/**/*.svg`, resolves each key's tier
 with the same ordered prefix rules as `src/utils/textureTiers.ts` (`tile_`, `group_`, `sm_shadow_`,

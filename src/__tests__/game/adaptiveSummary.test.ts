@@ -9,6 +9,11 @@ import { createDefaultProgressMap } from "../../game/progressLogic";
 import type { GameId, GameProgress } from "../../types";
 import { GAME_IDS } from "../../types";
 
+/** The 22 games whose ladders shift; the two fixed games are not assessed. */
+const ADAPTIVE_GAME_IDS = GAME_IDS.filter(
+  (gameId) => gameId !== "robot-path" && gameId !== "fix-it-machine",
+);
+
 /** A rolling window with `correct` true taps followed by `wrong` false taps. */
 function windowOf(correct: number, wrong: number): boolean[] {
   return [
@@ -150,15 +155,62 @@ describe("summariseAdaptiveSpread — the evidence floor", () => {
     expect(exactlySix.line).toBe(fullWindow.line);
   });
 
-  it("assesses every game at the upper boundary", () => {
-    const allGames = GAME_IDS.map((gameId) => [gameId, windowOf(8, 2)] as const);
+  it("assesses every adaptive game at the upper boundary", () => {
+    const allGames = ADAPTIVE_GAME_IDS.map((gameId) => [gameId, windowOf(8, 2)] as const);
     const spread = summariseAdaptiveSpread(progressWith(allGames), true);
 
-    expect(spread.assessed).toBe(GAME_IDS.length);
-    expect(spread.classic).toBe(GAME_IDS.length);
+    expect(ADAPTIVE_GAME_IDS.length).toBe(22);
+    expect(spread.assessed).toBe(22);
+    expect(spread.classic).toBe(22);
     expect(spread.line).toBe(
-      `Current bands · ${GAME_IDS.length} games assessed, all at classic · from recent answers`,
+      "Current bands · 22 games assessed, all at classic · from recent answers",
     );
+  });
+});
+
+describe("summariseAdaptiveSpread — non-adaptive games", () => {
+  it("ignores sufficient Robot Path and Fix-It Machine windows in a mixed spread", () => {
+    const adaptive = progressWith([
+      ["shape-sorter", windowOf(10, 0)], // +1 harder
+      ["animal-trace", windowOf(2, 8)], // -1 easier
+      ["pop-freeze", windowOf(8, 2)], // 0 classic
+    ]);
+    const withFixedGames: Record<GameId, GameProgress> = {
+      ...adaptive,
+      // Full windows, but no band reaches either game.
+      "robot-path": { ...adaptive["robot-path"], recent: windowOf(10, 0) },
+      "fix-it-machine": { ...adaptive["fix-it-machine"], recent: windowOf(0, 10) },
+    };
+    const baseline = summariseAdaptiveSpread(adaptive, true);
+
+    expect(summariseAdaptiveSpread(withFixedGames, true)).toEqual(baseline);
+    expect(baseline).toEqual({
+      state: "mixed",
+      line: "Current bands · 3 games assessed · 1 easier · 1 classic · 1 harder · from recent answers",
+      assessed: 3,
+      easier: 1,
+      classic: 1,
+      harder: 1,
+    });
+  });
+
+  it("stays sparse when only the non-adaptive games have enough answers", () => {
+    const spread = summariseAdaptiveSpread(
+      progressWith([
+        ["robot-path", windowOf(10, 0)],
+        ["fix-it-machine", windowOf(0, 10)],
+      ]),
+      true,
+    );
+
+    expect(spread).toEqual({
+      state: "sparse",
+      line: ADAPTIVE_SPARSE_LINE,
+      assessed: 0,
+      easier: 0,
+      classic: 0,
+      harder: 0,
+    });
   });
 });
 

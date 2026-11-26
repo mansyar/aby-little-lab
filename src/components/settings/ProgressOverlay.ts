@@ -373,9 +373,7 @@ export class ProgressOverlay {
       viewedProfile.activity,
     );
 
-    // Parent-facing note. The Overview prints the viewed profile's current
-    // spread; per-game pages keep the static explanation. Child-facing game UIs
-    // stay textless — this lives only where parents read.
+    // Parent-facing note: Overview shows the viewed spread; game pages stay static and textless.
     this.deps.overlayObjects.push(
       scene.add
         .text(
@@ -387,6 +385,10 @@ export class ProgressOverlay {
           textStyle({
             color: DISABLED_COLOR,
             fontSize: "20px",
+            // Wrap only the long Overview line; game pages keep the short copy unwrapped.
+            ...(this.page === 0
+              ? { align: "center", wordWrap: { width: OVERVIEW_TEXT_WIDTH } }
+              : {}),
           }),
         )
         .setOrigin(0.5),
