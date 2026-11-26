@@ -97,11 +97,15 @@ release record was moved, renumbered, or otherwise altered (NFR-5).
   primary reran both verbatim and records the results above. No scope or assertion
   changed as a result.
 
-## Pending review/PR gates
+## Post-review update
 
-1. Strict `conductor-review` of the completed phase work.
-2. Post-review doc sync if the reviewer records findings.
-3. PR creation, CI watch, and explicit merge decision by the owner.
+Strict review passed in round 4 at `71e5fbdb` after three evidence-only fix
+phases: R1 closed the proxy-computability finding F1, R2 closed the task-count
+finding F2, and owner-approved R3 closed the R2 evidence scope/provenance
+findings F3 and F4. No runtime, test, dependency, asset, schema, or storage file
+changed in any fix phase. Post-review doc sync is complete with no additional
+living-document change required; PR creation, CI watch, and the explicit merge
+decision remain.
 
 ## Notes
 

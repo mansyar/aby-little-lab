@@ -3,9 +3,9 @@
 - **Track:** `20261126-retention-proxy`
 - **Type:** `chore`
 - **Branch:** `chore/20261126-retention-proxy`
-- **Range:** `5b9995f07aeeaccbd95221aebf327807f97d0ae0..16d7536278d00894ffcb9f91d1aaeeec1737d894`
-- **Date:** `2026-11-26T11:25:00+11:00`
-- **Verdict:** `PASS WITH FINDINGS`
+- **Range:** `5b9995f07aeeaccbd95221aebf327807f97d0ae0..71e5fbdb476829198ad3b5266a862d3f1e19fa09`
+- **Date:** `2026-11-26T11:40:00+11:00`
+- **Verdict:** `PASS`
 
 ## Summary
 
@@ -13,11 +13,10 @@ The change remains documentation/Conductor-only. Round 1's High finding F1 is
 closed: the proxy is computed from paired Day-7 and close-out exports, using the
 earliest observed play day across both as a conservative stand-in, with the
 seven-day pruning limit stated and the no-data finding intact. Round 2's Medium
-finding F2 is closed: metadata reports 5/5 phases and 13/13 tasks, matching the
-plan. Round 3 found two evidence-file issues: `phase-R2.md` contains a false
-byte-identical scope claim for the whole range back to `ce3768da`, and omits its
-head commit. Strict mode has no deferrals; the two-fix-round cap has been
-reached, so these findings require an owner decision before PR.
+finding F2 is closed: metadata task counts match the plan. Round 3 found two
+evidence-file issues, F3 and F4; the owner explicitly approved a final R3
+correction beyond the original two-fix-round cap. Round 4 confirms F3 and F4 are
+closed and no findings remain. The final state is 6/6 phases and 14/14 tasks.
 
 ## Verification
 
@@ -69,7 +68,7 @@ reached, so these findings require an owner decision before PR.
 
 ### Medium
 
-- **F3 — false scope claim in R2 evidence**
+- **F3 — false scope claim in R2 evidence — CLOSED in R3**
   - **File:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md:36-37`
   - **What:** The note says the non-Conductor documentation tree remains byte-identical to `ce3768da`, but `git diff --quiet ce3768da..16d75362 -- . ':!conductor'` exits 1 because the R1 proxy fix changed `docs/retention-validation.md` after the gate.
   - **Why:** A verification file misstates scope and contradicts earlier evidence, weakening truthfulness.
@@ -79,7 +78,7 @@ reached, so these findings require an owner decision before PR.
 
 ### Low
 
-- **F4 — R2 evidence omits head commit**
+- **F4 — R2 evidence omits head commit — CLOSED in R3**
   - **File:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md:3-8`
   - **What:** The header records phase base but no head commit, unlike other phase reports; configured evidence format requires both.
   - **Why:** Missing head commit weakens traceability of the exact revision checked.
@@ -93,10 +92,10 @@ reached, so these findings require an owner decision before PR.
 
 ## Plan compliance
 
-All five phases are verified with result, checkpoint, and evidence lines. The
-plan has 13 checked tasks and metadata reports 13/13. The round-2/3 delta is
-Conductor-only; no runtime, test, dependency, asset, schema, or storage file
-changed. F3 and F4 concern evidence-file accuracy only.
+All six phases are verified with result, checkpoint, and evidence lines. The
+plan has 14 checked tasks and metadata reports 14/14. The round-2/3/R3 deltas
+are Conductor-only; no runtime, test, dependency, asset, schema, or storage file
+changed. F3 and F4 were evidence-file accuracy issues and are closed.
 
 ## Out of scope
 
@@ -108,7 +107,8 @@ changed. F3 and F4 concern evidence-file accuracy only.
 
 ## Doc sync
 
-`pending` — no post-review documentation sync has occurred yet.
+`complete` — no living-document change was required after review. The post-review
+sync is recorded in `verification/integrated.md`.
 
 ## History
 
@@ -117,3 +117,4 @@ changed. F3 and F4 concern evidence-file accuracy only.
 | 1 | BLOCK | 0 | 1 | 0 | 0 | 0 |
 | 2 | PASS WITH FINDINGS | 0 | 0 | 1 | 0 | 1 (F1) |
 | 3 | PASS WITH FINDINGS | 0 | 0 | 1 | 1 | 2 (F1, F2) |
+| 4 | PASS | 0 | 0 | 0 | 0 | 4 (F1–F4) |
