@@ -76,14 +76,19 @@ Do not retire the RM-6 row until the track completion commit.
 - **Covers:** F1, F2, F3, NFR-3, NFR-5, FR-5, FR-8, AC-5, AC-9
 - **Touches:** `src/game/adaptiveSummary.ts`, `src/__tests__/game/adaptiveSummary.test.ts`, `src/components/settings/ProgressOverlay.ts`, `src/__tests__/components/settings/ProgressOverlay.test.ts`, `docs/PRD.md`, `docs/TDD.md`, `docs/changelog.md`, `README.md`, `docs/perf-baseline.md`, `conductor/tracks/20261127-progress-band-movement/verification/phase-2.md`, `conductor/tracks/20261127-progress-band-movement/verification/phase-R1.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Exclude non-adaptive games from the spread** — covers: F1, NFR-3
-  - [ ] Skip Robot Path and Fix-It Machine while retaining deterministic normalization and band rules.
-  - [ ] Add sparse/all-games regressions proving their sufficient windows cannot change counts; reconcile PRD/TDD/changelog wording to adaptive games.
-- [ ] **R1.T2: Wrap the Overview note within its card** — covers: F2, FR-5, AC-5
-  - [ ] Apply the existing `OVERVIEW_TEXT_WIDTH` to the note's word wrap while preserving center alignment and per-game behavior.
-  - [ ] Add a style regression for the longest mixed line and provide narrow-viewport visual evidence.
-- [ ] **R1.T3: Correct evidence and run the full gate** — covers: F3, NFR-5, FR-8, AC-9
-  - [ ] Remove the Phase 2 evidence trailing blank line and make its whitespace claim accurate.
-  - [ ] Refresh gate-exposed living counts/figures only if needed; run the exact configured gate and record `verification/phase-R1.md`.
+- [x] **R1.T1: Exclude non-adaptive games from the spread** — covers: F1, NFR-3
+  - [x] Skip Robot Path and Fix-It Machine while retaining deterministic normalization and band rules.
+  - [x] Add sparse/all-games regressions proving their sufficient windows cannot change counts; reconcile PRD/TDD/changelog wording to adaptive games.
+- [x] **R1.T2: Wrap the Overview note within its card** — covers: F2, FR-5, AC-5
+  - [x] Apply the existing `OVERVIEW_TEXT_WIDTH` to the note's word wrap while preserving center alignment and per-game behavior.
+  - [x] Add a style regression for the longest mixed line and provide narrow-viewport visual evidence.
+- [x] **R1.T3: Correct evidence and run the full gate** — covers: F3, NFR-5, FR-8, AC-9
+  - [x] Remove the Phase 2 evidence trailing blank line and make its whitespace claim accurate.
+  - [x] Refresh gate-exposed living counts/figures only if needed; run the exact configured gate and record `verification/phase-R1.md`.
+
+**Result:** verified
+**Checkpoint:** `72f95f55f48320b0acd427a77b09562c52369f8a`
+**Evidence:** `conductor/tracks/20261127-progress-band-movement/verification/phase-R1.md`
+**Approved deviation:** the frozen Phase 2 checkpoint range retains its historical EOF blank line; the current file and full review range are clean, and no history rewrite was performed.

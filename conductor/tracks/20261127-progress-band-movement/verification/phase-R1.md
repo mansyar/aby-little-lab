@@ -91,4 +91,4 @@ The final evidence-only commit is `2fe87f04`, made separately after the primary'
 - **Gate:** the primary's final unchanged configured chain exited 0 (3,454 tests; docs 5/0; module-size zero warnings). `node scripts/validate-docs.js` was independently rerun after the final evidence commit and passed 5/0.
 - **Findings:** F1/F2/F3 are resolved in the current tree. The frozen `baeec96c..40db0123` whitespace failure is retained as immutable history; the current file and full review range pass `git diff --check`.
 - **Visual evidence:** the uncommitted 844×390 capture shows the full Current bands line, all three statements, and paging intact with no overlapping artifact. Media was produced by clearing the Hub suggestion ring through a board rebuild, not by changing production code.
-- **Checkpoint:** recorded after squash as `PENDING_R1_CHECKPOINT`.
+- **Checkpoint:** `72f95f55f48320b0acd427a77b09562c52369f8a`.
