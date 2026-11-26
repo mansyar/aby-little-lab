@@ -47,24 +47,21 @@
 - **Covers:** FR-8, AC-9, NFR-5
 - **Touches:** `docs/PRD.md`, `docs/changelog.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Update the PRD adaptive-band description** — covers: FR-8, AC-9
-  - [ ] **P2.T1.1:** Describe assessed-game counts, easier/classic/harder states, and the six-tap evidence floor.
-  - [ ] **P2.T1.2:** State explicitly that current spread does not measure the two-week longitudinal target.
-- [ ] **P2.T2: Add the dated changelog entry** — covers: FR-8, AC-9
-  - [ ] **P2.T2.1:** Record the parent-facing current-spread readout and preserved per-game pages.
-  - [ ] **P2.T2.2:** Keep v1.25.0/v1.26.x historical claims unchanged.
-- [ ] **P2.T3: Run the full gate and record evidence** — covers: NFR-5, AC-9
-  - [ ] **P2.T3.1:** Run the exact configured verification chain with docs validation 5/0.
-  - [ ] **P2.T3.2:** Prove only the allowed docs changed and write `verification/phase-2.md`.
+- [x] **P2.T1: Update the PRD adaptive-band description** — covers: FR-8, AC-9
+  - [x] **P2.T1.1:** Describe assessed-game counts, easier/classic/harder states, and the six-tap evidence floor.
+  - [x] **P2.T1.2:** State explicitly that current spread does not measure the two-week longitudinal target.
+- [x] **P2.T2: Add the dated changelog entry** — covers: FR-8, AC-9
+  - [x] **P2.T2.1:** Record the parent-facing current-spread readout and preserved per-game pages.
+  - [x] **P2.T2.2:** Keep v1.25.0/v1.26.x historical claims unchanged.
+- [x] **P2.T3: Run the full gate and record evidence** — covers: NFR-5, AC-9
+  - [x] **P2.T3.1:** Run the exact configured verification chain with docs validation 5/0.
+  - [x] **P2.T3.2:** Prove only the allowed docs changed and write `verification/phase-2.md`.
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261127-progress-band-movement/verification/phase-2.md
--->
+**Checkpoint:** `40db0123df856890b1e2bf5dd13008ea1ffa5650`
+**Evidence:** `conductor/tracks/20261127-progress-band-movement/verification/phase-2.md`
 
 ## Primary-only state follow-up
 

@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-27T08:13:14+11:00",
-  "updated_at": "2026-11-27T08:52:48+11:00",
+  "updated_at": "2026-11-27T09:03:35+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261127-progress-band-movement",
@@ -14,11 +14,11 @@
   "base_sha": "07d5c108684519581e088abcc9437905d50607ae",
   "progress": {
     "phases_total": 2,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 9,
-    "tasks_done": 6
+    "tasks_done": 9
   },
-  "last_checkpoint": "df98e3246122e3f98af41e883d0facd6d061407c",
+  "last_checkpoint": "40db0123df856890b1e2bf5dd13008ea1ffa5650",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

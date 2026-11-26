@@ -6,6 +6,7 @@
 - Branch: `feat/20261127-progress-band-movement`
 - Phase base: `baeec96ca1d3e254135671c4ae4af33a2fde07ed`
 - Docs head: `6ab75f05581555c3c438445c30090a583ecb1cb2`
+- Checkpoint: `40db0123df856890b1e2bf5dd13008ea1ffa5650`
 - Result: **verified** — the subagent's shell denied the exact chain once (`permission.rejected: shell`); the primary ran the exact configured verification chain from the repository root on 2026-11-27 and it exited 0. Every check in the chain passes.
 
 ## Commands
