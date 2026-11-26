@@ -301,3 +301,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Measure first-tap p95 headed and refresh the perf baseline each release** - [20261124-first-tap-p95-baseline](./archive/20261124-first-tap-p95-baseline/index.md) - chore - medium
 - [x] **Track: Reduce Find the Word cold first-tap latency** - [20261124-word-match-first-tap](./archive/20261124-word-match-first-tap/index.md) - bug - high
 - [x] **Track: Retention Pilot Pack** - [20261126-retention-pilot-pack](./archive/20261126-retention-pilot-pack/index.md) - chore - medium
+- [x] **Track: Wire the four signature content variants into real playthroughs** — [20261126-wire-content-variants](./archive/20261126-wire-content-variants/index.md) - feature - high

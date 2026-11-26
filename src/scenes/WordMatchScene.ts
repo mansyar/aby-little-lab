@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { pickVariantId, WORD_VARIANT_IDS } from "../game/contentVariants";
 import type { Rng } from "../game/random";
 import { generateWordPlaythrough, getWord, type WordRound } from "../game/wordLogic";
 import { selectWordMatchArt } from "../game/wordMatchArt";
@@ -92,7 +93,12 @@ export class WordMatchScene extends ChoiceRoundScene {
   }
 
   private buildRounds(): WordRound[] {
-    return generateWordPlaythrough(ROUND_COUNT, getAdaptiveBandShift(this.gameId()), this.rng);
+    return generateWordPlaythrough(
+      ROUND_COUNT,
+      getAdaptiveBandShift(this.gameId()),
+      this.rng,
+      pickVariantId(WORD_VARIANT_IDS, this.rng),
+    );
   }
 
   private ensureRounds(): void {

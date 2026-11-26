@@ -9,6 +9,7 @@
 
 import type { BandShift } from "./adaptiveLogic";
 import { type Rng, shuffle } from "./random";
+import type { StoryVariant } from "./storyVariants";
 
 /** Which easy-first band a story belongs to. Rounds 1-3 are `obvious`. */
 export type StoryLadder = "obvious" | "subtle";
@@ -260,16 +261,66 @@ export function buildRound(story: Story, rng: Rng = Math.random): StoryOrderRoun
  * shuffled, so consecutive playthroughs differ. `rng` must return a number in
  * [0, 1); tests pass a seeded generator so a playthrough is reproducible.
  *
+ * `variant` restricts stories to one signature slide when it can fill the
+ * shift's ladder mix; otherwise the full `STORY_POOL` is used. Omitting it
+ * keeps the classic draw byte-for-byte identical.
+ *
  * `rng` stays the **first** parameter, unlike the trailing-rng convention every
  * other module follows, for scene-call compatibility: `StoryOrderScene` calls
  * `buildPlaythrough(Math.random, shift)`. See the FR-3 deviation in the phase
  * evidence.
  */
-export function buildPlaythrough(rng: Rng = Math.random, shift: BandShift = 0): StoryOrderRound[] {
+export function buildPlaythrough(
+  rng: Rng = Math.random,
+  shift: BandShift = 0,
+  variant?: StoryVariant["id"],
+): StoryOrderRound[] {
   const mix = mixFor(shift);
-  const obvious = shuffleWith(OBVIOUS_POOL, rng).slice(0, mix.obvious);
-  const subtle = shuffleWith(SUBTLE_POOL, rng).slice(0, mix.subtle);
+  const pools = storyPoolsFor(mix, variant);
+  const obvious = shuffleWith(pools.obvious, rng).slice(0, mix.obvious);
+  const subtle = shuffleWith(pools.subtle, rng).slice(0, mix.subtle);
   return [...obvious, ...subtle].map((story) => buildRound(story, rng));
+}
+
+/**
+ * Mirrors `storyVariants.ts` membership locally: that module derives its pool
+ * from `STORY_POOL` at load time, so importing it here would be circular.
+ * Tests compare these entries against `storyVariantPool(id)`.
+ */
+const GROWING_IDS: ReadonlySet<string> = new Set([
+  "seed",
+  "duck",
+  "banana",
+  "rain",
+  "sun",
+  "caterpillar",
+  "tadpole",
+  "shadow",
+  "bee",
+]);
+
+/** The two signature story slides, used only when a caller opts in. */
+const STORY_VARIANT_POOLS: Record<StoryVariant["id"], readonly Story[]> = {
+  "growing-things": STORY_POOL.filter((story) => GROWING_IDS.has(story.id)),
+  "everyday-changes": STORY_POOL.filter((story) => !GROWING_IDS.has(story.id)),
+};
+
+/**
+ * Chooses the two ladder pools before any shuffle, preserving the exact RNG
+ * sequence of the no-variant path. A slide too thin for the shift's mix falls
+ * back to the full obvious/subtle pools.
+ */
+function storyPoolsFor(
+  mix: ReturnType<typeof mixFor>,
+  variant?: StoryVariant["id"],
+): { obvious: readonly Story[]; subtle: readonly Story[] } {
+  if (variant === undefined) return { obvious: OBVIOUS_POOL, subtle: SUBTLE_POOL };
+  const pool = STORY_VARIANT_POOLS[variant];
+  const obvious = pool.filter((story) => story.ladder === "obvious");
+  const subtle = pool.filter((story) => story.ladder === "subtle");
+  return obvious.length >= mix.obvious && subtle.length >= mix.subtle
+    ? { obvious, subtle }
+    : { obvious: OBVIOUS_POOL, subtle: SUBTLE_POOL };
 }
 
 /** True iff `placed` equals `solution` (same length, same order, same values). */

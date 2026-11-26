@@ -85,7 +85,23 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   };
 });
 
+const { drawScenariosMock } = vi.hoisted(() => ({
+  drawScenariosMock: vi.fn(),
+}));
+
+vi.mock("../../game/feelingsFacesLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/feelingsFacesLogic")>();
+  return {
+    ...actual,
+    drawScenarios: (...args: Parameters<typeof actual.drawScenarios>) => {
+      drawScenariosMock(...args);
+      return actual.drawScenarios(...args);
+    },
+  };
+});
+
 import { type Emotion, ROUND_COUNT, type Scenario } from "../../game/feelingsFacesLogic";
+import { type ScenarioVariant, scenarioVariantPool } from "../../game/scenarioVariants";
 import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import { HubScene } from "../../scenes/HubScene";
 import { hasSticker } from "../../utils/storage";
@@ -100,6 +116,16 @@ const NEXT_ROUND_DELAY = 700;
 /** Delay between the win celebration and the return to the Hub. */
 const AUTO_RETURN_DELAY = 3000;
 const TEST_VOICE = { voiceURI: "test-voice", lang: "en-US", name: "Test" };
+
+/** Signature slides and the mulberry32 seeds whose first draw selects each. */
+const SLIDE_CASES: ReadonlyArray<{
+  slide: ScenarioVariant["id"];
+  other: ScenarioVariant["id"];
+  seed: number;
+}> = [
+  { slide: "outdoors-and-play", other: "home-and-friends", seed: 7 },
+  { slide: "home-and-friends", other: "outdoors-and-play", seed: 1 },
+];
 
 /** The scene fields this flow drives; the scene owns the real values. */
 interface SceneInternals {
@@ -270,6 +296,30 @@ describe("Feelings Faces playthrough", () => {
     expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
     expect(hasSticker("feelings-faces")).toBe(true);
     expect(getImageByKey(game, "sticker_feelings_faces")).toBeDefined();
+
+    // AC-6: either signature slide reaches six of its own scenarios and a win.
+    for (const { slide, other, seed } of SLIDE_CASES) {
+      localStorage.clear();
+      vi.clearAllMocks();
+      const scene = new FeelingsFacesScene(mulberry32(seed));
+      playThrough(scene);
+
+      expect(drawScenariosMock).toHaveBeenCalledTimes(1);
+      expect(drawScenariosMock.mock.calls[0][1]).toBe(slide);
+      const rounds = internals(scene).rounds;
+      expect(rounds).toHaveLength(ROUND_COUNT);
+      const ids = rounds.map((scenario) => scenario.id);
+      expect(new Set(ids).size).toBe(6);
+      const poolIds = new Set(scenarioVariantPool(slide).map((scenario) => scenario.id));
+      const otherIds = new Set(scenarioVariantPool(other).map((scenario) => scenario.id));
+      for (const id of ids) {
+        expect(poolIds.has(id)).toBe(true);
+        expect(otherIds.has(id)).toBe(false);
+      }
+      expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+      expect(hasSticker("feelings-faces")).toBe(true);
+      expect(getImageByKey(scene, "sticker_feelings_faces")).toBeDefined();
+    }
   });
 
   it("returns to the hub with the heart sticker on the shelf", () => {

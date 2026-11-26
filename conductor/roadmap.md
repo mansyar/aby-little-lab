@@ -24,7 +24,6 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
-| RM-5 | Wire the four signature content variants into real playthroughs | feature | high | — | — | user |
 | RM-6 | Surface adaptive-band movement on the Progress Overview | feature | high | — | — | user |
 | RM-7 | Add a parent Help overlay explaining controls, data, backup, and play-time | feature | medium | — | — | user |
 

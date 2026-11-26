@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SCENARIO_VARIANT_IDS } from "../../game/contentVariants";
 import {
   answer,
   buildRoundChoices,
@@ -559,5 +560,90 @@ describe("scenario content variants", () => {
     for (const variant of SCENARIO_VARIANTS) scenarioVariantPool(variant.id);
     const after = Array.from({ length: 10 }, (_, seed) => drawScenarios(mulberry32(seed + 1)));
     expect(after).toEqual(before);
+  });
+});
+
+describe("drawScenarios (content variants)", () => {
+  it("mirrors the canonical outdoor scenario slide", () => {
+    const outdoorIds = [
+      "happy-ladybug",
+      "happy-bubbles",
+      "happy-plant",
+      "happy-truck",
+      "happy-ducks",
+      "happy-parade",
+      "happy-rainbow",
+      "sad-boat",
+      "sad-rain",
+      "sad-balloon",
+      "sad-kite",
+      "sad-cloud",
+      "angry-turn",
+      "angry-line",
+      "angry-slide",
+      "scared-dog",
+      "scared-swing",
+      "scared-owl",
+      "scared-wind",
+      "scared-moth",
+      "scared-flash",
+    ];
+    expect(
+      scenarioVariantPool("outdoors-and-play")
+        .map((s) => s.id)
+        .sort(),
+    ).toEqual([...outdoorIds].sort());
+    expect(
+      scenarioVariantPool("home-and-friends")
+        .map((s) => s.id)
+        .sort(),
+    ).toEqual(
+      SCENARIO_POOL.filter((s) => !outdoorIds.includes(s.id))
+        .map((s) => s.id)
+        .sort(),
+    );
+  });
+
+  it("draws six unique scenarios covering every emotion from each slide", () => {
+    for (const variant of SCENARIO_VARIANT_IDS) {
+      const allowed = new Set(scenarioVariantPool(variant).map((scenario) => scenario.id));
+      for (let seed = 0; seed < 20; seed++) {
+        const drawn = drawScenarios(mulberry32(seed), variant);
+        expect(drawn).toHaveLength(ROUND_COUNT);
+        expect(new Set(drawn.map((scenario) => scenario.id)).size).toBe(ROUND_COUNT);
+        for (const scenario of drawn) expect(allowed.has(scenario.id)).toBe(true);
+        for (const emotion of EMOTIONS) {
+          expect(drawn.some((scenario) => scenario.emotion === emotion)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("keeps the no-variant path byte-identical, with or without the argument", () => {
+    for (const seed of [1, 77, 2026]) {
+      expect(drawScenarios(mulberry32(seed), undefined)).toEqual(drawScenarios(mulberry32(seed)));
+    }
+  });
+
+  it("keeps both slides thick enough to cover all emotions and six rounds", () => {
+    for (const variant of SCENARIO_VARIANT_IDS) {
+      const pool = scenarioVariantPool(variant);
+      expect(pool.length).toBeGreaterThanOrEqual(ROUND_COUNT);
+      for (const emotion of EMOTIONS) {
+        expect(pool.some((scenario) => scenario.emotion === emotion)).toBe(true);
+      }
+    }
+  });
+
+  it("falls back to the full pool when the slide cannot be resolved", () => {
+    expect(drawScenarios(mulberry32(1), "missing" as "outdoors-and-play")).toEqual(
+      drawScenarios(mulberry32(1)),
+    );
+  });
+
+  it("is deterministic for each slide under a fixed seed", () => {
+    for (const variant of SCENARIO_VARIANT_IDS) {
+      expect(drawScenarios(mulberry32(5), variant)).toEqual(drawScenarios(mulberry32(5), variant));
+    }
   });
 });

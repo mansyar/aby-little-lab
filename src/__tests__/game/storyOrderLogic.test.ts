@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { STORY_VARIANT_IDS } from "../../game/contentVariants";
 import {
   buildPlaythrough,
   buildRound,
@@ -282,5 +283,89 @@ describe("story content variants", () => {
       buildPlaythrough(mulberry32(seed + 1)).map((round) => round.storyId),
     );
     expect(after).toEqual(before);
+  });
+});
+
+describe("buildPlaythrough (content variants)", () => {
+  it("mirrors the canonical growing-things slide", () => {
+    const growingIds = [
+      "seed",
+      "duck",
+      "banana",
+      "rain",
+      "sun",
+      "caterpillar",
+      "tadpole",
+      "shadow",
+      "bee",
+    ];
+    expect(
+      storyVariantPool("growing-things")
+        .map((story) => story.id)
+        .sort(),
+    ).toEqual([...growingIds].sort());
+    expect(
+      storyVariantPool("everyday-changes")
+        .map((story) => story.id)
+        .sort(),
+    ).toEqual(STORY_IDS.filter((id) => !growingIds.includes(id)).sort());
+  });
+
+  it("fills every shift from everyday-changes without repeats", () => {
+    const allowed = new Set(storyVariantPool("everyday-changes").map((story) => story.id));
+    for (const shift of [-1, 0, 1] as const) {
+      const mix = mixFor(shift);
+      for (let seed = 0; seed < 10; seed++) {
+        const rounds = buildPlaythrough(mulberry32(seed), shift, "everyday-changes");
+        expect(rounds).toHaveLength(ROUND_COUNT);
+        const ids = rounds.map((round) => round.storyId);
+        expect(new Set(ids).size).toBe(ROUND_COUNT);
+        for (const id of ids) expect(allowed.has(id)).toBe(true);
+        expect(ids.slice(0, mix.obvious).every((id) => storyFor(id).ladder === "obvious")).toBe(
+          true,
+        );
+        expect(ids.slice(mix.obvious).every((id) => storyFor(id).ladder === "subtle")).toBe(true);
+        for (const round of rounds) {
+          expect([...round.shuffled].sort()).toEqual([...round.solution].sort());
+        }
+      }
+    }
+  });
+
+  it("fills shift +1 from the thin growing-things slide", () => {
+    const allowed = new Set(storyVariantPool("growing-things").map((story) => story.id));
+    for (let seed = 0; seed < 10; seed++) {
+      const rounds = buildPlaythrough(mulberry32(seed), 1, "growing-things");
+      expect(rounds).toHaveLength(ROUND_COUNT);
+      const ids = rounds.map((round) => round.storyId);
+      expect(new Set(ids).size).toBe(ROUND_COUNT);
+      for (const id of ids) expect(allowed.has(id)).toBe(true);
+      expect(ids.slice(0, 1).every((id) => storyFor(id).ladder === "obvious")).toBe(true);
+      expect(ids.slice(1).every((id) => storyFor(id).ladder === "subtle")).toBe(true);
+    }
+  });
+
+  it("falls back to the full pool when growing-things cannot fill the mix", () => {
+    for (const shift of [-1, 0] as const) {
+      expect(buildPlaythrough(mulberry32(77), shift, "growing-things")).toEqual(
+        buildPlaythrough(mulberry32(77), shift),
+      );
+    }
+  });
+
+  it("keeps the no-variant path byte-identical, with or without the argument", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      expect(buildPlaythrough(mulberry32(1234), shift, undefined)).toEqual(
+        buildPlaythrough(mulberry32(1234), shift),
+      );
+    }
+  });
+
+  it("is deterministic for each slide under a fixed seed", () => {
+    for (const variant of STORY_VARIANT_IDS) {
+      expect(buildPlaythrough(mulberry32(5), 0, variant)).toEqual(
+        buildPlaythrough(mulberry32(5), 0, variant),
+      );
+    }
   });
 });

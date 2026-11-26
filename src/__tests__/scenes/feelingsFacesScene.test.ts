@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Scenario } from "../../game/feelingsFacesLogic";
+import { type ScenarioVariant, scenarioVariantPool } from "../../game/scenarioVariants";
 import { type MatchMediaStub, stubMatchMedia } from "../helpers/matchMediaStub";
 
 type MockFn = ReturnType<typeof vi.fn>;
@@ -95,8 +96,18 @@ import { buildRoundChoices, ROUND_COUNT } from "../../game/feelingsFacesLogic";
 import { isMastered } from "../../game/progressLogic";
 import { FeelingsFacesScene } from "../../scenes/FeelingsFacesScene";
 import type { GameProgress } from "../../types";
-import { earnSticker, getProgress, updateSettings } from "../../utils/storage";
+import { earnSticker, getProgress, hasSticker, updateSettings } from "../../utils/storage";
 import { mulberry32 } from "../helpers/randomHelper";
+
+/** Signature slides and the mulberry32 seeds whose first draw selects each. */
+const SLIDE_CASES: ReadonlyArray<{
+  slide: ScenarioVariant["id"];
+  other: ScenarioVariant["id"];
+  seed: number;
+}> = [
+  { slide: "outdoors-and-play", other: "home-and-friends", seed: 7 },
+  { slide: "home-and-friends", other: "outdoors-and-play", seed: 1 },
+];
 
 /** The rule line the scene must show and speak. */
 const RULE_LINE = "Tap the face that shows how Aby feels.";
@@ -495,30 +506,49 @@ describe("FeelingsFacesScene round flow", () => {
     expect(wiggle.duration).toBe(200);
   });
 
-  it("plays six rounds to a win: celebration, sticker once, justEarned and 3s auto-return", () => {
-    const scene = new FeelingsFacesScene(mulberry32(1234));
-    playThrough(scene);
+  it("plays six rounds on either slide to a win: celebration, sticker once, justEarned, 3s auto-return (AC-6)", () => {
+    for (const { slide, other, seed } of SLIDE_CASES) {
+      localStorage.clear();
+      vi.clearAllMocks();
+      getAdaptiveBandShiftMock.mockReturnValue(0);
+      mockSpeech.isSpeechSupported.mockReturnValue(true);
+      const scene = new FeelingsFacesScene(mulberry32(seed));
+      playThrough(scene);
 
-    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect(internals(scene).inputLocked).toBe(true);
-    expect(internals(scene).roundIndex).toBe(ROUND_COUNT);
+      expect(drawScenariosMock).toHaveBeenCalledTimes(1);
+      expect(drawScenariosMock.mock.calls[0][1]).toBe(slide);
+      const rounds = internals(scene).rounds;
+      const ids = rounds.map((scenario) => scenario.id);
+      expect(new Set(ids).size).toBe(6);
+      const poolIds = new Set(scenarioVariantPool(slide).map((scenario) => scenario.id));
+      const otherIds = new Set(scenarioVariantPool(other).map((scenario) => scenario.id));
+      for (const id of ids) {
+        expect(poolIds.has(id)).toBe(true);
+        expect(otherIds.has(id)).toBe(false);
+      }
 
-    // Shared win celebration: the ray burst grows and fades.
-    const celebration = getMockFn(internals(scene).tweens.add).mock.calls.find(
-      (call) => call[0]?.scaleX === 1.25 && call[0]?.scaleY === 1.25 && call[0]?.alpha === 0,
-    );
-    expect(celebration).toBeDefined();
+      expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+      expect(internals(scene).inputLocked).toBe(true);
+      expect(internals(scene).roundIndex).toBe(ROUND_COUNT);
 
-    expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
-    const sticker = getMockFn(internals(scene).add.image).mock.calls.find(
-      (call) => call[2] === "sticker_feelings_faces",
-    );
-    expect(sticker).toBeDefined();
+      // Shared win celebration: the ray burst grows and fades.
+      const celebration = getMockFn(internals(scene).tweens.add).mock.calls.find(
+        (call) => call[0]?.scaleX === 1.25 && call[0]?.scaleY === 1.25 && call[0]?.alpha === 0,
+      );
+      expect(celebration).toBeDefined();
 
-    fireAutoReturn(scene);
-    expect(internals(scene).scene.start).toHaveBeenCalledWith("Hub", {
-      justEarned: "feelings-faces",
-    });
+      expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
+      expect(hasSticker("feelings-faces")).toBe(true);
+      const sticker = getMockFn(internals(scene).add.image).mock.calls.find(
+        (call) => call[2] === "sticker_feelings_faces",
+      );
+      expect(sticker).toBeDefined();
+
+      fireAutoReturn(scene);
+      expect(internals(scene).scene.start).toHaveBeenCalledWith("Hub", {
+        justEarned: "feelings-faces",
+      });
+    }
   });
 
   it("does not award the sticker again on a repeat completion", () => {
@@ -759,6 +789,7 @@ describe("FeelingsFacesScene round flow", () => {
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("feelings-faces");
       expect(drawScenariosMock).toHaveBeenCalledTimes(1);
+      expect(drawScenariosMock).toHaveBeenCalledWith(expect.any(Function), expect.any(String));
       expect(kindsOfThreaded(internals(scene).ladder)).toEqual([
         "confusable",
         "confusable",
@@ -773,6 +804,7 @@ describe("FeelingsFacesScene round flow", () => {
       const scene = createScene();
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("feelings-faces");
       expect(drawScenariosMock).toHaveBeenCalledTimes(1);
+      expect(drawScenariosMock).toHaveBeenCalledWith(expect.any(Function), expect.any(String));
       expect(kindsOfThreaded(internals(scene).ladder)).toEqual([
         "distinct",
         "distinct",

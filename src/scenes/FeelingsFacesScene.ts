@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { faces } from "../game/art/faces";
+import { pickVariantId, SCENARIO_VARIANT_IDS } from "../game/contentVariants";
 import {
   answer,
   buildRoundChoices,
@@ -104,7 +105,7 @@ export class FeelingsFacesScene extends ChoiceRoundScene {
     this.createRuleLine();
 
     this.ladder = contrastSplitFor(getAdaptiveBandShift("feelings-faces"));
-    this.rounds = drawScenarios(this.rng);
+    this.rounds = drawScenarios(this.rng, pickVariantId(SCENARIO_VARIANT_IDS, this.rng));
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

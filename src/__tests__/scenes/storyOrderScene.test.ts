@@ -67,11 +67,38 @@ const { mockCompletionEffect } = vi.hoisted(() => ({
 
 vi.mock("../../utils/completionEffect", () => mockCompletionEffect);
 
+const { buildPlaythroughMock } = vi.hoisted(() => ({
+  buildPlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../game/storyOrderLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/storyOrderLogic")>();
+  return {
+    ...actual,
+    buildPlaythrough: (...args: Parameters<typeof actual.buildPlaythrough>) => {
+      buildPlaythroughMock(...args);
+      return actual.buildPlaythrough(...args);
+    },
+  };
+});
+
+import type { StoryOrderRound } from "../../game/storyOrderLogic";
+import type { StoryVariant } from "../../game/storyVariants";
 import { StoryOrderScene } from "../../scenes/StoryOrderScene";
 import { tapHits } from "../helpers/hitTest";
 import { mulberry32 } from "../helpers/randomHelper";
 
 const RULE = "Put the story in order, first to last.";
+
+/** Signature slides and the mulberry32 seeds whose first draw selects each. */
+const SLIDE_CASES: ReadonlyArray<{
+  slide: StoryVariant["id"];
+  other: StoryVariant["id"];
+  seed: number;
+}> = [
+  { slide: "growing-things", other: "everyday-changes", seed: 7 },
+  { slide: "everyday-changes", other: "growing-things", seed: 1 },
+];
 
 function getMockFn(fn: unknown): MockFn {
   return fn as unknown as MockFn;
@@ -91,6 +118,11 @@ function getCurrentRound(scene: unknown): { shuffled: string[]; solution: string
     roundIndex: number;
   };
   return s.rounds[s.roundIndex];
+}
+
+/** Returns the full six-story playthrough held by the scene. */
+function getRounds(scene: unknown): StoryOrderRound[] {
+  return (scene as unknown as { rounds: StoryOrderRound[] }).rounds;
 }
 
 interface TestPanel {
@@ -671,23 +703,40 @@ describe("StoryOrderScene interactions", () => {
     expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(false);
   });
 
-  it("completes the game on the last round", () => {
-    const scene = new StoryOrderScene(mulberry32(1234));
-    scene.create();
-    const s = scene as unknown as {
-      rounds: Array<{ solution: string[] }>;
-      roundIndex: number;
-      renderRound: () => void;
-    };
-    s.roundIndex = s.rounds.length - 1;
-    s.renderRound();
-    fillBoard(scene, s.rounds[s.roundIndex].solution);
-    validate(scene);
+  it("hands either slide to the generator and completes on the last round (AC-6)", () => {
+    for (const { slide, seed } of SLIDE_CASES) {
+      localStorage.clear();
+      vi.clearAllMocks();
+      mockParentLockInstances.length = 0;
+      const scene = new StoryOrderScene(mulberry32(seed));
+      scene.create();
 
-    expect(mockAudio.playCorrect).toHaveBeenCalled();
-    const callbacks = delayedCallbacks(scene);
-    callbacks[callbacks.length - 1]();
-    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+      expect(buildPlaythroughMock).toHaveBeenCalledTimes(1);
+      expect(buildPlaythroughMock.mock.calls[0][2]).toBe(slide);
+      const rounds = getRounds(scene);
+      expect(rounds).toHaveLength(6);
+      expect(new Set(rounds.map((round) => round.storyId)).size).toBe(6);
+      for (const round of rounds) {
+        expect(round.shuffled).toHaveLength(3);
+        expect(round.solution).toHaveLength(3);
+        expect([...round.shuffled].sort()).toEqual([...round.solution].sort());
+      }
+
+      const s = scene as unknown as {
+        rounds: Array<{ solution: string[] }>;
+        roundIndex: number;
+        renderRound: () => void;
+      };
+      s.roundIndex = s.rounds.length - 1;
+      s.renderRound();
+      fillBoard(scene, s.rounds[s.roundIndex].solution);
+      validate(scene);
+
+      expect(mockAudio.playCorrect).toHaveBeenCalled();
+      const callbacks = delayedCallbacks(scene);
+      callbacks[callbacks.length - 1]();
+      expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+    }
   });
 
   it("tolerates destroy failures when clearing a round", () => {
