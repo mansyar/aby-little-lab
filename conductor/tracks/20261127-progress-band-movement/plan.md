@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-9, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8
 - **Touches:** `src/game/adaptiveSummary.ts`, `src/__tests__/game/adaptiveSummary.test.ts`, `src/components/settings/ProgressOverlay.ts`, `src/__tests__/components/settings/ProgressOverlay.test.ts`, `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Add adaptive-summary logic tests** — covers: FR-1, FR-2, FR-7, AC-1, AC-2, AC-3, AC-7
   - [ ] **P1.T1.1:** Cover mixed, all-classic, sparse, and disabled states with deterministic fixtures.
