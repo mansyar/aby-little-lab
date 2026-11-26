@@ -93,6 +93,9 @@
 - **Covers:** F3, F4
 - **Touches:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`, `conductor/tracks/20261126-retention-proxy/plan.md`, `conductor/tracks/20261126-retention-proxy/metadata.json`
 - **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** verified
+- **Result:** F3/F4 closed by correcting R2 evidence scope and adding the head commit; docs validation and CRLF-aware whitespace passed.
+- **Checkpoint:** `6b7da237859fee76656ea8c339a58083aff349b0`
+- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
 
-- [ ] **R3.T1: Correct the R2 scope claim and add the R2 head commit, then record verified evidence** — covers: F3, F4
+- [x] **R3.T1: Correct the R2 scope claim and add the R2 head commit, then record verified evidence** — covers: F3, F4
