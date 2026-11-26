@@ -88,17 +88,15 @@
 **Checkpoint:** `88c85b009cb8520a4bc3543fa68cb264a6222318`
 **Evidence:** `conductor/tracks/20261126-wire-content-variants/verification/phase-3.md`
 
-<!--
-Review fixes are appended by `conductor-review` as:
-
 ## Phase R1: Review Fixes
 
-- **Goal:** Resolve review findings ...
+- **Goal:** Reconcile the spec/evidence prose with the implemented scope so the record matches the shipped code.
 - **Depends on:** Phase 3
-- **Covers:** review findings
-- **Touches:** ...
-- **Verification:** ...
+- **Covers:** F1
+- **Touches:** `conductor/tracks/20261126-wire-content-variants/spec.md`, `conductor/tracks/20261126-wire-content-variants/verification/integrated.md`
+- **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
 - **Status:** pending
 
-- [ ] **R1.T1: Resolve <finding ID>** — covers: <finding ID>
--->
+- [ ] **R1.T1: Resolve F1** — covers: F1
+  - [ ] **R1.T1.1:** Remove the unimplemented `generateWordBuildPlaythrough` mention from spec In Scope and correct FR-4's round wording to the shipped three-round shape session
+  - [ ] **R1.T1.2:** Point integrated AC-1 at the actual seeded selector tests in `wordLogic.test.ts` and re-run the exact gate
