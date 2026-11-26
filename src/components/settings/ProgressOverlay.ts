@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { bandShiftFor } from "../../game/adaptiveLogic";
+import { summariseAdaptiveSpread } from "../../game/adaptiveSummary";
 import type { E2EProgressState } from "../../game/e2eBridge";
 import { GAME_REGISTRY } from "../../game/gameRegistry";
 import { summariseInsights } from "../../game/insightsSummary";
@@ -156,6 +157,10 @@ export class ProgressOverlay {
     // is derived once per render so the page never recomputes on its own.
     const viewedProfile = profiles.find((profile) => profile.id === viewedId) ?? getActiveProfile();
     const summary = summariseInsights(viewedProfile, new Date());
+    // The Overview note reports the viewed profile's current band spread. Both
+    // inputs are explicit so this never falls back to the active profile.
+    const adaptiveEnabled = getSettings().adaptiveDifficulty;
+    const spreadLine = summariseAdaptiveSpread(progress, adaptiveEnabled).line;
 
     const backdrop = scene.add
       .rectangle(centerX, centerY, width, height, BACKDROP_COLOR, OVERLAY_ALPHA)
@@ -256,7 +261,6 @@ export class ProgressOverlay {
     const pageStart = Math.max(0, gamePage * PROGRESS_PAGE_SIZE);
     const pageEnd =
       gamePage < 0 ? 0 : Math.min(pageStart + PROGRESS_PAGE_SIZE, PROGRESS_ROWS.length);
-    const adaptiveEnabled = getSettings().adaptiveDifficulty;
     for (let i = pageStart; i < pageEnd; i += 1) {
       const row = PROGRESS_ROWS[i];
       const y = centerY + PROGRESS_ROW_START_Y + (i - pageStart) * PROGRESS_ROW_PITCH;
@@ -369,14 +373,17 @@ export class ProgressOverlay {
       viewedProfile.activity,
     );
 
-    // Static parent-facing note: difficulty bands adapt to recent accuracy.
-    // Child-facing game UIs stay textless; this lives only where parents read.
+    // Parent-facing note. The Overview prints the viewed profile's current
+    // spread; per-game pages keep the static explanation. Child-facing game UIs
+    // stay textless — this lives only where parents read.
     this.deps.overlayObjects.push(
       scene.add
         .text(
           centerX,
           centerY + 320,
-          "Difficulty adapts to your kid's recent answers · disable in Settings",
+          this.page === 0
+            ? spreadLine
+            : "Difficulty adapts to your kid's recent answers · disable in Settings",
           textStyle({
             color: DISABLED_COLOR,
             fontSize: "20px",

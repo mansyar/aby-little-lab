@@ -8,6 +8,7 @@ vi.mock("phaser", async () => {
 });
 
 import { ProgressOverlay } from "../../../components/settings/ProgressOverlay";
+import { ADAPTIVE_DISABLED_LINE, ADAPTIVE_SPARSE_LINE } from "../../../game/adaptiveSummary";
 import { GAME_REGISTRY } from "../../../game/gameRegistry";
 import { summariseInsights } from "../../../game/insightsSummary";
 import {
@@ -537,5 +538,104 @@ describe("ProgressOverlay", () => {
     expect(currentStatsLines().some((text) => text.includes("band -1"))).toBe(false);
     // Selecting a profile to view never changes the active one.
     expect(getActiveProfile().id).toBe("p2");
+  });
+});
+
+/** The static parent note kept on the per-game pages. */
+const STATIC_NOTE = "Difficulty adapts to your kid's recent answers · disable in Settings";
+
+/** Exact Overview copy for the windows used in the tests below. */
+const HARDER_NOTE =
+  "Current bands · 1 game assessed · 0 easier · 0 classic · 1 harder · from recent answers";
+const EASIER_NOTE =
+  "Current bands · 1 game assessed · 1 easier · 0 classic · 0 harder · from recent answers";
+const MIXED_NOTE =
+  "Current bands · 2 games assessed · 1 easier · 0 classic · 1 harder · from recent answers";
+
+describe("ProgressOverlay — current band spread on the Overview", () => {
+  it("replaces the static note on page 0 with the current spread", () => {
+    recordGameResult("shape-sorter", 10, 0);
+    recordGameResult("animal-trace", 2, 8);
+    const overlay = new ProgressOverlay({
+      scene: new MockScene() as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    expect(liveTexts(MIXED_NOTE)).toHaveLength(1);
+    expect(liveTexts(STATIC_NOTE)).toHaveLength(0);
+    for (const line of statementLines()) expect(liveTexts(line)).toHaveLength(1);
+    expect(liveTexts("1 / 5")).toHaveLength(1);
+
+    // A game page keeps the static note and drops the spread readout.
+    nextPage();
+    expect(liveTexts(STATIC_NOTE)).toHaveLength(1);
+    expect(liveTexts(MIXED_NOTE)).toHaveLength(0);
+    for (const line of statementLines()) expect(liveTexts(line)).toHaveLength(0);
+
+    previousPage();
+    expect(liveTexts(MIXED_NOTE)).toHaveLength(1);
+    expect(liveTexts("1 / 5")).toHaveLength(1);
+  });
+
+  it("switches the spread with the viewed profile and never reads the active one", () => {
+    // p1 (active first) leans harder; p2 (active after addProfile) leans easier.
+    recordGameResult("shape-sorter", 10, 0);
+    addProfile("dog");
+    recordGameResult("shape-sorter", 2, 8);
+    const overlay = new ProgressOverlay({
+      scene: new MockScene() as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    expect(getActiveProfile().id).toBe("p2");
+    expect(liveTexts(EASIER_NOTE)).toHaveLength(1);
+    expect(liveTexts(HARDER_NOTE)).toHaveLength(0);
+
+    // Tap p1's chip (centerX − 28 = 484, chip Y 189): the note follows p1.
+    const firstChip = live().find(
+      (obj) => obj.kind === "image" && obj.args?.[0] === 484 && obj.args?.[1] === 189,
+    );
+    if (!firstChip) throw new Error("no first chip");
+    tap(firstChip);
+
+    expect(liveTexts(HARDER_NOTE)).toHaveLength(1);
+    expect(liveTexts(EASIER_NOTE)).toHaveLength(0);
+    // Viewing another profile is read-only: p2 is still the active profile.
+    expect(getActiveProfile().id).toBe("p2");
+  });
+
+  it("uses the sparse note when no game has enough answers yet", () => {
+    recordGameResult("shape-sorter", 2, 1);
+    const overlay = new ProgressOverlay({
+      scene: new MockScene() as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    expect(liveTexts(ADAPTIVE_SPARSE_LINE)).toHaveLength(1);
+    expect(liveTexts(STATIC_NOTE)).toHaveLength(0);
+    for (const line of statementLines()) expect(liveTexts(line)).toHaveLength(1);
+  });
+
+  it("uses the disabled note when adaptive is off and keeps per-game bands flat", () => {
+    recordGameResult("shape-sorter", 10, 0);
+    recordGameResult("animal-trace", 2, 8);
+    updateSettings({ adaptiveDifficulty: false });
+    const overlay = new ProgressOverlay({
+      scene: new MockScene() as never,
+      overlayObjects: [] as never,
+    });
+    overlay.open();
+
+    expect(liveTexts(ADAPTIVE_DISABLED_LINE)).toHaveLength(1);
+    expect(liveTexts(MIXED_NOTE)).toHaveLength(0);
+    expect(liveTexts(STATIC_NOTE)).toHaveLength(0);
+
+    nextPage();
+    expect(liveTexts(STATIC_NOTE)).toHaveLength(1);
+    expect(liveTexts(ADAPTIVE_DISABLED_LINE)).toHaveLength(0);
+    expect(currentStatsLines().every((text) => text.includes("band 0"))).toBe(true);
   });
 });

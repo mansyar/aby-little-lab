@@ -2096,18 +2096,19 @@ describe("SettingsPanel progress report", () => {
     expect(findTextByLabel(scene, "›")).toBeDefined();
   });
 
-  it("explains adaptive difficulty to parents inside the report", () => {
+  it("prints the current-band note for parents inside the report", () => {
     const scene = createScene();
     new SettingsPanel(scene as never);
     triggerPointerdown(findTextByLabel(scene, "Progress") as MockGameObject);
 
+    // The Overview now prints the viewed profile's current spread instead of
+    // the static explanation; a fresh profile gets the explicit sparse line.
     const noteCall = scene.add.text.mock.calls.find(
-      (call) => typeof call[2] === "string" && call[2].includes("adapt"),
+      (call) => typeof call[2] === "string" && call[2].includes("current bands"),
     );
     expect(noteCall).toBeDefined();
-    if (!noteCall) throw new Error("adaptive note text not found");
-    // Tells the parent what it does AND where to disable it.
-    expect(noteCall?.[2]).toContain("Settings");
+    if (!noteCall) throw new Error("current-band note text not found");
+    expect(noteCall?.[2]).toContain("Not enough answers yet");
     // Muted footer styling keeps it secondary to the report rows.
     expect(noteCall?.[3]).toEqual(expect.objectContaining({ color: "#a0aec0" }));
     // Informational only — never a parent control.
