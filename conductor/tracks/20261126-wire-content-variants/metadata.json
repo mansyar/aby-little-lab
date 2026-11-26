@@ -6,7 +6,7 @@
   "priority": "high",
   "depends_on": [],
   "created_at": "2026-11-26T20:03:57+11:00",
-  "updated_at": "2026-11-26T20:58:28+11:00",
+  "updated_at": "2026-11-26T21:33:43+11:00",
   "spec": "spec.md",
   "plan": "plan.md",
   "branch": "feat/20261126-wire-content-variants",
@@ -14,11 +14,11 @@
   "base_sha": "f328437f4ac464a5bde808c8dc4cdf058c77d130",
   "progress": {
     "phases_total": 3,
-    "phases_verified": 1,
+    "phases_verified": 2,
     "tasks_total": 12,
-    "tasks_done": 6
+    "tasks_done": 9
   },
-  "last_checkpoint": "028ac8a03461e7657c110cc38cd4b06fbe2d061e",
+  "last_checkpoint": "9f2eab18c9f22098665f8caedf6e9a585df7d0fe",
   "review_verdict": null,
   "review_rounds": 0,
   "doc_sync": "pending",

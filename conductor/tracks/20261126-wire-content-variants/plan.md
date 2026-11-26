@@ -46,25 +46,23 @@
 - **Depends on:** Phase 1
 - **Covers:** FR-6, NFR-3, NFR-4, NFR-5, AC-6
 - **Touches:** `src/scenes/WordMatchScene.ts`, `src/scenes/StoryOrderScene.ts`, `src/scenes/ShapeSorterScene.ts`, `src/scenes/FeelingsFacesScene.ts`, `src/__tests__/scenes/wordMatchScene.test.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `src/__tests__/scenes/shapeSorterScene.test.ts`, `src/__tests__/scenes/shapeSorterFlow.test.ts`, `src/__tests__/scenes/feelingsFacesScene.test.ts`, `src/__tests__/scenes/feelingsFacesFlow.test.ts`
+  - Approved gate-driven test-support additions: `src/__tests__/scenes/artDeclarations.test.ts`, `src/__tests__/scenes/sceneRngEquivalence.test.ts`.
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P2.T1: Pass the selected slide through each scene** — covers: FR-6
+- [x] **P2.T1: Pass the selected slide through each scene** — covers: FR-6
   - [ ] **P2.T1.1:** Use the pure selector with each scene's existing RNG and forward the chosen id to the generator
   - [ ] **P2.T1.2:** Keep round counts, scoring, completion, and adaptive-band calls unchanged
-- [ ] **P2.T2: Prove scene reachability and completion** — covers: AC-6
+- [x] **P2.T2: Prove scene reachability and completion** — covers: AC-6
   - [ ] **P2.T2.1:** Extend scene/flow tests so both slides are exercised per game with seeded RNGs
   - [ ] **P2.T2.2:** Rerun existing completion and no-repeat assertions for both slides
-- [ ] **P2.T3: Prove scope and regression safety** — covers: NFR-3, NFR-4, NFR-5
+- [x] **P2.T3: Prove scope and regression safety** — covers: NFR-3, NFR-4, NFR-5
   - [ ] **P2.T3.1:** Run the full gate and confirm docs validation stays 5 passed / 0 failed
   - [ ] **P2.T3.2:** Confirm the phase diff is limited to the four scenes and their tests
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261126-wire-content-variants/verification/phase-2.md
--->
+**Checkpoint:** `9f2eab18c9f22098665f8caedf6e9a585df7d0fe`
+**Evidence:** `conductor/tracks/20261126-wire-content-variants/verification/phase-2.md`
 
 ## Phase 3: Docs truth sync
 
@@ -73,7 +71,7 @@ The primary appends after acceptance:
 - **Covers:** FR-9, NFR-4, NFR-5, AC-9
 - **Touches:** `docs/PRD.md`, `docs/TDD.md`, `docs/changelog.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P3.T1: Update the PRD** — covers: FR-9
   - [ ] **P3.T1.1:** Record that all four signature variant sets now reach play through a 50/50 per-playthrough draw
