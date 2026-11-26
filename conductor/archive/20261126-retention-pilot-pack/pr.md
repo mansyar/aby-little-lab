@@ -6,6 +6,7 @@ This docs-only chore track makes the already-recorded retention validation proto
 
 - **ID:** `20261126-retention-pilot-pack`
 - **Type:** `chore`
+- **Pull request:** [#103](https://github.com/mansyar/aby-little-lab/pull/103)
 - **Spec:** [`conductor/archive/20261126-retention-pilot-pack/spec.md`](conductor/archive/20261126-retention-pilot-pack/spec.md)
 - **Plan:** [`conductor/archive/20261126-retention-pilot-pack/plan.md`](conductor/archive/20261126-retention-pilot-pack/plan.md)
 - **Review:** [`conductor/archive/20261126-retention-pilot-pack/review.md`](conductor/archive/20261126-retention-pilot-pack/review.md)
