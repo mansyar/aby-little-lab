@@ -1,6 +1,6 @@
 # Conductor Roadmap
 
-<!-- next-rm-id: 8 -->
+<!-- next-rm-id: 9 -->
 
 > Planned and future work. The roadmap stores **intent** — ordering, priority,
 > and dependencies — not live state. `conductor-status` joins every entry whose
@@ -32,6 +32,7 @@
 
 | id | title | type | priority | depends_on | track | origin |
 | --- | --- | --- | --- | --- | --- | --- |
+| RM-8 | Add a parent control for narration pace | feature | medium | — | — | user |
 
 ## Dropped
 
