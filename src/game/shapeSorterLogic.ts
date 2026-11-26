@@ -1,5 +1,6 @@
 import type { BandShift } from "./adaptiveLogic";
 import { type Rng, shuffle } from "./random";
+import type { ShapeVariant } from "./shapeVariants";
 
 /** The twenty-four geometric shape types used in the Shape Sorter game. */
 export type ShapeType =
@@ -101,9 +102,50 @@ export function poolFor(shift: BandShift = 0): readonly ShapeType[] {
 }
 
 /**
+ * Mirrors `shapeVariants.ts` membership locally: that module derives its pool
+ * from `ALL_SHAPES` at load time, so importing it here would be circular.
+ * Tests compare these entries against `shapeVariantPool(id)`.
+ */
+const CURVY: ReadonlySet<ShapeType> = new Set<ShapeType>([
+  "circle",
+  "oval",
+  "heart",
+  "crescent",
+  "semicircle",
+  "teardrop",
+  "ring",
+  "capsule",
+]);
+
+/** The two signature shape slides, used only when a caller opts in. */
+const SHAPE_VARIANT_POOLS: Record<ShapeVariant["id"], readonly ShapeType[]> = {
+  curvy: ALL_SHAPES.filter((shape) => CURVY.has(shape)),
+  angular: ALL_SHAPES.filter((shape) => !CURVY.has(shape)),
+};
+
+/**
+ * Intersects the requested slide with the band pool before shuffling. If the
+ * slide cannot supply three unique shapes per round it falls back to the band
+ * pool; the no-variant path still returns `poolFor(shift)` unchanged.
+ */
+function shapePoolFor(
+  roundCount: number,
+  shift: BandShift,
+  variant?: ShapeVariant["id"],
+): readonly ShapeType[] {
+  const bandPool = poolFor(shift);
+  if (variant === undefined) return bandPool;
+  const slide = SHAPE_VARIANT_POOLS[variant].filter((shape) => bandPool.includes(shape));
+  return slide.length >= roundCount * 3 ? slide : bandPool;
+}
+
+/**
  * Generates a playthrough of `roundCount` rounds, each containing 3 shapes,
  * drawn without repeats across the entire playthrough (unique shapes per
  * session) from the band shift's selected shape pool.
+ *
+ * `variant` restricts shapes to one signature slide when it can supply three
+ * unique shapes per round; otherwise the full band pool is used.
  *
  * `rng` must return a number in [0, 1); tests pass a seeded generator so a
  * playthrough is reproducible. It is forwarded to the shared `shuffle`, and
@@ -114,8 +156,9 @@ export function generatePlaythrough(
   roundCount: number,
   shift: BandShift = 0,
   rng: Rng = Math.random,
+  variant?: ShapeVariant["id"],
 ): ShapeType[][] {
-  const shuffled = shuffle(poolFor(shift), rng);
+  const shuffled = shuffle(shapePoolFor(roundCount, shift, variant), rng);
   return Array.from({ length: roundCount }, (_, i) => shuffled.slice(i * 3, i * 3 + 3));
 }
 

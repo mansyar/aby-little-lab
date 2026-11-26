@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  pickVariantId,
+  SCENARIO_VARIANT_IDS,
+  SHAPE_VARIANT_IDS,
+  STORY_VARIANT_IDS,
+  WORD_VARIANT_IDS,
+} from "../../game/contentVariants";
+import {
   generateLetterTiles,
   generateWordBuildPlaythrough,
   generateWordPlaythrough,
@@ -8,6 +15,8 @@ import {
   WORD_POOL,
   type WordRound,
 } from "../../game/wordLogic";
+import { wordVariantPool } from "../../game/wordVariants";
+import { mulberry32 } from "../helpers/randomHelper";
 
 /** Number of rounds sampled to exercise randomized behavior without flaking. */
 const VARIETY_SAMPLES = 200;
@@ -537,5 +546,135 @@ describe("generateLetterTiles", () => {
     const first = generateLetterTiles("CAT", steady);
     const second = generateLetterTiles("CAT", steady);
     expect(second).toEqual(first);
+  });
+});
+
+describe("pickVariantId", () => {
+  it("maps 0, 0.5 and near-1 draws to the first, second and last id", () => {
+    const ids = ["first", "second"] as const;
+    expect(pickVariantId(ids, () => 0)).toBe("first");
+    expect(pickVariantId(ids, () => 0.5)).toBe("second");
+    expect(pickVariantId(ids, () => 0.999999)).toBe("second");
+    expect(pickVariantId(["only"], () => 0.999999)).toBe("only");
+  });
+
+  it("consumes exactly one draw per selection", () => {
+    let draws = 0;
+    const rng = () => {
+      draws += 1;
+      return 0.4;
+    };
+    pickVariantId(WORD_VARIANT_IDS, rng);
+    expect(draws).toBe(1);
+  });
+
+  it("selects both ids across seeded generators", () => {
+    const seen = new Set<string>();
+    for (let seed = 0; seed < 40; seed++) {
+      seen.add(pickVariantId(WORD_VARIANT_IDS, mulberry32(seed)));
+    }
+    expect(seen).toEqual(new Set(WORD_VARIANT_IDS));
+  });
+
+  it("is deterministic and keeps no state between calls", () => {
+    const sequence = (seed: number) => {
+      const rng = mulberry32(seed);
+      return [
+        pickVariantId(WORD_VARIANT_IDS, rng),
+        pickVariantId(STORY_VARIANT_IDS, rng),
+        pickVariantId(WORD_VARIANT_IDS, rng),
+      ];
+    };
+    expect(sequence(2026)).toEqual(sequence(2026));
+    // A fresh generator restarted with the same seed must not remember draws
+    // made by previous calls (including calls with a different id array).
+    const rng = mulberry32(77);
+    const first = pickVariantId(WORD_VARIANT_IDS, rng);
+    pickVariantId(SHAPE_VARIANT_IDS, rng);
+    pickVariantId(SCENARIO_VARIANT_IDS, rng);
+    expect(first).toBe(pickVariantId(WORD_VARIANT_IDS, mulberry32(77)));
+  });
+
+  it("exposes exactly the two signature ids for every game", () => {
+    expect(WORD_VARIANT_IDS).toEqual(["animals-and-food", "everyday-objects"]);
+    expect(STORY_VARIANT_IDS).toEqual(["growing-things", "everyday-changes"]);
+    expect(SHAPE_VARIANT_IDS).toEqual(["curvy", "angular"]);
+    expect(SCENARIO_VARIANT_IDS).toEqual(["outdoors-and-play", "home-and-friends"]);
+    for (const ids of [
+      WORD_VARIANT_IDS,
+      STORY_VARIANT_IDS,
+      SHAPE_VARIANT_IDS,
+      SCENARIO_VARIANT_IDS,
+    ]) {
+      expect(Object.isFrozen(ids)).toBe(true);
+    }
+  });
+});
+
+describe("generateWordPlaythrough (content variants)", () => {
+  for (const variant of WORD_VARIANT_IDS) {
+    it(`draws only ${variant} words and keeps the tier ladder, uniqueness and round validity`, () => {
+      const allowed = new Set(wordVariantPool(variant).map((entry) => entry.word));
+      for (const shift of [-1, 0, 1] as const) {
+        const expectedTiers =
+          shift === -1 ? [3, 3, 3, 3, 3, 3] : shift === 0 ? [3, 3, 3, 3, 3, 4] : [3, 3, 3, 3, 4, 4];
+        for (let seed = 0; seed < 10; seed++) {
+          const rounds = generateWordPlaythrough(6, shift, mulberry32(seed), variant);
+          expect(rounds).toHaveLength(6);
+          const targets = rounds.map((round) => round.target);
+          expect(new Set(targets).size).toBe(6);
+          for (const target of targets) expect(allowed.has(target)).toBe(true);
+          expect(targets.map((target) => getWord(target)?.tier ?? 0)).toEqual(expectedTiers);
+          for (const round of rounds) expectValidWordRound(round);
+        }
+      }
+    });
+  }
+
+  it("mirrors the canonical variant word pools", () => {
+    for (const variant of WORD_VARIANT_IDS) {
+      const groups = variant === "animals-and-food" ? ["animal", "food"] : ["sm", "toy"];
+      const expected = WORD_POOL.filter((entry) =>
+        groups.some((group) => entry.promptTexture.startsWith(`${group}_`)),
+      );
+      expect(wordVariantPool(variant)).toEqual(expected);
+    }
+  });
+
+  it("is deterministic under a fixed seed for each slide", () => {
+    for (const variant of WORD_VARIANT_IDS) {
+      expect(generateWordPlaythrough(6, 0, mulberry32(2026), variant)).toEqual(
+        generateWordPlaythrough(6, 0, mulberry32(2026), variant),
+      );
+    }
+  });
+
+  it("keeps the no-variant path byte-identical, with or without the argument", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      expect(generateWordPlaythrough(6, shift, mulberry32(1234), undefined)).toEqual(
+        generateWordPlaythrough(6, shift, mulberry32(1234)),
+      );
+    }
+  });
+
+  it("falls back to the full pool when a thin slide cannot fill the tier ladder", () => {
+    const variant = "animals-and-food";
+    const allowed = new Set(wordVariantPool(variant).map((entry) => entry.word));
+    const rounds = generateWordPlaythrough(9, -1, mulberry32(77), variant);
+    expect(rounds).toHaveLength(9);
+    expect(rounds.map((round) => getWord(round.target)?.tier ?? 0)).toEqual([
+      3, 3, 3, 3, 3, 3, 3, 3, 3,
+    ]);
+    expect(rounds.some((round) => !allowed.has(round.target))).toBe(true);
+    expect(rounds).toEqual(generateWordPlaythrough(9, -1, mulberry32(77)));
+  });
+
+  it("accepts a slide chosen by the pure selector", () => {
+    const rng = mulberry32(1);
+    const variant = pickVariantId(WORD_VARIANT_IDS, rng);
+    const allowed = new Set(wordVariantPool(variant).map((entry) => entry.word));
+    const rounds = generateWordPlaythrough(6, 0, rng, variant);
+    expect(rounds).toHaveLength(6);
+    for (const round of rounds) expect(allowed.has(round.target)).toBe(true);
   });
 });

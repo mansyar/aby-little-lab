@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { cutouts } from "../../game/art/cutouts";
 import { shapes } from "../../game/art/shapes";
+import { SHAPE_VARIANT_IDS } from "../../game/contentVariants";
 import { ART_KEYS_BY_GAME } from "../../game/hub/prewarm";
 import { shuffle } from "../../game/random";
 import {
@@ -257,6 +258,74 @@ describe("shape content variants", () => {
     // Rules keep drawing from the full pool, not the selected subset.
     for (const shape of generatePlaythrough(3, 0, mulberry32(1234)).flat()) {
       expect(ALL_SHAPES).toContain(shape);
+    }
+  });
+});
+
+describe("generatePlaythrough (content variants)", () => {
+  it("mirrors the canonical curvy and angular slides", () => {
+    const curvy = new Set([
+      "circle",
+      "oval",
+      "heart",
+      "crescent",
+      "semicircle",
+      "teardrop",
+      "ring",
+      "capsule",
+    ]);
+    expect(shapeVariantPool("curvy")).toEqual(ALL_SHAPES.filter((shape) => curvy.has(shape)));
+    expect(shapeVariantPool("angular")).toEqual(ALL_SHAPES.filter((shape) => !curvy.has(shape)));
+  });
+
+  it("draws angular shapes for shifts whose band pool can fill three rounds", () => {
+    for (const shift of [0, 1] as const) {
+      const allowed = shapeVariantPool("angular").filter((shape) => poolFor(shift).includes(shape));
+      expect(allowed.length).toBeGreaterThanOrEqual(9);
+      for (let seed = 0; seed < 10; seed++) {
+        const rounds = generatePlaythrough(3, shift, mulberry32(seed), "angular");
+        expect(rounds).toHaveLength(3);
+        for (const round of rounds) {
+          expect(round).toHaveLength(3);
+          expect(new Set(round).size).toBe(3);
+        }
+        const all = rounds.flat();
+        expect(new Set(all).size).toBe(9);
+        for (const shape of all) expect(allowed).toContain(shape);
+      }
+    }
+  });
+
+  it("falls back to the band pool when a slide cannot fill three rounds", () => {
+    for (const [shift, variant] of [
+      [-1, "curvy"],
+      [0, "curvy"],
+      [1, "curvy"],
+      [-1, "angular"],
+    ] as const) {
+      expect(generatePlaythrough(3, shift, mulberry32(77), variant)).toEqual(
+        generatePlaythrough(3, shift, mulberry32(77)),
+      );
+    }
+  });
+
+  it("keeps the no-variant path byte-identical, with or without the argument", () => {
+    for (const shift of [-1, 0, 1] as const) {
+      expect(generatePlaythrough(3, shift, mulberry32(1234), undefined)).toEqual(
+        generatePlaythrough(3, shift, mulberry32(1234)),
+      );
+    }
+    // At shift 0 only angular can fill the session: the two ids must differ.
+    expect(generatePlaythrough(3, 0, mulberry32(1234), "angular")).not.toEqual(
+      generatePlaythrough(3, 0, mulberry32(1234), "curvy"),
+    );
+  });
+
+  it("is deterministic for each slide under a fixed seed", () => {
+    for (const variant of SHAPE_VARIANT_IDS) {
+      expect(generatePlaythrough(3, 0, mulberry32(5), variant)).toEqual(
+        generatePlaythrough(3, 0, mulberry32(5), variant),
+      );
     }
   });
 });

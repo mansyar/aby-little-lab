@@ -9,6 +9,7 @@
 
 import type { BandShift } from "./adaptiveLogic";
 import { type Rng, shuffle } from "./random";
+import type { ScenarioVariant } from "./scenarioVariants";
 
 /** The four emotions Aby can show. */
 export type Emotion = "happy" | "sad" | "angry" | "scared";
@@ -99,21 +100,70 @@ function shuffleWith<T>(items: readonly T[], rng: Rng): T[] {
 }
 
 /**
+ * Mirrors `scenarioVariants.ts` membership locally: that module derives its
+ * pool from `SCENARIO_POOL` at load time, so importing it here would be
+ * circular. Tests compare these entries against `scenarioVariantPool(id)`.
+ */
+const OUTDOOR_IDS: ReadonlySet<string> = new Set([
+  "happy-ladybug",
+  "happy-bubbles",
+  "happy-plant",
+  "happy-truck",
+  "happy-ducks",
+  "happy-parade",
+  "happy-rainbow",
+  "sad-boat",
+  "sad-rain",
+  "sad-balloon",
+  "sad-kite",
+  "sad-cloud",
+  "angry-turn",
+  "angry-line",
+  "angry-slide",
+  "scared-dog",
+  "scared-swing",
+  "scared-owl",
+  "scared-wind",
+  "scared-moth",
+  "scared-flash",
+]);
+
+/** The two signature scenario slides, used only when a caller opts in. */
+const SCENARIO_VARIANT_POOLS: Record<ScenarioVariant["id"], readonly Scenario[]> = {
+  "outdoors-and-play": SCENARIO_POOL.filter((scenario) => OUTDOOR_IDS.has(scenario.id)),
+  "home-and-friends": SCENARIO_POOL.filter((scenario) => !OUTDOOR_IDS.has(scenario.id)),
+};
+
+/** Falls back to the full pool if a slide lacks an emotion or six scenarios. */
+function scenarioPoolFor(variant?: ScenarioVariant["id"]): readonly Scenario[] {
+  if (variant === undefined) return SCENARIO_POOL;
+  const pool = SCENARIO_VARIANT_POOLS[variant] ?? SCENARIO_POOL;
+  const coversAllEmotions = EMOTIONS.every((emotion) =>
+    pool.some((scenario) => scenario.emotion === emotion),
+  );
+  return coversAllEmotions && pool.length >= ROUND_COUNT ? pool : SCENARIO_POOL;
+}
+
+/**
  * Draws one playthrough of six scenarios: one per emotion first, so all four
  * emotions always appear, then two more from the unused pool, then shuffles
  * the six into presentation order. No scenario repeats within a run.
  *
+ * `variant` restricts scenarios to one signature slide when it covers every
+ * emotion and enough scenarios; otherwise the full `SCENARIO_POOL` is used.
+ *
  * `rng` must return a number in [0, 1); tests pass a seeded generator so a
  * draw is reproducible.
  */
-export function drawScenarios(rng: Rng = Math.random): Scenario[] {
+export function drawScenarios(rng: Rng = Math.random, variant?: ScenarioVariant["id"]): Scenario[] {
+  const pool = scenarioPoolFor(variant);
   const guaranteed = EMOTIONS.map((emotion) => {
-    const scenarios = SCENARIO_POOL.filter((scenario) => scenario.emotion === emotion);
+    const scenarios = pool.filter((scenario) => scenario.emotion === emotion);
     return shuffleWith(scenarios, rng)[0];
   });
   const drawnIds = new Set(guaranteed.map((scenario) => scenario.id));
   const extras = shuffleWith(
-    SCENARIO_POOL.filter((scenario) => !drawnIds.has(scenario.id)),
+    pool.filter((scenario) => !drawnIds.has(scenario.id)),
     rng,
   ).slice(0, ROUND_COUNT - EMOTIONS.length);
   return shuffleWith([...guaranteed, ...extras], rng);

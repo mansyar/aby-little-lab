@@ -1,6 +1,7 @@
 import type { BandShift } from "./adaptiveLogic";
 import { ALPHABET } from "./alphabetLogic";
 import { type Rng, shuffle } from "./random";
+import type { WordVariant } from "./wordVariants";
 
 /** A single first word: the printed word, its length, and its picture texture. */
 export interface FirstWord {
@@ -92,6 +93,42 @@ export function getWord(word: string): FirstWord | undefined {
   return WORD_POOL.find((entry) => entry.word === word);
 }
 
+/**
+ * Mirrors `wordVariants.ts` membership locally: that module derives its pools
+ * from `WORD_POOL` at load time, so importing it here would make the rule pool
+ * circular. Tests assert these entries match `wordVariantPool(id)`.
+ */
+function fromTextureGroups(groups: readonly string[]): readonly FirstWord[] {
+  return WORD_POOL.filter((entry) =>
+    groups.some((group) => entry.promptTexture.startsWith(`${group}_`)),
+  );
+}
+
+/** The two signature word slides, used only when a caller opts in. */
+const WORD_VARIANT_POOLS: Record<WordVariant["id"], readonly FirstWord[]> = {
+  "animals-and-food": fromTextureGroups(["animal", "food"]),
+  "everyday-objects": fromTextureGroups(["sm", "toy"]),
+};
+
+/**
+ * Selects the source pool before any shuffle, so the no-variant path consumes
+ * exactly the same random draws as before variants were added. A slide that
+ * cannot fill the tier split for the requested shift falls back to the full
+ * pool rather than breaking the easy-first ladder.
+ */
+function wordPoolFor(
+  roundCount: number,
+  shift: BandShift,
+  variant?: WordVariant["id"],
+): readonly FirstWord[] {
+  if (variant === undefined) return WORD_POOL;
+  const pool = WORD_VARIANT_POOLS[variant];
+  const earlyCount = Math.max(0, roundCount - 1 - shift);
+  const tier3 = pool.filter((entry) => entry.tier === 3).length;
+  const tier4 = pool.filter((entry) => entry.tier === 4).length;
+  return tier3 >= earlyCount && tier4 >= roundCount - earlyCount ? pool : WORD_POOL;
+}
+
 /** A single Find the Word round: one target word and 4 unique printed choices. */
 export interface WordRound {
   /** The word the child must find. */
@@ -137,6 +174,10 @@ export function generateWordRound(target: FirstWord, rng: Rng = Math.random): Wo
  * all-3-letter ladder, +1 brings a second 4-letter round forward. The default
  * 0 reproduces the classic split exactly.
  *
+ * `variant` restricts targets to one signature slide when it can satisfy the
+ * tier split; otherwise the full `WORD_POOL` is used. Omitting it keeps the
+ * classic full-pool draw byte-for-byte identical.
+ *
  * `rng` must return a number in [0, 1); tests pass a seeded generator so a
  * draw is reproducible.
  */
@@ -144,13 +185,15 @@ export function generateWordPlaythrough(
   roundCount = 6,
   shift: BandShift = 0,
   rng: Rng = Math.random,
+  variant?: WordVariant["id"],
 ): WordRound[] {
+  const pool = wordPoolFor(roundCount, shift, variant);
   const tier3 = shuffle(
-    WORD_POOL.filter((entry) => entry.tier === 3),
+    pool.filter((entry) => entry.tier === 3),
     rng,
   );
   const tier4 = shuffle(
-    WORD_POOL.filter((entry) => entry.tier === 4),
+    pool.filter((entry) => entry.tier === 4),
     rng,
   );
   const earlyCount = Math.min(tier3.length, Math.max(0, roundCount - 1 - shift));
