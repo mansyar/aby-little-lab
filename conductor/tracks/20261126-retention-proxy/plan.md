@@ -79,6 +79,9 @@
 - **Covers:** F2
 - **Touches:** `conductor/tracks/20261126-retention-proxy/metadata.json`, `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
 - **Verification:** `node scripts/validate-docs.js` and `git -c core.whitespace=cr-at-eol diff --check`
-- **Status:** pending
+- **Status:** verified
+- **Result:** F2 closed; metadata reports 5/5 phases and 13/13 tasks matching the plan; docs validation and CRLF-aware whitespace passed.
+- **Checkpoint:** `b0a0fd52950d14d923ba3e27de62ab3c5b711b31`
+- **Evidence:** `conductor/tracks/20261126-retention-proxy/verification/phase-R2.md`
 
-- [ ] **R2.T1: Set metadata task counts to the 12 checked plan tasks and record R2 evidence** — covers: F2
+- [x] **R2.T1: Set metadata task counts to the 13 checked plan tasks and record R2 evidence** — covers: F2
