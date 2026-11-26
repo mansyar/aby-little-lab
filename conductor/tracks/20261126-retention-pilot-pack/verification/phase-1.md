@@ -65,3 +65,19 @@ this evidence file is the one permitted extra path.
 - The earlier permission blocker is resolved: the primary ran the exact command
   and it completed with exit 0. The only warning was a pre-existing Vite advisory
   about chunks larger than 500 kB; no guard failed.
+
+## Primary verification
+
+Independent verification by the orchestrator after the executor's report:
+
+| Check | Command | Exit | Result |
+| --- | --- | --- | --- |
+| Working tree | `git status --porcelain --untracked-files=no` | 0 | Clean — no uncommitted changes. |
+| Scope | `git diff --name-only d433e9f8..HEAD` | 0 | Exactly `docs/retention-pilot-pack.md` and this evidence file; matches `Touches` plus the permitted evidence path. |
+| Commits | `git log --oneline d433e9f8..HEAD` | 0 | Three commits, all reported by the executor; no merge or user commits, so the squash guard passes. |
+| Full gate (primary) | `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js` | 0 | Already run by the primary after the executor's permission denial: 158 files / 3406 tests passed, coverage 97.09 % statements, all guards green, docs 5 passed / 0 failed. |
+| Re-check after final evidence commit | `node scripts/validate-docs.js` | 0 | `Results: 5 passed, 0 failed`. |
+| AC inspection | native read of `docs/retention-pilot-pack.md` | 0 | AC-1 through AC-7, AC-9, FR-9 and NFR-2–NFR-4 satisfied; AC-8's inbound link is Phase 2 scope as planned. |
+
+Verdict: **accepted**. Phase 1 is verified. The delegated AC-8 remainder is covered by
+Phase 2, so no phase criterion is silently dropped.
