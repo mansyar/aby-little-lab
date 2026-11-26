@@ -95,8 +95,12 @@
 - **Covers:** F1
 - **Touches:** `conductor/tracks/20261126-wire-content-variants/spec.md`, `conductor/tracks/20261126-wire-content-variants/verification/integrated.md`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **R1.T1: Resolve F1** — covers: F1
-  - [ ] **R1.T1.1:** Remove the unimplemented `generateWordBuildPlaythrough` mention from spec In Scope and correct FR-4's round wording to the shipped three-round shape session
-  - [ ] **R1.T1.2:** Point integrated AC-1 at the actual seeded selector tests in `wordLogic.test.ts` and re-run the exact gate
+- [x] **R1.T1: Resolve F1** — covers: F1
+  - [x] **R1.T1.1:** Remove the unimplemented `generateWordBuildPlaythrough` mention from spec In Scope and correct FR-4's round wording to the shipped three-round shape session
+  - [x] **R1.T1.2:** Point integrated AC-1 at the actual seeded selector tests in `wordLogic.test.ts` and re-run the exact gate
+
+**Result:** verified
+**Checkpoint:** `62ecfb9460b5266173c1b827f8d0957cfb83f2c7`
+**Evidence:** `conductor/tracks/20261126-wire-content-variants/verification/phase-R1.md`

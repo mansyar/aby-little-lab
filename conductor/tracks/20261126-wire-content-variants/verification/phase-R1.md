@@ -5,7 +5,7 @@
 - **Date:** `2026-11-26T22:07:00+11:00`
 - **Branch:** `feat/20261126-wire-content-variants`
 - **Base commit:** `005d5cb9ac8095a628e90de40212ecd2d35e0da3`
-- **Head commit:** `(recorded at acceptance)`
+- **Head commit:** `62ecfb9460b5266173c1b827f8d0957cfb83f2c7`
 - **Result:** `verified`
 
 ## Commands
@@ -45,3 +45,10 @@
 ## Notes
 
 The reviewer's F1 was a Low spec/plan inconsistency, fixed by removing `generateWordBuildPlaythrough` from In Scope and stating explicitly that it has no in-scope caller. Two adjacent prose inaccuracies noted by the reviewer were corrected in the same round to satisfy strict mode: FR-4's six-round wording became three-round/nine-shape, and integrated AC-1 now points at the actual `pickVariantId` tests in `wordLogic.test.ts`. No behavioural change.
+
+## Primary verification
+
+- **Verdict:** accepted
+- Scope checked: only the two planned Conductor prose files plus this evidence file changed in `005d5cb9..62ecfb94`.
+- Exact configured gate re-run by the primary with exit 0 after the prose fixes; docs validator 5 passed / 0 failed.
+- Checkpoint: `62ecfb9460b5266173c1b827f8d0957cfb83f2c7`.
