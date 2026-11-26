@@ -47,7 +47,7 @@
 - **Covers:** FR-6, NFR-3, NFR-4, NFR-5, AC-6
 - **Touches:** `src/scenes/WordMatchScene.ts`, `src/scenes/StoryOrderScene.ts`, `src/scenes/ShapeSorterScene.ts`, `src/scenes/FeelingsFacesScene.ts`, `src/__tests__/scenes/wordMatchScene.test.ts`, `src/__tests__/scenes/storyOrderScene.test.ts`, `src/__tests__/scenes/shapeSorterScene.test.ts`, `src/__tests__/scenes/shapeSorterFlow.test.ts`, `src/__tests__/scenes/feelingsFacesScene.test.ts`, `src/__tests__/scenes/feelingsFacesFlow.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P2.T1: Pass the selected slide through each scene** — covers: FR-6
   - [ ] **P2.T1.1:** Use the pure selector with each scene's existing RNG and forward the chosen id to the generator
