@@ -42,6 +42,7 @@ The only warning was the pre-existing Vite advisory about chunks larger than
 - `conductor/tracks/20261126-retention-pilot-pack/` (index, spec, plan, metadata, verification)
 - `docs/retention-pilot-pack.md`
 - `docs/retention-validation.md`
+- `README.md` (Documentation index entry, added in post-implementation doc sync)
 
 No family was contacted, no interview was held, no export was read, and no PII
 was committed. `.conductor/evidence/` was neither created nor committed.

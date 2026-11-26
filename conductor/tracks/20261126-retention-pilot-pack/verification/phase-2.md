@@ -5,7 +5,7 @@
 - **Date:** 2026-11-26
 - **Branch:** `chore/20261126-retention-pilot-pack`
 - **Base commit:** `134e51586c725a90021f72fc7b4a12def409f015`
-- **Head commit:** `4b681e4579d7847aeb53f905ac75feee32083f50` (verification-state head; phase doc commit `a60bd81a955bf3043b915c5b730efcd54f80dcc5`, followed by a separate evidence commit and this final evidence-update commit)
+- **Head commit (pre-squash):** `4b681e4579d7847aeb53f905ac75feee32083f50` (verification-state head; phase doc commit `a60bd81a955bf3043b915c5b730efcd54f80dcc5`, followed by a separate evidence commit and this final evidence-update commit). All pre-squash executor commits were squashed into checkpoint `04c9eb60`.
 - **Result:** verified — phase edits and static scope/link checks are complete, and the primary ran the full verification gate with exit code 0 (docs validator: 5 passed, 0 failed).
 
 ## Commands

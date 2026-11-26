@@ -5,8 +5,8 @@
 - **Date:** 2026-11-26
 - **Branch:** `chore/20261126-retention-pilot-pack`
 - **Base commit:** `d433e9f8b6cb249bb588580282b78b59c20de714`
-- **Head commit (authoring):** `f3041476`
-- **Prior evidence commit:** `f2aa6a8b`
+- **Head commit (authoring, pre-squash):** `f3041476` — squashed into checkpoint `be92d541`
+- **Prior evidence commit (pre-squash):** `f2aa6a8b` — squashed into checkpoint `be92d541`
 - **Result:** verified — the full configured gate passed with exit 0 (run by the
   primary after the executor's shell permission denial; output appended to the
   phase brief).

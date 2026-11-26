@@ -83,7 +83,7 @@ executable without changing the product's privacy posture.
 | AC-6 | The worksheet defines `E`, `R`, exclusions, and ≥ 40 % as a directional benchmark only. | FR-6 |
 | AC-7 | The summary template has no identifier fields and includes counts, direction, and incomplete cases. | FR-7 |
 | AC-8 | Both documents link to each other and the validator reports 5 passed / 0 failed. | FR-8, FR-9 |
-| AC-9 | The diff against the base branch contains only `docs/retention-pilot-pack.md`, `docs/retention-validation.md`, and Conductor state. | NFR-1 |
+| AC-9 | The diff against the base branch contains only `docs/retention-pilot-pack.md`, `docs/retention-validation.md`, `README.md` (documentation index), and Conductor state. | NFR-1 |
 
 ## Edge Cases
 
