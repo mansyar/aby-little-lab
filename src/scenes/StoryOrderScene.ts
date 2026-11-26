@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { pickVariantId, STORY_VARIANT_IDS } from "../game/contentVariants";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import type { E2ERoundGeometry, E2ERoundTarget } from "../game/e2eBridge";
 import type { Rng } from "../game/random";
@@ -89,7 +90,11 @@ export class StoryOrderScene extends ChoiceRoundScene {
     this.createProgressDots(ROUND_COUNT);
     this.createSpokenInstruction("Put the story in order, first to last.");
 
-    this.rounds = buildPlaythrough(this.rng, getAdaptiveBandShift("story-order"));
+    this.rounds = buildPlaythrough(
+      this.rng,
+      getAdaptiveBandShift("story-order"),
+      pickVariantId(STORY_VARIANT_IDS, this.rng),
+    );
     this.roundIndex = 0;
     this.inputLocked = false;
     this.renderRound();

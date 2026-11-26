@@ -95,8 +95,9 @@ vi.mock("../../game/wordLogic", async (importOriginal) => {
 });
 
 import * as wordLogic from "../../game/wordLogic";
-import { getWord } from "../../game/wordLogic";
+import { getWord, type WordRound } from "../../game/wordLogic";
 import { selectWordMatchArt } from "../../game/wordMatchArt";
+import { type WordVariant, wordVariantPool } from "../../game/wordVariants";
 import { WordMatchScene } from "../../scenes/WordMatchScene";
 import { earnSticker, updateSettings } from "../../utils/storage";
 import {
@@ -117,6 +118,21 @@ function getCurrentRound(scene: unknown): { target: string; choices: string[] } 
   const s = scene as { rounds: Array<{ target: string; choices: string[] }>; roundIndex: number };
   return s.rounds[s.roundIndex];
 }
+
+/** Returns the full six-round playthrough held by the scene. */
+function getRounds(scene: unknown): WordRound[] {
+  return (scene as unknown as { rounds: WordRound[] }).rounds;
+}
+
+/** Signature slides and the mulberry32 seeds whose first draw selects each. */
+const SLIDE_CASES: ReadonlyArray<{
+  slide: WordVariant["id"];
+  other: WordVariant["id"];
+  seed: number;
+}> = [
+  { slide: "animals-and-food", other: "everyday-objects", seed: 7 },
+  { slide: "everyday-objects", other: "animals-and-food", seed: 1 },
+];
 
 /** Card row y positions derived from the layout constants (centerY 384). */
 const CARD_ROW_YS = [384 + 110, 384 + 270];
@@ -622,38 +638,57 @@ describe("WordMatchScene completion", () => {
     localStorage.clear();
   });
 
-  it("wins after 6 correct rounds: celebration, first-time sticker, justEarned, auto-return", () => {
-    const scene = new WordMatchScene(mulberry32(1234));
-    scene.create();
+  it("wins after 6 correct rounds on either slide: celebration, first-time sticker, justEarned, auto-return (AC-6)", () => {
+    for (const { slide, other, seed } of SLIDE_CASES) {
+      localStorage.clear();
+      vi.clearAllMocks();
+      const scene = new WordMatchScene(mulberry32(seed));
+      scene.create();
 
-    for (let i = 0; i < 6; i++) {
-      completeRound(scene);
+      expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function), slide);
+      const rounds = getRounds(scene);
+      expect(rounds).toHaveLength(6);
+      const targets = rounds.map((round) => round.target);
+      expect(new Set(targets).size).toBe(6);
+      const poolWords = new Set(wordVariantPool(slide).map((entry) => entry.word));
+      const otherWords = new Set(wordVariantPool(other).map((entry) => entry.word));
+      for (const target of targets) {
+        expect(poolWords.has(target)).toBe(true);
+        expect(otherWords.has(target)).toBe(false);
+      }
+      for (const round of rounds) {
+        expect(round.choices).toHaveLength(4);
+      }
+
+      for (let i = 0; i < 6; i++) {
+        completeRound(scene);
+      }
+
+      expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
+      expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
+
+      // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
+      const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
+      expect(
+        tweenCalls.some(
+          (call) => call[0]?.scaleX === 1.25 && call[0]?.scaleY === 1.25 && call[0]?.alpha === 0,
+        ),
+      ).toBe(true);
+
+      // First completion awards the sticker and shows the reveal animation.
+      expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
+      const stickerImage = getMockFn(
+        (scene as unknown as { add: Record<string, unknown> }).add.image,
+      ).mock.calls.find((call) => call[2] === "sticker_word_match");
+      expect(stickerImage).toBeDefined();
+
+      fireAutoReturn(scene);
+      expect(
+        (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
+      ).toHaveBeenCalledWith("Hub", {
+        justEarned: "word-match",
+      });
     }
-
-    expect(mockAudio.playWin).toHaveBeenCalledTimes(1);
-    expect((scene as unknown as { inputLocked: boolean }).inputLocked).toBe(true);
-
-    // Shared win celebration: ray burst grows/fades (motionScale(1.25, 1)).
-    const tweenCalls = getMockFn(scene.tweens.add).mock.calls;
-    expect(
-      tweenCalls.some(
-        (call) => call[0]?.scaleX === 1.25 && call[0]?.scaleY === 1.25 && call[0]?.alpha === 0,
-      ),
-    ).toBe(true);
-
-    // First completion awards the sticker and shows the reveal animation.
-    expect(mockAudio.playSticker).toHaveBeenCalledTimes(1);
-    const stickerImage = getMockFn(
-      (scene as unknown as { add: Record<string, unknown> }).add.image,
-    ).mock.calls.find((call) => call[2] === "sticker_word_match");
-    expect(stickerImage).toBeDefined();
-
-    fireAutoReturn(scene);
-    expect(
-      (scene as unknown as { scene: Record<string, MockFn> }).scene.start,
-    ).toHaveBeenCalledWith("Hub", {
-      justEarned: "word-match",
-    });
   });
 
   /** Returns the speaker button image created with the icon_speaker texture. */
@@ -817,13 +852,23 @@ describe("adaptive band shift wiring", () => {
     const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
-    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 1, expect.any(Function));
+    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(
+      6,
+      1,
+      expect.any(Function),
+      expect.any(String),
+    );
   });
 
   it("requests the classic ladder when the facade returns 0", () => {
     const scene = new WordMatchScene(mulberry32(1234));
     scene.create();
 
-    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(6, 0, expect.any(Function));
+    expect(generateWordPlaythroughMock).toHaveBeenCalledWith(
+      6,
+      0,
+      expect.any(Function),
+      expect.any(String),
+    );
   });
 });

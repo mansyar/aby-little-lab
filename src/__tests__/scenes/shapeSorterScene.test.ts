@@ -1,11 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ShapeType } from "../../game/shapeSorterLogic";
+import type { ShapeVariant } from "../../game/shapeVariants";
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { hasSticker } from "../../utils/storage";
 import { mulberry32 } from "../helpers/randomHelper";
 
 type MockFn = ReturnType<typeof vi.fn>;
 type MockGameObject = Record<string, MockFn>;
+
+/** Signature slides and the mulberry32 seeds whose first draw selects each. */
+const SLIDE_CASES: ReadonlyArray<{
+  slide: ShapeVariant["id"];
+  other: ShapeVariant["id"];
+  seed: number;
+}> = [
+  { slide: "curvy", other: "angular", seed: 7 },
+  { slide: "angular", other: "curvy", seed: 1 },
+];
 
 /** Mirrors the scene's NEXT_ROUND_DELAY so tests can fire round advancement. */
 const NEXT_ROUND_DELAY = 1200;
@@ -249,19 +260,35 @@ describe("ShapeSorterScene multi-round sessions", () => {
     expect(getMockFn(mockAudio.playWin)).toHaveBeenCalledTimes(1);
   });
 
-  it("plays win, awards sticker, and schedules Hub return after the final round", () => {
-    const scene = createScene();
+  it("plays win, awards sticker, and schedules Hub return on either slide (AC-6)", () => {
+    for (const { slide, seed } of SLIDE_CASES) {
+      localStorage.clear();
+      vi.clearAllMocks();
+      getAdaptiveBandShiftMock.mockReturnValue(0);
+      const scene = new ShapeSorterScene(mulberry32(seed));
+      scene.create();
 
-    completeSession(scene);
+      expect(generatePlaythroughMock).toHaveBeenCalledTimes(1);
+      expect(generatePlaythroughMock.mock.calls[0][3]).toBe(slide);
+      const internals = getInternals(scene);
+      expect(internals.playthrough).toHaveLength(3);
+      for (const round of internals.playthrough) {
+        expect(round).toHaveLength(3);
+      }
+      expect(internals.shapes).toHaveLength(3);
+      expect(new Set(internals.playthrough.flat()).size).toBe(9);
 
-    expect(getMockFn(mockAudio.playWin)).toHaveBeenCalledTimes(1);
-    expect(getMockFn(mockAudio.playSticker)).toHaveBeenCalled();
-    expect(hasSticker("shape-sorter")).toBe(true);
+      completeSession(scene);
 
-    const autoReturnCall = getMockFn(scene.time.delayedCall).mock.calls.find(
-      (call) => call[0] === AUTO_RETURN_DELAY,
-    );
-    expect(autoReturnCall).toBeDefined();
+      expect(getMockFn(mockAudio.playWin)).toHaveBeenCalledTimes(1);
+      expect(getMockFn(mockAudio.playSticker)).toHaveBeenCalled();
+      expect(hasSticker("shape-sorter")).toBe(true);
+
+      const autoReturnCall = getMockFn(scene.time.delayedCall).mock.calls.find(
+        (call) => call[0] === AUTO_RETURN_DELAY,
+      );
+      expect(autoReturnCall).toBeDefined();
+    }
   });
 
   it("destroys the previous round's objects when advancing", () => {
@@ -318,12 +345,22 @@ describe("ShapeSorterScene multi-round sessions", () => {
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledTimes(1);
       expect(getAdaptiveBandShiftMock).toHaveBeenCalledWith("shape-sorter");
       expect(generatePlaythroughMock).toHaveBeenCalledTimes(1);
-      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 1, expect.any(Function));
+      expect(generatePlaythroughMock).toHaveBeenCalledWith(
+        3,
+        1,
+        expect.any(Function),
+        expect.any(String),
+      );
     });
 
     it("requests the classic pool when the facade returns 0", () => {
       createScene();
-      expect(generatePlaythroughMock).toHaveBeenCalledWith(3, 0, expect.any(Function));
+      expect(generatePlaythroughMock).toHaveBeenCalledWith(
+        3,
+        0,
+        expect.any(Function),
+        expect.any(String),
+      );
     });
 
     it("keeps three progress dots on every band", () => {

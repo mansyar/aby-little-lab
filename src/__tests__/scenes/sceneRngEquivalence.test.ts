@@ -92,6 +92,7 @@ vi.mock("../../utils/storage", async (importOriginal) => ({
 import * as addItUpLogic from "../../game/addItUpLogic";
 import { generatePathPoints, selectThreePairs, waypointsFor } from "../../game/animalTraceLogic";
 import { generateRound, scaleFactorsFor } from "../../game/bigSmallLogic";
+import { pickVariantId, STORY_VARIANT_IDS } from "../../game/contentVariants";
 import { appendNote, generateSequence, startLengthFor } from "../../game/musicalMemoryLogic";
 import {
   type BubbleConfig,
@@ -286,9 +287,11 @@ describe("scene rng equivalence — seeded scene output equals a direct builder 
 
     // rng stays the FIRST argument — storyOrderLogic is rng-first on purpose
     // (scene-call compatibility). This is the only case that fails if someone
-    // later "normalizes" the argument order.
+    // later "normalizes" the argument order. The scene now draws one value for
+    // its slide selector before the generator, so the replay does the same.
     const rng = mulberry32(SEED);
-    const rounds = storyOrderLogic.buildPlaythrough(rng, SHIFT);
+    const variant = pickVariantId(STORY_VARIANT_IDS, rng);
+    const rounds = storyOrderLogic.buildPlaythrough(rng, SHIFT, variant);
 
     expect(s.rounds).toEqual(rounds);
   });

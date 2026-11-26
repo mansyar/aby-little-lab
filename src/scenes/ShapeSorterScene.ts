@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 import { cutouts } from "../game/art/cutouts";
 import { shapes } from "../game/art/shapes";
+import { pickVariantId, SHAPE_VARIANT_IDS } from "../game/contentVariants";
 import { type BoardPiece, DragBoard } from "../game/dragBoard";
 import type { E2ERoundGeometry } from "../game/e2eBridge";
 import { type Rng, shuffle } from "../game/random";
@@ -116,6 +117,7 @@ export class ShapeSorterScene extends GameSceneBase {
       ROUND_COUNT,
       getAdaptiveBandShift("shape-sorter"),
       this.rng,
+      pickVariantId(SHAPE_VARIANT_IDS, this.rng),
     );
     this.roundIndex = 0;
     this.createProgressDots(ROUND_COUNT);

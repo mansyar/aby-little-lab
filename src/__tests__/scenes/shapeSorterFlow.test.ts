@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ShapeVariant } from "../../game/shapeVariants";
 import type { MockFn } from "../helpers/phaserMock";
 import {
   assertBoundedSuccessEffect,
@@ -70,8 +71,33 @@ vi.mock("../../scenes/sceneRegistry", async () => {
   return { ensureSceneLoaded: mockEnsureSceneLoaded };
 });
 
+const { generatePlaythroughMock } = vi.hoisted(() => ({
+  generatePlaythroughMock: vi.fn(),
+}));
+
+vi.mock("../../game/shapeSorterLogic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../game/shapeSorterLogic")>();
+  return {
+    ...actual,
+    generatePlaythrough: (...args: Parameters<typeof actual.generatePlaythrough>) => {
+      generatePlaythroughMock(...args);
+      return actual.generatePlaythrough(...args);
+    },
+  };
+});
+
 import { ShapeSorterScene } from "../../scenes/ShapeSorterScene";
 import { earnSticker, hasSticker } from "../../utils/storage";
+import { mulberry32 } from "../helpers/randomHelper";
+
+/** Signature slides and the mulberry32 seeds whose first draw selects each. */
+const SLIDE_CASES: ReadonlyArray<{
+  slide: ShapeVariant["id"];
+  seed: number;
+}> = [
+  { slide: "curvy", seed: 7 },
+  { slide: "angular", seed: 1 },
+];
 
 beforeEach(() => {
   vi.stubGlobal("screen", {
@@ -662,14 +688,26 @@ describe("ShapeSorterScene completion and sticker flow", () => {
     }
   }
 
-  it("plays win SFX when all shapes are placed", () => {
-    vi.mocked(hasSticker).mockReturnValue(false);
+  it("plays win SFX on either slide when all shapes are placed (AC-6)", () => {
+    for (const { slide, seed } of SLIDE_CASES) {
+      vi.clearAllMocks();
+      localStorage.clear();
+      vi.mocked(hasSticker).mockReturnValue(false);
 
-    const scene = new ShapeSorterScene();
-    scene.create();
-    completeAllRounds(scene);
+      const scene = new ShapeSorterScene(mulberry32(seed));
+      scene.create();
 
-    expect(mockAudio.playWin).toHaveBeenCalled();
+      expect(generatePlaythroughMock).toHaveBeenCalledTimes(1);
+      expect(generatePlaythroughMock.mock.calls[0][3]).toBe(slide);
+      const shapes = getShapeObjects(scene);
+      expect(shapes).toHaveLength(3);
+      expect(new Set(shapes.map((shape) => shape.type)).size).toBe(3);
+
+      completeAllRounds(scene);
+
+      expect(mockAudio.playWin).toHaveBeenCalled();
+      expect(earnSticker).toHaveBeenCalledWith("shape-sorter");
+    }
   });
 
   it("awards sticker on first completion only", () => {
