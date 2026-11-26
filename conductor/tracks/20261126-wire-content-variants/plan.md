@@ -13,34 +13,32 @@
 - **Depends on:** none
 - **Covers:** FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-8, NFR-1, NFR-2, NFR-4, AC-1, AC-2, AC-3, AC-4, AC-5, AC-7, AC-8
 - **Touches:** `src/game/contentVariants.ts`, `src/game/wordLogic.ts`, `src/game/storyOrderLogic.ts`, `src/game/shapeSorterLogic.ts`, `src/game/feelingsFacesLogic.ts`, `src/__tests__/game/wordLogic.test.ts`, `src/__tests__/game/storyOrderLogic.test.ts`, `src/__tests__/game/shapeSorterLogic.test.ts`, `src/__tests__/game/feelingsFacesLogic.test.ts`
+  - Gate-driven living-docs additions authorized by the primary after the first exact gate surfaced stale suite counts: `README.md`, `docs/TDD.md`, `docs/perf-baseline.md`.
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** in_progress
+- **Status:** verified
 
-- [ ] **P1.T1: Add the pure variant selector** — covers: FR-1
+- [x] **P1.T1: Add the pure variant selector** — covers: FR-1
   - [ ] **P1.T1.1:** Define the two slide ids per game and a no-state selector driven by an injected RNG
   - [ ] **P1.T1.2:** Test the 0/1 boundaries and both reachable ids with seeded RNGs
-- [ ] **P1.T2: Wire the word generator** — covers: FR-2, FR-7
+- [x] **P1.T2: Wire the word generator** — covers: FR-2, FR-7
   - [ ] **P1.T2.1:** Add optional variant to `generateWordPlaythrough` with tier/shift/no-repeat preservation and full-pool fallback
   - [ ] **P1.T2.2:** Prove both variants and no-variant parity with seeded tests
-- [ ] **P1.T3: Wire the story-order generator** — covers: FR-3, FR-7
+- [x] **P1.T3: Wire the story-order generator** — covers: FR-3, FR-7
   - [ ] **P1.T3.1:** Add optional variant to `buildPlaythrough`, keeping the RNG-first signature, obvious/subtle mix, and full-pool fallback for `growing-things`
   - [ ] **P1.T3.2:** Prove both variants, mix behavior, and no-variant parity with seeded tests
-- [ ] **P1.T4: Wire the shape-sorter generator** — covers: FR-4, FR-7
+- [x] **P1.T4: Wire the shape-sorter generator** — covers: FR-4, FR-7
   - [ ] **P1.T4.1:** Add optional variant to `generatePlaythrough` with three unique shapes per round and full-pool fallback for `curvy`
   - [ ] **P1.T4.2:** Prove both variants, no global repeats, and no-variant parity with seeded tests
-- [ ] **P1.T5: Wire the feelings-faces generator** — covers: FR-5, FR-7
+- [x] **P1.T5: Wire the feelings-faces generator** — covers: FR-5, FR-7
   - [ ] **P1.T5.1:** Add optional variant to `drawScenarios` while keeping one scenario per emotion and no repeats
   - [ ] **P1.T5.2:** Prove both variants and no-variant parity with seeded tests
-- [ ] **P1.T6: Prove invariants and scope** — covers: FR-8, NFR-1, NFR-2
+- [x] **P1.T6: Prove invariants and scope** — covers: FR-8, NFR-1, NFR-2
   - [ ] **P1.T6.1:** Run the full gate and confirm coverage thresholds and fallback cases
   - [ ] **P1.T6.2:** Confirm the diff contains only rule modules, the selector, and their tests, with no asset/schema/dependency/storage change
 
-<!--
-The primary appends after acceptance:
 **Result:** verified
-**Checkpoint:** <short-sha>
-**Evidence:** conductor/tracks/20261126-wire-content-variants/verification/phase-1.md
--->
+**Checkpoint:** `028ac8a03461e7657c110cc38cd4b06fbe2d061e`
+**Evidence:** `conductor/tracks/20261126-wire-content-variants/verification/phase-1.md`
 
 ## Phase 2: Scene pass-through
 
