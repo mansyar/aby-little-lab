@@ -7,8 +7,9 @@
 ## Overview
 
 Ship the four signature content variant sets — `animals-and-food` and
-`everyday-objects` words, `growing-things` and `calm-down` stories, `round` and
-`curvy` shapes, and `home` and `school` scenarios — into real playthroughs. The
+`everyday-objects` words, `growing-things` and `everyday-changes` stories, `curvy`
+and `angular` shapes, and `outdoors-and-play` and `home-and-friends` scenarios —
+into real playthroughs. The
 variant tables already exist as pure data with selectors, but no production
 gameplay code imports them, so children always see the classic pools. This track
 wires a per-playthrough variant choice into the four rule generators and the
