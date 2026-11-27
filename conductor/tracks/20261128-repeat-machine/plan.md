@@ -14,7 +14,7 @@
 - **Covers:** FR-1, FR-2, FR-4, FR-7, NFR-2, AC-1, AC-2, AC-3, AC-6
 - **Touches:** `src/game/repeatMachineLogic.ts`, `src/__tests__/game/repeatMachineLogic.test.ts`
 - **Verification:** `pnpm check && pnpm typecheck && pnpm test -- --run && pnpm test:coverage && pnpm build && node scripts/validate-bundle.js && node scripts/validate-module-size.js && node scripts/validate-textures.js && node scripts/validate-pwa.js && node scripts/validate-docs.js`
-- **Status:** pending
+- **Status:** in_progress
 
 - [ ] **P1.T1: Author the repeat-N rule module** — covers: FR-1, FR-2, FR-4
   - [ ] **P1.T1.1:** Target-count schedule with 2→4 ramp across 6 rounds.
